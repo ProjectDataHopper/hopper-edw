@@ -13,7 +13,7 @@ Estimated time: 2–3 hours with Hop GUI, or follow command-line steps only in u
 == Prerequisites
 
 . Install Docker with Compose v2 and Python 3 (stdlib only).
-. Build or download plugin **0.2.0-SNAPSHOT** for Apache Hop **2.18.1** (see link:../README.md[repository README]).
+. Build or download plugin **0.4.0** for Apache Hop **2.18.1** (see link:../README.md[repository README]).
 . Register `retail-example/` as a Hop project named **`retail-example`**.
 . Configure database connections **`CRM`** and **`Vault`** from project metadata.
 . Start PostgreSQL: from repo root, `./scripts/run-postgres.sh up`.
@@ -191,7 +191,7 @@ Reference: link:execution-maps.adoc[Execution maps].
 |CRM tables exist; run initial workflow's CRM load first; validate catalog fields vs live schema
 
 |Stale plugin behavior
-|Restart Hop GUI after installing **0.2.0-SNAPSHOT**
+|Restart Hop GUI after installing **0.4.0**
 
 |Need clean slate
 |`./scripts/run-postgres.sh reset` then `up`, rerun initial workflow

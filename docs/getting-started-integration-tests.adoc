@@ -14,7 +14,7 @@ Estimated time: half a day with Hop GUI, or follow along read-only first.
 
 . Register `integration-tests/` as a Hop project named **`hop-data-vault`**.
 . Configure database connections **`CRM`** and **`Vault`** in project metadata (`metadata/rdbms/CRM.json`, `metadata/rdbms/Vault.json`).
-. Install the **hop-datavault** plugin (**0.2.0-SNAPSHOT**) in Apache Hop **2.18.1**.
+. Install the **hop-datavault** plugin (**0.4.0**) in Apache Hop **2.18.1**.
 . Open the project in Hop GUI so `${PROJECT_HOME}` resolves.
 
 Full environment details: link:../integration-tests/PROJECT.md[Integration tests Hop project].

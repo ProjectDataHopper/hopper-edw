@@ -17,24 +17,25 @@ under the License.
 
 # Hop Data Vault 2.0 Plugin
 
-Apache Hop plugin for **Data Vault 2.0**, **Business Vault**, and **dimensional** modeling, validation, and model-driven loading. Version **0.3.0-SNAPSHOT** targets **Apache Hop 2.18.1** and **Java 21**.
+Apache Hop plugin for **Data Vault 2.0**, **Business Vault**, and **dimensional** modeling, validation, and model-driven loading. Version **0.4.0** targets **Apache Hop 2.18.1** and **Java 21**.
 
 **Model once. Generate loads and consumption layers.** Sources live in the Hop **Data Catalog**; visual **`.hdv`**, **`.hbv`**, and **`.hdm`** models drive workflow actions and optional **execution maps** (`.hem`).
 
-## Tuturials
+## Tutorials
 
 * [Hop Data Vault Tutorial - 1 - Creating your first data vault model](https://youtu.be/YRUwPdDyNDE)
 * [Hop Data Vault Tutorial - 2 - Updating your data vault](https://www.youtube.com/watch?v=k64kxMmyA4U)
 
-
 ## Features
 
-Full capability list with maturity labels: **[docs/feature-overview.md](docs/feature-overview.md)**
+Full capability list with maturity labels: **[docs/feature-overview.md](docs/feature-overview.md)**  
+Release notes: **[CHANGELOG.md](CHANGELOG.md)**
 
 Highlights:
 
 - **Data Catalog** — `DV_SOURCE` record definitions under `hop/{project}/sources`; catalog validation with proposals and acknowledgements
 - **Catalog versions + schema gate** — tag source contracts, **Validate resource definitions** CI action, impact blast radius, Markdown/HTML reports
+- **Source-to-target lineage** — field/table lineage with reason codes, Lineage tab, explainable DDL, catalog publish, drift gate, reverse browser ([docs](docs/source-to-target-lineage.adoc))
 - **Raw Data Vault** — `.hdv` modeler, Check model, Data Vault Update action, hybrid integration modes
 - **Business Vault** — `.hbv` SCD2 (single and multi-satellite), PIT tables, Business Vault Update action
 - **Dimensional modeler** — `.hdm` Kimball loads, Dimensional Publish/Update actions
@@ -77,7 +78,7 @@ Full index: **[docs/README.md](docs/README.md)**
 | [`docs/business-vault-configuration.adoc`](docs/business-vault-configuration.adoc) | Embedded `.hbv` configuration |
 | [`docs/business-vault-update-action.adoc`](docs/business-vault-update-action.adoc) | Business Vault Update action |
 
-Also: [`docs/ai-advisory.md`](docs/ai-advisory.md), [`docs/datavault-source.adoc`](docs/datavault-source.adoc), [`docs/datavault-source-database.adoc`](docs/datavault-source-database.adoc), [`docs/record-definition-input.adoc`](docs/record-definition-input.adoc), [`docs/date-dimension-generator.adoc`](docs/date-dimension-generator.adoc).
+Also: [`docs/source-to-target-lineage.adoc`](docs/source-to-target-lineage.adoc), [`docs/ai-advisory.md`](docs/ai-advisory.md), [`docs/datavault-source.adoc`](docs/datavault-source.adoc), [`docs/datavault-source-database.adoc`](docs/datavault-source-database.adoc), [`docs/record-definition-input.adoc`](docs/record-definition-input.adoc), [`docs/date-dimension-generator.adoc`](docs/date-dimension-generator.adoc).
 
 Screenshots are in [`docs/images/`](docs/images/).
 
@@ -120,14 +121,14 @@ mvn clean package
 
 Artifacts:
 
-- `target/hop-datavault-0.3.0-SNAPSHOT.jar`
-- `target/hop-datavault-0.3.0-SNAPSHOT.zip` (ready-to-unzip plugin layout)
+- `target/hop-datavault-0.4.0.jar`
+- `target/hop-datavault-0.4.0.zip` (ready-to-unzip plugin layout)
 
 ## Installation (external plugin)
 
 1. Unzip the assembly zip into your Hop installation, or manually copy the jar to:
    ```
-   $HOP_HOME/plugins/misc/datavault/hop-datavault-0.3.0-SNAPSHOT.jar
+   $HOP_HOME/plugins/misc/datavault/hop-datavault-0.4.0.jar
    ```
 2. Restart Hop GUI.
 3. New metadata types appear under **Metadata → Data Vault**. **Data Vault Update**, **Business Vault Update**, and **Validate resource definitions** actions are available in workflows. `.hdv` and `.hbv` files open in the visual modelers.
@@ -161,7 +162,9 @@ SELECT * FROM sat_customer WHERE x_load_end_ts IS NULL
 - Multi-active satellites via driving keys
 - Record source groups for partial model updates
 
-## Roadmap / 0.3.x focus
+## Roadmap / 0.4.x focus
+
+**Shipped in 0.4.0:** source-to-target lineage (table + field, reason codes), Lineage tab and reverse browser, explainable DDL, catalog lineage publish, lineage drift gate; transactional link dependent child keys; separate DV/BV target databases for incremental SCD2/PIT; SQL Server multi-byte VARCHAR expansion; pipeline wall-clock metrics. See [CHANGELOG.md](CHANGELOG.md).
 
 **Shipped in 0.3.0 preview:** catalog version tags, schema impact simulation, **Validate resource definitions** CI/CD gate (compare modes, failure severity, Markdown/HTML reports, downstream impact), retail `work/` runtime tree, schema-gate docs and screenshots.
 
