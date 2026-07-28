@@ -105,6 +105,10 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
 import org.apache.hop.datavault.hopgui.help.HelpTopics;
+import org.apache.hop.datavault.hopgui.lineage.LineageTabSupport;
+import org.apache.hop.datavault.lineage.DmModelLineageCollector;
+import org.apache.hop.datavault.lineage.LineageSnapshot;
+import org.apache.hop.datavault.lineage.TableLineage;
 
 /** Dialog to edit a dimension or fact table on the dimensional model canvas. */
 public class HopGuiDmTableDialog {
@@ -274,6 +278,7 @@ public class HopGuiDmTableDialog {
       addRangeDimensionRolesTab();
       addJunkDimensionRolesTab();
     }
+    addLineageTab();
 
     wTabFolder.setSelection(0);
     shell.layout(true, true);
@@ -291,6 +296,19 @@ public class HopGuiDmTableDialog {
     BaseDialog.defaultShellHandling(shell, e -> ok(), e -> cancel());
 
     return ok;
+  }
+
+  private void addLineageTab() {
+    TableLineage tableLineage = null;
+    try {
+      if (model != null) {
+        LineageSnapshot snapshot = DmModelLineageCollector.collect(model, variables);
+        tableLineage = LineageTabSupport.findTable(snapshot, input.getName());
+      }
+    } catch (Exception e) {
+      // Keep dialog open; tab shows empty lineage message.
+    }
+    LineageTabSupport.addTab(wTabFolder, variables, margin, tableLineage);
   }
 
   private void addGeneralTab() {

@@ -31,6 +31,10 @@ import org.apache.hop.datavault.hopgui.file.dimensional.DmSourceSqlGuiSupport;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
 import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
 import org.apache.hop.datavault.hopgui.help.HelpTopics;
+import org.apache.hop.datavault.hopgui.lineage.LineageTabSupport;
+import org.apache.hop.datavault.lineage.BvModelLineageCollector;
+import org.apache.hop.datavault.lineage.LineageSnapshot;
+import org.apache.hop.datavault.lineage.TableLineage;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
 import org.apache.hop.datavault.metadata.businessvault.BvBusinessTable;
@@ -414,6 +418,7 @@ public class HopGuiBvBusinessTableDialog {
             refreshGeneratedSql();
           }
         });
+    addLineageTab();
     wTabFolder.setSelection(0);
 
     Button wOk = new Button(shell, SWT.PUSH);
@@ -436,6 +441,19 @@ public class HopGuiBvBusinessTableDialog {
     BaseTransformDialog.setSize(shell, 720, 640);
     BaseDialog.defaultShellHandling(shell, e -> ok(), e -> cancel());
     return ok;
+  }
+
+  private void addLineageTab() {
+    TableLineage tableLineage = null;
+    try {
+      if (businessVaultModel != null) {
+        LineageSnapshot snapshot = BvModelLineageCollector.collect(businessVaultModel, variables);
+        tableLineage = LineageTabSupport.findTable(snapshot, input.getName());
+      }
+    } catch (Exception e) {
+      // Keep dialog open; tab shows empty lineage message.
+    }
+    LineageTabSupport.addTab(wTabFolder, variables, PropsUi.getMargin(), tableLineage);
   }
 
   private void getData() {

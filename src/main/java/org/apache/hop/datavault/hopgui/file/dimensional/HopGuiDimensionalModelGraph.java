@@ -1538,6 +1538,15 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     ddlStatements = DvDdlSupport.deduplicateCreateTableDdl(ddlStatements);
     if (!ddlStatements.isEmpty()) {
       try {
+        try {
+          String explanation =
+              org.apache.hop.datavault.lineage.DdlLineageExplainSupport.explain(
+                  ddlStatements, model, hopGui.getVariables());
+          org.apache.hop.datavault.hopgui.lineage.LineageTabSupport.showDdlExplanation(
+              hopGui.getShell(), explanation);
+        } catch (Exception lineageEx) {
+          // Non-fatal: still open SQL editor.
+        }
         DatabaseMeta dbMeta =
             DmTargetDatabaseSupport.loadTargetDatabase(
                 hopGui.getMetadataProvider(), model.getConfigurationOrDefault());

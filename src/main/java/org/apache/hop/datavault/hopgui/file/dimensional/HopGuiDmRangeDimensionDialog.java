@@ -29,6 +29,10 @@ import org.apache.hop.datavault.metadata.dimensional.DmRangeDimension;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.datavault.metadata.dimensional.IDmTable;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
+import org.apache.hop.datavault.hopgui.lineage.LineageTabSupport;
+import org.apache.hop.datavault.lineage.DmModelLineageCollector;
+import org.apache.hop.datavault.lineage.LineageSnapshot;
+import org.apache.hop.datavault.lineage.TableLineage;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.i18n.BaseMessages;
@@ -109,13 +113,19 @@ public class HopGuiDmRangeDimensionDialog {
         BaseMessages.getString(
             ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Label"));
     wValidate.addListener(SWT.Selection, e -> validate());
+    Button wLineage = new Button(shell, SWT.PUSH);
+    wLineage.setText(
+        BaseMessages.getString(LineageTabSupport.class, "LineageTab.ShowButton"));
+    wLineage.setToolTipText(
+        BaseMessages.getString(LineageTabSupport.class, "LineageTab.ShowButton.ToolTip"));
+    wLineage.addListener(SWT.Selection, e -> showLineage());
     Button wCancel = new Button(shell, SWT.PUSH);
     wCancel.setText(BaseMessages.getString(PKG, "System.Button.Cancel"));
     wCancel.addListener(SWT.Selection, e -> cancel());
     DialogHelpSupport.createHelpButton(shell, HelpTopics.DM_RANGE_DIMENSION);
 
     BaseTransformDialog.positionBottomButtons(
-        shell, new Button[] {wOk, wValidate, wCancel}, margin, null);
+        shell, new Button[] {wOk, wValidate, wLineage, wCancel}, margin, null);
 
     Label wlName = new Label(shell, SWT.RIGHT);
     wlName.setText(BaseMessages.getString(PKG, "HopGuiDmRangeDimensionDialog.Name.Label"));
@@ -197,6 +207,20 @@ public class HopGuiDmRangeDimensionDialog {
     BaseTransformDialog.setSize(shell, 560, 520);
     BaseDialog.defaultShellHandling(shell, e -> ok(), e -> cancel());
     return ok;
+  }
+
+  private void showLineage() {
+    TableLineage tableLineage = null;
+    try {
+      if (model != null) {
+        LineageSnapshot snapshot = DmModelLineageCollector.collect(model, variables);
+        tableLineage = LineageTabSupport.findTable(snapshot, input.getName());
+      }
+    } catch (Exception e) {
+      new ErrorDialog(shell, "Error", "Error building lineage for table", e);
+      return;
+    }
+    LineageTabSupport.openViewerDialog(shell, variables, tableLineage);
   }
 
   private void getData() {

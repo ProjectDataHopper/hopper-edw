@@ -26,6 +26,10 @@ import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.hopgui.EnumDialogSupport;
+import org.apache.hop.datavault.hopgui.lineage.LineageTabSupport;
+import org.apache.hop.datavault.lineage.BvModelLineageCollector;
+import org.apache.hop.datavault.lineage.LineageSnapshot;
+import org.apache.hop.datavault.lineage.TableLineage;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.datavault.metadata.IDvTable;
@@ -314,13 +318,19 @@ public class HopGuiBvTableDialog {
         BaseMessages.getString(
             ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Label"));
     wValidate.addListener(SWT.Selection, e -> validate());
+    Button wLineage = new Button(shell, SWT.PUSH);
+    wLineage.setText(
+        BaseMessages.getString(LineageTabSupport.class, "LineageTab.ShowButton"));
+    wLineage.setToolTipText(
+        BaseMessages.getString(LineageTabSupport.class, "LineageTab.ShowButton.ToolTip"));
+    wLineage.addListener(SWT.Selection, e -> showLineage());
     Button wCancel = new Button(shell, SWT.PUSH);
     wCancel.setText(BaseMessages.getString(PKG, "System.Button.Cancel"));
     wCancel.addListener(SWT.Selection, e -> cancel());
     DialogHelpSupport.createHelpButton(shell, HelpTopics.BV_TABLE);
 
     BaseTransformDialog.positionBottomButtons(
-        shell, new Button[] {wOk, wValidate, wCancel}, margin, null);
+        shell, new Button[] {wOk, wValidate, wLineage, wCancel}, margin, null);
 
     getData();
     if (pit) {
@@ -329,6 +339,20 @@ public class HopGuiBvTableDialog {
     BaseTransformDialog.setSize(shell, 560, pit ? 720 : 520);
     BaseDialog.defaultShellHandling(shell, e -> ok(), e -> cancel());
     return ok;
+  }
+
+  private void showLineage() {
+    TableLineage tableLineage = null;
+    try {
+      if (businessVaultModel != null) {
+        LineageSnapshot snapshot = BvModelLineageCollector.collect(businessVaultModel, variables);
+        tableLineage = LineageTabSupport.findTable(snapshot, input.getName());
+      }
+    } catch (Exception e) {
+      new ErrorDialog(shell, "Error", "Error building lineage for table", e);
+      return;
+    }
+    LineageTabSupport.openViewerDialog(shell, variables, tableLineage);
   }
 
   private Label addLabel(

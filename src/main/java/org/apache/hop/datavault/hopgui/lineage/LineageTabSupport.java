@@ -31,17 +31,22 @@ import org.apache.hop.datavault.lineage.TableSourceRef;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.FormDataBuilder;
 import org.apache.hop.ui.core.PropsUi;
+import org.apache.hop.ui.core.dialog.BaseDialog;
+import org.apache.hop.ui.core.dialog.ShowMessageDialog;
 import org.apache.hop.ui.core.gui.GuiResource;
 import org.apache.hop.ui.core.widget.ColumnInfo;
 import org.apache.hop.ui.core.widget.TableView;
+import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
@@ -78,12 +83,13 @@ public final class LineageTabSupport {
     fdlHeader.right = new FormAttachment(100, 0);
     wlHeader.setLayoutData(fdlHeader);
 
-    Text wReasons = new Text(comp, SWT.MULTI | SWT.READ_ONLY | SWT.BORDER | SWT.V_SCROLL | SWT.WRAP);
+    Text wReasons =
+        new Text(comp, SWT.MULTI | SWT.READ_ONLY | SWT.BORDER | SWT.V_SCROLL | SWT.WRAP);
     PropsUi.setLook(wReasons, Props.WIDGET_STYLE_FIXED);
     FormData fdReasons = new FormData();
     fdReasons.left = new FormAttachment(0, 0);
     fdReasons.top = new FormAttachment(wlHeader, margin);
-    fdReasons.right = new FormAttachment(100, 0);
+    fdReasons.right = new FormAttachment((int) (100 * PropsUi.getNativeZoomFactor()), 0);
     fdReasons.height = 90;
     wReasons.setLayoutData(fdReasons);
     wReasons.setText(formatTableHeader(tableLineage));
@@ -148,12 +154,7 @@ public final class LineageTabSupport {
             null,
             PropsUi.getInstance());
     tableView.setLayoutData(
-        new FormDataBuilder()
-            .left()
-            .top(wlFields, margin)
-            .right()
-            .bottom()
-            .result());
+        new FormDataBuilder().left().top(wlFields, margin).right().bottom().result());
 
     populateFields(tableView, tableLineage);
 
@@ -161,9 +162,7 @@ public final class LineageTabSupport {
     tab.setControl(comp);
   }
 
-  /**
-   * Resolves table lineage for a logical name from a snapshot (by logical or physical name).
-   */
+  /** Resolves table lineage for a logical name from a snapshot (by logical or physical name). */
   public static TableLineage findTable(LineageSnapshot snapshot, String logicalOrPhysicalName) {
     if (snapshot == null || Utils.isEmpty(logicalOrPhysicalName)) {
       return null;
@@ -172,6 +171,102 @@ public final class LineageTabSupport {
         .findTableByLogicalName(logicalOrPhysicalName)
         .or(() -> snapshot.findTableByPhysicalName(logicalOrPhysicalName))
         .orElse(null);
+  }
+
+  /** Opens a modal viewer for dialogs that do not use a CTabFolder (e.g. simple PIT editors). */
+  public static void openViewerDialog(
+      Shell parent, IVariables variables, TableLineage tableLineage) {
+    Shell shell = new Shell(parent, BaseDialog.getDefaultDialogStyle());
+    PropsUi.setLook(shell);
+    String title =
+        tableLineage != null && !Utils.isEmpty(tableLineage.getLogicalName())
+            ? BaseMessages.getString(PKG, "LineageTab.Title")
+                + " — "
+                + tableLineage.getLogicalName()
+            : BaseMessages.getString(PKG, "LineageTab.Title");
+    shell.setText(title);
+
+    FormLayout formLayout = new FormLayout();
+    formLayout.marginWidth = PropsUi.getFormMargin();
+    formLayout.marginHeight = PropsUi.getFormMargin();
+    shell.setLayout(formLayout);
+
+    int margin = PropsUi.getMargin();
+    Button wClose = new Button(shell, SWT.PUSH);
+    wClose.setText(BaseMessages.getString(PKG, "System.Button.Close"));
+    wClose.addListener(SWT.Selection, e -> shell.dispose());
+    BaseTransformDialog.positionBottomButtons(shell, new Button[] {wClose}, margin, null);
+
+    CTabFolder folder = new CTabFolder(shell, SWT.BORDER);
+    PropsUi.setLook(folder, Props.WIDGET_STYLE_TAB);
+    folder.setLayoutData(
+        new FormDataBuilder().left().top().right().bottom(wClose, -2 * margin).result());
+    addTab(folder, variables, margin, tableLineage);
+    folder.setSelection(0);
+
+    BaseTransformDialog.setSize(shell, 780, 560);
+    shell.open();
+    while (!shell.isDisposed()) {
+      if (!shell.getDisplay().readAndDispatch()) {
+        shell.getDisplay().sleep();
+      }
+    }
+  }
+
+  /** Shows a scrollable DDL lineage explanation dialog when explanation text is non-empty. */
+  public static void showDdlExplanation(Shell shell, String explanation) {
+    if (shell == null || Utils.isEmpty(explanation)) {
+      return;
+    }
+    ShowMessageDialog dialog =
+        new ShowMessageDialog(
+            shell,
+            SWT.OK | SWT.ICON_INFORMATION,
+            BaseMessages.getString(PKG, "LineageExplainDialog.Title"),
+            explanation,
+            true);
+    dialog.open();
+  }
+
+  /** Plain-text export of table + field lineage (for buttons / reports). */
+  public static String formatAsText(TableLineage tableLineage) {
+    if (tableLineage == null) {
+      return BaseMessages.getString(PKG, "LineageTab.NoLineage");
+    }
+    StringBuilder sb = new StringBuilder();
+    sb.append(formatTableHeader(tableLineage)).append("\n\n");
+    sb.append(BaseMessages.getString(PKG, "LineageTab.Fields.Label")).append('\n');
+    for (FieldLineage field : tableLineage.getFields()) {
+      if (field.getContributions().isEmpty()) {
+        sb.append("  - ")
+            .append(Const.NVL(field.getTargetFieldName(), ""))
+            .append(field.isTechnical() ? " [technical]" : "")
+            .append('\n');
+        continue;
+      }
+      for (FieldContribution contribution : field.getContributions()) {
+        sb.append("  - ")
+            .append(Const.NVL(field.getTargetFieldName(), ""))
+            .append(field.isTechnical() ? " [technical]" : "")
+            .append(" ← ")
+            .append(Const.NVL(contribution.getSourceName(), ""))
+            .append(
+                Utils.isEmpty(contribution.getSourceFieldName())
+                    ? ""
+                    : "." + contribution.getSourceFieldName());
+        if (!contribution.getReasons().isEmpty()) {
+          sb.append(" [")
+              .append(
+                  contribution.getReasons().stream()
+                      .map(r -> r.getCode().name())
+                      .collect(Collectors.joining("/")))
+              .append("] ")
+              .append(Const.NVL(contribution.getReasons().get(0).getMessage(), ""));
+        }
+        sb.append('\n');
+      }
+    }
+    return sb.toString().trim();
   }
 
   private static String formatTableHeader(TableLineage tableLineage) {
@@ -255,8 +350,7 @@ public final class LineageTabSupport {
         item.setText(3, Const.NVL(contribution.getSourceName(), ""));
         item.setText(4, Const.NVL(contribution.getSourceFieldName(), ""));
         item.setText(
-            5,
-            contribution.getTransform() != null ? contribution.getTransform().name() : "");
+            5, contribution.getTransform() != null ? contribution.getTransform().name() : "");
         String codes =
             contribution.getReasons().stream()
                 .map(r -> r.getCode().name())

@@ -44,6 +44,10 @@ import org.apache.hop.datavault.metadata.businessvault.BusinessVaultDerivativeSu
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
 import org.apache.hop.datavault.metadata.businessvault.IBvTable;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
+import org.apache.hop.datavault.hopgui.lineage.LineageTabSupport;
+import org.apache.hop.datavault.lineage.BvModelLineageCollector;
+import org.apache.hop.datavault.lineage.LineageSnapshot;
+import org.apache.hop.datavault.lineage.TableLineage;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.core.FormDataBuilder;
@@ -188,6 +192,7 @@ public class HopGuiBvScd2TableDialog {
     addDerivativesTab();
     addFieldMappingsTab();
     addSatelliteSettingsTab();
+    addLineageTab();
     wTabFolder.setSelection(0);
     shell.layout(true, true);
 
@@ -198,6 +203,19 @@ public class HopGuiBvScd2TableDialog {
     BaseTransformDialog.setSize(shell, 720, 620);
     BaseDialog.defaultShellHandling(shell, e -> ok(), e -> cancel());
     return ok;
+  }
+
+  private void addLineageTab() {
+    TableLineage tableLineage = null;
+    try {
+      if (businessVaultModel != null) {
+        LineageSnapshot snapshot = BvModelLineageCollector.collect(businessVaultModel, variables);
+        tableLineage = LineageTabSupport.findTable(snapshot, input.getName());
+      }
+    } catch (Exception e) {
+      // Keep dialog open; tab shows empty lineage message.
+    }
+    LineageTabSupport.addTab(wTabFolder, variables, margin, tableLineage);
   }
 
   private void addGeneralTab() {
