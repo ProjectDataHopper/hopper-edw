@@ -24,6 +24,8 @@ import java.util.stream.Collectors;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metadata.DataVaultModel;
+import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
+import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
@@ -51,6 +53,29 @@ public final class DdlLineageExplainSupport {
     }
     LineageSnapshot snapshot =
         DvModelLineageCollector.collect(model, variables, metadataProvider, null);
+    return explain(ddlStatements, snapshot);
+  }
+
+  public static String explain(
+      List<String> ddlStatements, BusinessVaultModel model, IVariables variables) {
+    if (ddlStatements == null || ddlStatements.isEmpty()) {
+      return "";
+    }
+    return explain(ddlStatements, BvModelLineageCollector.collect(model, variables));
+  }
+
+  public static String explain(
+      List<String> ddlStatements, DimensionalModel model, IVariables variables) {
+    if (ddlStatements == null || ddlStatements.isEmpty()) {
+      return "";
+    }
+    return explain(ddlStatements, DmModelLineageCollector.collect(model, variables));
+  }
+
+  public static String explain(List<String> ddlStatements, LineageSnapshot snapshot) {
+    if (ddlStatements == null || ddlStatements.isEmpty()) {
+      return "";
+    }
     List<DdlDelta> deltas = DdlDeltaClassifier.classify(ddlStatements);
     return format(deltas, snapshot, ddlStatements.size());
   }

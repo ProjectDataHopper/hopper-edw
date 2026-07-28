@@ -52,6 +52,7 @@ import org.apache.hop.core.vfs.HopVfs;
 import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.catalog.metadata.DataCatalogMeta;
 import org.apache.hop.datavault.catalog.DmCatalogPublisher;
+import org.apache.hop.datavault.lineage.DdlLineageExplainSupport;
 import org.apache.hop.datavault.hopgui.file.dimensional.HopDimensionalFileType;
 import org.apache.hop.datavault.metadata.dimensional.DmSourceRecordDefinitionSupport;
 import org.apache.hop.datavault.metadata.DvDdlSupport;
@@ -370,6 +371,22 @@ public class ActionDimensionalUpdate extends ActionBase implements Cloneable, IA
         ddlStatements = DvDdlSupport.deduplicateCreateTableDdl(ddlStatements);
 
         if (hasDdlStatements(ddlStatements)) {
+          try {
+            String explanation =
+                DdlLineageExplainSupport.explain(ddlStatements, dmModel, getVariables());
+            if (!Utils.isEmpty(explanation)) {
+              if (failIfDdlNeeded) {
+                logError(explanation);
+              } else {
+                logBasic(explanation);
+              }
+            }
+          } catch (Exception lineageEx) {
+            logError(
+                BaseMessages.getString(PKG, "ActionDimensionalUpdate.Log.LineageExplainFailed"),
+                lineageEx);
+          }
+
           if (failIfDdlNeeded) {
             logError(
                 BaseMessages.getString(PKG, "ActionDimensionalUpdate.Log.AbortingOnDdlNeeded"));

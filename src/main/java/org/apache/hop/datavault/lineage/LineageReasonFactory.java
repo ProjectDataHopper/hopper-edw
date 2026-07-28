@@ -193,6 +193,54 @@ public final class LineageReasonFactory {
         evidence);
   }
 
+  public static LineageReason bvScd2FieldMap(
+      String targetField, String satelliteName, String sourceField) {
+    Map<String, String> evidence = new LinkedHashMap<>();
+    evidence.put("targetField", nvl(targetField));
+    evidence.put("satelliteName", nvl(satelliteName));
+    evidence.put("sourceField", nvl(sourceField));
+    return new LineageReason(
+        LineageReasonCode.BV_SCD2_FIELD_MAP,
+        BaseMessages.getString(
+            PKG,
+            "LineageReason.BvScd2FieldMap",
+            nvl(targetField),
+            nvl(satelliteName),
+            nvl(sourceField)),
+        LineageConfidence.EXPLICIT,
+        evidence);
+  }
+
+  public static LineageReason bvPassthrough(String fieldName, String satelliteName) {
+    Map<String, String> evidence = new LinkedHashMap<>();
+    evidence.put("fieldName", nvl(fieldName));
+    evidence.put("satelliteName", nvl(satelliteName));
+    return new LineageReason(
+        LineageReasonCode.BV_PASSTHROUGH,
+        BaseMessages.getString(
+            PKG, "LineageReason.BvPassthrough", nvl(fieldName), nvl(satelliteName)),
+        LineageConfidence.CONVENTION,
+        evidence);
+  }
+
+  public static LineageReason dmRoleMapping(
+      String targetField, String sourceLabel, String sourceField) {
+    Map<String, String> evidence = new LinkedHashMap<>();
+    evidence.put("targetField", nvl(targetField));
+    evidence.put("sourceLabel", nvl(sourceLabel));
+    evidence.put("sourceField", nvl(sourceField));
+    return new LineageReason(
+        LineageReasonCode.DM_ROLE_MAPPING,
+        BaseMessages.getString(
+            PKG,
+            "LineageReason.DmRoleMapping",
+            nvl(targetField),
+            nvl(sourceLabel),
+            nvl(sourceField)),
+        LineageConfidence.EXPLICIT,
+        evidence);
+  }
+
   private static String nvl(String value) {
     return Utils.isEmpty(value) ? "" : value;
   }
