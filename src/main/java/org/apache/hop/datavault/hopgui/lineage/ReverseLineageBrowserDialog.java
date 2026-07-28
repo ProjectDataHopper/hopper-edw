@@ -248,8 +248,6 @@ public final class ReverseLineageBrowserDialog {
     for (int i = 0; i < rows.size(); i++) {
       ReverseLineageConsumer row = rows.get(i);
       TableItem item = new TableItem(wResults.table, SWT.NONE);
-      // Bind consumer to the item so open still works after the user sorts columns.
-      item.setData(row);
       item.setText(1, Integer.toString(row.getHopCount()));
       item.setText(2, row.getLayer() != null ? row.getLayer().name() : "");
       item.setText(3, Const.NVL(row.getModelName(), ""));
@@ -269,8 +267,10 @@ public final class ReverseLineageBrowserDialog {
     if (selection == null || selection.length == 0) {
       return;
     }
-    Object data = selection[0].getData();
-    if (!(data instanceof ReverseLineageConsumer consumer)) {
+    // TableView.sortTable() rebuilds every TableItem from cell text only (setData is lost).
+    // Resolve the consumer by matching displayed cells against the last filter result.
+    ReverseLineageConsumer consumer = findConsumerFromTableItem(selection[0]);
+    if (consumer == null) {
       return;
     }
     try {
@@ -290,6 +290,57 @@ public final class ReverseLineageBrowserDialog {
           BaseMessages.getString(PKG, "ReverseLineageBrowserDialog.Error.OpenModel"),
           e);
     }
+  }
+
+  /**
+   * Matches a (possibly re-sorted) {@link TableItem} to a consumer from {@link #currentRows}. Hop's
+   * {@code TableView.sortTable} discards {@link TableItem#setData(Object)} when it recreates rows.
+   */
+  private ReverseLineageConsumer findConsumerFromTableItem(TableItem item) {
+    if (item == null || currentRows == null || currentRows.isEmpty()) {
+      return null;
+    }
+    String hop = Const.NVL(item.getText(1), "");
+    String layer = Const.NVL(item.getText(2), "");
+    String model = Const.NVL(item.getText(3), "");
+    String table = Const.NVL(item.getText(4), "");
+    String tableType = Const.NVL(item.getText(5), "");
+    String targetField = Const.NVL(item.getText(6), "");
+    String transform = Const.NVL(item.getText(7), "");
+    String path = Const.NVL(item.getText(9), "");
+
+    for (ReverseLineageConsumer consumer : currentRows) {
+      if (consumer == null) {
+        continue;
+      }
+      if (!hop.equals(Integer.toString(consumer.getHopCount()))) {
+        continue;
+      }
+      String consumerLayer = consumer.getLayer() != null ? consumer.getLayer().name() : "";
+      if (!layer.equals(consumerLayer)) {
+        continue;
+      }
+      if (!model.equals(Const.NVL(consumer.getModelName(), ""))) {
+        continue;
+      }
+      if (!table.equals(Const.NVL(consumer.getTableName(), ""))) {
+        continue;
+      }
+      if (!tableType.equals(Const.NVL(consumer.getTableType(), ""))) {
+        continue;
+      }
+      if (!targetField.equals(Const.NVL(consumer.getTargetField(), ""))) {
+        continue;
+      }
+      if (!transform.equals(Const.NVL(consumer.getTransform(), ""))) {
+        continue;
+      }
+      if (!path.equals(Const.NVL(consumer.getPathSummary(), ""))) {
+        continue;
+      }
+      return consumer;
+    }
+    return null;
   }
 
   private static String mapLayerToUsageType(org.apache.hop.datavault.lineage.LineageLayer layer) {
