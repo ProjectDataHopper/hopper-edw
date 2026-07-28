@@ -30,11 +30,12 @@ hop-data-vault avoids that opacity by:
 
 A *lineage snapshot* is the full set of tables and fields for one model at a point in time. Collectors build it from:
 
-| Layer | Collector input |
-|-------|-----------------|
-| DV | `.hdv` hubs, links, satellites, standard columns, multi-source BKs |
-| BV | `.hbv` SCD2 field maps, derivatives, PIT technical columns |
-| DM | `.hdm` dimensions, facts, roles, measures, staging sources |
+|===
+| Layer | Collector input
+| DV | `.hdv` hubs, links, satellites, standard columns, multi-source BKs
+| BV | `.hbv` SCD2 field maps, derivatives, PIT technical columns
+| DM | `.hdm` dimensions, facts, roles, measures, staging sources
+|===
 
 === Table lineage
 
@@ -55,19 +56,20 @@ For each target column:
 
 === Reason codes (selection)
 
-| Code | Meaning |
-|------|---------|
-| `USER_EXPLICIT_NAME` | Table or physical name set in the modeler |
-| `USER_EXPLICIT_MAPPING` | Explicit source field mapping (for example hub business key) |
-| `DEFAULT_SAME_AS_SOURCE` | Target column uses the same name as the source (typical satellite attributes) |
-| `NAMING_CONVENTION` | Type-driven or organizational naming |
-| `STANDARD_COLUMN` | Config-driven technical column (`x_load_ts`, `x_record_source`, …) |
-| `HASH_FROM_BUSINESS_KEYS` | Hash key derived from business keys |
-| `PARENT_HASH_KEY` | Parent hub/link hash on a satellite or link |
-| `MULTI_SOURCE_HUB` | Same BK column fed by multiple record sources |
-| `LINK_HUB_KEY_MAPPING` | Link maps source columns to participating hub keys |
-| `BV_SCD2_FIELD_MAP` | Explicit Business Vault SCD2 field mapping |
-| `DM_ROLE_MAPPING` | Dimensional role, measure, or staging mapping |
+|===
+| Code | Meaning
+| `USER_EXPLICIT_NAME` | Table or physical name set in the modeler
+| `USER_EXPLICIT_MAPPING` | Explicit source field mapping (for example hub business key)
+| `DEFAULT_SAME_AS_SOURCE` | Target column uses the same name as the source (typical satellite attributes)
+| `NAMING_CONVENTION` | Type-driven or organizational naming
+| `STANDARD_COLUMN` | Config-driven technical column (`x_load_ts`, `x_record_source`, …)
+| `HASH_FROM_BUSINESS_KEYS` | Hash key derived from business keys
+| `PARENT_HASH_KEY` | Parent hub/link hash on a satellite or link
+| `MULTI_SOURCE_HUB` | Same BK column fed by multiple record sources
+| `LINK_HUB_KEY_MAPPING` | Link maps source columns to participating hub keys
+| `BV_SCD2_FIELD_MAP` | Explicit Business Vault SCD2 field mapping
+| `DM_ROLE_MAPPING` | Dimensional role, measure, or staging mapping 
+|===
 
 Confidence levels (`EXPLICIT`, `DERIVED`, `CONVENTION`, `INFERRED`) indicate how strongly the reason is grounded in stored metadata.
 
@@ -129,13 +131,15 @@ hop/{project}/lineage/{dv|bv|dm}/{model-name}/
   …
 ----
 
-| Aspect | Detail |
-|--------|--------|
-| Record type | `UNKNOWN` |
-| Tags | `LINEAGE`, optionally `LINEAGE_SNAPSHOT`, layer (`DV`/`BV`/`DM`), table type, model name |
-| Custom properties | `fieldsJson`, `tableReasonsJson`, `tableSourcesJson`, `physicalTableName`, `tableType`, `lineageLayer`, … |
-| Edit surface | **None** — fully derived; republish replaces lineage |
 
+|===
+| Aspect | Detail
+| Record type | `UNKNOWN`
+| Tags | `LINEAGE`, optionally `LINEAGE_SNAPSHOT`, layer (`DV`/`BV`/`DM`), table type, model name
+| Custom properties | `fieldsJson`, `tableReasonsJson`, `tableSourcesJson`, `physicalTableName`, `tableType`, `lineageLayer`, …
+| Edit surface | **None** — fully derived; republish replaces lineage
+|===
+So
 Models stay authoritative. Catalog lineage is for discovery, ops, and the drift gate.
 
 See also link:data-catalog.adoc[Data Catalog] for general catalog layout and version tags (source contracts).
@@ -144,14 +148,15 @@ See also link:data-catalog.adoc[Data Catalog] for general catalog layout and ver
 
 The **Validate resource definitions** workflow action (and interactive **Validate sources** on a resource definition group) compares **current model lineage** to the **last published catalog lineage** for each DV/BV/DM model in the group.
 
-| Drift type | Typical severity |
-|------------|------------------|
-| Physical / logical table rename without `USER_EXPLICIT_NAME` | *Blocking* |
-| Field rename (same source contribution, different target name) | Warning |
-| Mapping change (same target, different source) | Warning |
-| Table or field removed | Warning |
-| Table or field added | Info |
-| No catalog baseline yet | Info (first publish / missing siblings) |
+|===
+| Drift type | Typical severity
+| Physical / logical table rename without `USER_EXPLICIT_NAME` | *Blocking*
+| Field rename (same source contribution, different target name) | Warning
+| Mapping change (same target, different source) | Warning
+| Table or field removed | Warning
+| Table or field added | Info
+| No catalog baseline yet | Info (first publish / missing siblings)
+|===
 
 Markdown and HTML validation reports include a **Lineage Drift** section. Blocking lineage renames can elevate overall simulation status to critical, consistent with schema drift gates.
 
@@ -181,12 +186,13 @@ Use this when you need the inverse of the Lineage tab: *given a staging column, 
 
 == Relationship to other features
 
-| Feature | Relationship |
-|---------|----------------|
-| link:execution-maps.adoc[Execution maps] (`.hem`) | Workflow / pipeline / dataset *execution* graph; not field-level mapping reasons |
-| Marquez / OpenLineage (planned) | External table-level job lineage; can reuse model-derived edges later — link:plans/marquez-lineage-plan.md[plan] |
-| link:resource-definition-validation.adoc[Resource definition validation] | Source schema contracts + impact; lineage drift is an additional section of the same gate |
-| Mapping authoring UI (coach, suggest mappings) | Creates or refines model mappings; lineage *explains* the result |
+|===
+| Feature | Relationship
+| link:execution-maps.adoc[Execution maps] (`.hem`) | Workflow / pipeline / dataset *execution* graph; not field-level mapping reasons
+| Marquez / OpenLineage (planned) | External table-level job lineage; can reuse model-derived edges later — link:plans/marquez-lineage-plan.md[plan]
+| link:resource-definition-validation.adoc[Resource definition validation] | Source schema contracts + impact; lineage drift is an additional section of the same gate
+| Mapping authoring UI (coach, suggest mappings) | Creates or refines model mappings; lineage *explains* the result
+|===
 
 == Related documents
 
