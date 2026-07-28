@@ -40,6 +40,9 @@ Additional namespaces appear when models publish catalog entries, for example:
 * `hop/{project}/models/{model-name}/` — DV table definitions
 * `hop/{project}/business-vault/{model-name}/` — BV target tables
 * `hop/{project}/dimensional/{model-name}/` — dimensional table definitions
+* `hop/{project}/lineage/{dv|bv|dm}/{model-name}/` — **source-to-target lineage** sibling records (derived; not an edit surface)
+
+Lineage publish writes one `_snapshot` index record plus one record per target table (logical name). Records are typed `UNKNOWN` with tags `LINEAGE` / `LINEAGE_SNAPSHOT` and custom properties (`fieldsJson`, `tableReasonsJson`, `physicalTableName`, …). Models (`.hdv` / `.hbv` / `.hdm`) remain authoritative; republish replaces derived lineage fully.
 
 The catalog **key** is `namespace/name` (for example `hop/retail-example/sources/E2E-customer-hub`).
 
