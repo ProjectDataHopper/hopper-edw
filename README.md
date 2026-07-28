@@ -121,14 +121,16 @@ mvn clean package
 
 Artifacts:
 
-- `target/hop-datavault-0.4.0.jar`
-- `target/hop-datavault-0.4.0.zip` (ready-to-unzip plugin layout)
+- `target/hop-datavault-0.5.0-SNAPSHOT.jar`
+- `target/hop-datavault-0.5.0-SNAPSHOT.zip` (ready-to-unzip plugin layout)
+
+Published release artifacts: **[v0.4.0](https://github.com/mattcasters/hop-data-vault/releases/tag/v0.4.0)** (`hop-datavault-0.4.0.zip`).
 
 ## Installation (external plugin)
 
 1. Unzip the assembly zip into your Hop installation, or manually copy the jar to:
    ```
-   $HOP_HOME/plugins/misc/datavault/hop-datavault-0.4.0.jar
+   $HOP_HOME/plugins/misc/datavault/hop-datavault-0.5.0-SNAPSHOT.jar
    ```
 2. Restart Hop GUI.
 3. New metadata types appear under **Metadata → Data Vault**. **Data Vault Update**, **Business Vault Update**, and **Validate resource definitions** actions are available in workflows. `.hdv` and `.hbv` files open in the visual modelers.
