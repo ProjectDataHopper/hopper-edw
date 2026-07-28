@@ -53,6 +53,7 @@ import org.apache.hop.core.vfs.HopVfs;
 import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.catalog.metadata.DataCatalogMeta;
 import org.apache.hop.datavault.catalog.DvCatalogPublisher;
+import org.apache.hop.datavault.lineage.DdlLineageExplainSupport;
 import org.apache.hop.datavault.metadata.DataVaultConfiguration;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DvDdlSupport;
@@ -440,6 +441,24 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
         ddlStatements = DvDdlSupport.deduplicateCreateTableDdl(ddlStatements);
 
         if (hasDdlStatements(ddlStatements)) {
+          // Always explain structural changes with source-to-target lineage (VaultSpeed-style opacity guard).
+          try {
+            String explanation =
+                DdlLineageExplainSupport.explain(
+                    ddlStatements, model, getVariables(), getMetadataProvider());
+            if (!Utils.isEmpty(explanation)) {
+              if (failIfDdlNeeded) {
+                logError(explanation);
+              } else {
+                logBasic(explanation);
+              }
+            }
+          } catch (Exception lineageEx) {
+            logError(
+                BaseMessages.getString(PKG, "ActionDataVaultUpdate.Log.LineageExplainFailed"),
+                lineageEx);
+          }
+
           if (failIfDdlNeeded) {
             logError(BaseMessages.getString(PKG, "ActionDataVaultUpdate.Log.AbortingOnDdlNeeded"));
             result.setResult(false);

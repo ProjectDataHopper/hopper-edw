@@ -17,7 +17,7 @@ limitations under the License.
 
 # Hop Data Vault plugin — feature overview
 
-Apache Hop plugin for **model-driven Data Vault 2.0**, **Business Vault**, and **dimensional** loading. Version **0.3.0-SNAPSHOT** targets **Apache Hop 2.18.1** and **Java 21**.
+Apache Hop plugin for **model-driven Data Vault 2.0**, **Business Vault**, and **dimensional** loading. Version **0.4.0** targets **Apache Hop 2.18.1** and **Java 21**.
 
 **Model once. Generate loads and consumption layers.** The visual models (`.hdv`, `.hbv`, `.hdm`) are the contract between architects, modelers, and operations.
 
@@ -42,6 +42,9 @@ For a slide-style executive summary, see [presentations/hop-data-vault-overview.
 | BV PIT tables | Available | [business-vault-pit.adoc](business-vault-pit.adoc) |
 | BV SQL views / tables (`ref` / `source`) | Available | [business-vault-sql-view.adoc](business-vault-sql-view.adoc) (`vault1.hbv` + `retail-sql.hbv` samples) |
 | Catalog model registry (DV/BV/DM index) | Available | Published on catalog publish; short `ref('model', 'table')` lookup |
+| Source-to-target lineage (table + field, reason codes) | Available | [source-to-target-lineage.adoc](source-to-target-lineage.adoc) |
+| Explainable DDL + lineage drift gate | Available | [source-to-target-lineage.adoc](source-to-target-lineage.adoc), [resource-definition-validation.adoc](resource-definition-validation.adoc) |
+| Reverse lineage browser (source field → consumers) | Available | [source-to-target-lineage.adoc](source-to-target-lineage.adoc) |
 | BV→BV canvas references (multi-step BV) | Available | Alias cards + SQL `ref()` to tables in another `.hbv` |
 | Business Vault Update action | Available | [business-vault-update-action.adoc](business-vault-update-action.adoc) |
 | Dimensional modeler (`.hdm`) | Available | [dimensional-modeler-overview.adoc](dimensional-modeler-overview.adoc) |

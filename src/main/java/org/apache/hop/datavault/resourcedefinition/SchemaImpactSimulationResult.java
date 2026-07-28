@@ -18,7 +18,10 @@
 package org.apache.hop.datavault.resourcedefinition;
 
 import java.time.Instant;
+import java.util.List;
 import org.apache.hop.datavault.impact.ImpactGraph;
+import org.apache.hop.datavault.lineage.LineageDiffResult;
+import org.apache.hop.datavault.lineage.LineageDiffService;
 
 /** Outcome of a schema impact simulation run. */
 public record SchemaImpactSimulationResult(
@@ -28,18 +31,55 @@ public record SchemaImpactSimulationResult(
     String baselineVersionUsed,
     SchemaCompareMode compareMode,
     Instant timestamp,
-    SimulationStatus status) {
+    SimulationStatus status,
+    List<LineageDiffResult> lineageDiffs) {
+
+  public SchemaImpactSimulationResult {
+    lineageDiffs = lineageDiffs != null ? List.copyOf(lineageDiffs) : List.of();
+  }
+
+  /** Compatibility constructor without lineage diffs. */
+  public SchemaImpactSimulationResult(
+      ValidationReport validationReport,
+      ImpactGraph impactGraph,
+      String catalogVersionUsed,
+      String baselineVersionUsed,
+      SchemaCompareMode compareMode,
+      Instant timestamp,
+      SimulationStatus status) {
+    this(
+        validationReport,
+        impactGraph,
+        catalogVersionUsed,
+        baselineVersionUsed,
+        compareMode,
+        timestamp,
+        status,
+        List.of());
+  }
 
   public static SimulationStatus statusOf(ValidationReport report) {
+    return statusOf(report, List.of());
+  }
+
+  public static SimulationStatus statusOf(
+      ValidationReport report, List<LineageDiffResult> lineageDiffs) {
+    SimulationStatus base;
     if (report == null) {
-      return SimulationStatus.PASS;
+      base = SimulationStatus.PASS;
+    } else if (report.hasBlockingIssues()) {
+      base = SimulationStatus.CRITICAL_BLOCKED;
+    } else if (report.getIssueCount() > 0) {
+      base = SimulationStatus.WARNING;
+    } else {
+      base = SimulationStatus.PASS;
     }
-    if (report.hasBlockingIssues()) {
+    if (LineageDiffService.hasBlocking(lineageDiffs)) {
       return SimulationStatus.CRITICAL_BLOCKED;
     }
-    if (report.getIssueCount() > 0) {
+    if (LineageDiffService.hasWarnings(lineageDiffs) && base == SimulationStatus.PASS) {
       return SimulationStatus.WARNING;
     }
-    return SimulationStatus.PASS;
+    return base;
   }
 }

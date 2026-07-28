@@ -19,7 +19,6 @@
 package org.apache.hop.datavault.hopgui.file.businessvault;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -31,6 +30,7 @@ import org.apache.hop.core.gui.plugin.action.GuiActionType;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
 import org.apache.hop.core.xml.XmlHandler;
+import org.apache.hop.datavault.hopgui.file.ExplorerPerspectiveTabSupport;
 import org.apache.hop.datavault.metadata.ModelXmlWriteSupport;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
 import org.apache.hop.i18n.BaseMessages;
@@ -47,7 +47,6 @@ import org.apache.hop.ui.hopgui.file.HopFileTypeBase;
 import org.apache.hop.ui.hopgui.file.HopFileTypePlugin;
 import org.apache.hop.ui.hopgui.file.IHopFileType;
 import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
-import org.apache.hop.ui.hopgui.perspective.TabItemHandler;
 import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
@@ -150,7 +149,7 @@ public class HopBusinessVaultFileType extends HopFileTypeBase {
       HopGui hopGui, BusinessVaultModel model, String filename, HopBusinessVaultFileType fileType)
       throws Exception {
     ExplorerPerspective explorer = HopGui.getExplorerPerspective();
-    CTabFolder targetFolder = getTargetTabFolder(explorer);
+    CTabFolder targetFolder = ExplorerPerspectiveTabSupport.requireTabFolder(explorer);
 
     HopGuiBusinessVaultGraph graph =
         new HopGuiBusinessVaultGraph(targetFolder, hopGui, explorer, model, fileType);
@@ -165,28 +164,12 @@ public class HopBusinessVaultFileType extends HopFileTypeBase {
     tabItem.setControl(graph);
     tabItem.setData(graph);
 
-    addToItemsList(explorer, tabItem, graph);
+    ExplorerPerspectiveTabSupport.registerTabItem(explorer, tabItem, graph);
 
     targetFolder.setSelection(tabItem);
     explorer.activate();
 
     return graph;
-  }
-
-  private CTabFolder getTargetTabFolder(ExplorerPerspective explorer) throws Exception {
-    Field field = ExplorerPerspective.class.getDeclaredField("tabFolder");
-    field.setAccessible(true);
-    return (CTabFolder) field.get(explorer);
-  }
-
-  private void addToItemsList(
-      ExplorerPerspective explorer, CTabItem tabItem, IHopFileTypeHandler handler)
-      throws Exception {
-    Field itemsField = ExplorerPerspective.class.getDeclaredField("items");
-    itemsField.setAccessible(true);
-    //noinspection unchecked
-    List<TabItemHandler> items = (List<TabItemHandler>) itemsField.get(explorer);
-    items.add(new TabItemHandler(tabItem, handler));
   }
 
   @Override

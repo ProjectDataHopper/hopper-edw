@@ -145,7 +145,50 @@ public final class DmCatalogPublisher {
       }
     }
 
+    try {
+      org.apache.hop.datavault.lineage.LineageSnapshot lineageSnapshot =
+          org.apache.hop.datavault.lineage.DmModelLineageCollector.collect(dmModel, variables);
+      org.apache.hop.datavault.lineage.LineageCatalogPublisher.PublishResult lineageResult =
+          org.apache.hop.datavault.lineage.LineageCatalogPublisher.publish(
+              catalogConnectionName,
+              lineageSnapshot,
+              variables,
+              metadataProvider,
+              workflowName,
+              adaptLog(log));
+      errorCount += lineageResult.getErrorCount();
+      if (log != null) {
+        log.logBasic(
+            "Published "
+                + lineageResult.getLineageRecordCount()
+                + " lineage catalog record(s) for DM model");
+      }
+    } catch (Exception e) {
+      errorCount++;
+      if (log != null) {
+        log.logError("Failed to publish DM lineage catalog records", e);
+      }
+    }
+
     return new PublishResult(tableCount, errorCount);
+  }
+
+  private static org.apache.hop.datavault.lineage.LineageCatalogPublisher.CatalogPublishLog
+      adaptLog(CatalogPublishLog log) {
+    if (log == null) {
+      return null;
+    }
+    return new org.apache.hop.datavault.lineage.LineageCatalogPublisher.CatalogPublishLog() {
+      @Override
+      public void logBasic(String message) {
+        log.logBasic(message);
+      }
+
+      @Override
+      public void logError(String message, Throwable throwable) {
+        log.logError(message, throwable);
+      }
+    };
   }
 
   private static void upsertDefinition(

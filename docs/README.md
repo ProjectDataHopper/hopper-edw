@@ -17,7 +17,7 @@ limitations under the License.
 
 # Hop Data Vault documentation index
 
-Documentation for the **hop-datavault** plugin (version **0.3.0-SNAPSHOT**). Recent work adds **catalog version tags**, a **CI/CD schema validation gate** (workflow action + Markdown/HTML reports + downstream impact), data-quality rules and gates, multi-DB hardening, and Business Vault incremental loading.
+Documentation for the **hop-datavault** plugin (version **0.4.0**). Recent work adds **source-to-target lineage** (Lineage tab, explainable DDL, catalog publish, drift gate, reverse browser), **catalog version tags**, a **CI/CD schema validation gate**, data-quality rules and gates, multi-DB hardening, and Business Vault incremental loading. See [CHANGELOG.md](../CHANGELOG.md).
 
 **New here?** Read [feature-overview.md](feature-overview.md), then follow [getting-started-retail.adoc](getting-started-retail.adoc).
 
@@ -40,6 +40,7 @@ Documentation for the **hop-datavault** plugin (version **0.3.0-SNAPSHOT**). Rec
 | Document | Description |
 |----------|-------------|
 | [data-catalog.adoc](data-catalog.adoc) | Local catalog setup, namespaces, refresh, **catalog version tags** |
+| [source-to-target-lineage.adoc](source-to-target-lineage.adoc) | Field/table lineage, Lineage tab, explainable DDL, catalog publish, drift gate, reverse browser |
 | [datavault-source.adoc](datavault-source.adoc) | `DV_SOURCE` record definitions |
 | [datavault-source-database.adoc](datavault-source-database.adoc) | Database-backed source fields |
 | [resource-definition-validation.adoc](resource-definition-validation.adoc) | Schema gate action, GUI validate, impact, proposals, HTML/MD reports, DTAP |
