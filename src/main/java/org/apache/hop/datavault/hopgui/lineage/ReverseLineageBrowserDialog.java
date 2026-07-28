@@ -248,6 +248,8 @@ public final class ReverseLineageBrowserDialog {
     for (int i = 0; i < rows.size(); i++) {
       ReverseLineageConsumer row = rows.get(i);
       TableItem item = new TableItem(wResults.table, SWT.NONE);
+      // Bind consumer to the item so open still works after the user sorts columns.
+      item.setData(row);
       item.setText(1, Integer.toString(row.getHopCount()));
       item.setText(2, row.getLayer() != null ? row.getLayer().name() : "");
       item.setText(3, Const.NVL(row.getModelName(), ""));
@@ -263,15 +265,14 @@ public final class ReverseLineageBrowserDialog {
   }
 
   private void openSelected() {
-    int[] selection = wResults.table.getSelectionIndices();
-    if (selection == null || selection.length == 0 || currentRows.isEmpty()) {
+    TableItem[] selection = wResults.table.getSelection();
+    if (selection == null || selection.length == 0) {
       return;
     }
-    int row = selection[0];
-    if (row < 0 || row >= currentRows.size()) {
+    Object data = selection[0].getData();
+    if (!(data instanceof ReverseLineageConsumer consumer)) {
       return;
     }
-    ReverseLineageConsumer consumer = currentRows.get(row);
     try {
       SourceUsage usage =
           SourceUsage.builder()
