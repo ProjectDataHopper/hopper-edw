@@ -97,7 +97,7 @@ image::images/action-data-vault-update.png[Data Vault Update action dialog,align
 * **Parallel load** – Set **Parallel pipeline copies** to `2` or higher on large models to run staged table pipelines concurrently.
 * **Schema export only** – Enable **DDL SQL filename**, disable **Update target database structure**, enable **Do not update target database**. Writes DDL to a file without loading data.
 * **Partial load by feed group** – Set **Record source group** to match the `Group` on selected Data Vault Sources (for example only `nightly` feeds).
-* **Production guard** – Enable **Fail if DDL is needed** so the action fails if the target schema is not already aligned with the model.
+* **Production guard** – Enable **Fail if DDL is needed** so the action fails if the target schema is not already aligned with the model. When any DDL is generated, the action logs a **source-to-target lineage explanation** (which mappings force the structural change). See link:source-to-target-lineage.adoc[Source-to-target lineage].
 
 == DDL and target database
 

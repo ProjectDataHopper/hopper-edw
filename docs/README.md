@@ -40,6 +40,7 @@ Documentation for the **hop-datavault** plugin (version **0.3.0-SNAPSHOT**). Rec
 | Document | Description |
 |----------|-------------|
 | [data-catalog.adoc](data-catalog.adoc) | Local catalog setup, namespaces, refresh, **catalog version tags** |
+| [source-to-target-lineage.adoc](source-to-target-lineage.adoc) | Field/table lineage, Lineage tab, explainable DDL, catalog publish, drift gate, reverse browser |
 | [datavault-source.adoc](datavault-source.adoc) | `DV_SOURCE` record definitions |
 | [datavault-source-database.adoc](datavault-source-database.adoc) | Database-backed source fields |
 | [resource-definition-validation.adoc](resource-definition-validation.adoc) | Schema gate action, GUI validate, impact, proposals, HTML/MD reports, DTAP |

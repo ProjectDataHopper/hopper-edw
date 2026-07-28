@@ -23,6 +23,7 @@ Bottom of the editor:
 * **List catalog versions** — review tags already stored under the catalog’s `catalog-versions/` folder
 * **Tag catalog version** — freeze current source contracts for a semantic tag (for example `v1.0.0`)
 * **Validate sources** — run schema comparison and open the results dialog
+* **Browse lineage…** — reverse source-to-target lineage browser (see link:source-to-target-lineage.adoc[Source-to-target lineage])
 
 image::images/resource-definition-group-editor-with-version-mgt-buttons.png[Resource definition group editor for retail-sources with List catalog versions, Tag catalog version, and Validate sources,align="center"]
 
