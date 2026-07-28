@@ -26,6 +26,7 @@ import java.util.Set;
 import org.apache.hop.catalog.discovery.RecordDefinitionSchemaDiffSupport;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.datavault.lineage.LineageDiffReportFormatter;
 import org.apache.hop.datavault.resourcedefinition.ValidationReport.IssueSeverity;
 import org.apache.hop.datavault.resourcedefinition.ValidationReport.RecordDefinitionValidation;
 import org.apache.hop.datavault.resourcedefinition.ValidationReport.ValidationIssue;
@@ -65,6 +66,10 @@ public final class SchemaValidationReportFormatter {
           .append(Const.CR);
     }
     builder.append(ValidationReportFormatter.format(result.validationReport()));
+    String lineageLog = LineageDiffReportFormatter.formatLog(result.lineageDiffs());
+    if (!Utils.isEmpty(lineageLog)) {
+      builder.append(Const.CR).append(lineageLog);
+    }
     return builder.toString();
   }
 
@@ -125,14 +130,19 @@ public final class SchemaValidationReportFormatter {
       md.append(impactSummary).append('\n');
     }
 
+    String lineageMd = LineageDiffReportFormatter.formatMarkdown(result.lineageDiffs());
+    if (!Utils.isEmpty(lineageMd)) {
+      md.append(lineageMd);
+    }
+
     md.append("## 🛠️ Required Action\n");
     if (result.status() == SimulationStatus.CRITICAL_BLOCKED) {
       md.append(
           "Deploy the missing DDL migrations to the target database before restarting this workflow, ");
-      md.append("or update the Data Catalog mapping to match the source system.\n");
+      md.append("or update the Data Catalog mapping / model lineage to match the source system.\n");
     } else if (result.status() == SimulationStatus.WARNING) {
       md.append(
-          "Review warning-level drift and acknowledgements. Loads may continue if the gate is configured to fail only on critical issues.\n");
+          "Review warning-level drift, lineage renames, and acknowledgements. Loads may continue if the gate is configured to fail only on critical issues.\n");
     } else {
       md.append("No action required; schema validation passed.\n");
     }
@@ -211,12 +221,17 @@ public final class SchemaValidationReportFormatter {
           .append("</pre>");
     }
 
+    String lineageHtml = LineageDiffReportFormatter.formatHtmlSection(result.lineageDiffs());
+    if (!Utils.isEmpty(lineageHtml)) {
+      html.append(lineageHtml);
+    }
+
     html.append("<h2>Required Action</h2><p>");
     if (result.status() == SimulationStatus.CRITICAL_BLOCKED) {
       html.append(
-          "Deploy the missing DDL migrations or update the Data Catalog mapping before restarting this workflow.");
+          "Deploy the missing DDL migrations or update the Data Catalog mapping / model lineage before restarting this workflow.");
     } else if (result.status() == SimulationStatus.WARNING) {
-      html.append("Review warning-level drift before promoting.");
+      html.append("Review warning-level drift and lineage renames before promoting.");
     } else {
       html.append("No action required; schema validation passed.");
     }

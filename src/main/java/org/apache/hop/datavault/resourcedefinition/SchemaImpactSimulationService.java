@@ -38,6 +38,8 @@ import org.apache.hop.datavault.catalog.DvSourceCatalogService;
 import org.apache.hop.datavault.catalog.DvSourceFieldSupport;
 import org.apache.hop.datavault.impact.ImpactGraph;
 import org.apache.hop.datavault.impact.ImpactGraphBuilder;
+import org.apache.hop.datavault.lineage.LineageDiffResult;
+import org.apache.hop.datavault.lineage.LineageDiffService;
 import org.apache.hop.datavault.metadata.DvSourceType;
 import org.apache.hop.datavault.metadata.SourceField;
 import org.apache.hop.datavault.resourcedefinition.ValidationReport.RecordDefinitionValidation;
@@ -137,9 +139,24 @@ public final class SchemaImpactSimulationService {
             ? catalogVersionTag
             : baselineVersionTag;
 
-    SimulationStatus status = SchemaImpactSimulationResult.statusOf(report);
+    List<LineageDiffResult> lineageDiffs = List.of();
+    try {
+      lineageDiffs = LineageDiffService.compareModelsToCatalog(models, variables, metadataProvider);
+    } catch (Exception lineageEx) {
+      // Lineage drift is best-effort: never fail schema simulation solely because lineage load failed.
+      lineageDiffs = List.of();
+    }
+
+    SimulationStatus status = SchemaImpactSimulationResult.statusOf(report, lineageDiffs);
     return new SchemaImpactSimulationResult(
-        report, graph, catalogVersionUsed, baselineUsed, mode, Instant.now(), status);
+        report,
+        graph,
+        catalogVersionUsed,
+        baselineUsed,
+        mode,
+        Instant.now(),
+        status,
+        lineageDiffs);
   }
 
   /**

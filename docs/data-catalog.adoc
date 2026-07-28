@@ -44,6 +44,8 @@ Additional namespaces appear when models publish catalog entries, for example:
 
 Lineage publish writes one `_snapshot` index record plus one record per target table (logical name). Records are typed `UNKNOWN` with tags `LINEAGE` / `LINEAGE_SNAPSHOT` and custom properties (`fieldsJson`, `tableReasonsJson`, `physicalTableName`, …). Models (`.hdv` / `.hbv` / `.hdm`) remain authoritative; republish replaces derived lineage fully.
 
+**Lineage drift gate:** the **Validate resource definitions** workflow action compares current model lineage to the last published catalog lineage siblings. Renames without `USER_EXPLICIT_NAME` evidence are treated as **blocking**; mapping changes and removals are **warnings**. Drift appears in Markdown/HTML validation reports under *Lineage Drift*.
+
 The catalog **key** is `namespace/name` (for example `hop/retail-example/sources/E2E-customer-hub`).
 
 == Folder layout example (retail-example)
