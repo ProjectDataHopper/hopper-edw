@@ -36,6 +36,10 @@ import org.apache.hop.datavault.metadata.DvLink;
 import org.apache.hop.datavault.metadata.DvModelCheckOptions;
 import org.apache.hop.datavault.metadata.IDvTable;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
+import org.apache.hop.datavault.hopgui.lineage.LineageTabSupport;
+import org.apache.hop.datavault.lineage.DvModelLineageCollector;
+import org.apache.hop.datavault.lineage.LineageSnapshot;
+import org.apache.hop.datavault.lineage.TableLineage;
 import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.i18n.BaseMessages;
@@ -210,6 +214,7 @@ public class DvLinkDialog {
     addHubSourcesTab();
     addSatelliteSourcesTab();
     customPipelinesTab.addTab(wTabFolder);
+    addLineageTab();
 
     wTabFolder.setSelection(0);
 
@@ -224,6 +229,19 @@ public class DvLinkDialog {
 
   private int margin;
   private int middle;
+
+  private void addLineageTab() {
+    TableLineage tableLineage = null;
+    try {
+      if (model != null) {
+        LineageSnapshot snapshot = DvModelLineageCollector.collect(model, variables);
+        tableLineage = LineageTabSupport.findTable(snapshot, input.getName());
+      }
+    } catch (Exception e) {
+      // Keep dialog open; tab shows empty lineage message.
+    }
+    LineageTabSupport.addTab(wTabFolder, variables, margin, tableLineage);
+  }
 
   private void addOptionsTab() {
     CTabItem wOptionsTab = new CTabItem(wTabFolder, SWT.NONE);

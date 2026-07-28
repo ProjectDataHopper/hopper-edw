@@ -1040,6 +1040,27 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
 
     if (!ddlStatements.isEmpty()) {
       try {
+        // Explain structural changes with source-to-target lineage before opening SQL.
+        try {
+          String explanation =
+              org.apache.hop.datavault.lineage.DdlLineageExplainSupport.explain(
+                  ddlStatements, model, hopGui.getVariables(), hopGui.getMetadataProvider());
+          if (!Utils.isEmpty(explanation)) {
+            org.apache.hop.ui.core.dialog.ShowMessageDialog explainDialog =
+                new org.apache.hop.ui.core.dialog.ShowMessageDialog(
+                    hopGui.getShell(),
+                    SWT.OK | SWT.ICON_INFORMATION,
+                    BaseMessages.getString(
+                        org.apache.hop.datavault.hopgui.lineage.LineageTabSupport.class,
+                        "LineageExplainDialog.Title"),
+                    explanation,
+                    true);
+            explainDialog.open();
+          }
+        } catch (Exception lineageEx) {
+          // Non-fatal: still open SQL editor.
+        }
+
         DatabaseMeta dbMeta =
             DvSpecialRecordSupport.loadTargetDatabase(
                 hopGui.getMetadataProvider(), model.getConfigurationOrDefault());

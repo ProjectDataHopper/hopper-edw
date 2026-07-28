@@ -39,6 +39,10 @@ import org.apache.hop.datavault.metadata.DvIntegrationMode;
 import org.apache.hop.datavault.metadata.DvModelCheckOptions;
 import org.apache.hop.datavault.metadata.IDvTable;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
+import org.apache.hop.datavault.hopgui.lineage.LineageTabSupport;
+import org.apache.hop.datavault.lineage.DvModelLineageCollector;
+import org.apache.hop.datavault.lineage.LineageSnapshot;
+import org.apache.hop.datavault.lineage.TableLineage;
 import org.apache.hop.datavault.metadata.SourceField;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.FormDataBuilder;
@@ -191,6 +195,7 @@ public class DvHubDialog {
     addSourcesTab();
     addKeysTab();
     customPipelinesTab.addTab(wTabFolder);
+    addLineageTab();
 
     wTabFolder.setSelection(0);
 
@@ -366,6 +371,19 @@ public class DvHubDialog {
 
     wKeysComp.layout();
     wKeysTab.setControl(wKeysComp);
+  }
+
+  private void addLineageTab() {
+    TableLineage tableLineage = null;
+    try {
+      if (model != null) {
+        LineageSnapshot snapshot = DvModelLineageCollector.collect(model, variables);
+        tableLineage = LineageTabSupport.findTable(snapshot, input.getName());
+      }
+    } catch (Exception e) {
+      // Keep dialog open; tab shows empty lineage message.
+    }
+    LineageTabSupport.addTab(wTabFolder, variables, margin, tableLineage);
   }
 
   private void addSourcesTab() {
