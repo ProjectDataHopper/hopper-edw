@@ -46,6 +46,8 @@ Lineage publish writes one `_snapshot` index record plus one record per target t
 
 **Lineage drift gate:** the **Validate resource definitions** workflow action compares current model lineage to the last published catalog lineage siblings. Renames without `USER_EXPLICIT_NAME` evidence are treated as **blocking**; mapping changes and removals are **warnings**. Drift appears in Markdown/HTML validation reports under *Lineage Drift*.
 
+**Reverse lineage browser:** from a **Resource definition group** editor, use **Browse lineage…** to filter by source feed and field and see DV → BV → DM consumer paths (including multi-hop paths such as `CRM field → sat_x.col → bv.col`). Double-click or **Open model element** navigates to the consumer table on the canvas.
+
 The catalog **key** is `namespace/name` (for example `hop/retail-example/sources/E2E-customer-hub`).
 
 == Folder layout example (retail-example)

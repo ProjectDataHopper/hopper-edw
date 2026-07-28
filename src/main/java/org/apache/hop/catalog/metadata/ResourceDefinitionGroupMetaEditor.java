@@ -204,6 +204,17 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
     fdListVersions.bottom = new FormAttachment(100, 0);
     wListVersions.setLayoutData(fdListVersions);
 
+    Button wBrowseLineage = new Button(parent, SWT.PUSH);
+    wBrowseLineage.setText(
+        BaseMessages.getString(PKG, "ResourceDefinitionGroupMetaEditor.BrowseLineage.Label"));
+    wBrowseLineage.setToolTipText(
+        BaseMessages.getString(PKG, "ResourceDefinitionGroupMetaEditor.BrowseLineage.ToolTip"));
+    wBrowseLineage.addListener(SWT.Selection, e -> browseLineage());
+    FormData fdBrowseLineage = new FormData();
+    fdBrowseLineage.right = new FormAttachment(wListVersions, -margin);
+    fdBrowseLineage.bottom = new FormAttachment(100, 0);
+    wBrowseLineage.setLayoutData(fdBrowseLineage);
+
     setWidgetsContent();
     resetChanged();
 
@@ -374,6 +385,19 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
     ResourceDefinitionGroupMeta draft = new ResourceDefinitionGroupMeta();
     getWidgetsContent(draft);
     CatalogVersionGuiSupport.listVersionsForGroup(HopGui.getInstance(), draft);
+  }
+
+  private void browseLineage() {
+    ResourceDefinitionGroupMeta draft = new ResourceDefinitionGroupMeta();
+    getWidgetsContent(draft);
+    HopGui hopGui = HopGui.getInstance();
+    new org.apache.hop.datavault.hopgui.lineage.ReverseLineageBrowserDialog(
+            hopGui.getShell(),
+            hopGui,
+            draft,
+            hopGui.getVariables(),
+            hopGui.getMetadataProvider())
+        .open();
   }
 
   @Override
