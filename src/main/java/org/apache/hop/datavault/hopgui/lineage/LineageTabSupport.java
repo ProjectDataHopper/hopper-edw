@@ -78,8 +78,8 @@ public final class LineageTabSupport {
     wlHeader.setText(BaseMessages.getString(PKG, "LineageTab.TableReasons.Label"));
     PropsUi.setLook(wlHeader);
     FormData fdlHeader = new FormData();
-    fdlHeader.left = new FormAttachment(0, 0);
-    fdlHeader.top = new FormAttachment(0, 0);
+    fdlHeader.left = new FormAttachment(0, margin);
+    fdlHeader.top = new FormAttachment(0, margin);
     fdlHeader.right = new FormAttachment(100, 0);
     wlHeader.setLayoutData(fdlHeader);
 
@@ -87,10 +87,10 @@ public final class LineageTabSupport {
         new Text(comp, SWT.MULTI | SWT.READ_ONLY | SWT.BORDER | SWT.V_SCROLL | SWT.WRAP);
     PropsUi.setLook(wReasons, Props.WIDGET_STYLE_FIXED);
     FormData fdReasons = new FormData();
-    fdReasons.left = new FormAttachment(0, 0);
+    fdReasons.left = new FormAttachment(0, margin);
     fdReasons.top = new FormAttachment(wlHeader, margin);
-    fdReasons.right = new FormAttachment((int) (100 * PropsUi.getNativeZoomFactor()), 0);
-    fdReasons.height = 90;
+    fdReasons.right = new FormAttachment(100, -margin);
+    fdReasons.height = (int) (120 * PropsUi.getNativeZoomFactor());
     wReasons.setLayoutData(fdReasons);
     wReasons.setText(formatTableHeader(tableLineage));
 
@@ -98,9 +98,9 @@ public final class LineageTabSupport {
     wlFields.setText(BaseMessages.getString(PKG, "LineageTab.Fields.Label"));
     PropsUi.setLook(wlFields);
     FormData fdlFields = new FormData();
-    fdlFields.left = new FormAttachment(0, 0);
+    fdlFields.left = new FormAttachment(0, margin);
     fdlFields.top = new FormAttachment(wReasons, margin);
-    fdlFields.right = new FormAttachment(100, 0);
+    fdlFields.right = new FormAttachment(100, -margin);
     wlFields.setLayoutData(fdlFields);
 
     ColumnInfo[] columns =
