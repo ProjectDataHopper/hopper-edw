@@ -13,22 +13,37 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package org.apache.hop.datavault.hopgui.file.vault;
 
 import org.apache.hop.core.gui.IGc;
 import org.apache.hop.datavault.metadata.DvNoteType;
+import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.gui.GuiResource;
 import org.eclipse.swt.graphics.Color;
 
 /**
  * Fixed visual styles for {@link org.apache.hop.datavault.metadata.DvNote} types. Centralizes
- * colors and icons so the painter and dialog preview stay consistent. Colors come from {@link
- * GuiResource} so they respect Hop dark-mode contrast settings.
+ * colors and icons so the painter and dialog preview stay consistent.
+ *
+ * <p>Important and Information use distinct light fills in light mode (yellow / blue) and dark
+ * fills in dark mode (dark orange / dark gray). Text uses Hop's black color, which is inverted to
+ * light in dark mode, so contrast stays readable on both palettes.
  */
 public final class DvNoteStyle {
+
+  /** Dark-mode Important fill: dark orange (readable under light text). */
+  private static final RgbColor IMPORTANT_BG_DARK = new RgbColor(160, 85, 20);
+
+  /** Light-mode Important fill fallback when GuiResource is unavailable. */
+  private static final RgbColor IMPORTANT_BG_LIGHT = new RgbColor(255, 220, 100);
+
+  /** Dark-mode Information fill: dark gray (readable under light text). */
+  private static final RgbColor INFORMATION_BG_DARK = new RgbColor(70, 72, 78);
+
+  /** Light-mode Information fill fallback when GuiResource is unavailable. */
+  private static final RgbColor INFORMATION_BG_LIGHT = new RgbColor(180, 210, 255);
 
   private DvNoteStyle() {}
 
@@ -47,24 +62,33 @@ public final class DvNoteStyle {
     }
   }
 
+  private static boolean isDarkMode() {
+    try {
+      return PropsUi.getInstance().isDarkMode();
+    } catch (Throwable ignored) {
+      return false;
+    }
+  }
+
   public static RgbColor backgroundColor(DvNoteType type) {
     if (type == null) {
       type = DvNoteType.GENERAL;
     }
+    boolean dark = isDarkMode();
     GuiResource res = resourcesOrNull();
     if (res != null) {
       return switch (type) {
         case GENERAL -> fromColor(res.getColorDemoGray());
-        case IMPORTANT -> fromColor(res.getColorYellow());
+        case IMPORTANT -> dark ? IMPORTANT_BG_DARK : fromColor(res.getColorYellow());
         case WARNING -> fromColor(res.getColorLightRed());
-        case INFORMATION -> fromColor(res.getColorBlueCustomGrid());
+        case INFORMATION -> dark ? INFORMATION_BG_DARK : fromColor(res.getColorBlueCustomGrid());
       };
     }
     return switch (type) {
       case GENERAL -> new RgbColor(230, 230, 230);
-      case IMPORTANT -> new RgbColor(255, 220, 100);
+      case IMPORTANT -> dark ? IMPORTANT_BG_DARK : IMPORTANT_BG_LIGHT;
       case WARNING -> new RgbColor(255, 200, 200);
-      case INFORMATION -> new RgbColor(180, 210, 255);
+      case INFORMATION -> dark ? INFORMATION_BG_DARK : INFORMATION_BG_LIGHT;
     };
   }
 
@@ -76,33 +100,35 @@ public final class DvNoteStyle {
     if (res != null) {
       return switch (type) {
         case GENERAL -> fromColor(res.getColorDarkGray());
-        case IMPORTANT, INFORMATION -> fromColor(res.getColorWhite());
+        case IMPORTANT, INFORMATION ->
+            isDarkMode() ? fromColor(res.getColorLightGray()) : fromColor(res.getColorWhite());
         case WARNING -> fromColor(res.getColorRed());
       };
     }
     return switch (type) {
       case GENERAL -> new RgbColor(80, 80, 80);
-      case IMPORTANT, INFORMATION -> new RgbColor(255, 255, 255);
+      case IMPORTANT, INFORMATION ->
+          isDarkMode() ? new RgbColor(200, 200, 200) : new RgbColor(255, 255, 255);
       case WARNING -> new RgbColor(200, 0, 0);
     };
   }
 
   /**
-   * Text foreground for note body text. All note types use light fills (gray, yellow, red, blue),
-   * so black is required for contrast in light mode. Hop's contrastColor maps black to white in
-   * dark mode. {@code type} is retained for call-site consistency with other style methods.
+   * Text foreground for note body text. Uses Hop's black color (inverted to light in dark mode) so
+   * contrast works on light fills (light mode) and dark orange/gray Important/Information fills
+   * (dark mode). {@code type} is retained for call-site consistency with other style methods.
    */
   public static RgbColor textColor(DvNoteType type) {
     GuiResource res = resourcesOrNull();
     if (res != null) {
       return fromColor(res.getColorBlack());
     }
-    return new RgbColor(0, 0, 0);
+    return isDarkMode() ? new RgbColor(240, 240, 240) : new RgbColor(0, 0, 0);
   }
 
   /**
    * Hyperlink foreground; same contrast rules as {@link #textColor(DvNoteType)} so links stay
-   * readable on light note fills.
+   * readable on note fills.
    */
   public static RgbColor linkColor(DvNoteType type) {
     return textColor(type);
