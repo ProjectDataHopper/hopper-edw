@@ -214,28 +214,63 @@ public final class RemediationProposalSupport {
   private static List<RemediationProposal> proposalsForChangedField(
       String fieldName, String details, boolean mapped, List<SourceUsage> usages) {
     List<RemediationProposal> proposals = new ArrayList<>();
-    proposals.add(
-        new RemediationProposal(
-            ProposalType.REFRESH_CATALOG_CONTRACT,
-            BaseMessages.getString(
-                PKG, "RemediationProposalSupport.RefreshCatalogContract.Summary"),
-            BaseMessages.getString(
-                PKG,
-                "RemediationProposalSupport.RefreshCatalogContract.ChangedDetails",
-                fieldName,
-                Utils.isEmpty(details) ? "" : details)));
+    String change = Utils.isEmpty(details) ? "" : details;
+    LengthDirection direction = lengthDirection(change);
+
+    // Catalog is never modified by remediation. The catalog length is the value used to expand
+    // models and target DDL only.
     if (mapped) {
       proposals.add(
           new RemediationProposal(
-              ProposalType.UPDATE_TARGET_COLUMN_LENGTH,
+              ProposalType.ALIGN_MODELS_TO_BASELINE,
               BaseMessages.getString(
-                  PKG, "RemediationProposalSupport.UpdateTargetColumn.Summary"),
+                  PKG, "RemediationProposalSupport.ExpandModelsFromCatalog.Summary"),
               BaseMessages.getString(
                   PKG,
-                  "RemediationProposalSupport.UpdateTargetColumn.Details",
+                  "RemediationProposalSupport.ExpandModelsFromCatalog.Details",
                   fieldName,
-                  Utils.isEmpty(details) ? "" : details,
+                  change,
                   formatUsageDetails(fieldName, usages))));
+      if (direction == LengthDirection.ACTUAL_LONGER) {
+        proposals.add(
+            new RemediationProposal(
+                ProposalType.BLOCK_UPDATE_UNTIL_RESOLVED,
+                BaseMessages.getString(
+                    PKG, "RemediationProposalSupport.LiveLongerThanCatalog.Summary"),
+                BaseMessages.getString(
+                    PKG,
+                    "RemediationProposalSupport.LiveLongerThanCatalog.Details",
+                    fieldName,
+                    change)));
+      } else if (direction == LengthDirection.ACTUAL_SHORTER) {
+        proposals.add(
+            new RemediationProposal(
+                ProposalType.BLOCK_UPDATE_UNTIL_RESOLVED,
+                BaseMessages.getString(
+                    PKG, "RemediationProposalSupport.LiveNarrower.Summary"),
+                BaseMessages.getString(
+                    PKG,
+                    "RemediationProposalSupport.LiveNarrower.Details",
+                    fieldName,
+                    change)));
+      }
+      proposals.add(
+          new RemediationProposal(
+              ProposalType.REVIEW_MAPPINGS,
+              BaseMessages.getString(PKG, "RemediationProposalSupport.ReviewMappings.Summary"),
+              formatUsageDetails(fieldName, usages)));
+    } else {
+      // Unmapped length/type drift: do not rewrite the catalog from live here.
+      proposals.add(
+          new RemediationProposal(
+              ProposalType.BLOCK_UPDATE_UNTIL_RESOLVED,
+              BaseMessages.getString(
+                  PKG, "RemediationProposalSupport.UnmappedLengthChange.Summary"),
+              BaseMessages.getString(
+                  PKG,
+                  "RemediationProposalSupport.UnmappedLengthChange.Details",
+                  fieldName,
+                  change)));
       proposals.add(
           new RemediationProposal(
               ProposalType.REVIEW_MAPPINGS,
@@ -243,6 +278,38 @@ public final class RemediationProposalSupport {
               formatUsageDetails(fieldName, usages)));
     }
     return proposals;
+  }
+
+  enum LengthDirection {
+    ACTUAL_LONGER,
+    ACTUAL_SHORTER,
+    UNKNOWN
+  }
+
+  /**
+   * Diff details use {@code expected … → actual …}. Returns whether actual length is greater than
+   * expected (growth), shorter (would-be shrink), or not a comparable length change.
+   */
+  static LengthDirection lengthDirection(String details) {
+    String expected = RemediationProposalApplySupport.parseLengthSide(details, true);
+    String actual = RemediationProposalApplySupport.parseLengthSide(details, false);
+    int e = BaselineContractSupport.parsePositiveInt(expected);
+    int a = BaselineContractSupport.parsePositiveInt(actual);
+    if (e <= 0 || a <= 0) {
+      return LengthDirection.UNKNOWN;
+    }
+    if (a > e) {
+      return LengthDirection.ACTUAL_LONGER;
+    }
+    if (a < e) {
+      return LengthDirection.ACTUAL_SHORTER;
+    }
+    return LengthDirection.UNKNOWN;
+  }
+
+  /** @deprecated use {@link #lengthDirection(String)} */
+  static boolean isActualLengthLonger(String details) {
+    return lengthDirection(details) == LengthDirection.ACTUAL_LONGER;
   }
 
   private static boolean isFieldMapped(String fieldName, List<SourceUsage> usages) {

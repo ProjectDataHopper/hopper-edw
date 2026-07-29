@@ -79,7 +79,11 @@ class RetailDataVaultModelCheckTest {
     catalog.setName("local-catalog");
     catalog.setEnabled(true);
     FileDataCatalog fileCatalog = new FileDataCatalog();
-    fileCatalog.setStorageDirectory(RetailExampleCatalogFixtures.catalogStorageRootPath());
+    // Use committed seed fixtures, not gitignored work/edw-catalog (can drift after live refresh).
+    fileCatalog.setStorageDirectory(
+        RetailExampleCatalogFixtures.seedCatalogStorageRoot()
+            .toString()
+            .replace('\\', '/'));
     catalog.setCatalog(fileCatalog);
     metadataProvider.getSerializer(DataCatalogMeta.class).save(catalog);
 

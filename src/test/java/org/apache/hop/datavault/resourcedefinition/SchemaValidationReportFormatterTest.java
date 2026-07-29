@@ -37,9 +37,13 @@ class SchemaValidationReportFormatterTest {
     SchemaImpactSimulationResult result = sampleResult();
     String md = SchemaValidationReportFormatter.formatMarkdown(result);
 
-    assertTrue(md.contains("# Data Vault DDL Validation Report"), md);
+    assertTrue(
+        md.contains("# Data Vault Resource Definition Validation Report")
+            || md.contains("# Data Vault DDL Validation Report"),
+        md);
     assertTrue(md.contains("ERP_FINANCE"), md);
     assertTrue(md.contains("v2.4.0"), md);
+    assertTrue(md.contains("Baseline"), md);
     assertTrue(md.contains("CRITICAL BLOCKED") || md.contains("❌"), md);
     assertTrue(md.contains("customer_id"), md);
     assertTrue(md.contains("hub_customer"), md);

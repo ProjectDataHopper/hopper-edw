@@ -77,6 +77,8 @@
         </dependencySet>
         <dependencySet>
             <includes>
+                <include>org.apache.hop:hop-action-sql:jar</include>
+                <include>org.apache.hop:hop-action-success:jar</include>
                 <include>org.apache.hop:hop-transform-analyticquery:jar</include>
                 <include>org.apache.hop:hop-transform-append:jar</include>
                 <include>org.apache.hop:hop-transform-calculator:jar</include>

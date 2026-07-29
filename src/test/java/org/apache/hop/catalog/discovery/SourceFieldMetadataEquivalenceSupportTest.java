@@ -130,10 +130,18 @@ class SourceFieldMetadataEquivalenceSupportTest {
     discovered.setLength("100");
 
     assertFalse(SourceFieldMetadataEquivalenceSupport.dimensionsEquivalent(stored, discovered));
+    String details =
+        SourceFieldMetadataEquivalenceSupport.describeDimensionDifference(stored, discovered);
+    assertTrue(details != null && details.contains("length"), details);
+    // Convention: expected (stored/catalog) → actual (discovered/live). Growth 50 → 100.
     assertTrue(
-        SourceFieldMetadataEquivalenceSupport
-            .describeDimensionDifference(stored, discovered)
-            .contains("length"));
+        details.contains("50") && details.contains("100"),
+        "details should mention both lengths: " + details);
+    int idx50 = details.indexOf("50");
+    int idx100 = details.indexOf("100");
+    assertTrue(
+        idx50 >= 0 && idx100 > idx50,
+        "expected length must appear before actual length (50 before 100): " + details);
   }
 
   private static SourceField field(String name, String sourceDataType, int hopType) {

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<title>Schema remediation: expand models and schemas from catalog length</title>
+</head>
+<body>
+<h1>Schema remediation: expand models and schemas from catalog length</h1>
+<ul>
+<li><b>Remediation name:</b> accept-address_line1</li>
+<li><b>Workflow:</b> workflows/schema-remediation/accept-address_line1/accept-address_line1-apply-ddl.hwf</li>
+<li><b>SQL script:</b> workflows/schema-remediation/accept-address_line1/accept-address_line1-apply-ddl.sql</li>
+</ul>
+<h2>What changed</h2>
+<ul>
+<li>Expanding models and target DDL for field 'address_line1' to catalog length 75. The catalog was not modified.</li>
+<li>Downstream target BV customer_360_bv.cust_address (from catalog field address_line1, length 75, confidence EXPLICIT_MAP)</li>
+<li>Downstream target DM d_customer.cust_address (from catalog field address_line1, length 75, confidence DERIVED_VIA_BV)</li>
+<li>SQL script written (3 statement(s) for table(s) sat_customer_address, customer_360_bv, d_customer)</li>
+<li>DDL workflow written with one SQL action per target table</li>
+<li>Catalog was not modified by this remediation.</li>
+</ul>
+</body>
+</html>

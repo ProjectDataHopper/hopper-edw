@@ -57,4 +57,20 @@ class DataVaultConfigTest {
     assertEquals(30, copy.getLiveUpdatePollIntervalSeconds());
     assertEquals(30_000L, copy.resolveLiveUpdatePollIntervalMs());
   }
+
+  @Test
+  void defaultsSchemaRemediationFolder() {
+    DataVaultConfig config = new DataVaultConfig();
+    assertEquals(
+        DataVaultConfig.DEFAULT_SCHEMA_REMEDIATION_FOLDER,
+        config.getSchemaRemediationFolderOrDefault());
+
+    config.setSchemaRemediationFolder("  ");
+    assertEquals(
+        DataVaultConfig.DEFAULT_SCHEMA_REMEDIATION_FOLDER,
+        config.getSchemaRemediationFolderOrDefault());
+
+    config.setSchemaRemediationFolder("${PROJECT_HOME}/remediation");
+    assertEquals("${PROJECT_HOME}/remediation", config.getSchemaRemediationFolderOrDefault());
+  }
 }

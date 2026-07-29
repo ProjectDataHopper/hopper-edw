@@ -52,7 +52,9 @@ public final class DataCatalogSelectionSupport {
       return recordNodes;
     }
     for (DataCatalogTreeNode node : nodes) {
-      if (node != null && node.getType() == DataCatalogTreeNode.Type.RECORD) {
+      if (node != null
+          && (node.getType() == DataCatalogTreeNode.Type.RECORD
+              || node.getType() == DataCatalogTreeNode.Type.VERSION_RECORD)) {
         recordNodes.add(node);
       }
     }

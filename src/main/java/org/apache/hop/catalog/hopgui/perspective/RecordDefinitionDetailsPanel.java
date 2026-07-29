@@ -1132,6 +1132,14 @@ public class RecordDefinitionDetailsPanel {
   }
 
   public void setRecordDefinition(String catalogConnectionName, RecordDefinition definition) {
+    setRecordDefinition(catalogConnectionName, definition, false, null);
+  }
+
+  public void setRecordDefinition(
+      String catalogConnectionName,
+      RecordDefinition definition,
+      boolean readOnlyVersion,
+      String versionTag) {
     this.catalogConnectionName = catalogConnectionName;
     this.definition = definition;
     if (definition == null) {
@@ -1151,7 +1159,15 @@ public class RecordDefinitionDetailsPanel {
     }
 
     wType.setText(definition.getType() != null ? definition.getType().name() : "");
-    wDescription.setText(Const.NVL(definition.getDescription(), ""));
+    if (readOnlyVersion) {
+      String banner =
+          BaseMessages.getString(
+              PKG, messageKey("ReadOnlyVersion.Banner"), Const.NVL(versionTag, "?"));
+      String description = Const.NVL(definition.getDescription(), "");
+      wDescription.setText(Utils.isEmpty(description) ? banner : description + "\n\n" + banner);
+    } else {
+      wDescription.setText(Const.NVL(definition.getDescription(), ""));
+    }
 
     RecordOrigin origin = definition.getOrigin();
     if (origin != null) {
@@ -1248,20 +1264,22 @@ public class RecordDefinitionDetailsPanel {
     populateQualityRulesTable(definition.getQualityRules());
 
     if (wPreviewRecords != null) {
-      wPreviewRecords.setEnabled(RecordDefinitionPreviewSupport.supportsPreview(definition));
+      wPreviewRecords.setEnabled(
+          !readOnlyVersion && RecordDefinitionPreviewSupport.supportsPreview(definition));
     }
     if (wUpdateQualityRules != null) {
-      wUpdateQualityRules.setEnabled(true);
+      wUpdateQualityRules.setEnabled(!readOnlyVersion);
     }
     if (wTestQualityMeasure != null) {
-      wTestQualityMeasure.setEnabled(true);
+      wTestQualityMeasure.setEnabled(!readOnlyVersion);
     }
     if (wQualityHistory != null) {
       wQualityHistory.setEnabled(true);
     }
     if (wRefreshFromSource != null) {
       wRefreshFromSource.setEnabled(
-          RecordDefinitionPhysicalRefSupport.supportsRefreshFromSource(definition));
+          !readOnlyVersion
+              && RecordDefinitionPhysicalRefSupport.supportsRefreshFromSource(definition));
     }
 
     wPropertiesComp.pack();
