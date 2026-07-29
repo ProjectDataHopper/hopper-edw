@@ -1,0 +1,1632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hop Data Vault Plugin — Features &amp; Roadmap</title>
+  <meta name="description" content="Standalone presentation of current features and planned work for the Apache Hop Data Vault 2.0 plugin." />
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --surface: #ffffff;
+      --surface-2: #eef2f7;
+      --text: #1a2332;
+      --text-muted: #5a6a7e;
+      --border: #d5dde8;
+      --accent: #0d6e8c;
+      --accent-soft: #e6f4f8;
+      --sources: #c47a12;
+      --sources-bg: #fff6e8;
+      --dv: #1a5fb4;
+      --dv-bg: #e8f0fb;
+      --bv: #6b3fa0;
+      --bv-bg: #f3ebfb;
+      --dm: #1e7a46;
+      --dm-bg: #e7f6ed;
+      --catalog: #4a5568;
+      --catalog-bg: #edf0f4;
+      --ok: #1e7a46;
+      --ok-bg: #e7f6ed;
+      --planned: #9a5b00;
+      --planned-bg: #fff3df;
+      --warn: #b45309;
+      --shadow: 0 1px 3px rgba(26, 35, 50, 0.08), 0 8px 24px rgba(26, 35, 50, 0.06);
+      --radius: 12px;
+      --nav-w: 260px;
+      --font: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+      --mono: ui-monospace, "Cascadia Code", "SF Mono", Menlo, Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.55;
+      font-size: 16px;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: var(--nav-w) 1fr;
+      min-height: 100vh;
+    }
+
+    /* —— Nav —— */
+    .nav {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      background: #0f2433;
+      color: #d9e6ef;
+      padding: 1.25rem 0.85rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .nav-brand {
+      padding: 0.35rem 0.65rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 0.75rem;
+    }
+    .nav-brand .logo {
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: 0.02em;
+      color: #fff;
+      line-height: 1.3;
+    }
+    .nav-brand .meta {
+      font-size: 0.72rem;
+      color: #8aa4b8;
+      margin-top: 0.35rem;
+    }
+    .nav a.nav-link {
+      display: block;
+      padding: 0.45rem 0.7rem;
+      border-radius: 8px;
+      color: #c5d7e4;
+      font-size: 0.88rem;
+      text-decoration: none;
+      border-left: 3px solid transparent;
+    }
+    .nav a.nav-link:hover {
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      text-decoration: none;
+    }
+    .nav a.nav-link.active {
+      background: rgba(13, 110, 140, 0.35);
+      color: #fff;
+      border-left-color: #4ec3e0;
+      font-weight: 600;
+    }
+    .nav-section {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #6f8799;
+      padding: 0.85rem 0.7rem 0.25rem;
+      font-weight: 600;
+    }
+    .nav-footer {
+      margin-top: auto;
+      padding: 1rem 0.65rem 0;
+      font-size: 0.7rem;
+      color: #6f8799;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    /* —— Main —— */
+    .main {
+      min-width: 0;
+      padding: 1.5rem 2rem 3rem;
+    }
+    .page {
+      display: none;
+      animation: fadeIn 0.22s ease;
+      max-width: 1100px;
+    }
+    .page.active { display: block; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .page-header {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .page-header h1 {
+      margin: 0 0 0.4rem;
+      font-size: 1.85rem;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+    .page-header .lead {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 48rem;
+    }
+    .kicker {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      margin-bottom: 0.4rem;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      margin: 1.75rem 0 0.75rem;
+      letter-spacing: -0.01em;
+    }
+    h3 {
+      font-size: 1.05rem;
+      margin: 1.25rem 0 0.5rem;
+    }
+    p { margin: 0 0 0.85rem; }
+    ul, ol { margin: 0 0 1rem; padding-left: 1.25rem; }
+    li { margin-bottom: 0.35rem; }
+    code, .mono {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--surface-2);
+      padding: 0.1em 0.35em;
+      border-radius: 4px;
+    }
+
+    /* —— Components —— */
+    .hero {
+      background: linear-gradient(135deg, #0f2433 0%, #16445c 55%, #0d6e8c 100%);
+      color: #eef6fa;
+      border-radius: calc(var(--radius) + 4px);
+      padding: 2.25rem 2rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+      margin: 0 0 0.6rem;
+      font-size: clamp(1.6rem, 3vw, 2.15rem);
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+    .hero .tagline {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #7ed4eb;
+      margin-bottom: 0.75rem;
+    }
+    .hero p { color: #c5d7e4; max-width: 40rem; }
+    .hero .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1.1rem;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.28rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: rgba(255,255,255,0.12);
+      color: #e8f4fa;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      vertical-align: middle;
+    }
+    .badge-ok { background: var(--ok-bg); color: var(--ok); }
+    .badge-planned { background: var(--planned-bg); color: var(--planned); }
+    .badge-important { background: #fde8f0; color: #9d174d; }
+
+    .grid-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 0.9rem;
+      margin: 1rem 0 1.5rem;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.15rem;
+      box-shadow: var(--shadow);
+      transition: border-color 0.15s, transform 0.15s;
+    }
+    a.card {
+      color: inherit;
+      text-decoration: none;
+      display: block;
+    }
+    a.card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      text-decoration: none;
+    }
+    .card h3 {
+      margin: 0 0 0.4rem;
+      font-size: 1rem;
+    }
+    .card p {
+      margin: 0;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+    .card .card-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 0.75rem;
+      margin-bottom: 0.7rem;
+      color: #fff;
+    }
+    .card-icon.sources { background: var(--sources); }
+    .card-icon.dv { background: var(--dv); }
+    .card-icon.bv { background: var(--bv); }
+    .card-icon.dm { background: var(--dm); }
+    .card-icon.cat { background: var(--catalog); }
+    .card-icon.val { background: #0d6e8c; }
+    .card-icon.lin { background: #7c3aed; }
+    .card-icon.dq { background: #b45309; }
+    .card-icon.ops { background: #334155; }
+    .card-icon.road { background: #9a5b00; }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.4rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.25rem;
+    }
+    .panel.soft { background: var(--surface-2); box-shadow: none; }
+
+    .callout {
+      border-left: 4px solid var(--accent);
+      background: var(--accent-soft);
+      padding: 0.9rem 1.1rem;
+      border-radius: 0 10px 10px 0;
+      margin: 1rem 0;
+    }
+    .callout strong { color: var(--accent); }
+
+    table.features {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      background: var(--surface);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    table.features th,
+    table.features td {
+      text-align: left;
+      padding: 0.65rem 0.85rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    table.features th {
+      background: var(--surface-2);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+    table.features tr:last-child td { border-bottom: none; }
+    table.features tr:hover td { background: #fafcfe; }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    @media (max-width: 860px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+
+    .diagram-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      box-shadow: var(--shadow);
+      overflow-x: auto;
+      margin: 1rem 0 1.5rem;
+    }
+    .diagram-wrap svg { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+    .diagram-caption {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 0.75rem;
+    }
+
+    .flow {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.88rem;
+      margin: 0.75rem 0 1rem;
+    }
+    .flow .step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+    .flow .arrow { color: var(--text-muted); font-weight: 700; }
+
+    .issue-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 0.75rem;
+    }
+    .issue {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+    }
+    .issue .num {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .issue h4 {
+      margin: 0.25rem 0 0.35rem;
+      font-size: 0.95rem;
+    }
+    .issue p {
+      margin: 0;
+      font-size: 0.84rem;
+      color: var(--text-muted);
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1.25rem;
+      font-size: 0.82rem;
+      margin: 0.75rem 0;
+    }
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+
+    .role-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+    .role-table th, .role-table td {
+      padding: 0.7rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+    .role-table th { width: 28%; color: var(--accent); }
+
+    .screenshot {
+      margin: 1rem 0;
+      text-align: center;
+    }
+    .screenshot img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      background: var(--surface-2);
+    }
+    .screenshot figcaption {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+    .img-missing {
+      display: none;
+      padding: 1.5rem;
+      background: var(--surface-2);
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
+
+    .page-nav {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 2rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+    .page-nav a {
+      display: inline-flex;
+      flex-direction: column;
+      padding: 0.7rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      min-width: 140px;
+      text-decoration: none;
+      color: inherit;
+    }
+    .page-nav a:hover { border-color: var(--accent); text-decoration: none; }
+    .page-nav a span { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .page-nav a strong { color: var(--accent); font-size: 0.95rem; }
+    .page-nav a.next { text-align: right; margin-left: auto; }
+
+    .footer-note {
+      margin-top: 2.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .menu-toggle {
+      display: none;
+      position: fixed;
+      top: 0.75rem;
+      left: 0.75rem;
+      z-index: 100;
+      background: #0f2433;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.55rem 0.85rem;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+    }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .nav {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: min(280px, 85vw);
+        z-index: 90;
+        transform: translateX(-105%);
+        transition: transform 0.2s ease;
+        box-shadow: var(--shadow);
+      }
+      .nav.open { transform: none; }
+      .menu-toggle { display: block; }
+      .main { padding: 3.5rem 1.1rem 2.5rem; }
+      .hero { padding: 1.5rem 1.2rem; }
+    }
+
+    @media print {
+      .nav, .menu-toggle, .page-nav { display: none !important; }
+      .layout { display: block; }
+      .page { display: block !important; page-break-after: always; animation: none; }
+      .main { padding: 0; max-width: none; }
+      body { background: #fff; }
+      .hero { box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <button class="menu-toggle" type="button" id="menuToggle" aria-label="Open navigation">☰ Menu</button>
+
+  <div class="layout">
+    <nav class="nav" id="sideNav" aria-label="Presentation sections">
+      <div class="nav-brand">
+        <div class="logo">Hop Data Vault</div>
+        <div class="meta">Features &amp; Roadmap · v0.5.0-SNAPSHOT</div>
+      </div>
+
+      <div class="nav-section">Overview</div>
+      <a class="nav-link" href="#home" data-page="home">Home</a>
+      <a class="nav-link" href="#architecture" data-page="architecture">Architecture</a>
+      <a class="nav-link" href="#features" data-page="features">Feature maturity</a>
+
+      <div class="nav-section">Layers</div>
+      <a class="nav-link" href="#catalog" data-page="catalog">Data Catalog</a>
+      <a class="nav-link" href="#data-vault" data-page="data-vault">Raw Data Vault</a>
+      <a class="nav-link" href="#business-vault" data-page="business-vault">Business Vault</a>
+      <a class="nav-link" href="#dimensional" data-page="dimensional">Dimensional</a>
+
+      <div class="nav-section">Governance</div>
+      <a class="nav-link" href="#validation" data-page="validation">Schema validation</a>
+      <a class="nav-link" href="#data-quality" data-page="data-quality">Data quality</a>
+      <a class="nav-link" href="#lineage" data-page="lineage">Lineage</a>
+
+      <div class="nav-section">Delivery</div>
+      <a class="nav-link" href="#operations" data-page="operations">Operations &amp; AI</a>
+      <a class="nav-link" href="#samples" data-page="samples">Samples</a>
+      <a class="nav-link" href="#roadmap" data-page="roadmap">Roadmap &amp; issues</a>
+      <a class="nav-link" href="#summary" data-page="summary">Summary</a>
+
+      <div class="nav-footer">
+        Use ← → keys to navigate pages.<br />
+        Offline-ready · single HTML file
+      </div>
+    </nav>
+
+    <main class="main">
+
+      <!-- ========== HOME ========== -->
+      <section class="page active" id="page-home" data-page="home">
+        <div class="hero">
+          <div class="kicker" style="color:#7ed4eb">Apache Hop plugin</div>
+          <h1>Hop Data Vault 2.0</h1>
+          <div class="tagline">Model once. Generate loads and consumption layers.</div>
+          <p>
+            Visual, model-driven Data Vault, Business Vault, and dimensional modeling for Apache Hop —
+            with a shared Data Catalog, schema gates, content quality, and explainable source-to-target lineage.
+          </p>
+          <div class="badges">
+            <span class="chip">0.5.0-SNAPSHOT · release 0.4.0</span>
+            <span class="chip">Apache Hop 2.18.1</span>
+            <span class="chip">Java 21</span>
+            <span class="chip">.hdv · .hbv · .hdm · .hem</span>
+          </div>
+        </div>
+
+        <div class="panel soft">
+          <p style="margin:0">
+            <strong>The problem:</strong> hand-written vault pipelines drift from the model — hashing rules diverge,
+            satellite CDC is copy-pasted, and hybrid teams (Hop + dbt + SQL) lack one metadata picture.
+            <strong>The approach:</strong> the visual model is the contract; Hop generates DDL, insert-only loads,
+            SCD2 consumption, and marts from that contract.
+          </p>
+        </div>
+
+        <h2>Explore by topic</h2>
+        <div class="grid-cards">
+          <a class="card" href="#architecture">
+            <div class="card-icon cat">ARCH</div>
+            <h3>Architecture</h3>
+            <p>Sources → DV → BV → DM with Catalog, validation, DQ, and lineage.</p>
+          </a>
+          <a class="card" href="#catalog">
+            <div class="card-icon sources">SRC</div>
+            <h3>Data Catalog</h3>
+            <p>DV_SOURCE contracts, versions, model registry, lineage siblings.</p>
+          </a>
+          <a class="card" href="#data-vault">
+            <div class="card-icon dv">DV</div>
+            <h3>Raw Data Vault</h3>
+            <p>Hubs, links, satellites, hybrid integration modes, Update action.</p>
+          </a>
+          <a class="card" href="#business-vault">
+            <div class="card-icon bv">BV</div>
+            <h3>Business Vault</h3>
+            <p>SCD2 (single &amp; multi-sat), PIT, SQL tables, BV Update.</p>
+          </a>
+          <a class="card" href="#dimensional">
+            <div class="card-icon dm">DM</div>
+            <h3>Dimensional</h3>
+            <p>Kimball dimensions, facts, bridges — Publish &amp; Update.</p>
+          </a>
+          <a class="card" href="#validation">
+            <div class="card-icon val">VAL</div>
+            <h3>Schema gates</h3>
+            <p>CI/CD resource validation, blast radius, reports.</p>
+          </a>
+          <a class="card" href="#data-quality">
+            <div class="card-icon dq">DQ</div>
+            <h3>Data quality</h3>
+            <p>Measure → gate, content rules, pre/post load policies.</p>
+          </a>
+          <a class="card" href="#lineage">
+            <div class="card-icon lin">LIN</div>
+            <h3>Lineage</h3>
+            <p>Table/field reasons, explainable DDL, reverse browser.</p>
+          </a>
+          <a class="card" href="#roadmap">
+            <div class="card-icon road">MAP</div>
+            <h3>Roadmap</h3>
+            <p>Plans and open GitHub issues grouped by theme.</p>
+          </a>
+        </div>
+
+        <nav class="page-nav" aria-label="Page navigation">
+          <span></span>
+          <a class="next" href="#architecture"><span>Next</span><strong>Architecture →</strong></a>
+        </nav>
+      </section>
+
+      <!-- ========== ARCHITECTURE ========== -->
+      <section class="page" id="page-architecture" data-page="architecture">
+        <header class="page-header">
+          <span class="kicker">System view</span>
+          <h1>Architectural overview</h1>
+          <p class="lead">
+            One metadata chain from staging to consumption: left-to-right layers, Data Catalog underneath,
+            and cross-cutting schema validation, data quality, and lineage.
+          </p>
+        </header>
+
+        <div class="diagram-wrap">
+          <!-- Hero architecture SVG -->
+          <svg viewBox="0 0 960 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="archTitle archDesc">
+            <title id="archTitle">Hop Data Vault architecture</title>
+            <desc id="archDesc">Sources to Data Vault to Business Vault to Dimensional left to right, Data Catalog below, with schema validation, data quality, and lineage as cross-cutting concerns.</desc>
+
+            <defs>
+              <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#5a6a7e"/>
+              </marker>
+              <filter id="softShadow" x="-5%" y="-5%" width="110%" height="120%">
+                <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.12"/>
+              </filter>
+            </defs>
+
+            <!-- Background -->
+            <rect width="960" height="520" fill="#fafbfc" rx="8"/>
+
+            <!-- Title -->
+            <text x="480" y="28" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="15" font-weight="700" fill="#1a2332">Logical architecture — model-driven EDW on Apache Hop</text>
+
+            <!-- Layer boxes -->
+            <!-- Sources -->
+            <g filter="url(#softShadow)">
+              <rect x="40" y="70" width="175" height="150" rx="12" fill="#fff6e8" stroke="#c47a12" stroke-width="2"/>
+              <rect x="40" y="70" width="175" height="36" rx="12" fill="#c47a12"/>
+              <rect x="40" y="90" width="175" height="16" fill="#c47a12"/>
+              <text x="127" y="94" text-anchor="middle" fill="#fff" font-family="Segoe UI, system-ui, sans-serif" font-size="14" font-weight="700">Sources</text>
+              <text x="127" y="128" text-anchor="middle" fill="#7a4a08" font-family="Segoe UI, system-ui, sans-serif" font-size="12" font-weight="600">CRM · CSV · DB · Iceberg</text>
+              <text x="127" y="150" text-anchor="middle" fill="#5a6a7e" font-family="Segoe UI, system-ui, sans-serif" font-size="11">DV_SOURCE records</text>
+              <text x="127" y="170" text-anchor="middle" fill="#5a6a7e" font-family="Segoe UI, system-ui, sans-serif" font-size="11">record source · groups</text>
+              <text x="127" y="198" text-anchor="middle" fill="#c47a12" font-family="ui-monospace, monospace" font-size="11">catalog feeds</text>
+            </g>
+
+            <!-- DV -->
+            <g filter="url(#softShadow)">
+              <rect x="275" y="70" width="175" height="150" rx="12" fill="#e8f0fb" stroke="#1a5fb4" stroke-width="2"/>
+              <rect x="275" y="70" width="175" height="36" rx="12" fill="#1a5fb4"/>
+              <rect x="275" y="90" width="175" height="16" fill="#1a5fb4"/>
+              <text x="362" y="94" text-anchor="middle" fill="#fff" font-family="Segoe UI, system-ui, sans-serif" font-size="14" font-weight="700">Raw Data Vault</text>
+              <text x="362" y="128" text-anchor="middle" fill="#124080" font-family="Segoe UI, system-ui, sans-serif" font-size="12" font-weight="600">Hubs · Links · Satellites</text>
+              <text x="362" y="150" text-anchor="middle" fill="#5a6a7e" font-family="Segoe UI, system-ui, sans-serif" font-size="11">Insert-only loads · hash keys</text>
+              <text x="362" y="170" text-anchor="middle" fill="#5a6a7e" font-family="Segoe UI, system-ui, sans-serif" font-size="11">managed / external / custom</text>
+              <text x="362" y="198" text-anchor="middle" fill="#1a5fb4" font-family="ui-monospace, monospace" font-size="11">.hdv model</text>
+            </g>
+
+            <!-- BV -->
+            <g filter="url(#softShadow)">
+              <rect x="510" y="70" width="175" height="150" rx="12" fill="#f3ebfb" stroke="#6b3fa0" stroke-width="2"/>
+              <rect x="510" y="70" width="175" height="36" rx="12" fill="#6b3fa0"/>
+              <rect x="510" y="90" width="175" height="16" fill="#6b3fa0"/>
+              <text x="597" y="94" text-anchor="middle" fill="#fff" font-family="Segoe UI, system-ui, sans-serif" font-size="14" font-weight="700">Business Vault</text>
+              <text x="597" y="128" text-anchor="middle" fill="#4a2870" font-family="Segoe UI, system-ui, sans-serif" font-size="12" font-weight="600">SCD2 · PIT · SQL tables</text>
+              <text x="597" y="150" text-anchor="middle" fill="#5a6a7e" font-family="Segoe UI, system-ui, sans-serif" font-size="11">Functional timelines</text>
+              <text x="597" y="170" text-anchor="middle" fill="#5a6a7e" font-family="Segoe UI, system-ui, sans-serif" font-size="11">multi-sat merge · ref()</text>
+              <text x="597" y="198" text-anchor="middle" fill="#6b3fa0" font-family="ui-monospace, monospace" font-size="11">.hbv model</text>
+            </g>
+
+            <!-- DM -->
+            <g filter="url(#softShadow)">
+              <rect x="745" y="70" width="175" height="150" rx="12" fill="#e7f6ed" stroke="#1e7a46" stroke-width="2"/>
+              <rect x="745" y="70" width="175" height="36" rx="12" fill="#1e7a46"/>
+              <rect x="745" y="90" width="175" height="16" fill="#1e7a46"/>
+              <text x="832" y="94" text-anchor="middle" fill="#fff" font-family="Segoe UI, system-ui, sans-serif" font-size="14" font-weight="700">Dimensional</text>
+              <text x="832" y="128" text-anchor="middle" fill="#145c34" font-family="Segoe UI, system-ui, sans-serif" font-size="12" font-weight="600">Dims · Facts · Bridges</text>
+              <text x="832" y="150" text-anchor="middle" fill="#5a6a7e" font-family="Segoe UI, system-ui, sans-serif" font-size="11">Kimball marts</text>
+              <text x="832" y="170" text-anchor="middle" fill="#5a6a7e" font-family="Segoe UI, system-ui, sans-serif" font-size="11">Publish from DV · Update</text>
+              <text x="832" y="198" text-anchor="middle" fill="#1e7a46" font-family="ui-monospace, monospace" font-size="11">.hdm model</text>
+            </g>
+
+            <!-- Arrows between layers -->
+            <line x1="215" y1="145" x2="270" y2="145" stroke="#5a6a7e" stroke-width="2.5" marker-end="url(#arrow)"/>
+            <line x1="450" y1="145" x2="505" y2="145" stroke="#5a6a7e" stroke-width="2.5" marker-end="url(#arrow)"/>
+            <line x1="685" y1="145" x2="740" y2="145" stroke="#5a6a7e" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+            <!-- Drop lines to catalog -->
+            <line x1="127" y1="220" x2="127" y2="280" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <line x1="362" y1="220" x2="362" y2="280" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <line x1="597" y1="220" x2="597" y2="280" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <line x1="832" y1="220" x2="832" y2="280" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4 3"/>
+
+            <!-- Catalog band -->
+            <g filter="url(#softShadow)">
+              <rect x="40" y="280" width="880" height="88" rx="12" fill="#edf0f4" stroke="#4a5568" stroke-width="2"/>
+              <text x="480" y="310" text-anchor="middle" fill="#1a2332" font-family="Segoe UI, system-ui, sans-serif" font-size="15" font-weight="700">Data Catalog</text>
+              <text x="480" y="332" text-anchor="middle" fill="#4a5568" font-family="Segoe UI, system-ui, sans-serif" font-size="12">DV_SOURCE · version tags · published table layouts · model registry · lineage siblings</text>
+              <text x="480" y="352" text-anchor="middle" fill="#64748b" font-family="ui-monospace, monospace" font-size="11">hop/{project}/sources · models · business-vault · dimensional · lineage</text>
+            </g>
+
+            <!-- Cross-cutting concerns -->
+            <g filter="url(#softShadow)">
+              <rect x="40" y="400" width="280" height="90" rx="10" fill="#e6f4f8" stroke="#0d6e8c" stroke-width="1.5"/>
+              <text x="180" y="426" text-anchor="middle" fill="#0d6e8c" font-family="Segoe UI, system-ui, sans-serif" font-size="13" font-weight="700">Schema validation</text>
+              <text x="180" y="448" text-anchor="middle" fill="#5a6a7e" font-family="Segoe UI, system-ui, sans-serif" font-size="11">Check model · resource gate</text>
+              <text x="180" y="468" text-anchor="middle" fill="#5a6a7e" font-family="Segoe UI, system-ui, sans-serif" font-size="11">blast radius · MD/HTML reports</text>
+            </g>
+            <g filter="url(#softShadow)">
+              <rect x="340" y="400" width="280" height="90" rx="10" fill="#fff3df" stroke="#b45309" stroke-width="1.5"/>
+              <text x="480" y="426" text-anchor="middle" fill="#b45309" font-family="Segoe UI, system-ui, sans-serif" font-size="13" font-weight="700">Data quality</text>
+              <text x="480" y="448" text-anchor="middle" fill="#5a6a7e" font-family="Segoe UI, system-ui, sans-serif" font-size="11">Measure → Evaluate gate</text>
+              <text x="480" y="468" text-anchor="middle" fill="#5a6a7e" font-family="Segoe UI, system-ui, sans-serif" font-size="11">pre-load protect · post-load observe</text>
+            </g>
+            <g filter="url(#softShadow)">
+              <rect x="640" y="400" width="280" height="90" rx="10" fill="#f3ebfb" stroke="#7c3aed" stroke-width="1.5"/>
+              <text x="780" y="426" text-anchor="middle" fill="#6b3fa0" font-family="Segoe UI, system-ui, sans-serif" font-size="13" font-weight="700">Lineage</text>
+              <text x="780" y="448" text-anchor="middle" fill="#5a6a7e" font-family="Segoe UI, system-ui, sans-serif" font-size="11">table + field · reason codes</text>
+              <text x="780" y="468" text-anchor="middle" fill="#5a6a7e" font-family="Segoe UI, system-ui, sans-serif" font-size="11">explainable DDL · reverse browser</text>
+            </g>
+
+            <!-- Connectors from catalog to concerns -->
+            <line x1="180" y1="368" x2="180" y2="400" stroke="#0d6e8c" stroke-width="1.5" stroke-dasharray="3 2"/>
+            <line x1="480" y1="368" x2="480" y2="400" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3 2"/>
+            <line x1="780" y1="368" x2="780" y2="400" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="3 2"/>
+          </svg>
+          <p class="diagram-caption">Sources → Raw DV → Business Vault → Dimensional (left to right). Catalog is the shared foundation; validation, DQ, and lineage cut across all layers.</p>
+        </div>
+
+        <div class="legend">
+          <span><i class="swatch" style="background:var(--sources)"></i> Sources</span>
+          <span><i class="swatch" style="background:var(--dv)"></i> Data Vault</span>
+          <span><i class="swatch" style="background:var(--bv)"></i> Business Vault</span>
+          <span><i class="swatch" style="background:var(--dm)"></i> Dimensional</span>
+          <span><i class="swatch" style="background:var(--catalog)"></i> Catalog</span>
+        </div>
+
+        <h2>Hybrid integration modes (per table)</h2>
+        <div class="two-col">
+          <div class="panel">
+            <h3 style="margin-top:0">Not every raw vault table must be Hop-loaded</h3>
+            <table class="role-table">
+              <tr><th>Hop managed</th><td>Generate DDL and update pipelines (default).</td></tr>
+              <tr><th>External read-only</th><td>Table loaded elsewhere (dbt, SQL, other ETL); Hop documents it for BV and catalog.</td></tr>
+              <tr><th>Custom pipelines</th><td>You own <code>.hpl</code> loaders; Hop orchestrates them with generated ones.</td></tr>
+            </table>
+          </div>
+          <div class="panel soft">
+            <h3 style="margin-top:0">Also on the map</h3>
+            <ul>
+              <li><strong>Execution maps</strong> (<code>.hem</code>) — crawl workflows/models into lineage graphs for GUI and ops.</li>
+              <li><strong>AI Help</strong> — optional LLM advisory with review-before-apply proposals.</li>
+              <li><strong>Workflow actions</strong> — Data Vault / Business Vault / Dimensional Update, Validate resource definitions, DQ measure &amp; gate.</li>
+            </ul>
+          </div>
+        </div>
+
+        <nav class="page-nav">
+          <a href="#home"><span>Previous</span><strong>← Home</strong></a>
+          <a class="next" href="#features"><span>Next</span><strong>Feature maturity →</strong></a>
+        </nav>
+      </section>
+
+      <!-- ========== FEATURES ========== -->
+      <section class="page" id="page-features" data-page="features">
+        <header class="page-header">
+          <span class="kicker">Capability matrix</span>
+          <h1>Feature maturity</h1>
+          <p class="lead">What is available today versus planned. Detail pages explain each capability.</p>
+        </header>
+
+        <table class="features">
+          <thead>
+            <tr><th>Feature</th><th>Status</th><th>Detail</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Data Catalog + <code>DV_SOURCE</code> record definitions</td><td><span class="badge badge-ok">Available</span></td><td><a href="#catalog">Catalog</a></td></tr>
+            <tr><td>Resource definition validation (issues, proposals, acknowledgements)</td><td><span class="badge badge-ok">Available</span></td><td><a href="#validation">Validation</a></td></tr>
+            <tr><td>Catalog version tags + schema impact simulation (CI/CD gate)</td><td><span class="badge badge-ok">Available</span></td><td><a href="#validation">Validation</a></td></tr>
+            <tr><td>Data quality measure + quality gate (Phase 2 rules)</td><td><span class="badge badge-ok">Available</span></td><td><a href="#data-quality">Data quality</a></td></tr>
+            <tr><td>Data Vault modeler (<code>.hdv</code>) + Update action</td><td><span class="badge badge-ok">Available</span></td><td><a href="#data-vault">Raw DV</a></td></tr>
+            <tr><td>Integration modes (managed / external / custom)</td><td><span class="badge badge-ok">Available</span></td><td><a href="#data-vault">Raw DV</a></td></tr>
+            <tr><td>Business Vault modeler (<code>.hbv</code>): SCD2, PIT, SQL views/tables</td><td><span class="badge badge-ok">Available</span></td><td><a href="#business-vault">Business Vault</a></td></tr>
+            <tr><td>Dimensional modeler (<code>.hdm</code>) + Publish / Update</td><td><span class="badge badge-ok">Available</span></td><td><a href="#dimensional">Dimensional</a></td></tr>
+            <tr><td>Source-to-target lineage, explainable DDL, reverse browser</td><td><span class="badge badge-ok">Available</span></td><td><a href="#lineage">Lineage</a></td></tr>
+            <tr><td>Execution maps (<code>.hem</code>)</td><td><span class="badge badge-ok">Available</span></td><td><a href="#operations">Operations</a></td></tr>
+            <tr><td>AI Help (model, pipeline, workflow)</td><td><span class="badge badge-ok">Available</span></td><td><a href="#operations">Operations</a></td></tr>
+            <tr><td>Record Definition Input · Date Dimension Generator</td><td><span class="badge badge-ok">Available</span></td><td><a href="#operations">Operations</a></td></tr>
+            <tr><td>BV naming rules engine</td><td><span class="badge badge-planned">Planned</span></td><td><a href="#roadmap">Roadmap</a> · #41</td></tr>
+            <tr><td>Marquez / OpenLineage export</td><td><span class="badge badge-planned">Planned</span></td><td><a href="#roadmap">Roadmap</a></td></tr>
+            <tr><td>Hash-key ModPartitioner parallelism</td><td><span class="badge badge-planned">Planned</span></td><td><a href="#roadmap">Roadmap</a></td></tr>
+            <tr><td>Automated execution with dependency resolution</td><td><span class="badge badge-planned">Planned</span></td><td><a href="#roadmap">Roadmap</a> · #42</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout" style="margin-top:1.25rem">
+          <strong>Shipped in 0.4.0:</strong> source-to-target lineage (table + field, reason codes), Lineage tab,
+          explainable DDL, catalog lineage publish, drift gate, reverse browser; transactional link dependent child keys;
+          separate DV/BV databases for incremental SCD2/PIT; SQL Server multi-byte VARCHAR; pipeline wall-clock metrics.
+        </div>
+
+        <nav class="page-nav">
+          <a href="#architecture"><span>Previous</span><strong>← Architecture</strong></a>
+          <a class="next" href="#catalog"><span>Next</span><strong>Data Catalog →</strong></a>
+        </nav>
+      </section>
+
+      <!-- ========== CATALOG ========== -->
+      <section class="page" id="page-catalog" data-page="catalog">
+        <header class="page-header">
+          <span class="kicker">Foundation</span>
+          <h1>Data Catalog &amp; sources</h1>
+          <p class="lead">
+            Sources live as catalog record definitions — one stable vocabulary from feeds through models to generated pipelines.
+          </p>
+        </header>
+
+        <div class="panel">
+          <h2 style="margin-top:0">What lives in the catalog</h2>
+          <ul>
+            <li><strong><code>DV_SOURCE</code></strong> — logical feeds with record-source indicator, optional <strong>group</strong> for partial loads, and physical layout (database table today).</li>
+            <li>Namespace pattern: <code>hop/{project}/sources</code> (e.g. <code>hop/retail-example/sources</code>).</li>
+            <li>FILE catalog storage (retail: <code>work/edw-catalog/</code>) opened in the Hop <strong>Data Catalog</strong> perspective.</li>
+            <li>Hubs, links, and satellites reference source <strong>names</strong>, not raw connection strings.</li>
+          </ul>
+        </div>
+
+        <div class="two-col">
+          <div class="panel soft">
+            <h3 style="margin-top:0">Published namespaces</h3>
+            <ul>
+              <li><code>hop/{project}/models/{model}/</code> — DV table layouts</li>
+              <li><code>hop/{project}/business-vault/{model}/</code> — BV targets</li>
+              <li><code>hop/{project}/dimensional/{model}/</code> — mart tables</li>
+              <li><code>hop/{project}/lineage/{dv|bv|dm}/{model}/</code> — lineage siblings (derived, not edited)</li>
+            </ul>
+          </div>
+          <div class="panel soft">
+            <h3 style="margin-top:0">Catalog versions</h3>
+            <ul>
+              <li><strong>Tag catalog version</strong> freezes source contracts (e.g. <code>v1.0.0</code>).</li>
+              <li>Baselines for the CI/CD schema gate (working tree vs tag, version vs version, live source).</li>
+              <li>Resource definition group scopes which models participate.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>Catalog + model = shared contract</strong> between ingestion, vault, and consumption teams —
+          including hybrid warehouses where some tables are loaded outside Hop.
+        </div>
+
+        <p class="footer-note">Docs: <code>docs/data-catalog.adoc</code>, <code>docs/datavault-source.adoc</code></p>
+
+        <nav class="page-nav">
+          <a href="#features"><span>Previous</span><strong>← Features</strong></a>
+          <a class="next" href="#data-vault"><span>Next</span><strong>Raw Data Vault →</strong></a>
+        </nav>
+      </section>
+
+      <!-- ========== DATA VAULT ========== -->
+      <section class="page" id="page-data-vault" data-page="data-vault">
+        <header class="page-header">
+          <span class="kicker">Raw vault</span>
+          <h1>Data Vault modeler (.hdv)</h1>
+          <p class="lead">
+            Visual hubs, links, and satellites with embedded configuration. The model drives DDL and insert-only load pipelines.
+          </p>
+        </header>
+
+        <div class="grid-cards">
+          <div class="card">
+            <h3>Hubs</h3>
+            <p>Core business entities (Customer, Product, Order) with multi-source business keys.</p>
+          </div>
+          <div class="card">
+            <h3>Links</h3>
+            <p>Relationships between hubs; transactional links with dependent child keys.</p>
+          </div>
+          <div class="card">
+            <h3>Satellites</h3>
+            <p>Descriptive history — hashdiff or load-end-date patterns; multi-active via driving keys.</p>
+          </div>
+        </div>
+
+        <h2>Operations on the model</h2>
+        <div class="flow">
+          <span class="step">Edit model</span><span class="arrow">→</span>
+          <span class="step">Import sources</span><span class="arrow">→</span>
+          <span class="step">Check model</span><span class="arrow">→</span>
+          <span class="step">Generate DDL</span><span class="arrow">→</span>
+          <span class="step">Data Vault Update</span>
+        </div>
+
+        <div class="two-col">
+          <div class="panel">
+            <h3 style="margin-top:0">Data Vault Update action</h3>
+            <ul>
+              <li>Validates (optionally), generates DDL, stages update pipelines</li>
+              <li>Runs loads in parallel with a shared load timestamp</li>
+              <li>Supports record source <strong>groups</strong> for partial model updates</li>
+              <li>Fail-if-DDL and explainable structure changes (via lineage)</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <h3 style="margin-top:0">DV 2.0 options</h3>
+            <ul>
+              <li>Hashing: MD5 / SHA1 / SHA256 / SHA512</li>
+              <li>HEX, String, or Binary hash keys</li>
+              <li>Trim + casing, delimiter, null placeholder</li>
+              <li>Unknown / invalid sentinel records</li>
+              <li>Standard column naming (load TS, record source)</li>
+            </ul>
+          </div>
+        </div>
+
+        <figure class="screenshot">
+          <img src="../images/data-vault-model-retail-example.png" alt="Retail 360 Data Vault model in Hop GUI" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+          <div class="img-missing">Screenshot: Retail 360 Data Vault model (open from repo path <code>docs/images/</code>)</div>
+          <figcaption>Retail 360 Data Vault model</figcaption>
+        </figure>
+
+        <p class="footer-note">Docs: <code>docs/datavault-plugin.adoc</code>, <code>docs/dv-hub.adoc</code>, <code>docs/dv-link.adoc</code>, <code>docs/dv-satellite.adoc</code>, <code>docs/dv-integration-modes.adoc</code></p>
+
+        <nav class="page-nav">
+          <a href="#catalog"><span>Previous</span><strong>← Catalog</strong></a>
+          <a class="next" href="#business-vault"><span>Next</span><strong>Business Vault →</strong></a>
+        </nav>
+      </section>
+
+      <!-- ========== BUSINESS VAULT ========== -->
+      <section class="page" id="page-business-vault" data-page="business-vault">
+        <header class="page-header">
+          <span class="kicker">Consumption layer</span>
+          <h1>Business Vault (.hbv)</h1>
+          <p class="lead">
+            Raw vault stores technical history. Business Vault delivers functional timelines — when the source said a value was true.
+          </p>
+        </header>
+
+        <div class="panel">
+          <h2 style="margin-top:0">Table types</h2>
+          <div class="two-col">
+            <div>
+              <h3>SCD Type 2</h3>
+              <ul>
+                <li><code>valid_from</code> / <code>valid_to</code> (configurable names)</li>
+                <li>Open-ended current rows</li>
+                <li>Single-satellite or <strong>multi-satellite merge</strong> (e.g. Customer 360)</li>
+                <li>Incremental load support with separate DV/BV databases</li>
+              </ul>
+            </div>
+            <div>
+              <h3>PIT &amp; SQL</h3>
+              <ul>
+                <li><strong>PIT</strong> helpers for point-in-time joins across satellites</li>
+                <li><strong>SQL business tables</strong> — view or table materialization</li>
+                <li><code>ref()</code> / <code>source</code> helpers; BV→BV canvas references</li>
+                <li>Catalog model registry for short lookups</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow">
+          <span class="step">Link .hbv → .hdv</span><span class="arrow">→</span>
+          <span class="step">Define SCD2 / PIT / SQL</span><span class="arrow">→</span>
+          <span class="step">Business Vault Update</span><span class="arrow">→</span>
+          <span class="step">Optional catalog publish</span>
+        </div>
+
+        <figure class="screenshot">
+          <img src="../images/business-vault-model-customer-360.png" alt="Customer 360 Business Vault model" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+          <div class="img-missing">Screenshot: Customer 360 Business Vault model</div>
+          <figcaption>Customer 360 — multi-satellite SCD2 Business Vault</figcaption>
+        </figure>
+
+        <p class="footer-note">Docs: <code>docs/business-vault-overview.adoc</code>, <code>docs/business-vault-scd2.adoc</code>, <code>docs/business-vault-pit.adoc</code>, <code>docs/business-vault-sql-view.adoc</code></p>
+
+        <nav class="page-nav">
+          <a href="#data-vault"><span>Previous</span><strong>← Raw Data Vault</strong></a>
+          <a class="next" href="#dimensional"><span>Next</span><strong>Dimensional →</strong></a>
+        </nav>
+      </section>
+
+      <!-- ========== DIMENSIONAL ========== -->
+      <section class="page" id="page-dimensional" data-page="dimensional">
+        <header class="page-header">
+          <span class="kicker">Marts</span>
+          <h1>Dimensional modeler (.hdm)</h1>
+          <p class="lead">
+            Kimball star/snowflake modeling on the same canvas patterns as the vault modelers — driven by metadata, loaded by workflow actions.
+          </p>
+        </header>
+
+        <div class="grid-cards">
+          <div class="card"><h3>Dimensions</h3><p>Conformed, role-playing, junk, range dimensions.</p></div>
+          <div class="card"><h3>Facts</h3><p>Transactional, snapshot, and aggregate facts.</p></div>
+          <div class="card"><h3>Bridges</h3><p>Many-to-many relationship structures.</p></div>
+          <div class="card"><h3>Date dimension</h3><p>Date Dimension Generator transform for calendar attributes.</p></div>
+        </div>
+
+        <div class="two-col">
+          <div class="panel">
+            <h3 style="margin-top:0">Dimensional Publish</h3>
+            <p>Draft a <code>.hdm</code> model from a <code>.hdv</code> vault as a starting point for the mart design.</p>
+          </div>
+          <div class="panel">
+            <h3 style="margin-top:0">Dimensional Update</h3>
+            <p>Load the mart from the model — same validation-before-execution philosophy as DV/BV updates.</p>
+          </div>
+        </div>
+
+        <figure class="screenshot">
+          <img src="../images/dimensional-model-f-orders.png" alt="Dimensional model fact orders" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+          <div class="img-missing">Screenshot: dimensional model fact table</div>
+          <figcaption>Dimensional model — fact table example</figcaption>
+        </figure>
+
+        <p class="footer-note">Docs: <code>docs/dimensional-modeler-overview.adoc</code>, <code>docs/dimensional-update-action.adoc</code>, <code>docs/date-dimension-generator.adoc</code></p>
+
+        <nav class="page-nav">
+          <a href="#business-vault"><span>Previous</span><strong>← Business Vault</strong></a>
+          <a class="next" href="#validation"><span>Next</span><strong>Schema validation →</strong></a>
+        </nav>
+      </section>
+
+      <!-- ========== VALIDATION ========== -->
+      <section class="page" id="page-validation" data-page="validation">
+        <header class="page-header">
+          <span class="kicker">Governance</span>
+          <h1>Schema &amp; model validation</h1>
+          <p class="lead">
+            Catch broken references and contract drift before production loads — in the GUI and as a CI/CD gate.
+          </p>
+        </header>
+
+        <div class="diagram-wrap" style="padding:1rem 1.25rem">
+          <svg viewBox="0 0 880 160" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="880" height="160" fill="#fafbfc" rx="6"/>
+            <rect x="30" y="45" width="160" height="70" rx="10" fill="#e6f4f8" stroke="#0d6e8c" stroke-width="1.5"/>
+            <text x="110" y="75" text-anchor="middle" font-size="12" font-weight="700" fill="#0d6e8c" font-family="Segoe UI,sans-serif">Check model</text>
+            <text x="110" y="95" text-anchor="middle" font-size="11" fill="#5a6a7e" font-family="Segoe UI,sans-serif">structure + types</text>
+            <text x="205" y="85" font-size="18" fill="#94a3b8">→</text>
+            <rect x="230" y="45" width="200" height="70" rx="10" fill="#e6f4f8" stroke="#0d6e8c" stroke-width="1.5"/>
+            <text x="330" y="75" text-anchor="middle" font-size="12" font-weight="700" fill="#0d6e8c" font-family="Segoe UI,sans-serif">Validate sources</text>
+            <text x="330" y="95" text-anchor="middle" font-size="11" fill="#5a6a7e" font-family="Segoe UI,sans-serif">catalog contracts</text>
+            <text x="445" y="85" font-size="18" fill="#94a3b8">→</text>
+            <rect x="470" y="45" width="200" height="70" rx="10" fill="#e6f4f8" stroke="#0d6e8c" stroke-width="1.5"/>
+            <text x="570" y="75" text-anchor="middle" font-size="12" font-weight="700" fill="#0d6e8c" font-family="Segoe UI,sans-serif">Schema gate (CI)</text>
+            <text x="570" y="95" text-anchor="middle" font-size="11" fill="#5a6a7e" font-family="Segoe UI,sans-serif">compare · severity · report</text>
+            <text x="685" y="85" font-size="18" fill="#94a3b8">→</text>
+            <rect x="710" y="45" width="140" height="70" rx="10" fill="#e7f6ed" stroke="#1e7a46" stroke-width="1.5"/>
+            <text x="780" y="75" text-anchor="middle" font-size="12" font-weight="700" fill="#1e7a46" font-family="Segoe UI,sans-serif">Load actions</text>
+            <text x="780" y="95" text-anchor="middle" font-size="11" fill="#5a6a7e" font-family="Segoe UI,sans-serif">DV / BV / DM</text>
+          </svg>
+        </div>
+
+        <div class="two-col">
+          <div class="panel">
+            <h3 style="margin-top:0">Check model</h3>
+            <ul>
+              <li>Same engine in GUI toolbar and update actions</li>
+              <li>Structural rules + optional live source type checking</li>
+              <li>Stops broken references before pipeline generation</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <h3 style="margin-top:0">Resource definition validation</h3>
+            <ul>
+              <li>Feed-level checks with remediation <strong>proposals</strong></li>
+              <li><strong>Acknowledgements</strong> for accepted exceptions</li>
+              <li><strong>Downstream impact</strong> Source→DV→BV→DM</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="panel soft">
+          <h3 style="margin-top:0">Validate resource definitions — CI/CD schema gate</h3>
+          <ul>
+            <li><strong>Compare modes:</strong> live source vs catalog · working tree vs tagged baseline · version vs version</li>
+            <li><strong>Failure severity:</strong> <code>FAIL_ON_BLOCKING</code>, <code>FAIL_ON_WARNINGS</code>, <code>WARN_ONLY</code></li>
+            <li><strong>Reports:</strong> Markdown and/or HTML with blast-radius tables (e.g. under <code>work/reports/</code>)</li>
+            <li>Place the action <strong>before</strong> DV/BV/DM update actions in workflows</li>
+          </ul>
+        </div>
+
+        <figure class="screenshot">
+          <img src="../images/validate-resource-definitions-action-dialog.png" alt="Validate resource definitions action dialog" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+          <div class="img-missing">Screenshot: Validate resource definitions action dialog</div>
+          <figcaption>Validate resource definitions — CI/CD schema gate</figcaption>
+        </figure>
+
+        <p class="footer-note">Docs: <code>docs/resource-definition-validation.adoc</code></p>
+
+        <nav class="page-nav">
+          <a href="#dimensional"><span>Previous</span><strong>← Dimensional</strong></a>
+          <a class="next" href="#data-quality"><span>Next</span><strong>Data quality →</strong></a>
+        </nav>
+      </section>
+
+      <!-- ========== DATA QUALITY ========== -->
+      <section class="page" id="page-data-quality" data-page="data-quality">
+        <header class="page-header">
+          <span class="kicker">Content rules</span>
+          <h1>Data quality measure &amp; gate</h1>
+          <p class="lead">
+            Schema contracts are not enough. Measure content rules against sources and published targets, then apply policy.
+          </p>
+        </header>
+
+        <div class="two-col">
+          <div class="panel">
+            <h3 style="margin-top:0">Measure Data Quality</h3>
+            <p>Run rules against catalog subjects; produce a report; optionally persist history. Does <strong>not</strong> fail the workflow on findings (only infrastructure errors).</p>
+          </div>
+          <div class="panel">
+            <h3 style="margin-top:0">Evaluate Quality Gate</h3>
+            <p>Apply policy to a report; optional alert sinks. Can fail the workflow (<code>FAIL_ON_BLOCKING</code> / <code>FAIL_ON_WARNINGS</code>) or alert only.</p>
+          </div>
+        </div>
+
+        <h2>Typical patterns</h2>
+        <div class="flow">
+          <span class="step">Measure (sources)</span><span class="arrow">→</span>
+          <span class="step">Gate FAIL_ON_BLOCKING</span><span class="arrow">→</span>
+          <span class="step">Vault Update</span><span class="arrow">→</span>
+          <span class="step">Measure (targets)</span><span class="arrow">→</span>
+          <span class="step">Gate ALERT_ONLY</span>
+        </div>
+
+        <div class="panel soft">
+          <h3 style="margin-top:0">Rule library (Phase 1 + 2)</h3>
+          <p><strong>Phase 1:</strong> min/max row count, NOT NULL, allowed values, range, not-empty string.</p>
+          <p style="margin-bottom:0"><strong>Phase 2:</strong> null ratio max, min/max distinct, regex, min/max length, SQL assertion (trusted authors; single SELECT).</p>
+        </div>
+
+        <div class="callout">
+          Schema validation (resource definitions) and content quality are <strong>separate stacks</strong> —
+          both can protect loads and observe warehouses without conflating contract drift with bad data.
+        </div>
+
+        <p class="footer-note">Docs: <code>docs/data-quality.adoc</code></p>
+
+        <nav class="page-nav">
+          <a href="#validation"><span>Previous</span><strong>← Schema validation</strong></a>
+          <a class="next" href="#lineage"><span>Next</span><strong>Lineage →</strong></a>
+        </nav>
+      </section>
+
+      <!-- ========== LINEAGE ========== -->
+      <section class="page" id="page-lineage" data-page="lineage">
+        <header class="page-header">
+          <span class="kicker">Explainability · Available in 0.4.0</span>
+          <h1>Source-to-target lineage</h1>
+          <p class="lead">
+            Which feed contributes to a target? How is each column derived? Why does that mapping exist?
+            Models remain the source of truth — lineage is a deterministic projection.
+          </p>
+        </header>
+
+        <div class="panel">
+          <h2 style="margin-top:0">Capabilities</h2>
+          <ul>
+            <li><strong>Table + field lineage</strong> for DV, BV, and DM with structured <strong>reason codes</strong></li>
+            <li><strong>Lineage tab</strong> on hub, link, satellite, BV SCD2, and dimensional table dialogs</li>
+            <li><strong>Explainable DDL</strong> — every structure change is explained via lineage edges (not a boolean only)</li>
+            <li><strong>Catalog publish</strong> — sibling records under <code>hop/{project}/lineage/…</code></li>
+            <li><strong>Drift gate</strong> — Validate resource definitions compares models to catalog lineage baselines</li>
+            <li><strong>Reverse browser</strong> — from source field to all DV/BV/DM consumers (Resource definition group → Browse lineage…)</li>
+          </ul>
+        </div>
+
+        <h2>Selected reason codes</h2>
+        <table class="features">
+          <thead><tr><th>Code</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td><code>USER_EXPLICIT_MAPPING</code></td><td>Explicit source field mapping (e.g. hub business key)</td></tr>
+            <tr><td><code>DEFAULT_SAME_AS_SOURCE</code></td><td>Target column uses the same name as the source</td></tr>
+            <tr><td><code>STANDARD_COLUMN</code></td><td>Config-driven technical column (load TS, record source, …)</td></tr>
+            <tr><td><code>HASH_FROM_BUSINESS_KEYS</code></td><td>Hash key derived from business keys</td></tr>
+            <tr><td><code>LINK_HUB_KEY_MAPPING</code></td><td>Link maps source columns to participating hub keys</td></tr>
+            <tr><td><code>BV_SCD2_FIELD_MAP</code></td><td>Explicit Business Vault SCD2 field mapping</td></tr>
+            <tr><td><code>DM_ROLE_MAPPING</code></td><td>Dimensional role, measure, or staging mapping</td></tr>
+          </tbody>
+        </table>
+
+        <figure class="screenshot">
+          <img src="../images/data-vault-satellite-dialog-lineage-tab.png" alt="Satellite dialog Lineage tab" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+          <div class="img-missing">Screenshot: Lineage tab on satellite dialog</div>
+          <figcaption>Lineage tab — satellite field contributions and reasons</figcaption>
+        </figure>
+
+        <p class="footer-note">Docs: <code>docs/source-to-target-lineage.adoc</code> · CHANGELOG 0.4.0</p>
+
+        <nav class="page-nav">
+          <a href="#data-quality"><span>Previous</span><strong>← Data quality</strong></a>
+          <a class="next" href="#operations"><span>Next</span><strong>Operations &amp; AI →</strong></a>
+        </nav>
+      </section>
+
+      <!-- ========== OPERATIONS ========== -->
+      <section class="page" id="page-operations" data-page="operations">
+        <header class="page-header">
+          <span class="kicker">Delivery</span>
+          <h1>Operations, execution maps &amp; AI</h1>
+          <p class="lead">
+            Workflow-driven batches, observable loads, optional AI advisory — modelers stay in control.
+          </p>
+        </header>
+
+        <div class="two-col">
+          <div class="panel">
+            <h3 style="margin-top:0">Execution maps (.hem)</h3>
+            <ul>
+              <li>Crawl a root workflow or model</li>
+              <li>Persist a graph of workflows, models, generated pipelines, source datasets</li>
+              <li>Open in Hop GUI for execution and lineage-oriented views</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <h3 style="margin-top:0">Runtime operations</h3>
+            <ul>
+              <li>Docker runners: <code>scripts/run-hop.sh</code>, <code>run-postgres.sh</code></li>
+              <li>Parallel pipeline orchestration</li>
+              <li>Record source groups for partial loads</li>
+              <li>Catalog-backed load-run metrics; workflow load overview; per-table duration bars</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="panel soft">
+          <h3 style="margin-top:0">Pipeline transforms</h3>
+          <ul>
+            <li><strong>Record Definition Input</strong> — stream catalog record definitions (or fields) as pipeline rows</li>
+            <li><strong>Date Dimension Generator</strong> — populate standard calendar dimension attributes</li>
+            <li><strong><code>hop svg</code></strong> — export pipelines, workflows, and models to SVG</li>
+          </ul>
+        </div>
+
+        <div class="panel">
+          <h3 style="margin-top:0">AI Help (optional)</h3>
+          <p>LLM advisory on Data Vault models, pipelines, and workflows — scenarios, context inclusions, <strong>review-before-apply</strong> proposals.</p>
+          <ul>
+            <li>Suggest hubs, links, satellites from catalog sources</li>
+            <li>Layout and type mapping proposals</li>
+            <li>Performance tuning scenario using load-run metrics (parallel copies, preload cache)</li>
+          </ul>
+          <p style="margin-bottom:0">Configure under Hop GUI → Configuration → AI Assistant. Human modelers remain in control.</p>
+        </div>
+
+        <figure class="screenshot">
+          <img src="../images/execution-map-in-hop-gui-simulate-six-months.png" alt="Execution map in Hop GUI" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+          <div class="img-missing">Screenshot: execution map in Hop GUI</div>
+          <figcaption>Execution map — retail six-month simulation</figcaption>
+        </figure>
+
+        <p class="footer-note">Docs: <code>docs/operations.adoc</code>, <code>docs/execution-maps.adoc</code>, <code>docs/ai-advisory.md</code>, <code>docs/performance-tuning.md</code></p>
+
+        <nav class="page-nav">
+          <a href="#lineage"><span>Previous</span><strong>← Lineage</strong></a>
+          <a class="next" href="#samples"><span>Next</span><strong>Samples →</strong></a>
+        </nav>
+      </section>
+
+      <!-- ========== SAMPLES ========== -->
+      <section class="page" id="page-samples" data-page="samples">
+        <header class="page-header">
+          <span class="kicker">Learn by doing</span>
+          <h1>Sample projects</h1>
+          <p class="lead">Two Hop projects ship with the plugin — a tutorial path and a CI regression suite.</p>
+        </header>
+
+        <div class="two-col">
+          <div class="panel">
+            <h3 style="margin-top:0">retail-example</h3>
+            <p><strong>Learning path</strong> — CSV → CRM → DV → BV → DM, initial and monthly updates.</p>
+            <ul>
+              <li>Register as Hop project <code>retail-example</code></li>
+              <li><code>workflows/run-retail-initial.hwf</code> then monthly <code>run-retail-update.hwf</code></li>
+              <li>Primary onboarding: <code>docs/getting-started-retail.adoc</code></li>
+            </ul>
+          </div>
+          <div class="panel">
+            <h3 style="margin-top:0">integration-tests</h3>
+            <p><strong>CI / regression</strong> — Customer 360, multi-active, external read-only, golden datasets.</p>
+            <ul>
+              <li>Register as Hop project <code>hop-data-vault</code></li>
+              <li>PostgreSQL, MySQL, SingleStore, SQL Server runners</li>
+              <li><code>./run-tests.sh</code> or Docker stack scripts</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="panel soft">
+          <h3 style="margin-top:0">Featured fixtures</h3>
+          <ul>
+            <li><strong>vault1</strong> — classic hub / link / satellite</li>
+            <li><strong>customer-phone</strong> — multi-active satellite</li>
+            <li><strong>customer-360</strong> — four satellites merged into one BV SCD2 table</li>
+            <li><strong>customer-360-external</strong> — same BV with external read-only DV satellites</li>
+          </ul>
+        </div>
+
+        <h2>Video tutorials</h2>
+        <ul>
+          <li><a href="https://youtu.be/YRUwPdDyNDE" target="_blank" rel="noopener">Creating your first data vault model</a></li>
+          <li><a href="https://www.youtube.com/watch?v=k64kxMmyA4U" target="_blank" rel="noopener">Updating your data vault</a></li>
+        </ul>
+
+        <nav class="page-nav">
+          <a href="#operations"><span>Previous</span><strong>← Operations</strong></a>
+          <a class="next" href="#roadmap"><span>Next</span><strong>Roadmap →</strong></a>
+        </nav>
+      </section>
+
+      <!-- ========== ROADMAP ========== -->
+      <section class="page" id="page-roadmap" data-page="roadmap">
+        <header class="page-header">
+          <span class="kicker">Looking ahead</span>
+          <h1>Planned functionality &amp; open issues</h1>
+          <p class="lead">
+            From design plans in <code>docs/plans/</code> and open GitHub issues on
+            <a href="https://github.com/mattcasters/hop-data-vault/issues" target="_blank" rel="noopener">mattcasters/hop-data-vault</a>
+            (snapshot as of 2026-07-29).
+          </p>
+        </header>
+
+        <h2>Named plans <span class="badge badge-planned">Planned</span></h2>
+        <div class="issue-grid">
+          <div class="issue">
+            <div class="num">plan · #41</div>
+            <h4>BV naming rules engine</h4>
+            <p>Configurable naming conventions for Business Vault tables and columns.</p>
+          </div>
+          <div class="issue">
+            <div class="num">plan</div>
+            <h4>Marquez / OpenLineage export</h4>
+            <p>Push lineage events to OpenLineage-compatible backends (builds on internal lineage).</p>
+          </div>
+          <div class="issue">
+            <div class="num">plan</div>
+            <h4>Hash-key ModPartitioner parallelism</h4>
+            <p>Partition vault loads by hash key for higher throughput.</p>
+          </div>
+          <div class="issue">
+            <div class="num">plan</div>
+            <h4>Coach panel · AI M2 · metrics extensions</h4>
+            <p>In-modeler coaching UI, deeper AI assistant milestones, load-run metrics evolution.</p>
+          </div>
+        </div>
+
+        <h2>Platform &amp; automation</h2>
+        <div class="issue-grid">
+          <div class="issue">
+            <div class="num">#42 · <span class="badge badge-important">important</span></div>
+            <h4>Automated execution with dependency resolution</h4>
+            <p>Hand over DV/BV/DM models; resolve update order, parallel tracks, per resource group, skip already-updated windows.</p>
+          </div>
+          <div class="issue">
+            <div class="num">#80</div>
+            <h4>Automated DDL regression testing / DDL guard</h4>
+            <p>Compare generated DDL to deployed schema; halt on destructive changes until human approval.</p>
+          </div>
+          <div class="issue">
+            <div class="num">#82</div>
+            <h4>Downstream impact dry-run on field changes</h4>
+            <p>When updating catalog source fields, simulate Source→DV→BV→DM consequences before apply.</p>
+          </div>
+        </div>
+
+        <h2>Lineage &amp; observability</h2>
+        <div class="issue-grid">
+          <div class="issue">
+            <div class="num">#79</div>
+            <h4>Visual lineage with live metrics</h4>
+            <p>Overlay runtime telemetry on hubs/satellites (e.g. “42 min today vs 2 min average”).</p>
+          </div>
+          <div class="issue">
+            <div class="num">#78</div>
+            <h4>Time-travel auditing &amp; as-of validation</h4>
+            <p>Automated as-of reconciliation: sample historical source vs vault PIT query and diff.</p>
+          </div>
+        </div>
+
+        <h2>Modeling enhancements</h2>
+        <div class="issue-grid">
+          <div class="issue">
+            <div class="num">#86</div>
+            <h4>Date dimension enhancements</h4>
+            <p>Custom SQL attributes, relative attributes (YTD, M−1, …) driven by a business reference date.</p>
+          </div>
+          <div class="issue">
+            <div class="num">#72</div>
+            <h4>dbt-style macros in SQL Business Vault tables</h4>
+            <p>Register macros in Hop metadata; path toward dbt-core interoperability.</p>
+          </div>
+          <div class="issue">
+            <div class="num">#77</div>
+            <h4>Ghost records &amp; early-arriving facts</h4>
+            <p>Built-in orphan prevention, quarantine / error satellite, auto placeholder hubs.</p>
+          </div>
+        </div>
+
+        <h2>UX, docs &amp; follow-ups</h2>
+        <div class="issue-grid">
+          <div class="issue">
+            <div class="num">#83</div>
+            <h4>Validation issues UX</h4>
+            <p>Clearer path from found issues to details/proposals (beyond double-click).</p>
+          </div>
+          <div class="issue">
+            <div class="num">#25</div>
+            <h4>Automatic model documentation generator</h4>
+            <p>Generate table docs, descriptions, and source-to-target mappings from models.</p>
+          </div>
+          <div class="issue">
+            <div class="num">#92</div>
+            <h4>PK / constraints in generated DDL</h4>
+            <p>Follow-up: primary keys and constraints still missing from hub/link/satellite DDL.</p>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>Note:</strong> Issue <a href="https://github.com/mattcasters/hop-data-vault/issues/97" target="_blank" rel="noopener">#97</a>
+          tracked source-to-target lineage; the core capability shipped in <strong>0.4.0</strong> and is marked Available on the features page.
+          Further lineage polish may still appear under related observability issues (#79).
+        </div>
+
+        <nav class="page-nav">
+          <a href="#samples"><span>Previous</span><strong>← Samples</strong></a>
+          <a class="next" href="#summary"><span>Next</span><strong>Summary →</strong></a>
+        </nav>
+      </section>
+
+      <!-- ========== SUMMARY ========== -->
+      <section class="page" id="page-summary" data-page="summary">
+        <header class="page-header">
+          <span class="kicker">Takeaways</span>
+          <h1>Summary</h1>
+          <p class="lead">
+            The Hop Data Vault plugin turns Data Vault 2.0 from a pile of pipelines into a governed, model-driven platform.
+          </p>
+        </header>
+
+        <div class="hero" style="margin-bottom:1.5rem">
+          <h1 style="font-size:1.5rem">Model the warehouse. Let Hop generate the mechanics.</h1>
+          <p>
+            Raw vault from <code>.hdv</code> · Business vault SCD2 from <code>.hbv</code> · Dimensional marts from <code>.hdm</code> ·
+            External tables welcomed · Validation and quality before execution · Lineage that explains every mapping.
+          </p>
+        </div>
+
+        <div class="panel">
+          <h2 style="margin-top:0">Who benefits</h2>
+          <table class="role-table">
+            <tr><th>Architects</th><td>Governed hashing, naming, hybrid warehouse support, schema gates and lineage drift detection.</td></tr>
+            <tr><th>Modelers</th><td>Visual design, generated pipelines, BV without hand-written SCD2 SQL, AI proposals under review.</td></tr>
+            <tr><th>Operations</th><td>Workflow-driven batches, parallel execution, metrics, CI/CD validation gates, execution maps.</td></tr>
+            <tr><th>Analytics / BI</th><td>Functional SCD2 timelines, standardized BV columns, dimensional marts ready for reporting.</td></tr>
+          </table>
+        </div>
+
+        <div class="two-col">
+          <div class="panel soft">
+            <h3 style="margin-top:0">Get started</h3>
+            <ul>
+              <li>Install plugin 0.4.0+ into Apache Hop 2.18.1</li>
+              <li>Walk <code>retail-example/</code> with <code>docs/getting-started-retail.adoc</code></li>
+              <li>Deep fixtures: <code>integration-tests/</code></li>
+              <li>Markdown overview: <code>docs/presentations/hop-data-vault-overview.md</code></li>
+            </ul>
+          </div>
+          <div class="panel soft">
+            <h3 style="margin-top:0">Links</h3>
+            <ul>
+              <li><a href="https://github.com/mattcasters/hop-data-vault" target="_blank" rel="noopener">GitHub repository</a></li>
+              <li><a href="https://github.com/mattcasters/hop-data-vault/releases" target="_blank" rel="noopener">Releases</a></li>
+              <li><a href="https://github.com/mattcasters/hop-data-vault/issues" target="_blank" rel="noopener">Open issues</a></li>
+              <li><a href="../feature-overview.md">Feature overview (docs)</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <nav class="page-nav">
+          <a href="#roadmap"><span>Previous</span><strong>← Roadmap</strong></a>
+          <a class="next" href="#home"><span>Start over</span><strong>Home →</strong></a>
+        </nav>
+
+        <div class="footer-note">
+          Hop Data Vault plugin · presentation generated 2026-07-29 · content derived from project docs and open GitHub issues ·
+          Licensed under the Apache License, Version 2.0 ·
+          https://github.com/mattcasters/hop-data-vault
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      var pages = [
+        "home", "architecture", "features", "catalog", "data-vault",
+        "business-vault", "dimensional", "validation", "data-quality",
+        "lineage", "operations", "samples", "roadmap", "summary"
+      ];
+
+      var nav = document.getElementById("sideNav");
+      var toggle = document.getElementById("menuToggle");
+
+      function showPage(id) {
+        if (pages.indexOf(id) === -1) id = "home";
+        document.querySelectorAll(".page").forEach(function (el) {
+          el.classList.toggle("active", el.getAttribute("data-page") === id);
+        });
+        document.querySelectorAll(".nav-link").forEach(function (el) {
+          el.classList.toggle("active", el.getAttribute("data-page") === id);
+        });
+        if (nav) nav.classList.remove("open");
+        window.scrollTo(0, 0);
+      }
+
+      function currentIndex() {
+        var hash = (location.hash || "#home").slice(1);
+        var i = pages.indexOf(hash);
+        return i < 0 ? 0 : i;
+      }
+
+      function onHash() {
+        var id = (location.hash || "#home").slice(1);
+        showPage(id);
+      }
+
+      window.addEventListener("hashchange", onHash);
+      window.addEventListener("DOMContentLoaded", onHash);
+      onHash();
+
+      if (toggle) {
+        toggle.addEventListener("click", function () {
+          nav.classList.toggle("open");
+        });
+      }
+
+      document.addEventListener("keydown", function (e) {
+        if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
+        var i = currentIndex();
+        if (e.key === "ArrowRight" || e.key === "PageDown") {
+          if (i < pages.length - 1) {
+            e.preventDefault();
+            location.hash = pages[i + 1];
+          }
+        } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+          if (i > 0) {
+            e.preventDefault();
+            location.hash = pages[i - 1];
+          }
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -21,7 +21,7 @@ Apache Hop plugin for **model-driven Data Vault 2.0**, **Business Vault**, and *
 
 **Model once. Generate loads and consumption layers.** The visual models (`.hdv`, `.hbv`, `.hdm`) are the contract between architects, modelers, and operations.
 
-For a slide-style executive summary, see [presentations/hop-data-vault-overview.md](presentations/hop-data-vault-overview.md). For DV concepts and canvas usage, see [datavault-plugin.adoc](datavault-plugin.adoc).
+For a slide-style executive summary, see [presentations/hop-data-vault-overview.md](presentations/hop-data-vault-overview.md). Interactive HTML presentation (architecture diagram, detail pages, roadmap): [presentations/hop-data-vault-features.html](presentations/hop-data-vault-features.html). For DV concepts and canvas usage, see [datavault-plugin.adoc](datavault-plugin.adoc).
 
 ---
 

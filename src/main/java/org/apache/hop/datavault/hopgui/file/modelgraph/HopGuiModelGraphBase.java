@@ -1377,8 +1377,7 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
       return;
     }
     if (control) {
-      note.setSelected(!note.isSelected());
-      redraw();
+      editNote(note);
     } else if (!avoidContextDialog) {
       showNoteContextDialog(e, note, real);
     }

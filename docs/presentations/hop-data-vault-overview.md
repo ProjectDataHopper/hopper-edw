@@ -19,7 +19,8 @@ limitations under the License.
 
 **Model-driven Data Vault and Business Vault on Apache Hop 2.18.1**
 
-> For a feature checklist with documentation links, see [feature-overview.md](../feature-overview.md).
+> For a feature checklist with documentation links, see [feature-overview.md](../feature-overview.md).  
+> For an interactive standalone HTML presentation (architecture, detail pages, roadmap & open issues), open [hop-data-vault-features.html](hop-data-vault-features.html).
 
 ---
 
