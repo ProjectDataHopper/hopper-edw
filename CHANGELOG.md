@@ -2,6 +2,20 @@
 
 All notable changes to the hop-datavault plugin are documented in this file.
 
+## [Unreleased] — 0.5.0-SNAPSHOT
+
+### Resource definition validation and catalog-safe remediation (#83)
+
+- Design-time **Validate sources** opens an options dialog (baseline: working catalog or version tag; check axes for live sources, version drift, target models, target databases; optional report path)
+- Validation results dialog is master-detail with baseline/axes banner; remediation via explicit **Remediation proposals…** (double-click still works)
+- Length remediation expands DV satellite attributes, BV SCD2 mapped columns, and DM SQL-sourced columns **from the catalog field length** — the catalog is never rewritten on this path
+- Multi-table remediation package: SQL script + Hop workflow (one SQL action per target table) under the configured schema-remediation folder
+- BV-mediated SQL lineage for free-form DM sources (e.g. `d_customer.cust_address` via `customer_360_bv`)
+- Read-only **Versions** tree in the Data Catalog perspective for tagged catalog snapshots
+- Assembly packages `hop-action-sql` / success action so generated remediation workflows can run SQL actions
+- Retail sample package: `retail-example/workflows/schema-remediation/accept-address_line1/`
+- Docs and screenshots: [docs/resource-definition-validation.adoc](docs/resource-definition-validation.adoc)
+
 ## [0.4.0] — 2026-07-29
 
 Requires **Apache Hop 2.18.1** and **Java 21**.

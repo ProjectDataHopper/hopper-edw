@@ -17,7 +17,7 @@ limitations under the License.
 
 # Hop Data Vault documentation index
 
-Documentation for the **hop-datavault** plugin (development **0.5.0-SNAPSHOT**, latest release **0.4.0**). Recent work adds **source-to-target lineage** (Lineage tab, explainable DDL, catalog publish, drift gate, reverse browser), **catalog version tags**, a **CI/CD schema validation gate**, data-quality rules and gates, multi-DB hardening, and Business Vault incremental loading. See [CHANGELOG.md](../CHANGELOG.md).
+Documentation for the **hop-datavault** plugin (development **0.5.0-SNAPSHOT**, latest release **0.4.0**). Recent work adds **source-to-target lineage** (Lineage tab, explainable DDL, catalog publish, drift gate, reverse browser), **catalog version tags**, a **CI/CD schema validation gate** with design-time options and **catalog-safe multi-layer length remediation**, data-quality rules and gates, multi-DB hardening, and Business Vault incremental loading. See [CHANGELOG.md](../CHANGELOG.md).
 
 **New here?** Read [feature-overview.md](feature-overview.md), then follow [getting-started-retail.adoc](getting-started-retail.adoc).
 

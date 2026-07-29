@@ -135,14 +135,20 @@ In the retail project, widening catalog field `address_line1` to **75** and appl
 
 `retail-example/workflows/schema-remediation/accept-address_line1/`
 
-Example Markdown report (paths shown project-relative):
+| File | Role |
+|------|------|
+| `accept-address_line1-report.md` / `.html` | What changed, downstream targets, confidence |
+| `accept-address_line1-apply-ddl.sql` | Reviewable multi-table DDL (one section per table) |
+| `accept-address_line1-apply-ddl.hwf` | Hop workflow: one SQL action per table → Success |
+
+Example Markdown report (checked-in sample; paths project-relative under the retail project):
 
 ----
 # Schema remediation: expand models and schemas from catalog length
 
 - **Remediation name:** accept-address_line1
-- **Workflow:** workflows/schema-remediation/accept-address_line1/accept-address_line1-apply-ddl.hwf
-- **SQL script:** workflows/schema-remediation/accept-address_line1/accept-address_line1-apply-ddl.sql
+- **Workflow:** `workflows/schema-remediation/accept-address_line1/accept-address_line1-apply-ddl.hwf`
+- **SQL script:** `workflows/schema-remediation/accept-address_line1/accept-address_line1-apply-ddl.sql`
 
 ## What changed
 
@@ -154,20 +160,25 @@ Example Markdown report (paths shown project-relative):
 - Catalog was not modified by this remediation.
 ----
 
-The companion SQL widens **three** physical tables (DV satellite, BV SCD2, DM dimension), for example:
+The companion SQL widens **three** physical tables on connection **Vault** — DV satellite, BV SCD2, and DM dimension — using dialect-specific length-change steps (PostgreSQL example uses a temporary column rename):
 
 ----
 -- Connection: Vault  Table: sat_customer_address
-ALTER TABLE sat_customer_address ... VARCHAR(75);
+ALTER TABLE sat_customer_address ADD COLUMN address_line1_KTL VARCHAR(75);
+UPDATE sat_customer_address SET address_line1_KTL=address_line1;
+ALTER TABLE sat_customer_address DROP COLUMN address_line1;
+ALTER TABLE sat_customer_address RENAME address_line1_KTL TO address_line1;
 
 -- Connection: Vault  Table: customer_360_bv
-ALTER TABLE customer_360_bv ... cust_address ... VARCHAR(75);
+ALTER TABLE customer_360_bv ADD COLUMN cust_address_KTL VARCHAR(75);
+...
 
 -- Connection: Vault  Table: d_customer
-ALTER TABLE d_customer ... cust_address ... VARCHAR(75);
+ALTER TABLE d_customer ADD COLUMN cust_address_KTL VARCHAR(75);
+...
 ----
 
-Review the workflow/SQL on each DTAP environment before loads that need the wider columns.
+Review the workflow/SQL on each DTAP environment before loads that need the wider columns. The workflow is **not** run automatically when you accept the proposal.
 
 == HTML / Markdown gate reports
 
