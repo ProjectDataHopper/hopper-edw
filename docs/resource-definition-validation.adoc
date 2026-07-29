@@ -22,12 +22,24 @@ Bottom of the editor:
 
 * **List catalog versions** — review tags already stored under the catalog’s `catalog-versions/` folder
 * **Tag catalog version** — freeze current source contracts for a semantic tag (for example `v1.0.0`)
-* **Validate sources** — run schema comparison and open the results dialog
+* **Validate sources** — open the **validation options** dialog (baseline + check axes), then run comparison and open the results dialog
 * **Browse lineage…** — reverse source-to-target lineage browser (see link:source-to-target-lineage.adoc[Source-to-target lineage])
 
 image::images/resource-definition-group-editor-with-version-mgt-buttons.png[Resource definition group editor for retail-sources with List catalog versions, Tag catalog version, and Validate sources,align="center"]
 
-Catalog version storage and scope are described in link:data-catalog.adoc#catalog-versions[Data Catalog — Catalog versions].
+Catalog version storage and scope are described in link:data-catalog.adoc#catalog-versions[Data Catalog — Catalog versions]. Versions can also be browsed **read-only** under **Versions** in the Data Catalog perspective.
+
+=== Design-time validation options
+
+**Validate sources** does not run immediately. An options dialog asks what is being compared:
+
+image::images/resource-definition-group-validate-sources-dialog.png[Validate sources options dialog: baseline (working catalog or version tag), check axes, optional report path,align="center"]
+
+* **Baseline (truth for this run)** — current working catalog (typical after automatic drift notification) or a **catalog version tag** (immutable snapshot)
+* **What to check** — live source systems, working catalog vs version, target models (DV/BV/DM), target databases (DDL needed?), downstream impact/lineage
+* **Optional report** — write HTML/Markdown under a Hop VFS path (same formatter as the CI gate)
+
+Validation is always **read-only**. Catalog version snapshots are never modified by validation. The results banner restates the chosen baseline and axes.
 
 == Workflow action (CI/CD schema gate)
 
@@ -60,38 +72,117 @@ Version fields support Hop variables (for example `${PROMOTED_TAG}`). Tag lists 
 
 == Validation results dialog (GUI)
 
-After **Validate sources**, the **Source validation** dialog lists issues with a status banner (`PASS` / `WARNINGS` / `CRITICAL BLOCKED`):
+After **Validate sources**, the **Source validation** dialog uses a master-detail layout with a status banner (`PASS` / `WARNINGS` / `CRITICAL BLOCKED`) and the baseline/axes context from the options dialog:
 
-* **BLOCKING** rows are highlighted in red
-* **WARNING** rows are highlighted in amber
-* **Downstream impact** shows hubs, satellites, BV, and DM dependents when known
-* Toolbar actions support filtering, copy, and related catalog operations
+image::images/resource-definition-group-validation-results-dialog.png[Source validation results dialog with CRITICAL BLOCKED, issue list, and expected vs actual length on address_line1,align="center"]
 
-image::images/resource-definition-group-validation-blocking-issue-found.png[Source validation results dialog showing CRITICAL BLOCKED and a length change on product_name with downstream impact,align="center"]
+* **Top — issue summaries** (compact rows): Severity, Record definition, Field, Kind (for example `FIELD_TYPE_CHANGED`), Proposals count
+* **BLOCKING** rows are highlighted in red; **WARNING** rows in amber
+* **Bottom — selected issue details**: full message, downstream impact, and model usages
+* Select a summary row to load details (no need to hunt for double-click)
+
+Detail actions for the selected issue:
+
+* **Open source in catalog** — jump to the source record definition in the Data Catalog perspective
+* **Open target table** — open the selected model usage (hub, satellite, BV, or DM table)
+* **Remediation proposals…** — open the proposals dialog (also available via double-click)
+* **Acknowledge…** / **Revoke acknowledgement** — accept or clear a warning with a comment
+* Footer: show acknowledged issues, re-validate (re-opens options), tag catalog version
+
+image::images/resource-definition-group-validation-blocking-issue-found.png[Earlier screenshot: Source validation results dialog showing CRITICAL BLOCKED and length change with downstream impact,align="center"]
 
 == Issue detail and remediation
 
-Select (or open) an issue for the **Issue** dialog:
+Full issue text and blast radius stay in the **details pane** of the results dialog. Use **Remediation proposals…** for fixes.
 
-* Severity / issue code (for example `FIELD_TYPE_CHANGED`) and full description
-* Record definition identity (`namespace/name`)
-* **Downstream impact** list (satellite fields, BV tables, dimensions, facts)
-* **Model usages** (for example `DATA_VAULT_MODEL 'retail-360' / sat_product`)
-* **Remediation proposals** when the engine can suggest a fix:
-** Refresh catalog contract from source
-** Update target column length or type
-** Review model mapping
-* **Apply proposal** — accept a selected proposal and update the catalog record (blocking applies confirm blast radius)
-* **Acknowledge…** — record that a warning is accepted with a reason and optional expiry
-* **Open record definition** — jump to the catalog editor
+=== Catalog is never rewritten by length remediation
 
-image::images/resource-definition-group-validation-block-issue-details-and-proposals.png[Issue detail dialog with FIELD_TYPE_CHANGED, blast radius, model usage, and remediation proposals,align="center"]
+The **working catalog field length is the contract** used to expand models and target DDL. Remediation does **not** change the catalog. If the live source should define a new length, update the catalog yourself in the Data Catalog, then re-validate.
+
+image::images/resource-definition-group-validation-remediation-proposals-dialog.png[Remediation proposals dialog: expand field length in target models and database schemas using the catalog,align="center"]
+
+Primary proposal for length drift:
+
+**Expand field length in target models and database schemas (using the catalog)**
+
+* Catalog is **not** changed
+* DV satellite attributes in git-versioned models are expanded to the **catalog** field length
+* Downstream **BV SCD2** columns linked by explicit field mappings (e.g. `address_line1` → `cust_address` on `customer_360_bv`) are included for target DDL
+* Downstream **DM** columns sourced via SQL that reads a BV table (e.g. `JOIN customer_360_bv sc` + attribute `cust_address` on `d_customer`) are included when field names match (SQL table-ref + BV-mediated lineage, confidence `DERIVED_VIA_BV`)
+* You name the remediation package folder
+
+image::images/resource-definition-group-validation-remediation-confirmation-dialog.png[Confirm remediation dialog explaining models and SQL are updated from catalog length; catalog not changed,align="center"]
+
+=== Schema remediation package
+
+Under the **Schema remediation folder** (Data Vault 2.0 plugin settings; default `${PROJECT_HOME}/workflows/schema-remediation/<name>/`) the plugin writes:
+
+* a reviewable **SQL script** (always when DDL is needed), with sections per affected table
+* a Hop **workflow** with **one SQL action per target table** (run later per DTAP environment — **not** executed immediately)
+* HTML and Markdown **reports** of the catalog length used, each downstream target + lineage confidence, and that the catalog was not modified
+
+image::images/resource-definition-group-validation-remediation-result-dialog.png[Remediation result listing BV and DM targets, SQL path, workflow path, catalog not modified,align="center"]
+
+image::images/resource-definition-group-validation-remediation-workflow.png[Generated remediation workflow: Start to SQL actions for each target table to Success,align="center"]
+
+Other issue kinds (field added/removed, primary key change) may still offer **Refresh catalog contract from source** — that path *does* update the catalog. It is separate from length expand.
 
 Acknowledgements persist with the catalog record so teams can document conscious exceptions (for example known schema drift in a non-production feed).
 
+== Retail example: address_line1 length expand
+
+In the retail project, widening catalog field `address_line1` to **75** and applying expand produces a package under:
+
+`retail-example/workflows/schema-remediation/accept-address_line1/`
+
+| File | Role |
+|------|------|
+| `accept-address_line1-report.md` / `.html` | What changed, downstream targets, confidence |
+| `accept-address_line1-apply-ddl.sql` | Reviewable multi-table DDL (one section per table) |
+| `accept-address_line1-apply-ddl.hwf` | Hop workflow: one SQL action per table → Success |
+
+Example Markdown report (checked-in sample; paths project-relative under the retail project):
+
+----
+# Schema remediation: expand models and schemas from catalog length
+
+- **Remediation name:** accept-address_line1
+- **Workflow:** `workflows/schema-remediation/accept-address_line1/accept-address_line1-apply-ddl.hwf`
+- **SQL script:** `workflows/schema-remediation/accept-address_line1/accept-address_line1-apply-ddl.sql`
+
+## What changed
+
+- Expanding models and target DDL for field 'address_line1' to catalog length 75. The catalog was not modified.
+- Downstream target BV customer_360_bv.cust_address (from catalog field address_line1, length 75, confidence EXPLICIT_MAP)
+- Downstream target DM d_customer.cust_address (from catalog field address_line1, length 75, confidence DERIVED_VIA_BV)
+- SQL script written (3 statement(s) for table(s) sat_customer_address, customer_360_bv, d_customer): ...
+- DDL workflow written: ...
+- Catalog was not modified by this remediation.
+----
+
+The companion SQL widens **three** physical tables on connection **Vault** — DV satellite, BV SCD2, and DM dimension — using dialect-specific length-change steps (PostgreSQL example uses a temporary column rename):
+
+----
+-- Connection: Vault  Table: sat_customer_address
+ALTER TABLE sat_customer_address ADD COLUMN address_line1_KTL VARCHAR(75);
+UPDATE sat_customer_address SET address_line1_KTL=address_line1;
+ALTER TABLE sat_customer_address DROP COLUMN address_line1;
+ALTER TABLE sat_customer_address RENAME address_line1_KTL TO address_line1;
+
+-- Connection: Vault  Table: customer_360_bv
+ALTER TABLE customer_360_bv ADD COLUMN cust_address_KTL VARCHAR(75);
+...
+
+-- Connection: Vault  Table: d_customer
+ALTER TABLE d_customer ADD COLUMN cust_address_KTL VARCHAR(75);
+...
+----
+
+Review the workflow/SQL on each DTAP environment before loads that need the wider columns. The workflow is **not** run automatically when you accept the proposal.
+
 == HTML / Markdown gate reports
 
-When the workflow action has a **Report output path**, it writes scannable artifacts via Hop VFS (local, S3, Azure, and similar). The HTML report title is **Data Vault DDL Validation Report** and includes resource group, target/baseline tags, compare mode, status, issue table, downstream impact summary, and required action.
+When the workflow action has a **Report output path**, it writes scannable artifacts via Hop VFS (local, S3, Azure, and similar). The HTML report title is **Data Vault Resource Definition Validation Report** and includes resource group, **baseline**, compare mode, status, issue table, downstream impact summary, and required action.
 
 **Pass** (no schema drift vs the comparison baseline):
 
@@ -106,15 +197,15 @@ Markdown siblings are intended for CI log scrapers and PR comments. Retail write
 == Practical design-time workflow
 
 . Edit or import sources in the Data Catalog (or refresh contracts from the live system).
-. Open the **Resource definition group** → **Validate sources** before attaching feeds to a new `.hdv` model.
-. Fix errors; apply proposals where appropriate.
+. Open the **Resource definition group** → **Validate sources** → choose baseline and axes.
+. Fix errors; apply expand-from-catalog proposals where models/schemas lag the catalog.
 . Acknowledge warnings that are accepted risk, with a short reason.
 . **Tag catalog version** when the contract is ready for DTAP promotion.
 . Run **Check model** on the `.hdv` file — detailed type checking uses live database schemas when enabled.
 
 == Schema impact simulation (programmatic)
 
-`SchemaImpactSimulationService` orchestrates catalog schema comparison and optional downstream impact enrichment for CI/CD and design-time dry-runs (same modes as the workflow action).
+`SchemaImpactSimulationService` orchestrates catalog schema comparison and optional downstream impact enrichment for CI/CD and design-time dry-runs (same modes as the workflow action). Optional axes include target models and target database DDL readiness.
 
 Results include a `ValidationReport`, optional `ImpactGraph` blast-radius labels on issues, and overall status (`PASS` / `WARNING` / `CRITICAL_BLOCKED`).
 
@@ -125,13 +216,15 @@ Results include a `ValidationReport`, optional `ImpactGraph` blast-radius labels
 Use catalog versions and the schema gate to keep Development, Test, Acceptance, and Production aligned without “deploy and pray.”
 
 . **DEV — approve schema change**
-.. Import or refresh source definitions in the Data Catalog.
+.. Import or refresh source definitions in the Data Catalog (set the catalog field length when the contract changes).
 .. Run **Validate sources** on the resource definition group; review **downstream impact**.
-.. Apply remediations or acknowledge accepted warnings.
+.. Apply remediations (**expand models and database schemas from the catalog**) or acknowledge accepted warnings.
+.. Review generated files under `workflows/schema-remediation/` and commit them with the model change when appropriate.
+.. Run the generated DDL workflow against the **DEV** target database (or include it in the environment promotion package).
 .. **Tag catalog version** (for example `v2.4.0` or `2026-Q3-Release`) after the contract is agreed.
 . **Git promote**
-.. Commit model files (`.hdv` / `.hbv` / `.hdm`) and any **seeded** version fixtures. Prefer a gitignored runtime catalog (`work/edw-catalog/`) for working-tree and snapshot files generated on each machine.
-.. Promote the same tag through DTAP branches or release artifacts.
+.. Commit model files (`.hdv` / `.hbv` / `.hdm`), schema-remediation workflow/SQL artifacts, and any **seeded** version fixtures. Prefer a gitignored runtime catalog (`work/edw-catalog/`) for working-tree and snapshot files generated on each machine.
+.. Promote the same tag through DTAP branches or release artifacts; run the DDL workflow on each environment before loads that need the wider columns.
 . **TEST / ACC / PROD — gate before load**
 .. In the daily update workflow, place **Validate resource definitions** before Data Vault / Business Vault / Dimensional update actions.
 .. Configure for example:
@@ -164,12 +257,13 @@ The retail project workflow `retail-example/workflows/run-retail-update-models.h
 
 To detect a length change from the tagged baseline, edit the working-tree source JSON (or catalog UI) and re-run the workflow. `LIVE_SOURCE` compares to the **physical** CRM table and will not see catalog-only metadata edits.
 
-Generated files look like `retail-example/work/reports/retail-schema-validation.md` (and `.html`) when the gate runs. See also link:getting-started-retail.adoc[Getting started with the retail example].
+Design-time expand of `address_line1` to 75 is illustrated under `retail-example/workflows/schema-remediation/accept-address_line1/`. See also link:getting-started-retail.adoc[Getting started with the retail example].
 
-=== Limitations (MVP)
+=== Limitations
 
 * Catalog version snapshots freeze **source record definitions**, not model files (models stay in Git).
-* Dimensional impact from free-form SQL is **table-level** only.
+* Free-form DM SQL field lineage is best-effort: BV-mediated name matching and `table` / `alias.*` resolution; complex SQL may remain table-level only in impact.
+* Length remediation never rewrites the catalog; refresh-from-source remains a separate proposal for add/remove/PK issues.
 * The validation action does **not** auto-apply DDL; pair with update-action `failIfDdlNeeded` for target-DB readiness.
 * Content quality (nulls, ranges, allowed values) uses the separate Measure / Evaluate quality gate stack — see link:data-quality.adoc[Data quality].
 
@@ -178,5 +272,6 @@ Generated files look like `retail-example/work/reports/retail-schema-validation.
 * link:data-catalog.adoc[Data Catalog]
 * link:datavault-source.adoc[Data Vault Source]
 * link:datavault-update-action.adoc[Data Vault Update action] (model check options)
+* link:source-to-target-lineage.adoc[Source-to-target lineage]
 * link:data-quality.adoc[Data quality]
 * link:getting-started-retail.adoc[Getting started — retail example]

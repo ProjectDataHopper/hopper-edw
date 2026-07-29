@@ -1141,6 +1141,7 @@
               <li>Feed-level checks with remediation <strong>proposals</strong></li>
               <li><strong>Acknowledgements</strong> for accepted exceptions</li>
               <li><strong>Downstream impact</strong> Source→DV→BV→DM</li>
+              <li>Design-time options: baseline + axes before each run</li>
             </ul>
           </div>
         </div>
@@ -1154,6 +1155,27 @@
             <li>Place the action <strong>before</strong> DV/BV/DM update actions in workflows</li>
           </ul>
         </div>
+
+        <div class="panel soft">
+          <h3 style="margin-top:0">Catalog-safe length remediation</h3>
+          <ul>
+            <li>Working catalog field length is the contract — length expand does <strong>not</strong> rewrite the catalog</li>
+            <li>Expands DV satellite, BV SCD2 maps, and DM SQL-sourced columns (multi-table SQL + workflow)</li>
+            <li>Retail sample: <code>workflows/schema-remediation/accept-address_line1/</code> (<code>address_line1</code> → 75 on sat / BV / <code>d_customer</code>)</li>
+          </ul>
+        </div>
+
+        <figure class="screenshot">
+          <img src="../images/resource-definition-group-validate-sources-dialog.png" alt="Validate sources options dialog" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+          <div class="img-missing">Screenshot: Validate sources options dialog</div>
+          <figcaption>Validate sources — baseline and check axes (design time)</figcaption>
+        </figure>
+
+        <figure class="screenshot">
+          <img src="../images/resource-definition-group-validation-results-dialog.png" alt="Source validation results dialog" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+          <div class="img-missing">Screenshot: Source validation results</div>
+          <figcaption>Results with CRITICAL BLOCKED, expected vs actual, remediation entry points</figcaption>
+        </figure>
 
         <figure class="screenshot">
           <img src="../images/validate-resource-definitions-action-dialog.png" alt="Validate resource definitions action dialog" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />

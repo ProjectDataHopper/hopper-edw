@@ -26,6 +26,9 @@ package org.apache.hop.datavault.resourcedefinition;
  * @param baselineVersionTag expected side for WORKING_VS_VERSION and VERSION_VS_VERSION
  * @param includeImpact attach blast-radius labels via impact graph
  * @param detailedDataTypeChecking full type/length/PK vs types-only
+ * @param checkTargetModels compare baseline contract field metadata to mapped model attributes
+ * @param checkTargetDatabases detect target EDW tables that need DDL relative to models
+ * @param checkCatalogVsVersion when true with LIVE_SOURCE, also run working-vs-baseline version axis
  */
 public record SchemaImpactSimulationRequest(
     String resourceDefinitionGroup,
@@ -33,7 +36,10 @@ public record SchemaImpactSimulationRequest(
     SchemaCompareMode compareMode,
     String baselineVersionTag,
     boolean includeImpact,
-    boolean detailedDataTypeChecking) {
+    boolean detailedDataTypeChecking,
+    boolean checkTargetModels,
+    boolean checkTargetDatabases,
+    boolean checkCatalogVsVersion) {
 
   public static Builder builder() {
     return new Builder();
@@ -46,6 +52,9 @@ public record SchemaImpactSimulationRequest(
     private String baselineVersionTag;
     private boolean includeImpact = true;
     private boolean detailedDataTypeChecking = true;
+    private boolean checkTargetModels;
+    private boolean checkTargetDatabases;
+    private boolean checkCatalogVsVersion;
 
     public Builder resourceDefinitionGroup(String resourceDefinitionGroup) {
       this.resourceDefinitionGroup = resourceDefinitionGroup;
@@ -77,6 +86,21 @@ public record SchemaImpactSimulationRequest(
       return this;
     }
 
+    public Builder checkTargetModels(boolean checkTargetModels) {
+      this.checkTargetModels = checkTargetModels;
+      return this;
+    }
+
+    public Builder checkTargetDatabases(boolean checkTargetDatabases) {
+      this.checkTargetDatabases = checkTargetDatabases;
+      return this;
+    }
+
+    public Builder checkCatalogVsVersion(boolean checkCatalogVsVersion) {
+      this.checkCatalogVsVersion = checkCatalogVsVersion;
+      return this;
+    }
+
     public SchemaImpactSimulationRequest build() {
       return new SchemaImpactSimulationRequest(
           resourceDefinitionGroup,
@@ -84,7 +108,10 @@ public record SchemaImpactSimulationRequest(
           compareMode != null ? compareMode : SchemaCompareMode.LIVE_SOURCE,
           baselineVersionTag,
           includeImpact,
-          detailedDataTypeChecking);
+          detailedDataTypeChecking,
+          checkTargetModels,
+          checkTargetDatabases,
+          checkCatalogVsVersion);
     }
   }
 }

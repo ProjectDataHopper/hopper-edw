@@ -522,6 +522,61 @@ public class DataCatalogPerspective implements IHopPerspective {
       catalogItem.setText(Const.NVL(connection.getName(), ""));
       catalogItem.setData(DataCatalogTreeNode.catalog(connection.getName()));
       populateConnectionItems(catalogItem, connection.getName(), refs);
+      populateVersionItems(catalogItem, connection.getName(), variables, metadataProvider);
+    }
+  }
+
+  private void populateVersionItems(
+      TreeItem catalogItem,
+      String connectionName,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider) {
+    try {
+      List<org.apache.hop.catalog.versioning.CatalogVersionEntry> versions =
+          org.apache.hop.catalog.versioning.CatalogVersionService.listVersions(
+              connectionName, variables, metadataProvider);
+      if (versions == null || versions.isEmpty()) {
+        return;
+      }
+      TreeItem versionsRoot = new TreeItem(catalogItem, SWT.NONE);
+      versionsRoot.setText(
+          BaseMessages.getString(PKG, "DataCatalogPerspective.Tree.Versions.Label"));
+      versionsRoot.setData(DataCatalogTreeNode.versionsRoot(connectionName));
+      for (org.apache.hop.catalog.versioning.CatalogVersionEntry entry : versions) {
+        if (entry == null || Utils.isEmpty(entry.getTag())) {
+          continue;
+        }
+        TreeItem tagItem = new TreeItem(versionsRoot, SWT.NONE);
+        String label =
+            entry.getTag()
+                + "  ("
+                + Const.NVL(entry.getCreatedAt(), "")
+                + ", "
+                + entry.getRecordCount()
+                + " "
+                + BaseMessages.getString(PKG, "DataCatalogPerspective.Tree.Versions.Records")
+                + ")";
+        tagItem.setText(label);
+        tagItem.setData(DataCatalogTreeNode.versionTag(connectionName, entry.getTag()));
+        try {
+          List<org.apache.hop.catalog.model.RecordDefinition> defs =
+              org.apache.hop.catalog.versioning.CatalogVersionService.readAllAtVersion(
+                  connectionName, entry.getTag(), variables, metadataProvider);
+          for (org.apache.hop.catalog.model.RecordDefinition def : defs) {
+            if (def == null || def.getKey() == null) {
+              continue;
+            }
+            TreeItem recordItem = new TreeItem(tagItem, SWT.NONE);
+            recordItem.setText(def.getKey().toString());
+            recordItem.setData(
+                DataCatalogTreeNode.versionRecord(connectionName, entry.getTag(), def.getKey()));
+          }
+        } catch (HopException ignored) {
+          // Tag still shown; expand may be empty if snapshot is corrupt.
+        }
+      }
+    } catch (HopException ignored) {
+      // FILE catalogs without versions simply omit the Versions node.
     }
   }
 
@@ -760,15 +815,29 @@ public class DataCatalogPerspective implements IHopPerspective {
 
     DataCatalogTreeNode node = recordNodes.get(0);
     try {
-      RecordDefinition definition =
-          RecordDefinitionRegistry.getInstance()
-              .read(
-                  node.getCatalogConnectionName(),
-                  node.getRecordKey(),
-                  hopGui.getVariables(),
-                  hopGui.getMetadataProvider());
+      RecordDefinition definition;
+      boolean readOnlyVersion = node.getType() == DataCatalogTreeNode.Type.VERSION_RECORD;
+      if (readOnlyVersion) {
+        definition =
+            org.apache.hop.catalog.versioning.CatalogVersionService.readDefinition(
+                    node.getCatalogConnectionName(),
+                    node.getVersionTag(),
+                    node.getRecordKey(),
+                    hopGui.getVariables(),
+                    hopGui.getMetadataProvider())
+                .orElse(null);
+      } else {
+        definition =
+            RecordDefinitionRegistry.getInstance()
+                .read(
+                    node.getCatalogConnectionName(),
+                    node.getRecordKey(),
+                    hopGui.getVariables(),
+                    hopGui.getMetadataProvider());
+      }
       selectedRecordDefinition = definition;
-      detailsPanel.setRecordDefinition(node.getCatalogConnectionName(), definition);
+      detailsPanel.setRecordDefinition(
+          node.getCatalogConnectionName(), definition, readOnlyVersion, node.getVersionTag());
     } catch (HopException e) {
       detailsPanel.clear();
       new ErrorDialog(
@@ -791,9 +860,13 @@ public class DataCatalogPerspective implements IHopPerspective {
     if (toolBarWidgets == null) {
       return;
     }
-    boolean recordSelected =
-        !DataCatalogSelectionSupport.collectRecordNodes(tree.getSelection()).isEmpty();
-    toolBarWidgets.enableToolbarItem(TOOLBAR_ITEM_DELETE, recordSelected);
+    List<DataCatalogTreeNode> selectedRecords =
+        DataCatalogSelectionSupport.collectRecordNodes(tree.getSelection());
+    boolean recordSelected = !selectedRecords.isEmpty();
+    boolean anyVersion =
+        selectedRecords.stream()
+            .anyMatch(n -> n != null && n.getType() == DataCatalogTreeNode.Type.VERSION_RECORD);
+    toolBarWidgets.enableToolbarItem(TOOLBAR_ITEM_DELETE, recordSelected && !anyVersion);
     toolBarWidgets.enableToolbarItem(
         TOOLBAR_ITEM_PREVIEW,
         selectedRecordDefinition != null

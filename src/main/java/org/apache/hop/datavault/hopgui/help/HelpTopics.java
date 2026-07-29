@@ -73,6 +73,8 @@ public final class HelpTopics {
   public static final String RESOURCE_DEFINITION_ISSUE = "resource-definition-issue-dialog";
   public static final String RESOURCE_DEFINITION_VALIDATION_RESULTS =
       "resource-definition-validation-results-dialog";
+  public static final String RESOURCE_DEFINITION_VALIDATION_OPTIONS =
+      "resource-definition-validation-options-dialog";
   public static final String ACKNOWLEDGE_VALIDATION_ISSUE = "acknowledge-validation-issue-dialog";
   public static final String EXECUTION_MAP_GENERATION = "execution-map-generation-dialog";
   public static final String ELK_LAYOUT = "elk-layout-dialog";
@@ -127,6 +129,9 @@ public final class HelpTopics {
           Map.entry(HOP_AI_PROPOSAL_REVIEW, "HelpTopics.HopAiProposalReviewDialog.Title"),
           Map.entry(MODEL_AI_PROPOSAL_REVIEW, "HelpTopics.ModelAiProposalReviewDialog.Title"),
           Map.entry(RESOURCE_DEFINITION_ISSUE, "HelpTopics.ResourceDefinitionIssueDialog.Title"),
+          Map.entry(
+              RESOURCE_DEFINITION_VALIDATION_OPTIONS,
+              "HelpTopics.ResourceDefinitionValidationOptionsDialog.Title"),
           Map.entry(
               RESOURCE_DEFINITION_VALIDATION_RESULTS,
               "HelpTopics.ResourceDefinitionValidationResultsDialog.Title"),

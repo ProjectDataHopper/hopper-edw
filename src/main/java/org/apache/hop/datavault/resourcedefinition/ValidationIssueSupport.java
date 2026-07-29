@@ -109,6 +109,8 @@ public final class ValidationIssueSupport {
           hasFieldChange(diff, RecordDefinitionSchemaDiffSupport.ChangeKind.CHANGED, parsed.fieldName(), parsed.changeSignature());
       case PRIMARY_KEY_CHANGED ->
           hasPrimaryKeyChange(diff, parsed.changeSignature());
+      // Model/target axes are re-evaluated each run; drop acknowledgements when re-run no longer emits them.
+      case MODEL_ATTRIBUTE_NARROWER, TARGET_DDL_REQUIRED -> true;
     };
   }
 

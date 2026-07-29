@@ -79,20 +79,21 @@ public final class SchemaValidationReportFormatter {
     }
     ValidationReport report = result.validationReport();
     StringBuilder md = new StringBuilder();
-    md.append("# Data Vault DDL Validation Report\n");
+    md.append("# Data Vault Resource Definition Validation Report\n");
     md.append("**Timestamp:** ")
         .append(result.timestamp() != null ? TIMESTAMP.format(result.timestamp()) : "")
         .append("  \n");
     md.append("**Resource Group:** ")
         .append(escapeMd(report != null ? report.getGroupName() : ""))
         .append("  \n");
-    md.append("**Target Catalog Version:** ")
+    md.append("**Baseline:** ")
         .append(
-            Utils.isEmpty(result.catalogVersionUsed())
-                    && Utils.isEmpty(result.baselineVersionUsed())
-                ? "(working tree)"
+            Utils.isEmpty(result.baselineVersionUsed())
+                    && Utils.isEmpty(result.catalogVersionUsed())
+                ? "current working catalog (contract of record)"
                 : escapeMd(
-                    firstNonEmpty(result.catalogVersionUsed(), result.baselineVersionUsed())))
+                    firstNonEmpty(result.baselineVersionUsed(), result.catalogVersionUsed())
+                        + " (catalog version snapshot — not modified by validation)"))
         .append("  \n");
     if (result.compareMode() != null) {
       md.append("**Compare Mode:** `").append(result.compareMode().name()).append("`  \n");
@@ -156,7 +157,7 @@ public final class SchemaValidationReportFormatter {
     ValidationReport report = result.validationReport();
     StringBuilder html = new StringBuilder();
     html.append("<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\"/>");
-    html.append("<title>Data Vault DDL Validation Report</title>");
+    html.append("<title>Data Vault Resource Definition Validation Report</title>");
     html.append(
         "<style>body{font-family:Segoe UI,Arial,sans-serif;margin:24px;color:#1f2933}"
             + "h1,h2{color:#102a43}table{border-collapse:collapse;width:100%;margin:12px 0}"
@@ -164,7 +165,7 @@ public final class SchemaValidationReportFormatter {
             + "th{background:#f0f4f8}.critical{color:#b91c1c}.warning{color:#b45309}"
             + ".pass{color:#047857}.summary{background:#f7fafc;padding:12px;border-radius:8px;margin-bottom:16px}"
             + "</style></head><body>");
-    html.append("<h1>Data Vault DDL Validation Report</h1>");
+    html.append("<h1>Data Vault Resource Definition Validation Report</h1>");
     html.append("<div class=\"summary\">");
     html.append("<p><strong>Timestamp:</strong> ")
         .append(

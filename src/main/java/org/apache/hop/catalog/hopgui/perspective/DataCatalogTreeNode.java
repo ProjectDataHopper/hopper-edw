@@ -13,7 +13,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package org.apache.hop.catalog.hopgui.perspective;
@@ -27,32 +26,57 @@ public final class DataCatalogTreeNode {
   public enum Type {
     CATALOG,
     NAMESPACE,
-    RECORD
+    RECORD,
+    /** Virtual folder listing catalog version tags. */
+    VERSIONS_ROOT,
+    /** A single catalog version tag (immutable snapshot). */
+    VERSION_TAG,
+    /** A record definition inside a catalog version snapshot (read-only). */
+    VERSION_RECORD
   }
 
   private final Type type;
   private final String catalogConnectionName;
   private final String namespace;
   private final RecordDefinitionKey recordKey;
+  private final String versionTag;
 
   private DataCatalogTreeNode(
-      Type type, String catalogConnectionName, String namespace, RecordDefinitionKey recordKey) {
+      Type type,
+      String catalogConnectionName,
+      String namespace,
+      RecordDefinitionKey recordKey,
+      String versionTag) {
     this.type = type;
     this.catalogConnectionName = catalogConnectionName;
     this.namespace = namespace;
     this.recordKey = recordKey;
+    this.versionTag = versionTag;
   }
 
   public static DataCatalogTreeNode catalog(String connectionName) {
-    return new DataCatalogTreeNode(Type.CATALOG, connectionName, null, null);
+    return new DataCatalogTreeNode(Type.CATALOG, connectionName, null, null, null);
   }
 
   public static DataCatalogTreeNode namespace(String connectionName, String namespace) {
-    return new DataCatalogTreeNode(Type.NAMESPACE, connectionName, namespace, null);
+    return new DataCatalogTreeNode(Type.NAMESPACE, connectionName, namespace, null, null);
   }
 
   public static DataCatalogTreeNode record(String connectionName, RecordDefinitionRef ref) {
-    return new DataCatalogTreeNode(Type.RECORD, connectionName, null, ref.getKey());
+    return new DataCatalogTreeNode(Type.RECORD, connectionName, null, ref.getKey(), null);
+  }
+
+  public static DataCatalogTreeNode versionsRoot(String connectionName) {
+    return new DataCatalogTreeNode(Type.VERSIONS_ROOT, connectionName, null, null, null);
+  }
+
+  public static DataCatalogTreeNode versionTag(String connectionName, String tag) {
+    return new DataCatalogTreeNode(Type.VERSION_TAG, connectionName, null, null, tag);
+  }
+
+  public static DataCatalogTreeNode versionRecord(
+      String connectionName, String tag, RecordDefinitionKey key) {
+    return new DataCatalogTreeNode(Type.VERSION_RECORD, connectionName, null, key, tag);
   }
 
   public Type getType() {
@@ -69,5 +93,13 @@ public final class DataCatalogTreeNode {
 
   public RecordDefinitionKey getRecordKey() {
     return recordKey;
+  }
+
+  public String getVersionTag() {
+    return versionTag;
+  }
+
+  public boolean isReadOnlyVersionView() {
+    return type == Type.VERSION_RECORD || type == Type.VERSION_TAG || type == Type.VERSIONS_ROOT;
   }
 }

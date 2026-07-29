@@ -33,7 +33,11 @@ public final class ValidationReport {
     FIELD_REMOVED,
     FIELD_TYPE_CHANGED,
     PRIMARY_KEY_CHANGED,
-    MAPPING_BROKEN
+    MAPPING_BROKEN,
+    /** Model attribute length/type is narrower than the baseline catalog contract. */
+    MODEL_ATTRIBUTE_NARROWER,
+    /** Physical target table requires DDL to match the model layout. */
+    TARGET_DDL_REQUIRED
   }
 
   public enum IssueSeverity {
@@ -43,12 +47,28 @@ public final class ValidationReport {
   }
 
   public enum ProposalType {
-    REFRESH_CATALOG_CONTRACT,
+    /**
+     * Legacy alias for expanding models/DDL from the catalog field length. Does not change the
+     * catalog.
+     */
     UPDATE_TARGET_COLUMN_LENGTH,
+    /**
+     * Expand mapped model attributes (and optional target DDL) using the catalog field length. The
+     * catalog is never modified.
+     */
+    ALIGN_MODELS_TO_BASELINE,
+    /**
+     * Dangerous: refuse a longer live field and restore catalog values from a catalog version.
+     * Never invent values from models or target tables. Can truncate data at load time.
+     */
+    IGNORE_SOURCE_DRIFT,
+    REFRESH_CATALOG_CONTRACT,
     ADD_NEW_SATELLITE,
     EXTEND_EXISTING_SATELLITE,
     REVIEW_MAPPINGS,
-    BLOCK_UPDATE_UNTIL_RESOLVED
+    BLOCK_UPDATE_UNTIL_RESOLVED,
+    /** Generate a reviewable per-table DDL workflow package without executing it. */
+    GENERATE_TARGET_DDL_PACKAGE
   }
 
   public record RemediationProposal(ProposalType type, String summary, String details) {}

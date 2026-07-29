@@ -241,6 +241,18 @@
       <artifactId>hop-transform-languagemodelchat</artifactId>
       <version>${hop.version}</version>
     </dependency>
+    <!-- Bundled so remediation DDL workflow generation can instantiate ActionSql / ActionSuccess
+         from this plugin's classloader (Hop action plugins are otherwise isolated). -->
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-action-sql</artifactId>
+      <version>${hop.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-action-success</artifactId>
+      <version>${hop.version}</version>
+    </dependency>
 
     <!-- Compile-time deps normally supplied by Hop at runtime -->
     <dependency>

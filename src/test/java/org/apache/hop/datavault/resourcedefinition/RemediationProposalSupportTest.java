@@ -13,7 +13,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package org.apache.hop.datavault.resourcedefinition;
@@ -32,14 +31,14 @@ import org.junit.jupiter.api.Test;
 class RemediationProposalSupportTest {
 
   @Test
-  void problemAProducesTargetColumnUpdateProposalForMappedFieldChange() {
+  void mappedLengthGrowthOffersExpandModelsFromCatalogNeverCatalogRewrite() {
     RecordDefinitionSchemaDiffSupport.SchemaDiff diff =
         new RecordDefinitionSchemaDiffSupport.SchemaDiff(
             List.of(
                 new RecordDefinitionSchemaDiffSupport.FieldChange(
                     RecordDefinitionSchemaDiffSupport.ChangeKind.CHANGED,
                     "last_name",
-                    "length 50 -> 75")));
+                    "expected length 50 → actual length 75")));
 
     List<SourceUsage> usages =
         List.of(
@@ -55,12 +54,56 @@ class RemediationProposalSupportTest {
     ValidationIssue issue = issues.getFirst();
     assertEquals(IssueKind.FIELD_TYPE_CHANGED, issue.kind());
     assertEquals(IssueSeverity.BLOCKING, issue.severity());
+    assertEquals(ProposalType.ALIGN_MODELS_TO_BASELINE, issue.proposals().getFirst().type());
     assertTrue(
         issue.proposals().stream()
-            .anyMatch(proposal -> proposal.type() == ProposalType.UPDATE_TARGET_COLUMN_LENGTH));
+            .noneMatch(p -> p.type() == ProposalType.UPDATE_TARGET_COLUMN_LENGTH),
+        "must not offer catalog-rewriting accept-live");
     assertTrue(
         issue.proposals().stream()
-            .anyMatch(proposal -> proposal.type() == ProposalType.REFRESH_CATALOG_CONTRACT));
+            .noneMatch(p -> p.type() == ProposalType.IGNORE_SOURCE_DRIFT),
+        "must not offer catalog rewrite from version");
+    assertTrue(
+        issue.proposals().stream()
+            .noneMatch(p -> p.type() == ProposalType.REFRESH_CATALOG_CONTRACT),
+        "must not offer catalog refresh");
+    assertTrue(
+        issue.proposals().getFirst().summary().toLowerCase().contains("catalog"),
+        issue.proposals().getFirst().summary());
+    assertTrue(
+        issue.proposals().getFirst().details().toLowerCase().contains("catalog is not changed")
+            || issue.proposals().getFirst().details().toLowerCase().contains("not changed"),
+        issue.proposals().getFirst().details());
+  }
+
+  @Test
+  void whenActualShorterStillOffersExpandModelsFromCatalogNeverShrinkCatalog() {
+    RecordDefinitionSchemaDiffSupport.SchemaDiff diff =
+        new RecordDefinitionSchemaDiffSupport.SchemaDiff(
+            List.of(
+                new RecordDefinitionSchemaDiffSupport.FieldChange(
+                    RecordDefinitionSchemaDiffSupport.ChangeKind.CHANGED,
+                    "address_line1",
+                    "expected length 75 → actual length 50")));
+
+    List<SourceUsage> usages =
+        List.of(
+            SourceUsage.builder()
+                .modelType(SourceUsageIndexBuilder.MODEL_TYPE_DATA_VAULT)
+                .modelName("retail-360")
+                .modelElementName("sat_customer_address")
+                .mappedField("address_line1")
+                .build());
+
+    List<ValidationIssue> issues = RemediationProposalSupport.buildIssues(diff, usages, null);
+    assertEquals(1, issues.size());
+    assertEquals(ProposalType.ALIGN_MODELS_TO_BASELINE, issues.getFirst().proposals().getFirst().type());
+    assertTrue(
+        issues.getFirst().proposals().stream()
+            .noneMatch(p -> p.type() == ProposalType.UPDATE_TARGET_COLUMN_LENGTH));
+    assertTrue(
+        issues.getFirst().proposals().stream()
+            .noneMatch(p -> p.type() == ProposalType.REFRESH_CATALOG_CONTRACT));
   }
 
   @Test
@@ -91,5 +134,15 @@ class RemediationProposalSupportTest {
         issues.stream()
             .flatMap(issue -> issue.proposals().stream())
             .anyMatch(proposal -> proposal.type() == ProposalType.EXTEND_EXISTING_SATELLITE));
+  }
+
+  @Test
+  void isActualLengthLongerDetectsGrowthDirection() {
+    assertTrue(RemediationProposalSupport.isActualLengthLonger("length 50 -> 75"));
+    assertTrue(
+        RemediationProposalSupport.isActualLengthLonger("expected length 50 → actual length 75"));
+    assertTrue(!RemediationProposalSupport.isActualLengthLonger("length 75 -> 50"));
+    assertTrue(
+        !RemediationProposalSupport.isActualLengthLonger("expected length 75 → actual length 50"));
   }
 }

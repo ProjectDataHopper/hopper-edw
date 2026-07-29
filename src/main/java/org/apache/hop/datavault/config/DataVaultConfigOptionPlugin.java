@@ -69,6 +69,8 @@ public class DataVaultConfigOptionPlugin
       "10090-default-workflow-run-configuration";
   private static final String WIDGET_ID_LIVE_UPDATE_POLL_INTERVAL_SECONDS =
       "10100-live-update-poll-interval-seconds";
+  private static final String WIDGET_ID_SCHEMA_REMEDIATION_FOLDER =
+      "10110-schema-remediation-folder";
 
   @GuiWidgetElement(
       id = WIDGET_ID_DRAW_HASH_KEYS_IN_MODEL,
@@ -168,6 +170,19 @@ public class DataVaultConfigOptionPlugin
           "Seconds between live model-update metric refreshes in the Hop GUI (default 10)")
   private String liveUpdatePollIntervalSeconds;
 
+  @GuiWidgetElement(
+      id = WIDGET_ID_SCHEMA_REMEDIATION_FOLDER,
+      parentId = ConfigPluginOptionsTab.GUI_WIDGETS_PARENT_ID,
+      type = GuiElementType.TEXT,
+      variables = true,
+      label = "i18n::DataVaultConfigOptionPlugin.SchemaRemediationFolder.Message",
+      toolTip = "i18n::DataVaultConfigOptionPlugin.SchemaRemediationFolder.ToolTip")
+  @CommandLine.Option(
+      names = {"--dv-schema-remediation-folder"},
+      description =
+          "Root folder for schema-remediation packages (workflow, SQL, HTML/MD report)")
+  private String schemaRemediationFolder;
+
   public static DataVaultConfigOptionPlugin getInstance() {
     DataVaultConfigOptionPlugin instance = new DataVaultConfigOptionPlugin();
     DataVaultConfig config = DataVaultConfigSingleton.getConfig();
@@ -184,6 +199,7 @@ public class DataVaultConfigOptionPlugin
     instance.defaultWorkflowRunConfiguration = config.getDefaultWorkflowRunConfiguration();
     instance.liveUpdatePollIntervalSeconds =
         Integer.toString(config.getLiveUpdatePollIntervalSeconds());
+    instance.schemaRemediationFolder = config.getSchemaRemediationFolderOrDefault();
     return instance;
   }
 
@@ -289,6 +305,10 @@ public class DataVaultConfigOptionPlugin
           liveUpdatePollIntervalSeconds = getTextValue(control);
           config.setLiveUpdatePollIntervalSeconds(
               parseLiveUpdatePollIntervalSeconds(liveUpdatePollIntervalSeconds));
+          break;
+        case WIDGET_ID_SCHEMA_REMEDIATION_FOLDER:
+          schemaRemediationFolder = getTextValue(control);
+          config.setSchemaRemediationFolder(schemaRemediationFolder);
           break;
         default:
           break;

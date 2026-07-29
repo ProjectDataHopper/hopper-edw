@@ -17,13 +17,17 @@
 
 package org.apache.hop.datavault.hopgui.resourcedefinition;
 
+import java.util.List;
 import org.apache.hop.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.resourcedefinition.SchemaCompareMode;
 import org.apache.hop.datavault.resourcedefinition.SchemaImpactSimulationRequest;
 import org.apache.hop.datavault.resourcedefinition.SchemaImpactSimulationResult;
 import org.apache.hop.datavault.resourcedefinition.SchemaImpactSimulationService;
+import org.apache.hop.datavault.resourcedefinition.SchemaValidationReportFileWriter;
+import org.apache.hop.datavault.resourcedefinition.ValidationOptions;
 import org.apache.hop.datavault.resourcedefinition.ValidationReport;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
@@ -45,15 +49,13 @@ public final class ResourceDefinitionValidationGuiSupport {
     }
     Shell shell = hopGui.getShell();
     try {
-      SchemaImpactSimulationResult simulation =
-          runLiveSimulation(group, hopGui.getVariables(), hopGui.getMetadataProvider());
-      ValidationReport report = simulation.validationReport();
-      if (shell != null && !shell.isDisposed()) {
-        ResourceDefinitionValidationResultsDialog dialog =
-            new ResourceDefinitionValidationResultsDialog(shell, hopGui, group, report, simulation);
-        dialog.open();
+      ResourceDefinitionValidationOptionsDialog optionsDialog =
+          new ResourceDefinitionValidationOptionsDialog(shell, hopGui, group);
+      ValidationOptions options = optionsDialog.open();
+      if (options == null) {
+        return null;
       }
-      return report;
+      return validateAndShowResults(hopGui, group, options);
     } catch (Exception e) {
       if (shell != null && !shell.isDisposed()) {
         new ErrorDialog(
@@ -64,6 +66,26 @@ public final class ResourceDefinitionValidationGuiSupport {
       }
       return null;
     }
+  }
+
+  public static ValidationReport validateAndShowResults(
+      HopGui hopGui, ResourceDefinitionGroupMeta group, ValidationOptions options)
+      throws HopException {
+    if (hopGui == null || group == null || options == null) {
+      return null;
+    }
+    Shell shell = hopGui.getShell();
+    SchemaImpactSimulationResult simulation =
+        runSimulation(group, options, hopGui.getVariables(), hopGui.getMetadataProvider());
+    maybeWriteReport(options, simulation, hopGui.getVariables());
+    ValidationReport report = simulation.validationReport();
+    if (shell != null && !shell.isDisposed()) {
+      ResourceDefinitionValidationResultsDialog dialog =
+          new ResourceDefinitionValidationResultsDialog(
+              shell, hopGui, group, report, simulation, options);
+      dialog.open();
+    }
+    return report;
   }
 
   public static ValidationReport validateAndShowResults(
@@ -103,13 +125,39 @@ public final class ResourceDefinitionValidationGuiSupport {
   public static SchemaImpactSimulationResult runLiveSimulation(
       ResourceDefinitionGroupMeta group, IVariables variables, IHopMetadataProvider metadataProvider)
       throws HopException {
+    return runSimulation(group, ValidationOptions.defaults(), variables, metadataProvider);
+  }
+
+  public static SchemaImpactSimulationResult runSimulation(
+      ResourceDefinitionGroupMeta group,
+      ValidationOptions options,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider)
+      throws HopException {
+    ValidationOptions effective = options != null ? options : ValidationOptions.defaults();
     SchemaImpactSimulationRequest request =
-        SchemaImpactSimulationRequest.builder()
-            .resourceDefinitionGroup(group != null ? group.getName() : null)
-            .compareMode(SchemaCompareMode.LIVE_SOURCE)
-            .includeImpact(true)
-            .detailedDataTypeChecking(group == null || group.isDetailedDataTypeChecking())
-            .build();
+        effective.toSimulationRequest(
+            group != null ? group.getName() : null,
+            group == null || group.isDetailedDataTypeChecking());
     return SchemaImpactSimulationService.run(request, group, variables, metadataProvider);
+  }
+
+  private static void maybeWriteReport(
+      ValidationOptions options, SchemaImpactSimulationResult simulation, IVariables variables)
+      throws HopException {
+    if (options == null || !options.writeReport() || Utils.isEmpty(options.reportOutputPath())) {
+      return;
+    }
+    List<String> written =
+        SchemaValidationReportFileWriter.write(
+            options.reportOutputPath(),
+            options.reportFileBaseName(),
+            simulation,
+            options.reportFormat(),
+            variables);
+    // Paths are available to the results dialog via the simulation/report; no UI toast required.
+    if (written != null) {
+      written.size(); // touch for linters; silent success
+    }
   }
 }

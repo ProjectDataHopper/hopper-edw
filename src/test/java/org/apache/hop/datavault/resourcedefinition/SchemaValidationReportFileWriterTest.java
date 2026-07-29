@@ -60,8 +60,12 @@ class SchemaValidationReportFileWriterTest {
     assertTrue(Files.isRegularFile(md), paths.toString());
     assertTrue(Files.isRegularFile(html), paths.toString());
     String mdContent = Files.readString(md);
-    assertTrue(mdContent.contains("Data Vault DDL Validation Report"), mdContent);
+    assertTrue(
+        mdContent.contains("Data Vault Resource Definition Validation Report")
+            || mdContent.contains("Data Vault DDL Validation Report"),
+        mdContent);
     assertTrue(mdContent.contains("PASS") || mdContent.contains("✅"), mdContent);
+    assertTrue(mdContent.contains("Baseline"), mdContent);
   }
 
   @Test

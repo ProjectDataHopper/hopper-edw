@@ -31,6 +31,9 @@ public class DataVaultConfig {
   public static final String HOP_CONFIG_DATA_VAULT_CONFIG_KEY = "dataVaultConfig";
   public static final int DEFAULT_MAX_UNDO_OPERATIONS = 200;
   public static final int DEFAULT_LIVE_UPDATE_POLL_INTERVAL_SECONDS = 10;
+  /** Default root for named schema-remediation packages (workflow, SQL, report). */
+  public static final String DEFAULT_SCHEMA_REMEDIATION_FOLDER =
+      "${PROJECT_HOME}/workflows/schema-remediation";
 
   private boolean drawingHashKeysInModel;
   private int maxUndoOperations = DEFAULT_MAX_UNDO_OPERATIONS;
@@ -41,6 +44,7 @@ public class DataVaultConfig {
   private String defaultWorkflowRunConfiguration;
   private int liveUpdatePollIntervalSeconds = DEFAULT_LIVE_UPDATE_POLL_INTERVAL_SECONDS;
   private ExecutionMapLineStyle executionMapLineStyle = ExecutionMapLineStyle.DIRECT_CENTER;
+  private String schemaRemediationFolder = DEFAULT_SCHEMA_REMEDIATION_FOLDER;
 
   public DataVaultConfig() {
     drawingHashKeysInModel = true;
@@ -57,6 +61,20 @@ public class DataVaultConfig {
     defaultWorkflowRunConfiguration = config.defaultWorkflowRunConfiguration;
     setLiveUpdatePollIntervalSeconds(config.getLiveUpdatePollIntervalSeconds());
     setExecutionMapLineStyle(config.getExecutionMapLineStyleOrDefault());
+    setSchemaRemediationFolder(config.getSchemaRemediationFolderOrDefault());
+  }
+
+  public String getSchemaRemediationFolderOrDefault() {
+    return schemaRemediationFolder != null && !schemaRemediationFolder.isBlank()
+        ? schemaRemediationFolder
+        : DEFAULT_SCHEMA_REMEDIATION_FOLDER;
+  }
+
+  public void setSchemaRemediationFolder(String schemaRemediationFolder) {
+    this.schemaRemediationFolder =
+        schemaRemediationFolder != null && !schemaRemediationFolder.isBlank()
+            ? schemaRemediationFolder
+            : DEFAULT_SCHEMA_REMEDIATION_FOLDER;
   }
 
   public DmDefaultFieldNames getDimensionalDefaultFieldNames() {

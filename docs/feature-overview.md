@@ -102,7 +102,7 @@ Visual modeler for hubs, links, and satellites with embedded configuration (targ
 
 **Check model** in the GUI and model checks in update actions share one engine: structural rules plus optional **detailed data type checking** against live source schemas.
 
-Catalog **resource definition validation** adds feed-level checks with remediation proposals, acknowledgements, and **downstream impact** (Source→DV→BV→DM). From a **Resource definition group** you can **Tag catalog version**, **List catalog versions**, and **Validate sources** interactively.
+Catalog **resource definition validation** adds feed-level checks with remediation proposals, acknowledgements, and **downstream impact** (Source→DV→BV→DM). From a **Resource definition group** you can **Tag catalog version**, **List catalog versions**, and **Validate sources** (options dialog for baseline + axes). Length remediation expands models and multi-layer DDL (DV/BV/DM) **from the catalog length** without rewriting the catalog. Retail sample package: `workflows/schema-remediation/accept-address_line1/` (see [resource-definition-validation.adoc](resource-definition-validation.adoc)).
 
 The **Validate resource definitions** workflow action is the **CI/CD schema gate**:
 

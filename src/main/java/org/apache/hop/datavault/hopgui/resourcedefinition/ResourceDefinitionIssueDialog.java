@@ -18,27 +18,26 @@
 
 package org.apache.hop.datavault.hopgui.resourcedefinition;
 
-import org.apache.hop.catalog.hopgui.perspective.DataCatalogPerspective;
+import java.util.List;
 import org.apache.hop.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.apache.hop.catalog.model.RecordDefinition;
-import org.apache.hop.catalog.registry.RecordDefinitionRegistry;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
-import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
+import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.datavault.resourcedefinition.RemediationProposalApplySupport;
 import org.apache.hop.datavault.resourcedefinition.RemediationProposalApplySupport.ApplyResult;
 import org.apache.hop.datavault.resourcedefinition.RemediationProposalApplySupport.ProposalContext;
-import java.util.List;
-import org.apache.hop.datavault.resourcedefinition.SourceUsage;
-import org.apache.hop.datavault.resourcedefinition.ValidationAcknowledgementSupport;
+import org.apache.hop.datavault.resourcedefinition.ValidationReport.IssueSeverity;
+import org.apache.hop.datavault.resourcedefinition.ValidationReport.ProposalType;
 import org.apache.hop.datavault.resourcedefinition.ValidationReport.RecordDefinitionValidation;
 import org.apache.hop.datavault.resourcedefinition.ValidationReport.RemediationProposal;
 import org.apache.hop.datavault.resourcedefinition.ValidationReport.ValidationIssue;
 import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
+import org.apache.hop.ui.core.dialog.EnterStringDialog;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.core.widget.ColumnInfo;
@@ -46,19 +45,21 @@ import org.apache.hop.ui.core.widget.TableView;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
-import org.apache.hop.datavault.resourcedefinition.ValidationReport.IssueSeverity;
-import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
-import org.apache.hop.datavault.hopgui.help.HelpTopics;
 
-/** Shows one validation issue, its usages, proposals, and acknowledgement actions. */
+/**
+ * Remediation proposals dialog for a single validation issue: read-only summary list on top, full
+ * proposal details below (~70%), with always-visible Apply / Close footer buttons.
+ */
 public final class ResourceDefinitionIssueDialog {
 
   private static final Class<?> PKG = ResourceDefinitionIssueDialog.class;
@@ -72,6 +73,11 @@ public final class ResourceDefinitionIssueDialog {
   private final Runnable onChanged;
 
   private RecordDefinition definition;
+  private Shell shell;
+  private TableView wProposals;
+  private Text wDetailBody;
+  private Button wApplyProposal;
+  private List<RemediationProposal> proposals = List.of();
 
   public ResourceDefinitionIssueDialog(
       Shell parent,
@@ -92,7 +98,9 @@ public final class ResourceDefinitionIssueDialog {
 
   public void open() {
     try {
-      definition = loadDefinition();
+      definition =
+          ValidationIssueGuiActions.loadDefinition(
+              validation, hopGui.getVariables(), hopGui.getMetadataProvider());
     } catch (HopException e) {
       new ErrorDialog(
           parent,
@@ -102,7 +110,7 @@ public final class ResourceDefinitionIssueDialog {
       return;
     }
 
-    Shell shell = new Shell(parent, BaseDialog.getDefaultDialogStyle() | SWT.RESIZE | SWT.MAX);
+    shell = new Shell(parent, BaseDialog.getDefaultDialogStyle() | SWT.RESIZE | SWT.MAX);
     PropsUi.setLook(shell);
     shell.setText(
         BaseMessages.getString(
@@ -113,6 +121,22 @@ public final class ResourceDefinitionIssueDialog {
 
     int margin = PropsUi.getMargin();
 
+    // Footer first so content can attach above always-visible buttons.
+    wApplyProposal = new Button(shell, SWT.PUSH);
+    wApplyProposal.setText(
+        BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.ApplyProposal.Label"));
+    wApplyProposal.addListener(SWT.Selection, e -> applySelectedProposal());
+    wApplyProposal.setEnabled(false);
+
+    Button wClose = new Button(shell, SWT.PUSH);
+    wClose.setText(BaseMessages.getString(PKG, "System.Button.Close"));
+    wClose.addListener(SWT.Selection, e -> shell.dispose());
+
+    DialogHelpSupport.createHelpButton(shell, HelpTopics.RESOURCE_DEFINITION_ISSUE);
+
+    BaseTransformDialog.positionBottomButtons(
+        shell, new Button[] {wApplyProposal, wClose}, margin, null);
+
     Label wlHeader = new Label(shell, SWT.LEFT | SWT.WRAP);
     PropsUi.setLook(wlHeader);
     wlHeader.setText(buildHeaderText());
@@ -122,98 +146,143 @@ public final class ResourceDefinitionIssueDialog {
     fdlHeader.top = new FormAttachment(0, margin);
     wlHeader.setLayoutData(fdlHeader);
 
-    Label wlUsages = new Label(shell, SWT.LEFT);
-    PropsUi.setLook(wlUsages);
-    wlUsages.setText(BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.Usages.Label"));
-    FormData fdlUsages = new FormData();
-    fdlUsages.left = new FormAttachment(0, margin);
-    fdlUsages.top = new FormAttachment(wlHeader, margin);
-    wlUsages.setLayoutData(fdlUsages);
-
-    Text wUsages = new Text(shell, SWT.MULTI | SWT.BORDER | SWT.READ_ONLY | SWT.V_SCROLL | SWT.WRAP);
-    PropsUi.setLook(wUsages);
-    wUsages.setText(buildUsagesText());
-    FormData fdUsages = new FormData();
-    fdUsages.left = new FormAttachment(0, margin);
-    fdUsages.right = new FormAttachment(100, -margin);
-    fdUsages.top = new FormAttachment(wlUsages, margin);
-    fdUsages.height = 80;
-    wUsages.setLayoutData(fdUsages);
-
     Label wlProposals = new Label(shell, SWT.LEFT);
     PropsUi.setLook(wlProposals);
-    wlProposals.setText(BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.Proposals.Label"));
+    wlProposals.setText(
+        BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.Proposals.Label"));
     FormData fdlProposals = new FormData();
     fdlProposals.left = new FormAttachment(0, margin);
-    fdlProposals.top = new FormAttachment(wUsages, margin);
+    fdlProposals.top = new FormAttachment(wlHeader, margin);
     wlProposals.setLayoutData(fdlProposals);
 
-    ColumnInfo[] proposalColumns =
-        new ColumnInfo[] {
-          new ColumnInfo(
-              BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.Proposals.Summary.Column"),
-              ColumnInfo.COLUMN_TYPE_TEXT,
-              false),
-          new ColumnInfo(
-              BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.Proposals.Details.Column"),
-              ColumnInfo.COLUMN_TYPE_TEXT,
-              false)
-        };
-    TableView wProposals =
+    SashForm sash = new SashForm(shell, SWT.VERTICAL);
+    PropsUi.setLook(sash);
+    FormData fdSash = new FormData();
+    fdSash.left = new FormAttachment(0, margin);
+    fdSash.right = new FormAttachment(100, -margin);
+    fdSash.top = new FormAttachment(wlProposals, margin / 2);
+    fdSash.bottom = new FormAttachment(wApplyProposal, -2 * margin);
+    sash.setLayoutData(fdSash);
+
+    buildSummaryTable(sash);
+    buildDetailsPane(sash);
+    sash.setWeights(30, 70);
+
+    populateProposals();
+    wProposals.getTable().addListener(SWT.Selection, e -> showSelectedProposalDetails());
+    wProposals.getTable().addListener(SWT.DefaultSelection, e -> applySelectedProposal());
+
+    shell.setMinimumSize(720, 520);
+    BaseTransformDialog.setSize(shell, 800, 600);
+    shell.open();
+  }
+
+  private void buildSummaryTable(Composite parent) {
+    ColumnInfo summaryColumn =
+        new ColumnInfo(
+            BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.Proposals.Summary.Column"),
+            ColumnInfo.COLUMN_TYPE_TEXT,
+            false);
+    summaryColumn.setReadOnly(true);
+
+    wProposals =
         new TableView(
             hopGui.getVariables(),
-            shell,
+            parent,
             SWT.FULL_SELECTION | SWT.SINGLE | SWT.BORDER,
-            proposalColumns,
+            new ColumnInfo[] {summaryColumn},
             1,
             null,
             PropsUi.getInstance());
-    populateProposals(wProposals);
-    FormData fdProposals = new FormData();
-    fdProposals.left = new FormAttachment(0, margin);
-    fdProposals.right = new FormAttachment(100, -margin);
-    fdProposals.top = new FormAttachment(wlProposals, margin);
-    fdProposals.bottom = new FormAttachment(100, -90);
-    wProposals.setLayoutData(fdProposals);
+    wProposals.setReadonly(true);
+  }
 
-    Button wApplyProposal = new Button(shell, SWT.PUSH);
-    wApplyProposal.setText(
-        BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.ApplyProposal.Label"));
-    wApplyProposal.addListener(
-        SWT.Selection,
-        e -> applySelectedProposal(shell, wProposals));
+  private void buildDetailsPane(Composite parent) {
+    Composite details = new Composite(parent, SWT.NONE);
+    PropsUi.setLook(details);
+    details.setLayout(new FormLayout());
+    int margin = PropsUi.getMargin();
 
-    Button wAcknowledge = new Button(shell, SWT.PUSH);
-    wAcknowledge.setText(
-        BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.Acknowledge.Label"));
-    wAcknowledge.setEnabled(!acknowledged);
-    wAcknowledge.addListener(SWT.Selection, e -> acknowledgeIssue(shell));
+    Label wlDetails = new Label(details, SWT.LEFT);
+    PropsUi.setLook(wlDetails);
+    wlDetails.setText(
+        BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.Details.Label"));
+    FormData fdlDetails = new FormData();
+    fdlDetails.left = new FormAttachment(0, 0);
+    fdlDetails.top = new FormAttachment(0, 0);
+    fdlDetails.right = new FormAttachment(100, 0);
+    wlDetails.setLayoutData(fdlDetails);
 
-    Button wRevoke = new Button(shell, SWT.PUSH);
-    wRevoke.setText(BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.Revoke.Label"));
-    wRevoke.setEnabled(acknowledged);
-    wRevoke.addListener(SWT.Selection, e -> revokeAcknowledgement(shell));
+    wDetailBody =
+        new Text(details, SWT.MULTI | SWT.BORDER | SWT.READ_ONLY | SWT.WRAP | SWT.V_SCROLL);
+    PropsUi.setLook(wDetailBody);
+    FormData fdBody = new FormData();
+    fdBody.left = new FormAttachment(0, 0);
+    fdBody.right = new FormAttachment(100, 0);
+    fdBody.top = new FormAttachment(wlDetails, margin / 2);
+    fdBody.bottom = new FormAttachment(100, 0);
+    wDetailBody.setLayoutData(fdBody);
 
-    Button wOpenRecord = new Button(shell, SWT.PUSH);
-    wOpenRecord.setText(
-        BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.OpenRecord.Label"));
-    wOpenRecord.addListener(SWT.Selection, e -> openRecordDefinition());
+    clearDetails();
+  }
 
-    Button wClose = new Button(shell, SWT.PUSH);
-    wClose.setText(BaseMessages.getString(PKG, "System.Button.Close"));
-    wClose.addListener(SWT.Selection, e -> shell.dispose());
+  private void populateProposals() {
+    proposals =
+        issue.proposals() != null
+            ? issue.proposals().stream().filter(p -> p != null).toList()
+            : List.of();
 
-    DialogHelpSupport.createHelpButton(shell, HelpTopics.RESOURCE_DEFINITION_ISSUE);
+    wProposals.clearAll(false);
+    for (int i = 0; i < proposals.size(); i++) {
+      RemediationProposal proposal = proposals.get(i);
+      TableItem item =
+          i == 0
+              ? wProposals.getTable().getItem(0)
+              : new TableItem(wProposals.getTable(), SWT.NONE);
+      item.setText(1, Const.NVL(proposal.summary(), ""));
+    }
+    wProposals.removeEmptyRows();
+    wProposals.setRowNums();
+    wProposals.optWidth(true);
 
-    BaseTransformDialog.positionBottomButtons(
-        shell,
-        new Button[] {wApplyProposal, wAcknowledge, wRevoke, wOpenRecord, wClose},
-        margin,
-        wProposals);
+    if (!proposals.isEmpty()) {
+      wProposals.getTable().setSelection(0);
+      showSelectedProposalDetails();
+    } else {
+      clearDetails();
+    }
+  }
 
-    shell.setMinimumSize(720, 520);
-    shell.pack();
-    shell.open();
+  private void showSelectedProposalDetails() {
+    int index = wProposals.getTable().getSelectionIndex();
+    if (index < 0 || index >= proposals.size()) {
+      clearDetails();
+      return;
+    }
+    RemediationProposal proposal = proposals.get(index);
+    String typeName = proposal.type() != null ? proposal.type().name() : "";
+    String details = Const.NVL(proposal.details(), "");
+    wDetailBody.setText(
+        BaseMessages.getString(
+            PKG,
+            "ResourceDefinitionIssueDialog.Details.Body",
+            Const.NVL(proposal.summary(), ""),
+            typeName,
+            details));
+
+    boolean canApply =
+        proposal.type() != null && proposal.type() != ProposalType.BLOCK_UPDATE_UNTIL_RESOLVED;
+    wApplyProposal.setEnabled(canApply);
+  }
+
+  private void clearDetails() {
+    if (wDetailBody != null && !wDetailBody.isDisposed()) {
+      wDetailBody.setText(
+          BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.Details.NoneSelected"));
+    }
+    if (wApplyProposal != null && !wApplyProposal.isDisposed()) {
+      wApplyProposal.setEnabled(false);
+    }
   }
 
   private String buildHeaderText() {
@@ -224,85 +293,57 @@ public final class ResourceDefinitionIssueDialog {
     String header =
         BaseMessages.getString(
             PKG,
-            "ResourceDefinitionIssueDialog.Header",
-            issue.severity(),
-            issue.kind(),
+            "ResourceDefinitionIssueDialog.Header.Short",
+            issue.severity() != null ? issue.severity().name() : "",
+            issue.kind() != null ? issue.kind().name() : "",
             Const.NVL(issue.fieldName(), ""),
-            issue.message(),
-            keyLabel,
-            Const.NVL(validation.sourceType(), ""),
-            acknowledged
-                ? BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.Acknowledged.Yes")
-                : BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.Acknowledged.No"));
-    if (!Utils.isEmpty(issue.downstreamImpact())) {
+            Const.NVL(issue.message(), ""),
+            keyLabel);
+    if (acknowledged) {
       header =
           header
               + "\n"
-              + BaseMessages.getString(
-                  PKG,
-                  "ResourceDefinitionIssueDialog.ConfirmApply.Impact",
-                  issue.downstreamImpact());
+              + BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.Acknowledged.Note");
     }
     return header;
   }
 
-  private String buildUsagesText() {
-    String fieldName = issue.fieldName();
-    StringBuilder builder = new StringBuilder();
-    for (SourceUsage usage : validation.usages()) {
-      if (!Utils.isEmpty(fieldName) && !usage.mappedFields().contains(fieldName)) {
-        continue;
-      }
-      if (builder.length() > 0) {
-        builder.append('\n');
-      }
-      builder.append(
-          BaseMessages.getString(
-              PKG,
-              "ResourceDefinitionIssueDialog.Usage.Line",
-              usage.modelType(),
-              usage.modelName(),
-              usage.modelElementName()));
+  private void applySelectedProposal() {
+    int selectionIndex = wProposals.getTable().getSelectionIndex();
+    if (selectionIndex < 0 || selectionIndex >= proposals.size()) {
+      return;
     }
-    if (builder.length() == 0) {
-      return BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.NoUsages");
+    RemediationProposal proposal = proposals.get(selectionIndex);
+    if (proposal.type() == ProposalType.BLOCK_UPDATE_UNTIL_RESOLVED) {
+      return;
     }
-    return builder.toString();
-  }
+    if (!confirmDestructiveApply(proposal)) {
+      return;
+    }
 
-  private void populateProposals(TableView table) {
-    table.clearAll(false);
-    List<RemediationProposal> proposals =
-        issue.proposals() != null ? issue.proposals() : List.of();
-    for (int i = 0; i < proposals.size(); i++) {
-      RemediationProposal proposal = proposals.get(i);
-      if (proposal == null) {
-        continue;
+    String remediationName = null;
+    if (proposal.type() == ProposalType.UPDATE_TARGET_COLUMN_LENGTH
+        || proposal.type() == ProposalType.ALIGN_MODELS_TO_BASELINE
+        || proposal.type() == ProposalType.GENERATE_TARGET_DDL_PACKAGE) {
+      remediationName = askRemediationName();
+      if (Utils.isEmpty(remediationName)) {
+        return;
       }
-      TableItem item =
-          i == 0 ? table.getTable().getItem(0) : new TableItem(table.getTable(), SWT.NONE);
-      item.setText(1, proposal.summary());
-      item.setText(2, Const.NVL(proposal.details(), ""));
     }
-    table.removeEmptyRows();
-    table.setRowNums();
-    table.optWidth(true);
-  }
 
-  private void applySelectedProposal(Shell shell, TableView proposalsTable) {
-    int selectionIndex = proposalsTable.getTable().getSelectionIndex();
-    if (selectionIndex < 0 || issue.proposals() == null || selectionIndex >= issue.proposals().size()) {
-      return;
+    // Catalog is never rewritten for expand-models remediation. Version tag only for legacy ignore.
+    String baselineVersionTag = null;
+    if (proposal.type() == ProposalType.IGNORE_SOURCE_DRIFT) {
+      baselineVersionTag = askBaselineVersionTag();
+      if (Utils.isEmpty(baselineVersionTag)) {
+        return;
+      }
     }
-    RemediationProposal proposal = issue.proposals().get(selectionIndex);
-    if (proposal.type() == org.apache.hop.datavault.resourcedefinition.ValidationReport.ProposalType.BLOCK_UPDATE_UNTIL_RESOLVED) {
-      return;
-    }
-    if (!confirmDestructiveApply(shell, proposal)) {
-      return;
-    }
+
     try {
-      reloadDefinition();
+      definition =
+          ValidationIssueGuiActions.loadDefinition(
+              validation, hopGui.getVariables(), hopGui.getMetadataProvider());
       ApplyResult result =
           RemediationProposalApplySupport.apply(
               new ProposalContext(
@@ -313,13 +354,14 @@ public final class ResourceDefinitionIssueDialog {
                   issue,
                   proposal,
                   hopGui.getVariables(),
-                  hopGui.getMetadataProvider()));
+                  hopGui.getMetadataProvider(),
+                  remediationName,
+                  baselineVersionTag));
       if (onChanged != null) {
         onChanged.run();
       }
-      if (result.status() == RemediationProposalApplySupport.ApplyStatus.APPLIED) {
-        shell.dispose();
-      }
+      showApplyResult(result);
+      // Keep the dialog open after apply so the admin can re-read the report text if needed.
     } catch (Exception e) {
       new ErrorDialog(
           shell,
@@ -329,30 +371,75 @@ public final class ResourceDefinitionIssueDialog {
     }
   }
 
+  private String askRemediationName() {
+    String suggested =
+        "accept-"
+            + (issue != null && !Utils.isEmpty(issue.fieldName()) ? issue.fieldName() : "field");
+    EnterStringDialog dialog =
+        new EnterStringDialog(
+            shell,
+            suggested,
+            BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.RemediationName.Title"),
+            BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.RemediationName.Message"));
+    return dialog.open();
+  }
+
   /**
-   * Dry-run style confirmation for proposals that change catalog contracts or model mappings when
-   * the issue is blocking or has known downstream impact.
+   * Required catalog version tag used as the only legal source of field values when rejecting live
+   * source drift (never models or target tables).
    */
-  private boolean confirmDestructiveApply(Shell shell, RemediationProposal proposal) {
-    boolean destructive =
-        proposal.type()
-                == org.apache.hop.datavault.resourcedefinition.ValidationReport.ProposalType
-                    .REFRESH_CATALOG_CONTRACT
-            || proposal.type()
-                == org.apache.hop.datavault.resourcedefinition.ValidationReport.ProposalType
-                    .UPDATE_TARGET_COLUMN_LENGTH
-            || proposal.type()
-                == org.apache.hop.datavault.resourcedefinition.ValidationReport.ProposalType
-                    .EXTEND_EXISTING_SATELLITE
-            || proposal.type()
-                == org.apache.hop.datavault.resourcedefinition.ValidationReport.ProposalType
-                    .ADD_NEW_SATELLITE;
-    if (!destructive) {
-      return true;
+  private String askBaselineVersionTag() {
+    EnterStringDialog dialog =
+        new EnterStringDialog(
+            shell,
+            "",
+            BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.BaselineVersion.Title"),
+            BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.BaselineVersion.Message"));
+    dialog.setMandatory(true);
+    return dialog.open();
+  }
+
+  private String askOptionalBaselineVersionTag() {
+    EnterStringDialog dialog =
+        new EnterStringDialog(
+            shell,
+            "",
+            BaseMessages.getString(
+                PKG, "ResourceDefinitionIssueDialog.BaselineVersion.Optional.Title"),
+            BaseMessages.getString(
+                PKG, "ResourceDefinitionIssueDialog.BaselineVersion.Optional.Message"));
+    String tag = dialog.open();
+    return tag != null ? tag.trim() : null;
+  }
+
+  private void showApplyResult(ApplyResult result) {
+    if (result == null) {
+      return;
     }
-    boolean blocking = issue.severity() == IssueSeverity.BLOCKING;
-    boolean hasImpact = !Utils.isEmpty(issue.downstreamImpact());
-    if (!blocking && !hasImpact) {
+    int style =
+        result.status() == RemediationProposalApplySupport.ApplyStatus.APPLIED
+            ? SWT.ICON_INFORMATION
+            : SWT.ICON_WARNING;
+    MessageBox box = new MessageBox(shell, style | SWT.OK | SWT.PRIMARY_MODAL);
+    box.setText(BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.ApplyResult.Title"));
+    box.setMessage(Const.NVL(result.message(), result.status().name()));
+    box.open();
+  }
+
+  /**
+   * Confirmation for proposals that change catalog contracts, model metadata, or generate DDL
+   * workflows. Lists known model usages and states that physical DDL is not executed immediately.
+   */
+  private boolean confirmDestructiveApply(RemediationProposal proposal) {
+    boolean destructive =
+        proposal.type() == ProposalType.REFRESH_CATALOG_CONTRACT
+            || proposal.type() == ProposalType.UPDATE_TARGET_COLUMN_LENGTH
+            || proposal.type() == ProposalType.ALIGN_MODELS_TO_BASELINE
+            || proposal.type() == ProposalType.IGNORE_SOURCE_DRIFT
+            || proposal.type() == ProposalType.GENERATE_TARGET_DDL_PACKAGE
+            || proposal.type() == ProposalType.EXTEND_EXISTING_SATELLITE
+            || proposal.type() == ProposalType.ADD_NEW_SATELLITE;
+    if (!destructive) {
       return true;
     }
 
@@ -362,13 +449,41 @@ public final class ResourceDefinitionIssueDialog {
             BaseMessages.getString(
                 PKG, "ResourceDefinitionIssueDialog.ConfirmApply.Message", proposal.summary()))
         .append('\n');
-    if (blocking) {
+
+    if (proposal.type() == ProposalType.IGNORE_SOURCE_DRIFT) {
+      message
+          .append('\n')
+          .append(
+              BaseMessages.getString(
+                  PKG, "ResourceDefinitionIssueDialog.ConfirmApply.IgnoreDriftDanger"))
+          .append('\n');
+    } else if (proposal.type() == ProposalType.UPDATE_TARGET_COLUMN_LENGTH
+        || proposal.type() == ProposalType.ALIGN_MODELS_TO_BASELINE) {
+      message
+          .append('\n')
+          .append(
+              BaseMessages.getString(
+                  PKG, "ResourceDefinitionIssueDialog.ConfirmApply.AlignModelsExplain"))
+          .append('\n');
+    }
+
+    if (issue.severity() == IssueSeverity.BLOCKING
+        && proposal.type() != ProposalType.IGNORE_SOURCE_DRIFT) {
       message
           .append('\n')
           .append(BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.ConfirmApply.Blocking"))
           .append('\n');
     }
-    if (hasImpact) {
+    String usageTargets = formatUsageTargets();
+    if (!Utils.isEmpty(usageTargets)) {
+      message
+          .append('\n')
+          .append(
+              BaseMessages.getString(
+                  PKG, "ResourceDefinitionIssueDialog.ConfirmApply.Targets", usageTargets))
+          .append('\n');
+    }
+    if (!Utils.isEmpty(issue.downstreamImpact())) {
       message
           .append('\n')
           .append(
@@ -378,13 +493,21 @@ public final class ResourceDefinitionIssueDialog {
                   issue.downstreamImpact()))
           .append('\n');
     }
-    if (blocking) {
+    if (proposal.type() == ProposalType.UPDATE_TARGET_COLUMN_LENGTH
+        || proposal.type() == ProposalType.ALIGN_MODELS_TO_BASELINE
+        || proposal.type() == ProposalType.GENERATE_TARGET_DDL_PACKAGE) {
       message
           .append('\n')
           .append(
               BaseMessages.getString(
-                  PKG, "ResourceDefinitionIssueDialog.ConfirmApply.AcceptDestructive"));
+                  PKG, "ResourceDefinitionIssueDialog.ConfirmApply.NoPhysicalExecute"))
+          .append('\n');
     }
+    message
+        .append('\n')
+        .append(
+            BaseMessages.getString(
+                PKG, "ResourceDefinitionIssueDialog.ConfirmApply.AcceptDestructive"));
 
     MessageBox box =
         new MessageBox(shell, SWT.ICON_WARNING | SWT.YES | SWT.NO | SWT.PRIMARY_MODAL);
@@ -393,87 +516,33 @@ public final class ResourceDefinitionIssueDialog {
     return box.open() == SWT.YES;
   }
 
-  private void acknowledgeIssue(Shell shell) {
-    AcknowledgeValidationIssueDialog dialog =
-        new AcknowledgeValidationIssueDialog(shell, issue.message());
-    if (!dialog.openConfirmed()) {
-      return;
+  private String formatUsageTargets() {
+    if (validation == null || validation.usages() == null || validation.usages().isEmpty()) {
+      return "";
     }
-    try {
-      reloadDefinition();
-      ValidationAcknowledgementSupport.acknowledge(
-          validation.catalogConnection(),
-          definition,
-          issue.issueId(),
-          dialog.getComment(),
-          ValidationAcknowledgementSupport.resolveAcknowledgedBy(),
-          hopGui.getVariables(),
-          hopGui.getMetadataProvider());
-      notifyChanged();
-      shell.dispose();
-    } catch (HopException e) {
-      new ErrorDialog(
-          shell,
-          BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.Error.Title"),
-          BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.Error.Acknowledge"),
-          e);
-    }
-  }
-
-  private void revokeAcknowledgement(Shell shell) {
-    try {
-      reloadDefinition();
-      ValidationAcknowledgementSupport.revoke(
-          validation.catalogConnection(),
-          definition,
-          issue.issueId(),
-          hopGui.getVariables(),
-          hopGui.getMetadataProvider());
-      notifyChanged();
-      shell.dispose();
-    } catch (HopException e) {
-      new ErrorDialog(
-          shell,
-          BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.Error.Title"),
-          BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.Error.Revoke"),
-          e);
-    }
-  }
-
-  private void openRecordDefinition() {
-    try {
-      DataCatalogPerspective perspective = DataCatalogPerspective.getInstance();
-      if (perspective != null && validation.key() != null) {
-        perspective.selectRecordDefinition(validation.catalogConnection(), validation.key());
+    String fieldName = issue != null ? issue.fieldName() : null;
+    StringBuilder builder = new StringBuilder();
+    for (org.apache.hop.datavault.resourcedefinition.SourceUsage usage : validation.usages()) {
+      if (usage == null) {
+        continue;
       }
-    } catch (HopException e) {
-      new ErrorDialog(
-          parent,
-          BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.Error.Title"),
-          BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.Error.OpenRecord"),
-          e);
+      if (!Utils.isEmpty(fieldName)
+          && usage.mappedFields() != null
+          && !usage.mappedFields().isEmpty()
+          && usage.mappedFields().stream().noneMatch(fieldName::equalsIgnoreCase)) {
+        continue;
+      }
+      if (builder.length() > 0) {
+        builder.append('\n');
+      }
+      builder
+          .append("- ")
+          .append(Const.NVL(usage.modelType(), "?"))
+          .append(" / ")
+          .append(Const.NVL(usage.modelName(), "?"))
+          .append(" / ")
+          .append(Const.NVL(usage.modelElementName(), "?"));
     }
-  }
-
-  private RecordDefinition loadDefinition() throws HopException {
-    if (validation.key() == null || Utils.isEmpty(validation.catalogConnection())) {
-      return null;
-    }
-    return RecordDefinitionRegistry.getInstance()
-        .read(
-            validation.catalogConnection(),
-            validation.key(),
-            hopGui.getVariables(),
-            hopGui.getMetadataProvider());
-  }
-
-  private void reloadDefinition() throws HopException {
-    definition = loadDefinition();
-  }
-
-  private void notifyChanged() {
-    if (onChanged != null) {
-      onChanged.run();
-    }
+    return builder.toString();
   }
 }

@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.hop.catalog.discovery.RecordDefinitionDiscoveryService;
 import org.apache.hop.catalog.discovery.RecordDefinitionPhysicalRefSupport;
 import org.apache.hop.catalog.discovery.RecordDefinitionSchemaDiffSupport;
@@ -124,6 +125,35 @@ public final class SchemaImpactSimulationService {
                   metadataProvider);
         };
 
+    // Optional second axis: working catalog vs version baseline while also checking live sources.
+    boolean alsoVersion =
+        request != null
+            && request.checkCatalogVsVersion()
+            && mode == SchemaCompareMode.LIVE_SOURCE
+            && baselineVersionTag != null;
+    if (alsoVersion) {
+      ValidationReport versionReport =
+          simulateWorkingVsVersion(
+              models, baselineVersionTag, detailed, variables, metadataProvider);
+      report = mergeReports(report, versionReport);
+    }
+
+    // Baseline for model/target axes: version tag when set, else working catalog (null tag).
+    String contractBaselineTag =
+        baselineVersionTag != null
+            ? baselineVersionTag
+            : mode == SchemaCompareMode.LIVE_SOURCE ? catalogVersionTag : null;
+
+    if (request != null && request.checkTargetModels()) {
+      report =
+          ModelContractValidationSupport.enrich(
+              report, models, contractBaselineTag, variables, metadataProvider);
+    }
+    if (request != null && request.checkTargetDatabases()) {
+      report =
+          TargetSchemaValidationSupport.enrich(report, models, variables, metadataProvider);
+    }
+
     ImpactGraph graph = ImpactGraph.empty();
     if (includeImpact) {
       graph = ImpactGraphBuilder.build(models, variables);
@@ -136,7 +166,7 @@ public final class SchemaImpactSimulationService {
             : mode == SchemaCompareMode.VERSION_VS_VERSION ? catalogVersionTag : null;
     String baselineUsed =
         mode == SchemaCompareMode.LIVE_SOURCE
-            ? catalogVersionTag
+            ? (catalogVersionTag != null ? catalogVersionTag : baselineVersionTag)
             : baselineVersionTag;
 
     List<LineageDiffResult> lineageDiffs = List.of();
@@ -157,6 +187,66 @@ public final class SchemaImpactSimulationService {
         Instant.now(),
         status,
         lineageDiffs);
+  }
+
+  private static ValidationReport mergeReports(ValidationReport primary, ValidationReport secondary) {
+    if (primary == null) {
+      return secondary;
+    }
+    if (secondary == null) {
+      return primary;
+    }
+    ValidationReport merged = new ValidationReport(primary.getGroupName());
+    for (ValidationReport.RecordDefinitionValidation left : primary.getRecordValidations()) {
+      if (left == null) {
+        continue;
+      }
+      ValidationReport.RecordDefinitionValidation right = findMatching(secondary, left);
+      if (right == null) {
+        merged.addRecordValidation(left);
+        continue;
+      }
+      List<ValidationReport.ValidationIssue> all = new ArrayList<>(left.allIssues());
+      all.addAll(right.allIssues());
+      List<ValidationReport.ValidationIssue> visible = new ArrayList<>(left.issues());
+      visible.addAll(right.issues());
+      boolean inSync = left.inSync() && right.inSync() && visible.isEmpty();
+      merged.addRecordValidation(
+          new ValidationReport.RecordDefinitionValidation(
+              left.key(),
+              left.catalogConnection(),
+              left.sourceType(),
+              inSync,
+              left.schemaDiff() != null ? left.schemaDiff() : right.schemaDiff(),
+              left.usages() != null && !left.usages().isEmpty() ? left.usages() : right.usages(),
+              all,
+              visible,
+              left.acknowledgedIssueCount() + right.acknowledgedIssueCount()));
+    }
+    for (ValidationReport.RecordDefinitionValidation right : secondary.getRecordValidations()) {
+      if (right != null && findMatching(primary, right) == null) {
+        merged.addRecordValidation(right);
+      }
+    }
+    return merged;
+  }
+
+  private static ValidationReport.RecordDefinitionValidation findMatching(
+      ValidationReport report, ValidationReport.RecordDefinitionValidation needle) {
+    if (report == null || needle == null || needle.key() == null) {
+      return null;
+    }
+    for (ValidationReport.RecordDefinitionValidation candidate : report.getRecordValidations()) {
+      if (candidate == null || candidate.key() == null) {
+        continue;
+      }
+      if (needle.key().getName() != null
+          && needle.key().getName().equalsIgnoreCase(candidate.key().getName())
+          && Objects.equals(needle.key().getNamespace(), candidate.key().getNamespace())) {
+        return candidate;
+      }
+    }
+    return null;
   }
 
   /**
