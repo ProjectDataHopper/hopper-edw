@@ -63,7 +63,8 @@ public final class ExecutionMapCrawler {
     }
 
     ExecutionMapDocument document = new ExecutionMapDocument();
-    document.setRootArtifactPath(resolvedPath);
+    // Store portable path; crawl still uses resolvedPath for I/O below.
+    document.setRootArtifactPath(ExecutionMapPathSupport.toStoredPath(resolvedPath, variables));
     document.setRootArtifactType(
         isWorkflow
             ? ExecutionMapRootArtifactType.WORKFLOW

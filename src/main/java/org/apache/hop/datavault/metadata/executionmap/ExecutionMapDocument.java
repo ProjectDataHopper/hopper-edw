@@ -37,8 +37,11 @@ import org.apache.hop.metadata.api.IHopMetadata;
 public class ExecutionMapDocument extends HopMetadataBase
     implements IHopMetadata, IHasFilename, IUndo {
 
-  /** Runtime filename (not always serialized). */
-  @HopMetadataProperty private String filename;
+  /**
+   * Runtime open path ({@link IHasFilename}), like {@code AbstractMeta}. Never serialized — loaders
+   * bind this from the VFS path used to open/save.
+   */
+  private String filename;
 
   @HopMetadataProperty private String rootArtifactPath;
 

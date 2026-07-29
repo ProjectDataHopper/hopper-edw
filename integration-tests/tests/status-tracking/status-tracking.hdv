@@ -16,7 +16,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <data-vault-model>
-  <filename>/home/matt/git/mattcasters/hop-data-vault/integration-tests/tests//status-tracking/status-tracking.hdv</filename>
   <name_sync_with_filename>Y</name_sync_with_filename>
   <description>Status Tracking Satellite test: hub + descriptive satellite + STS on FULL_SNAPSHOT source</description>
   <configuration>

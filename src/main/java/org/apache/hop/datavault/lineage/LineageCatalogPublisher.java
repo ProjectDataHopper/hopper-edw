@@ -33,6 +33,7 @@ import org.apache.hop.catalog.registry.RecordDefinitionRegistry;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.catalog.CatalogModelRegistrySupport;
 import org.apache.hop.datavault.catalog.DvCatalogNamespaces;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
@@ -289,7 +290,8 @@ public final class LineageCatalogPublisher {
             ? snapshot.getModelLayer().name() + "_LINEAGE"
             : "LINEAGE");
     origin.setModelName(snapshot.getModelName());
-    origin.setModelFilename(snapshot.getModelFilename());
+    origin.setModelFilename(
+        CatalogModelRegistrySupport.portableModelPath(snapshot.getModelFilename(), variables));
     origin.setModelElementName(elementName);
     origin.setHopProject(DvCatalogNamespaces.resolveProjectKey(variables));
     origin.setUpdatedAt(updatedAt);

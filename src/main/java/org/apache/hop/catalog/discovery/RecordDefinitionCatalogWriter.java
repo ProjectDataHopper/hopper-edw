@@ -33,6 +33,7 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
+import org.apache.hop.datavault.catalog.CatalogModelRegistrySupport;
 import org.apache.hop.datavault.catalog.DvSourceCatalogMapper;
 import org.apache.hop.datavault.catalog.DvSourceFieldSupport;
 import org.apache.hop.datavault.metadata.DataVaultModel;
@@ -323,7 +324,7 @@ public final class RecordDefinitionCatalogWriter {
     definition.setType(recordType);
     definition.setDescription(request.getDescription());
     definition.setFields(DvSourceFieldSupport.toRowMeta(request.getFields(), variables));
-    definition.setOrigin(buildGenericOrigin(request));
+    definition.setOrigin(buildGenericOrigin(request, variables));
     applyPhysicalLocation(definition, request, variables);
     definition.getTags().add(recordType.name());
     if (request.getSourceType() != null) {
@@ -332,12 +333,15 @@ public final class RecordDefinitionCatalogWriter {
     return definition;
   }
 
-  private static RecordOrigin buildGenericOrigin(RecordDefinitionWriteRequest request) {
+  private static RecordOrigin buildGenericOrigin(
+      RecordDefinitionWriteRequest request, IVariables variables) {
     RecordOrigin origin = new RecordOrigin();
     origin.setModelType(request.getRecordType() != null ? request.getRecordType().name() : "RECORD");
     if (request.getModel() != null) {
       origin.setModelName(request.getModel().getName());
-      origin.setModelFilename(request.getModel().getFilename());
+      origin.setModelFilename(
+          CatalogModelRegistrySupport.portableModelPath(
+              request.getModel().getFilename(), variables));
       origin.setHopProject(request.getModel().getName());
     }
     origin.setModelElementName(request.getName());

@@ -16,7 +16,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <business-vault-model>
-  <filename>/home/matt/git/mattcasters/hop-data-vault/retail-example/models/retail-360.hbv</filename>
   <name_sync_with_filename>Y</name_sync_with_filename>
   <description>Retail customer 360 business vault: four satellites merged into one functional SCD2 table</description>
   <dataVaultModelPath>${PROJECT_HOME}/models/retail-360.hdv</dataVaultModelPath>

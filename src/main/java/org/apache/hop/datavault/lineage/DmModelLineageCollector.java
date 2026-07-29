@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.UUID;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.catalog.CatalogModelRegistrySupport;
 import org.apache.hop.datavault.catalog.DvCatalogNamespaces;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalConfiguration;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
@@ -51,7 +52,8 @@ public final class DmModelLineageCollector {
     snapshot.setProjectKey(DvCatalogNamespaces.resolveProjectKey(variables));
     snapshot.setModelLayer(LineageLayer.DM);
     snapshot.setModelName(model.getName());
-    snapshot.setModelFilename(model.getFilename());
+    snapshot.setModelFilename(
+        CatalogModelRegistrySupport.portableModelPath(model.getFilename(), variables));
 
     DimensionalConfiguration config = model.getConfigurationOrDefault();
     String targetDb = config != null ? config.getTargetDatabase() : null;
@@ -80,7 +82,8 @@ public final class DmModelLineageCollector {
       DimensionalModel model,
       IVariables variables,
       String targetDb) {
-    TableLineage lineage = baseTable(dimension, model, targetDb, DmTableType.DIMENSION.name());
+    TableLineage lineage =
+        baseTable(dimension, model, variables, targetDb, DmTableType.DIMENSION.name());
     addNamingReasons(lineage, dimension);
     addSourceRef(lineage, dimension.getSourceOrDefault(), variables);
 
@@ -148,7 +151,7 @@ public final class DmModelLineageCollector {
 
   private static TableLineage collectFact(
       DmFact fact, DimensionalModel model, IVariables variables, String targetDb) {
-    TableLineage lineage = baseTable(fact, model, targetDb, DmTableType.FACT.name());
+    TableLineage lineage = baseTable(fact, model, variables, targetDb, DmTableType.FACT.name());
     addNamingReasons(lineage, fact);
     addSourceRef(lineage, fact.getSourceOrDefault(), variables);
 
@@ -212,7 +215,7 @@ public final class DmModelLineageCollector {
   private static TableLineage collectGeneric(
       IDmTable table, DimensionalModel model, IVariables variables, String targetDb) {
     String type = table.getTableType() != null ? table.getTableType().name() : "DM";
-    TableLineage lineage = baseTable(table, model, targetDb, type);
+    TableLineage lineage = baseTable(table, model, variables, targetDb, type);
     addNamingReasons(lineage, table);
     if (table instanceof org.apache.hop.datavault.metadata.dimensional.DmTableBase base) {
       addSourceRef(lineage, base.getSourceOrDefault(), variables);
@@ -308,7 +311,11 @@ public final class DmModelLineageCollector {
   }
 
   private static TableLineage baseTable(
-      IDmTable table, DimensionalModel model, String targetDb, String tableType) {
+      IDmTable table,
+      DimensionalModel model,
+      IVariables variables,
+      String targetDb,
+      String tableType) {
     TableLineage lineage = new TableLineage();
     lineage.setLayer(LineageLayer.DM);
     lineage.setLogicalName(table.getName());
@@ -317,7 +324,8 @@ public final class DmModelLineageCollector {
     lineage.setPhysicalTableName(physical);
     lineage.setTableType(tableType);
     lineage.setModelName(model.getName());
-    lineage.setModelFilename(model.getFilename());
+    lineage.setModelFilename(
+        CatalogModelRegistrySupport.portableModelPath(model.getFilename(), variables));
     lineage.setTargetDatabaseMetaName(targetDb);
     lineage.setDescription(table.getDescription());
     return lineage;

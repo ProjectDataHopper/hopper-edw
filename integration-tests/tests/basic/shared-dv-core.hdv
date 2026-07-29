@@ -16,7 +16,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <data-vault-model>
-  <filename>${PROJECT_HOME}/tests/basic/shared-dv-core.hdv</filename>
   <name_sync_with_filename>Y</name_sync_with_filename>
   <description>Shared core hubs for cross-model Data Vault reference tests</description>
   <configuration>

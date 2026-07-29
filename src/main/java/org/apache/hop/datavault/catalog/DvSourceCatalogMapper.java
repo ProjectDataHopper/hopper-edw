@@ -130,7 +130,7 @@ public final class DvSourceCatalogMapper {
       definition.setDvSource(dvSourceRecord);
     }
     definition.setFields(DvSourceFieldSupport.toRowMeta(sourceFields, variables));
-    definition.setOrigin(buildOrigin(source, model, updatedAt, workflowName, pipelineName));
+    definition.setOrigin(buildOrigin(source, model, variables, updatedAt, workflowName, pipelineName));
     IDvSource dvSource = source.getDvSourceOrDefault();
     if (source.getSourceType() == DvSourceType.CSV) {
       definition.setPhysicalFile(buildPhysicalFileRef(dvSource));
@@ -174,6 +174,7 @@ public final class DvSourceCatalogMapper {
   private static RecordOrigin buildOrigin(
       DataVaultSource source,
       DataVaultModel model,
+      IVariables variables,
       Date updatedAt,
       String workflowName,
       String pipelineName) {
@@ -181,7 +182,8 @@ public final class DvSourceCatalogMapper {
     origin.setModelType("DATA_VAULT_SOURCE");
     if (model != null) {
       origin.setModelName(model.getName());
-      origin.setModelFilename(model.getFilename());
+      origin.setModelFilename(
+          CatalogModelRegistrySupport.portableModelPath(model.getFilename(), variables));
       origin.setHopProject(model.getName());
     }
     origin.setModelElementName(source.getName());

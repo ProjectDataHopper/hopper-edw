@@ -16,7 +16,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <data-vault-model>
-  <filename>${PROJECT_HOME}/tests/sqlserver-collation/string-collation.hdv</filename>
   <name_sync_with_filename>Y</name_sync_with_filename>
   <description>SQL Server collation scenario: source NVARCHAR/French_CI_AS business keys vs vault VARCHAR UTF-8 collation (Latin1_General_100_CI_AS_SC_UTF8)</description>
   <configuration>

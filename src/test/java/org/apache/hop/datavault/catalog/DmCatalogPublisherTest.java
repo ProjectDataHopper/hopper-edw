@@ -274,6 +274,8 @@ class DmCatalogPublisherTest {
     Node rootNode = XmlHandler.getSubNode(document, HopDimensionalFileType.XML_TAG);
     DimensionalModel model = new DimensionalModel();
     XmlMetadataUtil.deSerializeFromXml(rootNode, DimensionalModel.class, model, null);
+    // Filename is runtime-only (not in XML); bind load path like Hop file openers.
+    model.setFilename(fixture.toString());
     return model;
   }
 

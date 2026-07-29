@@ -16,7 +16,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <dimensional-model>
-  <filename>${PROJECT_HOME}/tests/basic/date-role-playing.hdm</filename>
   <name_sync_with_filename>Y</name_sync_with_filename>
   <description>Date dimension with role-playing aliases on an order fact</description>
   <configuration>

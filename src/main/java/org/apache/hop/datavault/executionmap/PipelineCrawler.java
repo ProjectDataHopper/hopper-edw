@@ -72,7 +72,8 @@ public final class PipelineCrawler {
       ExecutionMapNode pipelineNode = new ExecutionMapNode();
       pipelineNode.setNodeType(root ? ExecutionMapNodeType.ROOT_PIPELINE : ExecutionMapNodeType.PIPELINE);
       pipelineNode.setName(pipelineMeta.getName());
-      pipelineNode.setPath(resolvedPath);
+      pipelineNode.setPath(
+          ExecutionMapPathSupport.toStoredPath(resolvedPath, context.getVariables()));
       pipelineNode.setParentNodeId(parentNodeId);
       pipelineNode.setSnapshotId(
           context.capturePipelineSnapshot(resolvedPath, pipelineMeta.getXml(context.getVariables())));
@@ -144,7 +145,7 @@ public final class PipelineCrawler {
     ExecutionMapNode node = new ExecutionMapNode();
     node.setNodeType(ExecutionMapNodeType.PIPELINE_FILE);
     node.setName(extractBaseName(resolvedPath));
-    node.setPath(pipelinePath);
+    node.setPath(ExecutionMapPathSupport.toStoredPath(resolvedPath, context.getVariables()));
     node.setParentNodeId(parentNodeId);
     context.addNode(node);
     return node.getId();

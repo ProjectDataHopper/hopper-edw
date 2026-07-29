@@ -83,8 +83,11 @@ public class DataVaultModel extends HopMetadataBase
 
   public static final String GUI_PLUGIN_ELEMENT_PARENT_ID = "DATAVAULT_MODEL_DIALOG";
 
-  /** The filename (runtime, like in AbstractMeta/PipelineMeta). Not always serialized. */
-  @HopMetadataProperty private String filename;
+  /**
+   * Runtime open path ({@link IHasFilename}), like {@code AbstractMeta}. Never serialized — loaders
+   * bind this from the VFS path used to open/save (stale host paths must not land in git).
+   */
+  private String filename;
 
   /**
    * Whether the name should be kept in sync with the filename (derived via

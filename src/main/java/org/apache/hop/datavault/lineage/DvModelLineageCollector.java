@@ -26,6 +26,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.catalog.CatalogModelRegistrySupport;
 import org.apache.hop.datavault.catalog.DvCatalogNamespaces;
 import org.apache.hop.datavault.metadata.AttributeSource;
 import org.apache.hop.datavault.metadata.BusinessKey;
@@ -70,7 +71,8 @@ public final class DvModelLineageCollector {
     snapshot.setProjectKey(DvCatalogNamespaces.resolveProjectKey(variables));
     snapshot.setModelLayer(LineageLayer.DV);
     snapshot.setModelName(model.getName());
-    snapshot.setModelFilename(model.getFilename());
+    snapshot.setModelFilename(
+        CatalogModelRegistrySupport.portableModelPath(model.getFilename(), variables));
     snapshot.setCatalogConnection(catalogConnection);
 
     DataVaultConfiguration config = model.getConfigurationOrDefault();
@@ -90,7 +92,7 @@ public final class DvModelLineageCollector {
             case SATELLITE ->
                 collectSatellite(
                     (DvSatellite) table, model, config, variables, targetDb, sourcesNamespace);
-            case TABLE_REFERENCE -> collectGenericTable(table, model, config, targetDb);
+            case TABLE_REFERENCE -> collectGenericTable(table, model, config, variables, targetDb);
           };
       if (tableLineage != null) {
         snapshot.addTable(tableLineage);
@@ -107,7 +109,7 @@ public final class DvModelLineageCollector {
       IVariables variables,
       String targetDb,
       String sourcesNamespace) {
-    TableLineage table = baseTable(hub, model, targetDb, DvTableType.HUB.name());
+    TableLineage table = baseTable(hub, model, variables, targetDb, DvTableType.HUB.name());
     addNamingReasons(table, hub);
 
     List<String> recordSources =
@@ -205,7 +207,7 @@ public final class DvModelLineageCollector {
       IVariables variables,
       String targetDb,
       String sourcesNamespace) {
-    TableLineage table = baseTable(link, model, targetDb, DvTableType.LINK.name());
+    TableLineage table = baseTable(link, model, variables, targetDb, DvTableType.LINK.name());
     addNamingReasons(table, link);
 
     if (link.getHubNames() != null) {
@@ -354,7 +356,7 @@ public final class DvModelLineageCollector {
       IVariables variables,
       String targetDb,
       String sourcesNamespace) {
-    TableLineage table = baseTable(satellite, model, targetDb, DvTableType.SATELLITE.name());
+    TableLineage table = baseTable(satellite, model, variables, targetDb, DvTableType.SATELLITE.name());
     addNamingReasons(table, satellite);
 
     boolean linkSatellite = !Utils.isEmpty(satellite.getLinkName());
@@ -517,11 +519,16 @@ public final class DvModelLineageCollector {
   }
 
   private static TableLineage collectGenericTable(
-      IDvTable table, DataVaultModel model, DataVaultConfiguration config, String targetDb) {
+      IDvTable table,
+      DataVaultModel model,
+      DataVaultConfiguration config,
+      IVariables variables,
+      String targetDb) {
     TableLineage lineage =
         baseTable(
             table,
             model,
+            variables,
             targetDb,
             table.getTableType() != null ? table.getTableType().name() : "UNKNOWN");
     addNamingReasons(lineage, table);
@@ -529,7 +536,11 @@ public final class DvModelLineageCollector {
   }
 
   private static TableLineage baseTable(
-      IDvTable table, DataVaultModel model, String targetDb, String tableType) {
+      IDvTable table,
+      DataVaultModel model,
+      IVariables variables,
+      String targetDb,
+      String tableType) {
     TableLineage lineage = new TableLineage();
     lineage.setLayer(LineageLayer.DV);
     lineage.setLogicalName(table.getName());
@@ -538,7 +549,8 @@ public final class DvModelLineageCollector {
     lineage.setPhysicalTableName(physical);
     lineage.setTableType(tableType);
     lineage.setModelName(model.getName());
-    lineage.setModelFilename(model.getFilename());
+    lineage.setModelFilename(
+        CatalogModelRegistrySupport.portableModelPath(model.getFilename(), variables));
     lineage.setTargetDatabaseMetaName(targetDb);
     lineage.setDescription(table.getDescription());
     return lineage;

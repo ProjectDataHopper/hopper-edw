@@ -25,7 +25,6 @@ import java.util.Set;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.core.vfs.HopVfs;
 import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.datavault.hopgui.file.vault.HopVaultFileType;
 import org.apache.hop.datavault.metadata.DataVaultModel;
@@ -62,7 +61,9 @@ public final class BusinessVaultDvModelResolver {
           BaseMessages.getString(PKG, "BusinessVaultDvModelResolver.Error.MissingPath"));
     }
     try {
-      String resolvedPath = HopVfs.normalize(variables.resolve(dataVaultModelPath));
+      // Use DvModelLoadSupport so foreign absolute paths can be re-homed under PROJECT_HOME.
+      String resolvedPath =
+          DvModelLoadSupport.resolveModelPath(dataVaultModelPath, null, variables);
       Document document = XmlHandler.loadXmlFile(resolvedPath);
       Node rootNode = XmlHandler.getSubNode(document, HopVaultFileType.XML_TAG);
       if (rootNode == null) {

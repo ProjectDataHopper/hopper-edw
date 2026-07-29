@@ -123,6 +123,7 @@ class LineageCatalogBaselineLoaderTest {
     Node rootNode = XmlHandler.getSubNode(document, HopVaultFileType.XML_TAG);
     DataVaultModel model = new DataVaultModel();
     XmlMetadataUtil.deSerializeFromXml(rootNode, DataVaultModel.class, model, null);
+    model.setFilename(fixture.toString());
     return model;
   }
 }

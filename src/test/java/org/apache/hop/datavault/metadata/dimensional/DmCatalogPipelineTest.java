@@ -208,6 +208,7 @@ class DmCatalogPipelineTest {
     Node rootNode = XmlHandler.getSubNode(document, HopDimensionalFileType.XML_TAG);
     DimensionalModel model = new DimensionalModel();
     XmlMetadataUtil.deSerializeFromXml(rootNode, DimensionalModel.class, model, null);
+    model.setFilename(fixture.toString());
     return model;
   }
 }

@@ -85,6 +85,37 @@ class DvCatalogPublisherTest {
   }
 
   @Test
+  void publishedOriginModelFilenameIsPortableUnderProjectHome() throws Exception {
+    Path projectHome = Files.createTempDirectory("dv-catalog-portable-origin");
+    Path modelsDir = projectHome.resolve("models");
+    Files.createDirectories(modelsDir);
+    Path modelFile = modelsDir.resolve("vault1.hdv");
+    Files.copy(
+        Path.of("integration-tests/tests/basic/vault1.hdv").toAbsolutePath().normalize(),
+        modelFile);
+
+    variables.setVariable("PROJECT_HOME", projectHome.toAbsolutePath().normalize().toString());
+
+    DataVaultModel model = loadDataVaultModel(modelFile.toString());
+    model.setFilename(modelFile.toAbsolutePath().normalize().toString());
+
+    String namespace = DvCatalogNamespaces.projectModelsNamespace(variables, model);
+    RecordDefinitionKey key = new RecordDefinitionKey(namespace, "hub_customer");
+    RecordDefinitionRegistry registry = RecordDefinitionRegistry.getInstance();
+
+    DvCatalogPublisher.PublishResult result =
+        DvCatalogPublisher.publish(
+            CATALOG_CONNECTION, model, variables, metadataProvider, "portable-publish");
+    assertTrue(result.getTableCount() > 0);
+
+    RecordDefinition stored = registry.read(CATALOG_CONNECTION, key, variables, metadataProvider);
+    assertNotNull(stored);
+    assertNotNull(stored.getOrigin());
+    assertEquals(
+        "${PROJECT_HOME}/models/vault1.hdv", stored.getOrigin().getModelFilename());
+  }
+
+  @Test
   void republishPreservesQualityRulesAndValidationAcknowledgements() throws Exception {
     DataVaultModel model = loadDataVaultModel("integration-tests/tests/basic/vault1.hdv");
     String namespace = DvCatalogNamespaces.projectModelsNamespace(variables, model);
@@ -197,6 +228,8 @@ class DvCatalogPublisherTest {
     Node rootNode = XmlHandler.getSubNode(document, HopVaultFileType.XML_TAG);
     DataVaultModel model = new DataVaultModel();
     XmlMetadataUtil.deSerializeFromXml(rootNode, DataVaultModel.class, model, null);
+    // Filename is runtime-only (not in XML); bind load path like Hop file openers.
+    model.setFilename(fixture.toString());
     return model;
   }
 }

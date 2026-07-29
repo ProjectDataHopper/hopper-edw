@@ -62,7 +62,11 @@ public class DimensionalModel extends HopMetadataBase
 
   public static final String GUI_PLUGIN_ELEMENT_PARENT_ID = "DIMENSIONAL_MODEL_DIALOG";
 
-  @HopMetadataProperty private String filename;
+  /**
+   * Runtime open path ({@link IHasFilename}), like {@code AbstractMeta}. Never serialized — loaders
+   * bind this from the VFS path used to open/save.
+   */
+  private String filename;
 
   @HopMetadataProperty(key = "name_sync_with_filename")
   private boolean nameSynchronizedWithFilename = true;

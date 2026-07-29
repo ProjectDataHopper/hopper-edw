@@ -147,19 +147,22 @@ public final class ExecutionMapDatasetCatalogSupport {
       case DIMENSIONAL_MODEL -> {
         DimensionalModel model = new DimensionalModel();
         model.setName(modelNode.getName());
-        model.setFilename(modelNode.getPath());
+        model.setFilename(
+            ExecutionMapPathSupport.toResolvedPath(modelNode.getPath(), variables));
         yield DmCatalogNamespaces.projectDimensionalModelsNamespace(variables, model);
       }
       case DATA_VAULT_MODEL -> {
         DataVaultModel model = new DataVaultModel();
         model.setName(modelNode.getName());
-        model.setFilename(modelNode.getPath());
+        model.setFilename(
+            ExecutionMapPathSupport.toResolvedPath(modelNode.getPath(), variables));
         yield DvCatalogNamespaces.projectModelsNamespace(variables, model);
       }
       case BUSINESS_VAULT_MODEL -> {
         BusinessVaultModel model = new BusinessVaultModel();
         model.setName(modelNode.getName());
-        model.setFilename(modelNode.getPath());
+        model.setFilename(
+            ExecutionMapPathSupport.toResolvedPath(modelNode.getPath(), variables));
         yield BvCatalogNamespaces.projectBusinessVaultModelsNamespace(variables, model);
       }
       default -> null;

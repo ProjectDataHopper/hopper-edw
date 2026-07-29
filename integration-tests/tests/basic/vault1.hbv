@@ -16,7 +16,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <business-vault-model>
-  <filename>/home/matt/git/mattcasters/hop-data-vault/integration-tests/tests//basic/vault1.hbv</filename>
   <name_sync_with_filename>Y</name_sync_with_filename>
   <description/>
   <dataVaultModelPath>${PROJECT_HOME}/tests/basic/vault1.hdv</dataVaultModelPath>

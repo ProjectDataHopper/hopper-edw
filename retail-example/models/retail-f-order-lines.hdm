@@ -16,7 +16,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <dimensional-model>
-  <filename>/home/matt/git/mattcasters/hop-data-vault/retail-example/models/retail-f-order-lines.hdm</filename>
   <name_sync_with_filename>Y</name_sync_with_filename>
   <description/>
   <configuration>

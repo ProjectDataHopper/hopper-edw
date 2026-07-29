@@ -16,7 +16,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <business-vault-model>
-  <filename>/home/matt/git/mattcasters/hop-data-vault/retail-example/models/retail-sql.hbv</filename>
   <name_sync_with_filename>Y</name_sync_with_filename>
   <description>SQL business tables: phase-1 historical validity (satb_*) over raw vault satellites</description>
   <dataVaultModelPath>${PROJECT_HOME}/models/retail-360.hdv</dataVaultModelPath>
@@ -73,7 +72,7 @@ FROM {{ ref('retail-360', 'sat_product') }}</sqlQuery>
           <modelName>retail-360</modelName>
           <objectName>sat_product</objectName>
           <resolvedKind>DV_TABLE</resolvedKind>
-          <resolvedModelFilename>/home/matt/git/mattcasters/hop-data-vault/retail-example/models/retail-360.hdv</resolvedModelFilename>
+          <resolvedModelFilename>${PROJECT_HOME}/models/retail-360.hdv</resolvedModelFilename>
           <resolvedTableName>sat_product</resolvedTableName>
           <resolvedDvTableType>SATELLITE</resolvedDvTableType>
         </sql_ref>
@@ -108,7 +107,7 @@ One insert-only sat_product row becomes a closed interval; the latest stays open
     <dv_reference>
       <dvTableName>sat_product</dvTableName>
       <dvTableType>SATELLITE</dvTableType>
-      <referencedModelFilename>/home/matt/git/mattcasters/hop-data-vault/retail-example/models/retail-360.hdv</referencedModelFilename>
+      <referencedModelFilename>${PROJECT_HOME}/models/retail-360.hdv</referencedModelFilename>
       <xloc>96</xloc>
       <yloc>160</yloc>
     </dv_reference>

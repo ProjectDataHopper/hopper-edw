@@ -18,6 +18,7 @@
 
 package org.apache.hop.datavault.metadata;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -92,10 +93,78 @@ public final class DvModelLoadSupport {
       }
     }
     try {
-      return HopVfs.normalize(resolved);
+      String normalized = HopVfs.normalize(resolved);
+      // Foreign absolute paths (checked in from another host) → re-home under PROJECT_HOME.
+      if (!localFileExists(normalized)) {
+        String remapped = remapMissingAbsolutePath(normalized, variables);
+        if (!Utils.isEmpty(remapped)) {
+          return HopVfs.normalize(remapped);
+        }
+      }
+      return normalized;
     } catch (Exception e) {
       throw new HopException(
           BaseMessages.getString(PKG, "DvModelLoadSupport.Error.InvalidModelPath", modelPath), e);
+    }
+  }
+
+  /**
+   * When a stored absolute path no longer exists (e.g. another developer's {@code /home/...}), try
+   * the same basename / {@code models/…} tail under the current {@code PROJECT_HOME}.
+   */
+  static String remapMissingAbsolutePath(String absolutePath, IVariables variables) {
+    if (variables == null || Utils.isEmpty(absolutePath) || !isAbsolutePath(absolutePath)) {
+      return null;
+    }
+    String projectHome = variables.resolve("${" + VARIABLE_PROJECT_HOME + "}");
+    if (Utils.isEmpty(projectHome) || projectHome.contains("${")) {
+      return null;
+    }
+    try {
+      Path home = Path.of(HopVfs.normalize(projectHome)).normalize();
+      Path original = Path.of(absolutePath).normalize();
+      String basename = original.getFileName() != null ? original.getFileName().toString() : null;
+      if (!Utils.isEmpty(basename)) {
+        Path underModels = home.resolve("models").resolve(basename);
+        if (Files.isRegularFile(underModels)) {
+          return underModels.toString();
+        }
+        Path underHome = home.resolve(basename);
+        if (Files.isRegularFile(underHome)) {
+          return underHome.toString();
+        }
+      }
+      String slashPath = absolutePath.replace('\\', '/');
+      int modelsIdx = slashPath.lastIndexOf("/models/");
+      if (modelsIdx >= 0) {
+        String tail = slashPath.substring(modelsIdx + 1); // models/...
+        Path underHomeModels = home.resolve(tail);
+        if (Files.isRegularFile(underHomeModels)) {
+          return underHomeModels.toString();
+        }
+      }
+    } catch (Exception ignored) {
+      return null;
+    }
+    return null;
+  }
+
+  private static boolean localFileExists(String path) {
+    if (Utils.isEmpty(path)) {
+      return false;
+    }
+    try {
+      Path nio = Path.of(path);
+      if (Files.exists(nio)) {
+        return true;
+      }
+    } catch (Exception ignored) {
+      // fall through to VFS
+    }
+    try {
+      return HopVfs.getFileObject(path).exists();
+    } catch (Exception e) {
+      return false;
     }
   }
 

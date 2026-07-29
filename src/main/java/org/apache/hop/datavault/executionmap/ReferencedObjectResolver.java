@@ -221,7 +221,7 @@ public final class ReferencedObjectResolver {
     ExecutionMapNode node = new ExecutionMapNode();
     node.setNodeType(nodeType);
     node.setName(model != null ? extractName(model) : path);
-    node.setPath(path);
+    node.setPath(ExecutionMapPathSupport.toStoredPath(resolvedPath, context.getVariables()));
     node.setParentNodeId(parentNodeId);
     context.addNode(node);
     linkModelToParent(context, parentNodeId, node.getId());

@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.UUID;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.catalog.CatalogModelRegistrySupport;
 import org.apache.hop.datavault.catalog.DvCatalogNamespaces;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultConfiguration;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
@@ -49,7 +50,8 @@ public final class BvModelLineageCollector {
     snapshot.setProjectKey(DvCatalogNamespaces.resolveProjectKey(variables));
     snapshot.setModelLayer(LineageLayer.BV);
     snapshot.setModelName(model.getName());
-    snapshot.setModelFilename(model.getFilename());
+    snapshot.setModelFilename(
+        CatalogModelRegistrySupport.portableModelPath(model.getFilename(), variables));
 
     BusinessVaultConfiguration config = model.getConfigurationOrDefault();
     String targetDb = config != null ? config.getTargetDatabase() : null;
@@ -64,7 +66,7 @@ public final class BvModelLineageCollector {
       } else if (table instanceof BvPitTable pit) {
         tableLineage = collectPit(pit, model, config, variables, targetDb);
       } else {
-        tableLineage = collectGeneric(table, model, targetDb);
+        tableLineage = collectGeneric(table, model, variables, targetDb);
       }
       if (tableLineage != null) {
         snapshot.addTable(tableLineage);
@@ -79,7 +81,7 @@ public final class BvModelLineageCollector {
       BusinessVaultConfiguration config,
       IVariables variables,
       String targetDb) {
-    TableLineage lineage = baseTable(table, model, targetDb, BvTableType.SCD2.name());
+    TableLineage lineage = baseTable(table, model, variables, targetDb, BvTableType.SCD2.name());
     addNamingReasons(lineage, table);
 
     for (BvDerivativeRef ref : table.getDerivatives()) {
@@ -148,7 +150,7 @@ public final class BvModelLineageCollector {
       BusinessVaultConfiguration config,
       IVariables variables,
       String targetDb) {
-    TableLineage lineage = baseTable(table, model, targetDb, BvTableType.PIT.name());
+    TableLineage lineage = baseTable(table, model, variables, targetDb, BvTableType.PIT.name());
     addNamingReasons(lineage, table);
 
     for (BvDerivativeRef ref : table.getDerivatives()) {
@@ -168,9 +170,9 @@ public final class BvModelLineageCollector {
   }
 
   private static TableLineage collectGeneric(
-      IBvTable table, BusinessVaultModel model, String targetDb) {
+      IBvTable table, BusinessVaultModel model, IVariables variables, String targetDb) {
     String type = table.getTableType() != null ? table.getTableType().name() : "BV";
-    TableLineage lineage = baseTable(table, model, targetDb, type);
+    TableLineage lineage = baseTable(table, model, variables, targetDb, type);
     addNamingReasons(lineage, table);
     for (BvDerivativeRef ref : table.getDerivatives()) {
       if (ref == null || Utils.isEmpty(ref.getDvTableName())) {
@@ -184,7 +186,11 @@ public final class BvModelLineageCollector {
   }
 
   private static TableLineage baseTable(
-      IBvTable table, BusinessVaultModel model, String targetDb, String tableType) {
+      IBvTable table,
+      BusinessVaultModel model,
+      IVariables variables,
+      String targetDb,
+      String tableType) {
     TableLineage lineage = new TableLineage();
     lineage.setLayer(LineageLayer.BV);
     lineage.setLogicalName(table.getName());
@@ -193,7 +199,8 @@ public final class BvModelLineageCollector {
     lineage.setPhysicalTableName(physical);
     lineage.setTableType(tableType);
     lineage.setModelName(model.getName());
-    lineage.setModelFilename(model.getFilename());
+    lineage.setModelFilename(
+        CatalogModelRegistrySupport.portableModelPath(model.getFilename(), variables));
     lineage.setTargetDatabaseMetaName(targetDb);
     lineage.setDescription(table.getDescription());
     return lineage;

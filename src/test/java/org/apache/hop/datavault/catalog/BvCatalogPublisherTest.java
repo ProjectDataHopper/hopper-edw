@@ -165,6 +165,8 @@ class BvCatalogPublisherTest {
     Node rootNode = XmlHandler.getSubNode(document, HopBusinessVaultFileType.XML_TAG);
     BusinessVaultModel model = new BusinessVaultModel();
     XmlMetadataUtil.deSerializeFromXml(rootNode, BusinessVaultModel.class, model, null);
+    // Filename is runtime-only (not in XML); bind load path like Hop file openers.
+    model.setFilename(fixture.toString());
     return model;
   }
 
@@ -174,6 +176,7 @@ class BvCatalogPublisherTest {
     Node rootNode = XmlHandler.getSubNode(document, HopVaultFileType.XML_TAG);
     DataVaultModel model = new DataVaultModel();
     XmlMetadataUtil.deSerializeFromXml(rootNode, DataVaultModel.class, model, null);
+    model.setFilename(fixture.toString());
     return model;
   }
 }

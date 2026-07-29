@@ -283,7 +283,7 @@ public final class DvCatalogPublisher {
     RecordOrigin origin = new RecordOrigin();
     origin.setModelType("DATA_VAULT_MODEL");
     origin.setModelName(model.getName());
-    origin.setModelFilename(model.getFilename());
+    origin.setModelFilename(CatalogModelRegistrySupport.portableModelPath(model.getFilename(), variables));
     origin.setModelElementName(table.getName());
     origin.setHopProject(resolveProjectKey(variables));
     origin.setUpdatedAt(updatedAt);

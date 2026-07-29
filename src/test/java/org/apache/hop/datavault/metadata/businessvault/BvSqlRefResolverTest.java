@@ -114,4 +114,33 @@ class BvSqlRefResolverTest {
     assertEquals(1, refs.size());
     assertEquals(BvSqlResolvedKind.DV_TABLE, refs.get(0).getResolvedKind());
   }
+
+  @Test
+  void resolvedModelFilenameIsPortableWhenProjectHomeMatches() {
+    Variables variables = new Variables();
+    variables.setVariable("PROJECT_HOME", "/project");
+
+    BusinessVaultModel bvModel = new BusinessVaultModel();
+    bvModel.setFilename("/project/models/customer.hbv");
+    bvModel.setName("customer");
+    bvModel.setDataVaultModelPath("${PROJECT_HOME}/models/customer.hdv");
+
+    DataVaultModel dvModel = new DataVaultModel();
+    dvModel.setFilename("/project/models/customer.hdv");
+    DvHub hub = new DvHub();
+    hub.setName("hub_customer");
+    hub.setTableName("hub_customer");
+    dvModel.getTables().add(hub);
+
+    BvBusinessTable sqlTable = new BvBusinessTable();
+    sqlTable.setName("customer_enriched");
+    sqlTable.setSqlQuery("SELECT * FROM {{ ref('hub_customer') }}");
+
+    List<BvSqlRef> refs =
+        BvSqlRefResolver.syncRefsFromSql(sqlTable, bvModel, dvModel, variables, null);
+    assertEquals(1, refs.size());
+    assertEquals(BvSqlResolvedKind.DV_TABLE, refs.get(0).getResolvedKind());
+    assertEquals(
+        "${PROJECT_HOME}/models/customer.hdv", refs.get(0).getResolvedModelFilename());
+  }
 }

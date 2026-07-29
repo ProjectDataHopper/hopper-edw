@@ -268,7 +268,8 @@ public final class BvCatalogPublisher {
     RecordOrigin origin = new RecordOrigin();
     origin.setModelType("BUSINESS_VAULT_MODEL");
     origin.setModelName(bvModel.getName());
-    origin.setModelFilename(bvModel.getFilename());
+    origin.setModelFilename(
+        CatalogModelRegistrySupport.portableModelPath(bvModel.getFilename(), variables));
     origin.setModelElementName(table.getName());
     origin.setHopProject(BvCatalogNamespaces.resolveProjectKey(variables));
     origin.setUpdatedAt(updatedAt);

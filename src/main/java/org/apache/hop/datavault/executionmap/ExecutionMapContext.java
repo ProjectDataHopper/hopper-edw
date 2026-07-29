@@ -188,7 +188,9 @@ public final class ExecutionMapContext {
       ExecutionMapArtifactSnapshot snapshot = new ExecutionMapArtifactSnapshot();
       snapshot.setId(UUID.randomUUID().toString());
       snapshot.setArtifactType(artifactType);
-      snapshot.setSourcePath(sourcePath);
+      snapshot.setSourcePath(
+          ExecutionMapPathSupport.toStoredPath(
+              resolvedPath != null ? resolvedPath : sourcePath, variables));
       snapshot.setCapturedAt(new Date());
       snapshot.setXmlGzipBase64(ArtifactSnapshotSupport.encodeXml(xml));
       document.getSnapshotsOrEmpty().add(snapshot);

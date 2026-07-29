@@ -61,6 +61,8 @@ public final class ExecutionMapPersistence {
       throw new HopException("No execution map document to save");
     }
     try {
+      // Always store PROJECT_HOME-relative paths so maps open on any host.
+      ExecutionMapPathSupport.portableizeDocument(document, variables);
       ModelXmlWriteSupport.writeModelXml(
           HopExecutionMapFileType.XML_TAG, document, filename, variables);
       document.setFilename(filename);

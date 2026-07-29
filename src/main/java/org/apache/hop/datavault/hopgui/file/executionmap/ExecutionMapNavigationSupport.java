@@ -347,9 +347,9 @@ public final class ExecutionMapNavigationSupport {
       Node workflowNode = XmlHandler.loadXmlString(xml, WorkflowMeta.XML_TAG);
       WorkflowMeta workflowMeta = new WorkflowMeta(workflowNode, metadataProvider, variables);
       if (!Utils.isEmpty(snapshot.getSourcePath())) {
-        workflowMeta.setFilename(snapshot.getSourcePath());
+        workflowMeta.setFilename(resolvePath(variables, snapshot.getSourcePath()));
       } else if (node != null && !Utils.isEmpty(node.getPath())) {
-        workflowMeta.setFilename(node.getPath());
+        workflowMeta.setFilename(resolvePath(variables, node.getPath()));
       }
       workflowMeta.setName(
           !Utils.isEmpty(node != null ? node.getName() : null)
@@ -361,9 +361,9 @@ public final class ExecutionMapNavigationSupport {
     Node pipelineNode = XmlHandler.loadXmlString(xml, PipelineMeta.XML_TAG);
     PipelineMeta pipelineMeta = new PipelineMeta(pipelineNode, metadataProvider);
     if (!Utils.isEmpty(snapshot.getSourcePath())) {
-      pipelineMeta.setFilename(snapshot.getSourcePath());
+      pipelineMeta.setFilename(resolvePath(variables, snapshot.getSourcePath()));
     } else if (node != null && !Utils.isEmpty(node.getPath())) {
-      pipelineMeta.setFilename(node.getPath());
+      pipelineMeta.setFilename(resolvePath(variables, node.getPath()));
     }
     pipelineMeta.setName(
         !Utils.isEmpty(node != null ? node.getName() : null)

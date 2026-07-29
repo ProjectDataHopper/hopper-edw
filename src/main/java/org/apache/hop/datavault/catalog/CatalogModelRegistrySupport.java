@@ -648,7 +648,11 @@ public final class CatalogModelRegistrySupport {
     return null;
   }
 
-  static String portableModelPath(String filename, IVariables variables) {
+  /**
+   * Converts a runtime absolute model path into a portable stored value (typically {@code
+   * ${PROJECT_HOME}/...}) for catalog origins and model registry entries.
+   */
+  public static String portableModelPath(String filename, IVariables variables) {
     if (Utils.isEmpty(filename)) {
       return filename;
     }

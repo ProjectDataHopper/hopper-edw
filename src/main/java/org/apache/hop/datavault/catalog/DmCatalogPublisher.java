@@ -275,7 +275,8 @@ public final class DmCatalogPublisher {
     RecordOrigin origin = new RecordOrigin();
     origin.setModelType("DIMENSIONAL_MODEL");
     origin.setModelName(dmModel.getName());
-    origin.setModelFilename(dmModel.getFilename());
+    origin.setModelFilename(
+        CatalogModelRegistrySupport.portableModelPath(dmModel.getFilename(), variables));
     origin.setModelElementName(table.getName());
     origin.setHopProject(DmCatalogNamespaces.resolveProjectKey(variables));
     origin.setUpdatedAt(updatedAt);

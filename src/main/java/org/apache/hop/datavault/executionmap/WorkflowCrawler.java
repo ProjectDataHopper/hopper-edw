@@ -69,7 +69,8 @@ public final class WorkflowCrawler {
       ExecutionMapNode workflowNode = new ExecutionMapNode();
       workflowNode.setNodeType(root ? ExecutionMapNodeType.ROOT_WORKFLOW : ExecutionMapNodeType.WORKFLOW);
       workflowNode.setName(workflowMeta.getName());
-      workflowNode.setPath(resolvedPath);
+      workflowNode.setPath(
+          ExecutionMapPathSupport.toStoredPath(resolvedPath, context.getVariables()));
       workflowNode.setParentNodeId(parentNodeId);
       workflowNode.setSnapshotId(
           context.captureWorkflowSnapshot(resolvedPath, workflowMeta.getXml(context.getVariables())));

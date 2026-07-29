@@ -16,7 +16,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <data-vault-model>
-  <filename>${PROJECT_HOME}/tests/basic/cross-model-dv-subject.hdv</filename>
   <name_sync_with_filename>Y</name_sync_with_filename>
   <description>Subject-area model referencing shared hubs from another .hdv file</description>
   <configuration>

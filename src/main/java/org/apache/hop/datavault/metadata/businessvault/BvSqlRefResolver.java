@@ -26,6 +26,7 @@ import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metadata.DataVaultModel;
+import org.apache.hop.datavault.metadata.DvModelLoadSupport;
 import org.apache.hop.datavault.metadata.IDvTable;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
@@ -113,7 +114,7 @@ public final class BvSqlRefResolver {
       IHopMetadataProvider metadataProvider) {
     IBvTable bvTable = findBvTable(bvModel, objectName, self);
     if (bvTable != null) {
-      applyBvResolution(ref, bvTable, bvModel);
+      applyBvResolution(ref, bvTable, bvModel, variables);
       return;
     }
     // Canvas Hub/Link/Satellite reference (multi-model path when set).
@@ -131,7 +132,7 @@ public final class BvSqlRefResolver {
                 BusinessVaultDvModelResolver.resolveDvTable(
                     bvModel, objectName, variables, metadataProvider);
             if (fromAlias != null) {
-              applyDvResolution(ref, fromAlias, modelPath);
+              applyDvResolution(ref, fromAlias, modelPath, bvModel, variables);
               return;
             }
           } catch (Exception ignored) {
@@ -153,7 +154,7 @@ public final class BvSqlRefResolver {
       if (Utils.isEmpty(modelPath) && dvModel != null) {
         modelPath = dvModel.getFilename();
       }
-      applyDvResolution(ref, dvTable, modelPath);
+      applyDvResolution(ref, dvTable, modelPath, bvModel, variables);
     }
   }
 
@@ -171,7 +172,7 @@ public final class BvSqlRefResolver {
         && modelMatches(bvModel.getFilename(), bvModel.getName(), modelBasename(modelArg))) {
       IBvTable bvTable = findBvTable(bvModel, objectName, self);
       if (bvTable != null) {
-        applyBvResolution(ref, bvTable, bvModel);
+        applyBvResolution(ref, bvTable, bvModel, variables);
         return;
       }
     }
@@ -182,7 +183,7 @@ public final class BvSqlRefResolver {
             linkedDvModel.getFilename(), linkedDvModel.getName(), modelBasename(modelArg))) {
       IDvTable dvTable = findDvTable(linkedDvModel, objectName);
       if (dvTable != null) {
-        applyDvResolution(ref, dvTable, linkedDvModel.getFilename());
+        applyDvResolution(ref, dvTable, linkedDvModel.getFilename(), bvModel, variables);
         return;
       }
     }
@@ -243,7 +244,7 @@ public final class BvSqlRefResolver {
         }
       }
       if (!Utils.isEmpty(lastTried)) {
-        ref.setResolvedModelFilename(lastTried);
+        ref.setResolvedModelFilename(toPortableStoredPath(lastTried, null, variables));
       }
     } catch (Exception ignored) {
       // Catalog unavailable or load failed.
@@ -293,7 +294,7 @@ public final class BvSqlRefResolver {
       if (bvTable != null) {
         ref.setResolvedKind(BvSqlResolvedKind.BV_TABLE);
         ref.setResolvedTableName(physicalName(bvTable));
-        ref.setResolvedModelFilename(filename);
+        ref.setResolvedModelFilename(toPortableStoredPath(filename, null, variables));
         return true;
       }
     } catch (Exception ignored) {
@@ -313,7 +314,7 @@ public final class BvSqlRefResolver {
           BvSqlModelPathSupport.loadDataVaultModel(filename, null, variables, metadataProvider);
       IDvTable dvTable = findDvTable(externalDv, objectName);
       if (dvTable != null) {
-        applyDvResolution(ref, dvTable, filename);
+        applyDvResolution(ref, dvTable, filename, null, variables);
         return true;
       }
     } catch (Exception ignored) {
@@ -339,7 +340,7 @@ public final class BvSqlRefResolver {
                 resolvedPath.loadPath(), null, variables, metadataProvider);
         IDvTable dvTable = findDvTable(externalDv, objectName);
         if (dvTable != null) {
-          applyDvResolution(ref, dvTable, resolvedPath.storedPath());
+          applyDvResolution(ref, dvTable, resolvedPath.storedPath(), null, variables);
           return true;
         }
       } catch (HopException ignored) {
@@ -409,20 +410,40 @@ public final class BvSqlRefResolver {
   }
 
   private static void applyBvResolution(
-      BvSqlRef ref, IBvTable bvTable, BusinessVaultModel bvModel) {
+      BvSqlRef ref, IBvTable bvTable, BusinessVaultModel bvModel, IVariables variables) {
     ref.setResolvedKind(BvSqlResolvedKind.BV_TABLE);
     ref.setResolvedTableName(physicalName(bvTable));
     if (bvModel != null && !Utils.isEmpty(bvModel.getFilename())) {
-      ref.setResolvedModelFilename(bvModel.getFilename());
+      ref.setResolvedModelFilename(
+          toPortableStoredPath(bvModel.getFilename(), bvModel.getFilename(), variables));
     }
   }
 
-  private static void applyDvResolution(BvSqlRef ref, IDvTable dvTable, String modelFilename) {
+  private static void applyDvResolution(
+      BvSqlRef ref,
+      IDvTable dvTable,
+      String modelFilename,
+      BusinessVaultModel referringBv,
+      IVariables variables) {
     ref.setResolvedKind(BvSqlResolvedKind.DV_TABLE);
     ref.setResolvedTableName(physicalName(dvTable));
     ref.setResolvedDvTableType(dvTable.getTableType());
     if (!Utils.isEmpty(modelFilename)) {
-      ref.setResolvedModelFilename(modelFilename);
+      String referring = referringBv != null ? referringBv.getFilename() : null;
+      ref.setResolvedModelFilename(toPortableStoredPath(modelFilename, referring, variables));
+    }
+  }
+
+  /** Prefer {@code ${PROJECT_HOME}/…} (or relative) paths for persistence in model XML. */
+  private static String toPortableStoredPath(
+      String modelFilename, String referringFilename, IVariables variables) {
+    if (Utils.isEmpty(modelFilename) || variables == null) {
+      return modelFilename;
+    }
+    try {
+      return DvModelLoadSupport.toStoredModelPath(modelFilename, referringFilename, variables);
+    } catch (Exception e) {
+      return modelFilename;
     }
   }
 
@@ -469,6 +490,7 @@ public final class BvSqlRefResolver {
         // Upgrade existing alias with model path when missing; never add a duplicate.
         if (Utils.isEmpty(existing.getReferencedModelFilename())
             && !Utils.isEmpty(ref.getResolvedModelFilename())) {
+          // resolvedModelFilename is already portable when set via applyDvResolution.
           existing.setReferencedModelFilename(ref.getResolvedModelFilename());
         }
         continue;
