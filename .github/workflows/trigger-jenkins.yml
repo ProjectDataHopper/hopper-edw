@@ -16,6 +16,62 @@ jobs:
     # Must cover longest Jenkins job + queue wait (adjust if builds run longer)
     timeout-minutes: 120
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve build parameters from pom.xml
+        id: pom
+        run: |
+          set -euo pipefail
+          eval "$(python3 <<'PY'
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          root = ET.parse("pom.xml").getroot()
+          # Maven POMs use a default namespace
+          ns = {"m": "http://maven.apache.org/POM/4.0.0"}
+
+          def text(*paths):
+              for path in paths:
+                  el = root.find(path, ns)
+                  if el is not None and el.text and el.text.strip():
+                      return el.text.strip()
+              return ""
+
+          group_id = text("m:groupId", "groupId")
+          artifact_id = text("m:artifactId", "artifactId")
+          version = text("m:version", "version")
+          hop_version = text("m:properties/m:hop.version", "properties/hop.version")
+
+          missing = [n for n, v in [
+              ("groupId", group_id),
+              ("artifactId", artifact_id),
+              ("version", version),
+              ("hop.version", hop_version),
+          ] if not v]
+          if missing:
+              raise SystemExit(f"Could not read from pom.xml: {', '.join(missing)}")
+
+          def sh_export(name, value):
+              # Safe single-quoted shell assignment
+              print(f"{name}='{value.replace(chr(39), chr(39) + chr(92) + chr(39) + chr(39))}'")
+
+          sh_export("PLUGIN_VERSION", version)
+          sh_export("HOP_VERSION", hop_version)
+          sh_export("GROUP_ID", group_id)
+          sh_export("ARTIFACT_ID", artifact_id)
+          PY
+          )"
+          {
+            echo "plugin_version=${PLUGIN_VERSION}"
+            echo "hop_version=${HOP_VERSION}"
+            echo "group_id=${GROUP_ID}"
+            echo "artifact_id=${ARTIFACT_ID}"
+          } >> "$GITHUB_OUTPUT"
+          echo "Resolved from pom.xml:"
+          echo "  ${GROUP_ID}:${ARTIFACT_ID}:${PLUGIN_VERSION}"
+          echo "  hop.version=${HOP_VERSION}"
+
       - name: Trigger Jenkins job and wait for result
         env:
           JENKINS_URL: ${{ secrets.JENKINS_URL }}
@@ -23,6 +79,14 @@ jobs:
           JENKINS_TOKEN: ${{ secrets.JENKINS_TOKEN }}
           JENKINS_JOB: ${{ secrets.JENKINS_JOB }}
           JENKINS_BUILD_TOKEN: ${{ secrets.JENKINS_BUILD_TOKEN }}
+          # From pom.xml (Option B: pass explicit job parameters)
+          PLUGIN_VERSION: ${{ steps.pom.outputs.plugin_version }}
+          HOP_VERSION: ${{ steps.pom.outputs.hop_version }}
+          GROUP_ID: ${{ steps.pom.outputs.group_id }}
+          ARTIFACT_ID: ${{ steps.pom.outputs.artifact_id }}
+          # Exact commit that triggered this workflow (Jenkins GitSCM branch name accepts a SHA)
+          GIT_REF: ${{ github.sha }}
+          GIT_URL: ${{ github.server_url }}/${{ github.repository }}.git
           # Optional tuning (seconds)
           POLL_INTERVAL: "15"
           QUEUE_TIMEOUT: "900"
@@ -36,9 +100,15 @@ jobs:
           [ -n "${JENKINS_TOKEN:-}" ] || missing+=(JENKINS_TOKEN)
           [ -n "${JENKINS_JOB:-}" ] || missing+=(JENKINS_JOB)
           [ -n "${JENKINS_BUILD_TOKEN:-}" ] || missing+=(JENKINS_BUILD_TOKEN)
+          [ -n "${PLUGIN_VERSION:-}" ] || missing+=(PLUGIN_VERSION)
+          [ -n "${HOP_VERSION:-}" ] || missing+=(HOP_VERSION)
+          [ -n "${GROUP_ID:-}" ] || missing+=(GROUP_ID)
+          [ -n "${ARTIFACT_ID:-}" ] || missing+=(ARTIFACT_ID)
+          [ -n "${GIT_REF:-}" ] || missing+=(GIT_REF)
+          [ -n "${GIT_URL:-}" ] || missing+=(GIT_URL)
           if [ ${#missing[@]} -gt 0 ]; then
-            echo "Missing or empty secrets: ${missing[*]}"
-            echo "Ensure they exist on environment 'jenkins-data-hopper' and the job has environment: set."
+            echo "Missing or empty values: ${missing[*]}"
+            echo "Ensure Jenkins secrets exist on environment 'jenkins-data-hopper' and pom resolve succeeded."
             exit 1
           fi
 
@@ -49,6 +119,13 @@ jobs:
           echo "Jenkins base URL host: $(echo "$JENKINS_URL" | sed -E 's#https?://([^/]+).*#\1#')"
           echo "Jenkins user: $JENKINS_USER"
           echo "Jenkins job: $JENKINS_JOB"
+          echo "Build parameters:"
+          echo "  PLUGIN_VERSION=${PLUGIN_VERSION}"
+          echo "  HOP_VERSION=${HOP_VERSION}"
+          echo "  GROUP_ID=${GROUP_ID}"
+          echo "  ARTIFACT_ID=${ARTIFACT_ID}"
+          echo "  GIT_REF=${GIT_REF}"
+          echo "  GIT_URL=${GIT_URL}"
 
           # Job path: "folder/job" -> "job/folder/job/job"
           JOB_PATH=$(echo "$JENKINS_JOB" | sed 's#/#/job/#g')
@@ -102,13 +179,48 @@ jobs:
           if [ "$PARAM_COUNT" -gt 0 ]; then
             BUILD_ENDPOINT="$JOB_API/buildWithParameters"
             echo "Job has $PARAM_COUNT parameter(s); using buildWithParameters"
+            # Only pass parameters the job actually defines (avoids issues with unknown names).
+            mapfile -t JOB_PARAM_NAMES < <(
+              jq -r '
+                [.property[]?
+                  | select(.parameterDefinitions != null)
+                  | .parameterDefinitions[].name] | .[]
+              ' /tmp/jenkins-job
+            )
+            echo "Job parameter names: ${JOB_PARAM_NAMES[*]}"
+
+            # Known values we can supply from GitHub / pom.xml
+            declare -A PARAM_VALUES=(
+              [PLUGIN_VERSION]="${PLUGIN_VERSION}"
+              [HOP_VERSION]="${HOP_VERSION}"
+              [GROUP_ID]="${GROUP_ID}"
+              [ARTIFACT_ID]="${ARTIFACT_ID}"
+              [GIT_REF]="${GIT_REF}"
+              [GIT_URL]="${GIT_URL}"
+            )
+
+            CURL_DATA_ARGS=()
+            for name in "${JOB_PARAM_NAMES[@]}"; do
+              if [[ -v "PARAM_VALUES[$name]" ]]; then
+                value="${PARAM_VALUES[$name]}"
+                echo "  passing ${name}=${value}"
+                CURL_DATA_ARGS+=(--data-urlencode "${name}=${value}")
+              else
+                echo "  leaving job default for ${name}"
+              fi
+            done
+            if [ ${#CURL_DATA_ARGS[@]} -eq 0 ]; then
+              echo "WARNING: no overlapping parameters to pass; Jenkins job defaults will be used."
+              CURL_DATA_ARGS=(--data "")
+            fi
           else
             BUILD_ENDPOINT="$JOB_API/build"
             echo "Job has no parameters; using build"
+            CURL_DATA_ARGS=(--data "")
           fi
           echo "POST $BUILD_ENDPOINT"
 
-          # Remote trigger token as query param; empty form body satisfies Stapler.
+          # Remote trigger token as query param; form body carries job parameters.
           # Capture Location (queue item URL) from response headers.
           HTTP=$(curl -g -sS -D /tmp/jenkins-headers -o /tmp/jenkins-body -w "%{http_code}" \
             -X POST \
@@ -116,7 +228,7 @@ jobs:
             -b /tmp/jenkins-cookies \
             -H "$CRUMB_FIELD: $CRUMB" \
             -H "Content-Type: application/x-www-form-urlencoded" \
-            --data "" \
+            "${CURL_DATA_ARGS[@]}" \
             "${BUILD_ENDPOINT}?token=$(printf %s "$JENKINS_BUILD_TOKEN" | jq -sRr @uri)")
 
           echo "build HTTP $HTTP"

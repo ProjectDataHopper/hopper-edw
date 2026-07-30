@@ -1,0 +1,62 @@
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Hop marketplace repository definition for hop-datavault (Hop 2.19+).
+#
+# Jenkins publishes continuous SNAPSHOT zips to this Nexus after project changes.
+# Import into Hop so the plugin appears in marketplace query / install:
+#
+#   ./hop marketplace repo import hop-marketplace-repo.yaml
+#   # or from GitHub once on main:
+#   # ./hop marketplace repo import \
+#   #   https://raw.githubusercontent.com/mattcasters/hop-data-vault/main/hop-marketplace-repo.yaml
+#
+#   ./hop marketplace query datavault
+#   ./hop marketplace install hop-datavault
+#   # explicit GAV:
+#   # ./hop marketplace install org.apache.hop:hop-datavault:0.5.0-SNAPSHOT
+#
+# browse: true → Hop lists *.zip from this Nexus live (no cache).
+# plugins: optional metadata that enriches names/categories and can pin version.
+# Restart Hop after install so the plugin registry reloads.
+#
+schemaVersion: "1.0"
+kind: hop-marketplace-repository
+
+id: data-hopper-community
+name: Data Hopper Community Plugins
+url: https://repository.data-hopper.com/repository/hop-community-plugins/
+primary: false
+enabled: true
+browse: true
+includeSnapshots: true
+homepage: https://github.com/mattcasters/hop-data-vault
+description: >
+  Community Maven repository with continuous Jenkins builds of hop-datavault
+  (Data Vault 2.0, Business Vault, and dimensional modeling for Apache Hop).
+
+# Optional metadata (enriches live Nexus list; not a cache)
+# minHopVersion: only show when the running Hop is >= this version
+# version: pin of the published base version (Nexus resolves latest SNAPSHOT timestamp)
+plugins:
+  - groupId: org.apache.hop
+    artifactId: hop-datavault
+    version: 0.5.0-SNAPSHOT
+    minHopVersion: "2.18.1"
+    name: Data Vault
+    category: Community
+    description: >
+      Data Vault 2.0, Business Vault, and dimensional modeling for Apache Hop
+    installPath: plugins/misc/datavault

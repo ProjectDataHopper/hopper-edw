@@ -135,6 +135,26 @@ Published release artifacts: **[v0.4.0](https://github.com/mattcasters/hop-data-
 2. Restart Hop GUI.
 3. New metadata types appear under **Metadata → Data Vault**. **Data Vault Update**, **Business Vault Update**, and **Validate resource definitions** actions are available in workflows. `.hdv` and `.hbv` files open in the visual modelers.
 
+### Hop Marketplace (Hop 2.19+)
+
+Continuous Jenkins builds publish the plugin zip to the Data Hopper community Maven repository. On **Apache Hop 2.19 or later**, import the shareable repository definition from this project root ([`hop-marketplace-repo.yaml`](hop-marketplace-repo.yaml)), then install from the marketplace:
+
+```bash
+# From a Hop 2.19+ install (or point at the file / raw GitHub URL)
+./hop marketplace repo import /path/to/hop-data-vault/hop-marketplace-repo.yaml
+# After the file is on main:
+# ./hop marketplace repo import \
+#   https://raw.githubusercontent.com/mattcasters/hop-data-vault/main/hop-marketplace-repo.yaml
+
+./hop marketplace query datavault
+./hop marketplace install hop-datavault
+# or: ./hop marketplace install org.apache.hop:hop-datavault:0.5.0-SNAPSHOT
+```
+
+You can also use **Tools → Marketplace…** in Hop GUI: import the repository on the **Repositories** tab, then install from the **Plugins** tab.
+
+Restart Hop after install so the plugin registry reloads. The plugin is built against **Hop 2.18.1**; the marketplace install path itself requires Hop **2.19+**.
+
 ## Usage
 
 1. Define **Data Vault Sources** as catalog `DV_SOURCE` records (`hop/{project}/sources`) for your staging / CRM tables.
