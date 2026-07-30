@@ -47,6 +47,7 @@ import org.apache.hop.pipeline.PipelineHopMeta;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transforms.dummy.DummyMeta;
+import org.apache.hop.workflow.WorkflowMeta;
 import org.jspecify.annotations.NonNull;
 
 /**
@@ -357,6 +358,17 @@ public abstract class DvTableBase extends HopMetadataBase implements IHopMetadat
   }
 
   @Override
+  public List<WorkflowMeta> generateUpdateWorkflows(
+      IHopMetadataProvider metadataProvider,
+      IVariables variables,
+      DataVaultModel model,
+      Date loadDate,
+      String recordSourceGroup)
+      throws HopException {
+    return java.util.Collections.emptyList();
+  }
+
+  @Override
   public List<String> generateUpdateDdl(
       IHopMetadataProvider metadataProvider, IVariables variables, DataVaultModel model)
       throws HopException {
@@ -430,21 +442,65 @@ public abstract class DvTableBase extends HopMetadataBase implements IHopMetadat
       IVariables variables,
       DataVaultModel model)
       throws HopException {
-    if (DvDdlSupport.isShardKeyDdlEnabled(config, targetDatabaseMeta)) {
-      String[] shardKeyColumns =
-          resolveShardKeyColumns(metadataProvider, variables, model, targetFields);
-      if (shardKeyColumns != null && shardKeyColumns.length > 0) {
-        try {
-          return DvDdlSupport.getCreateTableDdl(
-              db, targetTableName, targetFields, shardKeyColumns, null, true);
-        } catch (Exception e) {
-          throw new HopException(
-              "Error getting shard-key DDL for target table: " + targetTableName, e);
+    return generateTargetTableDdl(
+        db,
+        config,
+        targetDatabaseMeta,
+        targetTableName,
+        targetFields,
+        metadataProvider,
+        variables,
+        model,
+        false);
+  }
+
+  protected String generateTargetTableDdl(
+      Database db,
+      DataVaultConfiguration config,
+      DatabaseMeta targetDatabaseMeta,
+      String targetTableName,
+      IRowMeta targetFields,
+      IHopMetadataProvider metadataProvider,
+      IVariables variables,
+      DataVaultModel model,
+      boolean statusTrackingSatellite)
+      throws HopException {
+    try {
+      String[] shardKeyColumns = null;
+      if (DvDdlSupport.isShardKeyDdlEnabled(config, targetDatabaseMeta)) {
+        shardKeyColumns =
+            resolveShardKeyColumns(metadataProvider, variables, model, targetFields);
+        if (shardKeyColumns != null && shardKeyColumns.length == 0) {
+          shardKeyColumns = null;
         }
       }
-    }
-    try {
-      return DvDdlSupport.getTargetTableDdl(db, targetTableName, targetFields);
+
+      List<String> primaryKeyColumns =
+          DvConstraintDdlSupport.resolveDvPrimaryKeyColumns(
+              this,
+              model,
+              config,
+              variables,
+              metadataProvider,
+              targetFields,
+              statusTrackingSatellite);
+      List<ForeignKeySpec> foreignKeys =
+          DvConstraintDdlSupport.resolveDvForeignKeys(
+              this,
+              model,
+              config,
+              targetDatabaseMeta,
+              variables,
+              metadataProvider,
+              statusTrackingSatellite);
+
+      return DvDdlSupport.getTargetTableDdl(
+          db,
+          targetTableName,
+          targetFields,
+          shardKeyColumns,
+          primaryKeyColumns,
+          foreignKeys);
     } catch (Exception e) {
       throw new HopException("Error getting DDL for target table: " + targetTableName, e);
     }

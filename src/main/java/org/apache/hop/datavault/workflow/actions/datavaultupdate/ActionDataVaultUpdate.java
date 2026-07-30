@@ -65,7 +65,9 @@ import org.apache.hop.datavault.metadata.DvIntegerSettingValidationSupport;
 import org.apache.hop.datavault.metadata.DvLoadDateSupport;
 import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
 import org.apache.hop.datavault.metadata.DvModelBulkUpdateExecutionSupport;
+import org.apache.hop.datavault.metadata.DvMultiSourceUpdateWorkflowSupport;
 import org.apache.hop.datavault.metadata.DvPipelineOrchestratorSupport;
+import org.apache.hop.datavault.metadata.DvUpdateWorkflowSupport;
 import org.apache.hop.datavault.metrics.ExecutionMetricsProfileResolver;
 import org.apache.hop.datavault.metrics.ResolvedExecutionMetrics;
 import org.apache.hop.datavault.metrics.metadata.ExecutionMetricsProfileMeta;
@@ -82,7 +84,7 @@ import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.config.PipelineRunConfiguration;
-
+import org.apache.hop.workflow.WorkflowMeta;
 import org.apache.hop.workflow.action.ActionBase;
 import org.apache.hop.workflow.action.IAction;
 import org.w3c.dom.Document;
@@ -621,7 +623,8 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
       }
 
       LogLevel pipelineLogLevel = pipelineConfig.resolveExecutionLogLevel();
-      List<PipelineMeta> allPipelineMetas = new ArrayList<>();
+      List<PipelineMeta> freePipelineMetas = new ArrayList<>();
+      List<MultiSourceUpdateUnit> multiSourceUnits = new ArrayList<>();
 
       for (IDvTable table : DvUpdateExecutionSupport.orderTablesForPipelineExecution(tables)) {
         if (DvIntegrationSupport.shouldSkipUpdatePipeline(table)) {
@@ -648,9 +651,17 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
         }
 
         List<PipelineMeta> pipelineMetas;
+        List<WorkflowMeta> workflowMetas;
         try {
           pipelineMetas =
               table.generateUpdatePipelines(
+                  getMetadataProvider(),
+                  getVariables(),
+                  model,
+                  batchLoadDate,
+                  realRecordSourceGroup);
+          workflowMetas =
+              table.generateUpdateWorkflows(
                   getMetadataProvider(),
                   getVariables(),
                   model,
@@ -666,7 +677,14 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
           continue;
         }
 
-        if (pipelineMetas == null || pipelineMetas.isEmpty()) {
+        if (pipelineMetas == null) {
+          pipelineMetas = List.of();
+        }
+        if (workflowMetas == null) {
+          workflowMetas = List.of();
+        }
+
+        if (pipelineMetas.isEmpty() && workflowMetas.isEmpty()) {
           if (!Utils.isEmpty(realRecordSourceGroup)) {
             logBasic(
                 BaseMessages.getString(
@@ -698,83 +716,80 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
         }
 
         for (PipelineMeta pipelineMeta : pipelineMetas) {
-          if (pipelineMeta == null) {
-            logError(
-                BaseMessages.getString(
-                    PKG, "ActionDataVaultUpdate.Error.GenerateFailed", table.getName()),
-                new HopException(
-                    BaseMessages.getString(
-                        PKG,
-                        "ActionDataVaultUpdate.Error.GenerateFailedEmpty",
-                        table.getName())));
-            totalErrors++;
-            success = false;
-            continue;
+          if (pipelineMeta != null) {
+            pipelineMeta.lookupReferencesAfterLoading();
+            String savedPipelineFile =
+                DvGeneratedPipelineSupport.saveBeforeExecution(
+                    pipelineConfig, getVariables(), pipelineMeta);
+            if (!Utils.isEmpty(savedPipelineFile)) {
+              logBasic(
+                  BaseMessages.getString(
+                      PKG,
+                      "ActionDataVaultUpdate.Log.SavedGeneratedPipeline",
+                      pipelineMeta.getName(),
+                      savedPipelineFile));
+            }
           }
+        }
 
-          pipelineMeta.lookupReferencesAfterLoading();
-          allPipelineMetas.add(pipelineMeta);
+        DvMultiSourceUpdateWorkflowSupport.UpdateArtifacts artifacts =
+            DvMultiSourceUpdateWorkflowSupport.UpdateArtifacts.of(pipelineMetas, workflowMetas);
+        freePipelineMetas.addAll(artifacts.freePipelines());
 
-          String savedPipelineFile =
-              DvGeneratedPipelineSupport.saveBeforeExecution(
-                  pipelineConfig, getVariables(), pipelineMeta);
-          if (!Utils.isEmpty(savedPipelineFile)) {
-            logBasic(
-                BaseMessages.getString(
-                    PKG,
-                    "ActionDataVaultUpdate.Log.SavedGeneratedPipeline",
-                    pipelineMeta.getName(),
-                    savedPipelineFile));
+        if (!artifacts.multiSourceWorkflows().isEmpty()) {
+          logBasic(
+              BaseMessages.getString(
+                  PKG,
+                  "ActionDataVaultUpdate.Log.MultiSourceSerialWorkflow",
+                  table.getName(),
+                  artifacts.nestedPipelines().size()));
+          for (WorkflowMeta workflowMeta : artifacts.multiSourceWorkflows()) {
+            if (workflowMeta == null) {
+              continue;
+            }
+            multiSourceUnits.add(
+                new MultiSourceUpdateUnit(
+                    table.getName(), workflowMeta, artifacts.nestedPipelines()));
+            String savedWorkflowFile =
+                DvGeneratedPipelineSupport.saveWorkflowBeforeExecution(
+                    pipelineConfig, getVariables(), workflowMeta);
+            if (!Utils.isEmpty(savedWorkflowFile)) {
+              logBasic(
+                  BaseMessages.getString(
+                      PKG,
+                      "ActionDataVaultUpdate.Log.SavedGeneratedWorkflow",
+                      workflowMeta.getName(),
+                      savedWorkflowFile));
+            }
           }
         }
       }
 
-      if (!allPipelineMetas.isEmpty()) {
+      if (!multiSourceUnits.isEmpty() || !freePipelineMetas.isEmpty()) {
         DvTargetLoadMode targetLoadMode = pipelineConfig.resolveTargetLoadMode();
         UpdateExecutionOutcome outcome;
         if (targetLoadMode == DvTargetLoadMode.STAGING_FILE) {
-          ResolvedExecutionMetrics executionMetrics =
-              ExecutionMetricsProfileResolver.resolve(
-                  resolve(executionMetricsProfile),
-                  resolve(metricsOutputFolder),
-                  resolve(dataCatalogConnection),
-                  pipelineConfig.getTargetDatabase(),
-                  GeneratedPipelineMetadataConstants.MODEL_TYPE_DV,
-                  getParentWorkflow(),
-                  getVariables(),
-                  getMetadataProvider());
-          DatabaseMeta targetDatabase =
-              DvSpecialRecordSupport.loadTargetDatabase(getMetadataProvider(), pipelineConfig);
-          DvModelBulkUpdateExecutionSupport.ExecutionOutcome bulkOutcome =
-              DvModelBulkUpdateExecutionSupport.executeStagingFileUpdate(
+          outcome =
+              executeWithMultiSourceAndStaging(
                   result,
-                  model.getName(),
+                  model,
                   pipelineConfig,
-                  allPipelineMetas,
+                  multiSourceUnits,
+                  freePipelineMetas,
                   realRunConfig,
                   realWorkflowRunConfig,
                   pipelineLogLevel,
-                  pipelineStagingFolder,
-                  targetDatabase,
-                  pipelineConfig.getTargetDatabase(),
-                  executionMetrics.enabled() ? executionMetrics.metricsOutputFolder() : null,
-                  executionMetrics.enabled() ? executionMetrics.publishContext() : null,
-                  resolve(dataVaultModelFile),
-                  getParentWorkflow(),
                   success,
-                  totalErrors,
-                  getVariables(),
-                  this,
-                  getMetadataProvider());
-          outcome =
-              new UpdateExecutionOutcome(bulkOutcome.success(), bulkOutcome.totalErrors());
+                  totalErrors);
         } else {
           outcome =
-              executeOrchestratorUpdate(
+              executeWithMultiSourceAndOrchestrator(
                   result,
                   model,
-                  allPipelineMetas,
+                  multiSourceUnits,
+                  freePipelineMetas,
                   realRunConfig,
+                  realWorkflowRunConfig,
                   pipelineLogLevel,
                   success,
                   totalErrors);
@@ -794,6 +809,226 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
   }
 
   private record UpdateExecutionOutcome(boolean success, int totalErrors) {}
+
+  /** Multi-source hub/link: serial workflow over nested per-source pipelines. */
+  private record MultiSourceUpdateUnit(
+      String tableName, WorkflowMeta workflowMeta, List<PipelineMeta> nestedPipelines) {}
+
+  private UpdateExecutionOutcome executeWithMultiSourceAndOrchestrator(
+      Result result,
+      DataVaultModel model,
+      List<MultiSourceUpdateUnit> multiSourceUnits,
+      List<PipelineMeta> freePipelineMetas,
+      String realRunConfig,
+      String realWorkflowRunConfig,
+      LogLevel pipelineLogLevel,
+      boolean success,
+      int totalErrors)
+      throws HopException {
+    String stagingFolder =
+        resolve(
+            DvPipelineOrchestratorSupport.resolveStagingFolder(
+                pipelineStagingFolder, getVariables(), model.getName()));
+
+    try {
+      DvPipelineOrchestratorSupport.prepareStagingFolder(stagingFolder, getVariables());
+
+      // Multi-source hubs/links first (serial sources), then free pipelines in parallel.
+      UpdateExecutionOutcome multiOutcome =
+          runMultiSourceWorkflowUnits(
+              multiSourceUnits,
+              stagingFolder,
+              realRunConfig,
+              realWorkflowRunConfig,
+              pipelineLogLevel,
+              success,
+              totalErrors);
+      success = multiOutcome.success();
+      totalErrors = multiOutcome.totalErrors();
+      if (!success) {
+        return multiOutcome;
+      }
+
+      if (!freePipelineMetas.isEmpty()) {
+        return executeOrchestratorUpdate(
+            result,
+            model,
+            freePipelineMetas,
+            realRunConfig,
+            pipelineLogLevel,
+            success,
+            totalErrors);
+      }
+      return new UpdateExecutionOutcome(success, totalErrors);
+    } finally {
+      try {
+        DvPipelineOrchestratorSupport.cleanupStagingFolder(stagingFolder, getVariables());
+      } catch (HopException e) {
+        logError(
+            BaseMessages.getString(
+                PKG, "ActionDataVaultUpdate.Error.StagingCleanupFailed", stagingFolder),
+            e);
+      }
+    }
+  }
+
+  private UpdateExecutionOutcome executeWithMultiSourceAndStaging(
+      Result result,
+      DataVaultModel model,
+      DataVaultConfiguration pipelineConfig,
+      List<MultiSourceUpdateUnit> multiSourceUnits,
+      List<PipelineMeta> freePipelineMetas,
+      String realRunConfig,
+      String realWorkflowRunConfig,
+      LogLevel pipelineLogLevel,
+      boolean success,
+      int totalErrors)
+      throws HopException {
+    ResolvedExecutionMetrics executionMetrics =
+        ExecutionMetricsProfileResolver.resolve(
+            resolve(executionMetricsProfile),
+            resolve(metricsOutputFolder),
+            resolve(dataCatalogConnection),
+            pipelineConfig.getTargetDatabase(),
+            GeneratedPipelineMetadataConstants.MODEL_TYPE_DV,
+            getParentWorkflow(),
+            getVariables(),
+            getMetadataProvider());
+    DatabaseMeta targetDatabase =
+        DvSpecialRecordSupport.loadTargetDatabase(getMetadataProvider(), pipelineConfig);
+
+    // Serial multi-source: pipeline+bulk per source in order (buildMasterWorkflow is sequential).
+    for (MultiSourceUpdateUnit unit : multiSourceUnits) {
+      if (unit == null || unit.nestedPipelines() == null || unit.nestedPipelines().isEmpty()) {
+        continue;
+      }
+      logBasic(
+          BaseMessages.getString(
+              PKG,
+              "ActionDataVaultUpdate.Log.RunningMultiSourceStaging",
+              unit.tableName(),
+              unit.nestedPipelines().size()));
+      DvModelBulkUpdateExecutionSupport.ExecutionOutcome bulkOutcome =
+          DvModelBulkUpdateExecutionSupport.executeStagingFileUpdate(
+              result,
+              model.getName() + "-" + unit.tableName(),
+              pipelineConfig,
+              unit.nestedPipelines(),
+              realRunConfig,
+              realWorkflowRunConfig,
+              pipelineLogLevel,
+              pipelineStagingFolder,
+              targetDatabase,
+              pipelineConfig.getTargetDatabase(),
+              executionMetrics.enabled() ? executionMetrics.metricsOutputFolder() : null,
+              executionMetrics.enabled() ? executionMetrics.publishContext() : null,
+              resolve(dataVaultModelFile),
+              getParentWorkflow(),
+              success,
+              totalErrors,
+              getVariables(),
+              this,
+              getMetadataProvider());
+      success = bulkOutcome.success();
+      totalErrors = bulkOutcome.totalErrors();
+      if (!success) {
+        return new UpdateExecutionOutcome(success, totalErrors);
+      }
+    }
+
+    if (!freePipelineMetas.isEmpty()) {
+      DvModelBulkUpdateExecutionSupport.ExecutionOutcome bulkOutcome =
+          DvModelBulkUpdateExecutionSupport.executeStagingFileUpdate(
+              result,
+              model.getName(),
+              pipelineConfig,
+              freePipelineMetas,
+              realRunConfig,
+              realWorkflowRunConfig,
+              pipelineLogLevel,
+              pipelineStagingFolder,
+              targetDatabase,
+              pipelineConfig.getTargetDatabase(),
+              executionMetrics.enabled() ? executionMetrics.metricsOutputFolder() : null,
+              executionMetrics.enabled() ? executionMetrics.publishContext() : null,
+              resolve(dataVaultModelFile),
+              getParentWorkflow(),
+              success,
+              totalErrors,
+              getVariables(),
+              this,
+              getMetadataProvider());
+      return new UpdateExecutionOutcome(bulkOutcome.success(), bulkOutcome.totalErrors());
+    }
+    return new UpdateExecutionOutcome(success, totalErrors);
+  }
+
+  private UpdateExecutionOutcome runMultiSourceWorkflowUnits(
+      List<MultiSourceUpdateUnit> multiSourceUnits,
+      String stagingFolder,
+      String realRunConfig,
+      String realWorkflowRunConfig,
+      LogLevel pipelineLogLevel,
+      boolean success,
+      int totalErrors)
+      throws HopException {
+    if (multiSourceUnits == null || multiSourceUnits.isEmpty()) {
+      return new UpdateExecutionOutcome(success, totalErrors);
+    }
+
+    String workflowRunConfig =
+        !Utils.isEmpty(realWorkflowRunConfig) ? realWorkflowRunConfig : realRunConfig;
+
+    for (MultiSourceUpdateUnit unit : multiSourceUnits) {
+      if (unit == null || unit.workflowMeta() == null) {
+        continue;
+      }
+      List<PipelineMeta> nested =
+          unit.nestedPipelines() != null ? unit.nestedPipelines() : List.of();
+      DvPipelineOrchestratorSupport.stageNamedPipelines(
+          stagingFolder, getVariables(), nested);
+      java.util.Map<String, String> stagedPaths =
+          DvMultiSourceUpdateWorkflowSupport.mapStagedPipelinePaths(nested);
+      DvMultiSourceUpdateWorkflowSupport.applyStagedPipelineFilenames(
+          unit.workflowMeta(), stagedPaths);
+      DvMultiSourceUpdateWorkflowSupport.applyPipelineRunConfiguration(
+          unit.workflowMeta(), realRunConfig);
+      DvPipelineOrchestratorSupport.stageWorkflow(
+          stagingFolder, getVariables(), unit.workflowMeta());
+
+      logBasic(
+          BaseMessages.getString(
+              PKG,
+              "ActionDataVaultUpdate.Log.RunningMultiSourceWorkflow",
+              unit.tableName(),
+              unit.workflowMeta().getName(),
+              nested.size()));
+
+      Result workflowResult =
+          DvUpdateWorkflowSupport.runMasterWorkflow(
+              unit.workflowMeta(),
+              workflowRunConfig,
+              pipelineLogLevel != null ? pipelineLogLevel : getLogLevel(),
+              this,
+              getVariables(),
+              getMetadataProvider());
+      if (workflowResult == null) {
+        workflowResult = new Result();
+      }
+      if (workflowResult.getNrErrors() > 0 || !workflowResult.getResult()) {
+        logError(
+            BaseMessages.getString(
+                PKG,
+                "ActionDataVaultUpdate.Error.MultiSourceWorkflowFailed",
+                unit.workflowMeta().getName(),
+                unit.tableName()));
+        success = false;
+        totalErrors += Math.max(1, (int) workflowResult.getNrErrors());
+        return new UpdateExecutionOutcome(success, totalErrors);
+      }
+    }
+    return new UpdateExecutionOutcome(success, totalErrors);
+  }
 
   private UpdateExecutionOutcome executeOrchestratorUpdate(
       Result result,
@@ -823,13 +1058,22 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
             PKG, "ActionDataVaultUpdate.Log.ParallelCopies", parallelCopies));
 
     try {
+      // Staging folder may already be prepared by multi-source path; recreate is safe.
       DvPipelineOrchestratorSupport.prepareStagingFolder(stagingFolder, getVariables());
+      // Free pipelines only — use a free-only subfolder so Get File Names does not pick multi-source
+      // nested .hpl files left from earlier staging.
+      String freeFolder = stagingFolder;
+      if (!freeFolder.endsWith("/") && !freeFolder.endsWith("\\")) {
+        freeFolder = freeFolder + "/";
+      }
+      freeFolder = freeFolder + "free/";
+      DvPipelineOrchestratorSupport.prepareStagingFolder(freeFolder, getVariables());
       DvPipelineOrchestratorSupport.stagePipelines(
-          stagingFolder, getVariables(), allPipelineMetas, true);
+          freeFolder, getVariables(), allPipelineMetas, true);
 
       PipelineMeta orchestrator =
           DvPipelineOrchestratorSupport.buildOrchestratorPipeline(
-              stagingFolder, realRunConfig, parallelCopies, model.getName());
+              freeFolder, realRunConfig, parallelCopies, model.getName());
 
       logBasic(
           BaseMessages.getString(

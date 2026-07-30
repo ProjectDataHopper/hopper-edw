@@ -136,6 +136,80 @@ class DvDdlSupportTest {
   }
 
   @Test
+  void buildCreateTableStatementOmitsPrimaryKeyWhenEmpty() {
+    DatabaseMeta databaseMeta = postgresDatabaseMeta();
+    IRowMeta fields = hubLayout();
+
+    String ddl =
+        DvDdlSupport.buildCreateTableStatement(
+            databaseMeta, new Variables(), "hub_customer", fields, null, List.of(), true);
+
+    assertFalse(ddl.toUpperCase().contains("PRIMARY KEY"));
+    assertFalse(ddl.toUpperCase().contains("FOREIGN KEY"));
+  }
+
+  @Test
+  void buildCreateTableStatementIncludesForeignKeyOnPostgres() {
+    DatabaseMeta databaseMeta = postgresDatabaseMeta();
+    IRowMeta fields = multiActiveSatelliteLayout();
+    ForeignKeySpec fk =
+        new ForeignKeySpec(
+            "fk_sat_customer_phone_hub_customer",
+            List.of("customer_hk"),
+            "hub_customer",
+            List.of("customer_hk"));
+
+    String ddl =
+        DvDdlSupport.buildCreateTableStatement(
+            databaseMeta,
+            new Variables(),
+            "sat_customer_phone",
+            fields,
+            null,
+            List.of("customer_hk", "phone_type", "LOAD_DATE"),
+            List.of(fk),
+            true);
+
+    assertTrue(ddl.toUpperCase().contains("PRIMARY KEY"));
+    assertTrue(ddl.toUpperCase().contains("FOREIGN KEY"));
+    assertTrue(ddl.toUpperCase().contains("REFERENCES"));
+    assertTrue(ddl.contains("hub_customer"));
+  }
+
+  @Test
+  void buildCreateTableStatementOmitsForeignKeyOnSingleStore() {
+    DatabaseMeta databaseMeta = singleStoreDatabaseMeta();
+    IRowMeta fields = multiActiveSatelliteLayout();
+    ForeignKeySpec fk =
+        new ForeignKeySpec(
+            "fk_sat_customer_phone_hub_customer",
+            List.of("customer_hk"),
+            "hub_customer",
+            List.of("customer_hk"));
+
+    String ddl =
+        DvDdlSupport.buildCreateTableStatement(
+            databaseMeta,
+            new Variables(),
+            "sat_customer_phone",
+            fields,
+            null,
+            List.of("customer_hk"),
+            List.of(fk),
+            true);
+
+    assertTrue(ddl.toUpperCase().contains("PRIMARY KEY"));
+    assertFalse(ddl.toUpperCase().contains("FOREIGN KEY"));
+    assertFalse(ddl.toUpperCase().contains("REFERENCES"));
+  }
+
+  @Test
+  void supportsForeignKeyConstraintsFalseForSingleStore() {
+    assertFalse(DvDdlSupport.supportsForeignKeyConstraints(singleStoreDatabaseMeta()));
+    assertTrue(DvDdlSupport.supportsForeignKeyConstraints(postgresDatabaseMeta()));
+  }
+
+  @Test
   void deduplicateCreateTableDdlKeepsFirstStatementPerTable() {
     String first =
         "CREATE TABLE sat_syn_product\n(\n  product_hk BYTEA\n, product_code VARCHAR(8)\n);";
@@ -235,6 +309,10 @@ class DvDdlSupportTest {
   private static DatabaseMeta singleStoreDatabaseMeta() {
     return new DatabaseMeta(
         "singlestore-test", "SingleStore (MemSQL)", "Native", "", "localhost", "test", "root", "");
+  }
+
+  private static DatabaseMeta postgresDatabaseMeta() {
+    return databaseMetaWithPluginId(DvBulkLoadPluginSupport.POSTGRESQL_DB_PLUGIN_ID);
   }
 
   private static DatabaseMeta databaseMetaWithPluginId(String pluginId) {

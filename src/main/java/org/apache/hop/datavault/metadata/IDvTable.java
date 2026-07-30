@@ -34,6 +34,7 @@ import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
+import org.apache.hop.workflow.WorkflowMeta;
 
 /**
  * Common interface for all Data Vault 2.0 table-like structures:
@@ -100,6 +101,33 @@ public interface IDvTable extends IGuiPosition, IBaseMeta, IHasName, IChanged, I
    * @throws HopException on metadata load or other errors during generation
    */
   List<PipelineMeta> generateUpdatePipelines(
+      IHopMetadataProvider metadataProvider,
+      IVariables variables,
+      DataVaultModel model,
+      Date loadDate,
+      String recordSourceGroup)
+      throws HopException;
+
+  /**
+   * Generate workflow units that orchestrate update pipelines for this table.
+   *
+   * <p>Multi-source hubs and links return one workflow that runs per-source pipelines in series so
+   * each subsequent source sees keys already inserted by earlier sources (required for safe
+   * primary-key enforcement under bulk load). When this list is non-empty, update execution must
+   * treat each workflow as the unit of work and must <em>not</em> schedule the nested pipelines as
+   * independent parallel orchestrator jobs.
+   *
+   * <p>Default implementations return an empty list (pipeline-only tables).
+   *
+   * @param metadataProvider for loading configuration, database connections, sources etc.
+   * @param variables for variable resolution
+   * @param model the containing DataVaultModel
+   * @param loadDate the static load date for this batch
+   * @param recordSourceGroup optional group filter; when empty, all record sources are processed
+   * @return generated workflows (often empty or a single multi-source serial workflow)
+   * @throws HopException on generation errors
+   */
+  List<WorkflowMeta> generateUpdateWorkflows(
       IHopMetadataProvider metadataProvider,
       IVariables variables,
       DataVaultModel model,

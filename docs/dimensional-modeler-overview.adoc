@@ -19,11 +19,17 @@ The plugins share infrastructure (graph shell, ELK layout, orchestrator, workflo
 
 A dimensional model contains:
 
-* **Configuration** — target database, default standard column names (`dim_key`, `date_from`, `date_to`, …), pipeline naming
+* **Configuration** — target database, default standard column names (`dim_key`, `date_from`, `date_to`, …), pipeline naming, optional **Generate primary keys** / **Generate foreign keys** for CREATE TABLE DDL
 * **Per-dimension surrogate keys** — optional override of strategy (none, auto-increment, source field such as a DV hash key) and column name; fact foreign key columns remain per join
 * **Tables** — dimensions, facts, junk dimensions, bridges, factless facts, snapshot facts, aggregates
 * **Conformed dimension registry** — logical name → physical dimension table
 * **Notes** — canvas documentation only
+
+Optional DDL constraints (both off by default):
+
+* **Generate primary keys** — dimension and junk surrogate keys, and bridge composite keys, as `PRIMARY KEY` on CREATE TABLE. Fact tables do not receive a primary key in this release.
+* **Generate foreign keys** — fact/bridge roles and dimension outriggers emit `FOREIGN KEY` clauses when the target engine supports them (not SingleStore). Parent dimensions receive a primary key when FK generation is enabled so references are valid. CREATE only; no ALTER retrofit.
+
 
 Open a `.hdm` file in Hop GUI for the visual editor (same interaction model as the Data Vault canvas).
 

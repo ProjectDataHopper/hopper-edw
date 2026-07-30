@@ -48,6 +48,7 @@ import org.apache.hop.pipeline.engine.IPipelineEngine;
 import org.apache.hop.pipeline.engine.PipelineEngineFactory;
 import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transforms.getfilenames.FileItem;
+import org.apache.hop.workflow.WorkflowMeta;
 import org.apache.hop.pipeline.transforms.getfilenames.FilterItem;
 import org.apache.hop.pipeline.transforms.getfilenames.GetFileNamesMeta;
 import org.apache.hop.pipeline.transforms.pipelineexecutor.PipelineExecutorMeta;
@@ -466,6 +467,46 @@ public final class DvPipelineOrchestratorSupport {
     target.setNrErrors(target.getNrErrors() + source.getNrErrors());
     if (source.getNrErrors() > 0 || !source.getResult()) {
       target.setResult(false);
+    }
+  }
+
+  /**
+   * Stages pipelines using stable basenames ({@code name.hpl}) without sequence prefixes. Used for
+   * multi-source nested pipelines referenced by serial update workflows.
+   */
+  public static void stageNamedPipelines(
+      String folder, IVariables variables, List<PipelineMeta> pipelines) throws HopException {
+    stagePipelines(folder, variables, pipelines, false);
+  }
+
+  /** Writes a workflow meta to the staging folder as {@code name.hwf}. */
+  public static String stageWorkflow(
+      String folder, IVariables variables, WorkflowMeta workflowMeta) throws HopException {
+    if (workflowMeta == null || Utils.isEmpty(workflowMeta.getName())) {
+      return null;
+    }
+    String workflowFilename =
+        appendPath(folder, workflowMeta.getName() + WorkflowMeta.WORKFLOW_EXTENSION);
+    workflowMeta.setFilename(workflowFilename);
+    try {
+      FileObject file = HopVfs.getFileObject(workflowFilename, variables);
+      FileObject parent = file.getParent();
+      if (parent != null && !parent.exists()) {
+        parent.createFolder();
+      }
+      String xml = workflowMeta.getXml(variables);
+      try (OutputStreamWriter writer =
+          new OutputStreamWriter(HopVfs.getOutputStream(file, false), StandardCharsets.UTF_8)) {
+        writer.write(xml);
+      }
+      return workflowFilename;
+    } catch (Exception e) {
+      throw new HopException(
+          "Unable to stage generated workflow '"
+              + workflowMeta.getName()
+              + "' to "
+              + workflowFilename,
+          e);
     }
   }
 

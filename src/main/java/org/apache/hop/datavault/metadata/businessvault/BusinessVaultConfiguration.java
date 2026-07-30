@@ -134,6 +134,24 @@ public class BusinessVaultConfiguration implements IDvTargetLoadConfiguration {
   private String validToField = DEFAULT_VALID_TO_FIELD;
 
   @GuiWidgetElement(
+      order = "0200",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::DataVaultConfiguration.GeneratePrimaryKeys.Label",
+      toolTip = "i18n::DataVaultConfiguration.GeneratePrimaryKeys.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_GENERAL_TAB_ID)
+  @HopMetadataProperty
+  private boolean generatePrimaryKeys = false;
+
+  @GuiWidgetElement(
+      order = "0210",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::DataVaultConfiguration.GenerateForeignKeys.Label",
+      toolTip = "i18n::DataVaultConfiguration.GenerateForeignKeys.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_GENERAL_TAB_ID)
+  @HopMetadataProperty
+  private boolean generateForeignKeys = false;
+
+  @GuiWidgetElement(
       order = "0510",
       type = GuiElementType.TEXT,
       variables = true,

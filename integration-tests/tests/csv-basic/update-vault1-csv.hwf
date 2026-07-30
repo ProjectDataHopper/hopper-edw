@@ -57,7 +57,11 @@
       <attributes_hac/>
     </action>
     <action>
-      <sql>DROP TABLE IF EXISTS hub_customer;
+      <sql>DROP VIEW IF EXISTS sat_customer_hb_v;
+DROP VIEW IF EXISTS satb_customer_hb;
+DROP TABLE IF EXISTS sat_customer_hb;
+DROP TABLE IF EXISTS pit_customer;
+DROP TABLE IF EXISTS hub_customer;
 DROP TABLE IF EXISTS sat_customer;
 </sql>
       <connection>Vault</connection>

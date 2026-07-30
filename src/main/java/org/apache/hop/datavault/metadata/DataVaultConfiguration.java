@@ -341,6 +341,24 @@ public class DataVaultConfiguration implements IDvTargetLoadConfiguration {
   private boolean useLoadEndDate = false;
 
   @GuiWidgetElement(
+      order = "0420",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::DataVaultConfiguration.GeneratePrimaryKeys.Label",
+      toolTip = "i18n::DataVaultConfiguration.GeneratePrimaryKeys.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_COLUMNS_TAB_ID)
+  @HopMetadataProperty
+  private boolean generatePrimaryKeys = false;
+
+  @GuiWidgetElement(
+      order = "0430",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::DataVaultConfiguration.GenerateForeignKeys.Label",
+      toolTip = "i18n::DataVaultConfiguration.GenerateForeignKeys.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_COLUMNS_TAB_ID)
+  @HopMetadataProperty
+  private boolean generateForeignKeys = false;
+
+  @GuiWidgetElement(
       order = "0500",
       type = GuiElementType.TEXT,
       variables = true,

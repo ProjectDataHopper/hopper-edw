@@ -66,6 +66,7 @@ import org.apache.hop.metadata.api.IHasName;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineHopMeta;
 import org.apache.hop.pipeline.PipelineMeta;
+import org.apache.hop.workflow.WorkflowMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transforms.constant.ConstantField;
 import org.apache.hop.pipeline.transforms.constant.ConstantMeta;
@@ -77,6 +78,7 @@ import org.apache.hop.pipeline.transforms.selectvalues.SelectValuesMeta;
 import org.apache.hop.pipeline.transforms.sort.SortRowsField;
 import org.apache.hop.pipeline.transforms.sort.SortRowsMeta;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
+import org.apache.hop.pipeline.transforms.uniquerowsbyhashset.UniqueRowsByHashSetMeta;
 import org.jspecify.annotations.NonNull;
 
 /**
@@ -678,23 +680,57 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
         TransformMeta selectTransform =
             addSourceSelectRows(ctx, pipelineMeta, predecessorTransform);
 
-        // Target side
+        // Target side: prefer SQL ORDER BY with a hop-compatible binary/C collation when we are
+        // certain it matches Hop SortRows (STRING/HEX). Linguistic DB collations can disagree on
+        // decimal-dash keys (e.g. "0-100-..." vs "0-10-...") and desynchronize MergeRows → PK
+        // violations. When uncertain, SortRows the target leg. Source always SortRows (hash in Hop).
+        DvHashKeyOrderStrategySupport.TargetHashOrderPlan targetOrderPlan =
+            resolveTargetHashOrderPlan(ctx, linkHashKeyFieldName);
         TransformMeta targetInputTransform =
-            addTargetTableInput(ctx, pipelineMeta);
+            addTargetTableInput(ctx, pipelineMeta, targetOrderPlan);
         if (targetInputTransform != null) {
           GeneratedPipelineMetadataSupport.stampTargetRead(
               targetInputTransform, "link", getName(), ctx.targetTableName, ctx.targetDbName);
         }
+        TransformMeta targetMergeInput = targetInputTransform;
+        if (targetOrderPlan.useHopSortRows()) {
+          targetMergeInput =
+              addSortRows(
+                  ctx,
+                  pipelineMeta,
+                  targetInputTransform,
+                  linkHashKeyFieldName,
+                  "sort_target_" + linkHashKeyFieldName,
+                  LOCATION_START_LINE_3.x + SPACING_WIDTH,
+                  LOCATION_START_LINE_3.y);
+        }
 
         TransformMeta sortTransform =
-            addSortRows(ctx, pipelineMeta, selectTransform, linkHashKeyFieldName);
+            addSortRows(
+                ctx,
+                pipelineMeta,
+                selectTransform,
+                linkHashKeyFieldName,
+                "sort_" + linkHashKeyFieldName,
+                LOCATION_START_LINE_2.x + SPACING_WIDTH * (hubNames.size() + 3),
+                LOCATION_START_LINE_2.y);
         if (sortTransform != null) {
           GeneratedPipelineMetadataSupport.stampSort(
               sortTransform, "link", getName(), ctx.targetTableName);
         }
 
+        // Collapse identical link hashes before CDC merge (source SQL DISTINCT covers DB sources;
+        // this also covers file sources and any post-hash duplicates).
+        TransformMeta uniqueTransform =
+            addUniqueLinkHashRows(pipelineMeta, sortTransform, linkHashKeyFieldName);
+        TransformMeta mergeInput = uniqueTransform != null ? uniqueTransform : sortTransform;
+
         TransformMeta mergeTransform =
-            addMergeRows(ctx, pipelineMeta, sortTransform, targetInputTransform);
+            addMergeRows(
+                ctx,
+                pipelineMeta,
+                mergeInput,
+                targetMergeInput != null ? targetMergeInput : targetInputTransform);
         if (mergeTransform != null) {
           GeneratedPipelineMetadataSupport.stampCdcMerge(
               mergeTransform, "link", getName(), ctx.targetTableName, ctx.targetDbName);
@@ -735,6 +771,32 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
     } catch (Exception e) {
       throw new HopException("Error generating update pipeline for Link target " + getName(), e);
     }
+  }
+
+  @Override
+  public List<WorkflowMeta> generateUpdateWorkflows(
+      IHopMetadataProvider metadataProvider,
+      IVariables variables,
+      DataVaultModel model,
+      Date loadDate,
+      String recordSourceGroup)
+      throws HopException {
+    List<PipelineMeta> pipelines =
+        generateUpdatePipelines(
+            metadataProvider, variables, model, loadDate, recordSourceGroup);
+    if (pipelines == null || pipelines.size() <= 1) {
+      return List.of();
+    }
+    DataVaultConfiguration config =
+        model != null ? model.getConfigurationOrDefault() : new DataVaultConfiguration();
+    String prefix =
+        config != null && !Utils.isEmpty(config.getLinkPipelineNamePrefix())
+            ? config.getLinkPipelineNamePrefix()
+            : DataVaultConfiguration.DEFAULT_LINK_PIPELINE_NAME_PREFIX;
+    String workflowName =
+        DvMultiSourceUpdateWorkflowSupport.defaultWorkflowName(this, prefix);
+    return DvMultiSourceUpdateWorkflowSupport.buildSerialWorkflowsIfMultiSource(
+        workflowName, pipelines);
   }
 
   @Override
@@ -1037,8 +1099,25 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
     return DvLinkHubSourceKeyFieldSupport.resolveSourceFieldNames(linkSource, hubName, hub, variables);
   }
 
+  private DvHashKeyOrderStrategySupport.TargetHashOrderPlan resolveTargetHashOrderPlan(
+      LinkUpdateContext ctx, String hashFieldName) {
+    String quoted =
+        ctx.targetDatabaseMeta != null
+            ? ctx.targetDatabaseMeta.quoteField(hashFieldName)
+            : hashFieldName;
+    return DvHashKeyOrderStrategySupport.resolve(
+        ctx.targetDatabaseMeta,
+        ctx.config,
+        ctx.variables,
+        quoted,
+        ctx.hashOrderSession,
+        true);
+  }
+
   private TransformMeta addTargetTableInput(
-      LinkUpdateContext ctx, PipelineMeta pipelineMeta)
+      LinkUpdateContext ctx,
+      PipelineMeta pipelineMeta,
+      DvHashKeyOrderStrategySupport.TargetHashOrderPlan orderPlan)
       throws HopException {
     if (ctx.targetDatabaseMeta == null) {
       return null;
@@ -1049,7 +1128,8 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
 
     String quotedLinkHash = ctx.targetDatabaseMeta.quoteField(linkHashKeyFieldName);
 
-    StringBuilder sql = new StringBuilder("SELECT ");
+    // DISTINCT so CDC merge never sees duplicate LHKs from a dirty target (pre-PK loads).
+    StringBuilder sql = new StringBuilder("SELECT DISTINCT ");
     sql.append(quotedLinkHash);
 
     // Also select the hub hash columns that are stored in the link (for completeness / potential
@@ -1072,10 +1152,15 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
     sql.append(
         ctx.targetDatabaseMeta.getQuotedSchemaTableCombination(
             ctx.variables, null, ctx.targetTableName));
-    sql.append(" ORDER BY ");
-    sql.append(quotedLinkHash);
 
-    DvSqlSupport.assignDisplaySql(targetTableInputMeta, sql.toString());
+    // SQL ORDER BY with hop-compatible COLLATE when certain; else unordered + Hop SortRows.
+    DvHashKeyOrderStrategySupport.TargetHashOrderPlan plan =
+        orderPlan != null
+            ? orderPlan
+            : DvHashKeyOrderStrategySupport.hopSortFallback();
+    String finalSql = DvHashKeyOrderStrategySupport.applyToDistinctSelect(sql.toString(), plan);
+
+    DvSqlSupport.assignDisplaySql(targetTableInputMeta, finalSql);
 
     String transformName = "target " + ctx.targetDatabaseMeta.getName() + "." + ctx.targetTableName;
 
@@ -1186,21 +1271,50 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
       LinkUpdateContext ctx,
       PipelineMeta pipelineMeta,
       TransformMeta predecessor,
-      String sortFieldName) {
+      String sortFieldName,
+      String transformName,
+      int locationX,
+      int locationY) {
+    if (predecessor == null || Utils.isEmpty(sortFieldName)) {
+      return predecessor;
+    }
     SortRowsMeta sortRowsMeta = new SortRowsMeta();
     SortRowsField sf = new SortRowsField();
     sf.setFieldName(sortFieldName);
     sf.setAscending(true);
+    // Must match on source and target streams — case-sensitive Java order, not DB collation.
     sf.setCaseSensitive(true);
     sortRowsMeta.getSortFields().add(sf);
     DvSortRowsSupport.applyConfiguration(sortRowsMeta, ctx.config, ctx.variables);
 
-    TransformMeta tm = new TransformMeta("SortRows", "sort_" + sortFieldName, sortRowsMeta);
-    Point loc =
-        new Point(
-            LOCATION_START_LINE_2.x + SPACING_WIDTH * (hubNames.size() + 3),
-            LOCATION_START_LINE_2.y);
-    tm.setLocation(loc);
+    TransformMeta tm =
+        new TransformMeta(
+            "SortRows",
+            Utils.isEmpty(transformName) ? "sort_" + sortFieldName : transformName,
+            sortRowsMeta);
+    tm.setLocation(new Point(locationX, locationY));
+    pipelineMeta.addTransform(tm);
+    pipelineMeta.addPipelineHop(new PipelineHopMeta(predecessor, tm));
+    return tm;
+  }
+
+  private TransformMeta addUniqueLinkHashRows(
+      PipelineMeta pipelineMeta, TransformMeta predecessor, String linkHashFieldName) {
+    if (predecessor == null || Utils.isEmpty(linkHashFieldName)) {
+      return predecessor;
+    }
+    UniqueRowsByHashSetMeta uniqueMeta = new UniqueRowsByHashSetMeta();
+    List<UniqueRowsByHashSetMeta.CompareField> compareFields = new ArrayList<>();
+    UniqueRowsByHashSetMeta.CompareField compareField =
+        new UniqueRowsByHashSetMeta.CompareField();
+    compareField.setName(linkHashFieldName);
+    compareFields.add(compareField);
+    uniqueMeta.setCompareFields(compareFields);
+
+    TransformMeta tm =
+        new TransformMeta("UniqueRowsByHashSet", "distinct_" + linkHashFieldName, uniqueMeta);
+    tm.setLocation(
+        predecessor.getLocation().x + SPACING_WIDTH, predecessor.getLocation().y);
     pipelineMeta.addTransform(tm);
     pipelineMeta.addPipelineHop(new PipelineHopMeta(predecessor, tm));
     return tm;
@@ -1312,6 +1426,10 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
     final String targetDbName;
     final String targetTableName;
     final String pipelineName;
+
+    /** Cache hop-compatible ORDER BY probes for this link update generation. */
+    final DvHashKeyOrderStrategySupport.Session hashOrderSession =
+        new DvHashKeyOrderStrategySupport.Session();
 
     LinkUpdateContext(
         DvLink link,

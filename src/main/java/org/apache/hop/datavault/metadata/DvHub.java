@@ -67,6 +67,7 @@ import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.api.IHopMetadataSerializer;
 import org.apache.hop.pipeline.PipelineHopMeta;
 import org.apache.hop.pipeline.PipelineMeta;
+import org.apache.hop.workflow.WorkflowMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transforms.constant.ConstantField;
 import org.apache.hop.pipeline.transforms.constant.ConstantMeta;
@@ -530,6 +531,32 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
     } catch (Exception e) {
       throw new HopException("Error generating update pipeline(s) for Hub target " + getName(), e);
     }
+  }
+
+  @Override
+  public List<WorkflowMeta> generateUpdateWorkflows(
+      IHopMetadataProvider metadataProvider,
+      IVariables variables,
+      DataVaultModel model,
+      Date loadDate,
+      String recordSourceGroup)
+      throws HopException {
+    List<PipelineMeta> pipelines =
+        generateUpdatePipelines(
+            metadataProvider, variables, model, loadDate, recordSourceGroup);
+    if (pipelines == null || pipelines.size() <= 1) {
+      return List.of();
+    }
+    DataVaultConfiguration config =
+        model != null ? model.getConfigurationOrDefault() : new DataVaultConfiguration();
+    String prefix =
+        config != null && !Utils.isEmpty(config.getHubPipelineNamePrefix())
+            ? config.getHubPipelineNamePrefix()
+            : DataVaultConfiguration.DEFAULT_HUB_PIPELINE_NAME_PREFIX;
+    String workflowName =
+        DvMultiSourceUpdateWorkflowSupport.defaultWorkflowName(this, prefix);
+    return DvMultiSourceUpdateWorkflowSupport.buildSerialWorkflowsIfMultiSource(
+        workflowName, pipelines);
   }
 
   private List<DataVaultSource> loadRecordSources(

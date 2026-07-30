@@ -66,7 +66,11 @@ public class DvDatabaseLinkSourcePipelineBuilder extends DvDatabaseSourcePipelin
    * @throws HopException In case there's an error in the model
    */
   protected String getSql() throws HopException {
-    StringBuilder sql = new StringBuilder("SELECT ");
+    // DISTINCT on hub BKs / driving keys / dependent child keys — same natural grain that becomes
+    // the link hash. Without this, repeated source rows (or multi-file history of the same pair)
+    // produce multiple identical LHK values; MergeRows then emits multiple "new" rows and bulk
+    // load fails on PRIMARY KEY (lnk_*_hk).
+    StringBuilder sql = new StringBuilder("SELECT DISTINCT ");
     DvLink link = (DvLink) dvTable;
     DvDatabaseSource source = (DvDatabaseSource) dvSource;
     DatabaseMeta sourceDbMeta = loadDatabaseMeta(variables.resolve(source.getDatabaseName()));

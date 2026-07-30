@@ -701,7 +701,8 @@ public class DvSatellite extends DvTableBase
               stsLayout,
               metadataProvider,
               variables,
-              model);
+              model,
+              true);
       if (!Utils.isEmpty(ddl)) {
         result.add(ddl);
       }

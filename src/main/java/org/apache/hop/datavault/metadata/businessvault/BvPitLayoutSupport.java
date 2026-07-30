@@ -127,7 +127,7 @@ public final class BvPitLayoutSupport {
     return "hashkey";
   }
 
-  static DvHub resolveHubDerivative(BvPitTable pitTable, DataVaultModel dvModel) {
+  public static DvHub resolveHubDerivative(BvPitTable pitTable, DataVaultModel dvModel) {
     if (pitTable == null || dvModel == null) {
       return null;
     }

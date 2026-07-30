@@ -416,6 +416,18 @@ def update_sample_size(full_count: int) -> int:
     return max(50, full_count // 100)
 
 
+def wave_new_id_range(base_count: int, sample_size: int, period_months: int) -> range:
+    """Allocate non-overlapping id ranges for each monthly update wave.
+
+    Without this, every update wave reuses {@code base_count+1 .. base_count+sample}
+    (e.g. orders O100001–O101000 every month) with a new random customer assignment,
+    so CRM append loads create many rows that share order_id but not customer_id.
+    """
+    period = max(1, period_months)
+    start = base_count + (period - 1) * sample_size + 1
+    return range(start, start + sample_size)
+
+
 def wave_rng(base_seed: int, wave_label: str) -> random.Random:
     return random.Random(base_seed + sum(ord(character) for character in wave_label))
 
@@ -523,16 +535,18 @@ def generate_update(files_dir: Path, scale: Scale, base_rng: random.Random, cont
     sample_orders = update_sample_size(scale.orders)
     sample_products = update_sample_size(scale.products)
     sample_warehouses = update_sample_size(scale.warehouses)
+    period_months = max(1, context.period_months)
 
     # Satellite CRM tables are upserted on update; include changed existing ids plus new ids.
+    # New entity ids must not overlap across monthly waves (see wave_new_id_range).
     changed_customers = sample_existing_ids(satellite_rng, scale.customers, sample_customers)
-    new_customers = range(scale.customers + 1, scale.customers + sample_customers + 1)
+    new_customers = wave_new_id_range(scale.customers, sample_customers, period_months)
     satellite_customers = chain(changed_customers, new_customers)
-    new_orders = range(scale.orders + 1, scale.orders + sample_orders + 1)
-    new_products = range(scale.products + 1, scale.products + sample_products + 1)
-    new_warehouses = range(scale.warehouses + 1, scale.warehouses + sample_warehouses + 1)
-    max_customer_id = scale.customers + sample_customers
-    max_product_id = scale.products + sample_products
+    new_orders = wave_new_id_range(scale.orders, sample_orders, period_months)
+    new_products = wave_new_id_range(scale.products, sample_products, period_months)
+    new_warehouses = wave_new_id_range(scale.warehouses, sample_warehouses, period_months)
+    max_customer_id = max(new_customers, default=scale.customers)
+    max_product_id = max(new_products, default=scale.products)
 
     write_csv(
         files_dir / f"customer_hub_{wave}.csv",
