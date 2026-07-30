@@ -54,6 +54,11 @@
       "name" : "MARQUEZ_NAMESPACE_JOB",
       "value" : "retail-job",
       "description" : "The namespace to use in Marquez"
+    },
+    {
+      "name" : "EXECUTIONS_FOLDER",
+      "value" : "/tmp/executions",
+      "description" : "Where to send/find the executions"
     }
   ]
 }
