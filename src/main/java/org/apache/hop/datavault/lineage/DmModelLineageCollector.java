@@ -26,7 +26,9 @@ import org.apache.hop.datavault.catalog.DvCatalogNamespaces;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalConfiguration;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.datavault.metadata.dimensional.DmDimension;
+import org.apache.hop.datavault.metadata.dimensional.DmDimensionAlias;
 import org.apache.hop.datavault.metadata.dimensional.DmDimensionAttribute;
+import org.apache.hop.datavault.metadata.dimensional.DmDimensionResolutionSupport;
 import org.apache.hop.datavault.metadata.dimensional.DmFact;
 import org.apache.hop.datavault.metadata.dimensional.DmFactDegenerateDimension;
 import org.apache.hop.datavault.metadata.dimensional.DmFactDimensionRole;
@@ -35,6 +37,7 @@ import org.apache.hop.datavault.metadata.dimensional.DmNaturalKeyField;
 import org.apache.hop.datavault.metadata.dimensional.DmSourceConfiguration;
 import org.apache.hop.datavault.metadata.dimensional.DmTableType;
 import org.apache.hop.datavault.metadata.dimensional.IDmTable;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Builds a {@link LineageSnapshot} from a dimensional (Kimball) model. */
 public final class DmModelLineageCollector {
@@ -42,6 +45,15 @@ public final class DmModelLineageCollector {
   private DmModelLineageCollector() {}
 
   public static LineageSnapshot collect(DimensionalModel model, IVariables variables) {
+    return collect(model, variables, null);
+  }
+
+  /**
+   * @param metadataProvider optional; required to resolve {@link DmDimensionAlias} targets that
+   *     live in an external {@code .hdm} file
+   */
+  public static LineageSnapshot collect(
+      DimensionalModel model, IVariables variables, IHopMetadataProvider metadataProvider) {
     if (model == null) {
       throw new IllegalArgumentException("Dimensional model is required");
     }
@@ -65,6 +77,8 @@ public final class DmModelLineageCollector {
       TableLineage tableLineage;
       if (table instanceof DmDimension dimension) {
         tableLineage = collectDimension(dimension, model, variables, targetDb);
+      } else if (table instanceof DmDimensionAlias alias) {
+        tableLineage = collectDimensionAlias(alias, model, variables, metadataProvider, targetDb);
       } else if (table instanceof DmFact fact) {
         tableLineage = collectFact(fact, model, variables, targetDb);
       } else {
@@ -142,6 +156,108 @@ public final class DmModelLineageCollector {
               dimension.getSurrogateKeyStrategy() != null
                   ? dimension.getSurrogateKeyStrategy().name()
                   : "surrogate"));
+      field.addContribution(contribution);
+      lineage.addField(field);
+    }
+
+    return lineage;
+  }
+
+  /**
+   * Dimension aliases (role-playing or external linked dimensions) do not store keys/attributes;
+   * field lineage is projected from the resolved physical {@link DmDimension}.
+   */
+  private static TableLineage collectDimensionAlias(
+      DmDimensionAlias alias,
+      DimensionalModel model,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider,
+      String targetDb) {
+    TableLineage lineage =
+        baseTable(alias, model, variables, targetDb, DmTableType.DIMENSION_ALIAS.name());
+    addNamingReasons(lineage, alias);
+
+    DmDimension target =
+        DmDimensionResolutionSupport.resolveAliasTarget(
+            model, alias, variables, metadataProvider);
+    String referencedName = resolve(alias.getReferencedDimensionName(), variables);
+    String externalModel = resolve(alias.getReferencedModelFilename(), variables);
+
+    if (target == null) {
+      lineage.addReason(
+          LineageReasonFactory.dmRoleMapping(
+              alias.getName(),
+              Utils.isEmpty(externalModel)
+                  ? "unresolved dimension alias → " + nvl(referencedName)
+                  : "unresolved external dimension alias → "
+                      + nvl(referencedName)
+                      + " in "
+                      + externalModel,
+              nvl(referencedName)));
+      if (!Utils.isEmpty(referencedName)) {
+        TableSourceRef ref =
+            new TableSourceRef(TableSourceKind.DM_TABLE, referencedName, TableSourceRole.OTHER);
+        lineage.addSource(ref);
+      }
+      return lineage;
+    }
+
+    // Shared physical table identity with the target dimension.
+    String physical =
+        !Utils.isEmpty(target.getTableName()) ? target.getTableName() : target.getName();
+    lineage.setPhysicalTableName(resolve(physical, variables));
+
+    TableSourceRef parent =
+        new TableSourceRef(TableSourceKind.DM_TABLE, target.getName(), TableSourceRole.OTHER);
+    parent.setPhysicalRef(lineage.getPhysicalTableName());
+    lineage.addSource(parent);
+
+    String sourceLabel =
+        DmDimensionResolutionSupport.resolveAliasSourceModelDisplayName(model, alias, variables);
+    if (Utils.isEmpty(sourceLabel)) {
+      sourceLabel = target.getName();
+    }
+    lineage.addReason(
+        LineageReasonFactory.dmRoleMapping(
+            alias.getName(),
+            "dimension alias of "
+                + target.getName()
+                + (Utils.isEmpty(externalModel) ? "" : " (" + sourceLabel + ")"),
+            target.getName()));
+
+    // Project target dimension fields as identity contributions from the physical dimension table.
+    TableLineage targetLineage = collectDimension(target, model, variables, targetDb);
+    for (FieldLineage targetField : targetLineage.getFields()) {
+      if (targetField == null || Utils.isEmpty(targetField.getTargetFieldName())) {
+        continue;
+      }
+      FieldLineage field = new FieldLineage(targetField.getTargetFieldName());
+      field.setTechnical(targetField.isTechnical());
+      field.setDataType(targetField.getDataType());
+      field.setLength(targetField.getLength());
+      field.setPrecision(targetField.getPrecision());
+
+      FieldContribution contribution = new FieldContribution();
+      contribution.setSourceKind(TableSourceKind.DM_TABLE);
+      contribution.setSourceName(target.getName());
+      contribution.setSourceFieldName(targetField.getTargetFieldName());
+      contribution.setTransform(FieldTransform.IDENTITY);
+      contribution.addReason(
+          LineageReasonFactory.dmRoleMapping(
+              targetField.getTargetFieldName(),
+              "aliased dimension " + target.getName(),
+              targetField.getTargetFieldName()));
+      // Preserve underlying staging reasons from the physical dimension where useful.
+      for (FieldContribution underlying : targetField.getContributions()) {
+        if (underlying == null) {
+          continue;
+        }
+        for (LineageReason reason : underlying.getReasons()) {
+          if (reason != null) {
+            contribution.addReason(reason);
+          }
+        }
+      }
       field.addContribution(contribution);
       lineage.addField(field);
     }

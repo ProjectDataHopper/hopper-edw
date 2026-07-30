@@ -39,6 +39,21 @@
       "name" : "OUTPUT_COPIES",
       "value" : "2",
       "description" : "Number of data load threads"
+    },
+    {
+      "name" : "MARQUEZ_API",
+      "value" : "http://localhost:5001/api/v1/lineage",
+      "description" : "The Marquez lineage API "
+    },
+    {
+      "name" : "MARQUEZ_NAMESPACE_DATASET",
+      "value" : "retail-dataset",
+      "description" : "The namespace to use in Marquez"
+    },
+    {
+      "name" : "MARQUEZ_NAMESPACE_JOB",
+      "value" : "retail-job",
+      "description" : "The namespace to use in Marquez"
     }
   ]
 }

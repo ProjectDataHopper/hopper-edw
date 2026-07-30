@@ -265,6 +265,32 @@ limitations under the License.
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
+    <action>
+      <resourceDefinitionGroup>retail-sources</resourceDefinitionGroup>
+      <includeDv>Y</includeDv>
+      <includeBv>Y</includeBv>
+      <includeDm>Y</includeDm>
+      <includeColumnLineage>Y</includeColumnLineage>
+      <includeOperationalMetrics>Y</includeOperationalMetrics>
+      <opsDatabase>OPS</opsDatabase>
+      <opsSchema/>
+      <destinationMode>HTTP</destinationMode>
+      <outputFolder/>
+      <httpUrl>${MARQUEZ_API}</httpUrl>
+      <httpApiKeyHeader/>
+      <httpApiKey/>
+      <jobNamespace>${MARQUEZ_NAMESPACE_JOB}</jobNamespace>
+      <datasetNamespace>${MARQUEZ_NAMESPACE_DATASET}</datasetNamespace>
+      <failOnHttpError>Y</failOnHttpError>
+      <timeoutMs>30000</timeoutMs>
+      <name>Export data lineage to Marquez</name>
+      <type>EXPORT_DATA_LINEAGE</type>
+      <attributes/>
+      <xloc>784</xloc>
+      <yloc>288</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
   </actions>
   <hops>
     <hop>
@@ -327,6 +353,13 @@ limitations under the License.
       <from>Start</from>
       <to>Validate resource definitions</to>
       <evaluation>Y</evaluation>
+      <unconditional>Y</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>End Vault Update</from>
+      <to>Export data lineage to Marquez</to>
+      <evaluation>N</evaluation>
       <unconditional>Y</unconditional>
       <enabled>Y</enabled>
     </hop>

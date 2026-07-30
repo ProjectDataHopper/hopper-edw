@@ -97,7 +97,8 @@ public final class LineageDiffService {
       }
       DimensionalModel model = loaded.model();
       String catalog = firstNonEmpty(loaded.catalogConnection(), defaultCatalog(models));
-      LineageSnapshot current = DmModelLineageCollector.collect(model, variables);
+      LineageSnapshot current =
+          DmModelLineageCollector.collect(model, variables, metadataProvider);
       String basename = DmCatalogNamespaces.resolveModelBasename(model);
       LineageSnapshot baseline =
           Utils.isEmpty(catalog)

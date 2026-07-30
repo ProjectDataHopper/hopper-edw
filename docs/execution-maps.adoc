@@ -43,7 +43,7 @@ Re-crawl after model or workflow changes so generated pipeline nodes stay curren
 
 == Relationship to lineage export
 
-Execution maps provide **in-project** execution graphs. External lineage systems (Marquez / OpenLineage) are planned separately — see link:plans/marquez-lineage-plan.md[Marquez lineage plan].
+Execution maps provide **in-project** execution graphs and optional table-level OpenLineage JSON next to the `.hem` file. Model-derived table **and** column OpenLineage export (Marquez / HTTP) is provided by the **Export data lineage** action — see link:openlineage-export.adoc[OpenLineage export].
 
 == Related documents
 

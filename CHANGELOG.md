@@ -4,6 +4,14 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## [Unreleased] — 0.5.0-SNAPSHOT
 
+### OpenLineage / Marquez lineage export (#101)
+
+- New workflow action **Export data lineage** emits model-derived OpenLineage COMPLETE events for DV/BV/DM tables (optional columnLineage + schema facets)
+- Destinations: folder (one JSON file per table + summary) and/or HTTP POST to OpenLineage endpoints (Marquez, Collibra OL-compatible)
+- Optional operational enrichment from `load_pipeline_metric`
+- Local stack: `./scripts/run-marquez.sh` and `scripts/docker/compose.marquez.yml` (API :5001, UI :3001)
+- Docs: [docs/openlineage-export.adoc](docs/openlineage-export.adoc)
+
 ### Optional primary and foreign keys in model DDL (#92)
 
 - Two **optional, default-off** model configuration checkboxes on DV (`.hdv`), BV (`.hbv`), and DM (`.hdm`): **Generate primary keys in DDL** and **Generate foreign keys in DDL**

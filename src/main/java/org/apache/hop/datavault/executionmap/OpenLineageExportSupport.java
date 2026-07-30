@@ -34,7 +34,9 @@ import org.apache.hop.datavault.metadata.executionmap.ExecutionMapDocument;
 /** Serializes execution map lineage to OpenLineage-compatible JSON. */
 public final class OpenLineageExportSupport {
 
-  public static final String PRODUCER = "https://github.com/mattcasters/hop-data-vault";
+  /** @deprecated use {@link org.apache.hop.datavault.openlineage.OpenLineageConstants#PRODUCER} */
+  public static final String PRODUCER =
+      org.apache.hop.datavault.openlineage.OpenLineageConstants.PRODUCER;
 
   private static final ObjectMapper MAPPER = new ObjectMapper();
 

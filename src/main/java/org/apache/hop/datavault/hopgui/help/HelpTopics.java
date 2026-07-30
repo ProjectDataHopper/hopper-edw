@@ -51,6 +51,7 @@ public final class HelpTopics {
   public static final String ACTION_END_VAULT_UPDATE = "action-end-vault-update-dialog";
   public static final String ACTION_VALIDATE_RESOURCE_DEFINITIONS =
       "action-validate-resource-definitions-dialog";
+  public static final String ACTION_EXPORT_DATA_LINEAGE = "action-export-data-lineage-dialog";
 
   public static final String IMPORT_DATABASE_TABLES_CATALOG = "import-database-tables-catalog-dialog";
   public static final String IMPORT_DATABASE_TABLES_OPTIONS = "import-database-tables-options-dialog";
@@ -109,6 +110,8 @@ public final class HelpTopics {
           Map.entry(
               ACTION_VALIDATE_RESOURCE_DEFINITIONS,
               "HelpTopics.ActionValidateResourceDefinitionsDialog.Title"),
+          Map.entry(
+              ACTION_EXPORT_DATA_LINEAGE, "HelpTopics.ActionExportDataLineageDialog.Title"),
           Map.entry(
               IMPORT_DATABASE_TABLES_CATALOG, "HelpTopics.ImportDatabaseTablesCatalogDialog.Title"),
           Map.entry(

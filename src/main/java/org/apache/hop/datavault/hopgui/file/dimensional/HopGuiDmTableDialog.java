@@ -302,7 +302,8 @@ public class HopGuiDmTableDialog {
     TableLineage tableLineage = null;
     try {
       if (model != null) {
-        LineageSnapshot snapshot = DmModelLineageCollector.collect(model, variables);
+        LineageSnapshot snapshot =
+            DmModelLineageCollector.collect(model, variables, metadataProvider);
         tableLineage = LineageTabSupport.findTable(snapshot, input.getName());
       }
     } catch (Exception e) {

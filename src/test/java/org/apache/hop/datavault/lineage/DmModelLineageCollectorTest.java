@@ -84,12 +84,66 @@ class DmModelLineageCollectorTest {
         "expected dimensional role mapping reasons");
   }
 
+  @Test
+  void dimensionAliasProjectsFieldsFromExternalTarget() {
+    LineageSnapshot snapshot = DmModelLineageCollector.collect(model, variables);
+
+    // Role-playing alias of conformed d_date (external model).
+    TableLineage alias =
+        snapshot
+            .findTableByLogicalName("d_order_date")
+            .orElseThrow(() -> new AssertionError("d_order_date alias missing in retail-f-orders"));
+
+    assertEquals("DIMENSION_ALIAS", alias.getTableType());
+    assertFalse(
+        alias.getFields().isEmpty(),
+        "dimension alias must project natural keys/attributes from the linked physical dimension");
+    assertTrue(
+        alias.getSources().stream()
+            .anyMatch(s -> "d_date".equalsIgnoreCase(s.getName())),
+        "alias should reference physical dimension d_date as a source");
+    assertTrue(
+        alias.getFields().stream()
+            .flatMap(f -> f.getContributions().stream())
+            .anyMatch(
+                c ->
+                    c.getSourceKind() == TableSourceKind.DM_TABLE
+                        && "d_date".equalsIgnoreCase(c.getSourceName())),
+        "field contributions should come from the parent DM dimension d_date");
+    // Physical identity shared with conformed d_date for OpenLineage / ops.
+    assertTrue(
+        alias.getPhysicalTableName() != null
+            && alias.getPhysicalTableName().toLowerCase().contains("date"),
+        "physical table name should resolve from the linked dimension");
+  }
+
+  @Test
+  void dimensionAliasWithBrokenExternalPathKeepsType() {
+    Variables broken = new Variables();
+    broken.setVariable("PROJECT_HOME", "/nonexistent/path");
+    DimensionalModel inventory;
+    try {
+      inventory = loadModel("retail-example/models/retail-f-inventory.hdm");
+    } catch (Exception e) {
+      throw new AssertionError(e);
+    }
+    LineageSnapshot snapshot = DmModelLineageCollector.collect(inventory, broken);
+    TableLineage warehouseAlias =
+        snapshot
+            .findTableByLogicalName("d_warehouse")
+            .orElseThrow(() -> new AssertionError("d_warehouse alias missing"));
+    assertEquals("DIMENSION_ALIAS", warehouseAlias.getTableType());
+    assertTrue(warehouseAlias.getFields().isEmpty(), "unresolved external alias has no fields");
+    assertFalse(warehouseAlias.getReasons().isEmpty());
+  }
+
   private static DimensionalModel loadModel(String relativePath) throws Exception {
     Path fixture = Path.of(relativePath).toAbsolutePath().normalize();
     Document document = XmlHandler.loadXmlFile(fixture.toFile());
     Node rootNode = XmlHandler.getSubNode(document, HopDimensionalFileType.XML_TAG);
-    DimensionalModel model = new DimensionalModel();
-    XmlMetadataUtil.deSerializeFromXml(rootNode, DimensionalModel.class, model, null);
-    return model;
+    DimensionalModel loaded = new DimensionalModel();
+    XmlMetadataUtil.deSerializeFromXml(rootNode, DimensionalModel.class, loaded, null);
+    loaded.setFilename(fixture.toString().replace('\\', '/'));
+    return loaded;
   }
 }

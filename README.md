@@ -172,4 +172,6 @@ SELECT * FROM sat_customer WHERE x_load_end_ts IS NULL
 
 **Also shipped (0.2.x line):** dimensional modeler, execution maps, catalog-first sources, data quality rules and gates, multi-DB integration hardening, incremental Business Vault SCD2, primary-key import/detection, SQL Server / Unicode EDW hardening.
 
-**Planned:** BV naming rules engine, Marquez / OpenLineage export, hash-key ModPartitioner parallelism, additional source types.
+**Planned:** BV naming rules engine, hash-key ModPartitioner parallelism, additional source types.
+
+**OpenLineage:** Export model-derived table and column lineage via the **Export data lineage** workflow action (file folder and/or Marquez HTTP). See [docs/openlineage-export.adoc](docs/openlineage-export.adoc); local Marquez: `./scripts/run-marquez.sh up`.

@@ -1,0 +1,137 @@
+= OpenLineage export
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+hop-data-vault can emit **OpenLineage** `RunEvent` documents for every Data Vault (DV), Business Vault (BV), and dimensional (DM) target table. Events are **model-derived** from the same lineage collectors that power the modeler Lineage tab, explainable DDL, and catalog lineage siblings.
+
+Use this to feed platforms such as **Marquez** or any OpenLineage-compatible HTTP endpoint (including Collibra OL integrations).
+
+== What is exported
+
+|===
+| Aspect | Detail
+| Source of truth | `.hdv` / `.hbv` / `.hdm` models (+ catalog resolution)
+| Granularity | One COMPLETE `RunEvent` per target table (**unique OpenLineage `runId` per job**; export correlation id on `hop_export` facet)
+| Column lineage | Output datasets always get a `schema` facet when fields are known; optional `columnLineage` facet when enabled
+| Source datasets | Input datasets (catalog feeds, parent tables) get a `schema` facet inferred from contributing field names; enriched from other events' outputs when the same dataset is a target elsewhere
+| Cross-layer edges | BV/DM events list parent DV/BV tables as inputs when the model maps them
+| Operational facts | Optional last-load enrichment from `load_pipeline_metric`
+| Destinations | Folder of JSON files and/or HTTP POST
+|===
+
+Multi-hop paths (source → satellite → BV → fact) appear as **chained dataset edges** across jobs in Marquez, not as a single job spanning all layers.
+
+== Workflow action: Export data lineage
+
+Add **Export data lineage** to a workflow. Configure the resource definition group, layer filters, destination, and optional job/dataset namespaces:
+
+image::images/data-lineage-export-data-lineage-action-dialog.png[Export data lineage action dialog,align="center"]
+
+The retail sample includes a dedicated workflow (`retail-example/workflows/send-lineage-to-marquez.hwf`) and an optional hop after **End Vault Update** in `run-retail-update-models.hwf`.
+
+=== Main settings
+
+|===
+| Field | Purpose
+| Resource definition group | All DV/BV/DM model files in the group are exported
+| Include DV / BV / DM | Layer filters (default: all on)
+| Include column-level lineage | Emit OpenLineage column facets (default: on)
+| Include operational load metrics | Attach last pipeline run facts when an ops DB is configured
+| Ops metrics database / schema | Hop connection (and optional schema) for `load_pipeline_metric`
+| Destination | `FILE`, `HTTP`, or `FILE_AND_HTTP`
+| Output folder | One `{layer}_{model}_{table}.json` per event + `export-summary.json`
+| OpenLineage HTTP URL | e.g. `http://localhost:5001/api/v1/lineage` or `${MARQUEZ_API}`
+| Job namespace | Default `hop-data-vault` (+ project key when available); e.g. `${MARQUEZ_NAMESPACE_JOB}`
+| Dataset namespace | Optional override for **all** input/output dataset namespaces. When empty, namespaces are derived from Hop connection names (e.g. `Vault`), catalog sources, or staging labels; e.g. `${MARQUEZ_NAMESPACE_DATASET}`
+| Fail on HTTP error | Fail the action when a POST fails (default on)
+| HTTP timeout (ms) | Connect/request timeout (default 30000)
+|===
+
+=== HTTP behaviour
+
+Marquez accepts **one** RunEvent object per `POST /api/v1/lineage` request. The action posts events sequentially. Optional API key header/value supports secured endpoints.
+
+=== File behaviour
+
+Each file is a single pretty-printed RunEvent (not an array). A non-OpenLineage `export-summary.json` lists counts, paths, and errors.
+
+== Viewing lineage in Marquez
+
+After export, open the Marquez UI and inspect job and dataset graphs.
+
+=== Job lineage graph
+
+Jobs (generated loads) sit between source and target datasets. Expanded nodes show schema fields when facets were exported:
+
+image::images/data-lineage-marquez-job-lineage.png[Marquez job lineage graph with datasets and jobs for dimensional retail models,align="center"]
+
+=== Column-level lineage
+
+Column lineage shows how source feed columns flow through satellites into Business Vault tables (for example customer address, prefs, demo, and contact into `customer_360_bv`):
+
+image::images/data-lineage-marquez-column-level-lineage.png[Marquez column-level lineage from E2E customer feeds through satellites to customer_360_bv,align="center"]
+
+== Dataset and job naming
+
+|===
+| Concept | Convention
+| Job namespace | Action **Job namespace**, or `hop-data-vault/{projectKey}` when a project key is known
+| Job name | `{layer}/{modelName}/{physicalTable}` e.g. `dv/retail-360/hub_customer`
+| Dataset namespace (override) | When action **Dataset namespace** is set, every input/output uses that value
+| Output dataset namespace (default) | Hop target database connection name (e.g. Vault)
+| Output dataset name | `schema.table` when schema is set, else physical table
+| Catalog feed input namespace (default) | Catalog sources namespace prefix from the project
+| Catalog feed input name | Feed / record source name (e.g. `E2E-customer-demo`)
+| Parent vault table input (default) | Target database connection + parent physical name
+|===
+
+Column transforms map from internal `FieldTransform` values:
+
+|===
+| FieldTransform | OpenLineage transformation
+| IDENTITY / RENAME | DIRECT / IDENTITY
+| HASH_INPUT | DIRECT / TRANSFORMAT with `masking: true`
+| DERIVED / CONSTANT / NONE | DIRECT / TRANSFORMAT
+|===
+
+Reason codes and short messages are concatenated into `transformations[].description`.
+
+== Local Marquez
+
+From the repository root:
+
+----
+./scripts/run-marquez.sh up
+----
+
+|===
+| Service | URL
+| API | `http://localhost:5001` — POST `/api/v1/lineage`
+| UI | `http://localhost:3001`
+|===
+
+Ports avoid common conflicts with macOS Control Center (5000) and local Postgres (5432). Compose file: `scripts/docker/compose.marquez.yml`.
+
+Example action HTTP URL: `http://localhost:5001/api/v1/lineage` (or a project variable such as `${MARQUEZ_API}`).
+
+Stop with `./scripts/run-marquez.sh down`. Reset data with `./scripts/run-marquez.sh reset`.
+
+== Relationship to other features
+
+|===
+| Feature | Relationship
+| link:source-to-target-lineage.adoc[Source-to-target lineage] | Same collectors; OpenLineage is an external serialization
+| link:execution-maps.adoc[Execution maps] | Optional table-level OpenLineage from crawled pipeline graphs (job names = pipeline names). Complementary, not column-level
+| Load-run metrics | Optional enrichment only; not a substitute for lineage structure
+| Catalog lineage siblings | Internal discovery + drift gate; OpenLineage is for external catalogs
+|===
+
+== Troubleshooting
+
+* **HTTP 4xx/5xx** — ensure Marquez is up (`./scripts/run-marquez.sh status`) and the URL includes `/api/v1/lineage`.
+* **Empty export** — verify the resource group lists model files and layer checkboxes are enabled.
+* **Missing column facets** — enable *Include column-level lineage*.
+* **Datasets still show connection name (e.g. Vault)** — set **Dataset namespace** on the action if you want a single override namespace.
+* **Ops enrichment skipped** — configure ops database/schema and ensure `load_pipeline_metric` exists; enrichment never fails the export by itself.

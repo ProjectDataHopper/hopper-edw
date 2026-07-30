@@ -73,7 +73,7 @@ public final class ReverseLineageIndexBuilder {
         continue;
       }
       DimensionalModel model = loaded.model();
-      snapshots.add(DmModelLineageCollector.collect(model, variables));
+      snapshots.add(DmModelLineageCollector.collect(model, variables, metadataProvider));
     }
 
     // Direct edges from every snapshot

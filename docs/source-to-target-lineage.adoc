@@ -189,7 +189,7 @@ Use this when you need the inverse of the Lineage tab: *given a staging column, 
 |===
 | Feature | Relationship
 | link:execution-maps.adoc[Execution maps] (`.hem`) | Workflow / pipeline / dataset *execution* graph; not field-level mapping reasons
-| Marquez / OpenLineage (planned) | External table-level job lineage; can reuse model-derived edges later — link:plans/marquez-lineage-plan.md[plan]
+| Marquez / OpenLineage | External table- and column-level job lineage via **Export data lineage** action — link:openlineage-export.adoc[OpenLineage export] (screenshots of the action and Marquez graphs)
 | link:resource-definition-validation.adoc[Resource definition validation] | Source schema contracts + impact; lineage drift is an additional section of the same gate
 | Mapping authoring UI (coach, suggest mappings) | Creates or refines model mappings; lineage *explains* the result
 |===

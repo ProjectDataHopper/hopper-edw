@@ -147,7 +147,8 @@ public final class DmCatalogPublisher {
 
     try {
       org.apache.hop.datavault.lineage.LineageSnapshot lineageSnapshot =
-          org.apache.hop.datavault.lineage.DmModelLineageCollector.collect(dmModel, variables);
+          org.apache.hop.datavault.lineage.DmModelLineageCollector.collect(
+              dmModel, variables, metadataProvider);
       org.apache.hop.datavault.lineage.LineageCatalogPublisher.PublishResult lineageResult =
           org.apache.hop.datavault.lineage.LineageCatalogPublisher.publish(
               catalogConnectionName,

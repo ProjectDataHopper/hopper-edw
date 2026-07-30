@@ -23,6 +23,7 @@ Docker runners and retail data generators used by `integration-tests/` and `reta
 
 ```bash
 ./scripts/run-postgres.sh up
+./scripts/run-marquez.sh up   # OpenLineage / Marquez (API :5001, UI :3001)
 ./scripts/run-hop.sh <hop-project-dir> <workflow>
 ```
 
