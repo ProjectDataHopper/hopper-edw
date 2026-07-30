@@ -17,7 +17,7 @@ under the License.
 
 # Hop Data Vault 2.0 Plugin
 
-Apache Hop plugin for **Data Vault 2.0**, **Business Vault**, and **dimensional** modeling, validation, and model-driven loading. Version **0.5.0** targets **Apache Hop 2.18.1** and **Java 21**.
+Apache Hop plugin for **Data Vault 2.0**, **Business Vault**, and **dimensional** modeling, validation, and model-driven loading. Version **0.6.0-SNAPSHOT** (latest release **0.5.0**) targets **Apache Hop 2.18.1** and **Java 21**.
 
 **Model once. Generate loads and consumption layers.** Sources live in the Hop **Data Catalog**; visual **`.hdv`**, **`.hbv`**, and **`.hdm`** models drive workflow actions and optional **execution maps** (`.hem`).
 
@@ -122,8 +122,8 @@ mvn clean package
 
 Artifacts:
 
-- `target/hop-datavault-0.5.0.jar`
-- `target/hop-datavault-0.5.0.zip` (ready-to-unzip plugin layout)
+- `target/hop-datavault-0.6.0-SNAPSHOT.jar`
+- `target/hop-datavault-0.6.0-SNAPSHOT.zip` (ready-to-unzip plugin layout)
 
 Published release artifacts: **[v0.5.0](https://github.com/mattcasters/hop-data-vault/releases/tag/v0.5.0)** (`hop-datavault-0.5.0.zip`).
 
@@ -131,7 +131,7 @@ Published release artifacts: **[v0.5.0](https://github.com/mattcasters/hop-data-
 
 1. Unzip the assembly zip into your Hop installation, or manually copy the jar to:
    ```
-   $HOP_HOME/plugins/misc/datavault/hop-datavault-0.5.0.jar
+   $HOP_HOME/plugins/misc/datavault/hop-datavault-0.6.0-SNAPSHOT.jar
    ```
 2. Restart Hop GUI.
 3. New metadata types appear under **Metadata → Data Vault**. **Data Vault Update**, **Business Vault Update**, **Validate resource definitions**, and **Export data lineage** actions are available in workflows. `.hdv`, `.hbv`, and `.hdm` files open in the visual modelers.
