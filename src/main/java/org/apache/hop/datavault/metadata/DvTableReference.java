@@ -34,6 +34,7 @@ import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
+import org.apache.hop.workflow.WorkflowMeta;
 
 /**
  * Read-only canvas reference to a Hub, Link, or Satellite table defined in another {@code .hdv}
@@ -111,6 +112,17 @@ public class DvTableReference extends DvTableBase {
 
   @Override
   public List<PipelineMeta> generateUpdatePipelines(
+      IHopMetadataProvider metadataProvider,
+      IVariables variables,
+      DataVaultModel model,
+      Date loadDate,
+      String recordSourceGroup)
+      throws HopException {
+    return List.of();
+  }
+
+  @Override
+  public List<WorkflowMeta> generateUpdateWorkflows(
       IHopMetadataProvider metadataProvider,
       IVariables variables,
       DataVaultModel model,

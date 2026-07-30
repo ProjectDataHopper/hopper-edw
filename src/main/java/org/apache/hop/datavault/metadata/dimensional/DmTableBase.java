@@ -35,7 +35,9 @@ import org.apache.hop.core.logging.SimpleLoggingObject;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.metadata.DvConstraintDdlSupport;
 import org.apache.hop.datavault.metadata.DvDdlSupport;
+import org.apache.hop.datavault.metadata.ForeignKeySpec;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
@@ -111,7 +113,15 @@ public abstract class DmTableBase extends HopMetadataBase implements IHopMetadat
         new SimpleLoggingObject(getClass().getSimpleName() + ".generateBuildDdl", LoggingObjectType.GENERAL, null);
     try (Database db = new Database(loggingObject, variables, targetDatabaseMeta)) {
       db.connect();
-      String ddl = DvDdlSupport.getTargetTableDdl(db, targetTableName, targetFields);
+      List<String> primaryKeyColumns =
+          DvConstraintDdlSupport.resolveDmPrimaryKeyColumns(
+              this, model, config, variables, metadataProvider);
+      List<ForeignKeySpec> foreignKeys =
+          DvConstraintDdlSupport.resolveDmForeignKeys(
+              this, model, config, targetDatabaseMeta, variables, metadataProvider);
+      String ddl =
+          DvDdlSupport.getTargetTableDdl(
+              db, targetTableName, targetFields, null, primaryKeyColumns, foreignKeys);
       if (!Utils.isEmpty(ddl)) {
         result.add(ddl);
       }

@@ -44,6 +44,8 @@ limitations under the License.
     <recordSourceField>x_record_source</recordSourceField>
     <recordSourceFieldLength>100</recordSourceFieldLength>
     <useLoadEndDate>N</useLoadEndDate>
+    <generatePrimaryKeys>Y</generatePrimaryKeys>
+    <generateForeignKeys>Y</generateForeignKeys>
     <targetTableBatchSize>1000</targetTableBatchSize>
     <targetTableParallelCopies>1</targetTableParallelCopies>
     <target_load_mode>Native bulk loader</target_load_mode>

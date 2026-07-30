@@ -1213,8 +1213,22 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       List<PipelineMeta> pipelineMetas =
           table.generateUpdatePipelines(
               hopGui.getMetadataProvider(), debugVariables, model, loadDate, null);
+      List<org.apache.hop.workflow.WorkflowMeta> workflowMetas =
+          table.generateUpdateWorkflows(
+              hopGui.getMetadataProvider(), debugVariables, model, loadDate, null);
+
+      // Multi-source hub/link: open the serial orchestration workflow first.
+      if (workflowMetas != null) {
+        for (org.apache.hop.workflow.WorkflowMeta workflowMeta : workflowMetas) {
+          if (workflowMeta != null) {
+            ModelGeneratedArtifactOpenSupport.openGeneratedWorkflow(workflowMeta);
+          }
+        }
+      }
+
       if (pipelineMetas == null || pipelineMetas.isEmpty()) {
-        if (DvIntegrationSupport.isCustomPipelines(table)) {
+        if ((workflowMetas == null || workflowMetas.isEmpty())
+            && DvIntegrationSupport.isCustomPipelines(table)) {
           MessageBox box = new MessageBox(hopGui.getShell(), SWT.OK | SWT.ICON_WARNING);
           box.setText(BaseMessages.getString(PKG, "HopGuiVaultGraph.DebugPipeline.Title"));
           box.setMessage(

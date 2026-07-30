@@ -15,7 +15,9 @@ At runtime the action:
 * Optionally ensures unknown and invalid sentinel rows exist in hubs and links (per the model configuration).
 * Optionally generates DDL (CREATE/ALTER statements) for the model's target database. DDL handling is independent of the data load: you can execute it on the database, write it to a SQL file, require that no DDL is needed, or combine these options.
 * Generates update pipelines for every hub, link, and satellite in the model (unless you choose to skip the data load or filter by record source group).
-* Stages pipelines to a folder and runs them through a **parallel orchestrator** (configurable copy count).
+* For **multi-source hubs and links**, also generates a **serial multi-source workflow** that runs each source pipeline one after another so keys written by an earlier source are visible to the next (required when primary keys are enabled).
+* Stages free pipelines (satellites, single-source tables) to a folder and runs them through a **parallel orchestrator** (configurable copy count). Multi-source units run as workflows first, then free pipelines.
+* Link CDC always sorts the **source** stream in Hop on the link hash key (hash is computed in the pipeline). For the **target** stream the plugin **automatically** chooses either SQL `ORDER BY` with a hop-compatible binary/`C` collation (when the target engine is known and the order is certain to match Hop SortRows) or a Hop Sort Rows transform. Linguistic database collations (PostgreSQL locale/ICU, SQL Server CI, MySQL `*_ci`, and others) can disagree with Java on STRING (decimal-dash) hash keys — for example `0-100-…` vs `0-10-…` — which breaks MergeRows and can re-insert existing keys under a primary key. This is **not PostgreSQL-only**; unknown engines fall back to Sort Rows. There is no user option for this: correctness is automatic.
 * Uses a single load date for the entire batch, so every row written during one run of the action receives the same `LOAD_DATE` value.
 * Aggregates row counts and errors from all generated pipelines into the workflow action result.
 

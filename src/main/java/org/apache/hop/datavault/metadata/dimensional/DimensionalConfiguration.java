@@ -175,6 +175,24 @@ public class DimensionalConfiguration extends HopMetadataBase
   @HopMetadataProperty
   private String currentFlagField = DEFAULT_CURRENT_FLAG_FIELD;
 
+  @GuiWidgetElement(
+      order = "0270",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::DataVaultConfiguration.GeneratePrimaryKeys.Label",
+      toolTip = "i18n::DataVaultConfiguration.GeneratePrimaryKeys.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_PARENT_ID)
+  @HopMetadataProperty
+  private boolean generatePrimaryKeys = false;
+
+  @GuiWidgetElement(
+      order = "0280",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::DataVaultConfiguration.GenerateForeignKeys.Label",
+      toolTip = "i18n::DataVaultConfiguration.GenerateForeignKeys.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_PARENT_ID)
+  @HopMetadataProperty
+  private boolean generateForeignKeys = false;
+
   @HopMetadataProperty private String openStartSentinel = DEFAULT_OPEN_START_SENTINEL;
 
   @HopMetadataProperty private String openEndSentinel = DEFAULT_OPEN_END_SENTINEL;

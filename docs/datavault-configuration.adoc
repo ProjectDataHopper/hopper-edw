@@ -124,6 +124,15 @@ image::images/data-vault-model-dialog-standard-columns-tab.png[Standard columns 
 
 |Use load end date pattern
 |Documents that satellites use an end-dating approach. Generated pipelines today perform insert-only change detection; this flag is mainly for documentation and future extensions.
+
+|Generate primary keys in DDL
+|When enabled, generated **CREATE TABLE** statements include a `PRIMARY KEY` on table identity columns: hub hash key; link hash key; satellite parent hash key + multi-active driving key (if any) + load date. Off by default. Does not retrofit constraints onto existing tables via ALTER. Enabling foreign keys also adds primary keys on parent hubs/links so references are valid.
+
+|Generate foreign keys in DDL
+|When enabled, generated **CREATE TABLE** statements include `FOREIGN KEY` constraints for model relationships (link → hubs, satellite/STS → parent hub or link). Off by default. Skipped on engines that do not support foreign keys (for example SingleStore). Applies only to CREATE TABLE, not ALTER drift.
+
+|Caution (hub multi-source + bulk load)
+|Hubs and links with **multiple record sources** generate one pipeline per source. The Data Vault Update action wraps those pipelines in a **serial multi-source workflow** so sources for the same physical table run one after another (each subsequent source sees keys already loaded). Free pipelines (satellites, single-source hubs/links) still run in the parallel orchestrator. This is required for safe primary-key enforcement under bulk load.
 |===
 
 === Target loading tab

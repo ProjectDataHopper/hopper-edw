@@ -53,6 +53,12 @@ These values apply when an SCD2 table does not override them.
 
 |Open end sentinel
 |Substituted when `valid_to` is null (default `9999-12-31 23:59:59`).
+
+|Generate primary keys in DDL
+|When enabled, generated **CREATE TABLE** statements include a `PRIMARY KEY` on Business Vault identity columns (for example SCD2 grain + `valid_from`, or PIT hash key + snapshot date). Off by default. CREATE only (no ALTER retrofit).
+
+|Generate foreign keys in DDL
+|When enabled, generated **CREATE TABLE** statements may include `FOREIGN KEY` constraints to parent Data Vault tables **only when** the BV target database is the same connection as the linked DV model. Skipped for cross-database BV/DV setups and on engines without FK support (for example SingleStore). Off by default.
 |===
 
 == Target loading

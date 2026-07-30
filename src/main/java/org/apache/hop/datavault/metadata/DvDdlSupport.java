@@ -81,6 +81,25 @@ public final class DvDdlSupport {
         && "SINGLESTORE".equalsIgnoreCase(databaseMeta.getPluginId());
   }
 
+  /**
+   * Whether the target engine supports emitting table-level PRIMARY KEY clauses in CREATE TABLE.
+   * All current EDW targets used by this plugin do.
+   */
+  public static boolean supportsPrimaryKeyConstraints(DatabaseMeta databaseMeta) {
+    return databaseMeta != null;
+  }
+
+  /**
+   * Whether the target engine supports FOREIGN KEY constraints. SingleStore does not; other
+   * supported EDW engines (PostgreSQL, MySQL/MariaDB, SQL Server, etc.) do.
+   */
+  public static boolean supportsForeignKeyConstraints(DatabaseMeta databaseMeta) {
+    if (databaseMeta == null) {
+      return false;
+    }
+    return !isSingleStore(databaseMeta);
+  }
+
   public static boolean isShardKeyDdlEnabled(
       DataVaultConfiguration config, DatabaseMeta databaseMeta) {
     return config != null
@@ -101,6 +120,25 @@ public final class DvDdlSupport {
       String primaryKeyColumn,
       boolean semicolon)
       throws HopDatabaseException {
+    List<String> primaryKeyFieldNames =
+        Utils.isEmpty(primaryKeyColumn) ? List.of() : List.of(primaryKeyColumn);
+    return getCreateTableDdl(
+        db, tableName, fields, shardKeyColumns, primaryKeyFieldNames, List.of(), semicolon);
+  }
+
+  /**
+   * Returns CREATE TABLE DDL with optional primary key, foreign key, and SingleStore shard key
+   * clauses. When the table already exists, returns Hop ALTER DDL without adding constraints.
+   */
+  public static String getCreateTableDdl(
+      Database db,
+      String tableName,
+      IRowMeta fields,
+      String[] shardKeyColumns,
+      List<String> primaryKeyFieldNames,
+      List<ForeignKeySpec> foreignKeys,
+      boolean semicolon)
+      throws HopDatabaseException {
     if (db == null || Utils.isEmpty(tableName) || fields == null || fields.isEmpty()) {
       return "";
     }
@@ -118,7 +156,14 @@ public final class DvDdlSupport {
     }
 
     return buildCreateTableStatement(
-        databaseMeta, db, tableName, layout, shardKeyColumns, primaryKeyColumn, semicolon);
+        databaseMeta,
+        db,
+        tableName,
+        layout,
+        shardKeyColumns,
+        primaryKeyFieldNames,
+        foreignKeys,
+        semicolon);
   }
 
   /**
@@ -126,6 +171,21 @@ public final class DvDdlSupport {
    * ANSI string columns on both CREATE and ALTER paths.
    */
   public static String getTargetTableDdl(Database db, String tableName, IRowMeta fields)
+      throws HopDatabaseException {
+    return getTargetTableDdl(db, tableName, fields, null, List.of(), List.of());
+  }
+
+  /**
+   * Returns target-table DDL, injecting primary/foreign key clauses into CREATE TABLE when
+   * requested. ALTER TABLE drift paths are unchanged (no constraint retrofit).
+   */
+  public static String getTargetTableDdl(
+      Database db,
+      String tableName,
+      IRowMeta fields,
+      String[] shardKeyColumns,
+      List<String> primaryKeyFieldNames,
+      List<ForeignKeySpec> foreignKeys)
       throws HopDatabaseException {
     if (db == null || Utils.isEmpty(tableName) || fields == null || fields.isEmpty()) {
       return "";
@@ -138,9 +198,21 @@ public final class DvDdlSupport {
     if (Utils.isEmpty(hopDdl)) {
       return "";
     }
-    if (isCreateTableDdl(hopDdl) && DvSqlOrderBySupport.isSqlServer(databaseMeta)) {
+    boolean hasConstraints =
+        (primaryKeyFieldNames != null && !primaryKeyFieldNames.isEmpty())
+            || (foreignKeys != null && !foreignKeys.isEmpty())
+            || (shardKeyColumns != null && shardKeyColumns.length > 0);
+    if (isCreateTableDdl(hopDdl)
+        && (hasConstraints || DvSqlOrderBySupport.isSqlServer(databaseMeta))) {
       return buildCreateTableStatement(
-          databaseMeta, db, tableName, layout, null, (String) null, true);
+          databaseMeta,
+          db,
+          tableName,
+          layout,
+          shardKeyColumns,
+          primaryKeyFieldNames,
+          foreignKeys,
+          true);
     }
     return enrichSqlServerDdl(databaseMeta, hopDdl);
   }
@@ -267,7 +339,14 @@ public final class DvDdlSupport {
     List<String> primaryKeyFieldNames =
         Utils.isEmpty(primaryKeyColumn) ? List.of() : List.of(primaryKeyColumn);
     return buildCreateTableStatement(
-        databaseMeta, variables, tableName, fields, shardKeyColumns, primaryKeyFieldNames, semicolon);
+        databaseMeta,
+        variables,
+        tableName,
+        fields,
+        shardKeyColumns,
+        primaryKeyFieldNames,
+        List.of(),
+        semicolon);
   }
 
   public static String buildCreateTableStatement(
@@ -277,6 +356,26 @@ public final class DvDdlSupport {
       IRowMeta fields,
       String[] shardKeyColumns,
       List<String> primaryKeyFieldNames,
+      boolean semicolon) {
+    return buildCreateTableStatement(
+        databaseMeta,
+        variables,
+        tableName,
+        fields,
+        shardKeyColumns,
+        primaryKeyFieldNames,
+        List.of(),
+        semicolon);
+  }
+
+  public static String buildCreateTableStatement(
+      DatabaseMeta databaseMeta,
+      IVariables variables,
+      String tableName,
+      IRowMeta fields,
+      String[] shardKeyColumns,
+      List<String> primaryKeyFieldNames,
+      List<ForeignKeySpec> foreignKeys,
       boolean semicolon) {
     if (databaseMeta == null || Utils.isEmpty(tableName) || fields == null || fields.isEmpty()) {
       return "";
@@ -298,7 +397,9 @@ public final class DvDdlSupport {
       ddl.append(getFieldDefinition(databaseMeta, valueMeta));
     }
 
-    appendPrimaryKeyClause(ddl, databaseMeta, primaryKeyFieldNames);
+    if (supportsPrimaryKeyConstraints(databaseMeta)) {
+      appendPrimaryKeyClause(ddl, databaseMeta, primaryKeyFieldNames);
+    }
 
     if (shardKeyColumns != null && shardKeyColumns.length > 0) {
       ddl.append(",").append(Const.CR);
@@ -310,6 +411,10 @@ public final class DvDdlSupport {
         ddl.append(databaseMeta.quoteField(shardKeyColumns[i]));
       }
       ddl.append(")");
+    }
+
+    if (supportsForeignKeyConstraints(databaseMeta)) {
+      appendForeignKeyClauses(ddl, databaseMeta, foreignKeys);
     }
 
     ddl.append(")").append(Const.CR);
@@ -335,6 +440,39 @@ public final class DvDdlSupport {
       ddl.append(databaseMeta.quoteField(primaryKeyFieldNames.get(i)));
     }
     ddl.append(")");
+  }
+
+  static void appendForeignKeyClauses(
+      StringBuilder ddl, DatabaseMeta databaseMeta, List<ForeignKeySpec> foreignKeys) {
+    if (foreignKeys == null || foreignKeys.isEmpty() || databaseMeta == null) {
+      return;
+    }
+    for (ForeignKeySpec fk : foreignKeys) {
+      if (fk == null || !fk.isValid()) {
+        continue;
+      }
+      ddl.append(",").append(Const.CR);
+      if (!Utils.isEmpty(fk.getConstraintName())) {
+        ddl.append("CONSTRAINT ").append(databaseMeta.quoteField(fk.getConstraintName())).append(" ");
+      }
+      ddl.append("FOREIGN KEY (");
+      for (int i = 0; i < fk.getChildColumns().size(); i++) {
+        if (i > 0) {
+          ddl.append(", ");
+        }
+        ddl.append(databaseMeta.quoteField(fk.getChildColumns().get(i)));
+      }
+      ddl.append(") REFERENCES ");
+      ddl.append(databaseMeta.quoteField(fk.getParentTableName()));
+      ddl.append(" (");
+      for (int i = 0; i < fk.getParentColumns().size(); i++) {
+        if (i > 0) {
+          ddl.append(", ");
+        }
+        ddl.append(databaseMeta.quoteField(fk.getParentColumns().get(i)));
+      }
+      ddl.append(")");
+    }
   }
 
   /**
