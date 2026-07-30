@@ -3,7 +3,7 @@
     "caching-file-location": {
       "createParentFolder": true,
       "persistenceDelay": "5000",
-      "rootFolder": "${java.io.tmpdir}/executions/",
+      "rootFolder": "${EXECUTIONS_FOLDER}",
       "maxCacheAge": "86400000"
     }
   },
