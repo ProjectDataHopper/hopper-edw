@@ -1,6 +1,6 @@
 # Marquez / OpenLineage lineage integration
 
-> **Status:** Implemented for issue **#101** (0.5.0-SNAPSHOT).  
+> **Status:** Implemented for issue **#101** (released in **0.5.0**).  
 > **User documentation:** [../openlineage-export.adoc](../openlineage-export.adoc)
 
 ## Summary

@@ -2,15 +2,22 @@
 
 All notable changes to the hop-datavault plugin are documented in this file.
 
-## [Unreleased] — 0.5.0-SNAPSHOT
+## [0.5.0] — 2026-07-30
+
+Requires **Apache Hop 2.18.1** and **Java 21**.
 
 ### OpenLineage / Marquez lineage export (#101)
 
-- New workflow action **Export data lineage** emits model-derived OpenLineage COMPLETE events for DV/BV/DM tables (optional columnLineage + schema facets)
+- New workflow action **Export data lineage** emits model-derived OpenLineage COMPLETE events for DV/BV/DM tables (table + optional column lineage)
 - Destinations: folder (one JSON file per table + summary) and/or HTTP POST to OpenLineage endpoints (Marquez, Collibra OL-compatible)
+- Configurable **job** and **dataset** namespaces
+- Physical location facets: standard `dataSource` plus `hop_location` (database connection/schema/table, CSV/Parquet folder+mask, Iceberg catalog location)
+- Dimension aliases (role-playing dims) keep logical dataset identity and **symlink** to the shared physical dimension (e.g. `d_shipping_date` → `d_date`)
+- Marquez-safe `dataSource.uri` encoding (spaces / unresolved `${variables}`) so failed POSTs no longer abort mid-export when **Fail on HTTP error** is enabled
 - Optional operational enrichment from `load_pipeline_metric`
 - Local stack: `./scripts/run-marquez.sh` and `scripts/docker/compose.marquez.yml` (API :5001, UI :3001)
-- Docs: [docs/openlineage-export.adoc](docs/openlineage-export.adoc)
+- Retail sample: `send-lineage-to-marquez.hwf`, env vars `MARQUEZ_API` / `MARQUEZ_NAMESPACE_*`
+- Docs and screenshots: [docs/openlineage-export.adoc](docs/openlineage-export.adoc)
 
 ### Optional primary and foreign keys in model DDL (#92)
 
@@ -22,22 +29,25 @@ All notable changes to the hop-datavault plugin are documented in this file.
 - DM PK for dimension/junk surrogate keys and bridge composites; FK for fact/bridge roles and dimension outriggers (facts have no PK in this release)
 - Foreign keys are skipped on SingleStore (and any engine treated as non-FK-capable); primary keys still apply when enabled
 - Enabling foreign keys also emits primary keys on parent tables that are referenced
-- Multi-source hubs/links: `generateUpdateWorkflows()` emits a serial workflow (Start → source pipelines in series) so sources for the same table no longer race under parallel Pipeline Executor / bulk load; free pipelines stay parallel
-- DV Update partitions multi-source units vs free pipelines; Debug opens multi-source workflows
-- Link updates: source SQL uses `SELECT DISTINCT` on relationship keys (was plain `SELECT`); Unique Rows on link hash before CDC merge so duplicate LHKs cannot bulk-load twice under PRIMARY KEY
-- **Root cause fix for `lnk_order_pkey` / bulk COPY failures:** link CDC target ordering for STRING/HEX hash keys must match Hop SortRows. Linguistic DB collations (not only PostgreSQL) can reverse decimal-dash keys (e.g. `0-100-…` vs `0-10-…`), desynchronizing MergeRows so existing LHKs are flagged `new`. **Automatic strategy** (`DvHashKeyOrderStrategySupport`): SQL `ORDER BY … COLLATE` with a hop-compatible binary/`C` collation when certain (static trust + optional live probe for PostgreSQL `"C"`, SQL Server `BIN2`, MySQL/SingleStore `utf8mb4_bin`, …); otherwise Hop SortRows on the target leg. Source stream always SortRows after `DvHashKey`. BINARY hash keys use plain SQL `ORDER BY`. No user option — correctness is the plugin's job
+- Multi-source hubs/links: serial workflow generation so sources for the same table no longer race under parallel bulk load
+- Link CDC target ordering for STRING/HEX hash keys matches Hop SortRows (collation-safe automatic strategy)
+- Integration: drop scripts not blocked by BV views on shared Vault DB
 
 ### Resource definition validation and catalog-safe remediation (#83)
 
-- Design-time **Validate sources** opens an options dialog (baseline: working catalog or version tag; check axes for live sources, version drift, target models, target databases; optional report path)
-- Validation results dialog is master-detail with baseline/axes banner; remediation via explicit **Remediation proposals…** (double-click still works)
-- Length remediation expands DV satellite attributes, BV SCD2 mapped columns, and DM SQL-sourced columns **from the catalog field length** — the catalog is never rewritten on this path
-- Multi-table remediation package: SQL script + Hop workflow (one SQL action per target table) under the configured schema-remediation folder
-- BV-mediated SQL lineage for free-form DM sources (e.g. `d_customer.cust_address` via `customer_360_bv`)
-- Read-only **Versions** tree in the Data Catalog perspective for tagged catalog snapshots
-- Assembly packages `hop-action-sql` / success action so generated remediation workflows can run SQL actions
-- Retail sample package: `retail-example/workflows/schema-remediation/accept-address_line1/`
+- Design-time **Validate sources** options dialog (baseline, check axes, optional report path)
+- Validation results master-detail; remediation via **Remediation proposals…**
+- Length remediation expands DV satellite attributes, BV SCD2 mapped columns, and DM SQL-sourced columns **from the catalog field length** (catalog never rewritten)
+- Multi-table remediation package: SQL script + Hop workflow under the schema-remediation folder
+- BV-mediated SQL lineage for free-form DM sources
+- Read-only **Versions** tree in the Data Catalog perspective
 - Docs and screenshots: [docs/resource-definition-validation.adoc](docs/resource-definition-validation.adoc)
+
+### Portability / UX
+
+- Issue #98: portable model and execution-map paths for cross-host projects
+- Dark-mode note fills (dark orange / dark gray)
+- Overview presentation and docs refresh
 
 ## [0.4.0] — 2026-07-29
 

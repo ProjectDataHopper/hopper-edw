@@ -78,6 +78,19 @@ public final class OpenLineageExportService {
     OpenLineageExportResult result = new OpenLineageExportResult(exportRunId);
     List<ObjectNode> events = new ArrayList<>();
 
+    // Prefer a catalog connection from the first loaded model for source physical resolution.
+    String defaultCatalog = null;
+    if (!models.dataVaultModels().isEmpty()
+        && models.dataVaultModels().get(0) != null) {
+      defaultCatalog = models.dataVaultModels().get(0).catalogConnection();
+    } else if (!models.businessVaultModels().isEmpty()
+        && models.businessVaultModels().get(0) != null) {
+      defaultCatalog = models.businessVaultModels().get(0).catalogConnection();
+    } else if (!models.dimensionalModels().isEmpty()
+        && models.dimensionalModels().get(0) != null) {
+      defaultCatalog = models.dimensionalModels().get(0).catalogConnection();
+    }
+
     if (options.isIncludeDv()) {
       for (ValidationModels.LoadedDataVaultModel loaded : models.dataVaultModels()) {
         if (loaded == null || loaded.model() == null) {
@@ -86,13 +99,17 @@ public final class OpenLineageExportService {
         LineageSnapshot snapshot =
             DvModelLineageCollector.collect(
                 loaded.model(), variables, metadataProvider, loaded.catalogConnection());
+        OpenLineageLocationContext locationContext =
+            new OpenLineageLocationContext(
+                variables, metadataProvider, loaded.catalogConnection());
         events.addAll(
             OpenLineageSnapshotMapper.toRunEvents(
                 snapshot,
                 options.getJobNamespace(),
                 options.getDatasetNamespace(),
                 options.isIncludeColumnLineage(),
-                exportRunId));
+                exportRunId,
+                locationContext));
       }
     }
     if (options.isIncludeBv()) {
@@ -101,13 +118,21 @@ public final class OpenLineageExportService {
           continue;
         }
         LineageSnapshot snapshot = BvModelLineageCollector.collect(loaded.model(), variables);
+        OpenLineageLocationContext locationContext =
+            new OpenLineageLocationContext(
+                variables,
+                metadataProvider,
+                !Utils.isEmpty(loaded.catalogConnection())
+                    ? loaded.catalogConnection()
+                    : defaultCatalog);
         events.addAll(
             OpenLineageSnapshotMapper.toRunEvents(
                 snapshot,
                 options.getJobNamespace(),
                 options.getDatasetNamespace(),
                 options.isIncludeColumnLineage(),
-                exportRunId));
+                exportRunId,
+                locationContext));
       }
     }
     if (options.isIncludeDm()) {
@@ -117,16 +142,23 @@ public final class OpenLineageExportService {
         }
         LineageSnapshot snapshot =
             DmModelLineageCollector.collect(loaded.model(), variables, metadataProvider);
+        OpenLineageLocationContext locationContext =
+            new OpenLineageLocationContext(
+                variables,
+                metadataProvider,
+                !Utils.isEmpty(loaded.catalogConnection())
+                    ? loaded.catalogConnection()
+                    : defaultCatalog);
         events.addAll(
             OpenLineageSnapshotMapper.toRunEvents(
                 snapshot,
                 options.getJobNamespace(),
                 options.getDatasetNamespace(),
                 options.isIncludeColumnLineage(),
-                exportRunId));
+                exportRunId,
+                locationContext));
       }
     }
-
     // Cross-model: copy output schemas onto matching input datasets (DV hub → BV, dim → fact, …).
     OpenLineageSnapshotMapper.enrichInputSchemasFromOutputs(events);
 
@@ -208,7 +240,8 @@ public final class OpenLineageExportService {
             options.getJobNamespace(),
             options.getDatasetNamespace(),
             options.isIncludeColumnLineage(),
-            exportRunId);
+            exportRunId,
+            null);
     events.forEach(e -> result.incrementEventCount());
 
     OpenLineageDestinationMode mode =

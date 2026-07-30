@@ -164,6 +164,36 @@ class OpenLineageSnapshotMapperTest {
   }
 
   @Test
+  void locationContextAttachesHopLocationOnOutputs() {
+    LineageSnapshot snapshot = DvModelLineageCollector.collect(model, variables);
+    // Ensure target connection is set so location facets can be built without DatabaseMeta.
+    snapshot
+        .getTables()
+        .forEach(
+            t -> {
+              if (t.getTargetDatabaseMetaName() == null || t.getTargetDatabaseMetaName().isBlank()) {
+                t.setTargetDatabaseMetaName("Vault");
+              }
+            });
+    OpenLineageLocationContext ctx = new OpenLineageLocationContext(variables, null, null);
+    List<ObjectNode> events =
+        OpenLineageSnapshotMapper.toRunEvents(
+            snapshot, "hop-data-vault", null, true, "export-loc", ctx);
+    ObjectNode hubEvent =
+        events.stream()
+            .filter(e -> e.path("job").path("name").asText("").contains("hub_customer"))
+            .findFirst()
+            .orElseThrow();
+    JsonNode out = hubEvent.path("outputs").get(0);
+    assertTrue(out.path("facets").has("dataSource"), "output should have dataSource facet");
+    assertTrue(out.path("facets").has("hop_location"), "output should have hop_location facet");
+    assertEquals(
+        "DATABASE", out.path("facets").path("hop_location").path("kind").asText());
+    assertEquals(
+        "hub_customer", out.path("facets").path("hop_location").path("tableName").asText());
+  }
+
+  @Test
   void fileNameForEventUsesJobName() {
     ObjectNode event = MAPPER.createObjectNode();
     ObjectNode job = MAPPER.createObjectNode();

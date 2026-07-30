@@ -15,6 +15,7 @@ Use this to feed platforms such as **Marquez** or any OpenLineage-compatible HTT
 | Source of truth | `.hdv` / `.hbv` / `.hdm` models (+ catalog resolution)
 | Granularity | One COMPLETE `RunEvent` per target table (**unique OpenLineage `runId` per job**; export correlation id on `hop_export` facet)
 | Column lineage | Output datasets always get a `schema` facet when fields are known; optional `columnLineage` facet when enabled
+| Physical location | Datasets get OpenLineage `dataSource` plus hop `hop_location` facets (database connection/schema/table, CSV/Parquet folder+mask, Iceberg catalog/namespace/table) when resolvable from the model or catalog
 | Source datasets | Input datasets (catalog feeds, parent tables) get a `schema` facet inferred from contributing field names; enriched from other events' outputs when the same dataset is a target elsewhere
 | Cross-layer edges | BV/DM events list parent DV/BV tables as inputs when the model maps them
 | Operational facts | Optional last-load enrichment from `load_pipeline_metric`
@@ -73,6 +74,10 @@ Column lineage shows how source feed columns flow through satellites into Busine
 
 image::images/data-lineage-marquez-column-level-lineage.png[Marquez column-level lineage from E2E customer feeds through satellites to customer_360_bv,align="center"]
 
+=== Dataset physical location
+
+Opening a dataset in Marquez shows field lists and, under **Facets**, the physical system details (`dataSource` / `hop_location`). See <<Physical location facets>> for the full description and screenshot.
+
 == Dataset and job naming
 
 |===
@@ -97,6 +102,40 @@ Column transforms map from internal `FieldTransform` values:
 |===
 
 Reason codes and short messages are concatenated into `transformations[].description`.
+
+== Physical location facets
+
+Besides identity (`namespace` / `name`) and column `schema`, each dataset may include:
+
+|===
+| Facet | Contents
+| `dataSource` | Standard OpenLineage facet: `name` (connection or kind) and `uri` (JDBC URL without credentials, `file://…` mask, Iceberg catalog path, or `hop://…` fallback)
+| `hop_location` | Structured hop-data-vault details: `kind` (`DATABASE` / `CSV` / `PARQUET` / `ICEBERG` / `STAGING`), `connectionName`, `schemaName`, `tableName`, file folder/masks, Iceberg catalog/warehouse/namespace/table/branch/snapshot
+| `symlinks` | Alternate identifiers: `schema.table` for DB targets, and for **dimension aliases** the shared physical dimension (e.g. `d_shipping_date` → `d_date`)
+|===
+
+Role-playing / linked dimension aliases use the **logical** name as the dataset id (`d_shipping_date`) and list the physical dimension under `symlinks` / `hop_location.tableName` (`d_date`). Projected fields from the physical dimension are still exported when the alias target resolves.
+
+**Targets** (hubs, sats, BV, facts) resolve location from the model target connection and physical table name.
+
+**Sources** (catalog feeds) resolve from the Data Catalog `RecordDefinition` physical table, file, or Iceberg ref when a catalog connection is available on the resource group / model.
+
+**Dataset namespace override** only changes OpenLineage identity. Physical facets still report the real Hop connection, schema, table, or file path so Marquez (or raw JSON) remains operable.
+
+In Marquez, open a dataset and expand **Facets** to inspect `dataSource` (JDBC/file/Iceberg URI) and `hop_location` (connection, table name, kind, …). Field types may show as N/A when only names were exported on source inputs; targets with full model field metadata include types in the `schema` facet.
+
+image::images/data-lineage-marquez-dataset-source-table-details.png[Marquez dataset detail for E2E-customer-prefs showing dataSource JDBC URI and hop_location connection/table facets,align="center"]
+
+Example `hop_location` for a database source feed:
+
+----
+"hop_location": {
+  "kind": "DATABASE",
+  "connectionName": "CRM",
+  "tableName": "customer_prefs",
+  "uri": "jdbc:postgresql://localhost:54320/..."
+}
+----
 
 == Local Marquez
 
@@ -134,4 +173,5 @@ Stop with `./scripts/run-marquez.sh down`. Reset data with `./scripts/run-marque
 * **Empty export** — verify the resource group lists model files and layer checkboxes are enabled.
 * **Missing column facets** — enable *Include column-level lineage*.
 * **Datasets still show connection name (e.g. Vault)** — set **Dataset namespace** on the action if you want a single override namespace.
+* **Dimensions/facts missing after location facets** — Marquez 500s when `dataSource.uri` contains spaces or unresolved `${variables}` (maps to null `sources.connection_url`). Rebuild with the URI encoding fix; with **Fail on HTTP error** enabled, a single bad event previously aborted the rest of the export (including later DM jobs).
 * **Ops enrichment skipped** — configure ops database/schema and ensure `load_pipeline_metric` exists; enrichment never fails the export by itself.

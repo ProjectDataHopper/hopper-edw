@@ -65,7 +65,7 @@ public final class OpenLineageSnapshotMapper {
       String jobNamespace,
       boolean includeColumnLineage,
       String exportRunId) {
-    return toRunEvents(snapshot, jobNamespace, null, includeColumnLineage, exportRunId);
+    return toRunEvents(snapshot, jobNamespace, null, includeColumnLineage, exportRunId, null);
   }
 
   /**
@@ -78,6 +78,21 @@ public final class OpenLineageSnapshotMapper {
       String datasetNamespace,
       boolean includeColumnLineage,
       String exportRunId) {
+    return toRunEvents(
+        snapshot, jobNamespace, datasetNamespace, includeColumnLineage, exportRunId, null);
+  }
+
+  /**
+   * @param locationContext optional; when set, attaches dataSource / hop_location facets on
+   *     datasets
+   */
+  public static List<ObjectNode> toRunEvents(
+      LineageSnapshot snapshot,
+      String jobNamespace,
+      String datasetNamespace,
+      boolean includeColumnLineage,
+      String exportRunId,
+      OpenLineageLocationContext locationContext) {
     if (snapshot == null || snapshot.getTables().isEmpty()) {
       return List.of();
     }
@@ -89,18 +104,37 @@ public final class OpenLineageSnapshotMapper {
     LineageLayer layer =
         snapshot.getModelLayer() != null ? snapshot.getModelLayer() : LineageLayer.DV;
 
+    // Prefer snapshot catalog connection when context has none.
+    OpenLineageLocationContext ctx = locationContext;
+    if (ctx != null
+        && Utils.isEmpty(ctx.getCatalogConnection())
+        && !Utils.isEmpty(snapshot.getCatalogConnection())) {
+      ctx =
+          new OpenLineageLocationContext(
+              ctx.getVariables(),
+              ctx.getMetadataProvider(),
+              snapshot.getCatalogConnection());
+    }
+
     List<ObjectNode> events = new ArrayList<>();
     for (TableLineage table : snapshot.getTables()) {
       if (table == null) {
         continue;
       }
+      // Job name uses logical table name so role-playing aliases stay unique
+      // (d_order_date vs d_shipping_date). Dataset output name still uses physical table.
+      String logical =
+          !Utils.isEmpty(table.getLogicalName())
+              ? table.getLogicalName()
+              : table.getPhysicalTableName();
       String physical =
           !Utils.isEmpty(table.getPhysicalTableName())
               ? table.getPhysicalTableName()
               : table.getLogicalName();
-      if (Utils.isEmpty(physical)) {
+      if (Utils.isEmpty(logical) && Utils.isEmpty(physical)) {
         continue;
       }
+      String jobTableSegment = !Utils.isEmpty(logical) ? logical : physical;
       // Marquez requires a unique runId per job run; never reuse one UUID across jobs.
       String runId = UUID.randomUUID().toString();
       events.add(
@@ -110,12 +144,14 @@ public final class OpenLineageSnapshotMapper {
               dsNs,
               layer,
               modelName,
+              jobTableSegment,
               physical,
               runId,
               correlationId,
               eventTime,
               includeColumnLineage,
-              snapshot));
+              snapshot,
+              ctx));
     }
     enrichInputSchemasFromOutputs(events);
     return events;
@@ -138,11 +174,13 @@ public final class OpenLineageSnapshotMapper {
         layer,
         modelName,
         physicalTableName,
+        physicalTableName,
         runId,
         null,
         eventTime,
         includeColumnLineage,
-        snapshot);
+        snapshot,
+        null);
   }
 
   public static ObjectNode toRunEvent(
@@ -151,12 +189,43 @@ public final class OpenLineageSnapshotMapper {
       String datasetNamespace,
       LineageLayer layer,
       String modelName,
+      String jobTableSegment,
       String physicalTableName,
       String runId,
       String exportCorrelationId,
       String eventTime,
       boolean includeColumnLineage,
       LineageSnapshot snapshot) {
+    return toRunEvent(
+        table,
+        jobNamespace,
+        datasetNamespace,
+        layer,
+        modelName,
+        jobTableSegment,
+        physicalTableName,
+        runId,
+        exportCorrelationId,
+        eventTime,
+        includeColumnLineage,
+        snapshot,
+        null);
+  }
+
+  public static ObjectNode toRunEvent(
+      TableLineage table,
+      String jobNamespace,
+      String datasetNamespace,
+      LineageLayer layer,
+      String modelName,
+      String jobTableSegment,
+      String physicalTableName,
+      String runId,
+      String exportCorrelationId,
+      String eventTime,
+      boolean includeColumnLineage,
+      LineageSnapshot snapshot,
+      OpenLineageLocationContext locationContext) {
     ObjectNode event = MAPPER.createObjectNode();
     event.put("eventType", "COMPLETE");
     event.put("eventTime", eventTime != null ? eventTime : Instant.now().toString());
@@ -189,18 +258,23 @@ public final class OpenLineageSnapshotMapper {
 
     ObjectNode job = MAPPER.createObjectNode();
     job.put("namespace", jobNamespace);
+    String jobLeaf =
+        !Utils.isEmpty(jobTableSegment)
+            ? jobTableSegment
+            : !Utils.isEmpty(physicalTableName) ? physicalTableName : "table";
     job.put(
         "name",
         layer.name().toLowerCase()
             + "/"
             + sanitizePathSegment(modelName)
             + "/"
-            + physicalTableName);
+            + sanitizePathSegment(jobLeaf));
     event.set("job", job);
 
     // Collect input datasets and per-input field names (for schema facets on sources).
     Map<String, DatasetKey> inputKeys = new LinkedHashMap<>();
     Map<String, Map<String, String>> inputFieldTypes = new LinkedHashMap<>();
+    Map<String, DatasetLocation> inputLocations = new LinkedHashMap<>();
 
     for (TableSourceRef source : table.getSources()) {
       DatasetKey key =
@@ -208,6 +282,13 @@ public final class OpenLineageSnapshotMapper {
       if (key != null) {
         inputKeys.putIfAbsent(key.id(), key);
         inputFieldTypes.computeIfAbsent(key.id(), ignored -> new LinkedHashMap<>());
+        if (locationContext != null && !inputLocations.containsKey(key.id())) {
+          DatasetLocation loc =
+              OpenLineageDatasetLocationResolver.forTableSource(source, table, locationContext);
+          if (loc != null) {
+            inputLocations.put(key.id(), loc);
+          }
+        }
       }
     }
     for (FieldLineage field : table.getFields()) {
@@ -227,6 +308,14 @@ public final class OpenLineageSnapshotMapper {
         if (!Utils.isEmpty(contribution.getSourceFieldName())) {
           fields.putIfAbsent(contribution.getSourceFieldName(), null);
         }
+        if (locationContext != null && !inputLocations.containsKey(key.id())) {
+          DatasetLocation loc =
+              OpenLineageDatasetLocationResolver.forContribution(
+                  contribution, table, locationContext);
+          if (loc != null) {
+            inputLocations.put(key.id(), loc);
+          }
+        }
       }
     }
 
@@ -239,6 +328,9 @@ public final class OpenLineageSnapshotMapper {
         facets.set("schema", schemaFacetFromNames(fields));
         input.set("facets", facets);
       }
+      OpenLineageDatasetFacetSupport.attachLocationFacets(input, inputLocations.get(key.id()));
+      // If this input is a role-playing alias with a physicalRef, link to the shared dimension.
+      attachInputPhysicalSymlink(input, key, table, datasetNamespace);
       inputs.add(input);
     }
     event.set("inputs", inputs);
@@ -255,6 +347,13 @@ public final class OpenLineageSnapshotMapper {
       }
       output.set("facets", facets);
     }
+    if (locationContext != null) {
+      OpenLineageDatasetFacetSupport.attachLocationFacets(
+          output, OpenLineageDatasetLocationResolver.forTargetTable(table, locationContext));
+    }
+    // Role-playing / linked dimension aliases: identity is the logical alias name (e.g.
+    // d_shipping_date); symlink + hop_location point at the shared physical table (d_date).
+    attachPhysicalAliasSymlink(output, table, datasetNamespace);
     ArrayNode outputs = MAPPER.createArrayNode();
     outputs.add(output);
     event.set("outputs", outputs);
@@ -263,14 +362,91 @@ public final class OpenLineageSnapshotMapper {
   }
 
   /**
-   * After all events in an export are built, copy output schemas onto input dataset references that
-   * share the same namespace/name (e.g. a DV hub used as input to a BV job).
+   * When a fact (or other table) lists a dimension role source that has a physicalRef different from
+   * the role name, attach a symlink so Marquez can navigate alias → physical dim.
+   */
+  private static void attachInputPhysicalSymlink(
+      ObjectNode input, DatasetKey key, TableLineage table, String datasetNamespace) {
+    if (input == null || key == null || table == null) {
+      return;
+    }
+    for (TableSourceRef source : table.getSources()) {
+      if (source == null || source.getKind() != TableSourceKind.DM_TABLE) {
+        continue;
+      }
+      String roleName = source.getName();
+      String physical = source.getPhysicalRef();
+      if (Utils.isEmpty(roleName)
+          || Utils.isEmpty(physical)
+          || roleName.equalsIgnoreCase(physical)) {
+        continue;
+      }
+      // Match this input dataset to the role name (dataset name is role name for DM_TABLE inputs).
+      if (!roleName.equalsIgnoreCase(key.name())
+          && !physical.equalsIgnoreCase(key.name())) {
+        continue;
+      }
+      String symlinkNamespace =
+          !Utils.isEmpty(datasetNamespace)
+              ? datasetNamespace
+              : input.path("namespace").asText(resolveOutputNamespace(table));
+      OpenLineageDatasetFacetSupport.attachSymlink(
+          input, symlinkNamespace, physical, "TABLE");
+      return;
+    }
+  }
+
+  /**
+   * For {@code DIMENSION_ALIAS} tables, declare a symlink to the physical dimension dataset so
+   * Marquez can relate {@code d_shipping_date} → {@code d_date} even when field lists differ.
+   */
+  private static void attachPhysicalAliasSymlink(
+      ObjectNode dataset, TableLineage table, String datasetNamespace) {
+    if (dataset == null || table == null) {
+      return;
+    }
+    if (table.getTableType() == null
+        || !table.getTableType().equalsIgnoreCase("DIMENSION_ALIAS")) {
+      return;
+    }
+    String logical = table.getLogicalName();
+    String physical = table.getPhysicalTableName();
+    if (Utils.isEmpty(physical) || physical.equalsIgnoreCase(logical)) {
+      // Also try parent source name if physical equals logical but parent ref exists.
+      physical = null;
+      for (TableSourceRef source : table.getSources()) {
+        if (source != null
+            && source.getKind() == TableSourceKind.DM_TABLE
+            && !Utils.isEmpty(source.getName())
+            && !source.getName().equalsIgnoreCase(logical)) {
+          physical =
+              !Utils.isEmpty(source.getPhysicalRef()) ? source.getPhysicalRef() : source.getName();
+          break;
+        }
+      }
+    }
+    if (Utils.isEmpty(physical) || physical.equalsIgnoreCase(logical)) {
+      return;
+    }
+    String symlinkNamespace =
+        !Utils.isEmpty(datasetNamespace)
+            ? datasetNamespace
+            : dataset.path("namespace").asText(resolveOutputNamespace(table));
+    OpenLineageDatasetFacetSupport.attachSymlink(
+        dataset, symlinkNamespace, physical, "TABLE");
+  }
+
+  /**
+   * After all events in an export are built, copy output schemas (and physical location facets)
+   * onto input dataset references that share the same namespace/name (e.g. a DV hub used as input
+   * to a BV job).
    */
   public static void enrichInputSchemasFromOutputs(List<ObjectNode> events) {
     if (events == null || events.isEmpty()) {
       return;
     }
     Map<String, ArrayNode> outputSchemas = new LinkedHashMap<>();
+    Map<String, ObjectNode> outputLocations = new LinkedHashMap<>();
     for (ObjectNode event : events) {
       if (event == null) {
         continue;
@@ -287,13 +463,38 @@ public final class OpenLineageSnapshotMapper {
         }
         ObjectNode out = (ObjectNode) outNode;
         String key = datasetId(out.path("namespace").asText(), out.path("name").asText());
+        // Also index by bare table name so parent-table inputs still match under dataset-namespace
+        // overrides.
+        String bareName = out.path("name").asText("");
         var fieldsNode = out.path("facets").path("schema").path("fields");
         if (fieldsNode != null && fieldsNode.isArray() && fieldsNode.size() > 0) {
           outputSchemas.put(key, (ArrayNode) fieldsNode);
+          if (!Utils.isEmpty(bareName)) {
+            outputSchemas.putIfAbsent(bareName.toLowerCase(), (ArrayNode) fieldsNode);
+          }
+        }
+        var hopLoc = out.path("facets").path("hop_location");
+        var dataSource = out.path("facets").path("dataSource");
+        if ((hopLoc != null && hopLoc.isObject()) || (dataSource != null && dataSource.isObject())) {
+          ObjectNode locCopy = MAPPER.createObjectNode();
+          if (hopLoc != null && hopLoc.isObject()) {
+            locCopy.set("hop_location", hopLoc.deepCopy());
+          }
+          if (dataSource != null && dataSource.isObject()) {
+            locCopy.set("dataSource", dataSource.deepCopy());
+          }
+          var symlinks = out.path("facets").path("symlinks");
+          if (symlinks != null && symlinks.isObject()) {
+            locCopy.set("symlinks", symlinks.deepCopy());
+          }
+          outputLocations.put(key, locCopy);
+          if (!Utils.isEmpty(bareName)) {
+            outputLocations.putIfAbsent(bareName.toLowerCase(), locCopy);
+          }
         }
       }
     }
-    if (outputSchemas.isEmpty()) {
+    if (outputSchemas.isEmpty() && outputLocations.isEmpty()) {
       return;
     }
     for (ObjectNode event : events) {
@@ -312,36 +513,58 @@ public final class OpenLineageSnapshotMapper {
         }
         ObjectNode in = (ObjectNode) inNode;
         String key = datasetId(in.path("namespace").asText(), in.path("name").asText());
+        String bare = in.path("name").asText("").toLowerCase();
         ArrayNode known = outputSchemas.get(key);
         if (known == null) {
-          continue;
+          known = outputSchemas.get(bare);
         }
-        var existingNode = in.path("facets").path("schema").path("fields");
-        if (existingNode != null && existingNode.isArray() && existingNode.size() > 0) {
-          ArrayNode existing = (ArrayNode) existingNode;
-          // Merge missing names from the known output schema.
-          Set<String> have = new LinkedHashSet<>();
-          for (int f = 0; f < existing.size(); f++) {
-            have.add(existing.get(f).path("name").asText());
-          }
-          for (int f = 0; f < known.size(); f++) {
-            String name = known.get(f).path("name").asText();
-            if (!Utils.isEmpty(name) && !have.contains(name)) {
-              existing.add(known.get(f).deepCopy());
+        if (known != null) {
+          var existingNode = in.path("facets").path("schema").path("fields");
+          if (existingNode != null && existingNode.isArray() && existingNode.size() > 0) {
+            ArrayNode existing = (ArrayNode) existingNode;
+            Set<String> have = new LinkedHashSet<>();
+            for (int f = 0; f < existing.size(); f++) {
+              have.add(existing.get(f).path("name").asText());
             }
+            for (int f = 0; f < known.size(); f++) {
+              String name = known.get(f).path("name").asText();
+              if (!Utils.isEmpty(name) && !have.contains(name)) {
+                existing.add(known.get(f).deepCopy());
+              }
+            }
+          } else {
+            ObjectNode facets =
+                in.has("facets") && in.get("facets").isObject()
+                    ? (ObjectNode) in.get("facets")
+                    : MAPPER.createObjectNode();
+            ObjectNode schema = MAPPER.createObjectNode();
+            schema.put("_producer", OpenLineageConstants.PRODUCER);
+            schema.put("_schemaURL", OpenLineageConstants.SCHEMA_FACET_URL);
+            schema.set("fields", known.deepCopy());
+            facets.set("schema", schema);
+            in.set("facets", facets);
           }
-          continue;
         }
-        ObjectNode facets =
-            in.has("facets") && in.get("facets").isObject()
-                ? (ObjectNode) in.get("facets")
-                : MAPPER.createObjectNode();
-        ObjectNode schema = MAPPER.createObjectNode();
-        schema.put("_producer", OpenLineageConstants.PRODUCER);
-        schema.put("_schemaURL", OpenLineageConstants.SCHEMA_FACET_URL);
-        schema.set("fields", known.deepCopy());
-        facets.set("schema", schema);
-        in.set("facets", facets);
+        ObjectNode locFacets = outputLocations.get(key);
+        if (locFacets == null) {
+          locFacets = outputLocations.get(bare);
+        }
+        if (locFacets != null) {
+          ObjectNode facets =
+              in.has("facets") && in.get("facets").isObject()
+                  ? (ObjectNode) in.get("facets")
+                  : MAPPER.createObjectNode();
+          if (!facets.has("dataSource") && locFacets.has("dataSource")) {
+            facets.set("dataSource", locFacets.get("dataSource").deepCopy());
+          }
+          if (!facets.has("hop_location") && locFacets.has("hop_location")) {
+            facets.set("hop_location", locFacets.get("hop_location").deepCopy());
+          }
+          if (!facets.has("symlinks") && locFacets.has("symlinks")) {
+            facets.set("symlinks", locFacets.get("symlinks").deepCopy());
+          }
+          in.set("facets", facets);
+        }
       }
     }
   }
@@ -535,6 +758,13 @@ public final class OpenLineageSnapshotMapper {
 
   private static DatasetKey outputDatasetKey(TableLineage table) {
     String namespace = resolveOutputNamespace(table);
+    // Dimension aliases keep the logical role name as dataset identity (d_shipping_date) so facts
+    // that reference the alias connect to this node; physical shared dim is expressed via symlink.
+    if (table.getTableType() != null
+        && table.getTableType().equalsIgnoreCase("DIMENSION_ALIAS")
+        && !Utils.isEmpty(table.getLogicalName())) {
+      return new DatasetKey(namespace, table.getLogicalName());
+    }
     String name =
         physicalName(table.getSchemaName(), table.getPhysicalTableName(), table.getLogicalName());
     return new DatasetKey(namespace, name);

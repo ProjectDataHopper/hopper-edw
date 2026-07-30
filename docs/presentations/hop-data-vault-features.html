@@ -554,7 +554,7 @@
     <nav class="nav" id="sideNav" aria-label="Presentation sections">
       <div class="nav-brand">
         <div class="logo">Hop Data Vault</div>
-        <div class="meta">Features &amp; Roadmap · v0.5.0-SNAPSHOT</div>
+        <div class="meta">Features &amp; Roadmap · v0.5.0</div>
       </div>
 
       <div class="nav-section">Overview</div>
@@ -598,7 +598,7 @@
             with a shared Data Catalog, schema gates, content quality, and explainable source-to-target lineage.
           </p>
           <div class="badges">
-            <span class="chip">0.5.0-SNAPSHOT · release 0.4.0</span>
+            <span class="chip">release 0.5.0</span>
             <span class="chip">Apache Hop 2.18.1</span>
             <span class="chip">Java 21</span>
             <span class="chip">.hdv · .hbv · .hdm · .hem</span>
@@ -856,14 +856,19 @@
             <tr><td>Execution maps (<code>.hem</code>)</td><td><span class="badge badge-ok">Available</span></td><td><a href="#operations">Operations</a></td></tr>
             <tr><td>AI Help (model, pipeline, workflow)</td><td><span class="badge badge-ok">Available</span></td><td><a href="#operations">Operations</a></td></tr>
             <tr><td>Record Definition Input · Date Dimension Generator</td><td><span class="badge badge-ok">Available</span></td><td><a href="#operations">Operations</a></td></tr>
+            <tr><td>Marquez / OpenLineage export</td><td><span class="badge badge-available">Available</span></td><td><a href="#lineage">Lineage</a> · #101</td></tr>
             <tr><td>BV naming rules engine</td><td><span class="badge badge-planned">Planned</span></td><td><a href="#roadmap">Roadmap</a> · #41</td></tr>
-            <tr><td>Marquez / OpenLineage export</td><td><span class="badge badge-planned">Planned</span></td><td><a href="#roadmap">Roadmap</a></td></tr>
             <tr><td>Hash-key ModPartitioner parallelism</td><td><span class="badge badge-planned">Planned</span></td><td><a href="#roadmap">Roadmap</a></td></tr>
             <tr><td>Automated execution with dependency resolution</td><td><span class="badge badge-planned">Planned</span></td><td><a href="#roadmap">Roadmap</a> · #42</td></tr>
           </tbody>
         </table>
 
         <div class="callout" style="margin-top:1.25rem">
+          <strong>Shipped in 0.5.0:</strong> OpenLineage / Marquez export (Export data lineage action, physical location facets,
+          dimension-alias symlinks); optional PK/FK in model DDL; resource-definition validation with catalog-safe length
+          remediation; portable model paths; dark-mode note fills.
+        </div>
+        <div class="callout" style="margin-top:0.75rem">
           <strong>Shipped in 0.4.0:</strong> source-to-target lineage (table + field, reason codes), Lineage tab,
           explainable DDL, catalog lineage publish, drift gate, reverse browser; transactional link dependent child keys;
           separate DV/BV databases for incremental SCD2/PIT; SQL Server multi-byte VARCHAR; pipeline wall-clock metrics.
@@ -1260,6 +1265,7 @@
             <li><strong>Catalog publish</strong> — sibling records under <code>hop/{project}/lineage/…</code></li>
             <li><strong>Drift gate</strong> — Validate resource definitions compares models to catalog lineage baselines</li>
             <li><strong>Reverse browser</strong> — from source field to all DV/BV/DM consumers (Resource definition group → Browse lineage…)</li>
+            <li><strong>OpenLineage / Marquez export</strong> (0.5.0) — workflow action <strong>Export data lineage</strong>: folder and/or HTTP POST, column lineage, physical location facets, dimension-alias symlinks</li>
           </ul>
         </div>
 
@@ -1283,7 +1289,7 @@
           <figcaption>Lineage tab — satellite field contributions and reasons</figcaption>
         </figure>
 
-        <p class="footer-note">Docs: <code>docs/source-to-target-lineage.adoc</code> · CHANGELOG 0.4.0</p>
+        <p class="footer-note">Docs: <code>docs/source-to-target-lineage.adoc</code>, <code>docs/openlineage-export.adoc</code> · CHANGELOG 0.4.0 / 0.5.0</p>
 
         <nav class="page-nav">
           <a href="#data-quality"><span>Previous</span><strong>← Data quality</strong></a>
@@ -1414,7 +1420,7 @@
           <p class="lead">
             From design plans in <code>docs/plans/</code> and open GitHub issues on
             <a href="https://github.com/mattcasters/hop-data-vault/issues" target="_blank" rel="noopener">mattcasters/hop-data-vault</a>
-            (snapshot as of 2026-07-29).
+            (snapshot as of 2026-07-30).
           </p>
         </header>
 
@@ -1426,9 +1432,9 @@
             <p>Configurable naming conventions for Business Vault tables and columns.</p>
           </div>
           <div class="issue">
-            <div class="num">plan</div>
+            <div class="num">#101 · <span class="badge badge-available">Available</span></div>
             <h4>Marquez / OpenLineage export</h4>
-            <p>Push lineage events to OpenLineage-compatible backends (builds on internal lineage).</p>
+            <p>Shipped in 0.5.0: Export data lineage action (folder + HTTP), physical location facets, dimension-alias symlinks.</p>
           </div>
           <div class="issue">
             <div class="num">plan</div>
@@ -1507,16 +1513,19 @@
             <p>Generate table docs, descriptions, and source-to-target mappings from models.</p>
           </div>
           <div class="issue">
-            <div class="num">#92</div>
+            <div class="num">#92 · <span class="badge badge-available">Available</span></div>
             <h4>PK / constraints in generated DDL</h4>
-            <p>Follow-up: primary keys and constraints still missing from hub/link/satellite DDL.</p>
+            <p>Shipped in 0.5.0: optional primary and foreign keys on DV/BV/DM model DDL (default off).</p>
           </div>
         </div>
 
         <div class="callout">
           <strong>Note:</strong> Issue <a href="https://github.com/mattcasters/hop-data-vault/issues/97" target="_blank" rel="noopener">#97</a>
-          tracked source-to-target lineage; the core capability shipped in <strong>0.4.0</strong> and is marked Available on the features page.
-          Further lineage polish may still appear under related observability issues (#79).
+          tracked source-to-target lineage (shipped in <strong>0.4.0</strong>).
+          Issue <a href="https://github.com/mattcasters/hop-data-vault/issues/101" target="_blank" rel="noopener">#101</a>
+          OpenLineage / Marquez export and issue
+          <a href="https://github.com/mattcasters/hop-data-vault/issues/92" target="_blank" rel="noopener">#92</a>
+          optional PK/FK DDL shipped in <strong>0.5.0</strong>.
         </div>
 
         <nav class="page-nav">
@@ -1557,7 +1566,7 @@
           <div class="panel soft">
             <h3 style="margin-top:0">Get started</h3>
             <ul>
-              <li>Install plugin 0.4.0+ into Apache Hop 2.18.1</li>
+              <li>Install plugin 0.5.0+ into Apache Hop 2.18.1</li>
               <li>Walk <code>retail-example/</code> with <code>docs/getting-started-retail.adoc</code></li>
               <li>Deep fixtures: <code>integration-tests/</code></li>
               <li>Markdown overview: <code>docs/presentations/hop-data-vault-overview.md</code></li>

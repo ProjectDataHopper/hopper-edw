@@ -80,7 +80,7 @@ public final class DmModelLineageCollector {
       } else if (table instanceof DmDimensionAlias alias) {
         tableLineage = collectDimensionAlias(alias, model, variables, metadataProvider, targetDb);
       } else if (table instanceof DmFact fact) {
-        tableLineage = collectFact(fact, model, variables, targetDb);
+        tableLineage = collectFact(fact, model, variables, metadataProvider, targetDb);
       } else {
         tableLineage = collectGeneric(table, model, variables, targetDb);
       }
@@ -266,7 +266,11 @@ public final class DmModelLineageCollector {
   }
 
   private static TableLineage collectFact(
-      DmFact fact, DimensionalModel model, IVariables variables, String targetDb) {
+      DmFact fact,
+      DimensionalModel model,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider,
+      String targetDb) {
     TableLineage lineage = baseTable(fact, model, variables, targetDb, DmTableType.FACT.name());
     addNamingReasons(lineage, fact);
     addSourceRef(lineage, fact.getSourceOrDefault(), variables);
@@ -282,8 +286,34 @@ public final class DmModelLineageCollector {
               ? resolve(role.getSourceFieldName(), variables)
               : fk;
       if (!Utils.isEmpty(dim)) {
-        lineage.addSource(
-            new TableSourceRef(TableSourceKind.DM_TABLE, dim, TableSourceRole.OTHER));
+        TableSourceRef dimRef =
+            new TableSourceRef(TableSourceKind.DM_TABLE, dim, TableSourceRole.OTHER);
+        // If the role points at a dimension alias, record the physical dimension name so
+        // OpenLineage can symlink d_shipping_date → d_date.
+        String physical =
+            DmDimensionResolutionSupport.resolvePhysicalTableName(
+                model, dim, variables, metadataProvider);
+        if (!Utils.isEmpty(physical) && !physical.equalsIgnoreCase(dim)) {
+          dimRef.setPhysicalRef(physical);
+        } else {
+          DmDimension resolved =
+              DmDimensionResolutionSupport.resolveDimension(
+                  model, dim, variables, metadataProvider);
+          if (resolved != null) {
+            String resolvedPhysical =
+                !Utils.isEmpty(resolved.getTableName())
+                    ? resolve(resolved.getTableName(), variables)
+                    : resolve(resolved.getName(), variables);
+            if (!Utils.isEmpty(resolvedPhysical)
+                && !resolvedPhysical.equalsIgnoreCase(dim)) {
+              dimRef.setPhysicalRef(resolvedPhysical);
+            } else if (resolved.getName() != null
+                && !resolved.getName().equalsIgnoreCase(dim)) {
+              dimRef.setPhysicalRef(resolve(resolved.getName(), variables));
+            }
+          }
+        }
+        lineage.addSource(dimRef);
       }
       FieldLineage field = new FieldLineage(fk);
       field.setTechnical(false);

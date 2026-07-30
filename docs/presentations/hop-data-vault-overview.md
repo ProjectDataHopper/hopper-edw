@@ -115,7 +115,7 @@ Same validation engine in the GUI and in workflow actions.
 
 - **Sources** live in the Hop data catalog (record definitions, field layouts, groups)
 - Optional **publish** of target table layouts after DV or BV updates
-- Foundation for downstream dimensional modeling and lineage (Marquez / OpenLineage planned)
+- Foundation for downstream dimensional modeling and OpenLineage / Marquez export
 
 Catalog + model = shared vocabulary between ingestion, vault, and consumption teams.
 
@@ -231,7 +231,7 @@ Choose per table — mixed models are supported.
 **Planned (0.1.x and beyond)**
 
 - BV naming rules engine
-- Marquez / OpenLineage lineage export
+- ~~Marquez / OpenLineage lineage export~~ — shipped in 0.5.0
 - Hash-key ModPartitioner parallelism
 
 ---
@@ -245,7 +245,7 @@ Choose per table — mixed models are supported.
 | **Implementers** | [README.md](../../README.md) and [integration-tests/PROJECT.md](../../integration-tests/PROJECT.md) |
 | **Reference** | [docs/README.md](../README.md) — full doc index |
 
-Open `retail-example/` for the tutorial, or `integration-tests/` as **`hop-data-vault`** for regression suites. Configure **CRM** and **Vault** connections, install plugin **0.4.0**.
+Open `retail-example/` for the tutorial, or `integration-tests/` as **`hop-data-vault`** for regression suites. Configure **CRM** and **Vault** connections, install plugin **0.5.0**.
 
 ---
 
