@@ -18,15 +18,12 @@
 # Jenkins publishes continuous SNAPSHOT zips to this Nexus after project changes.
 # Import into Hop so the plugin appears in marketplace query / install:
 #
-#   ./hop marketplace repo import hop-marketplace-repo.yaml
-#   # or from GitHub once on main:
-#   # ./hop marketplace repo import \
-#   #   https://raw.githubusercontent.com/mattcasters/hop-data-vault/main/hop-marketplace-repo.yaml
+#   ./hop marketplace repo import \
+#     https://raw.githubusercontent.com/mattcasters/hop-data-vault/refs/heads/main/hop-marketplace-repo.yaml
+#   # or a local path: ./hop marketplace repo import hop-marketplace-repo.yaml
 #
-#   ./hop marketplace query datavault
+#   ./hop marketplace query | grep vault
 #   ./hop marketplace install hop-datavault
-#   # explicit GAV:
-#   # ./hop marketplace install org.apache.hop:hop-datavault:0.5.0-SNAPSHOT
 #
 # browse: true → Hop lists *.zip from this Nexus live (no cache).
 # plugins: optional metadata that enriches names/categories and can pin version.

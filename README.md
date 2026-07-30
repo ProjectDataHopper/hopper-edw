@@ -137,23 +137,45 @@ Published release artifacts: **[v0.4.0](https://github.com/mattcasters/hop-data-
 
 ### Hop Marketplace (Hop 2.19+)
 
-Continuous Jenkins builds publish the plugin zip to the Data Hopper community Maven repository. On **Apache Hop 2.19 or later**, import the shareable repository definition from this project root ([`hop-marketplace-repo.yaml`](hop-marketplace-repo.yaml)), then install from the marketplace:
+Continuous Jenkins builds publish the latest SNAPSHOT zip to the Data Hopper community Maven repository. On **Apache Hop 2.19 or later**, import the shareable repository definition ([`hop-marketplace-repo.yaml`](hop-marketplace-repo.yaml)), then query and install.
+
+**1. Import the repository** (from GitHub `main`, or a local clone of this file):
 
 ```bash
-# From a Hop 2.19+ install (or point at the file / raw GitHub URL)
-./hop marketplace repo import /path/to/hop-data-vault/hop-marketplace-repo.yaml
-# After the file is on main:
-# ./hop marketplace repo import \
-#   https://raw.githubusercontent.com/mattcasters/hop-data-vault/main/hop-marketplace-repo.yaml
+./hop marketplace repo import \
+  https://raw.githubusercontent.com/mattcasters/hop-data-vault/refs/heads/main/hop-marketplace-repo.yaml
+```
 
-./hop marketplace query datavault
+```text
+Updated repository 'data-hopper-community' → https://repository.data-hopper.com/repository/hop-community-plugins/ (browse enabled)
+```
+
+**2. Query** available plugins (filter for this one):
+
+```bash
+./hop marketplace query | grep vault
+```
+
+```text
+| hop-datavault             | 0.5.0-SNAPSHOT  | Community     | data-hopper-community |           | 2026-07-30T13:55:08.094+00:00 | Data Vault 2.0, Business Vault, and dimensional model... |
+```
+
+**3. Install** the latest SNAPSHOT:
+
+```bash
 ./hop marketplace install hop-datavault
-# or: ./hop marketplace install org.apache.hop:hop-datavault:0.5.0-SNAPSHOT
+```
+
+```text
+Resolved hop-datavault → org.apache.hop:hop-datavault:0.5.0-SNAPSHOT (prefer repo 'data-hopper-community')
+… Marketplace - Downloading org.apache.hop:hop-datavault:0.5.0-SNAPSHOT from https://repository.data-hopper.com/repository/hop-community-plugins/org/apache/hop/hop-datavault/0.5.0-SNAPSHOT/hop-datavault-0.5.0-….zip
+… Marketplace - Installed org.apache.hop:hop-datavault:0.5.0-SNAPSHOT. Restart Hop to load the plugin.
+Plugin org.apache.hop:hop-datavault:0.5.0-SNAPSHOT installed under $HOP_HOME from repo 'data-hopper-community'. Restart Hop to load it.
 ```
 
 You can also use **Tools → Marketplace…** in Hop GUI: import the repository on the **Repositories** tab, then install from the **Plugins** tab.
 
-Restart Hop after install so the plugin registry reloads. The plugin is built against **Hop 2.18.1**; the marketplace install path itself requires Hop **2.19+**.
+**Restart Hop** after install so the plugin registry reloads. The plugin is built against **Hop 2.18.1**; the marketplace install path itself requires Hop **2.19+**.
 
 ## Usage
 
