@@ -71,6 +71,9 @@ else
 fi
 
 FAIL=0
+METRICS_FAIL=0
+FAILED_ENGINES=""
+PASSED_ENGINES=""
 ACTIVE_COMPOSE=""
 
 export HOST_UID="$(id -u)"
@@ -141,24 +144,68 @@ for db in ${DATABASES}; do
   reclaim_metrics_folder_ownership "${db}" "${COMPOSE_FILE}"
   reclaim_vault_catalog_ownership "${COMPOSE_FILE}"
 
+  # Banner is easy to miss in docker noise if we only print a single short line.
+  echo ""
+  echo "================================================================"
   if [ "${EXIT_CODE}" -ne 0 ]; then
-    echo "FAILED: ${db} (exit code ${EXIT_CODE})" >&2
+    echo " RESULT: ${db}  FAILED  (docker/hop exit code ${EXIT_CODE})"
+    echo " A non-zero hop exit means a suite inside tests/run-tests.hwf"
+    echo " (or run-tests-sqlserver.hwf) failed. Search the log above for"
+    echo " 'ERROR', 'Finished with errors', or the last workflow name."
+    echo "================================================================"
     FAIL=1
+    FAILED_ENGINES="${FAILED_ENGINES} ${db}(exit=${EXIT_CODE})"
   else
-    echo "PASSED: ${db}"
+    echo " RESULT: ${db}  PASSED  (exit code 0)"
+    echo "================================================================"
+    PASSED_ENGINES="${PASSED_ENGINES} ${db}"
   fi
+  echo ""
 done
 
 ACTIVE_COMPOSE=""
 restore_rdbms_connections
 trap - INT TERM EXIT
 
-collect_metrics_overview || FAIL=1
+echo ""
+echo "=== Collecting cross-engine metrics overview (post-run) ==="
+if ! collect_metrics_overview; then
+  METRICS_FAIL=1
+  FAIL=1
+fi
 print_metrics_overview_table
 
+echo ""
+echo "=== Multi-database summary ==="
+if [ -n "${PASSED_ENGINES}" ]; then
+  echo "Passed engines:${PASSED_ENGINES}"
+else
+  echo "Passed engines: (none)"
+fi
+if [ -n "${FAILED_ENGINES}" ]; then
+  echo "Failed engines:${FAILED_ENGINES}" >&2
+else
+  echo "Failed engines: (none)"
+fi
+if [ "${METRICS_FAIL}" -ne 0 ]; then
+  echo "Metrics overview: FAILED (see messages above; this is separate from per-engine hop runs)" >&2
+else
+  echo "Metrics overview: ok (or skipped)"
+fi
+
 if [ "${FAIL}" -ne 0 ]; then
-  echo "One or more database test runs failed." >&2
+  echo "" >&2
+  if [ -n "${FAILED_ENGINES}" ] && [ "${METRICS_FAIL}" -ne 0 ]; then
+    echo "One or more database engines failed, and metrics overview collection failed." >&2
+  elif [ -n "${FAILED_ENGINES}" ]; then
+    echo "One or more database engines failed (hop non-zero exit). See RESULT banners above." >&2
+  elif [ "${METRICS_FAIL}" -ne 0 ]; then
+    echo "All engines reported PASSED, but metrics overview collection failed." >&2
+  else
+    echo "One or more database test runs failed." >&2
+  fi
   exit 1
 fi
 
+echo ""
 echo "All database test runs passed."

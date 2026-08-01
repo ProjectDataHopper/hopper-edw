@@ -1,0 +1,45 @@
+{
+  "database_replacements": [],
+  "autoOpening": true,
+  "description": "",
+  "persist_filename": "",
+  "test_type": "UNIT_TEST",
+  "variableValues": [],
+  "basePath": "${HOP_UNIT_TESTS_FOLDER}",
+  "golden_data_sets": [
+    {
+      "field_mappings": [
+        {
+          "transform_field": "lnk_party_transfer_hrp_hk",
+          "data_set_field": "lnk_party_transfer_hrp_hk"
+        },
+        {
+          "transform_field": "party_hk",
+          "data_set_field": "party_hk"
+        },
+        {
+          "transform_field": "to_party_hk",
+          "data_set_field": "to_party_hk"
+        },
+        {
+          "transform_field": "x_record_source",
+          "data_set_field": "x_record_source"
+        },
+        {
+          "transform_field": "x_load_ts",
+          "data_set_field": "x_load_ts"
+        }
+      ],
+      "field_order": [
+        "lnk_party_transfer_hrp_hk",
+        "x_load_ts"
+      ],
+      "data_set_name": "lnk-party-transfer-hrp-golden1",
+      "transform_name": "Validate"
+    }
+  ],
+  "input_data_sets": [],
+  "name": "validate-lnk-party-transfer-hrp UNIT",
+  "trans_test_tweaks": [],
+  "pipeline_filename": "./tests/hub-alias-role-playing/validate-lnk-party-transfer-hrp.hpl"
+}

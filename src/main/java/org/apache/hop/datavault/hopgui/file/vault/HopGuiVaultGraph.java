@@ -78,6 +78,7 @@ import org.apache.hop.datavault.metadata.DvLink;
 import org.apache.hop.datavault.metadata.DvModelLoadSupport;
 import org.apache.hop.datavault.metadata.DvTableReference;
 import org.apache.hop.datavault.metadata.DvTableReferenceSupport;
+import org.apache.hop.datavault.metadata.DvTableResolutionSupport;
 import org.apache.hop.datavault.metadata.DvModelCheckOptions;
 import org.apache.hop.datavault.metadata.DvNote;
 import org.apache.hop.datavault.metadata.DvNoteType;
@@ -111,6 +112,7 @@ import org.apache.hop.ui.core.dialog.BaseDialog;
 import org.apache.hop.ui.core.dialog.CheckResultDialog;
 import org.apache.hop.ui.core.dialog.EditRowsDialog;
 import org.apache.hop.ui.core.dialog.EnterSelectionDialog;
+import org.apache.hop.ui.core.dialog.EnterStringDialog;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.core.gui.GuiResource;
@@ -1540,6 +1542,107 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     }
     graph.markUndoPoint();
     graph.addTableReferenceAtClick(DvTableType.HUB, context.getClick());
+  }
+
+  @GuiContextAction(
+      id = "vault-graph-add-hub-alias",
+      parentId = HopGuiVaultContext.CONTEXT_ID,
+      type = GuiActionType.Create,
+      name = "i18n::HopGuiVaultGraph.Context.AddHubAlias.Name",
+      tooltip = "i18n::HopGuiVaultGraph.Context.AddHubAlias.Tooltip",
+      image = "datavault-hub.svg",
+      category = "Data Vault",
+      categoryOrder = "4")
+  public void addHubAlias(HopGuiVaultContext context) {
+    HopGuiVaultGraph graph = context.getVaultGraph();
+    if (graph == null || context.getModel() == null) {
+      return;
+    }
+    graph.markUndoPoint();
+    graph.addHubAliasAtClick(context.getClick());
+  }
+
+  /**
+   * Places a same-model hub role-playing alias so a link can reference the same physical hub more
+   * than once with distinct source mappings and hash columns.
+   */
+  private void addHubAliasAtClick(Point click) {
+    if (model == null) {
+      return;
+    }
+    List<String> choices =
+        DvTableReferenceSupport.listAvailableTableNames(
+            model, model, DvTableType.HUB, true);
+    if (choices.isEmpty()) {
+      new ErrorDialog(
+          hopGui.getShell(),
+          BaseMessages.getString(PKG, "HopGuiVaultGraph.AddHubAlias.Error.Title"),
+          BaseMessages.getString(PKG, "HopGuiVaultGraph.AddHubAlias.Error.NoHubs"),
+          null);
+      return;
+    }
+    EnterSelectionDialog targetDialog =
+        new EnterSelectionDialog(
+            getShell(),
+            choices.toArray(new String[0]),
+            BaseMessages.getString(PKG, "HopGuiVaultGraph.AddHubAlias.SelectHub.Title"),
+            BaseMessages.getString(PKG, "HopGuiVaultGraph.AddHubAlias.SelectHub.Message"));
+    String targetName = targetDialog.open();
+    if (Utils.isEmpty(targetName)) {
+      return;
+    }
+    IDvTable target = model.findTable(targetName);
+    if (!(target instanceof DvHub)) {
+      return;
+    }
+    String suggestedAlias = "hub_" + targetName.replaceFirst("(?i)^hub_", "") + "_role";
+    if (model.findTable(suggestedAlias) != null) {
+      suggestedAlias = suggestedAlias + "_2";
+    }
+    EnterStringDialog nameDialog =
+        new EnterStringDialog(
+            getShell(),
+            suggestedAlias,
+            BaseMessages.getString(PKG, "HopGuiVaultGraph.AddHubAlias.AliasName.Title"),
+            BaseMessages.getString(PKG, "HopGuiVaultGraph.AddHubAlias.AliasName.Message"));
+    nameDialog.setMandatory(true);
+    String aliasName = nameDialog.open();
+    if (Utils.isEmpty(aliasName)) {
+      return;
+    }
+    if (model.findTable(aliasName) != null) {
+      new ErrorDialog(
+          hopGui.getShell(),
+          BaseMessages.getString(PKG, "HopGuiVaultGraph.AddHubAlias.Error.Title"),
+          BaseMessages.getString(
+              PKG, "HopGuiVaultGraph.AddHubAlias.Error.NameExists", aliasName),
+          null);
+      return;
+    }
+    String defaultRoleHash =
+        DvTableResolutionSupport.deriveRoleHashKeyFieldName(aliasName);
+    EnterStringDialog hashDialog =
+        new EnterStringDialog(
+            getShell(),
+            Const.NVL(defaultRoleHash, ""),
+            BaseMessages.getString(PKG, "HopGuiVaultGraph.AddHubAlias.RoleHash.Title"),
+            BaseMessages.getString(PKG, "HopGuiVaultGraph.AddHubAlias.RoleHash.Message"));
+    hashDialog.setMandatory(true);
+    String roleHash = hashDialog.open();
+    if (Utils.isEmpty(roleHash)) {
+      return;
+    }
+    int x = click != null ? click.x : 50;
+    int y = click != null ? click.y : 50;
+    DvTableReference alias =
+        DvTableReferenceSupport.createAlias(
+            aliasName, target, null, roleHash, new Point(x, y));
+    if (alias == null) {
+      return;
+    }
+    model.getTables().add(alias);
+    setChanged();
+    redraw();
   }
 
   @GuiContextAction(

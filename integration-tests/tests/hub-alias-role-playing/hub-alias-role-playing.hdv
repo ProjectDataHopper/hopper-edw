@@ -1,0 +1,153 @@
+<!--
+
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements.  See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to You under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with
+the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<data-vault-model>
+  <name_sync_with_filename>Y</name_sync_with_filename>
+  <description>Same physical hub twice on a link via hub role-playing aliases (issue #103)</description>
+  <configuration>
+    <targetDatabase>Vault</targetDatabase>
+    <dataCatalogConnection>local-catalog</dataCatalogConnection>
+    <hashAlgorithm>MD5</hashAlgorithm>
+    <hashKeyDataType>STRING</hashKeyDataType>
+    <generateUnknownRecord>Y</generateUnknownRecord>
+    <unknownBusinessKeyValue>N/A</unknownBusinessKeyValue>
+    <unknownHashKeyValue>00000000000000000000000000000000</unknownHashKeyValue>
+    <unknownLinkHashKeyValue>00000000000000000000000000000000</unknownLinkHashKeyValue>
+    <unknownRecordSource>UNKNOWN</unknownRecordSource>
+    <generateInvalidRecord>Y</generateInvalidRecord>
+    <invalidBusinessKeyValue>INVALID</invalidBusinessKeyValue>
+    <invalidHashKeyValue>FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF</invalidHashKeyValue>
+    <invalidLinkHashKeyValue>FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF</invalidLinkHashKeyValue>
+    <invalidRecordSource>INVALID</invalidRecordSource>
+    <hashContentCasing>UPPER</hashContentCasing>
+    <businessKeyDelimiter/>
+    <hashContentPrefix/>
+    <nullPlaceholder/>
+    <hashContentSuffix/>
+    <trimBusinessKeys>N</trimBusinessKeys>
+    <loadDateField>x_load_ts</loadDateField>
+    <loadEndDateField/>
+    <recordSourceField>x_record_source</recordSourceField>
+    <recordSourceFieldLength>100</recordSourceFieldLength>
+    <useLoadEndDate>N</useLoadEndDate>
+    <generatePrimaryKeys>N</generatePrimaryKeys>
+    <generateForeignKeys>N</generateForeignKeys>
+    <targetTableBatchSize>1000</targetTableBatchSize>
+    <targetTableParallelCopies>${OUTPUT_COPIES}</targetTableParallelCopies>
+    <target_load_mode>Table Output</target_load_mode>
+    <bulkLoadStagingFolder>${java.io.tmpdir}/dv2/bulk/</bulkLoadStagingFolder>
+    <bulkLoadDelimiter>,</bulkLoadDelimiter>
+    <bulkLoadEnclosure>"</bulkLoadEnclosure>
+    <bulkLoadEncoding>UTF-8</bulkLoadEncoding>
+    <bulkLoadLocalFileRequired>N</bulkLoadLocalFileRequired>
+    <sortRowsSize>1000000</sortRowsSize>
+    <execution_log_level>Minimal</execution_log_level>
+    <singleStoreShardKeyOnHashKey>N</singleStoreShardKeyOnHashKey>
+    <singleStoreShardKeyIncludeDrivingKeys>N</singleStoreShardKeyIncludeDrivingKeys>
+    <hubPipelineNamePrefix>hub-</hubPipelineNamePrefix>
+    <linkPipelineNamePrefix>link-</linkPipelineNamePrefix>
+    <satellitePipelineNamePrefix>sat-</satellitePipelineNamePrefix>
+    <generatedWorkflowNamePrefix>DV Bulk Update - </generatedWorkflowNamePrefix>
+    <stsPipelineNamePrefix>sts-</stsPipelineNamePrefix>
+  </configuration>
+  <coaching>
+    <coaching_sources/>
+  </coaching>
+  <tables>
+    <table>
+      <businessKeys>
+        <name>party_id</name>
+        <description>Party business key</description>
+        <dataType>Integer</dataType>
+        <length>9</length>
+        <sourceFieldName>party_id</sourceFieldName>
+        <recordSourceName>CRM-party-hrp</recordSourceName>
+      </businessKeys>
+      <hashKeyFieldName>party_hk</hashKeyFieldName>
+      <recordSources>
+        <recordSource>CRM-party-hrp</recordSource>
+      </recordSources>
+      <tableName>hub_party_hrp</tableName>
+      <description>Physical party hub; natural from-role on lnk_party_transfer_hrp, plus to-role via alias</description>
+      <tableType>HUB</tableType>
+      <integrationMode>HOP_MANAGED</integrationMode>
+      <customUpdatePipelinePaths/>
+      <xloc>64</xloc>
+      <yloc>128</yloc>
+      <name>hub_party_hrp</name>
+    </table>
+    <table>
+      <referencedTableName>hub_party_hrp</referencedTableName>
+      <referencedTableType>HUB</referencedTableType>
+      <hashKeyFieldName>to_party_hk</hashKeyFieldName>
+      <tableName>hub_party_hrp</tableName>
+      <description>To-party role alias of hub_party_hrp (second participation on the transfer link)</description>
+      <tableType>TABLE_REFERENCE</tableType>
+      <integrationMode>HOP_MANAGED</integrationMode>
+      <customUpdatePipelinePaths/>
+      <xloc>320</xloc>
+      <yloc>208</yloc>
+      <name>hub_to_party</name>
+    </table>
+    <table>
+      <hubNames>hub_party_hrp</hubNames>
+      <hubNames>hub_to_party</hubNames>
+      <linkHubSources>
+        <linkHubSource>
+          <source>CRM-party-transfer-hrp</source>
+          <hubSourceKeyFields>
+            <hubSourceKeyField>
+              <hubName>hub_party_hrp</hubName>
+              <businessKeySources>
+                <businessKeySource>
+                  <businessKeyField>party_id</businessKeyField>
+                  <sourceFieldName>from_party_id</sourceFieldName>
+                </businessKeySource>
+              </businessKeySources>
+              <drivingKeySources/>
+            </hubSourceKeyField>
+            <hubSourceKeyField>
+              <hubName>hub_to_party</hubName>
+              <businessKeySources>
+                <businessKeySource>
+                  <businessKeyField>party_id</businessKeyField>
+                  <sourceFieldName>to_party_id</sourceFieldName>
+                </businessKeySource>
+              </businessKeySources>
+              <drivingKeySources/>
+            </hubSourceKeyField>
+          </hubSourceKeyFields>
+        </linkHubSource>
+      </linkHubSources>
+      <linkSatelliteSources/>
+      <dependentChildKeys/>
+      <linkHashKeyFieldName>lnk_party_transfer_hrp_hk</linkHashKeyFieldName>
+      <hubSourceKeyFields/>
+      <hasDescriptiveAttributes>N</hasDescriptiveAttributes>
+      <tableName>lnk_party_transfer_hrp</tableName>
+      <description>Transfer: natural hub_party_hrp (from / party_hk) plus hub_to_party alias (to_party_hk)</description>
+      <tableType>LINK</tableType>
+      <integrationMode>HOP_MANAGED</integrationMode>
+      <customUpdatePipelinePaths/>
+      <xloc>560</xloc>
+      <yloc>128</yloc>
+      <name>lnk_party_transfer_hrp</name>
+    </table>
+  </tables>
+  <notes/>
+  <name>hub-alias-role-playing</name>
+</data-vault-model>

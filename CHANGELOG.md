@@ -2,6 +2,17 @@
 
 All notable changes to the hop-datavault plugin are documented in this file.
 
+## Unreleased
+
+### Hub aliases — same physical hub twice on a link (#103)
+
+- Same-model **hub aliases** (`TABLE_REFERENCE` with optional role `hashKeyFieldName`) so a link can participate one physical hub more than once with distinct source mappings and link columns (primary/secondary rep, from/to location)
+- Canvas action **Add Hub alias**; link dialog lists hub aliases as participating hubs
+- Link DDL, load pipelines, special records, and optional FKs use role hash columns
+- Docs: [dv-cross-model-references.adoc](docs/dv-cross-model-references.adoc), [dv-link.adoc](docs/dv-link.adoc)
+- Recommended modeling shape: **natural hub + alias** for extra roles (not two aliases with an orphan physical hub)
+- Integration: `tests/hub-alias-role-playing/`; retail sample: `hub_sales_rep` + `hub_secondary_rep` + `lnk_order_rep` with `sales_rep_initial.csv` / `order_rep_initial.csv`
+
 ## [0.5.0] — 2026-07-30
 
 Requires **Apache Hop 2.18.1** and **Java 21**.

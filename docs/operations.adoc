@@ -6,6 +6,8 @@ toc::[]
 
 Day-to-day operation of hop-datavault loads: environments, Docker runners, batch orchestration, and partial model updates.
 
+For **multi-team programs** (who owns core vs subject models, catalog contracts, git vs runtime, analyst discovery), see link:enterprise-modeling-and-team-collaboration.adoc[Organizing large Data Vault programs]. This page stays focused on *how to run* loads.
+
 == Docker runners
 
 From the repository root:

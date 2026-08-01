@@ -23,6 +23,8 @@ Apache Hop plugin for **model-driven Data Vault 2.0**, **Business Vault**, and *
 
 For a slide-style executive summary, see [presentations/hop-data-vault-overview.md](presentations/hop-data-vault-overview.md). Interactive HTML presentation (architecture diagram, detail pages, roadmap): [presentations/hop-data-vault-features.html](presentations/hop-data-vault-features.html). For DV concepts and canvas usage, see [datavault-plugin.adoc](datavault-plugin.adoc).
 
+**Large teams / hundreds of tables:** how to split models, assign personas (modeler, admin, ops, BV/DM, analysts), use git and the data catalog, and orchestrate loads — see [enterprise-modeling-and-team-collaboration.adoc](enterprise-modeling-and-team-collaboration.adoc).
+
 ---
 
 ## Feature maturity
@@ -34,6 +36,8 @@ For a slide-style executive summary, see [presentations/hop-data-vault-overview.
 | Catalog version tags + schema impact simulation (CI/CD gate, blast radius) | Available | [resource-definition-validation.adoc](resource-definition-validation.adoc), [data-catalog.adoc](data-catalog.adoc) |
 | Data quality measure + quality gate (content rules, persist, alerts) | Available (Phase 2) | [data-quality.adoc](data-quality.adoc) |
 | Data Vault modeler (`.hdv`) | Available | [datavault-plugin.adoc](datavault-plugin.adoc) |
+| Hub aliases / same hub twice on a link | Available | [dv-cross-model-references.adoc](dv-cross-model-references.adoc), [dv-link.adoc](dv-link.adoc) |
+| Large-program / multi-team modeling guide | Available (docs) | [enterprise-modeling-and-team-collaboration.adoc](enterprise-modeling-and-team-collaboration.adoc) |
 | Model validation (Check model, type checking) | Available | [datavault-update-action.adoc](datavault-update-action.adoc) |
 | Data Vault Update action | Available | [datavault-update-action.adoc](datavault-update-action.adoc) |
 | Integration modes (managed / external / custom) | Available | [dv-integration-modes.adoc](dv-integration-modes.adoc) |

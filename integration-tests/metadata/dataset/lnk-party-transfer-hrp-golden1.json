@@ -1,0 +1,49 @@
+{
+  "base_filename": "hub-alias-role-playing/lnk-party-transfer-hrp-golden1.csv",
+  "virtualPath": "/hub-alias-role-playing",
+  "name": "lnk-party-transfer-hrp-golden1",
+  "description": "Expected lnk_party_transfer_hrp with from/to role columns",
+  "dataset_fields": [
+    {
+      "field_comment": "lnk_party_transfer_hrp_hk",
+      "field_length": 63,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "lnk_party_transfer_hrp_hk",
+      "field_format": ""
+    },
+    {
+      "field_comment": "party_hk",
+      "field_length": 63,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "party_hk",
+      "field_format": ""
+    },
+    {
+      "field_comment": "to_party_hk",
+      "field_length": 63,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "to_party_hk",
+      "field_format": ""
+    },
+    {
+      "field_comment": "x_record_source",
+      "field_length": 100,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "x_record_source",
+      "field_format": ""
+    },
+    {
+      "field_comment": "x_load_ts",
+      "field_length": 6,
+      "field_type": 9,
+      "field_precision": -1,
+      "field_name": "x_load_ts",
+      "field_format": "yyyy/MM/dd HH:mm:ss.SSSSSSSSS"
+    }
+  ],
+  "folder_name": ""
+}

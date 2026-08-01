@@ -33,6 +33,7 @@ Documentation for the **hop-datavault** plugin (development **0.6.0-SNAPSHOT**, 
 
 | Document | Description |
 |----------|-------------|
+| [enterprise-modeling-and-team-collaboration.adoc](enterprise-modeling-and-team-collaboration.adoc) | **Large programs:** multi-file models, personas, git/catalog, load order, ops and analyst discovery |
 | [presentations/hop-data-vault-overview.md](presentations/hop-data-vault-overview.md) | High-level slide deck: goals, architecture, hybrid warehouses |
 
 ## Data Catalog and sources

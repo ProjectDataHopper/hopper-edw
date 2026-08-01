@@ -869,6 +869,95 @@ limitations under the License.
       <name>lnk_order</name>
       <virtualPath/>
     </table>
+    <table>
+      <businessKeys>
+        <name>rep_id</name>
+        <description>Sales representative business key</description>
+        <dataType>Integer</dataType>
+        <length>9</length>
+        <sourceFieldName>rep_id</sourceFieldName>
+        <recordSourceName>E2E-sales-rep</recordSourceName>
+      </businessKeys>
+      <hashKeyFieldName>sales_rep_hk</hashKeyFieldName>
+      <recordSources>
+        <recordSource>E2E-sales-rep</recordSource>
+      </recordSources>
+      <tableName>hub_sales_rep</tableName>
+      <description>Physical sales rep hub; natural primary role on lnk_order_rep, secondary via alias</description>
+      <tableType>HUB</tableType>
+      <integrationMode>HOP_MANAGED</integrationMode>
+      <xloc>80</xloc>
+      <yloc>720</yloc>
+      <name>hub_sales_rep</name>
+      <virtualPath/>
+    </table>
+    <table>
+      <referencedTableName>hub_sales_rep</referencedTableName>
+      <referencedTableType>HUB</referencedTableType>
+      <hashKeyFieldName>secondary_rep_hk</hashKeyFieldName>
+      <tableName>hub_sales_rep</tableName>
+      <description>Secondary sales rep role on an order (hub alias of hub_sales_rep)</description>
+      <tableType>TABLE_REFERENCE</tableType>
+      <xloc>320</xloc>
+      <yloc>768</yloc>
+      <name>hub_secondary_rep</name>
+      <virtualPath/>
+    </table>
+    <table>
+      <hubNames>hub_order</hubNames>
+      <hubNames>hub_sales_rep</hubNames>
+      <hubNames>hub_secondary_rep</hubNames>
+      <linkHubSources>
+        <linkHubSource>
+          <source>E2E-order-rep</source>
+          <hubSourceKeyFields>
+            <hubSourceKeyField>
+              <hubName>hub_order</hubName>
+              <businessKeySources>
+                <businessKeySource>
+                  <businessKeyField>order_id</businessKeyField>
+                  <sourceFieldName>order_id</sourceFieldName>
+                </businessKeySource>
+              </businessKeySources>
+              <drivingKeySources/>
+            </hubSourceKeyField>
+            <hubSourceKeyField>
+              <hubName>hub_sales_rep</hubName>
+              <businessKeySources>
+                <businessKeySource>
+                  <businessKeyField>rep_id</businessKeyField>
+                  <sourceFieldName>primary_rep_id</sourceFieldName>
+                </businessKeySource>
+              </businessKeySources>
+              <drivingKeySources/>
+            </hubSourceKeyField>
+            <hubSourceKeyField>
+              <hubName>hub_secondary_rep</hubName>
+              <businessKeySources>
+                <businessKeySource>
+                  <businessKeyField>rep_id</businessKeyField>
+                  <sourceFieldName>secondary_rep_id</sourceFieldName>
+                </businessKeySource>
+              </businessKeySources>
+              <drivingKeySources/>
+            </hubSourceKeyField>
+          </hubSourceKeyFields>
+        </linkHubSource>
+      </linkHubSources>
+      <linkSatelliteSources/>
+      <dependentChildKeys/>
+      <linkHashKeyFieldName>lnk_order_rep_hk</linkHashKeyFieldName>
+      <hubSourceKeyFields/>
+      <hasDescriptiveAttributes>N</hasDescriptiveAttributes>
+      <tableName>lnk_order_rep</tableName>
+      <description>Order with primary sales rep (natural hub) and secondary rep role (hub alias)</description>
+      <tableType>LINK</tableType>
+      <integrationMode>HOP_MANAGED</integrationMode>
+      <xloc>560</xloc>
+      <yloc>720</yloc>
+      <name>lnk_order_rep</name>
+      <virtualPath/>
+    </table>
   </tables>
   <notes/>
   <name>retail-360</name>

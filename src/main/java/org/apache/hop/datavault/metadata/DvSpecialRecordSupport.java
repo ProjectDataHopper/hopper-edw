@@ -235,7 +235,15 @@ public final class DvSpecialRecordSupport {
         throw new HopException(
             "Hub '" + hubName + "' not found in model for link " + link.getName());
       }
-      String hubHashCol = resolveHubHashKeyName(hub);
+      String hubHashCol =
+          DvTableResolutionSupport.resolveParticipatingHubHashColumn(
+              model, hubName, variables, null);
+      if (Utils.isEmpty(hubHashCol)) {
+        hubHashCol = resolveHubHashKeyName(hub);
+      }
+      if (variables != null) {
+        hubHashCol = variables.resolve(hubHashCol);
+      }
       IValueMeta hubHashMeta = layout.searchValueMeta(hubHashCol);
       if (hubHashMeta == null) {
         throw new HopException(
@@ -622,9 +630,20 @@ public final class DvSpecialRecordSupport {
 
   private static boolean isParticipatingHubHashColumn(
       DvLink link, DataVaultModel model, String columnName) {
+    if (link == null || model == null || Utils.isEmpty(columnName)) {
+      return false;
+    }
     for (String hubName : link.getHubNames()) {
-      DvHub hub = model.findHub(hubName);
-      if (hub != null && columnName.equals(resolveHubHashKeyName(hub))) {
+      String hubHashCol =
+          DvTableResolutionSupport.resolveParticipatingHubHashColumn(
+              model, hubName, null, null);
+      if (Utils.isEmpty(hubHashCol)) {
+        DvHub hub = model.findHub(hubName);
+        if (hub != null) {
+          hubHashCol = resolveHubHashKeyName(hub);
+        }
+      }
+      if (columnName.equals(hubHashCol)) {
         return true;
       }
     }

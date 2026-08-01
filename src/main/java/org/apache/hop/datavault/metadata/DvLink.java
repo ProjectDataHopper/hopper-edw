@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -208,6 +210,59 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
               ICheckResult.TYPE_RESULT_OK,
               BaseMessages.getString(PKG, "DvLink.CheckResult.ConnectedToHubs", hubNames.size()),
               this));
+      // Distinct role hash columns when the same physical hub is role-played via aliases.
+      Set<String> roleHashColumns = new LinkedHashSet<>();
+      Map<String, String> columnToParticipant = new LinkedHashMap<>();
+      for (String hubName : hubNames) {
+        if (Utils.isEmpty(hubName)) {
+          continue;
+        }
+        DvHub hub = model != null ? model.findHub(hubName, variables, metadataProvider) : null;
+        if (hub == null) {
+          remarks.add(
+              new CheckResult(
+                  ICheckResult.TYPE_RESULT_ERROR,
+                  BaseMessages.getString(PKG, "DvLink.CheckResult.HubNotFound", hubName),
+                  this));
+          continue;
+        }
+        String roleColumn =
+            DvTableResolutionSupport.resolveParticipatingHubHashColumn(
+                model, hubName, variables, metadataProvider);
+        if (Utils.isEmpty(roleColumn)) {
+          remarks.add(
+              new CheckResult(
+                  ICheckResult.TYPE_RESULT_ERROR,
+                  BaseMessages.getString(
+                      PKG, "DvLink.CheckResult.MissingRoleHashColumn", hubName),
+                  this));
+          continue;
+        }
+        String normalized = variables != null ? variables.resolve(roleColumn) : roleColumn;
+        if (columnToParticipant.containsKey(normalized.toLowerCase())) {
+          remarks.add(
+              new CheckResult(
+                  ICheckResult.TYPE_RESULT_ERROR,
+                  BaseMessages.getString(
+                      PKG,
+                      "DvLink.CheckResult.DuplicateRoleHashColumn",
+                      normalized,
+                      columnToParticipant.get(normalized.toLowerCase()),
+                      hubName),
+                  this));
+        } else {
+          columnToParticipant.put(normalized.toLowerCase(), hubName);
+          roleHashColumns.add(normalized);
+        }
+      }
+      if (roleHashColumns.size() >= 2) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_OK,
+                BaseMessages.getString(
+                    PKG, "DvLink.CheckResult.DistinctRoleHashColumns", roleHashColumns.size()),
+                this));
+      }
     }
 
     if (Utils.isEmpty(linkHashKeyFieldName)) {
@@ -620,7 +675,8 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
         }
         TransformMeta predecessorTransform = sourceInputTransform;
 
-        // Compute hub hashes for each participating hub (from their BKs in the source)
+        // Compute hub hashes for each participating hub/alias (from their BKs in the source).
+        // Role aliases use distinct output field names so the same physical hub can appear twice.
         List<String> hubHashNames = new ArrayList<>();
         int index = 0;
         for (String hubName : hubNames) {
@@ -630,7 +686,17 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
                 "Unable to find hub '" + hubName + "' in the model for Link table " + getName());
           }
 
-          String hubHashName = variables.resolve(hub.getHashKeyFieldName());
+          String hubHashName =
+              DvTableResolutionSupport.resolveParticipatingHubHashColumn(
+                  model, hubName, variables, metadataProvider);
+          if (Utils.isEmpty(hubHashName)) {
+            throw new HopException(
+                "Unable to resolve hash key column for participating hub '"
+                    + hubName
+                    + "' on link "
+                    + getName());
+          }
+          hubHashName = variables.resolve(hubHashName);
           hubHashNames.add(hubHashName);
           List<String> hubBkFields =
               resolveHubSourceBusinessKeyFields(linkSource, hubName, hub, variables);
@@ -836,19 +902,22 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
       }
       rowMeta.addValueMeta(linkHashMeta);
 
-      // 2. The participating hub hash keys (in the order defined in the link)
+      // 2. The participating hub hash keys (in the order defined in the link).
+      // Hub aliases may contribute role-specific column names (same physical hub twice).
       for (String hubName : hubNames) {
         DvHub hub = model.findHub(hubName, variables, metadataProvider);
         if (hub == null) {
           throw new HopException("Linked hub not found: " + hubName + " for link " + getName());
         }
-        String hubHashCol = hub.getHashKeyFieldName();
+        String hubHashCol =
+            DvTableResolutionSupport.resolveParticipatingHubHashColumn(
+                model, hubName, variables, metadataProvider);
         if (Utils.isEmpty(hubHashCol)) {
-          if (!Utils.isEmpty(hub.getBusinessKeys())) {
-            hubHashCol = hub.getBusinessKeys().get(0).getName() + "_hk";
-          } else {
-            hubHashCol = hub.getName() + "_hk";
-          }
+          throw new HopException(
+              "Unable to resolve hash key column for participating hub '"
+                  + hubName
+                  + "' on link "
+                  + getName());
         }
         // Same type/length as a normal hub hash
         IValueMeta hubHashMeta;
@@ -961,12 +1030,21 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
       throw new HopException("Please specify a hash key field name for link " + getName());
     }
 
-    // We want to keep only the hash keys from the hubs and the one from the link itself.
+    // We want to keep only the hash keys from the hubs/aliases and the one from the link itself.
     //
     for (String hubName : hubNames) {
-      DvHub hub = ctx.model.findHub(hubName, ctx.variables, ctx.metadataProvider);
+      String hubHashCol =
+          DvTableResolutionSupport.resolveParticipatingHubHashColumn(
+              ctx.model, hubName, ctx.variables, ctx.metadataProvider);
+      if (Utils.isEmpty(hubHashCol)) {
+        throw new HopException(
+            "Unable to resolve hash key column for participating hub '"
+                + hubName
+                + "' on link "
+                + getName());
+      }
       SelectField selectField = new SelectField();
-      selectField.setName(ctx.variables.resolve(hub.getHashKeyFieldName()));
+      selectField.setName(ctx.variables.resolve(hubHashCol));
       selectFields.add(selectField);
     }
 
@@ -1133,11 +1211,21 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
     sql.append(quotedLinkHash);
 
     // Also select the hub hash columns that are stored in the link (for completeness / potential
-    // value compare)
+    // value compare). Role aliases contribute their role column names.
     //
     for (String hubName : hubNames) {
-      DvHub hub = ctx.model.findHub(hubName, ctx.variables, ctx.metadataProvider);
-      sql.append(", ").append(ctx.targetDatabaseMeta.quoteField(hub.getHashKeyFieldName()));
+      String hubHashCol =
+          DvTableResolutionSupport.resolveParticipatingHubHashColumn(
+              ctx.model, hubName, ctx.variables, ctx.metadataProvider);
+      if (Utils.isEmpty(hubHashCol)) {
+        throw new HopException(
+            "Unable to resolve hash key column for participating hub '"
+                + hubName
+                + "' on link "
+                + getName());
+      }
+      sql.append(", ")
+          .append(ctx.targetDatabaseMeta.quoteField(ctx.variables.resolve(hubHashCol)));
     }
 
     // The name of the source is described in the Link itself
@@ -1206,12 +1294,21 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
         .getPassThroughFields()
         .add(new PassThroughField(linkHashKeyFieldName, null, false));
 
-    // The hash keys of the hubs
+    // The hash keys of the hubs / role aliases
     for (String hubName : hubNames) {
-      DvHub hub = ctx.model.findHub(hubName, ctx.variables, ctx.metadataProvider);
+      String hubHashCol =
+          DvTableResolutionSupport.resolveParticipatingHubHashColumn(
+              ctx.model, hubName, ctx.variables, ctx.metadataProvider);
+      if (Utils.isEmpty(hubHashCol)) {
+        throw new HopException(
+            "Unable to resolve hash key column for participating hub '"
+                + hubName
+                + "' on link "
+                + getName());
+      }
       mergeRowsMeta
           .getPassThroughFields()
-          .add(new PassThroughField(hub.getHashKeyFieldName(), null, false));
+          .add(new PassThroughField(ctx.variables.resolve(hubHashCol), null, false));
     }
 
     for (String drivingKeyName : drivingKeyNames) {

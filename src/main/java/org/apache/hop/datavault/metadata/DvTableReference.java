@@ -37,8 +37,12 @@ import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.workflow.WorkflowMeta;
 
 /**
- * Read-only canvas reference to a Hub, Link, or Satellite table defined in another {@code .hdv}
- * file. Used to split large Data Vault models into subject-area files without duplicating metadata.
+ * Read-only canvas reference or role-playing alias for a Hub, Link, or Satellite.
+ *
+ * <p>Cross-model references point at a table in another {@code .hdv} file (optional {@link
+ * #referencedModelFilename}). Same-model hub aliases leave the path empty and may use a distinct
+ * canvas name plus {@link #hashKeyFieldName} so a link can participate the same physical hub more
+ * than once with different roles and source mappings.
  */
 @Getter
 @Setter
@@ -54,6 +58,14 @@ public class DvTableReference extends DvTableBase {
   /** Type of the referenced table (HUB, LINK, or SATELLITE). */
   @HopMetadataProperty(storeWithCode = true)
   private DvTableType referencedTableType;
+
+  /**
+   * Optional role-specific hash key column name used when this reference/alias participates in a
+   * link. Required for role-playing the same physical hub more than once (e.g. {@code
+   * primary_rep_hk} / {@code secondary_rep_hk}). When empty, the physical hub's hash key field name
+   * is used (or a name derived from this alias).
+   */
+  @HopMetadataProperty private String hashKeyFieldName;
 
   public DvTableReference() {
     super();

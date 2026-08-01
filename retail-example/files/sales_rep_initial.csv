@@ -1,0 +1,6 @@
+rep_id,rep_name,region,load_date,record_source
+101,Ada Lovelace,NORTH,2024-01-01,E2E-sales-rep
+102,Grace Hopper,SOUTH,2024-01-01,E2E-sales-rep
+103,Alan Turing,EAST,2024-01-01,E2E-sales-rep
+104,Katherine Johnson,WEST,2024-01-01,E2E-sales-rep
+105,Donald Knuth,CENTRAL,2024-01-01,E2E-sales-rep

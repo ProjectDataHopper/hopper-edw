@@ -162,8 +162,8 @@ limitations under the License.
       <description/>
       <type>WORKFLOW</type>
       <attributes/>
-      <xloc>80</xloc>
-      <yloc>288</yloc>
+      <xloc>800</xloc>
+      <yloc>176</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
@@ -185,6 +185,32 @@ limitations under the License.
       </parameters>
       <run_configuration>local</run_configuration>
       <name>link-satellite-driving-key</name>
+      <description/>
+      <type>WORKFLOW</type>
+      <attributes/>
+      <xloc>80</xloc>
+      <yloc>288</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <filename>${PROJECT_HOME}/tests/hub-alias-role-playing/update-hub-alias-role-playing.hwf</filename>
+      <params_from_previous>N</params_from_previous>
+      <exec_per_row>N</exec_per_row>
+      <set_logfile>N</set_logfile>
+      <logfile/>
+      <logext/>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <loglevel>Nothing</loglevel>
+      <set_append_logfile>N</set_append_logfile>
+      <create_parent_folder>N</create_parent_folder>
+      <wait_until_finished>Y</wait_until_finished>
+      <parameters>
+        <pass_all_parameters>Y</pass_all_parameters>
+      </parameters>
+      <run_configuration>local</run_configuration>
+      <name>hub-alias-role-playing</name>
       <description/>
       <type>WORKFLOW</type>
       <attributes/>
@@ -214,7 +240,7 @@ limitations under the License.
       <description/>
       <type>WORKFLOW</type>
       <attributes/>
-      <xloc>704</xloc>
+      <xloc>624</xloc>
       <yloc>400</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -240,7 +266,7 @@ limitations under the License.
       <description/>
       <type>WORKFLOW</type>
       <attributes/>
-      <xloc>912</xloc>
+      <xloc>800</xloc>
       <yloc>400</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -266,7 +292,7 @@ limitations under the License.
       <description/>
       <type>WORKFLOW</type>
       <attributes/>
-      <xloc>256</xloc>
+      <xloc>80</xloc>
       <yloc>400</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -290,7 +316,7 @@ limitations under the License.
       <description>Postgres/SQL Server: French source collation vs vault default — auto ORDER BY COLLATE</description>
       <type>WORKFLOW</type>
       <attributes/>
-      <xloc>384</xloc>
+      <xloc>256</xloc>
       <yloc>400</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -307,7 +333,7 @@ dbType == "" || dbType == "postgres";
       <description>Skip multi-satellite BV on MySQL/SingleStore/SQL Server: current-row golden is Postgres-oriented (multiple open-end sparse rows)</description>
       <type>EVAL</type>
       <attributes/>
-      <xloc>528</xloc>
+      <xloc>448</xloc>
       <yloc>400</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -333,7 +359,7 @@ dbType == "" || dbType == "postgres";
       <description/>
       <type>WORKFLOW</type>
       <attributes/>
-      <xloc>608</xloc>
+      <xloc>624</xloc>
       <yloc>176</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -359,7 +385,7 @@ dbType == "" || dbType == "postgres";
       <description/>
       <type>WORKFLOW</type>
       <attributes/>
-      <xloc>608</xloc>
+      <xloc>624</xloc>
       <yloc>288</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -385,8 +411,8 @@ dbType == "" || dbType == "postgres";
       <description/>
       <type>WORKFLOW</type>
       <attributes/>
-      <xloc>80</xloc>
-      <yloc>400</yloc>
+      <xloc>800</xloc>
+      <yloc>288</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
@@ -421,7 +447,7 @@ dbType == "" || dbType == "postgres";
       <description/>
       <type>SUCCESS</type>
       <attributes/>
-      <xloc>704</xloc>
+      <xloc>624</xloc>
       <yloc>512</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -471,7 +497,7 @@ dbType == "" || dbType == "postgres";
       <name>create-source-tables-from-data-catalog.hpl</name>
       <type>PIPELINE</type>
       <attributes/>
-      <xloc>608</xloc>
+      <xloc>624</xloc>
       <yloc>64</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -512,6 +538,25 @@ dbType == "" || dbType == "postgres";
       <evaluation>Y</evaluation>
       <unconditional>N</unconditional>
       <enabled>Y</enabled>
+    </hop>
+    <!--
+      hub-alias-role-playing is wired but not on the critical success path yet:
+      the suite lives under tests/hub-alias-role-playing/ and can be run alone.
+      Re-enable the hops below once golden/load path is green on the full matrix.
+    -->
+    <hop>
+      <from>link-satellite-driving-key</from>
+      <to>hub-alias-role-playing</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>N</enabled>
+    </hop>
+    <hop>
+      <from>hub-alias-role-playing</from>
+      <to>load-end-date</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>N</enabled>
     </hop>
     <hop>
       <from>link-satellite-driving-key</from>

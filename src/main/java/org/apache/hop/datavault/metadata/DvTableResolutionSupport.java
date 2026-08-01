@@ -205,6 +205,68 @@ public final class DvTableResolutionSupport {
     return resolveLink(model, tableName, variables, metadataProvider) != null;
   }
 
+  /**
+   * Resolves the hash-key <em>column name on a link</em> for a participating hub or hub alias.
+   *
+   * <p>For a physical hub this is the hub's own hash key field. For a {@link DvTableReference} hub
+   * alias it prefers the alias {@link DvTableReference#getHashKeyFieldName()} so the same physical
+   * hub can appear more than once with role-specific columns.
+   */
+  public static String resolveParticipatingHubHashColumn(
+      DataVaultModel model,
+      String hubOrAliasName,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider) {
+    if (model == null || Utils.isEmpty(hubOrAliasName)) {
+      return null;
+    }
+    String resolvedName = resolve(hubOrAliasName, variables);
+    IDvTable table = model.findTable(resolvedName);
+    if (table instanceof DvTableReference reference
+        && reference.getReferencedTableType() == DvTableType.HUB) {
+      String roleHash = resolve(reference.getHashKeyFieldName(), variables);
+      if (!Utils.isEmpty(roleHash)) {
+        return roleHash;
+      }
+      // Role-playing alias with a distinct canvas name: derive a stable column name.
+      if (!Utils.isEmpty(reference.getName())
+          && !reference.getName().equalsIgnoreCase(resolve(reference.getReferencedTableName(), variables))) {
+        return deriveRoleHashKeyFieldName(reference.getName());
+      }
+    }
+    DvHub hub = resolveHub(model, resolvedName, variables, metadataProvider);
+    if (hub == null) {
+      return null;
+    }
+    String hubHash = resolve(hub.getHashKeyFieldName(), variables);
+    if (!Utils.isEmpty(hubHash)) {
+      return hubHash;
+    }
+    if (hub.getBusinessKeys() != null && !hub.getBusinessKeys().isEmpty()) {
+      String firstBk = resolve(hub.getBusinessKeys().get(0).getName(), variables);
+      if (!Utils.isEmpty(firstBk)) {
+        return firstBk + "_hk";
+      }
+    }
+    String hubName = resolve(hub.getName(), variables);
+    return Utils.isEmpty(hubName) ? null : hubName + "_hk";
+  }
+
+  /**
+   * Derives a default role hash-key column from an alias canvas name (e.g. {@code hub_primary_rep}
+   * → {@code primary_rep_hk}).
+   */
+  public static String deriveRoleHashKeyFieldName(String aliasName) {
+    if (Utils.isEmpty(aliasName)) {
+      return null;
+    }
+    String base = aliasName.trim();
+    if (base.regionMatches(true, 0, "hub_", 0, 4) && base.length() > 4) {
+      base = base.substring(4);
+    }
+    return base + "_hk";
+  }
+
   private static String resolve(String value, IVariables variables) {
     if (value == null) {
       return null;

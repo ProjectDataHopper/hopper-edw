@@ -24,7 +24,9 @@ import java.util.List;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
 
-/** Helpers for cross-model Data Vault table references on a subject-area canvas. */
+/**
+ * Helpers for Data Vault table references and hub role-playing aliases on a subject-area canvas.
+ */
 public final class DvTableReferenceSupport {
 
   private DvTableReferenceSupport() {}
@@ -44,20 +46,41 @@ public final class DvTableReferenceSupport {
     return table instanceof DvTableReference;
   }
 
+  /**
+   * Lists physical tables of the given type from {@code sourceModel} that can be referenced.
+   *
+   * <p>For the classic cross-model picker (default alias name = target name), skips targets whose
+   * canvas name is already taken on the subject model. Role-playing aliases with a different name
+   * can still target a hub that is already present as a physical table or another alias.
+   */
   public static List<String> listAvailableTableNames(
-      DataVaultModel externalModel, DataVaultModel subjectModel, DvTableType tableType) {
-    if (externalModel == null || tableType == null) {
+      DataVaultModel sourceModel, DataVaultModel subjectModel, DvTableType tableType) {
+    return listAvailableTableNames(sourceModel, subjectModel, tableType, false);
+  }
+
+  /**
+   * @param allowTargetsAlreadyOnCanvas when true (same-model hub aliases), list all physical tables
+   *     of the type even if the subject canvas already has a table with that name
+   */
+  public static List<String> listAvailableTableNames(
+      DataVaultModel sourceModel,
+      DataVaultModel subjectModel,
+      DvTableType tableType,
+      boolean allowTargetsAlreadyOnCanvas) {
+    if (sourceModel == null || tableType == null) {
       return List.of();
     }
     List<String> names = new ArrayList<>();
-    for (IDvTable table : externalModel.getTables()) {
+    for (IDvTable table : sourceModel.getTables()) {
       if (table == null
           || Utils.isEmpty(table.getName())
           || table.getTableType() != tableType
           || table instanceof DvTableReference) {
         continue;
       }
-      if (subjectModel != null && subjectModel.findTable(table.getName()) != null) {
+      if (!allowTargetsAlreadyOnCanvas
+          && subjectModel != null
+          && subjectModel.findTable(table.getName()) != null) {
         continue;
       }
       names.add(table.getName());
@@ -66,6 +89,7 @@ public final class DvTableReferenceSupport {
     return names;
   }
 
+  /** Cross-model reference with canvas name equal to the external table name. */
   public static DvTableReference createReference(
       IDvTable externalTable, String externalModelFilename, Point location) {
     if (externalTable == null
@@ -75,15 +99,50 @@ public final class DvTableReferenceSupport {
         || Utils.isEmpty(externalModelFilename)) {
       return null;
     }
+    return createAlias(
+        externalTable.getName(),
+        externalTable,
+        externalModelFilename,
+        null,
+        location);
+  }
+
+  /**
+   * Creates a table reference/alias. Same-model aliases pass a null/empty {@code
+   * referencedModelFilename}. Role-playing hub aliases should set a distinct {@code aliasName} and
+   * optional {@code roleHashKeyFieldName}.
+   */
+  public static DvTableReference createAlias(
+      String aliasName,
+      IDvTable targetTable,
+      String referencedModelFilename,
+      String roleHashKeyFieldName,
+      Point location) {
+    if (targetTable == null
+        || Utils.isEmpty(targetTable.getName())
+        || targetTable.getTableType() == null
+        || targetTable.getTableType() == DvTableType.TABLE_REFERENCE
+        || Utils.isEmpty(aliasName)) {
+      return null;
+    }
     DvTableReference reference = new DvTableReference();
-    reference.setName(externalTable.getName());
-    reference.setReferencedTableName(externalTable.getName());
-    reference.setReferencedModelFilename(externalModelFilename);
-    reference.setReferencedTableType(externalTable.getTableType());
+    reference.setName(aliasName);
+    reference.setReferencedTableName(targetTable.getName());
+    if (!Utils.isEmpty(referencedModelFilename)) {
+      reference.setReferencedModelFilename(referencedModelFilename);
+    }
+    reference.setReferencedTableType(targetTable.getTableType());
     reference.setTableName(
-        !Utils.isEmpty(externalTable.getTableName())
-            ? externalTable.getTableName()
-            : externalTable.getName());
+        !Utils.isEmpty(targetTable.getTableName())
+            ? targetTable.getTableName()
+            : targetTable.getName());
+    if (!Utils.isEmpty(roleHashKeyFieldName)) {
+      reference.setHashKeyFieldName(roleHashKeyFieldName);
+    } else if (!aliasName.equalsIgnoreCase(targetTable.getName())
+        && targetTable.getTableType() == DvTableType.HUB) {
+      reference.setHashKeyFieldName(
+          DvTableResolutionSupport.deriveRoleHashKeyFieldName(aliasName));
+    }
     if (location != null) {
       reference.setLocation(new Point(location.x, location.y));
     }

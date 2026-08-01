@@ -1,0 +1,41 @@
+{
+  "base_filename": "hub-alias-role-playing/hub-party-hrp-golden1.csv",
+  "virtualPath": "/hub-alias-role-playing",
+  "name": "hub-party-hrp-golden1",
+  "description": "Expected hub_party_hrp after initial load (hub alias role-playing)",
+  "dataset_fields": [
+    {
+      "field_comment": "party_hk",
+      "field_length": 63,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "party_hk",
+      "field_format": ""
+    },
+    {
+      "field_comment": "party_id",
+      "field_length": 63,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "party_id",
+      "field_format": ""
+    },
+    {
+      "field_comment": "x_record_source",
+      "field_length": 100,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "x_record_source",
+      "field_format": ""
+    },
+    {
+      "field_comment": "x_load_ts",
+      "field_length": 6,
+      "field_type": 9,
+      "field_precision": -1,
+      "field_name": "x_load_ts",
+      "field_format": "yyyy/MM/dd HH:mm:ss.SSSSSSSSS"
+    }
+  ],
+  "folder_name": ""
+}

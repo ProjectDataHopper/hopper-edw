@@ -20,6 +20,7 @@ package org.apache.hop.datavault.hopgui.file.modelgraph;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.hop.core.Const;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metadata.BusinessKey;
@@ -124,6 +125,21 @@ public final class DvTableDisplaySupport {
       }
       case TABLE_REFERENCE -> {
         if (table instanceof DvTableReference reference) {
+          // Role-playing hub aliases: show the role hash column used on links.
+          if (reference.getReferencedTableType() == DvTableType.HUB
+              && !Utils.isEmpty(reference.getHashKeyFieldName())) {
+            hashKeyFieldName = reference.getHashKeyFieldName();
+            break;
+          }
+          if (reference.getReferencedTableType() == DvTableType.HUB
+              && !Utils.isEmpty(reference.getName())
+              && !reference
+                  .getName()
+                  .equalsIgnoreCase(Const.NVL(reference.getReferencedTableName(), ""))) {
+            hashKeyFieldName =
+                DvTableResolutionSupport.deriveRoleHashKeyFieldName(reference.getName());
+            break;
+          }
           IDvTable target =
               DvTableResolutionSupport.resolveReferenceTarget(
                   model, reference, variables, null);

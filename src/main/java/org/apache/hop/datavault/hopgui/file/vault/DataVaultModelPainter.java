@@ -457,8 +457,14 @@ public class DataVaultModelPainter extends BasePainter {
           case LINK -> "Link";
           default -> table.getTableType() != null ? table.getTableType().name() : "";
         };
-    if (table instanceof DvTableReference) {
-      base = base + " (ref)";
+    if (table instanceof DvTableReference reference) {
+      boolean sameModelAlias =
+          Utils.isEmpty(reference.getReferencedModelFilename())
+              && !Utils.isEmpty(reference.getName())
+              && !reference
+                  .getName()
+                  .equalsIgnoreCase(Const.NVL(reference.getReferencedTableName(), ""));
+      base = base + (sameModelAlias ? " (alias)" : " (ref)");
     }
     String suffix = DvIntegrationSupport.integrationCanvasSuffix(table);
     if (Utils.isEmpty(suffix)) {

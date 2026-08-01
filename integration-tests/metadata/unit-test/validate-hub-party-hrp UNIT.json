@@ -1,0 +1,41 @@
+{
+  "database_replacements": [],
+  "autoOpening": true,
+  "description": "",
+  "persist_filename": "",
+  "test_type": "UNIT_TEST",
+  "variableValues": [],
+  "basePath": "${HOP_UNIT_TESTS_FOLDER}",
+  "golden_data_sets": [
+    {
+      "field_mappings": [
+        {
+          "transform_field": "party_hk",
+          "data_set_field": "party_hk"
+        },
+        {
+          "transform_field": "party_id",
+          "data_set_field": "party_id"
+        },
+        {
+          "transform_field": "x_record_source",
+          "data_set_field": "x_record_source"
+        },
+        {
+          "transform_field": "x_load_ts",
+          "data_set_field": "x_load_ts"
+        }
+      ],
+      "field_order": [
+        "party_hk",
+        "x_load_ts"
+      ],
+      "data_set_name": "hub-party-hrp-golden1",
+      "transform_name": "Validate"
+    }
+  ],
+  "input_data_sets": [],
+  "name": "validate-hub-party-hrp UNIT",
+  "trans_test_tweaks": [],
+  "pipeline_filename": "./tests/hub-alias-role-playing/validate-hub-party-hrp.hpl"
+}

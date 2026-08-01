@@ -1,0 +1,63 @@
+{
+  "namespace": "hop/integration-tests/sources",
+  "name": "CRM-party-transfer-hrp",
+  "type": "DV_SOURCE",
+  "description": "Party transfer source with from/to roles",
+  "rowMetaXml": "<row-meta><value-meta><type>Integer</type>\n<storagetype>normal</storagetype>\n<name>from_party_id</name>\n<length>9</length>\n<precision>0</precision>\n<origin/>\n<comments/>\n<conversion_Mask>####0;-####0</conversion_Mask>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>GMT</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>Integer</type>\n<storagetype>normal</storagetype>\n<name>to_party_id</name>\n<length>9</length>\n<precision>0</precision>\n<origin/>\n<comments/>\n<conversion_Mask>####0;-####0</conversion_Mask>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>GMT</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>record_source</name>\n<length>20</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask></conversion_Mask>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>GMT</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta></row-meta>",
+  "origin": {
+    "modelType": "DATA_VAULT_SOURCE",
+    "modelName": "hub-alias-role-playing",
+    "modelFilename": "/integration-tests/tests//hub-alias-role-playing/hub-alias-role-playing.hdv",
+    "modelElementName": "CRM-party-transfer-hrp",
+    "hopProject": "hub-alias-role-playing",
+    "createdAt": 1782138125659,
+    "updatedAt": 1782153230303,
+    "updatedBy": null,
+    "lastWorkflow": null,
+    "lastPipeline": null
+  },
+  "physicalTable": {
+    "databaseMetaName": "CRM",
+    "schemaName": "",
+    "tableName": "party_transfer_hrp"
+  },
+  "tags": [
+    "DV Source",
+    "FULL_SNAPSHOT"
+  ],
+  "glossaryTerms": [],
+  "customProperties": {},
+  "dvSource": {
+    "sourceType": "DATABASE",
+    "sourceIndicator": "CRM",
+    "sourceIndicatorField": "record_source",
+    "group": "",
+    "deliveryType": "FULL_SNAPSHOT",
+    "fields": [
+      {
+        "name": "from_party_id",
+        "description": "From party role BK",
+        "sourceDataType": "Integer",
+        "length": "9",
+        "precision": "0",
+        "hopType": 5
+      },
+      {
+        "name": "to_party_id",
+        "description": "To party role BK",
+        "sourceDataType": "Integer",
+        "length": "9",
+        "precision": "0",
+        "hopType": 5
+      },
+      {
+        "name": "record_source",
+        "description": "Record source indicator",
+        "sourceDataType": "String",
+        "length": "20",
+        "precision": "",
+        "hopType": 2
+      }
+    ]
+  }
+}

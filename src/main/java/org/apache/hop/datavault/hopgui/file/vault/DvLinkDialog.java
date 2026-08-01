@@ -41,6 +41,7 @@ import org.apache.hop.datavault.lineage.DvModelLineageCollector;
 import org.apache.hop.datavault.lineage.LineageSnapshot;
 import org.apache.hop.datavault.lineage.TableLineage;
 import org.apache.hop.datavault.metadata.DvSatellite;
+import org.apache.hop.datavault.metadata.DvTableReference;
 import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.FormDataBuilder;
@@ -679,7 +680,14 @@ public class DvLinkDialog {
     List<String> names = new ArrayList<>();
     if (model != null && model.getTables() != null) {
       for (IDvTable table : model.getTables()) {
-        if (table.getTableType() == DvTableType.HUB && !Utils.isEmpty(table.getName())) {
+        if (Utils.isEmpty(table.getName())) {
+          continue;
+        }
+        // Physical hubs and hub-like table references / role-playing aliases.
+        if (table.getTableType() == DvTableType.HUB) {
+          names.add(table.getName());
+        } else if (table instanceof DvTableReference reference
+            && reference.getReferencedTableType() == DvTableType.HUB) {
           names.add(table.getName());
         }
       }

@@ -202,22 +202,33 @@ public final class DvConstraintDdlSupport {
       return fks;
     }
     String childTable = physicalTableName(link);
+    int roleIndex = 0;
     for (String hubName : link.getHubNames()) {
       DvHub hub = model.findHub(hubName, variables, metadataProvider);
       if (hub == null) {
         continue;
       }
-      String hubHash = resolveHubHashKeyColumn(hub, variables);
+      String parentHash = resolveHubHashKeyColumn(hub, variables);
+      String childHash =
+          DvTableResolutionSupport.resolveParticipatingHubHashColumn(
+              model, hubName, variables, metadataProvider);
+      if (Utils.isEmpty(childHash)) {
+        childHash = parentHash;
+      } else if (variables != null) {
+        childHash = variables.resolve(childHash);
+      }
       String parentTable = physicalTableName(hub);
-      if (Utils.isEmpty(hubHash) || Utils.isEmpty(parentTable)) {
+      if (Utils.isEmpty(childHash) || Utils.isEmpty(parentHash) || Utils.isEmpty(parentTable)) {
         continue;
       }
+      // Distinct constraint names when the same parent hub is referenced by multiple role columns.
+      String suffix = childHash.equals(parentHash) ? parentTable : parentTable + "_" + (++roleIndex);
       fks.add(
           new ForeignKeySpec(
-              constraintName("fk", childTable, parentTable),
-              List.of(hubHash),
+              constraintName("fk", childTable, suffix),
+              List.of(childHash),
               parentTable,
-              List.of(hubHash)));
+              List.of(parentHash)));
     }
     return fks;
   }
