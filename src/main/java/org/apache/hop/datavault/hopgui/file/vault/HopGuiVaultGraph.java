@@ -478,6 +478,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       painter.setAreaOwners(areaOwners);
       painter.setMouseOverTableName(mouseOverTableName);
       painter.setMouseOverNoteLink(mouseOverNoteLink);
+      painter.setNoteImageBaseFilename(getFilename());
       painter.setShowingNavigationView(!propsUi.isHideViewportEnabled());
       painter.setShowHashKeyFieldNames(
           DataVaultConfigSingleton.getConfig().isDrawingHashKeysInModel());

@@ -13,30 +13,35 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.vault;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.Const;
+import org.apache.hop.core.NotePadMeta;
+import org.apache.hop.core.NotePadType;
 import org.apache.hop.core.gui.AreaOwner;
 import org.apache.hop.core.gui.AreaOwner.AreaType;
 import org.apache.hop.core.gui.DPoint;
 import org.apache.hop.core.gui.IGc;
-import org.apache.hop.core.gui.IGc.EFont;
 import org.apache.hop.core.gui.IGc.EColor;
+import org.apache.hop.core.gui.IGc.EFont;
+import org.apache.hop.core.gui.IGc.EImage;
 import org.apache.hop.core.gui.IGc.ELineStyle;
+import org.apache.hop.core.gui.NotePadStyle;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.Rectangle;
+import org.apache.hop.core.gui.markdown.MarkdownNoteRenderer;
+import org.apache.hop.core.gui.markdown.MarkdownNoteRenderer.PositionedLink;
+import org.apache.hop.core.gui.markdown.NoteLinkHit;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metadata.DvNote;
-import org.apache.hop.datavault.metadata.DvNoteType;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.ui.core.PropsUi;
 
 @Getter
 @Setter
@@ -74,7 +79,17 @@ public abstract class BasePainter {
   protected Rectangle graphPort;
   protected Rectangle viewPort;
   protected String mouseOverTableName;
-  protected DvNoteLinkHit mouseOverNoteLink;
+
+  /**
+   * Hovered Markdown link (Hop {@link NoteLinkHit}); identity of note pad matches canvas adapter.
+   */
+  protected NoteLinkHit mouseOverNoteLink;
+
+  /**
+   * Host model filename for resolving relative Markdown image paths (same role as pipeline filename
+   * in Hop painters).
+   */
+  protected String noteImageBaseFilename;
 
   /**
    * Navigation minimap mapping info captured during last drawNavigationView (for panning support).
@@ -216,7 +231,7 @@ public abstract class BasePainter {
       }
     }
   }
-  
+
   /**
    * Base spacing between hatching lines at 100% zoom; scaled by zoom so we draw fewer when zoomed
    * out.
@@ -336,9 +351,31 @@ public abstract class BasePainter {
     if (!drawNotes || notes == null || notes.isEmpty()) {
       return;
     }
+    syncNotePadDarkMode();
     for (DvNote note : notes) {
       drawNote(note);
     }
+  }
+
+  private void syncNotePadDarkMode() {
+    try {
+      NotePadStyle.setDarkMode(PropsUi.getInstance().isDarkMode());
+    } catch (Throwable ignored) {
+      // Headless SVG / unit tests without SWT PropsUi.
+    }
+  }
+
+  /**
+   * Base font size for Markdown notes: graph font height so body text matches table labels under
+   * the same canvas magnification (mirrors Hop BasePainter.markdownBaseFontSize).
+   */
+  private int markdownBaseFontSize() {
+    gc.setFont(EFont.GRAPH);
+    int graphHeight = gc.getFontHeight();
+    if (graphHeight > 0) {
+      return graphHeight;
+    }
+    return 10;
   }
 
   protected void drawNote(DvNote note) {
@@ -346,14 +383,17 @@ public abstract class BasePainter {
       return;
     }
 
-    DvNoteType noteType = note.getNoteType() != null ? note.getNoteType() : DvNoteType.GENERAL;
-    DvNoteStyle.RgbColor bg = DvNoteStyle.backgroundColor(noteType);
-    DvNoteStyle.RgbColor border = DvNoteStyle.borderColor(noteType);
-    DvNoteStyle.RgbColor textRgb = DvNoteStyle.textColor(noteType);
+    NotePadMeta noteMeta = DvNotePadSupport.forCanvas(note);
+    NotePadType type =
+        noteMeta.getNoteType() != null ? noteMeta.getNoteType() : NotePadType.GENERAL;
+    NotePadStyle.RgbColor bg = NotePadStyle.backgroundColor(type);
+    NotePadStyle.RgbColor border = NotePadStyle.borderColor(type);
 
     Point minimumSize = calculateNoteMinimumSize(note);
     note.setMinimumWidth(minimumSize.x);
     note.setMinimumHeight(minimumSize.y);
+    noteMeta.setMinimumWidth(minimumSize.x);
+    noteMeta.setMinimumHeight(minimumSize.y);
 
     Point notePos = noteDrawLocation(note.getLocation().x, note.getLocation().y);
     int width = note.getWidth();
@@ -370,7 +410,7 @@ public abstract class BasePainter {
 
     gc.setBackground(bg.red(), bg.green(), bg.blue());
     gc.setForeground(border.red(), border.green(), border.blue());
-    gc.setLineWidth(DvNoteStyle.borderWidth(noteType, note.isSelected()));
+    gc.setLineWidth(NotePadStyle.borderWidth(type, note.isSelected()));
     gc.fillRoundRectangle(
         noteShape.x, noteShape.y, noteShape.width, noteShape.height, radius, radius);
     gc.drawRoundRectangle(
@@ -395,7 +435,7 @@ public abstract class BasePainter {
     int textX = contentX;
     int textY = contentY;
 
-    IGc.EImage icon = DvNoteStyle.icon(noteType);
+    EImage icon = NotePadStyle.icon(type);
     if (icon != null) {
       try {
         gc.drawImage(icon, contentX, contentY, 1.0f);
@@ -405,119 +445,79 @@ public abstract class BasePainter {
       textX = contentX + NOTE_ICON_SIZE + NOTE_ICON_TEXT_GAP;
     }
 
-    String text = note.getText();
-    if (!Utils.isEmpty(text)) {
-      gc.setFont(EFont.GRAPH);
-      DvNoteStyle.RgbColor linkRgb = DvNoteStyle.linkColor(noteType);
-      String[] lines = text.split("\n", -1);
-      Point lineExtent = gc.textExtent("Ay");
-      int lineHeight = lineExtent.y;
-      for (int i = 0; i < lines.length; i++) {
-        drawNoteLine(note, lines[i], textX, textY + (i * lineHeight), lineHeight, textRgb, linkRgb);
-      }
-    }
-  }
-
-  private void drawNoteLine(
-      DvNote note,
-      String line,
-      int startX,
-      int startY,
-      int lineHeight,
-      DvNoteStyle.RgbColor textRgb,
-      DvNoteStyle.RgbColor linkRgb) {
-    List<DvNoteTextParser.Segment> segments = DvNoteTextParser.parseLine(line);
-    if (segments.isEmpty()) {
-      gc.setForeground(textRgb.red(), textRgb.green(), textRgb.blue());
-      gc.drawText(line != null ? line : "", startX, startY, true);
+    if (Utils.isEmpty(noteMeta.getNote())) {
       return;
     }
 
-    int cursorX = startX;
-    for (DvNoteTextParser.Segment segment : segments) {
-      String display = segment.displayText();
-      if (Utils.isEmpty(display)) {
-        continue;
+    int contentWidth = Math.max(20, noteShape.width - Const.NOTE_MARGIN - (textX - noteShape.x));
+    List<PositionedLink> positionedLinks = new ArrayList<>();
+    MarkdownNoteRenderer.paintWithLinkBounds(
+        gc,
+        noteMeta,
+        "Sans",
+        markdownBaseFontSize(),
+        textX,
+        textY,
+        contentWidth,
+        mouseOverNoteLink,
+        positionedLinks,
+        noteImageBaseFilename,
+        variables);
+
+    if (areaOwners != null) {
+      for (PositionedLink pl : positionedLinks) {
+        int pad = 1;
+        areaOwners.add(
+            new AreaOwner(
+                AreaType.NOTE_LINK,
+                pl.x() - pad,
+                pl.y() - pad,
+                pl.width() + 2 * pad,
+                pl.height() + 2 * pad,
+                offset,
+                note,
+                pl.hit()));
       }
-      boolean link = segment.link();
-      DvNoteStyle.RgbColor color = link ? linkRgb : textRgb;
-      gc.setForeground(color.red(), color.green(), color.blue());
-      gc.drawText(display, cursorX, startY, true);
-      Point extent = gc.textExtent(display);
-
-      if (link) {
-        boolean hover = isHoveredNoteLink(note, segment);
-        gc.setLineWidth(hover ? 2 : 1);
-        gc.drawLine(cursorX, startY + lineHeight - 1, cursorX + extent.x, startY + lineHeight - 1);
-        gc.setLineWidth(1);
-        if (areaOwners != null) {
-          DvNoteLinkHit linkHit = new DvNoteLinkHit(note, segment);
-          int pad = 1;
-          areaOwners.add(
-              new AreaOwner(
-                  AreaType.CUSTOM,
-                  cursorX - pad,
-                  startY - pad,
-                  extent.x + 2 * pad,
-                  lineHeight + 2 * pad,
-                  offset,
-                  note,
-                  linkHit));
-        }
-      }
-
-      cursorX += extent.x;
     }
-  }
-
-  private boolean isHoveredNoteLink(DvNote note, DvNoteTextParser.Segment segment) {
-    if (mouseOverNoteLink == null || note == null || segment == null) {
-      return false;
-    }
-    DvNoteTextParser.Segment hoverLink = mouseOverNoteLink.link();
-    return mouseOverNoteLink.note() == note
-        && hoverLink != null
-        && hoverLink.link() == segment.link()
-        && Objects.equals(hoverLink.label(), segment.label())
-        && Objects.equals(hoverLink.target(), segment.target());
   }
 
   /**
-   * Measure note content in model/logical units. Text extents are taken at identity scale so canvas
-   * magnification (incl. native zoom) is not applied twice to minimum width/height.
+   * Measure note content in model/logical units. Uses Hop Markdown layout so resize reflows text
+   * instead of locking to unwrapped line widths.
    */
   protected Point calculateNoteMinimumSize(DvNote note) {
     int margin = Const.NOTE_MARGIN;
-    int iconRowHeight = 0;
-    int textIndent = 0;
-    DvNoteType noteType = note.getNoteType() != null ? note.getNoteType() : DvNoteType.GENERAL;
-    if (DvNoteStyle.icon(noteType) != null) {
-      iconRowHeight = NOTE_ICON_SIZE;
-      textIndent = NOTE_ICON_SIZE + NOTE_ICON_TEXT_GAP;
-    }
+    NotePadMeta noteMeta = DvNotePadSupport.forCanvas(note);
+    NotePadType type =
+        noteMeta.getNoteType() != null ? noteMeta.getNoteType() : NotePadType.GENERAL;
+    int textIndent = NotePadStyle.icon(type) != null ? NOTE_ICON_SIZE + NOTE_ICON_TEXT_GAP : 0;
+
+    // Allow narrowing well below default note width; content reflows (wraps) instead.
+    final int minContentWidth = 40;
+    int minWidth = 2 * margin + textIndent + minContentWidth;
 
     float savedMag = magnification;
     gc.setTransform(0.0f, 0.0f, 1.0f);
     try {
-      gc.setFont(EFont.GRAPH);
-      int maxLineWidth = 0;
-      int lineHeight = gc.textExtent("Ay").y;
-      int lineCount = 1;
-      if (!Utils.isEmpty(note.getText())) {
-        String[] lines = note.getText().split("\n", -1);
-        lineCount = lines.length;
-        for (String line : lines) {
-          String display = DvNoteTextParser.displayLine(line);
-          Point extent = gc.textExtent(display != null ? display : "");
-          maxLineWidth = Math.max(maxLineWidth, extent.x);
-        }
-      } else {
-        maxLineWidth = gc.textExtent(" ").x;
+      if (Utils.isEmpty(noteMeta.getNote())) {
+        return new Point(minWidth, 2 * margin + Math.max(NOTE_ICON_SIZE, 16));
       }
-
-      int contentWidth = textIndent + maxLineWidth;
-      int contentHeight = Math.max(iconRowHeight, lineCount * lineHeight);
-      return new Point(2 * margin + contentWidth, 2 * margin + contentHeight);
+      int availableContent =
+          note.getWidth() > 0
+              ? Math.max(minContentWidth, note.getWidth() - 2 * margin - textIndent)
+              : minContentWidth;
+      MarkdownNoteRenderer.LayoutResult layout =
+          MarkdownNoteRenderer.measure(
+              gc,
+              noteMeta,
+              "Sans",
+              markdownBaseFontSize(),
+              availableContent,
+              noteImageBaseFilename,
+              variables);
+      int contentH =
+          Math.max(NotePadStyle.icon(type) != null ? NOTE_ICON_SIZE : 0, layout.height());
+      return new Point(minWidth, 2 * margin + contentH);
     } finally {
       gc.setTransform((float) offset.x, (float) offset.y, savedMag);
     }

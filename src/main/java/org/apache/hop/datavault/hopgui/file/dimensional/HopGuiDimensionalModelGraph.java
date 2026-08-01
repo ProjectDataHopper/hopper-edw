@@ -297,6 +297,7 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
       painter.setAreaOwners(areaOwners);
       painter.setMouseOverTableName(mouseOverTableName);
       painter.setMouseOverNoteLink(mouseOverNoteLink);
+      painter.setNoteImageBaseFilename(getFilename());
       painter.setSelectionRegion(selectionRegion);
       painter.setShowingNavigationView(!propsUi.isHideViewportEnabled());
       painter.setRelationshipDragInfo(

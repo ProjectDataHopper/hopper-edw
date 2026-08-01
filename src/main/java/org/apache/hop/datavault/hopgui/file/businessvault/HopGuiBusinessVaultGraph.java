@@ -313,6 +313,7 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
       painter.setMouseOverDvReferenceName(mouseOverDvReferenceName);
       painter.setMouseOverBvReferenceName(mouseOverBvReferenceName);
       painter.setMouseOverNoteLink(mouseOverNoteLink);
+      painter.setNoteImageBaseFilename(getFilename());
       painter.setSelectionRegion(selectionRegion);
       painter.setRelationshipDragInfo(
           startRelationshipBvTable,

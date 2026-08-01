@@ -13,13 +13,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.hop.core.NotePadMeta;
 import org.apache.hop.core.gui.IGuiPosition;
 import org.apache.hop.core.gui.IGuiSize;
 import org.apache.hop.core.gui.Point;
@@ -28,6 +27,10 @@ import org.apache.hop.metadata.api.HopMetadataProperty;
 /**
  * A typed annotation note on the Data Vault model canvas. Notes are documentation only; they do not
  * affect DV Update or DDL generation.
+ *
+ * <p>Canvas painting reuses Hop 2.19 {@link NotePadMeta} / {@code MarkdownNoteRenderer} via a
+ * stable transient adapter ({@link #canvasNotePad}) so link hover identity matches Hop's
+ * pipeline/workflow notes.
  */
 @Getter
 @Setter
@@ -53,6 +56,12 @@ public class DvNote implements IGuiPosition, IGuiSize, Cloneable {
 
   /** Minimum size computed during last paint (for resize operations). */
   private int minimumHeight;
+
+  /**
+   * Stable Hop note adapter used while painting and for {@code NoteLinkHit} identity. Not
+   * serialized; recreated on demand.
+   */
+  private transient NotePadMeta canvasNotePad;
 
   public DvNote() {}
 

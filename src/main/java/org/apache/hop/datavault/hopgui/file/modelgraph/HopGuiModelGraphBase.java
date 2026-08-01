@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.modelgraph;
 
 import java.util.ArrayList;
@@ -24,12 +22,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.apache.hop.core.NotePadMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.AreaOwner;
-import org.apache.hop.core.gui.IGc;
 import org.apache.hop.core.gui.IRedrawable;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.Rectangle;
+import org.apache.hop.core.gui.markdown.NoteLinkHit;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.datavault.hopgui.ModelCoachPanelAuditSupport;
 import org.apache.hop.datavault.hopgui.ModelLoadDurationPaneAuditSupport;
@@ -38,18 +37,19 @@ import org.apache.hop.datavault.hopgui.coaching.ICoachableModelGraph;
 import org.apache.hop.datavault.hopgui.coaching.ModelCoachPanel;
 import org.apache.hop.datavault.hopgui.file.metrics.ModelLoadDurationPane;
 import org.apache.hop.datavault.hopgui.file.vault.BasePainter;
-import org.apache.hop.datavault.hopgui.file.vault.DvNoteDialog;
-import org.apache.hop.datavault.hopgui.file.vault.DvNoteLinkHit;
-import org.apache.hop.datavault.hopgui.file.vault.DvNoteTextParser;
+import org.apache.hop.datavault.hopgui.file.vault.DvNotePadSupport;
 import org.apache.hop.datavault.metadata.DvNote;
+import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.core.gui.GuiToolbarWidgets;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.hopgui.context.GuiContextUtil;
-import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
 import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
+import org.apache.hop.ui.hopgui.dialog.NotePadDialog;
+import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
+import org.apache.hop.ui.hopgui.file.delegates.HopGuiNoteLinkSupport;
 import org.apache.hop.ui.hopgui.file.shared.HopGuiAbstractGraph;
 import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
 import org.apache.hop.ui.util.EnvironmentUtils;
@@ -79,7 +79,7 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
   protected boolean avoidContextDialog;
 
   // Note interaction state shared across model graph types.
-  protected DvNoteLinkHit mouseOverNoteLink;
+  protected NoteLinkHit mouseOverNoteLink;
   protected DvNote currentNote;
   protected DvNote selectedNote;
   protected Point noteDragStart;
@@ -582,10 +582,9 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
     return true;
   }
 
-  /**
-   * Left-click on empty canvas: start lasso rubber-band selection. Returns true when started.
-   */
-  protected boolean handleLassoMouseDown(Event e, Point real, boolean control, boolean onBackground) {
+  /** Left-click on empty canvas: start lasso rubber-band selection. Returns true when started. */
+  protected boolean handleLassoMouseDown(
+      Event e, Point real, boolean control, boolean onBackground) {
     if (e.button != 1 || !onBackground) {
       return false;
     }
@@ -623,9 +622,7 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
     return mouseInteractions().clearHoverState();
   }
 
-  /**
-   * Clears an empty lasso started by click-without-drag so background context menu can appear.
-   */
+  /** Clears an empty lasso started by click-without-drag so background context menu can appear. */
   protected void clearEmptyLassoOnMouseUp(boolean allow) {
     if (!allow || selectionRegion == null || !selectionRegion.isEmpty()) {
       return;
@@ -794,8 +791,6 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
 
   protected abstract void navigateToNoteLinkTable(String tableName);
 
-
-
   protected void onClearNoteDragState() {
     // Optional hook for subclasses with additional drag bookkeeping.
   }
@@ -823,8 +818,8 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
   }
 
   /**
-   * Returns true when the left button went down on the blue viewport rectangle and navigation panning
-   * started.
+   * Returns true when the left button went down on the blue viewport rectangle and navigation
+   * panning started.
    */
   protected boolean tryBeginNavigationViewportDrag(Event e) {
     if (e.button != 1
@@ -1100,36 +1095,25 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
     return null;
   }
 
-  protected @Nullable DvNoteLinkHit getAreaOwnerNoteLink(AreaOwner areaOwner) {
+  protected @Nullable NoteLinkHit getAreaOwnerNoteLink(AreaOwner areaOwner) {
+    NoteLinkHit hopHit = HopGuiNoteLinkSupport.linkHitFrom(areaOwner);
+    if (hopHit != null) {
+      return hopHit;
+    }
+    // Legacy CUSTOM area owners (should not appear after Markdown painter).
     if (areaOwner != null
         && areaOwner.getAreaType() == AreaOwner.AreaType.CUSTOM
-        && areaOwner.getOwner() instanceof DvNoteLinkHit linkHit) {
+        && areaOwner.getOwner() instanceof NoteLinkHit linkHit) {
       return linkHit;
     }
     return null;
   }
 
-  protected static boolean noteLinksEqual(DvNoteLinkHit a, DvNoteLinkHit b) {
-    if (a == b) {
-      return true;
-    }
-    if (a == null || b == null) {
-      return false;
-    }
-    DvNoteTextParser.Segment linkA = a.link();
-    DvNoteTextParser.Segment linkB = b.link();
-    return a.note() == b.note()
-        && linkA != null
-        && linkB != null
-        && linkA.link() == linkB.link()
-        && Objects.equals(linkA.label(), linkB.label())
-        && Objects.equals(linkA.target(), linkB.target());
-  }
-
   protected boolean mouseMoveOverNoteLink(AreaOwner areaOwner, boolean doRedraw) {
-    DvNoteLinkHit newOver = getAreaOwnerNoteLink(areaOwner);
+    NoteLinkHit newOver = getAreaOwnerNoteLink(areaOwner);
     if ((mouseOverNoteLink == null && newOver != null)
-        || (mouseOverNoteLink != null && !noteLinksEqual(mouseOverNoteLink, newOver))) {
+        || (mouseOverNoteLink != null
+            && !HopGuiNoteLinkSupport.noteLinksEqual(mouseOverNoteLink, newOver))) {
       doRedraw = true;
     }
     mouseOverNoteLink = newOver;
@@ -1140,10 +1124,11 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
         setCanvasCursor(hand);
         doRedraw = true;
       }
-      String target = newOver.link().target().trim();
+      String target = newOver.target() != null ? newOver.target().trim() : "";
       String tip =
-          DvNoteTextParser.isUrlTarget(target)
-              ? target
+          HopGuiNoteLinkSupport.isUrlTarget(target)
+                  || DvNotePadSupport.looksLikeFileOrUrlTarget(target)
+              ? HopGuiNoteLinkSupport.tooltipFor(newOver)
               : getNoteLinkTableTooltip(target);
       if (!Objects.equals(canvas.getToolTipText(), tip)) {
         canvas.setToolTipText(tip);
@@ -1335,8 +1320,14 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
       return;
     }
     byte[] beforeChange = recordUndo ? captureUndoSnapshot() : null;
-    DvNoteDialog dialog = new DvNoteDialog(getShell(), note);
-    if (dialog.open()) {
+    NotePadMeta pad = DvNotePadSupport.toNotePadMeta(note);
+    String title =
+        BaseMessages.getString(
+            org.apache.hop.datavault.hopgui.file.vault.DvNoteDialog.class, "DvNoteDialog.Title");
+    NotePadDialog dialog = new NotePadDialog(variables, getShell(), title, pad, getModelFilename());
+    NotePadMeta result = dialog.open();
+    if (result != null) {
+      DvNotePadSupport.applyFromNotePadMeta(note, result);
       commitDialogUndo(beforeChange);
       setChanged();
       redraw();
@@ -1364,7 +1355,7 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
   }
 
   protected boolean handleNoteLinkClickAt(Point real) {
-    DvNoteLinkHit linkHit = getAreaOwnerNoteLink(getVisibleAreaOwner(real.x, real.y));
+    NoteLinkHit linkHit = getAreaOwnerNoteLink(getVisibleAreaOwner(real.x, real.y));
     if (linkHit == null) {
       return false;
     }
@@ -1383,24 +1374,35 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
     }
   }
 
-  protected void followNoteLink(DvNoteLinkHit linkHit) {
-    if (linkHit == null || linkHit.link() == null || Utils.isEmpty(linkHit.link().target())) {
+  /**
+   * Follow a Markdown note link: HTTP(S) and Hop-openable files via Hop support; bare names
+   * navigate to a table in the model (legacy DV/BV/DM behavior).
+   */
+  protected void followNoteLink(NoteLinkHit linkHit) {
+    if (linkHit == null || Utils.isEmpty(linkHit.target())) {
       return;
     }
-    String target = linkHit.link().target().trim();
-    if (DvNoteTextParser.isUrlTarget(target)) {
+    String target = linkHit.target().trim();
+    if (HopGuiNoteLinkSupport.isUrlTarget(target)
+        || HopGuiNoteLinkSupport.isUrlTarget(variables.resolve(target))) {
       try {
-        EnvironmentUtils.getInstance().openUrl(target);
+        EnvironmentUtils.getInstance().openUrl(variables.resolve(target));
       } catch (HopException e) {
-        new ErrorDialog(
-            getShell(),
-            getNoteLinkErrorTitle(),
-            getNoteLinkUrlErrorMessage(target),
-            e);
+        new ErrorDialog(getShell(), getNoteLinkErrorTitle(), getNoteLinkUrlErrorMessage(target), e);
       }
       return;
     }
-    navigateToNoteLinkTable(target);
+    // Prefer table navigation for bare identifiers (hub_customer); files when path-like.
+    if (!DvNotePadSupport.looksLikeFileOrUrlTarget(target)) {
+      navigateToNoteLinkTable(target);
+      return;
+    }
+    // Path-like: open via Hop (pipeline/workflow/etc. relative to model file).
+    boolean handled =
+        HopGuiNoteLinkSupport.followLink(hopGui, variables, getModelFilename(), linkHit);
+    if (!handled) {
+      navigateToNoteLinkTable(target);
+    }
   }
 
   protected void showNoteLinkTableNotFound(String tableName) {
