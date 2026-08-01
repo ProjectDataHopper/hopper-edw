@@ -38,6 +38,7 @@ For a slide-style executive summary, see [presentations/hop-data-vault-overview.
 | Data Vault modeler (`.hdv`) | Available | [datavault-plugin.adoc](datavault-plugin.adoc) |
 | Hub aliases / same hub twice on a link | Available | [dv-cross-model-references.adoc](dv-cross-model-references.adoc), [dv-link.adoc](dv-link.adoc) |
 | Large-program / multi-team modeling guide | Available (docs) | [enterprise-modeling-and-team-collaboration.adoc](enterprise-modeling-and-team-collaboration.adoc) |
+| Architecture export (Draw.io) | Available (SOLUTION + DATA inventory + aggregated DV/BV/DM ELK) | [architecture-export.adoc](architecture-export.adoc) |
 | Model validation (Check model, type checking) | Available | [datavault-update-action.adoc](datavault-update-action.adoc) |
 | Data Vault Update action | Available | [datavault-update-action.adoc](datavault-update-action.adoc) |
 | Integration modes (managed / external / custom) | Available | [dv-integration-modes.adoc](dv-integration-modes.adoc) |

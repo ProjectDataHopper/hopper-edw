@@ -25,6 +25,7 @@ import org.apache.hop.core.vfs.HopVfs;
 import org.apache.hop.datavault.metadata.DvModelLoadSupport;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapArtifactSnapshot;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapDocument;
+import org.apache.hop.datavault.metadata.executionmap.ExecutionMapEdge;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapNode;
 
 /**
@@ -97,6 +98,18 @@ public final class ExecutionMapPathSupport {
     for (ExecutionMapArtifactSnapshot snapshot : document.getSnapshotsOrEmpty()) {
       if (snapshot != null) {
         snapshot.setSourcePath(toStoredPath(snapshot.getSourcePath(), variables));
+      }
+    }
+    for (ExecutionMapEdge edge : document.getEdgesOrEmpty()) {
+      if (edge != null && !Utils.isEmpty(edge.getLabel()) && !isLogicalScheme(edge.getLabel())) {
+        String label = edge.getLabel().trim();
+        // Only rewrite labels that look like filesystem paths (not free-text hop descriptions).
+        if (label.contains("/")
+            || label.contains("\\")
+            || label.contains("${PROJECT_HOME}")
+            || label.startsWith("${")) {
+          edge.setLabel(toStoredPath(label, variables));
+        }
       }
     }
   }

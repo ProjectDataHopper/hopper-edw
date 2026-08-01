@@ -287,7 +287,7 @@ Not everyone should open a 200-table canvas.
 |Schema validation report from the gate (HTML/Markdown under `work/reports` or CI artifacts)
 
 |Pretty architecture picture for a wiki?
-|`hop svg` export of a subject `.hdv` / `.hbv` (see docs README)
+|`hop svg` export of a subject `.hdv` / `.hbv` (see docs README); or link:architecture-export.adoc[Architecture export] to Draw.io for multi-file / workflow-driven views
 |===
 
 Reporting users usually connect BI tools to **BV or dimensional** schemas, not raw hubs/links. DV modelers still need raw models for history and audit; do not force analysts through raw vault unless that is an explicit architecture choice.

@@ -4,6 +4,15 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## Unreleased
 
+### Architecture export to Draw.io (#104)
+
+- Derived **SOLUTION** architecture (workflows / capabilities / model file refs only — no dataset table dump), **DATA inventory**, and **aggregated MODEL** layer diagrams
+- MODEL export unions all `.hdv` → `data-vault.drawio`, all `.hbv` → `business-vault.drawio`, all `.hdm` → `dimensional.drawio` (ELK layout, shared tables deduped)
+- SOLUTION swimlanes stay architectural; MODEL freeform uses ELK; default inventory file is `data-inventory.drawio` (not concatenated model names)
+- Paths in exports are project-relative or basenames (e.g. `models/retail-360.hdv`), not host absolute paths
+- CLI / action: `hop architecture-export` (`--also-data`, `--also-models`)
+- Docs: [architecture-export.adoc](docs/architecture-export.adoc)
+
 ### Hub aliases — same physical hub twice on a link (#103)
 
 - Same-model **hub aliases** (`TABLE_REFERENCE` with optional role `hashKeyFieldName`) so a link can participate one physical hub more than once with distinct source mappings and link columns (primary/secondary rep, from/to location)

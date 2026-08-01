@@ -322,50 +322,80 @@ public final class ElkGraphLayout {
   }
 
   public static ElkGraphLayout fromDataVaultModel(DataVaultModel model) {
+    List<DataVaultModel> models = new ArrayList<>();
+    if (model != null) {
+      models.add(model);
+    }
+    return fromDataVaultModels(models);
+  }
+
+  /**
+   * Aggregate layout graph across multiple DV model files (shared hubs/links deduped by table
+   * name). Used for multi-file enterprise models exported as one Draw.io diagram.
+   */
+  public static ElkGraphLayout fromDataVaultModels(Iterable<DataVaultModel> models) {
     List<ElkLayoutNode> nodes = new ArrayList<>();
     List<ElkLayoutEdge> edges = new ArrayList<>();
-    String name = model != null ? model.getName() : null;
+    ElkLayout defaults = ElkLayout.createDefault();
+    Map<String, IDvTable> tableByName = new HashMap<>();
+    Set<String> edgeKeys = new HashSet<>();
+    String name = "data-vault";
 
-    if (model != null && model.getTables() != null) {
-      ElkLayout defaults = ElkLayout.createDefault();
-      Map<String, IDvTable> tableByName = new HashMap<>();
-
-      for (IDvTable table : model.getTables()) {
-        if (table == null) {
+    if (models != null) {
+      for (DataVaultModel model : models) {
+        if (model == null || model.getTables() == null) {
           continue;
         }
-        String tableName = table.getName();
-        if (Utils.isEmpty(tableName)) {
-          continue;
+        if (models instanceof List<?> list && list.size() == 1 && !Utils.isEmpty(model.getName())) {
+          name = model.getName();
         }
-        tableByName.put(tableName, table);
-        nodes.add(
-            new ElkLayoutNode(
-                tableName,
-                tableName,
-                defaults.estimateNodeWidth(tableName),
-                VAULT_NODE_HEIGHT,
-                table));
+        for (IDvTable table : model.getTables()) {
+          if (table == null || Utils.isEmpty(table.getName())) {
+            continue;
+          }
+          // First definition wins for layout target; later files share the node.
+          tableByName.putIfAbsent(table.getName(), table);
+        }
       }
+    }
 
-      for (IDvTable table : model.getTables()) {
-        if (table == null) {
+    for (Map.Entry<String, IDvTable> entry : tableByName.entrySet()) {
+      String tableName = entry.getKey();
+      IDvTable table = entry.getValue();
+      nodes.add(
+          new ElkLayoutNode(
+              tableName,
+              tableName,
+              defaults.estimateNodeWidth(tableName),
+              VAULT_NODE_HEIGHT,
+              table));
+    }
+
+    if (models != null) {
+      for (DataVaultModel model : models) {
+        if (model == null || model.getTables() == null) {
           continue;
         }
-        if (table.getTableType() == DvTableType.LINK && table instanceof DvLink link) {
-          for (String hubName : link.getHubNames()) {
-            if (!Utils.isEmpty(hubName) && tableByName.containsKey(hubName)) {
-              edges.add(new ElkLayoutEdge(hubName, link.getName()));
+        for (IDvTable table : model.getTables()) {
+          if (table == null) {
+            continue;
+          }
+          if (table.getTableType() == DvTableType.LINK && table instanceof DvLink link) {
+            for (String hubName : link.getHubNames()) {
+              if (!Utils.isEmpty(hubName) && tableByName.containsKey(hubName)) {
+                addEdgeOnce(edges, edgeKeys, hubName, link.getName());
+              }
             }
           }
-        }
-        if (table.getTableType() == DvTableType.SATELLITE && table instanceof DvSatellite satellite) {
-          String parentName = satellite.getHubName();
-          if (Utils.isEmpty(parentName)) {
-            parentName = satellite.getLinkName();
-          }
-          if (!Utils.isEmpty(parentName) && tableByName.containsKey(parentName)) {
-            edges.add(new ElkLayoutEdge(parentName, satellite.getName()));
+          if (table.getTableType() == DvTableType.SATELLITE
+              && table instanceof DvSatellite satellite) {
+            String parentName = satellite.getHubName();
+            if (Utils.isEmpty(parentName)) {
+              parentName = satellite.getLinkName();
+            }
+            if (!Utils.isEmpty(parentName) && tableByName.containsKey(parentName)) {
+              addEdgeOnce(edges, edgeKeys, parentName, satellite.getName());
+            }
           }
         }
       }
@@ -376,41 +406,106 @@ public final class ElkGraphLayout {
 
   public static ElkGraphLayout fromBusinessVaultModel(
       BusinessVaultModel businessVaultModel, DataVaultModel dataVaultModel) {
+    List<BusinessVaultModel> bvModels = new ArrayList<>();
+    if (businessVaultModel != null) {
+      bvModels.add(businessVaultModel);
+    }
+    List<DataVaultModel> dvModels = new ArrayList<>();
+    if (dataVaultModel != null) {
+      dvModels.add(dataVaultModel);
+    }
+    return fromBusinessVaultModels(bvModels, dvModels);
+  }
+
+  /**
+   * Aggregate BV tables (and optional DV derivative targets) across multiple BV/DV model files.
+   */
+  public static ElkGraphLayout fromBusinessVaultModels(
+      Iterable<BusinessVaultModel> businessVaultModels, Iterable<DataVaultModel> dataVaultModels) {
     List<ElkLayoutNode> nodes = new ArrayList<>();
     List<ElkLayoutEdge> edges = new ArrayList<>();
-    String name = businessVaultModel != null ? businessVaultModel.getName() : null;
+    ElkLayout defaults = ElkLayout.createDefault();
+    Map<String, IBvTable> bvByName = new HashMap<>();
+    Map<String, IDvTable> dvTableByName = new HashMap<>();
+    Set<String> edgeKeys = new HashSet<>();
+    String name = "business-vault";
 
-    if (businessVaultModel != null && businessVaultModel.getTables() != null) {
-      ElkLayout defaults = ElkLayout.createDefault();
-      Map<String, IDvTable> dvTableByName = new HashMap<>();
-      if (dataVaultModel != null && dataVaultModel.getTables() != null) {
+    if (dataVaultModels != null) {
+      for (DataVaultModel dataVaultModel : dataVaultModels) {
+        if (dataVaultModel == null || dataVaultModel.getTables() == null) {
+          continue;
+        }
         for (IDvTable dvTable : dataVaultModel.getTables()) {
           if (dvTable != null && !Utils.isEmpty(dvTable.getName())) {
-            dvTableByName.put(dvTable.getName(), dvTable);
+            dvTableByName.putIfAbsent(dvTable.getName(), dvTable);
           }
         }
       }
+    }
 
-      for (IBvTable bvTable : businessVaultModel.getTables()) {
-        if (bvTable == null || Utils.isEmpty(bvTable.getName())) {
+    if (businessVaultModels != null) {
+      for (BusinessVaultModel businessVaultModel : businessVaultModels) {
+        if (businessVaultModel == null || businessVaultModel.getTables() == null) {
           continue;
         }
-        nodes.add(
-            new ElkLayoutNode(
-                bvTable.getName(),
-                bvTable.getName(),
-                defaults.estimateNodeWidth(bvTable.getName()),
-                VAULT_NODE_HEIGHT,
-                bvTable));
-
-        for (BvDerivativeRef derivative : bvTable.getDerivatives()) {
-          if (derivative == null || Utils.isEmpty(derivative.getDvTableName())) {
+        if (businessVaultModels instanceof List<?> list
+            && list.size() == 1
+            && !Utils.isEmpty(businessVaultModel.getName())) {
+          name = businessVaultModel.getName();
+        }
+        for (IBvTable bvTable : businessVaultModel.getTables()) {
+          if (bvTable == null || Utils.isEmpty(bvTable.getName())) {
             continue;
           }
-          if (dvTableByName.containsKey(derivative.getDvTableName())) {
-            edges.add(new ElkLayoutEdge(bvTable.getName(), derivative.getDvTableName()));
+          bvByName.putIfAbsent(bvTable.getName(), bvTable);
+        }
+      }
+    }
+
+    for (Map.Entry<String, IBvTable> entry : bvByName.entrySet()) {
+      IBvTable bvTable = entry.getValue();
+      nodes.add(
+          new ElkLayoutNode(
+              bvTable.getName(),
+              bvTable.getName(),
+              defaults.estimateNodeWidth(bvTable.getName()),
+              VAULT_NODE_HEIGHT,
+              bvTable));
+    }
+
+    // DV tables referenced as derivatives (layout targets for edges)
+    Set<String> referencedDv = new HashSet<>();
+    if (businessVaultModels != null) {
+      for (BusinessVaultModel businessVaultModel : businessVaultModels) {
+        if (businessVaultModel == null || businessVaultModel.getTables() == null) {
+          continue;
+        }
+        for (IBvTable bvTable : businessVaultModel.getTables()) {
+          if (bvTable == null) {
+            continue;
+          }
+          for (BvDerivativeRef derivative : bvTable.getDerivatives()) {
+            if (derivative == null || Utils.isEmpty(derivative.getDvTableName())) {
+              continue;
+            }
+            if (dvTableByName.containsKey(derivative.getDvTableName())) {
+              referencedDv.add(derivative.getDvTableName());
+              addEdgeOnce(edges, edgeKeys, bvTable.getName(), derivative.getDvTableName());
+            }
           }
         }
+      }
+    }
+    for (String dvName : referencedDv) {
+      IDvTable dvTable = dvTableByName.get(dvName);
+      if (dvTable != null) {
+        nodes.add(
+            new ElkLayoutNode(
+                dvName,
+                dvName,
+                defaults.estimateNodeWidth(dvName),
+                VAULT_NODE_HEIGHT,
+                dvTable));
       }
     }
 
@@ -418,49 +513,80 @@ public final class ElkGraphLayout {
   }
 
   public static ElkGraphLayout fromDimensionalModel(DimensionalModel dimensionalModel) {
+    List<DimensionalModel> models = new ArrayList<>();
+    if (dimensionalModel != null) {
+      models.add(dimensionalModel);
+    }
+    return fromDimensionalModels(models);
+  }
+
+  /** Aggregate dimensional tables across multiple .hdm files (conformed dims deduped by name). */
+  public static ElkGraphLayout fromDimensionalModels(Iterable<DimensionalModel> dimensionalModels) {
     List<ElkLayoutNode> nodes = new ArrayList<>();
     List<ElkLayoutEdge> edges = new ArrayList<>();
-    String name = dimensionalModel != null ? dimensionalModel.getName() : null;
+    ElkLayout defaults = ElkLayout.createDefault();
+    Map<String, IDmTable> tableByName = new HashMap<>();
+    Set<String> edgeKeys = new HashSet<>();
+    String name = "dimensional";
 
-    if (dimensionalModel != null && dimensionalModel.getTables() != null) {
-      ElkLayout defaults = ElkLayout.createDefault();
-      Map<String, IDmTable> tableByName = new HashMap<>();
-
-      for (IDmTable table : dimensionalModel.getTables()) {
-        if (table == null || Utils.isEmpty(table.getName())) {
+    if (dimensionalModels != null) {
+      for (DimensionalModel dimensionalModel : dimensionalModels) {
+        if (dimensionalModel == null || dimensionalModel.getTables() == null) {
           continue;
         }
-        tableByName.put(table.getName(), table);
-        nodes.add(
-            new ElkLayoutNode(
-                table.getName(),
-                table.getName(),
-                defaults.estimateNodeWidth(table.getName()),
-                VAULT_NODE_HEIGHT,
-                table));
+        if (dimensionalModels instanceof List<?> list
+            && list.size() == 1
+            && !Utils.isEmpty(dimensionalModel.getName())) {
+          name = dimensionalModel.getName();
+        }
+        for (IDmTable table : dimensionalModel.getTables()) {
+          if (table == null || Utils.isEmpty(table.getName())) {
+            continue;
+          }
+          tableByName.putIfAbsent(table.getName(), table);
+        }
       }
+    }
 
-      for (IDmTable table : dimensionalModel.getTables()) {
-        if (table == null) {
+    for (Map.Entry<String, IDmTable> entry : tableByName.entrySet()) {
+      IDmTable table = entry.getValue();
+      nodes.add(
+          new ElkLayoutNode(
+              table.getName(),
+              table.getName(),
+              defaults.estimateNodeWidth(table.getName()),
+              VAULT_NODE_HEIGHT,
+              table));
+    }
+
+    if (dimensionalModels != null) {
+      for (DimensionalModel dimensionalModel : dimensionalModels) {
+        if (dimensionalModel == null || dimensionalModel.getTables() == null) {
           continue;
         }
-        if (table instanceof DmFact fact) {
-          for (DmFactDimensionRole role : fact.getDimensionRolesOrEmpty()) {
-            if (role == null || Utils.isEmpty(role.getDimensionTableName())) {
-              continue;
-            }
-            if (tableByName.containsKey(role.getDimensionTableName())) {
-              edges.add(new ElkLayoutEdge(fact.getName(), role.getDimensionTableName()));
+        for (IDmTable table : dimensionalModel.getTables()) {
+          if (table == null) {
+            continue;
+          }
+          if (table instanceof DmFact fact) {
+            for (DmFactDimensionRole role : fact.getDimensionRolesOrEmpty()) {
+              if (role == null || Utils.isEmpty(role.getDimensionTableName())) {
+                continue;
+              }
+              if (tableByName.containsKey(role.getDimensionTableName())) {
+                addEdgeOnce(edges, edgeKeys, fact.getName(), role.getDimensionTableName());
+              }
             }
           }
-        }
-        if (table instanceof DmDimension dimension) {
-          for (DmDimensionOutriggerRef outrigger : dimension.getOutriggersOrEmpty()) {
-            if (outrigger == null || Utils.isEmpty(outrigger.getDimensionTableName())) {
-              continue;
-            }
-            if (tableByName.containsKey(outrigger.getDimensionTableName())) {
-              edges.add(new ElkLayoutEdge(dimension.getName(), outrigger.getDimensionTableName()));
+          if (table instanceof DmDimension dimension) {
+            for (DmDimensionOutriggerRef outrigger : dimension.getOutriggersOrEmpty()) {
+              if (outrigger == null || Utils.isEmpty(outrigger.getDimensionTableName())) {
+                continue;
+              }
+              if (tableByName.containsKey(outrigger.getDimensionTableName())) {
+                addEdgeOnce(
+                    edges, edgeKeys, dimension.getName(), outrigger.getDimensionTableName());
+              }
             }
           }
         }
@@ -470,9 +596,40 @@ public final class ElkGraphLayout {
     return new ElkGraphLayout(name, nodes, edges);
   }
 
+  private static void addEdgeOnce(
+      List<ElkLayoutEdge> edges, Set<String> edgeKeys, String fromId, String toId) {
+    String key = fromId + "->" + toId;
+    if (edgeKeys.add(key)) {
+      edges.add(new ElkLayoutEdge(fromId, toId));
+    }
+  }
+
   public void layout(ElkLayout layout) throws HopException {
-    if (layout == null || !layout.isEnabled() || nodes.isEmpty()) {
+    Map<String, ElkLayoutBox> boxes = layoutToBoxes(layout);
+    if (boxes.isEmpty()) {
       return;
+    }
+    for (ElkLayoutNode node : nodes) {
+      if (node.getTarget() == null) {
+        continue;
+      }
+      ElkLayoutBox box = boxes.get(node.getId());
+      if (box != null) {
+        node.getTarget().setLocation(box.x(), box.y());
+      }
+    }
+  }
+
+  /**
+   * Run ELK and return node positions without mutating {@link IGuiPosition} targets. Safe for
+   * architecture / Draw.io export of loaded models.
+   *
+   * @return map of node id → layout box (never null; empty when layout disabled or no nodes)
+   */
+  public Map<String, ElkLayoutBox> layoutToBoxes(ElkLayout layout) throws HopException {
+    Map<String, ElkLayoutBox> result = new HashMap<>();
+    if (layout == null || !layout.isEnabled() || nodes.isEmpty()) {
+      return result;
     }
 
     try {
@@ -480,10 +637,14 @@ public final class ElkGraphLayout {
       layout.applyTo(root);
 
       Map<String, ElkNode> elkNodes = new HashMap<>();
+      Map<String, double[]> dimensions = new HashMap<>();
       for (ElkLayoutNode node : nodes) {
         ElkNode elkNode = ElkGraphUtil.createNode(root);
         elkNode.setIdentifier(node.getId());
-        elkNode.setDimensions(resolveNodeWidth(node, layout), resolveNodeHeight(node, layout));
+        double w = resolveNodeWidth(node, layout);
+        double h = resolveNodeHeight(node, layout);
+        elkNode.setDimensions(w, h);
+        dimensions.put(node.getId(), new double[] {w, h});
         ElkGraphUtil.createLabel(node.getLabel(), elkNode);
         elkNodes.put(node.getId(), elkNode);
       }
@@ -504,17 +665,31 @@ public final class ElkGraphLayout {
       int originY = layout.getOriginY();
       for (ElkLayoutNode node : nodes) {
         ElkNode elkNode = elkNodes.get(node.getId());
-        if (elkNode == null || node.getTarget() == null) {
+        if (elkNode == null) {
           continue;
         }
         int x = layout.snap((int) Math.round(elkNode.getX()) + originX);
         int y = layout.snap((int) Math.round(elkNode.getY()) + originY);
-        node.getTarget().setLocation(x, y);
+        double[] dim = dimensions.get(node.getId());
+        int w = dim != null ? (int) Math.round(dim[0]) : layout.getMinNodeWidth();
+        int h = dim != null ? (int) Math.round(dim[1]) : layout.getNodeHeight();
+        result.put(node.getId(), new ElkLayoutBox(node.getId(), x, y, w, h));
       }
+      return result;
     } catch (Exception e) {
       throw new HopException(
           "Error applying ELK layout to graph " + (graphName != null ? graphName : ""), e);
     }
+  }
+
+  /** Structural edges used for this layout graph (for export consumers). */
+  public List<ElkLayoutEdge> getEdges() {
+    return List.copyOf(edges);
+  }
+
+  /** Layout nodes (for export consumers). */
+  public List<ElkLayoutNode> getNodes() {
+    return List.copyOf(nodes);
   }
 
   private static double resolveNodeWidth(ElkLayoutNode node, ElkLayout layout) {

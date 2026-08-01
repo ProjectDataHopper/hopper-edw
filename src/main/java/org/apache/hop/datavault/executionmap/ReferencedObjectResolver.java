@@ -143,10 +143,12 @@ public final class ReferencedObjectResolver {
             BusinessVaultDvModelResolver.buildEffectiveDataVaultModel(
                 bvModel, context.getVariables(), context.getMetadataProvider());
         if (dvModel != null && !dvModel.getTables().isEmpty()) {
-          String dvLabel =
-              !Utils.isEmpty(dvModel.getFilename())
-                  ? dvModel.getFilename()
-                  : "effective-dv-from-references";
+          String dvLabel = "effective-dv-from-references";
+          if (!Utils.isEmpty(dvModel.getFilename())) {
+            dvLabel =
+                ExecutionMapPathSupport.toStoredPath(
+                    dvModel.getFilename(), context.getVariables());
+          }
           String dvNodeId =
               addModelNode(context, modelNodeId, ExecutionMapNodeType.DATA_VAULT_MODEL, dvModel);
           context.addEdge(ExecutionMapEdgeType.MODEL_LINK, modelNodeId, dvNodeId, dvLabel);
