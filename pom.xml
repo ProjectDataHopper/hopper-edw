@@ -369,6 +369,28 @@
     </dependency>
   </dependencies>
 
+  <!--
+    Hop releases are on Maven Central (latest: 2.18.1). Until Hop 2.19.0 is released,
+    compile dependencies use 2.19.0-SNAPSHOT which is only published to the ASF Nexus
+    snapshots repository (not Central). Without this declaration, clean CI agents
+    (Jenkins, GitHub Actions, etc.) fail with "Could not find artifact ... 2.19.0-SNAPSHOT".
+    Local builds often work anyway because Hop was installed into ~/.m2 via `mvn install`.
+    Remove (or leave harmless) once hop.version points at a released version on Central.
+  -->
+  <repositories>
+    <repository>
+      <id>apache.snapshots</id>
+      <name>Apache Snapshot Repository</name>
+      <url>https://repository.apache.org/snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
   <build>
     <plugins>
       <plugin>
