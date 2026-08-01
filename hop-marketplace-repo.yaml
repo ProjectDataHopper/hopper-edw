@@ -51,7 +51,7 @@ plugins:
   - groupId: org.apache.hop
     artifactId: hop-datavault
     version: 0.5.0
-    minHopVersion: "2.18.1"
+    minHopVersion: "2.19.0"
     name: Data Vault
     category: Community
     description: >

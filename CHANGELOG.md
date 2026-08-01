@@ -4,6 +4,11 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## Unreleased
 
+### Required Apache Hop version
+
+- Development and runtime target is **Apache Hop 2.19.0** (use **2.19.0-SNAPSHOT** until the GA release ships)
+- Enables database-backed execution information (e.g. OPS `hop_executions`), BINARY hash key sorting ([apache/hop#7346](https://github.com/apache/hop/issues/7346)), and Hop Marketplace install for this plugin
+
 ### Architecture export to Draw.io (#104)
 
 - Derived **SOLUTION** architecture (workflows / capabilities / model file refs only — no dataset table dump), **DATA inventory**, and **aggregated MODEL** layer diagrams

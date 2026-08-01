@@ -17,7 +17,7 @@ limitations under the License.
 
 # Hop Data Vault 2.0 Plugin
 
-**Model-driven Data Vault and Business Vault on Apache Hop 2.18.1**
+**Model-driven Data Vault and Business Vault on Apache Hop 2.19.0**
 
 > For a feature checklist with documentation links, see [feature-overview.md](../feature-overview.md).  
 > For an interactive standalone HTML presentation (architecture, detail pages, roadmap & open issues), open [hop-data-vault-features.html](hop-data-vault-features.html).

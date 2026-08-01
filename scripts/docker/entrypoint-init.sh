@@ -19,7 +19,7 @@
 
 set -eu
 
-# Hop 2.18.1 does not create the caching execution-info folder automatically
+# Ensure the caching execution-info folder exists when using file-based locations
 # (createParentFolder was added in a later release). Retail-example enables
 # tmp-executions in its local run configuration, so ensure the folder exists.
 mkdir -p /tmp/executions

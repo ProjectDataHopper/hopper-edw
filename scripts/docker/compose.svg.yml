@@ -21,7 +21,7 @@ services:
       context: ../..
       dockerfile: scripts/docker/Dockerfile
       args:
-        HOP_IMAGE_VERSION: ${HOP_IMAGE_VERSION:-2.18.1}
+        HOP_IMAGE_VERSION: ${HOP_IMAGE_VERSION:-2.19.0-SNAPSHOT}
     image: docker-hop:latest
     user: root
     network_mode: host

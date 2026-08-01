@@ -13,7 +13,7 @@ Estimated time: 2–3 hours with Hop GUI, or follow command-line steps only in u
 == Prerequisites
 
 . Install Docker with Compose v2 and Python 3 (stdlib only).
-. Build or download plugin **0.5.0** for Apache Hop **2.18.1** (see link:../README.md[repository README]).
+. Build or download the plugin for Apache Hop **2.19.0** (or current **2.19.0-SNAPSHOT** until GA; see link:../README.md[repository README]).
 . Register `retail-example/` as a Hop project named **`retail-example`**.
 . Configure database connections **`CRM`** and **`Vault`** from project metadata.
 . Start PostgreSQL: from repo root, `./scripts/run-postgres.sh up`.

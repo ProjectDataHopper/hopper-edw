@@ -33,7 +33,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <hop.version>2.18.1</hop.version>
+    <!-- Required runtime: Hop 2.19.0 (use 2.19.0-SNAPSHOT until GA is published). -->
+    <hop.version>2.19.0-SNAPSHOT</hop.version>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
     <jandex.version>3.5.3</jandex.version>
@@ -79,7 +80,7 @@
       <scope>provided</scope>
     </dependency>
 
-    <!-- Lombok for cleaner code (getters, setters, etc.). Matches the version used by Apache Hop 2.18.1. -->
+    <!-- Lombok for cleaner code (getters, setters, etc.). Align with the Hop runtime pin. -->
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
@@ -235,7 +236,7 @@
       <artifactId>hop-transform-repeatfields</artifactId>
       <version>${hop.version}</version>
     </dependency>
-    <!-- LangChain4j language model chat (provided; 2.18.1 artifact not published for this module) -->
+    <!-- LangChain4j language model chat (provided when the Hop module is on the classpath) -->
     <dependency>
       <groupId>org.apache.hop</groupId>
       <artifactId>hop-transform-languagemodelchat</artifactId>

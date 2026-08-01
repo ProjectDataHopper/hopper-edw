@@ -71,7 +71,7 @@ When disabled or copies = 1, behavior stays exactly as today.
 Mirror pattern of `DvSortRowsSupport`:
 
 ```java
-// Sketch — actual API from hop-engine 2.18.1
+// Sketch — actual API from hop-engine 2.19.x
 PartitionSchema schema = new PartitionSchema(schemaName, null);
 schema.setDynamicallyDefined(true);
 schema.setNumberOfPartitions(copies);

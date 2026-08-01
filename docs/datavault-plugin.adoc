@@ -157,7 +157,7 @@ See link:datavault-update-action.adoc[Data Vault Update Action] for all options 
 Each Data Vault Model embeds a **configuration** object that controls:
 
 * Which database the Data Vault lives in (one target database per model).
-* Hash algorithm (MD5, SHA-256, etc.) and how hash keys are stored (HEX by default; BINARY is compact but requires Hop 2.19.0+ — see https://github.com/apache/hop/issues/7346[issue 7346]).
+* Hash algorithm (MD5, SHA-256, etc.) and how hash keys are stored (HEX by default; BINARY is compact and fully supported on Hop **2.19.0+** — see https://github.com/apache/hop/issues/7346[issue 7346]).
 * Names for standard columns such as LOAD_DATE and RECORD_SOURCE.
 * Whether business keys should be trimmed and upper-cased before hashing.
 * A placeholder to use for NULL values during hashing.

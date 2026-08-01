@@ -30,7 +30,7 @@ Target database and hashing strategy.
 |Algorithm for surrogate hash keys (MD5, SHA-256, SHA-1, SHA-512). Affects computation and maximum key length.
 
 |Hash key data type
-|Physical storage for hash keys: HEX (default), STRING, or BINARY. HEX and STRING are safe on all supported Hop versions. BINARY is more compact but requires Apache Hop *2.19.0 or later* for correct sorting in generated pipelines (see https://github.com/apache/hop/issues/7346[Hop issue 7346]); until 2.19 is released, prefer HEX.
+|Physical storage for hash keys: HEX (default), STRING, or BINARY. BINARY is the most compact form and sorts correctly on the required Hop **2.19.0+** runtime (see https://github.com/apache/hop/issues/7346[Hop issue 7346]).
 
 |Hash content casing
 |Upper-case, lower-case, or preserve business key casing before hashing. UPPER is the usual Data Vault choice.

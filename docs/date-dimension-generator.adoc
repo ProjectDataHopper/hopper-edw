@@ -12,7 +12,7 @@ The transform does not read upstream rows. Incoming hops, if present, are ignore
 
 == Prerequisites
 
-* Apache Hop 2.18.1 or compatible (provided by the hop-data-vault plugin).
+* Apache Hop 2.19.0 or compatible (required by the hop-data-vault plugin).
 * A target table (or downstream transforms) that accept the field layout you configure. The **Load defaults** button supplies a layout aligned with the standard `dim_date` attributes created by the dimensional modeler's date dimension template (`date_key`, `full_date`, `day_of_week`, and related calendar columns).
 
 == Dialog overview

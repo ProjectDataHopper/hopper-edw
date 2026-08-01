@@ -17,7 +17,7 @@ under the License.
 
 # Hop Data Vault 2.0 Plugin
 
-Apache Hop plugin for **Data Vault 2.0**, **Business Vault**, and **dimensional** modeling, validation, and model-driven loading. Version **0.6.0-SNAPSHOT** (latest release **0.5.0**) targets **Apache Hop 2.18.1** and **Java 21**.
+Apache Hop plugin for **Data Vault 2.0**, **Business Vault**, and **dimensional** modeling, validation, and model-driven loading. Version **0.6.0-SNAPSHOT** (latest release **0.5.0**) requires **Apache Hop 2.19.0** (or current **2.19.0-SNAPSHOT** until GA) and **Java 21**.
 
 **Model once. Generate loads and consumption layers.** Sources live in the Hop **Data Catalog**; visual **`.hdv`**, **`.hbv`**, and **`.hdm`** models drive workflow actions and optional **execution maps** (`.hem`).
 
@@ -136,9 +136,9 @@ Published release artifacts: **[v0.5.0](https://github.com/mattcasters/hop-data-
 2. Restart Hop GUI.
 3. New metadata types appear under **Metadata → Data Vault**. **Data Vault Update**, **Business Vault Update**, **Validate resource definitions**, and **Export data lineage** actions are available in workflows. `.hdv`, `.hbv`, and `.hdm` files open in the visual modelers.
 
-### Hop Marketplace (Hop 2.19+)
+### Hop Marketplace
 
-Continuous Jenkins builds publish the latest SNAPSHOT zip to the Data Hopper community Maven repository. On **Apache Hop 2.19 or later**, import the shareable repository definition ([`hop-marketplace-repo.yaml`](hop-marketplace-repo.yaml)), then query and install.
+Continuous Jenkins builds publish the latest SNAPSHOT zip to the Data Hopper community Maven repository. On **Apache Hop 2.19.0+**, import the shareable repository definition ([`hop-marketplace-repo.yaml`](hop-marketplace-repo.yaml)), then query and install.
 
 **1. Import the repository** (from GitHub `main`, or a local clone of this file):
 
@@ -176,7 +176,7 @@ Plugin org.apache.hop:hop-datavault:0.5.0 installed under $HOP_HOME from repo 'd
 
 You can also use **Tools → Marketplace…** in Hop GUI: import the repository on the **Repositories** tab, then install from the **Plugins** tab.
 
-**Restart Hop** after install so the plugin registry reloads. The plugin is built against **Hop 2.18.1**; the marketplace install path itself requires Hop **2.19+**.
+**Restart Hop** after install so the plugin registry reloads. This plugin requires **Hop 2.19.0** (or a matching 2.19.0-SNAPSHOT build until the GA release).
 
 ## Usage
 
@@ -198,7 +198,8 @@ SELECT * FROM sat_customer WHERE x_load_end_ts IS NULL
 ## Common Data Vault 2.0 options included
 
 - Hashing: MD5 / SHA1 / SHA256 / SHA512
-- HEX (default), String, or Binary hash keys (Binary needs Hop 2.19.0+; see [issue 7346](https://github.com/apache/hop/issues/7346))
+- HEX (default), String, or Binary hash keys (Binary sorting fixed in Hop 2.19.0 — [issue 7346](https://github.com/apache/hop/issues/7346))
+- Execution information to a database (e.g. OPS `hop_executions`) via Hop run configuration / execution info location (Hop 2.19.0+)
 - Trimming + casing normalization
 - Delimiter + null placeholder
 - Unknown and invalid sentinel record handling

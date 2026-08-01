@@ -95,7 +95,7 @@ These checks run before any pipelines are generated, so you catch problems early
 
 The plugin builds a target table layout that typically contains (in this order):
 
-1. The hash key column (its type and length depend on the hash algorithm and hash key data type chosen in the configuration: HEX is the default; STRING is human-readable; BINARY is the most compact but needs Apache Hop 2.19.0+ for correct sorting — see https://github.com/apache/hop/issues/7346[Hop issue 7346]).
+1. The hash key column (its type and length depend on the hash algorithm and hash key data type chosen in the configuration: HEX is the default; STRING is human-readable; BINARY is the most compact and is supported on the required Hop **2.19.0+** runtime — see https://github.com/apache/hop/issues/7346[Hop issue 7346]).
 2. The business key columns, in the order you defined them. Length and precision are taken from the source definition when available, so you get sensible column types (VARCHAR(50), DECIMAL(15,2), etc.) instead of generic large types.
 3. The record source column (name and length come from the configuration or the per-hub override; variables are supported).
 4. The load date column (usually a timestamp, named LOAD_DATE or whatever you configured).
