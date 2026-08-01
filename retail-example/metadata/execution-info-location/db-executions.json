@@ -1,0 +1,15 @@
+{
+  "executionInfoLocation": {
+    "caching-database-location": {
+      "persistenceDelay": "5000",
+      "connection": "OPS",
+      "maxCacheAge": "86400000",
+      "schemaName": "",
+      "tableName": "hop_executions"
+    }
+  },
+  "dataLoggingDelay": "2000",
+  "name": "db-executions",
+  "description": "",
+  "dataLoggingInterval": "5000"
+}

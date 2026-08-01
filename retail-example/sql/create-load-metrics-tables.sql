@@ -115,3 +115,36 @@ CREATE TABLE IF NOT EXISTS dv_ops.workflow_load_overview_model (
   success                  BOOLEAN       NULL,
   PRIMARY KEY (overview_id, sequence_no)
 );
+
+/*
+ * Create a table to store Hop execution information in.
+ *
+ */
+CREATE TABLE IF NOT EXISTS hop_executions
+(
+  id VARCHAR(100)
+, name VARCHAR(1024)
+, execution_type VARCHAR(32)
+, parent_id VARCHAR(100)
+, registration_date TIMESTAMP
+, execution_start_date TIMESTAMP
+, execution_end_date TIMESTAMP
+, failed BOOLEAN
+, status_description VARCHAR(128)
+, duration_ms BIGINT
+, json TEXT
+)
+;
+CREATE INDEX IF NOT EXISTS idx_hop_exec_start ON hop_executions(execution_start_date)
+;
+CREATE INDEX IF NOT EXISTS idx_hop_exec_name ON hop_executions("name")
+;
+CREATE INDEX IF NOT EXISTS idx_hop_exec_type ON hop_executions(execution_type)
+;
+CREATE INDEX IF NOT EXISTS idx_hop_exec_failed ON hop_executions(failed)
+;
+CREATE INDEX IF NOT EXISTS idx_hop_exec_parent ON hop_executions(parent_id)
+;
+CREATE INDEX IF NOT EXISTS idx_hop_exec_status ON hop_executions(status_description)
+;
+

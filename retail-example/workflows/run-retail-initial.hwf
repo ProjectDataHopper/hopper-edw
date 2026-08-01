@@ -171,6 +171,11 @@ limitations under the License.
           <value>${DV_INITIAL_LOAD_DATE}</value>
           <stream_name/>
         </parameter>
+        <parameter>
+          <name>REPORT_BASE_NAME</name>
+          <value>retail-dv-initial-report</value>
+          <stream_name/>
+        </parameter>
       </parameters>
       <run_configuration>local</run_configuration>
       <name>run-retail-update-models</name>

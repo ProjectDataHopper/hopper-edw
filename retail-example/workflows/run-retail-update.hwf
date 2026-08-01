@@ -107,6 +107,11 @@ limitations under the License.
           <value>${DV_UPDATE_LOAD_DATE}</value>
           <stream_name/>
         </parameter>
+        <parameter>
+          <name>REPORT_BASE_NAME</name>
+          <value>retail-dv-update-report</value>
+          <stream_name/>
+        </parameter>
       </parameters>
       <run_configuration>local</run_configuration>
       <name>run-retail-update-models</name>

@@ -47,6 +47,11 @@ limitations under the License.
       <description>Valid in the current workflow</description>
       <default_value>3</default_value>
     </parameter>
+    <parameter>
+      <name>REPORT_BASE_NAME</name>
+      <description>The base name of the report produced at the end of the DV update</description>
+      <default_value>retail-dv-initial-report</default_value>
+    </parameter>
   </parameters>
   <actions>
     <action>
@@ -146,7 +151,7 @@ limitations under the License.
       <writeMarkdownReport>Y</writeMarkdownReport>
       <writeHtmlReport>Y</writeHtmlReport>
       <reportOutputFolder>${PROJECT_HOME}/work/reports</reportOutputFolder>
-      <reportFileBaseName>retail-dv-initial-report</reportFileBaseName>
+      <reportFileBaseName>${REPORT_BASE_NAME}</reportFileBaseName>
       <failIfNoMetricsFound>Y</failIfNoMetricsFound>
       <includePipelineDetail>Y</includePipelineDetail>
       <includeInsights>Y</includeInsights>
