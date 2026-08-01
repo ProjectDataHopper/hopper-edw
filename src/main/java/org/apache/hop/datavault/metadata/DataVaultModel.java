@@ -523,6 +523,11 @@ public class DataVaultModel extends HopMetadataBase
       if (table == null) {
         continue;
       }
+      // Hub/link aliases (TABLE_REFERENCE) intentionally share the physical target table of the
+      // referenced hub; they do not create a second physical table and must not fail model check.
+      if (table.getTableType() == DvTableType.TABLE_REFERENCE) {
+        continue;
+      }
       String targetTableName =
           !Utils.isEmpty(table.getTableName()) ? table.getTableName() : table.getName();
       if (Utils.isEmpty(targetTableName)) {

@@ -1,0 +1,106 @@
+{
+  "namespace": "hop/retail-example/sources",
+  "name": "E2E-sales-rep",
+  "type": "DV_SOURCE",
+  "description": "Sales representative master (role-played on orders)",
+  "rowMetaXml": "<row-meta><value-meta><type>Integer</type>\n<storagetype>normal</storagetype>\n<name>rep_id</name>\n<length>9</length>\n<precision>0</precision>\n<origin/>\n<comments/>\n<conversion_Mask>####0;-####0</conversion_Mask>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>GMT</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>rep_name</name>\n<length>50</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask></conversion_Mask>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>GMT</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>region</name>\n<length>20</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask></conversion_Mask>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>GMT</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>Timestamp</type>\n<storagetype>normal</storagetype>\n<name>load_date</name>\n<length>-1</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask></conversion_Mask>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>GMT</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>record_source</name>\n<length>30</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask></conversion_Mask>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>GMT</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta></row-meta>",
+  "origin": {
+    "modelType": "DATA_VAULT_SOURCE",
+    "modelName": "retail-360",
+    "modelFilename": "${PROJECT_HOME}/models/retail-360.hdv",
+    "modelElementName": "E2E-sales-rep",
+    "hopProject": "retail-example",
+    "createdAt": 1782400000000,
+    "updatedAt": 1782400000000,
+    "updatedBy": null,
+    "lastWorkflow": null,
+    "lastPipeline": null
+  },
+  "physicalTable": {
+    "databaseMetaName": "CRM",
+    "schemaName": "",
+    "tableName": "sales_rep"
+  },
+  "physicalFile": null,
+  "tags": [
+    "DV Source",
+    "FULL_SNAPSHOT",
+    "DATABASE",
+    "RETAIL_E2E"
+  ],
+  "glossaryTerms": [],
+  "customProperties": {},
+  "validationAcknowledgements": [],
+  "qualityRules": [
+    {
+      "ruleSetName": "retail-source-quality",
+      "ruleId": "table-not-empty",
+      "inlineRule": null,
+      "severityOverride": null,
+      "fieldNameOverride": null,
+      "enabled": true
+    }
+  ],
+  "dvSource": {
+    "sourceType": "DATABASE",
+    "sourceIndicator": "",
+    "sourceIndicatorField": "record_source",
+    "group": null,
+    "deliveryType": "FULL_SNAPSHOT",
+    "fields": [
+      {
+        "name": "rep_id",
+        "description": null,
+        "sourceDataType": "Integer",
+        "length": "9",
+        "precision": "0",
+        "hopType": 5,
+        "inputOptions": null,
+        "primaryKeyPosition": 1
+      },
+      {
+        "name": "rep_name",
+        "description": null,
+        "sourceDataType": "String",
+        "length": "50",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "region",
+        "description": null,
+        "sourceDataType": "String",
+        "length": "20",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "load_date",
+        "description": null,
+        "sourceDataType": "Timestamp",
+        "length": "",
+        "precision": "",
+        "hopType": 9,
+        "inputOptions": {
+          "csv": {
+            "format": "yyyy-MM-dd",
+            "decimalSymbol": "",
+            "groupingSymbol": "",
+            "currencySymbol": null
+          }
+        }
+      },
+      {
+        "name": "record_source",
+        "description": null,
+        "sourceDataType": "String",
+        "length": "30",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      }
+    ]
+  }
+}

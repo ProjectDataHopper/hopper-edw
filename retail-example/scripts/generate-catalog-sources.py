@@ -96,6 +96,12 @@ QUALITY_BINDINGS: dict[str, list[dict]] = {
     "E2E-warehouse-product": [
         library_binding("table-not-empty"),
     ],
+    "E2E-sales-rep": [
+        library_binding("table-not-empty"),
+    ],
+    "E2E-order-rep": [
+        library_binding("table-not-empty"),
+    ],
 }
 
 
@@ -228,6 +234,31 @@ SOURCE_DEFINITIONS = {
             ("product_id", "String", "7", "", 2),
             ("stock_qty", "Integer", "9", "0", 5),
             ("reorder_point", "Integer", "9", "0", 5),
+            ("load_date", "Timestamp", "", "", 9),
+            ("record_source", "String", "30", "", 2),
+        ],
+    },
+    "E2E-sales-rep": {
+        "prefix": "sales_rep",
+        "description": "Sales representative master (role-played on orders)",
+        "primary_keys": ["rep_id"],
+        "fields": [
+            ("rep_id", "Integer", "9", "0", 5),
+            ("rep_name", "String", "50", "", 2),
+            ("region", "String", "20", "", 2),
+            ("load_date", "Timestamp", "", "", 9),
+            ("record_source", "String", "30", "", 2),
+        ],
+    },
+    "E2E-order-rep": {
+        "prefix": "order_rep",
+        "description": "Order to primary/secondary sales rep assignment (same hub twice on link)",
+        "primary_keys": ["order_id"],
+        "fields": [
+            # order_id length must match hub_order / E2E-order-header (7), not CSV display width
+            ("order_id", "String", "7", "", 2),
+            ("primary_rep_id", "Integer", "9", "0", 5),
+            ("secondary_rep_id", "Integer", "9", "0", 5),
             ("load_date", "Timestamp", "", "", 9),
             ("record_source", "String", "30", "", 2),
         ],

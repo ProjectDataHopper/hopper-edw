@@ -107,8 +107,12 @@ class DvUpdateWorkflowSupportTest {
 
   @Test
   void masterWorkflowChainsPipelineAndBulkActionsPerShard() throws Exception {
+    // PIPELINE is required for the staging pipeline hop; MYSQL bulk load for the bulk actions.
+    // hop-databases-mysql alone is not enough — hop-action-pipeline must be on the test classpath.
     if (!DvBulkLoadPluginSupport.isActionPluginAvailable(
-        DvBulkLoadCommandSupport.MYSQL_BULK_LOAD_ACTION_ID)) {
+            DvBulkLoadCommandSupport.MYSQL_BULK_LOAD_ACTION_ID)
+        || !DvBulkLoadPluginSupport.isActionPluginAvailable(
+            DvUpdateWorkflowSupport.PIPELINE_ACTION_ID)) {
       return;
     }
 
