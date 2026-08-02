@@ -49,6 +49,10 @@ Open editor tabs are searched from **in-memory** content so unsaved renames stil
 
 Full details: link:search.adoc[Project and metadata search].
 
+image::images/search-dialog-finding-results-in-models.png[Search Everywhere finding a match inside a Data Vault model,align="center"]
+
+image::images/search-panel-model-results.png[Search panel results for a model source field with canvas context,align="center"]
+
 == Visual model editor
 
 When you open a `.hdv` file you get a graphical editor comparable to the pipeline graph in Hop GUI.

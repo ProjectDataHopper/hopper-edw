@@ -18,6 +18,14 @@ Use Hop GUI **Search Everywhere** (global search) or the project search UI. Enum
 
 Fuzzy matching on object **names** is provided by Hop; content matching uses plugin analysers.
 
+**Search Everywhere** (quick popup) groups hits by location and type. Here a source record name matches a Data Vault model component under **Project files**:
+
+image::images/search-dialog-finding-results-in-models.png[Search Everywhere popup — CRM-party-transfer-hrp matches a Data Vault model link source under Project files,align="center"]
+
+The full **Search** panel lists matched text, model type, file path, and property description for each hit (for example a link source field value):
+
+image::images/search-panel-model-results.png[Search panel — CRM-party-transfer-hrp hit on lnk_party_transfer_hrp source in a Data Vault model, with model canvas above,align="center"]
+
 == Model files
 
 These extensions participate when the plugin is installed:

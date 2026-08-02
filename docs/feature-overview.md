@@ -124,6 +124,10 @@ Hop **Search Everywhere** / project search includes hop-data-vault models and me
 
 Open a model hit to open the file (or focus an open tab) and jump to the matching table or source query when the hit carries a component name. Open tabs search **unsaved** in-memory content. Full usage: [search.adoc](search.adoc).
 
+![Search Everywhere — model hit under Project files](images/search-dialog-finding-results-in-models.png)
+
+![Search panel — Data Vault model match with matched text and file details](images/search-panel-model-results.png)
+
 ### Raw Data Vault (`.hdv`)
 
 Visual modeler for hubs, links, and satellites with embedded configuration (target database, hashing, sentinels, column names, pipeline options). Toolbar actions: **Edit model**, **Import sources**, **Check model**, **Generate DDL**, **Debug**, optional **AI Help**.
