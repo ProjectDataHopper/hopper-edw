@@ -1,0 +1,92 @@
+= Update resource definition group action
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+== Description
+
+The **Update resource definition group** workflow action loads every Data Vault (`.hdv`), Business Vault (`.hbv`), and dimensional (`.hdm`) model listed on a **Resource definition group**, in a fixed layer order:
+
+1. All **Data Vault** models (list order on the group)
+2. All **Business Vault** models
+3. All **dimensional** models
+
+Each model runs through the same update path as the dedicated **Data Vault Update** / **Business Vault Update** / **Dimensional Update** actions (model check options, DDL policy, parallel pipeline copies, optional catalog publish).
+
+Optionally the action **manages vault update metrics** for the whole wave: it assigns `DV_WORKFLOW_EXECUTION_ID` at the start (Begin-style) and publishes a workflow load overview at the end (End-style). You do not need separate Begin/End Vault Update actions or hand-wired per-model hops for a standard multi-layer load.
+
+Retail example workflows `run-retail-update.hwf` and `run-retail-update-models.hwf` use this action with group **`retail-sources`**.
+
+== Dialog
+
+image::images/update-resource-definition-group-action-dialog.png[Update resource definition group action dialog — Selection tab with group and layer includes,align="center"]
+
+The dialog is organized into tabs.
+
+=== Selection
+
+[cols="1,3", options="header"]
+|===
+|Option |Description
+
+|Resource definition group
+|Metadata name of the group that lists `.hdv` / `.hbv` / `.hdm` paths (for example `retail-sources`). Required.
+
+|Include Data Vault models
+|Run Data Vault Update for each `.hdv` on the group (first).
+
+|Include Business Vault models
+|Run Business Vault Update for each `.hbv` (after DV).
+
+|Include dimensional models
+|Run Dimensional Update for each `.hdm` (after BV).
+|===
+
+=== Run
+
+Load date, pipeline / workflow run configurations, parallel pipeline copies, and optional **Record source group** filter for Data Vault models (same semantics as Data Vault Update).
+
+=== Operations
+
+Model check (log / abort / detailed type checking), **Update target database structure**, **Fail if DDL is needed**, and DV **Ensure special records**.
+
+=== Data catalog
+
+**Publish target tables to catalog** after each model update, with optional catalog connection override (empty = use the group's default catalog connection).
+
+=== Metrics
+
+When **Manage vault update metrics (Begin/End)** is enabled:
+
+* Assigns `DV_WORKFLOW_EXECUTION_ID` (and related variables) before models run — prefer **Use workflow log channel id as execution id**
+* Uses the shared **Execution metrics profile** (retail: `retail-execution-metrics`)
+* Can publish overview rows to the OPS database, ensure catalog definitions for overview tables, and log a summary to the workflow
+
+=== Reports
+
+Optional Markdown / HTML **workflow load overview** under a report folder (retail default: `${PROJECT_HOME}/work/reports`). Same report style as **End Vault Update**.
+
+== Open referenced models
+
+From the workflow canvas context menu, **Open referenced object** lists every non-empty model path on the configured group (DV, then BV, then DM). Labels show a **project-relative** path for readability (for example `Data Vault: models/retail-360.hdv`) without a `${PROJECT_HOME}/` prefix. Opening still uses the stored path so Hop can resolve project variables.
+
+== Typical chain
+
+```
+Schema gate (Validate resource definitions)
+  → Measure / Evaluate source quality
+  → Update resource definition group (retail-sources)
+  → Advance load control
+```
+
+See link:operations.adoc[Operations] for Docker runners and load overview screenshots, and link:resource-definition-validation.adoc[Resource definition validation] for the schema gate.
+
+== Related documentation
+
+* link:operations.adoc[Operations]
+* link:datavault-update-action.adoc[Data Vault Update action]
+* link:business-vault-update-action.adoc[Business Vault Update action]
+* link:dimensional-update-action.adoc[Dimensional Update action]
+* link:data-catalog.adoc[Data catalog] — resource definition groups
+* link:getting-started-retail.adoc[Getting started — retail]

@@ -34,6 +34,10 @@ import org.apache.hop.datavault.metadata.database.DvDatabaseSourceImportSupport;
 import org.apache.hop.datavault.metadata.file.CsvFileMetadataDiscovery;
 import org.apache.hop.datavault.metadata.file.ParquetFileMetadataDiscovery;
 import org.apache.hop.datavault.metadata.iceberg.IcebergTableMetadataDiscovery;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceModelLoadSupport;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceQuery;
+import org.apache.hop.datavault.metadata.sourcemodel.publish.SourceQueryCatalogPublisher;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
@@ -66,7 +70,45 @@ public final class RecordDefinitionDiscoveryService {
       case CSV -> discoverCsv(physicalRef, variables, metadataProvider);
       case PARQUET -> discoverParquet(physicalRef, variables, metadataProvider);
       case ICEBERG -> discoverIceberg(physicalRef, variables);
+      case COMPOSITE -> discoverComposite(physicalRef, variables, metadataProvider);
     };
+  }
+
+  /**
+   * Rediscover a COMPOSITE feed from its {@code .hsm} source model query projection (same path as
+   * publish).
+   */
+  private static DiscoveryResult discoverComposite(
+      PhysicalSourceRef physicalRef, IVariables variables, IHopMetadataProvider metadataProvider)
+      throws HopException {
+    if (physicalRef == null
+        || Utils.isEmpty(physicalRef.getCompositeSourceModelFilename())
+        || Utils.isEmpty(physicalRef.getCompositeSourceQueryName())) {
+      throw new HopException(
+          BaseMessages.getString(PKG, "RecordDefinitionDiscoveryService.Error.MissingCompositeRef"));
+    }
+    String modelFile =
+        variables != null
+            ? variables.resolve(physicalRef.getCompositeSourceModelFilename())
+            : physicalRef.getCompositeSourceModelFilename();
+    String queryName =
+        variables != null
+            ? variables.resolve(physicalRef.getCompositeSourceQueryName())
+            : physicalRef.getCompositeSourceQueryName();
+    SourceModel model = SourceModelLoadSupport.load(modelFile, variables, metadataProvider);
+    SourceQuery query = model.findQuery(queryName);
+    if (query == null) {
+      throw new HopException(
+          BaseMessages.getString(
+              PKG, "RecordDefinitionDiscoveryService.Error.QueryNotFound", queryName, modelFile));
+    }
+    List<SourceField> fields = SourceQueryCatalogPublisher.buildFieldsFromProjection(model, query);
+    if (fields == null || fields.isEmpty()) {
+      throw new HopException(
+          BaseMessages.getString(
+              PKG, "RecordDefinitionDiscoveryService.Error.EmptyCompositeProjection", queryName));
+    }
+    return new DiscoveryResult(fields, null);
   }
 
   private static DiscoveryResult discoverDatabase(

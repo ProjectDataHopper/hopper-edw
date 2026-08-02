@@ -65,6 +65,8 @@ SOURCE_PREFIXES = {
     "E2E-order-line": "order_line",
     "E2E-warehouse": "warehouse",
     "E2E-warehouse-product": "warehouse_product",
+    "E2E-sales-rep": "sales_rep",
+    "E2E-order-rep": "order_rep",
 }
 
 

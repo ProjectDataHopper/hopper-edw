@@ -2027,9 +2027,7 @@ public class HopGuiDmTableDialog {
         TableItem item = new TableItem(wNaturalKeys.table, SWT.NONE);
         item.setText(1, keyField.getFieldName());
       }
-      wNaturalKeys.removeEmptyRows();
-      wNaturalKeys.setRowNums();
-      wNaturalKeys.optWidth(true);
+      wNaturalKeys.optimizeTableView();
     }
 
     if (bridge && input instanceof DmBridge dmBridge) {
@@ -2044,9 +2042,7 @@ public class HopGuiDmTableDialog {
           item.setText(2, ref.getForeignKeyColumn());
         }
       }
-      wOutriggers.removeEmptyRows();
-      wOutriggers.setRowNums();
-      wOutriggers.optWidth(true);
+      wOutriggers.optimizeTableView();
     }
 
     if (dimensionAlias && input instanceof DmDimensionAlias alias) {
@@ -2087,10 +2083,7 @@ public class HopGuiDmTableDialog {
         TableItem item = new TableItem(wNaturalKeys.table, SWT.NONE);
         item.setText(1, naturalKey.getFieldName());
       }
-      wNaturalKeys.removeEmptyRows();
-      wNaturalKeys.setRowNums();
-      wNaturalKeys.optWidth(true);
-
+      wNaturalKeys.optimizeTableView();
       wAttributes.clearAll();
       for (DmDimensionAttribute attribute : dmDimension.getAttributesOrEmpty()) {
         if (attribute == null || Utils.isEmpty(attribute.getFieldName())) {
@@ -2110,10 +2103,7 @@ public class HopGuiDmTableDialog {
           item.setText(4, attribute.getPreviousFieldName());
         }
       }
-      wAttributes.removeEmptyRows();
-      wAttributes.setRowNums();
-      wAttributes.optWidth(true);
-
+      wAttributes.optimizeTableView();
       wOutriggers.clearAll();
       for (DmDimensionOutriggerRef outrigger : dmDimension.getOutriggersOrEmpty()) {
         if (outrigger == null || Utils.isEmpty(outrigger.getDimensionTableName())) {
@@ -2125,10 +2115,7 @@ public class HopGuiDmTableDialog {
           item.setText(2, outrigger.getForeignKeyColumn());
         }
       }
-      wOutriggers.removeEmptyRows();
-      wOutriggers.setRowNums();
-      wOutriggers.optWidth(true);
-
+      wOutriggers.optimizeTableView();
       refreshFieldComboChoices();
     }
 
@@ -2156,9 +2143,7 @@ public class HopGuiDmTableDialog {
         item.setText(5, role.isPreloadLookupCache() ? "Y" : "N");
         item.setText(6, formatSkipDimensionLookup(role));
       }
-      wDimensionRoles.removeEmptyRows();
-      wDimensionRoles.setRowNums();
-      wDimensionRoles.optWidth(true);
+      wDimensionRoles.optimizeTableView();
       refreshDimensionJoinComboChoices();
 
       if (!factless && wMeasures != null) {
@@ -2171,10 +2156,7 @@ public class HopGuiDmTableDialog {
           item.setText(1, measure.getFieldName());
           item.setText(2, measure.isAdditive() ? "Y" : "N");
         }
-        wMeasures.removeEmptyRows();
-        wMeasures.setRowNums();
-        wMeasures.optWidth(true);
-
+        wMeasures.optimizeTableView();
         refreshMeasureComboChoices();
       }
 
@@ -2188,9 +2170,7 @@ public class HopGuiDmTableDialog {
           TableItem item = new TableItem(wDegenerateDimensions.table, SWT.NONE);
           item.setText(1, degenerateDimension.getFieldName());
         }
-        wDegenerateDimensions.removeEmptyRows();
-        wDegenerateDimensions.setRowNums();
-        wDegenerateDimensions.optWidth(true);
+        wDegenerateDimensions.optimizeTableView();
         refreshDegenerateDimensionComboChoices();
       }
 
@@ -2206,9 +2186,7 @@ public class HopGuiDmTableDialog {
           item.setText(2, Const.NVL(rangeRole.getSourceFieldName(), ""));
           item.setText(3, Const.NVL(rangeRole.getTargetFieldName(), ""));
         }
-        wRangeDimensionRoles.removeEmptyRows();
-        wRangeDimensionRoles.setRowNums();
-        wRangeDimensionRoles.optWidth(true);
+        wRangeDimensionRoles.optimizeTableView();
         refreshRangeDimensionSourceFieldChoices();
       }
 
@@ -2222,9 +2200,7 @@ public class HopGuiDmTableDialog {
           item.setText(1, Const.NVL(junkRole.getJunkDimensionTableName(), ""));
           item.setText(2, Const.NVL(junkRole.getForeignKeyColumn(), ""));
         }
-        wJunkDimensionRoles.removeEmptyRows();
-        wJunkDimensionRoles.setRowNums();
-        wJunkDimensionRoles.optWidth(true);
+        wJunkDimensionRoles.optimizeTableView();
       }
     }
 
@@ -2243,9 +2219,7 @@ public class HopGuiDmTableDialog {
           item.setText(2, Const.NVL(band.getUpperBound(), ""));
           item.setText(3, Const.NVL(band.getLabel(), ""));
         }
-        wRangeBands.removeEmptyRows();
-        wRangeBands.setRowNums();
-        wRangeBands.optWidth(true);
+        wRangeBands.optimizeTableView();
       }
     }
   }
@@ -2768,9 +2742,7 @@ public class HopGuiDmTableDialog {
         item.setText(3, targetFieldName);
         usedTargets.add(targetFieldName);
       }
-      wRangeDimensionRoles.removeEmptyRows();
-      wRangeDimensionRoles.setRowNums();
-      wRangeDimensionRoles.optWidth(true);
+      wRangeDimensionRoles.optimizeTableView();
     } catch (HopException e) {
       showSourceFieldError(e);
     }
@@ -2817,9 +2789,7 @@ public class HopGuiDmTableDialog {
           item.setText(2, suggestedRole.getSourceFieldName());
         }
       }
-      wDimensionRoles.removeEmptyRows();
-      wDimensionRoles.setRowNums();
-      wDimensionRoles.optWidth(true);
+      wDimensionRoles.optimizeTableView();
       refreshDimensionJoinComboChoices();
     } catch (HopException e) {
       showSourceFieldError(e);
@@ -2874,9 +2844,7 @@ public class HopGuiDmTableDialog {
         item.setText(2, defaultSecondColumnValue);
       }
     }
-    tableView.removeEmptyRows();
-    tableView.setRowNums();
-    tableView.optWidth(true);
+    tableView.optimizeTableView();
   }
 
   private static List<String> readTableFieldNames(TableView tableView) {
@@ -3126,9 +3094,7 @@ public class HopGuiDmTableDialog {
       item.setText(2, fieldName);
       item.setText(3, defaultPolicy);
     }
-    wAttributes.removeEmptyRows();
-    wAttributes.setRowNums();
-    wAttributes.optWidth(true);
+    wAttributes.optimizeTableView();
     refreshDerivedLoadStrategyFromUi();
   }
 

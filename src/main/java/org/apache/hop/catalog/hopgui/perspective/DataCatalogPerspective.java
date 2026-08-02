@@ -28,6 +28,7 @@ import lombok.Getter;
 import org.apache.hop.catalog.hopgui.preview.RecordDefinitionPreviewRunner;
 import org.apache.hop.catalog.hopgui.preview.RecordDefinitionPreviewSupport;
 import org.apache.hop.catalog.metadata.DataCatalogMeta;
+import org.apache.hop.catalog.versioning.CatalogVersionGuiSupport;
 import org.apache.hop.catalog.model.RecordDefinition;
 import org.apache.hop.catalog.model.RecordDefinitionKey;
 import org.apache.hop.catalog.model.RecordDefinitionQuery;
@@ -95,6 +96,8 @@ public class DataCatalogPerspective implements IHopPerspective {
       "DataCatalogPerspective-Toolbar-10003-CollapseAll";
   public static final String TOOLBAR_ITEM_PREVIEW = "DataCatalogPerspective-Toolbar-10015-Preview";
   public static final String TOOLBAR_ITEM_DELETE = "DataCatalogPerspective-Toolbar-10010-Delete";
+  public static final String TOOLBAR_ITEM_TAG_VERSION =
+      "DataCatalogPerspective-Toolbar-10020-TagVersion";
   private static final String TREE_KEY = "Data catalog perspective tree";
 
   @Getter private static DataCatalogPerspective instance;
@@ -327,6 +330,21 @@ public class DataCatalogPerspective implements IHopPerspective {
   public void openImportMenu() {
     DataCatalogImportMenu.open(
         hopGui, null, resolveSelectedCatalogConnectionName(), this::refresh);
+  }
+
+  @GuiToolbarElement(
+      root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
+      id = TOOLBAR_ITEM_TAG_VERSION,
+      toolTip = "i18n::DataCatalogPerspective.Toolbar.TagVersion.Tooltip",
+      image = "resource-definition-group.svg")
+  public void tagCatalogVersion() {
+    String catalogConnection = resolveSelectedCatalogConnectionName();
+    if (Utils.isEmpty(catalogConnection)) {
+      return;
+    }
+    if (CatalogVersionGuiSupport.tagVersionFromPerspective(hopGui, catalogConnection) != null) {
+      refresh();
+    }
   }
 
   @GuiToolbarElement(
@@ -866,7 +884,9 @@ public class DataCatalogPerspective implements IHopPerspective {
     boolean anyVersion =
         selectedRecords.stream()
             .anyMatch(n -> n != null && n.getType() == DataCatalogTreeNode.Type.VERSION_RECORD);
+    boolean catalogElementSelected = !Utils.isEmpty(resolveSelectedCatalogConnectionName());
     toolBarWidgets.enableToolbarItem(TOOLBAR_ITEM_DELETE, recordSelected && !anyVersion);
+    toolBarWidgets.enableToolbarItem(TOOLBAR_ITEM_TAG_VERSION, catalogElementSelected);
     toolBarWidgets.enableToolbarItem(
         TOOLBAR_ITEM_PREVIEW,
         selectedRecordDefinition != null

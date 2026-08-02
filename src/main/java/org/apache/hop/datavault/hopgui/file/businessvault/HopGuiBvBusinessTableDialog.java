@@ -485,8 +485,7 @@ public class HopGuiBvBusinessTableDialog {
     if (wSources.table.getItemCount() == 0) {
       new TableItem(wSources.table, SWT.NONE);
     }
-    wSources.setRowNums();
-    wSources.optWidth(true);
+    wSources.optimizeTableView();
   }
 
   private void populateRefs(List<BvSqlRef> refs) {
@@ -508,8 +507,7 @@ public class HopGuiBvBusinessTableDialog {
     if (wRefs.table.getItemCount() == 0) {
       new TableItem(wRefs.table, SWT.NONE);
     }
-    wRefs.setRowNums();
-    wRefs.optWidth(true);
+    wRefs.optimizeTableView();
   }
 
   private void applyTo(BvBusinessTable target) {

@@ -36,6 +36,7 @@ import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.datavault.metadata.DvModelCheckOptions;
 import org.apache.hop.datavault.metadata.DvSatellite;
+import org.apache.hop.datavault.metadata.DvSatelliteParentKeySupport;
 import org.apache.hop.datavault.metadata.IDvTable;
 import org.apache.hop.datavault.metadata.SatelliteAttribute;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
@@ -43,6 +44,7 @@ import org.apache.hop.datavault.hopgui.lineage.LineageTabSupport;
 import org.apache.hop.datavault.lineage.DvModelLineageCollector;
 import org.apache.hop.datavault.lineage.LineageSnapshot;
 import org.apache.hop.datavault.lineage.TableLineage;
+import org.apache.hop.datavault.metadata.DvDataTypeSupport;
 import org.apache.hop.datavault.metadata.SourceField;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.FormDataBuilder;
@@ -99,6 +101,8 @@ public class DvSatelliteDialog {
   private Text wDrivingKey;
   private Combo wDrivingKeySourceField;
   private TableView wAttributes;
+  private TableView wParentKeys;
+  private Label wlParentKeysHint;
 
   private Button wStatusTrackingEnabled;
   private Text wStatusTableName;
@@ -195,6 +199,7 @@ public class DvSatelliteDialog {
 
     customPipelinesTab = new DvCustomPipelinesTabSupport(shell, hopGui, variables, margin);
     addGeneralTab();
+    addParentKeysTab();
     addAttributesTab();
     addStatusTrackingTab();
     customPipelinesTab.addTab(wTabFolder);
@@ -293,6 +298,7 @@ public class DvSatelliteDialog {
     PropsUi.setLook(wHubName);
     wHubName.setLayoutData(
         new FormDataBuilder().left(middle, 0).top(wRecordSource, margin).right().result());
+    wHubName.addListener(SWT.Selection, e -> updateParentKeysTabHint());
 
     Label wlLinkName = new Label(comp, SWT.RIGHT);
     wlLinkName.setText(BaseMessages.getString(PKG, "DvSatelliteDialog.LinkName.Label"));
@@ -308,6 +314,7 @@ public class DvSatelliteDialog {
     PropsUi.setLook(wLinkName);
     wLinkName.setLayoutData(
         new FormDataBuilder().left(middle, 0).top(wHubName, margin).right().result());
+    wLinkName.addListener(SWT.Selection, e -> updateParentKeysTabHint());
 
     Label wlDrivingKey = new Label(comp, SWT.RIGHT);
     wlDrivingKey.setText(BaseMessages.getString(PKG, "DvSatelliteDialog.DrivingKey.Label"));
@@ -339,6 +346,143 @@ public class DvSatelliteDialog {
     PropsUi.setLook(wDrivingKeySourceField);
     wDrivingKeySourceField.setLayoutData(
         new FormDataBuilder().left(middle, 0).top(wDrivingKey, margin).right().result());
+  }
+
+  private void addParentKeysTab() {
+    CTabItem tab = new CTabItem(wTabFolder, SWT.NONE);
+    tab.setFont(GuiResource.getInstance().getFontDefault());
+    tab.setText(BaseMessages.getString(PKG, "DvSatelliteDialog.Tab.ParentKeys.Label"));
+    tab.setToolTipText(BaseMessages.getString(PKG, "DvSatelliteDialog.Tab.ParentKeys.ToolTip"));
+
+    Composite comp = new Composite(wTabFolder, SWT.NONE);
+    PropsUi.setLook(comp);
+    comp.setLayout(new FormLayout());
+    tab.setControl(comp);
+
+    wlParentKeysHint = new Label(comp, SWT.LEFT | SWT.WRAP);
+    PropsUi.setLook(wlParentKeysHint);
+    wlParentKeysHint.setLayoutData(
+        new FormDataBuilder().left().top(0, margin).right().result());
+
+    ColumnInfo[] columns =
+        new ColumnInfo[] {
+          new ColumnInfo(
+              BaseMessages.getString(PKG, "DvSatelliteDialog.ParentKey.SourceField.Column"),
+              ColumnInfo.COLUMN_TYPE_TEXT,
+              false,
+              false),
+        };
+    columns[0].setUsingVariables(true);
+
+    Button wLoadParentKeys = new Button(comp, SWT.PUSH);
+    wLoadParentKeys.setText(
+        BaseMessages.getString(PKG, "DvSatelliteDialog.LoadParentKeys.Button"));
+    wLoadParentKeys.setToolTipText(
+        BaseMessages.getString(PKG, "DvSatelliteDialog.LoadParentKeys.ToolTip"));
+    PropsUi.setLook(wLoadParentKeys);
+    wLoadParentKeys.setLayoutData(new FormDataBuilder().left().bottom().result());
+    wLoadParentKeys.addListener(SWT.Selection, e -> loadParentKeysFromHub());
+
+    int nrRows =
+        input.getParentKeySourceFields() != null
+            ? Math.max(1, input.getParentKeySourceFields().size())
+            : 1;
+    wParentKeys =
+        new TableView(
+            variables,
+            comp,
+            SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI,
+            columns,
+            nrRows,
+            null,
+            PropsUi.getInstance());
+    wParentKeys.setLayoutData(
+        new FormDataBuilder()
+            .left()
+            .top(wlParentKeysHint, margin)
+            .right()
+            .bottom(wLoadParentKeys, -margin)
+            .result());
+
+    updateParentKeysTabHint();
+  }
+
+  private void updateParentKeysTabHint() {
+    if (wlParentKeysHint == null || wlParentKeysHint.isDisposed()) {
+      return;
+    }
+    String linkName = wLinkName != null ? Const.NVL(wLinkName.getText(), "").trim() : "";
+    if (!Utils.isEmpty(linkName)) {
+      wlParentKeysHint.setText(
+          BaseMessages.getString(PKG, "DvSatelliteDialog.ParentKeys.LinkSatellite.Hint"));
+      return;
+    }
+    String hubName = wHubName != null ? Const.NVL(wHubName.getText(), "").trim() : "";
+    String hubKeyOrder = "";
+    if (!Utils.isEmpty(hubName) && model != null) {
+      DvHub hub = model.findHub(hubName, variables, hopGui.getMetadataProvider());
+      if (hub != null) {
+        hubKeyOrder = DvSatelliteParentKeySupport.formatHubKeyOrder(hub, variables);
+      }
+    }
+    if (Utils.isEmpty(hubKeyOrder)) {
+      wlParentKeysHint.setText(
+          BaseMessages.getString(PKG, "DvSatelliteDialog.ParentKeys.HubSatellite.Hint"));
+    } else {
+      wlParentKeysHint.setText(
+          BaseMessages.getString(
+              PKG, "DvSatelliteDialog.ParentKeys.HubSatellite.HintWithOrder", hubKeyOrder));
+    }
+  }
+
+  private void loadParentKeysFromHub() {
+    String hubName = wHubName != null ? Const.NVL(wHubName.getText(), "").trim() : "";
+    String linkName = wLinkName != null ? Const.NVL(wLinkName.getText(), "").trim() : "";
+    if (!Utils.isEmpty(linkName)) {
+      MessageBox mb = new MessageBox(shell, SWT.OK | SWT.ICON_INFORMATION);
+      mb.setMessage(
+          BaseMessages.getString(PKG, "DvSatelliteDialog.LoadParentKeys.LinkSatellite.Message"));
+      mb.setText(BaseMessages.getString(PKG, "DvSatelliteDialog.LoadParentKeys.LinkSatellite.Title"));
+      mb.open();
+      return;
+    }
+    if (Utils.isEmpty(hubName)) {
+      MessageBox mb = new MessageBox(shell, SWT.OK | SWT.ICON_ERROR);
+      mb.setMessage(
+          BaseMessages.getString(PKG, "DvSatelliteDialog.LoadParentKeys.NoHub.Message"));
+      mb.setText(BaseMessages.getString(PKG, "DvSatelliteDialog.LoadParentKeys.NoHub.Title"));
+      mb.open();
+      return;
+    }
+    DvHub hub = model != null ? model.findHub(hubName, variables, hopGui.getMetadataProvider()) : null;
+    if (hub == null) {
+      MessageBox mb = new MessageBox(shell, SWT.OK | SWT.ICON_ERROR);
+      mb.setMessage(
+          BaseMessages.getString(
+              PKG, "DvSatelliteDialog.LoadParentKeys.HubNotFound.Message", hubName));
+      mb.setText(BaseMessages.getString(PKG, "DvSatelliteDialog.LoadParentKeys.HubNotFound.Title"));
+      mb.open();
+      return;
+    }
+    List<String> sourceFields =
+        DvSatelliteParentKeySupport.defaultSourceFieldsFromHub(hub, variables);
+    if (sourceFields.isEmpty()) {
+      MessageBox mb = new MessageBox(shell, SWT.OK | SWT.ICON_INFORMATION);
+      mb.setMessage(
+          BaseMessages.getString(
+              PKG, "DvSatelliteDialog.LoadParentKeys.NoBusinessKeys.Message", hubName));
+      mb.setText(
+          BaseMessages.getString(PKG, "DvSatelliteDialog.LoadParentKeys.NoBusinessKeys.Title"));
+      mb.open();
+      return;
+    }
+    wParentKeys.clearAll(false);
+    for (String sourceField : sourceFields) {
+      TableItem item = new TableItem(wParentKeys.table, SWT.NONE);
+      item.setText(1, Const.NVL(sourceField, ""));
+    }
+    wParentKeys.optimizeTableView();
+    updateParentKeysTabHint();
   }
 
   private void addAttributesTab() {
@@ -564,6 +708,18 @@ public class DvSatelliteDialog {
         item.setText(6, attr.isIncludeInChangeDataCapture() ? "Y" : "N");
       }
     }
+    wAttributes.optimizeTableView();
+
+    if (wParentKeys != null && input.getParentKeySourceFields() != null) {
+      for (int i = 0; i < input.getParentKeySourceFields().size(); i++) {
+        TableItem item = wParentKeys.table.getItem(i);
+        item.setText(1, Const.NVL(input.getParentKeySourceFields().get(i), ""));
+      }
+    }
+    if (wParentKeys != null) {
+      wParentKeys.optimizeTableView();
+    }
+    updateParentKeysTabHint();
 
     wStatusTrackingEnabled.setSelection(input.isStatusTrackingEnabled());
     wStatusTableName.setText(Const.NVL(input.getStatusTableName(), ""));
@@ -636,6 +792,17 @@ public class DvSatelliteDialog {
       attrs.add(attr);
     }
     target.setAttributes(attrs);
+
+    List<String> parentKeySourceFields = new ArrayList<>();
+    if (wParentKeys != null) {
+      for (TableItem item : wParentKeys.getNonEmptyItems()) {
+        String sourceField = item.getText(1);
+        if (!Utils.isEmpty(sourceField)) {
+          parentKeySourceFields.add(sourceField.trim());
+        }
+      }
+    }
+    target.setParentKeySourceFields(parentKeySourceFields);
 
     target.setStatusTrackingEnabled(wStatusTrackingEnabled.getSelection());
     target.setStatusTableName(wStatusTableName.getText());
@@ -836,7 +1003,7 @@ public class DvSatelliteDialog {
       TableItem item = new TableItem(wAttributes.table, SWT.NONE);
       item.setText(1, Const.NVL(sf.getName(), ""));
       item.setText(2, Const.NVL(sf.getDescription(), ""));
-      item.setText(3, Const.NVL(sf.getSourceDataType(), ""));
+      item.setText(3, Const.NVL(DvDataTypeSupport.preferredDataTypeLabel(sf), ""));
       item.setText(4, Const.NVL(sf.getLength(), ""));
       item.setText(5, Const.NVL(sf.getPrecision(), ""));
       item.setText(6, "Y");

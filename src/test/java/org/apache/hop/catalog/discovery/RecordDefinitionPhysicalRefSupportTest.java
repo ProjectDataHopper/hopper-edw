@@ -51,6 +51,43 @@ class RecordDefinitionPhysicalRefSupportTest {
     assertFalse(RecordDefinitionPhysicalRefSupport.supportsRefreshFromSource(definition));
   }
 
+  @Test
+  void supportsRefreshForCompositeDvSourceWithModelQueryPointer() throws Exception {
+    RecordDefinition definition = compositeDefinition();
+
+    assertTrue(RecordDefinitionPhysicalRefSupport.supportsRefreshFromSource(definition));
+    assertEquals(DvSourceType.COMPOSITE, RecordDefinitionPhysicalRefSupport.resolveSourceType(definition));
+    assertEquals(
+        "models/source-tables-crm.hsm",
+        RecordDefinitionPhysicalRefSupport.toPhysicalSourceRef(definition)
+            .getCompositeSourceModelFilename());
+    assertEquals(
+        "all-customer-info",
+        RecordDefinitionPhysicalRefSupport.toPhysicalSourceRef(definition)
+            .getCompositeSourceQueryName());
+  }
+
+  @Test
+  void doesNotSupportRefreshForCompositeWithoutModelQueryPointer() {
+    RecordDefinition definition = compositeDefinition();
+    definition.getDvSource().setCompositeSourceModelFilename(null);
+    definition.getDvSource().setCompositeSourceQueryName(null);
+
+    assertFalse(RecordDefinitionPhysicalRefSupport.supportsRefreshFromSource(definition));
+  }
+
+  private static RecordDefinition compositeDefinition() {
+    RecordDefinition definition = new RecordDefinition();
+    definition.setKey(new RecordDefinitionKey("hop/retail-example/sources", "all-customer-info"));
+    definition.setType(RecordDefinitionType.DV_SOURCE);
+    DvSourceRecord dvSource = new DvSourceRecord();
+    dvSource.setSourceType("COMPOSITE");
+    dvSource.setCompositeSourceModelFilename("models/source-tables-crm.hsm");
+    dvSource.setCompositeSourceQueryName("all-customer-info");
+    definition.setDvSource(dvSource);
+    return definition;
+  }
+
   private static RecordDefinition icebergDefinition() {
     RecordDefinition definition = new RecordDefinition();
     definition.setKey(new RecordDefinitionKey("hop/integration-tests/sources", "CRM-customer-iceberg"));

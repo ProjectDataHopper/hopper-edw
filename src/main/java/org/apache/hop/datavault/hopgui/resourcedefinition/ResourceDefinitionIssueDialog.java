@@ -241,10 +241,7 @@ public final class ResourceDefinitionIssueDialog {
               : new TableItem(wProposals.getTable(), SWT.NONE);
       item.setText(1, Const.NVL(proposal.summary(), ""));
     }
-    wProposals.removeEmptyRows();
-    wProposals.setRowNums();
-    wProposals.optWidth(true);
-
+    wProposals.optimizeTableView();
     if (!proposals.isEmpty()) {
       wProposals.getTable().setSelection(0);
       showSelectedProposalDetails();

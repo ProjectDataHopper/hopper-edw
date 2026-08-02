@@ -21,6 +21,9 @@ package org.apache.hop.datavault.metadata;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.metadata.composite.DvCompositeHubSourcePipelineBuilder;
+import org.apache.hop.datavault.metadata.composite.DvCompositeLinkSourcePipelineBuilder;
+import org.apache.hop.datavault.metadata.composite.DvCompositeSatelliteSourcePipelineBuilder;
 import org.apache.hop.datavault.metadata.file.DvCsvHubSourcePipelineBuilder;
 import org.apache.hop.datavault.metadata.file.DvCsvLinkSourcePipelineBuilder;
 import org.apache.hop.datavault.metadata.file.DvCsvSatelliteSourcePipelineBuilder;
@@ -61,6 +64,9 @@ public final class DvSourcePipelineBuilderFactory {
       case ICEBERG ->
           new DvIcebergHubSourcePipelineBuilder(
               variables, metadataProvider, model, pipelineMeta, recordSource, dvSource, hub, startPoint);
+      case COMPOSITE ->
+          new DvCompositeHubSourcePipelineBuilder(
+              variables, metadataProvider, model, pipelineMeta, recordSource, dvSource, hub, startPoint);
     };
   }
 
@@ -86,6 +92,9 @@ public final class DvSourcePipelineBuilderFactory {
               variables, metadataProvider, model, pipelineMeta, recordSource, dvSource, link, startPoint);
       case ICEBERG ->
           new DvIcebergLinkSourcePipelineBuilder(
+              variables, metadataProvider, model, pipelineMeta, recordSource, dvSource, link, startPoint);
+      case COMPOSITE ->
+          new DvCompositeLinkSourcePipelineBuilder(
               variables, metadataProvider, model, pipelineMeta, recordSource, dvSource, link, startPoint);
     };
   }
@@ -133,6 +142,16 @@ public final class DvSourcePipelineBuilderFactory {
               startPoint);
       case ICEBERG ->
           new DvIcebergSatelliteSourcePipelineBuilder(
+              variables,
+              metadataProvider,
+              model,
+              pipelineMeta,
+              recordSource,
+              dvSource,
+              satellite,
+              startPoint);
+      case COMPOSITE ->
+          new DvCompositeSatelliteSourcePipelineBuilder(
               variables,
               metadataProvider,
               model,

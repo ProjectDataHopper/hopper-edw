@@ -13,31 +13,47 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import org.apache.hop.pipeline.PipelineMeta;
 import org.junit.jupiter.api.Test;
 
 class DvUpdateExecutionSupportTest {
 
   @Test
-  void ordersHubsLinksThenSatellites() {
-    DvSatellite satellite = new DvSatellite("sat_customer");
-    DvLink link = new DvLink("lnk_order");
-    DvHub hub = new DvHub("hub_customer");
+  void freePipelinePhasesRunHubsThenLinksThenSatellites() {
+    DvUpdateExecutionSupport.FreePipelineBuckets buckets =
+        new DvUpdateExecutionSupport.FreePipelineBuckets();
+    PipelineMeta hub = named("hub-a");
+    PipelineMeta link = named("link-b");
+    PipelineMeta sat = named("sat-c");
 
-    List<IDvTable> ordered =
-        DvUpdateExecutionSupport.orderTablesForPipelineExecution(
-            List.of(satellite, link, hub));
+    // Intentionally add in reverse dependency order
+    buckets.add(DvTableType.SATELLITE, List.of(sat));
+    buckets.add(DvTableType.LINK, List.of(link));
+    buckets.add(DvTableType.HUB, List.of(hub));
 
-    assertEquals(3, ordered.size());
-    assertEquals("hub_customer", ordered.get(0).getName());
-    assertEquals("lnk_order", ordered.get(1).getName());
-    assertEquals("sat_customer", ordered.get(2).getName());
+    List<List<PipelineMeta>> phases = buckets.phases();
+    assertEquals(3, phases.size());
+    assertEquals("hub-a", phases.get(0).get(0).getName());
+    assertEquals("link-b", phases.get(1).get(0).getName());
+    assertEquals("sat-c", phases.get(2).get(0).getName());
+
+    List<PipelineMeta> flat = buckets.flattenedInDependencyOrder();
+    assertEquals(List.of("hub-a", "link-b", "sat-c"), flat.stream().map(PipelineMeta::getName).toList());
+    assertTrue(!buckets.isEmpty());
+    assertEquals(3, buckets.size());
+  }
+
+  private static PipelineMeta named(String name) {
+    PipelineMeta p = new PipelineMeta();
+    p.setName(name);
+    return p;
   }
 }

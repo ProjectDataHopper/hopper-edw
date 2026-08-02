@@ -59,6 +59,14 @@ image::images/validate-resource-definitions-action-dialog.png[Validate resource 
 | Failure severity | `FAIL_ON_BLOCKING` (default), `FAIL_ON_WARNINGS`, `WARN_ONLY` |
 | Fail on warnings (legacy) | Older workflows only; prefer **Failure severity** |
 | Include downstream impact | Annotate issues with Source→DV→BV→DM blast radius |
+| Check target databases | Compare model tables to the physical target database (CREATE/ALTER DDL needed) |
+| Target tables are created automatically | When target DB checks are on: missing tables (CREATE that vault update will apply) are **not reported** — they are expected. Layout drift on **existing** tables stays a warning. |
+
+=== Initial load and automatic table creation
+
+On a first vault load, target tables often do not exist yet. Enable **Target tables are created automatically** on the workflow action (Y/N or a Hop variable such as `${EXPECT_AUTOMATIC_TARGET_TABLE_CREATION}`) and the same option in the GUI **Validate sources** dialog so pending CREATE findings are **omitted** from reports and the results dialog (not listed as INFO noise). The gate can keep **fail-on-warnings** without treating expected first-load CREATE as a defect. ALTER / layout drift on tables that already exist is still reported.
+
+On **incremental update** runs, leave the option **off** (N) so missing or altered target tables fail the gate — the warehouse should already exist and drift is real. The retail sample sets `EXPECT_AUTOMATIC_TARGET_TABLE_CREATION=Y` from `run-retail-initial` and `N` from `run-retail-update` into shared `run-retail-update-models.hwf`.
 
 === Compare modes
 
@@ -94,6 +102,25 @@ image::images/resource-definition-group-validation-blocking-issue-found.png[Earl
 == Issue detail and remediation
 
 Full issue text and blast radius stay in the **details pane** of the results dialog. Use **Remediation proposals…** for fixes.
+
+=== How to read a finding (axis first)
+
+Each issue message is structured so you can see **what was checked** before the severity label:
+
+* **Axis** — which check produced the finding (live sources, working catalog vs baseline version, target database layout, …)
+* **Compared** — expected vs actual sides for that axis
+* **Found** — factual result (for example “source missing from baseline v1.0.0”, or “2 DDL statements required”)
+* **Why it matters** — what to do next for *this* axis
+
+The status banner also restates **compare mode** and **baseline** (current working catalog **or** a version tag such as `v1.0.0`). Selecting “current catalog” as baseline does **not** use a version tag; warnings can still appear from other axes (live discovery, target DB, models).
+
+| Kind | Typical meaning |
+|------|-----------------|
+| `BASELINE_CONTRACT_MISSING` | Source is used by models and in the working catalog, but **not** in the frozen baseline version |
+| `WORKING_CONTRACT_MISSING` | Models reference a source that is **not** in the working catalog yet (publish/generate first) |
+| `SOURCE_UNAVAILABLE` | **Live** discovery failed or the source is not refreshable (connection, path, COMPOSITE model) |
+| `TARGET_DDL_REQUIRED` | **EDW/target** table lags the model (often normal **before the first vault update** creates tables). Not a source-catalog field mismatch |
+| `FIELD_*` / `MODEL_ATTRIBUTE_NARROWER` | Field contract or model attribute length/type drift |
 
 === Catalog is never rewritten by length remediation
 

@@ -29,12 +29,14 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.plugin.GuiElementType;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.GuiWidgetElement;
+import org.apache.hop.core.logging.ILogChannel;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.datavault.architecture.ArchitectureExportService;
 import org.apache.hop.datavault.architecture.ArchitectureExportService.ExportResult;
 import org.apache.hop.datavault.architecture.ArchitectureViewType;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.workflow.action.ActionBase;
 import org.apache.hop.workflow.action.IAction;
 
@@ -135,14 +137,18 @@ public class ActionExportArchitecture extends ActionBase implements Cloneable, I
     super(name, "");
   }
 
-  /** Combo values for {@link #viewType}. */
-  public String[] getViewTypeCodes() {
-    return new String[] {
-      ArchitectureViewType.SOLUTION.name(),
-      ArchitectureViewType.DATA.name(),
-      ArchitectureViewType.MODEL.name(),
-      ArchitectureViewType.END_TO_END.name()
-    };
+  /**
+   * Combo values for {@link #viewType}.
+   *
+   * <p>Hop GUI {@code comboValuesMethod} contract: {@code (ILogChannel, IHopMetadataProvider) ->
+   * List&lt;String&gt;}.
+   */
+  public List<String> getViewTypeCodes(ILogChannel log, IHopMetadataProvider metadataProvider) {
+    return Arrays.asList(
+        ArchitectureViewType.SOLUTION.name(),
+        ArchitectureViewType.DATA.name(),
+        ArchitectureViewType.MODEL.name(),
+        ArchitectureViewType.END_TO_END.name());
   }
 
   @Override

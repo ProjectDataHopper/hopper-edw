@@ -1611,9 +1611,7 @@ public class RecordDefinitionDetailsPanel {
         item.setText(COL_GROUPING, "");
       }
     }
-    wFields.removeEmptyRows();
-    wFields.setRowNums();
-    wFields.optWidth(true);
+    wFields.optimizeTableView();
     if (csvSource) {
       ensureCsvFormatColumnsVisible();
     }
@@ -1736,9 +1734,7 @@ public class RecordDefinitionDetailsPanel {
       }
       item.setText(1, Const.NVL(items.get(i), ""));
     }
-    tableView.removeEmptyRows();
-    tableView.setRowNums();
-    tableView.optWidth(true);
+    tableView.optimizeTableView();
   }
 
   private void populateCustomPropertiesTable(Map<String, CatalogCustomProperty> customProperties) {
@@ -1763,9 +1759,7 @@ public class RecordDefinitionDetailsPanel {
           2, property != null && property.getType() != null ? property.getType().name() : "");
       item.setText(3, property != null ? Const.NVL(property.getValue(), "") : "");
     }
-    wCustomProperties.removeEmptyRows();
-    wCustomProperties.setRowNums();
-    wCustomProperties.optWidth(true);
+    wCustomProperties.optimizeTableView();
   }
 
   private TableView createQualityRulesTable(Composite tabComp) {
@@ -1921,9 +1915,7 @@ public class RecordDefinitionDetailsPanel {
       item.setText(5, binding.isEnabled() ? "Y" : "N");
       row++;
     }
-    wQualityRules.removeEmptyRows();
-    wQualityRules.setRowNums();
-    wQualityRules.optWidth(true);
+    wQualityRules.optimizeTableView();
   }
 
   private void updateQualityRules() {

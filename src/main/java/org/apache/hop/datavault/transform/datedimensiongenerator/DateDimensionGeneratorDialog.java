@@ -195,8 +195,7 @@ public class DateDimensionGeneratorDialog extends BaseTransformDialog {
       item.setText(6, Const.NVL(field.getLocale(), ""));
     }
 
-    wFields.setRowNums();
-    wFields.optWidth(true);
+    wFields.optimizeTableView();
   }
 
   private void loadDefaults() {
@@ -220,8 +219,7 @@ public class DateDimensionGeneratorDialog extends BaseTransformDialog {
       item.setText(5, Const.NVL(field.getFormatMask(), ""));
       item.setText(6, Const.NVL(field.getLocale(), ""));
     }
-    wFields.setRowNums();
-    wFields.optWidth(true);
+    wFields.optimizeTableView();
   }
 
   private void cancel() {

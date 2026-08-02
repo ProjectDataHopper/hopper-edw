@@ -44,6 +44,9 @@ import org.apache.hop.datavault.metadata.dimensional.DmFactDimensionRole;
 import org.apache.hop.datavault.metadata.dimensional.DmTableBase;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.datavault.metadata.dimensional.IDmTable;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceRelationship;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceTable;
 import org.apache.hop.datavault.executionmap.ExecutionMapLayoutOptions;
 import org.apache.hop.datavault.executionmap.ExecutionMapMetrics;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapDocument;
@@ -590,6 +593,47 @@ public final class ElkGraphLayout {
             }
           }
         }
+      }
+    }
+
+    return new ElkGraphLayout(name, nodes, edges);
+  }
+
+  /** Layout graph for a source system model ({@code .hsm}): tables linked by FK relationships. */
+  public static ElkGraphLayout fromSourceModel(SourceModel sourceModel) {
+    List<ElkLayoutNode> nodes = new ArrayList<>();
+    List<ElkLayoutEdge> edges = new ArrayList<>();
+    ElkLayout defaults = ElkLayout.createDefault();
+    Set<String> edgeKeys = new HashSet<>();
+    String name =
+        sourceModel != null && !Utils.isEmpty(sourceModel.getName())
+            ? sourceModel.getName()
+            : "source-model";
+
+    if (sourceModel != null) {
+      for (SourceTable table : sourceModel.getTables()) {
+        if (table == null || Utils.isEmpty(table.getName())) {
+          continue;
+        }
+        nodes.add(
+            new ElkLayoutNode(
+                table.getName(),
+                table.getName(),
+                defaults.estimateNodeWidth(table.getName()),
+                VAULT_NODE_HEIGHT,
+                table));
+      }
+      for (SourceRelationship relationship : sourceModel.getRelationships()) {
+        if (relationship == null) {
+          continue;
+        }
+        String child = relationship.getChildTableName();
+        String parent = relationship.getParentTableName();
+        if (Utils.isEmpty(child) || Utils.isEmpty(parent)) {
+          continue;
+        }
+        // Parent first in layout flow (lookup → child), then child depends on parent.
+        addEdgeOnce(edges, edgeKeys, parent, child);
       }
     }
 

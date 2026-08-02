@@ -17,13 +17,18 @@
 
 package org.apache.hop.catalog.versioning;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import org.apache.hop.catalog.metadata.ResourceDefinitionGroupMeta;
+import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.metadata.api.IHopMetadataSerializer;
+import org.apache.hop.ui.core.dialog.EnterSelectionDialog;
 import org.apache.hop.ui.core.dialog.EnterStringDialog;
 import org.apache.hop.ui.core.dialog.EnterTextDialog;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
@@ -39,7 +44,70 @@ public final class CatalogVersionGuiSupport {
 
   private CatalogVersionGuiSupport() {}
 
-  public static CatalogVersionEntry tagVersionFromGroup(HopGui hopGui, ResourceDefinitionGroupMeta group) {
+  /**
+   * Tag a catalog version from a known resource definition group (group editor). Uses the group's
+   * default catalog connection.
+   */
+  public static CatalogVersionEntry tagVersionFromGroup(
+      HopGui hopGui, ResourceDefinitionGroupMeta group) {
+    return tagVersionWithPrompts(hopGui, group, null);
+  }
+
+  /**
+   * Tag a catalog version from the Data Catalog perspective: pick a resource definition group
+   * (required for source scope), then tag + description. When {@code preferredCatalogConnection}
+   * is set (tree selection), that FILE catalog is used as the version storage root.
+   */
+  public static CatalogVersionEntry tagVersionFromPerspective(
+      HopGui hopGui, String preferredCatalogConnection) {
+    if (hopGui == null) {
+      return null;
+    }
+    Shell shell = hopGui.getShell();
+    try {
+      IHopMetadataProvider metadataProvider = hopGui.getMetadataProvider();
+      IVariables variables = hopGui.getVariables();
+      List<String> groupNames =
+          listGroupNamesPreferringConnection(
+              preferredCatalogConnection, variables, metadataProvider);
+      if (groupNames.isEmpty()) {
+        MessageBox box = new MessageBox(shell, SWT.OK | SWT.ICON_WARNING);
+        box.setText(BaseMessages.getString(PKG, "CatalogVersionGuiSupport.PickGroup.Empty.Title"));
+        box.setMessage(
+            BaseMessages.getString(PKG, "CatalogVersionGuiSupport.PickGroup.Empty.Message"));
+        box.open();
+        return null;
+      }
+
+      EnterSelectionDialog pickGroup =
+          new EnterSelectionDialog(
+              shell,
+              groupNames.toArray(new String[0]),
+              BaseMessages.getString(PKG, "CatalogVersionGuiSupport.PickGroup.Title"),
+              BaseMessages.getString(PKG, "CatalogVersionGuiSupport.PickGroup.Message"));
+      String selectedName = pickGroup.open(0);
+      if (Utils.isEmpty(selectedName)) {
+        return null;
+      }
+
+      ResourceDefinitionGroupMeta group =
+          metadataProvider
+              .getSerializer(ResourceDefinitionGroupMeta.class)
+              .load(selectedName.trim());
+      if (group == null) {
+        throw new HopException(
+            BaseMessages.getString(
+                PKG, "CatalogVersionGuiSupport.PickGroup.NotFound", selectedName.trim()));
+      }
+      return tagVersionWithPrompts(hopGui, group, preferredCatalogConnection);
+    } catch (Exception e) {
+      showError(shell, e);
+      return null;
+    }
+  }
+
+  private static CatalogVersionEntry tagVersionWithPrompts(
+      HopGui hopGui, ResourceDefinitionGroupMeta group, String catalogConnectionOverride) {
     if (hopGui == null || group == null) {
       return null;
     }
@@ -71,6 +139,7 @@ public final class CatalogVersionGuiSupport {
       String createdBy = System.getProperty("user.name", "");
       CatalogVersionEntry entry =
           CatalogVersionService.createFromGroup(
+              catalogConnectionOverride,
               group,
               tag.trim(),
               description.trim(),
@@ -152,6 +221,57 @@ public final class CatalogVersionGuiSupport {
       dialog.open();
     } catch (Exception e) {
       showError(shell, e);
+    }
+  }
+
+  /**
+   * Lists resource definition group names, putting groups whose catalog connection matches {@code
+   * preferredCatalogConnection} first (case-insensitive). Package-visible for unit tests.
+   */
+  static List<String> listGroupNamesPreferringConnection(
+      String preferredCatalogConnection,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider)
+      throws HopException {
+    if (metadataProvider == null) {
+      return List.of();
+    }
+    IHopMetadataSerializer<ResourceDefinitionGroupMeta> serializer =
+        metadataProvider.getSerializer(ResourceDefinitionGroupMeta.class);
+    List<String> names = new ArrayList<>(serializer.listObjectNames());
+    if (names.isEmpty()) {
+      return names;
+    }
+    String preferred =
+        !Utils.isEmpty(preferredCatalogConnection)
+            ? preferredCatalogConnection.trim()
+            : null;
+    names.sort(
+        Comparator.comparing((String name) -> !groupMatchesConnection(name, preferred, variables, serializer))
+            .thenComparing(String.CASE_INSENSITIVE_ORDER));
+    return names;
+  }
+
+  private static boolean groupMatchesConnection(
+      String groupName,
+      String preferredCatalogConnection,
+      IVariables variables,
+      IHopMetadataSerializer<ResourceDefinitionGroupMeta> serializer) {
+    if (Utils.isEmpty(preferredCatalogConnection) || Utils.isEmpty(groupName)) {
+      return false;
+    }
+    try {
+      ResourceDefinitionGroupMeta group = serializer.load(groupName);
+      if (group == null || Utils.isEmpty(group.getDataCatalogConnection())) {
+        return false;
+      }
+      String connection =
+          variables != null
+              ? variables.resolve(group.getDataCatalogConnection())
+              : group.getDataCatalogConnection();
+      return preferredCatalogConnection.equalsIgnoreCase(Const.trim(connection));
+    } catch (Exception e) {
+      return false;
     }
   }
 

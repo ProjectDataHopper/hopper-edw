@@ -7,16 +7,16 @@
   "name": "retail-sources",
   "previewRowLimit": 1000,
   "dataCatalogConnection": "local-catalog",
-  "description": "",
+  "description": "Retail DV/BV/DM models. List order within each layer is update order for the Update resource definition group action.",
   "business_vault_model": [
     "${PROJECT_HOME}/models/retail-360.hbv",
-    "${PROJECT_HOME}/models/retail-customer-phone.hbv",
-    "${PROJECT_HOME}/models/retail-sql.hbv"
+    "${PROJECT_HOME}/models/retail-sql.hbv",
+    "${PROJECT_HOME}/models/retail-customer-phone.hbv"
   ],
   "dimensional_model": [
     "${PROJECT_HOME}/models/retail-conformed-dims.hdm",
-    "${PROJECT_HOME}/models/retail-f-inventory.hdm",
+    "${PROJECT_HOME}/models/retail-f-orders.hdm",
     "${PROJECT_HOME}/models/retail-f-order-lines.hdm",
-    "${PROJECT_HOME}/models/retail-f-orders.hdm"
+    "${PROJECT_HOME}/models/retail-f-inventory.hdm"
   ]
 }

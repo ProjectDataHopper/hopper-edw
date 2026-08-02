@@ -296,11 +296,11 @@ public final class DvDatabaseSourceImportSupport {
     mb.open();
   }
 
-  static boolean shouldPreselectAllTables(int tableCount) {
+  public static boolean shouldPreselectAllTables(int tableCount) {
     return tableCount > 0 && tableCount <= LARGE_SCHEMA_TABLE_THRESHOLD;
   }
 
-  static List<Integer> defaultPreselectedTableIndexes(int tableCount) {
+  public static List<Integer> defaultPreselectedTableIndexes(int tableCount) {
     if (!shouldPreselectAllTables(tableCount)) {
       return List.of();
     }
@@ -311,7 +311,7 @@ public final class DvDatabaseSourceImportSupport {
     return indexes;
   }
 
-  static String[] sortedStrippedTableNames(String[] tableNames) {
+  public static String[] sortedStrippedTableNames(String[] tableNames) {
     if (tableNames == null || tableNames.length == 0) {
       return new String[0];
     }
@@ -323,7 +323,7 @@ public final class DvDatabaseSourceImportSupport {
     return sorted;
   }
 
-  static Set<String> tableNamesForSelectionIndexes(String[] choices, int[] selectionIndexes) {
+  public static Set<String> tableNamesForSelectionIndexes(String[] choices, int[] selectionIndexes) {
     Set<String> pickedTables = new LinkedHashSet<>();
     if (choices == null || selectionIndexes == null) {
       return pickedTables;

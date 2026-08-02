@@ -326,10 +326,7 @@ public class HubSourceKeyFieldDialog {
         item.setText(2, Const.NVL(bs.getSourceFieldName(), ""));
       }
     }
-    wBusinessKeySources.removeEmptyRows();
-    wBusinessKeySources.setRowNums();
-    wBusinessKeySources.optWidth(true);
-
+    wBusinessKeySources.optimizeTableView();
     // Driving key sources
     wDrivingKeySources.clearAll();
     if (input.getDrivingKeySources() != null) {
@@ -339,9 +336,7 @@ public class HubSourceKeyFieldDialog {
         item.setText(2, Const.NVL(ds.getSourceField(), ""));
       }
     }
-    wDrivingKeySources.removeEmptyRows();
-    wDrivingKeySources.setRowNums();
-    wDrivingKeySources.optWidth(true);
+    wDrivingKeySources.optimizeTableView();
   }
 
   private void ok() {

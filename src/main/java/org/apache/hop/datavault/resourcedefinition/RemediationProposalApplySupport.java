@@ -54,6 +54,7 @@ import org.apache.hop.datavault.catalog.DvSourceFieldSupport;
 import org.apache.hop.datavault.hopgui.resourcedefinition.ResourceDefinitionModelNavigationSupport;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DataVaultConfiguration;
+import org.apache.hop.datavault.metadata.DvDataTypeSupport;
 import org.apache.hop.datavault.metadata.DvHub;
 import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.DvSpecialRecordSupport;
@@ -1266,8 +1267,9 @@ public final class RemediationProposalApplySupport {
     SourceField discoveredField = resolveDiscoveredField(context, fieldName);
     SatelliteAttribute attribute = new SatelliteAttribute(fieldName);
     if (discoveredField != null) {
-      if (!Utils.isEmpty(discoveredField.getSourceDataType())) {
-        attribute.setDataType(discoveredField.getSourceDataType());
+      String dataTypeLabel = DvDataTypeSupport.preferredDataTypeLabel(discoveredField);
+      if (!Utils.isEmpty(dataTypeLabel)) {
+        attribute.setDataType(dataTypeLabel);
       }
       if (!Utils.isEmpty(discoveredField.getLength())) {
         attribute.setLength(discoveredField.getLength());

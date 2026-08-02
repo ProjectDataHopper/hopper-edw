@@ -34,6 +34,7 @@ import org.apache.hop.datavault.metadata.SourceFieldPrimaryKeySupport;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DataVaultSource;
 import org.apache.hop.core.ICheckResult;
+import org.apache.hop.datavault.metadata.DvDataTypeSupport;
 import org.apache.hop.datavault.metadata.DvHub;
 import org.apache.hop.datavault.metadata.DvIntegrationMode;
 import org.apache.hop.datavault.metadata.DvModelCheckOptions;
@@ -461,6 +462,7 @@ public class DvHubDialog {
       item.setText(5, Const.NVL(bk.getSourceFieldName(), ""));
       item.setText(6, Const.NVL(bk.getRecordSourceName(), ""));
     }
+    wBusinessKeys.optimizeTableView();
 
     // The record sources
     //
@@ -589,9 +591,7 @@ public class DvHubDialog {
     }
 
     if (changed) {
-      wBusinessKeys.removeEmptyRows();
-      wBusinessKeys.setRowNums();
-      wBusinessKeys.optWidth(true);
+      wBusinessKeys.optimizeTableView();
     }
   }
 
@@ -636,7 +636,7 @@ public class DvHubDialog {
         TableItem item = new TableItem(wBusinessKeys.table, SWT.NONE);
         item.setText(1, Const.NVL(sf.getName(), ""));
         item.setText(2, Const.NVL(sf.getDescription(), ""));
-        item.setText(3, Const.NVL(sf.getSourceDataType(), ""));
+        item.setText(3, Const.NVL(DvDataTypeSupport.preferredDataTypeLabel(sf), ""));
         item.setText(4, Const.NVL(sf.getLength(), ""));
         item.setText(5, Const.NVL(sf.getName(), ""));
         item.setText(6, Const.NVL(sourceName, ""));
@@ -684,7 +684,7 @@ public class DvHubDialog {
       TableItem item = new TableItem(wBusinessKeys.table, SWT.NONE);
       item.setText(1, Const.NVL(sf.getName(), ""));
       item.setText(2, Const.NVL(sf.getDescription(), ""));
-      item.setText(3, Const.NVL(sf.getSourceDataType(), ""));
+      item.setText(3, Const.NVL(DvDataTypeSupport.preferredDataTypeLabel(sf), ""));
       item.setText(4, Const.NVL(sf.getLength(), ""));
       item.setText(5, Const.NVL(sf.getName(), ""));
       item.setText(6, Const.NVL(sourceName, ""));

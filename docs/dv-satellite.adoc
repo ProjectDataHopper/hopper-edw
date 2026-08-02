@@ -12,8 +12,9 @@ In Data Vault 2.0, satellites are insert-only. When any of the tracked attribute
 
 When data is loaded for a satellite, the generated pipeline:
 
-* Reads the parent business keys (so it can compute the parent hash key), the satellite attributes, and the record source indicator from your source.
-* Calculates the parent hash key.
+* Reads the parent business keys from *this satellite's* record source (so it can compute the parent hash key), plus the satellite attributes and the record source indicator.
+* Calculates the parent hash key using the same logical business keys defined on the parent hub.
+* Does **not** require the satellite feed to be listed as a hub record source. Hub and satellite loads are independent (Data Vault 2.0): only the parent identity columns must be present on the satellite feed (by default with the same names as the hub business keys).
 * Compares the incoming data against the existing rows in the satellite table.
 * Detects real changes by comparing the actual attribute values (not just the presence of the parent key).
 * Inserts only the rows that are new for that parent key or that contain different attribute values.
@@ -44,6 +45,9 @@ Because the comparison looks at the attribute values themselves, you do not get 
 
 |Parent link
 |Select the Link this satellite describes (for satellites that hold relationship-level attributes). Choose either a parent link or a parent hub, not both.
+
+|Parent key source fields (tab)
+|For **hub satellites** only: optional ordered list of columns on *this satellite's* record source that supply the parent hub business key values. Order is the hub business key order (shown in the tab). Leave empty to use the hub business key names as source column names. This is not a re-definition of hub keys — only where the values sit on this one feed. Link satellites configure parent keys on the link's source mappings instead.
 
 |Attributes
 |The list of descriptive columns whose changes you want to track.
@@ -111,3 +115,13 @@ The same attribute list that is used for change detection is also used for the t
 == Satellites on multi-source hubs
 
 If your hub definition lists several record sources, you will normally also create multiple satellites (one per source) that all point to the same parent hub. Each satellite only needs to reference the Data Vault Source that is relevant to it. This pattern gives you clean per-source history while keeping the hub itself as a single unified business key table.
+
+You can also attach a satellite to a feed that is **not** used to load the hub (for example a multi-table source query that joins hub keys with descriptive attributes). The hub still loads from its own sources; the satellite only needs the parent business key columns on its feed so the same parent hash key can be computed.
+
+== Parent business keys on the satellite feed
+
+* The hub defines which business keys exist and in which order the parent hash is calculated.
+* By default the satellite feed must expose columns with those same names (for example `customer_id`).
+* If names differ, list the source column names on the satellite **Parent key source fields** tab in hub key order (for example one row `cust_no` for hub key `customer_id`). Leave the list empty for the default.
+* Do **not** put satellite-only source column names on the hub Keys tab — that tab is only for sources that **load the hub**.
+* Independent satellite feeds (composite queries, other models that only reference the hub) are expected; the sat feed need not be a hub record source.

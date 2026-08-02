@@ -19,7 +19,7 @@ limitations under the License.
 
 Apache Hop plugin for **model-driven Data Vault 2.0**, **Business Vault**, and **dimensional** loading. Version **0.6.0-SNAPSHOT** (latest release **0.5.0**) requires **Apache Hop 2.19.0** (or current **2.19.0-SNAPSHOT** until GA) and **Java 21**.
 
-**Model once. Generate loads and consumption layers.** The visual models (`.hdv`, `.hbv`, `.hdm`) are the contract between architects, modelers, and operations.
+**Model once. Generate loads and consumption layers.** The visual models (`.hsm`, `.hdv`, `.hbv`, `.hdm`) are the contract between architects, modelers, and operations.
 
 For a slide-style executive summary, see [presentations/hop-data-vault-overview.md](presentations/hop-data-vault-overview.md). Interactive HTML presentation (architecture diagram, detail pages, roadmap): [presentations/hop-data-vault-features.html](presentations/hop-data-vault-features.html). For DV concepts and canvas usage, see [datavault-plugin.adoc](datavault-plugin.adoc).
 
@@ -32,6 +32,7 @@ For a slide-style executive summary, see [presentations/hop-data-vault-overview.
 | Feature | Status | Documentation |
 |---------|--------|---------------|
 | Data Catalog + `DV_SOURCE` record definitions | Available | [data-catalog.adoc](data-catalog.adoc), [datavault-source.adoc](datavault-source.adoc) |
+| Source modeler (`.hsm`) + multi-table queries / composite feeds | Available | [source-modeler-overview.adoc](source-modeler-overview.adoc) |
 | Resource definition validation (issues, proposals, acknowledgements) | Available | [resource-definition-validation.adoc](resource-definition-validation.adoc) |
 | Catalog version tags + schema impact simulation (CI/CD gate, blast radius) | Available | [resource-definition-validation.adoc](resource-definition-validation.adoc), [data-catalog.adoc](data-catalog.adoc) |
 | Data quality measure + quality gate (content rules, persist, alerts) | Available (Phase 2) | [data-quality.adoc](data-quality.adoc) |
@@ -41,6 +42,7 @@ For a slide-style executive summary, see [presentations/hop-data-vault-overview.
 | Architecture export (Draw.io) | Available (SOLUTION + DATA inventory + aggregated DV/BV/DM ELK) | [architecture-export.adoc](architecture-export.adoc) |
 | Model validation (Check model, type checking) | Available | [datavault-update-action.adoc](datavault-update-action.adoc) |
 | Data Vault Update action | Available | [datavault-update-action.adoc](datavault-update-action.adoc) |
+| Update resource definition group action | Available | [update-resource-definition-group-action.adoc](update-resource-definition-group-action.adoc) |
 | Integration modes (managed / external / custom) | Available | [dv-integration-modes.adoc](dv-integration-modes.adoc) |
 | Business Vault modeler (`.hbv`) | Available | [business-vault-overview.adoc](business-vault-overview.adoc) |
 | BV SCD2 (single + multi-satellite merge) | Available | [business-vault-scd2.adoc](business-vault-scd2.adoc) |
@@ -68,7 +70,11 @@ For a slide-style executive summary, see [presentations/hop-data-vault-overview.
 ## Architecture (logical)
 
 ```
-Sources (Data Catalog / CRM)
+Source model (.hsm)  ──►  multi-table queries
+        │                       │
+        │         catalog DV_SOURCE (single-table or COMPOSITE)
+        ▼                       │
+Sources (Data Catalog / CRM) ◄──┘
         │
         ▼
   Raw Data Vault (.hdv)
@@ -93,9 +99,15 @@ Sources (Data Catalog / CRM)
 
 ### Data Catalog and sources
 
-Record definitions of type **`DV_SOURCE`** describe logical feeds: record-source indicator, optional **group** for partial loads, and physical layout (database table today). Definitions live under namespace `hop/{project}/sources` in the project's FILE catalog storage directory (retail: `work/edw-catalog/`) and open in the **Data Catalog** perspective.
+Record definitions of type **`DV_SOURCE`** describe logical feeds: record-source indicator, optional **group** for partial loads, and physical layout (database table, file types, or **composite** multi-table query). Definitions live under namespace `hop/{project}/sources` in the project's FILE catalog storage directory (retail: `work/edw-catalog/`) and open in the **Data Catalog** perspective.
 
 Hubs, links, and satellites reference source **names**, not raw connection details — one stable vocabulary from catalog through models to generated pipelines.
+
+### Source modeler (`.hsm`)
+
+Visual **source-system** modeler: import tables with PK/FK, draw relationships, and compose **source queries** (joins + projections). Publish a query as a catalog **COMPOSITE** feed; Data Vault loads generate single-connection SQL or a Merge Join pipeline. Retail sample: `retail-example/models/source-tables-crm.hsm`. See [source-modeler-overview.adoc](source-modeler-overview.adoc).
+
+![Source modeler — retail CRM tables with All customer info query SQL](images/source-modeler-retail-example-with-query-dialog-generated-sql.png)
 
 ### Raw Data Vault (`.hdv`)
 
@@ -148,7 +160,11 @@ The **Performance tuning** scenario can include load-run metrics and propose mod
 
 ### Operations
 
-Docker-based runners (`scripts/run-hop.sh`, `run-postgres.sh`), parallel pipeline orchestration, **record source group** partial loads, catalog-backed load-run metrics, workflow load overview reports (Begin/End Vault Update), and per-table duration bars on model graphs. See [operations.adoc](operations.adoc) and [performance-tuning.md](performance-tuning.md).
+Docker-based runners (`scripts/run-hop.sh`, `run-postgres.sh`), parallel pipeline orchestration, **record source group** partial loads, catalog-backed load-run metrics, workflow load overview reports, and per-table duration bars on model graphs.
+
+**Preferred batch shape:** **Update resource definition group** runs every DV/BV/DM model listed on a resource definition group (layer order DV → BV → DM) and can manage Begin/End-style vault update metrics in one action. See [update-resource-definition-group-action.adoc](update-resource-definition-group-action.adoc), [operations.adoc](operations.adoc), and [performance-tuning.md](performance-tuning.md).
+
+![Update resource definition group action dialog](images/update-resource-definition-group-action-dialog.png)
 
 ![Workflow load overview — per-model summary](images/workflow-load-overview-summary-models.png)
 

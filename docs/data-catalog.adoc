@@ -109,13 +109,23 @@ The working-tree catalog **list** API ignores `catalog-versions/` so snapshots n
 
 === Tagging from Hop GUI
 
+A catalog sources version freezes the **source contracts used by a resource definition group’s models**, not every file in the catalog.
+
+**From a Resource definition group**
+
 . Open metadata type **Resource definition group**.
 . Select the group that references your DV/BV/DM models (for example `retail-sources`).
 . Set the **Default catalog connection** (FILE catalog, for example `local-catalog`).
 . Use **Tag catalog version** to snapshot all source definitions currently referenced by the group's models.
 . Use **List catalog versions** to review existing tags, timestamps, and record counts.
 . Use **Validate sources** for an interactive schema check: a design-time options dialog asks for the baseline (working catalog or version tag) and which axes to check (live sources, version drift, target models, target databases). Length remediation expands models and DV/BV/DM DDL from the catalog without rewriting catalog records.
-. In the **Data Catalog perspective**, expand **Versions** under a FILE catalog connection to browse tags and open frozen record definitions **read-only** (snapshots are never edited from the UI).
+
+**From the Data Catalog perspective**
+
+. Select any element under a FILE catalog connection (for example `local-catalog`).
+. Click the toolbar **Tag version** action (enabled only when a catalog is selected).
+. Choose the **resource definition group** that defines source scope, then enter the tag and optional description.
+. Expand **Catalog sources versions** under that connection to browse tags and open frozen record definitions **read-only** (snapshots are never edited from the UI).
 
 image::images/resource-definition-group-editor-with-version-mgt-buttons.png[Resource definition group editor showing List catalog versions, Tag catalog version, and Validate sources,align="center"]
 

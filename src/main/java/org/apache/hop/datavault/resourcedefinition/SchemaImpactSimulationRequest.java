@@ -29,6 +29,8 @@ package org.apache.hop.datavault.resourcedefinition;
  * @param checkTargetModels compare baseline contract field metadata to mapped model attributes
  * @param checkTargetDatabases detect target EDW tables that need DDL relative to models
  * @param checkCatalogVsVersion when true with LIVE_SOURCE, also run working-vs-baseline version axis
+ * @param expectAutomaticTargetTableCreation when true, missing-table CREATE findings are omitted
+ *     (not reported) because vault update will create the tables; ALTER drift still warns
  */
 public record SchemaImpactSimulationRequest(
     String resourceDefinitionGroup,
@@ -39,7 +41,8 @@ public record SchemaImpactSimulationRequest(
     boolean detailedDataTypeChecking,
     boolean checkTargetModels,
     boolean checkTargetDatabases,
-    boolean checkCatalogVsVersion) {
+    boolean checkCatalogVsVersion,
+    boolean expectAutomaticTargetTableCreation) {
 
   public static Builder builder() {
     return new Builder();
@@ -55,6 +58,7 @@ public record SchemaImpactSimulationRequest(
     private boolean checkTargetModels;
     private boolean checkTargetDatabases;
     private boolean checkCatalogVsVersion;
+    private boolean expectAutomaticTargetTableCreation;
 
     public Builder resourceDefinitionGroup(String resourceDefinitionGroup) {
       this.resourceDefinitionGroup = resourceDefinitionGroup;
@@ -101,6 +105,11 @@ public record SchemaImpactSimulationRequest(
       return this;
     }
 
+    public Builder expectAutomaticTargetTableCreation(boolean expectAutomaticTargetTableCreation) {
+      this.expectAutomaticTargetTableCreation = expectAutomaticTargetTableCreation;
+      return this;
+    }
+
     public SchemaImpactSimulationRequest build() {
       return new SchemaImpactSimulationRequest(
           resourceDefinitionGroup,
@@ -111,7 +120,8 @@ public record SchemaImpactSimulationRequest(
           detailedDataTypeChecking,
           checkTargetModels,
           checkTargetDatabases,
-          checkCatalogVsVersion);
+          checkCatalogVsVersion,
+          expectAutomaticTargetTableCreation);
     }
   }
 }

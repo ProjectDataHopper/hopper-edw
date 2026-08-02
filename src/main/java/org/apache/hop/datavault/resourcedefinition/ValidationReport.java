@@ -27,8 +27,19 @@ import org.apache.hop.catalog.model.RecordDefinitionKey;
 public final class ValidationReport {
 
   public enum IssueKind {
+    /** Live physical source cannot be discovered or is not refreshable. */
     SOURCE_UNAVAILABLE,
     SOURCE_UNREADABLE,
+    /**
+     * Source is used by models and present in the working catalog, but missing from the chosen
+     * catalog version baseline (WORKING_VS_VERSION / version expected side).
+     */
+    BASELINE_CONTRACT_MISSING,
+    /**
+     * Source is used by models but the working-tree catalog has no record definition for it
+     * (publish/generate the source first).
+     */
+    WORKING_CONTRACT_MISSING,
     FIELD_ADDED,
     FIELD_REMOVED,
     FIELD_TYPE_CHANGED,
@@ -167,6 +178,25 @@ public final class ValidationReport {
 
   public int getIssueCount() {
     return recordValidations.stream().mapToInt(v -> v.issues().size()).sum();
+  }
+
+  /** Issues with severity WARNING or BLOCKING (INFO does not count). */
+  public int getGateRelevantIssueCount() {
+    return (int)
+        recordValidations.stream()
+            .flatMap(v -> v.issues().stream())
+            .filter(
+                issue ->
+                    issue != null
+                        && (issue.severity() == IssueSeverity.WARNING
+                            || issue.severity() == IssueSeverity.BLOCKING))
+            .count();
+  }
+
+  public boolean hasWarningIssues() {
+    return recordValidations.stream()
+        .flatMap(v -> v.issues().stream())
+        .anyMatch(issue -> issue != null && issue.severity() == IssueSeverity.WARNING);
   }
 
   public int getAcknowledgedIssueCount() {

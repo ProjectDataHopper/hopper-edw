@@ -48,7 +48,18 @@ public final class RecordDefinitionPhysicalRefSupport {
       case DATABASE -> definition.getPhysicalTable() != null;
       case CSV, PARQUET -> definition.getPhysicalFile() != null;
       case ICEBERG -> definition.getPhysicalIcebergTable() != null;
+      case COMPOSITE -> hasCompositeSourceRef(definition);
     };
+  }
+
+  /** COMPOSITE feeds are refreshable when they point at a source model query. */
+  static boolean hasCompositeSourceRef(RecordDefinition definition) {
+    if (definition == null || definition.getDvSource() == null) {
+      return false;
+    }
+    DvSourceRecord dvSource = definition.getDvSource();
+    return !Utils.isEmpty(dvSource.getCompositeSourceModelFilename())
+        && !Utils.isEmpty(dvSource.getCompositeSourceQueryName());
   }
 
   public static DvSourceType resolveSourceType(RecordDefinition definition) {
@@ -82,7 +93,22 @@ public final class RecordDefinitionPhysicalRefSupport {
       case DATABASE -> fromPhysicalTable(definition.getPhysicalTable());
       case CSV, PARQUET -> fromPhysicalFile(definition.getPhysicalFile());
       case ICEBERG -> fromPhysicalIcebergTable(definition.getPhysicalIcebergTable());
+      case COMPOSITE -> fromCompositeSource(definition.getDvSource());
     };
+  }
+
+  private static PhysicalSourceRef fromCompositeSource(DvSourceRecord dvSource) throws HopException {
+    if (dvSource == null
+        || Utils.isEmpty(dvSource.getCompositeSourceModelFilename())
+        || Utils.isEmpty(dvSource.getCompositeSourceQueryName())) {
+      throw new HopException(
+          BaseMessages.getString(
+              PKG, "RecordDefinitionPhysicalRefSupport.Error.MissingCompositeRef"));
+    }
+    return PhysicalSourceRef.builder()
+        .compositeSourceModelFilename(dvSource.getCompositeSourceModelFilename())
+        .compositeSourceQueryName(dvSource.getCompositeSourceQueryName())
+        .build();
   }
 
   private static PhysicalSourceRef fromPhysicalTable(PhysicalTableRef physicalTable)

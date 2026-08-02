@@ -239,9 +239,7 @@ public class DvLinkSatelliteSourceDialog {
         }
       }
     }
-    wSatelliteMappings.removeEmptyRows();
-    wSatelliteMappings.setRowNums();
-    wSatelliteMappings.optWidth(true);
+    wSatelliteMappings.optimizeTableView();
   }
 
   private void addSatelliteMapping() {
@@ -267,18 +265,14 @@ public class DvLinkSatelliteSourceDialog {
       }
     } else {
       TableItem item = new TableItem(wSatelliteMappings.table, SWT.NONE);
-      wSatelliteMappings.removeEmptyRows();
-      wSatelliteMappings.setRowNums();
-      wSatelliteMappings.optWidth(true);
+      wSatelliteMappings.optimizeTableView();
       return;
     }
 
     TableItem item = new TableItem(wSatelliteMappings.table, SWT.NONE);
     item.setText(1, Const.NVL(satelliteToAdd, ""));
     findOrCreateSatelliteField(satelliteToAdd);
-    wSatelliteMappings.removeEmptyRows();
-    wSatelliteMappings.setRowNums();
-    wSatelliteMappings.optWidth(true);
+    wSatelliteMappings.optimizeTableView();
   }
 
   private void editSatelliteMapping() {
@@ -336,9 +330,7 @@ public class DvLinkSatelliteSourceDialog {
     int idx = wSatelliteMappings.getSelectionIndex();
     if (idx >= 0) {
       wSatelliteMappings.table.remove(idx);
-      wSatelliteMappings.removeEmptyRows();
-      wSatelliteMappings.setRowNums();
-      wSatelliteMappings.optWidth(true);
+      wSatelliteMappings.optimizeTableView();
     }
   }
 

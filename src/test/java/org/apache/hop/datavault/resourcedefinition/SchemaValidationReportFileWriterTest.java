@@ -65,7 +65,11 @@ class SchemaValidationReportFileWriterTest {
             || mdContent.contains("Data Vault DDL Validation Report"),
         mdContent);
     assertTrue(mdContent.contains("PASS") || mdContent.contains("✅"), mdContent);
-    assertTrue(mdContent.contains("Baseline"), mdContent);
+    assertTrue(
+        mdContent.contains("Expected (baseline)")
+            || mdContent.contains("What we compared")
+            || mdContent.contains("Baseline"),
+        mdContent);
   }
 
   @Test

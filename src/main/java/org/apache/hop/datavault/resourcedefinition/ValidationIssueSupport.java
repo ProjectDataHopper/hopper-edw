@@ -102,6 +102,8 @@ public final class ValidationIssueSupport {
     return switch (parsed.kind()) {
       case SOURCE_UNAVAILABLE, SOURCE_UNREADABLE ->
           !Utils.isEmpty(unavailableMessage);
+      case BASELINE_CONTRACT_MISSING, WORKING_CONTRACT_MISSING ->
+          !Utils.isEmpty(unavailableMessage);
       case FIELD_ADDED -> hasFieldChange(diff, RecordDefinitionSchemaDiffSupport.ChangeKind.ADDED, parsed.fieldName(), parsed.changeSignature());
       case FIELD_REMOVED, MAPPING_BROKEN ->
           hasFieldChange(diff, RecordDefinitionSchemaDiffSupport.ChangeKind.REMOVED, parsed.fieldName(), parsed.changeSignature());

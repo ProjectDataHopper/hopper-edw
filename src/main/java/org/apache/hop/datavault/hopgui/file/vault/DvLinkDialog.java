@@ -863,10 +863,7 @@ public class DvLinkDialog {
         item.setText(1, Const.NVL(hubName, ""));
       }
     }
-    wHubNames.removeEmptyRows();
-    wHubNames.setRowNums();
-    wHubNames.optWidth(true);
-
+    wHubNames.optimizeTableView();
     wLinkSatelliteNames.clearAll();
     if (input.getLinkSatelliteNames() != null) {
       for (String satName : input.getLinkSatelliteNames()) {
@@ -874,10 +871,7 @@ public class DvLinkDialog {
         item.setText(1, Const.NVL(satName, ""));
       }
     }
-    wLinkSatelliteNames.removeEmptyRows();
-    wLinkSatelliteNames.setRowNums();
-    wLinkSatelliteNames.optWidth(true);
-
+    wLinkSatelliteNames.optimizeTableView();
     // Driving keys
     wDrivingKeyNames.clearAll();
     if (input.getDrivingKeyNames() != null) {
@@ -886,10 +880,7 @@ public class DvLinkDialog {
         item.setText(1, Const.NVL(dk, ""));
       }
     }
-    wDrivingKeyNames.removeEmptyRows();
-    wDrivingKeyNames.setRowNums();
-    wDrivingKeyNames.optWidth(true);
-
+    wDrivingKeyNames.optimizeTableView();
     wDependentChildKeys.clearAll();
     if (input.getDependentChildKeys() != null) {
       for (DependentChildKey dck : input.getDependentChildKeys()) {
@@ -905,10 +896,7 @@ public class DvLinkDialog {
         item.setText(6, Const.NVL(dck.getDescription(), ""));
       }
     }
-    wDependentChildKeys.removeEmptyRows();
-    wDependentChildKeys.setRowNums();
-    wDependentChildKeys.optWidth(true);
-
+    wDependentChildKeys.optimizeTableView();
     currentLinkHubSources.clear();
     wLinkHubSources.clearAll();
     if (input.getLinkHubSources() != null) {
@@ -922,10 +910,7 @@ public class DvLinkDialog {
         }
       }
     }
-    wLinkHubSources.removeEmptyRows();
-    wLinkHubSources.setRowNums();
-    wLinkHubSources.optWidth(true);
-
+    wLinkHubSources.optimizeTableView();
     currentLinkSatelliteSources.clear();
     wLinkSatelliteSources.clearAll();
     if (input.getLinkSatelliteSources() != null) {
@@ -939,9 +924,7 @@ public class DvLinkDialog {
         }
       }
     }
-    wLinkSatelliteSources.removeEmptyRows();
-    wLinkSatelliteSources.setRowNums();
-    wLinkSatelliteSources.optWidth(true);
+    wLinkSatelliteSources.optimizeTableView();
     customPipelinesTab.loadFrom(input);
   }
 

@@ -1,17 +1,35 @@
 {
-  "schemaVersion" : 1,
-  "versions" : [ {
-    "tag" : "v1.0.0",
-    "snapshotId" : "2026-07-14T154459-382328453Z-v1.0.0",
-    "createdAt" : "2026-07-14T15:44:59.382328453Z",
-    "createdBy" : "matt",
-    "description" : "A first version of the catalog",
-    "scope" : {
-      "resourceDefinitionGroup" : "retail-sources",
-      "namespaces" : [ "hop/retail-example/sources" ],
-      "recordKeys" : [ "hop/retail-example/sources/E2E-customer-hub", "hop/retail-example/sources/E2E-customer-address", "hop/retail-example/sources/E2E-customer-contact", "hop/retail-example/sources/E2E-customer-demo", "hop/retail-example/sources/E2E-customer-prefs", "hop/retail-example/sources/E2E-product", "hop/retail-example/sources/E2E-order-header", "hop/retail-example/sources/E2E-order-line", "hop/retail-example/sources/E2E-warehouse", "hop/retail-example/sources/E2E-warehouse-product" ]
-    },
-    "recordCount" : 10,
-    "contentHash" : "sha256:1312f32bbcde7a76454ddd270b4afd05e66bcc14c9fa392fa90b1c2c76e7963f"
-  } ]
+  "schemaVersion": 1,
+  "versions": [
+    {
+      "tag": "v1.0.0",
+      "snapshotId": "2026-07-14T154459-382328453Z-v1.0.0",
+      "createdAt": "2026-07-14T15:44:59.382328453Z",
+      "createdBy": "matt",
+      "description": "A first version of the catalog",
+      "scope": {
+        "resourceDefinitionGroup": "retail-sources",
+        "namespaces": [
+          "hop/retail-example/sources"
+        ],
+        "recordKeys": [
+          "hop/retail-example/sources/E2E-customer-address",
+          "hop/retail-example/sources/E2E-customer-contact",
+          "hop/retail-example/sources/E2E-customer-demo",
+          "hop/retail-example/sources/E2E-customer-hub",
+          "hop/retail-example/sources/E2E-customer-prefs",
+          "hop/retail-example/sources/E2E-order-header",
+          "hop/retail-example/sources/E2E-order-line",
+          "hop/retail-example/sources/E2E-order-rep",
+          "hop/retail-example/sources/E2E-product",
+          "hop/retail-example/sources/E2E-sales-rep",
+          "hop/retail-example/sources/E2E-warehouse-product",
+          "hop/retail-example/sources/E2E-warehouse",
+          "hop/retail-example/sources/all-customer-info"
+        ]
+      },
+      "recordCount": 13,
+      "contentHash": "sha256:1312f32bbcde7a76454ddd270b4afd05e66bcc14c9fa392fa90b1c2c76e7963f"
+    }
+  ]
 }

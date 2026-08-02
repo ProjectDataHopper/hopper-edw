@@ -40,7 +40,8 @@ class DvFieldMappingValidationSupportTest {
   }
 
   @Test
-  void validateSatelliteMappingsFlagsMissingHubBusinessKeyInSatelliteSource() throws HopException {
+  void validateSatelliteMappingsFlagsMissingParentBusinessKeyColumnInSatelliteSource()
+      throws HopException {
     DataVaultModel model = new DataVaultModel();
     DvHub hub = new DvHub("hub_syn_order");
     BusinessKey orderId = new BusinessKey("order_id");
@@ -52,10 +53,12 @@ class DvFieldMappingValidationSupportTest {
     List<IDvTable> tables = new ArrayList<>();
     tables.add(hub);
 
-    DvSatellite satellite = new TestSatellite("sat_syn_order", sourceWithFields("syn-product", "product_id"));
+    // Sat source lacks parent BK column order_id.
+    DvSatellite satellite =
+        new TestSatellite("sat_syn_order", sourceWithFields("syn-order", "product_id", "amount"));
     satellite.setHubName("hub_syn_order");
-    satellite.setRecordSourceName("syn-product");
-    satellite.setAttributes(List.of(attribute("product_id")));
+    satellite.setRecordSourceName("syn-order");
+    satellite.setAttributes(List.of(attribute("amount")));
     tables.add(satellite);
     model.setTables(tables);
 
@@ -76,7 +79,85 @@ class DvFieldMappingValidationSupportTest {
                     r.getType() == ICheckResult.TYPE_RESULT_ERROR
                         && r.getText().contains("order_id")
                         && r.getText().contains("hub_syn_order")
-                        && r.getText().contains("syn-product")));
+                        && r.getText().contains("syn-order")),
+        "Expected missing parent BK column on sat source, got: " + remarks);
+  }
+
+  @Test
+  void validateSatelliteMappingsAcceptsIndependentSourceWhenParentBkColumnPresent()
+      throws HopException {
+    DataVaultModel model = new DataVaultModel();
+    DvHub hub = new DvHub("hub_customer");
+    BusinessKey customerId = new BusinessKey("customer_id");
+    customerId.setSourceFieldName("customer_id");
+    customerId.setRecordSourceName("E2E-customer-hub");
+    customerId.setDataType("Integer");
+    customerId.setLength("9");
+    hub.setBusinessKeys(List.of(customerId));
+    List<IDvTable> tables = new ArrayList<>();
+    tables.add(hub);
+
+    // Satellite uses a different source than the hub; parent BK column name matches hub BK.
+    DvSatellite satellite =
+        new TestSatellite(
+            "sat_customer", sourceWithFields("all-customer-info", "customer_id", "email"));
+    satellite.setHubName("hub_customer");
+    satellite.setRecordSourceName("all-customer-info");
+    satellite.setAttributes(List.of(attribute("email")));
+    tables.add(satellite);
+    model.setTables(tables);
+
+    List<ICheckResult> remarks = new ArrayList<>();
+    DvFieldMappingValidationSupport.validateSatelliteMappings(
+        satellite,
+        model,
+        DvModelCheckOptions.fastOnly(),
+        null,
+        new Variables(),
+        satellite,
+        remarks);
+
+    assertFalse(
+        remarks.stream().anyMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_ERROR),
+        "Independent sat source with matching parent BK column should pass, got: " + remarks);
+  }
+
+  @Test
+  void validateSatelliteMappingsUsesOrderedParentKeySourceFields() throws HopException {
+    DataVaultModel model = new DataVaultModel();
+    DvHub hub = new DvHub("hub_customer");
+    BusinessKey customerId = new BusinessKey("customer_id");
+    customerId.setSourceFieldName("customer_id");
+    customerId.setRecordSourceName("E2E-customer-hub");
+    customerId.setDataType("Integer");
+    customerId.setLength("9");
+    hub.setBusinessKeys(List.of(customerId));
+    List<IDvTable> tables = new ArrayList<>();
+    tables.add(hub);
+
+    DvSatellite satellite =
+        new TestSatellite(
+            "sat_customer", sourceWithFields("all-customer-info", "cust_no", "email"));
+    satellite.setHubName("hub_customer");
+    satellite.setRecordSourceName("all-customer-info");
+    satellite.setParentKeySourceFields(List.of("cust_no"));
+    satellite.setAttributes(List.of(attribute("email")));
+    tables.add(satellite);
+    model.setTables(tables);
+
+    List<ICheckResult> remarks = new ArrayList<>();
+    DvFieldMappingValidationSupport.validateSatelliteMappings(
+        satellite,
+        model,
+        DvModelCheckOptions.fastOnly(),
+        null,
+        new Variables(),
+        satellite,
+        remarks);
+
+    assertFalse(
+        remarks.stream().anyMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_ERROR),
+        "Ordered parent key source field cust_no should resolve, got: " + remarks);
   }
 
   @Test
@@ -115,7 +196,43 @@ class DvFieldMappingValidationSupportTest {
             .anyMatch(
                 r ->
                     r.getType() == ICheckResult.TYPE_RESULT_ERROR
-                        && r.getText().contains("Hub business key source field")));
+                        && (r.getText().contains("Parent business key")
+                            || r.getText().contains("Hub business key"))));
+  }
+
+  @Test
+  void validateHubBusinessKeysFlagsMissingMappingForHubLoadSource() throws HopException {
+    DvHub hub = new DvHub("hub_customer");
+    BusinessKey customerId = new BusinessKey("customer_id");
+    customerId.setSourceFieldName("customer_id");
+    customerId.setRecordSourceName("E2E-customer-hub");
+    customerId.setDataType("Integer");
+    customerId.setLength("9");
+    hub.setBusinessKeys(List.of(customerId));
+
+    // Hub load source without a BK mapping for that source still fails (hub loads only).
+    DataVaultSource otherHubSource = sourceWithFields("crm-other", "customer_id", "email");
+    List<ICheckResult> remarks = new ArrayList<>();
+    DvFieldMappingValidationSupport.validateHubBusinessKeys(
+        hub,
+        otherHubSource,
+        null,
+        null,
+        DvModelCheckOptions.fastOnly(),
+        null,
+        new Variables(),
+        hub,
+        remarks);
+
+    assertTrue(
+        remarks.stream()
+            .anyMatch(
+                r ->
+                    r.getType() == ICheckResult.TYPE_RESULT_ERROR
+                        && r.getText().contains("hub_customer")
+                        && r.getText().contains("crm-other")
+                        && r.getText().contains("no business key mapped")),
+        "Expected hub missing BK-for-source error, got: " + remarks);
   }
 
   private static DataVaultSource sourceWithFields(String name, String... fieldNames) {

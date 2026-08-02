@@ -27,6 +27,8 @@ limitations under the License.
     <loadDateFieldFallback>x_load_ts</loadDateFieldFallback>
     <validFromField>x_from_ts</validFromField>
     <validToField>x_to_ts</validToField>
+    <generatePrimaryKeys>N</generatePrimaryKeys>
+    <generateForeignKeys>N</generateForeignKeys>
     <targetTableBatchSize>1000</targetTableBatchSize>
     <targetTableParallelCopies>1</targetTableParallelCopies>
     <target_load_mode>Table Output</target_load_mode>
@@ -99,7 +101,7 @@ One insert-only sat_product row becomes a closed interval; the latest stays open
       <noteType>INFORMATION</noteType>
       <xloc>48</xloc>
       <yloc>48</yloc>
-      <width>32</width>
+      <width>768</width>
       <height>32</height>
     </note>
   </notes>

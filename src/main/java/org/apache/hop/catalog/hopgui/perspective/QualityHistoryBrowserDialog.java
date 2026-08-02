@@ -217,9 +217,7 @@ public final class QualityHistoryBrowserDialog {
       item.setText(7, Const.NVL(entry.qualityRunId(), ""));
       item.setData(entry);
     }
-    tableView.removeEmptyRows();
-    tableView.setRowNums();
-    tableView.optWidth(true);
+    tableView.optimizeTableView();
   }
 
   private void openFindingsForSelection() {

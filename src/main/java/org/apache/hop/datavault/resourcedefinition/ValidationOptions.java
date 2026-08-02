@@ -32,6 +32,11 @@ public record ValidationOptions(
     boolean checkCatalogVsVersion,
     boolean checkTargetModels,
     boolean checkTargetDatabases,
+    /**
+     * When target DB check is on: missing tables (CREATE DDL applied by vault update) are omitted
+     * from findings. Layout drift on existing tables still warns.
+     */
+    boolean expectAutomaticTargetTableCreation,
     boolean includeImpact,
     boolean writeReport,
     String reportOutputPath,
@@ -59,6 +64,7 @@ public record ValidationOptions(
         false,
         true,
         true,
+        false,
         true,
         false,
         null,
@@ -119,6 +125,7 @@ public record ValidationOptions(
         .checkTargetModels(checkTargetModels)
         .checkTargetDatabases(checkTargetDatabases)
         .checkCatalogVsVersion(checkCatalogVsVersion && checkLiveSources)
+        .expectAutomaticTargetTableCreation(expectAutomaticTargetTableCreation)
         .build();
   }
 
@@ -135,6 +142,10 @@ public record ValidationOptions(
     appendAxis(builder, checkCatalogVsVersion, "working catalog vs version");
     appendAxis(builder, checkTargetModels, "target models (DV/BV/DM)");
     appendAxis(builder, checkTargetDatabases, "target databases (DV/BV/DM)");
+    appendAxis(
+        builder,
+        expectAutomaticTargetTableCreation,
+        "expect automatic target table creation");
     appendAxis(builder, includeImpact, "downstream impact / lineage");
     return builder.isEmpty() ? "none" : builder.toString();
   }

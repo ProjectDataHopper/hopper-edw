@@ -61,17 +61,29 @@ public final class DvFieldMappingValidationSupport {
       return;
     }
     String sourceName = resolveName(recordSource.getName(), variables);
+    List<BusinessKey> sourceKeys = hub.getBusinessKeysForSource(sourceName, variables);
+    List<BusinessKey> mappedKeys = filterBusinessKeysWithSourceField(sourceKeys);
+    if (mappedKeys.isEmpty()) {
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_ERROR,
+              BaseMessages.getString(
+                  PKG,
+                  "DvFieldMappingValidation.HubBusinessKeyNotMappedForSource",
+                  hub.getName(),
+                  sourceName),
+              checkSource));
+      return;
+    }
+
     ResolvedSourceFields resolved =
         resolveSourceFields(recordSource, options, metadataProvider, variables, checkSource, remarks);
     if (resolved == null) {
       return;
     }
 
-    for (BusinessKey bk : hub.getBusinessKeys()) {
+    for (BusinessKey bk : mappedKeys) {
       if (bk == null || Utils.isEmpty(bk.getName())) {
-        continue;
-      }
-      if (!businessKeyAppliesToSource(bk, sourceName, variables)) {
         continue;
       }
       String sourceFieldName = resolveSourceFieldName(bk.getSourceFieldName(), bk.getName(), variables);
@@ -90,7 +102,9 @@ public final class DvFieldMappingValidationSupport {
         continue;
       }
       try {
-        IValueMeta targetMeta = buildTargetValueMetaForHubBusinessKey(bk, variables);
+        SourceField storedField = resolved.storedFields.get(sourceFieldName);
+        IValueMeta targetMeta =
+            buildTargetValueMetaForHubBusinessKey(bk, storedField, variables);
         String mappingContext =
             BaseMessages.getString(
                 PKG,
@@ -587,7 +601,9 @@ public final class DvFieldMappingValidationSupport {
             continue;
           }
           try {
-            IValueMeta targetMeta = buildTargetValueMetaForHubBusinessKey(hubBk, variables);
+            SourceField storedField = resolved.storedFields.get(sourceFieldName);
+            IValueMeta targetMeta =
+                buildTargetValueMetaForHubBusinessKey(hubBk, storedField, variables);
             validateMapping(
                 sourceMeta,
                 targetMeta,
@@ -640,12 +656,25 @@ public final class DvFieldMappingValidationSupport {
       return;
     }
     String satelliteSourceName = resolveName(recordSource.getName(), variables);
-    for (BusinessKey bk : hub.getBusinessKeys()) {
-      if (bk == null || Utils.isEmpty(bk.getName())) {
-        continue;
+    // Parent identity values come from the sat feed; hub defines BK names/order. Optional
+    // parentKeySourceFields is an ordered list of source columns only (same length as hub BKs).
+    List<DvSatelliteParentKeySupport.ParentKeyField> parentKeys;
+    try {
+      parentKeys =
+          DvSatelliteParentKeySupport.resolveParentKeyFields(hub, satellite, variables);
+    } catch (HopException e) {
+      remarks.add(new CheckResult(ICheckResult.TYPE_RESULT_ERROR, e.getMessage(), checkSource));
+      return;
+    }
+    Map<String, BusinessKey> logicalBkByName = new HashMap<>();
+    for (BusinessKey bk : hub.getDistinctBusinessKeys()) {
+      if (bk != null && !Utils.isEmpty(bk.getName())) {
+        logicalBkByName.putIfAbsent(resolveName(bk.getName(), variables), bk);
       }
-      String sourceFieldName =
-          resolveSourceFieldName(bk.getSourceFieldName(), bk.getName(), variables);
+    }
+    for (DvSatelliteParentKeySupport.ParentKeyField parentKey : parentKeys) {
+      String sourceFieldName = parentKey.getSourceFieldName();
+      String businessKeyName = parentKey.getBusinessKeyName();
       IValueMeta sourceMeta = resolved.fields.get(sourceFieldName);
       if (sourceMeta == null) {
         remarks.add(
@@ -655,21 +684,27 @@ public final class DvFieldMappingValidationSupport {
                     PKG,
                     "DvFieldMappingValidation.SatelliteHubBusinessKeyMissing",
                     sourceFieldName,
-                    bk.getName(),
+                    businessKeyName,
                     hub.getName(),
                     satelliteSourceName),
                 checkSource));
         continue;
       }
+      BusinessKey bk = logicalBkByName.get(businessKeyName);
+      if (bk == null) {
+        continue;
+      }
       try {
-        IValueMeta targetMeta = buildTargetValueMetaForHubBusinessKey(bk, variables);
+        SourceField storedField = resolved.storedFields.get(sourceFieldName);
+        IValueMeta targetMeta =
+            buildTargetValueMetaForHubBusinessKey(bk, storedField, variables);
         validateMapping(
             sourceMeta,
             targetMeta,
             BaseMessages.getString(
                 PKG,
                 "DvFieldMappingValidation.Context.SatelliteHubBusinessKey",
-                bk.getName(),
+                businessKeyName,
                 sourceFieldName,
                 satelliteSourceName,
                 hub.getName()),
@@ -681,7 +716,7 @@ public final class DvFieldMappingValidationSupport {
               sourceFieldName,
               sourceMeta,
               satelliteSourceName,
-              bk.getName(),
+              businessKeyName,
               variables,
               checkSource,
               remarks);
@@ -691,6 +726,23 @@ public final class DvFieldMappingValidationSupport {
             new CheckResult(ICheckResult.TYPE_RESULT_ERROR, e.getMessage(), checkSource));
       }
     }
+  }
+
+  /**
+   * Business keys that hub load pipelines can use as source PK columns. Matches {@code
+   * getQuotedPkFields} which only selects keys with a non-empty {@link BusinessKey#getSourceFieldName()}.
+   */
+  private static List<BusinessKey> filterBusinessKeysWithSourceField(List<BusinessKey> keys) {
+    List<BusinessKey> mapped = new ArrayList<>();
+    if (keys == null) {
+      return mapped;
+    }
+    for (BusinessKey bk : keys) {
+      if (bk != null && !Utils.isEmpty(bk.getSourceFieldName())) {
+        mapped.add(bk);
+      }
+    }
+    return mapped;
   }
 
   private static void validateSatelliteAutoAttributes(
@@ -892,8 +944,15 @@ public final class DvFieldMappingValidationSupport {
 
   static IValueMeta buildTargetValueMetaForHubBusinessKey(BusinessKey bk, IVariables variables)
       throws HopException {
+    return buildTargetValueMetaForHubBusinessKey(bk, null, variables);
+  }
+
+  static IValueMeta buildTargetValueMetaForHubBusinessKey(
+      BusinessKey bk, SourceField storedField, IVariables variables) throws HopException {
     String name = bk.getName();
-    int type = ValueMetaFactory.getIdForValueMeta(resolveVariable(variables, bk.getDataType()));
+    int type =
+        DvDataTypeSupport.resolveHopTypeId(
+            resolveVariable(variables, bk.getDataType()), storedField);
     int length = Const.toInt(resolveVariable(variables, bk.getLength()), -1);
     int precision = Const.toInt(resolveVariable(variables, bk.getPrecision()), -1);
     IValueMeta meta = ValueMetaFactory.createValueMeta(name, type, length, precision);
@@ -909,14 +968,9 @@ public final class DvFieldMappingValidationSupport {
       SatelliteAttribute attr, SourceField storedField, IVariables variables)
       throws HopException {
     String name = attr.getName();
-    String dt = attr.getDataType();
-    int typeId = IValueMeta.TYPE_STRING;
-    if (!Utils.isEmpty(dt)) {
-      typeId = ValueMetaFactory.getIdForValueMeta(resolveVariable(variables, dt));
-      if (typeId <= 0) {
-        typeId = IValueMeta.TYPE_STRING;
-      }
-    }
+    int typeId =
+        DvDataTypeSupport.resolveHopTypeId(
+            resolveVariable(variables, attr.getDataType()), storedField);
     int length = Const.toInt(resolveVariable(variables, attr.getLength()), -1);
     int precision = Const.toInt(resolveVariable(variables, attr.getPrecision()), -1);
     if (storedField != null) {
@@ -1060,15 +1114,6 @@ public final class DvFieldMappingValidationSupport {
     } catch (HopPluginException e) {
       // ignore drift check if stored meta is invalid
     }
-  }
-
-  private static boolean businessKeyAppliesToSource(
-      BusinessKey bk, String sourceName, IVariables variables) {
-    String bkSource = resolveName(bk.getRecordSourceName(), variables);
-    if (Utils.isEmpty(bkSource)) {
-      return true;
-    }
-    return bkSource.equals(sourceName);
   }
 
   private static BusinessKey findHubBusinessKey(DvHub hub, String businessKeyField) {

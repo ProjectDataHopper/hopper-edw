@@ -363,7 +363,6 @@ public final class LineageTabSupport {
         item.setText(7, why);
       }
     }
-    tableView.setRowNums();
-    tableView.optWidth(true);
+    tableView.optimizeTableView();
   }
 }

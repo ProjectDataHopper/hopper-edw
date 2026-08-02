@@ -61,9 +61,11 @@ For each business key you can specify:
 Use the **Load from source** button on the **Keys** tab to populate business keys automatically. Before using it, make sure you have added at least one source in the **Record sources** tab. The button reads the primary key fields from the first source listed in the Record sources tab, creates business key rows for them, and automatically fills the Source system column with that source's name. You can then repeat the process after selecting a different source (or manually adjust the Source system values) if you need different source field names per system.
 
 |Record sources (Record sources tab)
-|A hub can be fed by one or more Data Vault Sources. List every source system or feed that will supply business keys for this hub.
+|A hub can be fed by one or more Data Vault Sources. List every source system or feed that will **load this hub** (insert business keys into the hub table).
 
-You can attach as many sources as you need. The generated load process will handle each source (typically producing one pipeline per source) but all of them write into the same physical hub table. This is the recommended way to handle a single business concept that receives data from multiple upstream systems (for example a Customer hub that is populated from both a CRM system and an ERP system).
+Do **not** list feeds that only load satellites of this hub. Satellite feeds are independent in Data Vault 2.0; each satellite has its own record source. Parent hash keys on satellites are computed from the parent business key columns present on the satellite feed.
+
+You can attach as many hub-load sources as you need. The generated load process will handle each source (typically producing one pipeline per source) but all of them write into the same physical hub table. This is the recommended way to handle a single business concept that receives identity from multiple upstream systems (for example a Customer hub that is populated from both a CRM system and an ERP system).
 |===
 
 == Integration mode

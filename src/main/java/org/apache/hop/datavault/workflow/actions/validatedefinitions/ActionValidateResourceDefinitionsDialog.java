@@ -140,6 +140,8 @@ public class ActionValidateResourceDefinitionsDialog extends ActionDialog {
             }
           });
 
+      // Re-read versions.json when the dialog regains focus (e.g. after Tag version elsewhere).
+      shell.addListener(SWT.Activate, e -> refreshCatalogVersionCombos());
 
       wSettingsComp.layout(true, true);
       scrolled.setMinSize(wSettingsComp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
@@ -238,11 +240,16 @@ public class ActionValidateResourceDefinitionsDialog extends ActionDialog {
   }
 
   /**
-   * Reload catalog version tags for ComboVar fields after the resource definition group changes.
+   * Reload catalog version tags for ComboVar fields after the resource definition group changes or
+   * when the dialog is activated. Reads {@code versions.json} from the FILE catalog (no tag cache).
+   * Uses dialog / HopGui variables so {@code ${PROJECT_HOME}} resolves like Data Catalog tagging.
    * Preserves any free-typed value (including variable expressions).
    */
   private void refreshCatalogVersionCombos() {
     if (widgets == null || widgets.getWidgetsMap() == null || widgets.getWidgetsMap().isEmpty()) {
+      return;
+    }
+    if (shell != null && shell.isDisposed()) {
       return;
     }
     try {
@@ -252,15 +259,21 @@ public class ActionValidateResourceDefinitionsDialog extends ActionDialog {
           getComboText(ActionValidateResourceDefinitions.WIDGET_ID_BASELINE_VERSION);
 
       IHopMetadataProvider metadataProvider = null;
+      IVariables listVariables = this.variables;
       HopGui hopGui = HopGui.getInstance();
       if (hopGui != null) {
         metadataProvider = hopGui.getMetadataProvider();
+        // Prefer HopGui project variables when dialog variables are incomplete.
+        if (hopGui.getVariables() != null) {
+          listVariables = hopGui.getVariables();
+        }
       }
       if (metadataProvider == null) {
         metadataProvider = this.metadataProvider;
       }
 
-      List<String> tags = action.listCatalogVersionTags(metadataProvider, LogChannel.UI);
+      List<String> tags =
+          action.listCatalogVersionTags(metadataProvider, LogChannel.UI, listVariables);
       String[] items = tags.toArray(new String[0]);
       widgets.setComboValues(ActionValidateResourceDefinitions.WIDGET_ID_TARGET_VERSION, items);
       widgets.setComboValues(ActionValidateResourceDefinitions.WIDGET_ID_BASELINE_VERSION, items);

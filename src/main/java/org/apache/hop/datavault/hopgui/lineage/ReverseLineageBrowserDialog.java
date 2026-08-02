@@ -242,7 +242,7 @@ public final class ReverseLineageBrowserDialog {
   private void populateTable(List<ReverseLineageConsumer> rows) {
     wResults.table.removeAll();
     if (rows == null || rows.isEmpty()) {
-      wResults.setRowNums();
+      wResults.optimizeTableView();
       return;
     }
     for (int i = 0; i < rows.size(); i++) {
@@ -258,8 +258,7 @@ public final class ReverseLineageBrowserDialog {
       item.setText(8, String.join("/", row.getReasonCodes()));
       item.setText(9, Const.NVL(row.getPathSummary(), ""));
     }
-    wResults.setRowNums();
-    wResults.optWidth(true);
+    wResults.optimizeTableView();
   }
 
   private void openSelected() {

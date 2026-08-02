@@ -24,6 +24,9 @@ import java.util.List;
 import org.apache.hop.datavault.resourcedefinition.SchemaCompareMode;
 import org.apache.hop.datavault.resourcedefinition.SchemaValidationFailureSeverity;
 import org.apache.hop.datavault.resourcedefinition.SchemaValidationReportFileWriter;
+import org.apache.hop.datavault.resourcedefinition.ValidationReport.IssueKind;
+import org.apache.hop.datavault.resourcedefinition.ValidationReport.IssueSeverity;
+import org.apache.hop.datavault.resourcedefinition.ValidationReport.ValidationIssue;
 import org.junit.jupiter.api.Test;
 
 class ActionValidateResourceDefinitionsTest {
@@ -80,5 +83,39 @@ class ActionValidateResourceDefinitionsTest {
     assertEquals(SchemaValidationFailureSeverity.WARN_ONLY.name(), copy.getFailureSeverity());
     assertTrue(copy.isFailOnWarnings());
     assertEquals(false, copy.isIncludeImpact());
+  }
+
+  @Test
+  void formatGateFindingLineIncludesSeverityKindAndFinding() {
+    ValidationIssue issue =
+        new ValidationIssue(
+            "id1",
+            IssueKind.BASELINE_CONTRACT_MISSING,
+            IssueSeverity.BLOCKING,
+            null,
+            "Axis: Working catalog vs baseline\nFound: Source 'hop/x' is missing from baseline.\nWhy it matters: gap",
+            List.of());
+    String line =
+        ActionValidateResourceDefinitions.formatGateFindingLine(
+            "hop/retail-example/sources/all-customer-info", issue);
+    assertTrue(line.startsWith("BLOCKING / BASELINE_CONTRACT_MISSING"));
+    assertTrue(line.contains("hop/retail-example/sources/all-customer-info"));
+    assertTrue(line.contains("Source 'hop/x' is missing from baseline."));
+  }
+
+  @Test
+  void formatGateFindingLineIncludesFieldWhenPresent() {
+    ValidationIssue issue =
+        new ValidationIssue(
+            "id2",
+            IssueKind.FIELD_TYPE_CHANGED,
+            IssueSeverity.WARNING,
+            "address_line1",
+            "Found: type changed VARCHAR(40) -> VARCHAR(80)",
+            List.of());
+    String line =
+        ActionValidateResourceDefinitions.formatGateFindingLine("hop/ns/source", issue);
+    assertTrue(line.contains("WARNING / FIELD_TYPE_CHANGED"));
+    assertTrue(line.contains("field=address_line1"));
   }
 }

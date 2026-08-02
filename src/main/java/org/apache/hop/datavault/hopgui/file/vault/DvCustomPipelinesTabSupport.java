@@ -179,9 +179,7 @@ public final class DvCustomPipelinesTabSupport {
         }
       }
     }
-    wCustomPipelines.removeEmptyRows();
-    wCustomPipelines.setRowNums();
-    wCustomPipelines.optWidth(true);
+    wCustomPipelines.optimizeTableView();
   }
 
   public void applyTo(DvTableBase table) {
@@ -233,9 +231,7 @@ public final class DvCustomPipelinesTabSupport {
         existing.add(path);
       }
     }
-    wCustomPipelines.removeEmptyRows();
-    wCustomPipelines.setRowNums();
-    wCustomPipelines.optWidth(true);
+    wCustomPipelines.optimizeTableView();
   }
 
   private void openSelectedPipelines() {

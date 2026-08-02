@@ -29,6 +29,7 @@ import org.apache.hop.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.apache.hop.catalog.model.RecordDefinition;
 import org.apache.hop.catalog.model.RecordDefinitionKey;
 import org.apache.hop.catalog.registry.RecordDefinitionRegistry;
+import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
@@ -36,6 +37,7 @@ import org.apache.hop.datavault.catalog.DvCatalogNamespaces;
 import org.apache.hop.datavault.catalog.DvSourceFieldSupport;
 import org.apache.hop.datavault.metadata.DvSourceType;
 import org.apache.hop.datavault.metadata.SourceField;
+import org.apache.hop.datavault.resourcedefinition.ValidationReport.IssueKind;
 import org.apache.hop.datavault.resourcedefinition.ValidationReport.RecordDefinitionValidation;
 import org.apache.hop.datavault.resourcedefinition.ValidationReport.ValidationIssue;
 import org.apache.hop.i18n.BaseMessages;
@@ -161,31 +163,45 @@ public final class SourceRecordValidationService {
     RecordDefinitionSchemaDiffSupport.SchemaDiff diff =
         new RecordDefinitionSchemaDiffSupport.SchemaDiff(new ArrayList<>());
 
+    String recordKey =
+        key != null ? key.getNamespace() + "/" + key.getName() : "?";
     if (!RecordDefinitionPhysicalRefSupport.supportsRefreshFromSource(definition)) {
       unavailableMessage =
-          BaseMessages.getString(PKG, "SourceRecordValidationService.Error.UnsupportedSource");
+          ValidationFindingFormatter.liveSourceUnavailable(
+              recordKey,
+              BaseMessages.getString(PKG, "SourceRecordValidationService.Error.UnsupportedSource"));
     } else {
       try {
         unavailableMessage = verifyReadability(definition, sourceType, previewRowLimit, variables, metadataProvider);
+        if (!Utils.isEmpty(unavailableMessage)) {
+          unavailableMessage =
+              ValidationFindingFormatter.liveSourceUnavailable(recordKey, unavailableMessage);
+        }
         if (Utils.isEmpty(unavailableMessage)) {
           diff =
               discoverAndDiff(
                   definition, sourceType, detailedDataTypeChecking, variables, metadataProvider);
         }
       } catch (HopException e) {
-        unavailableMessage = e.getMessage();
+        unavailableMessage =
+            ValidationFindingFormatter.liveSourceUnavailable(
+                recordKey, Const.NVL(e.getMessage(), e.getClass().getSimpleName()));
       } catch (Exception e) {
         unavailableMessage =
-            e.getMessage() != null
-                ? e.getMessage()
-                : BaseMessages.getString(PKG, "SourceRecordValidationService.Error.DiscoveryFailed");
+            ValidationFindingFormatter.liveSourceUnavailable(
+                recordKey,
+                e.getMessage() != null
+                    ? e.getMessage()
+                    : BaseMessages.getString(
+                        PKG, "SourceRecordValidationService.Error.DiscoveryFailed"));
       }
     }
 
     ValidationIssueSupport.pruneStaleAcknowledgements(definition, diff, unavailableMessage);
 
     List<ValidationIssue> allIssues =
-        RemediationProposalSupport.buildIssues(diff, usages, unavailableMessage);
+        RemediationProposalSupport.buildIssues(
+            diff, usages, unavailableMessage, IssueKind.SOURCE_UNAVAILABLE, recordKey);
     int acknowledgedIssueCount = ValidationIssueSupport.countAcknowledged(definition, allIssues);
     List<ValidationIssue> visibleIssues = ValidationIssueSupport.filterAcknowledged(definition, allIssues);
     boolean inSync =

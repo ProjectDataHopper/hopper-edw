@@ -79,6 +79,24 @@ If entries appear in the tree but fail to open, press **F5** to refresh the cata
 
 Reference: link:data-catalog.adoc[Data catalog], link:datavault-source.adoc[Data Vault sources].
 
+== Chapter 2b — Source modeler (optional multi-table feeds)
+
+Retail ships a **source model** of the CRM landing tables:
+
+[source,text]
+----
+models/source-tables-crm.hsm
+----
+
+image::images/source-modeler-retail-example-with-query-dialog-generated-sql.png[Retail source modeler with All customer info query and generated SQL,align="center"]
+
+. Open the `.hsm` file — table cards, relationship edges, and a purple **query** card.
+. Open query **All customer info** — customer hub left-joined to address, contact, demo, and prefs.
+. **Generate SQL** / **Preview data** (CRM connection required).
+. **Publish to catalog** to create composite feed `feed_customer_enriched` (model **Catalog connection** should be `local-catalog`).
+
+The main retail vault tutorial still binds one catalog source per physical table. Use the source modeler when you want a **single composed feed** (for example one satellite reading the joined customer attributes). Full walkthrough: link:source-modeler-overview.adoc[Source modeler overview].
+
 == Chapter 3 — Explore the Data Vault model
 
 . Open `models/retail-360.hdv`.
@@ -99,7 +117,7 @@ From the repository root:
 ./scripts/run-hop.sh retail-example workflows/run-retail-initial.hwf
 ----
 
-The workflow drops and recreates schemas, bootstraps `work/` (FILE catalog + schema-gate baseline `v1.0.0`), generates CSV source files, loads CRM, runs the **schema gate**, **measures source data quality and applies a quality gate** (blocking findings stop the load), then runs Data Vault Update, Business Vault Update, and Dimensional Update. After the update it re-measures sources in **alert-only** mode.
+The workflow drops and recreates schemas, bootstraps `work/` (FILE catalog + schema-gate baseline `v1.0.0`), generates CSV source files, loads CRM, runs the **schema gate**, **measures source data quality and applies a quality gate** (blocking findings stop the load), then runs **Update resource definition group** for `retail-sources` (all DV → BV → DM models with load overview metrics). After the update it re-measures sources in **alert-only** mode.
 
 In Hop GUI you can open `workflows/run-retail-initial.hwf` and run it with a configured pipeline run configuration.
 

@@ -244,9 +244,7 @@ public class DvLinkHubSourceDialog {
         }
       }
     }
-    wHubMappings.removeEmptyRows();
-    wHubMappings.setRowNums();
-    wHubMappings.optWidth(true);
+    wHubMappings.optimizeTableView();
   }
 
   private void addHubMapping() {
@@ -275,9 +273,7 @@ public class DvLinkHubSourceDialog {
     } else {
       // no known hubs, just add empty for user to type
       TableItem item = new TableItem(wHubMappings.table, SWT.NONE);
-      wHubMappings.removeEmptyRows();
-      wHubMappings.setRowNums();
-      wHubMappings.optWidth(true);
+      wHubMappings.optimizeTableView();
       return;
     }
 
@@ -285,9 +281,7 @@ public class DvLinkHubSourceDialog {
     item.setText(1, Const.NVL(hubToAdd, ""));
     // ensure pojo exists in pool
     findOrCreateHubField(hubToAdd);
-    wHubMappings.removeEmptyRows();
-    wHubMappings.setRowNums();
-    wHubMappings.optWidth(true);
+    wHubMappings.optimizeTableView();
   }
 
   private void editHubMapping() {
@@ -346,9 +340,7 @@ public class DvLinkHubSourceDialog {
     int idx = wHubMappings.getSelectionIndex();
     if (idx >= 0) {
       wHubMappings.table.remove(idx);
-      wHubMappings.removeEmptyRows();
-      wHubMappings.setRowNums();
-      wHubMappings.optWidth(true);
+      wHubMappings.optimizeTableView();
     }
   }
 

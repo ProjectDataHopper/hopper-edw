@@ -42,8 +42,9 @@ Documentation for the **hop-datavault** plugin (development **0.6.0-SNAPSHOT**, 
 | Document | Description |
 |----------|-------------|
 | [data-catalog.adoc](data-catalog.adoc) | Local catalog setup, namespaces, refresh, **catalog version tags** |
+| [source-modeler-overview.adoc](source-modeler-overview.adoc) | **Source modeler (`.hsm`)**: PK/FK import, multi-table queries, composite catalog feeds |
 | [source-to-target-lineage.adoc](source-to-target-lineage.adoc) | Field/table lineage, Lineage tab, explainable DDL, catalog publish, drift gate, reverse browser |
-| [datavault-source.adoc](datavault-source.adoc) | `DV_SOURCE` record definitions |
+| [datavault-source.adoc](datavault-source.adoc) | `DV_SOURCE` record definitions (database, file, **composite**) |
 | [datavault-source-database.adoc](datavault-source-database.adoc) | Database-backed source fields |
 | [resource-definition-validation.adoc](resource-definition-validation.adoc) | Schema gate action, GUI validate, impact, proposals, HTML/MD reports, DTAP |
 | [data-quality.adoc](data-quality.adoc) | Content quality measure, gate, history, alert sinks (Phase 2) |
@@ -84,7 +85,8 @@ Documentation for the **hop-datavault** plugin (development **0.6.0-SNAPSHOT**, 
 
 | Document | Description |
 |----------|-------------|
-| [operations.adoc](operations.adoc) | Docker runners, batch orchestration, partial loads |
+| [operations.adoc](operations.adoc) | Docker runners, batch orchestration, partial loads, load overview |
+| [update-resource-definition-group-action.adoc](update-resource-definition-group-action.adoc) | Preferred multi-model update action (group-scoped) |
 | [execution-maps.adoc](execution-maps.adoc) | `.hem` execution and lineage graphs |
 | [performance-tuning.md](performance-tuning.md) | Sort memory and pipeline tuning |
 | [ai-advisory.md](ai-advisory.md) | AI Help setup and usage |

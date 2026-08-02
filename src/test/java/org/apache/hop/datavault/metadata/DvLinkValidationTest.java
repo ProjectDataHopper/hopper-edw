@@ -18,6 +18,7 @@
 
 package org.apache.hop.datavault.metadata;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -136,6 +137,21 @@ class DvLinkValidationTest {
     assertFalse(
         layout.getValueMetaList().stream()
             .anyMatch(meta -> "x_record_source".equals(meta.getName())));
+  }
+
+  @Test
+  void resolveDependentChildSourceFieldNamesUsesSourceFieldOrName() throws HopException {
+    DvLink link = new DvLink("lnk_order_line");
+    DependentChildKey lineNumber = new DependentChildKey("line_number");
+    lineNumber.setSourceFieldName("line_number");
+    DependentChildKey seq = new DependentChildKey("reading_seq");
+    // no explicit sourceFieldName → falls back to name
+    link.getDependentChildKeys().add(lineNumber);
+    link.getDependentChildKeys().add(seq);
+
+    assertEquals(
+        List.of("line_number", "reading_seq"),
+        link.resolveDependentChildSourceFieldNames(new Variables()));
   }
 
   @Test

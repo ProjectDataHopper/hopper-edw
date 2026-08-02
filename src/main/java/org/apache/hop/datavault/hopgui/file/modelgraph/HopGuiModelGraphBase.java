@@ -187,11 +187,21 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
     return null;
   }
 
+  /**
+   * Default visibility of the coach panel when the user has never toggled it for this file. DV/BV/DM
+   * default to visible; source models override to hidden until there is a clear coach use-case.
+   */
+  protected boolean defaultCoachPanelVisible() {
+    return true;
+  }
+
   protected void restoreCoachPanelVisibility() {
     if (outerModelSash == null || coachPanel == null) {
       return;
     }
-    coachPanelVisible = ModelCoachPanelAuditSupport.retrievePanelVisible(getModelFilename());
+    coachPanelVisible =
+        ModelCoachPanelAuditSupport.retrievePanelVisible(
+            getModelFilename(), defaultCoachPanelVisible());
     applyCoachPanelVisibility();
   }
 
@@ -204,7 +214,7 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
     ModelCoachPanelAuditSupport.storePanelVisible(getModelFilename(), coachPanelVisible);
   }
 
-  private void applyCoachPanelVisibility() {
+  protected void applyCoachPanelVisibility() {
     if (outerModelSash == null || coachPanel == null || innerModelSash == null) {
       return;
     }
@@ -225,12 +235,21 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
     }
   }
 
+  /**
+   * Default visibility of the load-duration overview when the user has never toggled it for this
+   * file. DV/BV/DM default to visible; source models override to hidden until loads exist.
+   */
+  protected boolean defaultLoadDurationPanelVisible() {
+    return true;
+  }
+
   protected void restoreLoadDurationPanelVisibility() {
     if (innerModelSash == null || canvas == null || loadDurationPane == null) {
       return;
     }
     loadDurationPanelVisible =
-        ModelLoadDurationPaneAuditSupport.retrievePanelVisible(getModelFilename());
+        ModelLoadDurationPaneAuditSupport.retrievePanelVisible(
+            getModelFilename(), defaultLoadDurationPanelVisible());
     applyLoadDurationPanelVisibility();
   }
 
@@ -244,7 +263,7 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
         getModelFilename(), loadDurationPanelVisible);
   }
 
-  private void applyLoadDurationPanelVisibility() {
+  protected void applyLoadDurationPanelVisibility() {
     Composite canvasHolder = canvas.getParent();
     if (loadDurationPanelVisible) {
       innerModelSash.setMaximizedControl(null);

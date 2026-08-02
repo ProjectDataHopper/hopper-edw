@@ -36,6 +36,7 @@ class ValidationOptionsTest {
     assertTrue(request.checkTargetDatabases());
     assertTrue(request.includeImpact());
     assertFalse(request.checkCatalogVsVersion());
+    assertFalse(request.expectAutomaticTargetTableCreation());
   }
 
   @Test
@@ -48,6 +49,7 @@ class ValidationOptionsTest {
             true,
             false,
             true,
+            false,
             false,
             true,
             false,
@@ -69,6 +71,7 @@ class ValidationOptionsTest {
             null,
             false,
             true,
+            false,
             false,
             false,
             true,
@@ -94,10 +97,33 @@ class ValidationOptionsTest {
             false,
             false,
             false,
+            false,
             null,
             null,
             ReportFormat.BOTH);
     assertTrue(options.describeBaseline().contains("v2"));
     assertTrue(options.describeBaseline().toLowerCase().contains("immutable"));
+  }
+
+  @Test
+  void expectAutomaticTargetTableCreationPassedToRequest() {
+    ValidationOptions options =
+        new ValidationOptions(
+            BaselineKind.WORKING_CATALOG,
+            null,
+            null,
+            true,
+            false,
+            false,
+            true,
+            true,
+            true,
+            false,
+            null,
+            null,
+            ReportFormat.BOTH);
+    SchemaImpactSimulationRequest request = options.toSimulationRequest("g", true);
+    assertTrue(request.checkTargetDatabases());
+    assertTrue(request.expectAutomaticTargetTableCreation());
   }
 }

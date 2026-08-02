@@ -76,6 +76,7 @@ public final class ResourceDefinitionValidationOptionsDialog {
   private Button wCheckCatalogVersion;
   private Button wCheckModels;
   private Button wCheckTargetDb;
+  private Button wExpectAutoCreate;
   private Button wIncludeImpact;
   private Button wWriteReport;
   private TextVar wReportPath;
@@ -244,13 +245,27 @@ public final class ResourceDefinitionValidationOptionsDialog {
     fdTargetDb.right = new FormAttachment(100, -margin);
     wCheckTargetDb.setLayoutData(fdTargetDb);
 
+    wExpectAutoCreate = new Button(gAxes, SWT.CHECK);
+    PropsUi.setLook(wExpectAutoCreate);
+    wExpectAutoCreate.setText(
+        BaseMessages.getString(
+            PKG, "ResourceDefinitionValidationOptionsDialog.Axes.ExpectAutoCreate.Label"));
+    wExpectAutoCreate.setToolTipText(
+        BaseMessages.getString(
+            PKG, "ResourceDefinitionValidationOptionsDialog.Axes.ExpectAutoCreate.ToolTip"));
+    FormData fdAutoCreate = new FormData();
+    fdAutoCreate.left = new FormAttachment(0, margin * 3);
+    fdAutoCreate.top = new FormAttachment(wCheckTargetDb, margin / 2);
+    fdAutoCreate.right = new FormAttachment(100, -margin);
+    wExpectAutoCreate.setLayoutData(fdAutoCreate);
+
     wIncludeImpact = new Button(gAxes, SWT.CHECK);
     PropsUi.setLook(wIncludeImpact);
     wIncludeImpact.setText(
         BaseMessages.getString(PKG, "ResourceDefinitionValidationOptionsDialog.Axes.Impact.Label"));
     FormData fdImpact = new FormData();
     fdImpact.left = new FormAttachment(0, margin);
-    fdImpact.top = new FormAttachment(wCheckTargetDb, margin / 2);
+    fdImpact.top = new FormAttachment(wExpectAutoCreate, margin / 2);
     fdImpact.right = new FormAttachment(100, -margin);
     fdImpact.bottom = new FormAttachment(100, -margin);
     wIncludeImpact.setLayoutData(fdImpact);
@@ -324,6 +339,7 @@ public final class ResourceDefinitionValidationOptionsDialog {
     wBaselineWorking.addSelectionListener(enableListener);
     wBaselineVersion.addSelectionListener(enableListener);
     wWriteReport.addSelectionListener(enableListener);
+    wCheckTargetDb.addSelectionListener(enableListener);
 
     populateVersionTags();
     applyInitialValues(lastOptions != null ? lastOptions : ValidationOptions.defaults());
@@ -392,6 +408,7 @@ public final class ResourceDefinitionValidationOptionsDialog {
     wCheckCatalogVersion.setSelection(options.checkCatalogVsVersion());
     wCheckModels.setSelection(options.checkTargetModels());
     wCheckTargetDb.setSelection(options.checkTargetDatabases());
+    wExpectAutoCreate.setSelection(options.expectAutomaticTargetTableCreation());
     wIncludeImpact.setSelection(options.includeImpact());
     wWriteReport.setSelection(options.writeReport());
     wReportPath.setText(
@@ -412,6 +429,11 @@ public final class ResourceDefinitionValidationOptionsDialog {
     boolean write = wWriteReport.getSelection();
     wReportPath.setEnabled(write);
     wReportBaseName.setEnabled(write);
+    boolean targetDb = wCheckTargetDb.getSelection();
+    wExpectAutoCreate.setEnabled(targetDb);
+    if (!targetDb) {
+      wExpectAutoCreate.setSelection(false);
+    }
   }
 
   private void ok() {
@@ -463,6 +485,7 @@ public final class ResourceDefinitionValidationOptionsDialog {
             wCheckCatalogVersion.getSelection(),
             wCheckModels.getSelection(),
             wCheckTargetDb.getSelection(),
+            wCheckTargetDb.getSelection() && wExpectAutoCreate.getSelection(),
             wIncludeImpact.getSelection(),
             wWriteReport.getSelection(),
             Const.NVL(wReportPath.getText(), "").trim(),

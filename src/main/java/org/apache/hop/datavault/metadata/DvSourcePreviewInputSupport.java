@@ -32,6 +32,8 @@ import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.metadata.composite.DvCompositeSource;
+import org.apache.hop.datavault.metadata.composite.DvCompositeSourceResolver;
 import org.apache.hop.datavault.metadata.database.DvDatabaseSource;
 import org.apache.hop.datavault.metadata.database.DvDatabaseSourcePreviewSupport;
 import org.apache.hop.datavault.metadata.file.DvCsvSource;
@@ -98,7 +100,75 @@ public final class DvSourcePreviewInputSupport {
       case PARQUET -> buildParquetPreview(recordSource, (DvParquetSource) dvSource, variables, metadataProvider, rowLimit);
       case ICEBERG ->
           buildIcebergPreview(recordSource, (DvIcebergSource) dvSource, variables, metadataProvider, rowLimit);
+      case COMPOSITE ->
+          buildCompositePreview(
+              recordSource, (DvCompositeSource) dvSource, variables, metadataProvider, rowLimit);
     };
+  }
+
+  /**
+   * Preview pipeline for a composite (source-query) feed: Table Input with SQL resolved from the
+   * live {@code .hsm} query when possible, otherwise cached SQL.
+   */
+  private static PreviewPipeline buildCompositePreview(
+      DataVaultSource recordSource,
+      DvCompositeSource source,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider,
+      int rowLimit)
+      throws HopException {
+    if (source == null) {
+      throw new HopException(
+          BaseMessages.getString(PKG, "DvSourcePreviewInputSupport.Error.MissingSource"));
+    }
+    DvCompositeSourceResolver.ResolvedComposite resolved =
+        DvCompositeSourceResolver.resolveForSql(source, variables, metadataProvider);
+    DatabaseMeta databaseMeta = resolved.databaseMeta();
+    if (databaseMeta == null && !Utils.isEmpty(resolved.sharedDatabaseName())) {
+      String connectionName =
+          variables != null
+              ? variables.resolve(resolved.sharedDatabaseName())
+              : resolved.sharedDatabaseName();
+      try {
+        databaseMeta = metadataProvider.getSerializer(DatabaseMeta.class).load(connectionName);
+      } catch (Exception e) {
+        throw new HopException(
+            BaseMessages.getString(
+                PKG, "DvSourcePreviewInputSupport.Error.LoadDatabaseConnection", connectionName),
+            e);
+      }
+    }
+    if (databaseMeta == null) {
+      throw new HopException(
+          BaseMessages.getString(PKG, "DvSourcePreviewInputSupport.Error.CompositeNoConnection"));
+    }
+    if (Utils.isEmpty(resolved.sql())) {
+      throw new HopException(
+          BaseMessages.getString(PKG, "DvSourcePreviewInputSupport.Error.CompositeNoSql"));
+    }
+
+    String transformName =
+        calculateCompositeTransformName(recordSource, source);
+    TableInputMeta tableInputMeta = new TableInputMeta();
+    tableInputMeta.setConnection(databaseMeta.getName());
+    DvSqlSupport.assignDisplaySql(tableInputMeta, resolved.sql());
+    if (rowLimit > 0) {
+      tableInputMeta.setRowLimit(Integer.toString(rowLimit));
+    }
+
+    PipelineMeta previewMeta =
+        PipelinePreviewFactory.generatePreviewPipeline(
+            metadataProvider, tableInputMeta, transformName);
+    return new PreviewPipeline(previewMeta, transformName);
+  }
+
+  private static String calculateCompositeTransformName(
+      DataVaultSource recordSource, DvCompositeSource source) {
+    String feed =
+        recordSource != null && !Utils.isEmpty(recordSource.getName())
+            ? recordSource.getName()
+            : Const.NVL(source.getSourceQueryName(), "composite");
+    return "composite " + feed;
   }
 
   public static PreviewPipeline buildDatabasePreview(

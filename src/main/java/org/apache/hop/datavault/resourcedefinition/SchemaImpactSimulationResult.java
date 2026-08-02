@@ -69,9 +69,10 @@ public record SchemaImpactSimulationResult(
       base = SimulationStatus.PASS;
     } else if (report.hasBlockingIssues()) {
       base = SimulationStatus.CRITICAL_BLOCKED;
-    } else if (report.getIssueCount() > 0) {
+    } else if (report.hasWarningIssues()) {
       base = SimulationStatus.WARNING;
     } else {
+      // INFO-only findings still PASS (do not elevate status to WARNING).
       base = SimulationStatus.PASS;
     }
     if (LineageDiffService.hasBlocking(lineageDiffs)) {

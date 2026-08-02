@@ -13,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package org.apache.hop.datavault.resourcedefinition;
@@ -26,61 +27,53 @@ import org.apache.hop.catalog.discovery.RecordDefinitionSchemaDiffSupport;
 import org.apache.hop.catalog.model.RecordDefinitionKey;
 import org.apache.hop.datavault.resourcedefinition.ValidationReport.IssueKind;
 import org.apache.hop.datavault.resourcedefinition.ValidationReport.IssueSeverity;
-import org.apache.hop.datavault.resourcedefinition.ValidationReport.RecordDefinitionValidation;
 import org.apache.hop.datavault.resourcedefinition.ValidationReport.ValidationIssue;
 import org.junit.jupiter.api.Test;
 
 class SchemaValidationFailureSeverityTest {
 
   @Test
-  void parse_defaultsAndValues() {
-    assertEquals(
-        SchemaValidationFailureSeverity.FAIL_ON_BLOCKING,
-        SchemaValidationFailureSeverity.parse(null));
-    assertEquals(
-        SchemaValidationFailureSeverity.FAIL_ON_WARNINGS,
-        SchemaValidationFailureSeverity.parse("fail_on_warnings"));
-    assertEquals(
-        SchemaValidationFailureSeverity.WARN_ONLY,
-        SchemaValidationFailureSeverity.parse("WARN_ONLY"));
+  void failOnWarningsIgnoresInfoOnlyFindings() {
+    ValidationReport report = reportWith(IssueSeverity.INFO);
+    assertFalse(SchemaValidationFailureSeverity.FAIL_ON_WARNINGS.shouldFail(report));
+    assertEquals(SimulationStatus.PASS, SchemaImpactSimulationResult.statusOf(report));
   }
 
   @Test
-  void shouldFail_respectsPolicy() {
-    ValidationReport clean = new ValidationReport("g");
-    ValidationReport warning = reportWith(IssueSeverity.WARNING);
-    ValidationReport blocking = reportWith(IssueSeverity.BLOCKING);
+  void failOnWarningsFailsOnWarningFindings() {
+    ValidationReport report = reportWith(IssueSeverity.WARNING);
+    assertTrue(SchemaValidationFailureSeverity.FAIL_ON_WARNINGS.shouldFail(report));
+    assertEquals(SimulationStatus.WARNING, SchemaImpactSimulationResult.statusOf(report));
+  }
 
-    assertFalse(SchemaValidationFailureSeverity.FAIL_ON_BLOCKING.shouldFail(clean));
-    assertFalse(SchemaValidationFailureSeverity.FAIL_ON_BLOCKING.shouldFail(warning));
-    assertTrue(SchemaValidationFailureSeverity.FAIL_ON_BLOCKING.shouldFail(blocking));
-
-    assertTrue(SchemaValidationFailureSeverity.FAIL_ON_WARNINGS.shouldFail(warning));
-    assertTrue(SchemaValidationFailureSeverity.FAIL_ON_WARNINGS.shouldFail(blocking));
-
-    assertFalse(SchemaValidationFailureSeverity.WARN_ONLY.shouldFail(blocking));
-    assertFalse(SchemaValidationFailureSeverity.WARN_ONLY.shouldFail(warning));
+  @Test
+  void failOnBlockingIgnoresWarningsAndInfo() {
+    assertFalse(
+        SchemaValidationFailureSeverity.FAIL_ON_BLOCKING.shouldFail(
+            reportWith(IssueSeverity.WARNING)));
+    assertFalse(
+        SchemaValidationFailureSeverity.FAIL_ON_BLOCKING.shouldFail(
+            reportWith(IssueSeverity.INFO)));
   }
 
   private static ValidationReport reportWith(IssueSeverity severity) {
     ValidationReport report = new ValidationReport("g");
     report.addRecordValidation(
-        new RecordDefinitionValidation(
+        new ValidationReport.RecordDefinitionValidation(
             new RecordDefinitionKey("ns", "n"),
             "c",
-            "CSV",
+            "DATABASE",
             false,
             new RecordDefinitionSchemaDiffSupport.SchemaDiff(List.of()),
             List.of(),
             List.of(
                 new ValidationIssue(
                     "1",
-                    IssueKind.FIELD_TYPE_CHANGED,
+                    IssueKind.TARGET_DDL_REQUIRED,
                     severity,
-                    "f",
-                    "msg",
-                    List.of(),
-                    "hub_x"))));
+                    null,
+                    "finding",
+                    List.of()))));
     return report;
   }
 }

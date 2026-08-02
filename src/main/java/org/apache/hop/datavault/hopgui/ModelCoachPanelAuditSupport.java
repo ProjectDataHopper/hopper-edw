@@ -36,21 +36,28 @@ public final class ModelCoachPanelAuditSupport {
   private ModelCoachPanelAuditSupport() {}
 
   public static boolean retrievePanelVisible(String modelFilename) {
+    return retrievePanelVisible(modelFilename, true);
+  }
+
+  /**
+   * @param defaultVisible value when no audit preference has been stored yet
+   */
+  public static boolean retrievePanelVisible(String modelFilename, boolean defaultVisible) {
     try {
       AuditState auditState =
           AuditManager.getActive()
               .retrieveState(AUDIT_GROUP, AUDIT_TYPE, auditStateName(modelFilename));
       if (auditState == null || auditState.getStateMap() == null) {
-        return true;
+        return defaultVisible;
       }
       Object value = auditState.getStateMap().get(STATE_VISIBLE);
       if (value instanceof Boolean visible) {
         return visible;
       }
-      return true;
+      return defaultVisible;
     } catch (Exception e) {
       LogChannel.UI.logError("Error restoring coach panel visibility", e);
-      return true;
+      return defaultVisible;
     }
   }
 

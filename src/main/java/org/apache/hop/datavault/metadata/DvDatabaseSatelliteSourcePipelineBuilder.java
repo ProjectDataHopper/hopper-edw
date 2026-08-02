@@ -66,7 +66,11 @@ public class DvDatabaseSatelliteSourcePipelineBuilder extends DvDatabaseSourcePi
 
     DvHub hub = findHub(satellite.getHubName());
     StringBuilder sql = new StringBuilder("SELECT ");
-    appendFields(sql, getQuotedPkFields(hub, sourceDbMeta));
+    // Parent BKs come from the satellite feed (optional renames on the satellite).
+    appendFields(
+        sql,
+        DvSatelliteParentKeySupport.quotedSelectExpressions(
+            hub, satellite, sourceDbMeta, variables));
     appendComma(sql);
     appendFields(sql, quotedHubSatelliteAttributeFields(satellite, sourceDbMeta));
 
@@ -125,6 +129,11 @@ public class DvDatabaseSatelliteSourcePipelineBuilder extends DvDatabaseSourcePi
           DvLinkHubSourceKeyFieldSupport.resolveSourceFieldNames(hub, sourceKeyField, variables)) {
         quotedFields.add(sourceDbMeta.quoteField(sourceFieldName));
       }
+    }
+
+    // Dependent child keys are part of the link identity / link hash (same as link load).
+    for (String dckSourceField : linkedLink.resolveDependentChildSourceFieldNames(variables)) {
+      quotedFields.add(sourceDbMeta.quoteField(dckSourceField));
     }
 
     if (quotedFields.isEmpty()) {

@@ -9,6 +9,35 @@ All notable changes to the hop-datavault plugin are documented in this file.
 - Development and runtime target is **Apache Hop 2.19.0** (use **2.19.0-SNAPSHOT** until the GA release ships)
 - Enables database-backed execution information (e.g. OPS `hop_executions`), BINARY hash key sorting ([apache/hop#7346](https://github.com/apache/hop/issues/7346)), and Hop Marketplace install for this plugin
 
+### Satellite parent key source fields (DV2 independent feeds)
+
+- Hub owns logical business keys and hash order; hub satellites only optionally list **ordered source field names** on the sat feed (`parentKeySourceFields`) that supply those values
+- Empty list (normal case): source columns have the same names as the hub business keys
+- Non-empty list: same length as distinct hub BKs, zipped by position (no hub-BK name mapping on the satellite)
+- Satellite dialog tab **Parent key source fields**; **Load hub key names** fills the same-name default
+- Removed model-check warning that required the satellite record source to be listed on the parent hub
+- Hub Record sources / Keys remain for **hub loads only**
+- Docs: [dv-satellite.adoc](docs/dv-satellite.adoc), [dv-hub.adoc](docs/dv-hub.adoc)
+
+### Source modeler (`.hsm`) and composite feeds (#105)
+
+- New visual **source modeler** (`.hsm`): tables, PK/FK import, relationships, multi-table **source queries**, notes, ELK layout, undo/clipboard parity with other modelers
+- Query builder: joins (relationship or explicit keys), projection, WHERE, generation mode AUTO/SQL/PIPELINE, SQL preview and row preview
+- **COMPOSITE** catalog `DV_SOURCE`: publish queries with field layout + pointer to `.hsm` query; optional cached SQL
+- Hub / link / satellite pipeline builders consume composite sources (single-connection SQL subquery or Merge Join pipeline injection)
+- DV canvas action **Compose multi-table source…**; source-model toolbar/context **Publish to catalog**
+- Retail sample: `retail-example/models/source-tables-crm.hsm` (query **All customer info** → `feed_customer_enriched`)
+- Docs and screenshot: [source-modeler-overview.adoc](docs/source-modeler-overview.adoc); feature overview + getting-started snippet
+
+### Update resource definition group action
+
+- Workflow action **Update resource definition group** runs every DV / BV / DM model listed on a resource definition group (layer order DV → BV → DM; list order within each layer)
+- Tabbed dialog: Selection, Run, Operations, Data catalog, Metrics, Reports
+- Optional **Manage vault update metrics (Begin/End)** assigns `DV_WORKFLOW_EXECUTION_ID` and publishes a workflow load overview without separate Begin/End actions
+- Open referenced models from the workflow canvas with project-relative labels (no `${PROJECT_HOME}/` prefix in the menu text)
+- Retail: `run-retail-update.hwf` / `run-retail-update-models.hwf` use group `retail-sources`
+- Docs: [update-resource-definition-group-action.adoc](docs/update-resource-definition-group-action.adoc), [operations.adoc](docs/operations.adoc)
+
 ### Architecture export to Draw.io (#104)
 
 - Derived **SOLUTION** architecture (workflows / capabilities / model file refs only — no dataset table dump), **DATA inventory**, and **aggregated MODEL** layer diagrams

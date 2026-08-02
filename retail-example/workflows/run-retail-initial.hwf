@@ -82,8 +82,8 @@ limitations under the License.
       <name>Generate initial execution map</name>
       <type>GENERATE_EXECUTION_MAP</type>
       <attributes/>
-      <xloc>528</xloc>
-      <yloc>192</yloc>
+      <xloc>640</xloc>
+      <yloc>144</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
@@ -123,7 +123,7 @@ limitations under the License.
       <description/>
       <type>CHECK_DB_CONNECTIONS</type>
       <attributes/>
-      <xloc>368</xloc>
+      <xloc>416</xloc>
       <yloc>32</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -146,8 +146,8 @@ limitations under the License.
       <description/>
       <type>WORKFLOW</type>
       <attributes/>
-      <xloc>544</xloc>
-      <yloc>32</yloc>
+      <xloc>224</xloc>
+      <yloc>144</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
@@ -176,14 +176,36 @@ limitations under the License.
           <value>retail-dv-initial-report</value>
           <stream_name/>
         </parameter>
+        <parameter>
+          <name>EXPECT_AUTOMATIC_TARGET_TABLE_CREATION</name>
+          <value>Y</value>
+          <stream_name/>
+        </parameter>
       </parameters>
       <run_configuration>local</run_configuration>
       <name>run-retail-update-models</name>
       <description/>
       <type>WORKFLOW</type>
       <attributes/>
-      <xloc>304</xloc>
-      <yloc>192</yloc>
+      <xloc>416</xloc>
+      <yloc>144</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <rootArtifactFilename>${Internal.Workflow.Filename.Folder}/${Internal.Workflow.Filename.Name}</rootArtifactFilename>
+      <viewType>SOLUTION</viewType>
+      <outputDrawioFile>${PROJECT_HOME}/work/drawio/retail-solution.drawio</outputDrawioFile>
+      <alsoExportDataView>Y</alsoExportDataView>
+      <dataOutputDrawioFile>${PROJECT_HOME}/work/drawio/retail-data.drawio</dataOutputDrawioFile>
+      <alsoExportModelDiagrams>Y</alsoExportModelDiagrams>
+      <modelsOutputFolder>${PROJECT_HOME}/work/drawio/</modelsOutputFolder>
+      <name>Export architecture</name>
+      <description/>
+      <type>EXPORT_ARCHITECTURE</type>
+      <attributes/>
+      <xloc>640</xloc>
+      <yloc>224</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
@@ -220,6 +242,13 @@ limitations under the License.
     <hop>
       <from>run-retail-update-models</from>
       <to>Generate initial execution map</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>run-retail-update-models</from>
+      <to>Export architecture</to>
       <evaluation>Y</evaluation>
       <unconditional>N</unconditional>
       <enabled>Y</enabled>

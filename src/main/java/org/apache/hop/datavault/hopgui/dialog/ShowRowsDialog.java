@@ -166,6 +166,9 @@ public final class ShowRowsDialog {
       fillRow(item, rows.get(i));
     }
     if (!tableView.isDisposed()) {
+      // Cap column width for wide preview grids (optimizeTableView uses unbounded optWidth).
+      tableView.removeEmptyRows();
+      tableView.setRowNums();
       tableView.optWidth(true, 200);
     }
   }

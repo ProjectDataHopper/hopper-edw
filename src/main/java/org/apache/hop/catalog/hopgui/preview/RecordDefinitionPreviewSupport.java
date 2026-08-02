@@ -131,6 +131,10 @@ public final class RecordDefinitionPreviewSupport {
       case CSV -> hasCsvPreviewLocation(definition);
       case PARQUET -> hasParquetPreviewLocation(definition);
       case ICEBERG -> hasIcebergPreviewLocation(definition);
+      case COMPOSITE ->
+          definition.getDvSource() != null
+              && !Utils.isEmpty(definition.getDvSource().getCompositeSourceModelFilename())
+              && !Utils.isEmpty(definition.getDvSource().getCompositeSourceQueryName());
     };
   }
 

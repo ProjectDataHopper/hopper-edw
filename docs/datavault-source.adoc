@@ -9,9 +9,19 @@ A **Data Vault Source** is a **Data Catalog record definition** of type `DV_SOUR
 Each definition combines:
 
 * **DV semantics** — record source indicator, optional **group** for partial workflow loads
-* **Physical layout** — today typically a **database** table (connection, schema, table, field list); file sources are planned
+* **Physical layout** — **database** table, **CSV** / **Parquet** / **Iceberg**, or **composite** multi-table query from a link:source-modeler-overview.adoc[source model (`.hsm`)]
 
 Sources live under namespace `hop/{project}/sources` in the FILE catalog storage directory (retail example: `work/edw-catalog/`) and open in the **Data Catalog** perspective. See link:data-catalog.adoc[Data Catalog] for folder layout and refresh behavior.
+
+=== Composite sources
+
+A **COMPOSITE** `DV_SOURCE` is published from a source-model **source query**. It stores:
+
+* Projected field list (aliases used when mapping hub/sat attributes)
+* Path to the `.hsm` file and the query name (generation prefers live SQL from the model)
+* Optional cached SQL when the model file is unavailable
+
+Data Vault Update builds either a single-connection `Table Input` or a Merge Join pipeline depending on the query's generation mode. See link:source-modeler-overview.adoc[Source modeler overview].
 
 == Create and edit a source
 

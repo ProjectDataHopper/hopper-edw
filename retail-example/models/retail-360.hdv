@@ -181,6 +181,14 @@ limitations under the License.
         <sourceFieldName>customer_id</sourceFieldName>
         <recordSourceName>E2E-customer-prefs</recordSourceName>
       </businessKeys>
+      <businessKeys>
+        <name>customer_id</name>
+        <description/>
+        <dataType>Integer</dataType>
+        <length>9</length>
+        <sourceFieldName>customer_id</sourceFieldName>
+        <recordSourceName>all-customer-info</recordSourceName>
+      </businessKeys>
       <hashKeyFieldName>customer_hk</hashKeyFieldName>
       <recordSourceFieldName/>
       <recordSources>
@@ -189,14 +197,15 @@ limitations under the License.
         <recordSource>E2E-customer-contact</recordSource>
         <recordSource>E2E-customer-demo</recordSource>
         <recordSource>E2E-customer-prefs</recordSource>
+        <recordSource>all-customer-info</recordSource>
       </recordSources>
       <tableName>hub_customer</tableName>
       <description>Customer hub</description>
       <tableType>HUB</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>368</xloc>
-      <yloc>144</yloc>
+      <xloc>352</xloc>
+      <yloc>224</yloc>
       <name>hub_customer</name>
       <virtualPath/>
     </table>
@@ -227,9 +236,14 @@ limitations under the License.
         <precision>0</precision>
         <includeInChangeDataCapture>Y</includeInChangeDataCapture>
       </attributes>
+      <parentKeySourceFields>
+        <parentKeySourceField>customer_id</parentKeySourceField>
+      </parentKeySourceFields>
       <drivingKey/>
+      <drivingKeySourceField/>
       <recordSource>E2E-customer-demo</recordSource>
       <statusTrackingEnabled>N</statusTrackingEnabled>
+      <statusTableName/>
       <statusFieldName>record_status</statusFieldName>
       <activeStatusValue>ACTIVE</activeStatusValue>
       <deletedStatusValue>DELETED</deletedStatusValue>
@@ -238,8 +252,8 @@ limitations under the License.
       <tableType>SATELLITE</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>64</xloc>
-      <yloc>48</yloc>
+      <xloc>48</xloc>
+      <yloc>128</yloc>
       <name>sat_customer_demo</name>
       <virtualPath/>
     </table>
@@ -262,9 +276,14 @@ limitations under the License.
         <precision/>
         <includeInChangeDataCapture>Y</includeInChangeDataCapture>
       </attributes>
+      <parentKeySourceFields>
+        <parentKeySourceField>customer_id</parentKeySourceField>
+      </parentKeySourceFields>
       <drivingKey/>
+      <drivingKeySourceField/>
       <recordSource>E2E-customer-contact</recordSource>
       <statusTrackingEnabled>N</statusTrackingEnabled>
+      <statusTableName/>
       <statusFieldName>record_status</statusFieldName>
       <activeStatusValue>ACTIVE</activeStatusValue>
       <deletedStatusValue>DELETED</deletedStatusValue>
@@ -273,8 +292,8 @@ limitations under the License.
       <tableType>SATELLITE</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>64</xloc>
-      <yloc>112</yloc>
+      <xloc>48</xloc>
+      <yloc>192</yloc>
       <name>sat_customer_contact</name>
       <virtualPath/>
     </table>
@@ -285,7 +304,7 @@ limitations under the License.
         <name>address_line1</name>
         <description/>
         <dataType>String</dataType>
-        <length>75</length>
+        <length>50</length>
         <precision/>
         <includeInChangeDataCapture>Y</includeInChangeDataCapture>
       </attributes>
@@ -305,9 +324,14 @@ limitations under the License.
         <precision/>
         <includeInChangeDataCapture>Y</includeInChangeDataCapture>
       </attributes>
+      <parentKeySourceFields>
+        <parentKeySourceField>customer_id</parentKeySourceField>
+      </parentKeySourceFields>
       <drivingKey/>
+      <drivingKeySourceField/>
       <recordSource>E2E-customer-address</recordSource>
       <statusTrackingEnabled>N</statusTrackingEnabled>
+      <statusTableName/>
       <statusFieldName>record_status</statusFieldName>
       <activeStatusValue>ACTIVE</activeStatusValue>
       <deletedStatusValue>DELETED</deletedStatusValue>
@@ -316,8 +340,8 @@ limitations under the License.
       <tableType>SATELLITE</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>64</xloc>
-      <yloc>176</yloc>
+      <xloc>48</xloc>
+      <yloc>256</yloc>
       <name>sat_customer_address</name>
       <virtualPath/>
     </table>
@@ -348,9 +372,14 @@ limitations under the License.
         <precision/>
         <includeInChangeDataCapture>Y</includeInChangeDataCapture>
       </attributes>
+      <parentKeySourceFields>
+        <parentKeySourceField>customer_id</parentKeySourceField>
+      </parentKeySourceFields>
       <drivingKey/>
+      <drivingKeySourceField/>
       <recordSource>E2E-customer-prefs</recordSource>
       <statusTrackingEnabled>N</statusTrackingEnabled>
+      <statusTableName/>
       <statusFieldName>record_status</statusFieldName>
       <activeStatusValue>ACTIVE</activeStatusValue>
       <deletedStatusValue>DELETED</deletedStatusValue>
@@ -359,8 +388,8 @@ limitations under the License.
       <tableType>SATELLITE</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>112</xloc>
-      <yloc>304</yloc>
+      <xloc>48</xloc>
+      <yloc>320</yloc>
       <name>sat_customer_prefs</name>
       <virtualPath/>
     </table>
@@ -383,8 +412,8 @@ limitations under the License.
       <tableType>HUB</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>352</xloc>
-      <yloc>448</yloc>
+      <xloc>336</xloc>
+      <yloc>528</yloc>
       <name>hub_product</name>
       <virtualPath/>
     </table>
@@ -415,9 +444,14 @@ limitations under the License.
         <precision>2</precision>
         <includeInChangeDataCapture>Y</includeInChangeDataCapture>
       </attributes>
+      <parentKeySourceFields>
+        <parentKeySourceField>product_id</parentKeySourceField>
+      </parentKeySourceFields>
       <drivingKey/>
+      <drivingKeySourceField/>
       <recordSource>E2E-product</recordSource>
       <statusTrackingEnabled>N</statusTrackingEnabled>
+      <statusTableName/>
       <statusFieldName>record_status</statusFieldName>
       <activeStatusValue>ACTIVE</activeStatusValue>
       <deletedStatusValue>DELETED</deletedStatusValue>
@@ -426,8 +460,8 @@ limitations under the License.
       <tableType>SATELLITE</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>144</xloc>
-      <yloc>448</yloc>
+      <xloc>128</xloc>
+      <yloc>528</yloc>
       <name>sat_product</name>
       <virtualPath/>
     </table>
@@ -450,13 +484,14 @@ limitations under the License.
       <tableType>HUB</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>608</xloc>
-      <yloc>176</yloc>
+      <xloc>592</xloc>
+      <yloc>256</yloc>
       <name>hub_order</name>
       <virtualPath/>
     </table>
     <table>
       <hub>hub_order</hub>
+      <link/>
       <attributes>
         <name>customer_id</name>
         <description/>
@@ -505,9 +540,14 @@ limitations under the License.
         <precision>2</precision>
         <includeInChangeDataCapture>Y</includeInChangeDataCapture>
       </attributes>
+      <parentKeySourceFields>
+        <parentKeySourceField>order_id</parentKeySourceField>
+      </parentKeySourceFields>
       <drivingKey/>
+      <drivingKeySourceField/>
       <recordSource>E2E-order-header</recordSource>
       <statusTrackingEnabled>N</statusTrackingEnabled>
+      <statusTableName/>
       <statusFieldName>record_status</statusFieldName>
       <activeStatusValue>ACTIVE</activeStatusValue>
       <deletedStatusValue>DELETED</deletedStatusValue>
@@ -516,8 +556,8 @@ limitations under the License.
       <tableType>SATELLITE</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>832</xloc>
-      <yloc>176</yloc>
+      <xloc>816</xloc>
+      <yloc>256</yloc>
       <name>sat_order</name>
       <virtualPath/>
     </table>
@@ -596,8 +636,8 @@ limitations under the License.
       <tableType>LINK</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>512</xloc>
-      <yloc>320</yloc>
+      <xloc>496</xloc>
+      <yloc>400</yloc>
       <name>lnk_order_line</name>
       <virtualPath/>
     </table>
@@ -628,6 +668,7 @@ limitations under the License.
         <precision>2</precision>
         <includeInChangeDataCapture>Y</includeInChangeDataCapture>
       </attributes>
+      <parentKeySourceFields/>
       <drivingKey/>
       <drivingKeySourceField/>
       <recordSource>E2E-order-line</recordSource>
@@ -640,8 +681,8 @@ limitations under the License.
       <tableType>SATELLITE</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>720</xloc>
-      <yloc>320</yloc>
+      <xloc>704</xloc>
+      <yloc>400</yloc>
       <name>sat_lnk_order_line</name>
       <virtualPath/>
     </table>
@@ -664,8 +705,8 @@ limitations under the License.
       <tableType>HUB</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>544</xloc>
-      <yloc>448</yloc>
+      <xloc>528</xloc>
+      <yloc>528</yloc>
       <name>hub_warehouse</name>
       <virtualPath/>
     </table>
@@ -704,9 +745,14 @@ limitations under the License.
         <precision>0</precision>
         <includeInChangeDataCapture>Y</includeInChangeDataCapture>
       </attributes>
+      <parentKeySourceFields>
+        <parentKeySourceField>warehouse_id</parentKeySourceField>
+      </parentKeySourceFields>
       <drivingKey/>
+      <drivingKeySourceField/>
       <recordSource>E2E-warehouse</recordSource>
       <statusTrackingEnabled>N</statusTrackingEnabled>
+      <statusTableName/>
       <statusFieldName>record_status</statusFieldName>
       <activeStatusValue>ACTIVE</activeStatusValue>
       <deletedStatusValue>DELETED</deletedStatusValue>
@@ -715,8 +761,8 @@ limitations under the License.
       <tableType>SATELLITE</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>784</xloc>
-      <yloc>448</yloc>
+      <xloc>768</xloc>
+      <yloc>528</yloc>
       <name>sat_warehouse</name>
       <virtualPath/>
     </table>
@@ -782,8 +828,8 @@ limitations under the License.
       <tableType>LINK</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>512</xloc>
-      <yloc>608</yloc>
+      <xloc>496</xloc>
+      <yloc>688</yloc>
       <name>lnk_warehouse_product</name>
       <virtualPath/>
     </table>
@@ -806,6 +852,7 @@ limitations under the License.
         <precision>0</precision>
         <includeInChangeDataCapture>Y</includeInChangeDataCapture>
       </attributes>
+      <parentKeySourceFields/>
       <drivingKey/>
       <drivingKeySourceField/>
       <recordSource>E2E-warehouse-product</recordSource>
@@ -818,8 +865,8 @@ limitations under the License.
       <tableType>SATELLITE</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>768</xloc>
-      <yloc>608</yloc>
+      <xloc>752</xloc>
+      <yloc>688</yloc>
       <name>sat_lnk_warehouse_product</name>
       <virtualPath/>
     </table>
@@ -864,8 +911,8 @@ limitations under the License.
       <tableType>LINK</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>592</xloc>
-      <yloc>64</yloc>
+      <xloc>576</xloc>
+      <yloc>144</yloc>
       <name>lnk_order</name>
       <virtualPath/>
     </table>
@@ -886,8 +933,9 @@ limitations under the License.
       <description>Physical sales rep hub; natural primary role on lnk_order_rep, secondary via alias</description>
       <tableType>HUB</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
-      <xloc>80</xloc>
-      <yloc>720</yloc>
+      <customUpdatePipelinePaths/>
+      <xloc>128</xloc>
+      <yloc>800</yloc>
       <name>hub_sales_rep</name>
       <virtualPath/>
     </table>
@@ -898,8 +946,10 @@ limitations under the License.
       <tableName>hub_sales_rep</tableName>
       <description>Secondary sales rep role on an order (hub alias of hub_sales_rep)</description>
       <tableType>TABLE_REFERENCE</tableType>
-      <xloc>320</xloc>
-      <yloc>768</yloc>
+      <integrationMode>HOP_MANAGED</integrationMode>
+      <customUpdatePipelinePaths/>
+      <xloc>304</xloc>
+      <yloc>848</yloc>
       <name>hub_secondary_rep</name>
       <virtualPath/>
     </table>
@@ -953,12 +1003,145 @@ limitations under the License.
       <description>Order with primary sales rep (natural hub) and secondary rep role (hub alias)</description>
       <tableType>LINK</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
-      <xloc>560</xloc>
-      <yloc>720</yloc>
+      <customUpdatePipelinePaths/>
+      <xloc>544</xloc>
+      <yloc>800</yloc>
       <name>lnk_order_rep</name>
       <virtualPath/>
     </table>
+    <table>
+      <hub>hub_customer</hub>
+      <link/>
+      <attributes>
+        <name>address_line1</name>
+        <description/>
+        <dataType>String</dataType>
+        <length>50</length>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>city</name>
+        <description/>
+        <dataType>String</dataType>
+        <length>50</length>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>postal_code</name>
+        <description/>
+        <dataType>String</dataType>
+        <length>10</length>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>email</name>
+        <description/>
+        <dataType>String</dataType>
+        <length>50</length>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>phone</name>
+        <description/>
+        <dataType>String</dataType>
+        <length>20</length>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>segment</name>
+        <description/>
+        <dataType>String</dataType>
+        <length>20</length>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>loyalty_tier</name>
+        <description/>
+        <dataType>String</dataType>
+        <length>20</length>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>demo_score</name>
+        <description/>
+        <dataType>Integer</dataType>
+        <length>4</length>
+        <precision>0</precision>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>newsletter_opt_in</name>
+        <description/>
+        <dataType>String</dataType>
+        <length>1</length>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>preferred_channel</name>
+        <description/>
+        <dataType>String</dataType>
+        <length>10</length>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>language_code</name>
+        <description/>
+        <dataType>String</dataType>
+        <length>5</length>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <parentKeySourceFields>
+        <parentKeySourceField>customer_id</parentKeySourceField>
+      </parentKeySourceFields>
+      <drivingKey/>
+      <drivingKeySourceField/>
+      <recordSource>all-customer-info</recordSource>
+      <statusTrackingEnabled>N</statusTrackingEnabled>
+      <statusTableName/>
+      <statusFieldName>record_status</statusFieldName>
+      <activeStatusValue>ACTIVE</activeStatusValue>
+      <deletedStatusValue>DELETED</deletedStatusValue>
+      <tableName>sat_customer</tableName>
+      <description/>
+      <tableType>SATELLITE</tableType>
+      <integrationMode>HOP_MANAGED</integrationMode>
+      <customUpdatePipelinePaths/>
+      <xloc>304</xloc>
+      <yloc>80</yloc>
+      <name>sat_customer</name>
+      <virtualPath/>
+    </table>
   </tables>
-  <notes/>
+  <notes>
+    <note>
+      <text># Data Vault 2.0
+
+This is a sample [Data Vault 2.0](https://en.wikipedia.org/wiki/Data_vault_modeling) model. 
+It's the memory of your organisation for as far as source systems are concerned.
+
+This model is updated in workflow [workflows/update-retail-dv-bv-dm.hwf](../workflows/update-retail-dv-bv-dm.hwf), part of 2 top level workflows:
+
+* Simulate an initial load: [workflows/run-retail-initial.hwf](../workflows/run-retail-initial.hwf)
+* Similation an update scenario: [workflows/run-retail-update.hwf](../workflows/run-retail-update.hwf)
+
+
+</text>
+      <noteType>INFORMATION</noteType>
+      <xloc>720</xloc>
+      <yloc>16</yloc>
+      <width>544</width>
+      <height>192</height>
+    </note>
+  </notes>
   <name>retail-360</name>
 </data-vault-model>

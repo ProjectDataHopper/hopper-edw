@@ -53,23 +53,30 @@ The integration-tests project collects Data Vault / Business Vault update metric
 
 === Workflow load overview
 
-Bracket DV/BV/DM update waves with two workflow actions:
+**Preferred:** use the **Update resource definition group** workflow action. It loads every DV/BV/DM model listed on a resource definition group (order: all DV, then BV, then DM; list order within each layer), and can **manage vault update metrics** internally (assigns `DV_WORKFLOW_EXECUTION_ID` at start and publishes a load overview at the end). No separate Begin/End actions or hand-wired per-model hops are required.
 
-1. **Begin Vault Update** — assigns `DV_WORKFLOW_EXECUTION_ID` (and `DV_WORKFLOW_EXECUTION_STARTED_AT`) before model updates run.
-2. **End Vault Update** — correlates all `load_run` rows with that execution id, publishes `workflow_load_overview` / `workflow_load_overview_model` to the OPS database, and optionally writes Markdown/HTML reports and logs a full overview.
+image::images/update-resource-definition-group-action-dialog.png[Update resource definition group action dialog — group selection and layer includes,align="center"]
+
+Full option reference: link:update-resource-definition-group-action.adoc[Update resource definition group action].
 
 Retail example (`run-retail-update.hwf` / `run-retail-update-models.hwf`):
 
 ```
 Schema gate (Validate resource definitions)
   → Measure / Evaluate source quality
-  → Begin Vault Update → update-retail-dv-bv-dm → End Vault Update
+  → Update resource definition group (retail-sources)
   → Advance load control
 ```
 
+**Advanced:** you can still bracket custom multi-action graphs with:
+
+1. **Begin Vault Update** — assigns `DV_WORKFLOW_EXECUTION_ID` (and `DV_WORKFLOW_EXECUTION_STARTED_AT`) before model updates run.
+2. Per-model **Data Vault / Business Vault / Dimensional Update** actions (or a nested workflow).
+3. **End Vault Update** — correlates all `load_run` rows with that execution id, publishes `workflow_load_overview` / `workflow_load_overview_model` to the OPS database, and optionally writes Markdown/HTML reports.
+
 Schema gate details and HTML report samples: link:resource-definition-validation.adoc[Resource definition validation].
 
-Configure **End Vault Update** with the same execution metrics profile as the update actions (`retail-execution-metrics`). Retail report files default to `${PROJECT_HOME}/work/reports`.
+Configure the group action (or End Vault Update) with the same execution metrics profile as the model updates (`retail-execution-metrics`). Retail report files default to `${PROJECT_HOME}/work/reports`.
 
 Catalog record definitions for ops tables are published under the FILE catalog storage root (retail: `work/edw-catalog/hop/<project>/operations/`) — for example `workflow_load_overview`, `workflow_load_overview_model`.
 
@@ -95,5 +102,6 @@ Sort memory, partition copies, and large-model notes: link:performance-tuning.md
 
 == Related documents
 
+* link:update-resource-definition-group-action.adoc[Update resource definition group action]
 * link:execution-maps.adoc[Execution maps]
 * link:getting-started-retail.adoc[Getting started — retail example]

@@ -30,14 +30,13 @@ import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metadata.AttributeSource;
-import org.apache.hop.datavault.metadata.BusinessKey;
-import org.apache.hop.datavault.metadata.BusinessKeySource;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DataVaultSource;
 import org.apache.hop.datavault.metadata.DvHub;
 import org.apache.hop.datavault.metadata.DvLink;
 import org.apache.hop.datavault.metadata.DvLinkHubSourceKeyFieldSupport;
 import org.apache.hop.datavault.metadata.DvSatellite;
+import org.apache.hop.datavault.metadata.DvSatelliteParentKeySupport;
 import org.apache.hop.datavault.metadata.DvSourceFieldMappingSupport;
 import org.apache.hop.datavault.metadata.IDvSource;
 import org.apache.hop.datavault.metadata.SatelliteAttribute;
@@ -89,10 +88,9 @@ public class DvParquetSatelliteSourcePipelineBuilder extends DvParquetFileSource
   private void buildHubSatelliteMapping(DvSatellite satellite, Map<String, String> sourceToTarget)
       throws HopException {
     DvHub hub = findHub(satellite.getHubName());
-    for (BusinessKey key : hub.getBusinessKeys()) {
-      if (StringUtils.isNotEmpty(key.getSourceFieldName())) {
-        sourceToTarget.put(key.getSourceFieldName(), key.getName());
-      }
+    for (DvSatelliteParentKeySupport.ParentKeyField parentKey :
+        DvSatelliteParentKeySupport.resolveParentKeyFields(hub, satellite, variables)) {
+      sourceToTarget.put(parentKey.getSourceFieldName(), parentKey.getBusinessKeyName());
     }
     if (satellite.getAttributes().isEmpty()) {
       throw new HopException(
@@ -141,6 +139,11 @@ public class DvParquetSatelliteSourcePipelineBuilder extends DvParquetFileSource
         if (added.add(sourceFieldName)) {
           sourceToTarget.put(sourceFieldName, sourceFieldName);
         }
+      }
+    }
+    for (String dckSourceField : linkedLink.resolveDependentChildSourceFieldNames(variables)) {
+      if (added.add(dckSourceField)) {
+        sourceToTarget.put(dckSourceField, dckSourceField);
       }
     }
     if (sourceToTarget.isEmpty()) {

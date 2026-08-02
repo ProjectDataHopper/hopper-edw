@@ -1715,6 +1715,24 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
   }
 
   @GuiContextAction(
+      id = "vault-graph-compose-multi-table-source",
+      parentId = HopGuiVaultContext.CONTEXT_ID,
+      type = GuiActionType.Create,
+      name = "i18n::HopGuiVaultGraph.Context.ComposeMultiTableSource.Name",
+      tooltip = "i18n::HopGuiVaultGraph.Context.ComposeMultiTableSource.Tooltip",
+      image = "source-model.svg",
+      category = "Data Vault",
+      categoryOrder = "6")
+  public void composeMultiTableSource(HopGuiVaultContext context) {
+    HopGuiVaultGraph realGraph = context != null ? context.getVaultGraph() : this;
+    if (realGraph == null) {
+      return;
+    }
+    org.apache.hop.datavault.hopgui.file.sourcemodel.HopGuiSourceQueryComposeSupport.composeAndPublish(
+        realGraph.hopGui, realGraph.getShell());
+  }
+
+  @GuiContextAction(
       id = "vault-graph-add-note",
       parentId = HopGuiVaultContext.CONTEXT_ID,
       type = GuiActionType.Create,

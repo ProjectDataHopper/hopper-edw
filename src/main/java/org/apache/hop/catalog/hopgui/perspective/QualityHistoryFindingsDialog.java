@@ -171,9 +171,7 @@ public final class QualityHistoryFindingsDialog {
       item.setText(7, Const.NVL(finding.actualSummary(), ""));
       item.setText(8, Const.NVL(finding.expectedSummary(), ""));
     }
-    tableView.removeEmptyRows();
-    tableView.setRowNums();
-    tableView.optWidth(true);
+    tableView.optimizeTableView();
   }
 
   private void close() {

@@ -356,8 +356,7 @@ public class DvHashKeyDialog extends BaseTransformDialog {
       ti.setText(1, Const.NVL(field.getName(), ""));
     }
 
-    wFields.setRowNums();
-    wFields.optWidth(true);
+    wFields.optimizeTableView();
   }
 
   private void cancel() {

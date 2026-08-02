@@ -198,6 +198,9 @@ public final class RecordDefinitionCatalogWriter {
       case CSV -> buildCsvSource(request, variables);
       case PARQUET -> buildParquetSource(request, variables);
       case ICEBERG -> buildIcebergSource(request, variables);
+      case COMPOSITE ->
+          throw new HopException(
+              "Composite sources are published from a .hsm source model, not via discovery write requests.");
     };
   }
 

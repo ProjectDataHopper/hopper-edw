@@ -1,0 +1,998 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.apache.hop.datavault.workflow.actions.updateresourcegroup;
+
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.hop.catalog.metadata.DataCatalogMeta;
+import org.apache.hop.catalog.metadata.ResourceDefinitionGroupMeta;
+import org.apache.hop.core.Const;
+import org.apache.hop.core.Result;
+import org.apache.hop.core.annotations.Action;
+import org.apache.hop.core.database.DatabaseMeta;
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.file.IHasFilename;
+import org.apache.hop.core.gui.plugin.GuiElementType;
+import org.apache.hop.core.gui.plugin.GuiPlugin;
+import org.apache.hop.core.gui.plugin.GuiWidgetElement;
+import org.apache.hop.core.logging.LogChannel;
+import org.apache.hop.core.util.Utils;
+import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.metrics.VaultUpdateExecutionSupport;
+import org.apache.hop.datavault.metrics.WorkflowLoadOverviewFileWriter;
+import org.apache.hop.datavault.metrics.WorkflowLoadOverviewLoader;
+import org.apache.hop.datavault.metrics.WorkflowLoadOverviewPublisher;
+import org.apache.hop.datavault.metrics.WorkflowLoadOverviewReport;
+import org.apache.hop.datavault.metrics.WorkflowLoadOverviewReportFormatter;
+import org.apache.hop.datavault.metrics.WorkflowOverviewMetricsResolver;
+import org.apache.hop.datavault.metrics.metadata.ExecutionMetricsProfileMeta;
+import org.apache.hop.datavault.resourcedefinition.ResourceDefinitionGroupResolver;
+import org.apache.hop.datavault.workflow.WorkflowReferencedObjectVariableSupport;
+import org.apache.hop.datavault.workflow.actions.businessvaultupdate.ActionBusinessVaultUpdate;
+import org.apache.hop.datavault.workflow.actions.datavaultupdate.ActionDataVaultUpdate;
+import org.apache.hop.datavault.workflow.actions.dimensionalupdate.ActionDimensionalUpdate;
+import org.apache.hop.datavault.workflow.actions.updateresourcegroup.ResourceGroupModelUpdatePlanner.ModelUpdateJob;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.HopMetadataProperty;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.pipeline.config.PipelineRunConfiguration;
+import org.apache.hop.ui.hopgui.HopGui;
+import org.apache.hop.workflow.action.ActionBase;
+import org.apache.hop.workflow.action.IAction;
+import org.apache.hop.workflow.config.WorkflowRunConfiguration;
+
+/**
+ * Updates every DV / BV / DM model listed on a resource definition group, in layer order (DV → BV →
+ * DM) and group list order within each layer. Optionally brackets the wave with vault-update
+ * metrics (Begin/End behaviour) so separate Begin/End actions are not required.
+ */
+@Action(
+    id = "UPDATE_RESOURCE_DEFINITION_GROUP",
+    name = "i18n::ActionUpdateResourceDefinitionGroup.Name",
+    description = "i18n::ActionUpdateResourceDefinitionGroup.Description",
+    image = "resource-definition-group.svg",
+    categoryDescription = "i18n:org.apache.hop.workflow:ActionCategory.Category.General",
+    keywords = "i18n::ActionUpdateResourceDefinitionGroup.Keywords",
+    documentationUrl = "/workflow/actions/updateresourcedefinitiongroup.html")
+@GuiPlugin(description = "Update Resource Definition Group action")
+@Getter
+@Setter
+public class ActionUpdateResourceDefinitionGroup extends ActionBase implements Cloneable, IAction {
+
+  private static final Class<?> PKG = ActionUpdateResourceDefinitionGroup.class;
+
+  public static final String GUI_PLUGIN_ELEMENT_PARENT_ID =
+      "UPDATE_RESOURCE_DEFINITION_GROUP_ACTION";
+
+  public static final String GUI_PLUGIN_ELEMENT_SELECTION_TAB_ID =
+      "UPDATE_RESOURCE_DEFINITION_GROUP_ACTION_SELECTION_TAB";
+  public static final String GUI_PLUGIN_ELEMENT_RUN_TAB_ID =
+      "UPDATE_RESOURCE_DEFINITION_GROUP_ACTION_RUN_TAB";
+  public static final String GUI_PLUGIN_ELEMENT_OPERATIONS_TAB_ID =
+      "UPDATE_RESOURCE_DEFINITION_GROUP_ACTION_OPERATIONS_TAB";
+  public static final String GUI_PLUGIN_ELEMENT_CATALOG_TAB_ID =
+      "UPDATE_RESOURCE_DEFINITION_GROUP_ACTION_CATALOG_TAB";
+  public static final String GUI_PLUGIN_ELEMENT_METRICS_TAB_ID =
+      "UPDATE_RESOURCE_DEFINITION_GROUP_ACTION_METRICS_TAB";
+  public static final String GUI_PLUGIN_ELEMENT_REPORTS_TAB_ID =
+      "UPDATE_RESOURCE_DEFINITION_GROUP_ACTION_REPORTS_TAB";
+
+  /** Tab parent ids for dialog create/get/set of GuiCompositeWidgets. */
+  public static final String[] GUI_PLUGIN_ELEMENT_TAB_IDS = {
+    GUI_PLUGIN_ELEMENT_SELECTION_TAB_ID,
+    GUI_PLUGIN_ELEMENT_RUN_TAB_ID,
+    GUI_PLUGIN_ELEMENT_OPERATIONS_TAB_ID,
+    GUI_PLUGIN_ELEMENT_CATALOG_TAB_ID,
+    GUI_PLUGIN_ELEMENT_METRICS_TAB_ID,
+    GUI_PLUGIN_ELEMENT_REPORTS_TAB_ID,
+  };
+
+  @GuiWidgetElement(
+      order = "0100",
+      type = GuiElementType.METADATA,
+      metadata = ResourceDefinitionGroupMeta.class,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.Group.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.Group.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_SELECTION_TAB_ID)
+  @HopMetadataProperty
+  private String resourceDefinitionGroup;
+
+  @GuiWidgetElement(
+      order = "0200",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.IncludeDataVault.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.IncludeDataVault.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_SELECTION_TAB_ID)
+  @HopMetadataProperty
+  private boolean includeDataVault = true;
+
+  @GuiWidgetElement(
+      order = "0210",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.IncludeBusinessVault.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.IncludeBusinessVault.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_SELECTION_TAB_ID)
+  @HopMetadataProperty
+  private boolean includeBusinessVault = true;
+
+  @GuiWidgetElement(
+      order = "0220",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.IncludeDimensional.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.IncludeDimensional.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_SELECTION_TAB_ID)
+  @HopMetadataProperty
+  private boolean includeDimensional = true;
+
+  @GuiWidgetElement(
+      order = "0300",
+      type = GuiElementType.TEXT,
+      variables = true,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.LoadDate.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.LoadDate.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_RUN_TAB_ID)
+  @HopMetadataProperty
+  private String loadDate;
+
+  @GuiWidgetElement(
+      order = "0400",
+      type = GuiElementType.METADATA,
+      metadata = PipelineRunConfiguration.class,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.PipelineRunConfiguration.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.PipelineRunConfiguration.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_RUN_TAB_ID)
+  @HopMetadataProperty
+  private String pipelineRunConfiguration = "local";
+
+  @GuiWidgetElement(
+      order = "0410",
+      type = GuiElementType.METADATA,
+      metadata = WorkflowRunConfiguration.class,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.WorkflowRunConfiguration.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.WorkflowRunConfiguration.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_RUN_TAB_ID)
+  @HopMetadataProperty
+  private String workflowRunConfiguration = "local";
+
+  @GuiWidgetElement(
+      order = "0420",
+      type = GuiElementType.TEXT,
+      variables = true,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.ParallelPipelineCopies.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.ParallelPipelineCopies.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_RUN_TAB_ID)
+  @HopMetadataProperty
+  private String parallelPipelineCopies = "1";
+
+  @GuiWidgetElement(
+      order = "0500",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.LogModelCheckFailures.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.LogModelCheckFailures.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_OPERATIONS_TAB_ID)
+  @HopMetadataProperty
+  private boolean logModelCheckFailures = true;
+
+  @GuiWidgetElement(
+      order = "0510",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.AbortOnModelCheckFailures.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.AbortOnModelCheckFailures.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_OPERATIONS_TAB_ID)
+  @HopMetadataProperty
+  private boolean abortOnModelCheckFailures = true;
+
+  @GuiWidgetElement(
+      order = "0520",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.DetailedDataTypeChecking.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.DetailedDataTypeChecking.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_OPERATIONS_TAB_ID)
+  @HopMetadataProperty
+  private boolean detailedDataTypeChecking = true;
+
+  @GuiWidgetElement(
+      order = "0600",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.UpdateTargetDatabaseStructure.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.UpdateTargetDatabaseStructure.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_OPERATIONS_TAB_ID)
+  @HopMetadataProperty
+  private boolean updateTargetDatabaseStructure = true;
+
+  @GuiWidgetElement(
+      order = "0610",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.FailIfDdlNeeded.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.FailIfDdlNeeded.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_OPERATIONS_TAB_ID)
+  @HopMetadataProperty
+  private boolean failIfDdlNeeded;
+
+  @GuiWidgetElement(
+      order = "0620",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.PublishToCatalog.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.PublishToCatalog.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_CATALOG_TAB_ID)
+  @HopMetadataProperty
+  private boolean publishToCatalog = true;
+
+  @GuiWidgetElement(
+      order = "0630",
+      type = GuiElementType.METADATA,
+      metadata = DataCatalogMeta.class,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.DataCatalogConnection.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.DataCatalogConnection.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_CATALOG_TAB_ID)
+  @HopMetadataProperty
+  private String dataCatalogConnection;
+
+  @GuiWidgetElement(
+      order = "0640",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.EnsureSpecialRecords.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.EnsureSpecialRecords.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_OPERATIONS_TAB_ID)
+  @HopMetadataProperty
+  private boolean ensureSpecialRecords = true;
+
+  @GuiWidgetElement(
+      order = "0650",
+      type = GuiElementType.TEXT,
+      variables = true,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.RecordSourceGroup.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.RecordSourceGroup.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_RUN_TAB_ID)
+  @HopMetadataProperty
+  private String recordSourceGroup;
+
+  @GuiWidgetElement(
+      order = "0700",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.ManageMetrics.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.ManageMetrics.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_METRICS_TAB_ID)
+  @HopMetadataProperty
+  private boolean manageVaultUpdateMetrics = true;
+
+  @GuiWidgetElement(
+      order = "0710",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.UseWorkflowLogChannelId.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.UseWorkflowLogChannelId.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_METRICS_TAB_ID)
+  @HopMetadataProperty
+  private boolean useWorkflowLogChannelId = true;
+
+  @GuiWidgetElement(
+      order = "0720",
+      type = GuiElementType.METADATA,
+      metadata = ExecutionMetricsProfileMeta.class,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.ExecutionMetricsProfile.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.ExecutionMetricsProfile.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_METRICS_TAB_ID)
+  @HopMetadataProperty
+  private String executionMetricsProfile;
+
+  @GuiWidgetElement(
+      order = "0730",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.PublishMetricsToDatabase.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.PublishMetricsToDatabase.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_METRICS_TAB_ID)
+  @HopMetadataProperty
+  private boolean publishMetricsToDatabase = true;
+
+  @GuiWidgetElement(
+      order = "0740",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.PublishMetricsToCatalog.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.PublishMetricsToCatalog.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_METRICS_TAB_ID)
+  @HopMetadataProperty
+  private boolean publishMetricsToCatalog = true;
+
+  @GuiWidgetElement(
+      order = "0750",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.LogMetricsToWorkflow.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.LogMetricsToWorkflow.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_METRICS_TAB_ID)
+  @HopMetadataProperty
+  private boolean logMetricsToWorkflow = true;
+
+  @GuiWidgetElement(
+      order = "0760",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.WriteMarkdownReport.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.WriteMarkdownReport.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_REPORTS_TAB_ID)
+  @HopMetadataProperty
+  private boolean writeMarkdownReport;
+
+  @GuiWidgetElement(
+      order = "0770",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.WriteHtmlReport.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.WriteHtmlReport.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_REPORTS_TAB_ID)
+  @HopMetadataProperty
+  private boolean writeHtmlReport;
+
+  @GuiWidgetElement(
+      order = "0780",
+      type = GuiElementType.FOLDER,
+      variables = true,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.ReportOutputFolder.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.ReportOutputFolder.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_REPORTS_TAB_ID)
+  @HopMetadataProperty
+  private String reportOutputFolder = "${PROJECT_HOME}/work/reports";
+
+  @GuiWidgetElement(
+      order = "0790",
+      type = GuiElementType.TEXT,
+      variables = true,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.ReportFileBaseName.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.ReportFileBaseName.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_REPORTS_TAB_ID)
+  @HopMetadataProperty
+  private String reportFileBaseName;
+
+  @GuiWidgetElement(
+      order = "0800",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.FailIfNoMetricsFound.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.FailIfNoMetricsFound.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_METRICS_TAB_ID)
+  @HopMetadataProperty
+  private boolean failIfNoMetricsFound;
+
+  @GuiWidgetElement(
+      order = "0810",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.IncludePipelineDetail.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.IncludePipelineDetail.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_REPORTS_TAB_ID)
+  @HopMetadataProperty
+  private boolean includePipelineDetail = true;
+
+  @GuiWidgetElement(
+      order = "0820",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.IncludeInsights.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.IncludeInsights.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_REPORTS_TAB_ID)
+  @HopMetadataProperty
+  private boolean includeInsights = true;
+
+  public ActionUpdateResourceDefinitionGroup() {
+    super();
+  }
+
+  public ActionUpdateResourceDefinitionGroup(ActionUpdateResourceDefinitionGroup meta) {
+    super(meta);
+    this.resourceDefinitionGroup = meta.resourceDefinitionGroup;
+    this.includeDataVault = meta.includeDataVault;
+    this.includeBusinessVault = meta.includeBusinessVault;
+    this.includeDimensional = meta.includeDimensional;
+    this.loadDate = meta.loadDate;
+    this.pipelineRunConfiguration = meta.pipelineRunConfiguration;
+    this.workflowRunConfiguration = meta.workflowRunConfiguration;
+    this.parallelPipelineCopies = meta.parallelPipelineCopies;
+    this.logModelCheckFailures = meta.logModelCheckFailures;
+    this.abortOnModelCheckFailures = meta.abortOnModelCheckFailures;
+    this.detailedDataTypeChecking = meta.detailedDataTypeChecking;
+    this.updateTargetDatabaseStructure = meta.updateTargetDatabaseStructure;
+    this.failIfDdlNeeded = meta.failIfDdlNeeded;
+    this.publishToCatalog = meta.publishToCatalog;
+    this.dataCatalogConnection = meta.dataCatalogConnection;
+    this.ensureSpecialRecords = meta.ensureSpecialRecords;
+    this.recordSourceGroup = meta.recordSourceGroup;
+    this.manageVaultUpdateMetrics = meta.manageVaultUpdateMetrics;
+    this.useWorkflowLogChannelId = meta.useWorkflowLogChannelId;
+    this.executionMetricsProfile = meta.executionMetricsProfile;
+    this.publishMetricsToDatabase = meta.publishMetricsToDatabase;
+    this.publishMetricsToCatalog = meta.publishMetricsToCatalog;
+    this.logMetricsToWorkflow = meta.logMetricsToWorkflow;
+    this.writeMarkdownReport = meta.writeMarkdownReport;
+    this.writeHtmlReport = meta.writeHtmlReport;
+    this.reportOutputFolder = meta.reportOutputFolder;
+    this.reportFileBaseName = meta.reportFileBaseName;
+    this.failIfNoMetricsFound = meta.failIfNoMetricsFound;
+    this.includePipelineDetail = meta.includePipelineDetail;
+    this.includeInsights = meta.includeInsights;
+  }
+
+  @Override
+  public String getDialogClassName() {
+    return ActionUpdateResourceDefinitionGroupDialog.class.getName();
+  }
+
+  @Override
+  public Result execute(Result result, int nr) throws HopException {
+    result.setResult(false);
+    result.setNrErrors(1);
+
+    if (Utils.isEmpty(resourceDefinitionGroup)) {
+      throw new HopException(
+          BaseMessages.getString(PKG, "ActionUpdateResourceDefinitionGroup.Error.MissingGroup"));
+    }
+
+    String groupName = resolve(resourceDefinitionGroup);
+    ResourceDefinitionGroupMeta group =
+        ResourceDefinitionGroupResolver.loadGroup(groupName, getMetadataProvider());
+
+    List<ModelUpdateJob> jobs =
+        ResourceGroupModelUpdatePlanner.plan(
+            group, includeDataVault, includeBusinessVault, includeDimensional, this);
+    if (jobs.isEmpty()) {
+      throw new HopException(
+          BaseMessages.getString(
+              PKG, "ActionUpdateResourceDefinitionGroup.Error.NoModels", groupName));
+    }
+
+    String catalogConnection = resolveCatalogConnection(group);
+    String metricsProfile = Const.NVL(resolve(executionMetricsProfile), "");
+
+    String executionId = null;
+    if (manageVaultUpdateMetrics) {
+      executionId =
+          VaultUpdateExecutionSupport.beginExecution(
+              getParentWorkflow(),
+              VaultUpdateExecutionSupport.defaultExecutionIdVariableName(),
+              false,
+              useWorkflowLogChannelId);
+      if (Utils.isEmpty(executionId) && useWorkflowLogChannelId) {
+        throw new HopException(
+            BaseMessages.getString(
+                PKG, "ActionUpdateResourceDefinitionGroup.Error.MissingWorkflowLogChannelId"));
+      }
+      logBasic(
+          BaseMessages.getString(
+              PKG,
+              "ActionUpdateResourceDefinitionGroup.Log.MetricsStarted",
+              Const.NVL(executionId, "")));
+    }
+
+    int index = 0;
+    for (ModelUpdateJob job : jobs) {
+      index++;
+      logBasic(
+          BaseMessages.getString(
+              PKG,
+              "ActionUpdateResourceDefinitionGroup.Log.UpdatingModel",
+              job.layer().name(),
+              job.modelFile(),
+              Integer.toString(index),
+              Integer.toString(jobs.size())));
+      Result modelResult = runModelUpdate(job, catalogConnection, metricsProfile, result, nr);
+      mergeResult(result, modelResult);
+      if (modelResult.getNrErrors() > 0 || !modelResult.isResult()) {
+        result.setResult(false);
+        result.setNrErrors(Math.max(1, result.getNrErrors()));
+        logError(
+            BaseMessages.getString(
+                PKG,
+                "ActionUpdateResourceDefinitionGroup.Error.ModelFailed",
+                job.layer().name(),
+                job.modelFile()));
+        if (manageVaultUpdateMetrics) {
+          publishOverview(executionId, catalogConnection, metricsProfile, false);
+        }
+        return result;
+      }
+    }
+
+    if (manageVaultUpdateMetrics) {
+      publishOverview(executionId, catalogConnection, metricsProfile, true);
+    }
+
+    result.setResult(true);
+    result.setNrErrors(0);
+    logBasic(
+        BaseMessages.getString(
+            PKG,
+            "ActionUpdateResourceDefinitionGroup.Log.Completed",
+            groupName,
+            Integer.toString(jobs.size())));
+    return result;
+  }
+
+  private Result runModelUpdate(
+      ModelUpdateJob job,
+      String catalogConnection,
+      String metricsProfile,
+      Result parentResult,
+      int nr)
+      throws HopException {
+    IAction child =
+        switch (job.layer()) {
+          case DATA_VAULT ->
+              configureDataVaultUpdate(job.modelFile(), catalogConnection, metricsProfile);
+          case BUSINESS_VAULT ->
+              configureBusinessVaultUpdate(job.modelFile(), catalogConnection, metricsProfile);
+          case DIMENSIONAL ->
+              configureDimensionalUpdate(job.modelFile(), catalogConnection, metricsProfile);
+        };
+    prepareChildAction(child);
+    Result modelResult = new Result();
+    modelResult.setResult(true);
+    modelResult.setNrErrors(0);
+    // Carry forward rows / state where Hop expects it.
+    if (parentResult != null && parentResult.getRows() != null) {
+      modelResult.setRows(parentResult.getRows());
+    }
+    return child.execute(modelResult, nr);
+  }
+
+  private void prepareChildAction(IAction child) {
+    if (child instanceof ActionBase base) {
+      base.copyFrom(this);
+      base.setParentWorkflow(getParentWorkflow());
+      base.setParentWorkflowMeta(getParentWorkflowMeta());
+      base.setMetadataProvider(getMetadataProvider());
+    }
+  }
+
+  private ActionDataVaultUpdate configureDataVaultUpdate(
+      String modelFile, String catalogConnection, String metricsProfile) {
+    ActionDataVaultUpdate action = new ActionDataVaultUpdate();
+    action.setName("DV " + modelFile);
+    action.setDataVaultModelFile(modelFile);
+    action.setPipelineRunConfiguration(pipelineRunConfiguration);
+    action.setWorkflowRunConfiguration(workflowRunConfiguration);
+    action.setParallelPipelineCopies(parallelPipelineCopies);
+    action.setLogModelCheckFailures(logModelCheckFailures);
+    action.setAbortOnModelCheckFailures(abortOnModelCheckFailures);
+    action.setDetailedDataTypeChecking(detailedDataTypeChecking);
+    action.setUpdateTargetDatabaseStructure(updateTargetDatabaseStructure);
+    action.setFailIfDdlNeeded(failIfDdlNeeded);
+    action.setPublishToCatalog(publishToCatalog);
+    action.setDataCatalogConnection(catalogConnection);
+    action.setEnsureSpecialRecords(ensureSpecialRecords);
+    action.setLoadDate(loadDate);
+    action.setRecordSourceGroup(recordSourceGroup);
+    action.setExecutionMetricsProfile(metricsProfile);
+    action.setDoNotUpdateTargetDatabase(false);
+    return action;
+  }
+
+  private ActionBusinessVaultUpdate configureBusinessVaultUpdate(
+      String modelFile, String catalogConnection, String metricsProfile) {
+    ActionBusinessVaultUpdate action = new ActionBusinessVaultUpdate();
+    action.setName("BV " + modelFile);
+    action.setBusinessVaultModelFile(modelFile);
+    action.setPipelineRunConfiguration(pipelineRunConfiguration);
+    action.setWorkflowRunConfiguration(workflowRunConfiguration);
+    action.setParallelPipelineCopies(parallelPipelineCopies);
+    action.setLogModelCheckFailures(logModelCheckFailures);
+    action.setAbortOnModelCheckFailures(abortOnModelCheckFailures);
+    action.setUpdateTargetDatabaseStructure(updateTargetDatabaseStructure);
+    action.setFailIfDdlNeeded(failIfDdlNeeded);
+    action.setPublishToCatalog(publishToCatalog);
+    action.setDataCatalogConnection(catalogConnection);
+    action.setExecutionMetricsProfile(metricsProfile);
+    action.setDoNotUpdateTargetDatabase(false);
+    return action;
+  }
+
+  private ActionDimensionalUpdate configureDimensionalUpdate(
+      String modelFile, String catalogConnection, String metricsProfile) {
+    ActionDimensionalUpdate action = new ActionDimensionalUpdate();
+    action.setName("DM " + modelFile);
+    action.setDimensionalModelFile(modelFile);
+    action.setPipelineRunConfiguration(pipelineRunConfiguration);
+    action.setWorkflowRunConfiguration(workflowRunConfiguration);
+    action.setParallelPipelineCopies(parallelPipelineCopies);
+    action.setLogModelCheckFailures(logModelCheckFailures);
+    action.setAbortOnModelCheckFailures(abortOnModelCheckFailures);
+    action.setUpdateTargetDatabaseStructure(updateTargetDatabaseStructure);
+    action.setFailIfDdlNeeded(failIfDdlNeeded);
+    action.setPublishToCatalog(publishToCatalog);
+    action.setDataCatalogConnection(catalogConnection);
+    action.setExecutionMetricsProfile(metricsProfile);
+    action.setDoNotUpdateTargetDatabase(false);
+    return action;
+  }
+
+  private void publishOverview(
+      String executionId, String catalogConnection, String metricsProfile, boolean waveSucceeded)
+      throws HopException {
+    if (Utils.isEmpty(metricsProfile)) {
+      logBasic(
+          BaseMessages.getString(PKG, "ActionUpdateResourceDefinitionGroup.Log.NoMetricsProfile"));
+      return;
+    }
+    String resolvedId =
+        VaultUpdateExecutionSupport.resolveExecutionId(
+            this,
+            VaultUpdateExecutionSupport.defaultExecutionIdVariableName(),
+            useWorkflowLogChannelId,
+            VaultUpdateExecutionSupport.resolveWorkflowLogChannelId(getParentWorkflow()));
+    if (Utils.isEmpty(resolvedId)) {
+      resolvedId = executionId;
+    }
+    if (Utils.isEmpty(resolvedId)) {
+      if (failIfNoMetricsFound) {
+        throw new HopException(
+            BaseMessages.getString(
+                PKG, "ActionUpdateResourceDefinitionGroup.Error.MissingExecutionId"));
+      }
+      logBasic(
+          BaseMessages.getString(
+              PKG, "ActionUpdateResourceDefinitionGroup.Log.NoExecutionIdForOverview"));
+      return;
+    }
+
+    WorkflowOverviewMetricsResolver.ResolvedOverviewMetrics settings =
+        WorkflowOverviewMetricsResolver.resolve(
+            metricsProfile, catalogConnection, this, getMetadataProvider());
+    DatabaseMeta databaseMeta =
+        getMetadataProvider().getSerializer(DatabaseMeta.class).load(settings.targetDatabaseName());
+    if (databaseMeta == null) {
+      String message =
+          BaseMessages.getString(
+              PKG,
+              "ActionUpdateResourceDefinitionGroup.Error.MissingMetricsDatabase",
+              settings.targetDatabaseName());
+      if (failIfNoMetricsFound) {
+        throw new HopException(message);
+      }
+      logBasic(message);
+      return;
+    }
+
+    Date startedAt = VaultUpdateExecutionSupport.resolveStartedAt(this, null);
+    WorkflowLoadOverviewReport report =
+        WorkflowLoadOverviewLoader.load(
+            databaseMeta,
+            settings.operationsSchema(),
+            resolvedId,
+            resolveRootWorkflowName(),
+            startedAt,
+            this,
+            includePipelineDetail,
+            includeInsights,
+            WorkflowLoadOverviewReport.DEFAULT_MAX_PIPELINES_PER_MODEL);
+
+    if (report == null) {
+      String message =
+          BaseMessages.getString(
+              PKG, "ActionUpdateResourceDefinitionGroup.Error.NoMetricsFound", resolvedId);
+      if (failIfNoMetricsFound) {
+        throw new HopException(message);
+      }
+      logBasic(message);
+      return;
+    }
+
+    if (publishMetricsToDatabase || publishMetricsToCatalog) {
+      WorkflowLoadOverviewPublisher.publish(
+          null,
+          settings,
+          report,
+          publishMetricsToCatalog,
+          publishMetricsToDatabase,
+          this,
+          getMetadataProvider());
+    }
+
+    if (logMetricsToWorkflow) {
+      String formatted =
+          WorkflowLoadOverviewReportFormatter.formatLog(
+              report, includePipelineDetail, includeInsights);
+      if (!Utils.isEmpty(formatted)) {
+        logBasic(formatted);
+      }
+    }
+
+    if (writeMarkdownReport) {
+      String path =
+          WorkflowLoadOverviewFileWriter.writeMarkdown(
+              reportOutputFolder,
+              reportFileBaseName,
+              report,
+              includePipelineDetail,
+              includeInsights,
+              this);
+      if (!Utils.isEmpty(path)) {
+        logBasic(
+            BaseMessages.getString(
+                PKG, "ActionUpdateResourceDefinitionGroup.Log.MarkdownWritten", path));
+      }
+    }
+    if (writeHtmlReport) {
+      String path =
+          WorkflowLoadOverviewFileWriter.writeHtml(
+              reportOutputFolder,
+              reportFileBaseName,
+              report,
+              includePipelineDetail,
+              includeInsights,
+              this);
+      if (!Utils.isEmpty(path)) {
+        logBasic(
+            BaseMessages.getString(
+                PKG, "ActionUpdateResourceDefinitionGroup.Log.HtmlWritten", path));
+      }
+    }
+
+    if (!waveSucceeded) {
+      logBasic(
+          BaseMessages.getString(
+              PKG, "ActionUpdateResourceDefinitionGroup.Log.OverviewAfterFailure", resolvedId));
+    }
+  }
+
+  private String resolveCatalogConnection(ResourceDefinitionGroupMeta group) {
+    String fromAction = resolve(Const.NVL(dataCatalogConnection, ""));
+    if (!Utils.isEmpty(fromAction)) {
+      return fromAction;
+    }
+    if (group != null && !Utils.isEmpty(group.getDataCatalogConnection())) {
+      return resolve(group.getDataCatalogConnection());
+    }
+    return null;
+  }
+
+  private String resolveRootWorkflowName() {
+    if (getParentWorkflow() != null && getParentWorkflow().getWorkflowMeta() != null) {
+      return getParentWorkflow().getWorkflowMeta().getName();
+    }
+    if (getParentWorkflowMeta() != null) {
+      return getParentWorkflowMeta().getName();
+    }
+    return getName();
+  }
+
+  private static void mergeResult(Result into, Result from) {
+    if (into == null || from == null) {
+      return;
+    }
+    into.setNrErrors(into.getNrErrors() + from.getNrErrors());
+    into.setNrLinesRead(into.getNrLinesRead() + from.getNrLinesRead());
+    into.setNrLinesWritten(into.getNrLinesWritten() + from.getNrLinesWritten());
+    into.setNrLinesInput(into.getNrLinesInput() + from.getNrLinesInput());
+    into.setNrLinesOutput(into.getNrLinesOutput() + from.getNrLinesOutput());
+    into.setNrLinesUpdated(into.getNrLinesUpdated() + from.getNrLinesUpdated());
+    into.setNrLinesRejected(into.getNrLinesRejected() + from.getNrLinesRejected());
+    if (!Utils.isEmpty(from.getLogText())) {
+      into.setLogText(Const.NVL(into.getLogText(), "") + from.getLogText());
+    }
+  }
+
+  @Override
+  public IAction clone() {
+    return new ActionUpdateResourceDefinitionGroup(this);
+  }
+
+  @Override
+  public boolean isEvaluation() {
+    return true;
+  }
+
+  @Override
+  public boolean isUnconditional() {
+    return false;
+  }
+
+  @Override
+  public boolean supportsDrillDown() {
+    return true;
+  }
+
+  /**
+   * GUI labels for models listed on the resource definition group. Paths are shown project-relative
+   * without a {@code ${PROJECT_HOME}/} prefix (e.g. {@code models/retail-360.hdv}).
+   */
+  @Override
+  public String[] getReferencedObjectDescriptions() {
+    try {
+      IVariables vars = effectiveReferencedObjectVariables(null);
+      List<ReferencedModel> models = listReferencedModels(metadataProviderForGui(), vars);
+      String[] descriptions = new String[models.size()];
+      for (int i = 0; i < models.size(); i++) {
+        ReferencedModel model = models.get(i);
+        descriptions[i] =
+            BaseMessages.getString(
+                PKG,
+                model.descriptionKey(),
+                toDisplayRelativePath(model.storedPath(), vars));
+      }
+      return descriptions;
+    } catch (Exception e) {
+      LogChannel.GENERAL.logError("Error getting reference descriptions", e);
+      return super.getReferencedObjectDescriptions();
+    }
+  }
+
+  @Override
+  public boolean[] isReferencedObjectEnabled() {
+    try {
+      IVariables vars = effectiveReferencedObjectVariables(null);
+      List<ReferencedModel> models = listReferencedModels(metadataProviderForGui(), vars);
+      boolean[] enabled = new boolean[models.size()];
+      for (int i = 0; i < models.size(); i++) {
+        enabled[i] = StringUtils.isNotEmpty(models.get(i).storedPath());
+      }
+      return enabled;
+    } catch (Exception e) {
+      LogChannel.GENERAL.logError("Error checking referenced objects", e);
+      return super.isReferencedObjectEnabled();
+    }
+  }
+
+  /**
+   * Opens the model file at {@code index} (same order as {@link #getReferencedObjectDescriptions()}).
+   * Returns the stored path (often with {@code ${PROJECT_HOME}}); Hop resolves variables when
+   * opening.
+   */
+  @Override
+  public IHasFilename loadReferencedObject(
+      int index, IHopMetadataProvider metadataProvider, IVariables variables) throws HopException {
+    try {
+      IVariables vars = effectiveReferencedObjectVariables(variables);
+      IHopMetadataProvider provider =
+          metadataProvider != null ? metadataProvider : metadataProviderForGui();
+      List<ReferencedModel> models = listReferencedModels(provider, vars);
+      if (index < 0 || index >= models.size()) {
+        return super.loadReferencedObject(index, metadataProvider, variables);
+      }
+      String storedPath = models.get(index).storedPath();
+      return () -> storedPath;
+    } catch (Exception e) {
+      LogChannel.GENERAL.logError("Error loading referenced object", e);
+      return super.loadReferencedObject(index, metadataProvider, variables);
+    }
+  }
+
+  private IVariables effectiveReferencedObjectVariables(IVariables preferred) {
+    return WorkflowReferencedObjectVariableSupport.effectiveVariables(
+        this, getParentWorkflowMeta(), preferred != null ? preferred : this);
+  }
+
+  private static IHopMetadataProvider metadataProviderForGui() {
+    try {
+      return HopGui.getInstance().getMetadataProvider();
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  /**
+   * Ordered model files from the configured resource definition group (DV, then BV, then DM), using
+   * the same list order as group metadata. Empty paths are skipped.
+   */
+  private List<ReferencedModel> listReferencedModels(
+      IHopMetadataProvider metadataProvider, IVariables variables) throws HopException {
+    String groupName =
+        variables != null
+            ? variables.resolve(Const.NVL(resourceDefinitionGroup, ""))
+            : Const.NVL(resourceDefinitionGroup, "");
+    if (Utils.isEmpty(groupName) || metadataProvider == null) {
+      return List.of();
+    }
+    ResourceDefinitionGroupMeta group =
+        ResourceDefinitionGroupResolver.loadGroup(groupName, metadataProvider);
+    List<ReferencedModel> models = new ArrayList<>();
+    appendReferenced(
+        models,
+        group.getDataVaultModelFiles(),
+        "ActionUpdateResourceDefinitionGroup.ReferencedObject.DataVault");
+    appendReferenced(
+        models,
+        group.getBusinessVaultModelFiles(),
+        "ActionUpdateResourceDefinitionGroup.ReferencedObject.BusinessVault");
+    appendReferenced(
+        models,
+        group.getDimensionalModelFiles(),
+        "ActionUpdateResourceDefinitionGroup.ReferencedObject.Dimensional");
+    return models;
+  }
+
+  private static void appendReferenced(
+      List<ReferencedModel> models, List<String> files, String descriptionKey) {
+    if (files == null) {
+      return;
+    }
+    for (String file : files) {
+      if (StringUtils.isNotEmpty(file)) {
+        models.add(new ReferencedModel(file.trim(), descriptionKey));
+      }
+    }
+  }
+
+  /**
+   * Human-readable project-relative path for GUI menus: strips a leading {@code ${PROJECT_HOME}/}
+   * (or resolved absolute project home). Does not rewrite paths for loading.
+   *
+   * <p>Examples:
+   *
+   * <ul>
+   *   <li>{@code ${PROJECT_HOME}/models/retail-360.hdv} → {@code models/retail-360.hdv}
+   *   <li>{@code /proj/models/x.hdv} with {@code PROJECT_HOME=/proj} → {@code models/x.hdv}
+   *   <li>paths outside the project are left unchanged (or basename if absolute under another root)
+   * </ul>
+   */
+  static String toDisplayRelativePath(String storedOrRawPath, IVariables variables) {
+    if (Utils.isEmpty(storedOrRawPath)) {
+      return "";
+    }
+    String path = storedOrRawPath.trim().replace('\\', '/');
+    final String projectHomeToken = "${" + WorkflowReferencedObjectVariableSupport.VARIABLE_PROJECT_HOME + "}";
+    final String projectHomePrefix = projectHomeToken + "/";
+
+    if (path.startsWith(projectHomePrefix)) {
+      return path.substring(projectHomePrefix.length());
+    }
+    if (path.equals(projectHomeToken) || path.equals(projectHomeToken + "/")) {
+      return ".";
+    }
+
+    // Already project-relative without variable (models/foo.hdv)
+    if (!path.startsWith("/") && !path.matches("^[A-Za-z]:/.*") && !path.contains("${")) {
+      return path;
+    }
+
+    if (variables == null) {
+      return stripResolvedProjectHome(path, null);
+    }
+    String resolvedPath = variables.resolve(path).replace('\\', '/');
+    String projectHome = variables.resolve(projectHomeToken);
+    if (Utils.isEmpty(projectHome) || projectHome.contains("${")) {
+      return resolvedPath.contains("/")
+          ? resolvedPath.substring(resolvedPath.lastIndexOf('/') + 1)
+          : resolvedPath;
+    }
+    return stripResolvedProjectHome(resolvedPath, projectHome.replace('\\', '/'));
+  }
+
+  private static String stripResolvedProjectHome(String resolvedPath, String projectHome) {
+    if (Utils.isEmpty(resolvedPath)) {
+      return "";
+    }
+    if (Utils.isEmpty(projectHome)) {
+      return resolvedPath;
+    }
+    try {
+      Path home = Path.of(projectHome).toAbsolutePath().normalize();
+      Path file = Path.of(resolvedPath).toAbsolutePath().normalize();
+      if (file.startsWith(home)) {
+        String relative = home.relativize(file).toString().replace('\\', '/');
+        return Utils.isEmpty(relative) ? "." : relative;
+      }
+    } catch (Exception ignored) {
+      // fall through
+    }
+    String home = projectHome.endsWith("/") ? projectHome : projectHome + "/";
+    if (resolvedPath.startsWith(home)) {
+      return resolvedPath.substring(home.length());
+    }
+    return resolvedPath;
+  }
+
+  /** One model file listed on the resource definition group (open-referenced-object entry). */
+  record ReferencedModel(String storedPath, String descriptionKey) {}
+}

@@ -864,8 +864,7 @@ public class JunkDimensionDialog extends BaseTransformDialog {
     setAutoincUse();
     setSequence();
     setTableMax();
-    wKey.setRowNums();
-    wKey.optWidth(true);
+    wKey.optimizeTableView();
     wTransformName.selectAll();
     wTransformName.setFocus();
   }

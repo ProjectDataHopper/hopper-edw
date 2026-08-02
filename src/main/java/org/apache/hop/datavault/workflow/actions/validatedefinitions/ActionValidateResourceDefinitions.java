@@ -27,6 +27,7 @@ import lombok.Setter;
 import org.apache.hop.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.apache.hop.catalog.versioning.CatalogVersionEntry;
 import org.apache.hop.catalog.versioning.CatalogVersionService;
+import org.apache.hop.core.Const;
 import org.apache.hop.core.Result;
 import org.apache.hop.core.annotations.Action;
 import org.apache.hop.core.exception.HopException;
@@ -35,6 +36,7 @@ import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.GuiWidgetElement;
 import org.apache.hop.core.logging.ILogChannel;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.catalog.DvSourceCatalogService;
 import org.apache.hop.datavault.resourcedefinition.ResourceDefinitionGroupResolver;
 import org.apache.hop.datavault.resourcedefinition.SchemaCompareMode;
@@ -44,7 +46,11 @@ import org.apache.hop.datavault.resourcedefinition.SchemaImpactSimulationService
 import org.apache.hop.datavault.resourcedefinition.SchemaValidationFailureSeverity;
 import org.apache.hop.datavault.resourcedefinition.SchemaValidationReportFileWriter;
 import org.apache.hop.datavault.resourcedefinition.SchemaValidationReportFormatter;
+import org.apache.hop.datavault.resourcedefinition.ValidationFindingFormatter;
 import org.apache.hop.datavault.resourcedefinition.ValidationReport;
+import org.apache.hop.datavault.resourcedefinition.ValidationReport.IssueSeverity;
+import org.apache.hop.datavault.resourcedefinition.ValidationReport.RecordDefinitionValidation;
+import org.apache.hop.datavault.resourcedefinition.ValidationReport.ValidationIssue;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
@@ -84,6 +90,9 @@ public class ActionValidateResourceDefinitions extends ActionBase implements Clo
   public static final String WIDGET_ID_FAILURE_SEVERITY = "validate-failure-severity";
   public static final String WIDGET_ID_FAIL_ON_WARNINGS = "validate-fail-on-warnings";
   public static final String WIDGET_ID_INCLUDE_IMPACT = "validate-include-impact";
+  public static final String WIDGET_ID_CHECK_TARGET_DATABASES = "validate-check-target-databases";
+  public static final String WIDGET_ID_EXPECT_AUTO_TARGET_CREATE =
+      "validate-expect-auto-target-create";
 
   /** Extension-data key for downstream actions that want the report text. */
   public static final String RESULT_ATTR_REPORT = "schemaValidationReportText";
@@ -209,8 +218,36 @@ public class ActionValidateResourceDefinitions extends ActionBase implements Clo
   @HopMetadataProperty
   private boolean includeImpact = true;
 
+  @GuiWidgetElement(
+      id = WIDGET_ID_CHECK_TARGET_DATABASES,
+      order = "1100",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::ActionValidateResourceDefinitions.CheckTargetDatabases.Label",
+      toolTip = "i18n::ActionValidateResourceDefinitions.CheckTargetDatabases.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_PARENT_ID)
+  @HopMetadataProperty
+  private boolean checkTargetDatabases;
+
+  /**
+   * Y/N or Hop variable (e.g. {@code ${EXPECT_AUTOMATIC_TARGET_TABLE_CREATION}}). When true and
+   * target DB checks are on, missing-table CREATE findings are omitted (vault update will create
+   * them). ALTER drift on existing tables still warns.
+   */
+  @GuiWidgetElement(
+      id = WIDGET_ID_EXPECT_AUTO_TARGET_CREATE,
+      order = "1200",
+      type = GuiElementType.COMBO,
+      variables = true,
+      comboValuesMethod = "getYesNoOptions",
+      label = "i18n::ActionValidateResourceDefinitions.ExpectAutoTargetCreate.Label",
+      toolTip = "i18n::ActionValidateResourceDefinitions.ExpectAutoTargetCreate.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_PARENT_ID)
+  @HopMetadataProperty
+  private String expectAutomaticTargetTableCreation;
+
   public ActionValidateResourceDefinitions() {
     super();
+    this.expectAutomaticTargetTableCreation = "N";
   }
 
   public ActionValidateResourceDefinitions(ActionValidateResourceDefinitions meta) {
@@ -225,6 +262,11 @@ public class ActionValidateResourceDefinitions extends ActionBase implements Clo
     this.failureSeverity = meta.failureSeverity;
     this.failOnWarnings = meta.failOnWarnings;
     this.includeImpact = meta.includeImpact;
+    this.checkTargetDatabases = meta.checkTargetDatabases;
+    this.expectAutomaticTargetTableCreation =
+        meta.expectAutomaticTargetTableCreation != null
+            ? meta.expectAutomaticTargetTableCreation
+            : "N";
   }
 
   /**
@@ -255,6 +297,10 @@ public class ActionValidateResourceDefinitions extends ActionBase implements Clo
         SchemaValidationFailureSeverity.WARN_ONLY.name());
   }
 
+  public List<String> getYesNoOptions(ILogChannel log, IHopMetadataProvider metadataProvider) {
+    return Arrays.asList("Y", "N");
+  }
+
   /**
    * Catalog version tags for the FILE catalog of the selected resource definition group. Editable
    * ComboVar still allows free typing (including variable expressions). Never returns null; never
@@ -263,7 +309,7 @@ public class ActionValidateResourceDefinitions extends ActionBase implements Clo
   public List<String> getCatalogVersionTagOptions(
       ILogChannel log, IHopMetadataProvider metadataProvider) {
     try {
-      return listCatalogVersionTags(metadataProvider, log);
+      return listCatalogVersionTags(metadataProvider, log, this);
     } catch (Throwable t) {
       if (log != null) {
         log.logError(
@@ -275,26 +321,37 @@ public class ActionValidateResourceDefinitions extends ActionBase implements Clo
 
   /**
    * Same as {@link #getCatalogVersionTagOptions} but usable from the dialog after group changes.
+   * Pass design-time variables (dialog / HopGui project vars) so FILE catalog paths like {@code
+   * ${PROJECT_HOME}/work/edw-catalog} resolve the same way as Data Catalog tagging.
    */
   public List<String> listCatalogVersionTags(
       IHopMetadataProvider metadataProvider, ILogChannel log) {
+    return listCatalogVersionTags(metadataProvider, log, this);
+  }
+
+  public List<String> listCatalogVersionTags(
+      IHopMetadataProvider metadataProvider, ILogChannel log, IVariables variables) {
     Set<String> tags = new LinkedHashSet<>();
     if (metadataProvider == null || Utils.isEmpty(resourceDefinitionGroup)) {
       return new ArrayList<>(tags);
     }
+    IVariables vars = variables != null ? variables : this;
     try {
       ResourceDefinitionGroupMeta group =
           ResourceDefinitionGroupResolver.loadGroup(resourceDefinitionGroup, metadataProvider);
       String connection = group != null ? group.getDataCatalogConnection() : null;
+      if (!Utils.isEmpty(connection)) {
+        connection = vars.resolve(connection);
+      }
       if (Utils.isEmpty(connection)) {
         connection =
-            DvSourceCatalogService.resolvePreferredCatalogConnection(null, this, metadataProvider);
+            DvSourceCatalogService.resolvePreferredCatalogConnection(null, vars, metadataProvider);
       }
       if (Utils.isEmpty(connection)) {
         return new ArrayList<>(tags);
       }
       for (CatalogVersionEntry entry :
-          CatalogVersionService.listVersions(connection, this, metadataProvider)) {
+          CatalogVersionService.listVersions(connection, vars, metadataProvider)) {
         if (entry != null && !Utils.isEmpty(entry.getTag())) {
           tags.add(entry.getTag().trim());
         }
@@ -340,6 +397,17 @@ public class ActionValidateResourceDefinitions extends ActionBase implements Clo
       baselineTag = versionTag;
     }
 
+    boolean expectAutoCreate =
+        checkTargetDatabases && resolveBooleanOption(expectAutomaticTargetTableCreation);
+    if (checkTargetDatabases) {
+      logBasic(
+          BaseMessages.getString(
+              PKG,
+              "ActionValidateResourceDefinitions.Log.ExpectAutoCreate",
+              Const.NVL(expectAutomaticTargetTableCreation, ""),
+              Boolean.toString(expectAutoCreate)));
+    }
+
     SchemaImpactSimulationRequest request =
         SchemaImpactSimulationRequest.builder()
             .resourceDefinitionGroup(groupName)
@@ -348,10 +416,12 @@ public class ActionValidateResourceDefinitions extends ActionBase implements Clo
             .compareMode(mode)
             .includeImpact(includeImpact)
             .detailedDataTypeChecking(true)
+            .checkTargetDatabases(checkTargetDatabases)
+            .expectAutomaticTargetTableCreation(expectAutoCreate)
             .build();
 
     SchemaImpactSimulationResult simulation =
-        SchemaImpactSimulationService.run(request, getVariables(), getMetadataProvider());
+        SchemaImpactSimulationService.run(request, this, getMetadataProvider());
     ValidationReport report = simulation.validationReport();
 
     String formatted = SchemaValidationReportFormatter.formatLog(simulation);
@@ -366,7 +436,7 @@ public class ActionValidateResourceDefinitions extends ActionBase implements Clo
       SchemaValidationReportFileWriter.ReportFormat format = parseReportFormat(reportFormat);
       List<String> written =
           SchemaValidationReportFileWriter.write(
-              outputPath, reportFileBaseName, simulation, format, getVariables());
+              outputPath, reportFileBaseName, simulation, format, this);
       for (String path : written) {
         logBasic(
             BaseMessages.getString(
@@ -376,18 +446,89 @@ public class ActionValidateResourceDefinitions extends ActionBase implements Clo
 
     SchemaValidationFailureSeverity severity = resolveFailureSeverity();
     boolean failed = severity.shouldFail(report);
-    if (failed && severity == SchemaValidationFailureSeverity.FAIL_ON_WARNINGS) {
-      logError(
-          BaseMessages.getString(PKG, "ActionValidateResourceDefinitions.Error.WarningsPresent"));
+    if (failed) {
+      // Emit each gate-failing finding as ERROR so Hop GUI highlights them in red among the
+      // lengthy Basic log of the full report (which stays logBasic above).
+      int logged = logGateFailingFindings(report, severity);
+      if (severity == SchemaValidationFailureSeverity.FAIL_ON_WARNINGS) {
+        logError(
+            BaseMessages.getString(
+                PKG,
+                "ActionValidateResourceDefinitions.Error.WarningsPresent",
+                Integer.toString(Math.max(logged, report != null ? report.getGateRelevantIssueCount() : 0))));
+      } else {
+        logError(
+            BaseMessages.getString(
+                PKG,
+                "ActionValidateResourceDefinitions.Error.ValidationFailed",
+                Integer.toString(Math.max(logged, 1))));
+      }
     }
 
     result.setResult(!failed);
-    result.setNrErrors(failed ? Math.max(1, report != null ? report.getIssueCount() : 1) : 0);
+    int gateIssues = report != null ? report.getGateRelevantIssueCount() : 0;
+    result.setNrErrors(failed ? Math.max(1, gateIssues) : 0);
     if (failed) {
       result.setLogText(
-          BaseMessages.getString(PKG, "ActionValidateResourceDefinitions.Error.ValidationFailed"));
+          BaseMessages.getString(
+              PKG, "ActionValidateResourceDefinitions.Error.ValidationFailed", Integer.toString(gateIssues)));
     }
     return result;
+  }
+
+  /**
+   * Logs WARNING/BLOCKING findings that fail the configured severity policy with {@link
+   * #logError(String)} so they stand out in Hop GUI workflow logs.
+   *
+   * @return number of findings logged at ERROR
+   */
+  private int logGateFailingFindings(
+      ValidationReport report, SchemaValidationFailureSeverity policy) {
+    if (report == null) {
+      return 0;
+    }
+    boolean warningsFailGate = policy == SchemaValidationFailureSeverity.FAIL_ON_WARNINGS;
+    int logged = 0;
+    for (RecordDefinitionValidation validation : report.getRecordValidations()) {
+      if (validation == null || validation.issues() == null) {
+        continue;
+      }
+      String recordKey =
+          validation.key() != null
+              ? validation.key().getNamespace() + "/" + validation.key().getName()
+              : "?";
+      for (ValidationIssue issue : validation.issues()) {
+        if (issue == null || issue.severity() == null) {
+          continue;
+        }
+        if (issue.severity() == IssueSeverity.BLOCKING
+            || (warningsFailGate && issue.severity() == IssueSeverity.WARNING)) {
+          logError(formatGateFindingLine(recordKey, issue));
+          logged++;
+        }
+      }
+    }
+    return logged;
+  }
+
+  /** Compact one-liner: {@code BLOCKING / BASELINE_CONTRACT_MISSING  ns/name — short finding}. */
+  static String formatGateFindingLine(String recordKey, ValidationIssue issue) {
+    String severity =
+        issue.severity() != null ? issue.severity().name() : "?";
+    String kind = issue.kind() != null ? issue.kind().name() : "?";
+    StringBuilder line = new StringBuilder();
+    line.append(severity).append(" / ").append(kind);
+    if (!Utils.isEmpty(recordKey)) {
+      line.append("  ").append(recordKey);
+    }
+    if (!Utils.isEmpty(issue.fieldName())) {
+      line.append("  field=").append(issue.fieldName());
+    }
+    String finding = ValidationFindingFormatter.shortTitle(issue.message());
+    if (!Utils.isEmpty(finding)) {
+      line.append(" — ").append(finding);
+    }
+    return line.toString();
   }
 
   private SchemaValidationFailureSeverity resolveFailureSeverity() {
@@ -418,6 +559,15 @@ public class ActionValidateResourceDefinitions extends ActionBase implements Clo
     }
     String resolved = resolve(value);
     return Utils.isEmpty(resolved) ? null : resolved.trim();
+  }
+
+  /**
+   * Resolve a Y/N-style option that may contain Hop variables (including workflow parameters that
+   * Hop has already activated as variables). {@link #resolve(String)} then {@link
+   * Const#toBoolean(String)}.
+   */
+  private boolean resolveBooleanOption(String raw) {
+    return Const.toBoolean(Const.trim(resolve(Const.NVL(raw, ""))));
   }
 
   private static SchemaCompareMode parseCompareMode(String raw) {

@@ -114,7 +114,7 @@ public final class SourceFieldPrimaryKeySupport {
     for (SourceField field : primaryKeyFields(fields)) {
       BusinessKey businessKey = new BusinessKey(Const.NVL(field.getName(), ""));
       businessKey.setDescription(Const.NVL(field.getDescription(), ""));
-      businessKey.setDataType(Const.NVL(field.getSourceDataType(), ""));
+      businessKey.setDataType(DvDataTypeSupport.preferredDataTypeLabel(field));
       businessKey.setLength(Const.NVL(field.getLength(), ""));
       businessKey.setPrecision(Const.NVL(field.getPrecision(), ""));
       businessKey.setSourceFieldName(Const.NVL(field.getName(), ""));

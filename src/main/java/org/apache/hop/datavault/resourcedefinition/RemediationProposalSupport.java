@@ -23,6 +23,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.hop.catalog.discovery.RecordDefinitionSchemaDiffSupport;
+import org.apache.hop.core.Const;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.datavault.resourcedefinition.ValidationReport.IssueKind;
 import org.apache.hop.datavault.resourcedefinition.ValidationReport.IssueSeverity;
@@ -42,21 +43,31 @@ public final class RemediationProposalSupport {
       RecordDefinitionSchemaDiffSupport.SchemaDiff diff,
       List<SourceUsage> usages,
       String sourceUnavailableMessage) {
+    return buildIssues(diff, usages, sourceUnavailableMessage, IssueKind.SOURCE_UNAVAILABLE, null);
+  }
+
+  /**
+   * @param unavailableKind kind when {@code sourceUnavailableMessage} is set (live, baseline, …)
+   * @param recordKey display key for remediation details (optional)
+   */
+  public static List<ValidationIssue> buildIssues(
+      RecordDefinitionSchemaDiffSupport.SchemaDiff diff,
+      List<SourceUsage> usages,
+      String sourceUnavailableMessage,
+      IssueKind unavailableKind,
+      String recordKey) {
     List<ValidationIssue> issues = new ArrayList<>();
     if (!Utils.isEmpty(sourceUnavailableMessage)) {
+      IssueKind kind =
+          unavailableKind != null ? unavailableKind : IssueKind.SOURCE_UNAVAILABLE;
       issues.add(
           new ValidationIssue(
-              ValidationIssueSupport.buildIssueId(IssueKind.SOURCE_UNAVAILABLE, null, null),
-              IssueKind.SOURCE_UNAVAILABLE,
+              ValidationIssueSupport.buildIssueId(kind, null, null),
+              kind,
               IssueSeverity.BLOCKING,
               null,
               sourceUnavailableMessage,
-              List.of(
-                  new RemediationProposal(
-                      ProposalType.BLOCK_UPDATE_UNTIL_RESOLVED,
-                      BaseMessages.getString(
-                          PKG, "RemediationProposalSupport.BlockUpdateUntilResolved.Summary"),
-                      sourceUnavailableMessage))));
+              proposalsForUnavailable(kind, recordKey, sourceUnavailableMessage)));
       return issues;
     }
 
@@ -71,6 +82,40 @@ public final class RemediationProposalSupport {
       issues.add(buildIssueForChange(change, usages));
     }
     return issues;
+  }
+
+  private static List<RemediationProposal> proposalsForUnavailable(
+      IssueKind kind, String recordKey, String message) {
+    List<RemediationProposal> proposals = new ArrayList<>();
+    if (kind == IssueKind.BASELINE_CONTRACT_MISSING) {
+      proposals.add(
+          new RemediationProposal(
+              ProposalType.BLOCK_UPDATE_UNTIL_RESOLVED,
+              BaseMessages.getString(PKG, "RemediationProposalSupport.TagBaseline.Summary"),
+              BaseMessages.getString(PKG, "RemediationProposalSupport.TagBaseline.Details")));
+    } else if (kind == IssueKind.WORKING_CONTRACT_MISSING) {
+      proposals.add(
+          new RemediationProposal(
+              ProposalType.BLOCK_UPDATE_UNTIL_RESOLVED,
+              BaseMessages.getString(PKG, "RemediationProposalSupport.PublishWorking.Summary"),
+              BaseMessages.getString(
+                  PKG,
+                  "RemediationProposalSupport.PublishWorking.Details",
+                  Const.NVL(recordKey, "?"))));
+    } else {
+      proposals.add(
+          new RemediationProposal(
+              ProposalType.BLOCK_UPDATE_UNTIL_RESOLVED,
+              BaseMessages.getString(PKG, "RemediationProposalSupport.LiveUnavailable.Summary"),
+              Const.NVL(message, "")));
+    }
+    proposals.add(
+        new RemediationProposal(
+            ProposalType.BLOCK_UPDATE_UNTIL_RESOLVED,
+            BaseMessages.getString(
+                PKG, "RemediationProposalSupport.BlockUpdateUntilResolved.Summary"),
+            Const.NVL(message, "")));
+    return proposals;
   }
 
   private static ValidationIssue buildIssueForChange(

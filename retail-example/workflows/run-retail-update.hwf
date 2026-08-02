@@ -112,6 +112,11 @@ limitations under the License.
           <value>retail-dv-update-report</value>
           <stream_name/>
         </parameter>
+        <parameter>
+          <name>EXPECT_AUTOMATIC_TARGET_TABLE_CREATION</name>
+          <value>N</value>
+          <stream_name/>
+        </parameter>
       </parameters>
       <run_configuration>local</run_configuration>
       <name>run-retail-update-models</name>
@@ -187,6 +192,23 @@ limitations under the License.
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
+    <action>
+      <rootArtifactFilename>${Internal.Workflow.Filename.Folder}/${Internal.Workflow.Filename.Name}</rootArtifactFilename>
+      <viewType>SOLUTION</viewType>
+      <outputDrawioFile>${PROJECT_HOME}/work/drawio/retail-solution.drawio</outputDrawioFile>
+      <alsoExportDataView>Y</alsoExportDataView>
+      <dataOutputDrawioFile>${PROJECT_HOME}/work/drawio/retail-data.drawio</dataOutputDrawioFile>
+      <alsoExportModelDiagrams>Y</alsoExportModelDiagrams>
+      <modelsOutputFolder>${PROJECT_HOME}/work/drawio/</modelsOutputFolder>
+      <name>Export architecture</name>
+      <description/>
+      <type>EXPORT_ARCHITECTURE</type>
+      <attributes/>
+      <xloc>432</xloc>
+      <yloc>288</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
   </actions>
   <hops>
     <hop>
@@ -220,6 +242,13 @@ limitations under the License.
     <hop>
       <from>run-retail-update-db-update</from>
       <to>run-retail-update-models</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>run-retail-update-models</from>
+      <to>Export architecture</to>
       <evaluation>Y</evaluation>
       <unconditional>N</unconditional>
       <enabled>Y</enabled>

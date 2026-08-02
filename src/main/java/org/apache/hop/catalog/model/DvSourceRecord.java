@@ -37,4 +37,13 @@ public class DvSourceRecord {
   private String deliveryType;
   private List<CatalogSourceField> fields = new ArrayList<>();
   private DvCsvFormatRecord csvFormat;
+
+  /** Path to the {@code .hsm} source model when {@link #sourceType} is {@code COMPOSITE}. */
+  private String compositeSourceModelFilename;
+
+  /** Source query name inside the model when {@link #sourceType} is {@code COMPOSITE}. */
+  private String compositeSourceQueryName;
+
+  /** Optional cached SQL for composite feeds (fallback when the model file is unavailable). */
+  private String compositeGeneratedSql;
 }

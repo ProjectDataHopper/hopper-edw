@@ -424,18 +424,14 @@ public class HopGuiBvTableDialog {
 
   private void addDerivativeRow() {
     new TableItem(wDerivatives.table, SWT.NONE);
-    wDerivatives.removeEmptyRows();
-    wDerivatives.setRowNums();
-    wDerivatives.optWidth(true);
+    wDerivatives.optimizeTableView();
   }
 
   private void removeDerivativeRows() {
     int idx = wDerivatives.getSelectionIndex();
     if (idx >= 0) {
       wDerivatives.table.remove(idx);
-      wDerivatives.removeEmptyRows();
-      wDerivatives.setRowNums();
-      wDerivatives.optWidth(true);
+      wDerivatives.optimizeTableView();
     }
   }
 
@@ -481,9 +477,7 @@ public class HopGuiBvTableDialog {
         item.setText(2, derivative.getDvTableType().getDescription());
       }
     }
-    wDerivatives.removeEmptyRows();
-    wDerivatives.setRowNums();
-    wDerivatives.optWidth(true);
+    wDerivatives.optimizeTableView();
   }
 
   private void ok() {

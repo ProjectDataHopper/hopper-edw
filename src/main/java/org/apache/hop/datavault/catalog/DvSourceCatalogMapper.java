@@ -37,6 +37,7 @@ import org.apache.hop.datavault.metadata.DataVaultSource;
 import org.apache.hop.datavault.metadata.DvSourceDeliveryType;
 import org.apache.hop.datavault.metadata.DvSourceType;
 import org.apache.hop.datavault.metadata.SourceField;
+import org.apache.hop.datavault.metadata.composite.DvCompositeSource;
 import org.apache.hop.datavault.metadata.database.DvDatabaseSource;
 import org.apache.hop.datavault.metadata.file.DvCsvInputMode;
 import org.apache.hop.datavault.metadata.file.DvCsvSource;
@@ -127,6 +128,12 @@ public final class DvSourceCatalogMapper {
       dvSourceRecord.setGroup(source.getGroup());
       dvSourceRecord.setDeliveryType(source.getDeliveryTypeOrDefault().name());
       dvSourceRecord.setFields(DvSourceFieldSupport.toCatalogFields(sourceFields));
+      if (source.getSourceType() == DvSourceType.COMPOSITE
+          && source.getDvSourceOrDefault() instanceof DvCompositeSource composite) {
+        dvSourceRecord.setCompositeSourceModelFilename(composite.getSourceModelFilename());
+        dvSourceRecord.setCompositeSourceQueryName(composite.getSourceQueryName());
+        dvSourceRecord.setCompositeGeneratedSql(composite.getGeneratedSql());
+      }
       definition.setDvSource(dvSourceRecord);
     }
     definition.setFields(DvSourceFieldSupport.toRowMeta(sourceFields, variables));
@@ -147,6 +154,10 @@ public final class DvSourceCatalogMapper {
       definition.setPhysicalIcebergTable(buildPhysicalIcebergTableRef(dvSource));
       definition.setPhysicalTable(null);
       definition.setPhysicalFile(null);
+    } else if (source.getSourceType() == DvSourceType.COMPOSITE) {
+      definition.setPhysicalTable(null);
+      definition.setPhysicalFile(null);
+      definition.setPhysicalIcebergTable(null);
     } else {
       definition.setPhysicalTable(buildPhysicalTableRef(dvSource));
       definition.setPhysicalFile(null);

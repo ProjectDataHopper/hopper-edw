@@ -355,7 +355,7 @@ public class DataVaultModel extends HopMetadataBase
 
     remarks.add(
         new CheckResult(
-            ICheckResult.TYPE_RESULT_WARNING,
+            ICheckResult.TYPE_RESULT_COMMENT,
             BaseMessages.getString(
                 PKG,
                 "DataVaultModel.CheckResult.TargetLoadHashKeyPartitioningTableOutputOnly",

@@ -1,0 +1,156 @@
+= Source modeler overview (`.hsm`)
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+The **source modeler** captures source-system structure (tables, primary keys, foreign keys, and multi-table **source queries**) so Data Vault designers can feed hubs, links, and satellites without hand-written SQL for every join.
+
+Models are saved as **`.hsm`** files and open in Hop GUI with the same interaction style as `.hdv` / `.hbv` / `.hdm` (canvas, dialogs, undo, notes, check model).
+
+image::images/source-modeler-retail-example-with-query-dialog-generated-sql.png[Retail source modeler (source-tables-crm.hsm) with All customer info query dialog and generated SQL,align="center"]
+
+== Why a source modeler?
+
+Many source systems expose sparse or normalized tables: product + product type, customer hub + address/contact/demo/prefs, order line + status dictionary. VaultSpeed-style tooling treats the **source ER** as a first-class model, then composes **queries** that become load feeds.
+
+Without a source modeler, hop-data-vault typically maps each physical table to its own catalog `DV_SOURCE` and often its own satellite. That is correct for true independent history, but expensive when one satellite (or hub load) should read a join.
+
+Desired flow:
+
+```
+Source Model (.hsm)  ──import PK/FK──► tables + relationships
+        │
+        │  Source queries (joins / projections)
+        ▼
+Catalog DV_SOURCE (single-table OR COMPOSITE feed)
+        │
+        ▼
+  Raw Data Vault (.hdv)  → SQL Table Input OR Merge-Join pipeline
+```
+
+== Concepts
+
+[cols="1,3", options="header"]
+|===
+|Concept |Role
+
+|**Source table**
+|Canvas card for a physical entity (v1: database table). Columns, PK position, optional link to an existing catalog source name.
+
+|**Relationship**
+|Edge for FK-style joins (child → parent columns, join type, cardinality). Imported from JDBC FKs when present, or drawn manually.
+
+|**Source query**
+|Named multi-table projection: driving table, ordered joins, column list, optional WHERE, generation mode (`AUTO` / `SQL` / `PIPELINE`).
+
+|**Note**
+|Canvas documentation (same note pads as other modelers).
+|===
+
+== Schema import
+
+Toolbar **Import schema** (or canvas context):
+
+. Choose RDBMS connection and optional schema filter.
+. Multi-select tables.
+. Import columns + primary keys; discover imported foreign keys as relationships.
+. Optional: publish each table as a single-table catalog `DV_SOURCE`.
+. Auto-layout (ELK) when many tables arrive.
+
+If the database has no FKs, import still seeds tables and PKs; draw relationships with **Shift+drag** (or middle-button drag) between table cards.
+
+=== Relationship multiplicity (crow's foot)
+
+Each relationship has a **child side** (FK) and **parent side** (PK) multiplicity:
+
+* `1` — exactly one  
+* `0..1` — zero or one  
+* `N` — one or many  
+* `0..N` — zero or many  
+* `Unknown`
+
+Edit them in the relationship dialog. The canvas draws standard crow's-foot symbols near each endpoint and **spreads anchors** when multiple edges share the same side of a table.
+
+**Profile…** estimates multiplicity from the database using a size-gated strategy: exact key analytics for small tables, sampling for large tables, and a statistics-only heuristic when joins would be unsafe. Full outer joins are not used by default on large tables.
+
+== Source queries
+
+. **Add source query** (toolbar or canvas context), or double-click an existing query card.
+. Set **driving table** on the General tab. Optional **Catalog feed name** overrides the name used when publishing to the data catalog (empty = use the query name).
+. **Joins** — prefer **Add related tables…** (graph neighbors via model relationships). Join keys resolve automatically; the **Resolved keys** column is read-only. Relationship name and left/right column combos are optional overrides when multiple edges exist.
+. **Columns** — pick table and column from combos (participants only). Set **Key** (1-based) for the logical primary key of the composed feed. **Get primary keys** seeds projection + key positions from physical PKs.
+. Optional WHERE (without the `WHERE` keyword).
+. **Generation mode**
++
+--
+* **Automatic** — single-connection SQL when all participants are database tables on one connection; otherwise Merge Join pipeline.
+* **SQL (Table Input)** — force SQL path (fails if mixed connections).
+* **Pipeline (Merge Join)** — force Sort + Merge Join chain.
+--
+. **Generate SQL** / **Preview data** — SQL is pretty-printed with syntax highlighting (desktop).
+
+=== Publish to catalog
+
+Publishing creates or updates a catalog feed of type **`COMPOSITE`**:
+
+* Field layout from the projection (aliases become source field names).
+* **Logical primary key** from the Columns tab **Key** positions (catalog `primaryKeyPosition`) so hubs can **Get keys** from the composed feed.
+* Pointer to the `.hsm` path and query name (loads regenerate SQL from the live model when possible).
+* Optional cached SQL for fallback when the file is unavailable.
+
+Use the query context menu **Publish to catalog**, or the toolbar to publish all queries. Set **Catalog connection** under **Edit model** on the source model.
+
+After publish, bind hubs / links / satellites to the **feed name** (e.g. `feed_customer_enriched`) like any other `DV_SOURCE`. Map business keys and attributes to the **projected aliases**.
+
+=== From the Data Vault modeler
+
+On an empty area of a `.hdv` canvas, **Compose multi-table source…** opens a `.hsm` file, the query builder, saves the model, and publishes a composite feed. Then assign that feed name on the hub/sat/link.
+
+== Generation at load time
+
+When **Data Vault Update** builds a pipeline for a composite source:
+
+* **SQL mode** — `Table Input` with an outer `SELECT` of mapped fields from `(generated join SQL) composite_src`.
+* **Pipeline mode** — injects the generated Sort / Merge Join / Select Values graph from the source query.
+
+Prefer keeping the `.hsm` in the project so generation always reflects the latest join; re-publish when field layouts change so catalog field lists stay aligned for mapping dialogs.
+
+== Retail sample
+
+The retail project includes:
+
+[source,text]
+----
+retail-example/models/source-tables-crm.hsm
+----
+
+It models CRM landing tables (customer hub, address, contact, demo, prefs, orders, products, warehouses) with discovered/drawn relationships and a sample query **All customer info** that left-joins customer attributes into one feed intended to publish as `feed_customer_enriched`. The screenshot above shows that model with the query dialog open and **Generate SQL** output for the multi-table join.
+
+Workflow:
+
+. Open `source-tables-crm.hsm` in Hop GUI (project **retail-example**).
+. Review tables and the purple **query** card.
+. Open **All customer info** — use **Generate SQL** / **Preview data** (CRM connection required).
+. Ensure model **Catalog connection** points at the project catalog (`local-catalog`).
+. Publish the query; confirm `feed_customer_enriched` in the Data Catalog.
+. Optionally bind a satellite (or a prototype sat) to that feed and map fields — the default retail `.hdv` still uses one catalog source per physical table for the tutorial path.
+
+== Check model
+
+Source model **Check model** validates:
+
+* Tables and unique names
+* Relationship endpoints
+* Query driving table / join tables present
+* Non-empty projection (warning)
+
+Vault **Check model** continues to validate hub/sat field mappings against catalog field lists for composite feeds like any other source.
+
+== Related documentation
+
+* link:datavault-source.adoc[Data Vault sources] — catalog `DV_SOURCE` including composite feeds
+* link:data-catalog.adoc[Data catalog]
+* link:datavault-plugin.adoc[Data Vault plugin]
+* link:getting-started-retail.adoc[Getting started — retail]
+* Plan: link:plans/source-modeler-hsm-plan.md[Source modeler plan (issue #105)]

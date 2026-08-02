@@ -36,7 +36,12 @@ public enum DvSourceType implements IEnumHasCodeAndDescription {
   DATABASE("DATABASE", BaseMessages.getString(DvSourceType.class, "DvSourceType.Database")),
   CSV("CSV", BaseMessages.getString(DvSourceType.class, "DvSourceType.Csv")),
   PARQUET("PARQUET", BaseMessages.getString(DvSourceType.class, "DvSourceType.Parquet")),
-  ICEBERG("ICEBERG", BaseMessages.getString(DvSourceType.class, "DvSourceType.Iceberg"));
+  ICEBERG("ICEBERG", BaseMessages.getString(DvSourceType.class, "DvSourceType.Iceberg")),
+  /**
+   * Multi-table feed defined by a {@code SourceQuery} in a {@code .hsm} source model (SQL or Merge
+   * Join pipeline).
+   */
+  COMPOSITE("COMPOSITE", BaseMessages.getString(DvSourceType.class, "DvSourceType.Composite"));
 
   private final String code;
   private final String description;

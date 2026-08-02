@@ -439,9 +439,7 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
         table.add(file);
       }
     }
-    table.removeEmptyRows();
-    table.setRowNums();
-    table.optWidth(true);
+    table.optimizeTableView();
   }
 
   private static List<String> readModelTable(TableView table) {

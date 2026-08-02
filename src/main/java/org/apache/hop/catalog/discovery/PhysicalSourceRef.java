@@ -50,6 +50,10 @@ public final class PhysicalSourceRef {
   private final String s3Endpoint;
   private final String s3AccessKey;
   private final String s3SecretKey;
+  /** Path to the {@code .hsm} source model when refreshing a COMPOSITE feed. */
+  private final String compositeSourceModelFilename;
+  /** Source query name inside the model when refreshing a COMPOSITE feed. */
+  private final String compositeSourceQueryName;
 
   private PhysicalSourceRef(Builder builder) {
     this.databaseConnectionName = builder.databaseConnectionName;
@@ -69,6 +73,8 @@ public final class PhysicalSourceRef {
     this.s3Endpoint = builder.s3Endpoint;
     this.s3AccessKey = builder.s3AccessKey;
     this.s3SecretKey = builder.s3SecretKey;
+    this.compositeSourceModelFilename = builder.compositeSourceModelFilename;
+    this.compositeSourceQueryName = builder.compositeSourceQueryName;
   }
 
   public String getDatabaseConnectionName() {
@@ -137,6 +143,14 @@ public final class PhysicalSourceRef {
 
   public String getS3SecretKey() {
     return s3SecretKey;
+  }
+
+  public String getCompositeSourceModelFilename() {
+    return compositeSourceModelFilename;
+  }
+
+  public String getCompositeSourceQueryName() {
+    return compositeSourceQueryName;
   }
 
   public void validateIcebergLocation(IVariables variables) throws HopException {
@@ -274,6 +288,8 @@ public final class PhysicalSourceRef {
     private String s3Endpoint;
     private String s3AccessKey;
     private String s3SecretKey;
+    private String compositeSourceModelFilename;
+    private String compositeSourceQueryName;
 
     public Builder databaseConnectionName(String value) {
       this.databaseConnectionName = value;
@@ -357,6 +373,16 @@ public final class PhysicalSourceRef {
 
     public Builder s3SecretKey(String value) {
       this.s3SecretKey = value;
+      return this;
+    }
+
+    public Builder compositeSourceModelFilename(String value) {
+      this.compositeSourceModelFilename = value;
+      return this;
+    }
+
+    public Builder compositeSourceQueryName(String value) {
+      this.compositeSourceQueryName = value;
       return this;
     }
 

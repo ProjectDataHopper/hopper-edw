@@ -23,7 +23,7 @@ This file is for **AI coding assistants** and third-party contributors. Read it 
 
 ## What this project is
 
-**hop-datavault** is an Apache Hop plugin for **Data Vault 2.0**, **Business Vault**, and **dimensional** modeling: visual models (`.hdv` / `.hbv` / `.hdm`), catalog-first sources, model-driven DDL and load pipelines, lineage, schema validation gates, data quality, execution maps (`.hem`), and optional AI help.
+**hop-datavault** is an Apache Hop plugin for **Data Vault 2.0**, **Business Vault**, and **dimensional** modeling: visual models (`.hsm` / `.hdv` / `.hbv` / `.hdm`), catalog-first sources (including multi-table composite feeds), model-driven DDL and load pipelines, lineage, schema validation gates, data quality, execution maps (`.hem`), and optional AI help.
 
 - Maven artifact: `org.apache.hop:hop-datavault` (see `pom.xml` for current version)
 - Install layout: `plugins/misc/datavault/` (from the assembly zip under `target/`)
@@ -95,6 +95,7 @@ Do **not** “fix” Hop core inside this repo. Core Hop changes belong in **apa
 
 | Extension | Meaning |
 |-----------|---------|
+| `.hsm` | Source model (tables, FKs, multi-table queries) |
 | `.hdv` | Raw Data Vault model |
 | `.hbv` | Business Vault model |
 | `.hdm` | Dimensional model |

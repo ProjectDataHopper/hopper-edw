@@ -32,6 +32,7 @@ import org.apache.hop.datavault.metadata.DataVaultSource;
 import org.apache.hop.datavault.metadata.DvSourceDeliveryType;
 import org.apache.hop.datavault.metadata.DvSourceType;
 import org.apache.hop.datavault.metadata.SourceField;
+import org.apache.hop.datavault.metadata.composite.DvCompositeSource;
 import org.apache.hop.datavault.metadata.database.DvDatabaseSource;
 import org.apache.hop.datavault.metadata.file.DvCsvInputMode;
 import org.apache.hop.datavault.metadata.file.DvCsvSource;
@@ -119,6 +120,15 @@ public final class CatalogDvSourceMapper {
       DvIcebergLocationSupport.applyPhysicalIcebergTable(
           icebergSource, definition.getPhysicalIcebergTable());
       return icebergSource;
+    }
+    if (sourceType == DvSourceType.COMPOSITE) {
+      DvCompositeSource compositeSource = new DvCompositeSource();
+      compositeSource.setDescription(definition.getDescription());
+      compositeSource.setFields(fields);
+      compositeSource.setSourceModelFilename(dvSourceRecord.getCompositeSourceModelFilename());
+      compositeSource.setSourceQueryName(dvSourceRecord.getCompositeSourceQueryName());
+      compositeSource.setGeneratedSql(dvSourceRecord.getCompositeGeneratedSql());
+      return compositeSource;
     }
     DvDatabaseSource fallback = new DvDatabaseSource();
     fallback.setDescription(definition.getDescription());

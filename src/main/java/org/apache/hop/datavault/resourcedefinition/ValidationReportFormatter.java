@@ -81,15 +81,28 @@ public final class ValidationReportFormatter {
       }
 
       for (ValidationIssue issue : validation.issues()) {
-        builder.append(
-                BaseMessages.getString(
-                    PKG,
-                    "ValidationReportFormatter.Issue",
-                    issue.kind(),
-                    issue.severity(),
-                    Const.NVL(issue.fieldName(), ""),
-                    issue.message()))
-            .append(Const.CR);
+        String shortFinding = ValidationFindingFormatter.shortTitle(issue.message());
+        builder
+            .append("  ")
+            .append(issue.severity() != null ? issue.severity().name() : "?")
+            .append(" / ")
+            .append(issue.kind() != null ? issue.kind().name() : "?");
+        if (!Utils.isEmpty(issue.fieldName())) {
+          builder.append("  Field: ").append(issue.fieldName());
+        }
+        builder.append(Const.CR);
+        if (!Utils.isEmpty(shortFinding)) {
+          builder.append("    Finding: ").append(shortFinding).append(Const.CR);
+        }
+        // Full structured body (Axis / Compared / Found / Why) when multi-line.
+        if (!Utils.isEmpty(issue.message()) && issue.message().contains("\n")) {
+          for (String line : issue.message().split("\\R")) {
+            builder.append("    ").append(line).append(Const.CR);
+          }
+        } else if (!Utils.isEmpty(issue.message())
+            && (Utils.isEmpty(shortFinding) || !shortFinding.equals(issue.message().trim()))) {
+          builder.append("    ").append(issue.message()).append(Const.CR);
+        }
         if (!Utils.isEmpty(issue.downstreamImpact())) {
           builder
               .append("    Downstream impact: ")

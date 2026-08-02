@@ -243,9 +243,7 @@ public class HopGuiDmRangeDimensionDialog {
       item.setText(2, Const.NVL(band.getUpperBound(), ""));
       item.setText(3, Const.NVL(band.getLabel(), ""));
     }
-    wBands.removeEmptyRows();
-    wBands.setRowNums();
-    wBands.optWidth(true);
+    wBands.optimizeTableView();
   }
 
   private void ok() {

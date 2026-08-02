@@ -31,9 +31,11 @@ import org.apache.hop.catalog.model.RecordDefinition;
 import org.apache.hop.catalog.model.RecordDefinitionKey;
 import org.apache.hop.catalog.registry.RecordDefinitionRegistry;
 import org.apache.hop.catalog.versioning.CatalogVersionService;
+import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.resourcedefinition.ValidationReport.IssueKind;
 import org.apache.hop.datavault.catalog.DvCatalogNamespaces;
 import org.apache.hop.datavault.catalog.DvSourceCatalogService;
 import org.apache.hop.datavault.catalog.DvSourceFieldSupport;
@@ -151,7 +153,12 @@ public final class SchemaImpactSimulationService {
     }
     if (request != null && request.checkTargetDatabases()) {
       report =
-          TargetSchemaValidationSupport.enrich(report, models, variables, metadataProvider);
+          TargetSchemaValidationSupport.enrich(
+              report,
+              models,
+              variables,
+              metadataProvider,
+              request.expectAutomaticTargetTableCreation());
     }
 
     ImpactGraph graph = ImpactGraph.empty();
@@ -354,7 +361,8 @@ public final class SchemaImpactSimulationService {
               catalogConnection,
               usages,
               detailedDataTypeChecking,
-              true));
+              true,
+              baselineVersionTag));
     }
     return report;
   }
@@ -395,7 +403,8 @@ public final class SchemaImpactSimulationService {
               catalogConnection,
               usages,
               detailedDataTypeChecking,
-              true));
+              true,
+              baselineVersionTag));
     }
     return report;
   }
@@ -410,15 +419,22 @@ public final class SchemaImpactSimulationService {
       boolean detailedDataTypeChecking,
       IVariables variables,
       IHopMetadataProvider metadataProvider) {
+    String recordKey =
+        key != null ? key.getNamespace() + "/" + key.getName() : "?";
     if (expectedContract == null) {
+      // LIVE_SOURCE with a version tag as expected contract: treat as baseline gap if working
+      // discovery source exists, otherwise working/contract missing.
+      boolean workingPresent = discoverySource != null;
+      IssueKind kind =
+          workingPresent
+              ? IssueKind.BASELINE_CONTRACT_MISSING
+              : IssueKind.WORKING_CONTRACT_MISSING;
+      String finding =
+          workingPresent
+              ? ValidationFindingFormatter.baselineContractMissing(recordKey, null, true)
+              : ValidationFindingFormatter.workingContractMissing(recordKey);
       List<ValidationIssue> issues =
-          RemediationProposalSupport.buildIssues(
-              null,
-              usages,
-              BaseMessages.getString(
-                  PKG,
-                  "SchemaImpactSimulationService.Error.ExpectedNotFound",
-                  key != null ? key.getNamespace() + "/" + key.getName() : "?"));
+          RemediationProposalSupport.buildIssues(null, usages, finding, kind, recordKey);
       return new RecordDefinitionValidation(
           key,
           catalogConnection,
@@ -440,11 +456,17 @@ public final class SchemaImpactSimulationService {
 
     if (!RecordDefinitionPhysicalRefSupport.supportsRefreshFromSource(physical)) {
       unavailableMessage =
-          BaseMessages.getString(PKG, "SourceRecordValidationService.Error.UnsupportedSource");
+          ValidationFindingFormatter.liveSourceUnavailable(
+              recordKey,
+              BaseMessages.getString(PKG, "SourceRecordValidationService.Error.UnsupportedSource"));
     } else {
       try {
         unavailableMessage =
             verifyReadability(physical, sourceType, previewRowLimit, variables, metadataProvider);
+        if (!Utils.isEmpty(unavailableMessage)) {
+          unavailableMessage =
+              ValidationFindingFormatter.liveSourceUnavailable(recordKey, unavailableMessage);
+        }
         if (Utils.isEmpty(unavailableMessage)) {
           List<SourceField> expectedFields = extractFields(expectedContract);
           List<SourceField> actualFields =
@@ -452,12 +474,17 @@ public final class SchemaImpactSimulationService {
           diff = diffFields(expectedFields, actualFields, sourceType, detailedDataTypeChecking);
         }
       } catch (HopException e) {
-        unavailableMessage = e.getMessage();
+        unavailableMessage =
+            ValidationFindingFormatter.liveSourceUnavailable(
+                recordKey, Const.NVL(e.getMessage(), e.getClass().getSimpleName()));
       } catch (Exception e) {
         unavailableMessage =
-            e.getMessage() != null
-                ? e.getMessage()
-                : BaseMessages.getString(PKG, "SourceRecordValidationService.Error.DiscoveryFailed");
+            ValidationFindingFormatter.liveSourceUnavailable(
+                recordKey,
+                e.getMessage() != null
+                    ? e.getMessage()
+                    : BaseMessages.getString(
+                        PKG, "SourceRecordValidationService.Error.DiscoveryFailed"));
       }
     }
 
@@ -468,7 +495,8 @@ public final class SchemaImpactSimulationService {
         sourceTypeName,
         usages,
         diff,
-        unavailableMessage);
+        unavailableMessage,
+        IssueKind.SOURCE_UNAVAILABLE);
   }
 
   private static RecordDefinitionValidation validateFieldContracts(
@@ -478,16 +506,16 @@ public final class SchemaImpactSimulationService {
       String catalogConnection,
       List<SourceUsage> usages,
       boolean detailedDataTypeChecking,
-      boolean applyAcknowledgementsFromActual) {
+      boolean applyAcknowledgementsFromActual,
+      String baselineVersionTag) {
+    String recordKey =
+        key != null ? key.getNamespace() + "/" + key.getName() : "?";
     if (expected == null && actual == null) {
+      String finding =
+          ValidationFindingFormatter.bothContractsMissing(recordKey, baselineVersionTag);
       List<ValidationIssue> issues =
           RemediationProposalSupport.buildIssues(
-              null,
-              usages,
-              BaseMessages.getString(
-                  PKG,
-                  "SchemaImpactSimulationService.Error.BothMissing",
-                  key != null ? key.getNamespace() + "/" + key.getName() : "?"));
+              null, usages, finding, IssueKind.BASELINE_CONTRACT_MISSING, recordKey);
       return new RecordDefinitionValidation(
           key,
           catalogConnection,
@@ -500,14 +528,12 @@ public final class SchemaImpactSimulationService {
           0);
     }
     if (expected == null) {
+      // Working catalog has the source; frozen baseline does not.
+      String finding =
+          ValidationFindingFormatter.baselineContractMissing(recordKey, baselineVersionTag, true);
       List<ValidationIssue> issues =
           RemediationProposalSupport.buildIssues(
-              null,
-              usages,
-              BaseMessages.getString(
-                  PKG,
-                  "SchemaImpactSimulationService.Error.ExpectedNotFound",
-                  key != null ? key.getNamespace() + "/" + key.getName() : "?"));
+              null, usages, finding, IssueKind.BASELINE_CONTRACT_MISSING, recordKey);
       return new RecordDefinitionValidation(
           key,
           catalogConnection,
@@ -520,14 +546,10 @@ public final class SchemaImpactSimulationService {
           0);
     }
     if (actual == null) {
+      String finding = ValidationFindingFormatter.workingContractMissing(recordKey);
       List<ValidationIssue> issues =
           RemediationProposalSupport.buildIssues(
-              null,
-              usages,
-              BaseMessages.getString(
-                  PKG,
-                  "SchemaImpactSimulationService.Error.ActualNotFound",
-                  key != null ? key.getNamespace() + "/" + key.getName() : "?"));
+              null, usages, finding, IssueKind.WORKING_CONTRACT_MISSING, recordKey);
       return new RecordDefinitionValidation(
           key,
           catalogConnection,
@@ -548,7 +570,14 @@ public final class SchemaImpactSimulationService {
         diffFields(expectedFields, actualFields, sourceType, detailedDataTypeChecking);
     RecordDefinition ackSource = applyAcknowledgementsFromActual ? actual : expected;
     return toValidation(
-        ackSource, key, catalogConnection, sourceTypeName, usages, diff, null);
+        ackSource,
+        key,
+        catalogConnection,
+        sourceTypeName,
+        usages,
+        diff,
+        null,
+        IssueKind.SOURCE_UNAVAILABLE);
   }
 
   private static RecordDefinitionValidation toValidation(
@@ -558,12 +587,20 @@ public final class SchemaImpactSimulationService {
       String sourceTypeName,
       List<SourceUsage> usages,
       RecordDefinitionSchemaDiffSupport.SchemaDiff diff,
-      String unavailableMessage) {
+      String unavailableMessage,
+      IssueKind unavailableKind) {
     if (ackDefinition != null) {
       ValidationIssueSupport.pruneStaleAcknowledgements(ackDefinition, diff, unavailableMessage);
     }
+    String recordKey =
+        key != null ? key.getNamespace() + "/" + key.getName() : null;
     List<ValidationIssue> allIssues =
-        RemediationProposalSupport.buildIssues(diff, usages, unavailableMessage);
+        RemediationProposalSupport.buildIssues(
+            diff,
+            usages,
+            unavailableMessage,
+            unavailableKind != null ? unavailableKind : IssueKind.SOURCE_UNAVAILABLE,
+            recordKey);
     int acknowledgedIssueCount =
         ackDefinition != null
             ? ValidationIssueSupport.countAcknowledged(ackDefinition, allIssues)

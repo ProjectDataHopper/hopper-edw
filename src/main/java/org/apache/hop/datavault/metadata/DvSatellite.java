@@ -147,6 +147,15 @@ public class DvSatellite extends DvTableBase
   @HopMetadataProperty private List<SatelliteAttribute> attributes = new ArrayList<>();
 
   /**
+   * Optional ordered source field names that supply the parent hub business keys on <em>this
+   * satellite's</em> single record source (hub satellites only). Order matches {@link
+   * DvHub#getDistinctBusinessKeys()}. Empty list means use the hub business key names as source
+   * column names. Link satellites use link hub-source mappings instead.
+   */
+  @HopMetadataProperty(key = "parentKeySourceField", groupKey = "parentKeySourceFields")
+  private List<String> parentKeySourceFields = new ArrayList<>();
+
+  /**
    * Name of the driving key column for multi-active satellites (e.g. multiple phone numbers per
    * customer). Leave empty for a standard single-active satellite.
    */
@@ -399,45 +408,6 @@ public class DvSatellite extends DvTableBase
           this, model, effectiveOptions, metadataProvider, variables, this, remarks);
       DvFieldMappingValidationSupport.validateSatelliteRecordSourceFields(
           this, model, effectiveOptions, metadataProvider, variables, this, remarks);
-      checkSatelliteHubRecordSourceConsistency(remarks, metadataProvider, variables, model);
-    }
-  }
-
-  private void checkSatelliteHubRecordSourceConsistency(
-      List<ICheckResult> remarks,
-      IHopMetadataProvider metadataProvider,
-      IVariables variables,
-      DataVaultModel model) {
-    if (Utils.isEmpty(hubName) || Utils.isEmpty(recordSource) || model == null) {
-      return;
-    }
-    DvHub hub = model.findHub(hubName, variables, metadataProvider);
-    if (hub == null) {
-      return;
-    }
-    List<String> hubSources = hub.getRecordSources();
-    if (hubSources != null && !hubSources.isEmpty()) {
-      String resolvedSatelliteSource =
-          variables != null ? variables.resolve(recordSource) : recordSource;
-      boolean listed =
-          hubSources.stream()
-              .filter(s -> !Utils.isEmpty(s))
-              .anyMatch(
-                  s -> {
-                    String resolvedHubSource = variables != null ? variables.resolve(s) : s;
-                    return resolvedSatelliteSource.equals(resolvedHubSource);
-                  });
-      if (!listed) {
-        remarks.add(
-            new CheckResult(
-                ICheckResult.TYPE_RESULT_WARNING,
-                BaseMessages.getString(
-                    PKG,
-                    "DvSatellite.CheckResult.RecordSourceNotOnHub",
-                    recordSource,
-                    hubName),
-                this));
-      }
     }
   }
 
@@ -924,21 +894,26 @@ public class DvSatellite extends DvTableBase
         }
       } else {
         for (SatelliteAttribute attr : satAttrs) {
-          IValueMeta attrMeta = createValueMetaFromAttribute(attr);
+          SourceField matchingSource = null;
+          if (sourceFields != null) {
+            for (SourceField sf : sourceFields) {
+              if (attr.getName().equals(sf.getName())) {
+                matchingSource = sf;
+                break;
+              }
+            }
+          }
+          IValueMeta attrMeta = createValueMetaFromAttribute(attr, matchingSource);
           // If the SatelliteAttribute did not specify length/precision, try to take it
           // from the matching SourceField in the Data Vault Source (the source of truth for
           // the originating database column definitions).
-          if (sourceFields != null && (attrMeta.getLength() <= 0 || attrMeta.getPrecision() <= 0)) {
-            for (SourceField sf : sourceFields) {
-              if (attr.getName().equals(sf.getName())) {
-                if (attrMeta.getLength() <= 0) {
-                  attrMeta.setLength(Const.toInt(sf.getLength(), -1));
-                }
-                if (attrMeta.getPrecision() <= 0) {
-                  attrMeta.setPrecision(Const.toInt(sf.getPrecision(), -1));
-                }
-                break;
-              }
+          if (matchingSource != null
+              && (attrMeta.getLength() <= 0 || attrMeta.getPrecision() <= 0)) {
+            if (attrMeta.getLength() <= 0) {
+              attrMeta.setLength(Const.toInt(matchingSource.getLength(), -1));
+            }
+            if (attrMeta.getPrecision() <= 0) {
+              attrMeta.setPrecision(Const.toInt(matchingSource.getPrecision(), -1));
             }
           }
           rowMeta.addValueMeta(attrMeta);
@@ -1142,13 +1117,13 @@ public class DvSatellite extends DvTableBase
   }
 
   private IValueMeta createValueMetaFromAttribute(SatelliteAttribute attr) throws HopException {
+    return createValueMetaFromAttribute(attr, null);
+  }
+
+  private IValueMeta createValueMetaFromAttribute(SatelliteAttribute attr, SourceField sourceField)
+      throws HopException {
     String name = attr.getName();
-    String dt = attr.getDataType();
-    int typeId = IValueMeta.TYPE_STRING;
-    if (!Utils.isEmpty(dt)) {
-      typeId = ValueMetaFactory.getIdForValueMeta(dt);
-      if (typeId <= 0) typeId = IValueMeta.TYPE_STRING;
-    }
+    int typeId = DvDataTypeSupport.resolveHopTypeId(attr.getDataType(), sourceField);
     try {
       IValueMeta vm = ValueMetaFactory.createValueMeta(name, typeId);
       vm.setLength(Const.toInt(attr.getLength(), -1));
@@ -1177,16 +1152,10 @@ public class DvSatellite extends DvTableBase
             this,
             new Point(LOCATION_START_LINE_2.x, LOCATION_START_LINE_2.y));
     if (ctx.linkSatellite) {
-      if (builder instanceof DvDatabaseSatelliteSourcePipelineBuilder dbBuilder) {
-        dbBuilder.setLinkedLink(ctx.linkedLink);
-        dbBuilder.setDvLinkHubSource(ctx.linkHubSource);
-        dbBuilder.setDvLinkSatelliteSource(ctx.linkSatelliteSource);
-      } else if (builder
-          instanceof org.apache.hop.datavault.metadata.file.DvCsvSatelliteSourcePipelineBuilder csvBuilder) {
-        csvBuilder.setLinkedLink(ctx.linkedLink);
-        csvBuilder.setDvLinkHubSource(ctx.linkHubSource);
-        csvBuilder.setDvLinkSatelliteSource(ctx.linkSatelliteSource);
-      }
+      // Same package access to protected link-satellite wiring on all builder types.
+      builder.linkedLink = ctx.linkedLink;
+      builder.dvLinkHubSource = ctx.linkHubSource;
+      builder.dvLinkSatelliteSource = ctx.linkSatelliteSource;
     }
     builder.build();
 
@@ -1195,10 +1164,12 @@ public class DvSatellite extends DvTableBase
 
   /**
    * For link satellites: compute each participating hub hash from mapped source business key
-   * fields, then compute the link hash from those hub hashes.
+   * fields, then compute the link hash from those hub hashes plus any dependent child key source
+   * fields (same composition as {@link DvLink} load pipelines).
    */
   private TransformMeta addLinkHashKeyChain(
-      SatelliteUpdateContext ctx, PipelineMeta pipelineMeta, TransformMeta predecessor) {
+      SatelliteUpdateContext ctx, PipelineMeta pipelineMeta, TransformMeta predecessor)
+      throws HopException {
     TransformMeta current = predecessor;
     List<String> hubHashNames = new ArrayList<>();
     int index = 0;
@@ -1213,11 +1184,17 @@ public class DvSatellite extends DvTableBase
               index++);
       hubHashNames.add(step.hashKeyFieldName());
     }
+    // Match DvLink: link hash = hub hashes + dependent child key values (source field names).
+    List<String> linkHashInputFields = new ArrayList<>(hubHashNames);
+    if (ctx.linkedLink != null) {
+      linkHashInputFields.addAll(
+          ctx.linkedLink.resolveDependentChildSourceFieldNames(ctx.variables));
+    }
     return addDvHashKeyForFields(
         ctx,
         pipelineMeta,
         current,
-        hubHashNames,
+        linkHashInputFields,
         ctx.hashKeyFieldName,
         index);
   }
@@ -1883,16 +1860,9 @@ public class DvSatellite extends DvTableBase
             this,
             new Point(startLine.x, startLine.y));
     if (ctx.linkSatellite) {
-      if (builder instanceof DvDatabaseSatelliteSourcePipelineBuilder dbBuilder) {
-        dbBuilder.setLinkedLink(ctx.linkedLink);
-        dbBuilder.setDvLinkHubSource(ctx.linkHubSource);
-        dbBuilder.setDvLinkSatelliteSource(ctx.linkSatelliteSource);
-      } else if (builder
-          instanceof org.apache.hop.datavault.metadata.file.DvCsvSatelliteSourcePipelineBuilder csvBuilder) {
-        csvBuilder.setLinkedLink(ctx.linkedLink);
-        csvBuilder.setDvLinkHubSource(ctx.linkHubSource);
-        csvBuilder.setDvLinkSatelliteSource(ctx.linkSatelliteSource);
-      }
+      builder.linkedLink = ctx.linkedLink;
+      builder.dvLinkHubSource = ctx.linkHubSource;
+      builder.dvLinkSatelliteSource = ctx.linkSatelliteSource;
     }
     builder.build();
     return builder.getResultTransform();
@@ -1902,7 +1872,8 @@ public class DvSatellite extends DvTableBase
       SatelliteUpdateContext ctx,
       PipelineMeta pipelineMeta,
       TransformMeta predecessor,
-      Point startLine) {
+      Point startLine)
+      throws HopException {
     TransformMeta current = predecessor;
     List<String> hubHashNames = new ArrayList<>();
     int index = 0;
@@ -1918,11 +1889,16 @@ public class DvSatellite extends DvTableBase
               startLine);
       hubHashNames.add(step.hashKeyFieldName());
     }
+    List<String> linkHashInputFields = new ArrayList<>(hubHashNames);
+    if (ctx.linkedLink != null) {
+      linkHashInputFields.addAll(
+          ctx.linkedLink.resolveDependentChildSourceFieldNames(ctx.variables));
+    }
     return addDvHashKeyForFields(
         ctx,
         pipelineMeta,
         current,
-        hubHashNames,
+        linkHashInputFields,
         ctx.hashKeyFieldName,
         index,
         startLine);
@@ -2488,13 +2464,21 @@ public class DvSatellite extends DvTableBase
           List<String> inputFieldNames =
               DvLinkHubSourceKeyFieldSupport.resolveSourceFieldNames(
                   linkHubSource, hubName, hub, variables);
-          String hubHashFieldName = variables.resolve(hub.getHashKeyFieldName());
+          // Same intermediate hub hash column names as DvLink load (aliases / role columns).
+          String hubHashFieldName =
+              DvTableResolutionSupport.resolveParticipatingHubHashColumn(
+                  model, hubName, variables, metadataProvider);
+          if (Utils.isEmpty(hubHashFieldName)) {
+            hubHashFieldName = variables.resolve(hub.getHashKeyFieldName());
+          }
           if (Utils.isEmpty(hubHashFieldName)) {
             if (!Utils.isEmpty(hub.getBusinessKeys())) {
               hubHashFieldName = hub.getBusinessKeys().get(0).getName() + "_hk";
             } else {
               hubHashFieldName = hub.getName() + "_hk";
             }
+          } else {
+            hubHashFieldName = variables.resolve(hubHashFieldName);
           }
           hubHashCalcSteps.add(new HubHashCalcStep(inputFieldNames, hubHashFieldName));
         }

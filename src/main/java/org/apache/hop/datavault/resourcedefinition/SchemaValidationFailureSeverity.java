@@ -43,7 +43,8 @@ public enum SchemaValidationFailureSeverity {
     }
     return switch (this) {
       case WARN_ONLY -> false;
-      case FAIL_ON_WARNINGS -> report.getIssueCount() > 0;
+      // INFO findings do not fail the gate (WARNING and BLOCKING do).
+      case FAIL_ON_WARNINGS -> report.getGateRelevantIssueCount() > 0;
       case FAIL_ON_BLOCKING -> report.hasBlockingIssues();
     };
   }

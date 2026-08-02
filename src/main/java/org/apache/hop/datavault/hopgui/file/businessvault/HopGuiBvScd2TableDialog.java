@@ -629,9 +629,7 @@ public class HopGuiBvScd2TableDialog {
 
   private void addDerivativeRow() {
     new TableItem(wDerivatives.table, SWT.NONE);
-    wDerivatives.removeEmptyRows();
-    wDerivatives.setRowNums();
-    wDerivatives.optWidth(true);
+    wDerivatives.optimizeTableView();
     refreshSatelliteDependentTabs();
   }
 
@@ -639,18 +637,14 @@ public class HopGuiBvScd2TableDialog {
     int idx = wDerivatives.getSelectionIndex();
     if (idx >= 0) {
       wDerivatives.table.remove(idx);
-      wDerivatives.removeEmptyRows();
-      wDerivatives.setRowNums();
-      wDerivatives.optWidth(true);
+      wDerivatives.optimizeTableView();
       refreshSatelliteDependentTabs();
     }
   }
 
   private void addMappingRow() {
     new TableItem(wMappings.table, SWT.NONE);
-    wMappings.removeEmptyRows();
-    wMappings.setRowNums();
-    wMappings.optWidth(true);
+    wMappings.optimizeTableView();
     refreshMappingSourceCombos();
   }
 
@@ -658,9 +652,7 @@ public class HopGuiBvScd2TableDialog {
     int idx = wMappings.getSelectionIndex();
     if (idx >= 0) {
       wMappings.table.remove(idx);
-      wMappings.removeEmptyRows();
-      wMappings.setRowNums();
-      wMappings.optWidth(true);
+      wMappings.optimizeTableView();
     }
   }
 
@@ -722,10 +714,7 @@ public class HopGuiBvScd2TableDialog {
         item.setText(2, derivative.getDvTableType().getDescription());
       }
     }
-    wDerivatives.removeEmptyRows();
-    wDerivatives.setRowNums();
-    wDerivatives.optWidth(true);
-
+    wDerivatives.optimizeTableView();
     loadMappingsTable();
     refreshSatelliteDependentTabs();
   }
@@ -743,9 +732,7 @@ public class HopGuiBvScd2TableDialog {
       item.setText(2, Const.NVL(mapping.getSourceFieldName(), ""));
       item.setText(3, Const.NVL(mapping.getTargetFieldName(), ""));
     }
-    wMappings.removeEmptyRows();
-    wMappings.setRowNums();
-    wMappings.optWidth(true);
+    wMappings.optimizeTableView();
     refreshMappingSourceCombos();
   }
 
@@ -759,9 +746,7 @@ public class HopGuiBvScd2TableDialog {
       item.setText(2, Const.NVL(config.getFunctionalTimestampField(), ""));
       item.setText(3, Const.NVL(config.getSourceIndicatorValue(), ""));
     }
-    wSatelliteConfigs.removeEmptyRows();
-    wSatelliteConfigs.setRowNums();
-    wSatelliteConfigs.optWidth(true);
+    wSatelliteConfigs.optimizeTableView();
   }
 
   private void applyDerivativesToTable(BvScd2Table target) {

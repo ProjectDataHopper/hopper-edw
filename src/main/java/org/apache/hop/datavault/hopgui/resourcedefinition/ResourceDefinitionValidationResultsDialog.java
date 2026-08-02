@@ -32,6 +32,7 @@ import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.datavault.resourcedefinition.SchemaImpactSimulationResult;
 import org.apache.hop.datavault.resourcedefinition.SimulationStatus;
 import org.apache.hop.datavault.resourcedefinition.SourceUsage;
+import org.apache.hop.datavault.resourcedefinition.ValidationFindingFormatter;
 import org.apache.hop.datavault.resourcedefinition.ValidationOptions;
 import org.apache.hop.datavault.resourcedefinition.ValidationReport;
 import org.apache.hop.datavault.resourcedefinition.ValidationReport.IssueSeverity;
@@ -441,7 +442,15 @@ public final class ResourceDefinitionValidationResultsDialog {
           i == 0 ? wIssues.getTable().getItem(0) : new TableItem(wIssues.getTable(), SWT.NONE);
       item.setText(1, formatSeverity(row));
       item.setText(2, formatRecordDefinition(row.validation()));
-      item.setText(3, Const.NVL(row.issue().fieldName(), ""));
+      String fieldOrFinding = Const.NVL(row.issue().fieldName(), "");
+      if (Utils.isEmpty(fieldOrFinding)) {
+        fieldOrFinding =
+            ValidationFindingFormatter.shortTitle(Const.NVL(row.issue().message(), ""));
+        if (fieldOrFinding.length() > 80) {
+          fieldOrFinding = fieldOrFinding.substring(0, 77) + "...";
+        }
+      }
+      item.setText(3, fieldOrFinding);
       item.setText(4, row.issue().kind() != null ? row.issue().kind().name() : "");
       item.setText(
           5,
@@ -459,10 +468,7 @@ public final class ResourceDefinitionValidationResultsDialog {
         restoreIndex = i;
       }
     }
-    wIssues.removeEmptyRows();
-    wIssues.setRowNums();
-    wIssues.optWidth(true);
-
+    wIssues.optimizeTableView();
     if (rows.isEmpty()) {
       clearDetails();
       return;
@@ -527,9 +533,7 @@ public final class ResourceDefinitionValidationResultsDialog {
       item.setText(2, Const.NVL(usage.modelName(), ""));
       item.setText(3, Const.NVL(usage.modelElementName(), ""));
     }
-    wUsages.removeEmptyRows();
-    wUsages.setRowNums();
-    wUsages.optWidth(true);
+    wUsages.optimizeTableView();
     if (!usages.isEmpty()) {
       wUsages.getTable().setSelection(0);
     }
@@ -551,8 +555,7 @@ public final class ResourceDefinitionValidationResultsDialog {
     }
     if (wUsages != null && !wUsages.isDisposed()) {
       wUsages.clearAll(false);
-      wUsages.removeEmptyRows();
-      wUsages.setRowNums();
+      wUsages.optimizeTableView();
     }
     updateDetailButtonStates();
   }
@@ -723,7 +726,17 @@ public final class ResourceDefinitionValidationResultsDialog {
 
   private String formatValidationContext() {
     StringBuilder builder = new StringBuilder();
+    if (simulation != null) {
+      builder.append(
+          ValidationFindingFormatter.describeCompareContext(
+              simulation.compareMode(),
+              simulation.baselineVersionUsed(),
+              simulation.catalogVersionUsed()));
+    }
     if (options != null) {
+      if (!builder.isEmpty()) {
+        builder.append("  |  ");
+      }
       builder
           .append(
               BaseMessages.getString(
@@ -741,33 +754,8 @@ public final class ResourceDefinitionValidationResultsDialog {
     if (simulation == null) {
       return "";
     }
-    if (simulation.compareMode() != null) {
-      builder
-          .append(
-              BaseMessages.getString(
-                  PKG,
-                  "ResourceDefinitionValidationResultsDialog.Context.Mode",
-                  simulation.compareMode().name()));
-    }
-    if (!Utils.isEmpty(simulation.baselineVersionUsed())) {
-      if (!builder.isEmpty()) {
-        builder.append("  |  ");
-      }
-      builder.append(
-          BaseMessages.getString(
-              PKG,
-              "ResourceDefinitionValidationResultsDialog.Context.BaselineTag",
-              simulation.baselineVersionUsed()));
-    } else if (!Utils.isEmpty(simulation.catalogVersionUsed())) {
-      if (!builder.isEmpty()) {
-        builder.append("  |  ");
-      }
-      builder.append(
-          BaseMessages.getString(
-              PKG,
-              "ResourceDefinitionValidationResultsDialog.Context.BaselineTag",
-              simulation.catalogVersionUsed()));
-    } else {
+    if (Utils.isEmpty(simulation.baselineVersionUsed())
+        && Utils.isEmpty(simulation.catalogVersionUsed())) {
       if (!builder.isEmpty()) {
         builder.append("  |  ");
       }

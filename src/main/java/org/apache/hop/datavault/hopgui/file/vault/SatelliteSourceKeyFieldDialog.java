@@ -326,10 +326,7 @@ public class SatelliteSourceKeyFieldDialog {
         item.setText(2, Const.NVL(as.getSourceFieldName(), ""));
       }
     }
-    wAttributeSources.removeEmptyRows();
-    wAttributeSources.setRowNums();
-    wAttributeSources.optWidth(true);
-
+    wAttributeSources.optimizeTableView();
     wDrivingKeySources.clearAll();
     if (input.getDrivingKeySources() != null) {
       for (DrivingKeySource ds : input.getDrivingKeySources()) {
@@ -338,9 +335,7 @@ public class SatelliteSourceKeyFieldDialog {
         item.setText(2, Const.NVL(ds.getSourceField(), ""));
       }
     }
-    wDrivingKeySources.removeEmptyRows();
-    wDrivingKeySources.setRowNums();
-    wDrivingKeySources.optWidth(true);
+    wDrivingKeySources.optimizeTableView();
   }
 
   private void ok() {

@@ -715,19 +715,7 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
         // Final checksum for the Link Hash itself: hub hashes + dependent child key values
         // (source field names still in the stream at this point).
         List<String> linkHashInputFields = new ArrayList<>(hubHashNames);
-        for (DependentChildKey dck : listDependentChildKeys()) {
-          String sourceField =
-              ctx.variables.resolve(Const.NVL(dck.resolveSourceFieldName(), ""));
-          if (Utils.isEmpty(sourceField)) {
-            throw new HopException(
-                "Dependent child key '"
-                    + dck.getName()
-                    + "' on link "
-                    + getName()
-                    + " has no source field name");
-          }
-          linkHashInputFields.add(sourceField);
-        }
+        linkHashInputFields.addAll(resolveDependentChildSourceFieldNames(ctx.variables));
         TransformMeta linkHashCalc =
             addDvHashKeyForFields(
                 pipelineMeta,
@@ -1132,6 +1120,34 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
       return Collections.emptyList();
     }
     return dependentChildKeys;
+  }
+
+  /**
+   * Source field names for dependent child keys, in model order. Used when loading the link and
+   * when loading link satellites so both compute the same link hash (hub hashes + DCK values).
+   */
+  public List<String> resolveDependentChildSourceFieldNames(IVariables variables)
+      throws HopException {
+    List<String> names = new ArrayList<>();
+    for (DependentChildKey dck : listDependentChildKeys()) {
+      if (dck == null) {
+        continue;
+      }
+      String sourceField =
+          variables != null
+              ? variables.resolve(Const.NVL(dck.resolveSourceFieldName(), ""))
+              : Const.NVL(dck.resolveSourceFieldName(), "");
+      if (Utils.isEmpty(sourceField)) {
+        throw new HopException(
+            "Dependent child key '"
+                + dck.getName()
+                + "' on link "
+                + getName()
+                + " has no source field name");
+      }
+      names.add(sourceField);
+    }
+    return names;
   }
 
   private IValueMeta createValueMetaFromDependentChildKey(

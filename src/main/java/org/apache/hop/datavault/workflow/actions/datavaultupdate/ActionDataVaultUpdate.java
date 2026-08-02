@@ -623,7 +623,8 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
       }
 
       LogLevel pipelineLogLevel = pipelineConfig.resolveExecutionLogLevel();
-      List<PipelineMeta> freePipelineMetas = new ArrayList<>();
+      DvUpdateExecutionSupport.FreePipelineBuckets freePipelines =
+          new DvUpdateExecutionSupport.FreePipelineBuckets();
       List<MultiSourceUpdateUnit> multiSourceUnits = new ArrayList<>();
 
       for (IDvTable table : DvUpdateExecutionSupport.orderTablesForPipelineExecution(tables)) {
@@ -734,7 +735,7 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
 
         DvMultiSourceUpdateWorkflowSupport.UpdateArtifacts artifacts =
             DvMultiSourceUpdateWorkflowSupport.UpdateArtifacts.of(pipelineMetas, workflowMetas);
-        freePipelineMetas.addAll(artifacts.freePipelines());
+        freePipelines.add(table.getTableType(), artifacts.freePipelines());
 
         if (!artifacts.multiSourceWorkflows().isEmpty()) {
           logBasic(
@@ -765,7 +766,7 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
         }
       }
 
-      if (!multiSourceUnits.isEmpty() || !freePipelineMetas.isEmpty()) {
+      if (!multiSourceUnits.isEmpty() || !freePipelines.isEmpty()) {
         DvTargetLoadMode targetLoadMode = pipelineConfig.resolveTargetLoadMode();
         UpdateExecutionOutcome outcome;
         if (targetLoadMode == DvTargetLoadMode.STAGING_FILE) {
@@ -775,7 +776,7 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
                   model,
                   pipelineConfig,
                   multiSourceUnits,
-                  freePipelineMetas,
+                  freePipelines,
                   realRunConfig,
                   realWorkflowRunConfig,
                   pipelineLogLevel,
@@ -787,7 +788,7 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
                   result,
                   model,
                   multiSourceUnits,
-                  freePipelineMetas,
+                  freePipelines,
                   realRunConfig,
                   realWorkflowRunConfig,
                   pipelineLogLevel,
@@ -818,7 +819,7 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
       Result result,
       DataVaultModel model,
       List<MultiSourceUpdateUnit> multiSourceUnits,
-      List<PipelineMeta> freePipelineMetas,
+      DvUpdateExecutionSupport.FreePipelineBuckets freePipelines,
       String realRunConfig,
       String realWorkflowRunConfig,
       LogLevel pipelineLogLevel,
@@ -833,7 +834,8 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
     try {
       DvPipelineOrchestratorSupport.prepareStagingFolder(stagingFolder, getVariables());
 
-      // Multi-source hubs/links first (serial sources), then free pipelines in parallel.
+      // Multi-source hubs/links first (serial sources), then free pipelines by phase:
+      // hubs → links → satellites (parallel only within a phase so FKs stay valid).
       UpdateExecutionOutcome multiOutcome =
           runMultiSourceWorkflowUnits(
               multiSourceUnits,
@@ -849,15 +851,15 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
         return multiOutcome;
       }
 
-      if (!freePipelineMetas.isEmpty()) {
-        return executeOrchestratorUpdate(
-            result,
-            model,
-            freePipelineMetas,
-            realRunConfig,
-            pipelineLogLevel,
-            success,
-            totalErrors);
+      for (List<PipelineMeta> phase : freePipelines.phases()) {
+        UpdateExecutionOutcome phaseOutcome =
+            executeOrchestratorUpdate(
+                result, model, phase, realRunConfig, pipelineLogLevel, success, totalErrors);
+        success = phaseOutcome.success();
+        totalErrors = phaseOutcome.totalErrors();
+        if (!success) {
+          return phaseOutcome;
+        }
       }
       return new UpdateExecutionOutcome(success, totalErrors);
     } finally {
@@ -877,7 +879,7 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
       DataVaultModel model,
       DataVaultConfiguration pipelineConfig,
       List<MultiSourceUpdateUnit> multiSourceUnits,
-      List<PipelineMeta> freePipelineMetas,
+      DvUpdateExecutionSupport.FreePipelineBuckets freePipelines,
       String realRunConfig,
       String realWorkflowRunConfig,
       LogLevel pipelineLogLevel,
@@ -936,6 +938,8 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
       }
     }
 
+    // Sequential master workflow: free pipelines already flattened hub → link → satellite.
+    List<PipelineMeta> freePipelineMetas = freePipelines.flattenedInDependencyOrder();
     if (!freePipelineMetas.isEmpty()) {
       DvModelBulkUpdateExecutionSupport.ExecutionOutcome bulkOutcome =
           DvModelBulkUpdateExecutionSupport.executeStagingFileUpdate(

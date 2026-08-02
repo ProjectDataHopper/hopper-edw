@@ -44,7 +44,17 @@ CHANNELS = ("EMAIL", "SMS", "PHONE")
 LANGUAGES = ("en", "fr", "de", "es")
 CATEGORIES = ("Electronics", "Apparel", "Home", "Sports", "Grocery")
 REGIONS = ("North", "South", "East", "West")
+SALES_REGIONS = ("NORTH", "SOUTH", "EAST", "WEST", "CENTRAL")
 ORDER_STATUSES = ("NEW", "SHIPPED", "DELIVERED", "CANCELLED")
+
+# Seed sales reps (rep_id, rep_name, region) — extended with generated names for scale.sales_reps.
+SEED_SALES_REPS = (
+    (101, "Ada Lovelace", "NORTH"),
+    (102, "Grace Hopper", "SOUTH"),
+    (103, "Alan Turing", "EAST"),
+    (104, "Katherine Johnson", "WEST"),
+    (105, "Donald Knuth", "CENTRAL"),
+)
 
 
 @dataclass(frozen=True)
@@ -53,6 +63,7 @@ class Scale:
     products: int = 1_000
     orders: int = 100_000
     warehouses: int = 50
+    sales_reps: int = 25
 
 
 @dataclass(frozen=True)
@@ -70,6 +81,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--products", type=int, default=Scale.products)
     parser.add_argument("--orders", type=int, default=Scale.orders)
     parser.add_argument("--warehouses", type=int, default=Scale.warehouses)
+    parser.add_argument("--sales-reps", type=int, default=Scale.sales_reps)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument(
         "--progress-date",
@@ -405,6 +417,57 @@ def warehouse_product_rows(
     ]
 
 
+def sales_rep_id_range(scale: Scale) -> range:
+    """rep_id values: seed list starts at 101; remaining ids continue from 106."""
+    count = max(len(SEED_SALES_REPS), scale.sales_reps)
+    return range(101, 101 + count)
+
+
+def sales_rep_rows(
+    scale: Scale, rng: random.Random, load_date: str, rep_ids: Iterable[int]
+) -> list[list[object]]:
+    seed_by_id = {rep_id: (name, region) for rep_id, name, region in SEED_SALES_REPS}
+    rows: list[list[object]] = []
+    for rep_id in rep_ids:
+        if rep_id in seed_by_id:
+            name, region = seed_by_id[rep_id]
+        else:
+            name = f"Sales Rep {rep_id}"
+            region = rng.choice(SALES_REGIONS)
+        rows.append([rep_id, name, region, load_date, "E2E-sales-rep"])
+    return rows
+
+
+def order_rep_rows(
+    scale: Scale,
+    rng: random.Random,
+    load_date: str,
+    order_ids: Iterable[int],
+    rep_ids: Iterable[int],
+) -> list[list[object]]:
+    """One primary + secondary sales rep assignment per order (secondary != primary)."""
+    rep_list = list(rep_ids)
+    if not rep_list:
+        return []
+    rows: list[list[object]] = []
+    for order_id in order_ids:
+        primary = rng.choice(rep_list)
+        secondary = rng.choice(rep_list)
+        if len(rep_list) > 1:
+            while secondary == primary:
+                secondary = rng.choice(rep_list)
+        rows.append(
+            [
+                f"O{order_id:06d}",
+                primary,
+                secondary,
+                load_date,
+                "E2E-order-rep",
+            ]
+        )
+    return rows
+
+
 def subset_for_mode(mode: str, full_count: int, _rng: random.Random) -> range:
     if mode == "initial":
         return range(1, full_count + 1)
@@ -509,6 +572,18 @@ def generate_initial(files_dir: Path, scale: Scale, rng: random.Random) -> str:
             "record_source",
         ],
         order_line_rows(scale, rng, load_date, order_subset, anchor),
+    )
+
+    rep_subset = sales_rep_id_range(scale)
+    write_csv(
+        files_dir / f"sales_rep_{wave}.csv",
+        ["rep_id", "rep_name", "region", "load_date", "record_source"],
+        sales_rep_rows(scale, rng, load_date, rep_subset),
+    )
+    write_csv(
+        files_dir / f"order_rep_{wave}.csv",
+        ["order_id", "primary_rep_id", "secondary_rep_id", "load_date", "record_source"],
+        order_rep_rows(scale, rng, load_date, order_subset, rep_subset),
     )
 
     pairs = unique_random_pairs(
@@ -627,6 +702,19 @@ def generate_update(files_dir: Path, scale: Scale, base_rng: random.Random, cont
         ),
     )
 
+    # Sales rep master is loaded on initial; update waves only assign reps to new orders.
+    # Emit header-only sales_rep file so CRM load finds the CSV when RETAIL_CSV_WAVE is a month.
+    write_csv(
+        files_dir / f"sales_rep_{wave}.csv",
+        ["rep_id", "rep_name", "region", "load_date", "record_source"],
+        [],
+    )
+    write_csv(
+        files_dir / f"order_rep_{wave}.csv",
+        ["order_id", "primary_rep_id", "secondary_rep_id", "load_date", "record_source"],
+        order_rep_rows(scale, order_rng, load_date, new_orders, sales_rep_id_range(scale)),
+    )
+
     new_warehouse_list = list(new_warehouses)
     new_product_list = list(new_products)
     pairs = unique_random_pairs(
@@ -651,6 +739,7 @@ def main() -> None:
         products=args.products,
         orders=args.orders,
         warehouses=args.warehouses,
+        sales_reps=args.sales_reps,
     )
     rng = random.Random(args.seed)
 

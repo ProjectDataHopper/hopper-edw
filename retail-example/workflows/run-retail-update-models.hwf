@@ -48,6 +48,11 @@ limitations under the License.
       <default_value>3</default_value>
     </parameter>
     <parameter>
+      <name>EXPECT_AUTOMATIC_TARGET_TABLE_CREATION</name>
+      <description>Y on initial load (missing target tables are not reported; vault update creates them). N on update runs so missing/altered targets fail fail-on-warnings.</description>
+      <default_value>N</default_value>
+    </parameter>
+    <parameter>
       <name>REPORT_BASE_NAME</name>
       <description>The base name of the report produced at the end of the DV update</description>
       <default_value>retail-dv-initial-report</default_value>
@@ -74,37 +79,6 @@ limitations under the License.
       <attributes_hac/>
     </action>
     <action>
-      <filename>${PROJECT_HOME}/workflows/update-retail-dv-bv-dm.hwf</filename>
-      <params_from_previous>N</params_from_previous>
-      <exec_per_row>N</exec_per_row>
-      <set_logfile>N</set_logfile>
-      <logfile/>
-      <logext/>
-      <add_date>N</add_date>
-      <add_time>N</add_time>
-      <loglevel>Nothing</loglevel>
-      <set_append_logfile>N</set_append_logfile>
-      <create_parent_folder>N</create_parent_folder>
-      <wait_until_finished>Y</wait_until_finished>
-      <parameters>
-        <pass_all_parameters>Y</pass_all_parameters>
-        <parameter>
-          <name>DV_LOAD_DATE</name>
-          <value>${DV_ACTUAL_LOAD_DATE}</value>
-          <stream_name/>
-        </parameter>
-      </parameters>
-      <run_configuration>local</run_configuration>
-      <name>update-retail-dv-bv-dm</name>
-      <description/>
-      <type>WORKFLOW</type>
-      <attributes/>
-      <xloc>416</xloc>
-      <yloc>160</yloc>
-      <parallel>N</parallel>
-      <attributes_hac/>
-    </action>
-    <action>
       <sql/>
       <connection>Vault</connection>
       <useVariableSubstitution>N</useVariableSubstitution>
@@ -116,8 +90,8 @@ limitations under the License.
       <description/>
       <type>SQL</type>
       <attributes/>
-      <xloc>416</xloc>
-      <yloc>288</yloc>
+      <xloc>288</xloc>
+      <yloc>320</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
@@ -125,54 +99,20 @@ limitations under the License.
       <resourceDefinitionGroup>retail-sources</resourceDefinitionGroup>
       <targetCatalogVersion/>
       <compareMode>WORKING_VS_VERSION</compareMode>
-      <baselineCatalogVersion>v1.0.0</baselineCatalogVersion>
+      <baselineCatalogVersion>v1.1.0</baselineCatalogVersion>
       <reportOutputPath>${PROJECT_HOME}/work/reports</reportOutputPath>
       <reportFileBaseName>retail-schema-validation</reportFileBaseName>
       <reportFormat>BOTH</reportFormat>
       <failureSeverity>FAIL_ON_WARNINGS</failureSeverity>
       <failOnWarnings>Y</failOnWarnings>
       <includeImpact>Y</includeImpact>
+      <checkTargetDatabases>Y</checkTargetDatabases>
+      <expectAutomaticTargetTableCreation>${EXPECT_AUTOMATIC_TARGET_TABLE_CREATION}</expectAutomaticTargetTableCreation>
       <name>Validate resource definitions</name>
       <type>VALIDATE_RESOURCE_DEFINITIONS</type>
       <attributes/>
       <xloc>224</xloc>
       <yloc>48</yloc>
-      <parallel>N</parallel>
-      <attributes_hac/>
-    </action>
-    <action>
-      <workflowExecutionIdVariable/>
-      <useWorkflowLogChannelId>Y</useWorkflowLogChannelId>
-      <executionMetricsProfile>retail-execution-metrics</executionMetricsProfile>
-      <dataCatalogConnection>local-catalog</dataCatalogConnection>
-      <publishToDatabase>Y</publishToDatabase>
-      <publishToCatalog>Y</publishToCatalog>
-      <logToWorkflow>Y</logToWorkflow>
-      <writeMarkdownReport>Y</writeMarkdownReport>
-      <writeHtmlReport>Y</writeHtmlReport>
-      <reportOutputFolder>${PROJECT_HOME}/work/reports</reportOutputFolder>
-      <reportFileBaseName>${REPORT_BASE_NAME}</reportFileBaseName>
-      <failIfNoMetricsFound>Y</failIfNoMetricsFound>
-      <includePipelineDetail>Y</includePipelineDetail>
-      <includeInsights>Y</includeInsights>
-      <name>End Vault Update</name>
-      <type>END_VAULT_UPDATE</type>
-      <attributes/>
-      <xloc>576</xloc>
-      <yloc>160</yloc>
-      <parallel>N</parallel>
-      <attributes_hac/>
-    </action>
-    <action>
-      <workflowExecutionIdVariable/>
-      <useWorkflowLogChannelId>Y</useWorkflowLogChannelId>
-      <reuseExistingExecutionId>N</reuseExistingExecutionId>
-      <logToWorkflow>Y</logToWorkflow>
-      <name>Begin Vault Update</name>
-      <type>BEGIN_VAULT_UPDATE</type>
-      <attributes/>
-      <xloc>224</xloc>
-      <yloc>160</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
@@ -243,7 +183,7 @@ limitations under the License.
       <description>Measure published vault targets after update (POST_UPDATE, persist to OPS)</description>
       <type>MEASURE_DATA_QUALITY</type>
       <attributes/>
-      <xloc>784</xloc>
+      <xloc>464</xloc>
       <yloc>160</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -265,7 +205,7 @@ limitations under the License.
       <description>Alert on target quality findings after update without failing the workflow</description>
       <type>EVALUATE_QUALITY_GATE</type>
       <attributes/>
-      <xloc>1008</xloc>
+      <xloc>688</xloc>
       <yloc>160</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -291,44 +231,63 @@ limitations under the License.
       <name>Export data lineage to Marquez</name>
       <type>EXPORT_DATA_LINEAGE</type>
       <attributes/>
-      <xloc>784</xloc>
-      <yloc>288</yloc>
+      <xloc>464</xloc>
+      <yloc>272</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <resourceDefinitionGroup>retail-sources</resourceDefinitionGroup>
+      <includeDataVault>Y</includeDataVault>
+      <includeBusinessVault>Y</includeBusinessVault>
+      <includeDimensional>Y</includeDimensional>
+      <loadDate>${DV_ACTUAL_LOAD_DATE}</loadDate>
+      <pipelineRunConfiguration>local</pipelineRunConfiguration>
+      <workflowRunConfiguration>local</workflowRunConfiguration>
+      <parallelPipelineCopies>${PIPELINE_COPIES}</parallelPipelineCopies>
+      <logModelCheckFailures>Y</logModelCheckFailures>
+      <abortOnModelCheckFailures>Y</abortOnModelCheckFailures>
+      <detailedDataTypeChecking>Y</detailedDataTypeChecking>
+      <updateTargetDatabaseStructure>Y</updateTargetDatabaseStructure>
+      <failIfDdlNeeded>N</failIfDdlNeeded>
+      <publishToCatalog>Y</publishToCatalog>
+      <dataCatalogConnection>local-catalog</dataCatalogConnection>
+      <ensureSpecialRecords>Y</ensureSpecialRecords>
+      <recordSourceGroup/>
+      <manageVaultUpdateMetrics>Y</manageVaultUpdateMetrics>
+      <useWorkflowLogChannelId>Y</useWorkflowLogChannelId>
+      <executionMetricsProfile>retail-execution-metrics</executionMetricsProfile>
+      <publishMetricsToDatabase>Y</publishMetricsToDatabase>
+      <publishMetricsToCatalog>Y</publishMetricsToCatalog>
+      <logMetricsToWorkflow>Y</logMetricsToWorkflow>
+      <writeMarkdownReport>Y</writeMarkdownReport>
+      <writeHtmlReport>Y</writeHtmlReport>
+      <reportOutputFolder>${PROJECT_HOME}/work/reports</reportOutputFolder>
+      <reportFileBaseName>${REPORT_BASE_NAME}</reportFileBaseName>
+      <failIfNoMetricsFound>N</failIfNoMetricsFound>
+      <includePipelineDetail>Y</includePipelineDetail>
+      <includeInsights>Y</includeInsights>
+      <name>Update resource definition group</name>
+      <description>Update all DV/BV/DM models listed on retail-sources (order from group)</description>
+      <type>UPDATE_RESOURCE_DEFINITION_GROUP</type>
+      <attributes/>
+      <xloc>224</xloc>
+      <yloc>160</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
   </actions>
   <hops>
     <hop>
-      <from>update-retail-dv-bv-dm</from>
-      <to>advance-load-control.sql</to>
+      <from>Start</from>
+      <to>Validate resource definitions</to>
       <evaluation>Y</evaluation>
-      <unconditional>N</unconditional>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
-      <from>update-retail-dv-bv-dm</from>
-      <to>End Vault Update</to>
-      <evaluation>N</evaluation>
       <unconditional>Y</unconditional>
       <enabled>Y</enabled>
     </hop>
     <hop>
       <from>Validate resource definitions</from>
       <to>Measure source data quality</to>
-      <evaluation>Y</evaluation>
-      <unconditional>N</unconditional>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
-      <from>End Vault Update</from>
-      <to>Measure target data quality (post)</to>
-      <evaluation>N</evaluation>
-      <unconditional>Y</unconditional>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
-      <from>Begin Vault Update</from>
-      <to>update-retail-dv-bv-dm</to>
       <evaluation>Y</evaluation>
       <unconditional>N</unconditional>
       <enabled>Y</enabled>
@@ -342,7 +301,28 @@ limitations under the License.
     </hop>
     <hop>
       <from>Evaluate source quality gate</from>
-      <to>Begin Vault Update</to>
+      <to>Update resource definition group</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Update resource definition group</from>
+      <to>advance-load-control.sql</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Update resource definition group</from>
+      <to>Measure target data quality (post)</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Update resource definition group</from>
+      <to>Export data lineage to Marquez</to>
       <evaluation>Y</evaluation>
       <unconditional>N</unconditional>
       <enabled>Y</enabled>
@@ -350,20 +330,6 @@ limitations under the License.
     <hop>
       <from>Measure target data quality (post)</from>
       <to>Alert on target quality (post)</to>
-      <evaluation>N</evaluation>
-      <unconditional>Y</unconditional>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
-      <from>Start</from>
-      <to>Validate resource definitions</to>
-      <evaluation>Y</evaluation>
-      <unconditional>Y</unconditional>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
-      <from>End Vault Update</from>
-      <to>Export data lineage to Marquez</to>
       <evaluation>N</evaluation>
       <unconditional>Y</unconditional>
       <enabled>Y</enabled>

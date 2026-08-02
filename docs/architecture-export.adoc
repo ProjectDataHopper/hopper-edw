@@ -17,11 +17,11 @@ Export **derived** diagrams for architects and analysts. Models and workflows re
 |Layered **swimlanes** with multi-row wrapping (architecture layout — not ELK / Draw.io auto-layout).
 
 |**DATA inventory**
-|Which tables and sources are involved across models (lineage). **No relationship arrows**. Default file name: `data-inventory.drawio`.
+|Which tables and sources are involved across models (lineage). **No relationship arrows**. Default file name: `data-inventory.drawio`. Catalog feeds (including composite sources published from `.hsm` queries) appear as source inventory when referenced by vault models.
 |Swimlanes by layer; multi-row packing.
 
 |**MODEL diagrams (aggregated by layer)**
-|**Enterprise multi-file** data-model projection: all `.hdv` files → one DV diagram; all `.hbv` → one BV diagram; all `.hdm` → one dimensional diagram. Shared hubs/dims are **deduped by name**. Structural relationships included.
+|**Enterprise multi-file** data-model projection: all `.hdv` files → one DV diagram; all `.hbv` → one BV diagram; all `.hdm` → one dimensional diagram. Shared hubs/dims are **deduped by name**. Structural relationships included. Source models (`.hsm`) remain the ER canvas for physical sources; they are not yet a separate aggregated Draw.io layer (use the `.hsm` file and DATA inventory for source-side views).
 |**ELK** layout (same stack as the Hop GUI canvas).
 |===
 
