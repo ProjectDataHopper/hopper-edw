@@ -607,6 +607,53 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
   }
 
   @Override
+  public org.apache.hop.core.search.ISearchable createSearchable(
+      String locationDescription, org.apache.hop.metadata.api.IHopMetadataProvider metadataProvider)
+      throws org.apache.hop.core.exception.HopException {
+    return new org.apache.hop.datavault.hopgui.search.HopGuiSourceModelSearchable(
+        locationDescription, model);
+  }
+
+  /**
+   * Select and open a source query or table matching {@code componentName} (search navigation).
+   * Queries are preferred when both share a name.
+   */
+  public void openSearchComponent(String componentName) {
+    if (Utils.isEmpty(componentName) || model == null) {
+      return;
+    }
+    SourceQuery query = model.findQuery(componentName);
+    if (query != null) {
+      for (SourceQuery q : model.getQueries()) {
+        if (q != null) {
+          q.setSelected(false);
+        }
+      }
+      for (SourceTable t : model.getTables()) {
+        if (t != null) {
+          t.setSelected(false);
+        }
+      }
+      query.setSelected(true);
+      editQuery(query);
+      updateGui();
+      return;
+    }
+    SourceTable table = model.findTable(componentName);
+    if (table == null) {
+      return;
+    }
+    for (SourceTable t : model.getTables()) {
+      if (t != null) {
+        t.setSelected(false);
+      }
+    }
+    table.setSelected(true);
+    editTable(table);
+    updateGui();
+  }
+
+  @Override
   public String getName() {
     return model != null ? model.getName() : "Source Model";
   }

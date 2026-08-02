@@ -100,8 +100,13 @@ See link:plans/load-run-metrics-plan.md[load-run metrics plan] for the metadata 
 
 Sort memory, partition copies, and large-model notes: link:performance-tuning.md[performance-tuning.md].
 
+== Finding objects while operating
+
+Day-to-day operators and modelers can use Hop **Search Everywhere** to jump to hubs, satellites, source queries, resource definition groups, or metrics profiles by name without walking the project tree. See link:search.adoc[Project and metadata search].
+
 == Related documents
 
 * link:update-resource-definition-group-action.adoc[Update resource definition group action]
+* link:search.adoc[Project and metadata search]
 * link:execution-maps.adoc[Execution maps]
 * link:getting-started-retail.adoc[Getting started — retail example]

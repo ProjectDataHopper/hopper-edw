@@ -33,6 +33,7 @@ For a slide-style executive summary, see [presentations/hop-data-vault-overview.
 |---------|--------|---------------|
 | Data Catalog + `DV_SOURCE` record definitions | Available | [data-catalog.adoc](data-catalog.adoc), [datavault-source.adoc](datavault-source.adoc) |
 | Source modeler (`.hsm`) + multi-table queries / composite feeds | Available | [source-modeler-overview.adoc](source-modeler-overview.adoc) |
+| Project / Search Everywhere for models and plugin metadata | Available (Hop 2.19) | [search.adoc](search.adoc) |
 | Resource definition validation (issues, proposals, acknowledgements) | Available | [resource-definition-validation.adoc](resource-definition-validation.adoc) |
 | Catalog version tags + schema impact simulation (CI/CD gate, blast radius) | Available | [resource-definition-validation.adoc](resource-definition-validation.adoc), [data-catalog.adoc](data-catalog.adoc) |
 | Data quality measure + quality gate (content rules, persist, alerts) | Available (Phase 2) | [data-quality.adoc](data-quality.adoc) |
@@ -108,6 +109,20 @@ Hubs, links, and satellites reference source **names**, not raw connection detai
 Visual **source-system** modeler: import tables with PK/FK, draw relationships, and compose **source queries** (joins + projections). Publish a query as a catalog **COMPOSITE** feed; Data Vault loads generate single-connection SQL or a Merge Join pipeline. Retail sample: `retail-example/models/source-tables-crm.hsm`. See [source-modeler-overview.adoc](source-modeler-overview.adoc).
 
 ![Source modeler — retail CRM tables with All customer info query SQL](images/source-modeler-retail-example-with-query-dialog-generated-sql.png)
+
+### Project and metadata search (Hop 2.19)
+
+Hop **Search Everywhere** / project search includes hop-data-vault models and metadata:
+
+| Scope | Examples of matches |
+|-------|---------------------|
+| `.hsm` | Source tables, relationships, multi-table **query** names, WHERE text, published feed names |
+| `.hdv` | Hub / link / satellite names, physical names, configuration, canvas notes |
+| `.hbv` / `.hdm` | BV and dimensional table names, paths, configuration, notes |
+| Resource definition group | Group name, catalog connection, listed `.hdv` / `.hbv` / `.hdm` paths |
+| Data catalog, metrics profile, quality rule set | Connection paths, rule field names, metrics folder |
+
+Open a model hit to open the file (or focus an open tab) and jump to the matching table or source query when the hit carries a component name. Open tabs search **unsaved** in-memory content. Full usage: [search.adoc](search.adoc).
 
 ### Raw Data Vault (`.hdv`)
 

@@ -2408,6 +2408,38 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     return model;
   }
 
+  /**
+   * Project / open-tab search: prefer the in-memory model so unsaved edits are searchable.
+   */
+  @Override
+  public org.apache.hop.core.search.ISearchable createSearchable(
+      String locationDescription, org.apache.hop.metadata.api.IHopMetadataProvider metadataProvider)
+      throws org.apache.hop.core.exception.HopException {
+    return new org.apache.hop.datavault.hopgui.search.HopGuiDataVaultModelSearchable(
+        locationDescription, model);
+  }
+
+  /**
+   * Select and open the table matching {@code componentName} (search result navigation).
+   */
+  public void openSearchComponent(String componentName) {
+    if (Utils.isEmpty(componentName) || model == null) {
+      return;
+    }
+    IDvTable table = model.findTable(componentName);
+    if (table == null) {
+      return;
+    }
+    for (IDvTable t : model.getTables()) {
+      if (t != null) {
+        t.setSelected(false);
+      }
+    }
+    table.setSelected(true);
+    editTable(table);
+    updateGui();
+  }
+
   @Override
   public String getName() {
     return model != null ? model.getName() : "Data Vault Model";

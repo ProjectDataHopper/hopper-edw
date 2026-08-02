@@ -28,6 +28,7 @@ Documentation for the **hop-datavault** plugin (development **0.6.0-SNAPSHOT**, 
 | [feature-overview.md](feature-overview.md) | Major plugin capabilities, maturity, and links to deep dives |
 | [getting-started-retail.adoc](getting-started-retail.adoc) | Primary tutorial: retail-example (DV → BV → dimensional) |
 | [getting-started-integration-tests.adoc](getting-started-integration-tests.adoc) | Reference walkthrough: Customer 360 and integration test fixtures |
+| [search.adoc](search.adoc) | **Search Everywhere**: models (`.hsm`/`.hdv`/`.hbv`/`.hdm`) and plugin metadata |
 
 ## Managers and architects
 
@@ -87,6 +88,7 @@ Documentation for the **hop-datavault** plugin (development **0.6.0-SNAPSHOT**, 
 |----------|-------------|
 | [operations.adoc](operations.adoc) | Docker runners, batch orchestration, partial loads, load overview |
 | [update-resource-definition-group-action.adoc](update-resource-definition-group-action.adoc) | Preferred multi-model update action (group-scoped) |
+| [search.adoc](search.adoc) | Project search for models and plugin metadata (Hop 2.19) |
 | [execution-maps.adoc](execution-maps.adoc) | `.hem` execution and lineage graphs |
 | [performance-tuning.md](performance-tuning.md) | Sort memory and pipeline tuning |
 | [ai-advisory.md](ai-advisory.md) | AI Help setup and usage |

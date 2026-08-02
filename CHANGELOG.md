@@ -4,6 +4,15 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## Unreleased
 
+### Project and metadata search (#106)
+
+- Opt `.hsm` / `.hdv` / `.hbv` / `.hdm` into Hop 2.19 project search via `CAPABILITY_SEARCH` and `createSearchable()`
+- Content analysers for Data Vault, Business Vault, dimensional, and source models (table/query names, notes, configuration, high-value fields)
+- Content analysers for plugin metadata: resource definition group (model paths), data catalog connection, execution metrics profile, data quality rule set
+- Open search results navigate to the model and select/edit the matching table or source query when available
+- Open tabs search the in-memory model (unsaved edits)
+- Docs: [search.adoc](docs/search.adoc), feature overview matrix + plugin/operations usage
+
 ### Required Apache Hop version
 
 - Development and runtime target is **Apache Hop 2.19.0** (use **2.19.0-SNAPSHOT** until the GA release ships)

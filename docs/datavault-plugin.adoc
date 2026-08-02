@@ -28,14 +28,26 @@ The generated load processes follow the standard Data Vault 2.0 "insert-only" ap
 
 == Typical workflow
 
-1. Define **Data Vault Sources** that describe where your raw data lives (database connection, table, column layout, and record-source semantics).
+1. Define **Data Vault Sources** that describe where your raw data lives (database connection, table, column layout, and record-source semantics). Optionally model multi-table joins in a **source model** (`.hsm`) and publish composite feeds.
 2. Create **Hub**, **Link**, and **Satellite** definitions and group them into a **Data Vault Model** (saved as a `.hdv` file). Each model carries its own embedded **configuration** (target database, hashing rules, column names, sentinel records, and pipeline options).
 3. Lay objects out on the visual canvas, connect relationships, and add annotation notes where helpful.
 4. Use the **Check model** toolbar button to catch missing pieces or broken references early.
 5. Use **Generate DDL** to preview CREATE/ALTER statements, or **Debug** to generate and open a sample update pipeline for selected tables.
-6. In a workflow, add the **Data Vault Update** action, point it at your `.hdv` model, choose a pipeline run configuration, and run the full load (with optional model checks and DDL handling).
+6. In a workflow, add the **Data Vault Update** action (or **Update resource definition group** for multi-model waves), point it at your model(s), choose a pipeline run configuration, and run the full load (with optional model checks and DDL handling).
 
 This approach gives you consistent, maintainable Data Vault loads that stay in sync with your model.
+
+== Finding models and metadata (search)
+
+With **Apache Hop 2.19**, project **Search Everywhere** includes this plugin’s model files and metadata:
+
+* **Files:** `.hsm` (source), `.hdv` (raw vault), `.hbv` (business vault), `.hdm` (dimensional)
+* **Content:** table and query names, physical names, notes, configuration strings, published feed names, resource-definition-group model paths, quality rule fields, and related settings
+* **Open:** select a result to open the model (or metadata editor); model hits can jump to the matching table or source query on the canvas
+
+Open editor tabs are searched from **in-memory** content so unsaved renames still match.
+
+Full details: link:search.adoc[Project and metadata search].
 
 == Visual model editor
 
@@ -273,8 +285,9 @@ Today the plugin supports:
 
 * Data catalog integration and optional publish after DV/BV updates.
 * AI advisory with review-before-apply proposals.
-* Metadata search across Data Vault models.
+* **Project / Search Everywhere** (Hop 2.19): search `.hsm`, `.hdv`, `.hbv`, and `.hdm` content and plugin metadata (resource definition groups, catalog connections, metrics profiles, quality rule sets). See link:search.adoc[Project and metadata search].
+* Architecture export, OpenLineage / Marquez export, execution maps, and multi-layer **Update resource definition group** loads.
 
-Future work includes dimensional modeling from DV/BV metadata, a Business Vault field dictionary, additional source types, bridge tables, and lineage export (Marquez / OpenLineage).
+Future work may deepen catalog record-definition search and further source-system modeling convenience.
 
 If you are new to Data Vault 2.0, the plugin encourages good practices by making the key decisions (hashing, naming, source tracking, change detection) explicit and reusable through the model configuration and source metadata objects.

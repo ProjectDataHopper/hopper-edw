@@ -31,9 +31,12 @@ import org.apache.hop.core.gui.plugin.action.GuiActionType;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
 import org.apache.hop.core.xml.XmlHandler;
+import org.apache.hop.core.search.ISearchable;
 import org.apache.hop.datavault.hopgui.file.ExplorerPerspectiveTabSupport;
+import org.apache.hop.datavault.hopgui.search.HopGuiDataVaultModelSearchable;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.ModelXmlWriteSupport;
+import org.apache.hop.datavault.resourcedefinition.ResourceDefinitionGroupResolver;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
@@ -112,7 +115,20 @@ public class HopVaultFileType extends HopFileTypeBase {
     caps.setProperty(IHopFileType.CAPABILITY_DISTRIBUTE_VERTICAL, "true");
     caps.setProperty(IHopFileType.CAPABILITY_EXPORT_TO_SVG, "true");
     caps.setProperty(IHopFileType.CAPABILITY_FILE_HISTORY, "true");
+    caps.setProperty(IHopFileType.CAPABILITY_SEARCH, "true");
     return caps;
+  }
+
+  @Override
+  public ISearchable createSearchable(
+      String filename,
+      String locationDescription,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider)
+      throws HopException {
+    DataVaultModel model =
+        ResourceDefinitionGroupResolver.loadDataVaultModel(filename, variables, metadataProvider);
+    return new HopGuiDataVaultModelSearchable(locationDescription, model);
   }
 
   @Override

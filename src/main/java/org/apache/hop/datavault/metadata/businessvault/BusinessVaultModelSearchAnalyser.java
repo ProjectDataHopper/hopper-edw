@@ -13,10 +13,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
-package org.apache.hop.datavault.metadata;
+package org.apache.hop.datavault.metadata.businessvault;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,109 +26,99 @@ import org.apache.hop.core.search.ISearchable;
 import org.apache.hop.core.search.ISearchableAnalyser;
 import org.apache.hop.core.search.SearchableAnalyserPlugin;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.datavault.metadata.DvNote;
 
 @SearchableAnalyserPlugin(
-    id = "DataVaultModelSearchAnalyser",
-    name = "Search in Data Vault model metadata")
-public class DataVaultModelSearchAnalyser extends BaseSearchableAnalyser<DataVaultModel>
-    implements ISearchableAnalyser<DataVaultModel> {
+    id = "BusinessVaultModelSearchAnalyser",
+    name = "Search in Business Vault model metadata")
+public class BusinessVaultModelSearchAnalyser extends BaseSearchableAnalyser<BusinessVaultModel>
+    implements ISearchableAnalyser<BusinessVaultModel> {
 
   @Override
-  public Class<DataVaultModel> getSearchableClass() {
-    return DataVaultModel.class;
+  public Class<BusinessVaultModel> getSearchableClass() {
+    return BusinessVaultModel.class;
   }
 
   @Override
   public List<ISearchResult> search(
-      ISearchable<DataVaultModel> searchable, ISearchQuery searchQuery) {
-    DataVaultModel model = searchable.getSearchableObject();
-
+      ISearchable<BusinessVaultModel> searchable, ISearchQuery searchQuery) {
+    BusinessVaultModel model = searchable.getSearchableObject();
     List<ISearchResult> results = new ArrayList<>();
+    if (model == null) {
+      return results;
+    }
 
     matchProperty(
-        searchable, results, searchQuery, "data vault model name", model.getName(), null);
+        searchable, results, searchQuery, "business vault model name", model.getName(), null);
     matchProperty(
         searchable,
         results,
         searchQuery,
-        "data vault model description",
+        "business vault model description",
         model.getDescription(),
         null);
-
-    // The embedded Data Vault configuration and its properties
-    //
-    DataVaultConfiguration configuration = model.getConfigurationOrDefault();
-    matchObjectFields(
+    matchProperty(
         searchable,
         results,
         searchQuery,
-        configuration,
-        "data vault configuration property",
-        "configuration");
+        "business vault data vault model path",
+        model.getDataVaultModelPath(),
+        null);
 
-    // The tables (Hubs, Links and Satellites) and their properties
-    //
-    for (IDvTable table : model.getTables()) {
+    if (model.getConfiguration() != null) {
+      matchObjectFields(
+          searchable,
+          results,
+          searchQuery,
+          model.getConfiguration(),
+          "business vault configuration property",
+          "configuration");
+    }
+
+    for (IBvTable table : model.getTables()) {
       if (table == null) {
         continue;
       }
-
       String componentName = table.getName();
       if (Utils.isEmpty(componentName)) {
         componentName = table.getTableName();
       }
-
       matchProperty(
           searchable,
           results,
           searchQuery,
-          "data vault table name",
+          "business vault table name",
           table.getName(),
           componentName);
       matchProperty(
           searchable,
           results,
           searchQuery,
-          "data vault table physical name",
+          "business vault table physical name",
           table.getTableName(),
           componentName);
       matchProperty(
           searchable,
           results,
           searchQuery,
-          "data vault table description",
+          "business vault table description",
           table.getDescription(),
           componentName);
-
-      DvTableType tableType = table.getTableType();
-      if (tableType != null) {
-        matchProperty(
-            searchable,
-            results,
-            searchQuery,
-            "data vault table type",
-            tableType.name(),
-            componentName);
-      }
-
       matchObjectFields(
           searchable,
           results,
           searchQuery,
           table,
-          "data vault table property",
+          "business vault table property",
           componentName);
     }
 
-    // Canvas notes
-    //
     if (model.getNotes() != null) {
       for (DvNote note : model.getNotes()) {
-        if (note == null) {
-          continue;
+        if (note != null) {
+          matchProperty(
+              searchable, results, searchQuery, "business vault note text", note.getText(), null);
         }
-        matchProperty(
-            searchable, results, searchQuery, "data vault note text", note.getText(), null);
       }
     }
 
