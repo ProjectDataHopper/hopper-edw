@@ -33,6 +33,11 @@ import org.apache.hop.core.variables.IVariables;
 /**
  * Detects collation / Unicode-vs-ANSI differences on ORDER BY columns (SQL Server and PostgreSQL)
  * and resolves a bridge collation for generated {@code COLLATE} clauses.
+ *
+ * <p><b>Cross-engine (issue #108):</b> a SQL Server collation name such as {@code French_CI_AS}
+ * must never appear in PostgreSQL {@code ORDER BY} (and vice versa). When source and target use
+ * different database engines, no SQL bridge {@code COLLATE} is emitted — those names are not
+ * portable. Same-engine remediation (SQL Server↔SQL Server, PostgreSQL↔PostgreSQL) is unchanged.
  */
 public final class DvSqlOrderByCollationSupport {
 
@@ -65,12 +70,31 @@ public final class DvSqlOrderByCollationSupport {
     private final Map<String, ColumnSqlMeta> targetColumns;
     private final String sourceDbDefaultCollation;
     private final String targetDbDefaultCollation;
+    private final String sourcePluginId;
+    private final String targetPluginId;
 
+    /** Compatibility constructor without engine ids (tests / callers that do not track engines). */
     public Session(
         Map<String, ColumnSqlMeta> sourceColumns,
         Map<String, ColumnSqlMeta> targetColumns,
         String sourceDbDefaultCollation,
         String targetDbDefaultCollation) {
+      this(
+          sourceColumns,
+          targetColumns,
+          sourceDbDefaultCollation,
+          targetDbDefaultCollation,
+          null,
+          null);
+    }
+
+    public Session(
+        Map<String, ColumnSqlMeta> sourceColumns,
+        Map<String, ColumnSqlMeta> targetColumns,
+        String sourceDbDefaultCollation,
+        String targetDbDefaultCollation,
+        String sourcePluginId,
+        String targetPluginId) {
       this.sourceColumns =
           sourceColumns != null
               ? Collections.unmodifiableMap(new HashMap<>(sourceColumns))
@@ -81,10 +105,12 @@ public final class DvSqlOrderByCollationSupport {
               : Map.of();
       this.sourceDbDefaultCollation = sourceDbDefaultCollation;
       this.targetDbDefaultCollation = targetDbDefaultCollation;
+      this.sourcePluginId = sourcePluginId;
+      this.targetPluginId = targetPluginId;
     }
 
     public static Session empty() {
-      return new Session(Map.of(), Map.of(), null, null);
+      return new Session(Map.of(), Map.of(), null, null, null, null);
     }
 
     public Map<String, ColumnSqlMeta> sourceColumns() {
@@ -101,6 +127,31 @@ public final class DvSqlOrderByCollationSupport {
 
     public String targetDbDefaultCollation() {
       return targetDbDefaultCollation;
+    }
+
+    public String sourcePluginId() {
+      return sourcePluginId;
+    }
+
+    public String targetPluginId() {
+      return targetPluginId;
+    }
+
+    /**
+     * False when source and target are known to be different collation-capable engines (e.g. SQL
+     * Server vs PostgreSQL). Unknown plugin ids are treated as not cross-engine so callers can
+     * still apply a per-engine compatibility filter on the resolved name.
+     */
+    public boolean sameCollationEngineFamily() {
+      DvSqlOrderBySupport.CollationEngineFamily sourceFamily =
+          DvSqlOrderBySupport.collationEngineFamily(sourcePluginId);
+      DvSqlOrderBySupport.CollationEngineFamily targetFamily =
+          DvSqlOrderBySupport.collationEngineFamily(targetPluginId);
+      if (sourceFamily == DvSqlOrderBySupport.CollationEngineFamily.UNKNOWN
+          || targetFamily == DvSqlOrderBySupport.CollationEngineFamily.UNKNOWN) {
+        return true;
+      }
+      return sourceFamily == targetFamily;
     }
 
     public ColumnSqlMeta sourceColumn(String name) {
@@ -155,13 +206,30 @@ public final class DvSqlOrderByCollationSupport {
   /**
    * Resolves the bridge collation to apply on an ORDER BY expression when a sort risk is present.
    * Prefer source column collation so both merge legs sort with source semantics. Returns null when
-   * there is no risk or no collation name is available.
+   * there is no risk, no collation name is available, or source/target engines differ (issue #108).
    */
   public static String resolveBridgeCollation(
       ColumnSqlMeta source,
       ColumnSqlMeta target,
       String sourceDbDefaultCollation,
       String targetDbDefaultCollation) {
+    return resolveBridgeCollation(
+        source, target, sourceDbDefaultCollation, targetDbDefaultCollation, null);
+  }
+
+  /**
+   * @param session optional session; when present and source/target engines differ, returns null
+   *     (collation names are not portable across engines)
+   */
+  public static String resolveBridgeCollation(
+      ColumnSqlMeta source,
+      ColumnSqlMeta target,
+      String sourceDbDefaultCollation,
+      String targetDbDefaultCollation,
+      Session session) {
+    if (session != null && !session.sameCollationEngineFamily()) {
+      return null;
+    }
     if (!isOrderByRisk(source, target)) {
       return null;
     }
@@ -178,6 +246,101 @@ public final class DvSqlOrderByCollationSupport {
       return targetDbDefaultCollation.trim();
     }
     return null;
+  }
+
+  /**
+   * True when {@code collation} is safe to use in {@code ORDER BY … COLLATE} on {@code
+   * databaseMeta}. SQL Server and PostgreSQL collation name spaces are disjoint (issue #108).
+   */
+  public static boolean isCollationCompatibleWithEngine(
+      DatabaseMeta databaseMeta, String collation) {
+    if (databaseMeta == null || Utils.isEmpty(collation)) {
+      return false;
+    }
+    String name = stripCollationQuotes(collation);
+    if (Utils.isEmpty(name)) {
+      return false;
+    }
+    if (DvSqlOrderBySupport.isSqlServer(databaseMeta)) {
+      return looksLikeSqlServerCollation(name) && !looksLikePostgreSqlCollation(name);
+    }
+    if (DvSqlOrderBySupport.isPostgreSql(databaseMeta)) {
+      return looksLikePostgreSqlCollation(name) && !looksLikeSqlServerCollation(name);
+    }
+    return false;
+  }
+
+  static String stripCollationQuotes(String collation) {
+    if (Utils.isEmpty(collation)) {
+      return collation;
+    }
+    String trimmed = collation.trim();
+    if (trimmed.length() >= 2 && trimmed.startsWith("\"") && trimmed.endsWith("\"")) {
+      return trimmed.substring(1, trimmed.length() - 1).replace("\"\"", "\"");
+    }
+    return trimmed;
+  }
+
+  /**
+   * Heuristic for SQL Server collation identifiers ({@code French_CI_AS}, {@code
+   * Latin1_General_100_CI_AS_SC_UTF8}, {@code SQL_Latin1_General_CP1_CI_AS}).
+   *
+   * <p>Does not treat bare locale names ({@code en_US}) as SQL Server — those are PostgreSQL-style.
+   */
+  static boolean looksLikeSqlServerCollation(String collation) {
+    if (Utils.isEmpty(collation)) {
+      return false;
+    }
+    String u = collation.toUpperCase(Locale.ROOT);
+    // Clear PostgreSQL / ICU forms are not SQL Server collations.
+    if (u.contains("-X-ICU") || collation.contains(".") || "C".equals(u) || "POSIX".equals(u)) {
+      return false;
+    }
+    // Windows / SQL Server collations carry CI/CS/BIN (or well-known families). Avoid matching
+    // PostgreSQL locales like en_US that only have an underscore.
+    return u.contains("_CI_")
+        || u.contains("_CS_")
+        || u.contains("_BIN")
+        || u.startsWith("SQL_")
+        || u.contains("LATIN1_GENERAL")
+        || u.startsWith("FRENCH_")
+        || u.endsWith("_UTF8")
+        || u.contains("_SC_")
+        || u.endsWith("_CI_AS")
+        || u.endsWith("_CS_AS")
+        || u.endsWith("_CI_AI")
+        || u.endsWith("_CS_AI");
+  }
+
+  /**
+   * Heuristic for PostgreSQL collation names ({@code fr-FR-x-icu}, {@code en_US.utf8}, {@code C}).
+   */
+  static boolean looksLikePostgreSqlCollation(String collation) {
+    if (Utils.isEmpty(collation)) {
+      return false;
+    }
+    String u = collation.toUpperCase(Locale.ROOT);
+    if ("C".equals(u) || "POSIX".equals(u) || "DEFAULT".equals(u) || "UNICODE".equals(u)) {
+      return true;
+    }
+    if (u.contains("-X-ICU") || u.contains("X-ICU") || collation.contains(".")) {
+      return true;
+    }
+    // BCP-47 / ICU style with hyphens but not SQL Server CI/CS tokens.
+    if (collation.contains("-") && !u.contains("_CI_") && !u.contains("_CS_") && !u.contains("_BIN")) {
+      return true;
+    }
+    // Locale-style without provider: en_US (no .utf8) — not SQL Server if no _CI_/_CS_/_BIN.
+    if (collation.contains("_")
+        && !u.contains("_CI_")
+        && !u.contains("_CS_")
+        && !u.contains("_BIN")
+        && !u.startsWith("SQL_")
+        && !u.contains("LATIN1_GENERAL")
+        && !u.startsWith("FRENCH_")) {
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -208,7 +371,17 @@ public final class DvSqlOrderByCollationSupport {
       targetColumns = loadColumnMetaMap(targetDatabaseMeta, variables, targetSchema, targetTable);
       targetDefault = loadDatabaseDefaultCollation(targetDatabaseMeta, variables);
     }
-    return new Session(sourceColumns, targetColumns, sourceDefault, targetDefault);
+    return new Session(
+        sourceColumns,
+        targetColumns,
+        sourceDefault,
+        targetDefault,
+        pluginId(sourceDatabaseMeta),
+        pluginId(targetDatabaseMeta));
+  }
+
+  private static String pluginId(DatabaseMeta databaseMeta) {
+    return databaseMeta != null ? databaseMeta.getPluginId() : null;
   }
 
   /**

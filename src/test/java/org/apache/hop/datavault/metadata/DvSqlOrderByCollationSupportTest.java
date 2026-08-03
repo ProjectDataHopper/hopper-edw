@@ -102,6 +102,55 @@ class DvSqlOrderByCollationSupportTest {
   }
 
   @Test
+  void noBridgeWhenSourceSqlServerAndTargetPostgreSql() {
+    var source =
+        new DvSqlOrderByCollationSupport.ColumnSqlMeta("NUM_0", "nvarchar", "French_CI_AS");
+    var target =
+        new DvSqlOrderByCollationSupport.ColumnSqlMeta(
+            "NUM_0", "character varying", "en_US.utf8");
+    DvSqlOrderByCollationSupport.Session session =
+        new DvSqlOrderByCollationSupport.Session(
+            Map.of("NUM_0", source),
+            Map.of("NUM_0", target),
+            "French_CI_AS",
+            "en_US.utf8",
+            "MSSQLNATIVE",
+            "POSTGRESQL");
+    assertFalse(session.sameCollationEngineFamily());
+    assertNull(
+        DvSqlOrderByCollationSupport.resolveBridgeCollation(
+            source, target, "French_CI_AS", "en_US.utf8", session));
+  }
+
+  @Test
+  void collationCompatibilityRejectsCrossEngineNames() {
+    org.apache.hop.core.database.DatabaseMeta mssql =
+        new org.apache.hop.core.database.DatabaseMeta() {
+          @Override
+          public String getPluginId() {
+            return "MSSQLNATIVE";
+          }
+        };
+    org.apache.hop.core.database.DatabaseMeta postgres =
+        new org.apache.hop.core.database.DatabaseMeta() {
+          @Override
+          public String getPluginId() {
+            return "POSTGRESQL";
+          }
+        };
+    assertTrue(
+        DvSqlOrderByCollationSupport.isCollationCompatibleWithEngine(mssql, "French_CI_AS"));
+    assertFalse(
+        DvSqlOrderByCollationSupport.isCollationCompatibleWithEngine(postgres, "French_CI_AS"));
+    assertTrue(
+        DvSqlOrderByCollationSupport.isCollationCompatibleWithEngine(postgres, "fr-FR-x-icu"));
+    assertFalse(
+        DvSqlOrderByCollationSupport.isCollationCompatibleWithEngine(mssql, "fr-FR-x-icu"));
+    assertTrue(
+        DvSqlOrderByCollationSupport.isCollationCompatibleWithEngine(postgres, "en_US.utf8"));
+  }
+
+  @Test
   void parsesColumnMetaRows() {
     Map<String, DvSqlOrderByCollationSupport.ColumnSqlMeta> map =
         DvSqlOrderByCollationSupport.parseColumnMetaRows(

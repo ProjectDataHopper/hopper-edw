@@ -28,9 +28,18 @@ import org.apache.hop.core.variables.IVariables;
 /**
  * Builds ORDER BY clauses with automatic {@code COLLATE} when live source/target metadata shows a
  * sort risk (SQL Server and PostgreSQL). The same bridge collation is applied on both merge legs
- * for a given key.
+ * for a given key <em>only when both legs use the same database engine</em>. Collation names are
+ * not portable across engines (issue #108: SQL Server {@code French_CI_AS} must not appear on
+ * PostgreSQL).
  */
 public final class DvSqlOrderBySupport {
+
+  /** Collation-capable engine families for cross-engine ORDER BY safety (issue #108). */
+  public enum CollationEngineFamily {
+    SQL_SERVER,
+    POSTGRESQL,
+    UNKNOWN
+  }
 
   private DvSqlOrderBySupport() {}
 
@@ -150,6 +159,10 @@ public final class DvSqlOrderBySupport {
     if (Utils.isEmpty(collation)) {
       return field.quotedExpression();
     }
+    // Never emit a foreign-engine collation name (e.g. French_CI_AS on PostgreSQL) — issue #108.
+    if (!DvSqlOrderByCollationSupport.isCollationCompatibleWithEngine(databaseMeta, collation)) {
+      return field.quotedExpression();
+    }
     return field.quotedExpression()
         + " COLLATE "
         + formatCollationIdentifier(databaseMeta, collation);
@@ -157,7 +170,8 @@ public final class DvSqlOrderBySupport {
 
   /**
    * Auto-bridge when live meta shows a sort risk. Same bridge should be used on source and target
-   * ORDER BY for a given key.
+   * ORDER BY for a given key when both engines are the same family; cross-engine sessions yield
+   * null (issue #108).
    */
   public static String resolveCollation(
       OrderByField field, DvSqlOrderByCollationSupport.Session session) {
@@ -178,7 +192,7 @@ public final class DvSqlOrderBySupport {
       targetDefault = session.targetDbDefaultCollation();
     }
     return DvSqlOrderByCollationSupport.resolveBridgeCollation(
-        sourceMeta, targetMeta, sourceDefault, targetDefault);
+        sourceMeta, targetMeta, sourceDefault, targetDefault, session);
   }
 
   /**
@@ -204,6 +218,28 @@ public final class DvSqlOrderBySupport {
     }
     return DvBulkLoadPluginSupport.POSTGRESQL_DB_PLUGIN_ID.equalsIgnoreCase(
         databaseMeta.getPluginId());
+  }
+
+  /** Maps a Hop database plugin id to a collation engine family (issue #108). */
+  public static CollationEngineFamily collationEngineFamily(String pluginId) {
+    if (Utils.isEmpty(pluginId)) {
+      return CollationEngineFamily.UNKNOWN;
+    }
+    if (DvBulkLoadPluginSupport.MSSQL_DB_PLUGIN_ID.equalsIgnoreCase(pluginId)
+        || DvBulkLoadPluginSupport.MSSQLNATIVE_DB_PLUGIN_ID.equalsIgnoreCase(pluginId)) {
+      return CollationEngineFamily.SQL_SERVER;
+    }
+    if (DvBulkLoadPluginSupport.POSTGRESQL_DB_PLUGIN_ID.equalsIgnoreCase(pluginId)) {
+      return CollationEngineFamily.POSTGRESQL;
+    }
+    return CollationEngineFamily.UNKNOWN;
+  }
+
+  public static CollationEngineFamily collationEngineFamily(DatabaseMeta databaseMeta) {
+    if (databaseMeta == null) {
+      return CollationEngineFamily.UNKNOWN;
+    }
+    return collationEngineFamily(databaseMeta.getPluginId());
   }
 
   /**

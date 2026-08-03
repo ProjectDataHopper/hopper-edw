@@ -18,6 +18,7 @@ package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -189,6 +190,121 @@ class DvSqlOrderBySupportTest {
             session);
 
     assertEquals("[ITMREF_0]", expression);
+  }
+
+  /**
+   * Issue #108: SQL Server source + PostgreSQL target must not emit {@code COLLATE French_CI_AS}
+   * (or any SQL Server collation) on the Postgres ORDER BY.
+   */
+  @Test
+  void doesNotApplySqlServerCollationOnPostgreSqlTargetOrderBy() {
+    DatabaseMeta postgres =
+        databaseMetaWithPluginId(DvBulkLoadPluginSupport.POSTGRESQL_DB_PLUGIN_ID);
+    BusinessKey businessKey = new BusinessKey("NUM_0");
+    businessKey.setSourceFieldName("NUM_0");
+    businessKey.setDataType("String");
+
+    var source =
+        new DvSqlOrderByCollationSupport.ColumnSqlMeta("NUM_0", "nvarchar", "French_CI_AS");
+    var target =
+        new DvSqlOrderByCollationSupport.ColumnSqlMeta(
+            "NUM_0", "character varying", "en_US.utf8");
+    DvSqlOrderByCollationSupport.Session session =
+        new DvSqlOrderByCollationSupport.Session(
+            Map.of("NUM_0", source),
+            Map.of("NUM_0", target),
+            "French_CI_AS",
+            "en_US.utf8",
+            DvBulkLoadPluginSupport.MSSQLNATIVE_DB_PLUGIN_ID,
+            DvBulkLoadPluginSupport.POSTGRESQL_DB_PLUGIN_ID);
+
+    // Bridge must be suppressed for cross-engine sessions.
+    assertNull(
+        DvSqlOrderByCollationSupport.resolveBridgeCollation(
+            source, target, "French_CI_AS", "en_US.utf8", session));
+
+    String expression =
+        DvSqlOrderBySupport.orderExpression(
+            "\"NUM_0\"",
+            businessKey,
+            postgres,
+            new DataVaultConfiguration(),
+            new Variables(),
+            session);
+
+    assertEquals("\"NUM_0\"", expression);
+    assertFalse(expression.contains("COLLATE"));
+    assertFalse(expression.contains("French_CI_AS"));
+  }
+
+  @Test
+  void doesNotApplyPostgreSqlCollationOnSqlServerSourceOrderByWhenEnginesDiffer() {
+    DatabaseMeta mssql = mssqlDatabaseMeta();
+    BusinessKey businessKey = new BusinessKey("NUM_0");
+    businessKey.setSourceFieldName("NUM_0");
+    businessKey.setDataType("String");
+
+    var source =
+        new DvSqlOrderByCollationSupport.ColumnSqlMeta("NUM_0", "nvarchar", "French_CI_AS");
+    var target =
+        new DvSqlOrderByCollationSupport.ColumnSqlMeta(
+            "NUM_0", "character varying", "fr-FR-x-icu");
+    DvSqlOrderByCollationSupport.Session session =
+        new DvSqlOrderByCollationSupport.Session(
+            Map.of("NUM_0", source),
+            Map.of("NUM_0", target),
+            "French_CI_AS",
+            "fr-FR-x-icu",
+            DvBulkLoadPluginSupport.MSSQLNATIVE_DB_PLUGIN_ID,
+            DvBulkLoadPluginSupport.POSTGRESQL_DB_PLUGIN_ID);
+
+    String expression =
+        DvSqlOrderBySupport.orderExpression(
+            "[NUM_0]",
+            businessKey,
+            mssql,
+            new DataVaultConfiguration(),
+            new Variables(),
+            session);
+
+    assertEquals("[NUM_0]", expression);
+    assertFalse(expression.contains("COLLATE"));
+  }
+
+  /**
+   * Defense in depth: even without engine plugin ids on the session, a SQL Server collation must
+   * not be formatted into PostgreSQL ORDER BY.
+   */
+  @Test
+  void filtersIncompatibleCollationNameOnPostgreSqlEvenWithoutEngineIds() {
+    DatabaseMeta postgres =
+        databaseMetaWithPluginId(DvBulkLoadPluginSupport.POSTGRESQL_DB_PLUGIN_ID);
+    BusinessKey businessKey = new BusinessKey("NUM_0");
+    businessKey.setSourceFieldName("NUM_0");
+    businessKey.setDataType("String");
+
+    var source =
+        new DvSqlOrderByCollationSupport.ColumnSqlMeta("NUM_0", "nvarchar", "French_CI_AS");
+    var target =
+        new DvSqlOrderByCollationSupport.ColumnSqlMeta(
+            "NUM_0", "character varying", "en_US.utf8");
+    // No plugin ids — sameCollationEngineFamily is true; compatibility filter must still drop
+    // French_CI_AS on Postgres.
+    DvSqlOrderByCollationSupport.Session session =
+        new DvSqlOrderByCollationSupport.Session(
+            Map.of("NUM_0", source), Map.of("NUM_0", target), null, null);
+
+    String expression =
+        DvSqlOrderBySupport.orderExpression(
+            "\"NUM_0\"",
+            businessKey,
+            postgres,
+            new DataVaultConfiguration(),
+            new Variables(),
+            session);
+
+    assertEquals("\"NUM_0\"", expression);
+    assertFalse(expression.toUpperCase().contains("FRENCH"));
   }
 
   @Test

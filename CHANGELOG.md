@@ -35,6 +35,12 @@ All notable changes to the hop-datavault plugin are documented in this file.
 - Apache snapshots repository uses `updatePolicy=always` so agents re-check ASF Nexus for newer Hop SNAPSHOTs (avoids same-day stale `hop-ui` / missing `SwtGc#getNativeGc`)
 - `ModelGraphSvgIconCache` resolves `getNativeGc` reflectively so compile still succeeds if an older hop-ui is on the classpath
 
+### Cross-engine ORDER BY COLLATE (#108)
+
+- Do not apply a SQL Server bridge collation (e.g. `French_CI_AS`) on PostgreSQL `ORDER BY` (or Postgres ICU/locale names on SQL Server) when source and target engines differ
+- Same-engine remediation (SQL Server↔SQL Server, PostgreSQL↔PostgreSQL) is unchanged
+- Fixes hub/satellite/link update SQL that failed with `collation "French_CI_AS" for encoding "UTF8" does not exist` on Postgres targets fed from SQL Server sources
+
 ### Project and metadata search (#106)
 
 - Opt `.hsm` / `.hdv` / `.hbv` / `.hdm` into Hop 2.19 project search via `CAPABILITY_SEARCH` and `createSearchable()`
