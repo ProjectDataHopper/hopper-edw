@@ -17,7 +17,7 @@ limitations under the License.
 
 # Hop Data Vault plugin — feature overview
 
-Apache Hop plugin for **model-driven Data Vault 2.0**, **Business Vault**, and **dimensional** loading. Version **0.6.0-SNAPSHOT** (latest release **0.5.0**) requires **Apache Hop 2.19.0** (or current **2.19.0-SNAPSHOT** until GA) and **Java 21**.
+Apache Hop plugin for **model-driven Data Vault 2.0**, **Business Vault**, and **dimensional** loading. Version **0.6.0** requires **Apache Hop 2.19.0** (or a **recent 2.19.0-SNAPSHOT** until GA — [hop-client snapshots](https://repository.apache.org/content/groups/snapshots/org/apache/hop/hop-client/2.19.0-SNAPSHOT/)) and **Java 21**.
 
 **Model once. Generate loads and consumption layers.** The visual models (`.hsm`, `.hdv`, `.hbv`, `.hdm`) are the contract between architects, modelers, and operations.
 

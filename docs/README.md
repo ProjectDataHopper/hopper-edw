@@ -17,7 +17,7 @@ limitations under the License.
 
 # Hop Data Vault documentation index
 
-Documentation for the **hop-datavault** plugin (development **0.6.0-SNAPSHOT**, latest release **0.5.0**). Highlights include **OpenLineage / Marquez export**, **source-to-target lineage**, **catalog version tags**, a **CI/CD schema validation gate** with catalog-safe multi-layer length remediation, optional PK/FK DDL, data-quality rules and gates, multi-DB hardening, and Business Vault incremental loading. See [CHANGELOG.md](../CHANGELOG.md).
+Documentation for the **hop-datavault** plugin (**0.6.0**). Requires **Apache Hop 2.19.0** or a recent **2.19.0-SNAPSHOT** ([hop-client snapshots](https://repository.apache.org/content/groups/snapshots/org/apache/hop/hop-client/2.19.0-SNAPSHOT/)). Highlights include **reference tables**, **source modeler** (`.hsm`), **project search**, **architecture export**, hub aliases, **OpenLineage / Marquez export**, **source-to-target lineage**, catalog version tags, schema validation, multi-DB hardening, and Business Vault incremental loading. See [CHANGELOG.md](../CHANGELOG.md).
 
 **New here?** Read [feature-overview.md](feature-overview.md), then follow [getting-started-retail.adoc](getting-started-retail.adoc).
 

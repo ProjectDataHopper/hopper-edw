@@ -211,7 +211,7 @@ Reference: link:execution-maps.adoc[Execution maps].
 |CRM tables exist; run initial workflow's CRM load first; validate catalog fields vs live schema
 
 |Stale plugin behavior
-|Restart Hop GUI after installing **0.5.0**
+|Restart Hop GUI after installing **0.6.0** (on Apache Hop **2.19.0** / recent **2.19.0-SNAPSHOT**)
 
 |Need clean slate
 |`./scripts/run-postgres.sh reset` then `up`, rerun initial workflow

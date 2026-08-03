@@ -4,66 +4,46 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## Unreleased
 
+## [0.6.0] — 2026-08-03
+
+Requires **Apache Hop 2.19.0** (or a **recent 2.19.0-SNAPSHOT** until GA) and **Java 21**.
+
+**Hop runtime:** Hop **2.19.0** is not yet published to Maven Central. To use this plugin you must either **build Hop from source** (branch/tag aligned with 2.19) or **download a recent CI snapshot** of the Hop client:
+
+- [Apache Hop 2.19.0-SNAPSHOT (hop-client)](https://repository.apache.org/content/groups/snapshots/org/apache/hop/hop-client/2.19.0-SNAPSHOT/)
+
+Older Hop **2.18.x** (including 2.18.1) is **not** supported for 0.6.0.
+
+### Metadata note — linked tables vs reference tables
+
+In **0.6.0**, canvas **cross-model pointers** and **hub aliases** are stored as **linked tables**:
+
+| Concept | `tableType` (saved) | Java type | Meaning |
+|---------|---------------------|-----------|---------|
+| **Linked table** | `LINKED_TABLE` | `DvLinkedTable` | Pointer / hub alias into another table or model (UI: *Add Linked Hub / Link / Satellite*) |
+| **Reference table** | `REFERENCE` | `DvReferenceTable` | Physical vault **code/catalog** table (`ref_*`), natural keys + load audit, **no** hub hash |
+
+**Compatibility:** existing `.hdv` files that used `TABLE_REFERENCE` still **load** (dual-read). On the next **save**, they are rewritten as `LINKED_TABLE`. This rename avoids confusion with physical **Reference tables** (#110). Docs: [dv-cross-model-references.adoc](docs/dv-cross-model-references.adoc).
+
 ### Reference tables (#110)
 
-- First-class **Reference table** object on the raw Data Vault canvas (`tableType=REFERENCE`, `DvReferenceTable`): natural-key code/catalog tables with DV load audit columns (no hub hash keys or satellite hashdiff)
+- First-class **Reference table** object on the raw Data Vault canvas: natural-key code/catalog tables with DV load audit columns (no hub hash keys or satellite hashdiff)
 - GUI: add/edit dialog, icon, help topic; load mode **FULL_REPLACE** (delete+insert) with database and CSV source pipeline builders
 - Catalog type, lineage, DDL, Data Vault Update execution, and multi-source workflow wiring
-- Integration suite `tests/reference-table/` (golden ref_country two-wave load) on main and SQL Server runners
+- Integration suite `tests/reference-table/` (golden `ref_country` two-wave load)
 - Design notes: [docs/plans/dv-reference-tables-plan.md](docs/plans/dv-reference-tables-plan.md)
 
 ### Linked tables (rename from “table reference”)
 
-- Canvas pointers / hub aliases are now **linked tables** (`tableType=LINKED_TABLE`, class `DvLinkedTable`) so they are not confused with physical **Reference tables** (`REFERENCE` / `DvReferenceTable`)
+- Canvas pointers / hub aliases are **linked tables** (`LINKED_TABLE` / `DvLinkedTable`)
 - User language: **Add Linked Hub / Linked Link / Linked Satellite**; canvas badge `(linked)` (aliases stay `(alias)`)
-- Dual-read: existing `.hdv` with `TABLE_REFERENCE` still load; save rewrites as `LINKED_TABLE`
-- Docs: [dv-cross-model-references.adoc](docs/dv-cross-model-references.adoc)
-
-### SQL Server string length model-check vs vault DDL (issue #91 follow-up)
-
-- Model lengths remain **characters** (e.g. 50); vault SQL Server DDL still creates UTF-8 **`VARCHAR(n×3)`** (e.g. 150)
-- Field-mapping overflow check now uses `DvDdlSupport.effectiveStringCapacity` so capacity matches vault DDL (no more false “source 150 exceeds target 50”)
-- Catalog/CRM staging CREATE no longer applies vault UTF-8 length expansion (only vault/EDW paths do)
-- Docs: [datavault-plugin.adoc](docs/datavault-plugin.adoc), [dv-satellite.adoc](docs/dv-satellite.adoc)
-
-### Docker test image freshness
-
-- `ensure_hop_image` rebuilds `docker-hop:latest` when `target/hop-datavault-*.zip` is newer than the image (avoids stale plugin after `mvn package` without `./scripts/rebuild-hop.sh`)
-
-### Hop 2.19.0-SNAPSHOT resolution on CI
-
-- Apache snapshots repository uses `updatePolicy=always` so agents re-check ASF Nexus for newer Hop SNAPSHOTs (avoids same-day stale `hop-ui` / missing `SwtGc#getNativeGc`)
-- `ModelGraphSvgIconCache` resolves `getNativeGc` reflectively so compile still succeeds if an older hop-ui is on the classpath
+- Dual-read of legacy `TABLE_REFERENCE`; save rewrites as `LINKED_TABLE`
 
 ### Cross-engine ORDER BY COLLATE (#108)
 
 - Do not apply a SQL Server bridge collation (e.g. `French_CI_AS`) on PostgreSQL `ORDER BY` (or Postgres ICU/locale names on SQL Server) when source and target engines differ
 - Same-engine remediation (SQL Server↔SQL Server, PostgreSQL↔PostgreSQL) is unchanged
 - Fixes hub/satellite/link update SQL that failed with `collation "French_CI_AS" for encoding "UTF8" does not exist` on Postgres targets fed from SQL Server sources
-
-### Project and metadata search (#106)
-
-- Opt `.hsm` / `.hdv` / `.hbv` / `.hdm` into Hop 2.19 project search via `CAPABILITY_SEARCH` and `createSearchable()`
-- Content analysers for Data Vault, Business Vault, dimensional, and source models (table/query names, notes, configuration, high-value fields)
-- Content analysers for plugin metadata: resource definition group (model paths), data catalog connection, execution metrics profile, data quality rule set
-- Open search results navigate to the model and select/edit the matching table or source query when available
-- Open tabs search the in-memory model (unsaved edits)
-- Docs: [search.adoc](docs/search.adoc), feature overview matrix + plugin/operations usage
-
-### Required Apache Hop version
-
-- Development and runtime target is **Apache Hop 2.19.0** (use **2.19.0-SNAPSHOT** until the GA release ships)
-- Enables database-backed execution information (e.g. OPS `hop_executions`), BINARY hash key sorting ([apache/hop#7346](https://github.com/apache/hop/issues/7346)), and Hop Marketplace install for this plugin
-
-### Satellite parent key source fields (DV2 independent feeds)
-
-- Hub owns logical business keys and hash order; hub satellites only optionally list **ordered source field names** on the sat feed (`parentKeySourceFields`) that supply those values
-- Empty list (normal case): source columns have the same names as the hub business keys
-- Non-empty list: same length as distinct hub BKs, zipped by position (no hub-BK name mapping on the satellite)
-- Satellite dialog tab **Parent key source fields**; **Load hub key names** fills the same-name default
-- Removed model-check warning that required the satellite record source to be listed on the parent hub
-- Hub Record sources / Keys remain for **hub loads only**
-- Docs: [dv-satellite.adoc](docs/dv-satellite.adoc), [dv-hub.adoc](docs/dv-hub.adoc)
 
 ### Source modeler (`.hsm`) and composite feeds (#105)
 
@@ -73,34 +53,58 @@ All notable changes to the hop-datavault plugin are documented in this file.
 - Hub / link / satellite pipeline builders consume composite sources (single-connection SQL subquery or Merge Join pipeline injection)
 - DV canvas action **Compose multi-table source…**; source-model toolbar/context **Publish to catalog**
 - Retail sample: `retail-example/models/source-tables-crm.hsm` (query **All customer info** → `feed_customer_enriched`)
-- Docs and screenshot: [source-modeler-overview.adoc](docs/source-modeler-overview.adoc); feature overview + getting-started snippet
+- Docs: [source-modeler-overview.adoc](docs/source-modeler-overview.adoc)
 
-### Update resource definition group action
+### Project and metadata search (#106)
 
-- Workflow action **Update resource definition group** runs every DV / BV / DM model listed on a resource definition group (layer order DV → BV → DM; list order within each layer)
-- Tabbed dialog: Selection, Run, Operations, Data catalog, Metrics, Reports
-- Optional **Manage vault update metrics (Begin/End)** assigns `DV_WORKFLOW_EXECUTION_ID` and publishes a workflow load overview without separate Begin/End actions
-- Open referenced models from the workflow canvas with project-relative labels (no `${PROJECT_HOME}/` prefix in the menu text)
-- Retail: `run-retail-update.hwf` / `run-retail-update-models.hwf` use group `retail-sources`
-- Docs: [update-resource-definition-group-action.adoc](docs/update-resource-definition-group-action.adoc), [operations.adoc](docs/operations.adoc)
+- Opt `.hsm` / `.hdv` / `.hbv` / `.hdm` into Hop 2.19 project search via `CAPABILITY_SEARCH` and `createSearchable()`
+- Content analysers for models and plugin metadata (resource definition group, catalog connection, execution metrics, quality rule set)
+- Open search results navigate to the model and select/edit the matching table or source query when available
+- Docs: [search.adoc](docs/search.adoc)
 
 ### Architecture export to Draw.io (#104)
 
-- Derived **SOLUTION** architecture (workflows / capabilities / model file refs only — no dataset table dump), **DATA inventory**, and **aggregated MODEL** layer diagrams
-- MODEL export unions all `.hdv` → `data-vault.drawio`, all `.hbv` → `business-vault.drawio`, all `.hdm` → `dimensional.drawio` (ELK layout, shared tables deduped)
-- SOLUTION swimlanes stay architectural; MODEL freeform uses ELK; default inventory file is `data-inventory.drawio` (not concatenated model names)
-- Paths in exports are project-relative or basenames (e.g. `models/retail-360.hdv`), not host absolute paths
+- Derived **SOLUTION**, **DATA inventory**, and aggregated **MODEL** layer diagrams
+- MODEL export unions all `.hdv` → `data-vault.drawio`, all `.hbv` → `business-vault.drawio`, all `.hdm` → `dimensional.drawio`
 - CLI / action: `hop architecture-export` (`--also-data`, `--also-models`)
 - Docs: [architecture-export.adoc](docs/architecture-export.adoc)
 
 ### Hub aliases — same physical hub twice on a link (#103)
 
-- Same-model **hub aliases** (`LINKED_TABLE` / legacy `TABLE_REFERENCE` with optional role `hashKeyFieldName`) so a link can participate one physical hub more than once with distinct source mappings and link columns (primary/secondary rep, from/to location)
-- Canvas action **Add Hub alias**; link dialog lists hub aliases as participating hubs
-- Link DDL, load pipelines, special records, and optional FKs use role hash columns
-- Docs: [dv-cross-model-references.adoc](docs/dv-cross-model-references.adoc), [dv-link.adoc](docs/dv-link.adoc)
-- Recommended modeling shape: **natural hub + alias** for extra roles (not two aliases with an orphan physical hub)
-- Integration: `tests/hub-alias-role-playing/`; retail sample: `hub_sales_rep` + `hub_secondary_rep` + `lnk_order_rep` with `sales_rep_initial.csv` / `order_rep_initial.csv`
+- Same-model **hub aliases** (linked table with optional role `hashKeyFieldName`) so a link can participate one physical hub more than once
+- Canvas **Add Hub alias**; link dialog, DDL, load pipelines, special records, optional FKs
+- Integration: `tests/hub-alias-role-playing/`; retail sample `hub_sales_rep` + `hub_secondary_rep` + `lnk_order_rep`
+
+### Satellite parent key source fields (DV2 independent feeds)
+
+- Hub owns logical business keys and hash order; hub satellites may list **ordered source field names** (`parentKeySourceFields`) when names differ from hub BKs
+- Satellite dialog tab **Parent key source fields**
+- Docs: [dv-satellite.adoc](docs/dv-satellite.adoc), [dv-hub.adoc](docs/dv-hub.adoc)
+
+### Update resource definition group action
+
+- Workflow action **Update resource definition group** runs every DV / BV / DM model on a resource definition group
+- Optional **Manage vault update metrics (Begin/End)**; open referenced models from the canvas
+- Docs: [update-resource-definition-group-action.adoc](docs/update-resource-definition-group-action.adoc)
+
+### SQL Server string length / Unicode (issue #91 follow-up)
+
+- Model lengths remain **characters**; vault SQL Server DDL still creates UTF-8 **`VARCHAR(n×3)`**
+- Field-mapping overflow uses `effectiveStringCapacity` (capacity matches vault DDL)
+- Catalog/CRM staging CREATE does **not** apply vault UTF-8 length expansion
+
+### Hop 2.19 platform requirements
+
+- Development and runtime target is **Apache Hop 2.19.0** (use **2.19.0-SNAPSHOT** until GA)
+- Enables database-backed execution information (e.g. OPS `hop_executions`), BINARY hash key sorting ([apache/hop#7346](https://github.com/apache/hop/issues/7346)), and Hop Marketplace install
+- Markdown notes on DV/BV/DM model canvases (Hop 2.19 note API)
+- Apache snapshots repository `updatePolicy=always` for reliable CI resolution of Hop SNAPSHOTs
+
+### Stability and tooling
+
+- Canvas SVG icon cache / SWT handle-leak hardening (`ModelGraphSvgIconCache`; reflective `SwtGc#getNativeGc` for mixed hop-ui snapshots)
+- FILE catalog mkdir when `PROJECT_HOME` is unresolved
+- Docker test image freshness: rebuild `docker-hop:latest` when `target/hop-datavault-*.zip` is newer than the image
 
 ## [0.5.0] — 2026-07-30
 
