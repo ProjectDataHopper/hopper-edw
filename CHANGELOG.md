@@ -30,6 +30,11 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 - `ensure_hop_image` rebuilds `docker-hop:latest` when `target/hop-datavault-*.zip` is newer than the image (avoids stale plugin after `mvn package` without `./scripts/rebuild-hop.sh`)
 
+### Hop 2.19.0-SNAPSHOT resolution on CI
+
+- Apache snapshots repository uses `updatePolicy=always` so agents re-check ASF Nexus for newer Hop SNAPSHOTs (avoids same-day stale `hop-ui` / missing `SwtGc#getNativeGc`)
+- `ModelGraphSvgIconCache` resolves `getNativeGc` reflectively so compile still succeeds if an older hop-ui is on the classpath
+
 ### Project and metadata search (#106)
 
 - Opt `.hsm` / `.hdv` / `.hbv` / `.hdm` into Hop 2.19 project search via `CAPABILITY_SEARCH` and `createSearchable()`

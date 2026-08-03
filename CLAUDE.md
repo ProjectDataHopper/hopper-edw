@@ -44,6 +44,8 @@ Hop compile dependencies (`hop-core`, `hop-engine`, `hop-ui`) are **`provided`**
 
 Hop **2.19.0** is required for OPS database execution info, BINARY hash key sorting ([apache/hop#7346](https://github.com/apache/hop/issues/7346)), and Marketplace install. Do not assume APIs beyond the **2.19.0** line without a deliberate pin bump.
 
+Until **2.19.0** is on Maven Central, CI resolves Hop from the **Apache snapshots** repo declared in `pom.xml` with **`updatePolicy=always`** (stale same-day SNAPSHOT jars on Jenkins agents otherwise miss new APIs). Prefer `mvn -U …` on CI as well.
+
 ## Apache Hop source and API
 
 This plugin is built **against** Hop; it does not vendor Hop sources.

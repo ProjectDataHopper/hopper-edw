@@ -373,6 +373,12 @@
     (Jenkins, GitHub Actions, etc.) fail with "Could not find artifact ... 2.19.0-SNAPSHOT".
     Local builds often work anyway because Hop was installed into ~/.m2 via `mvn install`.
     Remove (or leave harmless) once hop.version points at a released version on Central.
+
+    updatePolicy=always: SNAPSHOT artifacts change often (new Hop APIs, bugfixes). Maven's
+    default "daily" policy reuses the first snapshot resolved that calendar day on the agent,
+    so Jenkins can compile against a stale hop-ui and miss methods such as SwtGc#getNativeGc
+    even after a newer 2.19.0-SNAPSHOT was published to repository.apache.org. Always
+    re-check metadata. CI may still pass -U for belt-and-suspenders.
   -->
   <repositories>
     <repository>
@@ -381,6 +387,7 @@
       </releases>
       <snapshots>
         <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
       </snapshots>
       <id>apache.snapshots</id>
       <name>Apache Snapshot Repository</name>

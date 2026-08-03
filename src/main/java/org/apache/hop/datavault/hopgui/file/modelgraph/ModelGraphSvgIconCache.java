@@ -16,6 +16,7 @@
  */
 package org.apache.hop.datavault.hopgui.file.modelgraph;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.hop.core.SwtUniversalImage;
@@ -41,6 +42,10 @@ import org.eclipse.swt.widgets.Display;
  * <p>This cache loads each SVG once via {@link SwtSvgImageUtil} and paints the shared bitmap
  * through the underlying SWT {@link GC} when the graphics context is {@link SwtGc}. SVG export
  * ({@code SvgGc}) still uses {@link IGc#drawImage(SvgFile, int, int, int, int, float, double)}.
+ *
+ * <p>{@code SwtGc#getNativeGc()} is resolved reflectively so this class still compiles against a
+ * slightly older hop-ui SNAPSHOT that lacks the method (stale CI agent cache). When the method is
+ * missing at runtime, callers fall back to {@link IGc#drawImage(SvgFile, ...)}.
  */
 public final class ModelGraphSvgIconCache {
 
@@ -48,7 +53,36 @@ public final class ModelGraphSvgIconCache {
   private static final Object DISPOSE_HOOK_LOCK = new Object();
   private static volatile boolean disposeHookRegistered;
 
+  /**
+   * Optional {@code SwtGc#getNativeGc()} — present on Hop builds that include issue #7762 (SVG
+   * image cache / handle-leak fix). Null when compiling/running against an older hop-ui.
+   */
+  private static final Method SWT_GC_GET_NATIVE_GC = resolveGetNativeGc();
+
   private ModelGraphSvgIconCache() {}
+
+  private static Method resolveGetNativeGc() {
+    try {
+      return SwtGc.class.getMethod("getNativeGc");
+    } catch (NoSuchMethodException e) {
+      return null;
+    }
+  }
+
+  /**
+   * @return native SWT {@link GC} when {@link SwtGc#getNativeGc()} exists; otherwise {@code null}
+   */
+  private static GC nativeGcOrNull(SwtGc swtGc) {
+    if (swtGc == null || SWT_GC_GET_NATIVE_GC == null) {
+      return null;
+    }
+    try {
+      Object gc = SWT_GC_GET_NATIVE_GC.invoke(swtGc);
+      return gc instanceof GC ? (GC) gc : null;
+    } catch (ReflectiveOperationException | LinkageError e) {
+      return null;
+    }
+  }
 
   /**
    * Draw a model-graph SVG icon at the given logical coordinates.
@@ -94,13 +128,9 @@ public final class ModelGraphSvgIconCache {
     if (display == null || display.isDisposed()) {
       return false;
     }
-    GC nativeGc;
-    try {
-      nativeGc = swtGc.getNativeGc();
-    } catch (LinkageError e) {
-      // Older hop-ui without getNativeGc(); fall back to IGc.drawImage(SvgFile).
-      return false;
-    }
+    // Reflective: do not call SwtGc#getNativeGc() directly (compile would require a hop-ui that
+    // already has the method). Missing method → false → drawIcon falls back to SvgFile path.
+    GC nativeGc = nativeGcOrNull(swtGc);
     if (nativeGc == null || nativeGc.isDisposed()) {
       return false;
     }
