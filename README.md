@@ -131,7 +131,10 @@ Artifacts:
 - `target/hop-datavault-0.7.0-SNAPSHOT.jar`
 - `target/hop-datavault-0.7.0-SNAPSHOT.zip` (ready-to-unzip plugin layout)
 
-Published release artifacts: **[v0.6.0](https://github.com/mattcasters/hop-data-vault/releases/tag/v0.6.0)** (`hop-datavault-0.6.0.zip`).
+Published release artifacts for **0.6.0**:
+
+- **GitHub:** [v0.6.0 release](https://github.com/mattcasters/hop-data-vault/releases/tag/v0.6.0) — [hop-datavault-0.6.0.zip](https://github.com/mattcasters/hop-data-vault/releases/download/v0.6.0/hop-datavault-0.6.0.zip)
+- **Nexus (Marketplace):** [hop-datavault-0.6.0.zip](https://repository.data-hopper.com/repository/hop-community-plugins/org/apache/hop/hop-datavault/0.6.0/hop-datavault-0.6.0.zip) (`org.apache.hop:hop-datavault:0.6.0`)
 
 ## Installation (external plugin)
 

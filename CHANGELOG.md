@@ -14,6 +14,8 @@ Requires **Apache Hop 2.19.0** (or a **recent 2.19.0-SNAPSHOT** until GA) and **
 
 Older Hop **2.18.x** (including 2.18.1) is **not** supported for 0.6.0.
 
+**Downloads:** [GitHub release zip](https://github.com/mattcasters/hop-data-vault/releases/download/v0.6.0/hop-datavault-0.6.0.zip) · [Data Hopper Nexus](https://repository.data-hopper.com/repository/hop-community-plugins/org/apache/hop/hop-datavault/0.6.0/hop-datavault-0.6.0.zip) (`org.apache.hop:hop-datavault:0.6.0`)
+
 ### Metadata note — linked tables vs reference tables
 
 In **0.6.0**, canvas **cross-model pointers** and **hub aliases** are stored as **linked tables**:
