@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.hop.catalog.discovery.HopVariableResolutionSupport;
 import org.apache.hop.catalog.metadata.DataCatalogMeta;
 import org.apache.hop.catalog.model.RecordDefinition;
 import org.apache.hop.catalog.model.RecordDefinitionKey;
@@ -42,6 +43,7 @@ import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.GuiWidgetElement;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
@@ -52,6 +54,8 @@ import org.apache.hop.metadata.api.IHopMetadataProvider;
 @Getter
 @Setter
 public class FileDataCatalog implements IDataCatalog {
+
+  private static final Class<?> PKG = FileDataCatalog.class;
 
   public static final String PLUGIN_ID = "FILE";
 
@@ -80,10 +84,20 @@ public class FileDataCatalog implements IDataCatalog {
       DataCatalogMeta meta, IVariables variables, IHopMetadataProvider metadataProvider)
       throws HopException {
     connectionName = meta != null ? meta.getName() : null;
-    String resolved =
-        variables != null ? variables.resolve(storageDirectory) : storageDirectory;
+    if (Utils.isEmpty(storageDirectory)) {
+      throw new HopException(
+          BaseMessages.getString(PKG, "FileDataCatalog.Error.StorageDirectoryNotConfigured"));
+    }
+    // Refuse unresolved ${PROJECT_HOME}/... so we never mkdir a literal path under Hop CWD
+    // (e.g. $HOP_HOME/${PROJECT_HOME}/work/edw-catalog when project variables are missing).
+    HopVariableResolutionSupport.requireResolved(
+        variables,
+        storageDirectory,
+        BaseMessages.getString(PKG, "FileDataCatalog.StorageDirectory.Label"));
+    String resolved = HopVariableResolutionSupport.resolve(variables, storageDirectory);
     if (Utils.isEmpty(resolved)) {
-      throw new HopException("File data catalog storage directory is not configured");
+      throw new HopException(
+          BaseMessages.getString(PKG, "FileDataCatalog.Error.StorageDirectoryNotConfigured"));
     }
     resolvedRoot = Path.of(resolved).toAbsolutePath().normalize();
     try {
