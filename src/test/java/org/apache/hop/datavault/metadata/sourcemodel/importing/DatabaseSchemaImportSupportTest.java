@@ -123,7 +123,8 @@ class DatabaseSchemaImportSupportTest {
     assertEquals(List.of("type_id"), rel.getChildColumns());
     assertEquals(List.of("type_id"), rel.getParentColumns());
     assertEquals(SourceJoinType.LEFT, rel.resolveDefaultJoinType());
-    assertEquals("N:1", rel.getCardinality());
+    // Import uses crow's-foot style free-text cardinality (optional child side).
+    assertEquals("0..N:1", rel.getCardinality());
     assertTrue(warnings.isEmpty());
   }
 

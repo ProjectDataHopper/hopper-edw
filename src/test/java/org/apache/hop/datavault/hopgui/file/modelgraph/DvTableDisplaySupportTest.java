@@ -25,6 +25,8 @@ import org.apache.hop.core.variables.Variables;
 import org.apache.hop.datavault.metadata.BusinessKey;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DvHub;
+import org.apache.hop.datavault.metadata.DvReferenceLoadMode;
+import org.apache.hop.datavault.metadata.DvReferenceTable;
 import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.DvTableType;
 import org.junit.jupiter.api.BeforeAll;
@@ -72,6 +74,24 @@ class DvTableDisplaySupportTest {
     assertEquals("datavault-hub.svg", DvTableDisplaySupport.getImagePath(DvTableType.HUB));
     assertEquals(
         "datavault-satellite.svg", DvTableDisplaySupport.getImagePath(DvTableType.SATELLITE));
+    assertEquals(
+        "datavault-reference.svg", DvTableDisplaySupport.getImagePath(DvTableType.REFERENCE));
     assertTrue(DvTableDisplaySupport.getImagePath(null).endsWith(".svg"));
+  }
+
+  @Test
+  void referenceNaturalKeysSummaryAndLoadBadge() {
+    DvReferenceTable ref = new DvReferenceTable("ref_country");
+    BusinessKey code = new BusinessKey("code");
+    BusinessKey cdc = new BusinessKey("x_src_cdc_ts");
+    ref.setNaturalKeys(java.util.List.of(code, cdc));
+    ref.setLoadMode(DvReferenceLoadMode.DELETE_INSERT);
+
+    assertEquals("code, x_src_cdc_ts", DvTableDisplaySupport.getNaturalKeysSummary(ref));
+    assertEquals("Δ keys", DvTableDisplaySupport.getReferenceLoadModeBadge(ref));
+    assertEquals(
+        "code, x_src_cdc_ts",
+        DvTableDisplaySupport.getSecondaryFieldLineForDisplay(
+            ref, new DataVaultModel(), null, new Variables(), false));
   }
 }

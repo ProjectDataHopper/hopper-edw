@@ -28,7 +28,7 @@ import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.core.xml.XmlHandler;
-import org.apache.hop.datavault.hopgui.file.vault.DvTableReferenceNavigationSupport;
+import org.apache.hop.datavault.hopgui.file.vault.DvLinkedTableNavigationSupport;
 import org.apache.hop.datavault.hopgui.file.vault.HopVaultFileType;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.junit.jupiter.api.BeforeAll;
@@ -57,10 +57,10 @@ class DvCrossModelReferenceValidationTest {
             .toAbsolutePath()
             .normalize()
             .toString());
-    DvTableReference reference = (DvTableReference) model.findTable("hub_customer");
+    DvLinkedTable reference = (DvLinkedTable) model.findTable("hub_customer");
 
     List<ICheckResult> remarks = new ArrayList<>();
-    DvReferenceValidationSupport.validateTableReference(
+    DvLinkedTableValidationSupport.validateLinkedTable(
         remarks, reference, model, null, new Variables());
 
     assertFalse(hasError(remarks));
@@ -110,11 +110,11 @@ class DvCrossModelReferenceValidationTest {
             .toAbsolutePath()
             .normalize()
             .toString());
-    DvTableReference reference = (DvTableReference) model.findTable("hub_customer");
+    DvLinkedTable reference = (DvLinkedTable) model.findTable("hub_customer");
     Variables variables = new Variables();
 
     assertTrue(
-        DvTableReferenceNavigationSupport.canNavigateToSourceTable(
+        DvLinkedTableNavigationSupport.canNavigateToSourceTable(
             model, reference, variables, null));
   }
 
@@ -122,7 +122,7 @@ class DvCrossModelReferenceValidationTest {
   void missingExternalModelReportsError() {
     DataVaultModel model = new DataVaultModel();
     model.setFilename("/tmp/subject-area.hdv");
-    DvTableReference reference = new DvTableReference();
+    DvLinkedTable reference = new DvLinkedTable();
     reference.setName("hub_customer");
     reference.setReferencedTableName("hub_customer");
     reference.setReferencedModelFilename("missing-shared.hdv");
@@ -130,7 +130,7 @@ class DvCrossModelReferenceValidationTest {
     model.getTables().add(reference);
 
     List<ICheckResult> remarks = new ArrayList<>();
-    DvReferenceValidationSupport.validateTableReference(
+    DvLinkedTableValidationSupport.validateLinkedTable(
         remarks, reference, model, null, new Variables());
 
     assertTrue(hasError(remarks));

@@ -21,6 +21,8 @@ public enum RecordDefinitionType {
   DV_HUB,
   DV_LINK,
   DV_SATELLITE,
+  /** Physical Data Vault reference / code table (natural keys, no hash key). */
+  DV_REFERENCE,
   DV_SOURCE,
   BV_TABLE,
   DIM_TABLE,

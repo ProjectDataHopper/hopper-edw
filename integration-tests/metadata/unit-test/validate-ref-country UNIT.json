@@ -1,0 +1,40 @@
+{
+  "database_replacements": [],
+  "autoOpening": true,
+  "description": "Validate ref_country after initial FULL_REPLACE load",
+  "persist_filename": "",
+  "test_type": "UNIT_TEST",
+  "variableValues": [],
+  "basePath": "${HOP_UNIT_TESTS_FOLDER}",
+  "golden_data_sets": [
+    {
+      "field_mappings": [
+        {
+          "transform_field": "code",
+          "data_set_field": "code"
+        },
+        {
+          "transform_field": "name",
+          "data_set_field": "name"
+        },
+        {
+          "transform_field": "x_load_ts",
+          "data_set_field": "x_load_ts"
+        },
+        {
+          "transform_field": "x_record_source",
+          "data_set_field": "x_record_source"
+        }
+      ],
+      "field_order": [
+        "code"
+      ],
+      "data_set_name": "ref-country-golden1",
+      "transform_name": "Validate"
+    }
+  ],
+  "input_data_sets": [],
+  "name": "validate-ref-country UNIT",
+  "trans_test_tweaks": [],
+  "pipeline_filename": "./tests/reference-table/validate-ref-country.hpl"
+}

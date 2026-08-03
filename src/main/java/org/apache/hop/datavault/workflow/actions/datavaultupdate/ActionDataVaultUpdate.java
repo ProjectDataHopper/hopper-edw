@@ -625,8 +625,8 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
           logBasic(
               BaseMessages.getString(
                   PKG,
-                  DvIntegrationSupport.isTableReference(table)
-                      ? "ActionDataVaultUpdate.Log.SkippingTableReference"
+                  DvIntegrationSupport.isLinkedTable(table)
+                      ? "ActionDataVaultUpdate.Log.SkippingLinkedTable"
                       : "ActionDataVaultUpdate.Log.SkippingExternalTable",
                   table.getName()));
           continue;

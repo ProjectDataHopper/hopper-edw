@@ -4,6 +4,32 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## Unreleased
 
+### Reference tables (#110)
+
+- First-class **Reference table** object on the raw Data Vault canvas (`tableType=REFERENCE`, `DvReferenceTable`): natural-key code/catalog tables with DV load audit columns (no hub hash keys or satellite hashdiff)
+- GUI: add/edit dialog, icon, help topic; load mode **FULL_REPLACE** (delete+insert) with database and CSV source pipeline builders
+- Catalog type, lineage, DDL, Data Vault Update execution, and multi-source workflow wiring
+- Integration suite `tests/reference-table/` (golden ref_country two-wave load) on main and SQL Server runners
+- Design notes: [docs/plans/dv-reference-tables-plan.md](docs/plans/dv-reference-tables-plan.md)
+
+### Linked tables (rename from “table reference”)
+
+- Canvas pointers / hub aliases are now **linked tables** (`tableType=LINKED_TABLE`, class `DvLinkedTable`) so they are not confused with physical **Reference tables** (`REFERENCE` / `DvReferenceTable`)
+- User language: **Add Linked Hub / Linked Link / Linked Satellite**; canvas badge `(linked)` (aliases stay `(alias)`)
+- Dual-read: existing `.hdv` with `TABLE_REFERENCE` still load; save rewrites as `LINKED_TABLE`
+- Docs: [dv-cross-model-references.adoc](docs/dv-cross-model-references.adoc)
+
+### SQL Server string length model-check vs vault DDL (issue #91 follow-up)
+
+- Model lengths remain **characters** (e.g. 50); vault SQL Server DDL still creates UTF-8 **`VARCHAR(n×3)`** (e.g. 150)
+- Field-mapping overflow check now uses `DvDdlSupport.effectiveStringCapacity` so capacity matches vault DDL (no more false “source 150 exceeds target 50”)
+- Catalog/CRM staging CREATE no longer applies vault UTF-8 length expansion (only vault/EDW paths do)
+- Docs: [datavault-plugin.adoc](docs/datavault-plugin.adoc), [dv-satellite.adoc](docs/dv-satellite.adoc)
+
+### Docker test image freshness
+
+- `ensure_hop_image` rebuilds `docker-hop:latest` when `target/hop-datavault-*.zip` is newer than the image (avoids stale plugin after `mvn package` without `./scripts/rebuild-hop.sh`)
+
 ### Project and metadata search (#106)
 
 - Opt `.hsm` / `.hdv` / `.hbv` / `.hdm` into Hop 2.19 project search via `CAPABILITY_SEARCH` and `createSearchable()`
@@ -58,7 +84,7 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ### Hub aliases — same physical hub twice on a link (#103)
 
-- Same-model **hub aliases** (`TABLE_REFERENCE` with optional role `hashKeyFieldName`) so a link can participate one physical hub more than once with distinct source mappings and link columns (primary/secondary rep, from/to location)
+- Same-model **hub aliases** (`LINKED_TABLE` / legacy `TABLE_REFERENCE` with optional role `hashKeyFieldName`) so a link can participate one physical hub more than once with distinct source mappings and link columns (primary/secondary rep, from/to location)
 - Canvas action **Add Hub alias**; link dialog lists hub aliases as participating hubs
 - Link DDL, load pipelines, special records, and optional FKs use role hash columns
 - Docs: [dv-cross-model-references.adoc](docs/dv-cross-model-references.adoc), [dv-link.adoc](docs/dv-link.adoc)

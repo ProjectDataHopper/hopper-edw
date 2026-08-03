@@ -50,8 +50,8 @@ public final class DvIntegrationSupport {
     return table instanceof DvTableBase base && resolveMode(base) == DvIntegrationMode.HOP_MANAGED;
   }
 
-  public static boolean isTableReference(IDvTable table) {
-    return table instanceof DvTableReference;
+  public static boolean isLinkedTable(IDvTable table) {
+    return table instanceof DvLinkedTable;
   }
 
   public static boolean isExternalRead(IDvTable table) {
@@ -65,23 +65,23 @@ public final class DvIntegrationSupport {
   }
 
   public static boolean shouldSkipDdl(IDvTable table) {
-    return isTableReference(table) || isExternalRead(table) || isCustomPipelines(table);
+    return isLinkedTable(table) || isExternalRead(table) || isCustomPipelines(table);
   }
 
   public static boolean shouldSkipSentinelRows(IDvTable table) {
-    return isTableReference(table) || isExternalRead(table);
+    return isLinkedTable(table) || isExternalRead(table);
   }
 
   public static boolean relaxesSourceValidation(IDvTable table) {
-    return isTableReference(table) || isExternalRead(table);
+    return isLinkedTable(table) || isExternalRead(table);
   }
 
   public static boolean shouldSkipUpdatePipeline(IDvTable table) {
-    return isTableReference(table) || isExternalRead(table);
+    return isLinkedTable(table) || isExternalRead(table);
   }
 
   public static String integrationCanvasSuffix(IDvTable table) {
-    if (isTableReference(table)) {
+    if (isLinkedTable(table)) {
       return "ref";
     }
     if (isExternalRead(table)) {

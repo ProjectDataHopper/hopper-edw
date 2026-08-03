@@ -39,7 +39,7 @@ public final class DvTableResolutionSupport {
     if (table instanceof DvHub hub) {
       return hub;
     }
-    if (table instanceof DvTableReference reference
+    if (table instanceof DvLinkedTable reference
         && reference.getReferencedTableType() == DvTableType.HUB) {
       IDvTable target = resolveReferenceTarget(model, reference, variables, metadataProvider);
       if (target instanceof DvHub hub) {
@@ -62,7 +62,7 @@ public final class DvTableResolutionSupport {
     if (table instanceof DvLink link) {
       return link;
     }
-    if (table instanceof DvTableReference reference
+    if (table instanceof DvLinkedTable reference
         && reference.getReferencedTableType() == DvTableType.LINK) {
       IDvTable target = resolveReferenceTarget(model, reference, variables, metadataProvider);
       if (target instanceof DvLink link) {
@@ -85,7 +85,7 @@ public final class DvTableResolutionSupport {
     if (table instanceof DvSatellite satellite) {
       return satellite;
     }
-    if (table instanceof DvTableReference reference
+    if (table instanceof DvLinkedTable reference
         && reference.getReferencedTableType() == DvTableType.SATELLITE) {
       IDvTable target = resolveReferenceTarget(model, reference, variables, metadataProvider);
       if (target instanceof DvSatellite satellite) {
@@ -97,7 +97,7 @@ public final class DvTableResolutionSupport {
 
   public static IDvTable resolveReferenceTarget(
       DataVaultModel model,
-      DvTableReference reference,
+      DvLinkedTable reference,
       IVariables variables,
       IHopMetadataProvider metadataProvider) {
     if (model == null || reference == null) {
@@ -116,7 +116,7 @@ public final class DvTableResolutionSupport {
                 variables,
                 metadataProvider);
         IDvTable referenced = externalModel.findTable(referencedName);
-        if (referenced == null || referenced instanceof DvTableReference) {
+        if (referenced == null || referenced instanceof DvLinkedTable) {
           return null;
         }
         DvTableType expectedType = reference.getReferencedTableType();
@@ -129,7 +129,7 @@ public final class DvTableResolutionSupport {
       }
     }
     IDvTable referenced = model.findTable(referencedName);
-    if (referenced == null || referenced instanceof DvTableReference) {
+    if (referenced == null || referenced instanceof DvLinkedTable) {
       return null;
     }
     DvTableType expectedType = reference.getReferencedTableType();
@@ -145,7 +145,7 @@ public final class DvTableResolutionSupport {
       IVariables variables,
       IHopMetadataProvider metadataProvider) {
     IDvTable table = model != null ? model.findTable(resolve(tableName, variables)) : null;
-    if (table instanceof DvTableReference reference) {
+    if (table instanceof DvLinkedTable reference) {
       IDvTable target = resolveReferenceTarget(model, reference, variables, metadataProvider);
       if (target != null && !Utils.isEmpty(target.getTableName())) {
         return resolve(target.getTableName(), variables);
@@ -164,21 +164,21 @@ public final class DvTableResolutionSupport {
     return null;
   }
 
-  public static boolean isTableReference(DataVaultModel model, String tableName) {
+  public static boolean isLinkedTable(DataVaultModel model, String tableName) {
     if (model == null || Utils.isEmpty(tableName)) {
       return false;
     }
     IDvTable table = model.findTable(tableName);
-    return table instanceof DvTableReference;
+    return table instanceof DvLinkedTable;
   }
 
-  public static boolean isExternalTableReference(DvTableReference reference) {
+  public static boolean isExternalTableReference(DvLinkedTable reference) {
     return reference != null && !Utils.isEmpty(reference.getReferencedModelFilename());
   }
 
   /** Label for the model that owns the referenced table (external path basename or this model). */
   public static String resolveReferenceSourceModelDisplayName(
-      DataVaultModel model, DvTableReference reference, IVariables variables) {
+      DataVaultModel model, DvLinkedTable reference, IVariables variables) {
     if (reference == null) {
       return "";
     }
@@ -218,8 +218,8 @@ public final class DvTableResolutionSupport {
   /**
    * Resolves the hash-key <em>column name on a link</em> for a participating hub or hub alias.
    *
-   * <p>For a physical hub this is the hub's own hash key field. For a {@link DvTableReference} hub
-   * alias it prefers the alias {@link DvTableReference#getHashKeyFieldName()} so the same physical
+   * <p>For a physical hub this is the hub's own hash key field. For a {@link DvLinkedTable} hub
+   * alias it prefers the alias {@link DvLinkedTable#getHashKeyFieldName()} so the same physical
    * hub can appear more than once with role-specific columns.
    */
   public static String resolveParticipatingHubHashColumn(
@@ -232,7 +232,7 @@ public final class DvTableResolutionSupport {
     }
     String resolvedName = resolve(hubOrAliasName, variables);
     IDvTable table = model.findTable(resolvedName);
-    if (table instanceof DvTableReference reference
+    if (table instanceof DvLinkedTable reference
         && reference.getReferencedTableType() == DvTableType.HUB) {
       String roleHash = resolve(reference.getHashKeyFieldName(), variables);
       if (!Utils.isEmpty(roleHash)) {

@@ -193,11 +193,16 @@ public abstract class DvTableBase extends HopMetadataBase implements IHopMetadat
     return tableType;
   }
 
+  /**
+   * Sets the table type. Legacy {@link DvTableType#TABLE_REFERENCE} is normalized to {@link
+   * DvTableType#LINKED_TABLE} so old {@code .hdv} files re-save with the current type code.
+   */
   public void setTableType(DvTableType tableType) {
-    if (!java.util.Objects.equals(this.tableType, tableType)) {
+    DvTableType normalized = DvTableType.normalize(tableType);
+    if (!java.util.Objects.equals(this.tableType, normalized)) {
       setChanged();
     }
-    this.tableType = tableType;
+    this.tableType = normalized;
   }
 
   public DvIntegrationMode getIntegrationMode() {

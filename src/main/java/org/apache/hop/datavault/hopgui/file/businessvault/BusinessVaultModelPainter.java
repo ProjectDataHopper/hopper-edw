@@ -557,7 +557,7 @@ public class BusinessVaultModelPainter extends BasePainter {
       return null;
     }
     if (!Utils.isEmpty(reference.getReferencedModelFilename())) {
-      return modelBasename(reference.getReferencedModelFilename()) + " (ref)";
+      return modelBasename(reference.getReferencedModelFilename()) + " (linked)";
     }
     if (!showHashKeyFieldNames
         || reference.getDvTableType() != DvTableType.SATELLITE

@@ -43,9 +43,9 @@ import org.apache.hop.workflow.WorkflowMeta;
  */
 @Getter
 @Setter
-public class DvTableReference extends DvTableBase {
+public class DvLinkedTable extends DvTableBase {
 
-  private static final Class<?> PKG = DvTableReference.class;
+  private static final Class<?> PKG = DvLinkedTable.class;
 
   @HopMetadataProperty private String referencedTableName;
 
@@ -64,9 +64,9 @@ public class DvTableReference extends DvTableBase {
    */
   @HopMetadataProperty private String hashKeyFieldName;
 
-  public DvTableReference() {
+  public DvLinkedTable() {
     super();
-    this.tableType = DvTableType.TABLE_REFERENCE;
+    this.tableType = DvTableType.LINKED_TABLE;
   }
 
   public void syncPhysicalTableName(
@@ -95,7 +95,7 @@ public class DvTableReference extends DvTableBase {
               this));
     }
     syncPhysicalTableName(model, variables, metadataProvider);
-    DvReferenceValidationSupport.validateTableReference(
+    DvLinkedTableValidationSupport.validateLinkedTable(
         remarks, this, model, metadataProvider, variables);
     if (Utils.isEmpty(getTableName())) {
       remarks.add(
@@ -113,7 +113,7 @@ public class DvTableReference extends DvTableBase {
     IDvTable target =
         DvTableResolutionSupport.resolveReferenceTarget(model, this, variables, metadataProvider);
     if (target == null) {
-      throw new HopException("Table reference '" + getName() + "' has no resolvable target table");
+      throw new HopException("Linked table '" + getName() + "' has no resolvable target table");
     }
     return target.getTargetTableLayout(metadataProvider, variables, model);
   }

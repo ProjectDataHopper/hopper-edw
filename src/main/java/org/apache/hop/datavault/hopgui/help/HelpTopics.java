@@ -27,6 +27,7 @@ public final class HelpTopics {
   public static final String DV_HUB = "dv-hub-dialog";
   public static final String DV_SATELLITE = "dv-satellite-dialog";
   public static final String DV_LINK = "dv-link-dialog";
+  public static final String DV_REFERENCE = "dv-reference-dialog";
   public static final String DV_MODEL = "dv-model-dialog";
   public static final String DV_NOTE = "dv-note-dialog";
   public static final String DV_LINK_HUB_SOURCE = "dv-link-hub-source-dialog";
@@ -89,6 +90,7 @@ public final class HelpTopics {
           Map.entry(DV_HUB, "HelpTopics.DvHubDialog.Title"),
           Map.entry(DV_SATELLITE, "HelpTopics.DvSatelliteDialog.Title"),
           Map.entry(DV_LINK, "HelpTopics.DvLinkDialog.Title"),
+          Map.entry(DV_REFERENCE, "HelpTopics.DvReferenceTableDialog.Title"),
           Map.entry(DV_MODEL, "HelpTopics.DvModelDialog.Title"),
           Map.entry(DV_NOTE, "HelpTopics.DvNoteDialog.Title"),
           Map.entry(DV_LINK_HUB_SOURCE, "HelpTopics.DvLinkHubSourceDialog.Title"),

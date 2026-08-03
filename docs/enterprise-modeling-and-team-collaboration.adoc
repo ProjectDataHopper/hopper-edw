@@ -12,8 +12,8 @@ It does **not** replace the technical reference pages. It explains *how to organ
 |===
 |Need |Go here
 
-|Cross-model table references and hub aliases (XML, canvas, load order)
-|link:dv-cross-model-references.adoc[Table references and hub aliases]
+|Cross-model linked tables and hub aliases (XML, canvas, load order)
+|link:dv-cross-model-references.adoc[Linked tables and hub aliases]
 
 |Catalog layout, namespaces, version tags
 |link:data-catalog.adoc[Data Catalog]
@@ -41,7 +41,7 @@ A single giant `.hdv` works for tutorials. It fails for programs:
 * **Clear authority** — business keys and hash definitions for a hub live in *one* owning model.
 * **Cognitive load** — canvases stay readable; execution maps stay useful.
 
-hop-datavault supports this with **cross-model table references** (subject models point at core hubs without copying metadata), optional **hub aliases** for role-playing inside a model, multi-model **Business Vault** and **dimensional** references, and a **catalog** that publishes contracts for everyone else.
+hop-datavault supports this with **cross-model linked tables** (subject models point at core hubs without copying metadata), optional **hub aliases** for role-playing inside a model, multi-model **Business Vault** and **dimensional** references, and a **catalog** that publishes contracts for everyone else.
 
 == Personas and responsibilities
 
@@ -142,7 +142,7 @@ Retail-example collapses many of these into fewer files for teaching. Integratio
 |Enterprise hubs (customer, product, party, calendar keys, …), optional shared links, standard hash/config. **Authoritative** business keys and hub hash names live here.
 
 |**Subject area** `.hdv`
-|Links and satellites for that domain; **table references** to core hubs (and links if needed). Local hubs only when the concept is truly local.
+|Links and satellites for that domain; **linked tables** to core hubs (and links if needed). Local hubs only when the concept is truly local.
 
 |**Business Vault** `.hbv`
 |SCD2 / PIT / SQL business objects. References DV tables via canvas aliases (possibly multi-model). May itself be split by domain.
@@ -166,8 +166,8 @@ Partial loads: tag `DV_SOURCE` definitions with a **group** and pass **Record so
 
 Do not confuse them:
 
-* **Cross-model table reference** — another `.hdv` owns the table; this file only points at it (collaboration / split files).
-* **Same-model hub alias** — extra *role* of a hub already in this file (e.g. secondary sales rep). Prefer **natural hub + alias** so the physical hub stays connected on the canvas. See link:dv-cross-model-references.adoc[Table references and hub aliases].
+* **Cross-model linked table** — another `.hdv` owns the table; this file only points at it (collaboration / split files).
+* **Same-model hub alias** — extra *role* of a hub already in this file (e.g. secondary sales rep). Prefer **natural hub + alias** so the physical hub stays connected on the canvas. See link:dv-cross-model-references.adoc[Linked tables and hub aliases].
 
 == Version control playbook
 
@@ -340,7 +340,7 @@ flowchart TB
   Admin --> Core
   Admin --> Tags
   Subj --> SubHdv
-  SubHdv -->|table references| Core
+  SubHdv -->|linked tables| Core
   BV --> Hbv
   BV --> Hdm
   Ops --> Wf
@@ -360,7 +360,7 @@ flowchart TB
 
 == Where to go next
 
-* **Mechanism — split DV files:** link:dv-cross-model-references.adoc[Table references and hub aliases]
+* **Mechanism — split DV files:** link:dv-cross-model-references.adoc[Linked tables and hub aliases]
 * **Mechanism — catalog and tags:** link:data-catalog.adoc[Data Catalog]
 * **Process — schema change and DTAP:** link:resource-definition-validation.adoc[Resource definition validation]
 * **Discovery — lineage:** link:source-to-target-lineage.adoc[Source-to-target lineage]

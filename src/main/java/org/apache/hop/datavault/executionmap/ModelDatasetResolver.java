@@ -286,6 +286,7 @@ public final class ModelDatasetResolver {
       case HUB -> RecordDefinitionType.DV_HUB.name();
       case LINK -> RecordDefinitionType.DV_LINK.name();
       case SATELLITE -> RecordDefinitionType.DV_SATELLITE.name();
+      case REFERENCE -> RecordDefinitionType.DV_REFERENCE.name();
       default -> RecordDefinitionType.PHYSICAL_TABLE.name();
     };
   }

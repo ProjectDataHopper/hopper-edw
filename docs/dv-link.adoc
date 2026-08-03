@@ -25,7 +25,7 @@ So each distinct dependent-child combination gets its own link hash key. Satelli
 
 *Dependent child keys* are not the same as *driving keys*:
 
-* **Hub aliases (role-playing)** — same physical hub more than once on the link: natural hub for one role, alias for each extra role (from vs to, primary vs secondary). See link:dv-cross-model-references.adoc[Table references and hub aliases].
+* **Hub aliases (role-playing)** — same physical hub more than once on the link: natural hub for one role, alias for each extra role (from vs to, primary vs secondary). See link:dv-cross-model-references.adoc[Linked tables and hub aliases].
 * **Dependent child keys** — making repeated occurrences of the *same* hubs unique (measurement every hour, sale line, sensor reading).
 
 You can map any source column(s) as dependent child keys; the plugin does not hard-code timestamps versus ids.
@@ -97,7 +97,7 @@ The comparison is done on the link hash key, so only new combinations of hubs (a
 |Participating hubs
 |The list of hubs (or **hub aliases**) that take part in this relationship. You need at least two. The order in the list is the order in which the hub hash columns will appear in the link table and is also the order used when calculating the link hash key.
 
-Add hubs or hub aliases by selecting them from the available definitions in the model. To put the **same physical hub twice** on one link (primary/secondary rep, from/to location), keep the **physical hub as the natural first role** and add a **hub alias only for each extra role** — see link:dv-cross-model-references.adoc[Table references and hub aliases]. List e.g. `hub_sales_rep` then `hub_secondary_rep` (not the same hub name twice). The alias contributes a distinct role hash key column and its own source business-key mapping.
+Add hubs or hub aliases by selecting them from the available definitions in the model. To put the **same physical hub twice** on one link (primary/secondary rep, from/to location), keep the **physical hub as the natural first role** and add a **hub alias only for each extra role** — see link:dv-cross-model-references.adoc[Linked tables and hub aliases]. List e.g. `hub_sales_rep` then `hub_secondary_rep` (not the same hub name twice). The alias contributes a distinct role hash key column and its own source business-key mapping.
 
 |Driving key names
 |Legacy optional fields on the link dialog. **Do not use these for role-playing the same hub**; use hub aliases instead. Multi-active **satellite** driving keys (a different concept) are configured on the satellite.

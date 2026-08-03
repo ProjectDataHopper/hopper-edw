@@ -47,7 +47,8 @@ class SourceFieldPrimaryKeySupportTest {
   void buildsBusinessKeysFromPrimaryKeyMetadata() {
     SourceField customerId = field("customer_id");
     customerId.setPrimaryKeyPosition(1);
-    customerId.setSourceDataType("Integer");
+    customerId.setHopType(IValueMeta.TYPE_INTEGER);
+    customerId.setSourceDataType("int4");
     customerId.setLength("9");
 
     List<BusinessKey> businessKeys =
@@ -58,6 +59,7 @@ class SourceFieldPrimaryKeySupportTest {
     assertEquals("customer_id", businessKeys.getFirst().getName());
     assertEquals("customer_id", businessKeys.getFirst().getSourceFieldName());
     assertEquals("CRM-customer", businessKeys.getFirst().getRecordSourceName());
+    // preferredDataTypeLabel prefers the Hop type name when hopType is set.
     assertEquals("Integer", businessKeys.getFirst().getDataType());
     assertEquals("9", businessKeys.getFirst().getLength());
   }

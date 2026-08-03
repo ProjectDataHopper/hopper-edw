@@ -39,7 +39,7 @@ import org.apache.hop.datavault.metadata.DvIntegrationMode;
 import org.apache.hop.datavault.metadata.DvLink;
 import org.apache.hop.datavault.metadata.DvModelCheckOptions;
 import org.apache.hop.datavault.metadata.DvSatellite;
-import org.apache.hop.datavault.metadata.DvTableReference;
+import org.apache.hop.datavault.metadata.DvLinkedTable;
 import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.datavault.metadata.IDvTable;
 import org.apache.hop.i18n.BaseMessages;
@@ -687,7 +687,7 @@ public class DvLinkDialog {
         // Physical hubs and hub-like table references / role-playing aliases.
         if (table.getTableType() == DvTableType.HUB) {
           names.add(table.getName());
-        } else if (table instanceof DvTableReference reference
+        } else if (table instanceof DvLinkedTable reference
             && reference.getReferencedTableType() == DvTableType.HUB) {
           names.add(table.getName());
         }

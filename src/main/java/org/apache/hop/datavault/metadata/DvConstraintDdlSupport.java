@@ -120,7 +120,26 @@ public final class DvConstraintDdlSupport {
     if (table instanceof DvSatellite satellite) {
       return resolveSatellitePrimaryKeyColumns(satellite, model, config, variables, layout);
     }
+    if (table instanceof DvReferenceTable reference) {
+      return resolveReferencePrimaryKeyColumns(reference, variables);
+    }
     return List.of();
+  }
+
+  private static List<String> resolveReferencePrimaryKeyColumns(
+      DvReferenceTable reference, IVariables variables) {
+    List<String> columns = new ArrayList<>();
+    if (reference == null || reference.getNaturalKeys() == null) {
+      return columns;
+    }
+    for (BusinessKey key : reference.getNaturalKeys()) {
+      if (key == null || Utils.isEmpty(key.getName())) {
+        continue;
+      }
+      String name = variables != null ? variables.resolve(key.getName()) : key.getName();
+      addIfPresent(columns, name);
+    }
+    return columns;
   }
 
   public static List<ForeignKeySpec> resolveDvForeignKeys(

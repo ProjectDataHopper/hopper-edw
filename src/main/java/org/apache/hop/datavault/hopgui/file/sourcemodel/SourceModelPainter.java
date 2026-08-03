@@ -524,6 +524,6 @@ public class SourceModelPainter extends BasePainter {
     if (nativeZoom < 1.0d) {
       nativeZoom = 1.0d;
     }
-    return (float) (nativeZoom);
+    return (float) (1.5d * nativeZoom);
   }
 }

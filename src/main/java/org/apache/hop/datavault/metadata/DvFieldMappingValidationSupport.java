@@ -111,7 +111,8 @@ public final class DvFieldMappingValidationSupport {
                 bk.getName(),
                 sourceFieldName,
                 recordSource.getName());
-        validateMapping(sourceMeta, targetMeta, mappingContext, checkSource, remarks);
+        validateMapping(
+            sourceMeta, targetMeta, mappingContext, targetDatabaseMeta, checkSource, remarks);
         if (options != null
             && options.isDetailedDataTypeChecking()
             && resolved.usedLive
@@ -171,7 +172,14 @@ public final class DvFieldMappingValidationSupport {
 
     if (!Utils.isEmpty(satellite.getHubName()) && model != null) {
       validateSatelliteHubBusinessKeys(
-          satellite, model, resolved, recordSource, variables, checkSource, remarks);
+          satellite,
+          model,
+          resolved,
+          recordSource,
+          targetDatabaseMeta,
+          variables,
+          checkSource,
+          remarks);
     }
 
     if (satellite.hasDrivingKey()) {
@@ -203,7 +211,8 @@ public final class DvFieldMappingValidationSupport {
                   satellite.getDrivingKey(),
                   drivingKeySourceField,
                   recordSource.getName());
-          validateMapping(sourceMeta, targetMeta, mappingContext, checkSource, remarks);
+          validateMapping(
+              sourceMeta, targetMeta, mappingContext, targetDatabaseMeta, checkSource, remarks);
           validatePhysicalSqlTypeIfDetailed(
               options,
               resolved.usedLive,
@@ -278,7 +287,8 @@ public final class DvFieldMappingValidationSupport {
                 attr.getName(),
                 sourceFieldName,
                 recordSource.getName());
-        validateMapping(sourceMeta, targetMeta, mappingContext, checkSource, remarks);
+        validateMapping(
+            sourceMeta, targetMeta, mappingContext, targetDatabaseMeta, checkSource, remarks);
         validatePhysicalSqlTypeIfDetailed(
             options,
             resolved.usedLive,
@@ -605,6 +615,7 @@ public final class DvFieldMappingValidationSupport {
                     sourceFieldName,
                     recordSource.getName(),
                     hubName),
+                resolveTargetDatabaseMeta(model, metadataProvider),
                 checkSource,
                 remarks);
             if (resolved.usedLive) {
@@ -632,6 +643,7 @@ public final class DvFieldMappingValidationSupport {
       DataVaultModel model,
       ResolvedSourceFields resolved,
       DataVaultSource recordSource,
+      DatabaseMeta targetDatabaseMeta,
       IVariables variables,
       ICheckResultSource checkSource,
       List<ICheckResult> remarks) {
@@ -697,6 +709,7 @@ public final class DvFieldMappingValidationSupport {
                 sourceFieldName,
                 satelliteSourceName,
                 hub.getName()),
+            targetDatabaseMeta,
             checkSource,
             remarks);
         if (resolved.usedLive) {
@@ -795,7 +808,8 @@ public final class DvFieldMappingValidationSupport {
                 "DvFieldMappingValidation.Context.SatelliteAutoAttribute",
                 fieldName,
                 recordSource.getName());
-        validateMapping(sourceMeta, targetMeta, mappingContext, checkSource, remarks);
+        validateMapping(
+            sourceMeta, targetMeta, mappingContext, targetDatabaseMeta, checkSource, remarks);
         validatePhysicalSqlTypeIfDetailed(
             options,
             resolved.usedLive,
@@ -867,6 +881,25 @@ public final class DvFieldMappingValidationSupport {
       String context,
       ICheckResultSource checkSource,
       List<ICheckResult> remarks) {
+    validateMapping(sourceMeta, targetMeta, context, null, checkSource, remarks);
+  }
+
+  /**
+   * Validates source → target type/length/precision.
+   *
+   * <p><b>Length contract:</b> model/target {@link IValueMeta} lengths are <em>characters</em>
+   * (e.g. satellite attribute 50). On SQL Server the vault stores UTF-8 {@code VARCHAR} with
+   * capacity {@code modelLength × 3} (e.g. {@code VARCHAR(150)}). Overflow checks use {@link
+   * DvDdlSupport#effectiveStringCapacity} so a character model length 50 is not reported as
+   * capacity 50 when the vault column is 150 bytes.
+   */
+  static void validateMapping(
+      IValueMeta sourceMeta,
+      IValueMeta targetMeta,
+      String context,
+      DatabaseMeta targetDatabaseMeta,
+      ICheckResultSource checkSource,
+      List<ICheckResult> remarks) {
     if (!typesCompatible(sourceMeta.getType(), targetMeta.getType())) {
       remarks.add(
           new CheckResult(
@@ -882,29 +915,49 @@ public final class DvFieldMappingValidationSupport {
 
     if (isLengthSensitive(sourceMeta.getType())) {
       int sourceLength = sourceMeta.getLength();
-      int targetLength = targetMeta.getLength();
-      if (sourceLength > 0 && targetLength > 0 && sourceLength > targetLength) {
-        remarks.add(
-            new CheckResult(
-                ICheckResult.TYPE_RESULT_ERROR,
-                BaseMessages.getString(
-                    PKG,
-                    "DvFieldMappingValidation.SourceLengthExceedsTarget",
-                    context,
-                    sourceLength,
-                    targetLength),
-                checkSource));
-      } else if (sourceLength > 0 && targetLength > 0 && sourceLength < targetLength) {
-        remarks.add(
-            new CheckResult(
-                ICheckResult.TYPE_RESULT_WARNING,
-                BaseMessages.getString(
-                    PKG,
-                    "DvFieldMappingValidation.SourceLengthLessThanTarget",
-                    context,
-                    sourceLength,
-                    targetLength),
-                checkSource));
+      int targetModelLength = targetMeta.getLength();
+      if (sourceLength > 0 && targetModelLength > 0) {
+        int targetCapacity =
+            DvDdlSupport.effectiveStringCapacity(targetDatabaseMeta, targetModelLength);
+        if (sourceLength > targetCapacity) {
+          // Message args: context, sourceLen, capacity, modelLen (SQL Server may expand capacity)
+          if (targetCapacity != targetModelLength) {
+            remarks.add(
+                new CheckResult(
+                    ICheckResult.TYPE_RESULT_ERROR,
+                    BaseMessages.getString(
+                        PKG,
+                        "DvFieldMappingValidation.SourceLengthExceedsTargetCapacity",
+                        context,
+                        sourceLength,
+                        targetCapacity,
+                        targetModelLength),
+                    checkSource));
+          } else {
+            remarks.add(
+                new CheckResult(
+                    ICheckResult.TYPE_RESULT_ERROR,
+                    BaseMessages.getString(
+                        PKG,
+                        "DvFieldMappingValidation.SourceLengthExceedsTarget",
+                        context,
+                        sourceLength,
+                        targetModelLength),
+                    checkSource));
+          }
+        } else if (sourceLength < targetModelLength) {
+          // Character-oriented warning only (not vs expanded byte capacity).
+          remarks.add(
+              new CheckResult(
+                  ICheckResult.TYPE_RESULT_WARNING,
+                  BaseMessages.getString(
+                      PKG,
+                      "DvFieldMappingValidation.SourceLengthLessThanTarget",
+                      context,
+                      sourceLength,
+                      targetModelLength),
+                  checkSource));
+        }
       }
     }
 

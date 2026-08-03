@@ -16,6 +16,7 @@
  */
 package org.apache.hop.datavault.metadata;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.ICheckResult;
+import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.variables.Variables;
@@ -273,4 +275,106 @@ class DvFieldMappingValidationSupportTest {
       return recordSource;
     }
   }
+
+
+
+
+  @Test
+  void effectiveStringCapacityExpandsSqlServerOnly() {
+    DatabaseMeta sqlServer = databaseMeta(DvBulkLoadPluginSupport.MSSQLNATIVE_DB_PLUGIN_ID);
+    DatabaseMeta postgres = databaseMeta("POSTGRESQL");
+    assertEquals(50, DvDdlSupport.effectiveStringCapacity(null, 50));
+    assertEquals(50, DvDdlSupport.effectiveStringCapacity(postgres, 50));
+    assertEquals(150, DvDdlSupport.effectiveStringCapacity(sqlServer, 50));
+  }
+
+  /**
+   * Design: model target length 50 (characters) → vault VARCHAR(150). A physical source that also
+   * reports 150 (or NVARCHAR-equivalent capacity) must not fail as "exceeds target length 50".
+   */
+  @Test
+  void validateMappingUsesVaultUtf8CapacityNotRawModelLengthOnSqlServer() throws Exception {
+    org.apache.hop.core.row.value.ValueMetaString source =
+        new org.apache.hop.core.row.value.ValueMetaString("name");
+    source.setLength(150);
+    org.apache.hop.core.row.value.ValueMetaString target =
+        new org.apache.hop.core.row.value.ValueMetaString("name");
+    target.setLength(50); // model character length
+
+    List<ICheckResult> remarks = new ArrayList<>();
+    DvFieldMappingValidationSupport.validateMapping(
+        source,
+        target,
+        "sat name",
+        databaseMeta(DvBulkLoadPluginSupport.MSSQLNATIVE_DB_PLUGIN_ID),
+        null,
+        remarks);
+
+    assertFalse(
+        remarks.stream().anyMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_ERROR),
+        () -> remarks.toString());
+  }
+
+  @Test
+  void validateMappingErrorsWhenSourceExceedsSqlServerUtf8Capacity() throws Exception {
+    org.apache.hop.core.row.value.ValueMetaString source =
+        new org.apache.hop.core.row.value.ValueMetaString("name");
+    source.setLength(200);
+    org.apache.hop.core.row.value.ValueMetaString target =
+        new org.apache.hop.core.row.value.ValueMetaString("name");
+    target.setLength(50);
+
+    List<ICheckResult> remarks = new ArrayList<>();
+    DvFieldMappingValidationSupport.validateMapping(
+        source,
+        target,
+        "sat name",
+        databaseMeta(DvBulkLoadPluginSupport.MSSQLNATIVE_DB_PLUGIN_ID),
+        null,
+        remarks);
+
+    assertTrue(
+        remarks.stream()
+            .anyMatch(
+                r ->
+                    r.getType() == ICheckResult.TYPE_RESULT_ERROR
+                        && r.getText() != null
+                        && r.getText().contains("capacity")
+                        && r.getText().contains("150")
+                        && r.getText().contains("50")),
+        () -> remarks.toString());
+  }
+
+  @Test
+  void validateMappingPostgresComparesCharacterLengthsWithoutExpansion() throws Exception {
+    org.apache.hop.core.row.value.ValueMetaString source =
+        new org.apache.hop.core.row.value.ValueMetaString("name");
+    source.setLength(60);
+    org.apache.hop.core.row.value.ValueMetaString target =
+        new org.apache.hop.core.row.value.ValueMetaString("name");
+    target.setLength(50);
+
+    List<ICheckResult> remarks = new ArrayList<>();
+    DvFieldMappingValidationSupport.validateMapping(
+        source, target, "sat name", databaseMeta("POSTGRESQL"), null, remarks);
+
+    assertTrue(
+        remarks.stream()
+            .anyMatch(
+                r ->
+                    r.getType() == ICheckResult.TYPE_RESULT_ERROR
+                        && r.getText() != null
+                        && r.getText().contains("exceeds target length")),
+        () -> remarks.toString());
+  }
+
+  private static DatabaseMeta databaseMeta(String pluginId) {
+    return new DatabaseMeta() {
+      @Override
+      public String getPluginId() {
+        return pluginId;
+      }
+    };
+  }
+
 }

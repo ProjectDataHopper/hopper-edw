@@ -214,7 +214,7 @@ public final class DvModelLoadSupport {
       if (table == null
           || Utils.isEmpty(table.getName())
           || table.getTableType() != tableType
-          || table instanceof DvTableReference) {
+          || table instanceof DvLinkedTable) {
         continue;
       }
       names.add(table.getName());

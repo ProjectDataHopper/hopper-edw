@@ -445,7 +445,7 @@ public class DataVaultModel extends HopMetadataBase
         hubNames.add(table.getName());
       } else if (table.getTableType() == DvTableType.LINK) {
         linkNames.add(table.getName());
-      } else if (table instanceof DvTableReference reference) {
+      } else if (table instanceof DvLinkedTable reference) {
         DvTableType referencedType = reference.getReferencedTableType();
         if (referencedType == DvTableType.HUB) {
           hubNames.add(table.getName());
@@ -518,9 +518,9 @@ public class DataVaultModel extends HopMetadataBase
       if (table == null) {
         continue;
       }
-      // Hub/link aliases (TABLE_REFERENCE) intentionally share the physical target table of the
+      // Linked tables / hub aliases intentionally share the physical target table of the
       // referenced hub; they do not create a second physical table and must not fail model check.
-      if (table.getTableType() == DvTableType.TABLE_REFERENCE) {
+      if (table.getTableType() == DvTableType.LINKED_TABLE) {
         continue;
       }
       String targetTableName =
@@ -654,6 +654,25 @@ public class DataVaultModel extends HopMetadataBase
   public DvLink findLink(
       String linkName, IVariables variables, IHopMetadataProvider metadataProvider) {
     return DvTableResolutionSupport.resolveLink(this, linkName, variables, metadataProvider);
+  }
+
+  /**
+   * Find the reference table with the given canvas name in the model.
+   *
+   * @param referenceName The name of the reference table to look for.
+   * @return The reference table or null if not found.
+   */
+  public DvReferenceTable findReferenceTable(String referenceName) {
+    if (Utils.isEmpty(referenceName)) {
+      return null;
+    }
+    for (IDvTable table : getTables()) {
+      if (table instanceof DvReferenceTable reference
+          && referenceName.equalsIgnoreCase(reference.getName())) {
+        return reference;
+      }
+    }
+    return null;
   }
 
   /**

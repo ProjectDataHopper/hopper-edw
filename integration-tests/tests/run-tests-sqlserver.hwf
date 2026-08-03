@@ -259,6 +259,27 @@
       <attributes_hac/>
     </action>
     <action>
+      <filename>${PROJECT_HOME}/tests/reference-table/update-reference-table.hwf</filename>
+      <params_from_previous>N</params_from_previous>
+      <exec_per_row>N</exec_per_row>
+      <set_logfile>N</set_logfile>
+      <loglevel>Nothing</loglevel>
+      <set_append_logfile>N</set_append_logfile>
+      <create_parent_folder>N</create_parent_folder>
+      <wait_until_finished>Y</wait_until_finished>
+      <parameters>
+        <pass_all_parameters>Y</pass_all_parameters>
+      </parameters>
+      <run_configuration>local</run_configuration>
+      <name>reference-table</name>
+      <type>WORKFLOW</type>
+      <attributes/>
+      <xloc>448</xloc>
+      <yloc>272</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
       <filename>${PROJECT_HOME}/tests/hash-key/run-hash-key-tests.hwf</filename>
       <params_from_previous>N</params_from_previous>
       <exec_per_row>N</exec_per_row>
@@ -434,6 +455,13 @@
     </hop>
     <hop>
       <from>load-end-date</from>
+      <to>reference-table</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>reference-table</from>
       <to>hash-key</to>
       <evaluation>Y</evaluation>
       <unconditional>N</unconditional>

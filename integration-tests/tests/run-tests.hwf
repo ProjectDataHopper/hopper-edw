@@ -220,6 +220,32 @@ limitations under the License.
       <attributes_hac/>
     </action>
     <action>
+      <filename>${PROJECT_HOME}/tests/reference-table/update-reference-table.hwf</filename>
+      <params_from_previous>N</params_from_previous>
+      <exec_per_row>N</exec_per_row>
+      <set_logfile>N</set_logfile>
+      <logfile/>
+      <logext/>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <loglevel>Nothing</loglevel>
+      <set_append_logfile>N</set_append_logfile>
+      <create_parent_folder>N</create_parent_folder>
+      <wait_until_finished>Y</wait_until_finished>
+      <parameters>
+        <pass_all_parameters>Y</pass_all_parameters>
+      </parameters>
+      <run_configuration>local</run_configuration>
+      <name>reference-table</name>
+      <description/>
+      <type>WORKFLOW</type>
+      <attributes/>
+      <xloc>432</xloc>
+      <yloc>288</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
       <filename>${PROJECT_HOME}/tests/multi-satellite-bv/update-customer-360.hwf</filename>
       <params_from_previous>N</params_from_previous>
       <exec_per_row>N</exec_per_row>
@@ -567,6 +593,13 @@ dbType == "" || dbType == "postgres";
     </hop>
     <hop>
       <from>load-end-date</from>
+      <to>reference-table</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>reference-table</from>
       <to>hash-key</to>
       <evaluation>Y</evaluation>
       <unconditional>N</unconditional>

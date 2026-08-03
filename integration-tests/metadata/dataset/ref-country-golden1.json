@@ -1,0 +1,41 @@
+{
+  "base_filename": "reference-table/ref-country-golden1.csv",
+  "virtualPath": "/reference-table",
+  "name": "ref-country-golden1",
+  "description": "Expected ref_country after initial FULL_REPLACE load (3 countries)",
+  "dataset_fields": [
+    {
+      "field_comment": "code",
+      "field_length": 3,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "code",
+      "field_format": ""
+    },
+    {
+      "field_comment": "name",
+      "field_length": 100,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "name",
+      "field_format": ""
+    },
+    {
+      "field_comment": "x_load_ts",
+      "field_length": 6,
+      "field_type": 9,
+      "field_precision": -1,
+      "field_name": "x_load_ts",
+      "field_format": "yyyy/MM/dd HH:mm:ss.SSSSSSSSS"
+    },
+    {
+      "field_comment": "x_record_source",
+      "field_length": 100,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "x_record_source",
+      "field_format": ""
+    }
+  ],
+  "folder_name": ""
+}

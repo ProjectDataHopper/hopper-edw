@@ -35,7 +35,7 @@ limitations under the License.
       <referencedModelFilename>shared-dv-core.hdv</referencedModelFilename>
       <referencedTableType>HUB</referencedTableType>
       <tableName>hub_customer</tableName>
-      <tableType>TABLE_REFERENCE</tableType>
+      <tableType>LINKED_TABLE</tableType>
       <xloc>64</xloc>
       <yloc>64</yloc>
       <name>hub_customer</name>
@@ -45,7 +45,7 @@ limitations under the License.
       <referencedModelFilename>shared-dv-core.hdv</referencedModelFilename>
       <referencedTableType>HUB</referencedTableType>
       <tableName>hub_order</tableName>
-      <tableType>TABLE_REFERENCE</tableType>
+      <tableType>LINKED_TABLE</tableType>
       <xloc>64</xloc>
       <yloc>192</yloc>
       <name>hub_order</name>
@@ -55,7 +55,7 @@ limitations under the License.
       <referencedModelFilename>shared-dv-core.hdv</referencedModelFilename>
       <referencedTableType>HUB</referencedTableType>
       <tableName>hub_product</tableName>
-      <tableType>TABLE_REFERENCE</tableType>
+      <tableType>LINKED_TABLE</tableType>
       <xloc>64</xloc>
       <yloc>320</yloc>
       <name>hub_product</name>

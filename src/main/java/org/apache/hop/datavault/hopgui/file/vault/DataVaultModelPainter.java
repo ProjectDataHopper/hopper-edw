@@ -43,8 +43,8 @@ import org.apache.hop.datavault.metadata.DvIntegrationSupport;
 import org.apache.hop.datavault.metadata.DvLink;
 import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.DvTableBase;
-import org.apache.hop.datavault.metadata.DvTableReference;
-import org.apache.hop.datavault.metadata.DvTableReferenceSupport;
+import org.apache.hop.datavault.metadata.DvLinkedTable;
+import org.apache.hop.datavault.metadata.DvLinkedTableSupport;
 import org.apache.hop.datavault.metadata.DvTableResolutionSupport;
 import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.datavault.metadata.IDvTable;
@@ -335,12 +335,25 @@ public class DataVaultModelPainter extends BasePainter {
     // Draw icon using SVG  top-left + margin
     drawTableIcon(table, x, y);
 
-    // Type label below the icon, small print
-    ModelGraphTableCardLayout.drawTypeBelowIcon(gc, getTypeLabel(table), x, y);
+    // Type label below the icon, small print (+ load mode badge for reference tables)
+    Point typeExtent = ModelGraphTableCardLayout.drawTypeBelowIcon(gc, getTypeLabel(table), x, y);
+    if (table instanceof org.apache.hop.datavault.metadata.DvReferenceTable referenceTable) {
+      String loadBadge = DvTableDisplaySupport.getReferenceLoadModeBadge(referenceTable);
+      if (!Utils.isEmpty(loadBadge)) {
+        ModelGraphTableCardLayout.drawExtraLineBelowType(gc, loadBadge, x, y, typeExtent, null);
+      }
+    } else if (table instanceof DvLinkedTable reference) {
+      String sourceModel =
+          DvTableResolutionSupport.resolveReferenceSourceModelDisplayName(
+              model, reference, variables);
+      if (!Utils.isEmpty(sourceModel)) {
+        ModelGraphTableCardLayout.drawExtraLineBelowType(gc, sourceModel, x, y, typeExtent, null);
+      }
+    }
 
-    // Name of the table to the right of the icon (and optional hash key field below it)
+    // Name of the table to the right of the icon (and optional hash key / natural keys below it)
     Point nameExtent = drawTableName(table, x, y);
-    if (showHashKeyFieldNames) {
+    if (showHashKeyFieldNames || table.getTableType() == DvTableType.REFERENCE) {
       drawTableHashKeyFieldName(table, x, y, nameExtent);
     }
 
@@ -374,13 +387,19 @@ public class DataVaultModelPainter extends BasePainter {
   }
 
   private void drawTableHashKeyFieldName(IDvTable table, int x, int y, Point nameExtent) {
-    String hashKeyFieldName = getHashKeyFieldNameForDisplay(table);
-    ModelGraphTableCardLayout.drawSecondaryLine(gc, hashKeyFieldName, x, y, nameExtent);
+    String secondaryLine = getSecondaryFieldLineForDisplay(table);
+    ModelGraphTableCardLayout.drawSecondaryLine(gc, secondaryLine, x, y, nameExtent);
   }
 
   private String getHashKeyFieldNameForDisplay(IDvTable table) {
     return DvTableDisplaySupport.getHashKeyFieldNameForDisplay(
         table, model, tableByName, variables);
+  }
+
+  /** Hash key for hubs/links/sats; natural-key summary for reference tables. */
+  private String getSecondaryFieldLineForDisplay(IDvTable table) {
+    return DvTableDisplaySupport.getSecondaryFieldLineForDisplay(
+        table, model, tableByName, variables, showHashKeyFieldNames);
   }
 
   private void drawTableBox(IDvTable table, int x, int y, Point box) {
@@ -405,7 +424,7 @@ public class DataVaultModelPainter extends BasePainter {
     ModelGraphTableCardLayout.drawSvgIcon(
         gc,
         getClass().getClassLoader(),
-        DvTableDisplaySupport.getImagePath(table.getTableType()),
+        DvTableDisplaySupport.getImagePathForTable(table),
         x,
         y,
         magnification);
@@ -441,7 +460,7 @@ public class DataVaultModelPainter extends BasePainter {
       return "";
     }
     DvTableType displayType =
-        table instanceof DvTableReference reference
+        table instanceof DvLinkedTable reference
             ? reference.getReferencedTableType()
             : table.getTableType();
     String base =
@@ -449,16 +468,17 @@ public class DataVaultModelPainter extends BasePainter {
           case HUB -> "Hub";
           case SATELLITE -> "Satellite";
           case LINK -> "Link";
+          case REFERENCE -> "Reference";
           default -> table.getTableType() != null ? table.getTableType().name() : "";
         };
-    if (table instanceof DvTableReference reference) {
+    if (table instanceof DvLinkedTable reference) {
       boolean sameModelAlias =
           Utils.isEmpty(reference.getReferencedModelFilename())
               && !Utils.isEmpty(reference.getName())
               && !reference
                   .getName()
                   .equalsIgnoreCase(Const.NVL(reference.getReferencedTableName(), ""));
-      base = base + (sameModelAlias ? " (alias)" : " (ref)");
+      base = base + (sameModelAlias ? " (alias)" : " (linked)");
     }
     String suffix = DvIntegrationSupport.integrationCanvasSuffix(table);
     if (Utils.isEmpty(suffix)) {
@@ -476,19 +496,17 @@ public class DataVaultModelPainter extends BasePainter {
   private Point calculateTableBoxSize(IDvTable table) {
     String name = table.getName() != null ? table.getName() : "?";
     String typeLabel = getTypeLabel(table);
-    String hashKeyFieldName = null;
-    if (showHashKeyFieldNames) {
-      hashKeyFieldName = getHashKeyFieldNameForDisplay(table);
-    }
-    String secondaryLine = null;
-    if (table instanceof DvTableReference reference) {
-      secondaryLine =
+    String fieldLine = getSecondaryFieldLineForDisplay(table);
+    String extraLine = null;
+    if (table instanceof DvLinkedTable reference) {
+      extraLine =
           DvTableResolutionSupport.resolveReferenceSourceModelDisplayName(
               model, reference, variables);
+    } else if (table instanceof org.apache.hop.datavault.metadata.DvReferenceTable referenceTable) {
+      extraLine = DvTableDisplaySupport.getReferenceLoadModeBadge(referenceTable);
     }
     ModelGraphTableCardLayout.BoxSize boxSize =
-        ModelGraphTableCardLayout.computeBoxSize(
-            gc, name, hashKeyFieldName, typeLabel, secondaryLine);
+        ModelGraphTableCardLayout.computeBoxSize(gc, name, fieldLine, typeLabel, extraLine);
     if (table instanceof DvTableBase base) {
       base.setDrawnBoxWidth(boxSize.width());
       base.setDrawnBoxHeight(boxSize.height());
@@ -500,8 +518,8 @@ public class DataVaultModelPainter extends BasePainter {
     if (a == null || b == null || a == b) {
       return false;
     }
-    DvTableType ta = DvTableReferenceSupport.effectiveTableType(a);
-    DvTableType tb = DvTableReferenceSupport.effectiveTableType(b);
+    DvTableType ta = DvLinkedTableSupport.effectiveTableType(a);
+    DvTableType tb = DvLinkedTableSupport.effectiveTableType(b);
     boolean hubSat =
         (ta == DvTableType.HUB && tb == DvTableType.SATELLITE)
             || (ta == DvTableType.SATELLITE && tb == DvTableType.HUB);
@@ -605,7 +623,10 @@ public class DataVaultModelPainter extends BasePainter {
         case LINK:
           gc.setBackground(IGc.EColor.YELLOW);
           break;
-        case TABLE_REFERENCE:
+        case REFERENCE:
+          gc.setBackground(IGc.EColor.BLUE);
+          break;
+        case LINKED_TABLE, TABLE_REFERENCE:
           gc.setBackground(IGc.EColor.LIGHTGRAY);
           break;
       }

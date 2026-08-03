@@ -121,7 +121,7 @@ Notes:
 
 - Surefire sets `HOP_AUDIT_FOLDER=/tmp/hop-data-vault-audit` — do not commit audit output.
 - Unit tests alone are **not** enough for DDL, SQL dialect, collation, Unicode, or load-path changes (see below).
-- After packaging, Docker-based tests need a Hop image that includes the plugin. Runners build `docker-hop:latest` on demand; force rebuild with `./scripts/rebuild-hop.sh`.
+- After packaging, Docker-based tests need a Hop image that includes the plugin. Runners call `ensure_hop_image` (in `scripts/hop-docker-lib.sh`): build when `docker-hop:latest` is missing, or when `target/hop-datavault-*.zip` is newer than the image. Force rebuild with `./scripts/rebuild-hop.sh`.
 
 ## Integration tests (multi-database)
 

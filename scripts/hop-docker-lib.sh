@@ -135,18 +135,102 @@ strip_carriage_returns() {
   printf '%s' "$1" | tr -d '\r'
 }
 
-ensure_hop_image() {
-  compose_file="${1:-${HOP_COMPOSE_FILE}}"
-  if docker image inspect "${HOP_IMAGE_NAME}" >/dev/null 2>&1; then
+# Newest host-side plugin assembly under target/ (signal that Maven package ran).
+latest_plugin_zip() {
+  # shellcheck disable=SC2012
+  ls -1t "${REPO_ROOT}"/target/hop-datavault-*.zip 2>/dev/null | head -n 1
+}
+
+# Epoch seconds for a file mtime (GNU or BSD stat).
+file_mtime_epoch() {
+  file="${1:?}"
+  if stat -c %Y "${file}" >/dev/null 2>&1; then
+    stat -c %Y "${file}"
+  elif stat -f %m "${file}" >/dev/null 2>&1; then
+    stat -f %m "${file}"
+  else
+    return 1
+  fi
+}
+
+# Epoch seconds for a local Docker image Created timestamp.
+docker_image_created_epoch() {
+  image="${1:?}"
+  created="$(docker image inspect "${image}" --format '{{.Created}}' 2>/dev/null)" || return 1
+  if [ -z "${created}" ]; then
+    return 1
+  fi
+  # GNU date (Linux / Git Bash); BusyBox date -d often works the same way.
+  date -d "${created}" +%s 2>/dev/null || return 1
+}
+
+# True when a host plugin zip exists and is newer than docker-hop:latest.
+hop_image_stale_vs_plugin_zip() {
+  if [ "${HOP_IMAGE_SKIP_FRESHNESS:-}" = "1" ] || [ "${HOP_IMAGE_SKIP_FRESHNESS:-}" = "true" ]; then
+    return 1
+  fi
+  if ! docker image inspect "${HOP_IMAGE_NAME}" >/dev/null 2>&1; then
+    return 1
+  fi
+  plugin_zip="$(latest_plugin_zip)"
+  if [ -z "${plugin_zip}" ] || [ ! -f "${plugin_zip}" ]; then
+    return 1
+  fi
+  zip_epoch="$(file_mtime_epoch "${plugin_zip}")" || return 1
+  image_epoch="$(docker_image_created_epoch "${HOP_IMAGE_NAME}")" || return 1
+  if [ "${zip_epoch}" -gt "${image_epoch}" ]; then
+    # Export paths for ensure_hop_image messaging (caller's subshell-safe via globals).
+    HOP_STALE_PLUGIN_ZIP="${plugin_zip}"
+    HOP_STALE_ZIP_EPOCH="${zip_epoch}"
+    HOP_STALE_IMAGE_EPOCH="${image_epoch}"
     return 0
   fi
-  echo "Building Hop docker image (${HOP_IMAGE_NAME})..."
+  return 1
+}
+
+format_epoch() {
+  epoch="${1:?}"
+  date -d "@${epoch}" '+%Y-%m-%d %H:%M:%S %z' 2>/dev/null || printf '%s\n' "${epoch}"
+}
+
+build_hop_image() {
+  compose_file="${1:-${HOP_COMPOSE_FILE}}"
   hop_image_version="$(strip_carriage_returns "${HOP_IMAGE_VERSION:-}")"
   if [ -n "${hop_image_version}" ]; then
     docker compose -f "${compose_file}" build --build-arg "HOP_IMAGE_VERSION=${hop_image_version}" hop
   else
     docker compose -f "${compose_file}" build hop
   fi
+}
+
+# Ensure docker-hop:latest exists and is at least as new as target/hop-datavault-*.zip.
+# Rebuilds when the image is missing or when a host plugin package is newer than the image
+# (common after "mvn package" without "./scripts/rebuild-hop.sh").
+# Set HOP_IMAGE_SKIP_FRESHNESS=1 to only build when the image is missing.
+ensure_hop_image() {
+  compose_file="${1:-${HOP_COMPOSE_FILE}}"
+  need_build=0
+  reason=""
+
+  if ! docker image inspect "${HOP_IMAGE_NAME}" >/dev/null 2>&1; then
+    need_build=1
+    reason="image missing"
+  elif hop_image_stale_vs_plugin_zip; then
+    need_build=1
+    zip_rel="${HOP_STALE_PLUGIN_ZIP#"${REPO_ROOT}"/}"
+    reason="plugin package newer than image"
+    echo "Hop image ${HOP_IMAGE_NAME} is older than the host plugin package:" >&2
+    echo "  zip:   ${zip_rel}  ($(format_epoch "${HOP_STALE_ZIP_EPOCH}"))" >&2
+    echo "  image: ${HOP_IMAGE_NAME}  ($(format_epoch "${HOP_STALE_IMAGE_EPOCH}"))" >&2
+    echo "Rebuilding so Docker tests pick up the latest plugin (or run: ./scripts/rebuild-hop.sh)." >&2
+  fi
+
+  if [ "${need_build}" -eq 0 ]; then
+    return 0
+  fi
+
+  echo "Building Hop docker image (${HOP_IMAGE_NAME}): ${reason}..."
+  build_hop_image "${compose_file}"
 }
 
 host_to_workspace_path() {

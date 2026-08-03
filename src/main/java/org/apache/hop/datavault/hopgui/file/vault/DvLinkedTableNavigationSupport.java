@@ -21,7 +21,7 @@ import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DvModelLoadSupport;
-import org.apache.hop.datavault.metadata.DvTableReference;
+import org.apache.hop.datavault.metadata.DvLinkedTable;
 import org.apache.hop.datavault.metadata.DvTableResolutionSupport;
 import org.apache.hop.datavault.metadata.IDvTable;
 import org.apache.hop.i18n.BaseMessages;
@@ -31,15 +31,15 @@ import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
 import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
 
 /** Navigates from a cross-model table reference to its source table in another or the same .hdv. */
-public final class DvTableReferenceNavigationSupport {
+public final class DvLinkedTableNavigationSupport {
 
-  private static final Class<?> PKG = DvTableReferenceNavigationSupport.class;
+  private static final Class<?> PKG = DvLinkedTableNavigationSupport.class;
 
-  private DvTableReferenceNavigationSupport() {}
+  private DvLinkedTableNavigationSupport() {}
 
   public static boolean canNavigateToSourceTable(
       DataVaultModel model,
-      DvTableReference reference,
+      DvLinkedTable reference,
       IVariables variables,
       IHopMetadataProvider metadataProvider) {
     if (model == null || reference == null || Utils.isEmpty(reference.getReferencedTableName())) {
@@ -57,17 +57,17 @@ public final class DvTableReferenceNavigationSupport {
       HopGui hopGui,
       DataVaultModel model,
       HopGuiVaultGraph currentGraph,
-      DvTableReference reference,
+      DvLinkedTable reference,
       IVariables variables,
       IHopMetadataProvider metadataProvider)
       throws HopException {
     if (hopGui == null) {
       throw new HopException(
-          BaseMessages.getString(PKG, "DvTableReferenceNavigationSupport.Error.MissingHopGui"));
+          BaseMessages.getString(PKG, "DvLinkedTableNavigationSupport.Error.MissingHopGui"));
     }
     if (model == null || reference == null) {
       throw new HopException(
-          BaseMessages.getString(PKG, "DvTableReferenceNavigationSupport.Error.MissingReference"));
+          BaseMessages.getString(PKG, "DvLinkedTableNavigationSupport.Error.MissingReference"));
     }
 
     SourceTableTarget target = resolveSourceTable(model, reference, variables, metadataProvider);
@@ -87,14 +87,14 @@ public final class DvTableReferenceNavigationSupport {
 
   private static SourceTableTarget resolveSourceTable(
       DataVaultModel model,
-      DvTableReference reference,
+      DvLinkedTable reference,
       IVariables variables,
       IHopMetadataProvider metadataProvider)
       throws HopException {
     String tableName = resolve(reference.getReferencedTableName(), variables);
     if (Utils.isEmpty(tableName)) {
       throw new HopException(
-          BaseMessages.getString(PKG, "DvTableReferenceNavigationSupport.Error.MissingTableName"));
+          BaseMessages.getString(PKG, "DvLinkedTableNavigationSupport.Error.MissingTableName"));
     }
 
     if (DvTableResolutionSupport.isExternalTableReference(reference)) {
@@ -108,11 +108,11 @@ public final class DvTableReferenceNavigationSupport {
               variables,
               metadataProvider);
       IDvTable referenced = externalModel.findTable(tableName);
-      if (referenced == null || referenced instanceof DvTableReference) {
+      if (referenced == null || referenced instanceof DvLinkedTable) {
         throw new HopException(
             BaseMessages.getString(
                 PKG,
-                "DvTableReferenceNavigationSupport.Error.TableNotFound",
+                "DvLinkedTableNavigationSupport.Error.TableNotFound",
                 tableName,
                 modelPath));
       }
@@ -121,7 +121,7 @@ public final class DvTableReferenceNavigationSupport {
         throw new HopException(
             BaseMessages.getString(
                 PKG,
-                "DvTableReferenceNavigationSupport.Error.TableTypeMismatch",
+                "DvLinkedTableNavigationSupport.Error.TableTypeMismatch",
                 tableName,
                 modelPath));
       }
@@ -129,16 +129,16 @@ public final class DvTableReferenceNavigationSupport {
     }
 
     IDvTable referenced = model.findTable(tableName);
-    if (referenced == null || referenced instanceof DvTableReference) {
+    if (referenced == null || referenced instanceof DvLinkedTable) {
       throw new HopException(
           BaseMessages.getString(
-              PKG, "DvTableReferenceNavigationSupport.Error.TableNotFoundInModel", tableName));
+              PKG, "DvLinkedTableNavigationSupport.Error.TableNotFoundInModel", tableName));
     }
     if (reference.getReferencedTableType() != null
         && referenced.getTableType() != reference.getReferencedTableType()) {
       throw new HopException(
           BaseMessages.getString(
-              PKG, "DvTableReferenceNavigationSupport.Error.TableTypeMismatchInModel", tableName));
+              PKG, "DvLinkedTableNavigationSupport.Error.TableTypeMismatchInModel", tableName));
     }
     return new SourceTableTarget(null, tableName, true);
   }
@@ -147,7 +147,7 @@ public final class DvTableReferenceNavigationSupport {
       HopGui hopGui, String modelPath, IVariables variables) throws HopException {
     if (Utils.isEmpty(modelPath)) {
       throw new HopException(
-          BaseMessages.getString(PKG, "DvTableReferenceNavigationSupport.Error.MissingModelPath"));
+          BaseMessages.getString(PKG, "DvLinkedTableNavigationSupport.Error.MissingModelPath"));
     }
 
     ExplorerPerspective explorer = HopGui.getExplorerPerspective();
@@ -159,7 +159,7 @@ public final class DvTableReferenceNavigationSupport {
     if (!(handler instanceof HopGuiVaultGraph graph)) {
       throw new HopException(
           BaseMessages.getString(
-              PKG, "DvTableReferenceNavigationSupport.Error.UnexpectedFileHandler"));
+              PKG, "DvLinkedTableNavigationSupport.Error.UnexpectedFileHandler"));
     }
     return graph;
   }

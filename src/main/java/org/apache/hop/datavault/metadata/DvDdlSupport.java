@@ -43,15 +43,24 @@ public final class DvDdlSupport {
   public static final String SQL_SERVER_UTF8_COLLATION = "Latin1_General_100_CI_AS_SC_UTF8";
 
   /**
-   * Multiplier applied to Hop string lengths when generating SQL Server {@code VARCHAR}/{@code
-   * CHAR} with a UTF-8 collation.
+   * Multiplier applied to Hop string lengths when generating SQL Server <em>vault/EDW</em> {@code
+   * VARCHAR}/{@code CHAR} with a UTF-8 collation.
    *
-   * <p>Source metadata (and Hop {@link IValueMeta} lengths) are character-oriented — matching
-   * {@code NVARCHAR(n)} where {@code n} is in UTF-16 code units. SQL Server {@code VARCHAR(n)} with
-   * a UTF-8 collation measures {@code n} in <em>bytes</em>. Multi-byte characters that fit in
-   * {@code NVARCHAR(50)} therefore overflow {@code VARCHAR(50)} (see issue #91). A factor of 3 is
-   * the worst-case UTF-8 size per BMP code unit that fits in NVARCHAR; supplementary characters
-   * need at most 2 bytes per code unit in UTF-8 relative to their NVARCHAR footprint.
+   * <p><b>Contract (do not drift):</b>
+   *
+   * <ul>
+   *   <li>Model / catalog / {@link IValueMeta} lengths are <em>character</em>-oriented (same units
+   *       as {@code NVARCHAR(n)}).
+   *   <li>Vault SQL Server DDL only: character length {@code n} → physical {@code VARCHAR(n×3)}
+   *       (or {@code VARCHAR(MAX)} when over 8000) via {@link #utf8ByteLengthForCharacterLength}.
+   *   <li>Model-check overflow must use {@link #effectiveStringCapacity}, not raw model length.
+   *   <li>Catalog / CRM staging CREATE must <em>not</em> apply this expansion (character lengths
+   *       stay as modeled).
+   * </ul>
+   *
+   * <p>SQL Server {@code VARCHAR(n)} with a UTF-8 collation measures {@code n} in <em>bytes</em>.
+   * Multi-byte content that fits in {@code NVARCHAR(50)} therefore overflows {@code VARCHAR(50)}
+   * (issue #91). Factor 3 is the worst-case UTF-8 size per BMP code unit.
    */
   public static final int SQL_SERVER_UTF8_LENGTH_FACTOR = 3;
 
@@ -372,6 +381,32 @@ public final class DvDdlSupport {
       List<String> primaryKeyFieldNames,
       List<ForeignKeySpec> foreignKeys,
       boolean semicolon) {
+    return buildCreateTableStatement(
+        databaseMeta,
+        variables,
+        tableName,
+        fields,
+        shardKeyColumns,
+        primaryKeyFieldNames,
+        foreignKeys,
+        semicolon,
+        true);
+  }
+
+  /**
+   * @param applySqlServerUtf8EdwPolicy vault/EDW {@code true} (UTF-8 COLLATE + length ×3); catalog
+   *     / CRM staging {@code false} (Hop native types, character lengths preserved)
+   */
+  public static String buildCreateTableStatement(
+      DatabaseMeta databaseMeta,
+      IVariables variables,
+      String tableName,
+      IRowMeta fields,
+      String[] shardKeyColumns,
+      List<String> primaryKeyFieldNames,
+      List<ForeignKeySpec> foreignKeys,
+      boolean semicolon,
+      boolean applySqlServerUtf8EdwPolicy) {
     if (databaseMeta == null || Utils.isEmpty(tableName) || fields == null || fields.isEmpty()) {
       return "";
     }
@@ -389,7 +424,7 @@ public final class DvDdlSupport {
       IValueMeta valueMeta = fields.getValueMeta(i);
       // Use a table-level PRIMARY KEY clause so JDBC discovery finds the constraint and
       // PostgreSQL does not emit BIGSERIAL for the first key column.
-      ddl.append(getFieldDefinition(databaseMeta, valueMeta));
+      ddl.append(getFieldDefinition(databaseMeta, valueMeta, applySqlServerUtf8EdwPolicy));
     }
 
     if (supportsPrimaryKeyConstraints(databaseMeta)) {
@@ -473,15 +508,31 @@ public final class DvDdlSupport {
   }
 
   /**
-   * Field definition with SQL Server UTF-8 collation on ANSI string types. Binary/numeric/date
-   * columns and already-collated definitions are left unchanged.
+   * Field definition with SQL Server vault/EDW UTF-8 policy (collation + length ×3) on ANSI string
+   * types. Binary/numeric/date columns and already-collated definitions are left unchanged.
+   *
+   * <p>For catalog/CRM staging tables use {@link #getFieldDefinition(DatabaseMeta, IValueMeta,
+   * boolean)} with {@code applySqlServerUtf8EdwPolicy=false} so character lengths are not expanded.
    */
   public static String getFieldDefinition(DatabaseMeta databaseMeta, IValueMeta valueMeta) {
+    return getFieldDefinition(databaseMeta, valueMeta, true);
+  }
+
+  /**
+   * @param applySqlServerUtf8EdwPolicy when {@code true} (vault/EDW), apply UTF-8 COLLATE and
+   *     length expansion; when {@code false} (catalog/CRM staging), use Hop's native field
+   *     definition only so modeled character lengths stay as-is
+   */
+  public static String getFieldDefinition(
+      DatabaseMeta databaseMeta, IValueMeta valueMeta, boolean applySqlServerUtf8EdwPolicy) {
     if (databaseMeta == null || valueMeta == null) {
       return "";
     }
     // addFieldname=true matches Database#getCreateTableStatement field lines.
     String definition = databaseMeta.getFieldDefinition(valueMeta, null, null, false);
+    if (!applySqlServerUtf8EdwPolicy) {
+      return definition;
+    }
     return enrichSqlServerFieldDefinition(databaseMeta, definition);
   }
 
@@ -575,6 +626,9 @@ public final class DvDdlSupport {
    * minimum UTF-8 byte length that can hold the same Unicode content on SQL Server {@code
    * VARCHAR}/{@code CHAR}. Returns a value greater than {@link
    * #SQL_SERVER_MAX_NON_MAX_STRING_LENGTH} when {@code VARCHAR(MAX)} should be used.
+   *
+   * <p>Used by vault DDL rewrite <em>and</em> by model-check capacity via {@link
+   * #effectiveStringCapacity}. Keep those call sites in sync.
    */
   public static int utf8ByteLengthForCharacterLength(int characterLength) {
     if (characterLength <= 0) {
@@ -585,5 +639,23 @@ public final class DvDdlSupport {
       return Integer.MAX_VALUE;
     }
     return (int) expanded;
+  }
+
+  /**
+   * Storage capacity for a model/catalog string length on the given database.
+   *
+   * <p>On SQL Server vault targets this is the UTF-8 byte capacity ({@code modelLength × {@link
+   * #SQL_SERVER_UTF8_LENGTH_FACTOR}}); elsewhere it is the character length as modeled. Use this
+   * whenever comparing a physical source length to a model target length so validation matches
+   * generated vault DDL.
+   */
+  public static int effectiveStringCapacity(DatabaseMeta databaseMeta, int modelCharacterLength) {
+    if (modelCharacterLength <= 0) {
+      return modelCharacterLength;
+    }
+    if (DvSqlOrderBySupport.isSqlServer(databaseMeta)) {
+      return utf8ByteLengthForCharacterLength(modelCharacterLength);
+    }
+    return modelCharacterLength;
   }
 }

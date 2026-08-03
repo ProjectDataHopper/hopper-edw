@@ -32,8 +32,9 @@ import org.apache.hop.datavault.metadata.DvHub;
 import org.apache.hop.datavault.metadata.DvLink;
 import org.apache.hop.datavault.metadata.DvNote;
 import org.apache.hop.datavault.metadata.DvNoteType;
+import org.apache.hop.datavault.metadata.DvReferenceTable;
 import org.apache.hop.datavault.metadata.DvSatellite;
-import org.apache.hop.datavault.metadata.DvTableReference;
+import org.apache.hop.datavault.metadata.DvLinkedTable;
 import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.datavault.metadata.IDvTable;
 import org.apache.hop.i18n.BaseMessages;
@@ -208,14 +209,17 @@ public class HopGuiVaultClipboardDelegate {
     if (Utils.isEmpty(tableTypeName)) {
       return null;
     }
-    DvTableType tableType = DvTableType.valueOf(tableTypeName);
+    // Dual-read: legacy TABLE_REFERENCE → LINKED_TABLE
+    DvTableType tableType = DvTableType.parsePersisted(tableTypeName);
     return switch (tableType) {
       case HUB -> XmlMetadataUtil.deSerializeFromXml(tableNode, DvHub.class, metadataProvider);
       case LINK -> XmlMetadataUtil.deSerializeFromXml(tableNode, DvLink.class, metadataProvider);
       case SATELLITE ->
           XmlMetadataUtil.deSerializeFromXml(tableNode, DvSatellite.class, metadataProvider);
-      case TABLE_REFERENCE ->
-          XmlMetadataUtil.deSerializeFromXml(tableNode, DvTableReference.class, metadataProvider);
+      case REFERENCE ->
+          XmlMetadataUtil.deSerializeFromXml(tableNode, DvReferenceTable.class, metadataProvider);
+      case LINKED_TABLE, TABLE_REFERENCE ->
+          XmlMetadataUtil.deSerializeFromXml(tableNode, DvLinkedTable.class, metadataProvider);
     };
   }
 

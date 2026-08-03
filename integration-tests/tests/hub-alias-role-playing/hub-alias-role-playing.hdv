@@ -96,7 +96,7 @@ limitations under the License.
       <hashKeyFieldName>to_party_hk</hashKeyFieldName>
       <tableName>hub_party_hrp</tableName>
       <description>To-party role alias of hub_party_hrp (second participation on the transfer link)</description>
-      <tableType>TABLE_REFERENCE</tableType>
+      <tableType>LINKED_TABLE</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
       <xloc>320</xloc>

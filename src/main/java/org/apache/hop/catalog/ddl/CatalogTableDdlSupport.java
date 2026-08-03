@@ -118,6 +118,7 @@ public final class CatalogTableDdlSupport {
     List<String> primaryKeyFieldNames =
         SourceFieldPrimaryKeySupport.primaryKeyFieldNames(sourceFields);
 
+    // Catalog/CRM staging: do not apply vault SQL Server UTF-8 length ×3 (keep character lengths).
     return DvDdlSupport.buildCreateTableStatement(
         databaseMeta,
         variables,
@@ -125,7 +126,9 @@ public final class CatalogTableDdlSupport {
         rowMeta,
         null,
         primaryKeyFieldNames,
-        appendSemicolon);
+        List.of(),
+        appendSemicolon,
+        false);
   }
 
   public static String generateDropTableDdl(

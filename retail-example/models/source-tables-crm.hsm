@@ -990,8 +990,8 @@ See docs/source-modeler-overview.adoc.
       <noteType>INFORMATION</noteType>
       <xloc>16</xloc>
       <yloc>16</yloc>
-      <width>544</width>
-      <height>160</height>
+      <width>528</width>
+      <height>144</height>
     </note>
   </notes>
   <name>source-tables-crm</name>

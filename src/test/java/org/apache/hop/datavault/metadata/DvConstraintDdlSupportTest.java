@@ -71,6 +71,23 @@ class DvConstraintDdlSupportTest {
   }
 
   @Test
+  void referencePrimaryKeyIsNaturalKeysWhenEnabled() throws HopException {
+    DataVaultModel model = new DataVaultModel();
+    DataVaultConfiguration config = new DataVaultConfiguration();
+    config.setGeneratePrimaryKeys(true);
+    DvReferenceTable ref = new DvReferenceTable("ref_country");
+    BusinessKey code = new BusinessKey("code");
+    BusinessKey cdc = new BusinessKey("x_src_cdc_ts");
+    ref.setNaturalKeys(List.of(code, cdc));
+
+    List<String> pk =
+        DvConstraintDdlSupport.resolveDvPrimaryKeyColumns(
+            ref, model, config, new Variables(), null, null, false);
+
+    assertEquals(List.of("code", "x_src_cdc_ts"), pk);
+  }
+
+  @Test
   void foreignKeyFlagForcesParentPrimaryKeyWithoutChildPk() throws HopException {
     DataVaultModel model = new DataVaultModel();
     DataVaultConfiguration config = new DataVaultConfiguration();

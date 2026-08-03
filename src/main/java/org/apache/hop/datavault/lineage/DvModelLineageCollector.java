@@ -35,6 +35,7 @@ import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DependentChildKey;
 import org.apache.hop.datavault.metadata.DvHub;
 import org.apache.hop.datavault.metadata.DvLink;
+import org.apache.hop.datavault.metadata.DvReferenceTable;
 import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.datavault.metadata.IDvTable;
@@ -92,7 +93,10 @@ public final class DvModelLineageCollector {
             case SATELLITE ->
                 collectSatellite(
                     (DvSatellite) table, model, config, variables, targetDb, sourcesNamespace);
-            case TABLE_REFERENCE -> collectGenericTable(table, model, config, variables, targetDb);
+            case REFERENCE ->
+                collectReference(
+                    (DvReferenceTable) table, model, config, variables, targetDb, sourcesNamespace);
+            case LINKED_TABLE, TABLE_REFERENCE -> collectGenericTable(table, model, config, variables, targetDb);
           };
       if (tableLineage != null) {
         snapshot.addTable(tableLineage);
@@ -524,6 +528,84 @@ public final class DvModelLineageCollector {
     }
 
     addStandardColumns(table, satellite, config, variables);
+    return table;
+  }
+
+  private static TableLineage collectReference(
+      DvReferenceTable reference,
+      DataVaultModel model,
+      DataVaultConfiguration config,
+      IVariables variables,
+      String targetDb,
+      String sourcesNamespace) {
+    TableLineage table =
+        baseTable(reference, model, variables, targetDb, DvTableType.REFERENCE.name());
+    addNamingReasons(table, reference);
+
+    List<String> recordSources =
+        reference.getRecordSources() != null ? reference.getRecordSources() : List.of();
+    for (String sourceRef : recordSources) {
+      if (Utils.isEmpty(sourceRef)) {
+        continue;
+      }
+      String sourceName = resolve(sourceRef, variables);
+      table.addSource(dvSourceRef(sourceName, sourcesNamespace, TableSourceRole.RECORD_SOURCE));
+      table.addReason(LineageReasonFactory.feedAttached(sourceName, "record source"));
+    }
+
+    if (reference.getNaturalKeys() != null) {
+      for (BusinessKey key : reference.getNaturalKeys()) {
+        if (key == null || Utils.isEmpty(key.getName())) {
+          continue;
+        }
+        String targetName = resolve(key.getName(), variables);
+        FieldLineage field = new FieldLineage(targetName);
+        field.setTechnical(false);
+        field.setDataType(key.getDataType());
+        field.setLength(key.getLength());
+        field.setPrecision(key.getPrecision());
+        String sourceName = resolve(key.getRecordSourceName(), variables);
+        String sourceField =
+            !Utils.isEmpty(key.getSourceFieldName())
+                ? resolve(key.getSourceFieldName(), variables)
+                : targetName;
+        FieldContribution contribution = new FieldContribution();
+        contribution.setSourceKind(TableSourceKind.DV_SOURCE);
+        contribution.setSourceName(sourceName);
+        contribution.setSourceCatalogKey(catalogKey(sourcesNamespace, sourceName));
+        contribution.setSourceFieldName(sourceField);
+        contribution.setTransform(
+            targetName.equals(sourceField) ? FieldTransform.IDENTITY : FieldTransform.RENAME);
+        contribution.addReason(
+            LineageReasonFactory.userExplicitMapping(targetName, sourceName, sourceField));
+        field.addContribution(contribution);
+        table.addField(field);
+      }
+    }
+
+    if (reference.getAttributes() != null) {
+      for (SatelliteAttribute attr : reference.getAttributes()) {
+        if (attr == null || Utils.isEmpty(attr.getName())) {
+          continue;
+        }
+        String targetName = resolve(attr.getName(), variables);
+        FieldLineage field = new FieldLineage(targetName);
+        field.setTechnical(false);
+        field.setDataType(attr.getDataType());
+        field.setLength(attr.getLength());
+        field.setPrecision(attr.getPrecision());
+        FieldContribution contribution = new FieldContribution();
+        contribution.setSourceKind(TableSourceKind.DV_SOURCE);
+        contribution.setSourceFieldName(targetName);
+        contribution.setTransform(FieldTransform.IDENTITY);
+        contribution.addReason(
+            LineageReasonFactory.userExplicitMapping(targetName, "", targetName));
+        field.addContribution(contribution);
+        table.addField(field);
+      }
+    }
+
+    addStandardColumns(table, reference, config, variables);
     return table;
   }
 

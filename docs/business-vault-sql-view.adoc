@@ -117,7 +117,7 @@ resolves to the BV table even if the catalog also has `retail-360.hdv`.
 
 1. If multiple sources exist, pick **Linked: …** or a **catalog-registered** DV model (`basename → path`).
 2. Then pick an unused table of that type from the chosen model.
-3. External aliases store `referencedModelFilename` and show `modelBasename (ref)` on the card.
+3. External aliases store `referencedModelFilename` and show `modelBasename (linked)` on the card.
 4. Clicking the alias name opens that model file and selects the table (not only the config-linked path).
 
 Parse/sync of SQL `ref()` into external models uses the same alias field so canvas and SQL stay aligned.

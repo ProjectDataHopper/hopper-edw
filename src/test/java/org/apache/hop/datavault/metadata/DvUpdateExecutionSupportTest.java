@@ -26,9 +26,10 @@ import org.junit.jupiter.api.Test;
 class DvUpdateExecutionSupportTest {
 
   @Test
-  void freePipelinePhasesRunHubsThenLinksThenSatellites() {
+  void freePipelinePhasesRunReferencesThenHubsLinksSatellites() {
     DvUpdateExecutionSupport.FreePipelineBuckets buckets =
         new DvUpdateExecutionSupport.FreePipelineBuckets();
+    PipelineMeta ref = named("ref-a");
     PipelineMeta hub = named("hub-a");
     PipelineMeta link = named("link-b");
     PipelineMeta sat = named("sat-c");
@@ -37,18 +38,33 @@ class DvUpdateExecutionSupportTest {
     buckets.add(DvTableType.SATELLITE, List.of(sat));
     buckets.add(DvTableType.LINK, List.of(link));
     buckets.add(DvTableType.HUB, List.of(hub));
+    buckets.add(DvTableType.REFERENCE, List.of(ref));
 
     List<List<PipelineMeta>> phases = buckets.phases();
-    assertEquals(3, phases.size());
-    assertEquals("hub-a", phases.get(0).get(0).getName());
-    assertEquals("link-b", phases.get(1).get(0).getName());
-    assertEquals("sat-c", phases.get(2).get(0).getName());
+    assertEquals(4, phases.size());
+    assertEquals("ref-a", phases.get(0).get(0).getName());
+    assertEquals("hub-a", phases.get(1).get(0).getName());
+    assertEquals("link-b", phases.get(2).get(0).getName());
+    assertEquals("sat-c", phases.get(3).get(0).getName());
 
     List<PipelineMeta> flat = buckets.flattenedInDependencyOrder();
     assertEquals(
-        List.of("hub-a", "link-b", "sat-c"), flat.stream().map(PipelineMeta::getName).toList());
+        List.of("ref-a", "hub-a", "link-b", "sat-c"),
+        flat.stream().map(PipelineMeta::getName).toList());
     assertTrue(!buckets.isEmpty());
-    assertEquals(3, buckets.size());
+    assertEquals(4, buckets.size());
+  }
+
+  @Test
+  void orderTablesPutsReferencesFirst() {
+    DvHub hub = new DvHub("hub_customer");
+    DvReferenceTable ref = new DvReferenceTable("ref_country");
+    DvSatellite sat = new DvSatellite("sat_customer");
+    List<IDvTable> ordered =
+        DvUpdateExecutionSupport.orderTablesForPipelineExecution(List.of(sat, hub, ref));
+    assertEquals(
+        List.of("ref_country", "hub_customer", "sat_customer"),
+        ordered.stream().map(IDvTable::getName).toList());
   }
 
   private static PipelineMeta named(String name) {

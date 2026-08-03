@@ -46,6 +46,7 @@ integration-tests/
     ├── link-satellite/
     ├── link-satellite-driving-key/
     ├── load-end-date/
+    ├── reference-table/
     ├── status-tracking/
     ├── multi-source-hub/
     ├── multi-satellite-bv/
@@ -67,6 +68,7 @@ integration-tests/
 | `tests/link-satellite/link-satellite.hdv` | Hubs + link + link satellite (customer–product relationship attributes) |
 | `tests/link-satellite-driving-key/link-satellite-driving-key.hdv` | Hubs + link + multi-active link satellite (`line_number` driving key) |
 | `tests/load-end-date/load-end-date.hdv` | Hub + standard satellite with load end date (`x_load_end_ts`) |
+| `tests/reference-table/reference-table.hdv` | Physical **Reference table** (`ref_country`) FULL_REPLACE two-wave load (issue #110) |
 
 `project-config.json` sets `metadataBaseFolder`, `dataSetsCsvFolder`, and `unitTestsBasePath` relative to `${PROJECT_HOME}`.
 
@@ -74,7 +76,7 @@ integration-tests/
 
 ### Command line (Docker)
 
-Both test scripts use the same Hop Docker image (`docker-hop:latest`). The image is built automatically on first use and reused on later runs. Shared logic lives in `docker/hop-docker-lib.sh`.
+Both test scripts use the same Hop Docker image (`docker-hop:latest`). The image is built automatically on first use, and **rebuilt when `target/hop-datavault-*.zip` is newer than the image** (so a local `mvn package` without `./scripts/rebuild-hop.sh` does not leave Docker tests on a stale plugin). Shared logic lives in `scripts/hop-docker-lib.sh`.
 
 **`run-postgres.sh`** — start a local PostgreSQL 16 container on port **54320** (`test` / `test` / `test`). Required before `run-tests.sh`.
 

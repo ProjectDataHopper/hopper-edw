@@ -85,11 +85,12 @@ import org.apache.hop.datavault.metadata.DvModelCheckOptions;
 import org.apache.hop.datavault.metadata.DvModelLoadSupport;
 import org.apache.hop.datavault.metadata.DvNote;
 import org.apache.hop.datavault.metadata.DvNoteType;
+import org.apache.hop.datavault.metadata.DvReferenceTable;
 import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.DvSpecialRecordSupport;
 import org.apache.hop.datavault.metadata.DvTableBase;
-import org.apache.hop.datavault.metadata.DvTableReference;
-import org.apache.hop.datavault.metadata.DvTableReferenceSupport;
+import org.apache.hop.datavault.metadata.DvLinkedTable;
+import org.apache.hop.datavault.metadata.DvLinkedTableSupport;
 import org.apache.hop.datavault.metadata.DvTableResolutionSupport;
 import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.datavault.metadata.DvTargetLoadMode;
@@ -600,12 +601,12 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     navigateToTable(tableName);
   }
 
-  private void navigateToReferencedTable(DvTableReference reference) {
+  private void navigateToReferencedTable(DvLinkedTable reference) {
     if (reference == null) {
       return;
     }
     try {
-      DvTableReferenceNavigationSupport.navigateToSourceTable(
+      DvLinkedTableNavigationSupport.navigateToSourceTable(
           hopGui,
           model,
           this,
@@ -1203,8 +1204,8 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
         box.setMessage(
             BaseMessages.getString(
                 PKG,
-                DvIntegrationSupport.isTableReference(table)
-                    ? "HopGuiVaultGraph.DebugPipeline.TableReference"
+                DvIntegrationSupport.isLinkedTable(table)
+                    ? "HopGuiVaultGraph.DebugPipeline.LinkedTable"
                     : "HopGuiVaultGraph.DebugPipeline.ExternalTable",
                 tableName));
         box.open();
@@ -1448,6 +1449,32 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     realGraph.setChanged();
   }
 
+  @GuiContextAction(
+      id = "vault-graph-add-reference",
+      parentId = HopGuiVaultContext.CONTEXT_ID,
+      type = GuiActionType.Create,
+      name = "Add Reference table",
+      tooltip =
+          "Add a natural-key reference/code table (no hub hash key) at the click location",
+      image = "datavault-reference.svg",
+      keywords = {"reference", "ref", "code", "lookup", "catalog"},
+      category = "Data Vault",
+      categoryOrder = "4")
+  public void addReferenceTable(HopGuiVaultContext context) {
+    Point click = context.getClick();
+    HopGuiVaultGraph realGraph = context.getVaultGraph();
+    DataVaultModel realModel = context.getModel();
+    if (realModel == null) {
+      return;
+    }
+    realGraph.markUndoPoint();
+    DvReferenceTable reference =
+        new DvReferenceTable(getUniqueTableNameFromModel("Reference", realModel));
+    PropsUi.setLocation(reference, click != null ? click.x : 50, click != null ? click.y : 50);
+    realModel.getTables().add(reference);
+    realGraph.setChanged();
+  }
+
   private void addTableReferenceAtClick(DvTableType tableType, Point click) {
     if (model == null || tableType == null) {
       return;
@@ -1478,22 +1505,22 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
               getVariables(),
               hopGui != null ? hopGui.getMetadataProvider() : null);
       List<String> choices =
-          DvTableReferenceSupport.listAvailableTableNames(externalModel, model, tableType);
+          DvLinkedTableSupport.listAvailableTableNames(externalModel, model, tableType);
       if (choices.isEmpty()) {
         new ErrorDialog(
             hopGui.getShell(),
-            BaseMessages.getString(PKG, "HopGuiVaultGraph.AddTableReference.Error.Title"),
+            BaseMessages.getString(PKG, "HopGuiVaultGraph.AddLinkedTable.Error.Title"),
             BaseMessages.getString(
-                PKG, "HopGuiVaultGraph.AddTableReference.Error.NoTables", tableType.name()),
+                PKG, "HopGuiVaultGraph.AddLinkedTable.Error.NoTables", tableType.name()),
             null);
         return;
       }
       String title =
           BaseMessages.getString(
-              PKG, "HopGuiVaultGraph.AddTableReference.Dialog.Title", tableType.name());
+              PKG, "HopGuiVaultGraph.AddLinkedTable.Dialog.Title", tableType.name());
       String message =
           BaseMessages.getString(
-              PKG, "HopGuiVaultGraph.AddTableReference.Dialog.Message", tableType.name());
+              PKG, "HopGuiVaultGraph.AddLinkedTable.Dialog.Message", tableType.name());
       EnterSelectionDialog dialog =
           new EnterSelectionDialog(getShell(), choices.toArray(new String[0]), title, message);
       String selectedName = dialog.open();
@@ -1506,8 +1533,8 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       }
       int x = click != null ? click.x : 50;
       int y = click != null ? click.y : 50;
-      DvTableReference reference =
-          DvTableReferenceSupport.createReference(externalTable, storedPath, new Point(x, y));
+      DvLinkedTable reference =
+          DvLinkedTableSupport.createReference(externalTable, storedPath, new Point(x, y));
       if (reference == null) {
         return;
       }
@@ -1517,7 +1544,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     } catch (HopException e) {
       new ErrorDialog(
           hopGui.getShell(),
-          BaseMessages.getString(PKG, "HopGuiVaultGraph.AddTableReference.Error.Title"),
+          BaseMessages.getString(PKG, "HopGuiVaultGraph.AddLinkedTable.Error.Title"),
           e.getMessage(),
           e);
     }
@@ -1568,7 +1595,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       return;
     }
     List<String> choices =
-        DvTableReferenceSupport.listAvailableTableNames(model, model, DvTableType.HUB, true);
+        DvLinkedTableSupport.listAvailableTableNames(model, model, DvTableType.HUB, true);
     if (choices.isEmpty()) {
       new ErrorDialog(
           hopGui.getShell(),
@@ -1628,8 +1655,8 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     }
     int x = click != null ? click.x : 50;
     int y = click != null ? click.y : 50;
-    DvTableReference alias =
-        DvTableReferenceSupport.createAlias(aliasName, target, null, roleHash, new Point(x, y));
+    DvLinkedTable alias =
+        DvLinkedTableSupport.createAlias(aliasName, target, null, roleHash, new Point(x, y));
     if (alias == null) {
       return;
     }
@@ -1833,7 +1860,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     IDvTable table = context.getTable();
     HopGuiVaultGraph graph = context.getVaultGraph();
     DataVaultModel dvModel = context.getModel();
-    if (!(table instanceof DvTableReference reference) || graph == null || dvModel == null) {
+    if (!(table instanceof DvLinkedTable reference) || graph == null || dvModel == null) {
       return;
     }
     graph.navigateToReferencedTable(reference);
@@ -1844,14 +1871,14 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       String contextActionId, HopGuiVaultTableContext context) {
     if (ACTION_ID_GO_TO_REFERENCED_TABLE.equals(contextActionId)) {
       IDvTable table = context.getTable();
-      if (!(table instanceof DvTableReference reference)) {
+      if (!(table instanceof DvLinkedTable reference)) {
         return false;
       }
-      return DvTableReferenceNavigationSupport.canNavigateToSourceTable(
+      return DvLinkedTableNavigationSupport.canNavigateToSourceTable(
           context.getModel(), reference, getVariables(), hopGui.getMetadataProvider());
     }
     IDvTable table = context.getTable();
-    if (table != null && table.getTableType() == DvTableType.TABLE_REFERENCE) {
+    if (table != null && table.getTableType() == DvTableType.LINKED_TABLE) {
       if ("vault-graph-edit-table".equals(contextActionId)
           || "vault-graph-show-table-pipeline".equals(contextActionId)) {
         return false;
@@ -2161,6 +2188,11 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     } else if (table.getTableType() == DvTableType.LINK) {
       DvLinkDialog dialog = new DvLinkDialog(parentShell, hopGui, (DvLink) table, model);
       modelChanged = dialog.open();
+    } else if (table.getTableType() == DvTableType.REFERENCE
+        && table instanceof DvReferenceTable referenceTable) {
+      DvReferenceTableDialog dialog =
+          new DvReferenceTableDialog(parentShell, hopGui, model, referenceTable);
+      modelChanged = dialog.open();
     }
     if (modelChanged) {
       commitDialogUndo(beforeChange);
@@ -2214,7 +2246,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
   }
 
   private static DvTableType effectiveRelationshipType(IDvTable table) {
-    return DvTableReferenceSupport.effectiveTableType(table);
+    return DvLinkedTableSupport.effectiveTableType(table);
   }
 
   private boolean isValidRelationshipPair(IDvTable a, IDvTable b) {
@@ -3125,7 +3157,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
 
       if (e.button == 1 && AreaOwner.AreaType.TRANSFORM_NAME == areaType) {
         avoidContextDialog = true;
-        if (tableHit instanceof DvTableReference reference) {
+        if (tableHit instanceof DvLinkedTable reference) {
           navigateToReferencedTable(reference);
         } else {
           editTable(tableHit);
@@ -3392,14 +3424,14 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
 
     private boolean mouseMoveOverTableName(AreaOwner areaOwner, boolean doRedraw) {
       String newOver = null;
-      DvTableReference referenceUnderName = null;
+      DvLinkedTable referenceUnderName = null;
       if (areaOwner != null
           && areaOwner.getAreaType() == AreaOwner.AreaType.TRANSFORM_NAME
           && startRelationshipTable == null
           && !dragSelection
           && selectionRegion == null) {
         newOver = (String) areaOwner.getOwner();
-        if (areaOwner.getParent() instanceof DvTableReference reference) {
+        if (areaOwner.getParent() instanceof DvLinkedTable reference) {
           referenceUnderName = reference;
         }
       }
@@ -3410,7 +3442,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       mouseOverTableName = newOver;
       Cursor hand = getDisplay().getSystemCursor(SWT.CURSOR_HAND);
       if (referenceUnderName != null
-          && DvTableReferenceNavigationSupport.canNavigateToSourceTable(
+          && DvLinkedTableNavigationSupport.canNavigateToSourceTable(
               model, referenceUnderName, getVariables(), hopGui.getMetadataProvider())) {
         if (!Objects.equals(getCanvasCursor(), hand)) {
           setCanvasCursor(hand);
@@ -3419,7 +3451,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
         String tip =
             BaseMessages.getString(
                 PKG,
-                "HopGuiVaultGraph.NavigateTableReference.Tooltip",
+                "HopGuiVaultGraph.NavigateLinkedTable.Tooltip",
                 referenceUnderName.getReferencedTableName());
         if (!Objects.equals(canvas.getToolTipText(), tip)) {
           canvas.setToolTipText(tip);

@@ -51,8 +51,8 @@ class DvHubAliasRolePlayingTest {
     hub.setTableName("hub_sales_rep");
     hub.setHashKeyFieldName("sales_rep_hk");
 
-    DvTableReference alias =
-        DvTableReferenceSupport.createAlias(
+    DvLinkedTable alias =
+        DvLinkedTableSupport.createAlias(
             "hub_secondary_rep", hub, null, null, new Point(10, 10));
 
     assertNotNull(alias);
@@ -68,9 +68,9 @@ class DvHubAliasRolePlayingTest {
   void listAvailableAllowsSameModelHubsWhenFlagSet() {
     DataVaultModel model = buildSalesRepModel();
     List<String> forCrossModel =
-        DvTableReferenceSupport.listAvailableTableNames(model, model, DvTableType.HUB, false);
+        DvLinkedTableSupport.listAvailableTableNames(model, model, DvTableType.HUB, false);
     List<String> forAlias =
-        DvTableReferenceSupport.listAvailableTableNames(model, model, DvTableType.HUB, true);
+        DvLinkedTableSupport.listAvailableTableNames(model, model, DvTableType.HUB, true);
 
     // Physical hub already on canvas: classic cross-model picker excludes it.
     assertFalse(forCrossModel.contains("hub_sales_rep"));
@@ -129,7 +129,7 @@ class DvHubAliasRolePlayingTest {
   void linkCheckFailsOnDuplicateRoleHashColumns() {
     DataVaultModel model = buildSalesRepModel();
     // Break secondary alias so it collides with the natural hub hash column.
-    DvTableReference secondary = (DvTableReference) model.findTable("hub_secondary_rep");
+    DvLinkedTable secondary = (DvLinkedTable) model.findTable("hub_secondary_rep");
     secondary.setHashKeyFieldName("sales_rep_hk");
 
     DvLink link = (DvLink) model.findTable("lnk_order_rep");
@@ -148,9 +148,9 @@ class DvHubAliasRolePlayingTest {
   @Test
   void sameModelAliasValidationPasses() {
     DataVaultModel model = buildSalesRepModel();
-    DvTableReference secondary = (DvTableReference) model.findTable("hub_secondary_rep");
+    DvLinkedTable secondary = (DvLinkedTable) model.findTable("hub_secondary_rep");
     List<ICheckResult> remarks = new ArrayList<>();
-    DvReferenceValidationSupport.validateTableReference(
+    DvLinkedTableValidationSupport.validateLinkedTable(
         remarks, secondary, model, null, new Variables());
     assertFalse(
         remarks.stream().anyMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_ERROR),
@@ -196,8 +196,8 @@ class DvHubAliasRolePlayingTest {
     order.getBusinessKeys().add(orderBk);
     model.getTables().add(order);
 
-    DvTableReference secondary =
-        DvTableReferenceSupport.createAlias(
+    DvLinkedTable secondary =
+        DvLinkedTableSupport.createAlias(
             "hub_secondary_rep", salesRep, null, "secondary_rep_hk", new Point(100, 200));
     model.getTables().add(secondary);
 

@@ -44,8 +44,16 @@ limitations under the License.
     <recordSourceField>x_record_source</recordSourceField>
     <recordSourceFieldLength>100</recordSourceFieldLength>
     <useLoadEndDate>N</useLoadEndDate>
+    <generatePrimaryKeys>N</generatePrimaryKeys>
+    <generateForeignKeys>N</generateForeignKeys>
     <targetTableBatchSize>1000</targetTableBatchSize>
     <targetTableParallelCopies>${OUTPUT_COPIES}</targetTableParallelCopies>
+    <target_load_mode>Table Output</target_load_mode>
+    <bulkLoadStagingFolder>${java.io.tmpdir}/dv2/bulk/</bulkLoadStagingFolder>
+    <bulkLoadDelimiter>,</bulkLoadDelimiter>
+    <bulkLoadEnclosure>"</bulkLoadEnclosure>
+    <bulkLoadEncoding>UTF-8</bulkLoadEncoding>
+    <bulkLoadLocalFileRequired>N</bulkLoadLocalFileRequired>
     <sortRowsSize>1000000</sortRowsSize>
     <execution_log_level>Minimal</execution_log_level>
     <singleStoreShardKeyOnHashKey>N</singleStoreShardKeyOnHashKey>
@@ -54,8 +62,12 @@ limitations under the License.
     <hubPipelineNamePrefix>hub-</hubPipelineNamePrefix>
     <linkPipelineNamePrefix>link-</linkPipelineNamePrefix>
     <satellitePipelineNamePrefix>sat-</satellitePipelineNamePrefix>
+    <generatedWorkflowNamePrefix>DV Bulk Update - </generatedWorkflowNamePrefix>
     <stsPipelineNamePrefix>sts-</stsPipelineNamePrefix>
   </configuration>
+  <coaching>
+    <coaching_sources/>
+  </coaching>
   <tables>
     <table>
       <businessKeys>
@@ -116,6 +128,7 @@ limitations under the License.
         <precision/>
         <includeInChangeDataCapture>Y</includeInChangeDataCapture>
       </attributes>
+      <parentKeySourceFields/>
       <drivingKey/>
       <recordSource>CRM-customer</recordSource>
       <statusTrackingEnabled>N</statusTrackingEnabled>
@@ -191,6 +204,7 @@ limitations under the License.
         <precision/>
         <includeInChangeDataCapture>N</includeInChangeDataCapture>
       </attributes>
+      <parentKeySourceFields/>
       <drivingKey/>
       <recordSource>CRM-product</recordSource>
       <statusTrackingEnabled>N</statusTrackingEnabled>
@@ -282,6 +296,7 @@ limitations under the License.
         <precision/>
         <includeInChangeDataCapture>N</includeInChangeDataCapture>
       </attributes>
+      <parentKeySourceFields/>
       <drivingKey/>
       <recordSource>CRM-order</recordSource>
       <statusTrackingEnabled>N</statusTrackingEnabled>
@@ -340,6 +355,7 @@ limitations under the License.
         </linkHubSource>
       </linkHubSources>
       <linkSatelliteSources/>
+      <dependentChildKeys/>
       <linkHashKeyFieldName>lnk_customer_order_hk</linkHashKeyFieldName>
       <hubSourceKeyFields/>
       <hasDescriptiveAttributes>N</hasDescriptiveAttributes>
@@ -359,34 +375,10 @@ limitations under the License.
     <note>
       <text>Please visit [the Apache Hop website](https://hop.apache.org) to download the latest version.</text>
       <noteType>GENERAL</noteType>
-      <xloc>208</xloc>
-      <yloc>400</yloc>
-      <width>128</width>
+      <xloc>48</xloc>
+      <yloc>416</yloc>
+      <width>272</width>
       <height>48</height>
-    </note>
-    <note>
-      <text>Important note: see table [hub_customer](hub_customer)</text>
-      <noteType>IMPORTANT</noteType>
-      <xloc>208</xloc>
-      <yloc>464</yloc>
-      <width>144</width>
-      <height>32</height>
-    </note>
-    <note>
-      <text>Warning note</text>
-      <noteType>WARNING</noteType>
-      <xloc>656</xloc>
-      <yloc>400</yloc>
-      <width>176</width>
-      <height>32</height>
-    </note>
-    <note>
-      <text>Information</text>
-      <noteType>INFORMATION</noteType>
-      <xloc>656</xloc>
-      <yloc>448</yloc>
-      <width>128</width>
-      <height>32</height>
     </note>
   </notes>
   <name>vault1</name>

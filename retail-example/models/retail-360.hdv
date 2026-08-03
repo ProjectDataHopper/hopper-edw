@@ -945,7 +945,7 @@ limitations under the License.
       <hashKeyFieldName>secondary_rep_hk</hashKeyFieldName>
       <tableName>hub_sales_rep</tableName>
       <description>Secondary sales rep role on an order (hub alias of hub_sales_rep)</description>
-      <tableType>TABLE_REFERENCE</tableType>
+      <tableType>LINKED_TABLE</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
       <xloc>304</xloc>

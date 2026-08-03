@@ -23,14 +23,14 @@ import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
 
 /**
- * Helpers for Data Vault table references and hub role-playing aliases on a subject-area canvas.
+ * Helpers for Data Vault linked tables and hub role-playing aliases on a subject-area canvas.
  */
-public final class DvTableReferenceSupport {
+public final class DvLinkedTableSupport {
 
-  private DvTableReferenceSupport() {}
+  private DvLinkedTableSupport() {}
 
   public static DvTableType effectiveTableType(IDvTable table) {
-    if (table instanceof DvTableReference reference && reference.getReferencedTableType() != null) {
+    if (table instanceof DvLinkedTable reference && reference.getReferencedTableType() != null) {
       return reference.getReferencedTableType();
     }
     return table != null ? table.getTableType() : null;
@@ -41,7 +41,7 @@ public final class DvTableReferenceSupport {
       return false;
     }
     IDvTable table = model.findTable(tableName);
-    return table instanceof DvTableReference;
+    return table instanceof DvLinkedTable;
   }
 
   /**
@@ -73,7 +73,7 @@ public final class DvTableReferenceSupport {
       if (table == null
           || Utils.isEmpty(table.getName())
           || table.getTableType() != tableType
-          || table instanceof DvTableReference) {
+          || table instanceof DvLinkedTable) {
         continue;
       }
       if (!allowTargetsAlreadyOnCanvas
@@ -88,12 +88,12 @@ public final class DvTableReferenceSupport {
   }
 
   /** Cross-model reference with canvas name equal to the external table name. */
-  public static DvTableReference createReference(
+  public static DvLinkedTable createReference(
       IDvTable externalTable, String externalModelFilename, Point location) {
     if (externalTable == null
         || Utils.isEmpty(externalTable.getName())
         || externalTable.getTableType() == null
-        || externalTable.getTableType() == DvTableType.TABLE_REFERENCE
+        || externalTable.getTableType() == DvTableType.LINKED_TABLE
         || Utils.isEmpty(externalModelFilename)) {
       return null;
     }
@@ -106,7 +106,7 @@ public final class DvTableReferenceSupport {
    * referencedModelFilename}. Role-playing hub aliases should set a distinct {@code aliasName} and
    * optional {@code roleHashKeyFieldName}.
    */
-  public static DvTableReference createAlias(
+  public static DvLinkedTable createAlias(
       String aliasName,
       IDvTable targetTable,
       String referencedModelFilename,
@@ -115,11 +115,11 @@ public final class DvTableReferenceSupport {
     if (targetTable == null
         || Utils.isEmpty(targetTable.getName())
         || targetTable.getTableType() == null
-        || targetTable.getTableType() == DvTableType.TABLE_REFERENCE
+        || targetTable.getTableType() == DvTableType.LINKED_TABLE
         || Utils.isEmpty(aliasName)) {
       return null;
     }
-    DvTableReference reference = new DvTableReference();
+    DvLinkedTable reference = new DvLinkedTable();
     reference.setName(aliasName);
     reference.setReferencedTableName(targetTable.getName());
     if (!Utils.isEmpty(referencedModelFilename)) {

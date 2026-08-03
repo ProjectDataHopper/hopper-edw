@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow>
+  <name>update-reference-table</name>
+  <name_sync_with_filename>Y</name_sync_with_filename>
+  <created_user>-</created_user>
+  <modified_user>-</modified_user>
+  <created_date>2026/08/03 12:00:00.000</created_date>
+  <modified_date>2026/08/03 12:00:00.000</modified_date>
+  <parameters>
+    <parameter>
+      <name>OUTPUT_COPIES</name>
+      <description>Valid in the current workflow</description>
+      <default_value>1</default_value>
+    </parameter>
+    <parameter>
+      <name>PIPELINE_COPIES</name>
+      <description>Valid in the current workflow</description>
+      <default_value>3</default_value>
+    </parameter>
+    <parameter>
+      <name>METRICS_FOLDER</name>
+      <description>Valid in the current workflow</description>
+      <default_value>${PROJECT_HOME}/metrics</default_value>
+    </parameter>
+    <parameter>
+      <name>DV_INITIAL_LOAD_DATE</name>
+      <description>Fixed load date for initial Data Vault Update actions</description>
+      <default_value>2024/01/01 00:00:00.000</default_value>
+    </parameter>
+    <parameter>
+      <name>DV_UPDATE_LOAD_DATE</name>
+      <description>Fixed load date for second FULL_REPLACE Data Vault Update</description>
+      <default_value>2024/01/02 00:00:00.000</default_value>
+    </parameter>
+  </parameters>
+  <actions>
+    <action>
+      <repeat>N</repeat>
+      <schedulerType>0</schedulerType>
+      <intervalSeconds>0</intervalSeconds>
+      <intervalMinutes>60</intervalMinutes>
+      <DayOfMonth>1</DayOfMonth>
+      <weekDay>1</weekDay>
+      <minutes>0</minutes>
+      <hour>12</hour>
+      <doNotWaitOnFirstExecution>N</doNotWaitOnFirstExecution>
+      <name>Start</name>
+      <description/>
+      <type>SPECIAL</type>
+      <attributes/>
+      <xloc>48</xloc>
+      <yloc>48</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <filename>${PROJECT_HOME}/tests/shared/create-source-tables-from-data-catalog.hpl</filename>
+      <params_from_previous>N</params_from_previous>
+      <exec_per_row>N</exec_per_row>
+      <clear_rows>N</clear_rows>
+      <clear_files>N</clear_files>
+      <create_parent_folder>N</create_parent_folder>
+      <set_logfile>N</set_logfile>
+      <set_append_logfile>N</set_append_logfile>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <loglevel>Basic</loglevel>
+      <wait_until_finished>Y</wait_until_finished>
+      <parameters>
+        <pass_all_parameters>Y</pass_all_parameters>
+      </parameters>
+      <run_configuration>local</run_configuration>
+      <name>create CRM source tables</name>
+      <description>Ensure country_ref exists from catalog CRM-country-ref</description>
+      <type>PIPELINE</type>
+      <attributes/>
+      <xloc>176</xloc>
+      <yloc>48</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <sql>DROP TABLE IF EXISTS ref_country
+;
+</sql>
+      <connection>Vault</connection>
+      <useVariableSubstitution>N</useVariableSubstitution>
+      <sqlfromfile>N</sqlfromfile>
+      <sqlfilename/>
+      <sendOneStatement>N</sendOneStatement>
+      <name>drop vault tables</name>
+      <description/>
+      <type>SQL</type>
+      <attributes/>
+      <xloc>336</xloc>
+      <yloc>48</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <filename>${PROJECT_HOME}/tests/reference-table/load-country1.hpl</filename>
+      <params_from_previous>N</params_from_previous>
+      <exec_per_row>N</exec_per_row>
+      <clear_rows>N</clear_rows>
+      <clear_files>N</clear_files>
+      <create_parent_folder>N</create_parent_folder>
+      <set_logfile>N</set_logfile>
+      <set_append_logfile>N</set_append_logfile>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <loglevel>Basic</loglevel>
+      <wait_until_finished>Y</wait_until_finished>
+      <parameters>
+        <pass_all_parameters>Y</pass_all_parameters>
+      </parameters>
+      <run_configuration>local</run_configuration>
+      <name>load-country1</name>
+      <description/>
+      <type>PIPELINE</type>
+      <attributes/>
+      <xloc>496</xloc>
+      <yloc>48</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <dataVaultModelFile>${PROJECT_HOME}/tests/reference-table/reference-table.hdv</dataVaultModelFile>
+      <pipelineRunConfiguration>local</pipelineRunConfiguration>
+      <logModelCheckFailures>Y</logModelCheckFailures>
+      <abortOnModelCheckFailures>Y</abortOnModelCheckFailures>
+      <detailedDataTypeChecking>N</detailedDataTypeChecking>
+      <parallelPipelineCopies>${PIPELINE_COPIES}</parallelPipelineCopies>
+      <pipelineStagingFolder/>
+      <metricsOutputFolder>${METRICS_FOLDER}</metricsOutputFolder>
+      <publishToCatalog>Y</publishToCatalog>
+      <dataCatalogConnection>vault-catalog</dataCatalogConnection>
+      <updateTargetDatabaseStructure>Y</updateTargetDatabaseStructure>
+      <ddlSqlFilename>${java.io.tmpdir}/reference-table-ddl.sql</ddlSqlFilename>
+      <failIfDdlNeeded>N</failIfDdlNeeded>
+      <recordSourceGroup/>
+      <ensureSpecialRecords>N</ensureSpecialRecords>
+      <doNotUpdateTargetDatabase>N</doNotUpdateTargetDatabase>
+      <loadDate>${DV_INITIAL_LOAD_DATE}</loadDate>
+      <name>update reference-table.hdv</name>
+      <description/>
+      <type>DATA_VAULT_UPDATE</type>
+      <attributes/>
+      <xloc>688</xloc>
+      <yloc>48</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <test_names>
+        <test_name>
+          <name>validate-ref-country UNIT</name>
+        </test_name>
+      </test_names>
+      <name>test after initial</name>
+      <description/>
+      <type>RunPipelineTests</type>
+      <attributes/>
+      <xloc>880</xloc>
+      <yloc>48</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <filename>${PROJECT_HOME}/tests/reference-table/load-country2.hpl</filename>
+      <params_from_previous>N</params_from_previous>
+      <exec_per_row>N</exec_per_row>
+      <clear_rows>N</clear_rows>
+      <clear_files>N</clear_files>
+      <create_parent_folder>N</create_parent_folder>
+      <set_logfile>N</set_logfile>
+      <set_append_logfile>N</set_append_logfile>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <loglevel>Basic</loglevel>
+      <wait_until_finished>Y</wait_until_finished>
+      <parameters>
+        <pass_all_parameters>Y</pass_all_parameters>
+      </parameters>
+      <run_configuration>local</run_configuration>
+      <name>load-country2</name>
+      <description/>
+      <type>PIPELINE</type>
+      <attributes/>
+      <xloc>336</xloc>
+      <yloc>176</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <dataVaultModelFile>${PROJECT_HOME}/tests/reference-table/reference-table.hdv</dataVaultModelFile>
+      <pipelineRunConfiguration>local</pipelineRunConfiguration>
+      <logModelCheckFailures>N</logModelCheckFailures>
+      <abortOnModelCheckFailures>N</abortOnModelCheckFailures>
+      <detailedDataTypeChecking>N</detailedDataTypeChecking>
+      <parallelPipelineCopies>${PIPELINE_COPIES}</parallelPipelineCopies>
+      <pipelineStagingFolder/>
+      <metricsOutputFolder>${METRICS_FOLDER}</metricsOutputFolder>
+      <publishToCatalog>N</publishToCatalog>
+      <updateTargetDatabaseStructure>N</updateTargetDatabaseStructure>
+      <ddlSqlFilename/>
+      <failIfDdlNeeded>N</failIfDdlNeeded>
+      <recordSourceGroup/>
+      <ensureSpecialRecords>N</ensureSpecialRecords>
+      <doNotUpdateTargetDatabase>N</doNotUpdateTargetDatabase>
+      <loadDate>${DV_UPDATE_LOAD_DATE}</loadDate>
+      <name>update reference-table.hdv replace</name>
+      <description/>
+      <type>DATA_VAULT_UPDATE</type>
+      <attributes/>
+      <xloc>528</xloc>
+      <yloc>176</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <test_names>
+        <test_name>
+          <name>validate-ref-country2 UNIT</name>
+        </test_name>
+      </test_names>
+      <name>test after replace</name>
+      <description/>
+      <type>RunPipelineTests</type>
+      <attributes/>
+      <xloc>720</xloc>
+      <yloc>176</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+  </actions>
+  <hops>
+    <hop>
+      <from>Start</from>
+      <to>create CRM source tables</to>
+      <evaluation>Y</evaluation>
+      <unconditional>Y</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>create CRM source tables</from>
+      <to>drop vault tables</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>drop vault tables</from>
+      <to>load-country1</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>load-country1</from>
+      <to>update reference-table.hdv</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>update reference-table.hdv</from>
+      <to>test after initial</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>test after initial</from>
+      <to>load-country2</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>load-country2</from>
+      <to>update reference-table.hdv replace</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>update reference-table.hdv replace</from>
+      <to>test after replace</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+  </hops>
+  <notepads/>
+  <attributes/>
+</workflow>

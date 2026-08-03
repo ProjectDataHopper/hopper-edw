@@ -27,16 +27,16 @@ import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
-/** Validation helpers for cross-model {@link DvTableReference} tables. */
-public final class DvReferenceValidationSupport {
+/** Validation helpers for cross-model {@link DvLinkedTable} tables. */
+public final class DvLinkedTableValidationSupport {
 
-  private static final Class<?> PKG = DvReferenceValidationSupport.class;
+  private static final Class<?> PKG = DvLinkedTableValidationSupport.class;
 
-  private DvReferenceValidationSupport() {}
+  private DvLinkedTableValidationSupport() {}
 
-  public static void validateTableReference(
+  public static void validateLinkedTable(
       List<ICheckResult> remarks,
-      DvTableReference reference,
+      DvLinkedTable reference,
       DataVaultModel model,
       IHopMetadataProvider metadataProvider,
       IVariables variables) {
@@ -52,20 +52,20 @@ public final class DvReferenceValidationSupport {
               ICheckResult.TYPE_RESULT_ERROR,
               BaseMessages.getString(
                   PKG,
-                  "DvReferenceValidationSupport.CheckResult.MissingReferencedTableName",
+                  "DvLinkedTableValidationSupport.CheckResult.MissingReferencedTableName",
                   Const.NVL(referenceName, "?")),
               reference));
       return;
     }
 
     if (reference.getReferencedTableType() == null
-        || reference.getReferencedTableType() == DvTableType.TABLE_REFERENCE) {
+        || reference.getReferencedTableType() == DvTableType.LINKED_TABLE) {
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_ERROR,
               BaseMessages.getString(
                   PKG,
-                  "DvReferenceValidationSupport.CheckResult.MissingReferencedTableType",
+                  "DvLinkedTableValidationSupport.CheckResult.MissingReferencedTableType",
                   Const.NVL(referenceName, "?")),
               reference));
       return;
@@ -80,7 +80,7 @@ public final class DvReferenceValidationSupport {
               ICheckResult.TYPE_RESULT_ERROR,
               BaseMessages.getString(
                   PKG,
-                  "DvReferenceValidationSupport.CheckResult.ReferenceReferencesSelf",
+                  "DvLinkedTableValidationSupport.CheckResult.ReferenceReferencesSelf",
                   referenceName),
               reference));
       return;
@@ -104,19 +104,19 @@ public final class DvReferenceValidationSupport {
 
   private static void validateLocalTableReference(
       List<ICheckResult> remarks,
-      DvTableReference reference,
+      DvLinkedTable reference,
       String referenceName,
       String referencedName,
       DataVaultModel model,
       IVariables variables) {
     IDvTable referenced = model != null ? model.findTable(referencedName) : null;
-    if (referenced instanceof DvTableReference) {
+    if (referenced instanceof DvLinkedTable) {
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_ERROR,
               BaseMessages.getString(
                   PKG,
-                  "DvReferenceValidationSupport.CheckResult.ReferenceReferencesReference",
+                  "DvLinkedTableValidationSupport.CheckResult.ReferenceReferencesReference",
                   referenceName,
                   referencedName),
               reference));
@@ -128,7 +128,7 @@ public final class DvReferenceValidationSupport {
               ICheckResult.TYPE_RESULT_ERROR,
               BaseMessages.getString(
                   PKG,
-                  "DvReferenceValidationSupport.CheckResult.UnknownReferencedTable",
+                  "DvLinkedTableValidationSupport.CheckResult.UnknownReferencedTable",
                   referenceName,
                   referencedName),
               reference));
@@ -137,7 +137,7 @@ public final class DvReferenceValidationSupport {
 
   private static void validateExternalTableReference(
       List<ICheckResult> remarks,
-      DvTableReference reference,
+      DvLinkedTable reference,
       String referenceName,
       String referencedName,
       String externalModelPath,
@@ -163,20 +163,20 @@ public final class DvReferenceValidationSupport {
               ICheckResult.TYPE_RESULT_ERROR,
               BaseMessages.getString(
                   PKG,
-                  "DvReferenceValidationSupport.CheckResult.ExternalModelCircularReference",
+                  "DvLinkedTableValidationSupport.CheckResult.ExternalModelCircularReference",
                   referenceName,
                   externalModelPath),
               reference));
     }
 
     IDvTable referenced = externalModel.findTable(referencedName);
-    if (referenced instanceof DvTableReference) {
+    if (referenced instanceof DvLinkedTable) {
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_ERROR,
               BaseMessages.getString(
                   PKG,
-                  "DvReferenceValidationSupport.CheckResult.ExternalReferenceReferencesReference",
+                  "DvLinkedTableValidationSupport.CheckResult.ExternalReferenceReferencesReference",
                   referenceName,
                   referencedName),
               reference));
@@ -188,7 +188,7 @@ public final class DvReferenceValidationSupport {
               ICheckResult.TYPE_RESULT_ERROR,
               BaseMessages.getString(
                   PKG,
-                  "DvReferenceValidationSupport.CheckResult.UnknownExternalReferencedTable",
+                  "DvLinkedTableValidationSupport.CheckResult.UnknownExternalReferencedTable",
                   referenceName,
                   referencedName,
                   externalModelPath),
@@ -212,7 +212,7 @@ public final class DvReferenceValidationSupport {
     try {
       String referringPath = comparableModelPath(referringModel.getFilename(), variables);
       for (IDvTable table : externalModel.getTables()) {
-        if (!(table instanceof DvTableReference externalReference)) {
+        if (!(table instanceof DvLinkedTable externalReference)) {
           continue;
         }
         if (Utils.isEmpty(externalReference.getReferencedModelFilename())) {
@@ -237,7 +237,7 @@ public final class DvReferenceValidationSupport {
 
   private static void warnOnExternalConfigurationMismatch(
       List<ICheckResult> remarks,
-      DvTableReference reference,
+      DvLinkedTable reference,
       String referenceName,
       DataVaultModel referringModel,
       DataVaultModel externalModel,
@@ -254,7 +254,7 @@ public final class DvReferenceValidationSupport {
               ICheckResult.TYPE_RESULT_WARNING,
               BaseMessages.getString(
                   PKG,
-                  "DvReferenceValidationSupport.CheckResult.ExternalModelTargetDatabaseMismatch",
+                  "DvLinkedTableValidationSupport.CheckResult.ExternalModelTargetDatabaseMismatch",
                   referenceName,
                   externalDatabase,
                   referringDatabase),
@@ -270,7 +270,7 @@ public final class DvReferenceValidationSupport {
               ICheckResult.TYPE_RESULT_WARNING,
               BaseMessages.getString(
                   PKG,
-                  "DvReferenceValidationSupport.CheckResult.ExternalModelHashAlgorithmMismatch",
+                  "DvLinkedTableValidationSupport.CheckResult.ExternalModelHashAlgorithmMismatch",
                   referenceName,
                   externalHashAlgorithm,
                   referringHashAlgorithm),
@@ -286,7 +286,7 @@ public final class DvReferenceValidationSupport {
               ICheckResult.TYPE_RESULT_WARNING,
               BaseMessages.getString(
                   PKG,
-                  "DvReferenceValidationSupport.CheckResult.ExternalModelHashKeyTypeMismatch",
+                  "DvLinkedTableValidationSupport.CheckResult.ExternalModelHashKeyTypeMismatch",
                   referenceName,
                   externalHashKeyType,
                   referringHashKeyType),

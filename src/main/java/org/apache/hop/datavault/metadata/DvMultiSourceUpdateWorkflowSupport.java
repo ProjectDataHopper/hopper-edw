@@ -295,7 +295,8 @@ public final class DvMultiSourceUpdateWorkflowSupport {
     return map.get(withoutExt + PipelineMeta.PIPELINE_EXTENSION);
   }
 
-  private static ActionMeta newPipelineActionMeta(
+  /** Creates a PIPELINE workflow action with optional run configuration. */
+  public static ActionMeta newPipelineActionMeta(
       String actionName,
       String pipelineFilename,
       String pipelineRunConfiguration,

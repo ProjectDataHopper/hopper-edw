@@ -28,7 +28,7 @@ import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
 /**
  * Context handler for clicks on the background of the Data Vault graph. Allows @GuiContextAction
  * annotated methods (in HopGuiVaultGraph etc) with parentId = HopGuiVaultContext.CONTEXT_ID to
- * contribute actions to the context dialog (e.g. add Hub/Satellite/Link).
+ * contribute actions to the context dialog (e.g. add Hub/Satellite/Link/Reference table).
  */
 public class HopGuiVaultContext extends BaseGuiContextHandler implements IGuiContextHandler {
 

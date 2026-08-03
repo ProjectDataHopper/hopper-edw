@@ -205,8 +205,12 @@ public interface IDvTable extends IGuiPosition, IBaseMeta, IHasName, IChanged, I
       if (DvTableType.LINK.name().equals(id)) {
         return new DvLink();
       }
-      if (DvTableType.TABLE_REFERENCE.name().equals(id)) {
-        return new DvTableReference();
+      if (DvTableType.REFERENCE.name().equals(id)) {
+        return new DvReferenceTable();
+      }
+      // LINKED_TABLE (current) and TABLE_REFERENCE (legacy .hdv dual-read)
+      if (DvTableType.isLinkedTableCode(id)) {
+        return new DvLinkedTable();
       }
       throw new HopException("Unable to recognize Data Vault table type with ID '" + id + "'");
     }
@@ -221,7 +225,9 @@ public interface IDvTable extends IGuiPosition, IBaseMeta, IHasName, IChanged, I
       if (tableType == null) {
         throw new HopException("Data Vault table has no table type set");
       }
-      return tableType.name();
+      // Always persist the current code for linked tables (never re-write TABLE_REFERENCE).
+      DvTableType normalized = DvTableType.normalize(tableType);
+      return normalized.name();
     }
   }
 }

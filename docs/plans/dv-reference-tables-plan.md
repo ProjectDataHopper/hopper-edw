@@ -4,7 +4,7 @@
 **Goal:** First-class support for **Reference tables** in hop-data-vault — natural-key code/catalog tables loaded into the vault database with DV audit columns, without hub hash keys or satellite hashdiff semantics. Align with VaultSpeed-style `ref_*` objects and industry “reference data in the vault” practice, while keeping pure Hub/Link/Satellite modeling intact for true business entities.
 
 **Related:**
-- Cross-model pointers are **not** this feature — see [dv-cross-model-references.adoc](../dv-cross-model-references.adoc) (`TABLE_REFERENCE`).
+- Cross-model pointers are **not** this feature — see [dv-cross-model-references.adoc](../dv-cross-model-references.adoc) (`LINKED_TABLE`; formerly `TABLE_REFERENCE`).
 - Reverse-engineering of VaultSpeed REF procedures (example EDW) already extracts JSON `entity_type: REF`; this plan covers **product** support and optional import into `.hdv`.
 
 ---

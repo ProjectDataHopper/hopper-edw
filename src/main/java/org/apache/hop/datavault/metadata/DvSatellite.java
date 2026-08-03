@@ -405,6 +405,48 @@ public class DvSatellite extends DvTableBase
           this, model, effectiveOptions, metadataProvider, variables, this, remarks);
       DvFieldMappingValidationSupport.validateSatelliteRecordSourceFields(
           this, model, effectiveOptions, metadataProvider, variables, this, remarks);
+      checkSatelliteHubRecordSourceConsistency(remarks, metadataProvider, variables, model);
+    }
+  }
+
+  /**
+   * Warn when a hub satellite's default record source is not listed on the parent hub's Record
+   * sources tab (multi-source modeling guidance).
+   */
+  private void checkSatelliteHubRecordSourceConsistency(
+      List<ICheckResult> remarks,
+      IHopMetadataProvider metadataProvider,
+      IVariables variables,
+      DataVaultModel model) {
+    if (Utils.isEmpty(hubName) || Utils.isEmpty(recordSource) || model == null) {
+      return;
+    }
+    DvHub hub = model.findHub(hubName, variables, metadataProvider);
+    if (hub == null) {
+      return;
+    }
+    List<String> hubSources = hub.getRecordSources();
+    if (hubSources == null || hubSources.isEmpty()) {
+      return;
+    }
+    String resolvedSatelliteSource =
+        variables != null ? variables.resolve(recordSource) : recordSource;
+    boolean listed =
+        hubSources.stream()
+            .filter(s -> !Utils.isEmpty(s))
+            .anyMatch(
+                s -> {
+                  String resolvedHubSource = variables != null ? variables.resolve(s) : s;
+                  return resolvedSatelliteSource != null
+                      && resolvedSatelliteSource.equals(resolvedHubSource);
+                });
+    if (!listed) {
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_WARNING,
+              BaseMessages.getString(
+                  PKG, "DvSatellite.CheckResult.RecordSourceNotOnHub", recordSource, hubName),
+              this));
     }
   }
 

@@ -37,7 +37,8 @@ public final class DvSourceFieldMappingSupport {
           case HUB -> ((DvHub) table).getRecordSourceFieldName();
           case SATELLITE -> null;
           case LINK -> ((DvLink) table).getRecordSourceFieldName();
-          case TABLE_REFERENCE -> null;
+          case REFERENCE -> null;
+          case LINKED_TABLE, TABLE_REFERENCE -> null;
         };
     if (StringUtils.isEmpty(targetSourceFieldName) && configuration != null) {
       targetSourceFieldName = configuration.getRecordSourceField();

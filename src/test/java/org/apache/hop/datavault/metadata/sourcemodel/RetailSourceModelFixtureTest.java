@@ -76,12 +76,12 @@ class RetailSourceModelFixtureTest {
     assertFalse(model.getRelationships().isEmpty());
     assertFalse(model.getQueries().isEmpty());
 
-    SourceQuery query = model.findQuery("All customer info");
-    assertNotNull(query, "Expected sample query 'All customer info'");
+    SourceQuery query = model.findQuery("all-customer-info");
+    assertNotNull(query, "Expected sample query 'all-customer-info'");
     assertEquals("customer_hub", query.getDrivingTableName());
     assertEquals(4, query.getJoins().size());
     assertFalse(query.getColumns().isEmpty());
-    assertEquals("feed_customer_enriched", query.getPublishedCatalogName());
+    assertEquals("all-customer-info", query.getPublishedCatalogName());
 
     List<ICheckResult> remarks = model.check(metadataProvider, new Variables());
     assertTrue(

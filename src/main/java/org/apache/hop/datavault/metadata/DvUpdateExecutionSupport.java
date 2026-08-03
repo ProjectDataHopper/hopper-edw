@@ -31,9 +31,14 @@ public final class DvUpdateExecutionSupport {
    * before parent links/hubs finish when foreign keys are enforced.
    */
   public static final class FreePipelineBuckets {
+    private final List<PipelineMeta> references = new ArrayList<>();
     private final List<PipelineMeta> hubs = new ArrayList<>();
     private final List<PipelineMeta> links = new ArrayList<>();
     private final List<PipelineMeta> satellites = new ArrayList<>();
+
+    public List<PipelineMeta> references() {
+      return references;
+    }
 
     public List<PipelineMeta> hubs() {
       return hubs;
@@ -52,18 +57,22 @@ public final class DvUpdateExecutionSupport {
         return;
       }
       switch (tableType) {
+        case REFERENCE -> references.addAll(pipelines);
         case HUB -> hubs.addAll(pipelines);
         case LINK -> links.addAll(pipelines);
         case SATELLITE -> satellites.addAll(pipelines);
-        default -> {
-          // ignore unknown types
+        case LINKED_TABLE, TABLE_REFERENCE -> {
+          // Cross-model pointers / aliases never generate load pipelines.
         }
       }
     }
 
-    /** Hub free pipelines, then links, then satellites (empty phases omitted). */
+    /** Reference free pipelines, then hubs, links, satellites (empty phases omitted). */
     public List<List<PipelineMeta>> phases() {
-      List<List<PipelineMeta>> phases = new ArrayList<>(3);
+      List<List<PipelineMeta>> phases = new ArrayList<>(4);
+      if (!references.isEmpty()) {
+        phases.add(List.copyOf(references));
+      }
       if (!hubs.isEmpty()) {
         phases.add(List.copyOf(hubs));
       }
@@ -77,16 +86,17 @@ public final class DvUpdateExecutionSupport {
     }
 
     public boolean isEmpty() {
-      return hubs.isEmpty() && links.isEmpty() && satellites.isEmpty();
+      return references.isEmpty() && hubs.isEmpty() && links.isEmpty() && satellites.isEmpty();
     }
 
     public int size() {
-      return hubs.size() + links.size() + satellites.size();
+      return references.size() + hubs.size() + links.size() + satellites.size();
     }
 
-    /** Flattened hub → link → satellite order (for sequential staging master workflows). */
+    /** Flattened reference → hub → link → satellite order. */
     public List<PipelineMeta> flattenedInDependencyOrder() {
       List<PipelineMeta> all = new ArrayList<>(size());
+      all.addAll(references);
       all.addAll(hubs);
       all.addAll(links);
       all.addAll(satellites);
@@ -94,8 +104,12 @@ public final class DvUpdateExecutionSupport {
     }
   }
 
-  /** Returns hubs, then links, then satellites (model order preserved within each type). */
+  /**
+   * Returns reference tables first, then hubs, links, satellites (model order preserved within each
+   * type).
+   */
   public static List<IDvTable> orderTablesForPipelineExecution(List<IDvTable> tables) {
+    List<IDvTable> references = new ArrayList<>();
     List<IDvTable> hubs = new ArrayList<>();
     List<IDvTable> links = new ArrayList<>();
     List<IDvTable> satellites = new ArrayList<>();
@@ -107,12 +121,18 @@ public final class DvUpdateExecutionSupport {
         continue;
       }
       switch (table.getTableType()) {
+        case REFERENCE -> references.add(table);
         case HUB -> hubs.add(table);
         case LINK -> links.add(table);
         case SATELLITE -> satellites.add(table);
+        case LINKED_TABLE, TABLE_REFERENCE -> {
+          // No load pipelines for pointers/aliases.
+        }
       }
     }
-    List<IDvTable> ordered = new ArrayList<>(hubs.size() + links.size() + satellites.size());
+    List<IDvTable> ordered =
+        new ArrayList<>(references.size() + hubs.size() + links.size() + satellites.size());
+    ordered.addAll(references);
     ordered.addAll(hubs);
     ordered.addAll(links);
     ordered.addAll(satellites);

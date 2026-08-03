@@ -24,6 +24,7 @@ import org.apache.hop.datavault.metadata.composite.DvCompositeLinkSourcePipeline
 import org.apache.hop.datavault.metadata.composite.DvCompositeSatelliteSourcePipelineBuilder;
 import org.apache.hop.datavault.metadata.file.DvCsvHubSourcePipelineBuilder;
 import org.apache.hop.datavault.metadata.file.DvCsvLinkSourcePipelineBuilder;
+import org.apache.hop.datavault.metadata.file.DvCsvReferenceSourcePipelineBuilder;
 import org.apache.hop.datavault.metadata.file.DvCsvSatelliteSourcePipelineBuilder;
 import org.apache.hop.datavault.metadata.file.DvParquetHubSourcePipelineBuilder;
 import org.apache.hop.datavault.metadata.file.DvParquetLinkSourcePipelineBuilder;
@@ -228,6 +229,47 @@ public final class DvSourcePipelineBuilderFactory {
               dvSource,
               satellite,
               startPoint);
+    };
+  }
+
+  public static DvSourcePipelineBuilder forReference(
+      IVariables variables,
+      IHopMetadataProvider metadataProvider,
+      DataVaultModel model,
+      PipelineMeta pipelineMeta,
+      DataVaultSource recordSource,
+      IDvSource dvSource,
+      DvReferenceTable reference,
+      Point startPoint)
+      throws HopException {
+    return switch (recordSource.getSourceType()) {
+      case DATABASE ->
+          new DvDatabaseReferenceSourcePipelineBuilder(
+              variables,
+              metadataProvider,
+              model,
+              pipelineMeta,
+              recordSource,
+              dvSource,
+              reference,
+              startPoint);
+      case CSV ->
+          new DvCsvReferenceSourcePipelineBuilder(
+              variables,
+              metadataProvider,
+              model,
+              pipelineMeta,
+              recordSource,
+              dvSource,
+              reference,
+              startPoint);
+      case PARQUET, ICEBERG, COMPOSITE ->
+          throw new HopException(
+              "Reference table FULL_REPLACE currently supports DATABASE and CSV sources only (got "
+                  + recordSource.getSourceType()
+                  + " for "
+                  + recordSource.getName()
+                  + ")");
     };
   }
 }
