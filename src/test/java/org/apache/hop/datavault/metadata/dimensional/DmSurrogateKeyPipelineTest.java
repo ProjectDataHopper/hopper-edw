@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -54,7 +52,9 @@ class DmSurrogateKeyPipelineTest {
     dimension
         .getAttributes()
         .add(new DmDimensionAttribute("customer_name", DmScdUpdatePolicy.TYPE3_CURRENT));
-    dimension.getSourceOrDefault().setSourceSql("SELECT customer_id, customer_hk, customer_name FROM stg_customer");
+    dimension
+        .getSourceOrDefault()
+        .setSourceSql("SELECT customer_id, customer_hk, customer_name FROM stg_customer");
     model.getTables().add(dimension);
 
     List<PipelineMeta> pipelines =

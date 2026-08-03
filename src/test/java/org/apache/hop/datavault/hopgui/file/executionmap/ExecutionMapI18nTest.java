@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.executionmap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -58,15 +56,15 @@ class ExecutionMapI18nTest {
 
     String previewTooltip =
         BaseMessages.getString(
-            HopGuiExecutionMapGraph.class,
-            "ExecutionMapNavigationSupport.Tooltip.PreviewDataset");
+            HopGuiExecutionMapGraph.class, "ExecutionMapNavigationSupport.Tooltip.PreviewDataset");
     assertEquals("Right-click and choose Preview data", previewTooltip);
     assertFalse(previewTooltip.startsWith("!"));
   }
 
   @Test
   void generationPluginMessagesResolveFromExecutionMapPluginPackage() {
-    String label = BaseMessages.getString(ExecutionMapGuiPlugin.class, "ExecutionMapGuiPlugin.Action.Name");
+    String label =
+        BaseMessages.getString(ExecutionMapGuiPlugin.class, "ExecutionMapGuiPlugin.Action.Name");
     assertEquals("Ad-hoc generate execution map", label);
   }
 }

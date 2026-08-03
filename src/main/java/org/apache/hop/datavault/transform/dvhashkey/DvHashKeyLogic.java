@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.transform.dvhashkey;
 
 import java.nio.charset.StandardCharsets;
@@ -65,11 +63,7 @@ public final class DvHashKeyLogic {
    * (all-null fields with no prefix/suffix).
    */
   public static byte[] buildHashInput(
-      Object[] row,
-      IRowMeta rowMeta,
-      int[] fieldIndexes,
-      DvHashKeyMeta meta,
-      IVariables variables)
+      Object[] row, IRowMeta rowMeta, int[] fieldIndexes, DvHashKeyMeta meta, IVariables variables)
       throws HopException {
     if (row == null || rowMeta == null || fieldIndexes == null || fieldIndexes.length == 0) {
       return null;
@@ -150,7 +144,10 @@ public final class DvHashKeyLogic {
    * Computes a hash key from explicit field values using the same rules as the DvHashKey transform.
    */
   public static Object computeHashFromValues(
-      List<Object> values, List<Boolean> binaryFlags, DataVaultConfiguration config, IVariables variables)
+      List<Object> values,
+      List<Boolean> binaryFlags,
+      DataVaultConfiguration config,
+      IVariables variables)
       throws HopException {
     if (values == null || values.isEmpty()) {
       return null;
@@ -160,9 +157,9 @@ public final class DvHashKeyLogic {
     Object[] row = new Object[values.size()];
     int[] fieldIndexes = new int[values.size()];
     for (int i = 0; i < values.size(); i++) {
-      boolean binary = binaryFlags != null && i < binaryFlags.size() && Boolean.TRUE.equals(binaryFlags.get(i));
-      IValueMeta valueMeta =
-          binary ? new ValueMetaBinary("f" + i) : new ValueMetaString("f" + i);
+      boolean binary =
+          binaryFlags != null && i < binaryFlags.size() && Boolean.TRUE.equals(binaryFlags.get(i));
+      IValueMeta valueMeta = binary ? new ValueMetaBinary("f" + i) : new ValueMetaString("f" + i);
       rowMeta.addValueMeta(valueMeta);
       fieldIndexes[i] = i;
       row[i] = values.get(i);

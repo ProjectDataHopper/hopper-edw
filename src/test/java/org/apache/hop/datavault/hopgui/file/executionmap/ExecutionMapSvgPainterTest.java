@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.executionmap;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -29,12 +27,12 @@ import org.apache.hop.datavault.command.svg.ExecutionMapExportScope;
 import org.apache.hop.datavault.command.svg.SvgExportService;
 import org.apache.hop.datavault.command.svg.SvgRenderOptions;
 import org.apache.hop.datavault.config.DataVaultConfigSingleton;
+import org.apache.hop.datavault.executionmap.CrawlOptions;
+import org.apache.hop.datavault.executionmap.ExecutionMapCrawler;
 import org.apache.hop.datavault.executionmap.ExecutionMapFocusContext;
 import org.apache.hop.datavault.executionmap.ExecutionMapLayoutSupport;
 import org.apache.hop.datavault.executionmap.ExecutionMapLineStyle;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapNodeType;
-import org.apache.hop.datavault.executionmap.CrawlOptions;
-import org.apache.hop.datavault.executionmap.ExecutionMapCrawler;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -62,12 +60,13 @@ class ExecutionMapSvgPainterTest {
             .getDocument();
 
     String svg =
-        SvgExportService.generateExecutionMapSvg(
-            document, SvgRenderOptions.defaults(), variables);
+        SvgExportService.generateExecutionMapSvg(document, SvgRenderOptions.defaults(), variables);
 
     assertFalse(svg.isBlank());
     assertTrue(svg.contains("<svg"));
-    assertTrue(svg.contains("line") || svg.contains("polyline"), "svg should contain routed edge segments");
+    assertTrue(
+        svg.contains("line") || svg.contains("polyline"),
+        "svg should contain routed edge segments");
   }
 
   @Test
@@ -77,8 +76,7 @@ class ExecutionMapSvgPainterTest {
         () -> {
           try {
             Variables variables = new Variables();
-            variables.setVariable(
-                "PROJECT_HOME", ROOT_WORKFLOW.getParent().getParent().toString());
+            variables.setVariable("PROJECT_HOME", ROOT_WORKFLOW.getParent().getParent().toString());
 
             var document =
                 ExecutionMapCrawler.crawl(
@@ -137,8 +135,7 @@ class ExecutionMapSvgPainterTest {
         () -> {
           try {
             Variables variables = new Variables();
-            variables.setVariable(
-                "PROJECT_HOME", ROOT_WORKFLOW.getParent().getParent().toString());
+            variables.setVariable("PROJECT_HOME", ROOT_WORKFLOW.getParent().getParent().toString());
 
             var document =
                 ExecutionMapCrawler.crawl(
@@ -173,8 +170,7 @@ class ExecutionMapSvgPainterTest {
         () -> {
           try {
             Variables variables = new Variables();
-            variables.setVariable(
-                "PROJECT_HOME", ROOT_WORKFLOW.getParent().getParent().toString());
+            variables.setVariable("PROJECT_HOME", ROOT_WORKFLOW.getParent().getParent().toString());
 
             var document =
                 ExecutionMapCrawler.crawl(
@@ -223,7 +219,10 @@ class ExecutionMapSvgPainterTest {
                 ROOT_WORKFLOW.toString(),
                 variables,
                 null,
-                CrawlOptions.builder().includeGeneratedPipelines(true).includeWorkflowActions(false).build())
+                CrawlOptions.builder()
+                    .includeGeneratedPipelines(true)
+                    .includeWorkflowActions(false)
+                    .build())
             .getDocument();
 
     String modelNodeId =

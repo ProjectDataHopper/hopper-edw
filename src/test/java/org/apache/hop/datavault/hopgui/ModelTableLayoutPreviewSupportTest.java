@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,7 +24,6 @@ import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.RowMeta;
-import org.apache.hop.core.row.value.ValueMetaInteger;
 import org.apache.hop.core.row.value.ValueMetaString;
 import org.apache.hop.core.row.value.ValueMetaTimestamp;
 import org.apache.hop.core.variables.Variables;
@@ -64,26 +61,31 @@ class ModelTableLayoutPreviewSupportTest {
         .add(new DmDimensionAttribute("customer_name", DmScdUpdatePolicy.TYPE1));
 
     DimensionalConfiguration config = new DimensionalConfiguration();
-    var layout = DmLayoutSupport.buildDimensionTargetTableLayout(dimension, config, new Variables());
+    var layout =
+        DmLayoutSupport.buildDimensionTargetTableLayout(dimension, config, new Variables());
 
     ModelTableLayoutPreviewSupport.MetadataPreview preview =
         ModelTableLayoutPreviewSupport.buildMetadataPreviewRows(layout);
 
     assertEquals(5, preview.previewMeta().size());
-    assertEquals(ModelTableLayoutPreviewSupport.COL_INDEX, preview.previewMeta().getValueMeta(0).getName());
-    assertEquals(ModelTableLayoutPreviewSupport.COL_FIELD, preview.previewMeta().getValueMeta(1).getName());
-    assertEquals(ModelTableLayoutPreviewSupport.COL_TYPE, preview.previewMeta().getValueMeta(2).getName());
-    assertEquals(ModelTableLayoutPreviewSupport.COL_LENGTH, preview.previewMeta().getValueMeta(3).getName());
-    assertEquals(ModelTableLayoutPreviewSupport.COL_PRECISION, preview.previewMeta().getValueMeta(4).getName());
+    assertEquals(
+        ModelTableLayoutPreviewSupport.COL_INDEX, preview.previewMeta().getValueMeta(0).getName());
+    assertEquals(
+        ModelTableLayoutPreviewSupport.COL_FIELD, preview.previewMeta().getValueMeta(1).getName());
+    assertEquals(
+        ModelTableLayoutPreviewSupport.COL_TYPE, preview.previewMeta().getValueMeta(2).getName());
+    assertEquals(
+        ModelTableLayoutPreviewSupport.COL_LENGTH, preview.previewMeta().getValueMeta(3).getName());
+    assertEquals(
+        ModelTableLayoutPreviewSupport.COL_PRECISION,
+        preview.previewMeta().getValueMeta(4).getName());
 
     assertEquals(3, preview.previewRows().size());
     assertEquals(1L, preview.previewRows().get(0)[0]);
     assertEquals("customer_id", preview.previewRows().get(0)[1]);
     assertEquals("customer_name", preview.previewRows().get(1)[1]);
     assertEquals("load_dt", preview.previewRows().get(2)[1]);
-    assertEquals(
-        layout.searchValueMeta("load_dt").getTypeDesc(),
-        preview.previewRows().get(2)[2]);
+    assertEquals(layout.searchValueMeta("load_dt").getTypeDesc(), preview.previewRows().get(2)[2]);
   }
 
   @Test
@@ -118,7 +120,10 @@ class ModelTableLayoutPreviewSupportTest {
 
     var layout =
         ModelTableLayoutPreviewSupport.resolveDvTableLayout(
-            new MemoryMetadataProvider(), new Variables(), new org.apache.hop.datavault.metadata.DataVaultModel(), hub);
+            new MemoryMetadataProvider(),
+            new Variables(),
+            new org.apache.hop.datavault.metadata.DataVaultModel(),
+            hub);
 
     assertTrue(layout.indexOfValue("customer_id_hk") >= 0);
     assertTrue(layout.indexOfValue("customer_id") >= 0);
@@ -149,12 +154,21 @@ class ModelTableLayoutPreviewSupportTest {
     RowMeta rowMeta = (RowMeta) ModelTableLayoutPreviewSupport.createMetadataPreviewRowMeta();
 
     assertEquals(5, rowMeta.size());
-    assertEquals(IValueMeta.TYPE_INTEGER, rowMeta.searchValueMeta(ModelTableLayoutPreviewSupport.COL_INDEX).getType());
-    assertEquals(IValueMeta.TYPE_STRING, rowMeta.searchValueMeta(ModelTableLayoutPreviewSupport.COL_FIELD).getType());
-    assertEquals(IValueMeta.TYPE_STRING, rowMeta.searchValueMeta(ModelTableLayoutPreviewSupport.COL_TYPE).getType());
-    assertEquals(IValueMeta.TYPE_INTEGER, rowMeta.searchValueMeta(ModelTableLayoutPreviewSupport.COL_LENGTH).getType());
     assertEquals(
-        IValueMeta.TYPE_INTEGER, rowMeta.searchValueMeta(ModelTableLayoutPreviewSupport.COL_PRECISION).getType());
+        IValueMeta.TYPE_INTEGER,
+        rowMeta.searchValueMeta(ModelTableLayoutPreviewSupport.COL_INDEX).getType());
+    assertEquals(
+        IValueMeta.TYPE_STRING,
+        rowMeta.searchValueMeta(ModelTableLayoutPreviewSupport.COL_FIELD).getType());
+    assertEquals(
+        IValueMeta.TYPE_STRING,
+        rowMeta.searchValueMeta(ModelTableLayoutPreviewSupport.COL_TYPE).getType());
+    assertEquals(
+        IValueMeta.TYPE_INTEGER,
+        rowMeta.searchValueMeta(ModelTableLayoutPreviewSupport.COL_LENGTH).getType());
+    assertEquals(
+        IValueMeta.TYPE_INTEGER,
+        rowMeta.searchValueMeta(ModelTableLayoutPreviewSupport.COL_PRECISION).getType());
   }
 
   @Test

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.openlineage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -226,7 +224,10 @@ public final class OpenLineageDatasetFacetSupport {
 
   static String toFileUri(String folder, String includeMask) {
     String base = folder == null ? "" : folder.replace('\\', '/');
-    if (!base.isEmpty() && !base.startsWith("file:") && !base.startsWith("s3:") && !base.startsWith("s3a:")) {
+    if (!base.isEmpty()
+        && !base.startsWith("file:")
+        && !base.startsWith("s3:")
+        && !base.startsWith("s3a:")) {
       if (base.startsWith("/")) {
         base = "file://" + base;
       } else {

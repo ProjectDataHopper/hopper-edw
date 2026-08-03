@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import java.util.HashSet;
@@ -44,7 +42,8 @@ public final class DmDimensionLoadStrategySupport {
     return attribute.getScdUpdatePolicy();
   }
 
-  public static String resolveSourceFieldName(DmDimensionAttribute attribute, IVariables variables) {
+  public static String resolveSourceFieldName(
+      DmDimensionAttribute attribute, IVariables variables) {
     if (attribute == null) {
       return null;
     }
@@ -55,7 +54,8 @@ public final class DmDimensionLoadStrategySupport {
     return resolveFieldName(source, variables);
   }
 
-  public static String resolveTargetFieldName(DmDimensionAttribute attribute, IVariables variables) {
+  public static String resolveTargetFieldName(
+      DmDimensionAttribute attribute, IVariables variables) {
     if (attribute == null) {
       return null;
     }
@@ -116,7 +116,10 @@ public final class DmDimensionLoadStrategySupport {
     };
   }
 
-  /** @deprecated Use {@link #resolveDisplayLabel(DmDimension)}; retained for AI/serialization compat. */
+  /**
+   * @deprecated Use {@link #resolveDisplayLabel(DmDimension)}; retained for AI/serialization
+   *     compat.
+   */
   @Deprecated
   public static DmDimensionScdType resolveDerivedScdType(DmDimension dimension) {
     DmDimensionLoadStrategy strategy = resolveLoadStrategy(dimension);

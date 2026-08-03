@@ -13,16 +13,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Date;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class WorkflowLoadOverviewReportFormatterTest {
@@ -99,7 +96,8 @@ class WorkflowLoadOverviewReportFormatterTest {
     assertTrue(markdown.contains("- Data Vault model"));
     assertTrue(markdown.contains("- Started: " + startedAtText));
     assertTrue(markdown.contains("- Finished: " + finishedAtText));
-    assertTrue(markdown.contains("| Type | Table | Source | Read | Inserted | Errors | Duration |"));
+    assertTrue(
+        markdown.contains("| Type | Table | Source | Read | Inserted | Errors | Duration |"));
     assertTrue(markdown.contains("| hub | hub_customer |"));
     assertTrue(markdown.contains("4.5s"));
     assertTrue(markdown.contains("### Pipelines"));
@@ -108,7 +106,8 @@ class WorkflowLoadOverviewReportFormatterTest {
     assertTrue(html.contains("<h2>Models</h2>"));
     assertTrue(html.contains("Started: " + startedAtText));
     assertTrue(html.contains("Finished: " + finishedAtText));
-    assertTrue(html.indexOf("Started: " + startedAtText) < html.indexOf("<strong>Execution:</strong>"));
+    assertTrue(
+        html.indexOf("Started: " + startedAtText) < html.indexOf("<strong>Execution:</strong>"));
     assertTrue(html.contains("Data Vault model"));
     assertTrue(html.contains("hub_customer"));
     assertTrue(html.contains("HIGH_TARGET_READ_RATIO"));
@@ -116,9 +115,12 @@ class WorkflowLoadOverviewReportFormatterTest {
 
   @Test
   void formatModelTypeLabelMapsKnownModelTypes() {
-    assertEquals("Data Vault model", WorkflowLoadOverviewReportFormatter.formatModelTypeLabel("dv"));
-    assertEquals("Business Vault model", WorkflowLoadOverviewReportFormatter.formatModelTypeLabel("bv"));
-    assertEquals("Dimensional model", WorkflowLoadOverviewReportFormatter.formatModelTypeLabel("dm"));
+    assertEquals(
+        "Data Vault model", WorkflowLoadOverviewReportFormatter.formatModelTypeLabel("dv"));
+    assertEquals(
+        "Business Vault model", WorkflowLoadOverviewReportFormatter.formatModelTypeLabel("bv"));
+    assertEquals(
+        "Dimensional model", WorkflowLoadOverviewReportFormatter.formatModelTypeLabel("dm"));
   }
 
   @Test

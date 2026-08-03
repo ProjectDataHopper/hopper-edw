@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.impl.file;
 
 import java.util.ArrayList;
@@ -36,11 +34,11 @@ import org.apache.hop.catalog.model.RecordDefinitionType;
 import org.apache.hop.catalog.model.RecordDefinitionValidationAcknowledgement;
 import org.apache.hop.catalog.model.RecordOrigin;
 import org.apache.hop.catalog.util.RowMetaCatalogSupport;
-import org.apache.hop.quality.model.RecordQualityRuleBinding;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.RowMeta;
+import org.apache.hop.quality.model.RecordQualityRuleBinding;
 
 /** JSON-serializable document stored by {@link FileDataCatalog} and catalog version snapshots. */
 @Getter
@@ -71,7 +69,9 @@ public class RecordDefinitionDocument {
     doc.namespace = definition.getKey().getNamespace();
     doc.name = definition.getKey().getName();
     doc.type =
-        definition.getType() != null ? definition.getType().name() : RecordDefinitionType.UNKNOWN.name();
+        definition.getType() != null
+            ? definition.getType().name()
+            : RecordDefinitionType.UNKNOWN.name();
     doc.description = definition.getDescription();
     doc.rowMetaXml = RowMetaCatalogSupport.toXml(definition.getFields());
     doc.origin = definition.getOrigin();

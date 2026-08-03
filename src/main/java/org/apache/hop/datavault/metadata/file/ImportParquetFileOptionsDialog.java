@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.file;
 
 import java.util.List;
@@ -23,6 +21,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.Const;
 import org.apache.hop.datavault.catalog.RecordSourceIndicatorOptions;
+import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
+import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.datavault.metadata.RecordSourceIndicatorImportSection;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.PropsUi;
@@ -37,8 +37,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
-import org.apache.hop.datavault.hopgui.help.HelpTopics;
 
 /** Collects import options before importing a Parquet file as a catalog record definition. */
 @Getter
@@ -95,7 +93,8 @@ public class ImportParquetFileOptionsDialog {
 
     Label wlFilePath = new Label(shell, SWT.RIGHT);
     PropsUi.setLook(wlFilePath);
-    wlFilePath.setText(BaseMessages.getString(PKG, "ImportParquetFileOptionsDialog.FilePath.Label"));
+    wlFilePath.setText(
+        BaseMessages.getString(PKG, "ImportParquetFileOptionsDialog.FilePath.Label"));
     FormData fdlFilePath = new FormData();
     fdlFilePath.top = new FormAttachment(0, margin);
     fdlFilePath.left = new FormAttachment(0, 0);

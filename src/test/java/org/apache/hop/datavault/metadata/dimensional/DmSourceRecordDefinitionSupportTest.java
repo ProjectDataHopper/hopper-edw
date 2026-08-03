@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -65,8 +63,7 @@ class DmSourceRecordDefinitionSupportTest {
   void setUp() throws HopException {
     variables = new Variables();
     variables.setVariable(
-        "PROJECT_HOME",
-        Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
+        "PROJECT_HOME", Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
 
     metadataProvider = new MemoryMetadataProvider();
     DatabaseMeta crm = new DatabaseMeta();

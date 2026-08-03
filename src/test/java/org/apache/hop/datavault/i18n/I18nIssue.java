@@ -13,15 +13,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.i18n;
 
-import java.nio.file.Path;
-
 /** A validation problem for an i18n key reference or bundle entry. */
-public record I18nIssue(Type type, String message, I18nReference reference, String key, String lookupPackage) {
+public record I18nIssue(
+    Type type, String message, I18nReference reference, String key, String lookupPackage) {
 
   public enum Type {
     MISSING,
@@ -55,7 +52,9 @@ public record I18nIssue(Type type, String message, I18nReference reference, Stri
         reference.kind() == I18nReference.Kind.ANNOTATION
             ? "i18n:" + foundInPackage + ":" + reference.key()
             : dependencyBundle
-                ? "use " + keyOwnerClass(reference.key()) + ".class as PKG, or duplicate key into "
+                ? "use "
+                    + keyOwnerClass(reference.key())
+                    + ".class as PKG, or duplicate key into "
                     + bundlePath(reference.lookupPackage())
                 : "duplicate key into "
                     + bundlePath(reference.lookupPackage())
@@ -101,9 +100,11 @@ public record I18nIssue(Type type, String message, I18nReference reference, Stri
         packageName);
   }
 
-  private static String formatReferenceIssue(String label, I18nReference reference, String... details) {
+  private static String formatReferenceIssue(
+      String label, I18nReference reference, String... details) {
     String fileName = reference.sourceFile().getFileName().toString();
-    StringBuilder builder = new StringBuilder(label).append(' ').append(fileName).append(':').append(reference.line());
+    StringBuilder builder =
+        new StringBuilder(label).append(' ').append(fileName).append(':').append(reference.line());
     for (String detail : details) {
       builder.append(System.lineSeparator()).append("  ").append(detail);
     }
@@ -112,6 +113,8 @@ public record I18nIssue(Type type, String message, I18nReference reference, Stri
   }
 
   private static String bundlePath(String packageName) {
-    return "src/main/resources/" + packageName.replace('.', '/') + "/messages/messages_en_US.properties";
+    return "src/main/resources/"
+        + packageName.replace('.', '/')
+        + "/messages/messages_en_US.properties";
   }
 }

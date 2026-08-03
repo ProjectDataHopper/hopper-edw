@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,8 +48,7 @@ class BvSqlTemplateParserTest {
   @Test
   void parsesSource() {
     List<BvSqlTemplateParser.MacroOccurrence> macros =
-        BvSqlTemplateParser.parse(
-            "JOIN {{ source('refdata', 'ref_lookup_something') }} l ON 1=1");
+        BvSqlTemplateParser.parse("JOIN {{ source('refdata', 'ref_lookup_something') }} l ON 1=1");
     assertEquals(1, macros.size());
     assertEquals(BvSqlTemplateParser.MacroKind.SOURCE, macros.get(0).kind());
     assertEquals("refdata", macros.get(0).sourceName());

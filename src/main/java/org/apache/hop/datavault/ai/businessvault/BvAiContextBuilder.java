@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai.businessvault;
 
 import java.util.ArrayList;
@@ -28,6 +26,7 @@ import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.ai.DvAiContextBuilder;
 import org.apache.hop.datavault.ai.DvTargetLoadAiConfigurationSupport;
 import org.apache.hop.datavault.metadata.DataVaultModel;
+import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultConfiguration;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultDvModelResolver;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
@@ -36,7 +35,6 @@ import org.apache.hop.datavault.metadata.businessvault.BvPitTable;
 import org.apache.hop.datavault.metadata.businessvault.BvScd2SatelliteConfig;
 import org.apache.hop.datavault.metadata.businessvault.BvScd2Table;
 import org.apache.hop.datavault.metadata.businessvault.IBvTable;
-import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
 import org.apache.hop.datavault.metrics.ExecutionInfoAiContextBuilder;
 import org.apache.hop.datavault.metrics.MetricsAiContextBuilder;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
@@ -78,7 +76,8 @@ public final class BvAiContextBuilder {
 
     String linkedDvModelStructureJson = "";
     if (request.isIncludeLinkedDvModel()) {
-      linkedDvModelStructureJson = serializeLinkedDvModelStructure(model, variables, metadataProvider);
+      linkedDvModelStructureJson =
+          serializeLinkedDvModelStructure(model, variables, metadataProvider);
     }
 
     String loadRunMetricsJson =
@@ -208,13 +207,16 @@ public final class BvAiContextBuilder {
     }
     json.append("],\"configuration\":");
     BusinessVaultConfiguration config = model.getConfigurationOrDefault();
-    json.append("{\"targetDatabase\":").append(DvAiContextBuilder.jsonString(config.getTargetDatabase()));
+    json.append("{\"targetDatabase\":")
+        .append(DvAiContextBuilder.jsonString(config.getTargetDatabase()));
     json.append(",\"functionalTimestampField\":")
         .append(DvAiContextBuilder.jsonString(config.getFunctionalTimestampField()));
     json.append(",\"loadDateFieldFallback\":")
         .append(DvAiContextBuilder.jsonString(config.getLoadDateFieldFallback()));
-    json.append(",\"validFromField\":").append(DvAiContextBuilder.jsonString(config.getValidFromField()));
-    json.append(",\"validToField\":").append(DvAiContextBuilder.jsonString(config.getValidToField()));
+    json.append(",\"validFromField\":")
+        .append(DvAiContextBuilder.jsonString(config.getValidFromField()));
+    json.append(",\"validToField\":")
+        .append(DvAiContextBuilder.jsonString(config.getValidToField()));
     DvTargetLoadAiConfigurationSupport.appendTargetLoadSummaryJson(json, config);
     json.append("}}");
     return json.toString();
@@ -287,9 +289,7 @@ public final class BvAiContextBuilder {
               ? "ERROR"
               : result.getType() == ICheckResult.TYPE_RESULT_OK
                   ? "OK"
-                  : result.getType() == ICheckResult.TYPE_RESULT_WARNING
-                      ? "WARNING"
-                      : "INFO";
+                  : result.getType() == ICheckResult.TYPE_RESULT_WARNING ? "WARNING" : "INFO";
       json.append("{\"type\":").append(DvAiContextBuilder.jsonString(type));
       json.append(",\"text\":").append(DvAiContextBuilder.jsonString(result.getText()));
       json.append(",\"source\":").append(DvAiContextBuilder.jsonString(formatCheckSource(result)));

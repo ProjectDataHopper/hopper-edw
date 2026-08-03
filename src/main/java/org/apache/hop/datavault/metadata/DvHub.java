@@ -13,17 +13,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
@@ -33,7 +29,6 @@ import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.Condition;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.ICheckResult;
-import org.apache.hop.core.database.Database;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.exception.HopValueException;
@@ -43,8 +38,6 @@ import org.apache.hop.core.gui.plugin.GuiElementType;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.GuiWidgetElement;
 import org.apache.hop.core.logging.ILoggingObject;
-import org.apache.hop.core.logging.LoggingObjectType;
-import org.apache.hop.core.logging.SimpleLoggingObject;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.RowMeta;
@@ -60,20 +53,19 @@ import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.catalog.DvSourceCatalogService;
 import org.apache.hop.datavault.transform.dvhashkey.DvHashKeyMeta;
 import org.apache.hop.datavault.transform.dvhashkey.DvHashKeyMetaFactory;
+import org.apache.hop.datavault.transform.mergerowsplus.MergeRowsPlusMeta;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHasName;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.metadata.api.IHopMetadataSerializer;
 import org.apache.hop.pipeline.PipelineHopMeta;
 import org.apache.hop.pipeline.PipelineMeta;
-import org.apache.hop.workflow.WorkflowMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transforms.constant.ConstantField;
 import org.apache.hop.pipeline.transforms.constant.ConstantMeta;
 import org.apache.hop.pipeline.transforms.filterrows.FilterRowsMeta;
-import org.apache.hop.datavault.transform.mergerowsplus.MergeRowsPlusMeta;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
+import org.apache.hop.workflow.WorkflowMeta;
 import org.jspecify.annotations.NonNull;
 
 /**
@@ -277,8 +269,7 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
                       .filter(s -> !Utils.isEmpty(s))
                       .anyMatch(
                           s -> {
-                            String resolvedHubSource =
-                                variables != null ? variables.resolve(s) : s;
+                            String resolvedHubSource = variables != null ? variables.resolve(s) : s;
                             return resolvedBkSource.equals(resolvedHubSource);
                           });
               if (!listed) {
@@ -366,7 +357,8 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
           continue;
         }
         try {
-          String resolvedRef = variables != null ? variables.resolve(recordSourceRef) : recordSourceRef;
+          String resolvedRef =
+              variables != null ? variables.resolve(recordSourceRef) : recordSourceRef;
           DataVaultSource recordSource =
               DvSourceCatalogService.resolveSource(resolvedRef, model, variables, metadataProvider);
           if (recordSource != null) {
@@ -517,11 +509,7 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
                 Set.of("flag"));
         if (writeResult != null && writeResult.transformMeta != null) {
           GeneratedPipelineMetadataSupport.stampWriteTarget(
-              writeResult.transformMeta,
-              "hub",
-              getName(),
-              ctx.targetTableName,
-              ctx.targetDbName);
+              writeResult.transformMeta, "hub", getName(), ctx.targetTableName, ctx.targetDbName);
         }
 
         result.add(pipelineMeta);
@@ -542,8 +530,7 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
       String recordSourceGroup)
       throws HopException {
     List<PipelineMeta> pipelines =
-        generateUpdatePipelines(
-            metadataProvider, variables, model, loadDate, recordSourceGroup);
+        generateUpdatePipelines(metadataProvider, variables, model, loadDate, recordSourceGroup);
     if (pipelines == null || pipelines.size() <= 1) {
       return List.of();
     }
@@ -553,8 +540,7 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
         config != null && !Utils.isEmpty(config.getHubPipelineNamePrefix())
             ? config.getHubPipelineNamePrefix()
             : DataVaultConfiguration.DEFAULT_HUB_PIPELINE_NAME_PREFIX;
-    String workflowName =
-        DvMultiSourceUpdateWorkflowSupport.defaultWorkflowName(this, prefix);
+    String workflowName = DvMultiSourceUpdateWorkflowSupport.defaultWorkflowName(this, prefix);
     return DvMultiSourceUpdateWorkflowSupport.buildSerialWorkflowsIfMultiSource(
         workflowName, pipelines);
   }
@@ -676,12 +662,14 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
     return rsFieldName;
   }
 
-  private DvSqlOrderByCollationSupport.Session loadHubOrderByCollationSession(HubUpdateContext ctx) {
+  private DvSqlOrderByCollationSupport.Session loadHubOrderByCollationSession(
+      HubUpdateContext ctx) {
     try {
       DatabaseMeta sourceDatabaseMeta = null;
       String sourceSchema = null;
       String sourceTable = null;
-      if (ctx.dvSource instanceof org.apache.hop.datavault.metadata.database.DvDatabaseSource dbSource) {
+      if (ctx.dvSource
+          instanceof org.apache.hop.datavault.metadata.database.DvDatabaseSource dbSource) {
         sourceSchema = dbSource.getSchemaName();
         sourceTable = dbSource.getTableName();
         if (!Utils.isEmpty(dbSource.getDatabaseName())) {
@@ -763,10 +751,7 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
   }
 
   private TransformMeta addDvHashKey(
-      HubUpdateContext ctx,
-      PipelineMeta pipelineMeta,
-      TransformMeta predecessor,
-      Point hashLine) {
+      HubUpdateContext ctx, PipelineMeta pipelineMeta, TransformMeta predecessor, Point hashLine) {
     String resultFieldName = ctx.hub.getHashKeyFieldName();
     if (Utils.isEmpty(resultFieldName)) {
       String bkName = "hashkey";
@@ -863,8 +848,8 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
   }
 
   /**
-   * Business keys that apply to the given record source. When {@link BusinessKey#getRecordSourceName()}
-   * is empty the key applies to every source.
+   * Business keys that apply to the given record source. When {@link
+   * BusinessKey#getRecordSourceName()} is empty the key applies to every source.
    */
   public List<BusinessKey> getBusinessKeysForSource(String sourceName, IVariables variables) {
     List<BusinessKey> result = new ArrayList<>();
@@ -949,8 +934,7 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
       this.metadataProvider = metadataProvider;
       this.variables = variables;
       this.config = config;
-      this.hashAlgorithm =
-          (config != null) ? config.resolveHashAlgorithm() : HashAlgorithm.MD5;
+      this.hashAlgorithm = (config != null) ? config.resolveHashAlgorithm() : HashAlgorithm.MD5;
       this.dataVaultSource = dataVaultSource;
       this.targetDatabaseMeta = targetDatabaseMeta;
       this.targetDbName = targetDbName;
@@ -984,7 +968,7 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
       }
 
       DataVaultConfiguration config = model.getConfigurationOrDefault();
-      
+
       // Target DB
       DatabaseMeta targetDatabaseMeta = null;
       String targetDbName = (config != null) ? config.getTargetDatabase() : null;

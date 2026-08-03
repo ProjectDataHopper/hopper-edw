@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -55,14 +53,14 @@ class ValidationFindingFormatterTest {
     assertTrue(text.contains("Target database") || text.toLowerCase().contains("target"), text);
     assertTrue(text.contains("sat_customer"), text);
     assertTrue(text.contains("Found:"), text);
-    assertTrue(text.toLowerCase().contains("first load") || text.toLowerCase().contains("ddl"), text);
+    assertTrue(
+        text.toLowerCase().contains("first load") || text.toLowerCase().contains("ddl"), text);
   }
 
   @Test
   void shortTitleExtractsFoundLine() {
     String structured =
-        ValidationFindingFormatter.baselineContractMissing(
-            "hop/x/y", "v1.0.0", true);
+        ValidationFindingFormatter.baselineContractMissing("hop/x/y", "v1.0.0", true);
     String shortTitle = ValidationFindingFormatter.shortTitle(structured);
     assertTrue(shortTitle.contains("hop/x/y") || shortTitle.contains("v1.0.0"), shortTitle);
     assertFalse(shortTitle.startsWith("Axis:"), shortTitle);
@@ -73,7 +71,8 @@ class ValidationFindingFormatterTest {
     String line =
         ValidationFindingFormatter.describeCompareContext(
             SchemaCompareMode.LIVE_SOURCE, null, null);
-    assertTrue(line.toLowerCase().contains("working catalog") || line.contains("LIVE_SOURCE"), line);
+    assertTrue(
+        line.toLowerCase().contains("working catalog") || line.contains("LIVE_SOURCE"), line);
   }
 
   @Test
@@ -91,9 +90,9 @@ class ValidationFindingFormatterTest {
   @Test
   void humanTitleForBaselineMissing() {
     String title =
-        ValidationFindingFormatter.humanTitle(
-            ValidationReport.IssueKind.BASELINE_CONTRACT_MISSING);
-    assertTrue(title.toLowerCase().contains("baseline") || title.toLowerCase().contains("missing"), title);
+        ValidationFindingFormatter.humanTitle(ValidationReport.IssueKind.BASELINE_CONTRACT_MISSING);
+    assertTrue(
+        title.toLowerCase().contains("baseline") || title.toLowerCase().contains("missing"), title);
     assertFalse(title.contains("BASELINE_CONTRACT"), title);
   }
 

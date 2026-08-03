@@ -13,14 +13,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import org.apache.hop.core.variables.IVariables;
 
-/** Target load and generated-artifact settings shared by DV, Business Vault, and dimensional models. */
+/**
+ * Target load and generated-artifact settings shared by DV, Business Vault, and dimensional models.
+ */
 public interface IDvTargetLoadConfiguration {
 
   String getTargetDatabase();

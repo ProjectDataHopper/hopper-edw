@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.ai;
 
 import java.util.List;
@@ -32,9 +30,11 @@ import org.apache.hop.datavault.ai.DvAiProposalValidator;
 import org.apache.hop.datavault.ai.DvAiRequest;
 import org.apache.hop.datavault.ai.DvAiResponse;
 import org.apache.hop.datavault.ai.DvAiScenario;
-import org.apache.hop.datavault.hopgui.EnumDialogSupport;
 import org.apache.hop.datavault.ai.HopAiConfig;
 import org.apache.hop.datavault.ai.HopAiConfigSingleton;
+import org.apache.hop.datavault.hopgui.EnumDialogSupport;
+import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
+import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
@@ -59,8 +59,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.jspecify.annotations.NonNull;
-import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
-import org.apache.hop.datavault.hopgui.help.HelpTopics;
 
 /** AI advisory dialog for the Data Vault modeler. */
 public class DvAiAdvisorDialog {
@@ -391,7 +389,8 @@ public class DvAiAdvisorDialog {
     var requestBuilder =
         DvAiRequest.builder()
             .userPrompt(question.trim())
-            .scenario(EnumDialogSupport.readCombo(wScenario, DvAiScenario.class, DvAiScenario.GENERAL))
+            .scenario(
+                EnumDialogSupport.readCombo(wScenario, DvAiScenario.class, DvAiScenario.GENERAL))
             .includeCheckResults(wIncludeChecks.getSelection())
             .includeCatalogSources(wIncludeCatalog.getSelection())
             .includeModelXml(wIncludeModelXml.getSelection())
@@ -550,10 +549,10 @@ public class DvAiAdvisorDialog {
   private void startNewConversation() {
     session.clear();
     lastScenarioIndex = wScenario.getSelectionIndex();
-    session.setScenario(EnumDialogSupport.readCombo(wScenario, DvAiScenario.class, DvAiScenario.GENERAL));
+    session.setScenario(
+        EnumDialogSupport.readCombo(wScenario, DvAiScenario.class, DvAiScenario.GENERAL));
     transcriptPanel.clear();
     updateCatalogSourceButton();
     wlStatusMessage.setText(statusMessage());
   }
-
 }

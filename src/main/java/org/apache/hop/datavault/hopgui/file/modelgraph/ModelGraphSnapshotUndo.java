@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.modelgraph;
 
 import java.io.ByteArrayInputStream;
@@ -93,13 +91,13 @@ public class ModelGraphSnapshotUndo<M> {
     redoStack.clear();
   }
 
-  public byte[] captureSnapshot(M model, IHopMetadataProvider metadataProvider) throws HopException {
+  public byte[] captureSnapshot(M model, IHopMetadataProvider metadataProvider)
+      throws HopException {
     if (model == null) {
       throw new HopException("Cannot capture snapshot of a null model");
     }
     try {
-      String xml =
-          XmlHandler.aroundTag(xmlRootTag, XmlMetadataUtil.serializeObjectToXml(model));
+      String xml = XmlHandler.aroundTag(xmlRootTag, XmlMetadataUtil.serializeObjectToXml(model));
       return compress(xml);
     } catch (Exception e) {
       throw new HopException("Error capturing model snapshot", e);
@@ -145,13 +143,15 @@ public class ModelGraphSnapshotUndo<M> {
   }
 
   @SuppressWarnings("unchecked")
-  public Object undoObject(Object model, IHopMetadataProvider metadataProvider, String preserveFilename)
+  public Object undoObject(
+      Object model, IHopMetadataProvider metadataProvider, String preserveFilename)
       throws HopException {
     return undo((M) model, metadataProvider, preserveFilename);
   }
 
   @SuppressWarnings("unchecked")
-  public Object redoObject(Object model, IHopMetadataProvider metadataProvider, String preserveFilename)
+  public Object redoObject(
+      Object model, IHopMetadataProvider metadataProvider, String preserveFilename)
       throws HopException {
     return redo((M) model, metadataProvider, preserveFilename);
   }

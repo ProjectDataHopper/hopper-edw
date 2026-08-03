@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.hopgui.perspective.importmenu;
 
 import java.util.ArrayList;
@@ -41,7 +39,10 @@ public final class DataCatalogImportMenu {
   private DataCatalogImportMenu() {}
 
   public static void open(
-      HopGui hopGui, DataVaultModel model, String preferredCatalogConnectionName, Runnable onComplete) {
+      HopGui hopGui,
+      DataVaultModel model,
+      String preferredCatalogConnectionName,
+      Runnable onComplete) {
     DataCatalogImportContext context =
         new DataCatalogImportContext(
             hopGui.getShell(),

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai;
 
 import org.apache.hop.core.exception.HopException;
@@ -32,8 +30,7 @@ public final class HopAiActionPluginSupport {
   public static ActionMeta newActionMeta(String pluginId, String name) throws HopException {
     try {
       IAction action =
-          PluginRegistry.getInstance()
-              .loadClass(ActionPluginType.class, pluginId, IAction.class);
+          PluginRegistry.getInstance().loadClass(ActionPluginType.class, pluginId, IAction.class);
       ActionMeta actionMeta = new ActionMeta(action);
       actionMeta.setName(name);
       return actionMeta;

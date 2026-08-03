@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.architecture;
 
 import java.util.ArrayList;
@@ -37,15 +35,16 @@ public class ArchitectureGraph {
   private String name;
   private String description;
   private ArchitectureViewType viewType = ArchitectureViewType.SOLUTION;
+
   /**
-   * When true, Draw.io export uses node x/y coordinates (ELK freeform) instead of swimlanes.
-   * When false, layered swimlane packing is used.
+   * When true, Draw.io export uses node x/y coordinates (ELK freeform) instead of swimlanes. When
+   * false, layered swimlane packing is used.
    */
   private boolean freeformLayout;
-  /**
-   * When true, Draw.io omits relationship edges (DATA inventory: tables only, no ER spider).
-   */
+
+  /** When true, Draw.io omits relationship edges (DATA inventory: tables only, no ER spider). */
   private boolean omitEdges;
+
   private final Map<String, ArchitectureNode> nodesById = new LinkedHashMap<>();
   private final List<ArchitectureEdge> edges = new ArrayList<>();
 
@@ -90,8 +89,7 @@ public class ArchitectureGraph {
     edges.add(edge);
   }
 
-  public void addEdge(
-      String fromId, String toId, ArchitectureEdgeKind kind, String label) {
+  public void addEdge(String fromId, String toId, ArchitectureEdgeKind kind, String label) {
     addEdge(new ArchitectureEdge(null, fromId, toId, kind, label));
   }
 

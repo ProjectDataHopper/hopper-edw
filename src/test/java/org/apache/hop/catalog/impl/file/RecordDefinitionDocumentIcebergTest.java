@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.impl.file;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,7 +36,8 @@ class RecordDefinitionDocumentIcebergTest {
   @Test
   void projectCatalogJson_deserializesPhysicalIcebergTable() throws Exception {
     Path catalogJson =
-        Path.of("integration-tests/catalog-data/hop/integration-tests/sources/CRM-customer-iceberg.json");
+        Path.of(
+            "integration-tests/catalog-data/hop/integration-tests/sources/CRM-customer-iceberg.json");
     RecordDefinitionDocument doc =
         MAPPER.readValue(Files.readString(catalogJson), RecordDefinitionDocument.class);
 
@@ -75,10 +74,8 @@ class RecordDefinitionDocumentIcebergTest {
     RecordDefinitionDocument restored =
         MAPPER.readValue(serialized, RecordDefinitionDocument.class);
     assertEquals(
-        physicalIcebergTable.getCatalogUri(),
-        restored.getPhysicalIcebergTable().getCatalogUri());
+        physicalIcebergTable.getCatalogUri(), restored.getPhysicalIcebergTable().getCatalogUri());
     assertEquals(
-        physicalIcebergTable.getS3SecretKey(),
-        restored.getPhysicalIcebergTable().getS3SecretKey());
+        physicalIcebergTable.getS3SecretKey(), restored.getPhysicalIcebergTable().getS3SecretKey());
   }
 }

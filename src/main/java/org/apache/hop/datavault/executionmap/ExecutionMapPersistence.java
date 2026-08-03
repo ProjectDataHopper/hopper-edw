@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import org.apache.hop.core.exception.HopException;
@@ -55,8 +53,8 @@ public final class ExecutionMapPersistence {
     }
   }
 
-  public static void save(
-      ExecutionMapDocument document, String filename, IVariables variables) throws HopException {
+  public static void save(ExecutionMapDocument document, String filename, IVariables variables)
+      throws HopException {
     if (document == null) {
       throw new HopException("No execution map document to save");
     }

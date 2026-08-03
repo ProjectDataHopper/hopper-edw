@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import org.apache.hop.core.util.Utils;
@@ -43,10 +41,7 @@ public final class BusinessVaultDerivativeSupport {
       return false;
     }
     return bvTable.getDerivatives().stream()
-        .anyMatch(
-            ref ->
-                ref != null
-                    && dvTableName.equalsIgnoreCase(ref.getDvTableName()));
+        .anyMatch(ref -> ref != null && dvTableName.equalsIgnoreCase(ref.getDvTableName()));
   }
 
   public static boolean canAddDerivative(IBvTable bvTable, BvDvTableReference dvReference) {
@@ -89,8 +84,6 @@ public final class BusinessVaultDerivativeSupport {
     }
     return bvTable
         .getDerivatives()
-        .removeIf(
-            ref ->
-                ref != null && dvTableName.equalsIgnoreCase(ref.getDvTableName()));
+        .removeIf(ref -> ref != null && dvTableName.equalsIgnoreCase(ref.getDvTableName()));
   }
 }

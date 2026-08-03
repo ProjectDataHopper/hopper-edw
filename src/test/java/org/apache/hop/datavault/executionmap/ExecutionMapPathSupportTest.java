@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -120,6 +119,7 @@ class ExecutionMapPathSupportTest {
 
     String resolved =
         ExecutionMapPathSupport.toResolvedPath("${PROJECT_HOME}/models/x.hdv", variables);
-    assertEquals(model.toAbsolutePath().normalize().toString(), Path.of(resolved).normalize().toString());
+    assertEquals(
+        model.toAbsolutePath().normalize().toString(), Path.of(resolved).normalize().toString());
   }
 }

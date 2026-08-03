@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.ArrayList;
@@ -45,8 +43,8 @@ public final class DvDdlSupport {
   public static final String SQL_SERVER_UTF8_COLLATION = "Latin1_General_100_CI_AS_SC_UTF8";
 
   /**
-   * Multiplier applied to Hop string lengths when generating SQL Server {@code VARCHAR}/{@code CHAR}
-   * with a UTF-8 collation.
+   * Multiplier applied to Hop string lengths when generating SQL Server {@code VARCHAR}/{@code
+   * CHAR} with a UTF-8 collation.
    *
    * <p>Source metadata (and Hop {@link IValueMeta} lengths) are character-oriented — matching
    * {@code NVARCHAR(n)} where {@code n} is in UTF-16 code units. SQL Server {@code VARCHAR(n)} with
@@ -77,8 +75,7 @@ public final class DvDdlSupport {
   private DvDdlSupport() {}
 
   public static boolean isSingleStore(DatabaseMeta databaseMeta) {
-    return databaseMeta != null
-        && "SINGLESTORE".equalsIgnoreCase(databaseMeta.getPluginId());
+    return databaseMeta != null && "SINGLESTORE".equalsIgnoreCase(databaseMeta.getPluginId());
   }
 
   /**
@@ -102,9 +99,7 @@ public final class DvDdlSupport {
 
   public static boolean isShardKeyDdlEnabled(
       DataVaultConfiguration config, DatabaseMeta databaseMeta) {
-    return config != null
-        && config.isSingleStoreShardKeyOnHashKey()
-        && isSingleStore(databaseMeta);
+    return config != null && config.isSingleStoreShardKeyOnHashKey() && isSingleStore(databaseMeta);
   }
 
   /**
@@ -167,8 +162,8 @@ public final class DvDdlSupport {
   }
 
   /**
-   * Returns Hop-generated DDL for a target table, with SQL Server UTF-8 collations applied to
-   * ANSI string columns on both CREATE and ALTER paths.
+   * Returns Hop-generated DDL for a target table, with SQL Server UTF-8 collations applied to ANSI
+   * string columns on both CREATE and ALTER paths.
    */
   public static String getTargetTableDdl(Database db, String tableName, IRowMeta fields)
       throws HopDatabaseException {
@@ -290,8 +285,8 @@ public final class DvDdlSupport {
   }
 
   /**
-   * Returns {@code true} when a CREATE TABLE statement should not be executed because the table
-   * was already created in the current batch or already exists in the target database.
+   * Returns {@code true} when a CREATE TABLE statement should not be executed because the table was
+   * already created in the current batch or already exists in the target database.
    */
   public static boolean shouldSkipCreateTable(
       Database db,
@@ -453,7 +448,9 @@ public final class DvDdlSupport {
       }
       ddl.append(",").append(Const.CR);
       if (!Utils.isEmpty(fk.getConstraintName())) {
-        ddl.append("CONSTRAINT ").append(databaseMeta.quoteField(fk.getConstraintName())).append(" ");
+        ddl.append("CONSTRAINT ")
+            .append(databaseMeta.quoteField(fk.getConstraintName()))
+            .append(" ");
       }
       ddl.append("FOREIGN KEY (");
       for (int i = 0; i < fk.getChildColumns().size(); i++) {
@@ -501,9 +498,9 @@ public final class DvDdlSupport {
   }
 
   /**
-   * Rewrites CREATE/ALTER DDL so SQL Server ANSI string types carry the EDW UTF-8 collation.
-   * No-op for other engines or empty input. Does not double-apply when {@code COLLATE} is already
-   * present after a string type.
+   * Rewrites CREATE/ALTER DDL so SQL Server ANSI string types carry the EDW UTF-8 collation. No-op
+   * for other engines or empty input. Does not double-apply when {@code COLLATE} is already present
+   * after a string type.
    */
   public static String enrichSqlServerDdl(DatabaseMeta databaseMeta, String ddl) {
     if (!DvSqlOrderBySupport.isSqlServer(databaseMeta) || Utils.isEmpty(ddl)) {

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.businessvault;
 
 import java.util.ArrayList;
@@ -28,7 +26,8 @@ import org.apache.hop.ui.hopgui.context.BaseGuiContextHandler;
 import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
 
 /** Context handler for background clicks on a Business Vault graph canvas. */
-public class HopGuiBusinessVaultContext extends BaseGuiContextHandler implements IGuiContextHandler {
+public class HopGuiBusinessVaultContext extends BaseGuiContextHandler
+    implements IGuiContextHandler {
 
   public static final String CONTEXT_ID = "HopGuiBusinessVaultContext";
 
@@ -51,7 +50,8 @@ public class HopGuiBusinessVaultContext extends BaseGuiContextHandler implements
   @Override
   public List<GuiAction> getSupportedActions() {
     List<GuiAction> actions = new ArrayList<>();
-    GuiActionLambdaBuilder<HopGuiBusinessVaultContext> lambdaBuilder = new GuiActionLambdaBuilder<>();
+    GuiActionLambdaBuilder<HopGuiBusinessVaultContext> lambdaBuilder =
+        new GuiActionLambdaBuilder<>();
     List<GuiAction> pluginActions = getPluginActions(true);
     if (pluginActions != null) {
       for (GuiAction pluginAction : pluginActions) {

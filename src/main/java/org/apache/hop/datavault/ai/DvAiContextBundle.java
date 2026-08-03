@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai;
 
 import java.util.List;
@@ -38,8 +36,10 @@ public class DvAiContextBundle {
   private final String loadRunMetricsJson;
   private final String executionInfoJson;
   private final String logsExcerpt;
+
   /** True when this is a follow-up turn in an ongoing conversation. */
   private final boolean followUp;
+
   /** Summaries of proposals the user applied since the previous turn. */
   private final List<String> appliedChangeSummaries;
 }

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.transform.sortedschemamerge;
 
 import org.apache.hop.core.IRowSet;
@@ -29,8 +27,7 @@ public final class SortedSchemaMergeRow {
   private final IRowMeta rowMeta;
   private final Object[] rowData;
 
-  public SortedSchemaMergeRow(
-      int streamIndex, IRowSet rowSet, IRowMeta rowMeta, Object[] rowData) {
+  public SortedSchemaMergeRow(int streamIndex, IRowSet rowSet, IRowMeta rowMeta, Object[] rowData) {
     this.streamIndex = streamIndex;
     this.rowSet = rowSet;
     this.rowMeta = rowMeta;

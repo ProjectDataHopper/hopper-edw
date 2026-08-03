@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.hopgui.file.sourcemodel;
 
 import java.util.ArrayList;
@@ -42,7 +41,8 @@ public final class SourceRelationshipEdgeLayout {
     BOTTOM
   }
 
-  public record EdgeGeometry(Point childAnchor, Point parentAnchor, Side childSide, Side parentSide) {}
+  public record EdgeGeometry(
+      Point childAnchor, Point parentAnchor, Side childSide, Side parentSide) {}
 
   private SourceRelationshipEdgeLayout() {}
 
@@ -54,7 +54,8 @@ public final class SourceRelationshipEdgeLayout {
     }
 
     // Provisional mid anchors to determine facing sides.
-    record Provisional(SourceRelationship rel, Bounds childB, Bounds parentB, Side childSide, Side parentSide) {}
+    record Provisional(
+        SourceRelationship rel, Bounds childB, Bounds parentB, Side childSide, Side parentSide) {}
     List<Provisional> provisionals = new ArrayList<>();
     for (SourceRelationship relationship : model.getRelationships()) {
       if (relationship == null || !relationship.isValid()) {
@@ -62,7 +63,10 @@ public final class SourceRelationshipEdgeLayout {
       }
       SourceTable child = tableByName.get(relationship.getChildTableName());
       SourceTable parent = tableByName.get(relationship.getParentTableName());
-      if (child == null || parent == null || child.getLocation() == null || parent.getLocation() == null) {
+      if (child == null
+          || parent == null
+          || child.getLocation() == null
+          || parent.getLocation() == null) {
         continue;
       }
       Bounds childB = boundsOf(child);

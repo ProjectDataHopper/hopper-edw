@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.metadata;
 
 import java.util.Comparator;
@@ -229,11 +227,7 @@ public class DataCatalogMetaEditor extends MetadataEditor<DataCatalogMeta> {
     IDataCatalog catalog = getMetadata().getCatalogOrDefault();
     guiCompositeWidgets = new GuiCompositeWidgets(manager.getVariables());
     guiCompositeWidgets.createCompositeWidgets(
-        catalog,
-        null,
-        wCatalogSpecificComp,
-        getGuiPluginElementParentId(catalog),
-        null);
+        catalog, null, wCatalogSpecificComp, getGuiPluginElementParentId(catalog), null);
     guiCompositeWidgets.setWidgetsListener(
         new GuiCompositeWidgetsAdapter() {
           @Override

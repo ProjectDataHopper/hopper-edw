@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai;
 
 import org.apache.hop.core.exception.HopException;
@@ -29,13 +27,17 @@ public final class HopAiM2PromptSupport {
 
   public static String buildM2Supplement() throws HopException {
     StringBuilder prompt = new StringBuilder();
-    prompt.append(HopAiPromptLoader.loadResource(PROMPT_ROOT, "preamble-hop-m2-supplement.txt"))
+    prompt
+        .append(HopAiPromptLoader.loadResource(PROMPT_ROOT, "preamble-hop-m2-supplement.txt"))
         .append('\n');
-    prompt.append(HopAiPromptLoader.loadResource(PROMPT_ROOT, "standards-condensed.txt"))
+    prompt
+        .append(HopAiPromptLoader.loadResource(PROMPT_ROOT, "standards-condensed.txt"))
         .append("\n\n");
-    prompt.append(HopAiPromptLoader.loadResource(PROMPT_ROOT, "skeleton-reference.txt"))
+    prompt
+        .append(HopAiPromptLoader.loadResource(PROMPT_ROOT, "skeleton-reference.txt"))
         .append("\n\n");
-    prompt.append(HopAiPromptLoader.loadResource(PROMPT_ROOT, "hop-proposals-schema.txt"))
+    prompt
+        .append(HopAiPromptLoader.loadResource(PROMPT_ROOT, "hop-proposals-schema.txt"))
         .append("\n\n");
     prompt.append("Transform plugin type index JSON:\n");
     prompt.append(HopAiPromptLoader.loadResource(PROMPT_ROOT, "transform-type-index.json"));

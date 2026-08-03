@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.catalog;
 
 import java.util.ArrayList;
@@ -32,7 +30,6 @@ import org.apache.hop.catalog.registry.RecordDefinitionRegistry;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.datavault.metadata.DataVaultConfiguration;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DataVaultSource;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
@@ -113,7 +110,8 @@ public final class DvSourceCatalogService {
     query.setNamespacePrefix(projectSourcesNamespace(variables));
     query.setType(RecordDefinitionType.DV_SOURCE);
     List<RecordDefinitionRef> refs =
-        RecordDefinitionRegistry.getInstance().list(connectionName, query, variables, metadataProvider);
+        RecordDefinitionRegistry.getInstance()
+            .list(connectionName, query, variables, metadataProvider);
     List<String> names = new ArrayList<>();
     for (RecordDefinitionRef ref : refs) {
       if (ref == null || ref.getKey() == null) {
@@ -163,7 +161,8 @@ public final class DvSourceCatalogService {
       IVariables variables,
       IHopMetadataProvider metadataProvider)
       throws HopException {
-    upsertSource(source, catalogConnectionName, null, variables, metadataProvider, new Date(), null);
+    upsertSource(
+        source, catalogConnectionName, null, variables, metadataProvider, new Date(), null);
   }
 
   public static void upsertSource(

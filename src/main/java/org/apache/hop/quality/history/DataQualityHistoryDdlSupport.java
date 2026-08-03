@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.quality.history;
 
 import java.util.ArrayList;
@@ -40,8 +38,8 @@ public final class DataQualityHistoryDdlSupport {
 
   private DataQualityHistoryDdlSupport() {}
 
-  public static void ensureTables(
-      Database db, DatabaseMeta databaseMeta, ILogChannel log) throws HopException {
+  public static void ensureTables(Database db, DatabaseMeta databaseMeta, ILogChannel log)
+      throws HopException {
     ensureTables(db, databaseMeta, DataQualityHistoryPublisher.DEFAULT_SCHEMA_NAME, log);
   }
 

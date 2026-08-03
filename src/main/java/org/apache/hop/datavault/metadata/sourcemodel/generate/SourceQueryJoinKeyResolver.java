@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.sourcemodel.generate;
 
 import java.util.ArrayList;
@@ -32,9 +31,7 @@ public final class SourceQueryJoinKeyResolver {
   private SourceQueryJoinKeyResolver() {}
 
   public record ResolvedJoinKeys(
-      List<String> leftTables,
-      List<String> leftColumns,
-      List<String> rightColumns) {
+      List<String> leftTables, List<String> leftColumns, List<String> rightColumns) {
 
     public boolean isValid() {
       return leftColumns != null
@@ -78,7 +75,10 @@ public final class SourceQueryJoinKeyResolver {
       SourceRelationship relationship = model.findRelationship(join.getRelationshipName());
       if (relationship == null) {
         throw new HopException(
-            "Relationship '" + join.getRelationshipName() + "' not found for join to " + rightTable);
+            "Relationship '"
+                + join.getRelationshipName()
+                + "' not found for join to "
+                + rightTable);
       }
       return fromRelationship(relationship, rightTable, inScopeTables);
     }
@@ -115,7 +115,11 @@ public final class SourceQueryJoinKeyResolver {
       // Joining child: left is parent (must be in scope), right is child FK cols.
       if (!inScopeTables.contains(parent)) {
         throw new HopException(
-            "Parent table '" + parent + "' must already be in the query before joining child '" + child + "'");
+            "Parent table '"
+                + parent
+                + "' must already be in the query before joining child '"
+                + child
+                + "'");
       }
       List<String> leftTables = new ArrayList<>();
       for (int i = 0; i < parentCols.size(); i++) {
@@ -126,7 +130,11 @@ public final class SourceQueryJoinKeyResolver {
     if (rightTable.equals(parent)) {
       if (!inScopeTables.contains(child)) {
         throw new HopException(
-            "Child table '" + child + "' must already be in the query before joining parent '" + parent + "'");
+            "Child table '"
+                + child
+                + "' must already be in the query before joining parent '"
+                + parent
+                + "'");
       }
       List<String> leftTables = new ArrayList<>();
       for (int i = 0; i < childCols.size(); i++) {

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.database;
 
 import java.util.List;
@@ -24,15 +22,15 @@ import lombok.Setter;
 import org.apache.hop.core.RowMetaAndData;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.row.IRowMeta;
-import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.core.gui.plugin.GuiElementType;
 import org.apache.hop.core.gui.plugin.GuiWidgetElement;
+import org.apache.hop.core.row.IRowMeta;
+import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metadata.DvSourceBase;
 import org.apache.hop.datavault.metadata.DvSourceType;
 import org.apache.hop.datavault.metadata.IDvSource;
 import org.apache.hop.metadata.api.HopMetadataProperty;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Database (RDBMS) implementation of {@link IDvSource}, embedded in {@link
@@ -42,8 +40,7 @@ import org.apache.hop.metadata.api.HopMetadataProperty;
 @Setter
 public class DvDatabaseSource extends DvSourceBase implements IDvSource {
 
-  public static final String GUI_PLUGIN_ELEMENT_DATABASE_TAB_ID =
-      "DATAVAULT_SOURCE_DATABASE_TAB";
+  public static final String GUI_PLUGIN_ELEMENT_DATABASE_TAB_ID = "DATAVAULT_SOURCE_DATABASE_TAB";
 
   @GuiWidgetElement(
       order = "0100",

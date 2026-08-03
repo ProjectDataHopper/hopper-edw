@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import java.util.ArrayList;
@@ -59,7 +57,8 @@ public final class ExecutionMapEdgeRouter {
           Math.max(from.x() + from.width(), to.x() + to.width())
               + SIDE_BUS_OFFSET
               + laneIndex * LANE_STAGGER;
-      sideBusX = nudgeVerticalBus(sideBusX, sourceAnchor.y, targetAnchor.y, obstacles, from, to, true);
+      sideBusX =
+          nudgeVerticalBus(sideBusX, sourceAnchor.y, targetAnchor.y, obstacles, from, to, true);
       return polyline(
           sourceAnchor.x,
           sourceAnchor.y,
@@ -177,10 +176,7 @@ public final class ExecutionMapEdgeRouter {
     if (a == null || b == null) {
       return false;
     }
-    return a.x() == b.x()
-        && a.y() == b.y()
-        && a.width() == b.width()
-        && a.height() == b.height();
+    return a.x() == b.x() && a.y() == b.y() && a.width() == b.width() && a.height() == b.height();
   }
 
   private static boolean verticalBusBlocked(
@@ -200,7 +196,8 @@ public final class ExecutionMapEdgeRouter {
     if (x < bounds.x() - GUTTER_CLEARANCE || x > bounds.x() + bounds.width() + GUTTER_CLEARANCE) {
       return false;
     }
-    return maxY >= bounds.y() - GUTTER_CLEARANCE && minY <= bounds.y() + bounds.height() + GUTTER_CLEARANCE;
+    return maxY >= bounds.y() - GUTTER_CLEARANCE
+        && minY <= bounds.y() + bounds.height() + GUTTER_CLEARANCE;
   }
 
   private static boolean segmentIntersectsBounds(int x1, int y1, int x2, int y2, Bounds bounds) {
@@ -251,8 +248,7 @@ public final class ExecutionMapEdgeRouter {
   }
 
   /** Collects obstacle bounds excluding the endpoints of a single edge. */
-  public static List<Bounds> obstaclesForEdge(
-      List<Bounds> allBounds, Bounds from, Bounds to) {
+  public static List<Bounds> obstaclesForEdge(List<Bounds> allBounds, Bounds from, Bounds to) {
     List<Bounds> obstacles = new ArrayList<>();
     if (allBounds == null) {
       return obstacles;

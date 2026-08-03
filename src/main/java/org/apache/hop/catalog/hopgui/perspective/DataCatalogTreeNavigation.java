@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.hopgui.perspective;
 
 import java.util.ArrayList;
@@ -43,8 +41,7 @@ public final class DataCatalogTreeNavigation {
    * Expands every ancestor of {@code item} so a programmatic selection is visible. When {@code
    * treeMemoryKey} is provided, expanded state is persisted like a user expand.
    */
-  public static void expandAncestors(
-      TreeItem item, String treeMemoryKey, Set<String> seededPaths) {
+  public static void expandAncestors(TreeItem item, String treeMemoryKey, Set<String> seededPaths) {
     if (item == null || item.isDisposed()) {
       return;
     }

@@ -13,15 +13,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.help;
 
 import java.util.Map;
 import org.apache.hop.core.util.Utils;
 
-/** Classpath topic ids for dialog help markdown under {@code org/apache/hop/datavault/hopgui/help/}. */
+/**
+ * Classpath topic ids for dialog help markdown under {@code org/apache/hop/datavault/hopgui/help/}.
+ */
 public final class HelpTopics {
 
   public static final String DV_HUB = "dv-hub-dialog";
@@ -53,8 +53,10 @@ public final class HelpTopics {
       "action-validate-resource-definitions-dialog";
   public static final String ACTION_EXPORT_DATA_LINEAGE = "action-export-data-lineage-dialog";
 
-  public static final String IMPORT_DATABASE_TABLES_CATALOG = "import-database-tables-catalog-dialog";
-  public static final String IMPORT_DATABASE_TABLES_OPTIONS = "import-database-tables-options-dialog";
+  public static final String IMPORT_DATABASE_TABLES_CATALOG =
+      "import-database-tables-catalog-dialog";
+  public static final String IMPORT_DATABASE_TABLES_OPTIONS =
+      "import-database-tables-options-dialog";
   public static final String IMPORT_CSV_FILE_OPTIONS = "import-csv-file-options-dialog";
   public static final String IMPORT_PARQUET_FILE_OPTIONS = "import-parquet-file-options-dialog";
   public static final String IMPORT_ICEBERG_TABLE = "import-iceberg-table-dialog";
@@ -92,7 +94,8 @@ public final class HelpTopics {
           Map.entry(DV_LINK_HUB_SOURCE, "HelpTopics.DvLinkHubSourceDialog.Title"),
           Map.entry(DV_LINK_SATELLITE_SOURCE, "HelpTopics.DvLinkSatelliteSourceDialog.Title"),
           Map.entry(DV_HUB_SOURCE_KEY_FIELD, "HelpTopics.HubSourceKeyFieldDialog.Title"),
-          Map.entry(DV_SATELLITE_SOURCE_KEY_FIELD, "HelpTopics.SatelliteSourceKeyFieldDialog.Title"),
+          Map.entry(
+              DV_SATELLITE_SOURCE_KEY_FIELD, "HelpTopics.SatelliteSourceKeyFieldDialog.Title"),
           Map.entry(BV_MODEL, "HelpTopics.BvModelDialog.Title"),
           Map.entry(BV_TABLE, "HelpTopics.BvTableDialog.Title"),
           Map.entry(BV_SCD2_TABLE, "HelpTopics.BvScd2TableDialog.Title"),
@@ -101,7 +104,8 @@ public final class HelpTopics {
           Map.entry(DM_RANGE_DIMENSION, "HelpTopics.DmRangeDimensionDialog.Title"),
           Map.entry(ACTION_DATAVAULT_UPDATE, "HelpTopics.ActionDataVaultUpdateDialog.Title"),
           Map.entry(ACTION_DIMENSIONAL_UPDATE, "HelpTopics.ActionDimensionalUpdateDialog.Title"),
-          Map.entry(ACTION_BUSINESSVAULT_UPDATE, "HelpTopics.ActionBusinessVaultUpdateDialog.Title"),
+          Map.entry(
+              ACTION_BUSINESSVAULT_UPDATE, "HelpTopics.ActionBusinessVaultUpdateDialog.Title"),
           Map.entry(ACTION_DIMENSIONAL_PUBLISH, "HelpTopics.ActionDimensionalPublishDialog.Title"),
           Map.entry(
               ACTION_GENERATE_EXECUTION_MAP, "HelpTopics.ActionGenerateExecutionMapDialog.Title"),
@@ -110,8 +114,7 @@ public final class HelpTopics {
           Map.entry(
               ACTION_VALIDATE_RESOURCE_DEFINITIONS,
               "HelpTopics.ActionValidateResourceDefinitionsDialog.Title"),
-          Map.entry(
-              ACTION_EXPORT_DATA_LINEAGE, "HelpTopics.ActionExportDataLineageDialog.Title"),
+          Map.entry(ACTION_EXPORT_DATA_LINEAGE, "HelpTopics.ActionExportDataLineageDialog.Title"),
           Map.entry(
               IMPORT_DATABASE_TABLES_CATALOG, "HelpTopics.ImportDatabaseTablesCatalogDialog.Title"),
           Map.entry(
@@ -119,7 +122,8 @@ public final class HelpTopics {
           Map.entry(IMPORT_CSV_FILE_OPTIONS, "HelpTopics.ImportCsvFileOptionsDialog.Title"),
           Map.entry(IMPORT_PARQUET_FILE_OPTIONS, "HelpTopics.ImportParquetFileOptionsDialog.Title"),
           Map.entry(IMPORT_ICEBERG_TABLE, "HelpTopics.ImportIcebergTableDialog.Title"),
-          Map.entry(IMPORT_ICEBERG_TABLE_OPTIONS, "HelpTopics.ImportIcebergTableOptionsDialog.Title"),
+          Map.entry(
+              IMPORT_ICEBERG_TABLE_OPTIONS, "HelpTopics.ImportIcebergTableOptionsDialog.Title"),
           Map.entry(
               IMPORT_DM_DATABASE_TABLES_OPTIONS,
               "HelpTopics.ImportDmDatabaseTablesOptionsDialog.Title"),

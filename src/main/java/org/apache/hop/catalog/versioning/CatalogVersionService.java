@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.catalog.versioning;
 
 import java.nio.file.Path;
@@ -92,7 +91,8 @@ public final class CatalogVersionService {
         SourceUsageIndexBuilder.build(models, variables);
     if (usageIndex.isEmpty()) {
       throw new HopException(
-          BaseMessages.getString(PKG, "CatalogVersionService.Error.NoSourcesInGroup", group.getName()));
+          BaseMessages.getString(
+              PKG, "CatalogVersionService.Error.NoSourcesInGroup", group.getName()));
     }
 
     String defaultNamespace = DvCatalogNamespaces.projectSourcesNamespace(variables);
@@ -109,7 +109,9 @@ public final class CatalogVersionService {
       List<SourceUsage> usages = entry.getValue();
       String catalogConnection =
           firstNonEmpty(
-              preferredConnection, resolveCatalogConnection(usages), group.getDataCatalogConnection());
+              preferredConnection,
+              resolveCatalogConnection(usages),
+              group.getDataCatalogConnection());
       if (Utils.isEmpty(catalogConnection)) {
         catalogConnection = preferredConnection;
       }
@@ -145,9 +147,7 @@ public final class CatalogVersionService {
     if (!missing.isEmpty()) {
       throw new HopException(
           BaseMessages.getString(
-              PKG,
-              "CatalogVersionService.Error.MissingDefinitions",
-              String.join(", ", missing)));
+              PKG, "CatalogVersionService.Error.MissingDefinitions", String.join(", ", missing)));
     }
 
     Instant now = Instant.now();

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.openlineage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,7 +32,8 @@ public final class OpenLineageFileWriter {
 
   private OpenLineageFileWriter() {}
 
-  public static void writeEvents(String outputFolder, List<ObjectNode> events, OpenLineageExportResult result)
+  public static void writeEvents(
+      String outputFolder, List<ObjectNode> events, OpenLineageExportResult result)
       throws HopException {
     if (Utils.isEmpty(outputFolder)) {
       throw new HopException("OpenLineage output folder is required");

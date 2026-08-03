@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.sourcemodel.generate;
 
 import java.util.ArrayList;
@@ -96,8 +95,7 @@ public final class SourceQueryPipelineGenerator {
     TableInputMeta tableInputMeta = new TableInputMeta();
     tableInputMeta.setConnection(databaseMeta.getName());
     DvSqlSupport.assignDisplaySql(tableInputMeta, sql);
-    TransformMeta source =
-        new TransformMeta("TableInput", "Query source", tableInputMeta);
+    TransformMeta source = new TransformMeta("TableInput", "Query source", tableInputMeta);
     source.setLocation(100, 100);
     pipelineMeta.addTransform(source);
     return pipelineMeta;
@@ -164,11 +162,9 @@ public final class SourceQueryPipelineGenerator {
 
       // Sort both sides for Merge Join.
       List<String> leftSortKeys = qualifyKeys(keys.leftTables(), keys.leftColumns(), aliases);
-      List<String> rightSortKeys =
-          qualifyKeys(List.of(rightName), keys.rightColumns(), aliases);
+      List<String> rightSortKeys = qualifyKeys(List.of(rightName), keys.rightColumns(), aliases);
 
-      TransformMeta leftSorted =
-          addSort(pipelineMeta, stream, leftSortKeys, new Point(x - 100, y));
+      TransformMeta leftSorted = addSort(pipelineMeta, stream, leftSortKeys, new Point(x - 100, y));
       TransformMeta rightSorted =
           addSort(pipelineMeta, rightInput, rightSortKeys, new Point(x, y + 150));
 
@@ -178,8 +174,7 @@ public final class SourceQueryPipelineGenerator {
       mergeMeta.setKeyFields2(rightSortKeys);
       mergeMeta.setLeftTransformName(leftSorted.getName());
       mergeMeta.setRightTransformName(rightSorted.getName());
-      TransformMeta merge =
-          new TransformMeta("MergeJoin", "Join " + rightName, mergeMeta);
+      TransformMeta merge = new TransformMeta("MergeJoin", "Join " + rightName, mergeMeta);
       merge.setLocation(x + 100, y + 75);
       pipelineMeta.addTransform(merge);
       pipelineMeta.addPipelineHop(new PipelineHopMeta(leftSorted, merge));
@@ -190,7 +185,8 @@ public final class SourceQueryPipelineGenerator {
     }
 
     // Final select to projected aliases only.
-    TransformMeta select = addSelectProjection(pipelineMeta, stream, query, aliases, new Point(x + 150, y));
+    TransformMeta select =
+        addSelectProjection(pipelineMeta, stream, query, aliases, new Point(x + 150, y));
     return pipelineMeta;
   }
 
@@ -207,7 +203,9 @@ public final class SourceQueryPipelineGenerator {
       throws HopException {
     if (Utils.isEmpty(table.getDatabaseName())) {
       throw new HopException(
-          "Table '" + table.getName() + "' has no database connection (file sources need PR later)");
+          "Table '"
+              + table.getName()
+              + "' has no database connection (file sources need PR later)");
     }
     DatabaseMeta databaseMeta =
         metadataProvider

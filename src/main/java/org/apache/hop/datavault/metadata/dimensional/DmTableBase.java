@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import java.util.ArrayList;
@@ -110,7 +108,8 @@ public abstract class DmTableBase extends HopMetadataBase implements IHopMetadat
     }
 
     var loggingObject =
-        new SimpleLoggingObject(getClass().getSimpleName() + ".generateBuildDdl", LoggingObjectType.GENERAL, null);
+        new SimpleLoggingObject(
+            getClass().getSimpleName() + ".generateBuildDdl", LoggingObjectType.GENERAL, null);
     try (Database db = new Database(loggingObject, variables, targetDatabaseMeta)) {
       db.connect();
       List<String> primaryKeyColumns =

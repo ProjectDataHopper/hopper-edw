@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.resourcedefinition;
 
 import java.util.List;
@@ -205,8 +203,7 @@ public final class ResourceDefinitionIssueDialog {
 
     Label wlDetails = new Label(details, SWT.LEFT);
     PropsUi.setLook(wlDetails);
-    wlDetails.setText(
-        BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.Details.Label"));
+    wlDetails.setText(BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.Details.Label"));
     FormData fdlDetails = new FormData();
     fdlDetails.left = new FormAttachment(0, 0);
     fdlDetails.top = new FormAttachment(0, 0);
@@ -468,7 +465,8 @@ public final class ResourceDefinitionIssueDialog {
         && proposal.type() != ProposalType.IGNORE_SOURCE_DRIFT) {
       message
           .append('\n')
-          .append(BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.ConfirmApply.Blocking"))
+          .append(
+              BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.ConfirmApply.Blocking"))
           .append('\n');
     }
     String usageTargets = formatUsageTargets();
@@ -506,8 +504,7 @@ public final class ResourceDefinitionIssueDialog {
             BaseMessages.getString(
                 PKG, "ResourceDefinitionIssueDialog.ConfirmApply.AcceptDestructive"));
 
-    MessageBox box =
-        new MessageBox(shell, SWT.ICON_WARNING | SWT.YES | SWT.NO | SWT.PRIMARY_MODAL);
+    MessageBox box = new MessageBox(shell, SWT.ICON_WARNING | SWT.YES | SWT.NO | SWT.PRIMARY_MODAL);
     box.setText(BaseMessages.getString(PKG, "ResourceDefinitionIssueDialog.ConfirmApply.Title"));
     box.setMessage(message.toString());
     return box.open() == SWT.YES;

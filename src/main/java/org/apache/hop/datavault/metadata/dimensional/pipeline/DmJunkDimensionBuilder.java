@@ -13,15 +13,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional.pipeline;
 
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataSupport;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalConfiguration;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.datavault.metadata.dimensional.DmFactJunkDimensionRole;
@@ -29,7 +28,6 @@ import org.apache.hop.datavault.metadata.dimensional.DmJunkDimension;
 import org.apache.hop.datavault.metadata.dimensional.DmJunkDimensionSupport;
 import org.apache.hop.datavault.metadata.dimensional.DmJunkHashCodeStrategy;
 import org.apache.hop.datavault.metadata.dimensional.DmJunkSurrogateKeyStrategy;
-import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataSupport;
 import org.apache.hop.datavault.metadata.dimensional.DmNaturalKeyField;
 import org.apache.hop.datavault.metadata.dimensional.DmSurrogateKeySupport;
 import org.apache.hop.datavault.transform.junkdimension.JunkDimensionMeta;
@@ -53,7 +51,8 @@ public final class DmJunkDimensionBuilder {
       DmJunkDimension junkDimension)
       throws HopException {
     DmPipelineBuilderSupport.BuildContext ctx =
-        DmPipelineBuilderSupport.BuildContext.create(metadataProvider, variables, model, junkDimension);
+        DmPipelineBuilderSupport.BuildContext.create(
+            metadataProvider, variables, model, junkDimension);
     if (ctx == null) {
       throw new HopException(
           "Unable to create build context for junk dimension " + junkDimension.getName());
@@ -113,10 +112,14 @@ public final class DmJunkDimensionBuilder {
         DmSurrogateKeySupport.resolveJunkStrategy(junkDimension);
     lookupMeta.setJunkSurrogateKeyStrategy(surrogateStrategy.getCode());
     lookupMeta.setSurrogateKeySourceField(
-        resolve(ctx, DmSurrogateKeySupport.resolveJunkSurrogateKeySourceField(junkDimension, ctx.config, ctx.variables)));
+        resolve(
+            ctx,
+            DmSurrogateKeySupport.resolveJunkSurrogateKeySourceField(
+                junkDimension, ctx.config, ctx.variables)));
 
     String technicalKeyField =
-        DmSurrogateKeySupport.resolveJunkSurrogateKeyField(junkDimension, ctx.config, ctx.variables);
+        DmSurrogateKeySupport.resolveJunkSurrogateKeyField(
+            junkDimension, ctx.config, ctx.variables);
     String outputField = technicalKeyField;
     if (factRole != null && !Utils.isEmpty(factRole.getForeignKeyColumn())) {
       outputField = resolve(ctx, factRole.getForeignKeyColumn());
@@ -136,7 +139,8 @@ public final class DmJunkDimensionBuilder {
 
     ReturnFields returnFields = new ReturnFields();
     returnFields.setTechnicalKeyField(technicalKeyField);
-    returnFields.setUseAutoIncrement(surrogateStrategy == DmJunkSurrogateKeyStrategy.AUTO_INCREMENT);
+    returnFields.setUseAutoIncrement(
+        surrogateStrategy == DmJunkSurrogateKeyStrategy.AUTO_INCREMENT);
     returnFields.setTechKeyCreation(resolveTechKeyCreation(surrogateStrategy));
     returnFields.setLastUpdateField(ctx.config.resolveLoadDateField(ctx.variables));
     fields.setReturnFields(returnFields);
@@ -152,12 +156,13 @@ public final class DmJunkDimensionBuilder {
   }
 
   private static String resolveHashCodeField(
-      DmJunkDimension junkDimension, DimensionalConfiguration config, org.apache.hop.core.variables.IVariables variables) {
+      DmJunkDimension junkDimension,
+      DimensionalConfiguration config,
+      org.apache.hop.core.variables.IVariables variables) {
     return DmJunkDimensionSupport.resolveJunkHashCodeField(junkDimension, config, variables);
   }
 
-  private static String resolve(
-      DmPipelineBuilderSupport.BuildContext ctx, String value) {
+  private static String resolve(DmPipelineBuilderSupport.BuildContext ctx, String value) {
     return resolve(ctx.variables, value);
   }
 

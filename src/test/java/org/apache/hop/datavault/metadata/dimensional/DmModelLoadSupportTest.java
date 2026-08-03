@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -110,7 +108,8 @@ class DmModelLoadSupportTest {
             tempModel.toString(), referringModel, variables, null);
     assertNotSame(first, reloaded);
     assertFalse(
-        Arrays.asList(DmModelLoadSupport.listBaseDimensionNames(reloaded)).contains("dim_customer"));
+        Arrays.asList(DmModelLoadSupport.listBaseDimensionNames(reloaded))
+            .contains("dim_customer"));
     assertTrue(
         Arrays.asList(DmModelLoadSupport.listBaseDimensionNames(reloaded))
             .contains("dim_customer_renamed"));
@@ -126,13 +125,11 @@ class DmModelLoadSupportTest {
     DimensionalModel first =
         DmModelLoadSupport.loadDimensionalModel(fixture.toString(), null, variables, null);
     assertSame(
-        first,
-        DmModelLoadSupport.loadDimensionalModel(fixture.toString(), null, variables, null));
+        first, DmModelLoadSupport.loadDimensionalModel(fixture.toString(), null, variables, null));
 
     DmModelLoadSupport.invalidateCachedModelByResolvedPath(resolvedPath);
     assertNotSame(
-        first,
-        DmModelLoadSupport.loadDimensionalModel(fixture.toString(), null, variables, null));
+        first, DmModelLoadSupport.loadDimensionalModel(fixture.toString(), null, variables, null));
   }
 
   @Test
@@ -142,8 +139,7 @@ class DmModelLoadSupportTest {
 
     assertEquals(
         "${PROJECT_HOME}/models/shared.hdm",
-        DmModelLoadSupport.toStoredModelPath(
-            "${PROJECT_HOME}/models/shared.hdm", null, variables));
+        DmModelLoadSupport.toStoredModelPath("${PROJECT_HOME}/models/shared.hdm", null, variables));
   }
 
   @Test

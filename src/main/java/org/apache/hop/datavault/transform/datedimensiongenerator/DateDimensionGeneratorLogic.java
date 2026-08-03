@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.transform.datedimensiongenerator;
 
 import java.time.DayOfWeek;
@@ -139,8 +137,7 @@ public final class DateDimensionGeneratorLogic {
         valueMeta.getType() == IValueMeta.TYPE_BOOLEAN
             && (Utils.isEmpty(mask) || MASK_IS_WEEKEND.equalsIgnoreCase(mask));
     boolean dayOfWeekField =
-        valueMeta.getType() == IValueMeta.TYPE_INTEGER
-            && MASK_DAY_OF_WEEK.equalsIgnoreCase(mask);
+        valueMeta.getType() == IValueMeta.TYPE_INTEGER && MASK_DAY_OF_WEEK.equalsIgnoreCase(mask);
     boolean dateKeyField =
         valueMeta.getType() == IValueMeta.TYPE_INTEGER
             && (MASK_DATE_KEY.equalsIgnoreCase(mask) || "YYYYMMDD".equalsIgnoreCase(mask));
@@ -151,7 +148,8 @@ public final class DateDimensionGeneratorLogic {
             BaseMessages.getString(
                 PKG, "DateDimensionGeneratorLogic.Error.MissingFormatMask", field.getName()));
       }
-      formatter = DateTimeFormatter.ofPattern(mask).withLocale(parseLocale(field.getLocale(), variables));
+      formatter =
+          DateTimeFormatter.ofPattern(mask).withLocale(parseLocale(field.getLocale(), variables));
     }
     return new PreparedField(valueMeta, formatter, weekendField, dayOfWeekField, dateKeyField);
   }
@@ -163,7 +161,8 @@ public final class DateDimensionGeneratorLogic {
     int length = Const.toInt(resolve(field.getLength(), variables), -1);
     int precision = Const.toInt(resolve(field.getPrecision(), variables), -1);
     IValueMeta valueMeta =
-        ValueMetaFactory.createValueMeta(resolve(field.getName(), variables), hopType, length, precision);
+        ValueMetaFactory.createValueMeta(
+            resolve(field.getName(), variables), hopType, length, precision);
     // Format masks are Java DateTimeFormatter patterns applied during row generation. They must not
     // be copied to Hop conversion masks on non-date types: Hop would prepend them when rendering
     // preview/output (e.g. integer 20000101 shown as "yyyyMMdd20000101").
@@ -198,8 +197,8 @@ public final class DateDimensionGeneratorLogic {
     return date.getYear() * 10000L + date.getMonthValue() * 100L + date.getDayOfMonth();
   }
 
-  private static Object convertFormattedValue(String formatted, LocalDate date, IValueMeta valueMeta)
-      throws HopException {
+  private static Object convertFormattedValue(
+      String formatted, LocalDate date, IValueMeta valueMeta) throws HopException {
     return switch (valueMeta.getType()) {
       case IValueMeta.TYPE_STRING -> formatted;
       case IValueMeta.TYPE_INTEGER -> parseLongValue(formatted, valueMeta.getName());
@@ -272,7 +271,8 @@ public final class DateDimensionGeneratorLogic {
       return LocalDate.parse(trimmed, SQL_DATE);
     } catch (DateTimeParseException e) {
       throw new HopException(
-          BaseMessages.getString(PKG, "DateDimensionGeneratorLogic.Error.InvalidDate", label, value),
+          BaseMessages.getString(
+              PKG, "DateDimensionGeneratorLogic.Error.InvalidDate", label, value),
           e);
     }
   }

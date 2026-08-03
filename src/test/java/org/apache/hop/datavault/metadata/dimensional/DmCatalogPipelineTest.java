@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,12 +31,12 @@ import org.apache.hop.core.variables.Variables;
 import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.datavault.hopgui.file.dimensional.HopDimensionalFileType;
 import org.apache.hop.datavault.metadata.dimensional.pipeline.DmUpdateExecutionSupport;
+import org.apache.hop.datavault.transform.junkdimension.JunkDimensionMeta;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
-import org.apache.hop.datavault.transform.junkdimension.JunkDimensionMeta;
 import org.apache.hop.pipeline.transforms.dimensionlookup.DimensionLookupMeta;
 import org.apache.hop.pipeline.transforms.insertupdate.InsertUpdateMeta;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
@@ -122,7 +120,8 @@ class DmCatalogPipelineTest {
     DmBridge bridge = (DmBridge) model.findTable("bridge_customer_product");
 
     PipelineMeta pipeline =
-        bridge.generateUpdatePipelines(testMetadataProvider(), new Variables(), model, new Date())
+        bridge
+            .generateUpdatePipelines(testMetadataProvider(), new Variables(), model, new Date())
             .get(0);
 
     assertEquals("dm-bridge-bridge_customer_product", pipeline.getName());
@@ -148,7 +147,11 @@ class DmCatalogPipelineTest {
             .get(0);
 
     assertEquals(4, pipeline.getTransforms().size());
-    assertEquals(2, pipeline.getTransforms().stream().filter(t -> t.getTransform() instanceof DimensionLookupMeta).count());
+    assertEquals(
+        2,
+        pipeline.getTransforms().stream()
+            .filter(t -> t.getTransform() instanceof DimensionLookupMeta)
+            .count());
     TableOutputMeta tableOutput =
         (TableOutputMeta)
             pipeline.getTransforms().stream()
@@ -203,7 +206,8 @@ class DmCatalogPipelineTest {
   }
 
   private static DimensionalModel loadExtendedCatalogModel() throws Exception {
-    Path fixture = Path.of("integration-tests/tests/basic/extended-catalog.hdm").toAbsolutePath().normalize();
+    Path fixture =
+        Path.of("integration-tests/tests/basic/extended-catalog.hdm").toAbsolutePath().normalize();
     Document document = XmlHandler.loadXmlFile(fixture.toFile());
     Node rootNode = XmlHandler.getSubNode(document, HopDimensionalFileType.XML_TAG);
     DimensionalModel model = new DimensionalModel();

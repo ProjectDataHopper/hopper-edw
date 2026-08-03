@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.workflow.actions.endvaultupdate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,7 +48,8 @@ class ActionEndVaultUpdateTest {
     assertEquals("HTML report", action.getReferencedObjectDescriptions()[1]);
     assertEquals(
         BaseMessages.getString(
-            ActionEndVaultUpdate.class, "ActionEndVaultUpdate.ReferencedObject.MarkdownDescription"),
+            ActionEndVaultUpdate.class,
+            "ActionEndVaultUpdate.ReferencedObject.MarkdownDescription"),
         action.getReferencedObjectDescriptions()[0]);
     assertEquals(
         BaseMessages.getString(
@@ -86,7 +85,8 @@ class ActionEndVaultUpdateTest {
   void disablesReferencedObjectsWhenReportFilesMissing(@TempDir Path tempDir) {
     ActionEndVaultUpdate action = configuredAction(tempDir, "missing-report");
 
-    assertFalse(action.isReferencedObjectEnabled()[ActionEndVaultUpdate.REFERENCED_OBJECT_MARKDOWN]);
+    assertFalse(
+        action.isReferencedObjectEnabled()[ActionEndVaultUpdate.REFERENCED_OBJECT_MARKDOWN]);
     assertFalse(action.isReferencedObjectEnabled()[ActionEndVaultUpdate.REFERENCED_OBJECT_HTML]);
   }
 
@@ -98,7 +98,8 @@ class ActionEndVaultUpdateTest {
     ActionEndVaultUpdate action = configuredAction(tempDir, "retail-dv-update-report");
     action.setWriteMarkdownReport(false);
 
-    assertFalse(action.isReferencedObjectEnabled()[ActionEndVaultUpdate.REFERENCED_OBJECT_MARKDOWN]);
+    assertFalse(
+        action.isReferencedObjectEnabled()[ActionEndVaultUpdate.REFERENCED_OBJECT_MARKDOWN]);
     assertTrue(action.isReferencedObjectEnabled()[ActionEndVaultUpdate.REFERENCED_OBJECT_HTML]);
   }
 

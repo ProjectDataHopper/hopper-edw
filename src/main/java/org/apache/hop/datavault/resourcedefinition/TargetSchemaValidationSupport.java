@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import java.util.ArrayList;
@@ -100,8 +99,7 @@ public final class TargetSchemaValidationSupport {
             if (!(table instanceof DvSatellite satellite)) {
               continue;
             }
-            List<String> ddl =
-                satellite.generateUpdateDdl(metadataProvider, variables, model);
+            List<String> ddl = satellite.generateUpdateDdl(metadataProvider, variables, model);
             if (ddl == null || ddl.isEmpty()) {
               continue;
             }
@@ -116,8 +114,7 @@ public final class TargetSchemaValidationSupport {
                     : satellite.getName();
             String modelName = Const.NVL(usage.modelName(), usage.modelFilename());
             boolean pendingCreate =
-                isPendingCreate(
-                    satellite, model, physicalName, ddl, variables, metadataProvider);
+                isPendingCreate(satellite, model, physicalName, ddl, variables, metadataProvider);
             // User opted into automatic table creation (initial vault load): omit missing-table
             // CREATE findings entirely — do not flood reports / results dialog with INFO noise.
             // Layout drift on tables that already exist still reports as WARNING.
@@ -153,7 +150,9 @@ public final class TargetSchemaValidationSupport {
             extra.add(
                 new ValidationIssue(
                     ValidationIssueSupport.buildIssueId(
-                        IssueKind.TARGET_DDL_REQUIRED, usage.modelElementName(), "ddl-check-failed"),
+                        IssueKind.TARGET_DDL_REQUIRED,
+                        usage.modelElementName(),
+                        "ddl-check-failed"),
                     IssueKind.TARGET_DDL_REQUIRED,
                     IssueSeverity.WARNING,
                     null,
@@ -172,9 +171,7 @@ public final class TargetSchemaValidationSupport {
     return enriched;
   }
 
-  /**
-   * True when the target table is missing (or DDL is create-only). Package-visible for tests.
-   */
+  /** True when the target table is missing (or DDL is create-only). Package-visible for tests. */
   static boolean isPendingCreate(
       DvSatellite satellite,
       DataVaultModel model,

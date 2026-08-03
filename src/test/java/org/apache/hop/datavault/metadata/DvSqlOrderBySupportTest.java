@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -56,10 +55,8 @@ class DvSqlOrderBySupportTest {
     BusinessKey businessKey = new BusinessKey("customer_id");
     businessKey.setDataType("Integer");
 
-    var source =
-        new DvSqlOrderByCollationSupport.ColumnSqlMeta("customer_id", "int", null);
-    var target =
-        new DvSqlOrderByCollationSupport.ColumnSqlMeta("customer_id", "int", null);
+    var source = new DvSqlOrderByCollationSupport.ColumnSqlMeta("customer_id", "int", null);
+    var target = new DvSqlOrderByCollationSupport.ColumnSqlMeta("customer_id", "int", null);
     DvSqlOrderByCollationSupport.Session session =
         new DvSqlOrderByCollationSupport.Session(
             Map.of("customer_id", source), Map.of("customer_id", target), null, null);
@@ -114,9 +111,11 @@ class DvSqlOrderBySupportTest {
     businessKey.setDataType("String");
 
     var source =
-        new DvSqlOrderByCollationSupport.ColumnSqlMeta("item_code", "character varying", "fr-FR-x-icu");
+        new DvSqlOrderByCollationSupport.ColumnSqlMeta(
+            "item_code", "character varying", "fr-FR-x-icu");
     var target =
-        new DvSqlOrderByCollationSupport.ColumnSqlMeta("item_code", "character varying", "en_US.utf8");
+        new DvSqlOrderByCollationSupport.ColumnSqlMeta(
+            "item_code", "character varying", "en_US.utf8");
     DvSqlOrderByCollationSupport.Session session =
         new DvSqlOrderByCollationSupport.Session(
             Map.of("item_code", source), Map.of("item_code", target), null, null);

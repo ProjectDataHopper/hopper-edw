@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import java.util.ArrayList;
@@ -96,12 +94,12 @@ public final class BvSqlRefResolver {
     String modelName = ref.getModelName();
 
     if (Utils.isEmpty(modelName)) {
-      resolveOneArgRef(
-          ref, self, bvModel, dvModel, objectName, variables, metadataProvider);
+      resolveOneArgRef(ref, self, bvModel, dvModel, objectName, variables, metadataProvider);
       return;
     }
 
-    resolveTwoArgRef(ref, self, bvModel, dvModel, modelName.trim(), objectName, variables, metadataProvider);
+    resolveTwoArgRef(
+        ref, self, bvModel, dvModel, modelName.trim(), objectName, variables, metadataProvider);
   }
 
   private static void resolveOneArgRef(
@@ -228,8 +226,8 @@ public final class BvSqlRefResolver {
       IHopMetadataProvider metadataProvider) {
     try {
       List<String> candidates =
-          org.apache.hop.datavault.catalog.CatalogModelRegistrySupport.listModelFilenamesForBasename(
-              modelArg, variables, metadataProvider);
+          org.apache.hop.datavault.catalog.CatalogModelRegistrySupport
+              .listModelFilenamesForBasename(modelArg, variables, metadataProvider);
       if (candidates.isEmpty()) {
         return false;
       }
@@ -577,8 +575,7 @@ public final class BvSqlRefResolver {
     if (alias == null) {
       return;
     }
-    if (alias.getLocation() != null
-        && (alias.getLocation().x != 0 || alias.getLocation().y != 0)) {
+    if (alias.getLocation() != null && (alias.getLocation().x != 0 || alias.getLocation().y != 0)) {
       return;
     }
     int index = bvModel != null ? bvModel.getDvReferences().size() : 0;
@@ -591,8 +588,7 @@ public final class BvSqlRefResolver {
     if (alias == null) {
       return;
     }
-    if (alias.getLocation() != null
-        && (alias.getLocation().x != 0 || alias.getLocation().y != 0)) {
+    if (alias.getLocation() != null && (alias.getLocation().x != 0 || alias.getLocation().y != 0)) {
       return;
     }
     int index = bvModel != null ? bvModel.getBvReferences().size() : 0;
@@ -702,9 +698,7 @@ public final class BvSqlRefResolver {
               ? source.getTableName()
               : macro.sourceTableName();
       DatabaseMeta db = bvDatabase;
-      if (source != null
-          && !Utils.isEmpty(source.getDatabaseName())
-          && metadataProvider != null) {
+      if (source != null && !Utils.isEmpty(source.getDatabaseName()) && metadataProvider != null) {
         DatabaseMeta sourceDb =
             metadataProvider.getSerializer(DatabaseMeta.class).load(source.getDatabaseName());
         if (sourceDb != null) {

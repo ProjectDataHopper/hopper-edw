@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.help;
 
 import java.io.InputStream;
@@ -69,8 +67,7 @@ public final class DialogHelpSupport {
     }
     try {
       String markdown = loadMarkdown(topicId);
-      String title =
-          BaseMessages.getString(PKG, HelpTopics.titleKey(topicId), topicId);
+      String title = BaseMessages.getString(PKG, HelpTopics.titleKey(topicId), topicId);
       MarkdownHelpDialog.open(parentShell, title, markdown, topicId);
     } catch (HopException ex) {
       new ErrorDialog(parentShell, getErrorTitle(), ex.getMessage(), ex);
@@ -79,15 +76,13 @@ public final class DialogHelpSupport {
 
   public static String loadMarkdown(String topicId) throws HopException {
     if (Utils.isEmpty(topicId)) {
-      throw new HopException(
-          BaseMessages.getString(PKG, "DialogHelp.MissingTopic", "(empty)"));
+      throw new HopException(BaseMessages.getString(PKG, "DialogHelp.MissingTopic", "(empty)"));
     }
     String fileName = topicId.endsWith(".md") ? topicId : topicId + ".md";
     String path = HELP_RESOURCE_ROOT + fileName;
     try (InputStream in = DialogHelpSupport.class.getResourceAsStream(path)) {
       if (in == null) {
-        throw new HopException(
-            BaseMessages.getString(PKG, "DialogHelp.MissingTopic", topicId));
+        throw new HopException(BaseMessages.getString(PKG, "DialogHelp.MissingTopic", topicId));
       }
       return MarkdownHelpContentSupport.stripLicenseHeader(
           new String(in.readAllBytes(), StandardCharsets.UTF_8));

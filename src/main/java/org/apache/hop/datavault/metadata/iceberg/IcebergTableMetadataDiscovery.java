@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.iceberg;
 
 import java.util.ArrayList;
@@ -93,13 +91,15 @@ public final class IcebergTableMetadataDiscovery {
   }
 
   private static SourceField toSourceField(String name, Type icebergType) throws HopException {
-    IValueMeta valueMeta = IcebergTypeMapping.valueMetaForField(name, icebergType, "IcebergDiscovery");
+    IValueMeta valueMeta =
+        IcebergTypeMapping.valueMetaForField(name, icebergType, "IcebergDiscovery");
     SourceField field = new SourceField(name);
     field.setDescription("");
     field.setSourceDataType(valueMeta.getTypeDesc());
     field.setHopType(valueMeta.getType());
     field.setLength(valueMeta.getLength() > 0 ? String.valueOf(valueMeta.getLength()) : "");
-    field.setPrecision(valueMeta.getPrecision() > 0 ? String.valueOf(valueMeta.getPrecision()) : "");
+    field.setPrecision(
+        valueMeta.getPrecision() > 0 ? String.valueOf(valueMeta.getPrecision()) : "");
     return field;
   }
 
@@ -107,7 +107,8 @@ public final class IcebergTableMetadataDiscovery {
       throws HopException {
     ClassLoader originalContextClassLoader = Thread.currentThread().getContextClassLoader();
     try {
-      Thread.currentThread().setContextClassLoader(IcebergTableMetadataDiscovery.class.getClassLoader());
+      Thread.currentThread()
+          .setContextClassLoader(IcebergTableMetadataDiscovery.class.getClassLoader());
 
       Map<String, String> properties = new HashMap<>();
       properties.put("type", "rest");
@@ -127,8 +128,7 @@ public final class IcebergTableMetadataDiscovery {
       }
       properties.put("client.region", "us-east-1");
 
-      Catalog catalog =
-          CatalogUtil.buildIcebergCatalog("rest", properties, new Configuration());
+      Catalog catalog = CatalogUtil.buildIcebergCatalog("rest", properties, new Configuration());
       Table table =
           catalog.loadTable(TableIdentifier.of(settings.namespace(), settings.tableName()));
       Schema schema = table.schema();

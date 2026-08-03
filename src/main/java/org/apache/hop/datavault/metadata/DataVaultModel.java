@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.ArrayList;
@@ -32,17 +30,17 @@ import org.apache.hop.base.AbstractMeta;
 import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.ICheckResult;
-import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.changed.ChangedFlag;
 import org.apache.hop.core.changed.IChanged;
+import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.file.IHasFilename;
 import org.apache.hop.core.gui.IUndo;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.plugin.GuiElementType;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.GuiWidgetElement;
-import org.apache.hop.core.undo.ChangeAction;
 import org.apache.hop.core.reflection.StringSearchResult;
+import org.apache.hop.core.undo.ChangeAction;
 import org.apache.hop.core.util.StringUtil;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
@@ -234,8 +232,7 @@ public class DataVaultModel extends HopMetadataBase
       IHopMetadataProvider metadataProvider, IVariables variables, DvModelCheckOptions options) {
     List<ICheckResult> remarks = new ArrayList<>();
 
-    List<DataVaultSource> sources =
-        loadDataVaultSources(metadataProvider, variables, remarks);
+    List<DataVaultSource> sources = loadDataVaultSources(metadataProvider, variables, remarks);
     checkTargetDatabase(remarks, metadataProvider, variables);
     checkTargetLoadMode(remarks, metadataProvider);
     checkTargetLoadModeGuidance(remarks, variables, metadataProvider);
@@ -378,15 +375,13 @@ public class DataVaultModel extends HopMetadataBase
     }
   }
 
-  private void checkTargetLoadingIntegerSettings(
-      List<ICheckResult> remarks, IVariables variables) {
+  private void checkTargetLoadingIntegerSettings(List<ICheckResult> remarks, IVariables variables) {
     DataVaultConfiguration config = getConfigurationOrDefault();
     for (DvIntegerSettingValidationSupport.IntegerSettingValidation validation :
         DvIntegerSettingValidationSupport.validateModelPipelineIntegerSettings(config, variables)) {
       if (!validation.isValid()) {
         remarks.add(
-            new CheckResult(
-                ICheckResult.TYPE_RESULT_ERROR, validation.errorMessage(), null));
+            new CheckResult(ICheckResult.TYPE_RESULT_ERROR, validation.errorMessage(), null));
       }
     }
   }
@@ -736,8 +731,9 @@ public class DataVaultModel extends HopMetadataBase
 
   /**
    * Collects all strings from this model that may contain variable references. Used by {@link
-   * #getUsedVariables()} in the same way as {@link org.apache.hop.pipeline.PipelineMeta#getStringList(boolean,
-   * boolean, boolean, boolean)} supports {@link org.apache.hop.pipeline.PipelineMeta#getUsedVariables()}.
+   * #getUsedVariables()} in the same way as {@link
+   * org.apache.hop.pipeline.PipelineMeta#getStringList(boolean, boolean, boolean, boolean)}
+   * supports {@link org.apache.hop.pipeline.PipelineMeta#getUsedVariables()}.
    */
   public List<StringSearchResult> getStringList() {
     List<StringSearchResult> stringList = new ArrayList<>();
@@ -746,10 +742,7 @@ public class DataVaultModel extends HopMetadataBase
       String xml = XmlMetadataUtil.serializeObjectToXml(this);
       stringList.add(
           new StringSearchResult(
-              xml,
-              this,
-              this,
-              BaseMessages.getString(PKG, "DataVaultModel.StringList.ModelXml")));
+              xml, this, this, BaseMessages.getString(PKG, "DataVaultModel.StringList.ModelXml")));
     } catch (HopException e) {
       addStringListEntry(stringList, getDescription(), "description");
       DataVaultConfiguration config = getConfigurationOrDefault();

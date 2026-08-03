@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.quality;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -54,8 +52,7 @@ class SqlAssertionRunnerTest {
         assertThrows(
             HopException.class,
             () ->
-                SqlAssertionRunner.prepareSql(
-                    "SELECT 1; DROP TABLE x", vars, "\"public\".\"t\""));
+                SqlAssertionRunner.prepareSql("SELECT 1; DROP TABLE x", vars, "\"public\".\"t\""));
     assertTrue(
         ex.getMessage().toLowerCase().contains("multi-statement")
             || ex.getMessage().toLowerCase().contains("semicolon"));
@@ -137,8 +134,7 @@ class SqlAssertionRunnerTest {
         SqlAssertionRunner.evaluateExpectation(rule, "s", "ONE_ROW_TRUE", null, true, true)
             .isEmpty());
     assertTrue(
-        SqlAssertionRunner.evaluateExpectation(rule, "s", "ONE_ROW_TRUE", null, true, 1)
-            .isEmpty());
+        SqlAssertionRunner.evaluateExpectation(rule, "s", "ONE_ROW_TRUE", null, true, 1).isEmpty());
 
     assertEquals(
         1,
@@ -149,8 +145,7 @@ class SqlAssertionRunnerTest {
         SqlAssertionRunner.evaluateExpectation(rule, "s", "ONE_ROW_TRUE", null, true, false)
             .size());
     assertEquals(
-        1,
-        SqlAssertionRunner.evaluateExpectation(rule, "s", "ONE_ROW_TRUE", null, true, 0).size());
+        1, SqlAssertionRunner.evaluateExpectation(rule, "s", "ONE_ROW_TRUE", null, true, 0).size());
   }
 
   @Test
@@ -159,8 +154,7 @@ class SqlAssertionRunnerTest {
     assertTrue(
         SqlAssertionRunner.evaluateExpectation(rule, "s", "SCALAR_EQ", "42", true, 42).isEmpty());
     assertTrue(
-        SqlAssertionRunner.evaluateExpectation(rule, "s", "SCALAR_EQ", "42", true, "42")
-            .isEmpty());
+        SqlAssertionRunner.evaluateExpectation(rule, "s", "SCALAR_EQ", "42", true, "42").isEmpty());
 
     List<DataQualityFinding> mismatch =
         SqlAssertionRunner.evaluateExpectation(rule, "s", "SCALAR_EQ", "42", true, 7);

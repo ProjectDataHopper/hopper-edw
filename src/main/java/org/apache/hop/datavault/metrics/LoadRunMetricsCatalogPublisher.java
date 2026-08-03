@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import java.text.SimpleDateFormat;
@@ -40,8 +38,8 @@ import org.apache.hop.core.row.value.ValueMetaInteger;
 import org.apache.hop.core.row.value.ValueMetaString;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.datavault.metadata.DvBulkLoadPluginSupport;
 import org.apache.hop.datavault.catalog.DvCatalogNamespaces;
+import org.apache.hop.datavault.metadata.DvBulkLoadPluginSupport;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Publishes load-run metrics record definitions and persists run rows to the target database. */
@@ -59,8 +57,11 @@ public final class LoadRunMetricsCatalogPublisher {
    */
   public static final String LEGACY_OPS_SCHEMA_NAME = "dv_ops";
 
-  /** @deprecated use {@link #DEFAULT_SCHEMA_NAME} */
+  /**
+   * @deprecated use {@link #DEFAULT_SCHEMA_NAME}
+   */
   @Deprecated public static final String SCHEMA_NAME = DEFAULT_SCHEMA_NAME;
+
   public static final String TABLE_LOAD_RUN = "load_run";
   public static final String TABLE_LOAD_PIPELINE_METRIC = "load_pipeline_metric";
   public static final String TABLE_LOAD_TRANSFORM_METRIC = "load_transform_metric";
@@ -84,12 +85,16 @@ public final class LoadRunMetricsCatalogPublisher {
       IVariables variables,
       IHopMetadataProvider metadataProvider)
       throws HopException {
-    if (Utils.isEmpty(runId) || pipelines == null || pipelines.isEmpty() || publishContext == null) {
+    if (Utils.isEmpty(runId)
+        || pipelines == null
+        || pipelines.isEmpty()
+        || publishContext == null) {
       return;
     }
     String targetDatabaseName = publishContext.targetDatabaseName();
     if (Utils.isEmpty(targetDatabaseName)) {
-      throw new HopException("Target database connection is required for load-run metrics publishing");
+      throw new HopException(
+          "Target database connection is required for load-run metrics publishing");
     }
 
     DatabaseMeta databaseMeta =
@@ -137,7 +142,11 @@ public final class LoadRunMetricsCatalogPublisher {
     }
   }
 
-  /** @deprecated use {@link #publish(ILogChannel, DvUpdateMetricsCollector.LoadRunPublishContext, String, String, String, String, String, boolean, long, List, List, IVariables, IHopMetadataProvider)} */
+  /**
+   * @deprecated use {@link #publish(ILogChannel, DvUpdateMetricsCollector.LoadRunPublishContext,
+   *     String, String, String, String, String, boolean, long, List, List, IVariables,
+   *     IHopMetadataProvider)}
+   */
   @Deprecated
   public static void publish(
       ILogChannel log,
@@ -277,14 +286,16 @@ public final class LoadRunMetricsCatalogPublisher {
     upsertDefinition(
         registry,
         catalogConnectionName,
-        buildPipelineMetricDefinition(namespace, targetDatabaseName, operationsSchema, databaseMeta),
+        buildPipelineMetricDefinition(
+            namespace, targetDatabaseName, operationsSchema, databaseMeta),
         variables,
         metadataProvider,
         updatedAt);
     upsertDefinition(
         registry,
         catalogConnectionName,
-        buildTransformMetricDefinition(namespace, targetDatabaseName, operationsSchema, databaseMeta),
+        buildTransformMetricDefinition(
+            namespace, targetDatabaseName, operationsSchema, databaseMeta),
         variables,
         metadataProvider,
         updatedAt);

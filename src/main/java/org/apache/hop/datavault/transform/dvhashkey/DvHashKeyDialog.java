@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.transform.dvhashkey;
 
 import java.util.ArrayList;
@@ -293,7 +291,8 @@ public class DvHashKeyDialog extends BaseTransformDialog {
     return transformName;
   }
 
-  private static void selectCCombo(CCombo combo, org.apache.hop.metadata.api.IEnumHasCodeAndDescription value) {
+  private static void selectCCombo(
+      CCombo combo, org.apache.hop.metadata.api.IEnumHasCodeAndDescription value) {
     if (combo == null || value == null) {
       return;
     }

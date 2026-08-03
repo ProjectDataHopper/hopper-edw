@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.i18n;
 
 import java.io.IOException;
@@ -90,7 +88,8 @@ public final class I18nValidator {
       return issues;
     }
 
-    if (bundleIndex.isProjectPackage(reference.lookupPackage()) && isDynamicPrefixReference(reference)) {
+    if (bundleIndex.isProjectPackage(reference.lookupPackage())
+        && isDynamicPrefixReference(reference)) {
       return issues;
     }
 
@@ -106,8 +105,7 @@ public final class I18nValidator {
             .filter(pkg -> !bundleIndex.isProjectPackage(pkg))
             .toList();
     if (!dependencyPackages.isEmpty()) {
-      issues.add(
-          I18nIssue.wrongPackage(reference, dependencyPackages.getFirst(), true));
+      issues.add(I18nIssue.wrongPackage(reference, dependencyPackages.getFirst(), true));
       return issues;
     }
 

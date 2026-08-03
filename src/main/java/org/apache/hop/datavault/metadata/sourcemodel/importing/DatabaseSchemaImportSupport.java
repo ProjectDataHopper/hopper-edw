@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.sourcemodel.importing;
 
 import java.util.ArrayList;
@@ -137,7 +136,8 @@ public final class DatabaseSchemaImportSupport {
               resolveUniqueLogicalName(
                   model,
                   importedTables,
-                  buildLogicalName(resolved.getSourceNamePrefix(), connectionName, schemaName, tableName));
+                  buildLogicalName(
+                      resolved.getSourceNamePrefix(), connectionName, schemaName, tableName));
 
           SourceTable sourceTable =
               buildSourceTable(

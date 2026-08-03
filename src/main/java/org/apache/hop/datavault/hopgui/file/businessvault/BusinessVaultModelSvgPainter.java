@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.businessvault;
 
 import java.util.ArrayList;
@@ -24,7 +22,6 @@ import org.apache.hop.core.gui.DPoint;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.SvgGc;
 import org.apache.hop.core.svg.HopSvgGraphics2D;
-import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.command.svg.ModelBoundsSupport;
 import org.apache.hop.datavault.command.svg.SvgRenderOptions;
@@ -69,8 +66,7 @@ public final class BusinessVaultModelSvgPainter {
       painter.setShowingNavigationView(false);
       painter.setShowHashKeyFieldNames(false);
       painter.setDrawNotes(renderOptions.isIncludeNotes());
-      painter.setMaximum(
-          ModelBoundsSupport.getMaximum(model, renderOptions.isIncludeNotes()));
+      painter.setMaximum(ModelBoundsSupport.getMaximum(model, renderOptions.isIncludeNotes()));
       try {
         painter.setDataVaultModel(
             BusinessVaultDvModelResolver.buildEffectiveDataVaultModel(

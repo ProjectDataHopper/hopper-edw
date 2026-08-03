@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.executionmap;
 
 import java.util.ArrayList;
@@ -27,9 +25,7 @@ import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.datavault.executionmap.ExecutionMapPersistence;
 import org.apache.hop.datavault.hopgui.file.ExplorerPerspectiveTabSupport;
-
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapDocument;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
 import org.apache.hop.ui.hopgui.file.HopFileTypeBase;
@@ -90,8 +86,8 @@ public class HopExecutionMapFileType extends HopFileTypeBase {
   }
 
   @Override
-  public IHopFileTypeHandler openFile(
-      HopGui hopGui, String filename, IVariables variables) throws HopException {
+  public IHopFileTypeHandler openFile(HopGui hopGui, String filename, IVariables variables)
+      throws HopException {
     try {
       ExecutionMapDocument document =
           ExecutionMapPersistence.load(filename, hopGui.getMetadataProvider(), variables);

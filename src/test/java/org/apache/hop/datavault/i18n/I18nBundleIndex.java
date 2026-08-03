@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.i18n;
 
 import java.io.File;
@@ -37,7 +35,9 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Stream;
 
-/** Indexes per-package {@code messages_en_US.properties} bundles from the project and/or classpath. */
+/**
+ * Indexes per-package {@code messages_en_US.properties} bundles from the project and/or classpath.
+ */
 public final class I18nBundleIndex {
 
   private static final String MESSAGES_RELATIVE_PATH = "messages/messages_en_US.properties";
@@ -87,7 +87,8 @@ public final class I18nBundleIndex {
     return index;
   }
 
-  private static void loadBundlesFromDirectory(I18nBundleIndex index, Path root) throws IOException {
+  private static void loadBundlesFromDirectory(I18nBundleIndex index, Path root)
+      throws IOException {
     if (!Files.isDirectory(root)) {
       return;
     }
@@ -127,8 +128,7 @@ public final class I18nBundleIndex {
 
   public static I18nBundleIndex merge(I18nBundleIndex project, I18nBundleIndex classpath) {
     I18nBundleIndex merged = new I18nBundleIndex();
-    project.keysByPackage.forEach(
-        (pkg, keys) -> merged.loadBundle(pkg, new HashSet<>(keys), true));
+    project.keysByPackage.forEach((pkg, keys) -> merged.loadBundle(pkg, new HashSet<>(keys), true));
     classpath.keysByPackage.forEach((pkg, keys) -> merged.loadBundle(pkg, keys, false));
     return merged;
   }

@@ -13,16 +13,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.List;
 import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.database.DatabaseMeta;
-import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
 
@@ -34,9 +31,7 @@ public final class DvTargetLoadModelCheckSupport {
   private DvTargetLoadModelCheckSupport() {}
 
   public static void checkTargetLoadMode(
-      List<ICheckResult> remarks,
-      IDvTargetLoadConfiguration config,
-      DatabaseMeta targetDatabase) {
+      List<ICheckResult> remarks, IDvTargetLoadConfiguration config, DatabaseMeta targetDatabase) {
     if (config == null) {
       return;
     }

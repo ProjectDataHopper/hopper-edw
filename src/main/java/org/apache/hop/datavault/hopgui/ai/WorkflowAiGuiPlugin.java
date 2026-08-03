@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.ai;
 
 import org.apache.hop.core.action.GuiContextAction;
@@ -55,7 +53,8 @@ public class WorkflowAiGuiPlugin {
       name = "i18n::WorkflowAiGuiPlugin.AiHelp.Name",
       tooltip = "i18n::WorkflowAiGuiPlugin.AiHelp.Tooltip",
       image = "datavault-ai-help.svg",
-      category = "i18n:org.apache.hop.ui.hopgui.file.workflow:HopGuiWorkflowGraph.ContextualAction.Category.Basic.Text",
+      category =
+          "i18n:org.apache.hop.ui.hopgui.file.workflow:HopGuiWorkflowGraph.ContextualAction.Category.Basic.Text",
       categoryOrder = "1")
   public void openAiAdvisorWorkflowContext(HopGuiWorkflowContext context) {
     if (context.getWorkflowGraph() != null) {
@@ -70,7 +69,8 @@ public class WorkflowAiGuiPlugin {
       name = "i18n::WorkflowAiGuiPlugin.AiHelp.Name",
       tooltip = "i18n::WorkflowAiGuiPlugin.AiHelp.Tooltip",
       image = "datavault-ai-help.svg",
-      category = "i18n:org.apache.hop.ui.hopgui.file.workflow:HopGuiWorkflowGraph.ContextualAction.Category.Basic.Text",
+      category =
+          "i18n:org.apache.hop.ui.hopgui.file.workflow:HopGuiWorkflowGraph.ContextualAction.Category.Basic.Text",
       categoryOrder = "1")
   public void openAiAdvisorActionContext(HopGuiWorkflowActionContext context) {
     if (context.getWorkflowGraph() != null) {

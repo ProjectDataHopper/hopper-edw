@@ -13,28 +13,26 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.file;
 
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.vfs2.FileObject;
+import org.apache.hop.catalog.discovery.PhysicalSourceRef;
+import org.apache.hop.catalog.discovery.RecordDefinitionCatalogWriter;
+import org.apache.hop.catalog.discovery.RecordDefinitionDiscoveryService;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
-import org.apache.hop.catalog.discovery.PhysicalSourceRef;
-import org.apache.hop.catalog.discovery.RecordDefinitionCatalogWriter;
-import org.apache.hop.catalog.discovery.RecordDefinitionDiscoveryService;
 import org.apache.hop.datavault.catalog.DvSourceCatalogService;
 import org.apache.hop.datavault.catalog.RecordSourceIndicatorOptions;
 import org.apache.hop.datavault.catalog.RecordSourceIndicatorSupport;
-import org.apache.hop.datavault.metadata.DvSourceType;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DataVaultSource;
+import org.apache.hop.datavault.metadata.DvSourceType;
 import org.apache.hop.datavault.metadata.SourceField;
 import org.apache.hop.datavault.metadata.database.DvDatabaseSourceImportSupport;
 import org.apache.hop.datavault.metadata.database.ImportDatabaseTablesCatalogDialog;
@@ -141,10 +139,7 @@ public final class DvParquetSourceImportSupport {
       DvParquetSource parquetSource = createParquetSource(resolvedFile, variables);
       DataVaultSource source =
           createDataVaultSource(
-              sourceName,
-              parquetSource,
-              discovery.fields(),
-              options.getRecordSourceOptions());
+              sourceName, parquetSource, discovery.fields(), options.getRecordSourceOptions());
       RecordDefinitionCatalogWriter.upsertDataVaultSource(
           source, catalogConnectionName, model, variables, metadataProvider, null, null, null);
 
@@ -178,8 +173,7 @@ public final class DvParquetSourceImportSupport {
       FileObject parent = fileObject.getParent();
       if (parent == null) {
         throw new HopException(
-            BaseMessages.getString(
-                PKG, "DvParquetSourceImportSupport.Error.MissingParentFolder"));
+            BaseMessages.getString(PKG, "DvParquetSourceImportSupport.Error.MissingParentFolder"));
       }
       folder = HopVfs.getFilename(parent);
       baseName = fileObject.getName().getBaseName();
@@ -187,8 +181,7 @@ public final class DvParquetSourceImportSupport {
       throw e;
     } catch (Exception e) {
       throw new HopException(
-          BaseMessages.getString(
-              PKG, "DvParquetSourceImportSupport.Error.DialogMessage", filePath),
+          BaseMessages.getString(PKG, "DvParquetSourceImportSupport.Error.DialogMessage", filePath),
           e);
     }
 

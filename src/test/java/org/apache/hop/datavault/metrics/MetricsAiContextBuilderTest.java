@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,7 +32,8 @@ class MetricsAiContextBuilderTest {
   @BeforeEach
   void setUp() throws Exception {
     metadataProvider = new MemoryMetadataProvider();
-    ExecutionMetricsProfileMeta profile = new ExecutionMetricsProfileMeta("retail-execution-metrics");
+    ExecutionMetricsProfileMeta profile =
+        new ExecutionMetricsProfileMeta("retail-execution-metrics");
     profile.setEnabled(true);
     profile.setTargetDatabaseConnection("OPS");
     profile.setOperationsSchema("dv_ops");
@@ -53,8 +52,7 @@ class MetricsAiContextBuilderTest {
   @Test
   void resolvesMetricsDatabaseFromEnabledProfile() {
     assertEquals("OPS", MetricsAiContextBuilder.resolveMetricsDatabaseName(metadataProvider, null));
-    assertEquals(
-        "dv_ops", MetricsAiContextBuilder.resolveOperationsSchema(metadataProvider, null));
+    assertEquals("dv_ops", MetricsAiContextBuilder.resolveOperationsSchema(metadataProvider, null));
   }
 
   @Test
@@ -62,18 +60,15 @@ class MetricsAiContextBuilderTest {
     assertEquals(
         "",
         MetricsAiContextBuilder.buildMetricsContextForPrompt(
-            "Explain hub modeling",
-            "retail-360",
-            "dv",
-            metadataProvider,
-            null));
+            "Explain hub modeling", "retail-360", "dv", metadataProvider, null));
   }
 
   @Test
   void shouldIncludeMetricsForExplicitFlagScenarioOrKeywords() {
     assertTrue(MetricsAiContextBuilder.shouldIncludeMetrics(true, false, "anything"));
     assertTrue(MetricsAiContextBuilder.shouldIncludeMetrics(false, true, "anything"));
-    assertFalse(MetricsAiContextBuilder.shouldIncludeMetrics(false, false, "What hubs should I add?"));
+    assertFalse(
+        MetricsAiContextBuilder.shouldIncludeMetrics(false, false, "What hubs should I add?"));
     assertTrue(
         MetricsAiContextBuilder.shouldIncludeMetrics(
             false, false, "How can I tune sort memory for this model?"));

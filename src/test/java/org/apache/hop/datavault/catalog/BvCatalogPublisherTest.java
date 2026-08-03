@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.catalog;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -87,8 +85,7 @@ class BvCatalogPublisherTest {
 
   @Test
   void republishPreservesQualityRulesAndValidationAcknowledgements() throws Exception {
-    BusinessVaultModel bvModel =
-        loadBusinessVaultModel("integration-tests/tests/basic/vault1.hbv");
+    BusinessVaultModel bvModel = loadBusinessVaultModel("integration-tests/tests/basic/vault1.hbv");
     DataVaultModel dvModel = loadDataVaultModel("integration-tests/tests/basic/vault1.hdv");
     String namespace = BvCatalogNamespaces.projectBusinessVaultModelsNamespace(variables, bvModel);
     RecordDefinitionKey key = new RecordDefinitionKey(namespace, "pit_customer");
@@ -112,8 +109,7 @@ class BvCatalogPublisherTest {
     binding.setEnabled(true);
     stored.setQualityRules(new ArrayList<>(List.of(binding)));
 
-    RecordDefinitionValidationAcknowledgement ack =
-        new RecordDefinitionValidationAcknowledgement();
+    RecordDefinitionValidationAcknowledgement ack = new RecordDefinitionValidationAcknowledgement();
     ack.setIssueId("FIELD_ADDED|snapshot_date|");
     ack.setComment("known pit column");
     ack.setAcknowledgedAt(new Date());

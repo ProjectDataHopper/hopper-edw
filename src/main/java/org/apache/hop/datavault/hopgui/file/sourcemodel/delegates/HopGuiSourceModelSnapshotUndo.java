@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.hopgui.file.sourcemodel.delegates;
 
 import org.apache.hop.core.exception.HopException;
@@ -26,8 +25,7 @@ import org.apache.hop.metadata.api.IHopMetadataProvider;
 public class HopGuiSourceModelSnapshotUndo {
 
   private final ModelGraphSnapshotUndo<SourceModel> delegate =
-      new ModelGraphSnapshotUndo<>(
-          SourceModel.class, SourceModel.XML_TAG, SourceModel::new);
+      new ModelGraphSnapshotUndo<>(SourceModel.class, SourceModel.XML_TAG, SourceModel::new);
 
   public ModelGraphSnapshotUndo<SourceModel> getDelegate() {
     return delegate;

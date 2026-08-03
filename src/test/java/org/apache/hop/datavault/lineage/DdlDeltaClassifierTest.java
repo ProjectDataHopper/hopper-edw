@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.lineage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -60,7 +59,8 @@ class DdlDeltaClassifierTest {
   @Test
   void stripsSchemaAndQuotes() {
     DdlDelta delta =
-        DdlDeltaClassifier.classifyOne("ALTER TABLE \"public\".\"hub_customer\" ADD \"new_col\" INT");
+        DdlDeltaClassifier.classifyOne(
+            "ALTER TABLE \"public\".\"hub_customer\" ADD \"new_col\" INT");
     assertEquals(DdlDeltaType.ADD_COLUMN, delta.getType());
     assertEquals("hub_customer", delta.getTableName());
     assertEquals("new_col", delta.getColumnName());

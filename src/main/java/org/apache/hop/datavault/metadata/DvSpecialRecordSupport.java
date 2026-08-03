@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.nio.charset.StandardCharsets;
@@ -35,8 +33,8 @@ import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.StringUtil;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.datavault.transform.dvhashkey.DvHashKeyLogic;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Ensures unknown and invalid (error) sentinel rows exist in hub and link target tables using
@@ -107,8 +105,7 @@ public final class DvSpecialRecordSupport {
                 db, hub, layout, tableName, config, variables, loadDate, SpecialRecordKind.INVALID);
       }
     } catch (Exception e) {
-      throw new HopException(
-          "Error ensuring special records for hub '" + hub.getName() + "'", e);
+      throw new HopException("Error ensuring special records for hub '" + hub.getName() + "'", e);
     }
     return inserted;
   }
@@ -168,8 +165,7 @@ public final class DvSpecialRecordSupport {
                 SpecialRecordKind.INVALID);
       }
     } catch (Exception e) {
-      throw new HopException(
-          "Error ensuring special records for link '" + link.getName() + "'", e);
+      throw new HopException("Error ensuring special records for link '" + link.getName() + "'", e);
     }
     return inserted;
   }
@@ -194,8 +190,7 @@ public final class DvSpecialRecordSupport {
       }
     }
 
-    Object hashValue =
-        resolveHubHashValue(hub, config, variables, kind, hashMeta.getType());
+    Object hashValue = resolveHubHashValue(hub, config, variables, kind, hashMeta.getType());
     if (hashValue == null) {
       return 0;
     }
@@ -249,7 +244,8 @@ public final class DvSpecialRecordSupport {
         throw new HopException(
             "Hub hash column '" + hubHashCol + "' not found in link layout for " + link.getName());
       }
-      Object hubHashValue = resolveHubHashValue(hub, config, variables, kind, hubHashMeta.getType());
+      Object hubHashValue =
+          resolveHubHashValue(hub, config, variables, kind, hubHashMeta.getType());
       if (hubHashValue == null) {
         return 0;
       }
@@ -373,11 +369,7 @@ public final class DvSpecialRecordSupport {
   }
 
   private static boolean specialRecordExists(
-      Database db,
-      IVariables variables,
-      String tableName,
-      IValueMeta hashMeta,
-      Object hashValue)
+      Database db, IVariables variables, String tableName, IValueMeta hashMeta, Object hashValue)
       throws HopException {
     String quotedTable =
         db.getDatabaseMeta().getQuotedSchemaTableCombination(variables, null, tableName);
@@ -439,7 +431,8 @@ public final class DvSpecialRecordSupport {
       IVariables variables,
       int valueMetaType)
       throws HopException {
-    String resolved = variables != null ? variables.resolve(Const.NVL(configuredValue, "")) : configuredValue;
+    String resolved =
+        variables != null ? variables.resolve(Const.NVL(configuredValue, "")) : configuredValue;
     if (Utils.isEmpty(resolved) && !Utils.isEmpty(fallbackBusinessKeyValue)) {
       return computeBusinessKeyHash(fallbackBusinessKeyValue, businessKeys, config, valueMetaType);
     }
@@ -540,8 +533,7 @@ public final class DvSpecialRecordSupport {
       values.add(businessKeyValue);
       binaryFlags.add(false);
     }
-    Object hash =
-        DvHashKeyLogic.computeHashFromValues(values, binaryFlags, config, null);
+    Object hash = DvHashKeyLogic.computeHashFromValues(values, binaryFlags, config, null);
     return coerceHashResult(hash, config, valueMetaType);
   }
 
@@ -598,7 +590,9 @@ public final class DvSpecialRecordSupport {
 
   private static String resolveHubHashKeyName(DvHub hub) {
     String hashKeyName = hub.getHashKeyFieldName();
-    if (Utils.isEmpty(hashKeyName) && hub.getBusinessKeys() != null && !hub.getBusinessKeys().isEmpty()) {
+    if (Utils.isEmpty(hashKeyName)
+        && hub.getBusinessKeys() != null
+        && !hub.getBusinessKeys().isEmpty()) {
       hashKeyName = hub.getBusinessKeys().get(0).getName() + "_HK";
     }
     return Const.NVL(hashKeyName, "hashkey");
@@ -635,8 +629,7 @@ public final class DvSpecialRecordSupport {
     }
     for (String hubName : link.getHubNames()) {
       String hubHashCol =
-          DvTableResolutionSupport.resolveParticipatingHubHashColumn(
-              model, hubName, null, null);
+          DvTableResolutionSupport.resolveParticipatingHubHashColumn(model, hubName, null, null);
       if (Utils.isEmpty(hubHashCol)) {
         DvHub hub = model.findHub(hubName);
         if (hub != null) {

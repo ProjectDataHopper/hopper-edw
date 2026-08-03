@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import org.apache.hop.core.exception.HopException;
@@ -45,7 +43,11 @@ public final class ExecutionMetricsProfileResolver {
 
     if (Utils.isEmpty(profileName)) {
       return resolveLegacy(
-          resolvedLegacyFolder, actionCatalogConnection, modelTargetDatabase, modelType, parentWorkflow);
+          resolvedLegacyFolder,
+          actionCatalogConnection,
+          modelTargetDatabase,
+          modelType,
+          parentWorkflow);
     }
 
     ExecutionMetricsProfileMeta profile =
@@ -104,7 +106,10 @@ public final class ExecutionMetricsProfileResolver {
     }
     DvUpdateMetricsCollector.LoadRunPublishContext publishContext =
         DvUpdateMetricsCollector.LoadRunPublishContext.withDefaults(
-            actionCatalogConnection, modelTargetDatabase, resolveWorkflowName(parentWorkflow), modelType);
+            actionCatalogConnection,
+            modelTargetDatabase,
+            resolveWorkflowName(parentWorkflow),
+            modelType);
     return new ResolvedExecutionMetrics(true, metricsOutputFolder, publishContext);
   }
 

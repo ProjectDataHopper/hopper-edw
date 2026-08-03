@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.quality.workflow.actions.measuredataquality;
 
 import java.util.ArrayList;
@@ -47,10 +45,10 @@ import org.apache.hop.datavault.resourcedefinition.ValidationModels;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.quality.history.DataQualityHistoryPublisher;
-import org.apache.hop.quality.metadata.DataQualityRuleSetMeta;
 import org.apache.hop.quality.history.DataQualityHistoryPublisher.PublishContext;
 import org.apache.hop.quality.history.DataQualityHistoryPublisher.PublishResult;
 import org.apache.hop.quality.history.DataQualityHistoryPublisher.PublishStatus;
+import org.apache.hop.quality.metadata.DataQualityRuleSetMeta;
 import org.apache.hop.quality.model.DataQualityReport;
 import org.apache.hop.quality.model.QualityEvaluationMode;
 import org.apache.hop.quality.model.QualityLifecycle;
@@ -349,12 +347,7 @@ public class ActionMeasureDataQuality extends ActionBase implements Cloneable, I
 
       PublishContext context =
           new PublishContext(
-              targetDatabase,
-              schema,
-              catalogConnection,
-              publishCatalog,
-              true,
-              autoCreateTables);
+              targetDatabase, schema, catalogConnection, publishCatalog, true, autoCreateTables);
 
       PublishResult publishResult =
           DataQualityHistoryPublisher.publish(
@@ -381,8 +374,7 @@ public class ActionMeasureDataQuality extends ActionBase implements Cloneable, I
       return publishResult;
     } catch (Exception e) {
       String msg = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
-      logError(
-          BaseMessages.getString(PKG, "ActionMeasureDataQuality.Error.PersistFailed", msg), e);
+      logError(BaseMessages.getString(PKG, "ActionMeasureDataQuality.Error.PersistFailed", msg), e);
       return new PublishResult(PublishStatus.FAILED, msg);
     }
   }
@@ -395,7 +387,8 @@ public class ActionMeasureDataQuality extends ActionBase implements Cloneable, I
     String fromVar =
         resolveOptional(
             getVariables() != null
-                ? getVariables().getVariable(DataQualityHistoryPublisher.VAR_QUALITY_HISTORY_DATABASE)
+                ? getVariables()
+                    .getVariable(DataQualityHistoryPublisher.VAR_QUALITY_HISTORY_DATABASE)
                 : null);
     if (!Utils.isEmpty(fromVar)) {
       return fromVar;

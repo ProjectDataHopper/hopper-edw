@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -98,8 +96,7 @@ class BusinessVaultDvReferenceSupportTest {
 
     // Linked model (null path): hub_customer still available even if external alias exists.
     List<String> hubs =
-        BusinessVaultDvReferenceSupport.listAvailableDvTableNames(
-            dv, bv, DvTableType.HUB, null);
+        BusinessVaultDvReferenceSupport.listAvailableDvTableNames(dv, bv, DvTableType.HUB, null);
     assertTrue(hubs.contains("hub_customer"));
 
     // Same external path: hub already used.

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai;
 
 import java.util.ArrayList;
@@ -32,18 +30,16 @@ import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.catalog.DvSourceCatalogService;
+import org.apache.hop.datavault.metadata.BusinessKey;
 import org.apache.hop.datavault.metadata.DataVaultConfiguration;
 import org.apache.hop.datavault.metadata.DataVaultModel;
-import org.apache.hop.datavault.metadata.DataVaultSource;
-import org.apache.hop.datavault.metadata.BusinessKey;
 import org.apache.hop.datavault.metadata.DvHub;
 import org.apache.hop.datavault.metadata.DvLink;
 import org.apache.hop.datavault.metadata.DvModelCheckOptions;
 import org.apache.hop.datavault.metadata.DvSatellite;
-import org.apache.hop.datavault.metadata.SatelliteAttribute;
-import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
 import org.apache.hop.datavault.metadata.IDvTable;
+import org.apache.hop.datavault.metadata.SatelliteAttribute;
 import org.apache.hop.datavault.metrics.ExecutionInfoAiContextBuilder;
 import org.apache.hop.datavault.metrics.MetricsAiContextBuilder;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
@@ -87,7 +83,8 @@ public final class DvAiContextBuilder {
 
     String recordDefinitionsJson = "";
     if (request.isIncludeCatalogSources()) {
-      recordDefinitionsJson = serializeRecordDefinitions(model, metadataProvider, variables, request);
+      recordDefinitionsJson =
+          serializeRecordDefinitions(model, metadataProvider, variables, request);
     }
 
     String loadRunMetricsJson =
@@ -152,8 +149,7 @@ public final class DvAiContextBuilder {
         appendStringArray(json, link.getHubNames());
         json.append("],\"drivingKeyNames\":[");
         appendStringArray(json, link.getDrivingKeyNames());
-        json.append("],\"hasDescriptiveAttributes\":")
-            .append(link.isHasDescriptiveAttributes());
+        json.append("],\"hasDescriptiveAttributes\":").append(link.isHasDescriptiveAttributes());
         json.append(",\"linkSatelliteNames\":[");
         appendStringArray(json, link.getLinkSatelliteNames());
         json.append(']');
@@ -234,7 +230,8 @@ public final class DvAiContextBuilder {
     json.append("],\"configuration\":");
     DataVaultConfiguration config = model.getConfigurationOrDefault();
     json.append("{\"targetDatabase\":").append(jsonString(config.getTargetDatabase()));
-    json.append(",\"dataCatalogConnection\":").append(jsonString(config.getDataCatalogConnection()));
+    json.append(",\"dataCatalogConnection\":")
+        .append(jsonString(config.getDataCatalogConnection()));
     json.append(",\"sortRowsSize\":").append(jsonString(config.getSortRowsSize()));
     DvTargetLoadAiConfigurationSupport.appendTargetLoadSummaryJson(json, config);
     json.append("}}");
@@ -316,8 +313,9 @@ public final class DvAiContextBuilder {
       if (index++ > 0) {
         json.append(',');
       }
-      json.append(serializeRecordDefinitionEntry(
-          sourceName, catalogConnection, model, variables, metadataProvider));
+      json.append(
+          serializeRecordDefinitionEntry(
+              sourceName, catalogConnection, model, variables, metadataProvider));
     }
     json.append("]}");
     return json.toString();
@@ -420,9 +418,7 @@ public final class DvAiContextBuilder {
               ? "ERROR"
               : result.getType() == ICheckResult.TYPE_RESULT_OK
                   ? "OK"
-                  : result.getType() == ICheckResult.TYPE_RESULT_WARNING
-                      ? "WARNING"
-                      : "INFO";
+                  : result.getType() == ICheckResult.TYPE_RESULT_WARNING ? "WARNING" : "INFO";
       json.append("{\"type\":").append(jsonString(type));
       json.append(",\"text\":").append(jsonString(result.getText()));
       json.append(",\"source\":").append(jsonString(formatCheckSource(result)));

@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,8 +46,7 @@ class DvTargetUnicodeCapabilitySupportTest {
   @Test
   void sqlServerLegacyCollationIsNotCapable() {
     var assessment =
-        DvTargetUnicodeCapabilitySupport.evaluate(
-            sqlServerMeta(), "SQL_Latin1_General_CP1_CI_AS");
+        DvTargetUnicodeCapabilitySupport.evaluate(sqlServerMeta(), "SQL_Latin1_General_CP1_CI_AS");
     assertEquals(DvTargetUnicodeCapabilitySupport.Status.NOT_CAPABLE, assessment.status());
     assertTrue(assessment.isHardFailure());
     assertTrue(assessment.remediation().contains("UTF-8"));

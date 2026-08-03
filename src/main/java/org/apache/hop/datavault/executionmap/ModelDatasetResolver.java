@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import java.util.ArrayList;
@@ -32,14 +30,12 @@ import org.apache.hop.datavault.metadata.DataVaultSource;
 import org.apache.hop.datavault.metadata.DvHub;
 import org.apache.hop.datavault.metadata.DvLink;
 import org.apache.hop.datavault.metadata.DvSatellite;
-import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.datavault.metadata.IDvTable;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
 import org.apache.hop.datavault.metadata.businessvault.IBvTable;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.datavault.metadata.dimensional.DmTableType;
 import org.apache.hop.datavault.metadata.dimensional.IDmTable;
-import org.apache.hop.datavault.metadata.executionmap.ExecutionMapEdgeType;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapNode;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapNodeType;
 import org.apache.hop.pipeline.PipelineMeta;
@@ -273,13 +269,9 @@ public final class ModelDatasetResolver {
       }
     } catch (HopException e) {
       context.addWarning(
-          "Failed to resolve DV sources for table '"
-              + table.getName()
-              + "': "
-              + e.getMessage());
+          "Failed to resolve DV sources for table '" + table.getName() + "': " + e.getMessage());
     }
-    String sourceNamespace =
-        DvCatalogNamespaces.projectSourcesNamespace(context.getVariables());
+    String sourceNamespace = DvCatalogNamespaces.projectSourcesNamespace(context.getVariables());
     for (DataVaultSource source : sources) {
       addDataVaultSourceDataset(
           context, modelNodeId, source, table.getName(), sourceNamespace, catalogConnectionName);

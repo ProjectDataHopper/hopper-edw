@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import java.util.ArrayList;
@@ -25,8 +23,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.row.IRowMeta;
+import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metadata.dimensional.DmDimensionLoadStrategySupport.DmDimensionLoadStrategy;
 import org.apache.hop.datavault.metadata.dimensional.pipeline.DmDimensionLookupBuilder;
@@ -42,8 +40,8 @@ import org.apache.hop.pipeline.PipelineMeta;
 public class DmDimension extends DmTableBase {
 
   /**
-   * @deprecated Load strategy is derived from per-attribute {@link DmScdUpdatePolicy} values. Retained
-   *     for deserializing legacy {@code .hdm} files; not written on save.
+   * @deprecated Load strategy is derived from per-attribute {@link DmScdUpdatePolicy} values.
+   *     Retained for deserializing legacy {@code .hdm} files; not written on save.
    */
   @Deprecated
   @HopMetadataProperty(storeWithCode = true)
@@ -66,8 +64,8 @@ public class DmDimension extends DmTableBase {
   @HopMetadataProperty private String surrogateKeySourceField;
 
   /**
-   * Optional source column used as the SCD2 effective start ({@code dateFromField}) on new versions.
-   * When empty, the dimensional update load timestamp is used.
+   * Optional source column used as the SCD2 effective start ({@code dateFromField}) on new
+   * versions. When empty, the dimensional update load timestamp is used.
    */
   @HopMetadataProperty private String effectiveDateSourceField;
 
@@ -75,7 +73,9 @@ public class DmDimension extends DmTableBase {
     super(DmTableType.DIMENSION);
   }
 
-  /** @deprecated Use {@link DmDimensionLoadStrategySupport#resolveDerivedScdType(DmDimension)}. */
+  /**
+   * @deprecated Use {@link DmDimensionLoadStrategySupport#resolveDerivedScdType(DmDimension)}.
+   */
   @Deprecated
   public DmDimensionScdType getScdTypeOrDefault() {
     return DmDimensionLoadStrategySupport.resolveDerivedScdType(this);
@@ -101,7 +101,9 @@ public class DmDimension extends DmTableBase {
     if (Utils.isEmpty(effectiveDateSourceField)) {
       return null;
     }
-    return variables != null ? variables.resolve(effectiveDateSourceField) : effectiveDateSourceField;
+    return variables != null
+        ? variables.resolve(effectiveDateSourceField)
+        : effectiveDateSourceField;
   }
 
   /**
@@ -159,8 +161,7 @@ public class DmDimension extends DmTableBase {
     IRowMeta sourceRowMeta =
         DmSourceFieldResolutionSupport.tryResolveSourceRowMeta(
             metadataProvider, variables, model, this);
-    return DmLayoutSupport.buildDimensionTargetTableLayout(
-        this, config, variables, sourceRowMeta);
+    return DmLayoutSupport.buildDimensionTargetTableLayout(this, config, variables, sourceRowMeta);
   }
 
   @Override

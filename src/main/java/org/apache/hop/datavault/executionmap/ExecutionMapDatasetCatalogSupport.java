@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import org.apache.hop.catalog.model.RecordDefinitionKey;
@@ -119,8 +117,7 @@ public final class ExecutionMapDatasetCatalogSupport {
 
   static String catalogNamespaceForDatasetNode(
       ExecutionMapNode datasetNode, ExecutionMapNode modelNode, IVariables variables) {
-    if (datasetNode != null
-        && datasetNode.getNodeType() == ExecutionMapNodeType.SOURCE_DATASET) {
+    if (datasetNode != null && datasetNode.getNodeType() == ExecutionMapNodeType.SOURCE_DATASET) {
       String sourcesNamespace = sourcesNamespaceForModelNode(modelNode, variables);
       if (!Utils.isEmpty(sourcesNamespace)) {
         return sourcesNamespace;
@@ -147,22 +144,19 @@ public final class ExecutionMapDatasetCatalogSupport {
       case DIMENSIONAL_MODEL -> {
         DimensionalModel model = new DimensionalModel();
         model.setName(modelNode.getName());
-        model.setFilename(
-            ExecutionMapPathSupport.toResolvedPath(modelNode.getPath(), variables));
+        model.setFilename(ExecutionMapPathSupport.toResolvedPath(modelNode.getPath(), variables));
         yield DmCatalogNamespaces.projectDimensionalModelsNamespace(variables, model);
       }
       case DATA_VAULT_MODEL -> {
         DataVaultModel model = new DataVaultModel();
         model.setName(modelNode.getName());
-        model.setFilename(
-            ExecutionMapPathSupport.toResolvedPath(modelNode.getPath(), variables));
+        model.setFilename(ExecutionMapPathSupport.toResolvedPath(modelNode.getPath(), variables));
         yield DvCatalogNamespaces.projectModelsNamespace(variables, model);
       }
       case BUSINESS_VAULT_MODEL -> {
         BusinessVaultModel model = new BusinessVaultModel();
         model.setName(modelNode.getName());
-        model.setFilename(
-            ExecutionMapPathSupport.toResolvedPath(modelNode.getPath(), variables));
+        model.setFilename(ExecutionMapPathSupport.toResolvedPath(modelNode.getPath(), variables));
         yield BvCatalogNamespaces.projectBusinessVaultModelsNamespace(variables, model);
       }
       default -> null;

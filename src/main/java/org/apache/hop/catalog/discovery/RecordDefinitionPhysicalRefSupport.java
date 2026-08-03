@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.discovery;
 
 import org.apache.hop.catalog.model.DvSourceRecord;
@@ -81,12 +79,14 @@ public final class RecordDefinitionPhysicalRefSupport {
       throws HopException {
     if (definition == null) {
       throw new HopException(
-          BaseMessages.getString(PKG, "RecordDefinitionPhysicalRefSupport.Error.MissingDefinition"));
+          BaseMessages.getString(
+              PKG, "RecordDefinitionPhysicalRefSupport.Error.MissingDefinition"));
     }
     DvSourceType sourceType = resolveSourceType(definition);
     if (sourceType == null) {
       throw new HopException(
-          BaseMessages.getString(PKG, "RecordDefinitionPhysicalRefSupport.Error.MissingSourceType"));
+          BaseMessages.getString(
+              PKG, "RecordDefinitionPhysicalRefSupport.Error.MissingSourceType"));
     }
 
     return switch (sourceType) {
@@ -97,7 +97,8 @@ public final class RecordDefinitionPhysicalRefSupport {
     };
   }
 
-  private static PhysicalSourceRef fromCompositeSource(DvSourceRecord dvSource) throws HopException {
+  private static PhysicalSourceRef fromCompositeSource(DvSourceRecord dvSource)
+      throws HopException {
     if (dvSource == null
         || Utils.isEmpty(dvSource.getCompositeSourceModelFilename())
         || Utils.isEmpty(dvSource.getCompositeSourceQueryName())) {
@@ -115,7 +116,8 @@ public final class RecordDefinitionPhysicalRefSupport {
       throws HopException {
     if (physicalTable == null) {
       throw new HopException(
-          BaseMessages.getString(PKG, "RecordDefinitionPhysicalRefSupport.Error.MissingPhysicalRef"));
+          BaseMessages.getString(
+              PKG, "RecordDefinitionPhysicalRefSupport.Error.MissingPhysicalRef"));
     }
     return PhysicalSourceRef.builder()
         .databaseConnectionName(physicalTable.getDatabaseMetaName())
@@ -128,7 +130,8 @@ public final class RecordDefinitionPhysicalRefSupport {
       throws HopException {
     if (physicalFile == null) {
       throw new HopException(
-          BaseMessages.getString(PKG, "RecordDefinitionPhysicalRefSupport.Error.MissingPhysicalRef"));
+          BaseMessages.getString(
+              PKG, "RecordDefinitionPhysicalRefSupport.Error.MissingPhysicalRef"));
     }
     return PhysicalSourceRef.builder()
         .folder(physicalFile.getFolder())
@@ -138,17 +141,19 @@ public final class RecordDefinitionPhysicalRefSupport {
         .build();
   }
 
-  private static PhysicalSourceRef fromPhysicalIcebergTable(PhysicalIcebergTableRef physicalIcebergTable)
-      throws HopException {
+  private static PhysicalSourceRef fromPhysicalIcebergTable(
+      PhysicalIcebergTableRef physicalIcebergTable) throws HopException {
     if (physicalIcebergTable == null) {
       throw new HopException(
-          BaseMessages.getString(PKG, "RecordDefinitionPhysicalRefSupport.Error.MissingPhysicalRef"));
+          BaseMessages.getString(
+              PKG, "RecordDefinitionPhysicalRefSupport.Error.MissingPhysicalRef"));
     }
     PhysicalSourceRef physicalRef =
         PhysicalSourceRef.fromPhysicalIcebergTableRef(physicalIcebergTable);
     if (physicalRef == null) {
       throw new HopException(
-          BaseMessages.getString(PKG, "RecordDefinitionPhysicalRefSupport.Error.MissingPhysicalRef"));
+          BaseMessages.getString(
+              PKG, "RecordDefinitionPhysicalRefSupport.Error.MissingPhysicalRef"));
     }
     return physicalRef;
   }

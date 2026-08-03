@@ -13,20 +13,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.layout;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.datavault.metadata.dimensional.DmDimension;
 import org.apache.hop.datavault.metadata.dimensional.DmFact;
 import org.apache.hop.datavault.metadata.dimensional.DmFactDimensionRole;
 import org.apache.hop.datavault.metadata.dimensional.DmNaturalKeyField;
-import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -56,8 +54,6 @@ class ElkGraphLayoutDimensionalTest {
     model.getTables().add(fact);
 
     assertDoesNotThrow(
-        () ->
-            ElkGraphLayout.fromDimensionalModel(model)
-                .layout(ElkLayout.createDefault()));
+        () -> ElkGraphLayout.fromDimensionalModel(model).layout(ElkLayout.createDefault()));
   }
 }

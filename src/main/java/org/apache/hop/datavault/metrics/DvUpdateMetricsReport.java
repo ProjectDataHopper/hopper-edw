@@ -13,16 +13,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import java.util.List;
 import lombok.Builder;
 import lombok.Value;
 
-/** JSON document written when metrics output folder is configured on the Data Vault Update action. */
+/**
+ * JSON document written when metrics output folder is configured on the Data Vault Update action.
+ */
 @Value
 @Builder
 public class DvUpdateMetricsReport {

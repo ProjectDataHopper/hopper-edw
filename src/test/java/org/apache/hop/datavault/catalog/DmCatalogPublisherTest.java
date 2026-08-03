@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.catalog;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,7 +46,6 @@ import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.datavault.metadata.dimensional.DmDimension;
 import org.apache.hop.datavault.metadata.dimensional.DmFact;
 import org.apache.hop.datavault.metadata.dimensional.IDmTable;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.apache.hop.quality.model.RecordQualityRuleBinding;
@@ -173,11 +170,7 @@ class DmCatalogPublisherTest {
 
     DmCatalogPublisher.PublishResult result =
         DmCatalogPublisher.publish(
-            CATALOG_CONNECTION,
-            model,
-            variables,
-            metadataProvider,
-            "publish-basic-star");
+            CATALOG_CONNECTION, model, variables, metadataProvider, "publish-basic-star");
 
     assertEquals(3, result.getTableCount());
     assertEquals(0, result.getErrorCount());
@@ -220,8 +213,7 @@ class DmCatalogPublisherTest {
     binding.setEnabled(true);
     stored.setQualityRules(new ArrayList<>(List.of(binding)));
 
-    RecordDefinitionValidationAcknowledgement ack =
-        new RecordDefinitionValidationAcknowledgement();
+    RecordDefinitionValidationAcknowledgement ack = new RecordDefinitionValidationAcknowledgement();
     ack.setIssueId("FIELD_ADDED|loyalty_tier|");
     ack.setComment("known additive column");
     ack.setAcknowledgedAt(new Date());
@@ -278,5 +270,4 @@ class DmCatalogPublisherTest {
     model.setFilename(fixture.toString());
     return model;
   }
-
 }

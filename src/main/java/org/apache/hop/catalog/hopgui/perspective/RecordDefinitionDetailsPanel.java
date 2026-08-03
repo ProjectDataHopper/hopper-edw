@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.hopgui.perspective;
 
 import java.text.SimpleDateFormat;
@@ -24,6 +22,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.hop.catalog.discovery.RecordDefinitionPhysicalRefSupport;
+import org.apache.hop.catalog.hopgui.navigation.RecordOriginNavigationSupport;
+import org.apache.hop.catalog.hopgui.preview.RecordDefinitionPreviewRunner;
+import org.apache.hop.catalog.hopgui.preview.RecordDefinitionPreviewSupport;
 import org.apache.hop.catalog.model.CatalogCustomProperty;
 import org.apache.hop.catalog.model.CatalogSourceField;
 import org.apache.hop.catalog.model.DvCsvFormatRecord;
@@ -31,29 +33,25 @@ import org.apache.hop.catalog.model.DvSourceRecord;
 import org.apache.hop.catalog.model.PhysicalFileRef;
 import org.apache.hop.catalog.model.PhysicalIcebergTableRef;
 import org.apache.hop.catalog.model.PhysicalTableRef;
-import org.apache.hop.catalog.discovery.RecordDefinitionPhysicalRefSupport;
 import org.apache.hop.catalog.model.RecordDefinition;
-import org.apache.hop.catalog.hopgui.preview.RecordDefinitionPreviewRunner;
-import org.apache.hop.catalog.hopgui.preview.RecordDefinitionPreviewSupport;
-import org.apache.hop.catalog.hopgui.navigation.RecordOriginNavigationSupport;
 import org.apache.hop.catalog.model.RecordDefinitionType;
 import org.apache.hop.catalog.model.RecordOrigin;
 import org.apache.hop.catalog.registry.RecordDefinitionRegistry;
+import org.apache.hop.core.Const;
+import org.apache.hop.core.Props;
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.row.IRowMeta;
+import org.apache.hop.core.row.IValueMeta;
+import org.apache.hop.core.row.RowMeta;
+import org.apache.hop.core.row.value.ValueMetaFactory;
+import org.apache.hop.core.util.Utils;
+import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.catalog.DvSourceFieldSupport;
 import org.apache.hop.datavault.catalog.RecordSourceIndicatorSupport;
 import org.apache.hop.datavault.metadata.CsvFieldOptions;
 import org.apache.hop.datavault.metadata.DvSourceDeliveryType;
 import org.apache.hop.datavault.metadata.SourceField;
 import org.apache.hop.datavault.metadata.SourceFieldInputOptions;
-import org.apache.hop.core.Const;
-import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.util.Utils;
-import org.apache.hop.core.Props;
-import org.apache.hop.core.row.IRowMeta;
-import org.apache.hop.core.row.IValueMeta;
-import org.apache.hop.core.row.RowMeta;
-import org.apache.hop.core.row.value.ValueMetaFactory;
-import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
@@ -94,6 +92,7 @@ public class RecordDefinitionDetailsPanel {
   private static final int MIN_CSV_FORMAT_COLUMN_WIDTH = 90;
 
   private final Composite parent;
+
   /**
    * Fallback variables from construction time. Prefer {@link #activeVariables()} for any DB / path
    * resolution: HopGui replaces its variables instance when a project/environment is enabled.
@@ -319,12 +318,20 @@ public class RecordDefinitionDetailsPanel {
 
     lastControl =
         addReadOnlyField(
-            wPropertiesComp, messageKey("Origin.LastDiscoveredAt.Label"), middle, margin, wUpdatedAt);
+            wPropertiesComp,
+            messageKey("Origin.LastDiscoveredAt.Label"),
+            middle,
+            margin,
+            wUpdatedAt);
     wLastDiscoveredAt = (Text) lastControl;
 
     lastControl =
         addReadOnlyField(
-            wPropertiesComp, messageKey("Origin.UpdatedBy.Label"), middle, margin, wLastDiscoveredAt);
+            wPropertiesComp,
+            messageKey("Origin.UpdatedBy.Label"),
+            middle,
+            margin,
+            wLastDiscoveredAt);
     wUpdatedBy = (Text) lastControl;
 
     lastControl =
@@ -1910,8 +1917,7 @@ public class RecordDefinitionDetailsPanel {
       item.setText(2, Const.NVL(binding.getRuleId(), ""));
       item.setText(3, Const.NVL(binding.getFieldNameOverride(), ""));
       item.setText(
-          4,
-          binding.getSeverityOverride() != null ? binding.getSeverityOverride().name() : "");
+          4, binding.getSeverityOverride() != null ? binding.getSeverityOverride().name() : "");
       item.setText(5, binding.isEnabled() ? "Y" : "N");
       row++;
     }
@@ -1987,8 +1993,7 @@ public class RecordDefinitionDetailsPanel {
               activeVariables(),
               metadataProvider,
               org.apache.hop.core.logging.LogChannel.GENERAL);
-      String text =
-          org.apache.hop.quality.service.DataQualityReportFormatter.format(report);
+      String text = org.apache.hop.quality.service.DataQualityReportFormatter.format(report);
       org.apache.hop.ui.core.dialog.EnterTextDialog dialog =
           new org.apache.hop.ui.core.dialog.EnterTextDialog(
               parent.getShell(),
@@ -2020,9 +2025,9 @@ public class RecordDefinitionDetailsPanel {
       if (connection == null) {
         MessageBox box = new MessageBox(parent.getShell(), SWT.OK | SWT.ICON_INFORMATION);
         box.setText(
-            BaseMessages.getString(PKG, "RecordDefinitionDetailsPanel.Quality.History.Error.Title"));
-        box.setMessage(
-            org.apache.hop.quality.history.DataQualityHistoryReader.MSG_NOT_CONFIGURED);
+            BaseMessages.getString(
+                PKG, "RecordDefinitionDetailsPanel.Quality.History.Error.Title"));
+        box.setMessage(org.apache.hop.quality.history.DataQualityHistoryReader.MSG_NOT_CONFIGURED);
         box.open();
         return;
       }
@@ -2069,20 +2074,19 @@ public class RecordDefinitionDetailsPanel {
               subjectKey,
               entries)
           .open();
-    } catch (org.apache.hop.quality.history.DataQualityHistoryReader
-        .QualityHistoryTablesMissingException e) {
+    } catch (
+        org.apache.hop.quality.history.DataQualityHistoryReader.QualityHistoryTablesMissingException
+            e) {
       MessageBox box = new MessageBox(parent.getShell(), SWT.OK | SWT.ICON_WARNING);
       box.setText(
           BaseMessages.getString(PKG, "RecordDefinitionDetailsPanel.Quality.History.Error.Title"));
-      box.setMessage(
-          org.apache.hop.quality.history.DataQualityHistoryReader.MSG_TABLES_MISSING);
+      box.setMessage(org.apache.hop.quality.history.DataQualityHistoryReader.MSG_TABLES_MISSING);
       box.open();
     } catch (Exception e) {
       new ErrorDialog(
           parent.getShell(),
           BaseMessages.getString(PKG, "RecordDefinitionDetailsPanel.Quality.History.Error.Title"),
-          BaseMessages.getString(
-              PKG, "RecordDefinitionDetailsPanel.Quality.History.Error.Message"),
+          BaseMessages.getString(PKG, "RecordDefinitionDetailsPanel.Quality.History.Error.Message"),
           e);
     }
   }

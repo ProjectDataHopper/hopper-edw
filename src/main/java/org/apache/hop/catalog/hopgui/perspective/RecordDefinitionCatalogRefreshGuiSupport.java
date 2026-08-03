@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.hopgui.perspective;
 
 import java.util.Date;
@@ -53,7 +51,8 @@ public final class RecordDefinitionCatalogRefreshGuiSupport {
     if (!RecordDefinitionPhysicalRefSupport.supportsRefreshFromSource(definition)) {
       MessageBox messageBox = new MessageBox(shell, SWT.OK | SWT.ICON_INFORMATION);
       messageBox.setText(
-          BaseMessages.getString(PKG, "RecordDefinitionCatalogRefreshGuiSupport.Unsupported.Title"));
+          BaseMessages.getString(
+              PKG, "RecordDefinitionCatalogRefreshGuiSupport.Unsupported.Title"));
       messageBox.setMessage(
           BaseMessages.getString(
               PKG, "RecordDefinitionCatalogRefreshGuiSupport.Unsupported.Message"));
@@ -69,10 +68,7 @@ public final class RecordDefinitionCatalogRefreshGuiSupport {
       }
 
       RecordDefinitionCatalogRefreshSupport.applyDiscoveredFields(
-          definition,
-          preview.discoveredFields(),
-          new Date(),
-          preview.physicalSchemaId());
+          definition, preview.discoveredFields(), new Date(), preview.physicalSchemaId());
       RecordDefinitionRegistry.getInstance()
           .update(catalogConnectionName, definition, variables, metadataProvider);
 

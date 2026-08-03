@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.modelgraph;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -116,10 +114,18 @@ class ModelGraphConnectionGeometryTest {
   @Test
   void effectiveSegmentCountScalesWithScreenLength() {
     double zoom = PropsUi.getNativeZoomFactor();
-    assertEquals(expectedSegmentCount(120, 20, zoom), ModelGraphConnectionGeometry.effectiveSegmentCount(120, 20));
-    assertEquals(expectedSegmentCount(300, 20, zoom), ModelGraphConnectionGeometry.effectiveSegmentCount(300, 20));
-    assertEquals(expectedSegmentCount(300, 30, zoom), ModelGraphConnectionGeometry.effectiveSegmentCount(300, 30));
-    assertEquals(expectedSegmentCount(5000, 20, zoom), ModelGraphConnectionGeometry.effectiveSegmentCount(5000, 20));
+    assertEquals(
+        expectedSegmentCount(120, 20, zoom),
+        ModelGraphConnectionGeometry.effectiveSegmentCount(120, 20));
+    assertEquals(
+        expectedSegmentCount(300, 20, zoom),
+        ModelGraphConnectionGeometry.effectiveSegmentCount(300, 20));
+    assertEquals(
+        expectedSegmentCount(300, 30, zoom),
+        ModelGraphConnectionGeometry.effectiveSegmentCount(300, 30));
+    assertEquals(
+        expectedSegmentCount(5000, 20, zoom),
+        ModelGraphConnectionGeometry.effectiveSegmentCount(5000, 20));
     assertTrue(
         ModelGraphConnectionGeometry.effectiveSegmentCount(300, 20)
             <= ModelGraphConnectionGeometry.effectiveSegmentCount(5000, 20));

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,8 +30,7 @@ class DvTargetLoadConfigurationSupportTest {
     DataVaultConfiguration config = new DataVaultConfiguration();
     config.setGeneratedWorkflowNamePrefix("dv-test-");
     assertEquals(
-        "dv-test-customers",
-        config.resolveGeneratedWorkflowName(new Variables(), "customers"));
+        "dv-test-customers", config.resolveGeneratedWorkflowName(new Variables(), "customers"));
   }
 
   @Test
@@ -51,8 +48,6 @@ class DvTargetLoadConfigurationSupportTest {
     config.setBulkLoadStagingFolder("/tmp/bulk");
     Variables variables = new Variables();
     assertEquals(
-        "/tmp/bulk/warehouse/",
-        config.resolveBulkLoadStagingFolder(variables, "warehouse"));
+        "/tmp/bulk/warehouse/", config.resolveBulkLoadStagingFolder(variables, "warehouse"));
   }
-
 }

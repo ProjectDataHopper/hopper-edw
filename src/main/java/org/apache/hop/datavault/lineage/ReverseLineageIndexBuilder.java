@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.lineage;
 
 import java.util.ArrayList;
@@ -170,16 +169,15 @@ public final class ReverseLineageIndexBuilder {
                   + "."
                   + nvl(field.getTargetFieldName());
           ReverseLineageKey key =
-              new ReverseLineageKey(contribution.getSourceName(), contribution.getSourceFieldName());
+              new ReverseLineageKey(
+                  contribution.getSourceName(), contribution.getSourceFieldName());
           index.add(key, toConsumer(snapshot, table, field, contribution, hopCount, path));
         }
       }
     }
   }
 
-  /**
-   * Map {@code dvTable.field} (lower) → original DV_SOURCE keys that contribute to that field.
-   */
+  /** Map {@code dvTable.field} (lower) → original DV_SOURCE keys that contribute to that field. */
   private static Map<String, List<ReverseLineageKey>> buildDvFieldOrigins(
       Map<String, LineageSnapshot> dvByModel) {
     Map<String, List<ReverseLineageKey>> origins = new LinkedHashMap<>();
@@ -238,8 +236,7 @@ public final class ReverseLineageIndexBuilder {
         .tableName(table.getLogicalName())
         .tableType(table.getTableType())
         .targetField(field.getTargetFieldName())
-        .transform(
-            contribution.getTransform() != null ? contribution.getTransform().name() : null)
+        .transform(contribution.getTransform() != null ? contribution.getTransform().name() : null)
         .reasonCodes(codes)
         .pathSummary(pathSummary)
         .hopCount(hopCount)

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.coaching;
 
 import java.util.ArrayList;
@@ -70,8 +68,8 @@ public class DmCoachingModelAdapter implements ICoachingModelAdapter {
   }
 
   @Override
-  public String resolveCatalogConnectionName(IVariables variables, IHopMetadataProvider metadataProvider)
-      throws HopException {
+  public String resolveCatalogConnectionName(
+      IVariables variables, IHopMetadataProvider metadataProvider) throws HopException {
     String configured = model.getConfigurationOrDefault().getDataCatalogConnection();
     if (variables != null) {
       configured = variables.resolve(configured);
@@ -171,5 +169,4 @@ public class DmCoachingModelAdapter implements ICoachingModelAdapter {
     }
     return derived;
   }
-
 }

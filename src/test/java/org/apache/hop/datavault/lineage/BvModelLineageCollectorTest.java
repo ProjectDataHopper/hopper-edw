@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.lineage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,8 +48,7 @@ class BvModelLineageCollectorTest {
   void setUp() throws Exception {
     variables = new Variables();
     variables.setVariable(
-        "PROJECT_HOME",
-        Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
+        "PROJECT_HOME", Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
     model = loadModel("retail-example/models/retail-360.hbv");
   }
 
@@ -66,8 +64,7 @@ class BvModelLineageCollectorTest {
 
     assertEquals("customer_360_bv", table.getPhysicalTableName());
     assertEquals("SCD2", table.getTableType());
-    assertTrue(
-        table.getSources().stream().anyMatch(s -> "sat_customer_demo".equals(s.getName())));
+    assertTrue(table.getSources().stream().anyMatch(s -> "sat_customer_demo".equals(s.getName())));
     assertFalse(table.getReasons().isEmpty());
 
     FieldLineage segment =

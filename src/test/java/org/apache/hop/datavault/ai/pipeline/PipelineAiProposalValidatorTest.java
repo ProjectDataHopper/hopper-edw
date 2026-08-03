@@ -13,18 +13,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai.pipeline;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 import java.util.Map;
+import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.datavault.ai.HopAiProposal;
 import org.apache.hop.datavault.ai.HopAiProposalValidation;
-import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.pipeline.PipelineHopMeta;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
@@ -49,13 +47,14 @@ class PipelineAiProposalValidatorTest {
     pipelineMeta.addTransform(output);
     pipelineMeta.addPipelineHop(new PipelineHopMeta(input, output));
 
-    HopAiProposal addTransform = proposal(
-        HopAiProposal.Type.ADD_TRANSFORM,
-        Map.of(
-            "transformPluginId", "Dummy",
-            "name", "Check",
-            "locationX", "200",
-            "locationY", "100"));
+    HopAiProposal addTransform =
+        proposal(
+            HopAiProposal.Type.ADD_TRANSFORM,
+            Map.of(
+                "transformPluginId", "Dummy",
+                "name", "Check",
+                "locationX", "200",
+                "locationY", "100"));
     HopAiProposal addHop =
         proposal(
             HopAiProposal.Type.ADD_PIPELINE_HOP,
@@ -70,7 +69,8 @@ class PipelineAiProposalValidatorTest {
                 "locationY", "50"));
 
     List<HopAiProposalValidation.Result> results =
-        PipelineAiProposalValidator.validate(pipelineMeta, List.of(addTransform, addHop, duplicateName));
+        PipelineAiProposalValidator.validate(
+            pipelineMeta, List.of(addTransform, addHop, duplicateName));
 
     assertEquals(HopAiProposalValidation.Status.OK, results.get(0).getStatus());
     assertEquals(HopAiProposalValidation.Status.OK, results.get(1).getStatus());

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.layout;
 
 import java.util.ArrayList;
@@ -25,37 +23,33 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.util.Utils;
-import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.core.gui.IGuiPosition;
+import org.apache.hop.core.util.Utils;
+import org.apache.hop.datavault.executionmap.ExecutionMapLayoutOptions;
+import org.apache.hop.datavault.executionmap.ExecutionMapMetrics;
+import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DvLink;
 import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.DvTableBase;
 import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.datavault.metadata.IDvTable;
-import org.apache.hop.datavault.metadata.businessvault.BvTableBase;
-import org.apache.hop.datavault.metadata.businessvault.BvDerivativeRef;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
+import org.apache.hop.datavault.metadata.businessvault.BvDerivativeRef;
+import org.apache.hop.datavault.metadata.businessvault.BvTableBase;
 import org.apache.hop.datavault.metadata.businessvault.IBvTable;
+import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.datavault.metadata.dimensional.DmDimension;
 import org.apache.hop.datavault.metadata.dimensional.DmDimensionOutriggerRef;
 import org.apache.hop.datavault.metadata.dimensional.DmFact;
 import org.apache.hop.datavault.metadata.dimensional.DmFactDimensionRole;
 import org.apache.hop.datavault.metadata.dimensional.DmTableBase;
-import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.datavault.metadata.dimensional.IDmTable;
+import org.apache.hop.datavault.metadata.executionmap.ExecutionMapDocument;
+import org.apache.hop.datavault.metadata.executionmap.ExecutionMapEdge;
+import org.apache.hop.datavault.metadata.executionmap.ExecutionMapNode;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceRelationship;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceTable;
-import org.apache.hop.datavault.executionmap.ExecutionMapLayoutOptions;
-import org.apache.hop.datavault.executionmap.ExecutionMapMetrics;
-import org.apache.hop.datavault.metadata.executionmap.ExecutionMapDocument;
-import org.apache.hop.datavault.metadata.executionmap.ExecutionMapEdge;
-import org.apache.hop.datavault.metadata.executionmap.ExecutionMapEdgeType;
-import org.apache.hop.datavault.metadata.executionmap.ExecutionMapNode;
-import org.eclipse.elk.core.math.ElkPadding;
-import org.eclipse.elk.core.options.CoreOptions;
-import org.eclipse.elk.graph.ElkEdge;
 import org.apache.hop.pipeline.PipelineHopMeta;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
@@ -63,7 +57,10 @@ import org.apache.hop.workflow.WorkflowHopMeta;
 import org.apache.hop.workflow.WorkflowMeta;
 import org.apache.hop.workflow.action.ActionMeta;
 import org.eclipse.elk.core.RecursiveGraphLayoutEngine;
+import org.eclipse.elk.core.math.ElkPadding;
+import org.eclipse.elk.core.options.CoreOptions;
 import org.eclipse.elk.core.util.BasicProgressMonitor;
+import org.eclipse.elk.graph.ElkEdge;
 import org.eclipse.elk.graph.ElkNode;
 import org.eclipse.elk.graph.util.ElkGraphUtil;
 
@@ -90,7 +87,10 @@ public final class ElkGraphLayout {
   public static void layoutExecutionMap(
       ExecutionMapDocument document, ExecutionMapLayoutOptions options, ElkLayout layout)
       throws HopException {
-    if (document == null || document.getNodesOrEmpty().isEmpty() || layout == null || !layout.isEnabled()) {
+    if (document == null
+        || document.getNodesOrEmpty().isEmpty()
+        || layout == null
+        || !layout.isEnabled()) {
       return;
     }
     ExecutionMapLayoutOptions layoutOptions =
@@ -178,7 +178,8 @@ public final class ElkGraphLayout {
       if (!options.usesEdgeForLayout(edge.getEdgeType())) {
         continue;
       }
-      String key = edge.getEdgeType().name() + ":" + edge.getFromNodeId() + "->" + edge.getToNodeId();
+      String key =
+          edge.getEdgeType().name() + ":" + edge.getFromNodeId() + "->" + edge.getToNodeId();
       if (layoutEdgeKeys.add(key)) {
         edges.add(new ElkLayoutEdge(edge.getFromNodeId(), edge.getToNodeId()));
       }
@@ -420,9 +421,7 @@ public final class ElkGraphLayout {
     return fromBusinessVaultModels(bvModels, dvModels);
   }
 
-  /**
-   * Aggregate BV tables (and optional DV derivative targets) across multiple BV/DV model files.
-   */
+  /** Aggregate BV tables (and optional DV derivative targets) across multiple BV/DV model files. */
   public static ElkGraphLayout fromBusinessVaultModels(
       Iterable<BusinessVaultModel> businessVaultModels, Iterable<DataVaultModel> dataVaultModels) {
     List<ElkLayoutNode> nodes = new ArrayList<>();
@@ -504,11 +503,7 @@ public final class ElkGraphLayout {
       if (dvTable != null) {
         nodes.add(
             new ElkLayoutNode(
-                dvName,
-                dvName,
-                defaults.estimateNodeWidth(dvName),
-                VAULT_NODE_HEIGHT,
-                dvTable));
+                dvName, dvName, defaults.estimateNodeWidth(dvName), VAULT_NODE_HEIGHT, dvTable));
       }
     }
 

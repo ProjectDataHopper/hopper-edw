@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.workflow.actions.validatedefinitions;
 
 import java.util.ArrayList;
@@ -455,7 +454,8 @@ public class ActionValidateResourceDefinitions extends ActionBase implements Clo
             BaseMessages.getString(
                 PKG,
                 "ActionValidateResourceDefinitions.Error.WarningsPresent",
-                Integer.toString(Math.max(logged, report != null ? report.getGateRelevantIssueCount() : 0))));
+                Integer.toString(
+                    Math.max(logged, report != null ? report.getGateRelevantIssueCount() : 0))));
       } else {
         logError(
             BaseMessages.getString(
@@ -471,7 +471,9 @@ public class ActionValidateResourceDefinitions extends ActionBase implements Clo
     if (failed) {
       result.setLogText(
           BaseMessages.getString(
-              PKG, "ActionValidateResourceDefinitions.Error.ValidationFailed", Integer.toString(gateIssues)));
+              PKG,
+              "ActionValidateResourceDefinitions.Error.ValidationFailed",
+              Integer.toString(gateIssues)));
     }
     return result;
   }
@@ -511,10 +513,9 @@ public class ActionValidateResourceDefinitions extends ActionBase implements Clo
     return logged;
   }
 
-  /** Compact one-liner: {@code BLOCKING / BASELINE_CONTRACT_MISSING  ns/name — short finding}. */
+  /** Compact one-liner: {@code BLOCKING / BASELINE_CONTRACT_MISSING ns/name — short finding}. */
   static String formatGateFindingLine(String recordKey, ValidationIssue issue) {
-    String severity =
-        issue.severity() != null ? issue.severity().name() : "?";
+    String severity = issue.severity() != null ? issue.severity().name() : "?";
     String kind = issue.kind() != null ? issue.kind().name() : "?";
     StringBuilder line = new StringBuilder();
     line.append(severity).append(" / ").append(kind);

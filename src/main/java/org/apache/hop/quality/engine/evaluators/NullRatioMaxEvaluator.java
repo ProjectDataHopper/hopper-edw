@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.quality.engine.evaluators;
 
 import java.util.List;
@@ -44,10 +42,7 @@ public final class NullRatioMaxEvaluator implements IDataQualityRuleEvaluator {
       return List.of();
     }
     Double maxRatio = EvaluatorSupport.parseDouble(rule.parameter(DataQualityRule.PARAM_MAX_RATIO));
-    if (maxRatio == null
-        || !Double.isFinite(maxRatio)
-        || maxRatio < 0.0
-        || maxRatio > 1.0) {
+    if (maxRatio == null || !Double.isFinite(maxRatio) || maxRatio < 0.0 || maxRatio > 1.0) {
       return List.of(
           EvaluatorSupport.findingWithSeverity(
               rule,
@@ -97,12 +92,7 @@ public final class NullRatioMaxEvaluator implements IDataQualityRuleEvaluator {
                 + formatRatio(ratio)
                 + " exceeds maxRatio "
                 + formatRatio(maxRatio),
-            "ratio="
-                + formatRatio(ratio)
-                + " nullCount="
-                + nullCount
-                + " rowCount="
-                + rowCount,
+            "ratio=" + formatRatio(ratio) + " nullCount=" + nullCount + " rowCount=" + rowCount,
             "maxRatio=" + formatRatio(maxRatio),
             metrics));
   }

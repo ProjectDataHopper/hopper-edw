@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.database;
 
 import java.util.HashMap;
@@ -28,6 +26,8 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
+import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.history.AuditManager;
 import org.apache.hop.history.AuditState;
 import org.apache.hop.i18n.BaseMessages;
@@ -44,8 +44,6 @@ import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Shell;
-import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
-import org.apache.hop.datavault.hopgui.help.HelpTopics;
 
 /** Asks which data catalog connection should receive imported record definitions. */
 @Getter
@@ -109,7 +107,8 @@ public class ImportDatabaseTablesCatalogDialog {
             DataCatalogMeta.class,
             shell,
             SWT.SINGLE | SWT.LEFT | SWT.BORDER,
-            BaseMessages.getString(PKG, "ImportDatabaseTablesCatalogDialog.CatalogConnection.Label"),
+            BaseMessages.getString(
+                PKG, "ImportDatabaseTablesCatalogDialog.CatalogConnection.Label"),
             BaseMessages.getString(
                 PKG, "ImportDatabaseTablesCatalogDialog.CatalogConnection.ToolTip"));
     FormData fdCatalogConnection = new FormData();
@@ -179,7 +178,8 @@ public class ImportDatabaseTablesCatalogDialog {
       if (catalogMeta == null) {
         new ErrorDialog(
             shell,
-            BaseMessages.getString(PKG, "ImportDatabaseTablesCatalogDialog.InvalidCatalog.DialogTitle"),
+            BaseMessages.getString(
+                PKG, "ImportDatabaseTablesCatalogDialog.InvalidCatalog.DialogTitle"),
             BaseMessages.getString(
                 PKG, "ImportDatabaseTablesCatalogDialog.InvalidCatalog.DialogMessage", selected),
             null);
@@ -188,7 +188,8 @@ public class ImportDatabaseTablesCatalogDialog {
       if (!catalogMeta.isEnabled()) {
         new ErrorDialog(
             shell,
-            BaseMessages.getString(PKG, "ImportDatabaseTablesCatalogDialog.DisabledCatalog.DialogTitle"),
+            BaseMessages.getString(
+                PKG, "ImportDatabaseTablesCatalogDialog.DisabledCatalog.DialogTitle"),
             BaseMessages.getString(
                 PKG, "ImportDatabaseTablesCatalogDialog.DisabledCatalog.DialogMessage", selected),
             null);
@@ -197,7 +198,8 @@ public class ImportDatabaseTablesCatalogDialog {
     } catch (HopException e) {
       new ErrorDialog(
           shell,
-          BaseMessages.getString(PKG, "ImportDatabaseTablesCatalogDialog.InvalidCatalog.DialogTitle"),
+          BaseMessages.getString(
+              PKG, "ImportDatabaseTablesCatalogDialog.InvalidCatalog.DialogTitle"),
           BaseMessages.getString(
               PKG, "ImportDatabaseTablesCatalogDialog.InvalidCatalog.DialogMessage", selected),
           e);

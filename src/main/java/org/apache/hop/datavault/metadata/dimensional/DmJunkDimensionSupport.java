@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import org.apache.hop.core.util.Utils;
@@ -138,9 +136,7 @@ public final class DmJunkDimensionSupport {
   }
 
   public static String resolveJunkHashCodeField(
-      DmJunkDimension junkDimension,
-      DimensionalConfiguration config,
-      IVariables variables) {
+      DmJunkDimension junkDimension, DimensionalConfiguration config, IVariables variables) {
     if (junkDimension == null) {
       return null;
     }
@@ -155,9 +151,7 @@ public final class DmJunkDimensionSupport {
   }
 
   public static boolean sharesHashAndSurrogateColumn(
-      DmJunkDimension junkDimension,
-      DimensionalConfiguration config,
-      IVariables variables) {
+      DmJunkDimension junkDimension, DimensionalConfiguration config, IVariables variables) {
     if (junkDimension == null) {
       return false;
     }

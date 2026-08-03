@@ -16,10 +16,7 @@
   ~ limitations under the License.
   ~
   -->
-
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.apache.hop</groupId>
@@ -32,60 +29,179 @@
   <url>https://github.com/mattcasters/hop-data-vault</url>
 
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <apache.rat.version>0.16.1</apache.rat.version>
+    <commonmark.version>0.29.0</commonmark.version>
+    <elk.version>0.10.0</elk.version>
+    <hadoop.version>3.3.6</hadoop.version>
     <!-- Required runtime: Hop 2.19.0 (use 2.19.0-SNAPSHOT until GA is published). -->
     <hop.version>2.19.0-SNAPSHOT</hop.version>
-    <maven.compiler.source>21</maven.compiler.source>
-    <maven.compiler.target>21</maven.compiler.target>
+    <iceberg.version>1.6.1</iceberg.version>
     <jandex.version>3.5.3</jandex.version>
     <lombok.version>1.18.42</lombok.version>
-    <apache.rat.version>0.16.1</apache.rat.version>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <spotless-maven-plugin.version>2.43.0</spotless-maven-plugin.version>
-    <elk.version>0.10.0</elk.version>
-    <iceberg.version>1.6.1</iceberg.version>
-    <hadoop.version>3.3.6</hadoop.version>
-    <commonmark.version>0.29.0</commonmark.version>
   </properties>
 
   <dependencies>
-    <!-- Hop core contains metadata annotations, IHopMetadata, HopMetadataBase, IHasName, IGuiPosition etc. -->
+
+    <!-- Compile-time deps normally supplied by Hop at runtime -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.21.1</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>1.17.1</version>
+    </dependency>
+
+    <!-- Iceberg read path: single shaded runtime jar avoids parquet classpath conflicts -->
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-common</artifactId>
+      <version>${hadoop.version}</version>
+    </dependency>
+    <!-- Bundled so remediation DDL workflow generation can instantiate ActionSql / ActionSuccess
+         from this plugin's classloader (Hop action plugins are otherwise isolated). -->
     <dependency>
       <groupId>org.apache.hop</groupId>
-      <artifactId>hop-core</artifactId>
+      <artifactId>hop-action-sql</artifactId>
       <version>${hop.version}</version>
-      <scope>provided</scope>
     </dependency>
-
-    <!-- IBaseMeta lives in hop-engine -->
     <dependency>
       <groupId>org.apache.hop</groupId>
-      <artifactId>hop-engine</artifactId>
+      <artifactId>hop-action-success</artifactId>
       <version>${hop.version}</version>
-      <scope>provided</scope>
     </dependency>
-
-    <!-- UI classes for HopFileType, HopGui, IGc etc. -->
     <dependency>
       <groupId>org.apache.hop</groupId>
-      <artifactId>hop-ui</artifactId>
+      <artifactId>hop-transform-analyticquery</artifactId>
       <version>${hop.version}</version>
-      <scope>provided</scope>
     </dependency>
-
-    <!-- Jandex index support for fast annotation discovery by Hop's plugin system -->
     <dependency>
-      <groupId>io.smallrye</groupId>
-      <artifactId>jandex</artifactId>
-      <version>${jandex.version}</version>
-      <scope>provided</scope>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-transform-append</artifactId>
+      <version>${hop.version}</version>
     </dependency>
-
-    <!-- Lombok for cleaner code (getters, setters, etc.). Align with the Hop runtime pin. -->
     <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <version>${lombok.version}</version>
-      <scope>provided</scope>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-transform-calculator</artifactId>
+      <version>${hop.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-transform-checksum</artifactId>
+      <version>${hop.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-transform-combinationlookup</artifactId>
+      <version>${hop.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-transform-constant</artifactId>
+      <version>${hop.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-transform-dimensionlookup</artifactId>
+      <version>${hop.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-transform-filemetadata</artifactId>
+      <version>${hop.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-transform-filterrows</artifactId>
+      <version>${hop.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-transform-getfilenames</artifactId>
+      <version>${hop.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-transform-groupby</artifactId>
+      <version>${hop.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-transform-ifnull</artifactId>
+      <version>${hop.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-transform-insertupdate</artifactId>
+      <version>${hop.version}</version>
+    </dependency>
+    <!-- LangChain4j language model chat (provided when the Hop module is on the classpath) -->
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-transform-languagemodelchat</artifactId>
+      <version>${hop.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-transform-mergejoin</artifactId>
+      <version>${hop.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-transform-mergerows</artifactId>
+      <version>${hop.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-transform-metainject</artifactId>
+      <version>${hop.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-transform-metastructure</artifactId>
+      <version>${hop.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-transform-numberrange</artifactId>
+      <version>${hop.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-transform-pipelineexecutor</artifactId>
+      <version>${hop.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-transform-repeatfields</artifactId>
+      <version>${hop.version}</version>
+    </dependency>
+    <!-- Compile scope: BV incremental Table Input params use Generate Rows (limit 1) -->
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-transform-rowgenerator</artifactId>
+      <version>${hop.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-transform-selectvalues</artifactId>
+      <version>${hop.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-transform-sort</artifactId>
+      <version>${hop.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-transform-sql</artifactId>
+      <version>${hop.version}</version>
     </dependency>
 
     <!--
@@ -108,112 +224,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.hop</groupId>
-      <artifactId>hop-transform-update</artifactId>
-      <version>${hop.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hop</groupId>
-      <artifactId>hop-transform-insertupdate</artifactId>
-      <version>${hop.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hop</groupId>
-      <artifactId>hop-transform-dimensionlookup</artifactId>
-      <version>${hop.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hop</groupId>
-      <artifactId>hop-transform-calculator</artifactId>
-      <version>${hop.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hop</groupId>
-      <artifactId>hop-transform-combinationlookup</artifactId>
-      <version>${hop.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hop</groupId>
-      <artifactId>hop-transform-numberrange</artifactId>
-      <version>${hop.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hop</groupId>
-      <artifactId>hop-transform-mergerows</artifactId>
-      <version>${hop.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hop</groupId>
-      <artifactId>hop-transform-metainject</artifactId>
-      <version>${hop.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hop</groupId>
-      <artifactId>hop-transform-filterrows</artifactId>
-      <version>${hop.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hop</groupId>
-      <artifactId>hop-transform-mergejoin</artifactId>
-      <version>${hop.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hop</groupId>
-      <artifactId>hop-transform-checksum</artifactId>
-      <version>${hop.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hop</groupId>
-      <artifactId>hop-transform-sql</artifactId>
-      <version>${hop.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hop</groupId>
-      <artifactId>hop-transform-constant</artifactId>
-      <version>${hop.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hop</groupId>
-      <artifactId>hop-transform-sort</artifactId>
-      <version>${hop.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hop</groupId>
-      <artifactId>hop-transform-selectvalues</artifactId>
-      <version>${hop.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hop</groupId>
-      <artifactId>hop-transform-groupby</artifactId>
-      <version>${hop.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hop</groupId>
-      <artifactId>hop-transform-ifnull</artifactId>
-      <version>${hop.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hop</groupId>
-      <artifactId>hop-transform-append</artifactId>
-      <version>${hop.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hop</groupId>
-      <artifactId>hop-transform-getfilenames</artifactId>
-      <version>${hop.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hop</groupId>
       <artifactId>hop-transform-textfile</artifactId>
-      <version>${hop.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hop</groupId>
-      <artifactId>hop-transform-filemetadata</artifactId>
-      <version>${hop.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hop</groupId>
-      <artifactId>hop-transform-metastructure</artifactId>
       <version>${hop.version}</version>
     </dependency>
     <dependency>
@@ -223,55 +234,8 @@
     </dependency>
     <dependency>
       <groupId>org.apache.hop</groupId>
-      <artifactId>hop-transform-pipelineexecutor</artifactId>
+      <artifactId>hop-transform-update</artifactId>
       <version>${hop.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hop</groupId>
-      <artifactId>hop-transform-analyticquery</artifactId>
-      <version>${hop.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hop</groupId>
-      <artifactId>hop-transform-repeatfields</artifactId>
-      <version>${hop.version}</version>
-    </dependency>
-    <!-- LangChain4j language model chat (provided when the Hop module is on the classpath) -->
-    <dependency>
-      <groupId>org.apache.hop</groupId>
-      <artifactId>hop-transform-languagemodelchat</artifactId>
-      <version>${hop.version}</version>
-    </dependency>
-    <!-- Bundled so remediation DDL workflow generation can instantiate ActionSql / ActionSuccess
-         from this plugin's classloader (Hop action plugins are otherwise isolated). -->
-    <dependency>
-      <groupId>org.apache.hop</groupId>
-      <artifactId>hop-action-sql</artifactId>
-      <version>${hop.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hop</groupId>
-      <artifactId>hop-action-success</artifactId>
-      <version>${hop.version}</version>
-    </dependency>
-
-    <!-- Compile-time deps normally supplied by Hop at runtime -->
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>2.21.1</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-      <version>1.17.1</version>
-    </dependency>
-
-    <!-- Iceberg read path: single shaded runtime jar avoids parquet classpath conflicts -->
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-common</artifactId>
-      <version>${hadoop.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.iceberg</groupId>
@@ -300,13 +264,6 @@
       <artifactId>commonmark-ext-task-list-items</artifactId>
       <version>${commonmark.version}</version>
     </dependency>
-
-    <!-- ELK layered layout for generated pipeline auto-positioning (bundled in plugin lib/) -->
-    <dependency>
-      <groupId>org.eclipse.elk</groupId>
-      <artifactId>org.eclipse.elk.core</artifactId>
-      <version>${elk.version}</version>
-    </dependency>
     <dependency>
       <groupId>org.eclipse.elk</groupId>
       <artifactId>org.eclipse.elk.alg.layered</artifactId>
@@ -318,28 +275,60 @@
       <version>${elk.version}</version>
     </dependency>
 
+    <!-- ELK layered layout for generated pipeline auto-positioning (bundled in plugin lib/) -->
     <dependency>
-      <groupId>org.apache.hop</groupId>
-      <artifactId>hop-transform-addsequence</artifactId>
-      <version>${hop.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <!-- Compile scope: BV incremental Table Input params use Generate Rows (limit 1) -->
-    <dependency>
-      <groupId>org.apache.hop</groupId>
-      <artifactId>hop-transform-rowgenerator</artifactId>
-      <version>${hop.version}</version>
+      <groupId>org.eclipse.elk</groupId>
+      <artifactId>org.eclipse.elk.core</artifactId>
+      <version>${elk.version}</version>
     </dependency>
 
+    <!-- Jandex index support for fast annotation discovery by Hop's plugin system -->
     <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter</artifactId>
-      <version>5.11.4</version>
+      <groupId>io.smallrye</groupId>
+      <artifactId>jandex</artifactId>
+      <version>${jandex.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <!-- Hop core contains metadata annotations, IHopMetadata, HopMetadataBase, IHasName, IGuiPosition etc. -->
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-core</artifactId>
+      <version>${hop.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- IBaseMeta lives in hop-engine -->
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-engine</artifactId>
+      <version>${hop.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- UI classes for HopFileType, HopGui, IGc etc. -->
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-ui</artifactId>
+      <version>${hop.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Lombok for cleaner code (getters, setters, etc.). Align with the Hop runtime pin. -->
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>2.3.232</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.hop</groupId>
-      <artifactId>hop-databases-singlestore</artifactId>
+      <artifactId>hop-databases-h2</artifactId>
       <version>${hop.version}</version>
       <scope>test</scope>
     </dependency>
@@ -357,14 +346,22 @@
     </dependency>
     <dependency>
       <groupId>org.apache.hop</groupId>
-      <artifactId>hop-databases-h2</artifactId>
+      <artifactId>hop-databases-singlestore</artifactId>
       <version>${hop.version}</version>
       <scope>test</scope>
     </dependency>
+
     <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
-      <version>2.3.232</version>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-transform-addsequence</artifactId>
+      <version>${hop.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>5.11.4</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -379,15 +376,15 @@
   -->
   <repositories>
     <repository>
-      <id>apache.snapshots</id>
-      <name>Apache Snapshot Repository</name>
-      <url>https://repository.apache.org/snapshots/</url>
       <releases>
         <enabled>false</enabled>
       </releases>
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
+      <id>apache.snapshots</id>
+      <name>Apache Snapshot Repository</name>
+      <url>https://repository.apache.org/snapshots/</url>
     </repository>
   </repositories>
 
@@ -450,9 +447,9 @@
             <includes>
               <include>src/**/*.java</include>
             </includes>
-            <googleJavaFormat/>
-            <importOrder/>
-            <removeUnusedImports/>
+            <googleJavaFormat></googleJavaFormat>
+            <importOrder></importOrder>
+            <removeUnusedImports></removeUnusedImports>
             <licenseHeader>
               <content><![CDATA[/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -469,8 +466,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */]]>
-              </content>
+ */]]></content>
             </licenseHeader>
           </java>
           <pom>
@@ -609,10 +605,10 @@
         <executions>
           <execution>
             <id>make-assembly</id>
-            <phase>package</phase>
             <goals>
               <goal>single</goal>
             </goals>
+            <phase>package</phase>
           </execution>
         </executions>
       </plugin>

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import org.apache.hop.core.Const;
@@ -32,8 +30,7 @@ public final class ValidationFindingFormatter {
 
   private ValidationFindingFormatter() {}
 
-  public static String format(
-      String axis, String compared, String found, String whyItMatters) {
+  public static String format(String axis, String compared, String found, String whyItMatters) {
     StringBuilder body = new StringBuilder();
     appendLine(body, "ValidationFindingFormatter.Axis", axis);
     appendLine(body, "ValidationFindingFormatter.Compared", compared);
@@ -53,24 +50,28 @@ public final class ValidationFindingFormatter {
     String found =
         workingPresent
             ? BaseMessages.getString(
-                PKG, "ValidationFindingFormatter.BaselineMissing.FoundWorkingPresent", recordKey, baseline)
+                PKG,
+                "ValidationFindingFormatter.BaselineMissing.FoundWorkingPresent",
+                recordKey,
+                baseline)
             : BaseMessages.getString(
-                PKG, "ValidationFindingFormatter.BaselineMissing.FoundNeither", recordKey, baseline);
+                PKG,
+                "ValidationFindingFormatter.BaselineMissing.FoundNeither",
+                recordKey,
+                baseline);
     return format(
         BaseMessages.getString(PKG, "ValidationFindingFormatter.Axis.BaselineVersion"),
         BaseMessages.getString(
             PKG, "ValidationFindingFormatter.BaselineMissing.Compared", baseline),
         found,
-        BaseMessages.getString(
-            PKG, "ValidationFindingFormatter.BaselineMissing.Why", baseline));
+        BaseMessages.getString(PKG, "ValidationFindingFormatter.BaselineMissing.Why", baseline));
   }
 
   public static String workingContractMissing(String recordKey) {
     return format(
         BaseMessages.getString(PKG, "ValidationFindingFormatter.Axis.WorkingCatalog"),
         BaseMessages.getString(PKG, "ValidationFindingFormatter.WorkingMissing.Compared"),
-        BaseMessages.getString(
-            PKG, "ValidationFindingFormatter.WorkingMissing.Found", recordKey),
+        BaseMessages.getString(PKG, "ValidationFindingFormatter.WorkingMissing.Found", recordKey),
         BaseMessages.getString(PKG, "ValidationFindingFormatter.WorkingMissing.Why"));
   }
 
@@ -81,10 +82,8 @@ public final class ValidationFindingFormatter {
             : baselineVersionTag.trim();
     return format(
         BaseMessages.getString(PKG, "ValidationFindingFormatter.Axis.BaselineVersion"),
-        BaseMessages.getString(
-            PKG, "ValidationFindingFormatter.BothMissing.Compared", baseline),
-        BaseMessages.getString(
-            PKG, "ValidationFindingFormatter.BothMissing.Found", recordKey),
+        BaseMessages.getString(PKG, "ValidationFindingFormatter.BothMissing.Compared", baseline),
+        BaseMessages.getString(PKG, "ValidationFindingFormatter.BothMissing.Found", recordKey),
         BaseMessages.getString(PKG, "ValidationFindingFormatter.BothMissing.Why"));
   }
 
@@ -93,7 +92,9 @@ public final class ValidationFindingFormatter {
         BaseMessages.getString(PKG, "ValidationFindingFormatter.Axis.LiveSource"),
         BaseMessages.getString(
             PKG, "ValidationFindingFormatter.LiveUnavailable.Compared", recordKey),
-        Const.NVL(detail, BaseMessages.getString(PKG, "ValidationFindingFormatter.LiveUnavailable.FoundGeneric")),
+        Const.NVL(
+            detail,
+            BaseMessages.getString(PKG, "ValidationFindingFormatter.LiveUnavailable.FoundGeneric")),
         BaseMessages.getString(PKG, "ValidationFindingFormatter.LiveUnavailable.Why"));
   }
 
@@ -118,13 +119,9 @@ public final class ValidationFindingFormatter {
     return format(
         BaseMessages.getString(PKG, "ValidationFindingFormatter.Axis.TargetDatabase"),
         BaseMessages.getString(
-            PKG,
-            "ValidationFindingFormatter.TargetDdlFailed.Compared",
-            Const.NVL(tableName, "?")),
+            PKG, "ValidationFindingFormatter.TargetDdlFailed.Compared", Const.NVL(tableName, "?")),
         BaseMessages.getString(
-            PKG,
-            "ValidationFindingFormatter.TargetDdlFailed.Found",
-            Const.NVL(errorDetail, "?")),
+            PKG, "ValidationFindingFormatter.TargetDdlFailed.Found", Const.NVL(errorDetail, "?")),
         BaseMessages.getString(PKG, "ValidationFindingFormatter.TargetDdlFailed.Why"));
   }
 
@@ -158,8 +155,8 @@ public final class ValidationFindingFormatter {
 
   /**
    * Parses Axis/Compared/Found/Why structured finding bodies produced by {@link #format}. Labels
-   * are matched in English for report layout; unknown messages fall back to the raw body as
-   * {@code found}.
+   * are matched in English for report layout; unknown messages fall back to the raw body as {@code
+   * found}.
    */
   public static StructuredFinding parseStructured(String structuredMessage) {
     if (Utils.isEmpty(structuredMessage)) {
@@ -255,9 +252,7 @@ public final class ValidationFindingFormatter {
     return translated;
   }
 
-  /**
-   * Human description of what this run compared (summary header). Avoids the word "Axis".
-   */
+  /** Human description of what this run compared (summary header). Avoids the word "Axis". */
   public static String describeWhatWeCompared(
       SchemaCompareMode mode, String baselineVersion, String catalogVersion) {
     if (mode == SchemaCompareMode.WORKING_VS_VERSION) {
@@ -277,8 +272,7 @@ public final class ValidationFindingFormatter {
     }
     // LIVE_SOURCE
     if (!Utils.isEmpty(catalogVersion) || !Utils.isEmpty(baselineVersion)) {
-      String tag =
-          !Utils.isEmpty(catalogVersion) ? catalogVersion.trim() : baselineVersion.trim();
+      String tag = !Utils.isEmpty(catalogVersion) ? catalogVersion.trim() : baselineVersion.trim();
       return BaseMessages.getString(
           PKG, "ValidationFindingFormatter.Summary.What.LiveVsVersion", tag);
     }
@@ -304,8 +298,7 @@ public final class ValidationFindingFormatter {
     }
     // WORKING_VS_VERSION
     if (!Utils.isEmpty(baselineVersion) || !Utils.isEmpty(catalogVersion)) {
-      String tag =
-          !Utils.isEmpty(baselineVersion) ? baselineVersion.trim() : catalogVersion.trim();
+      String tag = !Utils.isEmpty(baselineVersion) ? baselineVersion.trim() : catalogVersion.trim();
       return BaseMessages.getString(
           PKG, "ValidationFindingFormatter.Summary.Expected.Version", tag);
     }
@@ -319,9 +312,7 @@ public final class ValidationFindingFormatter {
     }
     if (mode == SchemaCompareMode.VERSION_VS_VERSION) {
       return BaseMessages.getString(
-          PKG,
-          "ValidationFindingFormatter.Summary.Actual.Version",
-          Const.NVL(catalogVersion, "?"));
+          PKG, "ValidationFindingFormatter.Summary.Actual.Version", Const.NVL(catalogVersion, "?"));
     }
     return BaseMessages.getString(PKG, "ValidationFindingFormatter.Summary.Actual.Working");
   }
@@ -349,8 +340,8 @@ public final class ValidationFindingFormatter {
   }
 
   /**
-   * Parsed structured finding for human reports (Axis/Compared are optional context; reports
-   * prefer found/why).
+   * Parsed structured finding for human reports (Axis/Compared are optional context; reports prefer
+   * found/why).
    */
   public record StructuredFinding(String axis, String compared, String found, String why) {
     public static StructuredFinding empty() {

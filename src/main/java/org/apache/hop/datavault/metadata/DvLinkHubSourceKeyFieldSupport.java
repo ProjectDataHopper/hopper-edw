@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.ArrayList;
@@ -94,7 +92,8 @@ public final class DvLinkHubSourceKeyFieldSupport {
         if (businessKeySource == null || Utils.isEmpty(businessKeySource.getBusinessKeyField())) {
           continue;
         }
-        explicitByBusinessKey.putIfAbsent(businessKeySource.getBusinessKeyField(), businessKeySource);
+        explicitByBusinessKey.putIfAbsent(
+            businessKeySource.getBusinessKeyField(), businessKeySource);
       }
     }
 
@@ -128,10 +127,7 @@ public final class DvLinkHubSourceKeyFieldSupport {
   }
 
   public static List<String> resolveSourceFieldNames(
-      DvLink.DvLinkHubSource linkHubSource,
-      String hubName,
-      DvHub hub,
-      IVariables variables)
+      DvLink.DvLinkHubSource linkHubSource, String hubName, DvHub hub, IVariables variables)
       throws HopException {
     DvLink.HubSourceKeyField hubSourceKeyField = findHubSourceKeyField(linkHubSource, hubName);
     List<String> sourceFieldNames = resolveSourceFieldNames(hub, hubSourceKeyField, variables);

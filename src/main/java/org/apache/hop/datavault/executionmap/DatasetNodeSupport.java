@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import org.apache.hop.core.util.Utils;
@@ -111,8 +109,7 @@ public final class DatasetNodeSupport {
       return;
     }
     ExecutionMapNode existing = context.getDocument().findNodeById(nodeId);
-    if (existing != null
-        && Utils.isEmpty(existing.getProperty(PROPERTY_CATALOG_CONNECTION))) {
+    if (existing != null && Utils.isEmpty(existing.getProperty(PROPERTY_CATALOG_CONNECTION))) {
       existing.setProperty(PROPERTY_CATALOG_CONNECTION, catalogConnectionName);
     }
   }

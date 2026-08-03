@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.quality.history;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -111,8 +109,7 @@ class DataQualityHistoryDdlSupportTest {
         statements.stream()
             .noneMatch(
                 sql ->
-                    sql.contains("CREATE INDEX IF NOT EXISTS")
-                        && sql.contains("idx_quality_run")));
+                    sql.contains("CREATE INDEX IF NOT EXISTS") && sql.contains("idx_quality_run")));
     assertTrue(
         statements.stream()
             .anyMatch(
@@ -133,8 +130,7 @@ class DataQualityHistoryDdlSupportTest {
   @Test
   void singlestoreUsesMysqlIndexDialectAndConnectionDefault() {
     List<String> statements =
-        DataQualityHistoryDdlSupport.buildCreateStatements(
-            databaseMetaWithPluginId("SINGLESTORE"));
+        DataQualityHistoryDdlSupport.buildCreateStatements(databaseMetaWithPluginId("SINGLESTORE"));
     assertTrue(statements.stream().noneMatch(sql -> sql.contains("CREATE DATABASE")));
     assertTrue(
         statements.stream()
@@ -172,8 +168,7 @@ class DataQualityHistoryDdlSupportTest {
 
   private static void assertContainsTable(List<String> statements, String table) {
     assertTrue(
-        statements.stream()
-            .anyMatch(sql -> sql.contains("CREATE TABLE IF NOT EXISTS " + table)),
+        statements.stream().anyMatch(sql -> sql.contains("CREATE TABLE IF NOT EXISTS " + table)),
         "expected table " + table);
   }
 

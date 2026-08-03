@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai;
 
 import java.util.ArrayList;
@@ -66,7 +64,9 @@ public final class DvAiProposalApplier {
     sb.append("\nRisk: ").append(proposal.getRiskLevel());
     if (proposal.getParameters() != null && !proposal.getParameters().isEmpty()) {
       sb.append("\nParameters:");
-      proposal.getParameters().forEach((k, v) -> sb.append("\n  ").append(k).append(" = ").append(v));
+      proposal
+          .getParameters()
+          .forEach((k, v) -> sb.append("\n  ").append(k).append(" = ").append(v));
     }
     return sb.toString();
   }
@@ -104,7 +104,12 @@ public final class DvAiProposalApplier {
       case ADD_MODEL_NOTE -> addModelNote(model, proposal);
       case SET_CONFIGURATION_PROPERTY -> setConfigurationProperty(model, proposal);
       case RENAME_TABLE -> renameTable(model, proposal);
-      case ADD_HUB, ADD_LINK, ADD_SATELLITE, SET_BUSINESS_KEYS, BIND_RECORD_SOURCE, SET_TABLE_LOCATION ->
+      case ADD_HUB,
+              ADD_LINK,
+              ADD_SATELLITE,
+              SET_BUSINESS_KEYS,
+              BIND_RECORD_SOURCE,
+              SET_TABLE_LOCATION ->
           DvAiStructuralProposalSupport.apply(model, proposal, metadataProvider, variables);
       default -> throw new HopException("Unsupported proposal type: " + proposal.getType());
     }
@@ -143,8 +148,7 @@ public final class DvAiProposalApplier {
     model.setChanged(true);
   }
 
-  private static void renameTable(DataVaultModel model, DvAiProposal proposal)
-      throws HopException {
+  private static void renameTable(DataVaultModel model, DvAiProposal proposal) throws HopException {
     String tableName = proposal.parameter("tableName");
     String newName = proposal.parameter("newName");
     if (Utils.isEmpty(tableName) || Utils.isEmpty(newName)) {

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import java.util.ArrayList;
@@ -105,12 +103,14 @@ public final class ExecutionMapTwoLevelLayout {
     return metrics;
   }
 
-  private static int cardWidth(ExecutionMapNode node, Map<String, ExecutionMapNodeCardMetrics> metrics) {
+  private static int cardWidth(
+      ExecutionMapNode node, Map<String, ExecutionMapNodeCardMetrics> metrics) {
     ExecutionMapNodeCardMetrics card = metrics != null ? metrics.get(node.getId()) : null;
     return card != null ? card.width() : ExecutionMapMetrics.MIN_NODE_WIDTH;
   }
 
-  private static int cardHeight(ExecutionMapNode node, Map<String, ExecutionMapNodeCardMetrics> metrics) {
+  private static int cardHeight(
+      ExecutionMapNode node, Map<String, ExecutionMapNodeCardMetrics> metrics) {
     ExecutionMapNodeCardMetrics card = metrics != null ? metrics.get(node.getId()) : null;
     return card != null ? card.height() : ExecutionMapMetrics.MIN_NODE_HEIGHT;
   }

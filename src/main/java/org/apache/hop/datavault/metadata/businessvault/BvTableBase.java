@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import java.util.ArrayList;
@@ -143,8 +141,7 @@ public abstract class BvTableBase extends HopMetadataBase implements IHopMetadat
               BaseMessages.getString(PKG, "BvTableBase.CheckResult.MissingTableName", getName()),
               this));
     }
-    BusinessVaultDerivativeValidationSupport.validateDerivatives(
-        remarks, this, dataVaultModel);
+    BusinessVaultDerivativeValidationSupport.validateDerivatives(remarks, this, dataVaultModel);
   }
 
   @Override
@@ -177,7 +174,8 @@ public abstract class BvTableBase extends HopMetadataBase implements IHopMetadat
     }
 
     String targetTableName = !Utils.isEmpty(getTableName()) ? getTableName() : getName();
-    IRowMeta targetFields = getTargetTableLayout(metadataProvider, variables, model, dataVaultModel);
+    IRowMeta targetFields =
+        getTargetTableLayout(metadataProvider, variables, model, dataVaultModel);
     if (targetFields == null || targetFields.isEmpty()) {
       return result;
     }
@@ -192,13 +190,7 @@ public abstract class BvTableBase extends HopMetadataBase implements IHopMetadat
               this, model, config, dataVaultModel, variables, targetFields);
       List<ForeignKeySpec> foreignKeys =
           DvConstraintDdlSupport.resolveBvForeignKeys(
-              this,
-              model,
-              config,
-              dataVaultModel,
-              targetDatabaseMeta,
-              metadataProvider,
-              variables);
+              this, model, config, dataVaultModel, targetDatabaseMeta, metadataProvider, variables);
       String ddl =
           DvDdlSupport.getTargetTableDdl(
               db, targetTableName, targetFields, null, primaryKeyColumns, foreignKeys);

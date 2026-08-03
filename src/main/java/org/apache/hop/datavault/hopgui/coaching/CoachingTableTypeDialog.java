@@ -13,20 +13,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.coaching;
 
 import java.util.Arrays;
 import java.util.List;
-import org.apache.hop.datavault.metadata.coaching.CoachingSourceRef;
-import org.apache.hop.datavault.metadata.coaching.DvCoachingModelAdapter;
 import org.apache.hop.datavault.metadata.coaching.BvCoachingModelAdapter;
+import org.apache.hop.datavault.metadata.coaching.CoachingSourceRef;
 import org.apache.hop.datavault.metadata.coaching.DmCoachingModelAdapter;
+import org.apache.hop.datavault.metadata.coaching.DvCoachingModelAdapter;
 import org.apache.hop.datavault.metadata.coaching.ICoachingModelAdapter;
-import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
 import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.eclipse.swt.SWT;
@@ -105,11 +103,13 @@ public class CoachingTableTypeDialog {
     wTableName.setLayoutData(fdName);
 
     Button wOk = new Button(shell, SWT.PUSH);
-    wOk.setText(BaseMessages.getString(org.apache.hop.ui.core.dialog.BaseDialog.class, "System.Button.OK"));
+    wOk.setText(
+        BaseMessages.getString(org.apache.hop.ui.core.dialog.BaseDialog.class, "System.Button.OK"));
     wOk.addListener(SWT.Selection, e -> ok());
     Button wCancel = new Button(shell, SWT.PUSH);
     wCancel.setText(
-        BaseMessages.getString(org.apache.hop.ui.core.dialog.BaseDialog.class, "System.Button.Cancel"));
+        BaseMessages.getString(
+            org.apache.hop.ui.core.dialog.BaseDialog.class, "System.Button.Cancel"));
     wCancel.addListener(SWT.Selection, e -> cancel());
     BaseTransformDialog.positionBottomButtons(
         shell, new Button[] {wOk, wCancel}, PropsUi.getMargin(), wTableName);

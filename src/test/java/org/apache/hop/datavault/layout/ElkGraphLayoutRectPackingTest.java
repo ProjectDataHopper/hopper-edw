@@ -13,12 +13,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.layout;
 
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashSet;
@@ -54,7 +51,8 @@ class ElkGraphLayoutRectPackingTest {
     return rows.size();
   }
 
-  private static Point[] layoutPipeline(PipelineMeta pipelineMeta, int targetWidth) throws Exception {
+  private static Point[] layoutPipeline(PipelineMeta pipelineMeta, int targetWidth)
+      throws Exception {
     ElkLayout layout = new ElkLayout();
     layout.setAlgorithm(ElkLayoutAlgorithm.RECT_PACKING);
     layout.setTargetWidth(targetWidth);

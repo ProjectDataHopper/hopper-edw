@@ -13,13 +13,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.hopgui.perspective;
 
 import org.apache.hop.catalog.discovery.RecordDefinitionCatalogRefreshSupport;
 import org.apache.hop.catalog.discovery.RecordDefinitionSchemaDiffSupport;
+import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
+import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
@@ -32,8 +32,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
-import org.apache.hop.datavault.hopgui.help.HelpTopics;
 
 /** Shows schema drift and asks whether to refresh the catalog contract from the live source. */
 public final class RefreshRecordDefinitionFromSourceDialog {
@@ -54,7 +52,8 @@ public final class RefreshRecordDefinitionFromSourceDialog {
   public boolean openConfirmed() {
     Shell shell = new Shell(parent, BaseDialog.getDefaultDialogStyle());
     PropsUi.setLook(shell);
-    shell.setText(BaseMessages.getString(PKG, "RefreshRecordDefinitionFromSourceDialog.Shell.Title"));
+    shell.setText(
+        BaseMessages.getString(PKG, "RefreshRecordDefinitionFromSourceDialog.Shell.Title"));
     shell.setLayout(new FormLayout());
 
     int margin = PropsUi.getMargin();
@@ -68,7 +67,8 @@ public final class RefreshRecordDefinitionFromSourceDialog {
     fdlSummary.top = new FormAttachment(0, margin);
     wlSummary.setLayoutData(fdlSummary);
 
-    Text wDiff = new Text(shell, SWT.MULTI | SWT.BORDER | SWT.READ_ONLY | SWT.V_SCROLL | SWT.H_SCROLL);
+    Text wDiff =
+        new Text(shell, SWT.MULTI | SWT.BORDER | SWT.READ_ONLY | SWT.V_SCROLL | SWT.H_SCROLL);
     PropsUi.setLook(wDiff);
     wDiff.setText(RecordDefinitionSchemaDiffSupport.formatDiff(preview.diff()));
     FormData fdDiff = new FormData();
@@ -79,7 +79,8 @@ public final class RefreshRecordDefinitionFromSourceDialog {
     wDiff.setLayoutData(fdDiff);
 
     Button wApply = new Button(shell, SWT.PUSH);
-    wApply.setText(BaseMessages.getString(PKG, "RefreshRecordDefinitionFromSourceDialog.Apply.Label"));
+    wApply.setText(
+        BaseMessages.getString(PKG, "RefreshRecordDefinitionFromSourceDialog.Apply.Label"));
     wApply.addListener(SWT.Selection, e -> confirm(shell));
 
     Button wCancel = new Button(shell, SWT.PUSH);

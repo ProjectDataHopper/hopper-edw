@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.i18n;
 
 import java.io.IOException;
@@ -31,7 +29,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-/** Scans Java sources for i18n key references in annotations and {@code BaseMessages.getString} calls. */
+/**
+ * Scans Java sources for i18n key references in annotations and {@code BaseMessages.getString}
+ * calls.
+ */
 public final class I18nReferenceScanner {
 
   private static final Pattern PACKAGE_PATTERN = Pattern.compile("^\\s*package\\s+([\\w.]+)\\s*;");
@@ -53,7 +54,8 @@ public final class I18nReferenceScanner {
   private static final Pattern BASE_MESSAGES_CLASS_PATTERN =
       Pattern.compile("BaseMessages\\.getString\\(\\s*(\\w+)\\.class\\s*,\\s*\"([^\"]+)\"");
   private static final Pattern BASE_MESSAGES_PACKAGE_PATTERN =
-      Pattern.compile("BaseMessages\\.getString\\(\\s*\"((?:[\\w.]+\\.)+[\\w.]+)\"\\s*,\\s*\"([^\"]+)\"");
+      Pattern.compile(
+          "BaseMessages\\.getString\\(\\s*\"((?:[\\w.]+\\.)+[\\w.]+)\"\\s*,\\s*\"([^\"]+)\"");
   private static final Pattern BASE_MESSAGES_SYSTEM_PATTERN =
       Pattern.compile("BaseMessages\\.getString\\(\\s*\"([^\"]+)\"\\s*\\)");
   private static final Pattern MAP_ENTRY_TITLE_KEY_PATTERN =
@@ -62,7 +64,8 @@ public final class I18nReferenceScanner {
       Pattern.compile("\"([A-Za-z][\\w.]+\\.[\\w.]+)\"");
 
   private static final Pattern ENUM_DESCRIPTION_KEY_PATTERN =
-      Pattern.compile("^\\s*[A-Z][A-Z0-9_]*\\([^\"]*\"[^\"]*\"\\s*,\\s*\"([A-Za-z][\\w.]+\\.[\\w.]+)\"");
+      Pattern.compile(
+          "^\\s*[A-Z][A-Z0-9_]*\\([^\"]*\"[^\"]*\"\\s*,\\s*\"([A-Za-z][\\w.]+\\.[\\w.]+)\"");
   private static final Pattern ENUM_SINGLE_KEY_PATTERN =
       Pattern.compile("^\\s*[A-Z][A-Z0-9_]*\\(\\s*\"([A-Za-z][\\w.]+\\.[\\w.]+)\"\\s*\\)");
 
@@ -221,14 +224,19 @@ public final class I18nReferenceScanner {
     }
   }
 
-  private void scanLine(FileContext context, String line, int lineNumber, List<I18nReference> references) {
+  private void scanLine(
+      FileContext context, String line, int lineNumber, List<I18nReference> references) {
     Matcher explicitMatcher = I18N_EXPLICIT_PATTERN.matcher(line);
     while (explicitMatcher.find()) {
       String key = explicitMatcher.group(2);
       maybeAddReference(
           references,
           annotationReference(
-              context, lineNumber, key, explicitMatcher.group(1), I18nReference.Kind.ANNOTATION_EXPLICIT),
+              context,
+              lineNumber,
+              key,
+              explicitMatcher.group(1),
+              I18nReference.Kind.ANNOTATION_EXPLICIT),
           line,
           explicitMatcher.end());
     }
@@ -238,7 +246,8 @@ public final class I18nReferenceScanner {
       String key = defaultMatcher.group(1);
       maybeAddReference(
           references,
-          annotationReference(context, lineNumber, key, context.packageName(), I18nReference.Kind.ANNOTATION),
+          annotationReference(
+              context, lineNumber, key, context.packageName(), I18nReference.Kind.ANNOTATION),
           line,
           defaultMatcher.end());
     }
@@ -347,7 +356,11 @@ public final class I18nReferenceScanner {
   }
 
   private I18nReference annotationReference(
-      FileContext context, int lineNumber, String key, String lookupPackage, I18nReference.Kind kind) {
+      FileContext context,
+      int lineNumber,
+      String key,
+      String lookupPackage,
+      I18nReference.Kind kind) {
     return new I18nReference(
         context.file(),
         lineNumber,
@@ -359,7 +372,11 @@ public final class I18nReferenceScanner {
   }
 
   private I18nReference codeReference(
-      FileContext context, int lineNumber, String key, String lookupClassFqn, I18nReference.Kind kind) {
+      FileContext context,
+      int lineNumber,
+      String key,
+      String lookupClassFqn,
+      I18nReference.Kind kind) {
     return new I18nReference(
         context.file(),
         lineNumber,
@@ -374,7 +391,12 @@ public final class I18nReferenceScanner {
       FileContext context, List<I18nReference> references, int lineNumber, String key) {
     maybeAddReference(
         references,
-        codeReference(context, lineNumber, key, context.declaringClassFqn(), I18nReference.Kind.ENUM_DESCRIPTION),
+        codeReference(
+            context,
+            lineNumber,
+            key,
+            context.declaringClassFqn(),
+            I18nReference.Kind.ENUM_DESCRIPTION),
         String.join(" ", context.lines()),
         -1);
   }

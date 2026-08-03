@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.sourcemodel;
 
 import java.util.ArrayList;
@@ -122,8 +121,7 @@ public class SourceRelationship extends HopMetadataBase implements IHopMetadata 
     if (parentMultiplicity == null) {
       parentMultiplicity = SourceRelationshipMultiplicity.ONE;
     }
-    if (Utils.isEmpty(cardinality)
-        || childMultiplicity != SourceRelationshipMultiplicity.UNKNOWN) {
+    if (Utils.isEmpty(cardinality) || childMultiplicity != SourceRelationshipMultiplicity.UNKNOWN) {
       return;
     }
     SourceRelationshipMultiplicity.MultiplicityPair pair =

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.layout;
 
 import java.util.List;
@@ -64,7 +62,8 @@ public class VaultElkLayout {
       if (layout == null) {
         return;
       }
-      vaultGraph.runUndoableModelChange(() -> ElkGraphLayout.fromDataVaultModel(model).layout(layout));
+      vaultGraph.runUndoableModelChange(
+          () -> ElkGraphLayout.fromDataVaultModel(model).layout(layout));
     } catch (HopException e) {
       ElkLayoutGuiSupport.showLayoutError(hopGui.getShell(), PKG, KEY_PREFIX, e);
     } catch (Exception e) {

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.i18n;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -50,7 +48,8 @@ class I18nKeysValidationTest {
             issues.size()
                 + " i18n issue(s):"
                 + System.lineSeparator()
-                + String.join(System.lineSeparator() + System.lineSeparator(), formatIssues(issues)));
+                + String.join(
+                    System.lineSeparator() + System.lineSeparator(), formatIssues(issues)));
   }
 
   @Test
@@ -62,7 +61,8 @@ class I18nKeysValidationTest {
             issues.size()
                 + " orphan i18n key(s):"
                 + System.lineSeparator()
-                + String.join(System.lineSeparator() + System.lineSeparator(), formatIssues(issues)));
+                + String.join(
+                    System.lineSeparator() + System.lineSeparator(), formatIssues(issues)));
   }
 
   private static List<String> formatIssues(List<I18nIssue> issues) {

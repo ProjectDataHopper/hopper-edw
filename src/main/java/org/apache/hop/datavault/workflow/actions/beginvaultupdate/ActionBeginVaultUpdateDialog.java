@@ -13,14 +13,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.workflow.actions.beginvaultupdate;
 
 import org.apache.hop.core.Const;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
+import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.FormDataBuilder;
 import org.apache.hop.ui.core.PropsUi;
@@ -34,8 +34,6 @@ import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
-import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
-import org.apache.hop.datavault.hopgui.help.HelpTopics;
 
 public class ActionBeginVaultUpdateDialog extends ActionDialog {
 
@@ -47,7 +45,10 @@ public class ActionBeginVaultUpdateDialog extends ActionDialog {
   private Composite wSettingsComp;
 
   public ActionBeginVaultUpdateDialog(
-      Shell parent, ActionBeginVaultUpdate action, WorkflowMeta workflowMeta, IVariables variables) {
+      Shell parent,
+      ActionBeginVaultUpdate action,
+      WorkflowMeta workflowMeta,
+      IVariables variables) {
     super(parent, workflowMeta, variables);
     this.action = action;
     if (Utils.isEmpty(action.getName())) {
@@ -57,7 +58,8 @@ public class ActionBeginVaultUpdateDialog extends ActionDialog {
 
   @Override
   public IAction open() {
-    createShell(BaseMessages.getString(PKG, "ActionBeginVaultUpdate.Title", action.getName()), action);
+    createShell(
+        BaseMessages.getString(PKG, "ActionBeginVaultUpdate.Title", action.getName()), action);
     buildButtonBar().ok(e -> ok()).cancel(e -> cancel()).build();
 
     DialogHelpSupport.installLocalHelpButton(shell, HelpTopics.ACTION_BEGIN_VAULT_UPDATE);
@@ -96,7 +98,8 @@ public class ActionBeginVaultUpdateDialog extends ActionDialog {
 
   private void setWidgetsContent() {
     wName.setText(Const.NVL(action.getName(), ""));
-    widgets.setWidgetsContents(action, wSettingsComp, ActionBeginVaultUpdate.GUI_PLUGIN_ELEMENT_PARENT_ID);
+    widgets.setWidgetsContents(
+        action, wSettingsComp, ActionBeginVaultUpdate.GUI_PLUGIN_ELEMENT_PARENT_ID);
   }
 
   private void getWidgetsContent() {

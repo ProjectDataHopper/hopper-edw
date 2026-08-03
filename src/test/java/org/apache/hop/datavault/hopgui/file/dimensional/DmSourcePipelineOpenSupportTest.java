@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.dimensional;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -32,18 +30,18 @@ class DmSourcePipelineOpenSupportTest {
   void canOpenWhenPipelineSourceAndFileConfigured() {
     DmDimension dimension = new DmDimension();
     dimension.getSourceOrDefault().setSourceType(DmSourceType.PIPELINE);
-    dimension.getSourceOrDefault().setSourcePipelineFile("${PROJECT_HOME}/test/streaming-source.hpl");
+    dimension
+        .getSourceOrDefault()
+        .setSourcePipelineFile("${PROJECT_HOME}/test/streaming-source.hpl");
 
-    assertTrue(
-        DmSourcePipelineOpenSupport.canOpenSourcePipeline(dimension, new Variables()));
+    assertTrue(DmSourcePipelineOpenSupport.canOpenSourcePipeline(dimension, new Variables()));
   }
 
   @Test
   void cannotOpenForSqlSourceOrMissingFile() {
     DmDimension sqlDimension = new DmDimension();
     sqlDimension.getSourceOrDefault().setSourceSql("SELECT 1");
-    assertFalse(
-        DmSourcePipelineOpenSupport.canOpenSourcePipeline(sqlDimension, new Variables()));
+    assertFalse(DmSourcePipelineOpenSupport.canOpenSourcePipeline(sqlDimension, new Variables()));
 
     DmDimension pipelineDimension = new DmDimension();
     pipelineDimension.getSourceOrDefault().setSourceType(DmSourceType.PIPELINE);

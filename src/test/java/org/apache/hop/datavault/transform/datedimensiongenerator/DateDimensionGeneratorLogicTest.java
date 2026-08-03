@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.transform.datedimensiongenerator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -58,7 +56,8 @@ class DateDimensionGeneratorLogicTest {
 
     assertEquals(LocalDate.of(2024, 1, 1), range.startDate());
     assertEquals(LocalDate.of(2024, 1, 3), range.endDate());
-    assertEquals(3, DateDimensionGeneratorLogic.dayCountInclusive(range.startDate(), range.endDate()));
+    assertEquals(
+        3, DateDimensionGeneratorLogic.dayCountInclusive(range.startDate(), range.endDate()));
   }
 
   @Test
@@ -77,8 +76,10 @@ class DateDimensionGeneratorLogicTest {
 
     assertEquals(meta.getFields().size(), rowMeta.size());
     assertTrue(rowMeta.indexOfValue("date_key") >= 0);
-    assertEquals(IValueMeta.TYPE_INTEGER, rowMeta.getValueMeta(rowMeta.indexOfValue("date_key")).getType());
-    assertEquals(IValueMeta.TYPE_DATE, rowMeta.getValueMeta(rowMeta.indexOfValue("full_date")).getType());
+    assertEquals(
+        IValueMeta.TYPE_INTEGER, rowMeta.getValueMeta(rowMeta.indexOfValue("date_key")).getType());
+    assertEquals(
+        IValueMeta.TYPE_DATE, rowMeta.getValueMeta(rowMeta.indexOfValue("full_date")).getType());
   }
 
   @Test
@@ -93,8 +94,7 @@ class DateDimensionGeneratorLogicTest {
             "generator",
             VARIABLES);
 
-    Object[] row =
-        DateDimensionGeneratorLogic.buildRow(LocalDate.of(2024, 3, 15), prepared);
+    Object[] row = DateDimensionGeneratorLogic.buildRow(LocalDate.of(2024, 3, 15), prepared);
 
     assertEquals("March", row[0]);
     assertEquals("maart", row[1]);
@@ -112,10 +112,8 @@ class DateDimensionGeneratorLogicTest {
             "generator",
             VARIABLES);
 
-    Object[] weekday =
-        DateDimensionGeneratorLogic.buildRow(LocalDate.of(2024, 1, 1), prepared);
-    Object[] weekend =
-        DateDimensionGeneratorLogic.buildRow(LocalDate.of(2024, 1, 6), prepared);
+    Object[] weekday = DateDimensionGeneratorLogic.buildRow(LocalDate.of(2024, 1, 1), prepared);
+    Object[] weekend = DateDimensionGeneratorLogic.buildRow(LocalDate.of(2024, 1, 6), prepared);
 
     assertEquals(20240101L, weekday[0]);
     assertFalse((Boolean) weekday[1]);
@@ -133,8 +131,7 @@ class DateDimensionGeneratorLogicTest {
             "generator",
             VARIABLES);
 
-    Object[] row =
-        DateDimensionGeneratorLogic.buildRow(LocalDate.of(2024, 6, 30), prepared);
+    Object[] row = DateDimensionGeneratorLogic.buildRow(LocalDate.of(2024, 6, 30), prepared);
 
     assertTrue(row[0] instanceof Date);
     IRowMeta rowMeta =
@@ -178,8 +175,7 @@ class DateDimensionGeneratorLogicTest {
             VARIABLES);
 
     // 2000-01-01 was a Saturday (ISO day 6).
-    Object[] row =
-        DateDimensionGeneratorLogic.buildRow(LocalDate.of(2000, 1, 1), prepared);
+    Object[] row = DateDimensionGeneratorLogic.buildRow(LocalDate.of(2000, 1, 1), prepared);
     assertEquals(6L, row[0]);
   }
 }

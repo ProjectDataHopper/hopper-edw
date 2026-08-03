@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.layout;
 
 import lombok.Getter;
@@ -256,8 +254,7 @@ public class ElkLayout {
         LayeredOptions.SPACING_NODE_NODE_BETWEEN_LAYERS, (double) getSpacingBetweenLayers());
     root.setProperty(LayeredOptions.SPACING_EDGE_NODE, (double) getSpacingEdgeNode());
     root.setProperty(
-        LayeredOptions.CROSSING_MINIMIZATION_STRATEGY,
-        getCrossingMinimization().toElkStrategy());
+        LayeredOptions.CROSSING_MINIMIZATION_STRATEGY, getCrossingMinimization().toElkStrategy());
     root.setProperty(LayeredOptions.NODE_PLACEMENT_STRATEGY, getNodePlacement().toElkStrategy());
     root.setProperty(LayeredOptions.LAYERING_STRATEGY, getLayeringStrategy().toElkStrategy());
     root.setProperty(LayeredOptions.CYCLE_BREAKING_STRATEGY, getCycleBreaking().toElkStrategy());

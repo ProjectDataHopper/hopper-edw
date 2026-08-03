@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.ArrayList;
@@ -77,7 +75,8 @@ public final class DvFieldMappingValidationSupport {
     }
 
     ResolvedSourceFields resolved =
-        resolveSourceFields(recordSource, options, metadataProvider, variables, checkSource, remarks);
+        resolveSourceFields(
+            recordSource, options, metadataProvider, variables, checkSource, remarks);
     if (resolved == null) {
       return;
     }
@@ -86,7 +85,8 @@ public final class DvFieldMappingValidationSupport {
       if (bk == null || Utils.isEmpty(bk.getName())) {
         continue;
       }
-      String sourceFieldName = resolveSourceFieldName(bk.getSourceFieldName(), bk.getName(), variables);
+      String sourceFieldName =
+          resolveSourceFieldName(bk.getSourceFieldName(), bk.getName(), variables);
       IValueMeta sourceMeta = resolved.fields.get(sourceFieldName);
       if (sourceMeta == null) {
         remarks.add(
@@ -103,8 +103,7 @@ public final class DvFieldMappingValidationSupport {
       }
       try {
         SourceField storedField = resolved.storedFields.get(sourceFieldName);
-        IValueMeta targetMeta =
-            buildTargetValueMetaForHubBusinessKey(bk, storedField, variables);
+        IValueMeta targetMeta = buildTargetValueMetaForHubBusinessKey(bk, storedField, variables);
         String mappingContext =
             BaseMessages.getString(
                 PKG,
@@ -138,8 +137,7 @@ public final class DvFieldMappingValidationSupport {
               remarks);
         }
       } catch (HopException e) {
-        remarks.add(
-            new CheckResult(ICheckResult.TYPE_RESULT_ERROR, e.getMessage(), checkSource));
+        remarks.add(new CheckResult(ICheckResult.TYPE_RESULT_ERROR, e.getMessage(), checkSource));
       }
     }
   }
@@ -163,7 +161,8 @@ public final class DvFieldMappingValidationSupport {
       return;
     }
     ResolvedSourceFields resolved =
-        resolveSourceFields(recordSource, options, metadataProvider, variables, checkSource, remarks);
+        resolveSourceFields(
+            recordSource, options, metadataProvider, variables, checkSource, remarks);
     if (resolved == null) {
       return;
     }
@@ -172,18 +171,11 @@ public final class DvFieldMappingValidationSupport {
 
     if (!Utils.isEmpty(satellite.getHubName()) && model != null) {
       validateSatelliteHubBusinessKeys(
-          satellite,
-          model,
-          resolved,
-          recordSource,
-          variables,
-          checkSource,
-          remarks);
+          satellite, model, resolved, recordSource, variables, checkSource, remarks);
     }
 
     if (satellite.hasDrivingKey()) {
-      String drivingKeySourceField =
-          resolveName(satellite.getDrivingKeySourceField(), variables);
+      String drivingKeySourceField = resolveName(satellite.getDrivingKeySourceField(), variables);
       IValueMeta sourceMeta = resolved.fields.get(drivingKeySourceField);
       if (sourceMeta == null) {
         remarks.add(
@@ -235,8 +227,7 @@ public final class DvFieldMappingValidationSupport {
                 remarks);
           }
         } catch (HopPluginException e) {
-          remarks.add(
-              new CheckResult(ICheckResult.TYPE_RESULT_ERROR, e.getMessage(), checkSource));
+          remarks.add(new CheckResult(ICheckResult.TYPE_RESULT_ERROR, e.getMessage(), checkSource));
         }
       }
     }
@@ -311,8 +302,7 @@ public final class DvFieldMappingValidationSupport {
               remarks);
         }
       } catch (HopException e) {
-        remarks.add(
-            new CheckResult(ICheckResult.TYPE_RESULT_ERROR, e.getMessage(), checkSource));
+        remarks.add(new CheckResult(ICheckResult.TYPE_RESULT_ERROR, e.getMessage(), checkSource));
       }
     }
   }
@@ -342,7 +332,8 @@ public final class DvFieldMappingValidationSupport {
       }
       DataVaultSource recordSource;
       try {
-        String resolvedRef = variables != null ? variables.resolve(recordSourceRef) : recordSourceRef;
+        String resolvedRef =
+            variables != null ? variables.resolve(recordSourceRef) : recordSourceRef;
         recordSource =
             org.apache.hop.datavault.catalog.DvSourceCatalogService.resolveSource(
                 resolvedRef, model, variables, metadataProvider);
@@ -660,8 +651,7 @@ public final class DvFieldMappingValidationSupport {
     // parentKeySourceFields is an ordered list of source columns only (same length as hub BKs).
     List<DvSatelliteParentKeySupport.ParentKeyField> parentKeys;
     try {
-      parentKeys =
-          DvSatelliteParentKeySupport.resolveParentKeyFields(hub, satellite, variables);
+      parentKeys = DvSatelliteParentKeySupport.resolveParentKeyFields(hub, satellite, variables);
     } catch (HopException e) {
       remarks.add(new CheckResult(ICheckResult.TYPE_RESULT_ERROR, e.getMessage(), checkSource));
       return;
@@ -696,8 +686,7 @@ public final class DvFieldMappingValidationSupport {
       }
       try {
         SourceField storedField = resolved.storedFields.get(sourceFieldName);
-        IValueMeta targetMeta =
-            buildTargetValueMetaForHubBusinessKey(bk, storedField, variables);
+        IValueMeta targetMeta = buildTargetValueMetaForHubBusinessKey(bk, storedField, variables);
         validateMapping(
             sourceMeta,
             targetMeta,
@@ -722,15 +711,15 @@ public final class DvFieldMappingValidationSupport {
               remarks);
         }
       } catch (HopException e) {
-        remarks.add(
-            new CheckResult(ICheckResult.TYPE_RESULT_ERROR, e.getMessage(), checkSource));
+        remarks.add(new CheckResult(ICheckResult.TYPE_RESULT_ERROR, e.getMessage(), checkSource));
       }
     }
   }
 
   /**
    * Business keys that hub load pipelines can use as source PK columns. Matches {@code
-   * getQuotedPkFields} which only selects keys with a non-empty {@link BusinessKey#getSourceFieldName()}.
+   * getQuotedPkFields} which only selects keys with a non-empty {@link
+   * BusinessKey#getSourceFieldName()}.
    */
   private static List<BusinessKey> filterBusinessKeysWithSourceField(List<BusinessKey> keys) {
     List<BusinessKey> mapped = new ArrayList<>();
@@ -836,10 +825,7 @@ public final class DvFieldMappingValidationSupport {
   }
 
   static List<SourceField> selectHubSatelliteAutoAttributeSourceFields(
-      DvHub hub,
-      DvSatellite satellite,
-      IVariables variables,
-      List<SourceField> sourceFields) {
+      DvHub hub, DvSatellite satellite, IVariables variables, List<SourceField> sourceFields) {
     Set<String> excluded = new HashSet<>();
     if (hub != null && hub.getBusinessKeys() != null) {
       for (BusinessKey bk : hub.getBusinessKeys()) {
@@ -925,9 +911,7 @@ public final class DvFieldMappingValidationSupport {
     if (ValueMetaBase.isNumeric(sourceMeta.getType())) {
       int sourcePrecision = sourceMeta.getPrecision();
       int targetPrecision = targetMeta.getPrecision();
-      if (sourcePrecision > 0
-          && targetPrecision > 0
-          && sourcePrecision > targetPrecision) {
+      if (sourcePrecision > 0 && targetPrecision > 0 && sourcePrecision > targetPrecision) {
         remarks.add(
             new CheckResult(
                 ICheckResult.TYPE_RESULT_ERROR,
@@ -965,8 +949,7 @@ public final class DvFieldMappingValidationSupport {
   }
 
   static IValueMeta buildTargetValueMetaForSatelliteAttribute(
-      SatelliteAttribute attr, SourceField storedField, IVariables variables)
-      throws HopException {
+      SatelliteAttribute attr, SourceField storedField, IVariables variables) throws HopException {
     String name = attr.getName();
     int typeId =
         DvDataTypeSupport.resolveHopTypeId(
@@ -1015,13 +998,11 @@ public final class DvFieldMappingValidationSupport {
         }
       }
     } catch (HopException e) {
-      remarks.add(
-          new CheckResult(ICheckResult.TYPE_RESULT_ERROR, e.getMessage(), checkSource));
+      remarks.add(new CheckResult(ICheckResult.TYPE_RESULT_ERROR, e.getMessage(), checkSource));
       return null;
     }
 
-    boolean detailed =
-        options != null && options.isDetailedDataTypeChecking();
+    boolean detailed = options != null && options.isDetailedDataTypeChecking();
     IDvSource dvSource = recordSource.getDvSourceOrDefault();
 
     if (!detailed) {
@@ -1029,9 +1010,7 @@ public final class DvFieldMappingValidationSupport {
           new CheckResult(
               ICheckResult.TYPE_RESULT_COMMENT,
               BaseMessages.getString(
-                  PKG,
-                  "DvFieldMappingValidation.UsingStoredMetadata",
-                  recordSource.getName()),
+                  PKG, "DvFieldMappingValidation.UsingStoredMetadata", recordSource.getName()),
               checkSource));
       return ResolvedSourceFields.fromStored(storedByName, variables);
     }
@@ -1041,9 +1020,7 @@ public final class DvFieldMappingValidationSupport {
           new CheckResult(
               ICheckResult.TYPE_RESULT_COMMENT,
               BaseMessages.getString(
-                  PKG,
-                  "DvFieldMappingValidation.LiveResolutionSkipped",
-                  recordSource.getName()),
+                  PKG, "DvFieldMappingValidation.LiveResolutionSkipped", recordSource.getName()),
               checkSource));
       return ResolvedSourceFields.fromStored(storedByName, variables);
     }
@@ -1055,9 +1032,7 @@ public final class DvFieldMappingValidationSupport {
             new CheckResult(
                 ICheckResult.TYPE_RESULT_WARNING,
                 BaseMessages.getString(
-                    PKG,
-                    "DvFieldMappingValidation.LiveResolutionEmpty",
-                    recordSource.getName()),
+                    PKG, "DvFieldMappingValidation.LiveResolutionEmpty", recordSource.getName()),
                 checkSource));
         return ResolvedSourceFields.fromStored(storedByName, variables);
       }
@@ -1214,9 +1189,7 @@ public final class DvFieldMappingValidationSupport {
       return null;
     }
     try {
-      return metadataProvider
-          .getSerializer(DatabaseMeta.class)
-          .load(config.getTargetDatabase());
+      return metadataProvider.getSerializer(DatabaseMeta.class).load(config.getTargetDatabase());
     } catch (Exception e) {
       return null;
     }

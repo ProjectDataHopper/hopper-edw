@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import java.util.Collections;
@@ -41,10 +39,13 @@ public class DvUpdateTableMetrics {
   long targetRowsInserted;
   long errors;
   boolean success;
+
   /** Pipeline wall-clock start from the Hop engine (may be null). */
   Date executionStartDate;
+
   /** Pipeline wall-clock end from the Hop engine (may be null). */
   Date executionEndDate;
+
   /** Wall-clock duration in ms (end − start when both dates are present). */
   long durationMs;
 

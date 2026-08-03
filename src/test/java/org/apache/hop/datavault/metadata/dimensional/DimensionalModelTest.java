@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,10 +46,8 @@ class DimensionalModelTest {
     DimensionalModel model = new DimensionalModel();
     model.getConfigurationOrDefault().setTargetDatabase("Vault");
     var remarks = model.check(null, new Variables());
-    assertTrue(
-        remarks.stream().anyMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_ERROR));
-    assertFalse(
-        remarks.stream().anyMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_OK));
+    assertTrue(remarks.stream().anyMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_ERROR));
+    assertFalse(remarks.stream().anyMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_OK));
   }
 
   @Test
@@ -66,10 +62,8 @@ class DimensionalModelTest {
     XmlMetadataUtil.deSerializeFromXml(rootNode, DimensionalModel.class, model, null);
 
     var remarks = model.check(null, new Variables());
-    assertTrue(
-        remarks.stream().anyMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_OK));
-    assertFalse(
-        remarks.stream().anyMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_ERROR));
+    assertTrue(remarks.stream().anyMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_OK));
+    assertFalse(remarks.stream().anyMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_ERROR));
     assertEquals(3, model.getTables().size());
   }
 
@@ -82,8 +76,7 @@ class DimensionalModelTest {
     DmFact fact = new DmFact();
     fact.setName("fact_sales");
     fact.setTableName("f_sales");
-    fact.getDimensionRoles()
-        .add(new DmFactDimensionRole("dim_product", "Product", "product_key"));
+    fact.getDimensionRoles().add(new DmFactDimensionRole("dim_product", "Product", "product_key"));
     fact.getMeasures().add(new DmFactMeasure("amount", true));
     original.getTables().add(fact);
     DmDimension dimension = new DmDimension();
@@ -111,8 +104,7 @@ class DimensionalModelTest {
     assertEquals("fact_sales", restored.getTables().get(0).getName());
     assertEquals(DmTableType.DIMENSION, restored.getTables().get(1).getTableType());
     assertEquals("dim_product", restored.getTables().get(1).getName());
-    assertEquals(
-        1, ((DmFact) restored.getTables().get(0)).getDimensionRolesOrEmpty().size());
+    assertEquals(1, ((DmFact) restored.getTables().get(0)).getDimensionRolesOrEmpty().size());
     assertEquals(1, ((DmDimension) restored.getTables().get(1)).getNaturalKeysOrEmpty().size());
   }
 }

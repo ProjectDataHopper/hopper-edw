@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import java.io.IOException;
@@ -56,7 +54,8 @@ public final class WorkflowLoadOverviewFileWriter {
         fileBaseName,
         report,
         MARKDOWN_EXTENSION,
-        WorkflowLoadOverviewReportFormatter.formatMarkdown(report, includePipelineDetail, includeInsights),
+        WorkflowLoadOverviewReportFormatter.formatMarkdown(
+            report, includePipelineDetail, includeInsights),
         variables);
   }
 
@@ -73,7 +72,8 @@ public final class WorkflowLoadOverviewFileWriter {
         fileBaseName,
         report,
         HTML_EXTENSION,
-        WorkflowLoadOverviewReportFormatter.formatHtml(report, includePipelineDetail, includeInsights),
+        WorkflowLoadOverviewReportFormatter.formatHtml(
+            report, includePipelineDetail, includeInsights),
         variables);
   }
 
@@ -102,7 +102,8 @@ public final class WorkflowLoadOverviewFileWriter {
         parent.createFolder();
       }
       try (OutputStreamWriter writer =
-          new OutputStreamWriter(fileObject.getContent().getOutputStream(), StandardCharsets.UTF_8)) {
+          new OutputStreamWriter(
+              fileObject.getContent().getOutputStream(), StandardCharsets.UTF_8)) {
         writer.write(content);
       }
       return fileObject.getName().getPath();
@@ -111,13 +112,16 @@ public final class WorkflowLoadOverviewFileWriter {
     }
   }
 
-  static String resolveBaseName(String fileBaseName, WorkflowLoadOverviewReport report, IVariables variables) {
+  static String resolveBaseName(
+      String fileBaseName, WorkflowLoadOverviewReport report, IVariables variables) {
     String resolved = variables != null ? variables.resolve(fileBaseName) : fileBaseName;
     if (!Utils.isEmpty(resolved)) {
       return sanitizeFileName(resolved);
     }
     String workflowName =
-        report.getRootWorkflowName() != null ? report.getRootWorkflowName() : "workflow-load-overview";
+        report.getRootWorkflowName() != null
+            ? report.getRootWorkflowName()
+            : "workflow-load-overview";
     String executionPrefix =
         report.getWorkflowExecutionId() != null && report.getWorkflowExecutionId().length() >= 8
             ? report.getWorkflowExecutionId().substring(0, 8)
@@ -153,7 +157,8 @@ public final class WorkflowLoadOverviewFileWriter {
     if (Utils.isEmpty(outputFolder) || Utils.isEmpty(extension)) {
       return null;
     }
-    String configured = resolveConfiguredReportPath(outputFolder, fileBaseName, extension, variables);
+    String configured =
+        resolveConfiguredReportPath(outputFolder, fileBaseName, extension, variables);
     if (!Utils.isEmpty(configured) && fileExists(configured)) {
       return configured;
     }

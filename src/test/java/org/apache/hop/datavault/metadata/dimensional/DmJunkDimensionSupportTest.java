@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -64,8 +62,7 @@ class DmJunkDimensionSupportTest {
     junk.getSourceOrDefault().setSourceFactTableName("fact_orders");
     junk.setFactTableName("legacy_fact");
 
-    assertEquals(
-        "fact_orders", DmJunkDimensionSupport.resolveFactTableName(junk, new Variables()));
+    assertEquals("fact_orders", DmJunkDimensionSupport.resolveFactTableName(junk, new Variables()));
   }
 
   @Test
@@ -74,8 +71,7 @@ class DmJunkDimensionSupportTest {
     junk.setLoadFromFactTable(true);
     junk.setFactTableName("legacy_fact");
 
-    assertEquals(
-        "legacy_fact", DmJunkDimensionSupport.resolveFactTableName(junk, new Variables()));
+    assertEquals("legacy_fact", DmJunkDimensionSupport.resolveFactTableName(junk, new Variables()));
   }
 
   @Test
@@ -110,8 +106,7 @@ class DmJunkDimensionSupportTest {
     assertEquals(
         "orders_junk_hk",
         DmJunkDimensionSupport.resolveJunkHashCodeField(junk, config, new Variables()));
-    assertTrue(
-        DmJunkDimensionSupport.sharesHashAndSurrogateColumn(junk, config, new Variables()));
+    assertTrue(DmJunkDimensionSupport.sharesHashAndSurrogateColumn(junk, config, new Variables()));
   }
 
   @Test
@@ -121,9 +116,7 @@ class DmJunkDimensionSupportTest {
     DimensionalConfiguration config = new DimensionalConfiguration();
 
     assertEquals(
-        "hashcode",
-        DmJunkDimensionSupport.resolveJunkHashCodeField(junk, config, new Variables()));
-    assertFalse(
-        DmJunkDimensionSupport.sharesHashAndSurrogateColumn(junk, config, new Variables()));
+        "hashcode", DmJunkDimensionSupport.resolveJunkHashCodeField(junk, config, new Variables()));
+    assertFalse(DmJunkDimensionSupport.sharesHashAndSurrogateColumn(junk, config, new Variables()));
   }
 }

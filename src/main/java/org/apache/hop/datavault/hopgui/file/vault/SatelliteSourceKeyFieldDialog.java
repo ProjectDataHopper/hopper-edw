@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.vault;
 
 import java.util.ArrayList;
@@ -25,6 +23,8 @@ import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
+import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.datavault.metadata.AttributeSource;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DataVaultSource;
@@ -37,8 +37,8 @@ import org.apache.hop.datavault.metadata.SatelliteAttribute;
 import org.apache.hop.datavault.metadata.SourceField;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.PropsUi;
-import org.apache.hop.ui.core.gui.WindowProperty;
 import org.apache.hop.ui.core.dialog.BaseDialog;
+import org.apache.hop.ui.core.gui.WindowProperty;
 import org.apache.hop.ui.core.widget.ColumnInfo;
 import org.apache.hop.ui.core.widget.TableView;
 import org.apache.hop.ui.hopgui.HopGui;
@@ -52,8 +52,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
-import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
-import org.apache.hop.datavault.hopgui.help.HelpTopics;
 
 /**
  * Dialog to edit the source field mappings for one link satellite within one DvLinkSatelliteSource.
@@ -150,15 +148,11 @@ public class SatelliteSourceKeyFieldDialog {
               ColumnInfo.COLUMN_TYPE_CCOMBO,
               getAttributeComboOptions()),
           new ColumnInfo(
-              "Source field name",
-              ColumnInfo.COLUMN_TYPE_CCOMBO,
-              getSourceFieldComboOptions()),
+              "Source field name", ColumnInfo.COLUMN_TYPE_CCOMBO, getSourceFieldComboOptions()),
         };
 
     int nrAttr =
-        (input.getAttributeSources() != null)
-            ? Math.max(1, input.getAttributeSources().size())
-            : 2;
+        (input.getAttributeSources() != null) ? Math.max(1, input.getAttributeSources().size()) : 2;
     wAttributeSources =
         new TableView(
             variables,
@@ -186,12 +180,9 @@ public class SatelliteSourceKeyFieldDialog {
 
     ColumnInfo[] dkCols =
         new ColumnInfo[] {
+          new ColumnInfo("Driving key", ColumnInfo.COLUMN_TYPE_CCOMBO, getDrivingKeyComboOptions()),
           new ColumnInfo(
-              "Driving key", ColumnInfo.COLUMN_TYPE_CCOMBO, getDrivingKeyComboOptions()),
-          new ColumnInfo(
-              "Source field name",
-              ColumnInfo.COLUMN_TYPE_CCOMBO,
-              getSourceFieldComboOptions()),
+              "Source field name", ColumnInfo.COLUMN_TYPE_CCOMBO, getSourceFieldComboOptions()),
         };
 
     int nrDk =

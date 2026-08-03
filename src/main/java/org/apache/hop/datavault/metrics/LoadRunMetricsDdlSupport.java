@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import java.util.ArrayList;
@@ -32,10 +30,9 @@ public final class LoadRunMetricsDdlSupport {
 
   private LoadRunMetricsDdlSupport() {}
 
-  public static void ensureMetricsTables(
-      Database db, DatabaseMeta databaseMeta, ILogChannel log) throws HopException {
-    ensureMetricsTables(
-        db, databaseMeta, LoadRunMetricsCatalogPublisher.DEFAULT_SCHEMA_NAME, log);
+  public static void ensureMetricsTables(Database db, DatabaseMeta databaseMeta, ILogChannel log)
+      throws HopException {
+    ensureMetricsTables(db, databaseMeta, LoadRunMetricsCatalogPublisher.DEFAULT_SCHEMA_NAME, log);
   }
 
   public static void ensureMetricsTables(
@@ -81,9 +78,11 @@ public final class LoadRunMetricsDdlSupport {
             : "";
     return switch (pluginId) {
       case DvBulkLoadPluginSupport.MYSQL_DB_PLUGIN_ID,
-          DvBulkLoadPluginSupport.SINGLESTORE_DB_PLUGIN_ID -> mysqlStatements(schema);
+              DvBulkLoadPluginSupport.SINGLESTORE_DB_PLUGIN_ID ->
+          mysqlStatements(schema);
       case DvBulkLoadPluginSupport.MSSQL_DB_PLUGIN_ID,
-          DvBulkLoadPluginSupport.MSSQLNATIVE_DB_PLUGIN_ID -> mssqlStatements(schema);
+              DvBulkLoadPluginSupport.MSSQLNATIVE_DB_PLUGIN_ID ->
+          mssqlStatements(schema);
       default -> postgresStatements(schema);
     };
   }
@@ -134,8 +133,7 @@ public final class LoadRunMetricsDdlSupport {
           duration_ms            BIGINT       NULL,
           PRIMARY KEY (run_id, pipeline_name)
         )"""
-            .formatted(
-                qualify(schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_PIPELINE_METRIC)));
+            .formatted(qualify(schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_PIPELINE_METRIC)));
     statements.add(
         """
         CREATE TABLE IF NOT EXISTS %s (
@@ -222,8 +220,7 @@ public final class LoadRunMetricsDdlSupport {
           duration_ms            BIGINT       NULL,
           PRIMARY KEY (run_id, pipeline_name)
         )"""
-            .formatted(
-                qualify(schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_PIPELINE_METRIC)));
+            .formatted(qualify(schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_PIPELINE_METRIC)));
     statements.add(
         """
         CREATE TABLE %s (
@@ -262,8 +259,8 @@ public final class LoadRunMetricsDdlSupport {
   }
 
   /**
-   * MySQL/SingleStore: no separate ops database for the default schema name. Tables are created
-   * in the connection default database (unqualified) when {@code schema} is blank.
+   * MySQL/SingleStore: no separate ops database for the default schema name. Tables are created in
+   * the connection default database (unqualified) when {@code schema} is blank.
    */
   private static List<String> mysqlStatements(String schema) {
     List<String> statements = new ArrayList<>();
@@ -301,8 +298,7 @@ public final class LoadRunMetricsDdlSupport {
           duration_ms            BIGINT       NULL,
           PRIMARY KEY (run_id, pipeline_name)
         )"""
-            .formatted(
-                qualify(schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_PIPELINE_METRIC)));
+            .formatted(qualify(schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_PIPELINE_METRIC)));
     statements.add(
         """
         CREATE TABLE IF NOT EXISTS %s (
@@ -363,7 +359,8 @@ public final class LoadRunMetricsDdlSupport {
     String qualifiedTable =
         databaseMeta.getQuotedSchemaTableCombination(
             db, resolvedSchema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_RUN);
-    String alterSql = "ALTER TABLE " + qualifiedTable + " ADD pipeline_run_configuration VARCHAR(255) NULL";
+    String alterSql =
+        "ALTER TABLE " + qualifiedTable + " ADD pipeline_run_configuration VARCHAR(255) NULL";
     if (log != null) {
       log.logBasic(
           "Adding pipeline_run_configuration column to "
@@ -383,15 +380,14 @@ public final class LoadRunMetricsDdlSupport {
       return;
     }
     if (db.checkColumnExists(
-        resolvedSchema,
-        LoadRunMetricsCatalogPublisher.TABLE_LOAD_RUN,
-        "workflow_execution_id")) {
+        resolvedSchema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_RUN, "workflow_execution_id")) {
       return;
     }
     String qualifiedTable =
         databaseMeta.getQuotedSchemaTableCombination(
             db, resolvedSchema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_RUN);
-    String alterSql = "ALTER TABLE " + qualifiedTable + " ADD workflow_execution_id VARCHAR(64) NULL";
+    String alterSql =
+        "ALTER TABLE " + qualifiedTable + " ADD workflow_execution_id VARCHAR(64) NULL";
     if (log != null) {
       log.logBasic(
           "Adding workflow_execution_id column to "
@@ -449,7 +445,8 @@ public final class LoadRunMetricsDdlSupport {
     String qualifiedTable =
         databaseMeta.getQuotedSchemaTableCombination(
             db, resolvedSchema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_PIPELINE_METRIC);
-    String alterSql = "ALTER TABLE " + qualifiedTable + " ADD " + columnName + " " + sqlType + " NULL";
+    String alterSql =
+        "ALTER TABLE " + qualifiedTable + " ADD " + columnName + " " + sqlType + " NULL";
     if (log != null) {
       log.logBasic(
           "Adding "

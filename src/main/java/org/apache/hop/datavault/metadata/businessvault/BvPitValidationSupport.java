@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import java.util.HashSet;
@@ -82,7 +80,9 @@ final class BvPitValidationSupport {
           new CheckResult(
               ICheckResult.TYPE_RESULT_ERROR,
               BaseMessages.getString(
-                  PKG, "BvPitValidationSupport.CheckResult.MissingDvTargetDatabase", pitTable.getName()),
+                  PKG,
+                  "BvPitValidationSupport.CheckResult.MissingDvTargetDatabase",
+                  pitTable.getName()),
               pitTable));
     } else if (metadataProvider != null) {
       try {
@@ -97,7 +97,9 @@ final class BvPitValidationSupport {
           new CheckResult(
               ICheckResult.TYPE_RESULT_ERROR,
               BaseMessages.getString(
-                  PKG, "BvPitValidationSupport.CheckResult.MissingBvTargetDatabase", pitTable.getName()),
+                  PKG,
+                  "BvPitValidationSupport.CheckResult.MissingBvTargetDatabase",
+                  pitTable.getName()),
               pitTable));
     } else if (metadataProvider != null) {
       try {
@@ -143,7 +145,8 @@ final class BvPitValidationSupport {
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_ERROR,
-              BaseMessages.getString(PKG, "BvPitTable.CheckResult.MissingHubDerivative", pitTable.getName()),
+              BaseMessages.getString(
+                  PKG, "BvPitTable.CheckResult.MissingHubDerivative", pitTable.getName()),
               pitTable));
     } else if (hubCount > 1) {
       remarks.add(
@@ -173,7 +176,8 @@ final class BvPitValidationSupport {
       return;
     }
 
-    List<DvSatellite> satellites = BvPitLayoutSupport.resolveSatelliteDerivatives(pitTable, dvModel);
+    List<DvSatellite> satellites =
+        BvPitLayoutSupport.resolveSatelliteDerivatives(pitTable, dvModel);
     BvPitSnapshotSchedule schedule = pitTable.getSnapshotScheduleOrDefault();
     Set<String> pointerNames = new HashSet<>();
 
@@ -183,7 +187,10 @@ final class BvPitValidationSupport {
             new CheckResult(
                 ICheckResult.TYPE_RESULT_ERROR,
                 BaseMessages.getString(
-                    PKG, "BvPitValidationSupport.Error.LinkSatelliteNotSupported", pitTable.getName(), satellite.getName()),
+                    PKG,
+                    "BvPitValidationSupport.Error.LinkSatelliteNotSupported",
+                    pitTable.getName(),
+                    satellite.getName()),
                 pitTable));
         continue;
       }

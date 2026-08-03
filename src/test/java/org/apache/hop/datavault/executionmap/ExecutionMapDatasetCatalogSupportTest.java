@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -70,11 +68,9 @@ class ExecutionMapDatasetCatalogSupportTest {
     document.getNodesOrEmpty().add(datasetNode);
 
     RecordDefinitionKey key =
-        ExecutionMapDatasetCatalogSupport.resolveDatasetRecordKey(
-            datasetNode, document, variables);
+        ExecutionMapDatasetCatalogSupport.resolveDatasetRecordKey(datasetNode, document, variables);
 
-    assertEquals(
-        new RecordDefinitionKey("hop/retail-example/sources", "E2E-customer-hub"), key);
+    assertEquals(new RecordDefinitionKey("hop/retail-example/sources", "E2E-customer-hub"), key);
     assertTrue(ExecutionMapDatasetCatalogSupport.isCatalogNamespace(key.getNamespace()));
   }
 
@@ -98,8 +94,7 @@ class ExecutionMapDatasetCatalogSupportTest {
     document.getNodesOrEmpty().add(datasetNode);
 
     RecordDefinitionKey key =
-        ExecutionMapDatasetCatalogSupport.resolveDatasetRecordKey(
-            datasetNode, document, variables);
+        ExecutionMapDatasetCatalogSupport.resolveDatasetRecordKey(datasetNode, document, variables);
 
     assertEquals(
         new RecordDefinitionKey("hop/retail-example/models/retail-360", "hub_customer"), key);
@@ -125,8 +120,7 @@ class ExecutionMapDatasetCatalogSupportTest {
     document.getNodesOrEmpty().add(datasetNode);
 
     RecordDefinitionKey key =
-        ExecutionMapDatasetCatalogSupport.resolveDatasetRecordKey(
-            datasetNode, document, variables);
+        ExecutionMapDatasetCatalogSupport.resolveDatasetRecordKey(datasetNode, document, variables);
 
     assertEquals(
         new RecordDefinitionKey(

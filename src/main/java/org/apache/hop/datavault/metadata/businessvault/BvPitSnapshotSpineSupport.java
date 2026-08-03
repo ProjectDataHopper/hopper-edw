@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import java.sql.Timestamp;
@@ -43,8 +41,7 @@ public final class BvPitSnapshotSpineSupport {
   public static final String DEFAULT_INCREMENTAL_SENTINEL = "1900-01-01 00:00:00";
   public static final LocalTime END_OF_DAY = LocalTime.of(23, 59, 59);
 
-  private static final DateTimeFormatter SQL_DATE =
-      DateTimeFormatter.ofPattern("yyyy-MM-dd");
+  private static final DateTimeFormatter SQL_DATE = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
   private BvPitSnapshotSpineSupport() {}
 
@@ -56,8 +53,7 @@ public final class BvPitSnapshotSpineSupport {
     }
   }
 
-  public static String resolveLoadDateField(
-      DataVaultConfiguration dvConfig, IVariables variables) {
+  public static String resolveLoadDateField(DataVaultConfiguration dvConfig, IVariables variables) {
     String field = dvConfig != null ? dvConfig.getLoadDateField() : null;
     if (variables != null) {
       field = variables.resolve(field);
@@ -84,8 +80,7 @@ public final class BvPitSnapshotSpineSupport {
 
     LocalDate endDate = resolveEndDate(schedule, variables, referenceDate);
     LocalDate startDate =
-        resolveStartDate(
-            schedule, variables, earliestParticipatingSatelliteLoad, earliestHubLoad);
+        resolveStartDate(schedule, variables, earliestParticipatingSatelliteLoad, earliestHubLoad);
     return new SpineBounds(startDate, endDate);
   }
 
@@ -212,7 +207,8 @@ public final class BvPitSnapshotSpineSupport {
     Matcher matcher = ANSI_TIMESTAMP_LITERAL.matcher(sql);
     StringBuilder out = new StringBuilder();
     while (matcher.find()) {
-      String replacement = Matcher.quoteReplacement(timestampLiteral(databaseMeta, matcher.group(1)));
+      String replacement =
+          Matcher.quoteReplacement(timestampLiteral(databaseMeta, matcher.group(1)));
       matcher.appendReplacement(out, replacement);
     }
     matcher.appendTail(out);
@@ -268,8 +264,7 @@ public final class BvPitSnapshotSpineSupport {
         continue;
       }
       String tableName = BvPitLayoutSupport.resolveSatellitePhysicalName(satellite);
-      String quotedTable =
-          databaseMeta.getQuotedSchemaTableCombination(variables, null, tableName);
+      String quotedTable = databaseMeta.getQuotedSchemaTableCombination(variables, null, tableName);
       branches.add("SELECT MIN(" + quotedLoadDate + ") AS min_load FROM " + quotedTable);
     }
     if (branches.isEmpty()) {
@@ -285,15 +280,11 @@ public final class BvPitSnapshotSpineSupport {
   }
 
   public static String buildEarliestHubLoadSql(
-      DatabaseMeta databaseMeta,
-      IVariables variables,
-      DvHub hub,
-      String loadDateField) {
+      DatabaseMeta databaseMeta, IVariables variables, DvHub hub, String loadDateField) {
     if (databaseMeta == null || hub == null) {
       return "SELECT " + nullTimestampLiteral(databaseMeta) + " AS earliest_load";
     }
-    String tableName =
-        !Utils.isEmpty(hub.getTableName()) ? hub.getTableName() : hub.getName();
+    String tableName = !Utils.isEmpty(hub.getTableName()) ? hub.getTableName() : hub.getName();
     String quotedTable = databaseMeta.getQuotedSchemaTableCombination(variables, null, tableName);
     String quotedLoadDate = databaseMeta.quoteField(loadDateField);
     return "SELECT MIN(" + quotedLoadDate + ") AS earliest_load FROM " + quotedTable;
@@ -315,8 +306,7 @@ public final class BvPitSnapshotSpineSupport {
           buildSinglestoreDynamicSnapshotSpineCte(
               cteName, snapshotColumnAlias, boundsCteName, anchor);
       case POSTGRES ->
-          buildPostgresDynamicSnapshotSpineCte(
-              cteName, snapshotColumnAlias, boundsCteName, anchor);
+          buildPostgresDynamicSnapshotSpineCte(cteName, snapshotColumnAlias, boundsCteName, anchor);
     };
   }
 
@@ -446,12 +436,12 @@ public final class BvPitSnapshotSpineSupport {
   }
 
   public static String buildPostgresSnapshotSpineCte(
-      String cteName,
-      String snapshotColumnAlias,
-      SpineBounds bounds,
-      BvPitSnapshotAnchor anchor) {
+      String cteName, String snapshotColumnAlias, SpineBounds bounds, BvPitSnapshotAnchor anchor) {
     if (bounds == null || !bounds.isValid()) {
-      return cteName + " AS (SELECT CAST(NULL AS timestamp) AS " + snapshotColumnAlias + " WHERE 1 = 0)";
+      return cteName
+          + " AS (SELECT CAST(NULL AS timestamp) AS "
+          + snapshotColumnAlias
+          + " WHERE 1 = 0)";
     }
     String startLiteral = "DATE '" + bounds.startDate().format(SQL_DATE) + "'";
     String endLiteral = "DATE '" + bounds.endDate().format(SQL_DATE) + "'";
@@ -484,8 +474,8 @@ public final class BvPitSnapshotSpineSupport {
 
   /**
    * BV-only query used at pipeline generation to resolve the incremental snapshot watermark.
-   * Returns {@code MAX(snapshot_date)} only; null results fall back to the default sentinel in
-   * Java so the SQL stays free of dialect-specific timestamp literals.
+   * Returns {@code MAX(snapshot_date)} only; null results fall back to the default sentinel in Java
+   * so the SQL stays free of dialect-specific timestamp literals.
    */
   public static String buildIncrementalSnapshotWatermarkSql(
       DatabaseMeta bvDatabaseMeta,
@@ -538,7 +528,8 @@ public final class BvPitSnapshotSpineSupport {
     return switch (rangeEnd) {
       case NOW -> referenceDate;
       case NOW_MINUS_HORIZON -> referenceDate.minusDays(Math.max(0, schedule.getHorizonDays()));
-      case FIXED_DATE -> parseFixedDate(resolve(variables, schedule.getRangeEndFixed()), "range end");
+      case FIXED_DATE ->
+          parseFixedDate(resolve(variables, schedule.getRangeEndFixed()), "range end");
     };
   }
 
@@ -553,7 +544,8 @@ public final class BvPitSnapshotSpineSupport {
             ? schedule.getRangeStart()
             : BvPitRangeStart.EARLIEST_PARTICIPATING_SATELLITE_LOAD;
     return switch (rangeStart) {
-      case FIXED_DATE -> parseFixedDate(resolve(variables, schedule.getRangeStartFixed()), "range start");
+      case FIXED_DATE ->
+          parseFixedDate(resolve(variables, schedule.getRangeStartFixed()), "range start");
       case EARLIEST_PARTICIPATING_SATELLITE_LOAD -> earliestParticipatingSatelliteLoad;
       case EARLIEST_HUB_LOAD -> earliestHubLoad;
     };

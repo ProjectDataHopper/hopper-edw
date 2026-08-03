@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.lineage;
 
 import java.util.Locale;
@@ -32,7 +31,9 @@ public final class ReverseLineageKey {
     this.sourceName = sourceName != null ? sourceName : "";
     this.sourceFieldName = sourceFieldName != null ? sourceFieldName : "";
     this.normalized =
-        this.sourceName.toLowerCase(Locale.ROOT) + "\0" + this.sourceFieldName.toLowerCase(Locale.ROOT);
+        this.sourceName.toLowerCase(Locale.ROOT)
+            + "\0"
+            + this.sourceFieldName.toLowerCase(Locale.ROOT);
   }
 
   public String sourceName() {

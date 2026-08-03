@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.lineage;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -52,8 +51,7 @@ class ReverseLineageIndexBuilderTest {
   void setUp() {
     variables = new Variables();
     variables.setVariable(
-        "PROJECT_HOME",
-        Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
+        "PROJECT_HOME", Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
   }
 
   @Test
@@ -90,11 +88,11 @@ class ReverseLineageIndexBuilderTest {
                         && c.getHopCount() >= 2),
         "multi-hop BV consumer via sat");
 
-    List<ReverseLineageConsumer> search =
-        index.search("customer-demo", "segment");
+    List<ReverseLineageConsumer> search = index.search("customer-demo", "segment");
     assertFalse(search.isEmpty());
     assertTrue(
-        search.stream().anyMatch(c -> c.getPathSummary() != null && c.getPathSummary().contains("segment")));
+        search.stream()
+            .anyMatch(c -> c.getPathSummary() != null && c.getPathSummary().contains("segment")));
   }
 
   private static DataVaultModel loadDv(String path) throws Exception {

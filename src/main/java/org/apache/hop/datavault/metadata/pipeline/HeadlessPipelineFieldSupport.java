@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.pipeline;
 
 import java.util.HashMap;
@@ -33,8 +31,8 @@ import org.apache.hop.pipeline.transform.ITransformMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
 
 /**
- * Resolves pipeline transform fields without calling GUI-oriented extension points. This is required
- * for headless CLI commands such as {@code hop execution-map}.
+ * Resolves pipeline transform fields without calling GUI-oriented extension points. This is
+ * required for headless CLI commands such as {@code hop execution-map}.
  */
 public final class HeadlessPipelineFieldSupport {
 
@@ -88,7 +86,8 @@ public final class HeadlessPipelineFieldSupport {
     }
 
     IRowMeta row = new RowMeta();
-    collectPreviousTransformFields(pipelineMeta, variables, transformMeta, targetTransform, row, cache);
+    collectPreviousTransformFields(
+        pipelineMeta, variables, transformMeta, targetTransform, row, cache);
     IRowMeta result =
         resolveThisTransformFields(
             pipelineMeta, variables, transformMeta, targetTransform, row, cache);

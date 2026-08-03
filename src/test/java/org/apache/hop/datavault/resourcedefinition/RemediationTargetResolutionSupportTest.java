@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -60,9 +59,7 @@ class RemediationTargetResolutionSupportTest {
     scd2.setTableName("customer_360_bv");
     scd2.getSatelliteConfigs().add(new BvScd2SatelliteConfig("sat_customer_address"));
     scd2.getFieldMappings()
-        .add(
-            new BvScd2FieldMapping(
-                "sat_customer_address", "address_line1", "cust_address"));
+        .add(new BvScd2FieldMapping("sat_customer_address", "address_line1", "cust_address"));
     bv.getTables().add(scd2);
 
     DimensionalModel dm = new DimensionalModel();
@@ -92,11 +89,7 @@ class RemediationTargetResolutionSupportTest {
 
     List<RemediationTargetColumn> targets =
         RemediationTargetResolutionSupport.resolveDownstreamTargets(
-            models,
-            "address_line1",
-            "75",
-            Set.of("sat_customer_address"),
-            new Variables());
+            models, "address_line1", "75", Set.of("sat_customer_address"), new Variables());
 
     assertTrue(
         targets.stream()
@@ -104,8 +97,7 @@ class RemediationTargetResolutionSupportTest {
                 t ->
                     RemediationTargetColumn.LAYER_BV.equals(t.layer())
                         && "cust_address".equals(t.targetFieldName())
-                        && RemediationTargetColumn.CONFIDENCE_EXPLICIT_MAP.equals(
-                            t.confidence())),
+                        && RemediationTargetColumn.CONFIDENCE_EXPLICIT_MAP.equals(t.confidence())),
         targets.toString());
     assertTrue(
         targets.stream()

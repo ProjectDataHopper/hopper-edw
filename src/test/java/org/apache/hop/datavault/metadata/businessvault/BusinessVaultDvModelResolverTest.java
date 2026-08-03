@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,8 +40,7 @@ class BusinessVaultDvModelResolverTest {
 
   @Test
   void buildEffectiveModelFromCanvasAliasWithoutLinkedPath() throws Exception {
-    Path dvPath =
-        Path.of("integration-tests/tests/basic/vault1.hdv").toAbsolutePath().normalize();
+    Path dvPath = Path.of("integration-tests/tests/basic/vault1.hdv").toAbsolutePath().normalize();
     BusinessVaultModel bv = new BusinessVaultModel();
     bv.setFilename(Path.of("integration-tests/tests/basic/vault1.hbv").toAbsolutePath().toString());
     // No dataVaultModelPath — multi-model style.
@@ -60,8 +57,7 @@ class BusinessVaultDvModelResolverTest {
 
   @Test
   void resolveDvTableUsesAliasPath() throws Exception {
-    Path dvPath =
-        Path.of("integration-tests/tests/basic/vault1.hdv").toAbsolutePath().normalize();
+    Path dvPath = Path.of("integration-tests/tests/basic/vault1.hdv").toAbsolutePath().normalize();
     BusinessVaultModel bv = new BusinessVaultModel();
     bv.setFilename(Path.of("integration-tests/tests/basic/vault1.hbv").toAbsolutePath().toString());
     BvDvTableReference satRef = new BvDvTableReference("sat_customer", DvTableType.SATELLITE);
@@ -69,8 +65,7 @@ class BusinessVaultDvModelResolverTest {
     bv.getDvReferences().add(satRef);
 
     IDvTable table =
-        BusinessVaultDvModelResolver.resolveDvTable(
-            bv, "sat_customer", new Variables(), null);
+        BusinessVaultDvModelResolver.resolveDvTable(bv, "sat_customer", new Variables(), null);
     assertNotNull(table);
     assertEquals("sat_customer", table.getName());
   }

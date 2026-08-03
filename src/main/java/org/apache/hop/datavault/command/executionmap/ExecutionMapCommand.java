@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.command.executionmap;
 
 import java.util.Map;
@@ -29,8 +27,8 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.logging.ILogChannel;
 import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.datavault.executionmap.CrawlOptions;
 import org.apache.hop.datavault.command.executionmap.ExecutionMapService.GenerateResult;
+import org.apache.hop.datavault.executionmap.CrawlOptions;
 import org.apache.hop.hop.Hop;
 import org.apache.hop.hop.plugin.HopCommand;
 import org.apache.hop.hop.plugin.IHopCommand;
@@ -84,12 +82,14 @@ public class ExecutionMapCommand implements Runnable, IHopCommand, IHasHopMetada
 
   @CommandLine.Option(
       names = {"--include-actions"},
-      description = "Include workflow action nodes in the execution map (still crawl action references when omitted)")
+      description =
+          "Include workflow action nodes in the execution map (still crawl action references when omitted)")
   private boolean includeActions;
 
   @CommandLine.Option(
       names = {"--include-transforms"},
-      description = "Include pipeline transform nodes in the execution map (still crawl transform references when omitted)")
+      description =
+          "Include pipeline transform nodes in the execution map (still crawl transform references when omitted)")
   private boolean includeTransforms;
 
   @CommandLine.Option(
@@ -157,5 +157,4 @@ public class ExecutionMapCommand implements Runnable, IHopCommand, IHasHopMetada
       variables.setVariable(VAR_PROJECT_HOME, variables.resolve(projectHome));
     }
   }
-
 }

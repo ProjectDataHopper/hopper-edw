@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.modelgraph;
 
 import java.util.List;
@@ -23,12 +21,12 @@ import java.util.function.Supplier;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.xml.XmlHandler;
-import org.apache.hop.datavault.metadata.DataVaultModel;
-import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
-import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.datavault.hopgui.file.businessvault.HopBusinessVaultFileType;
 import org.apache.hop.datavault.hopgui.file.dimensional.HopDimensionalFileType;
 import org.apache.hop.datavault.hopgui.file.vault.HopVaultFileType;
+import org.apache.hop.datavault.metadata.DataVaultModel;
+import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
+import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.apache.hop.ui.core.dialog.CheckResultDialog;
@@ -110,9 +108,11 @@ public final class ModelDialogValidationSupport {
   private static void preserveFilename(Object source, Object clone) {
     if (source instanceof DataVaultModel sourceDv && clone instanceof DataVaultModel cloneDv) {
       cloneDv.setFilename(sourceDv.getFilename());
-    } else if (source instanceof BusinessVaultModel sourceBv && clone instanceof BusinessVaultModel cloneBv) {
+    } else if (source instanceof BusinessVaultModel sourceBv
+        && clone instanceof BusinessVaultModel cloneBv) {
       cloneBv.setFilename(sourceBv.getFilename());
-    } else if (source instanceof DimensionalModel sourceDm && clone instanceof DimensionalModel cloneDm) {
+    } else if (source instanceof DimensionalModel sourceDm
+        && clone instanceof DimensionalModel cloneDm) {
       cloneDm.setFilename(sourceDm.getFilename());
     }
   }

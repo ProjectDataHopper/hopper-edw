@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.dimensional;
 
 import org.apache.hop.core.exception.HopException;
@@ -73,7 +71,8 @@ public final class DmDimensionAliasNavigationSupport {
           BaseMessages.getString(PKG, "DmDimensionAliasNavigationSupport.Error.MissingAlias"));
     }
 
-    SourceDimensionTarget target = resolveSourceDimension(model, alias, variables, metadataProvider);
+    SourceDimensionTarget target =
+        resolveSourceDimension(model, alias, variables, metadataProvider);
 
     if (target.sameModel()) {
       HopGuiDimensionalModelGraph graph = currentGraph;
@@ -107,10 +106,7 @@ public final class DmDimensionAliasNavigationSupport {
               alias.getReferencedModelFilename(), model.getFilename(), variables);
       DimensionalModel externalModel =
           DmModelLoadSupport.loadDimensionalModel(
-              alias.getReferencedModelFilename(),
-              model.getFilename(),
-              variables,
-              metadataProvider);
+              alias.getReferencedModelFilename(), model.getFilename(), variables, metadataProvider);
       if (!isDimensionTable(externalModel, dimensionName)) {
         throw new HopException(
             BaseMessages.getString(

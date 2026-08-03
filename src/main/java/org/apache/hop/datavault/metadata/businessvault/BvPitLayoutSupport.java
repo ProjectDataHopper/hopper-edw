@@ -13,16 +13,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
-import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.RowMeta;
 import org.apache.hop.core.row.value.ValueMetaTimestamp;
 import org.apache.hop.core.util.Utils;
@@ -46,7 +43,8 @@ public final class BvPitLayoutSupport {
     DvHub hub = resolveHubDerivative(pitTable, dvModel);
     List<DvSatellite> satellites = resolveSatelliteDerivatives(pitTable, dvModel);
     if (hub == null) {
-      throw new HopException("PIT table " + pitTable.getName() + " must reference a hub derivative");
+      throw new HopException(
+          "PIT table " + pitTable.getName() + " must reference a hub derivative");
     }
     if (satellites.isEmpty()) {
       throw new HopException(
@@ -89,8 +87,7 @@ public final class BvPitLayoutSupport {
   public static String resolveSatellitePointerColumnName(
       DvSatellite satellite, BvPitSnapshotSchedule schedule, IVariables variables) {
     String baseName = resolveSatellitePhysicalName(satellite);
-    String suffix =
-        schedule != null ? schedule.getSatellitePointerSuffix() : null;
+    String suffix = schedule != null ? schedule.getSatellitePointerSuffix() : null;
     if (variables != null) {
       suffix = variables.resolve(suffix);
     }
@@ -144,7 +141,8 @@ public final class BvPitLayoutSupport {
     return null;
   }
 
-  static List<DvSatellite> resolveSatelliteDerivatives(BvPitTable pitTable, DataVaultModel dvModel) {
+  static List<DvSatellite> resolveSatelliteDerivatives(
+      BvPitTable pitTable, DataVaultModel dvModel) {
     List<DvSatellite> satellites = new ArrayList<>();
     if (pitTable == null || dvModel == null) {
       return satellites;

@@ -13,19 +13,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.businessvault;
 
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.ICheckResult;
-import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.hopgui.EnumDialogSupport;
+import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
+import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
+import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.datavault.hopgui.lineage.LineageTabSupport;
 import org.apache.hop.datavault.lineage.BvModelLineageCollector;
 import org.apache.hop.datavault.lineage.LineageSnapshot;
@@ -33,6 +34,8 @@ import org.apache.hop.datavault.lineage.TableLineage;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.datavault.metadata.IDvTable;
+import org.apache.hop.datavault.metadata.businessvault.BusinessVaultDerivativeSupport;
+import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
 import org.apache.hop.datavault.metadata.businessvault.BvDerivativeRef;
 import org.apache.hop.datavault.metadata.businessvault.BvPitCadence;
 import org.apache.hop.datavault.metadata.businessvault.BvPitRangeEnd;
@@ -41,19 +44,16 @@ import org.apache.hop.datavault.metadata.businessvault.BvPitSnapshotAnchor;
 import org.apache.hop.datavault.metadata.businessvault.BvPitSnapshotSchedule;
 import org.apache.hop.datavault.metadata.businessvault.BvPitTable;
 import org.apache.hop.datavault.metadata.businessvault.BvTableType;
-import org.apache.hop.datavault.metadata.businessvault.BusinessVaultDerivativeSupport;
-import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
 import org.apache.hop.datavault.metadata.businessvault.IBvTable;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IEnumHasCodeAndDescription;
 import org.apache.hop.ui.core.PropsUi;
-import org.apache.hop.ui.core.gui.WindowProperty;
 import org.apache.hop.ui.core.dialog.BaseDialog;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
-import org.apache.hop.ui.hopgui.HopGui;
-import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
+import org.apache.hop.ui.core.gui.WindowProperty;
 import org.apache.hop.ui.core.widget.ColumnInfo;
 import org.apache.hop.ui.core.widget.TableView;
+import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormAttachment;
@@ -65,8 +65,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
-import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
-import org.apache.hop.datavault.hopgui.help.HelpTopics;
 
 /** Dialog to edit a Business Vault table on the canvas. */
 public class HopGuiBvTableDialog {
@@ -213,7 +211,8 @@ public class HopGuiBvTableDialog {
     org.eclipse.swt.widgets.Control derivativeTop = wDescription;
 
     if (pit) {
-      wlCadence = addLabel(shell, "HopGuiBvTableDialog.Cadence.Label", wSnapshotDateField, middle, margin);
+      wlCadence =
+          addLabel(shell, "HopGuiBvTableDialog.Cadence.Label", wSnapshotDateField, middle, margin);
       wCadence = addEnumCombo(shell, BvPitCadence.class, wlCadence, middle);
       wlSnapshotAnchor =
           addLabel(shell, "HopGuiBvTableDialog.SnapshotAnchor.Label", wCadence, middle, margin);
@@ -234,7 +233,8 @@ public class HopGuiBvTableDialog {
           addLabel(shell, "HopGuiBvTableDialog.RangeEndFixed.Label", wRangeEnd, middle, margin);
       wRangeEndFixed = addText(shell, wlRangeEndFixed, middle);
       wlPointerSuffix =
-          addLabel(shell, "HopGuiBvTableDialog.PointerSuffix.Label", wRangeEndFixed, middle, margin);
+          addLabel(
+              shell, "HopGuiBvTableDialog.PointerSuffix.Label", wRangeEndFixed, middle, margin);
       wPointerSuffix = addText(shell, wlPointerSuffix, middle);
 
       wRangeStart.addListener(SWT.Selection, e -> refreshFixedDateVisibility());
@@ -264,7 +264,8 @@ public class HopGuiBvTableDialog {
     wAddDerivative.addListener(SWT.Selection, e -> addDerivativeRow());
 
     wDeleteDerivative = new Button(shell, SWT.PUSH);
-    wDeleteDerivative.setText(BaseMessages.getString(PKG, "HopGuiBvTableDialog.Derivatives.Delete"));
+    wDeleteDerivative.setText(
+        BaseMessages.getString(PKG, "HopGuiBvTableDialog.Derivatives.Delete"));
     PropsUi.setLook(wDeleteDerivative);
     FormData fdDeleteDerivative = new FormData();
     fdDeleteDerivative.left = new FormAttachment(wAddDerivative, margin);
@@ -319,8 +320,7 @@ public class HopGuiBvTableDialog {
             ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Label"));
     wValidate.addListener(SWT.Selection, e -> validate());
     Button wLineage = new Button(shell, SWT.PUSH);
-    wLineage.setText(
-        BaseMessages.getString(LineageTabSupport.class, "LineageTab.ShowButton"));
+    wLineage.setText(BaseMessages.getString(LineageTabSupport.class, "LineageTab.ShowButton"));
     wLineage.setToolTipText(
         BaseMessages.getString(LineageTabSupport.class, "LineageTab.ShowButton.ToolTip"));
     wLineage.addListener(SWT.Selection, e -> showLineage());
@@ -356,7 +356,11 @@ public class HopGuiBvTableDialog {
   }
 
   private Label addLabel(
-      Shell parentShell, String messageKey, org.eclipse.swt.widgets.Control top, int middle, int margin) {
+      Shell parentShell,
+      String messageKey,
+      org.eclipse.swt.widgets.Control top,
+      int middle,
+      int margin) {
     Label label = new Label(parentShell, SWT.RIGHT);
     label.setText(BaseMessages.getString(PKG, messageKey));
     PropsUi.setLook(label);
@@ -499,9 +503,12 @@ public class HopGuiBvTableDialog {
     } catch (Exception ex) {
       new ErrorDialog(
           shell,
-          BaseMessages.getString(ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Label"),
           BaseMessages.getString(
-              ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Error", ex.getMessage()),
+              ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Label"),
+          BaseMessages.getString(
+              ModelDialogValidationSupport.class,
+              "ModelTableDialog.Validate.Error",
+              ex.getMessage()),
           ex);
     }
   }

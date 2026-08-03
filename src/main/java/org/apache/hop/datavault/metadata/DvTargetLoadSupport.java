@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.ArrayList;
@@ -130,7 +128,8 @@ public final class DvTargetLoadSupport {
     }
     return switch (mode) {
       case TABLE_OUTPUT ->
-          addTableOutput(ctx, pipelineMeta, targetLayout, predecessor, excludeFields, truncateTable);
+          addTableOutput(
+              ctx, pipelineMeta, targetLayout, predecessor, excludeFields, truncateTable);
       case NATIVE_BULK ->
           addNativeBulkLoader(ctx, pipelineMeta, targetLayout, predecessor, excludeFields);
       case STAGING_FILE ->
@@ -138,10 +137,13 @@ public final class DvTargetLoadSupport {
     };
   }
 
-  /** Builds the staged CSV filename base used by Text File Output and bulk-load workflow actions. */
+  /**
+   * Builds the staged CSV filename base used by Text File Output and bulk-load workflow actions.
+   */
   public static String buildStagingFileBase(
       String stagingFolder, String pipelineName, boolean includeCopyVariable) {
-    String base = ensureTrailingSlash(stagingFolder) + stripStagedPipelineSequencePrefix(pipelineName);
+    String base =
+        ensureTrailingSlash(stagingFolder) + stripStagedPipelineSequencePrefix(pipelineName);
     if (includeCopyVariable) {
       base = base + "-" + STAGING_FILE_COPY_VARIABLE_PATTERN;
     }
@@ -178,9 +180,7 @@ public final class DvTargetLoadSupport {
       base = base.replace(STAGING_FILE_COPY_VARIABLE_PATTERN, Integer.toString(copyIndex));
     } else if (base.endsWith("-" + STAGING_FILE_COPY_VARIABLE)) {
       base =
-          base.substring(0, base.length() - STAGING_FILE_COPY_VARIABLE.length())
-              + "-"
-              + copyIndex;
+          base.substring(0, base.length() - STAGING_FILE_COPY_VARIABLE.length()) + "-" + copyIndex;
     } else {
       base = base + "-" + copyIndex;
     }
@@ -293,7 +293,8 @@ public final class DvTargetLoadSupport {
     }
 
     try {
-      ITransformMeta bulkLoaderMeta = DvBulkLoadTransformSupport.loadTransformMeta(transformPluginId);
+      ITransformMeta bulkLoaderMeta =
+          DvBulkLoadTransformSupport.loadTransformMeta(transformPluginId);
       DvBulkLoadTransformSupport.configureNativeBulkLoader(
           transformPluginId, bulkLoaderMeta, ctx, targetLayout, excludeFields);
 

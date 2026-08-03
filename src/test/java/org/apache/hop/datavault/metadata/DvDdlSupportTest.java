@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
-
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
@@ -227,7 +224,8 @@ class DvDdlSupportTest {
 
   @Test
   void enrichSqlServerFieldDefinitionAppendsUtf8CollationAndExpandsLength() {
-    DatabaseMeta sqlServer = databaseMetaWithPluginId(DvBulkLoadPluginSupport.MSSQLNATIVE_DB_PLUGIN_ID);
+    DatabaseMeta sqlServer =
+        databaseMetaWithPluginId(DvBulkLoadPluginSupport.MSSQLNATIVE_DB_PLUGIN_ID);
     String definition = "customer_id VARCHAR(50)";
     String enriched = DvDdlSupport.enrichSqlServerFieldDefinition(sqlServer, definition);
     // NVARCHAR(50)-style character length must become UTF-8 byte length (×3) so multi-byte
@@ -238,11 +236,14 @@ class DvDdlSupportTest {
 
   @Test
   void enrichSqlServerDdlRewritesCreateAndAlterStrings() {
-    DatabaseMeta sqlServer = databaseMetaWithPluginId(DvBulkLoadPluginSupport.MSSQLNATIVE_DB_PLUGIN_ID);
+    DatabaseMeta sqlServer =
+        databaseMetaWithPluginId(DvBulkLoadPluginSupport.MSSQLNATIVE_DB_PLUGIN_ID);
     String create =
         "CREATE TABLE hub_item (\n  item_hk VARBINARY(16),\n  item_code VARCHAR(50)\n);";
     String rewritten = DvDdlSupport.enrichSqlServerDdl(sqlServer, create);
-    assertTrue(rewritten.contains("item_code VARCHAR(150) COLLATE " + DvDdlSupport.SQL_SERVER_UTF8_COLLATION));
+    assertTrue(
+        rewritten.contains(
+            "item_code VARCHAR(150) COLLATE " + DvDdlSupport.SQL_SERVER_UTF8_COLLATION));
     assertFalse(rewritten.toUpperCase().contains("VARBINARY(16) COLLATE"));
 
     String alter = "ALTER TABLE hub_item ADD name VARCHAR(100)";
@@ -253,13 +254,13 @@ class DvDdlSupportTest {
 
   @Test
   void rewriteSqlServerStringCollationsDoesNotDoubleApply() {
-    String already =
-        "customer_id VARCHAR(150) COLLATE " + DvDdlSupport.SQL_SERVER_UTF8_COLLATION;
+    String already = "customer_id VARCHAR(150) COLLATE " + DvDdlSupport.SQL_SERVER_UTF8_COLLATION;
     assertEquals(already, DvDdlSupport.rewriteSqlServerStringCollations(already));
 
     String plain = "customer_id VARCHAR(50), name CHAR(10), notes TEXT";
     String rewritten = DvDdlSupport.rewriteSqlServerStringCollations(plain);
-    assertTrue(rewritten.contains("VARCHAR(150) COLLATE " + DvDdlSupport.SQL_SERVER_UTF8_COLLATION));
+    assertTrue(
+        rewritten.contains("VARCHAR(150) COLLATE " + DvDdlSupport.SQL_SERVER_UTF8_COLLATION));
     assertTrue(rewritten.contains("CHAR(30) COLLATE " + DvDdlSupport.SQL_SERVER_UTF8_COLLATION));
     assertTrue(rewritten.contains("TEXT COLLATE " + DvDdlSupport.SQL_SERVER_UTF8_COLLATION));
     assertFalse(rewritten.toUpperCase().contains("NVARCHAR"));
@@ -281,8 +282,7 @@ class DvDdlSupportTest {
     assertEquals(150, DvDdlSupport.utf8ByteLengthForCharacterLength(50));
     // 3000 * 3 = 9000 > 8000 → VARCHAR(MAX) path
     assertEquals(9000, DvDdlSupport.utf8ByteLengthForCharacterLength(3000));
-    assertTrue(
-        DvDdlSupport.expandSqlServerUtf8StringType("VARCHAR", 3000).equals("VARCHAR(MAX)"));
+    assertTrue(DvDdlSupport.expandSqlServerUtf8StringType("VARCHAR", 3000).equals("VARCHAR(MAX)"));
     assertEquals("VARCHAR(MAX)", DvDdlSupport.expandSqlServerUtf8StringType("CHAR", 4000));
     assertEquals("VARCHAR(MAX)", DvDdlSupport.expandSqlServerUtf8StringType("VARCHAR", 8000));
     assertEquals(
@@ -295,13 +295,13 @@ class DvDdlSupportTest {
     String once = DvDdlSupport.rewriteSqlServerStringCollations("addr VARCHAR(50)");
     String twice = DvDdlSupport.rewriteSqlServerStringCollations(once);
     assertEquals(once, twice);
-    assertEquals(
-        "addr VARCHAR(150) COLLATE " + DvDdlSupport.SQL_SERVER_UTF8_COLLATION, once);
+    assertEquals("addr VARCHAR(150) COLLATE " + DvDdlSupport.SQL_SERVER_UTF8_COLLATION, once);
   }
 
   @Test
   void enrichSqlServerDdlIsNoOpForPostgres() {
-    DatabaseMeta postgres = databaseMetaWithPluginId(DvBulkLoadPluginSupport.POSTGRESQL_DB_PLUGIN_ID);
+    DatabaseMeta postgres =
+        databaseMetaWithPluginId(DvBulkLoadPluginSupport.POSTGRESQL_DB_PLUGIN_ID);
     String ddl = "CREATE TABLE t (name VARCHAR(50));";
     assertEquals(ddl, DvDdlSupport.enrichSqlServerDdl(postgres, ddl));
   }

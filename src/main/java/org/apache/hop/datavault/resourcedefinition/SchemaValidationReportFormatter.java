@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import java.time.ZoneOffset;
@@ -38,8 +37,8 @@ import org.apache.hop.i18n.BaseMessages;
  * Formats schema impact simulation results for logs, Markdown CI artifacts, and HTML.
  *
  * <p>Human reports lift run-level compare context into a summary header, show field type
- * differences in a compact table, and present narrative findings (baseline gaps, target DDL, …)
- * as readable cards — never jammed into an "Actual Type" cell.
+ * differences in a compact table, and present narrative findings (baseline gaps, target DDL, …) as
+ * readable cards — never jammed into an "Actual Type" cell.
  */
 public final class SchemaValidationReportFormatter {
 
@@ -64,33 +63,25 @@ public final class SchemaValidationReportFormatter {
     builder
         .append(
             ValidationFindingFormatter.describeCompareContext(
-                result.compareMode(),
-                result.baselineVersionUsed(),
-                result.catalogVersionUsed()))
+                result.compareMode(), result.baselineVersionUsed(), result.catalogVersionUsed()))
         .append(Const.CR);
     builder
         .append("What we compared: ")
         .append(
             ValidationFindingFormatter.describeWhatWeCompared(
-                result.compareMode(),
-                result.baselineVersionUsed(),
-                result.catalogVersionUsed()))
+                result.compareMode(), result.baselineVersionUsed(), result.catalogVersionUsed()))
         .append(Const.CR);
     builder
         .append("Expected (baseline): ")
         .append(
             ValidationFindingFormatter.describeExpectedSide(
-                result.compareMode(),
-                result.baselineVersionUsed(),
-                result.catalogVersionUsed()))
+                result.compareMode(), result.baselineVersionUsed(), result.catalogVersionUsed()))
         .append(Const.CR);
     builder
         .append("Actual: ")
         .append(
             ValidationFindingFormatter.describeActualSide(
-                result.compareMode(),
-                result.baselineVersionUsed(),
-                result.catalogVersionUsed()))
+                result.compareMode(), result.baselineVersionUsed(), result.catalogVersionUsed()))
         .append(Const.CR);
     builder.append(ValidationReportFormatter.format(result.validationReport()));
     String lineageLog = LineageDiffReportFormatter.formatLog(result.lineageDiffs());
@@ -115,8 +106,7 @@ public final class SchemaValidationReportFormatter {
         rows.stream().filter(r -> r.severity == IssueSeverity.BLOCKING).toList();
     List<IssueRow> warnings =
         rows.stream().filter(r -> r.severity == IssueSeverity.WARNING).toList();
-    List<IssueRow> infos =
-        rows.stream().filter(r -> r.severity == IssueSeverity.INFO).toList();
+    List<IssueRow> infos = rows.stream().filter(r -> r.severity == IssueSeverity.INFO).toList();
 
     if (!critical.isEmpty()) {
       md.append("## Critical issues\n\n");
@@ -189,8 +179,7 @@ public final class SchemaValidationReportFormatter {
         rows.stream().filter(r -> r.severity == IssueSeverity.BLOCKING).toList();
     List<IssueRow> warnings =
         rows.stream().filter(r -> r.severity == IssueSeverity.WARNING).toList();
-    List<IssueRow> infos =
-        rows.stream().filter(r -> r.severity == IssueSeverity.INFO).toList();
+    List<IssueRow> infos = rows.stream().filter(r -> r.severity == IssueSeverity.INFO).toList();
 
     if (rows.isEmpty()) {
       html.append("<h2>No schema problems detected</h2>");
@@ -279,9 +268,7 @@ public final class SchemaValidationReportFormatter {
       StringBuilder html, SchemaImpactSimulationResult result, ValidationReport report) {
     html.append("<div class=\"summary\">");
     html.append("<p><strong>Timestamp:</strong> ")
-        .append(
-            escapeHtml(
-                result.timestamp() != null ? TIMESTAMP.format(result.timestamp()) : ""))
+        .append(escapeHtml(result.timestamp() != null ? TIMESTAMP.format(result.timestamp()) : ""))
         .append("</p>");
     html.append("<p><strong>Resource group:</strong> ")
         .append(escapeHtml(report != null ? report.getGroupName() : ""))
@@ -327,8 +314,7 @@ public final class SchemaValidationReportFormatter {
     List<IssueRow> fieldRows = rows.stream().filter(IssueRow::fieldLevel).toList();
     List<IssueRow> narrativeRows = rows.stream().filter(r -> !r.fieldLevel).toList();
     if (!fieldRows.isEmpty()) {
-      md.append(
-          "| Source | Column | Expected | Actual | Severity | Impact |\n");
+      md.append("| Source | Column | Expected | Actual | Severity | Impact |\n");
       md.append("| :--- | :--- | :--- | :--- | :--- | :--- |\n");
       for (IssueRow row : fieldRows) {
         md.append("| `")
@@ -416,20 +402,16 @@ public final class SchemaValidationReportFormatter {
       html.append("</tbody></table>");
     }
     for (IssueRow row : narrativeRows) {
-      html.append("<div class=\"finding ")
-          .append(severityCss(row.severity))
-          .append("\">");
+      html.append("<div class=\"finding ").append(severityCss(row.severity)).append("\">");
       html.append("<h3 class=\"")
           .append(severityCss(row.severity))
           .append("\">")
           .append(escapeHtml(row.title))
           .append("</h3>");
       html.append("<div class=\"meta\">");
-      html.append("<strong>Source:</strong> ")
-          .append(escapeHtml(row.sourceObject));
+      html.append("<strong>Source:</strong> ").append(escapeHtml(row.sourceObject));
       if (row.kind != null) {
-        html.append(" &nbsp;·&nbsp; <strong>Code:</strong> ")
-            .append(escapeHtml(row.kind.name()));
+        html.append(" &nbsp;·&nbsp; <strong>Code:</strong> ").append(escapeHtml(row.kind.name()));
       }
       html.append(" &nbsp;·&nbsp; <strong>Severity:</strong> ")
           .append(escapeHtml(severityLabel(row.severity)));
@@ -581,11 +563,13 @@ public final class SchemaValidationReportFormatter {
         || kinds.contains(IssueKind.PRIMARY_KEY_CHANGED)
         || kinds.contains(IssueKind.MAPPING_BROKEN)
         || kinds.contains(IssueKind.MODEL_ATTRIBUTE_NARROWER)) {
-      steps.add(BaseMessages.getString(PKG, "SchemaValidationReportFormatter.Action.FieldContract"));
+      steps.add(
+          BaseMessages.getString(PKG, "SchemaValidationReportFormatter.Action.FieldContract"));
     }
     if (steps.isEmpty()) {
       if (status == SimulationStatus.CRITICAL_BLOCKED) {
-        return BaseMessages.getString(PKG, "SchemaValidationReportFormatter.Action.CriticalGeneric");
+        return BaseMessages.getString(
+            PKG, "SchemaValidationReportFormatter.Action.CriticalGeneric");
       }
       return BaseMessages.getString(PKG, "SchemaValidationReportFormatter.Action.WarningGeneric");
     }

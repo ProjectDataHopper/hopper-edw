@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.ai;
 
 import java.util.ArrayList;
@@ -26,6 +24,8 @@ import java.util.function.Function;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.datavault.ai.HopAiProposal;
 import org.apache.hop.datavault.ai.HopAiProposalValidation;
+import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
+import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.gui.WindowProperty;
@@ -41,8 +41,6 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
-import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
-import org.apache.hop.datavault.hopgui.help.HelpTopics;
 
 /** Review and selectively apply AI-proposed pipeline or workflow graph changes. */
 public class HopAiProposalReviewDialog {
@@ -132,8 +130,7 @@ public class HopAiProposalReviewDialog {
     for (HopAiProposal proposal : proposals) {
       HopAiProposalValidation.Result validation = validationByProposal.get(proposal);
       boolean blocked =
-          validation != null
-              && validation.getStatus() == HopAiProposalValidation.Status.BLOCKED;
+          validation != null && validation.getStatus() == HopAiProposalValidation.Status.BLOCKED;
       TableItem item = new TableItem(wProposals, SWT.NONE);
       item.setText(proposalLabel(proposal, validation));
       item.setChecked(!blocked);

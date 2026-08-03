@@ -13,16 +13,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional.pipeline;
 
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.exception.HopException;
-import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataSupport;
+import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.datavault.metadata.dimensional.DmDimension;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineHopMeta;
@@ -55,7 +53,8 @@ public final class DmInsertUpdateBuilder {
     GeneratedPipelineMetadataSupport.stampDmTablePipeline(pipelineMeta, ctx);
 
     TransformMeta sourceTransform = DmPipelineBuilderSupport.addSourceInput(ctx, pipelineMeta);
-    TransformMeta insertUpdateTransform = addInsertUpdate(ctx, pipelineMeta, sourceTransform, dimension);
+    TransformMeta insertUpdateTransform =
+        addInsertUpdate(ctx, pipelineMeta, sourceTransform, dimension);
     if (insertUpdateTransform != null) {
       GeneratedPipelineMetadataSupport.stampWriteTarget(
           insertUpdateTransform,
@@ -82,13 +81,15 @@ public final class DmInsertUpdateBuilder {
     lookup.setTableName(ctx.targetTableName);
 
     List<InsertUpdateKeyField> keys = new ArrayList<>();
-    for (String naturalKey : DmPipelineBuilderSupport.naturalKeyFieldNames(dimension, ctx.variables)) {
+    for (String naturalKey :
+        DmPipelineBuilderSupport.naturalKeyFieldNames(dimension, ctx.variables)) {
       keys.add(new InsertUpdateKeyField(naturalKey, naturalKey, "="));
     }
     lookup.setLookupKeys(keys);
 
     List<InsertUpdateValue> values = new ArrayList<>();
-    for (String naturalKey : DmPipelineBuilderSupport.naturalKeyFieldNames(dimension, ctx.variables)) {
+    for (String naturalKey :
+        DmPipelineBuilderSupport.naturalKeyFieldNames(dimension, ctx.variables)) {
       values.add(new InsertUpdateValue(naturalKey, naturalKey, false));
     }
     for (String attribute :

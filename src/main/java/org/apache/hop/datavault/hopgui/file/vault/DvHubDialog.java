@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.vault;
 
 import java.util.ArrayList;
@@ -24,27 +22,29 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.hop.core.Const;
+import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.Props;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.catalog.DvSourceCatalogService;
+import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
+import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
+import org.apache.hop.datavault.hopgui.help.HelpTopics;
+import org.apache.hop.datavault.hopgui.lineage.LineageTabSupport;
+import org.apache.hop.datavault.lineage.DvModelLineageCollector;
+import org.apache.hop.datavault.lineage.LineageSnapshot;
+import org.apache.hop.datavault.lineage.TableLineage;
 import org.apache.hop.datavault.metadata.BusinessKey;
-import org.apache.hop.datavault.metadata.SourceFieldPrimaryKeySupport;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DataVaultSource;
-import org.apache.hop.core.ICheckResult;
 import org.apache.hop.datavault.metadata.DvDataTypeSupport;
 import org.apache.hop.datavault.metadata.DvHub;
 import org.apache.hop.datavault.metadata.DvIntegrationMode;
 import org.apache.hop.datavault.metadata.DvModelCheckOptions;
 import org.apache.hop.datavault.metadata.IDvTable;
-import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
-import org.apache.hop.datavault.hopgui.lineage.LineageTabSupport;
-import org.apache.hop.datavault.lineage.DvModelLineageCollector;
-import org.apache.hop.datavault.lineage.LineageSnapshot;
-import org.apache.hop.datavault.lineage.TableLineage;
 import org.apache.hop.datavault.metadata.SourceField;
+import org.apache.hop.datavault.metadata.SourceFieldPrimaryKeySupport;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.FormDataBuilder;
 import org.apache.hop.ui.core.PropsUi;
@@ -71,8 +71,6 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
-import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
-import org.apache.hop.datavault.hopgui.help.HelpTopics;
 
 /** Dialog to edit the properties of a DvHub, including business keys list using TableView. */
 public class DvHubDialog {
@@ -258,8 +256,7 @@ public class DvHubDialog {
 
     // Hash key field name (per-hub, replaces global suffix from DataVaultConfiguration)
     Label wlHashKeyFieldName = new Label(wOptionsComp, SWT.RIGHT);
-    wlHashKeyFieldName.setText(
-        BaseMessages.getString(PKG, "DvHubDialog.HashKeyFieldName.Label"));
+    wlHashKeyFieldName.setText(BaseMessages.getString(PKG, "DvHubDialog.HashKeyFieldName.Label"));
     PropsUi.setLook(wlHashKeyFieldName);
     FormData fdlHashKeyFieldName = new FormData();
     fdlHashKeyFieldName.left = new FormAttachment(0, 0);
@@ -493,9 +490,12 @@ public class DvHubDialog {
     } catch (Exception ex) {
       new ErrorDialog(
           shell,
-          BaseMessages.getString(ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Label"),
           BaseMessages.getString(
-              ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Error", ex.getMessage()),
+              ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Label"),
+          BaseMessages.getString(
+              ModelDialogValidationSupport.class,
+              "ModelTableDialog.Validate.Error",
+              ex.getMessage()),
           ex);
     }
   }
@@ -615,8 +615,7 @@ public class DvHubDialog {
       new ErrorDialog(
           shell,
           BaseMessages.getString(PKG, "System.Dialog.Error.Title"),
-          BaseMessages.getString(
-              PKG, "DvHubDialog.GetKeys.ErrorLoadingSource.Message", sourceName),
+          BaseMessages.getString(PKG, "DvHubDialog.GetKeys.ErrorLoadingSource.Message", sourceName),
           e);
       return 0;
     }
@@ -630,7 +629,8 @@ public class DvHubDialog {
       return 0;
     }
 
-    List<SourceField> primaryKeyFields = SourceFieldPrimaryKeySupport.primaryKeyFields(sourceFields);
+    List<SourceField> primaryKeyFields =
+        SourceFieldPrimaryKeySupport.primaryKeyFields(sourceFields);
     if (!primaryKeyFields.isEmpty()) {
       for (SourceField sf : primaryKeyFields) {
         TableItem item = new TableItem(wBusinessKeys.table, SWT.NONE);

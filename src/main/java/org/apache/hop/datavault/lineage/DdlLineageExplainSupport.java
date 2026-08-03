@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.lineage;
 
 import java.util.ArrayList;
@@ -127,9 +126,7 @@ public final class DdlLineageExplainSupport {
           String sources =
               tl.getSources().stream()
                   .map(
-                      s ->
-                          nvl(s.getName())
-                              + (s.getRole() != null ? " (" + s.getRole() + ")" : ""))
+                      s -> nvl(s.getName()) + (s.getRole() != null ? " (" + s.getRole() + ")" : ""))
                   .collect(Collectors.joining(", "));
           sb.append("   ")
               .append(BaseMessages.getString(PKG, "DdlLineageExplain.Sources", sources))

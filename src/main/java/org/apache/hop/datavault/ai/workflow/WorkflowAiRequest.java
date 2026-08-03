@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai.workflow;
 
 import java.util.List;
@@ -35,6 +33,7 @@ public class WorkflowAiRequest {
   private final String focusActionName;
   private final String logsExcerpt;
   private final boolean followUp;
+
   @Singular("appliedChangeSummary")
   private final List<String> appliedChangeSummaries;
 }

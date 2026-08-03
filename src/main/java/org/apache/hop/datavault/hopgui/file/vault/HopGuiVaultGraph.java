@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.vault;
 
 import java.io.File;
@@ -42,7 +40,6 @@ import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.AreaOwner;
 import org.apache.hop.core.gui.IGc;
-
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.SnapAllignDistribute;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
@@ -66,39 +63,43 @@ import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.datavault.command.svg.SvgExportService;
 import org.apache.hop.datavault.command.svg.SvgRenderOptions;
 import org.apache.hop.datavault.config.DataVaultConfigSingleton;
+import org.apache.hop.datavault.hopgui.ModelGeneratedArtifactOpenSupport;
+import org.apache.hop.datavault.hopgui.ModelTableLayoutPreviewSupport;
+import org.apache.hop.datavault.hopgui.ModelUpdateActionAuditSupport;
+import org.apache.hop.datavault.hopgui.ModelUpdateWorkflowClipboardSupport;
 import org.apache.hop.datavault.hopgui.ai.DvAiAdvisorDialog;
+import org.apache.hop.datavault.hopgui.coaching.ICoachableModelGraph;
+import org.apache.hop.datavault.hopgui.file.modelgraph.HopGuiModelGraphBase;
+import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphHit;
+import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphMouseInteractions;
+import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphSnapshotUndo;
 import org.apache.hop.datavault.hopgui.file.vault.delegates.HopGuiVaultClipboardDelegate;
 import org.apache.hop.datavault.hopgui.file.vault.delegates.HopGuiVaultSnapshotUndo;
 import org.apache.hop.datavault.metadata.DataVaultConfiguration;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DvHub;
-import org.apache.hop.datavault.metadata.DvIntegrationSupport;
 import org.apache.hop.datavault.metadata.DvIntegerSettingValidationSupport;
+import org.apache.hop.datavault.metadata.DvIntegrationSupport;
 import org.apache.hop.datavault.metadata.DvLink;
-import org.apache.hop.datavault.metadata.DvModelLoadSupport;
-import org.apache.hop.datavault.metadata.DvTableReference;
-import org.apache.hop.datavault.metadata.DvTableReferenceSupport;
-import org.apache.hop.datavault.metadata.DvTableResolutionSupport;
 import org.apache.hop.datavault.metadata.DvModelCheckOptions;
+import org.apache.hop.datavault.metadata.DvModelLoadSupport;
 import org.apache.hop.datavault.metadata.DvNote;
 import org.apache.hop.datavault.metadata.DvNoteType;
 import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.DvSpecialRecordSupport;
+import org.apache.hop.datavault.metadata.DvTableBase;
+import org.apache.hop.datavault.metadata.DvTableReference;
+import org.apache.hop.datavault.metadata.DvTableReferenceSupport;
+import org.apache.hop.datavault.metadata.DvTableResolutionSupport;
+import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.datavault.metadata.DvTargetLoadMode;
 import org.apache.hop.datavault.metadata.DvUpdateExecutionSupport;
+import org.apache.hop.datavault.metadata.DvUpdateWorkflowSupport;
+import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
+import org.apache.hop.datavault.metadata.IDvTable;
 import org.apache.hop.datavault.metadata.coaching.CoachingSourceRef;
 import org.apache.hop.datavault.metadata.coaching.DvCoachingModelAdapter;
 import org.apache.hop.datavault.metadata.coaching.ICoachingModelAdapter;
-import org.apache.hop.datavault.hopgui.coaching.ICoachableModelGraph;
-import org.apache.hop.datavault.hopgui.ModelGeneratedArtifactOpenSupport;
-import org.apache.hop.datavault.hopgui.ModelTableLayoutPreviewSupport;
-import org.apache.hop.datavault.hopgui.ModelUpdateActionAuditSupport;
-import org.apache.hop.datavault.hopgui.ModelUpdateWorkflowClipboardSupport;
-import org.apache.hop.datavault.metadata.DvUpdateWorkflowSupport;
-import org.apache.hop.datavault.metadata.DvTableBase;
-import org.apache.hop.datavault.metadata.DvTableType;
-import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
-import org.apache.hop.datavault.metadata.IDvTable;
 import org.apache.hop.datavault.workflow.actions.datavaultupdate.ActionDataVaultUpdate;
 import org.apache.hop.datavault.workflow.actions.datavaultupdate.ActionDataVaultUpdateDialog;
 import org.apache.hop.history.AuditManager;
@@ -126,10 +127,6 @@ import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
 import org.apache.hop.ui.hopgui.file.IGraphSnapAlignDistribute;
 import org.apache.hop.ui.hopgui.file.IHopFileType;
 import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
-import org.apache.hop.datavault.hopgui.file.modelgraph.HopGuiModelGraphBase;
-import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphHit;
-import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphMouseInteractions;
-import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphSnapshotUndo;
 import org.apache.hop.ui.hopgui.file.workflow.HopGuiWorkflowGraph;
 import org.apache.hop.ui.hopgui.perspective.IHopPerspective;
 import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
@@ -140,7 +137,6 @@ import org.apache.hop.workflow.action.ActionMeta;
 import org.apache.hop.workflow.action.IAction;
 import org.apache.hop.workflow.actions.start.ActionStart;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.GC;
@@ -148,7 +144,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
@@ -596,7 +591,8 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
 
   @Override
   protected String getNoteLinkTableNotFoundMessage(String tableName) {
-    return BaseMessages.getString(PKG, "HopGuiVaultGraph.NoteLink.TableNotFound.Message", tableName);
+    return BaseMessages.getString(
+        PKG, "HopGuiVaultGraph.NoteLink.TableNotFound.Message", tableName);
   }
 
   @Override
@@ -728,7 +724,8 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
   @GuiToolbarElement(
       root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
       id = TOOLBAR_ITEM_TOGGLE_DURATIONS,
-      toolTip = "i18n:org.apache.hop.datavault.hopgui.file.metrics:ModelLoadDurationPane.Toggle.Tooltip",
+      toolTip =
+          "i18n:org.apache.hop.datavault.hopgui.file.metrics:ModelLoadDurationPane.Toggle.Tooltip",
       image = "ui/images/show-results.svg")
   public void toggleLoadDurationPanelToolbar() {
     toggleLoadDurationPanel();
@@ -1115,7 +1112,8 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     try {
       Timestamp loadDate = Timestamp.from(Instant.now());
       List<PipelineMeta> pipelineMetas = new ArrayList<>();
-      for (IDvTable table : DvUpdateExecutionSupport.orderTablesForPipelineExecution(model.getTables())) {
+      for (IDvTable table :
+          DvUpdateExecutionSupport.orderTablesForPipelineExecution(model.getTables())) {
         if (!table.isSelected() && model.nrSelectedTables() > 0) {
           continue;
         }
@@ -1471,8 +1469,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       String storedPath = selectedFile;
       if (!storedPath.contains("${")) {
         storedPath =
-            DvModelLoadSupport.toStoredModelPath(
-                selectedFile, model.getFilename(), getVariables());
+            DvModelLoadSupport.toStoredModelPath(selectedFile, model.getFilename(), getVariables());
       }
       DataVaultModel externalModel =
           DvModelLoadSupport.loadDataVaultModel(
@@ -1510,8 +1507,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       int x = click != null ? click.x : 50;
       int y = click != null ? click.y : 50;
       DvTableReference reference =
-          DvTableReferenceSupport.createReference(
-              externalTable, storedPath, new Point(x, y));
+          DvTableReferenceSupport.createReference(externalTable, storedPath, new Point(x, y));
       if (reference == null) {
         return;
       }
@@ -1572,8 +1568,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       return;
     }
     List<String> choices =
-        DvTableReferenceSupport.listAvailableTableNames(
-            model, model, DvTableType.HUB, true);
+        DvTableReferenceSupport.listAvailableTableNames(model, model, DvTableType.HUB, true);
     if (choices.isEmpty()) {
       new ErrorDialog(
           hopGui.getShell(),
@@ -1615,13 +1610,11 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       new ErrorDialog(
           hopGui.getShell(),
           BaseMessages.getString(PKG, "HopGuiVaultGraph.AddHubAlias.Error.Title"),
-          BaseMessages.getString(
-              PKG, "HopGuiVaultGraph.AddHubAlias.Error.NameExists", aliasName),
+          BaseMessages.getString(PKG, "HopGuiVaultGraph.AddHubAlias.Error.NameExists", aliasName),
           null);
       return;
     }
-    String defaultRoleHash =
-        DvTableResolutionSupport.deriveRoleHashKeyFieldName(aliasName);
+    String defaultRoleHash = DvTableResolutionSupport.deriveRoleHashKeyFieldName(aliasName);
     EnterStringDialog hashDialog =
         new EnterStringDialog(
             getShell(),
@@ -1636,8 +1629,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     int x = click != null ? click.x : 50;
     int y = click != null ? click.y : 50;
     DvTableReference alias =
-        DvTableReferenceSupport.createAlias(
-            aliasName, target, null, roleHash, new Point(x, y));
+        DvTableReferenceSupport.createAlias(aliasName, target, null, roleHash, new Point(x, y));
     if (alias == null) {
       return;
     }
@@ -1728,8 +1720,8 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     if (realGraph == null) {
       return;
     }
-    org.apache.hop.datavault.hopgui.file.sourcemodel.HopGuiSourceQueryComposeSupport.composeAndPublish(
-        realGraph.hopGui, realGraph.getShell());
+    org.apache.hop.datavault.hopgui.file.sourcemodel.HopGuiSourceQueryComposeSupport
+        .composeAndPublish(realGraph.hopGui, realGraph.getShell());
   }
 
   @GuiContextAction(
@@ -1825,7 +1817,8 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
   // The parentId links to HopGuiVaultTableContext. Edit does same as name-click; Delete removes
   // table.
 
-  private static final String ACTION_ID_GO_TO_REFERENCED_TABLE = "vault-graph-go-to-referenced-table";
+  private static final String ACTION_ID_GO_TO_REFERENCED_TABLE =
+      "vault-graph-go-to-referenced-table";
 
   @GuiContextAction(
       id = ACTION_ID_GO_TO_REFERENCED_TABLE,
@@ -1847,7 +1840,8 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
   }
 
   @GuiContextActionFilter(parentId = HopGuiVaultTableContext.CONTEXT_ID)
-  public boolean filterTableContextActions(String contextActionId, HopGuiVaultTableContext context) {
+  public boolean filterTableContextActions(
+      String contextActionId, HopGuiVaultTableContext context) {
     if (ACTION_ID_GO_TO_REFERENCED_TABLE.equals(contextActionId)) {
       IDvTable table = context.getTable();
       if (!(table instanceof DvTableReference reference)) {
@@ -2271,8 +2265,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
    * parent is cleared so the satellite has a single, unambiguous parent in the model.
    */
   private boolean createHubSatelliteRelationship(IDvTable from, IDvTable to) {
-    IDvTable satelliteTable =
-        effectiveRelationshipType(from) == DvTableType.SATELLITE ? from : to;
+    IDvTable satelliteTable = effectiveRelationshipType(from) == DvTableType.SATELLITE ? from : to;
     IDvTable hubTable = effectiveRelationshipType(from) == DvTableType.HUB ? from : to;
     if (!(satelliteTable instanceof DvSatellite satellite)
         || effectiveRelationshipType(hubTable) != DvTableType.HUB) {
@@ -2327,11 +2320,9 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
    * list.
    */
   private boolean createLinkSatelliteRelationship(IDvTable from, IDvTable to) {
-    IDvTable satelliteTable =
-        effectiveRelationshipType(from) == DvTableType.SATELLITE ? from : to;
+    IDvTable satelliteTable = effectiveRelationshipType(from) == DvTableType.SATELLITE ? from : to;
     IDvTable linkTable = effectiveRelationshipType(from) == DvTableType.LINK ? from : to;
-    if (!(satelliteTable instanceof DvSatellite satellite)
-        || !(linkTable instanceof DvLink link)) {
+    if (!(satelliteTable instanceof DvSatellite satellite) || !(linkTable instanceof DvLink link)) {
       return false;
     }
 
@@ -2408,9 +2399,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     return model;
   }
 
-  /**
-   * Project / open-tab search: prefer the in-memory model so unsaved edits are searchable.
-   */
+  /** Project / open-tab search: prefer the in-memory model so unsaved edits are searchable. */
   @Override
   public org.apache.hop.core.search.ISearchable createSearchable(
       String locationDescription, org.apache.hop.metadata.api.IHopMetadataProvider metadataProvider)
@@ -2419,9 +2408,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
         locationDescription, model);
   }
 
-  /**
-   * Select and open the table matching {@code componentName} (search result navigation).
-   */
+  /** Select and open the table matching {@code componentName} (search result navigation). */
   public void openSearchComponent(String componentName) {
     if (Utils.isEmpty(componentName) || model == null) {
       return;
@@ -2500,14 +2487,16 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       return;
     }
     if (active
-        instanceof org.apache.hop.datavault.hopgui.file.businessvault.HopGuiBusinessVaultGraph
-            businessVaultGraph) {
+        instanceof
+        org.apache.hop.datavault.hopgui.file.businessvault.HopGuiBusinessVaultGraph
+                businessVaultGraph) {
       businessVaultGraph.exportModelToSvg();
       return;
     }
     if (active
-        instanceof org.apache.hop.datavault.hopgui.file.executionmap.HopGuiExecutionMapGraph
-            executionMapGraph) {
+        instanceof
+        org.apache.hop.datavault.hopgui.file.executionmap.HopGuiExecutionMapGraph
+                executionMapGraph) {
       executionMapGraph.exportToSvg();
       return;
     }
@@ -2620,7 +2609,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     enableClipboardToolbarItems();
     enableUndoToolbarItems();
 
-    if (canvas!=null && !canvas.isDisposed()) {
+    if (canvas != null && !canvas.isDisposed()) {
       canvas.setFocus();
     }
   }
@@ -3187,7 +3176,10 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
 
     @Override
     public boolean handleObjectMouseMove(Point real, boolean leftButtonDown) {
-      if (!leftButtonDown || currentTable == null || startRelationshipTable != null || resize != null) {
+      if (!leftButtonDown
+          || currentTable == null
+          || startRelationshipTable != null
+          || resize != null) {
         return false;
       }
       currentTable.setSelected(true);
@@ -3257,8 +3249,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     }
 
     @Override
-    public void selectInLassoRegion(
-        int lassoMinX, int lassoMinY, int lassoMaxX, int lassoMaxY) {
+    public void selectInLassoRegion(int lassoMinX, int lassoMinY, int lassoMaxX, int lassoMaxY) {
       if (model == null) {
         return;
       }

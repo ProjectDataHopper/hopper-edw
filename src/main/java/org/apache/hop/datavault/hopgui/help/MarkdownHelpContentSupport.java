@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.help;
 
 import java.util.regex.Pattern;
@@ -25,8 +23,7 @@ import org.apache.hop.core.util.Utils;
 public final class MarkdownHelpContentSupport {
 
   private static final Pattern LEADING_LICENSE_COMMENT =
-      Pattern.compile(
-          "(?s)^\\s*<!--.*?Licensed to the Apache Software Foundation.*?-->\\s*");
+      Pattern.compile("(?s)^\\s*<!--.*?Licensed to the Apache Software Foundation.*?-->\\s*");
 
   private MarkdownHelpContentSupport() {}
 

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.ai;
 
 import java.util.List;
@@ -28,11 +26,16 @@ import org.apache.hop.datavault.ai.HopAiAdvisoryResponse;
 import org.apache.hop.datavault.ai.HopAiConfig;
 import org.apache.hop.datavault.ai.HopAiConfigSingleton;
 import org.apache.hop.datavault.ai.HopAiConversationSession;
+import org.apache.hop.datavault.ai.HopAiProposal;
 import org.apache.hop.datavault.ai.pipeline.PipelineAiAdvisorService;
 import org.apache.hop.datavault.ai.pipeline.PipelineAiContextBuilder;
+import org.apache.hop.datavault.ai.pipeline.PipelineAiProposalApplier;
+import org.apache.hop.datavault.ai.pipeline.PipelineAiProposalValidator;
 import org.apache.hop.datavault.ai.pipeline.PipelineAiRequest;
 import org.apache.hop.datavault.ai.pipeline.PipelineAiScenario;
 import org.apache.hop.datavault.hopgui.EnumDialogSupport;
+import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
+import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
@@ -42,9 +45,6 @@ import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.core.gui.GuiResource;
 import org.apache.hop.ui.core.gui.WindowProperty;
-import org.apache.hop.datavault.ai.HopAiProposal;
-import org.apache.hop.datavault.ai.pipeline.PipelineAiProposalApplier;
-import org.apache.hop.datavault.ai.pipeline.PipelineAiProposalValidator;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.hopgui.file.pipeline.HopGuiPipelineGraph;
 import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
@@ -60,8 +60,6 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
-import org.apache.hop.datavault.hopgui.help.HelpTopics;
 
 /** AI advisory dialog for Apache Hop pipelines. */
 public class PipelineAiAdvisorDialog {
@@ -276,8 +274,7 @@ public class PipelineAiAdvisorDialog {
 
   private Label addHorizontalSeparator(Control lastControl, int margin) {
     Label separator = new Label(shell, SWT.SEPARATOR | SWT.HORIZONTAL);
-    FormData fd =
-        new FormDataBuilder().left().right().top(lastControl, 2 * margin).build();
+    FormData fd = new FormDataBuilder().left().right().top(lastControl, 2 * margin).build();
     separator.setLayoutData(fd);
     return separator;
   }
@@ -449,8 +446,10 @@ public class PipelineAiAdvisorDialog {
       }
       session.recordApplied(turnIndex, selected);
       transcriptPanel.appendSystemLine(
-          BaseMessages.getString(PKG, "PipelineAiAdvisorDialog.Transcript.Applied", selected.size()));
-      wlStatusMessage.setText(BaseMessages.getString(PKG, "PipelineAiAdvisorDialog.Status.Applied"));
+          BaseMessages.getString(
+              PKG, "PipelineAiAdvisorDialog.Transcript.Applied", selected.size()));
+      wlStatusMessage.setText(
+          BaseMessages.getString(PKG, "PipelineAiAdvisorDialog.Status.Applied"));
       transcriptPanel.refreshScroll();
     } catch (Exception ex) {
       new ErrorDialog(

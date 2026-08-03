@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.sourcemodel.importing;
 
 import java.util.ArrayList;
@@ -50,8 +49,7 @@ public class SourceSchemaImportResult {
   }
 
   public static SourceSchemaImportResult empty() {
-    return new SourceSchemaImportResult(
-        List.of(), List.of(), List.of(), List.of(), List.of());
+    return new SourceSchemaImportResult(List.of(), List.of(), List.of(), List.of(), List.of());
   }
 
   public @NonNull List<SourceTable> getImportedTablesOrEmpty() {

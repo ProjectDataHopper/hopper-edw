@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import java.util.ArrayList;
@@ -38,10 +36,7 @@ public final class BusinessVaultBvReferenceSupport {
   public static final String BROWSE_HBV_LABEL = "Browse Business Vault model file (.hbv)…";
 
   public record BvModelSource(
-      String label,
-      String modelFilename,
-      String basename,
-      boolean browseFile) {
+      String label, String modelFilename, String basename, boolean browseFile) {
 
     public BvModelSource(String label, String modelFilename, String basename) {
       this(label, modelFilename, basename, false);
@@ -196,13 +191,25 @@ public final class BusinessVaultBvReferenceSupport {
         new org.apache.hop.catalog.model.RecordDefinitionQuery();
     projectQuery.setNamespacePrefix(CatalogModelRegistrySupport.modelsRegistryNamespace(variables));
     projectQuery.getTypes().add(RecordDefinitionType.BV_MODEL);
-    collect(definitions, seen, registry.listAll(projectQuery, variables, metadataProvider), registry, variables, metadataProvider);
+    collect(
+        definitions,
+        seen,
+        registry.listAll(projectQuery, variables, metadataProvider),
+        registry,
+        variables,
+        metadataProvider);
 
     if (definitions.isEmpty()) {
       org.apache.hop.catalog.model.RecordDefinitionQuery any =
           new org.apache.hop.catalog.model.RecordDefinitionQuery();
       any.getTypes().add(RecordDefinitionType.BV_MODEL);
-      collect(definitions, seen, registry.listAll(any, variables, metadataProvider), registry, variables, metadataProvider);
+      collect(
+          definitions,
+          seen,
+          registry.listAll(any, variables, metadataProvider),
+          registry,
+          variables,
+          metadataProvider);
     }
 
     if (definitions.isEmpty()) {
@@ -218,7 +225,8 @@ public final class BusinessVaultBvReferenceSupport {
           continue;
         }
         RecordDefinition def =
-            registry.read(ref.getCatalogConnectionName(), ref.getKey(), variables, metadataProvider);
+            registry.read(
+                ref.getCatalogConnectionName(), ref.getKey(), variables, metadataProvider);
         if (def != null
             && def.getOrigin() != null
             && isBusinessVaultModelFile(def.getOrigin().getModelFilename(), def)) {

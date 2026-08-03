@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import java.util.HashMap;
@@ -66,17 +64,20 @@ public final class PipelineCrawler {
     try {
       PipelineMeta pipelineMeta = loadedPipeline;
       if (pipelineMeta == null) {
-        pipelineMeta = new PipelineMeta(resolvedPath, context.getMetadataProvider(), context.getVariables());
+        pipelineMeta =
+            new PipelineMeta(resolvedPath, context.getMetadataProvider(), context.getVariables());
       }
 
       ExecutionMapNode pipelineNode = new ExecutionMapNode();
-      pipelineNode.setNodeType(root ? ExecutionMapNodeType.ROOT_PIPELINE : ExecutionMapNodeType.PIPELINE);
+      pipelineNode.setNodeType(
+          root ? ExecutionMapNodeType.ROOT_PIPELINE : ExecutionMapNodeType.PIPELINE);
       pipelineNode.setName(pipelineMeta.getName());
       pipelineNode.setPath(
           ExecutionMapPathSupport.toStoredPath(resolvedPath, context.getVariables()));
       pipelineNode.setParentNodeId(parentNodeId);
       pipelineNode.setSnapshotId(
-          context.capturePipelineSnapshot(resolvedPath, pipelineMeta.getXml(context.getVariables())));
+          context.capturePipelineSnapshot(
+              resolvedPath, pipelineMeta.getXml(context.getVariables())));
       context.addNode(pipelineNode);
       String pipelineNodeId = pipelineNode.getId();
 
@@ -101,12 +102,12 @@ public final class PipelineCrawler {
           transformNode.setParentNodeId(pipelineNodeId);
           context.addNode(transformNode);
           transformNodeIds.put(transformMeta.getName(), transformNode.getId());
-          context.addEdge(ExecutionMapEdgeType.CONTAINS, pipelineNodeId, transformNode.getId(), null);
+          context.addEdge(
+              ExecutionMapEdgeType.CONTAINS, pipelineNodeId, transformNode.getId(), null);
           referenceFromId = transformNode.getId();
         }
         if (transform != null) {
-          ReferencedObjectResolver.resolveTransform(
-              context, referenceFromId, transform, pluginId);
+          ReferencedObjectResolver.resolveTransform(context, referenceFromId, transform, pluginId);
         }
       }
 

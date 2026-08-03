@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai;
 
 import dev.langchain4j.data.message.AiMessage;
@@ -37,8 +35,7 @@ public final class DvAiAdvisorService {
   private DvAiAdvisorService() {}
 
   public static DvAiResponse advise(
-      HopAiConfig config, IVariables variables, DvAiContextBundle context)
-      throws HopException {
+      HopAiConfig config, IVariables variables, DvAiContextBundle context) throws HopException {
     return advise(config, variables, context, List.of());
   }
 
@@ -65,8 +62,7 @@ public final class DvAiAdvisorService {
 
     try {
       Response<AiMessage> response = facade.generate(messages);
-      String text =
-          response != null && response.content() != null ? response.content().text() : "";
+      String text = response != null && response.content() != null ? response.content().text() : "";
       return DvAiProposalParser.parse(text);
     } catch (Exception e) {
       throw new HopException("AI advisory request failed: " + e.getMessage(), e);
@@ -88,7 +84,9 @@ public final class DvAiAdvisorService {
     return buildUserPromptBody(context, false);
   }
 
-  /** @deprecated Use {@link #buildInitialUserPrompt(DvAiContextBundle)} instead. */
+  /**
+   * @deprecated Use {@link #buildInitialUserPrompt(DvAiContextBundle)} instead.
+   */
   @Deprecated
   static String buildUserPrompt(DvAiContextBundle context) {
     return buildInitialUserPrompt(context);
@@ -97,23 +95,24 @@ public final class DvAiAdvisorService {
   private static String buildUserPromptBody(DvAiContextBundle context, boolean includeFullContext) {
     StringBuilder prompt = new StringBuilder();
     prompt.append("User question:\n").append(context.getUserPrompt()).append("\n\n");
-    prompt.append("Model structure JSON:\n")
+    prompt
+        .append("Model structure JSON:\n")
         .append(nullToEmpty(context.getModelStructureJson()))
         .append("\n\n");
 
     if (includeFullContext) {
-      prompt.append("Model summary JSON:\n")
+      prompt
+          .append("Model summary JSON:\n")
           .append(nullToEmpty(context.getModelSummaryJson()))
           .append("\n\n");
       if (!Utils.isEmpty(context.getRecordDefinitionsJson())) {
-        prompt.append("Catalog record definitions JSON:\n")
+        prompt
+            .append("Catalog record definitions JSON:\n")
             .append(context.getRecordDefinitionsJson())
             .append("\n\n");
       }
       if (!Utils.isEmpty(context.getHopMetadataJson())) {
-        prompt.append("Hop metadata JSON:\n")
-            .append(context.getHopMetadataJson())
-            .append("\n\n");
+        prompt.append("Hop metadata JSON:\n").append(context.getHopMetadataJson()).append("\n\n");
       }
       if (!Utils.isEmpty(context.getModelXml())) {
         prompt.append("Data Vault model XML:\n").append(context.getModelXml()).append("\n\n");
@@ -124,17 +123,20 @@ public final class DvAiAdvisorService {
     }
 
     if (!Utils.isEmpty(context.getCheckResultsJson())) {
-      prompt.append("Model check results JSON:\n")
+      prompt
+          .append("Model check results JSON:\n")
           .append(context.getCheckResultsJson())
           .append("\n\n");
     }
     if (!Utils.isEmpty(context.getLoadRunMetricsJson())) {
-      prompt.append("Recent load-run metrics and insights JSON:\n")
+      prompt
+          .append("Recent load-run metrics and insights JSON:\n")
           .append(context.getLoadRunMetricsJson())
           .append("\n\n");
     }
     if (!Utils.isEmpty(context.getExecutionInfoJson())) {
-      prompt.append("Recent execution logs and transform metrics JSON:\n")
+      prompt
+          .append("Recent execution logs and transform metrics JSON:\n")
           .append(context.getExecutionInfoJson())
           .append("\n\n");
     }

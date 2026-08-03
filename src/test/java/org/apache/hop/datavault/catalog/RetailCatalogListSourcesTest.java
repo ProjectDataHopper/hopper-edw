@@ -13,13 +13,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.catalog;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -55,8 +53,7 @@ class RetailCatalogListSourcesTest {
   void setUp() throws HopException {
     variables = new Variables();
     variables.setVariable(
-        "PROJECT_HOME",
-        Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
+        "PROJECT_HOME", Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
 
     metadataProvider = new MemoryMetadataProvider();
     DataCatalogMeta catalog = new DataCatalogMeta();
@@ -74,9 +71,7 @@ class RetailCatalogListSourcesTest {
   void listSourcesIncludesRetailE2eSourcesDespiteOperationsDefinitions() {
     List<DataVaultSource> sources =
         assertDoesNotThrow(
-            () ->
-                DvSourceCatalogService.listSources(
-                    "local-catalog", variables, metadataProvider),
+            () -> DvSourceCatalogService.listSources("local-catalog", variables, metadataProvider),
             "Listing retail catalog sources should not fail when operations JSON is present");
 
     assertFalse(sources.isEmpty(), "Expected retail E2E DV sources in catalog");

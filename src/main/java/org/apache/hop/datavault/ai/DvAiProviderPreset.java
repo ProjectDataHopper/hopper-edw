@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai;
 
 import org.apache.hop.core.util.Utils;
@@ -24,7 +22,11 @@ import org.apache.hop.core.util.Utils;
 public enum DvAiProviderPreset {
   GROK("Grok (xAI)", "OPEN_AI", "https://api.x.ai/v1", "grok-4"),
   OPENAI("OpenAI", "OPEN_AI", "https://api.openai.com/v1", "gpt-4o-mini"),
-  GOOGLE_GEMINI("Google (Gemini)", "OPEN_AI", "https://generativelanguage.googleapis.com/v1beta/openai", "gemini-2.5-flash"),
+  GOOGLE_GEMINI(
+      "Google (Gemini)",
+      "OPEN_AI",
+      "https://generativelanguage.googleapis.com/v1beta/openai",
+      "gemini-2.5-flash"),
   ANTHROPIC("Anthropic", "ANTHROPIC", "", "claude-3-5-sonnet-20241022"),
   OLLAMA("Ollama", "OLLAMA", "http://localhost:11434", "llama3.2"),
   MISTRAL("Mistral", "MISTRAL", "https://api.mistral.ai/v1", "mistral-small-latest"),

@@ -13,16 +13,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.discovery;
 
 import java.util.Date;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.hop.catalog.model.DvCsvFormatRecord;
-import org.apache.hop.catalog.model.PhysicalFileRef;
-import org.apache.hop.catalog.model.PhysicalIcebergTableRef;
 import org.apache.hop.catalog.model.PhysicalTableRef;
 import org.apache.hop.catalog.model.RecordDefinition;
 import org.apache.hop.catalog.model.RecordDefinitionKey;
@@ -41,8 +37,6 @@ import org.apache.hop.datavault.metadata.DataVaultSource;
 import org.apache.hop.datavault.metadata.DvSourceDeliveryType;
 import org.apache.hop.datavault.metadata.DvSourceType;
 import org.apache.hop.datavault.metadata.IDvSource;
-import org.apache.hop.datavault.metadata.SourceField;
-import org.apache.hop.datavault.metadata.database.DvDatabaseSource;
 import org.apache.hop.datavault.metadata.database.DvDatabaseSourceImportSupport;
 import org.apache.hop.datavault.metadata.file.CsvFileMetadataDiscovery;
 import org.apache.hop.datavault.metadata.file.DvCsvInputMode;
@@ -62,7 +56,9 @@ public final class RecordDefinitionCatalogWriter {
   private RecordDefinitionCatalogWriter() {}
 
   public static void upsert(
-      RecordDefinitionWriteRequest request, IVariables variables, IHopMetadataProvider metadataProvider)
+      RecordDefinitionWriteRequest request,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider)
       throws HopException {
     validateRequest(request);
 
@@ -122,7 +118,8 @@ public final class RecordDefinitionCatalogWriter {
     if (Utils.isEmpty(catalogConnectionName)) {
       throw new HopException("Catalog connection name is required");
     }
-    String namespace = org.apache.hop.datavault.catalog.DvSourceCatalogService.projectSourcesNamespace(variables);
+    String namespace =
+        org.apache.hop.datavault.catalog.DvSourceCatalogService.projectSourcesNamespace(variables);
     RecordDefinition definition =
         DvSourceCatalogMapper.toRecordDefinition(
             source,
@@ -174,7 +171,8 @@ public final class RecordDefinitionCatalogWriter {
     } else {
       source.setDeliveryType(DvSourceDeliveryType.CHANGES_ONLY);
     }
-    if (!Utils.isEmpty(request.getDescription()) && dvSource instanceof org.apache.hop.datavault.metadata.DvSourceBase dvSourceBase) {
+    if (!Utils.isEmpty(request.getDescription())
+        && dvSource instanceof org.apache.hop.datavault.metadata.DvSourceBase dvSourceBase) {
       dvSourceBase.setDescription(request.getDescription());
     }
     return source;
@@ -339,7 +337,8 @@ public final class RecordDefinitionCatalogWriter {
   private static RecordOrigin buildGenericOrigin(
       RecordDefinitionWriteRequest request, IVariables variables) {
     RecordOrigin origin = new RecordOrigin();
-    origin.setModelType(request.getRecordType() != null ? request.getRecordType().name() : "RECORD");
+    origin.setModelType(
+        request.getRecordType() != null ? request.getRecordType().name() : "RECORD");
     if (request.getModel() != null) {
       origin.setModelName(request.getModel().getName());
       origin.setModelFilename(
@@ -372,9 +371,13 @@ public final class RecordDefinitionCatalogWriter {
               ? variables.resolve(physicalRef.getDatabaseConnectionName())
               : physicalRef.getDatabaseConnectionName());
       tableRef.setSchemaName(
-          variables != null ? variables.resolve(physicalRef.getSchemaName()) : physicalRef.getSchemaName());
+          variables != null
+              ? variables.resolve(physicalRef.getSchemaName())
+              : physicalRef.getSchemaName());
       tableRef.setTableName(
-          variables != null ? variables.resolve(physicalRef.getTableName()) : physicalRef.getTableName());
+          variables != null
+              ? variables.resolve(physicalRef.getTableName())
+              : physicalRef.getTableName());
       definition.setPhysicalTable(tableRef);
       definition.setPhysicalFile(null);
       definition.setPhysicalIcebergTable(null);

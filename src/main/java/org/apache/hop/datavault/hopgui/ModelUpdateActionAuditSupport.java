@@ -13,17 +13,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.hop.history.AuditManager;
-import org.apache.hop.history.AuditState;
 import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.history.AuditManager;
+import org.apache.hop.history.AuditState;
 import org.apache.hop.workflow.action.ActionMeta;
 
 /** Persists model update workflow action XML in Hop audit state per model file. */
@@ -33,7 +31,8 @@ public final class ModelUpdateActionAuditSupport {
 
   private ModelUpdateActionAuditSupport() {}
 
-  public static String retrieveActionXml(String auditGroup, String auditType, String modelFilename) {
+  public static String retrieveActionXml(
+      String auditGroup, String auditType, String modelFilename) {
     try {
       AuditState auditState =
           AuditManager.getActive()

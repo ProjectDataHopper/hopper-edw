@@ -13,28 +13,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.vault;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.hop.core.gui.Point;
-import org.apache.hop.core.gui.plugin.IGuiActionLambda;
 import org.apache.hop.core.gui.plugin.action.GuiAction;
 import org.apache.hop.core.gui.plugin.action.GuiActionLambdaBuilder;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.ui.hopgui.context.BaseGuiContextHandler;
 import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.hop.ui.hopgui.file.pipeline.context.HopGuiPipelineContext;
-
 /**
- * Context handler for clicks on the background of the Data Vault graph.
- * Allows @GuiContextAction annotated methods (in HopGuiVaultGraph etc) with
- * parentId = HopGuiVaultContext.CONTEXT_ID to contribute actions to the
- * context dialog (e.g. add Hub/Satellite/Link).
+ * Context handler for clicks on the background of the Data Vault graph. Allows @GuiContextAction
+ * annotated methods (in HopGuiVaultGraph etc) with parentId = HopGuiVaultContext.CONTEXT_ID to
+ * contribute actions to the context dialog (e.g. add Hub/Satellite/Link).
  */
 public class HopGuiVaultContext extends BaseGuiContextHandler implements IGuiContextHandler {
 
@@ -44,7 +38,7 @@ public class HopGuiVaultContext extends BaseGuiContextHandler implements IGuiCon
   private final HopGuiVaultGraph vaultGraph;
   private final Point click;
 
-  public HopGuiVaultContext( DataVaultModel model, HopGuiVaultGraph vaultGraph, Point click ) {
+  public HopGuiVaultContext(DataVaultModel model, HopGuiVaultGraph vaultGraph, Point click) {
     this.model = model;
     this.vaultGraph = vaultGraph;
     this.click = click;
@@ -63,11 +57,12 @@ public class HopGuiVaultContext extends BaseGuiContextHandler implements IGuiCon
     // Get the actions from @GuiContextAction annotations (in HopGuiVaultGraph etc)
     // that specify parentId = HopGuiVaultContext.CONTEXT_ID .
     // We manually wrap with lambdas that invoke on the *real* vaultGraph instance we hold
-    // (avoids needing no-arg ctor on HopGuiVaultGraph or implementing IGuiRefresher for lambdaBuilder).
+    // (avoids needing no-arg ctor on HopGuiVaultGraph or implementing IGuiRefresher for
+    // lambdaBuilder).
     //
-    List<GuiAction> pluginActions = getPluginActions( true );
-    if ( pluginActions != null ) {
-      for ( GuiAction pluginAction : pluginActions ) {
+    List<GuiAction> pluginActions = getPluginActions(true);
+    if (pluginActions != null) {
+      for (GuiAction pluginAction : pluginActions) {
         actions.add(lambdaBuilder.createLambda(pluginAction, this, vaultGraph));
       }
     }

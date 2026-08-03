@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.ai;
 
 import java.util.ArrayList;
@@ -36,6 +34,8 @@ import org.apache.hop.datavault.ai.businessvault.BvAiProposalValidator;
 import org.apache.hop.datavault.ai.businessvault.BvAiRequest;
 import org.apache.hop.datavault.ai.businessvault.BvAiScenario;
 import org.apache.hop.datavault.hopgui.EnumDialogSupport;
+import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
+import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
@@ -60,8 +60,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.jspecify.annotations.NonNull;
-import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
-import org.apache.hop.datavault.hopgui.help.HelpTopics;
 
 /** AI advisory dialog for the Business Vault modeler. */
 public class BvAiAdvisorDialog {
@@ -459,10 +457,7 @@ public class BvAiAdvisorDialog {
         BvAiProposalValidator.validate(model, proposals, metadataProvider, variables);
     ModelAiProposalReviewDialog reviewDialog =
         new ModelAiProposalReviewDialog(
-            shell,
-            proposals,
-            mapValidationResults(validation),
-            BvAiProposalApplier::preview);
+            shell, proposals, mapValidationResults(validation), BvAiProposalApplier::preview);
     if (!reviewDialog.open()) {
       return;
     }

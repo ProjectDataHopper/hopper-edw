@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.List;
@@ -27,12 +25,12 @@ import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.logging.LogLevel;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.datavault.metrics.DvUpdateMetricsCollector;
 import org.apache.hop.datavault.metrics.LoadRunMetricsPipelineSupport;
 import org.apache.hop.datavault.metrics.live.UpdateRunLiveRunContext;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.workflow.WorkflowMeta;
 import org.apache.hop.workflow.engine.IWorkflowEngine;
 
@@ -88,7 +86,8 @@ public final class DvModelBulkUpdateExecutionSupport {
       String pipelineStagingFolder,
       String parallelPipelineCopies,
       String metricsOutputFolder,
-      org.apache.hop.datavault.metrics.DvUpdateMetricsCollector.LoadRunPublishContext metricsPublishContext,
+      org.apache.hop.datavault.metrics.DvUpdateMetricsCollector.LoadRunPublishContext
+          metricsPublishContext,
       boolean success,
       int totalErrors,
       IVariables variables,
@@ -167,9 +166,7 @@ public final class DvModelBulkUpdateExecutionSupport {
       } catch (HopException e) {
         log.logError(
             BaseMessages.getString(
-                PKG,
-                "DvModelBulkUpdateExecutionSupport.Error.StagingCleanupFailed",
-                stagingFolder),
+                PKG, "DvModelBulkUpdateExecutionSupport.Error.StagingCleanupFailed", stagingFolder),
             e);
       }
     }
@@ -312,8 +309,7 @@ public final class DvModelBulkUpdateExecutionSupport {
             variables, modelName, metricsPublishContext);
 
     try {
-      DvPipelineOrchestratorSupport.prepareStagingFolder(
-          pipelineStagingFolderResolved, variables);
+      DvPipelineOrchestratorSupport.prepareStagingFolder(pipelineStagingFolderResolved, variables);
       if (metricsCollectionEnabled) {
         LoadRunMetricsPipelineSupport.enableTransformPerformanceCapture(allPipelineMetas);
       }
@@ -323,12 +319,7 @@ public final class DvModelBulkUpdateExecutionSupport {
 
       List<DvUpdateWorkflowSupport.DvStagingLoadDescriptor> descriptors =
           DvUpdateWorkflowSupport.buildStagingDescriptors(
-              pipelineConfig,
-              variables,
-              modelName,
-              targetDatabase,
-              targetDbName,
-              allPipelineMetas);
+              pipelineConfig, variables, modelName, targetDatabase, targetDbName, allPipelineMetas);
 
       WorkflowMeta masterWorkflow =
           DvUpdateWorkflowSupport.buildMasterWorkflow(
@@ -377,20 +368,21 @@ public final class DvModelBulkUpdateExecutionSupport {
       DvPipelineOrchestratorSupport.mergeResult(result, workflowResult);
 
       DvPipelineOrchestratorSupport.finalizeMetricsRun(
-            log,
-            metricsRunId,
-            modelName,
-            pipelineLogLevel != null ? pipelineLogLevel : parent.getLogLevel(),
-            metricsOutputFolder,
-            workflowOutcome.workflowLogChannelId(),
-            variables,
-            metadataProvider,
-            metricsPublishContext,
-            workflowResult);
+          log,
+          metricsRunId,
+          modelName,
+          pipelineLogLevel != null ? pipelineLogLevel : parent.getLogLevel(),
+          metricsOutputFolder,
+          workflowOutcome.workflowLogChannelId(),
+          variables,
+          metadataProvider,
+          metricsPublishContext,
+          workflowResult);
 
       if (workflowResult.getNrErrors() > 0 || !workflowResult.getResult()) {
         log.logError(
-            BaseMessages.getString(PKG, "DvModelBulkUpdateExecutionSupport.Error.BulkWorkflowFailed"));
+            BaseMessages.getString(
+                PKG, "DvModelBulkUpdateExecutionSupport.Error.BulkWorkflowFailed"));
         success = false;
         totalErrors += workflowResult.getNrErrors();
       }

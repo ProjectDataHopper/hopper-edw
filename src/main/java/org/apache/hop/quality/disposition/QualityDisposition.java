@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.quality.disposition;
 
 import org.apache.hop.quality.model.DataQualityReport;
@@ -30,7 +28,8 @@ public final class QualityDisposition {
     if (report == null) {
       return DispositionResult.fail(1, "No data quality report available");
     }
-    QualityDispositionMode effective = mode != null ? mode : QualityDispositionMode.FAIL_ON_BLOCKING;
+    QualityDispositionMode effective =
+        mode != null ? mode : QualityDispositionMode.FAIL_ON_BLOCKING;
 
     if (report.hasInfraErrors()) {
       return DispositionResult.fail(

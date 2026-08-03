@@ -13,19 +13,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.hopgui.preview;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import org.apache.hop.core.row.IValueMeta;
-import org.apache.hop.datavault.metadata.CsvFieldOptions;
-import org.apache.hop.datavault.metadata.SourceFieldInputOptions;
-import org.apache.hop.pipeline.transforms.csvinput.CsvInputField;
 
 import org.apache.hop.catalog.model.DvCsvFormatRecord;
 import org.apache.hop.catalog.model.DvSourceRecord;
@@ -34,10 +27,14 @@ import org.apache.hop.catalog.model.PhysicalTableRef;
 import org.apache.hop.catalog.model.RecordDefinition;
 import org.apache.hop.catalog.model.RecordDefinitionKey;
 import org.apache.hop.catalog.model.RecordDefinitionType;
+import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.variables.Variables;
+import org.apache.hop.datavault.metadata.CsvFieldOptions;
 import org.apache.hop.datavault.metadata.DvSourcePreviewInputSupport;
 import org.apache.hop.datavault.metadata.SourceField;
+import org.apache.hop.datavault.metadata.SourceFieldInputOptions;
 import org.apache.hop.datavault.metadata.file.DvCsvSource;
+import org.apache.hop.pipeline.transforms.csvinput.CsvInputField;
 import org.apache.hop.pipeline.transforms.csvinput.CsvInputMeta;
 import org.apache.hop.pipeline.transforms.fileinput.text.TextFileInputMeta;
 import org.junit.jupiter.api.Test;
@@ -101,11 +98,7 @@ class RecordDefinitionPreviewSupportTest {
 
     DvSourcePreviewInputSupport.PreviewPipeline preview =
         DvSourcePreviewInputSupport.buildPreviewPipeline(
-            dataVaultSource("customers", csvSource),
-            csvSource,
-            new Variables(),
-            null,
-            25);
+            dataVaultSource("customers", csvSource), csvSource, new Variables(), null, 25);
 
     assertTrue(
         preview.pipelineMeta().findTransform(preview.previewTransformName()).getTransform()
@@ -131,11 +124,7 @@ class RecordDefinitionPreviewSupportTest {
 
     DvSourcePreviewInputSupport.PreviewPipeline preview =
         DvSourcePreviewInputSupport.buildPreviewPipeline(
-            dataVaultSource("amounts", csvSource),
-            csvSource,
-            new Variables(),
-            null,
-            25);
+            dataVaultSource("amounts", csvSource), csvSource, new Variables(), null, 25);
 
     CsvInputMeta csvInputMeta =
         (CsvInputMeta)
@@ -155,11 +144,7 @@ class RecordDefinitionPreviewSupportTest {
 
     DvSourcePreviewInputSupport.PreviewPipeline preview =
         DvSourcePreviewInputSupport.buildPreviewPipeline(
-            dataVaultSource("customers", csvSource),
-            csvSource,
-            new Variables(),
-            null,
-            25);
+            dataVaultSource("customers", csvSource), csvSource, new Variables(), null, 25);
 
     assertTrue(
         preview.pipelineMeta().findTransform(preview.previewTransformName()).getTransform()

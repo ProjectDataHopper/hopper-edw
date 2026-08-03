@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.io.OutputStreamWriter;
@@ -46,8 +44,8 @@ public final class DvGeneratedPipelineSupport {
   }
 
   /**
-   * Writes the pipeline to {@link IDvTargetLoadConfiguration#getGeneratedPipelineFolder()} when that
-   * folder is set. Creates parent folders as needed.
+   * Writes the pipeline to {@link IDvTargetLoadConfiguration#getGeneratedPipelineFolder()} when
+   * that folder is set. Creates parent folders as needed.
    */
   public static String saveBeforeExecution(
       IDvTargetLoadConfiguration config, IVariables variables, PipelineMeta pipelineMeta)
@@ -94,8 +92,8 @@ public final class DvGeneratedPipelineSupport {
   }
 
   /**
-   * Writes the workflow to {@link IDvTargetLoadConfiguration#getGeneratedPipelineFolder()} when that
-   * folder is set. Creates parent folders as needed.
+   * Writes the workflow to {@link IDvTargetLoadConfiguration#getGeneratedPipelineFolder()} when
+   * that folder is set. Creates parent folders as needed.
    */
   public static String saveWorkflowBeforeExecution(
       IDvTargetLoadConfiguration config, IVariables variables, WorkflowMeta workflowMeta)

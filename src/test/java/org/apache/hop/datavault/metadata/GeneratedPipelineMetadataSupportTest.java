@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,10 +36,13 @@ class GeneratedPipelineMetadataSupportTest {
         pipeline, model, hub, "hub_customer", "CRM-customer");
 
     assertEquals("dv", getPipelineAttr(pipeline, GeneratedPipelineMetadataConstants.MODEL_TYPE));
-    assertEquals("retail-360", getPipelineAttr(pipeline, GeneratedPipelineMetadataConstants.MODEL_NAME));
+    assertEquals(
+        "retail-360", getPipelineAttr(pipeline, GeneratedPipelineMetadataConstants.MODEL_NAME));
     assertEquals("hub", getPipelineAttr(pipeline, GeneratedPipelineMetadataConstants.ELEMENT_TYPE));
-    assertEquals("hub_customer", getPipelineAttr(pipeline, GeneratedPipelineMetadataConstants.ELEMENT_NAME));
-    assertEquals("CRM-customer", getPipelineAttr(pipeline, GeneratedPipelineMetadataConstants.SOURCE_NAME));
+    assertEquals(
+        "hub_customer", getPipelineAttr(pipeline, GeneratedPipelineMetadataConstants.ELEMENT_NAME));
+    assertEquals(
+        "CRM-customer", getPipelineAttr(pipeline, GeneratedPipelineMetadataConstants.SOURCE_NAME));
   }
 
   @Test
@@ -53,8 +54,12 @@ class GeneratedPipelineMetadataSupportTest {
     GeneratedPipelineMetadataSupport.stampDvSatellitePipeline(
         satellitePipeline, dvModel, satellite, "sat_customer", "CRM-customer");
 
-    assertEquals("satellite", getPipelineAttr(satellitePipeline, GeneratedPipelineMetadataConstants.ELEMENT_TYPE));
-    assertEquals("sat_customer", getPipelineAttr(satellitePipeline, GeneratedPipelineMetadataConstants.ELEMENT_NAME));
+    assertEquals(
+        "satellite",
+        getPipelineAttr(satellitePipeline, GeneratedPipelineMetadataConstants.ELEMENT_TYPE));
+    assertEquals(
+        "sat_customer",
+        getPipelineAttr(satellitePipeline, GeneratedPipelineMetadataConstants.ELEMENT_NAME));
 
     PipelineMeta bvPipeline = new PipelineMeta();
     bvPipeline.setName("bv-scd2-customer_360");
@@ -65,7 +70,8 @@ class GeneratedPipelineMetadataSupportTest {
         bvPipeline, bvModel, "scd2", "customer_360", "bv_customer_360");
 
     assertEquals("bv", getPipelineAttr(bvPipeline, GeneratedPipelineMetadataConstants.MODEL_TYPE));
-    assertEquals("scd2", getPipelineAttr(bvPipeline, GeneratedPipelineMetadataConstants.ELEMENT_TYPE));
+    assertEquals(
+        "scd2", getPipelineAttr(bvPipeline, GeneratedPipelineMetadataConstants.ELEMENT_TYPE));
   }
 
   @Test
@@ -86,9 +92,13 @@ class GeneratedPipelineMetadataSupportTest {
     assertEquals(
         GeneratedPipelineMetadataConstants.ROLE_DIMENSION_LOOKUP,
         getTransformAttr(lookup, GeneratedPipelineMetadataConstants.LOGICAL_ROLE));
-    assertEquals("dimension", getTransformAttr(lookup, GeneratedPipelineMetadataConstants.ELEMENT_TYPE));
-    assertEquals("d_customer", getTransformAttr(lookup, GeneratedPipelineMetadataConstants.ELEMENT_NAME));
-    assertEquals("f_orders", getTransformAttr(lookup, GeneratedPipelineMetadataConstants.PARENT_ELEMENT_NAME));
+    assertEquals(
+        "dimension", getTransformAttr(lookup, GeneratedPipelineMetadataConstants.ELEMENT_TYPE));
+    assertEquals(
+        "d_customer", getTransformAttr(lookup, GeneratedPipelineMetadataConstants.ELEMENT_NAME));
+    assertEquals(
+        "f_orders",
+        getTransformAttr(lookup, GeneratedPipelineMetadataConstants.PARENT_ELEMENT_NAME));
     assertEquals(
         GeneratedPipelineMetadataConstants.LOOKUP_CACHE_DATABASE,
         getTransformAttr(lookup, GeneratedPipelineMetadataConstants.LOOKUP_CACHE_MODE));

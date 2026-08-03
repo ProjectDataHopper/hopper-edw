@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.transform.sortedschemamerge;
 
 import java.util.Collections;
@@ -123,10 +121,7 @@ public final class SortedSchemaMergeLogic {
         int fieldIndex = rowMeta.indexOfValue(sortKey.getFieldName());
         if (fieldIndex < 0) {
           throw new HopTransformException(
-              "Sort key ["
-                  + sortKey.getFieldName()
-                  + "] not found in input stream "
-                  + streamIndex);
+              "Sort key [" + sortKey.getFieldName() + "] not found in input stream " + streamIndex);
         }
         streamIndices[keyIndex] = fieldIndex;
       }

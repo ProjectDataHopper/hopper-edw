@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.ArrayList;
@@ -46,8 +44,7 @@ public class DataVaultModelSearchAnalyser extends BaseSearchableAnalyser<DataVau
 
     List<ISearchResult> results = new ArrayList<>();
 
-    matchProperty(
-        searchable, results, searchQuery, "data vault model name", model.getName(), null);
+    matchProperty(searchable, results, searchQuery, "data vault model name", model.getName(), null);
     matchProperty(
         searchable,
         results,
@@ -113,12 +110,7 @@ public class DataVaultModelSearchAnalyser extends BaseSearchableAnalyser<DataVau
       }
 
       matchObjectFields(
-          searchable,
-          results,
-          searchQuery,
-          table,
-          "data vault table property",
-          componentName);
+          searchable, results, searchQuery, table, "data vault table property", componentName);
     }
 
     // Canvas notes

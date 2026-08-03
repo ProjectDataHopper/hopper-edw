@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.List;
@@ -237,9 +236,7 @@ public final class DvTargetUnicodeCapabilitySupport {
       return evaluateMySqlFamily(probedValue);
     }
     return new Assessment(
-        Status.UNSUPPORTED_ENGINE,
-        databaseMeta != null ? databaseMeta.getPluginId() : null,
-        null);
+        Status.UNSUPPORTED_ENGINE, databaseMeta != null ? databaseMeta.getPluginId() : null, null);
   }
 
   static Assessment evaluateSqlServer(String collation) {
@@ -268,9 +265,7 @@ public final class DvTargetUnicodeCapabilitySupport {
   static Assessment evaluatePostgreSql(String encoding) {
     if (Utils.isEmpty(encoding)) {
       return new Assessment(
-          Status.UNKNOWN,
-          "empty database encoding",
-          "Create the database with ENCODING 'UTF8'.");
+          Status.UNKNOWN, "empty database encoding", "Create the database with ENCODING 'UTF8'.");
     }
     String normalized = encoding.trim().toUpperCase(Locale.ROOT);
     if ("UTF8".equals(normalized) || "UTF-8".equals(normalized)) {

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import lombok.Getter;
@@ -64,7 +62,8 @@ public class SourceField {
       order = "0300",
       type = GuiElementType.TEXT,
       label = "i18n:org.apache.hop.datavault.metadata.database:SourceField.SourceDataType.Label",
-      toolTip = "i18n:org.apache.hop.datavault.metadata.database:SourceField.SourceDataType.ToolTip",
+      toolTip =
+          "i18n:org.apache.hop.datavault.metadata.database:SourceField.SourceDataType.ToolTip",
       parentId = GUI_PLUGIN_ELEMENT_PARENT_ID)
   @HopMetadataProperty
   private String sourceDataType;
@@ -103,8 +102,10 @@ public class SourceField {
   @GuiWidgetElement(
       order = "0700",
       type = GuiElementType.TEXT,
-      label = "i18n:org.apache.hop.datavault.metadata.database:SourceField.PrimaryKeyPosition.Label",
-      toolTip = "i18n:org.apache.hop.datavault.metadata.database:SourceField.PrimaryKeyPosition.ToolTip",
+      label =
+          "i18n:org.apache.hop.datavault.metadata.database:SourceField.PrimaryKeyPosition.Label",
+      toolTip =
+          "i18n:org.apache.hop.datavault.metadata.database:SourceField.PrimaryKeyPosition.ToolTip",
       parentId = GUI_PLUGIN_ELEMENT_PARENT_ID)
   @HopMetadataProperty
   private int primaryKeyPosition;

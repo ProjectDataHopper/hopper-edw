@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.lineage;
 
 import java.util.ArrayList;
@@ -56,7 +55,9 @@ public class LineageSnapshot {
     if (logicalName == null) {
       return Optional.empty();
     }
-    return tables.stream().filter(t -> logicalName.equalsIgnoreCase(t.getLogicalName())).findFirst();
+    return tables.stream()
+        .filter(t -> logicalName.equalsIgnoreCase(t.getLogicalName()))
+        .findFirst();
   }
 
   public Optional<TableLineage> findTableByPhysicalName(String physicalTableName) {

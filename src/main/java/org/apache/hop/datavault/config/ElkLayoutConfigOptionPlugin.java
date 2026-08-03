@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.config;
 
 import lombok.Getter;
@@ -286,7 +284,8 @@ public class ElkLayoutConfigOptionPlugin
       ILogChannel log, IHasHopMetadataProvider hasHopMetadataProvider, IVariables variables)
       throws HopException {
     try {
-      boolean changed = applyLayoutOptions(log, DataVaultConfigSingleton.getConfig().getElkLayout());
+      boolean changed =
+          applyLayoutOptions(log, DataVaultConfigSingleton.getConfig().getElkLayout());
       if (changed) {
         DataVaultConfigSingleton.saveConfig();
       }
@@ -330,8 +329,7 @@ public class ElkLayoutConfigOptionPlugin
         case WIDGET_ID_LAYOUT_TARGET_WIDTH:
           layoutTargetWidth = getTextValue(control);
           elkLayout.setTargetWidth(
-              ElkLayoutValues.parsePositiveInt(
-                  layoutTargetWidth, ElkLayout.DEFAULT_TARGET_WIDTH));
+              ElkLayoutValues.parsePositiveInt(layoutTargetWidth, ElkLayout.DEFAULT_TARGET_WIDTH));
           break;
         case WIDGET_ID_LAYOUT_DIRECTION:
           layoutDirection =
@@ -411,8 +409,10 @@ public class ElkLayoutConfigOptionPlugin
     } catch (Exception e) {
       new ErrorDialog(
           HopGui.getInstance().getShell(),
-          BaseMessages.getString(PKG, "ElkLayoutConfigOptionPlugin.SavingOption.ErrorDialog.Header"),
-          BaseMessages.getString(PKG, "ElkLayoutConfigOptionPlugin.SavingOption.ErrorDialog.Message"),
+          BaseMessages.getString(
+              PKG, "ElkLayoutConfigOptionPlugin.SavingOption.ErrorDialog.Header"),
+          BaseMessages.getString(
+              PKG, "ElkLayoutConfigOptionPlugin.SavingOption.ErrorDialog.Message"),
           e);
     }
   }

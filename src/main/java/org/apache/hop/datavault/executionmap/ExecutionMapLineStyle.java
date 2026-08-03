@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import org.apache.hop.datavault.config.DataVaultConfigSingleton;
@@ -29,7 +27,8 @@ public enum ExecutionMapLineStyle implements IEnumHasCodeAndDescription {
       "DIRECT_CENTER",
       BaseMessages.getString(ExecutionMapLineStyle.class, "ExecutionMapLineStyle.DirectCenter")),
   SPLINE(
-      "SPLINE", BaseMessages.getString(ExecutionMapLineStyle.class, "ExecutionMapLineStyle.Spline")),
+      "SPLINE",
+      BaseMessages.getString(ExecutionMapLineStyle.class, "ExecutionMapLineStyle.Spline")),
   ORTHOGONAL(
       "ORTHOGONAL",
       BaseMessages.getString(ExecutionMapLineStyle.class, "ExecutionMapLineStyle.Orthogonal"));

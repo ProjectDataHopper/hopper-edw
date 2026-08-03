@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.impl.file;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,6 +23,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import org.apache.hop.catalog.model.CatalogCsvFieldOptions;
+import org.apache.hop.catalog.model.CatalogSourceField;
+import org.apache.hop.catalog.model.CatalogSourceFieldInputOptions;
+import org.apache.hop.catalog.model.DvSourceRecord;
+import org.apache.hop.catalog.model.RecordDefinition;
+import org.apache.hop.catalog.model.RecordDefinitionKey;
+import org.apache.hop.catalog.model.RecordDefinitionType;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.datavault.catalog.DvSourceCatalogMapper;
 import org.apache.hop.datavault.metadata.CsvFieldOptions;
@@ -33,12 +37,6 @@ import org.apache.hop.datavault.metadata.SourceField;
 import org.apache.hop.datavault.metadata.SourceFieldInputOptions;
 import org.apache.hop.datavault.metadata.file.DvCsvSource;
 import org.apache.hop.datavault.metadata.file.DvCsvSourceImportSupport;
-import org.apache.hop.catalog.model.CatalogSourceField;
-import org.apache.hop.catalog.model.CatalogSourceFieldInputOptions;
-import org.apache.hop.catalog.model.DvSourceRecord;
-import org.apache.hop.catalog.model.RecordDefinition;
-import org.apache.hop.catalog.model.RecordDefinitionKey;
-import org.apache.hop.catalog.model.RecordDefinitionType;
 import org.junit.jupiter.api.Test;
 
 class RecordDefinitionDocumentCsvOptionsTest {

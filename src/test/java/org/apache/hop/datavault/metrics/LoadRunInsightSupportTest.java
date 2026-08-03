@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -57,7 +55,8 @@ class LoadRunInsightSupportTest {
             .code(LoadRunInsightEngine.CODE_BULK_LOAD_USED)
             .build();
 
-    assertEquals(List.of(warning), LoadRunInsightSupport.reportableInsights(List.of(warning, note)));
+    assertEquals(
+        List.of(warning), LoadRunInsightSupport.reportableInsights(List.of(warning, note)));
   }
 
   @Test

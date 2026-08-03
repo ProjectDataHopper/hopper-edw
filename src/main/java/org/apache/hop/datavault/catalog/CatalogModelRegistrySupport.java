@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.catalog;
 
 import java.util.ArrayList;
@@ -80,8 +78,8 @@ public final class CatalogModelRegistrySupport {
   }
 
   /**
-   * @deprecated Prefer {@link #modelRegistryKey(IVariables, String, RecordDefinitionType)} so DV/BV/DM
-   *     basenames do not collide.
+   * @deprecated Prefer {@link #modelRegistryKey(IVariables, String, RecordDefinitionType)} so
+   *     DV/BV/DM basenames do not collide.
    */
   @Deprecated
   public static RecordDefinitionKey modelRegistryKey(IVariables variables, String modelBasename) {
@@ -96,8 +94,8 @@ public final class CatalogModelRegistrySupport {
   }
 
   /**
-   * Upserts a DV model registry entry. Preferred portable filename uses {@code ${PROJECT_HOME}} when
-   * possible.
+   * Upserts a DV model registry entry. Preferred portable filename uses {@code ${PROJECT_HOME}}
+   * when possible.
    */
   public static void registerDataVaultModel(
       String catalogConnectionName,
@@ -110,8 +108,7 @@ public final class CatalogModelRegistrySupport {
       throw new HopException("Data Vault model is required");
     }
     String basename = DvCatalogNamespaces.resolveModelBasename(model);
-    String storedPath =
-        portableModelPath(model.getFilename(), variables);
+    String storedPath = portableModelPath(model.getFilename(), variables);
     String tableNamespace = DvCatalogNamespaces.projectModelsNamespace(variables, model);
     registerModel(
         catalogConnectionName,
@@ -167,8 +164,7 @@ public final class CatalogModelRegistrySupport {
     }
     String basename = DmCatalogNamespaces.resolveModelBasename(model);
     String storedPath = portableModelPath(model.getFilename(), variables);
-    String tableNamespace =
-        DmCatalogNamespaces.projectDimensionalModelsNamespace(variables, model);
+    String tableNamespace = DmCatalogNamespaces.projectDimensionalModelsNamespace(variables, model);
     registerModel(
         catalogConnectionName,
         basename,
@@ -203,7 +199,8 @@ public final class CatalogModelRegistrySupport {
       throw new HopException("Model basename is required");
     }
     if (Utils.isEmpty(modelFilename)) {
-      throw new HopException("Model filename is required for registry entry '" + modelBasename + "'");
+      throw new HopException(
+          "Model filename is required for registry entry '" + modelBasename + "'");
     }
 
     Date updatedAt = new Date();
@@ -358,8 +355,7 @@ public final class CatalogModelRegistrySupport {
         continue;
       }
       RecordDefinition def =
-          registry.read(
-              ref.getCatalogConnectionName(), ref.getKey(), variables, metadataProvider);
+          registry.read(ref.getCatalogConnectionName(), ref.getKey(), variables, metadataProvider);
       if (def == null) {
         continue;
       }
@@ -422,7 +418,8 @@ public final class CatalogModelRegistrySupport {
           continue;
         }
         RecordDefinition def =
-            registry.read(ref.getCatalogConnectionName(), ref.getKey(), variables, metadataProvider);
+            registry.read(
+                ref.getCatalogConnectionName(), ref.getKey(), variables, metadataProvider);
         if (def != null) {
           return def;
         }
@@ -435,7 +432,8 @@ public final class CatalogModelRegistrySupport {
 
   /**
    * Lists distinct Data Vault models discoverable from a catalog: models-registry DV_MODEL entries
-   * plus basenames inferred from published DV table definitions under {@code hop/{project}/models/}.
+   * plus basenames inferred from published DV table definitions under {@code
+   * hop/{project}/models/}.
    *
    * @param preferredCatalogConnection when non-empty, query that catalog first (and only fall back
    *     to other catalogs if it yields nothing)
@@ -498,7 +496,9 @@ public final class CatalogModelRegistrySupport {
       }
       RecordDefinition def =
           registry.read(ref.getCatalogConnectionName(), ref.getKey(), variables, metadataProvider);
-      if (def == null || def.getOrigin() == null || Utils.isEmpty(def.getOrigin().getModelFilename())) {
+      if (def == null
+          || def.getOrigin() == null
+          || Utils.isEmpty(def.getOrigin().getModelFilename())) {
         continue;
       }
       String base = sanitizeBasename(def.getKey().getName());
@@ -544,16 +544,16 @@ public final class CatalogModelRegistrySupport {
       }
       RecordDefinition def =
           registry.read(ref.getCatalogConnectionName(), ref.getKey(), variables, metadataProvider);
-      if (def == null || def.getOrigin() == null || Utils.isEmpty(def.getOrigin().getModelFilename())) {
+      if (def == null
+          || def.getOrigin() == null
+          || Utils.isEmpty(def.getOrigin().getModelFilename())) {
         continue;
       }
       // Synthetic registry-shaped definition for the picker (not written back).
       RecordDefinition synthetic = new RecordDefinition();
-      synthetic.setKey(
-          modelRegistryKey(variables, basename, RecordDefinitionType.DV_MODEL));
+      synthetic.setKey(modelRegistryKey(variables, basename, RecordDefinitionType.DV_MODEL));
       synthetic.setType(RecordDefinitionType.DV_MODEL);
-      synthetic.setDescription(
-          "Data Vault model inferred from published tables in " + ns);
+      synthetic.setDescription("Data Vault model inferred from published tables in " + ns);
       RecordOrigin origin = new RecordOrigin();
       origin.setModelType(MODEL_KIND_DV);
       origin.setModelName(sanitizeBasename(basename));
@@ -576,8 +576,7 @@ public final class CatalogModelRegistrySupport {
     if (!Utils.isEmpty(preferredCatalogConnection)) {
       try {
         List<RecordDefinitionRef> preferred =
-            registry.list(
-                preferredCatalogConnection.trim(), query, variables, metadataProvider);
+            registry.list(preferredCatalogConnection.trim(), query, variables, metadataProvider);
         if (preferred != null && !preferred.isEmpty()) {
           return preferred;
         }

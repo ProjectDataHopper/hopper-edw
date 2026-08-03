@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.config;
 
 import java.util.Arrays;
@@ -62,8 +60,7 @@ import picocli.CommandLine;
 @GuiPlugin(description = "i18n::HopAiConfig.Tab.Name")
 @Getter
 @Setter
-public class HopAiConfigOptionPlugin
-    implements IConfigOptions, IGuiPluginCompositeWidgetsListener {
+public class HopAiConfigOptionPlugin implements IConfigOptions, IGuiPluginCompositeWidgetsListener {
 
   protected static final Class<?> PKG = HopAiConfigOptionPlugin.class;
 

@@ -13,15 +13,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.workflow.actions.generateexecutionmap;
 
 import org.apache.hop.core.Const;
 import org.apache.hop.core.Props;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
+import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.FormDataBuilder;
 import org.apache.hop.ui.core.PropsUi;
@@ -42,8 +42,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
-import org.apache.hop.datavault.hopgui.help.HelpTopics;
 
 public class ActionGenerateExecutionMapDialog extends ActionDialog {
 
@@ -122,12 +120,10 @@ public class ActionGenerateExecutionMapDialog extends ActionDialog {
 
     wSourceTabComp =
         createTab(
-            wTabFolder,
-            BaseMessages.getString(PKG, "ActionGenerateExecutionMap.Tab.Source.Label"));
+            wTabFolder, BaseMessages.getString(PKG, "ActionGenerateExecutionMap.Tab.Source.Label"));
     wCrawlTabComp =
         createTab(
-            wTabFolder,
-            BaseMessages.getString(PKG, "ActionGenerateExecutionMap.Tab.Crawl.Label"));
+            wTabFolder, BaseMessages.getString(PKG, "ActionGenerateExecutionMap.Tab.Crawl.Label"));
 
     widgets = new GuiCompositeWidgets(variables);
     widgets.createCompositeWidgets(
@@ -176,8 +172,7 @@ public class ActionGenerateExecutionMapDialog extends ActionDialog {
 
   private void getWidgetsContent() {
     action.setName(wName.getText());
-    widgets.getWidgetsContents(
-        action, ActionGenerateExecutionMap.GUI_PLUGIN_ELEMENT_SOURCE_TAB_ID);
+    widgets.getWidgetsContents(action, ActionGenerateExecutionMap.GUI_PLUGIN_ELEMENT_SOURCE_TAB_ID);
     widgets.getWidgetsContents(action, ActionGenerateExecutionMap.GUI_PLUGIN_ELEMENT_CRAWL_TAB_ID);
   }
 

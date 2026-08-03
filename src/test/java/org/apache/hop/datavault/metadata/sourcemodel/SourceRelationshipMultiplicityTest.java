@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.sourcemodel;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,7 +43,8 @@ class SourceRelationshipMultiplicityTest {
     relationship.setCardinality("0..N:1");
     relationship.setChildMultiplicity(SourceRelationshipMultiplicity.UNKNOWN);
     relationship.setParentMultiplicity(SourceRelationshipMultiplicity.ONE);
-    assertEquals(SourceRelationshipMultiplicity.ZERO_OR_MANY, relationship.resolveChildMultiplicity());
+    assertEquals(
+        SourceRelationshipMultiplicity.ZERO_OR_MANY, relationship.resolveChildMultiplicity());
     assertEquals(SourceRelationshipMultiplicity.ONE, relationship.resolveParentMultiplicity());
   }
 

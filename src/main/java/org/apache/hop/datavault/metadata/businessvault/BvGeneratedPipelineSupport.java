@@ -13,20 +13,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import java.util.List;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.datavault.metadata.DvGeneratedPipelineSupport;
-import org.apache.hop.datavault.metadata.IDvTargetLoadConfiguration;
 import org.apache.hop.datavault.config.DataVaultConfigSingleton;
 import org.apache.hop.datavault.layout.DvPipelineElkLayout;
 import org.apache.hop.datavault.layout.ElkLayout;
 import org.apache.hop.datavault.layout.ElkLayoutAlgorithm;
+import org.apache.hop.datavault.metadata.DvGeneratedPipelineSupport;
+import org.apache.hop.datavault.metadata.IDvTargetLoadConfiguration;
 import org.apache.hop.pipeline.PipelineMeta;
 
 /** Saves generated Business Vault build pipelines when configured to do so. */
@@ -70,7 +68,9 @@ public final class BvGeneratedPipelineSupport {
   }
 
   public static String saveWorkflowBeforeExecution(
-      IDvTargetLoadConfiguration config, IVariables variables, org.apache.hop.workflow.WorkflowMeta workflowMeta)
+      IDvTargetLoadConfiguration config,
+      IVariables variables,
+      org.apache.hop.workflow.WorkflowMeta workflowMeta)
       throws HopException {
     return DvGeneratedPipelineSupport.saveWorkflowBeforeExecution(config, variables, workflowMeta);
   }

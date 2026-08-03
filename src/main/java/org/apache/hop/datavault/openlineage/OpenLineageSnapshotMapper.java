@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.openlineage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -111,9 +109,7 @@ public final class OpenLineageSnapshotMapper {
         && !Utils.isEmpty(snapshot.getCatalogConnection())) {
       ctx =
           new OpenLineageLocationContext(
-              ctx.getVariables(),
-              ctx.getMetadataProvider(),
-              snapshot.getCatalogConnection());
+              ctx.getVariables(), ctx.getMetadataProvider(), snapshot.getCatalogConnection());
     }
 
     List<ObjectNode> events = new ArrayList<>();
@@ -362,8 +358,8 @@ public final class OpenLineageSnapshotMapper {
   }
 
   /**
-   * When a fact (or other table) lists a dimension role source that has a physicalRef different from
-   * the role name, attach a symlink so Marquez can navigate alias → physical dim.
+   * When a fact (or other table) lists a dimension role source that has a physicalRef different
+   * from the role name, attach a symlink so Marquez can navigate alias → physical dim.
    */
   private static void attachInputPhysicalSymlink(
       ObjectNode input, DatasetKey key, TableLineage table, String datasetNamespace) {
@@ -382,16 +378,14 @@ public final class OpenLineageSnapshotMapper {
         continue;
       }
       // Match this input dataset to the role name (dataset name is role name for DM_TABLE inputs).
-      if (!roleName.equalsIgnoreCase(key.name())
-          && !physical.equalsIgnoreCase(key.name())) {
+      if (!roleName.equalsIgnoreCase(key.name()) && !physical.equalsIgnoreCase(key.name())) {
         continue;
       }
       String symlinkNamespace =
           !Utils.isEmpty(datasetNamespace)
               ? datasetNamespace
               : input.path("namespace").asText(resolveOutputNamespace(table));
-      OpenLineageDatasetFacetSupport.attachSymlink(
-          input, symlinkNamespace, physical, "TABLE");
+      OpenLineageDatasetFacetSupport.attachSymlink(input, symlinkNamespace, physical, "TABLE");
       return;
     }
   }
@@ -405,8 +399,7 @@ public final class OpenLineageSnapshotMapper {
     if (dataset == null || table == null) {
       return;
     }
-    if (table.getTableType() == null
-        || !table.getTableType().equalsIgnoreCase("DIMENSION_ALIAS")) {
+    if (table.getTableType() == null || !table.getTableType().equalsIgnoreCase("DIMENSION_ALIAS")) {
       return;
     }
     String logical = table.getLogicalName();
@@ -432,8 +425,7 @@ public final class OpenLineageSnapshotMapper {
         !Utils.isEmpty(datasetNamespace)
             ? datasetNamespace
             : dataset.path("namespace").asText(resolveOutputNamespace(table));
-    OpenLineageDatasetFacetSupport.attachSymlink(
-        dataset, symlinkNamespace, physical, "TABLE");
+    OpenLineageDatasetFacetSupport.attachSymlink(dataset, symlinkNamespace, physical, "TABLE");
   }
 
   /**
@@ -475,7 +467,8 @@ public final class OpenLineageSnapshotMapper {
         }
         var hopLoc = out.path("facets").path("hop_location");
         var dataSource = out.path("facets").path("dataSource");
-        if ((hopLoc != null && hopLoc.isObject()) || (dataSource != null && dataSource.isObject())) {
+        if ((hopLoc != null && hopLoc.isObject())
+            || (dataSource != null && dataSource.isObject())) {
           ObjectNode locCopy = MAPPER.createObjectNode();
           if (hopLoc != null && hopLoc.isObject()) {
             locCopy.set("hop_location", hopLoc.deepCopy());
@@ -662,7 +655,8 @@ public final class OpenLineageSnapshotMapper {
           continue;
         }
         DatasetKey key =
-            applyDatasetNamespace(datasetKeyFromContribution(contribution, table), datasetNamespace);
+            applyDatasetNamespace(
+                datasetKeyFromContribution(contribution, table), datasetNamespace);
         if (key == null || Utils.isEmpty(contribution.getSourceFieldName())) {
           continue;
         }

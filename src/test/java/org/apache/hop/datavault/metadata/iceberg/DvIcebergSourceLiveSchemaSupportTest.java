@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.iceberg;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -37,7 +35,8 @@ class DvIcebergSourceLiveSchemaSupportTest {
     configured.setTableName("${ICEBERG_TABLE}");
 
     assertTrue(configured.supportsLiveFieldResolution());
-    assertFalse(DvIcebergSourceLiveSchemaSupport.hasResolvableLocation(configured, new Variables()));
+    assertFalse(
+        DvIcebergSourceLiveSchemaSupport.hasResolvableLocation(configured, new Variables()));
 
     Variables variables = new Variables();
     variables.setVariable("ICEBERG_CATALOG_URI", "http://iceberg-rest:8181");

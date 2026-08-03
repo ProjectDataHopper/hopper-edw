@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.layout;
 
 import lombok.Getter;
@@ -32,9 +30,13 @@ public enum ElkLayoutDirection implements IEnumHasCodeAndDescription {
       BaseMessages.getString(ElkLayoutDirection.class, "ElkLayoutDirection.Right"),
       Direction.RIGHT),
   LEFT(
-      "LEFT", BaseMessages.getString(ElkLayoutDirection.class, "ElkLayoutDirection.Left"), Direction.LEFT),
+      "LEFT",
+      BaseMessages.getString(ElkLayoutDirection.class, "ElkLayoutDirection.Left"),
+      Direction.LEFT),
   DOWN(
-      "DOWN", BaseMessages.getString(ElkLayoutDirection.class, "ElkLayoutDirection.Down"), Direction.DOWN),
+      "DOWN",
+      BaseMessages.getString(ElkLayoutDirection.class, "ElkLayoutDirection.Down"),
+      Direction.DOWN),
   UP("UP", BaseMessages.getString(ElkLayoutDirection.class, "ElkLayoutDirection.Up"), Direction.UP);
 
   private final String code;

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.executionmap;
 
 import java.nio.file.Path;
@@ -45,8 +43,7 @@ import org.eclipse.swt.SWT;
 @GuiPlugin(description = "i18n::ExecutionMapGuiPlugin.Description")
 public class ExecutionMapGuiPlugin {
 
-  public static final String TOOLBAR_ITEM =
-      "HopGuiWorkflowGraph-ToolBar-10047-execution-map";
+  public static final String TOOLBAR_ITEM = "HopGuiWorkflowGraph-ToolBar-10047-execution-map";
 
   @GuiToolbarElement(
       root = HopGuiWorkflowGraph.GUI_PLUGIN_TOOLBAR_PARENT_ID,
@@ -209,7 +206,10 @@ public class ExecutionMapGuiPlugin {
   }
 
   private static void generateAndOpen(
-      HopGui hopGui, org.apache.hop.core.variables.IVariables variables, String sourcePath, String suggestedOutput) {
+      HopGui hopGui,
+      org.apache.hop.core.variables.IVariables variables,
+      String sourcePath,
+      String suggestedOutput) {
     ExecutionMapGenerationDialog.Result generationOptions =
         ExecutionMapGenerationDialog.open(
             hopGui.getShell(), ExecutionMapGenerationDialog.Purpose.GENERATE);

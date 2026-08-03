@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import lombok.Getter;
@@ -81,8 +79,7 @@ public class DmSourceConfiguration {
     return resolveSourceType() == DmSourceType.FACT_TABLE;
   }
 
-  public String resolveSourceConnection(
-      DimensionalConfiguration config, IVariables variables) {
+  public String resolveSourceConnection(DimensionalConfiguration config, IVariables variables) {
     String connection = sourceConnection;
     if (variables != null) {
       connection = variables.resolve(connection);

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.quality.workflow.actions.measuredataquality;
 
 import org.apache.hop.core.Const;
@@ -76,11 +74,7 @@ public class ActionMeasureDataQualityDialog extends ActionDialog {
 
     widgets = new GuiCompositeWidgets(variables);
     widgets.createCompositeWidgets(
-        action,
-        null,
-        wSettingsComp,
-        ActionMeasureDataQuality.GUI_PLUGIN_ELEMENT_PARENT_ID,
-        null);
+        action, null, wSettingsComp, ActionMeasureDataQuality.GUI_PLUGIN_ELEMENT_PARENT_ID, null);
 
     setWidgetsContent();
     boolean changedBeforeOpen = action.hasChanged();

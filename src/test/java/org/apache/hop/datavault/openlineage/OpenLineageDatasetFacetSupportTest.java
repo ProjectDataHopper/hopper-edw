@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.openlineage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -95,8 +93,9 @@ class OpenLineageDatasetFacetSupportTest {
     assertFalse(
         dataset.path("facets").path("dataSource").path("uri").asText().contains(" "),
         "Marquez rejects dataSource.uri with spaces (connection_url NOT NULL / parse)");
-    assertTrue(dataset.path("facets").path("dataSource").path("uri").asText().contains("%20")
-        || dataset.path("facets").path("dataSource").path("uri").asText().contains("_"));
+    assertTrue(
+        dataset.path("facets").path("dataSource").path("uri").asText().contains("%20")
+            || dataset.path("facets").path("dataSource").path("uri").asText().contains("_"));
   }
 
   @Test
@@ -138,8 +137,7 @@ class OpenLineageDatasetFacetSupportTest {
     ice.setNamespace("retail");
     ice.setTableName("customers");
     iceberg.setPhysicalIcebergTable(ice);
-    DatasetLocation iceLoc =
-        OpenLineageDatasetLocationResolver.fromRecordDefinition(iceberg, null);
+    DatasetLocation iceLoc = OpenLineageDatasetLocationResolver.fromRecordDefinition(iceberg, null);
     assertEquals(DatasetLocationKind.ICEBERG, iceLoc.getKind());
     assertTrue(iceLoc.getUri().contains("customers"));
   }

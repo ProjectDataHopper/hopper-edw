@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import java.util.ArrayList;
@@ -105,12 +104,7 @@ public class BusinessVaultModelSearchAnalyser extends BaseSearchableAnalyser<Bus
           table.getDescription(),
           componentName);
       matchObjectFields(
-          searchable,
-          results,
-          searchQuery,
-          table,
-          "business vault table property",
-          componentName);
+          searchable, results, searchQuery, table, "business vault table property", componentName);
     }
 
     if (model.getNotes() != null) {

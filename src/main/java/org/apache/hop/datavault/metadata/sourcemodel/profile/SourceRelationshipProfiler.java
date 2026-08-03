@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.sourcemodel.profile;
 
 import java.util.List;
@@ -35,8 +34,8 @@ import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
- * Profiles a {@link SourceRelationship} to suggest child/parent multiplicities using size-gated
- * SQL (never defaulting to full outer join on large tables).
+ * Profiles a {@link SourceRelationship} to suggest child/parent multiplicities using size-gated SQL
+ * (never defaulting to full outer join on large tables).
  */
 public final class SourceRelationshipProfiler {
 
@@ -158,9 +157,15 @@ public final class SourceRelationshipProfiler {
 
       switch (strategy) {
         case STATS_ONLY -> applyStatsOnly(result, child, parent);
-        case FULL_OUTER -> applyExactKeyAnalytics(db, databaseMeta, variables, relationship, child, parent, result, false, opts);
-        case SAMPLED_KEY -> applyExactKeyAnalytics(db, databaseMeta, variables, relationship, child, parent, result, true, opts);
-        case EXACT_KEY -> applyExactKeyAnalytics(db, databaseMeta, variables, relationship, child, parent, result, false, opts);
+        case FULL_OUTER ->
+            applyExactKeyAnalytics(
+                db, databaseMeta, variables, relationship, child, parent, result, false, opts);
+        case SAMPLED_KEY ->
+            applyExactKeyAnalytics(
+                db, databaseMeta, variables, relationship, child, parent, result, true, opts);
+        case EXACT_KEY ->
+            applyExactKeyAnalytics(
+                db, databaseMeta, variables, relationship, child, parent, result, false, opts);
       }
     } catch (HopException e) {
       throw e;
@@ -213,7 +218,9 @@ public final class SourceRelationshipProfiler {
       result.setConfidence(SourceRelationshipProfileResult.Confidence.MEDIUM);
       result.addMessage(
           BaseMessages.getString(
-              PKG, "SourceRelationshipProfiler.Sampled.Note", Integer.toString(opts.getSampleSize())));
+              PKG,
+              "SourceRelationshipProfiler.Sampled.Note",
+              Integer.toString(opts.getSampleSize())));
     } else {
       result.setConfidence(SourceRelationshipProfileResult.Confidence.HIGH);
     }
@@ -239,7 +246,9 @@ public final class SourceRelationshipProfiler {
                 .map(k -> "c." + databaseMeta.quoteField(k) + " IS NOT NULL")
                 .collect(Collectors.joining(" AND "))
             + " GROUP BY "
-            + childKeys.stream().map(k -> "c." + databaseMeta.quoteField(k)).collect(Collectors.joining(", "))
+            + childKeys.stream()
+                .map(k -> "c." + databaseMeta.quoteField(k))
+                .collect(Collectors.joining(", "))
             + ") x";
     long maxChildren = queryLong(db, maxSql);
     result.setMaxChildrenPerParent(maxChildren);
@@ -277,7 +286,9 @@ public final class SourceRelationshipProfiler {
         "SELECT COUNT(*) FROM (SELECT 1 FROM "
             + parentSource
             + " p GROUP BY "
-            + parentKeys.stream().map(k -> "p." + databaseMeta.quoteField(k)).collect(Collectors.joining(", "))
+            + parentKeys.stream()
+                .map(k -> "p." + databaseMeta.quoteField(k))
+                .collect(Collectors.joining(", "))
             + " HAVING COUNT(*) > 1) d";
     long parentDups = queryLong(db, parentDupSql);
     boolean parentUnique = parentDups == 0;
@@ -290,7 +301,11 @@ public final class SourceRelationshipProfiler {
   }
 
   private static String buildOnClause(
-      DatabaseMeta databaseMeta, List<String> childKeys, List<String> parentKeys, String c, String p) {
+      DatabaseMeta databaseMeta,
+      List<String> childKeys,
+      List<String> parentKeys,
+      String c,
+      String p) {
     StringBuilder on = new StringBuilder();
     for (int i = 0; i < childKeys.size(); i++) {
       if (i > 0) {
@@ -307,9 +322,11 @@ public final class SourceRelationshipProfiler {
     return on.toString();
   }
 
-  private static String sampleSubquery(DatabaseMeta databaseMeta, String qualifiedTable, int sampleSize) {
+  private static String sampleSubquery(
+      DatabaseMeta databaseMeta, String qualifiedTable, int sampleSize) {
     int n = Math.max(1, sampleSize);
-    String plugin = databaseMeta.getPluginId() != null ? databaseMeta.getPluginId().toUpperCase() : "";
+    String plugin =
+        databaseMeta.getPluginId() != null ? databaseMeta.getPluginId().toUpperCase() : "";
     if (plugin.contains("POSTGRES")) {
       return "(SELECT * FROM " + qualifiedTable + " TABLESAMPLE SYSTEM (5) LIMIT " + n + ")";
     }
@@ -362,9 +379,7 @@ public final class SourceRelationshipProfiler {
             "SELECT COALESCE(c.reltuples, -1)::bigint FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE c.relname = '"
                 + escapeLiteral(name)
                 + "'"
-                + (Utils.isEmpty(schema)
-                    ? ""
-                    : " AND n.nspname = '" + escapeLiteral(schema) + "'");
+                + (Utils.isEmpty(schema) ? "" : " AND n.nspname = '" + escapeLiteral(schema) + "'");
         long v = queryLong(db, sql);
         return v >= 0 ? v : null;
       }

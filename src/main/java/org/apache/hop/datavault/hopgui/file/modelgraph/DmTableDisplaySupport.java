@@ -13,13 +13,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.modelgraph;
 
 import org.apache.hop.core.Const;
-import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalConfiguration;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
@@ -50,7 +47,11 @@ public final class DmTableDisplaySupport {
       return DIMENSION_ICON;
     }
     return switch (tableType) {
-      case FACT, FACTLESS_FACT, PERIODIC_SNAPSHOT_FACT, ACCUMULATING_SNAPSHOT_FACT, AGGREGATE_FACT ->
+      case FACT,
+              FACTLESS_FACT,
+              PERIODIC_SNAPSHOT_FACT,
+              ACCUMULATING_SNAPSHOT_FACT,
+              AGGREGATE_FACT ->
           FACT_ICON;
       case DIMENSION_ALIAS -> DIMENSION_ALIAS_ICON;
       case JUNK_DIMENSION -> JUNK_DIMENSION_ICON;
@@ -98,7 +99,8 @@ public final class DmTableDisplaySupport {
     }
     if (table instanceof DmDimensionAlias alias) {
       DmDimension target =
-          DmDimensionResolutionSupport.resolveAliasTarget(model, alias, variables, metadataProvider);
+          DmDimensionResolutionSupport.resolveAliasTarget(
+              model, alias, variables, metadataProvider);
       if (target == null) {
         return null;
       }
@@ -108,9 +110,7 @@ public final class DmTableDisplaySupport {
   }
 
   public static String resolveAliasSourceModelDisplayName(
-      DmDimensionAlias alias,
-      DimensionalModel model,
-      IVariables variables) {
+      DmDimensionAlias alias, DimensionalModel model, IVariables variables) {
     if (alias == null) {
       return null;
     }

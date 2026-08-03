@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.io.OutputStreamWriter;
@@ -24,12 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.apache.hop.datavault.metrics.DvUpdateMetricsCollector;
-import org.apache.hop.datavault.metrics.DvUpdateMetricsConstants;
-import org.apache.hop.datavault.metrics.LoadRunPublishSummary;
-import org.apache.hop.datavault.metrics.VaultUpdateExecutionSupport;
-import org.apache.hop.datavault.metrics.live.UpdateRunLiveMonitor;
-import org.apache.hop.datavault.metrics.live.UpdateRunLiveRunContext;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.hop.core.Result;
 import org.apache.hop.core.exception.HopException;
@@ -38,8 +30,14 @@ import org.apache.hop.core.logging.ILoggingObject;
 import org.apache.hop.core.logging.LogLevel;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.core.vfs.HopVfs;
+import org.apache.hop.datavault.metrics.DvUpdateMetricsCollector;
+import org.apache.hop.datavault.metrics.DvUpdateMetricsConstants;
+import org.apache.hop.datavault.metrics.LoadRunPublishSummary;
+import org.apache.hop.datavault.metrics.VaultUpdateExecutionSupport;
+import org.apache.hop.datavault.metrics.live.UpdateRunLiveMonitor;
+import org.apache.hop.datavault.metrics.live.UpdateRunLiveRunContext;
+import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.Pipeline;
 import org.apache.hop.pipeline.PipelineHopMeta;
@@ -48,7 +46,6 @@ import org.apache.hop.pipeline.engine.IPipelineEngine;
 import org.apache.hop.pipeline.engine.PipelineEngineFactory;
 import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transforms.getfilenames.FileItem;
-import org.apache.hop.workflow.WorkflowMeta;
 import org.apache.hop.pipeline.transforms.getfilenames.FilterItem;
 import org.apache.hop.pipeline.transforms.getfilenames.GetFileNamesMeta;
 import org.apache.hop.pipeline.transforms.pipelineexecutor.PipelineExecutorMeta;
@@ -92,8 +89,7 @@ public final class DvPipelineOrchestratorSupport {
   }
 
   /** Creates the staging folder and removes any previously staged {@code .hpl} files. */
-  public static void prepareStagingFolder(String folder, IVariables variables)
-      throws HopException {
+  public static void prepareStagingFolder(String folder, IVariables variables) throws HopException {
     try {
       FileObject stagingFolder = HopVfs.getFileObject(folder, variables);
       if (stagingFolder.exists()) {
@@ -128,10 +124,7 @@ public final class DvPipelineOrchestratorSupport {
    *     ({@code 0001-}, {@code 0002-}, …) so Get File Names picks up pipelines in list order
    */
   public static void stagePipelines(
-      String folder,
-      IVariables variables,
-      List<PipelineMeta> pipelines,
-      boolean sequenceFilenames)
+      String folder, IVariables variables, List<PipelineMeta> pipelines, boolean sequenceFilenames)
       throws HopException {
     if (pipelines == null || pipelines.isEmpty()) {
       return;
@@ -161,16 +154,13 @@ public final class DvPipelineOrchestratorSupport {
     GetFileNamesMeta getFileNamesMeta = new GetFileNamesMeta();
     getFileNamesMeta.setDefault();
     getFileNamesMeta.getFilterItemList().clear();
-    getFileNamesMeta
-        .getFilterItemList()
-        .add(new FilterItem(FileTypeFilter.ONLY_FILES.toString()));
+    getFileNamesMeta.getFilterItemList().add(new FilterItem(FileTypeFilter.ONLY_FILES.toString()));
 
     List<FileItem> filesList = new ArrayList<>();
     filesList.add(new FileItem(stagingFolder, HPL_FILE_MASK, "", "N", "N"));
     getFileNamesMeta.setFilesList(filesList);
 
-    TransformMeta getFileNamesTransform =
-        new TransformMeta("Get pipeline files", getFileNamesMeta);
+    TransformMeta getFileNamesTransform = new TransformMeta("Get pipeline files", getFileNamesMeta);
     getFileNamesTransform.setLocation(100, 100);
     pipelineMeta.addTransform(getFileNamesTransform);
 
@@ -181,8 +171,7 @@ public final class DvPipelineOrchestratorSupport {
     executorMeta.setRunConfigurationName(runConfiguration);
     executorMeta.setInheritingAllVariables(true);
 
-    TransformMeta executorTransform =
-        new TransformMeta("Execute update pipelines", executorMeta);
+    TransformMeta executorTransform = new TransformMeta("Execute update pipelines", executorMeta);
     executorTransform.setLocation(300, 100);
     executorTransform.setCopiesString(String.valueOf(Math.max(1, parallelCopies)));
     pipelineMeta.addTransform(executorTransform);
@@ -319,9 +308,7 @@ public final class DvPipelineOrchestratorSupport {
       variables.setVariable(DvUpdateMetricsConstants.VAR_MODEL_NAME, modelName);
       if (metricsPublishContext != null) {
         setVariableIfPresent(
-            variables,
-            DvUpdateMetricsConstants.VAR_MODEL_TYPE,
-            metricsPublishContext.modelType());
+            variables, DvUpdateMetricsConstants.VAR_MODEL_TYPE, metricsPublishContext.modelType());
         setVariableIfPresent(
             variables,
             DvUpdateMetricsConstants.VAR_WORKFLOW_NAME,
@@ -435,8 +422,7 @@ public final class DvPipelineOrchestratorSupport {
   }
 
   /** Deletes the staging folder and all files and sub-folders below it. */
-  public static void cleanupStagingFolder(String folder, IVariables variables)
-      throws HopException {
+  public static void cleanupStagingFolder(String folder, IVariables variables) throws HopException {
     if (Utils.isEmpty(folder)) {
       return;
     }
@@ -480,8 +466,8 @@ public final class DvPipelineOrchestratorSupport {
   }
 
   /** Writes a workflow meta to the staging folder as {@code name.hwf}. */
-  public static String stageWorkflow(
-      String folder, IVariables variables, WorkflowMeta workflowMeta) throws HopException {
+  public static String stageWorkflow(String folder, IVariables variables, WorkflowMeta workflowMeta)
+      throws HopException {
     if (workflowMeta == null || Utils.isEmpty(workflowMeta.getName())) {
       return null;
     }

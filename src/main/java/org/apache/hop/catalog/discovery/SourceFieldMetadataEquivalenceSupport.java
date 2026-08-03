@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.discovery;
 
 import java.util.ArrayList;
@@ -54,9 +52,10 @@ public final class SourceFieldMetadataEquivalenceSupport {
 
     List<String> parts = new ArrayList<>();
     switch (stored.getHopType()) {
-      case IValueMeta.TYPE_DATE, IValueMeta.TYPE_TIMESTAMP, IValueMeta.TYPE_BOOLEAN, IValueMeta.TYPE_BINARY ->
-          {
-          }
+      case IValueMeta.TYPE_DATE,
+          IValueMeta.TYPE_TIMESTAMP,
+          IValueMeta.TYPE_BOOLEAN,
+          IValueMeta.TYPE_BINARY -> {}
       case IValueMeta.TYPE_STRING -> addLengthDifference(parts, stored, discovered);
       case IValueMeta.TYPE_INTEGER -> addIntegerDifference(parts, stored, discovered);
       case IValueMeta.TYPE_NUMBER, IValueMeta.TYPE_BIGNUMBER ->
@@ -200,8 +199,8 @@ public final class SourceFieldMetadataEquivalenceSupport {
    *
    * <p>Catalog lengths often reflect display width (for example {@code 3} for a 0-100 score) while
    * JDBC discovery normalizes physical types to fixed lengths ({@code SMALLINT -> 4}, {@code
-   * INTEGER -> 9}, signed {@code BIGINT -> 15}). PostgreSQL DDL generation in Hop also maps
-   * lengths below 5 to {@code SMALLINT}, so a stored length of 3 round-trips as 4.
+   * INTEGER -> 9}, signed {@code BIGINT -> 15}). PostgreSQL DDL generation in Hop also maps lengths
+   * below 5 to {@code SMALLINT}, so a stored length of 3 round-trips as 4.
    */
   private static boolean integerLengthEquivalent(String left, String right) {
     int leftLength = parseDimension(left);

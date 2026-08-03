@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.List;
@@ -116,7 +114,8 @@ public final class RecordSourceIndicatorImportSection {
 
     wFieldMode = new Button(modeComp, SWT.RADIO);
     PropsUi.setLook(wFieldMode);
-    wFieldMode.setText(BaseMessages.getString(PKG, "RecordSourceIndicatorImportSection.Mode.Field"));
+    wFieldMode.setText(
+        BaseMessages.getString(PKG, "RecordSourceIndicatorImportSection.Mode.Field"));
     lastControl = modeComp;
 
     Label wlStatic = new Label(parent, SWT.RIGHT);

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import lombok.Getter;
@@ -24,8 +22,8 @@ import org.apache.hop.metadata.api.IEnumHasCode;
 import org.apache.hop.metadata.api.IEnumHasCodeAndDescription;
 
 /**
- * Semantic note type for annotations on a Data Vault model canvas. The type determines the
- * fixed visual style (colors, border, icon); users do not pick arbitrary fonts or colors.
+ * Semantic note type for annotations on a Data Vault model canvas. The type determines the fixed
+ * visual style (colors, border, icon); users do not pick arbitrary fonts or colors.
  */
 @Getter
 public enum DvNoteType implements IEnumHasCodeAndDescription {

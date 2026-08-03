@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.metrics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,13 +22,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.apache.hop.datavault.hopgui.widget.MarkdownStyleRenderer;
+import org.apache.hop.datavault.hopgui.widget.MarkdownStyleRenderer.RenderedMarkdown;
+import org.apache.hop.datavault.hopgui.widget.MarkdownStyleRenderer.SpanKind;
 import org.apache.hop.datavault.metrics.live.PipelineLiveMetrics;
 import org.apache.hop.datavault.metrics.live.TransformLiveMetrics;
 import org.apache.hop.datavault.metrics.live.UpdateRunLiveSnapshot;
 import org.apache.hop.datavault.metrics.live.UpdateRunLiveState;
-import org.apache.hop.datavault.hopgui.widget.MarkdownStyleRenderer;
-import org.apache.hop.datavault.hopgui.widget.MarkdownStyleRenderer.RenderedMarkdown;
-import org.apache.hop.datavault.hopgui.widget.MarkdownStyleRenderer.SpanKind;
 import org.junit.jupiter.api.Test;
 
 class UpdateRunLiveDiagnosticsFormatterTest {
@@ -127,7 +125,8 @@ class UpdateRunLiveDiagnosticsFormatterTest {
     assertTrue(rendered.spans().stream().anyMatch(span -> span.kind() == SpanKind.CODE_BLOCK));
     assertTrue(rendered.spans().stream().anyMatch(span -> span.kind() == SpanKind.BOLD));
     assertTrue(isSortedByStart(rendered.spans()));
-    assertEquals(1L, rendered.spans().stream().filter(span -> span.kind() == SpanKind.CODE_BLOCK).count());
+    assertEquals(
+        1L, rendered.spans().stream().filter(span -> span.kind() == SpanKind.CODE_BLOCK).count());
   }
 
   @Test
@@ -174,7 +173,8 @@ class UpdateRunLiveDiagnosticsFormatterTest {
                         && span.start() == 0
                         && span.length() == "Current status".length()));
     assertTrue(rendered.spans().stream().anyMatch(span -> span.kind() == SpanKind.CODE));
-    assertEquals(1L, rendered.spans().stream().filter(span -> span.kind() == SpanKind.CODE_BLOCK).count());
+    assertEquals(
+        1L, rendered.spans().stream().filter(span -> span.kind() == SpanKind.CODE_BLOCK).count());
   }
 
   private static boolean isSortedByStart(List<MarkdownStyleRenderer.StyleSpan> spans) {

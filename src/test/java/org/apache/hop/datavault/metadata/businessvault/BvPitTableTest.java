@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -51,7 +49,8 @@ class BvPitTableTest {
     DataVaultModel dvModel = loadVault1Model();
     BvPitTable table = validPitTable();
 
-    var layout = table.getTargetTableLayout(null, new Variables(), new BusinessVaultModel(), dvModel);
+    var layout =
+        table.getTargetTableLayout(null, new Variables(), new BusinessVaultModel(), dvModel);
 
     assertEquals(3, layout.size());
     assertEquals("customer_hk", layout.getValueMeta(0).getName());
@@ -129,7 +128,8 @@ class BvPitTableTest {
     BusinessVaultConfiguration config = new BusinessVaultConfiguration();
     config.setPitPipelineNamePrefix("pit-build-");
 
-    assertEquals("pit-build-pit_customer", config.buildPitPipelineName(new Variables(), "pit_customer"));
+    assertEquals(
+        "pit-build-pit_customer", config.buildPitPipelineName(new Variables(), "pit_customer"));
   }
 
   @Test

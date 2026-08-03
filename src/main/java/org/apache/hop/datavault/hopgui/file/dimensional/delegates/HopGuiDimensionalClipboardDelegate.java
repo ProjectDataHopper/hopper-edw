@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.dimensional.delegates;
 
 import java.util.ArrayList;
@@ -30,6 +28,7 @@ import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.datavault.hopgui.file.dimensional.HopGuiDimensionalModelGraph;
 import org.apache.hop.datavault.metadata.DvNote;
 import org.apache.hop.datavault.metadata.DvNoteType;
+import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.datavault.metadata.dimensional.DmAccumulatingSnapshotFact;
 import org.apache.hop.datavault.metadata.dimensional.DmAggregateFact;
 import org.apache.hop.datavault.metadata.dimensional.DmBridge;
@@ -38,10 +37,9 @@ import org.apache.hop.datavault.metadata.dimensional.DmDimensionAlias;
 import org.apache.hop.datavault.metadata.dimensional.DmFact;
 import org.apache.hop.datavault.metadata.dimensional.DmFactlessFact;
 import org.apache.hop.datavault.metadata.dimensional.DmJunkDimension;
-import org.apache.hop.datavault.metadata.dimensional.DmRangeDimension;
 import org.apache.hop.datavault.metadata.dimensional.DmPeriodicSnapshotFact;
+import org.apache.hop.datavault.metadata.dimensional.DmRangeDimension;
 import org.apache.hop.datavault.metadata.dimensional.DmTableType;
-import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.datavault.metadata.dimensional.IDmTable;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
@@ -183,8 +181,8 @@ public class HopGuiDimensionalClipboardDelegate {
     xml.append(XmlHandler.closeTag(XML_TAG_NOTES)).append(Const.CR);
   }
 
-  private List<IDmTable> deserializeTables(Node clipboardNode, IHopMetadataProvider metadataProvider)
-      throws HopXmlException {
+  private List<IDmTable> deserializeTables(
+      Node clipboardNode, IHopMetadataProvider metadataProvider) throws HopXmlException {
     List<IDmTable> tables = new ArrayList<>();
     Node tablesNode = XmlHandler.getSubNode(clipboardNode, XML_TAG_TABLES);
     if (tablesNode == null) {
@@ -226,7 +224,8 @@ public class HopGuiDimensionalClipboardDelegate {
       case ACCUMULATING_SNAPSHOT_FACT ->
           XmlMetadataUtil.deSerializeFromXml(
               tableNode, DmAccumulatingSnapshotFact.class, metadataProvider);
-      case BRIDGE -> XmlMetadataUtil.deSerializeFromXml(tableNode, DmBridge.class, metadataProvider);
+      case BRIDGE ->
+          XmlMetadataUtil.deSerializeFromXml(tableNode, DmBridge.class, metadataProvider);
       case AGGREGATE_FACT ->
           XmlMetadataUtil.deSerializeFromXml(tableNode, DmAggregateFact.class, metadataProvider);
     };

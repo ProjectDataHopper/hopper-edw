@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.vault;
 
 import java.io.File;
@@ -39,10 +37,10 @@ import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
@@ -63,8 +61,7 @@ public final class DvCustomPipelinesTabSupport {
   private Button wOpenSelected;
   private TableView wCustomPipelines;
 
-  public DvCustomPipelinesTabSupport(
-      Shell shell, HopGui hopGui, IVariables variables, int margin) {
+  public DvCustomPipelinesTabSupport(Shell shell, HopGui hopGui, IVariables variables, int margin) {
     this.shell = shell;
     this.hopGui = hopGui;
     this.variables = variables;
@@ -222,9 +219,7 @@ public final class DvCustomPipelinesTabSupport {
         continue;
       }
       String path =
-          Utils.isEmpty(filterPath)
-              ? fileName
-              : new File(filterPath, fileName).getAbsolutePath();
+          Utils.isEmpty(filterPath) ? fileName : new File(filterPath, fileName).getAbsolutePath();
       if (!existing.contains(path)) {
         TableItem item = new TableItem(wCustomPipelines.table, SWT.NONE);
         item.setText(1, path);

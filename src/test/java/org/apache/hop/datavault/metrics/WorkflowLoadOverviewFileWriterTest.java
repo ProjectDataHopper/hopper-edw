@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -69,11 +67,10 @@ class WorkflowLoadOverviewFileWriterTest {
   }
 
   @Test
-  void findsLatestWorkflowPrefixedReportWhenBaseNameMissing(@TempDir Path tempDir) throws Exception {
-    Path older =
-        tempDir.resolve("run-retail-initial-11111111-20260101-120000.md");
-    Path newer =
-        tempDir.resolve("run-retail-initial-22222222-20260201-120000.md");
+  void findsLatestWorkflowPrefixedReportWhenBaseNameMissing(@TempDir Path tempDir)
+      throws Exception {
+    Path older = tempDir.resolve("run-retail-initial-11111111-20260101-120000.md");
+    Path newer = tempDir.resolve("run-retail-initial-22222222-20260201-120000.md");
     Files.writeString(older, "older", StandardCharsets.UTF_8);
     Thread.sleep(20);
     Files.writeString(newer, "newer", StandardCharsets.UTF_8);

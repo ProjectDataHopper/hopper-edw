@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import java.util.Comparator;
@@ -26,7 +24,9 @@ import org.apache.hop.core.util.Utils;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapNode;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapNodeType;
 
-/** Resolves pipeline table references to catalog-backed dataset nodes when crawling under models. */
+/**
+ * Resolves pipeline table references to catalog-backed dataset nodes when crawling under models.
+ */
 final class PipelineDatasetCatalogResolver {
 
   private static final Pattern GENERATED_PIPELINE_SOURCE_NAME =
@@ -128,11 +128,9 @@ final class PipelineDatasetCatalogResolver {
 
   private static Comparator<ExecutionMapNode> datasetNodePreference(
       ExecutionMapNodeType preferredNodeType) {
-    return Comparator.<ExecutionMapNode>comparingInt(
-            node -> hasCatalogNamespace(node) ? 1 : 0)
+    return Comparator.<ExecutionMapNode>comparingInt(node -> hasCatalogNamespace(node) ? 1 : 0)
         .thenComparingInt(
-            node ->
-                preferredNodeType != null && node.getNodeType() == preferredNodeType ? 1 : 0);
+            node -> preferredNodeType != null && node.getNodeType() == preferredNodeType ? 1 : 0);
   }
 
   private static boolean hasCatalogNamespace(ExecutionMapNode node) {
@@ -157,7 +155,9 @@ final class PipelineDatasetCatalogResolver {
     boolean targetWrite = nodeType == ExecutionMapNodeType.TARGET_DATASET && !targetRead;
     boolean vaultTable = isVaultTableName(tableName);
 
-    if (targetWrite || targetRead || (vaultTable && nodeType == ExecutionMapNodeType.SOURCE_DATASET)) {
+    if (targetWrite
+        || targetRead
+        || (vaultTable && nodeType == ExecutionMapNodeType.SOURCE_DATASET)) {
       String namespace =
           ExecutionMapDatasetCatalogSupport.catalogNamespaceForModelNode(
               modelNode, context.getVariables());

@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.workflow.actions.updateresourcegroup;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,8 +37,7 @@ class ActionUpdateResourceDefinitionGroupReferencedObjectTest {
         ActionUpdateResourceDefinitionGroup.toDisplayRelativePath(
             "${PROJECT_HOME}/models/retail-360.hbv", vars));
     assertEquals(
-        ".",
-        ActionUpdateResourceDefinitionGroup.toDisplayRelativePath("${PROJECT_HOME}", vars));
+        ".", ActionUpdateResourceDefinitionGroup.toDisplayRelativePath("${PROJECT_HOME}", vars));
   }
 
   @Test

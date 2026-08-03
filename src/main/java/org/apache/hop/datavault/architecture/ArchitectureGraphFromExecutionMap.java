@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.architecture;
 
 import org.apache.hop.core.util.Utils;
@@ -88,17 +87,18 @@ public final class ArchitectureGraphFromExecutionMap {
     }
     return switch (type) {
       case PIPELINE_TRANSFORM,
-          MAPPING,
-          META_INJECT,
-          SOURCE_DATASET,
-          TARGET_DATASET,
-          PIPELINE,
-          ROOT_PIPELINE,
-          PIPELINE_FILE,
-          GENERATED_PIPELINE,
-          ORCHESTRATOR_PIPELINE,
-          PIPELINE_EXECUTOR,
-          WORKFLOW_EXECUTOR -> true;
+              MAPPING,
+              META_INJECT,
+              SOURCE_DATASET,
+              TARGET_DATASET,
+              PIPELINE,
+              ROOT_PIPELINE,
+              PIPELINE_FILE,
+              GENERATED_PIPELINE,
+              ORCHESTRATOR_PIPELINE,
+              PIPELINE_EXECUTOR,
+              WORKFLOW_EXECUTOR ->
+          true;
       default -> false;
     };
   }

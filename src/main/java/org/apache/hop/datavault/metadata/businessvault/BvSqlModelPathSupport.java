@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import java.util.ArrayList;
@@ -78,7 +76,8 @@ public final class BvSqlModelPathSupport {
         continue;
       }
       try {
-        String loadPath = DvModelLoadSupport.resolveModelPath(candidate, referringBvFilename, variables);
+        String loadPath =
+            DvModelLoadSupport.resolveModelPath(candidate, referringBvFilename, variables);
         if (fileExists(loadPath)) {
           String stored =
               DvModelLoadSupport.toStoredModelPath(loadPath, referringBvFilename, variables);
@@ -116,8 +115,7 @@ public final class BvSqlModelPathSupport {
     if (resolved == null || resolved.kind() == ModelFileKind.HBV) {
       throw new HopException("Resolved path is not a Data Vault model: " + resolved);
     }
-    return DvModelLoadSupport.loadDataVaultModel(
-        resolved.loadPath(), null, null, metadataProvider);
+    return DvModelLoadSupport.loadDataVaultModel(resolved.loadPath(), null, null, metadataProvider);
   }
 
   /**

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.hopgui.perspective;
 
 import java.text.SimpleDateFormat;
@@ -276,8 +274,7 @@ public final class QualityHistoryBrowserDialog {
       new ErrorDialog(
           shell,
           BaseMessages.getString(PKG, "RecordDefinitionDetailsPanel.Quality.History.Error.Title"),
-          BaseMessages.getString(
-              PKG, "RecordDefinitionDetailsPanel.Quality.History.Error.Message"),
+          BaseMessages.getString(PKG, "RecordDefinitionDetailsPanel.Quality.History.Error.Message"),
           e);
     }
   }

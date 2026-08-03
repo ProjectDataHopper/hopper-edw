@@ -13,12 +13,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.vault;
 
 import org.apache.hop.datavault.hopgui.EnumDialogSupport;
+import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
+import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.datavault.metadata.DvNote;
 import org.apache.hop.datavault.metadata.DvNoteType;
 import org.apache.hop.i18n.BaseMessages;
@@ -36,8 +36,6 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
-import org.apache.hop.datavault.hopgui.help.HelpTopics;
 
 /** Dialog to edit a Data Vault canvas note (type + text). */
 public class DvNoteDialog {
@@ -139,8 +137,7 @@ public class DvNoteDialog {
   }
 
   private void ok() {
-    input.setNoteType(
-        EnumDialogSupport.readCombo(wType, DvNoteType.class, DvNoteType.GENERAL));
+    input.setNoteType(EnumDialogSupport.readCombo(wType, DvNoteType.class, DvNoteType.GENERAL));
     input.setText(wText.getText());
     ok = true;
     dispose();

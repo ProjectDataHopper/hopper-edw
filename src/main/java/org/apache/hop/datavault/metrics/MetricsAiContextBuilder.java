@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import java.util.Date;
@@ -267,7 +265,8 @@ public final class MetricsAiContextBuilder {
       Database db)
       throws HopException {
     if (Utils.isEmpty(runId)
-        || !db.checkTableExists(schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_PIPELINE_METRIC)) {
+        || !db.checkTableExists(
+            schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_PIPELINE_METRIC)) {
       json.append("[]");
       return;
     }
@@ -315,7 +314,8 @@ public final class MetricsAiContextBuilder {
       Database db)
       throws HopException {
     if (Utils.isEmpty(runId)
-        || !db.checkTableExists(schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_TRANSFORM_METRIC)) {
+        || !db.checkTableExists(
+            schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_TRANSFORM_METRIC)) {
       json.append("[]");
       return;
     }
@@ -441,7 +441,8 @@ public final class MetricsAiContextBuilder {
       Object[] row = insightRows.get(i);
       json.append("{\"severity\":")
           .append(DvAiContextBuilder.jsonString(stringValue(insightMeta, row, "severity")));
-      json.append(",\"code\":").append(DvAiContextBuilder.jsonString(stringValue(insightMeta, row, "code")));
+      json.append(",\"code\":")
+          .append(DvAiContextBuilder.jsonString(stringValue(insightMeta, row, "code")));
       json.append(",\"message\":")
           .append(DvAiContextBuilder.jsonString(stringValue(insightMeta, row, "message")));
       json.append(",\"elementName\":")

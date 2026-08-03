@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.config;
 
 import java.util.concurrent.TimeUnit;
@@ -31,6 +29,7 @@ public class DataVaultConfig {
   public static final String HOP_CONFIG_DATA_VAULT_CONFIG_KEY = "dataVaultConfig";
   public static final int DEFAULT_MAX_UNDO_OPERATIONS = 200;
   public static final int DEFAULT_LIVE_UPDATE_POLL_INTERVAL_SECONDS = 10;
+
   /** Default root for named schema-remediation packages (workflow, SQL, report). */
   public static final String DEFAULT_SCHEMA_REMEDIATION_FOLDER =
       "${PROJECT_HOME}/workflows/schema-remediation";
@@ -55,7 +54,8 @@ public class DataVaultConfig {
     drawingHashKeysInModel = config.drawingHashKeysInModel;
     suppressLocalCatalogOffer = config.suppressLocalCatalogOffer;
     setMaxUndoOperations(config.maxUndoOperations);
-    setDimensionalDefaultFieldNames(new DmDefaultFieldNames(config.getDimensionalDefaultFieldNames()));
+    setDimensionalDefaultFieldNames(
+        new DmDefaultFieldNames(config.getDimensionalDefaultFieldNames()));
     setElkLayout(new ElkLayout(config.getElkLayout()));
     defaultPipelineRunConfiguration = config.defaultPipelineRunConfiguration;
     defaultWorkflowRunConfiguration = config.defaultWorkflowRunConfiguration;
@@ -133,8 +133,6 @@ public class DataVaultConfig {
 
   public void setExecutionMapLineStyle(ExecutionMapLineStyle executionMapLineStyle) {
     this.executionMapLineStyle =
-        executionMapLineStyle != null
-            ? executionMapLineStyle
-            : ExecutionMapLineStyle.DIRECT_CENTER;
+        executionMapLineStyle != null ? executionMapLineStyle : ExecutionMapLineStyle.DIRECT_CENTER;
   }
 }

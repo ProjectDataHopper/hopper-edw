@@ -13,14 +13,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.vault;
 
 import java.io.File;
 import org.apache.hop.core.Const;
-import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
@@ -54,10 +51,10 @@ public final class HopGuiDvDimensionalPublishSupport {
       IHopMetadataProvider metadataProvider = hopGui.getMetadataProvider();
 
       String proposedName =
-          Const.NVL(dataVaultModel.getName(), "dimensional-model") + "-draft"
+          Const.NVL(dataVaultModel.getName(), "dimensional-model")
+              + "-draft"
               + HopDimensionalFileType.DIMENSIONAL_FILE_EXTENSION;
-      String proposedFilename =
-          variables.getVariable("user.home") + File.separator + proposedName;
+      String proposedFilename = variables.getVariable("user.home") + File.separator + proposedName;
 
       String outputFilename =
           BaseDialog.presentFileDialog(
@@ -76,8 +73,7 @@ public final class HopGuiDvDimensionalPublishSupport {
       String realFilename = variables.resolve(outputFilename);
       if (HopVfs.getFileObject(realFilename).exists()) {
         MessageBox box = new MessageBox(hopGui.getShell(), SWT.YES | SWT.NO | SWT.ICON_QUESTION);
-        box.setText(
-            BaseMessages.getString(PKG, "HopGuiDvDimensionalPublishSupport.Exists.Title"));
+        box.setText(BaseMessages.getString(PKG, "HopGuiDvDimensionalPublishSupport.Exists.Title"));
         box.setMessage(
             BaseMessages.getString(PKG, "HopGuiDvDimensionalPublishSupport.Exists.Message"));
         if ((box.open() & SWT.YES) == 0) {
@@ -102,7 +98,8 @@ public final class HopGuiDvDimensionalPublishSupport {
       if (!publishResult.getWarningsOrEmpty().isEmpty()) {
         message.append(Const.CR).append(Const.CR);
         message.append(
-            BaseMessages.getString(PKG, "HopGuiDvDimensionalPublishSupport.Success.WarningsHeader"));
+            BaseMessages.getString(
+                PKG, "HopGuiDvDimensionalPublishSupport.Success.WarningsHeader"));
         for (String warning : publishResult.getWarningsOrEmpty()) {
           message.append(Const.CR).append("- ").append(warning);
         }
@@ -114,7 +111,8 @@ public final class HopGuiDvDimensionalPublishSupport {
               publishResult.getWarningsOrEmpty().isEmpty()
                   ? SWT.OK | SWT.ICON_INFORMATION
                   : SWT.OK | SWT.ICON_WARNING);
-      success.setText(BaseMessages.getString(PKG, "HopGuiDvDimensionalPublishSupport.Success.Title"));
+      success.setText(
+          BaseMessages.getString(PKG, "HopGuiDvDimensionalPublishSupport.Success.Title"));
       success.setMessage(message.toString());
       success.open();
 

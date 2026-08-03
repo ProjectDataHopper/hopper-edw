@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.sourcemodel.profile;
 
 import java.util.ArrayList;
@@ -34,8 +33,7 @@ public class SourceRelationshipProfileResult {
     LOW
   }
 
-  private SourceRelationshipMultiplicity childMultiplicity =
-      SourceRelationshipMultiplicity.UNKNOWN;
+  private SourceRelationshipMultiplicity childMultiplicity = SourceRelationshipMultiplicity.UNKNOWN;
   private SourceRelationshipMultiplicity parentMultiplicity =
       SourceRelationshipMultiplicity.UNKNOWN;
   private SourceRelationshipProfileStrategy strategyUsed;

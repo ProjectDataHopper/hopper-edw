@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.composite;
 
 import java.util.ArrayList;
@@ -26,7 +25,6 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.logging.LoggingObjectType;
 import org.apache.hop.core.logging.SimpleLoggingObject;
 import org.apache.hop.core.row.IRowMeta;
-import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceQueryPreviewSupport;
 import org.apache.hop.metadata.api.IHopMetadataProvider;

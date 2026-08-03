@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.database;
 
 import java.util.ArrayList;
@@ -31,12 +29,10 @@ import org.apache.hop.datavault.metadata.BusinessKey;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DataVaultSource;
 import org.apache.hop.datavault.metadata.DvHub;
-import org.apache.hop.datavault.metadata.DvLink;
-import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.DvSourceFieldMappingSupport;
+import org.apache.hop.datavault.metadata.DvSourcePipelineBuilder;
 import org.apache.hop.datavault.metadata.DvSqlOrderBySupport;
 import org.apache.hop.datavault.metadata.DvSqlSupport;
-import org.apache.hop.datavault.metadata.DvSourcePipelineBuilder;
 import org.apache.hop.datavault.metadata.IDvSource;
 import org.apache.hop.datavault.metadata.IDvTable;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
@@ -91,8 +87,7 @@ public abstract class DvDatabaseSourcePipelineBuilder extends DvSourcePipelineBu
         createTableInput(sourceTransformName, sourceDbMeta, querySql, location);
     pipelineMeta.addTransform(sourceTransformMeta);
 
-    resultTransform =
-        addRecordSourceFieldRenameIfNeeded(sourceTransformMeta, location);
+    resultTransform = addRecordSourceFieldRenameIfNeeded(sourceTransformMeta, location);
   }
 
   /**
@@ -111,8 +106,7 @@ public abstract class DvDatabaseSourcePipelineBuilder extends DvSourcePipelineBu
       return sourceTransform;
     }
     // Other databases honour SQL column aliases; SingleStore JDBC exposes the physical name.
-    if (sourceDbMeta == null
-        || !"SINGLESTORE".equalsIgnoreCase(sourceDbMeta.getPluginId())) {
+    if (sourceDbMeta == null || !"SINGLESTORE".equalsIgnoreCase(sourceDbMeta.getPluginId())) {
       return sourceTransform;
     }
 

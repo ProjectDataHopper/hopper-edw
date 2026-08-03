@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -70,8 +68,7 @@ class DvAiConversationSessionTest {
     DvAiConversationSession session = new DvAiConversationSession();
     DvAiProposal proposal = new DvAiProposal();
     proposal.setType(DvAiProposal.Type.RENAME_TABLE);
-    proposal.setParameters(
-        java.util.Map.of("tableName", "Hub", "newName", "HUB_CUSTOMER"));
+    proposal.setParameters(java.util.Map.of("tableName", "Hub", "newName", "HUB_CUSTOMER"));
 
     session.recordApplied(0, List.of(proposal));
 

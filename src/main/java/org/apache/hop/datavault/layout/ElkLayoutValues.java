@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.layout;
 
 import org.apache.hop.datavault.hopgui.EnumDialogSupport;
@@ -58,8 +56,7 @@ public final class ElkLayoutValues {
     if (value == null || value.isBlank()) {
       return defaultValue;
     }
-    E byDescription =
-        IEnumHasCodeAndDescription.lookupDescription(enumClass, value.trim(), null);
+    E byDescription = IEnumHasCodeAndDescription.lookupDescription(enumClass, value.trim(), null);
     if (byDescription != null) {
       return byDescription;
     }

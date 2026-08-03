@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.catalog.metadata;
 
 import java.util.ArrayList;
@@ -30,7 +29,8 @@ import org.apache.hop.core.search.SearchableAnalyserPlugin;
 @SearchableAnalyserPlugin(
     id = "DataCatalogMetaSearchableAnalyser",
     name = "Search in data catalog connection metadata")
-public class DataCatalogMetaSearchableAnalyser extends BaseMetadataSearchableAnalyser<DataCatalogMeta>
+public class DataCatalogMetaSearchableAnalyser
+    extends BaseMetadataSearchableAnalyser<DataCatalogMeta>
     implements ISearchableAnalyser<DataCatalogMeta> {
 
   @Override

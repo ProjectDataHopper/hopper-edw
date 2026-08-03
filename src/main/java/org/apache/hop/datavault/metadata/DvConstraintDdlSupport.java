@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.ArrayList;
@@ -163,7 +162,9 @@ public final class DvConstraintDdlSupport {
 
     if (satellite.hasDrivingKey()) {
       String drivingKey =
-          variables != null ? variables.resolve(satellite.getDrivingKey()) : satellite.getDrivingKey();
+          variables != null
+              ? variables.resolve(satellite.getDrivingKey())
+              : satellite.getDrivingKey();
       addIfPresent(columns, drivingKey);
     }
 
@@ -222,7 +223,8 @@ public final class DvConstraintDdlSupport {
         continue;
       }
       // Distinct constraint names when the same parent hub is referenced by multiple role columns.
-      String suffix = childHash.equals(parentHash) ? parentTable : parentTable + "_" + (++roleIndex);
+      String suffix =
+          childHash.equals(parentHash) ? parentTable : parentTable + "_" + (++roleIndex);
       fks.add(
           new ForeignKeySpec(
               constraintName("fk", childTable, suffix),
@@ -534,8 +536,10 @@ public final class DvConstraintDdlSupport {
       if (dvTarget == null) {
         return false;
       }
-      String bvName = variables != null ? variables.resolve(bvTarget.getName()) : bvTarget.getName();
-      String dvName = variables != null ? variables.resolve(dvTarget.getName()) : dvTarget.getName();
+      String bvName =
+          variables != null ? variables.resolve(bvTarget.getName()) : bvTarget.getName();
+      String dvName =
+          variables != null ? variables.resolve(dvTarget.getName()) : dvTarget.getName();
       return bvName != null && bvName.equalsIgnoreCase(dvName);
     } catch (Exception e) {
       return false;
@@ -624,7 +628,9 @@ public final class DvConstraintDdlSupport {
         continue;
       }
       String fk =
-          variables != null ? variables.resolve(ref.getForeignKeyColumn()) : ref.getForeignKeyColumn();
+          variables != null
+              ? variables.resolve(ref.getForeignKeyColumn())
+              : ref.getForeignKeyColumn();
       if (Utils.isEmpty(fk) && model != null) {
         DmDimension dim =
             DmDimensionResolutionSupport.resolveDimension(
@@ -763,7 +769,9 @@ public final class DvConstraintDdlSupport {
       return;
     }
     String fk =
-        variables != null ? variables.resolve(role.getForeignKeyColumn()) : role.getForeignKeyColumn();
+        variables != null
+            ? variables.resolve(role.getForeignKeyColumn())
+            : role.getForeignKeyColumn();
     if (Utils.isEmpty(fk)) {
       fk = DmLayoutSupport.defaultFactForeignKeyColumn(dimension, role, config, variables);
     }

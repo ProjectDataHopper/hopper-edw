@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -95,33 +93,24 @@ class ExecutionMapViewFilterTest {
 
   private static ExecutionMapDocument runRetailUpdateDocument() {
     ExecutionMapDocument document = new ExecutionMapDocument();
-    document
-        .getNodesOrEmpty()
-        .add(node("root", ExecutionMapNodeType.ROOT_WORKFLOW, null));
+    document.getNodesOrEmpty().add(node("root", ExecutionMapNodeType.ROOT_WORKFLOW, null));
     document
         .getNodesOrEmpty()
         .add(node("run-retail-initial", ExecutionMapNodeType.WORKFLOW, "root"));
-    document
-        .getNodesOrEmpty()
-        .add(node("update-6-times", ExecutionMapNodeType.PIPELINE, "root"));
+    document.getNodesOrEmpty().add(node("update-6-times", ExecutionMapNodeType.PIPELINE, "root"));
     document
         .getNodesOrEmpty()
         .add(node("run-retail-update", ExecutionMapNodeType.WORKFLOW, "update-6-times"));
     document
         .getNodesOrEmpty()
         .add(
-            node(
-                "write-load-control-context",
-                ExecutionMapNodeType.PIPELINE,
-                "run-retail-update"));
+            node("write-load-control-context", ExecutionMapNodeType.PIPELINE, "run-retail-update"));
     document
         .getNodesOrEmpty()
-        .add(
-            node("load-e2e-sources-to-crm", ExecutionMapNodeType.PIPELINE, "run-retail-initial"));
+        .add(node("load-e2e-sources-to-crm", ExecutionMapNodeType.PIPELINE, "run-retail-initial"));
     document
         .getNodesOrEmpty()
-        .add(
-            node("update-retail-dv-bv-dm", ExecutionMapNodeType.WORKFLOW, "run-retail-initial"));
+        .add(node("update-retail-dv-bv-dm", ExecutionMapNodeType.WORKFLOW, "run-retail-initial"));
     document
         .getEdgesOrEmpty()
         .add(edge(ExecutionMapEdgeType.CONTAINS, "run-retail-update", "load-e2e-sources-to-crm"));
@@ -134,12 +123,8 @@ class ExecutionMapViewFilterTest {
   private static ExecutionMapDocument sharedChildDocument() {
     ExecutionMapDocument document = new ExecutionMapDocument();
     document.getNodesOrEmpty().add(node("root", ExecutionMapNodeType.ROOT_WORKFLOW, null));
-    document
-        .getNodesOrEmpty()
-        .add(node("first-parent", ExecutionMapNodeType.WORKFLOW, "root"));
-    document
-        .getNodesOrEmpty()
-        .add(node("second-parent", ExecutionMapNodeType.WORKFLOW, "root"));
+    document.getNodesOrEmpty().add(node("first-parent", ExecutionMapNodeType.WORKFLOW, "root"));
+    document.getNodesOrEmpty().add(node("second-parent", ExecutionMapNodeType.WORKFLOW, "root"));
     document
         .getNodesOrEmpty()
         .add(node("shared-child", ExecutionMapNodeType.PIPELINE, "first-parent"));
@@ -156,15 +141,9 @@ class ExecutionMapViewFilterTest {
     document.getNodesOrEmpty().add(node("sibling", ExecutionMapNodeType.BV_UPDATE, "root"));
     document.getNodesOrEmpty().add(node("grandchild", ExecutionMapNodeType.PIPELINE, "child"));
 
-    document
-        .getEdgesOrEmpty()
-        .add(edge(ExecutionMapEdgeType.CONTAINS, "root", "child"));
-    document
-        .getEdgesOrEmpty()
-        .add(edge(ExecutionMapEdgeType.EXECUTES, "root", "child"));
-    document
-        .getEdgesOrEmpty()
-        .add(edge(ExecutionMapEdgeType.MODEL_LINK, "child", "grandchild"));
+    document.getEdgesOrEmpty().add(edge(ExecutionMapEdgeType.CONTAINS, "root", "child"));
+    document.getEdgesOrEmpty().add(edge(ExecutionMapEdgeType.EXECUTES, "root", "child"));
+    document.getEdgesOrEmpty().add(edge(ExecutionMapEdgeType.MODEL_LINK, "child", "grandchild"));
     return document;
   }
 

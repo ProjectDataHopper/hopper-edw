@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import java.util.ArrayList;
@@ -90,7 +88,8 @@ public class DmPeriodicSnapshotFact extends DmTableBase implements IDmFactLikeTa
       IVariables variables,
       DimensionalModel model) {
     super.check(remarks, metadataProvider, variables, model);
-    DmValidationSupport.validatePeriodicSnapshotFact(remarks, this, model, metadataProvider, variables);
+    DmValidationSupport.validatePeriodicSnapshotFact(
+        remarks, this, model, metadataProvider, variables);
   }
 
   @Override

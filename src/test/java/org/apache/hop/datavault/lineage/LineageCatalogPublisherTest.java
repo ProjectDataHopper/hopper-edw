@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.lineage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -65,8 +64,7 @@ class LineageCatalogPublisherTest {
   void setUp() throws Exception {
     variables = new Variables();
     variables.setVariable(
-        "PROJECT_HOME",
-        Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
+        "PROJECT_HOME", Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
 
     metadataProvider = new MemoryMetadataProvider();
     Path catalogDir = Files.createTempDirectory("lineage-catalog-publish-test");
@@ -96,8 +94,7 @@ class LineageCatalogPublisherTest {
         "expected snapshot + at least one table (got " + result.getLineageRecordCount() + ")");
 
     String namespace =
-        LineageCatalogNamespaces.projectLineageNamespace(
-            variables, LineageLayer.DV, "retail-360");
+        LineageCatalogNamespaces.projectLineageNamespace(variables, LineageLayer.DV, "retail-360");
     assertEquals("hop/retail-example/lineage/dv/retail-360", namespace);
 
     RecordDefinitionRegistry registry = RecordDefinitionRegistry.getInstance();
@@ -154,8 +151,7 @@ class LineageCatalogPublisherTest {
     assertTrue(second.isSuccess());
 
     String namespace =
-        LineageCatalogNamespaces.projectLineageNamespace(
-            variables, LineageLayer.DV, "retail-360");
+        LineageCatalogNamespaces.projectLineageNamespace(variables, LineageLayer.DV, "retail-360");
     RecordDefinition sat =
         RecordDefinitionRegistry.getInstance()
             .read(

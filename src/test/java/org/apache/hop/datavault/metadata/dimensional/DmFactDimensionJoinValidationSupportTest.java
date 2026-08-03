@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -138,8 +136,7 @@ class DmFactDimensionJoinValidationSupportTest {
         new Variables());
 
     assertEquals(2, remarks.size());
-    assertTrue(
-        remarks.stream().anyMatch(r -> r.getText().contains("Date or Timestamp")));
+    assertTrue(remarks.stream().anyMatch(r -> r.getText().contains("Date or Timestamp")));
     assertTrue(remarks.stream().anyMatch(r -> r.getText().contains("must be Integer")));
   }
 

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.quality.engine.evaluators;
 
 import java.util.ArrayList;
@@ -39,15 +37,29 @@ import org.apache.hop.quality.profile.FieldProfile;
  */
 public final class RegexEvaluator implements IDataQualityRuleEvaluator {
 
-  /** @deprecated use {@link RegexSupport#MATCH_MODE_FULL} */
+  /**
+   * @deprecated use {@link RegexSupport#MATCH_MODE_FULL}
+   */
   public static final String MATCH_MODE_FULL = RegexSupport.MATCH_MODE_FULL;
-  /** @deprecated use {@link RegexSupport#MATCH_MODE_FIND} */
+
+  /**
+   * @deprecated use {@link RegexSupport#MATCH_MODE_FIND}
+   */
   public static final String MATCH_MODE_FIND = RegexSupport.MATCH_MODE_FIND;
-  /** @deprecated use {@link RegexSupport#MATCH_MODE_PARTIAL} */
+
+  /**
+   * @deprecated use {@link RegexSupport#MATCH_MODE_PARTIAL}
+   */
   public static final String MATCH_MODE_PARTIAL = RegexSupport.MATCH_MODE_PARTIAL;
-  /** @deprecated use {@link RegexSupport#PATH_PUSHDOWN} */
+
+  /**
+   * @deprecated use {@link RegexSupport#PATH_PUSHDOWN}
+   */
   public static final String PATH_PUSHDOWN = RegexSupport.PATH_PUSHDOWN;
-  /** @deprecated use {@link RegexSupport#PATH_SAMPLE} */
+
+  /**
+   * @deprecated use {@link RegexSupport#PATH_SAMPLE}
+   */
   public static final String PATH_SAMPLE = RegexSupport.PATH_SAMPLE;
 
   @Override
@@ -100,8 +112,7 @@ public final class RegexEvaluator implements IDataQualityRuleEvaluator {
                   "nullCount", String.valueOf(field.getNullCount()), "nullAllowed", "false")));
     }
 
-    FieldProfile.RegexRuleProfile regexProfile =
-        field.findRegexProfile(RegexSupport.ruleKey(rule));
+    FieldProfile.RegexRuleProfile regexProfile = field.findRegexProfile(RegexSupport.ruleKey(rule));
 
     if (regexProfile != null
         && RegexSupport.PATH_PUSHDOWN.equalsIgnoreCase(regexProfile.getPath())) {
@@ -109,20 +120,13 @@ public final class RegexEvaluator implements IDataQualityRuleEvaluator {
       if (mismatch != null && mismatch > 0) {
         Map<String, String> metrics =
             EvaluatorSupport.metrics(
-                "mismatchCount",
-                String.valueOf(mismatch),
-                "path",
-                RegexSupport.PATH_PUSHDOWN);
+                "mismatchCount", String.valueOf(mismatch), "path", RegexSupport.PATH_PUSHDOWN);
         findings.add(
             EvaluatorSupport.finding(
                 rule,
                 context,
                 fieldName,
-                "Field '"
-                    + fieldName
-                    + "' has "
-                    + mismatch
-                    + " value(s) not matching regex",
+                "Field '" + fieldName + "' has " + mismatch + " value(s) not matching regex",
                 "mismatchCount=" + mismatch,
                 "pattern=" + patternText,
                 metrics));
@@ -146,8 +150,7 @@ public final class RegexEvaluator implements IDataQualityRuleEvaluator {
     }
 
     // Sample / client path (collector metrics)
-    if (regexProfile != null
-        && RegexSupport.PATH_SAMPLE.equalsIgnoreCase(regexProfile.getPath())) {
+    if (regexProfile != null && RegexSupport.PATH_SAMPLE.equalsIgnoreCase(regexProfile.getPath())) {
       long mismatchDistinct = regexProfile.getSampleMismatchCount();
       long mismatchRows = regexProfile.getSampleMismatchRows();
       if (mismatchDistinct > 0 || mismatchRows > 0) {
@@ -171,9 +174,7 @@ public final class RegexEvaluator implements IDataQualityRuleEvaluator {
                 rule,
                 context,
                 fieldName,
-                "Field '"
-                    + fieldName
-                    + "' has sample value(s) not matching regex",
+                "Field '" + fieldName + "' has sample value(s) not matching regex",
                 "mismatchDistinct="
                     + mismatchDistinct
                     + (mismatchRows > 0 ? " mismatchRows=" + mismatchRows : ""),
@@ -192,9 +193,7 @@ public final class RegexEvaluator implements IDataQualityRuleEvaluator {
                 rule,
                 context,
                 fieldName,
-                "REGEX coverage incomplete (sample limit "
-                    + regexProfile.getSampleLimit()
-                    + ")",
+                "REGEX coverage incomplete (sample limit " + regexProfile.getSampleLimit() + ")",
                 "sampleSize=" + regexProfile.getSampleSize(),
                 "full coverage",
                 metrics,
@@ -268,10 +267,7 @@ public final class RegexEvaluator implements IDataQualityRuleEvaluator {
     if (invalidDistinct > 0 || invalidRows > 0) {
       Map<String, String> metrics =
           EvaluatorSupport.metrics(
-              "path",
-              RegexSupport.PATH_SAMPLE,
-              "sampleSize",
-              String.valueOf(sampleSize));
+              "path", RegexSupport.PATH_SAMPLE, "sampleSize", String.valueOf(sampleSize));
       metrics.put("mismatchDistinct", String.valueOf(invalidDistinct));
       metrics.put("mismatchRows", String.valueOf(invalidRows));
       metrics.put("mismatchCount", String.valueOf(invalidRows));
@@ -280,11 +276,7 @@ public final class RegexEvaluator implements IDataQualityRuleEvaluator {
               rule,
               context,
               fieldName,
-              "Field '"
-                  + fieldName
-                  + "' has "
-                  + invalidRows
-                  + " value(s) not matching regex",
+              "Field '" + fieldName + "' has " + invalidRows + " value(s) not matching regex",
               "mismatchCount=" + invalidRows,
               "pattern=" + patternText,
               metrics));
@@ -312,22 +304,30 @@ public final class RegexEvaluator implements IDataQualityRuleEvaluator {
     return findings;
   }
 
-  /** @deprecated use {@link RegexSupport#ruleKey(DataQualityRule)} */
+  /**
+   * @deprecated use {@link RegexSupport#ruleKey(DataQualityRule)}
+   */
   public static String ruleKey(DataQualityRule rule) {
     return RegexSupport.ruleKey(rule);
   }
 
-  /** @deprecated use {@link RegexSupport#isFullMatch(DataQualityRule)} */
+  /**
+   * @deprecated use {@link RegexSupport#isFullMatch(DataQualityRule)}
+   */
   public static boolean isFullMatch(DataQualityRule rule) {
     return RegexSupport.isFullMatch(rule);
   }
 
-  /** @deprecated use {@link RegexSupport#compile(DataQualityRule, String)} */
+  /**
+   * @deprecated use {@link RegexSupport#compile(DataQualityRule, String)}
+   */
   public static Pattern compile(DataQualityRule rule, String patternText) {
     return RegexSupport.compile(rule, patternText);
   }
 
-  /** @deprecated use {@link RegexSupport#matches(Pattern, String, boolean)} */
+  /**
+   * @deprecated use {@link RegexSupport#matches(Pattern, String, boolean)}
+   */
   public static boolean matches(Pattern pattern, String value, boolean fullMatch) {
     return RegexSupport.matches(pattern, value, fullMatch);
   }

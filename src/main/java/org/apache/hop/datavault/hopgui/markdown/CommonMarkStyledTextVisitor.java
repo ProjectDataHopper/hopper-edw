@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.markdown;
 
 import java.util.ArrayList;
@@ -31,9 +29,9 @@ import org.commonmark.ext.gfm.tables.TableRow;
 import org.commonmark.ext.task.list.items.TaskListItemMarker;
 import org.commonmark.node.AbstractVisitor;
 import org.commonmark.node.BulletList;
+import org.commonmark.node.Code;
 import org.commonmark.node.CustomBlock;
 import org.commonmark.node.CustomNode;
-import org.commonmark.node.Code;
 import org.commonmark.node.Document;
 import org.commonmark.node.Emphasis;
 import org.commonmark.node.FencedCodeBlock;

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.transform.recordinput;
 
 import java.text.SimpleDateFormat;
@@ -60,7 +58,7 @@ public class RecordDefinitionInput
   @Override
   public boolean processRow() throws HopException {
     Object[] row = getRow();
-    if (row==null && meta.isSelectFromInput()) {
+    if (row == null && meta.isSelectFromInput()) {
       setOutputDone();
       return false;
     }
@@ -105,11 +103,7 @@ public class RecordDefinitionInput
             if (resolvedConnectionName.equalsIgnoreCase(ref.getCatalogConnectionName())) {
               RecordDefinition def =
                   RecordDefinitionRegistry.getInstance()
-                      .read(
-                          resolvedConnectionName,
-                          ref.getKey(),
-                          this,
-                          metadataProvider);
+                      .read(resolvedConnectionName, ref.getKey(), this, metadataProvider);
               if (def != null) {
                 definitions.add(def);
               }
@@ -160,7 +154,8 @@ public class RecordDefinitionInput
       }
       return true;
     } else {
-      if (data.definitionsToOutput == null || data.currentDefIndex >= data.definitionsToOutput.size()) {
+      if (data.definitionsToOutput == null
+          || data.currentDefIndex >= data.definitionsToOutput.size()) {
         setOutputDone();
         return false;
       }
@@ -189,8 +184,7 @@ public class RecordDefinitionInput
           outputRow[fIdx + 1] = valueMeta.getTypeDesc();
           outputRow[fIdx + 2] = (long) valueMeta.getLength();
           outputRow[fIdx + 3] = (long) valueMeta.getPrecision();
-          outputRow[fIdx + 4] =
-              (long) primaryKeyPositionForField(definition, valueMeta.getName());
+          outputRow[fIdx + 4] = (long) primaryKeyPositionForField(definition, valueMeta.getName());
 
           putRow(data.outputRowMeta, outputRow);
         }
@@ -226,8 +220,10 @@ public class RecordDefinitionInput
       outputRow[startIdx + 6] = origin.getModelFilename();
       outputRow[startIdx + 7] = origin.getModelElementName();
       outputRow[startIdx + 8] = origin.getHopProject();
-      outputRow[startIdx + 9] = origin.getCreatedAt() != null ? formatDate(origin.getCreatedAt()) : null;
-      outputRow[startIdx + 10] = origin.getUpdatedAt() != null ? formatDate(origin.getUpdatedAt()) : null;
+      outputRow[startIdx + 9] =
+          origin.getCreatedAt() != null ? formatDate(origin.getCreatedAt()) : null;
+      outputRow[startIdx + 10] =
+          origin.getUpdatedAt() != null ? formatDate(origin.getUpdatedAt()) : null;
       outputRow[startIdx + 11] = origin.getUpdatedBy();
       outputRow[startIdx + 12] = origin.getLastWorkflow();
       outputRow[startIdx + 13] = origin.getLastPipeline();

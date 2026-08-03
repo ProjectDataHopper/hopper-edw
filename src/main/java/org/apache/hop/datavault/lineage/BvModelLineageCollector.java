@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.lineage;
 
 import java.util.Date;
@@ -137,8 +136,7 @@ public final class BvModelLineageCollector {
 
     if (table.isIncludeHashKey()) {
       lineage.addReason(
-          LineageReasonFactory.standardColumn(
-              "parent_hash_key", "includeHashKey", "true"));
+          LineageReasonFactory.standardColumn("parent_hash_key", "includeHashKey", "true"));
     }
 
     return lineage;
@@ -194,8 +192,7 @@ public final class BvModelLineageCollector {
     TableLineage lineage = new TableLineage();
     lineage.setLayer(LineageLayer.BV);
     lineage.setLogicalName(table.getName());
-    String physical =
-        !Utils.isEmpty(table.getTableName()) ? table.getTableName() : table.getName();
+    String physical = !Utils.isEmpty(table.getTableName()) ? table.getTableName() : table.getName();
     lineage.setPhysicalTableName(physical);
     lineage.setTableType(tableType);
     lineage.setModelName(model.getName());
@@ -226,8 +223,7 @@ public final class BvModelLineageCollector {
     contribution.setSourceKind(TableSourceKind.CONFIG);
     contribution.setSourceName("BusinessVaultConfiguration");
     contribution.setTransform(FieldTransform.DERIVED);
-    contribution.addReason(
-        LineageReasonFactory.standardColumn(fieldName, configKey, fieldName));
+    contribution.addReason(LineageReasonFactory.standardColumn(fieldName, configKey, fieldName));
     field.addContribution(contribution);
     lineage.addField(field);
   }

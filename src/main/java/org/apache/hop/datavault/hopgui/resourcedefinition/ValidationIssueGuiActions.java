@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.resourcedefinition;
 
 import java.util.ArrayList;
@@ -52,7 +50,9 @@ public final class ValidationIssueGuiActions {
     }
     List<SourceUsage> filtered = new ArrayList<>();
     for (SourceUsage usage : validation.usages()) {
-      if (usage != null && usage.mappedFields() != null && usage.mappedFields().contains(fieldName)) {
+      if (usage != null
+          && usage.mappedFields() != null
+          && usage.mappedFields().contains(fieldName)) {
         filtered.add(usage);
       }
     }
@@ -121,10 +121,6 @@ public final class ValidationIssueGuiActions {
     }
     RecordDefinition definition = loadDefinition(validation, variables, metadataProvider);
     ValidationAcknowledgementSupport.revoke(
-        validation.catalogConnection(),
-        definition,
-        issue.issueId(),
-        variables,
-        metadataProvider);
+        validation.catalogConnection(), definition, issue.issueId(), variables, metadataProvider);
   }
 }

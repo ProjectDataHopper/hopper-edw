@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,7 +48,8 @@ class DvUpdateWorkflowSupportTest {
   void postgresBulkLoadUsesPipelineActionWithCorrectCsvPath() throws Exception {
     if (!DvBulkLoadPluginSupport.isTransformPluginAvailable(
             DvBulkLoadPluginSupport.PG_BULK_LOADER_ID)
-        || !DvBulkLoadPluginSupport.isActionPluginAvailable(DvUpdateWorkflowSupport.PIPELINE_ACTION_ID)) {
+        || !DvBulkLoadPluginSupport.isActionPluginAvailable(
+            DvUpdateWorkflowSupport.PIPELINE_ACTION_ID)) {
       return;
     }
 
@@ -125,7 +124,8 @@ class DvUpdateWorkflowSupportTest {
         new DatabaseMeta("mysql-test", "MySQL", "Native", "", "localhost", "test", "root", "");
     Variables variables = new Variables();
 
-    PipelineMeta pipelineMeta = buildStagingPipeline(config, variables, databaseMeta, "hub-customer-src");
+    PipelineMeta pipelineMeta =
+        buildStagingPipeline(config, variables, databaseMeta, "hub-customer-src");
 
     List<DvUpdateWorkflowSupport.DvStagingLoadDescriptor> descriptors =
         DvUpdateWorkflowSupport.buildStagingDescriptors(
@@ -141,7 +141,10 @@ class DvUpdateWorkflowSupportTest {
     long pipelineActions =
         workflowMeta.getActions().stream()
             .filter(action -> action.getAction() != null)
-            .filter(action -> DvUpdateWorkflowSupport.PIPELINE_ACTION_ID.equals(action.getAction().getPluginId()))
+            .filter(
+                action ->
+                    DvUpdateWorkflowSupport.PIPELINE_ACTION_ID.equals(
+                        action.getAction().getPluginId()))
             .count();
     long bulkActions =
         workflowMeta.getActions().stream()
@@ -154,9 +157,7 @@ class DvUpdateWorkflowSupportTest {
 
     assertEquals(1, pipelineActions);
     assertEquals(4, bulkActions);
-    assertEquals(
-        5,
-        workflowMeta.getWorkflowHops().size()); // Start -> pipeline -> 4 bulk actions
+    assertEquals(5, workflowMeta.getWorkflowHops().size()); // Start -> pipeline -> 4 bulk actions
     assertTrue(
         workflowMeta.getActions().stream()
             .map(ActionMeta::getName)
@@ -184,14 +185,12 @@ class DvUpdateWorkflowSupportTest {
     PipelineMeta pipelineMeta = new PipelineMeta();
     pipelineMeta.setName(pipelineName);
     pipelineMeta.setFilename("/tmp/dv2/vault1/0001-" + pipelineName + ".hpl");
-    TransformMeta predecessor =
-        new TransformMeta("Constant", "add_LOAD_DATE", new ConstantMeta());
+    TransformMeta predecessor = new TransformMeta("Constant", "add_LOAD_DATE", new ConstantMeta());
 
     IRowMeta layout = new RowMeta();
     layout.addValueMeta(new ValueMetaString("CUSTOMER_HK"));
 
-    DvTargetLoadSupport.addTargetLoad(
-        ctx, pipelineMeta, layout, predecessor, Set.of("flag"));
+    DvTargetLoadSupport.addTargetLoad(ctx, pipelineMeta, layout, predecessor, Set.of("flag"));
     return pipelineMeta;
   }
 }

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -70,8 +68,7 @@ class ModelXmlWriteSupportTest {
     assertThrows(
         HopException.class,
         () ->
-            ModelXmlWriteSupport.formatModelXml(
-                "dimensional-model", "<name>dm</name>", variables));
+            ModelXmlWriteSupport.formatModelXml("dimensional-model", "<name>dm</name>", variables));
   }
 
   @Test

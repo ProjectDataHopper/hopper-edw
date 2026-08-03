@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.hopgui.file.sourcemodel;
 
 import java.util.ArrayList;
@@ -38,10 +37,7 @@ public class HopGuiSourceTableContext extends BaseGuiContextHandler implements I
   private final Point click;
 
   public HopGuiSourceTableContext(
-      SourceModel model,
-      HopGuiSourceModelGraph sourceModelGraph,
-      SourceTable table,
-      Point click) {
+      SourceModel model, HopGuiSourceModelGraph sourceModelGraph, SourceTable table, Point click) {
     this.model = model;
     this.sourceModelGraph = sourceModelGraph;
     this.table = table;

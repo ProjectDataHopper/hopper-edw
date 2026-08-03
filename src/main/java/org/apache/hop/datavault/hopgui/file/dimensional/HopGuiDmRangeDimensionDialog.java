@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.dimensional;
 
 import java.util.List;
@@ -24,34 +22,33 @@ import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.datavault.metadata.dimensional.DmRangeBand;
-import org.apache.hop.datavault.metadata.dimensional.DmRangeDimension;
-import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
-import org.apache.hop.datavault.metadata.dimensional.IDmTable;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
+import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
+import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.datavault.hopgui.lineage.LineageTabSupport;
 import org.apache.hop.datavault.lineage.DmModelLineageCollector;
 import org.apache.hop.datavault.lineage.LineageSnapshot;
 import org.apache.hop.datavault.lineage.TableLineage;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.ui.core.dialog.ErrorDialog;
+import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
+import org.apache.hop.datavault.metadata.dimensional.DmRangeBand;
+import org.apache.hop.datavault.metadata.dimensional.DmRangeDimension;
+import org.apache.hop.datavault.metadata.dimensional.IDmTable;
 import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.FormDataBuilder;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
+import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.widget.ColumnInfo;
 import org.apache.hop.ui.core.widget.TableView;
 import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
-import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
-import org.apache.hop.datavault.hopgui.help.HelpTopics;
 
 /** Dialog to edit a metadata-only {@link DmRangeDimension} (NumberRange band definitions). */
 public class HopGuiDmRangeDimensionDialog {
@@ -114,8 +111,7 @@ public class HopGuiDmRangeDimensionDialog {
             ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Label"));
     wValidate.addListener(SWT.Selection, e -> validate());
     Button wLineage = new Button(shell, SWT.PUSH);
-    wLineage.setText(
-        BaseMessages.getString(LineageTabSupport.class, "LineageTab.ShowButton"));
+    wLineage.setText(BaseMessages.getString(LineageTabSupport.class, "LineageTab.ShowButton"));
     wLineage.setToolTipText(
         BaseMessages.getString(LineageTabSupport.class, "LineageTab.ShowButton.ToolTip"));
     wLineage.addListener(SWT.Selection, e -> showLineage());
@@ -130,14 +126,16 @@ public class HopGuiDmRangeDimensionDialog {
     Label wlName = new Label(shell, SWT.RIGHT);
     wlName.setText(BaseMessages.getString(PKG, "HopGuiDmRangeDimensionDialog.Name.Label"));
     PropsUi.setLook(wlName);
-    wlName.setLayoutData(new FormDataBuilder().left().top(0, margin).right(middle, -margin).result());
+    wlName.setLayoutData(
+        new FormDataBuilder().left().top(0, margin).right(middle, -margin).result());
 
     wName = new Text(shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wName);
     wName.setLayoutData(new FormDataBuilder().left(middle, 0).top(0, margin).right().result());
 
     Label wlDescription = new Label(shell, SWT.RIGHT);
-    wlDescription.setText(BaseMessages.getString(PKG, "HopGuiDmRangeDimensionDialog.Description.Label"));
+    wlDescription.setText(
+        BaseMessages.getString(PKG, "HopGuiDmRangeDimensionDialog.Description.Label"));
     PropsUi.setLook(wlDescription);
     wlDescription.setLayoutData(
         new FormDataBuilder().left().top(wName, margin).right(middle, -margin).result());
@@ -183,9 +181,11 @@ public class HopGuiDmRangeDimensionDialog {
               false)
         };
     bandColumns[0].setToolTip(
-        BaseMessages.getString(PKG, "HopGuiDmRangeDimensionDialog.Bands.Column.LowerBound.ToolTip"));
+        BaseMessages.getString(
+            PKG, "HopGuiDmRangeDimensionDialog.Bands.Column.LowerBound.ToolTip"));
     bandColumns[1].setToolTip(
-        BaseMessages.getString(PKG, "HopGuiDmRangeDimensionDialog.Bands.Column.UpperBound.ToolTip"));
+        BaseMessages.getString(
+            PKG, "HopGuiDmRangeDimensionDialog.Bands.Column.UpperBound.ToolTip"));
     bandColumns[2].setToolTip(
         BaseMessages.getString(PKG, "HopGuiDmRangeDimensionDialog.Bands.Column.Value.ToolTip"));
 
@@ -200,7 +200,12 @@ public class HopGuiDmRangeDimensionDialog {
             null,
             PropsUi.getInstance());
     wBands.setLayoutData(
-        new FormDataBuilder().left().top(wlBands, margin).right().bottom(wOk, -2 * margin).result());
+        new FormDataBuilder()
+            .left()
+            .top(wlBands, margin)
+            .right()
+            .bottom(wOk, -2 * margin)
+            .result());
 
     getData();
     shell.layout(true, true);
@@ -257,7 +262,8 @@ public class HopGuiDmRangeDimensionDialog {
 
   private void validate() {
     try {
-      DimensionalModel draft = ModelDialogValidationSupport.cloneDimensionalModel(model, metadataProvider);
+      DimensionalModel draft =
+          ModelDialogValidationSupport.cloneDimensionalModel(model, metadataProvider);
       DmRangeDimension draftTable = locateDraftTable(draft);
       applyWidgetsToTable(draftTable);
       List<ICheckResult> remarks = draft.check(metadataProvider, variables);
@@ -265,9 +271,12 @@ public class HopGuiDmRangeDimensionDialog {
     } catch (Exception ex) {
       new ErrorDialog(
           shell,
-          BaseMessages.getString(ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Label"),
           BaseMessages.getString(
-              ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Error", ex.getMessage()),
+              ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Label"),
+          BaseMessages.getString(
+              ModelDialogValidationSupport.class,
+              "ModelTableDialog.Validate.Error",
+              ex.getMessage()),
           ex);
     }
   }

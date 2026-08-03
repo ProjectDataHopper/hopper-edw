@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import java.util.HashSet;
@@ -79,7 +77,9 @@ public final class DmValidationSupport {
           new CheckResult(
               ICheckResult.TYPE_RESULT_ERROR,
               BaseMessages.getString(
-                  PKG, "DmValidationSupport.CheckResult.MissingJunkKeyFields", junkDimension.getName()),
+                  PKG,
+                  "DmValidationSupport.CheckResult.MissingJunkKeyFields",
+                  junkDimension.getName()),
               junkDimension));
     }
     if (!DmJunkDimensionSupport.isFactEmbedded(junkDimension)) {
@@ -158,7 +158,8 @@ public final class DmValidationSupport {
     if (remarks == null || fact == null) {
       return;
     }
-    validateDimensionRoles(remarks, fact.getName(), fact.getDimensionRolesOrEmpty(), model, variables, fact);
+    validateDimensionRoles(
+        remarks, fact.getName(), fact.getDimensionRolesOrEmpty(), model, variables, fact);
     validateFactDimensionLookupDate(
         remarks, fact, fact.getDimensionRolesOrEmpty(), model, metadataProvider, variables);
     validateDegenerateDimensions(remarks, fact, model, metadataProvider, variables);
@@ -185,7 +186,8 @@ public final class DmValidationSupport {
                   PKG, "DmValidationSupport.CheckResult.MissingSnapshotDateField", fact.getName()),
               fact));
     }
-    validateDimensionRoles(remarks, fact.getName(), fact.getDimensionRolesOrEmpty(), model, variables, fact);
+    validateDimensionRoles(
+        remarks, fact.getName(), fact.getDimensionRolesOrEmpty(), model, variables, fact);
     validateFactDimensionLookupDate(
         remarks, fact, fact.getDimensionRolesOrEmpty(), model, metadataProvider, variables);
     validateMeasures(remarks, fact, variables);
@@ -213,7 +215,8 @@ public final class DmValidationSupport {
                   PKG, "DmValidationSupport.CheckResult.MissingGrainKeys", fact.getName()),
               fact));
     }
-    validateDimensionRoles(remarks, fact.getName(), fact.getDimensionRolesOrEmpty(), model, variables, fact);
+    validateDimensionRoles(
+        remarks, fact.getName(), fact.getDimensionRolesOrEmpty(), model, variables, fact);
     validateFactDimensionLookupDate(
         remarks, fact, fact.getDimensionRolesOrEmpty(), model, metadataProvider, variables);
     validateMeasures(remarks, fact, variables);
@@ -310,13 +313,11 @@ public final class DmValidationSupport {
           new CheckResult(
               ICheckResult.TYPE_RESULT_ERROR,
               BaseMessages.getString(
-                  PKG,
-                  "DmValidationSupport.CheckResult.UnknownBaseFact",
-                  fact.getName(),
-                  baseFact),
+                  PKG, "DmValidationSupport.CheckResult.UnknownBaseFact", fact.getName(), baseFact),
               fact));
     }
-    validateDimensionRoles(remarks, fact.getName(), fact.getDimensionRolesOrEmpty(), model, variables, fact);
+    validateDimensionRoles(
+        remarks, fact.getName(), fact.getDimensionRolesOrEmpty(), model, variables, fact);
     validateFactDimensionLookupDate(
         remarks, fact, fact.getDimensionRolesOrEmpty(), model, metadataProvider, variables);
     validateMeasures(remarks, fact, variables);
@@ -345,7 +346,8 @@ public final class DmValidationSupport {
         remarks.add(
             new CheckResult(
                 ICheckResult.TYPE_RESULT_ERROR,
-                BaseMessages.getString(PKG, "DmValidationSupport.CheckResult.MissingConformedLogicalName"),
+                BaseMessages.getString(
+                    PKG, "DmValidationSupport.CheckResult.MissingConformedLogicalName"),
                 null));
         continue;
       }
@@ -365,9 +367,7 @@ public final class DmValidationSupport {
             new CheckResult(
                 ICheckResult.TYPE_RESULT_ERROR,
                 BaseMessages.getString(
-                    PKG,
-                    "DmValidationSupport.CheckResult.MissingConformedDimension",
-                    logicalName),
+                    PKG, "DmValidationSupport.CheckResult.MissingConformedDimension", logicalName),
                 null));
         continue;
       }
@@ -410,22 +410,25 @@ public final class DmValidationSupport {
       return;
     }
     String externalModelPath = resolve(alias.getReferencedModelFilename(), variables);
-    if (aliasName != null
-        && aliasName.equals(referencedName)
-        && Utils.isEmpty(externalModelPath)) {
+    if (aliasName != null && aliasName.equals(referencedName) && Utils.isEmpty(externalModelPath)) {
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_ERROR,
               BaseMessages.getString(
-                  PKG,
-                  "DmValidationSupport.CheckResult.AliasReferencesSelf",
-                  aliasName),
+                  PKG, "DmValidationSupport.CheckResult.AliasReferencesSelf", aliasName),
               alias));
       return;
     }
     if (!Utils.isEmpty(externalModelPath)) {
       validateExternalDimensionAlias(
-          remarks, alias, aliasName, referencedName, externalModelPath, model, metadataProvider, variables);
+          remarks,
+          alias,
+          aliasName,
+          referencedName,
+          externalModelPath,
+          model,
+          metadataProvider,
+          variables);
     } else {
       validateLocalDimensionAlias(remarks, alias, aliasName, referencedName, model, variables);
     }
@@ -492,8 +495,7 @@ public final class DmValidationSupport {
               variables,
               metadataProvider);
     } catch (HopException e) {
-      remarks.add(
-          new CheckResult(ICheckResult.TYPE_RESULT_ERROR, e.getMessage(), alias));
+      remarks.add(new CheckResult(ICheckResult.TYPE_RESULT_ERROR, e.getMessage(), alias));
       return;
     }
 
@@ -537,13 +539,16 @@ public final class DmValidationSupport {
     }
 
     if (model != null) {
-      warnOnExternalConfigurationMismatch(remarks, alias, aliasName, model, externalModel, variables);
+      warnOnExternalConfigurationMismatch(
+          remarks, alias, aliasName, model, externalModel, variables);
     }
   }
 
   private static boolean hasCircularExternalReference(
       DimensionalModel referringModel, DimensionalModel externalModel, IVariables variables) {
-    if (referringModel == null || externalModel == null || Utils.isEmpty(referringModel.getFilename())) {
+    if (referringModel == null
+        || externalModel == null
+        || Utils.isEmpty(referringModel.getFilename())) {
       return false;
     }
     try {
@@ -912,9 +917,7 @@ public final class DmValidationSupport {
             new CheckResult(
                 ICheckResult.TYPE_RESULT_ERROR,
                 BaseMessages.getString(
-                    PKG,
-                    "DmValidationSupport.CheckResult.MissingRoleDimension",
-                    tableName),
+                    PKG, "DmValidationSupport.CheckResult.MissingRoleDimension", tableName),
                 source));
         continue;
       }
@@ -1007,10 +1010,12 @@ public final class DmValidationSupport {
           DmSourceFieldResolutionSupport.tryResolveSourceRowMeta(
               metadataProvider, variables, model, factTable);
       if (sourceRowMeta != null) {
-        available.addAll(sourceRowMeta.getValueMetaList().stream().map(IValueMeta::getName).toList());
+        available.addAll(
+            sourceRowMeta.getValueMetaList().stream().map(IValueMeta::getName).toList());
       }
     }
-    for (DmFactDegenerateDimension degenerateDimension : factLike.getDegenerateDimensionsOrEmpty()) {
+    for (DmFactDegenerateDimension degenerateDimension :
+        factLike.getDegenerateDimensionsOrEmpty()) {
       String fieldName =
           resolve(
               degenerateDimension != null ? degenerateDimension.getFieldName() : null, variables);
@@ -1087,8 +1092,7 @@ public final class DmValidationSupport {
       IDmFactLikeTable factLike, IVariables variables) {
     Set<String> reserved = new HashSet<>();
     if (factLike instanceof DmPeriodicSnapshotFact periodicSnapshotFact) {
-      String snapshotDateField =
-          resolve(periodicSnapshotFact.getSnapshotDateField(), variables);
+      String snapshotDateField = resolve(periodicSnapshotFact.getSnapshotDateField(), variables);
       if (!Utils.isEmpty(snapshotDateField)) {
         reserved.add(snapshotDateField);
       }
@@ -1126,7 +1130,8 @@ public final class DmValidationSupport {
       }
     }
     Set<String> degenerateNames = new HashSet<>();
-    for (DmFactDegenerateDimension degenerateDimension : factLike.getDegenerateDimensionsOrEmpty()) {
+    for (DmFactDegenerateDimension degenerateDimension :
+        factLike.getDegenerateDimensionsOrEmpty()) {
       String fieldName =
           resolve(
               degenerateDimension != null ? degenerateDimension.getFieldName() : null, variables);
@@ -1154,13 +1159,13 @@ public final class DmValidationSupport {
           DmSourceFieldResolutionSupport.tryResolveSourceRowMeta(
               metadataProvider, variables, model, factTable);
       if (sourceRowMeta != null) {
-        available.addAll(sourceRowMeta.getValueMetaList().stream().map(IValueMeta::getName).toList());
+        available.addAll(
+            sourceRowMeta.getValueMetaList().stream().map(IValueMeta::getName).toList());
       }
     }
     for (DmFactRangeDimensionRole rangeRole : factLike.getRangeDimensionRolesOrEmpty()) {
       String rangeDimensionName =
-          resolve(
-              rangeRole != null ? rangeRole.getRangeDimensionTableName() : null, variables);
+          resolve(rangeRole != null ? rangeRole.getRangeDimensionTableName() : null, variables);
       String sourceFieldName =
           resolve(rangeRole != null ? rangeRole.getSourceFieldName() : null, variables);
       String targetFieldName =
@@ -1317,7 +1322,8 @@ public final class DmValidationSupport {
           DmSourceFieldResolutionSupport.tryResolveSourceRowMeta(
               metadataProvider, variables, model, factTable);
       if (sourceRowMeta != null) {
-        available.addAll(sourceRowMeta.getValueMetaList().stream().map(IValueMeta::getName).toList());
+        available.addAll(
+            sourceRowMeta.getValueMetaList().stream().map(IValueMeta::getName).toList());
       }
     }
     for (DmFactJunkDimensionRole junkRole : factLike.getJunkDimensionRolesOrEmpty()) {
@@ -1363,9 +1369,7 @@ public final class DmValidationSupport {
       }
       for (DmNaturalKeyField keyField : junkDimension.getKeyFieldsOrEmpty()) {
         String keyName = resolve(keyField != null ? keyField.getFieldName() : null, variables);
-        if (!Utils.isEmpty(keyName)
-            && !available.isEmpty()
-            && !available.contains(keyName)) {
+        if (!Utils.isEmpty(keyName) && !available.isEmpty() && !available.contains(keyName)) {
           remarks.add(
               new CheckResult(
                   ICheckResult.TYPE_RESULT_ERROR,
@@ -1540,8 +1544,7 @@ public final class DmValidationSupport {
     if (Utils.isEmpty(sourceField)) {
       if (!Utils.isEmpty(naturalKey)
           && (factSourceFields.contains(naturalKey)
-              || sourceContainsField(
-                  source, naturalKey, variables, metadataProvider, model))) {
+              || sourceContainsField(source, naturalKey, variables, metadataProvider, model))) {
         sourceField = naturalKey;
       } else {
         remarks.add(
@@ -1652,8 +1655,7 @@ public final class DmValidationSupport {
     if (remarks == null || role == null || dimension == null) {
       return;
     }
-    if (role.isSkipDimensionLookup()
-        && role.isForceDimensionLookup()) {
+    if (role.isSkipDimensionLookup() && role.isForceDimensionLookup()) {
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_ERROR,
@@ -1697,9 +1699,7 @@ public final class DmValidationSupport {
       String lookupKey =
           DmLayoutSupport.resolveDimensionLookupKeyField(dimension, config, variables);
       String fkColumn = resolve(role.getForeignKeyColumn(), variables);
-      if (!Utils.isEmpty(lookupKey)
-          && !Utils.isEmpty(fkColumn)
-          && !lookupKey.equals(fkColumn)) {
+      if (!Utils.isEmpty(lookupKey) && !Utils.isEmpty(fkColumn) && !lookupKey.equals(fkColumn)) {
         remarks.add(
             new CheckResult(
                 ICheckResult.TYPE_RESULT_ERROR,
@@ -1714,7 +1714,8 @@ public final class DmValidationSupport {
       }
     }
     if (DmSurrogateKeySupport.shouldSkipFactDimensionLookup(role, dimension, config, variables)
-        && Utils.isEmpty(DmSurrogateKeySupport.resolveFactRoleSourceField(role, dimension, variables))) {
+        && Utils.isEmpty(
+            DmSurrogateKeySupport.resolveFactRoleSourceField(role, dimension, variables))) {
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_ERROR,
@@ -1726,7 +1727,8 @@ public final class DmValidationSupport {
               source));
     }
     if (role.isPreloadLookupCache()
-        && DmSurrogateKeySupport.shouldSkipFactDimensionLookup(role, dimension, config, variables)) {
+        && DmSurrogateKeySupport.shouldSkipFactDimensionLookup(
+            role, dimension, config, variables)) {
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_OK,
@@ -1883,7 +1885,8 @@ public final class DmValidationSupport {
                 dimension));
       }
     }
-    if (DmSurrogateKeySupport.resolveStrategy(dimension) == DmSurrogateKeyStrategy.USE_SOURCE_FIELD) {
+    if (DmSurrogateKeySupport.resolveStrategy(dimension)
+        == DmSurrogateKeyStrategy.USE_SOURCE_FIELD) {
       String sourceField =
           DmSurrogateKeySupport.resolveSurrogateKeySourceField(dimension, config, variables);
       if (!Utils.isEmpty(sourceField) && !available.contains(sourceField)) {
@@ -1959,7 +1962,8 @@ public final class DmValidationSupport {
             dimension);
       }
     }
-    if (DmSurrogateKeySupport.resolveStrategy(dimension) == DmSurrogateKeyStrategy.USE_SOURCE_FIELD) {
+    if (DmSurrogateKeySupport.resolveStrategy(dimension)
+        == DmSurrogateKeyStrategy.USE_SOURCE_FIELD) {
       String sourceField =
           DmSurrogateKeySupport.resolveSurrogateKeySourceField(dimension, config, variables);
       if (!Utils.isEmpty(sourceField)) {
@@ -2192,8 +2196,7 @@ public final class DmValidationSupport {
       return;
     }
     if (source.isRecordDefinitionSource()) {
-      DimensionalConfiguration config =
-          model != null ? model.getConfigurationOrDefault() : null;
+      DimensionalConfiguration config = model != null ? model.getConfigurationOrDefault() : null;
       if (Utils.isEmpty(source.resolveSourceCatalogConnection(variables))
           && (config == null || Utils.isEmpty(config.getDataCatalogConnection()))) {
         if (metadataProvider == null) {

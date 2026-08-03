@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.openlineage;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -80,14 +78,12 @@ public final class OpenLineageExportService {
 
     // Prefer a catalog connection from the first loaded model for source physical resolution.
     String defaultCatalog = null;
-    if (!models.dataVaultModels().isEmpty()
-        && models.dataVaultModels().get(0) != null) {
+    if (!models.dataVaultModels().isEmpty() && models.dataVaultModels().get(0) != null) {
       defaultCatalog = models.dataVaultModels().get(0).catalogConnection();
     } else if (!models.businessVaultModels().isEmpty()
         && models.businessVaultModels().get(0) != null) {
       defaultCatalog = models.businessVaultModels().get(0).catalogConnection();
-    } else if (!models.dimensionalModels().isEmpty()
-        && models.dimensionalModels().get(0) != null) {
+    } else if (!models.dimensionalModels().isEmpty() && models.dimensionalModels().get(0) != null) {
       defaultCatalog = models.dimensionalModels().get(0).catalogConnection();
     }
 
@@ -100,8 +96,7 @@ public final class OpenLineageExportService {
             DvModelLineageCollector.collect(
                 loaded.model(), variables, metadataProvider, loaded.catalogConnection());
         OpenLineageLocationContext locationContext =
-            new OpenLineageLocationContext(
-                variables, metadataProvider, loaded.catalogConnection());
+            new OpenLineageLocationContext(variables, metadataProvider, loaded.catalogConnection());
         events.addAll(
             OpenLineageSnapshotMapper.toRunEvents(
                 snapshot,

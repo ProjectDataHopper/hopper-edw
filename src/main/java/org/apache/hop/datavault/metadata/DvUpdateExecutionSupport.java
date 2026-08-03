@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.ArrayList;
@@ -28,9 +26,9 @@ public final class DvUpdateExecutionSupport {
   private DvUpdateExecutionSupport() {}
 
   /**
-   * Free (single-source) pipelines bucketed by table type so orchestrators can run
-   * hub → link → satellite as separate phases. Parallelism is safe within a phase; satellites
-   * must not start before parent links/hubs finish when foreign keys are enforced.
+   * Free (single-source) pipelines bucketed by table type so orchestrators can run hub → link →
+   * satellite as separate phases. Parallelism is safe within a phase; satellites must not start
+   * before parent links/hubs finish when foreign keys are enforced.
    */
   public static final class FreePipelineBuckets {
     private final List<PipelineMeta> hubs = new ArrayList<>();

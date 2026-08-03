@@ -13,19 +13,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.file;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.apache.hop.core.file.TextFileInputField;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.datavault.metadata.CsvFieldOptions;
 import org.apache.hop.datavault.metadata.SourceField;
 import org.apache.hop.datavault.metadata.SourceFieldInputOptions;
 import org.apache.hop.pipeline.transforms.csvinput.CsvInputField;
-import org.apache.hop.core.file.TextFileInputField;
 import org.junit.jupiter.api.Test;
 
 class DvTextFileInputFieldSupportTest {

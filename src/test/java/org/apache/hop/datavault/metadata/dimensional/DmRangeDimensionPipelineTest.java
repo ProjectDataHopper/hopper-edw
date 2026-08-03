@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -112,12 +110,9 @@ class DmRangeDimensionPipelineTest {
     fact.setTableName("f_sales");
     fact.getDimensionRoles().add(new DmFactDimensionRole("dim_customer", "customer_key"));
     fact.getMeasures().add(new DmFactMeasure("amount", true));
-    fact
-        .getRangeDimensionRoles()
+    fact.getRangeDimensionRoles()
         .add(new DmFactRangeDimensionRole("dim_amount_band", "amount", "amount_band"));
-    fact
-        .getSourceOrDefault()
-        .setSourceSql("SELECT customer_id, amount FROM stg_sales");
+    fact.getSourceOrDefault().setSourceSql("SELECT customer_id, amount FROM stg_sales");
     model.getTables().add(fact);
     return model;
   }

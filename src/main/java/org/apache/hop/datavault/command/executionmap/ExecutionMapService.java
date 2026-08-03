@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.command.executionmap;
 
 import java.nio.file.Path;
@@ -44,8 +42,7 @@ public final class ExecutionMapService {
     private final String outputPath;
     private final List<String> warnings;
 
-    public GenerateResult(
-        ExecutionMapDocument document, String outputPath, List<String> warnings) {
+    public GenerateResult(ExecutionMapDocument document, String outputPath, List<String> warnings) {
       this.document = document;
       this.outputPath = outputPath;
       this.warnings = warnings;
@@ -58,8 +55,7 @@ public final class ExecutionMapService {
     private final DiffResult diff;
     private final List<String> warnings;
 
-    public RefreshResult(
-        ExecutionMapDocument document, DiffResult diff, List<String> warnings) {
+    public RefreshResult(ExecutionMapDocument document, DiffResult diff, List<String> warnings) {
       this.document = document;
       this.diff = diff;
       this.warnings = warnings;
@@ -115,8 +111,7 @@ public final class ExecutionMapService {
   }
 
   public static void exportLineage(
-      ExecutionMapDocument document, String outputPath, IVariables variables)
-      throws HopException {
+      ExecutionMapDocument document, String outputPath, IVariables variables) throws HopException {
     if (document == null) {
       throw new HopException("Execution map document is required");
     }
@@ -132,7 +127,8 @@ public final class ExecutionMapService {
     if (!Utils.isEmpty(outputPath)) {
       return variables != null ? variables.resolve(outputPath) : outputPath;
     }
-    String resolvedRoot = variables != null ? variables.resolve(rootArtifactPath) : rootArtifactPath;
+    String resolvedRoot =
+        variables != null ? variables.resolve(rootArtifactPath) : rootArtifactPath;
     Path path = Path.of(resolvedRoot);
     String base = path.getFileName().toString();
     int dot = base.lastIndexOf('.');

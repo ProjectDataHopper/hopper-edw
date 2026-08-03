@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.composite;
 
 import org.apache.hop.core.database.DatabaseMeta;
@@ -29,7 +28,9 @@ import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceQueryGenerat
 import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceQuerySqlGenerator;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
-/** Loads a live {@link SourceQuery} for a {@link DvCompositeSource} and resolves SQL when possible. */
+/**
+ * Loads a live {@link SourceQuery} for a {@link DvCompositeSource} and resolves SQL when possible.
+ */
 public final class DvCompositeSourceResolver {
 
   private DvCompositeSourceResolver() {}
@@ -44,19 +45,19 @@ public final class DvCompositeSourceResolver {
       boolean usedCachedSql) {}
 
   public static ResolvedComposite resolve(
-      DvCompositeSource composite,
-      IVariables variables,
-      IHopMetadataProvider metadataProvider)
+      DvCompositeSource composite, IVariables variables, IHopMetadataProvider metadataProvider)
       throws HopException {
     if (composite == null) {
       throw new HopException("Composite source is required");
     }
-    String modelFile = variables != null
-        ? variables.resolve(composite.getSourceModelFilename())
-        : composite.getSourceModelFilename();
-    String queryName = variables != null
-        ? variables.resolve(composite.getSourceQueryName())
-        : composite.getSourceQueryName();
+    String modelFile =
+        variables != null
+            ? variables.resolve(composite.getSourceModelFilename())
+            : composite.getSourceModelFilename();
+    String queryName =
+        variables != null
+            ? variables.resolve(composite.getSourceQueryName())
+            : composite.getSourceQueryName();
 
     SourceModel model = null;
     SourceQuery query = null;
@@ -68,11 +69,7 @@ public final class DvCompositeSourceResolver {
         if (query == null) {
           loadError =
               new HopException(
-                  "Source query '"
-                      + queryName
-                      + "' not found in source model '"
-                      + modelFile
-                      + "'");
+                  "Source query '" + queryName + "' not found in source model '" + modelFile + "'");
         }
       } catch (HopException e) {
         loadError = e;
@@ -120,9 +117,7 @@ public final class DvCompositeSourceResolver {
    * Requires SQL mode (or cached SQL).
    */
   public static ResolvedComposite resolveForSql(
-      DvCompositeSource composite,
-      IVariables variables,
-      IHopMetadataProvider metadataProvider)
+      DvCompositeSource composite, IVariables variables, IHopMetadataProvider metadataProvider)
       throws HopException {
     ResolvedComposite resolved = resolve(composite, variables, metadataProvider);
     if (Utils.isEmpty(resolved.sql())) {

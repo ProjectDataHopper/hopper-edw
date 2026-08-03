@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,7 +43,8 @@ class SqlSourceLineageSupportTest {
 
   @Test
   void extractAliasesAndStars() {
-    Map<String, String> aliases = SqlSourceLineageSupport.extractTableAliases(RETAIL_D_CUSTOMER_SQL);
+    Map<String, String> aliases =
+        SqlSourceLineageSupport.extractTableAliases(RETAIL_D_CUSTOMER_SQL);
     assertEquals("hub_customer", aliases.get("hc"));
     assertEquals("customer_360_bv", aliases.get("sc"));
     Set<String> stars = SqlSourceLineageSupport.extractStarAliases(RETAIL_D_CUSTOMER_SQL);

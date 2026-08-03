@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,7 +32,9 @@ import org.apache.hop.datavault.metadata.executionmap.ExecutionMapDocument;
 /** Serializes execution map lineage to OpenLineage-compatible JSON. */
 public final class OpenLineageExportSupport {
 
-  /** @deprecated use {@link org.apache.hop.datavault.openlineage.OpenLineageConstants#PRODUCER} */
+  /**
+   * @deprecated use {@link org.apache.hop.datavault.openlineage.OpenLineageConstants#PRODUCER}
+   */
   public static final String PRODUCER =
       org.apache.hop.datavault.openlineage.OpenLineageConstants.PRODUCER;
 

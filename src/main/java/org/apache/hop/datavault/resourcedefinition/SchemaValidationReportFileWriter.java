@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import java.io.OutputStreamWriter;
@@ -88,8 +87,7 @@ public final class SchemaValidationReportFileWriter {
       SchemaImpactSimulationResult result,
       IVariables variables)
       throws HopException {
-    List<String> paths =
-        write(outputPath, fileBaseName, result, ReportFormat.MARKDOWN, variables);
+    List<String> paths = write(outputPath, fileBaseName, result, ReportFormat.MARKDOWN, variables);
     return paths.isEmpty() ? null : paths.getFirst();
   }
 
@@ -137,7 +135,8 @@ public final class SchemaValidationReportFileWriter {
         parent.createFolder();
       }
       try (OutputStreamWriter writer =
-          new OutputStreamWriter(fileObject.getContent().getOutputStream(), StandardCharsets.UTF_8)) {
+          new OutputStreamWriter(
+              fileObject.getContent().getOutputStream(), StandardCharsets.UTF_8)) {
         writer.write(body);
       }
       return fileObject.getName().getPath();

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.transform.mergerowsplus;
 
 import java.util.ArrayList;
@@ -34,7 +32,6 @@ import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.pipeline.Pipeline;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.BaseTransform;
-import org.apache.hop.pipeline.transform.ITransform;
 import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transform.stream.IStream;
 import org.apache.hop.pipeline.transforms.mergerows.PassThroughField;
@@ -77,7 +74,8 @@ public class MergeRowsPlus extends BaseTransform<MergeRowsPlusMeta, MergeRowsPlu
       }
       data.compareRowMeta = data.twoRowSet.getRowMeta();
       if (data.compareRowMeta == null) {
-        data.compareRowMeta = getPipelineMeta().getTransformFields(this, meta.getCompareTransform());
+        data.compareRowMeta =
+            getPipelineMeta().getTransformFields(this, meta.getCompareTransform());
       }
 
       if (meta.isAlignInputLayouts()) {

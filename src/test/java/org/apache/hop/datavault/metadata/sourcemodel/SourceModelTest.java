@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.sourcemodel;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -67,8 +66,7 @@ class SourceModelTest {
     original.getConfigurationOrDefault().setDefaultSchema("public");
 
     String xml =
-        XmlHandler.aroundTag(
-            SourceModel.XML_TAG, XmlMetadataUtil.serializeObjectToXml(original));
+        XmlHandler.aroundTag(SourceModel.XML_TAG, XmlMetadataUtil.serializeObjectToXml(original));
     Document document = XmlHandler.loadXmlString(xml);
     Node rootNode = XmlHandler.getSubNode(document, SourceModel.XML_TAG);
 

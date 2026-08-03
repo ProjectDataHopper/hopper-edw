@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.transform.datedimensiongenerator;
 
 import java.util.ArrayList;
@@ -113,7 +111,8 @@ public class DateDimensionGeneratorMeta
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_ERROR,
-              BaseMessages.getString(PKG, "DateDimensionGeneratorMeta.CheckResult.StartDateMissing"),
+              BaseMessages.getString(
+                  PKG, "DateDimensionGeneratorMeta.CheckResult.StartDateMissing"),
               transformMeta));
     }
     if (Utils.isEmpty(endDate)) {
@@ -131,8 +130,7 @@ public class DateDimensionGeneratorMeta
               BaseMessages.getString(PKG, "DateDimensionGeneratorMeta.CheckResult.DateRangeOK"),
               transformMeta));
     } catch (HopException e) {
-      remarks.add(
-          new CheckResult(ICheckResult.TYPE_RESULT_ERROR, e.getMessage(), transformMeta));
+      remarks.add(new CheckResult(ICheckResult.TYPE_RESULT_ERROR, e.getMessage(), transformMeta));
     }
 
     if (fields == null || fields.isEmpty()) {

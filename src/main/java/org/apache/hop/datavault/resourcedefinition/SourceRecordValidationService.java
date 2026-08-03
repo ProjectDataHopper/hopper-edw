@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import java.util.ArrayList;
@@ -51,9 +49,12 @@ public final class SourceRecordValidationService {
   private SourceRecordValidationService() {}
 
   public static ValidationReport validateGroup(
-      ResourceDefinitionGroupMeta group, IVariables variables, IHopMetadataProvider metadataProvider)
+      ResourceDefinitionGroupMeta group,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider)
       throws HopException {
-    ValidationModels models = ResourceDefinitionGroupResolver.resolve(group, variables, metadataProvider);
+    ValidationModels models =
+        ResourceDefinitionGroupResolver.resolve(group, variables, metadataProvider);
     return validateModels(models, variables, metadataProvider);
   }
 
@@ -84,9 +85,11 @@ public final class SourceRecordValidationService {
       List<SourceUsage> usages = entry.getValue();
       String catalogConnection = resolveCatalogConnection(usages);
       RecordDefinitionKey resolvedKey =
-          SourceUsageIndexBuilder.resolveKey(templateKey, catalogConnection, variables, defaultNamespace);
+          SourceUsageIndexBuilder.resolveKey(
+              templateKey, catalogConnection, variables, defaultNamespace);
 
-      RecordDefinition definition = loadDefinition(catalogConnection, resolvedKey, variables, metadataProvider);
+      RecordDefinition definition =
+          loadDefinition(catalogConnection, resolvedKey, variables, metadataProvider);
       RecordDefinitionValidation validation =
           validateDefinition(
               definition,
@@ -163,8 +166,7 @@ public final class SourceRecordValidationService {
     RecordDefinitionSchemaDiffSupport.SchemaDiff diff =
         new RecordDefinitionSchemaDiffSupport.SchemaDiff(new ArrayList<>());
 
-    String recordKey =
-        key != null ? key.getNamespace() + "/" + key.getName() : "?";
+    String recordKey = key != null ? key.getNamespace() + "/" + key.getName() : "?";
     if (!RecordDefinitionPhysicalRefSupport.supportsRefreshFromSource(definition)) {
       unavailableMessage =
           ValidationFindingFormatter.liveSourceUnavailable(
@@ -172,7 +174,8 @@ public final class SourceRecordValidationService {
               BaseMessages.getString(PKG, "SourceRecordValidationService.Error.UnsupportedSource"));
     } else {
       try {
-        unavailableMessage = verifyReadability(definition, sourceType, previewRowLimit, variables, metadataProvider);
+        unavailableMessage =
+            verifyReadability(definition, sourceType, previewRowLimit, variables, metadataProvider);
         if (!Utils.isEmpty(unavailableMessage)) {
           unavailableMessage =
               ValidationFindingFormatter.liveSourceUnavailable(recordKey, unavailableMessage);
@@ -203,10 +206,9 @@ public final class SourceRecordValidationService {
         RemediationProposalSupport.buildIssues(
             diff, usages, unavailableMessage, IssueKind.SOURCE_UNAVAILABLE, recordKey);
     int acknowledgedIssueCount = ValidationIssueSupport.countAcknowledged(definition, allIssues);
-    List<ValidationIssue> visibleIssues = ValidationIssueSupport.filterAcknowledged(definition, allIssues);
-    boolean inSync =
-        Utils.isEmpty(unavailableMessage)
-            && visibleIssues.isEmpty();
+    List<ValidationIssue> visibleIssues =
+        ValidationIssueSupport.filterAcknowledged(definition, allIssues);
+    boolean inSync = Utils.isEmpty(unavailableMessage) && visibleIssues.isEmpty();
     return new RecordDefinitionValidation(
         key,
         catalogConnection,

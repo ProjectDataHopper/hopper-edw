@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai.workflow;
 
 import java.util.ArrayList;
@@ -50,7 +48,9 @@ public final class WorkflowAiProposalApplier {
     sb.append("\nRisk: ").append(proposal.getRiskLevel());
     if (proposal.getParameters() != null && !proposal.getParameters().isEmpty()) {
       sb.append("\nParameters:");
-      proposal.getParameters().forEach((k, v) -> sb.append("\n  ").append(k).append(" = ").append(v));
+      proposal
+          .getParameters()
+          .forEach((k, v) -> sb.append("\n  ").append(k).append(" = ").append(v));
     }
     return sb.toString();
   }
@@ -157,8 +157,10 @@ public final class WorkflowAiProposalApplier {
     ActionMeta from = workflowMeta.findAction(proposal.parameter("fromAction"));
     ActionMeta to = workflowMeta.findAction(proposal.parameter("toAction"));
     WorkflowHopMeta hop = new WorkflowHopMeta(from, to);
-    hop.setUnconditional(WorkflowAiProposalValidator.parseUnconditional(proposal.parameter("unconditional")));
-    hop.setEvaluation(WorkflowAiProposalValidator.parseEvaluation(proposal.parameter("evaluation")));
+    hop.setUnconditional(
+        WorkflowAiProposalValidator.parseUnconditional(proposal.parameter("unconditional")));
+    hop.setEvaluation(
+        WorkflowAiProposalValidator.parseEvaluation(proposal.parameter("evaluation")));
     workflowMeta.addWorkflowHop(hop);
     if (hopGui != null) {
       hopGui.undoDelegate.addUndoNew(
@@ -213,7 +215,10 @@ public final class WorkflowAiProposalApplier {
     workflowMeta.addNote(note);
     if (hopGui != null) {
       hopGui.undoDelegate.addUndoNew(
-          workflowMeta, new NotePadMeta[] {note}, new int[] {workflowMeta.indexOfNote(note)}, chainUndo);
+          workflowMeta,
+          new NotePadMeta[] {note},
+          new int[] {workflowMeta.indexOfNote(note)},
+          chainUndo);
     }
   }
 }

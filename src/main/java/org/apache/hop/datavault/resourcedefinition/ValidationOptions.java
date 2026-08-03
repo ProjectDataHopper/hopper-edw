@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import org.apache.hop.core.util.Utils;
@@ -104,7 +103,8 @@ public record ValidationOptions(
       mode = SchemaCompareMode.WORKING_VS_VERSION;
     } else if (checkTargetModels || checkTargetDatabases) {
       // Model/DB axes only: still need a report skeleton; use working vs nothing as LIVE without
-      // discovery by running LIVE_SOURCE against working catalog (fast path when sources unreachable
+      // discovery by running LIVE_SOURCE against working catalog (fast path when sources
+      // unreachable
       // is handled by service). Prefer WORKING_VS_VERSION only when a baseline tag is set.
       if (baselineKind == BaselineKind.CATALOG_VERSION && baselineTag != null) {
         mode = SchemaCompareMode.WORKING_VS_VERSION;
@@ -143,9 +143,7 @@ public record ValidationOptions(
     appendAxis(builder, checkTargetModels, "target models (DV/BV/DM)");
     appendAxis(builder, checkTargetDatabases, "target databases (DV/BV/DM)");
     appendAxis(
-        builder,
-        expectAutomaticTargetTableCreation,
-        "expect automatic target table creation");
+        builder, expectAutomaticTargetTableCreation, "expect automatic target table creation");
     appendAxis(builder, includeImpact, "downstream impact / lineage");
     return builder.isEmpty() ? "none" : builder.toString();
   }

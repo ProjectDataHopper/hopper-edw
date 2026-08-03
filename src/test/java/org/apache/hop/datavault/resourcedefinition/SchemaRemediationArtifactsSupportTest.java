@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -42,12 +40,7 @@ class SchemaRemediationArtifactsSupportTest {
   @Test
   void htmlEscapesContent() {
     String html =
-        SchemaRemediationArtifactsSupport.formatHtml(
-            "Title",
-            "name",
-            List.of("a < b"),
-            null,
-            null);
+        SchemaRemediationArtifactsSupport.formatHtml("Title", "name", List.of("a < b"), null, null);
     assertTrue(html.contains("a &lt; b"));
   }
 

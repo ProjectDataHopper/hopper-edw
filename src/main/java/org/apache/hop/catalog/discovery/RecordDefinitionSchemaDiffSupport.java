@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.discovery;
 
 import java.util.ArrayList;
@@ -55,7 +53,8 @@ public final class RecordDefinitionSchemaDiffSupport {
     }
   }
 
-  public static SchemaDiff diff(List<SourceField> storedFields, List<SourceField> discoveredFields) {
+  public static SchemaDiff diff(
+      List<SourceField> storedFields, List<SourceField> discoveredFields) {
     return diff(storedFields, discoveredFields, false);
   }
 
@@ -78,7 +77,10 @@ public final class RecordDefinitionSchemaDiffSupport {
         changes.add(new FieldChange(ChangeKind.REMOVED, name, null));
         continue;
       }
-      String details = typesOnly ? describeTypeDifference(stored, discovered) : describeDifference(stored, discovered);
+      String details =
+          typesOnly
+              ? describeTypeDifference(stored, discovered)
+              : describeDifference(stored, discovered);
       if (!Utils.isEmpty(details)) {
         changes.add(new FieldChange(ChangeKind.CHANGED, name, details));
       }
@@ -108,7 +110,8 @@ public final class RecordDefinitionSchemaDiffSupport {
     }
 
     StringBuilder builder = new StringBuilder();
-    builder.append(BaseMessages.getString(PKG, "RecordDefinitionSchemaDiffSupport.Summary.Changed"))
+    builder
+        .append(BaseMessages.getString(PKG, "RecordDefinitionSchemaDiffSupport.Summary.Changed"))
         .append('\n');
     for (FieldChange change : diff.changes()) {
       builder.append("  ");

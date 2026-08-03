@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.architecture;
 
 import java.util.LinkedHashMap;
@@ -32,15 +30,19 @@ public class ArchitectureNode {
   private String name;
   private ArchitectureNodeKind kind = ArchitectureNodeKind.OTHER;
   private ArchitectureLayer layer = ArchitectureLayer.OTHER;
+
   /** Subtype detail (HUB, LINK, DV_UPDATE, plugin id, …). */
   private String detailType;
+
   private String path;
   private String description;
+
   /**
    * Optional freeform layout coordinates (from ELK). When set, Draw.io freeform mode places the
    * node at these pixels; null means swimlane auto-layout.
    */
   private Integer x;
+
   private Integer y;
   private Integer width;
   private Integer height;

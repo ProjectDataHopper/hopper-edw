@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import java.util.ArrayList;
@@ -49,7 +47,8 @@ public final class DvUpdateMetricsCollector {
 
   private static final ConcurrentMap<String, List<DvUpdateTableMetrics>> METRICS_BY_RUN =
       new ConcurrentHashMap<>();
-  private static final ConcurrentMap<String, Date> RUN_STARTED_AT_BY_RUN_ID = new ConcurrentHashMap<>();
+  private static final ConcurrentMap<String, Date> RUN_STARTED_AT_BY_RUN_ID =
+      new ConcurrentHashMap<>();
 
   private DvUpdateMetricsCollector() {}
 
@@ -161,7 +160,8 @@ public final class DvUpdateMetricsCollector {
    * @param metricsOutputFolder optional folder for JSON output; skipped when empty
    * @param logChannelId orchestrator pipeline log channel id used in the JSON filename
    * @param variables variables for folder resolution
-   * @return aggregated metrics for the run, or {@link LoadRunPublishSummary#EMPTY} when none collected
+   * @return aggregated metrics for the run, or {@link LoadRunPublishSummary#EMPTY} when none
+   *     collected
    */
   public static LoadRunPublishSummary publishRunSummary(
       ILogChannel log,
@@ -173,15 +173,7 @@ public final class DvUpdateMetricsCollector {
       IVariables variables)
       throws HopException {
     return publishRunSummary(
-        log,
-        runId,
-        modelName,
-        logLevel,
-        metricsOutputFolder,
-        logChannelId,
-        variables,
-        null,
-        null);
+        log, runId, modelName, logLevel, metricsOutputFolder, logChannelId, variables, null, null);
   }
 
   public static LoadRunPublishSummary publishRunSummary(
@@ -234,7 +226,8 @@ public final class DvUpdateMetricsCollector {
             : LoadRunInsightEngine.evaluate(metrics);
     List<LoadRunInsight> reportableInsights = LoadRunInsightSupport.reportableInsights(insights);
     for (LoadRunInsight insight : insights) {
-      logAtLevel(log, effectiveLevel, "Load insight [" + insight.getCode() + "]: " + insight.getMessage());
+      logAtLevel(
+          log, effectiveLevel, "Load insight [" + insight.getCode() + "]: " + insight.getMessage());
     }
 
     boolean metricsEnabled = !Utils.isEmpty(metricsOutputFolder);
@@ -260,10 +253,13 @@ public final class DvUpdateMetricsCollector {
 
       if (publishContext != null && metadataProvider != null) {
         String modelType =
-            resolvePublishValue(publishContext.modelType(), variables, DvUpdateMetricsConstants.VAR_MODEL_TYPE);
+            resolvePublishValue(
+                publishContext.modelType(), variables, DvUpdateMetricsConstants.VAR_MODEL_TYPE);
         String workflowName =
             resolvePublishValue(
-                publishContext.workflowName(), variables, DvUpdateMetricsConstants.VAR_WORKFLOW_NAME);
+                publishContext.workflowName(),
+                variables,
+                DvUpdateMetricsConstants.VAR_WORKFLOW_NAME);
         String catalogConnection =
             resolvePublishValue(
                 publishContext.catalogConnectionName(),
@@ -323,13 +319,7 @@ public final class DvUpdateMetricsCollector {
     }
 
     String[] headers = {
-      COL_TYPE,
-      COL_TABLE,
-      COL_SOURCE,
-      COL_SOURCE_READ,
-      COL_TARGET_READ,
-      COL_INSERTED,
-      COL_ERRORS
+      COL_TYPE, COL_TABLE, COL_SOURCE, COL_SOURCE_READ, COL_TARGET_READ, COL_INSERTED, COL_ERRORS
     };
 
     int[] widths = new int[headers.length];
@@ -386,7 +376,9 @@ public final class DvUpdateMetricsCollector {
       case DETAILED -> log.logDetailed(message);
       case DEBUG -> log.logDebug(message);
       case ROWLEVEL -> log.logRowlevel(message);
-      case NOTHING -> { /* suppressed */ }
+      case NOTHING -> {
+        /* suppressed */
+      }
       default -> log.logBasic(message);
     }
   }

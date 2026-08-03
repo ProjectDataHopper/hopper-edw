@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.lineage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,8 +48,7 @@ class DmModelLineageCollectorTest {
   void setUp() throws Exception {
     variables = new Variables();
     variables.setVariable(
-        "PROJECT_HOME",
-        Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
+        "PROJECT_HOME", Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
     model = loadModel("retail-example/models/retail-f-orders.hdm");
   }
 
@@ -68,7 +66,11 @@ class DmModelLineageCollectorTest {
     TableLineage fact =
         snapshot
             .findTableByLogicalName("f_orders")
-            .or(() -> snapshot.getTables().stream().filter(t -> "FACT".equals(t.getTableType())).findFirst())
+            .or(
+                () ->
+                    snapshot.getTables().stream()
+                        .filter(t -> "FACT".equals(t.getTableType()))
+                        .findFirst())
             .orElseThrow(() -> new AssertionError("no fact table in retail-f-orders"));
 
     assertFalse(fact.getFields().isEmpty(), "fact should expose measures or FK roles");
@@ -99,8 +101,7 @@ class DmModelLineageCollectorTest {
         alias.getFields().isEmpty(),
         "dimension alias must project natural keys/attributes from the linked physical dimension");
     assertTrue(
-        alias.getSources().stream()
-            .anyMatch(s -> "d_date".equalsIgnoreCase(s.getName())),
+        alias.getSources().stream().anyMatch(s -> "d_date".equalsIgnoreCase(s.getName())),
         "alias should reference physical dimension d_date as a source");
     assertTrue(
         alias.getFields().stream()

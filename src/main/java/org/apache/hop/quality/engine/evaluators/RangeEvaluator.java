@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.quality.engine.evaluators;
 
 import java.util.List;
@@ -73,16 +71,23 @@ public final class RangeEvaluator implements IDataQualityRuleEvaluator {
       return List.of();
     }
 
-    String expected =
-        (min != null ? min : "-∞") + " .. " + (max != null ? max : "+∞");
+    String expected = (min != null ? min : "-∞") + " .. " + (max != null ? max : "+∞");
     String actual =
-        (observedMin != null ? observedMin : "?") + " .. " + (observedMax != null ? observedMax : "?");
+        (observedMin != null ? observedMin : "?")
+            + " .. "
+            + (observedMax != null ? observedMax : "?");
     return List.of(
         EvaluatorSupport.finding(
             rule,
             context,
             fieldName,
-            "Field '" + fieldName + "' observed range [" + actual + "] outside expected [" + expected + "]",
+            "Field '"
+                + fieldName
+                + "' observed range ["
+                + actual
+                + "] outside expected ["
+                + expected
+                + "]",
             actual,
             expected,
             EvaluatorSupport.metric("observedMin", String.valueOf(observedMin))));

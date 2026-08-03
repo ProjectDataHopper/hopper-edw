@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.sourcemodel;
 
 import lombok.Getter;
@@ -33,8 +32,10 @@ public class SourceColumn {
   @HopMetadataProperty private String sourceDataType;
   @HopMetadataProperty private String length;
   @HopMetadataProperty private String precision;
+
   /** Hop {@code ValueMetaInterface} type code. */
   @HopMetadataProperty private int hopType;
+
   /**
    * 1-based position in the source primary key; zero when the column is not part of the key (same
    * convention as catalog {@code SourceField}).

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.file;
 
 import java.lang.reflect.Constructor;
@@ -82,19 +80,9 @@ public final class DvParquetPluginSupport {
           Class.forName(PARQUET_FIELD_CLASS, true, parquetMeta.getClass().getClassLoader());
       Constructor<?> constructor =
           fieldClass.getConstructor(
-              String.class,
-              String.class,
-              String.class,
-              String.class,
-              String.class,
-              String.class);
+              String.class, String.class, String.class, String.class, String.class, String.class);
       return constructor.newInstance(
-          sourceField,
-          targetField,
-          targetType,
-          targetFormat,
-          targetLength,
-          targetPrecision);
+          sourceField, targetField, targetType, targetFormat, targetLength, targetPrecision);
     } catch (Exception e) {
       throw new HopException("Unable to create Parquet field mapping", e);
     }

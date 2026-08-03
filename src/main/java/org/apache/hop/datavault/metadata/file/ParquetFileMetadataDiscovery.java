@@ -13,14 +13,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.file;
 
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.fileinput.FileTypeFilter;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.value.ValueMetaFactory;
@@ -35,13 +34,11 @@ import org.apache.hop.pipeline.anon.AnonymousPipelineResults;
 import org.apache.hop.pipeline.anon.AnonymousPipelineRunner;
 import org.apache.hop.pipeline.transform.ITransformMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
-import org.apache.hop.core.fileinput.FileTypeFilter;
 import org.apache.hop.pipeline.transforms.dummy.DummyMeta;
 import org.apache.hop.pipeline.transforms.getfilenames.FileItem;
 import org.apache.hop.pipeline.transforms.getfilenames.FilterItem;
 import org.apache.hop.pipeline.transforms.getfilenames.GetFileNamesMeta;
 import org.apache.hop.pipeline.transforms.metastructure.TransformMetaStructureMeta;
-
 
 /** Discovers Parquet file layout by running an anonymous Hop pipeline in the Parquet plugin. */
 public final class ParquetFileMetadataDiscovery {
@@ -97,9 +94,7 @@ public final class ParquetFileMetadataDiscovery {
     GetFileNamesMeta getFileNamesMeta = new GetFileNamesMeta();
     getFileNamesMeta.setDefault();
     getFileNamesMeta.getFilterItemList().clear();
-    getFileNamesMeta
-        .getFilterItemList()
-        .add(new FilterItem(FileTypeFilter.ONLY_FILES.toString()));
+    getFileNamesMeta.getFilterItemList().add(new FilterItem(FileTypeFilter.ONLY_FILES.toString()));
     List<FileItem> filesList = new ArrayList<>();
     filesList.add(new FileItem(filePath, "", "", "N", "Y"));
     getFileNamesMeta.setFilesList(filesList);

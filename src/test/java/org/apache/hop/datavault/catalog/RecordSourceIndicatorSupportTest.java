@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.catalog;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -63,7 +61,8 @@ class RecordSourceIndicatorSupportTest {
 
   @Test
   void resolveForTableFieldOrStaticUsesColumnWhenPresent() {
-    List<SourceField> fields = List.of(new SourceField("customer_id"), new SourceField("x_record_source"));
+    List<SourceField> fields =
+        List.of(new SourceField("customer_id"), new SourceField("x_record_source"));
     RecordSourceIndicatorOptions resolved =
         RecordSourceIndicatorSupport.resolveForTable(
             RecordSourceIndicatorOptions.fieldOrStatic("CRM-customer"), fields, "CRM-customer");

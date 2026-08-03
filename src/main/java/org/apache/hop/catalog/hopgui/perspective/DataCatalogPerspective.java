@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.hopgui.perspective;
 
 import java.util.ArrayList;
@@ -25,15 +23,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import lombok.Getter;
+import org.apache.hop.catalog.hopgui.perspective.importmenu.DataCatalogImportMenu;
 import org.apache.hop.catalog.hopgui.preview.RecordDefinitionPreviewRunner;
 import org.apache.hop.catalog.hopgui.preview.RecordDefinitionPreviewSupport;
 import org.apache.hop.catalog.metadata.DataCatalogMeta;
-import org.apache.hop.catalog.versioning.CatalogVersionGuiSupport;
 import org.apache.hop.catalog.model.RecordDefinition;
 import org.apache.hop.catalog.model.RecordDefinitionKey;
 import org.apache.hop.catalog.model.RecordDefinitionQuery;
 import org.apache.hop.catalog.model.RecordDefinitionRef;
 import org.apache.hop.catalog.registry.RecordDefinitionRegistry;
+import org.apache.hop.catalog.versioning.CatalogVersionGuiSupport;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.Props;
 import org.apache.hop.core.exception.HopException;
@@ -56,7 +55,6 @@ import org.apache.hop.ui.core.gui.IToolbarContainer;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.hopgui.ToolbarFacade;
 import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
-import org.apache.hop.catalog.hopgui.perspective.importmenu.DataCatalogImportMenu;
 import org.apache.hop.ui.hopgui.perspective.HopPerspectivePlugin;
 import org.apache.hop.ui.hopgui.perspective.IHopPerspective;
 import org.eclipse.swt.SWT;
@@ -64,10 +62,10 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
@@ -87,8 +85,7 @@ public class DataCatalogPerspective implements IHopPerspective {
   public static final Class<?> PKG = DataCatalogPerspective.class;
   public static final String ID_PERSPECTIVE_TOOLBAR_ITEM = "20035-perspective-data-catalog";
   public static final String GUI_PLUGIN_TOOLBAR_PARENT_ID = "DataCatalogPerspective-Toolbar";
-  public static final String TOOLBAR_ITEM_IMPORT =
-      "DataCatalogPerspective-Toolbar-10005-Import";
+  public static final String TOOLBAR_ITEM_IMPORT = "DataCatalogPerspective-Toolbar-10005-Import";
   public static final String TOOLBAR_ITEM_REFRESH = "DataCatalogPerspective-Toolbar-10000-Refresh";
   public static final String TOOLBAR_ITEM_EXPAND_ALL =
       "DataCatalogPerspective-Toolbar-10001-ExpandAll";
@@ -117,6 +114,7 @@ public class DataCatalogPerspective implements IHopPerspective {
   private boolean groupByNamespace = DataCatalogPerspectiveAuditSupport.retrieveGroupByNamespace();
   private final Set<String> treeStateSeeded = new HashSet<>();
   private boolean rebuildingTree;
+
   /** Suppresses search/filter widget listeners while programmatically adjusting them. */
   private boolean suppressingFilterEvents;
 
@@ -207,7 +205,8 @@ public class DataCatalogPerspective implements IHopPerspective {
           if (suppressingFilterEvents) {
             return;
           }
-          recordListFilter = DataCatalogRecordListFilter.fromIndex(wRecordFilter.getSelectionIndex());
+          recordListFilter =
+              DataCatalogRecordListFilter.fromIndex(wRecordFilter.getSelectionIndex());
           refresh();
         });
     FormData fdFilter = new FormData();
@@ -217,8 +216,7 @@ public class DataCatalogPerspective implements IHopPerspective {
     wRecordFilter.setLayoutData(fdFilter);
 
     searchText = new Text(treeComposite, SWT.SEARCH | SWT.ICON_CANCEL | SWT.ICON_SEARCH);
-    searchText.setMessage(
-        BaseMessages.getString(PKG, "DataCatalogPerspective.Search.Placeholder"));
+    searchText.setMessage(BaseMessages.getString(PKG, "DataCatalogPerspective.Search.Placeholder"));
     PropsUi.setLook(searchText);
     FormData fdSearch = new FormData();
     fdSearch.left = new FormAttachment(0, 0);
@@ -255,8 +253,7 @@ public class DataCatalogPerspective implements IHopPerspective {
     wGroupByNamespace.setLayoutData(fdGroupByNamespace);
 
     IToolbarContainer toolBarContainer =
-        ToolbarFacade.createToolbarContainer(
-            treeComposite, SWT.WRAP | SWT.LEFT | SWT.HORIZONTAL);
+        ToolbarFacade.createToolbarContainer(treeComposite, SWT.WRAP | SWT.LEFT | SWT.HORIZONTAL);
     Control toolBar = toolBarContainer.getControl();
     toolBarWidgets = new GuiToolbarWidgets();
     toolBarWidgets.registerGuiPluginObject(this);
@@ -319,7 +316,8 @@ public class DataCatalogPerspective implements IHopPerspective {
     fdBody.bottom = new FormAttachment(100, 0);
     detailsBody.setLayoutData(fdBody);
 
-    detailsPanel = new RecordDefinitionDetailsPanel(detailsBody, hopGui.getVariables(), this::refresh);
+    detailsPanel =
+        new RecordDefinitionDetailsPanel(detailsBody, hopGui.getVariables(), this::refresh);
   }
 
   @GuiToolbarElement(
@@ -328,8 +326,7 @@ public class DataCatalogPerspective implements IHopPerspective {
       toolTip = "i18n::DataCatalogPerspective.Toolbar.Import.Tooltip",
       image = "ui/images/add.svg")
   public void openImportMenu() {
-    DataCatalogImportMenu.open(
-        hopGui, null, resolveSelectedCatalogConnectionName(), this::refresh);
+    DataCatalogImportMenu.open(hopGui, null, resolveSelectedCatalogConnectionName(), this::refresh);
   }
 
   @GuiToolbarElement(
@@ -413,11 +410,7 @@ public class DataCatalogPerspective implements IHopPerspective {
     // Confirm the definition exists in the catalog backend before relying on the filtered tree.
     RecordDefinition existing =
         RecordDefinitionRegistry.getInstance()
-            .read(
-                catalogConnectionName,
-                key,
-                hopGui.getVariables(),
-                hopGui.getMetadataProvider());
+            .read(catalogConnectionName, key, hopGui.getVariables(), hopGui.getMetadataProvider());
     if (existing == null) {
       throw new HopException(
           BaseMessages.getString(
@@ -459,7 +452,9 @@ public class DataCatalogPerspective implements IHopPerspective {
         recordListFilter = DataCatalogRecordListFilter.ALL;
         changed = true;
       }
-      if (wRecordFilter != null && !wRecordFilter.isDisposed() && wRecordFilter.getSelectionIndex() != 0) {
+      if (wRecordFilter != null
+          && !wRecordFilter.isDisposed()
+          && wRecordFilter.getSelectionIndex() != 0) {
         wRecordFilter.select(0);
         changed = true;
       }
@@ -640,7 +635,10 @@ public class DataCatalogPerspective implements IHopPerspective {
   }
 
   private boolean trySelectRecord(String catalogConnectionName, String recordKey) {
-    if (tree == null || tree.isDisposed() || Utils.isEmpty(catalogConnectionName) || Utils.isEmpty(recordKey)) {
+    if (tree == null
+        || tree.isDisposed()
+        || Utils.isEmpty(catalogConnectionName)
+        || Utils.isEmpty(recordKey)) {
       return false;
     }
     TreeItem catalogItem = findCatalogItem(catalogConnectionName);
@@ -760,8 +758,7 @@ public class DataCatalogPerspective implements IHopPerspective {
       return;
     }
 
-    MessageBox confirm =
-        new MessageBox(hopGui.getShell(), SWT.YES | SWT.NO | SWT.ICON_QUESTION);
+    MessageBox confirm = new MessageBox(hopGui.getShell(), SWT.YES | SWT.NO | SWT.ICON_QUESTION);
     confirm.setText(BaseMessages.getString(PKG, "DataCatalogPerspective.Delete.Title"));
     if (recordNodes.size() == 1) {
       DataCatalogTreeNode node = recordNodes.get(0);

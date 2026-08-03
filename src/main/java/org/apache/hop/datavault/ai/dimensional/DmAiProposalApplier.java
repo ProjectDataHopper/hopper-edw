@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai.dimensional;
 
 import java.util.ArrayList;
@@ -77,7 +75,9 @@ public final class DmAiProposalApplier {
     sb.append("\nRisk: ").append(proposal.getRiskLevel());
     if (proposal.getParameters() != null && !proposal.getParameters().isEmpty()) {
       sb.append("\nParameters:");
-      proposal.getParameters().forEach((k, v) -> sb.append("\n  ").append(k).append(" = ").append(v));
+      proposal
+          .getParameters()
+          .forEach((k, v) -> sb.append("\n  ").append(k).append(" = ").append(v));
     }
     return sb.toString();
   }

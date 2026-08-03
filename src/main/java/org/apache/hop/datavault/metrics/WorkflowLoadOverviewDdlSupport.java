@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import java.util.ArrayList;
@@ -69,9 +67,11 @@ public final class WorkflowLoadOverviewDdlSupport {
             : "";
     return switch (pluginId) {
       case DvBulkLoadPluginSupport.MYSQL_DB_PLUGIN_ID,
-          DvBulkLoadPluginSupport.SINGLESTORE_DB_PLUGIN_ID -> mysqlStatements(schema);
+              DvBulkLoadPluginSupport.SINGLESTORE_DB_PLUGIN_ID ->
+          mysqlStatements(schema);
       case DvBulkLoadPluginSupport.MSSQL_DB_PLUGIN_ID,
-          DvBulkLoadPluginSupport.MSSQLNATIVE_DB_PLUGIN_ID -> mssqlStatements(schema);
+              DvBulkLoadPluginSupport.MSSQLNATIVE_DB_PLUGIN_ID ->
+          mssqlStatements(schema);
       default -> postgresStatements(schema);
     };
   }

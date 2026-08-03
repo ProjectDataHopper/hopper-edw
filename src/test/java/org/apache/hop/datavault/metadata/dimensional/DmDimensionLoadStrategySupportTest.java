@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,7 +30,9 @@ class DmDimensionLoadStrategySupportTest {
     dimension.getAttributes().add(new DmDimensionAttribute("name", DmScdUpdatePolicy.TYPE1));
     dimension.getAttributes().add(new DmDimensionAttribute("city", DmScdUpdatePolicy.TYPE1));
 
-    assertEquals(DmDimensionLoadStrategy.PURE_TYPE1, DmDimensionLoadStrategySupport.resolveLoadStrategy(dimension));
+    assertEquals(
+        DmDimensionLoadStrategy.PURE_TYPE1,
+        DmDimensionLoadStrategySupport.resolveLoadStrategy(dimension));
   }
 
   @Test
@@ -40,7 +40,9 @@ class DmDimensionLoadStrategySupportTest {
     DmDimension dimension = new DmDimension();
     dimension.getAttributes().add(new DmDimensionAttribute("name", DmScdUpdatePolicy.TYPE2));
 
-    assertEquals(DmDimensionLoadStrategy.PURE_TYPE2, DmDimensionLoadStrategySupport.resolveLoadStrategy(dimension));
+    assertEquals(
+        DmDimensionLoadStrategy.PURE_TYPE2,
+        DmDimensionLoadStrategySupport.resolveLoadStrategy(dimension));
     assertTrue(DmDimensionLoadStrategySupport.usesVersionedLayout(dimension));
   }
 
@@ -64,7 +66,9 @@ class DmDimensionLoadStrategySupportTest {
     dimension.normalizeLegacyScdType();
 
     assertEquals(DmScdUpdatePolicy.TYPE2, dimension.getAttributes().get(0).getScdUpdatePolicy());
-    assertEquals(DmDimensionLoadStrategy.PURE_TYPE2, DmDimensionLoadStrategySupport.resolveLoadStrategy(dimension));
+    assertEquals(
+        DmDimensionLoadStrategy.PURE_TYPE2,
+        DmDimensionLoadStrategySupport.resolveLoadStrategy(dimension));
   }
 
   @Test
@@ -81,10 +85,13 @@ class DmDimensionLoadStrategySupportTest {
 
   @Test
   void resolvesSourceAndTargetFieldNames() {
-    DmDimensionAttribute attribute = new DmDimensionAttribute("birthdate_hist", DmScdUpdatePolicy.TYPE2);
+    DmDimensionAttribute attribute =
+        new DmDimensionAttribute("birthdate_hist", DmScdUpdatePolicy.TYPE2);
     attribute.setSourceFieldName("birthdate");
 
-    assertEquals("birthdate", DmDimensionLoadStrategySupport.resolveSourceFieldName(attribute, null));
-    assertEquals("birthdate_hist", DmDimensionLoadStrategySupport.resolveTargetFieldName(attribute, null));
+    assertEquals(
+        "birthdate", DmDimensionLoadStrategySupport.resolveSourceFieldName(attribute, null));
+    assertEquals(
+        "birthdate_hist", DmDimensionLoadStrategySupport.resolveTargetFieldName(attribute, null));
   }
 }

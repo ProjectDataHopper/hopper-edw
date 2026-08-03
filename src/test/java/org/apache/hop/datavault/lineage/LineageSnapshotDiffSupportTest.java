@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.lineage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -27,11 +26,15 @@ class LineageSnapshotDiffSupportTest {
 
   @Test
   void detectsPhysicalRenameAsBlockingWithoutExplicitName() {
-    LineageSnapshot baseline = snapshotWithHub("hub_customer", "hub_customer", "CRM", "customer_id");
-    LineageSnapshot current =
-        snapshotWithHub("hub_customer", "hub_cust_new", "CRM", "customer_id");
+    LineageSnapshot baseline =
+        snapshotWithHub("hub_customer", "hub_customer", "CRM", "customer_id");
+    LineageSnapshot current = snapshotWithHub("hub_customer", "hub_cust_new", "CRM", "customer_id");
     // Strip explicit name reason to simulate opaque rename
-    current.getTables().get(0).getReasons().removeIf(r -> r.getCode() == LineageReasonCode.USER_EXPLICIT_NAME);
+    current
+        .getTables()
+        .get(0)
+        .getReasons()
+        .removeIf(r -> r.getCode() == LineageReasonCode.USER_EXPLICIT_NAME);
 
     LineageDiffResult diff =
         LineageSnapshotDiffSupport.compare(baseline, current, "catalog:baseline");
@@ -75,11 +78,13 @@ class LineageSnapshotDiffSupportTest {
     LineageDiffResult diff = LineageSnapshotDiffSupport.compare(baseline, current, "t");
     assertTrue(
         diff.getEntries().stream().anyMatch(e -> e.getType() == LineageDiffType.FIELD_RENAMED));
-    assertEquals("old_name", diff.getEntries().stream()
-        .filter(e -> e.getType() == LineageDiffType.FIELD_RENAMED)
-        .findFirst()
-        .orElseThrow()
-        .getBaselineValue());
+    assertEquals(
+        "old_name",
+        diff.getEntries().stream()
+            .filter(e -> e.getType() == LineageDiffType.FIELD_RENAMED)
+            .findFirst()
+            .orElseThrow()
+            .getBaselineValue());
   }
 
   @Test
@@ -98,7 +103,8 @@ class LineageSnapshotDiffSupportTest {
     LineageDiffResult diff = LineageSnapshotDiffSupport.compare(null, current, "none");
     assertTrue(diff.isBaselineMissing());
     assertFalse(diff.hasBlocking());
-    assertTrue(diff.getEntries().stream().anyMatch(e -> e.getType() == LineageDiffType.TABLE_ADDED));
+    assertTrue(
+        diff.getEntries().stream().anyMatch(e -> e.getType() == LineageDiffType.TABLE_ADDED));
   }
 
   @Test
@@ -124,7 +130,8 @@ class LineageSnapshotDiffSupportTest {
     hub.setPhysicalTableName(physical);
     hub.setTableType("HUB");
     hub.addReason(LineageReasonFactory.userExplicitName(logical, physical));
-    hub.addSource(new TableSourceRef(TableSourceKind.DV_SOURCE, source, TableSourceRole.RECORD_SOURCE));
+    hub.addSource(
+        new TableSourceRef(TableSourceKind.DV_SOURCE, source, TableSourceRole.RECORD_SOURCE));
     FieldLineage bk = new FieldLineage("id");
     FieldContribution contribution = new FieldContribution();
     contribution.setSourceKind(TableSourceKind.DV_SOURCE);
@@ -132,8 +139,7 @@ class LineageSnapshotDiffSupportTest {
     contribution.setSourceFieldName(sourceField);
     contribution.setTransform(
         "id".equals(sourceField) ? FieldTransform.IDENTITY : FieldTransform.RENAME);
-    contribution.addReason(
-        LineageReasonFactory.userExplicitMapping("id", source, sourceField));
+    contribution.addReason(LineageReasonFactory.userExplicitMapping("id", source, sourceField));
     bk.addContribution(contribution);
     hub.addField(bk);
     snapshot.addTable(hub);

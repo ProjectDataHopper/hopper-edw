@@ -13,29 +13,27 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.file;
 
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.vfs2.FileObject;
+import org.apache.hop.catalog.discovery.PhysicalSourceRef;
+import org.apache.hop.catalog.discovery.RecordDefinitionCatalogWriter;
+import org.apache.hop.catalog.discovery.RecordDefinitionDiscoveryService;
 import org.apache.hop.catalog.hopgui.perspective.DataCatalogPerspective;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
-import org.apache.hop.catalog.discovery.PhysicalSourceRef;
-import org.apache.hop.catalog.discovery.RecordDefinitionCatalogWriter;
-import org.apache.hop.catalog.discovery.RecordDefinitionDiscoveryService;
 import org.apache.hop.datavault.catalog.DvSourceCatalogService;
 import org.apache.hop.datavault.catalog.RecordSourceIndicatorOptions;
 import org.apache.hop.datavault.catalog.RecordSourceIndicatorSupport;
-import org.apache.hop.datavault.metadata.DvSourceType;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DataVaultSource;
+import org.apache.hop.datavault.metadata.DvSourceType;
 import org.apache.hop.datavault.metadata.SourceField;
 import org.apache.hop.datavault.metadata.database.DvDatabaseSourceImportSupport;
 import org.apache.hop.datavault.metadata.database.ImportDatabaseTablesCatalogDialog;
@@ -48,7 +46,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
-/** Imports a single CSV file as a catalog-backed record definition using File Metadata discovery. */
+/**
+ * Imports a single CSV file as a catalog-backed record definition using File Metadata discovery.
+ */
 public final class DvCsvSourceImportSupport {
 
   private static final Class<?> PKG = DvCsvSourceImportSupport.class;
@@ -91,8 +91,7 @@ public final class DvCsvSourceImportSupport {
       new ErrorDialog(
           shell,
           BaseMessages.getString(PKG, "DvCsvSourceImportSupport.Error.DialogTitle"),
-          BaseMessages.getString(
-              PKG, "DvCsvSourceImportSupport.Error.DialogMessage", resolvedFile),
+          BaseMessages.getString(PKG, "DvCsvSourceImportSupport.Error.DialogMessage", resolvedFile),
           e);
       return;
     }
@@ -140,14 +139,10 @@ public final class DvCsvSourceImportSupport {
         return;
       }
 
-      DvCsvSource csvSource =
-          createCsvSource(resolvedFile, discovery.csvDiscovery(), variables);
+      DvCsvSource csvSource = createCsvSource(resolvedFile, discovery.csvDiscovery(), variables);
       DataVaultSource source =
           createDataVaultSource(
-              sourceName,
-              csvSource,
-              discovery.fields(),
-              options.getRecordSourceOptions());
+              sourceName, csvSource, discovery.fields(), options.getRecordSourceOptions());
       RecordDefinitionCatalogWriter.upsertDataVaultSource(
           source, catalogConnectionName, model, variables, metadataProvider, null, null, null);
 
@@ -166,8 +161,7 @@ public final class DvCsvSourceImportSupport {
       new ErrorDialog(
           shell,
           BaseMessages.getString(PKG, "DvCsvSourceImportSupport.Error.DialogTitle"),
-          BaseMessages.getString(
-              PKG, "DvCsvSourceImportSupport.Error.DialogMessage", resolvedFile),
+          BaseMessages.getString(PKG, "DvCsvSourceImportSupport.Error.DialogMessage", resolvedFile),
           e);
     }
   }
@@ -210,10 +204,8 @@ public final class DvCsvSourceImportSupport {
     csvSource.setIncludeFileMask(toIncludeFileMask(baseName));
     csvSource.setExcludeFileMask("");
     csvSource.setIncludeSubfolders(false);
-    csvSource.setDelimiter(
-        Utils.isEmpty(discovery.delimiter()) ? "," : discovery.delimiter());
-    csvSource.setEnclosure(
-        discovery.enclosure() != null ? discovery.enclosure() : "\"");
+    csvSource.setDelimiter(Utils.isEmpty(discovery.delimiter()) ? "," : discovery.delimiter());
+    csvSource.setEnclosure(discovery.enclosure() != null ? discovery.enclosure() : "\"");
     csvSource.setEncoding(discovery.charset());
     csvSource.setHeaderPresent(discovery.headerPresent());
     csvSource.setHeaderLines(discovery.headerLines());

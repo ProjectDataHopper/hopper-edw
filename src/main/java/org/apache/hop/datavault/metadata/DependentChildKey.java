@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata;
 
 import lombok.Getter;
@@ -33,7 +32,9 @@ import org.apache.hop.metadata.api.HopMetadataProperty;
 @Setter
 public class DependentChildKey {
 
-  /** Target column name on the link table (and preferred name after rename in the load pipeline). */
+  /**
+   * Target column name on the link table (and preferred name after rename in the load pipeline).
+   */
   @HopMetadataProperty private String name;
 
   /** Optional description of the dependent child key. */
@@ -45,7 +46,9 @@ public class DependentChildKey {
    */
   @HopMetadataProperty private String sourceFieldName;
 
-  /** Hop value meta type name used for DDL (e.g. String, Integer, Timestamp). Defaults to String. */
+  /**
+   * Hop value meta type name used for DDL (e.g. String, Integer, Timestamp). Defaults to String.
+   */
   @HopMetadataProperty private String dataType = "String";
 
   @HopMetadataProperty private String length;

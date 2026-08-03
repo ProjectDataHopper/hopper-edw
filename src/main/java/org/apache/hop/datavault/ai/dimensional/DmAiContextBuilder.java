@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai.dimensional;
 
 import java.util.ArrayList;
@@ -27,22 +25,21 @@ import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.ai.DvAiContextBuilder;
 import org.apache.hop.datavault.ai.DvTargetLoadAiConfigurationSupport;
+import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalConfiguration;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.datavault.metadata.dimensional.DmDimension;
-import org.apache.hop.datavault.metadata.dimensional.DmDimensionLoadStrategySupport;
 import org.apache.hop.datavault.metadata.dimensional.DmDimensionAlias;
-import org.apache.hop.datavault.metadata.dimensional.DmDimensionResolutionSupport;
-import org.apache.hop.datavault.metadata.dimensional.DmSurrogateKeyStrategy;
-import org.apache.hop.datavault.metadata.dimensional.DmSurrogateKeySupport;
 import org.apache.hop.datavault.metadata.dimensional.DmDimensionAttribute;
-import org.apache.hop.datavault.metadata.dimensional.DmFact;
+import org.apache.hop.datavault.metadata.dimensional.DmDimensionLoadStrategySupport;
+import org.apache.hop.datavault.metadata.dimensional.DmDimensionResolutionSupport;
 import org.apache.hop.datavault.metadata.dimensional.DmFactDimensionRole;
 import org.apache.hop.datavault.metadata.dimensional.DmFactMeasure;
 import org.apache.hop.datavault.metadata.dimensional.DmNaturalKeyField;
+import org.apache.hop.datavault.metadata.dimensional.DmSurrogateKeyStrategy;
+import org.apache.hop.datavault.metadata.dimensional.DmSurrogateKeySupport;
 import org.apache.hop.datavault.metadata.dimensional.IDmFactLikeTable;
 import org.apache.hop.datavault.metadata.dimensional.IDmTable;
-import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
 import org.apache.hop.datavault.metrics.ExecutionInfoAiContextBuilder;
 import org.apache.hop.datavault.metrics.MetricsAiContextBuilder;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
@@ -206,7 +203,8 @@ public final class DmAiContextBuilder {
         json.append(',');
       }
       DmDimensionAttribute attribute = attributes.get(i);
-      json.append("{\"fieldName\":").append(DvAiContextBuilder.jsonString(attribute.getFieldName()));
+      json.append("{\"fieldName\":")
+          .append(DvAiContextBuilder.jsonString(attribute.getFieldName()));
       json.append('}');
     }
   }
@@ -260,13 +258,18 @@ public final class DmAiContextBuilder {
     }
     json.append("],\"configuration\":");
     DimensionalConfiguration config = model.getConfigurationOrDefault();
-    json.append("{\"targetDatabase\":").append(DvAiContextBuilder.jsonString(config.getTargetDatabase()));
-    json.append(",\"sourceDatabase\":").append(DvAiContextBuilder.jsonString(config.getSourceDatabase()));
+    json.append("{\"targetDatabase\":")
+        .append(DvAiContextBuilder.jsonString(config.getTargetDatabase()));
+    json.append(",\"sourceDatabase\":")
+        .append(DvAiContextBuilder.jsonString(config.getSourceDatabase()));
     json.append(",\"dimKeyField\":").append(DvAiContextBuilder.jsonString(config.getDimKeyField()));
-    json.append(",\"versionField\":").append(DvAiContextBuilder.jsonString(config.getVersionField()));
-    json.append(",\"dateFromField\":").append(DvAiContextBuilder.jsonString(config.getDateFromField()));
+    json.append(",\"versionField\":")
+        .append(DvAiContextBuilder.jsonString(config.getVersionField()));
+    json.append(",\"dateFromField\":")
+        .append(DvAiContextBuilder.jsonString(config.getDateFromField()));
     json.append(",\"dateToField\":").append(DvAiContextBuilder.jsonString(config.getDateToField()));
-    json.append(",\"loadDateField\":").append(DvAiContextBuilder.jsonString(config.getLoadDateField()));
+    json.append(",\"loadDateField\":")
+        .append(DvAiContextBuilder.jsonString(config.getLoadDateField()));
     json.append(",\"currentFlagField\":")
         .append(DvAiContextBuilder.jsonString(config.getCurrentFlagField()));
     DvTargetLoadAiConfigurationSupport.appendTargetLoadSummaryJson(json, config);
@@ -328,9 +331,7 @@ public final class DmAiContextBuilder {
               ? "ERROR"
               : result.getType() == ICheckResult.TYPE_RESULT_OK
                   ? "OK"
-                  : result.getType() == ICheckResult.TYPE_RESULT_WARNING
-                      ? "WARNING"
-                      : "INFO";
+                  : result.getType() == ICheckResult.TYPE_RESULT_WARNING ? "WARNING" : "INFO";
       json.append("{\"type\":").append(DvAiContextBuilder.jsonString(type));
       json.append(",\"text\":").append(DvAiContextBuilder.jsonString(result.getText()));
       json.append(",\"source\":").append(DvAiContextBuilder.jsonString(formatCheckSource(result)));

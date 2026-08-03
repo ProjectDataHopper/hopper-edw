@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.discovery;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -85,7 +83,8 @@ class RecordDefinitionCatalogRefreshSupportTest {
 
   private static RecordDefinition icebergDefinition() {
     RecordDefinition definition = new RecordDefinition();
-    definition.setKey(new RecordDefinitionKey("hop/integration-tests/sources", "CRM-customer-iceberg"));
+    definition.setKey(
+        new RecordDefinitionKey("hop/integration-tests/sources", "CRM-customer-iceberg"));
     definition.setType(RecordDefinitionType.DV_SOURCE);
     DvSourceRecord dvSource = new DvSourceRecord();
     dvSource.setSourceType("ICEBERG");

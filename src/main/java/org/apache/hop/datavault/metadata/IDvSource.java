@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.List;
@@ -24,7 +22,6 @@ import org.apache.hop.core.changed.IChanged;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.datavault.metadata.composite.DvCompositeSource;
 import org.apache.hop.datavault.metadata.database.DvDatabaseSource;
 import org.apache.hop.datavault.metadata.file.DvCsvSource;
@@ -33,14 +30,15 @@ import org.apache.hop.datavault.metadata.iceberg.DvIcebergSource;
 import org.apache.hop.metadata.api.HopMetadataObject;
 import org.apache.hop.metadata.api.IHasName;
 import org.apache.hop.metadata.api.IHopMetadataObjectFactory;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Common interface for Data Vault source system definitions.
  *
  * <p>A source describes where raw data comes from (initially: an RDBMS table or query via a
- * registered DatabaseMeta / "rdbms" connection). Every source also carries the expected logical
- * row layout (list of {@link SourceField}) so that loading logic, lineage, and code generators
- * know the columns, types, and which columns form the natural key on the source.
+ * registered DatabaseMeta / "rdbms" connection). Every source also carries the expected logical row
+ * layout (list of {@link SourceField}) so that loading logic, lineage, and code generators know the
+ * columns, types, and which columns form the natural key on the source.
  *
  * <p>Supports multiple source kinds via polymorphism (DATABASE today; CSV, Parquet, Avro, Kafka,
  * ... tomorrow). When sources are embedded in a {@link DataVaultModel} (or other containers) the
@@ -109,8 +107,7 @@ public interface IDvSource extends IHasName, IChanged {
       if (DvSourceType.COMPOSITE.name().equals(id)) {
         return new DvCompositeSource();
       }
-      throw new HopException(
-          "Unable to recognize Data Vault source type with ID '" + id + "'");
+      throw new HopException("Unable to recognize Data Vault source type with ID '" + id + "'");
     }
 
     @Override

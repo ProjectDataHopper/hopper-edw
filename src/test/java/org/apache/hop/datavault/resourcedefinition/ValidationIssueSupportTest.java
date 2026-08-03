@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,7 +38,9 @@ class ValidationIssueSupportTest {
         ValidationIssueSupport.buildIssueId(
             IssueKind.FIELD_TYPE_CHANGED,
             new RecordDefinitionSchemaDiffSupport.FieldChange(
-                RecordDefinitionSchemaDiffSupport.ChangeKind.CHANGED, "last_name", "length 50 -> 75"));
+                RecordDefinitionSchemaDiffSupport.ChangeKind.CHANGED,
+                "last_name",
+                "length 50 -> 75"));
     assertEquals("FIELD_TYPE_CHANGED|last_name|length 50 -> 75", issueId);
   }
 
@@ -68,7 +68,8 @@ class ValidationIssueSupportTest {
   void filterAcknowledgedRemovesSuppressedIssues() {
     RecordDefinition definition = new RecordDefinition();
     definition.setKey(new RecordDefinitionKey("hop/retail-example/sources", "customer"));
-    String issueId = ValidationIssueSupport.buildIssueId(IssueKind.FIELD_ADDED, "loyalty_tier", null);
+    String issueId =
+        ValidationIssueSupport.buildIssueId(IssueKind.FIELD_ADDED, "loyalty_tier", null);
     RecordDefinitionValidationAcknowledgement acknowledgement =
         new RecordDefinitionValidationAcknowledgement();
     acknowledgement.setIssueId(issueId);

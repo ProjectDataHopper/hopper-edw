@@ -13,14 +13,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Set;
@@ -72,16 +69,14 @@ class DvTargetLoadSupportTest {
 
     PipelineMeta pipelineMeta = new PipelineMeta();
     pipelineMeta.setName("hub-customer-src");
-    TransformMeta predecessor =
-        new TransformMeta("Constant", "add_LOAD_DATE", new ConstantMeta());
+    TransformMeta predecessor = new TransformMeta("Constant", "add_LOAD_DATE", new ConstantMeta());
 
     IRowMeta layout = new RowMeta();
     layout.addValueMeta(new ValueMetaString("CUSTOMER_HK"));
     layout.addValueMeta(new ValueMetaString("flag"));
 
     DvTargetLoadSupport.TargetLoadResult result =
-        DvTargetLoadSupport.addTargetLoad(
-            ctx, pipelineMeta, layout, predecessor, Set.of("flag"));
+        DvTargetLoadSupport.addTargetLoad(ctx, pipelineMeta, layout, predecessor, Set.of("flag"));
 
     assertEquals(DvTargetLoadMode.TABLE_OUTPUT, result.mode);
     assertNotNull(result.transformMeta);
@@ -90,8 +85,7 @@ class DvTargetLoadSupportTest {
         pipelineMeta.getTransforms().stream()
             .anyMatch(tm -> "write_to_hub_customer".equals(tm.getName())));
 
-    TableOutputMeta tableOutputMeta =
-        (TableOutputMeta) result.transformMeta.getTransform();
+    TableOutputMeta tableOutputMeta = (TableOutputMeta) result.transformMeta.getTransform();
     assertEquals("hub_customer", tableOutputMeta.getTableName());
     assertEquals(1, tableOutputMeta.getFields().size());
     assertEquals("CUSTOMER_HK", tableOutputMeta.getFields().get(0).getFieldStream());
@@ -122,16 +116,14 @@ class DvTargetLoadSupportTest {
 
     PipelineMeta pipelineMeta = new PipelineMeta();
     pipelineMeta.setName("hub-customer-src");
-    TransformMeta predecessor =
-        new TransformMeta("Constant", "add_LOAD_DATE", new ConstantMeta());
+    TransformMeta predecessor = new TransformMeta("Constant", "add_LOAD_DATE", new ConstantMeta());
     predecessor.setLocation(new Point(100, 100));
 
     IRowMeta layout = new RowMeta();
     layout.addValueMeta(new ValueMetaString("CUSTOMER_HK"));
 
     DvTargetLoadSupport.TargetLoadResult result =
-        DvTargetLoadSupport.addTargetLoad(
-            ctx, pipelineMeta, layout, predecessor, Set.of("flag"));
+        DvTargetLoadSupport.addTargetLoad(ctx, pipelineMeta, layout, predecessor, Set.of("flag"));
 
     assertEquals(DvTargetLoadMode.STAGING_FILE, result.mode);
     assertNotNull(result.transformMeta);
@@ -178,8 +170,7 @@ class DvTargetLoadSupportTest {
             200);
 
     PipelineMeta pipelineMeta = new PipelineMeta();
-    TransformMeta predecessor =
-        new TransformMeta("Constant", "add_LOAD_DATE", new ConstantMeta());
+    TransformMeta predecessor = new TransformMeta("Constant", "add_LOAD_DATE", new ConstantMeta());
 
     ValueMetaString wideField = new ValueMetaString("WIDE_FIELD");
     wideField.setLength(Integer.MAX_VALUE);
@@ -200,8 +191,7 @@ class DvTargetLoadSupportTest {
   void buildStagingFileBaseStripsSequencedPipelinePrefix() {
     assertEquals(
         "/tmp/dv2/bulk/dm-fact-f_orders-${Internal.Transform.CopyNr}",
-        DvTargetLoadSupport.buildStagingFileBase(
-            "/tmp/dv2/bulk/", "0001-dm-fact-f_orders", true));
+        DvTargetLoadSupport.buildStagingFileBase("/tmp/dv2/bulk/", "0001-dm-fact-f_orders", true));
     assertEquals(
         "/tmp/dv2/bulk/hub-customer-src",
         DvTargetLoadSupport.buildStagingFileBase("/tmp/dv2/bulk/", "hub-customer-src", false));
@@ -249,22 +239,19 @@ class DvTargetLoadSupportTest {
 
     PipelineMeta pipelineMeta = new PipelineMeta();
     pipelineMeta.setName("hub-customer-src");
-    TransformMeta predecessor =
-        new TransformMeta("Constant", "add_LOAD_DATE", new ConstantMeta());
+    TransformMeta predecessor = new TransformMeta("Constant", "add_LOAD_DATE", new ConstantMeta());
     predecessor.setLocation(new Point(100, 100));
 
     IRowMeta layout = new RowMeta();
     layout.addValueMeta(new ValueMetaString("CUSTOMER_HK"));
 
     DvTargetLoadSupport.TargetLoadResult result =
-        DvTargetLoadSupport.addTargetLoad(
-            ctx, pipelineMeta, layout, predecessor, Set.of("flag"));
+        DvTargetLoadSupport.addTargetLoad(ctx, pipelineMeta, layout, predecessor, Set.of("flag"));
 
     assertEquals(DvTargetLoadMode.NATIVE_BULK, result.mode);
     assertNotNull(result.transformMeta);
     assertEquals("1", result.transformMeta.getCopiesString());
-    assertEquals(
-        DvBulkLoadPluginSupport.MYSQL_BULK_LOADER_ID, result.transformMeta.getPluginId());
+    assertEquals(DvBulkLoadPluginSupport.MYSQL_BULK_LOADER_ID, result.transformMeta.getPluginId());
     assertTrue(
         pipelineMeta.getTransforms().stream()
             .anyMatch(tm -> "bulk_load_to_hub_customer".equals(tm.getName())));

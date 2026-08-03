@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.businessvault;
 
 import java.io.OutputStream;
@@ -53,12 +51,12 @@ import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.datavault.command.svg.SvgExportService;
 import org.apache.hop.datavault.command.svg.SvgRenderOptions;
 import org.apache.hop.datavault.config.DataVaultConfigSingleton;
-import org.apache.hop.datavault.hopgui.coaching.ICoachableModelGraph;
 import org.apache.hop.datavault.hopgui.ModelGeneratedArtifactOpenSupport;
 import org.apache.hop.datavault.hopgui.ModelTableLayoutPreviewSupport;
 import org.apache.hop.datavault.hopgui.ModelUpdateActionAuditSupport;
 import org.apache.hop.datavault.hopgui.ModelUpdateWorkflowClipboardSupport;
 import org.apache.hop.datavault.hopgui.ai.BvAiAdvisorDialog;
+import org.apache.hop.datavault.hopgui.coaching.ICoachableModelGraph;
 import org.apache.hop.datavault.hopgui.file.businessvault.delegates.HopGuiBusinessVaultClipboardDelegate;
 import org.apache.hop.datavault.hopgui.file.businessvault.delegates.HopGuiBusinessVaultSnapshotUndo;
 import org.apache.hop.datavault.hopgui.file.modelgraph.HopGuiModelGraphBase;
@@ -72,17 +70,14 @@ import org.apache.hop.datavault.metadata.DvNoteType;
 import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.datavault.metadata.DvTargetLoadMode;
 import org.apache.hop.datavault.metadata.DvUpdateWorkflowSupport;
+import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
 import org.apache.hop.datavault.metadata.IDvTable;
+import org.apache.hop.datavault.metadata.businessvault.BusinessVaultBvReferenceSupport;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultConfiguration;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultDerivativeSupport;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultDvModelResolver;
-import org.apache.hop.datavault.metadata.businessvault.BusinessVaultBvReferenceSupport;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultDvReferenceSupport;
-import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
-import org.apache.hop.datavault.metadata.coaching.BvCoachingModelAdapter;
-import org.apache.hop.datavault.metadata.coaching.CoachingSourceRef;
-import org.apache.hop.datavault.metadata.coaching.ICoachingModelAdapter;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultUpdateExecutionSupport;
 import org.apache.hop.datavault.metadata.businessvault.BvBusinessTable;
 import org.apache.hop.datavault.metadata.businessvault.BvBvTableReference;
@@ -92,6 +87,9 @@ import org.apache.hop.datavault.metadata.businessvault.BvScd2Table;
 import org.apache.hop.datavault.metadata.businessvault.BvTableBase;
 import org.apache.hop.datavault.metadata.businessvault.BvTargetDatabaseSupport;
 import org.apache.hop.datavault.metadata.businessvault.IBvTable;
+import org.apache.hop.datavault.metadata.coaching.BvCoachingModelAdapter;
+import org.apache.hop.datavault.metadata.coaching.CoachingSourceRef;
+import org.apache.hop.datavault.metadata.coaching.ICoachingModelAdapter;
 import org.apache.hop.datavault.workflow.actions.businessvaultupdate.ActionBusinessVaultUpdate;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.pipeline.PipelineMeta;
@@ -126,7 +124,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
@@ -980,11 +977,8 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
         BusinessVaultDvReferenceSupport.listDvModelSources(
             model, dataVaultModel, getVariables(), hopGui.getMetadataProvider());
     // Always at least "Browse .hdv…"; if only browse and no catalog/linked, still allow pick.
-    boolean onlyBrowse =
-        sources.size() == 1 && sources.get(0).browseFile();
-    if (onlyBrowse
-        && dataVaultModel == null
-        && Utils.isEmpty(model.getDataVaultModelPath())) {
+    boolean onlyBrowse = sources.size() == 1 && sources.get(0).browseFile();
+    if (onlyBrowse && dataVaultModel == null && Utils.isEmpty(model.getDataVaultModelPath())) {
       // Still proceed — user can browse. Soft tip is in the browse dialog title/message.
     }
 
@@ -1009,10 +1003,7 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
         return;
       }
       chosenSource =
-          sources.stream()
-              .filter(s -> selectedSource.equals(s.label()))
-              .findFirst()
-              .orElse(null);
+          sources.stream().filter(s -> selectedSource.equals(s.label())).findFirst().orElse(null);
       if (chosenSource == null) {
         return;
       }
@@ -1155,10 +1146,7 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
         return;
       }
       chosenSource =
-          sources.stream()
-              .filter(s -> selectedSource.equals(s.label()))
-              .findFirst()
-              .orElse(null);
+          sources.stream().filter(s -> selectedSource.equals(s.label())).findFirst().orElse(null);
       if (chosenSource == null) {
         return;
       }
@@ -1380,8 +1368,7 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
                     && reference.getBvTableName() != null
                     && reference.getBvTableName().equalsIgnoreCase(ref.getBvTableName())
                     && Objects.equals(
-                        reference.getReferencedModelFilename(),
-                        ref.getReferencedModelFilename()));
+                        reference.getReferencedModelFilename(), ref.getReferencedModelFilename()));
     graph.setChanged();
     graph.redraw();
   }
@@ -1700,7 +1687,8 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
   @GuiToolbarElement(
       root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
       id = TOOLBAR_ITEM_TOGGLE_DURATIONS,
-      toolTip = "i18n:org.apache.hop.datavault.hopgui.file.metrics:ModelLoadDurationPane.Toggle.Tooltip",
+      toolTip =
+          "i18n:org.apache.hop.datavault.hopgui.file.metrics:ModelLoadDurationPane.Toggle.Tooltip",
       image = "ui/images/show-results.svg")
   public void toggleLoadDurationPanelToolbar() {
     toggleLoadDurationPanel();
@@ -1957,8 +1945,7 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
             && model.getTables().stream()
                 .anyMatch(t -> t instanceof BvScd2Table || t instanceof BvPitTable);
     if (!needsDv) {
-      dataVaultModel =
-          new org.apache.hop.datavault.metadata.DataVaultModel();
+      dataVaultModel = new org.apache.hop.datavault.metadata.DataVaultModel();
       return true;
     }
     new ErrorDialog(
@@ -2060,7 +2047,8 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
           continue;
         }
 
-        ModelGeneratedArtifactOpenSupport.openGeneratedPipeline(hopGui, pipelineMeta, debugVariables);
+        ModelGeneratedArtifactOpenSupport.openGeneratedPipeline(
+            hopGui, pipelineMeta, debugVariables);
       }
     } catch (Exception e) {
       new ErrorDialog(
@@ -2362,8 +2350,7 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
       return;
     }
     try {
-      BusinessVaultDvNavigationSupport.navigateToDvTable(
-          hopGui, model, reference, getVariables());
+      BusinessVaultDvNavigationSupport.navigateToDvTable(hopGui, model, reference, getVariables());
     } catch (HopException e) {
       new ErrorDialog(
           hopGui.getShell(),
@@ -2378,8 +2365,7 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
       return;
     }
     try {
-      BusinessVaultBvNavigationSupport.navigateToBvTable(
-          hopGui, model, reference, getVariables());
+      BusinessVaultBvNavigationSupport.navigateToBvTable(hopGui, model, reference, getVariables());
     } catch (HopException e) {
       new ErrorDialog(
           hopGui.getShell(),
@@ -3333,8 +3319,7 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
         doRedraw = true;
       }
       if ((mouseOverBvReferenceName == null && newBvRefOver != null)
-          || (mouseOverBvReferenceName != null
-              && !mouseOverBvReferenceName.equals(newBvRefOver))) {
+          || (mouseOverBvReferenceName != null && !mouseOverBvReferenceName.equals(newBvRefOver))) {
         mouseOverBvReferenceName = newBvRefOver;
         doRedraw = true;
       }
@@ -3468,7 +3453,8 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
       table.setName(generated);
       table.setTableName(generated.toLowerCase().replace(' ', '_'));
     }
-    PropsUi.setLocation(table, location != null ? location.x : 50, location != null ? location.y : 50);
+    PropsUi.setLocation(
+        table, location != null ? location.x : 50, location != null ? location.y : 50);
     model.getTables().add(table);
     setChanged();
     redraw();

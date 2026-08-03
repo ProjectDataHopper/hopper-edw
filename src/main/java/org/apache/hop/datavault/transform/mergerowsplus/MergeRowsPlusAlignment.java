@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.transform.mergerowsplus;
 
 import java.util.HashSet;
@@ -115,7 +113,8 @@ public final class MergeRowsPlusAlignment {
     }
   }
 
-  public static SchemaMapping buildSchemaMapping(IRowMeta referenceRowMeta, IRowMeta compareRowMeta) {
+  public static SchemaMapping buildSchemaMapping(
+      IRowMeta referenceRowMeta, IRowMeta compareRowMeta) {
     IRowMeta outputRowMeta = referenceRowMeta.clone();
     HashSet<String> fieldNames = new HashSet<>();
     for (String fieldName : outputRowMeta.getFieldNames()) {

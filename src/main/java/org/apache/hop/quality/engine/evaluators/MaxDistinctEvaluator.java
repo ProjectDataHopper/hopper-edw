@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.quality.engine.evaluators;
 
 import java.util.List;
@@ -73,8 +71,7 @@ public final class MaxDistinctEvaluator implements IDataQualityRuleEvaluator {
               "MAX_DISTINCT could not be evaluated: distinct count unavailable",
               "distinctUnknown=true",
               "max=" + max,
-              EvaluatorSupport.metrics(
-                  "distinctUnknown", "true", "max", String.valueOf(max)),
+              EvaluatorSupport.metrics("distinctUnknown", "true", "max", String.valueOf(max)),
               QualitySeverity.WARNING));
     }
 
@@ -86,10 +83,7 @@ public final class MaxDistinctEvaluator implements IDataQualityRuleEvaluator {
     if (field.isDistinctTruncated()) {
       Map<String, String> metrics =
           EvaluatorSupport.metrics(
-              "distinctTruncated",
-              "true",
-              "observedDistinct",
-              String.valueOf(size));
+              "distinctTruncated", "true", "observedDistinct", String.valueOf(size));
       metrics.put("max", String.valueOf(max));
       return List.of(
           EvaluatorSupport.findingWithSeverity(
@@ -122,12 +116,7 @@ public final class MaxDistinctEvaluator implements IDataQualityRuleEvaluator {
             rule,
             context,
             fieldName,
-            "Field '"
-                + fieldName
-                + "' distinct count "
-                + actual
-                + " exceeds maximum "
-                + max,
+            "Field '" + fieldName + "' distinct count " + actual + " exceeds maximum " + max,
             "distinctCount=" + actual,
             "max=" + max,
             metrics));

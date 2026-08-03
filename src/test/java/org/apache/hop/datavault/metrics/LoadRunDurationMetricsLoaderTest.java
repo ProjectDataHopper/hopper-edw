@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -59,7 +57,12 @@ class LoadRunDurationMetricsLoaderTest {
   @Test
   void assembleSnapshotIgnoresMetricsForTablesNotInModel() {
     List<LoadRunDurationRun> runs =
-        List.of(LoadRunDurationRun.builder().runId("run-1").finishedAt(new Date()).success(true).build());
+        List.of(
+            LoadRunDurationRun.builder()
+                .runId("run-1")
+                .finishedAt(new Date())
+                .success(true)
+                .build());
     List<LoadRunDurationMetricsLoader.DurationMetricRow> metrics =
         List.of(
             new LoadRunDurationMetricsLoader.DurationMetricRow("run-1", "hub_customer", 2_000L),
@@ -86,7 +89,12 @@ class LoadRunDurationMetricsLoaderTest {
   @Test
   void buildRunIdInClauseQuotesRunIds() {
     List<LoadRunDurationRun> runs =
-        List.of(LoadRunDurationRun.builder().runId("run'a").finishedAt(new Date()).success(true).build());
+        List.of(
+            LoadRunDurationRun.builder()
+                .runId("run'a")
+                .finishedAt(new Date())
+                .success(true)
+                .build());
     assertEquals("'run''a'", LoadRunDurationMetricsLoader.buildRunIdInClause(null, runs));
   }
 }

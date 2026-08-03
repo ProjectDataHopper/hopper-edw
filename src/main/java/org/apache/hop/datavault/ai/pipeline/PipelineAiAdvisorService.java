@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai.pipeline;
 
 import dev.langchain4j.data.message.ChatMessage;
@@ -27,8 +25,8 @@ import org.apache.hop.datavault.ai.HopAiAdvisorEngine;
 import org.apache.hop.datavault.ai.HopAiAdvisoryResponse;
 import org.apache.hop.datavault.ai.HopAiConfig;
 import org.apache.hop.datavault.ai.HopAiM2PromptSupport;
-import org.apache.hop.datavault.ai.HopAiProposalParser;
 import org.apache.hop.datavault.ai.HopAiPromptLoader;
+import org.apache.hop.datavault.ai.HopAiProposalParser;
 
 public final class PipelineAiAdvisorService {
 
@@ -55,9 +53,7 @@ public final class PipelineAiAdvisorService {
     StringBuilder prompt = new StringBuilder();
     prompt.append(HopAiPromptLoader.loadResource(PROMPT_ROOT, "preamble-hop.txt")).append("\n\n");
     PipelineAiScenario scenario =
-        context.getScenario() != null
-            ? context.getScenario()
-            : PipelineAiScenario.PIPELINE_GENERAL;
+        context.getScenario() != null ? context.getScenario() : PipelineAiScenario.PIPELINE_GENERAL;
     prompt.append(
         HopAiPromptLoader.loadResource(PROMPT_ROOT, scenario.getPromptResource() + ".txt"));
     prompt.append("\n\n").append(HopAiM2PromptSupport.buildM2Supplement());
@@ -75,16 +71,19 @@ public final class PipelineAiAdvisorService {
   private static String buildUserPromptBody(PipelineAiContextBundle context, boolean includeFull) {
     StringBuilder prompt = new StringBuilder();
     prompt.append("User question:\n").append(context.getUserPrompt()).append("\n\n");
-    prompt.append("Pipeline structure JSON:\n")
+    prompt
+        .append("Pipeline structure JSON:\n")
         .append(nullToEmpty(context.getStructureJson()))
         .append("\n\n");
 
     if (includeFull) {
-      prompt.append("Pipeline summary JSON:\n")
+      prompt
+          .append("Pipeline summary JSON:\n")
           .append(nullToEmpty(context.getSummaryJson()))
           .append("\n\n");
       if (!Utils.isEmpty(context.getTransformCatalogJson())) {
-        prompt.append("Available transform plugins JSON:\n")
+        prompt
+            .append("Available transform plugins JSON:\n")
             .append(context.getTransformCatalogJson())
             .append("\n\n");
       }
@@ -97,13 +96,12 @@ public final class PipelineAiAdvisorService {
     }
 
     if (!Utils.isEmpty(context.getFocusTransformName())) {
-      prompt.append("Focus transform:\n")
-          .append(context.getFocusTransformName())
-          .append("\n\n");
+      prompt.append("Focus transform:\n").append(context.getFocusTransformName()).append("\n\n");
     }
 
     if (!Utils.isEmpty(context.getCheckResultsJson())) {
-      prompt.append("Pipeline check results JSON:\n")
+      prompt
+          .append("Pipeline check results JSON:\n")
           .append(context.getCheckResultsJson())
           .append("\n\n");
     }

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -91,10 +89,7 @@ class HopAiProviderSettingsSupportTest {
     widgetSnapshot.setModelName("grok-4-fast");
 
     HopAiProviderSettingsSupport.switchProvider(
-        config,
-        DvAiProviderPreset.GROK,
-        DvAiProviderPreset.OLLAMA,
-        widgetSnapshot);
+        config, DvAiProviderPreset.GROK, DvAiProviderPreset.OLLAMA, widgetSnapshot);
 
     assertEquals(
         "edited-grok-key",
@@ -129,13 +124,11 @@ class HopAiProviderSettingsSupportTest {
     original.getProviderSettings().put(DvAiProviderPreset.OLLAMA.name(), ollama);
 
     ObjectMapper mapper = HopJson.newMapper();
-    HopAiConfig restored =
-        mapper.readValue(new Gson().toJson(original), HopAiConfig.class);
+    HopAiConfig restored = mapper.readValue(new Gson().toJson(original), HopAiConfig.class);
     HopAiProviderSettingsSupport.normalizeProviderSettings(restored);
 
     assertEquals(
-        "grok-key",
-        restored.getProviderSettings().get(DvAiProviderPreset.GROK.name()).getApiKey());
+        "grok-key", restored.getProviderSettings().get(DvAiProviderPreset.GROK.name()).getApiKey());
     assertEquals(
         "llama3.2",
         restored.getProviderSettings().get(DvAiProviderPreset.OLLAMA.name()).getModelName());

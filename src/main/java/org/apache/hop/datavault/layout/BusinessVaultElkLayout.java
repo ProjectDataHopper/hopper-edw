@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.layout;
 
 import org.apache.hop.core.exception.HopException;
@@ -60,9 +58,7 @@ public class BusinessVaultElkLayout {
       }
       DataVaultModel dataVaultModel = graph.getDataVaultModel();
       graph.runUndoableModelChange(
-          () ->
-              ElkGraphLayout.fromBusinessVaultModel(model, dataVaultModel)
-                  .layout(layout));
+          () -> ElkGraphLayout.fromBusinessVaultModel(model, dataVaultModel).layout(layout));
     } catch (HopException e) {
       ElkLayoutGuiSupport.showLayoutError(hopGui.getShell(), PKG, KEY_PREFIX, e);
     } catch (Exception e) {

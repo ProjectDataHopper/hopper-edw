@@ -13,13 +13,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.executionmap;
 
 import org.apache.hop.datavault.executionmap.ExecutionMapDiffSupport.DiffResult;
-
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.dialog.EnterTextDialog;
 import org.eclipse.swt.widgets.Shell;

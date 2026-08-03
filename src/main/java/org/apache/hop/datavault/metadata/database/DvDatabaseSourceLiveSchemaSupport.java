@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.database;
 
 import org.apache.hop.core.Const;
@@ -58,8 +56,7 @@ public final class DvDatabaseSourceLiveSchemaSupport {
     try {
       databaseMeta = metadataProvider.getSerializer(DatabaseMeta.class).load(connectionName);
     } catch (Exception e) {
-      throw new HopException(
-          "Error loading database connection '" + connectionName + "'", e);
+      throw new HopException("Error loading database connection '" + connectionName + "'", e);
     }
     if (databaseMeta == null) {
       throw new HopException("Database connection '" + connectionName + "' was not found.");

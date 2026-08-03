@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.dimensional;
 
 import org.apache.hop.core.exception.HopException;
@@ -42,8 +40,7 @@ public final class DmSourcePipelineOpenSupport {
       return false;
     }
     DmSourceConfiguration source = table.getSourceOrDefault();
-    return source.isPipelineSource()
-        && !Utils.isEmpty(source.resolveSourcePipelineFile(variables));
+    return source.isPipelineSource() && !Utils.isEmpty(source.resolveSourcePipelineFile(variables));
   }
 
   public static boolean canOpenSourcePipeline(

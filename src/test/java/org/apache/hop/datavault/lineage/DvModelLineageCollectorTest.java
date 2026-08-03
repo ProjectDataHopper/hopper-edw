@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.lineage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,8 +48,7 @@ class DvModelLineageCollectorTest {
   void setUp() throws Exception {
     variables = new Variables();
     variables.setVariable(
-        "PROJECT_HOME",
-        Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
+        "PROJECT_HOME", Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
     model = loadModel("retail-example/models/retail-360.hdv");
   }
 
@@ -166,16 +164,13 @@ class DvModelLineageCollectorTest {
             .orElseThrow(() -> new AssertionError("lnk_order_line missing"));
 
     assertEquals("LINK", link.getTableType());
-    assertTrue(
-        link.getSources().stream()
-            .anyMatch(s -> "E2E-order-line".equals(s.getName())));
-    assertTrue(
-        link.getSources().stream().anyMatch(s -> "hub_order".equals(s.getName())));
-    assertTrue(
-        link.getSources().stream().anyMatch(s -> "hub_product".equals(s.getName())));
+    assertTrue(link.getSources().stream().anyMatch(s -> "E2E-order-line".equals(s.getName())));
+    assertTrue(link.getSources().stream().anyMatch(s -> "hub_order".equals(s.getName())));
+    assertTrue(link.getSources().stream().anyMatch(s -> "hub_product".equals(s.getName())));
 
     FieldLineage orderId =
-        link.findField("order_id").orElseThrow(() -> new AssertionError("order_id mapping missing"));
+        link.findField("order_id")
+            .orElseThrow(() -> new AssertionError("order_id mapping missing"));
     assertTrue(
         orderId.getContributions().stream()
             .anyMatch(
@@ -208,9 +203,7 @@ class DvModelLineageCollectorTest {
     assertEquals("E2E-order-line", quantity.getContributions().get(0).getSourceName());
     assertEquals("quantity", quantity.getContributions().get(0).getSourceFieldName());
 
-    assertTrue(
-        sat.getSources().stream()
-            .anyMatch(s -> s.getRole() == TableSourceRole.PARENT_LINK));
+    assertTrue(sat.getSources().stream().anyMatch(s -> s.getRole() == TableSourceRole.PARENT_LINK));
   }
 
   @Test
@@ -220,7 +213,11 @@ class DvModelLineageCollectorTest {
       for (FieldLineage field : table.getFields()) {
         assertFalse(
             field.getContributions().isEmpty(),
-            () -> table.getLogicalName() + "." + field.getTargetFieldName() + " has no contributions");
+            () ->
+                table.getLogicalName()
+                    + "."
+                    + field.getTargetFieldName()
+                    + " has no contributions");
         for (FieldContribution contribution : field.getContributions()) {
           assertFalse(
               contribution.getReasons().isEmpty(),
@@ -238,7 +235,8 @@ class DvModelLineageCollectorTest {
   void programmaticHubCollectsExplicitMapping() {
     DataVaultModel small = new DataVaultModel();
     small.setName("unit-hub");
-    org.apache.hop.datavault.metadata.DvHub hub = new org.apache.hop.datavault.metadata.DvHub("hub_x");
+    org.apache.hop.datavault.metadata.DvHub hub =
+        new org.apache.hop.datavault.metadata.DvHub("hub_x");
     hub.setTableName("hub_x");
     hub.setHashKeyFieldName("x_hk");
     hub.getRecordSources().add("SRC-a");

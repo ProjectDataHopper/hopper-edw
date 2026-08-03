@@ -13,15 +13,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.workflow.actions.generateexecutionmap;
 
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.hop.core.Result;
 import org.apache.hop.core.annotations.Action;
 import org.apache.hop.core.exception.HopException;
@@ -30,12 +27,12 @@ import org.apache.hop.core.gui.plugin.GuiElementType;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.GuiWidgetElement;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.command.executionmap.ExecutionMapService;
 import org.apache.hop.datavault.command.executionmap.ExecutionMapService.GenerateResult;
 import org.apache.hop.datavault.executionmap.CrawlOptions;
 import org.apache.hop.datavault.executionmap.ExecutionMapPersistence;
 import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.workflow.WorkflowMeta;
@@ -204,7 +201,9 @@ public class ActionGenerateExecutionMap extends ActionBase implements Cloneable,
       String lineagePath =
           ExecutionMapService.defaultLineageOutputPath(generateResult.getOutputPath());
       ExecutionMapService.exportLineage(generateResult.getDocument(), lineagePath, getVariables());
-      logBasic(BaseMessages.getString(PKG, "ActionGenerateExecutionMap.Log.LineageWritten", lineagePath));
+      logBasic(
+          BaseMessages.getString(
+              PKG, "ActionGenerateExecutionMap.Log.LineageWritten", lineagePath));
     }
 
     logWarnings(generateResult.getWarnings());
@@ -239,8 +238,7 @@ public class ActionGenerateExecutionMap extends ActionBase implements Cloneable,
       IWorkflowEngine<WorkflowMeta> parentWorkflow,
       IVariables variables)
       throws HopException {
-    return resolveRootArtifactPath(
-        configuredRootArtifactFilename, parentWorkflow, null, variables);
+    return resolveRootArtifactPath(configuredRootArtifactFilename, parentWorkflow, null, variables);
   }
 
   static String resolveRootArtifactPath(

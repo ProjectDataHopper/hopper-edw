@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import lombok.Getter;
@@ -52,8 +50,7 @@ public class BvSqlSource {
     this.tableName = tableName;
   }
 
-  public BvSqlSource(
-      String sourceName, String databaseName, String schemaName, String tableName) {
+  public BvSqlSource(String sourceName, String databaseName, String schemaName, String tableName) {
     this.sourceName = sourceName;
     this.databaseName = databaseName;
     this.schemaName = schemaName;

@@ -14,11 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.hopgui.lineage;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import org.apache.hop.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.util.Utils;
@@ -142,8 +140,7 @@ public final class ReverseLineageBrowserDialog {
 
     wlStatus = new Label(shell, SWT.LEFT);
     PropsUi.setLook(wlStatus);
-    wlStatus.setLayoutData(
-        new FormDataBuilder().left().top(wSourceField, margin).right().result());
+    wlStatus.setLayoutData(new FormDataBuilder().left().top(wSourceField, margin).right().result());
 
     ColumnInfo[] columns =
         new ColumnInfo[] {

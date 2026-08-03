@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.lang.reflect.Method;
@@ -87,8 +86,7 @@ public final class DvMultiSourceUpdateWorkflowSupport {
   public static WorkflowMeta buildSerialSourceWorkflow(
       String workflowName, List<PipelineMeta> sourcePipelines, String pipelineRunConfiguration)
       throws HopException {
-    return buildSerialSourceWorkflow(
-        workflowName, sourcePipelines, pipelineRunConfiguration, null);
+    return buildSerialSourceWorkflow(workflowName, sourcePipelines, pipelineRunConfiguration, null);
   }
 
   public static WorkflowMeta buildSerialSourceWorkflow(
@@ -98,7 +96,8 @@ public final class DvMultiSourceUpdateWorkflowSupport {
       PipelineActionFactory actionFactory)
       throws HopException {
     if (sourcePipelines == null || sourcePipelines.isEmpty()) {
-      throw new HopException("At least one source pipeline is required for a multi-source workflow");
+      throw new HopException(
+          "At least one source pipeline is required for a multi-source workflow");
     }
 
     WorkflowMeta workflowMeta = new WorkflowMeta();
@@ -135,8 +134,7 @@ public final class DvMultiSourceUpdateWorkflowSupport {
 
   /** Default multi-source workflow name for a hub or link table. */
   public static String defaultWorkflowName(IDvTable table, String pipelineNamePrefix) {
-    String tablePart =
-        table != null && !Utils.isEmpty(table.getName()) ? table.getName() : "table";
+    String tablePart = table != null && !Utils.isEmpty(table.getName()) ? table.getName() : "table";
     String prefix = Utils.isEmpty(pipelineNamePrefix) ? "" : pipelineNamePrefix;
     return prefix + tablePart + "-multi-source";
   }
@@ -227,10 +225,8 @@ public final class DvMultiSourceUpdateWorkflowSupport {
       List<WorkflowMeta> multiSourceWorkflows) {
 
     public static UpdateArtifacts of(List<PipelineMeta> pipelines, List<WorkflowMeta> workflows) {
-      List<PipelineMeta> pipelineList =
-          pipelines == null ? List.of() : new ArrayList<>(pipelines);
-      List<WorkflowMeta> workflowList =
-          workflows == null ? List.of() : new ArrayList<>(workflows);
+      List<PipelineMeta> pipelineList = pipelines == null ? List.of() : new ArrayList<>(pipelines);
+      List<WorkflowMeta> workflowList = workflows == null ? List.of() : new ArrayList<>(workflows);
       if (workflowList.isEmpty()) {
         return new UpdateArtifacts(List.copyOf(pipelineList), List.of(), List.of());
       }
@@ -263,8 +259,7 @@ public final class DvMultiSourceUpdateWorkflowSupport {
         }
         free.clear();
       }
-      return new UpdateArtifacts(
-          List.copyOf(free), List.copyOf(nested), List.copyOf(workflowList));
+      return new UpdateArtifacts(List.copyOf(free), List.copyOf(nested), List.copyOf(workflowList));
     }
   }
 
@@ -356,8 +351,12 @@ public final class DvMultiSourceUpdateWorkflowSupport {
     if (Utils.isEmpty(name)) {
       return name;
     }
-    if (name.regionMatches(true, name.length() - PipelineMeta.PIPELINE_EXTENSION.length(),
-        PipelineMeta.PIPELINE_EXTENSION, 0, PipelineMeta.PIPELINE_EXTENSION.length())) {
+    if (name.regionMatches(
+        true,
+        name.length() - PipelineMeta.PIPELINE_EXTENSION.length(),
+        PipelineMeta.PIPELINE_EXTENSION,
+        0,
+        PipelineMeta.PIPELINE_EXTENSION.length())) {
       return name.substring(0, name.length() - PipelineMeta.PIPELINE_EXTENSION.length());
     }
     return name;

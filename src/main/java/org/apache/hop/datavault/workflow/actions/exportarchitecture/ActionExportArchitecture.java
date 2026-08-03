@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.workflow.actions.exportarchitecture;
 
 import java.util.ArrayList;
@@ -41,8 +39,8 @@ import org.apache.hop.workflow.action.ActionBase;
 import org.apache.hop.workflow.action.IAction;
 
 /**
- * Exports a Draw.io architecture diagram from a workflow root (SOLUTION view) and/or model
- * lineage (DATA view). Models remain the source of truth; the export is derived.
+ * Exports a Draw.io architecture diagram from a workflow root (SOLUTION view) and/or model lineage
+ * (DATA view). Models remain the source of truth; the export is derived.
  */
 @Action(
     id = "EXPORT_ARCHITECTURE",
@@ -204,10 +202,7 @@ public class ActionExportArchitecture extends ActionBase implements Cloneable, I
           } else {
             ExportResult dataExport =
                 ArchitectureExportService.exportDataDrawio(
-                    modelPaths,
-                    resolve(dataOutputDrawioFile),
-                    this,
-                    getMetadataProvider());
+                    modelPaths, resolve(dataOutputDrawioFile), this, getMetadataProvider());
             logWroteData(dataExport);
           }
         }

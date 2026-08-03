@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional.pipeline;
 
 import java.util.ArrayList;
@@ -62,14 +60,11 @@ public final class DmDimensionLookupBuilder {
     GeneratedPipelineMetadataSupport.stampDmTablePipeline(pipelineMeta, ctx);
 
     TransformMeta sourceTransform = DmPipelineBuilderSupport.addSourceInput(ctx, pipelineMeta);
-    TransformMeta lookupTransform = addHybridDimensionLookup(ctx, pipelineMeta, sourceTransform, dimension);
+    TransformMeta lookupTransform =
+        addHybridDimensionLookup(ctx, pipelineMeta, sourceTransform, dimension);
     if (lookupTransform != null) {
       GeneratedPipelineMetadataSupport.stampWriteTarget(
-          lookupTransform,
-          "dimension",
-          dimension.getName(),
-          ctx.targetTableName,
-          ctx.targetDbName);
+          lookupTransform, "dimension", dimension.getName(), ctx.targetTableName, ctx.targetDbName);
     }
 
     DmGeneratedPipelineSupport.applyLayout(pipelineMeta);
@@ -131,9 +126,7 @@ public final class DmDimensionLookupBuilder {
   }
 
   private static DimensionLookupMeta.DLFields buildLookupOnlyFields(
-      DmPipelineBuilderSupport.BuildContext ctx,
-      DmDimension dimension,
-      DmFactDimensionRole role) {
+      DmPipelineBuilderSupport.BuildContext ctx, DmDimension dimension, DmFactDimensionRole role) {
     DimensionLookupMeta.DLFields dlFields = new DimensionLookupMeta.DLFields();
     dlFields.setKeys(DmFactDimensionJoinBuilder.buildFactLookupKeys(dimension, role, ctx));
 
@@ -226,7 +219,8 @@ public final class DmDimensionLookupBuilder {
   private static List<DimensionLookupMeta.DLKey> buildNaturalKeys(
       DmDimension dimension, DmPipelineBuilderSupport.BuildContext ctx) {
     List<DimensionLookupMeta.DLKey> keys = new ArrayList<>();
-    for (String naturalKey : DmPipelineBuilderSupport.naturalKeyFieldNames(dimension, ctx.variables)) {
+    for (String naturalKey :
+        DmPipelineBuilderSupport.naturalKeyFieldNames(dimension, ctx.variables)) {
       DimensionLookupMeta.DLKey key = new DimensionLookupMeta.DLKey();
       key.setName(naturalKey);
       key.setLookup(naturalKey);
@@ -245,12 +239,12 @@ public final class DmDimensionLookupBuilder {
       DimensionLookupMeta lookupMeta,
       DmDimension dimension,
       DmPipelineBuilderSupport.BuildContext ctx) {
-    if (DmSurrogateKeySupport.resolveStrategy(dimension) != DmSurrogateKeyStrategy.USE_SOURCE_FIELD) {
+    if (DmSurrogateKeySupport.resolveStrategy(dimension)
+        != DmSurrogateKeyStrategy.USE_SOURCE_FIELD) {
       return;
     }
     lookupMeta.setTkSourceField(
-        DmSurrogateKeySupport.resolveSurrogateKeySourceField(
-            dimension, ctx.config, ctx.variables));
+        DmSurrogateKeySupport.resolveSurrogateKeySourceField(dimension, ctx.config, ctx.variables));
   }
 
   private static DimensionLookupMeta.DimensionUpdateType resolveUpdateType(

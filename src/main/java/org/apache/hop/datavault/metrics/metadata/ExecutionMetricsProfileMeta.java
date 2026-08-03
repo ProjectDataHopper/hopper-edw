@@ -13,15 +13,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics.metadata;
 
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.datavault.metrics.LoadRunInsightEngine;
-import org.apache.hop.datavault.metrics.LoadRunMetricsCatalogPublisher;
 import org.apache.hop.metadata.api.HopMetadata;
 import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
@@ -64,17 +61,17 @@ public class ExecutionMetricsProfileMeta extends HopMetadataBase implements IHop
 
   @HopMetadataProperty private boolean publishDatabaseRows = true;
 
-  @HopMetadataProperty private long dimLookupPreloadRatioThreshold =
-      LoadRunInsightEngine.DEFAULT_LOOKUP_RATIO_THRESHOLD;
+  @HopMetadataProperty
+  private long dimLookupPreloadRatioThreshold = LoadRunInsightEngine.DEFAULT_LOOKUP_RATIO_THRESHOLD;
 
-  @HopMetadataProperty private long targetReadRatioThreshold =
-      LoadRunInsightEngine.DEFAULT_TARGET_READ_RATIO_THRESHOLD;
+  @HopMetadataProperty
+  private long targetReadRatioThreshold = LoadRunInsightEngine.DEFAULT_TARGET_READ_RATIO_THRESHOLD;
 
-  @HopMetadataProperty private long sortRowsRiskThreshold =
-      LoadRunInsightEngine.DEFAULT_SORT_ROWS_RISK_THRESHOLD;
+  @HopMetadataProperty
+  private long sortRowsRiskThreshold = LoadRunInsightEngine.DEFAULT_SORT_ROWS_RISK_THRESHOLD;
 
-  @HopMetadataProperty private long highTransformDurationMs =
-      LoadRunInsightEngine.DEFAULT_HIGH_TRANSFORM_DURATION_MS;
+  @HopMetadataProperty
+  private long highTransformDurationMs = LoadRunInsightEngine.DEFAULT_HIGH_TRANSFORM_DURATION_MS;
 
   public ExecutionMetricsProfileMeta() {
     super();

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.openlineage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -63,7 +61,8 @@ class OpenLineageHttpClientTest {
           }
           postCount.incrementAndGet();
           lastAuth.set(exchange.getRequestHeaders().getFirst("Authorization"));
-          lastBody.set(new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
+          lastBody.set(
+              new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
           byte[] ok = "{}".getBytes(StandardCharsets.UTF_8);
           exchange.getResponseHeaders().add("Content-Type", "application/json");
           exchange.sendResponseHeaders(201, ok.length);

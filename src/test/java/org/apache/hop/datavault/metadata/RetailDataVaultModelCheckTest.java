@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -60,8 +58,7 @@ class RetailDataVaultModelCheckTest {
   void setUp() throws HopException {
     variables = new Variables();
     variables.setVariable(
-        "PROJECT_HOME",
-        Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
+        "PROJECT_HOME", Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
     variables.setVariable("OUTPUT_COPIES", "2");
 
     metadataProvider = new MemoryMetadataProvider();
@@ -81,9 +78,7 @@ class RetailDataVaultModelCheckTest {
     FileDataCatalog fileCatalog = new FileDataCatalog();
     // Use committed seed fixtures, not gitignored work/edw-catalog (can drift after live refresh).
     fileCatalog.setStorageDirectory(
-        RetailExampleCatalogFixtures.seedCatalogStorageRoot()
-            .toString()
-            .replace('\\', '/'));
+        RetailExampleCatalogFixtures.seedCatalogStorageRoot().toString().replace('\\', '/'));
     catalog.setCatalog(fileCatalog);
     metadataProvider.getSerializer(DataCatalogMeta.class).save(catalog);
 
@@ -95,7 +90,9 @@ class RetailDataVaultModelCheckTest {
     DataVaultModel model = loadModel("retail-example/models/retail-360.hdv");
     // Offline unit test: no live JDBC and no Hop bulk-loader transform plugins on the classpath.
     // The retail model uses native bulk load at runtime; force Table Output for model-check only.
-    model.getConfigurationOrDefault().setTargetLoadMode(DvTargetLoadMode.TABLE_OUTPUT.getDescription());
+    model
+        .getConfigurationOrDefault()
+        .setTargetLoadMode(DvTargetLoadMode.TABLE_OUTPUT.getDescription());
 
     List<ICheckResult> remarks =
         model.check(metadataProvider, variables, DvModelCheckOptions.fastOnly());

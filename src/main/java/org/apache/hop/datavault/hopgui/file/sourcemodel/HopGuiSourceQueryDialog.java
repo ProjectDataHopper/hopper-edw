@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.hopgui.file.sourcemodel;
 
 import java.util.ArrayList;
@@ -280,12 +279,7 @@ public class HopGuiSourceQueryDialog {
             variables, comp, SWT.MULTI | SWT.LEFT | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
     PropsUi.setLook(wWhere, Props.WIDGET_STYLE_FIXED);
     wWhere.setLayoutData(
-        new FormDataBuilder()
-            .left()
-            .top(wlWhere, margin)
-            .right()
-            .bottom(100, -margin)
-            .result());
+        new FormDataBuilder().left().top(wlWhere, margin).right().bottom(100, -margin).result());
   }
 
   private void addJoinsTab(CTabFolder tabFolder, int margin) {
@@ -319,8 +313,7 @@ public class HopGuiSourceQueryDialog {
             BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.Joins.Table"),
             ColumnInfo.COLUMN_TYPE_CCOMBO,
             tableNames());
-    colJoinTable.setComboValuesSelectionListener(
-        (item, rowNr, colNr) -> preferredJoinTableNames());
+    colJoinTable.setComboValuesSelectionListener((item, rowNr, colNr) -> preferredJoinTableNames());
 
     ColumnInfo colJoinType =
         new ColumnInfo(
@@ -494,8 +487,7 @@ public class HopGuiSourceQueryDialog {
       if (resolved.startsWith("${")) {
         return List.of();
       }
-      DatabaseMeta databaseMeta =
-          metadataProvider.getSerializer(DatabaseMeta.class).load(resolved);
+      DatabaseMeta databaseMeta = metadataProvider.getSerializer(DatabaseMeta.class).load(resolved);
       if (databaseMeta == null || databaseMeta.getReservedWords() == null) {
         return List.of();
       }
@@ -565,8 +557,7 @@ public class HopGuiSourceQueryDialog {
             wDrivingTable.getText(), readJoinsWithoutKeys());
     inScope.remove(item.getText(JOIN_COL_TABLE));
     for (SourceRelationship relationship :
-        SourceQueryRelationSupport.relationshipsTo(
-            model, item.getText(JOIN_COL_TABLE), inScope)) {
+        SourceQueryRelationSupport.relationshipsTo(model, item.getText(JOIN_COL_TABLE), inScope)) {
       if (!Utils.isEmpty(relationship.getName())) {
         names.add(relationship.getName());
       }
@@ -690,11 +681,11 @@ public class HopGuiSourceQueryDialog {
 
   private void addRelatedTables() {
     Set<String> inScope =
-        SourceQueryRelationSupport.inScopeFromDrivingAndJoins(
-            wDrivingTable.getText(), readJoins());
+        SourceQueryRelationSupport.inScopeFromDrivingAndJoins(wDrivingTable.getText(), readJoins());
     if (inScope.isEmpty()) {
       MessageBox box = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-      box.setText(BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.AddRelated.NeedDriving.Title"));
+      box.setText(
+          BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.AddRelated.NeedDriving.Title"));
       box.setMessage(
           BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.AddRelated.NeedDriving.Message"));
       box.open();
@@ -787,8 +778,7 @@ public class HopGuiSourceQueryDialog {
     q.setName(wName.getText());
     q.setDescription(wDescription.getText());
     q.setDrivingTableName(wDrivingTable.getText());
-    q.setGenerationMode(
-        SourceQueryGenerationMode.lookupDescription(wGenerationMode.getText()));
+    q.setGenerationMode(SourceQueryGenerationMode.lookupDescription(wGenerationMode.getText()));
     q.setWhereClause(wWhere.getText());
     q.setJoins(readJoins());
     q.setColumns(readColumns());
@@ -873,7 +863,9 @@ public class HopGuiSourceQueryDialog {
       String connectionName =
           SourceQueryGenerationSupport.resolveSharedDatabaseName(model, working);
       DatabaseMeta databaseMeta =
-          metadataProvider.getSerializer(DatabaseMeta.class).load(variables.resolve(connectionName));
+          metadataProvider
+              .getSerializer(DatabaseMeta.class)
+              .load(variables.resolve(connectionName));
       String sql = SourceQuerySqlGenerator.generate(model, working, databaseMeta, variables);
       wSqlPreview.setText(DvSqlSupport.formatForDisplay(sql));
     } catch (Exception e) {
@@ -942,8 +934,7 @@ public class HopGuiSourceQueryDialog {
     String catalogFeed = wPublishedCatalogName.getText().trim();
     input.setPublishedCatalogName(Utils.isEmpty(catalogFeed) ? null : catalogFeed);
     input.setDrivingTableName(wDrivingTable.getText());
-    input.setGenerationMode(
-        SourceQueryGenerationMode.lookupDescription(wGenerationMode.getText()));
+    input.setGenerationMode(SourceQueryGenerationMode.lookupDescription(wGenerationMode.getText()));
     input.setWhereClause(wWhere.getText());
     input.setJoins(readJoins());
     input.setColumns(readColumns());

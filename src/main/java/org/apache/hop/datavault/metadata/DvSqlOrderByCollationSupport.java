@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.Collections;
@@ -201,14 +200,12 @@ public final class DvSqlOrderByCollationSupport {
 
     if (DvSqlOrderBySupport.isCollationOrderBySupported(sourceDatabaseMeta)
         && !Utils.isEmpty(sourceTable)) {
-      sourceColumns =
-          loadColumnMetaMap(sourceDatabaseMeta, variables, sourceSchema, sourceTable);
+      sourceColumns = loadColumnMetaMap(sourceDatabaseMeta, variables, sourceSchema, sourceTable);
       sourceDefault = loadDatabaseDefaultCollation(sourceDatabaseMeta, variables);
     }
     if (DvSqlOrderBySupport.isCollationOrderBySupported(targetDatabaseMeta)
         && !Utils.isEmpty(targetTable)) {
-      targetColumns =
-          loadColumnMetaMap(targetDatabaseMeta, variables, targetSchema, targetTable);
+      targetColumns = loadColumnMetaMap(targetDatabaseMeta, variables, targetSchema, targetTable);
       targetDefault = loadDatabaseDefaultCollation(targetDatabaseMeta, variables);
     }
     return new Session(sourceColumns, targetColumns, sourceDefault, targetDefault);

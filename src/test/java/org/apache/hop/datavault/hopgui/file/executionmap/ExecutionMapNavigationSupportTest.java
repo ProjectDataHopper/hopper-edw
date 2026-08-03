@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.executionmap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -63,8 +61,7 @@ class ExecutionMapNavigationSupportTest {
   void setUpRetailCatalog() throws HopException {
     Variables catalogVariables = new Variables();
     catalogVariables.setVariable(
-        "PROJECT_HOME",
-        Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
+        "PROJECT_HOME", Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
 
     metadataProvider = new MemoryMetadataProvider();
     DataCatalogMeta catalog = new DataCatalogMeta();
@@ -92,8 +89,7 @@ class ExecutionMapNavigationSupportTest {
     variables.setVariable("PROJECT_HOME", "/project");
     assertEquals(
         "/project/models/retail.hdv",
-        ExecutionMapNavigationSupport.resolvePath(
-            variables, "${PROJECT_HOME}/models/retail.hdv"));
+        ExecutionMapNavigationSupport.resolvePath(variables, "${PROJECT_HOME}/models/retail.hdv"));
   }
 
   @Test
@@ -169,8 +165,7 @@ class ExecutionMapNavigationSupportTest {
     node.setProperty("datasetName", "d_customer");
     node.setProperty(DatasetNodeSupport.PROPERTY_CATALOG_CONNECTION, "local-catalog");
 
-    assertTrue(
-        ExecutionMapNavigationSupport.canNavigateToCatalog(node, new Variables(), null));
+    assertTrue(ExecutionMapNavigationSupport.canNavigateToCatalog(node, new Variables(), null));
   }
 
   @Test
@@ -181,8 +176,7 @@ class ExecutionMapNavigationSupportTest {
     node.setProperty("datasetName", "E2E-customer-hub");
     node.setProperty(DatasetNodeSupport.PROPERTY_CATALOG_CONNECTION, "local-catalog");
 
-    assertTrue(
-        ExecutionMapNavigationSupport.canNavigateToCatalog(node, new Variables(), null));
+    assertTrue(ExecutionMapNavigationSupport.canNavigateToCatalog(node, new Variables(), null));
   }
 
   @Test
@@ -206,21 +200,18 @@ class ExecutionMapNavigationSupportTest {
     document.getNodesOrEmpty().add(datasetNode);
 
     RecordDefinitionKey key =
-        ExecutionMapDatasetCatalogSupport.resolveDatasetRecordKey(
-            datasetNode, document, variables);
+        ExecutionMapDatasetCatalogSupport.resolveDatasetRecordKey(datasetNode, document, variables);
 
     assertEquals(new RecordDefinitionKey("hop/retail-example/sources", "E2E-customer-hub"), key);
     assertTrue(
-        ExecutionMapNavigationSupport.canNavigateToCatalog(
-            datasetNode, document, variables, null));
+        ExecutionMapNavigationSupport.canNavigateToCatalog(datasetNode, document, variables, null));
   }
 
   @Test
   void canPreviewTargetDatasetFromCatalogRecordDefinition() {
     Variables variables = new Variables();
     variables.setVariable(
-        "PROJECT_HOME",
-        Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
+        "PROJECT_HOME", Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
 
     ExecutionMapNode node = new ExecutionMapNode();
     node.setNodeType(ExecutionMapNodeType.TARGET_DATASET);
@@ -237,8 +228,7 @@ class ExecutionMapNavigationSupportTest {
   void canPreviewLegacyTargetDatasetUnderDataVaultModel() {
     Variables variables = new Variables();
     variables.setVariable(
-        "PROJECT_HOME",
-        Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
+        "PROJECT_HOME", Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
 
     ExecutionMapDocument document = new ExecutionMapDocument();
     ExecutionMapNode modelNode = new ExecutionMapNode();
@@ -264,8 +254,7 @@ class ExecutionMapNavigationSupportTest {
   void canPreviewLegacyTargetDatasetWithoutCatalogConnectionProperty() {
     Variables variables = new Variables();
     variables.setVariable(
-        "PROJECT_HOME",
-        Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
+        "PROJECT_HOME", Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
 
     ExecutionMapDocument document = new ExecutionMapDocument();
     ExecutionMapNode modelNode = new ExecutionMapNode();
@@ -290,8 +279,7 @@ class ExecutionMapNavigationSupportTest {
   void canPreviewDimensionalTargetDatasetFromCatalogRecordDefinition() {
     Variables variables = new Variables();
     variables.setVariable(
-        "PROJECT_HOME",
-        Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
+        "PROJECT_HOME", Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
 
     ExecutionMapDocument document = new ExecutionMapDocument();
     ExecutionMapNode modelNode = new ExecutionMapNode();
@@ -317,8 +305,7 @@ class ExecutionMapNavigationSupportTest {
   void canPreviewTargetDatasetFromAlternateCatalogConnection() throws HopException {
     Variables variables = new Variables();
     variables.setVariable(
-        "PROJECT_HOME",
-        Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
+        "PROJECT_HOME", Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
 
     DataCatalogMeta sourceCatalog = new DataCatalogMeta();
     sourceCatalog.setName("local-catalog");
@@ -333,7 +320,8 @@ class ExecutionMapNavigationSupportTest {
     vaultCatalog.setName("vault-catalog");
     vaultCatalog.setEnabled(true);
     FileDataCatalog vaultFileCatalog = new FileDataCatalog();
-    // Alternate catalog that does contain retail model targets (local-catalog is integration-tests).
+    // Alternate catalog that does contain retail model targets (local-catalog is
+    // integration-tests).
     vaultFileCatalog.setStorageDirectory(RetailExampleCatalogFixtures.unitCatalogStorageRootPath());
     vaultCatalog.setCatalog(vaultFileCatalog);
     metadataProvider.getSerializer(DataCatalogMeta.class).save(vaultCatalog);
@@ -354,8 +342,7 @@ class ExecutionMapNavigationSupportTest {
   void canPreviewBusinessVaultTargetDatasetFromCatalogRecordDefinition() {
     Variables variables = new Variables();
     variables.setVariable(
-        "PROJECT_HOME",
-        Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
+        "PROJECT_HOME", Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
 
     ExecutionMapDocument document = new ExecutionMapDocument();
     ExecutionMapNode modelNode = new ExecutionMapNode();
@@ -381,8 +368,7 @@ class ExecutionMapNavigationSupportTest {
   void buildTooltipIncludesPreviewHintForTargetDataset() {
     Variables variables = new Variables();
     variables.setVariable(
-        "PROJECT_HOME",
-        Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
+        "PROJECT_HOME", Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
 
     ExecutionMapNode node = new ExecutionMapNode();
     node.setNodeType(ExecutionMapNodeType.TARGET_DATASET);
@@ -402,8 +388,7 @@ class ExecutionMapNavigationSupportTest {
   void canPreviewSourceDatasetFromCatalogRecordDefinition() {
     Variables variables = new Variables();
     variables.setVariable(
-        "PROJECT_HOME",
-        Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
+        "PROJECT_HOME", Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
 
     ExecutionMapNode node = new ExecutionMapNode();
     node.setNodeType(ExecutionMapNodeType.SOURCE_DATASET);

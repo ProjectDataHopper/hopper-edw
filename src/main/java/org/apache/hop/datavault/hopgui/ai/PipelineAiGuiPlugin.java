@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.ai;
 
 import org.apache.hop.core.action.GuiContextAction;
@@ -55,7 +53,8 @@ public class PipelineAiGuiPlugin {
       name = "i18n::PipelineAiGuiPlugin.AiHelp.Name",
       tooltip = "i18n::PipelineAiGuiPlugin.AiHelp.Tooltip",
       image = "datavault-ai-help.svg",
-      category = "i18n:org.apache.hop.ui.hopgui.file.pipeline:HopGuiPipelineGraph.ContextualAction.Category.Basic.Text",
+      category =
+          "i18n:org.apache.hop.ui.hopgui.file.pipeline:HopGuiPipelineGraph.ContextualAction.Category.Basic.Text",
       categoryOrder = "1")
   public void openAiAdvisorPipelineContext(HopGuiPipelineContext context) {
     if (context.getPipelineGraph() != null) {
@@ -70,7 +69,8 @@ public class PipelineAiGuiPlugin {
       name = "i18n::PipelineAiGuiPlugin.AiHelp.Name",
       tooltip = "i18n::PipelineAiGuiPlugin.AiHelp.Tooltip",
       image = "datavault-ai-help.svg",
-      category = "i18n:org.apache.hop.ui.hopgui.file.pipeline:HopGuiPipelineGraph.ContextualAction.Category.Basic.Text",
+      category =
+          "i18n:org.apache.hop.ui.hopgui.file.pipeline:HopGuiPipelineGraph.ContextualAction.Category.Basic.Text",
       categoryOrder = "1")
   public void openAiAdvisorTransformContext(HopGuiPipelineTransformContext context) {
     if (context.getPipelineGraph() != null) {

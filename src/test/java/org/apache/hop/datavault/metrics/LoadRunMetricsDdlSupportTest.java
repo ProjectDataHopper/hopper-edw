@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,8 +43,7 @@ class LoadRunMetricsDdlSupportTest {
 
     assertTrue(statements.stream().noneMatch(sql -> sql.contains("CREATE SCHEMA")));
     assertTrue(
-        statements.stream()
-            .anyMatch(sql -> sql.contains("CREATE TABLE IF NOT EXISTS load_run")));
+        statements.stream().anyMatch(sql -> sql.contains("CREATE TABLE IF NOT EXISTS load_run")));
     assertTrue(statements.stream().anyMatch(sql -> sql.contains("pipeline_run_configuration")));
     assertTrue(statements.stream().anyMatch(sql -> sql.contains("workflow_execution_id")));
     assertTrue(
@@ -105,10 +102,12 @@ class LoadRunMetricsDdlSupportTest {
   void postgresDdlUsesCustomOperationsSchema() {
     List<String> statements =
         LoadRunMetricsDdlSupport.buildCreateStatements(
-            databaseMetaWithPluginId(DvBulkLoadPluginSupport.POSTGRESQL_DB_PLUGIN_ID), "retail_ops");
+            databaseMetaWithPluginId(DvBulkLoadPluginSupport.POSTGRESQL_DB_PLUGIN_ID),
+            "retail_ops");
 
     assertTrue(
-        statements.stream().anyMatch(sql -> sql.contains("CREATE SCHEMA IF NOT EXISTS retail_ops")));
+        statements.stream()
+            .anyMatch(sql -> sql.contains("CREATE SCHEMA IF NOT EXISTS retail_ops")));
     assertTrue(
         statements.stream()
             .anyMatch(sql -> sql.contains("CREATE TABLE IF NOT EXISTS retail_ops.load_run")));
@@ -124,8 +123,7 @@ class LoadRunMetricsDdlSupportTest {
         statements.stream().noneMatch(sql -> sql.contains("CREATE DATABASE")),
         "MySQL should not create a separate ops database");
     assertTrue(
-        statements.stream()
-            .anyMatch(sql -> sql.contains("CREATE TABLE IF NOT EXISTS load_run")));
+        statements.stream().anyMatch(sql -> sql.contains("CREATE TABLE IF NOT EXISTS load_run")));
     assertTrue(statements.stream().anyMatch(sql -> sql.contains("TINYINT(1)")));
   }
 
@@ -137,8 +135,7 @@ class LoadRunMetricsDdlSupportTest {
 
     assertTrue(statements.stream().noneMatch(sql -> sql.contains("CREATE DATABASE")));
     assertTrue(
-        statements.stream()
-            .anyMatch(sql -> sql.contains("CREATE TABLE IF NOT EXISTS load_run")));
+        statements.stream().anyMatch(sql -> sql.contains("CREATE TABLE IF NOT EXISTS load_run")));
   }
 
   @Test
@@ -159,8 +156,7 @@ class LoadRunMetricsDdlSupportTest {
     DatabaseMeta postgres =
         databaseMetaWithPluginId(DvBulkLoadPluginSupport.POSTGRESQL_DB_PLUGIN_ID);
 
-    assertEquals(
-        "", LoadRunMetricsCatalogPublisher.resolvePhysicalOperationsSchema(null, mysql));
+    assertEquals("", LoadRunMetricsCatalogPublisher.resolvePhysicalOperationsSchema(null, mysql));
     assertEquals(
         "", LoadRunMetricsCatalogPublisher.resolvePhysicalOperationsSchema("  ", postgres));
     assertEquals(

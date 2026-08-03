@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.coaching;
 
 import org.apache.hop.core.gui.Point;
@@ -36,7 +34,8 @@ public final class ModelGraphDropCoordinates {
    */
   public static Point toModelLocation(
       Canvas canvas, HopGuiAbstractGraph graphView, int displayX, int displayY) {
-    org.eclipse.swt.graphics.Point canvasPoint = canvas.getDisplay().map(null, canvas, displayX, displayY);
+    org.eclipse.swt.graphics.Point canvasPoint =
+        canvas.getDisplay().map(null, canvas, displayX, displayY);
     return graphView.screen2real(canvasPoint.x, canvasPoint.y);
   }
 }

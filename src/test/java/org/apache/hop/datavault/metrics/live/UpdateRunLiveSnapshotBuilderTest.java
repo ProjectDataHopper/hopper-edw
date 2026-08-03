@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics.live;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,12 +40,7 @@ class UpdateRunLiveSnapshotBuilderTest {
 
     UpdateRunLiveSnapshot snapshot =
         UpdateRunLiveSnapshotBuilder.build(
-            context,
-            new UpdateRunLiveStallDetector(),
-            List.of(),
-            false,
-            0L,
-            "f_orders");
+            context, new UpdateRunLiveStallDetector(), List.of(), false, 0L, "f_orders");
 
     assertEquals("f_orders", snapshot.getCurrentElementName());
     assertEquals(UpdateRunLiveState.RUNNING, snapshot.getOverallState());
@@ -142,9 +135,7 @@ class UpdateRunLiveSnapshotBuilderTest {
 
     List<TransformLiveMetrics> annotated =
         detector.annotateTransforms(
-            "0001-dm-fact-f_orders",
-            List.of(quietJunk),
-            threshold + 80_000L);
+            "0001-dm-fact-f_orders", List.of(quietJunk), threshold + 80_000L);
     assertEquals(140L, annotated.get(0).getSecondsSinceLastProgress());
     assertFalse(detector.isPipelineStalled(List.of(quietJunk, progressedSink)));
   }

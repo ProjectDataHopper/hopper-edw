@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai.workflow;
 
 import dev.langchain4j.data.message.ChatMessage;
@@ -27,8 +25,8 @@ import org.apache.hop.datavault.ai.HopAiAdvisorEngine;
 import org.apache.hop.datavault.ai.HopAiAdvisoryResponse;
 import org.apache.hop.datavault.ai.HopAiConfig;
 import org.apache.hop.datavault.ai.HopAiM2PromptSupport;
-import org.apache.hop.datavault.ai.HopAiProposalParser;
 import org.apache.hop.datavault.ai.HopAiPromptLoader;
+import org.apache.hop.datavault.ai.HopAiProposalParser;
 
 public final class WorkflowAiAdvisorService {
 
@@ -55,9 +53,7 @@ public final class WorkflowAiAdvisorService {
     StringBuilder prompt = new StringBuilder();
     prompt.append(HopAiPromptLoader.loadResource(PROMPT_ROOT, "preamble-hop.txt")).append("\n\n");
     WorkflowAiScenario scenario =
-        context.getScenario() != null
-            ? context.getScenario()
-            : WorkflowAiScenario.WORKFLOW_GENERAL;
+        context.getScenario() != null ? context.getScenario() : WorkflowAiScenario.WORKFLOW_GENERAL;
     prompt.append(
         HopAiPromptLoader.loadResource(PROMPT_ROOT, scenario.getPromptResource() + ".txt"));
     prompt.append("\n\n").append(HopAiM2PromptSupport.buildM2Supplement());
@@ -75,16 +71,19 @@ public final class WorkflowAiAdvisorService {
   private static String buildUserPromptBody(WorkflowAiContextBundle context, boolean includeFull) {
     StringBuilder prompt = new StringBuilder();
     prompt.append("User question:\n").append(context.getUserPrompt()).append("\n\n");
-    prompt.append("Workflow structure JSON:\n")
+    prompt
+        .append("Workflow structure JSON:\n")
         .append(nullToEmpty(context.getStructureJson()))
         .append("\n\n");
 
     if (includeFull) {
-      prompt.append("Workflow summary JSON:\n")
+      prompt
+          .append("Workflow summary JSON:\n")
           .append(nullToEmpty(context.getSummaryJson()))
           .append("\n\n");
       if (!Utils.isEmpty(context.getActionCatalogJson())) {
-        prompt.append("Available workflow action plugins JSON:\n")
+        prompt
+            .append("Available workflow action plugins JSON:\n")
             .append(context.getActionCatalogJson())
             .append("\n\n");
       }
@@ -101,7 +100,8 @@ public final class WorkflowAiAdvisorService {
     }
 
     if (!Utils.isEmpty(context.getCheckResultsJson())) {
-      prompt.append("Workflow check results JSON:\n")
+      prompt
+          .append("Workflow check results JSON:\n")
           .append(context.getCheckResultsJson())
           .append("\n\n");
     }

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.widget;
 
 import java.util.ArrayList;
@@ -69,8 +67,7 @@ public class MarkdownStyledTextComp extends Composite {
     refreshThemeColors();
 
     styledText =
-        new StyledText(
-            this, SWT.MULTI | SWT.WRAP | SWT.READ_ONLY | SWT.V_SCROLL | SWT.BORDER);
+        new StyledText(this, SWT.MULTI | SWT.WRAP | SWT.READ_ONLY | SWT.V_SCROLL | SWT.BORDER);
     PropsUi.setLook(styledText);
     applyBaseFont();
     styledText.setMargins(4, 4, 4, 4);
@@ -217,7 +214,10 @@ public class MarkdownStyledTextComp extends Composite {
   }
 
   private void applyBaseFont() {
-    if (styledText != null && !styledText.isDisposed() && fixedFont != null && !fixedFont.isDisposed()) {
+    if (styledText != null
+        && !styledText.isDisposed()
+        && fixedFont != null
+        && !fixedFont.isDisposed()) {
       styledText.setFont(fixedFont);
     }
   }
@@ -276,10 +276,7 @@ public class MarkdownStyledTextComp extends Composite {
   }
 
   private record FixedFonts(
-      Font fixedFont,
-      Font boldFixedFont,
-      boolean disposeFixedFont,
-      boolean disposeBoldFixedFont) {}
+      Font fixedFont, Font boldFixedFont, boolean disposeFixedFont, boolean disposeBoldFixedFont) {}
 
   private static FixedFonts resolveFixedFonts(GuiResource resources, Display display) {
     Font fixed = resources.getFontFixed();

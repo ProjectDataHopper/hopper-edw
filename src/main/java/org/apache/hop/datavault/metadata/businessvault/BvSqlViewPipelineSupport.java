@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import java.util.ArrayList;
@@ -81,8 +79,7 @@ public final class BvSqlViewPipelineSupport {
               businessTable.getName()));
     }
 
-    BvSqlRefResolver.syncRefsFromSql(
-        businessTable, bvModel, dvModel, variables, metadataProvider);
+    BvSqlRefResolver.syncRefsFromSql(businessTable, bvModel, dvModel, variables, metadataProvider);
     String resolvedQuery =
         BvSqlRefResolver.resolveSql(
             businessTable, bvModel, dvModel, metadataProvider, variables, targetDatabaseMeta);
@@ -106,8 +103,7 @@ public final class BvSqlViewPipelineSupport {
     execSqlMeta.setSingleStatement(createScript.singleStatement());
     execSqlMeta.setReplaceVariables(true);
 
-    TransformMeta transformMeta =
-        new TransformMeta("create_" + targetTableName, execSqlMeta);
+    TransformMeta transformMeta = new TransformMeta("create_" + targetTableName, execSqlMeta);
     transformMeta.setLocation(LOCATION_EXEC_SQL.x, LOCATION_EXEC_SQL.y);
     pipelineMeta.addTransform(transformMeta);
 
@@ -231,8 +227,7 @@ public final class BvSqlViewPipelineSupport {
                   + "\n) AS _bv_sql_src",
               false);
       case MYSQL, SINGLESTORE ->
-          new CreateScript(
-              "CREATE OR REPLACE TABLE " + quotedTarget + " AS\n" + query, true);
+          new CreateScript("CREATE OR REPLACE TABLE " + quotedTarget + " AS\n" + query, true);
       case POSTGRES ->
           // Postgres has no CREATE OR REPLACE TABLE; drop then CTAS.
           new CreateScript(

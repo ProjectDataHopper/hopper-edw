@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.lineage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -63,8 +62,7 @@ class LineageCatalogBaselineLoaderTest {
   void setUp() throws Exception {
     variables = new Variables();
     variables.setVariable(
-        "PROJECT_HOME",
-        Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
+        "PROJECT_HOME", Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
     metadataProvider = new MemoryMetadataProvider();
     Path dir = Files.createTempDirectory("lineage-baseline");
     DataCatalogMeta catalog = new DataCatalogMeta();
@@ -106,7 +104,9 @@ class LineageCatalogBaselineLoaderTest {
                 e ->
                     e.getType() == LineageDiffType.TABLE_RENAMED
                         || e.getType() == LineageDiffType.MAPPING_CHANGED),
-        () -> "unexpected drift: " + diff.getEntries().stream().map(LineageDiffEntry::getMessage).toList());
+        () ->
+            "unexpected drift: "
+                + diff.getEntries().stream().map(LineageDiffEntry::getMessage).toList());
   }
 
   @Test

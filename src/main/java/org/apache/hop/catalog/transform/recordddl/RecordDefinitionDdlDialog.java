@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.transform.recordddl;
 
 import java.util.ArrayList;
@@ -45,7 +43,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
 
 public class RecordDefinitionDdlDialog extends BaseTransformDialog {
 
@@ -120,7 +117,8 @@ public class RecordDefinitionDdlDialog extends BaseTransformDialog {
     tab.setControl(comp);
 
     Label wlCatalog = new Label(comp, SWT.RIGHT);
-    wlCatalog.setText(BaseMessages.getString(PKG, "RecordDefinitionDdlDialog.ConnectionName.Label"));
+    wlCatalog.setText(
+        BaseMessages.getString(PKG, "RecordDefinitionDdlDialog.ConnectionName.Label"));
     PropsUi.setLook(wlCatalog);
     FormData fdlCatalog = new FormData();
     fdlCatalog.left = new FormAttachment(0, margin);
@@ -137,7 +135,8 @@ public class RecordDefinitionDdlDialog extends BaseTransformDialog {
     wCatalogConnection.setLayoutData(fdCatalog);
 
     Label wlSelect = new Label(comp, SWT.RIGHT);
-    wlSelect.setText(BaseMessages.getString(PKG, "RecordDefinitionDdlDialog.SelectFromInput.Label"));
+    wlSelect.setText(
+        BaseMessages.getString(PKG, "RecordDefinitionDdlDialog.SelectFromInput.Label"));
     PropsUi.setLook(wlSelect);
     FormData fdlSelect = new FormData();
     fdlSelect.left = new FormAttachment(0, margin);
@@ -154,7 +153,8 @@ public class RecordDefinitionDdlDialog extends BaseTransformDialog {
     wSelectFromInput.setLayoutData(fdSelect);
 
     Label wlNamespaceField = new Label(comp, SWT.RIGHT);
-    wlNamespaceField.setText(BaseMessages.getString(PKG, "RecordDefinitionDdlDialog.NamespaceField.Label"));
+    wlNamespaceField.setText(
+        BaseMessages.getString(PKG, "RecordDefinitionDdlDialog.NamespaceField.Label"));
     PropsUi.setLook(wlNamespaceField);
     FormData fdlNamespaceField = new FormData();
     fdlNamespaceField.left = new FormAttachment(0, margin);
@@ -188,7 +188,8 @@ public class RecordDefinitionDdlDialog extends BaseTransformDialog {
     wNameField.setLayoutData(fdNameField);
 
     Label wlNamespaceValue = new Label(comp, SWT.RIGHT);
-    wlNamespaceValue.setText(BaseMessages.getString(PKG, "RecordDefinitionDdlDialog.NamespaceValue.Label"));
+    wlNamespaceValue.setText(
+        BaseMessages.getString(PKG, "RecordDefinitionDdlDialog.NamespaceValue.Label"));
     PropsUi.setLook(wlNamespaceValue);
     FormData fdlNamespaceValue = new FormData();
     fdlNamespaceValue.left = new FormAttachment(0, margin);
@@ -251,7 +252,8 @@ public class RecordDefinitionDdlDialog extends BaseTransformDialog {
     wOverrideConnection.setLayoutData(fdOverrideConnection);
 
     Label wlOverrideSchema = new Label(comp, SWT.RIGHT);
-    wlOverrideSchema.setText(BaseMessages.getString(PKG, "RecordDefinitionDdlDialog.OverrideSchema.Label"));
+    wlOverrideSchema.setText(
+        BaseMessages.getString(PKG, "RecordDefinitionDdlDialog.OverrideSchema.Label"));
     PropsUi.setLook(wlOverrideSchema);
     FormData fdlOverrideSchema = new FormData();
     fdlOverrideSchema.left = new FormAttachment(0, margin);
@@ -268,7 +270,8 @@ public class RecordDefinitionDdlDialog extends BaseTransformDialog {
     wOverrideSchema.setLayoutData(fdOverrideSchema);
 
     Label wlOverrideTable = new Label(comp, SWT.RIGHT);
-    wlOverrideTable.setText(BaseMessages.getString(PKG, "RecordDefinitionDdlDialog.OverrideTable.Label"));
+    wlOverrideTable.setText(
+        BaseMessages.getString(PKG, "RecordDefinitionDdlDialog.OverrideTable.Label"));
     PropsUi.setLook(wlOverrideTable);
     FormData fdlOverrideTable = new FormData();
     fdlOverrideTable.left = new FormAttachment(0, margin);
@@ -308,9 +311,23 @@ public class RecordDefinitionDdlDialog extends BaseTransformDialog {
     fdExecuteDdl.top = new FormAttachment(wlExecuteDdl, 0, SWT.CENTER);
     wExecuteDdl.setLayoutData(fdExecuteDdl);
 
-    wDropTableIfExists = addCheckbox(comp, "RecordDefinitionDdlDialog.DropTableIfExists.Label", middle, margin, wExecuteDdl);
-    wSkipIfTableExists = addCheckbox(comp, "RecordDefinitionDdlDialog.SkipIfTableExists.Label", middle, margin, wDropTableIfExists);
-    wAppendSemicolon = addCheckbox(comp, "RecordDefinitionDdlDialog.AppendSemicolon.Label", middle, margin, wSkipIfTableExists);
+    wDropTableIfExists =
+        addCheckbox(
+            comp, "RecordDefinitionDdlDialog.DropTableIfExists.Label", middle, margin, wExecuteDdl);
+    wSkipIfTableExists =
+        addCheckbox(
+            comp,
+            "RecordDefinitionDdlDialog.SkipIfTableExists.Label",
+            middle,
+            margin,
+            wDropTableIfExists);
+    wAppendSemicolon =
+        addCheckbox(
+            comp,
+            "RecordDefinitionDdlDialog.AppendSemicolon.Label",
+            middle,
+            margin,
+            wSkipIfTableExists);
     wFailIfNoFields =
         addCheckbox(
             comp,
@@ -322,7 +339,8 @@ public class RecordDefinitionDdlDialog extends BaseTransformDialog {
         BaseMessages.getString(PKG, "RecordDefinitionDdlDialog.FailIfNoFields.ToolTip"));
 
     Label wlOutputDdlField = new Label(comp, SWT.RIGHT);
-    wlOutputDdlField.setText(BaseMessages.getString(PKG, "RecordDefinitionDdlDialog.OutputDdlField.Label"));
+    wlOutputDdlField.setText(
+        BaseMessages.getString(PKG, "RecordDefinitionDdlDialog.OutputDdlField.Label"));
     PropsUi.setLook(wlOutputDdlField);
     FormData fdlOutputDdlField = new FormData();
     fdlOutputDdlField.left = new FormAttachment(0, margin);
@@ -404,7 +422,8 @@ public class RecordDefinitionDdlDialog extends BaseTransformDialog {
                   for (int i = 0; i < row.size(); i++) {
                     inputFields.add(row.getValueMeta(i).getName());
                   }
-                  shell.getDisplay()
+                  shell
+                      .getDisplay()
                       .asyncExec(
                           () -> {
                             String[] fieldNames =

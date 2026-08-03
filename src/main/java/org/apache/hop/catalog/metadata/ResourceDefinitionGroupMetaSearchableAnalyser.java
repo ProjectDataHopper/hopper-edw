@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.catalog.metadata;
 
 import java.util.ArrayList;
@@ -47,7 +46,8 @@ public class ResourceDefinitionGroupMetaSearchableAnalyser
       return results;
     }
 
-    matchProperty(searchable, results, searchQuery, "name", group.getName(), getMetadataComponent());
+    matchProperty(
+        searchable, results, searchQuery, "name", group.getName(), getMetadataComponent());
     matchProperty(
         searchable,
         results,
@@ -78,12 +78,7 @@ public class ResourceDefinitionGroupMetaSearchableAnalyser
     }
     for (String path : group.getDimensionalModelFiles()) {
       matchProperty(
-          searchable,
-          results,
-          searchQuery,
-          "dimensional model file",
-          path,
-          getMetadataComponent());
+          searchable, results, searchQuery, "dimensional model file", path, getMetadataComponent());
     }
 
     return results;

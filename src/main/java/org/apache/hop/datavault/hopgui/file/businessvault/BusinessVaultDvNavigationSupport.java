@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.businessvault;
 
 import org.apache.hop.core.exception.HopException;
@@ -49,17 +47,18 @@ public final class BusinessVaultDvNavigationSupport {
   }
 
   public static void navigateToDvTable(
-      HopGui hopGui,
-      BusinessVaultModel bvModel,
-      BvDvTableReference reference,
-      IVariables variables)
+      HopGui hopGui, BusinessVaultModel bvModel, BvDvTableReference reference, IVariables variables)
       throws HopException {
     if (reference == null) {
       throw new HopException(
           BaseMessages.getString(PKG, "BusinessVaultDvNavigationSupport.Error.MissingTableName"));
     }
     navigateToDvTable(
-        hopGui, bvModel, reference.getDvTableName(), reference.getReferencedModelFilename(), variables);
+        hopGui,
+        bvModel,
+        reference.getDvTableName(),
+        reference.getReferencedModelFilename(),
+        variables);
   }
 
   public static void navigateToDvTable(
@@ -121,10 +120,10 @@ public final class BusinessVaultDvNavigationSupport {
               modelPath));
     }
 
-    String resolvedPath =
-        DvModelLoadSupport.resolveModelPath(modelPath, referringBv, variables);
+    String resolvedPath = DvModelLoadSupport.resolveModelPath(modelPath, referringBv, variables);
     try {
-      resolvedPath = HopVfs.normalize(variables != null ? variables.resolve(resolvedPath) : resolvedPath);
+      resolvedPath =
+          HopVfs.normalize(variables != null ? variables.resolve(resolvedPath) : resolvedPath);
     } catch (Exception e) {
       resolvedPath = variables != null ? variables.resolve(modelPath) : modelPath;
     }

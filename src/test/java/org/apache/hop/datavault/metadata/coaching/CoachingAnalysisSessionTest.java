@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.coaching;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,16 +42,19 @@ class CoachingAnalysisSessionTest {
     DvHub hub = new DvHub("hub_customer");
     hub.getRecordSources().add("CRM-customer");
     model.getTables().add(hub);
-    model.getCoachingOrDefault()
+    model
+        .getCoachingOrDefault()
         .addCoachingSource(
-            CoachingSourceRef.forRecordDefinition("local-catalog", "hop/test/sources", "CRM-customer"));
-    model.getCoachingOrDefault()
+            CoachingSourceRef.forRecordDefinition(
+                "local-catalog", "hop/test/sources", "CRM-customer"));
+    model
+        .getCoachingOrDefault()
         .addCoachingSource(
-            CoachingSourceRef.forRecordDefinition("local-catalog", "hop/test/sources", "CRM-order"));
+            CoachingSourceRef.forRecordDefinition(
+                "local-catalog", "hop/test/sources", "CRM-order"));
 
     DvCoachingModelAdapter adapter = new DvCoachingModelAdapter(model, name -> {}, name -> {});
-    CoachingAnalysisSession session =
-        new CoachingAnalysisSession(adapter, new Variables(), null);
+    CoachingAnalysisSession session = new CoachingAnalysisSession(adapter, new Variables(), null);
 
     List<CoachingSourceNode> nodes = session.resolve(true);
 
@@ -66,9 +67,11 @@ class CoachingAnalysisSessionTest {
   @Test
   void sourcesOnlySkipsValidationWork() throws HopException {
     DataVaultModel model = new DataVaultModel();
-    model.getCoachingOrDefault()
+    model
+        .getCoachingOrDefault()
         .addCoachingSource(
-            CoachingSourceRef.forRecordDefinition("local-catalog", "hop/test/sources", "CRM-customer"));
+            CoachingSourceRef.forRecordDefinition(
+                "local-catalog", "hop/test/sources", "CRM-customer"));
 
     AtomicInteger checkCalls = new AtomicInteger();
     DvCoachingModelAdapter adapter =
@@ -84,8 +87,7 @@ class CoachingAnalysisSessionTest {
           }
         };
 
-    CoachingAnalysisSession session =
-        new CoachingAnalysisSession(adapter, new Variables(), null);
+    CoachingAnalysisSession session = new CoachingAnalysisSession(adapter, new Variables(), null);
     List<CoachingSourceNode> nodes = session.resolve(false);
 
     assertEquals(1, nodes.size());

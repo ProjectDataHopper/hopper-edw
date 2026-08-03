@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.Arrays;
@@ -23,6 +21,7 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.hop.catalog.metadata.DataCatalogMeta;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.gui.plugin.GuiElementType;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
@@ -31,10 +30,8 @@ import org.apache.hop.core.logging.ILogChannel;
 import org.apache.hop.core.logging.LogLevel;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.catalog.metadata.DataCatalogMeta;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
-
 
 /**
  * Configuration for Data Vault 2.0 physical implementation and update strategy.
@@ -65,7 +62,10 @@ public class DataVaultConfiguration implements IDvTargetLoadConfiguration {
   public static final String GUI_PLUGIN_ELEMENT_GENERATED_PIPELINES_TAB_ID =
       "DATAVAULT_CONFIGURATION_GENERATED_PIPELINES_TAB";
 
-  /** Default commit size used by {@link org.apache.hop.pipeline.transforms.tableoutput.TableOutputMeta}. */
+  /**
+   * Default commit size used by {@link
+   * org.apache.hop.pipeline.transforms.tableoutput.TableOutputMeta}.
+   */
   public static final String DEFAULT_TARGET_TABLE_BATCH_SIZE = "1000";
 
   /** Default number of parallel Table Output copies writing to the target table. */
@@ -526,8 +526,7 @@ public class DataVaultConfiguration implements IDvTargetLoadConfiguration {
   @HopMetadataProperty
   private String generatedWorkflowNamePrefix = DEFAULT_GENERATED_WORKFLOW_NAME_PREFIX;
 
-  @HopMetadataProperty
-  private String stsPipelineNamePrefix = DEFAULT_STS_PIPELINE_NAME_PREFIX;
+  @HopMetadataProperty private String stsPipelineNamePrefix = DEFAULT_STS_PIPELINE_NAME_PREFIX;
 
   public DataVaultConfiguration() {
     this.unknownHashKeyValue = "00000000000000000000000000000000";
@@ -539,8 +538,8 @@ public class DataVaultConfiguration implements IDvTargetLoadConfiguration {
   }
 
   /**
-   * Resolves the batch size (commit size) for generated Table Output transforms writing to target DV
-   * tables.
+   * Resolves the batch size (commit size) for generated Table Output transforms writing to target
+   * DV tables.
    */
   public String resolveTargetTableCommitSize(IVariables variables) {
     String size = targetTableBatchSize;
@@ -716,38 +715,23 @@ public class DataVaultConfiguration implements IDvTargetLoadConfiguration {
 
   public String buildHubPipelineName(
       IVariables variables, String targetTableName, String sourceName) {
-    return buildPipelineName(
-        variables, hubPipelineNamePrefix, "", targetTableName, sourceName);
+    return buildPipelineName(variables, hubPipelineNamePrefix, "", targetTableName, sourceName);
   }
 
   public String buildLinkPipelineName(
       IVariables variables, String targetTableName, String sourceName) {
-    return buildPipelineName(
-        variables,
-        linkPipelineNamePrefix,
-        "",
-        targetTableName,
-        sourceName);
+    return buildPipelineName(variables, linkPipelineNamePrefix, "", targetTableName, sourceName);
   }
 
   public String buildSatellitePipelineName(
       IVariables variables, String targetTableName, String sourceName) {
     return buildPipelineName(
-        variables,
-        satellitePipelineNamePrefix,
-        "",
-        targetTableName,
-        sourceName);
+        variables, satellitePipelineNamePrefix, "", targetTableName, sourceName);
   }
 
   public String buildStsPipelineName(
       IVariables variables, String statusTableName, String sourceName) {
-    return buildPipelineName(
-        variables,
-        stsPipelineNamePrefix,
-        "",
-        statusTableName,
-        sourceName);
+    return buildPipelineName(variables, stsPipelineNamePrefix, "", statusTableName, sourceName);
   }
 
   private static String buildPipelineName(

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.architecture;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -179,7 +177,9 @@ class ArchitectureExportTest {
     hub.setTableType("HUB");
     hub.setLayer(LineageLayer.DV);
     hub.setModelName("retail-360");
-    hub.addSource(new TableSourceRef(TableSourceKind.DV_SOURCE, "E2E-customer-hub", TableSourceRole.RECORD_SOURCE));
+    hub.addSource(
+        new TableSourceRef(
+            TableSourceKind.DV_SOURCE, "E2E-customer-hub", TableSourceRole.RECORD_SOURCE));
     snap.addTable(hub);
 
     TableLineage sat = new TableLineage();
@@ -188,7 +188,8 @@ class ArchitectureExportTest {
     sat.setTableType("SATELLITE");
     sat.setLayer(LineageLayer.DV);
     sat.setModelName("retail-360");
-    sat.addSource(new TableSourceRef(TableSourceKind.DV_TABLE, "hub_customer", TableSourceRole.PARENT_HUB));
+    sat.addSource(
+        new TableSourceRef(TableSourceKind.DV_TABLE, "hub_customer", TableSourceRole.PARENT_HUB));
     snap.addTable(sat);
 
     ArchitectureGraph graph = ArchitectureGraphFromLineage.build(List.of(snap));
@@ -203,7 +204,8 @@ class ArchitectureExportTest {
     assertTrue(drawio.contains("sat_customer_demo"));
     assertTrue(drawio.contains("E2E-customer-hub"));
     assertTrue(drawio.contains("mxCell"));
-    assertFalse(drawio.contains(" edge=\"1\""), "inventory drawio must not emit relationship edges");
+    assertFalse(
+        drawio.contains(" edge=\"1\""), "inventory drawio must not emit relationship edges");
   }
 
   @Test
@@ -297,7 +299,8 @@ class ArchitectureExportTest {
 
   @Test
   void resolveProjectRelativePathForWrite() throws Exception {
-    org.apache.hop.core.variables.Variables variables = new org.apache.hop.core.variables.Variables();
+    org.apache.hop.core.variables.Variables variables =
+        new org.apache.hop.core.variables.Variables();
     variables.setVariable("PROJECT_HOME", "/data/retail-example");
 
     String out =
@@ -313,7 +316,8 @@ class ArchitectureExportTest {
 
   @Test
   void projectRelativePathsInDrawioExport() {
-    org.apache.hop.core.variables.Variables variables = new org.apache.hop.core.variables.Variables();
+    org.apache.hop.core.variables.Variables variables =
+        new org.apache.hop.core.variables.Variables();
     variables.setVariable(
         "PROJECT_HOME", "/home/matt/git/mattcasters/hop-data-vault/retail-example");
 
@@ -359,8 +363,7 @@ class ArchitectureExportTest {
     link.setFromNodeId("model-bv");
     link.setToNodeId("model-dv");
     link.setEdgeType(ExecutionMapEdgeType.MODEL_LINK);
-    link.setLabel(
-        "/home/matt/git/mattcasters/hop-data-vault/retail-example/models/retail-360.hdv");
+    link.setLabel("/home/matt/git/mattcasters/hop-data-vault/retail-example/models/retail-360.hdv");
     map.getEdgesOrEmpty().add(link);
 
     ArchitectureGraph graph = ArchitectureGraphFromExecutionMap.build(map);

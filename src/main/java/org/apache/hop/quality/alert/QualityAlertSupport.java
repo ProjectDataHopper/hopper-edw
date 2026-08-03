@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.quality.alert;
 
 import java.util.ArrayList;
@@ -133,7 +131,8 @@ public final class QualityAlertSupport {
    * Apply the sink matrix and publish to each selected sink. Swallows nothing — sink failures
    * propagate as {@link HopException}. Unknown sink ids are logged and skipped.
    */
-  public static void publish(QualityAlertContext context, String alertSinks, boolean alertOnGateFailure)
+  public static void publish(
+      QualityAlertContext context, String alertSinks, boolean alertOnGateFailure)
       throws HopException {
     if (context == null || context.getReport() == null) {
       return;
@@ -144,7 +143,8 @@ public final class QualityAlertSupport {
     ILogChannel log = context.getLog();
 
     List<String> configured = parseSinkIds(alertSinks);
-    // Warn about unknown ids once (even when findingCount==0 we skip work but can still note config).
+    // Warn about unknown ids once (even when findingCount==0 we skip work but can still note
+    // config).
     for (String id : configured) {
       if (!REGISTRY.containsKey(id) && log != null) {
         log.logBasic("Unknown quality alert sink id ignored: " + id);

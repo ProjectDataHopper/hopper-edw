@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai.workflow;
 
 import java.util.ArrayList;
@@ -61,8 +59,7 @@ public final class WorkflowAiContextBuilder {
 
     String topologyXml = "";
     if (request.isIncludeTopologyXml()) {
-      topologyXml =
-          HopAiTextUtil.truncate(workflowMeta.getXml(variables), MAX_TOPOLOGY_XML_CHARS);
+      topologyXml = HopAiTextUtil.truncate(workflowMeta.getXml(variables), MAX_TOPOLOGY_XML_CHARS);
     }
 
     String checkResultsJson = "";
@@ -111,7 +108,8 @@ public final class WorkflowAiContextBuilder {
       }
       ActionMeta action = actions.get(i);
       json.append("{\"name\":").append(HopAiTextUtil.jsonString(action.getName()));
-      json.append(",\"pluginId\":").append(HopAiTextUtil.jsonString(action.getAction().getPluginId()));
+      json.append(",\"pluginId\":")
+          .append(HopAiTextUtil.jsonString(action.getAction().getPluginId()));
       json.append(",\"parallel\":").append(action.isLaunchingInParallel());
       json.append('}');
     }

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.quality.alert;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -121,12 +119,7 @@ class QualityAlertSinksTest {
 
     PublishContext publishContext =
         new PublishContext(
-            OPS_NAME,
-            DataQualityHistoryPublisher.DEFAULT_SCHEMA_NAME,
-            null,
-            false,
-            true,
-            true);
+            OPS_NAME, DataQualityHistoryPublisher.DEFAULT_SCHEMA_NAME, null, false, true, true);
 
     RecordingLog log = new RecordingLog();
     QualityAlertContext context =
@@ -163,12 +156,7 @@ class QualityAlertSinksTest {
     DataQualityReport report = sampleReportWithFinding();
     PublishContext publishContext =
         new PublishContext(
-            OPS_NAME,
-            DataQualityHistoryPublisher.DEFAULT_SCHEMA_NAME,
-            null,
-            false,
-            true,
-            true);
+            OPS_NAME, DataQualityHistoryPublisher.DEFAULT_SCHEMA_NAME, null, false, true, true);
 
     PublishResult first =
         DataQualityHistoryPublisher.publish(
@@ -181,7 +169,8 @@ class QualityAlertSinksTest {
             variables,
             metadataProvider);
     assertEquals(PublishStatus.INSERTED, first.status(), first.message());
-    assertEquals(1L, countRows(DataQualityHistoryPublisher.TABLE_QUALITY_FINDING, report.getRunId()));
+    assertEquals(
+        1L, countRows(DataQualityHistoryPublisher.TABLE_QUALITY_FINDING, report.getRunId()));
 
     DispositionResult disposition =
         QualityDisposition.apply(report, QualityDispositionMode.ALERT_ONLY);

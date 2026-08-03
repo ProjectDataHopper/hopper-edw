@@ -13,15 +13,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.workflow.actions.dimensionalupdate;
 
 import org.apache.hop.core.Const;
 import org.apache.hop.core.Props;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.hopgui.file.dimensional.HopGuiDimensionalModelDialog;
+import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
+import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.FormDataBuilder;
 import org.apache.hop.ui.core.PropsUi;
@@ -41,8 +41,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
-import org.apache.hop.datavault.hopgui.help.HelpTopics;
 
 public class ActionDimensionalUpdateDialog extends ActionDialog {
   private static final Class<?> PKG = ActionDimensionalUpdate.class;
@@ -132,11 +130,7 @@ public class ActionDimensionalUpdateDialog extends ActionDialog {
 
     widgets = new GuiCompositeWidgets(variables);
     widgets.createCompositeWidgets(
-        action,
-        null,
-        wModelTabComp,
-        ActionDimensionalUpdate.GUI_PLUGIN_ELEMENT_MODEL_TAB_ID,
-        null);
+        action, null, wModelTabComp, ActionDimensionalUpdate.GUI_PLUGIN_ELEMENT_MODEL_TAB_ID, null);
     widgets.createCompositeWidgets(
         action, null, wDdlTabComp, ActionDimensionalUpdate.GUI_PLUGIN_ELEMENT_DDL_TAB_ID, null);
 

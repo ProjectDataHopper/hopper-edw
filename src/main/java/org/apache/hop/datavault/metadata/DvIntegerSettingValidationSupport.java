@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.ArrayList;
@@ -44,10 +42,7 @@ public final class DvIntegerSettingValidationSupport {
   }
 
   public static IntegerSettingValidation validatePositiveInteger(
-      String configuredValue,
-      IVariables variables,
-      String defaultWhenEmpty,
-      String settingLabel) {
+      String configuredValue, IVariables variables, String defaultWhenEmpty, String settingLabel) {
     String resolved = resolve(variables, configuredValue);
     if (Utils.isEmpty(resolved)) {
       resolved = defaultWhenEmpty;
@@ -60,7 +55,11 @@ public final class DvIntegerSettingValidationSupport {
           configuredValue,
           resolved,
           BaseMessages.getString(
-              PKG, "DvIntegerSettingValidation.NotPositiveInteger", settingLabel, configuredValue, resolved));
+              PKG,
+              "DvIntegerSettingValidation.NotPositiveInteger",
+              settingLabel,
+              configuredValue,
+              resolved));
     }
 
     if (looksLikeUnresolvedVariable(resolved)) {
@@ -106,10 +105,7 @@ public final class DvIntegerSettingValidationSupport {
   }
 
   public static int requirePositiveInteger(
-      String configuredValue,
-      IVariables variables,
-      String defaultWhenEmpty,
-      String settingLabel)
+      String configuredValue, IVariables variables, String defaultWhenEmpty, String settingLabel)
       throws HopException {
     IntegerSettingValidation validation =
         validatePositiveInteger(configuredValue, variables, defaultWhenEmpty, settingLabel);
@@ -174,7 +170,8 @@ public final class DvIntegerSettingValidationSupport {
                 targetTableBatchSize,
                 variables,
                 defaultBatchSize,
-                BaseMessages.getString(PKG, "DvIntegerSettingValidation.Label.TargetTableBatchSize")),
+                BaseMessages.getString(
+                    PKG, "DvIntegerSettingValidation.Label.TargetTableBatchSize")),
             validatePositiveInteger(
                 targetTableParallelCopies,
                 variables,

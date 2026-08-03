@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.discovery;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,7 +30,8 @@ class RecordDefinitionSchemaDiffSupportTest {
   @Test
   void diff_reportsNoChangesWhenContractsMatch() {
     List<SourceField> stored = List.of(field("customer_id", "Integer", IValueMeta.TYPE_INTEGER));
-    List<SourceField> discovered = List.of(field("customer_id", "Integer", IValueMeta.TYPE_INTEGER));
+    List<SourceField> discovered =
+        List.of(field("customer_id", "Integer", IValueMeta.TYPE_INTEGER));
 
     RecordDefinitionSchemaDiffSupport.SchemaDiff diff =
         RecordDefinitionSchemaDiffSupport.diff(stored, discovered);
@@ -118,8 +117,7 @@ class RecordDefinitionSchemaDiffSupportTest {
     discoveredPk.setPrimaryKeyPosition(1);
 
     RecordDefinitionSchemaDiffSupport.SchemaDiff diff =
-        RecordDefinitionSchemaDiffSupport.diff(
-            List.of(storedPk), List.of(discoveredPk));
+        RecordDefinitionSchemaDiffSupport.diff(List.of(storedPk), List.of(discoveredPk));
 
     assertTrue(diff.hasChanges());
     assertEquals(3, diff.changes().size());

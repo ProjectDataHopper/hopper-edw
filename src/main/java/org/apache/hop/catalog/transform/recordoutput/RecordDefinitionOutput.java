@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.transform.recordoutput;
 
 import java.util.Date;
@@ -89,7 +87,8 @@ public class RecordDefinitionOutput
   }
 
   private void processDiscovery(Object[] baseRow, int statusStartIdx) throws HopException {
-    String namespace = resolveDefinitionValue(meta.getNamespaceValue(), meta.getNamespaceField(), baseRow);
+    String namespace =
+        resolveDefinitionValue(meta.getNamespaceValue(), meta.getNamespaceField(), baseRow);
     String name = resolveDefinitionValue(meta.getNameValue(), meta.getNameField(), baseRow);
     String description =
         resolveDefinitionValue(meta.getDescriptionValue(), meta.getDescriptionField(), baseRow);
@@ -135,8 +134,7 @@ public class RecordDefinitionOutput
               .group(meta.getGroup())
               .deliveryType(meta.getDeliveryType())
               .updatedAt(new Date())
-              .pipelineName(
-                  getPipelineMeta() != null ? getPipelineMeta().getName() : null)
+              .pipelineName(getPipelineMeta() != null ? getPipelineMeta().getName() : null)
               .build();
       RecordDefinitionCatalogWriter.upsert(request, this, metadataProvider);
       written = true;
@@ -161,7 +159,8 @@ public class RecordDefinitionOutput
     switch (meta.getSourceType()) {
       case DATABASE -> {
         builder.databaseConnectionName(
-            resolvePhysicalValue(meta.getDatabaseConnectionName(), meta.getDatabaseConnectionField(), row));
+            resolvePhysicalValue(
+                meta.getDatabaseConnectionName(), meta.getDatabaseConnectionField(), row));
         builder.schemaName(resolvePhysicalValue(meta.getSchemaName(), meta.getSchemaField(), row));
         builder.tableName(resolvePhysicalValue(meta.getTableName(), meta.getTableField(), row));
       }
@@ -175,7 +174,8 @@ public class RecordDefinitionOutput
       }
       case ICEBERG -> {
         builder.catalogUri(
-            resolvePhysicalValue(meta.getIcebergCatalogUri(), meta.getIcebergCatalogUriField(), row));
+            resolvePhysicalValue(
+                meta.getIcebergCatalogUri(), meta.getIcebergCatalogUriField(), row));
         builder.warehouse(
             resolvePhysicalValue(meta.getIcebergWarehouse(), meta.getIcebergWarehouseField(), row));
         builder.icebergNamespace(
@@ -183,14 +183,19 @@ public class RecordDefinitionOutput
         builder.icebergTableName(
             resolvePhysicalValue(meta.getIcebergTableName(), meta.getIcebergTableNameField(), row));
         builder.snapshotId(
-            resolvePhysicalValue(meta.getIcebergSnapshotId(), meta.getIcebergSnapshotIdField(), row));
-        builder.branch(resolvePhysicalValue(meta.getIcebergBranch(), meta.getIcebergBranchField(), row));
+            resolvePhysicalValue(
+                meta.getIcebergSnapshotId(), meta.getIcebergSnapshotIdField(), row));
+        builder.branch(
+            resolvePhysicalValue(meta.getIcebergBranch(), meta.getIcebergBranchField(), row));
         builder.s3Endpoint(
-            resolvePhysicalValue(meta.getIcebergS3Endpoint(), meta.getIcebergS3EndpointField(), row));
+            resolvePhysicalValue(
+                meta.getIcebergS3Endpoint(), meta.getIcebergS3EndpointField(), row));
         builder.s3AccessKey(
-            resolvePhysicalValue(meta.getIcebergS3AccessKey(), meta.getIcebergS3AccessKeyField(), row));
+            resolvePhysicalValue(
+                meta.getIcebergS3AccessKey(), meta.getIcebergS3AccessKeyField(), row));
         builder.s3SecretKey(
-            resolvePhysicalValue(meta.getIcebergS3SecretKey(), meta.getIcebergS3SecretKeyField(), row));
+            resolvePhysicalValue(
+                meta.getIcebergS3SecretKey(), meta.getIcebergS3SecretKeyField(), row));
       }
       default ->
           throw new HopException(

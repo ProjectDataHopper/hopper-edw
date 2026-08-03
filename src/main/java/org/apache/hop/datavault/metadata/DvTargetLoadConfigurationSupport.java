@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.List;
@@ -83,7 +81,8 @@ public final class DvTargetLoadConfigurationSupport {
     return resolved;
   }
 
-  public static void setTargetLoadModeFromDescriptionOrCode(String descriptionOrCode, TargetLoadModeHolder holder) {
+  public static void setTargetLoadModeFromDescriptionOrCode(
+      String descriptionOrCode, TargetLoadModeHolder holder) {
     if (holder == null) {
       return;
     }

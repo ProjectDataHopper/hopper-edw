@@ -13,18 +13,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.file;
 
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.file.TextFileInputField;
 import org.apache.hop.core.gui.ITextFileInputField;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.datavault.metadata.CsvFieldOptions;
 import org.apache.hop.datavault.metadata.SourceField;
-import org.apache.hop.core.file.TextFileInputField;
 import org.apache.hop.pipeline.transforms.csvinput.CsvInputField;
 
 /** Applies {@link SourceField} typing and CSV parsing options to Hop text-file input fields. */
@@ -48,8 +46,7 @@ public final class DvTextFileInputFieldSupport {
   }
 
   private static void applyHopType(
-      ITextFileInputField field, SourceField sourceField, boolean csvInput)
-      throws HopException {
+      ITextFileInputField field, SourceField sourceField, boolean csvInput) throws HopException {
     if (sourceField.getHopType() > 0) {
       field.setType(sourceField.getHopType());
     } else if (csvInput && field instanceof CsvInputField csvInputField) {

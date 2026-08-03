@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -83,8 +82,7 @@ class DvSatelliteParentKeySupportTest {
 
     assertThrows(
         HopException.class,
-        () ->
-            DvSatelliteParentKeySupport.resolveParentKeyFields(hub, satellite, new Variables()));
+        () -> DvSatelliteParentKeySupport.resolveParentKeyFields(hub, satellite, new Variables()));
   }
 
   @Test

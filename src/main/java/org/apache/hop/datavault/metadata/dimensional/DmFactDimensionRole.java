@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import lombok.Getter;
@@ -40,14 +38,12 @@ public class DmFactDimensionRole {
 
   @HopMetadataProperty private boolean truncateToDateKey;
 
-  /**
-   * When true, generated fact pipelines enable Dimension Lookup preloading cache for this join.
-   */
+  /** When true, generated fact pipelines enable Dimension Lookup preloading cache for this join. */
   @HopMetadataProperty private boolean preloadLookupCache;
 
   /**
-   * When true, copy the fact source surrogate/hash field into the fact foreign key column instead of
-   * using Dimension Lookup.
+   * When true, copy the fact source surrogate/hash field into the fact foreign key column instead
+   * of using Dimension Lookup.
    */
   @HopMetadataProperty private boolean skipDimensionLookup;
 

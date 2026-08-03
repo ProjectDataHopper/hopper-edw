@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -60,7 +58,11 @@ class DvUpdateMetricsParserTest {
 
   @Test
   void parsesBulkAndStagingWriteTransformsViaExtractorConstants() {
-    assertEquals("bulk_load_to_hub_customer", DvUpdateMetricsConstants.BULK_WRITE_TRANSFORM_PREFIX + "hub_customer");
-    assertEquals("stage_to_hub_customer", DvUpdateMetricsConstants.STAGING_WRITE_TRANSFORM_PREFIX + "hub_customer");
+    assertEquals(
+        "bulk_load_to_hub_customer",
+        DvUpdateMetricsConstants.BULK_WRITE_TRANSFORM_PREFIX + "hub_customer");
+    assertEquals(
+        "stage_to_hub_customer",
+        DvUpdateMetricsConstants.STAGING_WRITE_TRANSFORM_PREFIX + "hub_customer");
   }
 }

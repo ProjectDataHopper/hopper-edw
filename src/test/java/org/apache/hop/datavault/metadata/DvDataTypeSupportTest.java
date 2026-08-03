@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,8 +40,7 @@ class DvDataTypeSupportTest {
 
   @Test
   void resolveHopTypeIdUsesHopTypeName() {
-    assertEquals(
-        IValueMeta.TYPE_INTEGER, DvDataTypeSupport.resolveHopTypeId("Integer", null));
+    assertEquals(IValueMeta.TYPE_INTEGER, DvDataTypeSupport.resolveHopTypeId("Integer", null));
     assertEquals(IValueMeta.TYPE_STRING, DvDataTypeSupport.resolveHopTypeId("String", null));
   }
 
@@ -54,10 +51,8 @@ class DvDataTypeSupportTest {
     field.setSourceDataType("int2");
     field.setHopType(IValueMeta.TYPE_INTEGER);
 
-    assertEquals(
-        IValueMeta.TYPE_INTEGER, DvDataTypeSupport.resolveHopTypeId("int2", field));
-    assertEquals(
-        IValueMeta.TYPE_STRING, DvDataTypeSupport.resolveHopTypeId("varchar", null));
+    assertEquals(IValueMeta.TYPE_INTEGER, DvDataTypeSupport.resolveHopTypeId("int2", field));
+    assertEquals(IValueMeta.TYPE_STRING, DvDataTypeSupport.resolveHopTypeId("varchar", null));
   }
 
   @Test

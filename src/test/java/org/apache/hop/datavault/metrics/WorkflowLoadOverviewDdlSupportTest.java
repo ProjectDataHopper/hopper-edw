@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -48,8 +46,7 @@ class WorkflowLoadOverviewDdlSupportTest {
     assertTrue(
         statements.stream()
             .anyMatch(
-                sql ->
-                    sql.contains("CREATE TABLE IF NOT EXISTS workflow_load_overview_model")));
+                sql -> sql.contains("CREATE TABLE IF NOT EXISTS workflow_load_overview_model")));
     assertTrue(statements.stream().noneMatch(sql -> sql.contains("CREATE SCHEMA")));
   }
 
@@ -74,7 +71,8 @@ class WorkflowLoadOverviewDdlSupportTest {
 
     assertTrue(
         statements.stream()
-            .anyMatch(sql -> sql.contains("CREATE TABLE IF NOT EXISTS ops.workflow_load_overview")));
+            .anyMatch(
+                sql -> sql.contains("CREATE TABLE IF NOT EXISTS ops.workflow_load_overview")));
   }
 
   private static DatabaseMeta databaseMetaWithPluginId(String pluginId) {

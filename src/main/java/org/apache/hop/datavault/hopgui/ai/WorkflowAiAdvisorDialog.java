@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.ai;
 
 import java.util.List;
@@ -28,11 +26,16 @@ import org.apache.hop.datavault.ai.HopAiAdvisoryResponse;
 import org.apache.hop.datavault.ai.HopAiConfig;
 import org.apache.hop.datavault.ai.HopAiConfigSingleton;
 import org.apache.hop.datavault.ai.HopAiConversationSession;
+import org.apache.hop.datavault.ai.HopAiProposal;
 import org.apache.hop.datavault.ai.workflow.WorkflowAiAdvisorService;
 import org.apache.hop.datavault.ai.workflow.WorkflowAiContextBuilder;
+import org.apache.hop.datavault.ai.workflow.WorkflowAiProposalApplier;
+import org.apache.hop.datavault.ai.workflow.WorkflowAiProposalValidator;
 import org.apache.hop.datavault.ai.workflow.WorkflowAiRequest;
 import org.apache.hop.datavault.ai.workflow.WorkflowAiScenario;
 import org.apache.hop.datavault.hopgui.EnumDialogSupport;
+import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
+import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.FormDataBuilder;
@@ -41,9 +44,6 @@ import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.core.gui.GuiResource;
 import org.apache.hop.ui.core.gui.WindowProperty;
-import org.apache.hop.datavault.ai.HopAiProposal;
-import org.apache.hop.datavault.ai.workflow.WorkflowAiProposalApplier;
-import org.apache.hop.datavault.ai.workflow.WorkflowAiProposalValidator;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.hopgui.file.workflow.HopGuiWorkflowGraph;
 import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
@@ -60,8 +60,6 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
-import org.apache.hop.datavault.hopgui.help.HelpTopics;
 
 /** AI advisory dialog for Apache Hop workflows. */
 public class WorkflowAiAdvisorDialog {
@@ -276,8 +274,7 @@ public class WorkflowAiAdvisorDialog {
 
   private Label addHorizontalSeparator(Control lastControl, int margin) {
     Label separator = new Label(shell, SWT.SEPARATOR | SWT.HORIZONTAL);
-    FormData fd =
-        new FormDataBuilder().left().right().top(lastControl, 2 * margin).build();
+    FormData fd = new FormDataBuilder().left().right().top(lastControl, 2 * margin).build();
     separator.setLayoutData(fd);
     return separator;
   }
@@ -449,8 +446,10 @@ public class WorkflowAiAdvisorDialog {
       }
       session.recordApplied(turnIndex, selected);
       transcriptPanel.appendSystemLine(
-          BaseMessages.getString(PKG, "WorkflowAiAdvisorDialog.Transcript.Applied", selected.size()));
-      wlStatusMessage.setText(BaseMessages.getString(PKG, "WorkflowAiAdvisorDialog.Status.Applied"));
+          BaseMessages.getString(
+              PKG, "WorkflowAiAdvisorDialog.Transcript.Applied", selected.size()));
+      wlStatusMessage.setText(
+          BaseMessages.getString(PKG, "WorkflowAiAdvisorDialog.Status.Applied"));
       transcriptPanel.refreshScroll();
     } catch (Exception ex) {
       new ErrorDialog(

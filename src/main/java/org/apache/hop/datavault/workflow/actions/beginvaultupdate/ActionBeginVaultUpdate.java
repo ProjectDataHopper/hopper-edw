@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.workflow.actions.beginvaultupdate;
 
 import lombok.Getter;
@@ -119,15 +117,20 @@ public class ActionBeginVaultUpdate extends ActionBase implements Cloneable, IAc
     if (Utils.isEmpty(executionId)) {
       if (useWorkflowLogChannelId) {
         throw new HopException(
-            BaseMessages.getString(PKG, "ActionBeginVaultUpdate.Error.MissingWorkflowLogChannelId"));
+            BaseMessages.getString(
+                PKG, "ActionBeginVaultUpdate.Error.MissingWorkflowLogChannelId"));
       }
-      throw new HopException(BaseMessages.getString(PKG, "ActionBeginVaultUpdate.Error.MissingExecutionId"));
+      throw new HopException(
+          BaseMessages.getString(PKG, "ActionBeginVaultUpdate.Error.MissingExecutionId"));
     }
 
     if (logToWorkflow) {
       logBasic(
           BaseMessages.getString(
-              PKG, "ActionBeginVaultUpdate.Log.Started", executionId, resolveExecutionIdVariable()));
+              PKG,
+              "ActionBeginVaultUpdate.Log.Started",
+              executionId,
+              resolveExecutionIdVariable()));
     }
 
     result.setLogText(

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.coaching;
 
 import java.util.ArrayList;
@@ -42,9 +40,7 @@ public class DvCoachingModelAdapter implements ICoachingModelAdapter {
   private final Consumer<String> tableHighlighter;
 
   public DvCoachingModelAdapter(
-      DataVaultModel model,
-      Consumer<String> tableEditorOpener,
-      Consumer<String> tableHighlighter) {
+      DataVaultModel model, Consumer<String> tableEditorOpener, Consumer<String> tableHighlighter) {
     this.model = model;
     this.tableEditorOpener = tableEditorOpener;
     this.tableHighlighter = tableHighlighter;
@@ -66,8 +62,8 @@ public class DvCoachingModelAdapter implements ICoachingModelAdapter {
   }
 
   @Override
-  public String resolveCatalogConnectionName(IVariables variables, IHopMetadataProvider metadataProvider)
-      throws HopException {
+  public String resolveCatalogConnectionName(
+      IVariables variables, IHopMetadataProvider metadataProvider) throws HopException {
     return DvSourceCatalogService.resolveCatalogConnection(model, variables, metadataProvider);
   }
 

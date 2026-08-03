@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import java.util.HashMap;
@@ -44,7 +42,10 @@ public final class WorkflowCrawler {
     if (context == null) {
       return null;
     }
-    String resolvedPath = loadedWorkflow != null ? context.resolvePath(loadedWorkflow.getFilename()) : context.resolvePath(workflowPath);
+    String resolvedPath =
+        loadedWorkflow != null
+            ? context.resolvePath(loadedWorkflow.getFilename())
+            : context.resolvePath(workflowPath);
     String existing = context.existingNodeIdForPath(resolvedPath);
     if (!Utils.isEmpty(existing)) {
       if (!Utils.isEmpty(parentNodeId)) {
@@ -67,13 +68,15 @@ public final class WorkflowCrawler {
       }
 
       ExecutionMapNode workflowNode = new ExecutionMapNode();
-      workflowNode.setNodeType(root ? ExecutionMapNodeType.ROOT_WORKFLOW : ExecutionMapNodeType.WORKFLOW);
+      workflowNode.setNodeType(
+          root ? ExecutionMapNodeType.ROOT_WORKFLOW : ExecutionMapNodeType.WORKFLOW);
       workflowNode.setName(workflowMeta.getName());
       workflowNode.setPath(
           ExecutionMapPathSupport.toStoredPath(resolvedPath, context.getVariables()));
       workflowNode.setParentNodeId(parentNodeId);
       workflowNode.setSnapshotId(
-          context.captureWorkflowSnapshot(resolvedPath, workflowMeta.getXml(context.getVariables())));
+          context.captureWorkflowSnapshot(
+              resolvedPath, workflowMeta.getXml(context.getVariables())));
       context.addNode(workflowNode);
       String workflowNodeId = workflowNode.getId();
 

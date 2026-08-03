@@ -13,15 +13,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.coaching;
 
 import java.util.List;
 import java.util.function.Supplier;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.hopgui.GuiBusySupport;
+import org.apache.hop.datavault.hopgui.ModelCoachPanelAuditSupport;
 import org.apache.hop.datavault.metadata.coaching.CoachingInsight;
 import org.apache.hop.datavault.metadata.coaching.CoachingSourceNode;
 import org.apache.hop.datavault.metadata.coaching.CoachingSourceRef;
@@ -30,13 +30,10 @@ import org.apache.hop.datavault.metadata.coaching.CoachingTargetUsage;
 import org.apache.hop.datavault.metadata.coaching.ICoachingModelAdapter;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.datavault.hopgui.GuiBusySupport;
-import org.apache.hop.datavault.hopgui.ModelCoachPanelAuditSupport;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSource;
 import org.eclipse.swt.dnd.DragSourceAdapter;
@@ -48,8 +45,6 @@ import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
@@ -114,7 +109,8 @@ public class ModelCoachPanel extends Composite {
     refreshButton = createToolbarButton(BaseMessages.getString(PKG, "ModelCoachPanel.Refresh"));
     mapButton = createToolbarButton(BaseMessages.getString(PKG, "ModelCoachPanel.MapToTarget"));
     openTableButton = createToolbarButton(BaseMessages.getString(PKG, "ModelCoachPanel.OpenTable"));
-    importButton = createToolbarButton(BaseMessages.getString(PKG, "ModelCoachPanel.ImportSources"));
+    importButton =
+        createToolbarButton(BaseMessages.getString(PKG, "ModelCoachPanel.ImportSources"));
     refreshOnOpenButton = new Button(this, SWT.CHECK);
     refreshOnOpenButton.setText(BaseMessages.getString(PKG, "ModelCoachPanel.RefreshOnOpen"));
     PropsUi.setLook(refreshOnOpenButton);

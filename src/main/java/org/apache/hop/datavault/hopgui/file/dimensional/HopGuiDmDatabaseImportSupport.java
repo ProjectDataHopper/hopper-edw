@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.dimensional;
 
 import java.util.ArrayList;
@@ -34,11 +32,11 @@ import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
+import org.apache.hop.datavault.metadata.dimensional.IDmTable;
 import org.apache.hop.datavault.metadata.dimensional.dbimport.DmDatabaseImportOptions;
 import org.apache.hop.datavault.metadata.dimensional.dbimport.DmDatabaseImportResult;
 import org.apache.hop.datavault.metadata.dimensional.dbimport.DmDatabaseTableImportSupport;
 import org.apache.hop.datavault.metadata.dimensional.dbimport.ImportDmDatabaseTablesOptionsDialog;
-import org.apache.hop.datavault.metadata.dimensional.IDmTable;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.dialog.EditRowsDialog;
@@ -55,7 +53,8 @@ public final class HopGuiDmDatabaseImportSupport {
 
   private HopGuiDmDatabaseImportSupport() {}
 
-  public static void importDatabaseTables(HopGui hopGui, DimensionalModel model, Runnable onChanged) {
+  public static void importDatabaseTables(
+      HopGui hopGui, DimensionalModel model, Runnable onChanged) {
     if (hopGui == null || model == null) {
       return;
     }
@@ -159,10 +158,7 @@ public final class HopGuiDmDatabaseImportSupport {
   }
 
   private static List<String> promptForTableSelection(
-      Shell shell,
-      IVariables variables,
-      DatabaseMeta databaseMeta,
-      DmDatabaseImportOptions options)
+      Shell shell, IVariables variables, DatabaseMeta databaseMeta, DmDatabaseImportOptions options)
       throws HopException {
     String schemaName = variables.resolve(options.getSchemaName());
     String[] tableNames;
@@ -187,8 +183,7 @@ public final class HopGuiDmDatabaseImportSupport {
       mb.setText(
           BaseMessages.getString(PKG, "ImportDmDatabaseTablesOptionsDialog.NoTablesFound.Title"));
       mb.setMessage(
-          BaseMessages.getString(
-              PKG, "ImportDmDatabaseTablesOptionsDialog.NoTablesFound.Message"));
+          BaseMessages.getString(PKG, "ImportDmDatabaseTablesOptionsDialog.NoTablesFound.Message"));
       mb.open();
       return null;
     }

@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import java.time.Instant;
@@ -35,7 +34,6 @@ import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.datavault.resourcedefinition.ValidationReport.IssueKind;
 import org.apache.hop.datavault.catalog.DvCatalogNamespaces;
 import org.apache.hop.datavault.catalog.DvSourceCatalogService;
 import org.apache.hop.datavault.catalog.DvSourceFieldSupport;
@@ -45,6 +43,7 @@ import org.apache.hop.datavault.lineage.LineageDiffResult;
 import org.apache.hop.datavault.lineage.LineageDiffService;
 import org.apache.hop.datavault.metadata.DvSourceType;
 import org.apache.hop.datavault.metadata.SourceField;
+import org.apache.hop.datavault.resourcedefinition.ValidationReport.IssueKind;
 import org.apache.hop.datavault.resourcedefinition.ValidationReport.RecordDefinitionValidation;
 import org.apache.hop.datavault.resourcedefinition.ValidationReport.ValidationIssue;
 import org.apache.hop.i18n.BaseMessages;
@@ -91,9 +90,7 @@ public final class SchemaImpactSimulationService {
             : SchemaCompareMode.LIVE_SOURCE;
     boolean includeImpact = request == null || request.includeImpact();
     boolean detailed =
-        request == null
-            ? group.isDetailedDataTypeChecking()
-            : request.detailedDataTypeChecking();
+        request == null ? group.isDetailedDataTypeChecking() : request.detailedDataTypeChecking();
     String catalogVersionTag = request != null ? trimToNull(request.catalogVersionTag()) : null;
     String baselineVersionTag = request != null ? trimToNull(request.baselineVersionTag()) : null;
 
@@ -103,8 +100,7 @@ public final class SchemaImpactSimulationService {
     if (mode == SchemaCompareMode.VERSION_VS_VERSION) {
       if (baselineVersionTag == null || catalogVersionTag == null) {
         throw new HopException(
-            BaseMessages.getString(
-                PKG, "SchemaImpactSimulationService.Error.VersionPairRequired"));
+            BaseMessages.getString(PKG, "SchemaImpactSimulationService.Error.VersionPairRequired"));
       }
     }
 
@@ -180,23 +176,18 @@ public final class SchemaImpactSimulationService {
     try {
       lineageDiffs = LineageDiffService.compareModelsToCatalog(models, variables, metadataProvider);
     } catch (Exception lineageEx) {
-      // Lineage drift is best-effort: never fail schema simulation solely because lineage load failed.
+      // Lineage drift is best-effort: never fail schema simulation solely because lineage load
+      // failed.
       lineageDiffs = List.of();
     }
 
     SimulationStatus status = SchemaImpactSimulationResult.statusOf(report, lineageDiffs);
     return new SchemaImpactSimulationResult(
-        report,
-        graph,
-        catalogVersionUsed,
-        baselineUsed,
-        mode,
-        Instant.now(),
-        status,
-        lineageDiffs);
+        report, graph, catalogVersionUsed, baselineUsed, mode, Instant.now(), status, lineageDiffs);
   }
 
-  private static ValidationReport mergeReports(ValidationReport primary, ValidationReport secondary) {
+  private static ValidationReport mergeReports(
+      ValidationReport primary, ValidationReport secondary) {
     if (primary == null) {
       return secondary;
     }
@@ -261,7 +252,9 @@ public final class SchemaImpactSimulationService {
    * enrichment.
    */
   public static SchemaImpactSimulationResult runLiveWithImpact(
-      ResourceDefinitionGroupMeta group, IVariables variables, IHopMetadataProvider metadataProvider)
+      ResourceDefinitionGroupMeta group,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider)
       throws HopException {
     SchemaImpactSimulationRequest request =
         SchemaImpactSimulationRequest.builder()
@@ -295,13 +288,17 @@ public final class SchemaImpactSimulationService {
     for (Map.Entry<RecordDefinitionKey, List<SourceUsage>> entry : usageIndex.entrySet()) {
       List<SourceUsage> usages = entry.getValue();
       String catalogConnection =
-          firstNonEmpty(resolveCatalogConnection(usages), defaultCatalog, models.group().getDataCatalogConnection());
+          firstNonEmpty(
+              resolveCatalogConnection(usages),
+              defaultCatalog,
+              models.group().getDataCatalogConnection());
       RecordDefinitionKey resolvedKey =
           SourceUsageIndexBuilder.resolveKey(
               entry.getKey(), catalogConnection, variables, defaultNamespace);
 
       RecordDefinition expected =
-          loadFromVersion(catalogConnection, expectedVersionTag, resolvedKey, variables, metadataProvider);
+          loadFromVersion(
+              catalogConnection, expectedVersionTag, resolvedKey, variables, metadataProvider);
       // Physical discovery uses working-tree definition when available (current connection/path),
       // falling back to the versioned definition.
       RecordDefinition working =
@@ -343,7 +340,10 @@ public final class SchemaImpactSimulationService {
     for (Map.Entry<RecordDefinitionKey, List<SourceUsage>> entry : usageIndex.entrySet()) {
       List<SourceUsage> usages = entry.getValue();
       String catalogConnection =
-          firstNonEmpty(resolveCatalogConnection(usages), defaultCatalog, models.group().getDataCatalogConnection());
+          firstNonEmpty(
+              resolveCatalogConnection(usages),
+              defaultCatalog,
+              models.group().getDataCatalogConnection());
       RecordDefinitionKey resolvedKey =
           SourceUsageIndexBuilder.resolveKey(
               entry.getKey(), catalogConnection, variables, defaultNamespace);
@@ -384,7 +384,10 @@ public final class SchemaImpactSimulationService {
     for (Map.Entry<RecordDefinitionKey, List<SourceUsage>> entry : usageIndex.entrySet()) {
       List<SourceUsage> usages = entry.getValue();
       String catalogConnection =
-          firstNonEmpty(resolveCatalogConnection(usages), defaultCatalog, models.group().getDataCatalogConnection());
+          firstNonEmpty(
+              resolveCatalogConnection(usages),
+              defaultCatalog,
+              models.group().getDataCatalogConnection());
       RecordDefinitionKey resolvedKey =
           SourceUsageIndexBuilder.resolveKey(
               entry.getKey(), catalogConnection, variables, defaultNamespace);
@@ -419,16 +422,13 @@ public final class SchemaImpactSimulationService {
       boolean detailedDataTypeChecking,
       IVariables variables,
       IHopMetadataProvider metadataProvider) {
-    String recordKey =
-        key != null ? key.getNamespace() + "/" + key.getName() : "?";
+    String recordKey = key != null ? key.getNamespace() + "/" + key.getName() : "?";
     if (expectedContract == null) {
       // LIVE_SOURCE with a version tag as expected contract: treat as baseline gap if working
       // discovery source exists, otherwise working/contract missing.
       boolean workingPresent = discoverySource != null;
       IssueKind kind =
-          workingPresent
-              ? IssueKind.BASELINE_CONTRACT_MISSING
-              : IssueKind.WORKING_CONTRACT_MISSING;
+          workingPresent ? IssueKind.BASELINE_CONTRACT_MISSING : IssueKind.WORKING_CONTRACT_MISSING;
       String finding =
           workingPresent
               ? ValidationFindingFormatter.baselineContractMissing(recordKey, null, true)
@@ -508,8 +508,7 @@ public final class SchemaImpactSimulationService {
       boolean detailedDataTypeChecking,
       boolean applyAcknowledgementsFromActual,
       String baselineVersionTag) {
-    String recordKey =
-        key != null ? key.getNamespace() + "/" + key.getName() : "?";
+    String recordKey = key != null ? key.getNamespace() + "/" + key.getName() : "?";
     if (expected == null && actual == null) {
       String finding =
           ValidationFindingFormatter.bothContractsMissing(recordKey, baselineVersionTag);
@@ -592,8 +591,7 @@ public final class SchemaImpactSimulationService {
     if (ackDefinition != null) {
       ValidationIssueSupport.pruneStaleAcknowledgements(ackDefinition, diff, unavailableMessage);
     }
-    String recordKey =
-        key != null ? key.getNamespace() + "/" + key.getName() : null;
+    String recordKey = key != null ? key.getNamespace() + "/" + key.getName() : null;
     List<ValidationIssue> allIssues =
         RemediationProposalSupport.buildIssues(
             diff,
@@ -713,7 +711,8 @@ public final class SchemaImpactSimulationService {
     if (models.group() != null && !Utils.isEmpty(models.group().getDataCatalogConnection())) {
       return models.group().getDataCatalogConnection();
     }
-    return DvSourceCatalogService.resolvePreferredCatalogConnection(null, variables, metadataProvider);
+    return DvSourceCatalogService.resolvePreferredCatalogConnection(
+        null, variables, metadataProvider);
   }
 
   private static String resolveCatalogConnection(List<SourceUsage> usages) {

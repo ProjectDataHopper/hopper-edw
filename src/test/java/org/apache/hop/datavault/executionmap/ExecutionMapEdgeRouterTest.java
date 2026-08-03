@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -30,10 +28,14 @@ class ExecutionMapEdgeRouterTest {
 
   @Test
   void hubSpokeRouteAvoidsIntermediateNodes() {
-    Bounds hub = new Bounds(64, 80, ExecutionMapMetrics.NODE_WIDTH, ExecutionMapMetrics.NODE_HEIGHT);
-    Bounds dm1 = new Bounds(304, 64, ExecutionMapMetrics.NODE_WIDTH, ExecutionMapMetrics.NODE_HEIGHT);
-    Bounds dm2 = new Bounds(304, 144, ExecutionMapMetrics.NODE_WIDTH, ExecutionMapMetrics.NODE_HEIGHT);
-    Bounds dv = new Bounds(304, 448, ExecutionMapMetrics.NODE_WIDTH, ExecutionMapMetrics.NODE_HEIGHT);
+    Bounds hub =
+        new Bounds(64, 80, ExecutionMapMetrics.NODE_WIDTH, ExecutionMapMetrics.NODE_HEIGHT);
+    Bounds dm1 =
+        new Bounds(304, 64, ExecutionMapMetrics.NODE_WIDTH, ExecutionMapMetrics.NODE_HEIGHT);
+    Bounds dm2 =
+        new Bounds(304, 144, ExecutionMapMetrics.NODE_WIDTH, ExecutionMapMetrics.NODE_HEIGHT);
+    Bounds dv =
+        new Bounds(304, 448, ExecutionMapMetrics.NODE_WIDTH, ExecutionMapMetrics.NODE_HEIGHT);
 
     List<Bounds> obstacles = new ArrayList<>(List.of(hub, dm1, dm2, dv));
     int[] polyline =
@@ -49,8 +51,10 @@ class ExecutionMapEdgeRouterTest {
 
   @Test
   void sameColumnRouteUsesRightSideBus() {
-    Bounds bv = new Bounds(304, 544, ExecutionMapMetrics.NODE_WIDTH, ExecutionMapMetrics.NODE_HEIGHT);
-    Bounds dv = new Bounds(304, 448, ExecutionMapMetrics.NODE_WIDTH, ExecutionMapMetrics.NODE_HEIGHT);
+    Bounds bv =
+        new Bounds(304, 544, ExecutionMapMetrics.NODE_WIDTH, ExecutionMapMetrics.NODE_HEIGHT);
+    Bounds dv =
+        new Bounds(304, 448, ExecutionMapMetrics.NODE_WIDTH, ExecutionMapMetrics.NODE_HEIGHT);
 
     int[] polyline =
         ExecutionMapEdgeRouter.routeOrthogonal(
@@ -59,6 +63,7 @@ class ExecutionMapEdgeRouterTest {
 
     assertTrue(polyline.length >= 8);
     int busX = polyline[2];
-    assertTrue(busX > bv.x() + bv.width(), "same-column links should route outside the node column");
+    assertTrue(
+        busX > bv.x() + bv.width(), "same-column links should route outside the node column");
   }
 }

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.quality.alert;
 
 import org.apache.hop.core.exception.HopException;
@@ -23,7 +21,9 @@ import org.apache.hop.core.exception.HopException;
 /** Publishes a quality disposition alert to a sink (log, ops table, …). */
 public interface IQualityAlertSink {
 
-  /** Stable sink id used in {@code alertSinks} configuration (e.g. {@code log}, {@code ops_table}). */
+  /**
+   * Stable sink id used in {@code alertSinks} configuration (e.g. {@code log}, {@code ops_table}).
+   */
   String id();
 
   void publish(QualityAlertContext context) throws HopException;

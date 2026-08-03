@@ -13,15 +13,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.List;
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
@@ -50,7 +47,9 @@ class DmHybridDimensionPipelineTest {
     model.getTables().add(dimension);
 
     PipelineMeta pipeline =
-        dimension.generateUpdatePipelines(testMetadataProvider(), new Variables(), model, null).get(0);
+        dimension
+            .generateUpdatePipelines(testMetadataProvider(), new Variables(), model, null)
+            .get(0);
 
     TransformMeta lookup =
         pipeline.getTransforms().stream()
@@ -82,10 +81,10 @@ class DmHybridDimensionPipelineTest {
             .filter(f -> "is_current".equals(f.getLookup()))
             .findFirst()
             .orElseThrow();
-    assertEquals(
-        DimensionLookupMeta.DimensionUpdateType.LAST_VERSION, currentFlag.getUpdateType());
+    assertEquals(DimensionLookupMeta.DimensionUpdateType.LAST_VERSION, currentFlag.getUpdateType());
 
-    IRowMeta layout = dimension.getTargetTableLayout(testMetadataProvider(), new Variables(), model);
+    IRowMeta layout =
+        dimension.getTargetTableLayout(testMetadataProvider(), new Variables(), model);
     assertTrue(layout.indexOfValue("birthdate") >= 0);
     assertTrue(layout.indexOfValue("birthdate_hist") >= 0);
     assertTrue(layout.indexOfValue("is_current") >= 0);
@@ -96,10 +95,12 @@ class DmHybridDimensionPipelineTest {
     dimension.setName("dim_customer");
     dimension.setTableName("d_customer");
     dimension.getNaturalKeys().add(new DmNaturalKeyField("customer_id"));
-    DmDimensionAttribute punchThrough = new DmDimensionAttribute("birthdate", DmScdUpdatePolicy.TYPE1_PUNCH_THROUGH);
+    DmDimensionAttribute punchThrough =
+        new DmDimensionAttribute("birthdate", DmScdUpdatePolicy.TYPE1_PUNCH_THROUGH);
     punchThrough.setSourceFieldName("birthdate");
     dimension.getAttributes().add(punchThrough);
-    DmDimensionAttribute historized = new DmDimensionAttribute("birthdate_hist", DmScdUpdatePolicy.TYPE2);
+    DmDimensionAttribute historized =
+        new DmDimensionAttribute("birthdate_hist", DmScdUpdatePolicy.TYPE2);
     historized.setSourceFieldName("birthdate");
     dimension.getAttributes().add(historized);
     dimension
@@ -107,8 +108,7 @@ class DmHybridDimensionPipelineTest {
         .add(new DmDimensionAttribute("customer_name", DmScdUpdatePolicy.TYPE1));
     dimension
         .getSourceOrDefault()
-        .setSourceSql(
-            "SELECT customer_id, birthdate, customer_name FROM stg_customer");
+        .setSourceSql("SELECT customer_id, birthdate, customer_name FROM stg_customer");
     return dimension;
   }
 

@@ -14,10 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.impact;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -71,14 +69,7 @@ class ImpactGraphTest {
     Map<String, List<ImpactEdge>> outgoing = new LinkedHashMap<>();
 
     ImpactNode source =
-        node(
-            ImpactNodeKind.SOURCE_OBJECT,
-            null,
-            null,
-            null,
-            null,
-            "hop/demo/sources",
-            "customers");
+        node(ImpactNodeKind.SOURCE_OBJECT, null, null, null, null, "hop/demo/sources", "customers");
     ImpactNode fieldId =
         node(
             ImpactNodeKind.SOURCE_FIELD,
@@ -198,7 +189,14 @@ class ImpactGraphTest {
       String sourceNamespace,
       String sourceName) {
     return new ImpactNode(
-        kind, modelType, modelName, modelFilename, elementName, fieldName, sourceNamespace, sourceName);
+        kind,
+        modelType,
+        modelName,
+        modelFilename,
+        elementName,
+        fieldName,
+        sourceNamespace,
+        sourceName);
   }
 
   private static ImpactNode node(
@@ -209,14 +207,14 @@ class ImpactGraphTest {
       String fieldName,
       String sourceNamespace,
       String sourceName) {
-    return node(kind, modelType, modelName, modelFilename, null, fieldName, sourceNamespace, sourceName);
+    return node(
+        kind, modelType, modelName, modelFilename, null, fieldName, sourceNamespace, sourceName);
   }
 
   private static void edge(
-      Map<String, List<ImpactEdge>> outgoing,
-      ImpactEdgeType type,
-      ImpactNode from,
-      ImpactNode to) {
-    outgoing.computeIfAbsent(from.id(), ignored -> new ArrayList<>()).add(new ImpactEdge(type, from.id(), to.id()));
+      Map<String, List<ImpactEdge>> outgoing, ImpactEdgeType type, ImpactNode from, ImpactNode to) {
+    outgoing
+        .computeIfAbsent(from.id(), ignored -> new ArrayList<>())
+        .add(new ImpactEdge(type, from.id(), to.id()));
   }
 }

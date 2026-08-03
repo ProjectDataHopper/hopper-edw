@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.hopgui.navigation;
 
 import java.nio.file.Files;
@@ -36,7 +34,9 @@ import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
 import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
 
-/** Opens the originating DV, business vault, or dimensional model for a catalog record definition. */
+/**
+ * Opens the originating DV, business vault, or dimensional model for a catalog record definition.
+ */
 public final class RecordOriginNavigationSupport {
 
   public static final String MODEL_TYPE_DATA_VAULT = "DATA_VAULT_MODEL";
@@ -62,8 +62,8 @@ public final class RecordOriginNavigationSupport {
     }
   }
 
-  public static void navigateToOrigin(
-      HopGui hopGui, RecordOrigin origin, IVariables variables) throws HopException {
+  public static void navigateToOrigin(HopGui hopGui, RecordOrigin origin, IVariables variables)
+      throws HopException {
     if (hopGui == null) {
       throw new HopException(
           BaseMessages.getString(PKG, "RecordOriginNavigationSupport.Error.MissingHopGui"));
@@ -107,9 +107,7 @@ public final class RecordOriginNavigationSupport {
       default ->
           throw new HopException(
               BaseMessages.getString(
-                  PKG,
-                  "RecordOriginNavigationSupport.Error.UnsupportedModelType",
-                  modelType));
+                  PKG, "RecordOriginNavigationSupport.Error.UnsupportedModelType", modelType));
     }
   }
 

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,7 +39,8 @@ class LoadRunMetricsDatabasePublishTest {
   private static final String OPS_PORT = System.getenv().getOrDefault("DB_PORT", "54320");
   private static final String OPS_USER = System.getenv().getOrDefault("DB_USER", "test");
   private static final String OPS_PASSWORD = System.getenv().getOrDefault("DB_PASSWORD", "test");
-  private static final String OPS_DATABASE = System.getenv().getOrDefault("DB_OPS_NAME", "test_ops");
+  private static final String OPS_DATABASE =
+      System.getenv().getOrDefault("DB_OPS_NAME", "test_ops");
 
   private Variables variables;
   private MemoryMetadataProvider metadataProvider;
@@ -67,12 +66,7 @@ class LoadRunMetricsDatabasePublishTest {
 
     assumeTrue(
         LoadRunMetricsDatabaseAssertionSupport.canConnect(opsDatabase, variables),
-        "OPS PostgreSQL is not reachable on "
-            + OPS_HOST
-            + ":"
-            + OPS_PORT
-            + "/"
-            + OPS_DATABASE);
+        "OPS PostgreSQL is not reachable on " + OPS_HOST + ":" + OPS_PORT + "/" + OPS_DATABASE);
   }
 
   @Test

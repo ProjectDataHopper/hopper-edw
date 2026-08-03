@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.quality.history;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -107,13 +105,11 @@ class DataQualityHistoryReaderTest {
 
   @Test
   void resolveConnectionPrefersQualityHistoryVariable() throws Exception {
-    variables.setVariable(
-        DataQualityHistoryPublisher.VAR_QUALITY_HISTORY_DATABASE, "OPS_FROM_VAR");
+    variables.setVariable(DataQualityHistoryPublisher.VAR_QUALITY_HISTORY_DATABASE, "OPS_FROM_VAR");
     variables.setVariable(DataQualityHistoryPublisher.VAR_QUALITY_HISTORY_SCHEMA, "custom_ops");
 
     HistoryConnection connection =
-        DataQualityHistoryReader.resolveConnection(
-            CATALOG_CONNECTION, variables, metadataProvider);
+        DataQualityHistoryReader.resolveConnection(CATALOG_CONNECTION, variables, metadataProvider);
     assertNotNull(connection);
     assertEquals("OPS_FROM_VAR", connection.databaseMetaName());
     assertEquals("custom_ops", connection.schemaName());
@@ -125,8 +121,7 @@ class DataQualityHistoryReaderTest {
     variables.setVariable(DataQualityHistoryPublisher.VAR_QUALITY_HISTORY_DATABASE, OPS_NAME);
 
     HistoryConnection connection =
-        DataQualityHistoryReader.resolveConnection(
-            CATALOG_CONNECTION, variables, metadataProvider);
+        DataQualityHistoryReader.resolveConnection(CATALOG_CONNECTION, variables, metadataProvider);
     assertNotNull(connection);
     assertEquals(OPS_NAME, connection.databaseMetaName());
     assertEquals(DataQualityHistoryPublisher.DEFAULT_SCHEMA_NAME, connection.schemaName());
@@ -138,8 +133,7 @@ class DataQualityHistoryReaderTest {
     upsertOpsDef(namespace, DataQualityHistoryPublisher.TABLE_QUALITY_RUN, OPS_NAME, "dv_ops");
 
     HistoryConnection connection =
-        DataQualityHistoryReader.resolveConnection(
-            CATALOG_CONNECTION, variables, metadataProvider);
+        DataQualityHistoryReader.resolveConnection(CATALOG_CONNECTION, variables, metadataProvider);
     assertNotNull(connection);
     assertEquals(OPS_NAME, connection.databaseMetaName());
     assertEquals("dv_ops", connection.schemaName());
@@ -152,8 +146,7 @@ class DataQualityHistoryReaderTest {
     upsertOpsDef(namespace, "load_run", "OPS_LOAD", "ops_schema");
 
     HistoryConnection connection =
-        DataQualityHistoryReader.resolveConnection(
-            CATALOG_CONNECTION, variables, metadataProvider);
+        DataQualityHistoryReader.resolveConnection(CATALOG_CONNECTION, variables, metadataProvider);
     assertNotNull(connection);
     assertEquals("OPS_LOAD", connection.databaseMetaName());
     assertEquals("ops_schema", connection.schemaName());
@@ -172,12 +165,7 @@ class DataQualityHistoryReaderTest {
     DataQualityReport report = sampleReport();
     PublishContext context =
         new PublishContext(
-            OPS_NAME,
-            DataQualityHistoryPublisher.DEFAULT_SCHEMA_NAME,
-            null,
-            false,
-            true,
-            true);
+            OPS_NAME, DataQualityHistoryPublisher.DEFAULT_SCHEMA_NAME, null, false, true, true);
     PublishResult result =
         DataQualityHistoryPublisher.publish(
             LogChannel.GENERAL,
@@ -192,11 +180,7 @@ class DataQualityHistoryReaderTest {
 
     List<SubjectHistoryEntry> history =
         DataQualityHistoryReader.listSubjectHistory(
-            h2Ops,
-            DataQualityHistoryPublisher.DEFAULT_SCHEMA_NAME,
-            SUBJECT_KEY,
-            variables,
-            50);
+            h2Ops, DataQualityHistoryPublisher.DEFAULT_SCHEMA_NAME, SUBJECT_KEY, variables, 50);
     assertEquals(1, history.size());
     SubjectHistoryEntry entry = history.get(0);
     assertEquals(report.getRunId(), entry.qualityRunId());
@@ -226,12 +210,7 @@ class DataQualityHistoryReaderTest {
     DataQualityReport report = sampleReport();
     PublishContext context =
         new PublishContext(
-            OPS_NAME,
-            DataQualityHistoryPublisher.DEFAULT_SCHEMA_NAME,
-            null,
-            false,
-            true,
-            true);
+            OPS_NAME, DataQualityHistoryPublisher.DEFAULT_SCHEMA_NAME, null, false, true, true);
     assertEquals(
         PublishStatus.INSERTED,
         DataQualityHistoryPublisher.publish(

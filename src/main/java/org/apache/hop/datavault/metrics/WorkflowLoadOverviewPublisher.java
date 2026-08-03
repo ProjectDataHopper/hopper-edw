@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import java.text.SimpleDateFormat;
@@ -40,8 +38,8 @@ import org.apache.hop.core.row.value.ValueMetaInteger;
 import org.apache.hop.core.row.value.ValueMetaString;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.datavault.metadata.DvBulkLoadPluginSupport;
 import org.apache.hop.datavault.catalog.DvCatalogNamespaces;
+import org.apache.hop.datavault.metadata.DvBulkLoadPluginSupport;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Publishes workflow load overview rows and catalog record definitions. */
@@ -64,7 +62,8 @@ public final class WorkflowLoadOverviewPublisher {
     DatabaseMeta databaseMeta =
         metadataProvider.getSerializer(DatabaseMeta.class).load(settings.targetDatabaseName());
     if (databaseMeta == null) {
-      throw new HopException("Target database connection not found: " + settings.targetDatabaseName());
+      throw new HopException(
+          "Target database connection not found: " + settings.targetDatabaseName());
     }
     String operationsSchema =
         LoadRunMetricsCatalogPublisher.resolvePhysicalOperationsSchema(
@@ -72,7 +71,8 @@ public final class WorkflowLoadOverviewPublisher {
     String namespace = operationsNamespace(variables);
     Date finishedAt = report.getFinishedAt() != null ? report.getFinishedAt() : new Date();
 
-    if (publishCatalogDefinitions && settings.publishCatalogDefinitions()
+    if (publishCatalogDefinitions
+        && settings.publishCatalogDefinitions()
         && !Utils.isEmpty(settings.catalogConnectionName())) {
       publishRecordDefinitions(
           settings.catalogConnectionName(),
@@ -86,7 +86,8 @@ public final class WorkflowLoadOverviewPublisher {
     }
 
     if (publishDatabaseRows && settings.publishDatabaseRows()) {
-      insertOverviewRows(log, databaseMeta, operationsSchema, settings.autoCreateTables(), report, variables);
+      insertOverviewRows(
+          log, databaseMeta, operationsSchema, settings.autoCreateTables(), report, variables);
     }
   }
 
@@ -167,7 +168,8 @@ public final class WorkflowLoadOverviewPublisher {
 
     RecordDefinition definition = new RecordDefinition();
     definition.setKey(
-        new RecordDefinitionKey(namespace, WorkflowLoadOverviewDdlSupport.TABLE_WORKFLOW_LOAD_OVERVIEW));
+        new RecordDefinitionKey(
+            namespace, WorkflowLoadOverviewDdlSupport.TABLE_WORKFLOW_LOAD_OVERVIEW));
     definition.setType(RecordDefinitionType.PHYSICAL_TABLE);
     definition.setDescription("Workflow-level load overview for one vault update execution");
     definition.setFields(fields);
@@ -236,7 +238,8 @@ public final class WorkflowLoadOverviewPublisher {
     try {
       db.connect();
       if (autoCreateTables) {
-        WorkflowLoadOverviewDdlSupport.ensureOverviewTables(db, databaseMeta, operationsSchema, log);
+        WorkflowLoadOverviewDdlSupport.ensureOverviewTables(
+            db, databaseMeta, operationsSchema, log);
       }
       insertOverviewHeader(db, operationsSchema, report);
       insertOverviewModels(db, operationsSchema, report);
@@ -255,8 +258,8 @@ public final class WorkflowLoadOverviewPublisher {
     }
   }
 
-  private static void insertOverviewHeader(Database db, String operationsSchema, WorkflowLoadOverviewReport report)
-      throws HopException {
+  private static void insertOverviewHeader(
+      Database db, String operationsSchema, WorkflowLoadOverviewReport report) throws HopException {
     String qualifiedTable =
         db.getDatabaseMeta()
             .getQuotedSchemaTableCombination(
@@ -296,8 +299,8 @@ public final class WorkflowLoadOverviewPublisher {
     db.execStatement(sql);
   }
 
-  private static void insertOverviewModels(Database db, String operationsSchema, WorkflowLoadOverviewReport report)
-      throws HopException {
+  private static void insertOverviewModels(
+      Database db, String operationsSchema, WorkflowLoadOverviewReport report) throws HopException {
     List<WorkflowLoadOverviewReport.ModelEntry> models = report.getModels();
     if (models == null || models.isEmpty()) {
       return;
@@ -305,7 +308,9 @@ public final class WorkflowLoadOverviewPublisher {
     String qualifiedTable =
         db.getDatabaseMeta()
             .getQuotedSchemaTableCombination(
-                db, operationsSchema, WorkflowLoadOverviewDdlSupport.TABLE_WORKFLOW_LOAD_OVERVIEW_MODEL);
+                db,
+                operationsSchema,
+                WorkflowLoadOverviewDdlSupport.TABLE_WORKFLOW_LOAD_OVERVIEW_MODEL);
     for (WorkflowLoadOverviewReport.ModelEntry model : models) {
       String sql =
           "INSERT INTO "
@@ -342,7 +347,10 @@ public final class WorkflowLoadOverviewPublisher {
   }
 
   private static PhysicalTableRef physicalTableRef(
-      String targetDatabaseName, String operationsSchema, DatabaseMeta databaseMeta, String tableName) {
+      String targetDatabaseName,
+      String operationsSchema,
+      DatabaseMeta databaseMeta,
+      String tableName) {
     PhysicalTableRef ref = new PhysicalTableRef();
     ref.setDatabaseMetaName(targetDatabaseName);
     ref.setSchemaName(operationsSchema);

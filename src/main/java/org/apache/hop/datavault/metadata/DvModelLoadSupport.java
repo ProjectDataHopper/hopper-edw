@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.nio.file.Files;
@@ -169,11 +167,12 @@ public final class DvModelLoadSupport {
   }
 
   /**
-   * Converts a browsed or absolute path into a portable stored value when the Hop Projects file-open
-   * extension point did not already emit a variable-based path.
+   * Converts a browsed or absolute path into a portable stored value when the Hop Projects
+   * file-open extension point did not already emit a variable-based path.
    */
   public static String toStoredModelPath(
-      String selectedPath, String referringModelFilename, IVariables variables) throws HopException {
+      String selectedPath, String referringModelFilename, IVariables variables)
+      throws HopException {
     if (Utils.isEmpty(selectedPath)) {
       return selectedPath;
     }
@@ -188,7 +187,8 @@ public final class DvModelLoadSupport {
       normalized = HopVfs.normalize(resolved);
     } catch (Exception e) {
       throw new HopException(
-          BaseMessages.getString(PKG, "DvModelLoadSupport.Error.InvalidModelPath", selectedPath), e);
+          BaseMessages.getString(PKG, "DvModelLoadSupport.Error.InvalidModelPath", selectedPath),
+          e);
     }
 
     String projectHomeRelative = relativizeToProjectHome(normalized, variables);
@@ -196,7 +196,8 @@ public final class DvModelLoadSupport {
       return projectHomeRelative;
     }
 
-    String modelRelative = relativizeToReferringModel(normalized, referringModelFilename, variables);
+    String modelRelative =
+        relativizeToReferringModel(normalized, referringModelFilename, variables);
     if (!Utils.isEmpty(modelRelative)) {
       return modelRelative;
     }
@@ -292,8 +293,6 @@ public final class DvModelLoadSupport {
     if (Utils.isEmpty(path)) {
       return false;
     }
-    return path.startsWith("/")
-        || path.matches("^[A-Za-z]:[/\\\\].*")
-        || path.contains("://");
+    return path.startsWith("/") || path.matches("^[A-Za-z]:[/\\\\].*") || path.contains("://");
   }
 }

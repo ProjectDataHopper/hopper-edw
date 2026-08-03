@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.sourcemodel.generate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -64,7 +63,9 @@ class SourceQuerySqlGeneratorTest {
 
     String sql = SourceQuerySqlGenerator.generate(model, query, null, new Variables());
 
-    assertTrue(sql.endsWith(" WHERE product.product_id IS NOT NULL") || sql.contains(" WHERE product.product_id IS NOT NULL"));
+    assertTrue(
+        sql.endsWith(" WHERE product.product_id IS NOT NULL")
+            || sql.contains(" WHERE product.product_id IS NOT NULL"));
     assertEquals(1, countOccurrences(sql.toUpperCase(), " WHERE "));
   }
 

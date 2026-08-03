@@ -13,13 +13,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.executionmap;
 
 import lombok.Getter;
 import org.apache.hop.datavault.executionmap.CrawlOptions;
+import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
+import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.FormDataBuilder;
 import org.apache.hop.ui.core.PropsUi;
@@ -31,8 +31,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
-import org.apache.hop.datavault.hopgui.help.HelpTopics;
 
 /** Collects crawl options before generating or refreshing an execution map. */
 public class ExecutionMapGenerationDialog {
@@ -203,8 +201,7 @@ public class ExecutionMapGenerationDialog {
     Label label = new Label(shell, SWT.LEFT);
     label.setText(text);
     PropsUi.setLook(label);
-    label.setLayoutData(
-        new FormDataBuilder().left().top(top, 2 * margin).right().result());
+    label.setLayoutData(new FormDataBuilder().left().top(top, 2 * margin).right().result());
     return label;
   }
 

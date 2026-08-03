@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.model;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -97,8 +95,7 @@ class DataCatalogRecordListFilterTest {
         DataCatalogRecordListFilter.DIMENSIONAL_TABLES
             .toQuery()
             .matches(typedDefinition(RecordDefinitionType.FACT_TABLE)));
-    assertFalse(
-        DataCatalogRecordListFilter.DIMENSIONAL_TABLES.toQuery().matches(hubDefinition()));
+    assertFalse(DataCatalogRecordListFilter.DIMENSIONAL_TABLES.toQuery().matches(hubDefinition()));
     assertFalse(
         DataCatalogRecordListFilter.DIMENSIONAL_TABLES.toQuery().matches(sourceDefinition()));
   }

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.vault;
 
 import java.util.ArrayList;
@@ -63,8 +61,7 @@ public final class DataVaultModelSvgPainter {
       painter.setDrawNotes(renderOptions.isIncludeNotes());
       painter.setShowHashKeyFieldNames(renderOptions.isShowHashKeyFieldNames());
       painter.setShowEmptyModelHint(false);
-      painter.setMaximum(
-          ModelBoundsSupport.getMaximum(model, renderOptions.isIncludeNotes()));
+      painter.setMaximum(ModelBoundsSupport.getMaximum(model, renderOptions.isIncludeNotes()));
       painter.drawDataVaultModel();
 
       return graphics2D.toXml();

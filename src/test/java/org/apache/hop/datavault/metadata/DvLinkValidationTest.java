@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -346,9 +344,8 @@ class DvLinkValidationTest {
             .anyMatch(
                 r ->
                     r.getType() == ICheckResult.TYPE_RESULT_ERROR
-                        && r.getText()
-                            .contains("order-header")
-                            && r.getText().contains("lnk_order")));
+                        && r.getText().contains("order-header")
+                        && r.getText().contains("lnk_order")));
   }
 
   private static BusinessKey businessKey(String name) {

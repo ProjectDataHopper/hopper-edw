@@ -13,18 +13,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import java.util.Date;
 import org.apache.hop.pipeline.Pipeline;
+import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.engine.EngineMetrics;
 import org.apache.hop.pipeline.engine.IEngineComponent;
 import org.apache.hop.pipeline.engine.IEngineMetric;
 import org.apache.hop.pipeline.engine.IPipelineEngine;
-import org.apache.hop.pipeline.PipelineMeta;
 
 /**
  * Reads per-transform engine metrics from a completed update pipeline and maps them to source read,
@@ -41,14 +39,12 @@ public final class DvUpdateMetricsExtractor {
       DvUpdateMetricsParser.ParsedPipeline identity) {
     EngineMetrics metrics = engine.getEngineMetrics();
     String tableName = identity.tableName();
-    long sourceRowsRead = sumMetric(metrics, name -> isSourceTransform(name), Pipeline.METRIC_INPUT);
+    long sourceRowsRead =
+        sumMetric(metrics, name -> isSourceTransform(name), Pipeline.METRIC_INPUT);
     long targetRowsRead =
         sumMetric(metrics, name -> isTargetTransform(name, tableName), Pipeline.METRIC_INPUT);
     long targetRowsInserted =
-        sumMetric(
-            metrics,
-            name -> isWriteTransform(name, tableName),
-            Pipeline.METRIC_OUTPUT);
+        sumMetric(metrics, name -> isWriteTransform(name, tableName), Pipeline.METRIC_OUTPUT);
 
     Date executionStartDate = engine.getExecutionStartDate();
     Date executionEndDate = engine.getExecutionEndDate();

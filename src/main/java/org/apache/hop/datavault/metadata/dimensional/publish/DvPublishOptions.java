@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional.publish;
 
 import lombok.Getter;
@@ -26,7 +24,9 @@ import lombok.Setter;
 @Setter
 public class DvPublishOptions {
 
-  /** When a link has exactly two hubs and no measures, publish a bridge instead of a factless fact. */
+  /**
+   * When a link has exactly two hubs and no measures, publish a bridge instead of a factless fact.
+   */
   private boolean bridgeForTwoHubLinks = true;
 
   /** Append "-draft" to the published model name when not overridden. */

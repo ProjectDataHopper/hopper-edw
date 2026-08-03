@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.model;
 
 import java.util.ArrayList;
@@ -53,7 +51,8 @@ public class RecordDefinition {
 
   @HopMetadataProperty private List<String> glossaryTerms = new ArrayList<>();
 
-  @HopMetadataProperty private Map<String, CatalogCustomProperty> customProperties = new HashMap<>();
+  @HopMetadataProperty
+  private Map<String, CatalogCustomProperty> customProperties = new HashMap<>();
 
   @HopMetadataProperty(key = "validation_ack", groupKey = "validation_acks")
   private List<RecordDefinitionValidationAcknowledgement> validationAcknowledgements =

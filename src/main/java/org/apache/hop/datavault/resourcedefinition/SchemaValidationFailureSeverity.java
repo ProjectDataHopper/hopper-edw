@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 /** When the Validate Resource Definitions workflow action should fail the hop. */
@@ -43,7 +42,7 @@ public enum SchemaValidationFailureSeverity {
     }
     return switch (this) {
       case WARN_ONLY -> false;
-      // INFO findings do not fail the gate (WARNING and BLOCKING do).
+        // INFO findings do not fail the gate (WARNING and BLOCKING do).
       case FAIL_ON_WARNINGS -> report.getGateRelevantIssueCount() > 0;
       case FAIL_ON_BLOCKING -> report.hasBlockingIssues();
     };

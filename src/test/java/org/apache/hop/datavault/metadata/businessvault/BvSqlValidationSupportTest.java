@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -184,7 +182,8 @@ class BvSqlValidationSupportTest {
     table.getSources().add(incomplete);
 
     List<ICheckResult> remarks = check(table, model, new DataVaultModel());
-    assertTrue(hasErrorContaining(remarks, "physical table") || hasErrorContaining(remarks, "source"));
+    assertTrue(
+        hasErrorContaining(remarks, "physical table") || hasErrorContaining(remarks, "source"));
   }
 
   @Test
@@ -220,7 +219,9 @@ class BvSqlValidationSupportTest {
     table.getSources().add(new BvSqlSource("refdata", null, "ref", "t1"));
 
     List<ICheckResult> remarks = check(table, model, new DataVaultModel());
-    assertTrue(hasWarningContaining(remarks, "more than once") || hasWarningContaining(remarks, "Duplicate"));
+    assertTrue(
+        hasWarningContaining(remarks, "more than once")
+            || hasWarningContaining(remarks, "Duplicate"));
   }
 
   private static BusinessVaultModel modelWithTarget() {

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -43,8 +41,7 @@ import org.w3c.dom.Node;
 
 class ExecutionMapSerializationTest {
 
-  private static final Path RETAIL_HOME =
-      Path.of("retail-example").toAbsolutePath().normalize();
+  private static final Path RETAIL_HOME = Path.of("retail-example").toAbsolutePath().normalize();
   private static final Path ROOT_WORKFLOW =
       RETAIL_HOME.resolve("workflows/update-retail-dv-bv-dm.hwf");
 
@@ -94,8 +91,7 @@ class ExecutionMapSerializationTest {
     Files.writeString(output, xml, StandardCharsets.UTF_8);
 
     assertTrue(Files.exists(output));
-    ExecutionMapDocument loaded =
-        ExecutionMapPersistence.load(output.toString(), null, variables);
+    ExecutionMapDocument loaded = ExecutionMapPersistence.load(output.toString(), null, variables);
 
     assertEquals(original.getNodesOrEmpty().size(), loaded.getNodesOrEmpty().size());
     assertEquals(original.getEdgesOrEmpty().size(), loaded.getEdgesOrEmpty().size());
@@ -173,8 +169,7 @@ class ExecutionMapSerializationTest {
     Document document = XmlHandler.loadXmlString(wrapped);
     Node rootNode = XmlHandler.getSubNode(document, HopExecutionMapFileType.XML_TAG);
     ExecutionMapDocument loaded = new ExecutionMapDocument();
-    XmlMetadataUtil.deSerializeFromXml(
-        rootNode, ExecutionMapDocument.class, loaded, null);
+    XmlMetadataUtil.deSerializeFromXml(rootNode, ExecutionMapDocument.class, loaded, null);
     loaded.setFilename(original.getFilename());
     return loaded;
   }

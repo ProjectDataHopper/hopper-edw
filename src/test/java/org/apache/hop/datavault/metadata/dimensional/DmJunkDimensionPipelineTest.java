@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -27,8 +25,6 @@ import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.Variables;
-import org.apache.hop.datavault.metadata.dimensional.DmJunkHashCodeStrategy;
-import org.apache.hop.datavault.metadata.dimensional.DmJunkSurrogateKeyStrategy;
 import org.apache.hop.datavault.transform.junkdimension.JunkDimensionMeta;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
@@ -79,8 +75,7 @@ class DmJunkDimensionPipelineTest {
             .filter(t -> t.getTransform() instanceof DimensionLookupMeta)
             .findFirst()
             .orElseThrow();
-    assertTrue(
-        pipelineMeta.findPreviousTransforms(firstLookup).contains(junkTransform));
+    assertTrue(pipelineMeta.findPreviousTransforms(firstLookup).contains(junkTransform));
     assertTrue(pipelineMeta.findPreviousTransforms(junkTransform).contains(tableInput));
   }
 
@@ -147,9 +142,9 @@ class DmJunkDimensionPipelineTest {
     fact.setName("fact_sales");
     fact.getSourceOrDefault().setSourceType(DmSourceType.SQL);
     fact.getSourceOrDefault()
-        .setSourceSql(
-            "SELECT customer_id, is_promo, is_clearance, amount FROM staging.sales");
-    fact.getDimensionRoles().add(new DmFactDimensionRole("dim_customer", "customer_id", "customer_key"));
+        .setSourceSql("SELECT customer_id, is_promo, is_clearance, amount FROM staging.sales");
+    fact.getDimensionRoles()
+        .add(new DmFactDimensionRole("dim_customer", "customer_id", "customer_key"));
     fact.getJunkDimensionRoles()
         .add(new DmFactJunkDimensionRole("junk_sales_flags", "junk_sales_flags_key"));
     fact.getMeasures().add(new DmFactMeasure("amount"));

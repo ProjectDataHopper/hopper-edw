@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.transform.recordinput;
 
 import java.util.List;
@@ -213,28 +211,51 @@ public class RecordDefinitionInputMeta
     addField(inputRowMeta, variables.resolve(outputDescriptionField), IValueMeta.TYPE_STRING, name);
     addField(inputRowMeta, variables.resolve(outputModelTypeField), IValueMeta.TYPE_STRING, name);
     addField(inputRowMeta, variables.resolve(outputModelNameField), IValueMeta.TYPE_STRING, name);
-    addField(inputRowMeta, variables.resolve(outputModelFilenameField), IValueMeta.TYPE_STRING, name);
-    addField(inputRowMeta, variables.resolve(outputModelElementField), IValueMeta.TYPE_STRING, name);
+    addField(
+        inputRowMeta, variables.resolve(outputModelFilenameField), IValueMeta.TYPE_STRING, name);
+    addField(
+        inputRowMeta, variables.resolve(outputModelElementField), IValueMeta.TYPE_STRING, name);
     addField(inputRowMeta, variables.resolve(outputHopProjectField), IValueMeta.TYPE_STRING, name);
     addField(inputRowMeta, variables.resolve(outputCreatedAtField), IValueMeta.TYPE_STRING, name);
     addField(inputRowMeta, variables.resolve(outputUpdatedAtField), IValueMeta.TYPE_STRING, name);
     addField(inputRowMeta, variables.resolve(outputUpdatedByField), IValueMeta.TYPE_STRING, name);
-    addField(inputRowMeta, variables.resolve(outputLastWorkflowField), IValueMeta.TYPE_STRING, name);
-    addField(inputRowMeta, variables.resolve(outputLastPipelineField), IValueMeta.TYPE_STRING, name);
-    addField(inputRowMeta, variables.resolve(outputPhysicalDatabaseField), IValueMeta.TYPE_STRING, name);
-    addField(inputRowMeta, variables.resolve(outputPhysicalSchemaField), IValueMeta.TYPE_STRING, name);
-    addField(inputRowMeta, variables.resolve(outputPhysicalTableField), IValueMeta.TYPE_STRING, name);
-    addField(inputRowMeta, variables.resolve(outputDvSourceTypeField), IValueMeta.TYPE_STRING, name);
-    addField(inputRowMeta, variables.resolve(outputDvSourceIndicatorField), IValueMeta.TYPE_STRING, name);
-    addField(inputRowMeta, variables.resolve(outputDvSourceIndicatorFieldField), IValueMeta.TYPE_STRING, name);
-    addField(inputRowMeta, variables.resolve(outputDvSourceGroupField), IValueMeta.TYPE_STRING, name);
-    addField(inputRowMeta, variables.resolve(outputDvDeliveryTypeField), IValueMeta.TYPE_STRING, name);
+    addField(
+        inputRowMeta, variables.resolve(outputLastWorkflowField), IValueMeta.TYPE_STRING, name);
+    addField(
+        inputRowMeta, variables.resolve(outputLastPipelineField), IValueMeta.TYPE_STRING, name);
+    addField(
+        inputRowMeta, variables.resolve(outputPhysicalDatabaseField), IValueMeta.TYPE_STRING, name);
+    addField(
+        inputRowMeta, variables.resolve(outputPhysicalSchemaField), IValueMeta.TYPE_STRING, name);
+    addField(
+        inputRowMeta, variables.resolve(outputPhysicalTableField), IValueMeta.TYPE_STRING, name);
+    addField(
+        inputRowMeta, variables.resolve(outputDvSourceTypeField), IValueMeta.TYPE_STRING, name);
+    addField(
+        inputRowMeta,
+        variables.resolve(outputDvSourceIndicatorField),
+        IValueMeta.TYPE_STRING,
+        name);
+    addField(
+        inputRowMeta,
+        variables.resolve(outputDvSourceIndicatorFieldField),
+        IValueMeta.TYPE_STRING,
+        name);
+    addField(
+        inputRowMeta, variables.resolve(outputDvSourceGroupField), IValueMeta.TYPE_STRING, name);
+    addField(
+        inputRowMeta, variables.resolve(outputDvDeliveryTypeField), IValueMeta.TYPE_STRING, name);
 
     if (outputFieldsMetadata) {
       addField(inputRowMeta, variables.resolve(outputFieldNameField), IValueMeta.TYPE_STRING, name);
       addField(inputRowMeta, variables.resolve(outputFieldTypeField), IValueMeta.TYPE_STRING, name);
-      addField(inputRowMeta, variables.resolve(outputFieldLengthField), IValueMeta.TYPE_INTEGER, name);
-      addField(inputRowMeta, variables.resolve(outputFieldPrecisionField), IValueMeta.TYPE_INTEGER, name);
+      addField(
+          inputRowMeta, variables.resolve(outputFieldLengthField), IValueMeta.TYPE_INTEGER, name);
+      addField(
+          inputRowMeta,
+          variables.resolve(outputFieldPrecisionField),
+          IValueMeta.TYPE_INTEGER,
+          name);
       addField(
           inputRowMeta,
           variables.resolve(outputFieldPrimaryKeyPositionField),

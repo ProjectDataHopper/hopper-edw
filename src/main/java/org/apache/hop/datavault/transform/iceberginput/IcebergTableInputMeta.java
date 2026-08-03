@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.transform.iceberginput;
 
 import java.util.ArrayList;
@@ -23,7 +21,6 @@ import java.util.List;
 import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.annotations.Transform;
-import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.exception.HopTransformException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.IValueMeta;
@@ -47,7 +44,8 @@ import org.apache.hop.pipeline.transform.TransformMeta;
     categoryDescription = "i18n:org.apache.hop.pipeline.transform:BaseTransform.Category.Input",
     keywords = "i18n::IcebergTableInput.keyword",
     documentationUrl = "/pipeline/transforms/icebergtableinput.html")
-public class IcebergTableInputMeta extends BaseTransformMeta<IcebergTableInput, IcebergTableInputData> {
+public class IcebergTableInputMeta
+    extends BaseTransformMeta<IcebergTableInput, IcebergTableInputData> {
 
   private static final Class<?> PKG = IcebergTableInputMeta.class;
 
@@ -125,8 +123,7 @@ public class IcebergTableInputMeta extends BaseTransformMeta<IcebergTableInput, 
       }
 
       IcebergConnectionSettings settings = IcebergConnectionSettings.from(this, variables);
-      try (IcebergTableReader reader =
-          new IcebergTableReader(settings, List.of())) {
+      try (IcebergTableReader reader = new IcebergTableReader(settings, List.of())) {
         rowMeta.addRowMeta(reader.getOutputRowMeta());
       }
     } catch (Exception e) {
@@ -154,9 +151,7 @@ public class IcebergTableInputMeta extends BaseTransformMeta<IcebergTableInput, 
               BaseMessages.getString(PKG, "IcebergTableInputMeta.CheckResult.ConnectionOK"),
               transformMeta));
     } catch (IllegalArgumentException e) {
-      remarks.add(
-          new CheckResult(
-              ICheckResult.TYPE_RESULT_ERROR, e.getMessage(), transformMeta));
+      remarks.add(new CheckResult(ICheckResult.TYPE_RESULT_ERROR, e.getMessage(), transformMeta));
     }
   }
 

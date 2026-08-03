@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics.metadata;
 
 import org.apache.hop.core.Const;
@@ -145,7 +143,8 @@ public class ExecutionMetricsProfileMetaEditor extends MetadataEditor<ExecutionM
 
     Label wlEnabled = new Label(comp, SWT.RIGHT);
     PropsUi.setLook(wlEnabled);
-    wlEnabled.setText(BaseMessages.getString(PKG, "ExecutionMetricsProfileMetaEditor.Enabled.Label"));
+    wlEnabled.setText(
+        BaseMessages.getString(PKG, "ExecutionMetricsProfileMetaEditor.Enabled.Label"));
     FormData fdlEnabled = new FormData();
     fdlEnabled.top = new FormAttachment(last, margin);
     fdlEnabled.left = new FormAttachment(0, 0);
@@ -188,7 +187,8 @@ public class ExecutionMetricsProfileMetaEditor extends MetadataEditor<ExecutionM
     Label wlCatalog = new Label(comp, SWT.RIGHT);
     PropsUi.setLook(wlCatalog);
     wlCatalog.setText(
-        BaseMessages.getString(PKG, "ExecutionMetricsProfileMetaEditor.DataCatalogConnection.Label"));
+        BaseMessages.getString(
+            PKG, "ExecutionMetricsProfileMetaEditor.DataCatalogConnection.Label"));
     FormData fdlCatalog = new FormData();
     fdlCatalog.top = new FormAttachment(0, margin);
     fdlCatalog.left = new FormAttachment(0, 0);
@@ -314,12 +314,7 @@ public class ExecutionMetricsProfileMetaEditor extends MetadataEditor<ExecutionM
   }
 
   private Control addField(
-      Composite parent,
-      int middle,
-      int margin,
-      Control previous,
-      String labelKey,
-      Text text) {
+      Composite parent, int middle, int margin, Control previous, String labelKey, Text text) {
     Label label = new Label(parent, SWT.RIGHT);
     PropsUi.setLook(label);
     label.setText(BaseMessages.getString(PKG, labelKey));
@@ -343,12 +338,7 @@ public class ExecutionMetricsProfileMetaEditor extends MetadataEditor<ExecutionM
   }
 
   private Control addCheckbox(
-      Composite parent,
-      int middle,
-      int margin,
-      Control previous,
-      String labelKey,
-      Button button) {
+      Composite parent, int middle, int margin, Control previous, String labelKey, Button button) {
     Label label = new Label(parent, SWT.RIGHT);
     PropsUi.setLook(label);
     label.setText(BaseMessages.getString(PKG, labelKey));
@@ -414,7 +404,8 @@ public class ExecutionMetricsProfileMetaEditor extends MetadataEditor<ExecutionM
     wAutoCreateTables.setSelection(meta.isAutoCreateTables());
     wPublishCatalogDefinitions.setSelection(meta.isPublishCatalogDefinitions());
     wPublishDatabaseRows.setSelection(meta.isPublishDatabaseRows());
-    wDimLookupPreloadRatioThreshold.setText(Long.toString(meta.getDimLookupPreloadRatioThreshold()));
+    wDimLookupPreloadRatioThreshold.setText(
+        Long.toString(meta.getDimLookupPreloadRatioThreshold()));
     wTargetReadRatioThreshold.setText(Long.toString(meta.getTargetReadRatioThreshold()));
     wSortRowsRiskThreshold.setText(Long.toString(meta.getSortRowsRiskThreshold()));
     wHighTransformDurationMs.setText(Long.toString(meta.getHighTransformDurationMs()));
@@ -439,15 +430,18 @@ public class ExecutionMetricsProfileMetaEditor extends MetadataEditor<ExecutionM
     meta.setTargetReadRatioThreshold(
         parseThreshold(
             wTargetReadRatioThreshold,
-            org.apache.hop.datavault.metrics.LoadRunInsightEngine.DEFAULT_TARGET_READ_RATIO_THRESHOLD));
+            org.apache.hop.datavault.metrics.LoadRunInsightEngine
+                .DEFAULT_TARGET_READ_RATIO_THRESHOLD));
     meta.setSortRowsRiskThreshold(
         parseThreshold(
             wSortRowsRiskThreshold,
-            org.apache.hop.datavault.metrics.LoadRunInsightEngine.DEFAULT_SORT_ROWS_RISK_THRESHOLD));
+            org.apache.hop.datavault.metrics.LoadRunInsightEngine
+                .DEFAULT_SORT_ROWS_RISK_THRESHOLD));
     meta.setHighTransformDurationMs(
         parseThreshold(
             wHighTransformDurationMs,
-            org.apache.hop.datavault.metrics.LoadRunInsightEngine.DEFAULT_HIGH_TRANSFORM_DURATION_MS));
+            org.apache.hop.datavault.metrics.LoadRunInsightEngine
+                .DEFAULT_HIGH_TRANSFORM_DURATION_MS));
   }
 
   private static long parseThreshold(Text widget, long defaultValue) {

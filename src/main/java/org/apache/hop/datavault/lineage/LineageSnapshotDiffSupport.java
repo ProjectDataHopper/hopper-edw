@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.lineage;
 
 import java.util.ArrayList;
@@ -122,8 +121,7 @@ public final class LineageSnapshotDiffSupport {
         matchedCurr.add(logicalKey(curr));
         boolean physicalChanged =
             !equalsIgnoreCase(base.getPhysicalTableName(), curr.getPhysicalTableName());
-        boolean logicalChanged =
-            !equalsIgnoreCase(base.getLogicalName(), curr.getLogicalName());
+        boolean logicalChanged = !equalsIgnoreCase(base.getLogicalName(), curr.getLogicalName());
         if (logicalChanged || physicalChanged) {
           LineageDiffSeverity severity =
               physicalChanged && !hasExplicitNameReason(curr)

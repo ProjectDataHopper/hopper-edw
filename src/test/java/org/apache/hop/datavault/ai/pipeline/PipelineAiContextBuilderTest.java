@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai.pipeline;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -64,8 +62,7 @@ class PipelineAiContextBuilderTest {
             .includeTopologyXml(false)
             .build();
 
-    var bundle =
-        PipelineAiContextBuilder.build(pipelineMeta, null, new Variables(), request);
+    var bundle = PipelineAiContextBuilder.build(pipelineMeta, null, new Variables(), request);
 
     assertTrue(bundle.getLogsExcerpt().isEmpty());
   }
@@ -85,8 +82,7 @@ class PipelineAiContextBuilderTest {
             .includeTopologyXml(false)
             .build();
 
-    var bundle =
-        PipelineAiContextBuilder.build(pipelineMeta, null, new Variables(), request);
+    var bundle = PipelineAiContextBuilder.build(pipelineMeta, null, new Variables(), request);
 
     assertTrue(bundle.getLogsExcerpt().contains("ERROR: row rejected"));
   }

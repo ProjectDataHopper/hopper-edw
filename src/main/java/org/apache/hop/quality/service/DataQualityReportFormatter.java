@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.quality.service;
 
 import org.apache.hop.quality.model.DataQualityFinding;
@@ -39,7 +37,10 @@ public final class DataQualityReportFormatter {
         .append(report.getLifecycle())
         .append('\n');
     sb.append("Subjects: ")
-        .append(report.getSubjectKeys().isEmpty() ? "(none)" : String.join(", ", report.getSubjectKeys()))
+        .append(
+            report.getSubjectKeys().isEmpty()
+                ? "(none)"
+                : String.join(", ", report.getSubjectKeys()))
         .append('\n');
     sb.append("Findings: ")
         .append(report.getFindingCount())

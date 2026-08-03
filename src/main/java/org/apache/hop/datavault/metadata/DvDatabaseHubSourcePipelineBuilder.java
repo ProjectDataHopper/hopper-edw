@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.List;
@@ -34,8 +32,24 @@ import org.apache.hop.pipeline.PipelineMeta;
 @Getter
 @Setter
 public class DvDatabaseHubSourcePipelineBuilder extends DvDatabaseSourcePipelineBuilder {
-  public DvDatabaseHubSourcePipelineBuilder(IVariables variables, IHopMetadataProvider metadataProvider, DataVaultModel model, PipelineMeta pipelineMeta, DataVaultSource recordSource, IDvSource dvSource, DvHub dvTable, Point startPoint) {
-    super(variables, metadataProvider, model, pipelineMeta, recordSource, dvSource, dvTable, startPoint);
+  public DvDatabaseHubSourcePipelineBuilder(
+      IVariables variables,
+      IHopMetadataProvider metadataProvider,
+      DataVaultModel model,
+      PipelineMeta pipelineMeta,
+      DataVaultSource recordSource,
+      IDvSource dvSource,
+      DvHub dvTable,
+      Point startPoint) {
+    super(
+        variables,
+        metadataProvider,
+        model,
+        pipelineMeta,
+        recordSource,
+        dvSource,
+        dvTable,
+        startPoint);
   }
 
   protected String getSql() throws HopException {
@@ -81,8 +95,7 @@ public class DvDatabaseHubSourcePipelineBuilder extends DvDatabaseSourcePipeline
             metadataProvider
                 .getSerializer(org.apache.hop.core.database.DatabaseMeta.class)
                 .load(configuration.getTargetDatabase());
-        targetTable =
-            !Utils.isEmpty(hub.getTableName()) ? hub.getTableName() : hub.getName();
+        targetTable = !Utils.isEmpty(hub.getTableName()) ? hub.getTableName() : hub.getName();
         if (variables != null && targetTable != null) {
           targetTable = variables.resolve(targetTable);
         }

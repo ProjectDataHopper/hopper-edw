@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.dimensional;
 
 import java.util.ArrayList;
@@ -25,6 +23,7 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.hopgui.dialog.ShowRowsDialog;
 import org.apache.hop.datavault.metadata.dimensional.DmSourceConfiguration;
 import org.apache.hop.datavault.metadata.dimensional.DmSourcePipelineSupport;
 import org.apache.hop.i18n.BaseMessages;
@@ -35,9 +34,7 @@ import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.database.dialog.PreviewTableSettingsDialog;
 import org.apache.hop.ui.core.dialog.EnterTextDialog;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
-import org.apache.hop.datavault.hopgui.dialog.ShowRowsDialog;
 import org.apache.hop.ui.pipeline.dialog.PipelinePreviewProgressDialog;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
 /** Preview and field discovery helpers for dimensional pipeline sources in Hop GUI dialogs. */
@@ -80,8 +77,7 @@ public final class DmSourcePipelineGuiSupport {
       IVariables variables, IHopMetadataProvider metadataProvider, String pipelineFile)
       throws HopException {
     String resolvedFile = variables != null ? variables.resolve(pipelineFile) : pipelineFile;
-    return DmSourcePipelineSupport.listTransformNames(
-        resolvedFile, variables, metadataProvider);
+    return DmSourcePipelineSupport.listTransformNames(resolvedFile, variables, metadataProvider);
   }
 
   public static void previewSourcePipelineData(
@@ -106,8 +102,7 @@ public final class DmSourcePipelineGuiSupport {
 
       String resolvedFile = variables != null ? variables.resolve(pipelineFile) : pipelineFile;
       PipelineMeta sourcePipeline =
-          DmSourcePipelineSupport.loadSourcePipelineMeta(
-              resolvedFile, variables, metadataProvider);
+          DmSourcePipelineSupport.loadSourcePipelineMeta(resolvedFile, variables, metadataProvider);
       if (sourcePipeline.findTransform(transformName) == null) {
         throw new HopException(
             BaseMessages.getString(
@@ -177,8 +172,7 @@ public final class DmSourcePipelineGuiSupport {
           resolveFieldNames(variables, metadataProvider, pipelineFile, transformName);
       String message =
           String.join(
-              System.lineSeparator(),
-              fieldNames.stream().map(name -> "- " + name).toList());
+              System.lineSeparator(), fieldNames.stream().map(name -> "- " + name).toList());
       EnterTextDialog dialog =
           new EnterTextDialog(
               shell,

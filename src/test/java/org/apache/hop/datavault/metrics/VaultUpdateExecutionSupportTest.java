@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,7 +36,8 @@ class VaultUpdateExecutionSupportTest {
   @Test
   void beginExecutionAssignsExecutionIdAndStartedAtOnParentWorkflow() {
     LocalWorkflowEngine parentWorkflow = parentWorkflow();
-    String executionId = VaultUpdateExecutionSupport.beginExecution(parentWorkflow, null, false, false);
+    String executionId =
+        VaultUpdateExecutionSupport.beginExecution(parentWorkflow, null, false, false);
 
     assertNotNull(executionId);
     assertEquals(
@@ -54,7 +53,8 @@ class VaultUpdateExecutionSupportTest {
     LocalWorkflowEngine parentWorkflow = parentWorkflow();
     parentWorkflow.setVariable(DvUpdateMetricsConstants.VAR_WORKFLOW_EXECUTION_ID, "existing-id");
 
-    String executionId = VaultUpdateExecutionSupport.beginExecution(parentWorkflow, null, true, false);
+    String executionId =
+        VaultUpdateExecutionSupport.beginExecution(parentWorkflow, null, true, false);
 
     assertEquals("existing-id", executionId);
   }
@@ -89,7 +89,8 @@ class VaultUpdateExecutionSupportTest {
     LocalWorkflowEngine parentWorkflow = parentWorkflow();
     parentWorkflow.setVariable(DvUpdateMetricsConstants.VAR_WORKFLOW_EXECUTION_ID, "existing-id");
 
-    String executionId = VaultUpdateExecutionSupport.beginExecution(parentWorkflow, null, false, false);
+    String executionId =
+        VaultUpdateExecutionSupport.beginExecution(parentWorkflow, null, false, false);
 
     assertNotNull(executionId);
     assertFalse("existing-id".equals(executionId));
@@ -100,7 +101,8 @@ class VaultUpdateExecutionSupportTest {
     LocalWorkflowEngine parentWorkflow = parentWorkflow();
     String logChannelId = parentWorkflow.getLogChannelId();
 
-    String executionId = VaultUpdateExecutionSupport.beginExecution(parentWorkflow, null, false, true);
+    String executionId =
+        VaultUpdateExecutionSupport.beginExecution(parentWorkflow, null, false, true);
 
     assertEquals(logChannelId, executionId);
     assertEquals(
@@ -112,7 +114,8 @@ class VaultUpdateExecutionSupportTest {
   void resolveExecutionIdFallsBackToWorkflowLogChannelId() {
     assertEquals(
         "workflow-log-1",
-        VaultUpdateExecutionSupport.resolveExecutionId(new Variables(), null, true, "workflow-log-1"));
+        VaultUpdateExecutionSupport.resolveExecutionId(
+            new Variables(), null, true, "workflow-log-1"));
   }
 
   @Test

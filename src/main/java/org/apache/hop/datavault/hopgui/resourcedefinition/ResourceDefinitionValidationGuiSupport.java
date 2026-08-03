@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.hopgui.resourcedefinition;
 
 import java.util.List;
@@ -89,10 +88,7 @@ public final class ResourceDefinitionValidationGuiSupport {
   }
 
   public static ValidationReport validateAndShowResults(
-      Shell shell,
-      IVariables variables,
-      IHopMetadataProvider metadataProvider,
-      String groupName) {
+      Shell shell, IVariables variables, IHopMetadataProvider metadataProvider, String groupName) {
     try {
       SchemaImpactSimulationRequest request =
           SchemaImpactSimulationRequest.builder()
@@ -123,7 +119,9 @@ public final class ResourceDefinitionValidationGuiSupport {
   }
 
   public static SchemaImpactSimulationResult runLiveSimulation(
-      ResourceDefinitionGroupMeta group, IVariables variables, IHopMetadataProvider metadataProvider)
+      ResourceDefinitionGroupMeta group,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider)
       throws HopException {
     return runSimulation(group, ValidationOptions.defaults(), variables, metadataProvider);
   }

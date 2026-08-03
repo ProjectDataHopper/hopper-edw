@@ -14,19 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.workflow.actions.updateresourcegroup;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.hop.core.Const;
+import org.apache.hop.core.Props;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.hopgui.file.vault.HopGuiDataVaultModelDialog;
 import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
 import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.core.Props;
 import org.apache.hop.ui.core.FormDataBuilder;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
@@ -72,8 +71,7 @@ public class ActionUpdateResourceDefinitionGroupDialog extends ActionDialog {
   @Override
   public IAction open() {
     createShell(
-        BaseMessages.getString(
-            PKG, "ActionUpdateResourceDefinitionGroup.Title", action.getName()),
+        BaseMessages.getString(PKG, "ActionUpdateResourceDefinitionGroup.Title", action.getName()),
         action);
 
     buildButtonBar().ok(e -> ok()).cancel(e -> cancel()).build();

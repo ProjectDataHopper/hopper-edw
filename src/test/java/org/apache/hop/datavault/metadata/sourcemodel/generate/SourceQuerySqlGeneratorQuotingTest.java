@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.sourcemodel.generate;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -43,11 +42,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 class SourceQuerySqlGeneratorQuotingTest {
 
   @ParameterizedTest(name = "{0}")
-  @CsvSource({
-    "POSTGRESQL, \", \"",
-    "MYSQL, `, `",
-    "MSSQLNATIVE, [, ]"
-  })
+  @CsvSource({"POSTGRESQL, \", \"", "MYSQL, `, `", "MSSQLNATIVE, [, ]"})
   void quotesIdentifiersPerDialect(String pluginId, String open, String close) throws Exception {
     SourceModel model = productLookupModel();
     SourceQuery query = model.findQuery("feed_product_enriched");
@@ -204,8 +199,7 @@ class SourceQuerySqlGeneratorQuotingTest {
     return table;
   }
 
-  private static SourceRelationship rel(
-      String name, String child, String parent, String column) {
+  private static SourceRelationship rel(String name, String child, String parent, String column) {
     SourceRelationship relationship = new SourceRelationship(name);
     relationship.setChildTableName(child);
     relationship.setParentTableName(parent);

@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.workflow.actions.validatedefinitions;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -71,8 +70,7 @@ class ActionValidateResourceDefinitionsTest {
     original.setFailOnWarnings(true);
     original.setIncludeImpact(false);
 
-    ActionValidateResourceDefinitions copy =
-        (ActionValidateResourceDefinitions) original.clone();
+    ActionValidateResourceDefinitions copy = (ActionValidateResourceDefinitions) original.clone();
     assertEquals("retail-sources", copy.getResourceDefinitionGroup());
     assertEquals("${TARGET_VERSION}", copy.getTargetCatalogVersion());
     assertEquals(SchemaCompareMode.WORKING_VS_VERSION.name(), copy.getCompareMode());
@@ -113,8 +111,7 @@ class ActionValidateResourceDefinitionsTest {
             "address_line1",
             "Found: type changed VARCHAR(40) -> VARCHAR(80)",
             List.of());
-    String line =
-        ActionValidateResourceDefinitions.formatGateFindingLine("hop/ns/source", issue);
+    String line = ActionValidateResourceDefinitions.formatGateFindingLine("hop/ns/source", issue);
     assertTrue(line.contains("WARNING / FIELD_TYPE_CHANGED"));
     assertTrue(line.contains("field=address_line1"));
   }

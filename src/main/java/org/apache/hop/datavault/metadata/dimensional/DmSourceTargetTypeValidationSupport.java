@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import java.util.List;
@@ -96,9 +94,7 @@ public final class DmSourceTargetTypeValidationSupport {
     if (ValueMetaBase.isNumeric(sourceMeta.getType())) {
       int sourcePrecision = sourceMeta.getPrecision();
       int targetPrecision = targetMeta.getPrecision();
-      if (sourcePrecision > 0
-          && targetPrecision > 0
-          && sourcePrecision > targetPrecision) {
+      if (sourcePrecision > 0 && targetPrecision > 0 && sourcePrecision > targetPrecision) {
         remarks.add(
             new CheckResult(
                 ICheckResult.TYPE_RESULT_ERROR,

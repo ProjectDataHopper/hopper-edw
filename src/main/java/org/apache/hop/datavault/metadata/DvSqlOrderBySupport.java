@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.ArrayList;
@@ -56,8 +55,7 @@ public final class DvSqlOrderBySupport {
       DatabaseMeta databaseMeta,
       DataVaultConfiguration config,
       IVariables variables) {
-    appendOrderBy(
-        sql, businessKeys, quotedFieldExpressions, databaseMeta, config, variables, null);
+    appendOrderBy(sql, businessKeys, quotedFieldExpressions, databaseMeta, config, variables, null);
   }
 
   public static void appendOrderBy(
@@ -137,15 +135,11 @@ public final class DvSqlOrderBySupport {
               : targetName;
     }
     return orderExpression(
-        new OrderByField(quotedField, sourceName, targetName, stringTyped),
-        databaseMeta,
-        session);
+        new OrderByField(quotedField, sourceName, targetName, stringTyped), databaseMeta, session);
   }
 
   static String orderExpression(
-      OrderByField field,
-      DatabaseMeta databaseMeta,
-      DvSqlOrderByCollationSupport.Session session) {
+      OrderByField field, DatabaseMeta databaseMeta, DvSqlOrderByCollationSupport.Session session) {
     if (field == null || Utils.isEmpty(field.quotedExpression())) {
       return field != null ? field.quotedExpression() : null;
     }
@@ -156,7 +150,9 @@ public final class DvSqlOrderBySupport {
     if (Utils.isEmpty(collation)) {
       return field.quotedExpression();
     }
-    return field.quotedExpression() + " COLLATE " + formatCollationIdentifier(databaseMeta, collation);
+    return field.quotedExpression()
+        + " COLLATE "
+        + formatCollationIdentifier(databaseMeta, collation);
   }
 
   /**
@@ -186,8 +182,8 @@ public final class DvSqlOrderBySupport {
   }
 
   /**
-   * Engines where we load live column collations and may inject {@code ORDER BY … COLLATE}.
-   * SQL Server and PostgreSQL.
+   * Engines where we load live column collations and may inject {@code ORDER BY … COLLATE}. SQL
+   * Server and PostgreSQL.
    */
   public static boolean isCollationOrderBySupported(DatabaseMeta databaseMeta) {
     return isSqlServer(databaseMeta) || isPostgreSql(databaseMeta);

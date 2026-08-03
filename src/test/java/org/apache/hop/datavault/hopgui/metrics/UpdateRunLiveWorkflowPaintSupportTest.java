@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.metrics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,13 +42,13 @@ class UpdateRunLiveWorkflowPaintSupportTest {
   void runningStateUsesDistinctSvgBadge() {
     assertTrue(UpdateRunLiveWorkflowPaintSupport.usesRunningStatusIcon(UpdateRunLiveState.RUNNING));
     assertNull(UpdateRunLiveWorkflowPaintSupport.resolveStatusImage(UpdateRunLiveState.RUNNING));
-    assertEquals(
-        "ui/images/running-icon.svg", UpdateRunLiveWorkflowPaintSupport.RUNNING_ICON_PATH);
+    assertEquals("ui/images/running-icon.svg", UpdateRunLiveWorkflowPaintSupport.RUNNING_ICON_PATH);
   }
 
   @Test
   void stalledStateKeepsStandardErrorIcon() {
     assertEquals(
-        EImage.ERROR, UpdateRunLiveWorkflowPaintSupport.resolveStatusImage(UpdateRunLiveState.STALLED));
+        EImage.ERROR,
+        UpdateRunLiveWorkflowPaintSupport.resolveStatusImage(UpdateRunLiveState.STALLED));
   }
 }

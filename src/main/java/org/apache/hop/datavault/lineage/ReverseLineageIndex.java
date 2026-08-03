@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.lineage;
 
 import java.util.ArrayList;
@@ -54,9 +53,7 @@ public final class ReverseLineageIndex {
           .filter(
               e ->
                   e.getKey().sourceFieldName() != null
-                      && e.getKey()
-                          .sourceFieldName()
-                          .equalsIgnoreCase(sourceFieldName))
+                      && e.getKey().sourceFieldName().equalsIgnoreCase(sourceFieldName))
           .flatMap(e -> e.getValue().stream())
           .collect(Collectors.toCollection(ArrayList::new));
     }

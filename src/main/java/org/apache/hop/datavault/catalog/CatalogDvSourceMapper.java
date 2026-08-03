@@ -13,15 +13,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.catalog;
 
 import java.util.List;
 import org.apache.hop.catalog.model.DvCsvFormatRecord;
 import org.apache.hop.catalog.model.DvSourceRecord;
-import org.apache.hop.catalog.model.PhysicalFileRef;
 import org.apache.hop.catalog.model.PhysicalTableRef;
 import org.apache.hop.catalog.model.RecordDefinition;
 import org.apache.hop.catalog.model.RecordDefinitionType;
@@ -31,6 +28,7 @@ import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metadata.DataVaultSource;
 import org.apache.hop.datavault.metadata.DvSourceDeliveryType;
 import org.apache.hop.datavault.metadata.DvSourceType;
+import org.apache.hop.datavault.metadata.IDvSource;
 import org.apache.hop.datavault.metadata.SourceField;
 import org.apache.hop.datavault.metadata.composite.DvCompositeSource;
 import org.apache.hop.datavault.metadata.database.DvDatabaseSource;
@@ -40,7 +38,6 @@ import org.apache.hop.datavault.metadata.file.DvFileLocationSupport;
 import org.apache.hop.datavault.metadata.file.DvParquetSource;
 import org.apache.hop.datavault.metadata.iceberg.DvIcebergLocationSupport;
 import org.apache.hop.datavault.metadata.iceberg.DvIcebergSource;
-import org.apache.hop.datavault.metadata.IDvSource;
 
 /** Maps catalog {@link RecordDefinition} entries back to in-memory {@link DataVaultSource}. */
 public final class CatalogDvSourceMapper {
@@ -160,7 +157,8 @@ public final class CatalogDvSourceMapper {
     return dbSource;
   }
 
-  private static void applyPhysicalTable(DvDatabaseSource dbSource, PhysicalTableRef physicalTable) {
+  private static void applyPhysicalTable(
+      DvDatabaseSource dbSource, PhysicalTableRef physicalTable) {
     if (physicalTable == null) {
       return;
     }

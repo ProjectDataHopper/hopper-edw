@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.composite;
 
 import java.util.List;
@@ -41,8 +40,7 @@ import org.apache.hop.metadata.api.IHopMetadataProvider;
 @Setter
 public class DvCompositeSource extends DvSourceBase implements IDvSource {
 
-  public static final String GUI_PLUGIN_ELEMENT_COMPOSITE_TAB_ID =
-      "DATAVAULT_SOURCE_COMPOSITE_TAB";
+  public static final String GUI_PLUGIN_ELEMENT_COMPOSITE_TAB_ID = "DATAVAULT_SOURCE_COMPOSITE_TAB";
 
   @GuiWidgetElement(
       order = "0100",

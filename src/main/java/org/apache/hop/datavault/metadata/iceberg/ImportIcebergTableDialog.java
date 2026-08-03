@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.iceberg;
 
 import lombok.Getter;
@@ -23,6 +21,8 @@ import lombok.Setter;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
+import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
@@ -37,8 +37,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
-import org.apache.hop.datavault.hopgui.help.HelpTopics;
 
 /** Collects Iceberg connection settings before importing a table into the data catalog. */
 @Getter
@@ -95,39 +93,84 @@ public class ImportIcebergTableDialog {
     lastControl =
         wCatalogUri =
             addTextVarField(
-                variables, shell, "ImportIcebergTableDialog.CatalogUri.Label", lastControl, middle, margin);
+                variables,
+                shell,
+                "ImportIcebergTableDialog.CatalogUri.Label",
+                lastControl,
+                middle,
+                margin);
     lastControl =
         wWarehouse =
             addTextVarField(
-                variables, shell, "ImportIcebergTableDialog.Warehouse.Label", lastControl, middle, margin);
+                variables,
+                shell,
+                "ImportIcebergTableDialog.Warehouse.Label",
+                lastControl,
+                middle,
+                margin);
     lastControl =
         wNamespace =
             addTextVarField(
-                variables, shell, "ImportIcebergTableDialog.Namespace.Label", lastControl, middle, margin);
+                variables,
+                shell,
+                "ImportIcebergTableDialog.Namespace.Label",
+                lastControl,
+                middle,
+                margin);
     lastControl =
         wTableName =
             addTextVarField(
-                variables, shell, "ImportIcebergTableDialog.TableName.Label", lastControl, middle, margin);
+                variables,
+                shell,
+                "ImportIcebergTableDialog.TableName.Label",
+                lastControl,
+                middle,
+                margin);
     lastControl =
         wSnapshotId =
             addTextVarField(
-                variables, shell, "ImportIcebergTableDialog.SnapshotId.Label", lastControl, middle, margin);
+                variables,
+                shell,
+                "ImportIcebergTableDialog.SnapshotId.Label",
+                lastControl,
+                middle,
+                margin);
     lastControl =
         wBranch =
             addTextVarField(
-                variables, shell, "ImportIcebergTableDialog.Branch.Label", lastControl, middle, margin);
+                variables,
+                shell,
+                "ImportIcebergTableDialog.Branch.Label",
+                lastControl,
+                middle,
+                margin);
     lastControl =
         wS3Endpoint =
             addTextVarField(
-                variables, shell, "ImportIcebergTableDialog.S3Endpoint.Label", lastControl, middle, margin);
+                variables,
+                shell,
+                "ImportIcebergTableDialog.S3Endpoint.Label",
+                lastControl,
+                middle,
+                margin);
     lastControl =
         wS3AccessKey =
             addTextVarField(
-                variables, shell, "ImportIcebergTableDialog.S3AccessKey.Label", lastControl, middle, margin);
+                variables,
+                shell,
+                "ImportIcebergTableDialog.S3AccessKey.Label",
+                lastControl,
+                middle,
+                margin);
     lastControl =
         wS3SecretKey =
             addTextVarField(
-                variables, shell, "ImportIcebergTableDialog.S3SecretKey.Label", lastControl, middle, margin);
+                variables,
+                shell,
+                "ImportIcebergTableDialog.S3SecretKey.Label",
+                lastControl,
+                middle,
+                margin);
 
     wCatalogUri.setText("${ICEBERG_CATALOG_URI}");
     wWarehouse.setText("${ICEBERG_WAREHOUSE}");
@@ -155,7 +198,8 @@ public class ImportIcebergTableDialog {
     FormData fdl = new FormData();
     fdl.left = new FormAttachment(0, 0);
     fdl.right = new FormAttachment(middle, -margin);
-    fdl.top = previous == null ? new FormAttachment(0, margin) : new FormAttachment(previous, margin);
+    fdl.top =
+        previous == null ? new FormAttachment(0, margin) : new FormAttachment(previous, margin);
     label.setLayoutData(fdl);
 
     TextVar textVar = new TextVar(variables, parentShell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
@@ -209,7 +253,8 @@ public class ImportIcebergTableDialog {
     private String s3AccessKey;
     private String s3SecretKey;
 
-    public IcebergConnectionSettings toConnectionSettings(org.apache.hop.core.variables.IVariables variables) {
+    public IcebergConnectionSettings toConnectionSettings(
+        org.apache.hop.core.variables.IVariables variables) {
       return new IcebergConnectionSettings(
           resolve(variables, catalogUri),
           resolve(variables, warehouse),
@@ -222,7 +267,8 @@ public class ImportIcebergTableDialog {
           resolve(variables, s3SecretKey));
     }
 
-    private static String resolve(org.apache.hop.core.variables.IVariables variables, String value) {
+    private static String resolve(
+        org.apache.hop.core.variables.IVariables variables, String value) {
       if (variables == null || value == null) {
         return value;
       }

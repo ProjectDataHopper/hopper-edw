@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import java.util.ArrayList;
@@ -40,7 +38,9 @@ import org.apache.hop.pipeline.PipelineMeta;
 @Setter
 public class BvBusinessTable extends BvTableBase {
 
-  /** Authoring SQL containing optional {@code {{ ref(...) }}} / {@code {{ source(...) }}} macros. */
+  /**
+   * Authoring SQL containing optional {@code {{ ref(...) }}} / {@code {{ source(...) }}} macros.
+   */
   @HopMetadataProperty private String sqlQuery;
 
   @HopMetadataProperty(storeWithCode = true)

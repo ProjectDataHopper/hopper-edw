@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.catalog.versioning;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -107,7 +106,9 @@ class CatalogVersionStoreTest {
 
     assertThrows(
         Exception.class,
-        () -> store.writeSnapshot(baseSnapshot("v2.0.0-dup", "snap-v2"), List.of(sampleDefinition("x", "STRING"))));
+        () ->
+            store.writeSnapshot(
+                baseSnapshot("v2.0.0-dup", "snap-v2"), List.of(sampleDefinition("x", "STRING"))));
   }
 
   @Test

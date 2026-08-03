@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.catalog.impl.file;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -38,8 +37,7 @@ class FileDataCatalogTest {
   @Test
   void connect_rejectsUnresolvedProjectHome_withoutCreatingDirectories() throws Exception {
     // Hop leaves ${PROJECT_HOME} intact; Path.of(...).toAbsolutePath() would be under CWD.
-    Path literalRoot =
-        Path.of("${PROJECT_HOME}/work/edw-catalog").toAbsolutePath().normalize();
+    Path literalRoot = Path.of("${PROJECT_HOME}/work/edw-catalog").toAbsolutePath().normalize();
     boolean existedBefore = Files.exists(literalRoot);
 
     FileDataCatalog catalog = new FileDataCatalog();
@@ -113,5 +111,4 @@ class FileDataCatalogTest {
       catalog.disconnect();
     }
   }
-
 }

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.quality;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -118,7 +116,8 @@ class DataQualityEvaluatorsTest {
         DataQualityMeasureService.measureAgainstProfiles(
             "s", profile, List.of(rule), QualityLifecycle.PRE_UPDATE);
 
-    DispositionResult gate = QualityDisposition.apply(report, QualityDispositionMode.FAIL_ON_BLOCKING);
+    DispositionResult gate =
+        QualityDisposition.apply(report, QualityDispositionMode.FAIL_ON_BLOCKING);
     assertTrue(gate.isFailed());
 
     DispositionResult alert = QualityDisposition.apply(report, QualityDispositionMode.ALERT_ONLY);

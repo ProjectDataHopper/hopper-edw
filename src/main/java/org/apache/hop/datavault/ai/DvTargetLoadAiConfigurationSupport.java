@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai;
 
 import java.util.Set;
@@ -48,7 +46,8 @@ public final class DvTargetLoadAiConfigurationSupport {
     return propertyName != null && COMMON_TARGET_LOAD_PROPERTIES.contains(propertyName.trim());
   }
 
-  public static void appendTargetLoadSummaryJson(StringBuilder json, DataVaultConfiguration config) {
+  public static void appendTargetLoadSummaryJson(
+      StringBuilder json, DataVaultConfiguration config) {
     json.append(",\"targetTableParallelCopies\":")
         .append(DvAiContextBuilder.jsonString(config.getTargetTableParallelCopies()));
     json.append(",\"targetTableBatchSize\":")
@@ -99,7 +98,8 @@ public final class DvTargetLoadAiConfigurationSupport {
         .append(DvAiContextBuilder.jsonString(config.getBusinessTablePipelineNamePrefix()));
   }
 
-  public static void appendTargetLoadSummaryJson(StringBuilder json, DimensionalConfiguration config) {
+  public static void appendTargetLoadSummaryJson(
+      StringBuilder json, DimensionalConfiguration config) {
     json.append(",\"targetTableParallelCopies\":")
         .append(DvAiContextBuilder.jsonString(config.getTargetTableParallelCopies()));
     json.append(",\"targetTableBatchSize\":")
@@ -129,8 +129,8 @@ public final class DvTargetLoadAiConfigurationSupport {
         .append(DvAiContextBuilder.jsonString(config.getFactPipelineNamePrefix()));
   }
 
-  public static void applyToDataVault(DataVaultConfiguration config, String propertyName, String value)
-      throws HopException {
+  public static void applyToDataVault(
+      DataVaultConfiguration config, String propertyName, String value) throws HopException {
     switch (propertyName.trim()) {
       case "sortRowsSize" -> config.setSortRowsSize(value);
       case "targetTableParallelCopies" -> config.setTargetTableParallelCopies(value);

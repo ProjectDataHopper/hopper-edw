@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.ArrayList;
@@ -61,8 +60,7 @@ public final class DvHashKeyOrderStrategySupport {
    * Known reverse pair under UCA / locale collations vs Java: Java places TEN before HUNDRED
    * because {@code '-'} (45) &lt; {@code '0'} (48) after the shared prefix {@code 0-10}.
    */
-  public static final String PROBE_TEN =
-      "0-10-223-4-100-150-80-194-196-90-5-75-165-24-39-120";
+  public static final String PROBE_TEN = "0-10-223-4-100-150-80-194-196-90-5-75-165-24-39-120";
 
   public static final String PROBE_HUNDRED =
       "0-100-114-143-52-153-54-130-206-138-191-46-249-199-180-57";
@@ -160,8 +158,7 @@ public final class DvHashKeyOrderStrategySupport {
     }
 
     TargetHashOrderPlan plan =
-        resolveStringHashOrder(
-            databaseMeta, variables, quotedHashExpression, allowLiveProbe);
+        resolveStringHashOrder(databaseMeta, variables, quotedHashExpression, allowLiveProbe);
     if (session != null) {
       session.put(cacheKey, plan);
     }
@@ -208,10 +205,7 @@ public final class DvHashKeyOrderStrategySupport {
       case DvBulkLoadPluginSupport.POSTGRESQL_DB_PLUGIN_ID -> List.of("C", "POSIX");
       case DvBulkLoadPluginSupport.MSSQL_DB_PLUGIN_ID,
               DvBulkLoadPluginSupport.MSSQLNATIVE_DB_PLUGIN_ID ->
-          List.of(
-              "Latin1_General_100_BIN2",
-              "Latin1_General_100_BIN2_UTF8",
-              "Latin1_General_BIN2");
+          List.of("Latin1_General_100_BIN2", "Latin1_General_100_BIN2_UTF8", "Latin1_General_BIN2");
       case DvBulkLoadPluginSupport.MYSQL_DB_PLUGIN_ID,
               DvBulkLoadPluginSupport.SINGLESTORE_DB_PLUGIN_ID,
               "MARIADB" ->
@@ -334,9 +328,7 @@ public final class DvHashKeyOrderStrategySupport {
     return hopSort("no static trust and no live probe for " + databaseMeta.getPluginId());
   }
 
-  /**
-   * Builds ORDER BY fragment with optional COLLATE for a string hash expression.
-   */
+  /** Builds ORDER BY fragment with optional COLLATE for a string hash expression. */
   static String orderBySuffix(
       DatabaseMeta databaseMeta, String quotedExpression, String collation) {
     if (Utils.isEmpty(collation)) {
@@ -458,10 +450,7 @@ public final class DvHashKeyOrderStrategySupport {
   }
 
   private static TargetHashOrderPlan sqlOrderByWithCollation(
-      DatabaseMeta databaseMeta,
-      String quotedHashExpression,
-      String collation,
-      String rationale) {
+      DatabaseMeta databaseMeta, String quotedHashExpression, String collation, String rationale) {
     // COLLATE makes the ORDER BY expression differ from the bare select-list column; wrap DISTINCT
     // on every engine (PostgreSQL: "ORDER BY expressions must appear in select list").
     return sqlOrderBy(
@@ -492,9 +481,9 @@ public final class DvHashKeyOrderStrategySupport {
   }
 
   /**
-   * Cached plans store an ORDER BY built for a specific column expression. When reusing for
-   * another link on the same connection, rebuild the suffix with the new quoted expression while
-   * keeping mode/rationale/wrap flag.
+   * Cached plans store an ORDER BY built for a specific column expression. When reusing for another
+   * link on the same connection, rebuild the suffix with the new quoted expression while keeping
+   * mode/rationale/wrap flag.
    */
   private static TargetHashOrderPlan rebindQuotedExpression(
       TargetHashOrderPlan cached, String quotedHashExpression) {

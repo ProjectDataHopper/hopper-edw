@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.impl.file;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,10 +35,10 @@ import org.apache.hop.catalog.model.RecordDefinitionRef;
 import org.apache.hop.catalog.spi.IDataCatalog;
 import org.apache.hop.catalog.versioning.CatalogVersionStore;
 import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.gui.plugin.GuiElementType;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.GuiWidgetElement;
+import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
@@ -59,7 +57,8 @@ public class FileDataCatalog implements IDataCatalog {
 
   public static final String PLUGIN_ID = "FILE";
 
-  public static final String GUI_PLUGIN_ELEMENT_PARENT_ID = "FileDataCatalog-PluginSpecific-Options";
+  public static final String GUI_PLUGIN_ELEMENT_PARENT_ID =
+      "FileDataCatalog-PluginSpecific-Options";
 
   private static final ObjectMapper MAPPER =
       new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
@@ -239,7 +238,8 @@ public class FileDataCatalog implements IDataCatalog {
 
   private RecordDefinition readRecord(Path path) throws HopException {
     try {
-      RecordDefinitionDocument doc = MAPPER.readValue(path.toFile(), RecordDefinitionDocument.class);
+      RecordDefinitionDocument doc =
+          MAPPER.readValue(path.toFile(), RecordDefinitionDocument.class);
       return doc.toRecordDefinition();
     } catch (IOException e) {
       throw new HopException("Unable to read record definition from " + path, e);

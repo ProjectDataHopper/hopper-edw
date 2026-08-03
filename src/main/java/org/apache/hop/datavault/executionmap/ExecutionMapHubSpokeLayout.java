@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import java.util.ArrayList;
@@ -66,7 +64,10 @@ public final class ExecutionMapHubSpokeLayout {
     hub.setLocation(hubX, hubY);
 
     int targetColumnX =
-        hubX + ExecutionMapMetrics.NODE_WIDTH + ExecutionMapMetrics.HUB_GUTTER + ExecutionMapMetrics.BUS_LANE_WIDTH;
+        hubX
+            + ExecutionMapMetrics.NODE_WIDTH
+            + ExecutionMapMetrics.HUB_GUTTER
+            + ExecutionMapMetrics.BUS_LANE_WIDTH;
     List<ExecutionMapNode> spokes = new ArrayList<>();
     for (ExecutionMapNode node : document.getNodesOrEmpty()) {
       if (node != null && spokeIds.contains(node.getId())) {
@@ -110,7 +111,8 @@ public final class ExecutionMapHubSpokeLayout {
         continue;
       }
       ExecutionMapNodeType type = node.getNodeType();
-      if (type == ExecutionMapNodeType.ROOT_WORKFLOW || type == ExecutionMapNodeType.ROOT_PIPELINE) {
+      if (type == ExecutionMapNodeType.ROOT_WORKFLOW
+          || type == ExecutionMapNodeType.ROOT_PIPELINE) {
         return node;
       }
       if (fallback == null
@@ -141,7 +143,9 @@ public final class ExecutionMapHubSpokeLayout {
   }
 
   private static Comparator<ExecutionMapNode> hubSpokeComparator() {
-    return Comparator.comparing(ExecutionMapNode::getNodeType, Comparator.nullsLast(Comparator.naturalOrder()))
-        .thenComparing(node -> node.getName() != null ? node.getName() : "", String.CASE_INSENSITIVE_ORDER);
+    return Comparator.comparing(
+            ExecutionMapNode::getNodeType, Comparator.nullsLast(Comparator.naturalOrder()))
+        .thenComparing(
+            node -> node.getName() != null ? node.getName() : "", String.CASE_INSENSITIVE_ORDER);
   }
 }

@@ -13,18 +13,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.executionmap;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.hop.catalog.hopgui.perspective.DataCatalogPerspective;
 import org.apache.hop.catalog.hopgui.preview.RecordDefinitionPreviewRunner;
 import org.apache.hop.catalog.hopgui.preview.RecordDefinitionPreviewSupport;
-import org.apache.hop.catalog.hopgui.perspective.DataCatalogPerspective;
 import org.apache.hop.catalog.model.RecordDefinition;
 import org.apache.hop.catalog.model.RecordDefinitionKey;
 import org.apache.hop.catalog.model.RecordDefinitionQuery;
@@ -164,8 +162,7 @@ public final class ExecutionMapNavigationSupport {
         return;
       }
       if (canOpenFromSnapshot(node, document)) {
-        openFromSnapshot(
-            hopGui, variables, metadataProvider, findSnapshot(node, document), node);
+        openFromSnapshot(hopGui, variables, metadataProvider, findSnapshot(node, document), node);
         return;
       }
       if (canNavigateToCatalog(node, document, variables, metadataProvider)) {
@@ -176,28 +173,22 @@ public final class ExecutionMapNavigationSupport {
           shell,
           BaseMessages.getString(PKG, "ExecutionMapNavigationSupport.Error.OpenTitle"),
           BaseMessages.getString(
-              PKG,
-              "ExecutionMapNavigationSupport.Error.OpenMessage",
-              describeNode(node)),
+              PKG, "ExecutionMapNavigationSupport.Error.OpenMessage", describeNode(node)),
           null);
     } catch (Exception e) {
       new ErrorDialog(
           shell,
           BaseMessages.getString(PKG, "ExecutionMapNavigationSupport.Error.OpenTitle"),
           BaseMessages.getString(
-              PKG,
-              "ExecutionMapNavigationSupport.Error.OpenMessage",
-              describeNode(node)),
+              PKG, "ExecutionMapNavigationSupport.Error.OpenMessage", describeNode(node)),
           e instanceof HopException ? e : new HopException(e));
     }
   }
 
   public static void openNode(
-      HopGui hopGui,
-      IVariables variables,
-      ExecutionMapDocument document,
-      ExecutionMapNode node) {
-    openNode(hopGui, variables, hopGui != null ? hopGui.getMetadataProvider() : null, document, node);
+      HopGui hopGui, IVariables variables, ExecutionMapDocument document, ExecutionMapNode node) {
+    openNode(
+        hopGui, variables, hopGui != null ? hopGui.getMetadataProvider() : null, document, node);
   }
 
   public static void openDatasetInCatalog(
@@ -275,8 +266,7 @@ public final class ExecutionMapNavigationSupport {
               "ExecutionMapNavigationSupport.Error.PreviewUnsupported",
               definition.getKey() != null ? definition.getKey().toString() : node.getName()));
     }
-    RecordDefinitionPreviewRunner.run(
-        hopGui.getShell(), definition, variables, metadataProvider);
+    RecordDefinitionPreviewRunner.run(hopGui.getShell(), definition, variables, metadataProvider);
   }
 
   public static RecordDefinition resolveDatasetRecordDefinition(
@@ -299,8 +289,8 @@ public final class ExecutionMapNavigationSupport {
         .read(catalogConnectionName, key, variables, metadataProvider);
   }
 
-  public static void openArtifactFile(
-      HopGui hopGui, Shell shell, IVariables variables, String path) throws HopException {
+  public static void openArtifactFile(HopGui hopGui, Shell shell, IVariables variables, String path)
+      throws HopException {
     if (hopGui == null || Utils.isEmpty(path)) {
       return;
     }
@@ -437,7 +427,8 @@ public final class ExecutionMapNavigationSupport {
       if (!builder.isEmpty()) {
         builder.append(System.lineSeparator());
       }
-      builder.append(BaseMessages.getString(PKG, "ExecutionMapNavigationSupport.Tooltip.DoubleClick"));
+      builder.append(
+          BaseMessages.getString(PKG, "ExecutionMapNavigationSupport.Tooltip.DoubleClick"));
     }
     return builder.isEmpty() ? null : builder.toString();
   }

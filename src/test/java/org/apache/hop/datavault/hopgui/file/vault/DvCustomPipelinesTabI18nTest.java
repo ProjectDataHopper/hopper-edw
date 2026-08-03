@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.vault;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -52,9 +50,7 @@ class DvCustomPipelinesTabI18nTest {
   @Test
   void customPipelinesTabMessagesResolve() {
     assertResolved(
-        DvCustomPipelinesTabSupport.class,
-        "DvCustomPipelinesTab.Tab.Label",
-        "Custom pipelines");
+        DvCustomPipelinesTabSupport.class, "DvCustomPipelinesTab.Tab.Label", "Custom pipelines");
     assertResolved(
         DvCustomPipelinesTabSupport.class,
         "DvCustomPipelinesTab.SelectPipelines.Button",

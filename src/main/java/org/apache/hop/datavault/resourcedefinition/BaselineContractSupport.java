@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import java.util.List;
@@ -72,9 +71,7 @@ public final class BaselineContractSupport {
       return null;
     }
     for (SourceField field : fields) {
-      if (field != null
-          && field.getName() != null
-          && fieldName.equalsIgnoreCase(field.getName())) {
+      if (field != null && field.getName() != null && fieldName.equalsIgnoreCase(field.getName())) {
         return field;
       }
     }

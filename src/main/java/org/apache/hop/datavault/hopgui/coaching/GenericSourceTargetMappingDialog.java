@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.coaching;
 
 import org.apache.hop.core.util.Utils;
@@ -24,13 +22,13 @@ import org.apache.hop.datavault.metadata.coaching.CoachingSourceRef;
 import org.apache.hop.datavault.metadata.coaching.ICoachingModelAdapter;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.widget.TextVar;
+import org.apache.hop.ui.hopgui.HopGui;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.apache.hop.ui.hopgui.HopGui;
 
 /** Applies coaching bindings then opens the modeler table editor for refinement. */
 public class GenericSourceTargetMappingDialog {

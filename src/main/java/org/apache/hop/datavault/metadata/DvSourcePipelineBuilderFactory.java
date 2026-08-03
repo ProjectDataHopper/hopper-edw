@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import org.apache.hop.core.exception.HopException;
@@ -54,19 +52,54 @@ public final class DvSourcePipelineBuilderFactory {
     return switch (recordSource.getSourceType()) {
       case DATABASE ->
           new DvDatabaseHubSourcePipelineBuilder(
-              variables, metadataProvider, model, pipelineMeta, recordSource, dvSource, hub, startPoint);
+              variables,
+              metadataProvider,
+              model,
+              pipelineMeta,
+              recordSource,
+              dvSource,
+              hub,
+              startPoint);
       case CSV ->
           new DvCsvHubSourcePipelineBuilder(
-              variables, metadataProvider, model, pipelineMeta, recordSource, dvSource, hub, startPoint);
+              variables,
+              metadataProvider,
+              model,
+              pipelineMeta,
+              recordSource,
+              dvSource,
+              hub,
+              startPoint);
       case PARQUET ->
           new DvParquetHubSourcePipelineBuilder(
-              variables, metadataProvider, model, pipelineMeta, recordSource, dvSource, hub, startPoint);
+              variables,
+              metadataProvider,
+              model,
+              pipelineMeta,
+              recordSource,
+              dvSource,
+              hub,
+              startPoint);
       case ICEBERG ->
           new DvIcebergHubSourcePipelineBuilder(
-              variables, metadataProvider, model, pipelineMeta, recordSource, dvSource, hub, startPoint);
+              variables,
+              metadataProvider,
+              model,
+              pipelineMeta,
+              recordSource,
+              dvSource,
+              hub,
+              startPoint);
       case COMPOSITE ->
           new DvCompositeHubSourcePipelineBuilder(
-              variables, metadataProvider, model, pipelineMeta, recordSource, dvSource, hub, startPoint);
+              variables,
+              metadataProvider,
+              model,
+              pipelineMeta,
+              recordSource,
+              dvSource,
+              hub,
+              startPoint);
     };
   }
 
@@ -83,19 +116,54 @@ public final class DvSourcePipelineBuilderFactory {
     return switch (recordSource.getSourceType()) {
       case DATABASE ->
           new DvDatabaseLinkSourcePipelineBuilder(
-              variables, metadataProvider, model, pipelineMeta, recordSource, dvSource, link, startPoint);
+              variables,
+              metadataProvider,
+              model,
+              pipelineMeta,
+              recordSource,
+              dvSource,
+              link,
+              startPoint);
       case CSV ->
           new DvCsvLinkSourcePipelineBuilder(
-              variables, metadataProvider, model, pipelineMeta, recordSource, dvSource, link, startPoint);
+              variables,
+              metadataProvider,
+              model,
+              pipelineMeta,
+              recordSource,
+              dvSource,
+              link,
+              startPoint);
       case PARQUET ->
           new DvParquetLinkSourcePipelineBuilder(
-              variables, metadataProvider, model, pipelineMeta, recordSource, dvSource, link, startPoint);
+              variables,
+              metadataProvider,
+              model,
+              pipelineMeta,
+              recordSource,
+              dvSource,
+              link,
+              startPoint);
       case ICEBERG ->
           new DvIcebergLinkSourcePipelineBuilder(
-              variables, metadataProvider, model, pipelineMeta, recordSource, dvSource, link, startPoint);
+              variables,
+              metadataProvider,
+              model,
+              pipelineMeta,
+              recordSource,
+              dvSource,
+              link,
+              startPoint);
       case COMPOSITE ->
           new DvCompositeLinkSourcePipelineBuilder(
-              variables, metadataProvider, model, pipelineMeta, recordSource, dvSource, link, startPoint);
+              variables,
+              metadataProvider,
+              model,
+              pipelineMeta,
+              recordSource,
+              dvSource,
+              link,
+              startPoint);
     };
   }
 

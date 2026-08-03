@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -60,8 +58,7 @@ class DvLoadDateSupportTest {
 
   @Test
   void parsesConfiguredLoadDate() throws HopException {
-    Date resolved =
-        DvLoadDateSupport.resolveLoadDate("2024/01/01 00:00:00.000", new Variables());
+    Date resolved = DvLoadDateSupport.resolveLoadDate("2024/01/01 00:00:00.000", new Variables());
 
     assertEquals("2024/01/01 00:00:00.000", formatLoadDate(resolved));
     assertTrue(DvLoadDateSupport.isConfigured("2024/01/01 00:00:00.000", new Variables()));
@@ -80,7 +77,6 @@ class DvLoadDateSupportTest {
   @Test
   void invalidFormatThrows() {
     assertThrows(
-        HopException.class,
-        () -> DvLoadDateSupport.resolveLoadDate("2024-01-01", new Variables()));
+        HopException.class, () -> DvLoadDateSupport.resolveLoadDate("2024-01-01", new Variables()));
   }
 }

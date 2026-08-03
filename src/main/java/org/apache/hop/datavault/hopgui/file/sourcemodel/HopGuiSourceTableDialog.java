@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.hopgui.file.sourcemodel;
 
 import java.util.ArrayList;
@@ -46,7 +45,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -297,7 +295,8 @@ public class HopGuiSourceTableDialog {
       }
       item.setText(6, Const.NVL(hopTypeName, ""));
       item.setText(
-          7, column.getPrimaryKeyPosition() > 0 ? String.valueOf(column.getPrimaryKeyPosition()) : "");
+          7,
+          column.getPrimaryKeyPosition() > 0 ? String.valueOf(column.getPrimaryKeyPosition()) : "");
     }
     wColumns.optimizeTableView();
   }

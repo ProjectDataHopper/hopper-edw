@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.transform.junkdimension;
 
 import java.util.List;
@@ -38,11 +36,11 @@ import org.apache.hop.core.row.RowMeta;
 import org.apache.hop.core.row.value.ValueMetaDate;
 import org.apache.hop.core.row.value.ValueMetaInteger;
 import org.apache.hop.core.row.value.ValueMetaString;
-import org.apache.hop.datavault.metadata.dimensional.DmJunkHashCodeStrategy;
-import org.apache.hop.datavault.metadata.dimensional.DmJunkSurrogateKeyStrategy;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.xml.XmlHandler;
+import org.apache.hop.datavault.metadata.dimensional.DmJunkHashCodeStrategy;
+import org.apache.hop.datavault.metadata.dimensional.DmJunkSurrogateKeyStrategy;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.HopMetadataPropertyType;
@@ -52,9 +50,9 @@ import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.BaseTransformMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transforms.combinationlookup.CFields;
-import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
 import org.apache.hop.pipeline.transforms.combinationlookup.KeyField;
 import org.apache.hop.pipeline.transforms.combinationlookup.ReturnFields;
+import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
 import org.w3c.dom.Node;
 
 @Transform(
@@ -69,8 +67,7 @@ import org.w3c.dom.Node;
     actionTransformTypes = {ActionTransformType.RDBMS, ActionTransformType.LOOKUP})
 @Getter
 @Setter
-public class JunkDimensionMeta
-    extends BaseTransformMeta<JunkDimension, JunkDimensionData> {
+public class JunkDimensionMeta extends BaseTransformMeta<JunkDimension, JunkDimensionData> {
 
   private static final Class<?> PKG = JunkDimensionMeta.class;
 
@@ -222,7 +219,9 @@ public class JunkDimensionMeta
     return null;
   }
 
-  /** True when the hash lookup column is the same physical column as the technical/surrogate key. */
+  /**
+   * True when the hash lookup column is the same physical column as the technical/surrogate key.
+   */
   public boolean hashFieldSameAsTechnicalKey() {
     if (useSurrogateKeyAsHashCodeField) {
       return true;
@@ -364,8 +363,7 @@ public class JunkDimensionMeta
               cr =
                   new CheckResult(
                       ICheckResult.TYPE_RESULT_OK,
-                      BaseMessages.getString(
-                          PKG, "JunkDimensionMeta.CheckResult.AllFieldsFound"),
+                      BaseMessages.getString(PKG, "JunkDimensionMeta.CheckResult.AllFieldsFound"),
                       transformMeta);
             }
             remarks.add(cr);
@@ -384,17 +382,14 @@ public class JunkDimensionMeta
             } else {
               errorMessage =
                   BaseMessages.getString(
-                          PKG,
-                          "JunkDimensionMeta.CheckResult.TechnicalKeyFound",
-                          technicalKeyField)
+                          PKG, "JunkDimensionMeta.CheckResult.TechnicalKeyFound", technicalKeyField)
                       + Const.CR;
               cr = new CheckResult(ICheckResult.TYPE_RESULT_OK, errorMessage, transformMeta);
             }
             remarks.add(cr);
           } else {
             errorMessage =
-                BaseMessages.getString(
-                    PKG, "JunkDimensionMeta.CheckResult.CouldNotReadTableInfo");
+                BaseMessages.getString(PKG, "JunkDimensionMeta.CheckResult.CouldNotReadTableInfo");
             cr = new CheckResult(ICheckResult.TYPE_RESULT_ERROR, errorMessage, transformMeta);
             remarks.add(cr);
           }
@@ -461,8 +456,7 @@ public class JunkDimensionMeta
               remarks.add(cr);
             } else {
               errorMessage +=
-                  BaseMessages.getString(
-                          PKG, "JunkDimensionMeta.CheckResult.ErrorReadingSequence")
+                  BaseMessages.getString(PKG, "JunkDimensionMeta.CheckResult.ErrorReadingSequence")
                       + sequenceFrom
                       + "!";
               cr = new CheckResult(ICheckResult.TYPE_RESULT_ERROR, errorMessage, transformMeta);
@@ -494,8 +488,7 @@ public class JunkDimensionMeta
         db.disconnect();
       }
     } else {
-      errorMessage =
-          BaseMessages.getString(PKG, "JunkDimensionMeta.CheckResult.InvalidConnection");
+      errorMessage = BaseMessages.getString(PKG, "JunkDimensionMeta.CheckResult.InvalidConnection");
       cr = new CheckResult(ICheckResult.TYPE_RESULT_ERROR, errorMessage, transformMeta);
       remarks.add(cr);
     }

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import lombok.Getter;
@@ -27,8 +25,7 @@ import org.apache.hop.metadata.api.IEnumHasCodeAndDescription;
 @Getter
 public enum BvPitRangeStart implements IEnumHasCodeAndDescription {
   FIXED_DATE(
-      "FIXED_DATE",
-      BaseMessages.getString(BvPitRangeStart.class, "BvPitRangeStart.FixedDate")),
+      "FIXED_DATE", BaseMessages.getString(BvPitRangeStart.class, "BvPitRangeStart.FixedDate")),
   EARLIEST_PARTICIPATING_SATELLITE_LOAD(
       "EARLIEST_PARTICIPATING_SATELLITE_LOAD",
       BaseMessages.getString(

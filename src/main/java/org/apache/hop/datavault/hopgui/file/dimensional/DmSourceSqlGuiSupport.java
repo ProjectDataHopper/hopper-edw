@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.dimensional;
 
 import java.util.ArrayList;
@@ -28,6 +26,7 @@ import org.apache.hop.core.logging.LoggingObject;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.hopgui.dialog.ShowRowsDialog;
 import org.apache.hop.datavault.metadata.DvSqlSupport;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
@@ -39,9 +38,7 @@ import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.database.dialog.PreviewTableSettingsDialog;
 import org.apache.hop.ui.core.dialog.EnterTextDialog;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
-import org.apache.hop.datavault.hopgui.dialog.ShowRowsDialog;
 import org.apache.hop.ui.pipeline.dialog.PipelinePreviewProgressDialog;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
 /** Preview and field discovery helpers for dimensional source SQL in Hop GUI dialogs. */
@@ -68,8 +65,7 @@ public final class DmSourceSqlGuiSupport {
       database.connect();
       IRowMeta rowMeta = database.getQueryFields(sql, false);
       if (rowMeta == null || rowMeta.isEmpty()) {
-        throw new HopException(
-            BaseMessages.getString(PKG, "DmSourceSqlGuiSupport.Error.NoFields"));
+        throw new HopException(BaseMessages.getString(PKG, "DmSourceSqlGuiSupport.Error.NoFields"));
       }
       List<String> fieldNames = new ArrayList<>();
       for (int i = 0; i < rowMeta.size(); i++) {
@@ -79,16 +75,14 @@ public final class DmSourceSqlGuiSupport {
         }
       }
       if (fieldNames.isEmpty()) {
-        throw new HopException(
-            BaseMessages.getString(PKG, "DmSourceSqlGuiSupport.Error.NoFields"));
+        throw new HopException(BaseMessages.getString(PKG, "DmSourceSqlGuiSupport.Error.NoFields"));
       }
       return fieldNames;
     } catch (HopException e) {
       throw e;
     } catch (Exception e) {
       throw new HopException(
-          BaseMessages.getString(PKG, "DmSourceSqlGuiSupport.Error.ResolveFieldsFailed"),
-          e);
+          BaseMessages.getString(PKG, "DmSourceSqlGuiSupport.Error.ResolveFieldsFailed"), e);
     }
   }
 
@@ -105,7 +99,8 @@ public final class DmSourceSqlGuiSupport {
       }
       String sql = variables != null ? variables.resolve(sourceSql) : sourceSql;
       if (Utils.isEmpty(sql)) {
-        throw new HopException(BaseMessages.getString(PKG, "DmSourceSqlGuiSupport.Error.MissingSql"));
+        throw new HopException(
+            BaseMessages.getString(PKG, "DmSourceSqlGuiSupport.Error.MissingSql"));
       }
 
       PropsUi props = PropsUi.getInstance();
@@ -157,9 +152,7 @@ public final class DmSourceSqlGuiSupport {
                   variables,
                   BaseMessages.getString(PKG, "DmSourceSqlGuiSupport.PreviewData.Title"),
                   BaseMessages.getString(
-                      PKG,
-                      "DmSourceSqlGuiSupport.PreviewData.Message",
-                      databaseMeta.getName()),
+                      PKG, "DmSourceSqlGuiSupport.PreviewData.Message", databaseMeta.getName()),
                   progressDialog.getPreviewRowsMeta(PREVIEW_TRANSFORM_NAME),
                   progressDialog.getPreviewRows(PREVIEW_TRANSFORM_NAME))
               .open();

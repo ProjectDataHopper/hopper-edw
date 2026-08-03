@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.hopgui.file.sourcemodel;
 
 import java.util.ArrayList;
@@ -25,6 +24,7 @@ import lombok.Setter;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.Props;
+import org.apache.hop.core.RowMetaAndData;
 import org.apache.hop.core.action.GuiContextAction;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.AreaOwner;
@@ -41,25 +41,23 @@ import org.apache.hop.core.gui.plugin.toolbar.GuiToolbarElementType;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.variables.Variables;
+import org.apache.hop.datavault.hopgui.dialog.ShowRowsDialog;
 import org.apache.hop.datavault.hopgui.file.modelgraph.HopGuiModelGraphBase;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphHit;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphMouseInteractions;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphSnapshotUndo;
+import org.apache.hop.datavault.hopgui.file.sourcemodel.delegates.HopGuiSourceModelClipboardDelegate;
 import org.apache.hop.datavault.hopgui.file.sourcemodel.delegates.HopGuiSourceModelSnapshotUndo;
+import org.apache.hop.datavault.metadata.DvNote;
+import org.apache.hop.datavault.metadata.DvNoteType;
+import org.apache.hop.datavault.metadata.database.DvDatabaseSourceImportSupport;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceJoinType;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceQuery;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceRelationship;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceTable;
 import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceQueryPreviewSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.publish.SourceQueryCatalogPublisher;
-import org.apache.hop.datavault.metadata.sourcemodel.SourceQuery;
-import org.apache.hop.datavault.hopgui.dialog.ShowRowsDialog;
-import org.apache.hop.core.RowMetaAndData;
-import org.apache.hop.datavault.metadata.sourcemodel.SourceJoinType;
-import org.apache.hop.datavault.metadata.database.DvDatabaseSourceImportSupport;
-import org.apache.hop.datavault.metadata.DvNoteType;
-import org.apache.hop.datavault.hopgui.file.sourcemodel.delegates.HopGuiSourceModelClipboardDelegate;
-import org.apache.hop.core.action.GuiContextActionFilter;
-import org.apache.hop.datavault.metadata.DvNote;
-import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
-import org.apache.hop.datavault.metadata.sourcemodel.SourceTable;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
@@ -86,7 +84,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
@@ -97,9 +94,7 @@ import org.jspecify.annotations.Nullable;
  * Hop GUI editor for source system models ({@code .hsm}): tables, relationships, and (later) source
  * queries.
  */
-@GuiPlugin(
-    id = "HopGuiSourceModelGraph",
-    description = "i18n::HopGuiSourceModelGraph.Description")
+@GuiPlugin(id = "HopGuiSourceModelGraph", description = "i18n::HopGuiSourceModelGraph.Description")
 @Getter
 @Setter
 public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
@@ -111,9 +106,12 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
   public static final String TOOLBAR_ITEM_ZOOM_LEVEL =
       "HopGuiSourceModelGraph-ToolBar-10500-Zoom-Level";
   public static final String TOOLBAR_ITEM_ZOOM_IN = "HopGuiSourceModelGraph-ToolBar-10010-Zoom-In";
-  public static final String TOOLBAR_ITEM_ZOOM_OUT = "HopGuiSourceModelGraph-ToolBar-10020-Zoom-Out";
-  public static final String TOOLBAR_ITEM_ZOOM_100 = "HopGuiSourceModelGraph-ToolBar-10030-Zoom-100";
-  public static final String TOOLBAR_ITEM_ZOOM_FIT = "HopGuiSourceModelGraph-ToolBar-10040-Zoom-Fit";
+  public static final String TOOLBAR_ITEM_ZOOM_OUT =
+      "HopGuiSourceModelGraph-ToolBar-10020-Zoom-Out";
+  public static final String TOOLBAR_ITEM_ZOOM_100 =
+      "HopGuiSourceModelGraph-ToolBar-10030-Zoom-100";
+  public static final String TOOLBAR_ITEM_ZOOM_FIT =
+      "HopGuiSourceModelGraph-ToolBar-10040-Zoom-Fit";
   public static final String TOOLBAR_ITEM_EDIT_MODEL =
       "HopGuiSourceModelGraph-ToolBar-10050-Edit-Model";
   public static final String TOOLBAR_ITEM_IMPORT_SCHEMA =
@@ -1514,9 +1512,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       org.eclipse.swt.graphics.Point p = getShell().getDisplay().map(canvas, null, e.x, e.y);
       String message =
           BaseMessages.getString(
-              PKG,
-              "HopGuiSourceModelGraph.Context.Relationship.Message",
-              relationship.getName());
+              PKG, "HopGuiSourceModelGraph.Context.Relationship.Message", relationship.getName());
       IGuiContextHandler contextHandler =
           new HopGuiSourceRelationshipContext(model, this, relationship, new Point(p.x, p.y));
       GuiContextUtil.getInstance()
@@ -1668,13 +1664,10 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       DvDatabaseSourceImportSupport.refreshCatalogPerspective();
       setChanged();
       MessageBox box = new MessageBox(getShell(), SWT.ICON_INFORMATION | SWT.OK);
-      box.setText(
-          BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PublishQuery.Success.Title"));
+      box.setText(BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PublishQuery.Success.Title"));
       box.setMessage(
           BaseMessages.getString(
-              PKG,
-              "HopGuiSourceModelGraph.PublishQuery.Success.Message",
-              result.catalogName()));
+              PKG, "HopGuiSourceModelGraph.PublishQuery.Success.Message", result.catalogName()));
       box.open();
     } catch (Exception e) {
       new ErrorDialog(
@@ -1701,9 +1694,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
           BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PublishQueries.Success.Title"));
       box.setMessage(
           BaseMessages.getString(
-              PKG,
-              "HopGuiSourceModelGraph.PublishQueries.Success.Message",
-              results.size()));
+              PKG, "HopGuiSourceModelGraph.PublishQueries.Success.Message", results.size()));
       box.open();
     } catch (Exception e) {
       new ErrorDialog(
@@ -1719,7 +1710,6 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       model.setFilename(getFilename());
     }
   }
-
 
   @GuiContextAction(
       id = "source-model-graph-add-note",
@@ -1778,7 +1768,8 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     String tableName = table.getName();
     markUndoPoint();
     model.getTables().remove(table);
-    model.getRelationships()
+    model
+        .getRelationships()
         .removeIf(
             r ->
                 r != null
@@ -2010,9 +2001,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
         doRedraw = true;
       }
       Point baseLoc =
-          currentQuery != null
-              ? currentQuery.getLocation()
-              : currentTable.getLocation();
+          currentQuery != null ? currentQuery.getLocation() : currentTable.getLocation();
       boolean selected =
           currentQuery != null ? currentQuery.isSelected() : currentTable.isSelected();
       if (iconDragCommitted && selected && baseLoc != null) {

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -26,8 +24,8 @@ import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transforms.constant.ConstantMeta;
 import org.apache.hop.workflow.WorkflowMeta;
-import org.apache.hop.workflow.actions.start.ActionStart;
 import org.apache.hop.workflow.action.ActionMeta;
+import org.apache.hop.workflow.actions.start.ActionStart;
 import org.junit.jupiter.api.Test;
 
 class ModelGeneratedArtifactOpenSupportTest {

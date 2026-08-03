@@ -13,14 +13,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.database;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -87,7 +84,8 @@ public final class DatabasePrimaryKeyDiscoverySupport {
         columnsBySequence.putIfAbsent(sequence, columnName.trim());
       }
     } catch (SQLException e) {
-      throw new HopDatabaseException("Error reading primary key metadata for table " + tableName, e);
+      throw new HopDatabaseException(
+          "Error reading primary key metadata for table " + tableName, e);
     } finally {
       if (keys != null) {
         try {

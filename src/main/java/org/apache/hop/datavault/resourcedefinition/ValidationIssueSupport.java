@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import java.util.ArrayList;
@@ -50,8 +48,7 @@ public final class ValidationIssueSupport {
     }
     String signature =
         change.kind() == RecordDefinitionSchemaDiffSupport.ChangeKind.CHANGED
-                || change.kind()
-                    == RecordDefinitionSchemaDiffSupport.ChangeKind.PRIMARY_KEY_CHANGED
+                || change.kind() == RecordDefinitionSchemaDiffSupport.ChangeKind.PRIMARY_KEY_CHANGED
             ? change.details()
             : null;
     return buildIssueId(kind, change.fieldName(), signature);
@@ -100,18 +97,30 @@ public final class ValidationIssueSupport {
     }
 
     return switch (parsed.kind()) {
-      case SOURCE_UNAVAILABLE, SOURCE_UNREADABLE ->
-          !Utils.isEmpty(unavailableMessage);
+      case SOURCE_UNAVAILABLE, SOURCE_UNREADABLE -> !Utils.isEmpty(unavailableMessage);
       case BASELINE_CONTRACT_MISSING, WORKING_CONTRACT_MISSING ->
           !Utils.isEmpty(unavailableMessage);
-      case FIELD_ADDED -> hasFieldChange(diff, RecordDefinitionSchemaDiffSupport.ChangeKind.ADDED, parsed.fieldName(), parsed.changeSignature());
+      case FIELD_ADDED ->
+          hasFieldChange(
+              diff,
+              RecordDefinitionSchemaDiffSupport.ChangeKind.ADDED,
+              parsed.fieldName(),
+              parsed.changeSignature());
       case FIELD_REMOVED, MAPPING_BROKEN ->
-          hasFieldChange(diff, RecordDefinitionSchemaDiffSupport.ChangeKind.REMOVED, parsed.fieldName(), parsed.changeSignature());
+          hasFieldChange(
+              diff,
+              RecordDefinitionSchemaDiffSupport.ChangeKind.REMOVED,
+              parsed.fieldName(),
+              parsed.changeSignature());
       case FIELD_TYPE_CHANGED ->
-          hasFieldChange(diff, RecordDefinitionSchemaDiffSupport.ChangeKind.CHANGED, parsed.fieldName(), parsed.changeSignature());
-      case PRIMARY_KEY_CHANGED ->
-          hasPrimaryKeyChange(diff, parsed.changeSignature());
-      // Model/target axes are re-evaluated each run; drop acknowledgements when re-run no longer emits them.
+          hasFieldChange(
+              diff,
+              RecordDefinitionSchemaDiffSupport.ChangeKind.CHANGED,
+              parsed.fieldName(),
+              parsed.changeSignature());
+      case PRIMARY_KEY_CHANGED -> hasPrimaryKeyChange(diff, parsed.changeSignature());
+        // Model/target axes are re-evaluated each run; drop acknowledgements when re-run no longer
+        // emits them.
       case MODEL_ATTRIBUTE_NARROWER, TARGET_DDL_REQUIRED -> true;
     };
   }
@@ -197,7 +206,8 @@ public final class ValidationIssueSupport {
     }
     int count = 0;
     for (ValidationReport.ValidationIssue issue : issues) {
-      if (issue != null && ValidationAcknowledgementSupport.isAcknowledged(definition, issue.issueId())) {
+      if (issue != null
+          && ValidationAcknowledgementSupport.isAcknowledged(definition, issue.issueId())) {
         count++;
       }
     }

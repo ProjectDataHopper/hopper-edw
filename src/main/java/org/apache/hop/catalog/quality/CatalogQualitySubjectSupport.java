@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.quality;
 
 import java.util.ArrayList;
@@ -59,8 +57,7 @@ public final class CatalogQualitySubjectSupport {
       }
       int slash = keyText.lastIndexOf('/');
       if (slash <= 0 || slash >= keyText.length() - 1) {
-        throw new HopException(
-            "Record definition key must be 'namespace/name', got: " + keyText);
+        throw new HopException("Record definition key must be 'namespace/name', got: " + keyText);
       }
       RecordDefinitionKey key =
           new RecordDefinitionKey(keyText.substring(0, slash), keyText.substring(slash + 1));

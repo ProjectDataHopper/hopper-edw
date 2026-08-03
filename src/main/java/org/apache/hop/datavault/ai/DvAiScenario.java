@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai;
 
 import lombok.Getter;
@@ -32,8 +30,7 @@ public enum DvAiScenario implements IEnumHasCodeAndDescription {
   DV_MODELING("DV_MODELING", "DvAiScenario.DvModeling", "dv-modeling"),
   HOP_INTEGRATION("HOP_INTEGRATION", "DvAiScenario.HopIntegration", "hop-integration"),
   ERROR_DIAGNOSIS("ERROR_DIAGNOSIS", "DvAiScenario.ErrorDiagnosis", "error-diagnosis"),
-  PERFORMANCE_TUNING(
-      "PERFORMANCE_TUNING", "DvAiScenario.PerformanceTuning", "performance-tuning"),
+  PERFORMANCE_TUNING("PERFORMANCE_TUNING", "DvAiScenario.PerformanceTuning", "performance-tuning"),
   GENERAL("GENERAL", "DvAiScenario.General", "general");
 
   private final String code;

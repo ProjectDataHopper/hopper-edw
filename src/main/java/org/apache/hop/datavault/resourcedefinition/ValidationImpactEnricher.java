@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import java.util.ArrayList;
@@ -52,7 +51,8 @@ public final class ValidationImpactEnricher {
       return null;
     }
     List<ValidationIssue> allIssues = enrichIssues(validation.key(), validation.allIssues(), graph);
-    List<ValidationIssue> visibleIssues = enrichIssues(validation.key(), validation.issues(), graph);
+    List<ValidationIssue> visibleIssues =
+        enrichIssues(validation.key(), validation.issues(), graph);
     return new RecordDefinitionValidation(
         validation.key(),
         validation.catalogConnection(),

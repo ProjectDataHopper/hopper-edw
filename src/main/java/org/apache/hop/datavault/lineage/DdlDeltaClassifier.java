@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.lineage;
 
 import java.util.ArrayList;
@@ -78,8 +77,7 @@ public final class DdlDeltaClassifier {
     Matcher add = ALTER_ADD.matcher(sql);
     if (add.find()) {
       DdlDelta delta =
-          new DdlDelta(
-              DdlDeltaType.ADD_COLUMN, unquote(add.group(1)), unquote(add.group(2)), sql);
+          new DdlDelta(DdlDeltaType.ADD_COLUMN, unquote(add.group(1)), unquote(add.group(2)), sql);
       delta.setSummary("ADD COLUMN " + delta.getTableName() + "." + delta.getColumnName());
       return delta;
     }
@@ -104,8 +102,7 @@ public final class DdlDeltaClassifier {
 
     Matcher alterOnly = ALTER_TABLE_ONLY.matcher(sql);
     if (alterOnly.find()) {
-      DdlDelta delta =
-          new DdlDelta(DdlDeltaType.OTHER, unquote(alterOnly.group(1)), null, sql);
+      DdlDelta delta = new DdlDelta(DdlDeltaType.OTHER, unquote(alterOnly.group(1)), null, sql);
       delta.setSummary("ALTER TABLE " + delta.getTableName());
       return delta;
     }

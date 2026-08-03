@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional.pipeline;
 
 import java.util.ArrayList;
@@ -80,8 +78,7 @@ public final class DmFactDimensionJoinBuilder {
           DmDimensionResolutionSupport.resolveDimension(
               model, role.getDimensionTableName(), ctx.variables, metadataProvider);
       if (dimension == null) {
-        throw new HopException(
-            "references unknown dimension " + role.getDimensionTableName());
+        throw new HopException("references unknown dimension " + role.getDimensionTableName());
       }
       if (DmSurrogateKeySupport.shouldSkipFactDimensionLookup(
           role, dimension, ctx.config, ctx.variables)) {
@@ -108,8 +105,7 @@ public final class DmFactDimensionJoinBuilder {
           DmDimensionResolutionSupport.resolveDimension(
               model, role.getDimensionTableName(), ctx.variables, metadataProvider);
       if (dimension == null) {
-        throw new HopException(
-            "references unknown dimension " + role.getDimensionTableName());
+        throw new HopException("references unknown dimension " + role.getDimensionTableName());
       }
       predecessor =
           DmDimensionLookupBuilder.addFactDimensionLookup(
@@ -133,7 +129,8 @@ public final class DmFactDimensionJoinBuilder {
       if (mapping == null) {
         return predecessor;
       }
-      return addSurrogateKeyPassthroughSelectValues(ctx, pipelineMeta, predecessor, List.of(mapping));
+      return addSurrogateKeyPassthroughSelectValues(
+          ctx, pipelineMeta, predecessor, List.of(mapping));
     }
     return DmDimensionLookupBuilder.addFactDimensionLookup(
         ctx, pipelineMeta, predecessor, dimension, role);
@@ -338,8 +335,7 @@ public final class DmFactDimensionJoinBuilder {
     }
     addDimensionLookupDatePassthrough(ctx, selectFields);
 
-    TransformMeta tm =
-        new TransformMeta("SelectValues", DATE_KEYS_FORMAT_TRANSFORM, selectMeta);
+    TransformMeta tm = new TransformMeta("SelectValues", DATE_KEYS_FORMAT_TRANSFORM, selectMeta);
     tm.setLocation(
         predecessor.getLocation().x + DmPipelineBuilderSupport.SPACING_WIDTH,
         predecessor.getLocation().y);

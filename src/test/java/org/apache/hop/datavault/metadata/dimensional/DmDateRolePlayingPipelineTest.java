@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,7 +38,6 @@ import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.apache.hop.pipeline.PipelineMeta;
-import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transforms.calculator.CalculatorMeta;
 import org.apache.hop.pipeline.transforms.dimensionlookup.DimensionLookupMeta;
 import org.apache.hop.pipeline.transforms.selectvalues.SelectMetadataChange;
@@ -101,8 +98,7 @@ class DmDateRolePlayingPipelineTest {
         "order_date_key", formatMeta.getSelectOption().getSelectFields().get(0).getRename());
     assertEquals("shipping_date", formatMeta.getSelectOption().getSelectFields().get(1).getName());
     assertEquals(
-        "shipment_date_key",
-        formatMeta.getSelectOption().getSelectFields().get(1).getRename());
+        "shipment_date_key", formatMeta.getSelectOption().getSelectFields().get(1).getRename());
 
     List<SelectMetadataChange> formatChanges = formatMeta.getSelectOption().getMeta();
     assertEquals(2, formatChanges.size());
@@ -146,8 +142,7 @@ class DmDateRolePlayingPipelineTest {
         "order_date_key", formatMeta.getSelectOption().getSelectFields().get(0).getRename());
     assertEquals("shipping_date", formatMeta.getSelectOption().getSelectFields().get(1).getName());
     assertEquals(
-        "shipment_date_key",
-        formatMeta.getSelectOption().getSelectFields().get(1).getRename());
+        "shipment_date_key", formatMeta.getSelectOption().getSelectFields().get(1).getRename());
     assertEquals("order_date", formatMeta.getSelectOption().getSelectFields().get(2).getName());
     assertTrue(
         org.apache.hop.core.util.Utils.isEmpty(

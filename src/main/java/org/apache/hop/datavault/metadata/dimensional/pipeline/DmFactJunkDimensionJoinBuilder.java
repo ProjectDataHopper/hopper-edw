@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional.pipeline;
 
 import java.util.List;
@@ -53,9 +51,7 @@ public final class DmFactJunkDimensionJoinBuilder {
               model, role.getJunkDimensionTableName(), ctx.variables);
       if (junkDimension == null) {
         throw new HopException(
-            "Junk dimension '"
-                + role.getJunkDimensionTableName()
-                + "' was not found on the model");
+            "Junk dimension '" + role.getJunkDimensionTableName() + "' was not found on the model");
       }
       if (!DmJunkDimensionSupport.isFactEmbedded(junkDimension)) {
         throw new HopException(
@@ -65,7 +61,8 @@ public final class DmFactJunkDimensionJoinBuilder {
                 + ctx.table.getName()
                 + " but its Source type is not Fact table (inline)");
       }
-      current = DmJunkDimensionBuilder.addJunkDimension(ctx, pipelineMeta, current, junkDimension, role);
+      current =
+          DmJunkDimensionBuilder.addJunkDimension(ctx, pipelineMeta, current, junkDimension, role);
     }
     return current;
   }

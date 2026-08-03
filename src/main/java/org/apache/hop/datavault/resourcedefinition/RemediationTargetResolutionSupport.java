@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import java.util.ArrayList;
@@ -26,9 +25,6 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.datavault.metadata.DataVaultModel;
-import org.apache.hop.datavault.metadata.DvSatellite;
-import org.apache.hop.datavault.metadata.IDvTable;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultConfiguration;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
 import org.apache.hop.datavault.metadata.businessvault.BvScd2FieldMapping;
@@ -67,8 +63,7 @@ public final class RemediationTargetResolutionSupport {
     }
 
     // BV SCD2 explicit mappings: sourceFieldName → targetFieldName on BV table.
-    Map<String, List<BvFieldLink>> bvLinksBySource =
-        indexBvFieldLinks(models, variables);
+    Map<String, List<BvFieldLink>> bvLinksBySource = indexBvFieldLinks(models, variables);
     List<BvFieldLink> bvHits = bvLinksBySource.getOrDefault(normalize(sourceFieldName), List.of());
     for (BvFieldLink link : bvHits) {
       if (!satelliteNames.isEmpty()
@@ -131,9 +126,7 @@ public final class RemediationTargetResolutionSupport {
           continue;
         }
         String sql =
-            variables != null
-                ? variables.resolve(source.getSourceSql())
-                : source.getSourceSql();
+            variables != null ? variables.resolve(source.getSourceSql()) : source.getSourceSql();
         if (Utils.isEmpty(sql)) {
           continue;
         }
@@ -144,8 +137,7 @@ public final class RemediationTargetResolutionSupport {
         for (BvFieldLink bvLink : bvTargetToLink.values()) {
           String bvPhysical = normalize(bvLink.physicalTableName());
           String bvElement = normalize(bvLink.tableElementName());
-          boolean sqlRefsBv =
-              sqlTables.contains(bvPhysical) || sqlTables.contains(bvElement);
+          boolean sqlRefsBv = sqlTables.contains(bvPhysical) || sqlTables.contains(bvElement);
           if (!sqlRefsBv) {
             // Also: star alias bound to BV table
             for (String starAlias : starAliases) {

@@ -13,17 +13,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.help;
 
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.datavault.hopgui.widget.MarkdownStyledTextComp;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
 import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
-import org.apache.hop.datavault.hopgui.widget.MarkdownStyledTextComp;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
@@ -44,7 +42,8 @@ public final class MarkdownHelpDialog {
     }
     Shell shell = new Shell(parent, BaseDialog.getDefaultDialogStyle());
     PropsUi.setLook(shell);
-    shell.setText(Utils.isEmpty(title) ? BaseMessages.getString(PKG, "MarkdownHelpDialog.Title") : title);
+    shell.setText(
+        Utils.isEmpty(title) ? BaseMessages.getString(PKG, "MarkdownHelpDialog.Title") : title);
 
     FormLayout layout = new FormLayout();
     layout.marginWidth = PropsUi.getFormMargin();

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.metrics;
 
 import java.util.ArrayList;
@@ -211,7 +209,8 @@ public final class UpdateRunLiveAnalysisDialog {
     return rowMeta;
   }
 
-  private static List<Object[]> buildTransformRows(UpdateRunLiveSnapshot snapshot, IRowMeta rowMeta) {
+  private static List<Object[]> buildTransformRows(
+      UpdateRunLiveSnapshot snapshot, IRowMeta rowMeta) {
     List<Object[]> rows = new ArrayList<>();
     if (snapshot.getPipelines() == null) {
       return rows;

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,8 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import org.apache.hop.datavault.catalog.RecordSourceIndicatorSupport;
 import org.apache.hop.datavault.metadata.DvIntegrationMode;
 import org.apache.hop.datavault.metadata.DvSourceDeliveryType;
-import org.apache.hop.datavault.metadata.businessvault.BvScd2BuildMode;
 import org.apache.hop.datavault.metadata.HashAlgorithm;
+import org.apache.hop.datavault.metadata.businessvault.BvScd2BuildMode;
 import org.apache.hop.datavault.metadata.dimensional.DmDimensionScdType;
 import org.junit.jupiter.api.Test;
 
@@ -74,8 +72,7 @@ class EnumDialogSupportTest {
         DvSourceDeliveryType.FULL_SNAPSHOT.getDescription(),
         RecordSourceIndicatorSupport.deliveryTypeLabel(fromDescription));
 
-    DvSourceDeliveryType fromCode =
-        RecordSourceIndicatorSupport.parseDeliveryType("CHANGES_ONLY");
+    DvSourceDeliveryType fromCode = RecordSourceIndicatorSupport.parseDeliveryType("CHANGES_ONLY");
     assertSame(DvSourceDeliveryType.CHANGES_ONLY, fromCode);
   }
 }

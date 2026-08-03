@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 /**
@@ -28,7 +27,8 @@ package org.apache.hop.datavault.resourcedefinition;
  * @param detailedDataTypeChecking full type/length/PK vs types-only
  * @param checkTargetModels compare baseline contract field metadata to mapped model attributes
  * @param checkTargetDatabases detect target EDW tables that need DDL relative to models
- * @param checkCatalogVsVersion when true with LIVE_SOURCE, also run working-vs-baseline version axis
+ * @param checkCatalogVsVersion when true with LIVE_SOURCE, also run working-vs-baseline version
+ *     axis
  * @param expectAutomaticTargetTableCreation when true, missing-table CREATE findings are omitted
  *     (not reported) because vault update will create the tables; ALTER drift still warns
  */

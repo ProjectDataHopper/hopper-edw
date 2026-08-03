@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.transform.mergerowsplus;
 
 import java.util.ArrayList;
@@ -71,7 +69,8 @@ public final class MergeRowsPlusMetaFactory {
     return fields;
   }
 
-  public static PassThroughField passThrough(String sourceField, String renameTo, boolean reference) {
+  public static PassThroughField passThrough(
+      String sourceField, String renameTo, boolean reference) {
     return new PassThroughField(sourceField, renameTo, reference);
   }
 }

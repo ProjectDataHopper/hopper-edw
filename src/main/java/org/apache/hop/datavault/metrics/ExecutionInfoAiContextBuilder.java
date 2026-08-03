@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import java.util.ArrayDeque;
@@ -71,13 +69,16 @@ public final class ExecutionInfoAiContextBuilder {
     if (!shouldIncludeExecutionInfo(includeExecutionInfo, performanceTuningScenario, userPrompt)) {
       return "";
     }
-    String databaseName = MetricsAiContextBuilder.resolveMetricsDatabaseName(metadataProvider, variables);
+    String databaseName =
+        MetricsAiContextBuilder.resolveMetricsDatabaseName(metadataProvider, variables);
     if (Utils.isEmpty(databaseName)) {
       return "";
     }
     String schema = MetricsAiContextBuilder.resolveOperationsSchema(metadataProvider, variables);
     try {
-      LatestLoadRun latestRun = queryLatestLoadRun(databaseName, schema, modelName, modelType, variables, metadataProvider);
+      LatestLoadRun latestRun =
+          queryLatestLoadRun(
+              databaseName, schema, modelName, modelType, variables, metadataProvider);
       if (latestRun == null
           || Utils.isEmpty(latestRun.logChannelId())
           || Utils.isEmpty(latestRun.pipelineRunConfiguration())) {
@@ -90,7 +91,11 @@ public final class ExecutionInfoAiContextBuilder {
   }
 
   private record LatestLoadRun(
-      String runId, String logChannelId, String pipelineRunConfiguration, Date finishedAt, boolean success) {}
+      String runId,
+      String logChannelId,
+      String pipelineRunConfiguration,
+      Date finishedAt,
+      boolean success) {}
 
   private static LatestLoadRun queryLatestLoadRun(
       String metricsDatabaseName,
@@ -199,7 +204,11 @@ public final class ExecutionInfoAiContextBuilder {
   }
 
   private record PipelineExecutionSnapshot(
-      String logChannelId, String name, boolean failed, String logExcerpt, List<TransformSnapshot> transforms) {}
+      String logChannelId,
+      String name,
+      boolean failed,
+      String logExcerpt,
+      List<TransformSnapshot> transforms) {}
 
   private record TransformSnapshot(String name, String copyNr, Map<String, Long> metrics) {}
 
@@ -241,15 +250,11 @@ public final class ExecutionInfoAiContextBuilder {
     String logExcerpt = loadLogExcerpt(location, executionId, failed);
     List<TransformSnapshot> transforms = collectTransformSnapshots(state);
     return new PipelineExecutionSnapshot(
-        executionId,
-        execution.getName(),
-        failed,
-        logExcerpt,
-        transforms);
+        executionId, execution.getName(), failed, logExcerpt, transforms);
   }
 
-  private static String loadLogExcerpt(IExecutionInfoLocation location, String executionId, boolean failed)
-      throws HopException {
+  private static String loadLogExcerpt(
+      IExecutionInfoLocation location, String executionId, boolean failed) throws HopException {
     String loggingText = location.getExecutionStateLoggingText(executionId, MAX_LOG_EXCERPT_CHARS);
     if (Utils.isEmpty(loggingText)) {
       return "";
@@ -284,7 +289,8 @@ public final class ExecutionInfoAiContextBuilder {
     return transforms;
   }
 
-  private static void appendPipelineSnapshot(StringBuilder json, PipelineExecutionSnapshot pipeline) {
+  private static void appendPipelineSnapshot(
+      StringBuilder json, PipelineExecutionSnapshot pipeline) {
     json.append("{\"logChannelId\":")
         .append(DvAiContextBuilder.jsonString(pipeline.logChannelId()));
     json.append(",\"name\":").append(DvAiContextBuilder.jsonString(pipeline.name()));
@@ -317,7 +323,10 @@ public final class ExecutionInfoAiContextBuilder {
           json.append(',');
         }
         first = false;
-        json.append('"').append(escapeJsonField(entry.getKey())).append("\":").append(entry.getValue());
+        json.append('"')
+            .append(escapeJsonField(entry.getKey()))
+            .append("\":")
+            .append(entry.getValue());
       }
     }
     json.append("}}");

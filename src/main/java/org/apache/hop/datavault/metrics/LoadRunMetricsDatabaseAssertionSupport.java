@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import org.apache.hop.core.database.Database;
@@ -29,7 +27,8 @@ import org.apache.hop.core.variables.IVariables;
 /** Counts persisted load-run metrics rows for workflow and integration verification. */
 public final class LoadRunMetricsDatabaseAssertionSupport {
 
-  public record LoadRunDatabaseCounts(long loadRunRows, long transformMetricRows, long insightRows) {}
+  public record LoadRunDatabaseCounts(
+      long loadRunRows, long transformMetricRows, long insightRows) {}
 
   private LoadRunMetricsDatabaseAssertionSupport() {}
 
@@ -50,10 +49,7 @@ public final class LoadRunMetricsDatabaseAssertionSupport {
   }
 
   public static LoadRunDatabaseCounts countRowsForRun(
-      DatabaseMeta databaseMeta,
-      String operationsSchema,
-      String runId,
-      IVariables variables)
+      DatabaseMeta databaseMeta, String operationsSchema, String runId, IVariables variables)
       throws HopException {
     if (databaseMeta == null || Utils.isEmpty(runId)) {
       return new LoadRunDatabaseCounts(0L, 0L, 0L);
@@ -65,7 +61,14 @@ public final class LoadRunMetricsDatabaseAssertionSupport {
     Database db = new Database(loggingObject, variables, databaseMeta);
     try {
       db.connect();
-      long loadRunRows = countRows(db, databaseMeta, variables, schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_RUN, runId);
+      long loadRunRows =
+          countRows(
+              db,
+              databaseMeta,
+              variables,
+              schema,
+              LoadRunMetricsCatalogPublisher.TABLE_LOAD_RUN,
+              runId);
       long transformRows =
           countRows(
               db,
@@ -75,7 +78,13 @@ public final class LoadRunMetricsDatabaseAssertionSupport {
               LoadRunMetricsCatalogPublisher.TABLE_LOAD_TRANSFORM_METRIC,
               runId);
       long insightRows =
-          countRows(db, databaseMeta, variables, schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_INSIGHT, runId);
+          countRows(
+              db,
+              databaseMeta,
+              variables,
+              schema,
+              LoadRunMetricsCatalogPublisher.TABLE_LOAD_INSIGHT,
+              runId);
       return new LoadRunDatabaseCounts(loadRunRows, transformRows, insightRows);
     } catch (Exception e) {
       throw new HopException("Unable to count load-run metrics rows for run " + runId, e);

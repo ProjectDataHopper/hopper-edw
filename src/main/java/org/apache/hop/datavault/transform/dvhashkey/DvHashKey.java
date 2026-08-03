@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.transform.dvhashkey;
 
 import org.apache.hop.core.exception.HopException;
@@ -81,7 +79,8 @@ public class DvHashKey extends BaseTransform<DvHashKeyMeta, DvHashKeyData> {
       putRow(data.outputRowMeta, outputRow);
     } catch (Exception e) {
       if (getTransformMeta().isDoingErrorHandling()) {
-        putError(getInputRowMeta(), row, 1, e.toString(), meta.getResultFieldName(), "DvHashKey001");
+        putError(
+            getInputRowMeta(), row, 1, e.toString(), meta.getResultFieldName(), "DvHashKey001");
       } else {
         logError(BaseMessages.getString(PKG, "DvHashKey.ErrorInTransformRunning") + e.getMessage());
         setErrors(1);

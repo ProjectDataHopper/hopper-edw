@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,9 +37,23 @@ class WorkflowLoadOverviewLoaderTest {
     List<WorkflowLoadOverviewLoader.LoadRunRow> runs =
         List.of(
             new WorkflowLoadOverviewLoader.LoadRunRow(
-                "bv-run", bvStarted, bvFinished, "bv", "retail-360", "update-retail-dv-bv-dm", true, 0L),
+                "bv-run",
+                bvStarted,
+                bvFinished,
+                "bv",
+                "retail-360",
+                "update-retail-dv-bv-dm",
+                true,
+                0L),
             new WorkflowLoadOverviewLoader.LoadRunRow(
-                "dv-run", dvStarted, dvFinished, "dv", "retail-360", "update-retail-dv-bv-dm", true, 0L));
+                "dv-run",
+                dvStarted,
+                dvFinished,
+                "dv",
+                "retail-360",
+                "update-retail-dv-bv-dm",
+                true,
+                0L));
 
     Map<String, Long> durations = Map.of("dv-run", 1000L, "bv-run", 2000L);
     Map<String, List<WorkflowLoadOverviewReport.PipelineEntry>> pipelines =
@@ -77,13 +89,7 @@ class WorkflowLoadOverviewLoaderTest {
 
     WorkflowLoadOverviewReport report =
         WorkflowLoadOverviewLoader.assembleReport(
-            "exec-1",
-            "run-retail-update",
-            startedAt,
-            runs,
-            durations,
-            pipelines,
-            insights);
+            "exec-1", "run-retail-update", startedAt, runs, durations, pipelines, insights);
 
     assertEquals("exec-1", report.getWorkflowExecutionId());
     assertEquals("run-retail-update", report.getRootWorkflowName());
@@ -131,7 +137,14 @@ class WorkflowLoadOverviewLoaderTest {
     List<WorkflowLoadOverviewLoader.LoadRunRow> runs =
         List.of(
             new WorkflowLoadOverviewLoader.LoadRunRow(
-                "dv-run", null, finishedAt, "dv", "retail-360", "update-retail-dv-bv-dm", true, 0L));
+                "dv-run",
+                null,
+                finishedAt,
+                "dv",
+                "retail-360",
+                "update-retail-dv-bv-dm",
+                true,
+                0L));
 
     WorkflowLoadOverviewReport report =
         WorkflowLoadOverviewLoader.assembleReport(
@@ -142,11 +155,17 @@ class WorkflowLoadOverviewLoaderTest {
 
   @Test
   void modelTypeOrderPrefersDvBeforeBvBeforeDm() {
-    assertEquals(0, WorkflowLoadOverviewLoader.modelTypeOrder(
-        new WorkflowLoadOverviewLoader.LoadRunRow("a", null, null, "dv", "m", null, true, 0L)));
-    assertEquals(1, WorkflowLoadOverviewLoader.modelTypeOrder(
-        new WorkflowLoadOverviewLoader.LoadRunRow("a", null, null, "bv", "m", null, true, 0L)));
-    assertEquals(2, WorkflowLoadOverviewLoader.modelTypeOrder(
-        new WorkflowLoadOverviewLoader.LoadRunRow("a", null, null, "dm", "m", null, true, 0L)));
+    assertEquals(
+        0,
+        WorkflowLoadOverviewLoader.modelTypeOrder(
+            new WorkflowLoadOverviewLoader.LoadRunRow("a", null, null, "dv", "m", null, true, 0L)));
+    assertEquals(
+        1,
+        WorkflowLoadOverviewLoader.modelTypeOrder(
+            new WorkflowLoadOverviewLoader.LoadRunRow("a", null, null, "bv", "m", null, true, 0L)));
+    assertEquals(
+        2,
+        WorkflowLoadOverviewLoader.modelTypeOrder(
+            new WorkflowLoadOverviewLoader.LoadRunRow("a", null, null, "dm", "m", null, true, 0L)));
   }
 }

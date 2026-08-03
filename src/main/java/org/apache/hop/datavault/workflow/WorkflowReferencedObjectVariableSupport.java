@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.workflow;
 
 import java.nio.file.Path;
@@ -62,8 +60,7 @@ public final class WorkflowReferencedObjectVariableSupport {
     }
     String projectHome = findProjectHomeInParentChain(actionVariables);
     if (Utils.isEmpty(projectHome) && parentWorkflowMeta != null) {
-      projectHome =
-          deriveProjectHomeFromWorkflowFilename(parentWorkflowMeta.getFilename());
+      projectHome = deriveProjectHomeFromWorkflowFilename(parentWorkflowMeta.getFilename());
     }
     if (!Utils.isEmpty(projectHome)) {
       effective.setVariable(VARIABLE_PROJECT_HOME, projectHome);

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import java.util.regex.Matcher;
@@ -33,8 +31,7 @@ import org.apache.hop.pipeline.transforms.tableoutput.TableOutputMeta;
 /** Adds dataset leaf nodes from TableInput and TableOutput transforms in pipelines. */
 public final class PipelineDatasetResolver {
 
-  private static final Pattern FROM_TABLE =
-      Pattern.compile("(?is)\\bfrom\\s+([\\w.\"]+)");
+  private static final Pattern FROM_TABLE = Pattern.compile("(?is)\\bfrom\\s+([\\w.\"]+)");
 
   private PipelineDatasetResolver() {}
 
@@ -68,7 +65,8 @@ public final class PipelineDatasetResolver {
       String originModelNodeId,
       String transformName,
       TableInputMeta tableInput) {
-    String connection = DatasetNodeSupport.resolveValue(context.getVariables(), tableInput.getConnection());
+    String connection =
+        DatasetNodeSupport.resolveValue(context.getVariables(), tableInput.getConnection());
     String tableName = extractTableName(tableInput, transformName);
     if (Utils.isEmpty(connection) || Utils.isEmpty(tableName)) {
       return;
@@ -83,7 +81,8 @@ public final class PipelineDatasetResolver {
             tableName,
             transformName);
     if (!Utils.isEmpty(datasetNodeId)) {
-      context.addEdge(ExecutionMapEdgeType.READS_FROM, datasetNodeId, pipelineNodeId, transformName);
+      context.addEdge(
+          ExecutionMapEdgeType.READS_FROM, datasetNodeId, pipelineNodeId, transformName);
       DatasetNodeSupport.linkDatasetToModel(
           context, originModelNodeId, datasetNodeId, transformName);
     }
@@ -95,7 +94,8 @@ public final class PipelineDatasetResolver {
       String originModelNodeId,
       String transformName,
       TableOutputMeta tableOutput) {
-    String connection = DatasetNodeSupport.resolveValue(context.getVariables(), tableOutput.getConnection());
+    String connection =
+        DatasetNodeSupport.resolveValue(context.getVariables(), tableOutput.getConnection());
     String tableName =
         DatasetNodeSupport.resolveValue(context.getVariables(), tableOutput.getTableName());
     if (Utils.isEmpty(tableName)) {

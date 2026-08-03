@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import java.util.List;
@@ -28,8 +26,7 @@ public final class LoadRunMetricsPipelineSupport {
   private LoadRunMetricsPipelineSupport() {}
 
   public static boolean isMetricsCollectionEnabled(
-      String metricsOutputFolder,
-      DvUpdateMetricsCollector.LoadRunPublishContext publishContext) {
+      String metricsOutputFolder, DvUpdateMetricsCollector.LoadRunPublishContext publishContext) {
     if (!Utils.isEmpty(metricsOutputFolder)) {
       return true;
     }

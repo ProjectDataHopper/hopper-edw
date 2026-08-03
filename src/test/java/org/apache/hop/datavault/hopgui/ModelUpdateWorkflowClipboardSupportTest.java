@@ -13,16 +13,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.List;
-
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.datavault.workflow.actions.dimensionalupdate.ActionDimensionalUpdate;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;

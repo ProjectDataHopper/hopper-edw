@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.ArrayList;
@@ -31,10 +29,10 @@ import org.apache.hop.core.changed.ChangedFlag;
 import org.apache.hop.core.database.Database;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.logging.ILoggingObject;
 import org.apache.hop.core.logging.LoggingObjectType;
 import org.apache.hop.core.logging.SimpleLoggingObject;
-import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
@@ -333,8 +331,7 @@ public abstract class DvTableBase extends HopMetadataBase implements IHopMetadat
               this));
     }
 
-    DvIntegrationSupport.checkIntegrationMode(
-        this, remarks, metadataProvider, variables, model);
+    DvIntegrationSupport.checkIntegrationMode(this, remarks, metadataProvider, variables, model);
   }
 
   @Override
@@ -468,8 +465,7 @@ public abstract class DvTableBase extends HopMetadataBase implements IHopMetadat
     try {
       String[] shardKeyColumns = null;
       if (DvDdlSupport.isShardKeyDdlEnabled(config, targetDatabaseMeta)) {
-        shardKeyColumns =
-            resolveShardKeyColumns(metadataProvider, variables, model, targetFields);
+        shardKeyColumns = resolveShardKeyColumns(metadataProvider, variables, model, targetFields);
         if (shardKeyColumns != null && shardKeyColumns.length == 0) {
           shardKeyColumns = null;
         }
@@ -495,12 +491,7 @@ public abstract class DvTableBase extends HopMetadataBase implements IHopMetadat
               statusTrackingSatellite);
 
       return DvDdlSupport.getTargetTableDdl(
-          db,
-          targetTableName,
-          targetFields,
-          shardKeyColumns,
-          primaryKeyColumns,
-          foreignKeys);
+          db, targetTableName, targetFields, shardKeyColumns, primaryKeyColumns, foreignKeys);
     } catch (Exception e) {
       throw new HopException("Error getting DDL for target table: " + targetTableName, e);
     }
@@ -517,7 +508,12 @@ public abstract class DvTableBase extends HopMetadataBase implements IHopMetadat
     return 0;
   }
 
-  protected static @NonNull TransformMeta addDummyTransform(PipelineMeta pipelineMeta, TransformMeta referenceTransform, String transformName, int locationX, int locationY) {
+  protected static @NonNull TransformMeta addDummyTransform(
+      PipelineMeta pipelineMeta,
+      TransformMeta referenceTransform,
+      String transformName,
+      int locationX,
+      int locationY) {
     DummyMeta dummyMeta = new DummyMeta();
     TransformMeta referenceDummyTransform = new TransformMeta("Dummy", transformName, dummyMeta);
     referenceDummyTransform.setLocation(locationX, locationY);

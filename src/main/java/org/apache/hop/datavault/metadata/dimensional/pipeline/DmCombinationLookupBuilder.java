@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional.pipeline;
 
 import org.apache.hop.core.exception.HopException;
@@ -24,7 +22,9 @@ import org.apache.hop.datavault.metadata.dimensional.DmJunkDimension;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
 
-/** @deprecated Use {@link DmJunkDimensionBuilder} instead. */
+/**
+ * @deprecated Use {@link DmJunkDimensionBuilder} instead.
+ */
 @Deprecated
 public final class DmCombinationLookupBuilder {
 
@@ -36,6 +36,7 @@ public final class DmCombinationLookupBuilder {
       DimensionalModel model,
       DmJunkDimension junkDimension)
       throws HopException {
-    return DmJunkDimensionBuilder.generatePipeline(metadataProvider, variables, model, junkDimension);
+    return DmJunkDimensionBuilder.generatePipeline(
+        metadataProvider, variables, model, junkDimension);
   }
 }

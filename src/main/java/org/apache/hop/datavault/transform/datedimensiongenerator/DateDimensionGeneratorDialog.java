@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.transform.datedimensiongenerator;
 
 import org.apache.hop.core.Const;
@@ -69,7 +67,8 @@ public class DateDimensionGeneratorDialog extends BaseTransformDialog {
     buildButtonBar().ok(e -> ok()).cancel(e -> cancel()).build();
 
     Label wlStartDate = new Label(shell, SWT.RIGHT);
-    wlStartDate.setText(BaseMessages.getString(PKG, "DateDimensionGeneratorDialog.StartDate.Label"));
+    wlStartDate.setText(
+        BaseMessages.getString(PKG, "DateDimensionGeneratorDialog.StartDate.Label"));
     PropsUi.setLook(wlStartDate);
     FormData fdlStartDate = new FormData();
     fdlStartDate.left = new FormAttachment(0, 0);
@@ -101,7 +100,8 @@ public class DateDimensionGeneratorDialog extends BaseTransformDialog {
     wEndDate.setLayoutData(fdEndDate);
 
     wLoadDefaults = new Button(shell, SWT.PUSH);
-    wLoadDefaults.setText(BaseMessages.getString(PKG, "DateDimensionGeneratorDialog.LoadDefaults.Label"));
+    wLoadDefaults.setText(
+        BaseMessages.getString(PKG, "DateDimensionGeneratorDialog.LoadDefaults.Label"));
     PropsUi.setLook(wLoadDefaults);
     FormData fdLoadDefaults = new FormData();
     fdLoadDefaults.top = new FormAttachment(wEndDate, margin);

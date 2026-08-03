@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -61,11 +59,9 @@ class DmFactSurrogateKeyPassthroughPipelineTest {
             .filter(t -> "map_surrogate_keys".equals(t.getName()))
             .count());
     assertFalse(
-        pipelineMeta.getTransforms().stream()
-            .anyMatch(t -> "lookup_Product".equals(t.getName())));
+        pipelineMeta.getTransforms().stream().anyMatch(t -> "lookup_Product".equals(t.getName())));
     assertTrue(
-        pipelineMeta.getTransforms().stream()
-            .anyMatch(t -> "lookup_Customer".equals(t.getName())));
+        pipelineMeta.getTransforms().stream().anyMatch(t -> "lookup_Customer".equals(t.getName())));
 
     SelectValuesMeta passthroughMeta =
         (SelectValuesMeta)
@@ -76,7 +72,8 @@ class DmFactSurrogateKeyPassthroughPipelineTest {
                 .getTransform();
     assertTrue(passthroughMeta.getSelectOption().isSelectingAndSortingUnspecifiedFields());
     assertEquals(1, passthroughMeta.getSelectOption().getSelectFields().size());
-    assertEquals("product_hk", passthroughMeta.getSelectOption().getSelectFields().get(0).getName());
+    assertEquals(
+        "product_hk", passthroughMeta.getSelectOption().getSelectFields().get(0).getName());
     assertEquals(
         "product_key", passthroughMeta.getSelectOption().getSelectFields().get(0).getRename());
   }
@@ -94,11 +91,9 @@ class DmFactSurrogateKeyPassthroughPipelineTest {
         pipelineMeta.getTransforms().stream()
             .anyMatch(t -> "map_surrogate_keys".equals(t.getName())));
     assertTrue(
-        pipelineMeta.getTransforms().stream()
-            .anyMatch(t -> "lookup_Product".equals(t.getName())));
+        pipelineMeta.getTransforms().stream().anyMatch(t -> "lookup_Product".equals(t.getName())));
     assertTrue(
-        pipelineMeta.getTransforms().stream()
-            .anyMatch(t -> "lookup_Customer".equals(t.getName())));
+        pipelineMeta.getTransforms().stream().anyMatch(t -> "lookup_Customer".equals(t.getName())));
 
     DimensionLookupMeta productLookupMeta =
         (DimensionLookupMeta)
@@ -131,8 +126,7 @@ class DmFactSurrogateKeyPassthroughPipelineTest {
             .filter(t -> "lookup_Customer".equals(t.getName()))
             .findFirst()
             .orElseThrow();
-    DimensionLookupMeta customerLookupMeta =
-        (DimensionLookupMeta) customerLookup.getTransform();
+    DimensionLookupMeta customerLookupMeta = (DimensionLookupMeta) customerLookup.getTransform();
     assertEquals("d_customer", customerLookupMeta.getTableName());
     assertEquals("customer_key", customerLookupMeta.getFields().getReturns().getKeyRename());
   }
@@ -149,7 +143,8 @@ class DmFactSurrogateKeyPassthroughPipelineTest {
     warehouse.getNaturalKeys().clear();
     warehouse.getNaturalKeys().add(new DmNaturalKeyField("warehouse_id"));
 
-    DmFactDimensionRole warehouseRole = new DmFactDimensionRole("dim_warehouse", "Warehouse", "warehouse_hk");
+    DmFactDimensionRole warehouseRole =
+        new DmFactDimensionRole("dim_warehouse", "Warehouse", "warehouse_hk");
     warehouseRole.setSourceFieldName("warehouse_hk");
     warehouseRole.setSkipDimensionLookup(true);
     fact.getDimensionRoles().add(warehouseRole);
@@ -246,7 +241,9 @@ class DmFactSurrogateKeyPassthroughPipelineTest {
     warehouse.setScdType(DmDimensionScdType.TYPE1);
     warehouse.setSurrogateKeyStrategy(DmSurrogateKeyStrategy.NONE);
     warehouse.getNaturalKeys().add(new DmNaturalKeyField("warehouse_id"));
-    warehouse.getAttributes().add(new DmDimensionAttribute("warehouse_name", DmScdUpdatePolicy.TYPE1));
+    warehouse
+        .getAttributes()
+        .add(new DmDimensionAttribute("warehouse_name", DmScdUpdatePolicy.TYPE1));
     warehouse
         .getSourceOrDefault()
         .setSourceSql("SELECT warehouse_id, warehouse_name FROM stg_warehouse");
@@ -255,8 +252,7 @@ class DmFactSurrogateKeyPassthroughPipelineTest {
     DmFact fact = new DmFact();
     fact.setName("fact_inventory");
     fact.setTableName("f_inventory");
-    fact.getSourceOrDefault()
-        .setSourceSql("SELECT warehouse_id, stock_qty FROM stg_inventory");
+    fact.getSourceOrDefault().setSourceSql("SELECT warehouse_id, stock_qty FROM stg_inventory");
 
     DmFactDimensionRole warehouseRole =
         new DmFactDimensionRole("dim_warehouse", "Warehouse", "warehouse_id");
@@ -279,8 +275,12 @@ class DmFactSurrogateKeyPassthroughPipelineTest {
     customer.setTableName("d_customer");
     customer.setScdType(DmDimensionScdType.TYPE1);
     customer.getNaturalKeys().add(new DmNaturalKeyField("customer_id"));
-    customer.getAttributes().add(new DmDimensionAttribute("customer_name", DmScdUpdatePolicy.TYPE1));
-    customer.getSourceOrDefault().setSourceSql("SELECT customer_id, customer_name FROM stg_customer");
+    customer
+        .getAttributes()
+        .add(new DmDimensionAttribute("customer_name", DmScdUpdatePolicy.TYPE1));
+    customer
+        .getSourceOrDefault()
+        .setSourceSql("SELECT customer_id, customer_name FROM stg_customer");
     model.getTables().add(customer);
 
     DmDimension product = new DmDimension();

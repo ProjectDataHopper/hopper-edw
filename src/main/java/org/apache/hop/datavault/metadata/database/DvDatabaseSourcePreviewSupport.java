@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.database;
 
 import java.util.ArrayList;
@@ -57,15 +55,15 @@ public final class DvDatabaseSourcePreviewSupport {
 
     String tableName = Const.NVL(source.getTableName(), "").trim();
     if (Utils.isEmpty(tableName)) {
-      throw new HopException("Please specify a source table or view before previewing source data.");
+      throw new HopException(
+          "Please specify a source table or view before previewing source data.");
     }
 
     DatabaseMeta databaseMeta;
     try {
       databaseMeta = metadataProvider.getSerializer(DatabaseMeta.class).load(connectionName);
     } catch (Exception e) {
-      throw new HopException(
-          "Error loading database connection '" + connectionName + "'", e);
+      throw new HopException("Error loading database connection '" + connectionName + "'", e);
     }
     if (databaseMeta == null) {
       throw new HopException("Database connection '" + connectionName + "' was not found.");

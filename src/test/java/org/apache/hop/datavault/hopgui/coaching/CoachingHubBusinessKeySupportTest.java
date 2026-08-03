@@ -13,12 +13,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.coaching;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.List;
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.exception.HopException;
@@ -49,8 +48,7 @@ class CoachingHubBusinessKeySupportTest {
     source.setSource(databaseSource);
 
     DvHub hub = new DvHub("customer");
-    CoachingHubBusinessKeySupport.populateBusinessKeysFromSource(
-        hub, source, "CRM-customer", null);
+    CoachingHubBusinessKeySupport.populateBusinessKeysFromSource(hub, source, "CRM-customer", null);
 
     assertEquals(1, hub.getBusinessKeys().size());
     BusinessKey businessKey = hub.getBusinessKeys().getFirst();
@@ -71,11 +69,9 @@ class CoachingHubBusinessKeySupportTest {
     DataVaultSource source = new DataVaultSource("CRM-customer");
     source.setSource(databaseSource);
 
-    CoachingHubBusinessKeySupport.populateBusinessKeysFromSource(
-        hub, source, "CRM-customer", null);
+    CoachingHubBusinessKeySupport.populateBusinessKeysFromSource(hub, source, "CRM-customer", null);
 
     assertEquals(1, hub.getBusinessKeys().size());
     assertEquals("existing_key", hub.getBusinessKeys().getFirst().getName());
   }
-
 }

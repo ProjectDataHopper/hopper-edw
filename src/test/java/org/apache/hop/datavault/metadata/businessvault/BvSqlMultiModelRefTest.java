@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,7 +27,6 @@ import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.datavault.metadata.DataVaultModel;
-import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.DvTableType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -74,8 +71,7 @@ class BvSqlMultiModelRefTest {
     linkedDv.setName("other");
 
     List<BvSqlRef> refs =
-        BvSqlRefResolver.syncRefsFromSql(
-            sqlTable, bvModel, linkedDv, new Variables(), null);
+        BvSqlRefResolver.syncRefsFromSql(sqlTable, bvModel, linkedDv, new Variables(), null);
 
     assertEquals(1, refs.size());
     BvSqlRef ref = refs.get(0);
@@ -116,8 +112,9 @@ class BvSqlMultiModelRefTest {
     BvDvTableReference alias = bvModel.getDvReferences().get(0);
     assertEquals("hub_customer", alias.getDvTableName());
     assertNotNull(alias.getReferencedModelFilename());
-    assertTrue(alias.getReferencedModelFilename().replace('\\', '/').contains("core.hdv")
-        || alias.getReferencedModelFilename().contains("core"));
+    assertTrue(
+        alias.getReferencedModelFilename().replace('\\', '/').contains("core.hdv")
+            || alias.getReferencedModelFilename().contains("core"));
   }
 
   /**
@@ -150,8 +147,7 @@ class BvSqlMultiModelRefTest {
     variables.setVariable("PROJECT_HOME", tempDir.toString());
 
     List<BvSqlRef> refs =
-        BvSqlRefResolver.syncRefsFromSql(
-            sqlTable, bvModel, new DataVaultModel(), variables, null);
+        BvSqlRefResolver.syncRefsFromSql(sqlTable, bvModel, new DataVaultModel(), variables, null);
 
     assertEquals(1, refs.size());
     BvSqlRef ref = refs.get(0);
@@ -167,7 +163,8 @@ class BvSqlMultiModelRefTest {
   void sameBasenameStillResolvesDvObjectInHdv() throws Exception {
     Path models = tempDir.resolve("models");
     Files.createDirectories(models);
-    Files.writeString(models.resolve("retail-360.hdv"), hdvWithSatellite("retail-360", "sat_product"));
+    Files.writeString(
+        models.resolve("retail-360.hdv"), hdvWithSatellite("retail-360", "sat_product"));
     Files.writeString(
         models.resolve("retail-360.hbv"), hbvWithBusinessTable("retail-360", "customer_360_bv"));
 
@@ -187,8 +184,7 @@ class BvSqlMultiModelRefTest {
     variables.setVariable("PROJECT_HOME", tempDir.toString());
 
     List<BvSqlRef> refs =
-        BvSqlRefResolver.syncRefsFromSql(
-            sqlTable, bvModel, new DataVaultModel(), variables, null);
+        BvSqlRefResolver.syncRefsFromSql(sqlTable, bvModel, new DataVaultModel(), variables, null);
 
     assertEquals(BvSqlResolvedKind.DV_TABLE, refs.get(0).getResolvedKind());
     assertEquals("sat_product", refs.get(0).getResolvedTableName());

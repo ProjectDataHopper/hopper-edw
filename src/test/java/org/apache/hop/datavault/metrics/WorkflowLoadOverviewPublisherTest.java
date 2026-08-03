@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,9 +45,11 @@ class WorkflowLoadOverviewPublisherTest {
     RecordDefinition overviewModel =
         WorkflowLoadOverviewPublisher.buildOverviewModelDefinition(namespace, "OPS", "dv_ops", ops);
 
-    assertEquals(WorkflowLoadOverviewDdlSupport.TABLE_WORKFLOW_LOAD_OVERVIEW, overview.getKey().getName());
     assertEquals(
-        WorkflowLoadOverviewDdlSupport.TABLE_WORKFLOW_LOAD_OVERVIEW_MODEL, overviewModel.getKey().getName());
+        WorkflowLoadOverviewDdlSupport.TABLE_WORKFLOW_LOAD_OVERVIEW, overview.getKey().getName());
+    assertEquals(
+        WorkflowLoadOverviewDdlSupport.TABLE_WORKFLOW_LOAD_OVERVIEW_MODEL,
+        overviewModel.getKey().getName());
     assertEquals(RecordDefinitionType.PHYSICAL_TABLE, overview.getType());
     assertTrue(overview.getTags().contains("workflow-overview"));
     assertTrue(overviewModel.getTags().contains("workflow-overview"));

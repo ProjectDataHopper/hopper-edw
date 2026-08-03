@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -87,7 +85,10 @@ class DmDimensionResolutionSupportTest {
     DmModelLoadSupport.clearCache();
     DimensionalModel model = loadCrossModelAliasFixture();
     model.setFilename(
-        Path.of("integration-tests/tests/basic/cross-model-alias.hdm").toAbsolutePath().normalize().toString());
+        Path.of("integration-tests/tests/basic/cross-model-alias.hdm")
+            .toAbsolutePath()
+            .normalize()
+            .toString());
 
     DmDimension customer =
         DmDimensionResolutionSupport.resolveDimension(model, "dim_customer", new Variables());
@@ -110,16 +111,14 @@ class DmDimensionResolutionSupportTest {
   @Test
   void resolvesAliasSourceModelDisplayNameForExternalAndLocalAliases() throws Exception {
     DimensionalModel crossModel = loadCrossModelAliasFixture();
-    DmDimensionAlias externalCustomer =
-        (DmDimensionAlias) crossModel.findTable("dim_customer");
+    DmDimensionAlias externalCustomer = (DmDimensionAlias) crossModel.findTable("dim_customer");
     assertEquals(
         "shared-conformed",
         DmDimensionResolutionSupport.resolveAliasSourceModelDisplayName(
             crossModel, externalCustomer, new Variables()));
 
     DimensionalModel localModel = loadDateRolePlayingModel();
-    DmDimensionAlias localOrderDate =
-        (DmDimensionAlias) localModel.findTable("dim_order_date");
+    DmDimensionAlias localOrderDate = (DmDimensionAlias) localModel.findTable("dim_order_date");
     assertEquals(
         "date-role-playing",
         DmDimensionResolutionSupport.resolveAliasSourceModelDisplayName(

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui;
 
 import java.util.ArrayList;
@@ -29,6 +27,7 @@ import org.apache.hop.core.row.value.ValueMetaInteger;
 import org.apache.hop.core.row.value.ValueMetaString;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.hopgui.dialog.ShowRowsDialog;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.IDvTable;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultDvModelResolver;
@@ -39,7 +38,6 @@ import org.apache.hop.datavault.metadata.dimensional.IDmTable;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
-import org.apache.hop.datavault.hopgui.dialog.ShowRowsDialog;
 import org.eclipse.swt.widgets.Shell;
 
 /** Previews the projected target table layout for DV, BV, and DM model tables. */
@@ -206,7 +204,8 @@ public final class ModelTableLayoutPreviewSupport {
             shell,
             variables,
             BaseMessages.getString(PKG, "ModelTableLayoutPreviewSupport.Preview.Title"),
-            BaseMessages.getString(PKG, "ModelTableLayoutPreviewSupport.Preview.Message", tableLabel),
+            BaseMessages.getString(
+                PKG, "ModelTableLayoutPreviewSupport.Preview.Message", tableLabel),
             preview.previewMeta(),
             preview.previewRows())
         .open();

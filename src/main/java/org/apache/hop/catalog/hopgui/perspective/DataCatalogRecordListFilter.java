@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.hopgui.perspective;
 
 import java.util.List;
@@ -26,14 +24,12 @@ import org.apache.hop.i18n.BaseMessages;
 /** Quick filters for the data catalog record tree. */
 public enum DataCatalogRecordListFilter {
   ALL("DataCatalogPerspective.Filter.All"),
-  SOURCES(
-      "DataCatalogPerspective.Filter.Sources", List.of(RecordDefinitionType.DV_SOURCE)),
+  SOURCES("DataCatalogPerspective.Filter.Sources", List.of(RecordDefinitionType.DV_SOURCE)),
   DIMENSIONAL_TABLES(
       "DataCatalogPerspective.Filter.DimensionalTables",
       List.of(RecordDefinitionType.DIM_TABLE, RecordDefinitionType.FACT_TABLE)),
   BUSINESS_VAULT_TABLES(
-      "DataCatalogPerspective.Filter.BusinessVaultTables",
-      List.of(RecordDefinitionType.BV_TABLE)),
+      "DataCatalogPerspective.Filter.BusinessVaultTables", List.of(RecordDefinitionType.BV_TABLE)),
   DATA_VAULT_TABLES(
       "DataCatalogPerspective.Filter.DataVaultTables",
       List.of(
@@ -65,8 +61,7 @@ public enum DataCatalogRecordListFilter {
     this(labelKey, types, null);
   }
 
-  DataCatalogRecordListFilter(
-      String labelKey, List<RecordDefinitionType> types, String tag) {
+  DataCatalogRecordListFilter(String labelKey, List<RecordDefinitionType> types, String tag) {
     this.labelKey = labelKey;
     this.types = types;
     this.tag = tag;

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.quality.resolve;
 
 import java.util.ArrayList;
@@ -41,8 +39,7 @@ public final class QualityRuleResolver {
   }
 
   /**
-   * Resolves catalog bindings plus optional whole rule sets selected on Measure / Evaluate
-   * actions.
+   * Resolves catalog bindings plus optional whole rule sets selected on Measure / Evaluate actions.
    *
    * <p>A binding with {@code ruleSetName} and empty {@code ruleId} expands every enabled rule in
    * that set. Additional rule set names (action METADATA fields) expand the same way. Rules are

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -49,7 +47,9 @@ class DmFactRolePlayingValidationTest {
     dateDimension.setName("d_date");
     dateDimension.setScdType(DmDimensionScdType.TYPE1);
     dateDimension.getNaturalKeys().add(new DmNaturalKeyField("date_key"));
-    dateDimension.getAttributes().add(new DmDimensionAttribute("full_date", DmScdUpdatePolicy.TYPE1));
+    dateDimension
+        .getAttributes()
+        .add(new DmDimensionAttribute("full_date", DmScdUpdatePolicy.TYPE1));
     dateDimension.getAttributes().add(new DmDimensionAttribute("load_dt", DmScdUpdatePolicy.TYPE1));
     model.getTables().add(dateDimension);
 

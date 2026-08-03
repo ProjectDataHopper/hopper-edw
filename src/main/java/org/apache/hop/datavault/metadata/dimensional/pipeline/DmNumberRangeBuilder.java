@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional.pipeline;
 
 import java.util.List;
@@ -76,15 +74,11 @@ public final class DmNumberRangeBuilder {
     String targetField = resolve(ctx, role.getTargetFieldName());
     if (Utils.isEmpty(sourceField)) {
       throw new HopException(
-          "Range dimension role on table "
-              + ctx.table.getName()
-              + " is missing source field name");
+          "Range dimension role on table " + ctx.table.getName() + " is missing source field name");
     }
     if (Utils.isEmpty(targetField)) {
       throw new HopException(
-          "Range dimension role on table "
-              + ctx.table.getName()
-              + " is missing target field name");
+          "Range dimension role on table " + ctx.table.getName() + " is missing target field name");
     }
 
     NumberRangeMeta numberRangeMeta = new NumberRangeMeta();

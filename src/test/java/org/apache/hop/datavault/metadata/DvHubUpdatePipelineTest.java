@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -232,13 +230,12 @@ class DvHubUpdatePipelineTest {
       MemoryMetadataProvider metadataProvider, Variables variables) throws Exception {
     DataVaultModel model = buildItemHubModel();
     registerCatalog(metadataProvider, variables);
-    DvSourceCatalogService.upsertSource(
-        itemSource(), "local-catalog", variables, metadataProvider);
+    DvSourceCatalogService.upsertSource(itemSource(), "local-catalog", variables, metadataProvider);
     return model;
   }
 
-  private static void registerCatalog(
-      MemoryMetadataProvider metadataProvider, Variables variables) throws HopException {
+  private static void registerCatalog(MemoryMetadataProvider metadataProvider, Variables variables)
+      throws HopException {
     DataCatalogMeta catalog = new DataCatalogMeta();
     catalog.setName("local-catalog");
     catalog.setEnabled(true);

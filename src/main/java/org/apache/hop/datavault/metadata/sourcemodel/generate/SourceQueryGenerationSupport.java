@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.sourcemodel.generate;
 
 import java.util.ArrayList;
@@ -23,11 +22,11 @@ import java.util.List;
 import java.util.Set;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.datavault.metadata.DvSourceType;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQuery;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQueryColumn;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQueryGenerationMode;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQueryJoin;
-import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceTable;
 
 /** Resolves participants and effective generation mode for a {@link SourceQuery}. */

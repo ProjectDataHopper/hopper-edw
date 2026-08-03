@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -53,7 +51,8 @@ class BvPitVault1FixtureTest {
 
     BvPitTable pitTable = findPitTable(bvModel);
     assertEquals("pit_customer", pitTable.getTableName());
-    assertEquals(BvPitRangeStart.FIXED_DATE, pitTable.getSnapshotScheduleOrDefault().getRangeStart());
+    assertEquals(
+        BvPitRangeStart.FIXED_DATE, pitTable.getSnapshotScheduleOrDefault().getRangeStart());
     assertEquals("2024-01-31", pitTable.getSnapshotScheduleOrDefault().getRangeStartFixed());
     assertEquals(BvPitRangeEnd.FIXED_DATE, pitTable.getSnapshotScheduleOrDefault().getRangeEnd());
     assertEquals("2024-02-01", pitTable.getSnapshotScheduleOrDefault().getRangeEndFixed());

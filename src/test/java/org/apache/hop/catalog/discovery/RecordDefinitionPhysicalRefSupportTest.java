@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.discovery;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -37,7 +35,8 @@ class RecordDefinitionPhysicalRefSupportTest {
     RecordDefinition definition = icebergDefinition();
 
     assertTrue(RecordDefinitionPhysicalRefSupport.supportsRefreshFromSource(definition));
-    assertEquals(DvSourceType.ICEBERG, RecordDefinitionPhysicalRefSupport.resolveSourceType(definition));
+    assertEquals(
+        DvSourceType.ICEBERG, RecordDefinitionPhysicalRefSupport.resolveSourceType(definition));
     assertEquals(
         "${ICEBERG_NAMESPACE}",
         RecordDefinitionPhysicalRefSupport.toPhysicalSourceRef(definition).getIcebergNamespace());
@@ -56,7 +55,8 @@ class RecordDefinitionPhysicalRefSupportTest {
     RecordDefinition definition = compositeDefinition();
 
     assertTrue(RecordDefinitionPhysicalRefSupport.supportsRefreshFromSource(definition));
-    assertEquals(DvSourceType.COMPOSITE, RecordDefinitionPhysicalRefSupport.resolveSourceType(definition));
+    assertEquals(
+        DvSourceType.COMPOSITE, RecordDefinitionPhysicalRefSupport.resolveSourceType(definition));
     assertEquals(
         "models/source-tables-crm.hsm",
         RecordDefinitionPhysicalRefSupport.toPhysicalSourceRef(definition)
@@ -90,7 +90,8 @@ class RecordDefinitionPhysicalRefSupportTest {
 
   private static RecordDefinition icebergDefinition() {
     RecordDefinition definition = new RecordDefinition();
-    definition.setKey(new RecordDefinitionKey("hop/integration-tests/sources", "CRM-customer-iceberg"));
+    definition.setKey(
+        new RecordDefinitionKey("hop/integration-tests/sources", "CRM-customer-iceberg"));
     definition.setType(RecordDefinitionType.DV_SOURCE);
     DvSourceRecord dvSource = new DvSourceRecord();
     dvSource.setSourceType("ICEBERG");

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -80,9 +78,7 @@ class ExecutionMapFocusContextTest {
   @Test
   void canDrillIntoWhenNodeHasSharedChildLinkedByContainsEdge() {
     ExecutionMapDocument document = new ExecutionMapDocument();
-    document
-        .getNodesOrEmpty()
-        .add(node("parent", "Parent", ExecutionMapNodeType.WORKFLOW, "root"));
+    document.getNodesOrEmpty().add(node("parent", "Parent", ExecutionMapNodeType.WORKFLOW, "root"));
     document
         .getNodesOrEmpty()
         .add(node("shared", "Shared", ExecutionMapNodeType.PIPELINE, "other-parent"));

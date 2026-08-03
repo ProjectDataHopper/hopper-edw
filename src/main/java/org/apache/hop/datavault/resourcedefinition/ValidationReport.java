@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import java.util.ArrayList;
@@ -109,8 +107,7 @@ public final class ValidationReport {
     }
 
     public ValidationIssue withDownstreamImpact(String impact) {
-      return new ValidationIssue(
-          issueId, kind, severity, fieldName, message, proposals, impact);
+      return new ValidationIssue(issueId, kind, severity, fieldName, message, proposals, impact);
     }
   }
 
@@ -200,7 +197,9 @@ public final class ValidationReport {
   }
 
   public int getAcknowledgedIssueCount() {
-    return recordValidations.stream().mapToInt(RecordDefinitionValidation::acknowledgedIssueCount).sum();
+    return recordValidations.stream()
+        .mapToInt(RecordDefinitionValidation::acknowledgedIssueCount)
+        .sum();
   }
 
   public boolean hasBlockingIssues() {

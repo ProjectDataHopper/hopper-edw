@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.file;
 
 import java.nio.charset.Charset;
@@ -153,11 +151,7 @@ public final class CsvFileMetadataDiscovery {
       Long precision = asLong(cell(row, columns.precision));
       field.setPrecision(precision != null && precision >= 0 ? String.valueOf(precision) : "");
       field.setInputOptions(
-          csvInputOptions(
-              row,
-              columns.mask,
-              columns.decimalSymbol,
-              columns.groupingSymbol));
+          csvInputOptions(row, columns.mask, columns.decimalSymbol, columns.groupingSymbol));
       fields.add(field);
     }
 
@@ -166,8 +160,7 @@ public final class CsvFileMetadataDiscovery {
           BaseMessages.getString(PKG, "CsvFileMetadataDiscovery.Error.NoFields"));
     }
 
-    return new DiscoveryResult(
-        charset, delimiter, enclosure, headerPresent, headerLines, fields);
+    return new DiscoveryResult(charset, delimiter, enclosure, headerPresent, headerLines, fields);
   }
 
   private static SourceFieldInputOptions csvInputOptions(

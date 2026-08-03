@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.businessvault;
 
 import java.io.File;
@@ -39,7 +37,6 @@ import org.apache.hop.datavault.resourcedefinition.ResourceDefinitionGroupResolv
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
-
 import org.apache.hop.ui.core.dialog.BaseDialog;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.gui.GuiResource;
@@ -155,7 +152,8 @@ public class HopBusinessVaultFileType extends HopFileTypeBase {
     try {
       BusinessVaultModel model = new BusinessVaultModel();
       model.setName(
-          BaseMessages.getString(PKG, "HopBusinessVaultFileType.New.Text", "New Business Vault Model"));
+          BaseMessages.getString(
+              PKG, "HopBusinessVaultFileType.New.Text", "New Business Vault Model"));
       return addBusinessVaultToExplorer(hopGui, model, null, this);
     } catch (Exception e) {
       throw new HopException("Error creating new Business Vault model", e);
@@ -219,7 +217,7 @@ public class HopBusinessVaultFileType extends HopFileTypeBase {
             GuiActionType.Create,
             BaseMessages.getString(PKG, "HopBusinessVaultFileType.GuiAction.New.Name"),
             BaseMessages.getString(PKG, "HopBusinessVaultFileType.GuiAction.New.Tooltip"),
-                "business-vault-model.svg",
+            "business-vault-model.svg",
             (shift, ctrl, params) -> {
               try {
                 this.newFile(hopGui, hopGui.getVariables());

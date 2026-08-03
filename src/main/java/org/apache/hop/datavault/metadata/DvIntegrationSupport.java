@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.ArrayList;
@@ -57,7 +55,8 @@ public final class DvIntegrationSupport {
   }
 
   public static boolean isExternalRead(IDvTable table) {
-    return table instanceof DvTableBase base && resolveMode(base) == DvIntegrationMode.EXTERNAL_READ;
+    return table instanceof DvTableBase base
+        && resolveMode(base) == DvIntegrationMode.EXTERNAL_READ;
   }
 
   public static boolean isCustomPipelines(IDvTable table) {
@@ -118,10 +117,7 @@ public final class DvIntegrationSupport {
       } catch (Exception e) {
         throw new HopException(
             BaseMessages.getString(
-                PKG,
-                "DvIntegrationSupport.Error.LoadCustomPipeline",
-                resolved,
-                table.getName()),
+                PKG, "DvIntegrationSupport.Error.LoadCustomPipeline", resolved, table.getName()),
             e);
       }
     }
@@ -200,9 +196,7 @@ public final class DvIntegrationSupport {
               new CheckResult(
                   ICheckResult.TYPE_RESULT_OK,
                   BaseMessages.getString(
-                      PKG,
-                      "DvIntegrationSupport.CheckResult.ExternalHasLayout",
-                      layout.size()),
+                      PKG, "DvIntegrationSupport.CheckResult.ExternalHasLayout", layout.size()),
                   table));
         }
       } catch (HopException e) {
@@ -210,9 +204,7 @@ public final class DvIntegrationSupport {
             new CheckResult(
                 ICheckResult.TYPE_RESULT_ERROR,
                 BaseMessages.getString(
-                    PKG,
-                    "DvIntegrationSupport.CheckResult.ExternalLayoutError",
-                    e.getMessage()),
+                    PKG, "DvIntegrationSupport.CheckResult.ExternalLayoutError", e.getMessage()),
                 table));
       }
     }

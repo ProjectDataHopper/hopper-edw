@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,7 +45,8 @@ class DvUpdateExecutionSupportTest {
     assertEquals("sat-c", phases.get(2).get(0).getName());
 
     List<PipelineMeta> flat = buckets.flattenedInDependencyOrder();
-    assertEquals(List.of("hub-a", "link-b", "sat-c"), flat.stream().map(PipelineMeta::getName).toList());
+    assertEquals(
+        List.of("hub-a", "link-b", "sat-c"), flat.stream().map(PipelineMeta::getName).toList());
     assertTrue(!buckets.isEmpty());
     assertEquals(3, buckets.size());
   }

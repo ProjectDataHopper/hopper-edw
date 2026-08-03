@@ -13,15 +13,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -35,7 +32,6 @@ import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.Condition;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.ICheckResult;
-import org.apache.hop.core.database.Database;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.exception.HopValueException;
@@ -45,8 +41,6 @@ import org.apache.hop.core.gui.plugin.GuiElementType;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.GuiWidgetElement;
 import org.apache.hop.core.logging.ILoggingObject;
-import org.apache.hop.core.logging.LoggingObjectType;
-import org.apache.hop.core.logging.SimpleLoggingObject;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.RowMeta;
@@ -62,18 +56,17 @@ import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.catalog.DvSourceCatalogService;
 import org.apache.hop.datavault.transform.dvhashkey.DvHashKeyMeta;
 import org.apache.hop.datavault.transform.dvhashkey.DvHashKeyMetaFactory;
+import org.apache.hop.datavault.transform.mergerowsplus.MergeRowsPlusMeta;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHasName;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineHopMeta;
 import org.apache.hop.pipeline.PipelineMeta;
-import org.apache.hop.workflow.WorkflowMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transforms.constant.ConstantField;
 import org.apache.hop.pipeline.transforms.constant.ConstantMeta;
 import org.apache.hop.pipeline.transforms.filterrows.FilterRowsMeta;
-import org.apache.hop.datavault.transform.mergerowsplus.MergeRowsPlusMeta;
 import org.apache.hop.pipeline.transforms.mergerows.PassThroughField;
 import org.apache.hop.pipeline.transforms.selectvalues.SelectField;
 import org.apache.hop.pipeline.transforms.selectvalues.SelectValuesMeta;
@@ -81,6 +74,7 @@ import org.apache.hop.pipeline.transforms.sort.SortRowsField;
 import org.apache.hop.pipeline.transforms.sort.SortRowsMeta;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
 import org.apache.hop.pipeline.transforms.uniquerowsbyhashset.UniqueRowsByHashSetMeta;
+import org.apache.hop.workflow.WorkflowMeta;
 import org.jspecify.annotations.NonNull;
 
 /**
@@ -233,8 +227,7 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
           remarks.add(
               new CheckResult(
                   ICheckResult.TYPE_RESULT_ERROR,
-                  BaseMessages.getString(
-                      PKG, "DvLink.CheckResult.MissingRoleHashColumn", hubName),
+                  BaseMessages.getString(PKG, "DvLink.CheckResult.MissingRoleHashColumn", hubName),
                   this));
           continue;
         }
@@ -668,7 +661,9 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
         TransformMeta sourceInputTransform = addSourceTableInput(ctx, pipelineMeta, linkSource);
         if (sourceInputTransform != null) {
           String sourceConnection =
-              ctx.dvSource instanceof org.apache.hop.datavault.metadata.database.DvDatabaseSource dbSource
+              ctx.dvSource
+                      instanceof
+                      org.apache.hop.datavault.metadata.database.DvDatabaseSource dbSource
                   ? dbSource.getDatabaseName()
                   : null;
           GeneratedPipelineMetadataSupport.stampSourceRead(sourceInputTransform, sourceConnection);
@@ -737,7 +732,8 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
         // Target side: prefer SQL ORDER BY with a hop-compatible binary/C collation when we are
         // certain it matches Hop SortRows (STRING/HEX). Linguistic DB collations can disagree on
         // decimal-dash keys (e.g. "0-100-..." vs "0-10-...") and desynchronize MergeRows → PK
-        // violations. When uncertain, SortRows the target leg. Source always SortRows (hash in Hop).
+        // violations. When uncertain, SortRows the target leg. Source always SortRows (hash in
+        // Hop).
         DvHashKeyOrderStrategySupport.TargetHashOrderPlan targetOrderPlan =
             resolveTargetHashOrderPlan(ctx, linkHashKeyFieldName);
         TransformMeta targetInputTransform =
@@ -836,8 +832,7 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
       String recordSourceGroup)
       throws HopException {
     List<PipelineMeta> pipelines =
-        generateUpdatePipelines(
-            metadataProvider, variables, model, loadDate, recordSourceGroup);
+        generateUpdatePipelines(metadataProvider, variables, model, loadDate, recordSourceGroup);
     if (pipelines == null || pipelines.size() <= 1) {
       return List.of();
     }
@@ -847,8 +842,7 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
         config != null && !Utils.isEmpty(config.getLinkPipelineNamePrefix())
             ? config.getLinkPipelineNamePrefix()
             : DataVaultConfiguration.DEFAULT_LINK_PIPELINE_NAME_PREFIX;
-    String workflowName =
-        DvMultiSourceUpdateWorkflowSupport.defaultWorkflowName(this, prefix);
+    String workflowName = DvMultiSourceUpdateWorkflowSupport.defaultWorkflowName(this, prefix);
     return DvMultiSourceUpdateWorkflowSupport.buildSerialWorkflowsIfMultiSource(
         workflowName, pipelines);
   }
@@ -971,7 +965,9 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
             new Point(LOCATION_START_LINE_2.x, LOCATION_START_LINE_2.y));
     if (builder instanceof DvDatabaseLinkSourcePipelineBuilder dbBuilder) {
       dbBuilder.setDvLinkHubSource(linkSource);
-    } else if (builder instanceof org.apache.hop.datavault.metadata.file.DvCsvLinkSourcePipelineBuilder csvBuilder) {
+    } else if (builder
+        instanceof
+        org.apache.hop.datavault.metadata.file.DvCsvLinkSourcePipelineBuilder csvBuilder) {
       csvBuilder.setDvLinkHubSource(linkSource);
     }
     builder.build();
@@ -1059,8 +1055,7 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
     // Dependent child keys: rename source field → target column name for storage
     //
     for (DependentChildKey dck : listDependentChildKeys()) {
-      String sourceField =
-          ctx.variables.resolve(Const.NVL(dck.resolveSourceFieldName(), ""));
+      String sourceField = ctx.variables.resolve(Const.NVL(dck.resolveSourceFieldName(), ""));
       String targetField = ctx.variables.resolve(Const.NVL(dck.getName(), ""));
       if (Utils.isEmpty(sourceField) || Utils.isEmpty(targetField)) {
         throw new HopException(
@@ -1190,7 +1185,8 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
   private List<String> resolveHubSourceBusinessKeyFields(
       DvLinkHubSource linkSource, String hubName, DvHub hub, IVariables variables)
       throws HopException {
-    return DvLinkHubSourceKeyFieldSupport.resolveSourceFieldNames(linkSource, hubName, hub, variables);
+    return DvLinkHubSourceKeyFieldSupport.resolveSourceFieldNames(
+        linkSource, hubName, hub, variables);
   }
 
   private DvHashKeyOrderStrategySupport.TargetHashOrderPlan resolveTargetHashOrderPlan(
@@ -1200,12 +1196,7 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
             ? ctx.targetDatabaseMeta.quoteField(hashFieldName)
             : hashFieldName;
     return DvHashKeyOrderStrategySupport.resolve(
-        ctx.targetDatabaseMeta,
-        ctx.config,
-        ctx.variables,
-        quoted,
-        ctx.hashOrderSession,
-        true);
+        ctx.targetDatabaseMeta, ctx.config, ctx.variables, quoted, ctx.hashOrderSession, true);
   }
 
   private TransformMeta addTargetTableInput(
@@ -1240,8 +1231,7 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
                 + "' on link "
                 + getName());
       }
-      sql.append(", ")
-          .append(ctx.targetDatabaseMeta.quoteField(ctx.variables.resolve(hubHashCol)));
+      sql.append(", ").append(ctx.targetDatabaseMeta.quoteField(ctx.variables.resolve(hubHashCol)));
     }
 
     // The name of the source is described in the Link itself
@@ -1259,9 +1249,7 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
 
     // SQL ORDER BY with hop-compatible COLLATE when certain; else unordered + Hop SortRows.
     DvHashKeyOrderStrategySupport.TargetHashOrderPlan plan =
-        orderPlan != null
-            ? orderPlan
-            : DvHashKeyOrderStrategySupport.hopSortFallback();
+        orderPlan != null ? orderPlan : DvHashKeyOrderStrategySupport.hopSortFallback();
     String finalSql = DvHashKeyOrderStrategySupport.applyToDistinctSelect(sql.toString(), plan);
 
     DvSqlSupport.assignDisplaySql(targetTableInputMeta, finalSql);
@@ -1418,16 +1406,14 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
     }
     UniqueRowsByHashSetMeta uniqueMeta = new UniqueRowsByHashSetMeta();
     List<UniqueRowsByHashSetMeta.CompareField> compareFields = new ArrayList<>();
-    UniqueRowsByHashSetMeta.CompareField compareField =
-        new UniqueRowsByHashSetMeta.CompareField();
+    UniqueRowsByHashSetMeta.CompareField compareField = new UniqueRowsByHashSetMeta.CompareField();
     compareField.setName(linkHashFieldName);
     compareFields.add(compareField);
     uniqueMeta.setCompareFields(compareFields);
 
     TransformMeta tm =
         new TransformMeta("UniqueRowsByHashSet", "distinct_" + linkHashFieldName, uniqueMeta);
-    tm.setLocation(
-        predecessor.getLocation().x + SPACING_WIDTH, predecessor.getLocation().y);
+    tm.setLocation(predecessor.getLocation().x + SPACING_WIDTH, predecessor.getLocation().y);
     pipelineMeta.addTransform(tm);
     pipelineMeta.addPipelineHop(new PipelineHopMeta(predecessor, tm));
     return tm;
@@ -1615,7 +1601,8 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
 
       // Use per-source data if provided (new multi-source model), else fall back to top-level
       // legacy fields
-      DataVaultSource effectiveSource = linkSource.resolveSource(variables, metadataProvider, model);
+      DataVaultSource effectiveSource =
+          linkSource.resolveSource(variables, metadataProvider, model);
       if (effectiveSource == null) {
         throw new HopException("Please provide a valid record source in Link " + link.getName());
       }
@@ -1680,8 +1667,8 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
     @HopMetadataProperty private String source;
 
     /**
-     * Per-satellite source attribute field mappings for this specific source. Tells the system,
-     * for each participating link satellite, which columns in *this* source correspond to the
+     * Per-satellite source attribute field mappings for this specific source. Tells the system, for
+     * each participating link satellite, which columns in *this* source correspond to the
      * satellite's attributes (and driving keys when multi-active).
      */
     @HopMetadataProperty(key = "satelliteSourceKeyField", groupKey = "satelliteSourceKeyFields")

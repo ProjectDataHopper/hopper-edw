@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.widget;
 
 import java.util.ArrayList;
@@ -83,10 +81,7 @@ public final class MarkdownAsciiTable {
   private static void appendSeparator(StringBuilder table, int[] widths) {
     table.append('|');
     for (int width : widths) {
-      table
-          .append(' ')
-          .append("-".repeat(Math.max(1, width)))
-          .append(' ');
+      table.append(' ').append("-".repeat(Math.max(1, width))).append(' ');
       table.append('|');
     }
     table.append(System.lineSeparator());

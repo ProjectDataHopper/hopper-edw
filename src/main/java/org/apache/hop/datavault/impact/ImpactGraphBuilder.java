@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.impact;
 
 import java.util.ArrayList;
@@ -35,6 +34,7 @@ import org.apache.hop.datavault.metadata.DvHub;
 import org.apache.hop.datavault.metadata.DvLink;
 import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.IDvTable;
+import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
 import org.apache.hop.datavault.metadata.businessvault.BvBusinessTable;
 import org.apache.hop.datavault.metadata.businessvault.BvDerivativeRef;
 import org.apache.hop.datavault.metadata.businessvault.BvPitTable;
@@ -43,11 +43,10 @@ import org.apache.hop.datavault.metadata.businessvault.BvScd2SatelliteConfig;
 import org.apache.hop.datavault.metadata.businessvault.BvScd2Table;
 import org.apache.hop.datavault.metadata.businessvault.BvSqlRef;
 import org.apache.hop.datavault.metadata.businessvault.BvSqlResolvedKind;
-import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
 import org.apache.hop.datavault.metadata.businessvault.IBvTable;
+import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.datavault.metadata.dimensional.DmSourceConfiguration;
 import org.apache.hop.datavault.metadata.dimensional.DmSourceType;
-import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.datavault.metadata.dimensional.IDmTable;
 import org.apache.hop.datavault.resourcedefinition.SourceUsage;
 import org.apache.hop.datavault.resourcedefinition.SourceUsageIndexBuilder;
@@ -92,6 +91,7 @@ public final class ImpactGraphBuilder {
     private final String sourcesNamespace;
     private final Map<String, ImpactNode> nodes = new LinkedHashMap<>();
     private final Map<String, List<ImpactEdge>> outgoing = new LinkedHashMap<>();
+
     /** physical/logical table name (lower) → DV/BV table nodes for SQL scans */
     private final Map<String, List<ImpactNode>> tableNameIndex = new LinkedHashMap<>();
 
@@ -518,7 +518,8 @@ public final class ImpactGraphBuilder {
         return;
       }
       tableNameIndex
-          .computeIfAbsent(node.elementName().toLowerCase(Locale.ROOT), ignored -> new ArrayList<>())
+          .computeIfAbsent(
+              node.elementName().toLowerCase(Locale.ROOT), ignored -> new ArrayList<>())
           .add(node);
     }
 

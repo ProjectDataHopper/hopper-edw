@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,8 +36,7 @@ class DvBulkLoadPluginSupportTest {
   @Test
   void tableOutputIsAlwaysAvailable() {
     assertTrue(DvBulkLoadPluginSupport.isTransformPluginAvailable("TableOutput"));
-    assertTrue(
-        DvBulkLoadPluginSupport.isModeAvailable(null, DvTargetLoadMode.TABLE_OUTPUT));
+    assertTrue(DvBulkLoadPluginSupport.isModeAvailable(null, DvTargetLoadMode.TABLE_OUTPUT));
     assertTrue(
         DvBulkLoadPluginSupport.resolveCapabilities(null).stream()
             .anyMatch(cap -> cap.mode() == DvTargetLoadMode.TABLE_OUTPUT));
@@ -62,13 +59,11 @@ class DvBulkLoadPluginSupportTest {
 
     if (DvBulkLoadPluginSupport.isTransformPluginAvailable(
         DvBulkLoadPluginSupport.MYSQL_BULK_LOADER_ID)) {
-      assertTrue(
-          DvBulkLoadPluginSupport.isModeAvailable(mysql, DvTargetLoadMode.NATIVE_BULK));
+      assertTrue(DvBulkLoadPluginSupport.isModeAvailable(mysql, DvTargetLoadMode.NATIVE_BULK));
     }
     if (DvBulkLoadPluginSupport.isTransformPluginAvailable(
         DvBulkLoadPluginSupport.PG_BULK_LOADER_ID)) {
-      assertTrue(
-          DvBulkLoadPluginSupport.isModeAvailable(postgres, DvTargetLoadMode.NATIVE_BULK));
+      assertTrue(DvBulkLoadPluginSupport.isModeAvailable(postgres, DvTargetLoadMode.NATIVE_BULK));
     }
   }
 
@@ -88,14 +83,12 @@ class DvBulkLoadPluginSupportTest {
             DvBulkLoadPluginSupport.TEXT_FILE_OUTPUT_TRANSFORM_ID)
         && DvBulkLoadPluginSupport.isActionPluginAvailable(
             DvBulkLoadCommandSupport.MYSQL_BULK_LOAD_ACTION_ID)) {
-      assertTrue(
-          DvBulkLoadPluginSupport.isModeAvailable(mysql, DvTargetLoadMode.STAGING_FILE));
+      assertTrue(DvBulkLoadPluginSupport.isModeAvailable(mysql, DvTargetLoadMode.STAGING_FILE));
       assertTrue(
           DvBulkLoadPluginSupport.resolveCapabilities(mysql).stream()
               .anyMatch(cap -> cap.mode() == DvTargetLoadMode.STAGING_FILE));
     } else {
-      assertFalse(
-          DvBulkLoadPluginSupport.isModeAvailable(mysql, DvTargetLoadMode.STAGING_FILE));
+      assertFalse(DvBulkLoadPluginSupport.isModeAvailable(mysql, DvTargetLoadMode.STAGING_FILE));
     }
   }
 
@@ -134,8 +127,7 @@ class DvBulkLoadPluginSupportTest {
             DvBulkLoadPluginSupport.TEXT_FILE_OUTPUT_TRANSFORM_ID)
         && DvBulkLoadPluginSupport.isActionPluginAvailable(
             DvBulkLoadCommandSupport.MSSQL_BULK_LOAD_ACTION_ID)) {
-      assertTrue(
-          DvBulkLoadPluginSupport.isModeAvailable(mssql, DvTargetLoadMode.STAGING_FILE));
+      assertTrue(DvBulkLoadPluginSupport.isModeAvailable(mssql, DvTargetLoadMode.STAGING_FILE));
     }
   }
 

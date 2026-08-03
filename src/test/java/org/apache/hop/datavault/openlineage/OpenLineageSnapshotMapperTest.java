@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.openlineage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -60,8 +58,7 @@ class OpenLineageSnapshotMapperTest {
   void setUp() throws Exception {
     variables = new Variables();
     variables.setVariable(
-        "PROJECT_HOME",
-        Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
+        "PROJECT_HOME", Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
     model = loadModel("retail-example/models/retail-360.hdv");
   }
 
@@ -82,7 +79,9 @@ class OpenLineageSnapshotMapperTest {
     assertEquals("COMPLETE", hubEvent.path("eventType").asText());
     // Each job gets its own runId; export correlation id is on hop_export facet.
     assertFalse(hubEvent.path("run").path("runId").asText().isBlank());
-    assertEquals("run-test-1", hubEvent.path("run").path("facets").path("hop_export").path("exportRunId").asText());
+    assertEquals(
+        "run-test-1",
+        hubEvent.path("run").path("facets").path("hop_export").path("exportRunId").asText());
     assertTrue(hubEvent.path("job").path("namespace").asText().contains("hop-data-vault"));
     assertTrue(hubEvent.path("job").path("name").asText().startsWith("dv/"));
     assertTrue(hubEvent.path("inputs").isArray());
@@ -98,8 +97,7 @@ class OpenLineageSnapshotMapperTest {
             || columnLineage.path("fields").fieldNames().hasNext(),
         "expected columnLineage fields");
     if (columnLineage.path("fields").has("customer_id")) {
-      assertTrue(
-          columnLineage.path("fields").path("customer_id").path("inputFields").size() >= 1);
+      assertTrue(columnLineage.path("fields").path("customer_id").path("inputFields").size() >= 1);
     }
 
     // Source feeds appear as input datasets with inferred schema fields.
@@ -171,7 +169,8 @@ class OpenLineageSnapshotMapperTest {
         .getTables()
         .forEach(
             t -> {
-              if (t.getTargetDatabaseMetaName() == null || t.getTargetDatabaseMetaName().isBlank()) {
+              if (t.getTargetDatabaseMetaName() == null
+                  || t.getTargetDatabaseMetaName().isBlank()) {
                 t.setTargetDatabaseMetaName("Vault");
               }
             });
@@ -187,8 +186,7 @@ class OpenLineageSnapshotMapperTest {
     JsonNode out = hubEvent.path("outputs").get(0);
     assertTrue(out.path("facets").has("dataSource"), "output should have dataSource facet");
     assertTrue(out.path("facets").has("hop_location"), "output should have hop_location facet");
-    assertEquals(
-        "DATABASE", out.path("facets").path("hop_location").path("kind").asText());
+    assertEquals("DATABASE", out.path("facets").path("hop_location").path("kind").asText());
     assertEquals(
         "hub_customer", out.path("facets").path("hop_location").path("tableName").asText());
   }
@@ -199,7 +197,8 @@ class OpenLineageSnapshotMapperTest {
     ObjectNode job = MAPPER.createObjectNode();
     job.put("name", "dv/retail-360/hub_customer");
     event.set("job", job);
-    assertEquals("dv_retail-360_hub_customer.json", OpenLineageSnapshotMapper.fileNameForEvent(event));
+    assertEquals(
+        "dv_retail-360_hub_customer.json", OpenLineageSnapshotMapper.fileNameForEvent(event));
   }
 
   private static DataVaultModel loadModel(String relativePath) throws Exception {

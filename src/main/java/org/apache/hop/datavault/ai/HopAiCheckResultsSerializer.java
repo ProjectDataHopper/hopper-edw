@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai;
 
 import java.util.ArrayList;
@@ -42,9 +40,7 @@ public final class HopAiCheckResultsSerializer {
               ? "ERROR"
               : result.getType() == ICheckResult.TYPE_RESULT_OK
                   ? "OK"
-                  : result.getType() == ICheckResult.TYPE_RESULT_WARNING
-                      ? "WARNING"
-                      : "INFO";
+                  : result.getType() == ICheckResult.TYPE_RESULT_WARNING ? "WARNING" : "INFO";
       json.append("{\"type\":").append(jsonString(type));
       json.append(",\"text\":").append(jsonString(result.getText()));
       json.append(",\"source\":").append(jsonString(formatCheckSource(result)));

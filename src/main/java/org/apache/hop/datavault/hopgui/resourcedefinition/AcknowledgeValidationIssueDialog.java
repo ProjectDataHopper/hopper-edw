@@ -13,12 +13,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.resourcedefinition;
 
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
+import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
@@ -31,8 +31,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
-import org.apache.hop.datavault.hopgui.help.HelpTopics;
 
 /** Collects a required comment before acknowledging a validation issue. */
 public final class AcknowledgeValidationIssueDialog {
@@ -73,7 +71,8 @@ public final class AcknowledgeValidationIssueDialog {
 
     Label wlComment = new Label(shell, SWT.LEFT);
     PropsUi.setLook(wlComment);
-    wlComment.setText(BaseMessages.getString(PKG, "AcknowledgeValidationIssueDialog.Comment.Label"));
+    wlComment.setText(
+        BaseMessages.getString(PKG, "AcknowledgeValidationIssueDialog.Comment.Label"));
     FormData fdlComment = new FormData();
     fdlComment.left = new FormAttachment(0, margin);
     fdlComment.top = new FormAttachment(wlIssue, margin);

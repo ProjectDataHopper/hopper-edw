@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.quality.alert;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,7 +44,8 @@ class QualityAlertSupportTest {
   @Test
   void parseSinkIdsSplitsAndDedupes() {
     assertEquals(List.of("log", "ops_table"), QualityAlertSupport.parseSinkIds("log,ops_table"));
-    assertEquals(List.of("log", "ops_table"), QualityAlertSupport.parseSinkIds(" LOG ; ops_table ; log "));
+    assertEquals(
+        List.of("log", "ops_table"), QualityAlertSupport.parseSinkIds(" LOG ; ops_table ; log "));
   }
 
   @Test
@@ -80,7 +79,8 @@ class QualityAlertSupportTest {
   void alertOnlyWithFindingsUsesDefaultLogWhenBlank() {
     List<IQualityAlertSink> sinks =
         QualityAlertSupport.resolveSinks(QualityDispositionMode.ALERT_ONLY, 1, null, false);
-    assertEquals(List.of("log"), sinks.stream().map(IQualityAlertSink::id).collect(Collectors.toList()));
+    assertEquals(
+        List.of("log"), sinks.stream().map(IQualityAlertSink::id).collect(Collectors.toList()));
   }
 
   @Test
@@ -88,7 +88,8 @@ class QualityAlertSupportTest {
     List<IQualityAlertSink> sinks =
         QualityAlertSupport.resolveSinks(
             QualityDispositionMode.FAIL_ON_BLOCKING, 1, "log,ops_table", false);
-    assertEquals(List.of("log"), sinks.stream().map(IQualityAlertSink::id).collect(Collectors.toList()));
+    assertEquals(
+        List.of("log"), sinks.stream().map(IQualityAlertSink::id).collect(Collectors.toList()));
   }
 
   @Test
@@ -109,8 +110,7 @@ class QualityAlertSupportTest {
   @Test
   void alertOnlyDispositionPassesWithFindings() {
     DataQualityReport report = reportWithFinding();
-    DispositionResult result =
-        QualityDisposition.apply(report, QualityDispositionMode.ALERT_ONLY);
+    DispositionResult result = QualityDisposition.apply(report, QualityDispositionMode.ALERT_ONLY);
     assertTrue(!result.isFailed());
     assertTrue(report.getFindingCount() > 0);
   }

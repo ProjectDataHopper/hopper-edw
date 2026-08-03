@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import org.apache.hop.catalog.discovery.RecordDefinitionSchemaDiffSupport;
@@ -38,7 +36,8 @@ public final class ValidationReportFormatter {
       return "";
     }
     StringBuilder builder = new StringBuilder();
-    builder.append(
+    builder
+        .append(
             BaseMessages.getString(
                 PKG,
                 "ValidationReportFormatter.Summary",
@@ -54,7 +53,8 @@ public final class ValidationReportFormatter {
           validation.key() != null
               ? validation.key().getNamespace() + "/" + validation.key().getName()
               : "?";
-      builder.append(
+      builder
+          .append(
               BaseMessages.getString(
                   PKG,
                   "ValidationReportFormatter.RecordHeader",
@@ -65,12 +65,14 @@ public final class ValidationReportFormatter {
           .append(Const.CR);
 
       if (validation.schemaDiff() != null && validation.schemaDiff().hasChanges()) {
-        builder.append(RecordDefinitionSchemaDiffSupport.formatDiff(validation.schemaDiff()))
+        builder
+            .append(RecordDefinitionSchemaDiffSupport.formatDiff(validation.schemaDiff()))
             .append(Const.CR);
       }
 
       for (SourceUsage usage : validation.usages()) {
-        builder.append(
+        builder
+            .append(
                 BaseMessages.getString(
                     PKG,
                     "ValidationReportFormatter.Usage",
@@ -110,7 +112,8 @@ public final class ValidationReportFormatter {
               .append(Const.CR);
         }
         for (RemediationProposal proposal : issue.proposals()) {
-          builder.append(
+          builder
+              .append(
                   BaseMessages.getString(
                       PKG,
                       "ValidationReportFormatter.Proposal",
@@ -125,7 +128,8 @@ public final class ValidationReportFormatter {
     }
 
     if (report.hasBlockingIssues()) {
-      builder.append(Const.CR)
+      builder
+          .append(Const.CR)
           .append(BaseMessages.getString(PKG, "ValidationReportFormatter.BlockingIssues"))
           .append(Const.CR);
     }

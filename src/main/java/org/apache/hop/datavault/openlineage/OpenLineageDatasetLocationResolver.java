@@ -13,17 +13,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.openlineage;
 
+import org.apache.hop.catalog.model.DvSourceRecord;
 import org.apache.hop.catalog.model.PhysicalFileRef;
 import org.apache.hop.catalog.model.PhysicalIcebergTableRef;
 import org.apache.hop.catalog.model.PhysicalTableRef;
 import org.apache.hop.catalog.model.RecordDefinition;
 import org.apache.hop.catalog.model.RecordDefinitionKey;
-import org.apache.hop.catalog.model.DvSourceRecord;
 import org.apache.hop.catalog.registry.RecordDefinitionRegistry;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.util.Utils;
@@ -70,15 +68,9 @@ public final class OpenLineageDatasetLocationResolver {
       return null;
     }
     return switch (source.getKind()) {
-      case DV_SOURCE ->
-          forCatalogSource(
-              source.getName(), source.getCatalogKey(), context);
+      case DV_SOURCE -> forCatalogSource(source.getName(), source.getCatalogKey(), context);
       case DV_TABLE, BV_TABLE, DM_TABLE ->
-          forParentTable(
-              source.getName(),
-              source.getPhysicalRef(),
-              consumingTable,
-              context);
+          forParentTable(source.getName(), source.getPhysicalRef(), consumingTable, context);
       case CONFIG -> stagingLocation(source.getName());
     };
   }
@@ -103,8 +95,7 @@ public final class OpenLineageDatasetLocationResolver {
       return forCatalogSource(
           contribution.getSourceName(), contribution.getSourceCatalogKey(), context);
     }
-    return forParentTable(
-        contribution.getSourceName(), null, consumingTable, context);
+    return forParentTable(contribution.getSourceName(), null, consumingTable, context);
   }
 
   public static DatasetLocation forCatalogSource(
@@ -113,9 +104,7 @@ public final class OpenLineageDatasetLocationResolver {
       return null;
     }
     String cacheKey = "src:" + nvl(catalogKey) + ":" + sourceName;
-    return context.cached(
-        cacheKey,
-        () -> resolveCatalogSource(sourceName, catalogKey, context));
+    return context.cached(cacheKey, () -> resolveCatalogSource(sourceName, catalogKey, context));
   }
 
   private static DatasetLocation resolveCatalogSource(
@@ -247,8 +236,7 @@ public final class OpenLineageDatasetLocationResolver {
     if (Utils.isEmpty(tableName)) {
       return null;
     }
-    String connection =
-        consumingTable != null ? consumingTable.getTargetDatabaseMetaName() : null;
+    String connection = consumingTable != null ? consumingTable.getTargetDatabaseMetaName() : null;
     String schema = consumingTable != null ? consumingTable.getSchemaName() : null;
     return DatasetLocation.builder()
         .kind(DatasetLocationKind.DATABASE)
@@ -261,9 +249,7 @@ public final class OpenLineageDatasetLocationResolver {
   }
 
   private static String resolveJdbcUri(String connectionName, OpenLineageLocationContext context) {
-    if (Utils.isEmpty(connectionName)
-        || context == null
-        || context.getMetadataProvider() == null) {
+    if (Utils.isEmpty(connectionName) || context == null || context.getMetadataProvider() == null) {
       return !Utils.isEmpty(connectionName) ? "hop://connection/" + connectionName : null;
     }
     try {

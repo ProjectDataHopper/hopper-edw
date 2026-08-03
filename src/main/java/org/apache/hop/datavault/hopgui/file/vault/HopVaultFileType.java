@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.vault;
 
 import java.io.File;
@@ -28,10 +26,10 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.file.IHasFilename;
 import org.apache.hop.core.gui.plugin.action.GuiAction;
 import org.apache.hop.core.gui.plugin.action.GuiActionType;
+import org.apache.hop.core.search.ISearchable;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
 import org.apache.hop.core.xml.XmlHandler;
-import org.apache.hop.core.search.ISearchable;
 import org.apache.hop.datavault.hopgui.file.ExplorerPerspectiveTabSupport;
 import org.apache.hop.datavault.hopgui.search.HopGuiDataVaultModelSearchable;
 import org.apache.hop.datavault.metadata.DataVaultModel;
@@ -40,7 +38,6 @@ import org.apache.hop.datavault.resourcedefinition.ResourceDefinitionGroupResolv
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
-
 import org.apache.hop.ui.core.dialog.BaseDialog;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.gui.GuiResource;
@@ -215,9 +212,7 @@ public class HopVaultFileType extends HopFileTypeBase {
 
     explorer.activate();
 
-    targetFolder
-        .getDisplay()
-        .asyncExec(() -> LocalCatalogOfferSupport.maybeOffer(hopGui, model));
+    targetFolder.getDisplay().asyncExec(() -> LocalCatalogOfferSupport.maybeOffer(hopGui, model));
 
     return vaultGraph;
   }
@@ -253,7 +248,7 @@ public class HopVaultFileType extends HopFileTypeBase {
             GuiActionType.Create,
             BaseMessages.getString(PKG, "HopVaultFileType.GuiAction.New.Name"),
             BaseMessages.getString(PKG, "HopVaultFileType.GuiAction.New.Tooltip"),
-                "datavault-model.svg",
+            "datavault-model.svg",
             (shift, ctrl, params) -> {
               try {
                 this.newFile(hopGui, hopGui.getVariables());

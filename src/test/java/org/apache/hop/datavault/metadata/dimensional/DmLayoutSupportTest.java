@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -27,7 +25,6 @@ import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.RowMeta;
 import org.apache.hop.core.row.value.ValueMetaInteger;
-import org.apache.hop.core.row.value.ValueMetaString;
 import org.apache.hop.core.row.value.ValueMetaTimestamp;
 import org.apache.hop.core.variables.Variables;
 import org.junit.jupiter.api.BeforeAll;
@@ -46,10 +43,13 @@ class DmLayoutSupportTest {
     dimension.setName("dim_customer");
     dimension.setScdType(DmDimensionScdType.TYPE1);
     dimension.getNaturalKeys().add(new DmNaturalKeyField("customer_id"));
-    dimension.getAttributes().add(new DmDimensionAttribute("customer_name", DmScdUpdatePolicy.TYPE1));
+    dimension
+        .getAttributes()
+        .add(new DmDimensionAttribute("customer_name", DmScdUpdatePolicy.TYPE1));
 
     DimensionalConfiguration config = new DimensionalConfiguration();
-    var layout = DmLayoutSupport.buildDimensionTargetTableLayout(dimension, config, new Variables());
+    var layout =
+        DmLayoutSupport.buildDimensionTargetTableLayout(dimension, config, new Variables());
 
     assertEquals(3, layout.size());
     assertTrue(layout.indexOfValue("customer_id") >= 0);
@@ -63,10 +63,13 @@ class DmLayoutSupportTest {
     dimension.setName("dim_customer");
     dimension.setScdType(DmDimensionScdType.TYPE2);
     dimension.getNaturalKeys().add(new DmNaturalKeyField("customer_id"));
-    dimension.getAttributes().add(new DmDimensionAttribute("customer_name", DmScdUpdatePolicy.TYPE2));
+    dimension
+        .getAttributes()
+        .add(new DmDimensionAttribute("customer_name", DmScdUpdatePolicy.TYPE2));
 
     DimensionalConfiguration config = new DimensionalConfiguration();
-    var layout = DmLayoutSupport.buildDimensionTargetTableLayout(dimension, config, new Variables());
+    var layout =
+        DmLayoutSupport.buildDimensionTargetTableLayout(dimension, config, new Variables());
 
     assertTrue(layout.indexOfValue("dim_key") >= 0);
     assertTrue(layout.indexOfValue("customer_id") >= 0);
@@ -136,10 +139,13 @@ class DmLayoutSupportTest {
     dimension.getNaturalKeys().add(new DmNaturalKeyField("customer_id"));
 
     DimensionalConfiguration config = new DimensionalConfiguration();
-    var layout = DmLayoutSupport.buildDimensionTargetTableLayout(dimension, config, new Variables());
+    var layout =
+        DmLayoutSupport.buildDimensionTargetTableLayout(dimension, config, new Variables());
 
     assertTrue(layout.indexOfValue("customer_key") >= 0);
-    assertEquals("customer_key", DmLayoutSupport.resolveDimensionLookupKeyField(dimension, config, new Variables()));
+    assertEquals(
+        "customer_key",
+        DmLayoutSupport.resolveDimensionLookupKeyField(dimension, config, new Variables()));
   }
 
   @Test
@@ -153,7 +159,8 @@ class DmLayoutSupportTest {
     dimension.getNaturalKeys().add(new DmNaturalKeyField("warehouse_id"));
 
     DimensionalConfiguration config = new DimensionalConfiguration();
-    var layout = DmLayoutSupport.buildDimensionTargetTableLayout(dimension, config, new Variables());
+    var layout =
+        DmLayoutSupport.buildDimensionTargetTableLayout(dimension, config, new Variables());
 
     assertTrue(layout.indexOfValue("warehouse_hk") >= 0);
     assertTrue(layout.indexOfValue("warehouse_id") >= 0);
@@ -170,7 +177,8 @@ class DmLayoutSupportTest {
     dimension.getNaturalKeys().add(new DmNaturalKeyField("customer_id"));
 
     DimensionalConfiguration config = new DimensionalConfiguration();
-    var layout = DmLayoutSupport.buildDimensionTargetTableLayout(dimension, config, new Variables());
+    var layout =
+        DmLayoutSupport.buildDimensionTargetTableLayout(dimension, config, new Variables());
 
     assertTrue(layout.indexOfValue("customer_hk") >= 0);
     assertEquals(
@@ -341,8 +349,7 @@ class DmLayoutSupportTest {
     fact.getMeasures().add(new DmFactMeasure("amount", true));
 
     DimensionalConfiguration config = new DimensionalConfiguration();
-    var layout =
-        DmLayoutSupport.buildFactTargetTableLayout(fact, model, config, new Variables());
+    var layout = DmLayoutSupport.buildFactTargetTableLayout(fact, model, config, new Variables());
 
     assertEquals(3, layout.size());
     assertTrue(layout.indexOfValue("customer_key") >= 0);

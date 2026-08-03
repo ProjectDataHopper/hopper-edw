@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import java.util.ArrayList;
@@ -30,7 +28,6 @@ import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metadata.DataVaultConfiguration;
 import org.apache.hop.datavault.metadata.DataVaultModel;
-import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
@@ -90,9 +87,7 @@ public class BvScd2Table extends BvTableBase {
   }
 
   public String resolveIncrementalWatermarkField(
-      BusinessVaultConfiguration bvConfig,
-      DataVaultConfiguration dvConfig,
-      IVariables variables) {
+      BusinessVaultConfiguration bvConfig, DataVaultConfiguration dvConfig, IVariables variables) {
     if (!Utils.isEmpty(incrementalWatermarkField)) {
       return variables.resolve(incrementalWatermarkField);
     }
@@ -115,7 +110,8 @@ public class BvScd2Table extends BvTableBase {
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_ERROR,
-              BaseMessages.getString(PKG, "BvScd2Table.CheckResult.MissingSatelliteDerivative", getName()),
+              BaseMessages.getString(
+                  PKG, "BvScd2Table.CheckResult.MissingSatelliteDerivative", getName()),
               this));
     }
     BusinessVaultConfiguration bvConfig =
@@ -128,13 +124,13 @@ public class BvScd2Table extends BvTableBase {
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_ERROR,
-              BaseMessages.getString(PKG, "BvScd2Table.CheckResult.MissingFunctionalTimestamp", getName()),
+              BaseMessages.getString(
+                  PKG, "BvScd2Table.CheckResult.MissingFunctionalTimestamp", getName()),
               this));
     }
 
     if (isIncrementalBuild()) {
-      if (Utils.isEmpty(
-          resolveIncrementalWatermarkField(bvConfig, dvConfig, variables))) {
+      if (Utils.isEmpty(resolveIncrementalWatermarkField(bvConfig, dvConfig, variables))) {
         remarks.add(
             new CheckResult(
                 ICheckResult.TYPE_RESULT_ERROR,
@@ -186,7 +182,9 @@ public class BvScd2Table extends BvTableBase {
           new CheckResult(
               ICheckResult.TYPE_RESULT_WARNING,
               BaseMessages.getString(
-                  PKG, "BvScd2Table.CheckResult.IncrementalMultiSatelliteSourceIndicators", getName()),
+                  PKG,
+                  "BvScd2Table.CheckResult.IncrementalMultiSatelliteSourceIndicators",
+                  getName()),
               this));
     }
   }
@@ -214,7 +212,6 @@ public class BvScd2Table extends BvTableBase {
     }
     BusinessVaultConfiguration bvConfig =
         model != null ? model.getConfigurationOrDefault() : new BusinessVaultConfiguration();
-    return BvScd2PipelineSupport.buildTargetTableLayout(
-        this, bvConfig, dataVaultModel, variables);
+    return BvScd2PipelineSupport.buildTargetTableLayout(this, bvConfig, dataVaultModel, variables);
   }
 }

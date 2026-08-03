@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.discovery;
 
 import java.util.Date;
@@ -25,7 +23,6 @@ import org.apache.hop.catalog.model.DvSourceRecord;
 import org.apache.hop.catalog.model.RecordDefinition;
 import org.apache.hop.catalog.model.RecordOrigin;
 import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.catalog.DvSourceFieldSupport;
 import org.apache.hop.datavault.metadata.DvSourceType;
@@ -77,7 +74,8 @@ public final class RecordDefinitionCatalogRefreshSupport {
     if (sourceType == DvSourceType.ICEBERG) {
       diff = RecordDefinitionSchemaDiffSupport.diffTypesOnly(storedFields, discoveredFields);
       fieldsToApply =
-          RecordDefinitionIcebergRefreshSupport.mergeDiscoveredFields(storedFields, discoveredFields);
+          RecordDefinitionIcebergRefreshSupport.mergeDiscoveredFields(
+              storedFields, discoveredFields);
     } else {
       diff = RecordDefinitionSchemaDiffSupport.diff(storedFields, discoveredFields);
     }
@@ -99,7 +97,8 @@ public final class RecordDefinitionCatalogRefreshSupport {
       throws HopException {
     if (definition == null) {
       throw new HopException(
-          BaseMessages.getString(PKG, "RecordDefinitionCatalogRefreshSupport.Error.MissingDefinition"));
+          BaseMessages.getString(
+              PKG, "RecordDefinitionCatalogRefreshSupport.Error.MissingDefinition"));
     }
     if (discoveredFields == null || discoveredFields.isEmpty()) {
       throw new HopException(
@@ -112,7 +111,8 @@ public final class RecordDefinitionCatalogRefreshSupport {
     if (sourceType == DvSourceType.ICEBERG) {
       List<SourceField> storedFields = DvSourceFieldSupport.fromCatalogFields(dvSource.getFields());
       fieldsToApply =
-          RecordDefinitionIcebergRefreshSupport.mergeDiscoveredFields(storedFields, discoveredFields);
+          RecordDefinitionIcebergRefreshSupport.mergeDiscoveredFields(
+              storedFields, discoveredFields);
     }
     dvSource.setFields(DvSourceFieldSupport.toCatalogFields(fieldsToApply));
     definition.setFields(DvSourceFieldSupport.toRowMeta(fieldsToApply, null));

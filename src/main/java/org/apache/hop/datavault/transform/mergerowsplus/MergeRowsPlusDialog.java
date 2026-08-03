@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.transform.mergerowsplus;
 
 import java.util.List;
@@ -76,7 +74,10 @@ public class MergeRowsPlusDialog extends BaseTransformDialog {
   private final MergeRowsPlusMeta input;
 
   public MergeRowsPlusDialog(
-      Shell parent, IVariables variables, MergeRowsPlusMeta transformMeta, PipelineMeta pipelineMeta) {
+      Shell parent,
+      IVariables variables,
+      MergeRowsPlusMeta transformMeta,
+      PipelineMeta pipelineMeta) {
     super(parent, variables, transformMeta, pipelineMeta);
     input = transformMeta;
   }
@@ -209,7 +210,8 @@ public class MergeRowsPlusDialog extends BaseTransformDialog {
     wlAlign.setLayoutData(fdlAlign);
     wAlignInputLayouts = new Button(wSourcesComp, SWT.CHECK);
     PropsUi.setLook(wAlignInputLayouts);
-    wAlignInputLayouts.setText(BaseMessages.getString(PKG, "MergeRowsPlusDialog.AlignInputLayouts.Text"));
+    wAlignInputLayouts.setText(
+        BaseMessages.getString(PKG, "MergeRowsPlusDialog.AlignInputLayouts.Text"));
     wAlignInputLayouts.setSelection(true);
     wAlignInputLayouts.addListener(SWT.Selection, e -> input.setChanged());
     FormData fdAlign = new FormData();

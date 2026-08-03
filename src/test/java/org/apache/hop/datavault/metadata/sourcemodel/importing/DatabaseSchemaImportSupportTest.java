@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.sourcemodel.importing;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -187,8 +186,7 @@ class DatabaseSchemaImportSupportTest {
   void uniqueLogicalNameAddsSuffix() {
     SourceModel model = new SourceModel();
     model.getTables().add(new SourceTable("product"));
-    String unique =
-        DatabaseSchemaImportSupport.uniqueLogicalName(model, List.of(), "product");
+    String unique = DatabaseSchemaImportSupport.uniqueLogicalName(model, List.of(), "product");
     assertEquals("product_2", unique);
   }
 

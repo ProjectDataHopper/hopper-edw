@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,13 +24,12 @@ import java.nio.file.Path;
 import java.util.Date;
 import java.util.List;
 import org.apache.hop.core.HopEnvironment;
-import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.datavault.hopgui.file.dimensional.HopDimensionalFileType;
-import org.apache.hop.datavault.metadata.dimensional.DmPeriodicSnapshotFact;
 import org.apache.hop.datavault.metadata.dimensional.pipeline.DmUpdateExecutionSupport;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
@@ -140,12 +137,10 @@ class DmBasicStarPipelineTest {
             .filter(t -> "lookup_Customer".equals(t.getName()))
             .findFirst()
             .orElseThrow();
-    DimensionLookupMeta customerLookupMeta =
-        (DimensionLookupMeta) customerLookup.getTransform();
+    DimensionLookupMeta customerLookupMeta = (DimensionLookupMeta) customerLookup.getTransform();
     assertFalse(customerLookupMeta.isUpdate());
     assertEquals("d_customer", customerLookupMeta.getTableName());
-    assertEquals(
-        "customer_key", customerLookupMeta.getFields().getReturns().getKeyRename());
+    assertEquals("customer_key", customerLookupMeta.getFields().getReturns().getKeyRename());
     assertFalse(customerLookupMeta.isPreloadingCache());
     assertTrue(Utils.isEmpty(customerLookupMeta.getFields().getDate().getName()));
 
@@ -191,8 +186,7 @@ class DmBasicStarPipelineTest {
   @Test
   void factDimensionLookupDateConfiguredForEffectivityDimensionsOnly() throws Exception {
     DimensionalModel model = loadExtendedCatalogModel();
-    DmPeriodicSnapshotFact fact =
-        (DmPeriodicSnapshotFact) model.findTable("fact_daily_balance");
+    DmPeriodicSnapshotFact fact = (DmPeriodicSnapshotFact) model.findTable("fact_daily_balance");
     fact.setDimensionLookupDateField("snapshot_date");
     IHopMetadataProvider metadataProvider = testMetadataProvider();
 

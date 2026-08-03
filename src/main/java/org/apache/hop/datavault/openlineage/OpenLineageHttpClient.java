@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.openlineage;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -70,7 +68,8 @@ public final class OpenLineageHttpClient {
         builder.header("Authorization", apiKey);
       }
       HttpResponse<String> response =
-          httpClient.send(builder.build(), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+          httpClient.send(
+              builder.build(), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
       int status = response.statusCode();
       if (status < 200 || status >= 300) {
         String responseBody = response.body();

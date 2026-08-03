@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.ArrayList;
@@ -126,11 +124,11 @@ public final class DvBulkLoadPluginSupport {
     if (!Utils.isEmpty(nativeBulkTransformId)
         && isTransformPluginAvailable(nativeBulkTransformId)) {
       capabilities.add(
-          new BulkLoadCapability(
-              DvTargetLoadMode.NATIVE_BULK, nativeBulkTransformId, null, false));
+          new BulkLoadCapability(DvTargetLoadMode.NATIVE_BULK, nativeBulkTransformId, null, false));
     }
 
-    String stagingBulkActionId = DvBulkLoadCommandSupport.resolveStagingBulkActionPluginId(targetDatabase);
+    String stagingBulkActionId =
+        DvBulkLoadCommandSupport.resolveStagingBulkActionPluginId(targetDatabase);
     if (isTransformPluginAvailable(TEXT_FILE_OUTPUT_TRANSFORM_ID)
         && !Utils.isEmpty(stagingBulkActionId)
         && isActionPluginAvailable(stagingBulkActionId)) {

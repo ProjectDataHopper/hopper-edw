@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import java.util.HashSet;
@@ -79,10 +77,7 @@ public final class BvSqlValidationSupport {
 
     if (table.getReferenceStyleOrDefault() != BvSqlReferenceStyle.DBT) {
       remarks.add(
-          error(
-              table,
-              "BvBusinessTable.CheckResult.UnsupportedReferenceStyle",
-              tableLabel(table)));
+          error(table, "BvBusinessTable.CheckResult.UnsupportedReferenceStyle", tableLabel(table)));
     }
 
     validateMalformedTemplates(remarks, table);
@@ -101,8 +96,7 @@ public final class BvSqlValidationSupport {
    * Model-level SQL dependency graph checks (cycle detection once per model). Expects per-table
    * checks to have already synced {@code sqlRefs}.
    */
-  public static void validateModelSqlGraph(
-      List<ICheckResult> remarks, BusinessVaultModel bvModel) {
+  public static void validateModelSqlGraph(List<ICheckResult> remarks, BusinessVaultModel bvModel) {
     if (remarks == null || bvModel == null) {
       return;
     }
@@ -131,8 +125,7 @@ public final class BvSqlValidationSupport {
     }
     Matcher residual = RESIDUAL_TEMPLATE.matcher(stripped);
     if (residual.find()) {
-      remarks.add(
-          error(table, "BvBusinessTable.CheckResult.MalformedTemplate", tableLabel(table)));
+      remarks.add(error(table, "BvBusinessTable.CheckResult.MalformedTemplate", tableLabel(table)));
     }
   }
 
@@ -179,8 +172,7 @@ public final class BvSqlValidationSupport {
     }
   }
 
-  static void validateRefs(
-      List<ICheckResult> remarks, BvBusinessTable table, List<BvSqlRef> refs) {
+  static void validateRefs(List<ICheckResult> remarks, BvBusinessTable table, List<BvSqlRef> refs) {
     for (String label : BvSqlRefResolver.listUnresolvedRefLabels(refs)) {
       remarks.add(
           error(table, "BvBusinessTable.CheckResult.UnresolvedRef", tableLabel(table), label));
@@ -302,10 +294,7 @@ public final class BvSqlValidationSupport {
     BusinessVaultConfiguration config = bvModel.getConfigurationOrDefault();
     if (Utils.isEmpty(config.getTargetDatabase())) {
       remarks.add(
-          error(
-              table,
-              "BvBusinessTable.CheckResult.MissingBvTargetDatabase",
-              tableLabel(table)));
+          error(table, "BvBusinessTable.CheckResult.MissingBvTargetDatabase", tableLabel(table)));
       return;
     }
     if (metadataProvider == null) {

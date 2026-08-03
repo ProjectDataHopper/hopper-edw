@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import java.util.Date;
@@ -23,13 +21,12 @@ import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.CheckResult;
-import org.apache.hop.core.Const;
 import org.apache.hop.core.ICheckResult;
-import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
@@ -92,7 +89,8 @@ public class DmDimensionAlias extends DmTableBase {
     DmDimension target =
         DmDimensionResolutionSupport.resolveAliasTarget(model, this, variables, metadataProvider);
     if (target == null) {
-      throw new HopException("Dimension alias '" + getName() + "' has no resolvable target dimension");
+      throw new HopException(
+          "Dimension alias '" + getName() + "' has no resolvable target dimension");
     }
     return target.getTargetTableLayout(metadataProvider, variables, model);
   }

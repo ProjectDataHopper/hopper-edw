@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.architecture;
 
 import java.util.List;
@@ -140,9 +138,7 @@ public final class ArchitectureGraphFromLineage {
             ? table.getPhysicalTableName()
             : table.getLogicalName();
     String model =
-        !Utils.isEmpty(table.getModelName())
-            ? table.getModelName()
-            : snapshot.getModelName();
+        !Utils.isEmpty(table.getModelName()) ? table.getModelName() : snapshot.getModelName();
     // Dedupe across models when physical name matches (cross-model shared hubs).
     return "table:" + physical.toLowerCase() + "@" + (model != null ? model : "unknown");
   }

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.dimensional;
 
 import java.util.ArrayList;
@@ -27,8 +25,8 @@ import lombok.Setter;
 import org.apache.hop.core.gui.AreaOwner;
 import org.apache.hop.core.gui.AreaOwner.AreaType;
 import org.apache.hop.core.gui.IGc;
-import org.apache.hop.core.gui.IGc.EFont;
 import org.apache.hop.core.gui.IGc.EColor;
+import org.apache.hop.core.gui.IGc.EFont;
 import org.apache.hop.core.gui.IGc.ELineStyle;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
@@ -38,8 +36,8 @@ import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeome
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry.Bounds;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphTableCardLayout;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphTableNameHitArea;
-
 import org.apache.hop.datavault.hopgui.file.vault.BasePainter;
+import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.datavault.metadata.dimensional.DmBridge;
 import org.apache.hop.datavault.metadata.dimensional.DmBridgeDimensionRef;
 import org.apache.hop.datavault.metadata.dimensional.DmDimension;
@@ -50,10 +48,9 @@ import org.apache.hop.datavault.metadata.dimensional.DmFactJunkDimensionRole;
 import org.apache.hop.datavault.metadata.dimensional.DmFactRangeDimensionRole;
 import org.apache.hop.datavault.metadata.dimensional.DmJunkDimension;
 import org.apache.hop.datavault.metadata.dimensional.DmRangeDimension;
-import org.apache.hop.datavault.metadata.dimensional.IDmFactLikeTable;
 import org.apache.hop.datavault.metadata.dimensional.DmTableBase;
 import org.apache.hop.datavault.metadata.dimensional.DmTableType;
-import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
+import org.apache.hop.datavault.metadata.dimensional.IDmFactLikeTable;
 import org.apache.hop.datavault.metadata.dimensional.IDmTable;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
@@ -284,7 +281,8 @@ public class DimensionalModelPainter extends BasePainter {
       return;
     }
 
-    boolean validTarget = isValidRelationshipPair(startRelationshipTable, candidateRelationshipTarget);
+    boolean validTarget =
+        isValidRelationshipPair(startRelationshipTable, candidateRelationshipTarget);
     try {
       gc.setForeground(validTarget ? EColor.BLUE : EColor.DARKGRAY);
       gc.setLineWidth(2);
@@ -297,14 +295,14 @@ public class DimensionalModelPainter extends BasePainter {
         ModelGraphConnectionGeometry.drawConnectionSpline(gc, sourceBounds, targetBounds);
       } else {
         Bounds cursorBounds = ModelGraphConnectionGeometry.pointBounds(logEnd.x, logEnd.y);
-        Point lineStart =
-            ModelGraphConnectionGeometry.anchorToward(sourceBounds, cursorBounds);
+        Point lineStart = ModelGraphConnectionGeometry.anchorToward(sourceBounds, cursorBounds);
         ModelGraphConnectionGeometry.drawConnectionSpline(
             gc, lineStart, logEnd, sourceBounds, cursorBounds);
       }
       gc.setLineStyle(ELineStyle.SOLID);
       int marker = 4;
-      gc.fillRoundRectangle(logEnd.x - marker, logEnd.y - marker, marker * 2, marker * 2, marker * 2, marker * 2);
+      gc.fillRoundRectangle(
+          logEnd.x - marker, logEnd.y - marker, marker * 2, marker * 2, marker * 2, marker * 2);
     } finally {
       gc.setLineWidth(1);
       gc.setLineStyle(ELineStyle.SOLID);
@@ -454,7 +452,8 @@ public class DimensionalModelPainter extends BasePainter {
 
       if (areaOwners != null) {
         areaOwners.add(
-            new AreaOwner(AreaType.TRANSFORM_ICON, x, y, boxWidth, boxHeight, offset, table, label));
+            new AreaOwner(
+                AreaType.TRANSFORM_ICON, x, y, boxWidth, boxHeight, offset, table, label));
         int nameX = ModelGraphTableCardLayout.nameX(x);
         int nameY = ModelGraphTableCardLayout.nameY(y);
         ModelGraphTableNameHitArea.Bounds nameHit =

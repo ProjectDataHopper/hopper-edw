@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -70,7 +68,8 @@ class BvSqlViewPipelineSupportTest {
 
   @Test
   void viewScriptSingleStoreDropsThenCreateView() throws Exception {
-    BvBusinessTable table = viewTable("sat_customer_hb_v", "SELECT customer_hk FROM sat_customer_hb");
+    BvBusinessTable table =
+        viewTable("sat_customer_hb_v", "SELECT customer_hk FROM sat_customer_hb");
     BvSqlViewPipelineSupport.CreateScript script =
         BvSqlViewPipelineSupport.buildCreateScript(
             table,
@@ -93,10 +92,7 @@ class BvSqlViewPipelineSupportTest {
     BvBusinessTable table = viewTable("satb_customer_hb", authoringSql);
     BvSqlViewPipelineSupport.CreateScript script =
         BvSqlViewPipelineSupport.buildCreateScript(
-            table,
-            new TestDatabaseMeta("Vault", "MSSQLNATIVE"),
-            new Variables(),
-            authoringSql);
+            table, new TestDatabaseMeta("Vault", "MSSQLNATIVE"), new Variables(), authoringSql);
 
     assertTrue(script.sql().startsWith("CREATE OR ALTER VIEW satb_customer_hb AS"));
     assertTrue(script.sql().contains("CAST('9999-12-31 23:59:59' AS datetime2)"));
@@ -170,8 +166,7 @@ class BvSqlViewPipelineSupportTest {
   void stripsTrailingSemicolonFromQuery() throws Exception {
     BvBusinessTable table = viewTable("v1", "SELECT 1;");
     String sql =
-        BvSqlViewPipelineSupport.buildCreateStatement(
-            table, null, new Variables(), "SELECT 1;");
+        BvSqlViewPipelineSupport.buildCreateStatement(table, null, new Variables(), "SELECT 1;");
     assertFalse(sql.trim().endsWith(";"));
     assertTrue(sql.contains("SELECT 1"));
   }
@@ -209,8 +204,7 @@ class BvSqlViewPipelineSupportTest {
     assertEquals(1, pipelines.get(0).getTransforms().size());
     assertTrue(pipelines.get(0).getTransforms().get(0).getTransform() instanceof ExecSqlMeta);
 
-    ExecSqlMeta execSql =
-        (ExecSqlMeta) pipelines.get(0).getTransforms().get(0).getTransform();
+    ExecSqlMeta execSql = (ExecSqlMeta) pipelines.get(0).getTransforms().get(0).getTransform();
     assertEquals("Vault", execSql.getConnection());
     assertTrue(execSql.isSingleStatement());
     assertTrue(execSql.getSql().contains("CREATE OR REPLACE VIEW satb_product_hb AS"));

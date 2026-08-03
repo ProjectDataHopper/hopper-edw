@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import java.util.ArrayList;
@@ -98,8 +96,7 @@ public final class ExecutionMapModelPipelineLayout {
     int maxTargetWidth = 0;
     for (PipelineRow row : rowsByPipelineId.values()) {
       maxSourceWidth = Math.max(maxSourceWidth, maxColumnWidth(row.sources(), cardMetricsById));
-      maxPipelineWidth =
-          Math.max(maxPipelineWidth, cardWidth(row.pipeline(), cardMetricsById));
+      maxPipelineWidth = Math.max(maxPipelineWidth, cardWidth(row.pipeline(), cardMetricsById));
       maxTargetWidth = Math.max(maxTargetWidth, maxColumnWidth(row.targets(), cardMetricsById));
     }
 
@@ -116,7 +113,8 @@ public final class ExecutionMapModelPipelineLayout {
         continue;
       }
       int rowHeight =
-          layoutPipelineRow(row, cardMetricsById, sourceColumnX, pipelineColumnX, targetColumnX, rowY);
+          layoutPipelineRow(
+              row, cardMetricsById, sourceColumnX, pipelineColumnX, targetColumnX, rowY);
       totalContentHeight += rowHeight;
       if (i < pipelines.size() - 1) {
         totalContentHeight += ExecutionMapMetrics.PIPELINE_ROW_SPACING;
@@ -316,19 +314,22 @@ public final class ExecutionMapModelPipelineLayout {
 
   private static Comparator<ExecutionMapNode> pipelineComparator() {
     return Comparator.comparing(
-            (ExecutionMapNode node) -> node.getNodeType(), Comparator.nullsLast(Comparator.naturalOrder()))
+            (ExecutionMapNode node) -> node.getNodeType(),
+            Comparator.nullsLast(Comparator.naturalOrder()))
         .thenComparing(
             node -> node.getName() != null ? node.getName() : "", String.CASE_INSENSITIVE_ORDER);
   }
 
   private static Comparator<ExecutionMapNode> datasetComparator() {
     return Comparator.comparing(
-            (ExecutionMapNode node) -> node.getNodeType(), Comparator.nullsLast(Comparator.naturalOrder()))
+            (ExecutionMapNode node) -> node.getNodeType(),
+            Comparator.nullsLast(Comparator.naturalOrder()))
         .thenComparing(
             node -> node.getName() != null ? node.getName() : "", String.CASE_INSENSITIVE_ORDER);
   }
 
-  private record PipelineRow(ExecutionMapNode pipeline, List<ExecutionMapNode> sources, List<ExecutionMapNode> targets) {
+  private record PipelineRow(
+      ExecutionMapNode pipeline, List<ExecutionMapNode> sources, List<ExecutionMapNode> targets) {
     PipelineRow(ExecutionMapNode pipeline) {
       this(pipeline, new ArrayList<>(), new ArrayList<>());
     }

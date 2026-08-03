@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,13 +23,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.CheckResult;
+import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.core.xml.XmlHandler;
-import org.apache.hop.datavault.metadata.DataVaultConfiguration;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.DvTableType;
@@ -62,7 +59,9 @@ class BvScd2FieldMappingValidationTest {
   void rejectsDuplicateTargetFieldNames() throws Exception {
     BvScd2Table table = multiSatTable();
     table.getFieldMappings().add(new BvScd2FieldMapping("sat_customer", "name", "customer_name"));
-    table.getFieldMappings().add(new BvScd2FieldMapping("sat_customer_demo", "demo_score", "customer_name"));
+    table
+        .getFieldMappings()
+        .add(new BvScd2FieldMapping("sat_customer_demo", "demo_score", "customer_name"));
 
     List<ICheckResult> remarks = check(table, loadVault1Model());
 
@@ -72,8 +71,12 @@ class BvScd2FieldMappingValidationTest {
   @Test
   void rejectsUnknownSourceField() throws Exception {
     BvScd2Table table = multiSatTable();
-    table.getFieldMappings().add(new BvScd2FieldMapping("sat_customer", "missing_attr", "customer_name"));
-    table.getFieldMappings().add(new BvScd2FieldMapping("sat_customer_demo", "demo_score", "demo_score"));
+    table
+        .getFieldMappings()
+        .add(new BvScd2FieldMapping("sat_customer", "missing_attr", "customer_name"));
+    table
+        .getFieldMappings()
+        .add(new BvScd2FieldMapping("sat_customer_demo", "demo_score", "demo_score"));
 
     List<ICheckResult> remarks = check(table, loadVault1Model());
 
@@ -94,7 +97,9 @@ class BvScd2FieldMappingValidationTest {
   void validMultiSatelliteMappingsPassValidation() throws Exception {
     BvScd2Table table = multiSatTable();
     table.getFieldMappings().add(new BvScd2FieldMapping("sat_customer", "name", "customer_name"));
-    table.getFieldMappings().add(new BvScd2FieldMapping("sat_customer_demo", "demo_score", "demo_score"));
+    table
+        .getFieldMappings()
+        .add(new BvScd2FieldMapping("sat_customer_demo", "demo_score", "demo_score"));
 
     List<ICheckResult> remarks = check(table, loadVault1Model());
 
@@ -111,7 +116,9 @@ class BvScd2FieldMappingValidationTest {
     BvScd2Table table = multiSatTable();
     table.setFunctionalTimestampField("x_load_ts");
     table.getFieldMappings().add(new BvScd2FieldMapping("sat_customer", "name", "customer_name"));
-    table.getFieldMappings().add(new BvScd2FieldMapping("sat_customer_demo", "demo_score", "demo_score"));
+    table
+        .getFieldMappings()
+        .add(new BvScd2FieldMapping("sat_customer_demo", "demo_score", "demo_score"));
 
     var layout =
         BvScd2PipelineSupport.buildTargetTableLayout(
@@ -132,7 +139,9 @@ class BvScd2FieldMappingValidationTest {
     BvScd2Table original = multiSatTable();
     original.setName("customer_bv");
     original.setTableName("customer_bv");
-    original.getFieldMappings().add(new BvScd2FieldMapping("sat_customer", "name", "customer_name"));
+    original
+        .getFieldMappings()
+        .add(new BvScd2FieldMapping("sat_customer", "name", "customer_name"));
     original.getSatelliteConfigs().add(new BvScd2SatelliteConfig("sat_customer_demo"));
     original.getSatelliteConfigs().get(0).setSourceIndicatorValue("DEMO");
 
@@ -182,8 +191,7 @@ class BvScd2FieldMappingValidationTest {
     return remarks.stream()
         .anyMatch(
             remark ->
-                remark.getType() == ICheckResult.TYPE_RESULT_OK
-                    && remark instanceof CheckResult);
+                remark.getType() == ICheckResult.TYPE_RESULT_OK && remark instanceof CheckResult);
   }
 
   private static DataVaultModel loadVault1Model() throws Exception {

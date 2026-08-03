@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import java.util.ArrayList;
@@ -142,12 +140,10 @@ public final class MetadataMetricsResolver {
                       transformMeta, GeneratedPipelineMetadataConstants.ELEMENT_NAME))
               .parentElementName(
                   GeneratedPipelineMetadataSupport.getTransformAttribute(
-                      transformMeta,
-                      GeneratedPipelineMetadataConstants.PARENT_ELEMENT_NAME))
+                      transformMeta, GeneratedPipelineMetadataConstants.PARENT_ELEMENT_NAME))
               .lookupCacheMode(
                   GeneratedPipelineMetadataSupport.getTransformAttribute(
-                      transformMeta,
-                      GeneratedPipelineMetadataConstants.LOOKUP_CACHE_MODE))
+                      transformMeta, GeneratedPipelineMetadataConstants.LOOKUP_CACHE_MODE))
               .rowsRead(metricValue(metrics, component, Pipeline.METRIC_INPUT))
               .rowsWritten(metricValue(metrics, component, Pipeline.METRIC_OUTPUT))
               .rowsUpdated(metricValue(metrics, component, Pipeline.METRIC_UPDATED))
@@ -212,7 +208,8 @@ public final class MetadataMetricsResolver {
     return total;
   }
 
-  record AggregatedPipelineTotals(long sourceRowsRead, long targetRowsRead, long targetRowsInserted) {}
+  record AggregatedPipelineTotals(
+      long sourceRowsRead, long targetRowsRead, long targetRowsInserted) {}
 
   private static long sumRoleMetric(
       List<TransformRunMetrics> transforms, String role, boolean readMetric) {

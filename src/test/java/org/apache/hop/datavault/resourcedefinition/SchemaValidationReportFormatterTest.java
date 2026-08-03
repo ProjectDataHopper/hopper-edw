@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -75,8 +74,7 @@ class SchemaValidationReportFormatterTest {
     assertTrue(html.contains("v1.0.0"), html);
     assertTrue(html.contains("What is wrong"), html);
     assertTrue(html.contains("What to do"), html);
-    assertTrue(
-        html.contains("all-customer-info") || html.contains("missing from baseline"), html);
+    assertTrue(html.contains("all-customer-info") || html.contains("missing from baseline"), html);
     // Must not stuff Axis jargon into a type table cell.
     assertFalse(html.contains("<th>Actual Type</th>"), html);
     assertFalse(html.contains("Axis:"), html);

@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.hopgui.file.sourcemodel;
 
 import java.util.ArrayList;
@@ -79,10 +78,7 @@ public class HopGuiSourceRelationshipDialog {
   private boolean ok;
 
   public HopGuiSourceRelationshipDialog(
-      Shell parent,
-      SourceRelationship relationship,
-      SourceModel model,
-      IVariables variables) {
+      Shell parent, SourceRelationship relationship, SourceModel model, IVariables variables) {
     this(parent, relationship, model, variables, null);
   }
 
@@ -120,8 +116,7 @@ public class HopGuiSourceRelationshipDialog {
     wCancel.setText(BaseMessages.getString(PKG, "System.Button.Cancel"));
     wCancel.addListener(SWT.Selection, e -> cancel());
     Button wProfile = new Button(shell, SWT.PUSH);
-    wProfile.setText(
-        BaseMessages.getString(PKG, "HopGuiSourceRelationshipDialog.Profile.Button"));
+    wProfile.setText(BaseMessages.getString(PKG, "HopGuiSourceRelationshipDialog.Profile.Button"));
     wProfile.addListener(SWT.Selection, e -> profileRelationship());
     wProfile.setEnabled(metadataProvider != null);
     DialogHelpSupport.createHelpButton(shell, HelpTopics.IMPORT_DATABASE_TABLES_OPTIONS);
@@ -151,8 +146,7 @@ public class HopGuiSourceRelationshipDialog {
     String[] tableNames = tableNames();
 
     Label wlChild = new Label(shell, SWT.RIGHT);
-    wlChild.setText(
-        BaseMessages.getString(PKG, "HopGuiSourceRelationshipDialog.ChildTable.Label"));
+    wlChild.setText(BaseMessages.getString(PKG, "HopGuiSourceRelationshipDialog.ChildTable.Label"));
     PropsUi.setLook(wlChild);
     wlChild.setLayoutData(
         new FormDataBuilder().left().top(wDescription, margin).right(middle, -margin).result());
@@ -284,8 +278,7 @@ public class HopGuiSourceRelationshipDialog {
     EnumDialogSupport.selectCombo(wParentMultiplicity, input.resolveParentMultiplicity());
 
     wJoinColumns.clearAll(false);
-    int pairs =
-        Math.max(input.getChildColumns().size(), input.getParentColumns().size());
+    int pairs = Math.max(input.getChildColumns().size(), input.getParentColumns().size());
     for (int i = 0; i < pairs; i++) {
       TableItem item = new TableItem(wJoinColumns.table, SWT.NONE);
       if (i < input.getChildColumns().size()) {
@@ -389,8 +382,7 @@ public class HopGuiSourceRelationshipDialog {
       // and letting size gates downgrade.
       options.setStrategy(SourceRelationshipProfileStrategy.EXACT_KEY);
       SourceRelationshipProfileResult result =
-          SourceRelationshipProfiler.profile(
-              model, input, variables, metadataProvider, options);
+          SourceRelationshipProfiler.profile(model, input, variables, metadataProvider, options);
       EnumDialogSupport.selectCombo(wChildMultiplicity, result.getChildMultiplicity());
       EnumDialogSupport.selectCombo(wParentMultiplicity, result.getParentMultiplicity());
       StringBuilder msg = new StringBuilder();

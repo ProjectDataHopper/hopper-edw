@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics.live;
 
 import java.util.HashMap;
@@ -45,9 +43,7 @@ public final class UpdateRunLiveStallDetector {
       return List.of();
     }
     return transforms.stream()
-        .map(
-            transform ->
-                annotateTransform(pipelineName, transform, nowMillis))
+        .map(transform -> annotateTransform(pipelineName, transform, nowMillis))
         .toList();
   }
 

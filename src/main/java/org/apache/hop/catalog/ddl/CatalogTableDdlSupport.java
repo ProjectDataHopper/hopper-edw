@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.ddl;
 
 import java.util.List;
@@ -117,7 +115,8 @@ public final class CatalogTableDdlSupport {
     databaseMeta.quoteReservedWords(rowMeta);
     String qualifiedTableName =
         databaseMeta.getQuotedSchemaTableCombination(variables, schemaName, tableName);
-    List<String> primaryKeyFieldNames = SourceFieldPrimaryKeySupport.primaryKeyFieldNames(sourceFields);
+    List<String> primaryKeyFieldNames =
+        SourceFieldPrimaryKeySupport.primaryKeyFieldNames(sourceFields);
 
     return DvDdlSupport.buildCreateTableStatement(
         databaseMeta,
@@ -193,8 +192,7 @@ public final class CatalogTableDdlSupport {
       database.connect();
       if (!dropTableIfExists
           && skipIfTableExists
-          && DvDdlSupport.shouldSkipCreateTable(
-              database, variables, databaseMeta, ddl, null)) {
+          && DvDdlSupport.shouldSkipCreateTable(database, variables, databaseMeta, ddl, null)) {
         return new DdlResult(ddl, DdlStatus.SKIPPED_EXISTS, null);
       }
       database.execStatements(ddl);

@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import java.util.ArrayList;
@@ -73,11 +72,17 @@ public final class ModelContractValidationSupport {
       }
       List<ValidationIssue> extra =
           buildIssuesForValidation(
-              existing, usageIndex, baselineVersionTag, defaultNamespace, variables, metadataProvider);
+              existing,
+              usageIndex,
+              baselineVersionTag,
+              defaultNamespace,
+              variables,
+              metadataProvider);
       enriched.addRecordValidation(mergeIssues(existing, extra));
     }
 
-    // Also cover usages present in models but missing from the primary report (e.g. model-only run).
+    // Also cover usages present in models but missing from the primary report (e.g. model-only
+    // run).
     for (Map.Entry<RecordDefinitionKey, List<SourceUsage>> entry : usageIndex.entrySet()) {
       boolean present =
           report.getRecordValidations().stream()

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import java.sql.Timestamp;
@@ -31,17 +29,16 @@ import org.apache.hop.core.logging.ILoggingObject;
 import org.apache.hop.core.logging.LoggingObjectType;
 import org.apache.hop.core.logging.SimpleLoggingObject;
 import org.apache.hop.core.row.IRowMeta;
-import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metadata.DataVaultConfiguration;
 import org.apache.hop.datavault.metadata.DataVaultModel;
-import org.apache.hop.datavault.metadata.DvSqlSupport;
 import org.apache.hop.datavault.metadata.DvHub;
 import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.DvSpecialRecordSupport;
-import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataSupport;
+import org.apache.hop.datavault.metadata.DvSqlSupport;
 import org.apache.hop.datavault.metadata.DvTargetLoadSupport;
+import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataSupport;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineHopMeta;
@@ -50,6 +47,7 @@ import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transforms.rowgenerator.GeneratorField;
 import org.apache.hop.pipeline.transforms.rowgenerator.RowGeneratorMeta;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
+
 /** Generates PIT build pipelines from DV hub/satellite history. */
 public final class BvPitPipelineSupport {
 
@@ -99,7 +97,8 @@ public final class BvPitPipelineSupport {
         BvTargetDatabaseSupport.loadTargetDatabase(metadataProvider, bvConfig);
 
     DvHub hub = BvPitLayoutSupport.resolveHubDerivative(pitTable, dvModel);
-    List<DvSatellite> satellites = BvPitLayoutSupport.resolveSatelliteDerivatives(pitTable, dvModel);
+    List<DvSatellite> satellites =
+        BvPitLayoutSupport.resolveSatelliteDerivatives(pitTable, dvModel);
     if (hub == null) {
       throw new HopException(
           BaseMessages.getString(PKG, "BvPitPipelineSupport.Error.MissingHub", pitTable.getName()));
@@ -134,8 +133,7 @@ public final class BvPitPipelineSupport {
     String loadDateField = BvPitSnapshotSpineSupport.resolveLoadDateField(dvConfig, variables);
     String satellitePointerColumnName =
         BvPitLayoutSupport.resolveSatellitePointerColumnName(satellite, schedule, variables);
-    String hubTableName =
-        !Utils.isEmpty(hub.getTableName()) ? hub.getTableName() : hub.getName();
+    String hubTableName = !Utils.isEmpty(hub.getTableName()) ? hub.getTableName() : hub.getName();
     String satelliteTableName = BvPitLayoutSupport.resolveSatellitePhysicalName(satellite);
 
     return new PitBuildContext(
@@ -285,11 +283,7 @@ public final class BvPitPipelineSupport {
     PipelineMeta pipelineMeta = new PipelineMeta();
     pipelineMeta.setName(ctx.pipelineName());
     GeneratedPipelineMetadataSupport.stampBvElementPipeline(
-        pipelineMeta,
-        ctx.bvModel(),
-        "pit",
-        ctx.pitTable().getName(),
-        ctx.bvTargetTableName());
+        pipelineMeta, ctx.bvModel(), "pit", ctx.pitTable().getName(), ctx.bvTargetTableName());
 
     TransformMeta watermarkParam =
         addSnapshotWatermarkParamConstant(ctx, pipelineMeta, LOCATION_WATERMARK_PARAM);
@@ -420,9 +414,9 @@ public final class BvPitPipelineSupport {
   }
 
   /**
-   * Queries the BV PIT table for {@code MAX(snapshot_date)} at pipeline generation time. Falls
-   * back to the default sentinel when the table is missing or empty (null handling in Java keeps
-   * SQL free of dialect-specific timestamp literals).
+   * Queries the BV PIT table for {@code MAX(snapshot_date)} at pipeline generation time. Falls back
+   * to the default sentinel when the table is missing or empty (null handling in Java keeps SQL
+   * free of dialect-specific timestamp literals).
    */
   static String resolveIncrementalSnapshotWatermarkValue(PitBuildContext ctx) {
     if (ctx == null
@@ -440,7 +434,8 @@ public final class BvPitPipelineSupport {
             ctx.snapshotDateField());
     ILoggingObject loggingObject =
         new SimpleLoggingObject(
-            BvPitPipelineSupport.class.getSimpleName() + ".resolveIncrementalSnapshotWatermarkValue",
+            BvPitPipelineSupport.class.getSimpleName()
+                + ".resolveIncrementalSnapshotWatermarkValue",
             LoggingObjectType.GENERAL,
             null);
     try (Database db = new Database(loggingObject, ctx.variables(), ctx.targetDatabaseMeta())) {
@@ -460,9 +455,7 @@ public final class BvPitPipelineSupport {
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
       }
       String text = String.valueOf(value);
-      return Utils.isEmpty(text)
-          ? BvPitSnapshotSpineSupport.DEFAULT_INCREMENTAL_SENTINEL
-          : text;
+      return Utils.isEmpty(text) ? BvPitSnapshotSpineSupport.DEFAULT_INCREMENTAL_SENTINEL : text;
     } catch (Exception e) {
       return BvPitSnapshotSpineSupport.DEFAULT_INCREMENTAL_SENTINEL;
     }

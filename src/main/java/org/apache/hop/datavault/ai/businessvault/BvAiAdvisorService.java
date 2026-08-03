@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai.businessvault;
 
 import dev.langchain4j.data.message.AiMessage;
@@ -42,7 +40,10 @@ public final class BvAiAdvisorService {
   private BvAiAdvisorService() {}
 
   public static DvAiResponse advise(
-      HopAiConfig config, IVariables variables, BvAiContextBundle context, List<ChatMessage> history)
+      HopAiConfig config,
+      IVariables variables,
+      BvAiContextBundle context,
+      List<ChatMessage> history)
       throws HopException {
     HopAiAdvisorEngine.validateConfig(config);
 
@@ -61,8 +62,7 @@ public final class BvAiAdvisorService {
 
     try {
       Response<AiMessage> response = facade.generate(messages);
-      String text =
-          response != null && response.content() != null ? response.content().text() : "";
+      String text = response != null && response.content() != null ? response.content().text() : "";
       return DvAiProposalParser.parse(text);
     } catch (Exception e) {
       throw new HopException("AI advisory request failed: " + e.getMessage(), e);
@@ -87,23 +87,24 @@ public final class BvAiAdvisorService {
   private static String buildUserPromptBody(BvAiContextBundle context, boolean includeFullContext) {
     StringBuilder prompt = new StringBuilder();
     prompt.append("User question:\n").append(context.getUserPrompt()).append("\n\n");
-    prompt.append("Business Vault model structure JSON:\n")
+    prompt
+        .append("Business Vault model structure JSON:\n")
         .append(nullToEmpty(context.getModelStructureJson()))
         .append("\n\n");
 
     if (includeFullContext) {
-      prompt.append("Business Vault model summary JSON:\n")
+      prompt
+          .append("Business Vault model summary JSON:\n")
           .append(nullToEmpty(context.getModelSummaryJson()))
           .append("\n\n");
       if (!Utils.isEmpty(context.getLinkedDvModelStructureJson())) {
-        prompt.append("Linked Data Vault model structure JSON:\n")
+        prompt
+            .append("Linked Data Vault model structure JSON:\n")
             .append(context.getLinkedDvModelStructureJson())
             .append("\n\n");
       }
       if (!Utils.isEmpty(context.getHopMetadataJson())) {
-        prompt.append("Hop metadata JSON:\n")
-            .append(context.getHopMetadataJson())
-            .append("\n\n");
+        prompt.append("Hop metadata JSON:\n").append(context.getHopMetadataJson()).append("\n\n");
       }
       if (!Utils.isEmpty(context.getModelXml())) {
         prompt.append("Business Vault model XML:\n").append(context.getModelXml()).append("\n\n");
@@ -114,17 +115,20 @@ public final class BvAiAdvisorService {
     }
 
     if (!Utils.isEmpty(context.getCheckResultsJson())) {
-      prompt.append("Model check results JSON:\n")
+      prompt
+          .append("Model check results JSON:\n")
           .append(context.getCheckResultsJson())
           .append("\n\n");
     }
     if (!Utils.isEmpty(context.getLoadRunMetricsJson())) {
-      prompt.append("Recent load-run metrics and insights JSON:\n")
+      prompt
+          .append("Recent load-run metrics and insights JSON:\n")
           .append(context.getLoadRunMetricsJson())
           .append("\n\n");
     }
     if (!Utils.isEmpty(context.getExecutionInfoJson())) {
-      prompt.append("Recent execution logs and transform metrics JSON:\n")
+      prompt
+          .append("Recent execution logs and transform metrics JSON:\n")
           .append(context.getExecutionInfoJson())
           .append("\n\n");
     }

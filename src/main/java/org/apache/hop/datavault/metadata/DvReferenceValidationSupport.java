@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.nio.file.Path;
@@ -206,7 +204,9 @@ public final class DvReferenceValidationSupport {
 
   private static boolean hasCircularExternalReference(
       DataVaultModel referringModel, DataVaultModel externalModel, IVariables variables) {
-    if (referringModel == null || externalModel == null || Utils.isEmpty(referringModel.getFilename())) {
+    if (referringModel == null
+        || externalModel == null
+        || Utils.isEmpty(referringModel.getFilename())) {
       return false;
     }
     try {

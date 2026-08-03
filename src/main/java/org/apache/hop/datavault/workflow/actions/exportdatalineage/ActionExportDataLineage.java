@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.workflow.actions.exportdatalineage;
 
 import java.util.Arrays;
@@ -359,12 +357,9 @@ public class ActionExportDataLineage extends ActionBase implements Cloneable, IA
             .httpApiKeyHeader(
                 Utils.isEmpty(httpApiKeyHeader) ? null : getVariables().resolve(httpApiKeyHeader))
             .httpApiKey(Utils.isEmpty(httpApiKey) ? null : getVariables().resolve(httpApiKey))
-            .jobNamespace(
-                Utils.isEmpty(jobNamespace) ? null : getVariables().resolve(jobNamespace))
+            .jobNamespace(Utils.isEmpty(jobNamespace) ? null : getVariables().resolve(jobNamespace))
             .datasetNamespace(
-                Utils.isEmpty(datasetNamespace)
-                    ? null
-                    : getVariables().resolve(datasetNamespace))
+                Utils.isEmpty(datasetNamespace) ? null : getVariables().resolve(datasetNamespace))
             .opsDatabase(Utils.isEmpty(opsDatabase) ? null : getVariables().resolve(opsDatabase))
             .opsSchema(Utils.isEmpty(opsSchema) ? null : getVariables().resolve(opsSchema))
             .failOnHttpError(failOnHttpError)

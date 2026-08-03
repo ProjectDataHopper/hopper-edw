@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.lineage;
 
 import java.util.List;
@@ -34,8 +33,10 @@ public final class ReverseLineageConsumer {
   private final String targetField;
   private final String transform;
   private final List<String> reasonCodes;
+
   /** Human-readable path, e.g. {@code E2E.demo.segment → sat_customer_demo.segment}. */
   private final String pathSummary;
+
   /** Hop count from the queried source (1 = direct, 2 = via intermediate DV table, …). */
   private final int hopCount;
 

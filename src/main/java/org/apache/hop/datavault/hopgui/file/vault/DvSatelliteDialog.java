@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.vault;
 
 import java.util.ArrayList;
@@ -23,28 +21,30 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import org.apache.hop.core.Const;
+import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.Props;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.catalog.DvSourceCatalogService;
-import org.apache.hop.datavault.metadata.DataVaultModel;
-import org.apache.hop.datavault.metadata.DataVaultSource;
-import org.apache.hop.datavault.metadata.DvHub;
-import org.apache.hop.datavault.metadata.DvIntegrationMode;
-import org.apache.hop.datavault.metadata.DvTableType;
-import org.apache.hop.core.ICheckResult;
-import org.apache.hop.datavault.metadata.DvModelCheckOptions;
-import org.apache.hop.datavault.metadata.DvSatellite;
-import org.apache.hop.datavault.metadata.DvSatelliteParentKeySupport;
-import org.apache.hop.datavault.metadata.IDvTable;
-import org.apache.hop.datavault.metadata.SatelliteAttribute;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
+import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
+import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.datavault.hopgui.lineage.LineageTabSupport;
 import org.apache.hop.datavault.lineage.DvModelLineageCollector;
 import org.apache.hop.datavault.lineage.LineageSnapshot;
 import org.apache.hop.datavault.lineage.TableLineage;
+import org.apache.hop.datavault.metadata.DataVaultModel;
+import org.apache.hop.datavault.metadata.DataVaultSource;
 import org.apache.hop.datavault.metadata.DvDataTypeSupport;
+import org.apache.hop.datavault.metadata.DvHub;
+import org.apache.hop.datavault.metadata.DvIntegrationMode;
+import org.apache.hop.datavault.metadata.DvModelCheckOptions;
+import org.apache.hop.datavault.metadata.DvSatellite;
+import org.apache.hop.datavault.metadata.DvSatelliteParentKeySupport;
+import org.apache.hop.datavault.metadata.DvTableType;
+import org.apache.hop.datavault.metadata.IDvTable;
+import org.apache.hop.datavault.metadata.SatelliteAttribute;
 import org.apache.hop.datavault.metadata.SourceField;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.FormDataBuilder;
@@ -55,15 +55,12 @@ import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.core.gui.GuiResource;
 import org.apache.hop.ui.core.gui.WindowProperty;
 import org.apache.hop.ui.core.widget.ColumnInfo;
-
 import org.apache.hop.ui.core.widget.TableView;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
-import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
@@ -73,8 +70,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
-import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
-import org.apache.hop.datavault.hopgui.help.HelpTopics;
 
 /** Dialog to edit the properties of a DvSatellite, including attributes list using TableView. */
 public class DvSatelliteDialog {
@@ -161,26 +156,17 @@ public class DvSatelliteDialog {
     wlName.setText(BaseMessages.getString(PKG, "DvSatelliteDialog.Name.Label"));
     PropsUi.setLook(wlName);
     wlName.setLayoutData(
-        new FormDataBuilder()
-            .left()
-            .top(0, margin)
-            .right(middle, -margin)
-            .result());
+        new FormDataBuilder().left().top(0, margin).right(middle, -margin).result());
 
     wName = new Text(shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wName);
-    wName.setLayoutData(
-        new FormDataBuilder().left(middle, 0).top(0, margin).right().result());
+    wName.setLayoutData(new FormDataBuilder().left(middle, 0).top(0, margin).right().result());
 
     Label wlDescription = new Label(shell, SWT.RIGHT);
     wlDescription.setText(BaseMessages.getString(PKG, "DvSatelliteDialog.Description.Label"));
     PropsUi.setLook(wlDescription);
     wlDescription.setLayoutData(
-        new FormDataBuilder()
-            .left()
-            .top(wName, margin)
-            .right(middle, -margin)
-            .result());
+        new FormDataBuilder().left().top(wName, margin).right(middle, -margin).result());
 
     wDescription = new Text(shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wDescription);
@@ -260,11 +246,7 @@ public class DvSatelliteDialog {
     wlTableName.setText(BaseMessages.getString(PKG, "DvSatelliteDialog.TableName.Label"));
     PropsUi.setLook(wlTableName);
     wlTableName.setLayoutData(
-        new FormDataBuilder()
-            .left()
-            .top(wIntegrationMode, margin)
-            .right(middle, -margin)
-            .result());
+        new FormDataBuilder().left().top(wIntegrationMode, margin).right(middle, -margin).result());
 
     wTableName = new Text(comp, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wTableName);
@@ -288,11 +270,7 @@ public class DvSatelliteDialog {
     wlHubName.setText(BaseMessages.getString(PKG, "DvSatelliteDialog.HubName.Label"));
     PropsUi.setLook(wlHubName);
     wlHubName.setLayoutData(
-        new FormDataBuilder()
-            .left()
-            .top(wRecordSource, margin)
-            .right(middle, -margin)
-            .result());
+        new FormDataBuilder().left().top(wRecordSource, margin).right(middle, -margin).result());
 
     wHubName = new Combo(comp, SWT.READ_ONLY | SWT.BORDER);
     PropsUi.setLook(wHubName);
@@ -304,11 +282,7 @@ public class DvSatelliteDialog {
     wlLinkName.setText(BaseMessages.getString(PKG, "DvSatelliteDialog.LinkName.Label"));
     PropsUi.setLook(wlLinkName);
     wlLinkName.setLayoutData(
-        new FormDataBuilder()
-            .left()
-            .top(wHubName, margin)
-            .right(middle, -margin)
-            .result());
+        new FormDataBuilder().left().top(wHubName, margin).right(middle, -margin).result());
 
     wLinkName = new Combo(comp, SWT.READ_ONLY | SWT.BORDER);
     PropsUi.setLook(wLinkName);
@@ -320,11 +294,7 @@ public class DvSatelliteDialog {
     wlDrivingKey.setText(BaseMessages.getString(PKG, "DvSatelliteDialog.DrivingKey.Label"));
     PropsUi.setLook(wlDrivingKey);
     wlDrivingKey.setLayoutData(
-        new FormDataBuilder()
-            .left()
-            .top(wLinkName, margin)
-            .right(middle, -margin)
-            .result());
+        new FormDataBuilder().left().top(wLinkName, margin).right(middle, -margin).result());
 
     wDrivingKey = new Text(comp, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wDrivingKey);
@@ -336,11 +306,7 @@ public class DvSatelliteDialog {
         BaseMessages.getString(PKG, "DvSatelliteDialog.DrivingKeySourceField.Label"));
     PropsUi.setLook(wlDrivingKeySourceField);
     wlDrivingKeySourceField.setLayoutData(
-        new FormDataBuilder()
-            .left()
-            .top(wDrivingKey, margin)
-            .right(middle, -margin)
-            .result());
+        new FormDataBuilder().left().top(wDrivingKey, margin).right(middle, -margin).result());
 
     wDrivingKeySourceField = new Combo(comp, SWT.BORDER);
     PropsUi.setLook(wDrivingKeySourceField);
@@ -361,8 +327,7 @@ public class DvSatelliteDialog {
 
     wlParentKeysHint = new Label(comp, SWT.LEFT | SWT.WRAP);
     PropsUi.setLook(wlParentKeysHint);
-    wlParentKeysHint.setLayoutData(
-        new FormDataBuilder().left().top(0, margin).right().result());
+    wlParentKeysHint.setLayoutData(new FormDataBuilder().left().top(0, margin).right().result());
 
     ColumnInfo[] columns =
         new ColumnInfo[] {
@@ -375,8 +340,7 @@ public class DvSatelliteDialog {
     columns[0].setUsingVariables(true);
 
     Button wLoadParentKeys = new Button(comp, SWT.PUSH);
-    wLoadParentKeys.setText(
-        BaseMessages.getString(PKG, "DvSatelliteDialog.LoadParentKeys.Button"));
+    wLoadParentKeys.setText(BaseMessages.getString(PKG, "DvSatelliteDialog.LoadParentKeys.Button"));
     wLoadParentKeys.setToolTipText(
         BaseMessages.getString(PKG, "DvSatelliteDialog.LoadParentKeys.ToolTip"));
     PropsUi.setLook(wLoadParentKeys);
@@ -442,19 +406,20 @@ public class DvSatelliteDialog {
       MessageBox mb = new MessageBox(shell, SWT.OK | SWT.ICON_INFORMATION);
       mb.setMessage(
           BaseMessages.getString(PKG, "DvSatelliteDialog.LoadParentKeys.LinkSatellite.Message"));
-      mb.setText(BaseMessages.getString(PKG, "DvSatelliteDialog.LoadParentKeys.LinkSatellite.Title"));
+      mb.setText(
+          BaseMessages.getString(PKG, "DvSatelliteDialog.LoadParentKeys.LinkSatellite.Title"));
       mb.open();
       return;
     }
     if (Utils.isEmpty(hubName)) {
       MessageBox mb = new MessageBox(shell, SWT.OK | SWT.ICON_ERROR);
-      mb.setMessage(
-          BaseMessages.getString(PKG, "DvSatelliteDialog.LoadParentKeys.NoHub.Message"));
+      mb.setMessage(BaseMessages.getString(PKG, "DvSatelliteDialog.LoadParentKeys.NoHub.Message"));
       mb.setText(BaseMessages.getString(PKG, "DvSatelliteDialog.LoadParentKeys.NoHub.Title"));
       mb.open();
       return;
     }
-    DvHub hub = model != null ? model.findHub(hubName, variables, hopGui.getMetadataProvider()) : null;
+    DvHub hub =
+        model != null ? model.findHub(hubName, variables, hopGui.getMetadataProvider()) : null;
     if (hub == null) {
       MessageBox mb = new MessageBox(shell, SWT.OK | SWT.ICON_ERROR);
       mb.setMessage(
@@ -527,13 +492,12 @@ public class DvSatelliteDialog {
               BaseMessages.getString(
                   PKG, "DvSatelliteDialog.Attribute.IncludeInChangeDataCapture.Column"),
               ColumnInfo.COLUMN_TYPE_CCOMBO,
-                  BaseMessages.getString(PKG, "System.Combo.Yes"),
-                  BaseMessages.getString(PKG, "System.Combo.No")),
+              BaseMessages.getString(PKG, "System.Combo.Yes"),
+              BaseMessages.getString(PKG, "System.Combo.No")),
         };
 
     Button wLoadFromSource = new Button(comp, SWT.PUSH);
-    wLoadFromSource.setText(
-        BaseMessages.getString(PKG, "DvSatelliteDialog.GetAttributes.Button"));
+    wLoadFromSource.setText(BaseMessages.getString(PKG, "DvSatelliteDialog.GetAttributes.Button"));
     wLoadFromSource.setToolTipText(
         BaseMessages.getString(PKG, "DvSatelliteDialog.GetAttributes.ToolTip"));
     PropsUi.setLook(wLoadFromSource);
@@ -564,8 +528,7 @@ public class DvSatelliteDialog {
     CTabItem tab = new CTabItem(wTabFolder, SWT.NONE);
     tab.setFont(GuiResource.getInstance().getFontDefault());
     tab.setText(BaseMessages.getString(PKG, "DvSatelliteDialog.Tab.StatusTracking.Label"));
-    tab.setToolTipText(
-        BaseMessages.getString(PKG, "DvSatelliteDialog.Tab.StatusTracking.ToolTip"));
+    tab.setToolTipText(BaseMessages.getString(PKG, "DvSatelliteDialog.Tab.StatusTracking.ToolTip"));
 
     Composite comp = new Composite(wTabFolder, SWT.NONE);
     PropsUi.setLook(comp);
@@ -593,22 +556,14 @@ public class DvSatelliteDialog {
     wStatusTableName = new Text(comp, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wStatusTableName);
     wStatusTableName.setLayoutData(
-        new FormDataBuilder()
-            .left(middle, 0)
-            .top(wStatusTrackingEnabled, margin)
-            .right()
-            .result());
+        new FormDataBuilder().left(middle, 0).top(wStatusTrackingEnabled, margin).right().result());
 
     Label wlStatusFieldName = new Label(comp, SWT.RIGHT);
     wlStatusFieldName.setText(
         BaseMessages.getString(PKG, "DvSatelliteDialog.StatusTracking.FieldName.Label"));
     PropsUi.setLook(wlStatusFieldName);
     wlStatusFieldName.setLayoutData(
-        new FormDataBuilder()
-            .left()
-            .top(wStatusTableName, margin)
-            .right(middle, -margin)
-            .result());
+        new FormDataBuilder().left().top(wStatusTableName, margin).right(middle, -margin).result());
 
     wStatusFieldName = new Text(comp, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wStatusFieldName);
@@ -620,11 +575,7 @@ public class DvSatelliteDialog {
         BaseMessages.getString(PKG, "DvSatelliteDialog.StatusTracking.ActiveValue.Label"));
     PropsUi.setLook(wlActiveStatusValue);
     wlActiveStatusValue.setLayoutData(
-        new FormDataBuilder()
-            .left()
-            .top(wStatusFieldName, margin)
-            .right(middle, -margin)
-            .result());
+        new FormDataBuilder().left().top(wStatusFieldName, margin).right(middle, -margin).result());
 
     wActiveStatusValue = new Text(comp, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wActiveStatusValue);
@@ -751,9 +702,12 @@ public class DvSatelliteDialog {
     } catch (Exception ex) {
       new ErrorDialog(
           shell,
-          BaseMessages.getString(ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Label"),
           BaseMessages.getString(
-              ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Error", ex.getMessage()),
+              ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Label"),
+          BaseMessages.getString(
+              ModelDialogValidationSupport.class,
+              "ModelTableDialog.Validate.Error",
+              ex.getMessage()),
           ex);
     }
   }

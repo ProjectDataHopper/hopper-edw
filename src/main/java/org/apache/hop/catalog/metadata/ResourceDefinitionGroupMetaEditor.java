@@ -13,21 +13,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.metadata;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import org.apache.hop.catalog.versioning.CatalogVersionGuiSupport;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.catalog.versioning.CatalogVersionGuiSupport;
 import org.apache.hop.datavault.catalog.DvSourceCatalogService;
 import org.apache.hop.datavault.hopgui.file.businessvault.HopBusinessVaultFileType;
 import org.apache.hop.datavault.hopgui.file.dimensional.HopDimensionalFileType;
@@ -105,8 +103,7 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
     Control lastControl = wName;
 
     wDescription = new Text(parent, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
-    lastControl =
-        addTextField(parent, middle, margin, lastControl, "Description", wDescription);
+    lastControl = addTextField(parent, middle, margin, lastControl, "Description", wDescription);
 
     Label wlCatalog = new Label(parent, SWT.RIGHT);
     PropsUi.setLook(wlCatalog);
@@ -165,8 +162,7 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
     tabFolder.setLayoutData(fdTabs);
 
     wDvModels =
-        createModelTableTab(
-            tabFolder, "DataVaultModels", HopVaultFileType.VAULT_FILE_EXTENSION);
+        createModelTableTab(tabFolder, "DataVaultModels", HopVaultFileType.VAULT_FILE_EXTENSION);
     wBvModels =
         createModelTableTab(
             tabFolder,
@@ -235,7 +231,8 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
       Text textWidget) {
     Label label = new Label(parent, SWT.RIGHT);
     PropsUi.setLook(label);
-    label.setText(BaseMessages.getString(PKG, "ResourceDefinitionGroupMetaEditor." + labelKey + ".Label"));
+    label.setText(
+        BaseMessages.getString(PKG, "ResourceDefinitionGroupMetaEditor." + labelKey + ".Label"));
     FormData fdl = new FormData();
     fdl.top = new FormAttachment(lastControl, margin);
     fdl.left = new FormAttachment(0, 0);
@@ -392,11 +389,7 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
     getWidgetsContent(draft);
     HopGui hopGui = HopGui.getInstance();
     new org.apache.hop.datavault.hopgui.lineage.ReverseLineageBrowserDialog(
-            hopGui.getShell(),
-            hopGui,
-            draft,
-            hopGui.getVariables(),
-            hopGui.getMetadataProvider())
+            hopGui.getShell(), hopGui, draft, hopGui.getVariables(), hopGui.getMetadataProvider())
         .open();
   }
 

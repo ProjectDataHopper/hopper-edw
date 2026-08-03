@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import java.util.ArrayList;
@@ -144,9 +142,7 @@ public final class BvSqlTemplateParser {
         continue;
       }
       String key =
-          (model == null ? "" : model.trim().toLowerCase())
-              + "\0"
-              + object.trim().toLowerCase();
+          (model == null ? "" : model.trim().toLowerCase()) + "\0" + object.trim().toLowerCase();
       if (!seen.add(key)) {
         continue;
       }
@@ -183,8 +179,8 @@ public final class BvSqlTemplateParser {
    * Rewrites SQL by replacing each macro occurrence with a provided qualified name.
    *
    * @param sql authoring SQL
-   * @param replacement lookup key: for REF one-arg {@code object}, two-arg {@code
-   *     model\0object}; for SOURCE {@code source\0table}
+   * @param replacement lookup key: for REF one-arg {@code object}, two-arg {@code model\0object};
+   *     for SOURCE {@code source\0table}
    */
   public static String rewrite(
       String sql, java.util.function.Function<MacroOccurrence, String> replacementFn) {

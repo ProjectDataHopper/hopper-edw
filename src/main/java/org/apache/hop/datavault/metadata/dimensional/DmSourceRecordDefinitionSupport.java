@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import java.util.HashMap;
@@ -38,7 +36,9 @@ import org.apache.hop.pipeline.PipelineHopMeta;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
 
-/** Helpers for dimensional tables that use a data-catalog record definition as the staging source. */
+/**
+ * Helpers for dimensional tables that use a data-catalog record definition as the staging source.
+ */
 public final class DmSourceRecordDefinitionSupport {
 
   private static final Class<?> PKG = DmSourceRecordDefinitionSupport.class;
@@ -77,9 +77,11 @@ public final class DmSourceRecordDefinitionSupport {
       throws HopException {
     if (source == null) {
       throw new HopException(
-          BaseMessages.getString(PKG, "DmSourceRecordDefinitionSupport.Error.MissingConfiguration"));
+          BaseMessages.getString(
+              PKG, "DmSourceRecordDefinitionSupport.Error.MissingConfiguration"));
     }
-    String catalogConnection = resolveCatalogConnection(config, source, variables, metadataProvider);
+    String catalogConnection =
+        resolveCatalogConnection(config, source, variables, metadataProvider);
     String namespace = source.resolveSourceRecordNamespace(variables);
     String name = source.resolveSourceRecordName(variables);
     if (Utils.isEmpty(namespace) || Utils.isEmpty(name)) {
@@ -106,10 +108,7 @@ public final class DmSourceRecordDefinitionSupport {
     if (!RecordDefinitionPreviewSupport.supportsPreview(definition)) {
       throw new HopException(
           BaseMessages.getString(
-              PKG,
-              "DmSourceRecordDefinitionSupport.Error.UnsupportedRecord",
-              namespace,
-              name));
+              PKG, "DmSourceRecordDefinitionSupport.Error.UnsupportedRecord", namespace, name));
     }
     return definition;
   }
@@ -181,7 +180,8 @@ public final class DmSourceRecordDefinitionSupport {
       throws HopException {
     if (target == null || preview == null || preview.pipelineMeta() == null) {
       throw new HopException(
-          BaseMessages.getString(PKG, "DmSourceRecordDefinitionSupport.Error.MissingPreviewPipeline"));
+          BaseMessages.getString(
+              PKG, "DmSourceRecordDefinitionSupport.Error.MissingPreviewPipeline"));
     }
 
     PipelineMeta source = preview.pipelineMeta();

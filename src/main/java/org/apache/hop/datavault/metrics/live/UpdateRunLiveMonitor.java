@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics.live;
 
 import java.util.List;
@@ -109,12 +107,7 @@ public final class UpdateRunLiveMonitor implements AutoCloseable {
     List<PipelineLiveMetrics> rawPipelines =
         UpdateRunLiveMetricsExtractor.extractActivePipelines(engine);
     return UpdateRunLiveSnapshotBuilder.build(
-        context,
-        stallDetector,
-        rawPipelines,
-        engine.isFinished(),
-        engine.getErrors(),
-        null);
+        context, stallDetector, rawPipelines, engine.isFinished(), engine.getErrors(), null);
   }
 
   private void maybeLogStall(UpdateRunLiveSnapshot snapshot) {
@@ -130,7 +123,8 @@ public final class UpdateRunLiveMonitor implements AutoCloseable {
     lastStallLogAtMillis = now;
     UpdateRunLiveBottleneck bottleneck = snapshot.getPrimaryBottleneck();
     String pipelineName = bottleneck != null ? bottleneck.getPipelineName() : "";
-    String elementName = bottleneck != null ? bottleneck.getElementName() : snapshot.getCurrentElementName();
+    String elementName =
+        bottleneck != null ? bottleneck.getElementName() : snapshot.getCurrentElementName();
     String transformName = bottleneck != null ? bottleneck.getTransformName() : "";
     String pluginId = bottleneck != null ? bottleneck.getPluginId() : "";
     String message = bottleneck != null ? bottleneck.getMessage() : "";

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.List;
@@ -75,9 +73,11 @@ public final class DvBulkLoadCommandSupport {
     String actionName = "bulk_load_" + targetTableName + "_" + copyIndex;
     IAction action = DvBulkLoadActionSupport.newConfiguredAction(actionPluginId, actionName);
     if (MYSQL_BULK_LOAD_ACTION_ID.equals(actionPluginId)) {
-      configureMysqlBulkLoadAction(action, config, variables, targetDbName, targetTableName, stagedFilePath);
+      configureMysqlBulkLoadAction(
+          action, config, variables, targetDbName, targetTableName, stagedFilePath);
     } else if (MSSQL_BULK_LOAD_ACTION_ID.equals(actionPluginId)) {
-      configureMssqlBulkLoadAction(action, config, variables, targetDbName, targetTableName, stagedFilePath);
+      configureMssqlBulkLoadAction(
+          action, config, variables, targetDbName, targetTableName, stagedFilePath);
     } else {
       throw new HopException("Unsupported staging bulk-load action: " + actionPluginId);
     }
@@ -127,5 +127,4 @@ public final class DvBulkLoadCommandSupport {
     DvBulkLoadActionSupport.invoke(action, "setReplaceData", boolean.class, false);
     DvBulkLoadActionSupport.invoke(action, "setLocalInFile", boolean.class, true);
   }
-
 }

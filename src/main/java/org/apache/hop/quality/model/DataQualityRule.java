@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.quality.model;
 
 import java.util.LinkedHashMap;
@@ -37,30 +35,38 @@ public class DataQualityRule {
   public static final String PARAM_VALUES = "values";
   public static final String PARAM_NULL_ALLOWED = "nullAllowed";
   public static final String PARAM_TRIM = "trim";
+
   /** Null ratio upper bound for {@link DataQualityRuleType#NULL_RATIO_MAX} (0.0–1.0). */
   public static final String PARAM_MAX_RATIO = "maxRatio";
+
   /** Regex pattern for {@link DataQualityRuleType#REGEX}. */
   public static final String PARAM_PATTERN = "pattern";
+
   /** Regex case sensitivity (default true). */
   public static final String PARAM_CASE_SENSITIVE = "caseSensitive";
+
   /** Regex match mode: FULL (default) or FIND/PARTIAL. */
   public static final String PARAM_MATCH_MODE = "matchMode";
+
   /**
    * SQL text for {@link DataQualityRuleType#SQL_ASSERTION}. Must be a single SELECT/WITH statement.
    * Multi-statement is rejected via a literal semicolon scan (a single trailing {@code ;} is
    * allowed); semicolons inside string literals are false-rejected under this hard policy.
    */
   public static final String PARAM_SQL = "sql";
+
   /**
    * Expectation mode for {@link DataQualityRuleType#SQL_ASSERTION}: {@code ZERO_ROWS} (default),
    * {@code ONE_ROW_TRUE}, or {@code SCALAR_EQ}.
    */
   public static final String PARAM_EXPECT = "expect";
+
   /**
    * Expected scalar value when expect is {@code SCALAR_EQ}. Compared via strict {@code
    * String.valueOf(firstColumn)} equality (no numeric normalization).
    */
   public static final String PARAM_EXPECT_VALUE = "expectValue";
+
   /** JDBC query timeout seconds for {@link DataQualityRuleType#SQL_ASSERTION} (default 60). */
   public static final String PARAM_QUERY_TIMEOUT = "queryTimeoutSeconds";
 

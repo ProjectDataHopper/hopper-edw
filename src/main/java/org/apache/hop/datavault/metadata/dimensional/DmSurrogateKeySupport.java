@@ -13,16 +13,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import java.util.List;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 
-/** Resolves per-dimension and junk-dimension surrogate key settings with backward-compatible defaults. */
+/**
+ * Resolves per-dimension and junk-dimension surrogate key settings with backward-compatible
+ * defaults.
+ */
 public final class DmSurrogateKeySupport {
 
   private DmSurrogateKeySupport() {}

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -44,9 +42,7 @@ class TargetSchemaValidationSupportTest {
   void looksLikeCreateOnlyRejectsMixedCreateAndAlter() {
     assertFalse(
         TargetSchemaValidationSupport.looksLikeCreateOnly(
-            List.of(
-                "CREATE TABLE sat_x (id INT)",
-                "ALTER TABLE sat_x ADD COLUMN y INT")));
+            List.of("CREATE TABLE sat_x (id INT)", "ALTER TABLE sat_x ADD COLUMN y INT")));
   }
 
   @Test
@@ -54,8 +50,6 @@ class TargetSchemaValidationSupportTest {
     // Pending CREATE classification still holds when vault update also emits indexes.
     assertTrue(
         TargetSchemaValidationSupport.looksLikeCreateOnly(
-            List.of(
-                "CREATE TABLE sat_x (id INT)",
-                "CREATE INDEX idx_sat_x_hk ON sat_x (id)")));
+            List.of("CREATE TABLE sat_x (id INT)", "CREATE INDEX idx_sat_x_hk ON sat_x (id)")));
   }
 }

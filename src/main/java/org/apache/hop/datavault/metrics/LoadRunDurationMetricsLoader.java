@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import java.util.ArrayList;
@@ -64,7 +62,8 @@ public final class LoadRunDurationMetricsLoader {
           .build();
     }
 
-    String databaseName = MetricsAiContextBuilder.resolveMetricsDatabaseName(metadataProvider, variables);
+    String databaseName =
+        MetricsAiContextBuilder.resolveMetricsDatabaseName(metadataProvider, variables);
     if (Utils.isEmpty(databaseName) || metadataProvider == null) {
       return LoadRunDurationSnapshot.builder()
           .status(LoadRunDurationSnapshot.Status.NO_DATABASE)

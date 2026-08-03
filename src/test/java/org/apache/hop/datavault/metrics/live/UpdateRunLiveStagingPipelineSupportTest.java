@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics.live;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,13 +33,15 @@ class UpdateRunLiveStagingPipelineSupportTest {
   @Test
   void derivesElementNameFromGeneratedFactPipelineAction() throws Exception {
     LocalWorkflowEngine engine = engineWithActiveAction("run_0001-dm-fact-f_orders");
-    assertEquals("f_orders", UpdateRunLiveStagingPipelineSupport.resolveFallbackElementName(engine));
+    assertEquals(
+        "f_orders", UpdateRunLiveStagingPipelineSupport.resolveFallbackElementName(engine));
   }
 
   @Test
   void derivesTableNameFromBulkLoadAction() throws Exception {
     LocalWorkflowEngine engine = engineWithActiveAction("bulk_load_f_orders_0");
-    assertEquals("f-orders", UpdateRunLiveStagingPipelineSupport.resolveFallbackElementName(engine));
+    assertEquals(
+        "f-orders", UpdateRunLiveStagingPipelineSupport.resolveFallbackElementName(engine));
   }
 
   @Test

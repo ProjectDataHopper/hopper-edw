@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.ArrayList;
@@ -24,8 +22,8 @@ import org.apache.hop.core.Const;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.file.TextFileInputField;
-import org.apache.hop.core.fileinput.InputFile;
 import org.apache.hop.core.fileinput.FileTypeFilter;
+import org.apache.hop.core.fileinput.InputFile;
 import org.apache.hop.core.plugins.PluginRegistry;
 import org.apache.hop.core.plugins.TransformPluginType;
 import org.apache.hop.core.row.IValueMeta;
@@ -95,11 +93,18 @@ public final class DvSourcePreviewInputSupport {
           BaseMessages.getString(PKG, "DvSourcePreviewInputSupport.Error.UnsupportedSourceType"));
     }
     return switch (sourceType) {
-      case DATABASE -> buildDatabasePreview(recordSource, (DvDatabaseSource) dvSource, variables, metadataProvider, rowLimit);
-      case CSV -> buildCsvPreview(recordSource, (DvCsvSource) dvSource, variables, metadataProvider, rowLimit);
-      case PARQUET -> buildParquetPreview(recordSource, (DvParquetSource) dvSource, variables, metadataProvider, rowLimit);
+      case DATABASE ->
+          buildDatabasePreview(
+              recordSource, (DvDatabaseSource) dvSource, variables, metadataProvider, rowLimit);
+      case CSV ->
+          buildCsvPreview(
+              recordSource, (DvCsvSource) dvSource, variables, metadataProvider, rowLimit);
+      case PARQUET ->
+          buildParquetPreview(
+              recordSource, (DvParquetSource) dvSource, variables, metadataProvider, rowLimit);
       case ICEBERG ->
-          buildIcebergPreview(recordSource, (DvIcebergSource) dvSource, variables, metadataProvider, rowLimit);
+          buildIcebergPreview(
+              recordSource, (DvIcebergSource) dvSource, variables, metadataProvider, rowLimit);
       case COMPOSITE ->
           buildCompositePreview(
               recordSource, (DvCompositeSource) dvSource, variables, metadataProvider, rowLimit);
@@ -147,8 +152,7 @@ public final class DvSourcePreviewInputSupport {
           BaseMessages.getString(PKG, "DvSourcePreviewInputSupport.Error.CompositeNoSql"));
     }
 
-    String transformName =
-        calculateCompositeTransformName(recordSource, source);
+    String transformName = calculateCompositeTransformName(recordSource, source);
     TableInputMeta tableInputMeta = new TableInputMeta();
     tableInputMeta.setConnection(databaseMeta.getName());
     DvSqlSupport.assignDisplaySql(tableInputMeta, resolved.sql());
@@ -190,7 +194,8 @@ public final class DvSourcePreviewInputSupport {
     String connectionName = Const.NVL(source.getDatabaseName(), "").trim();
     if (Utils.isEmpty(connectionName)) {
       throw new HopException(
-          BaseMessages.getString(PKG, "DvSourcePreviewInputSupport.Error.MissingDatabaseConnection"));
+          BaseMessages.getString(
+              PKG, "DvSourcePreviewInputSupport.Error.MissingDatabaseConnection"));
     }
     String tableName = Const.NVL(source.getTableName(), "").trim();
     if (Utils.isEmpty(tableName)) {
@@ -214,7 +219,8 @@ public final class DvSourcePreviewInputSupport {
     }
 
     String transformName = calculateDatabaseTransformName(source);
-    String previewSql = DvDatabaseSourcePreviewSupport.buildPreviewSql(databaseMeta, variables, source);
+    String previewSql =
+        DvDatabaseSourcePreviewSupport.buildPreviewSql(databaseMeta, variables, source);
     if (previewSql == null) {
       String qualifiedTable =
           databaseMeta.getQuotedSchemaTableCombination(
@@ -230,7 +236,8 @@ public final class DvSourcePreviewInputSupport {
     }
 
     PipelineMeta previewMeta =
-        PipelinePreviewFactory.generatePreviewPipeline(metadataProvider, tableInputMeta, transformName);
+        PipelinePreviewFactory.generatePreviewPipeline(
+            metadataProvider, tableInputMeta, transformName);
     return new PreviewPipeline(previewMeta, transformName);
   }
 
@@ -338,7 +345,8 @@ public final class DvSourcePreviewInputSupport {
       String filename = variables.resolve(parquetSource.getSingleFilename());
       if (Utils.isEmpty(filename)) {
         throw new HopException(
-            BaseMessages.getString(PKG, "DvSourcePreviewInputSupport.Error.MissingParquetFilename"));
+            BaseMessages.getString(
+                PKG, "DvSourcePreviewInputSupport.Error.MissingParquetFilename"));
       }
       ITransformMeta parquetMeta = DvParquetPluginSupport.loadParquetInputMeta();
       DvParquetPluginSupport.configureForMetadataFile(parquetMeta, filename);
@@ -346,7 +354,8 @@ public final class DvSourcePreviewInputSupport {
           parquetMeta, buildParquetFields(parquetMeta, parquetSource, variables));
 
       PipelineMeta previewMeta =
-          PipelinePreviewFactory.generatePreviewPipeline(metadataProvider, parquetMeta, transformName);
+          PipelinePreviewFactory.generatePreviewPipeline(
+              metadataProvider, parquetMeta, transformName);
       return new PreviewPipeline(previewMeta, transformName);
     }
 
@@ -363,14 +372,15 @@ public final class DvSourcePreviewInputSupport {
     TransformMeta getFileNames = createGetFileNames(parquetSource, variables);
     pipelineMeta.addTransform(getFileNames);
 
-    TransformMeta selectFilename =
-        createSelectFilenameOnlyTransform(getFileNames);
+    TransformMeta selectFilename = createSelectFilenameOnlyTransform(getFileNames);
     pipelineMeta.addTransform(selectFilename);
     pipelineMeta.addPipelineHop(new PipelineHopMeta(getFileNames, selectFilename));
 
     ITransformMeta parquetMeta = DvParquetPluginSupport.loadParquetInputMeta();
     DvParquetPluginSupport.configureForFilenameField(
-        parquetMeta, PARQUET_FILENAME_FIELD, resolveParquetMetadataFilename(parquetSource, variables));
+        parquetMeta,
+        PARQUET_FILENAME_FIELD,
+        resolveParquetMetadataFilename(parquetSource, variables));
     DvParquetPluginSupport.setParquetFields(
         parquetMeta, buildParquetFields(parquetMeta, parquetSource, variables));
     TransformMeta parquetTransform =
@@ -429,14 +439,12 @@ public final class DvSourcePreviewInputSupport {
     return transformMeta;
   }
 
-  private static TransformMeta createGetFileNames(DvParquetSource parquetSource, IVariables variables)
-      throws HopException {
+  private static TransformMeta createGetFileNames(
+      DvParquetSource parquetSource, IVariables variables) throws HopException {
     GetFileNamesMeta getFileNamesMeta = new GetFileNamesMeta();
     getFileNamesMeta.setDefault();
     getFileNamesMeta.getFilterItemList().clear();
-    getFileNamesMeta
-        .getFilterItemList()
-        .add(new FilterItem(FileTypeFilter.ONLY_FILES.toString()));
+    getFileNamesMeta.getFilterItemList().add(new FilterItem(FileTypeFilter.ONLY_FILES.toString()));
 
     List<FileItem> filesList = new ArrayList<>();
     filesList.add(
@@ -465,8 +473,8 @@ public final class DvSourcePreviewInputSupport {
     return "";
   }
 
-  private static List<CsvInputField> buildCsvInputFields(DvCsvSource csvSource, IVariables variables)
-      throws HopException {
+  private static List<CsvInputField> buildCsvInputFields(
+      DvCsvSource csvSource, IVariables variables) throws HopException {
     List<CsvInputField> fields = new ArrayList<>();
     List<SourceField> catalogFields = csvSource.getFields();
     if (catalogFields == null || catalogFields.isEmpty()) {

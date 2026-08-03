@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.sourcemodel;
 
 import java.util.ArrayList;
@@ -60,6 +59,7 @@ public class SourceModel extends HopMetadataBase
 
   public static final String GUI_PLUGIN_ELEMENT_PARENT_ID = "SOURCE_MODEL_DIALOG";
   public static final String FILE_EXTENSION = ".hsm";
+
   /** Root XML element name for {@code .hsm} documents. */
   public static final String XML_TAG = "source-model";
 
@@ -317,7 +317,8 @@ public class SourceModel extends HopMetadataBase
         remarks.add(
             new CheckResult(
                 ICheckResult.TYPE_RESULT_ERROR,
-                BaseMessages.getString(PKG, "SourceModel.CheckResult.DuplicateTableName", tableName),
+                BaseMessages.getString(
+                    PKG, "SourceModel.CheckResult.DuplicateTableName", tableName),
                 null));
       }
     }
@@ -378,7 +379,8 @@ public class SourceModel extends HopMetadataBase
         remarks.add(
             new CheckResult(
                 ICheckResult.TYPE_RESULT_ERROR,
-                BaseMessages.getString(PKG, "SourceModel.CheckResult.DuplicateQueryName", queryName),
+                BaseMessages.getString(
+                    PKG, "SourceModel.CheckResult.DuplicateQueryName", queryName),
                 null));
       }
       if (findTable(query.getDrivingTableName()) == null) {

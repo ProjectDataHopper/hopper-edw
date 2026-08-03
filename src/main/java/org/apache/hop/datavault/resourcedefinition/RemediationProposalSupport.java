@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import java.util.ArrayList;
@@ -58,8 +56,7 @@ public final class RemediationProposalSupport {
       String recordKey) {
     List<ValidationIssue> issues = new ArrayList<>();
     if (!Utils.isEmpty(sourceUnavailableMessage)) {
-      IssueKind kind =
-          unavailableKind != null ? unavailableKind : IssueKind.SOURCE_UNAVAILABLE;
+      IssueKind kind = unavailableKind != null ? unavailableKind : IssueKind.SOURCE_UNAVAILABLE;
       issues.add(
           new ValidationIssue(
               ValidationIssueSupport.buildIssueId(kind, null, null),
@@ -129,8 +126,7 @@ public final class RemediationProposalSupport {
               IssueKind.FIELD_ADDED,
               IssueSeverity.WARNING,
               fieldName,
-              BaseMessages.getString(
-                  PKG, "RemediationProposalSupport.Issue.FieldAdded", fieldName),
+              BaseMessages.getString(PKG, "RemediationProposalSupport.Issue.FieldAdded", fieldName),
               proposalsForAddedField(fieldName, usages));
       case REMOVED -> {
         IssueKind kind = mapped ? IssueKind.MAPPING_BROKEN : IssueKind.FIELD_REMOVED;
@@ -141,9 +137,7 @@ public final class RemediationProposalSupport {
             fieldName,
             mapped
                 ? BaseMessages.getString(
-                    PKG,
-                    "RemediationProposalSupport.Issue.FieldRemovedMapped",
-                    fieldName)
+                    PKG, "RemediationProposalSupport.Issue.FieldRemovedMapped", fieldName)
                 : BaseMessages.getString(
                     PKG, "RemediationProposalSupport.Issue.FieldRemoved", fieldName),
             proposalsForRemovedField(fieldName, mapped, usages));
@@ -191,17 +185,14 @@ public final class RemediationProposalSupport {
             BaseMessages.getString(
                 PKG, "RemediationProposalSupport.RefreshCatalogContract.Summary"),
             BaseMessages.getString(
-                PKG,
-                "RemediationProposalSupport.RefreshCatalogContract.AddedDetails",
-                fieldName)));
+                PKG, "RemediationProposalSupport.RefreshCatalogContract.AddedDetails", fieldName)));
 
     Set<String> hubElements = hubElementsForUsages(usages);
     if (!hubElements.isEmpty()) {
       proposals.add(
           new RemediationProposal(
               ProposalType.ADD_NEW_SATELLITE,
-              BaseMessages.getString(
-                  PKG, "RemediationProposalSupport.AddNewSatellite.Summary"),
+              BaseMessages.getString(PKG, "RemediationProposalSupport.AddNewSatellite.Summary"),
               BaseMessages.getString(
                   PKG,
                   "RemediationProposalSupport.AddNewSatellite.Details",
@@ -214,8 +205,7 @@ public final class RemediationProposalSupport {
       proposals.add(
           new RemediationProposal(
               ProposalType.EXTEND_EXISTING_SATELLITE,
-              BaseMessages.getString(
-                  PKG, "RemediationProposalSupport.ExtendSatellite.Summary"),
+              BaseMessages.getString(PKG, "RemediationProposalSupport.ExtendSatellite.Summary"),
               BaseMessages.getString(
                   PKG,
                   "RemediationProposalSupport.ExtendSatellite.Details",
@@ -291,13 +281,9 @@ public final class RemediationProposalSupport {
         proposals.add(
             new RemediationProposal(
                 ProposalType.BLOCK_UPDATE_UNTIL_RESOLVED,
+                BaseMessages.getString(PKG, "RemediationProposalSupport.LiveNarrower.Summary"),
                 BaseMessages.getString(
-                    PKG, "RemediationProposalSupport.LiveNarrower.Summary"),
-                BaseMessages.getString(
-                    PKG,
-                    "RemediationProposalSupport.LiveNarrower.Details",
-                    fieldName,
-                    change)));
+                    PKG, "RemediationProposalSupport.LiveNarrower.Details", fieldName, change)));
       }
       proposals.add(
           new RemediationProposal(
@@ -352,7 +338,9 @@ public final class RemediationProposalSupport {
     return LengthDirection.UNKNOWN;
   }
 
-  /** @deprecated use {@link #lengthDirection(String)} */
+  /**
+   * @deprecated use {@link #lengthDirection(String)}
+   */
   static boolean isActualLengthLonger(String details) {
     return lengthDirection(details) == LengthDirection.ACTUAL_LONGER;
   }

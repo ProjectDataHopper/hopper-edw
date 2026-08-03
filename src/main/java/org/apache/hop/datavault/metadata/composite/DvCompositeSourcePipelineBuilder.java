@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.composite;
 
 import java.util.ArrayList;
@@ -98,9 +97,7 @@ public abstract class DvCompositeSourcePipelineBuilder extends DvSourcePipelineB
     String innerSql = resolved.sql();
     if (Utils.isEmpty(innerSql)) {
       throw new HopException(
-          "Composite source '"
-              + recordSource.getName()
-              + "' has no SQL (live query or cache)");
+          "Composite source '" + recordSource.getName() + "' has no SQL (live query or cache)");
     }
 
     sourceDbMeta = resolved.databaseMeta();
@@ -122,8 +119,7 @@ public abstract class DvCompositeSourcePipelineBuilder extends DvSourcePipelineB
     String querySql = getSql(innerSql);
     Point location = new Point(startPoint.x, startPoint.y);
     String transformName =
-        "composite "
-            + ConstNvl(compositeSource.getSourceQueryName(), recordSource.getName());
+        "composite " + ConstNvl(compositeSource.getSourceQueryName(), recordSource.getName());
     TransformMeta sourceTransform =
         createTableInput(transformName, sourceDbMeta, querySql, location);
     pipelineMeta.addTransform(sourceTransform);
@@ -185,8 +181,7 @@ public abstract class DvCompositeSourcePipelineBuilder extends DvSourcePipelineB
     }
   }
 
-  private TransformMeta findTerminalTransform(
-      PipelineMeta generated, Map<String, String> nameMap) {
+  private TransformMeta findTerminalTransform(PipelineMeta generated, Map<String, String> nameMap) {
     for (int i = generated.getTransforms().size() - 1; i >= 0; i--) {
       TransformMeta t = generated.getTransforms().get(i);
       boolean hasOut = false;

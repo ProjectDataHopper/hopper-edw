@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.iceberg;
 
 import java.util.ArrayList;
@@ -75,8 +73,8 @@ public abstract class DvIcebergSourcePipelineBuilder extends DvFileSourcePipelin
   }
 
   @Override
-  protected TransformMeta createFileInput(String transformName, Point location, ColumnMapping mapping)
-      throws HopException {
+  protected TransformMeta createFileInput(
+      String transformName, Point location, ColumnMapping mapping) throws HopException {
     IcebergTableInputMeta meta = new IcebergTableInputMeta();
     meta.setCatalogUri(icebergSource.getCatalogUri());
     meta.setWarehouse(icebergSource.getWarehouse());
@@ -129,8 +127,7 @@ public abstract class DvIcebergSourcePipelineBuilder extends DvFileSourcePipelin
   }
 
   private IcebergTableInputField toIcebergField(SourceField sourceField, String name) {
-    int hopType =
-        sourceField.getHopType() > 0 ? sourceField.getHopType() : IValueMeta.TYPE_STRING;
+    int hopType = sourceField.getHopType() > 0 ? sourceField.getHopType() : IValueMeta.TYPE_STRING;
     IcebergTableInputField field = new IcebergTableInputField(name, hopType);
     if (sourceField.getLength() != null) {
       field.setLength(sourceField.getLength());

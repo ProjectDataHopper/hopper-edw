@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.coaching;
 
 import java.util.ArrayList;
@@ -45,7 +43,8 @@ public final class CoachingAnalysisSession {
   }
 
   public List<CoachingSourceNode> resolve(boolean includeValidation) throws HopException {
-    List<CoachingSourceRef> sources = dedupeSources(adapter.resolveCoachingSources(variables, metadataProvider));
+    List<CoachingSourceRef> sources =
+        dedupeSources(adapter.resolveCoachingSources(variables, metadataProvider));
     if (sources.isEmpty()) {
       return List.of();
     }

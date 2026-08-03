@@ -13,20 +13,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapNode;
 
 /** Measured card size for an execution map node. */
-public record ExecutionMapNodeCardMetrics(int width, int height, int nameX, int nameY, int nameWidth, int nameHeight) {
+public record ExecutionMapNodeCardMetrics(
+    int width, int height, int nameX, int nameY, int nameWidth, int nameHeight) {
 
   public static ExecutionMapNodeCardMetrics defaultFor(ExecutionMapNode node) {
     String name = node != null && node.getName() != null ? node.getName() : "?";
     int estimatedNameWidth = Math.max(ExecutionMapMetrics.MIN_NODE_WIDTH - 80, name.length() * 8);
-    int width = Math.max(ExecutionMapMetrics.MIN_NODE_WIDTH, 16 + 32 + 16 + estimatedNameWidth + 16);
+    int width =
+        Math.max(ExecutionMapMetrics.MIN_NODE_WIDTH, 16 + 32 + 16 + estimatedNameWidth + 16);
     int height = Math.max(ExecutionMapMetrics.MIN_NODE_HEIGHT, 16 + 32 + 16 + 14 + 16);
     int nameX = 16 + 32 + 16;
     int nameY = 16;

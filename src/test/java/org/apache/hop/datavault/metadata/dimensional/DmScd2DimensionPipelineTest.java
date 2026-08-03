@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,24 +31,24 @@ import org.apache.hop.catalog.metadata.DataCatalogMeta;
 import org.apache.hop.catalog.registry.RecordDefinitionRegistry;
 import org.apache.hop.catalog.xp.RegisterDataCatalogMetadataExtensionPoint;
 import org.apache.hop.core.HopEnvironment;
-import org.apache.hop.core.logging.LogChannel;
-import org.apache.hop.core.plugins.PluginRegistry;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.logging.LogChannel;
+import org.apache.hop.core.plugins.PluginRegistry;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.datavault.catalog.RetailExampleCatalogFixtures;
 import org.apache.hop.datavault.metadata.dimensional.pipeline.DmPipelineBuilderSupport;
+import org.apache.hop.datavault.transform.mergerowsplus.MergeRowsPlusMeta;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transforms.calculator.CalculatorMeta;
 import org.apache.hop.pipeline.transforms.constant.ConstantMeta;
-import org.apache.hop.pipeline.transforms.selectvalues.SelectValuesMeta;
-import org.apache.hop.datavault.transform.mergerowsplus.MergeRowsPlusMeta;
-import org.apache.hop.pipeline.transforms.metainject.MetaInjectMeta;
 import org.apache.hop.pipeline.transforms.groupby.GroupByMeta;
+import org.apache.hop.pipeline.transforms.metainject.MetaInjectMeta;
+import org.apache.hop.pipeline.transforms.selectvalues.SelectValuesMeta;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
 import org.apache.hop.pipeline.transforms.tableoutput.TableOutputMeta;
 import org.apache.hop.pipeline.transforms.update.UpdateMeta;
@@ -79,9 +77,7 @@ class DmScd2DimensionPipelineTest {
     dimension.getNaturalKeys().add(new DmNaturalKeyField("order_id"));
     dimension.getSourceOrDefault().setSourceType(DmSourceType.RECORD_DEFINITION);
     dimension.getSourceOrDefault().setSourceCatalogConnection("local-catalog");
-    dimension
-        .getSourceOrDefault()
-        .setSourceRecordNamespace("hop/retail-example/sources");
+    dimension.getSourceOrDefault().setSourceRecordNamespace("hop/retail-example/sources");
     dimension.getSourceOrDefault().setSourceRecordName("E2E-order-header");
     model.getTables().add(dimension);
 
@@ -89,9 +85,7 @@ class DmScd2DimensionPipelineTest {
     IHopMetadataProvider metadataProvider = retailExampleMetadataProvider(variables);
 
     PipelineMeta pipeline =
-        dimension
-            .generateUpdatePipelines(metadataProvider, variables, model, new Date())
-            .get(0);
+        dimension.generateUpdatePipelines(metadataProvider, variables, model, new Date()).get(0);
 
     TransformMeta sourceTransform =
         pipeline.getTransforms().stream()
@@ -182,8 +176,15 @@ class DmScd2DimensionPipelineTest {
                 .getTransform();
     assertEquals(
         "version_new",
-        versionCalculator.getFunctions().get(versionCalculator.getFunctions().size() - 1).getFieldName());
-    assertFalse(versionCalculator.getFunctions().get(versionCalculator.getFunctions().size() - 1).isRemovedFromResult());
+        versionCalculator
+            .getFunctions()
+            .get(versionCalculator.getFunctions().size() - 1)
+            .getFieldName());
+    assertFalse(
+        versionCalculator
+            .getFunctions()
+            .get(versionCalculator.getFunctions().size() - 1)
+            .isRemovedFromResult());
     assertTrue(
         pipeline.getTransforms().stream()
             .anyMatch(
@@ -200,8 +201,7 @@ class DmScd2DimensionPipelineTest {
         pipeline.getTransforms().stream()
             .anyMatch(t -> t.getName().equals("update_d_customer_inplace")));
     assertTrue(
-        pipeline.getTransforms().stream()
-            .anyMatch(t -> t.getName().equals("close_d_customer")));
+        pipeline.getTransforms().stream().anyMatch(t -> t.getName().equals("close_d_customer")));
     assertTrue(
         pipeline.getTransforms().stream()
             .anyMatch(t -> t.getName().equals("select_merge_compare")));
@@ -216,7 +216,8 @@ class DmScd2DimensionPipelineTest {
                         && t.getTransform() instanceof MergeRowsPlusMeta));
     assertFalse(
         pipeline.getTransforms().stream()
-            .anyMatch(t -> t.getName().equals("merge_reference") || t.getName().equals("merge_compare")));
+            .anyMatch(
+                t -> t.getName().equals("merge_reference") || t.getName().equals("merge_compare")));
 
     ConstantMeta effectiveDates =
         (ConstantMeta)
@@ -238,17 +239,9 @@ class DmScd2DimensionPipelineTest {
             .anyMatch(field -> "date_from".equals(field.getFieldName())));
 
     List<String> expectedMergeFields =
-        List.of(
-            "customer_hk",
-            "cust_segment",
-            "customer_id",
-            "version",
-            "date_from",
-            "date_to");
-    assertEquals(
-        expectedMergeFields, selectOutputFieldNames(pipeline, "select_merge_compare"));
-    assertEquals(
-        expectedMergeFields, selectOutputFieldNames(pipeline, "select_merge_reference"));
+        List.of("customer_hk", "cust_segment", "customer_id", "version", "date_from", "date_to");
+    assertEquals(expectedMergeFields, selectOutputFieldNames(pipeline, "select_merge_compare"));
+    assertEquals(expectedMergeFields, selectOutputFieldNames(pipeline, "select_merge_reference"));
     assertEquals(6, selectOutputFieldNames(pipeline, "select_merge_compare").size());
 
     TableInputMeta targetInput =
@@ -304,7 +297,8 @@ class DmScd2DimensionPipelineTest {
                         && "date_from".equals(key.getKeyLookup())));
     assertEquals(1, updateMeta.getLookupField().getUpdateFields().size());
     assertEquals("date_to", updateMeta.getLookupField().getUpdateFields().get(0).getUpdateLookup());
-    assertEquals("date_from", updateMeta.getLookupField().getUpdateFields().get(0).getUpdateStream());
+    assertEquals(
+        "date_from", updateMeta.getLookupField().getUpdateFields().get(0).getUpdateStream());
   }
 
   @Test
@@ -357,9 +351,7 @@ class DmScd2DimensionPipelineTest {
                 .orElseThrow()
                 .getTransform();
     return selectMeta.getSelectOption().getSelectFields().stream()
-        .map(
-            field ->
-                Utils.isEmpty(field.getRename()) ? field.getName() : field.getRename())
+        .map(field -> Utils.isEmpty(field.getRename()) ? field.getName() : field.getRename())
         .toList();
   }
 
@@ -374,8 +366,7 @@ class DmScd2DimensionPipelineTest {
   private static Variables retailExampleVariables() {
     Variables variables = new Variables();
     variables.setVariable(
-        "PROJECT_HOME",
-        Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
+        "PROJECT_HOME", Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
     return variables;
   }
 

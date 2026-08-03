@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.sourcemodel.profile;
 
 import lombok.Getter;
@@ -36,8 +35,7 @@ public class SourceRelationshipProfileOptions {
   private long fullOuterMaxRows = DEFAULT_FULL_OUTER_MAX_ROWS;
   private int sampleSize = DEFAULT_SAMPLE_SIZE;
   private int queryTimeoutSeconds = DEFAULT_QUERY_TIMEOUT_SECONDS;
-  private SourceRelationshipProfileStrategy strategy =
-      SourceRelationshipProfileStrategy.EXACT_KEY;
+  private SourceRelationshipProfileStrategy strategy = SourceRelationshipProfileStrategy.EXACT_KEY;
 
   public static SourceRelationshipProfileOptions defaults() {
     return new SourceRelationshipProfileOptions();

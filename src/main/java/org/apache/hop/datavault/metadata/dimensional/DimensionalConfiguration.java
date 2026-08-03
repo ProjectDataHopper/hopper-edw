@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import java.util.List;
@@ -39,7 +37,6 @@ import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadata;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
-
 /** Warehouse configuration for a dimensional model. */
 @GuiPlugin
 @Getter
@@ -48,7 +45,8 @@ public class DimensionalConfiguration extends HopMetadataBase
     implements IHopMetadata, IDvTargetLoadConfiguration {
 
   public static final String GUI_PLUGIN_ELEMENT_PARENT_ID = "DIMENSIONAL_MODEL_DIALOG";
-  public static final String GUI_PLUGIN_ELEMENT_COLUMNS_TAB_ID = "DIMENSIONAL_CONFIGURATION_COLUMNS_TAB";
+  public static final String GUI_PLUGIN_ELEMENT_COLUMNS_TAB_ID =
+      "DIMENSIONAL_CONFIGURATION_COLUMNS_TAB";
   public static final String GUI_PLUGIN_ELEMENT_TARGET_LOAD_TAB_ID =
       "DIMENSIONAL_CONFIGURATION_TARGET_LOAD_TAB";
   public static final String GUI_PLUGIN_ELEMENT_GENERATED_ARTIFACTS_TAB_ID =
@@ -237,7 +235,8 @@ public class DimensionalConfiguration extends HopMetadataBase
       toolTip = "i18n::DataVaultConfiguration.BulkLoadStagingFolder.ToolTip",
       parentId = GUI_PLUGIN_ELEMENT_TARGET_LOAD_TAB_ID)
   @HopMetadataProperty
-  private String bulkLoadStagingFolder = DvTargetLoadConfigurationSupport.DEFAULT_BULK_LOAD_STAGING_FOLDER;
+  private String bulkLoadStagingFolder =
+      DvTargetLoadConfigurationSupport.DEFAULT_BULK_LOAD_STAGING_FOLDER;
 
   @GuiWidgetElement(
       order = "0514",
@@ -430,7 +429,10 @@ public class DimensionalConfiguration extends HopMetadataBase
 
   public String buildDimensionPipelineName(IVariables variables, String targetTableName) {
     return buildPipelineName(
-        variables, dimensionPipelineNamePrefix, DEFAULT_DIMENSION_PIPELINE_NAME_PREFIX, targetTableName);
+        variables,
+        dimensionPipelineNamePrefix,
+        DEFAULT_DIMENSION_PIPELINE_NAME_PREFIX,
+        targetTableName);
   }
 
   public String buildJunkDimensionPipelineName(IVariables variables, String targetTableName) {

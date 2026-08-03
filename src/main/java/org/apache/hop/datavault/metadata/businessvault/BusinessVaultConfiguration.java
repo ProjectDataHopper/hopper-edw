@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import java.util.List;
@@ -36,14 +34,14 @@ import org.apache.hop.datavault.metadata.IDvTargetLoadConfiguration;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
-
 /** Configuration embedded in a {@link BusinessVaultModel}. */
 @Getter
 @Setter
 @GuiPlugin
 public class BusinessVaultConfiguration implements IDvTargetLoadConfiguration {
 
-  public static final String GUI_PLUGIN_ELEMENT_GENERAL_TAB_ID = "BUSINESS_VAULT_CONFIGURATION_GENERAL_TAB";
+  public static final String GUI_PLUGIN_ELEMENT_GENERAL_TAB_ID =
+      "BUSINESS_VAULT_CONFIGURATION_GENERAL_TAB";
   public static final String GUI_PLUGIN_ELEMENT_TARGET_LOAD_TAB_ID =
       "BUSINESS_VAULT_CONFIGURATION_TARGET_LOAD_TAB";
   public static final String GUI_PLUGIN_ELEMENT_GENERATED_ARTIFACTS_TAB_ID =
@@ -191,7 +189,8 @@ public class BusinessVaultConfiguration implements IDvTargetLoadConfiguration {
       toolTip = "i18n::DataVaultConfiguration.BulkLoadStagingFolder.ToolTip",
       parentId = GUI_PLUGIN_ELEMENT_TARGET_LOAD_TAB_ID)
   @HopMetadataProperty
-  private String bulkLoadStagingFolder = DvTargetLoadConfigurationSupport.DEFAULT_BULK_LOAD_STAGING_FOLDER;
+  private String bulkLoadStagingFolder =
+      DvTargetLoadConfigurationSupport.DEFAULT_BULK_LOAD_STAGING_FOLDER;
 
   @GuiWidgetElement(
       order = "0514",
@@ -355,7 +354,11 @@ public class BusinessVaultConfiguration implements IDvTargetLoadConfiguration {
   public String buildScd2PipelineName(
       IVariables variables, String targetTableName, String sourceName) {
     return buildPipelineName(
-        variables, scd2PipelineNamePrefix, DEFAULT_SCD2_PIPELINE_NAME_PREFIX, targetTableName, sourceName);
+        variables,
+        scd2PipelineNamePrefix,
+        DEFAULT_SCD2_PIPELINE_NAME_PREFIX,
+        targetTableName,
+        sourceName);
   }
 
   public String buildPitPipelineName(IVariables variables, String targetTableName) {

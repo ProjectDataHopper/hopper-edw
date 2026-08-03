@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import java.util.HashMap;
@@ -55,8 +53,7 @@ public final class ExecutionMapNodeCardLayout {
       int nameY = ModelGraphTableCardLayout.nameY(0);
       metrics.put(
           node.getId(),
-          new ExecutionMapNodeCardMetrics(
-              width, height, nameX, nameY, nameExtent.x, nameExtent.y));
+          new ExecutionMapNodeCardMetrics(width, height, nameX, nameY, nameExtent.x, nameExtent.y));
     }
     return metrics;
   }
@@ -90,5 +87,4 @@ public final class ExecutionMapNodeCardLayout {
     ModelGraphTableCardLayout.drawTypeBelowIcon(
         gc, ExecutionMapNodeIconSupport.getTypeLabel(node), x, y);
   }
-
 }

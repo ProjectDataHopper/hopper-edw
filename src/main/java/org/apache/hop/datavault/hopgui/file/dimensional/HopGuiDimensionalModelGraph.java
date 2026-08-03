@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.dimensional;
 
 import java.util.ArrayList;
@@ -28,9 +26,9 @@ import org.apache.hop.core.Const;
 import org.apache.hop.core.DbCache;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.Props;
-import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.action.GuiContextAction;
 import org.apache.hop.core.action.GuiContextActionFilter;
+import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.AreaOwner;
 import org.apache.hop.core.gui.IGc;
@@ -47,6 +45,10 @@ import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.core.xml.XmlHandler;
+import org.apache.hop.datavault.hopgui.ModelGeneratedArtifactOpenSupport;
+import org.apache.hop.datavault.hopgui.ModelTableLayoutPreviewSupport;
+import org.apache.hop.datavault.hopgui.ModelUpdateActionAuditSupport;
+import org.apache.hop.datavault.hopgui.ModelUpdateWorkflowClipboardSupport;
 import org.apache.hop.datavault.hopgui.ai.DmAiAdvisorDialog;
 import org.apache.hop.datavault.hopgui.coaching.ICoachableModelGraph;
 import org.apache.hop.datavault.hopgui.file.dimensional.delegates.HopGuiDimensionalClipboardDelegate;
@@ -56,23 +58,17 @@ import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphHit;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphMouseInteractions;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphSnapshotUndo;
 import org.apache.hop.datavault.metadata.DvDdlSupport;
-import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
 import org.apache.hop.datavault.metadata.DvIntegerSettingValidationSupport;
 import org.apache.hop.datavault.metadata.DvNote;
 import org.apache.hop.datavault.metadata.DvNoteType;
 import org.apache.hop.datavault.metadata.DvTargetLoadMode;
-import org.apache.hop.datavault.hopgui.ModelGeneratedArtifactOpenSupport;
-import org.apache.hop.datavault.hopgui.ModelTableLayoutPreviewSupport;
-import org.apache.hop.datavault.hopgui.ModelUpdateActionAuditSupport;
-import org.apache.hop.datavault.hopgui.ModelUpdateWorkflowClipboardSupport;
 import org.apache.hop.datavault.metadata.DvUpdateWorkflowSupport;
-import org.apache.hop.datavault.workflow.actions.dimensionalupdate.ActionDimensionalUpdate;
-import org.apache.hop.workflow.action.ActionMeta;
-import org.apache.hop.datavault.metadata.dimensional.DimensionalConfiguration;
-import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
+import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
 import org.apache.hop.datavault.metadata.coaching.CoachingSourceRef;
 import org.apache.hop.datavault.metadata.coaching.DmCoachingModelAdapter;
 import org.apache.hop.datavault.metadata.coaching.ICoachingModelAdapter;
+import org.apache.hop.datavault.metadata.dimensional.DimensionalConfiguration;
+import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.datavault.metadata.dimensional.DmAccumulatingSnapshotFact;
 import org.apache.hop.datavault.metadata.dimensional.DmAggregateFact;
 import org.apache.hop.datavault.metadata.dimensional.DmBridge;
@@ -85,13 +81,13 @@ import org.apache.hop.datavault.metadata.dimensional.DmDimensionResolutionSuppor
 import org.apache.hop.datavault.metadata.dimensional.DmFact;
 import org.apache.hop.datavault.metadata.dimensional.DmFactDimensionRole;
 import org.apache.hop.datavault.metadata.dimensional.DmFactJunkDimensionRole;
+import org.apache.hop.datavault.metadata.dimensional.DmFactRangeDimensionRole;
 import org.apache.hop.datavault.metadata.dimensional.DmFactlessFact;
 import org.apache.hop.datavault.metadata.dimensional.DmJunkDimension;
 import org.apache.hop.datavault.metadata.dimensional.DmJunkDimensionSupport;
-import org.apache.hop.datavault.metadata.dimensional.DmFactRangeDimensionRole;
-import org.apache.hop.datavault.metadata.dimensional.DmRangeDimension;
 import org.apache.hop.datavault.metadata.dimensional.DmLayoutSupport;
 import org.apache.hop.datavault.metadata.dimensional.DmPeriodicSnapshotFact;
+import org.apache.hop.datavault.metadata.dimensional.DmRangeDimension;
 import org.apache.hop.datavault.metadata.dimensional.DmSurrogateKeyStrategy;
 import org.apache.hop.datavault.metadata.dimensional.DmSurrogateKeySupport;
 import org.apache.hop.datavault.metadata.dimensional.DmTableBase;
@@ -99,6 +95,7 @@ import org.apache.hop.datavault.metadata.dimensional.DmTargetDatabaseSupport;
 import org.apache.hop.datavault.metadata.dimensional.IDmFactLikeTable;
 import org.apache.hop.datavault.metadata.dimensional.IDmTable;
 import org.apache.hop.datavault.metadata.dimensional.pipeline.DmUpdateExecutionSupport;
+import org.apache.hop.datavault.workflow.actions.dimensionalupdate.ActionDimensionalUpdate;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.ui.core.ConstUi;
@@ -122,6 +119,7 @@ import org.apache.hop.ui.hopgui.perspective.IHopPerspective;
 import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
 import org.apache.hop.ui.hopgui.shared.SwtGc;
 import org.apache.hop.workflow.WorkflowMeta;
+import org.apache.hop.workflow.action.ActionMeta;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.graphics.GC;
@@ -129,7 +127,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
@@ -164,8 +161,7 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
       "HopGuiDimensionalModelGraph-ToolBar-10060-Check-Model";
   public static final String TOOLBAR_ITEM_AI_HELP =
       "HopGuiDimensionalModelGraph-ToolBar-10065-AI-Help";
-  public static final String TOOLBAR_ITEM_DEBUG =
-      "HopGuiDimensionalModelGraph-ToolBar-10070-Debug";
+  public static final String TOOLBAR_ITEM_DEBUG = "HopGuiDimensionalModelGraph-ToolBar-10070-Debug";
   public static final String TOOLBAR_ITEM_GENERATE_DDL =
       "HopGuiDimensionalModelGraph-ToolBar-10080-Generate-Ddl";
   public static final String TOOLBAR_ITEM_TOGGLE_COACH =
@@ -179,7 +175,8 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
   public static final String TOOLBAR_ITEM_COPY = "HopGuiDimensionalModelGraph-ToolBar-20030-Copy";
   public static final String TOOLBAR_ITEM_CUT = "HopGuiDimensionalModelGraph-ToolBar-20040-Cut";
   public static final String TOOLBAR_ITEM_PASTE = "HopGuiDimensionalModelGraph-ToolBar-20050-Paste";
-  public static final String TOOLBAR_ITEM_DELETE = "HopGuiDimensionalModelGraph-ToolBar-20060-Delete";
+  public static final String TOOLBAR_ITEM_DELETE =
+      "HopGuiDimensionalModelGraph-ToolBar-20060-Delete";
   public static final String TOOLBAR_ITEM_UNDO = "HopGuiDimensionalModelGraph-ToolBar-20070-Undo";
   public static final String TOOLBAR_ITEM_REDO = "HopGuiDimensionalModelGraph-ToolBar-20080-Redo";
 
@@ -673,7 +670,8 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
         DmDimensionResolutionSupport.resolveDimension(
             model, dimension.getName(), variables, hopGui.getMetadataProvider());
     if (resolved == null
-        || DmSurrogateKeySupport.resolveStrategy(resolved) != DmSurrogateKeyStrategy.USE_SOURCE_FIELD) {
+        || DmSurrogateKeySupport.resolveStrategy(resolved)
+            != DmSurrogateKeyStrategy.USE_SOURCE_FIELD) {
       return;
     }
     DimensionalConfiguration config = model.getConfigurationOrDefault();
@@ -773,7 +771,11 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
         return false;
       }
     }
-    bridge.getDimensionRefs().add(new DmBridgeDimensionRef(dimension.getName(), defaultForeignKeyForDimension(dimension)));
+    bridge
+        .getDimensionRefs()
+        .add(
+            new DmBridgeDimensionRef(
+                dimension.getName(), defaultForeignKeyForDimension(dimension)));
     return true;
   }
 
@@ -788,7 +790,9 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     }
     parent
         .getOutriggers()
-        .add(new DmDimensionOutriggerRef(outrigger.getName(), defaultForeignKeyForDimension(outrigger)));
+        .add(
+            new DmDimensionOutriggerRef(
+                outrigger.getName(), defaultForeignKeyForDimension(outrigger)));
     return true;
   }
 
@@ -1047,8 +1051,7 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     graph.markUndoPoint();
     Point click = context.getClick();
     DmDimension dateDimension =
-        DmDateDimensionTemplate.createDateDimension(
-            click != null ? click : new Point(50, 50));
+        DmDateDimensionTemplate.createDateDimension(click != null ? click : new Point(50, 50));
     graph.addTableAtClick(dateDimension, click);
     MessageBox box = new MessageBox(graph.getShell(), SWT.YES | SWT.NO | SWT.ICON_QUESTION);
     box.setText(
@@ -1365,8 +1368,7 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
           context.getModel(), alias, getVariables(), hopGui.getMetadataProvider());
     }
     if (ACTION_ID_OPEN_SOURCE_PIPELINE.equals(contextActionId)) {
-      return DmSourcePipelineOpenSupport.canOpenSourcePipeline(
-          context.getTable(), getVariables());
+      return DmSourcePipelineOpenSupport.canOpenSourcePipeline(context.getTable(), getVariables());
     }
     return true;
   }
@@ -1464,7 +1466,8 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
   @GuiToolbarElement(
       root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
       id = TOOLBAR_ITEM_TOGGLE_DURATIONS,
-      toolTip = "i18n:org.apache.hop.datavault.hopgui.file.metrics:ModelLoadDurationPane.Toggle.Tooltip",
+      toolTip =
+          "i18n:org.apache.hop.datavault.hopgui.file.metrics:ModelLoadDurationPane.Toggle.Tooltip",
       image = "ui/images/show-results.svg")
   public void toggleLoadDurationPanelToolbar() {
     toggleLoadDurationPanel();
@@ -1569,7 +1572,8 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     } else {
       MessageBox box = new MessageBox(hopGui.getShell(), SWT.OK | SWT.ICON_INFORMATION);
       box.setText(BaseMessages.getString(PKG, "HopGuiDimensionalModelGraph.NoDdlNeeded.Title"));
-      box.setMessage(BaseMessages.getString(PKG, "HopGuiDimensionalModelGraph.NoDdlNeeded.Message"));
+      box.setMessage(
+          BaseMessages.getString(PKG, "HopGuiDimensionalModelGraph.NoDdlNeeded.Message"));
       box.open();
     }
   }
@@ -1673,7 +1677,8 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
         if (pipelineMeta == null) {
           continue;
         }
-        ModelGeneratedArtifactOpenSupport.openGeneratedPipeline(hopGui, pipelineMeta, debugVariables);
+        ModelGeneratedArtifactOpenSupport.openGeneratedPipeline(
+            hopGui, pipelineMeta, debugVariables);
       }
     } catch (Exception e) {
       new ErrorDialog(
@@ -1990,8 +1995,7 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
 
   @Override
   protected String getNoteLinkTableTooltip(String target) {
-    return BaseMessages.getString(
-        PKG, "HopGuiDimensionalModelGraph.NoteLink.TableTooltip", target);
+    return BaseMessages.getString(PKG, "HopGuiDimensionalModelGraph.NoteLink.TableTooltip", target);
   }
 
   @Override
@@ -2361,7 +2365,7 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     }
     enableClipboardToolbarItems();
     enableUndoToolbarItems();
-    if (canvas!=null && !canvas.isDisposed()) {
+    if (canvas != null && !canvas.isDisposed()) {
       canvas.setFocus();
     }
   }
@@ -2678,8 +2682,7 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     }
 
     @Override
-    public void selectInLassoRegion(
-        int lassoMinX, int lassoMinY, int lassoMaxX, int lassoMaxY) {
+    public void selectInLassoRegion(int lassoMinX, int lassoMinY, int lassoMaxX, int lassoMaxY) {
       if (model == null) {
         return;
       }
@@ -2880,7 +2883,8 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
       table.setName(generated);
       table.setTableName(generated.toLowerCase().replace(' ', '_'));
     }
-    PropsUi.setLocation(table, location != null ? location.x : 50, location != null ? location.y : 50);
+    PropsUi.setLocation(
+        table, location != null ? location.x : 50, location != null ? location.y : 50);
     model.getTables().add(table);
     setChanged();
     redraw();

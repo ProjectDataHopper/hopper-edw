@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import java.util.ArrayList;
@@ -40,9 +38,7 @@ public final class ExecutionMapViewFilter {
       return childIds;
     }
     for (ExecutionMapNode node : document.getNodesOrEmpty()) {
-      if (node != null
-          && !Utils.isEmpty(node.getId())
-          && parentId.equals(node.getParentNodeId())) {
+      if (node != null && !Utils.isEmpty(node.getId()) && parentId.equals(node.getParentNodeId())) {
         childIds.add(node.getId());
       }
     }

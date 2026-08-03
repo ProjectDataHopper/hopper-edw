@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import org.apache.commons.lang3.StringUtils;
@@ -110,7 +108,8 @@ public final class DvSourceFieldMappingSupport {
     String sourceIndicator = recordSource.getSourceIndicator();
     if (StringUtils.isEmpty(sourceIndicator)) {
       throw new HopException(
-          "Please specify a static source indicator or a field in source " + recordSource.getName());
+          "Please specify a static source indicator or a field in source "
+              + recordSource.getName());
     }
     return sourceIndicator;
   }

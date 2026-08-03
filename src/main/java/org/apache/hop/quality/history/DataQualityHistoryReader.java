@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.quality.history;
 
 import java.nio.file.Path;
@@ -103,11 +101,10 @@ public final class DataQualityHistoryReader {
    * @return connection when resolved; {@code null} when not configured
    */
   public static HistoryConnection resolveConnection(
-      String catalogConnectionName,
-      IVariables variables,
-      IHopMetadataProvider metadataProvider)
+      String catalogConnectionName, IVariables variables, IHopMetadataProvider metadataProvider)
       throws HopException {
-    String fromVar = variableValue(variables, DataQualityHistoryPublisher.VAR_QUALITY_HISTORY_DATABASE);
+    String fromVar =
+        variableValue(variables, DataQualityHistoryPublisher.VAR_QUALITY_HISTORY_DATABASE);
     if (!Utils.isEmpty(fromVar)) {
       String schema =
           variableValue(variables, DataQualityHistoryPublisher.VAR_QUALITY_HISTORY_SCHEMA);
@@ -166,8 +163,7 @@ public final class DataQualityHistoryReader {
   }
 
   /**
-   * Lists recent profile-subject history for {@code subjectKey}, newest first, up to {@code
-   * limit}.
+   * Lists recent profile-subject history for {@code subjectKey}, newest first, up to {@code limit}.
    *
    * @throws HopException if connection/SQL fails
    * @throws QualityHistoryTablesMissingException if required tables are absent
@@ -274,7 +270,7 @@ public final class DataQualityHistoryReader {
 
       StringBuilder sql = new StringBuilder();
       sql.append(
-          "SELECT finding_seq, subject_key, rule_id, rule_name, rule_type, severity, field_name,")
+              "SELECT finding_seq, subject_key, rule_id, rule_name, rule_type, severity, field_name,")
           .append(" message, actual_summary, expected_summary FROM ")
           .append(findingTable)
           .append(" WHERE quality_run_id = ")
@@ -319,8 +315,7 @@ public final class DataQualityHistoryReader {
       return false;
     }
     String schema =
-        DataQualityHistoryDdlSupport.resolvePhysicalSchema(
-            operationsSchema, db.getDatabaseMeta());
+        DataQualityHistoryDdlSupport.resolvePhysicalSchema(operationsSchema, db.getDatabaseMeta());
     return db.checkTableExists(schema, DataQualityHistoryPublisher.TABLE_QUALITY_RUN)
         && db.checkTableExists(schema, DataQualityHistoryPublisher.TABLE_QUALITY_PROFILE_SUBJECT);
   }

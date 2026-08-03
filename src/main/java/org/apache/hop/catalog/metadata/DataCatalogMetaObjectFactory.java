@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.metadata;
 
 import java.util.List;
@@ -25,8 +23,8 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.metadata.api.IHopMetadataObjectFactory;
 
 /**
- * Instantiates {@link IDataCatalog} implementations from a persisted type id (same pattern as {@link
- * org.apache.hop.core.database.DatabaseMetaObjectFactory}).
+ * Instantiates {@link IDataCatalog} implementations from a persisted type id (same pattern as
+ * {@link org.apache.hop.core.database.DatabaseMetaObjectFactory}).
  */
 public class DataCatalogMetaObjectFactory implements IHopMetadataObjectFactory {
 

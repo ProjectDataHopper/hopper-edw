@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.command.svg;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -38,9 +36,13 @@ import org.w3c.dom.Node;
 class SvgExportServiceTest {
 
   private static final Path DV_PATH =
-      Path.of("integration-tests/tests/multi-satellite-bv/customer-360.hdv").toAbsolutePath().normalize();
+      Path.of("integration-tests/tests/multi-satellite-bv/customer-360.hdv")
+          .toAbsolutePath()
+          .normalize();
   private static final Path BV_PATH =
-      Path.of("integration-tests/tests/multi-satellite-bv/customer-360.hbv").toAbsolutePath().normalize();
+      Path.of("integration-tests/tests/multi-satellite-bv/customer-360.hbv")
+          .toAbsolutePath()
+          .normalize();
   private static final Path PROJECT_HOME = Path.of("project").toAbsolutePath().normalize();
 
   @BeforeAll

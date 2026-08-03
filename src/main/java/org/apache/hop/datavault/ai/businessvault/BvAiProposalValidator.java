@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai.businessvault;
 
 import java.util.ArrayList;
@@ -120,7 +118,8 @@ public final class BvAiProposalValidator {
           proposal, Status.BLOCKED, "A table named '" + newName + "' already exists");
     }
     if (tableName.trim().equals(newName.trim())) {
-      return new ValidationResult(proposal, Status.WARNING, "New name is the same as the current name");
+      return new ValidationResult(
+          proposal, Status.WARNING, "New name is the same as the current name");
     }
     return new ValidationResult(proposal, Status.OK, "");
   }

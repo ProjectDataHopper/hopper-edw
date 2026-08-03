@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import java.util.ArrayList;
@@ -48,7 +46,9 @@ public final class ResourceDefinitionGroupResolver {
   private ResourceDefinitionGroupResolver() {}
 
   public static ValidationModels resolve(
-      ResourceDefinitionGroupMeta group, IVariables variables, IHopMetadataProvider metadataProvider)
+      ResourceDefinitionGroupMeta group,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider)
       throws HopException {
     if (group == null) {
       throw new HopException(
@@ -60,7 +60,11 @@ public final class ResourceDefinitionGroupResolver {
       if (!Utils.isEmpty(modelFile)) {
         DataVaultModel model = loadDataVaultModel(modelFile, variables, metadataProvider);
         String catalogConnection =
-            resolveGroupCatalogConnection(group, model.getConfigurationOrDefault().getDataCatalogConnection(), variables, metadataProvider);
+            resolveGroupCatalogConnection(
+                group,
+                model.getConfigurationOrDefault().getDataCatalogConnection(),
+                variables,
+                metadataProvider);
         dvModels.add(new ValidationModels.LoadedDataVaultModel(model, catalogConnection));
       }
     }
@@ -74,7 +78,8 @@ public final class ResourceDefinitionGroupResolver {
                 model, variables, metadataProvider);
         String catalogConnection =
             resolveGroupCatalogConnection(group, null, variables, metadataProvider);
-        bvModels.add(new ValidationModels.LoadedBusinessVaultModel(model, dvModel, catalogConnection));
+        bvModels.add(
+            new ValidationModels.LoadedBusinessVaultModel(model, dvModel, catalogConnection));
       }
     }
 

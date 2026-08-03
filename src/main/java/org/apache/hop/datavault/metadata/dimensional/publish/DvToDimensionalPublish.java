@@ -13,14 +13,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional.publish;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -40,7 +37,6 @@ import org.apache.hop.datavault.metadata.DvLink;
 import org.apache.hop.datavault.metadata.DvNote;
 import org.apache.hop.datavault.metadata.DvNoteType;
 import org.apache.hop.datavault.metadata.DvSatellite;
-import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.datavault.metadata.IDvTable;
 import org.apache.hop.datavault.metadata.SatelliteAttribute;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalConfiguration;
@@ -49,7 +45,6 @@ import org.apache.hop.datavault.metadata.dimensional.DmBridge;
 import org.apache.hop.datavault.metadata.dimensional.DmBridgeDimensionRef;
 import org.apache.hop.datavault.metadata.dimensional.DmDimension;
 import org.apache.hop.datavault.metadata.dimensional.DmDimensionAttribute;
-import org.apache.hop.datavault.metadata.dimensional.DmDimensionScdType;
 import org.apache.hop.datavault.metadata.dimensional.DmFact;
 import org.apache.hop.datavault.metadata.dimensional.DmFactDimensionRole;
 import org.apache.hop.datavault.metadata.dimensional.DmFactMeasure;
@@ -132,8 +127,7 @@ public final class DvToDimensionalPublish {
     dimension.setName(dimensionName);
     dimension.setTableName(context.dimensionTableNameForHub(hub));
     dimension.setDescription(
-        BaseMessages.getString(
-            PKG, "DvToDimensionalPublish.Dimension.Description", hub.getName()));
+        BaseMessages.getString(PKG, "DvToDimensionalPublish.Dimension.Description", hub.getName()));
 
     for (BusinessKey businessKey : hub.getBusinessKeys()) {
       if (businessKey == null || Utils.isEmpty(businessKey.getName())) {
@@ -142,7 +136,8 @@ public final class DvToDimensionalPublish {
       dimension.getNaturalKeys().add(new DmNaturalKeyField(businessKey.getName()));
     }
 
-    List<DvSatellite> satellites = context.hubSatellitesByHub.getOrDefault(hub.getName(), List.of());
+    List<DvSatellite> satellites =
+        context.hubSatellitesByHub.getOrDefault(hub.getName(), List.of());
     boolean historized = !satellites.isEmpty() || context.usesLoadEndDate();
     DmScdUpdatePolicy attributePolicy =
         historized ? DmScdUpdatePolicy.TYPE2 : DmScdUpdatePolicy.TYPE1;
@@ -161,7 +156,9 @@ public final class DvToDimensionalPublish {
       }
     }
 
-    dimension.getSourceOrDefault().setSourceSql(draftSourceSql(context, hub.getTableName(), hub.getName()));
+    dimension
+        .getSourceOrDefault()
+        .setSourceSql(draftSourceSql(context, hub.getTableName(), hub.getName()));
     applyHubSurrogateKeyDefaults(dimension, hub, historized);
     copyLocation(dimension, hub);
     return dimension;
@@ -282,19 +279,19 @@ public final class DvToDimensionalPublish {
     bridge.setName(context.bridgeNameForLink(link));
     bridge.setTableName(context.bridgeTableNameForLink(link));
     bridge.setDescription(
-        BaseMessages.getString(
-            PKG, "DvToDimensionalPublish.Bridge.Description", link.getName()));
+        BaseMessages.getString(PKG, "DvToDimensionalPublish.Bridge.Description", link.getName()));
 
     for (String hubName : hubNames) {
       bridge
           .getDimensionRefs()
           .add(
               new DmBridgeDimensionRef(
-                  context.dimensionNameForHub(hubName),
-                  context.foreignKeyColumnForHub(hubName)));
+                  context.dimensionNameForHub(hubName), context.foreignKeyColumnForHub(hubName)));
     }
 
-    bridge.getSourceOrDefault().setSourceSql(draftSourceSql(context, link.getTableName(), link.getName()));
+    bridge
+        .getSourceOrDefault()
+        .setSourceSql(draftSourceSql(context, link.getTableName(), link.getName()));
     copyLocation(bridge, link);
     context.warn(
         BaseMessages.getString(
@@ -308,14 +305,15 @@ public final class DvToDimensionalPublish {
     factless.setName(context.factlessNameForLink(link));
     factless.setTableName(context.factlessTableNameForLink(link));
     factless.setDescription(
-        BaseMessages.getString(
-            PKG, "DvToDimensionalPublish.Factless.Description", link.getName()));
+        BaseMessages.getString(PKG, "DvToDimensionalPublish.Factless.Description", link.getName()));
 
     for (String hubName : hubNames) {
       factless.getDimensionRoles().add(context.dimensionRoleForHub(link, hubName));
     }
 
-    factless.getSourceOrDefault().setSourceSql(draftSourceSql(context, link.getTableName(), link.getName()));
+    factless
+        .getSourceOrDefault()
+        .setSourceSql(draftSourceSql(context, link.getTableName(), link.getName()));
     copyLocation(factless, link);
     return factless;
   }
@@ -361,7 +359,8 @@ public final class DvToDimensionalPublish {
       }
     }
 
-    fact.getSourceOrDefault().setSourceSql(draftSourceSql(context, satellite.getTableName(), satellite.getName()));
+    fact.getSourceOrDefault()
+        .setSourceSql(draftSourceSql(context, satellite.getTableName(), satellite.getName()));
     copyLocation(fact, satellite);
     return fact;
   }
@@ -371,9 +370,7 @@ public final class DvToDimensionalPublish {
     note.setNoteType(DvNoteType.IMPORTANT);
     note.setText(
         BaseMessages.getString(
-            PKG,
-            "DvToDimensionalPublish.Note.DraftReview",
-            context.dataVaultModel.getName()));
+            PKG, "DvToDimensionalPublish.Note.DraftReview", context.dataVaultModel.getName()));
     note.setLocation(new Point(32, 400));
     note.setWidth(420);
     note.setHeight(64);
@@ -383,7 +380,9 @@ public final class DvToDimensionalPublish {
   private static DimensionalConfiguration copyDimensionalConfiguration(DataVaultModel dvModel) {
     DimensionalConfiguration config = new DimensionalConfiguration();
     DataVaultConfiguration dvConfig =
-        dvModel.getConfiguration() != null ? dvModel.getConfiguration() : new DataVaultConfiguration();
+        dvModel.getConfiguration() != null
+            ? dvModel.getConfiguration()
+            : new DataVaultConfiguration();
     config.setTargetDatabase(dvConfig.getTargetDatabase());
     return config;
   }
@@ -404,12 +403,11 @@ public final class DvToDimensionalPublish {
       return context.options.getDescription();
     }
     return BaseMessages.getString(
-        PKG,
-        "DvToDimensionalPublish.Model.Description",
-        context.dataVaultModel.getName());
+        PKG, "DvToDimensionalPublish.Model.Description", context.dataVaultModel.getName());
   }
 
-  private static String draftSourceSql(PublishContext context, String tableName, String dvObjectName) {
+  private static String draftSourceSql(
+      PublishContext context, String tableName, String dvObjectName) {
     String physicalTable = !Utils.isEmpty(tableName) ? tableName : dvObjectName;
     return BaseMessages.getString(
         PKG, "DvToDimensionalPublish.DraftSourceSql", physicalTable, dvObjectName);
@@ -465,7 +463,8 @@ public final class DvToDimensionalPublish {
     if (reservedForFacts.contains(fieldName)) {
       return false;
     }
-    if (isMeasureAttribute(attribute) && context.matchesOtherHubBusinessKeyExists(reservedForFacts)) {
+    if (isMeasureAttribute(attribute)
+        && context.matchesOtherHubBusinessKeyExists(reservedForFacts)) {
       return false;
     }
     return true;
@@ -540,7 +539,9 @@ public final class DvToDimensionalPublish {
           continue;
         }
         if (!Utils.isEmpty(satellite.getHubName())) {
-          hubSatellitesByHub.computeIfAbsent(satellite.getHubName(), key -> new ArrayList<>()).add(satellite);
+          hubSatellitesByHub
+              .computeIfAbsent(satellite.getHubName(), key -> new ArrayList<>())
+              .add(satellite);
         }
         if (!Utils.isEmpty(satellite.getLinkName())) {
           linkSatellitesByLink

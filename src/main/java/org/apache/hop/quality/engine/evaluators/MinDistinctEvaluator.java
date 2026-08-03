@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.quality.engine.evaluators;
 
 import java.util.List;
@@ -70,8 +68,7 @@ public final class MinDistinctEvaluator implements IDataQualityRuleEvaluator {
               "MIN_DISTINCT could not be evaluated: distinct count unavailable",
               "distinctUnknown=true",
               "min=" + min,
-              EvaluatorSupport.metrics(
-                  "distinctUnknown", "true", "min", String.valueOf(min)),
+              EvaluatorSupport.metrics("distinctUnknown", "true", "min", String.valueOf(min)),
               QualitySeverity.WARNING));
     }
 
@@ -100,12 +97,7 @@ public final class MinDistinctEvaluator implements IDataQualityRuleEvaluator {
             rule,
             context,
             fieldName,
-            "Field '"
-                + fieldName
-                + "' distinct count "
-                + actual
-                + " is below minimum "
-                + min,
+            "Field '" + fieldName + "' distinct count " + actual + " is below minimum " + min,
             "distinctCount=" + actual,
             "min=" + min,
             metrics));

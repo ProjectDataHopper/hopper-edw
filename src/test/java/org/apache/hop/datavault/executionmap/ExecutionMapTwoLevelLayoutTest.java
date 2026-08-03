@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -98,9 +96,15 @@ class ExecutionMapTwoLevelLayoutTest {
 
   private static ExecutionMapDocument modelPipelineDocument() {
     ExecutionMapDocument document = new ExecutionMapDocument();
-    document.getNodesOrEmpty().add(node("model", "retail-360", ExecutionMapNodeType.DATA_VAULT_MODEL, null));
-    document.getNodesOrEmpty().add(node("pipe-a", "hub-a", ExecutionMapNodeType.GENERATED_PIPELINE, "model"));
-    document.getNodesOrEmpty().add(node("pipe-b", "hub-b", ExecutionMapNodeType.GENERATED_PIPELINE, "model"));
+    document
+        .getNodesOrEmpty()
+        .add(node("model", "retail-360", ExecutionMapNodeType.DATA_VAULT_MODEL, null));
+    document
+        .getNodesOrEmpty()
+        .add(node("pipe-a", "hub-a", ExecutionMapNodeType.GENERATED_PIPELINE, "model"));
+    document
+        .getNodesOrEmpty()
+        .add(node("pipe-b", "hub-b", ExecutionMapNodeType.GENERATED_PIPELINE, "model"));
     document
         .getNodesOrEmpty()
         .add(node("src-a", "CRM::customer", ExecutionMapNodeType.SOURCE_DATASET, "model"));
@@ -114,10 +118,18 @@ class ExecutionMapTwoLevelLayoutTest {
         .getNodesOrEmpty()
         .add(node("tgt-b", "Vault::hub_b", ExecutionMapNodeType.TARGET_DATASET, "model"));
 
-    document.getEdgesOrEmpty().add(edge(ExecutionMapEdgeType.READS_FROM, "src-a", "pipe-a", "source"));
-    document.getEdgesOrEmpty().add(edge(ExecutionMapEdgeType.READS_FROM, "tgt-a", "pipe-a", "target"));
-    document.getEdgesOrEmpty().add(edge(ExecutionMapEdgeType.READS_FROM, "src-b", "pipe-b", "source"));
-    document.getEdgesOrEmpty().add(edge(ExecutionMapEdgeType.WRITES_TO, "pipe-b", "tgt-b", "target"));
+    document
+        .getEdgesOrEmpty()
+        .add(edge(ExecutionMapEdgeType.READS_FROM, "src-a", "pipe-a", "source"));
+    document
+        .getEdgesOrEmpty()
+        .add(edge(ExecutionMapEdgeType.READS_FROM, "tgt-a", "pipe-a", "target"));
+    document
+        .getEdgesOrEmpty()
+        .add(edge(ExecutionMapEdgeType.READS_FROM, "src-b", "pipe-b", "source"));
+    document
+        .getEdgesOrEmpty()
+        .add(edge(ExecutionMapEdgeType.WRITES_TO, "pipe-b", "tgt-b", "target"));
     return document;
   }
 

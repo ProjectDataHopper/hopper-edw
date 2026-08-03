@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.coaching;
 
 import java.util.ArrayList;
@@ -41,7 +39,8 @@ public final class CoachingDvTargetIndex {
 
   private final Map<String, List<CoachingTargetUsage>> targetsByResolvedSourceName;
 
-  private CoachingDvTargetIndex(Map<String, List<CoachingTargetUsage>> targetsByResolvedSourceName) {
+  private CoachingDvTargetIndex(
+      Map<String, List<CoachingTargetUsage>> targetsByResolvedSourceName) {
     this.targetsByResolvedSourceName = targetsByResolvedSourceName;
   }
 
@@ -173,9 +172,7 @@ public final class CoachingDvTargetIndex {
   }
 
   private static void appendTarget(
-      Map<String, List<CoachingTargetUsage>> index,
-      String sourceKey,
-      CoachingTargetUsage target) {
+      Map<String, List<CoachingTargetUsage>> index, String sourceKey, CoachingTargetUsage target) {
     index.computeIfAbsent(sourceKey, key -> new ArrayList<>()).add(target);
   }
 }

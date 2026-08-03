@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai.businessvault;
 
 import lombok.Getter;
@@ -30,8 +28,7 @@ public enum BvAiScenario implements IEnumHasCodeAndDescription {
   BV_MODELING("BV_MODELING", "BvAiScenario.BvModeling", "bv-modeling"),
   HOP_INTEGRATION("HOP_INTEGRATION", "BvAiScenario.HopIntegration", "hop-integration"),
   ERROR_DIAGNOSIS("ERROR_DIAGNOSIS", "BvAiScenario.ErrorDiagnosis", "error-diagnosis"),
-  PERFORMANCE_TUNING(
-      "PERFORMANCE_TUNING", "BvAiScenario.PerformanceTuning", "performance-tuning"),
+  PERFORMANCE_TUNING("PERFORMANCE_TUNING", "BvAiScenario.PerformanceTuning", "performance-tuning"),
   GENERAL("GENERAL", "BvAiScenario.General", "general");
 
   private final String code;

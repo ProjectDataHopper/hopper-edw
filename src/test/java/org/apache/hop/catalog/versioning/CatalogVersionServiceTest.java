@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.catalog.versioning;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -82,8 +81,7 @@ class CatalogVersionServiceTest {
 
     ResourceDefinitionGroupMeta group = new ResourceDefinitionGroupMeta("retail-sources-test");
     group.setDataCatalogConnection("local-catalog");
-    group.setDataVaultModelFiles(
-        List.of("${PROJECT_HOME}/models/retail-360.hdv"));
+    group.setDataVaultModelFiles(List.of("${PROJECT_HOME}/models/retail-360.hdv"));
     metadataProvider.getSerializer(ResourceDefinitionGroupMeta.class).save(group);
 
     RecordDefinitionRegistry.getInstance().invalidate();
@@ -92,7 +90,9 @@ class CatalogVersionServiceTest {
   @Test
   void createFromGroup_snapshotsSourcesAndReadsBack() throws Exception {
     ResourceDefinitionGroupMeta group =
-        metadataProvider.getSerializer(ResourceDefinitionGroupMeta.class).load("retail-sources-test");
+        metadataProvider
+            .getSerializer(ResourceDefinitionGroupMeta.class)
+            .load("retail-sources-test");
 
     CatalogVersionEntry entry =
         CatalogVersionService.createFromGroup(
@@ -143,7 +143,9 @@ class CatalogVersionServiceTest {
   @Test
   void createFromGroup_rejectsDuplicateTag() throws Exception {
     ResourceDefinitionGroupMeta group =
-        metadataProvider.getSerializer(ResourceDefinitionGroupMeta.class).load("retail-sources-test");
+        metadataProvider
+            .getSerializer(ResourceDefinitionGroupMeta.class)
+            .load("retail-sources-test");
     CatalogVersionService.createFromGroup(
         group, "dup-tag", null, "tester", variables, metadataProvider);
     assertThrows(
@@ -169,5 +171,4 @@ class CatalogVersionServiceTest {
   private static void assertNotEmptyHash(String hash) {
     assertTrue(hash != null && hash.startsWith("sha256:") && hash.length() > 20);
   }
-
 }

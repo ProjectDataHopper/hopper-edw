@@ -13,13 +13,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.coaching;
 
 import org.apache.hop.core.gui.Point;
-import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metadata.coaching.CoachingSourceRef;
 import org.apache.hop.datavault.metadata.coaching.CoachingSourceResolver;
@@ -84,10 +81,7 @@ public final class CoachingCanvasDropSupport {
   }
 
   private static CoachingSourceRef findSource(
-      ICoachingModelAdapter adapter,
-      String identityKey,
-      IVariables variables,
-      HopGui hopGui) {
+      ICoachingModelAdapter adapter, String identityKey, IVariables variables, HopGui hopGui) {
     try {
       return CoachingSourceResolver.resolve(adapter, variables, hopGui.getMetadataProvider())
           .stream()

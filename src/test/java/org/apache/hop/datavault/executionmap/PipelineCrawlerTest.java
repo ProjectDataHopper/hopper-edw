@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -54,8 +52,7 @@ class PipelineCrawlerTest {
 
     PipelineMeta pipelineMeta = buildSamplePipeline();
 
-    PipelineCrawler.crawlPipeline(
-        context, pipelineMeta.getFilename(), pipelineMeta, true, null);
+    PipelineCrawler.crawlPipeline(context, pipelineMeta.getFilename(), pipelineMeta, true, null);
 
     assertContainsNodeType(document, ExecutionMapNodeType.ROOT_PIPELINE);
     assertFalse(containsTransformLayerNode(document));
@@ -82,8 +79,7 @@ class PipelineCrawlerTest {
 
     PipelineMeta pipelineMeta = buildSamplePipeline();
 
-    PipelineCrawler.crawlPipeline(
-        context, pipelineMeta.getFilename(), pipelineMeta, true, null);
+    PipelineCrawler.crawlPipeline(context, pipelineMeta.getFilename(), pipelineMeta, true, null);
 
     assertContainsNodeType(document, ExecutionMapNodeType.ROOT_PIPELINE);
     assertContainsNodeType(document, ExecutionMapNodeType.PIPELINE_TRANSFORM);

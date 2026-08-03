@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.transform.junkdimension;
 
 import java.nio.charset.StandardCharsets;
@@ -92,9 +90,7 @@ public final class JunkDimensionHashSupport {
   }
 
   public static boolean usesStringHashColumn(DmJunkHashCodeStrategy strategy) {
-    return strategy != null
-        && strategy.usesHashColumn()
-        && !strategy.usesIntegerHash();
+    return strategy != null && strategy.usesHashColumn() && !strategy.usesIntegerHash();
   }
 
   private static HashAlgorithm toHashAlgorithm(DmJunkHashCodeStrategy strategy) {
@@ -106,5 +102,4 @@ public final class JunkDimensionHashSupport {
       default -> HashAlgorithm.MD5;
     };
   }
-
 }

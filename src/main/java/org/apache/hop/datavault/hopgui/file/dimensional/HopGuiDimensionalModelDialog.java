@@ -13,13 +13,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.dimensional;
 
 import org.apache.hop.core.Props;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
+import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalConfiguration;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.i18n.BaseMessages;
@@ -45,8 +45,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.jspecify.annotations.NonNull;
-import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
-import org.apache.hop.datavault.hopgui.help.HelpTopics;
 
 /** Dialog to edit the properties of a {@link DimensionalModel}. */
 public class HopGuiDimensionalModelDialog {
@@ -158,7 +156,8 @@ public class HopGuiDimensionalModelDialog {
     wGeneratedArtifactsTabComp =
         createTabComposite(
             wTabFolder,
-            BaseMessages.getString(PKG, "HopGuiDimensionalModelDialog.Tab.GeneratedArtifacts.Label"),
+            BaseMessages.getString(
+                PKG, "HopGuiDimensionalModelDialog.Tab.GeneratedArtifacts.Label"),
             BaseMessages.getString(
                 PKG, "HopGuiDimensionalModelDialog.Tab.GeneratedArtifacts.ToolTip"));
 
@@ -230,9 +229,7 @@ public class HopGuiDimensionalModelDialog {
       }
       DimensionalConfiguration configuration = input.getConfigurationOrDefault();
       widgets.setWidgetsContents(
-          configuration,
-          wGeneralTabComp,
-          DimensionalConfiguration.GUI_PLUGIN_ELEMENT_PARENT_ID);
+          configuration, wGeneralTabComp, DimensionalConfiguration.GUI_PLUGIN_ELEMENT_PARENT_ID);
       widgets.setWidgetsContents(
           configuration,
           wTargetLoadTabComp,

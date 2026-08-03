@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.quality.profile;
 
 import java.sql.ResultSet;
@@ -280,8 +278,7 @@ public final class DatabaseProfileCollector {
   private static void collectBoundedDistinctSample(
       Database db, String pluginId, String quotedTable, String quotedField, FieldProfile field)
       throws Exception {
-    String sql =
-        distinctSampleSql(pluginId, quotedTable, quotedField, DISTINCT_SAMPLE_LIMIT);
+    String sql = distinctSampleSql(pluginId, quotedTable, quotedField, DISTINCT_SAMPLE_LIMIT);
     ResultSet rs = db.openQuery(sql);
     if (rs == null) {
       field.setDistinctUnknown(true);
@@ -297,7 +294,10 @@ public final class DatabaseProfileCollector {
         String display = String.valueOf(raw);
         seen++;
         field.observeValueCount(
-            raw, display, 1L, Math.max(RowProfileCollector.DEFAULT_MAX_DISTINCT, DISTINCT_SAMPLE_LIMIT));
+            raw,
+            display,
+            1L,
+            Math.max(RowProfileCollector.DEFAULT_MAX_DISTINCT, DISTINCT_SAMPLE_LIMIT));
       }
     } finally {
       db.closeQuery(rs);
@@ -594,7 +594,7 @@ public final class DatabaseProfileCollector {
         case MIN_DISTINCT, MAX_DISTINCT -> needs.exactDistinct = true;
         case MIN_LENGTH, MAX_LENGTH -> needs.stringLength = true;
         case REGEX -> needs.regexRules.add(rule);
-        // SQL_ASSERTION is in DATASET_ONLY_TYPES (continue above); fieldName is messaging only
+          // SQL_ASSERTION is in DATASET_ONLY_TYPES (continue above); fieldName is messaging only
         default -> {
           // Unknown field-scoped types: collect basic nulls
         }

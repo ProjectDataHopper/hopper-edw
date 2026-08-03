@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import org.apache.hop.core.exception.HopException;
@@ -32,7 +30,6 @@ import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
-
 /** Persists DV, BV, and DM models referenced by resource definition validation. */
 public final class ResourceDefinitionModelPersistenceSupport {
 
@@ -43,32 +40,41 @@ public final class ResourceDefinitionModelPersistenceSupport {
   public static void saveDataVaultModel(
       DataVaultModel model, IVariables variables, IHopMetadataProvider metadataProvider)
       throws HopException {
-    saveModel(model, model != null ? model.getFilename() : null, HopVaultFileType.XML_TAG, variables);
+    saveModel(
+        model, model != null ? model.getFilename() : null, HopVaultFileType.XML_TAG, variables);
   }
 
   public static void saveBusinessVaultModel(
       BusinessVaultModel model, IVariables variables, IHopMetadataProvider metadataProvider)
       throws HopException {
     saveModel(
-        model, model != null ? model.getFilename() : null, HopBusinessVaultFileType.XML_TAG, variables);
+        model,
+        model != null ? model.getFilename() : null,
+        HopBusinessVaultFileType.XML_TAG,
+        variables);
   }
 
   public static void saveDimensionalModel(
       DimensionalModel model, IVariables variables, IHopMetadataProvider metadataProvider)
       throws HopException {
     saveModel(
-        model, model != null ? model.getFilename() : null, HopDimensionalFileType.XML_TAG, variables);
+        model,
+        model != null ? model.getFilename() : null,
+        HopDimensionalFileType.XML_TAG,
+        variables);
   }
 
-  private static void saveModel(
-      Object model, String filename, String xmlTag, IVariables variables) throws HopException {
+  private static void saveModel(Object model, String filename, String xmlTag, IVariables variables)
+      throws HopException {
     if (model == null) {
       throw new HopException(
-          BaseMessages.getString(PKG, "ResourceDefinitionModelPersistenceSupport.Error.MissingModel"));
+          BaseMessages.getString(
+              PKG, "ResourceDefinitionModelPersistenceSupport.Error.MissingModel"));
     }
     if (Utils.isEmpty(filename)) {
       throw new HopException(
-          BaseMessages.getString(PKG, "ResourceDefinitionModelPersistenceSupport.Error.MissingFilename"));
+          BaseMessages.getString(
+              PKG, "ResourceDefinitionModelPersistenceSupport.Error.MissingFilename"));
     }
     try {
       String resolvedFilename = HopVfs.normalize(variables.resolve(filename));

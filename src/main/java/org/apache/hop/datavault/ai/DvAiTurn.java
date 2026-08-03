@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai;
 
 import java.util.ArrayList;
@@ -29,10 +27,13 @@ import lombok.Setter;
 public class DvAiTurn {
 
   private String userPrompt;
+
   /** Exact user message content sent to the LLM for this turn. */
   private String llmUserMessage;
+
   /** Assistant advice with dv_proposals blocks removed. */
   private String assistantAdvice;
+
   private List<DvAiProposal> proposals = new ArrayList<>();
   private List<String> appliedSummaries = new ArrayList<>();
   private boolean proposalBlockPresent;

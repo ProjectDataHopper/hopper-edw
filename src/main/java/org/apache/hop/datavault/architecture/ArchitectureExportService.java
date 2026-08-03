@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.architecture;
 
 import java.io.OutputStream;
@@ -74,8 +72,8 @@ public final class ArchitectureExportService {
   }
 
   /**
-   * Export SOLUTION architecture from a workflow/pipeline root (crawl) or an existing {@code
-   * .hem} file.
+   * Export SOLUTION architecture from a workflow/pipeline root (crawl) or an existing {@code .hem}
+   * file.
    */
   public static ExportResult exportSolutionDrawio(
       String rootOrHemPath,
@@ -135,8 +133,8 @@ public final class ArchitectureExportService {
   }
 
   /**
-   * Export DATA <em>inventory</em> (tables/sources, no relationship edges) from model lineage.
-   * For relational diagrams with ELK layout use {@link #exportLayerModelDrawios}.
+   * Export DATA <em>inventory</em> (tables/sources, no relationship edges) from model lineage. For
+   * relational diagrams with ELK layout use {@link #exportLayerModelDrawios}.
    */
   public static ExportResult exportDataDrawio(
       List<String> modelPaths,
@@ -217,8 +215,7 @@ public final class ArchitectureExportService {
         String lower = resolved.toLowerCase();
         if (lower.endsWith(".hdv")) {
           dvModels.add(
-              DvModelLoadSupport.loadDataVaultModel(
-                  resolved, null, variables, metadataProvider));
+              DvModelLoadSupport.loadDataVaultModel(resolved, null, variables, metadataProvider));
         } else if (lower.endsWith(".hbv")) {
           BusinessVaultModel bv =
               ResourceDefinitionGroupResolver.loadBusinessVaultModel(
@@ -252,8 +249,7 @@ public final class ArchitectureExportService {
     }
 
     if (!dvModels.isEmpty()) {
-      ArchitectureGraph graph =
-          ArchitectureGraphFromModel.fromDataVaultModels(dvModels, variables);
+      ArchitectureGraph graph = ArchitectureGraphFromModel.fromDataVaultModels(dvModels, variables);
       String out = base + "/data-vault.drawio";
       writeDrawio(graph, out);
       List<String> w = new ArrayList<>(warnings);
@@ -261,8 +257,7 @@ public final class ArchitectureExportService {
     }
     if (!bvModels.isEmpty()) {
       ArchitectureGraph graph =
-          ArchitectureGraphFromModel.fromBusinessVaultModels(
-              bvModels, bvEffectiveDv, variables);
+          ArchitectureGraphFromModel.fromBusinessVaultModels(bvModels, bvEffectiveDv, variables);
       String out = base + "/business-vault.drawio";
       writeDrawio(graph, out);
       results.add(new ExportResult(graph, out, List.copyOf(warnings)));
@@ -282,7 +277,9 @@ public final class ArchitectureExportService {
     return results;
   }
 
-  /** @deprecated use {@link #exportLayerModelDrawios} — keeps CLI/action wiring stable. */
+  /**
+   * @deprecated use {@link #exportLayerModelDrawios} — keeps CLI/action wiring stable.
+   */
   public static List<ExportResult> exportModelsDrawio(
       List<String> modelPaths,
       String outputDirectory,
@@ -339,8 +336,7 @@ public final class ArchitectureExportService {
     }
     if (lower.endsWith(".hbv")) {
       BusinessVaultModel model =
-          ResourceDefinitionGroupResolver.loadBusinessVaultModel(
-              path, variables, metadataProvider);
+          ResourceDefinitionGroupResolver.loadBusinessVaultModel(path, variables, metadataProvider);
       return BvModelLineageCollector.collect(model, variables);
     }
     if (lower.endsWith(".hdm")) {
@@ -355,8 +351,7 @@ public final class ArchitectureExportService {
       String configured, String defaultName, IVariables variables) {
     String out = configured;
     if (Utils.isEmpty(out)) {
-      String projectHome =
-          variables != null ? variables.getVariable("PROJECT_HOME") : null;
+      String projectHome = variables != null ? variables.getVariable("PROJECT_HOME") : null;
       if (!Utils.isEmpty(projectHome)) {
         out = "${PROJECT_HOME}/work/architecture/" + defaultName;
       } else {
@@ -384,8 +379,7 @@ public final class ArchitectureExportService {
     if (isAbsoluteOrVfs(resolved)) {
       return resolved;
     }
-    String projectHome =
-        variables != null ? variables.getVariable("PROJECT_HOME") : null;
+    String projectHome = variables != null ? variables.getVariable("PROJECT_HOME") : null;
     if (Utils.isEmpty(projectHome)) {
       return resolved;
     }
@@ -394,8 +388,7 @@ public final class ArchitectureExportService {
       relative = relative.substring(2);
     }
     String underProject =
-        variables.resolve(
-            "${PROJECT_HOME}/" + relative.replace('\\', '/').replaceAll("^/+", ""));
+        variables.resolve("${PROJECT_HOME}/" + relative.replace('\\', '/').replaceAll("^/+", ""));
     if (forWrite) {
       return underProject;
     }

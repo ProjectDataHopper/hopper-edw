@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.transform.junkdimension;
 
 import java.sql.ResultSet;
@@ -42,9 +40,9 @@ import org.apache.hop.core.row.RowMeta;
 import org.apache.hop.core.row.value.ValueMetaDate;
 import org.apache.hop.core.row.value.ValueMetaInteger;
 import org.apache.hop.core.row.value.ValueMetaString;
+import org.apache.hop.core.util.Utils;
 import org.apache.hop.datavault.metadata.dimensional.DmJunkHashCodeStrategy;
 import org.apache.hop.datavault.metadata.dimensional.DmJunkSurrogateKeyStrategy;
-import org.apache.hop.core.util.Utils;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.pipeline.Pipeline;
 import org.apache.hop.pipeline.PipelineMeta;
@@ -284,9 +282,7 @@ public class JunkDimension extends BaseTransform<JunkDimensionMeta, JunkDimensio
             case CREATION_METHOD_TABLEMAX:
               valKey =
                   data.db.getNextValue(
-                      data.realSchemaName,
-                      data.realTableName,
-                      returnFields.getTechnicalKeyField());
+                      data.realSchemaName, data.realTableName, returnFields.getTechnicalKeyField());
               break;
             case CREATION_METHOD_AUTOINC:
               valKey = 0L;
@@ -464,8 +460,8 @@ public class JunkDimension extends BaseTransform<JunkDimensionMeta, JunkDimensio
   }
 
   /**
-   * JunkDimension table: dimension table keys[]: which dim-fields do we use to look up key?
-   * retval: name of the key to return
+   * JunkDimension table: dimension table keys[]: which dim-fields do we use to look up key? retval:
+   * name of the key to return
    */
   public void setCombiLookup(IRowMeta inputRowMeta) throws HopDatabaseException {
     DatabaseMeta databaseMeta = getPipelineMeta().findDatabase(meta.getConnectionName(), variables);
@@ -783,8 +779,7 @@ public class JunkDimension extends BaseTransform<JunkDimensionMeta, JunkDimensio
         return true;
       } catch (HopDatabaseException dbe) {
         logError(
-            BaseMessages.getString(PKG, "JunkDimension.Log.UnableToConnectDB")
-                + dbe.getMessage());
+            BaseMessages.getString(PKG, "JunkDimension.Log.UnableToConnectDB") + dbe.getMessage());
       }
     }
     return false;

@@ -13,12 +13,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.resourcedefinition;
 
-import org.apache.hop.datavault.resourcedefinition.ValidationReport.IssueSeverity;
 import org.apache.hop.datavault.resourcedefinition.ValidationReport.RecordDefinitionValidation;
 import org.apache.hop.datavault.resourcedefinition.ValidationReport.ValidationIssue;
 
@@ -42,7 +39,8 @@ public record ValidationIssueRow(
     if (!showAcknowledged || validation == null || issue == null) {
       return false;
     }
-    return validation.issues().stream().noneMatch(visible -> visible.issueId().equals(issue.issueId()))
+    return validation.issues().stream()
+            .noneMatch(visible -> visible.issueId().equals(issue.issueId()))
         && validation.allIssues().stream().anyMatch(all -> all.issueId().equals(issue.issueId()));
   }
 }

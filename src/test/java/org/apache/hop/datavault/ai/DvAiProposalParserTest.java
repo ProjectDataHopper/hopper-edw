@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -54,7 +52,8 @@ class DvAiProposalParserTest {
 
     assertTrue(response.getMarkdownAdvice().contains("Increase sort memory"));
     assertEquals(1, response.getProposals().size());
-    assertEquals(DvAiProposal.Type.SET_CONFIGURATION_PROPERTY, response.getProposals().get(0).getType());
+    assertEquals(
+        DvAiProposal.Type.SET_CONFIGURATION_PROPERTY, response.getProposals().get(0).getType());
     assertEquals("30000000", response.getProposals().get(0).parameter("value"));
   }
 }

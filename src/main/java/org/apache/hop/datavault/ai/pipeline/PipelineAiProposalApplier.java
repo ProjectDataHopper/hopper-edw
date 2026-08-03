@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai.pipeline;
 
 import java.util.ArrayList;
@@ -51,7 +49,9 @@ public final class PipelineAiProposalApplier {
     sb.append("\nRisk: ").append(proposal.getRiskLevel());
     if (proposal.getParameters() != null && !proposal.getParameters().isEmpty()) {
       sb.append("\nParameters:");
-      proposal.getParameters().forEach((k, v) -> sb.append("\n  ").append(k).append(" = ").append(v));
+      proposal
+          .getParameters()
+          .forEach((k, v) -> sb.append("\n  ").append(k).append(" = ").append(v));
     }
     return sb.toString();
   }
@@ -87,7 +87,8 @@ public final class PipelineAiProposalApplier {
       case RENAME_TRANSFORM -> renameTransform(pipelineMeta, proposal, hopGui, chainUndo);
       case ADD_PIPELINE_HOP -> addPipelineHop(pipelineMeta, proposal, hopGui, chainUndo);
       case DELETE_PIPELINE_HOP -> deletePipelineHop(pipelineMeta, proposal, hopGui, chainUndo);
-      case SET_TRANSFORM_LOCATION -> setTransformLocation(pipelineMeta, proposal, hopGui, chainUndo);
+      case SET_TRANSFORM_LOCATION ->
+          setTransformLocation(pipelineMeta, proposal, hopGui, chainUndo);
       case ADD_PIPELINE_NOTE -> addPipelineNote(pipelineMeta, proposal, hopGui, chainUndo);
       default -> throw new HopException("Unsupported proposal type: " + proposal.getType());
     }
@@ -100,7 +101,8 @@ public final class PipelineAiProposalApplier {
     String name = proposal.parameter("name");
     HopAiProposalParamSupport.Location location = HopAiProposalParamSupport.parseLocation(proposal);
     ITransformMeta meta = HopAiTransformPluginSupport.loadTransformMeta(pluginId);
-    TransformMeta transformMeta = HopAiTransformPluginSupport.newTransformMeta(pluginId, name, meta);
+    TransformMeta transformMeta =
+        HopAiTransformPluginSupport.newTransformMeta(pluginId, name, meta);
     transformMeta.setLocation(new Point(location.x(), location.y()));
     pipelineMeta.addTransform(transformMeta);
     if (hopGui != null) {
@@ -218,7 +220,10 @@ public final class PipelineAiProposalApplier {
     pipelineMeta.addNote(note);
     if (hopGui != null) {
       hopGui.undoDelegate.addUndoNew(
-          pipelineMeta, new NotePadMeta[] {note}, new int[] {pipelineMeta.indexOfNote(note)}, chainUndo);
+          pipelineMeta,
+          new NotePadMeta[] {note},
+          new int[] {pipelineMeta.indexOfNote(note)},
+          chainUndo);
     }
   }
 }

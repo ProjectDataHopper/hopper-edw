@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -57,8 +55,7 @@ class DvUpdateMetricsCollectorTest {
     result.setResult(true);
 
     DvUpdateMetricsCollector.applyToResult(
-        result,
-        new LoadRunPublishSummary(new DvUpdateRunTotals(1000, 250, 0), "run-123", 4, 2));
+        result, new LoadRunPublishSummary(new DvUpdateRunTotals(1000, 250, 0), "run-123", 4, 2));
 
     assertEquals(1000, result.getNrLinesInput());
     assertEquals(250, result.getNrLinesOutput());

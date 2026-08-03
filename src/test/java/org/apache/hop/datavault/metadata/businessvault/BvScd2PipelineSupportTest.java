@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,10 +30,10 @@ import org.apache.hop.core.variables.Variables;
 import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.datavault.metadata.DataVaultConfiguration;
 import org.apache.hop.datavault.metadata.DataVaultModel;
-import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
-import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataSupport;
 import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.DvTableType;
+import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
+import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataSupport;
 import org.apache.hop.datavault.metadata.SatelliteAttribute;
 import org.apache.hop.datavault.metadata.businessvault.BvScd2PipelineSupport.SatelliteLeg;
 import org.apache.hop.datavault.metadata.businessvault.BvScd2PipelineSupport.Scd2BuildContext;
@@ -46,15 +44,15 @@ import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transforms.analyticquery.AnalyticQueryMeta;
 import org.apache.hop.pipeline.transforms.analyticquery.QueryField;
 import org.apache.hop.pipeline.transforms.constant.ConstantMeta;
+import org.apache.hop.pipeline.transforms.filterrows.FilterRowsMeta;
 import org.apache.hop.pipeline.transforms.groupby.GroupByMeta;
 import org.apache.hop.pipeline.transforms.ifnull.IfNullMeta;
+import org.apache.hop.pipeline.transforms.mergejoin.MergeJoinMeta;
 import org.apache.hop.pipeline.transforms.repeatfields.Repeat;
 import org.apache.hop.pipeline.transforms.repeatfields.RepeatFieldsMeta;
 import org.apache.hop.pipeline.transforms.repeatfields.RepeatFieldsMeta.RepeatType;
 import org.apache.hop.pipeline.transforms.selectvalues.SelectField;
 import org.apache.hop.pipeline.transforms.selectvalues.SelectValuesMeta;
-import org.apache.hop.pipeline.transforms.filterrows.FilterRowsMeta;
-import org.apache.hop.pipeline.transforms.mergejoin.MergeJoinMeta;
 import org.apache.hop.pipeline.transforms.sort.SortRowsMeta;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
 import org.apache.hop.pipeline.transforms.tableoutput.TableOutputMeta;
@@ -123,14 +121,16 @@ class BvScd2PipelineSupportTest {
     bvConfig.setValidToField("to_ts");
     Variables variables = new Variables();
 
-    assertEquals("from_ts", BvScd2PipelineSupport.resolveValidFromField(table, bvConfig, variables));
+    assertEquals(
+        "from_ts", BvScd2PipelineSupport.resolveValidFromField(table, bvConfig, variables));
     assertEquals("to_ts", BvScd2PipelineSupport.resolveValidToField(table, bvConfig, variables));
 
     table.setValidFromField("custom_from");
     table.setValidToField("custom_to");
     assertEquals(
         "custom_from", BvScd2PipelineSupport.resolveValidFromField(table, bvConfig, variables));
-    assertEquals("custom_to", BvScd2PipelineSupport.resolveValidToField(table, bvConfig, variables));
+    assertEquals(
+        "custom_to", BvScd2PipelineSupport.resolveValidToField(table, bvConfig, variables));
   }
 
   @Test
@@ -356,8 +356,10 @@ class BvScd2PipelineSupportTest {
         BvScd2PipelineSupport.CLOSE_LOOKUP_VALID_FROM_FIELD,
         updateMeta.getLookupField().getLookupKeys().get(1).getKeyStream());
     assertEquals(1, updateMeta.getLookupField().getUpdateFields().size());
-    assertEquals("valid_to", updateMeta.getLookupField().getUpdateFields().get(0).getUpdateLookup());
-    assertEquals("valid_from", updateMeta.getLookupField().getUpdateFields().get(0).getUpdateStream());
+    assertEquals(
+        "valid_to", updateMeta.getLookupField().getUpdateFields().get(0).getUpdateLookup());
+    assertEquals(
+        "valid_from", updateMeta.getLookupField().getUpdateFields().get(0).getUpdateStream());
     assertTrue(updateMeta.isErrorIgnored());
   }
 
@@ -370,9 +372,9 @@ class BvScd2PipelineSupportTest {
 
     // +2 param Generate Rows (watermark, open-row filter) vs full-rebuild chain
     assertEquals(15, transforms.size());
-    assertEquals(3, transforms.stream().filter(t -> t.getTransform() instanceof TableInputMeta).count());
-    assertTrue(
-        transforms.stream().anyMatch(t -> "read_open_bv_customer_scd2".equals(t.getName())));
+    assertEquals(
+        3, transforms.stream().filter(t -> t.getTransform() instanceof TableInputMeta).count());
+    assertTrue(transforms.stream().anyMatch(t -> "read_open_bv_customer_scd2".equals(t.getName())));
     assertTrue(
         transforms.stream()
             .anyMatch(
@@ -401,11 +403,17 @@ class BvScd2PipelineSupportTest {
                     t.getTransform()
                         instanceof
                         org.apache.hop.pipeline.transforms.rowgenerator.RowGeneratorMeta));
-    assertEquals(1, transforms.stream().filter(t -> t.getTransform() instanceof SortedSchemaMergeMeta).count());
-    assertEquals(1, transforms.stream().filter(t -> t.getTransform() instanceof MergeJoinMeta).count());
-    assertEquals(0, transforms.stream().filter(t -> t.getTransform() instanceof SortRowsMeta).count());
-    assertEquals(2, transforms.stream().filter(t -> t.getTransform() instanceof FilterRowsMeta).count());
-    assertEquals(1, transforms.stream().filter(t -> t.getTransform() instanceof UpdateMeta).count());
+    assertEquals(
+        1,
+        transforms.stream().filter(t -> t.getTransform() instanceof SortedSchemaMergeMeta).count());
+    assertEquals(
+        1, transforms.stream().filter(t -> t.getTransform() instanceof MergeJoinMeta).count());
+    assertEquals(
+        0, transforms.stream().filter(t -> t.getTransform() instanceof SortRowsMeta).count());
+    assertEquals(
+        2, transforms.stream().filter(t -> t.getTransform() instanceof FilterRowsMeta).count());
+    assertEquals(
+        1, transforms.stream().filter(t -> t.getTransform() instanceof UpdateMeta).count());
 
     TableOutputMeta tableOutputMeta =
         (TableOutputMeta)
@@ -473,7 +481,7 @@ class BvScd2PipelineSupportTest {
             .anyMatch(
                 hop ->
                     (BvScd2PipelineSupport.CLOSE_LOOKUP_READ_PREFIX + "bv_customer_scd2")
-                        .equals(hop.getFromTransform().getName())
+                            .equals(hop.getFromTransform().getName())
                         && hop.getToTransform().equals(joinCloseLookupTransform)));
   }
 
@@ -611,11 +619,14 @@ class BvScd2PipelineSupportTest {
     assertEquals(1, analyticQueryMeta.getGroupFields().size());
     assertEquals("customer_hk", analyticQueryMeta.getGroupFields().get(0).getFieldName());
     assertEquals(2, analyticQueryMeta.getQueryFields().size());
-    assertEquals(QueryField.AggregateType.LAG, analyticQueryMeta.getQueryFields().get(0).getAggregateType());
+    assertEquals(
+        QueryField.AggregateType.LAG, analyticQueryMeta.getQueryFields().get(0).getAggregateType());
     assertEquals("valid_from", analyticQueryMeta.getQueryFields().get(0).getAggregateField());
     assertEquals("x_load_ts", analyticQueryMeta.getQueryFields().get(0).getSubjectField());
     assertEquals(1, analyticQueryMeta.getQueryFields().get(0).getValueField());
-    assertEquals(QueryField.AggregateType.LEAD, analyticQueryMeta.getQueryFields().get(1).getAggregateType());
+    assertEquals(
+        QueryField.AggregateType.LEAD,
+        analyticQueryMeta.getQueryFields().get(1).getAggregateType());
     assertEquals("valid_to", analyticQueryMeta.getQueryFields().get(1).getAggregateField());
     assertEquals("x_load_ts", analyticQueryMeta.getQueryFields().get(1).getSubjectField());
 
@@ -742,7 +753,8 @@ class BvScd2PipelineSupportTest {
     List<TransformMeta> transforms = pipelineMeta.getTransforms();
 
     assertEquals(13, transforms.size());
-    assertEquals(2, transforms.stream().filter(t -> t.getTransform() instanceof TableInputMeta).count());
+    assertEquals(
+        2, transforms.stream().filter(t -> t.getTransform() instanceof TableInputMeta).count());
     for (TransformMeta transform :
         transforms.stream().filter(t -> t.getTransform() instanceof TableInputMeta).toList()) {
       assertEquals(
@@ -750,8 +762,10 @@ class BvScd2PipelineSupportTest {
           GeneratedPipelineMetadataSupport.getTransformAttribute(
               transform, GeneratedPipelineMetadataConstants.LOGICAL_ROLE));
     }
-    assertEquals(2, transforms.stream().filter(t -> t.getTransform() instanceof ConstantMeta).count());
-    assertEquals(3, transforms.stream().filter(t -> t.getTransform() instanceof SelectValuesMeta).count());
+    assertEquals(
+        2, transforms.stream().filter(t -> t.getTransform() instanceof ConstantMeta).count());
+    assertEquals(
+        3, transforms.stream().filter(t -> t.getTransform() instanceof SelectValuesMeta).count());
 
     TransformMeta mergeTransform =
         transforms.stream()
@@ -807,8 +821,7 @@ class BvScd2PipelineSupportTest {
             .orElseThrow();
     SelectValuesMeta postRepeatSelectMeta =
         (SelectValuesMeta) postRepeatSelectTransform.getTransform();
-    List<SelectField> postRepeatFields =
-        postRepeatSelectMeta.getSelectOption().getSelectFields();
+    List<SelectField> postRepeatFields = postRepeatSelectMeta.getSelectOption().getSelectFields();
     assertEquals("customer_hk", postRepeatFields.get(0).getName());
     assertEquals("x_load_ts", postRepeatFields.get(1).getName());
     assertEquals(BvScd2PipelineSupport.SOURCE_INDICATOR_FIELD, postRepeatFields.get(2).getName());
@@ -854,7 +867,8 @@ class BvScd2PipelineSupportTest {
         BvScd2PipelineSupport.buildTargetTableLayout(
             scd2Table, new BusinessVaultConfiguration(), dvModel, satellite, new Variables());
 
-    assertFalse(layout.getValueMetaList().stream().anyMatch(vm -> "customer_hk".equals(vm.getName())));
+    assertFalse(
+        layout.getValueMetaList().stream().anyMatch(vm -> "customer_hk".equals(vm.getName())));
     assertEquals("name", layout.getValueMeta(0).getName());
   }
 

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.ArrayList;
@@ -100,11 +98,7 @@ public final class DvTableReferenceSupport {
       return null;
     }
     return createAlias(
-        externalTable.getName(),
-        externalTable,
-        externalModelFilename,
-        null,
-        location);
+        externalTable.getName(), externalTable, externalModelFilename, null, location);
   }
 
   /**
@@ -140,8 +134,7 @@ public final class DvTableReferenceSupport {
       reference.setHashKeyFieldName(roleHashKeyFieldName);
     } else if (!aliasName.equalsIgnoreCase(targetTable.getName())
         && targetTable.getTableType() == DvTableType.HUB) {
-      reference.setHashKeyFieldName(
-          DvTableResolutionSupport.deriveRoleHashKeyFieldName(aliasName));
+      reference.setHashKeyFieldName(DvTableResolutionSupport.deriveRoleHashKeyFieldName(aliasName));
     }
     if (location != null) {
       reference.setLocation(new Point(location.x, location.y));

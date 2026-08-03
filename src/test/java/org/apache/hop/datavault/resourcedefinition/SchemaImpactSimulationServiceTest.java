@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -134,8 +133,7 @@ class SchemaImpactSimulationServiceTest {
     assertEquals("baseline-v1", result.baselineVersionUsed());
     assertNotNull(result.validationReport());
     assertTrue(
-        result.validationReport().getIssueCount() > 0
-            || result.status() != SimulationStatus.PASS,
+        result.validationReport().getIssueCount() > 0 || result.status() != SimulationStatus.PASS,
         "Expected drift after mutating working-tree fields");
     assertNotNull(result.impactGraph());
     assertFalse(result.impactGraph().nodes().isEmpty());
@@ -170,7 +168,8 @@ class SchemaImpactSimulationServiceTest {
                     "x",
                     "gone",
                     List.of()))));
-    assertEquals(SimulationStatus.CRITICAL_BLOCKED, SchemaImpactSimulationResult.statusOf(blocking));
+    assertEquals(
+        SimulationStatus.CRITICAL_BLOCKED, SchemaImpactSimulationResult.statusOf(blocking));
 
     ValidationReport warning = new ValidationReport("g");
     warning.addRecordValidation(
@@ -191,6 +190,7 @@ class SchemaImpactSimulationServiceTest {
                     "added",
                     List.of()))));
     assertEquals(SimulationStatus.WARNING, SchemaImpactSimulationResult.statusOf(warning));
-    assertEquals(SimulationStatus.PASS, SchemaImpactSimulationResult.statusOf(new ValidationReport("g")));
+    assertEquals(
+        SimulationStatus.PASS, SchemaImpactSimulationResult.statusOf(new ValidationReport("g")));
   }
 }

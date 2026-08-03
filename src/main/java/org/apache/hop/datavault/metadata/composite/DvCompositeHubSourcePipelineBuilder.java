@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.composite;
 
 import java.util.List;
@@ -44,14 +43,7 @@ public class DvCompositeHubSourcePipelineBuilder extends DvCompositeSourcePipeli
       DvHub hub,
       Point startPoint) {
     super(
-        variables,
-        metadataProvider,
-        model,
-        pipelineMeta,
-        recordSource,
-        dvSource,
-        hub,
-        startPoint);
+        variables, metadataProvider, model, pipelineMeta, recordSource, dvSource, hub, startPoint);
   }
 
   @Override

@@ -13,12 +13,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
-import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -64,14 +61,14 @@ public abstract class DvSourcePipelineBuilder {
   protected DvLink.DvLinkSatelliteSource dvLinkSatelliteSource;
 
   public DvSourcePipelineBuilder(
-          IVariables variables,
-          IHopMetadataProvider metadataProvider,
-          DataVaultModel model,
-          PipelineMeta pipelineMeta,
-          DataVaultSource recordSource,
-          IDvSource dvSource,
-          IDvTable dvTable,
-          Point startPoint) {
+      IVariables variables,
+      IHopMetadataProvider metadataProvider,
+      DataVaultModel model,
+      PipelineMeta pipelineMeta,
+      DataVaultSource recordSource,
+      IDvSource dvSource,
+      IDvTable dvTable,
+      Point startPoint) {
     this.variables = variables;
     this.metadataProvider = metadataProvider;
     this.model = model;
@@ -90,8 +87,9 @@ public abstract class DvSourcePipelineBuilder {
       throw new HopException("Please specify a database name to load");
     }
     DatabaseMeta databaseMeta = metadataProvider.getSerializer(DatabaseMeta.class).load(name);
-    if (databaseMeta==null) {
-      throw new HopException("Referenced database '"+name+"' couldn't be found in the metadata");
+    if (databaseMeta == null) {
+      throw new HopException(
+          "Referenced database '" + name + "' couldn't be found in the metadata");
     }
     return databaseMeta;
   }
@@ -111,7 +109,7 @@ public abstract class DvSourcePipelineBuilder {
             model, variables.resolve(hubName), variables, metadataProvider);
     if (hub == null) {
       throw new HopException(
-              "Hub " + hubName + " could not be found in data vault model " + model.getName());
+          "Hub " + hubName + " could not be found in data vault model " + model.getName());
     }
     return hub;
   }

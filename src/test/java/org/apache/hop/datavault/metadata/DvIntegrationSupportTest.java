@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,10 +30,9 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.datavault.hopgui.file.businessvault.HopBusinessVaultFileType;
+import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
 import org.apache.hop.datavault.metadata.businessvault.BvScd2PipelineSupport;
 import org.apache.hop.datavault.metadata.businessvault.BvScd2Table;
-import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
-
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
@@ -49,9 +46,13 @@ import org.w3c.dom.Node;
 class DvIntegrationSupportTest {
 
   private static final Path DV_PATH =
-      Path.of("integration-tests/tests/multi-satellite-bv/customer-360.hdv").toAbsolutePath().normalize();
+      Path.of("integration-tests/tests/multi-satellite-bv/customer-360.hdv")
+          .toAbsolutePath()
+          .normalize();
   private static final Path BV_PATH =
-      Path.of("integration-tests/tests/multi-satellite-bv/customer-360.hbv").toAbsolutePath().normalize();
+      Path.of("integration-tests/tests/multi-satellite-bv/customer-360.hbv")
+          .toAbsolutePath()
+          .normalize();
 
   @BeforeAll
   static void initHop() throws HopException {
@@ -94,11 +95,7 @@ class DvIntegrationSupportTest {
         remarks.stream().anyMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_ERROR),
         () -> remarks.stream().map(ICheckResult::getText).toList().toString());
     assertTrue(
-        remarks.stream()
-            .anyMatch(
-                r ->
-                    r.getText()
-                        .contains("External table layout defines")));
+        remarks.stream().anyMatch(r -> r.getText().contains("External table layout defines")));
   }
 
   @Test

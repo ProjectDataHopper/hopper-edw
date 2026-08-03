@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.catalog;
 
 import java.util.ArrayList;
@@ -52,7 +50,8 @@ public final class DvSourceFieldSupport {
       catalogField.setPrecision(field.getPrecision());
       catalogField.setHopType(field.getHopType());
       catalogField.setPrimaryKeyPosition(field.getPrimaryKeyPosition());
-      catalogField.setInputOptions(SourceFieldInputOptionsSupport.toCatalog(field.getInputOptions()));
+      catalogField.setInputOptions(
+          SourceFieldInputOptionsSupport.toCatalog(field.getInputOptions()));
       result.add(catalogField);
     }
     return result;
@@ -92,7 +91,8 @@ public final class DvSourceFieldSupport {
       sourceField.setPrecision(field.getPrecision());
       sourceField.setHopType(field.getHopType());
       sourceField.setPrimaryKeyPosition(field.getPrimaryKeyPosition());
-      sourceField.setInputOptions(SourceFieldInputOptionsSupport.fromCatalog(field.getInputOptions()));
+      sourceField.setInputOptions(
+          SourceFieldInputOptionsSupport.fromCatalog(field.getInputOptions()));
       result.add(sourceField);
     }
     return result;

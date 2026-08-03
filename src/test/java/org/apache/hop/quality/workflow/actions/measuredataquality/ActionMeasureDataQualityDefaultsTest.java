@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.quality.workflow.actions.measuredataquality;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -108,8 +106,7 @@ class ActionMeasureDataQualityDefaultsTest {
     action.copyFrom(variables);
 
     action.setHistorySchema("");
-    assertEquals(
-        DataQualityHistoryPublisher.DEFAULT_SCHEMA_NAME, action.resolveHistorySchema());
+    assertEquals(DataQualityHistoryPublisher.DEFAULT_SCHEMA_NAME, action.resolveHistorySchema());
 
     action.setVariable(DataQualityHistoryPublisher.VAR_QUALITY_HISTORY_SCHEMA, "ops2");
     assertEquals("ops2", action.resolveHistorySchema());

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.coaching;
 
 import java.util.ArrayList;
@@ -30,11 +28,11 @@ import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.catalog.DvSourceCatalogService;
 import org.apache.hop.datavault.metadata.DataVaultModel;
+import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultDvModelResolver;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
 import org.apache.hop.datavault.metadata.businessvault.BvDerivativeRef;
 import org.apache.hop.datavault.metadata.businessvault.BvDvTableReference;
-import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.datavault.metadata.businessvault.IBvTable;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
@@ -72,8 +70,8 @@ public class BvCoachingModelAdapter implements ICoachingModelAdapter {
   }
 
   @Override
-  public String resolveCatalogConnectionName(IVariables variables, IHopMetadataProvider metadataProvider)
-      throws HopException {
+  public String resolveCatalogConnectionName(
+      IVariables variables, IHopMetadataProvider metadataProvider) throws HopException {
     // Prefer BV model configuration catalog; fall back to effective DV models from canvas refs.
     String fromBv = model.getConfigurationOrDefault().getDataCatalogConnection();
     if (!org.apache.hop.core.util.Utils.isEmpty(fromBv)) {
@@ -158,11 +156,9 @@ public class BvCoachingModelAdapter implements ICoachingModelAdapter {
       if (reference == null || Utils.isEmpty(reference.getDvTableName())) {
         continue;
       }
-      String key =
-          reference.getDvTableName() + ":" + dvTableTypeName(reference.getDvTableType());
+      String key = reference.getDvTableName() + ":" + dvTableTypeName(reference.getDvTableType());
       if (seen.add(key)) {
-        derived.add(
-            buildDerivativeRef(reference.getDvTableName(), reference.getDvTableType()));
+        derived.add(buildDerivativeRef(reference.getDvTableName(), reference.getDvTableType()));
       }
     }
     return derived;
@@ -192,5 +188,4 @@ public class BvCoachingModelAdapter implements ICoachingModelAdapter {
   private static String dvTableTypeName(DvTableType dvTableType) {
     return dvTableType == null ? null : dvTableType.name();
   }
-
 }

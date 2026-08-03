@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.hopgui.file.sourcemodel;
 
 import java.util.ArrayList;
@@ -65,7 +64,8 @@ public class SourceModelPainter extends BasePainter {
   private Point relationshipDragEndLocation;
   private SourceTable candidateRelationshipTarget;
 
-  public SourceModelPainter(SourceModel model, IGc gc, IVariables variables, int width, int height) {
+  public SourceModelPainter(
+      SourceModel model, IGc gc, IVariables variables, int width, int height) {
     super(gc, variables, model, new Point(width, height));
     this.model = model;
   }
@@ -165,15 +165,9 @@ public class SourceModelPainter extends BasePainter {
 
       // Crow's foot symbols at each end (child = FK side, parent = PK side).
       SourceRelationshipCrowFootDrawer.draw(
-          gc,
-          screenFrom,
-          screenTo,
-          relationship.resolveChildMultiplicity());
+          gc, screenFrom, screenTo, relationship.resolveChildMultiplicity());
       SourceRelationshipCrowFootDrawer.draw(
-          gc,
-          screenTo,
-          screenFrom,
-          relationship.resolveParentMultiplicity());
+          gc, screenTo, screenFrom, relationship.resolveParentMultiplicity());
 
       // Label + left-click hit target at the midpoint (edit/delete context menu).
       String baseName =
@@ -222,8 +216,8 @@ public class SourceModelPainter extends BasePainter {
    * <p>{@code relationshipDragEndLocation} is in raw canvas/mouse coordinates. Drawing happens
    * under a GC scale of {@code magnification} only (SwtGc ignores translation), while table
    * geometry is painted at {@code real2screen(graph) = graph + offset}. The cursor end must
-   * therefore be converted to that same draw space: {@code canvas / magnification}. Using raw
-   * mouse coords here over-scales the tip by the native zoom factor.
+   * therefore be converted to that same draw space: {@code canvas / magnification}. Using raw mouse
+   * coords here over-scales the tip by the native zoom factor.
    */
   private void drawRelationshipCandidateLine() {
     if (startRelationshipTable == null || relationshipDragEndLocation == null) {
@@ -234,8 +228,7 @@ public class SourceModelPainter extends BasePainter {
       return;
     }
     Bounds startBounds = tableBounds(startRelationshipTable);
-    Point drawStart =
-        real2screen(startBounds.centerX(), startBounds.centerY());
+    Point drawStart = real2screen(startBounds.centerX(), startBounds.centerY());
     // Convert canvas mouse coords into draw space (pre-GC-scale).
     float mag = magnification > 0f ? magnification : 1f;
     Point drawEnd =
@@ -327,7 +320,8 @@ public class SourceModelPainter extends BasePainter {
 
       if (areaOwners != null) {
         areaOwners.add(
-            new AreaOwner(AreaType.TRANSFORM_ICON, x, y, boxWidth, boxHeight, offset, table, label));
+            new AreaOwner(
+                AreaType.TRANSFORM_ICON, x, y, boxWidth, boxHeight, offset, table, label));
         int nameX = ModelGraphTableCardLayout.nameX(x);
         int nameY = ModelGraphTableCardLayout.nameY(y);
         ModelGraphTableNameHitArea.Bounds nameHit =
@@ -377,7 +371,6 @@ public class SourceModelPainter extends BasePainter {
     return String.join(", ", names);
   }
 
-
   private static final int[] QUERY_COLOR = new int[] {120, 80, 160};
 
   private void drawQueries() {
@@ -394,9 +387,7 @@ public class SourceModelPainter extends BasePainter {
       }
       String label = Utils.isEmpty(query.getName()) ? "?" : query.getName();
       String secondary =
-          Utils.isEmpty(query.getDrivingTableName())
-              ? ""
-              : "from " + query.getDrivingTableName();
+          Utils.isEmpty(query.getDrivingTableName()) ? "" : "from " + query.getDrivingTableName();
       String typeLabel = "QUERY";
       int joins = query.getJoins() != null ? query.getJoins().size() : 0;
       String extra = joins + " join(s), " + query.getColumns().size() + " col(s)";
@@ -427,7 +418,8 @@ public class SourceModelPainter extends BasePainter {
 
       if (areaOwners != null) {
         areaOwners.add(
-            new AreaOwner(AreaType.TRANSFORM_ICON, x, y, boxWidth, boxHeight, offset, query, label));
+            new AreaOwner(
+                AreaType.TRANSFORM_ICON, x, y, boxWidth, boxHeight, offset, query, label));
         int nameX = ModelGraphTableCardLayout.nameX(x);
         int nameY = ModelGraphTableCardLayout.nameY(y);
         ModelGraphTableNameHitArea.Bounds nameHit =

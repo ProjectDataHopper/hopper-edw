@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.model;
 
 import lombok.Getter;
@@ -34,7 +32,9 @@ public class CatalogSourceField {
   private String length;
   private String precision;
   private int hopType;
+
   /** 1-based position in the source primary key; zero when not part of the key. */
   private int primaryKeyPosition;
+
   private CatalogSourceFieldInputOptions inputOptions;
 }

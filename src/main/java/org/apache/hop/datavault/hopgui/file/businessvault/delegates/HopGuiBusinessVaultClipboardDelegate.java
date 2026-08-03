@@ -13,14 +13,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.businessvault.delegates;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.exception.HopXmlException;
@@ -184,8 +181,8 @@ public class HopGuiBusinessVaultClipboardDelegate {
     xml.append(XmlHandler.closeTag(XML_TAG_NOTES)).append(Const.CR);
   }
 
-  private List<IBvTable> deserializeTables(Node clipboardNode, IHopMetadataProvider metadataProvider)
-      throws HopXmlException {
+  private List<IBvTable> deserializeTables(
+      Node clipboardNode, IHopMetadataProvider metadataProvider) throws HopXmlException {
     List<IBvTable> tables = new ArrayList<>();
     Node tablesNode = XmlHandler.getSubNode(clipboardNode, XML_TAG_TABLES);
     if (tablesNode == null) {

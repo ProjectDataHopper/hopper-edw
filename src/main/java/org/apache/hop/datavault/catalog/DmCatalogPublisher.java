@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.catalog;
 
 import java.util.Date;
@@ -71,8 +69,7 @@ public final class DmCatalogPublisher {
       IHopMetadataProvider metadataProvider,
       String workflowName)
       throws HopException {
-    return publish(
-        catalogConnectionName, dmModel, variables, metadataProvider, workflowName, null);
+    return publish(catalogConnectionName, dmModel, variables, metadataProvider, workflowName, null);
   }
 
   public static PublishResult publish(
@@ -293,7 +290,8 @@ public final class DmCatalogPublisher {
     }
     PhysicalTableRef ref = new PhysicalTableRef();
     ref.setDatabaseMetaName(config.getTargetDatabase());
-    String tableName = !Utils.isEmpty(table.getTableName()) ? table.getTableName() : table.getName();
+    String tableName =
+        !Utils.isEmpty(table.getTableName()) ? table.getTableName() : table.getName();
     ref.setTableName(tableName);
     try {
       DatabaseMeta databaseMeta =

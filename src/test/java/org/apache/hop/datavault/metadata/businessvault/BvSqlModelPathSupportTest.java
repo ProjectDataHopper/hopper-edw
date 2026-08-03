@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -62,8 +60,7 @@ class BvSqlModelPathSupportTest {
 
     Variables vars = new Variables();
     BvSqlModelPathSupport.ResolvedModelPath resolved =
-        BvSqlModelPathSupport.resolveExistingModelPath(
-            "../dv/retail-360", hbv.toString(), vars);
+        BvSqlModelPathSupport.resolveExistingModelPath("../dv/retail-360", hbv.toString(), vars);
 
     assertEquals(BvSqlModelPathSupport.ModelFileKind.HDV, resolved.kind());
     assertTrue(resolved.loadPath().replace('\\', '/').endsWith("/dv/retail-360.hdv"));
@@ -80,8 +77,7 @@ class BvSqlModelPathSupportTest {
     Files.writeString(hbv, "<!-- empty -->");
 
     BvSqlModelPathSupport.ResolvedModelPath resolved =
-        BvSqlModelPathSupport.resolveExistingModelPath(
-            "vault1", hbv.toString(), new Variables());
+        BvSqlModelPathSupport.resolveExistingModelPath("vault1", hbv.toString(), new Variables());
 
     assertEquals(BvSqlModelPathSupport.ModelFileKind.HDV, resolved.kind());
     assertTrue(resolved.loadPath().replace('\\', '/').endsWith("/models/vault1.hdv"));

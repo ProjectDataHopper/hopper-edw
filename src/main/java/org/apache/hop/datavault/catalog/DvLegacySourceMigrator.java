@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.catalog;
 
 import com.google.gson.JsonArray;
@@ -38,7 +36,6 @@ import org.apache.hop.core.plugins.PluginRegistry;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.variables.Variables;
-import org.apache.hop.metadata.serializer.json.JsonMetadataProvider;
 import org.apache.hop.datavault.metadata.DataVaultSource;
 import org.apache.hop.datavault.metadata.DvSourceDeliveryType;
 import org.apache.hop.datavault.metadata.DvSourceType;
@@ -46,6 +43,7 @@ import org.apache.hop.datavault.metadata.IDvSource;
 import org.apache.hop.datavault.metadata.SourceField;
 import org.apache.hop.datavault.metadata.database.DvDatabaseSource;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.metadata.serializer.json.JsonMetadataProvider;
 
 /** One-time migration of legacy {@code data-vault-source} Hop metadata JSON into the catalog. */
 public final class DvLegacySourceMigrator {
@@ -126,7 +124,7 @@ public final class DvLegacySourceMigrator {
   }
 
   private static IDvSource parseDvSource(JsonObject sourceObject) {
-    if (sourceObject == null || sourceObject.isEmpty()) {
+    if (sourceObject == null || sourceObject.size() == 0) {
       return new DvDatabaseSource();
     }
     for (Map.Entry<String, JsonElement> entry : sourceObject.entrySet()) {

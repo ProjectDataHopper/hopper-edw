@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.discovery;
 
 import java.util.List;
@@ -85,7 +83,8 @@ public final class RecordDefinitionDiscoveryService {
         || Utils.isEmpty(physicalRef.getCompositeSourceModelFilename())
         || Utils.isEmpty(physicalRef.getCompositeSourceQueryName())) {
       throw new HopException(
-          BaseMessages.getString(PKG, "RecordDefinitionDiscoveryService.Error.MissingCompositeRef"));
+          BaseMessages.getString(
+              PKG, "RecordDefinitionDiscoveryService.Error.MissingCompositeRef"));
     }
     String modelFile =
         variables != null
@@ -135,8 +134,7 @@ public final class RecordDefinitionDiscoveryService {
     try (Database db = new Database(LOGGING_OBJECT, variables, databaseMeta)) {
       db.connect();
       List<SourceField> fields =
-          DvDatabaseSourceImportSupport.importFieldsFromTable(
-              db, variables, schemaName, tableName);
+          DvDatabaseSourceImportSupport.importFieldsFromTable(db, variables, schemaName, tableName);
       return new DiscoveryResult(fields, null);
     } catch (Exception e) {
       throw new HopException("Error discovering database table fields.", e);
@@ -161,8 +159,8 @@ public final class RecordDefinitionDiscoveryService {
     return new DiscoveryResult(parquetDiscovery.fields(), null);
   }
 
-  private static DiscoveryResult discoverIceberg(PhysicalSourceRef physicalRef, IVariables variables)
-      throws HopException {
+  private static DiscoveryResult discoverIceberg(
+      PhysicalSourceRef physicalRef, IVariables variables) throws HopException {
     IcebergTableMetadataDiscovery.DiscoveryResult icebergDiscovery =
         IcebergTableMetadataDiscovery.discover(physicalRef, variables);
     return new DiscoveryResult(icebergDiscovery.fields(), null);

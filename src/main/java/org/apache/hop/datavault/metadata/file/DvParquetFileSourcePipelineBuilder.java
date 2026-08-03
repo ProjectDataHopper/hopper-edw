@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.file;
 
 import java.util.ArrayList;
@@ -71,8 +69,8 @@ public abstract class DvParquetFileSourcePipelineBuilder extends DvFileSourcePip
   }
 
   @Override
-  protected TransformMeta createFileInput(String transformName, Point location, ColumnMapping mapping)
-      throws HopException {
+  protected TransformMeta createFileInput(
+      String transformName, Point location, ColumnMapping mapping) throws HopException {
     TransformMeta getFileNames = createGetFileNames(location);
     pipelineMeta.addTransform(getFileNames);
 
@@ -91,9 +89,7 @@ public abstract class DvParquetFileSourcePipelineBuilder extends DvFileSourcePip
     GetFileNamesMeta getFileNamesMeta = new GetFileNamesMeta();
     getFileNamesMeta.setDefault();
     getFileNamesMeta.getFilterItemList().clear();
-    getFileNamesMeta
-        .getFilterItemList()
-        .add(new FilterItem(FileTypeFilter.ONLY_FILES.toString()));
+    getFileNamesMeta.getFilterItemList().add(new FilterItem(FileTypeFilter.ONLY_FILES.toString()));
 
     List<FileItem> filesList = new ArrayList<>();
     filesList.add(
@@ -105,7 +101,8 @@ public abstract class DvParquetFileSourcePipelineBuilder extends DvFileSourcePip
             "Y"));
     getFileNamesMeta.setFilesList(filesList);
 
-    TransformMeta transformMeta = new TransformMeta("GetFileNames", "list parquet files", getFileNamesMeta);
+    TransformMeta transformMeta =
+        new TransformMeta("GetFileNames", "list parquet files", getFileNamesMeta);
     transformMeta.setLocation(location.x, location.y);
     return transformMeta;
   }

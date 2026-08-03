@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.metrics;
 
 import java.text.SimpleDateFormat;
@@ -24,8 +22,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import org.apache.hop.core.gui.IGc;
-import org.apache.hop.core.gui.IGc.EFont;
 import org.apache.hop.core.gui.IGc.EColor;
+import org.apache.hop.core.gui.IGc.EFont;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.Rectangle;
 import org.apache.hop.core.util.Utils;
@@ -35,7 +33,6 @@ import org.apache.hop.datavault.metrics.LoadRunDurationRun;
 import org.apache.hop.datavault.metrics.LoadRunDurationSnapshot;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.PropsUi;
-
 
 /** Airflow-style duration bars for recent load runs, one row per model table. */
 public class LoadRunDurationOverviewPainter extends BasePainter {
@@ -84,15 +81,13 @@ public class LoadRunDurationOverviewPainter extends BasePainter {
   public static Point computePreferredSize(
       LoadRunDurationSnapshot snapshot, IGc gc, double nativeZoomFactor) {
     int labelColumnWidth =
-        gc != null
-            ? resolveLabelColumnWidth(snapshot, gc)
-            : LABEL_COLUMN_MIN_WIDTH;
+        gc != null ? resolveLabelColumnWidth(snapshot, gc) : LABEL_COLUMN_MIN_WIDTH;
     Point logical = computeLogicalPreferredSize(snapshot, labelColumnWidth);
-    return new Point(
-        scale(logical.x, nativeZoomFactor), scale(logical.y, nativeZoomFactor));
+    return new Point(scale(logical.x, nativeZoomFactor), scale(logical.y, nativeZoomFactor));
   }
 
-  public static Point computePreferredSize(LoadRunDurationSnapshot snapshot, double nativeZoomFactor) {
+  public static Point computePreferredSize(
+      LoadRunDurationSnapshot snapshot, double nativeZoomFactor) {
     return computePreferredSize(snapshot, null, nativeZoomFactor);
   }
 
@@ -107,11 +102,7 @@ public class LoadRunDurationOverviewPainter extends BasePainter {
     int runCount = Math.max(1, data.getRuns().size());
     int rowCount = Math.max(1, data.getTableNames().size());
     int resolvedLabelWidth = Math.max(LABEL_COLUMN_MIN_WIDTH, labelColumnWidth);
-    int width =
-        PADDING
-            + resolvedLabelWidth
-            + (runCount * (RUN_COLUMN_WIDTH + BAR_GAP))
-            + PADDING;
+    int width = PADDING + resolvedLabelWidth + (runCount * (RUN_COLUMN_WIDTH + BAR_GAP)) + PADDING;
     int height = PADDING + HEADER_HEIGHT + (rowCount * ROW_HEIGHT) + PADDING;
     return new Point(width, height);
   }
@@ -277,9 +268,7 @@ public class LoadRunDurationOverviewPainter extends BasePainter {
     }
     String label =
         BaseMessages.getString(
-            PKG,
-            "LoadRunDurationOverviewPainter.MaxDuration",
-            formatDuration(displayMax));
+            PKG, "LoadRunDurationOverviewPainter.MaxDuration", formatDuration(displayMax));
     gc.setFont(EFont.SMALL);
     gc.setForeground(EColor.DARKGRAY);
     gc.drawText(label, chartLeft(), PADDING, true);
@@ -314,12 +303,7 @@ public class LoadRunDurationOverviewPainter extends BasePainter {
   }
 
   private void drawDurationBar(
-      String tableName,
-      LoadRunDurationRun run,
-      int runIndex,
-      int x,
-      int y,
-      long durationMs) {
+      String tableName, LoadRunDurationRun run, int runIndex, int x, int y, long durationMs) {
     int baselineY = y + ROW_HEIGHT - ROW_BAR_MARGIN;
 
     if (durationMs <= 0L) {
@@ -352,8 +336,7 @@ public class LoadRunDurationOverviewPainter extends BasePainter {
 
   private String resolveStatusMessage(LoadRunDurationSnapshot data) {
     return switch (data.getStatus()) {
-      case NO_DATABASE ->
-          BaseMessages.getString(PKG, "LoadRunDurationOverviewPainter.NoDatabase");
+      case NO_DATABASE -> BaseMessages.getString(PKG, "LoadRunDurationOverviewPainter.NoDatabase");
       case NO_TABLES -> BaseMessages.getString(PKG, "LoadRunDurationOverviewPainter.NoTables");
       case NO_RUNS -> BaseMessages.getString(PKG, "LoadRunDurationOverviewPainter.NoRuns");
       case ERROR ->

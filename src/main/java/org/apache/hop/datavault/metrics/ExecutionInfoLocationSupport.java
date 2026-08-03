@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import org.apache.hop.core.exception.HopException;
@@ -26,22 +24,30 @@ import org.apache.hop.execution.IExecutionInfoLocation;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.config.PipelineRunConfiguration;
 
-/** Resolves and initializes Hop Execution Information Locations from pipeline run configurations. */
+/**
+ * Resolves and initializes Hop Execution Information Locations from pipeline run configurations.
+ */
 public final class ExecutionInfoLocationSupport {
 
   private ExecutionInfoLocationSupport() {}
 
   public record ResolvedExecutionInfoLocation(
-      String pipelineRunConfiguration, String executionInfoLocationName, IExecutionInfoLocation location) {}
+      String pipelineRunConfiguration,
+      String executionInfoLocationName,
+      IExecutionInfoLocation location) {}
 
   public static ResolvedExecutionInfoLocation resolveInitializedLocation(
-      String pipelineRunConfigurationName, IVariables variables, IHopMetadataProvider metadataProvider)
+      String pipelineRunConfigurationName,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider)
       throws HopException {
     if (metadataProvider == null || Utils.isEmpty(pipelineRunConfigurationName)) {
       return null;
     }
     String resolvedRunConfig =
-        variables != null ? variables.resolve(pipelineRunConfigurationName) : pipelineRunConfigurationName;
+        variables != null
+            ? variables.resolve(pipelineRunConfigurationName)
+            : pipelineRunConfigurationName;
     if (Utils.isEmpty(resolvedRunConfig)) {
       return null;
     }

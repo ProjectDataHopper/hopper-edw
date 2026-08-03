@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.ArrayList;
@@ -31,8 +29,8 @@ public final class DvSqlFormattingSupport {
   static final int SELECT_LIST_WRAP_WIDTH = 100;
 
   /**
-   * Indent for SELECT-list continuation lines (matches length of {@code "SELECT "} so columns
-   * align under the first field).
+   * Indent for SELECT-list continuation lines (matches length of {@code "SELECT "} so columns align
+   * under the first field).
    */
   static final int SELECT_LIST_CONTINUATION_SPACES = 7;
 
@@ -110,7 +108,11 @@ public final class DvSqlFormattingSupport {
         out.append(',');
       }
       out.append('\n').append(indent(1)).append(cteName).append(" AS (");
-      out.append('\n').append(formatQueryBlock(cteBody, 2)).append('\n').append(indent(1)).append(')');
+      out.append('\n')
+          .append(formatQueryBlock(cteBody, 2))
+          .append('\n')
+          .append(indent(1))
+          .append(')');
 
       position = closeParen + 1;
       cteCount++;
@@ -160,8 +162,7 @@ public final class DvSqlFormattingSupport {
       if (isSelectClause(clause)) {
         out.append(formatSelectClause(clause, indentLevel));
       } else {
-        out.append(indent(indentLevel))
-            .append(formatInlineSubqueries(clause, indentLevel));
+        out.append(indent(indentLevel)).append(formatInlineSubqueries(clause, indentLevel));
       }
     }
   }
@@ -466,9 +467,12 @@ public final class DvSqlFormattingSupport {
 
   private static boolean isKeywordBoundary(String sql, int index, int keywordLength) {
     boolean leading =
-        index == 0 || !Character.isLetterOrDigit(sql.charAt(index - 1)) && sql.charAt(index - 1) != '_';
+        index == 0
+            || !Character.isLetterOrDigit(sql.charAt(index - 1)) && sql.charAt(index - 1) != '_';
     int end = index + keywordLength;
-    boolean trailing = end >= sql.length() || !Character.isLetterOrDigit(sql.charAt(end)) && sql.charAt(end) != '_';
+    boolean trailing =
+        end >= sql.length()
+            || !Character.isLetterOrDigit(sql.charAt(end)) && sql.charAt(end) != '_';
     return leading && trailing;
   }
 

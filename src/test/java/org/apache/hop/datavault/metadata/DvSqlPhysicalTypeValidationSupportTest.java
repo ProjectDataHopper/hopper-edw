@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,8 +45,7 @@ class DvSqlPhysicalTypeValidationSupportTest {
         DvSqlPhysicalTypeValidationSupport.isSortSensitiveStringTypeMismatch(
             "NVARCHAR", "NVARCHAR"));
     assertFalse(
-        DvSqlPhysicalTypeValidationSupport.isSortSensitiveStringTypeMismatch(
-            "VARCHAR", "VARCHAR"));
+        DvSqlPhysicalTypeValidationSupport.isSortSensitiveStringTypeMismatch("VARCHAR", "VARCHAR"));
   }
 
   @Test
@@ -72,11 +70,8 @@ class DvSqlPhysicalTypeValidationSupportTest {
 
   @Test
   void extractsSqlTypeFromFieldDefinition() {
+    assertEquals("varchar", DvSqlPhysicalTypeValidationSupport.extractSqlTypeName("varchar(20)"));
     assertEquals(
-        "varchar",
-        DvSqlPhysicalTypeValidationSupport.extractSqlTypeName("varchar(20)"));
-    assertEquals(
-        "NVARCHAR",
-        DvSqlPhysicalTypeValidationSupport.extractSqlTypeName("NVARCHAR (20)"));
+        "NVARCHAR", DvSqlPhysicalTypeValidationSupport.extractSqlTypeName("NVARCHAR (20)"));
   }
 }

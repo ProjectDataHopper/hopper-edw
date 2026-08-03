@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -55,9 +53,7 @@ class BusinessVaultModelTest {
                     r.getType() == ICheckResult.TYPE_RESULT_ERROR
                         && r.getText() != null
                         && r.getText().toLowerCase().contains("data vault model file path")));
-    assertTrue(
-        remarks.stream()
-            .anyMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_WARNING));
+    assertTrue(remarks.stream().anyMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_WARNING));
   }
 
   @Test
@@ -86,7 +82,9 @@ class BusinessVaultModelTest {
     original.getDvReferences().add(new BvDvTableReference("hub_customer", DvTableType.HUB));
     BvBvTableReference bvRef =
         new BvBvTableReference(
-            "satb_product_hb", BvTableType.BUSINESS_TABLE, "${PROJECT_HOME}/models/bv-historize.hbv");
+            "satb_product_hb",
+            BvTableType.BUSINESS_TABLE,
+            "${PROJECT_HOME}/models/bv-historize.hbv");
     bvRef.setPhysicalTableName("satb_product_hb");
     original.getBvReferences().add(bvRef);
 
@@ -105,8 +103,7 @@ class BusinessVaultModelTest {
     assertEquals(
         original.getConfigurationOrDefault().getTargetDatabase(),
         restored.getConfigurationOrDefault().getTargetDatabase());
-    assertEquals(
-        "local-catalog", restored.getConfigurationOrDefault().getDataCatalogConnection());
+    assertEquals("local-catalog", restored.getConfigurationOrDefault().getDataCatalogConnection());
     assertEquals(1, restored.getTables().size());
     assertEquals(BvTableType.SCD2, restored.getTables().get(0).getTableType());
     assertEquals(1, restored.getDvReferences().size());
@@ -122,15 +119,13 @@ class BusinessVaultModelTest {
 
   @Test
   void resolverLoadsReferencedDataVaultModel() throws Exception {
-    Path dvPath =
-        Path.of("integration-tests/tests/basic/vault1.hdv").toAbsolutePath().normalize();
+    Path dvPath = Path.of("integration-tests/tests/basic/vault1.hdv").toAbsolutePath().normalize();
     BusinessVaultModel model = new BusinessVaultModel();
     model.setDataVaultModelPath(dvPath.toString());
 
     var remarks = model.check(null, new Variables());
     assertTrue(
-        remarks.stream()
-            .anyMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_WARNING),
+        remarks.stream().anyMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_WARNING),
         "Empty BV tables should produce a warning when DV model loads");
     assertFalse(
         remarks.stream()

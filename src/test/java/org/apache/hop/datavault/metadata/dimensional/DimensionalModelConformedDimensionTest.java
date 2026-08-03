@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,7 +42,8 @@ class DimensionalModelConformedDimensionTest {
 
     assertEquals(1, model.getConformedDimensionsOrEmpty().size());
     assertEquals("Product", model.getConformedDimensionsOrEmpty().get(0).getLogicalName());
-    assertEquals("dim_product", model.getConformedDimensionsOrEmpty().get(0).getDimensionTableName());
+    assertEquals(
+        "dim_product", model.getConformedDimensionsOrEmpty().get(0).getDimensionTableName());
   }
 
   @Test
@@ -80,7 +79,6 @@ class DimensionalModelConformedDimensionTest {
     DmValidationSupport.validateConfiguration(remarks, model, null, null);
     assertTrue(
         remarks.stream()
-            .noneMatch(
-                r -> r.getText() != null && r.getText().contains("dim_customer")));
+            .noneMatch(r -> r.getText() != null && r.getText().contains("dim_customer")));
   }
 }

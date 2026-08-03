@@ -13,17 +13,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional.pipeline;
 
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
-import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataSupport;
+import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.datavault.metadata.dimensional.DmAccumulatingSnapshotFact;
 import org.apache.hop.datavault.metadata.dimensional.DmFactDimensionRole;
 import org.apache.hop.datavault.metadata.dimensional.DmFactMeasure;
@@ -75,8 +73,7 @@ public final class DmAccumulatingSnapshotLoadBuilder {
               metadataProvider,
               fact.getDimensionRolesOrEmpty());
     } catch (HopException e) {
-      throw new HopException(
-          "Accumulating snapshot " + fact.getName() + ": " + e.getMessage(), e);
+      throw new HopException("Accumulating snapshot " + fact.getName() + ": " + e.getMessage(), e);
     }
 
     TransformMeta writeTransform = addInsertUpdate(ctx, pipelineMeta, predecessor, fact);
@@ -107,7 +104,8 @@ public final class DmAccumulatingSnapshotLoadBuilder {
 
     List<InsertUpdateKeyField> keys = new ArrayList<>();
     for (String grainKey :
-        DmPipelineBuilderSupport.naturalKeyFieldNamesFromList(fact.getGrainKeysOrEmpty(), ctx.variables)) {
+        DmPipelineBuilderSupport.naturalKeyFieldNamesFromList(
+            fact.getGrainKeysOrEmpty(), ctx.variables)) {
       keys.add(new InsertUpdateKeyField(grainKey, grainKey, "="));
     }
     lookup.setLookupKeys(keys);

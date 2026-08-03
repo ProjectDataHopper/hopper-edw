@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import lombok.Getter;
@@ -27,15 +25,14 @@ import org.apache.hop.pipeline.transforms.dimensionlookup.DimensionLookupMeta;
 /** How a dimension table obtains its warehouse surrogate/technical key column. */
 @Getter
 public enum DmSurrogateKeyStrategy implements IEnumHasCodeAndDescription {
-  NONE(
-      "NONE",
-      BaseMessages.getString(DmSurrogateKeyStrategy.class, "DmSurrogateKeyStrategy.None")),
+  NONE("NONE", BaseMessages.getString(DmSurrogateKeyStrategy.class, "DmSurrogateKeyStrategy.None")),
   AUTO_INCREMENT(
       "AUTO_INCREMENT",
       BaseMessages.getString(DmSurrogateKeyStrategy.class, "DmSurrogateKeyStrategy.AutoIncrement")),
   USE_SOURCE_FIELD(
       "USE_SOURCE_FIELD",
-      BaseMessages.getString(DmSurrogateKeyStrategy.class, "DmSurrogateKeyStrategy.UseSourceField")),
+      BaseMessages.getString(
+          DmSurrogateKeyStrategy.class, "DmSurrogateKeyStrategy.UseSourceField")),
   SEQUENCE(
       "SEQUENCE",
       BaseMessages.getString(DmSurrogateKeyStrategy.class, "DmSurrogateKeyStrategy.Sequence")),

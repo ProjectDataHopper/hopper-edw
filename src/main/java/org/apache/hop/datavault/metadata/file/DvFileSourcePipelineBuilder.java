@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.file;
 
 import java.util.ArrayList;
@@ -24,15 +22,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.file.TextFileInputField;
 import org.apache.hop.core.fileinput.InputFile;
 import org.apache.hop.core.gui.Point;
-import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.value.ValueMetaFactory;
-
-
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metadata.DataVaultModel;
@@ -137,7 +131,8 @@ public abstract class DvFileSourcePipelineBuilder extends DvSourcePipelineBuilde
     return sortTransform;
   }
 
-  protected TransformMeta addUniqueRows(TransformMeta predecessor, Point location, List<String> fieldNames) {
+  protected TransformMeta addUniqueRows(
+      TransformMeta predecessor, Point location, List<String> fieldNames) {
     if (predecessor == null || fieldNames == null || fieldNames.isEmpty()) {
       return predecessor;
     }
@@ -180,8 +175,7 @@ public abstract class DvFileSourcePipelineBuilder extends DvSourcePipelineBuilde
       return predecessor;
     }
 
-    TransformMeta transform =
-        new TransformMeta("SelectValues", "coerce mapped types", selectMeta);
+    TransformMeta transform = new TransformMeta("SelectValues", "coerce mapped types", selectMeta);
     transform.setLocation(predecessor.getLocation().x + TRANSFORM_SPACING_X, location.y);
     pipelineMeta.addTransform(transform);
     pipelineMeta.addPipelineHop(new PipelineHopMeta(predecessor, transform));
@@ -248,8 +242,8 @@ public abstract class DvFileSourcePipelineBuilder extends DvSourcePipelineBuilde
     return constantTransform;
   }
 
-  protected TransformMeta createFileInput(String transformName, Point location, ColumnMapping mapping)
-      throws HopException {
+  protected TransformMeta createFileInput(
+      String transformName, Point location, ColumnMapping mapping) throws HopException {
     DvCsvSource csvSource = (DvCsvSource) source;
     if (csvSource.usesSingleFile()) {
       return createCsvInput(transformName, location, mapping, csvSource);
@@ -350,7 +344,8 @@ public abstract class DvFileSourcePipelineBuilder extends DvSourcePipelineBuilde
     }
     if (fields.isEmpty()) {
       throw new HopException(
-          "Please define at least one mapped source column for CSV source " + recordSource.getName());
+          "Please define at least one mapped source column for CSV source "
+              + recordSource.getName());
     }
     return fields;
   }
@@ -392,7 +387,8 @@ public abstract class DvFileSourcePipelineBuilder extends DvSourcePipelineBuilde
     }
     if (fields.isEmpty()) {
       throw new HopException(
-          "Please define at least one mapped source column for CSV source " + recordSource.getName());
+          "Please define at least one mapped source column for CSV source "
+              + recordSource.getName());
     }
     return fields;
   }

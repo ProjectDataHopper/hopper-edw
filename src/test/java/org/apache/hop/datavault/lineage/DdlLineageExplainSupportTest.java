@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.lineage;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -48,8 +47,7 @@ class DdlLineageExplainSupportTest {
   void setUp() throws Exception {
     variables = new Variables();
     variables.setVariable(
-        "PROJECT_HOME",
-        Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
+        "PROJECT_HOME", Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
     model = loadModel("retail-example/models/retail-360.hdv");
   }
 
@@ -68,18 +66,14 @@ class DdlLineageExplainSupportTest {
         explanation.contains("E2E-customer-demo") || explanation.contains("DEFAULT_SAME_AS_SOURCE"),
         explanation);
     assertTrue(
-        explanation.contains("USER_EXPLICIT_NAME") || explanation.contains("model"),
-        explanation);
+        explanation.contains("USER_EXPLICIT_NAME") || explanation.contains("model"), explanation);
   }
 
   @Test
   void explainCreateTableListsFieldsWithReasons() {
     String explanation =
         DdlLineageExplainSupport.explain(
-            List.of("CREATE TABLE hub_customer (customer_id INTEGER);"),
-            model,
-            variables,
-            null);
+            List.of("CREATE TABLE hub_customer (customer_id INTEGER);"), model, variables, null);
 
     assertTrue(explanation.contains("CREATE TABLE hub_customer"), explanation);
     assertTrue(explanation.contains("customer_id"), explanation);

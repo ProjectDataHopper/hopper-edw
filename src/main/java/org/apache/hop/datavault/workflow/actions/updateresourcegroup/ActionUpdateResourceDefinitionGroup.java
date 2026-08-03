@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.workflow.actions.updateresourcegroup;
 
 import java.nio.file.Path;
@@ -817,9 +816,7 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
         ReferencedModel model = models.get(i);
         descriptions[i] =
             BaseMessages.getString(
-                PKG,
-                model.descriptionKey(),
-                toDisplayRelativePath(model.storedPath(), vars));
+                PKG, model.descriptionKey(), toDisplayRelativePath(model.storedPath(), vars));
       }
       return descriptions;
     } catch (Exception e) {
@@ -845,9 +842,9 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
   }
 
   /**
-   * Opens the model file at {@code index} (same order as {@link #getReferencedObjectDescriptions()}).
-   * Returns the stored path (often with {@code ${PROJECT_HOME}}); Hop resolves variables when
-   * opening.
+   * Opens the model file at {@code index} (same order as {@link
+   * #getReferencedObjectDescriptions()}). Returns the stored path (often with {@code
+   * ${PROJECT_HOME}}); Hop resolves variables when opening.
    */
   @Override
   public IHasFilename loadReferencedObject(
@@ -941,7 +938,8 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
       return "";
     }
     String path = storedOrRawPath.trim().replace('\\', '/');
-    final String projectHomeToken = "${" + WorkflowReferencedObjectVariableSupport.VARIABLE_PROJECT_HOME + "}";
+    final String projectHomeToken =
+        "${" + WorkflowReferencedObjectVariableSupport.VARIABLE_PROJECT_HOME + "}";
     final String projectHomePrefix = projectHomeToken + "/";
 
     if (path.startsWith(projectHomePrefix)) {

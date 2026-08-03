@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.sourcemodel;
 
 import lombok.Getter;
@@ -31,6 +30,7 @@ public class SourceQueryColumn {
 
   @HopMetadataProperty private String tableName;
   @HopMetadataProperty private String columnName;
+
   /** Output field name for the composed feed; defaults to {@link #columnName} when empty. */
   @HopMetadataProperty private String alias;
 

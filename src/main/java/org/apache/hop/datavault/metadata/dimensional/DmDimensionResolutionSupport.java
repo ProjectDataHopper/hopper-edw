@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import org.apache.hop.core.exception.HopException;
@@ -129,7 +127,10 @@ public final class DmDimensionResolutionSupport {
     return alias != null && !Utils.isEmpty(alias.getReferencedModelFilename());
   }
 
-  /** Label for the model that owns the alias target dimension (external path basename or this model). */
+  /**
+   * Label for the model that owns the alias target dimension (external path basename or this
+   * model).
+   */
   public static String resolveAliasSourceModelDisplayName(
       DimensionalModel model, DmDimensionAlias alias, IVariables variables) {
     if (alias == null) {

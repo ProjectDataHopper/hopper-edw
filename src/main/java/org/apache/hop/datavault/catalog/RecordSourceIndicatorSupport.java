@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.catalog;
 
 import java.util.ArrayList;
@@ -167,8 +165,7 @@ public final class RecordSourceIndicatorSupport {
         value.trim().toUpperCase(Locale.ROOT));
   }
 
-  private static void applyResolved(
-      DataVaultSource source, String staticValue, String fieldName) {
+  private static void applyResolved(DataVaultSource source, String staticValue, String fieldName) {
     source.setSourceIndicator(staticValue);
     source.setSourceIndicatorField(fieldName);
   }

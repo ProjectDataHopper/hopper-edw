@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.hopgui.resourcedefinition;
 
 import java.util.ArrayList;
@@ -122,8 +121,7 @@ public final class ResourceDefinitionValidationOptionsDialog {
 
     Label wlIntro = new Label(shell, SWT.LEFT | SWT.WRAP);
     PropsUi.setLook(wlIntro);
-    wlIntro.setText(
-        BaseMessages.getString(PKG, "ResourceDefinitionValidationOptionsDialog.Intro"));
+    wlIntro.setText(BaseMessages.getString(PKG, "ResourceDefinitionValidationOptionsDialog.Intro"));
     FormData fdlIntro = new FormData();
     fdlIntro.left = new FormAttachment(0, margin);
     fdlIntro.right = new FormAttachment(100, -margin);
@@ -411,10 +409,7 @@ public final class ResourceDefinitionValidationOptionsDialog {
     wExpectAutoCreate.setSelection(options.expectAutomaticTargetTableCreation());
     wIncludeImpact.setSelection(options.includeImpact());
     wWriteReport.setSelection(options.writeReport());
-    wReportPath.setText(
-        Const.NVL(
-            options.reportOutputPath(),
-            "${PROJECT_HOME}/work/reports"));
+    wReportPath.setText(Const.NVL(options.reportOutputPath(), "${PROJECT_HOME}/work/reports"));
     wReportBaseName.setText(
         Const.NVL(
             options.reportFileBaseName(),
@@ -442,8 +437,7 @@ public final class ResourceDefinitionValidationOptionsDialog {
     if (versionBaseline && Utils.isEmpty(tag)) {
       MessageBox box = new MessageBox(shell, SWT.OK | SWT.ICON_WARNING);
       box.setText(
-          BaseMessages.getString(
-              PKG, "ResourceDefinitionValidationOptionsDialog.Error.Title"));
+          BaseMessages.getString(PKG, "ResourceDefinitionValidationOptionsDialog.Error.Title"));
       box.setMessage(
           BaseMessages.getString(
               PKG, "ResourceDefinitionValidationOptionsDialog.Error.MissingVersionTag"));
@@ -456,19 +450,16 @@ public final class ResourceDefinitionValidationOptionsDialog {
         && !wCheckTargetDb.getSelection()) {
       MessageBox box = new MessageBox(shell, SWT.OK | SWT.ICON_WARNING);
       box.setText(
-          BaseMessages.getString(
-              PKG, "ResourceDefinitionValidationOptionsDialog.Error.Title"));
+          BaseMessages.getString(PKG, "ResourceDefinitionValidationOptionsDialog.Error.Title"));
       box.setMessage(
-          BaseMessages.getString(
-              PKG, "ResourceDefinitionValidationOptionsDialog.Error.NoAxes"));
+          BaseMessages.getString(PKG, "ResourceDefinitionValidationOptionsDialog.Error.NoAxes"));
       box.open();
       return;
     }
     if (wCheckCatalogVersion.getSelection() && Utils.isEmpty(tag)) {
       MessageBox box = new MessageBox(shell, SWT.OK | SWT.ICON_WARNING);
       box.setText(
-          BaseMessages.getString(
-              PKG, "ResourceDefinitionValidationOptionsDialog.Error.Title"));
+          BaseMessages.getString(PKG, "ResourceDefinitionValidationOptionsDialog.Error.Title"));
       box.setMessage(
           BaseMessages.getString(
               PKG, "ResourceDefinitionValidationOptionsDialog.Error.MissingVersionTagForAxis"));

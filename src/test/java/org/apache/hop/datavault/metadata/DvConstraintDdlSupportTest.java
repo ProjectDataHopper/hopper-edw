@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -140,7 +139,8 @@ class DvConstraintDdlSupportTest {
     link.setLinkHashKeyFieldName("order_lk");
     link.getHubNames().add("h_customer");
 
-    DatabaseMeta postgres = databaseMetaWithPluginId(DvBulkLoadPluginSupport.POSTGRESQL_DB_PLUGIN_ID);
+    DatabaseMeta postgres =
+        databaseMetaWithPluginId(DvBulkLoadPluginSupport.POSTGRESQL_DB_PLUGIN_ID);
     List<ForeignKeySpec> fks =
         DvConstraintDdlSupport.resolveDvForeignKeys(
             link, model, config, postgres, new Variables(), null, false);

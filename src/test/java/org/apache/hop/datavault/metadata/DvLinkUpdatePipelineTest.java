@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -53,15 +51,13 @@ class DvLinkUpdatePipelineTest {
 
     DvLink link = model.findLink("lnk_customer_invoice");
     List<PipelineMeta> pipelines =
-        link.generateUpdatePipelines(testMetadataProvider(), new Variables(), model, new Date(), null);
+        link.generateUpdatePipelines(
+            testMetadataProvider(), new Variables(), model, new Date(), null);
 
     assertEquals(1, pipelines.size());
     TableInputMeta sourceMeta =
         (TableInputMeta)
-            pipelines
-                .get(0)
-                .getTransforms()
-                .stream()
+            pipelines.get(0).getTransforms().stream()
                 .filter(t -> t.getName().startsWith("source"))
                 .findFirst()
                 .orElseThrow()
@@ -79,7 +75,8 @@ class DvLinkUpdatePipelineTest {
 
     DvLink link = model.findLink("lnk_customer_invoice");
     List<PipelineMeta> pipelines =
-        link.generateUpdatePipelines(testMetadataProvider(), new Variables(), model, new Date(), null);
+        link.generateUpdatePipelines(
+            testMetadataProvider(), new Variables(), model, new Date(), null);
 
     assertEquals(1, pipelines.size());
     PipelineMeta pipeline = pipelines.get(0);
@@ -162,8 +159,7 @@ class DvLinkUpdatePipelineTest {
 
     DvHub hubInvoice = new DvHub("hub_invoice");
     hubInvoice.setHashKeyFieldName("invoice_hk");
-    hubInvoice.setBusinessKeys(
-        List.of(businessKey("NUM_0"), businessKey("LIN_0")));
+    hubInvoice.setBusinessKeys(List.of(businessKey("NUM_0"), businessKey("LIN_0")));
 
     DvLink link = new DvLink("lnk_customer_invoice");
     link.setLinkHashKeyFieldName("lnk_customer_invoice_hk");
@@ -180,14 +176,11 @@ class DvLinkUpdatePipelineTest {
         .getSourceBusinessKeyFields()
         .addAll(
             List.of(
-                new BusinessKeySource("NUM_0", "NUM_0"),
-                new BusinessKeySource("LIN_0", "LIN_0")));
+                new BusinessKeySource("NUM_0", "NUM_0"), new BusinessKeySource("LIN_0", "LIN_0")));
 
     DvLink.HubSourceKeyField customerKeys = new DvLink.HubSourceKeyField();
     customerKeys.setHubName("hub_customer");
-    customerKeys
-        .getSourceBusinessKeyFields()
-        .add(new BusinessKeySource("BPCNUM_0", "BPCINV_0"));
+    customerKeys.getSourceBusinessKeyFields().add(new BusinessKeySource("BPCNUM_0", "BPCINV_0"));
 
     linkSource.getHubSourceKeyFields().addAll(List.of(invoiceKeys, customerKeys));
     link.getLinkHubSources().add(linkSource);

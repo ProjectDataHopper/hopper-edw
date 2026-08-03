@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,7 +46,9 @@ class RemediationDdlWorkflowSupportTest {
         RemediationDdlWorkflowSupport.formatSqlScript(
             List.of(
                 new ConnectionDdl(
-                    "edw", List.of("ALTER TABLE sat_customer_demo ALTER COLUMN email TYPE varchar(100)"))));
+                    "edw",
+                    List.of(
+                        "ALTER TABLE sat_customer_demo ALTER COLUMN email TYPE varchar(100)"))));
     assertTrue(script.contains("Connection: edw"));
     assertTrue(script.contains("ALTER TABLE sat_customer_demo"));
   }
@@ -95,7 +95,8 @@ class RemediationDdlWorkflowSupportTest {
                 new RemediationDdlWorkflowSupport.TableDdl(
                     "edw",
                     "sat_customer_demo",
-                    List.of("ALTER TABLE sat_customer_demo ALTER COLUMN email TYPE varchar(100)"))));
+                    List.of(
+                        "ALTER TABLE sat_customer_demo ALTER COLUMN email TYPE varchar(100)"))));
     assertTrue(script.contains("Table: sat_customer_demo"));
     assertTrue(script.contains("one SQL action per target table"));
   }
@@ -113,7 +114,14 @@ class RemediationDdlWorkflowSupportTest {
   void generatedArtifacts_workflowWrittenRequiresNoError() {
     RemediationDdlWorkflowSupport.GeneratedArtifacts ok =
         new RemediationDdlWorkflowSupport.GeneratedArtifacts(
-            "/tmp", "base", "/tmp/base.sql", "/tmp/base.hwf", 2, List.of("edw"), List.of("sat_x"), null);
+            "/tmp",
+            "base",
+            "/tmp/base.sql",
+            "/tmp/base.hwf",
+            2,
+            List.of("edw"),
+            List.of("sat_x"),
+            null);
     assertTrue(ok.workflowWritten());
 
     RemediationDdlWorkflowSupport.GeneratedArtifacts failedWorkflow =

@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.sourcemodel.generate;
 
 import java.util.ArrayList;
@@ -58,7 +57,8 @@ public final class SourceQueryRelationSupport {
     return new LinkedHashSet<>(SourceQueryGenerationSupport.participantTableNames(query));
   }
 
-  public static Set<String> inScopeFromDrivingAndJoins(String drivingTable, List<SourceQueryJoin> joins) {
+  public static Set<String> inScopeFromDrivingAndJoins(
+      String drivingTable, List<SourceQueryJoin> joins) {
     Set<String> inScope = new LinkedHashSet<>();
     if (!Utils.isEmpty(drivingTable)) {
       inScope.add(drivingTable.trim());

@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -211,7 +210,8 @@ class DvLinkSatelliteDependentChildKeyPipelineTest {
     for (String name : List.of("order_id", "product_id", "line_number", "quantity", "unit_price")) {
       SourceField field = new SourceField();
       field.setName(name);
-      field.setSourceDataType(name.contains("line") || name.equals("quantity") ? "Integer" : "String");
+      field.setSourceDataType(
+          name.contains("line") || name.equals("quantity") ? "Integer" : "String");
       field.setHopType(
           name.contains("line") || name.equals("quantity")
               ? IValueMeta.TYPE_INTEGER

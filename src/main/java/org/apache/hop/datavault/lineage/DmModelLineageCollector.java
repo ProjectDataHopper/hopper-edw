@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.lineage;
 
 import java.util.Date;
@@ -92,10 +91,7 @@ public final class DmModelLineageCollector {
   }
 
   private static TableLineage collectDimension(
-      DmDimension dimension,
-      DimensionalModel model,
-      IVariables variables,
-      String targetDb) {
+      DmDimension dimension, DimensionalModel model, IVariables variables, String targetDb) {
     TableLineage lineage =
         baseTable(dimension, model, variables, targetDb, DmTableType.DIMENSION.name());
     addNamingReasons(lineage, dimension);
@@ -178,8 +174,7 @@ public final class DmModelLineageCollector {
     addNamingReasons(lineage, alias);
 
     DmDimension target =
-        DmDimensionResolutionSupport.resolveAliasTarget(
-            model, alias, variables, metadataProvider);
+        DmDimensionResolutionSupport.resolveAliasTarget(model, alias, variables, metadataProvider);
     String referencedName = resolve(alias.getReferencedDimensionName(), variables);
     String externalModel = resolve(alias.getReferencedModelFilename(), variables);
 
@@ -304,11 +299,9 @@ public final class DmModelLineageCollector {
                 !Utils.isEmpty(resolved.getTableName())
                     ? resolve(resolved.getTableName(), variables)
                     : resolve(resolved.getName(), variables);
-            if (!Utils.isEmpty(resolvedPhysical)
-                && !resolvedPhysical.equalsIgnoreCase(dim)) {
+            if (!Utils.isEmpty(resolvedPhysical) && !resolvedPhysical.equalsIgnoreCase(dim)) {
               dimRef.setPhysicalRef(resolvedPhysical);
-            } else if (resolved.getName() != null
-                && !resolved.getName().equalsIgnoreCase(dim)) {
+            } else if (resolved.getName() != null && !resolved.getName().equalsIgnoreCase(dim)) {
               dimRef.setPhysicalRef(resolve(resolved.getName(), variables));
             }
           }
@@ -321,8 +314,7 @@ public final class DmModelLineageCollector {
       contribution.setTransform(
           fk.equals(sourceField) ? FieldTransform.IDENTITY : FieldTransform.RENAME);
       contribution.addReason(
-          LineageReasonFactory.dmRoleMapping(
-              fk, "dimension role " + nvl(dim), sourceField));
+          LineageReasonFactory.dmRoleMapping(fk, "dimension role " + nvl(dim), sourceField));
       field.addContribution(contribution);
       lineage.addField(field);
     }
@@ -465,8 +457,7 @@ public final class DmModelLineageCollector {
     TableLineage lineage = new TableLineage();
     lineage.setLayer(LineageLayer.DM);
     lineage.setLogicalName(table.getName());
-    String physical =
-        !Utils.isEmpty(table.getTableName()) ? table.getTableName() : table.getName();
+    String physical = !Utils.isEmpty(table.getTableName()) ? table.getTableName() : table.getName();
     lineage.setPhysicalTableName(physical);
     lineage.setTableType(tableType);
     lineage.setModelName(model.getName());

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.dimensional;
 
 import java.util.ArrayList;
@@ -67,8 +65,7 @@ public final class DimensionalModelSvgPainter {
       painter.setShowingNavigationView(false);
       painter.setShowEmptyModelHint(false);
       painter.setDrawNotes(renderOptions.isIncludeNotes());
-      painter.setMaximum(
-          ModelBoundsSupport.getMaximum(model, renderOptions.isIncludeNotes()));
+      painter.setMaximum(ModelBoundsSupport.getMaximum(model, renderOptions.isIncludeNotes()));
       painter.drawDimensionalModel(metadataProvider);
 
       return graphics2D.toXml();

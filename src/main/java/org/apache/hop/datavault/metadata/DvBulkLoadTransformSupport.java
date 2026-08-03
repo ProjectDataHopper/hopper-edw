@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.lang.reflect.Constructor;
@@ -166,7 +164,8 @@ public final class DvBulkLoadTransformSupport {
   private static Object createMySqlField(ITransformMeta meta, String streamName, String tableName)
       throws HopException {
     try {
-      Class<?> fieldClass = Class.forName(MYSQL_FIELD_CLASS, true, meta.getClass().getClassLoader());
+      Class<?> fieldClass =
+          Class.forName(MYSQL_FIELD_CLASS, true, meta.getClass().getClassLoader());
       Object field = fieldClass.getDeclaredConstructor().newInstance();
       invokeObject(field, "setFieldStream", String.class, streamName);
       invokeObject(field, "setFieldTable", String.class, tableName);
@@ -203,7 +202,11 @@ public final class DvBulkLoadTransformSupport {
     invoke(meta, "setConnection", String.class, ctx.targetDbName);
     invoke(meta, "setTargetTable", String.class, ctx.targetTableName);
     invoke(meta, "setTargetSchema", String.class, "");
-    invoke(meta, "setWorkDirectory", String.class, ctx.config.resolveBulkLoadStagingFolder(ctx.variables, ctx.modelName));
+    invoke(
+        meta,
+        "setWorkDirectory",
+        String.class,
+        ctx.config.resolveBulkLoadStagingFolder(ctx.variables, ctx.modelName));
     invoke(meta, "setRemoveFiles", boolean.class, true);
     invoke(meta, "setTrimWhitespace", boolean.class, false);
     invoke(meta, "setLocationTypeById", int.class, SNOWFLAKE_LOCATION_TYPE_INTERNAL_STAGE);
@@ -221,8 +224,16 @@ public final class DvBulkLoadTransformSupport {
     invoke(meta, "setDbConnectionName", String.class, ctx.targetDbName);
     invoke(meta, "setTableName", String.class, ctx.targetTableName);
     invoke(meta, "setSchemaName", String.class, "");
-    invoke(meta, "setFieldSeparator", String.class, ctx.config.resolveBulkLoadDelimiter(ctx.variables));
-    invoke(meta, "setFieldEnclosure", String.class, ctx.config.resolveBulkLoadEnclosure(ctx.variables));
+    invoke(
+        meta,
+        "setFieldSeparator",
+        String.class,
+        ctx.config.resolveBulkLoadDelimiter(ctx.variables));
+    invoke(
+        meta,
+        "setFieldEnclosure",
+        String.class,
+        ctx.config.resolveBulkLoadEnclosure(ctx.variables));
     invoke(meta, "setEncoding", String.class, ctx.config.resolveBulkLoadEncoding(ctx.variables));
     invoke(meta, "setTruncate", boolean.class, false);
     setMonetDbFields(meta, targetLayout, excludeFields);
@@ -260,7 +271,11 @@ public final class DvBulkLoadTransformSupport {
     invoke(meta, "setLoginUser", String.class, ctx.targetDatabaseMeta.getUsername());
     invoke(meta, "setLoginPassword", String.class, ctx.targetDatabaseMeta.getPassword());
     invoke(meta, "setFormat", String.class, "csv");
-    invoke(meta, "setColumnDelimiter", String.class, ctx.config.resolveBulkLoadDelimiter(ctx.variables));
+    invoke(
+        meta,
+        "setColumnDelimiter",
+        String.class,
+        ctx.config.resolveBulkLoadDelimiter(ctx.variables));
     invoke(meta, "setLineDelimiter", String.class, "\\n");
     invoke(meta, "setHeaders", List.class, List.of());
   }
@@ -349,8 +364,8 @@ public final class DvBulkLoadTransformSupport {
     }
   }
 
-  private static Object createSnowflakeField(ITransformMeta meta, String tableField, String streamField)
-      throws HopException {
+  private static Object createSnowflakeField(
+      ITransformMeta meta, String tableField, String streamField) throws HopException {
     try {
       Class<?> fieldClass =
           Class.forName(SNOWFLAKE_FIELD_CLASS, true, meta.getClass().getClassLoader());
@@ -361,20 +376,21 @@ public final class DvBulkLoadTransformSupport {
     }
   }
 
-  private static Object createMonetDbField(ITransformMeta meta, String tableField, String streamField)
-      throws HopException {
+  private static Object createMonetDbField(
+      ITransformMeta meta, String tableField, String streamField) throws HopException {
     try {
       Class<?> fieldClass =
           Class.forName(MONETDB_FIELD_CLASS, true, meta.getClass().getClassLoader());
-      Constructor<?> constructor = fieldClass.getConstructor(String.class, String.class, boolean.class);
+      Constructor<?> constructor =
+          fieldClass.getConstructor(String.class, String.class, boolean.class);
       return constructor.newInstance(streamField, tableField, true);
     } catch (Exception e) {
       throw new HopException("Unable to create MonetDB bulk loader field mapping", e);
     }
   }
 
-  private static Object createVerticaField(ITransformMeta meta, String tableField, String streamField)
-      throws HopException {
+  private static Object createVerticaField(
+      ITransformMeta meta, String tableField, String streamField) throws HopException {
     try {
       Class<?> fieldClass =
           Class.forName(VERTICA_FIELD_CLASS, true, meta.getClass().getClassLoader());
@@ -490,8 +506,7 @@ public final class DvBulkLoadTransformSupport {
       Method method = target.getClass().getMethod(methodName, argType);
       method.invoke(target, arg);
     } catch (Exception e) {
-      throw new HopException(
-          "Unable to configure bulk loader transform (" + methodName + ")", e);
+      throw new HopException("Unable to configure bulk loader transform (" + methodName + ")", e);
     }
   }
 }

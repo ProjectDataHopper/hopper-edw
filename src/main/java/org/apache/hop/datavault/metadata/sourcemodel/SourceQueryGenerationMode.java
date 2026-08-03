@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.sourcemodel;
 
 import lombok.Getter;
@@ -30,11 +29,16 @@ import org.apache.hop.metadata.api.IEnumHasCodeAndDescription;
  */
 @Getter
 public enum SourceQueryGenerationMode implements IEnumHasCodeAndDescription {
-  AUTO("AUTO", BaseMessages.getString(SourceQueryGenerationMode.class, "SourceQueryGenerationMode.Auto")),
-  SQL("SQL", BaseMessages.getString(SourceQueryGenerationMode.class, "SourceQueryGenerationMode.Sql")),
+  AUTO(
+      "AUTO",
+      BaseMessages.getString(SourceQueryGenerationMode.class, "SourceQueryGenerationMode.Auto")),
+  SQL(
+      "SQL",
+      BaseMessages.getString(SourceQueryGenerationMode.class, "SourceQueryGenerationMode.Sql")),
   PIPELINE(
       "PIPELINE",
-      BaseMessages.getString(SourceQueryGenerationMode.class, "SourceQueryGenerationMode.Pipeline"));
+      BaseMessages.getString(
+          SourceQueryGenerationMode.class, "SourceQueryGenerationMode.Pipeline"));
 
   private final String code;
   private final String description;

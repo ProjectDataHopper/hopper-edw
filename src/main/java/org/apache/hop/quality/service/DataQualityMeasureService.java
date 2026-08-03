@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.quality.service;
 
 import java.util.ArrayList;
@@ -183,9 +181,7 @@ public final class DataQualityMeasureService {
             .lifecycle(lifecycle)
             .build();
     for (DataQualityRule rule : rules) {
-      if (rule != null
-          && rule.isEnabled()
-          && rule.getType() == DataQualityRuleType.SQL_ASSERTION) {
+      if (rule != null && rule.isEnabled() && rule.getType() == DataQualityRuleType.SQL_ASSERTION) {
         report.addInfraError(
             "SQL_ASSERTION rule '"
                 + (rule.getName() != null && !rule.getName().isBlank()
@@ -243,7 +239,8 @@ public final class DataQualityMeasureService {
               + subjectKey);
     }
 
-    // Fallback: still SQL for DB when SAMPLE requested but pushdown preferred for accuracy on counts
+    // Fallback: still SQL for DB when SAMPLE requested but pushdown preferred for accuracy on
+    // counts
     if (hasDb) {
       log.logBasic(
           "Using SQL pushdown for database subject "

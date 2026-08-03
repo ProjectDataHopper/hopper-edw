@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.businessvault;
 
 import java.util.HashMap;
@@ -27,8 +25,8 @@ import org.apache.hop.core.Const;
 import org.apache.hop.core.gui.AreaOwner;
 import org.apache.hop.core.gui.AreaOwner.AreaType;
 import org.apache.hop.core.gui.IGc;
-import org.apache.hop.core.gui.IGc.EFont;
 import org.apache.hop.core.gui.IGc.EColor;
+import org.apache.hop.core.gui.IGc.EFont;
 import org.apache.hop.core.gui.IGc.ELineStyle;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
@@ -38,12 +36,12 @@ import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeome
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry.Bounds;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphTableCardLayout;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphTableNameHitArea;
-
 import org.apache.hop.datavault.hopgui.file.vault.BasePainter;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.datavault.metadata.IDvTable;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultDerivativeSupport;
+import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
 import org.apache.hop.datavault.metadata.businessvault.BvBusinessTable;
 import org.apache.hop.datavault.metadata.businessvault.BvBvTableReference;
 import org.apache.hop.datavault.metadata.businessvault.BvDerivativeRef;
@@ -52,7 +50,6 @@ import org.apache.hop.datavault.metadata.businessvault.BvSqlRef;
 import org.apache.hop.datavault.metadata.businessvault.BvSqlResolvedKind;
 import org.apache.hop.datavault.metadata.businessvault.BvTableBase;
 import org.apache.hop.datavault.metadata.businessvault.BvTableType;
-import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
 import org.apache.hop.datavault.metadata.businessvault.IBvTable;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
@@ -217,13 +214,9 @@ public class BusinessVaultModelPainter extends BasePainter {
         continue;
       }
       int w =
-          Math.max(
-              minSize,
-              (int) Math.ceil(Math.max(1, reference.getDrawnBoxWidth()) * scaleX));
+          Math.max(minSize, (int) Math.ceil(Math.max(1, reference.getDrawnBoxWidth()) * scaleX));
       int h =
-          Math.max(
-              minSize,
-              (int) Math.ceil(Math.max(1, reference.getDrawnBoxHeight()) * scaleY));
+          Math.max(minSize, (int) Math.ceil(Math.max(1, reference.getDrawnBoxHeight()) * scaleY));
       int x = (int) (graphX + loc.x * scaleX);
       int y = (int) (graphY + loc.y * scaleY);
       gc.setBackground(EColor.LIGHTGRAY);
@@ -237,13 +230,9 @@ public class BusinessVaultModelPainter extends BasePainter {
       }
       Point loc = reference.getLocation();
       int w =
-          Math.max(
-              minSize,
-              (int) Math.ceil(Math.max(1, reference.getDrawnBoxWidth()) * scaleX));
+          Math.max(minSize, (int) Math.ceil(Math.max(1, reference.getDrawnBoxWidth()) * scaleX));
       int h =
-          Math.max(
-              minSize,
-              (int) Math.ceil(Math.max(1, reference.getDrawnBoxHeight()) * scaleY));
+          Math.max(minSize, (int) Math.ceil(Math.max(1, reference.getDrawnBoxHeight()) * scaleY));
       int x = (int) (graphX + loc.x * scaleX);
       int y = (int) (graphY + loc.y * scaleY);
       gc.setBackground(EColor.BACKGROUND);
@@ -311,8 +300,7 @@ public class BusinessVaultModelPainter extends BasePainter {
         if (derivative == null || Utils.isEmpty(derivative.getDvTableName())) {
           continue;
         }
-        BvDvTableReference target =
-            dvRefByName.get(derivative.getDvTableName().toLowerCase());
+        BvDvTableReference target = dvRefByName.get(derivative.getDvTableName().toLowerCase());
         if (target == null || target.getLocation() == null) {
           continue;
         }
@@ -328,8 +316,8 @@ public class BusinessVaultModelPainter extends BasePainter {
   }
 
   /**
-   * Draws edges from a SQL business table to its {@code ref()} targets: same-model BV tables, canvas
-   * BV references (external .hbv), and canvas DV references when SQL resolved a DV table.
+   * Draws edges from a SQL business table to its {@code ref()} targets: same-model BV tables,
+   * canvas BV references (external .hbv), and canvas DV references when SQL resolved a DV table.
    */
   private void drawSqlRefConnections(
       BvBusinessTable businessTable,
@@ -555,8 +543,7 @@ public class BusinessVaultModelPainter extends BasePainter {
 
   private Point calculateDvReferenceBoxSize(BvDvTableReference reference) {
     String name = reference.getDvTableName() != null ? reference.getDvTableName() : "?";
-    String typeLabel =
-        reference.getDvTableType() != null ? reference.getDvTableType().name() : "?";
+    String typeLabel = reference.getDvTableType() != null ? reference.getDvTableType().name() : "?";
     ModelGraphTableCardLayout.BoxSize boxSize =
         ModelGraphTableCardLayout.computeBoxSize(
             gc, name, resolveDvReferenceSecondaryLine(reference), typeLabel, null);
@@ -617,10 +604,8 @@ public class BusinessVaultModelPainter extends BasePainter {
       gc.setForeground(EColor.DARKGRAY);
       gc.setLineStyle(ELineStyle.DOT);
       gc.setLineWidth(reference.isSelected() ? 2 : 1);
-      gc.fillRoundRectangle(
-          x, y, boxWidth, boxHeight, CORNER_RADIUS_5, CORNER_RADIUS_5);
-      gc.drawRoundRectangle(
-          x, y, boxWidth, boxHeight, CORNER_RADIUS_5, CORNER_RADIUS_5);
+      gc.fillRoundRectangle(x, y, boxWidth, boxHeight, CORNER_RADIUS_5, CORNER_RADIUS_5);
+      gc.drawRoundRectangle(x, y, boxWidth, boxHeight, CORNER_RADIUS_5, CORNER_RADIUS_5);
       gc.setLineStyle(ELineStyle.SOLID);
       gc.setLineWidth(1);
 
@@ -632,22 +617,14 @@ public class BusinessVaultModelPainter extends BasePainter {
 
       String name = reference.getDvTableName();
       Point nameExtent =
-          ModelGraphTableCardLayout.drawName(
-              gc, name, x, y, name.equals(mouseOverDvReferenceName));
+          ModelGraphTableCardLayout.drawName(gc, name, x, y, name.equals(mouseOverDvReferenceName));
       ModelGraphTableCardLayout.drawSecondaryLine(
           gc, resolveDvReferenceSecondaryLine(reference), x, y, nameExtent);
 
       if (areaOwners != null) {
         areaOwners.add(
             new AreaOwner(
-                AreaType.TRANSFORM_ICON,
-                x,
-                y,
-                boxWidth,
-                boxHeight,
-                offset,
-                reference,
-                name));
+                AreaType.TRANSFORM_ICON, x, y, boxWidth, boxHeight, offset, reference, name));
         int nameX = ModelGraphTableCardLayout.nameX(x);
         int nameY = ModelGraphTableCardLayout.nameY(y);
         ModelGraphTableNameHitArea.Bounds nameHit =
@@ -746,22 +723,14 @@ public class BusinessVaultModelPainter extends BasePainter {
 
       String name = reference.getBvTableName();
       Point nameExtent =
-          ModelGraphTableCardLayout.drawName(
-              gc, name, x, y, name.equals(mouseOverBvReferenceName));
+          ModelGraphTableCardLayout.drawName(gc, name, x, y, name.equals(mouseOverBvReferenceName));
       ModelGraphTableCardLayout.drawSecondaryLine(
           gc, resolveBvReferenceSecondaryLine(reference), x, y, nameExtent);
 
       if (areaOwners != null) {
         areaOwners.add(
             new AreaOwner(
-                AreaType.TRANSFORM_ICON,
-                x,
-                y,
-                boxWidth,
-                boxHeight,
-                offset,
-                reference,
-                name));
+                AreaType.TRANSFORM_ICON, x, y, boxWidth, boxHeight, offset, reference, name));
         int nameX = ModelGraphTableCardLayout.nameX(x);
         int nameY = ModelGraphTableCardLayout.nameY(y);
         ModelGraphTableNameHitArea.Bounds nameHit =
@@ -821,10 +790,7 @@ public class BusinessVaultModelPainter extends BasePainter {
       gc.setFont(EFont.SMALL);
       String typeLabel = base.getTableType().name();
       if (base instanceof BvBusinessTable businessTable) {
-        typeLabel =
-            typeLabel
-                + " / "
-                + businessTable.getMaterializationOrDefault().getCode();
+        typeLabel = typeLabel + " / " + businessTable.getMaterializationOrDefault().getCode();
       }
       gc.drawText(typeLabel, x + 8, y + 28, true);
       drawDerivativeReferences(base, x, y);
@@ -915,9 +881,7 @@ public class BusinessVaultModelPainter extends BasePainter {
       }
       String derLabel =
           derivative.getDvTableType() != null ? derivative.getDvTableType().name() : "?";
-      width =
-          Math.max(
-              width, gc.textExtent(derLabel + ": " + derivative.getDvTableName()).x + 16);
+      width = Math.max(width, gc.textExtent(derLabel + ": " + derivative.getDvTableName()).x + 16);
     }
     if (base instanceof BvBusinessTable businessTable) {
       for (BvSqlRef ref : businessTable.getSqlRefs()) {
@@ -945,8 +909,7 @@ public class BusinessVaultModelPainter extends BasePainter {
       }
     }
     int lineHeight = derivativeLineHeight();
-    return Math.max(
-        60, DERIVATIVES_TOP + refCount * lineHeight + DERIVATIVES_BOTTOM_PADDING);
+    return Math.max(60, DERIVATIVES_TOP + refCount * lineHeight + DERIVATIVES_BOTTOM_PADDING);
   }
 
   private static int countDerivatives(BvTableBase base) {

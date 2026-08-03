@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.transform.mergerowsplus;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.exception.HopRowException;
-import org.apache.hop.core.exception.HopTransformException;
 import org.apache.hop.core.exception.HopValueException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.RowMeta;
@@ -55,7 +52,8 @@ class MergeRowsPlusLogicTest {
     int[] valueNrs = new int[] {aligned.indexOfValue("name")};
 
     assertEquals(0, aligned.compare(refRow, cmpRow, keyNrs));
-    assertEquals(MergeRowsPlus.VALUE_CHANGED, flagForRows(aligned, refRow, cmpRow, keyNrs, valueNrs));
+    assertEquals(
+        MergeRowsPlus.VALUE_CHANGED, flagForRows(aligned, refRow, cmpRow, keyNrs, valueNrs));
   }
 
   @Test
@@ -97,7 +95,8 @@ class MergeRowsPlusLogicTest {
     Object[] refLater = mapping.mapRow(0, new Object[] {"2", "Bob"});
     Object[] cmpOnly = mapping.mapRow(1, new Object[] {"1", "Alice"});
 
-    assertEquals(MergeRowsPlus.VALUE_NEW, flagForRows(aligned, refLater, cmpOnly, keyNrs, valueNrs));
+    assertEquals(
+        MergeRowsPlus.VALUE_NEW, flagForRows(aligned, refLater, cmpOnly, keyNrs, valueNrs));
   }
 
   @Test
@@ -110,11 +109,7 @@ class MergeRowsPlusLogicTest {
   }
 
   private static String flagForRows(
-      IRowMeta aligned,
-      Object[] referenceRow,
-      Object[] compareRow,
-      int[] keyNrs,
-      int[] valueNrs)
+      IRowMeta aligned, Object[] referenceRow, Object[] compareRow, int[] keyNrs, int[] valueNrs)
       throws HopValueException {
     if (referenceRow == null && compareRow != null) {
       return MergeRowsPlus.VALUE_NEW;

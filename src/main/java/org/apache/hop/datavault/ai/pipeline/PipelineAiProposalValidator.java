@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai.pipeline;
 
 import java.util.ArrayList;
@@ -28,7 +26,6 @@ import org.apache.hop.core.util.Utils;
 import org.apache.hop.datavault.ai.HopAiProposal;
 import org.apache.hop.datavault.ai.HopAiProposalParamSupport;
 import org.apache.hop.datavault.ai.HopAiProposalValidation;
-import org.apache.hop.pipeline.PipelineHopMeta;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
 
@@ -83,7 +80,8 @@ public final class PipelineAiProposalValidator {
     if (Utils.isEmpty(name)) {
       return blocked(proposal, "name is required");
     }
-    if (PluginRegistry.getInstance().findPluginWithId(TransformPluginType.class, pluginId) == null) {
+    if (PluginRegistry.getInstance().findPluginWithId(TransformPluginType.class, pluginId)
+        == null) {
       return blocked(proposal, "Unknown transform plugin: " + pluginId);
     }
     if (pipelineMeta.findTransform(name) != null || reservedNames.contains(name.trim())) {
@@ -122,7 +120,8 @@ public final class PipelineAiProposalValidator {
       return blocked(proposal, "Transform not found: " + transformName);
     }
     if (!transformName.trim().equals(newName.trim())
-        && (pipelineMeta.findTransform(newName) != null || reservedNames.contains(newName.trim()))) {
+        && (pipelineMeta.findTransform(newName) != null
+            || reservedNames.contains(newName.trim()))) {
       return blocked(proposal, "Transform name already exists: " + newName);
     }
     reservedNames.add(newName.trim());

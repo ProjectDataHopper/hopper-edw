@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.transform.sortedschemamerge;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -59,10 +57,8 @@ class SortedSchemaMergeLogicTest {
     assertTrue(mapping.getOutputRowMeta().indexOfValue("attr_a") >= 0);
     assertTrue(mapping.getOutputRowMeta().indexOfValue("attr_b") >= 0);
 
-    Object[] mappedA =
-        mapping.mapRow(0, new Object[] {"hk-1", "value-a"});
-    Object[] mappedB =
-        mapping.mapRow(1, new Object[] {"hk-1", "value-b"});
+    Object[] mappedA = mapping.mapRow(0, new Object[] {"hk-1", "value-a"});
+    Object[] mappedB = mapping.mapRow(1, new Object[] {"hk-1", "value-b"});
 
     assertEquals("hk-1", mappedA[mapping.getOutputRowMeta().indexOfValue("hub_hk")]);
     assertEquals("value-a", mappedA[mapping.getOutputRowMeta().indexOfValue("attr_a")]);
@@ -86,7 +82,10 @@ class SortedSchemaMergeLogicTest {
 
     assertEquals(
         ValueMetaString.TYPE_STRING,
-        mapping.getOutputRowMeta().getValueMeta(mapping.getOutputRowMeta().indexOfValue("shared")).getType());
+        mapping
+            .getOutputRowMeta()
+            .getValueMeta(mapping.getOutputRowMeta().indexOfValue("shared"))
+            .getType());
   }
 
   @Test
@@ -109,26 +108,24 @@ class SortedSchemaMergeLogicTest {
     IRowMeta streamA = row("hub_hk", "load_dts");
     IRowMeta streamB = row("hub_hk", "load_dts");
 
-    List<SortedSchemaMergeSortKey> sortKeys = SortedSchemaMergeMetaFactory.sortKeys("hub_hk", "load_dts");
+    List<SortedSchemaMergeSortKey> sortKeys =
+        SortedSchemaMergeMetaFactory.sortKeys("hub_hk", "load_dts");
     int[][] sortKeyIndices =
-        SortedSchemaMergeLogic.resolveSortKeyIndices(
-            new IRowMeta[] {streamA, streamB}, sortKeys);
+        SortedSchemaMergeLogic.resolveSortKeyIndices(new IRowMeta[] {streamA, streamB}, sortKeys);
 
     SortedSchemaMergeRow left =
         new SortedSchemaMergeRow(0, null, streamA, new Object[] {"hk-a", "2024-01-01"});
     SortedSchemaMergeRow right =
         new SortedSchemaMergeRow(1, null, streamB, new Object[] {"hk-b", "2024-01-02"});
 
-    assertTrue(
-        SortedSchemaMergeLogic.compareRows(left, right, sortKeyIndices, sortKeys) < 0);
+    assertTrue(SortedSchemaMergeLogic.compareRows(left, right, sortKeyIndices, sortKeys) < 0);
 
     SortedSchemaMergeRow tieLeft =
         new SortedSchemaMergeRow(0, null, streamA, new Object[] {"hk-same", "2024-01-01"});
     SortedSchemaMergeRow tieRight =
         new SortedSchemaMergeRow(1, null, streamB, new Object[] {"hk-same", "2024-01-01"});
 
-    assertTrue(
-        SortedSchemaMergeLogic.compareRows(tieLeft, tieRight, sortKeyIndices, sortKeys) < 0);
+    assertTrue(SortedSchemaMergeLogic.compareRows(tieLeft, tieRight, sortKeyIndices, sortKeys) < 0);
   }
 
   @Test
@@ -139,13 +136,10 @@ class SortedSchemaMergeLogicTest {
     int[][] sortKeyIndices =
         SortedSchemaMergeLogic.resolveSortKeyIndices(new IRowMeta[] {layout}, sortKeys);
 
-    SortedSchemaMergeRow low =
-        new SortedSchemaMergeRow(0, null, layout, new Object[] {1L});
-    SortedSchemaMergeRow high =
-        new SortedSchemaMergeRow(0, null, layout, new Object[] {2L});
+    SortedSchemaMergeRow low = new SortedSchemaMergeRow(0, null, layout, new Object[] {1L});
+    SortedSchemaMergeRow high = new SortedSchemaMergeRow(0, null, layout, new Object[] {2L});
 
-    assertTrue(
-        SortedSchemaMergeLogic.compareRows(high, low, sortKeyIndices, sortKeys) < 0);
+    assertTrue(SortedSchemaMergeLogic.compareRows(high, low, sortKeyIndices, sortKeys) < 0);
   }
 
   private static IRowMeta row(String... names) {

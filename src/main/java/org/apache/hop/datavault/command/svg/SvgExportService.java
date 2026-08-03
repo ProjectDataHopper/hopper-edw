@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.command.svg;
 
 import java.io.OutputStream;
@@ -28,18 +26,18 @@ import org.apache.hop.core.logging.ILogChannel;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
 import org.apache.hop.core.xml.XmlHandler;
+import org.apache.hop.datavault.executionmap.ExecutionMapPersistence;
 import org.apache.hop.datavault.hopgui.file.businessvault.BusinessVaultModelSvgPainter;
 import org.apache.hop.datavault.hopgui.file.businessvault.HopBusinessVaultFileType;
 import org.apache.hop.datavault.hopgui.file.dimensional.DimensionalModelSvgPainter;
 import org.apache.hop.datavault.hopgui.file.dimensional.HopDimensionalFileType;
-import org.apache.hop.datavault.executionmap.ExecutionMapPersistence;
 import org.apache.hop.datavault.hopgui.file.executionmap.ExecutionMapSvgPainter;
 import org.apache.hop.datavault.hopgui.file.vault.DataVaultModelSvgPainter;
 import org.apache.hop.datavault.hopgui.file.vault.HopVaultFileType;
-import org.apache.hop.datavault.metadata.executionmap.ExecutionMapDocument;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
+import org.apache.hop.datavault.metadata.executionmap.ExecutionMapDocument;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.apache.hop.pipeline.PipelineMeta;
@@ -112,17 +110,20 @@ public final class SvgExportService {
     }
     SvgRenderOptions renderOptions = options != null ? options : SvgRenderOptions.defaults();
     return switch (extension) {
-      case EXT_HPL -> generatePipelineSvg(resolvedFilename, renderOptions, variables, metadataProvider);
-      case EXT_HWF -> generateWorkflowSvg(resolvedFilename, renderOptions, variables, metadataProvider);
-      case EXT_HDV -> generateDataVaultModelSvg(resolvedFilename, renderOptions, variables, metadataProvider);
+      case EXT_HPL ->
+          generatePipelineSvg(resolvedFilename, renderOptions, variables, metadataProvider);
+      case EXT_HWF ->
+          generateWorkflowSvg(resolvedFilename, renderOptions, variables, metadataProvider);
+      case EXT_HDV ->
+          generateDataVaultModelSvg(resolvedFilename, renderOptions, variables, metadataProvider);
       case EXT_HBV ->
-          generateBusinessVaultModelSvg(resolvedFilename, renderOptions, variables, metadataProvider);
+          generateBusinessVaultModelSvg(
+              resolvedFilename, renderOptions, variables, metadataProvider);
       case EXT_HDM ->
           generateDimensionalModelSvg(resolvedFilename, renderOptions, variables, metadataProvider);
       case EXT_HEM ->
           generateExecutionMapSvg(resolvedFilename, renderOptions, variables, metadataProvider);
-      default ->
-          throw new HopException("Unsupported file extension for SVG export: " + extension);
+      default -> throw new HopException("Unsupported file extension for SVG export: " + extension);
     };
   }
 
@@ -160,7 +161,8 @@ public final class SvgExportService {
       if (!targetRoot.exists()) {
         targetRoot.createFolder();
       }
-      processFolder(sourceRoot, targetRoot, sourceRoot, recursive, options, variables, metadataProvider, log);
+      processFolder(
+          sourceRoot, targetRoot, sourceRoot, recursive, options, variables, metadataProvider, log);
     } catch (HopException e) {
       throw e;
     } catch (Exception e) {
@@ -340,8 +342,7 @@ public final class SvgExportService {
     Document document = XmlHandler.loadXmlFile(filename);
     Node rootNode = XmlHandler.getSubNode(document, HopBusinessVaultFileType.XML_TAG);
     BusinessVaultModel model = new BusinessVaultModel();
-    XmlMetadataUtil.deSerializeFromXml(
-        rootNode, BusinessVaultModel.class, model, metadataProvider);
+    XmlMetadataUtil.deSerializeFromXml(rootNode, BusinessVaultModel.class, model, metadataProvider);
     return model;
   }
 

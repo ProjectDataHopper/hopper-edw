@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.coaching;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,13 +46,11 @@ class CoachingMappingApplierTest {
     CoachingSourceRef sourceRef =
         CoachingSourceRef.forRecordDefinition("local-catalog", "hop/test/sources", "CRM-customer");
 
-    CoachingMappingApplier.apply(
-        adapter, sourceRef, "customer_2", new Variables(), null);
+    CoachingMappingApplier.apply(adapter, sourceRef, "customer_2", new Variables(), null);
 
     assertEquals("CRM-customer", satellite.getRecordSourceName());
 
-    var targets =
-        adapter.resolveTargetsForSource(sourceRef, new Variables(), null);
+    var targets = adapter.resolveTargetsForSource(sourceRef, new Variables(), null);
     assertEquals(1, targets.size());
     assertEquals("customer_2", targets.getFirst().getTableName());
     assertEquals(DvTableType.SATELLITE.name(), targets.getFirst().getTableRole());

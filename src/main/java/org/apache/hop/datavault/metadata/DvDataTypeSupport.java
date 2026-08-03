@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import org.apache.hop.core.Const;
@@ -35,8 +33,8 @@ import org.apache.hop.core.util.Utils;
  * </ul>
  *
  * Only Hop names resolve via {@link ValueMetaFactory#getIdForValueMeta(String)}. When the label is
- * a SQL type, use the matching source field’s {@link SourceField#getHopType()} instead of defaulting
- * to String (which produced false type-mismatch validation errors).
+ * a SQL type, use the matching source field’s {@link SourceField#getHopType()} instead of
+ * defaulting to String (which produced false type-mismatch validation errors).
  */
 public final class DvDataTypeSupport {
 
@@ -64,8 +62,8 @@ public final class DvDataTypeSupport {
   }
 
   /**
-   * Preferred label to store on satellite attributes / hub business keys when copying from a
-   * source field: Hop type name when known, otherwise the native SQL type.
+   * Preferred label to store on satellite attributes / hub business keys when copying from a source
+   * field: Hop type name when known, otherwise the native SQL type.
    */
   public static String preferredDataTypeLabel(SourceField sourceField) {
     if (sourceField == null) {

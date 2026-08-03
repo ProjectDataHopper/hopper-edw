@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import java.io.OutputStreamWriter;
@@ -53,12 +51,12 @@ public final class RemediationDdlWorkflowSupport {
   /**
    * Default project-relative folder for generated remediation workflows and SQL scripts.
    *
-   * <p>Example: {@code ${PROJECT_HOME}/workflows/schema-remediation/apply-ddl_customer_email_20260729-153045.hwf}
+   * <p>Example: {@code
+   * ${PROJECT_HOME}/workflows/schema-remediation/apply-ddl_customer_email_20260729-153045.hwf}
    */
   public static final String DEFAULT_FOLDER = "${PROJECT_HOME}/workflows/schema-remediation";
 
-  private static final DateTimeFormatter TIMESTAMP =
-      DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
+  private static final DateTimeFormatter TIMESTAMP = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
 
   public record ConnectionDdl(String connectionName, List<String> statements) {
     public ConnectionDdl {
@@ -195,8 +193,7 @@ public final class RemediationDdlWorkflowSupport {
                 connectionDdl.statements()));
       }
     }
-    return writeSqlAndWorkflowForTables(
-        folder, baseName, tableDdls, variables, metadataProvider);
+    return writeSqlAndWorkflowForTables(folder, baseName, tableDdls, variables, metadataProvider);
   }
 
   /**
@@ -256,10 +253,7 @@ public final class RemediationDdlWorkflowSupport {
       writeTextFile(workflowFilename, xml, variables);
     } catch (Throwable t) {
       // NoClassDefFoundError (missing bundled ActionSql) is an Error, not Exception.
-      workflowError =
-          t.getMessage() != null
-              ? t.getMessage()
-              : t.getClass().getName();
+      workflowError = t.getMessage() != null ? t.getMessage() : t.getClass().getName();
       writtenWorkflow = null;
     }
 
@@ -355,9 +349,7 @@ public final class RemediationDdlWorkflowSupport {
       String connectionName,
       String tableName,
       String statement) {
-    if (statementsByTableKey == null
-        || Utils.isEmpty(connectionName)
-        || Utils.isEmpty(statement)) {
+    if (statementsByTableKey == null || Utils.isEmpty(connectionName) || Utils.isEmpty(statement)) {
       return;
     }
     statementsByTableKey

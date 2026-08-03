@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import java.util.ArrayList;
@@ -41,7 +39,9 @@ public final class DmDateDimensionTemplate {
     dimension.setDescription("Calendar date dimension");
     dimension.setScdType(DmDimensionScdType.TYPE1);
     dimension.setLocation(location != null ? location.x : 0, location != null ? location.y : 0);
-    dimension.getSourceOrDefault().setSourceSql("-- Populate dim_date from a calendar generator or staging source");
+    dimension
+        .getSourceOrDefault()
+        .setSourceSql("-- Populate dim_date from a calendar generator or staging source");
     dimension.getNaturalKeys().add(new DmNaturalKeyField("date_key"));
     addAttribute(dimension, "full_date");
     addAttribute(dimension, "day_of_week");
@@ -56,7 +56,8 @@ public final class DmDateDimensionTemplate {
     return dimension;
   }
 
-  public static DmDimensionAlias createDateAlias(String aliasName, String referencedDimensionName, Point location) {
+  public static DmDimensionAlias createDateAlias(
+      String aliasName, String referencedDimensionName, Point location) {
     DmDimensionAlias alias = new DmDimensionAlias();
     alias.setName(aliasName);
     alias.setReferencedDimensionName(referencedDimensionName);
@@ -90,7 +91,8 @@ public final class DmDateDimensionTemplate {
     return false;
   }
 
-  public static List<String> missingCommonAliases(DimensionalModel model, String referencedDimensionName) {
+  public static List<String> missingCommonAliases(
+      DimensionalModel model, String referencedDimensionName) {
     List<String> missing = new ArrayList<>();
     if (model == null || Utils.isEmpty(referencedDimensionName)) {
       return missing;

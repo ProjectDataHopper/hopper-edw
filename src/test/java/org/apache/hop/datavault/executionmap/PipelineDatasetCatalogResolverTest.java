@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -96,7 +94,8 @@ class PipelineDatasetCatalogResolverTest {
                             || node.getNodeType() == ExecutionMapNodeType.TARGET_DATASET)
                         && "Vault".equals(node.getProperty("datasetNamespace")))
             .count();
-    assertEquals(0, vaultBackedNodes, "Pipeline crawl should not create connection-backed datasets");
+    assertEquals(
+        0, vaultBackedNodes, "Pipeline crawl should not create connection-backed datasets");
 
     assertTrue(
         document.getNodesOrEmpty().stream()

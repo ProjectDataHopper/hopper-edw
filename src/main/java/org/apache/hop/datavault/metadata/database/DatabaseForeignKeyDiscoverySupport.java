@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.database;
 
 import java.sql.ResultSet;
@@ -109,7 +108,9 @@ public final class DatabaseForeignKeyDiscoverySupport {
         String pkTable = trimToNull(keys.getString("PKTABLE_NAME"));
         String fkColumn = trimToNull(keys.getString("FKCOLUMN_NAME"));
         String pkColumn = trimToNull(keys.getString("PKCOLUMN_NAME"));
-        if (Utils.isEmpty(fkTable) || Utils.isEmpty(pkTable) || Utils.isEmpty(fkColumn)
+        if (Utils.isEmpty(fkTable)
+            || Utils.isEmpty(pkTable)
+            || Utils.isEmpty(fkColumn)
             || Utils.isEmpty(pkColumn)) {
           continue;
         }

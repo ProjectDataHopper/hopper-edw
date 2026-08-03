@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.openlineage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,8 +34,8 @@ import org.apache.hop.datavault.metrics.LoadRunMetricsCatalogPublisher;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
- * Optionally attaches last-load operational facts from {@code load_pipeline_metric} onto OpenLineage
- * run facets.
+ * Optionally attaches last-load operational facts from {@code load_pipeline_metric} onto
+ * OpenLineage run facets.
  *
  * <p>Best-effort: missing tables or connections produce warnings, not hard failures.
  */

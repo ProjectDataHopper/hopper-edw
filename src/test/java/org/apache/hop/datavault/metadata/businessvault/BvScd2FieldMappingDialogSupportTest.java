@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -31,9 +29,7 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.datavault.metadata.DataVaultModel;
-import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.DvTableType;
-import org.apache.hop.datavault.metadata.SatelliteAttribute;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -146,7 +142,9 @@ class BvScd2FieldMappingDialogSupportTest {
 
   private static DataVaultModel loadCustomer360DvModel() throws Exception {
     Path dvPath =
-        Path.of("integration-tests/tests/multi-satellite-bv/customer-360.hdv").toAbsolutePath().normalize();
+        Path.of("integration-tests/tests/multi-satellite-bv/customer-360.hdv")
+            .toAbsolutePath()
+            .normalize();
     Document document = XmlHandler.loadXmlFile(dvPath.toFile());
     Node rootNode = XmlHandler.getSubNode(document, "data-vault-model");
     DataVaultModel model = new DataVaultModel();

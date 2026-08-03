@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapNode;
@@ -33,20 +31,18 @@ public final class ExecutionMapNodeIconSupport {
     return switch (nodeType) {
       case ROOT_WORKFLOW, WORKFLOW -> "ui/images/workflow.svg";
       case ROOT_PIPELINE,
-          PIPELINE,
-          PIPELINE_FILE,
-          GENERATED_PIPELINE,
-          ORCHESTRATOR_PIPELINE,
-          BULK_MASTER_WORKFLOW -> "ui/images/pipeline.svg";
+              PIPELINE,
+              PIPELINE_FILE,
+              GENERATED_PIPELINE,
+              ORCHESTRATOR_PIPELINE,
+              BULK_MASTER_WORKFLOW ->
+          "ui/images/pipeline.svg";
       case DATA_VAULT_MODEL, DV_UPDATE -> "datavault-model.svg";
       case BUSINESS_VAULT_MODEL, BV_UPDATE -> "business-vault-model.svg";
       case DIMENSIONAL_MODEL, DM_UPDATE, DM_PUBLISH -> "dimensional-model.svg";
       case WORKFLOW_ACTION -> "action.svg";
-      case PIPELINE_TRANSFORM,
-          PIPELINE_EXECUTOR,
-          WORKFLOW_EXECUTOR,
-          MAPPING,
-          META_INJECT -> "transform.svg";
+      case PIPELINE_TRANSFORM, PIPELINE_EXECUTOR, WORKFLOW_EXECUTOR, MAPPING, META_INJECT ->
+          "transform.svg";
       case SOURCE_DATASET, TARGET_DATASET -> "data-catalog.svg";
       default -> "execution-map.svg";
     };
@@ -58,13 +54,14 @@ public final class ExecutionMapNodeIconSupport {
     }
     return switch (nodeType) {
       case ROOT_WORKFLOW,
-          WORKFLOW,
-          ROOT_PIPELINE,
-          PIPELINE,
-          PIPELINE_FILE,
-          GENERATED_PIPELINE,
-          ORCHESTRATOR_PIPELINE,
-          BULK_MASTER_WORKFLOW -> org.apache.hop.ui.hopgui.HopGui.class.getClassLoader();
+              WORKFLOW,
+              ROOT_PIPELINE,
+              PIPELINE,
+              PIPELINE_FILE,
+              GENERATED_PIPELINE,
+              ORCHESTRATOR_PIPELINE,
+              BULK_MASTER_WORKFLOW ->
+          org.apache.hop.ui.hopgui.HopGui.class.getClassLoader();
       default -> ExecutionMapNodeIconSupport.class.getClassLoader();
     };
   }

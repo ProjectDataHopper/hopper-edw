@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.quality.profile;
 
 import java.util.LinkedHashMap;
@@ -70,8 +68,8 @@ public class FieldProfile {
 
   /**
    * Observe an empty string value. Records length 0 and includes {@code ""} in valueCounts /
-   * distinctValues so REGEX and distinct rules align with SQL {@code COUNT(DISTINCT)} (which
-   * counts empty strings).
+   * distinctValues so REGEX and distinct rules align with SQL {@code COUNT(DISTINCT)} (which counts
+   * empty strings).
    */
   public void observeEmptyString() {
     observeEmptyString(Integer.MAX_VALUE);
@@ -206,27 +204,34 @@ public class FieldProfile {
   public static class RegexRuleProfile {
     /** Path used: pushdown | sample | none. */
     private String path;
+
     /**
      * Mismatch row count from SQL pushdown (rows that failed the pattern); null if pushdown not
      * used.
      */
     private Long mismatchCount;
+
     /** Sample path: number of distinct values inspected. */
     private long sampleSize;
+
     /**
      * Sample path: number of failing distinct values (not weighted by row frequency). For
      * valueCounts-weighted row mismatches use {@link #sampleMismatchRows}.
      */
     private long sampleMismatchCount;
+
     /**
      * When sample was evaluated against valueCounts: total row weight of mismatched values. 0 when
      * only distinct sampling was used.
      */
     private long sampleMismatchRows;
+
     /** Sample path: limit applied (e.g. 500). */
     private int sampleLimit;
+
     /** True when sample limit was hit and all samples matched (coverage incomplete). */
     private boolean coverageIncomplete;
+
     /** True when neither pushdown nor sample could run. */
     private boolean skipped;
   }

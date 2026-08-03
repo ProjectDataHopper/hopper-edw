@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import java.util.ArrayList;
@@ -171,8 +169,7 @@ final class BvScd2FieldMappingValidationSupport {
     }
 
     validateSatelliteConfigs(remarks, scd2Table, satellites, derivativeNames, variables);
-    validateFunctionalTimestamps(
-        remarks, scd2Table, satellites, bvConfig, dvConfig, variables);
+    validateFunctionalTimestamps(remarks, scd2Table, satellites, bvConfig, dvConfig, variables);
   }
 
   private static void validateSharedParent(
@@ -302,7 +299,8 @@ final class BvScd2FieldMappingValidationSupport {
                 scd2Table));
         continue;
       }
-      if (!satelliteDefinesTimelineField(satellite, functionalTimestampField, dvConfig, variables)) {
+      if (!satelliteDefinesTimelineField(
+          satellite, functionalTimestampField, dvConfig, variables)) {
         remarks.add(
             new CheckResult(
                 ICheckResult.TYPE_RESULT_ERROR,
@@ -340,8 +338,7 @@ final class BvScd2FieldMappingValidationSupport {
     }
     String resolvedName = variables.resolve(satelliteName);
     for (BvScd2SatelliteConfig config : scd2Table.getSatelliteConfigs()) {
-      if (config != null
-          && resolvedName.equals(variables.resolve(config.getSatelliteName()))) {
+      if (config != null && resolvedName.equals(variables.resolve(config.getSatelliteName()))) {
         return config;
       }
     }

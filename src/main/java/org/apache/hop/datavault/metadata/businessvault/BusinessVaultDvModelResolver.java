@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import java.util.LinkedHashMap;
@@ -188,7 +186,8 @@ public final class BusinessVaultDvModelResolver {
     if (bvModel == null || Utils.isEmpty(dvTableName)) {
       return null;
     }
-    BvDvTableReference alias = BusinessVaultDvReferenceSupport.findDvReference(bvModel, dvTableName);
+    BvDvTableReference alias =
+        BusinessVaultDvReferenceSupport.findDvReference(bvModel, dvTableName);
     String path = null;
     if (alias != null) {
       path = alias.getReferencedModelFilename();
@@ -212,7 +211,8 @@ public final class BusinessVaultDvModelResolver {
     if (bvModel == null || Utils.isEmpty(dvTableName)) {
       return null;
     }
-    BvDvTableReference alias = BusinessVaultDvReferenceSupport.findDvReference(bvModel, dvTableName);
+    BvDvTableReference alias =
+        BusinessVaultDvReferenceSupport.findDvReference(bvModel, dvTableName);
     if (alias != null && !Utils.isEmpty(alias.getReferencedModelFilename())) {
       return alias.getReferencedModelFilename();
     }

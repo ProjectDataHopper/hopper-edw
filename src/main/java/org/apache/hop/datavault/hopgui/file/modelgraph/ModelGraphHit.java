@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.modelgraph;
 
 import org.apache.hop.core.gui.AreaOwner;
@@ -33,10 +31,7 @@ public final class ModelGraphHit {
   private final @Nullable Object canvasObject;
 
   public ModelGraphHit(
-      AreaOwner areaOwner,
-      AreaOwner.AreaType areaType,
-      DvNote note,
-      Object canvasObject) {
+      AreaOwner areaOwner, AreaOwner.AreaType areaType, DvNote note, Object canvasObject) {
     this.areaOwner = areaOwner;
     this.areaType = areaType;
     this.note = note;

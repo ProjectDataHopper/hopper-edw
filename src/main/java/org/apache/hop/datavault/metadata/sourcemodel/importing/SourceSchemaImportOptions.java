@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.sourcemodel.importing;
 
 import lombok.Getter;
@@ -28,10 +27,13 @@ public class SourceSchemaImportOptions {
 
   private String databaseName;
   private String schemaName;
+
   /** Optional prefix for canvas/catalog source names. */
   private String sourceNamePrefix;
+
   /** When true, also create/update catalog {@code DV_SOURCE} records for each imported table. */
   private boolean publishToCatalog = true;
+
   private String catalogConnectionName;
   private RecordSourceIndicatorOptions recordSourceOptions;
 

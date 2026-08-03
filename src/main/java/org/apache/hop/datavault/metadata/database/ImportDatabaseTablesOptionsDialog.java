@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.database;
 
 import java.util.HashMap;
@@ -27,14 +25,16 @@ import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.catalog.RecordSourceIndicatorOptions;
+import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
+import org.apache.hop.datavault.hopgui.help.HelpTopics;
+import org.apache.hop.datavault.metadata.RecordSourceIndicatorDatabaseImportSection;
 import org.apache.hop.history.AuditManager;
 import org.apache.hop.history.AuditState;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
-import org.apache.hop.datavault.catalog.RecordSourceIndicatorOptions;
-import org.apache.hop.datavault.metadata.RecordSourceIndicatorDatabaseImportSection;
 import org.apache.hop.ui.core.widget.MetaSelectionLine;
 import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.eclipse.swt.SWT;
@@ -46,8 +46,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
-import org.apache.hop.datavault.hopgui.help.HelpTopics;
 
 /** Collects database/schema and naming options before bulk-importing tables. */
 @Getter
@@ -88,8 +86,7 @@ public class ImportDatabaseTablesOptionsDialog {
   public ImportDatabaseTablesOptions open() {
     shell = new Shell(parent, BaseDialog.getDefaultDialogStyle());
     PropsUi.setLook(shell);
-    shell.setText(
-        BaseMessages.getString(PKG, "ImportDatabaseTablesOptionsDialog.Shell.Title"));
+    shell.setText(BaseMessages.getString(PKG, "ImportDatabaseTablesOptionsDialog.Shell.Title"));
     shell.setLayout(new FormLayout());
 
     PropsUi props = PropsUi.getInstance();
@@ -118,8 +115,7 @@ public class ImportDatabaseTablesOptionsDialog {
             shell,
             SWT.SINGLE | SWT.LEFT | SWT.BORDER,
             BaseMessages.getString(PKG, "ImportDatabaseTablesOptionsDialog.DatabaseName.Label"),
-            BaseMessages.getString(
-                PKG, "ImportDatabaseTablesOptionsDialog.DatabaseName.ToolTip"));
+            BaseMessages.getString(PKG, "ImportDatabaseTablesOptionsDialog.DatabaseName.ToolTip"));
     FormData fdDatabaseName = new FormData();
     fdDatabaseName.top = new FormAttachment(0, margin);
     fdDatabaseName.left = new FormAttachment(0, 0);
@@ -189,8 +185,7 @@ public class ImportDatabaseTablesOptionsDialog {
         return;
       }
 
-      wDatabaseName.setText(
-          Const.NVL(auditState.extractString(STATE_DATABASE_NAME, ""), ""));
+      wDatabaseName.setText(Const.NVL(auditState.extractString(STATE_DATABASE_NAME, ""), ""));
       wSchemaName.setText(Const.NVL(auditState.extractString(STATE_SCHEMA_NAME, ""), ""));
       wDataVaultSourcePrefix.setText(
           Const.NVL(auditState.extractString(STATE_DATA_VAULT_SOURCE_PREFIX, ""), ""));

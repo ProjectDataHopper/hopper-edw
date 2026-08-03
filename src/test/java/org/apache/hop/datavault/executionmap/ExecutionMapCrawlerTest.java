@@ -13,16 +13,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 
 import java.nio.file.Path;
 import org.apache.hop.core.HopEnvironment;
@@ -37,8 +34,7 @@ import org.junit.jupiter.api.Test;
 
 class ExecutionMapCrawlerTest {
 
-  private static final Path RETAIL_HOME =
-      Path.of("retail-example").toAbsolutePath().normalize();
+  private static final Path RETAIL_HOME = Path.of("retail-example").toAbsolutePath().normalize();
   private static final Path ROOT_WORKFLOW =
       RETAIL_HOME.resolve("workflows/update-retail-dv-bv-dm.hwf");
 
@@ -58,8 +54,7 @@ class ExecutionMapCrawlerTest {
             .build();
 
     ExecutionMapCrawler.CrawlResult result =
-        ExecutionMapCrawler.crawl(
-            ROOT_WORKFLOW.toString(), variables, null, options);
+        ExecutionMapCrawler.crawl(ROOT_WORKFLOW.toString(), variables, null, options);
 
     ExecutionMapDocument document = result.getDocument();
     assertNotNull(document);
@@ -83,8 +78,7 @@ class ExecutionMapCrawlerTest {
             .build();
 
     ExecutionMapCrawler.CrawlResult result =
-        ExecutionMapCrawler.crawl(
-            ROOT_WORKFLOW.toString(), variables, null, options);
+        ExecutionMapCrawler.crawl(ROOT_WORKFLOW.toString(), variables, null, options);
 
     ExecutionMapDocument document = result.getDocument();
     assertEqualsRootWorkflow(document);
@@ -104,8 +98,7 @@ class ExecutionMapCrawlerTest {
             .build();
 
     ExecutionMapCrawler.CrawlResult result =
-        ExecutionMapCrawler.crawl(
-            ROOT_WORKFLOW.toString(), variables, null, options);
+        ExecutionMapCrawler.crawl(ROOT_WORKFLOW.toString(), variables, null, options);
 
     ExecutionMapDocument document = result.getDocument();
     assertNotNull(document);
@@ -123,13 +116,13 @@ class ExecutionMapCrawlerTest {
             .build();
 
     ExecutionMapCrawler.CrawlResult result =
-        ExecutionMapCrawler.crawl(
-            ROOT_WORKFLOW.toString(), variables, null, options);
+        ExecutionMapCrawler.crawl(ROOT_WORKFLOW.toString(), variables, null, options);
 
     ExecutionMapDocument document = result.getDocument();
     ExecutionMapNode root =
         document.getNodesOrEmpty().stream()
-            .filter(node -> node != null && node.getNodeType() == ExecutionMapNodeType.ROOT_WORKFLOW)
+            .filter(
+                node -> node != null && node.getNodeType() == ExecutionMapNodeType.ROOT_WORKFLOW)
             .findFirst()
             .orElse(null);
     assertNotNull(root);
@@ -141,7 +134,8 @@ class ExecutionMapCrawlerTest {
                     node != null
                         && node.getNodeType() == ExecutionMapNodeType.DATA_VAULT_MODEL
                         && root.getId().equals(node.getParentNodeId()));
-    assertTrue(modelParentedUnderRoot, "Referenced DV models should be parented under the root workflow");
+    assertTrue(
+        modelParentedUnderRoot, "Referenced DV models should be parented under the root workflow");
   }
 
   @Test
@@ -151,8 +145,7 @@ class ExecutionMapCrawlerTest {
         CrawlOptions.builder().includeGeneratedPipelines(true).includeDatasetNodes(true).build();
 
     ExecutionMapCrawler.CrawlResult result =
-        ExecutionMapCrawler.crawl(
-            ROOT_WORKFLOW.toString(), variables, null, options);
+        ExecutionMapCrawler.crawl(ROOT_WORKFLOW.toString(), variables, null, options);
 
     ExecutionMapDocument document = result.getDocument();
     boolean hasDatasetNode =
@@ -187,8 +180,7 @@ class ExecutionMapCrawlerTest {
             .orElse(null);
     assertNotNull(hubCustomer, "Expected catalog-backed hub_customer target dataset");
     assertEquals(
-        "hop/retail-example/models/retail-360",
-        hubCustomer.getProperty("datasetNamespace"));
+        "hop/retail-example/models/retail-360", hubCustomer.getProperty("datasetNamespace"));
     assertEquals("DV_HUB", hubCustomer.getProperty("datasetKind"));
   }
 
@@ -223,5 +215,4 @@ class ExecutionMapCrawlerTest {
             .anyMatch(node -> node != null && node.getNodeType() == nodeType);
     assertTrue(found, () -> "Expected node type " + nodeType + " in execution map");
   }
-
 }

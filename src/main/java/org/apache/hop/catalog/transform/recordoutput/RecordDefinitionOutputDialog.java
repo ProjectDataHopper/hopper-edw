@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.transform.recordoutput;
 
 import java.util.ArrayList;
@@ -31,8 +29,8 @@ import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.hopgui.EnumDialogSupport;
 import org.apache.hop.datavault.metadata.DvSourceDeliveryType;
 import org.apache.hop.datavault.metadata.DvSourceType;
-import org.apache.hop.metadata.api.IEnumHasCodeAndDescription;
 import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IEnumHasCodeAndDescription;
 import org.apache.hop.metadata.api.IHopMetadataSerializer;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
@@ -191,28 +189,16 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
     last =
         wSelectFromInput =
             addCheckbox(
-                comp,
-                "RecordDefinitionOutputDialog.SelectFromInput.Label",
-                last,
-                middle,
-                margin);
+                comp, "RecordDefinitionOutputDialog.SelectFromInput.Label", last, middle, margin);
     wSelectFromInput.addListener(SWT.Selection, e -> setFlags());
     last =
         wWriteToCatalog =
             addCheckbox(
-                comp,
-                "RecordDefinitionOutputDialog.WriteToCatalog.Label",
-                last,
-                middle,
-                margin);
+                comp, "RecordDefinitionOutputDialog.WriteToCatalog.Label", last, middle, margin);
     last =
         wFailIfNoFields =
             addCheckbox(
-                comp,
-                "RecordDefinitionOutputDialog.FailIfNoFields.Label",
-                last,
-                middle,
-                margin);
+                comp, "RecordDefinitionOutputDialog.FailIfNoFields.Label", last, middle, margin);
   }
 
   private void buildDefinitionTab(CTabFolder tabFolder) {
@@ -225,12 +211,30 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
 
     int middle = props.getMiddlePct();
     Control last = null;
-    last = wNamespaceField = addFieldCombo(comp, "RecordDefinitionOutputDialog.NamespaceField.Label", last, middle, margin);
-    last = wNameField = addFieldCombo(comp, "RecordDefinitionOutputDialog.NameField.Label", last, middle, margin);
-    last = wDescriptionField = addFieldCombo(comp, "RecordDefinitionOutputDialog.DescriptionField.Label", last, middle, margin);
-    last = wNamespaceValue = addTextField(comp, "RecordDefinitionOutputDialog.NamespaceValue.Label", last, middle, margin);
-    last = wNameValue = addTextField(comp, "RecordDefinitionOutputDialog.NameValue.Label", last, middle, margin);
-    last = wDescriptionValue = addTextField(comp, "RecordDefinitionOutputDialog.DescriptionValue.Label", last, middle, margin);
+    last =
+        wNamespaceField =
+            addFieldCombo(
+                comp, "RecordDefinitionOutputDialog.NamespaceField.Label", last, middle, margin);
+    last =
+        wNameField =
+            addFieldCombo(
+                comp, "RecordDefinitionOutputDialog.NameField.Label", last, middle, margin);
+    last =
+        wDescriptionField =
+            addFieldCombo(
+                comp, "RecordDefinitionOutputDialog.DescriptionField.Label", last, middle, margin);
+    last =
+        wNamespaceValue =
+            addTextField(
+                comp, "RecordDefinitionOutputDialog.NamespaceValue.Label", last, middle, margin);
+    last =
+        wNameValue =
+            addTextField(
+                comp, "RecordDefinitionOutputDialog.NameValue.Label", last, middle, margin);
+    last =
+        wDescriptionValue =
+            addTextField(
+                comp, "RecordDefinitionOutputDialog.DescriptionValue.Label", last, middle, margin);
   }
 
   private void buildSourceTab(CTabFolder tabFolder) {
@@ -263,12 +267,55 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
     fdDb.top = new FormAttachment(last, margin);
     wDatabaseComp.setLayoutData(fdDb);
     Control dbLast = null;
-    dbLast = wDatabaseConnection = addCombo(wDatabaseComp, "RecordDefinitionOutputDialog.DatabaseConnection.Label", dbLast, middle, margin, new String[0]);
-    dbLast = wSchemaName = addTextField(wDatabaseComp, "RecordDefinitionOutputDialog.SchemaName.Label", dbLast, middle, margin);
-    dbLast = wTableName = addTextField(wDatabaseComp, "RecordDefinitionOutputDialog.TableName.Label", dbLast, middle, margin);
-    dbLast = wDatabaseConnectionField = addFieldCombo(wDatabaseComp, "RecordDefinitionOutputDialog.DatabaseConnectionField.Label", dbLast, middle, margin);
-    dbLast = wSchemaField = addFieldCombo(wDatabaseComp, "RecordDefinitionOutputDialog.SchemaField.Label", dbLast, middle, margin);
-    dbLast = wTableField = addFieldCombo(wDatabaseComp, "RecordDefinitionOutputDialog.TableField.Label", dbLast, middle, margin);
+    dbLast =
+        wDatabaseConnection =
+            addCombo(
+                wDatabaseComp,
+                "RecordDefinitionOutputDialog.DatabaseConnection.Label",
+                dbLast,
+                middle,
+                margin,
+                new String[0]);
+    dbLast =
+        wSchemaName =
+            addTextField(
+                wDatabaseComp,
+                "RecordDefinitionOutputDialog.SchemaName.Label",
+                dbLast,
+                middle,
+                margin);
+    dbLast =
+        wTableName =
+            addTextField(
+                wDatabaseComp,
+                "RecordDefinitionOutputDialog.TableName.Label",
+                dbLast,
+                middle,
+                margin);
+    dbLast =
+        wDatabaseConnectionField =
+            addFieldCombo(
+                wDatabaseComp,
+                "RecordDefinitionOutputDialog.DatabaseConnectionField.Label",
+                dbLast,
+                middle,
+                margin);
+    dbLast =
+        wSchemaField =
+            addFieldCombo(
+                wDatabaseComp,
+                "RecordDefinitionOutputDialog.SchemaField.Label",
+                dbLast,
+                middle,
+                margin);
+    dbLast =
+        wTableField =
+            addFieldCombo(
+                wDatabaseComp,
+                "RecordDefinitionOutputDialog.TableField.Label",
+                dbLast,
+                middle,
+                margin);
     fdDb.bottom = new FormAttachment(dbLast, margin);
 
     wFileComp = new Composite(comp, SWT.NONE);
@@ -280,14 +327,62 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
     fdFile.top = new FormAttachment(wDatabaseComp, margin);
     wFileComp.setLayoutData(fdFile);
     Control fileLast = null;
-    fileLast = wFilePath = addTextField(wFileComp, "RecordDefinitionOutputDialog.FilePath.Label", fileLast, middle, margin);
-    fileLast = wFolder = addTextField(wFileComp, "RecordDefinitionOutputDialog.Folder.Label", fileLast, middle, margin);
-    fileLast = wIncludeFileMask = addTextField(wFileComp, "RecordDefinitionOutputDialog.IncludeFileMask.Label", fileLast, middle, margin);
-    fileLast = wExcludeFileMask = addTextField(wFileComp, "RecordDefinitionOutputDialog.ExcludeFileMask.Label", fileLast, middle, margin);
-    fileLast = wIncludeSubfolders = addCheckbox(wFileComp, "RecordDefinitionOutputDialog.IncludeSubfolders.Label", fileLast, middle, margin);
-    fileLast = wFilePathField = addFieldCombo(wFileComp, "RecordDefinitionOutputDialog.FilePathField.Label", fileLast, middle, margin);
-    fileLast = wFolderField = addFieldCombo(wFileComp, "RecordDefinitionOutputDialog.FolderField.Label", fileLast, middle, margin);
-    fileLast = wIncludeFileMaskField = addFieldCombo(wFileComp, "RecordDefinitionOutputDialog.IncludeFileMaskField.Label", fileLast, middle, margin);
+    fileLast =
+        wFilePath =
+            addTextField(
+                wFileComp, "RecordDefinitionOutputDialog.FilePath.Label", fileLast, middle, margin);
+    fileLast =
+        wFolder =
+            addTextField(
+                wFileComp, "RecordDefinitionOutputDialog.Folder.Label", fileLast, middle, margin);
+    fileLast =
+        wIncludeFileMask =
+            addTextField(
+                wFileComp,
+                "RecordDefinitionOutputDialog.IncludeFileMask.Label",
+                fileLast,
+                middle,
+                margin);
+    fileLast =
+        wExcludeFileMask =
+            addTextField(
+                wFileComp,
+                "RecordDefinitionOutputDialog.ExcludeFileMask.Label",
+                fileLast,
+                middle,
+                margin);
+    fileLast =
+        wIncludeSubfolders =
+            addCheckbox(
+                wFileComp,
+                "RecordDefinitionOutputDialog.IncludeSubfolders.Label",
+                fileLast,
+                middle,
+                margin);
+    fileLast =
+        wFilePathField =
+            addFieldCombo(
+                wFileComp,
+                "RecordDefinitionOutputDialog.FilePathField.Label",
+                fileLast,
+                middle,
+                margin);
+    fileLast =
+        wFolderField =
+            addFieldCombo(
+                wFileComp,
+                "RecordDefinitionOutputDialog.FolderField.Label",
+                fileLast,
+                middle,
+                margin);
+    fileLast =
+        wIncludeFileMaskField =
+            addFieldCombo(
+                wFileComp,
+                "RecordDefinitionOutputDialog.IncludeFileMaskField.Label",
+                fileLast,
+                middle,
+                margin);
     fdFile.bottom = new FormAttachment(fileLast, margin);
 
     wIcebergComp = new Composite(comp, SWT.NONE);
@@ -299,24 +394,150 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
     fdIceberg.top = new FormAttachment(wFileComp, margin);
     wIcebergComp.setLayoutData(fdIceberg);
     Control icebergLast = null;
-    icebergLast = wIcebergCatalogUri = addTextField(wIcebergComp, "RecordDefinitionOutputDialog.IcebergCatalogUri.Label", icebergLast, middle, margin);
-    icebergLast = wIcebergWarehouse = addTextField(wIcebergComp, "RecordDefinitionOutputDialog.IcebergWarehouse.Label", icebergLast, middle, margin);
-    icebergLast = wIcebergNamespace = addTextField(wIcebergComp, "RecordDefinitionOutputDialog.IcebergNamespace.Label", icebergLast, middle, margin);
-    icebergLast = wIcebergTableName = addTextField(wIcebergComp, "RecordDefinitionOutputDialog.IcebergTableName.Label", icebergLast, middle, margin);
-    icebergLast = wIcebergSnapshotId = addTextField(wIcebergComp, "RecordDefinitionOutputDialog.IcebergSnapshotId.Label", icebergLast, middle, margin);
-    icebergLast = wIcebergBranch = addTextField(wIcebergComp, "RecordDefinitionOutputDialog.IcebergBranch.Label", icebergLast, middle, margin);
-    icebergLast = wIcebergS3Endpoint = addTextField(wIcebergComp, "RecordDefinitionOutputDialog.IcebergS3Endpoint.Label", icebergLast, middle, margin);
-    icebergLast = wIcebergS3AccessKey = addTextField(wIcebergComp, "RecordDefinitionOutputDialog.IcebergS3AccessKey.Label", icebergLast, middle, margin);
-    icebergLast = wIcebergS3SecretKey = addTextField(wIcebergComp, "RecordDefinitionOutputDialog.IcebergS3SecretKey.Label", icebergLast, middle, margin);
-    icebergLast = wIcebergCatalogUriField = addFieldCombo(wIcebergComp, "RecordDefinitionOutputDialog.IcebergCatalogUriField.Label", icebergLast, middle, margin);
-    icebergLast = wIcebergWarehouseField = addFieldCombo(wIcebergComp, "RecordDefinitionOutputDialog.IcebergWarehouseField.Label", icebergLast, middle, margin);
-    icebergLast = wIcebergNamespaceField = addFieldCombo(wIcebergComp, "RecordDefinitionOutputDialog.IcebergNamespaceField.Label", icebergLast, middle, margin);
-    icebergLast = wIcebergTableNameField = addFieldCombo(wIcebergComp, "RecordDefinitionOutputDialog.IcebergTableNameField.Label", icebergLast, middle, margin);
-    icebergLast = wIcebergSnapshotIdField = addFieldCombo(wIcebergComp, "RecordDefinitionOutputDialog.IcebergSnapshotIdField.Label", icebergLast, middle, margin);
-    icebergLast = wIcebergBranchField = addFieldCombo(wIcebergComp, "RecordDefinitionOutputDialog.IcebergBranchField.Label", icebergLast, middle, margin);
-    icebergLast = wIcebergS3EndpointField = addFieldCombo(wIcebergComp, "RecordDefinitionOutputDialog.IcebergS3EndpointField.Label", icebergLast, middle, margin);
-    icebergLast = wIcebergS3AccessKeyField = addFieldCombo(wIcebergComp, "RecordDefinitionOutputDialog.IcebergS3AccessKeyField.Label", icebergLast, middle, margin);
-    icebergLast = wIcebergS3SecretKeyField = addFieldCombo(wIcebergComp, "RecordDefinitionOutputDialog.IcebergS3SecretKeyField.Label", icebergLast, middle, margin);
+    icebergLast =
+        wIcebergCatalogUri =
+            addTextField(
+                wIcebergComp,
+                "RecordDefinitionOutputDialog.IcebergCatalogUri.Label",
+                icebergLast,
+                middle,
+                margin);
+    icebergLast =
+        wIcebergWarehouse =
+            addTextField(
+                wIcebergComp,
+                "RecordDefinitionOutputDialog.IcebergWarehouse.Label",
+                icebergLast,
+                middle,
+                margin);
+    icebergLast =
+        wIcebergNamespace =
+            addTextField(
+                wIcebergComp,
+                "RecordDefinitionOutputDialog.IcebergNamespace.Label",
+                icebergLast,
+                middle,
+                margin);
+    icebergLast =
+        wIcebergTableName =
+            addTextField(
+                wIcebergComp,
+                "RecordDefinitionOutputDialog.IcebergTableName.Label",
+                icebergLast,
+                middle,
+                margin);
+    icebergLast =
+        wIcebergSnapshotId =
+            addTextField(
+                wIcebergComp,
+                "RecordDefinitionOutputDialog.IcebergSnapshotId.Label",
+                icebergLast,
+                middle,
+                margin);
+    icebergLast =
+        wIcebergBranch =
+            addTextField(
+                wIcebergComp,
+                "RecordDefinitionOutputDialog.IcebergBranch.Label",
+                icebergLast,
+                middle,
+                margin);
+    icebergLast =
+        wIcebergS3Endpoint =
+            addTextField(
+                wIcebergComp,
+                "RecordDefinitionOutputDialog.IcebergS3Endpoint.Label",
+                icebergLast,
+                middle,
+                margin);
+    icebergLast =
+        wIcebergS3AccessKey =
+            addTextField(
+                wIcebergComp,
+                "RecordDefinitionOutputDialog.IcebergS3AccessKey.Label",
+                icebergLast,
+                middle,
+                margin);
+    icebergLast =
+        wIcebergS3SecretKey =
+            addTextField(
+                wIcebergComp,
+                "RecordDefinitionOutputDialog.IcebergS3SecretKey.Label",
+                icebergLast,
+                middle,
+                margin);
+    icebergLast =
+        wIcebergCatalogUriField =
+            addFieldCombo(
+                wIcebergComp,
+                "RecordDefinitionOutputDialog.IcebergCatalogUriField.Label",
+                icebergLast,
+                middle,
+                margin);
+    icebergLast =
+        wIcebergWarehouseField =
+            addFieldCombo(
+                wIcebergComp,
+                "RecordDefinitionOutputDialog.IcebergWarehouseField.Label",
+                icebergLast,
+                middle,
+                margin);
+    icebergLast =
+        wIcebergNamespaceField =
+            addFieldCombo(
+                wIcebergComp,
+                "RecordDefinitionOutputDialog.IcebergNamespaceField.Label",
+                icebergLast,
+                middle,
+                margin);
+    icebergLast =
+        wIcebergTableNameField =
+            addFieldCombo(
+                wIcebergComp,
+                "RecordDefinitionOutputDialog.IcebergTableNameField.Label",
+                icebergLast,
+                middle,
+                margin);
+    icebergLast =
+        wIcebergSnapshotIdField =
+            addFieldCombo(
+                wIcebergComp,
+                "RecordDefinitionOutputDialog.IcebergSnapshotIdField.Label",
+                icebergLast,
+                middle,
+                margin);
+    icebergLast =
+        wIcebergBranchField =
+            addFieldCombo(
+                wIcebergComp,
+                "RecordDefinitionOutputDialog.IcebergBranchField.Label",
+                icebergLast,
+                middle,
+                margin);
+    icebergLast =
+        wIcebergS3EndpointField =
+            addFieldCombo(
+                wIcebergComp,
+                "RecordDefinitionOutputDialog.IcebergS3EndpointField.Label",
+                icebergLast,
+                middle,
+                margin);
+    icebergLast =
+        wIcebergS3AccessKeyField =
+            addFieldCombo(
+                wIcebergComp,
+                "RecordDefinitionOutputDialog.IcebergS3AccessKeyField.Label",
+                icebergLast,
+                middle,
+                margin);
+    icebergLast =
+        wIcebergS3SecretKeyField =
+            addFieldCombo(
+                wIcebergComp,
+                "RecordDefinitionOutputDialog.IcebergS3SecretKeyField.Label",
+                icebergLast,
+                middle,
+                margin);
     fdIceberg.bottom = new FormAttachment(icebergLast, margin);
   }
 
@@ -330,9 +551,21 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
 
     int middle = props.getMiddlePct();
     Control last = null;
-    last = wSourceIndicator = addTextField(comp, "RecordDefinitionOutputDialog.SourceIndicator.Label", last, middle, margin);
-    last = wSourceIndicatorFieldName = addTextField(comp, "RecordDefinitionOutputDialog.SourceIndicatorField.Label", last, middle, margin);
-    last = wGroup = addTextField(comp, "RecordDefinitionOutputDialog.Group.Label", last, middle, margin);
+    last =
+        wSourceIndicator =
+            addTextField(
+                comp, "RecordDefinitionOutputDialog.SourceIndicator.Label", last, middle, margin);
+    last =
+        wSourceIndicatorFieldName =
+            addTextField(
+                comp,
+                "RecordDefinitionOutputDialog.SourceIndicatorField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wGroup =
+            addTextField(comp, "RecordDefinitionOutputDialog.Group.Label", last, middle, margin);
     last =
         wDeliveryType =
             addI18nEnumCombo(
@@ -357,10 +590,30 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
 
     int middle = props.getMiddlePct();
     Control last = null;
-    last = wFieldCountField = addTextField(comp, "RecordDefinitionOutputDialog.FieldCountField.Label", last, middle, margin);
-    last = wWrittenToCatalogField = addTextField(comp, "RecordDefinitionOutputDialog.WrittenToCatalogField.Label", last, middle, margin);
-    last = wCatalogNamespaceField = addTextField(comp, "RecordDefinitionOutputDialog.CatalogNamespaceField.Label", last, middle, margin);
-    last = wCatalogNameField = addTextField(comp, "RecordDefinitionOutputDialog.CatalogNameField.Label", last, middle, margin);
+    last =
+        wFieldCountField =
+            addTextField(
+                comp, "RecordDefinitionOutputDialog.FieldCountField.Label", last, middle, margin);
+    last =
+        wWrittenToCatalogField =
+            addTextField(
+                comp,
+                "RecordDefinitionOutputDialog.WrittenToCatalogField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wCatalogNamespaceField =
+            addTextField(
+                comp,
+                "RecordDefinitionOutputDialog.CatalogNamespaceField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wCatalogNameField =
+            addTextField(
+                comp, "RecordDefinitionOutputDialog.CatalogNameField.Label", last, middle, margin);
 
     FormData fdComp = new FormData();
     fdComp.left = new FormAttachment(0, 0);
@@ -374,14 +627,20 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
   }
 
   private org.eclipse.swt.custom.CCombo addCombo(
-      Composite composite, String labelKey, Control previous, int middle, int margin, String[] items) {
+      Composite composite,
+      String labelKey,
+      Control previous,
+      int middle,
+      int margin,
+      String[] items) {
     Label label = new Label(composite, SWT.RIGHT);
     label.setText(BaseMessages.getString(PKG, labelKey));
     PropsUi.setLook(label);
     FormData fdl = new FormData();
     fdl.left = new FormAttachment(0, 0);
     fdl.right = new FormAttachment(middle, -margin);
-    fdl.top = previous == null ? new FormAttachment(0, margin) : new FormAttachment(previous, margin);
+    fdl.top =
+        previous == null ? new FormAttachment(0, margin) : new FormAttachment(previous, margin);
     label.setLayoutData(fdl);
 
     org.eclipse.swt.custom.CCombo combo = new org.eclipse.swt.custom.CCombo(composite, SWT.BORDER);
@@ -413,7 +672,8 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
     FormData fdl = new FormData();
     fdl.left = new FormAttachment(0, 0);
     fdl.right = new FormAttachment(middle, -margin);
-    fdl.top = previous == null ? new FormAttachment(0, margin) : new FormAttachment(previous, margin);
+    fdl.top =
+        previous == null ? new FormAttachment(0, margin) : new FormAttachment(previous, margin);
     label.setLayoutData(fdl);
 
     Combo combo = new Combo(composite, SWT.READ_ONLY);
@@ -428,14 +688,20 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
   }
 
   private Combo addEnumCombo(
-      Composite composite, String labelKey, Control previous, int middle, int margin, Enum<?>[] values) {
+      Composite composite,
+      String labelKey,
+      Control previous,
+      int middle,
+      int margin,
+      Enum<?>[] values) {
     Label label = new Label(composite, SWT.RIGHT);
     label.setText(BaseMessages.getString(PKG, labelKey));
     PropsUi.setLook(label);
     FormData fdl = new FormData();
     fdl.left = new FormAttachment(0, 0);
     fdl.right = new FormAttachment(middle, -margin);
-    fdl.top = previous == null ? new FormAttachment(0, margin) : new FormAttachment(previous, margin);
+    fdl.top =
+        previous == null ? new FormAttachment(0, margin) : new FormAttachment(previous, margin);
     label.setLayoutData(fdl);
 
     Combo combo = new Combo(composite, SWT.READ_ONLY);
@@ -461,7 +727,8 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
     FormData fdl = new FormData();
     fdl.left = new FormAttachment(0, 0);
     fdl.right = new FormAttachment(middle, -margin);
-    fdl.top = previous == null ? new FormAttachment(0, margin) : new FormAttachment(previous, margin);
+    fdl.top =
+        previous == null ? new FormAttachment(0, margin) : new FormAttachment(previous, margin);
     label.setLayoutData(fdl);
 
     Text text = new Text(composite, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
@@ -482,7 +749,8 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
     FormData fd = new FormData();
     fd.left = new FormAttachment(middle, 0);
     fd.right = new FormAttachment(100, 0);
-    fd.top = previous == null ? new FormAttachment(0, margin) : new FormAttachment(previous, margin);
+    fd.top =
+        previous == null ? new FormAttachment(0, margin) : new FormAttachment(previous, margin);
     button.setLayoutData(fd);
     return button;
   }
@@ -684,7 +952,9 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
     }
     transformName = wTransformName.getText();
     input.setCatalogConnectionName(wConnectionName.getText());
-    input.setRecordDefinitionType(parseEnum(wRecordType.getText(), RecordDefinitionType.class, RecordDefinitionType.DV_SOURCE));
+    input.setRecordDefinitionType(
+        parseEnum(
+            wRecordType.getText(), RecordDefinitionType.class, RecordDefinitionType.DV_SOURCE));
     input.setSelectFromInput(wSelectFromInput.getSelection());
     input.setWriteToCatalog(wWriteToCatalog.getSelection());
     input.setFailIfNoFields(wFailIfNoFields.getSelection());

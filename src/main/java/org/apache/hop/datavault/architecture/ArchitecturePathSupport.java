@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.architecture;
 
 import org.apache.hop.core.util.Utils;
@@ -39,8 +38,8 @@ public final class ArchitecturePathSupport {
    * Convert a filesystem path (absolute, {@code ${PROJECT_HOME}/…}, or already relative) into a
    * project-relative display path without the {@code ${PROJECT_HOME}/} prefix.
    *
-   * <p>Logical schemes ({@code dataset://}, {@code generated://}, {@code synthetic://}) and non-path
-   * labels are returned unchanged.
+   * <p>Logical schemes ({@code dataset://}, {@code generated://}, {@code synthetic://}) and
+   * non-path labels are returned unchanged.
    */
   public static String toProjectRelativePath(String path, IVariables variables) {
     if (Utils.isEmpty(path) || ExecutionMapPathSupport.isLogicalScheme(path)) {

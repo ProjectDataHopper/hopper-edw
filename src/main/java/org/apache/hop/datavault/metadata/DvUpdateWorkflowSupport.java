@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.ArrayList;
@@ -29,6 +27,8 @@ import org.apache.hop.core.logging.LogLevel;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
+import org.apache.hop.datavault.metrics.live.UpdateRunLiveRunContext;
+import org.apache.hop.datavault.metrics.live.UpdateRunLiveStagingWorkflowMonitor;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transforms.textfileoutput.TextFileField;
@@ -38,8 +38,6 @@ import org.apache.hop.workflow.WorkflowMeta;
 import org.apache.hop.workflow.action.ActionMeta;
 import org.apache.hop.workflow.action.IAction;
 import org.apache.hop.workflow.actions.start.ActionStart;
-import org.apache.hop.datavault.metrics.live.UpdateRunLiveRunContext;
-import org.apache.hop.datavault.metrics.live.UpdateRunLiveStagingWorkflowMonitor;
 import org.apache.hop.workflow.engine.IWorkflowEngine;
 import org.apache.hop.workflow.engine.WorkflowEngineFactory;
 
@@ -138,8 +136,8 @@ public final class DvUpdateWorkflowSupport {
   }
 
   /**
-   * Builds a sequential master workflow: for each descriptor, run the staged pipeline then bulk-load
-   * every parallel shard file.
+   * Builds a sequential master workflow: for each descriptor, run the staged pipeline then
+   * bulk-load every parallel shard file.
    */
   public static WorkflowMeta buildMasterWorkflow(
       List<DvStagingLoadDescriptor> descriptors,
@@ -188,10 +186,7 @@ public final class DvUpdateWorkflowSupport {
           bulkActionMeta =
               newActionMeta(
                   PIPELINE_ACTION_ID,
-                  "bulk_load_"
-                      + sanitizeActionName(descriptor.targetTableName())
-                      + "_"
-                      + copyIndex,
+                  "bulk_load_" + sanitizeActionName(descriptor.targetTableName()) + "_" + copyIndex,
                   action ->
                       configurePipelineAction(action, bulkPipelinePath, pipelineRunConfiguration));
         } else {
@@ -358,7 +353,8 @@ public final class DvUpdateWorkflowSupport {
         continue;
       }
       if (transformMeta.getName().startsWith(DvTargetLoadSupport.STAGING_TRANSFORM_PREFIX)
-          && DvTargetLoadSupport.TEXT_FILE_OUTPUT_TRANSFORM_ID.equals(transformMeta.getPluginId())) {
+          && DvTargetLoadSupport.TEXT_FILE_OUTPUT_TRANSFORM_ID.equals(
+              transformMeta.getPluginId())) {
         return transformMeta;
       }
     }
@@ -374,7 +370,8 @@ public final class DvUpdateWorkflowSupport {
   private static void configurePipelineAction(
       IAction action, String pipelinePath, String pipelineRunConfiguration) throws HopException {
     DvBulkLoadActionSupport.invoke(action, "setFilename", String.class, pipelinePath);
-    DvBulkLoadActionSupport.invoke(action, "setRunConfiguration", String.class, pipelineRunConfiguration);
+    DvBulkLoadActionSupport.invoke(
+        action, "setRunConfiguration", String.class, pipelineRunConfiguration);
     DvBulkLoadActionSupport.invoke(action, "setWaitingToFinish", boolean.class, true);
     DvBulkLoadActionSupport.invoke(action, "setClearResultRows", boolean.class, false);
     DvBulkLoadActionSupport.invoke(action, "setClearResultFiles", boolean.class, false);

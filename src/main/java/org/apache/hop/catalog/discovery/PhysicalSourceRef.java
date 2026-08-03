@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.discovery;
 
 import java.util.regex.Pattern;
@@ -50,8 +48,10 @@ public final class PhysicalSourceRef {
   private final String s3Endpoint;
   private final String s3AccessKey;
   private final String s3SecretKey;
+
   /** Path to the {@code .hsm} source model when refreshing a COMPOSITE feed. */
   private final String compositeSourceModelFilename;
+
   /** Source query name inside the model when refreshing a COMPOSITE feed. */
   private final String compositeSourceQueryName;
 
@@ -156,8 +156,7 @@ public final class PhysicalSourceRef {
   public void validateIcebergLocation(IVariables variables) throws HopException {
     HopVariableResolutionSupport.requireResolved(variables, catalogUri, "Iceberg catalog URI");
     HopVariableResolutionSupport.requireResolved(variables, icebergNamespace, "Iceberg namespace");
-    HopVariableResolutionSupport.requireResolved(
-        variables, icebergTableName, "Iceberg table name");
+    HopVariableResolutionSupport.requireResolved(variables, icebergTableName, "Iceberg table name");
 
     if (Utils.isEmpty(resolve(variables, catalogUri))
         || Utils.isEmpty(resolve(variables, icebergNamespace))
@@ -237,8 +236,7 @@ public final class PhysicalSourceRef {
   }
 
   private static String findFirstMatchingFile(
-      FileObject folderObject, Pattern includePattern, Pattern excludePattern)
-      throws Exception {
+      FileObject folderObject, Pattern includePattern, Pattern excludePattern) throws Exception {
     FileObject[] children = folderObject.getChildren();
     if (children == null) {
       return null;

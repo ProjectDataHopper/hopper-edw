@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.command.architecture;
 
 import java.util.Arrays;
@@ -56,9 +54,7 @@ import picocli.CommandLine;
         "Export Draw.io architecture diagrams (SOLUTION from workflow/.hem, DATA from models)."
             + " Enable a project with -j/--project OR an environment with -e/--environment"
             + " (not both). Relative -f/-o paths are resolved under ${PROJECT_HOME}.")
-@HopCommand(
-    id = "architecture-export",
-    description = "Export architecture diagrams to Draw.io")
+@HopCommand(id = "architecture-export", description = "Export architecture diagrams to Draw.io")
 public class ArchitectureExportCommand implements Runnable, IHopCommand, IHasHopMetadataProvider {
 
   public static final String VAR_PROJECT_HOME = "PROJECT_HOME";
@@ -155,8 +151,7 @@ public class ArchitectureExportCommand implements Runnable, IHopCommand, IHasHop
         List<String> models =
             Arrays.stream(file.split("[,;]")).map(String::trim).filter(s -> !s.isEmpty()).toList();
         ExportResult result =
-            ArchitectureExportService.exportDataDrawio(
-                models, output, variables, metadataProvider);
+            ArchitectureExportService.exportDataDrawio(models, output, variables, metadataProvider);
         log.logBasic(
             "Wrote DATA inventory: "
                 + result.getOutputPath()

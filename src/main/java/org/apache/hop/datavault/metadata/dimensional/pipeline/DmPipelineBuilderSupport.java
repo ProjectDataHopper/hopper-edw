@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional.pipeline;
 
 import java.util.ArrayList;
@@ -42,7 +40,6 @@ import org.apache.hop.datavault.metadata.dimensional.DmSourceRecordDefinitionSup
 import org.apache.hop.datavault.metadata.dimensional.DmSurrogateKeyStrategy;
 import org.apache.hop.datavault.metadata.dimensional.DmSurrogateKeySupport;
 import org.apache.hop.datavault.metadata.dimensional.DmTableBase;
-import org.apache.hop.datavault.metadata.dimensional.DmTableType;
 import org.apache.hop.datavault.metadata.dimensional.DmTargetDatabaseSupport;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineHopMeta;
@@ -51,7 +48,6 @@ import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transforms.dummy.DummyMeta;
 import org.apache.hop.pipeline.transforms.metainject.MetaInjectMeta;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
-
 
 /** Shared helpers for generated dimensional load pipelines. */
 public final class DmPipelineBuilderSupport {
@@ -64,7 +60,9 @@ public final class DmPipelineBuilderSupport {
 
   private DmPipelineBuilderSupport() {}
 
-  /** Stream field carrying the incremented SCD2 version (avoids colliding with the merge branch). */
+  /**
+   * Stream field carrying the incremented SCD2 version (avoids colliding with the merge branch).
+   */
   public static String scd2NewVersionFieldName(String versionField) {
     if (Utils.isEmpty(versionField)) {
       return NEW_VERSION_FIELD_SUFFIX.substring(1);
@@ -260,7 +258,8 @@ public final class DmPipelineBuilderSupport {
       TransformMeta predecessor,
       boolean truncate)
       throws HopException {
-    return addTableOutput(ctx, pipelineMeta, targetLayout, predecessor, truncate, Collections.emptySet());
+    return addTableOutput(
+        ctx, pipelineMeta, targetLayout, predecessor, truncate, Collections.emptySet());
   }
 
   public static TransformMeta addTableOutput(
@@ -281,7 +280,8 @@ public final class DmPipelineBuilderSupport {
       TransformMeta predecessor,
       boolean truncate)
       throws HopException {
-    return addTargetLoad(ctx, pipelineMeta, targetLayout, predecessor, truncate, Collections.emptySet());
+    return addTargetLoad(
+        ctx, pipelineMeta, targetLayout, predecessor, truncate, Collections.emptySet());
   }
 
   public static TransformMeta addTargetLoad(
@@ -312,12 +312,7 @@ public final class DmPipelineBuilderSupport {
         excludeFields != null ? excludeFields : Collections.emptySet();
     DvTargetLoadSupport.TargetLoadResult result =
         DvTargetLoadSupport.addTargetLoad(
-            targetCtx,
-            pipelineMeta,
-            targetLayout,
-            predecessor,
-            resolvedExcludeFields,
-            truncate);
+            targetCtx, pipelineMeta, targetLayout, predecessor, resolvedExcludeFields, truncate);
     if (result != null && result.transformMeta != null) {
       GeneratedPipelineMetadataSupport.stampWriteTarget(
           result.transformMeta,
@@ -331,11 +326,7 @@ public final class DmPipelineBuilderSupport {
   }
 
   public static TransformMeta addDummyTransform(
-      PipelineMeta pipelineMeta,
-      TransformMeta predecessor,
-      String name,
-      int x,
-      int y) {
+      PipelineMeta pipelineMeta, TransformMeta predecessor, String name, int x, int y) {
     if (predecessor == null) {
       return null;
     }
@@ -409,7 +400,8 @@ public final class DmPipelineBuilderSupport {
       if (attribute == null || Utils.isEmpty(attribute.getFieldName())) {
         continue;
       }
-      if (attribute.getScdUpdatePolicy() == org.apache.hop.datavault.metadata.dimensional.DmScdUpdatePolicy.TYPE2) {
+      if (attribute.getScdUpdatePolicy()
+          == org.apache.hop.datavault.metadata.dimensional.DmScdUpdatePolicy.TYPE2) {
         continue;
       }
       String field = DmDimensionLoadStrategySupport.resolveTargetFieldName(attribute, variables);
@@ -438,7 +430,8 @@ public final class DmPipelineBuilderSupport {
   /** Field names and order required on both Merge Rows inputs for SCD2 dimensions. */
   public static List<String> scd2MergeRowFieldNames(BuildContext ctx, DmDimension dimension) {
     List<String> fields = new ArrayList<>();
-    if (DmSurrogateKeySupport.resolveStrategy(dimension) == DmSurrogateKeyStrategy.USE_SOURCE_FIELD) {
+    if (DmSurrogateKeySupport.resolveStrategy(dimension)
+        == DmSurrogateKeyStrategy.USE_SOURCE_FIELD) {
       String surrogateField =
           DmSurrogateKeySupport.resolveSurrogateKeyField(dimension, ctx.config, ctx.variables);
       if (!Utils.isEmpty(surrogateField)) {
@@ -454,8 +447,7 @@ public final class DmPipelineBuilderSupport {
   }
 
   /** Sort keys for SCD2 source collapse: natural keys, attributes, then optional effective date. */
-  public static List<String> scd2CollapseSortFieldNames(
-      BuildContext ctx, DmDimension dimension) {
+  public static List<String> scd2CollapseSortFieldNames(BuildContext ctx, DmDimension dimension) {
     List<String> fields = new ArrayList<>();
     fields.addAll(naturalKeyFieldNames(dimension, ctx.variables));
     fields.addAll(scd2AttributeFieldNames(dimension, ctx.variables));
@@ -470,9 +462,11 @@ public final class DmPipelineBuilderSupport {
   public static List<String> scd2CollapseAggregateFieldNames(
       BuildContext ctx, DmDimension dimension) {
     List<String> fields = new ArrayList<>();
-    if (DmSurrogateKeySupport.resolveStrategy(dimension) == DmSurrogateKeyStrategy.USE_SOURCE_FIELD) {
+    if (DmSurrogateKeySupport.resolveStrategy(dimension)
+        == DmSurrogateKeyStrategy.USE_SOURCE_FIELD) {
       String surrogateSource =
-          DmSurrogateKeySupport.resolveSurrogateKeySourceField(dimension, ctx.config, ctx.variables);
+          DmSurrogateKeySupport.resolveSurrogateKeySourceField(
+              dimension, ctx.config, ctx.variables);
       if (!Utils.isEmpty(surrogateSource)) {
         fields.add(surrogateSource);
       }
@@ -492,7 +486,8 @@ public final class DmPipelineBuilderSupport {
   /** Source stream column name on the compare branch for a merge-layout target field. */
   public static String scd2MergeCompareSourceFieldName(
       BuildContext ctx, DmDimension dimension, String targetFieldName) {
-    if (DmSurrogateKeySupport.resolveStrategy(dimension) == DmSurrogateKeyStrategy.USE_SOURCE_FIELD) {
+    if (DmSurrogateKeySupport.resolveStrategy(dimension)
+        == DmSurrogateKeyStrategy.USE_SOURCE_FIELD) {
       String surrogateTarget =
           DmSurrogateKeySupport.resolveSurrogateKeyField(dimension, ctx.config, ctx.variables);
       if (!Utils.isEmpty(surrogateTarget) && surrogateTarget.equals(targetFieldName)) {

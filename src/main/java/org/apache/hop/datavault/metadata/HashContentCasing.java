@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import lombok.Getter;
@@ -24,8 +22,8 @@ import org.apache.hop.metadata.api.IEnumHasCode;
 import org.apache.hop.metadata.api.IEnumHasCodeAndDescription;
 
 /**
- * How to normalize (case) the business key content before hashing.
- * This ensures consistent hash keys regardless of source case variations.
+ * How to normalize (case) the business key content before hashing. This ensures consistent hash
+ * keys regardless of source case variations.
  */
 @Getter
 public enum HashContentCasing implements IEnumHasCodeAndDescription {
@@ -46,7 +44,8 @@ public enum HashContentCasing implements IEnumHasCodeAndDescription {
   }
 
   public static HashContentCasing lookupDescription(String description) {
-    return IEnumHasCodeAndDescription.lookupDescription(HashContentCasing.class, description, UPPER);
+    return IEnumHasCodeAndDescription.lookupDescription(
+        HashContentCasing.class, description, UPPER);
   }
 
   public static HashContentCasing lookupCode(String code) {

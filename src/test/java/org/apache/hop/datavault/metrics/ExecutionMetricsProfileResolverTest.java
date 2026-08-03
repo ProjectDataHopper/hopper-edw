@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -72,7 +70,9 @@ class ExecutionMetricsProfileResolverTest {
     assertNotNull(resolved.publishContext());
     assertEquals("Vault", resolved.publishContext().targetDatabaseName());
     assertEquals("local-catalog", resolved.publishContext().catalogConnectionName());
-    assertEquals(LoadRunMetricsCatalogPublisher.DEFAULT_SCHEMA_NAME, resolved.publishContext().operationsSchema());
+    assertEquals(
+        LoadRunMetricsCatalogPublisher.DEFAULT_SCHEMA_NAME,
+        resolved.publishContext().operationsSchema());
     assertTrue(resolved.publishContext().publishDatabaseRows());
     assertTrue(resolved.publishContext().publishCatalogDefinitions());
   }
@@ -125,14 +125,7 @@ class ExecutionMetricsProfileResolverTest {
 
     ResolvedExecutionMetrics resolved =
         ExecutionMetricsProfileResolver.resolve(
-            "ops-profile",
-            "",
-            "action-catalog",
-            "Vault",
-            "dm",
-            null,
-            variables,
-            metadataProvider);
+            "ops-profile", "", "action-catalog", "Vault", "dm", null, variables, metadataProvider);
 
     assertTrue(resolved.enabled());
     assertEquals("/project/metrics", resolved.metricsOutputFolder());

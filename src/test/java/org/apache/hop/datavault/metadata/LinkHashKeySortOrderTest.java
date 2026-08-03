@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -29,9 +28,9 @@ import org.junit.jupiter.api.Test;
  * linguistic database ORDER BY collations for decimal-dash digests (e.g. {@code 0-10-...} vs {@code
  * 0-100-...}).
  *
- * <p>Link CDC must order the target stream with either a hop-compatible binary/{@code C}
- * collation on SQL {@code ORDER BY} (see {@link DvHashKeyOrderStrategySupport}) or Hop SortRows —
- * never a default locale/UCA collation alone.
+ * <p>Link CDC must order the target stream with either a hop-compatible binary/{@code C} collation
+ * on SQL {@code ORDER BY} (see {@link DvHashKeyOrderStrategySupport}) or Hop SortRows — never a
+ * default locale/UCA collation alone.
  */
 class LinkHashKeySortOrderTest {
 

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.metrics;
 
 import java.util.function.Supplier;
@@ -112,7 +110,8 @@ public class ModelLoadDurationPane extends Composite {
     PropsUi.setLook(viewDataButton);
     applyStandardBackground(viewDataButton);
     viewDataButton.setText(BaseMessages.getString(PKG, "ModelLoadDurationPane.ViewData"));
-    viewDataButton.setToolTipText(BaseMessages.getString(PKG, "ModelLoadDurationPane.ViewData.Tooltip"));
+    viewDataButton.setToolTipText(
+        BaseMessages.getString(PKG, "ModelLoadDurationPane.ViewData.Tooltip"));
     viewDataButton.addListener(SWT.Selection, event -> openDurationPreview());
     FormData fdViewData = new FormData();
     fdViewData.top = new FormAttachment(0, PropsUi.getMargin());
@@ -124,7 +123,8 @@ public class ModelLoadDurationPane extends Composite {
     PropsUi.setLook(refreshButton);
     applyStandardBackground(refreshButton);
     refreshButton.setText(BaseMessages.getString(PKG, "ModelLoadDurationPane.Refresh"));
-    refreshButton.setToolTipText(BaseMessages.getString(PKG, "ModelLoadDurationPane.Refresh.Tooltip"));
+    refreshButton.setToolTipText(
+        BaseMessages.getString(PKG, "ModelLoadDurationPane.Refresh.Tooltip"));
     refreshButton.addListener(SWT.Selection, event -> refresh());
     FormData fdRefresh = new FormData();
     fdRefresh.top = new FormAttachment(0, PropsUi.getMargin());
@@ -174,7 +174,8 @@ public class ModelLoadDurationPane extends Composite {
     if (refreshButton != null && !refreshButton.isDisposed()) {
       refreshButton.setEnabled(canInteract);
     }
-    viewDataButton.setEnabled(canInteract && LoadRunDurationPreviewSupport.hasPreviewRows(snapshot));
+    viewDataButton.setEnabled(
+        canInteract && LoadRunDurationPreviewSupport.hasPreviewRows(snapshot));
   }
 
   public void refresh() {

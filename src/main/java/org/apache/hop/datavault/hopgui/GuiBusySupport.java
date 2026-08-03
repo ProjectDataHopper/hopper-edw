@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui;
 
 import org.eclipse.swt.SWT;
@@ -39,10 +37,7 @@ public final class GuiBusySupport {
     }
     Display display = control.getDisplay();
     Shell shell = control.getShell();
-    if (display == null
-        || display.isDisposed()
-        || shell == null
-        || shell.isDisposed()) {
+    if (display == null || display.isDisposed() || shell == null || shell.isDisposed()) {
       runnable.run();
       return;
     }

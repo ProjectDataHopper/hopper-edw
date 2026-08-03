@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import java.util.HashSet;
@@ -68,13 +66,15 @@ public final class DmLayoutSupport {
     Set<String> added = new HashSet<>();
 
     if (loadStrategy == DmDimensionLoadStrategySupport.DmDimensionLoadStrategy.PURE_TYPE2
-        || loadStrategy == DmDimensionLoadStrategySupport.DmDimensionLoadStrategy.DIMENSION_LOOKUP) {
+        || loadStrategy
+            == DmDimensionLoadStrategySupport.DmDimensionLoadStrategy.DIMENSION_LOOKUP) {
       addSurrogateKeyColumn(rowMeta, added, dimension, resolvedConfig, variables);
       for (DmNaturalKeyField naturalKey : dimension.getNaturalKeysOrEmpty()) {
         addSourceMappedColumn(
             rowMeta, added, resolveFieldName(naturalKey.getFieldName(), variables), sourceRowMeta);
       }
-      addColumn(rowMeta, added, resolvedConfig.resolveVersionField(variables), new ValueMetaInteger());
+      addColumn(
+          rowMeta, added, resolvedConfig.resolveVersionField(variables), new ValueMetaInteger());
       addColumn(
           rowMeta, added, resolvedConfig.resolveDateFromField(variables), new ValueMetaTimestamp());
       addColumn(
@@ -184,7 +184,10 @@ public final class DmLayoutSupport {
   }
 
   public static IRowMeta buildFactlessFactTargetTableLayout(
-      DmFactlessFact fact, DimensionalModel model, DimensionalConfiguration config, IVariables variables)
+      DmFactlessFact fact,
+      DimensionalModel model,
+      DimensionalConfiguration config,
+      IVariables variables)
       throws HopException {
     return buildFactlessFactTargetTableLayout(fact, model, config, variables, null);
   }
@@ -218,7 +221,11 @@ public final class DmLayoutSupport {
     }
     RowMeta rowMeta = new RowMeta();
     Set<String> added = new HashSet<>();
-    addColumn(rowMeta, added, resolveFieldName(fact.getSnapshotDateField(), variables), new ValueMetaTimestamp());
+    addColumn(
+        rowMeta,
+        added,
+        resolveFieldName(fact.getSnapshotDateField(), variables),
+        new ValueMetaTimestamp());
     appendFactLikeColumns(
         rowMeta,
         added,
@@ -245,7 +252,11 @@ public final class DmLayoutSupport {
     }
     RowMeta rowMeta = new RowMeta();
     Set<String> added = new HashSet<>();
-    addColumn(rowMeta, added, resolveFieldName(fact.getSnapshotDateField(), variables), new ValueMetaTimestamp());
+    addColumn(
+        rowMeta,
+        added,
+        resolveFieldName(fact.getSnapshotDateField(), variables),
+        new ValueMetaTimestamp());
     appendFactLikeColumns(
         rowMeta,
         added,
@@ -318,7 +329,10 @@ public final class DmLayoutSupport {
   }
 
   public static IRowMeta buildBridgeTargetTableLayout(
-      DmBridge bridge, DimensionalModel model, DimensionalConfiguration config, IVariables variables)
+      DmBridge bridge,
+      DimensionalModel model,
+      DimensionalConfiguration config,
+      IVariables variables)
       throws HopException {
     return buildBridgeTargetTableLayout(bridge, model, config, variables, null);
   }
@@ -340,16 +354,24 @@ public final class DmLayoutSupport {
     for (DmBridgeDimensionRef ref : bridge.getDimensionRefsOrEmpty()) {
       DmFactDimensionRole role =
           new DmFactDimensionRole(ref.getDimensionTableName(), ref.getForeignKeyColumn());
-      addFactForeignKeyColumn(rowMeta, added, role, model, resolvedConfig, variables, metadataProvider);
+      addFactForeignKeyColumn(
+          rowMeta, added, role, model, resolvedConfig, variables, metadataProvider);
     }
     if (!Utils.isEmpty(bridge.getWeightField())) {
-      addColumn(rowMeta, added, resolveFieldName(bridge.getWeightField(), variables), new ValueMetaNumber());
+      addColumn(
+          rowMeta,
+          added,
+          resolveFieldName(bridge.getWeightField(), variables),
+          new ValueMetaNumber());
     }
     return rowMeta;
   }
 
   public static IRowMeta buildAggregateFactTargetTableLayout(
-      DmAggregateFact fact, DimensionalModel model, DimensionalConfiguration config, IVariables variables)
+      DmAggregateFact fact,
+      DimensionalModel model,
+      DimensionalConfiguration config,
+      IVariables variables)
       throws HopException {
     return buildAggregateFactTargetTableLayout(fact, model, config, variables, null);
   }
@@ -372,7 +394,8 @@ public final class DmLayoutSupport {
         fact);
   }
 
-  public static String resolvePreviousFieldName(DmDimensionAttribute attribute, IVariables variables) {
+  public static String resolvePreviousFieldName(
+      DmDimensionAttribute attribute, IVariables variables) {
     if (attribute == null) {
       return null;
     }
@@ -420,8 +443,8 @@ public final class DmLayoutSupport {
 
   /**
    * Warehouse key column used by Dimension Lookup when resolving a fact join to this dimension.
-   * Type 1 dimensions without a generated surrogate use their first natural key (for example
-   * {@code date_key} on calendar dimensions).
+   * Type 1 dimensions without a generated surrogate use their first natural key (for example {@code
+   * date_key} on calendar dimensions).
    */
   public static String resolveDimensionLookupKeyField(
       DmDimension dimension, DimensionalConfiguration config, IVariables variables) {
@@ -515,10 +538,7 @@ public final class DmLayoutSupport {
   }
 
   private static void addColumn(
-      RowMeta rowMeta,
-      Set<String> added,
-      String fieldName,
-      ValueMetaInteger valueMetaTemplate)
+      RowMeta rowMeta, Set<String> added, String fieldName, ValueMetaInteger valueMetaTemplate)
       throws HopException {
     ValueMetaInteger valueMeta = new ValueMetaInteger(fieldName);
     valueMeta.setLength(DEFAULT_INTEGER_FIELD_LENGTH);
@@ -527,40 +547,28 @@ public final class DmLayoutSupport {
   }
 
   private static void addColumn(
-      RowMeta rowMeta,
-      Set<String> added,
-      String fieldName,
-      ValueMetaTimestamp valueMetaTemplate)
+      RowMeta rowMeta, Set<String> added, String fieldName, ValueMetaTimestamp valueMetaTemplate)
       throws HopException {
     ValueMetaTimestamp valueMeta = new ValueMetaTimestamp(fieldName);
     addColumn(rowMeta, added, valueMeta);
   }
 
   private static void addColumn(
-      RowMeta rowMeta,
-      Set<String> added,
-      String fieldName,
-      ValueMetaBoolean valueMetaTemplate)
+      RowMeta rowMeta, Set<String> added, String fieldName, ValueMetaBoolean valueMetaTemplate)
       throws HopException {
     ValueMetaBoolean valueMeta = new ValueMetaBoolean(fieldName);
     addColumn(rowMeta, added, valueMeta);
   }
 
   private static void addColumn(
-      RowMeta rowMeta,
-      Set<String> added,
-      String fieldName,
-      ValueMetaNumber valueMetaTemplate)
+      RowMeta rowMeta, Set<String> added, String fieldName, ValueMetaNumber valueMetaTemplate)
       throws HopException {
     ValueMetaNumber valueMeta = new ValueMetaNumber(fieldName);
     addColumn(rowMeta, added, valueMeta);
   }
 
   private static void addLoadDateColumnIfAbsent(
-      RowMeta rowMeta,
-      Set<String> added,
-      DimensionalConfiguration config,
-      IVariables variables)
+      RowMeta rowMeta, Set<String> added, DimensionalConfiguration config, IVariables variables)
       throws HopException {
     String loadDateField = resolveFieldName(config.resolveLoadDateField(variables), variables);
     if (Utils.isEmpty(loadDateField) || added.contains(loadDateField)) {
@@ -663,7 +671,11 @@ public final class DmLayoutSupport {
       }
     }
     for (DmFactMeasure measure : measures) {
-      addColumn(rowMeta, added, resolveFieldName(measure.getFieldName(), variables), new ValueMetaNumber());
+      addColumn(
+          rowMeta,
+          added,
+          resolveFieldName(measure.getFieldName(), variables),
+          new ValueMetaNumber());
     }
   }
 
@@ -734,7 +746,8 @@ public final class DmLayoutSupport {
     String sourceFieldForType = lookupKeyField;
     if (DmSurrogateKeySupport.usesStringSurrogate(dimension)) {
       String sourceField =
-          DmSurrogateKeySupport.resolveSurrogateKeySourceField(dimension, resolvedConfig, variables);
+          DmSurrogateKeySupport.resolveSurrogateKeySourceField(
+              dimension, resolvedConfig, variables);
       if (!Utils.isEmpty(sourceField)) {
         sourceFieldForType = sourceField;
       }

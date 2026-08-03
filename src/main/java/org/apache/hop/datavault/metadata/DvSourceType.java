@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import lombok.Getter;
@@ -26,10 +24,10 @@ import org.apache.hop.metadata.api.IEnumHasCodeAndDescription;
 /**
  * Enumeration of supported source system types for a Data Vault model.
  *
- * <p>Each source type describes how rows are obtained (e.g. from an RDBMS table/query,
- * a CSV file, a Parquet file, etc). The common aspects (name + expected row layout via
- * fields) live in the base; type-specific connection details live in the concrete
- * implementations (DvDatabaseSource, ...).
+ * <p>Each source type describes how rows are obtained (e.g. from an RDBMS table/query, a CSV file,
+ * a Parquet file, etc). The common aspects (name + expected row layout via fields) live in the
+ * base; type-specific connection details live in the concrete implementations (DvDatabaseSource,
+ * ...).
  */
 @Getter
 public enum DvSourceType implements IEnumHasCodeAndDescription {

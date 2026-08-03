@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.quality.history;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,12 +23,12 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.hop.core.RowMetaAndData;
 import org.apache.hop.catalog.model.PhysicalTableRef;
 import org.apache.hop.catalog.model.RecordDefinition;
 import org.apache.hop.catalog.model.RecordDefinitionKey;
 import org.apache.hop.catalog.model.RecordDefinitionType;
 import org.apache.hop.catalog.registry.RecordDefinitionRegistry;
+import org.apache.hop.core.RowMetaAndData;
 import org.apache.hop.core.database.Database;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
@@ -67,6 +65,7 @@ public final class DataQualityHistoryPublisher {
 
   /** Historical name; not applied implicitly. */
   public static final String LEGACY_OPS_SCHEMA_NAME = "dv_ops";
+
   public static final String TABLE_QUALITY_RUN = "quality_run";
   public static final String TABLE_QUALITY_FINDING = "quality_finding";
   public static final String TABLE_QUALITY_PROFILE_SUBJECT = "quality_profile_subject";
@@ -470,8 +469,7 @@ public final class DataQualityHistoryPublisher {
         return new PublishResult(PublishStatus.SKIPPED, msg);
       }
 
-      insertQualityRun(
-          db, operationsSchema, report, loadId, workflowName, workflowExecutionId);
+      insertQualityRun(db, operationsSchema, report, loadId, workflowName, workflowExecutionId);
       wroteAny = true;
       if (afterQualityRunInsertedForTest != null) {
         afterQualityRunInsertedForTest.run();
@@ -524,11 +522,7 @@ public final class DataQualityHistoryPublisher {
     String qualified =
         db.getDatabaseMeta()
             .getQuotedSchemaTableCombination(db, operationsSchema, TABLE_QUALITY_RUN);
-    String sql =
-        "SELECT 1 FROM "
-            + qualified
-            + " WHERE quality_run_id = "
-            + sqlLiteral(runId);
+    String sql = "SELECT 1 FROM " + qualified + " WHERE quality_run_id = " + sqlLiteral(runId);
     RowMetaAndData row = db.getOneRow(sql);
     return row != null && row.getData() != null && row.getData().length > 0;
   }
@@ -617,11 +611,7 @@ public final class DataQualityHistoryPublisher {
     String qualified =
         db.getDatabaseMeta()
             .getQuotedSchemaTableCombination(db, operationsSchema, TABLE_QUALITY_ALERT);
-    String sql =
-        "SELECT 1 FROM "
-            + qualified
-            + " WHERE quality_run_id = "
-            + sqlLiteral(runId);
+    String sql = "SELECT 1 FROM " + qualified + " WHERE quality_run_id = " + sqlLiteral(runId);
     RowMetaAndData row = db.getOneRow(sql);
     return row != null && row.getData() != null && row.getData().length > 0;
   }
@@ -673,7 +663,12 @@ public final class DataQualityHistoryPublisher {
       } catch (Exception e) {
         if (log != null) {
           log.logError(
-              "Best-effort cleanup failed for " + operationsSchema + "." + table + ": " + e.getMessage());
+              "Best-effort cleanup failed for "
+                  + operationsSchema
+                  + "."
+                  + table
+                  + ": "
+                  + e.getMessage());
         }
       }
     }
@@ -784,11 +779,7 @@ public final class DataQualityHistoryPublisher {
   }
 
   private static void insertProfileField(
-      Database db,
-      String operationsSchema,
-      String runId,
-      String subjectKey,
-      FieldProfile field)
+      Database db, String operationsSchema, String runId, String subjectKey, FieldProfile field)
       throws HopException {
     IRowMeta layout = new RowMeta();
     layout.addValueMeta(stringMeta("quality_run_id", 64));
@@ -936,7 +927,10 @@ public final class DataQualityHistoryPublisher {
     List<Map.Entry<String, Long>> entries = new ArrayList<>(valueCounts.entrySet());
     entries.sort(
         (a, b) -> {
-          int cmp = Long.compare(b.getValue() != null ? b.getValue() : 0L, a.getValue() != null ? a.getValue() : 0L);
+          int cmp =
+              Long.compare(
+                  b.getValue() != null ? b.getValue() : 0L,
+                  a.getValue() != null ? a.getValue() : 0L);
           if (cmp != 0) {
             return cmp;
           }

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.config;
 
 import lombok.Getter;
@@ -30,15 +28,15 @@ import org.apache.hop.core.logging.ILogChannel;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHasHopMetadataProvider;
+import org.apache.hop.pipeline.config.PipelineRunConfiguration;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.gui.GuiCompositeWidgets;
 import org.apache.hop.ui.core.gui.IGuiPluginCompositeWidgetsListener;
-import org.apache.hop.pipeline.config.PipelineRunConfiguration;
 import org.apache.hop.ui.core.widget.MetaSelectionLine;
 import org.apache.hop.ui.core.widget.TextVar;
 import org.apache.hop.ui.hopgui.HopGui;
-import org.apache.hop.workflow.config.WorkflowRunConfiguration;
 import org.apache.hop.ui.hopgui.perspective.configuration.tabs.ConfigPluginOptionsTab;
+import org.apache.hop.workflow.config.WorkflowRunConfiguration;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
@@ -59,9 +57,11 @@ public class DataVaultConfigOptionPlugin
   private static final String WIDGET_ID_MAX_UNDO_OPERATIONS = "10010-max-undo-operations";
   private static final String WIDGET_ID_DM_DEFAULT_SURROGATE_KEY = "10020-dm-default-surrogate-key";
   private static final String WIDGET_ID_DM_DEFAULT_VERSION = "10030-dm-default-version";
-  private static final String WIDGET_ID_DM_DEFAULT_EFFECTIVE_FROM = "10040-dm-default-effective-from";
+  private static final String WIDGET_ID_DM_DEFAULT_EFFECTIVE_FROM =
+      "10040-dm-default-effective-from";
   private static final String WIDGET_ID_DM_DEFAULT_EFFECTIVE_TO = "10050-dm-default-effective-to";
-  private static final String WIDGET_ID_DM_DEFAULT_LOAD_TIMESTAMP = "10060-dm-default-load-timestamp";
+  private static final String WIDGET_ID_DM_DEFAULT_LOAD_TIMESTAMP =
+      "10060-dm-default-load-timestamp";
   private static final String WIDGET_ID_DM_DEFAULT_CURRENT_FLAG = "10070-dm-default-current-flag";
   private static final String WIDGET_ID_DEFAULT_PIPELINE_RUN_CONFIGURATION =
       "10080-default-pipeline-run-configuration";
@@ -179,8 +179,7 @@ public class DataVaultConfigOptionPlugin
       toolTip = "i18n::DataVaultConfigOptionPlugin.SchemaRemediationFolder.ToolTip")
   @CommandLine.Option(
       names = {"--dv-schema-remediation-folder"},
-      description =
-          "Root folder for schema-remediation packages (workflow, SQL, HTML/MD report)")
+      description = "Root folder for schema-remediation packages (workflow, SQL, HTML/MD report)")
   private String schemaRemediationFolder;
 
   public static DataVaultConfigOptionPlugin getInstance() {
@@ -279,7 +278,9 @@ public class DataVaultConfigOptionPlugin
           break;
         case WIDGET_ID_DM_DEFAULT_EFFECTIVE_FROM:
           dmDefaultEffectiveFromField = getTextValue(control);
-          config.getDimensionalDefaultFieldNames().setEffectiveFromField(dmDefaultEffectiveFromField);
+          config
+              .getDimensionalDefaultFieldNames()
+              .setEffectiveFromField(dmDefaultEffectiveFromField);
           break;
         case WIDGET_ID_DM_DEFAULT_EFFECTIVE_TO:
           dmDefaultEffectiveToField = getTextValue(control);
@@ -287,7 +288,9 @@ public class DataVaultConfigOptionPlugin
           break;
         case WIDGET_ID_DM_DEFAULT_LOAD_TIMESTAMP:
           dmDefaultLoadTimestampField = getTextValue(control);
-          config.getDimensionalDefaultFieldNames().setLoadTimestampField(dmDefaultLoadTimestampField);
+          config
+              .getDimensionalDefaultFieldNames()
+              .setLoadTimestampField(dmDefaultLoadTimestampField);
           break;
         case WIDGET_ID_DM_DEFAULT_CURRENT_FLAG:
           dmDefaultCurrentFlagField = getTextValue(control);

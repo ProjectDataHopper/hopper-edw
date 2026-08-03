@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.command.svg;
 
 import lombok.Getter;
@@ -39,7 +37,8 @@ public class SvgRenderOptions {
     return new SvgRenderOptions();
   }
 
-  public static SvgRenderOptions fromCli(boolean noNotes, float magnification, boolean showHashKeys) {
+  public static SvgRenderOptions fromCli(
+      boolean noNotes, float magnification, boolean showHashKeys) {
     return fromCli(noNotes, magnification, showHashKeys, ExecutionMapExportScope.FOCUSED);
   }
 
@@ -53,7 +52,9 @@ public class SvgRenderOptions {
     options.setMagnification(magnification);
     options.setShowHashKeyFieldNames(showHashKeys);
     options.setExecutionMapExportScope(
-        executionMapExportScope != null ? executionMapExportScope : ExecutionMapExportScope.FOCUSED);
+        executionMapExportScope != null
+            ? executionMapExportScope
+            : ExecutionMapExportScope.FOCUSED);
     return options;
   }
 }

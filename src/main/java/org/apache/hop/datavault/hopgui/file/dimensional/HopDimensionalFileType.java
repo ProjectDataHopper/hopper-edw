@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.dimensional;
 
 import java.io.File;
@@ -40,7 +38,6 @@ import org.apache.hop.datavault.resourcedefinition.ResourceDefinitionGroupResolv
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
-
 import org.apache.hop.ui.core.dialog.BaseDialog;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.gui.GuiResource;
@@ -114,8 +111,7 @@ public class HopDimensionalFileType extends HopFileTypeBase {
       IHopMetadataProvider metadataProvider)
       throws HopException {
     DimensionalModel model =
-        ResourceDefinitionGroupResolver.loadDimensionalModel(
-            filename, variables, metadataProvider);
+        ResourceDefinitionGroupResolver.loadDimensionalModel(filename, variables, metadataProvider);
     return new HopGuiDimensionalModelSearchable(locationDescription, model);
   }
 

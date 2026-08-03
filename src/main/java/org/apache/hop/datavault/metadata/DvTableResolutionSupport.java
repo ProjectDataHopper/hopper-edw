@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import org.apache.hop.core.exception.HopException;
@@ -29,7 +27,10 @@ public final class DvTableResolutionSupport {
   private DvTableResolutionSupport() {}
 
   public static DvHub resolveHub(
-      DataVaultModel model, String hubName, IVariables variables, IHopMetadataProvider metadataProvider) {
+      DataVaultModel model,
+      String hubName,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider) {
     if (model == null || Utils.isEmpty(hubName)) {
       return null;
     }
@@ -49,7 +50,10 @@ public final class DvTableResolutionSupport {
   }
 
   public static DvLink resolveLink(
-      DataVaultModel model, String linkName, IVariables variables, IHopMetadataProvider metadataProvider) {
+      DataVaultModel model,
+      String linkName,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider) {
     if (model == null || Utils.isEmpty(linkName)) {
       return null;
     }
@@ -196,12 +200,18 @@ public final class DvTableResolutionSupport {
   }
 
   public static boolean isHubLike(
-      DataVaultModel model, String tableName, IVariables variables, IHopMetadataProvider metadataProvider) {
+      DataVaultModel model,
+      String tableName,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider) {
     return resolveHub(model, tableName, variables, metadataProvider) != null;
   }
 
   public static boolean isLinkLike(
-      DataVaultModel model, String tableName, IVariables variables, IHopMetadataProvider metadataProvider) {
+      DataVaultModel model,
+      String tableName,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider) {
     return resolveLink(model, tableName, variables, metadataProvider) != null;
   }
 
@@ -230,7 +240,9 @@ public final class DvTableResolutionSupport {
       }
       // Role-playing alias with a distinct canvas name: derive a stable column name.
       if (!Utils.isEmpty(reference.getName())
-          && !reference.getName().equalsIgnoreCase(resolve(reference.getReferencedTableName(), variables))) {
+          && !reference
+              .getName()
+              .equalsIgnoreCase(resolve(reference.getReferencedTableName(), variables))) {
         return deriveRoleHashKeyFieldName(reference.getName());
       }
     }

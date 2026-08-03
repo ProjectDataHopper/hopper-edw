@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.catalog.smoke;
 
 import java.nio.file.Files;
@@ -23,7 +21,6 @@ import java.nio.file.Path;
 import org.apache.hop.catalog.model.RecordDefinition;
 import org.apache.hop.catalog.model.RecordDefinitionKey;
 import org.apache.hop.catalog.model.RecordDefinitionQuery;
-
 import org.apache.hop.catalog.model.RecordDefinitionType;
 import org.apache.hop.catalog.registry.RecordDefinitionRegistry;
 import org.apache.hop.catalog.xp.RegisterDataCatalogMetadataExtensionPoint;
@@ -82,7 +79,8 @@ public final class DvCatalogPublishSmoke {
               });
     }
 
-    DataVaultModel model = loadModel(projectHome + "/tests/basic/vault1.hdv", metadataProvider, variables);
+    DataVaultModel model =
+        loadModel(projectHome + "/tests/basic/vault1.hdv", metadataProvider, variables);
     RecordDefinitionRegistry.getInstance().invalidate();
 
     DvCatalogPublisher.PublishResult publishResult =

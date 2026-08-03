@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai.workflow;
 
 import java.util.ArrayList;
@@ -26,8 +24,8 @@ import org.apache.hop.core.plugins.ActionPluginType;
 import org.apache.hop.core.plugins.PluginRegistry;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.datavault.ai.HopAiProposal;
-import org.apache.hop.datavault.ai.HopAiProposalValidation;
 import org.apache.hop.datavault.ai.HopAiProposalParamSupport;
+import org.apache.hop.datavault.ai.HopAiProposalValidation;
 import org.apache.hop.workflow.WorkflowMeta;
 import org.apache.hop.workflow.action.ActionMeta;
 

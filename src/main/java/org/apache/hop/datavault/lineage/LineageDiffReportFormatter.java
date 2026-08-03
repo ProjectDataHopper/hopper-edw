@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.lineage;
 
 import java.util.List;
@@ -81,7 +80,8 @@ public final class LineageDiffReportFormatter {
       md.append("- **Baseline:** `")
           .append(escape(result.getBaselineSource()))
           .append("`")
-          .append(result.isBaselineMissing() ? " _(missing — first publish or no prior lineage)_" : "")
+          .append(
+              result.isBaselineMissing() ? " _(missing — first publish or no prior lineage)_" : "")
           .append("\n");
       if (result.isEmpty()) {
         md.append("- No lineage drift detected.\n\n");

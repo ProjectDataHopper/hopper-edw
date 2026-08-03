@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.architecture;
 
 import java.util.ArrayList;
@@ -43,6 +42,7 @@ public final class DrawioArchitectureExporter {
   private static final int ROW_GAP = 20;
   private static final int MARGIN = 40;
   private static final int LANE_LABEL_HEIGHT = 28;
+
   /** Max content width of a swimlane before wrapping to the next row. */
   private static final int MAX_LANE_CONTENT_WIDTH = 1400;
 
@@ -226,10 +226,7 @@ public final class DrawioArchitectureExporter {
   }
 
   private static int appendEdges(
-      StringBuilder cells,
-      ArchitectureGraph graph,
-      Map<String, Integer> nodeCellIds,
-      int cellId) {
+      StringBuilder cells, ArchitectureGraph graph, Map<String, Integer> nodeCellIds, int cellId) {
     for (ArchitectureEdge edge : graph.getEdges()) {
       Integer from = nodeCellIds.get(edge.getFromNodeId());
       Integer to = nodeCellIds.get(edge.getToNodeId());
@@ -238,9 +235,7 @@ public final class DrawioArchitectureExporter {
       }
       // Prefer short / empty labels on freeform model diagrams to reduce clutter
       String label = edge.getLabel() != null ? edge.getLabel() : "";
-      if (!graph.isFreeformLayout()
-          && edge.getKind() != null
-          && Utils.isEmpty(label)) {
+      if (!graph.isFreeformLayout() && edge.getKind() != null && Utils.isEmpty(label)) {
         label = edge.getKind().name().toLowerCase();
       }
       if (graph.isFreeformLayout() && ArchitecturePathSupport.looksLikeFilesystemPath(label)) {

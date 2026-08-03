@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.sourcemodel.profile;
 
 import lombok.Getter;
@@ -28,23 +27,19 @@ public enum SourceRelationshipProfileStrategy implements IEnumHasCodeAndDescript
   EXACT_KEY(
       "EXACT_KEY",
       BaseMessages.getString(
-          SourceRelationshipProfileStrategy.class,
-          "SourceRelationshipProfileStrategy.ExactKey")),
+          SourceRelationshipProfileStrategy.class, "SourceRelationshipProfileStrategy.ExactKey")),
   SAMPLED_KEY(
       "SAMPLED_KEY",
       BaseMessages.getString(
-          SourceRelationshipProfileStrategy.class,
-          "SourceRelationshipProfileStrategy.SampledKey")),
+          SourceRelationshipProfileStrategy.class, "SourceRelationshipProfileStrategy.SampledKey")),
   STATS_ONLY(
       "STATS_ONLY",
       BaseMessages.getString(
-          SourceRelationshipProfileStrategy.class,
-          "SourceRelationshipProfileStrategy.StatsOnly")),
+          SourceRelationshipProfileStrategy.class, "SourceRelationshipProfileStrategy.StatsOnly")),
   FULL_OUTER(
       "FULL_OUTER",
       BaseMessages.getString(
-          SourceRelationshipProfileStrategy.class,
-          "SourceRelationshipProfileStrategy.FullOuter"));
+          SourceRelationshipProfileStrategy.class, "SourceRelationshipProfileStrategy.FullOuter"));
 
   private final String code;
   private final String description;

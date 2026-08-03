@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.workflow.actions.validatedefinitions;
 
 import java.lang.reflect.Field;
@@ -79,7 +78,8 @@ public class ActionValidateResourceDefinitionsDialog extends ActionDialog {
 
     buildButtonBar().ok(e -> ok()).cancel(e -> cancel()).build();
 
-    DialogHelpSupport.installLocalHelpButton(shell, HelpTopics.ACTION_VALIDATE_RESOURCE_DEFINITIONS);
+    DialogHelpSupport.installLocalHelpButton(
+        shell, HelpTopics.ACTION_VALIDATE_RESOURCE_DEFINITIONS);
 
     // Scrolled settings area so ComboVar rows still fit on smaller screens.
     ScrolledComposite scrolled = new ScrolledComposite(shell, SWT.V_SCROLL | SWT.H_SCROLL);
@@ -118,7 +118,6 @@ public class ActionValidateResourceDefinitionsDialog extends ActionDialog {
                 + action.getClass().getName()
                 + " (GuiRegistry missing elements?)");
       }
-
 
       setWidgetsContent();
 
@@ -188,7 +187,8 @@ public class ActionValidateResourceDefinitionsDialog extends ActionDialog {
 
     // Drop empty root if present so we start clean.
     if (existing != null && (existing.getChildren() == null || existing.getChildren().isEmpty())) {
-      // putGuiElements overwrites the parent map entry when we re-add below via addGuiWidgetElement.
+      // putGuiElements overwrites the parent map entry when we re-add below via
+      // addGuiWidgetElement.
     }
 
     for (Field field : action.getClass().getDeclaredFields()) {

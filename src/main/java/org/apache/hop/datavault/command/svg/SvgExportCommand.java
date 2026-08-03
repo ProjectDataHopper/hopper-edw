@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.command.svg;
 
 import java.util.Map;
@@ -136,10 +134,7 @@ public class SvgExportCommand implements Runnable, IHopCommand, IHasHopMetadataP
 
       SvgRenderOptions options =
           SvgRenderOptions.fromCli(
-              noNotes,
-              magnification,
-              showHashKeys,
-              ExecutionMapExportScope.fromCli(exportScope));
+              noNotes, magnification, showHashKeys, ExecutionMapExportScope.fromCli(exportScope));
 
       if (StringUtils.isNotEmpty(file)) {
         exportSingleFile(options);
@@ -175,7 +170,8 @@ public class SvgExportCommand implements Runnable, IHopCommand, IHasHopMetadataP
         StringUtils.isNotEmpty(output)
             ? variables.resolve(output)
             : SvgExportService.defaultOutputPath(resolvedFile);
-    SvgExportService.exportFile(resolvedFile, outputPath, options, variables, metadataProvider, log);
+    SvgExportService.exportFile(
+        resolvedFile, outputPath, options, variables, metadataProvider, log);
     log.logBasic("Finished SVG export for " + resolvedFile);
   }
 

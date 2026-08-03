@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.businessvault;
 
 import java.util.ArrayList;
@@ -29,35 +27,36 @@ import org.apache.hop.core.Props;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.hopgui.EnumDialogSupport;
+import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
+import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
+import org.apache.hop.datavault.hopgui.help.HelpTopics;
+import org.apache.hop.datavault.hopgui.lineage.LineageTabSupport;
+import org.apache.hop.datavault.lineage.BvModelLineageCollector;
+import org.apache.hop.datavault.lineage.LineageSnapshot;
+import org.apache.hop.datavault.lineage.TableLineage;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.datavault.metadata.IDvTable;
-import org.apache.hop.datavault.hopgui.EnumDialogSupport;
+import org.apache.hop.datavault.metadata.businessvault.BusinessVaultConfiguration;
+import org.apache.hop.datavault.metadata.businessvault.BusinessVaultDerivativeSupport;
+import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
 import org.apache.hop.datavault.metadata.businessvault.BvDerivativeRef;
 import org.apache.hop.datavault.metadata.businessvault.BvScd2BuildMode;
 import org.apache.hop.datavault.metadata.businessvault.BvScd2FieldMapping;
 import org.apache.hop.datavault.metadata.businessvault.BvScd2FieldMappingDialogSupport;
 import org.apache.hop.datavault.metadata.businessvault.BvScd2SatelliteConfig;
 import org.apache.hop.datavault.metadata.businessvault.BvScd2Table;
-import org.apache.hop.datavault.metadata.businessvault.BusinessVaultConfiguration;
-import org.apache.hop.datavault.metadata.businessvault.BusinessVaultDerivativeSupport;
-import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
 import org.apache.hop.datavault.metadata.businessvault.IBvTable;
-import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
-import org.apache.hop.datavault.hopgui.lineage.LineageTabSupport;
-import org.apache.hop.datavault.lineage.BvModelLineageCollector;
-import org.apache.hop.datavault.lineage.LineageSnapshot;
-import org.apache.hop.datavault.lineage.TableLineage;
 import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.core.FormDataBuilder;
 import org.apache.hop.ui.core.PropsUi;
-import org.apache.hop.ui.core.gui.WindowProperty;
 import org.apache.hop.ui.core.dialog.BaseDialog;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
-import org.apache.hop.ui.core.gui.GuiResource;
+import org.apache.hop.ui.core.gui.WindowProperty;
 import org.apache.hop.ui.core.widget.ColumnInfo;
 import org.apache.hop.ui.core.widget.TableView;
+import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
@@ -70,8 +69,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
-import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
-import org.apache.hop.datavault.hopgui.help.HelpTopics;
 
 /** Tabbed dialog to edit a Business Vault SCD2 table, including multi-satellite field mappings. */
 public class HopGuiBvScd2TableDialog {
@@ -233,8 +230,7 @@ public class HopGuiBvScd2TableDialog {
 
     wTableName = new Text(comp, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wTableName);
-    wTableName.setLayoutData(
-        new FormDataBuilder().left(middle, 0).top(0, margin).right().result());
+    wTableName.setLayoutData(new FormDataBuilder().left(middle, 0).top(0, margin).right().result());
 
     Label wlIncludeHashKey = new Label(comp, SWT.RIGHT);
     wlIncludeHashKey.setText(
@@ -257,11 +253,7 @@ public class HopGuiBvScd2TableDialog {
     wlBuildMode.setText(BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.BuildMode.Label"));
     PropsUi.setLook(wlBuildMode);
     wlBuildMode.setLayoutData(
-        new FormDataBuilder()
-            .left()
-            .top(wIncludeHashKey, margin)
-            .right(middle, -margin)
-            .result());
+        new FormDataBuilder().left().top(wIncludeHashKey, margin).right(middle, -margin).result());
 
     wBuildMode = new Combo(comp, SWT.BORDER | SWT.READ_ONLY);
     PropsUi.setLook(wBuildMode);
@@ -275,11 +267,7 @@ public class HopGuiBvScd2TableDialog {
         BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.FunctionalTimestamp.Label"));
     PropsUi.setLook(wlFunctionalTimestamp);
     wlFunctionalTimestamp.setLayoutData(
-        new FormDataBuilder()
-            .left()
-            .top(wBuildMode, margin)
-            .right(middle, -margin)
-            .result());
+        new FormDataBuilder().left().top(wBuildMode, margin).right(middle, -margin).result());
 
     wFunctionalTimestamp = new Text(comp, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wFunctionalTimestamp);
@@ -300,11 +288,7 @@ public class HopGuiBvScd2TableDialog {
     wIncrementalWatermark = new Text(comp, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wIncrementalWatermark);
     wIncrementalWatermark.setLayoutData(
-        new FormDataBuilder()
-            .left(middle, 0)
-            .top(wFunctionalTimestamp, margin)
-            .right()
-            .result());
+        new FormDataBuilder().left(middle, 0).top(wFunctionalTimestamp, margin).right().result());
 
     Label wlValidFromField = new Label(comp, SWT.RIGHT);
     wlValidFromField.setText(
@@ -320,22 +304,14 @@ public class HopGuiBvScd2TableDialog {
     wValidFromField = new Text(comp, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wValidFromField);
     wValidFromField.setLayoutData(
-        new FormDataBuilder()
-            .left(middle, 0)
-            .top(wIncrementalWatermark, margin)
-            .right()
-            .result());
+        new FormDataBuilder().left(middle, 0).top(wIncrementalWatermark, margin).right().result());
 
     Label wlValidToField = new Label(comp, SWT.RIGHT);
     wlValidToField.setText(
         BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.ValidToField.Label"));
     PropsUi.setLook(wlValidToField);
     wlValidToField.setLayoutData(
-        new FormDataBuilder()
-            .left()
-            .top(wValidFromField, margin)
-            .right(middle, -margin)
-            .result());
+        new FormDataBuilder().left().top(wValidFromField, margin).right(middle, -margin).result());
 
     wValidToField = new Text(comp, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wValidToField);
@@ -480,12 +456,7 @@ public class HopGuiBvScd2TableDialog {
             null,
             PropsUi.getInstance());
     wMappings.setLayoutData(
-        new FormDataBuilder()
-            .left()
-            .top(wAddMapping, margin)
-            .right()
-            .bottom(100, margin)
-            .result());
+        new FormDataBuilder().left().top(wAddMapping, margin).right().bottom(100, margin).result());
     wMappings.optimizeTableView();
     wMappings.table.addListener(SWT.Modify, e -> refreshMappingSourceCombos());
   }
@@ -501,13 +472,13 @@ public class HopGuiBvScd2TableDialog {
     wlSatelliteSettings.setText(
         BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.SatelliteSettings.Intro"));
     PropsUi.setLook(wlSatelliteSettings);
-    wlSatelliteSettings.setLayoutData(
-        new FormDataBuilder().left().top(0, margin).right().result());
+    wlSatelliteSettings.setLayoutData(new FormDataBuilder().left().top(0, margin).right().result());
 
     ColumnInfo[] configCols =
         new ColumnInfo[] {
           new ColumnInfo(
-              BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.SatelliteSettings.Column.Satellite"),
+              BaseMessages.getString(
+                  PKG, "HopGuiBvScd2TableDialog.SatelliteSettings.Column.Satellite"),
               ColumnInfo.COLUMN_TYPE_TEXT,
               false),
           new ColumnInfo(
@@ -548,8 +519,7 @@ public class HopGuiBvScd2TableDialog {
       return;
     }
     String title = selected.getText();
-    if (BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Tab.FieldMappings.Label")
-            .equals(title)
+    if (BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Tab.FieldMappings.Label").equals(title)
         || BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Tab.SatelliteSettings.Label")
             .equals(title)) {
       refreshSatelliteDependentTabs();
@@ -672,8 +642,9 @@ public class HopGuiBvScd2TableDialog {
           .getFieldMappings()
           .add(new BvScd2FieldMapping(satelliteName, sourceFieldName, targetFieldName));
     }
-    input.getFieldMappings().addAll(
-        BvScd2FieldMappingDialogSupport.suggestMappings(input, dataVaultModel));
+    input
+        .getFieldMappings()
+        .addAll(BvScd2FieldMappingDialogSupport.suggestMappings(input, dataVaultModel));
     loadMappingsTable();
   }
 
@@ -809,9 +780,12 @@ public class HopGuiBvScd2TableDialog {
     } catch (Exception ex) {
       new ErrorDialog(
           shell,
-          BaseMessages.getString(ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Label"),
           BaseMessages.getString(
-              ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Error", ex.getMessage()),
+              ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Label"),
+          BaseMessages.getString(
+              ModelDialogValidationSupport.class,
+              "ModelTableDialog.Validate.Error",
+              ex.getMessage()),
           ex);
     }
   }
@@ -912,12 +886,12 @@ public class HopGuiBvScd2TableDialog {
             PKG,
             "HopGuiBvScd2TableDialog.ValidFromField.Tooltip",
             Const.NVL(
-                config.getValidFromField(),
-                BusinessVaultConfiguration.DEFAULT_VALID_FROM_FIELD)));
+                config.getValidFromField(), BusinessVaultConfiguration.DEFAULT_VALID_FROM_FIELD)));
     wValidToField.setToolTipText(
         BaseMessages.getString(
             PKG,
             "HopGuiBvScd2TableDialog.ValidToField.Tooltip",
-            Const.NVL(config.getValidToField(), BusinessVaultConfiguration.DEFAULT_VALID_TO_FIELD)));
+            Const.NVL(
+                config.getValidToField(), BusinessVaultConfiguration.DEFAULT_VALID_TO_FIELD)));
   }
 }

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.executionmap;
 
 import java.util.ArrayList;
@@ -35,18 +33,17 @@ import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.command.svg.ExecutionMapExportScope;
 import org.apache.hop.datavault.executionmap.ExecutionMapEdgeRouter;
-import org.apache.hop.datavault.executionmap.ExecutionMapLineStyle;
-import org.apache.hop.datavault.executionmap.ExecutionMapNodeColors;
 import org.apache.hop.datavault.executionmap.ExecutionMapFocusContext;
 import org.apache.hop.datavault.executionmap.ExecutionMapLayoutOptions;
+import org.apache.hop.datavault.executionmap.ExecutionMapLineStyle;
 import org.apache.hop.datavault.executionmap.ExecutionMapMetrics;
 import org.apache.hop.datavault.executionmap.ExecutionMapNodeCardLayout;
 import org.apache.hop.datavault.executionmap.ExecutionMapNodeCardMetrics;
+import org.apache.hop.datavault.executionmap.ExecutionMapNodeColors;
 import org.apache.hop.datavault.executionmap.ExecutionMapViewFilter;
 import org.apache.hop.datavault.executionmap.ExecutionMapViewSupport;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry.Bounds;
-import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphTableCardLayout;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphTableNameHitArea;
 import org.apache.hop.datavault.hopgui.file.vault.BasePainter;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapDocument;
@@ -208,7 +205,9 @@ public class ExecutionMapPainter extends BasePainter {
       if (Utils.isEmpty(node.getParentNodeId()) || !nodeById.containsKey(node.getParentNodeId())) {
         continue;
       }
-      childrenByParent.computeIfAbsent(node.getParentNodeId(), ignored -> new ArrayList<>()).add(node);
+      childrenByParent
+          .computeIfAbsent(node.getParentNodeId(), ignored -> new ArrayList<>())
+          .add(node);
     }
   }
 
@@ -234,15 +233,12 @@ public class ExecutionMapPainter extends BasePainter {
         w =
             Math.max(
                 4,
-                (int)
-                    Math.ceil(
-                        (metrics != null ? metrics.width() : LEGACY_NODE_WIDTH) * scaleX));
+                (int) Math.ceil((metrics != null ? metrics.width() : LEGACY_NODE_WIDTH) * scaleX));
         h =
             Math.max(
                 4,
                 (int)
-                    Math.ceil(
-                        (metrics != null ? metrics.height() : LEGACY_NODE_HEIGHT) * scaleY));
+                    Math.ceil((metrics != null ? metrics.height() : LEGACY_NODE_HEIGHT) * scaleY));
       }
       int x = (int) (graphX + node.getLocation().x * scaleX);
       int y = (int) (graphY + node.getLocation().y * scaleY);
@@ -271,8 +267,7 @@ public class ExecutionMapPainter extends BasePainter {
     int y = screenLoc.y;
     String name = node.getName() != null ? node.getName() : node.getId();
     boolean underlineName = name.equals(mouseOverNodeName);
-    ExecutionMapNodeCardLayout.drawCard(
-        gc, node, x, y, metrics, magnification, underlineName);
+    ExecutionMapNodeCardLayout.drawCard(gc, node, x, y, metrics, magnification, underlineName);
 
     if (areaOwners != null) {
       areaOwners.add(
@@ -287,10 +282,7 @@ public class ExecutionMapPainter extends BasePainter {
               name));
       ModelGraphTableNameHitArea.Bounds nameHit =
           ModelGraphTableNameHitArea.bounds(
-              x + metrics.nameX(),
-              y + metrics.nameY(),
-              metrics.nameWidth(),
-              metrics.nameHeight());
+              x + metrics.nameX(), y + metrics.nameY(), metrics.nameWidth(), metrics.nameHeight());
       areaOwners.add(
           new AreaOwner(
               AreaType.TRANSFORM_NAME,
@@ -325,10 +317,7 @@ public class ExecutionMapPainter extends BasePainter {
       secondary = node.getNodeType().name();
     }
     if (!Utils.isEmpty(node.getSnapshotId())) {
-      secondary =
-          secondary == null
-              ? "snapshot"
-              : secondary + " • snapshot";
+      secondary = secondary == null ? "snapshot" : secondary + " • snapshot";
     }
     if (!Utils.isEmpty(secondary)) {
       gc.drawText(secondary, x + 8, y + 24, true);
@@ -457,8 +446,7 @@ public class ExecutionMapPainter extends BasePainter {
 
     gc.setLineWidth(1);
     gc.setForeground(resolveEdgeColor(edge.getEdgeType(), flowEdge));
-    drawEdgeGeometry(
-        edge, fromBounds, toBounds, flowEdge, nodeBounds, laneIndexBySource);
+    drawEdgeGeometry(edge, fromBounds, toBounds, flowEdge, nodeBounds, laneIndexBySource);
     drawCenterEdgeLabel(edge, fromBounds, toBounds);
   }
 
@@ -478,8 +466,9 @@ public class ExecutionMapPainter extends BasePainter {
         gc.setLineStyle(flowEdge ? ELineStyle.SOLID : ELineStyle.DASH);
         ModelGraphConnectionGeometry.drawConnectionSpline(gc, fromBounds, toBounds);
       }
-      case ORTHOGONAL -> drawOrthogonalEdgeGeometry(
-          edge, fromBounds, toBounds, flowEdge, nodeBounds, laneIndexBySource);
+      case ORTHOGONAL ->
+          drawOrthogonalEdgeGeometry(
+              edge, fromBounds, toBounds, flowEdge, nodeBounds, laneIndexBySource);
       default -> {
         gc.setLineStyle(ELineStyle.DOT);
         ModelGraphConnectionGeometry.drawConnectionCenterLine(gc, fromBounds, toBounds);
@@ -501,9 +490,7 @@ public class ExecutionMapPainter extends BasePainter {
     }
     gc.setLineStyle(ELineStyle.DASH);
     int laneIndex =
-        laneIndexBySource != null
-            ? laneIndexBySource.getOrDefault(edge.getFromNodeId(), 0)
-            : 0;
+        laneIndexBySource != null ? laneIndexBySource.getOrDefault(edge.getFromNodeId(), 0) : 0;
     if (laneIndexBySource != null) {
       laneIndexBySource.put(edge.getFromNodeId(), laneIndex + 1);
     }
@@ -548,5 +535,4 @@ public class ExecutionMapPainter extends BasePainter {
     }
     return EColor.GRAY;
   }
-
 }

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.transform.dvhashkey;
 
 import java.util.ArrayList;
@@ -96,21 +94,18 @@ public class DvHashKeyMeta extends BaseTransformMeta<DvHashKey, DvHashKeyData> {
 
   @HopMetadataProperty(
       key = "hashContentPrefix",
-
       injectionKey = "HASH_CONTENT_PREFIX",
       injectionKeyDescription = "DvHashKey.Injection.HASH_CONTENT_PREFIX")
   private String hashContentPrefix;
 
   @HopMetadataProperty(
       key = "hashContentSuffix",
-
       injectionKey = "HASH_CONTENT_SUFFIX",
       injectionKeyDescription = "DvHashKey.Injection.HASH_CONTENT_SUFFIX")
   private String hashContentSuffix;
 
   @HopMetadataProperty(
       key = "nullPlaceholder",
-
       injectionKey = "NULL_PLACEHOLDER",
       injectionKeyDescription = "DvHashKey.Injection.NULL_PLACEHOLDER")
   private String nullPlaceholder = "^^";
@@ -161,8 +156,7 @@ public class DvHashKeyMeta extends BaseTransformMeta<DvHashKey, DvHashKeyData> {
     } else {
       valueMeta = new ValueMetaString(resolvedName);
     }
-    valueMeta.setLength(
-        DvHashKeyLogic.resultValueMetaLength(hashAlgorithm, hashKeyDataType));
+    valueMeta.setLength(DvHashKeyLogic.resultValueMetaLength(hashAlgorithm, hashKeyDataType));
     valueMeta.setOrigin(name);
     inputRowMeta.addValueMeta(valueMeta);
   }

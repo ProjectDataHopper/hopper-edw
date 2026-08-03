@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.lineage;
 
 import java.util.ArrayList;
@@ -66,9 +65,7 @@ public final class LineageDiffService {
                   catalog, LineageLayer.DV, basename, variables, metadataProvider);
       results.add(
           LineageSnapshotDiffSupport.compare(
-              baseline,
-              current,
-              baselineLabel(catalog, LineageLayer.DV, basename, variables)));
+              baseline, current, baselineLabel(catalog, LineageLayer.DV, basename, variables)));
     }
 
     for (ValidationModels.LoadedBusinessVaultModel loaded : models.businessVaultModels()) {
@@ -86,9 +83,7 @@ public final class LineageDiffService {
                   catalog, LineageLayer.BV, basename, variables, metadataProvider);
       results.add(
           LineageSnapshotDiffSupport.compare(
-              baseline,
-              current,
-              baselineLabel(catalog, LineageLayer.BV, basename, variables)));
+              baseline, current, baselineLabel(catalog, LineageLayer.BV, basename, variables)));
     }
 
     for (ValidationModels.LoadedDimensionalModel loaded : models.dimensionalModels()) {
@@ -97,8 +92,7 @@ public final class LineageDiffService {
       }
       DimensionalModel model = loaded.model();
       String catalog = firstNonEmpty(loaded.catalogConnection(), defaultCatalog(models));
-      LineageSnapshot current =
-          DmModelLineageCollector.collect(model, variables, metadataProvider);
+      LineageSnapshot current = DmModelLineageCollector.collect(model, variables, metadataProvider);
       String basename = DmCatalogNamespaces.resolveModelBasename(model);
       LineageSnapshot baseline =
           Utils.isEmpty(catalog)
@@ -107,9 +101,7 @@ public final class LineageDiffService {
                   catalog, LineageLayer.DM, basename, variables, metadataProvider);
       results.add(
           LineageSnapshotDiffSupport.compare(
-              baseline,
-              current,
-              baselineLabel(catalog, LineageLayer.DM, basename, variables)));
+              baseline, current, baselineLabel(catalog, LineageLayer.DM, basename, variables)));
     }
 
     return results;

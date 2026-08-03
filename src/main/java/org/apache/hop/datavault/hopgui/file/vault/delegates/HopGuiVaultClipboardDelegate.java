@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.vault.delegates;
 
 import java.util.ArrayList;
@@ -186,8 +184,8 @@ public class HopGuiVaultClipboardDelegate {
     xml.append(XmlHandler.closeTag(XML_TAG_NOTES)).append(Const.CR);
   }
 
-  private List<IDvTable> deserializeTables(Node clipboardNode, IHopMetadataProvider metadataProvider)
-      throws HopXmlException {
+  private List<IDvTable> deserializeTables(
+      Node clipboardNode, IHopMetadataProvider metadataProvider) throws HopXmlException {
     List<IDvTable> tables = new ArrayList<>();
     Node tablesNode = XmlHandler.getSubNode(clipboardNode, XML_TAG_TABLES);
     if (tablesNode == null) {
@@ -212,10 +210,8 @@ public class HopGuiVaultClipboardDelegate {
     }
     DvTableType tableType = DvTableType.valueOf(tableTypeName);
     return switch (tableType) {
-      case HUB ->
-          XmlMetadataUtil.deSerializeFromXml(tableNode, DvHub.class, metadataProvider);
-      case LINK ->
-          XmlMetadataUtil.deSerializeFromXml(tableNode, DvLink.class, metadataProvider);
+      case HUB -> XmlMetadataUtil.deSerializeFromXml(tableNode, DvHub.class, metadataProvider);
+      case LINK -> XmlMetadataUtil.deSerializeFromXml(tableNode, DvLink.class, metadataProvider);
       case SATELLITE ->
           XmlMetadataUtil.deSerializeFromXml(tableNode, DvSatellite.class, metadataProvider);
       case TABLE_REFERENCE ->

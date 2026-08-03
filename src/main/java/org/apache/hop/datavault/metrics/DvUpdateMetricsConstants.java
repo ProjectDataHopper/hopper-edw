@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 /** Variables and naming conventions for Data Vault update pipeline metrics collection. */
@@ -44,10 +42,9 @@ public final class DvUpdateMetricsConstants {
    */
   public static final String VAR_METRICS_DATABASE = "DV_UPDATE_METRICS_DATABASE";
 
-  /**
-   * Data catalog connection for operations record definitions (optional; skipped when empty).
-   */
-  public static final String VAR_METRICS_CATALOG_CONNECTION = "DV_UPDATE_METRICS_CATALOG_CONNECTION";
+  /** Data catalog connection for operations record definitions (optional; skipped when empty). */
+  public static final String VAR_METRICS_CATALOG_CONNECTION =
+      "DV_UPDATE_METRICS_CATALOG_CONNECTION";
 
   public static final String ORCHESTRATOR_NAME_PREFIX = "DV Update Orchestrator - ";
 

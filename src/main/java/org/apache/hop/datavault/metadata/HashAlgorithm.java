@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import lombok.Getter;
@@ -24,9 +22,8 @@ import org.apache.hop.metadata.api.IEnumHasCode;
 import org.apache.hop.metadata.api.IEnumHasCodeAndDescription;
 
 /**
- * Supported hashing algorithms for Data Vault 2.0 hash keys.
- * These are the most commonly used in DV2.0 implementations for generating
- * deterministic surrogate hash keys from business keys.
+ * Supported hashing algorithms for Data Vault 2.0 hash keys. These are the most commonly used in
+ * DV2.0 implementations for generating deterministic surrogate hash keys from business keys.
  */
 @Getter
 public enum HashAlgorithm implements IEnumHasCodeAndDescription {
@@ -43,9 +40,7 @@ public enum HashAlgorithm implements IEnumHasCodeAndDescription {
     this.description = description;
   }
 
-  /**
-   * Returns the length in bytes of the raw digest produced by this algorithm.
-   */
+  /** Returns the length in bytes of the raw digest produced by this algorithm. */
   public int getDigestLength() {
     return switch (this) {
       case MD5 -> 16;

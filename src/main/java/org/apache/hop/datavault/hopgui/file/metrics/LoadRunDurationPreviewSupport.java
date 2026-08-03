@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.metrics;
 
 import java.util.ArrayList;
@@ -28,12 +26,11 @@ import org.apache.hop.core.row.RowMeta;
 import org.apache.hop.core.row.value.ValueMetaDate;
 import org.apache.hop.core.row.value.ValueMetaNumber;
 import org.apache.hop.core.row.value.ValueMetaString;
-import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.hopgui.dialog.ShowRowsDialog;
 import org.apache.hop.datavault.metrics.LoadRunDurationRun;
 import org.apache.hop.datavault.metrics.LoadRunDurationSnapshot;
 import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.datavault.hopgui.dialog.ShowRowsDialog;
 import org.eclipse.swt.widgets.Shell;
 
 /** Builds tabular previews of load duration metrics for {@link ShowRowsDialog}. */
@@ -100,18 +97,13 @@ public final class LoadRunDurationPreviewSupport {
     List<Object[]> previewRows = new ArrayList<>(rows.size());
     for (PreviewRow row : rows) {
       previewRows.add(
-          new Object[] {
-            row.modelName(), row.tableName(), row.timestamp(), row.durationSeconds()
-          });
+          new Object[] {row.modelName(), row.tableName(), row.timestamp(), row.durationSeconds()});
     }
     return previewRows;
   }
 
   public static void openPreviewDialog(
-      Shell shell,
-      IVariables variables,
-      String modelName,
-      LoadRunDurationSnapshot snapshot) {
+      Shell shell, IVariables variables, String modelName, LoadRunDurationSnapshot snapshot) {
     List<Object[]> previewRows = buildPreviewRows(modelName, snapshot);
     if (previewRows.isEmpty()) {
       return;

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.widget;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -126,17 +124,13 @@ class MarkdownStyleRendererTest {
     RenderedMarkdown rendered =
         MarkdownStyleRenderer.render("### dm-fact-f_orders — f_orders `RUNNING`");
 
-    assertTrue(
-        rendered.spans().stream().anyMatch(span -> span.kind() == SpanKind.HEADING_3));
+    assertTrue(rendered.spans().stream().anyMatch(span -> span.kind() == SpanKind.HEADING_3));
     assertTrue(rendered.spans().stream().anyMatch(span -> span.kind() == SpanKind.CODE));
     assertTrue(isSortedByStart(rendered.spans()));
     assertTrue(!hasOverlappingSpans(rendered.spans()));
     assertTrue(
         containsKind(
-            rendered.spans(),
-            SpanKind.HEADING_3,
-            0,
-            "dm-fact-f_orders — f_orders ".length()));
+            rendered.spans(), SpanKind.HEADING_3, 0, "dm-fact-f_orders — f_orders ".length()));
     assertTrue(containsKind(rendered.spans(), SpanKind.CODE, 28, "RUNNING".length()));
   }
 
@@ -191,8 +185,7 @@ class MarkdownStyleRendererTest {
     return true;
   }
 
-  private static boolean containsKind(
-      List<StyleSpan> spans, SpanKind kind, int start, int length) {
+  private static boolean containsKind(List<StyleSpan> spans, SpanKind kind, int start, int length) {
     for (StyleSpan span : spans) {
       if (span.kind() == kind && span.start() == start && span.length() == length) {
         return true;

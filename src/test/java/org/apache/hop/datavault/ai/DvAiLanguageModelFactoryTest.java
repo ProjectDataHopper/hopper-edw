@@ -13,14 +13,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.apache.hop.datavault.ai.HopAiConfig;
 import org.apache.hop.pipeline.transforms.languagemodelchat.LanguageModelChatMeta;
 import org.junit.jupiter.api.Test;
 
@@ -40,6 +37,7 @@ class DvAiLanguageModelFactoryTest {
     assertEquals("test-key", meta.getOpenAiApiKey());
     assertEquals("grok-4", meta.getOpenAiModelName());
   }
+
   @Test
   void googleGeminiPresetMapsToOpenAiCompatibleSettings() throws Exception {
     HopAiConfig config = new HopAiConfig();
@@ -50,7 +48,8 @@ class DvAiLanguageModelFactoryTest {
     LanguageModelChatMeta meta = DvAiLanguageModelFactory.fromConfig(config, null);
 
     assertEquals("OPEN_AI", meta.getModelType());
-    assertEquals("https://generativelanguage.googleapis.com/v1beta/openai", meta.getOpenAiBaseUrl());
+    assertEquals(
+        "https://generativelanguage.googleapis.com/v1beta/openai", meta.getOpenAiBaseUrl());
     assertEquals("test-key-gemini", meta.getOpenAiApiKey());
     assertEquals("gemini-2.5-flash", meta.getOpenAiModelName());
   }

@@ -13,13 +13,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.quality.history;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -134,12 +131,7 @@ class DataQualityHistoryPublisherTest {
     DataQualityReport report = sampleReport();
     PublishContext context =
         new PublishContext(
-            OPS_NAME,
-            DataQualityHistoryPublisher.DEFAULT_SCHEMA_NAME,
-            null,
-            false,
-            true,
-            true);
+            OPS_NAME, DataQualityHistoryPublisher.DEFAULT_SCHEMA_NAME, null, false, true, true);
 
     PublishResult first =
         DataQualityHistoryPublisher.publish(
@@ -158,8 +150,7 @@ class DataQualityHistoryPublisherTest {
         countRows(DataQualityHistoryPublisher.TABLE_QUALITY_PROFILE_SUBJECT, report.getRunId());
     long fields =
         countRows(DataQualityHistoryPublisher.TABLE_QUALITY_PROFILE_FIELD, report.getRunId());
-    long findings =
-        countRows(DataQualityHistoryPublisher.TABLE_QUALITY_FINDING, report.getRunId());
+    long findings = countRows(DataQualityHistoryPublisher.TABLE_QUALITY_FINDING, report.getRunId());
     assertEquals(1L, runs);
     assertEquals(1L, subjects);
     assertEquals(1L, fields);
@@ -187,12 +178,7 @@ class DataQualityHistoryPublisherTest {
     DataQualityReport report = sampleReport();
     PublishContext context =
         new PublishContext(
-            OPS_NAME,
-            DataQualityHistoryPublisher.DEFAULT_SCHEMA_NAME,
-            null,
-            false,
-            true,
-            true);
+            OPS_NAME, DataQualityHistoryPublisher.DEFAULT_SCHEMA_NAME, null, false, true, true);
 
     DataQualityHistoryPublisher.afterQualityRunInsertedForTest =
         () -> {
@@ -211,8 +197,7 @@ class DataQualityHistoryPublisherTest {
               metadataProvider);
       assertEquals(PublishStatus.FAILED, result.status(), result.message());
       assertTrue(result.message().contains("forced mid-publish failure"));
-      assertEquals(
-          0L, countRows(DataQualityHistoryPublisher.TABLE_QUALITY_RUN, report.getRunId()));
+      assertEquals(0L, countRows(DataQualityHistoryPublisher.TABLE_QUALITY_RUN, report.getRunId()));
       assertEquals(
           0L,
           countRows(DataQualityHistoryPublisher.TABLE_QUALITY_PROFILE_SUBJECT, report.getRunId()));
@@ -240,12 +225,7 @@ class DataQualityHistoryPublisherTest {
 
     PublishContext context =
         new PublishContext(
-            OPS_NAME,
-            DataQualityHistoryPublisher.DEFAULT_SCHEMA_NAME,
-            null,
-            false,
-            true,
-            true);
+            OPS_NAME, DataQualityHistoryPublisher.DEFAULT_SCHEMA_NAME, null, false, true, true);
 
     PublishResult result =
         DataQualityHistoryPublisher.publish(
@@ -319,8 +299,7 @@ class DataQualityHistoryPublisherTest {
     assertEquals("ab", DataQualityHistoryPublisher.truncate("abcdef", 2));
     assertNull(DataQualityHistoryPublisher.truncate(null, 10));
     assertTrue(DataQualityHistoryPublisher.mapToJson(Map.of("x", "2")).contains("\"x\""));
-    String top =
-        DataQualityHistoryPublisher.topValuesJson(Map.of("a", 1L, "b", 5L, "c", 3L));
+    String top = DataQualityHistoryPublisher.topValuesJson(Map.of("a", 1L, "b", 5L, "c", 3L));
     assertNotNull(top);
     assertTrue(top.contains("\"b\""));
   }
@@ -369,7 +348,10 @@ class DataQualityHistoryPublisherTest {
                   + qualified
                   + " WHERE quality_run_id = "
                   + DataQualityHistoryPublisher.sqlLiteral(runId));
-      if (row == null || row.getData() == null || row.getData().length == 0 || row.getData()[0] == null) {
+      if (row == null
+          || row.getData() == null
+          || row.getData().length == 0
+          || row.getData()[0] == null) {
         return 0L;
       }
       Object value = row.getData()[0];

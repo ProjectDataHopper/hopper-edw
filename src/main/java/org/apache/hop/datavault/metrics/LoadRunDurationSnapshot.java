@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import java.util.Collections;
@@ -24,7 +22,9 @@ import java.util.Map;
 import lombok.Builder;
 import lombok.Value;
 
-/** In-memory load duration data for one model, consumed by {@code LoadRunDurationOverviewPainter}. */
+/**
+ * In-memory load duration data for one model, consumed by {@code LoadRunDurationOverviewPainter}.
+ */
 @Value
 @Builder
 public class LoadRunDurationSnapshot {

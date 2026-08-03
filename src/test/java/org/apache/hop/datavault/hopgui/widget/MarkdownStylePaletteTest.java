@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.widget;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -56,8 +54,14 @@ class MarkdownStylePaletteTest {
 
   @Test
   void darkHeadingColorsAreLighterThanLightVariants() {
-    assertTrue(MarkdownStylePalette.relativeLuminance(H1_DARK) > MarkdownStylePalette.relativeLuminance(H1_LIGHT));
-    assertTrue(MarkdownStylePalette.relativeLuminance(H2_DARK) > MarkdownStylePalette.relativeLuminance(H2_LIGHT));
-    assertTrue(MarkdownStylePalette.relativeLuminance(CODE_FG_DARK) > MarkdownStylePalette.relativeLuminance(CODE_FG_LIGHT));
+    assertTrue(
+        MarkdownStylePalette.relativeLuminance(H1_DARK)
+            > MarkdownStylePalette.relativeLuminance(H1_LIGHT));
+    assertTrue(
+        MarkdownStylePalette.relativeLuminance(H2_DARK)
+            > MarkdownStylePalette.relativeLuminance(H2_LIGHT));
+    assertTrue(
+        MarkdownStylePalette.relativeLuminance(CODE_FG_DARK)
+            > MarkdownStylePalette.relativeLuminance(CODE_FG_LIGHT));
   }
 }

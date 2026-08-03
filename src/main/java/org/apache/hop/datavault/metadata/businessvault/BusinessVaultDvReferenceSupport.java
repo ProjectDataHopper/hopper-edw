@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import java.util.ArrayList;
@@ -91,8 +89,7 @@ public final class BusinessVaultDvReferenceSupport {
   }
 
   /** First canvas alias with this DV table name, or null. */
-  public static BvDvTableReference findDvReference(
-      BusinessVaultModel model, String dvTableName) {
+  public static BvDvTableReference findDvReference(BusinessVaultModel model, String dvTableName) {
     if (model == null || Utils.isEmpty(dvTableName)) {
       return null;
     }
@@ -171,9 +168,7 @@ public final class BusinessVaultDvReferenceSupport {
               ? linkedDvModel.getName()
               : CatalogModelRegistrySupport.sanitizeBasename(linkedPath);
       String label =
-          "Linked: "
-              + linkedBasename
-              + (Utils.isEmpty(linkedPath) ? "" : " (" + linkedPath + ")");
+          "Linked: " + linkedBasename + (Utils.isEmpty(linkedPath) ? "" : " (" + linkedPath + ")");
       sources.add(new DvModelSource(label, linkedPath, linkedBasename, true));
     }
 
@@ -205,10 +200,7 @@ public final class BusinessVaultDvReferenceSupport {
           if (linkedPath != null && pathsLikelySame(linkedPath, filename)) {
             continue;
           }
-          String catalogLabel =
-              !Utils.isEmpty(preferredCatalog)
-                  ? preferredCatalog
-                  : "catalog";
+          String catalogLabel = !Utils.isEmpty(preferredCatalog) ? preferredCatalog : "catalog";
           sources.add(
               new DvModelSource(
                   "Catalog (" + catalogLabel + "): " + basename + "  →  " + filename,
@@ -221,14 +213,13 @@ public final class BusinessVaultDvReferenceSupport {
       }
     }
 
-    sources.add(
-        new DvModelSource(BROWSE_HDV_LABEL, null, null, false, true));
+    sources.add(new DvModelSource(BROWSE_HDV_LABEL, null, null, false, true));
     return sources;
   }
 
   /**
-   * Lists Data Vault models from the preferred catalog (BV configuration) when set: registry
-   * {@link RecordDefinitionType#DV_MODEL} entries and models inferred from published DV tables.
+   * Lists Data Vault models from the preferred catalog (BV configuration) when set: registry {@link
+   * RecordDefinitionType#DV_MODEL} entries and models inferred from published DV tables.
    */
   public static List<RecordDefinition> listCatalogDvModels(
       IVariables variables, IHopMetadataProvider metadataProvider) throws Exception {

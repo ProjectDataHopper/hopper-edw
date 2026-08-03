@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.database;
 
 import java.util.ArrayList;
@@ -24,6 +22,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import org.apache.hop.catalog.discovery.RecordDefinitionCatalogWriter;
 import org.apache.hop.catalog.hopgui.perspective.DataCatalogPerspective;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.database.Database;
@@ -39,7 +38,6 @@ import org.apache.hop.core.row.RowMeta;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.catalog.discovery.RecordDefinitionCatalogWriter;
 import org.apache.hop.datavault.catalog.DvSourceCatalogService;
 import org.apache.hop.datavault.catalog.RecordSourceIndicatorOptions;
 import org.apache.hop.datavault.catalog.RecordSourceIndicatorSupport;
@@ -207,7 +205,8 @@ public final class DvDatabaseSourceImportSupport {
                 shell,
                 variables,
                 metadataProvider,
-                resolveDefaultCatalogConnectionName(model, variables, preferredCatalogConnectionName))
+                resolveDefaultCatalogConnectionName(
+                    model, variables, preferredCatalogConnectionName))
             .open();
     if (Utils.isEmpty(catalogConnectionName)) {
       return;
@@ -253,7 +252,14 @@ public final class DvDatabaseSourceImportSupport {
                   fields,
                   tableRecordSource);
           RecordDefinitionCatalogWriter.upsertDataVaultSource(
-              imported, catalogConnectionName, model, variables, metadataProvider, null, null, null);
+              imported,
+              catalogConnectionName,
+              model,
+              variables,
+              metadataProvider,
+              null,
+              null,
+              null);
           importedCount++;
         } catch (Exception e) {
           errors.add(
@@ -323,7 +329,8 @@ public final class DvDatabaseSourceImportSupport {
     return sorted;
   }
 
-  public static Set<String> tableNamesForSelectionIndexes(String[] choices, int[] selectionIndexes) {
+  public static Set<String> tableNamesForSelectionIndexes(
+      String[] choices, int[] selectionIndexes) {
     Set<String> pickedTables = new LinkedHashSet<>();
     if (choices == null || selectionIndexes == null) {
       return pickedTables;
@@ -358,7 +365,8 @@ public final class DvDatabaseSourceImportSupport {
     if (pickedTables.isEmpty()) {
       MessageBox mb = new MessageBox(shell, SWT.OK | SWT.ICON_INFORMATION);
       mb.setText(
-          BaseMessages.getString(PKG, "DvDatabaseSourceEditor.ImportTables.Pick.NoneSelected.Title"));
+          BaseMessages.getString(
+              PKG, "DvDatabaseSourceEditor.ImportTables.Pick.NoneSelected.Title"));
       mb.setMessage(
           BaseMessages.getString(
               PKG, "DvDatabaseSourceEditor.ImportTables.Pick.NoneSelected.Message"));
@@ -527,8 +535,7 @@ public final class DvDatabaseSourceImportSupport {
       String schemaName,
       String tableName,
       List<SourceField> fields) {
-    return createDataVaultSource(
-        metadataName, connectionName, schemaName, tableName, fields, null);
+    return createDataVaultSource(metadataName, connectionName, schemaName, tableName, fields, null);
   }
 
   public static DataVaultSource createDataVaultSource(

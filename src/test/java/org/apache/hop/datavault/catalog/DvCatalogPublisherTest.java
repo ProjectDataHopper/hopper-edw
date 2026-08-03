@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.catalog;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -111,8 +109,7 @@ class DvCatalogPublisherTest {
     RecordDefinition stored = registry.read(CATALOG_CONNECTION, key, variables, metadataProvider);
     assertNotNull(stored);
     assertNotNull(stored.getOrigin());
-    assertEquals(
-        "${PROJECT_HOME}/models/vault1.hdv", stored.getOrigin().getModelFilename());
+    assertEquals("${PROJECT_HOME}/models/vault1.hdv", stored.getOrigin().getModelFilename());
   }
 
   @Test
@@ -141,8 +138,7 @@ class DvCatalogPublisherTest {
     binding.setEnabled(true);
     stored.setQualityRules(new ArrayList<>(List.of(binding)));
 
-    RecordDefinitionValidationAcknowledgement ack =
-        new RecordDefinitionValidationAcknowledgement();
+    RecordDefinitionValidationAcknowledgement ack = new RecordDefinitionValidationAcknowledgement();
     ack.setIssueId("FIELD_REMOVED|legacy_col|");
     ack.setComment("retired column");
     ack.setAcknowledgedAt(new Date());
@@ -196,8 +192,7 @@ class DvCatalogPublisherTest {
         RecordDefinitionRegistry.getInstance()
             .read(CATALOG_CONNECTION, modelKey, variables, metadataProvider);
     assertNotNull(
-        modelEntry,
-        "expected DV model registry entry for vault1 under " + modelKey.getNamespace());
+        modelEntry, "expected DV model registry entry for vault1 under " + modelKey.getNamespace());
     assertEquals("hop/integration-tests/models-registry/dv", modelKey.getNamespace());
     assertEquals(RecordDefinitionType.DV_MODEL, modelEntry.getType());
     assertNotNull(modelEntry.getOrigin());

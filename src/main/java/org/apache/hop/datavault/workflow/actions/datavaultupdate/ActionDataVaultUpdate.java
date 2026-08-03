@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.workflow.actions.datavaultupdate;
 
 import java.io.IOException;
@@ -31,6 +29,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.vfs2.FileObject;
+import org.apache.hop.catalog.metadata.DataCatalogMeta;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.Result;
@@ -46,38 +45,35 @@ import org.apache.hop.core.logging.ILoggingObject;
 import org.apache.hop.core.logging.LogLevel;
 import org.apache.hop.core.logging.LoggingObjectType;
 import org.apache.hop.core.logging.SimpleLoggingObject;
-import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.row.value.ValueMetaDate;
+import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
 import org.apache.hop.core.xml.XmlHandler;
-import org.apache.hop.catalog.metadata.DataCatalogMeta;
 import org.apache.hop.datavault.catalog.DvCatalogPublisher;
+import org.apache.hop.datavault.config.DvRunConfigurationSupport;
 import org.apache.hop.datavault.lineage.DdlLineageExplainSupport;
 import org.apache.hop.datavault.metadata.DataVaultConfiguration;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DvDdlSupport;
-import org.apache.hop.datavault.metadata.DvModelCheckOptions;
-import org.apache.hop.datavault.metadata.DvSpecialRecordSupport;
 import org.apache.hop.datavault.metadata.DvGeneratedPipelineSupport;
-import org.apache.hop.datavault.metadata.DvIntegrationSupport;
 import org.apache.hop.datavault.metadata.DvIntegerSettingValidationSupport;
+import org.apache.hop.datavault.metadata.DvIntegrationSupport;
 import org.apache.hop.datavault.metadata.DvLoadDateSupport;
-import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
 import org.apache.hop.datavault.metadata.DvModelBulkUpdateExecutionSupport;
+import org.apache.hop.datavault.metadata.DvModelCheckOptions;
 import org.apache.hop.datavault.metadata.DvMultiSourceUpdateWorkflowSupport;
 import org.apache.hop.datavault.metadata.DvPipelineOrchestratorSupport;
+import org.apache.hop.datavault.metadata.DvSpecialRecordSupport;
+import org.apache.hop.datavault.metadata.DvTableType;
+import org.apache.hop.datavault.metadata.DvTargetLoadMode;
+import org.apache.hop.datavault.metadata.DvUpdateExecutionSupport;
 import org.apache.hop.datavault.metadata.DvUpdateWorkflowSupport;
+import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
+import org.apache.hop.datavault.metadata.IDvTable;
 import org.apache.hop.datavault.metrics.ExecutionMetricsProfileResolver;
 import org.apache.hop.datavault.metrics.ResolvedExecutionMetrics;
 import org.apache.hop.datavault.metrics.metadata.ExecutionMetricsProfileMeta;
-import org.apache.hop.datavault.config.DvRunConfigurationSupport;
-import org.apache.hop.datavault.metadata.DvTargetLoadMode;
-import org.apache.hop.workflow.config.WorkflowRunConfiguration;
-import org.apache.hop.datavault.metadata.DvUpdateExecutionSupport;
-
-import org.apache.hop.datavault.metadata.DvTableType;
-import org.apache.hop.datavault.metadata.IDvTable;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
@@ -87,6 +83,7 @@ import org.apache.hop.pipeline.config.PipelineRunConfiguration;
 import org.apache.hop.workflow.WorkflowMeta;
 import org.apache.hop.workflow.action.ActionBase;
 import org.apache.hop.workflow.action.IAction;
+import org.apache.hop.workflow.config.WorkflowRunConfiguration;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -108,8 +105,7 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
   /** Root dialog identifier (action name field lives outside the tab folder). */
   public static final String GUI_PLUGIN_ELEMENT_PARENT_ID = "DATAVAULT_UPDATE_ACTION";
 
-  public static final String GUI_PLUGIN_ELEMENT_MODEL_TAB_ID =
-      "DATAVAULT_UPDATE_ACTION_MODEL_TAB";
+  public static final String GUI_PLUGIN_ELEMENT_MODEL_TAB_ID = "DATAVAULT_UPDATE_ACTION_MODEL_TAB";
 
   public static final String GUI_PLUGIN_ELEMENT_DDL_TAB_ID = "DATAVAULT_UPDATE_ACTION_DDL_TAB";
 
@@ -327,7 +323,6 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
     return new ActionDataVaultUpdate(this);
   }
 
-
   @Override
   public String getDialogClassName() {
     return ActionDataVaultUpdateDialog.class.getName();
@@ -414,9 +409,7 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
 
       String realDdlSqlFilename = resolve(ddlSqlFilename);
       boolean processDdl =
-          updateTargetDatabaseStructure
-              || failIfDdlNeeded
-              || !Utils.isEmpty(realDdlSqlFilename);
+          updateTargetDatabaseStructure || failIfDdlNeeded || !Utils.isEmpty(realDdlSqlFilename);
 
       if (processDdl) {
         boolean ddlPhaseFailed = false;
@@ -443,7 +436,8 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
         ddlStatements = DvDdlSupport.deduplicateCreateTableDdl(ddlStatements);
 
         if (hasDdlStatements(ddlStatements)) {
-          // Always explain structural changes with source-to-target lineage (VaultSpeed-style opacity guard).
+          // Always explain structural changes with source-to-target lineage (VaultSpeed-style
+          // opacity guard).
           try {
             String explanation =
                 DdlLineageExplainSupport.explain(
@@ -492,7 +486,8 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
           if (updateTargetDatabaseStructure) {
             if (targetDatabase == null) {
               logError(
-                  BaseMessages.getString(PKG, "ActionDataVaultUpdate.Error.DdlExecutionFailed", ""));
+                  BaseMessages.getString(
+                      PKG, "ActionDataVaultUpdate.Error.DdlExecutionFailed", ""));
               totalErrors++;
               success = false;
               ddlPhaseFailed = true;
@@ -521,9 +516,7 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
                   }
                   logBasic(
                       BaseMessages.getString(
-                          PKG,
-                          "ActionDataVaultUpdate.Log.ExecutingDdl",
-                          targetDatabase.getName()));
+                          PKG, "ActionDataVaultUpdate.Log.ExecutingDdl", targetDatabase.getName()));
                   db.execStatements(ddl);
                   String tableName = DvDdlSupport.extractCreateTableName(ddl);
                   if (!Utils.isEmpty(tableName)) {
@@ -642,9 +635,7 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
         if (DvIntegrationSupport.isCustomPipelines(table)) {
           logBasic(
               BaseMessages.getString(
-                  PKG,
-                  "ActionDataVaultUpdate.Log.LoadingCustomPipelines",
-                  table.getName()));
+                  PKG, "ActionDataVaultUpdate.Log.LoadingCustomPipelines", table.getName()));
         } else {
           logBasic(
               BaseMessages.getString(
@@ -698,18 +689,14 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
           if (DvIntegrationSupport.isCustomPipelines(table)) {
             logError(
                 BaseMessages.getString(
-                    PKG,
-                    "ActionDataVaultUpdate.Error.CustomPipelinesMissing",
-                    table.getName()));
+                    PKG, "ActionDataVaultUpdate.Error.CustomPipelinesMissing", table.getName()));
           } else {
             logError(
                 BaseMessages.getString(
                     PKG, "ActionDataVaultUpdate.Error.GenerateFailed", table.getName()),
                 new HopException(
                     BaseMessages.getString(
-                        PKG,
-                        "ActionDataVaultUpdate.Error.GenerateFailedEmpty",
-                        table.getName())));
+                        PKG, "ActionDataVaultUpdate.Error.GenerateFailedEmpty", table.getName())));
           }
           totalErrors++;
           success = false;
@@ -989,8 +976,7 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
       }
       List<PipelineMeta> nested =
           unit.nestedPipelines() != null ? unit.nestedPipelines() : List.of();
-      DvPipelineOrchestratorSupport.stageNamedPipelines(
-          stagingFolder, getVariables(), nested);
+      DvPipelineOrchestratorSupport.stageNamedPipelines(stagingFolder, getVariables(), nested);
       java.util.Map<String, String> stagedPaths =
           DvMultiSourceUpdateWorkflowSupport.mapStagedPipelinePaths(nested);
       DvMultiSourceUpdateWorkflowSupport.applyStagedPipelineFilenames(
@@ -1048,8 +1034,7 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
             DvPipelineOrchestratorSupport.resolveStagingFolder(
                 pipelineStagingFolder, getVariables(), model.getName()));
     int parallelCopies =
-        DvPipelineOrchestratorSupport.resolveParallelCopies(
-            parallelPipelineCopies, getVariables());
+        DvPipelineOrchestratorSupport.resolveParallelCopies(parallelPipelineCopies, getVariables());
 
     logBasic(
         BaseMessages.getString(
@@ -1058,13 +1043,13 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
             stagingFolder,
             allPipelineMetas.size()));
     logBasic(
-        BaseMessages.getString(
-            PKG, "ActionDataVaultUpdate.Log.ParallelCopies", parallelCopies));
+        BaseMessages.getString(PKG, "ActionDataVaultUpdate.Log.ParallelCopies", parallelCopies));
 
     try {
       // Staging folder may already be prepared by multi-source path; recreate is safe.
       DvPipelineOrchestratorSupport.prepareStagingFolder(stagingFolder, getVariables());
-      // Free pipelines only — use a free-only subfolder so Get File Names does not pick multi-source
+      // Free pipelines only — use a free-only subfolder so Get File Names does not pick
+      // multi-source
       // nested .hpl files left from earlier staging.
       String freeFolder = stagingFolder;
       if (!freeFolder.endsWith("/") && !freeFolder.endsWith("\\")) {
@@ -1123,8 +1108,7 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
       try {
         DvPipelineOrchestratorSupport.cleanupStagingFolder(stagingFolder, getVariables());
         logBasic(
-            BaseMessages.getString(
-                PKG, "ActionDataVaultUpdate.Log.StagingCleanup", stagingFolder));
+            BaseMessages.getString(PKG, "ActionDataVaultUpdate.Log.StagingCleanup", stagingFolder));
       } catch (HopException e) {
         logError(
             BaseMessages.getString(
@@ -1233,8 +1217,8 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
     }
   }
 
-  private DataVaultModel loadReferencedDataModel(IHopMetadataProvider provider, IVariables variables)
-      throws HopException {
+  private DataVaultModel loadReferencedDataModel(
+      IHopMetadataProvider provider, IVariables variables) throws HopException {
     String realModelFile = variables.resolve(dataVaultModelFile);
     if (Utils.isEmpty(realModelFile)) {
       throw new HopException(
@@ -1262,7 +1246,7 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
   @Override
   public String[] getReferencedObjectDescriptions() {
     return new String[] {
-            BaseMessages.getString(PKG, "ActionDataVaultUpdate.ReferencedObject.Description"),
+      BaseMessages.getString(PKG, "ActionDataVaultUpdate.ReferencedObject.Description"),
     };
   }
 

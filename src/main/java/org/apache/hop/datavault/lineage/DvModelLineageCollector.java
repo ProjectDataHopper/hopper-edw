@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.lineage;
 
 import java.util.ArrayList;
@@ -86,7 +85,8 @@ public final class DvModelLineageCollector {
       }
       TableLineage tableLineage =
           switch (table.getTableType()) {
-            case HUB -> collectHub((DvHub) table, model, config, variables, targetDb, sourcesNamespace);
+            case HUB ->
+                collectHub((DvHub) table, model, config, variables, targetDb, sourcesNamespace);
             case LINK ->
                 collectLink((DvLink) table, model, config, variables, targetDb, sourcesNamespace);
             case SATELLITE ->
@@ -173,8 +173,7 @@ public final class DvModelLineageCollector {
     // Hash key
     String hashField = resolve(hub.getHashKeyFieldName(), variables);
     if (!Utils.isEmpty(hashField)) {
-      String bkList =
-          bksByTarget.keySet().stream().sorted().collect(Collectors.joining(", "));
+      String bkList = bksByTarget.keySet().stream().sorted().collect(Collectors.joining(", "));
       FieldLineage hashLineage = new FieldLineage(hashField);
       hashLineage.setTechnical(true);
       FieldContribution hashContribution = new FieldContribution();
@@ -217,7 +216,8 @@ public final class DvModelLineageCollector {
         }
         String resolved = resolve(hubName, variables);
         TableSourceRef ref =
-            new TableSourceRef(TableSourceKind.DV_TABLE, resolved, TableSourceRole.PARTICIPATING_HUB);
+            new TableSourceRef(
+                TableSourceKind.DV_TABLE, resolved, TableSourceRole.PARTICIPATING_HUB);
         table.addSource(ref);
       }
     }
@@ -248,12 +248,15 @@ public final class DvModelLineageCollector {
 
         // Parent hash on link table
         FieldLineage parentHashField =
-            table.findField(parentHash).orElseGet(() -> {
-              FieldLineage f = new FieldLineage(parentHash);
-              f.setTechnical(true);
-              table.addField(f);
-              return f;
-            });
+            table
+                .findField(parentHash)
+                .orElseGet(
+                    () -> {
+                      FieldLineage f = new FieldLineage(parentHash);
+                      f.setTechnical(true);
+                      table.addField(f);
+                      return f;
+                    });
         FieldContribution parentHashContribution = new FieldContribution();
         parentHashContribution.setSourceKind(TableSourceKind.DV_SOURCE);
         parentHashContribution.setSourceName(sourceName);
@@ -277,12 +280,15 @@ public final class DvModelLineageCollector {
                   : targetBk;
           // Document the source mapping used to compute the hub hash (not always a physical BK col)
           FieldLineage mappingField =
-              table.findField(targetBk).orElseGet(() -> {
-                FieldLineage f = new FieldLineage(targetBk);
-                f.setTechnical(false);
-                table.addField(f);
-                return f;
-              });
+              table
+                  .findField(targetBk)
+                  .orElseGet(
+                      () -> {
+                        FieldLineage f = new FieldLineage(targetBk);
+                        f.setTechnical(false);
+                        table.addField(f);
+                        return f;
+                      });
           FieldContribution contribution = new FieldContribution();
           contribution.setSourceKind(TableSourceKind.DV_SOURCE);
           contribution.setSourceName(sourceName);
@@ -356,7 +362,8 @@ public final class DvModelLineageCollector {
       IVariables variables,
       String targetDb,
       String sourcesNamespace) {
-    TableLineage table = baseTable(satellite, model, variables, targetDb, DvTableType.SATELLITE.name());
+    TableLineage table =
+        baseTable(satellite, model, variables, targetDb, DvTableType.SATELLITE.name());
     addNamingReasons(table, satellite);
 
     boolean linkSatellite = !Utils.isEmpty(satellite.getLinkName());
@@ -396,7 +403,9 @@ public final class DvModelLineageCollector {
           for (DvLink.SatelliteSourceKeyField skf : satSource.getSatelliteSourceKeyFields()) {
             if (skf == null
                 || (!Utils.isEmpty(skf.getSatelliteName())
-                    && !satellite.getName().equalsIgnoreCase(resolve(skf.getSatelliteName(), variables)))) {
+                    && !satellite
+                        .getName()
+                        .equalsIgnoreCase(resolve(skf.getSatelliteName(), variables)))) {
               continue;
             }
             if (skf.getAttributeSources() == null) {
@@ -483,8 +492,7 @@ public final class DvModelLineageCollector {
         contribution.setTransform(
             targetName.equals(sourceField) ? FieldTransform.IDENTITY : FieldTransform.RENAME);
         if (targetName.equals(sourceField)) {
-          contribution.addReason(
-              LineageReasonFactory.defaultSameAsSource(targetName, sourceName));
+          contribution.addReason(LineageReasonFactory.defaultSameAsSource(targetName, sourceName));
         } else {
           contribution.addReason(
               LineageReasonFactory.userExplicitMapping(targetName, sourceName, sourceField));
@@ -508,7 +516,8 @@ public final class DvModelLineageCollector {
       contribution.setSourceName(recordSource);
       contribution.setSourceCatalogKey(catalogKey(sourcesNamespace, recordSource));
       contribution.setSourceFieldName(dkSource);
-      contribution.setTransform(dk.equals(dkSource) ? FieldTransform.IDENTITY : FieldTransform.RENAME);
+      contribution.setTransform(
+          dk.equals(dkSource) ? FieldTransform.IDENTITY : FieldTransform.RENAME);
       contribution.addReason(LineageReasonFactory.drivingKey(dk, dkSource, recordSource));
       field.addContribution(contribution);
       table.addField(field);
@@ -544,8 +553,7 @@ public final class DvModelLineageCollector {
     TableLineage lineage = new TableLineage();
     lineage.setLayer(LineageLayer.DV);
     lineage.setLogicalName(table.getName());
-    String physical =
-        !Utils.isEmpty(table.getTableName()) ? table.getTableName() : table.getName();
+    String physical = !Utils.isEmpty(table.getTableName()) ? table.getTableName() : table.getName();
     lineage.setPhysicalTableName(physical);
     lineage.setTableType(tableType);
     lineage.setModelName(model.getName());
@@ -566,10 +574,7 @@ public final class DvModelLineageCollector {
   }
 
   private static void addStandardColumns(
-      TableLineage table,
-      IDvTable dvTable,
-      DataVaultConfiguration config,
-      IVariables variables) {
+      TableLineage table, IDvTable dvTable, DataVaultConfiguration config, IVariables variables) {
     if (config == null) {
       return;
     }

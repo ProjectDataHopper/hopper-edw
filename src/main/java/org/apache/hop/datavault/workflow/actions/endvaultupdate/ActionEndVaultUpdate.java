@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.workflow.actions.endvaultupdate;
 
 import java.util.Date;
@@ -31,6 +29,7 @@ import org.apache.hop.core.gui.plugin.GuiElementType;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.GuiWidgetElement;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metrics.VaultUpdateExecutionSupport;
 import org.apache.hop.datavault.metrics.WorkflowLoadOverviewFileWriter;
 import org.apache.hop.datavault.metrics.WorkflowLoadOverviewLoader;
@@ -42,7 +41,6 @@ import org.apache.hop.datavault.metrics.metadata.ExecutionMetricsProfileMeta;
 import org.apache.hop.datavault.workflow.ReferencedFilename;
 import org.apache.hop.datavault.workflow.WorkflowReferencedObjectVariableSupport;
 import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.workflow.WorkflowMeta;
@@ -297,7 +295,8 @@ public class ActionEndVaultUpdate extends ActionBase implements Cloneable, IActi
 
     if (logToWorkflow) {
       String formatted =
-          WorkflowLoadOverviewReportFormatter.formatLog(report, includePipelineDetail, includeInsights);
+          WorkflowLoadOverviewReportFormatter.formatLog(
+              report, includePipelineDetail, includeInsights);
       if (!Utils.isEmpty(formatted)) {
         logBasic(formatted);
       }
@@ -313,7 +312,8 @@ public class ActionEndVaultUpdate extends ActionBase implements Cloneable, IActi
               includeInsights,
               getVariables());
       if (!Utils.isEmpty(markdownPath)) {
-        logBasic(BaseMessages.getString(PKG, "ActionEndVaultUpdate.Log.MarkdownWritten", markdownPath));
+        logBasic(
+            BaseMessages.getString(PKG, "ActionEndVaultUpdate.Log.MarkdownWritten", markdownPath));
       }
     }
 

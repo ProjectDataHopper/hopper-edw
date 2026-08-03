@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.hopgui.file.sourcemodel;
 
 import java.util.ArrayList;
@@ -65,12 +64,7 @@ public final class HopGuiSourceModelImportSupport {
 
     ImportSourceSchemaOptionsDialog optionsDialog =
         new ImportSourceSchemaOptionsDialog(
-            shell,
-            variables,
-            metadataProvider,
-            preferredDb,
-            preferredSchema,
-            preferredCatalog);
+            shell, variables, metadataProvider, preferredDb, preferredSchema, preferredCatalog);
     SourceSchemaImportOptions options = optionsDialog.open();
     if (options == null) {
       return;
@@ -172,8 +166,7 @@ public final class HopGuiSourceModelImportSupport {
 
     if (tableNames == null || tableNames.length == 0) {
       MessageBox mb = new MessageBox(shell, SWT.OK | SWT.ICON_INFORMATION);
-      mb.setText(
-          BaseMessages.getString(PKG, "HopGuiSourceModelImportSupport.NoTablesFound.Title"));
+      mb.setText(BaseMessages.getString(PKG, "HopGuiSourceModelImportSupport.NoTablesFound.Title"));
       mb.setMessage(
           BaseMessages.getString(PKG, "HopGuiSourceModelImportSupport.NoTablesFound.Message"));
       mb.open();
@@ -202,8 +195,7 @@ public final class HopGuiSourceModelImportSupport {
         DvDatabaseSourceImportSupport.tableNamesForSelectionIndexes(sorted, indexes);
     if (picked.isEmpty()) {
       MessageBox mb = new MessageBox(shell, SWT.OK | SWT.ICON_INFORMATION);
-      mb.setText(
-          BaseMessages.getString(PKG, "HopGuiSourceModelImportSupport.NoneSelected.Title"));
+      mb.setText(BaseMessages.getString(PKG, "HopGuiSourceModelImportSupport.NoneSelected.Title"));
       mb.setMessage(
           BaseMessages.getString(PKG, "HopGuiSourceModelImportSupport.NoneSelected.Message"));
       mb.open();

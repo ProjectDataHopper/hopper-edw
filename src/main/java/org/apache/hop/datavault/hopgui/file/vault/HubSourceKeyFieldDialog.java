@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.vault;
 
 import java.util.ArrayList;
@@ -25,6 +23,8 @@ import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
+import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.datavault.metadata.BusinessKeySource;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DataVaultSource;
@@ -34,8 +34,8 @@ import org.apache.hop.datavault.metadata.DvLink;
 import org.apache.hop.datavault.metadata.SourceField;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.PropsUi;
-import org.apache.hop.ui.core.gui.WindowProperty;
 import org.apache.hop.ui.core.dialog.BaseDialog;
+import org.apache.hop.ui.core.gui.WindowProperty;
 import org.apache.hop.ui.core.widget.ColumnInfo;
 import org.apache.hop.ui.core.widget.TableView;
 import org.apache.hop.ui.hopgui.HopGui;
@@ -49,14 +49,11 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
-import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
-import org.apache.hop.datavault.hopgui.help.HelpTopics;
 
 /**
  * Dialog to edit the source field mappings for one hub within one DvLinkHubSource. Allows
- * specifying
- * which source columns map to the hub's business keys and which source columns supply any driving
- * keys.
+ * specifying which source columns map to the hub's business keys and which source columns supply
+ * any driving keys.
  */
 public class HubSourceKeyFieldDialog {
   private static final Class<?> PKG = HubSourceKeyFieldDialog.class;
@@ -139,7 +136,8 @@ public class HubSourceKeyFieldDialog {
     fdHubName.top = new FormAttachment(0, margin);
     fdHubName.right = new FormAttachment(100, 0);
     wHubName.setLayoutData(fdHubName);
-    // If we have known hubs and none set yet, leave blank for user; editing context usually prefills
+    // If we have known hubs and none set yet, leave blank for user; editing context usually
+    // prefills
 
     // Business key sources section
     Label wlBks = new Label(shell, SWT.LEFT);
@@ -157,14 +155,13 @@ public class HubSourceKeyFieldDialog {
               ColumnInfo.COLUMN_TYPE_CCOMBO,
               getBusinessKeyComboOptions()),
           new ColumnInfo(
-              "Source field name",
-              ColumnInfo.COLUMN_TYPE_CCOMBO,
-              getSourceFieldComboOptions()),
+              "Source field name", ColumnInfo.COLUMN_TYPE_CCOMBO, getSourceFieldComboOptions()),
         };
 
-    int nrBk = (input.getSourceBusinessKeyFields() != null)
-        ? Math.max(1, input.getSourceBusinessKeyFields().size())
-        : 2;
+    int nrBk =
+        (input.getSourceBusinessKeyFields() != null)
+            ? Math.max(1, input.getSourceBusinessKeyFields().size())
+            : 2;
     wBusinessKeySources =
         new TableView(
             variables,
@@ -193,17 +190,15 @@ public class HubSourceKeyFieldDialog {
 
     ColumnInfo[] dkCols =
         new ColumnInfo[] {
+          new ColumnInfo("Driving key", ColumnInfo.COLUMN_TYPE_CCOMBO, getDrivingKeyComboOptions()),
           new ColumnInfo(
-              "Driving key", ColumnInfo.COLUMN_TYPE_CCOMBO, getDrivingKeyComboOptions()),
-          new ColumnInfo(
-              "Source field name",
-              ColumnInfo.COLUMN_TYPE_CCOMBO,
-              getSourceFieldComboOptions()),
+              "Source field name", ColumnInfo.COLUMN_TYPE_CCOMBO, getSourceFieldComboOptions()),
         };
 
-    int nrDk = (input.getDrivingKeySources() != null)
-        ? Math.max(1, input.getDrivingKeySources().size())
-        : 2;
+    int nrDk =
+        (input.getDrivingKeySources() != null)
+            ? Math.max(1, input.getDrivingKeySources().size())
+            : 2;
     wDrivingKeySources =
         new TableView(
             variables,

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -64,10 +62,8 @@ class BusinessVaultDerivativeSupportTest {
   @Test
   void addDerivativeFromCanvasReferenceAllowsMultipleReferences() {
     BvPitTable pitTable = new BvPitTable();
-    BvDvTableReference hubRef =
-        new BvDvTableReference("hub_customer", DvTableType.HUB);
-    BvDvTableReference satRef =
-        new BvDvTableReference("sat_customer", DvTableType.SATELLITE);
+    BvDvTableReference hubRef = new BvDvTableReference("hub_customer", DvTableType.HUB);
+    BvDvTableReference satRef = new BvDvTableReference("sat_customer", DvTableType.SATELLITE);
 
     assertTrue(BusinessVaultDerivativeSupport.addDerivative(pitTable, hubRef));
     assertTrue(BusinessVaultDerivativeSupport.addDerivative(pitTable, satRef));

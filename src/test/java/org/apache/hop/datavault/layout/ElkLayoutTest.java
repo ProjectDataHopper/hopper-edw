@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.layout;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -58,8 +56,7 @@ class ElkLayoutTest {
     assertEquals(
         WidthApproximationStrategy.TARGET_WIDTH,
         root.getProperty(RectPackingOptions.WIDTH_APPROXIMATION_STRATEGY));
-    assertEquals(
-        640.0, root.getProperty(RectPackingOptions.WIDTH_APPROXIMATION_TARGET_WIDTH));
+    assertEquals(640.0, root.getProperty(RectPackingOptions.WIDTH_APPROXIMATION_TARGET_WIDTH));
     assertNotNull(root.getProperty(RectPackingOptions.CONTENT_ALIGNMENT));
     assertFalse(root.getProperty(CoreOptions.EXPAND_NODES));
     assertTrue(root.getProperty(RectPackingOptions.NODE_SIZE_FIXED_GRAPH_SIZE));

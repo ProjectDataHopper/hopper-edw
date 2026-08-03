@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.config;
 
 import org.apache.hop.core.util.Utils;
@@ -30,12 +28,16 @@ public final class DvRunConfigurationSupport {
 
   public static String resolvePipelineRunConfiguration(String actionValue, IVariables variables) {
     return resolveRunConfiguration(
-        actionValue, DataVaultConfigSingleton.getConfig().getDefaultPipelineRunConfiguration(), variables);
+        actionValue,
+        DataVaultConfigSingleton.getConfig().getDefaultPipelineRunConfiguration(),
+        variables);
   }
 
   public static String resolveWorkflowRunConfiguration(String actionValue, IVariables variables) {
     return resolveRunConfiguration(
-        actionValue, DataVaultConfigSingleton.getConfig().getDefaultWorkflowRunConfiguration(), variables);
+        actionValue,
+        DataVaultConfigSingleton.getConfig().getDefaultWorkflowRunConfiguration(),
+        variables);
   }
 
   private static String resolveRunConfiguration(

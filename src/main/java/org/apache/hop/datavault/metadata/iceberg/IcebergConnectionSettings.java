@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.iceberg;
 
 import org.apache.hop.catalog.discovery.HopVariableResolutionSupport;
@@ -37,7 +35,8 @@ public record IcebergConnectionSettings(
     String s3AccessKey,
     String s3SecretKey) {
 
-  public static IcebergConnectionSettings from(PhysicalSourceRef physicalRef, IVariables variables) {
+  public static IcebergConnectionSettings from(
+      PhysicalSourceRef physicalRef, IVariables variables) {
     return new IcebergConnectionSettings(
         resolve(variables, physicalRef.getCatalogUri()),
         resolve(variables, physicalRef.getWarehouse()),

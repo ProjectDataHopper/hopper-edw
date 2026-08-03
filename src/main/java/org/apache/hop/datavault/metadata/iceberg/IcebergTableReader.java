@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.iceberg;
 
 import java.io.IOException;
@@ -83,8 +81,7 @@ public final class IcebergTableReader implements AutoCloseable {
       }
       properties.put("client.region", "us-east-1");
 
-      Catalog catalog =
-          CatalogUtil.buildIcebergCatalog("rest", properties, new Configuration());
+      Catalog catalog = CatalogUtil.buildIcebergCatalog("rest", properties, new Configuration());
       Table table =
           catalog.loadTable(TableIdentifier.of(settings.namespace(), settings.tableName()));
       schema = table.schema();
@@ -110,11 +107,7 @@ public final class IcebergTableReader implements AutoCloseable {
       iterator = records.iterator();
     } catch (Exception e) {
       throw new HopException(
-          "Unable to read Iceberg table "
-              + settings.namespace()
-              + "."
-              + settings.tableName(),
-          e);
+          "Unable to read Iceberg table " + settings.namespace() + "." + settings.tableName(), e);
     } finally {
       Thread.currentThread().setContextClassLoader(originalContextClassLoader);
     }
@@ -144,8 +137,7 @@ public final class IcebergTableReader implements AutoCloseable {
       if (field == null) {
         throw new HopException("Iceberg table does not contain field '" + fieldName + "'");
       }
-      rowMeta.addValueMeta(
-          IcebergTypeMapping.valueMetaForField(fieldName, field.type(), origin));
+      rowMeta.addValueMeta(IcebergTypeMapping.valueMetaForField(fieldName, field.type(), origin));
     }
     outputRowMeta = rowMeta;
   }

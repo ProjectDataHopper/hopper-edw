@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import java.util.ArrayList;
@@ -62,13 +60,17 @@ public final class WorkflowLoadOverviewLoader {
       if (!db.checkTableExists(schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_RUN)) {
         return null;
       }
-      List<LoadRunRow> runs = queryLoadRuns(db, databaseMeta, schema, workflowExecutionId, variables);
+      List<LoadRunRow> runs =
+          queryLoadRuns(db, databaseMeta, schema, workflowExecutionId, variables);
       if (runs.isEmpty()) {
         return null;
       }
-      runs.sort(Comparator.comparingInt(WorkflowLoadOverviewLoader::modelTypeOrder).thenComparing(LoadRunRow::finishedAt));
+      runs.sort(
+          Comparator.comparingInt(WorkflowLoadOverviewLoader::modelTypeOrder)
+              .thenComparing(LoadRunRow::finishedAt));
 
-      Map<String, Long> durationByRunId = queryDurationByRunId(db, databaseMeta, schema, runs, variables);
+      Map<String, Long> durationByRunId =
+          queryDurationByRunId(db, databaseMeta, schema, runs, variables);
       Map<String, Map<String, Long>> pipelineDurationByRunId =
           includePipelineDetail
               ? queryPipelineDurationByRunId(db, databaseMeta, schema, runs, variables)
@@ -76,10 +78,18 @@ public final class WorkflowLoadOverviewLoader {
       Map<String, List<WorkflowLoadOverviewReport.PipelineEntry>> pipelinesByRunId =
           includePipelineDetail
               ? queryPipelinesByRunId(
-                  db, databaseMeta, schema, runs, variables, maxPipelinesPerModel, pipelineDurationByRunId)
+                  db,
+                  databaseMeta,
+                  schema,
+                  runs,
+                  variables,
+                  maxPipelinesPerModel,
+                  pipelineDurationByRunId)
               : Map.of();
       Map<String, List<WorkflowLoadOverviewReport.InsightEntry>> insightsByRunId =
-          includeInsights ? queryInsightsByRunId(db, databaseMeta, schema, runs, variables) : Map.of();
+          includeInsights
+              ? queryInsightsByRunId(db, databaseMeta, schema, runs, variables)
+              : Map.of();
 
       return assembleReport(
           workflowExecutionId,
@@ -109,7 +119,8 @@ public final class WorkflowLoadOverviewLoader {
     List<LoadRunRow> orderedRuns = new ArrayList<>(runs);
     orderedRuns.sort(
         Comparator.comparingInt(WorkflowLoadOverviewLoader::modelTypeOrder)
-            .thenComparing(LoadRunRow::finishedAt, Comparator.nullsLast(Comparator.naturalOrder())));
+            .thenComparing(
+                LoadRunRow::finishedAt, Comparator.nullsLast(Comparator.naturalOrder())));
 
     WorkflowLoadOverviewReport.WorkflowLoadOverviewReportBuilder builder =
         WorkflowLoadOverviewReport.builder()
@@ -166,7 +177,8 @@ public final class WorkflowLoadOverviewLoader {
         errors = run.errorCount();
       }
 
-      long durationMs = durationByRunId != null ? durationByRunId.getOrDefault(run.runId(), 0L) : 0L;
+      long durationMs =
+          durationByRunId != null ? durationByRunId.getOrDefault(run.runId(), 0L) : 0L;
       boolean success = run.success() == null || run.success();
       if (!success) {
         allSuccess = false;
@@ -205,7 +217,8 @@ public final class WorkflowLoadOverviewLoader {
     return builder
         .metricsWorkflowName(metricsWorkflowName)
         .finishedAt(effectiveFinishedAt)
-        .durationMs(resolveWorkflowDurationMs(effectiveStartedAt, effectiveFinishedAt, totalDurationMs))
+        .durationMs(
+            resolveWorkflowDurationMs(effectiveStartedAt, effectiveFinishedAt, totalDurationMs))
         .modelCount(orderedRuns.size())
         .pipelineCount(totalPipelines)
         .insightCount(totalInsights)
@@ -358,8 +371,7 @@ public final class WorkflowLoadOverviewLoader {
       if (Utils.isEmpty(runId) || Utils.isEmpty(pipelineName) || duration == null) {
         continue;
       }
-      Map<String, Long> byPipeline =
-          durationsByRunId.computeIfAbsent(runId, id -> new HashMap<>());
+      Map<String, Long> byPipeline = durationsByRunId.computeIfAbsent(runId, id -> new HashMap<>());
       if (onlyIfAbsent && byPipeline.containsKey(pipelineName)) {
         continue;
       }
@@ -393,7 +405,8 @@ public final class WorkflowLoadOverviewLoader {
             + " WHERE run_id IN ("
             + inClause
             + ") ORDER BY run_id, target_rows_inserted DESC, source_rows_read DESC";
-    List<Object[]> rows = db.getRows(sql, Math.max(256, runs.size() * Math.max(1, maxPipelinesPerModel)));
+    List<Object[]> rows =
+        db.getRows(sql, Math.max(256, runs.size() * Math.max(1, maxPipelinesPerModel)));
     IRowMeta rowMeta = db.getReturnRowMeta();
     Map<String, List<WorkflowLoadOverviewReport.PipelineEntry>> pipelinesByRunId = new HashMap<>();
     if (rows == null || rowMeta == null) {
@@ -413,9 +426,7 @@ public final class WorkflowLoadOverviewLoader {
       String pipelineName = stringValue(rowMeta, row, "pipeline_name");
       long pipelineDurationMs =
           pipelineDurationByRunId != null
-              ? pipelineDurationByRunId
-                  .getOrDefault(runId, Map.of())
-                  .getOrDefault(pipelineName, 0L)
+              ? pipelineDurationByRunId.getOrDefault(runId, Map.of()).getOrDefault(pipelineName, 0L)
               : 0L;
       pipelinesByRunId
           .computeIfAbsent(runId, id -> new ArrayList<>())
@@ -539,8 +550,6 @@ public final class WorkflowLoadOverviewLoader {
       default -> 3;
     };
   }
-
-
 
   private static String sqlLiteral(IVariables variables, String value) {
     String resolved = variables != null ? variables.resolve(value) : value;

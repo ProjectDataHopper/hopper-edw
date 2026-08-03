@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.modelgraph;
 
 import org.apache.hop.core.gui.Point;
@@ -26,6 +24,7 @@ public final class ModelGraphTableNameHitArea {
   private static final int PAD_LEFT = 2;
   private static final int PAD_TOP = 2;
   private static final int PAD_RIGHT = 2;
+
   /** Extra space below the text baseline where the hover underline is drawn. */
   private static final int PAD_BELOW_UNDERLINE = 4;
 

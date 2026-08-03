@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.vault;
 
 import org.apache.hop.core.exception.HopException;
@@ -72,8 +70,7 @@ public final class DvTableReferenceNavigationSupport {
           BaseMessages.getString(PKG, "DvTableReferenceNavigationSupport.Error.MissingReference"));
     }
 
-    SourceTableTarget target =
-        resolveSourceTable(model, reference, variables, metadataProvider);
+    SourceTableTarget target = resolveSourceTable(model, reference, variables, metadataProvider);
 
     if (target.sameModel()) {
       HopGuiVaultGraph graph = currentGraph;
@@ -97,8 +94,7 @@ public final class DvTableReferenceNavigationSupport {
     String tableName = resolve(reference.getReferencedTableName(), variables);
     if (Utils.isEmpty(tableName)) {
       throw new HopException(
-          BaseMessages.getString(
-              PKG, "DvTableReferenceNavigationSupport.Error.MissingTableName"));
+          BaseMessages.getString(PKG, "DvTableReferenceNavigationSupport.Error.MissingTableName"));
     }
 
     if (DvTableResolutionSupport.isExternalTableReference(reference)) {
@@ -136,17 +132,13 @@ public final class DvTableReferenceNavigationSupport {
     if (referenced == null || referenced instanceof DvTableReference) {
       throw new HopException(
           BaseMessages.getString(
-              PKG,
-              "DvTableReferenceNavigationSupport.Error.TableNotFoundInModel",
-              tableName));
+              PKG, "DvTableReferenceNavigationSupport.Error.TableNotFoundInModel", tableName));
     }
     if (reference.getReferencedTableType() != null
         && referenced.getTableType() != reference.getReferencedTableType()) {
       throw new HopException(
           BaseMessages.getString(
-              PKG,
-              "DvTableReferenceNavigationSupport.Error.TableTypeMismatchInModel",
-              tableName));
+              PKG, "DvTableReferenceNavigationSupport.Error.TableTypeMismatchInModel", tableName));
     }
     return new SourceTableTarget(null, tableName, true);
   }

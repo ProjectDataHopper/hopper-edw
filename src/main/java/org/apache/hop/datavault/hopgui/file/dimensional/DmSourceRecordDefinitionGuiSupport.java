@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.dimensional;
 
 import java.util.ArrayList;
@@ -28,7 +26,6 @@ import org.apache.hop.catalog.model.RecordDefinitionKey;
 import org.apache.hop.catalog.model.RecordDefinitionQuery;
 import org.apache.hop.catalog.model.RecordDefinitionRef;
 import org.apache.hop.catalog.registry.RecordDefinitionRegistry;
-import org.apache.hop.core.Props;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
@@ -57,7 +54,8 @@ public final class DmSourceRecordDefinitionGuiSupport {
     if (Utils.isEmpty(catalogConnection)) {
       return List.of();
     }
-    String resolvedConnection = variables != null ? variables.resolve(catalogConnection) : catalogConnection;
+    String resolvedConnection =
+        variables != null ? variables.resolve(catalogConnection) : catalogConnection;
     List<RecordDefinitionRef> refs =
         RecordDefinitionRegistry.getInstance()
             .listAll(new RecordDefinitionQuery(), variables, metadataProvider);
@@ -77,11 +75,11 @@ public final class DmSourceRecordDefinitionGuiSupport {
       String namespace = ref.getKey().getNamespace();
       String name = ref.getKey().getName();
       String type = definition.getType() != null ? definition.getType().name() : "";
-      String label =
-          namespace + " / " + name + (Utils.isEmpty(type) ? "" : " (" + type + ")");
+      String label = namespace + " / " + name + (Utils.isEmpty(type) ? "" : " (" + type + ")");
       previewable.add(new PreviewableRecordRef(namespace, name, label));
     }
-    previewable.sort(Comparator.comparing(PreviewableRecordRef::label, String.CASE_INSENSITIVE_ORDER));
+    previewable.sort(
+        Comparator.comparing(PreviewableRecordRef::label, String.CASE_INSENSITIVE_ORDER));
     return previewable;
   }
 
@@ -126,8 +124,7 @@ public final class DmSourceRecordDefinitionGuiSupport {
               config, variables, metadataProvider, catalogConnection, namespace, recordName);
       String message =
           String.join(
-              System.lineSeparator(),
-              fieldNames.stream().map(name -> "- " + name).toList());
+              System.lineSeparator(), fieldNames.stream().map(name -> "- " + name).toList());
       EnterTextDialog dialog =
           new EnterTextDialog(
               shell,
@@ -157,7 +154,8 @@ public final class DmSourceRecordDefinitionGuiSupport {
       String recordName) {
     try {
       validateRecordInput(catalogConnection, namespace, recordName);
-      DmSourceConfiguration source = toSourceConfiguration(catalogConnection, namespace, recordName);
+      DmSourceConfiguration source =
+          toSourceConfiguration(catalogConnection, namespace, recordName);
       RecordDefinition definition =
           DmSourceRecordDefinitionSupport.loadRecordDefinition(
               source, config, variables, metadataProvider);
@@ -175,7 +173,8 @@ public final class DmSourceRecordDefinitionGuiSupport {
   public static DmSourceConfiguration toSourceConfiguration(
       String catalogConnection, String namespace, String recordName) {
     DmSourceConfiguration source = new DmSourceConfiguration();
-    source.setSourceType(org.apache.hop.datavault.metadata.dimensional.DmSourceType.RECORD_DEFINITION);
+    source.setSourceType(
+        org.apache.hop.datavault.metadata.dimensional.DmSourceType.RECORD_DEFINITION);
     source.setSourceCatalogConnection(catalogConnection);
     source.setSourceRecordNamespace(namespace);
     source.setSourceRecordName(recordName);

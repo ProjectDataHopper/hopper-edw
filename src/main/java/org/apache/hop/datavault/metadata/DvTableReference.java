@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.Date;
@@ -23,7 +21,6 @@ import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.CheckResult;
-import org.apache.hop.core.Const;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.logging.ILoggingObject;
@@ -116,8 +113,7 @@ public class DvTableReference extends DvTableBase {
     IDvTable target =
         DvTableResolutionSupport.resolveReferenceTarget(model, this, variables, metadataProvider);
     if (target == null) {
-      throw new HopException(
-          "Table reference '" + getName() + "' has no resolvable target table");
+      throw new HopException("Table reference '" + getName() + "' has no resolvable target table");
     }
     return target.getTargetTableLayout(metadataProvider, variables, model);
   }

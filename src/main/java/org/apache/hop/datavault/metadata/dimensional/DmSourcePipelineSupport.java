@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import java.io.InputStream;
@@ -28,10 +26,10 @@ import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.util.Utils;
-import org.apache.hop.core.variables.Variables;
 import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.core.variables.Variables;
 import org.apache.hop.datavault.metadata.pipeline.HeadlessPipelineFieldSupport;
+import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transforms.metainject.MetaInjectMeta;
@@ -89,9 +87,7 @@ public final class DmSourcePipelineSupport {
   }
 
   public static IRowMeta resolveSourceRowMeta(
-      DmSourceConfiguration source,
-      IVariables variables,
-      IHopMetadataProvider metadataProvider)
+      DmSourceConfiguration source, IVariables variables, IHopMetadataProvider metadataProvider)
       throws HopException {
     if (source == null) {
       throw new HopException(
@@ -112,10 +108,7 @@ public final class DmSourcePipelineSupport {
     if (pipelineMeta.findTransform(transformName) == null) {
       throw new HopException(
           BaseMessages.getString(
-              PKG,
-              "DmSourcePipelineSupport.Error.UnknownTransform",
-              transformName,
-              pipelineFile));
+              PKG, "DmSourcePipelineSupport.Error.UnknownTransform", transformName, pipelineFile));
     }
 
     try {

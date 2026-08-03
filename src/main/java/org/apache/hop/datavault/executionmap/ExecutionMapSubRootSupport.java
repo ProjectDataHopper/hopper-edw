@@ -13,15 +13,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.file.IHasFilename;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.core.file.IHasFilename;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.ITransformMeta;
@@ -119,13 +117,19 @@ public final class ExecutionMapSubRootSupport {
       return null;
     }
     if (loaded instanceof IHasFilename hasFilename && !Utils.isEmpty(hasFilename.getFilename())) {
-      return variables != null ? variables.resolve(hasFilename.getFilename()) : hasFilename.getFilename();
+      return variables != null
+          ? variables.resolve(hasFilename.getFilename())
+          : hasFilename.getFilename();
     }
     if (loaded instanceof WorkflowMeta workflowMeta && !Utils.isEmpty(workflowMeta.getFilename())) {
-      return variables != null ? variables.resolve(workflowMeta.getFilename()) : workflowMeta.getFilename();
+      return variables != null
+          ? variables.resolve(workflowMeta.getFilename())
+          : workflowMeta.getFilename();
     }
     if (loaded instanceof PipelineMeta pipelineMeta && !Utils.isEmpty(pipelineMeta.getFilename())) {
-      return variables != null ? variables.resolve(pipelineMeta.getFilename()) : pipelineMeta.getFilename();
+      return variables != null
+          ? variables.resolve(pipelineMeta.getFilename())
+          : pipelineMeta.getFilename();
     }
     return null;
   }

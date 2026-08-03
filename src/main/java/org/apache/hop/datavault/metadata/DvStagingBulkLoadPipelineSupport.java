@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.ArrayList;
@@ -41,7 +39,9 @@ public final class DvStagingBulkLoadPipelineSupport {
 
   private DvStagingBulkLoadPipelineSupport() {}
 
-  /** Returns whether staged bulk loading must stream from the Hop client instead of the DB server. */
+  /**
+   * Returns whether staged bulk loading must stream from the Hop client instead of the DB server.
+   */
   public static boolean usesClientSideBulkLoad(DatabaseMeta targetDatabase) {
     return targetDatabase != null
         && DvBulkLoadPluginSupport.POSTGRESQL_DB_PLUGIN_ID.equals(targetDatabase.getPluginId());

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai;
 
 import org.apache.hop.core.exception.HopException;
@@ -59,7 +57,8 @@ public final class HopAiLanguageModelFactory {
     }
 
     switch (preset) {
-      case GROK, OPENAI, GOOGLE_GEMINI, CUSTOM -> applyOpenAi(meta, baseUrl, apiKey, modelName, temp);
+      case GROK, OPENAI, GOOGLE_GEMINI, CUSTOM ->
+          applyOpenAi(meta, baseUrl, apiKey, modelName, temp);
       case ANTHROPIC -> {
         meta.setAnthropicApiKey(apiKey);
         meta.setAnthropicModelName(modelName);

@@ -13,14 +13,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
-import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.datavault.metadata.dimensional.DmDimension;
 import org.apache.hop.datavault.metadata.dimensional.DmFactDimensionRole;
 import org.apache.hop.datavault.metadata.dimensional.DmTableBase;
@@ -86,22 +83,23 @@ public final class GeneratedPipelineMetadataSupport {
     setTransformAttribute(
         transform, GeneratedPipelineMetadataConstants.ELEMENT_NAME, ctx.elementName());
     setTransformAttribute(
-        transform,
-        GeneratedPipelineMetadataConstants.PARENT_ELEMENT_NAME,
-        ctx.parentElementName());
+        transform, GeneratedPipelineMetadataConstants.PARENT_ELEMENT_NAME, ctx.parentElementName());
     setTransformAttribute(
         transform, GeneratedPipelineMetadataConstants.PHYSICAL_TABLE, ctx.physicalTable());
     setTransformAttribute(
         transform, GeneratedPipelineMetadataConstants.CONNECTION, ctx.connection());
     setTransformAttribute(
-        transform,
-        GeneratedPipelineMetadataConstants.LOOKUP_CACHE_MODE,
-        ctx.lookupCacheMode());
+        transform, GeneratedPipelineMetadataConstants.LOOKUP_CACHE_MODE, ctx.lookupCacheMode());
   }
 
   public static void stampDvHubPipeline(
-      PipelineMeta pipeline, DataVaultModel model, DvHub hub, String targetTable, String sourceName) {
-    stampDvElementPipeline(pipeline, model, "hub", hub != null ? hub.getName() : null, targetTable, sourceName);
+      PipelineMeta pipeline,
+      DataVaultModel model,
+      DvHub hub,
+      String targetTable,
+      String sourceName) {
+    stampDvElementPipeline(
+        pipeline, model, "hub", hub != null ? hub.getName() : null, targetTable, sourceName);
   }
 
   public static void stampDvSatellitePipeline(
@@ -120,7 +118,11 @@ public final class GeneratedPipelineMetadataSupport {
   }
 
   public static void stampDvLinkPipeline(
-      PipelineMeta pipeline, DataVaultModel model, DvLink link, String targetTable, String sourceName) {
+      PipelineMeta pipeline,
+      DataVaultModel model,
+      DvLink link,
+      String targetTable,
+      String sourceName) {
     stampDvElementPipeline(
         pipeline, model, "link", link != null ? link.getName() : null, targetTable, sourceName);
   }
@@ -264,7 +266,11 @@ public final class GeneratedPipelineMetadataSupport {
   }
 
   public static void stampTargetRead(
-      TransformMeta transform, String elementType, String elementName, String physicalTable, String connection) {
+      TransformMeta transform,
+      String elementType,
+      String elementName,
+      String physicalTable,
+      String connection) {
     stampTransform(
         transform,
         new TransformContext(
@@ -278,7 +284,11 @@ public final class GeneratedPipelineMetadataSupport {
   }
 
   public static void stampWriteTarget(
-      TransformMeta transform, String elementType, String elementName, String physicalTable, String connection) {
+      TransformMeta transform,
+      String elementType,
+      String elementName,
+      String physicalTable,
+      String connection) {
     stampTransform(
         transform,
         new TransformContext(

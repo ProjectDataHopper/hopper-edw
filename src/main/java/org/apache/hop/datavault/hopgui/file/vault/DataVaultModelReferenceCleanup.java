@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.vault;
 
 import java.util.Iterator;
@@ -27,9 +25,7 @@ import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.datavault.metadata.IDvTable;
 
-/**
- * Clears name-based cross-references when a table is removed from a {@link DataVaultModel}.
- */
+/** Clears name-based cross-references when a table is removed from a {@link DataVaultModel}. */
 final class DataVaultModelReferenceCleanup {
 
   private DataVaultModelReferenceCleanup() {}
@@ -155,7 +151,8 @@ final class DataVaultModelReferenceCleanup {
     }
   }
 
-  private static void forEachLink(DataVaultModel model, java.util.function.Consumer<DvLink> action) {
+  private static void forEachLink(
+      DataVaultModel model, java.util.function.Consumer<DvLink> action) {
     for (IDvTable table : model.getTables()) {
       if (table != null && table.getTableType() == DvTableType.LINK) {
         action.accept((DvLink) table);

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import java.util.ArrayList;
@@ -29,7 +27,6 @@ import org.apache.hop.datavault.metadata.executionmap.ExecutionMapDocument;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapEdge;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapEdgeType;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapNode;
-import org.apache.hop.datavault.metadata.executionmap.ExecutionMapNodeType;
 
 /** Extracts table-level lineage jobs from execution map documents. */
 public final class ExecutionMapLineageCollector {
@@ -59,9 +56,7 @@ public final class ExecutionMapLineageCollector {
       String key = jobKey(node);
       jobs.computeIfAbsent(
           key,
-          ignored ->
-              new ExecutionMapLineageEdge(
-                  jobNamespace, node.getName(), node.getPath()));
+          ignored -> new ExecutionMapLineageEdge(jobNamespace, node.getName(), node.getPath()));
     }
 
     for (ExecutionMapEdge edge : document.getEdgesOrEmpty()) {
@@ -138,10 +133,7 @@ public final class ExecutionMapLineageCollector {
     if (Utils.isEmpty(name) && !Utils.isEmpty(datasetNode.getName())) {
       name = datasetNode.getName();
     }
-    return new DatasetRef(
-        namespace,
-        name,
-        datasetNode.getProperty("datasetKind"));
+    return new DatasetRef(namespace, name, datasetNode.getProperty("datasetKind"));
   }
 
   private static String resolveJobNamespace(ExecutionMapDocument document) {

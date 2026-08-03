@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.catalog;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,9 +27,9 @@ class CatalogModelRegistrySupportTest {
   @Test
   void sanitizeBasenameStripsPathAndExtension() {
     assertEquals("retail-360", CatalogModelRegistrySupport.sanitizeBasename("retail-360.hdv"));
-    assertEquals("retail-360", CatalogModelRegistrySupport.sanitizeBasename("../models/retail-360"));
     assertEquals(
-        "customer_360", CatalogModelRegistrySupport.sanitizeBasename("customer 360.hbv"));
+        "retail-360", CatalogModelRegistrySupport.sanitizeBasename("../models/retail-360"));
+    assertEquals("customer_360", CatalogModelRegistrySupport.sanitizeBasename("customer 360.hbv"));
   }
 
   @Test
@@ -73,8 +71,7 @@ class CatalogModelRegistrySupportTest {
     Variables vars = new Variables();
     vars.setVariable("PROJECT_HOME", "/workspace/project");
     String stored =
-        CatalogModelRegistrySupport.portableModelPath(
-            "/workspace/project/models/vault1.hdv", vars);
+        CatalogModelRegistrySupport.portableModelPath("/workspace/project/models/vault1.hdv", vars);
     assertTrue(stored.contains("PROJECT_HOME") || stored.endsWith("vault1.hdv"));
   }
 }

@@ -13,14 +13,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import org.apache.hop.core.row.IValueMeta;
@@ -38,7 +35,9 @@ class SourceFieldPrimaryKeySupportTest {
     SourceFieldPrimaryKeySupport.applyPrimaryKeyFieldNames(
         fields, List.of("customer_id", "tenant_id"));
 
-    assertEquals(List.of("customer_id", "tenant_id"), SourceFieldPrimaryKeySupport.primaryKeyFieldNames(fields));
+    assertEquals(
+        List.of("customer_id", "tenant_id"),
+        SourceFieldPrimaryKeySupport.primaryKeyFieldNames(fields));
     assertEquals(2, first.getPrimaryKeyPosition());
     assertEquals(1, second.getPrimaryKeyPosition());
     assertEquals(0, other.getPrimaryKeyPosition());

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.discovery;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -36,7 +34,8 @@ class SourceFieldMetadataEquivalenceSupportTest {
     discovered.setLength("6");
 
     assertTrue(SourceFieldMetadataEquivalenceSupport.dimensionsEquivalent(stored, discovered));
-    assertNull(SourceFieldMetadataEquivalenceSupport.describeDimensionDifference(stored, discovered));
+    assertNull(
+        SourceFieldMetadataEquivalenceSupport.describeDimensionDifference(stored, discovered));
   }
 
   @Test
@@ -107,7 +106,8 @@ class SourceFieldMetadataEquivalenceSupportTest {
     discovered.setPrecision("0");
 
     assertTrue(SourceFieldMetadataEquivalenceSupport.dimensionsEquivalent(stored, discovered));
-    assertNull(SourceFieldMetadataEquivalenceSupport.describeDimensionDifference(stored, discovered));
+    assertNull(
+        SourceFieldMetadataEquivalenceSupport.describeDimensionDifference(stored, discovered));
   }
 
   @Test

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai.dimensional;
 
 import lombok.Getter;
@@ -30,8 +28,7 @@ public enum DmAiScenario implements IEnumHasCodeAndDescription {
   DM_MODELING("DM_MODELING", "DmAiScenario.DmModeling", "dm-modeling"),
   HOP_INTEGRATION("HOP_INTEGRATION", "DmAiScenario.HopIntegration", "hop-integration"),
   ERROR_DIAGNOSIS("ERROR_DIAGNOSIS", "DmAiScenario.ErrorDiagnosis", "error-diagnosis"),
-  PERFORMANCE_TUNING(
-      "PERFORMANCE_TUNING", "DmAiScenario.PerformanceTuning", "performance-tuning"),
+  PERFORMANCE_TUNING("PERFORMANCE_TUNING", "DmAiScenario.PerformanceTuning", "performance-tuning"),
   GENERAL("GENERAL", "DmAiScenario.General", "general");
 
   private final String code;

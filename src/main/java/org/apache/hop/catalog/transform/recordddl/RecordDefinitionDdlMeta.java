@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.transform.recordddl;
 
 import java.util.List;
@@ -144,10 +142,8 @@ public class RecordDefinitionDdlMeta
         inputRowMeta.getValueMeta(i).setOrigin(name);
       }
     }
-    addField(
-        inputRowMeta, resolveOutputDdlField(variables), IValueMeta.TYPE_STRING, name);
-    addField(
-        inputRowMeta, resolveOutputStatusField(variables), IValueMeta.TYPE_STRING, name);
+    addField(inputRowMeta, resolveOutputDdlField(variables), IValueMeta.TYPE_STRING, name);
+    addField(inputRowMeta, resolveOutputStatusField(variables), IValueMeta.TYPE_STRING, name);
   }
 
   public String resolveOutputDdlField(IVariables variables) {

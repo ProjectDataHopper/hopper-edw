@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.transform.datedimensiongenerator;
 
 import org.apache.hop.core.exception.HopException;
@@ -48,10 +46,14 @@ public class DateDimensionGenerator
       return false;
     }
     try {
-      DateRange range = DateDimensionGeneratorLogic.resolveDateRange(meta.getStartDate(), meta.getEndDate(), this);
+      DateRange range =
+          DateDimensionGeneratorLogic.resolveDateRange(
+              meta.getStartDate(), meta.getEndDate(), this);
       data.currentDate = range.startDate();
       data.endDate = range.endDate();
-      data.outputRowMeta = DateDimensionGeneratorLogic.buildOutputRowMeta(meta.getFields(), getTransformName(), this);
+      data.outputRowMeta =
+          DateDimensionGeneratorLogic.buildOutputRowMeta(
+              meta.getFields(), getTransformName(), this);
       data.preparedFields =
           DateDimensionGeneratorLogic.prepareFields(meta.getFields(), getTransformName(), this);
       return true;

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -73,11 +71,14 @@ final class DvAiStructuralProposalSupport {
         case ADD_HUB -> validateAddHub(model, proposal, metadataProvider, variables);
         case ADD_LINK -> validateAddLink(model, proposal);
         case ADD_SATELLITE -> validateAddSatellite(model, proposal, metadataProvider, variables);
-        case SET_BUSINESS_KEYS -> validateSetBusinessKeys(model, proposal, metadataProvider, variables);
-        case BIND_RECORD_SOURCE -> validateBindRecordSource(model, proposal, metadataProvider, variables);
+        case SET_BUSINESS_KEYS ->
+            validateSetBusinessKeys(model, proposal, metadataProvider, variables);
+        case BIND_RECORD_SOURCE ->
+            validateBindRecordSource(model, proposal, metadataProvider, variables);
         case SET_TABLE_LOCATION -> validateSetTableLocation(model, proposal);
-        default -> new DvAiProposalValidator.ValidationResult(
-            proposal, DvAiProposalValidator.Status.BLOCKED, "Unsupported structural proposal");
+        default ->
+            new DvAiProposalValidator.ValidationResult(
+                proposal, DvAiProposalValidator.Status.BLOCKED, "Unsupported structural proposal");
       };
     } catch (HopException e) {
       return new DvAiProposalValidator.ValidationResult(
@@ -109,8 +110,7 @@ final class DvAiStructuralProposalSupport {
 
     hub.setRecordSources(new ArrayList<>(List.of(recordSource.trim())));
     hub.setBusinessKeys(
-        parseBusinessKeys(
-            proposal, recordSource.trim(), model, metadataProvider, variables, true));
+        parseBusinessKeys(proposal, recordSource.trim(), model, metadataProvider, variables, true));
 
     hub.setLocation(defaultLocation(model, proposal));
     model.getTables().add(hub);
@@ -218,7 +218,9 @@ final class DvAiStructuralProposalSupport {
     }
     if (table instanceof DvHub hub) {
       List<String> sources =
-          hub.getRecordSources() != null ? new ArrayList<>(hub.getRecordSources()) : new ArrayList<>();
+          hub.getRecordSources() != null
+              ? new ArrayList<>(hub.getRecordSources())
+              : new ArrayList<>();
       if (!sources.contains(recordSource.trim())) {
         sources.add(recordSource.trim());
       }
@@ -244,7 +246,8 @@ final class DvAiStructuralProposalSupport {
     model.setChanged(true);
   }
 
-  private static void wireLinkSatellite(DataVaultModel model, String linkName, String satelliteName) {
+  private static void wireLinkSatellite(
+      DataVaultModel model, String linkName, String satelliteName) {
     DvLink link = model.findLink(linkName);
     if (link == null) {
       return;
@@ -377,7 +380,8 @@ final class DvAiStructuralProposalSupport {
     List<BusinessKey> keys = new ArrayList<>();
     String json = proposal.parameter("businessKeysJson");
     if (!Utils.isEmpty(json)) {
-      keys.addAll(parseBusinessKeysJson(json, defaultRecordSource, model, metadataProvider, variables));
+      keys.addAll(
+          parseBusinessKeysJson(json, defaultRecordSource, model, metadataProvider, variables));
     } else {
       String keyName = trimToNull(proposal.parameter("businessKeyName"));
       if (keyName != null) {
@@ -400,12 +404,20 @@ final class DvAiStructuralProposalSupport {
           key.setRecordSourceName(defaultRecordSource);
         }
         requireCatalogField(
-            key.getRecordSourceName(), key.getSourceFieldName(), model, metadataProvider, variables);
+            key.getRecordSourceName(),
+            key.getSourceFieldName(),
+            model,
+            metadataProvider,
+            variables);
       }
     } else if (!keys.isEmpty()) {
       for (BusinessKey key : keys) {
         requireCatalogField(
-            key.getRecordSourceName(), key.getSourceFieldName(), model, metadataProvider, variables);
+            key.getRecordSourceName(),
+            key.getSourceFieldName(),
+            model,
+            metadataProvider,
+            variables);
       }
     }
     return keys;
@@ -432,11 +444,9 @@ final class DvAiStructuralProposalSupport {
         }
         BusinessKey key = new BusinessKey(name.trim());
         String sourceField = node.path("sourceFieldName").asText(null);
-        key.setSourceFieldName(
-            !Utils.isEmpty(sourceField) ? sourceField.trim() : name.trim());
+        key.setSourceFieldName(!Utils.isEmpty(sourceField) ? sourceField.trim() : name.trim());
         String rs = node.path("recordSourceName").asText(null);
-        key.setRecordSourceName(
-            !Utils.isEmpty(rs) ? rs.trim() : defaultRecordSource);
+        key.setRecordSourceName(!Utils.isEmpty(rs) ? rs.trim() : defaultRecordSource);
         if (!Utils.isEmpty(node.path("dataType").asText(null))) {
           key.setDataType(node.path("dataType").asText());
         }
@@ -471,7 +481,8 @@ final class DvAiStructuralProposalSupport {
         SatelliteAttribute attribute = new SatelliteAttribute();
         attribute.setName(name);
         attribute.setDataType("String");
-        enrichAttributeFromCatalog(attribute, name, recordSource, model, metadataProvider, variables);
+        enrichAttributeFromCatalog(
+            attribute, name, recordSource, model, metadataProvider, variables);
         attributes.add(attribute);
       }
     }
@@ -586,11 +597,7 @@ final class DvAiStructuralProposalSupport {
     }
     if (findCatalogField(recordSource, fieldName, model, metadataProvider, variables) == null) {
       throw new HopException(
-          "Field '"
-              + fieldName
-              + "' was not found in catalog source '"
-              + recordSource
-              + "'");
+          "Field '" + fieldName + "' was not found in catalog source '" + recordSource + "'");
     }
   }
 
@@ -622,9 +629,8 @@ final class DvAiStructuralProposalSupport {
       IVariables variables)
       throws HopException {
     if (metadataProvider == null) {
-      throw new HopException("Metadata provider is required to resolve catalog source '"
-          + recordSource
-          + "'");
+      throw new HopException(
+          "Metadata provider is required to resolve catalog source '" + recordSource + "'");
     }
     return DvSourceCatalogService.resolveSource(recordSource, model, variables, metadataProvider);
   }

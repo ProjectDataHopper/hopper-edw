@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,12 +27,15 @@ import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.Variables;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.datavault.hopgui.file.businessvault.HopBusinessVaultFileType;
 import org.apache.hop.datavault.metadata.DataVaultModel;
-import org.apache.hop.datavault.metadata.DvTableType;
+import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
+import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataSupport;
+import org.apache.hop.datavault.metadata.businessvault.BvScd2PipelineSupport.Scd2BuildContext;
+import org.apache.hop.datavault.transform.sortedschemamerge.SortedSchemaMergeMeta;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
@@ -43,10 +44,6 @@ import org.apache.hop.pipeline.transforms.repeatfields.RepeatFieldsMeta;
 import org.apache.hop.pipeline.transforms.rowgenerator.RowGeneratorMeta;
 import org.apache.hop.pipeline.transforms.selectvalues.SelectValuesMeta;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
-import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
-import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataSupport;
-import org.apache.hop.datavault.metadata.businessvault.BvScd2PipelineSupport.Scd2BuildContext;
-import org.apache.hop.datavault.transform.sortedschemamerge.SortedSchemaMergeMeta;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
@@ -55,9 +52,13 @@ import org.w3c.dom.Node;
 class BvScd2MultiSatelliteFixtureTest {
 
   private static final Path DV_PATH =
-      Path.of("integration-tests/tests/multi-satellite-bv/customer-360.hdv").toAbsolutePath().normalize();
+      Path.of("integration-tests/tests/multi-satellite-bv/customer-360.hdv")
+          .toAbsolutePath()
+          .normalize();
   private static final Path BV_PATH =
-      Path.of("integration-tests/tests/multi-satellite-bv/customer-360.hbv").toAbsolutePath().normalize();
+      Path.of("integration-tests/tests/multi-satellite-bv/customer-360.hbv")
+          .toAbsolutePath()
+          .normalize();
   private static final Path EXTERNAL_DV_PATH =
       Path.of("integration-tests/tests/multi-satellite-bv/customer-360-external.hdv")
           .toAbsolutePath()
@@ -135,9 +136,12 @@ class BvScd2MultiSatelliteFixtureTest {
     PipelineMeta pipelineMeta = pipelines.get(0);
     List<TransformMeta> transforms = pipelineMeta.getTransforms();
     assertEquals(19, transforms.size());
-    assertEquals(4, transforms.stream().filter(t -> t.getTransform() instanceof TableInputMeta).count());
-    assertEquals(4, transforms.stream().filter(t -> t.getTransform() instanceof ConstantMeta).count());
-    assertEquals(5, transforms.stream().filter(t -> t.getTransform() instanceof SelectValuesMeta).count());
+    assertEquals(
+        4, transforms.stream().filter(t -> t.getTransform() instanceof TableInputMeta).count());
+    assertEquals(
+        4, transforms.stream().filter(t -> t.getTransform() instanceof ConstantMeta).count());
+    assertEquals(
+        5, transforms.stream().filter(t -> t.getTransform() instanceof SelectValuesMeta).count());
 
     TransformMeta mergeTransform =
         transforms.stream()
@@ -180,7 +184,8 @@ class BvScd2MultiSatelliteFixtureTest {
     List<TransformMeta> transforms = pipelineMeta.getTransforms();
     // +2 param Generate Rows (watermark, open-row filter)
     assertEquals(30, transforms.size());
-    assertEquals(6, transforms.stream().filter(t -> t.getTransform() instanceof TableInputMeta).count());
+    assertEquals(
+        6, transforms.stream().filter(t -> t.getTransform() instanceof TableInputMeta).count());
     assertTrue(
         transforms.stream()
             .anyMatch(
@@ -194,8 +199,7 @@ class BvScd2MultiSatelliteFixtureTest {
         transforms.stream()
             .anyMatch(
                 t -> BvScd2PipelineSupport.PARAM_OPEN_ROW_FILTER_TRANSFORM.equals(t.getName())));
-    assertTrue(
-        transforms.stream().anyMatch(t -> "read_open_customer_360_bv".equals(t.getName())));
+    assertTrue(transforms.stream().anyMatch(t -> "read_open_customer_360_bv".equals(t.getName())));
     assertTrue(
         transforms.stream()
             .anyMatch(
@@ -224,9 +228,7 @@ class BvScd2MultiSatelliteFixtureTest {
         (RowGeneratorMeta)
             transforms.stream()
                 .filter(
-                    t ->
-                        BvScd2PipelineSupport.PARAM_OPEN_ROW_FILTER_TRANSFORM.equals(
-                            t.getName()))
+                    t -> BvScd2PipelineSupport.PARAM_OPEN_ROW_FILTER_TRANSFORM.equals(t.getName()))
                 .findFirst()
                 .orElseThrow()
                 .getTransform();
@@ -236,7 +238,8 @@ class BvScd2MultiSatelliteFixtureTest {
         "param_open_row_filter field count must match open-target ? placeholders");
 
     String closeLookupSql = BvScd2PipelineSupport.buildOpenTargetCloseLookupSql(buildContext);
-    assertTrue(closeLookupSql.contains("SELECT customer_hk, x_from_ts AS _close_lookup_valid_from"));
+    assertTrue(
+        closeLookupSql.contains("SELECT customer_hk, x_from_ts AS _close_lookup_valid_from"));
     assertTrue(closeLookupSql.contains("FROM customer_360_bv"));
     assertTrue(closeLookupSql.contains(" = ?"));
     assertFalse(closeLookupSql.contains("cust_email"));
@@ -302,7 +305,7 @@ class BvScd2MultiSatelliteFixtureTest {
             .anyMatch(
                 hop ->
                     (BvScd2PipelineSupport.CLOSE_LOOKUP_READ_PREFIX + "customer_360_bv")
-                        .equals(hop.getFromTransform().getName())
+                            .equals(hop.getFromTransform().getName())
                         && hop.getToTransform().equals(joinCloseLookupTransform)));
 
     TransformMeta repeatTransform =
@@ -316,7 +319,8 @@ class BvScd2MultiSatelliteFixtureTest {
         repeatMeta.getRepeats().stream()
             .anyMatch(
                 repeat ->
-                    BvScd2PipelineSupport.BASELINE_SOURCE_INDICATOR.equals(repeat.getIndicatorValue())
+                    BvScd2PipelineSupport.BASELINE_SOURCE_INDICATOR.equals(
+                            repeat.getIndicatorValue())
                         && "cust_email".equals(repeat.getSourceField())));
   }
 

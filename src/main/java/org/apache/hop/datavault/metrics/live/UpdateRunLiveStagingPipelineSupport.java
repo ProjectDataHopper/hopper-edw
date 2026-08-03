@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics.live;
 
 import java.lang.reflect.Method;
@@ -41,8 +39,7 @@ public final class UpdateRunLiveStagingPipelineSupport {
   private static final String RUN_ACTION_PREFIX = "run_";
   private static final String BULK_LOAD_ACTION_PREFIX = "bulk_load_";
 
-  private static final ConcurrentMap<
-          IWorkflowEngine<WorkflowMeta>, ConcurrentMap<String, IAction>>
+  private static final ConcurrentMap<IWorkflowEngine<WorkflowMeta>, ConcurrentMap<String, IAction>>
       ACTIVE_PIPELINE_ACTIONS = new ConcurrentHashMap<>();
 
   private UpdateRunLiveStagingPipelineSupport() {}
@@ -51,9 +48,7 @@ public final class UpdateRunLiveStagingPipelineSupport {
     return new IActionListener<>() {
       @Override
       public void beforeExecution(
-          IWorkflowEngine<WorkflowMeta> workflow,
-          ActionMeta actionMeta,
-          IAction cloneAction) {
+          IWorkflowEngine<WorkflowMeta> workflow, ActionMeta actionMeta, IAction cloneAction) {
         if (!isPipelineAction(cloneAction) || workflow == null || actionMeta == null) {
           return;
         }

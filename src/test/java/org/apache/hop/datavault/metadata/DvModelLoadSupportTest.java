@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -63,13 +62,11 @@ class DvModelLoadSupportTest {
     Variables variables = new Variables();
     variables.setVariable("PROJECT_HOME", tempDir.toAbsolutePath().normalize().toString());
 
-    String foreign =
-        "/home/otheruser/git/hop-data-vault/retail-example/models/retail-360.hdv";
+    String foreign = "/home/otheruser/git/hop-data-vault/retail-example/models/retail-360.hdv";
     String resolved = DvModelLoadSupport.resolveModelPath(foreign, null, variables);
 
     assertTrue(
-        Files.isRegularFile(Path.of(resolved)),
-        "expected remapped path to exist: " + resolved);
+        Files.isRegularFile(Path.of(resolved)), "expected remapped path to exist: " + resolved);
     assertEquals(realModel.toAbsolutePath().normalize(), Path.of(resolved).normalize());
   }
 
@@ -80,7 +77,6 @@ class DvModelLoadSupportTest {
 
     assertEquals(
         null,
-        DvModelLoadSupport.remapMissingAbsolutePath(
-            "/nowhere/else/missing-model.hdv", variables));
+        DvModelLoadSupport.remapMissingAbsolutePath("/nowhere/else/missing-model.hdv", variables));
   }
 }

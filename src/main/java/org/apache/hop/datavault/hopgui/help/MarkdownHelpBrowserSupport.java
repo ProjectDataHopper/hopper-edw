@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.help;
 
 import java.nio.charset.StandardCharsets;
@@ -39,7 +37,8 @@ public final class MarkdownHelpBrowserSupport {
 
   private MarkdownHelpBrowserSupport() {}
 
-  public static void openInBrowser(Shell parentShell, String title, String markdown, String topicId) {
+  public static void openInBrowser(
+      Shell parentShell, String title, String markdown, String topicId) {
     if (parentShell == null || parentShell.isDisposed()) {
       return;
     }
@@ -71,7 +70,8 @@ public final class MarkdownHelpBrowserSupport {
       return tempFile;
     } catch (Exception e) {
       throw new HopException(
-          BaseMessages.getString(PKG, "MarkdownHelpDialog.OpenInBrowser.WriteFailed", e.getMessage()),
+          BaseMessages.getString(
+              PKG, "MarkdownHelpDialog.OpenInBrowser.WriteFailed", e.getMessage()),
           e);
     }
   }
@@ -85,7 +85,8 @@ public final class MarkdownHelpBrowserSupport {
       }
     } catch (Exception ex) {
       throw new HopException(
-          BaseMessages.getString(PKG, "MarkdownHelpDialog.OpenInBrowser.OpenFailed", ex.getMessage()),
+          BaseMessages.getString(
+              PKG, "MarkdownHelpDialog.OpenInBrowser.OpenFailed", ex.getMessage()),
           ex);
     }
   }

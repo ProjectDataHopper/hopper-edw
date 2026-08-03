@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.metrics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -57,7 +55,8 @@ class LoadRunDurationPreviewSupportTest {
                     "sat_customer", new long[] {0L, 500L}))
             .build();
 
-    List<Object[]> rows = LoadRunDurationPreviewSupport.buildPreviewRows("retail-f-orders", snapshot);
+    List<Object[]> rows =
+        LoadRunDurationPreviewSupport.buildPreviewRows("retail-f-orders", snapshot);
 
     assertEquals(3, rows.size());
     assertEquals("retail-f-orders", rows.get(0)[0]);

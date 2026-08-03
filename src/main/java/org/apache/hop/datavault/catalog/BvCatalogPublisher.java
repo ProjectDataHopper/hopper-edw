@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.catalog;
 
 import java.util.Date;
@@ -94,7 +92,8 @@ public final class BvCatalogPublisher {
       throw new HopException("Business Vault model is required for publishing");
     }
 
-    String tableNamespace = BvCatalogNamespaces.projectBusinessVaultModelsNamespace(variables, bvModel);
+    String tableNamespace =
+        BvCatalogNamespaces.projectBusinessVaultModelsNamespace(variables, bvModel);
     Date updatedAt = new Date();
 
     RecordDefinitionRegistry registry = RecordDefinitionRegistry.getInstance();
@@ -242,16 +241,15 @@ public final class BvCatalogPublisher {
     definition.setType(RecordDefinitionType.BV_TABLE);
     definition.setDescription(table.getDescription());
     definition.setFields(layout);
-    definition.setOrigin(buildTableOrigin(table, bvModel, originVariables, updatedAt, workflowName));
+    definition.setOrigin(
+        buildTableOrigin(table, bvModel, originVariables, updatedAt, workflowName));
     definition.setPhysicalTable(buildPhysicalTableRef(bvModel, table, metadataProvider));
     BvTableType tableType = table.getTableType();
     if (tableType != null) {
       definition.getTags().add("BV " + tableType.name());
     }
     if (table instanceof BvBusinessTable businessTable) {
-      definition
-          .getTags()
-          .add("BV " + businessTable.getMaterializationOrDefault().getCode());
+      definition.getTags().add("BV " + businessTable.getMaterializationOrDefault().getCode());
     }
     if (!Utils.isEmpty(bvModel.getName())) {
       definition.getTags().add(bvModel.getName());

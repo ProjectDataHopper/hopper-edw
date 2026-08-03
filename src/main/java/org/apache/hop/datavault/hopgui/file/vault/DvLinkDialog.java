@@ -13,36 +13,35 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.vault;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.apache.hop.core.Const;
+import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.Props;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.catalog.DvSourceCatalogService;
-import org.apache.hop.datavault.metadata.DataVaultModel;
-import org.apache.hop.datavault.metadata.DataVaultSource;
-import org.apache.hop.datavault.metadata.DvIntegrationMode;
-import org.apache.hop.core.ICheckResult;
-import org.apache.hop.datavault.metadata.DependentChildKey;
-import org.apache.hop.datavault.metadata.DvLink;
-import org.apache.hop.datavault.metadata.DvModelCheckOptions;
-import org.apache.hop.datavault.metadata.IDvTable;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
+import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
+import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.datavault.hopgui.lineage.LineageTabSupport;
 import org.apache.hop.datavault.lineage.DvModelLineageCollector;
 import org.apache.hop.datavault.lineage.LineageSnapshot;
 import org.apache.hop.datavault.lineage.TableLineage;
+import org.apache.hop.datavault.metadata.DataVaultModel;
+import org.apache.hop.datavault.metadata.DependentChildKey;
+import org.apache.hop.datavault.metadata.DvIntegrationMode;
+import org.apache.hop.datavault.metadata.DvLink;
+import org.apache.hop.datavault.metadata.DvModelCheckOptions;
 import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.DvTableReference;
 import org.apache.hop.datavault.metadata.DvTableType;
+import org.apache.hop.datavault.metadata.IDvTable;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.FormDataBuilder;
 import org.apache.hop.ui.core.PropsUi;
@@ -51,7 +50,6 @@ import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.gui.GuiResource;
 import org.apache.hop.ui.core.gui.WindowProperty;
 import org.apache.hop.ui.core.widget.ColumnInfo;
-import org.apache.hop.ui.core.widget.MetaSelectionLine;
 import org.apache.hop.ui.core.widget.TableView;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
@@ -68,15 +66,13 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
-import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
-import org.apache.hop.datavault.hopgui.help.HelpTopics;
 
 /**
- * Dialog to edit the properties of a DvLink using a TabFolder.
- * Name and description are placed at the top, buttons at the bottom.
- * Tabs: Options (hash key field, record source field, hasDescriptiveAttributes, participating hubs
- * and link satellites), Driving keys, Dependent child keys (transactional links), Hub sources
- * (DvLinkHubSourceDialog), Satellite sources (DvLinkSatelliteSourceDialog).
+ * Dialog to edit the properties of a DvLink using a TabFolder. Name and description are placed at
+ * the top, buttons at the bottom. Tabs: Options (hash key field, record source field,
+ * hasDescriptiveAttributes, participating hubs and link satellites), Driving keys, Dependent child
+ * keys (transactional links), Hub sources (DvLinkHubSourceDialog), Satellite sources
+ * (DvLinkSatelliteSourceDialog).
  */
 public class DvLinkDialog {
   private static final Class<?> PKG = DvLinkDialog.class;
@@ -248,7 +244,8 @@ public class DvLinkDialog {
     CTabItem wOptionsTab = new CTabItem(wTabFolder, SWT.NONE);
     wOptionsTab.setFont(GuiResource.getInstance().getFontDefault());
     wOptionsTab.setText("Options");
-    wOptionsTab.setToolTipText("General options for this link (hash key, record source field, descriptive attributes, participating hubs)");
+    wOptionsTab.setToolTipText(
+        "General options for this link (hash key, record source field, descriptive attributes, participating hubs)");
     Composite wOptionsComp = new Composite(wTabFolder, SWT.NONE);
     PropsUi.setLook(wOptionsComp);
     wOptionsComp.setLayout(new FormLayout());
@@ -363,7 +360,10 @@ public class DvLinkDialog {
               hubNames.toArray(new String[0])),
         };
 
-    int nrHubRows = (input.getHubNames() != null && !input.getHubNames().isEmpty()) ? input.getHubNames().size() : 2;
+    int nrHubRows =
+        (input.getHubNames() != null && !input.getHubNames().isEmpty())
+            ? input.getHubNames().size()
+            : 2;
     wHubNames =
         new TableView(
             variables,
@@ -428,7 +428,8 @@ public class DvLinkDialog {
     CTabItem wKeysTab = new CTabItem(wTabFolder, SWT.NONE);
     wKeysTab.setFont(GuiResource.getInstance().getFontDefault());
     wKeysTab.setText("Driving keys");
-    wKeysTab.setToolTipText("Driving keys (when the same hub participates multiple times under different roles)");
+    wKeysTab.setToolTipText(
+        "Driving keys (when the same hub participates multiple times under different roles)");
     Composite wKeysComp = new Composite(wTabFolder, SWT.NONE);
     PropsUi.setLook(wKeysComp);
     wKeysComp.setLayout(new FormLayout());
@@ -947,9 +948,12 @@ public class DvLinkDialog {
     } catch (Exception ex) {
       new ErrorDialog(
           shell,
-          BaseMessages.getString(ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Label"),
           BaseMessages.getString(
-              ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Error", ex.getMessage()),
+              ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Label"),
+          BaseMessages.getString(
+              ModelDialogValidationSupport.class,
+              "ModelTableDialog.Validate.Error",
+              ex.getMessage()),
           ex);
     }
   }

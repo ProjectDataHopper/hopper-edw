@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai.businessvault;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,7 +39,6 @@ class BvAiProposalApplierTest {
     BvAiProposalApplier.apply(model, List.of(proposal), null, new Variables());
 
     assertEquals(
-        DvTargetLoadMode.STAGING_FILE,
-        model.getConfigurationOrDefault().resolveTargetLoadMode());
+        DvTargetLoadMode.STAGING_FILE, model.getConfigurationOrDefault().resolveTargetLoadMode());
   }
 }

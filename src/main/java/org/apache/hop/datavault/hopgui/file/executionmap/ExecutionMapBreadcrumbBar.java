@@ -13,16 +13,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.executionmap;
 
 import java.util.List;
 import java.util.function.Consumer;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.datavault.executionmap.ExecutionMapFocusContext;
-
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapDocument;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapNode;
 import org.apache.hop.i18n.BaseMessages;
@@ -44,9 +41,7 @@ public class ExecutionMapBreadcrumbBar extends Composite {
   private final Runnable navigateRootListener;
 
   public ExecutionMapBreadcrumbBar(
-      Composite parent,
-      Consumer<String> navigateListener,
-      Runnable navigateRootListener) {
+      Composite parent, Consumer<String> navigateListener, Runnable navigateRootListener) {
     super(parent, SWT.NONE);
     this.navigateListener = navigateListener;
     this.navigateRootListener = navigateRootListener;
@@ -73,9 +68,7 @@ public class ExecutionMapBreadcrumbBar extends Composite {
     Link rootLink = new Link(this, SWT.NONE);
     PropsUi.setLook(rootLink);
     rootLink.setText(
-        "<a>"
-            + BaseMessages.getString(PKG, "HopGuiExecutionMapGraph.Breadcrumb.Root")
-            + "</a>");
+        "<a>" + BaseMessages.getString(PKG, "HopGuiExecutionMapGraph.Breadcrumb.Root") + "</a>");
     rootLink.addSelectionListener(
         new SelectionAdapter() {
           @Override

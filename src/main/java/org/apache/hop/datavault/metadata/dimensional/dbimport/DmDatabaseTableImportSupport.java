@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional.dbimport;
 
 import java.util.ArrayList;
@@ -131,7 +129,10 @@ public final class DmDatabaseTableImportSupport {
         } catch (Exception e) {
           errors.add(
               BaseMessages.getString(
-                  PKG, "DmDatabaseTableImportSupport.Error.TableImportFailed", tableName, e.getMessage()));
+                  PKG,
+                  "DmDatabaseTableImportSupport.Error.TableImportFailed",
+                  tableName,
+                  e.getMessage()));
         }
       }
     } catch (HopDatabaseException e) {
@@ -187,9 +188,9 @@ public final class DmDatabaseTableImportSupport {
     return switch (tableType) {
       case DIMENSION ->
           normalized.startsWith("dim_") ? normalized : "dim_" + stripPrefix(normalized, "d_");
-      case FACT -> normalized.startsWith("fact_") ? normalized : "fact_" + stripPrefix(normalized, "f_");
-      case BRIDGE ->
-          normalized.startsWith("bridge_") ? normalized : "bridge_" + normalized;
+      case FACT ->
+          normalized.startsWith("fact_") ? normalized : "fact_" + stripPrefix(normalized, "f_");
+      case BRIDGE -> normalized.startsWith("bridge_") ? normalized : "bridge_" + normalized;
       case FACTLESS_FACT ->
           normalized.startsWith("factless_")
               ? normalized
@@ -208,7 +209,8 @@ public final class DmDatabaseTableImportSupport {
     dimension.setName(inferMetadataName(tableName, DmTableType.DIMENSION));
     dimension.setTableName(tableName);
     dimension.setDescription(
-        BaseMessages.getString(PKG, "DmDatabaseTableImportSupport.Dimension.Description", tableName));
+        BaseMessages.getString(
+            PKG, "DmDatabaseTableImportSupport.Dimension.Description", tableName));
     DmDimensionScdType defaultScdType =
         options != null && options.getDefaultDimensionScdType() != null
             ? options.getDefaultDimensionScdType()
@@ -442,10 +444,7 @@ public final class DmDatabaseTableImportSupport {
           PKG, "DmDatabaseTableImportSupport.DraftSourceSql.Empty", tableName);
     }
     return BaseMessages.getString(
-        PKG,
-        "DmDatabaseTableImportSupport.DraftSourceSql",
-        String.join(", ", columns),
-        tableName);
+        PKG, "DmDatabaseTableImportSupport.DraftSourceSql", String.join(", ", columns), tableName);
   }
 
   private static String normalizeTableName(String tableName) {

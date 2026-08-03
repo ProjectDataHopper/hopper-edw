@@ -13,15 +13,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.hop.core.Result;
 import org.apache.hop.core.variables.Variables;
@@ -60,7 +57,8 @@ class DvPipelineOrchestratorSupportTest {
     assertEquals("retail-f-orders", variables.getVariable(DvUpdateMetricsConstants.VAR_MODEL_NAME));
     assertEquals("dm", variables.getVariable(DvUpdateMetricsConstants.VAR_MODEL_TYPE));
     assertEquals(
-        "update-retail-dv-bv-dm", variables.getVariable(DvUpdateMetricsConstants.VAR_WORKFLOW_NAME));
+        "update-retail-dv-bv-dm",
+        variables.getVariable(DvUpdateMetricsConstants.VAR_WORKFLOW_NAME));
     assertEquals("Vault", variables.getVariable(DvUpdateMetricsConstants.VAR_METRICS_DATABASE));
     assertEquals(
         "local-catalog",

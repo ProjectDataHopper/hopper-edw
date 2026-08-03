@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.metrics;
 
 import java.lang.reflect.Field;
@@ -28,16 +26,16 @@ import org.apache.hop.core.gui.DPoint;
 import org.apache.hop.core.gui.IGc;
 import org.apache.hop.core.gui.IGc.EImage;
 import org.apache.hop.core.gui.Point;
-import org.apache.hop.core.svg.SvgFile;
 import org.apache.hop.core.plugins.ActionPluginType;
 import org.apache.hop.core.plugins.PluginRegistry;
+import org.apache.hop.core.svg.SvgFile;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.datavault.metrics.live.UpdateRunLiveRegistry;
+import org.apache.hop.datavault.metrics.live.UpdateRunLiveSnapshot;
+import org.apache.hop.datavault.metrics.live.UpdateRunLiveState;
 import org.apache.hop.datavault.workflow.actions.businessvaultupdate.ActionBusinessVaultUpdate;
 import org.apache.hop.datavault.workflow.actions.datavaultupdate.ActionDataVaultUpdate;
 import org.apache.hop.datavault.workflow.actions.dimensionalupdate.ActionDimensionalUpdate;
-import org.apache.hop.datavault.metrics.live.UpdateRunLiveSnapshot;
-import org.apache.hop.datavault.metrics.live.UpdateRunLiveState;
 import org.apache.hop.workflow.WorkflowMeta;
 import org.apache.hop.workflow.WorkflowPainter;
 import org.apache.hop.workflow.action.ActionMeta;
@@ -112,14 +110,7 @@ public final class UpdateRunLiveWorkflowPaintSupport {
     view.areaOwners()
         .add(
             new AreaOwner(
-                AreaType.CUSTOM,
-                hitX,
-                hitY,
-                hitSize,
-                hitSize,
-                view.offset(),
-                badgeData,
-                tooltip));
+                AreaType.CUSTOM, hitX, hitY, hitSize, hitSize, view.offset(), badgeData, tooltip));
   }
 
   private static Optional<UpdateRunLiveSnapshot> findSnapshot(
@@ -193,8 +184,7 @@ public final class UpdateRunLiveWorkflowPaintSupport {
     if (usesRunningStatusIcon(state)) {
       SvgFile runningIcon =
           new SvgFile(RUNNING_ICON_PATH, UpdateRunLiveWorkflowPaintSupport.class.getClassLoader());
-      view
-          .gc()
+      view.gc()
           .drawImage(
               runningIcon,
               iconX,

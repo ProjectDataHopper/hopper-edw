@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.workflow.actions.exportdatalineage;
 
 import java.lang.reflect.Field;
@@ -144,7 +142,11 @@ public class ActionExportDataLineageDialog extends ActionDialog {
     }
 
     LogChannel.UI.logBasic(
-        "Export Data Lineage: registering GUI widgets for " + className + " (parent " + parentId + ")");
+        "Export Data Lineage: registering GUI widgets for "
+            + className
+            + " (parent "
+            + parentId
+            + ")");
 
     for (Field field : action.getClass().getDeclaredFields()) {
       GuiWidgetElement element = field.getAnnotation(GuiWidgetElement.class);

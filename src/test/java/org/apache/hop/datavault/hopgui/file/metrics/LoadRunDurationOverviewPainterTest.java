@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.metrics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -54,7 +52,9 @@ class LoadRunDurationOverviewPainterTest {
     int expectedWidth =
         LoadRunDurationOverviewPainter.PADDING
             + LoadRunDurationOverviewPainter.LABEL_COLUMN_MIN_WIDTH
-            + (2 * (LoadRunDurationOverviewPainter.RUN_COLUMN_WIDTH + LoadRunDurationOverviewPainter.BAR_GAP))
+            + (2
+                * (LoadRunDurationOverviewPainter.RUN_COLUMN_WIDTH
+                    + LoadRunDurationOverviewPainter.BAR_GAP))
             + LoadRunDurationOverviewPainter.PADDING;
     int expectedHeight =
         LoadRunDurationOverviewPainter.PADDING
@@ -69,12 +69,13 @@ class LoadRunDurationOverviewPainterTest {
     assertEquals(expectedWidth * 2, scaled.x);
     assertEquals(expectedHeight * 2, scaled.y);
 
-    Point wider =
-        LoadRunDurationOverviewPainter.computeLogicalPreferredSize(snapshot, 220);
+    Point wider = LoadRunDurationOverviewPainter.computeLogicalPreferredSize(snapshot, 220);
     assertEquals(
         LoadRunDurationOverviewPainter.PADDING
             + 220
-            + (2 * (LoadRunDurationOverviewPainter.RUN_COLUMN_WIDTH + LoadRunDurationOverviewPainter.BAR_GAP))
+            + (2
+                * (LoadRunDurationOverviewPainter.RUN_COLUMN_WIDTH
+                    + LoadRunDurationOverviewPainter.BAR_GAP))
             + LoadRunDurationOverviewPainter.PADDING,
         wider.x);
   }
@@ -83,7 +84,8 @@ class LoadRunDurationOverviewPainterTest {
   void computeBarHeightScalesAgainstMaxDuration() {
     int barAreaHeight =
         LoadRunDurationOverviewPainter.rowBarAreaHeight(
-            LoadRunDurationOverviewPainter.ROW_HEIGHT, LoadRunDurationOverviewPainter.ROW_BAR_MARGIN);
+            LoadRunDurationOverviewPainter.ROW_HEIGHT,
+            LoadRunDurationOverviewPainter.ROW_BAR_MARGIN);
     assertEquals(0, LoadRunDurationOverviewPainter.computeBarHeight(0L, 10_000L, barAreaHeight));
     assertEquals(
         barAreaHeight,
@@ -100,8 +102,13 @@ class LoadRunDurationOverviewPainterTest {
             .tableNames(List.of("hub_customer"))
             .runs(
                 List.of(
-                    LoadRunDurationRun.builder().runId("run-1").finishedAt(new Date()).success(true).build()))
-            .durationsByElement(Map.of("hub_customer", new long[] {1_000L}, "other_table", new long[] {9_000L}))
+                    LoadRunDurationRun.builder()
+                        .runId("run-1")
+                        .finishedAt(new Date())
+                        .success(true)
+                        .build()))
+            .durationsByElement(
+                Map.of("hub_customer", new long[] {1_000L}, "other_table", new long[] {9_000L}))
             .maxDurationMs(9_000L)
             .build();
 
@@ -129,7 +136,11 @@ class LoadRunDurationOverviewPainterTest {
             .tableNames(List.of("hub_customer"))
             .runs(
                 List.of(
-                    LoadRunDurationRun.builder().runId("run-1").finishedAt(new Date()).success(true).build()))
+                    LoadRunDurationRun.builder()
+                        .runId("run-1")
+                        .finishedAt(new Date())
+                        .success(true)
+                        .build()))
             .durationsByElement(Map.of("hub_customer", new long[] {42L}))
             .maxDurationMs(42L)
             .build();

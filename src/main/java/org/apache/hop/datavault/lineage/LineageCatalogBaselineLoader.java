@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.lineage;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -23,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.hop.catalog.model.CatalogCustomProperty;
 import org.apache.hop.catalog.model.RecordDefinition;
-import org.apache.hop.catalog.model.RecordDefinitionKey;
 import org.apache.hop.catalog.model.RecordDefinitionQuery;
 import org.apache.hop.catalog.model.RecordDefinitionRef;
 import org.apache.hop.catalog.registry.RecordDefinitionRegistry;
@@ -119,8 +117,7 @@ public final class LineageCatalogBaselineLoader {
         parseSources(prop(props, LineageCatalogNamespaces.PROP_SOURCES_JSON), table);
         parseFields(prop(props, LineageCatalogNamespaces.PROP_FIELDS_JSON), table);
       } catch (Exception e) {
-        throw new HopException(
-            "Failed to parse lineage catalog record " + definition.getKey(), e);
+        throw new HopException("Failed to parse lineage catalog record " + definition.getKey(), e);
       }
     }
     if (Utils.isEmpty(table.getPhysicalTableName())) {
@@ -137,18 +134,14 @@ public final class LineageCatalogBaselineLoader {
         JSON.readValue(json, new TypeReference<List<Map<String, Object>>>() {});
     for (Map<String, Object> map : list) {
       LineageReasonCode code = parseEnum(LineageReasonCode.class, str(map.get("code")));
-      LineageConfidence confidence =
-          parseEnum(LineageConfidence.class, str(map.get("confidence")));
+      LineageConfidence confidence = parseEnum(LineageConfidence.class, str(map.get("confidence")));
       if (code == null) {
         continue;
       }
       @SuppressWarnings("unchecked")
       Map<String, String> evidence =
-          map.get("evidence") instanceof Map
-              ? (Map<String, String>) map.get("evidence")
-              : Map.of();
-      table.addReason(
-          new LineageReason(code, str(map.get("message")), confidence, evidence));
+          map.get("evidence") instanceof Map ? (Map<String, String>) map.get("evidence") : Map.of();
+      table.addReason(new LineageReason(code, str(map.get("message")), confidence, evidence));
     }
   }
 
@@ -183,7 +176,9 @@ public final class LineageCatalogBaselineLoader {
       field.setDataType(str(map.get("dataType")));
       field.setLength(str(map.get("length")));
       field.setPrecision(str(map.get("precision")));
-      field.setTechnical(Boolean.TRUE.equals(map.get("technical")) || "true".equalsIgnoreCase(str(map.get("technical"))));
+      field.setTechnical(
+          Boolean.TRUE.equals(map.get("technical"))
+              || "true".equalsIgnoreCase(str(map.get("technical"))));
       Object contribObj = map.get("contributions");
       if (contribObj instanceof List<?> contribList) {
         for (Object item : contribList) {

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.coaching;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,9 +43,11 @@ class DvCoachingModelAdapterTest {
     hub.getRecordSources().add("CRM-customer");
     model.getTables().add(hub);
 
-    model.getCoachingOrDefault()
+    model
+        .getCoachingOrDefault()
         .addCoachingSource(
-            CoachingSourceRef.forRecordDefinition("local-catalog", "hop/test/sources", "CRM-customer"));
+            CoachingSourceRef.forRecordDefinition(
+                "local-catalog", "hop/test/sources", "CRM-customer"));
 
     DvCoachingModelAdapter adapter = new DvCoachingModelAdapter(model, name -> {}, name -> {});
     CoachingSourceRef sourceRef = adapter.resolveCoachingSources(new Variables(), null).getFirst();
@@ -62,9 +62,11 @@ class DvCoachingModelAdapterTest {
   @Test
   void addsInsightWhenSourceUnmapped() throws HopException {
     DataVaultModel model = new DataVaultModel();
-    model.getCoachingOrDefault()
+    model
+        .getCoachingOrDefault()
         .addCoachingSource(
-            CoachingSourceRef.forRecordDefinition("local-catalog", "hop/test/sources", "CRM-customer"));
+            CoachingSourceRef.forRecordDefinition(
+                "local-catalog", "hop/test/sources", "CRM-customer"));
     DvCoachingModelAdapter adapter = new DvCoachingModelAdapter(model, name -> {}, name -> {});
     CoachingSourceRef sourceRef = adapter.resolveCoachingSources(new Variables(), null).getFirst();
     List<CoachingInsight> insights =

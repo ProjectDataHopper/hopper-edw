@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,8 +28,9 @@ class HopAiConversationSessionTest {
   @Test
   void recordsProposalsAndAppliedSummaries() {
     HopAiConversationSession session = new HopAiConversationSession();
-    HopAiAdvisoryResponse response = HopAiProposalParser.parse(
-        """
+    HopAiAdvisoryResponse response =
+        HopAiProposalParser.parse(
+            """
         Advice only.
 
         ```hop_proposals

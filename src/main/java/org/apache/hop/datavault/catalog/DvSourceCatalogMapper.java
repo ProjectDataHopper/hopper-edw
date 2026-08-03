@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.catalog;
 
 import java.util.Date;
@@ -23,30 +21,28 @@ import java.util.List;
 import org.apache.hop.catalog.model.DvCsvFormatRecord;
 import org.apache.hop.catalog.model.DvSourceRecord;
 import org.apache.hop.catalog.model.PhysicalFileRef;
+import org.apache.hop.catalog.model.PhysicalIcebergTableRef;
 import org.apache.hop.catalog.model.PhysicalTableRef;
 import org.apache.hop.catalog.model.RecordDefinition;
 import org.apache.hop.catalog.model.RecordDefinitionKey;
 import org.apache.hop.catalog.model.RecordDefinitionType;
 import org.apache.hop.catalog.model.RecordOrigin;
 import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DataVaultSource;
-import org.apache.hop.datavault.metadata.DvSourceDeliveryType;
 import org.apache.hop.datavault.metadata.DvSourceType;
+import org.apache.hop.datavault.metadata.IDvSource;
 import org.apache.hop.datavault.metadata.SourceField;
 import org.apache.hop.datavault.metadata.composite.DvCompositeSource;
 import org.apache.hop.datavault.metadata.database.DvDatabaseSource;
 import org.apache.hop.datavault.metadata.file.DvCsvInputMode;
 import org.apache.hop.datavault.metadata.file.DvCsvSource;
 import org.apache.hop.datavault.metadata.file.DvFileLocationSupport;
-import org.apache.hop.catalog.model.PhysicalIcebergTableRef;
 import org.apache.hop.datavault.metadata.file.IDvFileBasedSource;
 import org.apache.hop.datavault.metadata.iceberg.DvIcebergLocationSupport;
 import org.apache.hop.datavault.metadata.iceberg.DvIcebergSource;
-import org.apache.hop.datavault.metadata.IDvSource;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Maps {@link DataVaultSource} to catalog {@link RecordDefinition} entries. */
@@ -137,7 +133,8 @@ public final class DvSourceCatalogMapper {
       definition.setDvSource(dvSourceRecord);
     }
     definition.setFields(DvSourceFieldSupport.toRowMeta(sourceFields, variables));
-    definition.setOrigin(buildOrigin(source, model, variables, updatedAt, workflowName, pipelineName));
+    definition.setOrigin(
+        buildOrigin(source, model, variables, updatedAt, workflowName, pipelineName));
     IDvSource dvSource = source.getDvSourceOrDefault();
     if (source.getSourceType() == DvSourceType.CSV) {
       definition.setPhysicalFile(buildPhysicalFileRef(dvSource));
@@ -179,7 +176,8 @@ public final class DvSourceCatalogMapper {
       IVariables variables,
       IHopMetadataProvider metadataProvider)
       throws HopException {
-    return toRecordDefinition(source, namespace, null, variables, metadataProvider, new Date(), null);
+    return toRecordDefinition(
+        source, namespace, null, variables, metadataProvider, new Date(), null);
   }
 
   private static RecordOrigin buildOrigin(

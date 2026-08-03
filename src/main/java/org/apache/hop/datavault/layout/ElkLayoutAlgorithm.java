@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.layout;
 
 import lombok.Getter;
@@ -26,7 +24,8 @@ import org.apache.hop.metadata.api.IEnumHasCodeAndDescription;
 /** ELK layout algorithm selection for {@link ElkLayout}. */
 @Getter
 public enum ElkLayoutAlgorithm implements IEnumHasCodeAndDescription {
-  LAYERED("LAYERED", BaseMessages.getString(ElkLayoutAlgorithm.class, "ElkLayoutAlgorithm.Layered")),
+  LAYERED(
+      "LAYERED", BaseMessages.getString(ElkLayoutAlgorithm.class, "ElkLayoutAlgorithm.Layered")),
   RECT_PACKING(
       "RECT_PACKING",
       BaseMessages.getString(ElkLayoutAlgorithm.class, "ElkLayoutAlgorithm.RectPacking"));

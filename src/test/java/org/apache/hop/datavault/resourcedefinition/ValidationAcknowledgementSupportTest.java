@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -65,7 +63,9 @@ class ValidationAcknowledgementSupportTest {
         ValidationAcknowledgementSupport.isAcknowledged(definition, "FIELD_ADDED|loyalty_tier|"));
 
     // Revoke without persistence because registry update would fail without catalog wiring.
-    definition.getValidationAcknowledgements().removeIf(a -> "FIELD_ADDED|loyalty_tier|".equals(a.getIssueId()));
+    definition
+        .getValidationAcknowledgements()
+        .removeIf(a -> "FIELD_ADDED|loyalty_tier|".equals(a.getIssueId()));
     assertFalse(
         ValidationAcknowledgementSupport.isAcknowledged(definition, "FIELD_ADDED|loyalty_tier|"));
   }

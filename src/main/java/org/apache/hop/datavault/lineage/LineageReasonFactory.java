@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.lineage;
 
 import java.util.LinkedHashMap;
@@ -83,7 +82,8 @@ public final class LineageReasonFactory {
         evidence);
   }
 
-  public static LineageReason standardColumn(String fieldName, String configKey, String configValue) {
+  public static LineageReason standardColumn(
+      String fieldName, String configKey, String configValue) {
     Map<String, String> evidence = new LinkedHashMap<>();
     evidence.put("fieldName", nvl(fieldName));
     evidence.put("configKey", nvl(configKey));
@@ -108,7 +108,8 @@ public final class LineageReasonFactory {
         evidence);
   }
 
-  public static LineageReason parentHashKey(String hashField, String parentTable, String parentHash) {
+  public static LineageReason parentHashKey(
+      String hashField, String parentTable, String parentHash) {
     Map<String, String> evidence = new LinkedHashMap<>();
     evidence.put("hashField", nvl(hashField));
     evidence.put("parentTable", nvl(parentTable));
@@ -116,11 +117,7 @@ public final class LineageReasonFactory {
     return new LineageReason(
         LineageReasonCode.PARENT_HASH_KEY,
         BaseMessages.getString(
-            PKG,
-            "LineageReason.ParentHashKey",
-            nvl(hashField),
-            nvl(parentTable),
-            nvl(parentHash)),
+            PKG, "LineageReason.ParentHashKey", nvl(hashField), nvl(parentTable), nvl(parentHash)),
         LineageConfidence.DERIVED,
         evidence);
   }

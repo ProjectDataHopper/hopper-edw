@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.smoke;
 
 import java.nio.file.Files;
@@ -41,7 +39,8 @@ import org.apache.hop.core.variables.Variables;
 import org.apache.hop.metadata.serializer.json.JsonMetadataProvider;
 
 /**
- * Manual smoke runner for catalog CRUD. Invoked from {@code integration-tests/tests/catalog/smoke-catalog.sh}.
+ * Manual smoke runner for catalog CRUD. Invoked from {@code
+ * integration-tests/tests/catalog/smoke-catalog.sh}.
  */
 public final class CatalogRegistrySmoke {
 

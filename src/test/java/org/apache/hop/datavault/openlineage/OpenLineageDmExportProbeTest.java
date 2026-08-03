@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.openlineage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -61,8 +59,7 @@ class OpenLineageDmExportProbeTest {
   void setUp() {
     variables = new Variables();
     variables.setVariable(
-        "PROJECT_HOME",
-        Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
+        "PROJECT_HOME", Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
   }
 
   @Test
@@ -108,8 +105,7 @@ class OpenLineageDmExportProbeTest {
     assertTrue(dmJobs > 0, "expected dm/* jobs");
     // Role-playing aliases must keep unique job names (logical), not collapse to physical d_date.
     assertTrue(
-        all.stream()
-            .anyMatch(e -> e.path("job").path("name").asText().contains("d_order_date")),
+        all.stream().anyMatch(e -> e.path("job").path("name").asText().contains("d_order_date")),
         "expected unique job for d_order_date alias");
 
     // Alias datasets use logical name and symlink to the shared physical dimension (d_date).

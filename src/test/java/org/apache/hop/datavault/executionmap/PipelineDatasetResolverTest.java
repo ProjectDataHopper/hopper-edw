@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -110,12 +108,9 @@ class PipelineDatasetResolverTest {
             .filter(node -> node.getNodeType() == ExecutionMapNodeType.SOURCE_DATASET)
             .findFirst()
             .orElseThrow();
-    assertEquals(
-        "dataset://hop/retail-example/sources::E2E-customer-hub", sourceDataset.getPath());
+    assertEquals("dataset://hop/retail-example/sources::E2E-customer-hub", sourceDataset.getPath());
     assertEquals("DV_SOURCE", sourceDataset.getProperty("datasetKind"));
-    assertEquals(
-        "hop/retail-example/sources",
-        sourceDataset.getProperty("datasetNamespace"));
+    assertEquals("hop/retail-example/sources", sourceDataset.getProperty("datasetNamespace"));
     assertEquals(modelNode.getId(), sourceDataset.getParentNodeId());
 
     ExecutionMapNode targetDataset =

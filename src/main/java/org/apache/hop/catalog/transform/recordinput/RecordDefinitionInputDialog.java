@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.transform.recordinput;
 
 import java.util.ArrayList;
@@ -26,13 +24,14 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.hopgui.file.vault.HopGuiDataVaultModelDialog;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataSerializer;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
-import org.apache.hop.ui.core.dialog.ErrorDialog;
+import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.CTabFolder;
@@ -46,8 +45,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
-import org.apache.hop.datavault.hopgui.file.vault.HopGuiDataVaultModelDialog;
 
 public class RecordDefinitionInputDialog extends BaseTransformDialog {
 
@@ -185,8 +182,7 @@ public class RecordDefinitionInputDialog extends BaseTransformDialog {
 
     // Name field combo
     Label wlNameField = new Label(wGeneralTabComp, SWT.RIGHT);
-    wlNameField.setText(
-        BaseMessages.getString(PKG, "RecordDefinitionInputDialog.NameField.Label"));
+    wlNameField.setText(BaseMessages.getString(PKG, "RecordDefinitionInputDialog.NameField.Label"));
     PropsUi.setLook(wlNameField);
     FormData fdlNameField = new FormData();
     fdlNameField.left = new FormAttachment(0, 0);
@@ -223,8 +219,7 @@ public class RecordDefinitionInputDialog extends BaseTransformDialog {
 
     // Name value text
     Label wlNameValue = new Label(wGeneralTabComp, SWT.RIGHT);
-    wlNameValue.setText(
-        BaseMessages.getString(PKG, "RecordDefinitionInputDialog.NameValue.Label"));
+    wlNameValue.setText(BaseMessages.getString(PKG, "RecordDefinitionInputDialog.NameValue.Label"));
     PropsUi.setLook(wlNameValue);
     FormData fdlNameValue = new FormData();
     fdlNameValue.left = new FormAttachment(0, 0);
@@ -280,32 +275,214 @@ public class RecordDefinitionInputDialog extends BaseTransformDialog {
     wRenamesComp.setLayout(new FormLayout());
 
     Control last = null;
-    last = wOutNamespace = addTextField(wRenamesComp, "RecordDefinitionInputDialog.OutputNamespaceField.Label", last, middle, margin);
-    last = wOutName = addTextField(wRenamesComp, "RecordDefinitionInputDialog.OutputNameField.Label", last, middle, margin);
-    last = wOutType = addTextField(wRenamesComp, "RecordDefinitionInputDialog.OutputTypeField.Label", last, middle, margin);
-    last = wOutDescription = addTextField(wRenamesComp, "RecordDefinitionInputDialog.OutputDescriptionField.Label", last, middle, margin);
-    last = wOutModelType = addTextField(wRenamesComp, "RecordDefinitionInputDialog.OutputModelTypeField.Label", last, middle, margin);
-    last = wOutModelName = addTextField(wRenamesComp, "RecordDefinitionInputDialog.OutputModelNameField.Label", last, middle, margin);
-    last = wOutModelFilename = addTextField(wRenamesComp, "RecordDefinitionInputDialog.OutputModelFilenameField.Label", last, middle, margin);
-    last = wOutModelElement = addTextField(wRenamesComp, "RecordDefinitionInputDialog.OutputModelElementField.Label", last, middle, margin);
-    last = wOutHopProject = addTextField(wRenamesComp, "RecordDefinitionInputDialog.OutputHopProjectField.Label", last, middle, margin);
-    last = wOutCreatedAt = addTextField(wRenamesComp, "RecordDefinitionInputDialog.OutputCreatedAtField.Label", last, middle, margin);
-    last = wOutUpdatedAt = addTextField(wRenamesComp, "RecordDefinitionInputDialog.OutputUpdatedAtField.Label", last, middle, margin);
-    last = wOutUpdatedBy = addTextField(wRenamesComp, "RecordDefinitionInputDialog.OutputUpdatedByField.Label", last, middle, margin);
-    last = wOutLastWorkflow = addTextField(wRenamesComp, "RecordDefinitionInputDialog.OutputLastWorkflowField.Label", last, middle, margin);
-    last = wOutLastPipeline = addTextField(wRenamesComp, "RecordDefinitionInputDialog.OutputLastPipelineField.Label", last, middle, margin);
-    last = wOutPhysicalDatabase = addTextField(wRenamesComp, "RecordDefinitionInputDialog.OutputPhysicalDatabaseField.Label", last, middle, margin);
-    last = wOutPhysicalSchema = addTextField(wRenamesComp, "RecordDefinitionInputDialog.OutputPhysicalSchemaField.Label", last, middle, margin);
-    last = wOutPhysicalTable = addTextField(wRenamesComp, "RecordDefinitionInputDialog.OutputPhysicalTableField.Label", last, middle, margin);
-    last = wOutDvSourceType = addTextField(wRenamesComp, "RecordDefinitionInputDialog.OutputDvSourceTypeField.Label", last, middle, margin);
-    last = wOutDvSourceIndicator = addTextField(wRenamesComp, "RecordDefinitionInputDialog.OutputDvSourceIndicatorField.Label", last, middle, margin);
-    last = wOutDvSourceIndicatorField = addTextField(wRenamesComp, "RecordDefinitionInputDialog.OutputDvSourceIndicatorFieldField.Label", last, middle, margin);
-    last = wOutDvSourceGroup = addTextField(wRenamesComp, "RecordDefinitionInputDialog.OutputDvSourceGroupField.Label", last, middle, margin);
-    last = wOutDvDeliveryType = addTextField(wRenamesComp, "RecordDefinitionInputDialog.OutputDvDeliveryTypeField.Label", last, middle, margin);
-    last = wOutFieldName = addTextField(wRenamesComp, "RecordDefinitionInputDialog.OutputFieldNameField.Label", last, middle, margin);
-    last = wOutFieldType = addTextField(wRenamesComp, "RecordDefinitionInputDialog.OutputFieldTypeField.Label", last, middle, margin);
-    last = wOutFieldLength = addTextField(wRenamesComp, "RecordDefinitionInputDialog.OutputFieldLengthField.Label", last, middle, margin);
-    last = wOutFieldPrecision = addTextField(wRenamesComp, "RecordDefinitionInputDialog.OutputFieldPrecisionField.Label", last, middle, margin);
+    last =
+        wOutNamespace =
+            addTextField(
+                wRenamesComp,
+                "RecordDefinitionInputDialog.OutputNamespaceField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wOutName =
+            addTextField(
+                wRenamesComp,
+                "RecordDefinitionInputDialog.OutputNameField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wOutType =
+            addTextField(
+                wRenamesComp,
+                "RecordDefinitionInputDialog.OutputTypeField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wOutDescription =
+            addTextField(
+                wRenamesComp,
+                "RecordDefinitionInputDialog.OutputDescriptionField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wOutModelType =
+            addTextField(
+                wRenamesComp,
+                "RecordDefinitionInputDialog.OutputModelTypeField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wOutModelName =
+            addTextField(
+                wRenamesComp,
+                "RecordDefinitionInputDialog.OutputModelNameField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wOutModelFilename =
+            addTextField(
+                wRenamesComp,
+                "RecordDefinitionInputDialog.OutputModelFilenameField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wOutModelElement =
+            addTextField(
+                wRenamesComp,
+                "RecordDefinitionInputDialog.OutputModelElementField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wOutHopProject =
+            addTextField(
+                wRenamesComp,
+                "RecordDefinitionInputDialog.OutputHopProjectField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wOutCreatedAt =
+            addTextField(
+                wRenamesComp,
+                "RecordDefinitionInputDialog.OutputCreatedAtField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wOutUpdatedAt =
+            addTextField(
+                wRenamesComp,
+                "RecordDefinitionInputDialog.OutputUpdatedAtField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wOutUpdatedBy =
+            addTextField(
+                wRenamesComp,
+                "RecordDefinitionInputDialog.OutputUpdatedByField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wOutLastWorkflow =
+            addTextField(
+                wRenamesComp,
+                "RecordDefinitionInputDialog.OutputLastWorkflowField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wOutLastPipeline =
+            addTextField(
+                wRenamesComp,
+                "RecordDefinitionInputDialog.OutputLastPipelineField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wOutPhysicalDatabase =
+            addTextField(
+                wRenamesComp,
+                "RecordDefinitionInputDialog.OutputPhysicalDatabaseField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wOutPhysicalSchema =
+            addTextField(
+                wRenamesComp,
+                "RecordDefinitionInputDialog.OutputPhysicalSchemaField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wOutPhysicalTable =
+            addTextField(
+                wRenamesComp,
+                "RecordDefinitionInputDialog.OutputPhysicalTableField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wOutDvSourceType =
+            addTextField(
+                wRenamesComp,
+                "RecordDefinitionInputDialog.OutputDvSourceTypeField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wOutDvSourceIndicator =
+            addTextField(
+                wRenamesComp,
+                "RecordDefinitionInputDialog.OutputDvSourceIndicatorField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wOutDvSourceIndicatorField =
+            addTextField(
+                wRenamesComp,
+                "RecordDefinitionInputDialog.OutputDvSourceIndicatorFieldField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wOutDvSourceGroup =
+            addTextField(
+                wRenamesComp,
+                "RecordDefinitionInputDialog.OutputDvSourceGroupField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wOutDvDeliveryType =
+            addTextField(
+                wRenamesComp,
+                "RecordDefinitionInputDialog.OutputDvDeliveryTypeField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wOutFieldName =
+            addTextField(
+                wRenamesComp,
+                "RecordDefinitionInputDialog.OutputFieldNameField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wOutFieldType =
+            addTextField(
+                wRenamesComp,
+                "RecordDefinitionInputDialog.OutputFieldTypeField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wOutFieldLength =
+            addTextField(
+                wRenamesComp,
+                "RecordDefinitionInputDialog.OutputFieldLengthField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wOutFieldPrecision =
+            addTextField(
+                wRenamesComp,
+                "RecordDefinitionInputDialog.OutputFieldPrecisionField.Label",
+                last,
+                middle,
+                margin);
     last =
         wOutFieldPrimaryKeyPosition =
             addTextField(
@@ -350,15 +527,19 @@ public class RecordDefinitionInputDialog extends BaseTransformDialog {
                 for (int i = 0; i < row.size(); i++) {
                   inputFields.add(row.getValueMeta(i).getName());
                 }
-                shell.getDisplay().asyncExec(() -> {
-                  String[] fieldNames = org.apache.hop.ui.core.ConstUi.sortFieldNames(inputFields);
-                  wNamespaceField.setItems(fieldNames);
-                  wNameField.setItems(fieldNames);
-                  
-                  // restore values
-                  wNamespaceField.setText(Const.NVL(input.getNamespaceField(), ""));
-                  wNameField.setText(Const.NVL(input.getNameField(), ""));
-                });
+                shell
+                    .getDisplay()
+                    .asyncExec(
+                        () -> {
+                          String[] fieldNames =
+                              org.apache.hop.ui.core.ConstUi.sortFieldNames(inputFields);
+                          wNamespaceField.setItems(fieldNames);
+                          wNameField.setItems(fieldNames);
+
+                          // restore values
+                          wNamespaceField.setText(Const.NVL(input.getNamespaceField(), ""));
+                          wNameField.setText(Const.NVL(input.getNameField(), ""));
+                        });
               }
             } catch (HopException e) {
               logError(BaseMessages.getString(PKG, "System.Dialog.GetFieldsFailed.Message"));

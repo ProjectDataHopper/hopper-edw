@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.hopgui.file.sourcemodel;
 
 import org.apache.hop.core.gui.IGc;
@@ -42,10 +41,7 @@ public final class SourceRelationshipCrowFootDrawer {
    * @param multiplicity multiplicity of this end
    */
   public static void draw(
-      IGc gc,
-      Point entityAnchor,
-      Point otherAnchor,
-      SourceRelationshipMultiplicity multiplicity) {
+      IGc gc, Point entityAnchor, Point otherAnchor, SourceRelationshipMultiplicity multiplicity) {
     if (gc == null || entityAnchor == null || otherAnchor == null) {
       return;
     }
@@ -75,8 +71,7 @@ public final class SourceRelationshipCrowFootDrawer {
             (int) Math.round(entityAnchor.x + ux * 5), (int) Math.round(entityAnchor.y + uy * 5));
     Point minCenter =
         new Point(
-            (int) Math.round(entityAnchor.x + ux * 12),
-            (int) Math.round(entityAnchor.y + uy * 12));
+            (int) Math.round(entityAnchor.x + ux * 12), (int) Math.round(entityAnchor.y + uy * 12));
 
     if (m.isMany()) {
       drawCrowsFoot(gc, maxCenter, ux, uy, px, py);

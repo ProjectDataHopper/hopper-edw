@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.transform.sortedschemamerge;
 
 import java.util.ArrayList;
@@ -28,7 +26,6 @@ import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.annotations.Transform;
 import org.apache.hop.core.exception.HopPluginException;
 import org.apache.hop.core.exception.HopTransformException;
-
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
@@ -50,7 +47,8 @@ import org.apache.hop.pipeline.transform.TransformMeta;
     documentationUrl = "/pipeline/transforms/sortedschemamerge.html")
 @Getter
 @Setter
-public class SortedSchemaMergeMeta extends BaseTransformMeta<SortedSchemaMerge, SortedSchemaMergeData> {
+public class SortedSchemaMergeMeta
+    extends BaseTransformMeta<SortedSchemaMerge, SortedSchemaMergeData> {
 
   private static final Class<?> PKG = SortedSchemaMergeMeta.class;
 
@@ -118,10 +116,7 @@ public class SortedSchemaMergeMeta extends BaseTransformMeta<SortedSchemaMerge, 
   }
 
   private static IRowMeta[] resolveInputLayouts(
-      PipelineMeta pipelineMeta,
-      String transformName,
-      IRowMeta[] info,
-      IVariables variables)
+      PipelineMeta pipelineMeta, String transformName, IRowMeta[] info, IVariables variables)
       throws HopTransformException {
     if (info != null && info.length > 0 && !isEmptyLayout(info)) {
       return info;
@@ -208,7 +203,8 @@ public class SortedSchemaMergeMeta extends BaseTransformMeta<SortedSchemaMerge, 
       return;
     }
 
-    List<IRowMeta> inputLayouts = resolveCheckInputLayouts(pipelineMeta, transformMeta, input, prev, variables);
+    List<IRowMeta> inputLayouts =
+        resolveCheckInputLayouts(pipelineMeta, transformMeta, input, prev, variables);
     if (!inputLayouts.isEmpty()) {
       StringBuilder missing = new StringBuilder();
       for (SortedSchemaMergeSortKey sortKey : sortKeys) {

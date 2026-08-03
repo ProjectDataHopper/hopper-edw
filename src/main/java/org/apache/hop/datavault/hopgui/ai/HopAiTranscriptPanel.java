@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.ai;
 
 import org.apache.hop.core.util.Utils;
@@ -135,9 +133,7 @@ public final class HopAiTranscriptPanel {
     markdownComp.setMarkdown(markdown != null ? markdown : "");
     int height =
         Math.clamp(
-            markdownComp.getPreferredHeight(width),
-            ADVICE_TEXT_MIN_HEIGHT,
-            ADVICE_TEXT_MAX_HEIGHT);
+            markdownComp.getPreferredHeight(width), ADVICE_TEXT_MIN_HEIGHT, ADVICE_TEXT_MAX_HEIGHT);
     FormData fd = new FormData();
     fd.left = new FormAttachment(0, PropsUi.getMargin());
     fd.right = new FormAttachment(100, -PropsUi.getMargin());

@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.hopgui.file.sourcemodel;
 
 import java.util.ArrayList;
@@ -71,8 +70,7 @@ public final class HopGuiSourceQueryComposeSupport {
     }
 
     try {
-      SourceModel model =
-          SourceModelLoadSupport.load(filename, variables, metadataProvider);
+      SourceModel model = SourceModelLoadSupport.load(filename, variables, metadataProvider);
       List<String> queryNames = new ArrayList<>();
       for (SourceQuery q : model.getQueries()) {
         if (q != null && !Utils.isEmpty(q.getName())) {
@@ -111,18 +109,14 @@ public final class HopGuiSourceQueryComposeSupport {
       model.clearChanged();
 
       SourceQueryCatalogPublisher.PublishResult result =
-          SourceQueryCatalogPublisher.publish(
-              model, query, null, variables, metadataProvider);
+          SourceQueryCatalogPublisher.publish(model, query, null, variables, metadataProvider);
       DvDatabaseSourceImportSupport.refreshCatalogPerspective();
 
       MessageBox box = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-      box.setText(
-          BaseMessages.getString(PKG, "HopGuiSourceQueryComposeSupport.Success.Title"));
+      box.setText(BaseMessages.getString(PKG, "HopGuiSourceQueryComposeSupport.Success.Title"));
       box.setMessage(
           BaseMessages.getString(
-              PKG,
-              "HopGuiSourceQueryComposeSupport.Success.Message",
-              result.catalogName()));
+              PKG, "HopGuiSourceQueryComposeSupport.Success.Message", result.catalogName()));
       box.open();
       return result.catalogName();
     } catch (Exception e) {

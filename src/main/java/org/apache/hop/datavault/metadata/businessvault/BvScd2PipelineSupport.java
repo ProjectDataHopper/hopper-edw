@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import java.sql.Timestamp;
@@ -25,25 +23,24 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.hop.core.Condition;
-import org.apache.hop.core.exception.HopValueException;
-import org.apache.hop.core.row.ValueMetaAndData;
-import org.apache.hop.core.row.value.ValueMetaTimestamp;
 import org.apache.hop.core.CheckResult;
+import org.apache.hop.core.Condition;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.DbCache;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.RowMetaAndData;
 import org.apache.hop.core.database.Database;
 import org.apache.hop.core.database.DatabaseMeta;
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.exception.HopValueException;
+import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.logging.ILoggingObject;
 import org.apache.hop.core.logging.LoggingObjectType;
 import org.apache.hop.core.logging.SimpleLoggingObject;
-import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.RowMeta;
+import org.apache.hop.core.row.ValueMetaAndData;
 import org.apache.hop.core.row.value.ValueMetaBinary;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.row.value.ValueMetaString;
@@ -53,21 +50,21 @@ import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metadata.DataVaultConfiguration;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DvHub;
-import org.apache.hop.datavault.metadata.DvSqlSupport;
-import org.apache.hop.datavault.metadata.HashAlgorithm;
-import org.apache.hop.datavault.metadata.HashKeyDataType;
 import org.apache.hop.datavault.metadata.DvLink;
 import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.DvSpecialRecordSupport;
-import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataSupport;
-import org.apache.hop.datavault.metadata.DvTargetLoadSupport;
+import org.apache.hop.datavault.metadata.DvSqlSupport;
 import org.apache.hop.datavault.metadata.DvTableType;
+import org.apache.hop.datavault.metadata.DvTargetLoadSupport;
+import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataSupport;
+import org.apache.hop.datavault.metadata.HashAlgorithm;
+import org.apache.hop.datavault.metadata.HashKeyDataType;
 import org.apache.hop.datavault.metadata.IDvTable;
 import org.apache.hop.datavault.metadata.SatelliteAttribute;
-import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.datavault.transform.sortedschemamerge.SortedSchemaMergeMeta;
 import org.apache.hop.datavault.transform.sortedschemamerge.SortedSchemaMergeMetaFactory;
 import org.apache.hop.datavault.transform.sortedschemamerge.SortedSchemaMergeSortKey;
+import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineHopMeta;
 import org.apache.hop.pipeline.PipelineMeta;
@@ -75,27 +72,28 @@ import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transforms.analyticquery.AnalyticQueryMeta;
 import org.apache.hop.pipeline.transforms.analyticquery.GroupField;
 import org.apache.hop.pipeline.transforms.analyticquery.QueryField;
+import org.apache.hop.pipeline.transforms.constant.ConstantField;
+import org.apache.hop.pipeline.transforms.constant.ConstantMeta;
+import org.apache.hop.pipeline.transforms.filterrows.FilterRowsMeta;
 import org.apache.hop.pipeline.transforms.groupby.Aggregation;
 import org.apache.hop.pipeline.transforms.groupby.GroupByMeta;
 import org.apache.hop.pipeline.transforms.groupby.GroupingField;
 import org.apache.hop.pipeline.transforms.ifnull.Field;
 import org.apache.hop.pipeline.transforms.ifnull.IfNullMeta;
-import org.apache.hop.pipeline.transforms.constant.ConstantField;
-import org.apache.hop.pipeline.transforms.constant.ConstantMeta;
-import org.apache.hop.pipeline.transforms.rowgenerator.GeneratorField;
-import org.apache.hop.pipeline.transforms.rowgenerator.RowGeneratorMeta;
+import org.apache.hop.pipeline.transforms.mergejoin.MergeJoinMeta;
 import org.apache.hop.pipeline.transforms.repeatfields.Repeat;
 import org.apache.hop.pipeline.transforms.repeatfields.RepeatFieldsMeta;
 import org.apache.hop.pipeline.transforms.repeatfields.RepeatFieldsMeta.RepeatType;
+import org.apache.hop.pipeline.transforms.rowgenerator.GeneratorField;
+import org.apache.hop.pipeline.transforms.rowgenerator.RowGeneratorMeta;
 import org.apache.hop.pipeline.transforms.selectvalues.SelectField;
 import org.apache.hop.pipeline.transforms.selectvalues.SelectValuesMeta;
-import org.apache.hop.pipeline.transforms.filterrows.FilterRowsMeta;
-import org.apache.hop.pipeline.transforms.mergejoin.MergeJoinMeta;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
 import org.apache.hop.pipeline.transforms.update.UpdateField;
 import org.apache.hop.pipeline.transforms.update.UpdateKeyField;
 import org.apache.hop.pipeline.transforms.update.UpdateLookupField;
 import org.apache.hop.pipeline.transforms.update.UpdateMeta;
+
 /**
  * Generates SCD2 build pipelines from DV satellite history using Analytic Query (LAG/LEAD validity
  * bounds), If Null sentinels, and Group By collapse for duplicate timestamps.
@@ -112,12 +110,16 @@ public final class BvScd2PipelineSupport {
   static final String RECORD_SOURCE_CONCAT_SEPARATOR = ", ";
   public static final String DEFAULT_INCREMENTAL_SENTINEL = "1900-01-01 00:00:00";
   static final String INCREMENTAL_WATERMARK_FIELD = "_incremental_watermark";
+
   /** Table Input JDBC parameter field for the open-end sentinel (positional {@code ?}). */
   static final String OPEN_END_PARAM_FIELD = "_param_open_end";
+
   /** Standalone Constant that feeds satellite Table Input {@code ?} watermarks. */
   public static final String PARAM_WATERMARK_TRANSFORM = "param_incremental_watermark";
+
   /** Standalone Constant that feeds open-target / close-lookup Table Input {@code ?} params. */
   public static final String PARAM_OPEN_ROW_FILTER_TRANSFORM = "param_open_row_filter";
+
   static final String CLOSE_LOOKUP_VALID_FROM_FIELD = "_close_lookup_valid_from";
   static final String CLOSE_LOOKUP_READ_PREFIX = "read_open_close_lookup_";
   static final String JOIN_CLOSE_LOOKUP_VALID_FROM = "join_close_lookup_valid_from";
@@ -145,14 +147,15 @@ public final class BvScd2PipelineSupport {
           new CheckResult(
               ICheckResult.TYPE_RESULT_ERROR,
               BaseMessages.getString(
-                  PKG, "BvScd2PipelineSupport.CheckResult.MissingDvTargetDatabase", scd2Table.getName()),
+                  PKG,
+                  "BvScd2PipelineSupport.CheckResult.MissingDvTargetDatabase",
+                  scd2Table.getName()),
               scd2Table));
     } else if (metadataProvider != null) {
       try {
         DvSpecialRecordSupport.loadTargetDatabase(metadataProvider, dvConfig);
       } catch (HopException e) {
-        remarks.add(
-            new CheckResult(ICheckResult.TYPE_RESULT_ERROR, e.getMessage(), scd2Table));
+        remarks.add(new CheckResult(ICheckResult.TYPE_RESULT_ERROR, e.getMessage(), scd2Table));
       }
     }
 
@@ -161,14 +164,15 @@ public final class BvScd2PipelineSupport {
           new CheckResult(
               ICheckResult.TYPE_RESULT_ERROR,
               BaseMessages.getString(
-                  PKG, "BvScd2PipelineSupport.CheckResult.MissingBvTargetDatabase", scd2Table.getName()),
+                  PKG,
+                  "BvScd2PipelineSupport.CheckResult.MissingBvTargetDatabase",
+                  scd2Table.getName()),
               scd2Table));
     } else if (metadataProvider != null) {
       try {
         BvTargetDatabaseSupport.loadTargetDatabase(metadataProvider, bvConfig);
       } catch (HopException e) {
-        remarks.add(
-            new CheckResult(ICheckResult.TYPE_RESULT_ERROR, e.getMessage(), scd2Table));
+        remarks.add(new CheckResult(ICheckResult.TYPE_RESULT_ERROR, e.getMessage(), scd2Table));
       }
     }
   }
@@ -185,11 +189,7 @@ public final class BvScd2PipelineSupport {
     PipelineMeta pipelineMeta = new PipelineMeta();
     pipelineMeta.setName(ctx.pipelineName);
     GeneratedPipelineMetadataSupport.stampBvElementPipeline(
-        pipelineMeta,
-        ctx.bvModel,
-        "scd2",
-        ctx.scd2Table.getName(),
-        ctx.bvTargetTableName);
+        pipelineMeta, ctx.bvModel, "scd2", ctx.scd2Table.getName(), ctx.bvTargetTableName);
 
     TransformMeta watermarkParam = null;
     TransformMeta openRowFilterParam = null;
@@ -201,8 +201,7 @@ public final class BvScd2PipelineSupport {
           addOpenRowFilterParamConstant(
               ctx,
               pipelineMeta,
-              new Point(
-                  LOCATION_START.x - SPACING_WIDTH, LOCATION_START.y + LEG_SPACING_HEIGHT));
+              new Point(LOCATION_START.x - SPACING_WIDTH, LOCATION_START.y + LEG_SPACING_HEIGHT));
     }
 
     TransformMeta tableInput = addSatelliteTableInput(ctx, pipelineMeta, watermarkParam);
@@ -238,11 +237,7 @@ public final class BvScd2PipelineSupport {
     PipelineMeta pipelineMeta = new PipelineMeta();
     pipelineMeta.setName(ctx.pipelineName);
     GeneratedPipelineMetadataSupport.stampBvElementPipeline(
-        pipelineMeta,
-        ctx.bvModel,
-        "scd2",
-        ctx.scd2Table.getName(),
-        ctx.bvTargetTableName);
+        pipelineMeta, ctx.bvModel, "scd2", ctx.scd2Table.getName(), ctx.bvTargetTableName);
 
     TransformMeta watermarkParam = null;
     TransformMeta openRowFilterParam = null;
@@ -277,8 +272,7 @@ public final class BvScd2PipelineSupport {
       Point baselineLocation =
           new Point(LOCATION_START.x, LOCATION_START.y + ctx.legs.size() * LEG_SPACING_HEIGHT);
       legOutputs.add(
-          addIncrementalBaselineLeg(
-              ctx, pipelineMeta, baselineLocation, true, openRowFilterParam));
+          addIncrementalBaselineLeg(ctx, pipelineMeta, baselineLocation, true, openRowFilterParam));
     }
 
     TransformMeta sortedMerge = addSortedSchemaMerge(ctx, pipelineMeta, legOutputs);
@@ -325,12 +319,14 @@ public final class BvScd2PipelineSupport {
       BvScd2Table scd2Table,
       DvSatellite satellite)
       throws HopException {
-    SharedScd2Resources resources = resolveSharedResources(metadataProvider, bvModel, dvModel, scd2Table, variables);
+    SharedScd2Resources resources =
+        resolveSharedResources(metadataProvider, bvModel, dvModel, scd2Table, variables);
 
     String satelliteTableName =
         !Utils.isEmpty(satellite.getTableName()) ? satellite.getTableName() : satellite.getName();
     String pipelineName =
-        resources.bvConfig.buildScd2PipelineName(variables, resources.bvTargetTableName, satellite.getName());
+        resources.bvConfig.buildScd2PipelineName(
+            variables, resources.bvTargetTableName, satellite.getName());
 
     String hashKeyFieldName = resolveHashKeyFieldName(satellite, dvModel, variables);
     String drivingKeyFieldName =
@@ -390,10 +386,12 @@ public final class BvScd2PipelineSupport {
               + " references multiple satellites and requires explicit field mappings");
     }
 
-    SharedScd2Resources resources = resolveSharedResources(metadataProvider, bvModel, dvModel, scd2Table, variables);
+    SharedScd2Resources resources =
+        resolveSharedResources(metadataProvider, bvModel, dvModel, scd2Table, variables);
     DvSatellite anchorSatellite = satellites.get(0);
     String pipelineName =
-        resources.bvConfig.buildScd2PipelineName(variables, resources.bvTargetTableName, scd2Table.getName());
+        resources.bvConfig.buildScd2PipelineName(
+            variables, resources.bvTargetTableName, scd2Table.getName());
     String hashKeyFieldName = resolveHashKeyFieldName(anchorSatellite, dvModel, variables);
     String drivingKeyFieldName = resolveSharedDrivingKeyFieldName(satellites, variables);
     List<String> mappedAttributeFieldNames = resolveMappedTargetFieldNames(scd2Table, variables);
@@ -459,16 +457,12 @@ public final class BvScd2PipelineSupport {
     if (Utils.isEmpty(sourceDbName)) {
       throw new HopException(
           BaseMessages.getString(
-              PKG,
-              "BvScd2PipelineSupport.Error.MissingDvTargetDatabase",
-              scd2Table.getName()));
+              PKG, "BvScd2PipelineSupport.Error.MissingDvTargetDatabase", scd2Table.getName()));
     }
     if (metadataProvider == null) {
       throw new HopException(
           BaseMessages.getString(
-              PKG,
-              "BvScd2PipelineSupport.Error.MissingMetadataProvider",
-              scd2Table.getName()));
+              PKG, "BvScd2PipelineSupport.Error.MissingMetadataProvider", scd2Table.getName()));
     }
     DatabaseMeta sourceDatabaseMeta =
         DvSpecialRecordSupport.loadTargetDatabase(metadataProvider, dvConfig);
@@ -477,9 +471,7 @@ public final class BvScd2PipelineSupport {
     if (Utils.isEmpty(targetDbName)) {
       throw new HopException(
           BaseMessages.getString(
-              PKG,
-              "BvScd2PipelineSupport.Error.MissingBvTargetDatabase",
-              scd2Table.getName()));
+              PKG, "BvScd2PipelineSupport.Error.MissingBvTargetDatabase", scd2Table.getName()));
     }
     DatabaseMeta targetDatabaseMeta =
         BvTargetDatabaseSupport.loadTargetDatabase(metadataProvider, bvConfig);
@@ -624,7 +616,9 @@ public final class BvScd2PipelineSupport {
         BvScd2FieldMappingValidationSupport.resolveSatelliteDerivatives(scd2Table, dvModel);
     if (satellites.isEmpty()) {
       throw new HopException(
-          "SCD2 table " + scd2Table.getName() + " must reference a Data Vault satellite derivative");
+          "SCD2 table "
+              + scd2Table.getName()
+              + " must reference a Data Vault satellite derivative");
     }
 
     RowMeta rowMeta = new RowMeta();
@@ -697,7 +691,8 @@ public final class BvScd2PipelineSupport {
       BusinessVaultConfiguration bvConfig,
       DataVaultModel dvModel,
       IVariables variables) {
-    rowMeta.addValueMeta(buildRecordSourceValueMeta(dvModel.getConfigurationOrDefault(), variables));
+    rowMeta.addValueMeta(
+        buildRecordSourceValueMeta(dvModel.getConfigurationOrDefault(), variables));
     rowMeta.addValueMeta(
         new ValueMetaTimestamp(
             resolveFunctionalTimestampField(
@@ -720,8 +715,7 @@ public final class BvScd2PipelineSupport {
       BusinessVaultConfiguration bvConfig,
       DataVaultConfiguration dvConfig,
       IVariables variables) {
-    if (satelliteConfig != null
-        && !Utils.isEmpty(satelliteConfig.getFunctionalTimestampField())) {
+    if (satelliteConfig != null && !Utils.isEmpty(satelliteConfig.getFunctionalTimestampField())) {
       return variables.resolve(satelliteConfig.getFunctionalTimestampField());
     }
     return resolveFunctionalTimestampField(scd2Table, bvConfig, dvConfig, variables);
@@ -793,10 +787,10 @@ public final class BvScd2PipelineSupport {
   }
 
   /**
-   * Distinct hash keys from DV satellites that have rows after the watermark parameter.
-   * Each UNION branch uses its own positional {@code ?} for the watermark — JDBC does not reuse
-   * bind values across placeholders. The open-row filter parameter row must supply one watermark
-   * field per branch ({@link #countDeltaHashKeyWatermarkPlaceholders}).
+   * Distinct hash keys from DV satellites that have rows after the watermark parameter. Each UNION
+   * branch uses its own positional {@code ?} for the watermark — JDBC does not reuse bind values
+   * across placeholders. The open-row filter parameter row must supply one watermark field per
+   * branch ({@link #countDeltaHashKeyWatermarkPlaceholders}).
    *
    * <p>Only safe to embed in BV-connected SQL when {@link #usesSharedTargetConnection}.
    */
@@ -811,16 +805,9 @@ public final class BvScd2PipelineSupport {
           ctx.isMultiSatellite()
               ? leg.sourceFunctionalTimestampField
               : ctx.functionalTimestampField;
-      String sourceTimestampColumn =
-          ctx.sourceDatabaseMeta.quoteField(sourceTimestampField);
+      String sourceTimestampColumn = ctx.sourceDatabaseMeta.quoteField(sourceTimestampField);
       String filter = buildIncrementalSatelliteFilterSql(sourceTimestampColumn);
-      unionBranches.add(
-          "SELECT "
-              + hashKeyColumn
-              + " FROM "
-              + satelliteTable
-              + " WHERE "
-              + filter);
+      unionBranches.add("SELECT " + hashKeyColumn + " FROM " + satelliteTable + " WHERE " + filter);
     }
     if (unionBranches.isEmpty()) {
       String hashKeyColumn = ctx.sourceDatabaseMeta.quoteField(ctx.hashKeyFieldName);
@@ -932,22 +919,21 @@ public final class BvScd2PipelineSupport {
   }
 
   /**
-   * Incremental satellite filter using a positional JDBC parameter for the watermark.
-   * Bound at runtime from a preceding Constant / Get Variables transform — dialect-neutral.
+   * Incremental satellite filter using a positional JDBC parameter for the watermark. Bound at
+   * runtime from a preceding Constant / Get Variables transform — dialect-neutral.
    */
   public static String buildIncrementalSatelliteFilterSql(String sourceTimestampColumnRef) {
     return sourceTimestampColumnRef + " > ?";
   }
 
   /**
-   * BV-only query used at pipeline generation to resolve the incremental watermark value.
-   * Returns {@code MAX(watermark)} only; null/empty results fall back to the default sentinel in
-   * Java so the SQL stays free of dialect-specific timestamp literals.
+   * BV-only query used at pipeline generation to resolve the incremental watermark value. Returns
+   * {@code MAX(watermark)} only; null/empty results fall back to the default sentinel in Java so
+   * the SQL stays free of dialect-specific timestamp literals.
    */
   public static String buildIncrementalWatermarkSql(Scd2BuildContext ctx) {
     String watermarkField =
-        ctx.scd2Table.resolveIncrementalWatermarkField(
-            ctx.bvConfig, ctx.dvConfig, ctx.variables);
+        ctx.scd2Table.resolveIncrementalWatermarkField(ctx.bvConfig, ctx.dvConfig, ctx.variables);
     String quotedTable =
         ctx.targetDatabaseMeta.getQuotedSchemaTableCombination(
             ctx.variables, null, ctx.bvTargetTableName);
@@ -977,7 +963,10 @@ public final class BvScd2PipelineSupport {
     try (Database db = new Database(loggingObject, ctx.variables, ctx.targetDatabaseMeta)) {
       db.connect();
       RowMetaAndData row = db.getOneRow(sql);
-      if (row == null || row.getData() == null || row.getData().length == 0 || row.getData()[0] == null) {
+      if (row == null
+          || row.getData() == null
+          || row.getData().length == 0
+          || row.getData()[0] == null) {
         return DEFAULT_INCREMENTAL_SENTINEL;
       }
       Object value = row.getData()[0];
@@ -1037,8 +1026,7 @@ public final class BvScd2PipelineSupport {
           ctx.isMultiSatellite()
               ? leg.sourceFunctionalTimestampField
               : ctx.functionalTimestampField;
-      String sourceTimestampColumn =
-          ctx.sourceDatabaseMeta.quoteField(sourceTimestampField);
+      String sourceTimestampColumn = ctx.sourceDatabaseMeta.quoteField(sourceTimestampField);
       sql.append(" WHERE ");
       sql.append(buildIncrementalSatelliteFilterSql(sourceTimestampColumn));
     }
@@ -1199,8 +1187,7 @@ public final class BvScd2PipelineSupport {
   private static IValueMeta cloneValueMetaWithName(IValueMeta sourceMeta, String targetName)
       throws HopException {
     try {
-      IValueMeta targetMeta =
-          ValueMetaFactory.createValueMeta(targetName, sourceMeta.getType());
+      IValueMeta targetMeta = ValueMetaFactory.createValueMeta(targetName, sourceMeta.getType());
       targetMeta.setLength(sourceMeta.getLength());
       targetMeta.setPrecision(sourceMeta.getPrecision());
       targetMeta.setConversionMask(sourceMeta.getConversionMask());
@@ -1331,8 +1318,8 @@ public final class BvScd2PipelineSupport {
   }
 
   /**
-   * Single Timestamp field used as the satellite Table Input watermark parameter ({@code ?}).
-   * Value is resolved against the BV target at pipeline generation time.
+   * Single Timestamp field used as the satellite Table Input watermark parameter ({@code ?}). Value
+   * is resolved against the BV target at pipeline generation time.
    *
    * <p>Uses Generate Rows (not Constant): Constant only enriches incoming rows and emits nothing
    * when used as a pipeline start without a predecessor.
@@ -1353,9 +1340,9 @@ public final class BvScd2PipelineSupport {
    *
    * <ul>
    *   <li>Always: open-end sentinel ({@code valid_to = ?}) — first field
-   *   <li>Same-connection only: one watermark field per UNION branch in the delta hash-key
-   *       subquery ({@code … WHERE ts > ?}). JDBC requires a distinct bind value for each {@code
-   *       ?}; the same watermark value is repeated for each leg.
+   *   <li>Same-connection only: one watermark field per UNION branch in the delta hash-key subquery
+   *       ({@code … WHERE ts > ?}). JDBC requires a distinct bind value for each {@code ?}; the
+   *       same watermark value is repeated for each leg.
    * </ul>
    */
   private static TransformMeta addOpenRowFilterParamConstant(
@@ -1367,8 +1354,7 @@ public final class BvScd2PipelineSupport {
       int watermarkParams = countDeltaHashKeyWatermarkPlaceholders(ctx);
       for (int i = 0; i < watermarkParams; i++) {
         // Unique field names; Table Input binds by position to each ? in order.
-        fields.add(
-            timestampGeneratorField(INCREMENTAL_WATERMARK_FIELD + "_" + i, watermark));
+        fields.add(timestampGeneratorField(INCREMENTAL_WATERMARK_FIELD + "_" + i, watermark));
       }
     }
     return addParameterRowGenerator(
@@ -1379,19 +1365,12 @@ public final class BvScd2PipelineSupport {
 
   private static GeneratorField timestampGeneratorField(String name, String value) {
     return new GeneratorField(
-        name,
-        "Timestamp",
-        TIMESTAMP_PARAM_FORMAT,
-        -1,
-        -1,
-        null,
-        null,
-        null,
-        value,
-        false);
+        name, "Timestamp", TIMESTAMP_PARAM_FORMAT, -1, -1, null, null, null, value, false);
   }
 
-  /** Generate Rows with limit 1 — a true start transform that feeds Table Input {@code ?} params. */
+  /**
+   * Generate Rows with limit 1 — a true start transform that feeds Table Input {@code ?} params.
+   */
   private static TransformMeta addParameterRowGenerator(
       PipelineMeta pipelineMeta,
       String transformName,
@@ -1426,17 +1405,13 @@ public final class BvScd2PipelineSupport {
   }
 
   private static TransformMeta addBaselineSourceIndicatorConstant(
-      Scd2BuildContext ctx,
-      PipelineMeta pipelineMeta,
-      TransformMeta predecessor,
-      Point location) {
+      Scd2BuildContext ctx, PipelineMeta pipelineMeta, TransformMeta predecessor, Point location) {
     ConstantMeta constantMeta = new ConstantMeta();
     ConstantField indicatorField =
         new ConstantField(SOURCE_INDICATOR_FIELD, "String", BASELINE_SOURCE_INDICATOR);
     constantMeta.getFields().add(indicatorField);
 
-    TransformMeta tm =
-        new TransformMeta("Constant", "source_baseline", constantMeta);
+    TransformMeta tm = new TransformMeta("Constant", "source_baseline", constantMeta);
     tm.setLocation(location.x + SPACING_WIDTH, location.y);
     pipelineMeta.addTransform(tm);
     pipelineMeta.addPipelineHop(new PipelineHopMeta(predecessor, tm));
@@ -1444,10 +1419,7 @@ public final class BvScd2PipelineSupport {
   }
 
   private static TransformMeta addBaselineSelectValues(
-      Scd2BuildContext ctx,
-      PipelineMeta pipelineMeta,
-      TransformMeta predecessor,
-      Point location) {
+      Scd2BuildContext ctx, PipelineMeta pipelineMeta, TransformMeta predecessor, Point location) {
     SelectValuesMeta selectMeta = new SelectValuesMeta();
     selectMeta.getSelectOption().setSelectingAndSortingUnspecifiedFields(false);
     List<SelectField> selectFields = selectMeta.getSelectOption().getSelectFields();
@@ -1680,16 +1652,10 @@ public final class BvScd2PipelineSupport {
     List<QueryField> queryFields = new ArrayList<>();
     queryFields.add(
         new QueryField(
-            ctx.validFromField,
-            ctx.functionalTimestampField,
-            QueryField.AggregateType.LAG,
-            1));
+            ctx.validFromField, ctx.functionalTimestampField, QueryField.AggregateType.LAG, 1));
     queryFields.add(
         new QueryField(
-            ctx.validToField,
-            ctx.functionalTimestampField,
-            QueryField.AggregateType.LEAD,
-            1));
+            ctx.validToField, ctx.functionalTimestampField, QueryField.AggregateType.LEAD, 1));
     analyticQueryMeta.setQueryFields(queryFields);
 
     String analyticTransformName =
@@ -1697,9 +1663,10 @@ public final class BvScd2PipelineSupport {
             ? "analytic_" + ctx.bvTargetTableName
             : "analytic_" + ctx.satelliteTableName;
     int analyticX =
-        ctx.isMultiSatellite() ? LOCATION_START.x + 6 * SPACING_WIDTH : LOCATION_START.x + SPACING_WIDTH;
-    TransformMeta tm =
-        new TransformMeta("AnalyticQuery", analyticTransformName, analyticQueryMeta);
+        ctx.isMultiSatellite()
+            ? LOCATION_START.x + 6 * SPACING_WIDTH
+            : LOCATION_START.x + SPACING_WIDTH;
+    TransformMeta tm = new TransformMeta("AnalyticQuery", analyticTransformName, analyticQueryMeta);
     tm.setLocation(analyticX, LOCATION_START.y);
     pipelineMeta.addTransform(tm);
     pipelineMeta.addPipelineHop(new PipelineHopMeta(predecessor, tm));
@@ -1827,8 +1794,7 @@ public final class BvScd2PipelineSupport {
       throws HopException {
     IRowMeta targetLayout =
         buildTargetTableLayout(ctx.scd2Table, ctx.bvConfig, ctx.dvModel, ctx.variables);
-    Set<String> excludeFields =
-        Set.of(INCREMENTAL_WATERMARK_FIELD, CLOSE_LOOKUP_VALID_FROM_FIELD);
+    Set<String> excludeFields = Set.of(INCREMENTAL_WATERMARK_FIELD, CLOSE_LOOKUP_VALID_FROM_FIELD);
 
     int x = predecessor.getLocation().x + SPACING_WIDTH;
     int y = predecessor.getLocation().y;
@@ -1843,15 +1809,7 @@ public final class BvScd2PipelineSupport {
     x += SPACING_WIDTH;
 
     DvTargetLoadSupport.TargetLoadResult writeResult =
-        addScd2TargetLoad(
-            ctx,
-            pipelineMeta,
-            targetLayout,
-            rowsToWrite,
-            x,
-            y,
-            false,
-            excludeFields);
+        addScd2TargetLoad(ctx, pipelineMeta, targetLayout, rowsToWrite, x, y, false, excludeFields);
     TransformMeta writeTransform = writeResult.transformMeta;
 
     TransformMeta filterOpen =
@@ -1906,8 +1864,7 @@ public final class BvScd2PipelineSupport {
     mergeJoinMeta.getKeyFields1().add(joinKeyField);
     mergeJoinMeta.getKeyFields2().add(joinKeyField);
 
-    TransformMeta tm =
-        new TransformMeta("MergeJoin", JOIN_CLOSE_LOOKUP_VALID_FROM, mergeJoinMeta);
+    TransformMeta tm = new TransformMeta("MergeJoin", JOIN_CLOSE_LOOKUP_VALID_FROM, mergeJoinMeta);
     tm.setLocation(location);
     pipelineMeta.addTransform(tm);
     pipelineMeta.addPipelineHop(new PipelineHopMeta(mainPredecessor, tm));
@@ -1918,18 +1875,13 @@ public final class BvScd2PipelineSupport {
   }
 
   private static TransformMeta addIncrementalWatermarkConstant(
-      Scd2BuildContext ctx,
-      PipelineMeta pipelineMeta,
-      TransformMeta predecessor,
-      Point location) {
+      Scd2BuildContext ctx, PipelineMeta pipelineMeta, TransformMeta predecessor, Point location) {
     ConstantMeta constantMeta = new ConstantMeta();
     constantMeta
         .getFields()
         .add(
             new ConstantField(
-                INCREMENTAL_WATERMARK_FIELD,
-                "Timestamp",
-                resolveIncrementalWatermarkValue(ctx)));
+                INCREMENTAL_WATERMARK_FIELD, "Timestamp", resolveIncrementalWatermarkValue(ctx)));
 
     TransformMeta tm =
         new TransformMeta("Constant", "set_" + INCREMENTAL_WATERMARK_FIELD, constantMeta);
@@ -1940,10 +1892,7 @@ public final class BvScd2PipelineSupport {
   }
 
   private static TransformMeta addFilterIncrementalRows(
-      Scd2BuildContext ctx,
-      PipelineMeta pipelineMeta,
-      TransformMeta predecessor,
-      Point location)
+      Scd2BuildContext ctx, PipelineMeta pipelineMeta, TransformMeta predecessor, Point location)
       throws HopException {
     FilterRowsMeta filterRowsMeta = new FilterRowsMeta();
     try {
@@ -1958,8 +1907,7 @@ public final class BvScd2PipelineSupport {
       throw new HopException("Error creating incremental SCD2 watermark filter condition", e);
     }
 
-    TransformMeta tm =
-        new TransformMeta("FilterRows", "filter_incremental_rows", filterRowsMeta);
+    TransformMeta tm = new TransformMeta("FilterRows", "filter_incremental_rows", filterRowsMeta);
     tm.setLocation(location);
     pipelineMeta.addTransform(tm);
     pipelineMeta.addPipelineHop(new PipelineHopMeta(predecessor, tm));
@@ -1967,10 +1915,7 @@ public final class BvScd2PipelineSupport {
   }
 
   private static TransformMeta addFilterNewOpenRows(
-      Scd2BuildContext ctx,
-      PipelineMeta pipelineMeta,
-      TransformMeta predecessor,
-      Point location)
+      Scd2BuildContext ctx, PipelineMeta pipelineMeta, TransformMeta predecessor, Point location)
       throws HopException {
     FilterRowsMeta filterRowsMeta = new FilterRowsMeta();
     try {
@@ -1987,8 +1932,7 @@ public final class BvScd2PipelineSupport {
       throw new HopException("Error creating incremental SCD2 open-row filter condition", e);
     }
 
-    TransformMeta tm =
-        new TransformMeta("FilterRows", "filter_new_open_rows", filterRowsMeta);
+    TransformMeta tm = new TransformMeta("FilterRows", "filter_new_open_rows", filterRowsMeta);
     tm.setLocation(location);
     pipelineMeta.addTransform(tm);
     pipelineMeta.addPipelineHop(new PipelineHopMeta(predecessor, tm));
@@ -2014,19 +1958,15 @@ public final class BvScd2PipelineSupport {
     if (ctx.hasDrivingKey()) {
       lookup
           .getLookupKeys()
-          .add(
-              new UpdateKeyField(ctx.drivingKeyFieldName, ctx.drivingKeyFieldName, "="));
+          .add(new UpdateKeyField(ctx.drivingKeyFieldName, ctx.drivingKeyFieldName, "="));
     }
     lookup
         .getLookupKeys()
-        .add(
-            new UpdateKeyField(
-                CLOSE_LOOKUP_VALID_FROM_FIELD, ctx.validFromField, "="));
+        .add(new UpdateKeyField(CLOSE_LOOKUP_VALID_FROM_FIELD, ctx.validFromField, "="));
     lookup.getUpdateFields().add(new UpdateField(ctx.validToField, ctx.validFromField));
     updateMeta.setLookupField(lookup);
 
-    TransformMeta tm =
-        new TransformMeta("Update", "close_" + ctx.bvTargetTableName, updateMeta);
+    TransformMeta tm = new TransformMeta("Update", "close_" + ctx.bvTargetTableName, updateMeta);
     tm.setLocation(location);
     pipelineMeta.addTransform(tm);
     pipelineMeta.addPipelineHop(new PipelineHopMeta(predecessor, tm));
@@ -2076,12 +2016,7 @@ public final class BvScd2PipelineSupport {
             locationY);
 
     return DvTargetLoadSupport.addTargetLoad(
-        targetCtx,
-        pipelineMeta,
-        targetLayout,
-        predecessor,
-        excludeFields,
-        truncateTable);
+        targetCtx, pipelineMeta, targetLayout, predecessor, excludeFields, truncateTable);
   }
 
   public static List<PipelineMeta> generateBuildPipelines(
@@ -2093,7 +2028,8 @@ public final class BvScd2PipelineSupport {
       throws HopException {
     try {
       DbCache.clearAll();
-      Scd2BuildContext ctx = createContext(metadataProvider, variables, bvModel, dvModel, scd2Table);
+      Scd2BuildContext ctx =
+          createContext(metadataProvider, variables, bvModel, dvModel, scd2Table);
       if (ctx == null) {
         return List.of();
       }
@@ -2124,7 +2060,9 @@ public final class BvScd2PipelineSupport {
       this.sourceIndicatorValue = sourceIndicatorValue;
       this.sourceFunctionalTimestampField = sourceFunctionalTimestampField;
       this.fieldMappings =
-          fieldMappings == null ? List.of() : Collections.unmodifiableList(new ArrayList<>(fieldMappings));
+          fieldMappings == null
+              ? List.of()
+              : Collections.unmodifiableList(new ArrayList<>(fieldMappings));
     }
   }
 

@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.sourcemodel.publish;
 
 import java.util.ArrayList;
@@ -42,9 +41,7 @@ import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceQuerySqlGene
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
-/**
- * Publishes a {@link SourceQuery} as a catalog {@code DV_SOURCE} of type {@code COMPOSITE}.
- */
+/** Publishes a {@link SourceQuery} as a catalog {@code DV_SOURCE} of type {@code COMPOSITE}. */
 public final class SourceQueryCatalogPublisher {
 
   private static final Class<?> PKG = SourceQueryCatalogPublisher.class;
@@ -91,7 +88,10 @@ public final class SourceQueryCatalogPublisher {
     composite.setDescription(
         !Utils.isEmpty(query.getDescription())
             ? query.getDescription()
-            : "Source query " + query.getName() + " from " + Const.NVL(model.getName(), "source model"));
+            : "Source query "
+                + query.getName()
+                + " from "
+                + Const.NVL(model.getName(), "source model"));
     composite.setFields(fields);
     String modelFilename = model.getFilename();
     if (Utils.isEmpty(modelFilename)) {
@@ -163,8 +163,7 @@ public final class SourceQueryCatalogPublisher {
           model != null && !Utils.isEmpty(column.getTableName())
               ? model.findTable(column.getTableName())
               : null;
-      SourceColumn sourceColumn =
-          table != null ? table.findColumn(column.getColumnName()) : null;
+      SourceColumn sourceColumn = table != null ? table.findColumn(column.getColumnName()) : null;
       if (sourceColumn != null) {
         field.setDescription(sourceColumn.getDescription());
         field.setSourceDataType(sourceColumn.getSourceDataType());

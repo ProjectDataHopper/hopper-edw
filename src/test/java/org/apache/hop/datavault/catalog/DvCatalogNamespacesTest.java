@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.catalog;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,11 +28,13 @@ class DvCatalogNamespacesTest {
     Variables variables = new Variables();
     variables.setVariable("PROJECT_HOME", "/workspace/integration-tests");
 
-    assertEquals("hop/integration-tests/sources", DvCatalogNamespaces.projectSourcesNamespace(variables));
+    assertEquals(
+        "hop/integration-tests/sources", DvCatalogNamespaces.projectSourcesNamespace(variables));
   }
 
   @Test
   void projectSourcesNamespaceDefaultsWhenProjectHomeUnset() {
-    assertEquals("hop/project/sources", DvCatalogNamespaces.projectSourcesNamespace(new Variables()));
+    assertEquals(
+        "hop/project/sources", DvCatalogNamespaces.projectSourcesNamespace(new Variables()));
   }
 }

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics.live;
 
 import java.util.ArrayList;
@@ -79,8 +77,7 @@ final class UpdateRunLiveSnapshotBuilder {
     }
 
     if (executionFinished && overallState != UpdateRunLiveState.FAILED) {
-      overallState =
-          executionErrors > 0 ? UpdateRunLiveState.FAILED : UpdateRunLiveState.COMPLETED;
+      overallState = executionErrors > 0 ? UpdateRunLiveState.FAILED : UpdateRunLiveState.COMPLETED;
     }
 
     UpdateRunLiveBottleneck bottleneck = UpdateRunLiveClassifier.classifyRun(pipelines);

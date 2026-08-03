@@ -13,16 +13,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.modelgraph;
 
 import org.apache.hop.core.gui.IGc;
-import org.apache.hop.core.gui.IGc.EFont;
 import org.apache.hop.core.gui.IGc.EColor;
+import org.apache.hop.core.gui.IGc.EFont;
 import org.apache.hop.core.gui.Point;
-import org.apache.hop.core.svg.SvgFile;
 import org.apache.hop.core.util.Utils;
 
 /** Shared table-card layout metrics and drawing helpers for model graph painters. */
@@ -37,11 +34,7 @@ public final class ModelGraphTableCardLayout {
   public record BoxSize(int width, int height) {}
 
   public static BoxSize computeBoxSize(
-      IGc gc,
-      String name,
-      String secondaryLine,
-      String typeLabel,
-      String extraLineBelowType) {
+      IGc gc, String name, String secondaryLine, String typeLabel, String extraLineBelowType) {
     String resolvedName = Utils.isEmpty(name) ? "?" : name;
     String resolvedType = Utils.isEmpty(typeLabel) ? "" : typeLabel;
     String resolvedSecondary = Utils.isEmpty(secondaryLine) ? "" : secondaryLine;
@@ -59,8 +52,7 @@ public final class ModelGraphTableCardLayout {
 
     int textColumnWidth = Math.max(nameExtent.x, secondaryExtent.x);
     int textColumnHeight =
-        nameExtent.y
-            + (secondaryExtent.y > 0 ? SECONDARY_LABEL_GAP + secondaryExtent.y : 0);
+        nameExtent.y + (secondaryExtent.y > 0 ? SECONDARY_LABEL_GAP + secondaryExtent.y : 0);
     int leftColumnHeight = ICON_SIZE + MARGIN + typeExtent.y;
     if (extraExtent.y > 0) {
       leftColumnHeight += SECONDARY_LABEL_GAP + extraExtent.y;
@@ -95,24 +87,24 @@ public final class ModelGraphTableCardLayout {
   }
 
   public static void drawSvgIcon(
-      IGc gc,
-      ClassLoader classLoader,
-      String imagePath,
-      int boxX,
-      int boxY,
-      float magnification) {
-    try {
-      SvgFile svgFile = new SvgFile(imagePath, classLoader);
-      gc.drawImage(
-          svgFile, boxX + MARGIN, boxY + MARGIN, ICON_SIZE, ICON_SIZE, magnification, 0);
-    } catch (Exception e) {
+      IGc gc, ClassLoader classLoader, String imagePath, int boxX, int boxY, float magnification) {
+    boolean drawn =
+        ModelGraphSvgIconCache.drawIcon(
+            gc,
+            classLoader,
+            imagePath,
+            boxX + MARGIN,
+            boxY + MARGIN,
+            ICON_SIZE,
+            ICON_SIZE,
+            magnification);
+    if (!drawn) {
       gc.setBackground(EColor.BLUE);
       gc.fillRectangle(boxX + MARGIN, boxY + MARGIN, ICON_SIZE, ICON_SIZE);
     }
   }
 
-  public static Point drawName(
-      IGc gc, String name, int boxX, int boxY, boolean underline) {
+  public static Point drawName(IGc gc, String name, int boxX, int boxY, boolean underline) {
     gc.setFont(EFont.GRAPH);
     gc.setForeground(EColor.BLACK);
     String resolvedName = Utils.isEmpty(name) ? "?" : name;
@@ -126,7 +118,8 @@ public final class ModelGraphTableCardLayout {
     return extent;
   }
 
-  public static void drawSecondaryLine(IGc gc, String secondaryLine, int boxX, int boxY, Point nameExtent) {
+  public static void drawSecondaryLine(
+      IGc gc, String secondaryLine, int boxX, int boxY, Point nameExtent) {
     if (Utils.isEmpty(secondaryLine)) {
       return;
     }

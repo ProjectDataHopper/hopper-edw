@@ -13,12 +13,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -32,7 +29,9 @@ import org.apache.hop.catalog.discovery.RecordDefinitionCatalogRefreshSupport;
 import org.apache.hop.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.apache.hop.catalog.model.CatalogSourceField;
 import org.apache.hop.catalog.model.RecordDefinition;
+import org.apache.hop.catalog.model.RecordDefinitionKey;
 import org.apache.hop.catalog.registry.RecordDefinitionRegistry;
+import org.apache.hop.catalog.versioning.CatalogVersionService;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.database.Database;
 import org.apache.hop.core.database.DatabaseMeta;
@@ -45,16 +44,14 @@ import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.row.value.ValueMetaString;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.datavault.metadata.DvDdlSupport;
-import org.apache.hop.datavault.metadata.businessvault.BvTargetDatabaseSupport;
-import org.apache.hop.datavault.metadata.dimensional.DmTargetDatabaseSupport;
 import org.apache.hop.datavault.ai.DvAiProposal;
 import org.apache.hop.datavault.ai.DvAiProposalApplier;
 import org.apache.hop.datavault.catalog.DvSourceFieldSupport;
 import org.apache.hop.datavault.hopgui.resourcedefinition.ResourceDefinitionModelNavigationSupport;
-import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DataVaultConfiguration;
+import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DvDataTypeSupport;
+import org.apache.hop.datavault.metadata.DvDdlSupport;
 import org.apache.hop.datavault.metadata.DvHub;
 import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.DvSpecialRecordSupport;
@@ -62,16 +59,14 @@ import org.apache.hop.datavault.metadata.IDvTable;
 import org.apache.hop.datavault.metadata.SatelliteAttribute;
 import org.apache.hop.datavault.metadata.SourceField;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
-import org.apache.hop.datavault.metadata.businessvault.BvScd2Table;
+import org.apache.hop.datavault.metadata.businessvault.BvTargetDatabaseSupport;
 import org.apache.hop.datavault.metadata.businessvault.IBvTable;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
+import org.apache.hop.datavault.metadata.dimensional.DmTargetDatabaseSupport;
 import org.apache.hop.datavault.metadata.dimensional.IDmTable;
 import org.apache.hop.datavault.resourcedefinition.RemediationDdlWorkflowSupport.GeneratedArtifacts;
 import org.apache.hop.datavault.resourcedefinition.RemediationDdlWorkflowSupport.TableDdl;
-import org.apache.hop.catalog.versioning.CatalogVersionService;
-import org.apache.hop.catalog.model.RecordDefinitionKey;
 import org.apache.hop.datavault.resourcedefinition.SchemaRemediationArtifactsSupport.RemediationPackage;
-import org.apache.hop.datavault.resourcedefinition.ValidationReport.ProposalType;
 import org.apache.hop.datavault.resourcedefinition.ValidationReport.RecordDefinitionValidation;
 import org.apache.hop.datavault.resourcedefinition.ValidationReport.RemediationProposal;
 import org.apache.hop.datavault.resourcedefinition.ValidationReport.ValidationIssue;
@@ -177,7 +172,7 @@ public final class RemediationProposalApplySupport {
     try {
       return switch (context.proposal().type()) {
         case REFRESH_CATALOG_CONTRACT -> applyRefreshCatalogContract(context);
-        // Legacy type: same as expand models/DDL from catalog — never rewrites the catalog.
+          // Legacy type: same as expand models/DDL from catalog — never rewrites the catalog.
         case UPDATE_TARGET_COLUMN_LENGTH -> applyExpandModelsFromCatalog(context);
         case ALIGN_MODELS_TO_BASELINE -> applyExpandModelsFromCatalog(context);
         case IGNORE_SOURCE_DRIFT -> applyIgnoreSourceDrift(context);
@@ -212,12 +207,8 @@ public final class RemediationProposalApplySupport {
         RecordDefinitionCatalogRefreshSupport.preview(
             definition, context.variables(), context.metadataProvider());
     RecordDefinitionCatalogRefreshSupport.applyDiscoveredFields(
-        definition,
-        preview.discoveredFields(),
-        new Date(),
-        preview.physicalSchemaId());
-    ValidationIssueSupport.pruneStaleAcknowledgements(
-        definition, preview.diff(), null);
+        definition, preview.discoveredFields(), new Date(), preview.physicalSchemaId());
+    ValidationIssueSupport.pruneStaleAcknowledgements(definition, preview.diff(), null);
     RecordDefinitionRegistry.getInstance()
         .update(
             context.validation().catalogConnection(),
@@ -254,8 +245,7 @@ public final class RemediationProposalApplySupport {
               PKG, "RemediationProposalApplySupport.Error.MissingBaselineVersion", fieldName));
     }
 
-    RecordDefinitionKey key =
-        context.validation() != null ? context.validation().key() : null;
+    RecordDefinitionKey key = context.validation() != null ? context.validation().key() : null;
     if (key == null && context.definition() != null) {
       key = context.definition().getKey();
     }
@@ -281,8 +271,7 @@ public final class RemediationProposalApplySupport {
                             context.baselineVersionTag())));
 
     SourceField baselineField =
-        BaselineContractSupport.findField(
-            BaselineContractSupport.fieldsOf(baselineDef), fieldName);
+        BaselineContractSupport.findField(BaselineContractSupport.fieldsOf(baselineDef), fieldName);
     if (baselineField == null || Utils.isEmpty(baselineField.getLength())) {
       throw new HopException(
           BaseMessages.getString(
@@ -336,8 +325,7 @@ public final class RemediationProposalApplySupport {
     // Always use the working catalog definition loaded for this issue — never live discovery.
     RecordDefinition catalogDef = context.definition();
     if (catalogDef == null) {
-      RecordDefinitionKey key =
-          context.validation() != null ? context.validation().key() : null;
+      RecordDefinitionKey key = context.validation() != null ? context.validation().key() : null;
       String catalogConnection =
           context.validation() != null ? context.validation().catalogConnection() : null;
       catalogDef =
@@ -350,8 +338,7 @@ public final class RemediationProposalApplySupport {
           BaseMessages.getString(PKG, "RemediationProposalApplySupport.Error.MissingDefinition"));
     }
     SourceField catalogField =
-        BaselineContractSupport.findField(
-            BaselineContractSupport.fieldsOf(catalogDef), fieldName);
+        BaselineContractSupport.findField(BaselineContractSupport.fieldsOf(catalogDef), fieldName);
     if (catalogField == null) {
       throw new HopException(
           BaseMessages.getString(
@@ -426,7 +413,8 @@ public final class RemediationProposalApplySupport {
       if (model != null && model.hasChanged()) {
         ResourceDefinitionModelPersistenceSupport.saveDataVaultModel(
             model, context.variables(), context.metadataProvider());
-        reportLines.add("Saved Data Vault model " + Const.NVL(model.getFilename(), model.getName()));
+        reportLines.add(
+            "Saved Data Vault model " + Const.NVL(model.getFilename(), model.getName()));
       }
     }
 
@@ -597,7 +585,8 @@ public final class RemediationProposalApplySupport {
       try {
         collectTargetDdl(ddlByTable, model, satellite, context);
       } catch (HopException e) {
-        reportLines.add("DDL generation warning for " + satellite.getName() + ": " + e.getMessage());
+        reportLines.add(
+            "DDL generation warning for " + satellite.getName() + ": " + e.getMessage());
       }
     }
 
@@ -615,11 +604,7 @@ public final class RemediationProposalApplySupport {
             + "-apply-ddl";
     GeneratedArtifacts artifacts =
         RemediationDdlWorkflowSupport.writeSqlAndWorkflowForTables(
-            packageFolder,
-            baseName,
-            tableDdls,
-            context.variables(),
-            context.metadataProvider());
+            packageFolder, baseName, tableDdls, context.variables(), context.metadataProvider());
     reportLines.add(
         "Workflow: "
             + artifacts.workflowFilename()
@@ -678,8 +663,7 @@ public final class RemediationProposalApplySupport {
     if (!Utils.isEmpty(discoveredField.getPrecision())
         && !discoveredField.getPrecision().equals(Const.NVL(attribute.getPrecision(), ""))) {
       // Precision: take the larger absolute value when both numeric.
-      String prec =
-          preferLongerLength(attribute.getPrecision(), discoveredField.getPrecision());
+      String prec = preferLongerLength(attribute.getPrecision(), discoveredField.getPrecision());
       if (!Utils.isEmpty(prec) && !prec.equals(Const.NVL(attribute.getPrecision(), ""))) {
         attribute.setPrecision(prec);
         changed = true;
@@ -737,9 +721,7 @@ public final class RemediationProposalApplySupport {
       return null;
     }
     for (SourceField field : fields) {
-      if (field != null
-          && field.getName() != null
-          && fieldName.equalsIgnoreCase(field.getName())) {
+      if (field != null && field.getName() != null && fieldName.equalsIgnoreCase(field.getName())) {
         return field;
       }
     }
@@ -754,9 +736,7 @@ public final class RemediationProposalApplySupport {
       return null;
     }
     for (CatalogSourceField field : definition.getDvSource().getFields()) {
-      if (field != null
-          && field.getName() != null
-          && fieldName.equalsIgnoreCase(field.getName())) {
+      if (field != null && field.getName() != null && fieldName.equalsIgnoreCase(field.getName())) {
         return field.getLength();
       }
     }
@@ -777,9 +757,7 @@ public final class RemediationProposalApplySupport {
     }
     boolean found = false;
     for (CatalogSourceField field : fields) {
-      if (field != null
-          && field.getName() != null
-          && fieldName.equalsIgnoreCase(field.getName())) {
+      if (field != null && field.getName() != null && fieldName.equalsIgnoreCase(field.getName())) {
         field.setLength(length);
         found = true;
         break;
@@ -808,8 +786,7 @@ public final class RemediationProposalApplySupport {
     }
     try {
       for (String ddl :
-          satellite.generateUpdateDdl(
-              context.metadataProvider(), context.variables(), model)) {
+          satellite.generateUpdateDdl(context.metadataProvider(), context.variables(), model)) {
         RemediationDdlWorkflowSupport.addTableStatement(
             ddlByTable, targetDatabaseMeta.getName(), satellite.getName(), ddl);
       }
@@ -945,7 +922,8 @@ public final class RemediationProposalApplySupport {
       }
     }
     if (dvModel == null) {
-      throw new HopException("Data Vault model required for BV DDL of " + target.tableElementName());
+      throw new HopException(
+          "Data Vault model required for BV DDL of " + target.tableElementName());
     }
     String connection =
         !Utils.isEmpty(target.connectionName())
@@ -1044,8 +1022,7 @@ public final class RemediationProposalApplySupport {
       // Layout may use different casing; scan case-insensitively.
       for (int i = 0; i < forced.size(); i++) {
         IValueMeta candidate = forced.getValueMeta(i);
-        if (candidate != null
-            && target.targetFieldName().equalsIgnoreCase(candidate.getName())) {
+        if (candidate != null && target.targetFieldName().equalsIgnoreCase(candidate.getName())) {
           field = candidate;
           break;
         }
@@ -1077,8 +1054,7 @@ public final class RemediationProposalApplySupport {
               + ")");
     }
 
-    String tableName =
-        Const.NVL(target.physicalTableName(), target.tableElementName());
+    String tableName = Const.NVL(target.physicalTableName(), target.tableElementName());
     SimpleLoggingObject logging =
         new SimpleLoggingObject(
             "RemediationProposalApplySupport.generateDdlWithForcedFieldLength",
@@ -1170,9 +1146,7 @@ public final class RemediationProposalApplySupport {
           BaseMessages.getString(PKG, "RemediationProposalApplySupport.Error.MissingDefinition"));
     }
     for (CatalogSourceField field : fields) {
-      if (field != null
-          && field.getName() != null
-          && fieldName.equalsIgnoreCase(field.getName())) {
+      if (field != null && field.getName() != null && fieldName.equalsIgnoreCase(field.getName())) {
         field.setSourceDataType(sourceDataType);
         return;
       }
@@ -1218,7 +1192,8 @@ public final class RemediationProposalApplySupport {
             "attributeNames",
             Utils.isEmpty(fieldName) ? "" : fieldName));
 
-    DvAiProposalApplier.apply(model, List.of(proposal), context.metadataProvider(), context.variables());
+    DvAiProposalApplier.apply(
+        model, List.of(proposal), context.metadataProvider(), context.variables());
     ResourceDefinitionModelPersistenceSupport.saveDataVaultModel(
         model, context.variables(), context.metadataProvider());
 
@@ -1253,9 +1228,7 @@ public final class RemediationProposalApplySupport {
     if (!(table instanceof DvSatellite satellite)) {
       throw new HopException(
           BaseMessages.getString(
-              PKG,
-              "RemediationProposalApplySupport.Error.NotSatellite",
-              usage.modelElementName()));
+              PKG, "RemediationProposalApplySupport.Error.NotSatellite", usage.modelElementName()));
     }
     if (findAttribute(satellite, fieldName) != null) {
       return new ApplyResult(
@@ -1337,9 +1310,7 @@ public final class RemediationProposalApplySupport {
         RecordDefinitionCatalogRefreshSupport.preview(
             definition, context.variables(), context.metadataProvider());
     for (SourceField field : preview.discoveredFields()) {
-      if (field != null
-          && field.getName() != null
-          && fieldName.equalsIgnoreCase(field.getName())) {
+      if (field != null && field.getName() != null && fieldName.equalsIgnoreCase(field.getName())) {
         return field;
       }
     }
@@ -1419,7 +1390,8 @@ public final class RemediationProposalApplySupport {
     if (hubToken.startsWith("HUB_")) {
       hubToken = hubToken.substring(4);
     }
-    String fieldToken = Utils.isEmpty(fieldName) ? "EXTRA" : fieldName.toUpperCase().replace(' ', '_');
+    String fieldToken =
+        Utils.isEmpty(fieldName) ? "EXTRA" : fieldName.toUpperCase().replace(' ', '_');
     return "SAT_" + hubToken + "_" + fieldToken;
   }
 

@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.Locale;
@@ -76,7 +75,8 @@ public final class DvSqlPhysicalTypeValidationSupport {
     }
 
     String sourceSqlType = normalizeSqlTypeName(sourceMeta.getOriginalColumnTypeName());
-    String targetSqlType = normalizeSqlTypeName(resolveTargetSqlType(targetMeta, targetDatabaseMeta));
+    String targetSqlType =
+        normalizeSqlTypeName(resolveTargetSqlType(targetMeta, targetDatabaseMeta));
     if (Utils.isEmpty(sourceSqlType) || Utils.isEmpty(targetSqlType)) {
       return;
     }

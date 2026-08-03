@@ -188,8 +188,9 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
   }
 
   /**
-   * Default visibility of the coach panel when the user has never toggled it for this file. DV/BV/DM
-   * default to visible; source models override to hidden until there is a clear coach use-case.
+   * Default visibility of the coach panel when the user has never toggled it for this file.
+   * DV/BV/DM default to visible; source models override to hidden until there is a clear coach
+   * use-case.
    */
   protected boolean defaultCoachPanelVisible() {
     return true;

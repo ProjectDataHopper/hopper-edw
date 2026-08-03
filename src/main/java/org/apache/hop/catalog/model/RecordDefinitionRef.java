@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.catalog.model;
 
 import lombok.Getter;
@@ -44,8 +42,7 @@ public class RecordDefinitionRef {
     this.type = type;
   }
 
-  public static RecordDefinitionRef of(
-      String catalogConnectionName, RecordDefinition definition) {
+  public static RecordDefinitionRef of(String catalogConnectionName, RecordDefinition definition) {
     RecordDefinitionRef ref = new RecordDefinitionRef();
     ref.setCatalogConnectionName(catalogConnectionName);
     ref.setKey(definition.getKey());

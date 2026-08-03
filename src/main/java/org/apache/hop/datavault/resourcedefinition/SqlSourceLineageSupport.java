@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import java.util.LinkedHashMap;
@@ -58,7 +57,8 @@ public final class SqlSourceLineageSupport {
         names.add(table.toLowerCase(Locale.ROOT));
       }
     }
-    // Fallback: generic identifiers (may include column names; callers filter against known tables).
+    // Fallback: generic identifiers (may include column names; callers filter against known
+    // tables).
     if (names.isEmpty()) {
       Matcher id = SQL_IDENTIFIER.matcher(sql);
       while (id.find()) {
@@ -126,43 +126,44 @@ public final class SqlSourceLineageSupport {
     }
     return switch (token.toLowerCase(Locale.ROOT)) {
       case "select",
-          "from",
-          "where",
-          "join",
-          "inner",
-          "left",
-          "right",
-          "outer",
-          "full",
-          "cross",
-          "on",
-          "and",
-          "or",
-          "as",
-          "group",
-          "order",
-          "by",
-          "having",
-          "union",
-          "all",
-          "distinct",
-          "limit",
-          "offset",
-          "case",
-          "when",
-          "then",
-          "else",
-          "end",
-          "with",
-          "in",
-          "not",
-          "null",
-          "is",
-          "between",
-          "like",
-          "exists",
-          "true",
-          "false" -> true;
+              "from",
+              "where",
+              "join",
+              "inner",
+              "left",
+              "right",
+              "outer",
+              "full",
+              "cross",
+              "on",
+              "and",
+              "or",
+              "as",
+              "group",
+              "order",
+              "by",
+              "having",
+              "union",
+              "all",
+              "distinct",
+              "limit",
+              "offset",
+              "case",
+              "when",
+              "then",
+              "else",
+              "end",
+              "with",
+              "in",
+              "not",
+              "null",
+              "is",
+              "between",
+              "like",
+              "exists",
+              "true",
+              "false" ->
+          true;
       default -> false;
     };
   }

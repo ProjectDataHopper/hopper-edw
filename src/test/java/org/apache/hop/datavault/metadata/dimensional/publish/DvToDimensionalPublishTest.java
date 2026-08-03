@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional.publish;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -82,7 +80,8 @@ class DvToDimensionalPublishTest {
         dimCustomer.getAttributesOrEmpty().stream()
             .map(attr -> attr.getFieldName())
             .collect(Collectors.toSet()));
-    assertEquals(DmScdUpdatePolicy.TYPE2, dimCustomer.getAttributesOrEmpty().get(0).getScdUpdatePolicy());
+    assertEquals(
+        DmScdUpdatePolicy.TYPE2, dimCustomer.getAttributesOrEmpty().get(0).getScdUpdatePolicy());
     assertTrue(dimCustomer.getSourceOrDefault().getSourceSql().contains("hub_customer"));
 
     DmDimension dimProduct = findDimension(published, "dim_product");

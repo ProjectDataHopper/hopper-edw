@@ -13,14 +13,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.file.IHasFilename;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.datavault.hopgui.file.businessvault.HopBusinessVaultFileType;
 import org.apache.hop.datavault.hopgui.file.dimensional.HopDimensionalFileType;
 import org.apache.hop.datavault.hopgui.file.vault.HopVaultFileType;
@@ -32,7 +31,6 @@ import org.apache.hop.datavault.metadata.executionmap.ExecutionMapDocument;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapEdgeType;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapNode;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapNodeType;
-import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.ITransformMeta;
@@ -80,7 +78,8 @@ public final class ReferencedObjectResolver {
         return;
       }
     } catch (Exception e) {
-      context.addWarning("Failed to read referenced objects for " + pluginId + ": " + e.getMessage());
+      context.addWarning(
+          "Failed to read referenced objects for " + pluginId + ": " + e.getMessage());
       return;
     }
 
@@ -146,8 +145,7 @@ public final class ReferencedObjectResolver {
           String dvLabel = "effective-dv-from-references";
           if (!Utils.isEmpty(dvModel.getFilename())) {
             dvLabel =
-                ExecutionMapPathSupport.toStoredPath(
-                    dvModel.getFilename(), context.getVariables());
+                ExecutionMapPathSupport.toStoredPath(dvModel.getFilename(), context.getVariables());
           }
           String dvNodeId =
               addModelNode(context, modelNodeId, ExecutionMapNodeType.DATA_VAULT_MODEL, dvModel);
@@ -194,7 +192,8 @@ public final class ReferencedObjectResolver {
       String filename = loaded.getFilename();
       String lower = filename.toLowerCase();
       if (lower.endsWith(".hwf")) {
-        String workflowNodeId = WorkflowCrawler.crawlWorkflow(context, filename, null, false, fromNodeId);
+        String workflowNodeId =
+            WorkflowCrawler.crawlWorkflow(context, filename, null, false, fromNodeId);
         context.addEdge(ExecutionMapEdgeType.REFERENCES, fromNodeId, workflowNodeId, description);
       } else if (lower.endsWith(".hpl")) {
         String pipelineNodeId = resolvePipelineFile(context, fromNodeId, filename);
@@ -261,18 +260,18 @@ public final class ReferencedObjectResolver {
     return "artifact";
   }
 
-  public static DataVaultModel loadDataVaultModel(
-      String path, ExecutionMapContext context) throws HopException {
+  public static DataVaultModel loadDataVaultModel(String path, ExecutionMapContext context)
+      throws HopException {
     return loadModel(path, HopVaultFileType.XML_TAG, DataVaultModel.class, context);
   }
 
-  public static BusinessVaultModel loadBusinessVaultModel(
-      String path, ExecutionMapContext context) throws HopException {
+  public static BusinessVaultModel loadBusinessVaultModel(String path, ExecutionMapContext context)
+      throws HopException {
     return loadModel(path, HopBusinessVaultFileType.XML_TAG, BusinessVaultModel.class, context);
   }
 
-  public static DimensionalModel loadDimensionalModel(
-      String path, ExecutionMapContext context) throws HopException {
+  public static DimensionalModel loadDimensionalModel(String path, ExecutionMapContext context)
+      throws HopException {
     return loadModel(path, HopDimensionalFileType.XML_TAG, DimensionalModel.class, context);
   }
 
@@ -286,8 +285,7 @@ public final class ReferencedObjectResolver {
         rootNode = document.getDocumentElement();
       }
       T model = type.getDeclaredConstructor().newInstance();
-      XmlMetadataUtil.deSerializeFromXml(
-          rootNode, type, model, context.getMetadataProvider());
+      XmlMetadataUtil.deSerializeFromXml(rootNode, type, model, context.getMetadataProvider());
       if (model instanceof DataVaultModel dataVaultModel) {
         dataVaultModel.setFilename(resolvedPath);
       } else if (model instanceof BusinessVaultModel businessVaultModel) {

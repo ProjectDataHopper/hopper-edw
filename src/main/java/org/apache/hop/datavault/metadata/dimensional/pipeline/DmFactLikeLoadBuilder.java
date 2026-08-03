@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional.pipeline;
 
 import org.apache.hop.core.exception.HopException;
@@ -69,8 +67,7 @@ public final class DmFactLikeLoadBuilder {
               metadataProvider,
               factLike.getDimensionRolesOrEmpty());
     } catch (HopException e) {
-      throw new HopException(
-          "Table " + factLike.getName() + ": " + e.getMessage(), e);
+      throw new HopException("Table " + factLike.getName() + ": " + e.getMessage(), e);
     }
 
     IRowMeta targetLayout = factLike.getTargetTableLayout(metadataProvider, variables, model);

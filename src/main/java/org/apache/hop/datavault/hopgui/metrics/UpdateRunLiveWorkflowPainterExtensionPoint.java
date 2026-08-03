@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.metrics;
 
 import org.apache.hop.core.exception.HopException;
@@ -30,7 +28,8 @@ import org.apache.hop.workflow.WorkflowPainter;
     id = "UpdateRunLiveWorkflowPainterExtensionPoint",
     extensionPointId = "WorkflowPainterEnd",
     description = "Draws live update status on executing DV/BV/DM update workflow actions")
-public class UpdateRunLiveWorkflowPainterExtensionPoint implements IExtensionPoint<WorkflowPainter> {
+public class UpdateRunLiveWorkflowPainterExtensionPoint
+    implements IExtensionPoint<WorkflowPainter> {
 
   @Override
   public void callExtensionPoint(ILogChannel log, IVariables variables, WorkflowPainter painter)

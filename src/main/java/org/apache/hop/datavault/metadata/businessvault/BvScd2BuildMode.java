@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import lombok.Getter;
@@ -27,11 +25,9 @@ import org.apache.hop.metadata.api.IEnumHasCodeAndDescription;
 @Getter
 public enum BvScd2BuildMode implements IEnumHasCodeAndDescription {
   FULL_REBUILD(
-      "FULL_REBUILD",
-      BaseMessages.getString(BvScd2BuildMode.class, "BvScd2BuildMode.FullRebuild")),
+      "FULL_REBUILD", BaseMessages.getString(BvScd2BuildMode.class, "BvScd2BuildMode.FullRebuild")),
   INCREMENTAL(
-      "INCREMENTAL",
-      BaseMessages.getString(BvScd2BuildMode.class, "BvScd2BuildMode.Incremental"));
+      "INCREMENTAL", BaseMessages.getString(BvScd2BuildMode.class, "BvScd2BuildMode.Incremental"));
 
   private final String code;
   private final String description;

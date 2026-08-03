@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.openlineage;
 
 import lombok.Builder;
@@ -31,13 +29,16 @@ public class OpenLineageExportOptions {
   @Builder.Default private final boolean includeDm = true;
   @Builder.Default private final boolean includeColumnLineage = true;
   @Builder.Default private final boolean includeOperationalMetrics = false;
-  @Builder.Default private final OpenLineageDestinationMode destinationMode = OpenLineageDestinationMode.FILE;
+
+  @Builder.Default
+  private final OpenLineageDestinationMode destinationMode = OpenLineageDestinationMode.FILE;
 
   private final String outputFolder;
   private final String httpUrl;
   private final String httpApiKeyHeader;
   private final String httpApiKey;
   private final String jobNamespace;
+
   /** When set, overrides Hop connection / catalog dataset namespaces for all datasets. */
   private final String datasetNamespace;
 

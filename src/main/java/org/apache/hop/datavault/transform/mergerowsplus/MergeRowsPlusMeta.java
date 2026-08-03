@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.transform.mergerowsplus;
 
 import java.util.ArrayList;
@@ -162,7 +160,8 @@ public class MergeRowsPlusMeta extends BaseTransformMeta<MergeRowsPlus, MergeRow
       throws HopTransformException {
     if (info != null) {
       if (alignInputLayouts && info.length == 2 && info[0] != null && info[1] != null) {
-        r.mergeRowMeta(MergeRowsPlusAlignment.buildSchemaMapping(info[0], info[1]).getOutputRowMeta(), name);
+        r.mergeRowMeta(
+            MergeRowsPlusAlignment.buildSchemaMapping(info[0], info[1]).getOutputRowMeta(), name);
       } else {
         boolean found = false;
         for (int i = 0; i < info.length && !found; i++) {
@@ -256,7 +255,8 @@ public class MergeRowsPlusMeta extends BaseTransformMeta<MergeRowsPlus, MergeRow
       cr =
           new CheckResult(
               ICheckResult.TYPE_RESULT_OK,
-              BaseMessages.getString(PKG, "MergeRowsPlusMeta.CheckResult.OneSourceTransformMissing"),
+              BaseMessages.getString(
+                  PKG, "MergeRowsPlusMeta.CheckResult.OneSourceTransformMissing"),
               transformMeta);
       remarks.add(cr);
     }
@@ -295,12 +295,14 @@ public class MergeRowsPlusMeta extends BaseTransformMeta<MergeRowsPlus, MergeRow
           cr =
               new CheckResult(
                   ICheckResult.TYPE_RESULT_ERROR,
-                  BaseMessages.getString(PKG, "MergeRowsPlusMeta.CheckResult.RowDefinitionNotMatch"),
+                  BaseMessages.getString(
+                      PKG, "MergeRowsPlusMeta.CheckResult.RowDefinitionNotMatch"),
                   transformMeta);
           remarks.add(cr);
         }
       }
-    } else if (referenceStream.getTransformName() != null && compareStream.getTransformName() != null) {
+    } else if (referenceStream.getTransformName() != null
+        && compareStream.getTransformName() != null) {
       cr =
           new CheckResult(
               ICheckResult.TYPE_RESULT_OK,

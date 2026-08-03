@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.sourcemodel;
 
 import java.util.Locale;
@@ -115,8 +114,7 @@ public enum SourceRelationshipMultiplicity implements IEnumHasCodeAndDescription
     if (child == null && parent == null) {
       return null;
     }
-    return new MultiplicityPair(
-        child != null ? child : UNKNOWN, parent != null ? parent : UNKNOWN);
+    return new MultiplicityPair(child != null ? child : UNKNOWN, parent != null ? parent : UNKNOWN);
   }
 
   private static SourceRelationshipMultiplicity parseToken(String token) {

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.catalog;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,8 +40,7 @@ class CatalogDvSourceMapperIcebergTest {
   void mapsIcebergCatalogDefinitionToDataVaultSource() throws Exception {
     RecordDefinition definition = icebergRecordDefinition();
 
-    DataVaultSource source =
-        CatalogDvSourceMapper.toDataVaultSource(definition, new Variables());
+    DataVaultSource source = CatalogDvSourceMapper.toDataVaultSource(definition, new Variables());
 
     assertEquals("CRM-customer-iceberg", source.getName());
     assertEquals(DvSourceDeliveryType.FULL_SNAPSHOT, source.getDeliveryTypeOrDefault());
@@ -89,17 +86,15 @@ class CatalogDvSourceMapperIcebergTest {
 
   private static RecordDefinition icebergRecordDefinition() {
     RecordDefinition definition = new RecordDefinition();
-    definition.setKey(new RecordDefinitionKey("hop/integration-tests/sources", "CRM-customer-iceberg"));
+    definition.setKey(
+        new RecordDefinitionKey("hop/integration-tests/sources", "CRM-customer-iceberg"));
     definition.setType(RecordDefinitionType.DV_SOURCE);
 
     DvSourceRecord dvSource = new DvSourceRecord();
     dvSource.setSourceType("ICEBERG");
     dvSource.setSourceIndicatorField("record_source");
     dvSource.setDeliveryType("FULL_SNAPSHOT");
-    dvSource.setFields(
-        List.of(
-            catalogField("customer_id", 5),
-            catalogField("record_source", 2)));
+    dvSource.setFields(List.of(catalogField("customer_id", 5), catalogField("record_source", 2)));
     definition.setDvSource(dvSource);
 
     PhysicalIcebergTableRef physicalIcebergTable = new PhysicalIcebergTableRef();

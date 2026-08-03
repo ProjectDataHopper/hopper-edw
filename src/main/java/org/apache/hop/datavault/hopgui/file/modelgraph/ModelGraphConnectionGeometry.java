@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.modelgraph;
 
 import org.apache.hop.core.gui.IGc;
@@ -176,11 +174,7 @@ public final class ModelGraphConnectionGeometry {
     if (gc == null || fromBounds == null || toBounds == null) {
       return;
     }
-    gc.drawLine(
-        fromBounds.centerX(),
-        fromBounds.centerY(),
-        toBounds.centerX(),
-        toBounds.centerY());
+    gc.drawLine(fromBounds.centerX(), fromBounds.centerY(), toBounds.centerX(), toBounds.centerY());
   }
 
   /** Draws a spline between the edge anchors on two table bounds. */

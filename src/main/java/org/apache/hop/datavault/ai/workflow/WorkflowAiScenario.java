@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai.workflow;
 
 import lombok.Getter;
@@ -26,10 +24,8 @@ import org.apache.hop.metadata.api.IEnumHasCodeAndDescription;
 
 @Getter
 public enum WorkflowAiScenario implements IEnumHasCodeAndDescription {
-  WORKFLOW_GENERAL(
-      "WORKFLOW_GENERAL", "WorkflowAiScenario.WorkflowGeneral", "workflow-general"),
-  ACTION_SELECTION(
-      "ACTION_SELECTION", "WorkflowAiScenario.ActionSelection", "action-selection"),
+  WORKFLOW_GENERAL("WORKFLOW_GENERAL", "WorkflowAiScenario.WorkflowGeneral", "workflow-general"),
+  ACTION_SELECTION("ACTION_SELECTION", "WorkflowAiScenario.ActionSelection", "action-selection"),
   WORKFLOW_ERROR_DIAGNOSIS(
       "WORKFLOW_ERROR_DIAGNOSIS",
       "WorkflowAiScenario.WorkflowErrorDiagnosis",

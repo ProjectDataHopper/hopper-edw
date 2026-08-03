@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -60,8 +59,7 @@ class RemediationProposalSupportTest {
             .noneMatch(p -> p.type() == ProposalType.UPDATE_TARGET_COLUMN_LENGTH),
         "must not offer catalog-rewriting accept-live");
     assertTrue(
-        issue.proposals().stream()
-            .noneMatch(p -> p.type() == ProposalType.IGNORE_SOURCE_DRIFT),
+        issue.proposals().stream().noneMatch(p -> p.type() == ProposalType.IGNORE_SOURCE_DRIFT),
         "must not offer catalog rewrite from version");
     assertTrue(
         issue.proposals().stream()
@@ -97,7 +95,8 @@ class RemediationProposalSupportTest {
 
     List<ValidationIssue> issues = RemediationProposalSupport.buildIssues(diff, usages, null);
     assertEquals(1, issues.size());
-    assertEquals(ProposalType.ALIGN_MODELS_TO_BASELINE, issues.getFirst().proposals().getFirst().type());
+    assertEquals(
+        ProposalType.ALIGN_MODELS_TO_BASELINE, issues.getFirst().proposals().getFirst().type());
     assertTrue(
         issues.getFirst().proposals().stream()
             .noneMatch(p -> p.type() == ProposalType.UPDATE_TARGET_COLUMN_LENGTH));

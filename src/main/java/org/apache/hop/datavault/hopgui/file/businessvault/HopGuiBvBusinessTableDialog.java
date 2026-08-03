@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.businessvault;
 
 import java.util.ArrayList;
@@ -243,7 +241,8 @@ public class HopGuiBvBusinessTableDialog {
     wSyncRefs.addListener(SWT.Selection, e -> syncRefsFromSqlUi());
 
     Button wPreviewSql = new Button(sqlComp, SWT.PUSH);
-    wPreviewSql.setText(BaseMessages.getString(PKG, "HopGuiBvBusinessTableDialog.PreviewSql.Label"));
+    wPreviewSql.setText(
+        BaseMessages.getString(PKG, "HopGuiBvBusinessTableDialog.PreviewSql.Label"));
     wPreviewSql.setToolTipText(
         BaseMessages.getString(PKG, "HopGuiBvBusinessTableDialog.PreviewSql.ToolTip"));
     PropsUi.setLook(wPreviewSql);
@@ -498,8 +497,7 @@ public class HopGuiBvBusinessTableDialog {
         TableItem item = new TableItem(wRefs.table, SWT.NONE);
         item.setText(1, Const.NVL(ref.getModelName(), ""));
         item.setText(2, Const.NVL(ref.getObjectName(), ""));
-        item.setText(
-            3, ref.getResolvedKind() != null ? ref.getResolvedKind().getCode() : "");
+        item.setText(3, ref.getResolvedKind() != null ? ref.getResolvedKind().getCode() : "");
         item.setText(4, Const.NVL(ref.getResolvedTableName(), ""));
         item.setText(5, Const.NVL(ref.getResolvedModelFilename(), ""));
       }
@@ -514,16 +512,14 @@ public class HopGuiBvBusinessTableDialog {
     target.setName(wName.getText());
     target.setTableName(wTableName.getText());
     target.setDescription(wDescription.getText());
-    target.setMaterialization(
-        BvSqlMaterialization.lookupDescription(wMaterialization.getText()));
+    target.setMaterialization(BvSqlMaterialization.lookupDescription(wMaterialization.getText()));
     target.setReferenceStyle(BvSqlReferenceStyle.lookupDescription(wReferenceStyle.getText()));
     target.setSqlQuery(wSqlQuery.getText());
     target.setSources(readSources());
     IHopMetadataProvider metadataProvider = HopGui.getInstance().getMetadataProvider();
     BvSqlRefResolver.syncRefsFromSql(
         target, businessVaultModel, dataVaultModel, variables, metadataProvider);
-    BvSqlRefResolver.ensureDvCanvasAliases(
-        businessVaultModel, target.getSqlRefs(), dataVaultModel);
+    BvSqlRefResolver.ensureDvCanvasAliases(businessVaultModel, target.getSqlRefs(), dataVaultModel);
     BvSqlRefResolver.ensureBvCanvasAliases(businessVaultModel, target.getSqlRefs());
   }
 

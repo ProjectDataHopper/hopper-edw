@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.vault;
 
 import java.util.ArrayList;
@@ -32,12 +30,15 @@ import org.apache.hop.core.gui.AreaOwner.AreaType;
 import org.apache.hop.core.gui.IGc;
 import org.apache.hop.core.gui.IGc.EFont;
 import org.apache.hop.core.gui.Point;
-import org.apache.hop.core.gui.Rectangle;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.catalog.DvSourceCatalogService;
+import org.apache.hop.datavault.hopgui.file.modelgraph.DvTableDisplaySupport;
+import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry;
+import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry.Bounds;
+import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphTableCardLayout;
+import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphTableNameHitArea;
 import org.apache.hop.datavault.metadata.DataVaultModel;
-import org.apache.hop.datavault.metadata.DvHub;
 import org.apache.hop.datavault.metadata.DvIntegrationSupport;
 import org.apache.hop.datavault.metadata.DvLink;
 import org.apache.hop.datavault.metadata.DvSatellite;
@@ -46,12 +47,6 @@ import org.apache.hop.datavault.metadata.DvTableReference;
 import org.apache.hop.datavault.metadata.DvTableReferenceSupport;
 import org.apache.hop.datavault.metadata.DvTableResolutionSupport;
 import org.apache.hop.datavault.metadata.DvTableType;
-import org.apache.hop.datavault.hopgui.file.modelgraph.DvTableDisplaySupport;
-import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry;
-import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry.Bounds;
-import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphTableCardLayout;
-import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphTableNameHitArea;
-
 import org.apache.hop.datavault.metadata.IDvTable;
 import org.apache.hop.i18n.BaseMessages;
 
@@ -329,7 +324,6 @@ public class DataVaultModelPainter extends BasePainter {
       }
     }
     gc.setTransform(0, 0, 1.0f);
-
   }
 
   private void drawTable(IDvTable table, int x, int y) {

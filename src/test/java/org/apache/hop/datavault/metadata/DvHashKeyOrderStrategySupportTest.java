@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -172,7 +171,8 @@ class DvHashKeyOrderStrategySupportTest {
     String body = "SELECT DISTINCT [hk], [a] FROM [lnk]";
     String applied = DvHashKeyOrderStrategySupport.applyToDistinctSelect(body, plan);
 
-    assertTrue(applied.startsWith("SELECT * FROM (SELECT DISTINCT [hk], [a] FROM [lnk]) hop_lhk_ord"));
+    assertTrue(
+        applied.startsWith("SELECT * FROM (SELECT DISTINCT [hk], [a] FROM [lnk]) hop_lhk_ord"));
     assertTrue(applied.contains("ORDER BY [hk] COLLATE Latin1_General_100_BIN2"));
   }
 

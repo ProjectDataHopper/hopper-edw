@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.workflow.actions.businessvaultupdate;
 
 import java.io.IOException;
@@ -50,18 +48,15 @@ import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
 import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.datavault.catalog.BvCatalogPublisher;
-import org.apache.hop.datavault.lineage.DdlLineageExplainSupport;
+import org.apache.hop.datavault.config.DvRunConfigurationSupport;
 import org.apache.hop.datavault.hopgui.file.businessvault.HopBusinessVaultFileType;
+import org.apache.hop.datavault.lineage.DdlLineageExplainSupport;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DvDdlSupport;
 import org.apache.hop.datavault.metadata.DvIntegerSettingValidationSupport;
 import org.apache.hop.datavault.metadata.DvModelBulkUpdateExecutionSupport;
-import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
-import org.apache.hop.datavault.metrics.DvUpdateMetricsCollector;
-import org.apache.hop.datavault.metrics.ExecutionMetricsProfileResolver;
-import org.apache.hop.datavault.metrics.ResolvedExecutionMetrics;
-import org.apache.hop.datavault.metrics.metadata.ExecutionMetricsProfileMeta;
 import org.apache.hop.datavault.metadata.DvTargetLoadMode;
+import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultConfiguration;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultDvModelResolver;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
@@ -69,16 +64,19 @@ import org.apache.hop.datavault.metadata.businessvault.BusinessVaultUpdateExecut
 import org.apache.hop.datavault.metadata.businessvault.BvGeneratedPipelineSupport;
 import org.apache.hop.datavault.metadata.businessvault.BvTargetDatabaseSupport;
 import org.apache.hop.datavault.metadata.businessvault.IBvTable;
+import org.apache.hop.datavault.metrics.DvUpdateMetricsCollector;
+import org.apache.hop.datavault.metrics.ExecutionMetricsProfileResolver;
+import org.apache.hop.datavault.metrics.ResolvedExecutionMetrics;
+import org.apache.hop.datavault.metrics.metadata.ExecutionMetricsProfileMeta;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.apache.hop.pipeline.PipelineMeta;
-import org.apache.hop.datavault.config.DvRunConfigurationSupport;
 import org.apache.hop.pipeline.config.PipelineRunConfiguration;
-import org.apache.hop.workflow.config.WorkflowRunConfiguration;
 import org.apache.hop.workflow.action.ActionBase;
 import org.apache.hop.workflow.action.IAction;
+import org.apache.hop.workflow.config.WorkflowRunConfiguration;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -345,9 +343,7 @@ public class ActionBusinessVaultUpdate extends ActionBase implements Cloneable, 
       int totalErrors = 0;
       String realDdlSqlFilename = resolve(ddlSqlFilename);
       boolean processDdl =
-          updateTargetDatabaseStructure
-              || failIfDdlNeeded
-              || !Utils.isEmpty(realDdlSqlFilename);
+          updateTargetDatabaseStructure || failIfDdlNeeded || !Utils.isEmpty(realDdlSqlFilename);
 
       if (processDdl) {
         boolean ddlPhaseFailed = false;
@@ -407,15 +403,11 @@ public class ActionBusinessVaultUpdate extends ActionBase implements Cloneable, 
               writeDdlToFile(ddlStatements, targetDatabase, realDdlSqlFilename);
               logBasic(
                   BaseMessages.getString(
-                      PKG,
-                      "ActionBusinessVaultUpdate.Log.DdlSavedToFile",
-                      realDdlSqlFilename));
+                      PKG, "ActionBusinessVaultUpdate.Log.DdlSavedToFile", realDdlSqlFilename));
             } catch (Exception e) {
               logError(
                   BaseMessages.getString(
-                      PKG,
-                      "ActionBusinessVaultUpdate.Error.DdlSaveFailed",
-                      realDdlSqlFilename),
+                      PKG, "ActionBusinessVaultUpdate.Error.DdlSaveFailed", realDdlSqlFilename),
                   e);
               totalErrors++;
               success = false;
@@ -528,8 +520,7 @@ public class ActionBusinessVaultUpdate extends ActionBase implements Cloneable, 
                 table.getTableType()));
 
         List<PipelineMeta> pipelineMetas =
-            table.generateBuildPipelines(
-                getMetadataProvider(), getVariables(), bvModel, dvModel);
+            table.generateBuildPipelines(getMetadataProvider(), getVariables(), bvModel, dvModel);
 
         if (pipelineMetas == null || pipelineMetas.isEmpty()) {
           logError(

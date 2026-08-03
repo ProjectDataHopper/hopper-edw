@@ -13,17 +13,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import java.util.Date;
 import java.util.List;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
-import org.apache.hop.datavault.metadata.DvUpdateExecutionSupport;
 import org.apache.hop.datavault.metadata.DataVaultModel;
+import org.apache.hop.datavault.metadata.DvUpdateExecutionSupport;
 import org.apache.hop.datavault.metadata.IDvTable;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultUpdateExecutionSupport;
@@ -37,7 +35,6 @@ import org.apache.hop.datavault.metadata.executionmap.ExecutionMapEdgeType;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapNode;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapNodeType;
 import org.apache.hop.pipeline.PipelineMeta;
-
 
 /** Resolves statically generated pipelines from DV/BV/DM models during crawl. */
 public final class ModelPipelineResolver {
@@ -63,11 +60,7 @@ public final class ModelPipelineResolver {
         try {
           List<PipelineMeta> pipelines =
               table.generateUpdatePipelines(
-                  context.getMetadataProvider(),
-                  context.getVariables(),
-                  model,
-                  new Date(),
-                  null);
+                  context.getMetadataProvider(), context.getVariables(), model, new Date(), null);
           generatedCount += addGeneratedPipelines(context, modelNodeId, model.getName(), pipelines);
         } catch (Exception e) {
           context.addWarning(
@@ -189,7 +182,10 @@ public final class ModelPipelineResolver {
   }
 
   private static int addGeneratedPipelines(
-      ExecutionMapContext context, String modelNodeId, String modelName, List<PipelineMeta> pipelines)
+      ExecutionMapContext context,
+      String modelNodeId,
+      String modelName,
+      List<PipelineMeta> pipelines)
       throws HopException {
     if (pipelines == null || pipelines.isEmpty()) {
       return 0;
@@ -210,7 +206,10 @@ public final class ModelPipelineResolver {
               syntheticPath, pipelineMeta.getXml(context.getVariables())));
       context.addNode(generatedNode);
       context.addEdge(
-          ExecutionMapEdgeType.GENERATES, modelNodeId, generatedNode.getId(), pipelineMeta.getName());
+          ExecutionMapEdgeType.GENERATES,
+          modelNodeId,
+          generatedNode.getId(),
+          pipelineMeta.getName());
       ModelDatasetResolver.linkGeneratedPipeline(
           context, modelNodeId, generatedNode.getId(), pipelineMeta);
       count++;

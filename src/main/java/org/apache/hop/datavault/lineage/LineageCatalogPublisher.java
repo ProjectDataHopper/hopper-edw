@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.lineage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -79,7 +78,8 @@ public final class LineageCatalogPublisher {
       IHopMetadataProvider metadataProvider,
       String workflowName)
       throws HopException {
-    return publish(catalogConnectionName, snapshot, variables, metadataProvider, workflowName, null);
+    return publish(
+        catalogConnectionName, snapshot, variables, metadataProvider, workflowName, null);
   }
 
   public static PublishResult publish(
@@ -140,8 +140,7 @@ public final class LineageCatalogPublisher {
       } catch (Exception e) {
         errors++;
         if (log != null) {
-          log.logError(
-              "Failed to publish lineage for table '" + table.getLogicalName() + "'", e);
+          log.logError("Failed to publish lineage for table '" + table.getLogicalName() + "'", e);
         }
       }
     }
@@ -178,8 +177,10 @@ public final class LineageCatalogPublisher {
 
     Map<String, Object> compact = new LinkedHashMap<>();
     compact.put("id", snapshot.getId());
-    compact.put("capturedAt", snapshot.getCapturedAt() != null ? snapshot.getCapturedAt().getTime() : null);
-    compact.put("modelLayer", snapshot.getModelLayer() != null ? snapshot.getModelLayer().name() : null);
+    compact.put(
+        "capturedAt", snapshot.getCapturedAt() != null ? snapshot.getCapturedAt().getTime() : null);
+    compact.put(
+        "modelLayer", snapshot.getModelLayer() != null ? snapshot.getModelLayer().name() : null);
     compact.put("modelName", snapshot.getModelName());
     compact.put("modelFilename", snapshot.getModelFilename());
     compact.put("projectKey", snapshot.getProjectKey());
@@ -247,9 +248,7 @@ public final class LineageCatalogPublisher {
             CatalogCustomProperty.string(
                 table.getLayer() != null
                     ? table.getLayer().name()
-                    : (snapshot.getModelLayer() != null
-                        ? snapshot.getModelLayer().name()
-                        : "DV")));
+                    : (snapshot.getModelLayer() != null ? snapshot.getModelLayer().name() : "DV")));
     definition
         .getCustomProperties()
         .put(
@@ -264,12 +263,14 @@ public final class LineageCatalogPublisher {
         .getCustomProperties()
         .put(
             LineageCatalogNamespaces.PROP_TABLE_REASONS_JSON,
-            CatalogCustomProperty.string(JSON.writeValueAsString(reasonsToMaps(table.getReasons()))));
+            CatalogCustomProperty.string(
+                JSON.writeValueAsString(reasonsToMaps(table.getReasons()))));
     definition
         .getCustomProperties()
         .put(
             LineageCatalogNamespaces.PROP_SOURCES_JSON,
-            CatalogCustomProperty.string(JSON.writeValueAsString(sourcesToMaps(table.getSources()))));
+            CatalogCustomProperty.string(
+                JSON.writeValueAsString(sourcesToMaps(table.getSources()))));
     definition
         .getCustomProperties()
         .put(
@@ -335,9 +336,7 @@ public final class LineageCatalogPublisher {
       Map<String, Object> map = new LinkedHashMap<>();
       map.put("code", reason.getCode() != null ? reason.getCode().name() : null);
       map.put("message", reason.getMessage());
-      map.put(
-          "confidence",
-          reason.getConfidence() != null ? reason.getConfidence().name() : null);
+      map.put("confidence", reason.getConfidence() != null ? reason.getConfidence().name() : null);
       map.put("evidence", reason.getEvidence());
       list.add(map);
     }

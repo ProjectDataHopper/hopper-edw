@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.transform.junkdimension;
 
 import java.util.ArrayList;
@@ -55,9 +53,9 @@ import org.apache.hop.ui.core.widget.TableView;
 import org.apache.hop.ui.core.widget.TextVar;
 import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
-import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.ModifyListener;
@@ -122,7 +120,10 @@ public class JunkDimensionDialog extends BaseTransformDialog {
   private String[] tableFieldNames = new String[0];
 
   public JunkDimensionDialog(
-      Shell parent, IVariables variables, JunkDimensionMeta transformMeta, PipelineMeta pipelineMeta) {
+      Shell parent,
+      IVariables variables,
+      JunkDimensionMeta transformMeta,
+      PipelineMeta pipelineMeta) {
     super(parent, variables, transformMeta, pipelineMeta);
     input = transformMeta;
   }
@@ -149,12 +150,7 @@ public class JunkDimensionDialog extends BaseTransformDialog {
     backupChanged = input.hasChanged();
     databaseMeta = resolveDatabase(input.getConnectionName());
 
-    buildButtonBar()
-        .ok(e -> ok())
-        .get(e -> get())
-        .sql(e -> create())
-        .cancel(e -> cancel())
-        .build();
+    buildButtonBar().ok(e -> ok()).get(e -> get()).sql(e -> create()).cancel(e -> cancel()).build();
 
     wTabFolder = new CTabFolder(shell, SWT.BORDER);
     PropsUi.setLook(wTabFolder, Props.WIDGET_STYLE_TAB);
@@ -650,8 +646,7 @@ public class JunkDimensionDialog extends BaseTransformDialog {
             wHashCodeStrategy, DmJunkHashCodeStrategy.class, DmJunkHashCodeStrategy.INTEGER_LEGACY);
     boolean usesHashColumn = hashStrategy.usesHashColumn();
 
-    if (wUseSurrogateKeyAsHashCodeField != null
-        && !wUseSurrogateKeyAsHashCodeField.isDisposed()) {
+    if (wUseSurrogateKeyAsHashCodeField != null && !wUseSurrogateKeyAsHashCodeField.isDisposed()) {
       wUseSurrogateKeyAsHashCodeField.setEnabled(usesHashColumn);
       if (!usesHashColumn) {
         wUseSurrogateKeyAsHashCodeField.setSelection(false);
@@ -823,8 +818,7 @@ public class JunkDimensionDialog extends BaseTransformDialog {
     wTechnicalKeyOutputField.setText(Const.NVL(input.resolveTechnicalKeyOutputField(), ""));
     wHashField.setText(Const.NVL(input.getHashField(), ""));
 
-    EnumDialogSupport.selectCombo(
-        wSurrogateKeyStrategy, input.resolveJunkSurrogateKeyStrategy());
+    EnumDialogSupport.selectCombo(wSurrogateKeyStrategy, input.resolveJunkSurrogateKeyStrategy());
     wSurrogateKeySourceField.setText(Const.NVL(input.getSurrogateKeySourceField(), ""));
 
     DmJunkHashCodeStrategy hashStrategy = JunkDimensionHashSupport.resolveStrategy(input);
@@ -1031,9 +1025,7 @@ public class JunkDimensionDialog extends BaseTransformDialog {
                   BaseMessages.getString(
                       PKG, "JunkDimensionDialog.AvailableSchemas.Title", wConnection.getText()),
                   BaseMessages.getString(
-                      PKG,
-                      "JunkDimensionDialog.AvailableSchemas.Message",
-                      wConnection.getText()));
+                      PKG, "JunkDimensionDialog.AvailableSchemas.Message", wConnection.getText()));
           String d = dialog.open();
           if (d != null) {
             wSchema.setText(Const.NVL(d, ""));

@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import java.util.Date;
@@ -53,7 +51,8 @@ public final class ExecutionMapCrawler {
     if (Utils.isEmpty(rootArtifactPath)) {
       throw new HopException("Root artifact path is required");
     }
-    String resolvedPath = variables != null ? variables.resolve(rootArtifactPath) : rootArtifactPath;
+    String resolvedPath =
+        variables != null ? variables.resolve(rootArtifactPath) : rootArtifactPath;
     String lower = resolvedPath.toLowerCase();
     boolean isWorkflow = lower.endsWith(".hwf");
     boolean isPipeline = lower.endsWith(".hpl");
@@ -66,9 +65,7 @@ public final class ExecutionMapCrawler {
     // Store portable path; crawl still uses resolvedPath for I/O below.
     document.setRootArtifactPath(ExecutionMapPathSupport.toStoredPath(resolvedPath, variables));
     document.setRootArtifactType(
-        isWorkflow
-            ? ExecutionMapRootArtifactType.WORKFLOW
-            : ExecutionMapRootArtifactType.PIPELINE);
+        isWorkflow ? ExecutionMapRootArtifactType.WORKFLOW : ExecutionMapRootArtifactType.PIPELINE);
     document.setCrawledAt(new Date());
     document.setHopProject(ExecutionMapContext.resolveProjectKey(variables));
 

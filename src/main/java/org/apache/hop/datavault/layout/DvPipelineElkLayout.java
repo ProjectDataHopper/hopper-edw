@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.layout;
 
 import java.util.List;
@@ -23,9 +21,7 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.datavault.config.DataVaultConfigSingleton;
 import org.apache.hop.pipeline.PipelineMeta;
 
-/**
- * Applies {@link ElkLayout} to Hop {@link PipelineMeta} graphs using the Eclipse Layout Kernel.
- */
+/** Applies {@link ElkLayout} to Hop {@link PipelineMeta} graphs using the Eclipse Layout Kernel. */
 public final class DvPipelineElkLayout {
 
   private DvPipelineElkLayout() {}

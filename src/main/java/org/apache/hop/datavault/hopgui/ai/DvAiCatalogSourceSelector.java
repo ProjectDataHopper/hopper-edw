@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.ai;
 
 import java.util.ArrayList;
@@ -37,7 +35,9 @@ import org.apache.hop.ui.core.dialog.MessageBox;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
-/** Resolves the model catalog connection and lets the user pick record definitions for AI context. */
+/**
+ * Resolves the model catalog connection and lets the user pick record definitions for AI context.
+ */
 public final class DvAiCatalogSourceSelector {
 
   private static final Class<?> PKG = DvAiCatalogSourceSelector.class;
@@ -76,7 +76,8 @@ public final class DvAiCatalogSourceSelector {
       return List.of();
     }
     try {
-      String catalogConnection = ensureCatalogConnection(parent, model, variables, metadataProvider, onModelChanged);
+      String catalogConnection =
+          ensureCatalogConnection(parent, model, variables, metadataProvider, onModelChanged);
       if (catalogConnection == null) {
         return null;
       }

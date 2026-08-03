@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.quality.profile;
 
 import java.sql.ResultSet;
@@ -42,9 +40,10 @@ import org.apache.hop.quality.model.QualitySeverity;
  * SELECT/WITH-only SQL assertion runner for {@link DataQualityRuleType#SQL_ASSERTION}.
  *
  * <p>Not a sandbox — DB grants and trusted metadata authors are the real boundary. Security
- * controls are best-effort allowlist/denylist. MySQL executable comments ({@code /}{@code *!}…{@code
- * *}{@code /}) are rejected outright. Residual risk remains for non-executable comment-split
- * keywords, string-literal edge cases, and side-effecting functions ({@code pg_sleep}, etc.).
+ * controls are best-effort allowlist/denylist. MySQL executable comments ({@code /}{@code
+ * *!}…{@code *}{@code /}) are rejected outright. Residual risk remains for non-executable
+ * comment-split keywords, string-literal edge cases, and side-effecting functions ({@code
+ * pg_sleep}, etc.).
  *
  * <p>All expect modes request at most one JDBC row ({@code setQueryLimit(1)}); authors should still
  * include server-side {@code LIMIT} when practical — the limit only caps client/driver buffering.
@@ -52,8 +51,9 @@ import org.apache.hop.quality.model.QualitySeverity;
  * <p>Parse/security rejection, timeout, and SQL errors throw {@link HopException} (infra).
  * Expectation failures return findings.
  *
- * <p>Multi-statement rejection is a literal semicolon scan (a single trailing {@code ;} is allowed).
- * Semicolons inside string or dollar-quoted literals are false-rejected under this hard policy.
+ * <p>Multi-statement rejection is a literal semicolon scan (a single trailing {@code ;} is
+ * allowed). Semicolons inside string or dollar-quoted literals are false-rejected under this hard
+ * policy.
  */
 public final class SqlAssertionRunner {
 
@@ -73,8 +73,7 @@ public final class SqlAssertionRunner {
   /** JDBC max-rows cap for all expect modes (each only needs one row). */
   public static final int QUERY_ROW_LIMIT = 1;
 
-  private static final Pattern ALLOWLIST_START =
-      Pattern.compile("(?is)^\\s*(with|select)\\b");
+  private static final Pattern ALLOWLIST_START = Pattern.compile("(?is)^\\s*(with|select)\\b");
 
   private static final Pattern DENYLIST_TOKENS =
       Pattern.compile(
@@ -120,7 +119,8 @@ public final class SqlAssertionRunner {
 
     String rawSql = rule.parameter(DataQualityRule.PARAM_SQL);
     if (Utils.isEmpty(rawSql)) {
-      throw new HopException("SQL_ASSERTION rule '" + ruleLabel(rule) + "' is missing parameter sql");
+      throw new HopException(
+          "SQL_ASSERTION rule '" + ruleLabel(rule) + "' is missing parameter sql");
     }
 
     DatabaseMeta databaseMeta = loadDatabaseMeta(databaseMetaName, metadataProvider);
@@ -135,8 +135,7 @@ public final class SqlAssertionRunner {
     try {
       expect = normalizeExpect(rule.parameter(DataQualityRule.PARAM_EXPECT, EXPECT_ZERO_ROWS));
     } catch (IllegalArgumentException e) {
-      throw new HopException(
-          "SQL_ASSERTION rule '" + ruleLabel(rule) + "': " + e.getMessage(), e);
+      throw new HopException("SQL_ASSERTION rule '" + ruleLabel(rule) + "': " + e.getMessage(), e);
     }
     String expectValue = rule.parameter(DataQualityRule.PARAM_EXPECT_VALUE);
     if (EXPECT_SCALAR_EQ.equals(expect) && expectValue == null) {
@@ -223,8 +222,8 @@ public final class SqlAssertionRunner {
   /**
    * Best-effort SELECT/WITH allowlist and token denylist. Throws on rejection (infra).
    *
-   * <p>MySQL executable comments are rejected before any strip. Denylist is applied to both the
-   * raw SQL and the comment-stripped form so strip cannot hide tokens. Residual risk remains for
+   * <p>MySQL executable comments are rejected before any strip. Denylist is applied to both the raw
+   * SQL and the comment-stripped form so strip cannot hide tokens. Residual risk remains for
    * non-executable comment-split keywords and side-effecting functions.
    */
   public static void validateSelectOnly(String preparedSql, DataQualityRule rule)
@@ -252,8 +251,8 @@ public final class SqlAssertionRunner {
   }
 
   /**
-   * Reject MySQL versioned/executable comments that the engine would execute while a naive
-   * stripper would hide denylisted tokens from validation.
+   * Reject MySQL versioned/executable comments that the engine would execute while a naive stripper
+   * would hide denylisted tokens from validation.
    */
   public static void rejectMysqlExecutableComments(String sql, DataQualityRule rule)
       throws HopException {
@@ -262,9 +261,7 @@ public final class SqlAssertionRunner {
     }
     if (MYSQL_EXECUTABLE_COMMENT_OPEN.matcher(sql).find()) {
       throw new HopException(
-          "SQL_ASSERTION rule '"
-              + ruleLabel(rule)
-              + "' rejects MySQL executable comments (/*!)");
+          "SQL_ASSERTION rule '" + ruleLabel(rule) + "' rejects MySQL executable comments (/*!)");
     }
   }
 
@@ -333,9 +330,7 @@ public final class SqlAssertionRunner {
     }
   }
 
-  /**
-   * Evaluate expectation against an open result set (fetches at most one row).
-   */
+  /** Evaluate expectation against an open result set (fetches at most one row). */
   public static List<DataQualityFinding> evaluateResult(
       DataQualityRule rule, String subjectKey, String expect, String expectValue, ResultSet rs)
       throws Exception {
@@ -440,8 +435,8 @@ public final class SqlAssertionRunner {
 
   /**
    * Strict string equality: {@code String.valueOf(actual)} vs {@code expectValue}. Numeric JDBC
-   * types are not normalized ({@code 42.0} / {@code BigDecimal("42.00")} do not match {@code "42"}).
-   * Authors should cast/format in SQL when needed.
+   * types are not normalized ({@code 42.0} / {@code BigDecimal("42.00")} do not match {@code
+   * "42"}). Authors should cast/format in SQL when needed.
    */
   public static boolean scalarEquals(Object actual, String expectValue) {
     if (expectValue == null) {

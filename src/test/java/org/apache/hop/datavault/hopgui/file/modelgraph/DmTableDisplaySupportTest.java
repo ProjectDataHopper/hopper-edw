@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.modelgraph;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,9 +28,9 @@ import org.apache.hop.datavault.metadata.dimensional.DmDimensionAlias;
 import org.apache.hop.datavault.metadata.dimensional.DmDimensionScdType;
 import org.apache.hop.datavault.metadata.dimensional.DmFact;
 import org.apache.hop.datavault.metadata.dimensional.DmJunkDimension;
+import org.apache.hop.datavault.metadata.dimensional.DmNaturalKeyField;
 import org.apache.hop.datavault.metadata.dimensional.DmRangeBand;
 import org.apache.hop.datavault.metadata.dimensional.DmRangeDimension;
-import org.apache.hop.datavault.metadata.dimensional.DmNaturalKeyField;
 import org.apache.hop.datavault.metadata.dimensional.DmTableType;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.junit.jupiter.api.BeforeAll;
@@ -63,8 +61,7 @@ class DmTableDisplaySupportTest {
         DmTableDisplaySupport.BRIDGE_ICON,
         DmTableDisplaySupport.resolveTableIconPath(DmTableType.BRIDGE));
     assertEquals(
-        DmTableDisplaySupport.DIMENSION_ICON,
-        DmTableDisplaySupport.resolveTableIconPath(null));
+        DmTableDisplaySupport.DIMENSION_ICON, DmTableDisplaySupport.resolveTableIconPath(null));
   }
 
   @Test

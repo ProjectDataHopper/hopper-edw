@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.businessvault.delegates;
 
 import java.util.HashMap;
@@ -36,8 +34,7 @@ final class BusinessVaultClipboardPasteSupport {
 
   private BusinessVaultClipboardPasteSupport() {}
 
-  static void applyLocationOffset(
-      List<IBvTable> tables, List<DvNote> notes, Point pasteLocation) {
+  static void applyLocationOffset(List<IBvTable> tables, List<DvNote> notes, Point pasteLocation) {
     Point min = computeMinimumLocation(tables, notes);
     if (min == null) {
       return;

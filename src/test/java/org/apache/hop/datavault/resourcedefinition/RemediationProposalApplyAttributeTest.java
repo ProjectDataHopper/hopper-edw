@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,7 +46,8 @@ class RemediationProposalApplyAttributeTest {
     assertEquals("120", attribute.getLength());
     // Data type is only rewritten when ValueMetaFactory is initialized (returns a real name).
     assertTrue(
-        "String".equals(attribute.getDataType()) || "String".equalsIgnoreCase(attribute.getDataType())
+        "String".equals(attribute.getDataType())
+            || "String".equalsIgnoreCase(attribute.getDataType())
             || attribute.getDataType() != null);
   }
 
@@ -66,10 +65,8 @@ class RemediationProposalApplyAttributeTest {
 
   @Test
   void parseLengthSidesFromChangeDetails() {
-    assertEquals(
-        "50", RemediationProposalApplySupport.parseLengthSide("length 50 -> 75", true));
-    assertEquals(
-        "75", RemediationProposalApplySupport.parseLengthSide("length 50 -> 75", false));
+    assertEquals("50", RemediationProposalApplySupport.parseLengthSide("length 50 -> 75", true));
+    assertEquals("75", RemediationProposalApplySupport.parseLengthSide("length 50 -> 75", false));
     assertEquals(
         "50",
         RemediationProposalApplySupport.parseLengthSide(
@@ -97,9 +94,7 @@ class RemediationProposalApplyAttributeTest {
 
     Method method =
         RemediationProposalApplySupport.class.getDeclaredMethod(
-            "findAttribute",
-            org.apache.hop.datavault.metadata.DvSatellite.class,
-            String.class);
+            "findAttribute", org.apache.hop.datavault.metadata.DvSatellite.class, String.class);
     method.setAccessible(true);
     SatelliteAttribute found = (SatelliteAttribute) method.invoke(null, satellite, "email");
 

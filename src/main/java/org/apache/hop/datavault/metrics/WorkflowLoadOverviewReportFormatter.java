@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import java.text.SimpleDateFormat;
@@ -88,7 +86,8 @@ public final class WorkflowLoadOverviewReportFormatter {
         }
       }
       if (includeInsights && !model.getInsights().isEmpty()) {
-        builder.append(BaseMessages.getString(PKG, "WorkflowLoadOverviewReportFormatter.Insights"))
+        builder
+            .append(BaseMessages.getString(PKG, "WorkflowLoadOverviewReportFormatter.Insights"))
             .append(Const.CR);
         for (WorkflowLoadOverviewReport.InsightEntry insight : model.getInsights()) {
           builder
@@ -188,7 +187,8 @@ public final class WorkflowLoadOverviewReportFormatter {
     }
     StringBuilder builder = new StringBuilder();
     builder.append("<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\"/>");
-    builder.append("<title>Workflow Load Overview — ")
+    builder
+        .append("<title>Workflow Load Overview — ")
         .append(escapeHtml(safe(report.getRootWorkflowName())))
         .append("</title>");
     builder.append(
@@ -197,11 +197,13 @@ public final class WorkflowLoadOverviewReportFormatter {
             + "th,td{border:1px solid #d9e2ec;padding:8px;text-align:left}"
             + "th{background:#f0f4f8}.summary{background:#f7fafc;padding:12px;border-radius:8px}"
             + ".failed{color:#b91c1c}.success{color:#047857}</style></head><body>");
-    builder.append("<h1>Workflow Load Overview — ")
+    builder
+        .append("<h1>Workflow Load Overview — ")
         .append(escapeHtml(safe(report.getRootWorkflowName())))
         .append("</h1>");
     appendWorkflowTimingHtml(builder, report);
-    builder.append("<p><strong>Execution:</strong> <code>")
+    builder
+        .append("<p><strong>Execution:</strong> <code>")
         .append(escapeHtml(safe(report.getWorkflowExecutionId())))
         .append("</code></p>");
     builder.append("<div class=\"summary\">");
@@ -210,25 +212,28 @@ public final class WorkflowLoadOverviewReportFormatter {
     builder.append("</div>");
 
     for (WorkflowLoadOverviewReport.ModelEntry model : safeModels(report)) {
-      builder.append("<h2>")
+      builder
+          .append("<h2>")
           .append(escapeHtml(safe(model.getModelType()).toUpperCase(Locale.ROOT)))
           .append(" — ")
           .append(escapeHtml(safe(model.getModelName())))
           .append("</h2>");
-      builder.append("<p>")
-          .append(escapeHtml(formatModelTypeLabel(model.getModelType())));
+      builder.append("<p>").append(escapeHtml(formatModelTypeLabel(model.getModelType())));
       appendModelTimingHtml(builder, model);
-      builder.append("<br/>Run id: <code>")
+      builder
+          .append("<br/>Run id: <code>")
           .append(escapeHtml(safe(model.getLoadRunId())))
           .append("</code></p>");
 
       if (includePipelineDetail && !model.getPipelines().isEmpty()) {
-        builder.append("<h3>Pipelines</h3><table><thead><tr>")
+        builder
+            .append("<h3>Pipelines</h3><table><thead><tr>")
             .append(
                 "<th>Type</th><th>Table</th><th>Source</th><th>Read</th><th>Inserted</th><th>Errors</th><th>Duration</th>")
             .append("</tr></thead><tbody>");
         for (WorkflowLoadOverviewReport.PipelineEntry pipeline : model.getPipelines()) {
-          builder.append("<tr><td>")
+          builder
+              .append("<tr><td>")
               .append(escapeHtml(safe(pipeline.getElementType())))
               .append("</td><td>")
               .append(escapeHtml(safe(pipeline.getElementName())))
@@ -250,7 +255,8 @@ public final class WorkflowLoadOverviewReportFormatter {
       if (includeInsights && !model.getInsights().isEmpty()) {
         builder.append("<h3>Insights</h3><ul>");
         for (WorkflowLoadOverviewReport.InsightEntry insight : model.getInsights()) {
-          builder.append("<li><strong>")
+          builder
+              .append("<li><strong>")
               .append(escapeHtml(safe(insight.getCode())))
               .append("</strong>: ")
               .append(escapeHtml(safe(insight.getMessage())))
@@ -263,7 +269,8 @@ public final class WorkflowLoadOverviewReportFormatter {
     return builder.toString();
   }
 
-  private static List<String> formatPipelineTable(List<WorkflowLoadOverviewReport.PipelineEntry> pipelines) {
+  private static List<String> formatPipelineTable(
+      List<WorkflowLoadOverviewReport.PipelineEntry> pipelines) {
     String[] headers = {"Type", "Table", "Source", "Read", "Inserted", "Errors", "Duration"};
     List<String[]> rows = new ArrayList<>();
     for (WorkflowLoadOverviewReport.PipelineEntry pipeline : pipelines) {
@@ -336,7 +343,8 @@ public final class WorkflowLoadOverviewReportFormatter {
       StringBuilder builder, WorkflowLoadOverviewReport report) {
     builder.append("## Summary\n\n");
     builder
-        .append("| Models | Pipelines | Duration | Rows inserted | Status |\n| ---: | ---: | ---: | ---: | --- |\n| ")
+        .append(
+            "| Models | Pipelines | Duration | Rows inserted | Status |\n| ---: | ---: | ---: | ---: | --- |\n| ")
         .append(report.getModelCount())
         .append(" | ")
         .append(report.getPipelineCount())
@@ -353,7 +361,8 @@ public final class WorkflowLoadOverviewReportFormatter {
       StringBuilder builder, WorkflowLoadOverviewReport report) {
     builder
         .append("<h2>Summary</h2><table><thead><tr>")
-        .append("<th>Models</th><th>Pipelines</th><th>Duration</th><th>Rows inserted</th><th>Status</th>")
+        .append(
+            "<th>Models</th><th>Pipelines</th><th>Duration</th><th>Rows inserted</th><th>Status</th>")
         .append("</tr></thead><tbody><tr><td>")
         .append(report.getModelCount())
         .append("</td><td>")
@@ -427,7 +436,8 @@ public final class WorkflowLoadOverviewReportFormatter {
     builder.append("</tbody></table>");
   }
 
-  private static List<WorkflowLoadOverviewReport.ModelEntry> safeModels(WorkflowLoadOverviewReport report) {
+  private static List<WorkflowLoadOverviewReport.ModelEntry> safeModels(
+      WorkflowLoadOverviewReport report) {
     return report.getModels() != null ? report.getModels() : List.of();
   }
 
@@ -443,31 +453,35 @@ public final class WorkflowLoadOverviewReportFormatter {
       return "";
     }
     return switch (modelType.toLowerCase(Locale.ROOT)) {
-      case "dv" ->
-          BaseMessages.getString(PKG, "WorkflowLoadOverviewReportFormatter.ModelType.Dv");
-      case "bv" ->
-          BaseMessages.getString(PKG, "WorkflowLoadOverviewReportFormatter.ModelType.Bv");
-      case "dm" ->
-          BaseMessages.getString(PKG, "WorkflowLoadOverviewReportFormatter.ModelType.Dm");
+      case "dv" -> BaseMessages.getString(PKG, "WorkflowLoadOverviewReportFormatter.ModelType.Dv");
+      case "bv" -> BaseMessages.getString(PKG, "WorkflowLoadOverviewReportFormatter.ModelType.Bv");
+      case "dm" -> BaseMessages.getString(PKG, "WorkflowLoadOverviewReportFormatter.ModelType.Dm");
       default -> modelType;
     };
   }
 
-  private static void appendWorkflowTimingLog(StringBuilder builder, WorkflowLoadOverviewReport report) {
-    appendTimingLabelLine(builder, "WorkflowLoadOverviewReportFormatter.Started", report.getStartedAt());
-    appendTimingLabelLine(builder, "WorkflowLoadOverviewReportFormatter.Finished", report.getFinishedAt());
+  private static void appendWorkflowTimingLog(
+      StringBuilder builder, WorkflowLoadOverviewReport report) {
+    appendTimingLabelLine(
+        builder, "WorkflowLoadOverviewReportFormatter.Started", report.getStartedAt());
+    appendTimingLabelLine(
+        builder, "WorkflowLoadOverviewReportFormatter.Finished", report.getFinishedAt());
   }
 
-  private static void appendWorkflowTimingMarkdown(StringBuilder builder, WorkflowLoadOverviewReport report) {
-    appendTimingLabelLineMarkdown(builder, "WorkflowLoadOverviewReportFormatter.Started", report.getStartedAt());
-    appendTimingLabelLineMarkdown(builder, "WorkflowLoadOverviewReportFormatter.Finished", report.getFinishedAt());
+  private static void appendWorkflowTimingMarkdown(
+      StringBuilder builder, WorkflowLoadOverviewReport report) {
+    appendTimingLabelLineMarkdown(
+        builder, "WorkflowLoadOverviewReportFormatter.Started", report.getStartedAt());
+    appendTimingLabelLineMarkdown(
+        builder, "WorkflowLoadOverviewReportFormatter.Finished", report.getFinishedAt());
     if (!Utils.isEmpty(formatTimestamp(report.getStartedAt()))
         || !Utils.isEmpty(formatTimestamp(report.getFinishedAt()))) {
       builder.append('\n');
     }
   }
 
-  private static void appendWorkflowTimingHtml(StringBuilder builder, WorkflowLoadOverviewReport report) {
+  private static void appendWorkflowTimingHtml(
+      StringBuilder builder, WorkflowLoadOverviewReport report) {
     String started = formatTimestamp(report.getStartedAt());
     String finished = formatTimestamp(report.getFinishedAt());
     if (Utils.isEmpty(started) && Utils.isEmpty(finished)) {
@@ -475,25 +489,28 @@ public final class WorkflowLoadOverviewReportFormatter {
     }
     builder.append("<p>");
     if (!Utils.isEmpty(started)) {
-      builder
-          .append(escapeHtml(
+      builder.append(
+          escapeHtml(
               BaseMessages.getString(PKG, "WorkflowLoadOverviewReportFormatter.Started", started)));
     }
     if (!Utils.isEmpty(finished)) {
       if (!Utils.isEmpty(started)) {
         builder.append("<br/>");
       }
-      builder
-          .append(escapeHtml(
-              BaseMessages.getString(PKG, "WorkflowLoadOverviewReportFormatter.Finished", finished)));
+      builder.append(
+          escapeHtml(
+              BaseMessages.getString(
+                  PKG, "WorkflowLoadOverviewReportFormatter.Finished", finished)));
     }
     builder.append("</p>");
   }
 
   private static void appendModelTimingMarkdown(
       StringBuilder builder, WorkflowLoadOverviewReport.ModelEntry model) {
-    appendTimingBulletMarkdown(builder, "WorkflowLoadOverviewReportFormatter.Started", model.getStartedAt());
-    appendTimingBulletMarkdown(builder, "WorkflowLoadOverviewReportFormatter.Finished", model.getFinishedAt());
+    appendTimingBulletMarkdown(
+        builder, "WorkflowLoadOverviewReportFormatter.Started", model.getStartedAt());
+    appendTimingBulletMarkdown(
+        builder, "WorkflowLoadOverviewReportFormatter.Finished", model.getFinishedAt());
   }
 
   private static void appendModelTimingHtml(
@@ -503,14 +520,18 @@ public final class WorkflowLoadOverviewReportFormatter {
     if (!Utils.isEmpty(started)) {
       builder
           .append("<br/>")
-          .append(escapeHtml(
-              BaseMessages.getString(PKG, "WorkflowLoadOverviewReportFormatter.Started", started)));
+          .append(
+              escapeHtml(
+                  BaseMessages.getString(
+                      PKG, "WorkflowLoadOverviewReportFormatter.Started", started)));
     }
     if (!Utils.isEmpty(finished)) {
       builder
           .append("<br/>")
-          .append(escapeHtml(
-              BaseMessages.getString(PKG, "WorkflowLoadOverviewReportFormatter.Finished", finished)));
+          .append(
+              escapeHtml(
+                  BaseMessages.getString(
+                      PKG, "WorkflowLoadOverviewReportFormatter.Finished", finished)));
     }
   }
 
@@ -519,30 +540,25 @@ public final class WorkflowLoadOverviewReportFormatter {
     if (Utils.isEmpty(timestamp)) {
       return;
     }
-    builder
-        .append(BaseMessages.getString(PKG, messageKey, timestamp))
-        .append(Const.CR);
+    builder.append(BaseMessages.getString(PKG, messageKey, timestamp)).append(Const.CR);
   }
 
-  private static void appendTimingLabelLineMarkdown(StringBuilder builder, String messageKey, Date value) {
+  private static void appendTimingLabelLineMarkdown(
+      StringBuilder builder, String messageKey, Date value) {
     String timestamp = formatTimestamp(value);
     if (Utils.isEmpty(timestamp)) {
       return;
     }
-    builder
-        .append(BaseMessages.getString(PKG, messageKey, timestamp))
-        .append('\n');
+    builder.append(BaseMessages.getString(PKG, messageKey, timestamp)).append('\n');
   }
 
-  private static void appendTimingBulletMarkdown(StringBuilder builder, String messageKey, Date value) {
+  private static void appendTimingBulletMarkdown(
+      StringBuilder builder, String messageKey, Date value) {
     String timestamp = formatTimestamp(value);
     if (Utils.isEmpty(timestamp)) {
       return;
     }
-    builder
-        .append("- ")
-        .append(BaseMessages.getString(PKG, messageKey, timestamp))
-        .append('\n');
+    builder.append("- ").append(BaseMessages.getString(PKG, messageKey, timestamp)).append('\n');
   }
 
   private static String safe(String value) {

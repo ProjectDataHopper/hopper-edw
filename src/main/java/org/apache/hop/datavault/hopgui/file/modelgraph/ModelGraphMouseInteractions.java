@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.modelgraph;
 
 import org.apache.hop.core.gui.AreaOwner;
@@ -35,7 +33,8 @@ public interface ModelGraphMouseInteractions {
    * Table/ref/icon hits: relationship drag, name edit, body drag, info icon. Returns true when the
    * event was consumed.
    */
-  boolean handleObjectMouseDown(Event e, Point real, ModelGraphHit hit, boolean shift, boolean control);
+  boolean handleObjectMouseDown(
+      Event e, Point real, ModelGraphHit hit, boolean shift, boolean control);
 
   boolean isRelationshipDragActive();
 

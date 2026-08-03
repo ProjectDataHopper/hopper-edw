@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.sourcemodel;
 
 import org.apache.hop.core.exception.HopException;
@@ -37,8 +36,7 @@ public final class SourceModelLoadSupport {
     if (filename == null || filename.isBlank()) {
       throw new HopException("Source model filename is empty");
     }
-    String resolved =
-        HopVfs.normalize(variables != null ? variables.resolve(filename) : filename);
+    String resolved = HopVfs.normalize(variables != null ? variables.resolve(filename) : filename);
     try {
       Document document = XmlHandler.loadXmlFile(resolved);
       Node rootNode = XmlHandler.getSubNode(document, SourceModel.XML_TAG);

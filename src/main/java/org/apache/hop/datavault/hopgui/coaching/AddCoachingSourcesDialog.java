@@ -13,11 +13,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.coaching;
-
 
 import org.apache.hop.catalog.metadata.DataCatalogMeta;
 import org.apache.hop.core.exception.HopException;
@@ -29,13 +26,12 @@ import org.apache.hop.datavault.hopgui.GuiBusySupport;
 import org.apache.hop.datavault.metadata.coaching.CoachingSourceRef;
 import org.apache.hop.datavault.metadata.coaching.ICoachingModelAdapter;
 import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
-import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.core.widget.MetaSelectionLine;
 import org.apache.hop.ui.hopgui.HopGui;
+import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
@@ -80,7 +76,8 @@ public class AddCoachingSourcesDialog {
 
       Button wOk = new Button(shell, SWT.PUSH);
       wOk.setText(
-          BaseMessages.getString(org.apache.hop.ui.core.dialog.BaseDialog.class, "System.Button.OK"));
+          BaseMessages.getString(
+              org.apache.hop.ui.core.dialog.BaseDialog.class, "System.Button.OK"));
       wOk.addListener(SWT.Selection, e -> ok(onAccepted));
       Button wCancel = new Button(shell, SWT.PUSH);
       wCancel.setText(
@@ -139,7 +136,9 @@ public class AddCoachingSourcesDialog {
 
       BaseTransformDialog.positionBottomButtons(shell, new Button[] {wOk, wCancel}, margin, null);
 
-      wSources = new org.eclipse.swt.widgets.List(shell, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
+      wSources =
+          new org.eclipse.swt.widgets.List(
+              shell, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
       PropsUi.setLook(wSources);
       FormData fdSources = new FormData();
       fdSources.left = new FormAttachment(wlSources, margin);

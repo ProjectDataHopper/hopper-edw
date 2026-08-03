@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.businessvault;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,7 +33,6 @@ import org.apache.hop.datavault.metadata.DataVaultConfiguration;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DvHub;
 import org.apache.hop.datavault.metadata.DvSatellite;
-import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -119,7 +116,9 @@ class BvPitSnapshotSpineSupportTest {
   @Test
   void generateDailySpineUsesEndOfDayAnchor() throws Exception {
     BvPitSnapshotSchedule schedule = defaultSchedule();
-    var bounds = new BvPitSnapshotSpineSupport.SpineBounds(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 3));
+    var bounds =
+        new BvPitSnapshotSpineSupport.SpineBounds(
+            LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 3));
 
     List<LocalDateTime> spine = BvPitSnapshotSpineSupport.generateSnapshotSpine(bounds, schedule);
 
@@ -132,7 +131,9 @@ class BvPitSnapshotSpineSupportTest {
   void generateDailySpineUsesStartOfDayAnchor() throws Exception {
     BvPitSnapshotSchedule schedule = defaultSchedule();
     schedule.setSnapshotAnchor(BvPitSnapshotAnchor.START_OF_PERIOD);
-    var bounds = new BvPitSnapshotSpineSupport.SpineBounds(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 2));
+    var bounds =
+        new BvPitSnapshotSpineSupport.SpineBounds(
+            LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 2));
 
     List<LocalDateTime> spine = BvPitSnapshotSpineSupport.generateSnapshotSpine(bounds, schedule);
 
@@ -143,7 +144,9 @@ class BvPitSnapshotSpineSupportTest {
 
   @Test
   void invalidBoundsProduceEmptySpine() throws Exception {
-    var bounds = new BvPitSnapshotSpineSupport.SpineBounds(LocalDate.of(2024, 1, 5), LocalDate.of(2024, 1, 1));
+    var bounds =
+        new BvPitSnapshotSpineSupport.SpineBounds(
+            LocalDate.of(2024, 1, 5), LocalDate.of(2024, 1, 1));
 
     List<LocalDateTime> spine =
         BvPitSnapshotSpineSupport.generateSnapshotSpine(bounds, defaultSchedule());
@@ -155,7 +158,9 @@ class BvPitSnapshotSpineSupportTest {
   @Test
   void filterIncrementalSpineKeepsOnlyNewSnapshots() throws Exception {
     BvPitSnapshotSchedule schedule = defaultSchedule();
-    var bounds = new BvPitSnapshotSpineSupport.SpineBounds(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 3));
+    var bounds =
+        new BvPitSnapshotSpineSupport.SpineBounds(
+            LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 3));
     List<LocalDateTime> spine = BvPitSnapshotSpineSupport.generateSnapshotSpine(bounds, schedule);
 
     List<LocalDateTime> incremental =
@@ -168,14 +173,17 @@ class BvPitSnapshotSpineSupportTest {
 
   @Test
   void buildPostgresSnapshotSpineCteUsesGenerateSeries() throws Exception {
-    var bounds = new BvPitSnapshotSpineSupport.SpineBounds(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 2));
+    var bounds =
+        new BvPitSnapshotSpineSupport.SpineBounds(
+            LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 2));
 
     String sql =
         BvPitSnapshotSpineSupport.buildPostgresSnapshotSpineCte(
             "snapshot_spine", "snapshot_date", bounds, BvPitSnapshotAnchor.END_OF_PERIOD);
 
     assertTrue(sql.contains("snapshot_spine AS ("));
-    assertTrue(sql.contains("generate_series(DATE '2024-01-01', DATE '2024-01-02', INTERVAL '1 day')"));
+    assertTrue(
+        sql.contains("generate_series(DATE '2024-01-01', DATE '2024-01-02', INTERVAL '1 day')"));
     assertTrue(sql.contains("23 hours 59 minutes 59 seconds"));
     assertTrue(sql.contains("AS snapshot_date"));
   }
@@ -186,11 +194,7 @@ class BvPitSnapshotSpineSupportTest {
 
     String sql =
         BvPitSnapshotSpineSupport.buildDynamicSnapshotSpineCte(
-            mysql,
-            "snapshot_spine",
-            "snapshot_date",
-            "bounds",
-            BvPitSnapshotAnchor.END_OF_PERIOD);
+            mysql, "snapshot_spine", "snapshot_date", "bounds", BvPitSnapshotAnchor.END_OF_PERIOD);
 
     assertTrue(sql.contains("WITH RECURSIVE days AS ("));
     assertTrue(sql.contains("DATE_ADD(d.spine_day, INTERVAL 1 DAY)"));
@@ -207,7 +211,9 @@ class BvPitSnapshotSpineSupportTest {
         "CAST('1900-01-01 00:00:00' AS DATETIME)",
         BvPitSnapshotSpineSupport.timestampLiteral(mysql, "1900-01-01 00:00:00"));
     assertEquals("CAST(NULL AS DATETIME)", BvPitSnapshotSpineSupport.nullTimestampLiteral(mysql));
-    assertEquals("DATE(earliest_load)", BvPitSnapshotSpineSupport.castToDateExpression(mysql, "earliest_load"));
+    assertEquals(
+        "DATE(earliest_load)",
+        BvPitSnapshotSpineSupport.castToDateExpression(mysql, "earliest_load"));
     assertEquals(
         "DATE_SUB(CURRENT_DATE, INTERVAL 1 DAY)",
         BvPitSnapshotSpineSupport.currentDateMinusDaysExpression(mysql, 1));
@@ -226,7 +232,8 @@ class BvPitSnapshotSpineSupportTest {
             "bounds",
             BvPitSnapshotAnchor.START_OF_PERIOD);
 
-    assertFalse(sql.contains("WITH RECURSIVE"), "SingleStore recursive CTEs cannot base on CTE bounds");
+    assertFalse(
+        sql.contains("WITH RECURSIVE"), "SingleStore recursive CTEs cannot base on CTE bounds");
     assertTrue(sql.contains("day_offsets AS ("));
     assertTrue(sql.contains("digits AS ("));
     assertTrue(sql.contains("DATEDIFF(b.end_date, b.start_date)"));
@@ -261,10 +268,7 @@ class BvPitSnapshotSpineSupportTest {
 
     String sql =
         BvPitSnapshotSpineSupport.buildEarliestParticipatingSatelliteLoadSql(
-            databaseMeta,
-            new Variables(),
-            List.of(satCustomer, satProduct),
-            "x_load_ts");
+            databaseMeta, new Variables(), List.of(satCustomer, satProduct), "x_load_ts");
 
     assertTrue(sql.contains("SELECT MIN(min_load) AS earliest_load FROM ("));
     assertTrue(sql.contains("SELECT MIN(x_load_ts) AS min_load FROM sat_customer"));
@@ -295,11 +299,9 @@ class BvPitSnapshotSpineSupportTest {
   @Test
   void normalizeAnsiTimestampLiteralsRewritesForSqlServer() {
     DatabaseMeta sqlServer = new TestDatabaseMeta("Vault", "MSSQLNATIVE");
-    String sql =
-        "COALESCE(LEAD(x) OVER (ORDER BY t), TIMESTAMP '9999-12-31 23:59:59')";
+    String sql = "COALESCE(LEAD(x) OVER (ORDER BY t), TIMESTAMP '9999-12-31 23:59:59')";
 
-    String normalized =
-        BvPitSnapshotSpineSupport.normalizeAnsiTimestampLiterals(sqlServer, sql);
+    String normalized = BvPitSnapshotSpineSupport.normalizeAnsiTimestampLiterals(sqlServer, sql);
 
     assertEquals(
         "COALESCE(LEAD(x) OVER (ORDER BY t), CAST('9999-12-31 23:59:59' AS datetime2))",
@@ -311,8 +313,7 @@ class BvPitSnapshotSpineSupportTest {
     DatabaseMeta postgres = new TestDatabaseMeta("Vault", "POSTGRESQL");
     String sql = "SELECT TIMESTAMP '1900-01-01 00:00:00'";
 
-    assertEquals(
-        sql, BvPitSnapshotSpineSupport.normalizeAnsiTimestampLiterals(postgres, sql));
+    assertEquals(sql, BvPitSnapshotSpineSupport.normalizeAnsiTimestampLiterals(postgres, sql));
   }
 
   @Test
@@ -334,7 +335,8 @@ class BvPitSnapshotSpineSupportTest {
     DataVaultConfiguration dvConfig = new DataVaultConfiguration();
     dvConfig.setLoadDateField("x_load_ts");
 
-    assertEquals("x_load_ts", BvPitSnapshotSpineSupport.resolveLoadDateField(dvConfig, new Variables()));
+    assertEquals(
+        "x_load_ts", BvPitSnapshotSpineSupport.resolveLoadDateField(dvConfig, new Variables()));
   }
 
   private static BvPitSnapshotSchedule defaultSchedule() {

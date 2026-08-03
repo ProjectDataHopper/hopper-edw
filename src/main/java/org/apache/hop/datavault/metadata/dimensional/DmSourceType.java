@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.dimensional;
 
 import lombok.Getter;
@@ -31,9 +29,7 @@ public enum DmSourceType implements IEnumHasCodeAndDescription {
   RECORD_DEFINITION(
       "RECORD_DEFINITION",
       BaseMessages.getString(DmSourceType.class, "DmSourceType.RecordDefinition")),
-  FACT_TABLE(
-      "FACT_TABLE",
-      BaseMessages.getString(DmSourceType.class, "DmSourceType.FactTable"));
+  FACT_TABLE("FACT_TABLE", BaseMessages.getString(DmSourceType.class, "DmSourceType.FactTable"));
 
   private final String code;
   private final String description;

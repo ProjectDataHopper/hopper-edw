@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.vault.delegates;
 
 import java.util.ArrayList;
@@ -40,8 +38,7 @@ final class DataVaultClipboardPasteSupport {
 
   private DataVaultClipboardPasteSupport() {}
 
-  static void applyLocationOffset(
-      List<IDvTable> tables, List<DvNote> notes, Point pasteLocation) {
+  static void applyLocationOffset(List<IDvTable> tables, List<DvNote> notes, Point pasteLocation) {
     Point min = computeMinimumLocation(tables, notes);
     if (min == null) {
       return;
@@ -167,8 +164,7 @@ final class DataVaultClipboardPasteSupport {
     return candidate;
   }
 
-  private static boolean isNameUsed(
-      DataVaultModel model, String name, Set<String> reservedNames) {
+  private static boolean isNameUsed(DataVaultModel model, String name, Set<String> reservedNames) {
     if (Utils.isEmpty(name)) {
       return false;
     }

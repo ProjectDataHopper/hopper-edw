@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.catalog.versioning;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -282,7 +281,8 @@ public final class CatalogVersionStore {
 
   private static RecordDefinition readRecord(Path path) throws HopException {
     try {
-      RecordDefinitionDocument doc = MAPPER.readValue(path.toFile(), RecordDefinitionDocument.class);
+      RecordDefinitionDocument doc =
+          MAPPER.readValue(path.toFile(), RecordDefinitionDocument.class);
       return doc.toRecordDefinition();
     } catch (IOException e) {
       throw new HopException(

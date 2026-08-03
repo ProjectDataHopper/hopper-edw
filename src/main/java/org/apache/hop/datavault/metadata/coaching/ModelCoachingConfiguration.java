@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata.coaching;
 
 import java.util.ArrayList;
@@ -61,7 +59,8 @@ public class ModelCoachingConfiguration {
     return new ModelCoachingConfiguration();
   }
 
-  public static String resolveCatalogConnectionName(ModelCoachingConfiguration coaching, String fallback) {
+  public static String resolveCatalogConnectionName(
+      ModelCoachingConfiguration coaching, String fallback) {
     if (coaching == null || coaching.getCoachingSourcesOrEmpty().isEmpty()) {
       return fallback;
     }

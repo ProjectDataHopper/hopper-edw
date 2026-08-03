@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai.pipeline;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,13 +45,13 @@ class PipelineAiScenarioTest {
   @Test
   void lookupDescriptionResolvesLocalizedLabel() {
     assertEquals(
-        PipelineAiScenario.PIPELINE_DESIGN, PipelineAiScenario.lookupDescription("Pipeline design"));
+        PipelineAiScenario.PIPELINE_DESIGN,
+        PipelineAiScenario.lookupDescription("Pipeline design"));
   }
 
   @Test
   void resolveAcceptsLocalizedDescription() {
     assertEquals(
-        PipelineAiScenario.PIPELINE_ERROR_DIAGNOSIS,
-        PipelineAiScenario.resolve("Error diagnosis"));
+        PipelineAiScenario.PIPELINE_ERROR_DIAGNOSIS, PipelineAiScenario.resolve("Error diagnosis"));
   }
 }

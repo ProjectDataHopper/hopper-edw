@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.hopgui.file.businessvault.delegates;
 
 import org.apache.hop.core.exception.HopException;
@@ -29,9 +27,7 @@ public class HopGuiBusinessVaultSnapshotUndo {
 
   private final ModelGraphSnapshotUndo<BusinessVaultModel> delegate =
       new ModelGraphSnapshotUndo<>(
-          BusinessVaultModel.class,
-          HopBusinessVaultFileType.XML_TAG,
-          BusinessVaultModel::new);
+          BusinessVaultModel.class, HopBusinessVaultFileType.XML_TAG, BusinessVaultModel::new);
 
   public ModelGraphSnapshotUndo<BusinessVaultModel> getDelegate() {
     return delegate;

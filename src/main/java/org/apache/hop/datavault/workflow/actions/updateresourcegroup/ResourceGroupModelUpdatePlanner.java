@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.workflow.actions.updateresourcegroup;
 
 import java.util.ArrayList;
@@ -73,10 +72,7 @@ public final class ResourceGroupModelUpdatePlanner {
   }
 
   private static void appendLayer(
-      List<ModelUpdateJob> jobs,
-      ModelLayer layer,
-      List<String> modelFiles,
-      IVariables variables) {
+      List<ModelUpdateJob> jobs, ModelLayer layer, List<String> modelFiles, IVariables variables) {
     if (modelFiles == null) {
       return;
     }

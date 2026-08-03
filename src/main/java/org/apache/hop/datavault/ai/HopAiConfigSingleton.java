@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.ai;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,9 +48,11 @@ public class HopAiConfigSingleton {
     }
     HopAiProviderSettingsSupport.normalizeProviderSettings(hopAiConfig);
     HopAiProviderSettingsSupport.ensureMigrated(hopAiConfig);
-    HopConfig.getInstance().getConfigMap().put(HopAiConfig.HOP_CONFIG_HOP_AI_CONFIG_KEY, hopAiConfig);
+    HopConfig.getInstance()
+        .getConfigMap()
+        .put(HopAiConfig.HOP_CONFIG_HOP_AI_CONFIG_KEY, hopAiConfig);
   }
-  
+
   public static HopAiConfig getConfig() {
     if (instance == null) {
       instance = new HopAiConfigSingleton();
@@ -64,7 +64,8 @@ public class HopAiConfigSingleton {
     if (instance == null) {
       instance = new HopAiConfigSingleton();
     }
-    HopConfig.getInstance().saveOption(HopAiConfig.HOP_CONFIG_HOP_AI_CONFIG_KEY, instance.hopAiConfig);
+    HopConfig.getInstance()
+        .saveOption(HopAiConfig.HOP_CONFIG_HOP_AI_CONFIG_KEY, instance.hopAiConfig);
     HopConfig.getInstance().saveToFile();
   }
 }

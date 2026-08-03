@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.catalog.versioning;
 
 import java.util.ArrayList;
@@ -55,8 +54,8 @@ public final class CatalogVersionGuiSupport {
 
   /**
    * Tag a catalog version from the Data Catalog perspective: pick a resource definition group
-   * (required for source scope), then tag + description. When {@code preferredCatalogConnection}
-   * is set (tree selection), that FILE catalog is used as the version storage root.
+   * (required for source scope), then tag + description. When {@code preferredCatalogConnection} is
+   * set (tree selection), that FILE catalog is used as the version storage root.
    */
   public static CatalogVersionEntry tagVersionFromPerspective(
       HopGui hopGui, String preferredCatalogConnection) {
@@ -171,7 +170,8 @@ public final class CatalogVersionGuiSupport {
     }
     Shell shell = hopGui.getShell();
     try {
-      String connection = resolveConnection(group, hopGui.getVariables(), hopGui.getMetadataProvider());
+      String connection =
+          resolveConnection(group, hopGui.getVariables(), hopGui.getMetadataProvider());
       if (Utils.isEmpty(connection)) {
         MessageBox box = new MessageBox(shell, SWT.OK | SWT.ICON_WARNING);
         box.setText(BaseMessages.getString(PKG, "CatalogVersionGuiSupport.List.Title"));
@@ -188,8 +188,7 @@ public final class CatalogVersionGuiSupport {
         MessageBox box = new MessageBox(shell, SWT.OK | SWT.ICON_INFORMATION);
         box.setText(BaseMessages.getString(PKG, "CatalogVersionGuiSupport.List.Empty.Title"));
         box.setMessage(
-            BaseMessages.getString(
-                PKG, "CatalogVersionGuiSupport.List.Empty.Message", connection));
+            BaseMessages.getString(PKG, "CatalogVersionGuiSupport.List.Empty.Message", connection));
         box.open();
         return;
       }
@@ -243,11 +242,10 @@ public final class CatalogVersionGuiSupport {
       return names;
     }
     String preferred =
-        !Utils.isEmpty(preferredCatalogConnection)
-            ? preferredCatalogConnection.trim()
-            : null;
+        !Utils.isEmpty(preferredCatalogConnection) ? preferredCatalogConnection.trim() : null;
     names.sort(
-        Comparator.comparing((String name) -> !groupMatchesConnection(name, preferred, variables, serializer))
+        Comparator.comparing(
+                (String name) -> !groupMatchesConnection(name, preferred, variables, serializer))
             .thenComparing(String.CASE_INSENSITIVE_ORDER));
     return names;
   }
@@ -276,15 +274,17 @@ public final class CatalogVersionGuiSupport {
   }
 
   private static String resolveConnection(
-      ResourceDefinitionGroupMeta group, IVariables variables, IHopMetadataProvider metadataProvider)
+      ResourceDefinitionGroupMeta group,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider)
       throws HopException {
     if (group != null && !Utils.isEmpty(group.getDataCatalogConnection())) {
       return variables != null
           ? variables.resolve(group.getDataCatalogConnection())
           : group.getDataCatalogConnection();
     }
-    return org.apache.hop.datavault.catalog.DvSourceCatalogService.resolvePreferredCatalogConnection(
-        null, variables, metadataProvider);
+    return org.apache.hop.datavault.catalog.DvSourceCatalogService
+        .resolvePreferredCatalogConnection(null, variables, metadataProvider);
   }
 
   private static void showError(Shell shell, Exception e) {

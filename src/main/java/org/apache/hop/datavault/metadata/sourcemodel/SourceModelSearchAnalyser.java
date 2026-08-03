@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hop.datavault.metadata.sourcemodel;
 
 import java.util.ArrayList;
@@ -49,12 +48,7 @@ public class SourceModelSearchAnalyser extends BaseSearchableAnalyser<SourceMode
 
     matchProperty(searchable, results, searchQuery, "source model name", model.getName(), null);
     matchProperty(
-        searchable,
-        results,
-        searchQuery,
-        "source model description",
-        model.getDescription(),
-        null);
+        searchable, results, searchQuery, "source model description", model.getDescription(), null);
 
     if (model.getConfiguration() != null) {
       matchObjectFields(

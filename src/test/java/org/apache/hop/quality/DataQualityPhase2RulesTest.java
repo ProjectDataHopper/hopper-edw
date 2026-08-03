@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.quality;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -67,7 +65,8 @@ class DataQualityPhase2RulesTest {
   void nullRatioMaxPassesAtBoundaryAndZeroRows() {
     IRowMeta meta = new RowMeta();
     meta.addValueMeta(new ValueMetaString("segment"));
-    List<Object[]> rows = List.of(new Object[] {"A"}, new Object[] {null}, new Object[] {"B"}, new Object[] {"C"});
+    List<Object[]> rows =
+        List.of(new Object[] {"A"}, new Object[] {null}, new Object[] {"B"}, new Object[] {"C"});
     DataProfileSnapshot profile = fullScan(meta, rows);
     // 1/4 = 0.25 exactly → pass (ratio <= maxRatio)
     DataQualityRule rule =
@@ -79,7 +78,9 @@ class DataQualityPhase2RulesTest {
     empty.setRowCount(0);
     empty.field("segment");
     assertFalse(
-        measure(empty, rule(DataQualityRuleType.NULL_RATIO_MAX, "segment", Map.of("maxRatio", "0.0")))
+        measure(
+                empty,
+                rule(DataQualityRuleType.NULL_RATIO_MAX, "segment", Map.of("maxRatio", "0.0")))
             .hasBlockingFindings());
   }
 
@@ -89,8 +90,7 @@ class DataQualityPhase2RulesTest {
     profile.setSubjectKey("s");
     profile.setRowCount(10);
     profile.field("x").addNullCount(1);
-    DataQualityRule rule =
-        rule(DataQualityRuleType.NULL_RATIO_MAX, "x", Map.of("maxRatio", "1.5"));
+    DataQualityRule rule = rule(DataQualityRuleType.NULL_RATIO_MAX, "x", Map.of("maxRatio", "1.5"));
     DataQualityReport report = measure(profile, rule);
     assertEquals(1, report.getFindingCount());
     assertEquals(QualitySeverity.WARNING, report.getFindings().get(0).getSeverity());
@@ -102,8 +102,7 @@ class DataQualityPhase2RulesTest {
     profile.setSubjectKey("s");
     profile.setRowCount(10);
     profile.field("x").addNullCount(1);
-    DataQualityRule rule =
-        rule(DataQualityRuleType.NULL_RATIO_MAX, "x", Map.of("maxRatio", "NaN"));
+    DataQualityRule rule = rule(DataQualityRuleType.NULL_RATIO_MAX, "x", Map.of("maxRatio", "NaN"));
     DataQualityReport report = measure(profile, rule);
     assertEquals(1, report.getFindingCount());
     assertEquals(QualitySeverity.WARNING, report.getFindings().get(0).getSeverity());
@@ -117,7 +116,8 @@ class DataQualityPhase2RulesTest {
     profile.setRowCount(100);
     FieldProfile field = profile.field("customer_id");
     field.setExactDistinctCount(3L);
-    DataQualityRule rule = rule(DataQualityRuleType.MIN_DISTINCT, "customer_id", Map.of("min", "5"));
+    DataQualityRule rule =
+        rule(DataQualityRuleType.MIN_DISTINCT, "customer_id", Map.of("min", "5"));
     assertTrue(measure(profile, rule).hasBlockingFindings());
 
     field.setExactDistinctCount(5L);
@@ -257,7 +257,8 @@ class DataQualityPhase2RulesTest {
     DataProfileSnapshot profile = new DataProfileSnapshot();
     profile.setSubjectKey("s");
     profile.setRowCount(1);
-    DataQualityRule rule = rule(DataQualityRuleType.MIN_DISTINCT, "missing_col", Map.of("min", "1"));
+    DataQualityRule rule =
+        rule(DataQualityRuleType.MIN_DISTINCT, "missing_col", Map.of("min", "1"));
     DataQualityReport report = measure(profile, rule);
     assertEquals(1, report.getFindingCount());
     assertTrue(report.getFindings().get(0).getMessage().contains("not found"));
@@ -270,10 +271,7 @@ class DataQualityPhase2RulesTest {
     List<Object[]> rows = List.of(new Object[] {"ABC"}, new Object[] {"12"}, new Object[] {"XYZ"});
     DataProfileSnapshot profile = fullScan(meta, rows);
     DataQualityRule rule =
-        rule(
-            DataQualityRuleType.REGEX,
-            "code",
-            Map.of("pattern", "[A-Z]{3}", "matchMode", "FULL"));
+        rule(DataQualityRuleType.REGEX, "code", Map.of("pattern", "[A-Z]{3}", "matchMode", "FULL"));
     DataQualityReport report = measure(profile, rule);
     assertTrue(report.hasBlockingFindings());
     assertTrue(report.getFindings().get(0).getMetrics().get("path").equals("sample"));
@@ -285,8 +283,7 @@ class DataQualityPhase2RulesTest {
     meta.addValueMeta(new ValueMetaString("code"));
     List<Object[]> rows = List.of(new Object[] {"ABC"}, new Object[] {"XYZ"});
     DataProfileSnapshot profile = fullScan(meta, rows);
-    DataQualityRule rule =
-        rule(DataQualityRuleType.REGEX, "code", Map.of("pattern", "[A-Z]{3}"));
+    DataQualityRule rule = rule(DataQualityRuleType.REGEX, "code", Map.of("pattern", "[A-Z]{3}"));
     assertFalse(measure(profile, rule).hasBlockingFindings());
   }
 
@@ -313,8 +310,7 @@ class DataQualityPhase2RulesTest {
     field.observeValueCount("DEF", "DEF", 1L, 1); // truncates
     assertTrue(field.isDistinctTruncated());
 
-    DataQualityRule rule =
-        rule(DataQualityRuleType.REGEX, "code", Map.of("pattern", "[A-Z]{3}"));
+    DataQualityRule rule = rule(DataQualityRuleType.REGEX, "code", Map.of("pattern", "[A-Z]{3}"));
     rule.setSeverity(QualitySeverity.BLOCKING);
     DataQualityReport report = measure(profile, rule);
     assertEquals(1, report.getFindingCount());
@@ -327,8 +323,7 @@ class DataQualityPhase2RulesTest {
     DataProfileSnapshot profile = new DataProfileSnapshot();
     profile.setSubjectKey("s");
     FieldProfile field = profile.field("code");
-    DataQualityRule rule =
-        rule(DataQualityRuleType.REGEX, "code", Map.of("pattern", "^[A-Z]+$"));
+    DataQualityRule rule = rule(DataQualityRuleType.REGEX, "code", Map.of("pattern", "^[A-Z]+$"));
     rule.setSeverity(QualitySeverity.WARNING);
     FieldProfile.RegexRuleProfile stats = field.regexProfile(rule.getId());
     stats.setPath("pushdown");
@@ -349,10 +344,7 @@ class DataQualityPhase2RulesTest {
     List<Object[]> rows = List.of(new Object[] {"xxABC yy"}, new Object[] {"nope"});
     DataProfileSnapshot profile = fullScan(meta, rows);
     DataQualityRule rule =
-        rule(
-            DataQualityRuleType.REGEX,
-            "note",
-            Map.of("pattern", "ABC", "matchMode", "FIND"));
+        rule(DataQualityRuleType.REGEX, "note", Map.of("pattern", "ABC", "matchMode", "FIND"));
     DataQualityReport report = measure(profile, rule);
     assertTrue(report.hasBlockingFindings());
   }
@@ -378,7 +370,8 @@ class DataQualityPhase2RulesTest {
     assertTrue(measure(profile, maxRule).hasBlockingFindings());
 
     // Reset max only fails for values above max
-    DataProfileSnapshot profile2 = fullScan(meta, List.of(new Object[] {"ab"}, new Object[] {"abcdef"}));
+    DataProfileSnapshot profile2 =
+        fullScan(meta, List.of(new Object[] {"ab"}, new Object[] {"abcdef"}));
     DataQualityRule okMax = rule(DataQualityRuleType.MAX_LENGTH, "name", Map.of("max", "6"));
     assertFalse(measure(profile2, okMax).hasBlockingFindings());
   }
@@ -394,8 +387,7 @@ class DataQualityPhase2RulesTest {
 
   @Test
   void distinctSampleSqlIsDialectAware() {
-    String pg =
-        DatabaseProfileCollector.distinctSampleSql("POSTGRESQL", "t", "c", 500);
+    String pg = DatabaseProfileCollector.distinctSampleSql("POSTGRESQL", "t", "c", 500);
     assertTrue(pg.contains("LIMIT 500"));
     assertFalse(pg.contains("TOP"));
 
@@ -423,8 +415,7 @@ class DataQualityPhase2RulesTest {
     DataProfileSnapshot profile = new DataProfileSnapshot();
     profile.setSubjectKey("s");
     profile.field("code"); // no values
-    DataQualityRule rule =
-        rule(DataQualityRuleType.REGEX, "code", Map.of("pattern", "[A-Z]+"));
+    DataQualityRule rule = rule(DataQualityRuleType.REGEX, "code", Map.of("pattern", "[A-Z]+"));
     DataQualityReport report = measure(profile, rule);
     assertEquals(1, report.getFindingCount());
     assertEquals(QualitySeverity.WARNING, report.getFindings().get(0).getSeverity());
@@ -436,8 +427,7 @@ class DataQualityPhase2RulesTest {
     DataProfileSnapshot profile = new DataProfileSnapshot();
     profile.setSubjectKey("s");
     FieldProfile field = profile.field("code");
-    DataQualityRule rule =
-        rule(DataQualityRuleType.REGEX, "code", Map.of("pattern", "[A-Z]+"));
+    DataQualityRule rule = rule(DataQualityRuleType.REGEX, "code", Map.of("pattern", "[A-Z]+"));
     FieldProfile.RegexRuleProfile stats = field.regexProfile(RegexSupport.ruleKey(rule));
     stats.setSkipped(true);
     stats.setPath(RegexSupport.PATH_NONE);

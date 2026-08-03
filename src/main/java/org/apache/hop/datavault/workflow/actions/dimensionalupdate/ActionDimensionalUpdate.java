@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.workflow.actions.dimensionalupdate;
 
 import java.io.IOException;
@@ -31,6 +29,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.vfs2.FileObject;
+import org.apache.hop.catalog.metadata.DataCatalogMeta;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.Result;
@@ -43,43 +42,41 @@ import org.apache.hop.core.gui.plugin.GuiElementType;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.GuiWidgetElement;
 import org.apache.hop.core.logging.ILoggingObject;
-import org.apache.hop.core.logging.LogLevel;
 import org.apache.hop.core.logging.LoggingObjectType;
 import org.apache.hop.core.logging.SimpleLoggingObject;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
 import org.apache.hop.core.xml.XmlHandler;
-import org.apache.hop.catalog.metadata.DataCatalogMeta;
 import org.apache.hop.datavault.catalog.DmCatalogPublisher;
-import org.apache.hop.datavault.lineage.DdlLineageExplainSupport;
+import org.apache.hop.datavault.config.DvRunConfigurationSupport;
 import org.apache.hop.datavault.hopgui.file.dimensional.HopDimensionalFileType;
-import org.apache.hop.datavault.metadata.dimensional.DmSourceRecordDefinitionSupport;
+import org.apache.hop.datavault.lineage.DdlLineageExplainSupport;
 import org.apache.hop.datavault.metadata.DvDdlSupport;
 import org.apache.hop.datavault.metadata.DvIntegerSettingValidationSupport;
 import org.apache.hop.datavault.metadata.DvModelBulkUpdateExecutionSupport;
-import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
-import org.apache.hop.datavault.metrics.DvUpdateMetricsCollector;
-import org.apache.hop.datavault.metrics.ExecutionMetricsProfileResolver;
-import org.apache.hop.datavault.metrics.ResolvedExecutionMetrics;
-import org.apache.hop.datavault.metrics.metadata.ExecutionMetricsProfileMeta;
 import org.apache.hop.datavault.metadata.DvTargetLoadMode;
+import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalConfiguration;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
+import org.apache.hop.datavault.metadata.dimensional.DmSourceRecordDefinitionSupport;
 import org.apache.hop.datavault.metadata.dimensional.DmTargetDatabaseSupport;
 import org.apache.hop.datavault.metadata.dimensional.IDmTable;
 import org.apache.hop.datavault.metadata.dimensional.pipeline.DmGeneratedPipelineSupport;
 import org.apache.hop.datavault.metadata.dimensional.pipeline.DmUpdateExecutionSupport;
+import org.apache.hop.datavault.metrics.DvUpdateMetricsCollector;
+import org.apache.hop.datavault.metrics.ExecutionMetricsProfileResolver;
+import org.apache.hop.datavault.metrics.ResolvedExecutionMetrics;
+import org.apache.hop.datavault.metrics.metadata.ExecutionMetricsProfileMeta;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.apache.hop.pipeline.PipelineMeta;
-import org.apache.hop.datavault.config.DvRunConfigurationSupport;
 import org.apache.hop.pipeline.config.PipelineRunConfiguration;
-import org.apache.hop.workflow.config.WorkflowRunConfiguration;
 import org.apache.hop.workflow.action.ActionBase;
 import org.apache.hop.workflow.action.IAction;
+import org.apache.hop.workflow.config.WorkflowRunConfiguration;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -100,7 +97,8 @@ public class ActionDimensionalUpdate extends ActionBase implements Cloneable, IA
   private static final Class<?> PKG = ActionDimensionalUpdate.class;
 
   public static final String GUI_PLUGIN_ELEMENT_PARENT_ID = "DIMENSIONAL_UPDATE_ACTION";
-  public static final String GUI_PLUGIN_ELEMENT_MODEL_TAB_ID = "DIMENSIONAL_UPDATE_ACTION_MODEL_TAB";
+  public static final String GUI_PLUGIN_ELEMENT_MODEL_TAB_ID =
+      "DIMENSIONAL_UPDATE_ACTION_MODEL_TAB";
   public static final String GUI_PLUGIN_ELEMENT_DDL_TAB_ID = "DIMENSIONAL_UPDATE_ACTION_DDL_TAB";
   public static final String DEFAULT_STAGING_PREFIX = "${java.io.tmpdir}/dm/";
 
@@ -342,9 +340,7 @@ public class ActionDimensionalUpdate extends ActionBase implements Cloneable, IA
       int totalErrors = 0;
       String realDdlSqlFilename = resolve(ddlSqlFilename);
       boolean processDdl =
-          updateTargetDatabaseStructure
-              || failIfDdlNeeded
-              || !Utils.isEmpty(realDdlSqlFilename);
+          updateTargetDatabaseStructure || failIfDdlNeeded || !Utils.isEmpty(realDdlSqlFilename);
 
       if (processDdl) {
         boolean ddlPhaseFailed = false;
@@ -404,15 +400,11 @@ public class ActionDimensionalUpdate extends ActionBase implements Cloneable, IA
               writeDdlToFile(ddlStatements, targetDatabase, realDdlSqlFilename);
               logBasic(
                   BaseMessages.getString(
-                      PKG,
-                      "ActionDimensionalUpdate.Log.DdlSavedToFile",
-                      realDdlSqlFilename));
+                      PKG, "ActionDimensionalUpdate.Log.DdlSavedToFile", realDdlSqlFilename));
             } catch (Exception e) {
               logError(
                   BaseMessages.getString(
-                      PKG,
-                      "ActionDimensionalUpdate.Error.DdlSaveFailed",
-                      realDdlSqlFilename),
+                      PKG, "ActionDimensionalUpdate.Error.DdlSaveFailed", realDdlSqlFilename),
                   e);
               totalErrors++;
               success = false;
@@ -484,8 +476,7 @@ public class ActionDimensionalUpdate extends ActionBase implements Cloneable, IA
         }
 
         if (updateTargetDatabaseStructure && ddlPhaseFailed) {
-          logError(
-              BaseMessages.getString(PKG, "ActionDimensionalUpdate.Log.AbortingOnDdlFailure"));
+          logError(BaseMessages.getString(PKG, "ActionDimensionalUpdate.Log.AbortingOnDdlFailure"));
           return finishExecution(result, false, Math.max(totalErrors, 1), dmModel);
         }
       }
@@ -501,8 +492,7 @@ public class ActionDimensionalUpdate extends ActionBase implements Cloneable, IA
       List<PipelineMeta> allPipelineMetas = new ArrayList<>();
       Date loadTimestamp = new Date();
 
-      for (IDmTable table :
-          DmUpdateExecutionSupport.orderTablesForPipelineExecution(tables)) {
+      for (IDmTable table : DmUpdateExecutionSupport.orderTablesForPipelineExecution(tables)) {
         logBasic(
             BaseMessages.getString(
                 PKG,
@@ -672,7 +662,8 @@ public class ActionDimensionalUpdate extends ActionBase implements Cloneable, IA
               publishResult.getErrorCount()));
       return publishResult.isSuccess();
     } catch (Exception e) {
-      logError(BaseMessages.getString(PKG, "ActionDimensionalUpdate.Error.CatalogPublishFailed"), e);
+      logError(
+          BaseMessages.getString(PKG, "ActionDimensionalUpdate.Error.CatalogPublishFailed"), e);
       return false;
     }
   }
@@ -797,8 +788,8 @@ public class ActionDimensionalUpdate extends ActionBase implements Cloneable, IA
     }
   }
 
-  private DimensionalModel loadDimensionalModel(
-      IHopMetadataProvider provider, IVariables variables) throws HopException {
+  private DimensionalModel loadDimensionalModel(IHopMetadataProvider provider, IVariables variables)
+      throws HopException {
     String realModelFile = variables.resolve(dimensionalModelFile);
     if (Utils.isEmpty(realModelFile)) {
       throw new HopException(

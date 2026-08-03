@@ -13,13 +13,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapDocument;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapEdge;
@@ -44,7 +42,8 @@ class ExecutionMapLayoutSupportTest {
     ExecutionMapNode pipeline = document.findNodeById("pipeline");
     ExecutionMapNode dataset = document.findNodeById("dataset");
 
-    assertTrue(actionA.getLocation().x < actionB.getLocation().x, "action flow should run left-to-right");
+    assertTrue(
+        actionA.getLocation().x < actionB.getLocation().x, "action flow should run left-to-right");
     assertTrue(
         transformA.getLocation().x < transformB.getLocation().x,
         "pipeline flow should run left-to-right");
@@ -79,8 +78,7 @@ class ExecutionMapLayoutSupportTest {
             + ExecutionMapMetrics.BUS_LANE_WIDTH;
     assertEquals(expectedTargetX, dm.getLocation().x);
     assertEquals(expectedTargetX, dv.getLocation().x);
-    assertTrue(
-        dm.getLocation().y != dv.getLocation().y, "spokes should be vertically separated");
+    assertTrue(dm.getLocation().y != dv.getLocation().y, "spokes should be vertically separated");
     assertTrue(
         expectedTargetX - (hub.getLocation().x + ExecutionMapMetrics.NODE_WIDTH) >= 64,
         "gutter between hub and targets should be at least 64px");
@@ -89,7 +87,9 @@ class ExecutionMapLayoutSupportTest {
   @Test
   void layoutSucceedsWhenOnlyNonLayoutEdgesArePresent() throws Exception {
     ExecutionMapDocument document = buildSampleDocument();
-    document.getEdgesOrEmpty().removeIf(edge -> ExecutionMapLayoutOptions.DEFAULT.usesEdgeForLayout(edge.getEdgeType()));
+    document
+        .getEdgesOrEmpty()
+        .removeIf(edge -> ExecutionMapLayoutOptions.DEFAULT.usesEdgeForLayout(edge.getEdgeType()));
     document
         .getEdgesOrEmpty()
         .add(edge(ExecutionMapEdgeType.REFERENCES, "action-b", "pipeline", "ref"));
@@ -121,28 +121,54 @@ class ExecutionMapLayoutSupportTest {
     ExecutionMapDocument document = new ExecutionMapDocument();
     document.setRootArtifactPath("workflows/sample.hwf");
 
-    document.getNodesOrEmpty().add(node("workflow", "Sample workflow", ExecutionMapNodeType.ROOT_WORKFLOW, null));
-    document.getNodesOrEmpty().add(node("action-a", "Action A", ExecutionMapNodeType.WORKFLOW_ACTION, "workflow"));
-    document.getNodesOrEmpty().add(node("action-b", "Action B", ExecutionMapNodeType.WORKFLOW_ACTION, "workflow"));
-    document.getNodesOrEmpty().add(node("pipeline", "Sample pipeline", ExecutionMapNodeType.PIPELINE, "action-b"));
     document
         .getNodesOrEmpty()
-        .add(node("transform-a", "Transform A", ExecutionMapNodeType.PIPELINE_TRANSFORM, "pipeline"));
+        .add(node("workflow", "Sample workflow", ExecutionMapNodeType.ROOT_WORKFLOW, null));
     document
         .getNodesOrEmpty()
-        .add(node("transform-b", "Transform B", ExecutionMapNodeType.PIPELINE_TRANSFORM, "pipeline"));
+        .add(node("action-a", "Action A", ExecutionMapNodeType.WORKFLOW_ACTION, "workflow"));
+    document
+        .getNodesOrEmpty()
+        .add(node("action-b", "Action B", ExecutionMapNodeType.WORKFLOW_ACTION, "workflow"));
+    document
+        .getNodesOrEmpty()
+        .add(node("pipeline", "Sample pipeline", ExecutionMapNodeType.PIPELINE, "action-b"));
+    document
+        .getNodesOrEmpty()
+        .add(
+            node(
+                "transform-a", "Transform A", ExecutionMapNodeType.PIPELINE_TRANSFORM, "pipeline"));
+    document
+        .getNodesOrEmpty()
+        .add(
+            node(
+                "transform-b", "Transform B", ExecutionMapNodeType.PIPELINE_TRANSFORM, "pipeline"));
     document
         .getNodesOrEmpty()
         .add(node("dataset", "orders", ExecutionMapNodeType.SOURCE_DATASET, "transform-b"));
 
     document.getEdgesOrEmpty().add(edge(ExecutionMapEdgeType.HOP, "action-a", "action-b", null));
-    document.getEdgesOrEmpty().add(edge(ExecutionMapEdgeType.HOP, "transform-a", "transform-b", null));
-    document.getEdgesOrEmpty().add(edge(ExecutionMapEdgeType.CONTAINS, "workflow", "action-a", null));
-    document.getEdgesOrEmpty().add(edge(ExecutionMapEdgeType.CONTAINS, "workflow", "action-b", null));
-    document.getEdgesOrEmpty().add(edge(ExecutionMapEdgeType.CONTAINS, "action-b", "pipeline", null));
-    document.getEdgesOrEmpty().add(edge(ExecutionMapEdgeType.CONTAINS, "pipeline", "transform-a", null));
-    document.getEdgesOrEmpty().add(edge(ExecutionMapEdgeType.CONTAINS, "pipeline", "transform-b", null));
-    document.getEdgesOrEmpty().add(edge(ExecutionMapEdgeType.READS_FROM, "transform-b", "dataset", null));
+    document
+        .getEdgesOrEmpty()
+        .add(edge(ExecutionMapEdgeType.HOP, "transform-a", "transform-b", null));
+    document
+        .getEdgesOrEmpty()
+        .add(edge(ExecutionMapEdgeType.CONTAINS, "workflow", "action-a", null));
+    document
+        .getEdgesOrEmpty()
+        .add(edge(ExecutionMapEdgeType.CONTAINS, "workflow", "action-b", null));
+    document
+        .getEdgesOrEmpty()
+        .add(edge(ExecutionMapEdgeType.CONTAINS, "action-b", "pipeline", null));
+    document
+        .getEdgesOrEmpty()
+        .add(edge(ExecutionMapEdgeType.CONTAINS, "pipeline", "transform-a", null));
+    document
+        .getEdgesOrEmpty()
+        .add(edge(ExecutionMapEdgeType.CONTAINS, "pipeline", "transform-b", null));
+    document
+        .getEdgesOrEmpty()
+        .add(edge(ExecutionMapEdgeType.READS_FROM, "transform-b", "dataset", null));
     return document;
   }
 

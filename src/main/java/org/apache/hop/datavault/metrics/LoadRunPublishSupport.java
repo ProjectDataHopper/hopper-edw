@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metrics;
 
 import org.apache.hop.core.util.Utils;
@@ -37,10 +35,7 @@ public final class LoadRunPublishSupport {
       return null;
     }
     return DvUpdateMetricsCollector.LoadRunPublishContext.withDefaults(
-        catalogConnectionName,
-        targetDatabaseName,
-        resolveWorkflowName(parentWorkflow),
-        modelType);
+        catalogConnectionName, targetDatabaseName, resolveWorkflowName(parentWorkflow), modelType);
   }
 
   private static String resolveWorkflowName(IWorkflowEngine<WorkflowMeta> parentWorkflow) {

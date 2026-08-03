@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.resourcedefinition;
 
 import java.io.OutputStreamWriter;
@@ -50,8 +48,7 @@ public final class SchemaRemediationArtifactsSupport {
   private SchemaRemediationArtifactsSupport() {}
 
   public static String configuredRootFolder(IVariables variables) {
-    String configured =
-        DataVaultConfigSingleton.getConfig().getSchemaRemediationFolderOrDefault();
+    String configured = DataVaultConfigSingleton.getConfig().getSchemaRemediationFolderOrDefault();
     if (Utils.isEmpty(configured)) {
       configured = DataVaultConfig.DEFAULT_SCHEMA_REMEDIATION_FOLDER;
     }
@@ -107,7 +104,8 @@ public final class SchemaRemediationArtifactsSupport {
     String base = sanitizeRemediationName(remediationName);
     String mdPath = appendPath(folder, base + "-report.md");
     String htmlPath = appendPath(folder, base + "-report.html");
-    String markdown = formatMarkdown(title, remediationName, reportLines, workflowFilename, sqlFilename);
+    String markdown =
+        formatMarkdown(title, remediationName, reportLines, workflowFilename, sqlFilename);
     String html = formatHtml(title, remediationName, reportLines, workflowFilename, sqlFilename);
     writeText(mdPath, markdown, variables);
     writeText(htmlPath, html, variables);
@@ -159,9 +157,7 @@ public final class SchemaRemediationArtifactsSupport {
           .append("</code></li>");
     }
     if (!Utils.isEmpty(sqlFilename)) {
-      b.append("<li><b>SQL script:</b> <code>")
-          .append(escape(sqlFilename))
-          .append("</code></li>");
+      b.append("<li><b>SQL script:</b> <code>").append(escape(sqlFilename)).append("</code></li>");
     }
     b.append("</ul><h2>What changed</h2><ul>");
     if (reportLines == null || reportLines.isEmpty()) {

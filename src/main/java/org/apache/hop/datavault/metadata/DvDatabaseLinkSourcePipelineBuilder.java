@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import java.util.ArrayList;
@@ -83,10 +81,7 @@ public class DvDatabaseLinkSourcePipelineBuilder extends DvDatabaseSourcePipelin
       DvHub hub = findHub(hubName);
       if (hub == null) {
         throw new HopException(
-            "No DV link source key field found for hub: "
-                + hubName
-                + " in Link "
-                + link.getName());
+            "No DV link source key field found for hub: " + hubName + " in Link " + link.getName());
       }
       DvLink.HubSourceKeyField sourceKeyField =
           DvLinkHubSourceKeyFieldSupport.findHubSourceKeyField(dvLinkHubSource, hubName);
@@ -144,8 +139,7 @@ public class DvDatabaseLinkSourcePipelineBuilder extends DvDatabaseSourcePipelin
     List<String> keyFields = hubKeyFields.computeIfAbsent(hubName, f -> new ArrayList<>());
 
     for (DvLinkHubSourceKeyFieldSupport.ResolvedBusinessKeySource resolvedMapping :
-        DvLinkHubSourceKeyFieldSupport.resolveBusinessKeySources(
-            hub, sourceKeyField, variables)) {
+        DvLinkHubSourceKeyFieldSupport.resolveBusinessKeySources(hub, sourceKeyField, variables)) {
       if (hub.findBusinessKey(resolvedMapping.getBusinessKeyField()) == null) {
         throw new HopException(
             "The specified business key field "

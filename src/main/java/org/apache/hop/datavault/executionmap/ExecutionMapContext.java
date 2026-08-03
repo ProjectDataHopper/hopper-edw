@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.executionmap;
 
 import java.nio.file.Path;
@@ -178,8 +176,7 @@ public final class ExecutionMapContext {
       return null;
     }
     String resolvedPath = Utils.isEmpty(sourcePath) ? null : resolvePath(sourcePath);
-    String dedupeKey =
-        resolvedPath != null ? resolvedPath : artifactType.name() + ":" + sourcePath;
+    String dedupeKey = resolvedPath != null ? resolvedPath : artifactType.name() + ":" + sourcePath;
     String existing = snapshotIdByArtifactPath.get(dedupeKey);
     if (existing != null) {
       return existing;
@@ -255,11 +252,7 @@ public final class ExecutionMapContext {
       return false;
     }
     return switch (nodeType) {
-      case PIPELINE_TRANSFORM,
-          PIPELINE_EXECUTOR,
-          WORKFLOW_EXECUTOR,
-          MAPPING,
-          META_INJECT -> true;
+      case PIPELINE_TRANSFORM, PIPELINE_EXECUTOR, WORKFLOW_EXECUTOR, MAPPING, META_INJECT -> true;
       default -> false;
     };
   }

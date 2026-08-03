@@ -13,9 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -106,7 +104,11 @@ class DvRecordSourceValidationTest {
 
     List<ICheckResult> remarks = new ArrayList<>();
     satellite.check(
-        remarks, new MemoryMetadataProvider(), new Variables(), DvModelCheckOptions.fastOnly(), model);
+        remarks,
+        new MemoryMetadataProvider(),
+        new Variables(),
+        DvModelCheckOptions.fastOnly(),
+        model);
 
     assertTrue(
         remarks.stream()
@@ -132,7 +134,11 @@ class DvRecordSourceValidationTest {
 
     List<ICheckResult> remarks = new ArrayList<>();
     satellite.check(
-        remarks, new MemoryMetadataProvider(), new Variables(), DvModelCheckOptions.fastOnly(), model);
+        remarks,
+        new MemoryMetadataProvider(),
+        new Variables(),
+        DvModelCheckOptions.fastOnly(),
+        model);
 
     assertTrue(
         remarks.stream()
@@ -206,7 +212,9 @@ class DvRecordSourceValidationTest {
     hub.setRecordSourceFieldName("src_invoice");
     hub.setRecordSources(List.of("invoice-source"));
     hub.setBusinessKeys(
-        List.of(businessKey("NUM_0", "NUM_0", "invoice-source"), businessKey("LIN_0", "LIN_0", "invoice-source")));
+        List.of(
+            businessKey("NUM_0", "NUM_0", "invoice-source"),
+            businessKey("LIN_0", "LIN_0", "invoice-source")));
 
     TestSatellite satellite = new TestSatellite("s_invoice", invoiceSource());
     satellite.setHubName("h_invoice");
