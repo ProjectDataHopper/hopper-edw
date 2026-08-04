@@ -110,6 +110,17 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
   private Text wSourceIndicatorFieldName;
   private Text wGroup;
   private Combo wDeliveryType;
+  private org.eclipse.swt.custom.CCombo wDeliveryTypeField;
+  private Button wFieldsFromInput;
+  private org.eclipse.swt.custom.CCombo wFieldGroupingField;
+  private org.eclipse.swt.custom.CCombo wFieldNameField;
+  private org.eclipse.swt.custom.CCombo wFieldTypeField;
+  private org.eclipse.swt.custom.CCombo wFieldLengthField;
+  private org.eclipse.swt.custom.CCombo wFieldPrecisionField;
+  private org.eclipse.swt.custom.CCombo wFieldPrimaryKeyPositionField;
+  private org.eclipse.swt.custom.CCombo wFieldFormatField;
+  private org.eclipse.swt.custom.CCombo wFieldDecimalField;
+  private org.eclipse.swt.custom.CCombo wFieldGroupingSymbolField;
   private Text wFieldCountField;
   private Text wWrittenToCatalogField;
   private Text wCatalogNamespaceField;
@@ -142,6 +153,7 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
 
     buildGeneralTab(wTabFolder);
     buildDefinitionTab(wTabFolder);
+    buildFieldsTab(wTabFolder);
     buildSourceTab(wTabFolder);
     buildDvSourceTab(wTabFolder);
     buildOutputTab(wTabFolder);
@@ -235,6 +247,75 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
         wDescriptionValue =
             addTextField(
                 comp, "RecordDefinitionOutputDialog.DescriptionValue.Label", last, middle, margin);
+  }
+
+  private void buildFieldsTab(CTabFolder tabFolder) {
+    CTabItem tab = new CTabItem(tabFolder, SWT.NONE);
+    tab.setText(BaseMessages.getString(PKG, "RecordDefinitionOutputDialog.FieldsTab.Label"));
+    Composite comp = new Composite(tabFolder, SWT.NONE);
+    PropsUi.setLook(comp);
+    comp.setLayout(new FormLayout());
+    tab.setControl(comp);
+
+    int middle = props.getMiddlePct();
+    Control last = null;
+    last =
+        wFieldsFromInput =
+            addCheckbox(
+                comp, "RecordDefinitionOutputDialog.FieldsFromInput.Label", last, middle, margin);
+    wFieldsFromInput.addListener(SWT.Selection, e -> setFlags());
+    last =
+        wFieldGroupingField =
+            addFieldCombo(
+                comp,
+                "RecordDefinitionOutputDialog.FieldGroupingField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wFieldNameField =
+            addFieldCombo(
+                comp, "RecordDefinitionOutputDialog.FieldNameField.Label", last, middle, margin);
+    last =
+        wFieldTypeField =
+            addFieldCombo(
+                comp, "RecordDefinitionOutputDialog.FieldTypeField.Label", last, middle, margin);
+    last =
+        wFieldLengthField =
+            addFieldCombo(
+                comp, "RecordDefinitionOutputDialog.FieldLengthField.Label", last, middle, margin);
+    last =
+        wFieldPrecisionField =
+            addFieldCombo(
+                comp,
+                "RecordDefinitionOutputDialog.FieldPrecisionField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wFieldPrimaryKeyPositionField =
+            addFieldCombo(
+                comp,
+                "RecordDefinitionOutputDialog.FieldPrimaryKeyPositionField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wFieldFormatField =
+            addFieldCombo(
+                comp, "RecordDefinitionOutputDialog.FieldFormatField.Label", last, middle, margin);
+    last =
+        wFieldDecimalField =
+            addFieldCombo(
+                comp, "RecordDefinitionOutputDialog.FieldDecimalField.Label", last, middle, margin);
+    last =
+        wFieldGroupingSymbolField =
+            addFieldCombo(
+                comp,
+                "RecordDefinitionOutputDialog.FieldGroupingSymbolField.Label",
+                last,
+                middle,
+                margin);
   }
 
   private void buildSourceTab(CTabFolder tabFolder) {
@@ -575,6 +656,10 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
                 middle,
                 margin,
                 DvSourceDeliveryType.class);
+    last =
+        wDeliveryTypeField =
+            addFieldCombo(
+                comp, "RecordDefinitionOutputDialog.DeliveryTypeField.Label", last, middle, margin);
   }
 
   private void buildOutputTab(CTabFolder tabFolder) {
@@ -817,7 +902,17 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
       wIcebergBranchField,
       wIcebergS3EndpointField,
       wIcebergS3AccessKeyField,
-      wIcebergS3SecretKeyField
+      wIcebergS3SecretKeyField,
+      wDeliveryTypeField,
+      wFieldGroupingField,
+      wFieldNameField,
+      wFieldTypeField,
+      wFieldLengthField,
+      wFieldPrecisionField,
+      wFieldPrimaryKeyPositionField,
+      wFieldFormatField,
+      wFieldDecimalField,
+      wFieldGroupingSymbolField
     };
     for (org.eclipse.swt.custom.CCombo combo : combos) {
       combo.setItems(fieldNames);
@@ -841,7 +936,12 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
   }
 
   private void setFlags() {
-    boolean fromInput = wSelectFromInput.getSelection();
+    boolean fieldsFromInput = wFieldsFromInput.getSelection();
+    if (fieldsFromInput && !wSelectFromInput.getSelection()) {
+      wSelectFromInput.setSelection(true);
+    }
+    boolean fromInput = wSelectFromInput.getSelection() || fieldsFromInput;
+
     wNamespaceField.setEnabled(fromInput);
     wNameField.setEnabled(fromInput);
     wDescriptionField.setEnabled(fromInput);
@@ -860,6 +960,7 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
     wIcebergS3EndpointField.setEnabled(fromInput);
     wIcebergS3AccessKeyField.setEnabled(fromInput);
     wIcebergS3SecretKeyField.setEnabled(fromInput);
+    wDeliveryTypeField.setEnabled(fromInput);
     wNamespaceValue.setEnabled(!fromInput);
     wNameValue.setEnabled(!fromInput);
     wDescriptionValue.setEnabled(!fromInput);
@@ -880,6 +981,17 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
     wIcebergS3Endpoint.setEnabled(!fromInput);
     wIcebergS3AccessKey.setEnabled(!fromInput);
     wIcebergS3SecretKey.setEnabled(!fromInput);
+
+    wFieldGroupingField.setEnabled(fieldsFromInput);
+    wFieldNameField.setEnabled(fieldsFromInput);
+    wFieldTypeField.setEnabled(fieldsFromInput);
+    wFieldLengthField.setEnabled(fieldsFromInput);
+    wFieldPrecisionField.setEnabled(fieldsFromInput);
+    wFieldPrimaryKeyPositionField.setEnabled(fieldsFromInput);
+    wFieldFormatField.setEnabled(fieldsFromInput);
+    wFieldDecimalField.setEnabled(fieldsFromInput);
+    wFieldGroupingSymbolField.setEnabled(fieldsFromInput);
+
     updateSourcePanels();
   }
 
@@ -935,6 +1047,17 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
     wSourceIndicatorFieldName.setText(Const.NVL(input.getSourceIndicatorField(), ""));
     wGroup.setText(Const.NVL(input.getGroup(), ""));
     EnumDialogSupport.selectCombo(wDeliveryType, input.getDeliveryType());
+    wDeliveryTypeField.setText(Const.NVL(input.getDeliveryTypeField(), ""));
+    wFieldsFromInput.setSelection(input.isFieldsFromInput());
+    wFieldGroupingField.setText(Const.NVL(input.getFieldGroupingField(), ""));
+    wFieldNameField.setText(Const.NVL(input.getFieldNameField(), ""));
+    wFieldTypeField.setText(Const.NVL(input.getFieldTypeField(), ""));
+    wFieldLengthField.setText(Const.NVL(input.getFieldLengthField(), ""));
+    wFieldPrecisionField.setText(Const.NVL(input.getFieldPrecisionField(), ""));
+    wFieldPrimaryKeyPositionField.setText(Const.NVL(input.getFieldPrimaryKeyPositionField(), ""));
+    wFieldFormatField.setText(Const.NVL(input.getFieldFormatField(), ""));
+    wFieldDecimalField.setText(Const.NVL(input.getFieldDecimalField(), ""));
+    wFieldGroupingSymbolField.setText(Const.NVL(input.getFieldGroupingSymbolField(), ""));
     wFieldCountField.setText(Const.NVL(input.getFieldCountField(), ""));
     wWrittenToCatalogField.setText(Const.NVL(input.getWrittenToCatalogField(), ""));
     wCatalogNamespaceField.setText(Const.NVL(input.getCatalogNamespaceField(), ""));
@@ -1004,6 +1127,20 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
     input.setDeliveryType(
         EnumDialogSupport.readCombo(
             wDeliveryType, DvSourceDeliveryType.class, DvSourceDeliveryType.CHANGES_ONLY));
+    input.setDeliveryTypeField(wDeliveryTypeField.getText());
+    input.setFieldsFromInput(wFieldsFromInput.getSelection());
+    if (wFieldsFromInput.getSelection()) {
+      input.setSelectFromInput(true);
+    }
+    input.setFieldGroupingField(wFieldGroupingField.getText());
+    input.setFieldNameField(wFieldNameField.getText());
+    input.setFieldTypeField(wFieldTypeField.getText());
+    input.setFieldLengthField(wFieldLengthField.getText());
+    input.setFieldPrecisionField(wFieldPrecisionField.getText());
+    input.setFieldPrimaryKeyPositionField(wFieldPrimaryKeyPositionField.getText());
+    input.setFieldFormatField(wFieldFormatField.getText());
+    input.setFieldDecimalField(wFieldDecimalField.getText());
+    input.setFieldGroupingSymbolField(wFieldGroupingSymbolField.getText());
     input.setFieldCountField(wFieldCountField.getText());
     input.setWrittenToCatalogField(wWrittenToCatalogField.getText());
     input.setCatalogNamespaceField(wCatalogNamespaceField.getText());

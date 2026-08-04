@@ -16,7 +16,10 @@
  */
 package org.apache.hop.catalog.transform.recordoutput;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.hop.core.row.IRowMeta;
+import org.apache.hop.datavault.metadata.SourceField;
 import org.apache.hop.pipeline.transform.BaseTransformData;
 import org.apache.hop.pipeline.transform.ITransformData;
 
@@ -34,6 +37,23 @@ public class RecordDefinitionOutputData extends BaseTransformData implements ITr
   public int includeFileMaskFieldIndex = -1;
   public int statusFieldStartIndex = -1;
   public boolean fixedConfigProcessed;
+
+  // Stream field-definition mode
+  public int fieldGroupingFieldIndex = -1;
+  public int fieldNameFieldIndex = -1;
+  public int fieldTypeFieldIndex = -1;
+  public int fieldLengthFieldIndex = -1;
+  public int fieldPrecisionFieldIndex = -1;
+  public int fieldPrimaryKeyPositionFieldIndex = -1;
+  public int fieldFormatFieldIndex = -1;
+  public int fieldDecimalFieldIndex = -1;
+  public int fieldGroupingSymbolFieldIndex = -1;
+  public int deliveryTypeFieldIndex = -1;
+
+  public final List<SourceField> currentFields = new ArrayList<>();
+  public Object[] currentGroupBaseRow;
+  public String currentGroupValue;
+  public boolean hasOpenGroup;
 
   public RecordDefinitionOutputData() {
     super();

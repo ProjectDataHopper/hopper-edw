@@ -193,6 +193,44 @@ public class RecordDefinitionOutputMeta
   @HopMetadataProperty(key = "delivery_type", storeWithCode = true)
   private DvSourceDeliveryType deliveryType = DvSourceDeliveryType.CHANGES_ONLY;
 
+  @HopMetadataProperty(key = "delivery_type_field")
+  private String deliveryTypeField;
+
+  /** When true, collect field definitions from the input stream instead of discovering them. */
+  @HopMetadataProperty(key = "fields_from_input")
+  private boolean fieldsFromInput;
+
+  /**
+   * Input field used as the consecutive-group break key for stream field rows. Empty means the
+   * entire input stream is one record definition.
+   */
+  @HopMetadataProperty(key = "field_grouping_field")
+  private String fieldGroupingField;
+
+  @HopMetadataProperty(key = "field_name_field")
+  private String fieldNameField;
+
+  @HopMetadataProperty(key = "field_type_field")
+  private String fieldTypeField;
+
+  @HopMetadataProperty(key = "field_length_field")
+  private String fieldLengthField;
+
+  @HopMetadataProperty(key = "field_precision_field")
+  private String fieldPrecisionField;
+
+  @HopMetadataProperty(key = "field_primary_key_position_field")
+  private String fieldPrimaryKeyPositionField;
+
+  @HopMetadataProperty(key = "field_format_field")
+  private String fieldFormatField;
+
+  @HopMetadataProperty(key = "field_decimal_field")
+  private String fieldDecimalField;
+
+  @HopMetadataProperty(key = "field_grouping_symbol_field")
+  private String fieldGroupingSymbolField;
+
   @HopMetadataProperty(key = "field_count_field")
   private String fieldCountField = "field_count";
 
@@ -263,7 +301,7 @@ public class RecordDefinitionOutputMeta
               transformMeta));
     }
 
-    if (selectFromInput) {
+    if (fieldsFromInput || selectFromInput) {
       if (prev == null || prev.isEmpty()) {
         remarks.add(
             new CheckResult(
@@ -276,6 +314,14 @@ public class RecordDefinitionOutputMeta
           new CheckResult(
               ICheckResult.TYPE_RESULT_WARNING,
               "Namespace and name values are not fully configured.",
+              transformMeta));
+    }
+
+    if (fieldsFromInput && Utils.isEmpty(fieldNameField)) {
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_ERROR,
+              "Field name field is required when using field definitions from the input stream.",
               transformMeta));
     }
   }

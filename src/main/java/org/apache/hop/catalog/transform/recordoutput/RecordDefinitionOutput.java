@@ -16,6 +16,7 @@
  */
 package org.apache.hop.catalog.transform.recordoutput;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.apache.hop.catalog.discovery.PhysicalSourceRef;
@@ -27,6 +28,7 @@ import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.RowDataUtil;
 import org.apache.hop.core.row.RowMeta;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.datavault.metadata.DvSourceDeliveryType;
 import org.apache.hop.datavault.metadata.SourceField;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.pipeline.Pipeline;
@@ -51,6 +53,10 @@ public class RecordDefinitionOutput
 
   @Override
   public boolean processRow() throws HopException {
+    if (meta.isFieldsFromInput()) {
+      return processFieldsFromInput();
+    }
+
     Object[] row = getRow();
 
     if (!meta.isSelectFromInput()) {
@@ -86,7 +92,96 @@ public class RecordDefinitionOutput
     return true;
   }
 
+  private boolean processFieldsFromInput() throws HopException {
+    Object[] row = getRow();
+
+    if (first) {
+      first = false;
+      if (getInputRowMeta() == null && row == null) {
+        setOutputDone();
+        return false;
+      }
+      IRowMeta inputMeta = getInputRowMeta();
+      if (inputMeta == null) {
+        throw new HopException(
+            BaseMessages.getString(PKG, "RecordDefinitionOutput.Error.MissingInputFields"));
+      }
+      data.outputRowMeta = inputMeta.clone();
+      meta.getFields(data.outputRowMeta, getTransformName(), null, null, this, metadataProvider);
+      data.statusFieldStartIndex = inputMeta.size();
+      resolveInputFieldIndexes();
+      resolveStreamFieldIndexes();
+    }
+
+    if (row == null) {
+      flushFieldGroup();
+      setOutputDone();
+      return false;
+    }
+
+    String groupValue =
+        RecordDefinitionOutputFieldSupport.groupingValue(
+            getInputRowMeta(), row, data.fieldGroupingFieldIndex);
+
+    if (data.hasOpenGroup
+        && RecordDefinitionOutputFieldSupport.groupChanged(data.currentGroupValue, groupValue)) {
+      flushFieldGroup();
+    }
+
+    if (!data.hasOpenGroup) {
+      data.hasOpenGroup = true;
+      data.currentGroupValue = groupValue;
+      data.currentGroupBaseRow = row;
+      data.currentFields.clear();
+    }
+
+    SourceField field =
+        RecordDefinitionOutputFieldSupport.sourceFieldFromRow(
+            getInputRowMeta(),
+            row,
+            data.fieldNameFieldIndex,
+            data.fieldTypeFieldIndex,
+            data.fieldLengthFieldIndex,
+            data.fieldPrecisionFieldIndex,
+            data.fieldPrimaryKeyPositionFieldIndex,
+            data.fieldFormatFieldIndex,
+            data.fieldDecimalFieldIndex,
+            data.fieldGroupingSymbolFieldIndex);
+    data.currentFields.add(field);
+    return true;
+  }
+
+  private void flushFieldGroup() throws HopException {
+    if (!data.hasOpenGroup) {
+      return;
+    }
+
+    List<SourceField> fields = new ArrayList<>(data.currentFields);
+    Object[] baseRow = data.currentGroupBaseRow;
+    data.hasOpenGroup = false;
+    data.currentGroupBaseRow = null;
+    data.currentGroupValue = null;
+    data.currentFields.clear();
+
+    writeDefinition(baseRow, fields, data.statusFieldStartIndex, null);
+  }
+
   private void processDiscovery(Object[] baseRow, int statusStartIdx) throws HopException {
+    PhysicalSourceRef physicalRef = buildPhysicalRef(baseRow);
+    RecordDefinitionDiscoveryService.DiscoveryResult discovery =
+        RecordDefinitionDiscoveryService.discover(
+            meta.getSourceType(), physicalRef, this, metadataProvider);
+
+    List<SourceField> fields = discovery.fields();
+    writeDefinition(baseRow, fields, statusStartIdx, discovery);
+  }
+
+  private void writeDefinition(
+      Object[] baseRow,
+      List<SourceField> fields,
+      int statusStartIdx,
+      RecordDefinitionDiscoveryService.DiscoveryResult discovery)
+      throws HopException {
     String namespace =
         resolveDefinitionValue(meta.getNamespaceValue(), meta.getNamespaceField(), baseRow);
     String name = resolveDefinitionValue(meta.getNameValue(), meta.getNameField(), baseRow);
@@ -104,21 +199,18 @@ public class RecordDefinitionOutput
           BaseMessages.getString(PKG, "RecordDefinitionOutput.Error.MissingCatalogConnection"));
     }
 
-    PhysicalSourceRef physicalRef = buildPhysicalRef(baseRow);
-    RecordDefinitionDiscoveryService.DiscoveryResult discovery =
-        RecordDefinitionDiscoveryService.discover(
-            meta.getSourceType(), physicalRef, this, metadataProvider);
-
-    List<SourceField> fields = discovery.fields();
     int fieldCount = fields != null ? fields.size() : 0;
     if (fieldCount == 0 && meta.isFailIfNoFields()) {
       throw new HopException(
           BaseMessages.getString(PKG, "RecordDefinitionOutput.Error.NoFieldsDiscovered"));
     }
 
+    PhysicalSourceRef physicalRef = buildPhysicalRef(baseRow);
+    DvSourceDeliveryType deliveryType = resolveDeliveryType(baseRow);
+
     boolean written = false;
     if (meta.isWriteToCatalog() && fieldCount > 0) {
-      RecordDefinitionWriteRequest request =
+      RecordDefinitionWriteRequest.Builder requestBuilder =
           RecordDefinitionWriteRequest.builder()
               .catalogConnectionName(catalogConnection)
               .namespace(namespace)
@@ -128,15 +220,16 @@ public class RecordDefinitionOutput
               .sourceType(meta.getSourceType())
               .physicalRef(physicalRef)
               .fields(fields)
-              .csvDiscovery(discovery.csvDiscovery())
               .sourceIndicator(meta.getSourceIndicator())
               .sourceIndicatorField(meta.getSourceIndicatorField())
               .group(meta.getGroup())
-              .deliveryType(meta.getDeliveryType())
+              .deliveryType(deliveryType)
               .updatedAt(new Date())
-              .pipelineName(getPipelineMeta() != null ? getPipelineMeta().getName() : null)
-              .build();
-      RecordDefinitionCatalogWriter.upsert(request, this, metadataProvider);
+              .pipelineName(getPipelineMeta() != null ? getPipelineMeta().getName() : null);
+      if (discovery != null) {
+        requestBuilder.csvDiscovery(discovery.csvDiscovery());
+      }
+      RecordDefinitionCatalogWriter.upsert(requestBuilder.build(), this, metadataProvider);
       written = true;
     }
 
@@ -152,6 +245,18 @@ public class RecordDefinitionOutput
     outputRow[statusStartIdx + 2] = namespace;
     outputRow[statusStartIdx + 3] = name;
     putRow(data.outputRowMeta, outputRow);
+  }
+
+  private DvSourceDeliveryType resolveDeliveryType(Object[] baseRow) throws HopException {
+    String streamValue = null;
+    if (baseRow != null
+        && data.deliveryTypeFieldIndex >= 0
+        && getInputRowMeta() != null
+        && data.deliveryTypeFieldIndex < getInputRowMeta().size()) {
+      streamValue = getInputRowMeta().getString(baseRow, data.deliveryTypeFieldIndex);
+    }
+    return RecordDefinitionOutputFieldSupport.resolveDeliveryType(
+        streamValue, meta.getDeliveryType());
   }
 
   private PhysicalSourceRef buildPhysicalRef(Object[] row) throws HopException {
@@ -207,7 +312,8 @@ public class RecordDefinitionOutput
 
   private String resolveDefinitionValue(String fixedValue, String fieldName, Object[] row)
       throws HopException {
-    if (meta.isSelectFromInput() && !Utils.isEmpty(fieldName) && row != null) {
+    boolean fromInput = meta.isSelectFromInput() || meta.isFieldsFromInput();
+    if (fromInput && !Utils.isEmpty(fieldName) && row != null) {
       int index = getInputRowMeta().indexOfValue(resolve(fieldName));
       if (index >= 0) {
         return getInputRowMeta().getString(row, index);
@@ -218,7 +324,8 @@ public class RecordDefinitionOutput
 
   private String resolvePhysicalValue(String fixedValue, String fieldName, Object[] row)
       throws HopException {
-    if (meta.isSelectFromInput() && !Utils.isEmpty(fieldName) && row != null) {
+    boolean fromInput = meta.isSelectFromInput() || meta.isFieldsFromInput();
+    if (fromInput && !Utils.isEmpty(fieldName) && row != null) {
       int index = getInputRowMeta().indexOfValue(resolve(fieldName));
       if (index >= 0) {
         String value = getInputRowMeta().getString(row, index);
@@ -241,6 +348,40 @@ public class RecordDefinitionOutput
     data.filePathFieldIndex = indexOf(inputRowMeta, meta.getFilePathField());
     data.folderFieldIndex = indexOf(inputRowMeta, meta.getFolderField());
     data.includeFileMaskFieldIndex = indexOf(inputRowMeta, meta.getIncludeFileMaskField());
+    data.deliveryTypeFieldIndex = indexOf(inputRowMeta, meta.getDeliveryTypeField());
+  }
+
+  private void resolveStreamFieldIndexes() throws HopException {
+    IRowMeta inputRowMeta = getInputRowMeta();
+    data.fieldGroupingFieldIndex = indexOf(inputRowMeta, meta.getFieldGroupingField());
+    data.fieldNameFieldIndex = indexOf(inputRowMeta, meta.getFieldNameField());
+    data.fieldTypeFieldIndex = indexOf(inputRowMeta, meta.getFieldTypeField());
+    data.fieldLengthFieldIndex = indexOf(inputRowMeta, meta.getFieldLengthField());
+    data.fieldPrecisionFieldIndex = indexOf(inputRowMeta, meta.getFieldPrecisionField());
+    data.fieldPrimaryKeyPositionFieldIndex =
+        indexOf(inputRowMeta, meta.getFieldPrimaryKeyPositionField());
+    data.fieldFormatFieldIndex = indexOf(inputRowMeta, meta.getFieldFormatField());
+    data.fieldDecimalFieldIndex = indexOf(inputRowMeta, meta.getFieldDecimalField());
+    data.fieldGroupingSymbolFieldIndex = indexOf(inputRowMeta, meta.getFieldGroupingSymbolField());
+
+    if (data.fieldNameFieldIndex < 0) {
+      throw new HopException(
+          BaseMessages.getString(
+              PKG,
+              "RecordDefinitionOutput.Error.FieldNameFieldNotFound",
+              resolve(meta.getFieldNameField())));
+    }
+    if (data.fieldTypeFieldIndex < 0 && !Utils.isEmpty(meta.getFieldTypeField())) {
+      throw new HopException(
+          BaseMessages.getString(
+              PKG,
+              "RecordDefinitionOutput.Error.FieldTypeFieldNotFound",
+              resolve(meta.getFieldTypeField())));
+    }
+    if (data.fieldTypeFieldIndex < 0) {
+      throw new HopException(
+          BaseMessages.getString(PKG, "RecordDefinitionOutput.Error.MissingFieldTypeMapping"));
+    }
   }
 
   private int indexOf(IRowMeta rowMeta, String fieldName) {
