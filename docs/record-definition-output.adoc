@@ -1,0 +1,305 @@
+= Record Definition Output
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+The **Record Definition Output** transform writes **record definitions** to a Hop **data catalog** connection. It is an output transform (category **Output**) and appears in the transform palette with the data catalog icon.
+
+Use it when you want to **publish or migrate** catalog entries from a pipeline instead of only editing them in the Data Catalog perspective. Two field sources are supported:
+
+* **Physical discovery** — inspect a database table, CSV/Parquet file, or Iceberg table and store the discovered layout.
+* **Stream field definitions** — accept one input row per column (name, type, length, precision, primary key position, format options) and assemble complete definitions with a **field grouping** key. This path is intended for catalog migration and bulk load of existing metadata.
+
+The inverse transform is link:record-definition-input.adoc[Record Definition Input], which reads catalog entries as pipeline rows.
+
+== Prerequisites
+
+* A configured **data catalog connection** (DataCatalogMeta). The transform's **Catalog connection** dropdown lists every catalog connection in the project.
+* For **physical discovery**: a reachable physical source (database connection, file path/folder, or Iceberg settings) that the Hop runtime can inspect.
+* For **stream fields**: an upstream transform that emits **one row per field**, preferably sorted so consecutive rows for the same record definition share a stable grouping value.
+
+You can inspect written entries afterward from the **Data Catalog** perspective in Hop GUI.
+
+== Operating modes
+
+[cols="1,3", options="header"]
+|===
+|Mode |When to use
+
+|Fixed configuration discovery
+|No input stream (or no “select from input”). Namespace, name, and physical location are fixed dialog values. The transform discovers fields once and optionally writes one catalog entry.
+
+|Per-row discovery
+|**Select definition and source from previous transform input?** is enabled, and stream field mode is off. Each input row supplies definition keys and/or physical location fields; the transform discovers and writes once per input row.
+
+|Stream field definitions (migration)
+|**Use field definitions from input stream?** is enabled on the **Fields** tab. Physical discovery is skipped. Field rows are collected into groups; each group becomes one catalog write.
+|===
+
+== Dialog overview
+
+The transform dialog has seven tabs: **General**, **Definition**, **Fields**, **Physical table**, **Source**, **DV Source**, and **Output**.
+
+=== General
+
+[cols="1,3", options="header"]
+|===
+|Option |Description
+
+|Transform name
+|The name of this transform in the pipeline graph.
+
+|Catalog connection
+|Required. Target data catalog connection for the upsert.
+
+|Record definition type
+|Semantic type of the entry to write (for example `DV_SOURCE`). Data Vault source loads use `DV_SOURCE`.
+
+|Select definition and source from previous transform input?
+|When enabled, namespace, name, description, and physical location can be read from input fields instead of fixed values. Stream field mode also requires an input stream (the dialog enables select-from-input when field stream mode is on).
+
+|Write definition to catalog?
+|When enabled (default), successful field resolution is written via the catalog registry (upsert). When disabled, the transform still resolves fields and emits status columns without persisting.
+
+|Fail when no fields are available?
+|When enabled (default), an empty field list fails the transform. When disabled, empty groups or failed discoveries produce status output without writing.
+|===
+
+=== Definition
+
+Identifies the catalog entry (namespace + name) and optional description.
+
+[cols="1,3", options="header"]
+|===
+|Option |Description
+
+|Namespace field / Name field / Description field
+|Enabled when reading from input. Names of incoming columns that hold catalog namespace, record name, and description.
+
+|Namespace value / Name value / Description value
+|Enabled when not reading from input. Fixed values for a single definition. Namespace and name are required for a successful write.
+|===
+
+Typical namespaces follow project conventions (for example `hop/integration-tests/sources` or `hop/<project>/sources`). Names must be unique within a namespace.
+
+=== Fields
+
+Configures **stream field definition** mode — the migration path.
+
+[cols="1,3", options="header"]
+|===
+|Option |Description
+
+|Use field definitions from input stream?
+|When enabled, the transform does **not** discover fields from the physical source. Each input row contributes one column to the current definition. Select-from-input is forced on.
+
+|Field grouping field
+|Optional. Name of an input column used as the **consecutive group break key**. While this value stays the same, field rows are accumulated. When it changes, the previous group is written to the catalog and a new group starts. Leave empty to treat the **entire input stream** as a single definition (flush only at end of input).
+
+|Field name field
+|Required in stream mode. Incoming column that holds the catalog field name.
+
+|Field type field
+|Required in stream mode. Incoming column that holds the Hop type name (`String`, `Integer`, `Number`, `Date`, `Timestamp`, `Boolean`, `BigNumber`, and so on — the same labels as the catalog Fields tab).
+
+|Field length field
+|Optional. Incoming column for field length (stored as text on the source field).
+
+|Field precision field
+|Optional. Incoming column for field precision.
+
+|Primary key position field
+|Optional. Incoming column for 1-based position in the source primary key. Empty or zero means the field is not part of the key.
+
+|Format field
+|Optional. CSV/text format mask (for example date formats). Stored under field input options.
+
+|Decimal symbol field
+|Optional. Decimal separator for numeric CSV parsing.
+
+|Grouping symbol field
+|Optional. Thousands grouping symbol for numeric CSV parsing.
+|===
+
+==== Field grouping semantics
+
+Stream mode behaves like a single-pass **Group By**:
+
+* Rows must be **ordered** so that all fields for one record definition are consecutive. A later reappearance of an earlier grouping value starts a **new** group (it is not merged with the first).
+* The **first row** of each group is the base for definition-level attributes (namespace, name, description, physical source fields, delivery type field). Keep those columns stable within a group.
+* On end of input, the last open group is flushed automatically.
+* One **status output row** is emitted per completed group (not one row per field).
+
+.Example stream (grouping field = `record_name`)
+[cols="1,1,1,1", options="header"]
+|===
+|record_name |field_name |field_type |field_length
+
+|customer |customer_id |Integer |9
+|customer |name |String |100
+|order |order_id |Integer |9
+|order |amount |Number |12
+|===
+
+This produces **two** catalog writes: `customer` with two fields, then `order` with two fields (namespace/name still come from Definition mapping on the first row of each group).
+
+==== Mapping to the catalog Fields tab
+
+Stream mappings align with the Fields section of a catalog entry in the Data Catalog perspective:
+
+[cols="1,1,2", options="header"]
+|===
+|Dialog mapping |Catalog column |Stored on
+
+|Field name |Name |Source field name
+|Field type |Type |Hop type + source data type label
+|Field length |Length |Source field length
+|Field precision |Precision |Source field precision
+|Primary key position |PK position |1-based key order
+|Format / Decimal / Grouping |Format / Decimal / Grouping |CSV field input options (only when at least one is non-empty)
+|===
+
+Empty field names or unknown Hop type labels fail the transform with a clear error so bad migration rows do not silently corrupt the catalog.
+
+=== Physical table
+
+Maps to the catalog entry **Physical table** properties (`PhysicalTableRef`: database connection, schema, table). Used when the source type is **Database** (discovery and stream field modes).
+
+In stream field / migration mode, values are taken from the **first row of each field group** when the corresponding input field is mapped and non-empty. Fixed values act as fallbacks.
+
+[cols="1,3", options="header"]
+|===
+|Option |Description
+
+|Database connection
+|Fixed Hop database connection name for the physical table.
+
+|Schema
+|Fixed schema (or empty for the connection default).
+
+|Table
+|Fixed physical table or view name.
+
+|Database connection field
+|Input column holding the connection name (preferred over the fixed value when non-empty).
+
+|Schema field
+|Input column holding the schema name.
+
+|Table field
+|Input column holding the table name.
+|===
+
+=== Source
+
+Selects the Data Vault / discovery **source type** and non-table locations (file or Iceberg). Database connection coordinates live on the **Physical table** tab.
+
+[cols="1,3", options="header"]
+|===
+|Option |Description
+
+|Source type
+|`DATABASE`, `CSV`, `PARQUET`, or `ICEBERG` (composite sources are published from a `.hsm` source model, not this transform). For `DATABASE`, configure connection/schema/table on the **Physical table** tab.
+
+|File path, folder, include/exclude masks, include subfolders
+|CSV and Parquet location settings (fixed and/or field-based).
+
+|Iceberg URI, warehouse, namespace, table, snapshot, branch, S3 credentials
+|Iceberg location settings (fixed and/or field-based).
+|===
+
+In **discovery** mode, Source (and Physical table for databases) are used to **inspect** the physical object and derive the field list. In **stream field** mode the location is stored on the definition but discovery is skipped.
+
+=== DV Source
+
+Data Vault source metadata written with `DV_SOURCE` definitions.
+
+[cols="1,3", options="header"]
+|===
+|Option |Description
+
+|Source indicator
+|Fixed record-source indicator value (for example a system code such as `CRM`).
+
+|Source indicator field
+|Name of a **source data column** used as the record-source indicator (not an input mapping for this transform). Stored as source metadata.
+
+|Group
+|Organizational group tag on the Data Vault source. Distinct from the **Field grouping field** on the Fields tab.
+
+|Delivery type
+|Fixed delivery semantics: **Changes only** (`CHANGES_ONLY`) or **Full snapshot** (`FULL_SNAPSHOT`). Important for status tracking satellites and CDC-style loads: deletion detection is only valid for full snapshots.
+
+|Delivery type field
+|Optional input column that overrides the fixed delivery type per definition (first row of the group). Accepts codes (`CHANGES_ONLY`, `FULL_SNAPSHOT`) or the dialog description labels. Empty values fall back to the fixed **Delivery type**.
+|===
+
+=== Output
+
+Names of status columns appended to each emitted row. Defaults:
+
+[cols="2,3", options="header"]
+|===
+|Default name |Description
+
+|`field_count`
+|Number of fields written (or discovered) for the definition.
+
+|`written_to_catalog`
+|Boolean: `true` when the definition was upserted (write enabled and field count greater than zero).
+
+|`catalog_namespace`
+|Namespace that was written.
+
+|`catalog_name`
+|Record name that was written.
+|===
+
+In discovery modes the transform passes through the input row (when present) and appends these columns. In stream field mode it emits **one row per completed group**, based on the first row of that group, with the same status columns appended.
+
+== Example: migrate field metadata into the catalog
+
+A typical migration pipeline loads a spreadsheet or CSV where each row is one column of a source table:
+
+1. **CSV file input** (or table input) — rows with `namespace`, `name`, `record_key`, `field_name`, `field_type`, `field_length`, `field_precision`, `pk_position`, optional format columns, physical table coordinates, and `delivery_type`.
+2. **Sort rows** — sort by `record_key` (and a stable field order if you care about column order).
+3. **Record Definition Output**:
+   * Catalog connection set to your target catalog.
+   * **Use field definitions from input stream?** enabled.
+   * **Field grouping field** = `record_key` (or `name` if that uniquely identifies each definition and is constant on every field row).
+   * Map **Field name / type / length / precision / PK / format** columns.
+   * Definition: namespace and name from input fields.
+   * Physical table: database connection / schema / table from input fields (first row of each group).
+   * Source: source type **Database** (or file/Iceberg as appropriate).
+   * DV Source: delivery type fixed (**Full snapshot** / **Changes only**) or from a `delivery_type` field (`FULL_SNAPSHOT` / `CHANGES_ONLY` codes are accepted).
+   * **Write definition to catalog?** enabled.
+
+After the pipeline runs, open the Data Catalog perspective and confirm each definition’s Fields tab matches the migration file.
+
+== Example: discover and publish from a physical table
+
+1. **Get variables** or fixed values for namespace and name.
+2. **Record Definition Output** with stream field mode **off**:
+   * Source type **Database**, connection/schema/table set (fixed or from input).
+   * Delivery type and source indicator on the DV Source tab.
+   * Write to catalog enabled.
+
+Each run discovers current columns and upserts the catalog entry. Use this for onboarding tables that already exist in the database.
+
+== Tips
+
+* Prefer **stream field mode** when the authoritative field list already exists outside Hop (data dictionaries, Excel, another catalog). Prefer **discovery** when the physical system is the source of truth.
+* Always **sort** (or already group) input by the field grouping key before Record Definition Output in migration pipelines.
+* Do not confuse **Field grouping field** (row-break key for collecting columns) with **Group** on the DV Source tab (business/org tag on the source).
+* Keep catalog connection names stable across environments; override database connection names in the stream or via variables if needed.
+* Variables are supported on catalog connection name and on fixed string values; field name combos select columns from the previous transform.
+* After writing, use link:record-definition-input.adoc[Record Definition Input] (optionally with denormalized field metadata) to verify or drive DDL from the same catalog.
+* Composite multi-table sources are not created by this transform; publish those from a link:source-modeler-overview.adoc[source model (`.hsm`)].
+
+== Related documentation
+
+* link:data-catalog.adoc[Data Catalog] — local catalog setup, namespaces, versions
+* link:record-definition-input.adoc[Record Definition Input] — read catalog definitions as rows
+* link:datavault-source.adoc[Data Vault sources] — `DV_SOURCE` record definitions
+* link:datavault-source-database.adoc[Database-backed sources] — database source fields

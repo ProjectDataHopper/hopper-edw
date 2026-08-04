@@ -18,7 +18,6 @@ package org.apache.hop.datavault.catalog;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.datavault.metadata.DataVaultSource;
 import org.apache.hop.datavault.metadata.SourceField;
@@ -151,18 +150,31 @@ public final class RecordSourceIndicatorSupport {
     return deliveryType.getDescription();
   }
 
+  /**
+   * Parses a delivery type from a stored code ({@code CHANGES_ONLY}, {@code FULL_SNAPSHOT}), enum
+   * name, or UI description label.
+   *
+   * <p>Important: do not use {@link
+   * org.apache.hop.datavault.metadata.DvSourceDeliveryType#lookupDescription(String)} alone for
+   * unknown values — that API returns a default of {@code CHANGES_ONLY} instead of null, which
+   * would swallow valid codes such as {@code FULL_SNAPSHOT}.
+   */
   public static org.apache.hop.datavault.metadata.DvSourceDeliveryType parseDeliveryType(
       String value) {
     if (Utils.isEmpty(value)) {
       return org.apache.hop.datavault.metadata.DvSourceDeliveryType.CHANGES_ONLY;
     }
-    org.apache.hop.datavault.metadata.DvSourceDeliveryType byDescription =
-        org.apache.hop.datavault.metadata.DvSourceDeliveryType.lookupDescription(value.trim());
-    if (byDescription != null) {
-      return byDescription;
+    String trimmed = value.trim();
+    for (org.apache.hop.datavault.metadata.DvSourceDeliveryType type :
+        org.apache.hop.datavault.metadata.DvSourceDeliveryType.values()) {
+      if (type.getCode().equalsIgnoreCase(trimmed) || type.name().equalsIgnoreCase(trimmed)) {
+        return type;
+      }
+      if (type.getDescription() != null && type.getDescription().equalsIgnoreCase(trimmed)) {
+        return type;
+      }
     }
-    return org.apache.hop.datavault.metadata.DvSourceDeliveryType.lookupCode(
-        value.trim().toUpperCase(Locale.ROOT));
+    return org.apache.hop.datavault.metadata.DvSourceDeliveryType.CHANGES_ONLY;
   }
 
   private static void applyResolved(DataVaultSource source, String staticValue, String fieldName) {

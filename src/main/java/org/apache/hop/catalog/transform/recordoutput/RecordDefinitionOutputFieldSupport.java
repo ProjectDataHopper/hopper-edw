@@ -16,7 +16,6 @@
  */
 package org.apache.hop.catalog.transform.recordoutput;
 
-import java.util.Locale;
 import java.util.Objects;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
@@ -24,6 +23,7 @@ import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.datavault.catalog.RecordSourceIndicatorSupport;
 import org.apache.hop.datavault.metadata.CsvFieldOptions;
 import org.apache.hop.datavault.metadata.DvSourceDeliveryType;
 import org.apache.hop.datavault.metadata.SourceField;
@@ -143,25 +143,8 @@ public final class RecordDefinitionOutputFieldSupport {
    */
   public static DvSourceDeliveryType resolveDeliveryType(
       String streamValue, DvSourceDeliveryType fallback) {
-    if (Utils.isEmpty(streamValue)) {
-      return fallback != null ? fallback : DvSourceDeliveryType.CHANGES_ONLY;
-    }
-    String trimmed = streamValue.trim();
-    for (DvSourceDeliveryType type : DvSourceDeliveryType.values()) {
-      if (type.getCode().equalsIgnoreCase(trimmed) || type.name().equalsIgnoreCase(trimmed)) {
-        return type;
-      }
-      if (type.getDescription() != null && type.getDescription().equalsIgnoreCase(trimmed)) {
-        return type;
-      }
-    }
-    // Last resort: case-insensitive contains match on description for localized labels
-    String upper = trimmed.toUpperCase(Locale.ROOT);
-    for (DvSourceDeliveryType type : DvSourceDeliveryType.values()) {
-      if (type.getDescription() != null
-          && type.getDescription().toUpperCase(Locale.ROOT).equals(upper)) {
-        return type;
-      }
+    if (!Utils.isEmpty(streamValue)) {
+      return RecordSourceIndicatorSupport.parseDeliveryType(streamValue);
     }
     return fallback != null ? fallback : DvSourceDeliveryType.CHANGES_ONLY;
   }

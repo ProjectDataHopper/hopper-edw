@@ -312,8 +312,7 @@ public class RecordDefinitionOutput
 
   private String resolveDefinitionValue(String fixedValue, String fieldName, Object[] row)
       throws HopException {
-    boolean fromInput = meta.isSelectFromInput() || meta.isFieldsFromInput();
-    if (fromInput && !Utils.isEmpty(fieldName) && row != null) {
+    if (!Utils.isEmpty(fieldName) && row != null && getInputRowMeta() != null) {
       int index = getInputRowMeta().indexOfValue(resolve(fieldName));
       if (index >= 0) {
         return getInputRowMeta().getString(row, index);
@@ -324,8 +323,8 @@ public class RecordDefinitionOutput
 
   private String resolvePhysicalValue(String fixedValue, String fieldName, Object[] row)
       throws HopException {
-    boolean fromInput = meta.isSelectFromInput() || meta.isFieldsFromInput();
-    if (fromInput && !Utils.isEmpty(fieldName) && row != null) {
+    // Prefer stream values when a field is mapped (including first row of a field group).
+    if (!Utils.isEmpty(fieldName) && row != null && getInputRowMeta() != null) {
       int index = getInputRowMeta().indexOfValue(resolve(fieldName));
       if (index >= 0) {
         String value = getInputRowMeta().getString(row, index);

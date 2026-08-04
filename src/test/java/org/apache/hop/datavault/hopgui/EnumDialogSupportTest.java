@@ -72,7 +72,16 @@ class EnumDialogSupportTest {
         DvSourceDeliveryType.FULL_SNAPSHOT.getDescription(),
         RecordSourceIndicatorSupport.deliveryTypeLabel(fromDescription));
 
-    DvSourceDeliveryType fromCode = RecordSourceIndicatorSupport.parseDeliveryType("CHANGES_ONLY");
-    assertSame(DvSourceDeliveryType.CHANGES_ONLY, fromCode);
+    DvSourceDeliveryType fromChangesCode =
+        RecordSourceIndicatorSupport.parseDeliveryType("CHANGES_ONLY");
+    assertSame(DvSourceDeliveryType.CHANGES_ONLY, fromChangesCode);
+
+    // Stored codes must not fall through lookupDescription's CHANGES_ONLY default.
+    DvSourceDeliveryType fromFullSnapshotCode =
+        RecordSourceIndicatorSupport.parseDeliveryType("FULL_SNAPSHOT");
+    assertSame(DvSourceDeliveryType.FULL_SNAPSHOT, fromFullSnapshotCode);
+    assertSame(
+        DvSourceDeliveryType.FULL_SNAPSHOT,
+        RecordSourceIndicatorSupport.parseDeliveryType("full_snapshot"));
   }
 }

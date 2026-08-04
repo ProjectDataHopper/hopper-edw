@@ -85,7 +85,6 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
   private org.eclipse.swt.custom.CCombo wFilePathField;
   private org.eclipse.swt.custom.CCombo wFolderField;
   private org.eclipse.swt.custom.CCombo wIncludeFileMaskField;
-  private Composite wDatabaseComp;
   private Composite wFileComp;
   private Composite wIcebergComp;
   private Text wIcebergCatalogUri;
@@ -154,6 +153,7 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
     buildGeneralTab(wTabFolder);
     buildDefinitionTab(wTabFolder);
     buildFieldsTab(wTabFolder);
+    buildPhysicalTableTab(wTabFolder);
     buildSourceTab(wTabFolder);
     buildDvSourceTab(wTabFolder);
     buildOutputTab(wTabFolder);
@@ -318,6 +318,51 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
                 margin);
   }
 
+  private void buildPhysicalTableTab(CTabFolder tabFolder) {
+    CTabItem tab = new CTabItem(tabFolder, SWT.NONE);
+    tab.setText(BaseMessages.getString(PKG, "RecordDefinitionOutputDialog.PhysicalTableTab.Label"));
+    Composite comp = new Composite(tabFolder, SWT.NONE);
+    PropsUi.setLook(comp);
+    comp.setLayout(new FormLayout());
+    tab.setControl(comp);
+
+    int middle = props.getMiddlePct();
+    Control last = null;
+    last =
+        wDatabaseConnection =
+            addCombo(
+                comp,
+                "RecordDefinitionOutputDialog.DatabaseConnection.Label",
+                last,
+                middle,
+                margin,
+                new String[0]);
+    last =
+        wSchemaName =
+            addTextField(
+                comp, "RecordDefinitionOutputDialog.SchemaName.Label", last, middle, margin);
+    last =
+        wTableName =
+            addTextField(
+                comp, "RecordDefinitionOutputDialog.TableName.Label", last, middle, margin);
+    last =
+        wDatabaseConnectionField =
+            addFieldCombo(
+                comp,
+                "RecordDefinitionOutputDialog.DatabaseConnectionField.Label",
+                last,
+                middle,
+                margin);
+    last =
+        wSchemaField =
+            addFieldCombo(
+                comp, "RecordDefinitionOutputDialog.SchemaField.Label", last, middle, margin);
+    last =
+        wTableField =
+            addFieldCombo(
+                comp, "RecordDefinitionOutputDialog.TableField.Label", last, middle, margin);
+  }
+
   private void buildSourceTab(CTabFolder tabFolder) {
     CTabItem tab = new CTabItem(tabFolder, SWT.NONE);
     tab.setText(BaseMessages.getString(PKG, "RecordDefinitionOutputDialog.SourceTab.Label"));
@@ -339,73 +384,13 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
                 DvSourceType.class);
     wSourceType.addModifyListener((ModifyListener) e -> updateSourcePanels());
 
-    wDatabaseComp = new Composite(comp, SWT.NONE);
-    PropsUi.setLook(wDatabaseComp);
-    wDatabaseComp.setLayout(new FormLayout());
-    FormData fdDb = new FormData();
-    fdDb.left = new FormAttachment(0, 0);
-    fdDb.right = new FormAttachment(100, 0);
-    fdDb.top = new FormAttachment(last, margin);
-    wDatabaseComp.setLayoutData(fdDb);
-    Control dbLast = null;
-    dbLast =
-        wDatabaseConnection =
-            addCombo(
-                wDatabaseComp,
-                "RecordDefinitionOutputDialog.DatabaseConnection.Label",
-                dbLast,
-                middle,
-                margin,
-                new String[0]);
-    dbLast =
-        wSchemaName =
-            addTextField(
-                wDatabaseComp,
-                "RecordDefinitionOutputDialog.SchemaName.Label",
-                dbLast,
-                middle,
-                margin);
-    dbLast =
-        wTableName =
-            addTextField(
-                wDatabaseComp,
-                "RecordDefinitionOutputDialog.TableName.Label",
-                dbLast,
-                middle,
-                margin);
-    dbLast =
-        wDatabaseConnectionField =
-            addFieldCombo(
-                wDatabaseComp,
-                "RecordDefinitionOutputDialog.DatabaseConnectionField.Label",
-                dbLast,
-                middle,
-                margin);
-    dbLast =
-        wSchemaField =
-            addFieldCombo(
-                wDatabaseComp,
-                "RecordDefinitionOutputDialog.SchemaField.Label",
-                dbLast,
-                middle,
-                margin);
-    dbLast =
-        wTableField =
-            addFieldCombo(
-                wDatabaseComp,
-                "RecordDefinitionOutputDialog.TableField.Label",
-                dbLast,
-                middle,
-                margin);
-    fdDb.bottom = new FormAttachment(dbLast, margin);
-
     wFileComp = new Composite(comp, SWT.NONE);
     PropsUi.setLook(wFileComp);
     wFileComp.setLayout(new FormLayout());
     FormData fdFile = new FormData();
     fdFile.left = new FormAttachment(0, 0);
     fdFile.right = new FormAttachment(100, 0);
-    fdFile.top = new FormAttachment(wDatabaseComp, margin);
+    fdFile.top = new FormAttachment(last, margin);
     wFileComp.setLayoutData(fdFile);
     Control fileLast = null;
     fileLast =
@@ -924,14 +909,12 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
   private void updateSourcePanels() {
     DvSourceType type =
         EnumDialogSupport.readCombo(wSourceType, DvSourceType.class, DvSourceType.CSV);
-    boolean database = type == DvSourceType.DATABASE;
     boolean iceberg = type == DvSourceType.ICEBERG;
-    boolean file = !database && !iceberg;
-    wDatabaseComp.setVisible(database);
+    boolean file = type == DvSourceType.CSV || type == DvSourceType.PARQUET;
     wFileComp.setVisible(file);
     wIcebergComp.setVisible(iceberg);
-    if (wDatabaseComp.getParent() != null) {
-      wDatabaseComp.getParent().layout();
+    if (wFileComp.getParent() != null) {
+      wFileComp.getParent().layout();
     }
   }
 
@@ -945,9 +928,14 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
     wNamespaceField.setEnabled(fromInput);
     wNameField.setEnabled(fromInput);
     wDescriptionField.setEnabled(fromInput);
-    wDatabaseConnectionField.setEnabled(fromInput);
-    wSchemaField.setEnabled(fromInput);
-    wTableField.setEnabled(fromInput);
+    // Physical table: field mappings always usable; values from the first row of each group win
+    // when present. Fixed connection/schema/table remain available as fallbacks.
+    wDatabaseConnectionField.setEnabled(true);
+    wSchemaField.setEnabled(true);
+    wTableField.setEnabled(true);
+    wDatabaseConnection.setEnabled(true);
+    wSchemaName.setEnabled(true);
+    wTableName.setEnabled(true);
     wFilePathField.setEnabled(fromInput);
     wFolderField.setEnabled(fromInput);
     wIncludeFileMaskField.setEnabled(fromInput);
@@ -964,9 +952,6 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
     wNamespaceValue.setEnabled(!fromInput);
     wNameValue.setEnabled(!fromInput);
     wDescriptionValue.setEnabled(!fromInput);
-    wDatabaseConnection.setEnabled(!fromInput);
-    wSchemaName.setEnabled(!fromInput);
-    wTableName.setEnabled(!fromInput);
     wFilePath.setEnabled(!fromInput);
     wFolder.setEnabled(!fromInput);
     wIncludeFileMask.setEnabled(!fromInput);

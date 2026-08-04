@@ -135,6 +135,10 @@ class RecordDefinitionOutputFieldSupportTest {
         RecordDefinitionOutputFieldSupport.resolveDeliveryType(
             "FULL_SNAPSHOT", DvSourceDeliveryType.CHANGES_ONLY));
     assertEquals(
+        DvSourceDeliveryType.FULL_SNAPSHOT,
+        RecordDefinitionOutputFieldSupport.resolveDeliveryType(
+            "full_snapshot", DvSourceDeliveryType.CHANGES_ONLY));
+    assertEquals(
         DvSourceDeliveryType.CHANGES_ONLY,
         RecordDefinitionOutputFieldSupport.resolveDeliveryType(
             null, DvSourceDeliveryType.CHANGES_ONLY));
