@@ -19,6 +19,7 @@ package org.apache.hop.catalog.discovery;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.util.Utils;
@@ -153,31 +154,22 @@ public final class RecordDefinitionSchemaDiffSupport {
       if (field == null || Utils.isEmpty(field.getName())) {
         continue;
       }
-      indexed.put(field.getName().trim(), field);
+      // Case-insensitive: SingleStore/MySQL JDBC names may differ in case from catalog.
+      indexed.putIfAbsent(field.getName().trim().toLowerCase(Locale.ROOT), field);
     }
     return indexed;
   }
 
   private static String describeTypeDifference(SourceField stored, SourceField discovered) {
-    if (stored.getHopType() == discovered.getHopType()) {
-      return null;
-    }
-    return BaseMessages.getString(
-        PKG,
-        "RecordDefinitionSchemaDiffSupport.Detail.Type",
-        stored.getSourceDataType(),
-        discovered.getSourceDataType());
+    return SourceFieldMetadataEquivalenceSupport.describeTypeDifference(stored, discovered);
   }
 
   private static String describeDifference(SourceField stored, SourceField discovered) {
     List<String> parts = new ArrayList<>();
-    if (stored.getHopType() != discovered.getHopType()) {
-      parts.add(
-          BaseMessages.getString(
-              PKG,
-              "RecordDefinitionSchemaDiffSupport.Detail.Type",
-              stored.getSourceDataType(),
-              discovered.getSourceDataType()));
+    String typeDetails =
+        SourceFieldMetadataEquivalenceSupport.describeTypeDifference(stored, discovered);
+    if (!Utils.isEmpty(typeDetails)) {
+      parts.add(typeDetails);
     }
     String dimensionDetails =
         SourceFieldMetadataEquivalenceSupport.describeDimensionDifference(stored, discovered);

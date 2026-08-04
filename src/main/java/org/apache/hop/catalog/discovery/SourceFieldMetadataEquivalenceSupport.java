@@ -21,6 +21,8 @@ import java.util.List;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.datavault.metadata.DvDataTypeSupport;
+import org.apache.hop.datavault.metadata.DvSqlStringTypeSupport;
 import org.apache.hop.datavault.metadata.SourceField;
 import org.apache.hop.i18n.BaseMessages;
 
@@ -31,6 +33,10 @@ import org.apache.hop.i18n.BaseMessages;
  * Database.getDataTypeFromKnownSqlType} in Apache Hop: database precision is total significant
  * digits while Hop length is digits before the decimal; floating types often normalize both
  * dimensions to {@code -1}.
+ *
+ * <p>SingleStore/MySQL also misreport {@code VARCHAR(n)} display size as {@code 255} and sometimes
+ * map {@code DATETIME} to String. Catalog contracts that match the physical table must not be
+ * treated as drift against that JDBC noise.
  */
 public final class SourceFieldMetadataEquivalenceSupport {
 
@@ -42,16 +48,40 @@ public final class SourceFieldMetadataEquivalenceSupport {
     return Utils.isEmpty(describeDimensionDifference(stored, discovered));
   }
 
+  /** True when effective Hop types are the same (or Date/Timestamp compatible). */
+  public static boolean typesEquivalent(SourceField stored, SourceField discovered) {
+    return Utils.isEmpty(describeTypeDifference(stored, discovered));
+  }
+
+  public static String describeTypeDifference(SourceField stored, SourceField discovered) {
+    if (stored == null || discovered == null) {
+      return null;
+    }
+    int storedType = effectiveHopType(stored);
+    int discoveredType = effectiveHopType(discovered);
+    if (hopTypesCompatible(storedType, discoveredType)) {
+      return null;
+    }
+    return BaseMessages.getString(
+        PKG,
+        "RecordDefinitionSchemaDiffSupport.Detail.Type",
+        Const.NVL(stored.getSourceDataType(), valueMetaTypeName(storedType)),
+        Const.NVL(discovered.getSourceDataType(), valueMetaTypeName(discoveredType)));
+  }
+
   public static String describeDimensionDifference(SourceField stored, SourceField discovered) {
     if (stored == null || discovered == null) {
       return null;
     }
-    if (stored.getHopType() != discovered.getHopType()) {
+    int storedType = effectiveHopType(stored);
+    int discoveredType = effectiveHopType(discovered);
+    // Different types: dimension compare is meaningless (type path reports the issue).
+    if (!hopTypesCompatible(storedType, discoveredType)) {
       return null;
     }
 
     List<String> parts = new ArrayList<>();
-    switch (stored.getHopType()) {
+    switch (storedType) {
       case IValueMeta.TYPE_DATE,
           IValueMeta.TYPE_TIMESTAMP,
           IValueMeta.TYPE_BOOLEAN,
@@ -67,7 +97,7 @@ public final class SourceFieldMetadataEquivalenceSupport {
 
   private static void addLengthDifference(
       List<String> parts, SourceField stored, SourceField discovered) {
-    if (!stringLengthEquivalent(stored.getLength(), discovered.getLength())) {
+    if (!stringLengthEquivalent(stored, discovered)) {
       parts.add(
           BaseMessages.getString(
               PKG,
@@ -190,8 +220,86 @@ public final class SourceFieldMetadataEquivalenceSupport {
     return precision < 0 ? 0 : precision;
   }
 
-  private static boolean stringLengthEquivalent(String left, String right) {
-    return parseDimension(left) == parseDimension(right);
+  /**
+   * String length equivalence including SingleStore/MySQL JDBC display-size noise and LOB capacity
+   * markers.
+   */
+  static boolean stringLengthEquivalent(SourceField stored, SourceField discovered) {
+    if (stored == null || discovered == null) {
+      return false;
+    }
+    // Both large-text / LOB: any reported length is capacity noise.
+    if (DvSqlStringTypeSupport.isLargeTextSourceField(stored)
+        && DvSqlStringTypeSupport.isLargeTextSourceField(discovered)) {
+      return true;
+    }
+    if (DvSqlStringTypeSupport.isLargeTextSourceField(stored)
+        || DvSqlStringTypeSupport.isLargeTextSourceField(discovered)) {
+      // One side LOB, other side fixed VARCHAR — not equivalent.
+      int other =
+          DvSqlStringTypeSupport.isLargeTextSourceField(stored)
+              ? parseDimension(discovered.getLength())
+              : parseDimension(stored.getLength());
+      return other >= DvSqlStringTypeSupport.CLOB_LENGTH || other <= 0;
+    }
+    return stringLengthEquivalent(stored.getLength(), discovered.getLength());
+  }
+
+  static boolean stringLengthEquivalent(String left, String right) {
+    int leftLength = parseDimension(left);
+    int rightLength = parseDimension(right);
+    if (leftLength == rightLength) {
+      return true;
+    }
+    // Classic SingleStore/MySQL getColumnDisplaySize noise vs declared COLUMN_SIZE.
+    if (isClassicJdbcDisplaySizeNoise(leftLength, rightLength)
+        || isClassicJdbcDisplaySizeNoise(rightLength, leftLength)) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * {@code suspicious} looks like a bogus display size for declared character length {@code
+   * declared}.
+   */
+  static boolean isClassicJdbcDisplaySizeNoise(int suspicious, int declared) {
+    if (declared <= 0 || suspicious <= 0 || suspicious == declared) {
+      return false;
+    }
+    if (suspicious == DvSqlStringTypeSupport.TINYTEXT_CAPACITY
+        && declared != DvSqlStringTypeSupport.TINYTEXT_CAPACITY
+        && declared < DvSqlStringTypeSupport.CLOB_LENGTH) {
+      return true;
+    }
+    return suspicious == declared * 3 || suspicious == declared * 4;
+  }
+
+  static int effectiveHopType(SourceField field) {
+    if (field == null) {
+      return IValueMeta.TYPE_NONE;
+    }
+    return DvDataTypeSupport.effectiveHopTypeId(field.getHopType(), field.getSourceDataType());
+  }
+
+  static boolean hopTypesCompatible(int left, int right) {
+    if (left == right) {
+      return true;
+    }
+    if ((left == IValueMeta.TYPE_NUMBER && right == IValueMeta.TYPE_BIGNUMBER)
+        || (left == IValueMeta.TYPE_BIGNUMBER && right == IValueMeta.TYPE_NUMBER)) {
+      return true;
+    }
+    return (left == IValueMeta.TYPE_DATE && right == IValueMeta.TYPE_TIMESTAMP)
+        || (left == IValueMeta.TYPE_TIMESTAMP && right == IValueMeta.TYPE_DATE);
+  }
+
+  private static String valueMetaTypeName(int hopType) {
+    try {
+      return org.apache.hop.core.row.value.ValueMetaFactory.getValueMetaName(hopType);
+    } catch (Exception e) {
+      return String.valueOf(hopType);
+    }
   }
 
   /**

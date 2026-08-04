@@ -140,6 +140,32 @@ class RecordDefinitionSchemaDiffSupportTest {
     assertTrue(diff.isInSync());
   }
 
+  @Test
+  void diff_ignoresSingleStoreVarcharDisplaySizeNoise() {
+    SourceField catalog = field("customer_name", "VARCHAR", IValueMeta.TYPE_STRING);
+    catalog.setLength("150");
+    SourceField jdbc = field("customer_name", "VARCHAR", IValueMeta.TYPE_STRING);
+    jdbc.setLength("255");
+
+    RecordDefinitionSchemaDiffSupport.SchemaDiff diff =
+        RecordDefinitionSchemaDiffSupport.diff(List.of(catalog), List.of(jdbc));
+
+    assertTrue(diff.isInSync(), () -> "Unexpected changes: " + diff.changes());
+  }
+
+  @Test
+  void diff_matchesFieldsCaseInsensitively() {
+    SourceField catalog = field("Customer_Name", "VARCHAR", IValueMeta.TYPE_STRING);
+    catalog.setLength("150");
+    SourceField jdbc = field("customer_name", "VARCHAR", IValueMeta.TYPE_STRING);
+    jdbc.setLength("150");
+
+    RecordDefinitionSchemaDiffSupport.SchemaDiff diff =
+        RecordDefinitionSchemaDiffSupport.diff(List.of(catalog), List.of(jdbc));
+
+    assertTrue(diff.isInSync(), () -> "Unexpected changes: " + diff.changes());
+  }
+
   private static SourceField field(String name, String sourceDataType, int hopType) {
     SourceField field = new SourceField(name);
     field.setSourceDataType(sourceDataType);

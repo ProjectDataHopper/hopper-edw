@@ -144,6 +144,38 @@ class SourceFieldMetadataEquivalenceSupportTest {
         "expected length must appear before actual length (50 before 100): " + details);
   }
 
+  @Test
+  void singleStoreVarchar150VsJdbcDisplay255IsEquivalent() {
+    // Catalog matches physical VARCHAR(150); JDBC rediscovery reports display size 255.
+    SourceField catalog = field("customer_name", "VARCHAR", IValueMeta.TYPE_STRING);
+    catalog.setLength("150");
+    SourceField jdbc = field("customer_name", "VARCHAR", IValueMeta.TYPE_STRING);
+    jdbc.setLength("255");
+
+    assertTrue(SourceFieldMetadataEquivalenceSupport.dimensionsEquivalent(catalog, jdbc));
+    assertTrue(SourceFieldMetadataEquivalenceSupport.typesEquivalent(catalog, jdbc));
+  }
+
+  @Test
+  void datetimeStoredAsStringIsTypeEquivalentToTimestamp() {
+    SourceField catalog = field("load_dts", "DATETIME(6)", IValueMeta.TYPE_TIMESTAMP);
+    catalog.setLength("6");
+    SourceField jdbc = field("load_dts", "DATETIME", IValueMeta.TYPE_STRING);
+    jdbc.setLength("255");
+
+    assertTrue(SourceFieldMetadataEquivalenceSupport.typesEquivalent(catalog, jdbc));
+  }
+
+  @Test
+  void longtextLengthsAreEquivalentDespiteDisplay255() {
+    SourceField catalog = field("notes", "LONGTEXT", IValueMeta.TYPE_STRING);
+    catalog.setLength(String.valueOf(org.apache.hop.core.database.DatabaseMeta.CLOB_LENGTH));
+    SourceField jdbc = field("notes", "LONGTEXT", IValueMeta.TYPE_STRING);
+    jdbc.setLength("255");
+
+    assertTrue(SourceFieldMetadataEquivalenceSupport.dimensionsEquivalent(catalog, jdbc));
+  }
+
   private static SourceField field(String name, String sourceDataType, int hopType) {
     SourceField field = new SourceField(name);
     field.setSourceDataType(sourceDataType);
