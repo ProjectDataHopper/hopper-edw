@@ -1564,15 +1564,149 @@ public final class DvFieldMappingValidationSupport {
           String name = resolveName(vm.getName(), variables);
           try {
             IValueMeta copy = ValueMetaFactory.cloneValueMeta(vm);
-            DvSqlStringTypeSupport.normalizeStringLength(copy);
-            fields.put(name, copy);
+            SourceField stored = storedByName.get(name);
+            IValueMeta reconciled = reconcileLiveWithStoredCatalog(copy, stored, variables);
+            fields.put(name, reconciled);
           } catch (HopPluginException e) {
-            DvSqlStringTypeSupport.normalizeStringLength(vm);
-            fields.put(name, vm);
+            SourceField stored = storedByName.get(name);
+            try {
+              fields.put(name, reconcileLiveWithStoredCatalog(vm, stored, variables));
+            } catch (HopPluginException ignored) {
+              DvSqlStringTypeSupport.normalizeStringLength(vm);
+              fields.put(name, vm);
+            }
           }
         }
       }
       return new ResolvedSourceFields(fields, storedByName, true);
     }
+  }
+
+  /**
+   * Merges live JDBC {@link IValueMeta} with catalog/stored {@link SourceField}.
+   *
+   * <p>SingleStore/MySQL {@code getTableFieldsMeta} often reports wrong display sizes (255 for
+   * {@code VARCHAR(150)}) and sometimes maps {@code DATETIME} to String. When the data catalog
+   * already holds the correct declared type/length (matching the physical table), prefer those
+   * dimensions over JDBC noise so source→target validation does not false-fail.
+   */
+  static IValueMeta reconcileLiveWithStoredCatalog(
+      IValueMeta live, SourceField stored, IVariables variables) throws HopPluginException {
+    if (live == null) {
+      return null;
+    }
+    if (stored == null) {
+      DvSqlStringTypeSupport.normalizeStringLength(live);
+      return live;
+    }
+
+    String sqlType =
+        !Utils.isEmpty(live.getOriginalColumnTypeName())
+            ? live.getOriginalColumnTypeName()
+            : stored.getSourceDataType();
+    int hopType = DvDataTypeSupport.effectiveHopTypeId(live.getType(), sqlType);
+    // Catalog hop type + SQL can correct a live String mis-map when live TYPE_NAME is missing.
+    hopType = DvDataTypeSupport.effectiveHopTypeId(hopType, stored.getSourceDataType());
+    if (stored.getHopType() > 0
+        && hopType == IValueMeta.TYPE_STRING
+        && stored.getHopType() != IValueMeta.TYPE_STRING
+        && DvDataTypeSupport.hopTypeIdFromSqlTypeName(stored.getSourceDataType())
+            == stored.getHopType()) {
+      hopType = stored.getHopType();
+    }
+
+    int length = live.getLength();
+    int precision = live.getPrecision();
+    int storedLength = Const.toInt(resolveVariable(variables, stored.getLength()), -1);
+    int storedPrecision = Const.toInt(resolveVariable(variables, stored.getPrecision()), -1);
+
+    if (isLengthSensitive(hopType) || hopType == IValueMeta.TYPE_STRING) {
+      // Prefer declared catalog length over classic JDBC display-size bugs.
+      if (storedLength > 0
+          && (length <= 0
+              || length == storedLength
+              || isClassicJdbcDisplaySizeNoise(length, storedLength))) {
+        length = storedLength;
+      }
+      if (DvSqlStringTypeSupport.isLargeTextSqlType(sqlType)
+          || DvSqlStringTypeSupport.isLargeTextSqlType(stored.getSourceDataType())) {
+        String largeType =
+            DvSqlStringTypeSupport.isLargeTextSqlType(sqlType)
+                ? sqlType
+                : stored.getSourceDataType();
+        length = DvSqlStringTypeSupport.capacityForSqlStringType(largeType, length);
+      }
+    } else if (isTemporalType(hopType)) {
+      int fsp = DvDataTypeSupport.fractionalSecondsFromSqlTypeName(sqlType);
+      if (fsp < 0) {
+        fsp = DvDataTypeSupport.fractionalSecondsFromSqlTypeName(stored.getSourceDataType());
+      }
+      if (fsp < 0 && storedPrecision >= 0 && storedPrecision <= 9) {
+        fsp = storedPrecision;
+      }
+      if (fsp >= 0) {
+        // Prefer catalog/SQL fsp over bogus live scale (e.g. 9 for DATETIME(6)).
+        if (length < 0 || length > 9 || (fsp > 0 && length != fsp && length == 9)) {
+          length = fsp;
+        }
+        if (precision < 0 || precision > 9 || (fsp > 0 && precision != fsp && precision == 9)) {
+          precision = fsp;
+        }
+      }
+    } else if (ValueMetaBase.isNumeric(hopType) && storedPrecision >= 0 && precision < 0) {
+      precision = storedPrecision;
+    }
+
+    IValueMeta reconciled;
+    if (hopType != live.getType()
+        || length != live.getLength()
+        || precision != live.getPrecision()) {
+      reconciled = ValueMetaFactory.createValueMeta(live.getName(), hopType, length, precision);
+    } else {
+      reconciled = live;
+      reconciled.setLength(length, precision);
+    }
+
+    if (!Utils.isEmpty(sqlType)) {
+      reconciled.setOriginalColumnTypeName(sqlType);
+    } else if (!Utils.isEmpty(stored.getSourceDataType())) {
+      reconciled.setOriginalColumnTypeName(stored.getSourceDataType());
+    }
+
+    if (storedLength > 0
+        && (reconciled.getOriginalPrecision() <= 0
+            || isClassicJdbcDisplaySizeNoise(reconciled.getOriginalPrecision(), storedLength))) {
+      reconciled.setOriginalPrecision(storedLength);
+    }
+
+    int fspForScale =
+        DvDataTypeSupport.fractionalSecondsFromSqlTypeName(reconciled.getOriginalColumnTypeName());
+    if (fspForScale >= 0) {
+      reconciled.setOriginalScale(fspForScale);
+    } else if (storedPrecision >= 0 && storedPrecision <= 9 && isTemporalType(hopType)) {
+      reconciled.setOriginalScale(storedPrecision);
+    }
+
+    DvSqlStringTypeSupport.normalizeStringLength(reconciled);
+    return reconciled;
+  }
+
+  /**
+   * True when {@code liveLength} looks like MySQL/SingleStore display-size noise relative to the
+   * catalog-declared length (255 default, or utf8/utf8mb4 byte multipliers).
+   */
+  static boolean isClassicJdbcDisplaySizeNoise(int liveLength, int declaredLength) {
+    if (declaredLength <= 0 || liveLength <= 0) {
+      return false;
+    }
+    if (liveLength == declaredLength) {
+      return false;
+    }
+    if (liveLength == DvSqlStringTypeSupport.TINYTEXT_CAPACITY
+        && declaredLength != DvSqlStringTypeSupport.TINYTEXT_CAPACITY
+        && declaredLength < DvSqlStringTypeSupport.CLOB_LENGTH) {
+      return true;
+    }
+    return liveLength == declaredLength * 3 || liveLength == declaredLength * 4;
   }
 }
