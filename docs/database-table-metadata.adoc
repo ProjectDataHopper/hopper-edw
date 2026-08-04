@@ -1,0 +1,61 @@
+= Database Table Metadata
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+The **Database Table Metadata** transform discovers relational table **columns as Hop types** without reading data rows. It is designed for catalog migration and empty tables where **Table Input** + **Metadata structure of stream** cannot run, and where **Get JDBC Metadata** returns raw database types instead of Hop type / length / precision.
+
+Use it together with link:record-definition-output.adoc[Record Definition Output] (stream field mode) to publish catalog Fields with primary-key positions.
+
+== What it produces
+
+For each column of each selected table, the transform emits one output row with:
+
+* Identity: database connection, schema, table  
+* Field: name, **Hop type** (`String`, `Integer`, …), length, precision, ordinal position  
+* Primary key: **1-based position** in the composite key (0 if not part of the PK)  
+* Native `source_data_type` (JDBC/original column type name when available)  
+* Optional foreign key attributes on child columns (constraint name, position, referenced schema/table/column)
+
+Discovery reuses the same path as catalog/source import: `Database.getTableFieldsMeta` plus primary-key and imported-key JDBC metadata. **Empty tables are supported.**
+
+== Dialog
+
+=== General
+
+[cols="1,3", options="header"]
+|===
+|Option |Description
+
+|Database connection
+|Hop relational connection used when not overridden by a connection field.
+
+|Read schema and table from previous transform input?
+|When enabled, each input row supplies table (and optionally schema/connection) to inspect. When disabled, a single fixed schema/table is used.
+
+|Include foreign key columns?
+|When enabled (default), adds FK columns on the output (denormalized on the child column; first matching imported FK wins if a column participates in multiple constraints).
+
+|Database connection field / Schema field / Table field
+|Input field names when reading from the previous transform. Table field is required in that mode.
+
+|Schema / Table
+|Fixed schema and table when not reading from input. Table is required.
+|===
+
+=== Output fields
+
+Rename any output column. Defaults align with **Record Definition Output** stream field mappings (`field_name`, `field_type`, `field_length`, `field_precision`, `field_primary_key_position`).
+
+== Example: bulk catalog import from a table list
+
+1. Build a list of tables (SQL, CSV, or Get table names).  
+2. **Database Table Metadata** — select from input; map schema/table fields; connection fixed or from stream.  
+3. **Record Definition Output** — Fields from stream; field grouping = `table_name` (or a record key); map field name/type/length/precision/PK; Physical table from connection/schema/table fields.
+
+== Tips
+
+* Prefer this transform over Get JDBC Metadata when the consumer expects **Hop** types (catalog Fields, DDL transforms, RDO).  
+* Unique/non-unique secondary indexes are not emitted yet; PK and imported FKs are.  
+* Connection failures and missing tables fail the transform with a clear error for migration pipelines.

@@ -260,7 +260,7 @@ In discovery modes the transform passes through the input row (when present) and
 
 == Example: migrate field metadata into the catalog
 
-A typical migration pipeline loads a spreadsheet or CSV where each row is one column of a source table:
+A typical migration pipeline discovers columns with link:database-table-metadata.adoc[Database Table Metadata] (or loads a spreadsheet where each row is one column of a source table):
 
 1. **CSV file input** (or table input) — rows with `namespace`, `name`, `record_key`, `field_name`, `field_type`, `field_length`, `field_precision`, `pk_position`, optional format columns, physical table coordinates, and `delivery_type`.
 2. **Sort rows** — sort by `record_key` (and a stable field order if you care about column order).

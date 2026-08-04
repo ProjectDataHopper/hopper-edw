@@ -52,6 +52,7 @@ Documentation for the **hop-datavault** plugin (development **0.7.0-SNAPSHOT**, 
 | [data-quality.adoc](data-quality.adoc) | Content quality measure, gate, history, alert sinks (Phase 2) |
 | [record-definition-input.adoc](record-definition-input.adoc) | Pipeline transform: read catalog definitions as rows |
 | [record-definition-output.adoc](record-definition-output.adoc) | Pipeline transform: write/discover/migrate catalog definitions |
+| [database-table-metadata.adoc](database-table-metadata.adoc) | Pipeline transform: Hop-typed table columns + PK/FK (empty tables OK) |
 
 ## Data Vault reference (AsciiDoc)
 
