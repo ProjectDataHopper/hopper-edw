@@ -105,6 +105,13 @@ public final class ModelDialogValidationSupport {
   /**
    * Runs model validation under {@link ProgressMonitorDialog} with cancel support. On failure shows
    * an error dialog and returns empty remarks (not cancelled).
+   *
+   * <p>Important: {@link ProgressMonitorDialog}'s monitor {@code done()} disposes the dialog and
+   * unblocks the UI thread. Model checks call {@code done()} in a {@code finally} block before they
+   * return their remark list. If we forwarded {@code done()} immediately, the UI could finish
+   * {@link ProgressMonitorDialog#run} before results were copied — yielding an empty Check Results
+   * dialog. We defer {@code done()} until after remarks are stored (same effective ordering as Hop
+   * pipeline/workflow checks, which mutate a shared list before {@code done()}).
    */
   public static ModelCheckProgressResult runChecksWithProgress(
       Shell shell, CheckWorkWithMonitor work) {
@@ -120,14 +127,16 @@ public final class ModelDialogValidationSupport {
       }
     }
 
-    List<ICheckResult> remarks = new ArrayList<>();
+    // Synchronized: worker thread writes before done(); UI thread reads after run() returns.
+    List<ICheckResult> remarks = Collections.synchronizedList(new ArrayList<>());
     ProgressMonitorDialog monitorDialog = new ProgressMonitorDialog(shell);
     try {
       monitorDialog.run(
           true,
           monitor -> {
+            DeferredDoneMonitor deferred = new DeferredDoneMonitor(monitor);
             try {
-              List<ICheckResult> result = work.run(monitor);
+              List<ICheckResult> result = work.run(deferred);
               if (result != null) {
                 remarks.addAll(result);
               }
@@ -136,6 +145,9 @@ public final class ModelDialogValidationSupport {
                   e,
                   BaseMessages.getString(
                       PKG, "ModelDialogValidationSupport.Check.Error.Exception", e.getMessage()));
+            } finally {
+              // Close the progress dialog only after remarks are safely in the shared list.
+              deferred.finish();
             }
           });
     } catch (Exception e) {
@@ -150,7 +162,59 @@ public final class ModelDialogValidationSupport {
     boolean cancelled =
         monitorDialog.getProgressMonitor() != null
             && monitorDialog.getProgressMonitor().isCanceled();
-    return new ModelCheckProgressResult(remarks, cancelled);
+    return new ModelCheckProgressResult(new ArrayList<>(remarks), cancelled);
+  }
+
+  /**
+   * Forwards progress updates but defers {@link #done()} so the progress shell is not disposed
+   * until the caller has stored check results.
+   */
+  private static final class DeferredDoneMonitor implements IProgressMonitor {
+    private final IProgressMonitor delegate;
+    private boolean finished;
+
+    private DeferredDoneMonitor(IProgressMonitor delegate) {
+      this.delegate =
+          delegate != null ? delegate : new org.apache.hop.core.ProgressNullMonitorListener();
+    }
+
+    @Override
+    public void beginTask(String message, int nrWorks) {
+      delegate.beginTask(message, nrWorks);
+    }
+
+    @Override
+    public void subTask(String message) {
+      delegate.subTask(message);
+    }
+
+    @Override
+    public boolean isCanceled() {
+      return delegate.isCanceled();
+    }
+
+    @Override
+    public void worked(int nrWorks) {
+      delegate.worked(nrWorks);
+    }
+
+    @Override
+    public void done() {
+      // Deferred — see finish().
+    }
+
+    @Override
+    public void setTaskName(String taskName) {
+      delegate.setTaskName(taskName);
+    }
+
+    private void finish() {
+      if (finished) {
+        return;
+      }
+      finished = true;
+      delegate.done();
+    }
   }
 
   public static DataVaultModel cloneDataVaultModel(
