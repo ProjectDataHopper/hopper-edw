@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/mattcasters/hop-data-vault/docs/ai-file-schemas/metadata/data-catalog.schema.json",
+  "title": "Hop Data Catalog connection metadata",
+  "description": "metadata/data-catalog/*.json — points at catalog storage; does not hold individual sources.",
+  "type": "object",
+  "required": ["name"],
+  "additionalProperties": true,
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Catalog connection name referenced by models (dataCatalogConnection)."
+    },
+    "description": { "type": "string" },
+    "enabled": { "type": "boolean" },
+    "virtualPath": { "type": "string" },
+    "catalog": {
+      "type": "object",
+      "description": "Map of pluginId → backend config (FILE, etc.).",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "pluginId": { "type": "string" },
+          "storageDirectory": {
+            "type": "string",
+            "description": "FILE backend root; prefer ${PROJECT_HOME}/…"
+          }
+        }
+      }
+    }
+  }
+}

@@ -29,6 +29,7 @@ Documentation for the **hop-datavault** plugin (development **0.7.0-SNAPSHOT**, 
 | [getting-started-retail.adoc](getting-started-retail.adoc) | Primary tutorial: retail-example (DV → BV → dimensional) |
 | [getting-started-integration-tests.adoc](getting-started-integration-tests.adoc) | Reference walkthrough: Customer 360 and integration test fixtures |
 | [search.adoc](search.adoc) | **Search Everywhere**: models (`.hsm`/`.hdv`/`.hbv`/`.hdm`) and plugin metadata |
+| [ai-file-schemas/README.md](ai-file-schemas/README.md) | **AI context pack**: XSD/JSON Schema + purpose markdown for models and metadata (Gemini/external AIs) |
 
 ## Managers and architects
 

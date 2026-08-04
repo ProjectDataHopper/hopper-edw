@@ -4,6 +4,14 @@ The Apache Hop Data Vault plugin includes an AI-powered assistant (the **AI Help
 
 ![Data Vault AI Help Dialog](images/data-vault-ai-help-dialog.png)
 
+## External AI agents (Gemini, etc.)
+
+When using an **external** model (outside Hop GUI) to edit project files, attach the portable schema pack:
+
+- **[ai-file-schemas/README.md](ai-file-schemas/README.md)** — XSD for `.hdv` / `.hbv` / `.hdm` / `.hsm`, JSON Schema for plugin metadata and catalog sources, plus purpose/anti-pattern markdown.
+
+Start sessions with `conventions.md` + the file-type docs that match the edit. Prefer modifying existing samples under `retail-example/` or `integration-tests/` over inventing structure.
+
 ---
 
 ## Prerequisites & Installation

@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/mattcasters/hop-data-vault/docs/ai-file-schemas/metadata/resource-definition-group.schema.json",
+  "title": "Resource definition group",
+  "description": "metadata/resource-definition-group/*.json — lists .hdv/.hbv/.hdm for validation and group update.",
+  "type": "object",
+  "required": ["name"],
+  "additionalProperties": true,
+  "properties": {
+    "name": { "type": "string" },
+    "description": { "type": "string" },
+    "virtualPath": { "type": "string" },
+    "dataCatalogConnection": {
+      "type": "string",
+      "description": "Name of metadata/data-catalog entry."
+    },
+    "detailedDataTypeChecking": { "type": "boolean" },
+    "previewRowLimit": { "type": "integer" },
+    "data_vault_model": {
+      "type": "array",
+      "description": "Ordered .hdv paths (DV update order within layer).",
+      "items": { "type": "string" }
+    },
+    "business_vault_model": {
+      "type": "array",
+      "description": "Ordered .hbv paths.",
+      "items": { "type": "string" }
+    },
+    "dimensional_model": {
+      "type": "array",
+      "description": "Ordered .hdm paths.",
+      "items": { "type": "string" }
+    }
+  }
+}

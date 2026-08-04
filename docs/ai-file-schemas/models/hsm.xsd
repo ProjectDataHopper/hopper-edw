@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Relaxed structural schema for Source model .hsm files (AI guidance).
+  Source of truth: org.apache.hop.datavault.metadata.sourcemodel.SourceModel
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+  <xs:simpleType name="hopYn">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Y"/>
+      <xs:enumeration value="N"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="openElements">
+    <xs:sequence>
+      <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="source-model">
+    <xs:annotation>
+      <xs:documentation>
+        Source modeler (.hsm): physical source tables, relationships, multi-table queries.
+        Publish to catalog as DV_SOURCE / COMPOSITE — does not load the vault by itself.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="name" type="xs:string" minOccurs="0"/>
+        <xs:element name="name_sync_with_filename" type="hopYn" minOccurs="0"/>
+        <xs:element name="description" type="xs:string" minOccurs="0"/>
+        <xs:element name="configuration" type="openElements" minOccurs="0"/>
+        <xs:element name="tables" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="table" type="openElements" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="relationships" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="relationship" type="openElements" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="queries" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="query" type="openElements" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>

@@ -1,0 +1,141 @@
+<dimensional-model>
+  <name_sync_with_filename>Y</name_sync_with_filename>
+  <description>Retail warehouse star schema with date role-playing and extended catalog tables</description>
+  <configuration>
+    <targetDatabase>Vault</targetDatabase>
+    <sourceDatabase/>
+    <dataCatalogConnection/>
+    <standardColumnsFolder/>
+    <dimKeyField>dim_key</dimKeyField>
+    <versionField>x_version</versionField>
+    <dateFromField>x_from_ts</dateFromField>
+    <dateToField>x_to_ts</dateToField>
+    <loadDateField>x_load_ts</loadDateField>
+    <currentFlagField>x_is_current</currentFlagField>
+    <openStartSentinel>1900-01-01 00:00:00</openStartSentinel>
+    <openEndSentinel>9999-12-31 23:59:59</openEndSentinel>
+    <targetTableBatchSize>1000</targetTableBatchSize>
+    <targetTableParallelCopies>4</targetTableParallelCopies>
+    <target_load_mode>Staging file + bulk command</target_load_mode>
+    <bulkLoadStagingFolder>${java.io.tmpdir}/dv2/bulk/</bulkLoadStagingFolder>
+    <bulkLoadDelimiter>,</bulkLoadDelimiter>
+    <bulkLoadEnclosure>"</bulkLoadEnclosure>
+    <bulkLoadEncoding>UTF-8</bulkLoadEncoding>
+    <bulkLoadLocalFileRequired>N</bulkLoadLocalFileRequired>
+    <generatedPipelineFolder/>
+    <dimensionPipelineNamePrefix>dm-dim-</dimensionPipelineNamePrefix>
+    <junkDimensionPipelineNamePrefix>dm-junk-</junkDimensionPipelineNamePrefix>
+    <bridgePipelineNamePrefix>dm-bridge-</bridgePipelineNamePrefix>
+    <factPipelineNamePrefix>dm-fact-</factPipelineNamePrefix>
+    <generatedWorkflowNamePrefix>DM Bulk Update - </generatedWorkflowNamePrefix>
+  </configuration>
+  
+<tables>
+<table>
+      <dimension_roles>
+        <dimension_role>
+          <dimensionTableName>d_order</dimensionTableName>
+          <foreignKeyColumn>order_hk</foreignKeyColumn>
+          <sourceFieldName>order_id</sourceFieldName>
+          <truncateToDateKey>N</truncateToDateKey>
+          <preloadLookupCache>N</preloadLookupCache>
+          <skipDimensionLookup>Y</skipDimensionLookup>
+          <forceDimensionLookup>N</forceDimensionLookup>
+        </dimension_role>
+        <dimension_role>
+          <dimensionTableName>d_customer</dimensionTableName>
+          <foreignKeyColumn>customer_hk</foreignKeyColumn>
+          <sourceFieldName>customer_id</sourceFieldName>
+          <truncateToDateKey>N</truncateToDateKey>
+          <preloadLookupCache>Y</preloadLookupCache>
+          <skipDimensionLookup>N</skipDimensionLookup>
+          <forceDimensionLookup>N</forceDimensionLookup>
+        </dimension_role>
+        <dimension_role>
+          <dimensionTableName>d_order_date</dimensionTableName>
+          <foreignKeyColumn>order_date_key</foreignKeyColumn>
+          <sourceFieldName>order_date</sourceFieldName>
+          <truncateToDateKey>Y</truncateToDateKey>
+          <preloadLookupCache>N</preloadLookupCache>
+          <skipDimensionLookup>N</skipDimensionLookup>
+          <forceDimensionLookup>N</forceDimensionLookup>
+        </dimension_role>
+        <dimension_role>
+          <dimensionTableName>d_shipping_date</dimensionTableName>
+          <foreignKeyColumn>shipping_date_key</foreignKeyColumn>
+          <sourceFieldName>shipping_date</sourceFieldName>
+          <truncateToDateKey>Y</truncateToDateKey>
+          <preloadLookupCache>N</preloadLookupCache>
+          <skipDimensionLookup>N</skipDimensionLookup>
+          <forceDimensionLookup>N</forceDimensionLookup>
+        </dimension_role>
+        <dimension_role>
+          <dimensionTableName>d_delivery_date</dimensionTableName>
+          <foreignKeyColumn>delivery_date_key</foreignKeyColumn>
+          <sourceFieldName>delivery_date</sourceFieldName>
+          <truncateToDateKey>Y</truncateToDateKey>
+          <preloadLookupCache>N</preloadLookupCache>
+          <skipDimensionLookup>N</skipDimensionLookup>
+          <forceDimensionLookup>N</forceDimensionLookup>
+        </dimension_role>
+      </dimension_roles>
+      <measures>
+        <measure>
+          <fieldName>total_amount</fieldName>
+          <additive>Y</additive>
+        </measure>
+      </measures>
+      <degenerate_dimensions>
+        <degenerate_dimension>
+          <fieldName>degenerate_info</fieldName>
+        </degenerate_dimension>
+      </degenerate_dimensions>
+      <range_dimension_roles/>
+      <junk_dimension_roles>
+        <junk_dimension_role>
+          <junkDimensionTableName>d_orders_junk</junkDimensionTableName>
+          <foreignKeyColumn>d_orders_junk_key</foreignKeyColumn>
+        </junk_dimension_role>
+      </junk_dimension_roles>
+      <tableName>f_orders</tableName>
+      <description/>
+      <tableType>FACT</tableType>
+      <sourceType>SQL</sourceType>
+      <sourceConnection>Vault</sourceConnection>
+      <sourceSql>SELECT lo.customer_hk, ho.order_id, hc.customer_id, lo.order_hk, 
+       so.order_date, so.shipping_date, so.delivery_date, so.total_amount, 
+       'abcd' as degenerate_info,
+       'a' as j1,
+       'b' as j2,
+       'c' as j3 
+FROM lnk_order lo 
+JOIN sat_order so 
+  ON lo.order_hk = so.order_hk 
+JOIN hub_order ho
+  ON so.order_hk = ho.order_hk
+JOIN hub_customer hc
+  ON lo.customer_hk = hc.customer_hk</sourceSql>
+      <sourcePipelineFile/>
+      <sourcePipelineTransform/>
+      <sourcePipelineRunConfiguration/>
+      <sourceCatalogConnection>local-catalog</sourceCatalogConnection>
+      <sourceRecordNamespace>hop/retail-example/sources</sourceRecordNamespace>
+      <sourceRecordName>E2E-order-line</sourceRecordName>
+      <dimensionLookupDateField>order_date</dimensionLookupDateField>
+      <xloc>320</xloc>
+      <yloc>160</yloc>
+      <name>f_orders</name>
+    </table>
+<table>
+      <referencedDimensionName>d_order</referencedDimensionName>
+      <referencedModelFilename>${PROJECT_HOME}/models/retail-conformed-dims.hdm</referencedModelFilename>
+      <tableName>d_order</tableName>
+      <description/>
+      <tableType>DIMENSION_ALIAS</tableType>
+      <sourceType>SQL</sourceType>
+      <xloc>96</xloc>
+      <yloc>160</yloc>
+      <name>d_order</name>
+    </table>
+</tables>
+</dimensional-model>

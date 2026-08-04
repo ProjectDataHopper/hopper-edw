@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Relaxed structural schema for Dimensional .hdm files (AI guidance).
+  Source of truth: org.apache.hop.datavault.metadata.dimensional.DimensionalModel
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+  <xs:simpleType name="hopYn">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Y"/>
+      <xs:enumeration value="N"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="openElements">
+    <xs:sequence>
+      <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="dimensional-model">
+    <xs:annotation>
+      <xs:documentation>
+        Dimensional / Kimball model (.hdm). Table types: DIMENSION, FACT, JUNK_DIMENSION,
+        BRIDGE, DIMENSION_ALIAS, RANGE_DIMENSION, …
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="name" type="xs:string" minOccurs="0"/>
+        <xs:element name="name_sync_with_filename" type="hopYn" minOccurs="0"/>
+        <xs:element name="description" type="xs:string" minOccurs="0"/>
+        <xs:element name="configuration" type="openElements" minOccurs="0"/>
+        <xs:element name="tables" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="table" type="openElements" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>

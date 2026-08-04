@@ -1,0 +1,76 @@
+<source-model>
+  <name_sync_with_filename>Y</name_sync_with_filename>
+  <configuration>
+    <defaultDatabase>CRM</defaultDatabase>
+    <defaultSchema>public</defaultSchema>
+    <catalogConnection>local-catalog</catalogConnection>
+  </configuration>
+  
+<tables>
+<table>
+      <physicalType>DATABASE</physicalType>
+      <databaseName>CRM</databaseName>
+      <schemaName>public</schemaName>
+      <tableName>customer_address</tableName>
+      <columns>
+        <column>
+          <name>customer_id</name>
+          <description/>
+          <sourceDataType>int4</sourceDataType>
+          <length>9</length>
+          <precision>0</precision>
+          <hopType>5</hopType>
+          <primaryKeyPosition>1</primaryKeyPosition>
+        </column>
+        <column>
+          <name>address_line1</name>
+          <description/>
+          <sourceDataType>varchar</sourceDataType>
+          <length>50</length>
+          <precision/>
+          <hopType>2</hopType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+        </column>
+        <column>
+          <name>city</name>
+          <description/>
+          <sourceDataType>varchar</sourceDataType>
+          <length>50</length>
+          <precision/>
+          <hopType>2</hopType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+        </column>
+        <column>
+          <name>postal_code</name>
+          <description/>
+          <sourceDataType>varchar</sourceDataType>
+          <length>10</length>
+          <precision/>
+          <hopType>2</hopType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+        </column>
+        <column>
+          <name>load_date</name>
+          <description/>
+          <sourceDataType>timestamp</sourceDataType>
+          <length>6</length>
+          <precision/>
+          <hopType>9</hopType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+        </column>
+        <column>
+          <name>record_source</name>
+          <description/>
+          <sourceDataType>varchar</sourceDataType>
+          <length>30</length>
+          <precision/>
+          <hopType>2</hopType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+        </column>
+      </columns>
+      <xloc>1040</xloc>
+      <yloc>288</yloc>
+      <name>customer_address</name>
+    </table>
+</tables>
+</source-model>

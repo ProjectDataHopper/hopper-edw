@@ -4,6 +4,10 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## Unreleased
 
+### AI file-schema pack for external agents
+
+- `docs/ai-file-schemas/`: purpose markdown + relaxed XSD for `.hdv` / `.hbv` / `.hdm` / `.hsm`, JSON Schema for plugin metadata and catalog record definitions, samples and cross-reference guide (for Gemini and other external AIs)
+
 ## [0.6.0] — 2026-08-03
 
 Requires **Apache Hop 2.19.0** (or a **recent 2.19.0-SNAPSHOT** until GA) and **Java 21**.

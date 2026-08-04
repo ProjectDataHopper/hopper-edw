@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Relaxed structural schema for Hop Data Vault .hdv files (AI guidance).
+  Source of truth: org.apache.hop.datavault.metadata.DataVaultModel and table classes.
+  Not a full formal validation of every optional field.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+  <xs:simpleType name="hopYn">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Y"/>
+      <xs:enumeration value="N"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="dvTableType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="HUB"/>
+      <xs:enumeration value="LINK"/>
+      <xs:enumeration value="SATELLITE"/>
+      <xs:enumeration value="REFERENCE"/>
+      <xs:enumeration value="LINKED_TABLE"/>
+      <xs:enumeration value="TABLE_REFERENCE"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Open content: Hop may add elements; AI should still prefer documented names. -->
+  <xs:complexType name="openElements" mixed="false">
+    <xs:sequence>
+      <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="data-vault-model">
+    <xs:annotation>
+      <xs:documentation>Raw Data Vault 2.0 model (.hdv). Drives DV Update / DDL.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="name" type="xs:string" minOccurs="0"/>
+        <xs:element name="name_sync_with_filename" type="hopYn" minOccurs="0"/>
+        <xs:element name="description" type="xs:string" minOccurs="0"/>
+        <xs:element name="configuration" type="openElements" minOccurs="0"/>
+        <xs:element name="coaching" type="openElements" minOccurs="0"/>
+        <xs:element name="tables" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="table" type="dvTable" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="notes" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="note" type="openElements" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="dvTable">
+    <xs:annotation>
+      <xs:documentation>
+        Polymorphic vault table. Discriminator: tableType.
+        HUB: businessKeys, recordSources, hashKeyFieldName.
+        SATELLITE: hub or link, recordSource, attributes.
+        LINK: hubNames, linkHubSources.
+        REFERENCE: naturalKeys, attributes, recordSources.
+        LINKED_TABLE: referencedTableName, referencedModelFilename, hashKeyFieldName (alias).
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="tableName" type="xs:string" minOccurs="0"/>
+      <xs:element name="name" type="xs:string" minOccurs="0"/>
+      <xs:element name="description" type="xs:string" minOccurs="0"/>
+      <xs:element name="tableType" type="dvTableType" minOccurs="0"/>
+      <xs:element name="xloc" type="xs:string" minOccurs="0"/>
+      <xs:element name="yloc" type="xs:string" minOccurs="0"/>
+      <xs:element name="integrationMode" type="xs:string" minOccurs="0"/>
+      <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>

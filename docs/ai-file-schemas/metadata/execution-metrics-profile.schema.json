@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/mattcasters/hop-data-vault/docs/ai-file-schemas/metadata/execution-metrics-profile.schema.json",
+  "title": "Execution metrics profile",
+  "description": "metadata/execution-metrics-profile/*.json — load-run metrics for vault updates.",
+  "type": "object",
+  "required": ["name"],
+  "additionalProperties": true,
+  "properties": {
+    "name": { "type": "string" },
+    "description": { "type": "string" },
+    "enabled": { "type": "boolean" },
+    "metricsOutputFolder": { "type": "string" },
+    "targetDatabaseConnection": { "type": "string" },
+    "operationsSchema": { "type": "string" },
+    "dataCatalogConnection": { "type": "string" },
+    "autoCreateTables": { "type": "boolean" },
+    "publishDatabaseRows": { "type": "boolean" },
+    "publishCatalogDefinitions": { "type": "boolean" },
+    "targetReadRatioThreshold": { "type": "number" },
+    "highTransformDurationMs": { "type": "number" },
+    "dimLookupPreloadRatioThreshold": { "type": "number" },
+    "sortRowsRiskThreshold": { "type": "number" }
+  }
+}

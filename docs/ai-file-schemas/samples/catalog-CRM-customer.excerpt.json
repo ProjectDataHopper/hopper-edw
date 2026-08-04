@@ -1,0 +1,95 @@
+{
+  "namespace": "hop/integration-tests/sources",
+  "name": "CRM-customer",
+  "type": "DV_SOURCE",
+  "description": "",
+  "rowMetaXml": "<row-meta><value-meta><type>Integer</type>\n<storagetype>normal</storagetype>\n<name>customer_id</name>\n<length>9</length>\u2026",
+  "origin": {
+    "modelType": "DATA_VAULT_SOURCE",
+    "modelName": "status-tracking",
+    "modelFilename": "/integration-tests/tests//status-tracking/status-tracking.hdv",
+    "modelElementName": "CRM-customer",
+    "hopProject": "status-tracking",
+    "createdAt": 1782138129585,
+    "updatedAt": 1782153237567,
+    "updatedBy": null,
+    "lastWorkflow": "update status-tracking.hdv",
+    "lastPipeline": null
+  },
+  "physicalTable": {
+    "databaseMetaName": "CRM",
+    "schemaName": "",
+    "tableName": "customer"
+  },
+  "tags": [
+    "DV Source",
+    "FULL_SNAPSHOT"
+  ],
+  "glossaryTerms": [],
+  "customProperties": {},
+  "dvSource": {
+    "sourceType": "DATABASE",
+    "sourceIndicator": "",
+    "sourceIndicatorField": "record_source",
+    "group": null,
+    "deliveryType": "FULL_SNAPSHOT",
+    "fields": [
+      {
+        "name": "customer_id",
+        "description": "",
+        "sourceDataType": "Integer",
+        "length": "9",
+        "precision": "0",
+        "hopType": 5
+      },
+      {
+        "name": "name",
+        "description": "",
+        "sourceDataType": "String",
+        "length": "50",
+        "precision": "",
+        "hopType": 2
+      },
+      {
+        "name": "email",
+        "description": "",
+        "sourceDataType": "String",
+        "length": "50",
+        "precision": "",
+        "hopType": 2
+      },
+      {
+        "name": "address",
+        "description": "",
+        "sourceDataType": "String",
+        "length": "50",
+        "precision": "",
+        "hopType": 2
+      },
+      {
+        "name": "city",
+        "description": "",
+        "sourceDataType": "String",
+        "length": "50",
+        "precision": "",
+        "hopType": 2
+      },
+      {
+        "name": "load_date",
+        "description": "",
+        "sourceDataType": "Timestamp",
+        "length": "6",
+        "precision": "",
+        "hopType": 9
+      },
+      {
+        "name": "record_source",
+        "description": "",
+        "sourceDataType": "String",
+        "length": "20",
+        "precision": "",
+        "hopType": 2
+      }
+    ]
+  }
+}
