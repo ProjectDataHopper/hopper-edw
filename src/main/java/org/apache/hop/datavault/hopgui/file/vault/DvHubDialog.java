@@ -495,12 +495,10 @@ public class DvHubDialog {
                 DvHub draftTable = locateDraftTable(draft);
                 applyWidgetsToTable(draftTable);
                 List<ICheckResult> tableRemarks = new ArrayList<>();
-                draftTable.check(
-                    tableRemarks,
-                    hopGui.getMetadataProvider(),
-                    variables,
-                    DvModelCheckOptions.defaults(),
-                    draft);
+                try (DvModelCheckOptions options = DvModelCheckOptions.forCheckRun()) {
+                  draftTable.check(
+                      tableRemarks, hopGui.getMetadataProvider(), variables, options, draft);
+                }
                 return tableRemarks;
               });
       ModelDialogValidationSupport.showCheckResults(shell, remarks);

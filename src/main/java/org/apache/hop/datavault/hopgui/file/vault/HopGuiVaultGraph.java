@@ -749,7 +749,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
                 model.check(
                     hopGui.getMetadataProvider(),
                     getVariables(),
-                    DvModelCheckOptions.defaults(),
+                    DvModelCheckOptions.forCheckRun(),
                     monitor));
     if (result.cancelled() && result.remarks().isEmpty()) {
       return;
@@ -1021,7 +1021,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
                 model.check(
                     hopGui.getMetadataProvider(),
                     getVariables(),
-                    DvModelCheckOptions.defaults(),
+                    DvModelCheckOptions.forCheckRun(),
                     monitor));
     if (result.cancelled()) {
       return false;

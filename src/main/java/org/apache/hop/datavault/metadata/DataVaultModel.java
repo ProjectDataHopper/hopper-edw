@@ -227,7 +227,7 @@ public class DataVaultModel extends HopMetadataBase
    * @return list of check results (errors, warnings, ok)
    */
   public List<ICheckResult> check(IHopMetadataProvider metadataProvider, IVariables variables) {
-    return check(metadataProvider, variables, DvModelCheckOptions.defaults(), null);
+    return check(metadataProvider, variables, DvModelCheckOptions.forCheckRun(), null);
   }
 
   public List<ICheckResult> check(
@@ -238,6 +238,9 @@ public class DataVaultModel extends HopMetadataBase
   /**
    * Validate this model, reporting progress per table when {@code monitor} is provided.
    * Cancellation stops further table checks; remarks collected so far are still returned.
+   *
+   * <p>Ensures a session cache so live source schema lookups reuse JDBC connections across tables
+   * for this run, then releases it.
    */
   public List<ICheckResult> check(
       IHopMetadataProvider metadataProvider,
@@ -248,7 +251,9 @@ public class DataVaultModel extends HopMetadataBase
       monitor = new ProgressNullMonitorListener();
     }
     if (options == null) {
-      options = DvModelCheckOptions.defaults();
+      options = DvModelCheckOptions.forCheckRun();
+    } else {
+      options.ensureCache();
     }
 
     List<ICheckResult> remarks = new ArrayList<>();
@@ -256,27 +261,29 @@ public class DataVaultModel extends HopMetadataBase
     monitor.beginTask(
         BaseMessages.getString(PKG, "DataVaultModel.Monitor.VerifyingModel"), tables.size());
 
-    List<DataVaultSource> sources = loadDataVaultSources(metadataProvider, variables, remarks);
-    if (monitor.isCanceled()) {
-      monitor.done();
+    try {
+      List<DataVaultSource> sources = loadDataVaultSources(metadataProvider, variables, remarks);
+      if (monitor.isCanceled()) {
+        return remarks;
+      }
+      checkTargetDatabase(remarks, metadataProvider, variables);
+      checkTargetLoadMode(remarks, metadataProvider);
+      checkTargetLoadModeGuidance(remarks, variables, metadataProvider);
+      checkTargetLoadingIntegerSettings(remarks, variables);
+      checkTablesPresent(remarks);
+      checkTables(
+          remarks, metadataProvider, variables, collectDefinedHubAndLinkNames(), options, monitor);
+      if (!monitor.isCanceled()) {
+        checkDuplicateTableNames(remarks);
+        checkDuplicateTargetTableNames(remarks);
+        checkDuplicateStsTableNames(remarks, variables);
+        checkDuplicateSourceNames(remarks, sources);
+      }
       return remarks;
+    } finally {
+      monitor.done();
+      options.close();
     }
-    checkTargetDatabase(remarks, metadataProvider, variables);
-    checkTargetLoadMode(remarks, metadataProvider);
-    checkTargetLoadModeGuidance(remarks, variables, metadataProvider);
-    checkTargetLoadingIntegerSettings(remarks, variables);
-    checkTablesPresent(remarks);
-    checkTables(
-        remarks, metadataProvider, variables, collectDefinedHubAndLinkNames(), options, monitor);
-    if (!monitor.isCanceled()) {
-      checkDuplicateTableNames(remarks);
-      checkDuplicateTargetTableNames(remarks);
-      checkDuplicateStsTableNames(remarks, variables);
-      checkDuplicateSourceNames(remarks, sources);
-    }
-
-    monitor.done();
-    return remarks;
   }
 
   private List<DataVaultSource> loadDataVaultSources(

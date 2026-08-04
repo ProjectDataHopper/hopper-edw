@@ -36,6 +36,8 @@ import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.config.DataVaultConfigSingleton;
+import org.apache.hop.datavault.metadata.database.DvDatabaseSource;
+import org.apache.hop.datavault.metadata.database.DvDatabaseSourceLiveSchemaSupport;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
@@ -1362,7 +1364,7 @@ public final class DvFieldMappingValidationSupport {
     }
 
     try {
-      IRowMeta liveRowMeta = dvSource.resolveLiveFields(variables, metadataProvider);
+      IRowMeta liveRowMeta = resolveLiveFields(dvSource, options, variables, metadataProvider);
       if (liveRowMeta == null || liveRowMeta.isEmpty()) {
         remarks.add(
             new CheckResult(
@@ -1385,6 +1387,40 @@ public final class DvFieldMappingValidationSupport {
               checkSource));
       return ResolvedSourceFields.fromStored(storedByName, variables);
     }
+  }
+
+  /**
+   * Live field resolution with optional check-run cache (shared JDBC connections + schema
+   * memoization).
+   */
+  private static IRowMeta resolveLiveFields(
+      IDvSource dvSource,
+      DvModelCheckOptions options,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider)
+      throws HopException {
+    DvModelCheckCache cache = options != null ? options.getCache() : null;
+    if (dvSource instanceof DvDatabaseSource dbSource) {
+      return DvDatabaseSourceLiveSchemaSupport.resolveLiveFields(
+          dbSource, variables, metadataProvider, cache);
+    }
+    if (cache != null) {
+      String key =
+          DvModelCheckCache.genericLiveFieldsKey(
+              dvSource.getSourceType() != null ? dvSource.getSourceType().name() : "source",
+              Const.NVL(
+                  dvSource.getName(), Integer.toHexString(System.identityHashCode(dvSource))));
+      IRowMeta cached = cache.getLiveFields(key);
+      if (cached != null) {
+        return cached;
+      }
+      IRowMeta liveRowMeta = dvSource.resolveLiveFields(variables, metadataProvider);
+      if (liveRowMeta != null) {
+        cache.putLiveFields(key, liveRowMeta);
+      }
+      return liveRowMeta;
+    }
+    return dvSource.resolveLiveFields(variables, metadataProvider);
   }
 
   private static void addStoredDriftWarnings(
