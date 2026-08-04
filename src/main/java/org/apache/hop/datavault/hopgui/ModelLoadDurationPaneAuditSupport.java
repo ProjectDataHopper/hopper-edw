@@ -33,7 +33,7 @@ public final class ModelLoadDurationPaneAuditSupport {
   private ModelLoadDurationPaneAuditSupport() {}
 
   public static boolean retrievePanelVisible(String modelFilename) {
-    return retrievePanelVisible(modelFilename, true);
+    return retrievePanelVisible(modelFilename, false);
   }
 
   /**

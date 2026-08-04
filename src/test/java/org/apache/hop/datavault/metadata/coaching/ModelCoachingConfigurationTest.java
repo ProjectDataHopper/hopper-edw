@@ -98,8 +98,8 @@ class ModelCoachingConfigurationTest {
   }
 
   @Test
-  void coachPanelAuditDefaultsVisibleForUnknownFile() {
-    assertTrue(ModelCoachPanelAuditSupport.retrievePanelVisible("/tmp/unknown-model.hdv"));
+  void coachPanelAuditDefaultsHiddenForUnknownFile() {
+    assertFalse(ModelCoachPanelAuditSupport.retrievePanelVisible("/tmp/unknown-model.hdv"));
   }
 
   @Test

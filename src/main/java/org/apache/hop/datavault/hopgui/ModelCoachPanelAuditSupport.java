@@ -34,7 +34,7 @@ public final class ModelCoachPanelAuditSupport {
   private ModelCoachPanelAuditSupport() {}
 
   public static boolean retrievePanelVisible(String modelFilename) {
-    return retrievePanelVisible(modelFilename, true);
+    return retrievePanelVisible(modelFilename, false);
   }
 
   /**

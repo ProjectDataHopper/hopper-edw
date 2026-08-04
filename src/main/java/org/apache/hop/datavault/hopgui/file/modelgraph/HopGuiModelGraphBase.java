@@ -106,8 +106,8 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
   protected SashForm innerModelSash;
   protected ModelCoachPanel coachPanel;
   protected ModelLoadDurationPane loadDurationPane;
-  protected boolean coachPanelVisible = true;
-  protected boolean loadDurationPanelVisible = true;
+  protected boolean coachPanelVisible;
+  protected boolean loadDurationPanelVisible;
 
   protected HopGuiModelGraphBase(HopGui hopGui, Composite parent, ExplorerPerspective perspective) {
     super(hopGui, parent, SWT.NO_BACKGROUND);
@@ -188,12 +188,12 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
   }
 
   /**
-   * Default visibility of the coach panel when the user has never toggled it for this file.
-   * DV/BV/DM default to visible; source models override to hidden until there is a clear coach
-   * use-case.
+   * Default visibility of the coach panel when the user has never toggled it for this file. Shown
+   * only for new/unsaved models (no filename yet) so existing and generated files open with a full
+   * canvas. Source models override to always hidden until there is a clear coach use-case.
    */
   protected boolean defaultCoachPanelVisible() {
-    return true;
+    return Utils.isEmpty(getModelFilename());
   }
 
   protected void restoreCoachPanelVisibility() {
@@ -237,11 +237,12 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
   }
 
   /**
-   * Default visibility of the load-duration overview when the user has never toggled it for this
-   * file. DV/BV/DM default to visible; source models override to hidden until loads exist.
+   * Default visibility of the load-duration (metrics) overview when the user has never toggled it
+   * for this file. Off by default so opening many models stays uncluttered; users can open via the
+   * toolbar.
    */
   protected boolean defaultLoadDurationPanelVisible() {
-    return true;
+    return false;
   }
 
   protected void restoreLoadDurationPanelVisibility() {
