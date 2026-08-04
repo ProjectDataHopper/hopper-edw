@@ -35,6 +35,7 @@ import org.apache.hop.core.row.value.ValueMetaBase;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.config.DataVaultConfigSingleton;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
@@ -871,8 +872,13 @@ public final class DvFieldMappingValidationSupport {
       return true;
     }
     // DECIMAL/NUMERIC: MySQL JDBC maps to BigNumber; PostgreSQL maps to Number.
-    return (sourceType == IValueMeta.TYPE_NUMBER && targetType == IValueMeta.TYPE_BIGNUMBER)
-        || (sourceType == IValueMeta.TYPE_BIGNUMBER && targetType == IValueMeta.TYPE_NUMBER);
+    if ((sourceType == IValueMeta.TYPE_NUMBER && targetType == IValueMeta.TYPE_BIGNUMBER)
+        || (sourceType == IValueMeta.TYPE_BIGNUMBER && targetType == IValueMeta.TYPE_NUMBER)) {
+      return true;
+    }
+    // DATE vs TIMESTAMP: vault DDL often uses DATETIME(6) for both; JDBC/source may report either.
+    return (sourceType == IValueMeta.TYPE_DATE && targetType == IValueMeta.TYPE_TIMESTAMP)
+        || (sourceType == IValueMeta.TYPE_TIMESTAMP && targetType == IValueMeta.TYPE_DATE);
   }
 
   static void validateMapping(
@@ -977,6 +983,115 @@ public final class DvFieldMappingValidationSupport {
                 checkSource));
       }
     }
+
+    validateTemporalFractionalPrecision(
+        sourceMeta, targetMeta, context, targetDatabaseMeta, checkSource, remarks);
+  }
+
+  /**
+   * Warns when source date/time fractional-second precision exceeds the target model or engine
+   * capacity (e.g. nanoseconds → SingleStore/MySQL {@code DATETIME(6)}). Never an error: truncation
+   * is often the best available mapping.
+   */
+  static void validateTemporalFractionalPrecision(
+      IValueMeta sourceMeta,
+      IValueMeta targetMeta,
+      String context,
+      DatabaseMeta targetDatabaseMeta,
+      ICheckResultSource checkSource,
+      List<ICheckResult> remarks) {
+    if (!isWarnTimestampFractionalPrecisionLossEnabled()) {
+      return;
+    }
+    if (sourceMeta == null
+        || targetMeta == null
+        || !isTemporalType(sourceMeta.getType())
+        || !isTemporalType(targetMeta.getType())) {
+      return;
+    }
+    int sourceFrac = temporalFractionalDigits(sourceMeta);
+    if (sourceFrac <= 0) {
+      return;
+    }
+    int targetFrac = temporalFractionalDigits(targetMeta);
+    int engineMax = maxTemporalFractionalDigits(targetDatabaseMeta);
+    int capacity = targetFrac >= 0 ? targetFrac : engineMax;
+    if (engineMax >= 0) {
+      capacity = targetFrac >= 0 ? Math.min(targetFrac, engineMax) : engineMax;
+    }
+    if (capacity < 0 || sourceFrac <= capacity) {
+      return;
+    }
+    remarks.add(
+        new CheckResult(
+            ICheckResult.TYPE_RESULT_WARNING,
+            BaseMessages.getString(
+                PKG,
+                "DvFieldMappingValidation.TimestampFractionalPrecisionLoss",
+                context,
+                sourceFrac,
+                capacity),
+            checkSource));
+  }
+
+  static boolean isTemporalType(int hopType) {
+    return hopType == IValueMeta.TYPE_DATE || hopType == IValueMeta.TYPE_TIMESTAMP;
+  }
+
+  /**
+   * Fractional-second digits for a temporal value meta. JDBC often stores TIMESTAMP scale in {@link
+   * IValueMeta#getLength()}; precision is used as a secondary signal.
+   */
+  static int temporalFractionalDigits(IValueMeta meta) {
+    if (meta == null || !isTemporalType(meta.getType())) {
+      return -1;
+    }
+    if (meta.getType() == IValueMeta.TYPE_TIMESTAMP) {
+      int length = meta.getLength();
+      if (length >= 0 && length <= 9) {
+        return length;
+      }
+    }
+    int precision = meta.getPrecision();
+    if (precision >= 0 && precision <= 9) {
+      return precision;
+    }
+    return -1;
+  }
+
+  /**
+   * Engine-specific maximum fractional digits for vault datetime storage, or {@code -1} when
+   * unknown / unlimited for this check.
+   */
+  static int maxTemporalFractionalDigits(DatabaseMeta databaseMeta) {
+    if (databaseMeta == null || Utils.isEmpty(databaseMeta.getPluginId())) {
+      return -1;
+    }
+    String pluginId = databaseMeta.getPluginId();
+    // SingleStore / MySQL / MariaDB: DATETIME(fsp) max fsp is 6 (microseconds).
+    if (DvBulkLoadPluginSupport.SINGLESTORE_DB_PLUGIN_ID.equalsIgnoreCase(pluginId)
+        || DvBulkLoadPluginSupport.MYSQL_DB_PLUGIN_ID.equalsIgnoreCase(pluginId)
+        || "MARIADB".equalsIgnoreCase(pluginId)) {
+      return 6;
+    }
+    // SQL Server DATETIME2 max scale is 7.
+    if (DvBulkLoadPluginSupport.MSSQLNATIVE_DB_PLUGIN_ID.equalsIgnoreCase(pluginId)
+        || "MSSQL".equalsIgnoreCase(pluginId)) {
+      return 7;
+    }
+    // PostgreSQL timestamp typically 0–6.
+    if (DvBulkLoadPluginSupport.POSTGRESQL_DB_PLUGIN_ID.equalsIgnoreCase(pluginId)) {
+      return 6;
+    }
+    return -1;
+  }
+
+  private static boolean isWarnTimestampFractionalPrecisionLossEnabled() {
+    try {
+      return DataVaultConfigSingleton.getConfig().isWarnTimestampFractionalPrecisionLoss();
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   static IValueMeta buildTargetValueMetaForHubBusinessKey(BusinessKey bk, IVariables variables)
@@ -1025,6 +1140,10 @@ public final class DvFieldMappingValidationSupport {
     String name = resolveName(sf.getName(), variables);
     int type = sf.getHopType();
     if (type <= 0) {
+      // Prefer SQL type on the source field (e.g. DATETIME(6) → Timestamp) over default String.
+      type = DvDataTypeSupport.resolveHopTypeId(sf.getSourceDataType(), null);
+    }
+    if (type <= 0) {
       type = IValueMeta.TYPE_STRING;
     }
     IValueMeta vm =
@@ -1033,6 +1152,9 @@ public final class DvFieldMappingValidationSupport {
             type,
             Const.toInt(resolveVariable(variables, sf.getLength()), -1),
             Const.toInt(resolveVariable(variables, sf.getPrecision()), -1));
+    if (!Utils.isEmpty(sf.getSourceDataType())) {
+      vm.setOriginalColumnTypeName(sf.getSourceDataType());
+    }
     return vm;
   }
 

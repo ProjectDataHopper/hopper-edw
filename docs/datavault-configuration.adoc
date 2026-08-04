@@ -207,6 +207,9 @@ image::images/hopgui-configuration-perspecive-data-vault-options.png[Hop GUI Dat
 |Enforce Unicode-capable target databases (EDW)
 |When enabled (**default**), model check reports an **error** if the target fails the Unicode capability probe (for example SingleStore/MySQL schema charset `utf8` instead of `utf8mb4`). When disabled, the probe still runs and failures become **warnings** only — useful for controlled migrations onto legacy charsets. Prefer recreating the EDW schema as `utf8mb4` (or the engine-equivalent full Unicode setting) when operations allow.
 
+|Warn when timestamp fractional precision is reduced
+|When enabled (**default**), model check reports a **warning** if a source date/time has more fractional-second digits than the target layout or engine allows (for example nanosecond timestamps stored as SingleStore/MySQL `DATETIME(6)` microseconds — the best available mapping). Never an error. Disable when truncation is accepted.
+
 |Maximum undo/redo operations kept in memory
 |Number of gzip-compressed XML snapshots kept for undo/redo on `.hdv` files (default 200). Older snapshots are discarded when the limit is exceeded.
 |===

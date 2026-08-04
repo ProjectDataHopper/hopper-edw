@@ -39,6 +39,18 @@ class DataVaultConfigTest {
   }
 
   @Test
+  void defaultsWarnTimestampFractionalPrecisionLossToTrue() {
+    assertTrue(new DataVaultConfig().isWarnTimestampFractionalPrecisionLoss());
+  }
+
+  @Test
+  void copiesWarnTimestampFractionalPrecisionLoss() {
+    DataVaultConfig source = new DataVaultConfig();
+    source.setWarnTimestampFractionalPrecisionLoss(false);
+    assertFalse(new DataVaultConfig(source).isWarnTimestampFractionalPrecisionLoss());
+  }
+
+  @Test
   void defaultsLiveUpdatePollIntervalToTenSeconds() {
     DataVaultConfig config = new DataVaultConfig();
 

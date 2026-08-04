@@ -565,6 +565,22 @@ public class DvLinkDialog {
     fdlSources.top = new FormAttachment(0, 0);
     wlSources.setLayoutData(fdlSources);
 
+    Button wOpenInCatalog = new Button(wSourcesComp, SWT.PUSH);
+    wOpenInCatalog.setText(
+        BaseMessages.getString(PKG, "DvHubDialog.OpenInCatalog.Label"));
+    wOpenInCatalog.setToolTipText(
+        BaseMessages.getString(PKG, "DvHubDialog.OpenInCatalog.ToolTip"));
+    PropsUi.setLook(wOpenInCatalog);
+    FormData fdOpenInCatalog = new FormData();
+    fdOpenInCatalog.right = new FormAttachment(100, 0);
+    fdOpenInCatalog.top = new FormAttachment(wlSources, margin);
+    wOpenInCatalog.setLayoutData(fdOpenInCatalog);
+    wOpenInCatalog.addListener(
+        SWT.Selection,
+        e ->
+            RecordSourceCatalogNavigationSupport.openSelectedSourceInCatalog(
+                shell, hopGui, variables, hopGui.getMetadataProvider(), model, wLinkHubSources));
+
     Button wEditMappings = new Button(wSourcesComp, SWT.PUSH);
     wEditMappings.setText("Edit hub source mappings...");
     FormData fdEdit = new FormData();
@@ -630,6 +646,27 @@ public class DvLinkDialog {
     fdlSatSources.left = new FormAttachment(0, 0);
     fdlSatSources.top = new FormAttachment(0, 0);
     wlSatSources.setLayoutData(fdlSatSources);
+
+    Button wOpenSatInCatalog = new Button(wSatSourcesComp, SWT.PUSH);
+    wOpenSatInCatalog.setText(
+        BaseMessages.getString(PKG, "DvHubDialog.OpenInCatalog.Label"));
+    wOpenSatInCatalog.setToolTipText(
+        BaseMessages.getString(PKG, "DvHubDialog.OpenInCatalog.ToolTip"));
+    PropsUi.setLook(wOpenSatInCatalog);
+    FormData fdOpenSatInCatalog = new FormData();
+    fdOpenSatInCatalog.right = new FormAttachment(100, 0);
+    fdOpenSatInCatalog.top = new FormAttachment(wlSatSources, margin);
+    wOpenSatInCatalog.setLayoutData(fdOpenSatInCatalog);
+    wOpenSatInCatalog.addListener(
+        SWT.Selection,
+        e ->
+            RecordSourceCatalogNavigationSupport.openSelectedSourceInCatalog(
+                shell,
+                hopGui,
+                variables,
+                hopGui.getMetadataProvider(),
+                model,
+                wLinkSatelliteSources));
 
     Button wEditSatMappings = new Button(wSatSourcesComp, SWT.PUSH);
     wEditSatMappings.setText("Edit satellite source mappings...");

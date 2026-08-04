@@ -56,6 +56,8 @@ public class DataVaultConfigOptionPlugin
   private static final String WIDGET_ID_DRAW_HASH_KEYS_IN_MODEL = "10000-draw-hash-keys-in-model";
   private static final String WIDGET_ID_ENFORCE_TARGET_UNICODE_CAPABILITY =
       "10005-enforce-target-unicode-capability";
+  private static final String WIDGET_ID_WARN_TIMESTAMP_FRACTIONAL_PRECISION_LOSS =
+      "10006-warn-timestamp-fractional-precision-loss";
   private static final String WIDGET_ID_MAX_UNDO_OPERATIONS = "10010-max-undo-operations";
   private static final String WIDGET_ID_DM_DEFAULT_SURROGATE_KEY = "10020-dm-default-surrogate-key";
   private static final String WIDGET_ID_DM_DEFAULT_VERSION = "10030-dm-default-version";
@@ -95,6 +97,18 @@ public class DataVaultConfigOptionPlugin
       description =
           "When true (default), model check errors if the target database is not Unicode-capable for EDW string storage")
   private Boolean enforceTargetUnicodeCapability;
+
+  @GuiWidgetElement(
+      id = WIDGET_ID_WARN_TIMESTAMP_FRACTIONAL_PRECISION_LOSS,
+      parentId = ConfigPluginOptionsTab.GUI_WIDGETS_PARENT_ID,
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::DataVaultConfigOptionPlugin.WarnTimestampFractionalPrecisionLoss.Message",
+      toolTip = "i18n::DataVaultConfigOptionPlugin.WarnTimestampFractionalPrecisionLoss.ToolTip")
+  @CommandLine.Option(
+      names = {"--dv-warn-timestamp-precision-loss"},
+      description =
+          "When true (default), model check warns if source timestamp fractional precision exceeds the target engine (e.g. nanoseconds vs SingleStore DATETIME(6))")
+  private Boolean warnTimestampFractionalPrecisionLoss;
 
   @GuiWidgetElement(
       id = WIDGET_ID_MAX_UNDO_OPERATIONS,
@@ -201,6 +215,8 @@ public class DataVaultConfigOptionPlugin
     DataVaultConfig config = DataVaultConfigSingleton.getConfig();
     instance.drawingHashKeysInModel = config.isDrawingHashKeysInModel();
     instance.enforceTargetUnicodeCapability = config.isEnforceTargetUnicodeCapability();
+    instance.warnTimestampFractionalPrecisionLoss =
+        config.isWarnTimestampFractionalPrecisionLoss();
     instance.maxUndoOperations = Integer.toString(config.getMaxUndoOperations());
     DmDefaultFieldNames defaults = config.getDimensionalDefaultFieldNames();
     instance.dmDefaultSurrogateKeyField = defaults.getSurrogateKeyField();
@@ -239,6 +255,14 @@ public class DataVaultConfigOptionPlugin
             enforceTargetUnicodeCapability
                 ? "Enabled hard enforcement of Unicode-capable target databases"
                 : "Disabled hard enforcement of Unicode-capable target databases (warnings only)");
+        changed = true;
+      }
+      if (warnTimestampFractionalPrecisionLoss != null) {
+        config.setWarnTimestampFractionalPrecisionLoss(warnTimestampFractionalPrecisionLoss);
+        log.logBasic(
+            warnTimestampFractionalPrecisionLoss
+                ? "Enabled warnings for timestamp fractional precision loss"
+                : "Disabled warnings for timestamp fractional precision loss");
         changed = true;
       }
       if (maxUndoOperations != null) {
@@ -290,6 +314,10 @@ public class DataVaultConfigOptionPlugin
         case WIDGET_ID_ENFORCE_TARGET_UNICODE_CAPABILITY:
           enforceTargetUnicodeCapability = ((Button) control).getSelection();
           config.setEnforceTargetUnicodeCapability(enforceTargetUnicodeCapability);
+          break;
+        case WIDGET_ID_WARN_TIMESTAMP_FRACTIONAL_PRECISION_LOSS:
+          warnTimestampFractionalPrecisionLoss = ((Button) control).getSelection();
+          config.setWarnTimestampFractionalPrecisionLoss(warnTimestampFractionalPrecisionLoss);
           break;
         case WIDGET_ID_MAX_UNDO_OPERATIONS:
           maxUndoOperations = getTextValue(control);

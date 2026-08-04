@@ -117,8 +117,13 @@ public final class DmSourceTargetTypeValidationSupport {
         || (sourceType == IValueMeta.TYPE_NUMBER && targetType == IValueMeta.TYPE_INTEGER)) {
       return true;
     }
-    return (sourceType == IValueMeta.TYPE_NUMBER && targetType == IValueMeta.TYPE_BIGNUMBER)
-        || (sourceType == IValueMeta.TYPE_BIGNUMBER && targetType == IValueMeta.TYPE_NUMBER);
+    if ((sourceType == IValueMeta.TYPE_NUMBER && targetType == IValueMeta.TYPE_BIGNUMBER)
+        || (sourceType == IValueMeta.TYPE_BIGNUMBER && targetType == IValueMeta.TYPE_NUMBER)) {
+      return true;
+    }
+    // DATE vs TIMESTAMP (e.g. JDBC Timestamp vs model Date / SingleStore DATETIME).
+    return (sourceType == IValueMeta.TYPE_DATE && targetType == IValueMeta.TYPE_TIMESTAMP)
+        || (sourceType == IValueMeta.TYPE_TIMESTAMP && targetType == IValueMeta.TYPE_DATE);
   }
 
   private static boolean isLengthSensitive(int type) {

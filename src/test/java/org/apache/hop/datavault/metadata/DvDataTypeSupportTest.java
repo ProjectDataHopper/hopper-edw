@@ -56,6 +56,77 @@ class DvDataTypeSupportTest {
   }
 
   @Test
+  void resolveHopTypeIdMapsDatetimeAndTimestampSqlNames() {
+    assertEquals(
+        IValueMeta.TYPE_TIMESTAMP, DvDataTypeSupport.resolveHopTypeId("DATETIME(6)", null));
+    assertEquals(IValueMeta.TYPE_TIMESTAMP, DvDataTypeSupport.resolveHopTypeId("datetime", null));
+    assertEquals(
+        IValueMeta.TYPE_TIMESTAMP, DvDataTypeSupport.resolveHopTypeId("TIMESTAMP", null));
+    assertEquals(IValueMeta.TYPE_DATE, DvDataTypeSupport.resolveHopTypeId("DATE", null));
+  }
+
+  @Test
+  void resolveHopTypeIdUsesSourceDataTypeWhenHopTypeUnset() {
+    SourceField field = new SourceField();
+    field.setName("load_dts");
+    field.setSourceDataType("DATETIME(6)");
+    field.setHopType(0);
+
+    assertEquals(
+        IValueMeta.TYPE_TIMESTAMP, DvDataTypeSupport.resolveHopTypeId(null, field));
+    assertEquals(
+        IValueMeta.TYPE_TIMESTAMP, DvDataTypeSupport.resolveHopTypeId("", field));
+  }
+
+  @Test
+  void satelliteValidationAcceptsDatetimeSqlLabelAgainstTimestampSource() throws HopException {
+    DataVaultModel model = new DataVaultModel();
+    DvHub hub = new DvHub("hub_customer");
+    BusinessKey customerId = new BusinessKey("customer_id");
+    customerId.setSourceFieldName("customer_id");
+    customerId.setRecordSourceName("all-customer-info");
+    customerId.setDataType("Integer");
+    hub.setBusinessKeys(List.of(customerId));
+
+    DataVaultSource source = new DataVaultSource("all-customer-info");
+    SourceField customerIdField = field("customer_id", "int4", IValueMeta.TYPE_INTEGER, "9");
+    SourceField loadDts =
+        field("load_dts", "DATETIME(6)", IValueMeta.TYPE_TIMESTAMP, "");
+    source.getDvSourceOrDefault().setFields(List.of(customerIdField, loadDts));
+
+    DvSatellite satellite = new TestSatellite("sat_customer", source);
+    satellite.setHubName("hub_customer");
+    satellite.setRecordSourceName("all-customer-info");
+    SatelliteAttribute loadAttr = new SatelliteAttribute();
+    loadAttr.setName("load_dts");
+    // Native SingleStore / MySQL type as often stored on attributes after import.
+    loadAttr.setDataType("DATETIME(6)");
+    satellite.setAttributes(List.of(loadAttr));
+
+    model.setTables(List.of(hub, satellite));
+
+    List<ICheckResult> remarks = new ArrayList<>();
+    DvFieldMappingValidationSupport.validateSatelliteMappings(
+        satellite,
+        model,
+        DvModelCheckOptions.fastOnly(),
+        null,
+        new Variables(),
+        satellite,
+        remarks);
+
+    assertFalse(
+        remarks.stream()
+            .anyMatch(
+                r ->
+                    r.getType() == ICheckResult.TYPE_RESULT_ERROR
+                        && r.getText() != null
+                        && r.getText().contains("load_dts")
+                        && r.getText().contains("does not match")),
+        () -> "Unexpected type mismatch remarks: " + remarks);
+  }
+
+  @Test
   void preferredDataTypeLabelPrefersHopTypeName() {
     SourceField field = new SourceField();
     field.setSourceDataType("int2");
@@ -65,12 +136,22 @@ class DvDataTypeSupportTest {
   }
 
   @Test
-  void preferredDataTypeLabelFallsBackToSourceSqlType() {
+  void preferredDataTypeLabelResolvesKnownSqlTypeWhenHopTypeUnset() {
     SourceField field = new SourceField();
     field.setSourceDataType("int2");
     field.setHopType(0);
 
-    assertEquals("int2", DvDataTypeSupport.preferredDataTypeLabel(field));
+    // int2 is mapped to Integer so attributes store a Hop-facing type name.
+    assertEquals("Integer", DvDataTypeSupport.preferredDataTypeLabel(field));
+  }
+
+  @Test
+  void preferredDataTypeLabelFallsBackToUnknownSqlType() {
+    SourceField field = new SourceField();
+    field.setSourceDataType("weird_custom_type");
+    field.setHopType(0);
+
+    assertEquals("weird_custom_type", DvDataTypeSupport.preferredDataTypeLabel(field));
   }
 
   @Test

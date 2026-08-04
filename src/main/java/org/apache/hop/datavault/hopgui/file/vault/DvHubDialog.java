@@ -394,11 +394,27 @@ public class DvHubDialog {
     wSourcesComp.setLayout(new FormLayout());
 
     // Multi-record sources section for Hubs (supports multiple sources feeding one Hub table)
+    Button wOpenInCatalog = new Button(wSourcesComp, SWT.PUSH);
+    wOpenInCatalog.setText(BaseMessages.getString(PKG, "DvHubDialog.OpenInCatalog.Label"));
+    wOpenInCatalog.setToolTipText(
+        BaseMessages.getString(PKG, "DvHubDialog.OpenInCatalog.ToolTip"));
+    PropsUi.setLook(wOpenInCatalog);
+    FormData fdOpenInCatalog = new FormData();
+    fdOpenInCatalog.right = new FormAttachment(100, 0);
+    fdOpenInCatalog.top = new FormAttachment(0, 0);
+    wOpenInCatalog.setLayoutData(fdOpenInCatalog);
+    wOpenInCatalog.addListener(
+        SWT.Selection,
+        e ->
+            RecordSourceCatalogNavigationSupport.openSelectedSourceInCatalog(
+                shell, hopGui, variables, hopGui.getMetadataProvider(), model, wSources));
+
     Label wlSources = new Label(wSourcesComp, SWT.LEFT);
     wlSources.setText(BaseMessages.getString(PKG, "DvHubDialog.RecordSources.Label"));
     PropsUi.setLook(wlSources);
     FormData fdlSources = new FormData();
     fdlSources.left = new FormAttachment(0, 0);
+    fdlSources.right = new FormAttachment(wOpenInCatalog, -margin);
     fdlSources.top = new FormAttachment(0, 0);
     wlSources.setLayoutData(fdlSources);
 
@@ -426,7 +442,7 @@ public class DvHubDialog {
             PropsUi.getInstance());
     FormData fdSources = new FormData();
     fdSources.left = new FormAttachment(0, 0);
-    fdSources.top = new FormAttachment(wlSources, margin);
+    fdSources.top = new FormAttachment(wOpenInCatalog, margin);
     fdSources.right = new FormAttachment(100, 0);
     fdSources.bottom = new FormAttachment(100, 0);
     wSources.setLayoutData(fdSources);

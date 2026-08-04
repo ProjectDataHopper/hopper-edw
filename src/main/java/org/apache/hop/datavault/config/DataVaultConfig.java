@@ -42,6 +42,14 @@ public class DataVaultConfig {
    */
   private boolean enforceTargetUnicodeCapability = true;
 
+  /**
+   * When true (default), model check warns if a source timestamp/date has more fractional-second
+   * precision than the target layout or engine allows (for example Postgres {@code timestamp(9)} →
+   * SingleStore {@code DATETIME(6)}). Disable to silence those warnings when truncation is
+   * accepted.
+   */
+  private boolean warnTimestampFractionalPrecisionLoss = true;
+
   private int maxUndoOperations = DEFAULT_MAX_UNDO_OPERATIONS;
   private DmDefaultFieldNames dimensionalDefaultFieldNames = new DmDefaultFieldNames();
   private ElkLayout elkLayout = ElkLayout.createDefault();
@@ -55,12 +63,14 @@ public class DataVaultConfig {
   public DataVaultConfig() {
     drawingHashKeysInModel = true;
     enforceTargetUnicodeCapability = true;
+    warnTimestampFractionalPrecisionLoss = true;
   }
 
   public DataVaultConfig(DataVaultConfig config) {
     this();
     drawingHashKeysInModel = config.drawingHashKeysInModel;
     enforceTargetUnicodeCapability = config.enforceTargetUnicodeCapability;
+    warnTimestampFractionalPrecisionLoss = config.warnTimestampFractionalPrecisionLoss;
     suppressLocalCatalogOffer = config.suppressLocalCatalogOffer;
     setMaxUndoOperations(config.maxUndoOperations);
     setDimensionalDefaultFieldNames(
