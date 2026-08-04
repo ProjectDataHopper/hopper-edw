@@ -111,4 +111,5 @@ When detailed type checking is active, database sources resolve types from the l
 * link:data-catalog.adoc[Data Catalog]
 * link:datavault-source-database.adoc[Database source details]
 * link:record-definition-input.adoc[Record Definition Input transform]
+* link:record-definition-output.adoc[Record Definition Output transform]
 * link:dv-hub.adoc[Hub metadata]

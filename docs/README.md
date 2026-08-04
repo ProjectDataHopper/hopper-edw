@@ -51,6 +51,7 @@ Documentation for the **hop-datavault** plugin (development **0.7.0-SNAPSHOT**, 
 | [resource-definition-validation.adoc](resource-definition-validation.adoc) | Schema gate action, GUI validate, impact, proposals, HTML/MD reports, DTAP |
 | [data-quality.adoc](data-quality.adoc) | Content quality measure, gate, history, alert sinks (Phase 2) |
 | [record-definition-input.adoc](record-definition-input.adoc) | Pipeline transform: read catalog definitions as rows |
+| [record-definition-output.adoc](record-definition-output.adoc) | Pipeline transform: write/discover/migrate catalog definitions |
 
 ## Data Vault reference (AsciiDoc)
 

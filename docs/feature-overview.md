@@ -60,6 +60,7 @@ For a slide-style executive summary, see [presentations/hop-data-vault-overview.
 | Execution maps (`.hem`) | Available | [execution-maps.adoc](execution-maps.adoc) |
 | AI Help (model, pipeline, workflow) | Available | [ai-advisory.md](ai-advisory.md) |
 | Record Definition Input transform | Available | [record-definition-input.adoc](record-definition-input.adoc) |
+| Record Definition Output transform | Available | [record-definition-output.adoc](record-definition-output.adoc) |
 | Date Dimension Generator transform | Available | [date-dimension-generator.adoc](date-dimension-generator.adoc) |
 | `hop svg` export | Available | [README.md](README.md#command-line-tools) |
 | BV naming rules engine | Planned | [plans/bv-naming-rules-engine-plan.md](plans/bv-naming-rules-engine-plan.md) |
@@ -175,6 +176,7 @@ The **Performance tuning** scenario can include load-run metrics and propose mod
 ### Pipeline transforms
 
 - **Record Definition Input** — stream catalog record definitions (or fields) as pipeline rows.
+- **Record Definition Output** — discover or migrate field layouts into the data catalog (including stream field grouping).
 - **Date Dimension Generator** — populate standard calendar dimension attributes.
 
 ### Operations

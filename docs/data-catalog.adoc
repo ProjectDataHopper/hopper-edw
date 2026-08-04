@@ -143,4 +143,5 @@ Use tagged versions as the expected contract for the **Validate resource definit
 
 * link:datavault-source.adoc[Data Vault Source]
 * link:record-definition-input.adoc[Record Definition Input transform]
+* link:record-definition-output.adoc[Record Definition Output transform]
 * link:resource-definition-validation.adoc[Resource definition validation]
