@@ -17,6 +17,9 @@
 package org.apache.hop.datavault.hopgui.dialog;
 
 import java.util.List;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.hop.core.Const;
+import org.apache.hop.core.config.HopConfig;
 import org.apache.hop.core.exception.HopValueException;
 import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.row.IRowMeta;
@@ -25,6 +28,7 @@ import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.PropsUi;
+import org.apache.hop.ui.core.dialog.PreviewRowsDialog;
 import org.apache.hop.ui.core.gui.GuiResource;
 import org.apache.hop.ui.core.gui.WindowProperty;
 import org.apache.hop.ui.core.widget.ColumnInfo;
@@ -40,10 +44,23 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 
-/** Read-only row viewer with a title and header message; no action buttons. */
+/**
+ * Read-only row viewer with a title and header message; no action buttons.
+ *
+ * <p>Binary fields are formatted like Hop's {@link PreviewRowsDialog}: hexadecimal by default, or
+ * via {@link IValueMeta#getString(Object)} when system variable {@code
+ * HOP_BINARY_FIELDS_AVOID_HEX_PREVIEW} is true.
+ */
 public final class ShowRowsDialog {
 
   private static final Class<?> PKG = ShowRowsDialog.class;
+
+  private static final int MAX_BINARY_STRING_PREVIEW_SIZE =
+      PreviewRowsDialog.MAX_BINARY_STRING_PREVIEW_SIZE;
+
+  private static final boolean AVOID_BINARY_IN_HEX =
+      Const.toBoolean(
+          HopConfig.readStringVariable(Const.HOP_BINARY_FIELDS_AVOID_HEX_PREVIEW, "false"));
 
   private final Shell parentShell;
   private final IVariables variables;
@@ -189,20 +206,42 @@ public final class ShowRowsDialog {
       IValueMeta valueMeta = rowMeta.getValueMeta(column);
       String displayValue;
       try {
-        displayValue = valueMeta.getString(row[column]);
+        displayValue = formatCellValue(valueMeta, row[column]);
       } catch (HopValueException | ArrayIndexOutOfBoundsException e) {
         new LogChannel(PKG).logError("Unable to format preview cell", e);
         displayValue = null;
       }
 
       if (displayValue != null) {
-        item.setText(column + 1, displayValue);
+        item.setText(column + 1, TableView.formatCellValueForDisplay(displayValue));
         item.setForeground(column + 1, GuiResource.getInstance().getColorBlack());
       } else {
         item.setText(column + 1, "<null>");
         item.setForeground(column + 1, GuiResource.getInstance().getColorBlue());
       }
     }
+  }
+
+  /**
+   * Formats a cell for preview display. Binary values use hex encoding unless {@code
+   * HOP_BINARY_FIELDS_AVOID_HEX_PREVIEW} is enabled (same contract as Hop GUI preview dialogs).
+   */
+  static String formatCellValue(IValueMeta valueMeta, Object value) throws HopValueException {
+    if (valueMeta == null) {
+      return null;
+    }
+    if (valueMeta.isBinary()) {
+      byte[] bytes = valueMeta.getBinary(value);
+      if (bytes == null) {
+        return null;
+      }
+      String show = AVOID_BINARY_IN_HEX ? valueMeta.getString(bytes) : Hex.encodeHexString(bytes);
+      if (show != null && show.length() > MAX_BINARY_STRING_PREVIEW_SIZE) {
+        return show.substring(0, MAX_BINARY_STRING_PREVIEW_SIZE);
+      }
+      return show;
+    }
+    return valueMeta.getString(value);
   }
 
   private void saveWindowProperty() {
