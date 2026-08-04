@@ -20,7 +20,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.hop.core.HopEnvironment;
+import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.junit.jupiter.api.BeforeAll;
@@ -91,6 +94,24 @@ class DvTargetUnicodeCapabilitySupportTest {
     assertEquals(
         DvTargetUnicodeCapabilitySupport.Status.NOT_CAPABLE,
         DvTargetUnicodeCapabilitySupport.evaluate(mysqlMeta(), "utf8").status());
+  }
+
+  @Test
+  void notCapableIsErrorWhenEnforcedAndWarningWhenSoft() {
+    var assessment = DvTargetUnicodeCapabilitySupport.evaluate(mysqlMeta(), "utf8");
+    assertTrue(assessment.isHardFailure());
+
+    List<ICheckResult> enforced = new ArrayList<>();
+    DvTargetUnicodeCapabilitySupport.addRemark(
+        enforced, assessment, "Vault", mysqlMeta().getPluginId(), true);
+    assertEquals(1, enforced.size());
+    assertEquals(ICheckResult.TYPE_RESULT_ERROR, enforced.get(0).getType());
+
+    List<ICheckResult> soft = new ArrayList<>();
+    DvTargetUnicodeCapabilitySupport.addRemark(
+        soft, assessment, "Vault", mysqlMeta().getPluginId(), false);
+    assertEquals(1, soft.size());
+    assertEquals(ICheckResult.TYPE_RESULT_WARNING, soft.get(0).getType());
   }
 
   @Test

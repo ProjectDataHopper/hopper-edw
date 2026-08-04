@@ -28,6 +28,7 @@ import org.apache.hop.core.logging.LoggingObjectType;
 import org.apache.hop.core.logging.SimpleLoggingObject;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.config.DataVaultConfigSingleton;
 import org.apache.hop.i18n.BaseMessages;
 
 /**
@@ -96,6 +97,19 @@ public final class DvTargetUnicodeCapabilitySupport {
       Assessment assessment,
       String targetDatabaseName,
       String pluginId) {
+    addRemark(remarks, assessment, targetDatabaseName, pluginId, isEnforcementEnabled());
+  }
+
+  /**
+   * @param enforceHardFailure when false, {@link Status#NOT_CAPABLE} is reported as a warning so
+   *     model check can continue (global plugin config).
+   */
+  public static void addRemark(
+      List<ICheckResult> remarks,
+      Assessment assessment,
+      String targetDatabaseName,
+      String pluginId,
+      boolean enforceHardFailure) {
     if (remarks == null || assessment == null) {
       return;
     }
@@ -112,17 +126,24 @@ public final class DvTargetUnicodeCapabilitySupport {
                       name,
                       Const.NVL(assessment.detail(), engine)),
                   null));
-      case NOT_CAPABLE ->
-          remarks.add(
-              new CheckResult(
-                  ICheckResult.TYPE_RESULT_ERROR,
-                  BaseMessages.getString(
-                      PKG,
-                      "DvTargetUnicodeCapabilitySupport.CheckResult.NotCapable",
-                      name,
-                      Const.NVL(assessment.detail(), ""),
-                      Const.NVL(assessment.remediation(), "")),
-                  null));
+      case NOT_CAPABLE -> {
+        int type =
+            enforceHardFailure ? ICheckResult.TYPE_RESULT_ERROR : ICheckResult.TYPE_RESULT_WARNING;
+        String messageKey =
+            enforceHardFailure
+                ? "DvTargetUnicodeCapabilitySupport.CheckResult.NotCapable"
+                : "DvTargetUnicodeCapabilitySupport.CheckResult.NotCapableWarning";
+        remarks.add(
+            new CheckResult(
+                type,
+                BaseMessages.getString(
+                    PKG,
+                    messageKey,
+                    name,
+                    Const.NVL(assessment.detail(), ""),
+                    Const.NVL(assessment.remediation(), "")),
+                null));
+      }
       case CONNECTION_FAILED ->
           remarks.add(
               new CheckResult(
@@ -156,6 +177,15 @@ public final class DvTargetUnicodeCapabilitySupport {
       default -> {
         // no-op
       }
+    }
+  }
+
+  /** Global plugin config: hard-fail Unicode target check when enabled (default true). */
+  public static boolean isEnforcementEnabled() {
+    try {
+      return DataVaultConfigSingleton.getConfig().isEnforceTargetUnicodeCapability();
+    } catch (Exception e) {
+      return true;
     }
   }
 

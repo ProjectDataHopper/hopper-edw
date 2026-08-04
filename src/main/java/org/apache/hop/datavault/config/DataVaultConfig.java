@@ -35,6 +35,13 @@ public class DataVaultConfig {
       "${PROJECT_HOME}/workflows/schema-remediation";
 
   private boolean drawingHashKeysInModel;
+  /**
+   * When true (default), model check reports a hard error if the target database is not
+   * Unicode-capable for EDW string storage. When false, the same probe still runs but failures are
+   * warnings only (useful for migrations onto legacy MySQL/SingleStore {@code utf8} schemas).
+   */
+  private boolean enforceTargetUnicodeCapability = true;
+
   private int maxUndoOperations = DEFAULT_MAX_UNDO_OPERATIONS;
   private DmDefaultFieldNames dimensionalDefaultFieldNames = new DmDefaultFieldNames();
   private ElkLayout elkLayout = ElkLayout.createDefault();
@@ -47,11 +54,13 @@ public class DataVaultConfig {
 
   public DataVaultConfig() {
     drawingHashKeysInModel = true;
+    enforceTargetUnicodeCapability = true;
   }
 
   public DataVaultConfig(DataVaultConfig config) {
     this();
     drawingHashKeysInModel = config.drawingHashKeysInModel;
+    enforceTargetUnicodeCapability = config.enforceTargetUnicodeCapability;
     suppressLocalCatalogOffer = config.suppressLocalCatalogOffer;
     setMaxUndoOperations(config.maxUndoOperations);
     setDimensionalDefaultFieldNames(

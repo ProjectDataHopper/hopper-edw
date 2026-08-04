@@ -17,10 +17,26 @@
 package org.apache.hop.datavault.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
 class DataVaultConfigTest {
+
+  @Test
+  void defaultsEnforceTargetUnicodeCapabilityToTrue() {
+    DataVaultConfig config = new DataVaultConfig();
+    assertTrue(config.isEnforceTargetUnicodeCapability());
+  }
+
+  @Test
+  void copiesEnforceTargetUnicodeCapability() {
+    DataVaultConfig source = new DataVaultConfig();
+    source.setEnforceTargetUnicodeCapability(false);
+    DataVaultConfig copy = new DataVaultConfig(source);
+    assertFalse(copy.isEnforceTargetUnicodeCapability());
+  }
 
   @Test
   void defaultsLiveUpdatePollIntervalToTenSeconds() {

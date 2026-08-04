@@ -156,13 +156,17 @@ On **SQL Server** (and **PostgreSQL** with ICU/locale collations), generated hub
 
 === Unicode capability (EDW requirement)
 
-Data Vault, Business Vault, and dimensional models require a **Unicode-capable target database**. Model check (and update actions that enforce model check) refuse to treat non-Unicode targets as valid EDW destinations:
+Data Vault, Business Vault, and dimensional models require a **Unicode-capable target database**. Model check (and update actions that enforce model check) refuse to treat non-Unicode targets as valid EDW destinations by default:
 
 * **SQL Server** — database default collation must end with `_UTF8` (for example `Latin1_General_100_CI_AS_SC_UTF8`). Requires SQL Server 2019 or later.
 * **PostgreSQL** — database encoding must be `UTF8`.
-* **MySQL / MariaDB / SingleStore** — schema character set must be `utf8mb4` (plain `utf8` or `latin1` is rejected).
+* **MySQL / MariaDB / SingleStore** — schema character set must be `utf8mb4` (plain `utf8` / `utf8mb3` or `latin1` is rejected).
 
-If the vault database is unreachable during check, a **warning** is raised so offline design can continue; when connectivity is available and the encoding is wrong, an **error** blocks the update.
+==== utf8 vs utf8mb4 (MySQL family)
+
+On MySQL, MariaDB, and SingleStore, the historical charset name **`utf8` is not full Unicode**: it is a 3-byte encoding (BMP only, historically `utf8mb3`). Supplementary-plane characters (many emoji, some rare CJK and symbols) need **4 bytes** and therefore **`utf8mb4`**. Everyday Western European text often fits in both; full EDW Unicode storage does not.
+
+If the vault database is unreachable during check, a **warning** is raised so offline design can continue; when connectivity is available and the encoding is wrong, an **error** blocks the update **when enforcement is enabled** (see plugin-wide options below).
 
 === Generated pipelines tab
 
@@ -199,6 +203,9 @@ image::images/hopgui-configuration-perspecive-data-vault-options.png[Hop GUI Dat
 
 |Draw hash keys in model
 |When enabled, hash key column names are drawn on table cards in the visual model editor.
+
+|Enforce Unicode-capable target databases (EDW)
+|When enabled (**default**), model check reports an **error** if the target fails the Unicode capability probe (for example SingleStore/MySQL schema charset `utf8` instead of `utf8mb4`). When disabled, the probe still runs and failures become **warnings** only — useful for controlled migrations onto legacy charsets. Prefer recreating the EDW schema as `utf8mb4` (or the engine-equivalent full Unicode setting) when operations allow.
 
 |Maximum undo/redo operations kept in memory
 |Number of gzip-compressed XML snapshots kept for undo/redo on `.hdv` files (default 200). Older snapshots are discarded when the limit is exceeded.

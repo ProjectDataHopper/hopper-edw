@@ -54,6 +54,8 @@ public class DataVaultConfigOptionPlugin
   protected static final Class<?> PKG = DataVaultConfigOptionPlugin.class;
 
   private static final String WIDGET_ID_DRAW_HASH_KEYS_IN_MODEL = "10000-draw-hash-keys-in-model";
+  private static final String WIDGET_ID_ENFORCE_TARGET_UNICODE_CAPABILITY =
+      "10005-enforce-target-unicode-capability";
   private static final String WIDGET_ID_MAX_UNDO_OPERATIONS = "10010-max-undo-operations";
   private static final String WIDGET_ID_DM_DEFAULT_SURROGATE_KEY = "10020-dm-default-surrogate-key";
   private static final String WIDGET_ID_DM_DEFAULT_VERSION = "10030-dm-default-version";
@@ -81,6 +83,18 @@ public class DataVaultConfigOptionPlugin
       names = {"--dv-draw-hash-keys"},
       description = "Enable or disable drawing hash keys in Data Vault models")
   private Boolean drawingHashKeysInModel;
+
+  @GuiWidgetElement(
+      id = WIDGET_ID_ENFORCE_TARGET_UNICODE_CAPABILITY,
+      parentId = ConfigPluginOptionsTab.GUI_WIDGETS_PARENT_ID,
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::DataVaultConfigOptionPlugin.EnforceTargetUnicodeCapability.Message",
+      toolTip = "i18n::DataVaultConfigOptionPlugin.EnforceTargetUnicodeCapability.ToolTip")
+  @CommandLine.Option(
+      names = {"--dv-enforce-target-unicode"},
+      description =
+          "When true (default), model check errors if the target database is not Unicode-capable for EDW string storage")
+  private Boolean enforceTargetUnicodeCapability;
 
   @GuiWidgetElement(
       id = WIDGET_ID_MAX_UNDO_OPERATIONS,
@@ -186,6 +200,7 @@ public class DataVaultConfigOptionPlugin
     DataVaultConfigOptionPlugin instance = new DataVaultConfigOptionPlugin();
     DataVaultConfig config = DataVaultConfigSingleton.getConfig();
     instance.drawingHashKeysInModel = config.isDrawingHashKeysInModel();
+    instance.enforceTargetUnicodeCapability = config.isEnforceTargetUnicodeCapability();
     instance.maxUndoOperations = Integer.toString(config.getMaxUndoOperations());
     DmDefaultFieldNames defaults = config.getDimensionalDefaultFieldNames();
     instance.dmDefaultSurrogateKeyField = defaults.getSurrogateKeyField();
@@ -216,6 +231,14 @@ public class DataVaultConfigOptionPlugin
         } else {
           log.logBasic("Disabled drawing hash keys in model");
         }
+        changed = true;
+      }
+      if (enforceTargetUnicodeCapability != null) {
+        config.setEnforceTargetUnicodeCapability(enforceTargetUnicodeCapability);
+        log.logBasic(
+            enforceTargetUnicodeCapability
+                ? "Enabled hard enforcement of Unicode-capable target databases"
+                : "Disabled hard enforcement of Unicode-capable target databases (warnings only)");
         changed = true;
       }
       if (maxUndoOperations != null) {
@@ -263,6 +286,10 @@ public class DataVaultConfigOptionPlugin
         case WIDGET_ID_DRAW_HASH_KEYS_IN_MODEL:
           drawingHashKeysInModel = ((Button) control).getSelection();
           config.setDrawingHashKeysInModel(drawingHashKeysInModel);
+          break;
+        case WIDGET_ID_ENFORCE_TARGET_UNICODE_CAPABILITY:
+          enforceTargetUnicodeCapability = ((Button) control).getSelection();
+          config.setEnforceTargetUnicodeCapability(enforceTargetUnicodeCapability);
           break;
         case WIDGET_ID_MAX_UNDO_OPERATIONS:
           maxUndoOperations = getTextValue(control);
