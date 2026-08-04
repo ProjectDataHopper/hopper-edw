@@ -51,7 +51,6 @@ import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.datavault.command.svg.SvgExportService;
 import org.apache.hop.datavault.command.svg.SvgRenderOptions;
 import org.apache.hop.datavault.config.DataVaultConfigSingleton;
-import org.apache.hop.datavault.hopgui.GuiBusySupport;
 import org.apache.hop.datavault.hopgui.ModelGeneratedArtifactOpenSupport;
 import org.apache.hop.datavault.hopgui.ModelTableLayoutPreviewSupport;
 import org.apache.hop.datavault.hopgui.ModelUpdateActionAuditSupport;
@@ -61,6 +60,7 @@ import org.apache.hop.datavault.hopgui.coaching.ICoachableModelGraph;
 import org.apache.hop.datavault.hopgui.file.businessvault.delegates.HopGuiBusinessVaultClipboardDelegate;
 import org.apache.hop.datavault.hopgui.file.businessvault.delegates.HopGuiBusinessVaultSnapshotUndo;
 import org.apache.hop.datavault.hopgui.file.modelgraph.HopGuiModelGraphBase;
+import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphHit;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphMouseInteractions;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphSnapshotUndo;
@@ -1704,11 +1704,14 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     if (model == null) {
       return;
     }
-    List<ICheckResult> remarks = new ArrayList<>();
-    GuiBusySupport.showWhile(
-        hopShell(),
-        () -> remarks.addAll(model.check(hopGui.getMetadataProvider(), getVariables())));
-    showCheckResultsDialog(remarks);
+    ModelDialogValidationSupport.ModelCheckProgressResult result =
+        ModelDialogValidationSupport.runChecksWithProgress(
+            hopShell(),
+            monitor -> model.check(hopGui.getMetadataProvider(), getVariables(), monitor));
+    if (result.cancelled() && result.remarks().isEmpty()) {
+      return;
+    }
+    showCheckResultsDialog(new ArrayList<>(result.remarks()));
   }
 
   @GuiToolbarElement(
@@ -1812,15 +1815,21 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     return remarks.stream().anyMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_ERROR);
   }
 
-  /** Returns false when the model has check errors (dialog already shown). */
+  /**
+   * Returns false when the model has check errors (dialog already shown) or check was cancelled.
+   */
   private boolean validateModelForDebug() {
     if (model == null) {
       return false;
     }
-    List<ICheckResult> remarks = new ArrayList<>();
-    GuiBusySupport.showWhile(
-        hopShell(),
-        () -> remarks.addAll(model.check(hopGui.getMetadataProvider(), getVariables())));
+    ModelDialogValidationSupport.ModelCheckProgressResult result =
+        ModelDialogValidationSupport.runChecksWithProgress(
+            hopShell(),
+            monitor -> model.check(hopGui.getMetadataProvider(), getVariables(), monitor));
+    if (result.cancelled()) {
+      return false;
+    }
+    List<ICheckResult> remarks = new ArrayList<>(result.remarks());
     if (!hasCheckErrors(remarks)) {
       return true;
     }

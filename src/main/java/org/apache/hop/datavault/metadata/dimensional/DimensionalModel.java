@@ -25,7 +25,10 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.base.AbstractMeta;
 import org.apache.hop.core.CheckResult;
+import org.apache.hop.core.Const;
 import org.apache.hop.core.ICheckResult;
+import org.apache.hop.core.IProgressMonitor;
+import org.apache.hop.core.ProgressNullMonitorListener;
 import org.apache.hop.core.changed.ChangedFlag;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.file.IHasFilename;
@@ -275,7 +278,24 @@ public class DimensionalModel extends HopMetadataBase
   }
 
   public List<ICheckResult> check(IHopMetadataProvider metadataProvider, IVariables variables) {
+    return check(metadataProvider, variables, null);
+  }
+
+  /**
+   * Validate this model, reporting progress per table when {@code monitor} is provided.
+   * Cancellation stops further table checks; remarks collected so far are still returned.
+   */
+  public List<ICheckResult> check(
+      IHopMetadataProvider metadataProvider, IVariables variables, IProgressMonitor monitor) {
+    if (monitor == null) {
+      monitor = new ProgressNullMonitorListener();
+    }
+
     List<ICheckResult> remarks = new ArrayList<>();
+    List<IDmTable> tables = getTables();
+    monitor.beginTask(
+        BaseMessages.getString(PKG, "DimensionalModel.Monitor.VerifyingModel"), tables.size());
+
     DmValidationSupport.validateConfiguration(remarks, this, metadataProvider, variables);
     DimensionalConfiguration config = getConfigurationOrDefault();
     org.apache.hop.core.database.DatabaseMeta targetDatabase = null;
@@ -298,7 +318,7 @@ public class DimensionalModel extends HopMetadataBase
         variables,
         DimensionalConfiguration.DEFAULT_TARGET_TABLE_BATCH_SIZE,
         DimensionalConfiguration.DEFAULT_TARGET_TABLE_PARALLEL_COPIES);
-    if (getTables().isEmpty()) {
+    if (tables.isEmpty()) {
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_ERROR,
@@ -306,11 +326,18 @@ public class DimensionalModel extends HopMetadataBase
               null));
     }
     Set<String> names = new HashSet<>();
-    for (IDmTable table : getTables()) {
+    for (IDmTable table : tables) {
+      if (monitor.isCanceled()) {
+        break;
+      }
       if (table == null) {
+        monitor.worked(1);
         continue;
       }
       String name = table.getName();
+      monitor.subTask(
+          BaseMessages.getString(
+              PKG, "DimensionalModel.Monitor.VerifyingTable", Const.NVL(name, "?")));
       if (!Utils.isEmpty(name)) {
         if (!names.add(name)) {
           remarks.add(
@@ -321,14 +348,17 @@ public class DimensionalModel extends HopMetadataBase
         }
       }
       table.check(remarks, metadataProvider, variables, this);
+      monitor.worked(1);
     }
-    if (remarks.stream().noneMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_ERROR)) {
+    if (!monitor.isCanceled()
+        && remarks.stream().noneMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_ERROR)) {
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_OK,
               BaseMessages.getString(PKG, "DimensionalModel.CheckResult.Ok"),
               null));
     }
+    monitor.done();
     return remarks;
   }
 

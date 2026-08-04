@@ -26,7 +26,10 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.base.AbstractMeta;
 import org.apache.hop.core.CheckResult;
+import org.apache.hop.core.Const;
 import org.apache.hop.core.ICheckResult;
+import org.apache.hop.core.IProgressMonitor;
+import org.apache.hop.core.ProgressNullMonitorListener;
 import org.apache.hop.core.changed.ChangedFlag;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.file.IHasFilename;
@@ -321,7 +324,23 @@ public class BusinessVaultModel extends HopMetadataBase
   }
 
   public List<ICheckResult> check(IHopMetadataProvider metadataProvider, IVariables variables) {
+    return check(metadataProvider, variables, null);
+  }
+
+  /**
+   * Validate this model, reporting progress per table when {@code monitor} is provided.
+   * Cancellation stops further table checks; remarks collected so far are still returned.
+   */
+  public List<ICheckResult> check(
+      IHopMetadataProvider metadataProvider, IVariables variables, IProgressMonitor monitor) {
+    if (monitor == null) {
+      monitor = new ProgressNullMonitorListener();
+    }
+
     List<ICheckResult> remarks = new ArrayList<>();
+    List<IBvTable> tables = getTables();
+    monitor.beginTask(
+        BaseMessages.getString(PKG, "BusinessVaultModel.Monitor.VerifyingModel"), tables.size());
 
     // DV tables come from canvas Hub/Link/Satellite references (multi-model capable).
     // Optional legacy dataVaultModelPath is only a default when an alias has no path.
@@ -335,7 +354,7 @@ public class BusinessVaultModel extends HopMetadataBase
       // Continue with null model so table-level checks still report structure issues.
     }
 
-    if (getTables().isEmpty()) {
+    if (tables.isEmpty()) {
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_WARNING,
@@ -345,10 +364,17 @@ public class BusinessVaultModel extends HopMetadataBase
 
     Set<String> names = new HashSet<>();
     Set<String> targetNames = new HashSet<>();
-    for (IBvTable table : getTables()) {
+    for (IBvTable table : tables) {
+      if (monitor.isCanceled()) {
+        break;
+      }
       if (table == null) {
+        monitor.worked(1);
         continue;
       }
+      String tableLabel = Const.NVL(table.getName(), "?");
+      monitor.subTask(
+          BaseMessages.getString(PKG, "BusinessVaultModel.Monitor.VerifyingTable", tableLabel));
       if (!Utils.isEmpty(table.getName()) && !names.add(table.getName())) {
         remarks.add(
             new CheckResult(
@@ -368,6 +394,12 @@ public class BusinessVaultModel extends HopMetadataBase
                 table));
       }
       table.check(remarks, metadataProvider, variables, this, dataVaultModel);
+      monitor.worked(1);
+    }
+
+    if (monitor.isCanceled()) {
+      monitor.done();
+      return remarks;
     }
 
     // SQL business-table dependency graph (cycles reported once for the model).
@@ -526,6 +558,7 @@ public class BusinessVaultModel extends HopMetadataBase
               BaseMessages.getString(PKG, "BusinessVaultModel.CheckResult.Ok"),
               null));
     }
+    monitor.done();
     return remarks;
   }
 

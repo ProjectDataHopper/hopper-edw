@@ -26,6 +26,8 @@ import lombok.Setter;
 import org.apache.hop.base.AbstractMeta;
 import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.ICheckResult;
+import org.apache.hop.core.IProgressMonitor;
+import org.apache.hop.core.ProgressNullMonitorListener;
 import org.apache.hop.core.changed.ChangedFlag;
 import org.apache.hop.core.file.IHasFilename;
 import org.apache.hop.core.gui.IUndo;
@@ -290,8 +292,27 @@ public class SourceModel extends HopMetadataBase
    * PRs for generation-mode and catalog-publish checks.
    */
   public List<ICheckResult> check(IHopMetadataProvider metadataProvider, IVariables variables) {
+    return check(metadataProvider, variables, null);
+  }
+
+  /**
+   * Structural validation with optional progress reporting. Cancellation stops further element
+   * checks; remarks collected so far are still returned.
+   */
+  public List<ICheckResult> check(
+      IHopMetadataProvider metadataProvider, IVariables variables, IProgressMonitor monitor) {
+    if (monitor == null) {
+      monitor = new ProgressNullMonitorListener();
+    }
+
     List<ICheckResult> remarks = new ArrayList<>();
-    if (getTables().isEmpty()) {
+    List<SourceTable> tables = getTables();
+    List<SourceRelationship> relationships = getRelationships();
+    List<SourceQuery> queries = getQueries();
+    int totalWork = tables.size() + relationships.size() + queries.size();
+    monitor.beginTask(BaseMessages.getString(PKG, "SourceModel.Monitor.VerifyingModel"), totalWork);
+
+    if (tables.isEmpty()) {
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_ERROR,
@@ -300,17 +321,25 @@ public class SourceModel extends HopMetadataBase
     }
 
     Set<String> tableNames = new HashSet<>();
-    for (SourceTable table : getTables()) {
+    for (SourceTable table : tables) {
+      if (monitor.isCanceled()) {
+        monitor.done();
+        return remarks;
+      }
       if (table == null) {
+        monitor.worked(1);
         continue;
       }
       String tableName = table.getName();
+      monitor.subTask(
+          BaseMessages.getString(PKG, "SourceModel.Monitor.VerifyingTable", ConstNvl(tableName)));
       if (Utils.isEmpty(tableName)) {
         remarks.add(
             new CheckResult(
                 ICheckResult.TYPE_RESULT_ERROR,
                 BaseMessages.getString(PKG, "SourceModel.CheckResult.TableMissingName"),
                 null));
+        monitor.worked(1);
         continue;
       }
       if (!tableNames.add(tableName)) {
@@ -321,14 +350,23 @@ public class SourceModel extends HopMetadataBase
                     PKG, "SourceModel.CheckResult.DuplicateTableName", tableName),
                 null));
       }
+      monitor.worked(1);
     }
 
     Set<String> relationshipNames = new HashSet<>();
-    for (SourceRelationship relationship : getRelationships()) {
+    for (SourceRelationship relationship : relationships) {
+      if (monitor.isCanceled()) {
+        monitor.done();
+        return remarks;
+      }
       if (relationship == null) {
+        monitor.worked(1);
         continue;
       }
       String relName = relationship.getName();
+      monitor.subTask(
+          BaseMessages.getString(
+              PKG, "SourceModel.Monitor.VerifyingRelationship", ConstNvl(relName)));
       if (!Utils.isEmpty(relName) && !relationshipNames.add(relName)) {
         remarks.add(
             new CheckResult(
@@ -367,14 +405,22 @@ public class SourceModel extends HopMetadataBase
                     PKG, "SourceModel.CheckResult.RelationshipInvalidColumns", ConstNvl(relName)),
                 null));
       }
+      monitor.worked(1);
     }
 
     Set<String> queryNames = new HashSet<>();
-    for (SourceQuery query : getQueries()) {
+    for (SourceQuery query : queries) {
+      if (monitor.isCanceled()) {
+        monitor.done();
+        return remarks;
+      }
       if (query == null) {
+        monitor.worked(1);
         continue;
       }
       String queryName = query.getName();
+      monitor.subTask(
+          BaseMessages.getString(PKG, "SourceModel.Monitor.VerifyingQuery", ConstNvl(queryName)));
       if (!Utils.isEmpty(queryName) && !queryNames.add(queryName)) {
         remarks.add(
             new CheckResult(
@@ -446,15 +492,18 @@ public class SourceModel extends HopMetadataBase
                   null));
         }
       }
+      monitor.worked(1);
     }
 
-    if (remarks.stream().noneMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_ERROR)) {
+    if (!monitor.isCanceled()
+        && remarks.stream().noneMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_ERROR)) {
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_OK,
               BaseMessages.getString(PKG, "SourceModel.CheckResult.Ok"),
               null));
     }
+    monitor.done();
     return remarks;
   }
 

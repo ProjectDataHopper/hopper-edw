@@ -30,6 +30,8 @@ import org.apache.hop.base.AbstractMeta;
 import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.ICheckResult;
+import org.apache.hop.core.IProgressMonitor;
+import org.apache.hop.core.ProgressNullMonitorListener;
 import org.apache.hop.core.changed.ChangedFlag;
 import org.apache.hop.core.changed.IChanged;
 import org.apache.hop.core.exception.HopException;
@@ -225,25 +227,55 @@ public class DataVaultModel extends HopMetadataBase
    * @return list of check results (errors, warnings, ok)
    */
   public List<ICheckResult> check(IHopMetadataProvider metadataProvider, IVariables variables) {
-    return check(metadataProvider, variables, DvModelCheckOptions.defaults());
+    return check(metadataProvider, variables, DvModelCheckOptions.defaults(), null);
   }
 
   public List<ICheckResult> check(
       IHopMetadataProvider metadataProvider, IVariables variables, DvModelCheckOptions options) {
+    return check(metadataProvider, variables, options, null);
+  }
+
+  /**
+   * Validate this model, reporting progress per table when {@code monitor} is provided.
+   * Cancellation stops further table checks; remarks collected so far are still returned.
+   */
+  public List<ICheckResult> check(
+      IHopMetadataProvider metadataProvider,
+      IVariables variables,
+      DvModelCheckOptions options,
+      IProgressMonitor monitor) {
+    if (monitor == null) {
+      monitor = new ProgressNullMonitorListener();
+    }
+    if (options == null) {
+      options = DvModelCheckOptions.defaults();
+    }
+
     List<ICheckResult> remarks = new ArrayList<>();
+    List<IDvTable> tables = getTables();
+    monitor.beginTask(
+        BaseMessages.getString(PKG, "DataVaultModel.Monitor.VerifyingModel"), tables.size());
 
     List<DataVaultSource> sources = loadDataVaultSources(metadataProvider, variables, remarks);
+    if (monitor.isCanceled()) {
+      monitor.done();
+      return remarks;
+    }
     checkTargetDatabase(remarks, metadataProvider, variables);
     checkTargetLoadMode(remarks, metadataProvider);
     checkTargetLoadModeGuidance(remarks, variables, metadataProvider);
     checkTargetLoadingIntegerSettings(remarks, variables);
     checkTablesPresent(remarks);
-    checkTables(remarks, metadataProvider, variables, collectDefinedHubAndLinkNames(), options);
-    checkDuplicateTableNames(remarks);
-    checkDuplicateTargetTableNames(remarks);
-    checkDuplicateStsTableNames(remarks, variables);
-    checkDuplicateSourceNames(remarks, sources);
+    checkTables(
+        remarks, metadataProvider, variables, collectDefinedHubAndLinkNames(), options, monitor);
+    if (!monitor.isCanceled()) {
+      checkDuplicateTableNames(remarks);
+      checkDuplicateTargetTableNames(remarks);
+      checkDuplicateStsTableNames(remarks, variables);
+      checkDuplicateSourceNames(remarks, sources);
+    }
 
+    monitor.done();
     return remarks;
   }
 
@@ -462,14 +494,24 @@ public class DataVaultModel extends HopMetadataBase
       IHopMetadataProvider metadataProvider,
       IVariables variables,
       DefinedTableNames definedNames,
-      DvModelCheckOptions options) {
+      DvModelCheckOptions options,
+      IProgressMonitor monitor) {
     for (IDvTable table : getTables()) {
-      table.check(remarks, metadataProvider, variables, options, this);
-      if (table instanceof DvSatellite satellite) {
-        checkSatelliteReferences(remarks, satellite, definedNames);
-      } else if (table instanceof DvLink link) {
-        checkLinkReferences(remarks, link, definedNames.hubNames());
+      if (monitor.isCanceled()) {
+        break;
       }
+      String tableLabel = Const.NVL(table != null ? table.getName() : null, "?");
+      monitor.subTask(
+          BaseMessages.getString(PKG, "DataVaultModel.Monitor.VerifyingTable", tableLabel));
+      if (table != null) {
+        table.check(remarks, metadataProvider, variables, options, this);
+        if (table instanceof DvSatellite satellite) {
+          checkSatelliteReferences(remarks, satellite, definedNames);
+        } else if (table instanceof DvLink link) {
+          checkLinkReferences(remarks, link, definedNames.hubNames());
+        }
+      }
+      monitor.worked(1);
     }
   }
 

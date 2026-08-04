@@ -22,7 +22,6 @@ import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.Const;
-import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.Props;
 import org.apache.hop.core.RowMetaAndData;
 import org.apache.hop.core.action.GuiContextAction;
@@ -41,9 +40,9 @@ import org.apache.hop.core.gui.plugin.toolbar.GuiToolbarElementType;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.variables.Variables;
-import org.apache.hop.datavault.hopgui.GuiBusySupport;
 import org.apache.hop.datavault.hopgui.dialog.ShowRowsDialog;
 import org.apache.hop.datavault.hopgui.file.modelgraph.HopGuiModelGraphBase;
+import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphHit;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphMouseInteractions;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphSnapshotUndo;
@@ -403,10 +402,13 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     if (model == null) {
       return;
     }
-    List<ICheckResult> remarks = new ArrayList<>();
-    GuiBusySupport.showWhile(
-        getShell(), () -> remarks.addAll(model.check(hopGui.getMetadataProvider(), variables)));
-    CheckResultDialog dialog = new CheckResultDialog(getShell(), remarks);
+    ModelDialogValidationSupport.ModelCheckProgressResult result =
+        ModelDialogValidationSupport.runChecksWithProgress(
+            getShell(), monitor -> model.check(hopGui.getMetadataProvider(), variables, monitor));
+    if (result.cancelled() && result.remarks().isEmpty()) {
+      return;
+    }
+    CheckResultDialog dialog = new CheckResultDialog(getShell(), new ArrayList<>(result.remarks()));
     dialog.open();
   }
 

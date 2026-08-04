@@ -16,11 +16,14 @@
  */
 package org.apache.hop.datavault.hopgui.file.modelgraph;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import org.apache.hop.core.ICheckResult;
+import org.apache.hop.core.IProgressMonitor;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.datavault.hopgui.GuiBusySupport;
@@ -30,9 +33,12 @@ import org.apache.hop.datavault.hopgui.file.vault.HopVaultFileType;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
+import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.apache.hop.ui.core.dialog.CheckResultDialog;
+import org.apache.hop.ui.core.dialog.ErrorDialog;
+import org.apache.hop.ui.core.dialog.ProgressMonitorDialog;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.w3c.dom.Document;
@@ -41,12 +47,32 @@ import org.w3c.dom.Node;
 /** Clones warehouse models for non-destructive table dialog validation. */
 public final class ModelDialogValidationSupport {
 
+  private static final Class<?> PKG = ModelDialogValidationSupport.class;
+
   private ModelDialogValidationSupport() {}
 
   /** Callable that produces check remarks and may throw checked exceptions. */
   @FunctionalInterface
   public interface CheckWork {
     List<ICheckResult> run() throws Exception;
+  }
+
+  /**
+   * Callable that produces check remarks with progress reporting and may throw checked exceptions.
+   */
+  @FunctionalInterface
+  public interface CheckWorkWithMonitor {
+    List<ICheckResult> run(IProgressMonitor monitor) throws Exception;
+  }
+
+  /**
+   * Result of a model check run under {@link ProgressMonitorDialog}, including whether the user
+   * cancelled mid-run.
+   */
+  public record ModelCheckProgressResult(List<ICheckResult> remarks, boolean cancelled) {
+    public ModelCheckProgressResult {
+      remarks = remarks != null ? List.copyOf(remarks) : List.of();
+    }
   }
 
   /**
@@ -74,6 +100,57 @@ public final class ModelDialogValidationSupport {
       throw error.get();
     }
     return remarks.get();
+  }
+
+  /**
+   * Runs model validation under {@link ProgressMonitorDialog} with cancel support. On failure shows
+   * an error dialog and returns empty remarks (not cancelled).
+   */
+  public static ModelCheckProgressResult runChecksWithProgress(
+      Shell shell, CheckWorkWithMonitor work) {
+    if (work == null) {
+      return new ModelCheckProgressResult(List.of(), false);
+    }
+    if (shell == null || shell.isDisposed()) {
+      try {
+        List<ICheckResult> remarks = work.run(null);
+        return new ModelCheckProgressResult(remarks != null ? remarks : List.of(), false);
+      } catch (Exception e) {
+        return new ModelCheckProgressResult(List.of(), false);
+      }
+    }
+
+    List<ICheckResult> remarks = new ArrayList<>();
+    ProgressMonitorDialog monitorDialog = new ProgressMonitorDialog(shell);
+    try {
+      monitorDialog.run(
+          true,
+          monitor -> {
+            try {
+              List<ICheckResult> result = work.run(monitor);
+              if (result != null) {
+                remarks.addAll(result);
+              }
+            } catch (Throwable e) {
+              throw new InvocationTargetException(
+                  e,
+                  BaseMessages.getString(
+                      PKG, "ModelDialogValidationSupport.Check.Error.Exception", e.getMessage()));
+            }
+          });
+    } catch (Exception e) {
+      new ErrorDialog(
+          shell,
+          BaseMessages.getString(PKG, "ModelDialogValidationSupport.Check.Error.Title"),
+          BaseMessages.getString(PKG, "ModelDialogValidationSupport.Check.Error.Message"),
+          e);
+      return new ModelCheckProgressResult(List.of(), false);
+    }
+
+    boolean cancelled =
+        monitorDialog.getProgressMonitor() != null
+            && monitorDialog.getProgressMonitor().isCanceled();
+    return new ModelCheckProgressResult(remarks, cancelled);
   }
 
   public static DataVaultModel cloneDataVaultModel(
