@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.RowMeta;
 import org.apache.hop.core.variables.Variables;
@@ -63,5 +64,23 @@ class DvModelCheckCacheTest {
     DvModelCheckCache cache = new DvModelCheckCache();
     cache.close();
     assertThrows(IllegalStateException.class, () -> cache.putLiveFields("k", new RowMeta()));
+  }
+
+  @Test
+  void sharedSessionIsNotClosedByDefaultFactorySemantics() {
+    DvModelCheckOptions single = DvModelCheckOptions.forCheckRun();
+    assertTrue(!single.isSharedSession());
+    DvModelCheckOptions shared = DvModelCheckOptions.forSharedCheckSession();
+    assertTrue(shared.isSharedSession());
+    assertTrue(shared.getCache() != null);
+    shared.close();
+  }
+
+  @Test
+  void catalogSourceNamesRoundTrip() {
+    try (DvModelCheckCache cache = new DvModelCheckCache()) {
+      cache.putCatalogSourceNames("local-catalog", List.of("a", "b"));
+      assertEquals(List.of("a", "b"), cache.getCatalogSourceNames("local-catalog"));
+    }
   }
 }

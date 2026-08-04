@@ -82,13 +82,33 @@ public final class DvTargetUnicodeCapabilitySupport {
       DatabaseMeta targetDatabase,
       IVariables variables,
       String targetDatabaseName) {
+    checkTargetUnicodeCapability(remarks, targetDatabase, variables, targetDatabaseName, null);
+  }
+
+  /**
+   * Like {@link #checkTargetUnicodeCapability(List, DatabaseMeta, IVariables, String)} but reuses a
+   * cached {@link Assessment} from {@code cache} when present (important for multi-model batches).
+   */
+  public static void checkTargetUnicodeCapability(
+      List<ICheckResult> remarks,
+      DatabaseMeta targetDatabase,
+      IVariables variables,
+      String targetDatabaseName,
+      DvModelCheckCache cache) {
     if (remarks == null) {
       return;
     }
     if (targetDatabase == null) {
       return;
     }
-    Assessment assessment = assess(targetDatabase, variables);
+    String cacheKey = Const.NVL(targetDatabaseName, Const.NVL(targetDatabase.getName(), ""));
+    Assessment assessment = cache != null ? cache.getUnicodeAssessment(cacheKey) : null;
+    if (assessment == null) {
+      assessment = assess(targetDatabase, variables);
+      if (cache != null && !Utils.isEmpty(cacheKey)) {
+        cache.putUnicodeAssessment(cacheKey, assessment);
+      }
+    }
     addRemark(remarks, assessment, targetDatabaseName, targetDatabase.getPluginId());
   }
 

@@ -16,7 +16,9 @@
  */
 package org.apache.hop.datavault.metadata;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.database.Database;
@@ -24,19 +26,24 @@ import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.metadata.DvTargetUnicodeCapabilitySupport.Assessment;
 
 /**
- * Per model-check-run cache for live source schema lookups and open JDBC connections.
+ * Per check-session cache for live source schema lookups, open JDBC connections, catalog name
+ * lists, and target Unicode probes.
  *
  * <p>Without this, detailed model checking opens a new database connection for every table (and
- * often twice per table) when resolving live field metadata. Callers must {@link #close()} the
- * cache after the check completes.
+ * often twice per table) when resolving live field metadata. For multi-model batches, use {@link
+ * DvModelCheckOptions#forSharedCheckSession()} so one session spans many models. Callers must
+ * {@link #close()} when the session ends.
  */
 public final class DvModelCheckCache implements AutoCloseable {
 
   private final Map<String, IRowMeta> liveFieldsByKey = new LinkedHashMap<>();
   private final Map<String, Database> openDatabasesByConnection = new LinkedHashMap<>();
   private final Map<String, DatabaseMeta> databaseMetaByName = new LinkedHashMap<>();
+  private final Map<String, Assessment> unicodeAssessmentsByConnection = new LinkedHashMap<>();
+  private final Map<String, List<String>> catalogSourceNamesByConnection = new LinkedHashMap<>();
   private boolean closed;
 
   public IRowMeta getLiveFields(String cacheKey) {
@@ -87,6 +94,39 @@ public final class DvModelCheckCache implements AutoCloseable {
     databaseMetaByName.put(connectionName, databaseMeta);
   }
 
+  public Assessment getUnicodeAssessment(String connectionName) {
+    ensureOpen();
+    if (Utils.isEmpty(connectionName)) {
+      return null;
+    }
+    return unicodeAssessmentsByConnection.get(connectionName);
+  }
+
+  public void putUnicodeAssessment(String connectionName, Assessment assessment) {
+    ensureOpen();
+    if (Utils.isEmpty(connectionName) || assessment == null) {
+      return;
+    }
+    unicodeAssessmentsByConnection.put(connectionName, assessment);
+  }
+
+  public List<String> getCatalogSourceNames(String catalogConnectionName) {
+    ensureOpen();
+    if (Utils.isEmpty(catalogConnectionName)) {
+      return null;
+    }
+    List<String> names = catalogSourceNamesByConnection.get(catalogConnectionName);
+    return names != null ? List.copyOf(names) : null;
+  }
+
+  public void putCatalogSourceNames(String catalogConnectionName, List<String> sourceNames) {
+    ensureOpen();
+    if (Utils.isEmpty(catalogConnectionName) || sourceNames == null) {
+      return;
+    }
+    catalogSourceNamesByConnection.put(catalogConnectionName, new ArrayList<>(sourceNames));
+  }
+
   /**
    * Stable key for a live database table schema lookup: {@code connection|schema|table} after
    * variable resolution.
@@ -132,6 +172,8 @@ public final class DvModelCheckCache implements AutoCloseable {
     openDatabasesByConnection.clear();
     liveFieldsByKey.clear();
     databaseMetaByName.clear();
+    unicodeAssessmentsByConnection.clear();
+    catalogSourceNamesByConnection.clear();
   }
 
   private void ensureOpen() {

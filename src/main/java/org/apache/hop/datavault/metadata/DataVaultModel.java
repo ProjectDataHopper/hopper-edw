@@ -239,8 +239,9 @@ public class DataVaultModel extends HopMetadataBase
    * Validate this model, reporting progress per table when {@code monitor} is provided.
    * Cancellation stops further table checks; remarks collected so far are still returned.
    *
-   * <p>Ensures a session cache so live source schema lookups reuse JDBC connections across tables
-   * for this run, then releases it.
+   * <p>Ensures a session cache so live source schema lookups reuse JDBC connections. Single-model
+   * runs close the cache when finished; {@link DvModelCheckOptions#forSharedCheckSession()} keeps
+   * it open for multi-model batches.
    */
   public List<ICheckResult> check(
       IHopMetadataProvider metadataProvider,
@@ -262,11 +263,12 @@ public class DataVaultModel extends HopMetadataBase
         BaseMessages.getString(PKG, "DataVaultModel.Monitor.VerifyingModel"), tables.size());
 
     try {
-      List<DataVaultSource> sources = loadDataVaultSources(metadataProvider, variables, remarks);
+      List<String> sourceNames =
+          loadDataVaultSourceNames(metadataProvider, variables, remarks, options.getCache());
       if (monitor.isCanceled()) {
         return remarks;
       }
-      checkTargetDatabase(remarks, metadataProvider, variables);
+      checkTargetDatabase(remarks, metadataProvider, variables, options.getCache());
       checkTargetLoadMode(remarks, metadataProvider);
       checkTargetLoadModeGuidance(remarks, variables, metadataProvider);
       checkTargetLoadingIntegerSettings(remarks, variables);
@@ -277,22 +279,43 @@ public class DataVaultModel extends HopMetadataBase
         checkDuplicateTableNames(remarks);
         checkDuplicateTargetTableNames(remarks);
         checkDuplicateStsTableNames(remarks, variables);
-        checkDuplicateSourceNames(remarks, sources);
+        checkDuplicateSourceNames(remarks, sourceNames);
       }
       return remarks;
     } finally {
       monitor.done();
-      options.close();
+      // Shared multi-model sessions keep JDBC/live schema warm until the caller closes.
+      if (!options.isSharedSession()) {
+        options.close();
+      }
     }
   }
 
-  private List<DataVaultSource> loadDataVaultSources(
-      IHopMetadataProvider metadataProvider, IVariables variables, List<ICheckResult> remarks) {
+  /**
+   * Catalog source <em>names</em> only (for duplicate-name checks). Avoids fully deserializing
+   * every DV_SOURCE record definition on each model check — critical when validating hundreds of
+   * models.
+   */
+  private List<String> loadDataVaultSourceNames(
+      IHopMetadataProvider metadataProvider,
+      IVariables variables,
+      List<ICheckResult> remarks,
+      DvModelCheckCache cache) {
     try {
-      return DvSourceCatalogService.listSources(
-          DvSourceCatalogService.resolveCatalogConnection(this, variables, metadataProvider),
-          variables,
-          metadataProvider);
+      String catalogConnection =
+          DvSourceCatalogService.resolveCatalogConnection(this, variables, metadataProvider);
+      if (cache != null) {
+        List<String> cached = cache.getCatalogSourceNames(catalogConnection);
+        if (cached != null) {
+          return cached;
+        }
+      }
+      List<String> names =
+          DvSourceCatalogService.listSourceNames(catalogConnection, variables, metadataProvider);
+      if (cache != null) {
+        cache.putCatalogSourceNames(catalogConnection, names);
+      }
+      return names;
     } catch (Exception e) {
       remarks.add(
           new CheckResult(
@@ -426,7 +449,10 @@ public class DataVaultModel extends HopMetadataBase
   }
 
   private void checkTargetDatabase(
-      List<ICheckResult> remarks, IHopMetadataProvider metadataProvider, IVariables variables) {
+      List<ICheckResult> remarks,
+      IHopMetadataProvider metadataProvider,
+      IVariables variables,
+      DvModelCheckCache cache) {
     DataVaultConfiguration config = getConfigurationOrDefault();
     if (Utils.isEmpty(config.getTargetDatabase())) {
       remarks.add(
@@ -449,7 +475,7 @@ public class DataVaultModel extends HopMetadataBase
       org.apache.hop.core.database.DatabaseMeta targetDatabase =
           DvSpecialRecordSupport.loadTargetDatabase(metadataProvider, config);
       DvTargetUnicodeCapabilitySupport.checkTargetUnicodeCapability(
-          remarks, targetDatabase, variables, config.getTargetDatabase());
+          remarks, targetDatabase, variables, config.getTargetDatabase(), cache);
     } catch (HopException e) {
       remarks.add(
           new CheckResult(
@@ -615,9 +641,9 @@ public class DataVaultModel extends HopMetadataBase
     }
   }
 
-  private void checkDuplicateSourceNames(
-      List<ICheckResult> remarks, List<DataVaultSource> sources) {
-    checkDuplicateNames(remarks, sources, "DataVaultModel.CheckResult.DuplicateSourceName");
+  private void checkDuplicateSourceNames(List<ICheckResult> remarks, List<String> sourceNames) {
+    checkDuplicateStringNames(
+        remarks, sourceNames, "DataVaultModel.CheckResult.DuplicateSourceName");
   }
 
   private void checkDuplicateNames(
@@ -629,6 +655,25 @@ public class DataVaultModel extends HopMetadataBase
       }
       nameCount.merge(item.getName(), 1, Integer::sum);
     }
+    addDuplicateNameRemarks(remarks, nameCount, messageKey);
+  }
+
+  private void checkDuplicateStringNames(
+      List<ICheckResult> remarks, Iterable<String> names, String messageKey) {
+    Map<String, Integer> nameCount = new HashMap<>();
+    if (names != null) {
+      for (String name : names) {
+        if (Utils.isEmpty(name)) {
+          continue;
+        }
+        nameCount.merge(name, 1, Integer::sum);
+      }
+    }
+    addDuplicateNameRemarks(remarks, nameCount, messageKey);
+  }
+
+  private void addDuplicateNameRemarks(
+      List<ICheckResult> remarks, Map<String, Integer> nameCount, String messageKey) {
     for (Map.Entry<String, Integer> entry : nameCount.entrySet()) {
       if (entry.getValue() > 1) {
         remarks.add(
