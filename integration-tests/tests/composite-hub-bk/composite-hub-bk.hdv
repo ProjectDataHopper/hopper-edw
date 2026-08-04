@@ -1,28 +1,45 @@
+<!--
+
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements.  See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to You under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with
+the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
 <data-vault-model>
   <name_sync_with_filename>Y</name_sync_with_filename>
-  <description/>
+  <description>Composite hub business key (VaultSpeed-style single vault BK column from two EXT parts)</description>
   <configuration>
     <targetDatabase>Vault</targetDatabase>
     <dataCatalogConnection>local-catalog</dataCatalogConnection>
     <hashAlgorithm>MD5</hashAlgorithm>
     <hashKeyDataType>STRING</hashKeyDataType>
-    <generateUnknownRecord>Y</generateUnknownRecord>
+    <generateUnknownRecord>N</generateUnknownRecord>
     <unknownBusinessKeyValue>N/A</unknownBusinessKeyValue>
     <unknownHashKeyValue>00000000000000000000000000000000</unknownHashKeyValue>
     <unknownLinkHashKeyValue>00000000000000000000000000000000</unknownLinkHashKeyValue>
     <unknownRecordSource>UNKNOWN</unknownRecordSource>
-    <generateInvalidRecord>Y</generateInvalidRecord>
+    <generateInvalidRecord>N</generateInvalidRecord>
     <invalidBusinessKeyValue>INVALID</invalidBusinessKeyValue>
     <invalidHashKeyValue>FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF</invalidHashKeyValue>
     <invalidLinkHashKeyValue>FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF</invalidLinkHashKeyValue>
     <invalidRecordSource>INVALID</invalidRecordSource>
-    <hashContentCasing>UPPER</hashContentCasing>
-    <businessKeyDelimiter/>
+    <hashContentCasing>NONE</hashContentCasing>
+    <businessKeyDelimiter>#</businessKeyDelimiter>
     <hashContentPrefix/>
-    <nullPlaceholder/>
-    <hashContentSuffix/>
+    <nullPlaceholder>^^</nullPlaceholder>
+    <hashContentSuffix>#</hashContentSuffix>
+    <trimBusinessKeys>Y</trimBusinessKeys>
     <hashUsesComposedBusinessKey>N</hashUsesComposedBusinessKey>
-    <trimBusinessKeys>N</trimBusinessKeys>
     <loadDateField>x_load_ts</loadDateField>
     <loadEndDateField/>
     <recordSourceField>x_record_source</recordSourceField>
@@ -42,7 +59,6 @@
     <execution_log_level>Minimal</execution_log_level>
     <singleStoreShardKeyOnHashKey>N</singleStoreShardKeyOnHashKey>
     <singleStoreShardKeyIncludeDrivingKeys>N</singleStoreShardKeyIncludeDrivingKeys>
-    <generatedPipelineFolder/>
     <hubPipelineNamePrefix>hub-</hubPipelineNamePrefix>
     <linkPipelineNamePrefix>link-</linkPipelineNamePrefix>
     <satellitePipelineNamePrefix>sat-</satellitePipelineNamePrefix>
@@ -52,21 +68,11 @@
   <coaching>
     <coaching_sources/>
   </coaching>
-  
-<tables>
-<table>
-      <businessKeys>
-        <name>customer_id</name>
-        <description/>
-        <dataType>Integer</dataType>
-        <length>9</length>
-        <composite>N</composite>
-        <sourceFieldName>customer_id</sourceFieldName>
-        <recordSourceName>CRM-customer</recordSourceName>
-      </businessKeys>
-      <!-- Composite hub BK example (VaultSpeed-style single vault column):
+  <tables>
+    <table>
       <businessKeys>
         <name>burger_bk</name>
+        <description>Composed business key from EXT parts</description>
         <dataType>String</dataType>
         <length>100</length>
         <composite>Y</composite>
@@ -74,75 +80,53 @@
           <sourceFieldName>num_seq_bkcc_bk</sourceFieldName>
           <sourceFieldName>num_seq_bk</sourceFieldName>
         </sourceFieldNames>
-        <recordSourceName>edw_ext.ami_indiv_klanten</recordSourceName>
+        <recordSourceName>CRM-burger-ext</recordSourceName>
       </businessKeys>
-      -->
-      <hashKeyFieldName>customer_hk</hashKeyFieldName>
+      <hashKeyFieldName>burger_hk</hashKeyFieldName>
       <recordSourceFieldName/>
       <recordSources>
-        <recordSource>CRM-customer</recordSource>
+        <recordSource>CRM-burger-ext</recordSource>
       </recordSources>
-      <tableName>hub_customer</tableName>
-      <description/>
+      <tableName>hub_burger</tableName>
+      <description>Hub with composite single-column business key</description>
       <tableType>HUB</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>32</xloc>
-      <yloc>32</yloc>
-      <name>hub_customer</name>
-      <virtualPath/>
+      <xloc>64</xloc>
+      <yloc>64</yloc>
+      <name>hub_burger</name>
     </table>
-<table>
-      <hub>hub_customer</hub>
+    <table>
+      <hub>hub_burger</hub>
       <link/>
       <attributes>
-        <name>name</name>
-        <description/>
+        <name>status</name>
+        <description>Status attribute from EXT feed</description>
         <dataType>String</dataType>
-        <length>50</length>
+        <length>20</length>
         <precision/>
         <includeInChangeDataCapture>Y</includeInChangeDataCapture>
       </attributes>
-      <attributes>
-        <name>email</name>
-        <description/>
-        <dataType>String</dataType>
-        <length>50</length>
-        <precision/>
-        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
-      </attributes>
-      <attributes>
-        <name>address</name>
-        <description/>
-        <dataType>String</dataType>
-        <length>50</length>
-        <precision/>
-        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
-      </attributes>
-      <attributes>
-        <name>city</name>
-        <description/>
-        <dataType>String</dataType>
-        <length>50</length>
-        <precision/>
-        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
-      </attributes>
-      <parentKeySourceFields/>
+      <parentKeySourceFields>
+        <parentKeySourceField>num_seq_bkcc_bk</parentKeySourceField>
+        <parentKeySourceField>num_seq_bk</parentKeySourceField>
+      </parentKeySourceFields>
       <drivingKey/>
-      <recordSource>CRM-customer</recordSource>
+      <recordSource>CRM-burger-ext</recordSource>
       <statusTrackingEnabled>N</statusTrackingEnabled>
       <statusFieldName>record_status</statusFieldName>
       <activeStatusValue>ACTIVE</activeStatusValue>
       <deletedStatusValue>DELETED</deletedStatusValue>
-      <tableName>sat_customer</tableName>
-      <description/>
+      <tableName>sat_burger</tableName>
+      <description>Satellite hashed from composite hub source parts</description>
       <tableType>SATELLITE</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>272</xloc>
-      <yloc>32</yloc>
-      <name>sat_customer</name>
-      <virtualPath/>
+      <xloc>320</xloc>
+      <yloc>64</yloc>
+      <name>sat_burger</name>
     </table>
-</tables>
+  </tables>
+  <notes/>
+  <name>composite-hub-bk</name>
 </data-vault-model>

@@ -188,8 +188,8 @@ limitations under the License.
       <description/>
       <type>WORKFLOW</type>
       <attributes/>
-      <xloc>80</xloc>
-      <yloc>288</yloc>
+      <xloc>992</xloc>
+      <yloc>176</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
@@ -214,7 +214,7 @@ limitations under the License.
       <description/>
       <type>WORKFLOW</type>
       <attributes/>
-      <xloc>256</xloc>
+      <xloc>80</xloc>
       <yloc>288</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -240,7 +240,33 @@ limitations under the License.
       <description/>
       <type>WORKFLOW</type>
       <attributes/>
-      <xloc>432</xloc>
+      <xloc>448</xloc>
+      <yloc>288</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <filename>${PROJECT_HOME}/tests/composite-hub-bk/update-composite-hub-bk.hwf</filename>
+      <params_from_previous>N</params_from_previous>
+      <exec_per_row>N</exec_per_row>
+      <set_logfile>N</set_logfile>
+      <logfile/>
+      <logext/>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <loglevel>Nothing</loglevel>
+      <set_append_logfile>N</set_append_logfile>
+      <create_parent_folder>N</create_parent_folder>
+      <wait_until_finished>Y</wait_until_finished>
+      <parameters>
+        <pass_all_parameters>Y</pass_all_parameters>
+      </parameters>
+      <run_configuration>local</run_configuration>
+      <name>composite-hub-bk</name>
+      <description>Composite hub business key (single vault BK column from parts)</description>
+      <type>WORKFLOW</type>
+      <attributes/>
+      <xloc>624</xloc>
       <yloc>288</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -411,7 +437,7 @@ dbType == "" || dbType == "postgres";
       <description/>
       <type>WORKFLOW</type>
       <attributes/>
-      <xloc>624</xloc>
+      <xloc>800</xloc>
       <yloc>288</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -437,7 +463,7 @@ dbType == "" || dbType == "postgres";
       <description/>
       <type>WORKFLOW</type>
       <attributes/>
-      <xloc>800</xloc>
+      <xloc>992</xloc>
       <yloc>288</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -463,7 +489,7 @@ dbType == "" || dbType == "postgres";
       <description/>
       <type>WORKFLOW</type>
       <attributes/>
-      <xloc>448</xloc>
+      <xloc>256</xloc>
       <yloc>288</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -565,27 +591,15 @@ dbType == "" || dbType == "postgres";
       <unconditional>N</unconditional>
       <enabled>Y</enabled>
     </hop>
-    <!--
-      hub-alias-role-playing is wired but not on the critical success path yet:
-      the suite lives under tests/hub-alias-role-playing/ and can be run alone.
-      Re-enable the hops below once golden/load path is green on the full matrix.
-    -->
     <hop>
       <from>link-satellite-driving-key</from>
       <to>hub-alias-role-playing</to>
       <evaluation>Y</evaluation>
       <unconditional>N</unconditional>
-      <enabled>N</enabled>
+      <enabled>Y</enabled>
     </hop>
     <hop>
       <from>hub-alias-role-playing</from>
-      <to>load-end-date</to>
-      <evaluation>Y</evaluation>
-      <unconditional>N</unconditional>
-      <enabled>N</enabled>
-    </hop>
-    <hop>
-      <from>link-satellite-driving-key</from>
       <to>load-end-date</to>
       <evaluation>Y</evaluation>
       <unconditional>N</unconditional>
@@ -600,6 +614,13 @@ dbType == "" || dbType == "postgres";
     </hop>
     <hop>
       <from>reference-table</from>
+      <to>composite-hub-bk</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>composite-hub-bk</from>
       <to>hash-key</to>
       <evaluation>Y</evaluation>
       <unconditional>N</unconditional>

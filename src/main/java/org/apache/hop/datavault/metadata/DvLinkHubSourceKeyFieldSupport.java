@@ -25,20 +25,39 @@ import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
 
-/** Resolves link hub source business key fields, including implicit hub-name fallback. */
+/**
+ * Resolves link hub source business key fields, including implicit hub-name fallback and composite
+ * multi-part mappings.
+ *
+ * <p>Links do not store hub business-key columns. Resolved source fields are hash inputs only
+ * (ordered parts for composite hub BKs). Composition/hash rules come from the hub + configuration.
+ */
 public final class DvLinkHubSourceKeyFieldSupport {
 
   private static final Class<?> PKG = DvLinkHubSourceKeyFieldSupport.class;
 
   private DvLinkHubSourceKeyFieldSupport() {}
 
+  /**
+   * One hash-input field on the link feed for a hub vault BK (composite BKs yield multiple rows
+   * with the same {@code businessKeyField}).
+   */
   public static final class ResolvedBusinessKeySource {
     private final String businessKeyField;
     private final String sourceFieldName;
+    private final boolean compositePart;
+    private final int partIndex;
 
     public ResolvedBusinessKeySource(String businessKeyField, String sourceFieldName) {
+      this(businessKeyField, sourceFieldName, false, 0);
+    }
+
+    public ResolvedBusinessKeySource(
+        String businessKeyField, String sourceFieldName, boolean compositePart, int partIndex) {
       this.businessKeyField = businessKeyField;
       this.sourceFieldName = sourceFieldName;
+      this.compositePart = compositePart;
+      this.partIndex = partIndex;
     }
 
     public String getBusinessKeyField() {
@@ -47,6 +66,14 @@ public final class DvLinkHubSourceKeyFieldSupport {
 
     public String getSourceFieldName() {
       return sourceFieldName;
+    }
+
+    public boolean isCompositePart() {
+      return compositePart;
+    }
+
+    public int getPartIndex() {
+      return partIndex;
     }
   }
 
@@ -103,14 +130,39 @@ public final class DvLinkHubSourceKeyFieldSupport {
       }
       String businessKeyName = resolve(variables, businessKey.getName());
       BusinessKeySource explicit = explicitByBusinessKey.get(businessKey.getName());
-      String sourceFieldName;
-      if (explicit != null && !Utils.isEmpty(explicit.getSourceFieldName())) {
-        sourceFieldName = resolve(variables, explicit.getSourceFieldName());
-      } else {
-        sourceFieldName = businessKeyName;
+      if (explicit == null) {
+        // Also try resolved name key
+        explicit = explicitByBusinessKey.get(businessKeyName);
       }
-      if (!Utils.isEmpty(sourceFieldName)) {
-        resolved.add(new ResolvedBusinessKeySource(businessKeyName, sourceFieldName));
+
+      if (businessKey.isComposite()) {
+        List<String> parts =
+            explicit != null ? resolveList(variables, explicit.resolveSourceParts()) : List.of();
+        if (parts.isEmpty()) {
+          // Fall back to hub definition parts (first-seen mapping) for dialog/load defaults
+          parts = resolveList(variables, businessKey.resolveSourceParts());
+        }
+        if (parts.isEmpty()) {
+          // Degenerate: treat vault name as single source field
+          resolved.add(new ResolvedBusinessKeySource(businessKeyName, businessKeyName, true, 0));
+        } else {
+          for (int i = 0; i < parts.size(); i++) {
+            if (!Utils.isEmpty(parts.get(i))) {
+              resolved.add(new ResolvedBusinessKeySource(businessKeyName, parts.get(i), true, i));
+            }
+          }
+        }
+      } else {
+        String sourceFieldName;
+        if (explicit != null) {
+          List<String> parts = resolveList(variables, explicit.resolveSourceParts());
+          sourceFieldName = parts.isEmpty() ? businessKeyName : parts.get(0);
+        } else {
+          sourceFieldName = businessKeyName;
+        }
+        if (!Utils.isEmpty(sourceFieldName)) {
+          resolved.add(new ResolvedBusinessKeySource(businessKeyName, sourceFieldName));
+        }
       }
     }
     return resolved;
@@ -140,6 +192,61 @@ public final class DvLinkHubSourceKeyFieldSupport {
               linkHubSource.getSourceName()));
     }
     return sourceFieldNames;
+  }
+
+  /**
+   * Validates that each composite hub BK has the expected number of mapped source parts on the link
+   * feed. Returns empty when OK; otherwise human-readable error messages.
+   */
+  public static List<String> findCompositePartCountMismatches(
+      DvHub hub, DvLink.HubSourceKeyField hubSourceKeyField, IVariables variables) {
+    List<String> errors = new ArrayList<>();
+    if (hub == null) {
+      return errors;
+    }
+    Map<String, BusinessKeySource> explicitByBusinessKey = new LinkedHashMap<>();
+    if (hubSourceKeyField != null && hubSourceKeyField.getSourceBusinessKeyFields() != null) {
+      for (BusinessKeySource businessKeySource : hubSourceKeyField.getSourceBusinessKeyFields()) {
+        if (businessKeySource == null || Utils.isEmpty(businessKeySource.getBusinessKeyField())) {
+          continue;
+        }
+        explicitByBusinessKey.putIfAbsent(
+            businessKeySource.getBusinessKeyField(), businessKeySource);
+      }
+    }
+    for (DvBusinessKeyPartSupport.VaultBusinessKey vaultKey :
+        DvBusinessKeyPartSupport.resolveVaultBusinessKeys(hub)) {
+      if (!vaultKey.composite()) {
+        continue;
+      }
+      BusinessKeySource explicit = explicitByBusinessKey.get(vaultKey.vaultFieldName());
+      if (explicit == null) {
+        continue; // fallback parts used; existence checked elsewhere
+      }
+      int mapped = explicit.sourcePartCount();
+      int expected = vaultKey.partCount();
+      if (mapped > 0 && mapped != expected) {
+        errors.add(
+            "Composite hub business key '"
+                + vaultKey.vaultFieldName()
+                + "' expects "
+                + expected
+                + " source field(s) on the link feed but mapping has "
+                + mapped);
+      }
+    }
+    return errors;
+  }
+
+  private static List<String> resolveList(IVariables variables, List<String> values) {
+    if (values == null || values.isEmpty()) {
+      return List.of();
+    }
+    List<String> resolved = new ArrayList<>(values.size());
+    for (String value : values) {
+      resolved.add(resolve(variables, value));
+    }
+    return resolved;
   }
 
   private static String resolve(IVariables variables, String value) {

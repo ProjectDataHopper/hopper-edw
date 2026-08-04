@@ -18,17 +18,21 @@ package org.apache.hop.datavault.hopgui.file.vault;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
 import org.apache.hop.datavault.hopgui.help.HelpTopics;
+import org.apache.hop.datavault.metadata.BusinessKey;
 import org.apache.hop.datavault.metadata.BusinessKeySource;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DataVaultSource;
 import org.apache.hop.datavault.metadata.DrivingKeySource;
+import org.apache.hop.datavault.metadata.DvBusinessKeyPartSupport;
 import org.apache.hop.datavault.metadata.DvHub;
 import org.apache.hop.datavault.metadata.DvLink;
 import org.apache.hop.datavault.metadata.SourceField;
@@ -140,28 +144,38 @@ public class HubSourceKeyFieldDialog {
     // prefills
 
     // Business key sources section
-    Label wlBks = new Label(shell, SWT.LEFT);
-    wlBks.setText("Business key source fields (hub BK field -> source column)");
+    Label wlBks = new Label(shell, SWT.LEFT | SWT.WRAP);
+    wlBks.setText(BaseMessages.getString(PKG, "HubSourceKeyFieldDialog.BusinessKeySources.Label"));
     PropsUi.setLook(wlBks);
     FormData fdlBks = new FormData();
     fdlBks.left = new FormAttachment(0, 0);
     fdlBks.top = new FormAttachment(wHubName, margin);
+    fdlBks.right = new FormAttachment(100, 0);
     wlBks.setLayoutData(fdlBks);
+
+    Label wlBksHint = new Label(shell, SWT.LEFT | SWT.WRAP);
+    wlBksHint.setText(
+        BaseMessages.getString(PKG, "HubSourceKeyFieldDialog.BusinessKeySources.Hint"));
+    PropsUi.setLook(wlBksHint);
+    FormData fdlBksHint = new FormData();
+    fdlBksHint.left = new FormAttachment(0, 0);
+    fdlBksHint.top = new FormAttachment(wlBks, margin / 2);
+    fdlBksHint.right = new FormAttachment(100, 0);
+    wlBksHint.setLayoutData(fdlBksHint);
 
     ColumnInfo[] bkCols =
         new ColumnInfo[] {
           new ColumnInfo(
-              "Hub business key field",
+              BaseMessages.getString(PKG, "HubSourceKeyFieldDialog.HubBusinessKey.Column"),
               ColumnInfo.COLUMN_TYPE_CCOMBO,
               getBusinessKeyComboOptions()),
           new ColumnInfo(
-              "Source field name", ColumnInfo.COLUMN_TYPE_CCOMBO, getSourceFieldComboOptions()),
+              BaseMessages.getString(PKG, "HubSourceKeyFieldDialog.SourceField.Column"),
+              ColumnInfo.COLUMN_TYPE_CCOMBO,
+              getSourceFieldComboOptions()),
         };
 
-    int nrBk =
-        (input.getSourceBusinessKeyFields() != null)
-            ? Math.max(1, input.getSourceBusinessKeyFields().size())
-            : 2;
+    int nrBk = Math.max(1, countBusinessKeySourceRowsForDisplay());
     wBusinessKeySources =
         new TableView(
             variables,
@@ -174,7 +188,7 @@ public class HubSourceKeyFieldDialog {
 
     FormData fdBks = new FormData();
     fdBks.left = new FormAttachment(0, 0);
-    fdBks.top = new FormAttachment(wlBks, margin);
+    fdBks.top = new FormAttachment(wlBksHint, margin);
     fdBks.right = new FormAttachment(100, 0);
     fdBks.bottom = new FormAttachment(50, -margin);
     wBusinessKeySources.setLayoutData(fdBks);
@@ -261,14 +275,32 @@ public class HubSourceKeyFieldDialog {
     return options.toArray(new String[0]);
   }
 
+  private int countBusinessKeySourceRowsForDisplay() {
+    if (input.getSourceBusinessKeyFields() == null) {
+      return 2;
+    }
+    int count = 0;
+    for (BusinessKeySource mapping : input.getSourceBusinessKeyFields()) {
+      if (mapping == null) {
+        continue;
+      }
+      List<String> parts = mapping.resolveSourceParts();
+      count += Math.max(1, parts.size());
+    }
+    return Math.max(1, count);
+  }
+
   private String[] getSourceFieldComboOptions() {
     List<String> options = new ArrayList<>(loadRecordSourceFieldNames());
     if (input.getSourceBusinessKeyFields() != null) {
       for (BusinessKeySource mapping : input.getSourceBusinessKeyFields()) {
-        if (mapping != null
-            && !Utils.isEmpty(mapping.getSourceFieldName())
-            && !options.contains(mapping.getSourceFieldName())) {
-          options.add(mapping.getSourceFieldName());
+        if (mapping == null) {
+          continue;
+        }
+        for (String part : mapping.resolveSourceParts()) {
+          if (!Utils.isEmpty(part) && !options.contains(part)) {
+            options.add(part);
+          }
         }
       }
     }
@@ -312,13 +344,25 @@ public class HubSourceKeyFieldDialog {
       wHubName.setText(input.getHubName());
     }
 
-    // Business key sources
+    // Business key sources: expand composite multi-part mappings to one row per source part
     wBusinessKeySources.clearAll();
     if (input.getSourceBusinessKeyFields() != null) {
       for (BusinessKeySource bs : input.getSourceBusinessKeyFields()) {
-        TableItem item = new TableItem(wBusinessKeySources.table, SWT.NONE);
-        item.setText(1, Const.NVL(bs.getBusinessKeyField(), ""));
-        item.setText(2, Const.NVL(bs.getSourceFieldName(), ""));
+        if (bs == null) {
+          continue;
+        }
+        List<String> parts = bs.resolveSourceParts();
+        if (parts.isEmpty()) {
+          TableItem item = new TableItem(wBusinessKeySources.table, SWT.NONE);
+          item.setText(1, Const.NVL(bs.getBusinessKeyField(), ""));
+          item.setText(2, "");
+        } else {
+          for (String part : parts) {
+            TableItem item = new TableItem(wBusinessKeySources.table, SWT.NONE);
+            item.setText(1, Const.NVL(bs.getBusinessKeyField(), ""));
+            item.setText(2, Const.NVL(part, ""));
+          }
+        }
       }
     }
     wBusinessKeySources.optimizeTableView();
@@ -337,13 +381,45 @@ public class HubSourceKeyFieldDialog {
   private void ok() {
     input.setHubName(wHubName.getText());
 
-    // Read business key sources table
-    List<BusinessKeySource> bks = new ArrayList<>();
+    // Read business key sources table; group rows with the same hub BK (composite parts)
+    Map<String, List<String>> partsByBusinessKey = new LinkedHashMap<>();
     for (TableItem item : wBusinessKeySources.getNonEmptyItems()) {
+      String businessKeyField = Const.NVL(item.getText(1), "").trim();
+      String sourceField = Const.NVL(item.getText(2), "").trim();
+      if (Utils.isEmpty(businessKeyField) && Utils.isEmpty(sourceField)) {
+        continue;
+      }
+      // Allow comma-separated multi-part in a single cell as well
+      List<String> parts = BusinessKeySourceFieldUiSupport.parseSourceFields(sourceField);
+      if (parts.isEmpty() && !Utils.isEmpty(sourceField)) {
+        parts = List.of(sourceField);
+      }
+      List<String> grouped =
+          partsByBusinessKey.computeIfAbsent(businessKeyField, k -> new ArrayList<>());
+      for (String part : parts) {
+        if (!Utils.isEmpty(part)) {
+          grouped.add(part);
+        }
+      }
+      if (parts.isEmpty()) {
+        partsByBusinessKey.putIfAbsent(businessKeyField, new ArrayList<>());
+      }
+    }
+
+    List<BusinessKeySource> bks = new ArrayList<>();
+    for (Map.Entry<String, List<String>> entry : partsByBusinessKey.entrySet()) {
       BusinessKeySource bs = new BusinessKeySource();
-      bs.setBusinessKeyField(item.getText(1));
-      bs.setSourceFieldName(item.getText(2));
-      if (!Utils.isEmpty(bs.getBusinessKeyField()) || !Utils.isEmpty(bs.getSourceFieldName())) {
+      bs.setBusinessKeyField(entry.getKey());
+      List<String> parts = entry.getValue();
+      boolean compositeOnHub = isCompositeHubBusinessKey(entry.getKey());
+      if (parts.size() > 1 || compositeOnHub) {
+        bs.setSourceFieldNames(new ArrayList<>(parts));
+        bs.setSourceFieldName(parts.isEmpty() ? null : parts.get(0));
+      } else if (parts.size() == 1) {
+        bs.setSourceFieldNames(new ArrayList<>());
+        bs.setSourceFieldName(parts.get(0));
+      }
+      if (!Utils.isEmpty(bs.getBusinessKeyField()) || !bs.resolveSourceParts().isEmpty()) {
         bks.add(bs);
       }
     }
@@ -363,6 +439,27 @@ public class HubSourceKeyFieldDialog {
 
     ok = true;
     dispose();
+  }
+
+  private boolean isCompositeHubBusinessKey(String businessKeyField) {
+    if (Utils.isEmpty(businessKeyField) || model == null) {
+      return false;
+    }
+    String hubName = Const.NVL(wHubName != null ? wHubName.getText() : input.getHubName(), "");
+    if (Utils.isEmpty(hubName)) {
+      return false;
+    }
+    DvHub hub = model.findHub(hubName, variables, hopGui.getMetadataProvider());
+    if (hub == null) {
+      return false;
+    }
+    for (BusinessKey bk : hub.getDistinctBusinessKeys()) {
+      if (bk != null && businessKeyField.equals(bk.getName()) && bk.isComposite()) {
+        return true;
+      }
+    }
+    return DvBusinessKeyPartSupport.hubHasCompositeBusinessKey(hub)
+        && hub.getBusinessKeyFieldNames().contains(businessKeyField);
   }
 
   private void cancel() {

@@ -144,9 +144,15 @@ public abstract class DvDatabaseSourcePipelineBuilder extends DvSourcePipelineBu
     String sourceName = variables.resolve(recordSource.getName());
 
     for (BusinessKey key : hub.getBusinessKeysForSource(sourceName, variables)) {
-      if (StringUtils.isNotEmpty(key.getSourceFieldName())) {
-        String quotedPk = sourceDbMeta.quoteField(variables.resolve(key.getSourceFieldName()));
-        pkQuotedFields.add(quotedPk);
+      if (key == null) {
+        continue;
+      }
+      // Composite: N source parts; multipartite/single: one source field (dual-read list or scalar)
+      for (String part : key.resolveSourceParts()) {
+        if (StringUtils.isNotEmpty(part)) {
+          String quotedPk = sourceDbMeta.quoteField(variables.resolve(part));
+          pkQuotedFields.add(quotedPk);
+        }
       }
     }
     if (pkQuotedFields.isEmpty()) {

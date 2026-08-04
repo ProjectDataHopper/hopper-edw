@@ -34,6 +34,7 @@ import org.apache.hop.datavault.hopgui.lineage.LineageTabSupport;
 import org.apache.hop.datavault.lineage.DvModelLineageCollector;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DataVaultSource;
+import org.apache.hop.datavault.metadata.DvBusinessKeyPartSupport;
 import org.apache.hop.datavault.metadata.DvDataTypeSupport;
 import org.apache.hop.datavault.metadata.DvHub;
 import org.apache.hop.datavault.metadata.DvIntegrationMode;
@@ -381,16 +382,28 @@ public class DvSatelliteDialog {
       return;
     }
     String hubName = wHubName != null ? Const.NVL(wHubName.getText(), "").trim() : "";
+    String preferredSource =
+        wRecordSource != null ? Const.NVL(wRecordSource.getText(), "").trim() : "";
     String hubKeyOrder = "";
+    boolean hubHasComposite = false;
     if (!Utils.isEmpty(hubName) && model != null) {
       DvHub hub = model.findHub(hubName, variables, hopGui.getMetadataProvider());
       if (hub != null) {
-        hubKeyOrder = DvSatelliteParentKeySupport.formatHubKeyOrder(hub, variables);
+        List<String> defaults =
+            DvSatelliteParentKeySupport.defaultSourceFieldsFromHub(hub, preferredSource, variables);
+        hubKeyOrder = defaults.isEmpty() ? "" : String.join(", ", defaults);
+        hubHasComposite = DvBusinessKeyPartSupport.hubHasCompositeBusinessKey(hub);
       }
     }
     if (Utils.isEmpty(hubKeyOrder)) {
       wlParentKeysHint.setText(
           BaseMessages.getString(PKG, "DvSatelliteDialog.ParentKeys.HubSatellite.Hint"));
+    } else if (hubHasComposite) {
+      wlParentKeysHint.setText(
+          BaseMessages.getString(
+              PKG,
+              "DvSatelliteDialog.ParentKeys.HubSatellite.HintWithCompositeOrder",
+              hubKeyOrder));
     } else {
       wlParentKeysHint.setText(
           BaseMessages.getString(
@@ -428,8 +441,10 @@ public class DvSatelliteDialog {
       mb.open();
       return;
     }
+    String preferredSource =
+        wRecordSource != null ? Const.NVL(wRecordSource.getText(), "").trim() : "";
     List<String> sourceFields =
-        DvSatelliteParentKeySupport.defaultSourceFieldsFromHub(hub, variables);
+        DvSatelliteParentKeySupport.defaultSourceFieldsFromHub(hub, preferredSource, variables);
     if (sourceFields.isEmpty()) {
       MessageBox mb = new MessageBox(shell, SWT.OK | SWT.ICON_INFORMATION);
       mb.setMessage(

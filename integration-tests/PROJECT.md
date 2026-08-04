@@ -47,6 +47,7 @@ integration-tests/
     ├── link-satellite-driving-key/
     ├── load-end-date/
     ├── reference-table/
+    ├── composite-hub-bk/
     ├── status-tracking/
     ├── multi-source-hub/
     ├── multi-satellite-bv/
@@ -69,6 +70,7 @@ integration-tests/
 | `tests/link-satellite-driving-key/link-satellite-driving-key.hdv` | Hubs + link + multi-active link satellite (`line_number` driving key) |
 | `tests/load-end-date/load-end-date.hdv` | Hub + standard satellite with load end date (`x_load_end_ts`) |
 | `tests/reference-table/reference-table.hdv` | Physical **Reference table** (`ref_country`) FULL_REPLACE two-wave load (issue #110) |
+| `tests/composite-hub-bk/composite-hub-bk.hdv` | Composite hub business key (`burger_bk` from two EXT parts) + satellite parent parts |
 
 `project-config.json` sets `metadataBaseFolder`, `dataSetsCsvFolder`, and `unitTestsBasePath` relative to `${PROJECT_HOME}`.
 

@@ -1,7 +1,7 @@
 {
   "database_replacements": [],
   "autoOpening": true,
-  "description": "",
+  "description": "Validate sat_burger parent hash matches composite hub parts recipe",
   "persist_filename": "",
   "test_type": "UNIT_TEST",
   "variableValues": [],
@@ -10,12 +10,12 @@
     {
       "field_mappings": [
         {
-          "transform_field": "party_hk",
-          "data_set_field": "party_hk"
+          "transform_field": "burger_hk",
+          "data_set_field": "burger_hk"
         },
         {
-          "transform_field": "party_id",
-          "data_set_field": "party_id"
+          "transform_field": "status",
+          "data_set_field": "status"
         },
         {
           "transform_field": "x_record_source",
@@ -27,17 +27,14 @@
         }
       ],
       "field_order": [
-        "party_hk",
-        "party_id",
-        "x_record_source",
-        "x_load_ts"
+        "burger_hk"
       ],
-      "data_set_name": "hub-party-hrp-golden1",
+      "data_set_name": "sat-burger-golden1",
       "transform_name": "Validate"
     }
   ],
   "input_data_sets": [],
-  "name": "validate-hub-party-hrp UNIT",
+  "name": "validate-sat-burger UNIT",
   "trans_test_tweaks": [],
-  "pipeline_filename": "./tests/hub-alias-role-playing/validate-hub-party-hrp.hpl"
+  "pipeline_filename": "./tests/composite-hub-bk/validate-sat-burger.hpl"
 }

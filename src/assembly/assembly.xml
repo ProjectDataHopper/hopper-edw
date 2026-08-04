@@ -84,6 +84,7 @@
                 <include>org.apache.hop:hop-transform-calculator:jar</include>
                 <include>org.apache.hop:hop-transform-checksum:jar</include>
                 <include>org.apache.hop:hop-transform-combinationlookup:jar</include>
+                <include>org.apache.hop:hop-transform-concatfields:jar</include>
                 <include>org.apache.hop:hop-transform-constant:jar</include>
                 <include>org.apache.hop:hop-transform-dimensionlookup:jar</include>
                 <include>org.apache.hop:hop-transform-filemetadata:jar</include>

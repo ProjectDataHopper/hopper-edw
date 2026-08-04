@@ -4,6 +4,17 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## Unreleased
 
+### Composite hub business keys (multi-source-field → one vault BK column)
+
+- Model a hub business key as **one physical vault column** composed from ordered **source parts** (`composite=Y` + `sourceFieldNames`), with dual-read of legacy multipartite vault columns and single-field mappings
+- Hub DDL/load: compose stored BK with business key delimiter / trim / null placeholder; default **hash over parts** (optional hash content suffix is hash-only — VaultSpeed-style trailing `#` parity); optional **Hash composed business key** config flag
+- Satellites and links map ordered source parts for parent/hub hash calculation only — they do **not** store the composed BK column
+- Check model: part counts, multi-source consistency, link/sat parent-key length
+- GUI: hub Keys composite column + multi-part source fields; satellite parent-key defaults/hints; link hub source mapping multi-part rows
+- Integration suite `tests/composite-hub-bk/`: EXT two-part feed → `hub_burger` (`IKL#12278170`) + VS-style hash (`parts + #` + trailing `#`), satellite parent parts; wired into `run-tests.hwf` / SQL Server orchestrator
+- Bundle `hop-transform-concatfields` in the plugin assembly (required for generated compose steps)
+- Docs: [dv-hub.adoc](docs/dv-hub.adoc#composite-hub-business-keys), [dv-satellite.adoc](docs/dv-satellite.adoc), [dv-link.adoc](docs/dv-link.adoc), [datavault-configuration.adoc](docs/datavault-configuration.adoc), [feature-overview.md](docs/feature-overview.md); AI schema notes in [docs/ai-file-schemas/models/hdv.md](docs/ai-file-schemas/models/hdv.md)
+
 ### AI file-schema pack for external agents
 
 - `docs/ai-file-schemas/`: purpose markdown + relaxed XSD for `.hdv` / `.hbv` / `.hdm` / `.hsm`, JSON Schema for plugin metadata and catalog record definitions, samples and cross-reference guide (for Gemini and other external AIs)

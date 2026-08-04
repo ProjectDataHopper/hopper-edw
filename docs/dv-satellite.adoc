@@ -47,7 +47,7 @@ Because the comparison looks at the attribute values themselves, you do not get 
 |Select the Link this satellite describes (for satellites that hold relationship-level attributes). Choose either a parent link or a parent hub, not both.
 
 |Parent key source fields (tab)
-|For **hub satellites** only: optional ordered list of columns on *this satellite's* record source that supply the parent hub business key values. Order is the hub business key order (shown in the tab). Leave empty to use the hub business key names as source column names. This is not a re-definition of hub keys — only where the values sit on this one feed. Link satellites configure parent keys on the link's source mappings instead.
+|For **hub satellites** only: optional ordered list of columns on *this satellite's* record source that supply the parent hub **hash inputs**. Length and order match the hub's multipartite vault keys *or*, for composite hub business keys, the ordered source *parts* (not the composed vault BK column name). Leave empty to default from the hub (vault key names, or hub-mapped parts for the satellite record source when known). This is not a re-definition of hub keys — only where the values sit on this one feed. The satellite table does **not** store hub business-key text. Link satellites configure parent keys on the link's source mappings instead. Use **Load from hub mapping** to fill defaults.
 
 |Attributes
 |The list of descriptive columns whose changes you want to track.
@@ -120,8 +120,9 @@ You can also attach a satellite to a feed that is **not** used to load the hub (
 
 == Parent business keys on the satellite feed
 
-* The hub defines which business keys exist and in which order the parent hash is calculated.
-* By default the satellite feed must expose columns with those same names (for example `customer_id`).
-* If names differ, list the source column names on the satellite **Parent key source fields** tab in hub key order (for example one row `cust_no` for hub key `customer_id`). Leave the list empty for the default.
+* The hub defines vault business keys and, for composite keys, ordered source parts. The parent hash uses the same delimiter / suffix / casing rules as hub loads (from the model configuration).
+* **Multipartite hub keys:** by default the satellite feed exposes columns with those vault names (for example `customer_id`). If names differ, list source columns on the **Parent key source fields** tab in hub key order (for example `cust_no` for hub key `customer_id`).
+* **Composite hub keys** (single vault column on the hub): list **N source part columns** in hub part order (for example `num_seq_bkcc_bk`, `num_seq_bk`). Do **not** require a composed `burger_bk` column on the satellite feed. Leave the list empty to default from the hub mapping when the sat record source is also a hub source (or when the hub definition carries default part names).
 * Do **not** put satellite-only source column names on the hub Keys tab — that tab is only for sources that **load the hub**.
-* Independent satellite feeds (composite queries, other models that only reference the hub) are expected; the sat feed need not be a hub record source.
+* Independent satellite feeds (multi-table composite queries, other models that only reference the hub) are expected; the sat feed need not be a hub record source.
+* See link:dv-hub.adoc#composite-hub-business-keys[Composite hub business keys] for storage vs hash rules.

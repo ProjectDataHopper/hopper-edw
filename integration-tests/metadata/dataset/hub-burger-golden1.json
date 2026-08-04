@@ -1,24 +1,24 @@
 {
-  "base_filename": "hub-alias-role-playing/hub-party-hrp-golden1.csv",
-  "virtualPath": "/hub-alias-role-playing",
-  "name": "hub-party-hrp-golden1",
-  "description": "Expected hub_party_hrp after initial load (hub alias role-playing)",
+  "base_filename": "composite-hub-bk/hub-burger-golden1.csv",
+  "virtualPath": "/composite-hub-bk",
+  "name": "hub-burger-golden1",
+  "description": "Expected hub_burger after composite BK load (stored IKL#12278170 + VS-style hash of parts+suffix)",
   "dataset_fields": [
     {
-      "field_comment": "party_hk",
+      "field_comment": "burger_hk",
       "field_length": 63,
       "field_type": 2,
       "field_precision": -1,
-      "field_name": "party_hk",
+      "field_name": "burger_hk",
       "field_format": ""
     },
     {
-      "field_comment": "party_id",
-      "field_length": 9,
-      "field_type": 5,
-      "field_precision": 0,
-      "field_name": "party_id",
-      "field_format": "####0;-####0"
+      "field_comment": "burger_bk",
+      "field_length": 100,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "burger_bk",
+      "field_format": ""
     },
     {
       "field_comment": "x_record_source",

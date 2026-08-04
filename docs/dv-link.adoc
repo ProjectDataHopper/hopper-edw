@@ -115,7 +115,7 @@ When set, these values are stored on the link and folded into the link hash afte
 
 In many source systems the columns that identify a hub inside a relationship table have different names than the business keys in the hub's own source (for example customer_id in the customer hub source versus cust_fk or customer_id in an order source). When this happens, use the table in this section to tell the plugin exactly which source columns correspond to which hub's business keys.
 
-For each participating hub you can enter the list of source business key field names (in the same order as the hub's business keys). If you leave a mapping empty for a hub, the plugin will use the business key names defined on that hub.
+For each participating hub you can enter source field mappings (in the same order as the hub's hash-input parts). **Multipartite** hubs: one source field per vault business key name. **Composite** hubs (single vault BK column): one row per *source part* with the same hub business key field name (order matters), or a multi-part mapping that expands to those parts. If you leave a mapping empty for a hub, the plugin falls back to the hub business key names (multipartite) or the hub's default source parts (composite). Links do **not** store hub business-key text — only hub hash keys (and optional dependent child keys).
 
 This mapping capability is one of the most practical features when integrating real-world source systems that do not use identical column naming across tables.
 
@@ -140,7 +140,8 @@ Clicking **Check model** will flag issues such as:
 * Dependent child keys are listed but a name (or resolvable source field) is missing, or the source field is not present on a link hub record source.
 * A participating hub or hub alias does not resolve in the current model.
 * The "Has descriptive attributes" flag is on (informational note).
-* **Source-to-target type mismatches** for hub-key field mappings: each `BusinessKeySource` entry is validated against the source column and the corresponding hub business key definition.
+* **Source-to-target type mismatches** for hub-key field mappings: each resolved source field (including every composite part) is validated against the source column and the corresponding hub business key definition.
+* Composite hub business keys with the wrong number of mapped source parts on a link feed.
 
 These checks run early and prevent many runtime surprises.
 
@@ -167,6 +168,7 @@ On the target side a NULL placeholder is used for the record source during the c
 * Define your hubs first. Links depend on them.
 * When you have role-playing hubs (same hub used multiple times), always define driving keys so the relationships are unambiguous.
 * When the same hubs can relate more than once (hourly sensor readings, repeated purchases, line items), add dependent child keys so each event gets its own link hash — do not rely on a link satellite alone to invent event identity under a single relationship hash.
-* Use the Hub source key fields mapping whenever the column names in the relationship source differ from the hub business key names. This is very common and saves a lot of source-side view or staging work.
+* Use the Hub source key fields mapping whenever the column names in the relationship source differ from the hub business key names (or composite source parts). This is very common and saves a lot of source-side view or staging work.
+* For composite hub BKs, map ordered source parts on the link feed; do not expect a composed vault BK column on the link table. See link:dv-hub.adoc#composite-hub-business-keys[Composite hub business keys].
 * If the relationship itself has attributes that change (for example contract terms, status, effective dates), create a satellite on the link and check the "Has descriptive attributes" box as documentation. For pure event facts, you may still attach a satellite for measures; after dependent child keys are set, that satellite parents on the event-level link key.
 * Keep the list of participating hubs in a consistent order across the model if you care about column ordering in the physical link tables.

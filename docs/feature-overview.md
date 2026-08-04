@@ -38,6 +38,7 @@ For a slide-style executive summary, see [presentations/hop-data-vault-overview.
 | Catalog version tags + schema impact simulation (CI/CD gate, blast radius) | Available | [resource-definition-validation.adoc](resource-definition-validation.adoc), [data-catalog.adoc](data-catalog.adoc) |
 | Data quality measure + quality gate (content rules, persist, alerts) | Available (Phase 2) | [data-quality.adoc](data-quality.adoc) |
 | Data Vault modeler (`.hdv`) | Available | [datavault-plugin.adoc](datavault-plugin.adoc) |
+| Composite hub business keys (multi-source-field → one vault BK column) | Available | [dv-hub.adoc](dv-hub.adoc#composite-hub-business-keys), [dv-satellite.adoc](dv-satellite.adoc), [dv-link.adoc](dv-link.adoc) |
 | Hub aliases / same hub twice on a link | Available | [dv-cross-model-references.adoc](dv-cross-model-references.adoc), [dv-link.adoc](dv-link.adoc) |
 | Large-program / multi-team modeling guide | Available (docs) | [enterprise-modeling-and-team-collaboration.adoc](enterprise-modeling-and-team-collaboration.adoc) |
 | Architecture export (Draw.io) | Available (SOLUTION + DATA inventory + aggregated DV/BV/DM ELK) | [architecture-export.adoc](architecture-export.adoc) |

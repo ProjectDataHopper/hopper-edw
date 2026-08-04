@@ -43,9 +43,9 @@ How hop-data-vault artifacts compose a typical project.
 
 ## Naming rules AIs often break
 
-1. **Hub business keys** must map to source fields that exist on the hub’s record source(s).
-2. **Satellite** `hub` (or `link`) name must match a table name already on the same `.hdv` canvas (or a linked hub).
-3. **Link** `hubNames` / `linkHubSources` must list participating hubs with BK source mappings.
+1. **Hub business keys** must map to source fields that exist on the hub’s record source(s). Composite BKs (`composite=Y`) need ordered `sourceFieldNames` (same part count across multi-source mappings for the same vault name).
+2. **Satellite** `hub` (or `link`) name must match a table name already on the same `.hdv` canvas (or a linked hub). `parentKeySourceFields` length = hub hash-input part count (parts for composite hubs — not a composed BK column on the sat).
+3. **Link** `hubNames` / `linkHubSources` must list participating hubs with BK source mappings (one source field per multipartite vault BK, or N part fields per composite vault BK).
 4. **BV** tables map attributes from **DV satellites**, not directly from CRM unless designed that way.
 5. **RDG** paths should use `${PROJECT_HOME}/models/…` and list models in intended update order within each layer (DV → BV → DM).
 

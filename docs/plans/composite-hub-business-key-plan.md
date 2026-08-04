@@ -1,6 +1,6 @@
 # Plan: Composite hub business keys (multi-source-field → one vault BK column)
 
-**Status:** Proposed (feature request)  
+**Status:** Implemented (metadata, hub/sat/link pipelines, validation, GUI, docs — see CHANGELOG Unreleased)  
 **Goal:** Allow a hub to **store a single physical business-key column** that is **built by concatenating multiple source fields** (VaultSpeed-style composite BKs), while still hashing from those parts (or from the composed string with explicit rules). Satellites and links must **consume the hub’s logical BK model** and map source parts correctly without inventing parallel multipartite vault columns.
 
 **Origin / motivating case (EDW reverse-engineering):**

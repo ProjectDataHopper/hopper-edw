@@ -24,9 +24,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.datavault.metadata.BusinessKey;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DataVaultSource;
+import org.apache.hop.datavault.metadata.DvBusinessKeyPartSupport;
 import org.apache.hop.datavault.metadata.DvHub;
 import org.apache.hop.datavault.metadata.DvSourceFieldMappingSupport;
 import org.apache.hop.datavault.metadata.IDvSource;
@@ -65,11 +65,7 @@ public class DvParquetHubSourcePipelineBuilder extends DvParquetFileSourcePipeli
 
     Map<String, String> sourceToTarget = new LinkedHashMap<>();
     String sourceName = variables.resolve(recordSource.getName());
-    for (BusinessKey key : hub.getBusinessKeysForSource(sourceName, variables)) {
-      if (StringUtils.isNotEmpty(key.getSourceFieldName())) {
-        sourceToTarget.put(key.getSourceFieldName(), key.getName());
-      }
-    }
+    DvBusinessKeyPartSupport.putHubSourceColumnMappings(sourceToTarget, hub, sourceName, variables);
 
     String sourceFieldName = variables.resolve(recordSource.getSourceIndicatorField());
     if (StringUtils.isNotEmpty(sourceFieldName)) {
@@ -85,10 +81,11 @@ public class DvParquetHubSourcePipelineBuilder extends DvParquetFileSourcePipeli
   protected TransformMeta finishSourceChain(
       TransformMeta predecessor, Point location, ColumnMapping mapping) throws HopException {
     DvHub hub = (DvHub) dvTable;
-    List<String> sortAndUniqueFields = new ArrayList<>();
-    for (BusinessKey key : hub.getDistinctBusinessKeys()) {
-      sortAndUniqueFields.add(variables.resolve(key.getName()));
-    }
+    String sourceName = variables.resolve(recordSource.getName());
+    List<String> sortAndUniqueFields =
+        new ArrayList<>(
+            DvBusinessKeyPartSupport.resolveHubSourceIdentityStreamFields(
+                hub, sourceName, variables));
     String targetSourceFieldName =
         DvSourceFieldMappingSupport.findTargetSourceFieldName(configuration, recordSource, hub);
     sortAndUniqueFields.add(variables.resolve(targetSourceFieldName));

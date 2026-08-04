@@ -40,9 +40,11 @@ import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.datavault.catalog.DvSourceCatalogService;
 import org.apache.hop.datavault.metadata.database.DvDatabaseSource;
+import org.apache.hop.datavault.transform.dvhashkey.DvHashKeyMeta;
 import org.apache.hop.datavault.transform.mergerowsplus.MergeRowsPlusMeta;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
+import org.apache.hop.pipeline.transforms.concatfields.ConcatFieldsMeta;
 import org.apache.hop.pipeline.transforms.sort.SortRowsMeta;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
 import org.junit.jupiter.api.BeforeAll;
@@ -159,6 +161,101 @@ class DvHubUpdatePipelineTest {
         hub.getBusinessKeysForSource("crm_customer_prefs", new Variables()).get(0).getName());
     assertEquals(5, hub.getBusinessKeys().size());
     assertEquals(1, hub.getDistinctBusinessKeys().size());
+  }
+
+  @Test
+  void compositeHubSourceSqlSelectsAllSourceParts() throws Exception {
+    DvHub hub = compositeBurgerHub();
+    DataVaultSource extSource = burgerExtSource();
+
+    PipelineMeta pipelineMeta = new PipelineMeta();
+    DvDatabaseHubSourcePipelineBuilder builder =
+        new DvDatabaseHubSourcePipelineBuilder(
+            new Variables(),
+            testMetadataProvider(),
+            new DataVaultModel(),
+            pipelineMeta,
+            extSource,
+            extSource.getDvSourceOrDefault(),
+            hub,
+            new Point(0, 0));
+    builder.build();
+
+    TableInputMeta sourceMeta =
+        (TableInputMeta)
+            pipelineMeta.getTransforms().stream()
+                .filter(t -> t.getName().startsWith("source"))
+                .findFirst()
+                .orElseThrow()
+                .getTransform();
+
+    String sql = sourceMeta.getSql().replace('\n', ' ');
+    assertTrue(sql.contains("num_seq_bkcc_bk"));
+    assertTrue(sql.contains("num_seq_bk"));
+    assertFalse(sql.contains("burger_bk"));
+  }
+
+  @Test
+  void compositeHubLayoutUsesSingleVaultBkColumnNamedByBusinessKey() throws Exception {
+    Variables variables = catalogVariables();
+    MemoryMetadataProvider metadataProvider = mssqlMetadataProvider();
+    DataVaultModel model = registerCompositeBurgerModel(metadataProvider, variables);
+    DvHub hub = model.findHub("hub_burger");
+
+    var layout = hub.getTargetTableLayout(metadataProvider, variables, model);
+    assertNotNull(layout);
+    assertNotNull(layout.searchValueMeta("burger_bk"));
+    assertEquals(null, layout.searchValueMeta("num_seq_bkcc_bk"));
+    assertEquals(null, layout.searchValueMeta("num_seq_bk"));
+    // One BK column only (plus hash, record source, load date)
+    long bkCols =
+        layout.getValueMetaList().stream().filter(vm -> "burger_bk".equals(vm.getName())).count();
+    assertEquals(1, bkCols);
+  }
+
+  @Test
+  void compositeHubPipelineComposesAndHashesParts() throws Exception {
+    Variables variables = catalogVariables();
+    MemoryMetadataProvider metadataProvider = mssqlMetadataProvider();
+    DataVaultModel model = registerCompositeBurgerModel(metadataProvider, variables);
+    DvHub hub = model.findHub("hub_burger");
+
+    List<PipelineMeta> pipelines =
+        hub.generateUpdatePipelines(metadataProvider, variables, model, new Date(), null);
+    assertEquals(1, pipelines.size());
+    PipelineMeta pipeline = pipelines.get(0);
+
+    assertTrue(
+        pipeline.getTransforms().stream()
+            .anyMatch(t -> t.getTransform() instanceof ConcatFieldsMeta),
+        "expected ConcatFields compose step");
+    ConcatFieldsMeta concat =
+        (ConcatFieldsMeta)
+            pipeline.getTransforms().stream()
+                .filter(t -> t.getTransform() instanceof ConcatFieldsMeta)
+                .findFirst()
+                .orElseThrow()
+                .getTransform();
+    assertEquals("burger_bk", concat.getExtraFields().getTargetFieldName());
+    assertEquals("#", concat.getSeparator());
+    assertEquals(2, concat.getOutputFields().size());
+
+    MergeRowsPlusMeta mergeRowsMeta =
+        (MergeRowsPlusMeta) pipeline.findTransform("merge_diff").getTransform();
+    assertEquals(List.of("burger_bk"), mergeRowsMeta.getKeyFields());
+
+    DvHashKeyMeta hashMeta =
+        (DvHashKeyMeta) pipeline.findTransform("calc_burger_hk").getTransform();
+    assertEquals(
+        List.of("num_seq_bkcc_bk", "num_seq_bk"),
+        hashMeta.getFields().stream().map(f -> f.getName()).toList());
+    assertEquals("#", hashMeta.getBusinessKeyDelimiter());
+    assertEquals("#", hashMeta.getHashContentSuffix());
+
+    TableInputMeta targetMeta =
+        (TableInputMeta) pipeline.findTransform("target_hub_burger").getTransform();
+    assertTrue(targetMeta.getSql().contains("burger_bk"));
+    assertFalse(targetMeta.getSql().contains("num_seq_bkcc_bk"));
   }
 
   private static DvHub multiSourceCustomerHub() {
@@ -279,6 +376,64 @@ class DvHubUpdatePipelineTest {
     fields.add(field);
     source.getDvSourceOrDefault().setFields(fields);
     return source;
+  }
+
+  private static DvHub compositeBurgerHub() {
+    DvHub hub = new DvHub("hub_burger");
+    hub.setHashKeyFieldName("burger_hk");
+    hub.setTableName("hub_burger");
+    hub.setRecordSources(List.of("ext_burger"));
+    BusinessKey key = new BusinessKey("burger_bk");
+    key.setComposite(true);
+    key.setDataType("String");
+    key.setLength("100");
+    key.setSourceFieldNames(List.of("num_seq_bkcc_bk", "num_seq_bk"));
+    key.setRecordSourceName("ext_burger");
+    hub.setBusinessKeys(List.of(key));
+    return hub;
+  }
+
+  private static DataVaultSource burgerExtSource() {
+    DataVaultSource source = new DataVaultSource("ext_burger");
+    source.setSourceIndicator("ext_burger");
+    DvDatabaseSource dbSource = new DvDatabaseSource();
+    dbSource.setDatabaseName("CRM");
+    dbSource.setSchemaName("public");
+    dbSource.setTableName("ami_indiv_klanten");
+    source.setSource(dbSource);
+    List<SourceField> fields = new ArrayList<>();
+    for (String name : List.of("num_seq_bkcc_bk", "num_seq_bk")) {
+      SourceField field = new SourceField();
+      field.setName(name);
+      field.setSourceDataType("varchar");
+      field.setHopType(IValueMeta.TYPE_STRING);
+      field.setLength("50");
+      fields.add(field);
+    }
+    source.getDvSourceOrDefault().setFields(fields);
+    return source;
+  }
+
+  private static DataVaultModel registerCompositeBurgerModel(
+      MemoryMetadataProvider metadataProvider, Variables variables) throws Exception {
+    DataVaultModel model = new DataVaultModel();
+    DataVaultConfiguration config = model.getConfigurationOrDefault();
+    config.setTargetDatabase("Vault");
+    config.setDataCatalogConnection("local-catalog");
+    config.setRecordSourceField("dv_record_source");
+    config.setBusinessKeyDelimiter("#");
+    config.setHashContentSuffix("#");
+    config.setHashContentCasing(HashContentCasing.NONE.name());
+    config.setHashUsesComposedBusinessKey(false);
+
+    DvHub hub = compositeBurgerHub();
+    hub.setRecordSourceFieldName("dv_record_source");
+    model.getTables().add(hub);
+
+    registerCatalog(metadataProvider, variables);
+    DvSourceCatalogService.upsertSource(
+        burgerExtSource(), "local-catalog", variables, metadataProvider);
+    return model;
   }
 
   private static MemoryMetadataProvider testMetadataProvider() throws HopException {

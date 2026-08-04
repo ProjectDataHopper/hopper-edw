@@ -36,16 +36,19 @@ Target database and hashing strategy.
 |Upper-case, lower-case, or preserve business key casing before hashing. UPPER is the usual Data Vault choice.
 
 |Business key delimiter
-|String used to concatenate composite business keys and link hash inputs (for example `||`).
+|String used to join multipartite business key parts for hashing, and to compose **stored** composite hub BK strings (for example `||` or `#`). Also used for link hash inputs over hub hashes.
 
 |Hash content prefix / suffix
-|Optional text prepended or appended to the concatenated key content before hashing. Supports variables.
+|Optional text prepended or appended to the concatenated key content before hashing. Supports variables. A trailing suffix is common for VaultSpeed-style recipes and is applied to the *hash input only* — it is not written into a composed hub business-key column.
 
 |Null placeholder
-|Value substituted for NULL key parts during hashing (default `^^`).
+|Value substituted for NULL key parts during hashing and during stored composite BK composition (default `^^`).
 
 |Trim business keys
-|Remove leading and trailing whitespace before hashing (recommended, on by default).
+|Remove leading and trailing whitespace before hashing and before composing stored composite hub BKs (recommended, on by default).
+
+|Hash composed business key
+|When enabled, hub hashing for composite (single-column) business keys uses the composed vault field only. Default is off: hash ordered **source parts** (better VaultSpeed trailing-suffix parity). Satellites and links always map source parts for parent/hub hash calculation; they do not store the composed BK column.
 |===
 
 === Unknown records tab

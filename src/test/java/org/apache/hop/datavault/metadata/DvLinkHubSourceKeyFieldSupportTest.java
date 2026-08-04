@@ -107,6 +107,77 @@ class DvLinkHubSourceKeyFieldSupportTest {
     assertTrue(ex.getMessage().contains("order-header"));
   }
 
+  @Test
+  void resolveBusinessKeySourcesExpandsCompositeParts() {
+    DvHub hub = new DvHub("hub_burger");
+    BusinessKey bk = businessKey("burger_bk");
+    bk.setComposite(true);
+    bk.setSourceFieldNames(List.of("num_seq_bkcc_bk", "num_seq_bk"));
+    hub.setBusinessKeys(List.of(bk));
+
+    DvLink.HubSourceKeyField hubSourceKeyField = new DvLink.HubSourceKeyField();
+    hubSourceKeyField.setHubName("hub_burger");
+    BusinessKeySource mapping = new BusinessKeySource();
+    mapping.setBusinessKeyField("burger_bk");
+    mapping.setSourceFieldNames(List.of("src_cc", "src_seq"));
+    hubSourceKeyField.getSourceBusinessKeyFields().add(mapping);
+
+    List<DvLinkHubSourceKeyFieldSupport.ResolvedBusinessKeySource> resolved =
+        DvLinkHubSourceKeyFieldSupport.resolveBusinessKeySources(
+            hub, hubSourceKeyField, new Variables());
+
+    assertEquals(2, resolved.size());
+    assertEquals("burger_bk", resolved.get(0).getBusinessKeyField());
+    assertEquals("src_cc", resolved.get(0).getSourceFieldName());
+    assertTrue(resolved.get(0).isCompositePart());
+    assertEquals(0, resolved.get(0).getPartIndex());
+    assertEquals("src_seq", resolved.get(1).getSourceFieldName());
+    assertEquals(1, resolved.get(1).getPartIndex());
+
+    assertEquals(
+        List.of("src_cc", "src_seq"),
+        DvLinkHubSourceKeyFieldSupport.resolveSourceFieldNames(
+            hub, hubSourceKeyField, new Variables()));
+  }
+
+  @Test
+  void resolveBusinessKeySourcesFallsBackToHubPartsWhenLinkMappingEmpty() {
+    DvHub hub = new DvHub("hub_burger");
+    BusinessKey bk = businessKey("burger_bk");
+    bk.setComposite(true);
+    bk.setSourceFieldNames(List.of("num_seq_bkcc_bk", "num_seq_bk"));
+    hub.setBusinessKeys(List.of(bk));
+
+    DvLink.HubSourceKeyField hubSourceKeyField = new DvLink.HubSourceKeyField();
+    hubSourceKeyField.setHubName("hub_burger");
+
+    assertEquals(
+        List.of("num_seq_bkcc_bk", "num_seq_bk"),
+        DvLinkHubSourceKeyFieldSupport.resolveSourceFieldNames(
+            hub, hubSourceKeyField, new Variables()));
+  }
+
+  @Test
+  void findCompositePartCountMismatchesDetectsWrongPartCount() {
+    DvHub hub = new DvHub("hub_burger");
+    BusinessKey bk = businessKey("burger_bk");
+    bk.setComposite(true);
+    bk.setSourceFieldNames(List.of("a", "b"));
+    hub.setBusinessKeys(List.of(bk));
+
+    DvLink.HubSourceKeyField hubSourceKeyField = new DvLink.HubSourceKeyField();
+    BusinessKeySource mapping = new BusinessKeySource();
+    mapping.setBusinessKeyField("burger_bk");
+    mapping.setSourceFieldNames(List.of("only_one"));
+    hubSourceKeyField.getSourceBusinessKeyFields().add(mapping);
+
+    List<String> errors =
+        DvLinkHubSourceKeyFieldSupport.findCompositePartCountMismatches(
+            hub, hubSourceKeyField, new Variables());
+    assertEquals(1, errors.size());
+    assertTrue(errors.get(0).contains("burger_bk"));
+  }
+
   private static BusinessKey businessKey(String name) {
     BusinessKey key = new BusinessKey(name);
     key.setDataType("String");

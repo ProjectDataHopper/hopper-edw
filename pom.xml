@@ -103,6 +103,11 @@
     </dependency>
     <dependency>
       <groupId>org.apache.hop</groupId>
+      <artifactId>hop-transform-concatfields</artifactId>
+      <version>${hop.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hop</groupId>
       <artifactId>hop-transform-constant</artifactId>
       <version>${hop.version}</version>
     </dependency>

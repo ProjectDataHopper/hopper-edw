@@ -2429,21 +2429,14 @@ public class DvSatellite extends DvTableBase
             DvSourceFieldMappingSupport.resolveRecordSourceFieldNameForSatellite(
                 config, model, sat, variables);
         hashKeyFieldName = linkedHub.getHashKeyFieldName();
-        // Use distinct hub BKs so multi-source hubs with per-source BusinessKey rows
-        // (same name, different recordSourceName) do not double-hash the key.
+        // Hash inputs = expanded parent-key stream fields (multipartite vault names, or N source
+        // parts for composite hub BKs). Satellites do not store composed BK columns.
         List<BusinessKey> hubKeys = linkedHub.getDistinctBusinessKeys();
-        if (Utils.isEmpty(hashKeyFieldName)) {
-          if (!Utils.isEmpty(hubKeys)) {
-            for (BusinessKey bk : hubKeys) {
-              hubBkNames.add(bk.getName());
-            }
-            hashKeyFieldName = hubKeys.get(0).getName() + "_hk";
-          }
-        } else {
-          for (BusinessKey bk : hubKeys) {
-            hubBkNames.add(bk.getName());
-          }
+        if (Utils.isEmpty(hashKeyFieldName) && !Utils.isEmpty(hubKeys)) {
+          hashKeyFieldName = hubKeys.get(0).getName() + "_hk";
         }
+        hubBkNames.addAll(
+            DvSatelliteParentKeySupport.resolveBusinessKeyNames(linkedHub, sat, variables));
       } else {
         linkedLink = model.findLink(sat.getLinkName(), variables, metadataProvider);
         if (linkedLink == null) {

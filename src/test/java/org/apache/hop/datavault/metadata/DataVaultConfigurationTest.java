@@ -55,6 +55,12 @@ class DataVaultConfigurationTest {
   }
 
   @Test
+  void newConfigurationDefaultsHashUsesComposedBusinessKeyToFalse() {
+    DataVaultConfiguration configuration = new DataVaultConfiguration();
+    assertEquals(false, configuration.isHashUsesComposedBusinessKey());
+  }
+
+  @Test
   void blankSortRowsSizeFallsBackToHopDefault() {
     DataVaultConfiguration configuration = new DataVaultConfiguration();
     configuration.setSortRowsSize("");

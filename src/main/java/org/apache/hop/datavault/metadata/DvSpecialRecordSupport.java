@@ -402,7 +402,7 @@ public final class DvSpecialRecordSupport {
             : config.getInvalidHashKeyValue();
     String fallbackBk = resolveBusinessKeyValue(config, variables, kind);
     return resolveHashValue(
-        configured, fallbackBk, hub.getBusinessKeys(), config, variables, valueMetaType);
+        configured, fallbackBk, hub.getDistinctBusinessKeys(), config, variables, valueMetaType);
   }
 
   static Object resolveLinkHashValue(
@@ -524,10 +524,21 @@ public final class DvSpecialRecordSupport {
       throws HopException {
     List<Object> values = new ArrayList<>();
     List<Boolean> binaryFlags = new ArrayList<>();
+    boolean hashComposed = config != null && config.isHashUsesComposedBusinessKey();
     if (businessKeys != null && !businessKeys.isEmpty()) {
-      for (BusinessKey ignored : businessKeys) {
-        values.add(businessKeyValue);
-        binaryFlags.add(false);
+      for (BusinessKey bk : businessKeys) {
+        if (bk == null) {
+          continue;
+        }
+        // Composite: hash over N part slots (sentinel repeated) unless hash-composed mode.
+        int partCount = 1;
+        if (bk.isComposite() && !hashComposed) {
+          partCount = Math.max(bk.sourcePartCount(), 1);
+        }
+        for (int i = 0; i < partCount; i++) {
+          values.add(businessKeyValue);
+          binaryFlags.add(false);
+        }
       }
     } else {
       values.add(businessKeyValue);

@@ -114,6 +114,72 @@ class DvSatelliteParentKeySupportTest {
         DvSatelliteParentKeySupport.defaultSourceFieldsFromHub(hub, new Variables()));
   }
 
+  @Test
+  void compositeHubExpandsParentKeysToSourceParts() throws HopException {
+    DvHub hub = compositeBurgerHub();
+    DvSatellite satellite = new DvSatellite("sat_burger");
+    satellite.setHubName("hub_burger");
+    satellite.setRecordSourceName("ext_burger");
+    satellite.setParentKeySourceFields(List.of("num_seq_bkcc_bk", "num_seq_bk"));
+
+    List<DvSatelliteParentKeySupport.ParentKeyField> fields =
+        DvSatelliteParentKeySupport.resolveParentKeyFields(hub, satellite, new Variables());
+
+    assertEquals(2, fields.size());
+    assertEquals("num_seq_bkcc_bk", fields.get(0).getSourceFieldName());
+    assertEquals("num_seq_bkcc_bk", fields.get(0).getBusinessKeyName());
+    assertEquals("burger_bk", fields.get(0).getVaultBusinessKeyName());
+    assertTrue(fields.get(0).isCompositePart());
+    assertEquals("num_seq_bk", fields.get(1).getSourceFieldName());
+    assertFalse(fields.get(0).requiresRename());
+  }
+
+  @Test
+  void compositeHubDefaultsParentKeysFromHubSourceParts() throws HopException {
+    DvHub hub = compositeBurgerHub();
+    DvSatellite satellite = new DvSatellite("sat_burger");
+    satellite.setHubName("hub_burger");
+    satellite.setRecordSourceName("ext_burger");
+
+    List<DvSatelliteParentKeySupport.ParentKeyField> fields =
+        DvSatelliteParentKeySupport.resolveParentKeyFields(hub, satellite, new Variables());
+
+    assertEquals(2, fields.size());
+    assertEquals("num_seq_bkcc_bk", fields.get(0).getSourceFieldName());
+    assertEquals("num_seq_bk", fields.get(1).getSourceFieldName());
+  }
+
+  @Test
+  void compositeHubParentKeyCountMismatchThrows() {
+    DvHub hub = compositeBurgerHub();
+    DvSatellite satellite = new DvSatellite("sat_burger");
+    satellite.setParentKeySourceFields(List.of("only_one"));
+
+    assertThrows(
+        HopException.class,
+        () -> DvSatelliteParentKeySupport.resolveParentKeyFields(hub, satellite, new Variables()));
+  }
+
+  @Test
+  void defaultSourceFieldsFromHubExpandsCompositeParts() {
+    DvHub hub = compositeBurgerHub();
+    assertEquals(
+        List.of("num_seq_bkcc_bk", "num_seq_bk"),
+        DvSatelliteParentKeySupport.defaultSourceFieldsFromHub(hub, "ext_burger", new Variables()));
+    assertEquals(2, DvSatelliteParentKeySupport.expectedParentKeySourceFieldCount(hub));
+  }
+
+  private static DvHub compositeBurgerHub() {
+    DvHub hub = new DvHub("hub_burger");
+    BusinessKey bk = new BusinessKey("burger_bk");
+    bk.setComposite(true);
+    bk.setSourceFieldNames(List.of("num_seq_bkcc_bk", "num_seq_bk"));
+    bk.setRecordSourceName("ext_burger");
+    bk.setDataType("String");
+    hub.setBusinessKeys(List.of(bk));
+    return hub;
+  }
+
   private static DvHub hubWithKeys(String... names) {
     DvHub hub = new DvHub("hub_test");
     List<BusinessKey> keys = new java.util.ArrayList<>();

@@ -88,60 +88,69 @@ public final class DvFieldMappingValidationSupport {
       if (bk == null || Utils.isEmpty(bk.getName())) {
         continue;
       }
-      String sourceFieldName =
-          resolveSourceFieldName(bk.getSourceFieldName(), bk.getName(), variables);
-      IValueMeta sourceMeta = resolved.fields.get(sourceFieldName);
-      if (sourceMeta == null) {
-        remarks.add(
-            new CheckResult(
-                ICheckResult.TYPE_RESULT_ERROR,
-                BaseMessages.getString(
-                    PKG,
-                    "DvFieldMappingValidation.SourceFieldMissing",
-                    sourceFieldName,
-                    recordSource.getName(),
-                    bk.getName()),
-                checkSource));
-        continue;
+      List<String> sourceParts = bk.resolveSourceParts();
+      if (sourceParts.isEmpty()) {
+        sourceParts =
+            List.of(resolveSourceFieldName(bk.getSourceFieldName(), bk.getName(), variables));
       }
-      try {
-        SourceField storedField = resolved.storedFields.get(sourceFieldName);
-        IValueMeta targetMeta = buildTargetValueMetaForHubBusinessKey(bk, storedField, variables);
-        String mappingContext =
-            BaseMessages.getString(
-                PKG,
-                "DvFieldMappingValidation.Context.HubBusinessKey",
-                bk.getName(),
+      for (String part : sourceParts) {
+        String sourceFieldName = resolveName(part, variables);
+        if (Utils.isEmpty(sourceFieldName)) {
+          continue;
+        }
+        IValueMeta sourceMeta = resolved.fields.get(sourceFieldName);
+        if (sourceMeta == null) {
+          remarks.add(
+              new CheckResult(
+                  ICheckResult.TYPE_RESULT_ERROR,
+                  BaseMessages.getString(
+                      PKG,
+                      "DvFieldMappingValidation.SourceFieldMissing",
+                      sourceFieldName,
+                      recordSource.getName(),
+                      bk.getName()),
+                  checkSource));
+          continue;
+        }
+        try {
+          SourceField storedField = resolved.storedFields.get(sourceFieldName);
+          IValueMeta targetMeta = buildTargetValueMetaForHubBusinessKey(bk, storedField, variables);
+          String mappingContext =
+              BaseMessages.getString(
+                  PKG,
+                  "DvFieldMappingValidation.Context.HubBusinessKey",
+                  bk.getName(),
+                  sourceFieldName,
+                  recordSource.getName());
+          validateMapping(
+              sourceMeta, targetMeta, mappingContext, targetDatabaseMeta, checkSource, remarks);
+          if (options != null
+              && options.isDetailedDataTypeChecking()
+              && resolved.usedLive
+              && targetDatabaseMeta != null) {
+            DvSqlPhysicalTypeValidationSupport.validatePhysicalSqlTypeMapping(
+                sourceMeta,
+                targetMeta,
+                mappingContext,
+                targetDatabaseMeta,
+                config,
+                checkSource,
+                remarks);
+          }
+          if (resolved.usedLive) {
+            addStoredDriftWarnings(
+                resolved.storedFields,
                 sourceFieldName,
-                recordSource.getName());
-        validateMapping(
-            sourceMeta, targetMeta, mappingContext, targetDatabaseMeta, checkSource, remarks);
-        if (options != null
-            && options.isDetailedDataTypeChecking()
-            && resolved.usedLive
-            && targetDatabaseMeta != null) {
-          DvSqlPhysicalTypeValidationSupport.validatePhysicalSqlTypeMapping(
-              sourceMeta,
-              targetMeta,
-              mappingContext,
-              targetDatabaseMeta,
-              config,
-              checkSource,
-              remarks);
+                sourceMeta,
+                recordSource.getName(),
+                bk.getName(),
+                variables,
+                checkSource,
+                remarks);
+          }
+        } catch (HopException e) {
+          remarks.add(new CheckResult(ICheckResult.TYPE_RESULT_ERROR, e.getMessage(), checkSource));
         }
-        if (resolved.usedLive) {
-          addStoredDriftWarnings(
-              resolved.storedFields,
-              sourceFieldName,
-              sourceMeta,
-              recordSource.getName(),
-              bk.getName(),
-              variables,
-              checkSource,
-              remarks);
-        }
-      } catch (HopException e) {
-        remarks.add(new CheckResult(ICheckResult.TYPE_RESULT_ERROR, e.getMessage(), checkSource));
       }
     }
   }
@@ -557,6 +566,11 @@ public final class DvFieldMappingValidationSupport {
         if (hub == null) {
           continue;
         }
+        for (String partCountError :
+            DvLinkHubSourceKeyFieldSupport.findCompositePartCountMismatches(
+                hub, hubSourceKeyField, variables)) {
+          remarks.add(new CheckResult(ICheckResult.TYPE_RESULT_ERROR, partCountError, checkSource));
+        }
         List<DvLinkHubSourceKeyFieldSupport.ResolvedBusinessKeySource> resolvedMappings =
             DvLinkHubSourceKeyFieldSupport.resolveBusinessKeySources(
                 hub, hubSourceKeyField, variables);
@@ -662,8 +676,8 @@ public final class DvFieldMappingValidationSupport {
       return;
     }
     String satelliteSourceName = resolveName(recordSource.getName(), variables);
-    // Parent identity values come from the sat feed; hub defines BK names/order. Optional
-    // parentKeySourceFields is an ordered list of source columns only (same length as hub BKs).
+    // Parent identity values come from the sat feed; hub defines vault BKs + composite part order.
+    // Optional parentKeySourceFields length = total hub hash-input part count.
     List<DvSatelliteParentKeySupport.ParentKeyField> parentKeys;
     try {
       parentKeys = DvSatelliteParentKeySupport.resolveParentKeyFields(hub, satellite, variables);
@@ -680,6 +694,7 @@ public final class DvFieldMappingValidationSupport {
     for (DvSatelliteParentKeySupport.ParentKeyField parentKey : parentKeys) {
       String sourceFieldName = parentKey.getSourceFieldName();
       String businessKeyName = parentKey.getBusinessKeyName();
+      String vaultBkName = parentKey.getVaultBusinessKeyName();
       IValueMeta sourceMeta = resolved.fields.get(sourceFieldName);
       if (sourceMeta == null) {
         remarks.add(
@@ -689,13 +704,13 @@ public final class DvFieldMappingValidationSupport {
                     PKG,
                     "DvFieldMappingValidation.SatelliteHubBusinessKeyMissing",
                     sourceFieldName,
-                    businessKeyName,
+                    vaultBkName,
                     hub.getName(),
                     satelliteSourceName),
                 checkSource));
         continue;
       }
-      BusinessKey bk = logicalBkByName.get(businessKeyName);
+      BusinessKey bk = logicalBkByName.get(resolveName(vaultBkName, variables));
       if (bk == null) {
         continue;
       }
@@ -743,7 +758,7 @@ public final class DvFieldMappingValidationSupport {
       return mapped;
     }
     for (BusinessKey bk : keys) {
-      if (bk != null && !Utils.isEmpty(bk.getSourceFieldName())) {
+      if (bk != null && !bk.resolveSourceParts().isEmpty()) {
         mapped.add(bk);
       }
     }
@@ -849,7 +864,12 @@ public final class DvFieldMappingValidationSupport {
         if (bk == null) {
           continue;
         }
-        excluded.add(resolveSourceFieldName(bk.getSourceFieldName(), bk.getName(), variables));
+        for (String part : bk.resolveSourceParts()) {
+          excluded.add(resolveName(part, variables));
+        }
+        if (bk.resolveSourceParts().isEmpty()) {
+          excluded.add(resolveSourceFieldName(bk.getSourceFieldName(), bk.getName(), variables));
+        }
       }
     }
     if (satellite.hasDrivingKey()) {

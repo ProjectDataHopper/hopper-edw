@@ -14,9 +14,10 @@ When you load data into a hub (either from the visual model editor's Debug butto
 
 * Makes sure the target hub table exists (it can create or alter it for you).
 * Reads the business key values (and the record source indicator) from the source you attached to the hub.
-* Compares the incoming keys against what is already in the hub.
+* For *composite* (single vault column) business keys, composes the stored BK string from ordered source parts using the model delimiter (see <<composite-hub-business-keys>>).
+* Compares the incoming keys against what is already in the hub (on vault column names).
 * Inserts only the rows that represent genuinely new business keys.
-* Calculates the hash key for those new rows.
+* Calculates the hash key for those new rows (by default from ordered parts for composite keys, with optional hash suffix — not written into the stored BK column).
 * Writes the new rows together with the current load date and the record source value.
 
 Only new keys are inserted. Existing keys are left untouched. This is the classic Data Vault 2.0 "insert-only" pattern for hubs.
@@ -49,21 +50,25 @@ If you leave it empty, the plugin will derive a name from the first business key
 The field supports variables. If left empty, the value from the active Data Vault Configuration is used.
 
 |Business keys (Keys tab)
-|One or more business key definitions that together uniquely identify an instance of the hub. Composite (multi-part) keys are fully supported. The order of the keys matters because it affects how the hash key is calculated.
+|One or more business key definitions that together uniquely identify an instance of the hub. Two multi-part styles are supported — see <<composite-hub-business-keys>>:
+
+* *Multipartite vault columns* (default): several rows with different **Name** values → several physical hub columns; hash uses those column names in order.
+* *Composite (single vault column)*: **Composite=Y** on one row → one physical hub column; ordered **source field name(s)** supply the parts.
 
 For each business key you can specify:
-* The name of the column in the hub table.
+* The **name** of the column in the hub table (always the physical vault column name).
 * An optional description.
 * Data type and length (used when the source definition does not provide them).
-* An optional "Source field name" if the column has a different name in a particular source than the hub column name.
-* **Source system** – the name of the Data Vault Source this business key mapping applies to. This column is the key to supporting multiple sources on one hub. When the same logical key (for example `CUSTOMER_ID`) comes from different source systems under different physical column names, you create separate rows in the business keys table and tag each with its Source system.
+* **Composite** (Y/N) — single composed vault column from multiple source parts when Y.
+* **Source field name(s)** — one source column, or comma-separated ordered parts when Composite=Y. If the source column name matches the hub name for a non-composite key, a single value is enough.
+* **Source system** – the name of the Data Vault Source this business key mapping applies to. This column is the key to supporting multiple sources on one hub. When the same logical key (for example `CUSTOMER_ID` or composite `burger_bk`) comes from different source systems under different physical column names, you create separate rows in the business keys table and tag each with its Source system (same **Name**, same part *count* for composite keys).
 
-Use the **Load from source** button on the **Keys** tab to populate business keys automatically. Before using it, make sure you have added at least one source in the **Record sources** tab. The button reads the primary key fields from the first source listed in the Record sources tab, creates business key rows for them, and automatically fills the Source system column with that source's name. You can then repeat the process after selecting a different source (or manually adjust the Source system values) if you need different source field names per system.
+Use the **Import keys from sources** button on the **Keys** tab to populate business keys automatically. Before using it, make sure you have added at least one source in the **Record sources** tab. The button reads the primary key fields from unmapped sources, creates multipartite-style business key rows (Composite=N), and fills the Source system column. To model a VaultSpeed-style single composed column, set **Composite=Y**, set the vault **Name** to the hub BK column (for example `burger_bk`), and list ordered source parts in **Source field name(s)**.
 
 |Record sources (Record sources tab)
 |A hub can be fed by one or more Data Vault Sources. List every source system or feed that will **load this hub** (insert business keys into the hub table).
 
-Do **not** list feeds that only load satellites of this hub. Satellite feeds are independent in Data Vault 2.0; each satellite has its own record source. Parent hash keys on satellites are computed from the parent business key columns present on the satellite feed.
+Do **not** list feeds that only load satellites of this hub. Satellite feeds are independent in Data Vault 2.0; each satellite has its own record source. Parent hash keys on satellites are computed from parent identity *values* on the satellite feed (hub vault key names, or ordered source *parts* for composite hub keys — not a stored composed BK column on the satellite).
 
 You can attach as many hub-load sources as you need. The generated load process will handle each source (typically producing one pipeline per source) but all of them write into the same physical hub table. This is the recommended way to handle a single business concept that receives identity from multiple upstream systems (for example a Customer hub that is populated from both a CRM system and an ERP system).
 |===
@@ -87,7 +92,9 @@ When you click **Check model** on the model editor toolbar, the plugin validates
 * The hub has no record sources listed in the Record sources tab.
 * One or more of the listed record sources do not exist in the project.
 * Business keys that reference a Source system that is not present in the Record sources list.
-* **Source-to-target type mismatches** for each business key mapping (per record source): incompatible Hop types, or source column length/precision larger than the hub business key definition.
+* Missing source part columns for composite business keys (or different part *counts* for the same vault BK name across multi-source mappings).
+* **Source-to-target type mismatches** for each business key mapping (per record source / part): incompatible Hop types, or source column length/precision larger than the hub business key definition.
+* Warning when **Hash composed business key** is enabled together with a non-empty hash content suffix on a hub that uses composite BKs (confirm the recipe intentionally hashes the composed string rather than ordered parts).
 
 Type validation uses the live database schema when **detailed data type checking** is active (always in the GUI; configurable on the Data Vault Update action). A warning is raised when stored source field metadata in the Data Vault Source differs from the live schema.
 
@@ -98,7 +105,7 @@ These checks run before any pipelines are generated, so you catch problems early
 The plugin builds a target table layout that typically contains (in this order):
 
 1. The hash key column (its type and length depend on the hash algorithm and hash key data type chosen in the configuration: HEX is the default; STRING is human-readable; BINARY is the most compact and is supported on the required Hop **2.19.0+** runtime — see https://github.com/apache/hop/issues/7346[Hop issue 7346]).
-2. The business key columns, in the order you defined them. Length and precision are taken from the source definition when available, so you get sensible column types (VARCHAR(50), DECIMAL(15,2), etc.) instead of generic large types.
+2. The business key columns: **one physical column per distinct business key name**, in definition order. Composite keys still contribute a *single* vault column (the composed string). Multipartite keys contribute one column per name. Length and precision come from the business key definition.
 3. The record source column (name and length come from the configuration or the per-hub override; variables are supported).
 4. The load date column (usually a timestamp, named LOAD_DATE or whatever you configured).
 
@@ -115,10 +122,56 @@ To use this:
 
 This approach keeps your hub modeling clean: one logical hub table, many places it can be populated from, with explicit control over which source columns map to which business keys.
 
+For composite business keys, every source that maps the same vault **Name** must use the same number of source parts (only the field *names* may differ per source).
+
+[[composite-hub-business-keys]]
+== Composite hub business keys (single vault column)
+
+Many warehouses (including VaultSpeed-style models) store a *single* hub business-key column built by concatenating several source fields, while still hashing from those parts under fixed rules.
+
+=== Multipartite vs composite
+
+[cols="1,2,2", options="header"]
+|===
+|Style |Hub table |Hash inputs (default)
+
+|Multipartite vault columns
+|One physical column per business key **Name** (for example `order_id`, `line_no`)
+|Those vault column names / stream fields, in order
+
+|Composite (this feature)
+|One physical column (for example `burger_bk = IKL#12278170`)
+|Ordered *source parts* (for example `num_seq_bkcc_bk`, `num_seq_bk`); optional trailing **hash content suffix** applies to the hash input only
+|===
+
+Do not confuse this with **composite catalog feeds** (multi-table `.hsm` queries): those describe *sources*, not hub BK composition.
+
+=== Storage vs hash
+
+* **Stored BK** = ordered parts joined with the model **business key delimiter**, with trim / null placeholder from configuration. The hash content **suffix** is *not* stored in the column (so you can match VaultSpeed: stored `IKL#12278170`, hash input `IKL#12278170#` when delimiter and suffix are both `#`).
+* **Hash** (default): `DvHashKey` over ordered part fields, using delimiter, casing, prefix/suffix, trim, and null placeholder from configuration.
+* Optional configuration flag **Hash composed business key**: hash the composed vault field only (simpler; may not match trailing-suffix recipes).
+
+Satellites and links **do not store** the composed hub BK column. They map ordered source part columns on *their* feeds and compute the parent/hub hash using the hub definition and the same model hash settings.
+
+=== Modeling example
+
+[source,text]
+----
+Source parts:  num_seq_bkcc_bk = IKL ,  num_seq_bk = 12278170
+Delimiter:     #
+Hash suffix:   #
+Stored BK:     burger_bk = IKL#12278170
+Hash input:    IKL#12278170#   (parts + delimiter + suffix)
+----
+
+In the hub Keys tab: Name `burger_bk`, Composite `Y`, Source field name(s) `num_seq_bkcc_bk, num_seq_bk`, plus the Source system for that feed.
+
 == Tips for hubs
 
-* Start with good source definitions (Data Vault Database Source) that accurately declare primary keys and column lengths. This makes **Load from source** work well and produces better target tables.
-* When a hub has multiple sources, add them all on the Record sources tab first, then use **Load from source** for each source in turn so the Source system column is populated correctly.
+* Start with good source definitions (Data Vault Database Source) that accurately declare primary keys and column lengths. This makes **Import keys from sources** work well and produces better target tables.
+* When a hub has multiple sources, add them all on the Record sources tab first, then use **Import keys from sources** for each source in turn so the Source system column is populated correctly.
+* Prefer composite single-column BKs when you need DDL/hash parity with existing VaultSpeed-style hubs; keep multipartite vault columns when each part is a true natural key column of equal stature.
 * Be consistent with hash key naming across the model (either rely on the default suffix or set explicit names on every hub).
 * Use the per-hub record source field name override sparingly; most of the time the model configuration's record source field name is sufficient.
 * Hashing rules are defined once per model in the embedded configuration (Edit model dialog). Use consistent hash key naming across hubs rather than expecting per-table hashing overrides.

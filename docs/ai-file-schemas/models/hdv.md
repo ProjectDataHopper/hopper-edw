@@ -50,20 +50,24 @@ Visual **raw Data Vault 2.0** model: hubs, links, satellites, physical **referen
 
 ### Hub essentials
 
-- `businessKeys` (name, dataType, length, `sourceFieldName`, optional `recordSourceName`)  
+- `businessKeys` (name, dataType, length; dual-read `sourceFieldName` and/or ordered `sourceFieldNames`; optional `composite` Y/N; optional `recordSourceName`)  
+- **Multipartite:** several `businessKeys` with different `name` → several physical columns; hash order = first-seen names  
+- **Composite (single vault column):** `composite=Y`, one vault `name`, ordered `sourceFieldNames` (or multi-source rows with same `name` + different `recordSourceName`, same part count)  
 - `hashKeyFieldName`  
 - `recordSources` / `recordSource` (catalog source names)  
+- Configuration: `businessKeyDelimiter`, `hashContentSuffix`, `hashUsesComposedBusinessKey` (default N: hash parts for composite BKs)  
 
 ### Satellite essentials
 
 - `hub` or `link` parent name  
 - `recordSource` catalog name  
 - `attributes` (name/type/length; CDC include flags)  
-- Optional `parentKeySourceFields`, driving key, status tracking  
+- Optional `parentKeySourceFields` (ordered source columns = hub hash-input parts: multipartite vault names or composite source parts — **not** a stored composed BK)  
+- Optional driving key, status tracking  
 
 ### Link essentials
 
-- `hubNames`, `linkHubSources` with `businessKeySources`  
+- `hubNames`, `linkHubSources` with `businessKeySources` (`businessKeyField` + `sourceFieldName` and/or `sourceFieldNames` for composite parts)  
 - Optional dependent child keys, link satellites  
 
 ### Reference table essentials
@@ -84,6 +88,9 @@ Visual **raw Data Vault 2.0** model: hubs, links, satellites, physical **referen
 3. Using `REFERENCE` for a cross-model hub pointer — use `LINKED_TABLE`.  
 4. Omitting `recordSource` / `recordSources` so loads cannot resolve catalog feeds.  
 5. Hardcoding SQL Server-only collations or dialects in the model XML (not stored here; loads use connections).  
+6. Modeling VaultSpeed-style composed BKs as multipartite vault columns (`burger_bk_1`, `burger_bk_2`) when the target DDL has a single `burger_bk` — use `composite=Y` + `sourceFieldNames` instead.  
+7. Putting a composed hub BK column on satellites or links — sats/links map **source parts** and store only parent/hub **hash keys**.  
+8. Confusing hub BK `composite` with catalog **COMPOSITE** multi-table source feeds (`.hsm` queries).  
 
 ## Product docs
 

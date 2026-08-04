@@ -310,6 +310,15 @@ public class DvHubDialog {
     fdlBusinessKeys.top = new FormAttachment(0, 0);
     wlBusinessKeys.setLayoutData(fdlBusinessKeys);
 
+    Label wlBusinessKeysHint = new Label(wKeysComp, SWT.LEFT | SWT.WRAP);
+    wlBusinessKeysHint.setText(BaseMessages.getString(PKG, "DvHubDialog.BusinessKeys.Hint"));
+    PropsUi.setLook(wlBusinessKeysHint);
+    FormData fdlBusinessKeysHint = new FormData();
+    fdlBusinessKeysHint.left = new FormAttachment(0, 0);
+    fdlBusinessKeysHint.top = new FormAttachment(wlBusinessKeys, margin);
+    fdlBusinessKeysHint.right = new FormAttachment(100, 0);
+    wlBusinessKeysHint.setLayoutData(fdlBusinessKeysHint);
+
     ColumnInfo[] columns =
         new ColumnInfo[] {
           new ColumnInfo(
@@ -328,6 +337,10 @@ public class DvHubDialog {
               BaseMessages.getString(PKG, "DvHubDialog.BusinessKey.Length.Column"),
               ColumnInfo.COLUMN_TYPE_TEXT,
               false),
+          new ColumnInfo(
+              BaseMessages.getString(PKG, "DvHubDialog.BusinessKey.Composite.Column"),
+              ColumnInfo.COLUMN_TYPE_CCOMBO,
+              BusinessKeySourceFieldUiSupport.COMPOSITE_YES_NO),
           new ColumnInfo(
               BaseMessages.getString(PKG, "DvHubDialog.BusinessKey.SourceFieldName.Column"),
               ColumnInfo.COLUMN_TYPE_TEXT,
@@ -359,7 +372,7 @@ public class DvHubDialog {
     wBusinessKeys.setLayoutData(
         new FormDataBuilder()
             .left()
-            .top(wlBusinessKeys, margin)
+            .top(wlBusinessKeysHint, margin)
             .right()
             .bottom(wLoadFromSource, -margin)
             .result());
@@ -461,8 +474,9 @@ public class DvHubDialog {
       item.setText(2, Const.NVL(bk.getDescription(), ""));
       item.setText(3, Const.NVL(bk.getDataType(), ""));
       item.setText(4, Const.NVL(bk.getLength(), ""));
-      item.setText(5, Const.NVL(bk.getSourceFieldName(), ""));
-      item.setText(6, Const.NVL(bk.getRecordSourceName(), ""));
+      item.setText(5, BusinessKeySourceFieldUiSupport.formatCompositeFlag(bk.isComposite()));
+      item.setText(6, BusinessKeySourceFieldUiSupport.formatSourceFields(bk));
+      item.setText(7, Const.NVL(bk.getRecordSourceName(), ""));
     }
     wBusinessKeys.optimizeTableView();
 
@@ -541,8 +555,9 @@ public class DvHubDialog {
       bk.setDescription(item.getText(2));
       bk.setDataType(item.getText(3));
       bk.setLength(item.getText(4));
-      bk.setSourceFieldName(item.getText(5));
-      bk.setRecordSourceName(item.getText(6));
+      boolean composite = BusinessKeySourceFieldUiSupport.isCompositeYes(item.getText(5));
+      BusinessKeySourceFieldUiSupport.applyToBusinessKey(bk, composite, item.getText(6));
+      bk.setRecordSourceName(item.getText(7));
       keys.add(bk);
     }
     target.setBusinessKeys(keys);
@@ -572,7 +587,7 @@ public class DvHubDialog {
 
     Set<String> sourcesInKeys = new HashSet<>();
     for (TableItem item : wBusinessKeys.getNonEmptyItems()) {
-      String sourceSystem = item.getText(6);
+      String sourceSystem = item.getText(7);
       if (!Utils.isEmpty(sourceSystem)) {
         sourcesInKeys.add(sourceSystem);
       }
@@ -653,20 +668,20 @@ public class DvHubDialog {
         item.setText(2, Const.NVL(sf.getDescription(), ""));
         item.setText(3, Const.NVL(DvDataTypeSupport.preferredDataTypeLabel(sf), ""));
         item.setText(4, Const.NVL(sf.getLength(), ""));
-        item.setText(5, Const.NVL(sf.getName(), ""));
-        item.setText(6, Const.NVL(sourceName, ""));
+        item.setText(5, BusinessKeySourceFieldUiSupport.formatCompositeFlag(false));
+        item.setText(6, Const.NVL(sf.getName(), ""));
+        item.setText(7, Const.NVL(sourceName, ""));
       }
       return primaryKeyFields.size();
     }
 
     Set<String> preselectedSourceFields = new HashSet<>();
     for (TableItem item : wBusinessKeys.getNonEmptyItems()) {
-      if (!sourceName.equals(item.getText(6))) {
+      if (!sourceName.equals(item.getText(7))) {
         continue;
       }
-      String sourceFieldName = item.getText(5);
-      if (!Utils.isEmpty(sourceFieldName)) {
-        preselectedSourceFields.add(sourceFieldName);
+      for (String part : BusinessKeySourceFieldUiSupport.parseSourceFields(item.getText(6))) {
+        preselectedSourceFields.add(part);
       }
     }
 
@@ -701,8 +716,9 @@ public class DvHubDialog {
       item.setText(2, Const.NVL(sf.getDescription(), ""));
       item.setText(3, Const.NVL(DvDataTypeSupport.preferredDataTypeLabel(sf), ""));
       item.setText(4, Const.NVL(sf.getLength(), ""));
-      item.setText(5, Const.NVL(sf.getName(), ""));
-      item.setText(6, Const.NVL(sourceName, ""));
+      item.setText(5, BusinessKeySourceFieldUiSupport.formatCompositeFlag(false));
+      item.setText(6, Const.NVL(sf.getName(), ""));
+      item.setText(7, Const.NVL(sourceName, ""));
     }
     return indices.length;
   }

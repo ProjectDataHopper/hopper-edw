@@ -61,6 +61,9 @@ import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineHopMeta;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
+import org.apache.hop.pipeline.transforms.concatfields.ConcatField;
+import org.apache.hop.pipeline.transforms.concatfields.ConcatFieldsMeta;
+import org.apache.hop.pipeline.transforms.concatfields.ExtraFields;
 import org.apache.hop.pipeline.transforms.constant.ConstantField;
 import org.apache.hop.pipeline.transforms.constant.ConstantMeta;
 import org.apache.hop.pipeline.transforms.filterrows.FilterRowsMeta;
@@ -211,16 +214,16 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
                   this));
         }
 
-        // Validate that the source field (sourceFieldName or fallback to name) of this business
-        // key exists in the DataVaultSource referenced by its recordSourceName.
+        // Validate that source field(s) (sourceFieldNames / sourceFieldName or fallback to name)
+        // of this business key exist in the DataVaultSource referenced by its recordSourceName.
         if (DvIntegrationSupport.relaxesSourceValidation(this)) {
           continue;
         }
-        String sourceField = bk.getSourceFieldName();
-        if (Utils.isEmpty(sourceField)) {
-          sourceField = bk.getName();
+        List<String> sourceParts = bk.resolveSourceParts();
+        if (sourceParts.isEmpty() && !Utils.isEmpty(bk.getName())) {
+          sourceParts = List.of(bk.getName());
         }
-        if (!Utils.isEmpty(sourceField)
+        if (!sourceParts.isEmpty()
             && !Utils.isEmpty(bk.getRecordSourceName())
             && metadataProvider != null) {
           try {
@@ -233,28 +236,31 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
                     resolvedRecordSource, model, variables, metadataProvider);
             if (recordSource != null) {
               List<SourceField> fields = recordSource.getFields(metadataProvider);
-              boolean exists = false;
-              String resolvedSourceField =
-                  variables != null ? variables.resolve(sourceField) : sourceField;
-              for (SourceField sf : fields) {
-                String sfName = variables != null ? variables.resolve(sf.getName()) : sf.getName();
-                if (resolvedSourceField != null && resolvedSourceField.equals(sfName)) {
-                  exists = true;
-                  break;
+              for (String sourceField : sourceParts) {
+                boolean exists = false;
+                String resolvedSourceField =
+                    variables != null ? variables.resolve(sourceField) : sourceField;
+                for (SourceField sf : fields) {
+                  String sfName =
+                      variables != null ? variables.resolve(sf.getName()) : sf.getName();
+                  if (resolvedSourceField != null && resolvedSourceField.equals(sfName)) {
+                    exists = true;
+                    break;
+                  }
                 }
-              }
-              if (!exists) {
-                remarks.add(
-                    new CheckResult(
-                        ICheckResult.TYPE_RESULT_ERROR,
-                        "Source field '"
-                            + sourceField
-                            + "' of business key '"
-                            + bk.getName()
-                            + "' does not exist in record source '"
-                            + bk.getRecordSourceName()
-                            + "'",
-                        this));
+                if (!exists) {
+                  remarks.add(
+                      new CheckResult(
+                          ICheckResult.TYPE_RESULT_ERROR,
+                          "Source field '"
+                              + sourceField
+                              + "' of business key '"
+                              + bk.getName()
+                              + "' does not exist in record source '"
+                              + bk.getRecordSourceName()
+                              + "'",
+                          this));
+                }
               }
             }
             if (!Utils.isEmpty(bk.getRecordSourceName())
@@ -297,6 +303,21 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
                     this));
           }
         }
+      }
+      for (String mismatch :
+          DvBusinessKeyPartSupport.findCompositePartCountMismatches(this, variables)) {
+        remarks.add(new CheckResult(ICheckResult.TYPE_RESULT_ERROR, mismatch, this));
+      }
+      DataVaultConfiguration hubConfig = model != null ? model.getConfigurationOrDefault() : null;
+      if (hubConfig != null
+          && hubConfig.isHashUsesComposedBusinessKey()
+          && !Utils.isEmpty(hubConfig.getHashContentSuffix())
+          && DvBusinessKeyPartSupport.hubHasCompositeBusinessKey(this)) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_WARNING,
+                BaseMessages.getString(PKG, "DvHub.CheckResult.HashComposedWithSuffixWarning"),
+                this));
       }
     }
 
@@ -438,6 +459,11 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
         TransformMeta sourceInputTransform = addSourceTableInput(ctx, src, pipelineMeta);
         GeneratedPipelineMetadataSupport.stampSourceRead(sourceInputTransform, ctx.targetDbName);
 
+        // Composite hub BKs: compose source parts into the single vault BK column before merge so
+        // CDC keys match the target table (parts remain on the stream for default hash-over-parts).
+        TransformMeta sourceForMerge =
+            addComposeCompositeBusinessKeys(ctx, pipelineMeta, sourceInputTransform);
+
         // Target TableInput (from target DB, for diff) — same ORDER BY keys + bridge COLLATE.
         TransformMeta targetInputTransform = addTargetTableInput(ctx, pipelineMeta);
         if (targetInputTransform != null) {
@@ -447,7 +473,7 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
 
         // MergeRowsPlus (diff) on business keys. No SortRows: both legs are DB-sorted.
         TransformMeta mergeTransform =
-            addMergeRows(ctx, pipelineMeta, sourceInputTransform, targetInputTransform);
+            addMergeRows(ctx, pipelineMeta, sourceForMerge, targetInputTransform);
         if (mergeTransform != null) {
           GeneratedPipelineMetadataSupport.stampTransform(
               mergeTransform,
@@ -584,6 +610,82 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
     builder.build();
 
     return builder.getResultTransform();
+  }
+
+  /**
+   * For each composite business key, add a ConcatFields step that builds the stored vault BK column
+   * from ordered source parts (delimiter/trim/null from configuration via ConcatFields nullif +
+   * separator). Part fields stay on the stream for hash-over-parts.
+   */
+  private TransformMeta addComposeCompositeBusinessKeys(
+      HubUpdateContext ctx, PipelineMeta pipelineMeta, TransformMeta predecessor) {
+    if (predecessor == null || !DvBusinessKeyPartSupport.hubHasCompositeBusinessKey(this)) {
+      return predecessor;
+    }
+
+    String sourceName =
+        ctx.dataVaultSource != null ? ctx.variables.resolve(ctx.dataVaultSource.getName()) : null;
+    String delimiter =
+        ctx.config != null && !Utils.isEmpty(ctx.config.getBusinessKeyDelimiter())
+            ? ctx.variables.resolve(ctx.config.getBusinessKeyDelimiter())
+            : "||";
+    String nullPlaceholder =
+        ctx.config != null
+            ? ctx.variables.resolve(Const.NVL(ctx.config.getNullPlaceholder(), ""))
+            : "";
+
+    TransformMeta current = predecessor;
+    int composeIndex = 0;
+    for (DvBusinessKeyPartSupport.VaultBusinessKey vaultKey :
+        DvBusinessKeyPartSupport.resolveVaultBusinessKeys(this)) {
+      if (!vaultKey.composite()) {
+        continue;
+      }
+      List<String> parts =
+          DvBusinessKeyPartSupport.resolveSourcePartsForHubSource(
+              this, vaultKey.vaultFieldName(), sourceName, ctx.variables);
+      if (parts.isEmpty()) {
+        continue;
+      }
+
+      ConcatFieldsMeta concatMeta = new ConcatFieldsMeta();
+      concatMeta.setSeparator(delimiter);
+      concatMeta.setSkipValueEmpty(false);
+      List<ConcatField> fields = new ArrayList<>();
+      for (String part : parts) {
+        ConcatField field = new ConcatField();
+        field.setName(part);
+        if (!Utils.isEmpty(nullPlaceholder)) {
+          field.setNullString(nullPlaceholder);
+        }
+        if (ctx.config == null || ctx.config.isTrimBusinessKeys()) {
+          field.setTrimType("both");
+        }
+        fields.add(field);
+      }
+      concatMeta.setOutputFields(fields);
+
+      ExtraFields extra = new ExtraFields();
+      extra.setTargetFieldName(vaultKey.vaultFieldName());
+      BusinessKey def = vaultKey.definition();
+      int targetLength = def != null ? Const.toInt(ctx.variables.resolve(def.getLength()), -1) : -1;
+      extra.setTargetFieldLength(targetLength);
+      extra.setRemoveSelectedFields(false);
+      concatMeta.setExtraFields(extra);
+
+      String transformName = "compose_" + vaultKey.vaultFieldName();
+      if (composeIndex > 0) {
+        transformName = transformName + "_" + composeIndex;
+      }
+      TransformMeta tm = new TransformMeta("ConcatFields", transformName, concatMeta);
+      tm.setLocation(
+          LOCATION_START_LINE_2.x + SPACING_WIDTH * (1 + composeIndex), LOCATION_START_LINE_2.y);
+      pipelineMeta.addTransform(tm);
+      pipelineMeta.addPipelineHop(new PipelineHopMeta(current, tm));
+      current = tm;
+      composeIndex++;
+    }
+    return current;
   }
 
   private TransformMeta addTargetTableInput(HubUpdateContext ctx, PipelineMeta pipelineMeta)
@@ -761,12 +863,18 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
       resultFieldName = bkName + "_hk";
     }
 
-    List<String> businessKeyNames = new ArrayList<>();
-    for (BusinessKey bk : getDistinctBusinessKeys()) {
-      businessKeyNames.add(bk.getName());
+    String sourceName =
+        ctx.dataVaultSource != null ? ctx.variables.resolve(ctx.dataVaultSource.getName()) : null;
+    List<String> hashInputFields =
+        DvBusinessKeyPartSupport.resolveHashInputStreamFieldNames(
+            this, sourceName, ctx.config, ctx.variables);
+    if (hashInputFields.isEmpty()) {
+      for (BusinessKey bk : getDistinctBusinessKeys()) {
+        hashInputFields.add(bk.getName());
+      }
     }
     DvHashKeyMeta hashKeyMeta =
-        DvHashKeyMetaFactory.create(ctx.config, businessKeyNames, resultFieldName);
+        DvHashKeyMetaFactory.create(ctx.config, hashInputFields, resultFieldName);
 
     TransformMeta tm = new TransformMeta("DvHashKey", "calc_" + resultFieldName, hashKeyMeta);
     int x =
@@ -1068,19 +1176,19 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
       }
       rowMeta.addValueMeta(hashMeta);
 
-      // 2. Then business keys (type from the metadata)
+      // 2. Then business keys (type from the metadata). Physical column name is always the vault
+      // BK name (sourceFieldName / sourceFieldNames are source mappings only). Composite BKs still
+      // contribute a single vault column.
       //
       for (BusinessKey bk : getDistinctBusinessKeys()) {
-        String srcFieldName = bk.getSourceFieldName();
-        if (Utils.isEmpty(srcFieldName)) {
-          srcFieldName = bk.getName();
-        }
+        String vaultFieldName = variables.resolve(bk.getName());
 
         int type = ValueMetaFactory.getIdForValueMeta(variables.resolve(bk.getDataType()));
         int length = Const.toInt(variables.resolve(bk.getLength()), -1);
         int precision = Const.toInt(variables.resolve(bk.getPrecision()), -1);
 
-        IValueMeta bkMeta = ValueMetaFactory.createValueMeta(srcFieldName, type, length, precision);
+        IValueMeta bkMeta =
+            ValueMetaFactory.createValueMeta(vaultFieldName, type, length, precision);
 
         if (bkMeta == null || bkMeta.getType() == IValueMeta.TYPE_NONE) {
           throw new HopException(

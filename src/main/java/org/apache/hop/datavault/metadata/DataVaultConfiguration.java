@@ -294,6 +294,23 @@ public class DataVaultConfiguration implements IDvTargetLoadConfiguration {
   @HopMetadataProperty
   private boolean trimBusinessKeys = true;
 
+  /**
+   * When {@code true}, hub hash inputs for composite business keys use the composed vault BK field
+   * only. Default {@code false}: hash over ordered source parts (VaultSpeed-style trailing suffix
+   * applies to the joined parts, not to a separately stored composed string with suffix).
+   *
+   * <p>Satellites and links do not store composed BK columns; they hash from mapped source parts
+   * using the hub definition and these hash settings.
+   */
+  @GuiWidgetElement(
+      order = "0155",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::DataVaultConfiguration.HashUsesComposedBusinessKey.Label",
+      toolTip = "i18n::DataVaultConfiguration.HashUsesComposedBusinessKey.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_GENERAL_TAB_ID)
+  @HopMetadataProperty
+  private boolean hashUsesComposedBusinessKey;
+
   @GuiWidgetElement(
       order = "0330",
       type = GuiElementType.TEXT,
