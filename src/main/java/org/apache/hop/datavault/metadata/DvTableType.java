@@ -42,11 +42,13 @@ public enum DvTableType implements IEnumHasCodeAndDescription {
    * Read-only canvas card pointing at a Hub, Link, Satellite, or Reference table (cross-model), or
    * a same-model hub alias for role-playing. Not a loadable physical object by itself.
    */
-  LINKED_TABLE("LINKED_TABLE", BaseMessages.getString(DvTableType.class, "DvTableType.LinkedTable")),
+  LINKED_TABLE(
+      "LINKED_TABLE", BaseMessages.getString(DvTableType.class, "DvTableType.LinkedTable")),
   /**
    * Legacy name for {@link #LINKED_TABLE}. Kept so Hop can {@code Enum.valueOf} old {@code .hdv}
-   * files that still store {@code <tableType>TABLE_REFERENCE</tableType>}. Callers should treat this
-   * as {@link #LINKED_TABLE} (see {@link #normalize(DvTableType)} / {@link #parsePersisted(String)}).
+   * files that still store {@code <tableType>TABLE_REFERENCE</tableType>}. Callers should treat
+   * this as {@link #LINKED_TABLE} (see {@link #normalize(DvTableType)} / {@link
+   * #parsePersisted(String)}).
    *
    * @deprecated Use {@link #LINKED_TABLE}. New writes always use {@code LINKED_TABLE}.
    */

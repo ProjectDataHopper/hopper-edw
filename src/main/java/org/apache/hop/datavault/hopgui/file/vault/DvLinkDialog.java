@@ -37,9 +37,9 @@ import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DependentChildKey;
 import org.apache.hop.datavault.metadata.DvIntegrationMode;
 import org.apache.hop.datavault.metadata.DvLink;
+import org.apache.hop.datavault.metadata.DvLinkedTable;
 import org.apache.hop.datavault.metadata.DvModelCheckOptions;
 import org.apache.hop.datavault.metadata.DvSatellite;
-import org.apache.hop.datavault.metadata.DvLinkedTable;
 import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.datavault.metadata.IDvTable;
 import org.apache.hop.i18n.BaseMessages;
@@ -566,10 +566,8 @@ public class DvLinkDialog {
     wlSources.setLayoutData(fdlSources);
 
     Button wOpenInCatalog = new Button(wSourcesComp, SWT.PUSH);
-    wOpenInCatalog.setText(
-        BaseMessages.getString(PKG, "DvHubDialog.OpenInCatalog.Label"));
-    wOpenInCatalog.setToolTipText(
-        BaseMessages.getString(PKG, "DvHubDialog.OpenInCatalog.ToolTip"));
+    wOpenInCatalog.setText(BaseMessages.getString(PKG, "DvHubDialog.OpenInCatalog.Label"));
+    wOpenInCatalog.setToolTipText(BaseMessages.getString(PKG, "DvHubDialog.OpenInCatalog.ToolTip"));
     PropsUi.setLook(wOpenInCatalog);
     FormData fdOpenInCatalog = new FormData();
     fdOpenInCatalog.right = new FormAttachment(100, 0);
@@ -648,8 +646,7 @@ public class DvLinkDialog {
     wlSatSources.setLayoutData(fdlSatSources);
 
     Button wOpenSatInCatalog = new Button(wSatSourcesComp, SWT.PUSH);
-    wOpenSatInCatalog.setText(
-        BaseMessages.getString(PKG, "DvHubDialog.OpenInCatalog.Label"));
+    wOpenSatInCatalog.setText(BaseMessages.getString(PKG, "DvHubDialog.OpenInCatalog.Label"));
     wOpenSatInCatalog.setToolTipText(
         BaseMessages.getString(PKG, "DvHubDialog.OpenInCatalog.ToolTip"));
     PropsUi.setLook(wOpenSatInCatalog);

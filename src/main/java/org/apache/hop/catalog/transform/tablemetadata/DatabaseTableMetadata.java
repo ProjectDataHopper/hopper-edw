@@ -159,7 +159,8 @@ public class DatabaseTableMetadata
       return;
     }
     closeDatabaseQuietly();
-    DatabaseMeta databaseMeta = metadataProvider.getSerializer(DatabaseMeta.class).load(connectionName);
+    DatabaseMeta databaseMeta =
+        metadataProvider.getSerializer(DatabaseMeta.class).load(connectionName);
     if (databaseMeta == null) {
       throw new HopException(
           BaseMessages.getString(

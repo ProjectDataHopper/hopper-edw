@@ -41,10 +41,10 @@ import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphTableNameHitAre
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DvIntegrationSupport;
 import org.apache.hop.datavault.metadata.DvLink;
-import org.apache.hop.datavault.metadata.DvSatellite;
-import org.apache.hop.datavault.metadata.DvTableBase;
 import org.apache.hop.datavault.metadata.DvLinkedTable;
 import org.apache.hop.datavault.metadata.DvLinkedTableSupport;
+import org.apache.hop.datavault.metadata.DvSatellite;
+import org.apache.hop.datavault.metadata.DvTableBase;
 import org.apache.hop.datavault.metadata.DvTableResolutionSupport;
 import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.datavault.metadata.IDvTable;

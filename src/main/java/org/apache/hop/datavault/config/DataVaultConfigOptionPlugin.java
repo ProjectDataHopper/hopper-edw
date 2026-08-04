@@ -215,8 +215,7 @@ public class DataVaultConfigOptionPlugin
     DataVaultConfig config = DataVaultConfigSingleton.getConfig();
     instance.drawingHashKeysInModel = config.isDrawingHashKeysInModel();
     instance.enforceTargetUnicodeCapability = config.isEnforceTargetUnicodeCapability();
-    instance.warnTimestampFractionalPrecisionLoss =
-        config.isWarnTimestampFractionalPrecisionLoss();
+    instance.warnTimestampFractionalPrecisionLoss = config.isWarnTimestampFractionalPrecisionLoss();
     instance.maxUndoOperations = Integer.toString(config.getMaxUndoOperations());
     DmDefaultFieldNames defaults = config.getDimensionalDefaultFieldNames();
     instance.dmDefaultSurrogateKeyField = defaults.getSurrogateKeyField();

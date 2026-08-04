@@ -327,7 +327,10 @@ public final class DvSqlOrderByCollationSupport {
       return true;
     }
     // BCP-47 / ICU style with hyphens but not SQL Server CI/CS tokens.
-    if (collation.contains("-") && !u.contains("_CI_") && !u.contains("_CS_") && !u.contains("_BIN")) {
+    if (collation.contains("-")
+        && !u.contains("_CI_")
+        && !u.contains("_CS_")
+        && !u.contains("_BIN")) {
       return true;
     }
     // Locale-style without provider: en_US (no .utf8) — not SQL Server if no _CI_/_CS_/_BIN.

@@ -114,8 +114,7 @@ class DvCrossModelReferenceValidationTest {
     Variables variables = new Variables();
 
     assertTrue(
-        DvLinkedTableNavigationSupport.canNavigateToSourceTable(
-            model, reference, variables, null));
+        DvLinkedTableNavigationSupport.canNavigateToSourceTable(model, reference, variables, null));
   }
 
   @Test

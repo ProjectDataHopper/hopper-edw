@@ -81,6 +81,8 @@ import org.apache.hop.datavault.metadata.DvHub;
 import org.apache.hop.datavault.metadata.DvIntegerSettingValidationSupport;
 import org.apache.hop.datavault.metadata.DvIntegrationSupport;
 import org.apache.hop.datavault.metadata.DvLink;
+import org.apache.hop.datavault.metadata.DvLinkedTable;
+import org.apache.hop.datavault.metadata.DvLinkedTableSupport;
 import org.apache.hop.datavault.metadata.DvModelCheckOptions;
 import org.apache.hop.datavault.metadata.DvModelLoadSupport;
 import org.apache.hop.datavault.metadata.DvNote;
@@ -89,8 +91,6 @@ import org.apache.hop.datavault.metadata.DvReferenceTable;
 import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.DvSpecialRecordSupport;
 import org.apache.hop.datavault.metadata.DvTableBase;
-import org.apache.hop.datavault.metadata.DvLinkedTable;
-import org.apache.hop.datavault.metadata.DvLinkedTableSupport;
 import org.apache.hop.datavault.metadata.DvTableResolutionSupport;
 import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.datavault.metadata.DvTargetLoadMode;
@@ -1454,8 +1454,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       parentId = HopGuiVaultContext.CONTEXT_ID,
       type = GuiActionType.Create,
       name = "Add Reference table",
-      tooltip =
-          "Add a natural-key reference/code table (no hub hash key) at the click location",
+      tooltip = "Add a natural-key reference/code table (no hub hash key) at the click location",
       image = "datavault-reference.svg",
       keywords = {"reference", "ref", "code", "lookup", "catalog"},
       category = "Data Vault",

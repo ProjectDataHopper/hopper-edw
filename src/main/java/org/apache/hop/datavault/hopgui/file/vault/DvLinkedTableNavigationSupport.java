@@ -20,8 +20,8 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metadata.DataVaultModel;
-import org.apache.hop.datavault.metadata.DvModelLoadSupport;
 import org.apache.hop.datavault.metadata.DvLinkedTable;
+import org.apache.hop.datavault.metadata.DvModelLoadSupport;
 import org.apache.hop.datavault.metadata.DvTableResolutionSupport;
 import org.apache.hop.datavault.metadata.IDvTable;
 import org.apache.hop.i18n.BaseMessages;
@@ -111,10 +111,7 @@ public final class DvLinkedTableNavigationSupport {
       if (referenced == null || referenced instanceof DvLinkedTable) {
         throw new HopException(
             BaseMessages.getString(
-                PKG,
-                "DvLinkedTableNavigationSupport.Error.TableNotFound",
-                tableName,
-                modelPath));
+                PKG, "DvLinkedTableNavigationSupport.Error.TableNotFound", tableName, modelPath));
       }
       if (reference.getReferencedTableType() != null
           && referenced.getTableType() != reference.getReferencedTableType()) {

@@ -96,7 +96,8 @@ public final class DvModelLineageCollector {
             case REFERENCE ->
                 collectReference(
                     (DvReferenceTable) table, model, config, variables, targetDb, sourcesNamespace);
-            case LINKED_TABLE, TABLE_REFERENCE -> collectGenericTable(table, model, config, variables, targetDb);
+            case LINKED_TABLE, TABLE_REFERENCE ->
+                collectGenericTable(table, model, config, variables, targetDb);
           };
       if (tableLineage != null) {
         snapshot.addTable(tableLineage);

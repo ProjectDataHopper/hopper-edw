@@ -22,9 +22,7 @@ import java.util.List;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
 
-/**
- * Helpers for Data Vault linked tables and hub role-playing aliases on a subject-area canvas.
- */
+/** Helpers for Data Vault linked tables and hub role-playing aliases on a subject-area canvas. */
 public final class DvLinkedTableSupport {
 
   private DvLinkedTableSupport() {}

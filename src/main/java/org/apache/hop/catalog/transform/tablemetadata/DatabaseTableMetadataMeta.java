@@ -130,7 +130,10 @@ public class DatabaseTableMetadataMeta
       IHopMetadataProvider metadataProvider)
       throws HopTransformException {
     addField(
-        inputRowMeta, variables.resolve(outputDatabaseConnectionField), IValueMeta.TYPE_STRING, name);
+        inputRowMeta,
+        variables.resolve(outputDatabaseConnectionField),
+        IValueMeta.TYPE_STRING,
+        name);
     addField(inputRowMeta, variables.resolve(outputSchemaNameField), IValueMeta.TYPE_STRING, name);
     addField(inputRowMeta, variables.resolve(outputTableNameField), IValueMeta.TYPE_STRING, name);
     addField(

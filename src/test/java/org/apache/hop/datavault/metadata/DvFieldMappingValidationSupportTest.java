@@ -276,9 +276,6 @@ class DvFieldMappingValidationSupportTest {
     }
   }
 
-
-
-
   @Test
   void effectiveStringCapacityExpandsSqlServerOnly() {
     DatabaseMeta sqlServer = databaseMeta(DvBulkLoadPluginSupport.MSSQLNATIVE_DB_PLUGIN_ID);
@@ -376,5 +373,4 @@ class DvFieldMappingValidationSupportTest {
       }
     };
   }
-
 }

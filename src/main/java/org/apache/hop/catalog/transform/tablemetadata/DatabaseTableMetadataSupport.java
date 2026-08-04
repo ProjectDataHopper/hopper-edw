@@ -33,8 +33,8 @@ import org.apache.hop.datavault.metadata.database.DiscoveredForeignKey;
 import org.apache.hop.datavault.metadata.database.DvDatabaseSourceImportSupport;
 
 /**
- * Discovers table column metadata as Hop types with primary-key and foreign-key attributes,
- * reusing catalog/source import discovery.
+ * Discovers table column metadata as Hop types with primary-key and foreign-key attributes, reusing
+ * catalog/source import discovery.
  */
 public final class DatabaseTableMetadataSupport {
 

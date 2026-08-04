@@ -51,8 +51,8 @@ public final class DvDdlSupport {
    * <ul>
    *   <li>Model / catalog / {@link IValueMeta} lengths are <em>character</em>-oriented (same units
    *       as {@code NVARCHAR(n)}).
-   *   <li>Vault SQL Server DDL only: character length {@code n} → physical {@code VARCHAR(n×3)}
-   *       (or {@code VARCHAR(MAX)} when over 8000) via {@link #utf8ByteLengthForCharacterLength}.
+   *   <li>Vault SQL Server DDL only: character length {@code n} → physical {@code VARCHAR(n×3)} (or
+   *       {@code VARCHAR(MAX)} when over 8000) via {@link #utf8ByteLengthForCharacterLength}.
    *   <li>Model-check overflow must use {@link #effectiveStringCapacity}, not raw model length.
    *   <li>Catalog / CRM staging CREATE must <em>not</em> apply this expansion (character lengths
    *       stay as modeled).

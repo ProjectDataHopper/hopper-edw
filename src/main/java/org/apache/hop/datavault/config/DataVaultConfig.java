@@ -35,6 +35,7 @@ public class DataVaultConfig {
       "${PROJECT_HOME}/workflows/schema-remediation";
 
   private boolean drawingHashKeysInModel;
+
   /**
    * When true (default), model check reports a hard error if the target database is not
    * Unicode-capable for EDW string storage. When false, the same probe still runs but failures are

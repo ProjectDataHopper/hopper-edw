@@ -44,7 +44,9 @@ public final class RecordSourceCatalogNavigationSupport {
    * source name combo).
    */
   public static String selectedSourceName(TableView sourcesTable) {
-    if (sourcesTable == null || sourcesTable.getTable() == null || sourcesTable.getTable().isDisposed()) {
+    if (sourcesTable == null
+        || sourcesTable.getTable() == null
+        || sourcesTable.getTable().isDisposed()) {
       return null;
     }
     Table table = sourcesTable.getTable();
@@ -96,7 +98,8 @@ public final class RecordSourceCatalogNavigationSupport {
       String catalogConnection =
           DvSourceCatalogService.resolveCatalogConnection(model, variables, metadataProvider);
       String namespace = DvSourceCatalogService.projectSourcesNamespace(variables);
-      String resolvedName = variables != null ? variables.resolve(sourceName.trim()) : sourceName.trim();
+      String resolvedName =
+          variables != null ? variables.resolve(sourceName.trim()) : sourceName.trim();
       DataCatalogPerspective perspective = DataCatalogPerspective.getInstance();
       if (perspective == null) {
         throw new HopException(

@@ -29,7 +29,6 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.datavault.config.DataVaultConfigSingleton;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,8 +52,7 @@ class DvTimestampFractionalPrecisionValidationTest {
 
   @AfterEach
   void restoreFlag() {
-    DataVaultConfigSingleton.getConfig()
-        .setWarnTimestampFractionalPrecisionLoss(originalWarnFlag);
+    DataVaultConfigSingleton.getConfig().setWarnTimestampFractionalPrecisionLoss(originalWarnFlag);
   }
 
   @Test
@@ -73,8 +71,10 @@ class DvTimestampFractionalPrecisionValidationTest {
 
   @Test
   void warnsWhenSourceNanosecondsExceedSingleStoreDatetime6() throws Exception {
-    IValueMeta source = ValueMetaFactory.createValueMeta("event_ts", IValueMeta.TYPE_TIMESTAMP, 9, -1);
-    IValueMeta target = ValueMetaFactory.createValueMeta("event_ts", IValueMeta.TYPE_TIMESTAMP, -1, -1);
+    IValueMeta source =
+        ValueMetaFactory.createValueMeta("event_ts", IValueMeta.TYPE_TIMESTAMP, 9, -1);
+    IValueMeta target =
+        ValueMetaFactory.createValueMeta("event_ts", IValueMeta.TYPE_TIMESTAMP, -1, -1);
     List<ICheckResult> remarks = new ArrayList<>();
 
     DvFieldMappingValidationSupport.validateTemporalFractionalPrecision(
@@ -93,8 +93,10 @@ class DvTimestampFractionalPrecisionValidationTest {
 
   @Test
   void noWarningWhenSourceWithinDatetime6() throws Exception {
-    IValueMeta source = ValueMetaFactory.createValueMeta("event_ts", IValueMeta.TYPE_TIMESTAMP, 6, -1);
-    IValueMeta target = ValueMetaFactory.createValueMeta("event_ts", IValueMeta.TYPE_TIMESTAMP, -1, -1);
+    IValueMeta source =
+        ValueMetaFactory.createValueMeta("event_ts", IValueMeta.TYPE_TIMESTAMP, 6, -1);
+    IValueMeta target =
+        ValueMetaFactory.createValueMeta("event_ts", IValueMeta.TYPE_TIMESTAMP, -1, -1);
     List<ICheckResult> remarks = new ArrayList<>();
 
     DvFieldMappingValidationSupport.validateTemporalFractionalPrecision(
@@ -111,8 +113,10 @@ class DvTimestampFractionalPrecisionValidationTest {
   @Test
   void warningCanBeDisabledInConfig() throws Exception {
     DataVaultConfigSingleton.getConfig().setWarnTimestampFractionalPrecisionLoss(false);
-    IValueMeta source = ValueMetaFactory.createValueMeta("event_ts", IValueMeta.TYPE_TIMESTAMP, 9, -1);
-    IValueMeta target = ValueMetaFactory.createValueMeta("event_ts", IValueMeta.TYPE_TIMESTAMP, -1, -1);
+    IValueMeta source =
+        ValueMetaFactory.createValueMeta("event_ts", IValueMeta.TYPE_TIMESTAMP, 9, -1);
+    IValueMeta target =
+        ValueMetaFactory.createValueMeta("event_ts", IValueMeta.TYPE_TIMESTAMP, -1, -1);
     List<ICheckResult> remarks = new ArrayList<>();
 
     DvFieldMappingValidationSupport.validateTemporalFractionalPrecision(
@@ -128,8 +132,10 @@ class DvTimestampFractionalPrecisionValidationTest {
 
   @Test
   void neverEmitsErrorSeverity() throws Exception {
-    IValueMeta source = ValueMetaFactory.createValueMeta("event_ts", IValueMeta.TYPE_TIMESTAMP, 9, -1);
-    IValueMeta target = ValueMetaFactory.createValueMeta("event_ts", IValueMeta.TYPE_TIMESTAMP, 3, -1);
+    IValueMeta source =
+        ValueMetaFactory.createValueMeta("event_ts", IValueMeta.TYPE_TIMESTAMP, 9, -1);
+    IValueMeta target =
+        ValueMetaFactory.createValueMeta("event_ts", IValueMeta.TYPE_TIMESTAMP, 3, -1);
     List<ICheckResult> remarks = new ArrayList<>();
 
     DvFieldMappingValidationSupport.validateTemporalFractionalPrecision(

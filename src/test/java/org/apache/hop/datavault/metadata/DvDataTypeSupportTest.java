@@ -60,8 +60,7 @@ class DvDataTypeSupportTest {
     assertEquals(
         IValueMeta.TYPE_TIMESTAMP, DvDataTypeSupport.resolveHopTypeId("DATETIME(6)", null));
     assertEquals(IValueMeta.TYPE_TIMESTAMP, DvDataTypeSupport.resolveHopTypeId("datetime", null));
-    assertEquals(
-        IValueMeta.TYPE_TIMESTAMP, DvDataTypeSupport.resolveHopTypeId("TIMESTAMP", null));
+    assertEquals(IValueMeta.TYPE_TIMESTAMP, DvDataTypeSupport.resolveHopTypeId("TIMESTAMP", null));
     assertEquals(IValueMeta.TYPE_DATE, DvDataTypeSupport.resolveHopTypeId("DATE", null));
   }
 
@@ -72,10 +71,46 @@ class DvDataTypeSupportTest {
     field.setSourceDataType("DATETIME(6)");
     field.setHopType(0);
 
+    assertEquals(IValueMeta.TYPE_TIMESTAMP, DvDataTypeSupport.resolveHopTypeId(null, field));
+    assertEquals(IValueMeta.TYPE_TIMESTAMP, DvDataTypeSupport.resolveHopTypeId("", field));
+  }
+
+  @Test
+  void resolveHopTypeIdCorrectsDatetimeStoredAsStringHopType() {
+    SourceField field = new SourceField();
+    field.setName("load_dts");
+    field.setSourceDataType("DATETIME(6)");
+    field.setHopType(IValueMeta.TYPE_STRING);
+
+    assertEquals(IValueMeta.TYPE_TIMESTAMP, DvDataTypeSupport.resolveHopTypeId(null, field));
     assertEquals(
-        IValueMeta.TYPE_TIMESTAMP, DvDataTypeSupport.resolveHopTypeId(null, field));
-    assertEquals(
-        IValueMeta.TYPE_TIMESTAMP, DvDataTypeSupport.resolveHopTypeId("", field));
+        IValueMeta.TYPE_TIMESTAMP,
+        DvDataTypeSupport.effectiveHopTypeId(IValueMeta.TYPE_STRING, "DATETIME(6)"));
+  }
+
+  @Test
+  void explicitHopStringLabelIsNotOverriddenBySourceSqlType() {
+    SourceField field = new SourceField();
+    field.setSourceDataType("int2");
+    field.setHopType(IValueMeta.TYPE_INTEGER);
+
+    // User set attribute type to String intentionally — keep String.
+    assertEquals(IValueMeta.TYPE_STRING, DvDataTypeSupport.resolveHopTypeId("String", field));
+  }
+
+  @Test
+  void fractionalSecondsFromSqlTypeNameParsesDatetime() {
+    assertEquals(6, DvDataTypeSupport.fractionalSecondsFromSqlTypeName("DATETIME(6)"));
+    assertEquals(3, DvDataTypeSupport.fractionalSecondsFromSqlTypeName("TIMESTAMP(3)"));
+    assertEquals(-1, DvDataTypeSupport.fractionalSecondsFromSqlTypeName("DATETIME"));
+    assertEquals(-1, DvDataTypeSupport.fractionalSecondsFromSqlTypeName("VARCHAR(50)"));
+  }
+
+  @Test
+  void characterLengthFromSqlTypeNameParsesVarchar() {
+    assertEquals(150, DvDataTypeSupport.characterLengthFromSqlTypeName("VARCHAR(150)"));
+    assertEquals(50, DvDataTypeSupport.characterLengthFromSqlTypeName("NVARCHAR(50)"));
+    assertEquals(-1, DvDataTypeSupport.characterLengthFromSqlTypeName("VARCHAR"));
   }
 
   @Test
@@ -90,8 +125,7 @@ class DvDataTypeSupportTest {
 
     DataVaultSource source = new DataVaultSource("all-customer-info");
     SourceField customerIdField = field("customer_id", "int4", IValueMeta.TYPE_INTEGER, "9");
-    SourceField loadDts =
-        field("load_dts", "DATETIME(6)", IValueMeta.TYPE_TIMESTAMP, "");
+    SourceField loadDts = field("load_dts", "DATETIME(6)", IValueMeta.TYPE_TIMESTAMP, "");
     source.getDvSourceOrDefault().setFields(List.of(customerIdField, loadDts));
 
     DvSatellite satellite = new TestSatellite("sat_customer", source);

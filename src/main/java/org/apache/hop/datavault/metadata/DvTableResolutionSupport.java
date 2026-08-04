@@ -219,8 +219,8 @@ public final class DvTableResolutionSupport {
    * Resolves the hash-key <em>column name on a link</em> for a participating hub or hub alias.
    *
    * <p>For a physical hub this is the hub's own hash key field. For a {@link DvLinkedTable} hub
-   * alias it prefers the alias {@link DvLinkedTable#getHashKeyFieldName()} so the same physical
-   * hub can appear more than once with role-specific columns.
+   * alias it prefers the alias {@link DvLinkedTable#getHashKeyFieldName()} so the same physical hub
+   * can appear more than once with role-specific columns.
    */
   public static String resolveParticipatingHubHashColumn(
       DataVaultModel model,

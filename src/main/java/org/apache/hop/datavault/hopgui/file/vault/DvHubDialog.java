@@ -396,8 +396,7 @@ public class DvHubDialog {
     // Multi-record sources section for Hubs (supports multiple sources feeding one Hub table)
     Button wOpenInCatalog = new Button(wSourcesComp, SWT.PUSH);
     wOpenInCatalog.setText(BaseMessages.getString(PKG, "DvHubDialog.OpenInCatalog.Label"));
-    wOpenInCatalog.setToolTipText(
-        BaseMessages.getString(PKG, "DvHubDialog.OpenInCatalog.ToolTip"));
+    wOpenInCatalog.setToolTipText(BaseMessages.getString(PKG, "DvHubDialog.OpenInCatalog.ToolTip"));
     PropsUi.setLook(wOpenInCatalog);
     FormData fdOpenInCatalog = new FormData();
     fdOpenInCatalog.right = new FormAttachment(100, 0);

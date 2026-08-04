@@ -881,6 +881,34 @@ public final class DvFieldMappingValidationSupport {
         || (sourceType == IValueMeta.TYPE_TIMESTAMP && targetType == IValueMeta.TYPE_DATE);
   }
 
+  /**
+   * Type compatibility using Hop type ids and, when JDBC mis-mapped a column to String, the native
+   * SQL type on {@link IValueMeta#getOriginalColumnTypeName()}.
+   */
+  static boolean typesCompatible(IValueMeta sourceMeta, IValueMeta targetMeta) {
+    if (sourceMeta == null || targetMeta == null) {
+      return false;
+    }
+    int sourceType =
+        DvDataTypeSupport.effectiveHopTypeId(
+            sourceMeta.getType(), sourceMeta.getOriginalColumnTypeName());
+    int targetType =
+        DvDataTypeSupport.effectiveHopTypeId(
+            targetMeta.getType(), targetMeta.getOriginalColumnTypeName());
+    if (typesCompatible(sourceType, targetType)) {
+      return true;
+    }
+    // Identical physical SQL types (e.g. both DATETIME) are compatible even if hop ids diverged.
+    String sourceSql =
+        DvDataTypeSupport.normalizeSqlTypeBase(sourceMeta.getOriginalColumnTypeName());
+    String targetSql =
+        DvDataTypeSupport.normalizeSqlTypeBase(targetMeta.getOriginalColumnTypeName());
+    if (!Utils.isEmpty(sourceSql) && sourceSql.equals(targetSql)) {
+      return true;
+    }
+    return false;
+  }
+
   static void validateMapping(
       IValueMeta sourceMeta,
       IValueMeta targetMeta,
@@ -906,68 +934,79 @@ public final class DvFieldMappingValidationSupport {
       DatabaseMeta targetDatabaseMeta,
       ICheckResultSource checkSource,
       List<ICheckResult> remarks) {
-    if (!typesCompatible(sourceMeta.getType(), targetMeta.getType())) {
+    if (sourceMeta == null || targetMeta == null) {
+      return;
+    }
+
+    // Align hop types with native SQL names before comparing (fixes DATETIME stored as String).
+    int sourceType =
+        DvDataTypeSupport.effectiveHopTypeId(
+            sourceMeta.getType(), sourceMeta.getOriginalColumnTypeName());
+    int targetType =
+        DvDataTypeSupport.effectiveHopTypeId(
+            targetMeta.getType(), targetMeta.getOriginalColumnTypeName());
+
+    if (!typesCompatible(sourceMeta, targetMeta)) {
+      String sourceDesc =
+          sourceType != sourceMeta.getType()
+              ? ValueMetaFactory.getValueMetaName(sourceType)
+              : sourceMeta.getTypeDesc();
+      String targetDesc =
+          targetType != targetMeta.getType()
+              ? ValueMetaFactory.getValueMetaName(targetType)
+              : targetMeta.getTypeDesc();
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_ERROR,
               BaseMessages.getString(
-                  PKG,
-                  "DvFieldMappingValidation.TypeMismatch",
-                  context,
-                  sourceMeta.getTypeDesc(),
-                  targetMeta.getTypeDesc()),
+                  PKG, "DvFieldMappingValidation.TypeMismatch", context, sourceDesc, targetDesc),
               checkSource));
     }
 
-    if (isLengthSensitive(sourceMeta.getType())) {
-      int sourceLength = sourceMeta.getLength();
-      int targetModelLength = targetMeta.getLength();
-      if (sourceLength > 0 && targetModelLength > 0) {
-        int targetCapacity =
-            DvDdlSupport.effectiveStringCapacity(targetDatabaseMeta, targetModelLength);
-        if (sourceLength > targetCapacity) {
-          // Message args: context, sourceLen, capacity, modelLen (SQL Server may expand capacity)
-          if (targetCapacity != targetModelLength) {
-            remarks.add(
-                new CheckResult(
-                    ICheckResult.TYPE_RESULT_ERROR,
-                    BaseMessages.getString(
-                        PKG,
-                        "DvFieldMappingValidation.SourceLengthExceedsTargetCapacity",
-                        context,
-                        sourceLength,
-                        targetCapacity,
-                        targetModelLength),
-                    checkSource));
-          } else {
-            remarks.add(
-                new CheckResult(
-                    ICheckResult.TYPE_RESULT_ERROR,
-                    BaseMessages.getString(
-                        PKG,
-                        "DvFieldMappingValidation.SourceLengthExceedsTarget",
-                        context,
-                        sourceLength,
-                        targetModelLength),
-                    checkSource));
+    if (isLengthSensitive(sourceType) || isLengthSensitive(targetType)) {
+      // LONGTEXT/CLOB on SingleStore/MySQL often report display size 255; normalize before compare.
+      DvSqlStringTypeSupport.normalizeStringLength(sourceMeta);
+      DvSqlStringTypeSupport.normalizeStringLength(targetMeta);
+      if (!DvSqlStringTypeSupport.skipStringLengthOverflowCheck(sourceMeta, targetMeta)) {
+        int sourceLength = DvSqlStringTypeSupport.lengthForValidation(sourceMeta);
+        int targetModelLength = DvSqlStringTypeSupport.lengthForValidation(targetMeta);
+        if (sourceLength > 0 && targetModelLength > 0) {
+          int targetCapacity =
+              DvDdlSupport.effectiveStringCapacity(targetDatabaseMeta, targetModelLength);
+          if (sourceLength > targetCapacity) {
+            // Message args: context, sourceLen, capacity, modelLen (SQL Server may expand capacity)
+            if (targetCapacity != targetModelLength) {
+              remarks.add(
+                  new CheckResult(
+                      ICheckResult.TYPE_RESULT_ERROR,
+                      BaseMessages.getString(
+                          PKG,
+                          "DvFieldMappingValidation.SourceLengthExceedsTargetCapacity",
+                          context,
+                          sourceLength,
+                          targetCapacity,
+                          targetModelLength),
+                      checkSource));
+            } else {
+              remarks.add(
+                  new CheckResult(
+                      ICheckResult.TYPE_RESULT_ERROR,
+                      BaseMessages.getString(
+                          PKG,
+                          "DvFieldMappingValidation.SourceLengthExceedsTarget",
+                          context,
+                          sourceLength,
+                          targetModelLength),
+                      checkSource));
+            }
           }
-        } else if (sourceLength < targetModelLength) {
-          // Character-oriented warning only (not vs expanded byte capacity).
-          remarks.add(
-              new CheckResult(
-                  ICheckResult.TYPE_RESULT_WARNING,
-                  BaseMessages.getString(
-                      PKG,
-                      "DvFieldMappingValidation.SourceLengthLessThanTarget",
-                      context,
-                      sourceLength,
-                      targetModelLength),
-                  checkSource));
+          // Do not warn when source length < target: a wider target is safe (no truncation) and
+          // JDBC display sizes (e.g. SingleStore reporting 255) often inflate the target number.
         }
       }
     }
 
-    if (ValueMetaBase.isNumeric(sourceMeta.getType())) {
+    if (ValueMetaBase.isNumeric(sourceType) && ValueMetaBase.isNumeric(targetType)) {
       int sourcePrecision = sourceMeta.getPrecision();
       int targetPrecision = targetMeta.getPrecision();
       if (sourcePrecision > 0 && targetPrecision > 0 && sourcePrecision > targetPrecision) {
@@ -1003,10 +1042,16 @@ public final class DvFieldMappingValidationSupport {
     if (!isWarnTimestampFractionalPrecisionLossEnabled()) {
       return;
     }
-    if (sourceMeta == null
-        || targetMeta == null
-        || !isTemporalType(sourceMeta.getType())
-        || !isTemporalType(targetMeta.getType())) {
+    if (sourceMeta == null || targetMeta == null) {
+      return;
+    }
+    int sourceType =
+        DvDataTypeSupport.effectiveHopTypeId(
+            sourceMeta.getType(), sourceMeta.getOriginalColumnTypeName());
+    int targetType =
+        DvDataTypeSupport.effectiveHopTypeId(
+            targetMeta.getType(), targetMeta.getOriginalColumnTypeName());
+    if (!isTemporalType(sourceType) || !isTemporalType(targetType)) {
       return;
     }
     int sourceFrac = temporalFractionalDigits(sourceMeta);
@@ -1039,18 +1084,44 @@ public final class DvFieldMappingValidationSupport {
   }
 
   /**
-   * Fractional-second digits for a temporal value meta. JDBC often stores TIMESTAMP scale in {@link
-   * IValueMeta#getLength()}; precision is used as a secondary signal.
+   * Fractional-second digits for a temporal value meta.
+   *
+   * <p>Preference order:
+   *
+   * <ol>
+   *   <li>SQL type label ({@code DATETIME(6)}, {@code TIMESTAMP(3)}) — most reliable for reverse
+   *       import
+   *   <li>TIMESTAMP {@link IValueMeta#getLength()} (Hop/Database stores JDBC scale in length)
+   *   <li>{@link IValueMeta#getOriginalScale()} when length is not a usable scale
+   *   <li>{@link IValueMeta#getPrecision()}
+   * </ol>
+   *
+   * <p>Note: {@code originalScale} defaults to {@code 0} on new value metas, so length must be
+   * preferred over an unset scale of zero.
    */
   static int temporalFractionalDigits(IValueMeta meta) {
-    if (meta == null || !isTemporalType(meta.getType())) {
+    if (meta == null) {
       return -1;
     }
-    if (meta.getType() == IValueMeta.TYPE_TIMESTAMP) {
-      int length = meta.getLength();
-      if (length >= 0 && length <= 9) {
-        return length;
-      }
+    int effectiveType =
+        DvDataTypeSupport.effectiveHopTypeId(meta.getType(), meta.getOriginalColumnTypeName());
+    if (!isTemporalType(effectiveType)) {
+      return -1;
+    }
+    int fromSql =
+        DvDataTypeSupport.fractionalSecondsFromSqlTypeName(meta.getOriginalColumnTypeName());
+    if (fromSql >= 0 && fromSql <= 9) {
+      return fromSql;
+    }
+    // Hop stores TIMESTAMP scale in length (see Database.getValueFromSqlType Types.TIMESTAMP).
+    int length = meta.getLength();
+    if (length >= 0 && length <= 9) {
+      return length;
+    }
+    int originalScale = meta.getOriginalScale();
+    // Only trust originalScale when length was not a scale (e.g. display width) and scale is set.
+    if (originalScale > 0 && originalScale <= 9) {
+      return originalScale;
     }
     int precision = meta.getPrecision();
     if (precision >= 0 && precision <= 9) {
@@ -1102,26 +1173,39 @@ public final class DvFieldMappingValidationSupport {
   static IValueMeta buildTargetValueMetaForHubBusinessKey(
       BusinessKey bk, SourceField storedField, IVariables variables) throws HopException {
     String name = bk.getName();
-    int type =
-        DvDataTypeSupport.resolveHopTypeId(
-            resolveVariable(variables, bk.getDataType()), storedField);
+    String dataType = resolveVariable(variables, bk.getDataType());
+    // resolveHopTypeId: explicit Hop labels win; SQL labels and source-field SQL correct JDBC
+    // noise.
+    int type = DvDataTypeSupport.resolveHopTypeId(dataType, storedField);
     int length = Const.toInt(resolveVariable(variables, bk.getLength()), -1);
     int precision = Const.toInt(resolveVariable(variables, bk.getPrecision()), -1);
+    if (precision < 0) {
+      int fsp = DvDataTypeSupport.fractionalSecondsFromSqlTypeName(dataType);
+      if (fsp < 0 && storedField != null) {
+        fsp = DvDataTypeSupport.fractionalSecondsFromSqlTypeName(storedField.getSourceDataType());
+      }
+      if (fsp >= 0) {
+        precision = fsp;
+        if (isTemporalType(type) && length < 0) {
+          length = fsp;
+        }
+      }
+    }
     IValueMeta meta = ValueMetaFactory.createValueMeta(name, type, length, precision);
     if (meta == null || meta.getType() == IValueMeta.TYPE_NONE) {
       throw new HopException(
           BaseMessages.getString(
               PKG, "DvFieldMappingValidation.InvalidBusinessKeyType", bk.getName()));
     }
+    applySqlTypeHint(meta, dataType, storedField);
     return meta;
   }
 
   static IValueMeta buildTargetValueMetaForSatelliteAttribute(
       SatelliteAttribute attr, SourceField storedField, IVariables variables) throws HopException {
     String name = attr.getName();
-    int typeId =
-        DvDataTypeSupport.resolveHopTypeId(
-            resolveVariable(variables, attr.getDataType()), storedField);
+    String dataType = resolveVariable(variables, attr.getDataType());
+    int typeId = DvDataTypeSupport.resolveHopTypeId(dataType, storedField);
     int length = Const.toInt(resolveVariable(variables, attr.getLength()), -1);
     int precision = Const.toInt(resolveVariable(variables, attr.getPrecision()), -1);
     if (storedField != null) {
@@ -1132,30 +1216,107 @@ public final class DvFieldMappingValidationSupport {
         precision = Const.toInt(resolveVariable(variables, storedField.getPrecision()), -1);
       }
     }
-    return ValueMetaFactory.createValueMeta(name, typeId, length, precision);
+    if (precision < 0) {
+      int fsp = DvDataTypeSupport.fractionalSecondsFromSqlTypeName(dataType);
+      if (fsp < 0 && storedField != null) {
+        fsp = DvDataTypeSupport.fractionalSecondsFromSqlTypeName(storedField.getSourceDataType());
+      }
+      if (fsp >= 0) {
+        precision = fsp;
+        if (isTemporalType(typeId) && length < 0) {
+          length = fsp;
+        }
+      }
+    }
+    String sqlTypeHint = resolveSqlTypeHint(dataType, storedField);
+    if (DvSqlStringTypeSupport.isLargeTextSqlType(sqlTypeHint)) {
+      length = DvSqlStringTypeSupport.capacityForSqlStringType(sqlTypeHint, length);
+    }
+    int fromTypeName = DvDataTypeSupport.characterLengthFromSqlTypeName(sqlTypeHint);
+    if (fromTypeName > 0 && (length <= 0 || length == DvSqlStringTypeSupport.TINYTEXT_CAPACITY)) {
+      length = fromTypeName;
+    }
+    IValueMeta meta = ValueMetaFactory.createValueMeta(name, typeId, length, precision);
+    applySqlTypeHint(meta, dataType, storedField);
+    DvSqlStringTypeSupport.normalizeStringLength(meta);
+    return meta;
   }
 
   static IValueMeta valueMetaFromSourceField(SourceField sf, IVariables variables)
       throws HopPluginException {
     String name = resolveName(sf.getName(), variables);
-    int type = sf.getHopType();
-    if (type <= 0) {
-      // Prefer SQL type on the source field (e.g. DATETIME(6) → Timestamp) over default String.
-      type = DvDataTypeSupport.resolveHopTypeId(sf.getSourceDataType(), null);
-    }
+    // Prefer SQL type when hop type is missing or wrongly stored as String (DATETIME→String).
+    int type = DvDataTypeSupport.effectiveHopTypeId(sf.getHopType(), sf.getSourceDataType());
     if (type <= 0) {
       type = IValueMeta.TYPE_STRING;
     }
-    IValueMeta vm =
-        ValueMetaFactory.createValueMeta(
-            name,
-            type,
-            Const.toInt(resolveVariable(variables, sf.getLength()), -1),
-            Const.toInt(resolveVariable(variables, sf.getPrecision()), -1));
+    int length = Const.toInt(resolveVariable(variables, sf.getLength()), -1);
+    int precision = Const.toInt(resolveVariable(variables, sf.getPrecision()), -1);
+    if (DvSqlStringTypeSupport.isLargeTextSqlType(sf.getSourceDataType())) {
+      length = DvSqlStringTypeSupport.capacityForSqlStringType(sf.getSourceDataType(), length);
+    }
+    int fromTypeName = DvDataTypeSupport.characterLengthFromSqlTypeName(sf.getSourceDataType());
+    if (fromTypeName > 0 && (length <= 0 || length == DvSqlStringTypeSupport.TINYTEXT_CAPACITY)) {
+      length = fromTypeName;
+    }
+    if (isTemporalType(type)) {
+      int fsp = DvDataTypeSupport.fractionalSecondsFromSqlTypeName(sf.getSourceDataType());
+      if (fsp >= 0) {
+        if (precision < 0) {
+          precision = fsp;
+        }
+        // Hop stores TIMESTAMP scale in length; prefer SQL fsp over a bogus JDBC scale (e.g. 9).
+        if (length < 0 || length > fsp) {
+          length = fsp;
+        }
+      }
+    }
+    IValueMeta vm = ValueMetaFactory.createValueMeta(name, type, length, precision);
     if (!Utils.isEmpty(sf.getSourceDataType())) {
       vm.setOriginalColumnTypeName(sf.getSourceDataType());
+      int declared = DvDataTypeSupport.characterLengthFromSqlTypeName(sf.getSourceDataType());
+      if (declared > 0) {
+        vm.setOriginalPrecision(declared);
+      }
     }
+    DvSqlStringTypeSupport.normalizeStringLength(vm);
     return vm;
+  }
+
+  /**
+   * Native SQL type to attach on the target value meta. Never substitutes the source field's SQL
+   * type when the model label is an explicit Hop type name ({@code String}, {@code Integer}, …) —
+   * that would make {@code effectiveHopTypeId(String, "int2")} look like Integer and hide real
+   * mismatches.
+   */
+  private static String resolveSqlTypeHint(String dataType, SourceField storedField) {
+    if (!Utils.isEmpty(dataType)) {
+      if (DvSqlStringTypeSupport.isLargeTextSqlType(dataType)
+          || DvDataTypeSupport.hopTypeIdFromSqlTypeName(dataType) > 0) {
+        return dataType;
+      }
+      // Explicit Hop type name — do not attach source SQL type name.
+      return null;
+    }
+    return storedField != null ? storedField.getSourceDataType() : null;
+  }
+
+  private static void applySqlTypeHint(IValueMeta meta, String dataType, SourceField storedField) {
+    if (meta == null) {
+      return;
+    }
+    String sqlTypeHint = resolveSqlTypeHint(dataType, storedField);
+    if (!Utils.isEmpty(sqlTypeHint)) {
+      meta.setOriginalColumnTypeName(sqlTypeHint);
+      int declared = DvDataTypeSupport.characterLengthFromSqlTypeName(sqlTypeHint);
+      if (declared > 0) {
+        meta.setOriginalPrecision(declared);
+      }
+      int fsp = DvDataTypeSupport.fractionalSecondsFromSqlTypeName(sqlTypeHint);
+      if (fsp >= 0) {
+        meta.setOriginalScale(fsp);
+      }
+    }
   }
 
   private static ResolvedSourceFields resolveSourceFields(
@@ -1401,7 +1562,14 @@ public final class DvFieldMappingValidationSupport {
       for (IValueMeta vm : liveRowMeta.getValueMetaList()) {
         if (vm != null && !Utils.isEmpty(vm.getName())) {
           String name = resolveName(vm.getName(), variables);
-          fields.put(name, vm);
+          try {
+            IValueMeta copy = ValueMetaFactory.cloneValueMeta(vm);
+            DvSqlStringTypeSupport.normalizeStringLength(copy);
+            fields.put(name, copy);
+          } catch (HopPluginException e) {
+            DvSqlStringTypeSupport.normalizeStringLength(vm);
+            fields.put(name, vm);
+          }
         }
       }
       return new ResolvedSourceFields(fields, storedByName, true);

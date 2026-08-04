@@ -65,9 +65,14 @@ public final class DvDatabaseSourceLiveSchemaSupport {
     String schemaName = Const.NVL(source.getSchemaName(), "");
     try (Database db = new Database(LOGGING_OBJECT, variables, databaseMeta)) {
       db.connect();
-      return db.getTableFieldsMeta(
-          variables != null ? variables.resolve(schemaName) : schemaName,
-          variables != null ? variables.resolve(tableName) : tableName);
+      String resolvedSchema = variables != null ? variables.resolve(schemaName) : schemaName;
+      String resolvedTable = variables != null ? variables.resolve(tableName) : tableName;
+      IRowMeta rowMeta = db.getTableFieldsMeta(resolvedSchema, resolvedTable);
+      // Prefer JDBC getColumns COLUMN_SIZE/TYPE_NAME over ResultSet display sizes
+      // (SingleStore/MySQL).
+      DatabaseJdbcColumnEnrichmentSupport.enrichRowMeta(
+          db, databaseMeta, resolvedSchema, resolvedTable, rowMeta);
+      return rowMeta;
     } catch (HopDatabaseException e) {
       throw new HopException("Error reading live source table metadata.", e);
     }

@@ -106,8 +106,7 @@ class DvSqlOrderByCollationSupportTest {
     var source =
         new DvSqlOrderByCollationSupport.ColumnSqlMeta("NUM_0", "nvarchar", "French_CI_AS");
     var target =
-        new DvSqlOrderByCollationSupport.ColumnSqlMeta(
-            "NUM_0", "character varying", "en_US.utf8");
+        new DvSqlOrderByCollationSupport.ColumnSqlMeta("NUM_0", "character varying", "en_US.utf8");
     DvSqlOrderByCollationSupport.Session session =
         new DvSqlOrderByCollationSupport.Session(
             Map.of("NUM_0", source),
@@ -138,14 +137,12 @@ class DvSqlOrderByCollationSupportTest {
             return "POSTGRESQL";
           }
         };
-    assertTrue(
-        DvSqlOrderByCollationSupport.isCollationCompatibleWithEngine(mssql, "French_CI_AS"));
+    assertTrue(DvSqlOrderByCollationSupport.isCollationCompatibleWithEngine(mssql, "French_CI_AS"));
     assertFalse(
         DvSqlOrderByCollationSupport.isCollationCompatibleWithEngine(postgres, "French_CI_AS"));
     assertTrue(
         DvSqlOrderByCollationSupport.isCollationCompatibleWithEngine(postgres, "fr-FR-x-icu"));
-    assertFalse(
-        DvSqlOrderByCollationSupport.isCollationCompatibleWithEngine(mssql, "fr-FR-x-icu"));
+    assertFalse(DvSqlOrderByCollationSupport.isCollationCompatibleWithEngine(mssql, "fr-FR-x-icu"));
     assertTrue(
         DvSqlOrderByCollationSupport.isCollationCompatibleWithEngine(postgres, "en_US.utf8"));
   }

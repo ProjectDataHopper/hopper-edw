@@ -498,6 +498,9 @@ public final class DvDatabaseSourceImportSupport {
     if (rowMeta == null || rowMeta.isEmpty()) {
       return List.of();
     }
+    // Correct VARCHAR/LONGTEXT/DATETIME sizes and types from JDBC getColumns (not display size).
+    DatabaseJdbcColumnEnrichmentSupport.enrichRowMeta(
+        db, db.getDatabaseMeta(), resolvedSchema, resolvedTable, rowMeta);
 
     List<SourceField> fields = new ArrayList<>();
     for (IValueMeta vm : rowMeta.getValueMetaList()) {
@@ -506,8 +509,27 @@ public final class DvDatabaseSourceImportSupport {
       String nativeType = vm.getOriginalColumnTypeName();
       sf.setSourceDataType(
           !org.apache.hop.core.util.Utils.isEmpty(nativeType) ? nativeType : vm.getTypeDesc());
-      sf.setLength(vm.getLength() > 0 ? String.valueOf(vm.getLength()) : "");
-      sf.setPrecision(vm.getPrecision() >= 0 ? String.valueOf(vm.getPrecision()) : "");
+      org.apache.hop.datavault.metadata.DvSqlStringTypeSupport.normalizeStringLength(vm);
+      int length = vm.getLength();
+      if (org.apache.hop.datavault.metadata.DvSqlStringTypeSupport.isLargeTextSqlType(nativeType)) {
+        length =
+            org.apache.hop.datavault.metadata.DvSqlStringTypeSupport.capacityForSqlStringType(
+                nativeType, length);
+      }
+      sf.setLength(length > 0 ? String.valueOf(length) : "");
+      // Temporal: length holds fractional seconds after enrichment.
+      if (vm.getType() == org.apache.hop.core.row.IValueMeta.TYPE_TIMESTAMP
+          || vm.getType() == org.apache.hop.core.row.IValueMeta.TYPE_DATE) {
+        if (vm.getLength() >= 0 && vm.getLength() <= 9) {
+          sf.setPrecision(String.valueOf(vm.getLength()));
+        } else if (vm.getPrecision() >= 0) {
+          sf.setPrecision(String.valueOf(vm.getPrecision()));
+        } else {
+          sf.setPrecision("");
+        }
+      } else {
+        sf.setPrecision(vm.getPrecision() >= 0 ? String.valueOf(vm.getPrecision()) : "");
+      }
       sf.setHopType(vm.getType());
       fields.add(sf);
     }

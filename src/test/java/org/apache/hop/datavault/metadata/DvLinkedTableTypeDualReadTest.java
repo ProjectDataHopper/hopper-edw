@@ -76,10 +76,8 @@ class DvLinkedTableTypeDualReadTest {
         """;
     // Polymorphic path via DataVaultModel list would use factory; here deserialize the concrete
     // class after factory would have chosen DvLinkedTable for TABLE_REFERENCE.
-    Node node =
-        org.apache.hop.core.xml.XmlHandler.loadXmlString(xml, "table");
-    DvLinkedTable table =
-        XmlMetadataUtil.deSerializeFromXml(node, DvLinkedTable.class, null);
+    Node node = org.apache.hop.core.xml.XmlHandler.loadXmlString(xml, "table");
+    DvLinkedTable table = XmlMetadataUtil.deSerializeFromXml(node, DvLinkedTable.class, null);
     assertEquals("hub_customer", table.getName());
     // setTableType normalizes legacy TABLE_REFERENCE from the property field
     assertEquals(DvTableType.LINKED_TABLE, table.getTableType());

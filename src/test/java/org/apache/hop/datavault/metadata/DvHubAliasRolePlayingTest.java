@@ -52,8 +52,7 @@ class DvHubAliasRolePlayingTest {
     hub.setHashKeyFieldName("sales_rep_hk");
 
     DvLinkedTable alias =
-        DvLinkedTableSupport.createAlias(
-            "hub_secondary_rep", hub, null, null, new Point(10, 10));
+        DvLinkedTableSupport.createAlias("hub_secondary_rep", hub, null, null, new Point(10, 10));
 
     assertNotNull(alias);
     assertEquals("hub_secondary_rep", alias.getName());

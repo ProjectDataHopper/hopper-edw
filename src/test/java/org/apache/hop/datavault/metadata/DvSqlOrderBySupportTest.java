@@ -207,8 +207,7 @@ class DvSqlOrderBySupportTest {
     var source =
         new DvSqlOrderByCollationSupport.ColumnSqlMeta("NUM_0", "nvarchar", "French_CI_AS");
     var target =
-        new DvSqlOrderByCollationSupport.ColumnSqlMeta(
-            "NUM_0", "character varying", "en_US.utf8");
+        new DvSqlOrderByCollationSupport.ColumnSqlMeta("NUM_0", "character varying", "en_US.utf8");
     DvSqlOrderByCollationSupport.Session session =
         new DvSqlOrderByCollationSupport.Session(
             Map.of("NUM_0", source),
@@ -247,8 +246,7 @@ class DvSqlOrderBySupportTest {
     var source =
         new DvSqlOrderByCollationSupport.ColumnSqlMeta("NUM_0", "nvarchar", "French_CI_AS");
     var target =
-        new DvSqlOrderByCollationSupport.ColumnSqlMeta(
-            "NUM_0", "character varying", "fr-FR-x-icu");
+        new DvSqlOrderByCollationSupport.ColumnSqlMeta("NUM_0", "character varying", "fr-FR-x-icu");
     DvSqlOrderByCollationSupport.Session session =
         new DvSqlOrderByCollationSupport.Session(
             Map.of("NUM_0", source),
@@ -260,12 +258,7 @@ class DvSqlOrderBySupportTest {
 
     String expression =
         DvSqlOrderBySupport.orderExpression(
-            "[NUM_0]",
-            businessKey,
-            mssql,
-            new DataVaultConfiguration(),
-            new Variables(),
-            session);
+            "[NUM_0]", businessKey, mssql, new DataVaultConfiguration(), new Variables(), session);
 
     assertEquals("[NUM_0]", expression);
     assertFalse(expression.contains("COLLATE"));
@@ -286,8 +279,7 @@ class DvSqlOrderBySupportTest {
     var source =
         new DvSqlOrderByCollationSupport.ColumnSqlMeta("NUM_0", "nvarchar", "French_CI_AS");
     var target =
-        new DvSqlOrderByCollationSupport.ColumnSqlMeta(
-            "NUM_0", "character varying", "en_US.utf8");
+        new DvSqlOrderByCollationSupport.ColumnSqlMeta("NUM_0", "character varying", "en_US.utf8");
     // No plugin ids — sameCollationEngineFamily is true; compatibility filter must still drop
     // French_CI_AS on Postgres.
     DvSqlOrderByCollationSupport.Session session =
