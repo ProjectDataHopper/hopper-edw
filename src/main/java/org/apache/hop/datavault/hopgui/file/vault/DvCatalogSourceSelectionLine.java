@@ -17,8 +17,10 @@
 package org.apache.hop.datavault.hopgui.file.vault;
 
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.catalog.DvSourceCatalogService;
+import org.apache.hop.datavault.hopgui.GuiBusySupport;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DataVaultSource;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
@@ -32,13 +34,20 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-/** Combo-based picker for Data Vault sources stored in the data catalog. */
+/**
+ * Combo-based picker for Data Vault sources stored in the data catalog.
+ *
+ * <p>Catalog source names are loaded lazily on first focus (with wait cursor) so table dialogs open
+ * without listing the catalog up front. {@link #setText(String)} can show the current value without
+ * loading the list.
+ */
 public class DvCatalogSourceSelectionLine extends Composite {
 
   private final IVariables variables;
   private final IHopMetadataProvider metadataProvider;
   private final DataVaultModel model;
   private final Combo wCombo;
+  private boolean itemsLoaded;
 
   public DvCatalogSourceSelectionLine(
       IVariables variables,
@@ -81,13 +90,34 @@ public class DvCatalogSourceSelectionLine extends Composite {
     fd.right = new FormAttachment(100, 0);
     fd.top = new FormAttachment(label, 0, SWT.CENTER);
     wCombo.setLayoutData(fd);
+
+    wCombo.addListener(SWT.FocusIn, e -> ensureItemsLoaded());
+    wCombo.addListener(SWT.MouseDown, e -> ensureItemsLoaded());
   }
 
+  /**
+   * Eagerly loads catalog source names (wait cursor). Prefer relying on focus-time loading; call
+   * this only when the full list is required immediately.
+   */
   public void fillItems() throws HopException {
-    wCombo.removeAll();
-    for (String name : DvSourceCatalogService.listSourceNames(model, variables, metadataProvider)) {
-      wCombo.add(name);
+    String previous = wCombo.getText();
+    final HopException[] error = new HopException[1];
+    GuiBusySupport.showWhile(
+        this,
+        () -> {
+          try {
+            doFillItems();
+          } catch (HopException e) {
+            error[0] = e;
+          }
+        });
+    if (error[0] != null) {
+      throw error[0];
     }
+    if (!Utils.isEmpty(previous) && !wCombo.isDisposed()) {
+      wCombo.setText(previous);
+    }
+    itemsLoaded = true;
   }
 
   public String getText() {
@@ -104,5 +134,32 @@ public class DvCatalogSourceSelectionLine extends Composite {
 
   public DataVaultSource resolveSelectedSource() throws HopException {
     return DvSourceCatalogService.resolveSource(getText(), model, variables, metadataProvider);
+  }
+
+  private void ensureItemsLoaded() {
+    if (itemsLoaded || wCombo.isDisposed()) {
+      return;
+    }
+    String previous = wCombo.getText();
+    GuiBusySupport.showWhile(
+        this,
+        () -> {
+          try {
+            doFillItems();
+          } catch (HopException e) {
+            // Leave combo items empty; typed value still works.
+          }
+        });
+    if (!wCombo.isDisposed() && !Utils.isEmpty(previous)) {
+      wCombo.setText(previous);
+    }
+    itemsLoaded = true;
+  }
+
+  private void doFillItems() throws HopException {
+    wCombo.removeAll();
+    for (String name : DvSourceCatalogService.listSourceNames(model, variables, metadataProvider)) {
+      wCombo.add(name);
+    }
   }
 }

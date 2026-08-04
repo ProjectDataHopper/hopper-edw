@@ -220,15 +220,8 @@ public class DvLinkHubSourceDialog {
   }
 
   private void getData() {
-    // Source
-    try {
-      wSource.fillItems();
-      if (!Utils.isEmpty(input.getSourceName())) {
-        wSource.setText(input.getSourceName());
-      }
-    } catch (HopException e) {
-      // ignore, leave blank
-    }
+    // Catalog source names load lazily on combo focus (wait cursor).
+    wSource.setText(Const.NVL(input.getSourceName(), ""));
 
     currentHubFields.clear();
     wHubMappings.clearAll();

@@ -45,6 +45,7 @@ import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.core.xml.XmlHandler;
+import org.apache.hop.datavault.hopgui.GuiBusySupport;
 import org.apache.hop.datavault.hopgui.ModelGeneratedArtifactOpenSupport;
 import org.apache.hop.datavault.hopgui.ModelTableLayoutPreviewSupport;
 import org.apache.hop.datavault.hopgui.ModelUpdateActionAuditSupport;
@@ -1482,7 +1483,11 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     if (model == null) {
       return;
     }
-    showCheckResultsDialog(model.check(hopGui.getMetadataProvider(), getVariables()));
+    List<ICheckResult> remarks = new ArrayList<>();
+    GuiBusySupport.showWhile(
+        hopShell(),
+        () -> remarks.addAll(model.check(hopGui.getMetadataProvider(), getVariables())));
+    showCheckResultsDialog(remarks);
   }
 
   @GuiToolbarElement(
@@ -1622,7 +1627,10 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     if (model == null) {
       return false;
     }
-    List<ICheckResult> remarks = model.check(hopGui.getMetadataProvider(), getVariables());
+    List<ICheckResult> remarks = new ArrayList<>();
+    GuiBusySupport.showWhile(
+        hopShell(),
+        () -> remarks.addAll(model.check(hopGui.getMetadataProvider(), getVariables())));
     if (!hasCheckErrors(remarks)) {
       return true;
     }

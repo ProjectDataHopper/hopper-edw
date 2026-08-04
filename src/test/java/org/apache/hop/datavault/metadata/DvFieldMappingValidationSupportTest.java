@@ -286,8 +286,9 @@ class DvFieldMappingValidationSupportTest {
   }
 
   /**
-   * Design: model target length 50 (characters) → vault VARCHAR(150). A physical source that also
-   * reports 150 (or NVARCHAR-equivalent capacity) must not fail as "exceeds target length 50".
+   * Design: model field length 50 (characters) → vault VARCHAR(150). A physical source that also
+   * reports 150 (or NVARCHAR-equivalent capacity) must not fail as "exceeds model field settings
+   * length 50".
    */
   @Test
   void validateMappingUsesVaultUtf8CapacityNotRawModelLengthOnSqlServer() throws Exception {
@@ -361,7 +362,7 @@ class DvFieldMappingValidationSupportTest {
                 r ->
                     r.getType() == ICheckResult.TYPE_RESULT_ERROR
                         && r.getText() != null
-                        && r.getText().contains("exceeds target length")),
+                        && r.getText().contains("exceeds model field settings length")),
         () -> remarks.toString());
   }
 

@@ -32,8 +32,6 @@ import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
 import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.datavault.hopgui.lineage.LineageTabSupport;
 import org.apache.hop.datavault.lineage.DvModelLineageCollector;
-import org.apache.hop.datavault.lineage.LineageSnapshot;
-import org.apache.hop.datavault.lineage.TableLineage;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DataVaultSource;
 import org.apache.hop.datavault.metadata.DvDataTypeSupport;
@@ -204,16 +202,17 @@ public class DvSatelliteDialog {
   }
 
   private void addLineageTab() {
-    TableLineage tableLineage = null;
-    try {
-      if (model != null) {
-        LineageSnapshot snapshot = DvModelLineageCollector.collect(model, variables);
-        tableLineage = LineageTabSupport.findTable(snapshot, input.getName());
-      }
-    } catch (Exception e) {
-      // Keep dialog open; tab shows empty lineage message.
-    }
-    LineageTabSupport.addTab(wTabFolder, variables, margin, tableLineage);
+    LineageTabSupport.addLazyTab(
+        wTabFolder,
+        variables,
+        margin,
+        () -> {
+          if (model == null) {
+            return null;
+          }
+          return LineageTabSupport.findTable(
+              DvModelLineageCollector.collect(model, variables), input.getName());
+        });
   }
 
   private void addGeneralTab() {
@@ -631,14 +630,8 @@ public class DvSatelliteDialog {
             : DvIntegrationMode.HOP_MANAGED;
     wIntegrationMode.setText(integrationMode.getDescription());
     wDescription.setText(Const.NVL(input.getDescription(), ""));
-    try {
-      wRecordSource.fillItems();
-      if (!Utils.isEmpty(input.getRecordSourceName())) {
-        wRecordSource.setText(Const.NVL(input.getRecordSourceName(), ""));
-      }
-    } catch (HopException e) {
-      wRecordSource.setText("");
-    }
+    // Catalog source names load lazily on combo focus (wait cursor).
+    wRecordSource.setText(Const.NVL(input.getRecordSourceName(), ""));
     refreshHubNameItems();
     selectComboValue(wHubName, Const.NVL(input.getHubName(), ""));
     refreshLinkNameItems();
@@ -692,12 +685,24 @@ public class DvSatelliteDialog {
 
   private void validate() {
     try {
-      DataVaultModel draft =
-          ModelDialogValidationSupport.cloneDataVaultModel(model, hopGui.getMetadataProvider());
-      DvSatellite draftTable = locateDraftTable(draft);
-      applyWidgetsToTable(draftTable);
       List<ICheckResult> remarks =
-          draft.check(hopGui.getMetadataProvider(), variables, DvModelCheckOptions.defaults());
+          ModelDialogValidationSupport.runChecksWithBusyCursor(
+              shell,
+              () -> {
+                DataVaultModel draft =
+                    ModelDialogValidationSupport.cloneDataVaultModel(
+                        model, hopGui.getMetadataProvider());
+                DvSatellite draftTable = locateDraftTable(draft);
+                applyWidgetsToTable(draftTable);
+                List<ICheckResult> tableRemarks = new ArrayList<>();
+                draftTable.check(
+                    tableRemarks,
+                    hopGui.getMetadataProvider(),
+                    variables,
+                    DvModelCheckOptions.defaults(),
+                    draft);
+                return tableRemarks;
+              });
       ModelDialogValidationSupport.showCheckResults(shell, remarks);
     } catch (Exception ex) {
       new ErrorDialog(

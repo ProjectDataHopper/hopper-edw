@@ -33,8 +33,6 @@ import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
 import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.datavault.hopgui.lineage.LineageTabSupport;
 import org.apache.hop.datavault.lineage.BvModelLineageCollector;
-import org.apache.hop.datavault.lineage.LineageSnapshot;
-import org.apache.hop.datavault.lineage.TableLineage;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.datavault.metadata.IDvTable;
@@ -203,16 +201,17 @@ public class HopGuiBvScd2TableDialog {
   }
 
   private void addLineageTab() {
-    TableLineage tableLineage = null;
-    try {
-      if (businessVaultModel != null) {
-        LineageSnapshot snapshot = BvModelLineageCollector.collect(businessVaultModel, variables);
-        tableLineage = LineageTabSupport.findTable(snapshot, input.getName());
-      }
-    } catch (Exception e) {
-      // Keep dialog open; tab shows empty lineage message.
-    }
-    LineageTabSupport.addTab(wTabFolder, variables, margin, tableLineage);
+    LineageTabSupport.addLazyTab(
+        wTabFolder,
+        variables,
+        margin,
+        () -> {
+          if (businessVaultModel == null) {
+            return null;
+          }
+          return LineageTabSupport.findTable(
+              BvModelLineageCollector.collect(businessVaultModel, variables), input.getName());
+        });
   }
 
   private void addGeneralTab() {
@@ -769,13 +768,24 @@ public class HopGuiBvScd2TableDialog {
 
   private void validate() {
     try {
-      BusinessVaultModel draft =
-          ModelDialogValidationSupport.cloneBusinessVaultModel(
-              businessVaultModel, HopGui.getInstance().getMetadataProvider());
-      BvScd2Table draftTable = locateDraftTable(draft);
-      applyWidgetsToTable(draftTable);
       List<ICheckResult> remarks =
-          draft.check(HopGui.getInstance().getMetadataProvider(), variables);
+          ModelDialogValidationSupport.runChecksWithBusyCursor(
+              shell,
+              () -> {
+                BusinessVaultModel draft =
+                    ModelDialogValidationSupport.cloneBusinessVaultModel(
+                        businessVaultModel, HopGui.getInstance().getMetadataProvider());
+                BvScd2Table draftTable = locateDraftTable(draft);
+                applyWidgetsToTable(draftTable);
+                List<ICheckResult> tableRemarks = new ArrayList<>();
+                draftTable.check(
+                    tableRemarks,
+                    HopGui.getInstance().getMetadataProvider(),
+                    variables,
+                    draft,
+                    dataVaultModel);
+                return tableRemarks;
+              });
       ModelDialogValidationSupport.showCheckResults(shell, remarks);
     } catch (Exception ex) {
       new ErrorDialog(

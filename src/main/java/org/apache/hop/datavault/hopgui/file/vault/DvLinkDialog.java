@@ -25,14 +25,11 @@ import org.apache.hop.core.Props;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.datavault.catalog.DvSourceCatalogService;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
 import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
 import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.datavault.hopgui.lineage.LineageTabSupport;
 import org.apache.hop.datavault.lineage.DvModelLineageCollector;
-import org.apache.hop.datavault.lineage.LineageSnapshot;
-import org.apache.hop.datavault.lineage.TableLineage;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DependentChildKey;
 import org.apache.hop.datavault.metadata.DvIntegrationMode;
@@ -228,16 +225,17 @@ public class DvLinkDialog {
   private int middle;
 
   private void addLineageTab() {
-    TableLineage tableLineage = null;
-    try {
-      if (model != null) {
-        LineageSnapshot snapshot = DvModelLineageCollector.collect(model, variables);
-        tableLineage = LineageTabSupport.findTable(snapshot, input.getName());
-      }
-    } catch (Exception e) {
-      // Keep dialog open; tab shows empty lineage message.
-    }
-    LineageTabSupport.addTab(wTabFolder, variables, margin, tableLineage);
+    LineageTabSupport.addLazyTab(
+        wTabFolder,
+        variables,
+        margin,
+        () -> {
+          if (model == null) {
+            return null;
+          }
+          return LineageTabSupport.findTable(
+              DvModelLineageCollector.collect(model, variables), input.getName());
+        });
   }
 
   private void addOptionsTab() {
@@ -588,21 +586,10 @@ public class DvLinkDialog {
     wEditMappings.addListener(SWT.Selection, e -> editSelectedLinkHubSource());
 
     // Simple table of source names (CCOMBO) - details managed via the sub dialog
-    List<String> sourceNames = new ArrayList<>();
-    try {
-      sourceNames =
-          DvSourceCatalogService.listSourceNames(model, variables, hopGui.getMetadataProvider());
-    } catch (Exception e) {
-      sourceNames = new ArrayList<>();
-    }
-    Collections.sort(sourceNames);
-
     ColumnInfo[] srcCols =
         new ColumnInfo[] {
-          new ColumnInfo(
-              "Data Vault Source",
-              ColumnInfo.COLUMN_TYPE_CCOMBO,
-              sourceNames.toArray(new String[0])),
+          DvSourceComboSupport.createLazySourceColumn(
+              "Data Vault Source", shell, model, variables, hopGui.getMetadataProvider()),
         };
 
     wLinkHubSources =
@@ -673,21 +660,10 @@ public class DvLinkDialog {
     wEditSatMappings.setLayoutData(fdEditSat);
     wEditSatMappings.addListener(SWT.Selection, e -> editSelectedLinkSatelliteSource());
 
-    List<String> sourceNames = new ArrayList<>();
-    try {
-      sourceNames =
-          DvSourceCatalogService.listSourceNames(model, variables, hopGui.getMetadataProvider());
-    } catch (Exception e) {
-      sourceNames = new ArrayList<>();
-    }
-    Collections.sort(sourceNames);
-
     ColumnInfo[] srcCols =
         new ColumnInfo[] {
-          new ColumnInfo(
-              "Data Vault Source",
-              ColumnInfo.COLUMN_TYPE_CCOMBO,
-              sourceNames.toArray(new String[0])),
+          DvSourceComboSupport.createLazySourceColumn(
+              "Data Vault Source", shell, model, variables, hopGui.getMetadataProvider()),
         };
 
     wLinkSatelliteSources =
@@ -972,12 +948,24 @@ public class DvLinkDialog {
 
   private void validate() {
     try {
-      DataVaultModel draft =
-          ModelDialogValidationSupport.cloneDataVaultModel(model, hopGui.getMetadataProvider());
-      DvLink draftTable = locateDraftTable(draft);
-      applyWidgetsToTable(draftTable);
       List<ICheckResult> remarks =
-          draft.check(hopGui.getMetadataProvider(), variables, DvModelCheckOptions.defaults());
+          ModelDialogValidationSupport.runChecksWithBusyCursor(
+              shell,
+              () -> {
+                DataVaultModel draft =
+                    ModelDialogValidationSupport.cloneDataVaultModel(
+                        model, hopGui.getMetadataProvider());
+                DvLink draftTable = locateDraftTable(draft);
+                applyWidgetsToTable(draftTable);
+                List<ICheckResult> tableRemarks = new ArrayList<>();
+                draftTable.check(
+                    tableRemarks,
+                    hopGui.getMetadataProvider(),
+                    variables,
+                    DvModelCheckOptions.defaults(),
+                    draft);
+                return tableRemarks;
+              });
       ModelDialogValidationSupport.showCheckResults(shell, remarks);
     } catch (Exception ex) {
       new ErrorDialog(

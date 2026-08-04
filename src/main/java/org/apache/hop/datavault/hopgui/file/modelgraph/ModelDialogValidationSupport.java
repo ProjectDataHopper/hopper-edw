@@ -16,11 +16,14 @@
  */
 package org.apache.hop.datavault.hopgui.file.modelgraph;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.xml.XmlHandler;
+import org.apache.hop.datavault.hopgui.GuiBusySupport;
 import org.apache.hop.datavault.hopgui.file.businessvault.HopBusinessVaultFileType;
 import org.apache.hop.datavault.hopgui.file.dimensional.HopDimensionalFileType;
 import org.apache.hop.datavault.hopgui.file.vault.HopVaultFileType;
@@ -30,6 +33,7 @@ import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.apache.hop.ui.core.dialog.CheckResultDialog;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -38,6 +42,39 @@ import org.w3c.dom.Node;
 public final class ModelDialogValidationSupport {
 
   private ModelDialogValidationSupport() {}
+
+  /** Callable that produces check remarks and may throw checked exceptions. */
+  @FunctionalInterface
+  public interface CheckWork {
+    List<ICheckResult> run() throws Exception;
+  }
+
+  /**
+   * Runs model/table validation with the wait cursor, then returns the remarks. Exceptions from
+   * {@code work} are rethrown to the caller.
+   */
+  public static List<ICheckResult> runChecksWithBusyCursor(Control control, CheckWork work)
+      throws Exception {
+    if (work == null) {
+      return Collections.emptyList();
+    }
+    AtomicReference<List<ICheckResult>> remarks = new AtomicReference<>(Collections.emptyList());
+    AtomicReference<Exception> error = new AtomicReference<>();
+    GuiBusySupport.showWhile(
+        control,
+        () -> {
+          try {
+            List<ICheckResult> result = work.run();
+            remarks.set(result != null ? result : Collections.emptyList());
+          } catch (Exception e) {
+            error.set(e);
+          }
+        });
+    if (error.get() != null) {
+      throw error.get();
+    }
+    return remarks.get();
+  }
 
   public static DataVaultModel cloneDataVaultModel(
       DataVaultModel model, IHopMetadataProvider metadataProvider) throws HopException {

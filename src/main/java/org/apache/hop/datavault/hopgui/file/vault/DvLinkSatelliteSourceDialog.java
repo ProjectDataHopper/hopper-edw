@@ -214,14 +214,8 @@ public class DvLinkSatelliteSourceDialog {
   }
 
   private void getData() {
-    try {
-      wSource.fillItems();
-      if (!Utils.isEmpty(input.getSourceName())) {
-        wSource.setText(input.getSourceName());
-      }
-    } catch (HopException e) {
-      // ignore
-    }
+    // Catalog source names load lazily on combo focus (wait cursor).
+    wSource.setText(Const.NVL(input.getSourceName(), ""));
 
     currentSatelliteFields.clear();
     wSatelliteMappings.clearAll();

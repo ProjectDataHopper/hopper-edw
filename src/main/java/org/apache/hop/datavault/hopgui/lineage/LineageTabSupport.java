@@ -16,11 +16,15 @@
  */
 package org.apache.hop.datavault.hopgui.lineage;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.Props;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.hopgui.GuiBusySupport;
 import org.apache.hop.datavault.lineage.FieldContribution;
 import org.apache.hop.datavault.lineage.FieldLineage;
 import org.apache.hop.datavault.lineage.LineageReason;
@@ -64,101 +68,51 @@ public final class LineageTabSupport {
    */
   public static void addTab(
       CTabFolder tabFolder, IVariables variables, int margin, TableLineage tableLineage) {
-    CTabItem tab = new CTabItem(tabFolder, SWT.NONE);
-    tab.setFont(GuiResource.getInstance().getFontDefault());
-    tab.setText(BaseMessages.getString(PKG, "LineageTab.Title"));
-    tab.setToolTipText(BaseMessages.getString(PKG, "LineageTab.ToolTip"));
+    LineageTabContent content = createTab(tabFolder, variables, margin);
+    content.apply(tableLineage);
+  }
 
-    Composite comp = new Composite(tabFolder, SWT.NONE);
-    PropsUi.setLook(comp);
-    comp.setLayout(new FormLayout());
+  /**
+   * Adds a Lineage tab that computes lineage only when the user first selects the tab (with wait
+   * cursor). Prefer this in table dialogs so open stays fast.
+   */
+  public static void addLazyTab(
+      CTabFolder tabFolder,
+      IVariables variables,
+      int margin,
+      Supplier<TableLineage> lineageSupplier) {
+    LineageTabContent content = createTab(tabFolder, variables, margin);
+    content.wReasons.setText(BaseMessages.getString(PKG, "LineageTab.NotLoaded"));
 
-    Label wlHeader = new Label(comp, SWT.LEFT);
-    wlHeader.setText(BaseMessages.getString(PKG, "LineageTab.TableReasons.Label"));
-    PropsUi.setLook(wlHeader);
-    FormData fdlHeader = new FormData();
-    fdlHeader.left = new FormAttachment(0, margin);
-    fdlHeader.top = new FormAttachment(0, margin);
-    fdlHeader.right = new FormAttachment(100, 0);
-    wlHeader.setLayoutData(fdlHeader);
-
-    Text wReasons =
-        new Text(comp, SWT.MULTI | SWT.READ_ONLY | SWT.BORDER | SWT.V_SCROLL | SWT.WRAP);
-    PropsUi.setLook(wReasons, Props.WIDGET_STYLE_FIXED);
-    FormData fdReasons = new FormData();
-    fdReasons.left = new FormAttachment(0, margin);
-    fdReasons.top = new FormAttachment(wlHeader, margin);
-    fdReasons.right = new FormAttachment(100, -margin);
-    fdReasons.height = (int) (120 * PropsUi.getNativeZoomFactor());
-    wReasons.setLayoutData(fdReasons);
-    wReasons.setText(formatTableHeader(tableLineage));
-
-    Label wlFields = new Label(comp, SWT.LEFT);
-    wlFields.setText(BaseMessages.getString(PKG, "LineageTab.Fields.Label"));
-    PropsUi.setLook(wlFields);
-    FormData fdlFields = new FormData();
-    fdlFields.left = new FormAttachment(0, margin);
-    fdlFields.top = new FormAttachment(wReasons, margin);
-    fdlFields.right = new FormAttachment(100, -margin);
-    wlFields.setLayoutData(fdlFields);
-
-    ColumnInfo[] columns =
-        new ColumnInfo[] {
-          new ColumnInfo(
-              BaseMessages.getString(PKG, "LineageTab.Column.TargetField"),
-              ColumnInfo.COLUMN_TYPE_TEXT,
-              false,
-              true),
-          new ColumnInfo(
-              BaseMessages.getString(PKG, "LineageTab.Column.Technical"),
-              ColumnInfo.COLUMN_TYPE_TEXT,
-              false,
-              true),
-          new ColumnInfo(
-              BaseMessages.getString(PKG, "LineageTab.Column.Source"),
-              ColumnInfo.COLUMN_TYPE_TEXT,
-              false,
-              true),
-          new ColumnInfo(
-              BaseMessages.getString(PKG, "LineageTab.Column.SourceField"),
-              ColumnInfo.COLUMN_TYPE_TEXT,
-              false,
-              true),
-          new ColumnInfo(
-              BaseMessages.getString(PKG, "LineageTab.Column.Transform"),
-              ColumnInfo.COLUMN_TYPE_TEXT,
-              false,
-              true),
-          new ColumnInfo(
-              BaseMessages.getString(PKG, "LineageTab.Column.ReasonCode"),
-              ColumnInfo.COLUMN_TYPE_TEXT,
-              false,
-              true),
-          new ColumnInfo(
-              BaseMessages.getString(PKG, "LineageTab.Column.Why"),
-              ColumnInfo.COLUMN_TYPE_TEXT,
-              false,
-              true),
-        };
-
-    int rowCount = countContributionRows(tableLineage);
-    TableView tableView =
-        new TableView(
-            variables,
-            comp,
-            SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI,
-            columns,
-            Math.max(rowCount, 1),
-            true, // read-only
-            null,
-            PropsUi.getInstance());
-    tableView.setLayoutData(
-        new FormDataBuilder().left().top(wlFields, margin).right().bottom().result());
-
-    populateFields(tableView, tableLineage);
-
-    comp.layout();
-    tab.setControl(comp);
+    AtomicBoolean loaded = new AtomicBoolean(false);
+    tabFolder.addListener(
+        SWT.Selection,
+        e -> {
+          if (tabFolder.isDisposed() || content.tab.isDisposed()) {
+            return;
+          }
+          if (tabFolder.getSelection() != content.tab) {
+            return;
+          }
+          if (!loaded.compareAndSet(false, true)) {
+            return;
+          }
+          AtomicReference<TableLineage> lineage = new AtomicReference<>();
+          GuiBusySupport.showWhile(
+              tabFolder,
+              () -> {
+                try {
+                  if (lineageSupplier != null) {
+                    lineage.set(lineageSupplier.get());
+                  }
+                } catch (Exception ignored) {
+                  // Keep dialog open; tab shows empty lineage message.
+                }
+              });
+          if (!tabFolder.isDisposed() && !content.tab.isDisposed()) {
+            content.apply(lineage.get());
+          }
+        });
   }
 
   /** Resolves table lineage for a logical name from a snapshot (by logical or physical name). */
@@ -268,6 +222,104 @@ public final class LineageTabSupport {
     return sb.toString().trim();
   }
 
+  private static LineageTabContent createTab(
+      CTabFolder tabFolder, IVariables variables, int margin) {
+    CTabItem tab = new CTabItem(tabFolder, SWT.NONE);
+    tab.setFont(GuiResource.getInstance().getFontDefault());
+    tab.setText(BaseMessages.getString(PKG, "LineageTab.Title"));
+    tab.setToolTipText(BaseMessages.getString(PKG, "LineageTab.ToolTip"));
+
+    Composite comp = new Composite(tabFolder, SWT.NONE);
+    PropsUi.setLook(comp);
+    comp.setLayout(new FormLayout());
+
+    Label wlHeader = new Label(comp, SWT.LEFT);
+    wlHeader.setText(BaseMessages.getString(PKG, "LineageTab.TableReasons.Label"));
+    PropsUi.setLook(wlHeader);
+    FormData fdlHeader = new FormData();
+    fdlHeader.left = new FormAttachment(0, margin);
+    fdlHeader.top = new FormAttachment(0, margin);
+    fdlHeader.right = new FormAttachment(100, 0);
+    wlHeader.setLayoutData(fdlHeader);
+
+    Text wReasons =
+        new Text(comp, SWT.MULTI | SWT.READ_ONLY | SWT.BORDER | SWT.V_SCROLL | SWT.WRAP);
+    PropsUi.setLook(wReasons, Props.WIDGET_STYLE_FIXED);
+    FormData fdReasons = new FormData();
+    fdReasons.left = new FormAttachment(0, margin);
+    fdReasons.top = new FormAttachment(wlHeader, margin);
+    fdReasons.right = new FormAttachment(100, -margin);
+    fdReasons.height = (int) (120 * PropsUi.getNativeZoomFactor());
+    wReasons.setLayoutData(fdReasons);
+    wReasons.setText("");
+
+    Label wlFields = new Label(comp, SWT.LEFT);
+    wlFields.setText(BaseMessages.getString(PKG, "LineageTab.Fields.Label"));
+    PropsUi.setLook(wlFields);
+    FormData fdlFields = new FormData();
+    fdlFields.left = new FormAttachment(0, margin);
+    fdlFields.top = new FormAttachment(wReasons, margin);
+    fdlFields.right = new FormAttachment(100, -margin);
+    wlFields.setLayoutData(fdlFields);
+
+    ColumnInfo[] columns =
+        new ColumnInfo[] {
+          new ColumnInfo(
+              BaseMessages.getString(PKG, "LineageTab.Column.TargetField"),
+              ColumnInfo.COLUMN_TYPE_TEXT,
+              false,
+              true),
+          new ColumnInfo(
+              BaseMessages.getString(PKG, "LineageTab.Column.Technical"),
+              ColumnInfo.COLUMN_TYPE_TEXT,
+              false,
+              true),
+          new ColumnInfo(
+              BaseMessages.getString(PKG, "LineageTab.Column.Source"),
+              ColumnInfo.COLUMN_TYPE_TEXT,
+              false,
+              true),
+          new ColumnInfo(
+              BaseMessages.getString(PKG, "LineageTab.Column.SourceField"),
+              ColumnInfo.COLUMN_TYPE_TEXT,
+              false,
+              true),
+          new ColumnInfo(
+              BaseMessages.getString(PKG, "LineageTab.Column.Transform"),
+              ColumnInfo.COLUMN_TYPE_TEXT,
+              false,
+              true),
+          new ColumnInfo(
+              BaseMessages.getString(PKG, "LineageTab.Column.ReasonCode"),
+              ColumnInfo.COLUMN_TYPE_TEXT,
+              false,
+              true),
+          new ColumnInfo(
+              BaseMessages.getString(PKG, "LineageTab.Column.Why"),
+              ColumnInfo.COLUMN_TYPE_TEXT,
+              false,
+              true),
+        };
+
+    TableView tableView =
+        new TableView(
+            variables,
+            comp,
+            SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI,
+            columns,
+            1,
+            true, // read-only
+            null,
+            PropsUi.getInstance());
+    tableView.setLayoutData(
+        new FormDataBuilder().left().top(wlFields, margin).right().bottom().result());
+
+    comp.layout();
+    tab.setControl(comp);
+
+    return new LineageTabContent(tab, wReasons, tableView);
+  }
+
   private static String formatTableHeader(TableLineage tableLineage) {
     if (tableLineage == null) {
       return BaseMessages.getString(PKG, "LineageTab.NoLineage");
@@ -312,6 +364,23 @@ public final class LineageTabSupport {
     return name;
   }
 
+  private static void ensureRowCount(TableView tableView, int needed) {
+    if (tableView == null || tableView.table == null || tableView.table.isDisposed()) {
+      return;
+    }
+    while (tableView.table.getItemCount() < Math.max(needed, 1)) {
+      new TableItem(tableView.table, SWT.NONE);
+    }
+  }
+
+  private static void clearFieldRows(TableView tableView) {
+    if (tableView == null || tableView.table == null || tableView.table.isDisposed()) {
+      return;
+    }
+    tableView.table.removeAll();
+    new TableItem(tableView.table, SWT.NONE);
+  }
+
   private static int countContributionRows(TableLineage tableLineage) {
     if (tableLineage == null) {
       return 0;
@@ -328,9 +397,14 @@ public final class LineageTabSupport {
   }
 
   private static void populateFields(TableView tableView, TableLineage tableLineage) {
+    clearFieldRows(tableView);
     if (tableLineage == null) {
+      tableView.optimizeTableView();
       return;
     }
+    int needed = countContributionRows(tableLineage);
+    ensureRowCount(tableView, needed);
+
     int row = 0;
     for (FieldLineage field : tableLineage.getFields()) {
       if (field.getContributions().isEmpty()) {
@@ -363,5 +437,25 @@ public final class LineageTabSupport {
       }
     }
     tableView.optimizeTableView();
+  }
+
+  private static final class LineageTabContent {
+    private final CTabItem tab;
+    private final Text wReasons;
+    private final TableView tableView;
+
+    private LineageTabContent(CTabItem tab, Text wReasons, TableView tableView) {
+      this.tab = tab;
+      this.wReasons = wReasons;
+      this.tableView = tableView;
+    }
+
+    private void apply(TableLineage tableLineage) {
+      if (wReasons == null || wReasons.isDisposed()) {
+        return;
+      }
+      wReasons.setText(formatTableHeader(tableLineage));
+      populateFields(tableView, tableLineage);
+    }
   }
 }

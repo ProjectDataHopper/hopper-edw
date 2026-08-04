@@ -41,6 +41,7 @@ import org.apache.hop.core.gui.plugin.toolbar.GuiToolbarElementType;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.variables.Variables;
+import org.apache.hop.datavault.hopgui.GuiBusySupport;
 import org.apache.hop.datavault.hopgui.dialog.ShowRowsDialog;
 import org.apache.hop.datavault.hopgui.file.modelgraph.HopGuiModelGraphBase;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphHit;
@@ -402,7 +403,9 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     if (model == null) {
       return;
     }
-    List<ICheckResult> remarks = model.check(hopGui.getMetadataProvider(), variables);
+    List<ICheckResult> remarks = new ArrayList<>();
+    GuiBusySupport.showWhile(
+        getShell(), () -> remarks.addAll(model.check(hopGui.getMetadataProvider(), variables)));
     CheckResultDialog dialog = new CheckResultDialog(getShell(), remarks);
     dialog.open();
   }

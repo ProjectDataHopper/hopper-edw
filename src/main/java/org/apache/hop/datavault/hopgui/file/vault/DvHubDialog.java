@@ -17,7 +17,6 @@
 package org.apache.hop.datavault.hopgui.file.vault;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,8 +32,6 @@ import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
 import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.datavault.hopgui.lineage.LineageTabSupport;
 import org.apache.hop.datavault.lineage.DvModelLineageCollector;
-import org.apache.hop.datavault.lineage.LineageSnapshot;
-import org.apache.hop.datavault.lineage.TableLineage;
 import org.apache.hop.datavault.metadata.BusinessKey;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DataVaultSource;
@@ -372,16 +369,17 @@ public class DvHubDialog {
   }
 
   private void addLineageTab() {
-    TableLineage tableLineage = null;
-    try {
-      if (model != null) {
-        LineageSnapshot snapshot = DvModelLineageCollector.collect(model, variables);
-        tableLineage = LineageTabSupport.findTable(snapshot, input.getName());
-      }
-    } catch (Exception e) {
-      // Keep dialog open; tab shows empty lineage message.
-    }
-    LineageTabSupport.addTab(wTabFolder, variables, margin, tableLineage);
+    LineageTabSupport.addLazyTab(
+        wTabFolder,
+        variables,
+        margin,
+        () -> {
+          if (model == null) {
+            return null;
+          }
+          return LineageTabSupport.findTable(
+              DvModelLineageCollector.collect(model, variables), input.getName());
+        });
   }
 
   private void addSourcesTab() {
@@ -417,18 +415,10 @@ public class DvHubDialog {
     fdlSources.top = new FormAttachment(0, 0);
     wlSources.setLayoutData(fdlSources);
 
-    List<String> sources = new ArrayList<>();
-    try {
-      sources =
-          DvSourceCatalogService.listSourceNames(model, variables, hopGui.getMetadataProvider());
-    } catch (Exception e) {
-      sources = new ArrayList<>();
-    }
-    Collections.sort(sources);
     ColumnInfo[] columns =
         new ColumnInfo[] {
-          new ColumnInfo(
-              "Data Vault Source", ColumnInfo.COLUMN_TYPE_CCOMBO, sources.toArray(new String[0])),
+          DvSourceComboSupport.createLazySourceColumn(
+              "Data Vault Source", shell, model, variables, hopGui.getMetadataProvider()),
         };
     wSources =
         new TableView(
@@ -495,12 +485,24 @@ public class DvHubDialog {
 
   private void validate() {
     try {
-      DataVaultModel draft =
-          ModelDialogValidationSupport.cloneDataVaultModel(model, hopGui.getMetadataProvider());
-      DvHub draftTable = locateDraftTable(draft);
-      applyWidgetsToTable(draftTable);
       List<ICheckResult> remarks =
-          draft.check(hopGui.getMetadataProvider(), variables, DvModelCheckOptions.defaults());
+          ModelDialogValidationSupport.runChecksWithBusyCursor(
+              shell,
+              () -> {
+                DataVaultModel draft =
+                    ModelDialogValidationSupport.cloneDataVaultModel(
+                        model, hopGui.getMetadataProvider());
+                DvHub draftTable = locateDraftTable(draft);
+                applyWidgetsToTable(draftTable);
+                List<ICheckResult> tableRemarks = new ArrayList<>();
+                draftTable.check(
+                    tableRemarks,
+                    hopGui.getMetadataProvider(),
+                    variables,
+                    DvModelCheckOptions.defaults(),
+                    draft);
+                return tableRemarks;
+              });
       ModelDialogValidationSupport.showCheckResults(shell, remarks);
     } catch (Exception ex) {
       new ErrorDialog(

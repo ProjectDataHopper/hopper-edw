@@ -34,8 +34,6 @@ import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
 import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.datavault.hopgui.lineage.LineageTabSupport;
 import org.apache.hop.datavault.lineage.DmModelLineageCollector;
-import org.apache.hop.datavault.lineage.LineageSnapshot;
-import org.apache.hop.datavault.lineage.TableLineage;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalConfiguration;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.datavault.metadata.dimensional.DmAccumulatingSnapshotFact;
@@ -292,17 +290,17 @@ public class HopGuiDmTableDialog {
   }
 
   private void addLineageTab() {
-    TableLineage tableLineage = null;
-    try {
-      if (model != null) {
-        LineageSnapshot snapshot =
-            DmModelLineageCollector.collect(model, variables, metadataProvider);
-        tableLineage = LineageTabSupport.findTable(snapshot, input.getName());
-      }
-    } catch (Exception e) {
-      // Keep dialog open; tab shows empty lineage message.
-    }
-    LineageTabSupport.addTab(wTabFolder, variables, margin, tableLineage);
+    LineageTabSupport.addLazyTab(
+        wTabFolder,
+        variables,
+        margin,
+        () -> {
+          if (model == null) {
+            return null;
+          }
+          return LineageTabSupport.findTable(
+              DmModelLineageCollector.collect(model, variables, metadataProvider), input.getName());
+        });
   }
 
   private void addGeneralTab() {
@@ -2219,11 +2217,18 @@ public class HopGuiDmTableDialog {
 
   private void validate() {
     try {
-      DimensionalModel draft =
-          ModelDialogValidationSupport.cloneDimensionalModel(model, metadataProvider);
-      IDmTable draftTable = locateDraftTable(draft);
-      applyWidgetsToTable(draftTable, draft);
-      List<ICheckResult> remarks = draft.check(metadataProvider, variables);
+      List<ICheckResult> remarks =
+          ModelDialogValidationSupport.runChecksWithBusyCursor(
+              shell,
+              () -> {
+                DimensionalModel draft =
+                    ModelDialogValidationSupport.cloneDimensionalModel(model, metadataProvider);
+                IDmTable draftTable = locateDraftTable(draft);
+                applyWidgetsToTable(draftTable, draft);
+                List<ICheckResult> tableRemarks = new ArrayList<>();
+                draftTable.check(tableRemarks, metadataProvider, variables, draft);
+                return tableRemarks;
+              });
       ModelDialogValidationSupport.showCheckResults(shell, remarks);
     } catch (Exception ex) {
       new ErrorDialog(

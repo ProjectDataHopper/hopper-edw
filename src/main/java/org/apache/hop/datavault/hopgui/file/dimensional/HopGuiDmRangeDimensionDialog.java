@@ -16,6 +16,7 @@
  */
 package org.apache.hop.datavault.hopgui.file.dimensional;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.ICheckResult;
@@ -262,11 +263,18 @@ public class HopGuiDmRangeDimensionDialog {
 
   private void validate() {
     try {
-      DimensionalModel draft =
-          ModelDialogValidationSupport.cloneDimensionalModel(model, metadataProvider);
-      DmRangeDimension draftTable = locateDraftTable(draft);
-      applyWidgetsToTable(draftTable);
-      List<ICheckResult> remarks = draft.check(metadataProvider, variables);
+      List<ICheckResult> remarks =
+          ModelDialogValidationSupport.runChecksWithBusyCursor(
+              shell,
+              () -> {
+                DimensionalModel draft =
+                    ModelDialogValidationSupport.cloneDimensionalModel(model, metadataProvider);
+                DmRangeDimension draftTable = locateDraftTable(draft);
+                applyWidgetsToTable(draftTable);
+                List<ICheckResult> tableRemarks = new ArrayList<>();
+                draftTable.check(tableRemarks, metadataProvider, variables, draft);
+                return tableRemarks;
+              });
       ModelDialogValidationSupport.showCheckResults(shell, remarks);
     } catch (Exception ex) {
       new ErrorDialog(

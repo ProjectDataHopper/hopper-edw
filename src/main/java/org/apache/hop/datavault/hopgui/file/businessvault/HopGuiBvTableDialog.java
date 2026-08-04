@@ -492,13 +492,24 @@ public class HopGuiBvTableDialog {
 
   private void validate() {
     try {
-      BusinessVaultModel draft =
-          ModelDialogValidationSupport.cloneBusinessVaultModel(
-              businessVaultModel, HopGui.getInstance().getMetadataProvider());
-      IBvTable draftTable = locateDraftTable(draft);
-      applyWidgetsToTable(draftTable);
       List<ICheckResult> remarks =
-          draft.check(HopGui.getInstance().getMetadataProvider(), variables);
+          ModelDialogValidationSupport.runChecksWithBusyCursor(
+              shell,
+              () -> {
+                BusinessVaultModel draft =
+                    ModelDialogValidationSupport.cloneBusinessVaultModel(
+                        businessVaultModel, HopGui.getInstance().getMetadataProvider());
+                IBvTable draftTable = locateDraftTable(draft);
+                applyWidgetsToTable(draftTable);
+                List<ICheckResult> tableRemarks = new ArrayList<>();
+                draftTable.check(
+                    tableRemarks,
+                    HopGui.getInstance().getMetadataProvider(),
+                    variables,
+                    draft,
+                    dataVaultModel);
+                return tableRemarks;
+              });
       ModelDialogValidationSupport.showCheckResults(shell, remarks);
     } catch (Exception ex) {
       new ErrorDialog(

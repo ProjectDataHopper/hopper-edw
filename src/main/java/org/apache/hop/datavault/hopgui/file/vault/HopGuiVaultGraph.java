@@ -63,6 +63,7 @@ import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.datavault.command.svg.SvgExportService;
 import org.apache.hop.datavault.command.svg.SvgRenderOptions;
 import org.apache.hop.datavault.config.DataVaultConfigSingleton;
+import org.apache.hop.datavault.hopgui.GuiBusySupport;
 import org.apache.hop.datavault.hopgui.ModelGeneratedArtifactOpenSupport;
 import org.apache.hop.datavault.hopgui.ModelTableLayoutPreviewSupport;
 import org.apache.hop.datavault.hopgui.ModelUpdateActionAuditSupport;
@@ -741,7 +742,9 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     if (model == null) {
       return;
     }
-    showCheckResultsDialog(runModelCheck());
+    List<ICheckResult> remarks = new ArrayList<>();
+    GuiBusySupport.showWhile(hopShell(), () -> remarks.addAll(runModelCheck()));
+    showCheckResultsDialog(remarks);
   }
 
   @GuiToolbarElement(
@@ -1004,7 +1007,8 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     if (model == null) {
       return false;
     }
-    List<ICheckResult> remarks = runModelCheck();
+    List<ICheckResult> remarks = new ArrayList<>();
+    GuiBusySupport.showWhile(hopShell(), () -> remarks.addAll(runModelCheck()));
     if (!hasCheckErrors(remarks)) {
       return true;
     }

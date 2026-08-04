@@ -82,4 +82,49 @@ class ModelDialogValidationSupportTest {
                         && remark.getText() != null
                         && remark.getText().contains("customer")));
   }
+
+  @Test
+  void tableDialogValidateChecksOnlySelectedTable() throws HopException {
+    DataVaultModel model = new DataVaultModel();
+    DvHub good = new DvHub();
+    good.setName("good_hub");
+    good.setTableName("h_good");
+    DvHub broken = new DvHub();
+    // empty name produces a check error only when this hub is validated
+    broken.setName("");
+    broken.setTableName("h_broken");
+    model.getTables().add(good);
+    model.getTables().add(broken);
+
+    DataVaultModel draft =
+        ModelDialogValidationSupport.cloneDataVaultModel(model, new MemoryMetadataProvider());
+    IDvTable draftGood = draft.getTables().get(0);
+    IDvTable draftBroken = draft.getTables().get(1);
+
+    List<ICheckResult> tableOnly = new java.util.ArrayList<>();
+    draftGood.check(
+        tableOnly,
+        new MemoryMetadataProvider(),
+        new Variables(),
+        DvModelCheckOptions.fastOnly(),
+        draft);
+
+    List<ICheckResult> wholeModel =
+        draft.check(new MemoryMetadataProvider(), new Variables(), DvModelCheckOptions.fastOnly());
+
+    // Single-table validate must not include remarks for other tables in the model.
+    assertTrue(
+        tableOnly.stream().allMatch(r -> r.getSourceInfo() == draftGood),
+        () -> "Expected only good_hub remarks, got: " + tableOnly);
+    assertTrue(
+        wholeModel.stream().anyMatch(r -> r.getSourceInfo() == draftBroken),
+        () -> "Expected whole-model check to include broken hub remarks, got: " + wholeModel);
+    assertTrue(
+        wholeModel.size() > tableOnly.size(),
+        () ->
+            "Expected whole-model check to produce more remarks than single-table check; whole="
+                + wholeModel.size()
+                + " tableOnly="
+                + tableOnly.size());
+  }
 }
