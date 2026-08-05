@@ -232,4 +232,4 @@ SELECT * FROM sat_customer WHERE x_load_end_ts IS NULL
 
 **Also shipped (0.2.x line):** dimensional modeler, execution maps, catalog-first sources, data quality rules and gates, multi-DB integration hardening, incremental Business Vault SCD2, primary-key import/detection, SQL Server / Unicode EDW hardening.
 
-**Planned:** BV naming rules engine, hash-key ModPartitioner parallelism, additional source types, automated execution with dependency resolution.
+**Planned:** BV naming rules engine, additional source types, automated execution with dependency resolution.

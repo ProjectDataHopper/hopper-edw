@@ -98,7 +98,7 @@ See link:plans/load-run-metrics-plan.md[load-run metrics plan] for the metadata 
 
 == Performance
 
-Sort memory, partition copies, and large-model notes: link:performance-tuning.md[performance-tuning.md].
+Sort memory, parallel pipeline/table copies, and large-model notes: link:performance-tuning.md[performance-tuning.md].
 
 == Finding objects while operating
 

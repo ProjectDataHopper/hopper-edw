@@ -234,7 +234,7 @@ Choose per table — mixed models are supported.
 - ~~Marquez / OpenLineage lineage export~~ — shipped in 0.5.0
 - ~~Reference tables, source modeler, project search, architecture export~~ — shipped in 0.6.0
 - ~~Composite hub business keys, optional load cycle ID, optional sat record-source omit~~ — shipped in 0.7.0
-- Hash-key ModPartitioner parallelism
+- ~~Hash-key ModPartitioner parallelism~~ — abandoned (scale over tables instead; see [plans/hash-key-partitioning-plan.md](../plans/hash-key-partitioning-plan.md))
 
 ---
 

@@ -66,7 +66,6 @@ For a slide-style executive summary, see [presentations/hop-data-vault-overview.
 | `hop svg` export | Available | [README.md](README.md#command-line-tools) |
 | BV naming rules engine | Planned | [plans/bv-naming-rules-engine-plan.md](plans/bv-naming-rules-engine-plan.md) |
 | Marquez / OpenLineage export | Available | [openlineage-export.adoc](openlineage-export.adoc) |
-| Hash-key ModPartitioner parallelism | Planned | [plans/hash-key-partitioning-plan.md](plans/hash-key-partitioning-plan.md) |
 
 ---
 

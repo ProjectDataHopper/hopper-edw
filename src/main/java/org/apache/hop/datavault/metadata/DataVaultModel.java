@@ -411,15 +411,6 @@ public class DataVaultModel extends HopMetadataBase
                 null));
       }
     }
-
-    remarks.add(
-        new CheckResult(
-            ICheckResult.TYPE_RESULT_COMMENT,
-            BaseMessages.getString(
-                PKG,
-                "DataVaultModel.CheckResult.TargetLoadHashKeyPartitioningTableOutputOnly",
-                mode.getDescription()),
-            null));
   }
 
   private static int resolveTargetTableParallelCopies(

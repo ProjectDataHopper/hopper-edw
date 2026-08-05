@@ -39,7 +39,7 @@ Applied to the generated **Table Output** transform as Hop transform copies. Row
 
 Example from the large synthetic model (`integration-tests/files/large/syn-large.hdv`): `targetTableParallelCopies=4`.
 
-**Future option:** hash-key mod partitioning (same partition count, aligned swimlanes through merge) is described in [hash-key-partitioning-plan.md](hash-key-partitioning-plan.md) — not implemented yet; pick up when loads outgrow round-robin copies.
+**Scale-out preference:** prefer more concurrent **table pipelines** (`parallelPipelineCopies` / model orchestrator) over deeper single-pipeline partitioning. Hash-key ModPartitioner swimlanes were evaluated and **abandoned** — see [plans/hash-key-partitioning-plan.md](plans/hash-key-partitioning-plan.md).
 
 ---
 
@@ -130,9 +130,9 @@ Operational notes:
 
 ---
 
-## Hash-key partitioning and bulk modes
+## Bulk modes and parallel copies
 
-Deferred [hash-key mod partitioning](hash-key-partitioning-plan.md) targets multi-copy **Table Output** with hash-key swimlanes. It does **not** apply to native bulk loaders (single writer) or staging-file mode (use parallel Text File Output copies for shard fan-out instead). The model check emits a warning when a non–Table Output load mode is selected.
+**Native bulk loader** is a single writer: `targetTableParallelCopies` > 1 is ignored (model check warns). **Staging-file** mode uses parallel Text File Output copies for shard fan-out when copies > 1, not Hop ModPartitioner swimlanes.
 
 ---
 
@@ -195,5 +195,3 @@ For richer history and metrics beyond the live GUI view, configure an **Executio
 ## Related docs
 
 - [datavault-configuration.adoc](datavault-configuration.adoc) — full configuration reference
-- [hash-key-partitioning-plan.md](hash-key-partitioning-plan.md) — deferred design for hash-key swimlanes through merge
-- [Hop partitioning manual](https://hop.apache.org/manual/latest/pipeline/partitioning.html) — background on mod partitioning and data swimlanes

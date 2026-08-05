@@ -1,10 +1,18 @@
 # Hash-key mod partitioning for update pipelines
 
-**Status:** Deferred — implement when load performance becomes critical.
+**Status:** **Abandoned** (2026-08-05).
 
-Replace round-robin `Table Output` parallelism with **Hop remainder-of-division (ModPartitioner) partitioning on the hash key**, so rows with the same hash key stay in the same swimlane from the first post-hash sort through MergeRows and all the way to Table Output. Partition count equals existing **`targetTableParallelCopies`** (e.g. 4 in `integration-tests/files/large/syn-large.hdv`).
+## Why abandoned
 
-Reference: [Hop partitioning manual](https://hop.apache.org/manual/latest/pipeline/partitioning.html)
+Hop **ModPartitioner** swimlanes through sort/merge/write were considered as a way to speed up single large satellite/link loads. In practice we already scale well enough by **running many table pipelines in parallel** (`parallelPipelineCopies` / model orchestration) and optional **Table Output copies** for write fan-out. The complexity of key-aligned partitioning (merge-leg consistency, hub redesign, bulk-mode exclusions) is not justified while table-level parallelism is the primary scale-out path.
+
+This document is kept only as historical design notes. **Do not implement** unless a future workload proves table-level parallelism insufficient.
+
+---
+
+~~Original deferred goal:~~ Replace round-robin `Table Output` parallelism with **Hop remainder-of-division (ModPartitioner) partitioning on the hash key**, so rows with the same hash key stay in the same swimlane from the first post-hash sort through MergeRows and all the way to Table Output. Partition count equals existing **`targetTableParallelCopies`**.
+
+Reference (background only): [Hop partitioning manual](https://hop.apache.org/manual/latest/pipeline/partitioning.html)
 
 ---
 
@@ -191,10 +199,12 @@ Apply same schema + hash field to STS transforms that participate in merge/sort:
 
 ## Implementation checklist
 
-- [ ] **config-flag** — Add `enableHashKeyPartitioning` to `DataVaultConfiguration` + i18n + `isHashKeyPartitioningEnabled()`
-- [ ] **partitioning-support** — Create `DvPartitioningSupport` (PartitionSchema, ModPartitioner, `applyToTransforms`)
-- [ ] **wire-satellite** — Apply partitioning in `DvSatellite` update pipeline + load-end-date branch; remove `setCopiesString` when partitioned
-- [ ] **wire-link** — Apply partitioning in `DvLink` update pipeline; remove `setCopiesString` when partitioned
-- [ ] **wire-sts** — Apply partitioning in `DvSatellite` STS pipeline merge/sort paths
-- [ ] **tests** — Add `DvPartitioningSupportTest` + pipeline generation test asserting ModPartitioner and shared schema
-- [ ] **validate-syn-large** — Manual run on syn-large (4 partitions) to confirm swimlanes and load behavior
+**Cancelled** — plan abandoned. Items left for historical reference only.
+
+- [x] ~~**config-flag**~~ — cancelled
+- [x] ~~**partitioning-support**~~ — cancelled
+- [x] ~~**wire-satellite**~~ — cancelled
+- [x] ~~**wire-link**~~ — cancelled
+- [x] ~~**wire-sts**~~ — cancelled
+- [x] ~~**tests**~~ — cancelled
+- [x] ~~**validate-syn-large**~~ — cancelled
