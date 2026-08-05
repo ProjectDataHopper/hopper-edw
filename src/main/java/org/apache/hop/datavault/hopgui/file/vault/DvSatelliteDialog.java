@@ -267,6 +267,24 @@ public class DvSatelliteDialog {
         new FormDataBuilder().left().top(wTableName, margin).right().result());
     wRecordSource.addModifyListener(e -> refreshDrivingKeySourceFieldItems());
 
+    Button wOpenInCatalog = new Button(comp, SWT.PUSH);
+    wOpenInCatalog.setText(BaseMessages.getString(PKG, "DvSatelliteDialog.OpenInCatalog.Label"));
+    wOpenInCatalog.setToolTipText(
+        BaseMessages.getString(PKG, "DvSatelliteDialog.OpenInCatalog.ToolTip"));
+    PropsUi.setLook(wOpenInCatalog);
+    wOpenInCatalog.setLayoutData(
+        new FormDataBuilder().left(middle, 0).top(wRecordSource, margin).result());
+    wOpenInCatalog.addListener(
+        SWT.Selection,
+        e ->
+            RecordSourceCatalogNavigationSupport.openSourceInCatalog(
+                shell,
+                hopGui,
+                variables,
+                hopGui.getMetadataProvider(),
+                model,
+                wRecordSource.getText()));
+
     wStoreRecordSource = new Button(comp, SWT.CHECK);
     wStoreRecordSource.setText(
         BaseMessages.getString(PKG, "DvSatelliteDialog.StoreRecordSource.Label"));
@@ -274,7 +292,7 @@ public class DvSatelliteDialog {
         BaseMessages.getString(PKG, "DvSatelliteDialog.StoreRecordSource.ToolTip"));
     PropsUi.setLook(wStoreRecordSource);
     wStoreRecordSource.setLayoutData(
-        new FormDataBuilder().left(middle, 0).top(wRecordSource, margin).right().result());
+        new FormDataBuilder().left(middle, 0).top(wOpenInCatalog, margin).right().result());
 
     Label wlHubName = new Label(comp, SWT.RIGHT);
     wlHubName.setText(BaseMessages.getString(PKG, "DvSatelliteDialog.HubName.Label"));
