@@ -4,12 +4,23 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## Unreleased
 
-### Optional satellite record-source column (VaultSpeed)
+## [0.7.0] — 2026-08-05
 
-- Per-satellite **Store record source indicator** (default on) — uncheck to omit the physical source-indicator column from satellite (and STS) DDL and loads
-- Model check no longer requires a feed source indicator when the satellite does not store the column; catalog feed binding remains required
-- Business Vault SCD2 injects a constant record-source value (leg indicator / satellite name) when reading such satellites
-- GUI checkbox on the satellite General tab; docs: [dv-satellite.adoc](docs/dv-satellite.adoc)
+Requires **Apache Hop 2.19.0** (or a **recent 2.19.0-SNAPSHOT** until GA) and **Java 21**.
+
+**Hop runtime:** Hop **2.19.0** is not yet published to Maven Central. To use this plugin you must either **build Hop from source** (branch/tag aligned with 2.19) or **download a recent CI snapshot** of the Hop client:
+
+- [Apache Hop 2.19.0-SNAPSHOT (hop-client)](https://repository.apache.org/content/groups/snapshots/org/apache/hop/hop-client/2.19.0-SNAPSHOT/)
+
+**Downloads:** [GitHub release zip](https://github.com/mattcasters/hop-data-vault/releases/download/v0.7.0/hop-datavault-0.7.0.zip) · [Data Hopper Nexus](https://repository.data-hopper.com/repository/hop-community-plugins/org/apache/hop/hop-datavault/0.7.0/hop-datavault-0.7.0.zip) (`org.apache.hop:hop-datavault:0.7.0`)
+
+### Optional load cycle ID (#111)
+
+- Optional **Store load cycle ID** on DV / BV / dimensional model configuration (default off)
+- When enabled, every managed target table layout includes an integer audit column (default `LOAD_CYCLE_ID`)
+- Each Data Vault / Business Vault / Dimensional Update allocates the next ID from a durable control table on the model target database (default `dv_load_cycle`) and stamps that value on all rows written in the run
+- Workflow variable `DV_LOAD_CYCLE_ID` is set for the allocated value; generated pipelines inject a Constant integer field
+- Docs: [datavault-configuration.adoc](docs/datavault-configuration.adoc)
 
 ### Composite hub business keys (multi-source-field → one vault BK column)
 
@@ -22,9 +33,29 @@ All notable changes to the hop-datavault plugin are documented in this file.
 - Bundle `hop-transform-concatfields` in the plugin assembly (required for generated compose steps)
 - Docs: [dv-hub.adoc](docs/dv-hub.adoc#composite-hub-business-keys), [dv-satellite.adoc](docs/dv-satellite.adoc), [dv-link.adoc](docs/dv-link.adoc), [datavault-configuration.adoc](docs/datavault-configuration.adoc), [feature-overview.md](docs/feature-overview.md); AI schema notes in [docs/ai-file-schemas/models/hdv.md](docs/ai-file-schemas/models/hdv.md)
 
+### Optional satellite record-source column (VaultSpeed)
+
+- Per-satellite **Store record source indicator** (default on) — uncheck to omit the physical source-indicator column from satellite (and STS) DDL and loads
+- Model check no longer requires a feed source indicator when the satellite does not store the column; catalog feed binding remains required
+- Business Vault SCD2 injects a constant record-source value (leg indicator / satellite name) when reading such satellites
+- GUI checkbox on the satellite General tab; docs: [dv-satellite.adoc](docs/dv-satellite.adoc)
+
 ### AI file-schema pack for external agents
 
 - `docs/ai-file-schemas/`: purpose markdown + relaxed XSD for `.hdv` / `.hbv` / `.hdm` / `.hsm`, JSON Schema for plugin metadata and catalog record definitions, samples and cross-reference guide (for Gemini and other external AIs)
+
+### Catalog, model check, and GUI polish
+
+- Catalog and data type validation refinements; SingleStore false type/length rediscovery diffs reduced
+- Model check: database connection caching and progress bar
+- Defer lineage and catalog source loads when opening model table dialogs
+- **Open in catalog** action on the satellite record-source field
+- Resource definition group editor performance with large model lists
+- **MODELS** architecture export from resource definition groups
+- Unicode EDW target checks globally configurable; binary fields shown as hex in plugin Show Rows previews
+- Coach and metrics panels closed by default in modelers
+- Record Definition Output improvements (physical table mapping + docs)
+- Link table performance improvements
 
 ## [0.6.0] — 2026-08-03
 
