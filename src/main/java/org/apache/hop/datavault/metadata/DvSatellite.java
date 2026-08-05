@@ -634,6 +634,7 @@ public class DvSatellite extends DvTableBase
       } else {
         insertPredecessor = addConstantForOpenLoadEndDate(ctx, pipelineMeta, insertPredecessor);
       }
+      insertPredecessor = addConstantForLoadCycleId(ctx, pipelineMeta, insertPredecessor);
 
       // Add Table Output to insert new satellite versions
       IRowMeta targetLayout = getTargetTableLayout(metadataProvider, variables, model);
@@ -1006,6 +1007,9 @@ public class DvSatellite extends DvTableBase
         rowMeta.addValueMeta(loadEndMeta);
       }
 
+      DvLoadCycleSupport.appendToLayout(
+          rowMeta, config.isStoreLoadCycleId(), config.getLoadCycleIdField(), variables);
+
       return rowMeta;
 
     } catch (Exception e) {
@@ -1087,6 +1091,11 @@ public class DvSatellite extends DvTableBase
     }
     loadDateField = variables.resolve(loadDateField);
     rowMeta.addValueMeta(new ValueMetaTimestamp(loadDateField));
+
+    if (config != null) {
+      DvLoadCycleSupport.appendToLayout(
+          rowMeta, config.isStoreLoadCycleId(), config.getLoadCycleIdField(), variables);
+    }
 
     return rowMeta;
   }
@@ -1685,6 +1694,27 @@ public class DvSatellite extends DvTableBase
     return tm;
   }
 
+  private TransformMeta addConstantForLoadCycleId(
+      SatelliteUpdateContext ctx, PipelineMeta pipelineMeta, TransformMeta predecessor)
+      throws HopException {
+    if (ctx.config == null || !ctx.config.isStoreLoadCycleId()) {
+      return predecessor;
+    }
+    Point location = null;
+    if (predecessor != null && predecessor.getLocation() != null) {
+      location =
+          new Point(predecessor.getLocation().x + SPACING_WIDTH, predecessor.getLocation().y);
+    }
+    return DvLoadCycleSupport.addConstantForLoadCycleId(
+        pipelineMeta,
+        predecessor,
+        true,
+        ctx.config.getLoadCycleIdField(),
+        ctx.variables,
+        null,
+        location);
+  }
+
   private TransformMeta addConstantForOpenLoadEndDate(
       SatelliteUpdateContext ctx, PipelineMeta pipelineMeta, TransformMeta predecessor)
       throws HopException {
@@ -1868,6 +1898,7 @@ public class DvSatellite extends DvTableBase
 
     TransformMeta withLoadDate =
         addConstantForLoadDate(ctx, pipelineMeta, loadDate, unionTransform);
+    withLoadDate = addConstantForLoadCycleId(ctx, pipelineMeta, withLoadDate);
     IRowMeta stsLayout = getStatusTargetTableLayout(ctx.metadataProvider, ctx.variables, ctx.model);
     TransformMeta stsWriteTransform =
         addStsTableOutput(ctx, pipelineMeta, stsTableName, stsLayout, withLoadDate);

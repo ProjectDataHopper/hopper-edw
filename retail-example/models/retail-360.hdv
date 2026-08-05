@@ -39,10 +39,14 @@ limitations under the License.
     <nullPlaceholder/>
     <hashContentSuffix/>
     <trimBusinessKeys>N</trimBusinessKeys>
+    <hashUsesComposedBusinessKey>N</hashUsesComposedBusinessKey>
     <loadDateField>x_load_ts</loadDateField>
     <loadEndDateField/>
     <recordSourceField>x_record_source</recordSourceField>
     <recordSourceFieldLength>100</recordSourceFieldLength>
+    <storeLoadCycleId>N</storeLoadCycleId>
+    <loadCycleIdField>LOAD_CYCLE_ID</loadCycleIdField>
+    <loadCycleControlTable>dv_load_cycle</loadCycleControlTable>
     <useLoadEndDate>N</useLoadEndDate>
     <generatePrimaryKeys>Y</generatePrimaryKeys>
     <generateForeignKeys>Y</generateForeignKeys>
@@ -146,6 +150,8 @@ limitations under the License.
         <description/>
         <dataType>Integer</dataType>
         <length>9</length>
+        <composite>N</composite>
+        <sourceFieldNames/>
         <sourceFieldName>customer_id</sourceFieldName>
         <recordSourceName>E2E-customer-hub</recordSourceName>
       </businessKeys>
@@ -154,6 +160,8 @@ limitations under the License.
         <description/>
         <dataType>Integer</dataType>
         <length>9</length>
+        <composite>N</composite>
+        <sourceFieldNames/>
         <sourceFieldName>customer_id</sourceFieldName>
         <recordSourceName>E2E-customer-address</recordSourceName>
       </businessKeys>
@@ -162,6 +170,8 @@ limitations under the License.
         <description/>
         <dataType>Integer</dataType>
         <length>9</length>
+        <composite>N</composite>
+        <sourceFieldNames/>
         <sourceFieldName>customer_id</sourceFieldName>
         <recordSourceName>E2E-customer-contact</recordSourceName>
       </businessKeys>
@@ -170,6 +180,8 @@ limitations under the License.
         <description/>
         <dataType>Integer</dataType>
         <length>9</length>
+        <composite>N</composite>
+        <sourceFieldNames/>
         <sourceFieldName>customer_id</sourceFieldName>
         <recordSourceName>E2E-customer-demo</recordSourceName>
       </businessKeys>
@@ -178,6 +190,8 @@ limitations under the License.
         <description/>
         <dataType>Integer</dataType>
         <length>9</length>
+        <composite>N</composite>
+        <sourceFieldNames/>
         <sourceFieldName>customer_id</sourceFieldName>
         <recordSourceName>E2E-customer-prefs</recordSourceName>
       </businessKeys>
@@ -186,6 +200,8 @@ limitations under the License.
         <description/>
         <dataType>Integer</dataType>
         <length>9</length>
+        <composite>N</composite>
+        <sourceFieldNames/>
         <sourceFieldName>customer_id</sourceFieldName>
         <recordSourceName>all-customer-info</recordSourceName>
       </businessKeys>
@@ -242,6 +258,7 @@ limitations under the License.
       <drivingKey/>
       <drivingKeySourceField/>
       <recordSource>E2E-customer-demo</recordSource>
+      <storeRecordSource>Y</storeRecordSource>
       <statusTrackingEnabled>N</statusTrackingEnabled>
       <statusTableName/>
       <statusFieldName>record_status</statusFieldName>
@@ -282,6 +299,7 @@ limitations under the License.
       <drivingKey/>
       <drivingKeySourceField/>
       <recordSource>E2E-customer-contact</recordSource>
+      <storeRecordSource>Y</storeRecordSource>
       <statusTrackingEnabled>N</statusTrackingEnabled>
       <statusTableName/>
       <statusFieldName>record_status</statusFieldName>
@@ -330,6 +348,7 @@ limitations under the License.
       <drivingKey/>
       <drivingKeySourceField/>
       <recordSource>E2E-customer-address</recordSource>
+      <storeRecordSource>Y</storeRecordSource>
       <statusTrackingEnabled>N</statusTrackingEnabled>
       <statusTableName/>
       <statusFieldName>record_status</statusFieldName>
@@ -378,6 +397,7 @@ limitations under the License.
       <drivingKey/>
       <drivingKeySourceField/>
       <recordSource>E2E-customer-prefs</recordSource>
+      <storeRecordSource>Y</storeRecordSource>
       <statusTrackingEnabled>N</statusTrackingEnabled>
       <statusTableName/>
       <statusFieldName>record_status</statusFieldName>
@@ -399,6 +419,8 @@ limitations under the License.
         <description/>
         <dataType>String</dataType>
         <length>7</length>
+        <composite>N</composite>
+        <sourceFieldNames/>
         <sourceFieldName>product_id</sourceFieldName>
         <recordSourceName>E2E-product</recordSourceName>
       </businessKeys>
@@ -450,6 +472,7 @@ limitations under the License.
       <drivingKey/>
       <drivingKeySourceField/>
       <recordSource>E2E-product</recordSource>
+      <storeRecordSource>Y</storeRecordSource>
       <statusTrackingEnabled>N</statusTrackingEnabled>
       <statusTableName/>
       <statusFieldName>record_status</statusFieldName>
@@ -471,6 +494,8 @@ limitations under the License.
         <description/>
         <dataType>String</dataType>
         <length>7</length>
+        <composite>N</composite>
+        <sourceFieldNames/>
         <sourceFieldName>order_id</sourceFieldName>
         <recordSourceName>E2E-order-header</recordSourceName>
       </businessKeys>
@@ -546,6 +571,7 @@ limitations under the License.
       <drivingKey/>
       <drivingKeySourceField/>
       <recordSource>E2E-order-header</recordSource>
+      <storeRecordSource>Y</storeRecordSource>
       <statusTrackingEnabled>N</statusTrackingEnabled>
       <statusTableName/>
       <statusFieldName>record_status</statusFieldName>
@@ -574,6 +600,7 @@ limitations under the License.
               <businessKeySources>
                 <businessKeySource>
                   <businessKeyField>order_id</businessKeyField>
+                  <sourceFieldNames/>
                   <sourceFieldName>order_id</sourceFieldName>
                 </businessKeySource>
               </businessKeySources>
@@ -584,6 +611,7 @@ limitations under the License.
               <businessKeySources>
                 <businessKeySource>
                   <businessKeyField>product_id</businessKeyField>
+                  <sourceFieldNames/>
                   <sourceFieldName>product_id</sourceFieldName>
                 </businessKeySource>
               </businessKeySources>
@@ -672,6 +700,7 @@ limitations under the License.
       <drivingKey/>
       <drivingKeySourceField/>
       <recordSource>E2E-order-line</recordSource>
+      <storeRecordSource>Y</storeRecordSource>
       <statusTrackingEnabled>N</statusTrackingEnabled>
       <statusFieldName>record_status</statusFieldName>
       <activeStatusValue>ACTIVE</activeStatusValue>
@@ -692,6 +721,8 @@ limitations under the License.
         <description/>
         <dataType>Integer</dataType>
         <length>9</length>
+        <composite>N</composite>
+        <sourceFieldNames/>
         <sourceFieldName>warehouse_id</sourceFieldName>
         <recordSourceName>E2E-warehouse</recordSourceName>
       </businessKeys>
@@ -751,6 +782,7 @@ limitations under the License.
       <drivingKey/>
       <drivingKeySourceField/>
       <recordSource>E2E-warehouse</recordSource>
+      <storeRecordSource>Y</storeRecordSource>
       <statusTrackingEnabled>N</statusTrackingEnabled>
       <statusTableName/>
       <statusFieldName>record_status</statusFieldName>
@@ -779,6 +811,7 @@ limitations under the License.
               <businessKeySources>
                 <businessKeySource>
                   <businessKeyField>warehouse_id</businessKeyField>
+                  <sourceFieldNames/>
                   <sourceFieldName>warehouse_id</sourceFieldName>
                 </businessKeySource>
               </businessKeySources>
@@ -789,6 +822,7 @@ limitations under the License.
               <businessKeySources>
                 <businessKeySource>
                   <businessKeyField>product_id</businessKeyField>
+                  <sourceFieldNames/>
                   <sourceFieldName>product_id</sourceFieldName>
                 </businessKeySource>
               </businessKeySources>
@@ -856,6 +890,7 @@ limitations under the License.
       <drivingKey/>
       <drivingKeySourceField/>
       <recordSource>E2E-warehouse-product</recordSource>
+      <storeRecordSource>Y</storeRecordSource>
       <statusTrackingEnabled>N</statusTrackingEnabled>
       <statusFieldName>record_status</statusFieldName>
       <activeStatusValue>ACTIVE</activeStatusValue>
@@ -882,6 +917,7 @@ limitations under the License.
               <businessKeySources>
                 <businessKeySource>
                   <businessKeyField>customer_id</businessKeyField>
+                  <sourceFieldNames/>
                   <sourceFieldName>customer_id</sourceFieldName>
                 </businessKeySource>
               </businessKeySources>
@@ -892,6 +928,7 @@ limitations under the License.
               <businessKeySources>
                 <businessKeySource>
                   <businessKeyField>order_id</businessKeyField>
+                  <sourceFieldNames/>
                   <sourceFieldName>order_id</sourceFieldName>
                 </businessKeySource>
               </businessKeySources>
@@ -922,6 +959,8 @@ limitations under the License.
         <description>Sales representative business key</description>
         <dataType>Integer</dataType>
         <length>9</length>
+        <composite>N</composite>
+        <sourceFieldNames/>
         <sourceFieldName>rep_id</sourceFieldName>
         <recordSourceName>E2E-sales-rep</recordSourceName>
       </businessKeys>
@@ -966,6 +1005,7 @@ limitations under the License.
               <businessKeySources>
                 <businessKeySource>
                   <businessKeyField>order_id</businessKeyField>
+                  <sourceFieldNames/>
                   <sourceFieldName>order_id</sourceFieldName>
                 </businessKeySource>
               </businessKeySources>
@@ -976,6 +1016,7 @@ limitations under the License.
               <businessKeySources>
                 <businessKeySource>
                   <businessKeyField>rep_id</businessKeyField>
+                  <sourceFieldNames/>
                   <sourceFieldName>primary_rep_id</sourceFieldName>
                 </businessKeySource>
               </businessKeySources>
@@ -986,6 +1027,7 @@ limitations under the License.
               <businessKeySources>
                 <businessKeySource>
                   <businessKeyField>rep_id</businessKeyField>
+                  <sourceFieldNames/>
                   <sourceFieldName>secondary_rep_id</sourceFieldName>
                 </businessKeySource>
               </businessKeySources>
@@ -1106,6 +1148,7 @@ limitations under the License.
       <drivingKey/>
       <drivingKeySourceField/>
       <recordSource>all-customer-info</recordSource>
+      <storeRecordSource>Y</storeRecordSource>
       <statusTrackingEnabled>N</statusTrackingEnabled>
       <statusTableName/>
       <statusFieldName>record_status</statusFieldName>

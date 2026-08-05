@@ -523,6 +523,7 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
         // Add Constant transform for the static load date (provided to the method)
         TransformMeta constantTransform =
             addConstantForLoadDate(ctx, pipelineMeta, loadDate, checkSumTransform);
+        constantTransform = addConstantForLoadCycleId(ctx, pipelineMeta, constantTransform);
 
         // Write new rows to the target (all target fields except "flag")
         IRowMeta targetLayout = getTargetTableLayout(metadataProvider, variables, model);
@@ -914,6 +915,22 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
     return tm;
   }
 
+  private TransformMeta addConstantForLoadCycleId(
+      HubUpdateContext ctx, PipelineMeta pipelineMeta, TransformMeta predecessor)
+      throws HopException {
+    if (ctx.config == null || !ctx.config.isStoreLoadCycleId()) {
+      return predecessor;
+    }
+    return DvLoadCycleSupport.addConstantForLoadCycleId(
+        pipelineMeta,
+        predecessor,
+        true,
+        ctx.config.getLoadCycleIdField(),
+        ctx.variables,
+        null,
+        new Point(LOCATION_START_LINE_3.x + 6 * SPACING_WIDTH, LOCATION_START_LINE_3.y));
+  }
+
   private static DvTargetLoadSupport.TargetLoadContext buildTargetLoadContext(
       HubUpdateContext ctx, String pipelineName) {
     String tableName = ctx.targetTableName;
@@ -1228,6 +1245,9 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
       }
       IValueMeta loadMeta = new ValueMetaTimestamp(loadDateField);
       rowMeta.addValueMeta(loadMeta);
+
+      DvLoadCycleSupport.appendToLayout(
+          rowMeta, config.isStoreLoadCycleId(), config.getLoadCycleIdField(), variables);
 
       return rowMeta;
 

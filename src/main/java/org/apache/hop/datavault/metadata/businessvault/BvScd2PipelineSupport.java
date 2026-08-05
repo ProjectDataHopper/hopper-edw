@@ -51,6 +51,7 @@ import org.apache.hop.datavault.metadata.DataVaultConfiguration;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DvHub;
 import org.apache.hop.datavault.metadata.DvLink;
+import org.apache.hop.datavault.metadata.DvLoadCycleSupport;
 import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.DvSpecialRecordSupport;
 import org.apache.hop.datavault.metadata.DvSqlSupport;
@@ -704,6 +705,10 @@ public final class BvScd2PipelineSupport {
         new ValueMetaTimestamp(resolveValidFromField(scd2Table, bvConfig, variables)));
     rowMeta.addValueMeta(
         new ValueMetaTimestamp(resolveValidToField(scd2Table, bvConfig, variables)));
+    if (bvConfig != null) {
+      DvLoadCycleSupport.appendToLayout(
+          rowMeta, bvConfig.isStoreLoadCycleId(), bvConfig.getLoadCycleIdField(), variables);
+    }
   }
 
   static boolean hasFieldMappings(BvScd2Table scd2Table) {
@@ -1808,10 +1813,32 @@ public final class BvScd2PipelineSupport {
   private static TransformMeta addTableOutput(
       Scd2BuildContext ctx, PipelineMeta pipelineMeta, TransformMeta predecessor)
       throws HopException {
+    TransformMeta withCycle = addConstantForLoadCycleId(ctx, pipelineMeta, predecessor);
     if (ctx.scd2Table != null && ctx.scd2Table.isIncrementalBuild()) {
-      return addIncrementalWrites(ctx, pipelineMeta, predecessor);
+      return addIncrementalWrites(ctx, pipelineMeta, withCycle);
     }
-    return addFullRebuildTableOutput(ctx, pipelineMeta, predecessor);
+    return addFullRebuildTableOutput(ctx, pipelineMeta, withCycle);
+  }
+
+  private static TransformMeta addConstantForLoadCycleId(
+      Scd2BuildContext ctx, PipelineMeta pipelineMeta, TransformMeta predecessor)
+      throws HopException {
+    if (ctx.bvConfig == null || !ctx.bvConfig.isStoreLoadCycleId()) {
+      return predecessor;
+    }
+    Point location = null;
+    if (predecessor != null && predecessor.getLocation() != null) {
+      location =
+          new Point(predecessor.getLocation().x + SPACING_WIDTH, predecessor.getLocation().y);
+    }
+    return DvLoadCycleSupport.addConstantForLoadCycleId(
+        pipelineMeta,
+        predecessor,
+        true,
+        ctx.bvConfig.getLoadCycleIdField(),
+        ctx.variables,
+        null,
+        location);
   }
 
   private static TransformMeta addFullRebuildTableOutput(

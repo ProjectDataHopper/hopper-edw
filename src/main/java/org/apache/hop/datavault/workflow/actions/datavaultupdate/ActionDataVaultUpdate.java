@@ -59,6 +59,7 @@ import org.apache.hop.datavault.metadata.DvDdlSupport;
 import org.apache.hop.datavault.metadata.DvGeneratedPipelineSupport;
 import org.apache.hop.datavault.metadata.DvIntegerSettingValidationSupport;
 import org.apache.hop.datavault.metadata.DvIntegrationSupport;
+import org.apache.hop.datavault.metadata.DvLoadCycleSupport;
 import org.apache.hop.datavault.metadata.DvLoadDateSupport;
 import org.apache.hop.datavault.metadata.DvModelBulkUpdateExecutionSupport;
 import org.apache.hop.datavault.metadata.DvModelCheckOptions;
@@ -397,6 +398,31 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
       } else {
         logBasic(BaseMessages.getString(PKG, "ActionDataVaultUpdate.Log.UsingCurrentLoadDate"));
       }
+
+      DataVaultConfiguration configuration = model.getConfigurationOrDefault();
+      if (configuration.isStoreLoadCycleId()) {
+        DatabaseMeta loadCycleDatabase =
+            DvSpecialRecordSupport.loadTargetDatabase(getMetadataProvider(), configuration);
+        if (loadCycleDatabase == null) {
+          throw new HopException(
+              BaseMessages.getString(PKG, "ActionDataVaultUpdate.Error.LoadCycleTargetMissing"));
+        }
+        ILoggingObject loadCycleLog =
+            new SimpleLoggingObject("ActionDataVaultUpdate", LoggingObjectType.GENERAL, null);
+        long cycleId =
+            DvLoadCycleSupport.allocateNext(
+                loadCycleDatabase,
+                getVariables(),
+                loadCycleLog,
+                configuration.getLoadCycleControlTable());
+        if (getParentWorkflow() != null) {
+          DvLoadCycleSupport.setCycleIdVariable(getParentWorkflow(), cycleId);
+        }
+        logBasic(
+            BaseMessages.getString(
+                PKG, "ActionDataVaultUpdate.Log.UsingLoadCycleId", Long.toString(cycleId)));
+      }
+
       boolean success = true;
       int totalErrors = 0;
       String realRecordSourceGroup = resolve(recordSourceGroup);

@@ -226,6 +226,7 @@ public final class DmScd2DimensionBuilder {
     ConstantField loadField = new ConstantField(loadDateField, "Date", loadDateString);
     loadField.setFieldFormat(loadDateMeta.getConversionMask());
     constantMeta.getFields().add(loadField);
+    appendLoadCycleConstantField(ctx, constantMeta);
 
     TransformMeta constantTransform =
         new TransformMeta("Constant", "add_effective_dates", constantMeta);
@@ -705,6 +706,7 @@ public final class DmScd2DimensionBuilder {
     ConstantField loadField = new ConstantField(loadDateField, "Date", loadDateString);
     loadField.setFieldFormat(loadDateMeta.getConversionMask());
     constantMeta.getFields().add(loadField);
+    appendLoadCycleConstantField(ctx, constantMeta);
 
     TransformMeta tm =
         new TransformMeta(
@@ -715,6 +717,29 @@ public final class DmScd2DimensionBuilder {
     pipelineMeta.addTransform(tm);
     pipelineMeta.addPipelineHop(new PipelineHopMeta(predecessor, tm));
     return tm;
+  }
+
+  private static void appendLoadCycleConstantField(
+      DmPipelineBuilderSupport.BuildContext ctx, ConstantMeta constantMeta) throws HopException {
+    if (ctx == null
+        || ctx.config == null
+        || !ctx.config.isStoreLoadCycleId()
+        || constantMeta == null) {
+      return;
+    }
+    Long cycleId =
+        org.apache.hop.datavault.metadata.DvLoadCycleSupport.resolveCycleIdFromVariables(
+            ctx.variables);
+    if (cycleId == null) {
+      throw new HopException(
+          "Load cycle id column is enabled but no cycle id is available (variable "
+              + org.apache.hop.datavault.metadata.DvLoadCycleSupport.VAR_LOAD_CYCLE_ID
+              + ").");
+    }
+    String fieldName =
+        org.apache.hop.datavault.metadata.DvLoadCycleSupport.resolveFieldName(
+            ctx.config.getLoadCycleIdField(), ctx.variables);
+    constantMeta.getFields().add(new ConstantField(fieldName, "Integer", Long.toString(cycleId)));
   }
 
   private static CalculatorMetaFunction calculatorFunction(

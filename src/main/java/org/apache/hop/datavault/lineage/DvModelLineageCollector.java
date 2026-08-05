@@ -35,6 +35,7 @@ import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DependentChildKey;
 import org.apache.hop.datavault.metadata.DvHub;
 import org.apache.hop.datavault.metadata.DvLink;
+import org.apache.hop.datavault.metadata.DvLoadCycleSupport;
 import org.apache.hop.datavault.metadata.DvReferenceTable;
 import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.DvTableType;
@@ -678,6 +679,31 @@ public final class DvModelLineageCollector {
           LineageReasonFactory.standardColumn(loadDate, "loadDateField", loadDate));
       field.addContribution(contribution);
       table.addField(field);
+    }
+
+    if (config.isStoreLoadCycleId()) {
+      String loadCycle =
+          resolve(
+              Utils.isEmpty(config.getLoadCycleIdField())
+                  ? DvLoadCycleSupport.DEFAULT_FIELD_NAME
+                  : config.getLoadCycleIdField(),
+              variables);
+      if (Utils.isEmpty(loadCycle)) {
+        loadCycle = DvLoadCycleSupport.DEFAULT_FIELD_NAME;
+      }
+      if (table.findField(loadCycle).isEmpty()) {
+        FieldLineage field = new FieldLineage(loadCycle);
+        field.setTechnical(true);
+        field.setDataType("Integer");
+        FieldContribution contribution = new FieldContribution();
+        contribution.setSourceKind(TableSourceKind.CONFIG);
+        contribution.setSourceName("DataVaultConfiguration");
+        contribution.setTransform(FieldTransform.CONSTANT);
+        contribution.addReason(
+            LineageReasonFactory.standardColumn(loadCycle, "loadCycleIdField", loadCycle));
+        field.addContribution(contribution);
+        table.addField(field);
+      }
     }
 
     boolean storeRecordSource =

@@ -793,6 +793,7 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
         }
         TransformMeta constantTransform =
             addConstantForLoadDate(ctx, pipelineMeta, loadDate, filterTransform);
+        constantTransform = addConstantForLoadCycleId(ctx, pipelineMeta, constantTransform);
 
         IRowMeta targetLayout = getTargetTableLayout(metadataProvider, variables, model);
 
@@ -940,6 +941,9 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
       if (Utils.isEmpty(loadDateField)) loadDateField = "LOAD_DATE";
       IValueMeta loadMeta = new ValueMetaTimestamp(loadDateField);
       rowMeta.addValueMeta(loadMeta);
+
+      DvLoadCycleSupport.appendToLayout(
+          rowMeta, config.isStoreLoadCycleId(), config.getLoadCycleIdField(), variables);
 
       return rowMeta;
     } catch (Exception e) {
@@ -1444,6 +1448,22 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
     pipelineMeta.addTransform(tm);
     pipelineMeta.addPipelineHop(new PipelineHopMeta(predecessor, tm));
     return tm;
+  }
+
+  private TransformMeta addConstantForLoadCycleId(
+      LinkUpdateContext ctx, PipelineMeta pipelineMeta, TransformMeta predecessor)
+      throws HopException {
+    if (ctx.config == null || !ctx.config.isStoreLoadCycleId()) {
+      return predecessor;
+    }
+    return DvLoadCycleSupport.addConstantForLoadCycleId(
+        pipelineMeta,
+        predecessor,
+        true,
+        ctx.config.getLoadCycleIdField(),
+        ctx.variables,
+        null,
+        new Point(LOCATION_START_LINE_3.x + 5 * SPACING_WIDTH, LOCATION_START_LINE_3.y));
   }
 
   private DvTargetLoadSupport.TargetLoadContext buildTargetLoadContext(

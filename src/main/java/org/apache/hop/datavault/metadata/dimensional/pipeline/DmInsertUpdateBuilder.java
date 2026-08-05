@@ -53,6 +53,8 @@ public final class DmInsertUpdateBuilder {
     GeneratedPipelineMetadataSupport.stampDmTablePipeline(pipelineMeta, ctx);
 
     TransformMeta sourceTransform = DmPipelineBuilderSupport.addSourceInput(ctx, pipelineMeta);
+    sourceTransform =
+        DmPipelineBuilderSupport.addLoadCycleConstantIfEnabled(ctx, pipelineMeta, sourceTransform);
     TransformMeta insertUpdateTransform =
         addInsertUpdate(ctx, pipelineMeta, sourceTransform, dimension);
     if (insertUpdateTransform != null) {
@@ -98,6 +100,12 @@ public final class DmInsertUpdateBuilder {
     }
     String loadDateField = ctx.config.resolveLoadDateField(ctx.variables);
     values.add(new InsertUpdateValue(loadDateField, loadDateField, true));
+    if (ctx.config.isStoreLoadCycleId()) {
+      String cycleField =
+          org.apache.hop.datavault.metadata.DvLoadCycleSupport.resolveFieldName(
+              ctx.config.getLoadCycleIdField(), ctx.variables);
+      values.add(new InsertUpdateValue(cycleField, cycleField, true));
+    }
     lookup.setValueFields(values);
 
     insertUpdateMeta.setInsertUpdateLookupField(lookup);

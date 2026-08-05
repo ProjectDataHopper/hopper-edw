@@ -61,6 +61,13 @@ class DataVaultConfigurationTest {
   }
 
   @Test
+  void newConfigurationDefaultsStoreLoadCycleIdToFalse() {
+    DataVaultConfiguration configuration = new DataVaultConfiguration();
+    assertEquals(false, configuration.isStoreLoadCycleId());
+    assertEquals("LOAD_CYCLE_ID", configuration.getLoadCycleIdField());
+  }
+
+  @Test
   void blankSortRowsSizeFallsBackToHopDefault() {
     DataVaultConfiguration configuration = new DataVaultConfiguration();
     configuration.setSortRowsSize("");

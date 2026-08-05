@@ -125,6 +125,15 @@ image::images/data-vault-model-dialog-standard-columns-tab.png[Standard columns 
 |Record source field length
 |Character length of the record source column in target tables. Supports variables (default 100).
 
+|Store load cycle ID
+|When enabled (off by default), every Data Vault table includes an integer **load cycle ID** column. Each Data Vault Update allocates the next value from a durable control table on the target database and stamps that same ID on all rows written in the run (including special/sentinel rows).
+
+|Load cycle ID field name
+|Column name for the load cycle ID (default `LOAD_CYCLE_ID`). Supports variables. Used only when Store load cycle ID is enabled.
+
+|Load cycle control table
+|Physical table on the model target database that holds the counter (default `dv_load_cycle`). Created automatically on first allocate. Supports variables. The allocated value is also published as workflow variable `DV_LOAD_CYCLE_ID`.
+
 |Use load end date pattern
 |Documents that satellites use an end-dating approach. Generated pipelines today perform insert-only change detection; this flag is mainly for documentation and future extensions.
 

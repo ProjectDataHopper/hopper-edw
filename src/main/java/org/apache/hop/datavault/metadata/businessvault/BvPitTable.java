@@ -82,6 +82,7 @@ public class BvPitTable extends BvTableBase {
     if (dataVaultModel == null) {
       return null;
     }
-    return BvPitLayoutSupport.buildTargetTableLayout(this, dataVaultModel, variables);
+    BusinessVaultConfiguration bvConfig = model != null ? model.getConfigurationOrDefault() : null;
+    return BvPitLayoutSupport.buildTargetTableLayout(this, bvConfig, dataVaultModel, variables);
   }
 }

@@ -84,7 +84,7 @@ Visual **raw Data Vault 2.0** model: hubs, links, satellites, physical **referen
 
 ## Anti-patterns (for Gemini)
 
-1. Inventing `x_load_ts` / hash columns as satellite attributes — those come from **configuration** standard columns.  
+1. Inventing `x_load_ts` / load-cycle / hash columns as satellite attributes — those come from **configuration** standard columns (`storeLoadCycleId`, `loadCycleIdField` optional).  
 2. Putting CRM columns on a hub that are not business keys — use a satellite.  
 3. Using `REFERENCE` for a cross-model hub pointer — use `LINKED_TABLE`.  
 4. Omitting `recordSource` / `recordSources` so loads cannot resolve catalog feeds.  

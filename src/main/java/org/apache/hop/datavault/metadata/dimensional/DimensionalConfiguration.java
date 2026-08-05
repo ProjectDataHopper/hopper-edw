@@ -29,6 +29,7 @@ import org.apache.hop.core.logging.ILogChannel;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.config.DataVaultConfigSingleton;
+import org.apache.hop.datavault.metadata.DvLoadCycleSupport;
 import org.apache.hop.datavault.metadata.DvTargetLoadConfigurationSupport;
 import org.apache.hop.datavault.metadata.DvTargetLoadMode;
 import org.apache.hop.datavault.metadata.IDvTargetLoadConfiguration;
@@ -162,6 +163,35 @@ public class DimensionalConfiguration extends HopMetadataBase
       parentId = GUI_PLUGIN_ELEMENT_PARENT_ID)
   @HopMetadataProperty
   private String loadDateField = DEFAULT_LOAD_DATE_FIELD;
+
+  @GuiWidgetElement(
+      order = "0252",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::DataVaultConfiguration.StoreLoadCycleId.Label",
+      toolTip = "i18n::DimensionalConfiguration.StoreLoadCycleId.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_PARENT_ID)
+  @HopMetadataProperty
+  private boolean storeLoadCycleId;
+
+  @GuiWidgetElement(
+      order = "0254",
+      type = GuiElementType.TEXT,
+      variables = true,
+      label = "i18n::DataVaultConfiguration.LoadCycleIdField.Label",
+      toolTip = "i18n::DimensionalConfiguration.LoadCycleIdField.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_PARENT_ID)
+  @HopMetadataProperty
+  private String loadCycleIdField = DvLoadCycleSupport.DEFAULT_FIELD_NAME;
+
+  @GuiWidgetElement(
+      order = "0256",
+      type = GuiElementType.TEXT,
+      variables = true,
+      label = "i18n::DataVaultConfiguration.LoadCycleControlTable.Label",
+      toolTip = "i18n::DimensionalConfiguration.LoadCycleControlTable.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_PARENT_ID)
+  @HopMetadataProperty
+  private String loadCycleControlTable = DvLoadCycleSupport.DEFAULT_CONTROL_TABLE;
 
   @GuiWidgetElement(
       order = "0260",

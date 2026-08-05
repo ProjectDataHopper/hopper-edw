@@ -331,6 +331,8 @@ public final class DvSpecialRecordSupport {
         row[i] = convertToValueMeta(recordSource, meta);
       } else if (isLoadDateColumn(config, name)) {
         row[i] = loadDate;
+      } else if (isLoadCycleColumn(config, variables, name)) {
+        row[i] = resolveLoadCycleId(variables);
       }
     }
     return row;
@@ -363,6 +365,8 @@ public final class DvSpecialRecordSupport {
         row[i] = convertToValueMeta(recordSource, meta);
       } else if (isLoadDateColumn(config, name)) {
         row[i] = loadDate;
+      } else if (isLoadCycleColumn(config, variables, name)) {
+        row[i] = resolveLoadCycleId(variables);
       }
     }
     return row;
@@ -676,6 +680,19 @@ public final class DvSpecialRecordSupport {
       loadDateField = "LOAD_DATE";
     }
     return columnName.equals(loadDateField);
+  }
+
+  private static boolean isLoadCycleColumn(
+      DataVaultConfiguration config, IVariables variables, String columnName) {
+    if (config == null || !config.isStoreLoadCycleId()) {
+      return false;
+    }
+    return DvLoadCycleSupport.isLoadCycleColumn(
+        true, config.getLoadCycleIdField(), variables, columnName);
+  }
+
+  private static Long resolveLoadCycleId(IVariables variables) {
+    return DvLoadCycleSupport.resolveCycleIdFromVariables(variables);
   }
 
   private static Object convertToValueMeta(String value, IValueMeta meta) throws HopException {

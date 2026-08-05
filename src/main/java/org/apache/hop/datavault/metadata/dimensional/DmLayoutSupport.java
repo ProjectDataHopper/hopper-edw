@@ -30,6 +30,7 @@ import org.apache.hop.core.row.value.ValueMetaString;
 import org.apache.hop.core.row.value.ValueMetaTimestamp;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.metadata.DvLoadCycleSupport;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Target table layout helpers aligned with Hop warehouse transform contracts. */
@@ -571,10 +572,20 @@ public final class DmLayoutSupport {
       RowMeta rowMeta, Set<String> added, DimensionalConfiguration config, IVariables variables)
       throws HopException {
     String loadDateField = resolveFieldName(config.resolveLoadDateField(variables), variables);
-    if (Utils.isEmpty(loadDateField) || added.contains(loadDateField)) {
-      return;
+    if (!Utils.isEmpty(loadDateField) && !added.contains(loadDateField)) {
+      addColumn(rowMeta, added, loadDateField, new ValueMetaTimestamp());
     }
-    addColumn(rowMeta, added, loadDateField, new ValueMetaTimestamp());
+    if (config != null && config.isStoreLoadCycleId()) {
+      String cycleField =
+          resolveFieldName(
+              Utils.isEmpty(config.getLoadCycleIdField())
+                  ? DvLoadCycleSupport.DEFAULT_FIELD_NAME
+                  : config.getLoadCycleIdField(),
+              variables);
+      if (!Utils.isEmpty(cycleField) && !added.contains(cycleField)) {
+        addColumn(rowMeta, added, cycleField, new ValueMetaInteger());
+      }
+    }
   }
 
   private static void addColumn(

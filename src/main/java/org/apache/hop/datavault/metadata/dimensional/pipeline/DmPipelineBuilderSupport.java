@@ -26,6 +26,7 @@ import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.metadata.DvLoadCycleSupport;
 import org.apache.hop.datavault.metadata.DvSqlSupport;
 import org.apache.hop.datavault.metadata.DvTargetLoadSupport;
 import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
@@ -296,6 +297,8 @@ public final class DmPipelineBuilderSupport {
       return null;
     }
 
+    TransformMeta writePredecessor = addLoadCycleConstantIfEnabled(ctx, pipelineMeta, predecessor);
+
     DvTargetLoadSupport.TargetLoadContext targetCtx =
         new DvTargetLoadSupport.TargetLoadContext(
             ctx.config,
@@ -305,14 +308,19 @@ public final class DmPipelineBuilderSupport {
             ctx.targetTableName,
             ctx.pipelineName,
             ctx.model.getName(),
-            predecessor.getLocation().x + SPACING_WIDTH,
-            predecessor.getLocation().y);
+            writePredecessor.getLocation().x + SPACING_WIDTH,
+            writePredecessor.getLocation().y);
 
     Set<String> resolvedExcludeFields =
         excludeFields != null ? excludeFields : Collections.emptySet();
     DvTargetLoadSupport.TargetLoadResult result =
         DvTargetLoadSupport.addTargetLoad(
-            targetCtx, pipelineMeta, targetLayout, predecessor, resolvedExcludeFields, truncate);
+            targetCtx,
+            pipelineMeta,
+            targetLayout,
+            writePredecessor,
+            resolvedExcludeFields,
+            truncate);
     if (result != null && result.transformMeta != null) {
       GeneratedPipelineMetadataSupport.stampWriteTarget(
           result.transformMeta,
@@ -323,6 +331,28 @@ public final class DmPipelineBuilderSupport {
           ctx.targetDbName);
     }
     return result.transformMeta;
+  }
+
+  public static TransformMeta addLoadCycleConstantIfEnabled(
+      BuildContext ctx, PipelineMeta pipelineMeta, TransformMeta predecessor) throws HopException {
+    if (ctx == null
+        || ctx.config == null
+        || !ctx.config.isStoreLoadCycleId()
+        || predecessor == null) {
+      return predecessor;
+    }
+    Point location =
+        predecessor.getLocation() != null
+            ? new Point(predecessor.getLocation().x + SPACING_WIDTH, predecessor.getLocation().y)
+            : null;
+    return DvLoadCycleSupport.addConstantForLoadCycleId(
+        pipelineMeta,
+        predecessor,
+        true,
+        ctx.config.getLoadCycleIdField(),
+        ctx.variables,
+        null,
+        location);
   }
 
   public static TransformMeta addDummyTransform(

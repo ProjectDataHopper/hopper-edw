@@ -26,6 +26,7 @@ import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DvHub;
+import org.apache.hop.datavault.metadata.DvLoadCycleSupport;
 import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.DvTableType;
 
@@ -36,6 +37,15 @@ public final class BvPitLayoutSupport {
 
   public static IRowMeta buildTargetTableLayout(
       BvPitTable pitTable, DataVaultModel dvModel, IVariables variables) throws HopException {
+    return buildTargetTableLayout(pitTable, null, dvModel, variables);
+  }
+
+  public static IRowMeta buildTargetTableLayout(
+      BvPitTable pitTable,
+      BusinessVaultConfiguration bvConfig,
+      DataVaultModel dvModel,
+      IVariables variables)
+      throws HopException {
     if (pitTable == null || dvModel == null) {
       throw new HopException("PIT table layout requires a Data Vault model");
     }
@@ -69,6 +79,10 @@ public final class BvPitLayoutSupport {
                 + pitTable.getName());
       }
       rowMeta.addValueMeta(new ValueMetaTimestamp(pointerName));
+    }
+    if (bvConfig != null) {
+      DvLoadCycleSupport.appendToLayout(
+          rowMeta, bvConfig.isStoreLoadCycleId(), bvConfig.getLoadCycleIdField(), variables);
     }
     return rowMeta;
   }

@@ -349,6 +349,35 @@ public class DataVaultConfiguration implements IDvTargetLoadConfiguration {
   private String recordSourceFieldLength = "100";
 
   @GuiWidgetElement(
+      order = "0360",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::DataVaultConfiguration.StoreLoadCycleId.Label",
+      toolTip = "i18n::DataVaultConfiguration.StoreLoadCycleId.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_COLUMNS_TAB_ID)
+  @HopMetadataProperty
+  private boolean storeLoadCycleId;
+
+  @GuiWidgetElement(
+      order = "0365",
+      type = GuiElementType.TEXT,
+      variables = true,
+      label = "i18n::DataVaultConfiguration.LoadCycleIdField.Label",
+      toolTip = "i18n::DataVaultConfiguration.LoadCycleIdField.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_COLUMNS_TAB_ID)
+  @HopMetadataProperty
+  private String loadCycleIdField = DvLoadCycleSupport.DEFAULT_FIELD_NAME;
+
+  @GuiWidgetElement(
+      order = "0367",
+      type = GuiElementType.TEXT,
+      variables = true,
+      label = "i18n::DataVaultConfiguration.LoadCycleControlTable.Label",
+      toolTip = "i18n::DataVaultConfiguration.LoadCycleControlTable.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_COLUMNS_TAB_ID)
+  @HopMetadataProperty
+  private String loadCycleControlTable = DvLoadCycleSupport.DEFAULT_CONTROL_TABLE;
+
+  @GuiWidgetElement(
       order = "0410",
       type = GuiElementType.CHECKBOX,
       label = "i18n::DataVaultConfiguration.UseLoadEndDate.Label",

@@ -34,6 +34,7 @@ import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metadata.DataVaultConfiguration;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DvHub;
+import org.apache.hop.datavault.metadata.DvLoadCycleSupport;
 import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.DvSpecialRecordSupport;
 import org.apache.hop.datavault.metadata.DvSqlSupport;
@@ -383,7 +384,21 @@ public final class BvPitPipelineSupport {
       PitBuildContext ctx, PipelineMeta pipelineMeta, TransformMeta predecessor)
       throws HopException {
     IRowMeta targetLayout =
-        BvPitLayoutSupport.buildTargetTableLayout(ctx.pitTable(), ctx.dvModel(), ctx.variables());
+        BvPitLayoutSupport.buildTargetTableLayout(
+            ctx.pitTable(), ctx.bvConfig(), ctx.dvModel(), ctx.variables());
+
+    TransformMeta writePredecessor = predecessor;
+    if (ctx.bvConfig() != null && ctx.bvConfig().isStoreLoadCycleId()) {
+      writePredecessor =
+          DvLoadCycleSupport.addConstantForLoadCycleId(
+              pipelineMeta,
+              predecessor,
+              true,
+              ctx.bvConfig().getLoadCycleIdField(),
+              ctx.variables(),
+              null,
+              new Point(LOCATION_TABLE_OUTPUT.x - 50, LOCATION_TABLE_OUTPUT.y));
+    }
 
     DvTargetLoadSupport.TargetLoadContext targetCtx =
         new DvTargetLoadSupport.TargetLoadContext(
@@ -402,7 +417,7 @@ public final class BvPitPipelineSupport {
             targetCtx,
             pipelineMeta,
             targetLayout,
-            predecessor,
+            writePredecessor,
             java.util.Collections.emptySet(),
             false);
     return result.transformMeta;

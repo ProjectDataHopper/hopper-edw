@@ -490,6 +490,11 @@ public class DvReferenceTable extends DvTableBase
       rsMeta.setLength(rsLength);
       rowMeta.addValueMeta(rsMeta);
 
+      if (config != null) {
+        DvLoadCycleSupport.appendToLayout(
+            rowMeta, config.isStoreLoadCycleId(), config.getLoadCycleIdField(), variables);
+      }
+
       return rowMeta;
     } catch (HopException e) {
       throw e;
@@ -616,6 +621,8 @@ public class DvReferenceTable extends DvTableBase
 
         TransformMeta constantTransform =
             addConstantForLoadDate(config, variables, pipelineMeta, loadDate, sourceTransform);
+        constantTransform =
+            addConstantForLoadCycleId(config, variables, pipelineMeta, constantTransform);
 
         // DELETE_INSERT same-DB: insert only (delete runs in orchestrating workflow).
         // FULL_REPLACE or DELETE_INSERT fallback: truncate + insert.
@@ -829,5 +836,24 @@ public class DvReferenceTable extends DvTableBase
     pipelineMeta.addTransform(tm);
     pipelineMeta.addPipelineHop(new PipelineHopMeta(predecessor, tm));
     return tm;
+  }
+
+  private TransformMeta addConstantForLoadCycleId(
+      DataVaultConfiguration config,
+      IVariables variables,
+      PipelineMeta pipelineMeta,
+      TransformMeta predecessor)
+      throws HopException {
+    if (config == null || !config.isStoreLoadCycleId()) {
+      return predecessor;
+    }
+    return DvLoadCycleSupport.addConstantForLoadCycleId(
+        pipelineMeta,
+        predecessor,
+        true,
+        config.getLoadCycleIdField(),
+        variables,
+        null,
+        new Point(LOCATION_LOAD.x + 2 * SPACING_WIDTH, LOCATION_LOAD.y));
   }
 }

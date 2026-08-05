@@ -54,6 +54,7 @@ import org.apache.hop.datavault.lineage.DdlLineageExplainSupport;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DvDdlSupport;
 import org.apache.hop.datavault.metadata.DvIntegerSettingValidationSupport;
+import org.apache.hop.datavault.metadata.DvLoadCycleSupport;
 import org.apache.hop.datavault.metadata.DvModelBulkUpdateExecutionSupport;
 import org.apache.hop.datavault.metadata.DvTargetLoadMode;
 import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
@@ -305,6 +306,31 @@ public class ActionBusinessVaultUpdate extends ActionBase implements Cloneable, 
       DataVaultModel dvModel =
           BusinessVaultDvModelResolver.buildEffectiveDataVaultModel(
               bvModel, getVariables(), getMetadataProvider());
+
+      BusinessVaultConfiguration bvConfiguration = bvModel.getConfigurationOrDefault();
+      if (bvConfiguration.isStoreLoadCycleId()) {
+        DatabaseMeta loadCycleDatabase =
+            BvTargetDatabaseSupport.loadTargetDatabase(getMetadataProvider(), bvConfiguration);
+        if (loadCycleDatabase == null) {
+          throw new HopException(
+              BaseMessages.getString(
+                  PKG, "ActionBusinessVaultUpdate.Error.LoadCycleTargetMissing"));
+        }
+        ILoggingObject loadCycleLog =
+            new SimpleLoggingObject("ActionBusinessVaultUpdate", LoggingObjectType.GENERAL, null);
+        long cycleId =
+            DvLoadCycleSupport.allocateNext(
+                loadCycleDatabase,
+                getVariables(),
+                loadCycleLog,
+                bvConfiguration.getLoadCycleControlTable());
+        if (getParentWorkflow() != null) {
+          DvLoadCycleSupport.setCycleIdVariable(getParentWorkflow(), cycleId);
+        }
+        logBasic(
+            BaseMessages.getString(
+                PKG, "ActionBusinessVaultUpdate.Log.UsingLoadCycleId", Long.toString(cycleId)));
+      }
 
       if (logModelCheckFailures || abortOnModelCheckFailures) {
         List<ICheckResult> remarks = bvModel.check(getMetadataProvider(), getVariables());

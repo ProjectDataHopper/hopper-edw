@@ -54,6 +54,7 @@ import org.apache.hop.datavault.hopgui.file.dimensional.HopDimensionalFileType;
 import org.apache.hop.datavault.lineage.DdlLineageExplainSupport;
 import org.apache.hop.datavault.metadata.DvDdlSupport;
 import org.apache.hop.datavault.metadata.DvIntegerSettingValidationSupport;
+import org.apache.hop.datavault.metadata.DvLoadCycleSupport;
 import org.apache.hop.datavault.metadata.DvModelBulkUpdateExecutionSupport;
 import org.apache.hop.datavault.metadata.DvTargetLoadMode;
 import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
@@ -302,6 +303,30 @@ public class ActionDimensionalUpdate extends ActionBase implements Cloneable, IA
       }
 
       DimensionalModel dmModel = loadDimensionalModel(getMetadataProvider(), getVariables());
+
+      DimensionalConfiguration dmConfiguration = dmModel.getConfigurationOrDefault();
+      if (dmConfiguration.isStoreLoadCycleId()) {
+        DatabaseMeta loadCycleDatabase =
+            DmTargetDatabaseSupport.loadTargetDatabase(getMetadataProvider(), dmConfiguration);
+        if (loadCycleDatabase == null) {
+          throw new HopException(
+              BaseMessages.getString(PKG, "ActionDimensionalUpdate.Error.LoadCycleTargetMissing"));
+        }
+        ILoggingObject loadCycleLog =
+            new SimpleLoggingObject("ActionDimensionalUpdate", LoggingObjectType.GENERAL, null);
+        long cycleId =
+            DvLoadCycleSupport.allocateNext(
+                loadCycleDatabase,
+                getVariables(),
+                loadCycleLog,
+                dmConfiguration.getLoadCycleControlTable());
+        if (getParentWorkflow() != null) {
+          DvLoadCycleSupport.setCycleIdVariable(getParentWorkflow(), cycleId);
+        }
+        logBasic(
+            BaseMessages.getString(
+                PKG, "ActionDimensionalUpdate.Log.UsingLoadCycleId", Long.toString(cycleId)));
+      }
 
       if (logModelCheckFailures || abortOnModelCheckFailures) {
         List<ICheckResult> remarks = dmModel.check(getMetadataProvider(), getVariables());
