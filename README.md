@@ -17,7 +17,7 @@ under the License.
 
 # Hop Data Vault 2.0 Plugin
 
-Apache Hop plugin for **Data Vault 2.0**, **Business Vault**, and **dimensional** modeling, validation, and model-driven loading. Version **0.7.0** requires **Apache Hop 2.19.0** (or a **recent 2.19.0-SNAPSHOT** until GA) and **Java 21**.
+Apache Hop plugin for **Data Vault 2.0**, **Business Vault**, and **dimensional** modeling, validation, and model-driven loading. Version **0.8.0-SNAPSHOT** (latest release **0.7.0**) requires **Apache Hop 2.19.0** (or a **recent 2.19.0-SNAPSHOT** until GA) and **Java 21**.
 
 **Hop 2.19 is required.** Until the GA client is on Maven Central, build Hop from source or download a recent CI snapshot of **hop-client**:
 
@@ -128,8 +128,8 @@ mvn clean package
 
 Artifacts:
 
-- `target/hop-datavault-0.7.0.jar`
-- `target/hop-datavault-0.7.0.zip` (ready-to-unzip plugin layout)
+- `target/hop-datavault-0.8.0-SNAPSHOT.jar`
+- `target/hop-datavault-0.8.0-SNAPSHOT.zip` (ready-to-unzip plugin layout)
 
 Published release artifacts for **0.7.0**:
 
@@ -141,7 +141,7 @@ Published release artifacts for **0.7.0**:
 1. Install **Apache Hop 2.19.0** or a **recent 2.19.0-SNAPSHOT** client ([hop-client snapshots](https://repository.apache.org/content/groups/snapshots/org/apache/hop/hop-client/2.19.0-SNAPSHOT/)).
 2. Unzip the assembly zip into your Hop installation, or manually copy the jar to:
    ```
-   $HOP_HOME/plugins/misc/datavault/hop-datavault-0.7.0.jar
+   $HOP_HOME/plugins/misc/datavault/hop-datavault-0.8.0-SNAPSHOT.jar
    ```
 3. Restart Hop GUI.
 4. New metadata types appear under **Metadata → Data Vault**. **Data Vault Update**, **Business Vault Update**, **Validate resource definitions**, **Export data lineage**, and **Update resource definition group** actions are available in workflows. `.hsm`, `.hdv`, `.hbv`, and `.hdm` files open in the visual modelers.
