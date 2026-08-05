@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.hop.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.apache.hop.core.Result;
 import org.apache.hop.core.annotations.Action;
 import org.apache.hop.core.exception.HopException;
@@ -68,6 +69,16 @@ public class ActionExportArchitecture extends ActionBase implements Cloneable, I
       parentId = GUI_PLUGIN_ELEMENT_PARENT_ID)
   @HopMetadataProperty
   private String rootArtifactFilename;
+
+  @GuiWidgetElement(
+      order = "0150",
+      type = GuiElementType.METADATA,
+      metadata = ResourceDefinitionGroupMeta.class,
+      label = "i18n::ActionExportArchitecture.ResourceDefinitionGroup.Label",
+      toolTip = "i18n::ActionExportArchitecture.ResourceDefinitionGroup.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_PARENT_ID)
+  @HopMetadataProperty
+  private String resourceDefinitionGroup;
 
   @GuiWidgetElement(
       order = "0200",
@@ -146,6 +157,7 @@ public class ActionExportArchitecture extends ActionBase implements Cloneable, I
         ArchitectureViewType.SOLUTION.name(),
         ArchitectureViewType.DATA.name(),
         ArchitectureViewType.MODEL.name(),
+        ArchitectureViewType.MODELS.name(),
         ArchitectureViewType.END_TO_END.name());
   }
 
@@ -153,33 +165,53 @@ public class ActionExportArchitecture extends ActionBase implements Cloneable, I
   public Result execute(Result prevResult, int nr) throws HopException {
     Result result = prevResult != null ? prevResult : new Result();
     try {
-      String root = resolve(rootArtifactFilename);
-      if (Utils.isEmpty(root)) {
-        throw new HopException(
-            BaseMessages.getString(PKG, "ActionExportArchitecture.Error.MissingRoot"));
-      }
-
       ArchitectureViewType view = parseViewType(viewType);
-      if (view == ArchitectureViewType.DATA) {
-        List<String> models = splitPaths(root);
-        ExportResult dataExport =
-            ArchitectureExportService.exportDataDrawio(
-                models, resolve(outputDrawioFile), this, getMetadataProvider());
-        logWroteData(dataExport);
-      } else if (view == ArchitectureViewType.MODEL) {
-        List<String> models = splitPaths(root);
-        String dir = resolve(modelsOutputFolder);
-        if (Utils.isEmpty(dir)) {
-          dir = resolve(outputDrawioFile);
+      String root = resolve(rootArtifactFilename);
+      String groupName = resolve(resourceDefinitionGroup);
+
+      if (view == ArchitectureViewType.DATA
+          || view == ArchitectureViewType.MODEL
+          || view == ArchitectureViewType.MODELS) {
+        List<String> modelPaths = resolveModelPaths(groupName, root);
+        if (modelPaths.isEmpty()) {
+          throw new HopException(
+              BaseMessages.getString(PKG, "ActionExportArchitecture.Error.MissingModels"));
         }
-        List<ExportResult> modelExports =
-            ArchitectureExportService.exportLayerModelDrawios(
-                models, dir, this, getMetadataProvider());
-        for (ExportResult modelExport : modelExports) {
-          logWroteModel(modelExport);
+        if (view == ArchitectureViewType.DATA) {
+          ExportResult dataExport =
+              ArchitectureExportService.exportDataDrawio(
+                  modelPaths, resolve(outputDrawioFile), this, getMetadataProvider());
+          logWroteData(dataExport);
+        } else if (view == ArchitectureViewType.MODEL) {
+          String dir = resolve(modelsOutputFolder);
+          if (Utils.isEmpty(dir)) {
+            dir = resolve(outputDrawioFile);
+          }
+          List<ExportResult> modelExports =
+              ArchitectureExportService.exportLayerModelDrawios(
+                  modelPaths, dir, this, getMetadataProvider());
+          for (ExportResult modelExport : modelExports) {
+            logWroteModel(modelExport);
+          }
+        } else {
+          // MODELS — one Draw.io per model under type subfolders
+          String dir = resolve(modelsOutputFolder);
+          if (Utils.isEmpty(dir)) {
+            dir = resolve(outputDrawioFile);
+          }
+          List<ExportResult> modelExports =
+              ArchitectureExportService.exportPerModelDrawios(
+                  modelPaths, dir, this, getMetadataProvider());
+          for (ExportResult modelExport : modelExports) {
+            logWrotePerModel(modelExport);
+          }
         }
       } else {
         // SOLUTION or END_TO_END: crawl workflow / load .hem
+        if (Utils.isEmpty(root)) {
+          throw new HopException(
+              BaseMessages.getString(PKG, "ActionExportArchitecture.Error.MissingRoot"));
+        }
         ExportResult export =
             ArchitectureExportService.exportSolutionDrawio(
                 root, resolve(outputDrawioFile), this, getMetadataProvider(), true);
@@ -194,8 +226,12 @@ public class ActionExportArchitecture extends ActionBase implements Cloneable, I
           logBasic(warning);
         }
 
-        List<String> modelPaths =
+        List<String> mapModels =
             ArchitectureExportService.modelPathsFromExecutionMap(export.getExecutionMap());
+        List<String> modelPaths = resolveModelPaths(groupName, null);
+        if (modelPaths.isEmpty()) {
+          modelPaths = mapModels;
+        }
         if (alsoExportDataView) {
           if (modelPaths.isEmpty()) {
             logBasic(BaseMessages.getString(PKG, "ActionExportArchitecture.Log.NoModelsForData"));
@@ -230,6 +266,15 @@ public class ActionExportArchitecture extends ActionBase implements Cloneable, I
     return result;
   }
 
+  /**
+   * When a resource definition group is set, use its model files; otherwise use fallback paths
+   * (from root for model views, or from the execution map for SOLUTION also-export).
+   */
+  private List<String> resolveModelPaths(String groupName, String rootPaths) throws HopException {
+    List<String> fallback = splitPaths(rootPaths);
+    return ArchitectureExportService.resolveModelPaths(groupName, fallback, getMetadataProvider());
+  }
+
   private void logWroteData(ExportResult dataExport) {
     logBasic(
         BaseMessages.getString(
@@ -244,19 +289,33 @@ public class ActionExportArchitecture extends ActionBase implements Cloneable, I
   }
 
   private void logWroteModel(ExportResult modelExport) {
-    if (modelExport.getWarnings() != null && !modelExport.getWarnings().isEmpty()) {
-      for (String warning : modelExport.getWarnings()) {
-        logBasic(warning);
-      }
-      return;
+    for (String warning : modelExport.getWarnings()) {
+      logBasic(warning);
     }
-    logBasic(
-        BaseMessages.getString(
-            PKG,
-            "ActionExportArchitecture.Log.WroteModel",
-            modelExport.getOutputPath(),
-            modelExport.getGraph().nodeCount(),
-            modelExport.getGraph().edgeCount()));
+    if (modelExport.getGraph() != null && modelExport.getGraph().nodeCount() > 0) {
+      logBasic(
+          BaseMessages.getString(
+              PKG,
+              "ActionExportArchitecture.Log.WroteModel",
+              modelExport.getOutputPath(),
+              modelExport.getGraph().nodeCount(),
+              modelExport.getGraph().edgeCount()));
+    }
+  }
+
+  private void logWrotePerModel(ExportResult modelExport) {
+    for (String warning : modelExport.getWarnings()) {
+      logBasic(warning);
+    }
+    if (modelExport.getGraph() != null && modelExport.getGraph().nodeCount() > 0) {
+      logBasic(
+          BaseMessages.getString(
+              PKG,
+              "ActionExportArchitecture.Log.WrotePerModel",
+              modelExport.getOutputPath(),
+              modelExport.getGraph().nodeCount(),
+              modelExport.getGraph().edgeCount()));
+    }
   }
 
   private static ArchitectureViewType parseViewType(String code) {

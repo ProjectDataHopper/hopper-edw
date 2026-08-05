@@ -6,7 +6,7 @@ toc::[]
 
 Export **derived** diagrams for architects and analysts. Models and workflows remain the source of truth; exports are projections for Draw.io / ArchiMate-style communication (issue #104).
 
-== Three products
+== Four products
 
 [cols="1,2,2", options="header"]
 |===
@@ -23,9 +23,13 @@ Export **derived** diagrams for architects and analysts. Models and workflows re
 |**MODEL diagrams (aggregated by layer)**
 |**Enterprise multi-file** data-model projection: all `.hdv` files → one DV diagram; all `.hbv` → one BV diagram; all `.hdm` → one dimensional diagram. Shared hubs/dims are **deduped by name**. Structural relationships included. Source models (`.hsm`) remain the ER canvas for physical sources; they are not yet a separate aggregated Draw.io layer (use the `.hsm` file and DATA inventory for source-side views).
 |**ELK** layout (same stack as the Hop GUI canvas).
+
+|**MODELS diagrams (one file per model)**
+|**Documentation set** for each model listed on a **resource definition group** (or an explicit path list): one Draw.io per `.hdv` / `.hbv` / `.hdm` under type subfolders. No SOLUTION crawl required.
+|**ELK** layout per model file.
 |===
 
-The point of MODEL export is the **aggregate across model files** (subject areas, shared core, multiple dimensional stars) — not a one-file-at-a-time dump of each `.hdv`.
+The point of **MODEL** export is the **aggregate across model files** (subject areas, shared core, multiple dimensional stars). Use **MODELS** when you want a folder of diagrams named after each model for docs or review.
 
 == Screenshots (retail example)
 
@@ -53,6 +57,12 @@ work/architecture/data-inventory.drawio        # short default inventory name
 work/architecture/models/data-vault.drawio     # all .hdv tables unioned + ELK
 work/architecture/models/business-vault.drawio
 work/architecture/models/dimensional.drawio
+
+# MODELS view (per file) — typically from a resource definition group:
+work/architecture/models/data-vault/retail-360.drawio
+work/architecture/models/business-vault/retail-360.drawio
+work/architecture/models/dimensional/retail-f-orders.drawio
+work/architecture/models/dimensional/retail-conformed-dims.drawio
 ```
 
 == Formats (current)
@@ -65,11 +75,33 @@ ArchiMate Open Exchange XML is planned next (same intermediate graphs).
 
 **Export architecture** (`EXPORT_ARCHITECTURE`):
 
-* **Root** — workflow path, `.hem`, or for DATA/MODEL a comma-separated list of `.hdv`/`.hbv`/`.hdm` paths
-* **View type** — `SOLUTION`, `DATA` (inventory), `MODEL` (layer aggregates), or `END_TO_END`
+* **Root** — workflow path, `.hem`, or for DATA/MODEL/MODELS a comma-separated list of `.hdv`/`.hbv`/`.hdm` paths (optional when a resource definition group supplies models)
+* **Resource definition group** — optional. When set, supplies model files for DATA, MODEL, MODELS, and SOLUTION “also export” options (overrides root path list and execution-map discovery)
+* **View type** — `SOLUTION`, `DATA` (inventory), `MODEL` (layer aggregates), `MODELS` (one file per model under type subfolders), or `END_TO_END`
 * **Output Draw.io file** — primary SOLUTION destination
-* **Also export DATA inventory** — second file from models discovered on the crawl
+* **Also export DATA inventory** — second file from models (group preferred, else crawl discovery)
 * **Also export aggregated model diagrams (ELK)** — writes `data-vault.drawio` / `business-vault.drawio` / `dimensional.drawio` under the models folder
+* **Models output folder** — for `MODEL` aggregates and `MODELS` per-file diagrams (default `${PROJECT_HOME}/work/architecture/models`)
+
+=== MODELS-only documentation export
+
+To document every model on a resource definition group **without** solution architecture:
+
+1. Set **View type** to `MODELS`
+2. Select the **Resource definition group**
+3. Set **Models output folder** (optional)
+4. Leave **Root** empty
+
+Output layout:
+
+```text
+{models folder}/
+  data-vault/{basename}.drawio
+  business-vault/{basename}.drawio
+  dimensional/{basename}.drawio
+```
+
+Basename is the model file name without extension (`models/subdir/retail-360.hdv` → `retail-360.drawio`).
 
 == CLI
 
@@ -96,6 +128,13 @@ hop architecture-export \
   -f models/retail-360.hdv,models/retail-360.hbv,models/retail-f-orders.hdm,models/retail-conformed-dims.hdm \
   --view MODEL \
   --models-output work/architecture/models
+
+# MODELS only — one Draw.io per model from a resource definition group:
+hop architecture-export \
+  -e retail-example-docker-pg \
+  -g retail-sources \
+  --view MODELS \
+  --models-output work/architecture/models
 ----
 
 DATA inventory only:
@@ -109,6 +148,17 @@ hop architecture-export \
   --view DATA
 ----
 
+Or with a group:
+
+[source,bash]
+----
+hop architecture-export \
+  -e retail-example-docker-pg \
+  -g retail-sources \
+  -o work/architecture/retail-data-inventory.drawio \
+  --view DATA
+----
+
 == How it is built
 
 ```
@@ -118,6 +168,10 @@ all .hdv / .hbv / .hdm
   →  ElkGraphLayout.from*Models (union + dedupe)
   →  layoutToBoxes (ELK, no model file mutation)
   →  ArchitectureGraph (MODEL freeform)  →  data-vault | business-vault | dimensional .drawio
+each .hdv / .hbv / .hdm
+  →  ElkGraphLayout (single file)
+  →  ArchitectureGraph (MODELS freeform)
+  →  {type}/{basename}.drawio
 ```
 
 * ELK coordinates are computed in memory and **do not** rewrite table positions in model files on disk.

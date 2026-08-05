@@ -30,6 +30,12 @@ public enum ArchitectureViewType {
    * dimensional — tables unioned across files, ELK layout, structural relationships.
    */
   MODEL,
+  /**
+   * One Draw.io per model file under type subfolders ({@code data-vault/}, {@code business-vault/},
+   * {@code dimensional/}), named {@code {basename}.drawio}. Prefer a resource definition group as
+   * the model source.
+   */
+  MODELS,
   /** Coarse Source → DV → BV → DM flow (same exporter as SOLUTION for now). */
   END_TO_END
 }

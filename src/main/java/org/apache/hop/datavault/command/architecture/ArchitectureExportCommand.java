@@ -51,7 +51,7 @@ import picocli.CommandLine;
     mixinStandardHelpOptions = true,
     name = "architecture-export",
     description =
-        "Export Draw.io architecture diagrams (SOLUTION from workflow/.hem, DATA from models)."
+        "Export Draw.io architecture diagrams (SOLUTION from workflow/.hem, DATA/MODEL/MODELS from models)."
             + " Enable a project with -j/--project OR an environment with -e/--environment"
             + " (not both). Relative -f/-o paths are resolved under ${PROJECT_HOME}.")
 @HopCommand(id = "architecture-export", description = "Export architecture diagrams to Draw.io")
@@ -67,9 +67,16 @@ public class ArchitectureExportCommand implements Runnable, IHopCommand, IHasHop
   @CommandLine.Option(
       names = {"-f", "--file"},
       description =
-          "Root workflow, .hem, or comma-separated model paths (for DATA view)."
+          "Root workflow, .hem, or comma-separated model paths (for DATA/MODEL/MODELS when no --group)."
               + " Relative to the enabled project when using -j/-e.")
   private String file;
+
+  @CommandLine.Option(
+      names = {"-g", "--group", "--resource-definition-group"},
+      description =
+          "Resource definition group name. When set, supplies model files for DATA, MODEL, MODELS,"
+              + " and SOLUTION --also-data / --also-models (overrides -f model list and map discovery).")
+  private String resourceDefinitionGroup;
 
   @CommandLine.Option(
       names = {"-o", "--output"},
@@ -80,13 +87,15 @@ public class ArchitectureExportCommand implements Runnable, IHopCommand, IHasHop
       names = {"--view"},
       defaultValue = "SOLUTION",
       description =
-          "SOLUTION, DATA (inventory), MODEL (aggregated DV/BV/DM ELK diagrams), or END_TO_END")
+          "SOLUTION, DATA (inventory), MODEL (aggregated DV/BV/DM ELK diagrams),"
+              + " MODELS (one Draw.io per model under type subfolders), or END_TO_END")
   private String view;
 
   @CommandLine.Option(
       names = {"--also-data"},
       description =
-          "Also export DATA inventory (tables/sources, no ER edges) from models on the execution map")
+          "Also export DATA inventory (tables/sources, no ER edges) from models on the execution map"
+              + " or resource definition group")
   private boolean alsoData;
 
   @CommandLine.Option(
@@ -98,14 +107,15 @@ public class ArchitectureExportCommand implements Runnable, IHopCommand, IHasHop
       names = {"--also-models"},
       description =
           "Also export aggregated layer model Draw.io files (data-vault, business-vault, dimensional)"
-              + " from all models on the execution map, laid out with ELK")
+              + " from models on the execution map or resource definition group, laid out with ELK")
   private boolean alsoModels;
 
   @CommandLine.Option(
       names = {"--models-output"},
       description =
-          "Directory for aggregated layer Draw.io files"
-              + " (default ${PROJECT_HOME}/work/architecture/models)")
+          "Directory for MODEL aggregates and MODELS per-file diagrams"
+              + " (default ${PROJECT_HOME}/work/architecture/models)."
+              + " MODELS writes data-vault/, business-vault/, dimensional/ subfolders.")
   private String modelsOutput;
 
   @CommandLine.Option(
@@ -136,10 +146,6 @@ public class ArchitectureExportCommand implements Runnable, IHopCommand, IHasHop
       handleMixinActions();
       applyProjectHome();
 
-      if (Utils.isEmpty(file)) {
-        throw new HopException("Missing --file root workflow, .hem, or model path(s)");
-      }
-
       ArchitectureViewType viewType;
       try {
         viewType = ArchitectureViewType.valueOf(view.trim().toUpperCase());
@@ -147,29 +153,52 @@ public class ArchitectureExportCommand implements Runnable, IHopCommand, IHasHop
         viewType = ArchitectureViewType.SOLUTION;
       }
 
-      if (viewType == ArchitectureViewType.DATA) {
-        List<String> models =
-            Arrays.stream(file.split("[,;]")).map(String::trim).filter(s -> !s.isEmpty()).toList();
-        ExportResult result =
-            ArchitectureExportService.exportDataDrawio(models, output, variables, metadataProvider);
-        log.logBasic(
-            "Wrote DATA inventory: "
-                + result.getOutputPath()
-                + " ("
-                + result.getGraph().nodeCount()
-                + " nodes)");
-      } else if (viewType == ArchitectureViewType.MODEL) {
-        List<String> models =
-            Arrays.stream(file.split("[,;]")).map(String::trim).filter(s -> !s.isEmpty()).toList();
-        // Always aggregate by layer (DV / BV / DM) across all listed model files.
-        String dir = !Utils.isEmpty(modelsOutput) ? modelsOutput : output;
-        List<ExportResult> results =
-            ArchitectureExportService.exportLayerModelDrawios(
-                models, dir, variables, metadataProvider);
-        for (ExportResult r : results) {
-          logModelResult(r);
+      String groupName =
+          !Utils.isEmpty(resourceDefinitionGroup)
+              ? variables.resolve(resourceDefinitionGroup)
+              : null;
+
+      if (viewType == ArchitectureViewType.DATA
+          || viewType == ArchitectureViewType.MODEL
+          || viewType == ArchitectureViewType.MODELS) {
+        List<String> models = resolveModelPaths(groupName, file);
+        if (models.isEmpty()) {
+          throw new HopException(
+              "Missing --group resource definition group or --file model path(s) for "
+                  + viewType
+                  + " view");
+        }
+        if (viewType == ArchitectureViewType.DATA) {
+          ExportResult result =
+              ArchitectureExportService.exportDataDrawio(
+                  models, output, variables, metadataProvider);
+          log.logBasic(
+              "Wrote DATA inventory: "
+                  + result.getOutputPath()
+                  + " ("
+                  + result.getGraph().nodeCount()
+                  + " nodes)");
+        } else if (viewType == ArchitectureViewType.MODEL) {
+          String dir = !Utils.isEmpty(modelsOutput) ? modelsOutput : output;
+          List<ExportResult> results =
+              ArchitectureExportService.exportLayerModelDrawios(
+                  models, dir, variables, metadataProvider);
+          for (ExportResult r : results) {
+            logModelResult(r, true);
+          }
+        } else {
+          String dir = !Utils.isEmpty(modelsOutput) ? modelsOutput : output;
+          List<ExportResult> results =
+              ArchitectureExportService.exportPerModelDrawios(
+                  models, dir, variables, metadataProvider);
+          for (ExportResult r : results) {
+            logModelResult(r, false);
+          }
         }
       } else {
+        if (Utils.isEmpty(file)) {
+          throw new HopException("Missing --file root workflow, .hem, or model path(s)");
+        }
         ExportResult result =
             ArchitectureExportService.exportSolutionDrawio(
                 file, output, variables, metadataProvider, true);
@@ -181,8 +210,12 @@ public class ArchitectureExportCommand implements Runnable, IHopCommand, IHasHop
                 + " nodes, "
                 + result.getGraph().edgeCount()
                 + " edges)");
-        List<String> models =
+        List<String> mapModels =
             ArchitectureExportService.modelPathsFromExecutionMap(result.getExecutionMap());
+        List<String> models = resolveModelPaths(groupName, null);
+        if (models.isEmpty()) {
+          models = mapModels;
+        }
         if (alsoData) {
           if (models.isEmpty()) {
             log.logBasic("No models discovered for DATA inventory export");
@@ -206,7 +239,7 @@ public class ArchitectureExportCommand implements Runnable, IHopCommand, IHasHop
                 ArchitectureExportService.exportLayerModelDrawios(
                     models, modelsOutput, variables, metadataProvider);
             for (ExportResult r : modelResults) {
-              logModelResult(r);
+              logModelResult(r, true);
             }
           }
         }
@@ -215,6 +248,18 @@ public class ArchitectureExportCommand implements Runnable, IHopCommand, IHasHop
       log.logError("Architecture export failed", e);
       System.exit(1);
     }
+  }
+
+  private List<String> resolveModelPaths(String groupName, String filePaths) throws HopException {
+    List<String> fromFile = List.of();
+    if (!Utils.isEmpty(filePaths)) {
+      fromFile =
+          Arrays.stream(filePaths.split("[,;]"))
+              .map(String::trim)
+              .filter(s -> !s.isEmpty())
+              .toList();
+    }
+    return ArchitectureExportService.resolveModelPaths(groupName, fromFile, metadataProvider);
   }
 
   /**
@@ -231,7 +276,7 @@ public class ArchitectureExportCommand implements Runnable, IHopCommand, IHasHop
     }
   }
 
-  private void logModelResult(ExportResult r) {
+  private void logModelResult(ExportResult r, boolean aggregated) {
     if (r.getWarnings() != null) {
       for (String warning : r.getWarnings()) {
         log.logBasic("Model export: " + warning);
@@ -239,7 +284,7 @@ public class ArchitectureExportCommand implements Runnable, IHopCommand, IHasHop
     }
     if (r.getGraph() != null && r.getGraph().nodeCount() > 0) {
       log.logBasic(
-          "Wrote aggregated MODEL diagram: "
+          (aggregated ? "Wrote aggregated MODEL diagram: " : "Wrote per-model diagram: ")
               + r.getOutputPath()
               + " ("
               + r.getGraph().nodeCount()

@@ -23,17 +23,27 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import org.apache.hop.catalog.metadata.ResourceDefinitionGroupMeta;
+import org.apache.hop.catalog.xp.RegisterResourceDefinitionGroupMetadataExtensionPoint;
+import org.apache.hop.core.HopEnvironment;
+import org.apache.hop.core.logging.LogChannel;
+import org.apache.hop.core.plugins.PluginRegistry;
+import org.apache.hop.core.variables.Variables;
 import org.apache.hop.datavault.lineage.LineageLayer;
 import org.apache.hop.datavault.lineage.LineageSnapshot;
 import org.apache.hop.datavault.lineage.TableLineage;
 import org.apache.hop.datavault.lineage.TableSourceKind;
 import org.apache.hop.datavault.lineage.TableSourceRef;
 import org.apache.hop.datavault.lineage.TableSourceRole;
+import org.apache.hop.datavault.metadata.DataVaultModel;
+import org.apache.hop.datavault.metadata.DvHub;
+import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapDocument;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapEdge;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapEdgeType;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapNode;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapNodeType;
+import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.junit.jupiter.api.Test;
 
 class ArchitectureExportTest {
@@ -387,5 +397,100 @@ class ArchitectureExportTest {
     String drawio = DrawioArchitectureExporter.export(graph);
     assertTrue(drawio.contains("models/retail-360.hdv"));
     assertFalse(drawio.contains("/home/matt/"));
+  }
+
+  @Test
+  void modelBasenameStripsPathAndExtension() {
+    assertEquals("retail-360", ArchitectureExportService.modelBasename("models/retail-360.hdv"));
+    assertEquals(
+        "retail-360", ArchitectureExportService.modelBasename("models/subdir/retail-360.HBV"));
+    assertEquals(
+        "retail-f-orders",
+        ArchitectureExportService.modelBasename("/data/project/models/retail-f-orders.hdm"));
+    assertEquals("plain", ArchitectureExportService.modelBasename("plain"));
+    assertEquals("", ArchitectureExportService.modelBasename(null));
+    assertEquals("", ArchitectureExportService.modelBasename(""));
+  }
+
+  @Test
+  void modelPathsFromResourceDefinitionGroupOrdersDvBvDm() {
+    ResourceDefinitionGroupMeta group = new ResourceDefinitionGroupMeta("retail");
+    group.getDimensionalModelFiles().add("models/retail-f-orders.hdm");
+    group.getDataVaultModelFiles().add("models/retail-360.hdv");
+    group.getBusinessVaultModelFiles().add("models/retail-360.hbv");
+    group.getDimensionalModelFiles().add("models/retail-conformed-dims.hdm");
+
+    List<String> paths = ArchitectureExportService.modelPathsFromResourceDefinitionGroup(group);
+    assertEquals(
+        List.of(
+            "models/retail-360.hdv",
+            "models/retail-360.hbv",
+            "models/retail-f-orders.hdm",
+            "models/retail-conformed-dims.hdm"),
+        paths);
+  }
+
+  @Test
+  void resolveModelPathsPrefersGroupOverFallback() throws Exception {
+    HopEnvironment.init();
+    new RegisterResourceDefinitionGroupMetadataExtensionPoint()
+        .callExtensionPoint(LogChannel.GENERAL, new Variables(), PluginRegistry.getInstance());
+
+    MemoryMetadataProvider metadata = new MemoryMetadataProvider();
+    ResourceDefinitionGroupMeta group = new ResourceDefinitionGroupMeta("docs");
+    group.getDataVaultModelFiles().add("models/from-group.hdv");
+    metadata.getSerializer(ResourceDefinitionGroupMeta.class).save(group);
+
+    List<String> paths =
+        ArchitectureExportService.resolveModelPaths(
+            "docs", List.of("models/from-root.hdv"), metadata);
+    assertEquals(List.of("models/from-group.hdv"), paths);
+
+    List<String> fallbackOnly =
+        ArchitectureExportService.resolveModelPaths(
+            null, List.of("models/from-root.hdv"), metadata);
+    assertEquals(List.of("models/from-root.hdv"), fallbackOnly);
+  }
+
+  @Test
+  void perModelDrawioPathUsesTypeSubfoldersAndBasename() {
+    assertEquals(
+        "/docs/models/data-vault/retail-360.drawio",
+        ArchitectureExportService.perModelDrawioPath(
+            "/docs/models", "models/subdir/retail-360.hdv"));
+    assertEquals(
+        "/docs/models/business-vault/retail-360.drawio",
+        ArchitectureExportService.perModelDrawioPath(
+            "/docs/models/", "${PROJECT_HOME}/models/retail-360.hbv"));
+    assertEquals(
+        "work/architecture/models/dimensional/retail-f-orders.drawio",
+        ArchitectureExportService.perModelDrawioPath(
+            "work/architecture/models", "models/retail-f-orders.hdm"));
+    assertNull(
+        ArchitectureExportService.perModelDrawioPath("/docs", "models/source-tables-crm.hsm"));
+    assertNull(ArchitectureExportService.perModelDrawioPath("/docs", null));
+  }
+
+  @Test
+  void singleModelGraphExportsFreeformElkDrawio() throws Exception {
+    Variables variables = new Variables();
+    DataVaultModel core = new DataVaultModel();
+    core.setName("retail-360");
+    DvHub hub = new DvHub("hub_customer");
+    core.getTables().add(hub);
+    DvSatellite sat = new DvSatellite("sat_customer");
+    sat.setHubName("hub_customer");
+    core.getTables().add(sat);
+
+    ArchitectureGraph graph = ArchitectureGraphFromModel.fromDataVault(core, variables);
+    assertEquals(ArchitectureViewType.MODEL, graph.getViewType());
+    assertTrue(graph.isFreeformLayout());
+    assertEquals(2, graph.nodeCount());
+    assertTrue(graph.edgeCount() >= 1);
+
+    String drawio = DrawioArchitectureExporter.export(graph);
+    assertTrue(drawio.contains("hub_customer"));
+    assertTrue(drawio.contains("sat_customer"));
+    assertTrue(drawio.contains(" edge=\"1\""));
   }
 }

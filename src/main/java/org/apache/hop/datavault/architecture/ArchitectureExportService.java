@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import org.apache.commons.vfs2.FileObject;
+import org.apache.hop.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
@@ -35,6 +36,7 @@ import org.apache.hop.datavault.lineage.DvModelLineageCollector;
 import org.apache.hop.datavault.lineage.LineageSnapshot;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DvModelLoadSupport;
+import org.apache.hop.datavault.metadata.businessvault.BusinessVaultDvModelResolver;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapDocument;
@@ -289,6 +291,157 @@ public final class ArchitectureExportService {
     return exportLayerModelDrawios(modelPaths, outputDirectory, variables, metadataProvider);
   }
 
+  /**
+   * Export <b>one Draw.io per model file</b> under type subfolders:
+   *
+   * <ul>
+   *   <li>{@code data-vault/{basename}.drawio} — each {@code .hdv}
+   *   <li>{@code business-vault/{basename}.drawio} — each {@code .hbv}
+   *   <li>{@code dimensional/{basename}.drawio} — each {@code .hdm}
+   * </ul>
+   *
+   * Basename is the model file name without extension. Does not mutate model coordinates on disk.
+   */
+  public static List<ExportResult> exportPerModelDrawios(
+      List<String> modelPaths,
+      String outputDirectory,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider)
+      throws HopException {
+    List<ExportResult> results = new ArrayList<>();
+    if (modelPaths == null || modelPaths.isEmpty()) {
+      return results;
+    }
+    String dir =
+        resolveProjectRelativePath(
+            !Utils.isEmpty(outputDirectory)
+                ? outputDirectory
+                : "${PROJECT_HOME}/work/architecture/models",
+            variables,
+            true);
+    String base = dir.replaceAll("/+$", "");
+    List<String> skipWarnings = new ArrayList<>();
+
+    for (String path : modelPaths) {
+      if (Utils.isEmpty(path)) {
+        continue;
+      }
+      List<String> modelWarnings = new ArrayList<>();
+      try {
+        String resolved = resolveProjectRelativePath(path, variables, false);
+        String lower = resolved.toLowerCase();
+        String basename = modelBasename(resolved);
+        if (Utils.isEmpty(basename)) {
+          skipWarnings.add("Skip model with empty basename: " + resolved);
+          continue;
+        }
+        String out = perModelDrawioPath(base, resolved);
+        if (out == null) {
+          skipWarnings.add("Skip unsupported model path for per-model export: " + resolved);
+          continue;
+        }
+        if (lower.endsWith(".hdv")) {
+          DataVaultModel model =
+              DvModelLoadSupport.loadDataVaultModel(resolved, null, variables, metadataProvider);
+          ArchitectureGraph graph = ArchitectureGraphFromModel.fromDataVault(model, variables);
+          writeDrawio(graph, out);
+          results.add(new ExportResult(graph, out, modelWarnings));
+        } else if (lower.endsWith(".hbv")) {
+          BusinessVaultModel bv =
+              ResourceDefinitionGroupResolver.loadBusinessVaultModel(
+                  resolved, variables, metadataProvider);
+          DataVaultModel effective = null;
+          try {
+            effective =
+                BusinessVaultDvModelResolver.buildEffectiveDataVaultModel(
+                    bv, variables, metadataProvider);
+          } catch (Exception e) {
+            modelWarnings.add("BV effective DV for " + resolved + ": " + e.getMessage());
+          }
+          ArchitectureGraph graph =
+              ArchitectureGraphFromModel.fromBusinessVault(bv, effective, variables);
+          writeDrawio(graph, out);
+          results.add(new ExportResult(graph, out, modelWarnings));
+        } else if (lower.endsWith(".hdm")) {
+          DimensionalModel dm =
+              ResourceDefinitionGroupResolver.loadDimensionalModel(
+                  resolved, variables, metadataProvider);
+          ArchitectureGraph graph = ArchitectureGraphFromModel.fromDimensional(dm, variables);
+          writeDrawio(graph, out);
+          results.add(new ExportResult(graph, out, modelWarnings));
+        }
+      } catch (HopException e) {
+        skipWarnings.add("Skip model " + path + ": " + e.getMessage());
+      }
+    }
+
+    if (!skipWarnings.isEmpty()) {
+      if (results.isEmpty()) {
+        ArchitectureGraph empty = new ArchitectureGraph();
+        empty.setName("empty");
+        results.add(new ExportResult(empty, base, skipWarnings));
+      } else {
+        // Attach skip warnings to the last successful result so callers can log them.
+        ExportResult last = results.get(results.size() - 1);
+        List<String> combined = new ArrayList<>(last.getWarnings());
+        combined.addAll(skipWarnings);
+        results.set(
+            results.size() - 1,
+            new ExportResult(
+                last.getGraph(), last.getOutputPath(), combined, last.getExecutionMap()));
+      }
+    }
+    return results;
+  }
+
+  /**
+   * Prefer model files listed on a resource definition group when {@code groupName} is non-empty;
+   * otherwise return {@code fallbackPaths} (may be empty).
+   */
+  public static List<String> resolveModelPaths(
+      String groupName, List<String> fallbackPaths, IHopMetadataProvider metadataProvider)
+      throws HopException {
+    if (!Utils.isEmpty(groupName)) {
+      return modelPathsFromResourceDefinitionGroup(groupName, metadataProvider);
+    }
+    return fallbackPaths != null ? fallbackPaths : List.of();
+  }
+
+  /**
+   * Model paths from a resource definition group (DV, then BV, then DM; list order within each).
+   */
+  public static List<String> modelPathsFromResourceDefinitionGroup(
+      String groupName, IHopMetadataProvider metadataProvider) throws HopException {
+    ResourceDefinitionGroupMeta group =
+        ResourceDefinitionGroupResolver.loadGroup(groupName, metadataProvider);
+    return modelPathsFromResourceDefinitionGroup(group);
+  }
+
+  /** Model paths from a loaded resource definition group (DV, then BV, then DM). */
+  public static List<String> modelPathsFromResourceDefinitionGroup(
+      ResourceDefinitionGroupMeta group) {
+    List<String> paths = new ArrayList<>();
+    if (group == null) {
+      return paths;
+    }
+    for (String modelFile : group.getDataVaultModelFiles()) {
+      if (!Utils.isEmpty(modelFile)) {
+        paths.add(modelFile);
+      }
+    }
+    for (String modelFile : group.getBusinessVaultModelFiles()) {
+      if (!Utils.isEmpty(modelFile)) {
+        paths.add(modelFile);
+      }
+    }
+    for (String modelFile : group.getDimensionalModelFiles()) {
+      if (!Utils.isEmpty(modelFile)) {
+        paths.add(modelFile);
+      }
+    }
+    return paths;
+  }
+
   /** Discover model paths from an execution map document. */
   public static List<String> modelPathsFromExecutionMap(ExecutionMapDocument map) {
     List<String> paths = new ArrayList<>();
@@ -308,6 +461,66 @@ public final class ArchitectureExportService {
       }
     }
     return paths;
+  }
+
+  /**
+   * File basename without extension for a model path ({@code models/retail-360.hdv} → {@code
+   * retail-360}).
+   */
+  public static String modelBasename(String path) {
+    if (Utils.isEmpty(path)) {
+      return "";
+    }
+    String normalized = path.replace('\\', '/');
+    int slash = normalized.lastIndexOf('/');
+    String name = slash >= 0 ? normalized.substring(slash + 1) : normalized;
+    // Strip trailing query/fragment if any (VFS edge cases)
+    int q = name.indexOf('?');
+    if (q >= 0) {
+      name = name.substring(0, q);
+    }
+    String lower = name.toLowerCase();
+    if (lower.endsWith(".hdv")
+        || lower.endsWith(".hbv")
+        || lower.endsWith(".hdm")
+        || lower.endsWith(".hsm")
+        || lower.endsWith(".drawio")) {
+      return name.substring(0, name.lastIndexOf('.'));
+    }
+    int dot = name.lastIndexOf('.');
+    if (dot > 0) {
+      return name.substring(0, dot);
+    }
+    return name;
+  }
+
+  /**
+   * Output path for a single model under type subfolders, or {@code null} if the extension is not a
+   * DV/BV/DM model file.
+   *
+   * <p>Examples: {@code base/data-vault/retail-360.drawio}, {@code
+   * base/business-vault/retail-360.drawio}, {@code base/dimensional/retail-f-orders.drawio}.
+   */
+  public static String perModelDrawioPath(String baseDirectory, String modelPath) {
+    if (Utils.isEmpty(baseDirectory) || Utils.isEmpty(modelPath)) {
+      return null;
+    }
+    String base = baseDirectory.replace('\\', '/').replaceAll("/+$", "");
+    String basename = modelBasename(modelPath);
+    if (Utils.isEmpty(basename)) {
+      return null;
+    }
+    String lower = modelPath.replace('\\', '/').toLowerCase();
+    if (lower.endsWith(".hdv")) {
+      return base + "/data-vault/" + basename + ".drawio";
+    }
+    if (lower.endsWith(".hbv")) {
+      return base + "/business-vault/" + basename + ".drawio";
+    }
+    if (lower.endsWith(".hdm")) {
+      return base + "/dimensional/" + basename + ".drawio";
+    }
+    return null;
   }
 
   public static void writeDrawio(ArchitectureGraph graph, String outputPath) throws HopException {
