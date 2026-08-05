@@ -26,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hop.catalog.metadata.DataCatalogMeta;
 import org.apache.hop.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.apache.hop.core.Const;
+import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.Result;
 import org.apache.hop.core.annotations.Action;
 import org.apache.hop.core.database.DatabaseMeta;
@@ -45,12 +46,14 @@ import org.apache.hop.datavault.metrics.WorkflowLoadOverviewReport;
 import org.apache.hop.datavault.metrics.WorkflowLoadOverviewReportFormatter;
 import org.apache.hop.datavault.metrics.WorkflowOverviewMetricsResolver;
 import org.apache.hop.datavault.metrics.metadata.ExecutionMetricsProfileMeta;
+import org.apache.hop.datavault.resourcedefinition.ParallelValidationSupport;
 import org.apache.hop.datavault.resourcedefinition.ResourceDefinitionGroupResolver;
 import org.apache.hop.datavault.workflow.WorkflowReferencedObjectVariableSupport;
 import org.apache.hop.datavault.workflow.actions.businessvaultupdate.ActionBusinessVaultUpdate;
 import org.apache.hop.datavault.workflow.actions.datavaultupdate.ActionDataVaultUpdate;
 import org.apache.hop.datavault.workflow.actions.dimensionalupdate.ActionDimensionalUpdate;
 import org.apache.hop.datavault.workflow.actions.updateresourcegroup.ResourceGroupModelUpdatePlanner.ModelUpdateJob;
+import org.apache.hop.datavault.workflow.actions.updateresourcegroup.ResourceGroupModelValidationSupport.ModelCheckOutcome;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
@@ -210,6 +213,20 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
   @HopMetadataProperty
   private boolean detailedDataTypeChecking = true;
 
+  /**
+   * Max concurrent model checks before the update wave (and for dry-run validation). Literal or Hop
+   * variable; default {@code 8}.
+   */
+  @GuiWidgetElement(
+      order = "0530",
+      type = GuiElementType.TEXT,
+      variables = true,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.ModelCheckParallelism.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.ModelCheckParallelism.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_OPERATIONS_TAB_ID)
+  @HopMetadataProperty
+  private String modelCheckParallelism = "8";
+
   @GuiWidgetElement(
       order = "0600",
       type = GuiElementType.CHECKBOX,
@@ -227,6 +244,19 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
       parentId = GUI_PLUGIN_ELEMENT_OPERATIONS_TAB_ID)
   @HopMetadataProperty
   private boolean failIfDdlNeeded;
+
+  /**
+   * Dry run: skip data load pipelines on each child DV/BV/DM update (same semantics as Data Vault
+   * Update). Model checks still run; DDL still runs when structure update / fail-if-DDL is on.
+   */
+  @GuiWidgetElement(
+      order = "0615",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.DoNotUpdateTargetDatabase.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.DoNotUpdateTargetDatabase.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_OPERATIONS_TAB_ID)
+  @HopMetadataProperty
+  private boolean doNotUpdateTargetDatabase;
 
   @GuiWidgetElement(
       order = "0620",
@@ -388,6 +418,7 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
 
   public ActionUpdateResourceDefinitionGroup() {
     super();
+    this.modelCheckParallelism = "8";
   }
 
   public ActionUpdateResourceDefinitionGroup(ActionUpdateResourceDefinitionGroup meta) {
@@ -403,8 +434,11 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
     this.logModelCheckFailures = meta.logModelCheckFailures;
     this.abortOnModelCheckFailures = meta.abortOnModelCheckFailures;
     this.detailedDataTypeChecking = meta.detailedDataTypeChecking;
+    this.modelCheckParallelism =
+        meta.modelCheckParallelism != null ? meta.modelCheckParallelism : "8";
     this.updateTargetDatabaseStructure = meta.updateTargetDatabaseStructure;
     this.failIfDdlNeeded = meta.failIfDdlNeeded;
+    this.doNotUpdateTargetDatabase = meta.doNotUpdateTargetDatabase;
     this.publishToCatalog = meta.publishToCatalog;
     this.dataCatalogConnection = meta.dataCatalogConnection;
     this.ensureSpecialRecords = meta.ensureSpecialRecords;
@@ -454,9 +488,44 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
 
     String catalogConnection = resolveCatalogConnection(group);
     String metricsProfile = Const.NVL(resolve(executionMetricsProfile), "");
+    int checkParallelism = resolveModelCheckParallelism();
+
+    if (doNotUpdateTargetDatabase) {
+      logBasic(
+          BaseMessages.getString(PKG, "ActionUpdateResourceDefinitionGroup.Log.DryRunEnabled"));
+    }
+
+    // Parallel model validation for the whole group (before any load / DDL wave).
+    boolean preValidated = false;
+    if (logModelCheckFailures || abortOnModelCheckFailures) {
+      preValidated = true;
+      boolean validationFailed = runParallelModelChecks(jobs, checkParallelism, result);
+      if (validationFailed && abortOnModelCheckFailures) {
+        result.setResult(false);
+        result.setNrErrors(Math.max(1, result.getNrErrors()));
+        logError(
+            BaseMessages.getString(
+                PKG, "ActionUpdateResourceDefinitionGroup.Log.AbortingOnModelCheck"));
+        return result;
+      }
+    }
+
+    // Pure dry-run validation: no data load, and no structure/DDL work requested → done.
+    if (doNotUpdateTargetDatabase && !updateTargetDatabaseStructure && !failIfDdlNeeded) {
+      result.setResult(true);
+      result.setNrErrors(0);
+      logBasic(
+          BaseMessages.getString(
+              PKG,
+              "ActionUpdateResourceDefinitionGroup.Log.DryRunValidationOnly",
+              groupName,
+              Integer.toString(jobs.size()),
+              Integer.toString(checkParallelism)));
+      return result;
+    }
 
     String executionId = null;
-    if (manageVaultUpdateMetrics) {
+    if (manageVaultUpdateMetrics && !doNotUpdateTargetDatabase) {
       executionId =
           VaultUpdateExecutionSupport.beginExecution(
               getParentWorkflow(),
@@ -481,12 +550,15 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
       logBasic(
           BaseMessages.getString(
               PKG,
-              "ActionUpdateResourceDefinitionGroup.Log.UpdatingModel",
+              doNotUpdateTargetDatabase
+                  ? "ActionUpdateResourceDefinitionGroup.Log.DryRunModel"
+                  : "ActionUpdateResourceDefinitionGroup.Log.UpdatingModel",
               job.layer().name(),
               job.modelFile(),
               Integer.toString(index),
               Integer.toString(jobs.size())));
-      Result modelResult = runModelUpdate(job, catalogConnection, metricsProfile, result, nr);
+      Result modelResult =
+          runModelUpdate(job, catalogConnection, metricsProfile, result, nr, preValidated);
       mergeResult(result, modelResult);
       if (modelResult.getNrErrors() > 0 || !modelResult.isResult()) {
         result.setResult(false);
@@ -497,14 +569,14 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
                 "ActionUpdateResourceDefinitionGroup.Error.ModelFailed",
                 job.layer().name(),
                 job.modelFile()));
-        if (manageVaultUpdateMetrics) {
+        if (manageVaultUpdateMetrics && !doNotUpdateTargetDatabase) {
           publishOverview(executionId, catalogConnection, metricsProfile, false);
         }
         return result;
       }
     }
 
-    if (manageVaultUpdateMetrics) {
+    if (manageVaultUpdateMetrics && !doNotUpdateTargetDatabase) {
       publishOverview(executionId, catalogConnection, metricsProfile, true);
     }
 
@@ -513,10 +585,104 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
     logBasic(
         BaseMessages.getString(
             PKG,
-            "ActionUpdateResourceDefinitionGroup.Log.Completed",
+            doNotUpdateTargetDatabase
+                ? "ActionUpdateResourceDefinitionGroup.Log.DryRunCompleted"
+                : "ActionUpdateResourceDefinitionGroup.Log.Completed",
             groupName,
             Integer.toString(jobs.size())));
     return result;
+  }
+
+  private int resolveModelCheckParallelism() {
+    String raw = modelCheckParallelism;
+    if (!Utils.isEmpty(raw)) {
+      raw = resolve(raw);
+    }
+    return ParallelValidationSupport.resolveParallelism(
+        raw, ParallelValidationSupport.DEFAULT_PARALLELISM);
+  }
+
+  /**
+   * @return true when any model had check errors (or failed to load/check)
+   */
+  private boolean runParallelModelChecks(List<ModelUpdateJob> jobs, int parallelism, Result result)
+      throws HopException {
+    long started = System.currentTimeMillis();
+    logBasic(
+        BaseMessages.getString(
+            PKG,
+            "ActionUpdateResourceDefinitionGroup.Log.ModelCheckStart",
+            Integer.toString(jobs.size()),
+            Integer.toString(parallelism)));
+
+    List<ModelCheckOutcome> outcomes =
+        ResourceGroupModelValidationSupport.checkModels(
+            jobs, detailedDataTypeChecking, parallelism, this, getMetadataProvider());
+
+    int modelsWithErrors = 0;
+    int totalErrors = 0;
+    for (ModelCheckOutcome outcome : outcomes) {
+      if (outcome == null || outcome.job() == null) {
+        continue;
+      }
+      String label = ResourceGroupModelValidationSupport.formatModelLabel(outcome.job());
+      if (outcome.failure() != null) {
+        modelsWithErrors++;
+        totalErrors++;
+        if (logModelCheckFailures || abortOnModelCheckFailures) {
+          logError(
+              BaseMessages.getString(
+                  PKG,
+                  "ActionUpdateResourceDefinitionGroup.Log.ModelCheckException",
+                  label,
+                  Const.NVL(
+                      outcome.failure().getMessage(),
+                      outcome.failure().getClass().getSimpleName())));
+        }
+        continue;
+      }
+      if (outcome.remarks() != null) {
+        for (ICheckResult remark : outcome.remarks()) {
+          if (remark == null) {
+            continue;
+          }
+          String message =
+              BaseMessages.getString(
+                  PKG,
+                  "ActionUpdateResourceDefinitionGroup.Log.ModelCheckResult",
+                  label,
+                  remark.getTypeDesc(),
+                  remark.getText());
+          if (remark.getType() == ICheckResult.TYPE_RESULT_ERROR) {
+            if (logModelCheckFailures || abortOnModelCheckFailures) {
+              logError(message);
+            }
+          } else if (remark.getType() == ICheckResult.TYPE_RESULT_WARNING
+              && logModelCheckFailures) {
+            logBasic(message);
+          }
+        }
+      }
+      if (outcome.hasError()) {
+        modelsWithErrors++;
+        totalErrors += Math.max(1, outcome.errorCount());
+      }
+    }
+
+    long elapsedMs = System.currentTimeMillis() - started;
+    logBasic(
+        BaseMessages.getString(
+            PKG,
+            "ActionUpdateResourceDefinitionGroup.Log.ModelCheckFinished",
+            Integer.toString(jobs.size()),
+            Integer.toString(modelsWithErrors),
+            Long.toString(elapsedMs),
+            Integer.toString(parallelism)));
+
+    if (modelsWithErrors > 0 && result != null) {
+      result.setNrErrors(result.getNrErrors() + totalErrors);
+    }
+    return modelsWithErrors > 0;
   }
 
   private Result runModelUpdate(
@@ -524,16 +690,20 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
       String catalogConnection,
       String metricsProfile,
       Result parentResult,
-      int nr)
+      int nr,
+      boolean skipChildModelCheck)
       throws HopException {
     IAction child =
         switch (job.layer()) {
           case DATA_VAULT ->
-              configureDataVaultUpdate(job.modelFile(), catalogConnection, metricsProfile);
+              configureDataVaultUpdate(
+                  job.modelFile(), catalogConnection, metricsProfile, skipChildModelCheck);
           case BUSINESS_VAULT ->
-              configureBusinessVaultUpdate(job.modelFile(), catalogConnection, metricsProfile);
+              configureBusinessVaultUpdate(
+                  job.modelFile(), catalogConnection, metricsProfile, skipChildModelCheck);
           case DIMENSIONAL ->
-              configureDimensionalUpdate(job.modelFile(), catalogConnection, metricsProfile);
+              configureDimensionalUpdate(
+                  job.modelFile(), catalogConnection, metricsProfile, skipChildModelCheck);
         };
     prepareChildAction(child);
     Result modelResult = new Result();
@@ -556,63 +726,72 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
   }
 
   private ActionDataVaultUpdate configureDataVaultUpdate(
-      String modelFile, String catalogConnection, String metricsProfile) {
+      String modelFile,
+      String catalogConnection,
+      String metricsProfile,
+      boolean skipChildModelCheck) {
     ActionDataVaultUpdate action = new ActionDataVaultUpdate();
     action.setName("DV " + modelFile);
     action.setDataVaultModelFile(modelFile);
     action.setPipelineRunConfiguration(pipelineRunConfiguration);
     action.setWorkflowRunConfiguration(workflowRunConfiguration);
     action.setParallelPipelineCopies(parallelPipelineCopies);
-    action.setLogModelCheckFailures(logModelCheckFailures);
-    action.setAbortOnModelCheckFailures(abortOnModelCheckFailures);
+    action.setLogModelCheckFailures(!skipChildModelCheck && logModelCheckFailures);
+    action.setAbortOnModelCheckFailures(!skipChildModelCheck && abortOnModelCheckFailures);
     action.setDetailedDataTypeChecking(detailedDataTypeChecking);
     action.setUpdateTargetDatabaseStructure(updateTargetDatabaseStructure);
     action.setFailIfDdlNeeded(failIfDdlNeeded);
-    action.setPublishToCatalog(publishToCatalog);
+    action.setPublishToCatalog(publishToCatalog && !doNotUpdateTargetDatabase);
     action.setDataCatalogConnection(catalogConnection);
-    action.setEnsureSpecialRecords(ensureSpecialRecords);
+    action.setEnsureSpecialRecords(ensureSpecialRecords && !doNotUpdateTargetDatabase);
     action.setLoadDate(loadDate);
     action.setRecordSourceGroup(recordSourceGroup);
     action.setExecutionMetricsProfile(metricsProfile);
-    action.setDoNotUpdateTargetDatabase(false);
+    action.setDoNotUpdateTargetDatabase(doNotUpdateTargetDatabase);
     return action;
   }
 
   private ActionBusinessVaultUpdate configureBusinessVaultUpdate(
-      String modelFile, String catalogConnection, String metricsProfile) {
+      String modelFile,
+      String catalogConnection,
+      String metricsProfile,
+      boolean skipChildModelCheck) {
     ActionBusinessVaultUpdate action = new ActionBusinessVaultUpdate();
     action.setName("BV " + modelFile);
     action.setBusinessVaultModelFile(modelFile);
     action.setPipelineRunConfiguration(pipelineRunConfiguration);
     action.setWorkflowRunConfiguration(workflowRunConfiguration);
     action.setParallelPipelineCopies(parallelPipelineCopies);
-    action.setLogModelCheckFailures(logModelCheckFailures);
-    action.setAbortOnModelCheckFailures(abortOnModelCheckFailures);
+    action.setLogModelCheckFailures(!skipChildModelCheck && logModelCheckFailures);
+    action.setAbortOnModelCheckFailures(!skipChildModelCheck && abortOnModelCheckFailures);
     action.setUpdateTargetDatabaseStructure(updateTargetDatabaseStructure);
     action.setFailIfDdlNeeded(failIfDdlNeeded);
-    action.setPublishToCatalog(publishToCatalog);
+    action.setPublishToCatalog(publishToCatalog && !doNotUpdateTargetDatabase);
     action.setDataCatalogConnection(catalogConnection);
     action.setExecutionMetricsProfile(metricsProfile);
-    action.setDoNotUpdateTargetDatabase(false);
+    action.setDoNotUpdateTargetDatabase(doNotUpdateTargetDatabase);
     return action;
   }
 
   private ActionDimensionalUpdate configureDimensionalUpdate(
-      String modelFile, String catalogConnection, String metricsProfile) {
+      String modelFile,
+      String catalogConnection,
+      String metricsProfile,
+      boolean skipChildModelCheck) {
     ActionDimensionalUpdate action = new ActionDimensionalUpdate();
     action.setName("DM " + modelFile);
     action.setDimensionalModelFile(modelFile);
     action.setPipelineRunConfiguration(pipelineRunConfiguration);
     action.setWorkflowRunConfiguration(workflowRunConfiguration);
     action.setParallelPipelineCopies(parallelPipelineCopies);
-    action.setLogModelCheckFailures(logModelCheckFailures);
-    action.setAbortOnModelCheckFailures(abortOnModelCheckFailures);
+    action.setLogModelCheckFailures(!skipChildModelCheck && logModelCheckFailures);
+    action.setAbortOnModelCheckFailures(!skipChildModelCheck && abortOnModelCheckFailures);
     action.setUpdateTargetDatabaseStructure(updateTargetDatabaseStructure);
     action.setFailIfDdlNeeded(failIfDdlNeeded);
-    action.setPublishToCatalog(publishToCatalog);
+    action.setPublishToCatalog(publishToCatalog && !doNotUpdateTargetDatabase);
     action.setDataCatalogConnection(catalogConnection);
     action.setExecutionMetricsProfile(metricsProfile);
-    action.setDoNotUpdateTargetDatabase(false);
+    action.setDoNotUpdateTargetDatabase(doNotUpdateTargetDatabase);
     return action;
   }
 
