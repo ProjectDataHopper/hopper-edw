@@ -17,16 +17,23 @@
 package org.apache.hop.catalog.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.datavault.hopgui.file.dimensional.HopDimensionalFileType;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 class ResourceDefinitionGroupModelDiscoverySupportTest {
+
+  @AfterEach
+  void clearCache() {
+    ResourceDefinitionGroupModelDiscoverySupport.invalidateCache();
+  }
 
   @Test
   void findProjectModelFilesReturnsProjectRelativePaths(@TempDir Path projectHome)
@@ -79,5 +86,80 @@ class ResourceDefinitionGroupModelDiscoverySupportTest {
             "/tmp/other/model.hdv", variables);
 
     assertEquals(null, relative);
+  }
+
+  @Test
+  void shouldSkipHeavyDirectories() {
+    assertTrue(ResourceDefinitionGroupModelDiscoverySupport.shouldSkipDirectory("target"));
+    assertTrue(ResourceDefinitionGroupModelDiscoverySupport.shouldSkipDirectory(".git"));
+    assertTrue(ResourceDefinitionGroupModelDiscoverySupport.shouldSkipDirectory("node_modules"));
+    assertFalse(ResourceDefinitionGroupModelDiscoverySupport.shouldSkipDirectory("models"));
+  }
+
+  @Test
+  void skipsModelsUnderTargetDirectory(@TempDir Path projectHome) throws Exception {
+    Path modelsDir = projectHome.resolve("models");
+    Path targetDir = projectHome.resolve("target").resolve("models");
+    Files.createDirectories(modelsDir);
+    Files.createDirectories(targetDir);
+    Files.writeString(modelsDir.resolve("keep.hdv"), "<model/>");
+    Files.writeString(targetDir.resolve("skip.hdv"), "<model/>");
+
+    Variables variables = new Variables();
+    variables.setVariable("PROJECT_HOME", projectHome.toString());
+
+    var files =
+        ResourceDefinitionGroupModelDiscoverySupport.findProjectModelFiles(variables, ".hdv");
+    assertEquals(1, files.size());
+    assertEquals("${PROJECT_HOME}/models/keep.hdv", files.get(0));
+  }
+
+  @Test
+  void cachesDiscoveryResultsUntilInvalidated(@TempDir Path projectHome) throws Exception {
+    Path modelsDir = projectHome.resolve("models");
+    Files.createDirectories(modelsDir);
+    Files.writeString(modelsDir.resolve("one.hdv"), "<model/>");
+
+    Variables variables = new Variables();
+    variables.setVariable("PROJECT_HOME", projectHome.toString());
+
+    var first =
+        ResourceDefinitionGroupModelDiscoverySupport.findProjectModelFiles(variables, ".hdv");
+    assertEquals(1, first.size());
+
+    // Add another model on disk; cached result should still be the previous walk.
+    Files.writeString(modelsDir.resolve("two.hdv"), "<model/>");
+    var cached =
+        ResourceDefinitionGroupModelDiscoverySupport.findProjectModelFiles(variables, ".hdv");
+    assertEquals(1, cached.size());
+    assertEquals(first, cached);
+
+    // Force refresh sees the new file.
+    var forced =
+        ResourceDefinitionGroupModelDiscoverySupport.findProjectModelFiles(variables, ".hdv", true);
+    assertEquals(2, forced.size());
+
+    ResourceDefinitionGroupModelDiscoverySupport.invalidateCache();
+    var afterInvalidate =
+        ResourceDefinitionGroupModelDiscoverySupport.findProjectModelFiles(variables, ".hdv");
+    assertEquals(2, afterInvalidate.size());
+  }
+
+  @Test
+  void cacheReturnsDefensiveCopy(@TempDir Path projectHome) throws Exception {
+    Path modelsDir = projectHome.resolve("models");
+    Files.createDirectories(modelsDir);
+    Files.writeString(modelsDir.resolve("one.hdv"), "<model/>");
+
+    Variables variables = new Variables();
+    variables.setVariable("PROJECT_HOME", projectHome.toString());
+
+    var first =
+        ResourceDefinitionGroupModelDiscoverySupport.findProjectModelFiles(variables, ".hdv");
+    first.clear();
+    var second =
+        ResourceDefinitionGroupModelDiscoverySupport.findProjectModelFiles(variables, ".hdv");
+    assertEquals(1, second.size());
+    assertFalse(first == second);
   }
 }

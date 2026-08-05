@@ -27,6 +27,7 @@ import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.catalog.DvSourceCatalogService;
+import org.apache.hop.datavault.hopgui.GuiBusySupport;
 import org.apache.hop.datavault.hopgui.file.businessvault.HopBusinessVaultFileType;
 import org.apache.hop.datavault.hopgui.file.dimensional.HopDimensionalFileType;
 import org.apache.hop.datavault.hopgui.file.vault.HopVaultFileType;
@@ -54,22 +55,33 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
-/** Editor for {@link ResourceDefinitionGroupMeta}. */
+/**
+ * Editor for {@link ResourceDefinitionGroupMeta}.
+ *
+ * <p>Optimized for large model lists (hundreds of paths): authoritative in-memory lists, lazy tab
+ * materialization, view-only path filter, and bulk table fill without full-column optWidth scans.
+ */
 @GuiPlugin(description = "Editor for Resource Definition Group metadata")
 public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDefinitionGroupMeta> {
 
   private static final Class<?> PKG = ResourceDefinitionGroupMetaEditor.class;
+
+  /** Sample this many rows when sizing the path column (avoids O(n) textExtent over all paths). */
+  private static final int OPT_WIDTH_SAMPLE_ROWS = 40;
 
   private Text wName;
   private Text wDescription;
   private Combo wCatalogConnection;
   private Text wPreviewRowLimit;
   private Button wDetailedChecking;
-  private TableView wDvModels;
-  private TableView wBvModels;
-  private TableView wDmModels;
+  private CTabFolder tabFolder;
+
+  private ModelTab dvTab;
+  private ModelTab bvTab;
+  private ModelTab dmTab;
 
   public ResourceDefinitionGroupMetaEditor(
       HopGui hopGui,
@@ -153,7 +165,7 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
     wDetailedChecking.setLayoutData(fdDetailed);
     lastControl = wDetailedChecking;
 
-    CTabFolder tabFolder = new CTabFolder(parent, SWT.BORDER);
+    tabFolder = new CTabFolder(parent, SWT.BORDER);
     FormData fdTabs = new FormData();
     fdTabs.top = new FormAttachment(lastControl, margin);
     fdTabs.left = new FormAttachment(0, 0);
@@ -161,17 +173,24 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
     fdTabs.bottom = new FormAttachment(100, -50);
     tabFolder.setLayoutData(fdTabs);
 
-    wDvModels =
-        createModelTableTab(tabFolder, "DataVaultModels", HopVaultFileType.VAULT_FILE_EXTENSION);
-    wBvModels =
-        createModelTableTab(
+    dvTab = createModelTab(tabFolder, "DataVaultModels", HopVaultFileType.VAULT_FILE_EXTENSION);
+    bvTab =
+        createModelTab(
             tabFolder,
             "BusinessVaultModels",
             HopBusinessVaultFileType.BUSINESS_VAULT_FILE_EXTENSION);
-    wDmModels =
-        createModelTableTab(
+    dmTab =
+        createModelTab(
             tabFolder, "DimensionalModels", HopDimensionalFileType.DIMENSIONAL_FILE_EXTENSION);
     tabFolder.setSelection(0);
+    tabFolder.addListener(
+        SWT.Selection,
+        e -> {
+          ModelTab selected = selectedModelTab();
+          if (selected != null) {
+            selected.ensureLoaded();
+          }
+        });
 
     Button wValidate = new Button(parent, SWT.PUSH);
     wValidate.setText(
@@ -248,17 +267,35 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
     return textWidget;
   }
 
-  private TableView createModelTableTab(
-      CTabFolder tabFolder, String labelKey, String modelExtension) {
-    CTabItem tab = new CTabItem(tabFolder, SWT.NONE);
+  private ModelTab createModelTab(CTabFolder folder, String labelKey, String modelExtension) {
+    CTabItem tab = new CTabItem(folder, SWT.NONE);
     tab.setText(
         BaseMessages.getString(PKG, "ResourceDefinitionGroupMetaEditor." + labelKey + ".Tab"));
 
-    Composite comp = new Composite(tabFolder, SWT.NONE);
+    Composite comp = new Composite(folder, SWT.NONE);
     comp.setLayout(new FormLayout());
     tab.setControl(comp);
 
     int margin = PropsUi.getMargin();
+
+    Label wlFilter = new Label(comp, SWT.LEFT);
+    PropsUi.setLook(wlFilter);
+    wlFilter.setText(BaseMessages.getString(PKG, "ResourceDefinitionGroupMetaEditor.Filter.Label"));
+    FormData fdlFilter = new FormData();
+    fdlFilter.left = new FormAttachment(0, margin);
+    fdlFilter.top = new FormAttachment(0, margin);
+    wlFilter.setLayoutData(fdlFilter);
+
+    Text wFilter =
+        new Text(comp, SWT.SINGLE | SWT.LEFT | SWT.BORDER | SWT.SEARCH | SWT.ICON_CANCEL);
+    PropsUi.setLook(wFilter);
+    wFilter.setMessage(
+        BaseMessages.getString(PKG, "ResourceDefinitionGroupMetaEditor.Filter.Placeholder"));
+    FormData fdFilter = new FormData();
+    fdFilter.left = new FormAttachment(wlFilter, margin);
+    fdFilter.top = new FormAttachment(0, margin);
+    fdFilter.right = new FormAttachment(100, -margin);
+    wFilter.setLayoutData(fdFilter);
 
     Button wAddModels = new Button(comp, SWT.PUSH);
     PropsUi.setLook(wAddModels);
@@ -269,6 +306,13 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
     fdAddModels.bottom = new FormAttachment(100, -margin);
     wAddModels.setLayoutData(fdAddModels);
 
+    Label wlCount = new Label(comp, SWT.LEFT);
+    PropsUi.setLook(wlCount);
+    FormData fdCount = new FormData();
+    fdCount.left = new FormAttachment(wAddModels, margin * 2);
+    fdCount.top = new FormAttachment(wAddModels, 0, SWT.CENTER);
+    wlCount.setLayoutData(fdCount);
+
     ColumnInfo[] columns =
         new ColumnInfo[] {
           new ColumnInfo(
@@ -276,6 +320,7 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
               ColumnInfo.COLUMN_TYPE_TEXT,
               false)
         };
+    final ModelTab[] tabHolder = new ModelTab[1];
     TableView table =
         new TableView(
             projectVariables(),
@@ -283,36 +328,63 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
             SWT.FULL_SELECTION | SWT.MULTI | SWT.BORDER,
             columns,
             1,
-            null,
+            e -> {
+              if (tabHolder[0] != null) {
+                tabHolder[0].onTableModified();
+              }
+            },
             PropsUi.getInstance());
     FormData fdTable = new FormData();
     fdTable.left = new FormAttachment(0, margin);
     fdTable.right = new FormAttachment(100, -margin);
-    fdTable.top = new FormAttachment(0, margin);
+    fdTable.top = new FormAttachment(wFilter, margin);
     fdTable.bottom = new FormAttachment(wAddModels, -margin);
     table.setLayoutData(fdTable);
 
-    wAddModels.addListener(
-        SWT.Selection, e -> addModelsFromProject(table, labelKey, modelExtension));
-    return table;
+    ModelTab modelTab = new ModelTab(labelKey, modelExtension, table, wFilter, wlCount);
+    tabHolder[0] = modelTab;
+    wAddModels.addListener(SWT.Selection, e -> addModelsFromProject(modelTab));
+    wFilter.addListener(SWT.Modify, e -> modelTab.onFilterChanged());
+    return modelTab;
+  }
+
+  private ModelTab selectedModelTab() {
+    if (tabFolder == null || tabFolder.isDisposed()) {
+      return null;
+    }
+    return switch (tabFolder.getSelectionIndex()) {
+      case 0 -> dvTab;
+      case 1 -> bvTab;
+      case 2 -> dmTab;
+      default -> null;
+    };
   }
 
   private IVariables projectVariables() {
     return getHopGui().getVariables();
   }
 
-  private void addModelsFromProject(TableView table, String labelKey, String modelExtension) {
+  private void addModelsFromProject(ModelTab modelTab) {
+    modelTab.flushTableToList();
     IVariables variables = projectVariables();
-    List<String> discovered =
-        ResourceDefinitionGroupModelDiscoverySupport.findProjectModelFiles(
-            variables, modelExtension);
+    final List<String>[] discoveredHolder = new List[1];
+    GuiBusySupport.showWhile(
+        getShell(),
+        () ->
+            discoveredHolder[0] =
+                ResourceDefinitionGroupModelDiscoverySupport.findProjectModelFiles(
+                    variables, modelTab.modelExtension));
+    List<String> discovered = discoveredHolder[0] != null ? discoveredHolder[0] : List.of();
+
     if (discovered.isEmpty()) {
       MessageBox box = new MessageBox(getShell(), SWT.OK | SWT.ICON_INFORMATION);
       box.setText(
           BaseMessages.getString(PKG, "ResourceDefinitionGroupMetaEditor.AddModels.NoFiles.Title"));
       box.setMessage(
           BaseMessages.getString(
-              PKG, "ResourceDefinitionGroupMetaEditor.AddModels.NoFiles.Message", modelExtension));
+              PKG,
+              "ResourceDefinitionGroupMetaEditor.AddModels.NoFiles.Message",
+              modelTab.modelExtension));
       box.open();
       return;
     }
@@ -323,12 +395,14 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
             getShell(),
             choices,
             BaseMessages.getString(
-                PKG, "ResourceDefinitionGroupMetaEditor.AddModels.Dialog.Title", modelExtension),
+                PKG,
+                "ResourceDefinitionGroupMetaEditor.AddModels.Dialog.Title",
+                modelTab.modelExtension),
             BaseMessages.getString(
                 PKG,
                 "ResourceDefinitionGroupMetaEditor.AddModels.Dialog.Message",
                 BaseMessages.getString(
-                    PKG, "ResourceDefinitionGroupMetaEditor." + labelKey + ".Tab")));
+                    PKG, "ResourceDefinitionGroupMetaEditor." + modelTab.labelKey + ".Tab")));
     dialog.setMulti(true);
     if (dialog.open() == null) {
       return;
@@ -339,13 +413,17 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
       return;
     }
 
-    Set<String> existing = new LinkedHashSet<>(readModelTable(table));
+    Set<String> existing = new LinkedHashSet<>(modelTab.paths);
     for (int index : indices) {
       if (index >= 0 && index < choices.length) {
         existing.add(choices[index]);
       }
     }
-    fillModelTable(table, new ArrayList<>(existing));
+    modelTab.paths.clear();
+    modelTab.paths.addAll(existing);
+    modelTab.loaded = true;
+    modelTab.repaintTable();
+    setChanged();
   }
 
   private void populateCatalogConnections() {
@@ -401,9 +479,22 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
     wCatalogConnection.setText(Const.NVL(meta.getDataCatalogConnection(), ""));
     wPreviewRowLimit.setText(String.valueOf(Math.max(1, meta.getPreviewRowLimit())));
     wDetailedChecking.setSelection(meta.isDetailedDataTypeChecking());
-    fillModelTable(wDvModels, meta.getDataVaultModelFiles());
-    fillModelTable(wBvModels, meta.getBusinessVaultModelFiles());
-    fillModelTable(wDmModels, meta.getDimensionalModelFiles());
+
+    if (dvTab != null) {
+      dvTab.setPaths(meta.getDataVaultModelFiles());
+    }
+    if (bvTab != null) {
+      bvTab.setPaths(meta.getBusinessVaultModelFiles());
+    }
+    if (dmTab != null) {
+      dmTab.setPaths(meta.getDimensionalModelFiles());
+    }
+
+    // Materialize only the visible tab; others fill on first selection.
+    ModelTab selected = selectedModelTab();
+    if (selected != null) {
+      selected.ensureLoaded();
+    }
   }
 
   @Override
@@ -417,22 +508,51 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
       meta.setPreviewRowLimit(10);
     }
     meta.setDetailedDataTypeChecking(wDetailedChecking.getSelection());
-    meta.setDataVaultModelFiles(readModelTable(wDvModels));
-    meta.setBusinessVaultModelFiles(readModelTable(wBvModels));
-    meta.setDimensionalModelFiles(readModelTable(wDmModels));
+
+    if (dvTab != null) {
+      dvTab.flushTableToList();
+      meta.setDataVaultModelFiles(new ArrayList<>(dvTab.paths));
+    }
+    if (bvTab != null) {
+      bvTab.flushTableToList();
+      meta.setBusinessVaultModelFiles(new ArrayList<>(bvTab.paths));
+    }
+    if (dmTab != null) {
+      dmTab.flushTableToList();
+      meta.setDimensionalModelFiles(new ArrayList<>(dmTab.paths));
+    }
   }
 
-  private static void fillModelTable(TableView table, List<String> files) {
-    table.clearAll();
-    if (files == null) {
+  /**
+   * Bulk-fills a {@link TableView} without {@code optimizeTableView()} (full optWidth over all
+   * rows). Uses a bounded sample for column width.
+   */
+  static void fillModelTableFast(TableView table, List<String> files) {
+    if (table == null || table.isDisposed() || table.table == null || table.table.isDisposed()) {
       return;
     }
-    for (String file : files) {
-      if (!Utils.isEmpty(file)) {
-        table.add(file);
+    table.table.setRedraw(false);
+    try {
+      table.table.removeAll();
+      if (files != null) {
+        for (String file : files) {
+          if (!Utils.isEmpty(file)) {
+            table.add(file);
+          }
+        }
+      }
+      if (table.table.getItemCount() == 0) {
+        new TableItem(table.table, SWT.NONE);
+      }
+      table.removeEmptyRows();
+      table.setRowNums();
+      // Bound text measurement: sample first N rows only (nrLines > 0).
+      table.optWidth(true, OPT_WIDTH_SAMPLE_ROWS);
+    } finally {
+      if (!table.table.isDisposed()) {
+        table.table.setRedraw(true);
       }
     }
-    table.optimizeTableView();
   }
 
   private static List<String> readModelTable(TableView table) {
@@ -455,5 +575,118 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
       return false;
     }
     return wName.setFocus();
+  }
+
+  /** One model-layer tab: authoritative path list + optional filtered TableView. */
+  private final class ModelTab {
+    private final String labelKey;
+    private final String modelExtension;
+    private final TableView table;
+    private final Text wFilter;
+    private final Label wlCount;
+    private final List<String> paths = new ArrayList<>();
+    private boolean loaded;
+    private boolean suppressingFilter;
+
+    private ModelTab(
+        String labelKey, String modelExtension, TableView table, Text wFilter, Label wlCount) {
+      this.labelKey = labelKey;
+      this.modelExtension = modelExtension;
+      this.table = table;
+      this.wFilter = wFilter;
+      this.wlCount = wlCount;
+    }
+
+    private void setPaths(List<String> source) {
+      paths.clear();
+      if (source != null) {
+        for (String path : source) {
+          if (!Utils.isEmpty(path)) {
+            paths.add(path);
+          }
+        }
+      }
+      loaded = false;
+      if (wFilter != null && !wFilter.isDisposed()) {
+        suppressingFilter = true;
+        try {
+          wFilter.setText("");
+        } finally {
+          suppressingFilter = false;
+        }
+      }
+      updateCountLabel();
+    }
+
+    private void ensureLoaded() {
+      if (loaded || table == null || table.isDisposed()) {
+        return;
+      }
+      repaintTable();
+      loaded = true;
+    }
+
+    private void onFilterChanged() {
+      if (suppressingFilter || table == null || table.isDisposed()) {
+        return;
+      }
+      if (loaded) {
+        flushTableToList();
+      }
+      loaded = true;
+      repaintTable();
+    }
+
+    private void onTableModified() {
+      setChanged();
+    }
+
+    private void flushTableToList() {
+      if (!loaded || table == null || table.isDisposed()) {
+        return;
+      }
+      String filter = currentFilter();
+      List<String> tableContent = readModelTable(table);
+      List<String> merged =
+          ResourceDefinitionGroupModelListSupport.mergeFilteredTableEdit(
+              paths, filter, tableContent);
+      paths.clear();
+      paths.addAll(merged);
+    }
+
+    private void repaintTable() {
+      if (table == null || table.isDisposed()) {
+        return;
+      }
+      String filter = currentFilter();
+      List<String> visible = ResourceDefinitionGroupModelListSupport.filterPaths(paths, filter);
+      fillModelTableFast(table, visible);
+      updateCountLabel();
+    }
+
+    private String currentFilter() {
+      if (wFilter == null || wFilter.isDisposed()) {
+        return "";
+      }
+      return Const.NVL(wFilter.getText(), "").trim();
+    }
+
+    private void updateCountLabel() {
+      if (wlCount == null || wlCount.isDisposed()) {
+        return;
+      }
+      String filter = currentFilter();
+      int total = paths.size();
+      if (Utils.isEmpty(filter)) {
+        wlCount.setText(
+            BaseMessages.getString(
+                PKG, "ResourceDefinitionGroupMetaEditor.ModelCount.Label", total));
+      } else {
+        int shown = ResourceDefinitionGroupModelListSupport.filterPaths(paths, filter).size();
+        wlCount.setText(
+            BaseMessages.getString(
+                PKG, "ResourceDefinitionGroupMetaEditor.ModelCountFiltered.Label", shown, total));
+      }
+    }
   }
 }

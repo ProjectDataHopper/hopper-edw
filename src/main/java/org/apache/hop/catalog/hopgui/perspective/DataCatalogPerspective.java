@@ -27,6 +27,7 @@ import org.apache.hop.catalog.hopgui.perspective.importmenu.DataCatalogImportMen
 import org.apache.hop.catalog.hopgui.preview.RecordDefinitionPreviewRunner;
 import org.apache.hop.catalog.hopgui.preview.RecordDefinitionPreviewSupport;
 import org.apache.hop.catalog.metadata.DataCatalogMeta;
+import org.apache.hop.catalog.metadata.ResourceDefinitionGroupModelDiscoverySupport;
 import org.apache.hop.catalog.model.RecordDefinition;
 import org.apache.hop.catalog.model.RecordDefinitionKey;
 import org.apache.hop.catalog.model.RecordDefinitionQuery;
@@ -134,7 +135,8 @@ public class DataCatalogPerspective implements IHopPerspective {
 
   @Override
   public void perspectiveActivated() {
-    refresh();
+    // Soft rebuild: keep live catalog connections; only toolbar F5 / mutations invalidate.
+    refreshTree(false);
   }
 
   @Override
@@ -166,10 +168,27 @@ public class DataCatalogPerspective implements IHopPerspective {
 
     refresh();
 
+    // Do NOT listen to MetadataChanged for a full catalog rebuild. Hop fires that event when any
+    // metadata editor is first marked dirty (e.g. typing a resource definition group name), which
+    // would disconnect every catalog and re-list all records on the UI thread. Explicit actions
+    // (toolbar refresh, import, delete, perspective activation) call refresh() themselves.
+    // On project switch, drop cached catalog connections so the next refresh uses the new project.
     hopGui
         .getEventsHandler()
         .addEventListener(
-            getClass().getName(), e -> refresh(), HopGuiEvents.MetadataChanged.name());
+            getClass().getName() + "ProjectActivated",
+            e ->
+                hopGui
+                    .getDisplay()
+                    .asyncExec(
+                        () -> {
+                          RecordDefinitionRegistry.getInstance().invalidate();
+                          ResourceDefinitionGroupModelDiscoverySupport.invalidateCache();
+                          if (tree != null && !tree.isDisposed()) {
+                            refreshTree(false);
+                          }
+                        }),
+            HopGuiEvents.ProjectActivated.name());
   }
 
   private void createTreePane(Composite parent) {
@@ -207,7 +226,7 @@ public class DataCatalogPerspective implements IHopPerspective {
           }
           recordListFilter =
               DataCatalogRecordListFilter.fromIndex(wRecordFilter.getSelectionIndex());
-          refresh();
+          refreshTree(false);
         });
     FormData fdFilter = new FormData();
     fdFilter.left = new FormAttachment(wlFilter, PropsUi.getMargin());
@@ -230,7 +249,7 @@ public class DataCatalogPerspective implements IHopPerspective {
             return;
           }
           filterText = Const.NVL(searchText.getText(), "").trim();
-          refresh();
+          refreshTree(false);
         });
 
     wGroupByNamespace = new Button(treeComposite, SWT.CHECK);
@@ -245,7 +264,7 @@ public class DataCatalogPerspective implements IHopPerspective {
         e -> {
           groupByNamespace = wGroupByNamespace.getSelection();
           DataCatalogPerspectiveAuditSupport.storeGroupByNamespace(groupByNamespace);
-          refresh();
+          refreshTree(false);
         });
     FormData fdGroupByNamespace = new FormData();
     fdGroupByNamespace.left = new FormAttachment(0, PropsUi.getMargin());
@@ -472,12 +491,27 @@ public class DataCatalogPerspective implements IHopPerspective {
     return changed;
   }
 
+  /**
+   * Full refresh: disconnect cached catalogs and rebuild the tree. Used by toolbar F5 and after
+   * catalog content mutations (import, delete, version tag).
+   */
   public void refresh() {
+    refreshTree(true);
+  }
+
+  /**
+   * Rebuilds the catalog tree.
+   *
+   * @param invalidateRegistry when true, disconnects all cached catalog connections first
+   */
+  public void refreshTree(boolean invalidateRegistry) {
     if (tree == null || tree.isDisposed()) {
       return;
     }
 
-    RecordDefinitionRegistry.getInstance().invalidate();
+    if (invalidateRegistry) {
+      RecordDefinitionRegistry.getInstance().invalidate();
+    }
 
     TreeItem[] selection = tree.getSelection();
     String selectedCatalog = DataCatalogSelectionSupport.firstCatalogConnectionName(selection);
