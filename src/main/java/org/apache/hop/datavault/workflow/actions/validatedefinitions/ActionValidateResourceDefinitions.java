@@ -37,6 +37,7 @@ import org.apache.hop.core.logging.ILogChannel;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.catalog.DvSourceCatalogService;
+import org.apache.hop.datavault.resourcedefinition.ParallelValidationSupport;
 import org.apache.hop.datavault.resourcedefinition.ResourceDefinitionGroupResolver;
 import org.apache.hop.datavault.resourcedefinition.SchemaCompareMode;
 import org.apache.hop.datavault.resourcedefinition.SchemaImpactSimulationRequest;
@@ -92,6 +93,7 @@ public class ActionValidateResourceDefinitions extends ActionBase implements Clo
   public static final String WIDGET_ID_CHECK_TARGET_DATABASES = "validate-check-target-databases";
   public static final String WIDGET_ID_EXPECT_AUTO_TARGET_CREATE =
       "validate-expect-auto-target-create";
+  public static final String WIDGET_ID_VALIDATION_PARALLELISM = "validate-validation-parallelism";
 
   /** Extension-data key for downstream actions that want the report text. */
   public static final String RESULT_ATTR_REPORT = "schemaValidationReportText";
@@ -244,9 +246,25 @@ public class ActionValidateResourceDefinitions extends ActionBase implements Clo
   @HopMetadataProperty
   private String expectAutomaticTargetTableCreation;
 
+  /**
+   * Max concurrent live-source discoveries and target-table DDL checks. Literal integer or Hop
+   * variable (e.g. {@code ${VALIDATION_PARALLELISM}}). Default {@code 8}; use {@code 1} for serial.
+   */
+  @GuiWidgetElement(
+      id = WIDGET_ID_VALIDATION_PARALLELISM,
+      order = "1300",
+      type = GuiElementType.TEXT,
+      variables = true,
+      label = "i18n::ActionValidateResourceDefinitions.ValidationParallelism.Label",
+      toolTip = "i18n::ActionValidateResourceDefinitions.ValidationParallelism.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_PARENT_ID)
+  @HopMetadataProperty
+  private String validationParallelism;
+
   public ActionValidateResourceDefinitions() {
     super();
     this.expectAutomaticTargetTableCreation = "N";
+    this.validationParallelism = "8";
   }
 
   public ActionValidateResourceDefinitions(ActionValidateResourceDefinitions meta) {
@@ -266,6 +284,8 @@ public class ActionValidateResourceDefinitions extends ActionBase implements Clo
         meta.expectAutomaticTargetTableCreation != null
             ? meta.expectAutomaticTargetTableCreation
             : "N";
+    this.validationParallelism =
+        meta.validationParallelism != null ? meta.validationParallelism : "8";
   }
 
   /**
@@ -407,6 +427,16 @@ public class ActionValidateResourceDefinitions extends ActionBase implements Clo
               Boolean.toString(expectAutoCreate)));
     }
 
+    int parallelism =
+        ParallelValidationSupport.resolveParallelism(
+            resolveOptional(validationParallelism), ParallelValidationSupport.DEFAULT_PARALLELISM);
+    logBasic(
+        BaseMessages.getString(
+            PKG,
+            "ActionValidateResourceDefinitions.Log.ValidationParallelism",
+            Integer.toString(parallelism)));
+
+    long started = System.currentTimeMillis();
     SchemaImpactSimulationRequest request =
         SchemaImpactSimulationRequest.builder()
             .resourceDefinitionGroup(groupName)
@@ -417,11 +447,21 @@ public class ActionValidateResourceDefinitions extends ActionBase implements Clo
             .detailedDataTypeChecking(true)
             .checkTargetDatabases(checkTargetDatabases)
             .expectAutomaticTargetTableCreation(expectAutoCreate)
+            .validationParallelism(parallelism)
             .build();
 
     SchemaImpactSimulationResult simulation =
         SchemaImpactSimulationService.run(request, this, getMetadataProvider());
     ValidationReport report = simulation.validationReport();
+    long elapsedMs = System.currentTimeMillis() - started;
+    int sourceCount = report != null ? report.getRecordValidations().size() : 0;
+    logBasic(
+        BaseMessages.getString(
+            PKG,
+            "ActionValidateResourceDefinitions.Log.ValidationDuration",
+            Integer.toString(sourceCount),
+            Long.toString(elapsedMs),
+            Integer.toString(parallelism)));
 
     String formatted = SchemaValidationReportFormatter.formatLog(simulation);
     if (!Utils.isEmpty(formatted)) {

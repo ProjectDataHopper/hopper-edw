@@ -5,9 +5,11 @@ Practical notes for tuning Data Vault update loads. Settings live in two places:
 - **Model** (`.hdv` → Target loading tab): batch size, Table Output copies, Sort Rows in-memory buffer
 - **Workflow** (Data Vault Update action): parallel pipeline copies, JVM heap on the run configuration
 
+There is a **third** kind of parallelism for the **schema gate** (not loads): concurrent live-source discovery and target-table DDL checks. See [Schema gate validation parallelism](#schema-gate-validation-parallelism) below.
+
 ---
 
-## Two kinds of parallelism
+## Two kinds of load parallelism
 
 Generated update pipelines use parallelism at two independent levels. They stack: total resource use is roughly the product of both when loads run concurrently.
 
@@ -40,6 +42,29 @@ Applied to the generated **Table Output** transform as Hop transform copies. Row
 Example from the large synthetic model (`integration-tests/files/large/syn-large.hdv`): `targetTableParallelCopies=4`.
 
 **Scale-out preference:** prefer more concurrent **table pipelines** (`parallelPipelineCopies` / model orchestrator) over deeper single-pipeline partitioning. Hash-key ModPartitioner swimlanes were evaluated and **abandoned** — see [plans/hash-key-partitioning-plan.md](plans/hash-key-partitioning-plan.md).
+
+---
+
+## Schema gate validation parallelism
+
+**Setting:** `validationParallelism` / **Parallel checks** on:
+
+- Design-time **Validate sources** options dialog (resource definition group)
+- Workflow action **Validate resource definitions (schema gate)**
+
+Default **`8`** (clamped 1–64). Use **`1`** for serial debugging.
+
+Live source validation opens a JDBC connection per catalog source to rediscover fields. Over a VPN, that latency dominates wall-clock time when hundreds or thousands of sources run **one after another**. Bounded parallel fan-out overlaps those waits. The same knob applies to **Check target databases** (per-satellite DDL readiness).
+
+| Use case | Guidance |
+|----------|----------|
+| ~1000 database sources over VPN | Start at 8; try 12–16 if the source DB and gateway accept more sessions |
+| Fragile source / low `max_connections` | Lower to 2–4 or 1 |
+| Offline catalog-version only compare | Parallelism still helps lightly (catalog I/O); leave default |
+
+This is **not** the same as `parallelPipelineCopies` on update actions. Validation does not load data.
+
+See [resource-definition-validation.adoc](resource-definition-validation.adoc).
 
 ---
 

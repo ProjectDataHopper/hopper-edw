@@ -59,7 +59,13 @@ public final class TargetSchemaValidationSupport {
       ValidationModels models,
       IVariables variables,
       IHopMetadataProvider metadataProvider) {
-    return enrich(report, models, variables, metadataProvider, false);
+    return enrich(
+        report,
+        models,
+        variables,
+        metadataProvider,
+        false,
+        ParallelValidationSupport.DEFAULT_PARALLELISM);
   }
 
   public static ValidationReport enrich(
@@ -68,107 +74,181 @@ public final class TargetSchemaValidationSupport {
       IVariables variables,
       IHopMetadataProvider metadataProvider,
       boolean expectAutomaticTargetTableCreation) {
+    return enrich(
+        report,
+        models,
+        variables,
+        metadataProvider,
+        expectAutomaticTargetTableCreation,
+        ParallelValidationSupport.DEFAULT_PARALLELISM);
+  }
+
+  public static ValidationReport enrich(
+      ValidationReport report,
+      ValidationModels models,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider,
+      boolean expectAutomaticTargetTableCreation,
+      int validationParallelism) {
     if (report == null || models == null) {
       return report;
     }
-    ValidationReport enriched = new ValidationReport(report.getGroupName());
+
+    List<RecordDefinitionValidation> owners = new ArrayList<>();
+    List<TargetCheckJob> jobs = new ArrayList<>();
     Set<String> tablesChecked = new LinkedHashSet<>();
 
     for (RecordDefinitionValidation existing : report.getRecordValidations()) {
       if (existing == null) {
         continue;
       }
-      List<ValidationIssue> extra = new ArrayList<>();
-      if (existing.usages() != null) {
-        for (SourceUsage usage : existing.usages()) {
-          if (usage == null
-              || !SourceUsageIndexBuilder.MODEL_TYPE_DATA_VAULT.equals(usage.modelType())
-              || Utils.isEmpty(usage.modelFilename())
-              || Utils.isEmpty(usage.modelElementName())) {
-            continue;
-          }
-          String tableKey = usage.modelFilename() + "#" + usage.modelElementName();
-          if (!tablesChecked.add(tableKey)) {
-            continue;
-          }
-          try {
-            DataVaultModel model =
-                ResourceDefinitionGroupResolver.loadDataVaultModel(
-                    usage.modelFilename(), variables, metadataProvider);
-            IDvTable table = model.findTable(usage.modelElementName());
-            if (!(table instanceof DvSatellite satellite)) {
-              continue;
-            }
-            List<String> ddl = satellite.generateUpdateDdl(metadataProvider, variables, model);
-            if (ddl == null || ddl.isEmpty()) {
-              continue;
-            }
-            String preview = String.join("; ", ddl.subList(0, Math.min(3, ddl.size())));
-            if (ddl.size() > 3) {
-              preview = preview + "; ...";
-            }
-            String tableName = Const.NVL(satellite.getName(), usage.modelElementName());
-            String physicalName =
-                !Utils.isEmpty(satellite.getTableName())
-                    ? satellite.getTableName()
-                    : satellite.getName();
-            String modelName = Const.NVL(usage.modelName(), usage.modelFilename());
-            boolean pendingCreate =
-                isPendingCreate(satellite, model, physicalName, ddl, variables, metadataProvider);
-            // User opted into automatic table creation (initial vault load): omit missing-table
-            // CREATE findings entirely — do not flood reports / results dialog with INFO noise.
-            // Layout drift on tables that already exist still reports as WARNING.
-            if (pendingCreate && expectAutomaticTargetTableCreation) {
-              continue;
-            }
-            String message =
-                ValidationFindingFormatter.targetDdlRequired(
-                    tableName, modelName, ddl.size(), preview);
-            extra.add(
+      int ownerIndex = owners.size();
+      owners.add(existing);
+      if (existing.usages() == null) {
+        continue;
+      }
+      for (SourceUsage usage : existing.usages()) {
+        if (usage == null
+            || !SourceUsageIndexBuilder.MODEL_TYPE_DATA_VAULT.equals(usage.modelType())
+            || Utils.isEmpty(usage.modelFilename())
+            || Utils.isEmpty(usage.modelElementName())) {
+          continue;
+        }
+        String tableKey = usage.modelFilename() + "#" + usage.modelElementName();
+        if (!tablesChecked.add(tableKey)) {
+          continue;
+        }
+        jobs.add(new TargetCheckJob(ownerIndex, usage));
+      }
+    }
+
+    List<List<ValidationIssue>> perOwnerExtras = new ArrayList<>(owners.size());
+    for (int i = 0; i < owners.size(); i++) {
+      perOwnerExtras.add(new ArrayList<>());
+    }
+
+    int parallelism = ParallelValidationSupport.resolveParallelism(validationParallelism);
+    try {
+      List<TargetCheckResult> results =
+          ParallelValidationSupport.map(
+              parallelism,
+              jobs,
+              (job, index) ->
+                  checkTargetTable(
+                      job.usage(),
+                      expectAutomaticTargetTableCreation,
+                      variables,
+                      metadataProvider));
+      for (int i = 0; i < jobs.size(); i++) {
+        TargetCheckResult result = results.get(i);
+        if (result == null || result.issue() == null) {
+          continue;
+        }
+        perOwnerExtras.get(jobs.get(i).ownerIndex()).add(result.issue());
+      }
+    } catch (HopException e) {
+      // Unexpected pool failure: attach a single warning to the first owner so the gate still
+      // surfaces a problem instead of aborting silently.
+      if (!owners.isEmpty()) {
+        perOwnerExtras
+            .get(0)
+            .add(
                 new ValidationIssue(
                     ValidationIssueSupport.buildIssueId(
-                        IssueKind.TARGET_DDL_REQUIRED, satellite.getName(), "ddl"),
+                        IssueKind.TARGET_DDL_REQUIRED, "target-check", "pool-failed"),
                     IssueKind.TARGET_DDL_REQUIRED,
                     IssueSeverity.WARNING,
                     null,
-                    message,
-                    List.of(
-                        new RemediationProposal(
-                            ProposalType.GENERATE_TARGET_DDL_PACKAGE,
-                            BaseMessages.getString(
-                                PKG, "TargetSchemaValidationSupport.Proposal.Summary"),
-                            BaseMessages.getString(
-                                PKG,
-                                "TargetSchemaValidationSupport.Proposal.Details",
-                                satellite.getName(),
-                                Integer.toString(ddl.size()))))));
-          } catch (HopException e) {
-            String tableName = Const.NVL(usage.modelElementName(), "?");
-            String message =
-                ValidationFindingFormatter.targetDdlCheckFailed(
-                    tableName, Const.NVL(e.getMessage(), e.getClass().getSimpleName()));
-            extra.add(
-                new ValidationIssue(
-                    ValidationIssueSupport.buildIssueId(
-                        IssueKind.TARGET_DDL_REQUIRED,
-                        usage.modelElementName(),
-                        "ddl-check-failed"),
-                    IssueKind.TARGET_DDL_REQUIRED,
-                    IssueSeverity.WARNING,
-                    null,
-                    message,
+                    ValidationFindingFormatter.targetDdlCheckFailed(
+                        "?", Const.NVL(e.getMessage(), e.getClass().getSimpleName())),
                     List.of(
                         new RemediationProposal(
                             ProposalType.BLOCK_UPDATE_UNTIL_RESOLVED,
                             BaseMessages.getString(
                                 PKG, "TargetSchemaValidationSupport.Proposal.CheckFailed.Summary"),
                             Const.NVL(e.getMessage(), "")))));
-          }
-        }
       }
-      enriched.addRecordValidation(mergeIssues(existing, extra));
+    }
+
+    ValidationReport enriched = new ValidationReport(report.getGroupName());
+    for (int i = 0; i < owners.size(); i++) {
+      enriched.addRecordValidation(mergeIssues(owners.get(i), perOwnerExtras.get(i)));
     }
     return enriched;
+  }
+
+  private static TargetCheckResult checkTargetTable(
+      SourceUsage usage,
+      boolean expectAutomaticTargetTableCreation,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider) {
+    try {
+      DataVaultModel model =
+          ResourceDefinitionGroupResolver.loadDataVaultModel(
+              usage.modelFilename(), variables, metadataProvider);
+      IDvTable table = model.findTable(usage.modelElementName());
+      if (!(table instanceof DvSatellite satellite)) {
+        return TargetCheckResult.empty();
+      }
+      List<String> ddl = satellite.generateUpdateDdl(metadataProvider, variables, model);
+      if (ddl == null || ddl.isEmpty()) {
+        return TargetCheckResult.empty();
+      }
+      String preview = String.join("; ", ddl.subList(0, Math.min(3, ddl.size())));
+      if (ddl.size() > 3) {
+        preview = preview + "; ...";
+      }
+      String tableName = Const.NVL(satellite.getName(), usage.modelElementName());
+      String physicalName =
+          !Utils.isEmpty(satellite.getTableName()) ? satellite.getTableName() : satellite.getName();
+      String modelName = Const.NVL(usage.modelName(), usage.modelFilename());
+      boolean pendingCreate =
+          isPendingCreate(satellite, model, physicalName, ddl, variables, metadataProvider);
+      // User opted into automatic table creation (initial vault load): omit missing-table
+      // CREATE findings entirely — do not flood reports / results dialog with INFO noise.
+      // Layout drift on tables that already exist still reports as WARNING.
+      if (pendingCreate && expectAutomaticTargetTableCreation) {
+        return TargetCheckResult.empty();
+      }
+      String message =
+          ValidationFindingFormatter.targetDdlRequired(tableName, modelName, ddl.size(), preview);
+      return new TargetCheckResult(
+          new ValidationIssue(
+              ValidationIssueSupport.buildIssueId(
+                  IssueKind.TARGET_DDL_REQUIRED, satellite.getName(), "ddl"),
+              IssueKind.TARGET_DDL_REQUIRED,
+              IssueSeverity.WARNING,
+              null,
+              message,
+              List.of(
+                  new RemediationProposal(
+                      ProposalType.GENERATE_TARGET_DDL_PACKAGE,
+                      BaseMessages.getString(PKG, "TargetSchemaValidationSupport.Proposal.Summary"),
+                      BaseMessages.getString(
+                          PKG,
+                          "TargetSchemaValidationSupport.Proposal.Details",
+                          satellite.getName(),
+                          Integer.toString(ddl.size()))))));
+    } catch (HopException e) {
+      String tableName = Const.NVL(usage.modelElementName(), "?");
+      String message =
+          ValidationFindingFormatter.targetDdlCheckFailed(
+              tableName, Const.NVL(e.getMessage(), e.getClass().getSimpleName()));
+      return new TargetCheckResult(
+          new ValidationIssue(
+              ValidationIssueSupport.buildIssueId(
+                  IssueKind.TARGET_DDL_REQUIRED, usage.modelElementName(), "ddl-check-failed"),
+              IssueKind.TARGET_DDL_REQUIRED,
+              IssueSeverity.WARNING,
+              null,
+              message,
+              List.of(
+                  new RemediationProposal(
+                      ProposalType.BLOCK_UPDATE_UNTIL_RESOLVED,
+                      BaseMessages.getString(
+                          PKG, "TargetSchemaValidationSupport.Proposal.CheckFailed.Summary"),
+                      Const.NVL(e.getMessage(), "")))));
+    }
   }
 
   /** True when the target table is missing (or DDL is create-only). Package-visible for tests. */
@@ -268,5 +348,13 @@ public final class TargetSchemaValidationSupport {
         all,
         visible,
         existing.acknowledgedIssueCount());
+  }
+
+  private record TargetCheckJob(int ownerIndex, SourceUsage usage) {}
+
+  private record TargetCheckResult(ValidationIssue issue) {
+    static TargetCheckResult empty() {
+      return new TargetCheckResult(null);
+    }
   }
 }

@@ -36,6 +36,7 @@ class ValidationOptionsTest {
     assertTrue(request.includeImpact());
     assertFalse(request.checkCatalogVsVersion());
     assertFalse(request.expectAutomaticTargetTableCreation());
+    assertEquals(ParallelValidationSupport.DEFAULT_PARALLELISM, request.validationParallelism());
   }
 
   @Test
@@ -54,11 +55,13 @@ class ValidationOptionsTest {
             false,
             null,
             null,
-            ReportFormat.BOTH);
+            ReportFormat.BOTH,
+            4);
     SchemaImpactSimulationRequest request = options.toSimulationRequest("g", true);
     assertEquals(SchemaCompareMode.LIVE_SOURCE, request.compareMode());
     assertEquals("v1.0.0", request.catalogVersionTag());
     assertEquals("v1.0.0", request.baselineVersionTag());
+    assertEquals(4, request.validationParallelism());
   }
 
   @Test
@@ -77,7 +80,8 @@ class ValidationOptionsTest {
             false,
             null,
             null,
-            ReportFormat.BOTH);
+            ReportFormat.BOTH,
+            8);
     SchemaImpactSimulationRequest request = options.toSimulationRequest("g", true);
     assertEquals(SchemaCompareMode.WORKING_VS_VERSION, request.compareMode());
     assertEquals("v1.0.0", request.baselineVersionTag());
@@ -99,7 +103,8 @@ class ValidationOptionsTest {
             false,
             null,
             null,
-            ReportFormat.BOTH);
+            ReportFormat.BOTH,
+            8);
     assertTrue(options.describeBaseline().contains("v2"));
     assertTrue(options.describeBaseline().toLowerCase().contains("immutable"));
   }
@@ -120,9 +125,11 @@ class ValidationOptionsTest {
             false,
             null,
             null,
-            ReportFormat.BOTH);
+            ReportFormat.BOTH,
+            16);
     SchemaImpactSimulationRequest request = options.toSimulationRequest("g", true);
     assertTrue(request.checkTargetDatabases());
     assertTrue(request.expectAutomaticTargetTableCreation());
+    assertEquals(16, request.validationParallelism());
   }
 }

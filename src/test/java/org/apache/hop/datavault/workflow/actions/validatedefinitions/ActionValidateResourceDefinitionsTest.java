@@ -39,6 +39,7 @@ class ActionValidateResourceDefinitionsTest {
     assertEquals(
         SchemaValidationReportFileWriter.ReportFormat.MARKDOWN.name(), action.getReportFormat());
     assertTrue(action.isIncludeImpact());
+    assertEquals("8", action.getValidationParallelism());
     assertTrue(action.isEvaluation());
 
     // Hop GUI requires (ILogChannel, IHopMetadataProvider) signature.
@@ -69,6 +70,7 @@ class ActionValidateResourceDefinitionsTest {
     original.setFailureSeverity(SchemaValidationFailureSeverity.WARN_ONLY.name());
     original.setFailOnWarnings(true);
     original.setIncludeImpact(false);
+    original.setValidationParallelism("${VALIDATION_PARALLELISM}");
 
     ActionValidateResourceDefinitions copy = (ActionValidateResourceDefinitions) original.clone();
     assertEquals("retail-sources", copy.getResourceDefinitionGroup());
@@ -81,6 +83,7 @@ class ActionValidateResourceDefinitionsTest {
     assertEquals(SchemaValidationFailureSeverity.WARN_ONLY.name(), copy.getFailureSeverity());
     assertTrue(copy.isFailOnWarnings());
     assertEquals(false, copy.isIncludeImpact());
+    assertEquals("${VALIDATION_PARALLELISM}", copy.getValidationParallelism());
   }
 
   @Test

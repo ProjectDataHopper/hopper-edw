@@ -27,6 +27,7 @@ import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.catalog.DvSourceCatalogService;
 import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
 import org.apache.hop.datavault.hopgui.help.HelpTopics;
+import org.apache.hop.datavault.resourcedefinition.ParallelValidationSupport;
 import org.apache.hop.datavault.resourcedefinition.SchemaValidationReportFileWriter.ReportFormat;
 import org.apache.hop.datavault.resourcedefinition.ValidationOptions;
 import org.apache.hop.datavault.resourcedefinition.ValidationOptions.BaselineKind;
@@ -49,6 +50,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Spinner;
 
 /**
  * Asks the DV administrator what baseline (truth) and which check axes to use before validating a
@@ -80,6 +82,7 @@ public final class ResourceDefinitionValidationOptionsDialog {
   private Button wWriteReport;
   private TextVar wReportPath;
   private TextVar wReportBaseName;
+  private Spinner wParallelism;
   private ValidationOptions result;
 
   public ResourceDefinitionValidationOptionsDialog(
@@ -265,8 +268,33 @@ public final class ResourceDefinitionValidationOptionsDialog {
     fdImpact.left = new FormAttachment(0, margin);
     fdImpact.top = new FormAttachment(wExpectAutoCreate, margin / 2);
     fdImpact.right = new FormAttachment(100, -margin);
-    fdImpact.bottom = new FormAttachment(100, -margin);
     wIncludeImpact.setLayoutData(fdImpact);
+
+    Label wlParallelism = new Label(gAxes, SWT.RIGHT);
+    PropsUi.setLook(wlParallelism);
+    wlParallelism.setText(
+        BaseMessages.getString(
+            PKG, "ResourceDefinitionValidationOptionsDialog.Axes.Parallelism.Label"));
+    FormData fdlParallelism = new FormData();
+    fdlParallelism.left = new FormAttachment(0, margin);
+    fdlParallelism.top = new FormAttachment(wIncludeImpact, margin);
+    wlParallelism.setLayoutData(fdlParallelism);
+
+    wParallelism = new Spinner(gAxes, SWT.BORDER);
+    PropsUi.setLook(wParallelism);
+    wParallelism.setMinimum(1);
+    wParallelism.setMaximum(ParallelValidationSupport.MAX_PARALLELISM);
+    wParallelism.setIncrement(1);
+    wParallelism.setPageIncrement(4);
+    wParallelism.setSelection(ParallelValidationSupport.DEFAULT_PARALLELISM);
+    wParallelism.setToolTipText(
+        BaseMessages.getString(
+            PKG, "ResourceDefinitionValidationOptionsDialog.Axes.Parallelism.ToolTip"));
+    FormData fdParallelism = new FormData();
+    fdParallelism.left = new FormAttachment(wlParallelism, margin);
+    fdParallelism.top = new FormAttachment(wIncludeImpact, margin);
+    fdParallelism.bottom = new FormAttachment(100, -margin);
+    wParallelism.setLayoutData(fdParallelism);
 
     Group gReport = new Group(shell, SWT.SHADOW_ETCHED_IN);
     PropsUi.setLook(gReport);
@@ -343,8 +371,8 @@ public final class ResourceDefinitionValidationOptionsDialog {
     applyInitialValues(lastOptions != null ? lastOptions : ValidationOptions.defaults());
     enableFields();
 
-    shell.setMinimumSize(560, 520);
-    BaseTransformDialog.setSize(shell, 640, 600);
+    shell.setMinimumSize(560, 560);
+    BaseTransformDialog.setSize(shell, 640, 640);
     shell.open();
     while (!shell.isDisposed()) {
       if (!shell.getDisplay().readAndDispatch()) {
@@ -408,6 +436,8 @@ public final class ResourceDefinitionValidationOptionsDialog {
     wCheckTargetDb.setSelection(options.checkTargetDatabases());
     wExpectAutoCreate.setSelection(options.expectAutomaticTargetTableCreation());
     wIncludeImpact.setSelection(options.includeImpact());
+    wParallelism.setSelection(
+        ParallelValidationSupport.resolveParallelism(options.validationParallelism()));
     wWriteReport.setSelection(options.writeReport());
     wReportPath.setText(Const.NVL(options.reportOutputPath(), "${PROJECT_HOME}/work/reports"));
     wReportBaseName.setText(
@@ -481,7 +511,8 @@ public final class ResourceDefinitionValidationOptionsDialog {
             wWriteReport.getSelection(),
             Const.NVL(wReportPath.getText(), "").trim(),
             Const.NVL(wReportBaseName.getText(), "").trim(),
-            ReportFormat.BOTH);
+            ReportFormat.BOTH,
+            ParallelValidationSupport.resolveParallelism(wParallelism.getSelection()));
     lastOptions = result;
     shell.dispose();
   }

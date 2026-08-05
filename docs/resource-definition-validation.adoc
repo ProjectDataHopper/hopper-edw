@@ -37,6 +37,7 @@ image::images/resource-definition-group-validate-sources-dialog.png[Validate sou
 
 * **Baseline (truth for this run)** — current working catalog (typical after automatic drift notification) or a **catalog version tag** (immutable snapshot)
 * **What to check** — live source systems, working catalog vs version, target models (DV/BV/DM), target databases (DDL needed?), downstream impact/lineage
+* **Parallel checks** — max concurrent live-source discoveries and target-table DDL checks (default **8**, range 1–64). Raise this when validating hundreds of database sources over a high-latency link (VPN); set **1** for serial debugging.
 * **Optional report** — write HTML/Markdown under a Hop VFS path (same formatter as the CI gate)
 
 Validation is always **read-only**. Catalog version snapshots are never modified by validation. The results banner restates the chosen baseline and axes.
@@ -61,6 +62,7 @@ image::images/validate-resource-definitions-action-dialog.png[Validate resource 
 | Include downstream impact | Annotate issues with Source→DV→BV→DM blast radius |
 | Check target databases | Compare model tables to the physical target database (CREATE/ALTER DDL needed) |
 | Target tables are created automatically | When target DB checks are on: missing tables (CREATE that vault update will apply) are **not reported** — they are expected. Layout drift on **existing** tables stays a warning. |
+| Parallel checks | Max concurrent live-source / target-DB checks (default `8`, supports `${VALIDATION_PARALLELISM}`). Independent of load `parallelPipelineCopies`. |
 
 === Initial load and automatic table creation
 

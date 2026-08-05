@@ -53,9 +53,19 @@ public final class SourceRecordValidationService {
       IVariables variables,
       IHopMetadataProvider metadataProvider)
       throws HopException {
+    return validateGroup(
+        group, variables, metadataProvider, ParallelValidationSupport.DEFAULT_PARALLELISM);
+  }
+
+  public static ValidationReport validateGroup(
+      ResourceDefinitionGroupMeta group,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider,
+      int validationParallelism)
+      throws HopException {
     ValidationModels models =
         ResourceDefinitionGroupResolver.resolve(group, variables, metadataProvider);
-    return validateModels(models, variables, metadataProvider);
+    return validateModels(models, variables, metadataProvider, validationParallelism);
   }
 
   public static ValidationReport validateGroupByName(
@@ -69,6 +79,16 @@ public final class SourceRecordValidationService {
   public static ValidationReport validateModels(
       ValidationModels models, IVariables variables, IHopMetadataProvider metadataProvider)
       throws HopException {
+    return validateModels(
+        models, variables, metadataProvider, ParallelValidationSupport.DEFAULT_PARALLELISM);
+  }
+
+  public static ValidationReport validateModels(
+      ValidationModels models,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider,
+      int validationParallelism)
+      throws HopException {
     if (models == null || models.group() == null) {
       throw new HopException(
           BaseMessages.getString(PKG, "SourceRecordValidationService.Error.MissingGroup"));
@@ -79,27 +99,36 @@ public final class SourceRecordValidationService {
         SourceUsageIndexBuilder.build(models, variables);
     String defaultNamespace = DvCatalogNamespaces.projectSourcesNamespace(variables);
     int previewRowLimit = Math.max(1, models.group().getPreviewRowLimit());
+    boolean detailedDataTypeChecking = models.group().isDetailedDataTypeChecking();
+    int parallelism = ParallelValidationSupport.resolveParallelism(validationParallelism);
 
-    for (Map.Entry<RecordDefinitionKey, List<SourceUsage>> entry : usageIndex.entrySet()) {
-      RecordDefinitionKey templateKey = entry.getKey();
-      List<SourceUsage> usages = entry.getValue();
-      String catalogConnection = resolveCatalogConnection(usages);
-      RecordDefinitionKey resolvedKey =
-          SourceUsageIndexBuilder.resolveKey(
-              templateKey, catalogConnection, variables, defaultNamespace);
+    List<Map.Entry<RecordDefinitionKey, List<SourceUsage>>> entries =
+        new ArrayList<>(usageIndex.entrySet());
+    List<RecordDefinitionValidation> validations =
+        ParallelValidationSupport.map(
+            parallelism,
+            entries,
+            (entry, index) -> {
+              RecordDefinitionKey templateKey = entry.getKey();
+              List<SourceUsage> usages = entry.getValue();
+              String catalogConnection = resolveCatalogConnection(usages);
+              RecordDefinitionKey resolvedKey =
+                  SourceUsageIndexBuilder.resolveKey(
+                      templateKey, catalogConnection, variables, defaultNamespace);
 
-      RecordDefinition definition =
-          loadDefinition(catalogConnection, resolvedKey, variables, metadataProvider);
-      RecordDefinitionValidation validation =
-          validateDefinition(
-              definition,
-              resolvedKey,
-              catalogConnection,
-              usages,
-              previewRowLimit,
-              models.group().isDetailedDataTypeChecking(),
-              variables,
-              metadataProvider);
+              RecordDefinition definition =
+                  loadDefinition(catalogConnection, resolvedKey, variables, metadataProvider);
+              return validateDefinition(
+                  definition,
+                  resolvedKey,
+                  catalogConnection,
+                  usages,
+                  previewRowLimit,
+                  detailedDataTypeChecking,
+                  variables,
+                  metadataProvider);
+            });
+    for (RecordDefinitionValidation validation : validations) {
       report.addRecordValidation(validation);
     }
     return report;

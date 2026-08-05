@@ -31,6 +31,7 @@ package org.apache.hop.datavault.resourcedefinition;
  *     axis
  * @param expectAutomaticTargetTableCreation when true, missing-table CREATE findings are omitted
  *     (not reported) because vault update will create the tables; ALTER drift still warns
+ * @param validationParallelism max concurrent live-source / target-DB checks (clamped 1..64)
  */
 public record SchemaImpactSimulationRequest(
     String resourceDefinitionGroup,
@@ -42,7 +43,8 @@ public record SchemaImpactSimulationRequest(
     boolean checkTargetModels,
     boolean checkTargetDatabases,
     boolean checkCatalogVsVersion,
-    boolean expectAutomaticTargetTableCreation) {
+    boolean expectAutomaticTargetTableCreation,
+    int validationParallelism) {
 
   public static Builder builder() {
     return new Builder();
@@ -59,6 +61,7 @@ public record SchemaImpactSimulationRequest(
     private boolean checkTargetDatabases;
     private boolean checkCatalogVsVersion;
     private boolean expectAutomaticTargetTableCreation;
+    private int validationParallelism = ParallelValidationSupport.DEFAULT_PARALLELISM;
 
     public Builder resourceDefinitionGroup(String resourceDefinitionGroup) {
       this.resourceDefinitionGroup = resourceDefinitionGroup;
@@ -110,6 +113,11 @@ public record SchemaImpactSimulationRequest(
       return this;
     }
 
+    public Builder validationParallelism(int validationParallelism) {
+      this.validationParallelism = validationParallelism;
+      return this;
+    }
+
     public SchemaImpactSimulationRequest build() {
       return new SchemaImpactSimulationRequest(
           resourceDefinitionGroup,
@@ -121,7 +129,8 @@ public record SchemaImpactSimulationRequest(
           checkTargetModels,
           checkTargetDatabases,
           checkCatalogVsVersion,
-          expectAutomaticTargetTableCreation);
+          expectAutomaticTargetTableCreation,
+          ParallelValidationSupport.resolveParallelism(validationParallelism));
     }
   }
 }

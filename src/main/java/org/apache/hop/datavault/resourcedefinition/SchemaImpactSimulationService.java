@@ -104,15 +104,31 @@ public final class SchemaImpactSimulationService {
       }
     }
 
+    int validationParallelism =
+        request != null
+            ? ParallelValidationSupport.resolveParallelism(request.validationParallelism())
+            : ParallelValidationSupport.DEFAULT_PARALLELISM;
+
     ValidationModels models =
         ResourceDefinitionGroupResolver.resolve(group, variables, metadataProvider);
     ValidationReport report =
         switch (mode) {
           case LIVE_SOURCE ->
-              simulateLive(models, catalogVersionTag, detailed, variables, metadataProvider);
+              simulateLive(
+                  models,
+                  catalogVersionTag,
+                  detailed,
+                  variables,
+                  metadataProvider,
+                  validationParallelism);
           case WORKING_VS_VERSION ->
               simulateWorkingVsVersion(
-                  models, baselineVersionTag, detailed, variables, metadataProvider);
+                  models,
+                  baselineVersionTag,
+                  detailed,
+                  variables,
+                  metadataProvider,
+                  validationParallelism);
           case VERSION_VS_VERSION ->
               simulateVersionVsVersion(
                   models,
@@ -120,7 +136,8 @@ public final class SchemaImpactSimulationService {
                   catalogVersionTag,
                   detailed,
                   variables,
-                  metadataProvider);
+                  metadataProvider,
+                  validationParallelism);
         };
 
     // Optional second axis: working catalog vs version baseline while also checking live sources.
@@ -132,7 +149,12 @@ public final class SchemaImpactSimulationService {
     if (alsoVersion) {
       ValidationReport versionReport =
           simulateWorkingVsVersion(
-              models, baselineVersionTag, detailed, variables, metadataProvider);
+              models,
+              baselineVersionTag,
+              detailed,
+              variables,
+              metadataProvider,
+              validationParallelism);
       report = mergeReports(report, versionReport);
     }
 
@@ -154,7 +176,8 @@ public final class SchemaImpactSimulationService {
               models,
               variables,
               metadataProvider,
-              request.expectAutomaticTargetTableCreation());
+              request.expectAutomaticTargetTableCreation(),
+              validationParallelism);
     }
 
     ImpactGraph graph = ImpactGraph.empty();
@@ -271,11 +294,14 @@ public final class SchemaImpactSimulationService {
       String expectedVersionTag,
       boolean detailedDataTypeChecking,
       IVariables variables,
-      IHopMetadataProvider metadataProvider)
+      IHopMetadataProvider metadataProvider,
+      int validationParallelism)
       throws HopException {
+    int parallelism = ParallelValidationSupport.resolveParallelism(validationParallelism);
     if (Utils.isEmpty(expectedVersionTag)) {
       // Fast path: identical to classic SourceRecordValidationService behavior.
-      return SourceRecordValidationService.validateModels(models, variables, metadataProvider);
+      return SourceRecordValidationService.validateModels(
+          models, variables, metadataProvider, parallelism);
     }
 
     ValidationReport report = new ValidationReport(models.group().getName());
@@ -284,38 +310,48 @@ public final class SchemaImpactSimulationService {
     String defaultNamespace = DvCatalogNamespaces.projectSourcesNamespace(variables);
     int previewRowLimit = Math.max(1, models.group().getPreviewRowLimit());
     String defaultCatalog = resolveDefaultCatalog(models, variables, metadataProvider);
+    String groupCatalog = models.group().getDataCatalogConnection();
 
-    for (Map.Entry<RecordDefinitionKey, List<SourceUsage>> entry : usageIndex.entrySet()) {
-      List<SourceUsage> usages = entry.getValue();
-      String catalogConnection =
-          firstNonEmpty(
-              resolveCatalogConnection(usages),
-              defaultCatalog,
-              models.group().getDataCatalogConnection());
-      RecordDefinitionKey resolvedKey =
-          SourceUsageIndexBuilder.resolveKey(
-              entry.getKey(), catalogConnection, variables, defaultNamespace);
+    List<Map.Entry<RecordDefinitionKey, List<SourceUsage>>> entries =
+        new ArrayList<>(usageIndex.entrySet());
+    List<RecordDefinitionValidation> validations =
+        ParallelValidationSupport.map(
+            parallelism,
+            entries,
+            (entry, index) -> {
+              List<SourceUsage> usages = entry.getValue();
+              String catalogConnection =
+                  firstNonEmpty(resolveCatalogConnection(usages), defaultCatalog, groupCatalog);
+              RecordDefinitionKey resolvedKey =
+                  SourceUsageIndexBuilder.resolveKey(
+                      entry.getKey(), catalogConnection, variables, defaultNamespace);
 
-      RecordDefinition expected =
-          loadFromVersion(
-              catalogConnection, expectedVersionTag, resolvedKey, variables, metadataProvider);
-      // Physical discovery uses working-tree definition when available (current connection/path),
-      // falling back to the versioned definition.
-      RecordDefinition working =
-          loadWorking(catalogConnection, resolvedKey, variables, metadataProvider);
-      RecordDefinition discoverySource = working != null ? working : expected;
+              RecordDefinition expected =
+                  loadFromVersion(
+                      catalogConnection,
+                      expectedVersionTag,
+                      resolvedKey,
+                      variables,
+                      metadataProvider);
+              // Physical discovery uses working-tree definition when available (current
+              // connection/path), falling back to the versioned definition.
+              RecordDefinition working =
+                  loadWorking(catalogConnection, resolvedKey, variables, metadataProvider);
+              RecordDefinition discoverySource = working != null ? working : expected;
 
-      report.addRecordValidation(
-          validateAgainstLive(
-              expected,
-              discoverySource,
-              resolvedKey,
-              catalogConnection,
-              usages,
-              previewRowLimit,
-              detailedDataTypeChecking,
-              variables,
-              metadataProvider));
+              return validateAgainstLive(
+                  expected,
+                  discoverySource,
+                  resolvedKey,
+                  catalogConnection,
+                  usages,
+                  previewRowLimit,
+                  detailedDataTypeChecking,
+                  variables,
+                  metadataProvider);
+            });
+    for (RecordDefinitionValidation validation : validations) {
+      report.addRecordValidation(validation);
     }
     return report;
   }
@@ -325,7 +361,8 @@ public final class SchemaImpactSimulationService {
       String baselineVersionTag,
       boolean detailedDataTypeChecking,
       IVariables variables,
-      IHopMetadataProvider metadataProvider)
+      IHopMetadataProvider metadataProvider,
+      int validationParallelism)
       throws HopException {
     if (Utils.isEmpty(baselineVersionTag)) {
       throw new HopException(
@@ -336,33 +373,44 @@ public final class SchemaImpactSimulationService {
         SourceUsageIndexBuilder.build(models, variables);
     String defaultNamespace = DvCatalogNamespaces.projectSourcesNamespace(variables);
     String defaultCatalog = resolveDefaultCatalog(models, variables, metadataProvider);
+    String groupCatalog = models.group().getDataCatalogConnection();
+    int parallelism = ParallelValidationSupport.resolveParallelism(validationParallelism);
 
-    for (Map.Entry<RecordDefinitionKey, List<SourceUsage>> entry : usageIndex.entrySet()) {
-      List<SourceUsage> usages = entry.getValue();
-      String catalogConnection =
-          firstNonEmpty(
-              resolveCatalogConnection(usages),
-              defaultCatalog,
-              models.group().getDataCatalogConnection());
-      RecordDefinitionKey resolvedKey =
-          SourceUsageIndexBuilder.resolveKey(
-              entry.getKey(), catalogConnection, variables, defaultNamespace);
+    List<Map.Entry<RecordDefinitionKey, List<SourceUsage>>> entries =
+        new ArrayList<>(usageIndex.entrySet());
+    List<RecordDefinitionValidation> validations =
+        ParallelValidationSupport.map(
+            parallelism,
+            entries,
+            (entry, index) -> {
+              List<SourceUsage> usages = entry.getValue();
+              String catalogConnection =
+                  firstNonEmpty(resolveCatalogConnection(usages), defaultCatalog, groupCatalog);
+              RecordDefinitionKey resolvedKey =
+                  SourceUsageIndexBuilder.resolveKey(
+                      entry.getKey(), catalogConnection, variables, defaultNamespace);
 
-      RecordDefinition expected =
-          loadFromVersion(
-              catalogConnection, baselineVersionTag, resolvedKey, variables, metadataProvider);
-      RecordDefinition actual =
-          loadWorking(catalogConnection, resolvedKey, variables, metadataProvider);
-      report.addRecordValidation(
-          validateFieldContracts(
-              expected,
-              actual,
-              resolvedKey,
-              catalogConnection,
-              usages,
-              detailedDataTypeChecking,
-              true,
-              baselineVersionTag));
+              RecordDefinition expected =
+                  loadFromVersion(
+                      catalogConnection,
+                      baselineVersionTag,
+                      resolvedKey,
+                      variables,
+                      metadataProvider);
+              RecordDefinition actual =
+                  loadWorking(catalogConnection, resolvedKey, variables, metadataProvider);
+              return validateFieldContracts(
+                  expected,
+                  actual,
+                  resolvedKey,
+                  catalogConnection,
+                  usages,
+                  detailedDataTypeChecking,
+                  true,
+                  baselineVersionTag);
+            });
+    for (RecordDefinitionValidation validation : validations) {
+      report.addRecordValidation(validation);
     }
     return report;
   }
@@ -373,41 +421,57 @@ public final class SchemaImpactSimulationService {
       String actualVersionTag,
       boolean detailedDataTypeChecking,
       IVariables variables,
-      IHopMetadataProvider metadataProvider)
+      IHopMetadataProvider metadataProvider,
+      int validationParallelism)
       throws HopException {
     ValidationReport report = new ValidationReport(models.group().getName());
     Map<RecordDefinitionKey, List<SourceUsage>> usageIndex =
         SourceUsageIndexBuilder.build(models, variables);
     String defaultNamespace = DvCatalogNamespaces.projectSourcesNamespace(variables);
     String defaultCatalog = resolveDefaultCatalog(models, variables, metadataProvider);
+    String groupCatalog = models.group().getDataCatalogConnection();
+    int parallelism = ParallelValidationSupport.resolveParallelism(validationParallelism);
 
-    for (Map.Entry<RecordDefinitionKey, List<SourceUsage>> entry : usageIndex.entrySet()) {
-      List<SourceUsage> usages = entry.getValue();
-      String catalogConnection =
-          firstNonEmpty(
-              resolveCatalogConnection(usages),
-              defaultCatalog,
-              models.group().getDataCatalogConnection());
-      RecordDefinitionKey resolvedKey =
-          SourceUsageIndexBuilder.resolveKey(
-              entry.getKey(), catalogConnection, variables, defaultNamespace);
+    List<Map.Entry<RecordDefinitionKey, List<SourceUsage>>> entries =
+        new ArrayList<>(usageIndex.entrySet());
+    List<RecordDefinitionValidation> validations =
+        ParallelValidationSupport.map(
+            parallelism,
+            entries,
+            (entry, index) -> {
+              List<SourceUsage> usages = entry.getValue();
+              String catalogConnection =
+                  firstNonEmpty(resolveCatalogConnection(usages), defaultCatalog, groupCatalog);
+              RecordDefinitionKey resolvedKey =
+                  SourceUsageIndexBuilder.resolveKey(
+                      entry.getKey(), catalogConnection, variables, defaultNamespace);
 
-      RecordDefinition expected =
-          loadFromVersion(
-              catalogConnection, baselineVersionTag, resolvedKey, variables, metadataProvider);
-      RecordDefinition actual =
-          loadFromVersion(
-              catalogConnection, actualVersionTag, resolvedKey, variables, metadataProvider);
-      report.addRecordValidation(
-          validateFieldContracts(
-              expected,
-              actual,
-              resolvedKey,
-              catalogConnection,
-              usages,
-              detailedDataTypeChecking,
-              true,
-              baselineVersionTag));
+              RecordDefinition expected =
+                  loadFromVersion(
+                      catalogConnection,
+                      baselineVersionTag,
+                      resolvedKey,
+                      variables,
+                      metadataProvider);
+              RecordDefinition actual =
+                  loadFromVersion(
+                      catalogConnection,
+                      actualVersionTag,
+                      resolvedKey,
+                      variables,
+                      metadataProvider);
+              return validateFieldContracts(
+                  expected,
+                  actual,
+                  resolvedKey,
+                  catalogConnection,
+                  usages,
+                  detailedDataTypeChecking,
+                  true,
+                  baselineVersionTag);
+            });
+    for (RecordDefinitionValidation validation : validations) {
+      report.addRecordValidation(validation);
     }
     return report;
   }

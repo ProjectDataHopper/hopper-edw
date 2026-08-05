@@ -40,7 +40,9 @@ public record ValidationOptions(
     boolean writeReport,
     String reportOutputPath,
     String reportFileBaseName,
-    ReportFormat reportFormat) {
+    ReportFormat reportFormat,
+    /** Concurrent live-source / target-DB checks (clamped 1..64). */
+    int validationParallelism) {
 
   public enum BaselineKind {
     /** Working-tree catalog is the contract of record (common after drift notification). */
@@ -52,6 +54,7 @@ public record ValidationOptions(
   public ValidationOptions {
     baselineKind = baselineKind != null ? baselineKind : BaselineKind.WORKING_CATALOG;
     reportFormat = reportFormat != null ? reportFormat : ReportFormat.BOTH;
+    validationParallelism = ParallelValidationSupport.resolveParallelism(validationParallelism);
   }
 
   public static ValidationOptions defaults() {
@@ -68,7 +71,8 @@ public record ValidationOptions(
         false,
         null,
         null,
-        ReportFormat.BOTH);
+        ReportFormat.BOTH,
+        ParallelValidationSupport.DEFAULT_PARALLELISM);
   }
 
   /**
@@ -126,6 +130,7 @@ public record ValidationOptions(
         .checkTargetDatabases(checkTargetDatabases)
         .checkCatalogVsVersion(checkCatalogVsVersion && checkLiveSources)
         .expectAutomaticTargetTableCreation(expectAutomaticTargetTableCreation)
+        .validationParallelism(validationParallelism)
         .build();
   }
 
@@ -145,6 +150,10 @@ public record ValidationOptions(
     appendAxis(
         builder, expectAutomaticTargetTableCreation, "expect automatic target table creation");
     appendAxis(builder, includeImpact, "downstream impact / lineage");
+    if (!builder.isEmpty()) {
+      builder.append(", ");
+    }
+    builder.append("parallelism=").append(validationParallelism);
     return builder.isEmpty() ? "none" : builder.toString();
   }
 
