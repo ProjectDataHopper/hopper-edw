@@ -24,7 +24,6 @@ import org.apache.hop.catalog.metadata.DataCatalogMeta;
 import org.apache.hop.catalog.model.RecordDefinition;
 import org.apache.hop.catalog.model.RecordDefinitionKey;
 import org.apache.hop.catalog.model.RecordDefinitionQuery;
-import org.apache.hop.catalog.model.RecordDefinitionRef;
 import org.apache.hop.catalog.model.RecordDefinitionType;
 import org.apache.hop.catalog.registry.RecordDefinitionRegistry;
 import org.apache.hop.core.exception.HopException;
@@ -106,21 +105,36 @@ public final class DvSourceCatalogService {
       throws HopException {
     String connectionName =
         resolvePreferredCatalogConnection(catalogConnectionName, variables, metadataProvider);
+    return RecordDefinitionRegistry.getInstance()
+        .listNames(connectionName, sourcesQuery(variables), variables, metadataProvider);
+  }
+
+  /**
+   * Cheap existence check for DV sources in the project sources namespace. Prefer this for paint /
+   * empty-model onboarding over {@link #listSourceNames} so large catalogs do not rebuild name
+   * lists on every canvas refresh.
+   */
+  public static boolean hasAnySources(
+      DataVaultModel model, IVariables variables, IHopMetadataProvider metadataProvider)
+      throws HopException {
+    return hasAnySources(
+        resolveCatalogConnection(model, variables, metadataProvider), variables, metadataProvider);
+  }
+
+  public static boolean hasAnySources(
+      String catalogConnectionName, IVariables variables, IHopMetadataProvider metadataProvider)
+      throws HopException {
+    String connectionName =
+        resolvePreferredCatalogConnection(catalogConnectionName, variables, metadataProvider);
+    return RecordDefinitionRegistry.getInstance()
+        .hasAny(connectionName, sourcesQuery(variables), variables, metadataProvider);
+  }
+
+  private static RecordDefinitionQuery sourcesQuery(IVariables variables) {
     RecordDefinitionQuery query = new RecordDefinitionQuery();
     query.setNamespacePrefix(projectSourcesNamespace(variables));
     query.setType(RecordDefinitionType.DV_SOURCE);
-    List<RecordDefinitionRef> refs =
-        RecordDefinitionRegistry.getInstance()
-            .list(connectionName, query, variables, metadataProvider);
-    List<String> names = new ArrayList<>();
-    for (RecordDefinitionRef ref : refs) {
-      if (ref == null || ref.getKey() == null) {
-        continue;
-      }
-      names.add(ref.getKey().getName());
-    }
-    names.sort(String.CASE_INSENSITIVE_ORDER);
-    return names;
+    return query;
   }
 
   public static List<DataVaultSource> listSources(

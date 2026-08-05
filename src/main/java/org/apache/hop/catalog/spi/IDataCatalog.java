@@ -60,4 +60,14 @@ public interface IDataCatalog {
   void delete(RecordDefinitionKey key) throws HopException;
 
   List<RecordDefinitionRef> list(RecordDefinitionQuery query) throws HopException;
+
+  /**
+   * Returns whether at least one record matches the query. Default implementation lists all matches
+   * and checks emptiness; file catalogs override with a short-circuit walk for paint/onboarding hot
+   * paths.
+   */
+  default boolean anyMatch(RecordDefinitionQuery query) throws HopException {
+    List<RecordDefinitionRef> refs = list(query);
+    return refs != null && !refs.isEmpty();
+  }
 }

@@ -37,8 +37,16 @@ public final class DvSourceComboSupport {
   private DvSourceComboSupport() {}
 
   /**
+   * Creates a dialog-scoped cache for source names so multiple lazy source columns share one
+   * catalog list.
+   */
+  public static AtomicReference<String[]> newSharedSourceNameCache() {
+    return new AtomicReference<>();
+  }
+
+  /**
    * Creates a CCOMBO column whose values are loaded lazily on first cell edit. Subsequent edits
-   * reuse the cached list.
+   * reuse a private cache.
    */
   public static ColumnInfo createLazySourceColumn(
       String columnTitle,
@@ -46,11 +54,27 @@ public final class DvSourceComboSupport {
       DataVaultModel model,
       IVariables variables,
       IHopMetadataProvider metadataProvider) {
+    return createLazySourceColumn(
+        columnTitle, busyControl, model, variables, metadataProvider, newSharedSourceNameCache());
+  }
+
+  /**
+   * Creates a CCOMBO column that loads catalog names lazily and reuses {@code sharedCache} across
+   * columns in the same dialog (e.g. link hub sources and satellite sources).
+   */
+  public static ColumnInfo createLazySourceColumn(
+      String columnTitle,
+      Control busyControl,
+      DataVaultModel model,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider,
+      AtomicReference<String[]> sharedCache) {
+    AtomicReference<String[]> cache =
+        sharedCache != null ? sharedCache : newSharedSourceNameCache();
     ColumnInfo column = new ColumnInfo(columnTitle, ColumnInfo.COLUMN_TYPE_CCOMBO, new String[0]);
-    AtomicReference<String[]> cached = new AtomicReference<>();
     column.setComboValuesSelectionListener(
         (item, rowNr, colNr) ->
-            loadSourceNames(busyControl, model, variables, metadataProvider, cached));
+            loadSourceNames(busyControl, model, variables, metadataProvider, cache));
     return column;
   }
 

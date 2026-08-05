@@ -19,6 +19,7 @@ package org.apache.hop.datavault.hopgui.file.vault;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.Props;
@@ -68,8 +69,8 @@ import org.eclipse.swt.widgets.Text;
  * Dialog to edit the properties of a DvLink using a TabFolder. Name and description are placed at
  * the top, buttons at the bottom. Tabs: Options (hash key field, record source field,
  * hasDescriptiveAttributes, participating hubs and link satellites), Driving keys, Dependent child
- * keys (transactional links), Hub sources (DvLinkHubSourceDialog), Satellite sources
- * (DvLinkSatelliteSourceDialog).
+ * keys (transactional links), Hub sources and Satellite sources (built lazily on first tab
+ * selection), Custom pipelines, Lineage (lazy).
  */
 public class DvLinkDialog {
   private static final Class<?> PKG = DvLinkDialog.class;
@@ -103,14 +104,27 @@ public class DvLinkDialog {
   // Dependent child keys tab (transactional links)
   private TableView wDependentChildKeys;
 
-  // Hub sources tab
+  // Hub sources tab (widgets built lazily on first tab selection)
+  private CTabItem wHubSourcesTab;
+  private Composite wHubSourcesComp;
   private TableView wLinkHubSources;
+  private boolean hubSourcesTabBuilt;
   private List<DvLink.DvLinkHubSource> currentLinkHubSources = new ArrayList<>();
 
-  // Satellite sources tab
+  // Satellite sources tab (widgets built lazily on first tab selection)
+  private CTabItem wSatSourcesTab;
+  private Composite wSatSourcesComp;
   private TableView wLinkSatelliteSources;
+  private boolean satSourcesTabBuilt;
   private List<DvLink.DvLinkSatelliteSource> currentLinkSatelliteSources = new ArrayList<>();
   private DvCustomPipelinesTabSupport customPipelinesTab;
+
+  /**
+   * Shared lazy cache for DV source names used by both hub-source and satellite-source CCOMBO
+   * columns so the first catalog list is paid once per dialog.
+   */
+  private final AtomicReference<String[]> sharedSourceNameCache =
+      DvSourceComboSupport.newSharedSourceNameCache();
 
   private boolean ok;
 
@@ -205,10 +219,11 @@ public class DvLinkDialog {
     addOptionsTab();
     addDrivingKeysTab();
     addDependentChildKeysTab();
-    addHubSourcesTab();
-    addSatelliteSourcesTab();
+    addHubSourcesTabPlaceholder();
+    addSatelliteSourcesTabPlaceholder();
     customPipelinesTab.addTab(wTabFolder);
     addLineageTab();
+    registerLazySourceTabBuilders();
 
     wTabFolder.setSelection(0);
 
@@ -216,6 +231,8 @@ public class DvLinkDialog {
     customPipelinesTab.bindIntegrationMode(wIntegrationMode);
 
     BaseTransformDialog.setSize(shell, 700, 550);
+    // Prefer the name field over any TableView CCOMBO so open does not land in a cell editor.
+    wName.setFocus();
     BaseDialog.defaultShellHandling(shell, e -> ok(), e -> cancel());
 
     return ok;
@@ -545,17 +562,61 @@ public class DvLinkDialog {
     wDepTab.setControl(wDepComp);
   }
 
-  private void addHubSourcesTab() {
-    CTabItem wSourcesTab = new CTabItem(wTabFolder, SWT.NONE);
-    wSourcesTab.setFont(GuiResource.getInstance().getFontDefault());
-    wSourcesTab.setText("Hub sources");
-    wSourcesTab.setToolTipText(
+  /**
+   * Registers empty Hub sources / Satellite sources tabs. Widgets are built on first selection so
+   * dialog open stays light (same idea as the Lineage tab).
+   */
+  private void addHubSourcesTabPlaceholder() {
+    wHubSourcesTab = new CTabItem(wTabFolder, SWT.NONE);
+    wHubSourcesTab.setFont(GuiResource.getInstance().getFontDefault());
+    wHubSourcesTab.setText("Hub sources");
+    wHubSourcesTab.setToolTipText(
         "Record sources for this link and their per-hub business key / driving key field mappings");
-    Composite wSourcesComp = new Composite(wTabFolder, SWT.NONE);
-    PropsUi.setLook(wSourcesComp);
-    wSourcesComp.setLayout(new FormLayout());
+    wHubSourcesComp = new Composite(wTabFolder, SWT.NONE);
+    PropsUi.setLook(wHubSourcesComp);
+    wHubSourcesComp.setLayout(new FormLayout());
+    wHubSourcesTab.setControl(wHubSourcesComp);
+  }
 
-    Label wlSources = new Label(wSourcesComp, SWT.LEFT);
+  private void addSatelliteSourcesTabPlaceholder() {
+    wSatSourcesTab = new CTabItem(wTabFolder, SWT.NONE);
+    wSatSourcesTab.setFont(GuiResource.getInstance().getFontDefault());
+    wSatSourcesTab.setText("Satellite sources");
+    wSatSourcesTab.setToolTipText(
+        "Record sources for link satellites and their per-satellite attribute / driving key mappings");
+    wSatSourcesComp = new Composite(wTabFolder, SWT.NONE);
+    PropsUi.setLook(wSatSourcesComp);
+    wSatSourcesComp.setLayout(new FormLayout());
+    wSatSourcesTab.setControl(wSatSourcesComp);
+  }
+
+  private void registerLazySourceTabBuilders() {
+    wTabFolder.addListener(
+        SWT.Selection,
+        e -> {
+          if (wTabFolder.isDisposed()) {
+            return;
+          }
+          CTabItem selected = wTabFolder.getSelection();
+          if (selected == wHubSourcesTab) {
+            ensureHubSourcesTabBuilt();
+          } else if (selected == wSatSourcesTab) {
+            ensureSatelliteSourcesTabBuilt();
+          }
+        });
+  }
+
+  private void ensureHubSourcesTabBuilt() {
+    if (hubSourcesTabBuilt
+        || wHubSourcesComp == null
+        || wHubSourcesComp.isDisposed()
+        || shell == null
+        || shell.isDisposed()) {
+      return;
+    }
+    hubSourcesTabBuilt = true;
+
+    Label wlSources = new Label(wHubSourcesComp, SWT.LEFT);
     wlSources.setText("Link hub sources (one entry per record source feeding this link)");
     PropsUi.setLook(wlSources);
     FormData fdlSources = new FormData();
@@ -563,7 +624,7 @@ public class DvLinkDialog {
     fdlSources.top = new FormAttachment(0, 0);
     wlSources.setLayoutData(fdlSources);
 
-    Button wOpenInCatalog = new Button(wSourcesComp, SWT.PUSH);
+    Button wOpenInCatalog = new Button(wHubSourcesComp, SWT.PUSH);
     wOpenInCatalog.setText(BaseMessages.getString(PKG, "DvHubDialog.OpenInCatalog.Label"));
     wOpenInCatalog.setToolTipText(BaseMessages.getString(PKG, "DvHubDialog.OpenInCatalog.ToolTip"));
     PropsUi.setLook(wOpenInCatalog);
@@ -577,7 +638,7 @@ public class DvLinkDialog {
             RecordSourceCatalogNavigationSupport.openSelectedSourceInCatalog(
                 shell, hopGui, variables, hopGui.getMetadataProvider(), model, wLinkHubSources));
 
-    Button wEditMappings = new Button(wSourcesComp, SWT.PUSH);
+    Button wEditMappings = new Button(wHubSourcesComp, SWT.PUSH);
     wEditMappings.setText("Edit hub source mappings...");
     FormData fdEdit = new FormData();
     fdEdit.left = new FormAttachment(0, 0);
@@ -585,17 +646,21 @@ public class DvLinkDialog {
     wEditMappings.setLayoutData(fdEdit);
     wEditMappings.addListener(SWT.Selection, e -> editSelectedLinkHubSource());
 
-    // Simple table of source names (CCOMBO) - details managed via the sub dialog
     ColumnInfo[] srcCols =
         new ColumnInfo[] {
           DvSourceComboSupport.createLazySourceColumn(
-              "Data Vault Source", shell, model, variables, hopGui.getMetadataProvider()),
+              "Data Vault Source",
+              shell,
+              model,
+              variables,
+              hopGui.getMetadataProvider(),
+              sharedSourceNameCache),
         };
 
     wLinkHubSources =
         new TableView(
             variables,
-            wSourcesComp,
+            wHubSourcesComp,
             SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI,
             srcCols,
             2,
@@ -609,19 +674,19 @@ public class DvLinkDialog {
     fdSources.bottom = new FormAttachment(100, 0);
     wLinkHubSources.setLayoutData(fdSources);
 
-    wSourcesComp.layout();
-    wSourcesTab.setControl(wSourcesComp);
+    populateHubSourcesTable();
+    wHubSourcesComp.layout(true, true);
   }
 
-  private void addSatelliteSourcesTab() {
-    CTabItem wSatSourcesTab = new CTabItem(wTabFolder, SWT.NONE);
-    wSatSourcesTab.setFont(GuiResource.getInstance().getFontDefault());
-    wSatSourcesTab.setText("Satellite sources");
-    wSatSourcesTab.setToolTipText(
-        "Record sources for link satellites and their per-satellite attribute / driving key mappings");
-    Composite wSatSourcesComp = new Composite(wTabFolder, SWT.NONE);
-    PropsUi.setLook(wSatSourcesComp);
-    wSatSourcesComp.setLayout(new FormLayout());
+  private void ensureSatelliteSourcesTabBuilt() {
+    if (satSourcesTabBuilt
+        || wSatSourcesComp == null
+        || wSatSourcesComp.isDisposed()
+        || shell == null
+        || shell.isDisposed()) {
+      return;
+    }
+    satSourcesTabBuilt = true;
 
     Label wlSatSources = new Label(wSatSourcesComp, SWT.LEFT);
     wlSatSources.setText(
@@ -663,7 +728,12 @@ public class DvLinkDialog {
     ColumnInfo[] srcCols =
         new ColumnInfo[] {
           DvSourceComboSupport.createLazySourceColumn(
-              "Data Vault Source", shell, model, variables, hopGui.getMetadataProvider()),
+              "Data Vault Source",
+              shell,
+              model,
+              variables,
+              hopGui.getMetadataProvider(),
+              sharedSourceNameCache),
         };
 
     wLinkSatelliteSources =
@@ -683,8 +753,36 @@ public class DvLinkDialog {
     fdSatSources.bottom = new FormAttachment(100, 0);
     wLinkSatelliteSources.setLayoutData(fdSatSources);
 
-    wSatSourcesComp.layout();
-    wSatSourcesTab.setControl(wSatSourcesComp);
+    populateSatelliteSourcesTable();
+    wSatSourcesComp.layout(true, true);
+  }
+
+  private void populateHubSourcesTable() {
+    if (wLinkHubSources == null || wLinkHubSources.isDisposed()) {
+      return;
+    }
+    TableViewPopulateSupport.clearRows(wLinkHubSources);
+    for (DvLink.DvLinkHubSource ls : currentLinkHubSources) {
+      if (ls != null && !Utils.isEmpty(ls.getSourceName())) {
+        TableItem item = new TableItem(wLinkHubSources.table, SWT.NONE);
+        item.setText(1, ls.getSourceName());
+      }
+    }
+    wLinkHubSources.optimizeTableView();
+  }
+
+  private void populateSatelliteSourcesTable() {
+    if (wLinkSatelliteSources == null || wLinkSatelliteSources.isDisposed()) {
+      return;
+    }
+    TableViewPopulateSupport.clearRows(wLinkSatelliteSources);
+    for (DvLink.DvLinkSatelliteSource ls : currentLinkSatelliteSources) {
+      if (ls != null && !Utils.isEmpty(ls.getSourceName())) {
+        TableItem item = new TableItem(wLinkSatelliteSources.table, SWT.NONE);
+        item.setText(1, ls.getSourceName());
+      }
+    }
+    wLinkSatelliteSources.optimizeTableView();
   }
 
   private List<String> getModelHubNames() {
@@ -715,19 +813,33 @@ public class DvLinkDialog {
   }
 
   private List<String> getModelLinkSatelliteNames() {
+    return resolveLinkSatelliteComboNames(model, input);
+  }
+
+  /**
+   * Combo options for participating link satellites: model satellites attached to this link, plus
+   * any names already stored on the link (so existing selections remain visible).
+   */
+  static List<String> resolveLinkSatelliteComboNames(DataVaultModel model, DvLink link) {
     List<String> names = new ArrayList<>();
+    String thisLinkName = link != null ? link.getName() : null;
     if (model != null && model.getTables() != null) {
       for (IDvTable table : model.getTables()) {
-        if (table.getTableType() == DvTableType.SATELLITE) {
-          DvSatellite satellite = (DvSatellite) table;
-          if (!Utils.isEmpty(satellite.getLinkName()) && !Utils.isEmpty(table.getName())) {
-            names.add(table.getName());
-          }
+        if (table.getTableType() != DvTableType.SATELLITE || !(table instanceof DvSatellite sat)) {
+          continue;
         }
+        if (Utils.isEmpty(sat.getLinkName()) || Utils.isEmpty(table.getName())) {
+          continue;
+        }
+        // Prefer satellites attached to this link; still keep already-selected names below.
+        if (!Utils.isEmpty(thisLinkName) && !thisLinkName.equals(sat.getLinkName())) {
+          continue;
+        }
+        names.add(table.getName());
       }
     }
-    if (input.getLinkSatelliteNames() != null) {
-      for (String satName : input.getLinkSatelliteNames()) {
+    if (link != null && link.getLinkSatelliteNames() != null) {
+      for (String satName : link.getLinkSatelliteNames()) {
         if (!Utils.isEmpty(satName) && !names.contains(satName)) {
           names.add(satName);
         }
@@ -780,6 +892,9 @@ public class DvLinkDialog {
   }
 
   private void editSelectedLinkHubSource() {
+    if (wLinkHubSources == null || wLinkHubSources.isDisposed()) {
+      return;
+    }
     List<TableItem> items = wLinkHubSources.getNonEmptyItems();
     if (items.isEmpty()) {
       return;
@@ -817,6 +932,9 @@ public class DvLinkDialog {
   }
 
   private void editSelectedLinkSatelliteSource() {
+    if (wLinkSatelliteSources == null || wLinkSatelliteSources.isDisposed()) {
+      return;
+    }
     List<TableItem> items = wLinkSatelliteSources.getNonEmptyItems();
     if (items.isEmpty()) {
       return;
@@ -866,8 +984,9 @@ public class DvLinkDialog {
     wRecordSourceFieldName.setText(Const.NVL(input.getRecordSourceFieldName(), ""));
     wHasDescriptiveAttributes.setSelection(input.isHasDescriptiveAttributes());
 
-    // Hubs (single column now)
-    wHubNames.clearAll();
+    // Avoid TableView.clearAll() — it schedules async edit(0,1) and forces CCOMBO listeners
+    // (including catalog source listing) during open.
+    TableViewPopulateSupport.clearRows(wHubNames);
     if (input.getHubNames() != null) {
       for (String hubName : input.getHubNames()) {
         TableItem item = new TableItem(wHubNames.table, SWT.NONE);
@@ -875,7 +994,8 @@ public class DvLinkDialog {
       }
     }
     wHubNames.optimizeTableView();
-    wLinkSatelliteNames.clearAll();
+
+    TableViewPopulateSupport.clearRows(wLinkSatelliteNames);
     if (input.getLinkSatelliteNames() != null) {
       for (String satName : input.getLinkSatelliteNames()) {
         TableItem item = new TableItem(wLinkSatelliteNames.table, SWT.NONE);
@@ -883,8 +1003,8 @@ public class DvLinkDialog {
       }
     }
     wLinkSatelliteNames.optimizeTableView();
-    // Driving keys
-    wDrivingKeyNames.clearAll();
+
+    TableViewPopulateSupport.clearRows(wDrivingKeyNames);
     if (input.getDrivingKeyNames() != null) {
       for (String dk : input.getDrivingKeyNames()) {
         TableItem item = new TableItem(wDrivingKeyNames.table, SWT.NONE);
@@ -892,7 +1012,8 @@ public class DvLinkDialog {
       }
     }
     wDrivingKeyNames.optimizeTableView();
-    wDependentChildKeys.clearAll();
+
+    TableViewPopulateSupport.clearRows(wDependentChildKeys);
     if (input.getDependentChildKeys() != null) {
       for (DependentChildKey dck : input.getDependentChildKeys()) {
         if (dck == null) {
@@ -908,34 +1029,31 @@ public class DvLinkDialog {
       }
     }
     wDependentChildKeys.optimizeTableView();
+
+    // Source mapping details stay in memory; tables are filled when those tabs are first opened.
     currentLinkHubSources.clear();
-    wLinkHubSources.clearAll();
     if (input.getLinkHubSources() != null) {
       for (DvLink.DvLinkHubSource ls : input.getLinkHubSources()) {
         if (ls != null) {
           currentLinkHubSources.add(ls);
-          if (!Utils.isEmpty(ls.getSourceName()) && !Utils.isEmpty(ls.getSourceName())) {
-            TableItem item = new TableItem(wLinkHubSources.table, SWT.NONE);
-            item.setText(1, ls.getSourceName());
-          }
         }
       }
     }
-    wLinkHubSources.optimizeTableView();
+    if (hubSourcesTabBuilt) {
+      populateHubSourcesTable();
+    }
+
     currentLinkSatelliteSources.clear();
-    wLinkSatelliteSources.clearAll();
     if (input.getLinkSatelliteSources() != null) {
       for (DvLink.DvLinkSatelliteSource ls : input.getLinkSatelliteSources()) {
         if (ls != null) {
           currentLinkSatelliteSources.add(ls);
-          if (!Utils.isEmpty(ls.getSourceName()) && !Utils.isEmpty(ls.getSourceName())) {
-            TableItem item = new TableItem(wLinkSatelliteSources.table, SWT.NONE);
-            item.setText(1, ls.getSourceName());
-          }
         }
       }
     }
-    wLinkSatelliteSources.optimizeTableView();
+    if (satSourcesTabBuilt) {
+      populateSatelliteSourcesTable();
+    }
     customPipelinesTab.loadFrom(input);
   }
 
@@ -1042,7 +1160,26 @@ public class DvLinkDialog {
     }
     target.setDependentChildKeys(depKeys);
 
+    applyLinkHubSourcesToTable(target);
+    applyLinkSatelliteSourcesToTable(target);
+    customPipelinesTab.applyTo(target);
+  }
+
+  /**
+   * When the Hub sources tab was never opened, preserve in-memory mappings from {@link #getData()}.
+   * When the table exists, table rows define the ordered source list and details are matched from
+   * {@link #currentLinkHubSources}.
+   */
+  private void applyLinkHubSourcesToTable(DvLink target) {
     target.getLinkHubSources().clear();
+    if (wLinkHubSources == null || wLinkHubSources.isDisposed()) {
+      for (DvLink.DvLinkHubSource ls : currentLinkHubSources) {
+        if (ls != null && !Utils.isEmpty(ls.getSourceName())) {
+          target.getLinkHubSources().add(ls);
+        }
+      }
+      return;
+    }
     for (TableItem item : wLinkHubSources.getNonEmptyItems()) {
       String sname = item.getText(1);
       if (Utils.isEmpty(sname)) {
@@ -1061,8 +1198,18 @@ public class DvLinkDialog {
       }
       target.getLinkHubSources().add(match);
     }
+  }
 
+  private void applyLinkSatelliteSourcesToTable(DvLink target) {
     target.getLinkSatelliteSources().clear();
+    if (wLinkSatelliteSources == null || wLinkSatelliteSources.isDisposed()) {
+      for (DvLink.DvLinkSatelliteSource ls : currentLinkSatelliteSources) {
+        if (ls != null && !Utils.isEmpty(ls.getSourceName())) {
+          target.getLinkSatelliteSources().add(ls);
+        }
+      }
+      return;
+    }
     for (TableItem item : wLinkSatelliteSources.getNonEmptyItems()) {
       String sname = item.getText(1);
       if (Utils.isEmpty(sname)) {
@@ -1081,7 +1228,6 @@ public class DvLinkDialog {
       }
       target.getLinkSatelliteSources().add(match);
     }
-    customPipelinesTab.applyTo(target);
   }
 
   private void cancel() {

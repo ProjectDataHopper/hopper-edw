@@ -16,6 +16,7 @@
  */
 package org.apache.hop.catalog.impl.file;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.IOException;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.hop.catalog.discovery.HopVariableResolutionSupport;
 import org.apache.hop.catalog.metadata.DataCatalogMeta;
@@ -32,6 +34,7 @@ import org.apache.hop.catalog.model.RecordDefinition;
 import org.apache.hop.catalog.model.RecordDefinitionKey;
 import org.apache.hop.catalog.model.RecordDefinitionQuery;
 import org.apache.hop.catalog.model.RecordDefinitionRef;
+import org.apache.hop.catalog.model.RecordDefinitionType;
 import org.apache.hop.catalog.spi.IDataCatalog;
 import org.apache.hop.catalog.versioning.CatalogVersionStore;
 import org.apache.hop.core.exception.HopException;
@@ -157,13 +160,31 @@ public class FileDataCatalog implements IDataCatalog {
     }
   }
 
+  /**
+   * Lists record definitions matching the query.
+   *
+   * <p>Performance notes for large catalogs:
+   *
+   * <ul>
+   *   <li>When {@link RecordDefinitionQuery#getNamespacePrefix()} is set, only that namespace
+   *       directory (and children) is walked — not the entire storage tree (models, other projects,
+   *       etc.).
+   *   <li>Listing reads a lightweight JSON header (name/namespace/type/description/tags) and does
+   *       not deserialize {@code rowMetaXml} or nested DV/physical payloads required only for full
+   *       {@link #read(RecordDefinitionKey)}.
+   * </ul>
+   */
   @Override
   public List<RecordDefinitionRef> list(RecordDefinitionQuery query) throws HopException {
     ensureConnected();
     RecordDefinitionQuery effectiveQuery = query != null ? query : new RecordDefinitionQuery();
     List<RecordDefinitionRef> results = new ArrayList<>();
     Path versionsRoot = resolvedRoot.resolve(CatalogVersionStore.VERSIONS_DIRECTORY_NAME);
-    try (Stream<Path> paths = Files.walk(resolvedRoot)) {
+    Path walkRoot = resolveListWalkRoot(effectiveQuery);
+    if (walkRoot == null) {
+      return results;
+    }
+    try (Stream<Path> paths = Files.walk(walkRoot)) {
       paths
           .filter(Files::isRegularFile)
           .filter(path -> path.toString().endsWith(".json"))
@@ -171,9 +192,9 @@ public class FileDataCatalog implements IDataCatalog {
           .forEach(
               path -> {
                 try {
-                  RecordDefinition definition = readRecord(path);
-                  if (effectiveQuery.matches(definition)) {
-                    results.add(RecordDefinitionRef.of(connectionName, definition));
+                  RecordDefinition skeleton = readListSkeleton(path);
+                  if (effectiveQuery.matches(skeleton)) {
+                    results.add(RecordDefinitionRef.of(connectionName, skeleton));
                   }
                 } catch (HopException e) {
                   LogChannel.GENERAL.logError(
@@ -181,9 +202,42 @@ public class FileDataCatalog implements IDataCatalog {
                 }
               });
     } catch (IOException e) {
-      throw new HopException("Unable to list record definitions under " + resolvedRoot, e);
+      throw new HopException("Unable to list record definitions under " + walkRoot, e);
     }
     return results;
+  }
+
+  /**
+   * Short-circuit existence check: stops after the first matching record. Used for empty-model
+   * onboarding hints so paint does not materialize the full source name list.
+   */
+  @Override
+  public boolean anyMatch(RecordDefinitionQuery query) throws HopException {
+    ensureConnected();
+    RecordDefinitionQuery effectiveQuery = query != null ? query : new RecordDefinitionQuery();
+    Path versionsRoot = resolvedRoot.resolve(CatalogVersionStore.VERSIONS_DIRECTORY_NAME);
+    Path walkRoot = resolveListWalkRoot(effectiveQuery);
+    if (walkRoot == null) {
+      return false;
+    }
+    try (Stream<Path> paths = Files.walk(walkRoot)) {
+      return paths
+          .filter(Files::isRegularFile)
+          .filter(path -> path.toString().endsWith(".json"))
+          .filter(path -> !isUnderDirectory(path, versionsRoot))
+          .anyMatch(
+              path -> {
+                try {
+                  return effectiveQuery.matches(readListSkeleton(path));
+                } catch (HopException e) {
+                  LogChannel.GENERAL.logError(
+                      "Skipping unreadable catalog record definition: " + path, e);
+                  return false;
+                }
+              });
+    } catch (IOException e) {
+      throw new HopException("Unable to scan catalog records under " + walkRoot, e);
+    }
   }
 
   /**
@@ -200,8 +254,39 @@ public class FileDataCatalog implements IDataCatalog {
     }
   }
 
+  /**
+   * When a namespace prefix is present, scope the filesystem walk to that directory. Returns {@code
+   * null} when the scoped directory does not exist (no matching records under that prefix path).
+   */
+  private Path resolveListWalkRoot(RecordDefinitionQuery query) {
+    if (Utils.isEmpty(query.getNamespacePrefix())) {
+      return resolvedRoot;
+    }
+    Path scoped = toNamespaceDirectory(query.getNamespacePrefix());
+    if (Files.isDirectory(scoped)) {
+      return scoped;
+    }
+    return null;
+  }
+
+  private Path toNamespaceDirectory(String namespace) {
+    Path path = resolvedRoot;
+    if (Utils.isEmpty(namespace)) {
+      return path;
+    }
+    for (String segment : namespace.split("/")) {
+      if (!segment.isBlank()) {
+        path = path.resolve(sanitizePathSegment(segment));
+      }
+    }
+    return path.normalize();
+  }
+
   private static boolean isUnderDirectory(Path path, Path directory) {
-    if (path == null || directory == null || !Files.exists(directory)) {
+    if (path == null || directory == null) {
+      return false;
+    }
+    if (!Files.exists(directory)) {
       return false;
     }
     Path normalizedPath = path.toAbsolutePath().normalize();
@@ -244,5 +329,50 @@ public class FileDataCatalog implements IDataCatalog {
     } catch (IOException e) {
       throw new HopException("Unable to read record definition from " + path, e);
     }
+  }
+
+  /**
+   * Reads only the fields needed for list filtering and {@link RecordDefinitionRef} construction.
+   * Skips row metadata and heavy nested payloads.
+   */
+  private RecordDefinition readListSkeleton(Path path) throws HopException {
+    try {
+      ListHeader header = MAPPER.readValue(path.toFile(), ListHeader.class);
+      RecordDefinition definition = new RecordDefinition();
+      definition.setKey(new RecordDefinitionKey(header.namespace, header.name));
+      definition.setType(parseListType(header.type));
+      definition.setDescription(header.description);
+      definition.setTags(header.tags != null ? new ArrayList<>(header.tags) : new ArrayList<>());
+      return definition;
+    } catch (IOException e) {
+      throw new HopException("Unable to read catalog list header from " + path, e);
+    }
+  }
+
+  private static RecordDefinitionType parseListType(String raw) {
+    if (raw == null || raw.isBlank()) {
+      return RecordDefinitionType.UNKNOWN;
+    }
+    try {
+      return RecordDefinitionType.valueOf(raw);
+    } catch (IllegalArgumentException e) {
+      return RecordDefinitionType.UNKNOWN;
+    }
+  }
+
+  /**
+   * Minimal JSON projection for listing. Unknown properties (including large {@code rowMetaXml})
+   * are ignored so listing stays cheap on large catalogs.
+   */
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  @Getter
+  @Setter
+  @NoArgsConstructor
+  static final class ListHeader {
+    private String namespace;
+    private String name;
+    private String type;
+    private String description;
+    private List<String> tags;
   }
 }

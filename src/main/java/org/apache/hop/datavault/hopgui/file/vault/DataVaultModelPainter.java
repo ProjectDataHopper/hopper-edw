@@ -247,12 +247,17 @@ public class DataVaultModelPainter extends BasePainter {
     return model.getTables().isEmpty() && notesEmpty;
   }
 
+  /**
+   * Empty-model onboarding only: true when the project sources namespace has at least one DV
+   * source. Uses a short-circuit catalog existence check (session-cached) — never lists all source
+   * names on paint.
+   */
   private boolean hasCatalogRecordDefinitions() {
     if (metadataProvider == null) {
       return false;
     }
     try {
-      return !DvSourceCatalogService.listSourceNames(model, variables, metadataProvider).isEmpty();
+      return DvSourceCatalogService.hasAnySources(model, variables, metadataProvider);
     } catch (HopException ignored) {
       return false;
     }

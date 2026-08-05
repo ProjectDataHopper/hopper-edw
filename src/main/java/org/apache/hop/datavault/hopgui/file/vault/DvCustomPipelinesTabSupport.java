@@ -166,7 +166,8 @@ public final class DvCustomPipelinesTabSupport {
     if (wCustomPipelines == null || wCustomPipelines.isDisposed() || table == null) {
       return;
     }
-    wCustomPipelines.clearAll();
+    // Avoid TableView.clearAll() — it schedules edit(0,1) and steals focus on dialog open.
+    TableViewPopulateSupport.clearRows(wCustomPipelines);
     List<String> paths = table.getCustomUpdatePipelinePaths();
     if (paths != null) {
       for (String path : paths) {

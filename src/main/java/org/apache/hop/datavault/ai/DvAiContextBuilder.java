@@ -292,6 +292,7 @@ public final class DvAiContextBuilder {
     int totalAvailable = 0;
     if (metadataProvider != null) {
       try {
+        // Session-cached name list (registry); avoid ad-hoc full ref copies per AI turn.
         totalAvailable =
             DvSourceCatalogService.listSourceNames(model, variables, metadataProvider).size();
       } catch (Exception ignored) {

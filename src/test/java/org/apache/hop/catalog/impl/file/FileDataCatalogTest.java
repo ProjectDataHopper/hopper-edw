@@ -16,6 +16,7 @@
  */
 package org.apache.hop.catalog.impl.file;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -23,8 +24,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.hop.catalog.metadata.DataCatalogMeta;
+import org.apache.hop.catalog.model.RecordDefinition;
+import org.apache.hop.catalog.model.RecordDefinitionKey;
+import org.apache.hop.catalog.model.RecordDefinitionQuery;
+import org.apache.hop.catalog.model.RecordDefinitionRef;
+import org.apache.hop.catalog.model.RecordDefinitionType;
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.row.RowMeta;
+import org.apache.hop.core.row.value.ValueMetaString;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.junit.jupiter.api.Test;
@@ -110,5 +121,108 @@ class FileDataCatalogTest {
     } finally {
       catalog.disconnect();
     }
+  }
+
+  @Test
+  void list_withNamespacePrefix_scopesToSourcesAndIgnoresModels() throws Exception {
+    FileDataCatalog catalog = connectedCatalog();
+    try {
+      catalog.create(definition("hop/demo/sources", "src-a", RecordDefinitionType.DV_SOURCE));
+      catalog.create(definition("hop/demo/sources", "src-b", RecordDefinitionType.DV_SOURCE));
+      catalog.create(definition("hop/demo/models/vault", "hub_x", RecordDefinitionType.DV_HUB));
+
+      RecordDefinitionQuery sourcesOnly = new RecordDefinitionQuery();
+      sourcesOnly.setNamespacePrefix("hop/demo/sources");
+      sourcesOnly.setType(RecordDefinitionType.DV_SOURCE);
+
+      List<RecordDefinitionRef> refs = catalog.list(sourcesOnly);
+      Set<String> names = refs.stream().map(r -> r.getKey().getName()).collect(Collectors.toSet());
+      assertEquals(Set.of("src-a", "src-b"), names);
+      assertTrue(refs.stream().allMatch(r -> r.getType() == RecordDefinitionType.DV_SOURCE));
+    } finally {
+      catalog.disconnect();
+    }
+  }
+
+  @Test
+  void list_returnsEmptyWhenNamespaceDirectoryMissing() throws Exception {
+    FileDataCatalog catalog = connectedCatalog();
+    try {
+      catalog.create(definition("hop/demo/models/vault", "hub_x", RecordDefinitionType.DV_HUB));
+
+      RecordDefinitionQuery sourcesOnly = new RecordDefinitionQuery();
+      sourcesOnly.setNamespacePrefix("hop/demo/sources");
+      sourcesOnly.setType(RecordDefinitionType.DV_SOURCE);
+
+      assertTrue(catalog.list(sourcesOnly).isEmpty());
+    } finally {
+      catalog.disconnect();
+    }
+  }
+
+  @Test
+  void anyMatch_shortCircuitsWithoutListingModels() throws Exception {
+    FileDataCatalog catalog = connectedCatalog();
+    try {
+      catalog.create(definition("hop/demo/sources", "src-a", RecordDefinitionType.DV_SOURCE));
+      catalog.create(definition("hop/demo/models/vault", "hub_x", RecordDefinitionType.DV_HUB));
+
+      RecordDefinitionQuery sourcesOnly = new RecordDefinitionQuery();
+      sourcesOnly.setNamespacePrefix("hop/demo/sources");
+      sourcesOnly.setType(RecordDefinitionType.DV_SOURCE);
+      assertTrue(catalog.anyMatch(sourcesOnly));
+
+      RecordDefinitionQuery missing = new RecordDefinitionQuery();
+      missing.setNamespacePrefix("hop/demo/missing");
+      assertFalse(catalog.anyMatch(missing));
+    } finally {
+      catalog.disconnect();
+    }
+  }
+
+  @Test
+  void list_readsLightweightHeaderWithoutFailingOnLargeRowMeta() throws Exception {
+    FileDataCatalog catalog = connectedCatalog();
+    try {
+      RecordDefinition source =
+          definition("hop/demo/sources", "fat-source", RecordDefinitionType.DV_SOURCE);
+      RowMeta fields = new RowMeta();
+      for (int i = 0; i < 50; i++) {
+        fields.addValueMeta(new ValueMetaString("col_" + i));
+      }
+      source.setFields(fields);
+      source.setDescription("with fat row meta");
+      catalog.create(source);
+
+      RecordDefinitionQuery query = new RecordDefinitionQuery();
+      query.setNamespacePrefix("hop/demo/sources");
+      List<RecordDefinitionRef> refs = catalog.list(query);
+      assertEquals(1, refs.size());
+      assertEquals("fat-source", refs.get(0).getKey().getName());
+      assertEquals("with fat row meta", refs.get(0).getDescription());
+      assertEquals(RecordDefinitionType.DV_SOURCE, refs.get(0).getType());
+    } finally {
+      catalog.disconnect();
+    }
+  }
+
+  private FileDataCatalog connectedCatalog() throws HopException {
+    Path storage = tempDir.resolve("catalog-data");
+    FileDataCatalog catalog = new FileDataCatalog();
+    catalog.setStorageDirectory(storage.toString().replace('\\', '/'));
+    DataCatalogMeta meta = new DataCatalogMeta("local");
+    meta.setCatalog(catalog);
+    catalog.connect(meta, new Variables(), new MemoryMetadataProvider());
+    return catalog;
+  }
+
+  private static RecordDefinition definition(
+      String namespace, String name, RecordDefinitionType type) {
+    RecordDefinition definition = new RecordDefinition();
+    definition.setKey(new RecordDefinitionKey(namespace, name));
+    definition.setType(type);
+    definition.setDescription(name + " desc");
+    definition.setFields(new RowMeta());
+    return definition;
   }
 }
