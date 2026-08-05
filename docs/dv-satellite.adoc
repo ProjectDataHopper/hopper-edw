@@ -40,6 +40,9 @@ Because the comparison looks at the attribute values themselves, you do not get 
 |Default record source
 |The Data Vault Source that feeds this satellite. Required.
 
+|Store record source indicator
+|When checked (default), the satellite table includes the model record-source column and load pipelines write the feed's source indicator into it. Uncheck for **VaultSpeed-style** mono-source satellites that omit the source-indicator column from the physical table. The catalog feed binding is still required. Hubs and links always store record source.
+
 |Parent hub
 |Select the Hub this satellite describes (for normal hub satellites). Choose either a parent hub or a parent link, not both.
 
@@ -99,10 +102,12 @@ The layout that drives DDL and loading usually contains:
 
 1. The parent hash key column (the hash key name is taken from the parent hub definition).
 2. The satellite attribute columns, in the order you listed them (or all qualifying source columns if the list is empty). Length and precision information from the source definition is used when available so you get realistic column types.
-3. The record source column.
+3. The record source column (**only when Store record source indicator is enabled**).
 4. The load date column.
 
 The same attribute list that is used for change detection is also used for the target table and the final load, so what you see in the dialog is what ends up in the database.
+
+When **Store record source indicator** is off, the feed does not need a static or column-based source indicator for this satellite alone. If the same catalog source also feeds a hub or link, that consumer still requires an indicator.
 
 == Tips for satellites
 

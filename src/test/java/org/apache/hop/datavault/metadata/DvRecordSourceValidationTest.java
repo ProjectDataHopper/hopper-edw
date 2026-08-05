@@ -17,6 +17,7 @@
 package org.apache.hop.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -117,6 +118,100 @@ class DvRecordSourceValidationTest {
                     r.getType() == ICheckResult.TYPE_RESULT_ERROR
                         && r.getText().contains("invoice-source")
                         && r.getText().contains("s_invoice")));
+  }
+
+  @Test
+  void satelliteWithoutStoredRecordSourceAllowsMissingSourceIndicator() {
+    DataVaultModel model = new DataVaultModel();
+    DvHub hub = new DvHub("h_invoice");
+    hub.setRecordSources(List.of("invoice-source"));
+    model.getTables().add(hub);
+
+    DataVaultSource source = invoiceSource();
+    source.setSourceIndicator(null);
+    source.setSourceIndicatorField(null);
+
+    TestSatellite satellite = new TestSatellite("s_invoice", source);
+    satellite.setHubName("h_invoice");
+    satellite.setRecordSourceName("invoice-source");
+    satellite.setStoreRecordSource(false);
+    satellite.setAttributes(List.of(attribute("CLE_0")));
+    model.getTables().add(satellite);
+
+    List<ICheckResult> remarks = new ArrayList<>();
+    satellite.check(
+        remarks,
+        new MemoryMetadataProvider(),
+        new Variables(),
+        DvModelCheckOptions.fastOnly(),
+        model);
+
+    assertTrue(
+        remarks.stream()
+            .noneMatch(
+                r ->
+                    r.getType() == ICheckResult.TYPE_RESULT_ERROR
+                        && r.getText().contains("invoice-source")
+                        && r.getText().contains("s_invoice")
+                        && r.getText().toLowerCase().contains("indicator")));
+  }
+
+  @Test
+  void satelliteTargetLayoutOmitsRecordSourceWhenNotStored() throws Exception {
+    DataVaultModel model = buildInvoiceModel();
+    TestSatellite satellite = (TestSatellite) model.findTable("s_invoice");
+    satellite.setStoreRecordSource(false);
+
+    assertTrue(
+        satellite
+            .getTargetTableLayout(testMetadataProvider(), new Variables(), model)
+            .getValueMetaList()
+            .stream()
+            .noneMatch(meta -> "src_invoice".equals(meta.getName())));
+  }
+
+  @Test
+  void satellitePipelineOmitsRecordSourceWhenNotStored() throws Exception {
+    DataVaultModel model = buildInvoiceModel();
+    TestSatellite satellite = (TestSatellite) model.findTable("s_invoice");
+    satellite.setStoreRecordSource(false);
+
+    List<PipelineMeta> pipelines =
+        satellite.generateUpdatePipelines(
+            testMetadataProvider(), new Variables(), model, new Date(), null);
+
+    assertEquals(1, pipelines.size());
+    PipelineMeta pipeline = pipelines.get(0);
+
+    SelectValuesMeta selectMeta =
+        (SelectValuesMeta)
+            pipeline.getTransforms().stream()
+                .filter(t -> "hk plus attr".equals(t.getName()))
+                .findFirst()
+                .orElseThrow()
+                .getTransform();
+    assertTrue(
+        selectMeta.getSelectOption().getSelectFields().stream()
+            .map(SelectField::getName)
+            .noneMatch("src_invoice"::equals));
+
+    TableInputMeta sourceMeta =
+        (TableInputMeta)
+            pipeline.getTransforms().stream()
+                .filter(t -> t.getName().startsWith("source"))
+                .findFirst()
+                .orElseThrow()
+                .getTransform();
+    assertFalse(sourceMeta.getSql().contains("src_invoice"));
+  }
+
+  @Test
+  void shouldStoreRecordSourceHelper() {
+    DvSatellite sat = new DvSatellite("s_test");
+    assertTrue(DvSourceFieldMappingSupport.shouldStoreRecordSource(sat));
+    sat.setStoreRecordSource(false);
+    assertFalse(DvSourceFieldMappingSupport.shouldStoreRecordSource(sat));
+    assertTrue(DvSourceFieldMappingSupport.shouldStoreRecordSource(new DvHub("h_test")));
   }
 
   @Test

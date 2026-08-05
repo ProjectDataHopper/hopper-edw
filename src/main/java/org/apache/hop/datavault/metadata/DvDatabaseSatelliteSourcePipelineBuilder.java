@@ -77,8 +77,10 @@ public class DvDatabaseSatelliteSourcePipelineBuilder extends DvDatabaseSourcePi
       sql.append(sourceDbMeta.quoteField(variables.resolve(satellite.getDrivingKeySourceField())));
     }
 
-    appendComma(sql);
-    appendSourceField(hub, sql, sourceDbMeta);
+    if (satellite.isStoreRecordSource()) {
+      appendComma(sql);
+      appendSourceField(hub, sql, sourceDbMeta);
+    }
     appendFrom(sourceDbMeta, dbSource, sql);
 
     return sql.toString();
@@ -151,8 +153,10 @@ public class DvDatabaseSatelliteSourcePipelineBuilder extends DvDatabaseSourcePi
       sql.append(sourceDbMeta.quoteField(variables.resolve(satellite.getDrivingKeySourceField())));
     }
 
-    appendComma(sql);
-    appendSourceField(satellite, sql, sourceDbMeta);
+    if (satellite.isStoreRecordSource()) {
+      appendComma(sql);
+      appendSourceField(satellite, sql, sourceDbMeta);
+    }
     appendFrom(sourceDbMeta, dbSource, sql);
 
     return sql.toString();

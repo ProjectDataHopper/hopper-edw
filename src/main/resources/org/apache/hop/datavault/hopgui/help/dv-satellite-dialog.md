@@ -25,7 +25,7 @@ Satellites are **insert-only**: when tracked attribute values change for a paren
 
 For each load, the generated pipeline:
 
-1. Reads parent business keys (to compute the parent hash key), satellite attributes, and the record source indicator from your catalog feed.
+1. Reads parent business keys (to compute the parent hash key), satellite attributes, and (when **Store record source indicator** is enabled) the record source indicator from your catalog feed.
 2. Calculates the parent hash key (from the parent hub, or from the parent link's participating hubs).
 3. Compares incoming attribute values against existing satellite rows for that parent (and driving key, when used).
 4. Inserts only rows that are new or that contain **changed** attribute values.
@@ -40,7 +40,7 @@ The editor opens from a satellite box on the Data Vault model canvas (double-cli
 | Area | Contents |
 |------|----------|
 | **Header** | Name and description (apply to the satellite definition everywhere in the model) |
-| **General tab** | Integration mode, physical table, default record source, parent hub or link, driving keys |
+| **General tab** | Integration mode, physical table, default record source, store record source indicator, parent hub or link, driving keys |
 | **Attributes tab** | Columns to historize and the **Load from source** action |
 | **Status tracking tab** | Optional Status Tracking Satellite (STS) for full-snapshot deletion detection |
 | **Footer** | **OK**, **Validate**, **Cancel**, and **Help** |
@@ -55,9 +55,9 @@ As with hubs, "record source" appears in more than one place:
 |---------|------------------|---------|
 | **Catalog feed** | **Default record source** on the General tab | `CRM-customer` (a DV_SOURCE in the Data Catalog) |
 | **Value in the vault row** | Catalog source → source indicator or indicator field | `CRM` or a column from the feed |
-| **Target column name** | Data Vault model configuration (global default) | `RECORD_SOURCE` |
+| **Target column name** | Data Vault model configuration (global default); only written when **Store record source indicator** is on | `RECORD_SOURCE` |
 
-The **Default record source** dropdown lists **catalog DV_SOURCE entries** (logical feeds), not individual source columns. Configure the value written to each loaded row on the catalog source definition.
+The **Default record source** dropdown lists **catalog DV_SOURCE entries** (logical feeds), not individual source columns. Configure the value written to each loaded row on the catalog source definition when the satellite stores the indicator column.
 
 A default record source is **required** for Hop-managed satellites, even when the satellite reads the **same physical table** as its parent hub.
 
@@ -68,6 +68,7 @@ A default record source is **required** for Hop-managed satellites, even when th
 | **Integration mode** | **Hop managed** (default) — Hop generates DDL and update pipelines. **External read-only** — the table is loaded elsewhere (e.g. dbt); Hop documents structure for Business Vault and dimensional publishing only. **Custom pipelines** — Hop runs your own `.hpl` files from `customUpdatePipelinePaths` instead of generating pipelines. |
 | **Physical table name** | Target table in the vault database. Leave blank to default to the satellite **Name**. |
 | **Default record source** | Catalog **DV_SOURCE** that feeds this satellite. Required for generated pipelines. Changing this refreshes the **Driving key source field** dropdown. |
+| **Store record source indicator** | When checked (default), the satellite table includes the model record-source column and loads write the feed's source indicator into it. Uncheck for **VaultSpeed-style** mono-source satellites that omit the source-indicator column from the physical table. The catalog feed is still required. Hubs and links always store record source. |
 | **Parent hub** | Dropdown of hubs defined in this model. Select the hub this satellite describes (normal hub satellites). Choose **either** a parent hub **or** a parent link, not both. If the current value is not in the model (e.g. after an external reference), it is still listed and pre-selected. |
 | **Parent link** | Dropdown of links defined in this model. Select the link for **link satellites** that historize relationship-level attributes. Leave **Parent hub** empty when using a link satellite. |
 | **Driving key column** | Target column name that, together with the parent hash key and load date, makes each row unique. Leave empty for a standard single-active satellite. Set both driving key fields for **multi-active** satellites (e.g. multiple current phone numbers per customer). |

@@ -181,6 +181,18 @@ public class DvSatellite extends DvTableBase
   @HopMetadataProperty private String recordSource;
 
   /**
+   * When true (default), the satellite target table includes the model record-source column and
+   * load pipelines write the feed's source indicator into it. When false (VaultSpeed-style
+   * mono-source satellites), the physical table has no record-source column; provenance is implied
+   * by the satellite definition and its catalog feed binding.
+   *
+   * <p>{@code defaultBoolean = true} so existing .hdv models without this element keep storing the
+   * column (Hop XML/JSON otherwise default missing booleans to false).
+   */
+  @HopMetadataProperty(defaultBoolean = true)
+  private boolean storeRecordSource = true;
+
+  /**
    * When enabled, a separate STS table tracks active/deleted status per load (full snapshot only).
    */
   @HopMetadataProperty private boolean statusTrackingEnabled;
@@ -959,19 +971,21 @@ public class DvSatellite extends DvTableBase
         }
       }
 
-      // Record source column (hub satellites inherit the parent hub column name when set)
-      String rsFieldName =
-          DvSourceFieldMappingSupport.resolveRecordSourceFieldNameForSatellite(
-              config, model, this, variables);
-      String lengthString =
-          (config != null && !Utils.isEmpty(config.getRecordSourceFieldLength()))
-              ? config.getRecordSourceFieldLength()
-              : "100";
-      lengthString = variables.resolve(lengthString);
-      int rsLength = Const.toInt(lengthString, 100);
-      IValueMeta rsMeta = new ValueMetaString(rsFieldName);
-      rsMeta.setLength(rsLength);
-      rowMeta.addValueMeta(rsMeta);
+      // Record source column (optional; VaultSpeed-style sats may omit it)
+      if (isStoreRecordSource()) {
+        String rsFieldName =
+            DvSourceFieldMappingSupport.resolveRecordSourceFieldNameForSatellite(
+                config, model, this, variables);
+        String lengthString =
+            (config != null && !Utils.isEmpty(config.getRecordSourceFieldLength()))
+                ? config.getRecordSourceFieldLength()
+                : "100";
+        lengthString = variables.resolve(lengthString);
+        int rsLength = Const.toInt(lengthString, 100);
+        IValueMeta rsMeta = new ValueMetaString(rsFieldName);
+        rsMeta.setLength(rsLength);
+        rowMeta.addValueMeta(rsMeta);
+      }
 
       // Load date
       String loadDateField = config.getLoadDateField();
@@ -1048,22 +1062,24 @@ public class DvSatellite extends DvTableBase
     statusMeta.setLength(statusLength);
     rowMeta.addValueMeta(statusMeta);
 
-    String rsFieldName = "RECORD_SOURCE";
-    if (config != null && !Utils.isEmpty(config.getRecordSourceField())) {
-      rsFieldName = config.getRecordSourceField();
+    if (isStoreRecordSource()) {
+      String rsFieldName = "RECORD_SOURCE";
+      if (config != null && !Utils.isEmpty(config.getRecordSourceField())) {
+        rsFieldName = config.getRecordSourceField();
+      }
+      rsFieldName = variables.resolve(rsFieldName);
+      if (Utils.isEmpty(rsFieldName)) {
+        rsFieldName = "RECORD_SOURCE";
+      }
+      String lengthString =
+          (config != null && !Utils.isEmpty(config.getRecordSourceFieldLength()))
+              ? config.getRecordSourceFieldLength()
+              : "100";
+      int rsLength = Const.toInt(variables.resolve(lengthString), 100);
+      IValueMeta rsMeta = new ValueMetaString(rsFieldName);
+      rsMeta.setLength(rsLength);
+      rowMeta.addValueMeta(rsMeta);
     }
-    rsFieldName = variables.resolve(rsFieldName);
-    if (Utils.isEmpty(rsFieldName)) {
-      rsFieldName = "RECORD_SOURCE";
-    }
-    String lengthString =
-        (config != null && !Utils.isEmpty(config.getRecordSourceFieldLength()))
-            ? config.getRecordSourceFieldLength()
-            : "100";
-    int rsLength = Const.toInt(variables.resolve(lengthString), 100);
-    IValueMeta rsMeta = new ValueMetaString(rsFieldName);
-    rsMeta.setLength(rsLength);
-    rowMeta.addValueMeta(rsMeta);
 
     String loadDateField = config.getLoadDateField();
     if (Utils.isEmpty(loadDateField)) {
@@ -1296,9 +1312,11 @@ public class DvSatellite extends DvTableBase
       selectFields.add(selectField);
     }
 
-    SelectField recordSourceSelect = new SelectField();
-    recordSourceSelect.setName(ctx.recordSourceField);
-    selectFields.add(recordSourceSelect);
+    if (ctx.storesRecordSource()) {
+      SelectField recordSourceSelect = new SelectField();
+      recordSourceSelect.setName(ctx.recordSourceField);
+      selectFields.add(recordSourceSelect);
+    }
 
     TransformMeta tm = new TransformMeta("SelectValues", "hk plus attr", selectMeta);
     int selectX = LOCATION_START_LINE_2.x + (ctx.hashChainLength() + 1) * SPACING_WIDTH;
@@ -1380,7 +1398,9 @@ public class DvSatellite extends DvTableBase
     if (ctx.hasDrivingKey()) {
       selectFields.add(ctx.targetDatabaseMeta.quoteField(ctx.drivingKeyFieldName));
     }
-    selectFields.add(ctx.targetDatabaseMeta.quoteField(ctx.recordSourceField));
+    if (ctx.storesRecordSource()) {
+      selectFields.add(ctx.targetDatabaseMeta.quoteField(ctx.recordSourceField));
+    }
     if (useLoadEndDate(ctx)) {
       selectFields.add(quotedLoadDate);
     }
@@ -1431,12 +1451,13 @@ public class DvSatellite extends DvTableBase
       agg.setTypeLabel("LAST_INCL_NULL");
       aggregations.add(agg);
     }
-    // Also aggregate the record source field with LAST_INCL_NULL
-    Aggregation rsAgg = new Aggregation();
-    rsAgg.setSubject(ctx.recordSourceField);
-    rsAgg.setField(ctx.recordSourceField);
-    rsAgg.setTypeLabel("LAST_INCL_NULL");
-    aggregations.add(rsAgg);
+    if (ctx.storesRecordSource()) {
+      Aggregation rsAgg = new Aggregation();
+      rsAgg.setSubject(ctx.recordSourceField);
+      rsAgg.setField(ctx.recordSourceField);
+      rsAgg.setTypeLabel("LAST_INCL_NULL");
+      aggregations.add(rsAgg);
+    }
 
     if (useLoadEndDate(ctx)) {
       Aggregation loadDateAgg = new Aggregation();
@@ -1961,9 +1982,11 @@ public class DvSatellite extends DvTableBase
       selectFields.add(drivingKeyField);
     }
 
-    SelectField recordSourceSelect = new SelectField();
-    recordSourceSelect.setName(ctx.recordSourceField);
-    selectFields.add(recordSourceSelect);
+    if (ctx.storesRecordSource()) {
+      SelectField recordSourceSelect = new SelectField();
+      recordSourceSelect.setName(ctx.recordSourceField);
+      selectFields.add(recordSourceSelect);
+    }
 
     TransformMeta tm = new TransformMeta("SelectValues", "sts source keys", selectMeta);
     tm.setLocation(predecessor.getLocation().x + SPACING_WIDTH, predecessor.getLocation().y);
@@ -1984,14 +2007,15 @@ public class DvSatellite extends DvTableBase
     String quotedHash = ctx.targetDatabaseMeta.quoteField(ctx.hashKeyFieldName);
     String quotedStatus = ctx.targetDatabaseMeta.quoteField(statusField);
     String quotedLoadDate = ctx.targetDatabaseMeta.quoteField(loadDateField);
-    String quotedRecordSource = ctx.targetDatabaseMeta.quoteField(ctx.recordSourceField);
 
     List<String> selectFields = new ArrayList<>();
     selectFields.add(quotedStatus);
     if (ctx.hasDrivingKey()) {
       selectFields.add(ctx.targetDatabaseMeta.quoteField(ctx.drivingKeyFieldName));
     }
-    selectFields.add(quotedRecordSource);
+    if (ctx.storesRecordSource()) {
+      selectFields.add(ctx.targetDatabaseMeta.quoteField(ctx.recordSourceField));
+    }
     selectFields.add(quotedLoadDate);
     selectFields.add(quotedHash);
 
@@ -2026,11 +2050,13 @@ public class DvSatellite extends DvTableBase
     statusAgg.setTypeLabel("LAST_INCL_NULL");
     aggregations.add(statusAgg);
 
-    Aggregation rsAgg = new Aggregation();
-    rsAgg.setSubject(ctx.recordSourceField);
-    rsAgg.setField(ctx.recordSourceField);
-    rsAgg.setTypeLabel("LAST_INCL_NULL");
-    aggregations.add(rsAgg);
+    if (ctx.storesRecordSource()) {
+      Aggregation rsAgg = new Aggregation();
+      rsAgg.setSubject(ctx.recordSourceField);
+      rsAgg.setField(ctx.recordSourceField);
+      rsAgg.setTypeLabel("LAST_INCL_NULL");
+      aggregations.add(rsAgg);
+    }
     groupByMeta.setAggregations(aggregations);
 
     TransformMeta groupTm =
@@ -2067,9 +2093,11 @@ public class DvSatellite extends DvTableBase
       drivingKeySelect.setName(ctx.drivingKeyFieldName);
       keyFields.add(drivingKeySelect);
     }
-    SelectField recordSourceSelect = new SelectField();
-    recordSourceSelect.setName(ctx.recordSourceField);
-    keyFields.add(recordSourceSelect);
+    if (ctx.storesRecordSource()) {
+      SelectField recordSourceSelect = new SelectField();
+      recordSourceSelect.setName(ctx.recordSourceField);
+      keyFields.add(recordSourceSelect);
+    }
 
     TransformMeta keySelectTm =
         new TransformMeta("SelectValues", "sts_active_key_set", keySelectMeta);
@@ -2134,9 +2162,11 @@ public class DvSatellite extends DvTableBase
       drivingKeySelect.setName(ctx.drivingKeyFieldName);
       selectFields.add(drivingKeySelect);
     }
-    SelectField recordSourceSelect = new SelectField();
-    recordSourceSelect.setName(ctx.recordSourceField);
-    selectFields.add(recordSourceSelect);
+    if (ctx.storesRecordSource()) {
+      SelectField recordSourceSelect = new SelectField();
+      recordSourceSelect.setName(ctx.recordSourceField);
+      selectFields.add(recordSourceSelect);
+    }
     if (!Utils.isEmpty(statusFieldName)) {
       SelectField statusSelect = new SelectField();
       statusSelect.setName(statusFieldName);
@@ -2279,10 +2309,11 @@ public class DvSatellite extends DvTableBase
     final DvLink.DvLinkSatelliteSource linkSatelliteSource;
     final List<HubHashCalcStep> hubHashCalcSteps;
 
-    // Record source indicator support
+    // Record source indicator support (null/empty when satellite does not store the column)
     final String sourceIndicator;
     final String sourceIndicatorField;
     final String recordSourceField;
+    final boolean storeRecordSource;
     final String drivingKeyFieldName;
     final String drivingKeySourceFieldName;
 
@@ -2315,6 +2346,7 @@ public class DvSatellite extends DvTableBase
         String sourceIndicator,
         String sourceIndicatorField,
         String recordSourceField,
+        boolean storeRecordSource,
         String drivingKeyFieldName,
         String drivingKeySourceFieldName)
         throws HopException {
@@ -2346,7 +2378,11 @@ public class DvSatellite extends DvTableBase
       this.hubHashCalcSteps = hubHashCalcSteps != null ? hubHashCalcSteps : new ArrayList<>();
       this.sourceIndicator = sourceIndicator;
       this.sourceIndicatorField = sourceIndicatorField;
-      this.recordSourceField = recordSourceField != null ? recordSourceField : "RECORD_SOURCE";
+      this.storeRecordSource = storeRecordSource;
+      this.recordSourceField =
+          storeRecordSource
+              ? (recordSourceField != null ? recordSourceField : "RECORD_SOURCE")
+              : null;
       this.drivingKeyFieldName = drivingKeyFieldName;
       this.drivingKeySourceFieldName = drivingKeySourceFieldName;
 
@@ -2355,6 +2391,10 @@ public class DvSatellite extends DvTableBase
 
     boolean hasDrivingKey() {
       return !Utils.isEmpty(drivingKeyFieldName) && !Utils.isEmpty(drivingKeySourceFieldName);
+    }
+
+    boolean storesRecordSource() {
+      return storeRecordSource && !Utils.isEmpty(recordSourceField);
     }
 
     int hashChainLength() {
@@ -2380,7 +2420,8 @@ public class DvSatellite extends DvTableBase
 
       DataVaultConfiguration config = model.getConfigurationOrDefault();
 
-      String recordSourceField = "RECORD_SOURCE";
+      boolean storeRecordSource = sat.isStoreRecordSource();
+      String recordSourceField = null;
 
       // Target DB
       DatabaseMeta targetDatabaseMeta = null;
@@ -2425,9 +2466,11 @@ public class DvSatellite extends DvTableBase
         if (linkedHub == null) {
           throw new HopException("Please link satellite " + sat.getName() + " to a hub");
         }
-        recordSourceField =
-            DvSourceFieldMappingSupport.resolveRecordSourceFieldNameForSatellite(
-                config, model, sat, variables);
+        if (storeRecordSource) {
+          recordSourceField =
+              DvSourceFieldMappingSupport.resolveRecordSourceFieldNameForSatellite(
+                  config, model, sat, variables);
+        }
         hashKeyFieldName = linkedHub.getHashKeyFieldName();
         // Hash inputs = expanded parent-key stream fields (multipartite vault names, or N source
         // parts for composite hub BKs). Satellites do not store composed BK columns.
@@ -2442,9 +2485,11 @@ public class DvSatellite extends DvTableBase
         if (linkedLink == null) {
           throw new HopException("Please link satellite " + sat.getName() + " to a link");
         }
-        recordSourceField =
-            DvSourceFieldMappingSupport.resolveRecordSourceFieldNameForSatellite(
-                config, model, sat, variables);
+        if (storeRecordSource) {
+          recordSourceField =
+              DvSourceFieldMappingSupport.resolveRecordSourceFieldNameForSatellite(
+                  config, model, sat, variables);
+        }
         hashKeyFieldName = variables.resolve(linkedLink.getLinkHashKeyFieldName());
         if (Utils.isEmpty(hashKeyFieldName)) {
           hashKeyFieldName = linkedLink.getName() + "_LK";
@@ -2509,8 +2554,10 @@ public class DvSatellite extends DvTableBase
         }
       }
 
-      sourceIndicator = recordSource.getSourceIndicator();
-      sourceIndicatorField = recordSource.getSourceIndicatorField();
+      if (storeRecordSource) {
+        sourceIndicator = recordSource.getSourceIndicator();
+        sourceIndicatorField = recordSource.getSourceIndicatorField();
+      }
 
       List<SourceField> sourceFields = recordSource.getFields(metadataProvider);
 
@@ -2567,6 +2614,7 @@ public class DvSatellite extends DvTableBase
           sourceIndicator,
           sourceIndicatorField,
           recordSourceField,
+          storeRecordSource,
           drivingKeyFieldName,
           drivingKeySourceFieldName);
     }

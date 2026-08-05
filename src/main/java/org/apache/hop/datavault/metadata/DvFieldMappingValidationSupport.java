@@ -389,6 +389,11 @@ public final class DvFieldMappingValidationSupport {
     if (satellite == null || model == null || Utils.isEmpty(satellite.getRecordSourceName())) {
       return;
     }
+    // VaultSpeed-style satellites omit the physical source-indicator column; feed binding remains
+    // required, but the catalog feed need not configure a static/field indicator for this sat.
+    if (!satellite.isStoreRecordSource()) {
+      return;
+    }
     DataVaultConfiguration config = model.getConfigurationOrDefault();
     try {
       DvSourceFieldMappingSupport.resolveRecordSourceFieldNameForSatellite(

@@ -205,6 +205,9 @@ public abstract class DvFileSourcePipelineBuilder extends DvSourcePipelineBuilde
 
   private TransformMeta addRecordSourceField(
       TransformMeta predecessor, Point location, ColumnMapping mapping) throws HopException {
+    if (!DvSourceFieldMappingSupport.shouldStoreRecordSource(dvTable)) {
+      return predecessor;
+    }
     String targetSourceFieldName =
         DvSourceFieldMappingSupport.findTargetSourceFieldName(configuration, recordSource, dvTable);
     String staticRecordSource = DvSourceFieldMappingSupport.resolveRecordSourceValue(recordSource);

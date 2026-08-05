@@ -60,7 +60,8 @@ Visual **raw Data Vault 2.0** model: hubs, links, satellites, physical **referen
 ### Satellite essentials
 
 - `hub` or `link` parent name  
-- `recordSource` catalog name  
+- `recordSource` catalog name (feed binding; still required for managed loads)  
+- `storeRecordSource` (optional, default `Y`) — when `N`, omit the physical record-source / source-indicator column (VaultSpeed-style mono-source sats)  
 - `attributes` (name/type/length; CDC include flags)  
 - Optional `parentKeySourceFields` (ordered source columns = hub hash-input parts: multipartite vault names or composite source parts — **not** a stored composed BK)  
 - Optional driving key, status tracking  

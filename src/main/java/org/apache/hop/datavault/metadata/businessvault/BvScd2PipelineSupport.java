@@ -208,7 +208,10 @@ public final class BvScd2PipelineSupport {
     if (tableInput != null) {
       GeneratedPipelineMetadataSupport.stampSourceRead(tableInput, ctx.sourceDbName);
     }
-    TransformMeta mergeInput = tableInput;
+    TransformMeta legStream =
+        injectRecordSourceConstantIfNeeded(
+            ctx, ctx.legs.get(0), pipelineMeta, tableInput, LOCATION_START);
+    TransformMeta mergeInput = legStream;
     if (ctx.scd2Table != null && ctx.scd2Table.isIncrementalBuild()) {
       TransformMeta baselineOutput =
           addIncrementalBaselineLeg(
@@ -217,7 +220,7 @@ public final class BvScd2PipelineSupport {
               new Point(LOCATION_START.x, LOCATION_START.y + LEG_SPACING_HEIGHT),
               false,
               openRowFilterParam);
-      mergeInput = addSortedSchemaMerge(ctx, pipelineMeta, List.of(tableInput, baselineOutput));
+      mergeInput = addSortedSchemaMerge(ctx, pipelineMeta, List.of(legStream, baselineOutput));
     }
     TransformMeta analyticQuery = addAnalyticQuery(ctx, pipelineMeta, mergeInput);
     TransformMeta ifNull = addIfNull(ctx, pipelineMeta, analyticQuery);
@@ -1008,7 +1011,9 @@ public final class BvScd2PipelineSupport {
         selectFields.add(ctx.sourceDatabaseMeta.quoteField(attr));
       }
     }
-    selectFields.add(ctx.sourceDatabaseMeta.quoteField(ctx.recordSourceField));
+    if (leg.satellite == null || leg.satellite.isStoreRecordSource()) {
+      selectFields.add(ctx.sourceDatabaseMeta.quoteField(ctx.recordSourceField));
+    }
     selectFields.add(
         ctx.sourceDatabaseMeta.quoteField(
             ctx.isMultiSatellite()
@@ -1457,9 +1462,45 @@ public final class BvScd2PipelineSupport {
     ConstantField indicatorField =
         new ConstantField(SOURCE_INDICATOR_FIELD, "String", leg.sourceIndicatorValue);
     constantMeta.getFields().add(indicatorField);
+    // When the DV satellite does not store a record-source column, materialize the BV RS value
+    // from the configured leg indicator (or satellite name) so downstream collapse still has it.
+    if (leg.satellite != null && !leg.satellite.isStoreRecordSource()) {
+      constantMeta
+          .getFields()
+          .add(new ConstantField(ctx.recordSourceField, "String", leg.sourceIndicatorValue));
+    }
 
     TransformMeta tm =
         new TransformMeta("Constant", "source_" + leg.satellite.getName(), constantMeta);
+    tm.setLocation(location.x + SPACING_WIDTH, location.y);
+    pipelineMeta.addTransform(tm);
+    pipelineMeta.addPipelineHop(new PipelineHopMeta(predecessor, tm));
+    return tm;
+  }
+
+  /**
+   * For single-satellite pipelines, inject a constant record-source field when the DV satellite
+   * omits that column so Analytic Query / Group By / BV write still see {@code
+   * ctx.recordSourceField}.
+   */
+  private static TransformMeta injectRecordSourceConstantIfNeeded(
+      Scd2BuildContext ctx,
+      SatelliteLeg leg,
+      PipelineMeta pipelineMeta,
+      TransformMeta predecessor,
+      Point location) {
+    if (predecessor == null
+        || leg == null
+        || leg.satellite == null
+        || leg.satellite.isStoreRecordSource()) {
+      return predecessor;
+    }
+    ConstantMeta constantMeta = new ConstantMeta();
+    constantMeta
+        .getFields()
+        .add(new ConstantField(ctx.recordSourceField, "String", leg.sourceIndicatorValue));
+    TransformMeta tm =
+        new TransformMeta("Constant", "record_source_" + leg.satellite.getName(), constantMeta);
     tm.setLocation(location.x + SPACING_WIDTH, location.y);
     pipelineMeta.addTransform(tm);
     pipelineMeta.addPipelineHop(new PipelineHopMeta(predecessor, tm));

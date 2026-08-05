@@ -187,6 +187,9 @@ public class DvParquetSatelliteSourcePipelineBuilder extends DvParquetFileSource
 
   private void addRecordSourceMapping(DvSatellite satellite, Map<String, String> sourceToTarget)
       throws HopException {
+    if (!satellite.isStoreRecordSource()) {
+      return;
+    }
     String sourceFieldName = variables.resolve(recordSource.getSourceIndicatorField());
     if (StringUtils.isNotEmpty(sourceFieldName)) {
       String targetSourceFieldName =

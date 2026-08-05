@@ -680,31 +680,36 @@ public final class DvModelLineageCollector {
       table.addField(field);
     }
 
-    String recordSourceField = null;
-    if (dvTable instanceof DvHub hub && !Utils.isEmpty(hub.getRecordSourceFieldName())) {
-      recordSourceField = resolve(hub.getRecordSourceFieldName(), variables);
-    } else if (dvTable instanceof DvLink link && !Utils.isEmpty(link.getRecordSourceFieldName())) {
-      recordSourceField = resolve(link.getRecordSourceFieldName(), variables);
-    }
-    if (Utils.isEmpty(recordSourceField)) {
-      recordSourceField = resolve(config.getRecordSourceField(), variables);
-    }
-    if (Utils.isEmpty(recordSourceField)) {
-      recordSourceField = "RECORD_SOURCE";
-    }
-    if (table.findField(recordSourceField).isEmpty()) {
-      FieldLineage field = new FieldLineage(recordSourceField);
-      field.setTechnical(true);
-      field.setDataType("String");
-      FieldContribution contribution = new FieldContribution();
-      contribution.setSourceKind(TableSourceKind.CONFIG);
-      contribution.setSourceName("DataVaultConfiguration");
-      contribution.setTransform(FieldTransform.CONSTANT);
-      contribution.addReason(
-          LineageReasonFactory.standardColumn(
-              recordSourceField, "recordSourceField", recordSourceField));
-      field.addContribution(contribution);
-      table.addField(field);
+    boolean storeRecordSource =
+        !(dvTable instanceof DvSatellite satellite) || satellite.isStoreRecordSource();
+    if (storeRecordSource) {
+      String recordSourceField = null;
+      if (dvTable instanceof DvHub hub && !Utils.isEmpty(hub.getRecordSourceFieldName())) {
+        recordSourceField = resolve(hub.getRecordSourceFieldName(), variables);
+      } else if (dvTable instanceof DvLink link
+          && !Utils.isEmpty(link.getRecordSourceFieldName())) {
+        recordSourceField = resolve(link.getRecordSourceFieldName(), variables);
+      }
+      if (Utils.isEmpty(recordSourceField)) {
+        recordSourceField = resolve(config.getRecordSourceField(), variables);
+      }
+      if (Utils.isEmpty(recordSourceField)) {
+        recordSourceField = "RECORD_SOURCE";
+      }
+      if (table.findField(recordSourceField).isEmpty()) {
+        FieldLineage field = new FieldLineage(recordSourceField);
+        field.setTechnical(true);
+        field.setDataType("String");
+        FieldContribution contribution = new FieldContribution();
+        contribution.setSourceKind(TableSourceKind.CONFIG);
+        contribution.setSourceName("DataVaultConfiguration");
+        contribution.setTransform(FieldTransform.CONSTANT);
+        contribution.addReason(
+            LineageReasonFactory.standardColumn(
+                recordSourceField, "recordSourceField", recordSourceField));
+        field.addContribution(contribution);
+        table.addField(field);
+      }
     }
 
     // Load end date only for satellites when the model enables the pattern.

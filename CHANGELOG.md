@@ -4,6 +4,13 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## Unreleased
 
+### Optional satellite record-source column (VaultSpeed)
+
+- Per-satellite **Store record source indicator** (default on) — uncheck to omit the physical source-indicator column from satellite (and STS) DDL and loads
+- Model check no longer requires a feed source indicator when the satellite does not store the column; catalog feed binding remains required
+- Business Vault SCD2 injects a constant record-source value (leg indicator / satellite name) when reading such satellites
+- GUI checkbox on the satellite General tab; docs: [dv-satellite.adoc](docs/dv-satellite.adoc)
+
 ### Composite hub business keys (multi-source-field → one vault BK column)
 
 - Model a hub business key as **one physical vault column** composed from ordered **source parts** (`composite=Y` + `sourceFieldNames`), with dual-read of legacy multipartite vault columns and single-field mappings

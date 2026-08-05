@@ -114,4 +114,16 @@ public final class DvSourceFieldMappingSupport {
     }
     return sourceIndicator;
   }
+
+  /**
+   * Whether the given vault table materializes a record-source / source-indicator column. Hubs,
+   * links, and reference tables always do; satellites may opt out ({@link
+   * DvSatellite#isStoreRecordSource()}).
+   */
+  public static boolean shouldStoreRecordSource(IDvTable table) {
+    if (table instanceof DvSatellite satellite) {
+      return satellite.isStoreRecordSource();
+    }
+    return true;
+  }
 }

@@ -83,8 +83,10 @@ public class DvCompositeSatelliteSourcePipelineBuilder extends DvCompositeSource
       sql.append(sourceDbMeta.quoteField(variables.resolve(satellite.getDrivingKeySourceField())));
     }
 
-    appendComma(sql);
-    appendSourceField(hub, sql, sourceDbMeta);
+    if (satellite.isStoreRecordSource()) {
+      appendComma(sql);
+      appendSourceField(hub, sql, sourceDbMeta);
+    }
     appendFromSubquery(sql, innerSql);
     return sql.toString();
   }
@@ -142,8 +144,10 @@ public class DvCompositeSatelliteSourcePipelineBuilder extends DvCompositeSource
       sql.append(sourceDbMeta.quoteField(variables.resolve(satellite.getDrivingKeySourceField())));
     }
 
-    appendComma(sql);
-    appendSourceField(satellite, sql, sourceDbMeta);
+    if (satellite.isStoreRecordSource()) {
+      appendComma(sql);
+      appendSourceField(satellite, sql, sourceDbMeta);
+    }
     appendFromSubquery(sql, innerSql);
     return sql.toString();
   }

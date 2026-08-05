@@ -130,6 +130,7 @@
       <parentKeySourceFields/>
       <drivingKey/>
       <recordSource>CRM-customer</recordSource>
+      <storeRecordSource>Y</storeRecordSource>
       <statusTrackingEnabled>N</statusTrackingEnabled>
       <statusFieldName>record_status</statusFieldName>
       <activeStatusValue>ACTIVE</activeStatusValue>

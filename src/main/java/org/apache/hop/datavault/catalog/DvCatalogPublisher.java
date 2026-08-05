@@ -252,7 +252,11 @@ public final class DvCatalogPublisher {
       definition.getTags().add(model.getName());
     }
     DataVaultConfiguration config = model.getConfigurationOrDefault();
-    if (config != null && !Utils.isEmpty(config.getRecordSourceField())) {
+    boolean publishRecordSourceField =
+        !(table instanceof DvSatellite satellite) || satellite.isStoreRecordSource();
+    if (publishRecordSourceField
+        && config != null
+        && !Utils.isEmpty(config.getRecordSourceField())) {
       definition
           .getCustomProperties()
           .put("recordSourceField", CatalogCustomProperty.string(config.getRecordSourceField()));

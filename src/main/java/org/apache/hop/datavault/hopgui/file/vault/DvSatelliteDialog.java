@@ -94,6 +94,7 @@ public class DvSatelliteDialog {
   private Combo wLinkName;
   private Text wDrivingKey;
   private Combo wDrivingKeySourceField;
+  private Button wStoreRecordSource;
   private TableView wAttributes;
   private TableView wParentKeys;
   private Label wlParentKeysHint;
@@ -266,16 +267,29 @@ public class DvSatelliteDialog {
         new FormDataBuilder().left().top(wTableName, margin).right().result());
     wRecordSource.addModifyListener(e -> refreshDrivingKeySourceFieldItems());
 
+    wStoreRecordSource = new Button(comp, SWT.CHECK);
+    wStoreRecordSource.setText(
+        BaseMessages.getString(PKG, "DvSatelliteDialog.StoreRecordSource.Label"));
+    wStoreRecordSource.setToolTipText(
+        BaseMessages.getString(PKG, "DvSatelliteDialog.StoreRecordSource.ToolTip"));
+    PropsUi.setLook(wStoreRecordSource);
+    wStoreRecordSource.setLayoutData(
+        new FormDataBuilder().left(middle, 0).top(wRecordSource, margin).right().result());
+
     Label wlHubName = new Label(comp, SWT.RIGHT);
     wlHubName.setText(BaseMessages.getString(PKG, "DvSatelliteDialog.HubName.Label"));
     PropsUi.setLook(wlHubName);
     wlHubName.setLayoutData(
-        new FormDataBuilder().left().top(wRecordSource, margin).right(middle, -margin).result());
+        new FormDataBuilder()
+            .left()
+            .top(wStoreRecordSource, margin)
+            .right(middle, -margin)
+            .result());
 
     wHubName = new Combo(comp, SWT.READ_ONLY | SWT.BORDER);
     PropsUi.setLook(wHubName);
     wHubName.setLayoutData(
-        new FormDataBuilder().left(middle, 0).top(wRecordSource, margin).right().result());
+        new FormDataBuilder().left(middle, 0).top(wStoreRecordSource, margin).right().result());
     wHubName.addListener(SWT.Selection, e -> updateParentKeysTabHint());
 
     Label wlLinkName = new Label(comp, SWT.RIGHT);
@@ -647,6 +661,7 @@ public class DvSatelliteDialog {
     wDescription.setText(Const.NVL(input.getDescription(), ""));
     // Catalog source names load lazily on combo focus (wait cursor).
     wRecordSource.setText(Const.NVL(input.getRecordSourceName(), ""));
+    wStoreRecordSource.setSelection(input.isStoreRecordSource());
     refreshHubNameItems();
     selectComboValue(wHubName, Const.NVL(input.getHubName(), ""));
     refreshLinkNameItems();
@@ -747,6 +762,7 @@ public class DvSatelliteDialog {
     target.setDescription(wDescription.getText());
     target.setIntegrationMode(DvIntegrationMode.lookupDescription(wIntegrationMode.getText()));
     target.setRecordSourceName(wRecordSource.getText());
+    target.setStoreRecordSource(wStoreRecordSource.getSelection());
     target.setHubName(wHubName.getText());
     target.setLinkName(wLinkName.getText());
     target.setDrivingKey(wDrivingKey.getText());
