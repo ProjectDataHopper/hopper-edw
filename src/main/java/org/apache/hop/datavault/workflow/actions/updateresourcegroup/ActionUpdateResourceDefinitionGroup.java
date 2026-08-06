@@ -26,7 +26,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hop.catalog.metadata.DataCatalogMeta;
 import org.apache.hop.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.apache.hop.core.Const;
-import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.Result;
 import org.apache.hop.core.annotations.Action;
 import org.apache.hop.core.database.DatabaseMeta;
@@ -92,6 +91,8 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
       "UPDATE_RESOURCE_DEFINITION_GROUP_ACTION_RUN_TAB";
   public static final String GUI_PLUGIN_ELEMENT_OPERATIONS_TAB_ID =
       "UPDATE_RESOURCE_DEFINITION_GROUP_ACTION_OPERATIONS_TAB";
+  public static final String GUI_PLUGIN_ELEMENT_VALIDATION_TAB_ID =
+      "UPDATE_RESOURCE_DEFINITION_GROUP_ACTION_VALIDATION_TAB";
   public static final String GUI_PLUGIN_ELEMENT_CATALOG_TAB_ID =
       "UPDATE_RESOURCE_DEFINITION_GROUP_ACTION_CATALOG_TAB";
   public static final String GUI_PLUGIN_ELEMENT_METRICS_TAB_ID =
@@ -104,10 +105,14 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
     GUI_PLUGIN_ELEMENT_SELECTION_TAB_ID,
     GUI_PLUGIN_ELEMENT_RUN_TAB_ID,
     GUI_PLUGIN_ELEMENT_OPERATIONS_TAB_ID,
+    GUI_PLUGIN_ELEMENT_VALIDATION_TAB_ID,
     GUI_PLUGIN_ELEMENT_CATALOG_TAB_ID,
     GUI_PLUGIN_ELEMENT_METRICS_TAB_ID,
     GUI_PLUGIN_ELEMENT_REPORTS_TAB_ID,
   };
+
+  /** Extension-data key for the last model-validation report text. */
+  public static final String RESULT_ATTR_MODEL_VALIDATION_REPORT = "modelValidationReportText";
 
   @GuiWidgetElement(
       order = "0100",
@@ -191,7 +196,7 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
       type = GuiElementType.CHECKBOX,
       label = "i18n::ActionUpdateResourceDefinitionGroup.LogModelCheckFailures.Label",
       toolTip = "i18n::ActionUpdateResourceDefinitionGroup.LogModelCheckFailures.ToolTip",
-      parentId = GUI_PLUGIN_ELEMENT_OPERATIONS_TAB_ID)
+      parentId = GUI_PLUGIN_ELEMENT_VALIDATION_TAB_ID)
   @HopMetadataProperty
   private boolean logModelCheckFailures = true;
 
@@ -200,7 +205,7 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
       type = GuiElementType.CHECKBOX,
       label = "i18n::ActionUpdateResourceDefinitionGroup.AbortOnModelCheckFailures.Label",
       toolTip = "i18n::ActionUpdateResourceDefinitionGroup.AbortOnModelCheckFailures.ToolTip",
-      parentId = GUI_PLUGIN_ELEMENT_OPERATIONS_TAB_ID)
+      parentId = GUI_PLUGIN_ELEMENT_VALIDATION_TAB_ID)
   @HopMetadataProperty
   private boolean abortOnModelCheckFailures = true;
 
@@ -209,7 +214,7 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
       type = GuiElementType.CHECKBOX,
       label = "i18n::ActionUpdateResourceDefinitionGroup.DetailedDataTypeChecking.Label",
       toolTip = "i18n::ActionUpdateResourceDefinitionGroup.DetailedDataTypeChecking.ToolTip",
-      parentId = GUI_PLUGIN_ELEMENT_OPERATIONS_TAB_ID)
+      parentId = GUI_PLUGIN_ELEMENT_VALIDATION_TAB_ID)
   @HopMetadataProperty
   private boolean detailedDataTypeChecking = true;
 
@@ -223,9 +228,63 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
       variables = true,
       label = "i18n::ActionUpdateResourceDefinitionGroup.ModelCheckParallelism.Label",
       toolTip = "i18n::ActionUpdateResourceDefinitionGroup.ModelCheckParallelism.ToolTip",
-      parentId = GUI_PLUGIN_ELEMENT_OPERATIONS_TAB_ID)
+      parentId = GUI_PLUGIN_ELEMENT_VALIDATION_TAB_ID)
   @HopMetadataProperty
   private String modelCheckParallelism = "8";
+
+  /**
+   * When true, model-check warnings are omitted from the workflow log (still stored in the
+   * validation report file). Errors still abort when abort-on-check is enabled.
+   */
+  @GuiWidgetElement(
+      order = "0540",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.IgnoreModelCheckWarnings.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.IgnoreModelCheckWarnings.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_VALIDATION_TAB_ID)
+  @HopMetadataProperty
+  private boolean ignoreModelCheckWarnings;
+
+  @GuiWidgetElement(
+      order = "0550",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.WriteValidationReport.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.WriteValidationReport.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_VALIDATION_TAB_ID)
+  @HopMetadataProperty
+  private boolean writeValidationReport;
+
+  @GuiWidgetElement(
+      order = "0560",
+      type = GuiElementType.FOLDER,
+      variables = true,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.ValidationReportFolder.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.ValidationReportFolder.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_VALIDATION_TAB_ID)
+  @HopMetadataProperty
+  private String validationReportFolder = "${PROJECT_HOME}/work/reports";
+
+  @GuiWidgetElement(
+      order = "0570",
+      type = GuiElementType.TEXT,
+      variables = true,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.ValidationReportBaseName.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.ValidationReportBaseName.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_VALIDATION_TAB_ID)
+  @HopMetadataProperty
+  private String validationReportBaseName;
+
+  @GuiWidgetElement(
+      order = "0580",
+      type = GuiElementType.COMBO,
+      variables = false,
+      comboValuesMethod = "getValidationReportFormatOptions",
+      label = "i18n::ActionUpdateResourceDefinitionGroup.ValidationReportFormat.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.ValidationReportFormat.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_VALIDATION_TAB_ID)
+  @HopMetadataProperty
+  private String validationReportFormat =
+      GroupModelValidationReportFileWriter.ReportFormat.MARKDOWN.name();
 
   @GuiWidgetElement(
       order = "0600",
@@ -419,6 +478,8 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
   public ActionUpdateResourceDefinitionGroup() {
     super();
     this.modelCheckParallelism = "8";
+    this.validationReportFolder = "${PROJECT_HOME}/work/reports";
+    this.validationReportFormat = GroupModelValidationReportFileWriter.ReportFormat.MARKDOWN.name();
   }
 
   public ActionUpdateResourceDefinitionGroup(ActionUpdateResourceDefinitionGroup meta) {
@@ -436,6 +497,14 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
     this.detailedDataTypeChecking = meta.detailedDataTypeChecking;
     this.modelCheckParallelism =
         meta.modelCheckParallelism != null ? meta.modelCheckParallelism : "8";
+    this.ignoreModelCheckWarnings = meta.ignoreModelCheckWarnings;
+    this.writeValidationReport = meta.writeValidationReport;
+    this.validationReportFolder = meta.validationReportFolder;
+    this.validationReportBaseName = meta.validationReportBaseName;
+    this.validationReportFormat =
+        meta.validationReportFormat != null
+            ? meta.validationReportFormat
+            : GroupModelValidationReportFileWriter.ReportFormat.MARKDOWN.name();
     this.updateTargetDatabaseStructure = meta.updateTargetDatabaseStructure;
     this.failIfDdlNeeded = meta.failIfDdlNeeded;
     this.doNotUpdateTargetDatabase = meta.doNotUpdateTargetDatabase;
@@ -456,6 +525,15 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
     this.failIfNoMetricsFound = meta.failIfNoMetricsFound;
     this.includePipelineDetail = meta.includePipelineDetail;
     this.includeInsights = meta.includeInsights;
+  }
+
+  /** Hop GUI comboValuesMethod contract: {@code (ILogChannel, IHopMetadataProvider) -> List}. */
+  public List<String> getValidationReportFormatOptions(
+      org.apache.hop.core.logging.ILogChannel log, IHopMetadataProvider metadataProvider) {
+    return List.of(
+        GroupModelValidationReportFileWriter.ReportFormat.MARKDOWN.name(),
+        GroupModelValidationReportFileWriter.ReportFormat.HTML.name(),
+        GroupModelValidationReportFileWriter.ReportFormat.BOTH.name());
   }
 
   @Override
@@ -497,9 +575,9 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
 
     // Parallel model validation for the whole group (before any load / DDL wave).
     boolean preValidated = false;
-    if (logModelCheckFailures || abortOnModelCheckFailures) {
-      preValidated = true;
-      boolean validationFailed = runParallelModelChecks(jobs, checkParallelism, result);
+    if (logModelCheckFailures || abortOnModelCheckFailures || writeValidationReport) {
+      preValidated = logModelCheckFailures || abortOnModelCheckFailures;
+      boolean validationFailed = runParallelModelChecks(jobs, checkParallelism, groupName, result);
       if (validationFailed && abortOnModelCheckFailures) {
         result.setResult(false);
         result.setNrErrors(Math.max(1, result.getNrErrors()));
@@ -507,6 +585,10 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
             BaseMessages.getString(
                 PKG, "ActionUpdateResourceDefinitionGroup.Log.AbortingOnModelCheck"));
         return result;
+      }
+      // When only writing a report (no log/abort), still skip child re-checks if we ran checks.
+      if (writeValidationReport) {
+        preValidated = true;
       }
     }
 
@@ -605,9 +687,10 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
   /**
    * @return true when any model had check errors (or failed to load/check)
    */
-  private boolean runParallelModelChecks(List<ModelUpdateJob> jobs, int parallelism, Result result)
+  private boolean runParallelModelChecks(
+      List<ModelUpdateJob> jobs, int parallelism, String groupName, Result result)
       throws HopException {
-    long started = System.currentTimeMillis();
+    java.time.Instant startedAt = java.time.Instant.now();
     logBasic(
         BaseMessages.getString(
             PKG,
@@ -618,71 +701,85 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
     List<ModelCheckOutcome> outcomes =
         ResourceGroupModelValidationSupport.checkModels(
             jobs, detailedDataTypeChecking, parallelism, this, getMetadataProvider());
+    java.time.Instant finishedAt = java.time.Instant.now();
 
-    int modelsWithErrors = 0;
-    int totalErrors = 0;
-    for (ModelCheckOutcome outcome : outcomes) {
-      if (outcome == null || outcome.job() == null) {
-        continue;
-      }
-      String label = ResourceGroupModelValidationSupport.formatModelLabel(outcome.job());
-      if (outcome.failure() != null) {
-        modelsWithErrors++;
-        totalErrors++;
-        if (logModelCheckFailures || abortOnModelCheckFailures) {
-          logError(
-              BaseMessages.getString(
-                  PKG,
-                  "ActionUpdateResourceDefinitionGroup.Log.ModelCheckException",
-                  label,
-                  Const.NVL(
-                      outcome.failure().getMessage(),
-                      outcome.failure().getClass().getSimpleName())));
-        }
-        continue;
-      }
-      if (outcome.remarks() != null) {
-        for (ICheckResult remark : outcome.remarks()) {
-          if (remark == null) {
+    GroupModelValidationReport report =
+        GroupModelValidationAggregator.aggregate(
+            groupName, outcomes, parallelism, startedAt, finishedAt);
+
+    boolean includeWarningsInLog = logModelCheckFailures && !ignoreModelCheckWarnings;
+    String logText = GroupModelValidationReportFormatter.formatLog(report, includeWarningsInLog);
+    if (logModelCheckFailures || abortOnModelCheckFailures) {
+      if (!Utils.isEmpty(logText)) {
+        for (String line : logText.split("\n")) {
+          if (Utils.isEmpty(line)) {
             continue;
           }
-          String message =
-              BaseMessages.getString(
-                  PKG,
-                  "ActionUpdateResourceDefinitionGroup.Log.ModelCheckResult",
-                  label,
-                  remark.getTypeDesc(),
-                  remark.getText());
-          if (remark.getType() == ICheckResult.TYPE_RESULT_ERROR) {
-            if (logModelCheckFailures || abortOnModelCheckFailures) {
-              logError(message);
-            }
-          } else if (remark.getType() == ICheckResult.TYPE_RESULT_WARNING
-              && logModelCheckFailures) {
-            logBasic(message);
+          if (line.startsWith("ERROR") || line.startsWith("FAILED")) {
+            logError(line);
+          } else {
+            logBasic(line);
           }
         }
       }
-      if (outcome.hasError()) {
-        modelsWithErrors++;
-        totalErrors += Math.max(1, outcome.errorCount());
-      }
+    } else {
+      logBasic(
+          BaseMessages.getString(
+              PKG,
+              "ActionUpdateResourceDefinitionGroup.Log.ModelCheckFinished",
+              Integer.toString(report.modelsChecked()),
+              Integer.toString(report.modelsWithErrors()),
+              Long.toString(Math.max(0, finishedAt.toEpochMilli() - startedAt.toEpochMilli())),
+              Integer.toString(parallelism)));
     }
 
-    long elapsedMs = System.currentTimeMillis() - started;
-    logBasic(
-        BaseMessages.getString(
-            PKG,
-            "ActionUpdateResourceDefinitionGroup.Log.ModelCheckFinished",
-            Integer.toString(jobs.size()),
-            Integer.toString(modelsWithErrors),
-            Long.toString(elapsedMs),
-            Integer.toString(parallelism)));
+    stashModelValidationReport(logText);
 
-    if (modelsWithErrors > 0 && result != null) {
-      result.setNrErrors(result.getNrErrors() + totalErrors);
+    if (writeValidationReport) {
+      writeModelValidationReportFiles(report);
     }
-    return modelsWithErrors > 0;
+
+    if (report.hasErrors() && result != null) {
+      result.setNrErrors(result.getNrErrors() + Math.max(1, report.totalErrors()));
+    }
+    return report.hasErrors();
+  }
+
+  private void writeModelValidationReportFiles(GroupModelValidationReport report)
+      throws HopException {
+    String folder = Const.NVL(validationReportFolder, "${PROJECT_HOME}/work/reports");
+    GroupModelValidationReportFileWriter.ReportFormat format =
+        parseValidationReportFormat(validationReportFormat);
+    List<String> written =
+        GroupModelValidationReportFileWriter.write(
+            folder, validationReportBaseName, report, format, this);
+    for (String path : written) {
+      logBasic(
+          BaseMessages.getString(
+              PKG, "ActionUpdateResourceDefinitionGroup.Log.ValidationReportWritten", path));
+    }
+  }
+
+  private void stashModelValidationReport(String formatted) {
+    if (Utils.isEmpty(formatted)) {
+      return;
+    }
+    getExtensionDataMap().put(RESULT_ATTR_MODEL_VALIDATION_REPORT, formatted);
+    if (getParentWorkflow() != null) {
+      getParentWorkflow().getExtensionDataMap().put(RESULT_ATTR_MODEL_VALIDATION_REPORT, formatted);
+    }
+  }
+
+  private static GroupModelValidationReportFileWriter.ReportFormat parseValidationReportFormat(
+      String raw) {
+    if (Utils.isEmpty(raw)) {
+      return GroupModelValidationReportFileWriter.ReportFormat.MARKDOWN;
+    }
+    try {
+      return GroupModelValidationReportFileWriter.ReportFormat.valueOf(raw.trim().toUpperCase());
+    } catch (IllegalArgumentException e) {
+      return GroupModelValidationReportFileWriter.ReportFormat.MARKDOWN;
+    }
   }
 
   private Result runModelUpdate(

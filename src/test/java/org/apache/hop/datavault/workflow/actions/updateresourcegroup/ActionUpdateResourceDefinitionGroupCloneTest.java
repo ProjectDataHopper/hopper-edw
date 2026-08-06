@@ -31,16 +31,27 @@ class ActionUpdateResourceDefinitionGroupCloneTest {
     assertEquals("8", action.getModelCheckParallelism());
     assertTrue(action.isLogModelCheckFailures());
     assertTrue(action.isAbortOnModelCheckFailures());
+    assertFalse(action.isIgnoreModelCheckWarnings());
+    assertFalse(action.isWriteValidationReport());
+    assertEquals(
+        GroupModelValidationReportFileWriter.ReportFormat.MARKDOWN.name(),
+        action.getValidationReportFormat());
   }
 
   @Test
-  void clone_copiesDryRunAndModelCheckParallelism() {
+  void clone_copiesDryRunAndValidationOptions() {
     ActionUpdateResourceDefinitionGroup original = new ActionUpdateResourceDefinitionGroup();
     original.setResourceDefinitionGroup("retail-sources");
     original.setDoNotUpdateTargetDatabase(true);
     original.setModelCheckParallelism("${MODEL_CHECK_PARALLELISM}");
     original.setDetailedDataTypeChecking(false);
     original.setUpdateTargetDatabaseStructure(false);
+    original.setIgnoreModelCheckWarnings(true);
+    original.setWriteValidationReport(true);
+    original.setValidationReportFolder("${PROJECT_HOME}/reports");
+    original.setValidationReportBaseName("group-check");
+    original.setValidationReportFormat(
+        GroupModelValidationReportFileWriter.ReportFormat.BOTH.name());
 
     ActionUpdateResourceDefinitionGroup copy =
         (ActionUpdateResourceDefinitionGroup) original.clone();
@@ -49,5 +60,12 @@ class ActionUpdateResourceDefinitionGroupCloneTest {
     assertEquals("${MODEL_CHECK_PARALLELISM}", copy.getModelCheckParallelism());
     assertFalse(copy.isDetailedDataTypeChecking());
     assertFalse(copy.isUpdateTargetDatabaseStructure());
+    assertTrue(copy.isIgnoreModelCheckWarnings());
+    assertTrue(copy.isWriteValidationReport());
+    assertEquals("${PROJECT_HOME}/reports", copy.getValidationReportFolder());
+    assertEquals("group-check", copy.getValidationReportBaseName());
+    assertEquals(
+        GroupModelValidationReportFileWriter.ReportFormat.BOTH.name(),
+        copy.getValidationReportFormat());
   }
 }

@@ -44,8 +44,8 @@ import org.eclipse.swt.widgets.Shell;
 
 /**
  * Dialog for {@link ActionUpdateResourceDefinitionGroup}. Options are grouped into topic tabs
- * (Selection, Run, Operations, Data catalog, Metrics, Reports) using the same multi-{@code
- * parentId} {@link GuiCompositeWidgets} pattern as Data Vault Update.
+ * (Selection, Run, Operations, Validation, Data catalog, Metrics, Reports) using the same multi-
+ * {@code parentId} {@link GuiCompositeWidgets} pattern as Data Vault Update.
  */
 public class ActionUpdateResourceDefinitionGroupDialog extends ActionDialog {
 
@@ -102,6 +102,11 @@ public class ActionUpdateResourceDefinitionGroupDialog extends ActionDialog {
         ActionUpdateResourceDefinitionGroup.GUI_PLUGIN_ELEMENT_OPERATIONS_TAB_ID,
         "ActionUpdateResourceDefinitionGroup.Tab.Operations.Label",
         "ActionUpdateResourceDefinitionGroup.Tab.Operations.ToolTip");
+    addTab(
+        wTabFolder,
+        ActionUpdateResourceDefinitionGroup.GUI_PLUGIN_ELEMENT_VALIDATION_TAB_ID,
+        "ActionUpdateResourceDefinitionGroup.Tab.Validation.Label",
+        "ActionUpdateResourceDefinitionGroup.Tab.Validation.ToolTip");
     addTab(
         wTabFolder,
         ActionUpdateResourceDefinitionGroup.GUI_PLUGIN_ELEMENT_CATALOG_TAB_ID,

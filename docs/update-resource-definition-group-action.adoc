@@ -49,14 +49,29 @@ Load date, pipeline / workflow run configurations, parallel pipeline copies, and
 
 === Operations
 
-Model check (log / abort / detailed type checking), **Model check parallelism**, **Update target database structure**, **Fail if DDL is needed**, **Do not update target database** (dry run), and DV **Ensure special records**.
+**Update target database structure**, **Fail if DDL is needed**, **Do not update target database** (dry run), and DV **Ensure special records**.
+
+[cols="1,3", options="header"]
+|===
+|Option |Description
+
+|Update target database structure / Fail if DDL is needed
+|Same DDL policy as the dedicated update actions, applied per model.
+
+|Do not update target database
+|**Dry run.** Runs the parallel model checks (and optional DDL when structure update or fail-if-DDL is on) but **skips data load pipelines** on every child DV/BV/DM update — same semantics as Data Vault Update. With structure update and fail-if-DDL both off, only validation runs and reports (no per-model update step).
+|===
+
+=== Validation
+
+Model checks for every selected DV/BV/DM model run **before** the update wave. Repeated **environment** findings (for example target database encoding / Unicode capability on a shared connection) are **collapsed once** in the log and report, with a model count, instead of one identical line per model.
 
 [cols="1,3", options="header"]
 |===
 |Option |Description
 
 |Log model check failures / Abort on model check failures
-|Validate every selected DV/BV/DM model **before** the update wave (parallel when configured). Findings are logged; abort stops the action when check errors exist.
+|Log aggregated findings; abort stops the action when **errors** exist (warnings never abort by themselves).
 
 |Detailed data type checking
 |Live source schema checks for Data Vault models (higher latency over VPN).
@@ -64,11 +79,11 @@ Model check (log / abort / detailed type checking), **Model check parallelism**,
 |Model check parallelism
 |Max concurrent model validations (default `8`, range 1–64, variables allowed). Independent of **Parallel pipeline copies** used for data loads.
 
-|Update target database structure / Fail if DDL is needed
-|Same DDL policy as the dedicated update actions, applied per model.
+|Ignore warnings
+|Omit warnings from the workflow log (including shared encoding warnings). Errors still abort when abort-on-check is on. Warnings remain in the validation report file when written.
 
-|Do not update target database
-|**Dry run.** Runs the parallel model checks (and optional DDL when structure update or fail-if-DDL is on) but **skips data load pipelines** on every child DV/BV/DM update — same semantics as Data Vault Update. With structure update and fail-if-DDL both off, only validation runs and reports (no per-model update step).
+|Write validation report
+|Write Markdown and/or HTML under the validation report folder (default `${PROJECT_HOME}/work/reports`). Shared findings appear once; model-specific issues are listed per model.
 |===
 
 === Data catalog
