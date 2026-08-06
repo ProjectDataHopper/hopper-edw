@@ -51,6 +51,19 @@ class GroupModelValidationReportFormatterTest {
     assertTrue(md.contains("465"));
   }
 
+  @Test
+  void formatHtml_isRealHtmlNotMarkdownInPre() {
+    String html = GroupModelValidationReportFormatter.formatHtml(sampleReport());
+    assertTrue(html.contains("<!DOCTYPE html>"));
+    assertTrue(html.contains("<table>"));
+    assertTrue(html.contains("<h2>Shared environment findings</h2>"));
+    assertTrue(html.contains("encoding"));
+    // Must not dump Markdown syntax as the body of a <pre> block.
+    assertFalse(html.contains("<pre"));
+    assertFalse(html.contains("## Shared environment findings"));
+    assertFalse(html.contains("| Severity | Models |"));
+  }
+
   private static GroupModelValidationReport sampleReport() {
     return new GroupModelValidationReport(
         "retail-sources",

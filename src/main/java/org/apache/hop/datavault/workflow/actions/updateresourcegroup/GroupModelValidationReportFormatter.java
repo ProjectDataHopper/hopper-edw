@@ -161,15 +161,141 @@ public final class GroupModelValidationReportFormatter {
   }
 
   public static String formatHtml(GroupModelValidationReport report) {
-    String md = formatMarkdown(report);
-    // Lightweight HTML wrapper (no external Markdown dependency).
-    String escaped =
-        md.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br/>\n");
-    return "<!DOCTYPE html>\n<html><head><meta charset=\"UTF-8\"/><title>Model validation "
-        + Const.NVL(report != null ? report.groupName() : "", "")
-        + "</title></head><body>\n<pre style=\"white-space:pre-wrap;font-family:system-ui,sans-serif\">"
-        + escaped
-        + "</pre>\n</body></html>\n";
+    if (report == null) {
+      return "";
+    }
+    String group = Const.NVL(report.groupName(), "");
+    StringBuilder html = new StringBuilder();
+    html.append("<!DOCTYPE html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"/>");
+    html.append("<title>Model validation: ").append(escapeHtml(group)).append("</title>");
+    html.append(
+        "<style>"
+            + "body{font-family:Segoe UI,Arial,sans-serif;margin:24px;color:#1f2933;line-height:1.45}"
+            + "h1,h2,h3{color:#102a43}h2{margin-top:1.6em}"
+            + "table{border-collapse:collapse;width:100%;margin:12px 0}"
+            + "th,td{border:1px solid #d9e2ec;padding:8px;text-align:left;vertical-align:top}"
+            + "th{background:#f0f4f8}"
+            + ".summary{background:#f7fafc;padding:16px 18px;border-radius:8px;margin-bottom:20px;"
+            + "border:1px solid #d9e2ec}"
+            + ".summary p{margin:0.35em 0}"
+            + ".error{color:#b91c1c}.warning{color:#b45309}.pass{color:#047857}"
+            + ".finding{border:1px solid #d9e2ec;border-radius:8px;padding:12px 14px;margin:10px 0;"
+            + "background:#fff}"
+            + ".finding.error{border-left:4px solid #b91c1c}"
+            + ".finding.warning{border-left:4px solid #b45309}"
+            + "ul{margin:6px 0 0 1.2em}"
+            + "</style></head><body>\n");
+    html.append("<h1>Model validation: ").append(escapeHtml(group)).append("</h1>\n");
+    html.append("<div class=\"summary\">\n");
+    html.append("<p><strong>Status:</strong> ")
+        .append(statusClassSpan(report.status().name()))
+        .append("</p>\n");
+    html.append("<p><strong>Models checked:</strong> ")
+        .append(report.modelsChecked())
+        .append("</p>\n");
+    html.append("<p><strong>Models with errors:</strong> ")
+        .append(report.modelsWithErrors())
+        .append("</p>\n");
+    html.append("<p><strong>Total errors:</strong> ")
+        .append(report.totalErrors())
+        .append("</p>\n");
+    html.append("<p><strong>Unique shared warnings:</strong> ")
+        .append(report.uniqueSharedWarnings())
+        .append("</p>\n");
+    html.append("<p><strong>Unique shared errors:</strong> ")
+        .append(report.uniqueSharedErrors())
+        .append("</p>\n");
+    html.append("<p><strong>Parallelism:</strong> ")
+        .append(report.parallelism())
+        .append("</p>\n");
+    if (report.startedAt() != null && report.finishedAt() != null) {
+      long ms =
+          Math.max(0, report.finishedAt().toEpochMilli() - report.startedAt().toEpochMilli());
+      html.append("<p><strong>Duration:</strong> ").append(ms).append(" ms</p>\n");
+    }
+    html.append("</div>\n");
+
+    html.append("<h2>Shared environment findings</h2>\n");
+    if (report.sharedFindings().isEmpty()) {
+      html.append("<p><em>None</em></p>\n");
+    } else {
+      html.append("<table>\n<thead><tr><th>Severity</th><th>Models</th><th>Message</th></tr></thead>\n<tbody>\n");
+      for (AggregatedFinding finding : report.sharedFindings()) {
+        html.append("<tr><td class=\"")
+            .append(severityCss(finding.severity()))
+            .append("\">")
+            .append(escapeHtml(finding.severity().name()))
+            .append("</td><td>")
+            .append(finding.modelCount())
+            .append("</td><td>")
+            .append(escapeHtml(finding.message()))
+            .append("</td></tr>\n");
+      }
+      html.append("</tbody></table>\n");
+    }
+
+    html.append("<h2>Model-specific findings</h2>\n");
+    if (report.modelFindings().isEmpty()) {
+      html.append("<p><em>None</em></p>\n");
+    } else {
+      for (ModelFinding model : report.modelFindings()) {
+        boolean modelError = model.hasError();
+        html.append("<div class=\"finding ")
+            .append(modelError ? "error" : "warning")
+            .append("\">\n");
+        html.append("<h3>")
+            .append(escapeHtml(model.layer()))
+            .append(" ")
+            .append(escapeHtml(model.modelFile()))
+            .append("</h3>\n<ul>\n");
+        if (model.loadFailure() != null && !model.loadFailure().isBlank()) {
+          html.append("<li class=\"error\"><strong>ERROR</strong> load/check failed: ")
+              .append(escapeHtml(model.loadFailure()))
+              .append("</li>\n");
+        }
+        for (FindingIssue issue : model.issues()) {
+          html.append("<li class=\"")
+              .append(severityCss(issue.severity()))
+              .append("\"><strong>")
+              .append(escapeHtml(issue.severity().name()))
+              .append("</strong> ")
+              .append(escapeHtml(issue.message()))
+              .append("</li>\n");
+        }
+        html.append("</ul>\n</div>\n");
+      }
+    }
+
+    int clean = Math.max(0, report.modelsChecked() - report.modelFindings().size());
+    html.append("<h2>Models without model-specific findings</h2>\n");
+    html.append("<p>")
+        .append(clean)
+        .append(" of ")
+        .append(report.modelsChecked())
+        .append(" model(s)</p>\n");
+    html.append("</body></html>\n");
+    return html.toString();
+  }
+
+  private static String severityCss(Severity severity) {
+    if (severity == Severity.ERROR) {
+      return "error";
+    }
+    if (severity == Severity.WARNING) {
+      return "warning";
+    }
+    return "";
+  }
+
+  private static String statusClassSpan(String status) {
+    String css =
+        switch (status) {
+          case "FAILED" -> "error";
+          case "WARNINGS" -> "warning";
+          case "PASS" -> "pass";
+          default -> "";
+        };
+    return "<span class=\"" + css + "\">" + escapeHtml(status) + "</span>";
   }
 
   private static String escapeMd(String value) {
@@ -177,5 +303,16 @@ public final class GroupModelValidationReportFormatter {
       return "";
     }
     return value.replace("|", "\\|");
+  }
+
+  private static String escapeHtml(String value) {
+    if (value == null) {
+      return "";
+    }
+    return value
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace("\"", "&quot;");
   }
 }
