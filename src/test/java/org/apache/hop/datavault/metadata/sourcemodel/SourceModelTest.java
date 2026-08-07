@@ -131,6 +131,156 @@ class SourceModelTest {
                         && r.getText().contains("missing_parent")));
   }
 
+  @Test
+  void xmlRoundTripPreservesJsonSource() throws Exception {
+    SourceModel original = sampleJsonLandingModel();
+    original.setName("json-landing");
+
+    String xml =
+        XmlHandler.aroundTag(SourceModel.XML_TAG, XmlMetadataUtil.serializeObjectToXml(original));
+    Document document = XmlHandler.loadXmlString(xml);
+    Node rootNode = XmlHandler.getSubNode(document, SourceModel.XML_TAG);
+
+    SourceModel restored = new SourceModel();
+    XmlMetadataUtil.deSerializeFromXml(rootNode, SourceModel.class, restored, null);
+
+    assertEquals(1, restored.getJsonSources().size());
+    SourceJson json = restored.findJsonSource("order_lines");
+    assertNotNull(json);
+    assertEquals(SourceJsonParentKind.TABLE, json.resolveParentSourceKind());
+    assertEquals("events", json.getParentSourceName());
+    assertEquals("payload", json.getJsonFieldName());
+    assertTrue(json.isIgnoreMissingPath());
+    assertEquals(3, json.getFields().size());
+
+    SourceJsonField passThrough = json.getFields().get(0);
+    assertTrue(passThrough.isPassThrough());
+    assertEquals("event_id", passThrough.getParentFieldName());
+    assertEquals(1, passThrough.getPrimaryKeyPosition());
+
+    SourceJsonField sku = json.getFields().get(1);
+    assertEquals("sku", sku.getName());
+    assertEquals("$.lines.*.sku", sku.getPath());
+    assertTrue(sku.isArrayExpandingPath());
+  }
+
+  @Test
+  void checkOkForJsonSourceWithParentTable() {
+    SourceModel model = sampleJsonLandingModel();
+    List<ICheckResult> remarks = model.check(null, new Variables());
+    assertTrue(remarks.stream().anyMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_OK));
+    assertFalse(remarks.stream().anyMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_ERROR));
+  }
+
+  @Test
+  void checkFlagsJsonSourceMissingParent() {
+    SourceModel model = sampleJsonLandingModel();
+    model.findJsonSource("order_lines").setParentSourceName("missing_events");
+    List<ICheckResult> remarks = model.check(null, new Variables());
+    assertTrue(remarks.stream().anyMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_ERROR));
+    assertTrue(
+        remarks.stream()
+            .anyMatch(r -> r.getText() != null && r.getText().contains("missing_events")));
+  }
+
+  @Test
+  void checkFlagsJsonSourceMultipleArrayBases() {
+    SourceModel model = sampleJsonLandingModel();
+    SourceJson json = model.findJsonSource("order_lines");
+    SourceJsonField other = new SourceJsonField("tag", "$.tags.*");
+    other.setHopType(2);
+    json.getFields().add(other);
+    List<ICheckResult> remarks = model.check(null, new Variables());
+    assertTrue(
+        remarks.stream()
+            .anyMatch(
+                r ->
+                    r.getType() == ICheckResult.TYPE_RESULT_ERROR
+                        && r.getText() != null
+                        && r.getText().contains("different arrays")));
+  }
+
+  @Test
+  void checkFlagsJsonSourceParentCycle() {
+    SourceModel model = sampleJsonLandingModel();
+    SourceJson first = model.findJsonSource("order_lines");
+
+    SourceJson second = new SourceJson("nested_items");
+    second.setParentSourceKind(SourceJsonParentKind.JSON);
+    second.setParentSourceName("order_lines");
+    second.setJsonFieldName("item_json");
+    SourceJsonField f = new SourceJsonField("x", "$.x");
+    f.setPrimaryKeyPosition(1);
+    second.getFields().add(f);
+    model.getJsonSources().add(second);
+
+    // Create a cycle: order_lines → nested_items → order_lines
+    first.setParentSourceKind(SourceJsonParentKind.JSON);
+    first.setParentSourceName("nested_items");
+    first.setJsonFieldName("payload");
+
+    List<ICheckResult> remarks = model.check(null, new Variables());
+    assertTrue(
+        remarks.stream()
+            .anyMatch(
+                r ->
+                    r.getType() == ICheckResult.TYPE_RESULT_ERROR
+                        && r.getText() != null
+                        && r.getText().toLowerCase().contains("cyclic")));
+  }
+
+  @Test
+  void arrayBasePathGroupsFieldsUnderSameArray() {
+    assertEquals("$.lines[*]", SourceModel.arrayBasePath("$.lines[*].sku"));
+    assertEquals("$.lines[*]", SourceModel.arrayBasePath("$.lines[*].qty"));
+    assertEquals("$.tags[*]", SourceModel.arrayBasePath("$.tags[*]"));
+    assertEquals("$.lines.*", SourceModel.arrayBasePath("$.lines.*.sku"));
+    assertEquals("$.tags.*", SourceModel.arrayBasePath("$.tags.*"));
+  }
+
+  private static SourceModel sampleJsonLandingModel() {
+    SourceModel model = new SourceModel();
+
+    SourceTable events = new SourceTable("events");
+    events.setTableName("events");
+    events.setDatabaseName("CRM");
+    events.setLocation(new Point(40, 40));
+    SourceColumn eventId = new SourceColumn("event_id");
+    eventId.setPrimaryKeyPosition(1);
+    eventId.setHopType(5);
+    events.getColumns().add(eventId);
+    SourceColumn payload = new SourceColumn("payload");
+    payload.setHopType(2);
+    events.getColumns().add(payload);
+    model.getTables().add(events);
+
+    SourceJson json = new SourceJson("order_lines");
+    json.setDescription("Flatten order line items from event payload");
+    json.setParentSourceKind(SourceJsonParentKind.TABLE);
+    json.setParentSourceName("events");
+    json.setJsonFieldName("payload");
+    json.setIgnoreMissingPath(true);
+    json.setDefaultPathLeafToNull(true);
+    json.setLocation(new Point(260, 40));
+
+    SourceJsonField passThrough = SourceJsonField.passThroughField("event_id");
+    passThrough.setPrimaryKeyPosition(1);
+    passThrough.setHopType(5);
+    json.getFields().add(passThrough);
+
+    SourceJsonField sku = new SourceJsonField("sku", "$.lines.*.sku");
+    sku.setHopType(2);
+    sku.setPrimaryKeyPosition(2);
+    json.getFields().add(sku);
+
+    SourceJsonField qty = new SourceJsonField("qty", "$.lines.*.qty");
+    qty.setHopType(5);
+    json.getFields().add(qty);
+
+    model.getJsonSources().add(json);
+    return model;
+  }
+
   private static SourceModel sampleProductLookupModel() {
     SourceModel model = new SourceModel();
 

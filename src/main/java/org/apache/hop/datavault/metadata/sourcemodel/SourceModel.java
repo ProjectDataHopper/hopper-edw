@@ -48,8 +48,8 @@ import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.jspecify.annotations.NonNull;
 
 /**
- * Source-system model ({@code .hsm}): physical tables, PK/FK relationships, and multi-table source
- * queries that feed Data Vault hubs, links, and satellites.
+ * Source-system model ({@code .hsm}): physical tables, PK/FK relationships, multi-table source
+ * queries, and JSON extractions that feed Data Vault hubs, links, and satellites.
  */
 @GuiPlugin
 @Getter
@@ -100,6 +100,11 @@ public class SourceModel extends HopMetadataBase
   @Getter(AccessLevel.NONE)
   @Setter(AccessLevel.NONE)
   private List<SourceQuery> queries = new ArrayList<>();
+
+  @HopMetadataProperty(key = "json-source", groupKey = "json-sources")
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.NONE)
+  private List<SourceJson> jsonSources = new ArrayList<>();
 
   @HopMetadataProperty(key = "note", groupKey = "notes")
   @Getter(AccessLevel.NONE)
@@ -153,6 +158,17 @@ public class SourceModel extends HopMetadataBase
     this.queries = queries != null ? queries : new ArrayList<>();
   }
 
+  public @NonNull List<SourceJson> getJsonSources() {
+    if (jsonSources == null) {
+      jsonSources = new ArrayList<>();
+    }
+    return jsonSources;
+  }
+
+  public void setJsonSources(List<SourceJson> jsonSources) {
+    this.jsonSources = jsonSources != null ? jsonSources : new ArrayList<>();
+  }
+
   public @NonNull List<DvNote> getNotes() {
     if (notes == null) {
       notes = new ArrayList<>();
@@ -168,6 +184,7 @@ public class SourceModel extends HopMetadataBase
     setTables(tables);
     setRelationships(relationships);
     setQueries(queries);
+    setJsonSources(jsonSources);
     setNotes(notes);
   }
 
@@ -234,6 +251,23 @@ public class SourceModel extends HopMetadataBase
         maxy = loc.y + boxH;
       }
     }
+    for (SourceJson jsonSource : getJsonSources()) {
+      if (jsonSource == null) {
+        continue;
+      }
+      Point loc = jsonSource.getLocation();
+      if (loc == null) {
+        continue;
+      }
+      int boxW = 160;
+      int boxH = 80;
+      if (loc.x + boxW > maxx) {
+        maxx = loc.x + boxW;
+      }
+      if (loc.y + boxH > maxy) {
+        maxy = loc.y + boxH;
+      }
+    }
     for (DvNote note : getNotes()) {
       Point loc = note.getLocation();
       if (loc == null) {
@@ -287,9 +321,21 @@ public class SourceModel extends HopMetadataBase
     return null;
   }
 
+  public SourceJson findJsonSource(String jsonSourceName) {
+    if (Utils.isEmpty(jsonSourceName)) {
+      return null;
+    }
+    for (SourceJson jsonSource : getJsonSources()) {
+      if (jsonSource != null && jsonSourceName.equals(jsonSource.getName())) {
+        return jsonSource;
+      }
+    }
+    return null;
+  }
+
   /**
-   * Structural validation for the source model (tables, relationships, queries). Expanded in later
-   * PRs for generation-mode and catalog-publish checks.
+   * Structural validation for the source model (tables, relationships, queries, JSON sources).
+   * Expanded in later PRs for generation-mode and catalog-publish checks.
    */
   public List<ICheckResult> check(IHopMetadataProvider metadataProvider, IVariables variables) {
     return check(metadataProvider, variables, null);
@@ -309,7 +355,8 @@ public class SourceModel extends HopMetadataBase
     List<SourceTable> tables = getTables();
     List<SourceRelationship> relationships = getRelationships();
     List<SourceQuery> queries = getQueries();
-    int totalWork = tables.size() + relationships.size() + queries.size();
+    List<SourceJson> jsonSources = getJsonSources();
+    int totalWork = tables.size() + relationships.size() + queries.size() + jsonSources.size();
     monitor.beginTask(BaseMessages.getString(PKG, "SourceModel.Monitor.VerifyingModel"), totalWork);
 
     if (tables.isEmpty()) {
@@ -495,6 +542,125 @@ public class SourceModel extends HopMetadataBase
       monitor.worked(1);
     }
 
+    Set<String> jsonSourceNames = new HashSet<>();
+    for (SourceJson jsonSource : jsonSources) {
+      if (monitor.isCanceled()) {
+        monitor.done();
+        return remarks;
+      }
+      if (jsonSource == null) {
+        monitor.worked(1);
+        continue;
+      }
+      String jsonName = jsonSource.getName();
+      monitor.subTask(
+          BaseMessages.getString(
+              PKG, "SourceModel.Monitor.VerifyingJsonSource", ConstNvl(jsonName)));
+      if (!Utils.isEmpty(jsonName) && !jsonSourceNames.add(jsonName)) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_ERROR,
+                BaseMessages.getString(
+                    PKG, "SourceModel.CheckResult.DuplicateJsonSourceName", jsonName),
+                null));
+      }
+      SourceJsonParentKind parentKind = jsonSource.resolveParentSourceKind();
+      String parentName = jsonSource.getParentSourceName();
+      if (Utils.isEmpty(parentName)) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_ERROR,
+                BaseMessages.getString(
+                    PKG, "SourceModel.CheckResult.JsonSourceMissingParent", ConstNvl(jsonName)),
+                null));
+      } else if (!parentExists(parentKind, parentName)) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_ERROR,
+                BaseMessages.getString(
+                    PKG,
+                    "SourceModel.CheckResult.JsonSourceParentNotFound",
+                    ConstNvl(jsonName),
+                    parentKind != null ? parentKind.getCode() : "?",
+                    ConstNvl(parentName)),
+                null));
+      }
+      if (Utils.isEmpty(jsonSource.getJsonFieldName())) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_ERROR,
+                BaseMessages.getString(
+                    PKG, "SourceModel.CheckResult.JsonSourceMissingJsonField", ConstNvl(jsonName)),
+                null));
+      }
+      if (jsonSource.getFields().isEmpty()) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_WARNING,
+                BaseMessages.getString(
+                    PKG, "SourceModel.CheckResult.JsonSourceEmptyProjection", ConstNvl(jsonName)),
+                null));
+      }
+      // Distinct array base paths: multiple fields may expand the same array (allowed by
+      // JsonInput); different array bases are not.
+      Set<String> arrayBases = new HashSet<>();
+      for (SourceJsonField field : jsonSource.getFields()) {
+        if (field != null && field.isArrayExpandingPath()) {
+          arrayBases.add(arrayBasePath(field.getPath()));
+        }
+      }
+      if (arrayBases.size() > 1) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_ERROR,
+                BaseMessages.getString(
+                    PKG,
+                    "SourceModel.CheckResult.JsonSourceMultipleArrays",
+                    ConstNvl(jsonName),
+                    Integer.toString(arrayBases.size())),
+                null));
+      }
+      Set<Integer> keyPositions = new HashSet<>();
+      boolean hasLogicalKey = false;
+      for (SourceJsonField field : jsonSource.getFields()) {
+        if (field == null || !field.isPrimaryKey()) {
+          continue;
+        }
+        hasLogicalKey = true;
+        int position = field.getPrimaryKeyPosition();
+        if (!keyPositions.add(position)) {
+          remarks.add(
+              new CheckResult(
+                  ICheckResult.TYPE_RESULT_ERROR,
+                  BaseMessages.getString(
+                      PKG,
+                      "SourceModel.CheckResult.JsonSourceDuplicateKeyPosition",
+                      ConstNvl(jsonName),
+                      Integer.toString(position)),
+                  null));
+        }
+      }
+      if (!jsonSource.getFields().isEmpty() && !hasLogicalKey) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_WARNING,
+                BaseMessages.getString(
+                    PKG, "SourceModel.CheckResult.JsonSourceMissingLogicalKey", ConstNvl(jsonName)),
+                null));
+      }
+      if (parentKind == SourceJsonParentKind.JSON
+          && !Utils.isEmpty(parentName)
+          && hasJsonParentCycle(jsonName, parentName, new HashSet<>())) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_ERROR,
+                BaseMessages.getString(
+                    PKG, "SourceModel.CheckResult.JsonSourceParentCycle", ConstNvl(jsonName)),
+                null));
+      }
+      monitor.worked(1);
+    }
+
     if (!monitor.isCanceled()
         && remarks.stream().noneMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_ERROR)) {
       remarks.add(
@@ -505,6 +671,63 @@ public class SourceModel extends HopMetadataBase
     }
     monitor.done();
     return remarks;
+  }
+
+  private boolean parentExists(SourceJsonParentKind parentKind, String parentName) {
+    if (parentKind == null || Utils.isEmpty(parentName)) {
+      return false;
+    }
+    return switch (parentKind) {
+      case TABLE -> findTable(parentName) != null;
+      case QUERY -> findQuery(parentName) != null;
+      case JSON -> findJsonSource(parentName) != null;
+    };
+  }
+
+  /**
+   * Walks JSON→JSON parent links looking for a cycle involving {@code startName}.
+   *
+   * @param startName name of the JSON source being validated
+   * @param currentParent parent name currently under inspection
+   * @param visited names already seen on this walk
+   */
+  private boolean hasJsonParentCycle(String startName, String currentParent, Set<String> visited) {
+    if (Utils.isEmpty(currentParent)) {
+      return false;
+    }
+    if (currentParent.equals(startName)) {
+      return true;
+    }
+    if (!visited.add(currentParent)) {
+      return true;
+    }
+    SourceJson parent = findJsonSource(currentParent);
+    if (parent == null || parent.resolveParentSourceKind() != SourceJsonParentKind.JSON) {
+      return false;
+    }
+    return hasJsonParentCycle(startName, parent.getParentSourceName(), visited);
+  }
+
+  /**
+   * Extracts the array base (path up to and including the first array wildcard) so multiple fields
+   * under the same array are treated as one expansion.
+   *
+   * <p>Supports JsonPath {@code [*]} and Hop sample style {@code .*}.
+   */
+  public static String arrayBasePath(String path) {
+    if (path == null) {
+      return "";
+    }
+    String p = path.trim();
+    int bracket = p.indexOf("[*]");
+    if (bracket >= 0) {
+      return p.substring(0, bracket + 3);
+    }
+    int star = p.indexOf(".*");
+    if (star >= 0) {
+      return p.substring(0, star + 2);
+    }
+    return p;
   }
 
   private static String ConstNvl(String value) {

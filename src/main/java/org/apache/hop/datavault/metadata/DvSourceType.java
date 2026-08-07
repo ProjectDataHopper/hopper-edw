@@ -39,7 +39,12 @@ public enum DvSourceType implements IEnumHasCodeAndDescription {
    * Multi-table feed defined by a {@code SourceQuery} in a {@code .hsm} source model (SQL or Merge
    * Join pipeline).
    */
-  COMPOSITE("COMPOSITE", BaseMessages.getString(DvSourceType.class, "DvSourceType.Composite"));
+  COMPOSITE("COMPOSITE", BaseMessages.getString(DvSourceType.class, "DvSourceType.Composite")),
+  /**
+   * JSON extraction feed defined by a {@code SourceJson} in a {@code .hsm} source model (parent
+   * source + JsonInput).
+   */
+  JSON("JSON", BaseMessages.getString(DvSourceType.class, "DvSourceType.Json"));
 
   private final String code;
   private final String description;

@@ -163,6 +163,71 @@ public class SourceModelSearchAnalyser extends BaseSearchableAnalyser<SourceMode
           searchable, results, searchQuery, query, "source query property", componentName);
     }
 
+    for (SourceJson jsonSource : model.getJsonSources()) {
+      if (jsonSource == null) {
+        continue;
+      }
+      String componentName = jsonSource.getName();
+      matchProperty(
+          searchable,
+          results,
+          searchQuery,
+          "source json name",
+          jsonSource.getName(),
+          componentName);
+      matchProperty(
+          searchable,
+          results,
+          searchQuery,
+          "source json description",
+          jsonSource.getDescription(),
+          componentName);
+      matchProperty(
+          searchable,
+          results,
+          searchQuery,
+          "source json parent",
+          jsonSource.getParentSourceName(),
+          componentName);
+      matchProperty(
+          searchable,
+          results,
+          searchQuery,
+          "source json field name",
+          jsonSource.getJsonFieldName(),
+          componentName);
+      matchProperty(
+          searchable,
+          results,
+          searchQuery,
+          "source json published catalog name",
+          jsonSource.getPublishedCatalogName(),
+          componentName);
+      for (SourceJsonField field : jsonSource.getFields()) {
+        if (field == null) {
+          continue;
+        }
+        matchProperty(
+            searchable,
+            results,
+            searchQuery,
+            "source json output field",
+            field.getName(),
+            componentName);
+        matchProperty(
+            searchable, results, searchQuery, "source json path", field.getPath(), componentName);
+        matchProperty(
+            searchable,
+            results,
+            searchQuery,
+            "source json parent field",
+            field.getParentFieldName(),
+            componentName);
+      }
+      matchObjectFields(
+          searchable, results, searchQuery, jsonSource, "source json property", componentName);
+    }
+
     if (model.getNotes() != null) {
       for (DvNote note : model.getNotes()) {
         if (note != null && !Utils.isEmpty(note.getText())) {

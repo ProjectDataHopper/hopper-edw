@@ -108,7 +108,37 @@ public final class DvSourcePreviewInputSupport {
       case COMPOSITE ->
           buildCompositePreview(
               recordSource, (DvCompositeSource) dvSource, variables, metadataProvider, rowLimit);
+      case JSON ->
+          buildJsonPreview(
+              recordSource,
+              (org.apache.hop.datavault.metadata.json.DvJsonSource) dvSource,
+              variables,
+              metadataProvider,
+              rowLimit);
     };
+  }
+
+  private static PreviewPipeline buildJsonPreview(
+      DataVaultSource recordSource,
+      org.apache.hop.datavault.metadata.json.DvJsonSource source,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider,
+      int rowLimit)
+      throws HopException {
+    if (source == null) {
+      throw new HopException(
+          BaseMessages.getString(PKG, "DvSourcePreviewInputSupport.Error.MissingSource"));
+    }
+    org.apache.hop.datavault.metadata.json.DvJsonSourceResolver.ResolvedJson resolved =
+        org.apache.hop.datavault.metadata.json.DvJsonSourceResolver.resolve(
+            source, variables, metadataProvider);
+    org.apache.hop.datavault.metadata.sourcemodel.generate.SourceJsonPreviewSupport.PreviewPipeline
+        built =
+            org.apache.hop.datavault.metadata.sourcemodel.generate.SourceJsonPreviewSupport
+                .buildPreviewPipeline(
+                    resolved.model(), resolved.jsonSource(), variables, metadataProvider);
+    // rowLimit is enforced by PipelinePreviewProgressDialog; generation is full.
+    return new PreviewPipeline(built.pipelineMeta(), built.previewTransformName());
   }
 
   /**

@@ -38,6 +38,7 @@ import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphTableCardLayout
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphTableNameHitArea;
 import org.apache.hop.datavault.hopgui.file.vault.BasePainter;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceColumn;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceJson;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQuery;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceRelationship;
@@ -103,6 +104,7 @@ public class SourceModelPainter extends BasePainter {
     drawNotes(model.getNotes());
     drawTables();
     drawQueries();
+    drawJsonSources();
     drawRect(selectionRegion);
 
     gc.setTransform(0.0f, 0.0f, 1.0f);
@@ -373,6 +375,9 @@ public class SourceModelPainter extends BasePainter {
 
   private static final int[] QUERY_COLOR = new int[] {120, 80, 160};
 
+  /** Teal/cyan card for JSON extraction nodes (distinct from purple queries). */
+  private static final int[] JSON_COLOR = new int[] {20, 130, 140};
+
   private void drawQueries() {
     if (model.getQueries() == null) {
       return;
@@ -438,10 +443,84 @@ public class SourceModelPainter extends BasePainter {
     }
   }
 
+  private void drawJsonSources() {
+    if (model.getJsonSources() == null) {
+      return;
+    }
+    for (SourceJson jsonSource : model.getJsonSources()) {
+      if (jsonSource == null) {
+        continue;
+      }
+      Point loc = jsonSource.getLocation();
+      if (loc == null) {
+        continue;
+      }
+      String label = Utils.isEmpty(jsonSource.getName()) ? "?" : jsonSource.getName();
+      String secondary =
+          Utils.isEmpty(jsonSource.getParentSourceName())
+              ? ""
+              : "from " + jsonSource.getParentSourceName();
+      if (!Utils.isEmpty(jsonSource.getJsonFieldName())) {
+        secondary =
+            Utils.isEmpty(secondary)
+                ? jsonSource.getJsonFieldName()
+                : secondary + " · " + jsonSource.getJsonFieldName();
+      }
+      String typeLabel = "JSON";
+      int fieldCount = jsonSource.getFields() != null ? jsonSource.getFields().size() : 0;
+      String extra = fieldCount + " field(s)";
+
+      ModelGraphTableCardLayout.BoxSize boxSize =
+          ModelGraphTableCardLayout.computeBoxSize(gc, label, secondary, typeLabel, extra);
+      int boxWidth = Math.max(160, boxSize.width());
+      int boxHeight = Math.max(80, boxSize.height());
+
+      Point screenLoc = real2screen(loc.x, loc.y);
+      int x = screenLoc.x;
+      int y = screenLoc.y;
+
+      gc.setBackground(EColor.WHITE);
+      gc.fillRoundRectangle(x, y, boxWidth, boxHeight, CORNER_RADIUS_5, CORNER_RADIUS_5);
+      gc.setLineWidth(jsonSource.isSelected() ? 2 : 1);
+      gc.setForeground(JSON_COLOR[0], JSON_COLOR[1], JSON_COLOR[2]);
+      gc.drawRoundRectangle(x, y, boxWidth, boxHeight, CORNER_RADIUS_5, CORNER_RADIUS_5);
+      gc.setLineWidth(1);
+
+      ModelGraphTableCardLayout.drawSvgIcon(
+          gc, getClass().getClassLoader(), "source-model.svg", x, y, magnification);
+      Point nameExtent =
+          ModelGraphTableCardLayout.drawName(gc, label, x, y, label.equals(mouseOverTableName));
+      ModelGraphTableCardLayout.drawSecondaryLine(gc, secondary, x, y, nameExtent);
+      Point typeExtent = ModelGraphTableCardLayout.drawTypeBelowIcon(gc, typeLabel, x, y);
+      ModelGraphTableCardLayout.drawExtraLineBelowType(gc, extra, x, y, typeExtent, JSON_COLOR);
+
+      if (areaOwners != null) {
+        areaOwners.add(
+            new AreaOwner(
+                AreaType.TRANSFORM_ICON, x, y, boxWidth, boxHeight, offset, jsonSource, label));
+        int nameX = ModelGraphTableCardLayout.nameX(x);
+        int nameY = ModelGraphTableCardLayout.nameY(y);
+        ModelGraphTableNameHitArea.Bounds nameHit =
+            ModelGraphTableNameHitArea.bounds(nameX, nameY, nameExtent);
+        areaOwners.add(
+            new AreaOwner(
+                AreaType.TRANSFORM_NAME,
+                nameHit.x(),
+                nameHit.y(),
+                nameHit.width(),
+                nameHit.height(),
+                offset,
+                jsonSource,
+                label));
+      }
+    }
+  }
+
   private boolean isEmptyModel() {
     boolean notesEmpty = !drawNotes || model.getNotes().isEmpty();
     boolean queriesEmpty = model.getQueries() == null || model.getQueries().isEmpty();
-    return model.getTables().isEmpty() && queriesEmpty && notesEmpty;
+    boolean jsonEmpty = model.getJsonSources() == null || model.getJsonSources().isEmpty();
+    return model.getTables().isEmpty() && queriesEmpty && jsonEmpty && notesEmpty;
   }
 
   private List<String> getEmptyModelHintLines() {
@@ -449,6 +528,7 @@ public class SourceModelPainter extends BasePainter {
     lines.add(BaseMessages.getString(PKG, "SourceModelPainter.EmptyModel.Intro"));
     lines.add(BaseMessages.getString(PKG, "SourceModelPainter.EmptyModel.AddTables"));
     lines.add(BaseMessages.getString(PKG, "SourceModelPainter.EmptyModel.AddQuery"));
+    lines.add(BaseMessages.getString(PKG, "SourceModelPainter.EmptyModel.AddJson"));
     return lines;
   }
 

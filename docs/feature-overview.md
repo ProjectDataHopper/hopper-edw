@@ -113,9 +113,13 @@ Hubs, links, and satellites reference source **names**, not raw connection detai
 
 ### Source modeler (`.hsm`)
 
-Visual **source-system** modeler: import tables with PK/FK, draw relationships, and compose **source queries** (joins + projections). Publish a query as a catalog **COMPOSITE** feed; Data Vault loads generate single-connection SQL or a Merge Join pipeline. Retail sample: `retail-example/models/source-tables-crm.hsm`. See [source-modeler-overview.adoc](source-modeler-overview.adoc).
+Visual **source-system** modeler: import tables with PK/FK, draw relationships, compose **source queries** (joins + projections), and define **source JSON** extractions (flatten a JSON field into a feed; chain steps for nested arrays). Publish a query as catalog **COMPOSITE** or a JSON extraction as **JSON**; Data Vault loads generate SQL/Merge Join or parent + JsonInput pipelines. Retail sample: `retail-example/models/source-tables-crm.hsm`. See [source-modeler-overview.adoc](source-modeler-overview.adoc).
 
 ![Source modeler — retail CRM tables with All customer info query SQL](images/source-modeler-retail-example-with-query-dialog-generated-sql.png)
+
+![Source modeler — tables, query, and JSON source cards](images/source-modeler-example.png)
+
+![Source JSON dialog — extract fields from a parent JSON column](images/source-modeler-json-source.png)
 
 ### Project and metadata search (Hop 2.19)
 

@@ -69,6 +69,7 @@ public final class RecordDefinitionDiscoveryService {
       case PARQUET -> discoverParquet(physicalRef, variables, metadataProvider);
       case ICEBERG -> discoverIceberg(physicalRef, variables);
       case COMPOSITE -> discoverComposite(physicalRef, variables, metadataProvider);
+      case JSON -> discoverJson(physicalRef, variables, metadataProvider);
     };
   }
 
@@ -106,6 +107,43 @@ public final class RecordDefinitionDiscoveryService {
       throw new HopException(
           BaseMessages.getString(
               PKG, "RecordDefinitionDiscoveryService.Error.EmptyCompositeProjection", queryName));
+    }
+    return new DiscoveryResult(fields, null);
+  }
+
+  private static DiscoveryResult discoverJson(
+      PhysicalSourceRef physicalRef, IVariables variables, IHopMetadataProvider metadataProvider)
+      throws HopException {
+    if (physicalRef == null
+        || Utils.isEmpty(physicalRef.getJsonSourceModelFilename())
+        || Utils.isEmpty(physicalRef.getJsonSourceName())) {
+      throw new HopException(
+          BaseMessages.getString(
+              PKG, "RecordDefinitionDiscoveryService.Error.MissingCompositeRef"));
+    }
+    String modelFile =
+        variables != null
+            ? variables.resolve(physicalRef.getJsonSourceModelFilename())
+            : physicalRef.getJsonSourceModelFilename();
+    String jsonName =
+        variables != null
+            ? variables.resolve(physicalRef.getJsonSourceName())
+            : physicalRef.getJsonSourceName();
+    SourceModel model = SourceModelLoadSupport.load(modelFile, variables, metadataProvider);
+    org.apache.hop.datavault.metadata.sourcemodel.SourceJson jsonSource =
+        model.findJsonSource(jsonName);
+    if (jsonSource == null) {
+      throw new HopException(
+          BaseMessages.getString(
+              PKG, "RecordDefinitionDiscoveryService.Error.QueryNotFound", jsonName, modelFile));
+    }
+    List<SourceField> fields =
+        org.apache.hop.datavault.metadata.sourcemodel.publish.SourceJsonCatalogPublisher
+            .buildFieldsFromProjection(jsonSource);
+    if (fields == null || fields.isEmpty()) {
+      throw new HopException(
+          BaseMessages.getString(
+              PKG, "RecordDefinitionDiscoveryService.Error.EmptyCompositeProjection", jsonName));
     }
     return new DiscoveryResult(fields, null);
   }

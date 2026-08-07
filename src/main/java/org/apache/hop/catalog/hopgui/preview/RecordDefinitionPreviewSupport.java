@@ -133,6 +133,10 @@ public final class RecordDefinitionPreviewSupport {
           definition.getDvSource() != null
               && !Utils.isEmpty(definition.getDvSource().getCompositeSourceModelFilename())
               && !Utils.isEmpty(definition.getDvSource().getCompositeSourceQueryName());
+      case JSON ->
+          definition.getDvSource() != null
+              && !Utils.isEmpty(definition.getDvSource().getJsonSourceModelFilename())
+              && !Utils.isEmpty(definition.getDvSource().getJsonSourceName());
     };
   }
 

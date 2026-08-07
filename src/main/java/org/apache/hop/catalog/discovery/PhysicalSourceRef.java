@@ -55,6 +55,12 @@ public final class PhysicalSourceRef {
   /** Source query name inside the model when refreshing a COMPOSITE feed. */
   private final String compositeSourceQueryName;
 
+  /** Path to the {@code .hsm} source model when refreshing a JSON feed. */
+  private final String jsonSourceModelFilename;
+
+  /** Source JSON object name when refreshing a JSON feed. */
+  private final String jsonSourceName;
+
   private PhysicalSourceRef(Builder builder) {
     this.databaseConnectionName = builder.databaseConnectionName;
     this.schemaName = builder.schemaName;
@@ -75,6 +81,8 @@ public final class PhysicalSourceRef {
     this.s3SecretKey = builder.s3SecretKey;
     this.compositeSourceModelFilename = builder.compositeSourceModelFilename;
     this.compositeSourceQueryName = builder.compositeSourceQueryName;
+    this.jsonSourceModelFilename = builder.jsonSourceModelFilename;
+    this.jsonSourceName = builder.jsonSourceName;
   }
 
   public String getDatabaseConnectionName() {
@@ -151,6 +159,14 @@ public final class PhysicalSourceRef {
 
   public String getCompositeSourceQueryName() {
     return compositeSourceQueryName;
+  }
+
+  public String getJsonSourceModelFilename() {
+    return jsonSourceModelFilename;
+  }
+
+  public String getJsonSourceName() {
+    return jsonSourceName;
   }
 
   public void validateIcebergLocation(IVariables variables) throws HopException {
@@ -288,6 +304,8 @@ public final class PhysicalSourceRef {
     private String s3SecretKey;
     private String compositeSourceModelFilename;
     private String compositeSourceQueryName;
+    private String jsonSourceModelFilename;
+    private String jsonSourceName;
 
     public Builder databaseConnectionName(String value) {
       this.databaseConnectionName = value;
@@ -381,6 +399,16 @@ public final class PhysicalSourceRef {
 
     public Builder compositeSourceQueryName(String value) {
       this.compositeSourceQueryName = value;
+      return this;
+    }
+
+    public Builder jsonSourceModelFilename(String value) {
+      this.jsonSourceModelFilename = value;
+      return this;
+    }
+
+    public Builder jsonSourceName(String value) {
+      this.jsonSourceName = value;
       return this;
     }
 

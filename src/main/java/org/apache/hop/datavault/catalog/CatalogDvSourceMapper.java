@@ -127,6 +127,15 @@ public final class CatalogDvSourceMapper {
       compositeSource.setGeneratedSql(dvSourceRecord.getCompositeGeneratedSql());
       return compositeSource;
     }
+    if (sourceType == DvSourceType.JSON) {
+      org.apache.hop.datavault.metadata.json.DvJsonSource jsonSource =
+          new org.apache.hop.datavault.metadata.json.DvJsonSource();
+      jsonSource.setDescription(definition.getDescription());
+      jsonSource.setFields(fields);
+      jsonSource.setSourceModelFilename(dvSourceRecord.getJsonSourceModelFilename());
+      jsonSource.setSourceJsonName(dvSourceRecord.getJsonSourceName());
+      return jsonSource;
+    }
     DvDatabaseSource fallback = new DvDatabaseSource();
     fallback.setDescription(definition.getDescription());
     fallback.setFields(fields);

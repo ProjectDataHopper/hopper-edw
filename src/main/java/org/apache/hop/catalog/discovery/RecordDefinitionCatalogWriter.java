@@ -199,6 +199,9 @@ public final class RecordDefinitionCatalogWriter {
       case COMPOSITE ->
           throw new HopException(
               "Composite sources are published from a .hsm source model, not via discovery write requests.");
+      case JSON ->
+          throw new HopException(
+              "JSON sources are published from a .hsm source model, not via discovery write requests.");
     };
   }
 

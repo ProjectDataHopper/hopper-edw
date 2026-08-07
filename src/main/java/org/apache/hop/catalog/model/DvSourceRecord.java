@@ -44,4 +44,10 @@ public class DvSourceRecord {
 
   /** Optional cached SQL for composite feeds (fallback when the model file is unavailable). */
   private String compositeGeneratedSql;
+
+  /** Path to the {@code .hsm} source model when {@link #sourceType} is {@code JSON}. */
+  private String jsonSourceModelFilename;
+
+  /** Source JSON object name inside the model when {@link #sourceType} is {@code JSON}. */
+  private String jsonSourceName;
 }

@@ -130,6 +130,12 @@ public final class DvSourceCatalogMapper {
         dvSourceRecord.setCompositeSourceQueryName(composite.getSourceQueryName());
         dvSourceRecord.setCompositeGeneratedSql(composite.getGeneratedSql());
       }
+      if (source.getSourceType() == DvSourceType.JSON
+          && source.getDvSourceOrDefault()
+              instanceof org.apache.hop.datavault.metadata.json.DvJsonSource jsonSrc) {
+        dvSourceRecord.setJsonSourceModelFilename(jsonSrc.getSourceModelFilename());
+        dvSourceRecord.setJsonSourceName(jsonSrc.getSourceJsonName());
+      }
       definition.setDvSource(dvSourceRecord);
     }
     definition.setFields(DvSourceFieldSupport.toRowMeta(sourceFields, variables));
@@ -151,7 +157,8 @@ public final class DvSourceCatalogMapper {
       definition.setPhysicalIcebergTable(buildPhysicalIcebergTableRef(dvSource));
       definition.setPhysicalTable(null);
       definition.setPhysicalFile(null);
-    } else if (source.getSourceType() == DvSourceType.COMPOSITE) {
+    } else if (source.getSourceType() == DvSourceType.COMPOSITE
+        || source.getSourceType() == DvSourceType.JSON) {
       definition.setPhysicalTable(null);
       definition.setPhysicalFile(null);
       definition.setPhysicalIcebergTable(null);

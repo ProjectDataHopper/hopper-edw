@@ -1,0 +1,57 @@
+<!--
+  Excerpt: Source JSON object on a .hsm source model (Issue #114).
+  Parent table "events" has a payload column containing JSON documents.
+-->
+<source-model>
+  <name>json-landing-example</name>
+  <tables>
+    <table>
+      <name>events</name>
+      <physicalType>DATABASE</physicalType>
+      <databaseName>CRM</databaseName>
+      <tableName>events</tableName>
+      <columns>
+        <column>
+          <name>event_id</name>
+          <hopType>Integer</hopType>
+          <primaryKeyPosition>1</primaryKeyPosition>
+        </column>
+        <column>
+          <name>payload</name>
+          <hopType>String</hopType>
+        </column>
+      </columns>
+    </table>
+  </tables>
+  <json-sources>
+    <json-source>
+      <name>order_lines</name>
+      <description>Flatten order line items from event payload</description>
+      <parentSourceKind>TABLE</parentSourceKind>
+      <parentSourceName>events</parentSourceName>
+      <jsonFieldName>payload</jsonFieldName>
+      <ignoreMissingPath>Y</ignoreMissingPath>
+      <defaultPathLeafToNull>Y</defaultPathLeafToNull>
+      <fields>
+        <field>
+          <name>event_id</name>
+          <passThrough>Y</passThrough>
+          <parentFieldName>event_id</parentFieldName>
+          <hopType>Integer</hopType>
+          <primaryKeyPosition>1</primaryKeyPosition>
+        </field>
+        <field>
+          <name>sku</name>
+          <path>$.lines.*.sku</path>
+          <hopType>String</hopType>
+          <primaryKeyPosition>2</primaryKeyPosition>
+        </field>
+        <field>
+          <name>qty</name>
+          <path>$.lines.*.qty</path>
+          <hopType>Integer</hopType>
+        </field>
+      </fields>
+    </json-source>
+  </json-sources>
+</source-model>

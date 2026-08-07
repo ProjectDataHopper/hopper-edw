@@ -52,16 +52,21 @@ import org.apache.hop.datavault.metadata.DvNote;
 import org.apache.hop.datavault.metadata.DvNoteType;
 import org.apache.hop.datavault.metadata.database.DvDatabaseSourceImportSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJoinType;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceJson;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQuery;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceRelationship;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceTable;
+import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceJsonPreviewSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceQueryPreviewSupport;
+import org.apache.hop.datavault.metadata.sourcemodel.publish.SourceJsonCatalogPublisher;
 import org.apache.hop.datavault.metadata.sourcemodel.publish.SourceQueryCatalogPublisher;
 import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.pipeline.Pipeline;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
 import org.apache.hop.ui.core.dialog.CheckResultDialog;
+import org.apache.hop.ui.core.dialog.EnterTextDialog;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.core.gui.GuiResource;
@@ -77,6 +82,7 @@ import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
 import org.apache.hop.ui.hopgui.perspective.IHopPerspective;
 import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
 import org.apache.hop.ui.hopgui.shared.SwtGc;
+import org.apache.hop.ui.pipeline.dialog.PipelinePreviewProgressDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.graphics.GC;
@@ -91,8 +97,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Hop GUI editor for source system models ({@code .hsm}): tables, relationships, and (later) source
- * queries.
+ * Hop GUI editor for source system models ({@code .hsm}): tables, relationships, multi-table
+ * queries, and JSON extractions.
  */
 @GuiPlugin(id = "HopGuiSourceModelGraph", description = "i18n::HopGuiSourceModelGraph.Description")
 @Getter
@@ -118,6 +124,8 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       "HopGuiSourceModelGraph-ToolBar-10055-Import-Schema";
   public static final String TOOLBAR_ITEM_NEW_QUERY =
       "HopGuiSourceModelGraph-ToolBar-10057-New-Query";
+  public static final String TOOLBAR_ITEM_NEW_JSON =
+      "HopGuiSourceModelGraph-ToolBar-10059-New-Json";
   public static final String TOOLBAR_ITEM_PUBLISH_QUERIES =
       "HopGuiSourceModelGraph-ToolBar-10058-Publish-Queries";
   public static final String TOOLBAR_ITEM_CHECK_MODEL =
@@ -150,6 +158,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
   private String mouseOverTableName;
   private SourceTable currentTable;
   private SourceQuery currentQuery;
+  private SourceJson currentJsonSource;
   private SourceTable startRelationshipTable;
   private Point relationshipDragEndLocation;
   private SourceTable candidateRelationshipTarget;
@@ -384,6 +393,16 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
 
   @GuiToolbarElement(
       root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
+      id = TOOLBAR_ITEM_NEW_JSON,
+      toolTip = "i18n::HopGuiSourceModelGraph.Toolbar.NewJson.Tooltip",
+      type = GuiToolbarElementType.BUTTON,
+      image = "source-model.svg")
+  public void newJsonFromToolbar() {
+    addJsonAt(lastClick != null ? lastClick : new Point(50, 50));
+  }
+
+  @GuiToolbarElement(
+      root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
       id = TOOLBAR_ITEM_PUBLISH_QUERIES,
       toolTip = "i18n::HopGuiSourceModelGraph.Toolbar.PublishQueries.Tooltip",
       type = GuiToolbarElementType.BUTTON,
@@ -503,6 +522,11 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
         query.setSelected(true);
       }
     }
+    for (SourceJson jsonSource : model.getJsonSources()) {
+      if (jsonSource != null) {
+        jsonSource.setSelected(true);
+      }
+    }
     for (DvNote note : model.getNotes()) {
       if (note != null) {
         note.setSelected(true);
@@ -541,13 +565,18 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
     List<SourceTable> selected = getSelectedTables();
     List<SourceQuery> selectedQueries = getSelectedQueries();
+    List<SourceJson> selectedJson = getSelectedJsonSources();
     List<DvNote> selectedNotes = getSelectedNotes();
-    if (selected.isEmpty() && selectedQueries.isEmpty() && selectedNotes.isEmpty()) {
+    if (selected.isEmpty()
+        && selectedQueries.isEmpty()
+        && selectedJson.isEmpty()
+        && selectedNotes.isEmpty()) {
       return;
     }
     markUndoPoint();
     model.getTables().removeAll(selected);
     model.getQueries().removeAll(selectedQueries);
+    model.getJsonSources().removeAll(selectedJson);
     model.getNotes().removeAll(selectedNotes);
     setChanged();
     redraw();
@@ -618,8 +647,8 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
   }
 
   /**
-   * Select and open a source query or table matching {@code componentName} (search navigation).
-   * Queries are preferred when both share a name.
+   * Select and open a source query, JSON source, or table matching {@code componentName} (search
+   * navigation). Queries are preferred when both share a name; JSON sources next.
    */
   public void openSearchComponent(String componentName) {
     if (Utils.isEmpty(componentName) || model == null) {
@@ -627,18 +656,17 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
     SourceQuery query = model.findQuery(componentName);
     if (query != null) {
-      for (SourceQuery q : model.getQueries()) {
-        if (q != null) {
-          q.setSelected(false);
-        }
-      }
-      for (SourceTable t : model.getTables()) {
-        if (t != null) {
-          t.setSelected(false);
-        }
-      }
+      unselectAllCanvasObjects();
       query.setSelected(true);
       editQuery(query);
+      updateGui();
+      return;
+    }
+    SourceJson jsonSource = model.findJsonSource(componentName);
+    if (jsonSource != null) {
+      unselectAllCanvasObjects();
+      jsonSource.setSelected(true);
+      editJsonSource(jsonSource);
       updateGui();
       return;
     }
@@ -760,6 +788,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     boolean hasSelection =
         !getSelectedTables().isEmpty()
             || !getSelectedQueries().isEmpty()
+            || !getSelectedJsonSources().isEmpty()
             || !getSelectedNotes().isEmpty();
     boolean hasClipboard = false;
     try {
@@ -1091,6 +1120,11 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       editQuery(query);
       return;
     }
+    SourceJson jsonSource = getAreaOwnerJsonSource(areaOwner);
+    if (jsonSource != null) {
+      editJsonSource(jsonSource);
+      return;
+    }
     SourceTable table = getAreaOwnerTable(areaOwner);
     if (table != null) {
       editTable(table);
@@ -1110,8 +1144,30 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     iconOffset = null;
     currentTable = null;
     currentQuery = null;
+    currentJsonSource = null;
     clearNavigationViewportState();
     clearSelectionRegion();
+  }
+
+  private void unselectAllCanvasObjects() {
+    if (model == null) {
+      return;
+    }
+    for (SourceTable t : model.getTables()) {
+      if (t != null) {
+        t.setSelected(false);
+      }
+    }
+    for (SourceQuery q : model.getQueries()) {
+      if (q != null) {
+        q.setSelected(false);
+      }
+    }
+    for (SourceJson j : model.getJsonSources()) {
+      if (j != null) {
+        j.setSelected(false);
+      }
+    }
   }
 
   private @Nullable SourceTable getAreaOwnerTable(AreaOwner areaOwner) {
@@ -1147,12 +1203,40 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     return selected;
   }
 
+  private List<SourceJson> getSelectedJsonSources() {
+    List<SourceJson> selected = new ArrayList<>();
+    if (model == null) {
+      return selected;
+    }
+    for (SourceJson jsonSource : model.getJsonSources()) {
+      if (jsonSource != null && jsonSource.isSelected()) {
+        selected.add(jsonSource);
+      }
+    }
+    return selected;
+  }
+
   private boolean isQueryInLassoScreenRect(
       SourceQuery query, int lassoMinX, int lassoMinY, int lassoMaxX, int lassoMaxY) {
-    if (query == null || query.getLocation() == null) {
+    return isCardInLassoScreenRect(
+        query != null ? query.getLocation() : null, lassoMinX, lassoMinY, lassoMaxX, lassoMaxY);
+  }
+
+  private boolean isJsonInLassoScreenRect(
+      SourceJson jsonSource, int lassoMinX, int lassoMinY, int lassoMaxX, int lassoMaxY) {
+    return isCardInLassoScreenRect(
+        jsonSource != null ? jsonSource.getLocation() : null,
+        lassoMinX,
+        lassoMinY,
+        lassoMaxX,
+        lassoMaxY);
+  }
+
+  private boolean isCardInLassoScreenRect(
+      Point loc, int lassoMinX, int lassoMinY, int lassoMaxX, int lassoMaxY) {
+    if (loc == null) {
       return false;
     }
-    Point loc = query.getLocation();
     int tw = 160;
     int th = 80;
     int tMinX = (int) (loc.x + offset.x);
@@ -1167,8 +1251,12 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
   private void moveSelectedObjects(int dx, int dy) {
     List<SourceTable> selectedTables = getSelectedTables();
     List<SourceQuery> selectedQueries = getSelectedQueries();
+    List<SourceJson> selectedJson = getSelectedJsonSources();
     List<DvNote> selectedNotes = getSelectedNotes();
-    if (selectedTables.isEmpty() && selectedQueries.isEmpty() && selectedNotes.isEmpty()) {
+    if (selectedTables.isEmpty()
+        && selectedQueries.isEmpty()
+        && selectedJson.isEmpty()
+        && selectedNotes.isEmpty()) {
       return;
     }
     for (SourceTable table : selectedTables) {
@@ -1182,6 +1270,17 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
     for (SourceQuery query : selectedQueries) {
       Point loc = query.getLocation();
+      if (loc != null) {
+        if (loc.x + dx < 0) {
+          dx = -loc.x;
+        }
+        if (loc.y + dy < 0) {
+          dy = -loc.y;
+        }
+      }
+    }
+    for (SourceJson jsonSource : selectedJson) {
+      Point loc = jsonSource.getLocation();
       if (loc != null) {
         if (loc.x + dx < 0) {
           dx = -loc.x;
@@ -1210,6 +1309,13 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       if (loc != null) {
         Point snapped = PropsUi.calculateGridPosition(new Point(loc.x + dx, loc.y + dy));
         query.setLocation(snapped);
+      }
+    }
+    for (SourceJson jsonSource : selectedJson) {
+      Point loc = jsonSource.getLocation();
+      if (loc != null) {
+        Point snapped = PropsUi.calculateGridPosition(new Point(loc.x + dx, loc.y + dy));
+        jsonSource.setLocation(snapped);
       }
     }
     for (DvNote note : selectedNotes) {
@@ -1315,6 +1421,59 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       setChanged();
       redraw();
     }
+  }
+
+  private void editJsonSource(SourceJson jsonSource) {
+    if (jsonSource == null) {
+      return;
+    }
+    byte[] beforeChange = captureUndoSnapshot();
+    boolean accepted =
+        new HopGuiSourceJsonDialog(
+                getShell(), jsonSource, model, variables, hopGui.getMetadataProvider())
+            .open();
+    if (accepted) {
+      commitDialogUndo(beforeChange);
+      setChanged();
+      redraw();
+    }
+  }
+
+  private void addJsonAt(Point location) {
+    if (model == null) {
+      return;
+    }
+    byte[] beforeChange = captureUndoSnapshot();
+    SourceJson jsonSource = new SourceJson(uniqueJsonName("json"));
+    if (!model.getTables().isEmpty() && model.getTables().get(0) != null) {
+      jsonSource.setParentSourceName(model.getTables().get(0).getName());
+    }
+    Point snapped =
+        PropsUi.calculateGridPosition(
+            new Point(location != null ? location.x : 50, location != null ? location.y : 50));
+    jsonSource.setLocation(snapped);
+    model.getJsonSources().add(jsonSource);
+    boolean accepted =
+        new HopGuiSourceJsonDialog(
+                getShell(), jsonSource, model, variables, hopGui.getMetadataProvider())
+            .open();
+    if (accepted) {
+      commitDialogUndo(beforeChange);
+      setChanged();
+    } else {
+      model.getJsonSources().remove(jsonSource);
+    }
+    redraw();
+  }
+
+  private String uniqueJsonName(String base) {
+    String name = base;
+    int i = 2;
+    while (model.findJsonSource(name) != null) {
+      name = base + i;
+      i++;
+    }
+    return name;
   }
 
   private void previewQuery(SourceQuery query) {
@@ -1486,6 +1645,13 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     return null;
   }
 
+  private SourceJson getAreaOwnerJsonSource(AreaOwner areaOwner) {
+    if (areaOwner != null && areaOwner.getParent() instanceof SourceJson jsonSource) {
+      return jsonSource;
+    }
+    return null;
+  }
+
   private List<SourceRelationship> getSelectedRelationshipsForClipboard() {
     // Relationships are not multi-selected on canvas yet; empty list for copy of tables only.
     return List.of();
@@ -1554,6 +1720,27 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
   }
 
+  private void showJsonContextDialog(Event e, SourceJson jsonSource) {
+    try {
+      org.eclipse.swt.graphics.Point p = getShell().getDisplay().map(canvas, null, e.x, e.y);
+      String message =
+          BaseMessages.getString(
+              PKG, "HopGuiSourceModelGraph.Context.Json.Message", jsonSource.getName());
+      IGuiContextHandler contextHandler =
+          new HopGuiSourceJsonContext(model, this, jsonSource, new Point(p.x, p.y));
+      GuiContextUtil.getInstance()
+          .handleActionSelection(getShell(), message, new Point(p.x, p.y), contextHandler);
+    } catch (Exception ex) {
+      new ErrorDialog(
+          getShell(),
+          BaseMessages.getString(PKG, "HopGuiSourceModelGraph.Context.Error.Header"),
+          BaseMessages.getString(PKG, "HopGuiSourceModelGraph.Context.Error.Message"),
+          ex);
+    } finally {
+      canvas.setFocus();
+    }
+  }
+
   @GuiContextAction(
       id = "source-model-graph-add-table",
       parentId = HopGuiSourceModelContext.CONTEXT_ID,
@@ -1591,6 +1778,172 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       categoryOrder = "4")
   public void addQuery(HopGuiSourceModelContext context) {
     addQueryAt(lastClick != null ? lastClick : new Point(50, 50));
+  }
+
+  @GuiContextAction(
+      id = "source-model-graph-add-json",
+      parentId = HopGuiSourceModelContext.CONTEXT_ID,
+      type = GuiActionType.Create,
+      name = "i18n::HopGuiSourceModelGraph.Context.AddJson.Name",
+      tooltip = "i18n::HopGuiSourceModelGraph.Context.AddJson.Tooltip",
+      image = "source-model.svg",
+      category = "Basic",
+      categoryOrder = "5")
+  public void addJson(HopGuiSourceModelContext context) {
+    addJsonAt(lastClick != null ? lastClick : new Point(50, 50));
+  }
+
+  @GuiContextAction(
+      id = "source-model-json-edit",
+      parentId = HopGuiSourceJsonContext.CONTEXT_ID,
+      type = GuiActionType.Modify,
+      name = "i18n::HopGuiSourceModelGraph.Context.Json.Edit.Name",
+      tooltip = "i18n::HopGuiSourceModelGraph.Context.Json.Edit.Tooltip",
+      image = "ui/images/edit.svg",
+      category = "Basic",
+      categoryOrder = "1")
+  public void editJsonAction(HopGuiSourceJsonContext context) {
+    if (context != null) {
+      editJsonSource(context.getJsonSource());
+    }
+  }
+
+  @GuiContextAction(
+      id = "source-model-json-preview",
+      parentId = HopGuiSourceJsonContext.CONTEXT_ID,
+      type = GuiActionType.Info,
+      name = "i18n::HopGuiSourceModelGraph.Context.Json.Preview.Name",
+      tooltip = "i18n::HopGuiSourceModelGraph.Context.Json.Preview.Tooltip",
+      image = "ui/images/preview.svg",
+      category = "Basic",
+      categoryOrder = "2")
+  public void previewJsonAction(HopGuiSourceJsonContext context) {
+    if (context != null) {
+      previewJsonSource(context.getJsonSource());
+    }
+  }
+
+  @GuiContextAction(
+      id = "source-model-json-publish",
+      parentId = HopGuiSourceJsonContext.CONTEXT_ID,
+      type = GuiActionType.Create,
+      name = "i18n::HopGuiSourceModelGraph.Context.Json.Publish.Name",
+      tooltip = "i18n::HopGuiSourceModelGraph.Context.Json.Publish.Tooltip",
+      image = "ui/images/publish.svg",
+      category = "Basic",
+      categoryOrder = "3")
+  public void publishJsonAction(HopGuiSourceJsonContext context) {
+    if (context != null && context.getJsonSource() != null) {
+      publishJsonSource(context.getJsonSource());
+    }
+  }
+
+  private void previewJsonSource(SourceJson jsonSource) {
+    if (model == null || jsonSource == null) {
+      return;
+    }
+    try {
+      SourceJsonPreviewSupport.validateForPreview(jsonSource);
+      SourceJsonPreviewSupport.PreviewPipeline built =
+          SourceJsonPreviewSupport.buildPreviewPipeline(
+              model, jsonSource, variables, hopGui.getMetadataProvider());
+      int previewRows = SourceJsonPreviewSupport.DEFAULT_ROW_LIMIT;
+      PipelinePreviewProgressDialog progressDialog =
+          new PipelinePreviewProgressDialog(
+              getShell(),
+              variables,
+              built.pipelineMeta(),
+              new String[] {built.previewTransformName()},
+              new int[] {previewRows});
+      progressDialog.open();
+      Pipeline pipeline = progressDialog.getPipeline();
+      if (progressDialog.isCancelled()) {
+        return;
+      }
+      if (pipeline != null
+          && pipeline.getResult() != null
+          && pipeline.getResult().getNrErrors() > 0) {
+        EnterTextDialog etd =
+            new EnterTextDialog(
+                getShell(),
+                BaseMessages.getString(PKG, "HopGuiSourceJsonDialog.Preview.Error.Title"),
+                BaseMessages.getString(PKG, "HopGuiSourceJsonDialog.Preview.Error.Message"),
+                progressDialog.getLoggingText(),
+                true);
+        etd.setReadOnly();
+        etd.open();
+        return;
+      }
+      List<Object[]> data = progressDialog.getPreviewRows(built.previewTransformName());
+      if (data == null || data.isEmpty()) {
+        MessageBox emptyBox = new MessageBox(getShell(), SWT.ICON_INFORMATION | SWT.OK);
+        emptyBox.setText(BaseMessages.getString(PKG, "HopGuiSourceJsonDialog.Preview.Empty.Title"));
+        emptyBox.setMessage(
+            BaseMessages.getString(PKG, "HopGuiSourceJsonDialog.Preview.Empty.Message"));
+        emptyBox.open();
+        return;
+      }
+      new ShowRowsDialog(
+              getShell(),
+              variables,
+              BaseMessages.getString(PKG, "HopGuiSourceJsonDialog.Preview.Title"),
+              BaseMessages.getString(PKG, "HopGuiSourceJsonDialog.Preview.Message"),
+              progressDialog.getPreviewRowsMeta(built.previewTransformName()),
+              data)
+          .open();
+    } catch (Exception e) {
+      new ErrorDialog(
+          getShell(),
+          BaseMessages.getString(PKG, "HopGuiSourceJsonDialog.Preview.Error.Title"),
+          BaseMessages.getString(PKG, "HopGuiSourceJsonDialog.Preview.Error.Message"),
+          e);
+    }
+  }
+
+  @GuiContextAction(
+      id = "source-model-json-delete",
+      parentId = HopGuiSourceJsonContext.CONTEXT_ID,
+      type = GuiActionType.Delete,
+      name = "i18n::HopGuiSourceModelGraph.Context.Json.Delete.Name",
+      tooltip = "i18n::HopGuiSourceModelGraph.Context.Json.Delete.Tooltip",
+      image = "ui/images/delete.svg",
+      category = "Basic",
+      categoryOrder = "4")
+  public void deleteJsonAction(HopGuiSourceJsonContext context) {
+    if (context == null || context.getJsonSource() == null || model == null) {
+      return;
+    }
+    markUndoPoint();
+    model.getJsonSources().remove(context.getJsonSource());
+    setChanged();
+    redraw();
+  }
+
+  private void publishJsonSource(SourceJson jsonSource) {
+    if (model == null || jsonSource == null) {
+      return;
+    }
+    try {
+      ensureModelFilenameForPublish();
+      SourceJsonCatalogPublisher.PublishResult result =
+          SourceJsonCatalogPublisher.publish(
+              model, jsonSource, null, variables, hopGui.getMetadataProvider());
+      DvDatabaseSourceImportSupport.refreshCatalogPerspective();
+      MessageBox box = new MessageBox(getShell(), SWT.ICON_INFORMATION | SWT.OK);
+      box.setText(BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PublishJson.Success.Title"));
+      box.setMessage(
+          BaseMessages.getString(
+              PKG, "HopGuiSourceModelGraph.PublishJson.Success.Message", result.catalogName()));
+      box.open();
+      setChanged();
+      redraw();
+    } catch (Exception e) {
+      new ErrorDialog(
+          getShell(),
+          BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PublishJson.Error.Title"),
+          BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PublishJson.Error.Message"),
+          e);
+    }
   }
 
   @GuiContextAction(
@@ -1878,9 +2231,10 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       AreaOwner areaOwner = getVisibleAreaOwner(logicalX, logicalY);
       SourceTable table = getAreaOwnerTable(areaOwner);
       SourceQuery query = getAreaOwnerQuery(areaOwner);
+      SourceJson jsonSource = getAreaOwnerJsonSource(areaOwner);
       DvNote note = getAreaOwnerNote(areaOwner);
       AreaOwner.AreaType areaType = areaOwner == null ? null : areaOwner.getAreaType();
-      Object canvasObject = query != null ? query : table;
+      Object canvasObject = query != null ? query : (jsonSource != null ? jsonSource : table);
       return new ModelGraphHit(areaOwner, areaType, note, canvasObject);
     }
 
@@ -1900,10 +2254,36 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
           prepareExclusiveDragSelection(
               control, queryHit.isSelected(), () -> queryHit.setSelected(true));
           currentQuery = queryHit;
+          currentJsonSource = null;
           currentTable = null;
           iconDragStart = new Point(real.x, real.y);
           iconDragCommitted = false;
           Point loc = queryHit.getLocation() != null ? queryHit.getLocation() : new Point(0, 0);
+          iconOffset = new Point(real.x - loc.x, real.y - loc.y);
+          clearNoteDragState();
+          clearSelectionRegion();
+          redraw();
+          return true;
+        }
+        return false;
+      }
+      if (obj instanceof SourceJson jsonHit) {
+        AreaOwner.AreaType areaType = hit.areaType();
+        if (e.button == 1 && areaType == AreaOwner.AreaType.TRANSFORM_NAME) {
+          avoidContextDialog = true;
+          editJsonSource(jsonHit);
+          clearTableDragState();
+          return true;
+        }
+        if (e.button == 1 && areaType == AreaOwner.AreaType.TRANSFORM_ICON) {
+          prepareExclusiveDragSelection(
+              control, jsonHit.isSelected(), () -> jsonHit.setSelected(true));
+          currentJsonSource = jsonHit;
+          currentQuery = null;
+          currentTable = null;
+          iconDragStart = new Point(real.x, real.y);
+          iconDragCommitted = false;
+          Point loc = jsonHit.getLocation() != null ? jsonHit.getLocation() : new Point(0, 0);
           iconOffset = new Point(real.x - loc.x, real.y - loc.y);
           clearNoteDragState();
           clearSelectionRegion();
@@ -1942,6 +2322,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
             control, tableHit.isSelected(), () -> tableHit.setSelected(true));
         currentTable = tableHit;
         currentQuery = null;
+        currentJsonSource = null;
         iconDragStart = new Point(real.x, real.y);
         iconDragCommitted = false;
         Point loc = tableHit.getLocation() != null ? tableHit.getLocation() : new Point(0, 0);
@@ -1986,7 +2367,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     @Override
     public boolean handleObjectMouseMove(Point real, boolean leftButtonDown) {
       if (!leftButtonDown
-          || (currentTable == null && currentQuery == null)
+          || (currentTable == null && currentQuery == null && currentJsonSource == null)
           || startRelationshipTable != null
           || resize != null) {
         return false;
@@ -1997,6 +2378,9 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       if (currentQuery != null) {
         currentQuery.setSelected(true);
       }
+      if (currentJsonSource != null) {
+        currentJsonSource.setSelected(true);
+      }
       if (iconOffset == null) {
         iconOffset = new Point(0, 0);
       }
@@ -2005,10 +2389,18 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       if (tryCommitIconDrag(real)) {
         doRedraw = true;
       }
-      Point baseLoc =
-          currentQuery != null ? currentQuery.getLocation() : currentTable.getLocation();
-      boolean selected =
-          currentQuery != null ? currentQuery.isSelected() : currentTable.isSelected();
+      Point baseLoc;
+      boolean selected;
+      if (currentJsonSource != null) {
+        baseLoc = currentJsonSource.getLocation();
+        selected = currentJsonSource.isSelected();
+      } else if (currentQuery != null) {
+        baseLoc = currentQuery.getLocation();
+        selected = currentQuery.isSelected();
+      } else {
+        baseLoc = currentTable.getLocation();
+        selected = currentTable.isSelected();
+      }
       if (iconDragCommitted && selected && baseLoc != null) {
         int dx = icon.x - baseLoc.x;
         int dy = icon.y - baseLoc.y;
@@ -2075,6 +2467,11 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
           query.setSelected(false);
         }
       }
+      for (SourceJson jsonSource : model.getJsonSources()) {
+        if (jsonSource != null) {
+          jsonSource.setSelected(false);
+        }
+      }
       unselectAllNotes();
     }
 
@@ -2091,6 +2488,11 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       for (SourceQuery query : model.getQueries()) {
         if (isQueryInLassoScreenRect(query, lassoMinX, lassoMinY, lassoMaxX, lassoMaxY)) {
           query.setSelected(true);
+        }
+      }
+      for (SourceJson jsonSource : model.getJsonSources()) {
+        if (isJsonInLassoScreenRect(jsonSource, lassoMinX, lassoMinY, lassoMaxX, lassoMaxY)) {
+          jsonSource.setSelected(true);
         }
       }
       for (DvNote note : model.getNotes()) {
@@ -2165,6 +2567,19 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
         return true;
       }
 
+      SourceJson jsonHit = getAreaOwnerJsonSource(getVisibleAreaOwner(real.x, real.y));
+      if (jsonHit != null) {
+        if (isControlDown(e)) {
+          avoidContextDialog = true;
+          editJsonSource(jsonHit);
+        } else if (!avoidContextDialog) {
+          showJsonContextDialog(e, jsonHit);
+        }
+        clearTableDragState();
+        avoidContextDialog = false;
+        return true;
+      }
+
       // Prefer relationship label hit over a leftover table selection from mouse-down.
       SourceRelationship relationshipHit =
           getAreaOwnerRelationship(getVisibleAreaOwner(real.x, real.y));
@@ -2227,6 +2642,9 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
             && sourceQuery.getName() != null) {
           // Same underline affordance as table cards (painter matches mouseOverTableName).
           newOver = sourceQuery.getName();
+        } else if (areaOwner.getParent() instanceof SourceJson sourceJson
+            && sourceJson.getName() != null) {
+          newOver = sourceJson.getName();
         }
       }
       if ((mouseOverTableName == null && newOver != null)

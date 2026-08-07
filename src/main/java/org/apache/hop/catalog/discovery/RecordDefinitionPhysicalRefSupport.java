@@ -47,6 +47,7 @@ public final class RecordDefinitionPhysicalRefSupport {
       case CSV, PARQUET -> definition.getPhysicalFile() != null;
       case ICEBERG -> definition.getPhysicalIcebergTable() != null;
       case COMPOSITE -> hasCompositeSourceRef(definition);
+      case JSON -> hasJsonSourceRef(definition);
     };
   }
 
@@ -58,6 +59,16 @@ public final class RecordDefinitionPhysicalRefSupport {
     DvSourceRecord dvSource = definition.getDvSource();
     return !Utils.isEmpty(dvSource.getCompositeSourceModelFilename())
         && !Utils.isEmpty(dvSource.getCompositeSourceQueryName());
+  }
+
+  /** JSON feeds are refreshable when they point at a source model JSON object. */
+  static boolean hasJsonSourceRef(RecordDefinition definition) {
+    if (definition == null || definition.getDvSource() == null) {
+      return false;
+    }
+    DvSourceRecord dvSource = definition.getDvSource();
+    return !Utils.isEmpty(dvSource.getJsonSourceModelFilename())
+        && !Utils.isEmpty(dvSource.getJsonSourceName());
   }
 
   public static DvSourceType resolveSourceType(RecordDefinition definition) {
@@ -94,6 +105,7 @@ public final class RecordDefinitionPhysicalRefSupport {
       case CSV, PARQUET -> fromPhysicalFile(definition.getPhysicalFile());
       case ICEBERG -> fromPhysicalIcebergTable(definition.getPhysicalIcebergTable());
       case COMPOSITE -> fromCompositeSource(definition.getDvSource());
+      case JSON -> fromJsonSource(definition.getDvSource());
     };
   }
 
@@ -109,6 +121,20 @@ public final class RecordDefinitionPhysicalRefSupport {
     return PhysicalSourceRef.builder()
         .compositeSourceModelFilename(dvSource.getCompositeSourceModelFilename())
         .compositeSourceQueryName(dvSource.getCompositeSourceQueryName())
+        .build();
+  }
+
+  private static PhysicalSourceRef fromJsonSource(DvSourceRecord dvSource) throws HopException {
+    if (dvSource == null
+        || Utils.isEmpty(dvSource.getJsonSourceModelFilename())
+        || Utils.isEmpty(dvSource.getJsonSourceName())) {
+      throw new HopException(
+          BaseMessages.getString(
+              PKG, "RecordDefinitionPhysicalRefSupport.Error.MissingCompositeRef"));
+    }
+    return PhysicalSourceRef.builder()
+        .jsonSourceModelFilename(dvSource.getJsonSourceModelFilename())
+        .jsonSourceName(dvSource.getJsonSourceName())
         .build();
   }
 

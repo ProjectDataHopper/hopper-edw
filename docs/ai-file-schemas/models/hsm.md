@@ -23,6 +23,7 @@ Does **not** define vault hubs/sats (that is `.hdv`).
 | `tables` / `table` | Physical source tables |
 | `relationships` / `relationship` | PK/FK style relationships |
 | `queries` / `query` | Multi-table source queries (when present) |
+| `json-sources` / `json-source` | JSON extractions from a parent field (when present) |
 
 ## Table essentials
 
@@ -39,6 +40,17 @@ Does **not** define vault hubs/sats (that is `.hdv`).
 ## Query / COMPOSITE essentials
 
 When present: joins, projection, WHERE, generation mode, optional published catalog feed name. Publishing creates a catalog COMPOSITE `DV_SOURCE` that `.hdv` hubs/sats can use as `recordSource`.
+
+## JSON source essentials
+
+When present under `json-sources` / `json-source`:
+
+- `parentSourceKind` (`TABLE` / `QUERY` / `JSON`)
+- `parentSourceName`, `jsonFieldName`
+- `fields` / `field`: output name, JsonPath (`path`), optional pass-through parent field, Hop type, key position
+- Publishing creates a catalog **JSON** `DV_SOURCE` pointing at the `.hsm` + JSON object name
+
+Sample: [hsm-json-excerpt.xml](../samples/hsm-json-excerpt.xml).
 
 ## Anti-patterns
 

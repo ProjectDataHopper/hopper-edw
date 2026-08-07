@@ -146,6 +146,11 @@
       <artifactId>hop-transform-insertupdate</artifactId>
       <version>${hop.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-transform-json</artifactId>
+      <version>${hop.version}</version>
+    </dependency>
     <!-- LangChain4j language model chat (provided when the Hop module is on the classpath) -->
     <dependency>
       <groupId>org.apache.hop</groupId>

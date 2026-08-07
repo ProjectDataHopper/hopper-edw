@@ -4,11 +4,13 @@
 
 toc::[]
 
-The **source modeler** captures source-system structure (tables, primary keys, foreign keys, and multi-table **source queries**) so Data Vault designers can feed hubs, links, and satellites without hand-written SQL for every join.
+The **source modeler** captures source-system structure (tables, primary keys, foreign keys, multi-table **source queries**, and **source JSON** extractions) so Data Vault designers can feed hubs, links, and satellites without hand-written SQL for every join.
 
 Models are saved as **`.hsm`** files and open in Hop GUI with the same interaction style as `.hdv` / `.hbv` / `.hdm` (canvas, dialogs, undo, notes, check model).
 
 image::images/source-modeler-retail-example-with-query-dialog-generated-sql.png[Retail source modeler (source-tables-crm.hsm) with All customer info query dialog and generated SQL,align="center"]
+
+image::images/source-modeler-example.png[Source modeler canvas with tables, relationships, a multi-table query, and a JSON source card,align="center"]
 
 == Why a source modeler?
 
@@ -44,9 +46,27 @@ Catalog DV_SOURCE (single-table OR COMPOSITE feed)
 |**Source query**
 |Named multi-table projection: driving table, ordered joins, column list, optional WHERE, generation mode (`AUTO` / `SQL` / `PIPELINE`).
 
+|**Source JSON**
+|Named JSON extraction: parent table/query/JSON source, JSON field, projected fields (JsonPath + pass-through keys). JsonInput rules apply (top-level leaves + at most one array). Publish as catalog type `JSON`. Chain Source JSON objects for nested arrays.
+
 |**Note**
 |Canvas documentation (same note pads as other modelers).
 |===
+
+== Source JSON
+
+. **Add source JSON** (toolbar or canvas context), or double-click an existing teal **JSON** card.
+. On **General**: choose **parent kind** (table, query, or another JSON source), parent name, and the **JSON field** that holds the document.
+. On **Fields**:
+** **Add parent primary keys** — pass-through grain columns.
+** **Sample and propose fields…** — samples non-empty JSON from the parent (database tables and SQL-mode queries) and proposes JsonPaths + types (including epoch → Date). If multiple arrays exist, pick one to expand; others can be emitted as JSON strings for chaining.
+** **Paste sample JSON…** — offline / Kafka design without a live parent sample.
+** **Preview data** — runs the generated parent + JsonInput pipeline with a row limit.
+. Publish to the catalog (context menu). Bind hubs/links/sats to the feed name like any other `DV_SOURCE`.
+
+Parent **SourceTable** objects currently support **database** physical types for generation and sampling. File/Kafka payloads should land in a database table (or a Source Query over database tables) first. Nested arrays: first Source JSON projects nested arrays as JSON-string fields; a second Source JSON expands that field.
+
+Sample excerpt: link:ai-file-schemas/samples/hsm-json-excerpt.xml[hsm-json-excerpt.xml].
 
 == Schema import
 
