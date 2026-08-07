@@ -35,6 +35,12 @@ For a slide-style executive summary, see [presentations/hop-data-vault-overview.
 | Source modeler (`.hsm`) + multi-table queries / composite feeds | Available | [source-modeler-overview.adoc](source-modeler-overview.adoc) |
 | Project / Search Everywhere for models and plugin metadata | Available (Hop 2.19) | [search.adoc](search.adoc) |
 | Resource definition validation (issues, proposals, acknowledgements) | Available | [resource-definition-validation.adoc](resource-definition-validation.adoc) |
+| Metadata harvesting (live source discovery + OPS history, distinct from load) | Available (Phase 1–4) | [metadata-harvesting.adoc](metadata-harvesting.adoc) |
+| Schema gate `HARVEST_RUN` (reuse harvest without rediscovery) | Available (Phase 2) | [metadata-harvesting.adoc](metadata-harvesting.adoc), [resource-definition-validation.adoc](resource-definition-validation.adoc) |
+| Schema harvest history browser (group + subject UI) | Available (Phase 3) | [metadata-harvesting.adoc](metadata-harvesting.adoc) |
+| Model-check prefers harvest for type checks | Available (Phase 4) | [metadata-harvesting.adoc](metadata-harvesting.adoc) |
+| PK/FK drift on harvest (OPS + optional catalog FK contract) | Available | [metadata-harvesting.adoc](metadata-harvesting.adoc) |
+| Apply harvest FKs → catalog / generate `.hsm` from harvest | Available | [metadata-harvesting.adoc](metadata-harvesting.adoc) |
 | Catalog version tags + schema impact simulation (CI/CD gate, blast radius) | Available | [resource-definition-validation.adoc](resource-definition-validation.adoc), [data-catalog.adoc](data-catalog.adoc) |
 | Data quality measure + quality gate (content rules, persist, alerts) | Available (Phase 2) | [data-quality.adoc](data-quality.adoc) |
 | Data Vault modeler (`.hdv`) | Available | [datavault-plugin.adoc](datavault-plugin.adoc) |

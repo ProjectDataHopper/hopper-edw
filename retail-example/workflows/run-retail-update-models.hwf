@@ -97,9 +97,33 @@ limitations under the License.
     </action>
     <action>
       <resourceDefinitionGroup>retail-sources</resourceDefinitionGroup>
+      <catalogConnection>local-catalog</catalogConnection>
+      <baselineMode>WORKING_CATALOG</baselineMode>
+      <baselineVersionTag/>
+      <recordSourceGroupFilter/>
+      <connectionNameFilter/>
+      <persistHistory>Y</persistHistory>
+      <historyDatabase>OPS</historyDatabase>
+      <historySchema>dv_ops</historySchema>
+      <autoCreateTables>Y</autoCreateTables>
+      <publishCatalogDefinitions>Y</publishCatalogDefinitions>
+      <failOnPersistError>Y</failOnPersistError>
+      <failOnDiscoveryErrors>N</failOnDiscoveryErrors>
+      <reportOutputPath>${PROJECT_HOME}/work/reports</reportOutputPath>
+      <name>Harvest source metadata</name>
+      <description>Discover live source schemas, persist schema_harvest_* history (no catalog rewrite, no load)</description>
+      <type>HARVEST_SOURCE_METADATA</type>
+      <attributes/>
+      <xloc>208</xloc>
+      <yloc>48</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <resourceDefinitionGroup>retail-sources</resourceDefinitionGroup>
       <targetCatalogVersion/>
-      <compareMode>WORKING_VS_VERSION</compareMode>
-      <baselineCatalogVersion>v1.1.0</baselineCatalogVersion>
+      <compareMode>HARVEST_RUN</compareMode>
+      <baselineCatalogVersion/>
       <reportOutputPath>${PROJECT_HOME}/work/reports</reportOutputPath>
       <reportFileBaseName>retail-schema-validation</reportFileBaseName>
       <reportFormat>BOTH</reportFormat>
@@ -108,10 +132,15 @@ limitations under the License.
       <includeImpact>Y</includeImpact>
       <checkTargetDatabases>Y</checkTargetDatabases>
       <expectAutomaticTargetTableCreation>${EXPECT_AUTOMATIC_TARGET_TABLE_CREATION}</expectAutomaticTargetTableCreation>
+      <validationParallelism>8</validationParallelism>
+      <harvestRunId>${DV_SCHEMA_HARVEST_RUN_ID}</harvestRunId>
+      <harvestHistoryDatabase>OPS</harvestHistoryDatabase>
+      <harvestHistorySchema>dv_ops</harvestHistorySchema>
       <name>Validate resource definitions</name>
+      <description>Schema gate from the prior harvest (no second live discovery); optional target DDL checks</description>
       <type>VALIDATE_RESOURCE_DEFINITIONS</type>
       <attributes/>
-      <xloc>224</xloc>
+      <xloc>400</xloc>
       <yloc>48</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -136,7 +165,7 @@ limitations under the License.
       <description>Profile CRM source extracts against retail-source-quality rules</description>
       <type>MEASURE_DATA_QUALITY</type>
       <attributes/>
-      <xloc>464</xloc>
+      <xloc>640</xloc>
       <yloc>48</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -158,7 +187,7 @@ limitations under the License.
       <description>Fail the workflow when source quality has blocking findings</description>
       <type>EVALUATE_QUALITY_GATE</type>
       <attributes/>
-      <xloc>672</xloc>
+      <xloc>848</xloc>
       <yloc>48</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -248,8 +277,14 @@ limitations under the License.
       <logModelCheckFailures>Y</logModelCheckFailures>
       <abortOnModelCheckFailures>Y</abortOnModelCheckFailures>
       <detailedDataTypeChecking>Y</detailedDataTypeChecking>
+      <modelCheckParallelism>8</modelCheckParallelism>
+      <ignoreModelCheckWarnings>N</ignoreModelCheckWarnings>
+      <writeValidationReport>N</writeValidationReport>
+      <validationReportFolder>${PROJECT_HOME}/work/reports</validationReportFolder>
+      <validationReportFormat>MARKDOWN</validationReportFormat>
       <updateTargetDatabaseStructure>Y</updateTargetDatabaseStructure>
       <failIfDdlNeeded>N</failIfDdlNeeded>
+      <doNotUpdateTargetDatabase>N</doNotUpdateTargetDatabase>
       <publishToCatalog>Y</publishToCatalog>
       <dataCatalogConnection>local-catalog</dataCatalogConnection>
       <ensureSpecialRecords>Y</ensureSpecialRecords>
@@ -280,9 +315,16 @@ limitations under the License.
   <hops>
     <hop>
       <from>Start</from>
-      <to>Validate resource definitions</to>
+      <to>Harvest source metadata</to>
       <evaluation>Y</evaluation>
       <unconditional>Y</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Harvest source metadata</from>
+      <to>Validate resource definitions</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
       <enabled>Y</enabled>
     </hop>
     <hop>

@@ -49,6 +49,7 @@ Documentation for the **hop-datavault** plugin (development **0.8.0-SNAPSHOT**, 
 | [datavault-source.adoc](datavault-source.adoc) | `DV_SOURCE` record definitions (database, file, **composite**) |
 | [datavault-source-database.adoc](datavault-source-database.adoc) | Database-backed source fields |
 | [resource-definition-validation.adoc](resource-definition-validation.adoc) | Schema gate action, GUI validate, impact, proposals, HTML/MD reports, DTAP |
+| [metadata-harvesting.adoc](metadata-harvesting.adoc) | **Metadata harvest** as a distinct EDW phase: OPS history, `HARVEST_RUN` gate, GUI, apply FKs / generate `.hsm` |
 | [data-quality.adoc](data-quality.adoc) | Content quality measure, gate, history, alert sinks (Phase 2) |
 | [record-definition-input.adoc](record-definition-input.adoc) | Pipeline transform: read catalog definitions as rows |
 | [record-definition-output.adoc](record-definition-output.adoc) | Pipeline transform: write/discover/migrate catalog definitions |

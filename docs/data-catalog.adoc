@@ -119,6 +119,8 @@ A catalog sources version freezes the **source contracts used by a resource defi
 . Use **Tag catalog version** to snapshot all source definitions currently referenced by the group's models.
 . Use **List catalog versions** to review existing tags, timestamps, and record counts.
 . Use **Validate sources** for an interactive schema check: a design-time options dialog asks for the baseline (working catalog or version tag) and which axes to check (live sources, version drift, target models, target databases). Length remediation expands models and DV/BV/DM DDL from the catalog without rewriting catalog records.
+. Use **Harvest history…** to browse persisted schema harvest runs and drift for sources used by the group.
+. Use **Apply harvest to catalog…** / **Generate .hsm from harvest…** to promote harvest FK (and optional field) inventory into catalog contracts or a source model (see link:metadata-harvesting.adoc[Metadata harvesting]).
 
 **From the Data Catalog perspective**
 
@@ -127,7 +129,7 @@ A catalog sources version freezes the **source contracts used by a resource defi
 . Choose the **resource definition group** that defines source scope, then enter the tag and optional description.
 . Expand **Catalog sources versions** under that connection to browse tags and open frozen record definitions **read-only** (snapshots are never edited from the UI).
 
-image::images/resource-definition-group-editor-with-version-mgt-buttons.png[Resource definition group editor showing List catalog versions, Tag catalog version, and Validate sources,align="center"]
+image::images/resource-definition-group-editor.png[Resource definition group editor for retail-sources with harvest actions, lineage, catalog version buttons, and Validate sources,align="center"]
 
 Duplicate tags are rejected. Snapshot contents are immutable: editing working-tree JSON after tagging does not change the frozen version.
 
@@ -142,6 +144,7 @@ Use tagged versions as the expected contract for the **Validate resource definit
 == Related documents
 
 * link:datavault-source.adoc[Data Vault Source]
+* link:metadata-harvesting.adoc[Metadata harvesting]
 * link:record-definition-input.adoc[Record Definition Input transform]
 * link:record-definition-output.adoc[Record Definition Output transform]
 * link:database-table-metadata.adoc[Database Table Metadata transform]

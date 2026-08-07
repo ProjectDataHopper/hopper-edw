@@ -270,6 +270,13 @@ public final class ValidationFindingFormatter {
           Const.NVL(baselineVersion, "?"),
           Const.NVL(catalogVersion, "?"));
     }
+    if (mode == SchemaCompareMode.HARVEST_RUN) {
+      String run =
+          !Utils.isEmpty(catalogVersion)
+              ? catalogVersion.trim()
+              : !Utils.isEmpty(baselineVersion) ? baselineVersion.trim() : "?";
+      return BaseMessages.getString(PKG, "ValidationFindingFormatter.Summary.What.HarvestRun", run);
+    }
     // LIVE_SOURCE
     if (!Utils.isEmpty(catalogVersion) || !Utils.isEmpty(baselineVersion)) {
       String tag = !Utils.isEmpty(catalogVersion) ? catalogVersion.trim() : baselineVersion.trim();
@@ -296,6 +303,9 @@ public final class ValidationFindingFormatter {
           "ValidationFindingFormatter.Summary.Expected.Version",
           Const.NVL(baselineVersion, "?"));
     }
+    if (mode == SchemaCompareMode.HARVEST_RUN) {
+      return BaseMessages.getString(PKG, "ValidationFindingFormatter.Summary.Expected.Harvest");
+    }
     // WORKING_VS_VERSION
     if (!Utils.isEmpty(baselineVersion) || !Utils.isEmpty(catalogVersion)) {
       String tag = !Utils.isEmpty(baselineVersion) ? baselineVersion.trim() : catalogVersion.trim();
@@ -313,6 +323,11 @@ public final class ValidationFindingFormatter {
     if (mode == SchemaCompareMode.VERSION_VS_VERSION) {
       return BaseMessages.getString(
           PKG, "ValidationFindingFormatter.Summary.Actual.Version", Const.NVL(catalogVersion, "?"));
+    }
+    if (mode == SchemaCompareMode.HARVEST_RUN) {
+      String run =
+          !Utils.isEmpty(catalogVersion) ? catalogVersion.trim() : Const.NVL(baselineVersion, "?");
+      return BaseMessages.getString(PKG, "ValidationFindingFormatter.Summary.Actual.Harvest", run);
     }
     return BaseMessages.getString(PKG, "ValidationFindingFormatter.Summary.Actual.Working");
   }

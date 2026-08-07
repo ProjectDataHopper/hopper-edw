@@ -31,5 +31,11 @@ public enum SchemaCompareMode {
    * Expected = {@code baselineVersionTag}; actual = {@code catalogVersionTag} (offline version
    * diff).
    */
-  VERSION_VS_VERSION
+  VERSION_VS_VERSION,
+  /**
+   * Actual = persisted schema harvest run (OPS {@code schema_harvest_*}); no live source discovery.
+   * Expected contract was already compared during harvest (working catalog or version tag). Use
+   * after {@code Harvest source metadata}; run id from request or {@code DV_SCHEMA_HARVEST_RUN_ID}.
+   */
+  HARVEST_RUN
 }

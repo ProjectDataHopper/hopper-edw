@@ -53,6 +53,12 @@ image::images/action-data-vault-update.png[Data Vault Update action dialog,align
 |Detailed data type checking
 |When enabled (default: on), model check validates source-to-target field type compatibility using the live source schema for database sources. Disable to validate using stored source field metadata only (faster, no database round-trip).
 
+|Prefer last harvest for type checks
+|When detailed checking is on (default: on), reuse DISCOVERED layouts from a schema harvest (`${DV_SCHEMA_HARVEST_RUN_ID}` or configured run id) instead of querying each source table. Falls back to live discovery when no harvest is available. See link:metadata-harvesting.adoc[Metadata harvesting].
+
+|Harvest run id / history database
+|Optional harvest location for type-check reuse.
+
 |Parallel pipeline copies
 |Number of Pipeline Executor copies used to run staged update pipelines in parallel (round-robin distribution). Default is `1` (sequential orchestration with one worker).
 

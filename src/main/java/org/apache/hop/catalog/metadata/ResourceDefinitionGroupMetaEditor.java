@@ -230,6 +230,42 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
     fdBrowseLineage.bottom = new FormAttachment(100, 0);
     wBrowseLineage.setLayoutData(fdBrowseLineage);
 
+    Button wHarvestHistory = new Button(parent, SWT.PUSH);
+    wHarvestHistory.setText(
+        BaseMessages.getString(PKG, "ResourceDefinitionGroupMetaEditor.HarvestHistory.Label"));
+    wHarvestHistory.setToolTipText(
+        BaseMessages.getString(PKG, "ResourceDefinitionGroupMetaEditor.HarvestHistory.ToolTip"));
+    wHarvestHistory.addListener(SWT.Selection, e -> browseHarvestHistory());
+    FormData fdHarvestHistory = new FormData();
+    fdHarvestHistory.right = new FormAttachment(wBrowseLineage, -margin);
+    fdHarvestHistory.bottom = new FormAttachment(100, 0);
+    wHarvestHistory.setLayoutData(fdHarvestHistory);
+
+    Button wApplyHarvestCatalog = new Button(parent, SWT.PUSH);
+    wApplyHarvestCatalog.setText(
+        BaseMessages.getString(PKG, "ResourceDefinitionGroupMetaEditor.ApplyHarvestCatalog.Label"));
+    wApplyHarvestCatalog.setToolTipText(
+        BaseMessages.getString(
+            PKG, "ResourceDefinitionGroupMetaEditor.ApplyHarvestCatalog.ToolTip"));
+    wApplyHarvestCatalog.addListener(SWT.Selection, e -> applyHarvestToCatalog());
+    FormData fdApplyHarvestCatalog = new FormData();
+    fdApplyHarvestCatalog.right = new FormAttachment(wHarvestHistory, -margin);
+    fdApplyHarvestCatalog.bottom = new FormAttachment(100, 0);
+    wApplyHarvestCatalog.setLayoutData(fdApplyHarvestCatalog);
+
+    Button wGenerateHsmFromHarvest = new Button(parent, SWT.PUSH);
+    wGenerateHsmFromHarvest.setText(
+        BaseMessages.getString(
+            PKG, "ResourceDefinitionGroupMetaEditor.GenerateHsmFromHarvest.Label"));
+    wGenerateHsmFromHarvest.setToolTipText(
+        BaseMessages.getString(
+            PKG, "ResourceDefinitionGroupMetaEditor.GenerateHsmFromHarvest.ToolTip"));
+    wGenerateHsmFromHarvest.addListener(SWT.Selection, e -> generateHsmFromHarvest());
+    FormData fdGenerateHsmFromHarvest = new FormData();
+    fdGenerateHsmFromHarvest.right = new FormAttachment(wApplyHarvestCatalog, -margin);
+    fdGenerateHsmFromHarvest.bottom = new FormAttachment(100, 0);
+    wGenerateHsmFromHarvest.setLayoutData(fdGenerateHsmFromHarvest);
+
     setWidgetsContent();
     resetChanged();
 
@@ -469,6 +505,27 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
     new org.apache.hop.datavault.hopgui.lineage.ReverseLineageBrowserDialog(
             hopGui.getShell(), hopGui, draft, hopGui.getVariables(), hopGui.getMetadataProvider())
         .open();
+  }
+
+  private void browseHarvestHistory() {
+    ResourceDefinitionGroupMeta draft = new ResourceDefinitionGroupMeta();
+    getWidgetsContent(draft);
+    org.apache.hop.catalog.hopgui.perspective.SchemaHarvestHistoryGuiSupport.openForGroup(
+        HopGui.getInstance(), draft);
+  }
+
+  private void applyHarvestToCatalog() {
+    ResourceDefinitionGroupMeta draft = new ResourceDefinitionGroupMeta();
+    getWidgetsContent(draft);
+    org.apache.hop.catalog.harvest.SchemaHarvestApplyGuiSupport.applyCatalogFksFromHarvest(
+        HopGui.getInstance(), draft);
+  }
+
+  private void generateHsmFromHarvest() {
+    ResourceDefinitionGroupMeta draft = new ResourceDefinitionGroupMeta();
+    getWidgetsContent(draft);
+    org.apache.hop.catalog.harvest.SchemaHarvestApplyGuiSupport.generateHsmFromHarvest(
+        HopGui.getInstance(), draft);
   }
 
   @Override

@@ -196,21 +196,16 @@ public final class GroupModelValidationReportFormatter {
     html.append("<p><strong>Models with errors:</strong> ")
         .append(report.modelsWithErrors())
         .append("</p>\n");
-    html.append("<p><strong>Total errors:</strong> ")
-        .append(report.totalErrors())
-        .append("</p>\n");
+    html.append("<p><strong>Total errors:</strong> ").append(report.totalErrors()).append("</p>\n");
     html.append("<p><strong>Unique shared warnings:</strong> ")
         .append(report.uniqueSharedWarnings())
         .append("</p>\n");
     html.append("<p><strong>Unique shared errors:</strong> ")
         .append(report.uniqueSharedErrors())
         .append("</p>\n");
-    html.append("<p><strong>Parallelism:</strong> ")
-        .append(report.parallelism())
-        .append("</p>\n");
+    html.append("<p><strong>Parallelism:</strong> ").append(report.parallelism()).append("</p>\n");
     if (report.startedAt() != null && report.finishedAt() != null) {
-      long ms =
-          Math.max(0, report.finishedAt().toEpochMilli() - report.startedAt().toEpochMilli());
+      long ms = Math.max(0, report.finishedAt().toEpochMilli() - report.startedAt().toEpochMilli());
       html.append("<p><strong>Duration:</strong> ").append(ms).append(" ms</p>\n");
     }
     html.append("</div>\n");
@@ -219,7 +214,8 @@ public final class GroupModelValidationReportFormatter {
     if (report.sharedFindings().isEmpty()) {
       html.append("<p><em>None</em></p>\n");
     } else {
-      html.append("<table>\n<thead><tr><th>Severity</th><th>Models</th><th>Message</th></tr></thead>\n<tbody>\n");
+      html.append(
+          "<table>\n<thead><tr><th>Severity</th><th>Models</th><th>Message</th></tr></thead>\n<tbody>\n");
       for (AggregatedFinding finding : report.sharedFindings()) {
         html.append("<tr><td class=\"")
             .append(severityCss(finding.severity()))

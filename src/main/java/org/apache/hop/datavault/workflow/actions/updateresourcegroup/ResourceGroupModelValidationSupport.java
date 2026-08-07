@@ -17,9 +17,13 @@
 package org.apache.hop.datavault.workflow.actions.updateresourcegroup;
 
 import java.util.List;
+import java.util.Map;
+import org.apache.hop.catalog.harvest.SchemaHarvestModelCheckSupport;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.logging.ILogChannel;
+import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DvModelCheckOptions;
@@ -66,9 +70,24 @@ public final class ResourceGroupModelValidationSupport {
     }
   }
 
+  /** Harvest reuse settings for parallel model checks. */
+  public record HarvestReuseSettings(
+      boolean preferHarvest,
+      String harvestRunId,
+      String harvestHistoryDatabase,
+      String harvestHistorySchema,
+      String harvestCatalogConnection,
+      String harvestResourceGroup) {
+
+    public static HarvestReuseSettings disabled() {
+      return new HarvestReuseSettings(false, null, null, null, null, null);
+    }
+  }
+
   /**
    * Checks each model with at most {@code parallelism} concurrent tasks. Each task uses its own
-   * {@link DvModelCheckOptions} session (no shared JDBC cache across threads).
+   * {@link DvModelCheckOptions} session (no shared JDBC cache across threads). When harvest reuse
+   * is enabled, DISCOVERED layouts are loaded once and pre-seeded into each session cache.
    */
   public static List<ModelCheckOutcome> checkModels(
       List<ModelUpdateJob> jobs,
@@ -77,19 +96,86 @@ public final class ResourceGroupModelValidationSupport {
       IVariables variables,
       IHopMetadataProvider metadataProvider)
       throws HopException {
+    return checkModels(
+        jobs,
+        detailedDataTypeChecking,
+        parallelism,
+        HarvestReuseSettings.disabled(),
+        variables,
+        metadataProvider,
+        null);
+  }
+
+  public static List<ModelCheckOutcome> checkModels(
+      List<ModelUpdateJob> jobs,
+      boolean detailedDataTypeChecking,
+      int parallelism,
+      HarvestReuseSettings harvestReuse,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider,
+      ILogChannel log)
+      throws HopException {
     if (jobs == null || jobs.isEmpty()) {
       return List.of();
     }
+    Map<String, IRowMeta> harvestedLayouts = Map.of();
+    if (harvestReuse != null && harvestReuse.preferHarvest() && detailedDataTypeChecking) {
+      DvModelCheckOptions probe = DvModelCheckOptions.forCheckRun();
+      probe.setDetailedDataTypeChecking(true);
+      probe.setPreferHarvestForLiveFields(true);
+      probe.setHarvestRunId(harvestReuse.harvestRunId());
+      probe.setHarvestHistoryDatabase(harvestReuse.harvestHistoryDatabase());
+      probe.setHarvestHistorySchema(harvestReuse.harvestHistorySchema());
+      probe.setHarvestCatalogConnection(harvestReuse.harvestCatalogConnection());
+      probe.setHarvestResourceGroup(harvestReuse.harvestResourceGroup());
+      try {
+        harvestedLayouts =
+            SchemaHarvestModelCheckSupport.loadDiscoveredFieldsByDatabaseKey(
+                probe, variables, metadataProvider, log);
+        if (log != null) {
+          if (harvestedLayouts.isEmpty()) {
+            log.logBasic(
+                "No harvest layouts available for model-check reuse (live discovery will be used)");
+          } else {
+            log.logBasic(
+                "Loaded "
+                    + harvestedLayouts.size()
+                    + " harvested table layout(s) for parallel model-check reuse");
+          }
+        }
+      } catch (Exception e) {
+        if (log != null) {
+          log.logBasic(
+              "Unable to load harvest for model-check reuse: "
+                  + Const.NVL(e.getMessage(), e.getClass().getSimpleName()));
+        }
+        harvestedLayouts = Map.of();
+      } finally {
+        probe.close();
+      }
+    }
+
     int parallel = ParallelValidationSupport.resolveParallelism(parallelism);
+    Map<String, IRowMeta> layoutsForTasks = harvestedLayouts;
     return ParallelValidationSupport.map(
         parallel,
         jobs,
-        (job, index) -> checkOne(job, detailedDataTypeChecking, variables, metadataProvider));
+        (job, index) ->
+            checkOne(job, detailedDataTypeChecking, layoutsForTasks, variables, metadataProvider));
   }
 
   static ModelCheckOutcome checkOne(
       ModelUpdateJob job,
       boolean detailedDataTypeChecking,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider) {
+    return checkOne(job, detailedDataTypeChecking, Map.of(), variables, metadataProvider);
+  }
+
+  static ModelCheckOutcome checkOne(
+      ModelUpdateJob job,
+      boolean detailedDataTypeChecking,
+      Map<String, IRowMeta> harvestedLayouts,
       IVariables variables,
       IHopMetadataProvider metadataProvider) {
     if (job == null) {
@@ -100,7 +186,11 @@ public final class ResourceGroupModelValidationSupport {
           switch (job.layer()) {
             case DATA_VAULT ->
                 checkDataVault(
-                    job.modelFile(), detailedDataTypeChecking, variables, metadataProvider);
+                    job.modelFile(),
+                    detailedDataTypeChecking,
+                    harvestedLayouts,
+                    variables,
+                    metadataProvider);
             case BUSINESS_VAULT -> checkBusinessVault(job.modelFile(), variables, metadataProvider);
             case DIMENSIONAL -> checkDimensional(job.modelFile(), variables, metadataProvider);
           };
@@ -113,6 +203,7 @@ public final class ResourceGroupModelValidationSupport {
   private static List<ICheckResult> checkDataVault(
       String modelFile,
       boolean detailedDataTypeChecking,
+      Map<String, IRowMeta> harvestedLayouts,
       IVariables variables,
       IHopMetadataProvider metadataProvider)
       throws HopException {
@@ -120,6 +211,9 @@ public final class ResourceGroupModelValidationSupport {
         ResourceDefinitionGroupResolver.loadDataVaultModel(modelFile, variables, metadataProvider);
     try (DvModelCheckOptions options = DvModelCheckOptions.forCheckRun()) {
       options.setDetailedDataTypeChecking(detailedDataTypeChecking);
+      if (harvestedLayouts != null && !harvestedLayouts.isEmpty()) {
+        SchemaHarvestModelCheckSupport.applyToCache(options.ensureCache(), harvestedLayouts);
+      }
       return model.check(metadataProvider, variables, options);
     }
   }

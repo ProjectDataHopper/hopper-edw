@@ -303,12 +303,19 @@ public final class SourceFieldMetadataEquivalenceSupport {
   }
 
   /**
-   * Compares integer lengths using Hop JDBC canonical sizes.
+   * Compares integer lengths using Hop / JDBC canonical physical families.
    *
-   * <p>Catalog lengths often reflect display width (for example {@code 3} for a 0-100 score) while
-   * JDBC discovery normalizes physical types to fixed lengths ({@code SMALLINT -> 4}, {@code
-   * INTEGER -> 9}, signed {@code BIGINT -> 15}). PostgreSQL DDL generation in Hop also maps lengths
-   * below 5 to {@code SMALLINT}, so a stored length of 3 round-trips as 4.
+   * <p>Catalog lengths often reflect Hop conventions while JDBC {@code COLUMN_SIZE} uses
+   * decimal-digit widths for fixed integer types:
+   *
+   * <ul>
+   *   <li>SMALLINT — Hop {@code 4}, JDBC often {@code 5}
+   *   <li>INTEGER — Hop {@code 9}, JDBC often {@code 10} (max digits of signed int32)
+   *   <li>BIGINT — Hop {@code 15}, JDBC often {@code 19}
+   * </ul>
+   *
+   * Catalog display widths (for example {@code 3} for a 0–100 score) that round-trip as SMALLINT
+   * must not flag as drift against JDBC {@code 4}/{@code 5}.
    */
   private static boolean integerLengthEquivalent(String left, String right) {
     int leftLength = parseDimension(left);
@@ -319,17 +326,24 @@ public final class SourceFieldMetadataEquivalenceSupport {
     return canonicalHopIntegerLength(leftLength) == canonicalHopIntegerLength(rightLength);
   }
 
+  /**
+   * Maps a reported integer length into a Hop physical family token: {@code 4} SMALLINT, {@code 9}
+   * INTEGER, {@code 15} BIGINT. Unclassified lengths are returned unchanged.
+   */
   private static int canonicalHopIntegerLength(int length) {
     if (length <= 0) {
       return length;
     }
-    if (length < 5) {
+    // SMALLINT family: Hop 4, JDBC 5, and smaller display widths that DDL maps to SMALLINT.
+    if (length <= 5) {
       return 4;
     }
-    if (length <= 9) {
+    // INTEGER family: Hop 9, JDBC 10 (signed int32 digit width).
+    if (length <= 10) {
       return 9;
     }
-    if (length <= 15) {
+    // BIGINT family: Hop 15, JDBC 19 (signed int64 digit width).
+    if (length <= 19) {
       return 15;
     }
     return length;

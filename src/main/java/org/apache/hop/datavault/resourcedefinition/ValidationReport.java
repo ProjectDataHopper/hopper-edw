@@ -42,6 +42,10 @@ public final class ValidationReport {
     FIELD_REMOVED,
     FIELD_TYPE_CHANGED,
     PRIMARY_KEY_CHANGED,
+    /** Live/catalog foreign-key constraint added, removed, or composition changed. */
+    FOREIGN_KEY_ADDED,
+    FOREIGN_KEY_REMOVED,
+    FOREIGN_KEY_CHANGED,
     MAPPING_BROKEN,
     /** Model attribute length/type is narrower than the baseline catalog contract. */
     MODEL_ATTRIBUTE_NARROWER,

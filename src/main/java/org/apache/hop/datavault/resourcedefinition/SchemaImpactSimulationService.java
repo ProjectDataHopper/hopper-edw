@@ -24,6 +24,10 @@ import java.util.Objects;
 import org.apache.hop.catalog.discovery.RecordDefinitionDiscoveryService;
 import org.apache.hop.catalog.discovery.RecordDefinitionPhysicalRefSupport;
 import org.apache.hop.catalog.discovery.RecordDefinitionSchemaDiffSupport;
+import org.apache.hop.catalog.harvest.SchemaHarvestModels.HarvestResult;
+import org.apache.hop.catalog.harvest.history.SchemaHarvestHistoryPublisher;
+import org.apache.hop.catalog.harvest.history.SchemaHarvestHistoryReader;
+import org.apache.hop.catalog.harvest.history.SchemaHarvestHistoryReader.HistoryConnection;
 import org.apache.hop.catalog.hopgui.preview.RecordDefinitionPreviewSupport;
 import org.apache.hop.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.apache.hop.catalog.model.RecordDefinition;
@@ -31,6 +35,7 @@ import org.apache.hop.catalog.model.RecordDefinitionKey;
 import org.apache.hop.catalog.registry.RecordDefinitionRegistry;
 import org.apache.hop.catalog.versioning.CatalogVersionService;
 import org.apache.hop.core.Const;
+import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
@@ -111,6 +116,7 @@ public final class SchemaImpactSimulationService {
 
     ValidationModels models =
         ResourceDefinitionGroupResolver.resolve(group, variables, metadataProvider);
+    String harvestRunIdUsed = null;
     ValidationReport report =
         switch (mode) {
           case LIVE_SOURCE ->
@@ -138,6 +144,12 @@ public final class SchemaImpactSimulationService {
                   variables,
                   metadataProvider,
                   validationParallelism);
+          case HARVEST_RUN -> {
+            HarvestLoad loaded =
+                loadHarvestForGate(request, group, models, variables, metadataProvider);
+            harvestRunIdUsed = loaded.runId();
+            yield loaded.report();
+          }
         };
 
     // Optional second axis: working catalog vs version baseline while also checking live sources.
@@ -189,11 +201,15 @@ public final class SchemaImpactSimulationService {
     String catalogVersionUsed =
         mode == SchemaCompareMode.LIVE_SOURCE
             ? catalogVersionTag
-            : mode == SchemaCompareMode.VERSION_VS_VERSION ? catalogVersionTag : null;
+            : mode == SchemaCompareMode.VERSION_VS_VERSION
+                ? catalogVersionTag
+                : mode == SchemaCompareMode.HARVEST_RUN ? harvestRunIdUsed : null;
     String baselineUsed =
         mode == SchemaCompareMode.LIVE_SOURCE
             ? (catalogVersionTag != null ? catalogVersionTag : baselineVersionTag)
-            : baselineVersionTag;
+            : mode == SchemaCompareMode.HARVEST_RUN
+                ? (harvestRunIdUsed != null ? "HARVEST:" + harvestRunIdUsed : "HARVEST")
+                : baselineVersionTag;
 
     List<LineageDiffResult> lineageDiffs = List.of();
     try {
@@ -287,6 +303,77 @@ public final class SchemaImpactSimulationService {
             .detailedDataTypeChecking(group == null || group.isDetailedDataTypeChecking())
             .build();
     return run(request, group, variables, metadataProvider);
+  }
+
+  private record HarvestLoad(String runId, ValidationReport report) {}
+
+  private static HarvestLoad loadHarvestForGate(
+      SchemaImpactSimulationRequest request,
+      ResourceDefinitionGroupMeta group,
+      ValidationModels models,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider)
+      throws HopException {
+    String groupName = group != null ? group.getName() : request.resourceDefinitionGroup();
+    String catalogConnection =
+        !Utils.isEmpty(request.harvestCatalogConnection())
+            ? request.harvestCatalogConnection()
+            : group != null ? group.getDataCatalogConnection() : null;
+    if (!Utils.isEmpty(catalogConnection) && variables != null) {
+      catalogConnection = variables.resolve(catalogConnection);
+    }
+
+    HistoryConnection history =
+        SchemaHarvestHistoryReader.resolveConnection(
+            request.harvestHistoryDatabase(),
+            request.harvestHistorySchema(),
+            catalogConnection,
+            variables,
+            metadataProvider);
+    if (history == null) {
+      throw new HopException(
+          BaseMessages.getString(PKG, "SchemaImpactSimulationService.Error.HarvestHistoryDb"));
+    }
+    DatabaseMeta databaseMeta =
+        SchemaHarvestHistoryReader.loadDatabaseMeta(history.databaseMetaName(), metadataProvider);
+    if (databaseMeta == null) {
+      throw new HopException(
+          BaseMessages.getString(
+              PKG,
+              "SchemaImpactSimulationService.Error.HarvestHistoryDbMissing",
+              history.databaseMetaName()));
+    }
+
+    String runId = trimToNull(request.harvestRunId());
+    if (runId == null && variables != null) {
+      String fromVar =
+          variables.getVariable(SchemaHarvestHistoryPublisher.VAR_SCHEMA_HARVEST_RUN_ID);
+      if (Utils.isEmpty(fromVar)) {
+        String resolved =
+            variables.resolve("${" + SchemaHarvestHistoryPublisher.VAR_SCHEMA_HARVEST_RUN_ID + "}");
+        if (!Utils.isEmpty(resolved) && !resolved.contains("${")) {
+          fromVar = resolved;
+        }
+      }
+      runId = trimToNull(fromVar);
+    }
+    if (runId == null) {
+      runId =
+          SchemaHarvestHistoryReader.findLatestRunId(
+              databaseMeta, history.schemaName(), groupName, variables);
+    }
+    if (Utils.isEmpty(runId)) {
+      throw new HopException(
+          BaseMessages.getString(
+              PKG, "SchemaImpactSimulationService.Error.HarvestRunNotFound", groupName));
+    }
+
+    HarvestResult harvest =
+        SchemaHarvestHistoryReader.loadHarvestResult(
+            databaseMeta, history.schemaName(), runId, variables);
+    ValidationReport report =
+        HarvestBackedValidationSupport.toValidationReport(harvest, models, variables);
+    return new HarvestLoad(runId, report);
   }
 
   private static ValidationReport simulateLive(

@@ -94,9 +94,18 @@ public class ActionValidateResourceDefinitions extends ActionBase implements Clo
   public static final String WIDGET_ID_EXPECT_AUTO_TARGET_CREATE =
       "validate-expect-auto-target-create";
   public static final String WIDGET_ID_VALIDATION_PARALLELISM = "validate-validation-parallelism";
+  public static final String WIDGET_ID_HARVEST_RUN_ID = "validate-harvest-run-id";
+  public static final String WIDGET_ID_HARVEST_HISTORY_DB = "validate-harvest-history-database";
+  public static final String WIDGET_ID_HARVEST_HISTORY_SCHEMA = "validate-harvest-history-schema";
 
   /** Extension-data key for downstream actions that want the report text. */
   public static final String RESULT_ATTR_REPORT = "schemaValidationReportText";
+
+  public static final String DEFAULT_HARVEST_RUN_ID =
+      "${"
+          + org.apache.hop.catalog.harvest.history.SchemaHarvestHistoryPublisher
+              .VAR_SCHEMA_HARVEST_RUN_ID
+          + "}";
 
   @GuiWidgetElement(
       id = WIDGET_ID_RESOURCE_GROUP,
@@ -261,10 +270,48 @@ public class ActionValidateResourceDefinitions extends ActionBase implements Clo
   @HopMetadataProperty
   private String validationParallelism;
 
+  /**
+   * Harvest run id for {@link SchemaCompareMode#HARVEST_RUN}. Default {@code
+   * ${DV_SCHEMA_HARVEST_RUN_ID}}; empty after resolve falls back to the latest run for the group.
+   */
+  @GuiWidgetElement(
+      id = WIDGET_ID_HARVEST_RUN_ID,
+      order = "1400",
+      type = GuiElementType.TEXT,
+      variables = true,
+      label = "i18n::ActionValidateResourceDefinitions.HarvestRunId.Label",
+      toolTip = "i18n::ActionValidateResourceDefinitions.HarvestRunId.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_PARENT_ID)
+  @HopMetadataProperty
+  private String harvestRunId = DEFAULT_HARVEST_RUN_ID;
+
+  @GuiWidgetElement(
+      id = WIDGET_ID_HARVEST_HISTORY_DB,
+      order = "1500",
+      type = GuiElementType.METADATA,
+      metadata = org.apache.hop.core.database.DatabaseMeta.class,
+      label = "i18n::ActionValidateResourceDefinitions.HarvestHistoryDatabase.Label",
+      toolTip = "i18n::ActionValidateResourceDefinitions.HarvestHistoryDatabase.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_PARENT_ID)
+  @HopMetadataProperty
+  private String harvestHistoryDatabase;
+
+  @GuiWidgetElement(
+      id = WIDGET_ID_HARVEST_HISTORY_SCHEMA,
+      order = "1600",
+      type = GuiElementType.TEXT,
+      variables = true,
+      label = "i18n::ActionValidateResourceDefinitions.HarvestHistorySchema.Label",
+      toolTip = "i18n::ActionValidateResourceDefinitions.HarvestHistorySchema.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_PARENT_ID)
+  @HopMetadataProperty
+  private String harvestHistorySchema;
+
   public ActionValidateResourceDefinitions() {
     super();
     this.expectAutomaticTargetTableCreation = "N";
     this.validationParallelism = "8";
+    this.harvestRunId = DEFAULT_HARVEST_RUN_ID;
   }
 
   public ActionValidateResourceDefinitions(ActionValidateResourceDefinitions meta) {
@@ -286,6 +333,9 @@ public class ActionValidateResourceDefinitions extends ActionBase implements Clo
             : "N";
     this.validationParallelism =
         meta.validationParallelism != null ? meta.validationParallelism : "8";
+    this.harvestRunId = meta.harvestRunId != null ? meta.harvestRunId : DEFAULT_HARVEST_RUN_ID;
+    this.harvestHistoryDatabase = meta.harvestHistoryDatabase;
+    this.harvestHistorySchema = meta.harvestHistorySchema;
   }
 
   /**
@@ -297,7 +347,8 @@ public class ActionValidateResourceDefinitions extends ActionBase implements Clo
     return Arrays.asList(
         SchemaCompareMode.LIVE_SOURCE.name(),
         SchemaCompareMode.WORKING_VS_VERSION.name(),
-        SchemaCompareMode.VERSION_VS_VERSION.name());
+        SchemaCompareMode.VERSION_VS_VERSION.name(),
+        SchemaCompareMode.HARVEST_RUN.name());
   }
 
   public List<String> getReportFormatOptions(
@@ -437,6 +488,18 @@ public class ActionValidateResourceDefinitions extends ActionBase implements Clo
             Integer.toString(parallelism)));
 
     long started = System.currentTimeMillis();
+    String resolvedHarvestRunId = resolveOptional(harvestRunId);
+    String resolvedHarvestDb = resolveOptional(harvestHistoryDatabase);
+    String resolvedHarvestSchema = resolveOptional(harvestHistorySchema);
+    if (mode == SchemaCompareMode.HARVEST_RUN) {
+      logBasic(
+          BaseMessages.getString(
+              PKG,
+              "ActionValidateResourceDefinitions.Log.HarvestRun",
+              Const.NVL(resolvedHarvestRunId, "(latest for group)"),
+              Const.NVL(resolvedHarvestDb, "(auto)")));
+    }
+
     SchemaImpactSimulationRequest request =
         SchemaImpactSimulationRequest.builder()
             .resourceDefinitionGroup(groupName)
@@ -448,6 +511,9 @@ public class ActionValidateResourceDefinitions extends ActionBase implements Clo
             .checkTargetDatabases(checkTargetDatabases)
             .expectAutomaticTargetTableCreation(expectAutoCreate)
             .validationParallelism(parallelism)
+            .harvestRunId(resolvedHarvestRunId)
+            .harvestHistoryDatabase(resolvedHarvestDb)
+            .harvestHistorySchema(resolvedHarvestSchema)
             .build();
 
     SchemaImpactSimulationResult simulation =

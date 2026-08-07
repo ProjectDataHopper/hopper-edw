@@ -76,6 +76,12 @@ Model checks for every selected DV/BV/DM model run **before** the update wave. R
 |Detailed data type checking
 |Live source schema checks for Data Vault models (higher latency over VPN).
 
+|Prefer last harvest for type checks
+|When detailed checking is on, reuse DISCOVERED layouts from **Harvest source metadata** (`${DV_SCHEMA_HARVEST_RUN_ID}` or latest for the group) instead of re-querying each source table. Default on; falls back to live discovery when no harvest is available.
+
+|Harvest run id / history database
+|Optional overrides for harvest reuse (defaults: `${DV_SCHEMA_HARVEST_RUN_ID}`, auto-resolved OPS).
+
 |Model check parallelism
 |Max concurrent model validations (default `8`, range 1–64, variables allowed). Independent of **Parallel pipeline copies** used for data loads.
 
@@ -109,13 +115,14 @@ From the workflow canvas context menu, **Open referenced object** lists every no
 == Typical chain
 
 ```
-Schema gate (Validate resource definitions)
+Harvest source metadata
+  → Schema gate (Validate resource definitions)
   → Measure / Evaluate source quality
   → Update resource definition group (retail-sources)
   → Advance load control
 ```
 
-See link:operations.adoc[Operations] for Docker runners and load overview screenshots, and link:resource-definition-validation.adoc[Resource definition validation] for the schema gate.
+See link:metadata-harvesting.adoc[Metadata harvesting] for the observation step, link:operations.adoc[Operations] for Docker runners and load overview screenshots, and link:resource-definition-validation.adoc[Resource definition validation] for the schema gate.
 
 == Related documentation
 

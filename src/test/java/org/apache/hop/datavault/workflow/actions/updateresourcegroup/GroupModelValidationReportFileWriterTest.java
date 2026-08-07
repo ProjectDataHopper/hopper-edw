@@ -55,11 +55,7 @@ class GroupModelValidationReportFileWriterTest {
 
     List<String> written =
         GroupModelValidationReportFileWriter.write(
-            tempDir.toString(),
-            "html-only-report",
-            report,
-            ReportFormat.HTML,
-            new Variables());
+            tempDir.toString(), "html-only-report", report, ReportFormat.HTML, new Variables());
 
     assertEquals(1, written.size());
     assertTrue(written.getFirst().endsWith(".html"));
@@ -74,25 +70,11 @@ class GroupModelValidationReportFileWriterTest {
   void markdownOnly_writesMarkdownNotHtml() throws Exception {
     GroupModelValidationReport report =
         new GroupModelValidationReport(
-            "g",
-            Instant.now(),
-            Instant.now(),
-            1,
-            1,
-            0,
-            0,
-            0,
-            0,
-            List.of(),
-            List.of());
+            "g", Instant.now(), Instant.now(), 1, 1, 0, 0, 0, 0, List.of(), List.of());
 
     List<String> written =
         GroupModelValidationReportFileWriter.write(
-            tempDir.toString(),
-            "md-only-report",
-            report,
-            ReportFormat.MARKDOWN,
-            new Variables());
+            tempDir.toString(), "md-only-report", report, ReportFormat.MARKDOWN, new Variables());
 
     assertEquals(1, written.size());
     assertTrue(written.getFirst().endsWith(".md"));

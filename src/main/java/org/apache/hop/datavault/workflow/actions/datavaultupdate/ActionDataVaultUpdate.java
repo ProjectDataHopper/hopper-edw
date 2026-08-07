@@ -169,6 +169,43 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
   @HopMetadataProperty
   private boolean detailedDataTypeChecking = true;
 
+  /**
+   * Prefer DISCOVERED field layouts from a schema harvest for detailed type checking (skips live
+   * JDBC when harvest data is available).
+   */
+  @GuiWidgetElement(
+      order = "0455",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::ActionDataVaultUpdate.PreferHarvestForTypeChecks.Label",
+      toolTip = "i18n::ActionDataVaultUpdate.PreferHarvestForTypeChecks.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_MODEL_TAB_ID)
+  @HopMetadataProperty
+  private boolean preferHarvestForTypeChecks = true;
+
+  @GuiWidgetElement(
+      order = "0456",
+      type = GuiElementType.TEXT,
+      variables = true,
+      label = "i18n::ActionDataVaultUpdate.HarvestRunId.Label",
+      toolTip = "i18n::ActionDataVaultUpdate.HarvestRunId.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_MODEL_TAB_ID)
+  @HopMetadataProperty
+  private String harvestRunId =
+      "${"
+          + org.apache.hop.catalog.harvest.history.SchemaHarvestHistoryPublisher
+              .VAR_SCHEMA_HARVEST_RUN_ID
+          + "}";
+
+  @GuiWidgetElement(
+      order = "0457",
+      type = GuiElementType.METADATA,
+      metadata = DatabaseMeta.class,
+      label = "i18n::ActionDataVaultUpdate.HarvestHistoryDatabase.Label",
+      toolTip = "i18n::ActionDataVaultUpdate.HarvestHistoryDatabase.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_MODEL_TAB_ID)
+  @HopMetadataProperty
+  private String harvestHistoryDatabase;
+
   @GuiWidgetElement(
       order = "0350",
       type = GuiElementType.TEXT,
@@ -304,6 +341,9 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
     this.logModelCheckFailures = meta.logModelCheckFailures;
     this.abortOnModelCheckFailures = meta.abortOnModelCheckFailures;
     this.detailedDataTypeChecking = meta.detailedDataTypeChecking;
+    this.preferHarvestForTypeChecks = meta.preferHarvestForTypeChecks;
+    this.harvestRunId = meta.harvestRunId;
+    this.harvestHistoryDatabase = meta.harvestHistoryDatabase;
     this.updateTargetDatabaseStructure = meta.updateTargetDatabaseStructure;
     this.ddlSqlFilename = meta.ddlSqlFilename;
     this.failIfDdlNeeded = meta.failIfDdlNeeded;
@@ -351,8 +391,15 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
 
       // Perform model check if requested
       if (logModelCheckFailures || abortOnModelCheckFailures) {
-        DvModelCheckOptions checkOptions = new DvModelCheckOptions();
+        DvModelCheckOptions checkOptions = DvModelCheckOptions.forCheckRun();
         checkOptions.setDetailedDataTypeChecking(detailedDataTypeChecking);
+        checkOptions.setPreferHarvestForLiveFields(preferHarvestForTypeChecks);
+        checkOptions.setHarvestRunId(harvestRunId);
+        checkOptions.setHarvestHistoryDatabase(harvestHistoryDatabase);
+        checkOptions.setHarvestCatalogConnection(dataCatalogConnection);
+        org.apache.hop.catalog.harvest.SchemaHarvestModelCheckSupport.warmCacheIfPreferred(
+            checkOptions, this, getMetadataProvider(), getLogChannel());
+        // model.check closes the options session (including cache) when not shared.
         List<ICheckResult> remarks = model.check(getMetadataProvider(), this, checkOptions);
         for (ICheckResult remark : remarks) {
           String message =

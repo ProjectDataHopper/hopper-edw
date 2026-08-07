@@ -48,6 +48,23 @@ public class DvModelCheckOptions implements AutoCloseable {
    */
   private boolean sharedSession;
 
+  /**
+   * When true with detailed type checking, prefer DISCOVERED layouts from a schema harvest (cache
+   * warm) over live JDBC for database sources. Falls back to live discovery when no harvest is
+   * available.
+   */
+  private boolean preferHarvestForLiveFields;
+
+  /** Optional harvest run id (empty → {@code DV_SCHEMA_HARVEST_RUN_ID} or latest for group). */
+  private String harvestRunId;
+
+  private String harvestHistoryDatabase;
+  private String harvestHistorySchema;
+  private String harvestCatalogConnection;
+
+  /** Resource definition group name used when resolving the latest harvest run. */
+  private String harvestResourceGroup;
+
   public static DvModelCheckOptions defaults() {
     return new DvModelCheckOptions();
   }

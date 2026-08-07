@@ -132,7 +132,7 @@ Retail wires **Validate resource definitions** in `workflows/run-retail-update-m
 
 Design-time: open metadata **Resource definition group** `retail-sources` for **Tag catalog version**, **List catalog versions**, and **Validate sources** (options dialog, then results + optional expand-from-catalog remediation). A sample multi-table remediation package for `address_line1` length 75 is under `workflows/schema-remediation/accept-address_line1/`.
 
-image::images/resource-definition-group-editor-with-version-mgt-buttons.png[Resource definition group retail-sources with catalog version and Validate sources buttons,align="center"]
+image::images/resource-definition-group-editor.png[Resource definition group retail-sources with harvest, lineage, catalog version, and Validate sources buttons,align="center"]
 
 image::images/resource-definition-group-validate-sources-dialog.png[Validate sources options dialog for baseline and check axes,align="center"]
 

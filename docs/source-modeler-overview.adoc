@@ -151,6 +151,7 @@ Vault **Check model** continues to validate hub/sat field mappings against catal
 
 * link:datavault-source.adoc[Data Vault sources] — catalog `DV_SOURCE` including composite feeds
 * link:data-catalog.adoc[Data catalog]
+* link:metadata-harvesting.adoc[Metadata harvesting] — generate or merge a `.hsm` from harvested FK inventory
 * link:datavault-plugin.adoc[Data Vault plugin]
 * link:getting-started-retail.adoc[Getting started — retail]
 * Plan: link:plans/source-modeler-hsm-plan.md[Source modeler plan (issue #105)]

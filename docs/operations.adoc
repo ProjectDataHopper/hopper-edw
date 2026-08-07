@@ -28,9 +28,11 @@ See link:../scripts/README.md[scripts/README.md] and link:../integration-tests/P
 
 Typical production workflow chain:
 
-1. **Data Vault Update** on `.hdv` — raw vault load (skips external read-only tables)
-2. **Business Vault Update** on `.hbv` — rebuild SCD2 / PIT tables
-3. **Dimensional Update** on `.hdm` — load marts
+1. **Harvest source metadata** — discover live source schemas, persist drift history (OPS); does not load the EDW (see link:metadata-harvesting.adoc[Metadata harvesting])
+2. **Validate resource definitions** — schema gate / policy on contracts (optional axes: live, version, target DDL)
+3. **Measure / evaluate source quality** — content rules (optional)
+4. **Update resource definition group** (or dedicated DV / BV / DM update actions) — load the warehouse
+5. Optional **Measure target quality** with alert-only disposition
 
 Configure on each action:
 
@@ -62,11 +64,14 @@ Full option reference: link:update-resource-definition-group-action.adoc[Update 
 Retail example (`run-retail-update.hwf` / `run-retail-update-models.hwf`):
 
 ```
-Schema gate (Validate resource definitions)
+Harvest source metadata (optional Phase 1 wiring)
+  → Schema gate (Validate resource definitions)
   → Measure / Evaluate source quality
   → Update resource definition group (retail-sources)
   → Advance load control
 ```
+
+Metadata harvest details: link:metadata-harvesting.adoc[Metadata harvesting].
 
 **Advanced:** you can still bracket custom multi-action graphs with:
 

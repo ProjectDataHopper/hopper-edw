@@ -20,3 +20,7 @@ limitations under the License.
 Planning and implementation documents for features in progress. These are **not** end-user documentation.
 
 For product documentation, start at [../README.md](../README.md) or [../feature-overview.md](../feature-overview.md).
+
+| Plan | Topic |
+|------|--------|
+| (session plan / issue #112) | Metadata harvesting as distinct EDW phase — product doc: [../metadata-harvesting.adoc](../metadata-harvesting.adoc) |

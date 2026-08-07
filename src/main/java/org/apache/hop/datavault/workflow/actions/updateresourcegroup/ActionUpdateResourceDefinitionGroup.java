@@ -219,6 +219,43 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
   private boolean detailedDataTypeChecking = true;
 
   /**
+   * When detailed type checking is on, reuse DISCOVERED layouts from the latest schema harvest
+   * (e.g. {@code DV_SCHEMA_HARVEST_RUN_ID}) instead of re-querying live source JDBC metadata.
+   */
+  @GuiWidgetElement(
+      order = "0525",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.PreferHarvestForTypeChecks.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.PreferHarvestForTypeChecks.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_VALIDATION_TAB_ID)
+  @HopMetadataProperty
+  private boolean preferHarvestForTypeChecks = true;
+
+  @GuiWidgetElement(
+      order = "0526",
+      type = GuiElementType.TEXT,
+      variables = true,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.HarvestRunId.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.HarvestRunId.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_VALIDATION_TAB_ID)
+  @HopMetadataProperty
+  private String harvestRunId =
+      "${"
+          + org.apache.hop.catalog.harvest.history.SchemaHarvestHistoryPublisher
+              .VAR_SCHEMA_HARVEST_RUN_ID
+          + "}";
+
+  @GuiWidgetElement(
+      order = "0527",
+      type = GuiElementType.METADATA,
+      metadata = org.apache.hop.core.database.DatabaseMeta.class,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.HarvestHistoryDatabase.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.HarvestHistoryDatabase.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_VALIDATION_TAB_ID)
+  @HopMetadataProperty
+  private String harvestHistoryDatabase;
+
+  /**
    * Max concurrent model checks before the update wave (and for dry-run validation). Literal or Hop
    * variable; default {@code 8}.
    */
@@ -495,6 +532,9 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
     this.logModelCheckFailures = meta.logModelCheckFailures;
     this.abortOnModelCheckFailures = meta.abortOnModelCheckFailures;
     this.detailedDataTypeChecking = meta.detailedDataTypeChecking;
+    this.preferHarvestForTypeChecks = meta.preferHarvestForTypeChecks;
+    this.harvestRunId = meta.harvestRunId;
+    this.harvestHistoryDatabase = meta.harvestHistoryDatabase;
     this.modelCheckParallelism =
         meta.modelCheckParallelism != null ? meta.modelCheckParallelism : "8";
     this.ignoreModelCheckWarnings = meta.ignoreModelCheckWarnings;
@@ -698,9 +738,23 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
             Integer.toString(jobs.size()),
             Integer.toString(parallelism)));
 
+    ResourceGroupModelValidationSupport.HarvestReuseSettings harvestReuse =
+        new ResourceGroupModelValidationSupport.HarvestReuseSettings(
+            preferHarvestForTypeChecks,
+            harvestRunId,
+            harvestHistoryDatabase,
+            null,
+            dataCatalogConnection,
+            resourceDefinitionGroup);
     List<ModelCheckOutcome> outcomes =
         ResourceGroupModelValidationSupport.checkModels(
-            jobs, detailedDataTypeChecking, parallelism, this, getMetadataProvider());
+            jobs,
+            detailedDataTypeChecking,
+            parallelism,
+            harvestReuse,
+            this,
+            getMetadataProvider(),
+            getLogChannel());
     java.time.Instant finishedAt = java.time.Instant.now();
 
     GroupModelValidationReport report =
@@ -836,6 +890,9 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
     action.setLogModelCheckFailures(!skipChildModelCheck && logModelCheckFailures);
     action.setAbortOnModelCheckFailures(!skipChildModelCheck && abortOnModelCheckFailures);
     action.setDetailedDataTypeChecking(detailedDataTypeChecking);
+    action.setPreferHarvestForTypeChecks(preferHarvestForTypeChecks);
+    action.setHarvestRunId(harvestRunId);
+    action.setHarvestHistoryDatabase(harvestHistoryDatabase);
     action.setUpdateTargetDatabaseStructure(updateTargetDatabaseStructure);
     action.setFailIfDdlNeeded(failIfDdlNeeded);
     action.setPublishToCatalog(publishToCatalog && !doNotUpdateTargetDatabase);

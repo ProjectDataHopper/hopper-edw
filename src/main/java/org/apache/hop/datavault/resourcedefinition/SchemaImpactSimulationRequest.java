@@ -32,6 +32,11 @@ package org.apache.hop.datavault.resourcedefinition;
  * @param expectAutomaticTargetTableCreation when true, missing-table CREATE findings are omitted
  *     (not reported) because vault update will create the tables; ALTER drift still warns
  * @param validationParallelism max concurrent live-source / target-DB checks (clamped 1..64)
+ * @param harvestRunId harvest run id for {@link SchemaCompareMode#HARVEST_RUN} (or empty → latest
+ *     for group / {@code DV_SCHEMA_HARVEST_RUN_ID})
+ * @param harvestHistoryDatabase OPS connection for harvest history (optional)
+ * @param harvestHistorySchema schema for harvest tables (optional, empty = connection default)
+ * @param harvestCatalogConnection catalog connection used to resolve harvest OPS location
  */
 public record SchemaImpactSimulationRequest(
     String resourceDefinitionGroup,
@@ -44,7 +49,11 @@ public record SchemaImpactSimulationRequest(
     boolean checkTargetDatabases,
     boolean checkCatalogVsVersion,
     boolean expectAutomaticTargetTableCreation,
-    int validationParallelism) {
+    int validationParallelism,
+    String harvestRunId,
+    String harvestHistoryDatabase,
+    String harvestHistorySchema,
+    String harvestCatalogConnection) {
 
   public static Builder builder() {
     return new Builder();
@@ -62,6 +71,10 @@ public record SchemaImpactSimulationRequest(
     private boolean checkCatalogVsVersion;
     private boolean expectAutomaticTargetTableCreation;
     private int validationParallelism = ParallelValidationSupport.DEFAULT_PARALLELISM;
+    private String harvestRunId;
+    private String harvestHistoryDatabase;
+    private String harvestHistorySchema;
+    private String harvestCatalogConnection;
 
     public Builder resourceDefinitionGroup(String resourceDefinitionGroup) {
       this.resourceDefinitionGroup = resourceDefinitionGroup;
@@ -118,6 +131,26 @@ public record SchemaImpactSimulationRequest(
       return this;
     }
 
+    public Builder harvestRunId(String harvestRunId) {
+      this.harvestRunId = harvestRunId;
+      return this;
+    }
+
+    public Builder harvestHistoryDatabase(String harvestHistoryDatabase) {
+      this.harvestHistoryDatabase = harvestHistoryDatabase;
+      return this;
+    }
+
+    public Builder harvestHistorySchema(String harvestHistorySchema) {
+      this.harvestHistorySchema = harvestHistorySchema;
+      return this;
+    }
+
+    public Builder harvestCatalogConnection(String harvestCatalogConnection) {
+      this.harvestCatalogConnection = harvestCatalogConnection;
+      return this;
+    }
+
     public SchemaImpactSimulationRequest build() {
       return new SchemaImpactSimulationRequest(
           resourceDefinitionGroup,
@@ -130,7 +163,11 @@ public record SchemaImpactSimulationRequest(
           checkTargetDatabases,
           checkCatalogVsVersion,
           expectAutomaticTargetTableCreation,
-          ParallelValidationSupport.resolveParallelism(validationParallelism));
+          ParallelValidationSupport.resolveParallelism(validationParallelism),
+          harvestRunId,
+          harvestHistoryDatabase,
+          harvestHistorySchema,
+          harvestCatalogConnection);
     }
   }
 }

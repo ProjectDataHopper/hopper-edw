@@ -36,5 +36,19 @@ public class CatalogSourceField {
   /** 1-based position in the source primary key; zero when not part of the key. */
   private int primaryKeyPosition;
 
+  /**
+   * Optional foreign-key metadata (child column). Zero / empty when not part of an imported FK.
+   * Populated by harvest refresh or Database Table Metadata import; used as the catalog contract
+   * for FK drift detection and future source-model (.hsm) generation.
+   */
+  private String fkConstraintName;
+
+  /** 1-based position within the composite FK; zero when not part of an FK. */
+  private int fkPosition;
+
+  private String fkReferencedSchema;
+  private String fkReferencedTable;
+  private String fkReferencedColumn;
+
   private CatalogSourceFieldInputOptions inputOptions;
 }

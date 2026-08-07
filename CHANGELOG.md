@@ -4,6 +4,17 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## Unreleased
 
+### Metadata harvesting (#112)
+
+- **Harvest source metadata** workflow action: connection-batched live discovery, OPS history (`schema_harvest_run` / `subject` / `field` / `fk` / `change`), Markdown reports, variable `DV_SCHEMA_HARVEST_RUN_ID`
+- Schema gate compare mode **`HARVEST_RUN`** reuses harvest without rediscovering sources; retail `run-retail-update-models.hwf` chain is harvest → validate → quality → update
+- Harvest history GUI (resource definition group + catalog subject timeline) with changes / field snapshot drill-down
+- Model-check / load path can prefer last harvest DISCOVERED layouts for detailed type checking
+- PK drift and FK inventory (optional catalog FK contract; live-only FKs are INFO until applied)
+- **Apply harvest to catalog…** and **Generate .hsm from harvest…** on the resource definition group editor
+- Integer family equivalence for source field metadata (avoids false length drift across SMALLINT/INTEGER/BIGINT)
+- Docs: [metadata-harvesting.adoc](docs/metadata-harvesting.adoc), screenshots under `docs/images/`
+
 ## [0.7.0] — 2026-08-05
 
 Requires **Apache Hop 2.19.0** (or a **recent 2.19.0-SNAPSHOT** until GA) and **Java 21**.

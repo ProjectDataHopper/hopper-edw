@@ -25,7 +25,7 @@ Bottom of the editor:
 * **Validate sources** — open the **validation options** dialog (baseline + check axes), then run comparison and open the results dialog
 * **Browse lineage…** — reverse source-to-target lineage browser (see link:source-to-target-lineage.adoc[Source-to-target lineage])
 
-image::images/resource-definition-group-editor-with-version-mgt-buttons.png[Resource definition group editor for retail-sources with List catalog versions, Tag catalog version, and Validate sources,align="center"]
+image::images/resource-definition-group-editor.png[Resource definition group editor for retail-sources with harvest actions, lineage, catalog version buttons, and Validate sources,align="center"]
 
 Catalog version storage and scope are described in link:data-catalog.adoc#catalog-versions[Data Catalog — Catalog versions]. Versions can also be browsed **read-only** under **Versions** in the Data Catalog perspective.
 
@@ -52,8 +52,10 @@ image::images/validate-resource-definitions-action-dialog.png[Validate resource 
 |-----------|---------|
 | Resource definition group | Required validation scope (for example `retail-sources`) |
 | Target catalog version | Tag such as `v1.0.0` / `${TARGET_VERSION}`, or a ComboVar free-typed expression. **LIVE_SOURCE:** expected contract (empty = working tree). **VERSION_VS_VERSION:** the *actual* tag. **WORKING_VS_VERSION:** used as baseline if Baseline is empty. |
-| Compare mode | `LIVE_SOURCE` (default), `WORKING_VS_VERSION`, `VERSION_VS_VERSION` |
+| Compare mode | `LIVE_SOURCE` (default), `WORKING_VS_VERSION`, `VERSION_VS_VERSION`, **`HARVEST_RUN`** |
 | Baseline catalog version | **WORKING_VS_VERSION / VERSION_VS_VERSION:** expected/reference tag. **LIVE_SOURCE:** used as expected when Target is empty. ComboVar list is filled from tags in the group’s FILE catalog. |
+| Harvest run id | **HARVEST_RUN:** run id (default `${DV_SCHEMA_HARVEST_RUN_ID}`); empty → latest harvest for the group |
+| Harvest history database / schema | **HARVEST_RUN:** OPS connection holding `schema_harvest_*` (retail: `OPS` / `dv_ops`) |
 | Report output path | Folder/path for Markdown and/or HTML (Hop VFS), for example `${PROJECT_HOME}/work/reports` |
 | Report file base name | Optional base name without extension (defaults to a group/timestamp name) |
 | Report format | `MARKDOWN`, `HTML`, or `BOTH` |
@@ -77,6 +79,7 @@ On **incremental update** runs, leave the option **off** (N) so missing or alter
 | `LIVE_SOURCE` | Working tree, or Target/Baseline tag | Live physical source discovery | Daily CI against CRM/source DB |
 | `WORKING_VS_VERSION` | Baseline (or Target if Baseline empty) tag | Working-tree catalog | Detect catalog field length/type edits without a live DB |
 | `VERSION_VS_VERSION` | Baseline tag | Target tag | Offline PR review between two frozen contracts |
+| `HARVEST_RUN` | Contract already compared during harvest | Persisted harvest snapshot (OPS) | After **Harvest source metadata** — no second live discovery; see link:metadata-harvesting.adoc[Metadata harvesting] |
 
 Version fields support Hop variables (for example `${PROMOTED_TAG}`). Tag lists refresh when the resource definition group changes.
 

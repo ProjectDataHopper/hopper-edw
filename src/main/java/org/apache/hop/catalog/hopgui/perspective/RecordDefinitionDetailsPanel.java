@@ -163,6 +163,7 @@ public class RecordDefinitionDetailsPanel {
   private Button wUpdateQualityRules;
   private Button wTestQualityMeasure;
   private Button wQualityHistory;
+  private Button wSchemaHarvestHistory;
 
   private final List<Control> physicalTableSectionControls = new ArrayList<>();
   private final List<Control> physicalFileSectionControls = new ArrayList<>();
@@ -812,6 +813,20 @@ public class RecordDefinitionDetailsPanel {
     wQualityHistory.setLayoutData(fdQualityHistory);
     wQualityHistory.addListener(SWT.Selection, e -> openQualityHistory());
 
+    wSchemaHarvestHistory = new Button(wQualityTabComp, SWT.PUSH);
+    wSchemaHarvestHistory.setText(
+        BaseMessages.getString(
+            PKG, "RecordDefinitionDetailsPanel.SchemaHarvest.HistoryButton.Label"));
+    wSchemaHarvestHistory.setToolTipText(
+        BaseMessages.getString(
+            PKG, "RecordDefinitionDetailsPanel.SchemaHarvest.HistoryButton.ToolTip"));
+    PropsUi.setLook(wSchemaHarvestHistory);
+    FormData fdSchemaHarvest = new FormData();
+    fdSchemaHarvest.right = new FormAttachment(wQualityHistory, -PropsUi.getMargin());
+    fdSchemaHarvest.bottom = new FormAttachment(100, 0);
+    wSchemaHarvestHistory.setLayoutData(fdSchemaHarvest);
+    wSchemaHarvestHistory.addListener(SWT.Selection, e -> openSchemaHarvestHistory());
+
     FormData fdQualityRules = (FormData) wQualityRules.getLayoutData();
     fdQualityRules.bottom = new FormAttachment(wUpdateQualityRules, -PropsUi.getMargin());
     wQualityRules.setLayoutData(fdQualityRules);
@@ -1282,6 +1297,9 @@ public class RecordDefinitionDetailsPanel {
     }
     if (wQualityHistory != null) {
       wQualityHistory.setEnabled(true);
+    }
+    if (wSchemaHarvestHistory != null) {
+      wSchemaHarvestHistory.setEnabled(true);
     }
     if (wRefreshFromSource != null) {
       wRefreshFromSource.setEnabled(
@@ -2010,6 +2028,18 @@ public class RecordDefinitionDetailsPanel {
           BaseMessages.getString(PKG, "RecordDefinitionDetailsPanel.Quality.Test.Error.Message"),
           e);
     }
+  }
+
+  private void openSchemaHarvestHistory() {
+    if (definition == null) {
+      return;
+    }
+    SchemaHarvestHistoryGuiSupport.openForSubject(
+        parent.getShell(),
+        catalogConnectionName,
+        definition,
+        activeVariables(),
+        HopGui.getInstance().getMetadataProvider());
   }
 
   private void openQualityHistory() {

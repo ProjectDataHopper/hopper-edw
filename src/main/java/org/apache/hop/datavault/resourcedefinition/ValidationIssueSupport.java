@@ -119,6 +119,9 @@ public final class ValidationIssueSupport {
               parsed.fieldName(),
               parsed.changeSignature());
       case PRIMARY_KEY_CHANGED -> hasPrimaryKeyChange(diff, parsed.changeSignature());
+        // FK issues come from harvest (not SchemaDiff); keep acknowledgements until re-harvest
+        // clears them.
+      case FOREIGN_KEY_ADDED, FOREIGN_KEY_REMOVED, FOREIGN_KEY_CHANGED -> true;
         // Model/target axes are re-evaluated each run; drop acknowledgements when re-run no longer
         // emits them.
       case MODEL_ATTRIBUTE_NARROWER, TARGET_DDL_REQUIRED -> true;

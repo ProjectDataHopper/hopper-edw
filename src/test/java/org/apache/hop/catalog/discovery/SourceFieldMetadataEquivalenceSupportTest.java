@@ -111,6 +111,36 @@ class SourceFieldMetadataEquivalenceSupportTest {
   }
 
   @Test
+  void integerLengthsMatchHopNineVsJdbcTen() {
+    // PostgreSQL INTEGER COLUMN_SIZE is 10; Hop catalog contracts use 9.
+    SourceField stored = field("customer_id", "Integer", IValueMeta.TYPE_INTEGER);
+    stored.setLength("9");
+    stored.setPrecision("0");
+    SourceField discovered = field("customer_id", "Integer", IValueMeta.TYPE_INTEGER);
+    discovered.setLength("10");
+    discovered.setPrecision("0");
+
+    assertTrue(SourceFieldMetadataEquivalenceSupport.dimensionsEquivalent(stored, discovered));
+    assertNull(
+        SourceFieldMetadataEquivalenceSupport.describeDimensionDifference(stored, discovered));
+  }
+
+  @Test
+  void smallintLengthsMatchHopFourVsJdbcFive() {
+    // PostgreSQL SMALLINT COLUMN_SIZE is 5; Hop catalog often stores 4.
+    SourceField stored = field("demo_score", "Integer", IValueMeta.TYPE_INTEGER);
+    stored.setLength("4");
+    stored.setPrecision("0");
+    SourceField discovered = field("demo_score", "Integer", IValueMeta.TYPE_INTEGER);
+    discovered.setLength("5");
+    discovered.setPrecision("0");
+
+    assertTrue(SourceFieldMetadataEquivalenceSupport.dimensionsEquivalent(stored, discovered));
+    assertNull(
+        SourceFieldMetadataEquivalenceSupport.describeDimensionDifference(stored, discovered));
+  }
+
+  @Test
   void integerLengthsInDifferentPhysicalFamiliesAreReported() {
     SourceField stored = field("demo_score", "Integer", IValueMeta.TYPE_INTEGER);
     stored.setLength("3");

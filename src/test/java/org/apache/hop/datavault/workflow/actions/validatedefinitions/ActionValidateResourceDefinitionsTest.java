@@ -44,8 +44,11 @@ class ActionValidateResourceDefinitionsTest {
 
     // Hop GUI requires (ILogChannel, IHopMetadataProvider) signature.
     List<String> modes = action.getCompareModeOptions(null, null);
-    assertEquals(3, modes.size());
+    assertEquals(4, modes.size());
     assertTrue(modes.contains(SchemaCompareMode.WORKING_VS_VERSION.name()));
+    assertTrue(modes.contains(SchemaCompareMode.HARVEST_RUN.name()));
+    assertEquals(
+        ActionValidateResourceDefinitions.DEFAULT_HARVEST_RUN_ID, action.getHarvestRunId());
     List<String> severities = action.getFailureSeverityOptions(null, null);
     assertEquals(3, severities.size());
     assertTrue(severities.contains(SchemaValidationFailureSeverity.WARN_ONLY.name()));
@@ -71,11 +74,15 @@ class ActionValidateResourceDefinitionsTest {
     original.setFailOnWarnings(true);
     original.setIncludeImpact(false);
     original.setValidationParallelism("${VALIDATION_PARALLELISM}");
+    original.setCompareMode(SchemaCompareMode.HARVEST_RUN.name());
+    original.setHarvestRunId("${DV_SCHEMA_HARVEST_RUN_ID}");
+    original.setHarvestHistoryDatabase("OPS");
+    original.setHarvestHistorySchema("");
 
     ActionValidateResourceDefinitions copy = (ActionValidateResourceDefinitions) original.clone();
     assertEquals("retail-sources", copy.getResourceDefinitionGroup());
     assertEquals("${TARGET_VERSION}", copy.getTargetCatalogVersion());
-    assertEquals(SchemaCompareMode.WORKING_VS_VERSION.name(), copy.getCompareMode());
+    assertEquals(SchemaCompareMode.HARVEST_RUN.name(), copy.getCompareMode());
     assertEquals("v1.0.0", copy.getBaselineCatalogVersion());
     assertEquals("${PROJECT_HOME}/reports", copy.getReportOutputPath());
     assertEquals("schema-gate", copy.getReportFileBaseName());
@@ -84,6 +91,8 @@ class ActionValidateResourceDefinitionsTest {
     assertTrue(copy.isFailOnWarnings());
     assertEquals(false, copy.isIncludeImpact());
     assertEquals("${VALIDATION_PARALLELISM}", copy.getValidationParallelism());
+    assertEquals("${DV_SCHEMA_HARVEST_RUN_ID}", copy.getHarvestRunId());
+    assertEquals("OPS", copy.getHarvestHistoryDatabase());
   }
 
   @Test
