@@ -38,7 +38,7 @@ Catalog DV_SOURCE (single-table OR COMPOSITE feed)
 |Concept |Role
 
 |**Source table**
-|Canvas card for a physical entity (v1: database table). Columns, PK position, optional link to an existing catalog source name.
+|Canvas card for a physical entity (v1: database table). Columns, PK position, optional link to an existing catalog source name. See image:images/source-modeler-source-table.png[Source table dialog,width=480].
 
 |**Relationship**
 |Edge for FK-style joins (child → parent columns, join type, cardinality). Imported from JDBC FKs when present, or drawn manually.
@@ -47,13 +47,15 @@ Catalog DV_SOURCE (single-table OR COMPOSITE feed)
 |Named multi-table projection: driving table, ordered joins, column list, optional WHERE, generation mode (`AUTO` / `SQL` / `PIPELINE`).
 
 |**Source JSON**
-|Named JSON extraction: parent table/query/JSON source, JSON field, projected fields (JsonPath + pass-through keys). JsonInput rules apply (top-level leaves + at most one array). Publish as catalog type `JSON`. Chain Source JSON objects for nested arrays.
+|Named JSON extraction: parent table/query/JSON source, JSON field, projected fields (JsonPath + pass-through keys). JsonInput rules apply (top-level leaves + at most one array). Publish as catalog type `JSON`. Chain Source JSON objects for nested arrays. See image:images/source-modeler-json-source.png[Source JSON dialog,width=480].
 
 |**Note**
 |Canvas documentation (same note pads as other modelers).
 |===
 
 == Source JSON
+
+image::images/source-modeler-json-source.png[Source JSON dialog — parent source, JSON field, pass-through keys, and JsonPath extractions,align="center"]
 
 . **Add source JSON** (toolbar or canvas context), or double-click an existing teal **JSON** card.
 . On **General**: choose **parent kind** (table, query, or another JSON source), parent name, and the **JSON field** that holds the document.
@@ -67,6 +69,10 @@ Catalog DV_SOURCE (single-table OR COMPOSITE feed)
 Parent **SourceTable** objects currently support **database** physical types for generation and sampling. File/Kafka payloads should land in a database table (or a Source Query over database tables) first. Nested arrays: first Source JSON projects nested arrays as JSON-string fields; a second Source JSON expands that field.
 
 Sample excerpt: link:ai-file-schemas/samples/hsm-json-excerpt.xml[hsm-json-excerpt.xml].
+
+=== Source table dialog
+
+image::images/source-modeler-source-table.png[Source table dialog with columns and primary-key positions,align="center"]
 
 == Schema import
 
