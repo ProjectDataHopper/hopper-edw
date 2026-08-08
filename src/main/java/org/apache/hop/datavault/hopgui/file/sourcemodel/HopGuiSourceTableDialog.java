@@ -18,23 +18,33 @@ package org.apache.hop.datavault.hopgui.file.sourcemodel;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.Const;
+import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.Props;
+import org.apache.hop.core.RowMetaAndData;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.hopgui.dialog.ShowRowsDialog;
+import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
 import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
 import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceColumn;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceTable;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceTableLiveSchemaSupport;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceTableValidationSupport;
+import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceTablePreviewSupport;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.FormDataBuilder;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
+import org.apache.hop.ui.core.dialog.ErrorDialog;
+import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.core.gui.GuiResource;
 import org.apache.hop.ui.core.gui.WindowProperty;
 import org.apache.hop.ui.core.widget.ColumnInfo;
@@ -105,11 +115,18 @@ public class HopGuiSourceTableDialog {
     Button wOk = new Button(shell, SWT.PUSH);
     wOk.setText(BaseMessages.getString(PKG, "System.Button.OK"));
     wOk.addListener(SWT.Selection, e -> ok());
+    Button wValidate = new Button(shell, SWT.PUSH);
+    wValidate.setText(BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Validate.Button"));
+    wValidate.addListener(SWT.Selection, e -> validateDefinition());
     Button wCancel = new Button(shell, SWT.PUSH);
     wCancel.setText(BaseMessages.getString(PKG, "System.Button.Cancel"));
     wCancel.addListener(SWT.Selection, e -> cancel());
+    Button wPreview = new Button(shell, SWT.PUSH);
+    wPreview.setText(BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Preview.Button"));
+    wPreview.addListener(SWT.Selection, e -> previewData());
     DialogHelpSupport.createHelpButton(shell, HelpTopics.IMPORT_DATABASE_TABLES_OPTIONS);
-    BaseTransformDialog.positionBottomButtons(shell, new Button[] {wOk, wCancel}, margin, null);
+    BaseTransformDialog.positionBottomButtons(
+        shell, new Button[] {wOk, wValidate, wCancel, wPreview}, margin, null);
 
     CTabFolder wTabFolder = new CTabFolder(shell, SWT.BORDER);
     PropsUi.setLook(wTabFolder, Props.WIDGET_STYLE_TAB);
@@ -222,6 +239,23 @@ public class HopGuiSourceTableDialog {
     comp.setLayout(new FormLayout());
     tab.setControl(comp);
 
+    Button wGetColumns = new Button(comp, SWT.PUSH);
+    wGetColumns.setText(BaseMessages.getString(PKG, "HopGuiSourceTableDialog.GetColumns.Button"));
+    wGetColumns.setToolTipText(
+        BaseMessages.getString(PKG, "HopGuiSourceTableDialog.GetColumns.ToolTip"));
+    PropsUi.setLook(wGetColumns);
+    wGetColumns.setLayoutData(new FormDataBuilder().left().top(0, margin).result());
+    wGetColumns.addListener(SWT.Selection, e -> getColumnsFromLiveTable());
+
+    Button wShowDiff = new Button(comp, SWT.PUSH);
+    wShowDiff.setText(BaseMessages.getString(PKG, "HopGuiSourceTableDialog.ShowDifferences.Button"));
+    wShowDiff.setToolTipText(
+        BaseMessages.getString(PKG, "HopGuiSourceTableDialog.ShowDifferences.ToolTip"));
+    PropsUi.setLook(wShowDiff);
+    wShowDiff.setLayoutData(
+        new FormDataBuilder().left(wGetColumns, margin).top(0, margin).result());
+    wShowDiff.addListener(SWT.Selection, e -> showColumnDifferences());
+
     String[] hopTypes = ValueMetaFactory.getValueMetaNames();
     ColumnInfo[] columns =
         new ColumnInfo[] {
@@ -261,11 +295,16 @@ public class HopGuiSourceTableDialog {
             comp,
             SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI,
             columns,
-            input.getColumns().size(),
+            Math.max(input.getColumns().size(), 1),
             null,
             PropsUi.getInstance());
     wColumns.setLayoutData(
-        new FormDataBuilder().left().top(0, margin).right().bottom(100, -margin).result());
+        new FormDataBuilder()
+            .left()
+            .top(wGetColumns, margin)
+            .right()
+            .bottom(100, -margin)
+            .result());
   }
 
   private void getData() {
@@ -351,6 +390,243 @@ public class HopGuiSourceTableDialog {
   private void cancel() {
     ok = false;
     dispose();
+  }
+
+  private void previewData() {
+    try {
+      SourceTable working = workingTableFromDialog();
+      List<RowMetaAndData> rows =
+          SourceTablePreviewSupport.preview(
+              model,
+              working,
+              variables,
+              metadataProvider,
+              SourceTablePreviewSupport.DEFAULT_ROW_LIMIT);
+      if (rows.isEmpty()) {
+        MessageBox emptyBox = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
+        emptyBox.setText(
+            BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Preview.Empty.Title"));
+        emptyBox.setMessage(
+            BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Preview.Empty.Message"));
+        emptyBox.open();
+        return;
+      }
+      ShowRowsDialog dialog =
+          new ShowRowsDialog(
+              shell,
+              variables,
+              BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Preview.Title"),
+              BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Preview.Message"),
+              rows.get(0).getRowMeta(),
+              toObjectList(rows));
+      dialog.open();
+    } catch (Exception e) {
+      new ErrorDialog(
+          shell,
+          BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Preview.Error.Title"),
+          BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Preview.Error.Message"),
+          e);
+    }
+  }
+
+  private void validateDefinition() {
+    try {
+      SourceTable working = workingTableFromDialog();
+      working.setColumns(readColumnsFromTable());
+      List<ICheckResult> remarks =
+          new ArrayList<>(SourceTableValidationSupport.check(model, working, variables));
+
+      // Always try live layout comparison so add/remove/type drift is visible at design time.
+      try {
+        List<SourceColumn> live =
+            SourceTableLiveSchemaSupport.discoverColumns(
+                model, working, variables, metadataProvider);
+        List<SourceTableLiveSchemaSupport.ColumnDiff> diffs =
+            SourceTableLiveSchemaSupport.compareColumns(working.getColumns(), live);
+        if (diffs.isEmpty()) {
+          remarks.add(
+              new CheckResult(
+                  ICheckResult.TYPE_RESULT_OK,
+                  BaseMessages.getString(
+                      PKG, "HopGuiSourceTableDialog.Validate.LiveMatch.Message"),
+                  null));
+        } else {
+          remarks.addAll(SourceTableLiveSchemaSupport.diffsToRemarks(diffs));
+        }
+      } catch (Exception liveEx) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_WARNING,
+                BaseMessages.getString(
+                    PKG,
+                    "HopGuiSourceTableDialog.Validate.LiveSkipped.Message",
+                    liveEx.getMessage() != null
+                        ? liveEx.getMessage()
+                        : liveEx.getClass().getSimpleName()),
+                null));
+      }
+
+      if (remarks.isEmpty()) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_OK,
+                BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Validate.Ok.Message"),
+                null));
+      }
+      ModelDialogValidationSupport.showCheckResults(shell, remarks);
+    } catch (Exception ex) {
+      new ErrorDialog(
+          shell,
+          BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Validate.Error.Title"),
+          BaseMessages.getString(
+              PKG, "HopGuiSourceTableDialog.Validate.Error.Message", ex.getMessage()),
+          ex);
+    }
+  }
+
+  private void getColumnsFromLiveTable() {
+    try {
+      SourceTable working = workingTableFromDialog();
+      List<SourceColumn> live =
+          SourceTableLiveSchemaSupport.discoverColumns(
+              model, working, variables, metadataProvider);
+      if (live.isEmpty()) {
+        MessageBox box = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
+        box.setText(
+            BaseMessages.getString(PKG, "HopGuiSourceTableDialog.GetColumns.Empty.Title"));
+        box.setMessage(
+            BaseMessages.getString(PKG, "HopGuiSourceTableDialog.GetColumns.Empty.Message"));
+        box.open();
+        return;
+      }
+      boolean replace = true;
+      if (wColumns.nrNonEmpty() > 0) {
+        MessageBox confirm =
+            new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO | SWT.CANCEL);
+        confirm.setText(
+            BaseMessages.getString(PKG, "HopGuiSourceTableDialog.GetColumns.Replace.Title"));
+        confirm.setMessage(
+            BaseMessages.getString(PKG, "HopGuiSourceTableDialog.GetColumns.Replace.Message"));
+        int answer = confirm.open();
+        if (answer == SWT.CANCEL) {
+          return;
+        }
+        replace = answer == SWT.YES;
+      }
+      if (replace) {
+        populateColumnsTable(live);
+      } else {
+        // Append only names not already present.
+        java.util.Set<String> existing = new java.util.HashSet<>();
+        for (SourceColumn col : readColumnsFromTable()) {
+          if (col != null && !Utils.isEmpty(col.getName())) {
+            existing.add(col.getName().trim().toLowerCase());
+          }
+        }
+        List<SourceColumn> merged = new ArrayList<>(readColumnsFromTable());
+        for (SourceColumn liveCol : live) {
+          if (liveCol != null
+              && !Utils.isEmpty(liveCol.getName())
+              && existing.add(liveCol.getName().trim().toLowerCase())) {
+            merged.add(liveCol);
+          }
+        }
+        populateColumnsTable(merged);
+      }
+    } catch (Exception e) {
+      new ErrorDialog(
+          shell,
+          BaseMessages.getString(PKG, "HopGuiSourceTableDialog.GetColumns.Error.Title"),
+          BaseMessages.getString(PKG, "HopGuiSourceTableDialog.GetColumns.Error.Message"),
+          e);
+    }
+  }
+
+  private void showColumnDifferences() {
+    try {
+      SourceTable working = workingTableFromDialog();
+      working.setColumns(readColumnsFromTable());
+      List<SourceColumn> live =
+          SourceTableLiveSchemaSupport.discoverColumns(
+              model, working, variables, metadataProvider);
+      List<SourceTableLiveSchemaSupport.ColumnDiff> diffs =
+          SourceTableLiveSchemaSupport.compareColumns(working.getColumns(), live);
+      List<ICheckResult> remarks = new ArrayList<>();
+      if (diffs.isEmpty()) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_OK,
+                BaseMessages.getString(
+                    PKG, "HopGuiSourceTableDialog.ShowDifferences.None.Message"),
+                null));
+      } else {
+        remarks.addAll(SourceTableLiveSchemaSupport.diffsToRemarks(diffs));
+      }
+      ModelDialogValidationSupport.showCheckResults(shell, remarks);
+    } catch (Exception e) {
+      new ErrorDialog(
+          shell,
+          BaseMessages.getString(PKG, "HopGuiSourceTableDialog.ShowDifferences.Error.Title"),
+          BaseMessages.getString(PKG, "HopGuiSourceTableDialog.ShowDifferences.Error.Message"),
+          e);
+    }
+  }
+
+  private void populateColumnsTable(List<SourceColumn> columns) {
+    wColumns.clearAll(false);
+    if (columns != null) {
+      for (SourceColumn column : columns) {
+        if (column == null || Utils.isEmpty(column.getName())) {
+          continue;
+        }
+        TableItem item = new TableItem(wColumns.table, SWT.NONE);
+        item.setText(1, Const.NVL(column.getName(), ""));
+        item.setText(2, Const.NVL(column.getDescription(), ""));
+        item.setText(3, Const.NVL(column.getSourceDataType(), ""));
+        item.setText(4, Const.NVL(column.getLength(), ""));
+        item.setText(5, Const.NVL(column.getPrecision(), ""));
+        String hopTypeName;
+        try {
+          hopTypeName =
+              column.getHopType() > 0
+                  ? ValueMetaFactory.getValueMetaName(column.getHopType())
+                  : "";
+        } catch (Exception e) {
+          hopTypeName = "";
+        }
+        item.setText(6, Const.NVL(hopTypeName, ""));
+        item.setText(
+            7,
+            column.getPrimaryKeyPosition() > 0
+                ? String.valueOf(column.getPrimaryKeyPosition())
+                : "");
+      }
+    }
+    wColumns.optimizeTableView();
+  }
+
+  /**
+   * Snapshot of dialog fields for preview / live schema without committing OK. Connection, schema,
+   * and physical table name drive discovery; columns are taken from the grid when needed.
+   */
+  private SourceTable workingTableFromDialog() {
+    SourceTable working = new SourceTable();
+    working.setName(wName.getText() != null ? wName.getText().trim() : "");
+    working.setDatabaseName(wDatabaseName.getText());
+    working.setSchemaName(wSchemaName.getText());
+    working.setTableName(wTableName.getText());
+    if (input.getPhysicalType() != null) {
+      working.setPhysicalType(input.getPhysicalType());
+    }
+    return working;
+  }
+
+  private static List<Object[]> toObjectList(List<RowMetaAndData> rows) {
+    List<Object[]> list = new ArrayList<>();
+    for (RowMetaAndData row : rows) {
+      list.add(row.getData());
+    }
+    return list;
   }
 
   private void dispose() {

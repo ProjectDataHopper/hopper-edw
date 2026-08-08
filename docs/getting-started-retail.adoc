@@ -90,18 +90,26 @@ models/source-tables-crm.hsm
 
 image::images/source-modeler-retail-example-with-query-dialog-generated-sql.png[Retail source modeler with All customer info query and generated SQL,align="center"]
 
-. Open the `.hsm` file — table cards, relationship edges, and a purple **query** card.
+. Open the `.hsm` file — table cards, relationship edges, a purple **query** card, and a teal **JSON** card.
 . Open query **All customer info** — customer hub left-joined to address, contact, demo, and prefs.
 . **Generate SQL** / **Preview data** (CRM connection required).
 . **Publish to catalog** to create composite feed `feed_customer_enriched` (model **Catalog connection** should be `local-catalog`).
 
-The main retail vault tutorial still binds one catalog source per physical table. Use the source modeler when you want a **single composed feed** (for example one satellite reading the joined customer attributes). Full walkthrough: link:source-modeler-overview.adoc[Source modeler overview].
+=== Kafka-style shipment events (Source JSON → vault)
+
+Retail lands a simulated **Kafka consumer** table `order_shipment_event` (UUID `message_id`, JSON `payload`, topic/partition/offset). `generate-retail-data.py` writes shipment-tracking events for a subset of orders during initial and update waves (statuses such as `LABEL_CREATED`, `PICKED_UP`, `IN_TRANSIT`, `DELIVERED`).
+
+. On the same `.hsm`, open Source JSON **order_shipment_tracking** (parent = `order_shipment_event`, JSON field = `payload`).
+. After CRM is loaded, use **Sample and propose fields** / **Preview data** / **Validate** on the JSON card.
+. **Publish to catalog** as **`feed_order_shipment_tracking`** (type `JSON`) — already wired for the tutorial when you bootstrap / publish from the sample model.
+
+The main retail vault still uses one catalog source per physical table for classic hubs/sats, **plus** this JSON feed for shipment tracking. Use the source modeler for **composed feeds** (SQL joins or JSON extractions). Full walkthrough: link:source-modeler-overview.adoc[Source modeler overview].
 
 == Chapter 3 — Explore the Data Vault model
 
 . Open `models/retail-360.hdv`.
 . Click **Edit model** — target database **Vault**, hashing and sentinel settings.
-. Inspect hubs, links, and satellites on the canvas.
+. Inspect hubs, links, and satellites on the canvas — including **`hub_order_shipment`**, **`lnk_order_shipment`**, and **`sat_order_shipment`** (record source `feed_order_shipment_tracking`).
 . Click **Check model** — resolve any errors before loading.
 
 image::images/data-vault-model-retail-example.png[Retail 360 Data Vault model — hubs, links, and satellites on the Hop canvas,align="center"]
@@ -117,7 +125,7 @@ From the repository root:
 ./scripts/run-hop.sh retail-example workflows/run-retail-initial.hwf
 ----
 
-The workflow drops and recreates schemas, bootstraps `work/` (FILE catalog + schema-gate baseline `v1.0.0`), generates CSV source files, loads CRM, runs the **schema gate**, **measures source data quality and applies a quality gate** (blocking findings stop the load), then runs **Update resource definition group** for `retail-sources` (all DV → BV → DM models with load overview metrics). After the update it re-measures sources in **alert-only** mode.
+The workflow drops and recreates schemas, bootstraps `work/` (FILE catalog + schema-gate baseline `v1.0.0`), generates CSV source files (including shipment event CSVs), loads CRM, runs the **schema gate**, **measures source data quality and applies a quality gate** (blocking findings stop the load), then runs **Update resource definition group** for `retail-sources` (all DV → BV → DM models). That action manages vault metrics and writes load-overview reports under `work/reports/` (`retail-dv-initial-report` / `retail-dv-update-report` via `REPORT_BASE_NAME`). After the update it re-measures sources in **alert-only** mode.
 
 In Hop GUI you can open `workflows/run-retail-initial.hwf` and run it with a configured pipeline run configuration.
 

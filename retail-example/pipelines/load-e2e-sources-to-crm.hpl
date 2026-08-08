@@ -22,7 +22,8 @@
     <rownum_field/>
     <header>Y</header>
     <separator>,</separator>
-    <enclosure/>
+    <!-- Required when values contain commas (e.g. JSON payload in order_shipment_event). -->
+    <enclosure>"</enclosure>
     <buffer_size>50000</buffer_size>
     <lazy_conversion>N</lazy_conversion>
     <add_filename_result>N</add_filename_result>
@@ -124,7 +125,8 @@
     <rownum_field/>
     <header>Y</header>
     <separator>,</separator>
-    <enclosure/>
+    <!-- Required when values contain commas (e.g. JSON payload in order_shipment_event). -->
+    <enclosure>"</enclosure>
     <buffer_size>50000</buffer_size>
     <lazy_conversion>N</lazy_conversion>
     <add_filename_result>N</add_filename_result>
@@ -279,7 +281,8 @@
     <rownum_field/>
     <header>Y</header>
     <separator>,</separator>
-    <enclosure/>
+    <!-- Required when values contain commas (e.g. JSON payload in order_shipment_event). -->
+    <enclosure>"</enclosure>
     <buffer_size>50000</buffer_size>
     <lazy_conversion>N</lazy_conversion>
     <add_filename_result>N</add_filename_result>
@@ -418,7 +421,8 @@
     <rownum_field/>
     <header>Y</header>
     <separator>,</separator>
-    <enclosure/>
+    <!-- Required when values contain commas (e.g. JSON payload in order_shipment_event). -->
+    <enclosure>"</enclosure>
     <buffer_size>50000</buffer_size>
     <lazy_conversion>N</lazy_conversion>
     <add_filename_result>N</add_filename_result>
@@ -573,7 +577,8 @@
     <rownum_field/>
     <header>Y</header>
     <separator>,</separator>
-    <enclosure/>
+    <!-- Required when values contain commas (e.g. JSON payload in order_shipment_event). -->
+    <enclosure>"</enclosure>
     <buffer_size>50000</buffer_size>
     <lazy_conversion>N</lazy_conversion>
     <add_filename_result>N</add_filename_result>
@@ -728,7 +733,8 @@
     <rownum_field/>
     <header>Y</header>
     <separator>,</separator>
-    <enclosure/>
+    <!-- Required when values contain commas (e.g. JSON payload in order_shipment_event). -->
+    <enclosure>"</enclosure>
     <buffer_size>50000</buffer_size>
     <lazy_conversion>N</lazy_conversion>
     <add_filename_result>N</add_filename_result>
@@ -863,7 +869,8 @@
     <rownum_field/>
     <header>Y</header>
     <separator>,</separator>
-    <enclosure/>
+    <!-- Required when values contain commas (e.g. JSON payload in order_shipment_event). -->
+    <enclosure>"</enclosure>
     <buffer_size>50000</buffer_size>
     <lazy_conversion>N</lazy_conversion>
     <add_filename_result>N</add_filename_result>
@@ -1031,7 +1038,8 @@
     <rownum_field/>
     <header>Y</header>
     <separator>,</separator>
-    <enclosure/>
+    <!-- Required when values contain commas (e.g. JSON payload in order_shipment_event). -->
+    <enclosure>"</enclosure>
     <buffer_size>50000</buffer_size>
     <lazy_conversion>N</lazy_conversion>
     <add_filename_result>N</add_filename_result>
@@ -1188,7 +1196,8 @@
     <rownum_field/>
     <header>Y</header>
     <separator>,</separator>
-    <enclosure/>
+    <!-- Required when values contain commas (e.g. JSON payload in order_shipment_event). -->
+    <enclosure>"</enclosure>
     <buffer_size>50000</buffer_size>
     <lazy_conversion>N</lazy_conversion>
     <add_filename_result>N</add_filename_result>
@@ -1334,7 +1343,8 @@
     <rownum_field/>
     <header>Y</header>
     <separator>,</separator>
-    <enclosure/>
+    <!-- Required when values contain commas (e.g. JSON payload in order_shipment_event). -->
+    <enclosure>"</enclosure>
     <buffer_size>50000</buffer_size>
     <lazy_conversion>N</lazy_conversion>
     <add_filename_result>N</add_filename_result>
@@ -1469,7 +1479,8 @@
     <rownum_field/>
     <header>Y</header>
     <separator>,</separator>
-    <enclosure/>
+    <!-- Required when values contain commas (e.g. JSON payload in order_shipment_event). -->
+    <enclosure>"</enclosure>
     <buffer_size>50000</buffer_size>
     <lazy_conversion>N</lazy_conversion>
     <add_filename_result>N</add_filename_result>
@@ -1593,7 +1604,8 @@
     <rownum_field/>
     <header>Y</header>
     <separator>,</separator>
-    <enclosure/>
+    <!-- Required when values contain commas (e.g. JSON payload in order_shipment_event). -->
+    <enclosure>"</enclosure>
     <buffer_size>50000</buffer_size>
     <lazy_conversion>N</lazy_conversion>
     <add_filename_result>N</add_filename_result>
@@ -1709,6 +1721,164 @@
     </partitioning>
     <attributes/>
   </transform>
+  <transform>
+    <type>CSVInput</type>
+    <name>order_shipment_event_csv</name>
+    <filename>${PROJECT_HOME}/files/order_shipment_event_${RETAIL_CSV_WAVE}.csv</filename>
+    <include_filename>N</include_filename>
+    <rownum_field/>
+    <header>Y</header>
+    <separator>,</separator>
+    <!-- Required when values contain commas (e.g. JSON payload in order_shipment_event). -->
+    <enclosure>"</enclosure>
+    <buffer_size>50000</buffer_size>
+    <lazy_conversion>N</lazy_conversion>
+    <add_filename_result>N</add_filename_result>
+    <parallel>N</parallel>
+    <encoding/>
+    <newline_possible>N</newline_possible>
+    <schemaDefinition/>
+    <ignoreFields>N</ignoreFields>
+    <fields>
+      <field>
+        <name>message_id</name>
+        <length>36</length>
+        <type>String</type>
+        <format></format>
+        <trim_type>none</trim_type>
+        <precision>-1</precision>
+        <currency>$</currency>
+        <decimal>.</decimal>
+        <group>,</group>
+      </field>
+      <field>
+        <name>payload</name>
+        <length>4000</length>
+        <type>String</type>
+        <format></format>
+        <trim_type>none</trim_type>
+        <precision>-1</precision>
+        <currency>$</currency>
+        <decimal>.</decimal>
+        <group>,</group>
+      </field>
+      <field>
+        <name>kafka_timestamp</name>
+        <length>-1</length>
+        <type>Date</type>
+        <format>yyyy-MM-dd</format>
+        <trim_type>none</trim_type>
+        <precision>-1</precision>
+        <currency>$</currency>
+        <decimal>.</decimal>
+        <group>,</group>
+      </field>
+      <field>
+        <name>topic</name>
+        <length>80</length>
+        <type>String</type>
+        <format></format>
+        <trim_type>none</trim_type>
+        <precision>-1</precision>
+        <currency>$</currency>
+        <decimal>.</decimal>
+        <group>,</group>
+      </field>
+      <field>
+        <name>partition</name>
+        <length>9</length>
+        <type>Integer</type>
+        <format>#</format>
+        <trim_type>none</trim_type>
+        <precision>0</precision>
+        <currency>$</currency>
+        <decimal>.</decimal>
+        <group>,</group>
+      </field>
+      <field>
+        <name>offset</name>
+        <length>12</length>
+        <type>Integer</type>
+        <format>#</format>
+        <trim_type>none</trim_type>
+        <precision>0</precision>
+        <currency>$</currency>
+        <decimal>.</decimal>
+        <group>,</group>
+      </field>
+      <field>
+        <name>load_date</name>
+        <length>-1</length>
+        <type>Date</type>
+        <format>yyyy-MM-dd</format>
+        <trim_type>none</trim_type>
+        <precision>-1</precision>
+        <currency>$</currency>
+        <decimal>.</decimal>
+        <group>,</group>
+      </field>
+      <field>
+        <name>record_source</name>
+        <length>40</length>
+        <type>String</type>
+        <format></format>
+        <trim_type>none</trim_type>
+        <precision>-1</precision>
+        <currency>$</currency>
+        <decimal>.</decimal>
+        <group>,</group>
+      </field>
+    </fields>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+    <GUI>
+      <xloc>160</xloc>
+      <yloc>640</yloc>
+    </GUI>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <attributes/>
+  </transform>
+  <transform>
+    <type>TableOutput</type>
+    <name>order_shipment_event_out</name>
+    <connection>CRM</connection>
+    <schema/>
+    <table>order_shipment_event</table>
+    <commit>1000</commit>
+    <truncate>N</truncate>
+    <only_when_have_rows>N</only_when_have_rows>
+    <ignore_errors>N</ignore_errors>
+    <use_batch>Y</use_batch>
+    <partitioning_enabled>N</partitioning_enabled>
+    <partitioning_field/>
+    <partitioning_daily>N</partitioning_daily>
+    <partitioning_monthly>Y</partitioning_monthly>
+    <tablename_in_field>N</tablename_in_field>
+    <tablename_field/>
+    <tablename_in_table>Y</tablename_in_table>
+    <return_keys>N</return_keys>
+    <return_field/>
+    <specify_fields>N</specify_fields>
+    <auto_update_table_structure>N</auto_update_table_structure>
+    <always_drop_and_recreate>N</always_drop_and_recreate>
+    <add_columns>N</add_columns>
+    <drop_columns>N</drop_columns>
+    <change_column_types>N</change_column_types>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+    <GUI>
+      <xloc>400</xloc>
+      <yloc>640</yloc>
+    </GUI>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <attributes/>
+  </transform>
   <order>
     <hop>
       <from>customer_hub_csv</from>
@@ -1768,6 +1938,11 @@
     <hop>
       <from>order_rep_csv</from>
       <to>order_rep_out</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>order_shipment_event_csv</from>
+      <to>order_shipment_event_out</to>
       <enabled>Y</enabled>
     </hop>
   </order>

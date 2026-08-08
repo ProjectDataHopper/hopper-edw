@@ -16,12 +16,20 @@
  */
 package org.apache.hop.catalog.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 
-/** Optional link from a record definition to a physical database table. */
+/**
+ * Optional link from a record definition to a physical database table.
+ *
+ * <p>When this record owns the column layout of that table (published hubs/sats/dims, ops tables,
+ * {@code PHYSICAL_TABLE}), {@link #fields} is the authoritative layout. For {@code DV_SOURCE}
+ * records, {@link #fields} is unused — the source contract lives on {@link DvSourceRecord#fields}.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -32,4 +40,10 @@ public class PhysicalTableRef {
   @HopMetadataProperty private String schemaName;
 
   @HopMetadataProperty private String tableName;
+
+  /**
+   * Column layout for this physical table when the parent record definition owns the layout
+   * (vault targets, dimensional tables, generic physical tables). Empty for location-only refs.
+   */
+  @HopMetadataProperty private List<CatalogSourceField> fields = new ArrayList<>();
 }

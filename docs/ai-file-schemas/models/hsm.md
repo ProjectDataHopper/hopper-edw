@@ -49,6 +49,7 @@ When present under `json-sources` / `json-source`:
 - `parentSourceName`, `jsonFieldName`
 - `fields` / `field`: output name, JsonPath (`path`), optional pass-through parent field, Hop type, key position
 - Publishing creates a catalog **JSON** `DV_SOURCE` pointing at the `.hsm` + JSON object name
+- Published catalog layout is **`dvSource.fields[]`** (types/lengths/PK), not top-level `rowMetaXml` — see [catalog-record-definition.md](../metadata/catalog-record-definition.md)
 
 Sample: [hsm-json-excerpt.xml](../samples/hsm-json-excerpt.xml).
 
@@ -62,3 +63,5 @@ Sample: [hsm-json-excerpt.xml](../samples/hsm-json-excerpt.xml).
 
 - [source-modeler-overview.adoc](../../source-modeler-overview.adoc)  
 - [data-catalog.adoc](../../data-catalog.adoc)  
+- [catalog-record-definition.md](../metadata/catalog-record-definition.md) (catalog JSON after publish)  
+

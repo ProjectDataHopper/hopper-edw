@@ -17,9 +17,16 @@ ${PROJECT_HOME}/metadata/<metadata-key>/<name>.json
 
 ## Catalog FILE store (not under metadata/)
 
-Record definitions (sources/targets) live in the **catalog storage directory** configured by the data-catalog connection (e.g. `${PROJECT_HOME}/work/edw-catalog` or integration-tests `catalog-data/`).
+Record definitions (sources/targets/ops) live in the **catalog storage directory** configured by the data-catalog connection (e.g. `${PROJECT_HOME}/work/edw-catalog` or integration-tests `catalog-data/`).
 
-See [catalog-record-definition.md](catalog-record-definition.md) and [catalog-record-definition.schema.json](catalog-record-definition.schema.json).
+| Doc | Role |
+|-----|------|
+| [catalog-record-definition.md](catalog-record-definition.md) | Purpose, **layout homes**, schema change log, anti-patterns |
+| [catalog-record-definition.schema.json](catalog-record-definition.schema.json) | JSON Schema (`dvSource.fields` / `physicalTable.fields`, legacy `rowMetaXml`) |
+| [../samples/catalog-CRM-customer.excerpt.json](../samples/catalog-CRM-customer.excerpt.json) | `DV_SOURCE` sample |
+| [../samples/catalog-hub-customer.excerpt.json](../samples/catalog-hub-customer.excerpt.json) | `DV_HUB` sample (`physicalTable.fields`) |
+
+**Layout contract:** sources use `dvSource.fields[]`; published hubs/sats/dims/ops use `physicalTable.fields[]`. Top-level `rowMetaXml` is legacy-only (read/migrate, never write).
 
 ## Hop core types (no full schema here)
 

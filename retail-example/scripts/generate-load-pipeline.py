@@ -88,7 +88,8 @@ def csv_input_transform(prefix: str, yloc: int) -> str:
     <rownum_field/>
     <header>Y</header>
     <separator>,</separator>
-    <enclosure/>
+    <!-- Required when values contain commas (e.g. JSON payload in order_shipment_event). -->
+    <enclosure>"</enclosure>
     <buffer_size>50000</buffer_size>
     <lazy_conversion>N</lazy_conversion>
     <add_filename_result>N</add_filename_result>

@@ -9,9 +9,11 @@ A **Data Vault Source** is a **Data Catalog record definition** of type `DV_SOUR
 Each definition combines:
 
 * **DV semantics** — record source indicator, optional **group** for partial workflow loads
-* **Physical layout** — **database** table, **CSV** / **Parquet** / **Iceberg**, or **composite** multi-table query from a link:source-modeler-overview.adoc[source model (`.hsm`)]
+* **Physical layout** — **database** table, **CSV** / **Parquet** / **Iceberg**, **composite** multi-table query, or **JSON** extraction from a link:source-modeler-overview.adoc[source model (`.hsm`)]
 
 Sources live under namespace `hop/{project}/sources` in the FILE catalog storage directory (retail example: `work/edw-catalog/`) and open in the **Data Catalog** perspective. See link:data-catalog.adoc[Data Catalog] for folder layout and refresh behavior.
+
+Field layout is stored on structured homes (`dvSource.fields` and, for table-backed sources, physical table fields). Do not invent a parallel layout blob in catalog JSON.
 
 === Composite sources
 
@@ -22,6 +24,21 @@ A **COMPOSITE** `DV_SOURCE` is published from a source-model **source query**. I
 * Optional cached SQL when the model file is unavailable
 
 Data Vault Update builds either a single-connection `Table Input` or a Merge Join pipeline depending on the query's generation mode. See link:source-modeler-overview.adoc[Source modeler overview].
+
+=== JSON sources
+
+A **JSON** `DV_SOURCE` is published from a source-model **Source JSON** object. It stores:
+
+* Projected field list (pass-through keys + JsonPath extractions)
+* Path to the `.hsm` file and the Source JSON name
+* Parent reference (table / query / nested JSON source) and the JSON field to parse
+
+At load time, Data Vault Update injects the generated parent + JsonInput graph, then:
+
+* Adds a **Constant** (or rename) for the vault record-source column when the feed uses a static `sourceIndicator`
+* For **hubs**, sorts and distincts identity fields so MergeRowsPlus CDC matches database/file sources on incremental loads
+
+Retail sample: `feed_order_shipment_tracking` over `order_shipment_event.payload` → `hub_order_shipment` / link / sat.
 
 == Create and edit a source
 
@@ -63,10 +80,8 @@ Each source is a JSON file. Important fields:
 |Optional tag for **Record source group** on Data Vault Update
 
 |`dvSource.fields`
-|Column layout with types, lengths, primary-key flags
+|**Authoritative** column layout (types, lengths, primary-key / FK flags, CSV options). Location refs (`physicalTable` / `physicalFile`) do not store the contract.
 
-|`rowMetaXml`
-|Hop row metadata for pipeline field resolution
 |===
 
 Example path: `retail-example/work/edw-catalog/hop/retail-example/sources/E2E-customer-hub.json`.

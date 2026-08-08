@@ -99,14 +99,7 @@ public final class RecordDefinitionPreviewSupport {
     databaseSource.setTableName(physicalTable.getTableName());
     databaseSource.setDescription(definition.getDescription());
 
-    if (definition.getFields() != null && !definition.getFields().isEmpty()) {
-      databaseSource.setFields(DvSourceFieldSupport.fromRowMeta(definition.getFields()));
-    } else if (definition.getDvSource() != null
-        && definition.getDvSource().getFields() != null
-        && !definition.getDvSource().getFields().isEmpty()) {
-      databaseSource.setFields(
-          DvSourceFieldSupport.fromCatalogFields(definition.getDvSource().getFields()));
-    }
+    databaseSource.setFields(DvSourceFieldSupport.sourceFieldsFromDefinition(definition));
     return databaseSource;
   }
 

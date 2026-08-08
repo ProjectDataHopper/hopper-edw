@@ -101,12 +101,32 @@ Model checks for every selected DV/BV/DM model run **before** the update wave. R
 When **Manage vault update metrics (Begin/End)** is enabled:
 
 * Assigns `DV_WORKFLOW_EXECUTION_ID` (and related variables) before models run — prefer **Use workflow log channel id as execution id**
+* Propagates those variables onto this action and each programmatic child DV/BV/DM update so `load_run.workflow_execution_id` is correlated (required for overview reports)
 * Uses the shared **Execution metrics profile** (retail: `retail-execution-metrics`)
 * Can publish overview rows to the OPS database, ensure catalog definitions for overview tables, and log a summary to the workflow
 
 === Reports
 
 Optional Markdown / HTML **workflow load overview** under a report folder (retail default: `${PROJECT_HOME}/work/reports`). Same report style as **End Vault Update**.
+
+[cols="1,3", options="header"]
+|===
+|Option |Description
+
+|Write Markdown / Write HTML
+|Emit load-overview reports after the wave (and on failure when metrics are available).
+
+|Report output folder
+|Directory for report files (variables allowed). Default `${PROJECT_HOME}/work/reports`.
+
+|Report file base name
+|Optional base name without extension (variables allowed). Retail passes `REPORT_BASE_NAME` (`retail-dv-initial-report` / `retail-dv-update-report`). Empty → auto name from workflow + execution id + timestamp.
+
+|Include pipeline detail / insights
+|Same detail levels as **End Vault Update**.
+|===
+
+If reports are missing after a successful load, check the workflow log for **no metrics found** for the execution id: child updates must inherit `DV_WORKFLOW_EXECUTION_ID` (handled by this action when metrics management is on).
 
 == Open referenced models
 

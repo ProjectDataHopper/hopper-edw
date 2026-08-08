@@ -172,13 +172,13 @@ public final class WorkflowLoadOverviewPublisher {
             namespace, WorkflowLoadOverviewDdlSupport.TABLE_WORKFLOW_LOAD_OVERVIEW));
     definition.setType(RecordDefinitionType.PHYSICAL_TABLE);
     definition.setDescription("Workflow-level load overview for one vault update execution");
-    definition.setFields(fields);
     definition.setPhysicalTable(
         physicalTableRef(
             targetDatabaseName,
             operationsSchema,
             databaseMeta,
             WorkflowLoadOverviewDdlSupport.TABLE_WORKFLOW_LOAD_OVERVIEW));
+    org.apache.hop.datavault.catalog.DvSourceFieldSupport.applyRowMetaLayoutToDefinition(definition, fields, null);
     definition.getTags().add("operations");
     definition.getTags().add("load-metrics");
     definition.getTags().add("workflow-overview");
@@ -212,13 +212,13 @@ public final class WorkflowLoadOverviewPublisher {
             namespace, WorkflowLoadOverviewDdlSupport.TABLE_WORKFLOW_LOAD_OVERVIEW_MODEL));
     definition.setType(RecordDefinitionType.PHYSICAL_TABLE);
     definition.setDescription("Per-model summary rows for one workflow load overview");
-    definition.setFields(fields);
     definition.setPhysicalTable(
         physicalTableRef(
             targetDatabaseName,
             operationsSchema,
             databaseMeta,
             WorkflowLoadOverviewDdlSupport.TABLE_WORKFLOW_LOAD_OVERVIEW_MODEL));
+    org.apache.hop.datavault.catalog.DvSourceFieldSupport.applyRowMetaLayoutToDefinition(definition, fields, null);
     definition.getTags().add("operations");
     definition.getTags().add("load-metrics");
     definition.getTags().add("workflow-overview");

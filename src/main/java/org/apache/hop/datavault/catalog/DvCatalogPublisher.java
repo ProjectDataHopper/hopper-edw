@@ -244,9 +244,9 @@ public final class DvCatalogPublisher {
     definition.setKey(new RecordDefinitionKey(namespace, table.getName()));
     definition.setType(mapTableType(table.getTableType()));
     definition.setDescription(table.getDescription());
-    definition.setFields(layout);
     definition.setOrigin(buildTableOrigin(table, model, variables, updatedAt, workflowName));
     definition.setPhysicalTable(buildPhysicalTableRef(model, table, metadataProvider));
+    DvSourceFieldSupport.applyRowMetaLayoutToDefinition(definition, layout, variables);
     definition.getTags().add("DV " + table.getTableType().name());
     if (!Utils.isEmpty(model.getName())) {
       definition.getTags().add(model.getName());

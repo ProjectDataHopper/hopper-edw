@@ -32,7 +32,12 @@ DV source catalog entries use namespace **`hop/retail-example/sources`**.
 
 ### Source model sample
 
-`models/source-tables-crm.hsm` maps CRM landing tables (PK/FK relationships) and includes query **All customer info** (hub + address + contact + demo + prefs). Publish it as composite catalog feed `feed_customer_enriched` when experimenting with multi-table satellite loads.
+`models/source-tables-crm.hsm` maps CRM landing tables (PK/FK relationships) and includes:
+
+- Query **All customer info** (hub + address + contact + demo + prefs). Publish as composite catalog feed `feed_customer_enriched` when experimenting with multi-table satellite loads.
+- Table **order_shipment_event** — Kafka-style consumer landing (UUID `message_id`, JSON `payload`, `kafka_timestamp`, `topic`, `partition`, `offset`). Populated by `scripts/generate-retail-data.py` during initial and update waves with **order shipping tracking** events (label created → picked up → in transit → delivered, …).
+- Source JSON **order_shipment_tracking** — flattens `payload` into columns (`order_id`, `status`, `carrier`, location, …) plus pass-through Kafka metadata. Published as catalog feed **`feed_order_shipment_tracking`** (type `JSON`).
+- Data Vault **`retail-360.hdv`** loads that feed into **`hub_order_shipment`**, **`lnk_order_shipment`**, and **`sat_order_shipment`** (JSON source pipeline: record-source constant, hub sort/distinct for CDC).
 
 ## Prerequisites
 
@@ -61,7 +66,7 @@ Environment variables in `environments/local-docker-postgres.json`:
 - `DB_SOURCE_NAME` → CRM (`test_source`)
 - `DB_TARGET_NAME` → Vault (`test_edw`)
 
-DV record sources are **database-backed** catalog entries (`physicalTable` on CRM). CSV files under `files/` are still generated for debugging; `load-e2e-sources-to-crm.hpl` loads them into CRM before each DV update.
+Most DV record sources are **database-backed** catalog entries (`physicalTable` on CRM). The shipment feed is a **JSON** catalog source over `order_shipment_event.payload`. CSV files under `files/` are still generated for debugging; `load-e2e-sources-to-crm.hpl` loads them into CRM before each DV update.
 
 ## Project layout
 
@@ -119,6 +124,11 @@ From the repository root:
   - **Initial** (`run-retail-initial` → `EXPECT_AUTOMATIC_TARGET_TABLE_CREATION=Y`): missing-table CREATE is not reported (expected; vault update creates tables)
   - **Update** (`run-retail-update` → `N`, default): missing/altered targets stay WARNINGs and fail the gate
 - Writes `work/reports/retail-schema-validation.md` and `.html`
+
+After the vault wave, **Update resource definition group** also writes load-overview reports when metrics are enabled:
+
+- Initial: `work/reports/retail-dv-initial-report.md` / `.html` (`REPORT_BASE_NAME`)
+- Update: `work/reports/retail-dv-update-report.md` / `.html`
 
 Baseline **`v1.0.0`** is seeded from `fixtures/schema-gate-baseline/` into
 `work/edw-catalog/catalog-versions/` by `bootstrap-retail-work.py`. Refresh the

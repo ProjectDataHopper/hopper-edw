@@ -3,7 +3,6 @@
   "name": "CRM-customer",
   "type": "DV_SOURCE",
   "description": "",
-  "rowMetaXml": "<row-meta><value-meta><type>Integer</type>\n<storagetype>normal</storagetype>\n<name>customer_id</name>\n<length>9</length>\u2026",
   "origin": {
     "modelType": "DATA_VAULT_SOURCE",
     "modelName": "status-tracking",

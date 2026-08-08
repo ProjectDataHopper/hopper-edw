@@ -335,18 +335,18 @@ public final class SchemaHarvestService {
                 definition.getKey(),
                 variables,
                 metadataProvider);
-        if (versioned.isPresent() && versioned.get().getDvSource() != null) {
-          return DvSourceFieldSupport.fromCatalogFields(versioned.get().getDvSource().getFields());
+        if (versioned.isPresent()) {
+          return DvSourceFieldSupport.sourceFieldsFromDefinition(versioned.get());
         }
       } catch (Exception ignored) {
         // Fall back to working catalog contract.
       }
     }
-    DvSourceRecord dvSource = definition.getDvSource();
-    if (dvSource == null) {
+    try {
+      return DvSourceFieldSupport.sourceFieldsFromDefinition(definition);
+    } catch (Exception e) {
       return List.of();
     }
-    return DvSourceFieldSupport.fromCatalogFields(dvSource.getFields());
   }
 
   private static HarvestStatus deriveStatus(

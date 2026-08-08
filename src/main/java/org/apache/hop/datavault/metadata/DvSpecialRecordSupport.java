@@ -614,11 +614,7 @@ public final class DvSpecialRecordSupport {
   }
 
   private static String resolveLinkHashKeyName(DvLink link) {
-    String linkHashName = link.getLinkHashKeyFieldName();
-    if (Utils.isEmpty(linkHashName)) {
-      linkHashName = link.getName() + "_LK";
-    }
-    return linkHashName;
+    return link.resolveLinkHashKeyFieldName();
   }
 
   private static boolean isBusinessKeyColumn(DvHub hub, String columnName) {

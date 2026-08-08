@@ -342,10 +342,7 @@ public final class DvModelLineageCollector {
     }
 
     // Link hash key
-    String linkHash = resolve(link.getLinkHashKeyFieldName(), variables);
-    if (Utils.isEmpty(linkHash)) {
-      linkHash = resolve(link.getName(), variables) + "_LK";
-    }
+    String linkHash = link.resolveLinkHashKeyFieldName(variables);
     FieldLineage linkHashField = new FieldLineage(linkHash);
     linkHashField.setTechnical(true);
     FieldContribution linkHashContribution = new FieldContribution();
@@ -442,10 +439,7 @@ public final class DvModelLineageCollector {
       if (linkSatellite) {
         DvLink parentLink = model.findLink(parentName, variables, null);
         if (parentLink != null) {
-          parentHashField = resolve(parentLink.getLinkHashKeyFieldName(), variables);
-          if (Utils.isEmpty(parentHashField)) {
-            parentHashField = parentName + "_LK";
-          }
+          parentHashField = parentLink.resolveLinkHashKeyFieldName(variables);
         }
       } else {
         DvHub parentHub = model.findHub(parentName, variables, null);

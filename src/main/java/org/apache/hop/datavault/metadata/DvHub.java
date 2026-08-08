@@ -214,6 +214,30 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
                   this));
         }
 
+        // Target DDL / catalog publish need a concrete Hop (or SQL) type on the vault BK column.
+        String resolvedDataType =
+            variables != null ? variables.resolve(Const.NVL(bk.getDataType(), "")) : bk.getDataType();
+        if (Utils.isEmpty(resolvedDataType)) {
+          remarks.add(
+              new CheckResult(
+                  ICheckResult.TYPE_RESULT_ERROR,
+                  BaseMessages.getString(
+                      PKG,
+                      "DvHub.CheckResult.BusinessKeyNoDataType",
+                      Const.NVL(bk.getName(), "?")),
+                  this));
+        } else if (!DvDataTypeSupport.isKnownDataTypeLabel(resolvedDataType)) {
+          remarks.add(
+              new CheckResult(
+                  ICheckResult.TYPE_RESULT_ERROR,
+                  BaseMessages.getString(
+                      PKG,
+                      "DvHub.CheckResult.BusinessKeyInvalidDataType",
+                      Const.NVL(bk.getName(), "?"),
+                      resolvedDataType),
+                  this));
+        }
+
         // Validate that source field(s) (sourceFieldNames / sourceFieldName or fallback to name)
         // of this business key exist in the DataVaultSource referenced by its recordSourceName.
         if (DvIntegrationSupport.relaxesSourceValidation(this)) {
@@ -1018,6 +1042,68 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
     return variables != null && name != null ? variables.resolve(name) : name;
   }
 
+  /**
+   * Best-effort lookup of a catalog source field for a business key (first source part) so layout
+   * generation can fall back to the source hop type when {@link BusinessKey#getDataType()} is blank.
+   */
+  private SourceField findBusinessKeySourceField(
+      BusinessKey bk,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider,
+      DataVaultModel model) {
+    if (bk == null || metadataProvider == null) {
+      return null;
+    }
+    List<String> sourceParts = bk.resolveSourceParts();
+    if (sourceParts.isEmpty() && !Utils.isEmpty(bk.getName())) {
+      sourceParts = List.of(bk.getName());
+    }
+    if (sourceParts.isEmpty()) {
+      return null;
+    }
+    String sourceFieldName =
+        variables != null ? variables.resolve(sourceParts.get(0)) : sourceParts.get(0);
+    if (Utils.isEmpty(sourceFieldName)) {
+      return null;
+    }
+
+    List<String> candidateSources = new ArrayList<>();
+    if (!Utils.isEmpty(bk.getRecordSourceName())) {
+      candidateSources.add(bk.getRecordSourceName());
+    }
+    if (recordSources != null) {
+      for (String rs : recordSources) {
+        if (!Utils.isEmpty(rs) && !candidateSources.contains(rs)) {
+          candidateSources.add(rs);
+        }
+      }
+    }
+
+    for (String sourceName : candidateSources) {
+      try {
+        String resolved =
+            variables != null ? variables.resolve(sourceName) : sourceName;
+        DataVaultSource recordSource =
+            DvSourceCatalogService.resolveSource(resolved, model, variables, metadataProvider);
+        if (recordSource == null) {
+          continue;
+        }
+        for (SourceField sf : recordSource.getFields(metadataProvider)) {
+          if (sf == null || Utils.isEmpty(sf.getName())) {
+            continue;
+          }
+          String sfName = variables != null ? variables.resolve(sf.getName()) : sf.getName();
+          if (sourceFieldName.equals(sfName)) {
+            return sf;
+          }
+        }
+      } catch (Exception ignored) {
+        // Best-effort only; layout still fails later if type remains unknown.
+      }
+    }
+    return null;
+  }
+
   /** Context object holding all loaded / derived objects for the hub update pipeline generation. */
   private static class HubUpdateContext {
     final DvHub hub;
@@ -1195,14 +1281,23 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
 
       // 2. Then business keys (type from the metadata). Physical column name is always the vault
       // BK name (sourceFieldName / sourceFieldNames are source mappings only). Composite BKs still
-      // contribute a single vault column.
+      // contribute a single vault column. Prefer the modeled dataType; when blank, fall back to a
+      // matching source field hop type (same pattern as satellite attributes).
       //
       for (BusinessKey bk : getDistinctBusinessKeys()) {
         String vaultFieldName = variables.resolve(bk.getName());
 
-        int type = ValueMetaFactory.getIdForValueMeta(variables.resolve(bk.getDataType()));
+        SourceField matchingSource = findBusinessKeySourceField(bk, variables, metadataProvider, model);
+        int type =
+            DvDataTypeSupport.resolveHopTypeId(variables.resolve(bk.getDataType()), matchingSource);
         int length = Const.toInt(variables.resolve(bk.getLength()), -1);
+        if (length <= 0 && matchingSource != null) {
+          length = Const.toInt(matchingSource.getLength(), -1);
+        }
         int precision = Const.toInt(variables.resolve(bk.getPrecision()), -1);
+        if (precision < 0 && matchingSource != null) {
+          precision = Const.toInt(matchingSource.getPrecision(), -1);
+        }
 
         IValueMeta bkMeta =
             ValueMetaFactory.createValueMeta(vaultFieldName, type, length, precision);

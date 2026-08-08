@@ -509,7 +509,7 @@ limitations under the License.
       <tableType>HUB</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>592</xloc>
+      <xloc>608</xloc>
       <yloc>256</yloc>
       <name>hub_order</name>
       <virtualPath/>
@@ -582,8 +582,8 @@ limitations under the License.
       <tableType>SATELLITE</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>816</xloc>
-      <yloc>256</yloc>
+      <xloc>384</xloc>
+      <yloc>304</yloc>
       <name>sat_order</name>
       <virtualPath/>
     </table>
@@ -1162,6 +1162,209 @@ limitations under the License.
       <xloc>304</xloc>
       <yloc>80</yloc>
       <name>sat_customer</name>
+      <virtualPath/>
+    </table>
+    <table>
+      <businessKeys>
+        <name>message_id</name>
+        <description/>
+        <dataType>String</dataType>
+        <length>36</length>
+        <composite>N</composite>
+        <sourceFieldNames/>
+        <sourceFieldName>message_id</sourceFieldName>
+        <recordSourceName>feed_order_shipment_tracking</recordSourceName>
+      </businessKeys>
+      <hashKeyFieldName>order_shipment_hk</hashKeyFieldName>
+      <recordSourceFieldName/>
+      <recordSources>
+        <recordSource>feed_order_shipment_tracking</recordSource>
+      </recordSources>
+      <tableName>hub_order_shipment</tableName>
+      <description/>
+      <tableType>HUB</tableType>
+      <integrationMode>HOP_MANAGED</integrationMode>
+      <customUpdatePipelinePaths/>
+      <xloc>1024</xloc>
+      <yloc>256</yloc>
+      <name>hub_order_shipment</name>
+      <virtualPath/>
+    </table>
+    <table>
+      <hub>hub_order_shipment</hub>
+      <link/>
+      <attributes>
+        <name>kafka_timestamp</name>
+        <description/>
+        <dataType>Timestamp</dataType>
+        <length/>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>topic</name>
+        <description/>
+        <dataType>String</dataType>
+        <length>80</length>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>partition</name>
+        <description/>
+        <dataType>Integer</dataType>
+        <length>9</length>
+        <precision>0</precision>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>offset</name>
+        <description/>
+        <dataType>Integer</dataType>
+        <length>12</length>
+        <precision>0</precision>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>order_id</name>
+        <description>JsonPath: $.order_id</description>
+        <dataType>String</dataType>
+        <length>7</length>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>tracking_number</name>
+        <description>JsonPath: $.tracking_number</description>
+        <dataType>String</dataType>
+        <length>40</length>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>carrier</name>
+        <description>JsonPath: $.carrier</description>
+        <dataType>String</dataType>
+        <length>20</length>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>status</name>
+        <description>JsonPath: $.status</description>
+        <dataType>String</dataType>
+        <length>30</length>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>status_ts</name>
+        <description>JsonPath: $.status_ts</description>
+        <dataType>String</dataType>
+        <length>40</length>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>city</name>
+        <description>JsonPath: $.location.city</description>
+        <dataType>String</dataType>
+        <length>50</length>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>region</name>
+        <description>JsonPath: $.location.region</description>
+        <dataType>String</dataType>
+        <length>20</length>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>warehouse_id</name>
+        <description>JsonPath: $.warehouse_id</description>
+        <dataType>String</dataType>
+        <length>9</length>
+        <precision>0</precision>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>notes</name>
+        <description>JsonPath: $.notes</description>
+        <dataType>String</dataType>
+        <length>200</length>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <parentKeySourceFields>
+        <parentKeySourceField>message_id</parentKeySourceField>
+      </parentKeySourceFields>
+      <drivingKey/>
+      <drivingKeySourceField/>
+      <recordSource>feed_order_shipment_tracking</recordSource>
+      <storeRecordSource>Y</storeRecordSource>
+      <statusTrackingEnabled>N</statusTrackingEnabled>
+      <statusTableName/>
+      <statusFieldName>record_status</statusFieldName>
+      <activeStatusValue>ACTIVE</activeStatusValue>
+      <deletedStatusValue>DELETED</deletedStatusValue>
+      <tableName>sat_order_shipment</tableName>
+      <description/>
+      <tableType>SATELLITE</tableType>
+      <integrationMode>HOP_MANAGED</integrationMode>
+      <customUpdatePipelinePaths/>
+      <xloc>1056</xloc>
+      <yloc>416</yloc>
+      <name>sat_order_shipment</name>
+      <virtualPath/>
+    </table>
+    <table>
+      <hubNames>hub_order_shipment</hubNames>
+      <hubNames>hub_order</hubNames>
+      <linkHubSources>
+        <linkHubSource>
+          <source>feed_order_shipment_tracking</source>
+          <hubSourceKeyFields>
+            <hubSourceKeyField>
+              <hubName>hub_order</hubName>
+              <businessKeySources>
+                <businessKeySource>
+                  <businessKeyField>order_id</businessKeyField>
+                  <sourceFieldNames/>
+                  <sourceFieldName>order_id</sourceFieldName>
+                </businessKeySource>
+              </businessKeySources>
+              <drivingKeySources/>
+            </hubSourceKeyField>
+            <hubSourceKeyField>
+              <hubName>hub_order_shipment</hubName>
+              <businessKeySources>
+                <businessKeySource>
+                  <businessKeyField>message_id</businessKeyField>
+                  <sourceFieldNames/>
+                  <sourceFieldName>message_id</sourceFieldName>
+                </businessKeySource>
+              </businessKeySources>
+              <drivingKeySources/>
+            </hubSourceKeyField>
+          </hubSourceKeyFields>
+        </linkHubSource>
+      </linkHubSources>
+      <linkSatelliteSources/>
+      <dependentChildKeys/>
+      <linkHashKeyFieldName>lnk_order_shipment_hk</linkHashKeyFieldName>
+      <hubSourceKeyFields/>
+      <hasDescriptiveAttributes>N</hasDescriptiveAttributes>
+      <recordSourceFieldName/>
+      <tableName>lnk_order_shipment</tableName>
+      <description/>
+      <tableType>LINK</tableType>
+      <integrationMode>HOP_MANAGED</integrationMode>
+      <customUpdatePipelinePaths/>
+      <xloc>784</xloc>
+      <yloc>256</yloc>
+      <name>lnk_order_shipment</name>
       <virtualPath/>
     </table>
   </tables>

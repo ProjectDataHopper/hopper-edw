@@ -45,6 +45,107 @@ class DvLinkValidationTest {
   }
 
   @Test
+  void resolveLinkHashKeyFieldNameDefaultsToNamePlusLk() {
+    DvLink link = new DvLink("lnk_order_shipment");
+    assertEquals("lnk_order_shipment_LK", link.resolveLinkHashKeyFieldName());
+    assertEquals("lnk_order_shipment_LK", link.resolveLinkHashKeyFieldName(new Variables()));
+  }
+
+  @Test
+  void resolveLinkHashKeyFieldNameUsesStoredValue() {
+    DvLink link = new DvLink("lnk_order_shipment");
+    link.setLinkHashKeyFieldName("lnk_order_shipment_hk");
+    assertEquals("lnk_order_shipment_hk", link.resolveLinkHashKeyFieldName());
+  }
+
+  @Test
+  void resolveLinkHashKeyFieldNameResolvesVariables() {
+    DvLink link = new DvLink("lnk_order");
+    link.setLinkHashKeyFieldName("${PREFIX}_lk");
+    Variables variables = new Variables();
+    variables.setVariable("PREFIX", "order");
+    assertEquals("order_lk", link.resolveLinkHashKeyFieldName(variables));
+  }
+
+  @Test
+  void checkCommentsWhenLinkHashKeyBlankButNamePresent() {
+    DvLink link = new DvLink("lnk_order_shipment");
+    link.setIntegrationMode(DvIntegrationMode.EXTERNAL_READ);
+    link.getHubNames().add("hub_order");
+    link.getHubNames().add("hub_order_shipment");
+
+    List<ICheckResult> remarks = new ArrayList<>();
+    link.check(
+        remarks, null, new Variables(), DvModelCheckOptions.defaults(), new DataVaultModel());
+
+    assertTrue(
+        remarks.stream()
+            .anyMatch(
+                r ->
+                    r.getType() == ICheckResult.TYPE_RESULT_COMMENT
+                        && r.getText()
+                            .equals(
+                                BaseMessages.getString(
+                                    PKG,
+                                    "DvLink.CheckResult.NoLinkHashKeyFieldName",
+                                    "lnk_order_shipment_LK"))));
+    assertFalse(
+        remarks.stream()
+            .anyMatch(
+                r ->
+                    r.getType() == ICheckResult.TYPE_RESULT_ERROR
+                        && r.getText()
+                            .contains(
+                                BaseMessages.getString(
+                                    PKG, "DvLink.CheckResult.MissingResolvableLinkHashKey"))));
+  }
+
+  @Test
+  void checkErrorsWhenLinkHashKeyUnresolvable() {
+    DvLink link = new DvLink();
+    link.setName("");
+    link.setLinkHashKeyFieldName("");
+    link.setIntegrationMode(DvIntegrationMode.EXTERNAL_READ);
+
+    List<ICheckResult> remarks = new ArrayList<>();
+    link.check(
+        remarks, null, new Variables(), DvModelCheckOptions.defaults(), new DataVaultModel());
+
+    assertTrue(
+        remarks.stream()
+            .anyMatch(
+                r ->
+                    r.getType() == ICheckResult.TYPE_RESULT_ERROR
+                        && r.getText()
+                            .equals(
+                                BaseMessages.getString(
+                                    PKG, "DvLink.CheckResult.MissingResolvableLinkHashKey"))));
+  }
+
+  @Test
+  void targetTableLayoutDefaultsBlankLinkHashKey() throws HopException {
+    DataVaultModel model = new DataVaultModel();
+    DvHub hubOrder = new DvHub("hub_order");
+    hubOrder.setHashKeyFieldName("order_hk");
+    DvHub hubShipment = new DvHub("hub_order_shipment");
+    hubShipment.setHashKeyFieldName("shipment_hk");
+
+    DvLink link = new DvLink("lnk_order_shipment");
+    // blank stored name — must default, not throw at layout/generation time
+    link.setLinkHashKeyFieldName("");
+    link.getHubNames().add("hub_order");
+    link.getHubNames().add("hub_order_shipment");
+    model.getTables().addAll(List.of(hubOrder, hubShipment, link));
+
+    IRowMeta layout =
+        link.getTargetTableLayout(new MemoryMetadataProvider(), new Variables(), model);
+
+    assertTrue(
+        layout.getValueMetaList().stream()
+            .anyMatch(meta -> "lnk_order_shipment_LK".equals(meta.getName())));
+  }
+
+  @Test
   void checkErrorsWhenLinkHubSourcesMissing() {
     DvLink link = new DvLink("lnk_order");
     link.getHubNames().add("hub_customer");

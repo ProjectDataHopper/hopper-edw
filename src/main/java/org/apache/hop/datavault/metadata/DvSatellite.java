@@ -346,6 +346,30 @@ public class DvSatellite extends DvTableBase
                   BaseMessages.getString(PKG, "DvSatellite.CheckResult.AttributeNoName"),
                   this));
         }
+        String resolvedDataType =
+            variables != null
+                ? variables.resolve(Const.NVL(attr.getDataType(), ""))
+                : attr.getDataType();
+        if (Utils.isEmpty(resolvedDataType)) {
+          remarks.add(
+              new CheckResult(
+                  ICheckResult.TYPE_RESULT_ERROR,
+                  BaseMessages.getString(
+                      PKG,
+                      "DvSatellite.CheckResult.AttributeNoDataType",
+                      Const.NVL(attr.getName(), "?")),
+                  this));
+        } else if (!DvDataTypeSupport.isKnownDataTypeLabel(resolvedDataType)) {
+          remarks.add(
+              new CheckResult(
+                  ICheckResult.TYPE_RESULT_ERROR,
+                  BaseMessages.getString(
+                      PKG,
+                      "DvSatellite.CheckResult.AttributeInvalidDataType",
+                      Const.NVL(attr.getName(), "?"),
+                      resolvedDataType),
+                  this));
+        }
       }
 
       // Verify that all specified attributes exist in the record source's fields.
@@ -845,10 +869,7 @@ public class DvSatellite extends DvTableBase
         if (linkedLink == null) {
           throw new HopException("Please provide an existing link in satellite " + getName());
         }
-        hashKeyName = linkedLink.getLinkHashKeyFieldName();
-        if (Utils.isEmpty(hashKeyName)) {
-          hashKeyName = linkedLink.getName() + "_LK";
-        }
+        hashKeyName = linkedLink.resolveLinkHashKeyFieldName(variables);
       }
 
       IValueMeta hashMeta;
@@ -1118,11 +1139,7 @@ public class DvSatellite extends DvTableBase
       if (linkedLink == null) {
         throw new HopException("Please provide an existing link in satellite " + getName());
       }
-      String hashKeyName = variables.resolve(linkedLink.getLinkHashKeyFieldName());
-      if (Utils.isEmpty(hashKeyName)) {
-        hashKeyName = linkedLink.getName() + "_LK";
-      }
-      return hashKeyName;
+      return linkedLink.resolveLinkHashKeyFieldName(variables);
     }
     throw new HopException("Satellite " + getName() + " is not linked to a hub or link");
   }
@@ -2521,10 +2538,7 @@ public class DvSatellite extends DvTableBase
               DvSourceFieldMappingSupport.resolveRecordSourceFieldNameForSatellite(
                   config, model, sat, variables);
         }
-        hashKeyFieldName = variables.resolve(linkedLink.getLinkHashKeyFieldName());
-        if (Utils.isEmpty(hashKeyFieldName)) {
-          hashKeyFieldName = linkedLink.getName() + "_LK";
-        }
+        hashKeyFieldName = linkedLink.resolveLinkHashKeyFieldName(variables);
         linkHubSource = findLinkHubSource(linkedLink, recordSource);
         linkSatelliteSource = findLinkSatelliteSource(linkedLink, recordSource);
 

@@ -772,10 +772,11 @@ public final class SchemaImpactSimulationService {
   }
 
   private static List<SourceField> extractFields(RecordDefinition definition) {
-    if (definition == null || definition.getDvSource() == null) {
+    try {
+      return DvSourceFieldSupport.sourceFieldsFromDefinition(definition);
+    } catch (Exception e) {
       return List.of();
     }
-    return DvSourceFieldSupport.fromCatalogFields(definition.getDvSource().getFields());
   }
 
   private static List<SourceField> discoverFields(

@@ -1,37 +1,86 @@
 {
-  "namespace" : "hop/hop-project/models/retail-model",
-  "name" : "l_customer_order",
-  "type" : "DV_LINK",
-  "description" : "",
-  "rowMetaXml" : "<row-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>customer_order_hk</name>\n<length>32</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>customer_hk</name>\n<length>32</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>order_hk</name>\n<length>32</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>x_record_source</name>\n<length>100</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>Timestamp</type>\n<storagetype>normal</storagetype>\n<name>x_load_ts</name>\n<length>-1</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta></row-meta>",
-  "origin" : {
-    "modelType" : "DATA_VAULT_MODEL",
-    "modelName" : "retail-model",
-    "modelFilename" : "/home/matt/git/mattcasters/hop-data-vault/docs/video-tutorials/your-first-data-vault-model/hop-project/retail-model.hdv",
-    "modelElementName" : "l_customer_order",
-    "hopProject" : "hop-project",
-    "createdAt" : 1783529152035,
-    "updatedAt" : 1783547693419,
-    "lastDiscoveredAt" : null,
-    "updatedBy" : null,
-    "lastWorkflow" : "retail-model",
-    "lastPipeline" : null
+  "namespace": "hop/hop-project/models/retail-model",
+  "name": "l_customer_order",
+  "type": "DV_LINK",
+  "description": "",
+  "origin": {
+    "modelType": "DATA_VAULT_MODEL",
+    "modelName": "retail-model",
+    "modelFilename": "/home/matt/git/mattcasters/hop-data-vault/docs/video-tutorials/your-first-data-vault-model/hop-project/retail-model.hdv",
+    "modelElementName": "l_customer_order",
+    "hopProject": "hop-project",
+    "createdAt": 1783529152035,
+    "updatedAt": 1783547693419,
+    "lastDiscoveredAt": null,
+    "updatedBy": null,
+    "lastWorkflow": "retail-model",
+    "lastPipeline": null
   },
-  "physicalTable" : {
-    "databaseMetaName" : "Vault",
-    "schemaName" : null,
-    "tableName" : "l_customer_order"
+  "physicalTable": {
+    "databaseMetaName": "Vault",
+    "schemaName": null,
+    "tableName": "l_customer_order",
+    "fields": [
+      {
+        "name": "customer_order_hk",
+        "description": null,
+        "sourceDataType": "String",
+        "length": "32",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "customer_hk",
+        "description": null,
+        "sourceDataType": "String",
+        "length": "32",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "order_hk",
+        "description": null,
+        "sourceDataType": "String",
+        "length": "32",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "x_record_source",
+        "description": null,
+        "sourceDataType": "String",
+        "length": "100",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "x_load_ts",
+        "description": null,
+        "sourceDataType": "Timestamp",
+        "length": "",
+        "precision": "",
+        "hopType": 9,
+        "inputOptions": null
+      }
+    ]
   },
-  "physicalFile" : null,
-  "physicalIcebergTable" : null,
-  "tags" : [ "DV LINK", "retail-model" ],
-  "glossaryTerms" : [ ],
-  "customProperties" : {
-    "recordSourceField" : {
-      "type" : "STRING",
-      "value" : "x_record_source"
+  "physicalFile": null,
+  "physicalIcebergTable": null,
+  "tags": [
+    "DV LINK",
+    "retail-model"
+  ],
+  "glossaryTerms": [],
+  "customProperties": {
+    "recordSourceField": {
+      "type": "STRING",
+      "value": "x_record_source"
     }
   },
-  "validationAcknowledgements" : [ ],
-  "dvSource" : null
+  "validationAcknowledgements": [],
+  "dvSource": null
 }

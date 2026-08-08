@@ -1,106 +1,117 @@
 {
-  "namespace" : "hop/integration-tests/sources",
-  "name" : "CRM-customer-iceberg",
-  "type" : "DV_SOURCE",
-  "description" : "Customer Iceberg source for iceberg-basic integration tests",
-  "rowMetaXml" : "<row-meta><value-meta><type>Integer</type>\n<storagetype>normal</storagetype>\n<name>customer_id</name>\n<length>9</length>\n<precision>0</precision>\n<origin/>\n<comments/>\n<conversion_Mask>####0;-####0</conversion_Mask>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>name</name>\n<length>50</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>email</name>\n<length>50</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>address</name>\n<length>50</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>city</name>\n<length>50</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>Timestamp</type>\n<storagetype>normal</storagetype>\n<name>load_date</name>\n<length>-1</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>record_source</name>\n<length>20</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta></row-meta>",
-  "origin" : {
-    "modelType" : "DATA_VAULT_SOURCE",
-    "modelName" : "vault1-iceberg",
-    "modelFilename" : "/integration-tests/tests//iceberg-basic/vault1-iceberg.hdv",
-    "modelElementName" : "CRM-customer-iceberg",
-    "hopProject" : "iceberg-basic",
-    "createdAt" : 1782200000000,
-    "updatedAt" : 1782200000000,
-    "lastDiscoveredAt" : 1782402679134,
-    "updatedBy" : null,
-    "lastWorkflow" : null,
-    "lastPipeline" : null
+  "namespace": "hop/integration-tests/sources",
+  "name": "CRM-customer-iceberg",
+  "type": "DV_SOURCE",
+  "description": "Customer Iceberg source for iceberg-basic integration tests",
+  "origin": {
+    "modelType": "DATA_VAULT_SOURCE",
+    "modelName": "vault1-iceberg",
+    "modelFilename": "/integration-tests/tests//iceberg-basic/vault1-iceberg.hdv",
+    "modelElementName": "CRM-customer-iceberg",
+    "hopProject": "iceberg-basic",
+    "createdAt": 1782200000000,
+    "updatedAt": 1782200000000,
+    "lastDiscoveredAt": 1782402679134,
+    "updatedBy": null,
+    "lastWorkflow": null,
+    "lastPipeline": null
   },
-  "physicalTable" : null,
-  "physicalFile" : null,
-  "physicalIcebergTable" : {
-    "catalogUri" : "${ICEBERG_CATALOG_URI}",
-    "warehouse" : "${ICEBERG_WAREHOUSE}",
-    "namespace" : "${ICEBERG_NAMESPACE}",
-    "tableName" : "${ICEBERG_TABLE}",
-    "snapshotId" : "",
-    "branch" : "",
-    "s3Endpoint" : "${S3_ENDPOINT}",
-    "s3AccessKey" : "${S3_ACCESS_KEY}",
-    "s3SecretKey" : "${S3_SECRET_KEY}"
+  "physicalTable": null,
+  "physicalFile": null,
+  "physicalIcebergTable": {
+    "catalogUri": "${ICEBERG_CATALOG_URI}",
+    "warehouse": "${ICEBERG_WAREHOUSE}",
+    "namespace": "${ICEBERG_NAMESPACE}",
+    "tableName": "${ICEBERG_TABLE}",
+    "snapshotId": "",
+    "branch": "",
+    "s3Endpoint": "${S3_ENDPOINT}",
+    "s3AccessKey": "${S3_ACCESS_KEY}",
+    "s3SecretKey": "${S3_SECRET_KEY}"
   },
-  "tags" : [ "DV Source", "FULL_SNAPSHOT", "ICEBERG" ],
-  "glossaryTerms" : [ ],
-  "customProperties" : {
-    "physicalSchemaId" : {
-      "type" : "STRING",
-      "value" : "0"
+  "tags": [
+    "DV Source",
+    "FULL_SNAPSHOT",
+    "ICEBERG"
+  ],
+  "glossaryTerms": [],
+  "customProperties": {
+    "physicalSchemaId": {
+      "type": "STRING",
+      "value": "0"
     }
   },
-  "dvSource" : {
-    "sourceType" : "ICEBERG",
-    "sourceIndicator" : "",
-    "sourceIndicatorField" : "record_source",
-    "group" : null,
-    "deliveryType" : "FULL_SNAPSHOT",
-    "fields" : [ {
-      "name" : "customer_id",
-      "description" : "",
-      "sourceDataType" : "Integer",
-      "length" : "9",
-      "precision" : "0",
-      "hopType" : 5,
-      "inputOptions" : null
-    }, {
-      "name" : "name",
-      "description" : "",
-      "sourceDataType" : "String",
-      "length" : "50",
-      "precision" : "",
-      "hopType" : 2,
-      "inputOptions" : null
-    }, {
-      "name" : "email",
-      "description" : "",
-      "sourceDataType" : "String",
-      "length" : "50",
-      "precision" : "",
-      "hopType" : 2,
-      "inputOptions" : null
-    }, {
-      "name" : "address",
-      "description" : "",
-      "sourceDataType" : "String",
-      "length" : "50",
-      "precision" : "",
-      "hopType" : 2,
-      "inputOptions" : null
-    }, {
-      "name" : "city",
-      "description" : "",
-      "sourceDataType" : "String",
-      "length" : "50",
-      "precision" : "",
-      "hopType" : 2,
-      "inputOptions" : null
-    }, {
-      "name" : "load_date",
-      "description" : "",
-      "sourceDataType" : "Timestamp",
-      "length" : "",
-      "precision" : "",
-      "hopType" : 9,
-      "inputOptions" : null
-    }, {
-      "name" : "record_source",
-      "description" : "",
-      "sourceDataType" : "String",
-      "length" : "20",
-      "precision" : "",
-      "hopType" : 2,
-      "inputOptions" : null
-    } ],
-    "csvFormat" : null
+  "dvSource": {
+    "sourceType": "ICEBERG",
+    "sourceIndicator": "",
+    "sourceIndicatorField": "record_source",
+    "group": null,
+    "deliveryType": "FULL_SNAPSHOT",
+    "fields": [
+      {
+        "name": "customer_id",
+        "description": "",
+        "sourceDataType": "Integer",
+        "length": "9",
+        "precision": "0",
+        "hopType": 5,
+        "inputOptions": null
+      },
+      {
+        "name": "name",
+        "description": "",
+        "sourceDataType": "String",
+        "length": "50",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "email",
+        "description": "",
+        "sourceDataType": "String",
+        "length": "50",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "address",
+        "description": "",
+        "sourceDataType": "String",
+        "length": "50",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "city",
+        "description": "",
+        "sourceDataType": "String",
+        "length": "50",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "load_date",
+        "description": "",
+        "sourceDataType": "Timestamp",
+        "length": "",
+        "precision": "",
+        "hopType": 9,
+        "inputOptions": null
+      },
+      {
+        "name": "record_source",
+        "description": "",
+        "sourceDataType": "String",
+        "length": "20",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      }
+    ],
+    "csvFormat": null
   }
 }

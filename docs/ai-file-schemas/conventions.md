@@ -53,9 +53,19 @@ Model canvases store a **single** `tables/table` list. Discriminator:
 
 ## Catalog is the contract
 
-- Source field names, types, and lengths for DV loads come from **catalog** `DV_SOURCE` (or COMPOSITE) records and/or `.hsm`.
-- Models **reference** sources by name (`CRM-customer`), they do not redefine the full source schema.
+- Source field names, types, and lengths for DV loads come from **catalog** `DV_SOURCE` records (and/or `.hsm` published into the catalog).
+- Models **reference** sources by name (`CRM-customer`); they do not redefine the full source schema.
 - If a field is missing, update the catalog / source model first.
+
+### Catalog JSON layout homes (do not invent `rowMetaXml`)
+
+| Record `type` | Authoritative columns |
+|---------------|------------------------|
+| `DV_SOURCE` | `dvSource.fields[]` |
+| `DV_HUB` / `DV_LINK` / `DV_SATELLITE` / `DV_REFERENCE` / `BV_TABLE` / `DIM_TABLE` / `FACT_TABLE` / `PHYSICAL_TABLE` | `physicalTable.fields[]` |
+
+- `physicalTable` on a **source** is **location only** (database/schema/table) — not the field list.
+- Top-level **`rowMetaXml` is legacy**: never write or hand-edit it. See [metadata/catalog-record-definition.md](metadata/catalog-record-definition.md).
 
 ## Canvas layout
 

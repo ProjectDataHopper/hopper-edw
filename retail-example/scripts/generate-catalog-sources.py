@@ -102,6 +102,9 @@ QUALITY_BINDINGS: dict[str, list[dict]] = {
     "E2E-order-rep": [
         library_binding("table-not-empty"),
     ],
+    "E2E-order-shipment-event": [
+        library_binding("table-not-empty"),
+    ],
 }
 
 
@@ -261,6 +264,25 @@ SOURCE_DEFINITIONS = {
             ("secondary_rep_id", "Integer", "9", "0", 5),
             ("load_date", "Timestamp", "", "", 9),
             ("record_source", "String", "30", "", 2),
+        ],
+    },
+    "E2E-order-shipment-event": {
+        "prefix": "order_shipment_event",
+        "description": (
+            "Kafka-style consumer landing for order shipment tracking events "
+            "(message key + JSON payload + topic/partition/offset). "
+            "Flatten payload with a Source JSON object on source-tables-crm.hsm."
+        ),
+        "primary_keys": ["message_id"],
+        "fields": [
+            ("message_id", "String", "36", "", 2),
+            ("payload", "String", "4000", "", 2),
+            ("kafka_timestamp", "Timestamp", "", "", 9),
+            ("topic", "String", "80", "", 2),
+            ("partition", "Integer", "9", "0", 5),
+            ("offset", "Integer", "12", "0", 5),
+            ("load_date", "Timestamp", "", "", 9),
+            ("record_source", "String", "40", "", 2),
         ],
     },
 }

@@ -322,15 +322,8 @@ public final class DvConstraintDdlSupport {
     if (link == null) {
       return null;
     }
-    String linkHashName = link.getLinkHashKeyFieldName();
-    if (!Utils.isEmpty(linkHashName)) {
-      return variables != null ? variables.resolve(linkHashName) : linkHashName;
-    }
-    String name = link.getName();
-    if (variables != null) {
-      name = variables.resolve(name);
-    }
-    return Utils.isEmpty(name) ? null : name + "_LK";
+    String linkHashName = link.resolveLinkHashKeyFieldName(variables);
+    return Utils.isEmpty(linkHashName) ? null : linkHashName;
   }
 
   private static String resolveSatelliteParentHashColumn(

@@ -65,8 +65,8 @@ public final class DvDataTypeSupport {
       }
     }
     if (sourceField != null) {
-      // Correct JDBC mis-maps (DATETIME stored as hopType String) via SQL type name.
-      return effectiveHopTypeId(sourceField.getHopType(), sourceField.getSourceDataType());
+      // Correct JDBC / default mis-maps (DATETIME or Integer stored as hopType String).
+      return resolveSourceFieldHopType(sourceField);
     }
     return IValueMeta.TYPE_STRING;
   }
@@ -146,28 +146,89 @@ public final class DvDataTypeSupport {
   }
 
   /**
+   * Effective Hop type id for a catalog/source field used by import-from-source, validation, and
+   * row-meta derivation.
+   *
+   * <p>Corrects a stored {@link IValueMeta#TYPE_STRING} (or unset {@code hopType}) when {@link
+   * SourceField#getSourceDataType()} is a known Hop type name or native SQL type (e.g. {@code
+   * Integer}, {@code int4}, {@code DATETIME(6)}). This matches how catalog layouts often keep the
+   * real type label in {@code sourceDataType} while {@code hopType} was defaulted to String.
+   */
+  public static int resolveSourceFieldHopType(SourceField sourceField) {
+    if (sourceField == null) {
+      return IValueMeta.TYPE_STRING;
+    }
+    int hopType = sourceField.getHopType();
+    String label = sourceField.getSourceDataType();
+
+    // Prefer SQL / native type correction over a stale TYPE_STRING hopType (JDBC noise, defaults).
+    hopType = effectiveHopTypeId(hopType, label);
+
+    // When still unset or still String, try the label as an explicit Hop type name (Integer, …).
+    if ((hopType <= 0 || hopType == IValueMeta.TYPE_STRING) && !Utils.isEmpty(label)) {
+      int fromHopName = ValueMetaFactory.getIdForValueMeta(label.trim());
+      if (fromHopName > 0 && (hopType <= 0 || fromHopName != IValueMeta.TYPE_STRING)) {
+        hopType = fromHopName;
+      }
+    }
+
+    return hopType > 0 ? hopType : IValueMeta.TYPE_STRING;
+  }
+
+  /**
    * Preferred label to store on satellite attributes / hub business keys when copying from a source
    * field: Hop type name when known, otherwise the native SQL type.
+   *
+   * <p>Never returns empty for a non-null field: unresolved types become {@code String} so hub/sat
+   * import-from-source always fills the Data type column (required for vault DDL).
    */
   public static String preferredDataTypeLabel(SourceField sourceField) {
     if (sourceField == null) {
-      return "";
+      return "String";
     }
-    int hopType = sourceField.getHopType();
-    if (hopType <= 0) {
-      hopType = hopTypeIdFromSqlTypeName(sourceField.getSourceDataType());
-    }
-    if (hopType > 0) {
-      try {
-        String hopTypeName = ValueMetaFactory.getValueMetaName(hopType);
-        if (!Utils.isEmpty(hopTypeName) && !"-".equals(hopTypeName)) {
+    int hopType = resolveSourceFieldHopType(sourceField);
+    try {
+      String hopTypeName = ValueMetaFactory.getValueMetaName(hopType);
+      if (!Utils.isEmpty(hopTypeName)
+          && !"-".equals(hopTypeName)
+          && !"None".equalsIgnoreCase(hopTypeName)) {
+        // Only trust the Hop name when it is not a String default masking a free-text SQL label.
+        if (hopType != IValueMeta.TYPE_STRING) {
           return hopTypeName;
         }
-      } catch (Exception ignored) {
-        // Fall through to source SQL type.
+        String sourceDataType = Const.NVL(sourceField.getSourceDataType(), "").trim();
+        if (Utils.isEmpty(sourceDataType)
+            || "String".equalsIgnoreCase(sourceDataType)
+            || hopTypeIdFromSqlTypeName(sourceDataType) == IValueMeta.TYPE_STRING
+            || ValueMetaFactory.getIdForValueMeta(sourceDataType) == IValueMeta.TYPE_STRING) {
+          return hopTypeName;
+        }
+        // Unrecognized free-text label with hopType String: keep the source label for DDL/debug.
+        return sourceDataType;
       }
+    } catch (Exception ignored) {
+      // Fall through to source SQL type / String default.
     }
-    return Const.NVL(sourceField.getSourceDataType(), "");
+    String sourceDataType = Const.NVL(sourceField.getSourceDataType(), "").trim();
+    if (!Utils.isEmpty(sourceDataType)) {
+      return sourceDataType;
+    }
+    return "String";
+  }
+
+  /**
+   * True when {@code dataType} is a known Hop type name ({@code String}, {@code Integer}, …) or a
+   * recognized native SQL type label. Empty/null labels return false.
+   */
+  public static boolean isKnownDataTypeLabel(String dataType) {
+    if (Utils.isEmpty(dataType)) {
+      return false;
+    }
+    String trimmed = dataType.trim();
+    if (ValueMetaFactory.getIdForValueMeta(trimmed) > 0) {
+      return true;
+    }
+    return hopTypeIdFromSqlTypeName(trimmed) > 0;
   }
 
   static String normalizeSqlTypeBase(String sqlTypeName) {

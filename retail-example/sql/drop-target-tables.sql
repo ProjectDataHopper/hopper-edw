@@ -48,6 +48,8 @@ DROP TABLE IF EXISTS customer_360_bv CASCADE;
 -- Data vault: link satellites, then links, then satellites, then hubs
 DROP TABLE IF EXISTS sat_lnk_order_line CASCADE;
 DROP TABLE IF EXISTS sat_lnk_warehouse_product CASCADE;
+
+DROP TABLE IF EXISTS lnk_order_shipment CASCADE;
 DROP TABLE IF EXISTS lnk_order_line CASCADE;
 DROP TABLE IF EXISTS lnk_warehouse_product CASCADE;
 DROP TABLE IF EXISTS lnk_order_rep CASCADE;
@@ -56,6 +58,7 @@ DROP TABLE IF EXISTS lnk_order CASCADE;
 DROP TABLE IF EXISTS sat_order CASCADE;
 DROP TABLE IF EXISTS sat_warehouse CASCADE;
 DROP TABLE IF EXISTS sat_product CASCADE;
+DROP TABLE IF EXISTS sat_order_shipment CASCADE;
 DROP TABLE IF EXISTS sat_customer_prefs CASCADE;
 DROP TABLE IF EXISTS sat_customer_address CASCADE;
 DROP TABLE IF EXISTS sat_customer_contact CASCADE;
@@ -68,6 +71,7 @@ DROP TABLE IF EXISTS hub_product CASCADE;
 DROP TABLE IF EXISTS hub_sales_rep CASCADE;
 DROP TABLE IF EXISTS hub_secondary_rep CASCADE;
 DROP TABLE IF EXISTS hub_customer CASCADE;
+DROP TABLE IF EXISTS hub_order_shipment CASCADE;
 
 -- Staging views (dimensional / vault staging)
 DROP VIEW IF EXISTS stg_e2e_sales_agg CASCADE;

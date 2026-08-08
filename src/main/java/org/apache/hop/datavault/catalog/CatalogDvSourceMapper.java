@@ -67,7 +67,7 @@ public final class CatalogDvSourceMapper {
       source.setSourceIndicatorField(dvSourceRecord.getSourceIndicatorField());
       source.setGroup(dvSourceRecord.getGroup());
       source.setDeliveryType(parseDeliveryType(dvSourceRecord.getDeliveryType()));
-      List<SourceField> fields = DvSourceFieldSupport.fromCatalogFields(dvSourceRecord.getFields());
+      List<SourceField> fields = DvSourceFieldSupport.sourceFieldsFromDefinition(definition);
       source.setSource(buildDvSource(dvSourceRecord, definition, fields));
     } else {
       applyLegacyProperties(source, definition);

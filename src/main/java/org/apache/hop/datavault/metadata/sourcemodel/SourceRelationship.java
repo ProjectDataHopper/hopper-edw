@@ -28,18 +28,34 @@ import org.apache.hop.metadata.api.IHopMetadata;
 import org.jspecify.annotations.NonNull;
 
 /**
- * FK-style relationship edge between two {@link SourceTable} nodes on a source model canvas.
+ * FK-style relationship edge between two source-model nodes (table, query, or JSON extraction).
  *
  * <p>Child columns reference parent columns (parallel lists). Imported FKs default to {@link
  * SourceJoinType#LEFT} for lookup-friendly joins. Each end carries a crow's-foot multiplicity
  * ({@link SourceRelationshipMultiplicity}).
+ *
+ * <p>{@link #childTableName} / {@link #parentTableName} hold the endpoint <em>name</em> (legacy
+ * property keys kept for {@code .hsm} compatibility). Endpoint kinds default to {@link
+ * SourceEndpointKind#TABLE} when unset so older models load unchanged.
  */
 @Getter
 @Setter
 public class SourceRelationship extends HopMetadataBase implements IHopMetadata {
 
   @HopMetadataProperty private String description;
+
+  /** Kind of the child (FK / many) endpoint. Defaults to TABLE for older models. */
+  @HopMetadataProperty(storeWithCode = true)
+  private SourceEndpointKind childEndpointKind = SourceEndpointKind.TABLE;
+
+  /** Kind of the parent (PK / one) endpoint. Defaults to TABLE for older models. */
+  @HopMetadataProperty(storeWithCode = true)
+  private SourceEndpointKind parentEndpointKind = SourceEndpointKind.TABLE;
+
+  /** Name of the child endpoint (table, query, or JSON source). */
   @HopMetadataProperty private String childTableName;
+
+  /** Name of the parent endpoint (table, query, or JSON source). */
   @HopMetadataProperty private String parentTableName;
 
   @HopMetadataProperty(key = "child_column", groupKey = "child_columns")
@@ -97,6 +113,14 @@ public class SourceRelationship extends HopMetadataBase implements IHopMetadata 
 
   public SourceJoinType resolveDefaultJoinType() {
     return defaultJoinType != null ? defaultJoinType : SourceJoinType.LEFT;
+  }
+
+  public SourceEndpointKind resolveChildEndpointKind() {
+    return childEndpointKind != null ? childEndpointKind : SourceEndpointKind.TABLE;
+  }
+
+  public SourceEndpointKind resolveParentEndpointKind() {
+    return parentEndpointKind != null ? parentEndpointKind : SourceEndpointKind.TABLE;
   }
 
   public SourceRelationshipMultiplicity resolveChildMultiplicity() {

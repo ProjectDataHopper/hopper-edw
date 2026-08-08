@@ -768,8 +768,11 @@ public final class RemediationProposalApplySupport {
           BaseMessages.getString(
               PKG, "RemediationProposalApplySupport.Error.DiscoveredFieldMissing", fieldName));
     }
-    List<SourceField> sourceFields = DvSourceFieldSupport.fromCatalogFields(fields);
-    definition.setFields(DvSourceFieldSupport.toRowMeta(sourceFields, null));
+    if (definition.getDvSource() != null) {
+      definition.getDvSource().setFields(fields);
+    }
+    // Structured fields authority; regenerate derived IRowMeta.
+    DvSourceFieldSupport.prepareForPersistence(definition);
   }
 
   private static void collectTargetDdl(

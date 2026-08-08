@@ -113,7 +113,7 @@ Hubs, links, and satellites reference source **names**, not raw connection detai
 
 ### Source modeler (`.hsm`)
 
-Visual **source-system** modeler: import tables with PK/FK, draw relationships, compose **source queries** (joins + projections), and define **source JSON** extractions (flatten a JSON field into a feed; chain steps for nested arrays). Publish a query as catalog **COMPOSITE** or a JSON extraction as **JSON**; Data Vault loads generate SQL/Merge Join or parent + JsonInput pipelines. Retail sample: `retail-example/models/source-tables-crm.hsm`. See [source-modeler-overview.adoc](source-modeler-overview.adoc).
+Visual **source-system** modeler: import tables with PK/FK, draw relationships, compose **source queries** (joins + projections), and define **source JSON** extractions (flatten a JSON field into a feed; chain steps for nested arrays). **Validate** tables/queries/JSON/relationships at design time. Publish a query as catalog **COMPOSITE** or a JSON extraction as **JSON**; Data Vault loads generate SQL/Merge Join or parent + JsonInput pipelines (with record-source injection and hub sort/distinct for JSON). Retail sample: `retail-example/models/source-tables-crm.hsm` including Kafka-style shipment events → `feed_order_shipment_tracking` on `retail-360.hdv`. See [source-modeler-overview.adoc](source-modeler-overview.adoc).
 
 ![Source modeler — retail CRM tables with All customer info query SQL](images/source-modeler-retail-example-with-query-dialog-generated-sql.png)
 
@@ -193,7 +193,7 @@ The **Performance tuning** scenario can include load-run metrics and propose mod
 
 Docker-based runners (`scripts/run-hop.sh`, `run-postgres.sh`), parallel pipeline orchestration, **record source group** partial loads, catalog-backed load-run metrics, workflow load overview reports, and per-table duration bars on model graphs.
 
-**Preferred batch shape:** **Update resource definition group** runs every DV/BV/DM model listed on a resource definition group (layer order DV → BV → DM) and can manage Begin/End-style vault update metrics in one action. See [update-resource-definition-group-action.adoc](update-resource-definition-group-action.adoc), [operations.adoc](operations.adoc), and [performance-tuning.md](performance-tuning.md).
+**Preferred batch shape:** **Update resource definition group** runs every DV/BV/DM model listed on a resource definition group (layer order DV → BV → DM), manages Begin/End-style vault update metrics in one action, and can write Markdown/HTML **load overview** reports. See [update-resource-definition-group-action.adoc](update-resource-definition-group-action.adoc), [operations.adoc](operations.adoc), and [performance-tuning.md](performance-tuning.md).
 
 ![Update resource definition group action dialog](images/update-resource-definition-group-action-dialog.png)
 

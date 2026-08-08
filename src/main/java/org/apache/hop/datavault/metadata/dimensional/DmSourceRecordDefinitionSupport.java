@@ -17,6 +17,7 @@
 package org.apache.hop.datavault.metadata.dimensional;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.hop.catalog.hopgui.preview.RecordDefinitionPreviewSupport;
 import org.apache.hop.catalog.model.RecordDefinition;
@@ -30,6 +31,7 @@ import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.catalog.DvSourceCatalogService;
 import org.apache.hop.datavault.catalog.DvSourceFieldSupport;
 import org.apache.hop.datavault.metadata.DvSourcePreviewInputSupport;
+import org.apache.hop.datavault.metadata.SourceField;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineHopMeta;
@@ -144,16 +146,11 @@ public final class DmSourceRecordDefinitionSupport {
 
   private static IRowMeta resolveRowMetaFromDefinition(
       RecordDefinition definition, IVariables variables) throws HopException {
-    if (definition.getFields() != null && !definition.getFields().isEmpty()) {
-      return definition.getFields();
+    List<SourceField> fields = DvSourceFieldSupport.sourceFieldsFromDefinition(definition);
+    if (fields == null || fields.isEmpty()) {
+      return null;
     }
-    if (definition.getDvSource() != null
-        && definition.getDvSource().getFields() != null
-        && !definition.getDvSource().getFields().isEmpty()) {
-      return DvSourceFieldSupport.toRowMetaFromCatalog(
-          definition.getDvSource().getFields(), variables);
-    }
-    return null;
+    return DvSourceFieldSupport.toRowMeta(fields, variables);
   }
 
   public static TransformMeta appendSourceInput(

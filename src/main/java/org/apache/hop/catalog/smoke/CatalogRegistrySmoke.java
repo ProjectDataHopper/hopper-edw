@@ -120,7 +120,13 @@ public final class CatalogRegistrySmoke {
     definition.setKey(new RecordDefinitionKey("hop/smoke-test", "smoke_record"));
     definition.setType(RecordDefinitionType.DV_HUB);
     definition.setDescription("Smoke test hub record");
-    definition.setFields(rowMeta);
+    org.apache.hop.catalog.model.PhysicalTableRef physical =
+        new org.apache.hop.catalog.model.PhysicalTableRef();
+    physical.setDatabaseMetaName("Vault");
+    physical.setTableName("smoke_record");
+    definition.setPhysicalTable(physical);
+    org.apache.hop.datavault.catalog.DvSourceFieldSupport.applyRowMetaLayoutToDefinition(
+        definition, rowMeta, null);
     definition.getTags().add("smoke-test");
     return definition;
   }

@@ -123,7 +123,6 @@ public final class DvSourceCatalogMapper {
       dvSourceRecord.setSourceIndicatorField(source.getSourceIndicatorField());
       dvSourceRecord.setGroup(source.getGroup());
       dvSourceRecord.setDeliveryType(source.getDeliveryTypeOrDefault().name());
-      dvSourceRecord.setFields(DvSourceFieldSupport.toCatalogFields(sourceFields));
       if (source.getSourceType() == DvSourceType.COMPOSITE
           && source.getDvSourceOrDefault() instanceof DvCompositeSource composite) {
         dvSourceRecord.setCompositeSourceModelFilename(composite.getSourceModelFilename());
@@ -138,7 +137,8 @@ public final class DvSourceCatalogMapper {
       }
       definition.setDvSource(dvSourceRecord);
     }
-    definition.setFields(DvSourceFieldSupport.toRowMeta(sourceFields, variables));
+    // Single writer: structured fields + derived row meta.
+    DvSourceFieldSupport.applyLayoutToDefinition(definition, sourceFields, variables);
     definition.setOrigin(
         buildOrigin(source, model, variables, updatedAt, workflowName, pipelineName));
     IDvSource dvSource = source.getDvSourceOrDefault();

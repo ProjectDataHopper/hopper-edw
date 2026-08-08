@@ -380,16 +380,7 @@ public class SourceModel extends HopMetadataBase
       String tableName = table.getName();
       monitor.subTask(
           BaseMessages.getString(PKG, "SourceModel.Monitor.VerifyingTable", ConstNvl(tableName)));
-      if (Utils.isEmpty(tableName)) {
-        remarks.add(
-            new CheckResult(
-                ICheckResult.TYPE_RESULT_ERROR,
-                BaseMessages.getString(PKG, "SourceModel.CheckResult.TableMissingName"),
-                null));
-        monitor.worked(1);
-        continue;
-      }
-      if (!tableNames.add(tableName)) {
+      if (!Utils.isEmpty(tableName) && !tableNames.add(tableName)) {
         remarks.add(
             new CheckResult(
                 ICheckResult.TYPE_RESULT_ERROR,
@@ -397,6 +388,7 @@ public class SourceModel extends HopMetadataBase
                     PKG, "SourceModel.CheckResult.DuplicateTableName", tableName),
                 null));
       }
+      remarks.addAll(SourceTableValidationSupport.check(this, table, variables));
       monitor.worked(1);
     }
 
@@ -422,36 +414,7 @@ public class SourceModel extends HopMetadataBase
                     PKG, "SourceModel.CheckResult.DuplicateRelationshipName", relName),
                 null));
       }
-      if (findTable(relationship.getChildTableName()) == null) {
-        remarks.add(
-            new CheckResult(
-                ICheckResult.TYPE_RESULT_ERROR,
-                BaseMessages.getString(
-                    PKG,
-                    "SourceModel.CheckResult.RelationshipMissingChild",
-                    ConstNvl(relName),
-                    ConstNvl(relationship.getChildTableName())),
-                null));
-      }
-      if (findTable(relationship.getParentTableName()) == null) {
-        remarks.add(
-            new CheckResult(
-                ICheckResult.TYPE_RESULT_ERROR,
-                BaseMessages.getString(
-                    PKG,
-                    "SourceModel.CheckResult.RelationshipMissingParent",
-                    ConstNvl(relName),
-                    ConstNvl(relationship.getParentTableName())),
-                null));
-      }
-      if (!relationship.isValid()) {
-        remarks.add(
-            new CheckResult(
-                ICheckResult.TYPE_RESULT_ERROR,
-                BaseMessages.getString(
-                    PKG, "SourceModel.CheckResult.RelationshipInvalidColumns", ConstNvl(relName)),
-                null));
-      }
+      remarks.addAll(SourceRelationshipValidationSupport.check(this, relationship));
       monitor.worked(1);
     }
 
@@ -476,69 +439,8 @@ public class SourceModel extends HopMetadataBase
                     PKG, "SourceModel.CheckResult.DuplicateQueryName", queryName),
                 null));
       }
-      if (findTable(query.getDrivingTableName()) == null) {
-        remarks.add(
-            new CheckResult(
-                ICheckResult.TYPE_RESULT_ERROR,
-                BaseMessages.getString(
-                    PKG,
-                    "SourceModel.CheckResult.QueryMissingDrivingTable",
-                    ConstNvl(queryName),
-                    ConstNvl(query.getDrivingTableName())),
-                null));
-      }
-      if (query.getColumns().isEmpty()) {
-        remarks.add(
-            new CheckResult(
-                ICheckResult.TYPE_RESULT_WARNING,
-                BaseMessages.getString(
-                    PKG, "SourceModel.CheckResult.QueryEmptyProjection", ConstNvl(queryName)),
-                null));
-      }
-      Set<Integer> keyPositions = new HashSet<>();
-      boolean hasLogicalKey = false;
-      for (SourceQueryColumn column : query.getColumns()) {
-        if (column == null || !column.isPrimaryKey()) {
-          continue;
-        }
-        hasLogicalKey = true;
-        int position = column.getPrimaryKeyPosition();
-        if (!keyPositions.add(position)) {
-          remarks.add(
-              new CheckResult(
-                  ICheckResult.TYPE_RESULT_ERROR,
-                  BaseMessages.getString(
-                      PKG,
-                      "SourceModel.CheckResult.QueryDuplicateKeyPosition",
-                      ConstNvl(queryName),
-                      Integer.toString(position)),
-                  null));
-        }
-      }
-      if (!query.getColumns().isEmpty() && !hasLogicalKey) {
-        remarks.add(
-            new CheckResult(
-                ICheckResult.TYPE_RESULT_WARNING,
-                BaseMessages.getString(
-                    PKG, "SourceModel.CheckResult.QueryMissingLogicalKey", ConstNvl(queryName)),
-                null));
-      }
-      for (SourceQueryJoin join : query.getJoins()) {
-        if (join == null) {
-          continue;
-        }
-        if (findTable(join.getTableName()) == null) {
-          remarks.add(
-              new CheckResult(
-                  ICheckResult.TYPE_RESULT_ERROR,
-                  BaseMessages.getString(
-                      PKG,
-                      "SourceModel.CheckResult.QueryJoinMissingTable",
-                      ConstNvl(queryName),
-                      ConstNvl(join.getTableName())),
-                  null));
-        }
-      }
+      remarks.addAll(
+          SourceQueryValidationSupport.check(this, query, variables, metadataProvider));
       monitor.worked(1);
     }
 
@@ -556,108 +458,7 @@ public class SourceModel extends HopMetadataBase
       monitor.subTask(
           BaseMessages.getString(
               PKG, "SourceModel.Monitor.VerifyingJsonSource", ConstNvl(jsonName)));
-      if (!Utils.isEmpty(jsonName) && !jsonSourceNames.add(jsonName)) {
-        remarks.add(
-            new CheckResult(
-                ICheckResult.TYPE_RESULT_ERROR,
-                BaseMessages.getString(
-                    PKG, "SourceModel.CheckResult.DuplicateJsonSourceName", jsonName),
-                null));
-      }
-      SourceJsonParentKind parentKind = jsonSource.resolveParentSourceKind();
-      String parentName = jsonSource.getParentSourceName();
-      if (Utils.isEmpty(parentName)) {
-        remarks.add(
-            new CheckResult(
-                ICheckResult.TYPE_RESULT_ERROR,
-                BaseMessages.getString(
-                    PKG, "SourceModel.CheckResult.JsonSourceMissingParent", ConstNvl(jsonName)),
-                null));
-      } else if (!parentExists(parentKind, parentName)) {
-        remarks.add(
-            new CheckResult(
-                ICheckResult.TYPE_RESULT_ERROR,
-                BaseMessages.getString(
-                    PKG,
-                    "SourceModel.CheckResult.JsonSourceParentNotFound",
-                    ConstNvl(jsonName),
-                    parentKind != null ? parentKind.getCode() : "?",
-                    ConstNvl(parentName)),
-                null));
-      }
-      if (Utils.isEmpty(jsonSource.getJsonFieldName())) {
-        remarks.add(
-            new CheckResult(
-                ICheckResult.TYPE_RESULT_ERROR,
-                BaseMessages.getString(
-                    PKG, "SourceModel.CheckResult.JsonSourceMissingJsonField", ConstNvl(jsonName)),
-                null));
-      }
-      if (jsonSource.getFields().isEmpty()) {
-        remarks.add(
-            new CheckResult(
-                ICheckResult.TYPE_RESULT_WARNING,
-                BaseMessages.getString(
-                    PKG, "SourceModel.CheckResult.JsonSourceEmptyProjection", ConstNvl(jsonName)),
-                null));
-      }
-      // Distinct array base paths: multiple fields may expand the same array (allowed by
-      // JsonInput); different array bases are not.
-      Set<String> arrayBases = new HashSet<>();
-      for (SourceJsonField field : jsonSource.getFields()) {
-        if (field != null && field.isArrayExpandingPath()) {
-          arrayBases.add(arrayBasePath(field.getPath()));
-        }
-      }
-      if (arrayBases.size() > 1) {
-        remarks.add(
-            new CheckResult(
-                ICheckResult.TYPE_RESULT_ERROR,
-                BaseMessages.getString(
-                    PKG,
-                    "SourceModel.CheckResult.JsonSourceMultipleArrays",
-                    ConstNvl(jsonName),
-                    Integer.toString(arrayBases.size())),
-                null));
-      }
-      Set<Integer> keyPositions = new HashSet<>();
-      boolean hasLogicalKey = false;
-      for (SourceJsonField field : jsonSource.getFields()) {
-        if (field == null || !field.isPrimaryKey()) {
-          continue;
-        }
-        hasLogicalKey = true;
-        int position = field.getPrimaryKeyPosition();
-        if (!keyPositions.add(position)) {
-          remarks.add(
-              new CheckResult(
-                  ICheckResult.TYPE_RESULT_ERROR,
-                  BaseMessages.getString(
-                      PKG,
-                      "SourceModel.CheckResult.JsonSourceDuplicateKeyPosition",
-                      ConstNvl(jsonName),
-                      Integer.toString(position)),
-                  null));
-        }
-      }
-      if (!jsonSource.getFields().isEmpty() && !hasLogicalKey) {
-        remarks.add(
-            new CheckResult(
-                ICheckResult.TYPE_RESULT_WARNING,
-                BaseMessages.getString(
-                    PKG, "SourceModel.CheckResult.JsonSourceMissingLogicalKey", ConstNvl(jsonName)),
-                null));
-      }
-      if (parentKind == SourceJsonParentKind.JSON
-          && !Utils.isEmpty(parentName)
-          && hasJsonParentCycle(jsonName, parentName, new HashSet<>())) {
-        remarks.add(
-            new CheckResult(
-                ICheckResult.TYPE_RESULT_ERROR,
-                BaseMessages.getString(
-                    PKG, "SourceModel.CheckResult.JsonSourceParentCycle", ConstNvl(jsonName)),
-                null));
-      }
+      remarks.addAll(SourceJsonValidationSupport.check(jsonSource, this, jsonSourceNames));
       monitor.worked(1);
     }
 
@@ -671,41 +472,6 @@ public class SourceModel extends HopMetadataBase
     }
     monitor.done();
     return remarks;
-  }
-
-  private boolean parentExists(SourceJsonParentKind parentKind, String parentName) {
-    if (parentKind == null || Utils.isEmpty(parentName)) {
-      return false;
-    }
-    return switch (parentKind) {
-      case TABLE -> findTable(parentName) != null;
-      case QUERY -> findQuery(parentName) != null;
-      case JSON -> findJsonSource(parentName) != null;
-    };
-  }
-
-  /**
-   * Walks JSON→JSON parent links looking for a cycle involving {@code startName}.
-   *
-   * @param startName name of the JSON source being validated
-   * @param currentParent parent name currently under inspection
-   * @param visited names already seen on this walk
-   */
-  private boolean hasJsonParentCycle(String startName, String currentParent, Set<String> visited) {
-    if (Utils.isEmpty(currentParent)) {
-      return false;
-    }
-    if (currentParent.equals(startName)) {
-      return true;
-    }
-    if (!visited.add(currentParent)) {
-      return true;
-    }
-    SourceJson parent = findJsonSource(currentParent);
-    if (parent == null || parent.resolveParentSourceKind() != SourceJsonParentKind.JSON) {
-      return false;
-    }
-    return hasJsonParentCycle(startName, parent.getParentSourceName(), visited);
   }
 
   /**

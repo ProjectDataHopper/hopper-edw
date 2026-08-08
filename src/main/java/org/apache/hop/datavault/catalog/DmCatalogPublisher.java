@@ -29,6 +29,7 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.catalog.DvSourceFieldSupport;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalConfiguration;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.datavault.metadata.dimensional.DmTableType;
@@ -234,10 +235,10 @@ public final class DmCatalogPublisher {
     definition.setKey(new RecordDefinitionKey(namespace, table.getName()));
     definition.setType(mapTableType(table.getTableType()));
     definition.setDescription(table.getDescription());
-    definition.setFields(layout);
     definition.setOrigin(
         buildTableOrigin(table, dmModel, originVariables, updatedAt, workflowName));
     definition.setPhysicalTable(buildPhysicalTableRef(dmModel, table, metadataProvider));
+    DvSourceFieldSupport.applyRowMetaLayoutToDefinition(definition, layout, variables);
     DmTableType tableType = table.getTableType();
     if (tableType != null) {
       definition.getTags().add("DM " + tableType.name());

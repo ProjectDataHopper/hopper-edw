@@ -140,4 +140,26 @@ class VaultUpdateExecutionSupportTest {
         parentWorkflow.getVariable(DvUpdateMetricsConstants.VAR_WORKFLOW_EXECUTION_ID),
         VaultUpdateExecutionSupport.resolveExecutionId(childWorkflow, null));
   }
+
+  @Test
+  void propagateExecutionVariablesCopiesIdAndStartedAtOntoAlreadyInitializedSpace() {
+    LocalWorkflowEngine parentWorkflow = parentWorkflow();
+    VaultUpdateExecutionSupport.beginExecution(parentWorkflow, null, false, false);
+
+    // Simulates an action that already ran initializeFrom before beginExecution.
+    Variables actionVariables = new Variables();
+    actionVariables.initializeFrom(new Variables());
+    assertNull(
+        VaultUpdateExecutionSupport.resolveExecutionId(actionVariables, null),
+        "action space must not magically see workflow vars without propagate");
+
+    VaultUpdateExecutionSupport.propagateExecutionVariables(parentWorkflow, actionVariables);
+
+    assertEquals(
+        parentWorkflow.getVariable(DvUpdateMetricsConstants.VAR_WORKFLOW_EXECUTION_ID),
+        VaultUpdateExecutionSupport.resolveExecutionId(actionVariables, null));
+    assertEquals(
+        parentWorkflow.getVariable(DvUpdateMetricsConstants.VAR_WORKFLOW_EXECUTION_STARTED_AT),
+        actionVariables.getVariable(DvUpdateMetricsConstants.VAR_WORKFLOW_EXECUTION_STARTED_AT));
+  }
 }

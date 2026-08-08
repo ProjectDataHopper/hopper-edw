@@ -1,0 +1,46 @@
+{
+  "namespace": "hop/retail-example/models/retail-360",
+  "name": "hub_customer",
+  "type": "DV_HUB",
+  "description": "Customer hub",
+  "physicalTable": {
+    "databaseMetaName": "Vault",
+    "schemaName": null,
+    "tableName": "hub_customer",
+    "fields": [
+      {
+        "name": "customer_hk",
+        "description": null,
+        "sourceDataType": "String",
+        "length": "63",
+        "precision": "",
+        "hopType": 2
+      },
+      {
+        "name": "customer_id",
+        "description": null,
+        "sourceDataType": "Integer",
+        "length": "9",
+        "precision": "",
+        "hopType": 5
+      },
+      {
+        "name": "x_record_source",
+        "description": null,
+        "sourceDataType": "String",
+        "length": "100",
+        "precision": "",
+        "hopType": 2
+      },
+      {
+        "name": "x_load_ts",
+        "description": null,
+        "sourceDataType": "Timestamp",
+        "length": "",
+        "precision": "",
+        "hopType": 9
+      }
+    ]
+  },
+  "tags": ["DV HUB", "retail-360"]
+}

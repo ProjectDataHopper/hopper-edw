@@ -39,6 +39,7 @@ import org.apache.hop.core.row.value.ValueMetaString;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.catalog.DvCatalogNamespaces;
+import org.apache.hop.datavault.catalog.DvSourceFieldSupport;
 import org.apache.hop.datavault.metadata.DvBulkLoadPluginSupport;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
@@ -353,9 +354,9 @@ public final class LoadRunMetricsCatalogPublisher {
     definition.setKey(new RecordDefinitionKey(namespace, TABLE_LOAD_RUN));
     definition.setType(RecordDefinitionType.PHYSICAL_TABLE);
     definition.setDescription("Load run summary for generated DV/BV/DM update orchestrations");
-    definition.setFields(fields);
     definition.setPhysicalTable(
         physicalTableRef(targetDatabaseName, operationsSchema, databaseMeta, TABLE_LOAD_RUN));
+    DvSourceFieldSupport.applyRowMetaLayoutToDefinition(definition, fields, null);
     definition.getTags().add("operations");
     definition.getTags().add("load-metrics");
     return definition;
@@ -385,10 +386,10 @@ public final class LoadRunMetricsCatalogPublisher {
     definition.setKey(new RecordDefinitionKey(namespace, TABLE_LOAD_PIPELINE_METRIC));
     definition.setType(RecordDefinitionType.PHYSICAL_TABLE);
     definition.setDescription("Per-pipeline metrics for one load run");
-    definition.setFields(fields);
     definition.setPhysicalTable(
         physicalTableRef(
             targetDatabaseName, operationsSchema, databaseMeta, TABLE_LOAD_PIPELINE_METRIC));
+    DvSourceFieldSupport.applyRowMetaLayoutToDefinition(definition, fields, null);
     definition.getTags().add("operations");
     definition.getTags().add("load-metrics");
     return definition;
@@ -419,10 +420,10 @@ public final class LoadRunMetricsCatalogPublisher {
     definition.setKey(new RecordDefinitionKey(namespace, TABLE_LOAD_TRANSFORM_METRIC));
     definition.setType(RecordDefinitionType.PHYSICAL_TABLE);
     definition.setDescription("Per-transform metrics for one load run");
-    definition.setFields(fields);
     definition.setPhysicalTable(
         physicalTableRef(
             targetDatabaseName, operationsSchema, databaseMeta, TABLE_LOAD_TRANSFORM_METRIC));
+    DvSourceFieldSupport.applyRowMetaLayoutToDefinition(definition, fields, null);
     definition.getTags().add("operations");
     definition.getTags().add("load-metrics");
     return definition;
@@ -448,9 +449,9 @@ public final class LoadRunMetricsCatalogPublisher {
     definition.setKey(new RecordDefinitionKey(namespace, TABLE_LOAD_INSIGHT));
     definition.setType(RecordDefinitionType.PHYSICAL_TABLE);
     definition.setDescription("Rule-based tuning insights for one load run");
-    definition.setFields(fields);
     definition.setPhysicalTable(
         physicalTableRef(targetDatabaseName, operationsSchema, databaseMeta, TABLE_LOAD_INSIGHT));
+    DvSourceFieldSupport.applyRowMetaLayoutToDefinition(definition, fields, null);
     definition.getTags().add("operations");
     definition.getTags().add("load-metrics");
     definition.getTags().add("insights");

@@ -170,8 +170,8 @@ public class FileDataCatalog implements IDataCatalog {
    *       directory (and children) is walked — not the entire storage tree (models, other projects,
    *       etc.).
    *   <li>Listing reads a lightweight JSON header (name/namespace/type/description/tags) and does
-   *       not deserialize {@code rowMetaXml} or nested DV/physical payloads required only for full
-   *       {@link #read(RecordDefinitionKey)}.
+   *       not deserialize nested field layouts ({@code dvSource.fields} / {@code
+   *       physicalTable.fields}) required only for full {@link #read(RecordDefinitionKey)}.
    * </ul>
    */
   @Override
@@ -361,7 +361,8 @@ public class FileDataCatalog implements IDataCatalog {
   }
 
   /**
-   * Minimal JSON projection for listing. Unknown properties (including large {@code rowMetaXml})
+   * Minimal JSON projection for listing. Unknown properties (including large field layouts and legacy
+   * {@code rowMetaXml})
    * are ignored so listing stays cheap on large catalogs.
    */
   @JsonIgnoreProperties(ignoreUnknown = true)

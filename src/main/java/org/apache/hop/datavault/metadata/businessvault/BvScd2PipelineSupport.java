@@ -1137,11 +1137,10 @@ public final class BvScd2PipelineSupport {
     } else if (!Utils.isEmpty(satellite.getLinkName())) {
       DvLink link = model.findLink(satellite.getLinkName());
       if (link != null) {
-        String linkHash = variables.resolve(link.getLinkHashKeyFieldName());
+        String linkHash = link.resolveLinkHashKeyFieldName(variables);
         if (!Utils.isEmpty(linkHash)) {
           return linkHash;
         }
-        return link.getName() + "_LK";
       }
     }
     return "hashkey";

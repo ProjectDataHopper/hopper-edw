@@ -3,7 +3,6 @@
   "name": "CRM-c360-address",
   "type": "DV_SOURCE",
   "description": "Customer 360 CSV source for address satellite integration tests",
-  "rowMetaXml": "",
   "origin": {
     "modelType": "DATA_VAULT_SOURCE",
     "modelName": "customer-360",

@@ -3,11 +3,174 @@
   "name": "d_customer",
   "type": "DIM_TABLE",
   "description": "d_customer",
-  "rowMetaXml": "<row-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>customer_hk</name>\n<length>-1</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>Integer</type>\n<storagetype>normal</storagetype>\n<name>customer_id</name>\n<length>9</length>\n<precision>0</precision>\n<origin/>\n<comments>customer_id</comments>\n<conversion_Mask>####0;-####0</conversion_Mask>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>Integer</type>\n<storagetype>normal</storagetype>\n<name>x_version</name>\n<length>9</length>\n<precision>0</precision>\n<origin/>\n<comments/>\n<conversion_Mask>####0;-####0</conversion_Mask>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>Timestamp</type>\n<storagetype>normal</storagetype>\n<name>x_from_ts</name>\n<length>-1</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>Timestamp</type>\n<storagetype>normal</storagetype>\n<name>x_to_ts</name>\n<length>-1</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>Boolean</type>\n<storagetype>normal</storagetype>\n<name>x_is_current</name>\n<length>-1</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>cust_segment</name>\n<length>20</length>\n<precision>-1</precision>\n<origin/>\n<comments>cust_segment</comments>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>cust_loyalty_tier</name>\n<length>20</length>\n<precision>-1</precision>\n<origin/>\n<comments>cust_loyalty_tier</comments>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>Integer</type>\n<storagetype>normal</storagetype>\n<name>cust_demo_score</name>\n<length>4</length>\n<precision>0</precision>\n<origin/>\n<comments>cust_demo_score</comments>\n<conversion_Mask>####0;-####0</conversion_Mask>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>cust_email</name>\n<length>50</length>\n<precision>-1</precision>\n<origin/>\n<comments>cust_email</comments>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>cust_phone</name>\n<length>20</length>\n<precision>-1</precision>\n<origin/>\n<comments>cust_phone</comments>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>cust_address</name>\n<length>50</length>\n<precision>-1</precision>\n<origin/>\n<comments>cust_address</comments>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>cust_city</name>\n<length>50</length>\n<precision>-1</precision>\n<origin/>\n<comments>cust_city</comments>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>cust_postal_code</name>\n<length>10</length>\n<precision>-1</precision>\n<origin/>\n<comments>cust_postal_code</comments>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>cust_newsletter</name>\n<length>1</length>\n<precision>-1</precision>\n<origin/>\n<comments>cust_newsletter</comments>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>cust_channel</name>\n<length>10</length>\n<precision>-1</precision>\n<origin/>\n<comments>cust_channel</comments>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>cust_language</name>\n<length>5</length>\n<precision>-1</precision>\n<origin/>\n<comments>cust_language</comments>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>Timestamp</type>\n<storagetype>normal</storagetype>\n<name>x_load_ts</name>\n<length>-1</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta></row-meta>",
   "physicalTable": {
     "databaseMetaName": "Vault",
     "schemaName": null,
-    "tableName": "d_customer"
+    "tableName": "d_customer",
+    "fields": [
+      {
+        "name": "customer_hk",
+        "description": null,
+        "sourceDataType": "String",
+        "length": "",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "customer_id",
+        "description": "customer_id",
+        "sourceDataType": "Integer",
+        "length": "9",
+        "precision": "0",
+        "hopType": 5,
+        "inputOptions": null
+      },
+      {
+        "name": "x_version",
+        "description": null,
+        "sourceDataType": "Integer",
+        "length": "9",
+        "precision": "0",
+        "hopType": 5,
+        "inputOptions": null
+      },
+      {
+        "name": "x_from_ts",
+        "description": null,
+        "sourceDataType": "Timestamp",
+        "length": "",
+        "precision": "",
+        "hopType": 9,
+        "inputOptions": null
+      },
+      {
+        "name": "x_to_ts",
+        "description": null,
+        "sourceDataType": "Timestamp",
+        "length": "",
+        "precision": "",
+        "hopType": 9,
+        "inputOptions": null
+      },
+      {
+        "name": "x_is_current",
+        "description": null,
+        "sourceDataType": "Boolean",
+        "length": "",
+        "precision": "",
+        "hopType": 4,
+        "inputOptions": null
+      },
+      {
+        "name": "cust_segment",
+        "description": "cust_segment",
+        "sourceDataType": "String",
+        "length": "20",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "cust_loyalty_tier",
+        "description": "cust_loyalty_tier",
+        "sourceDataType": "String",
+        "length": "20",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "cust_demo_score",
+        "description": "cust_demo_score",
+        "sourceDataType": "Integer",
+        "length": "4",
+        "precision": "0",
+        "hopType": 5,
+        "inputOptions": null
+      },
+      {
+        "name": "cust_email",
+        "description": "cust_email",
+        "sourceDataType": "String",
+        "length": "50",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "cust_phone",
+        "description": "cust_phone",
+        "sourceDataType": "String",
+        "length": "20",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "cust_address",
+        "description": "cust_address",
+        "sourceDataType": "String",
+        "length": "50",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "cust_city",
+        "description": "cust_city",
+        "sourceDataType": "String",
+        "length": "50",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "cust_postal_code",
+        "description": "cust_postal_code",
+        "sourceDataType": "String",
+        "length": "10",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "cust_newsletter",
+        "description": "cust_newsletter",
+        "sourceDataType": "String",
+        "length": "1",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "cust_channel",
+        "description": "cust_channel",
+        "sourceDataType": "String",
+        "length": "10",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "cust_language",
+        "description": "cust_language",
+        "sourceDataType": "String",
+        "length": "5",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "x_load_ts",
+        "description": null,
+        "sourceDataType": "Timestamp",
+        "length": "",
+        "precision": "",
+        "hopType": 9,
+        "inputOptions": null
+      }
+    ]
   },
   "tags": [
     "DM DIMENSION",

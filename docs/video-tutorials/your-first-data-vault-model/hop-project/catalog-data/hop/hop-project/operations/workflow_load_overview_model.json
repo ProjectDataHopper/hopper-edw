@@ -1,20 +1,142 @@
 {
-  "namespace" : "hop/hop-project/operations",
-  "name" : "workflow_load_overview_model",
-  "type" : "PHYSICAL_TABLE",
-  "description" : "Per-model summary rows for one workflow load overview",
-  "rowMetaXml" : "<row-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>overview_id</name>\n<length>64</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>Integer</type>\n<storagetype>normal</storagetype>\n<name>sequence_no</name>\n<length>-1</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask>####0;-####0</conversion_Mask>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>load_run_id</name>\n<length>64</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>model_type</name>\n<length>16</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>model_name</name>\n<length>255</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>Integer</type>\n<storagetype>normal</storagetype>\n<name>pipeline_count</name>\n<length>-1</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask>####0;-####0</conversion_Mask>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>Integer</type>\n<storagetype>normal</storagetype>\n<name>source_rows_read</name>\n<length>-1</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask>####0;-####0</conversion_Mask>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>Integer</type>\n<storagetype>normal</storagetype>\n<name>target_rows_read</name>\n<length>-1</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask>####0;-####0</conversion_Mask>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>Integer</type>\n<storagetype>normal</storagetype>\n<name>target_rows_inserted</name>\n<length>-1</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask>####0;-####0</conversion_Mask>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>Integer</type>\n<storagetype>normal</storagetype>\n<name>errors</name>\n<length>-1</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask>####0;-####0</conversion_Mask>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>Integer</type>\n<storagetype>normal</storagetype>\n<name>duration_ms</name>\n<length>-1</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask>####0;-####0</conversion_Mask>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>Integer</type>\n<storagetype>normal</storagetype>\n<name>insight_count</name>\n<length>-1</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask>####0;-####0</conversion_Mask>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>Boolean</type>\n<storagetype>normal</storagetype>\n<name>success</name>\n<length>-1</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>Europe/Brussels</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta></row-meta>",
-  "origin" : null,
-  "physicalTable" : {
-    "databaseMetaName" : "OPS",
-    "schemaName" : "dv_ops",
-    "tableName" : "workflow_load_overview_model"
+  "namespace": "hop/hop-project/operations",
+  "name": "workflow_load_overview_model",
+  "type": "PHYSICAL_TABLE",
+  "description": "Per-model summary rows for one workflow load overview",
+  "origin": null,
+  "physicalTable": {
+    "databaseMetaName": "OPS",
+    "schemaName": "dv_ops",
+    "tableName": "workflow_load_overview_model",
+    "fields": [
+      {
+        "name": "overview_id",
+        "description": null,
+        "sourceDataType": "String",
+        "length": "64",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "sequence_no",
+        "description": null,
+        "sourceDataType": "Integer",
+        "length": "",
+        "precision": "",
+        "hopType": 5,
+        "inputOptions": null
+      },
+      {
+        "name": "load_run_id",
+        "description": null,
+        "sourceDataType": "String",
+        "length": "64",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "model_type",
+        "description": null,
+        "sourceDataType": "String",
+        "length": "16",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "model_name",
+        "description": null,
+        "sourceDataType": "String",
+        "length": "255",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "pipeline_count",
+        "description": null,
+        "sourceDataType": "Integer",
+        "length": "",
+        "precision": "",
+        "hopType": 5,
+        "inputOptions": null
+      },
+      {
+        "name": "source_rows_read",
+        "description": null,
+        "sourceDataType": "Integer",
+        "length": "",
+        "precision": "",
+        "hopType": 5,
+        "inputOptions": null
+      },
+      {
+        "name": "target_rows_read",
+        "description": null,
+        "sourceDataType": "Integer",
+        "length": "",
+        "precision": "",
+        "hopType": 5,
+        "inputOptions": null
+      },
+      {
+        "name": "target_rows_inserted",
+        "description": null,
+        "sourceDataType": "Integer",
+        "length": "",
+        "precision": "",
+        "hopType": 5,
+        "inputOptions": null
+      },
+      {
+        "name": "errors",
+        "description": null,
+        "sourceDataType": "Integer",
+        "length": "",
+        "precision": "",
+        "hopType": 5,
+        "inputOptions": null
+      },
+      {
+        "name": "duration_ms",
+        "description": null,
+        "sourceDataType": "Integer",
+        "length": "",
+        "precision": "",
+        "hopType": 5,
+        "inputOptions": null
+      },
+      {
+        "name": "insight_count",
+        "description": null,
+        "sourceDataType": "Integer",
+        "length": "",
+        "precision": "",
+        "hopType": 5,
+        "inputOptions": null
+      },
+      {
+        "name": "success",
+        "description": null,
+        "sourceDataType": "Boolean",
+        "length": "",
+        "precision": "",
+        "hopType": 4,
+        "inputOptions": null
+      }
+    ]
   },
-  "physicalFile" : null,
-  "physicalIcebergTable" : null,
-  "tags" : [ "operations", "load-metrics", "workflow-overview" ],
-  "glossaryTerms" : [ ],
-  "customProperties" : { },
-  "validationAcknowledgements" : [ ],
-  "dvSource" : null
+  "physicalFile": null,
+  "physicalIcebergTable": null,
+  "tags": [
+    "operations",
+    "load-metrics",
+    "workflow-overview"
+  ],
+  "glossaryTerms": [],
+  "customProperties": {},
+  "validationAcknowledgements": [],
+  "dvSource": null
 }

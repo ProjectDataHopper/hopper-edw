@@ -229,7 +229,7 @@ public final class SchemaHarvestHistoryPublisher {
   }
 
   static RecordDefinition buildRunDefinition(
-      String namespace, String targetDatabaseName, String operationsSchema) {
+      String namespace, String targetDatabaseName, String operationsSchema) throws org.apache.hop.core.exception.HopException {
     IRowMeta fields = new RowMeta();
     fields.addValueMeta(stringMeta("harvest_run_id", 64));
     fields.addValueMeta(new ValueMetaDate("started_at"));
@@ -250,16 +250,16 @@ public final class SchemaHarvestHistoryPublisher {
     definition.setKey(new RecordDefinitionKey(namespace, TABLE_HARVEST_RUN));
     definition.setType(RecordDefinitionType.PHYSICAL_TABLE);
     definition.setDescription("Schema metadata harvest run header");
-    definition.setFields(fields);
     definition.setPhysicalTable(
         physicalTableRef(targetDatabaseName, operationsSchema, TABLE_HARVEST_RUN));
+    org.apache.hop.datavault.catalog.DvSourceFieldSupport.applyRowMetaLayoutToDefinition(definition, fields, null);
     definition.getTags().add("operations");
     definition.getTags().add("schema-harvest");
     return definition;
   }
 
   static RecordDefinition buildSubjectDefinition(
-      String namespace, String targetDatabaseName, String operationsSchema) {
+      String namespace, String targetDatabaseName, String operationsSchema) throws org.apache.hop.core.exception.HopException {
     IRowMeta fields = new RowMeta();
     fields.addValueMeta(stringMeta("harvest_run_id", 64));
     fields.addValueMeta(stringMeta("subject_key", 512));
@@ -277,16 +277,16 @@ public final class SchemaHarvestHistoryPublisher {
     definition.setKey(new RecordDefinitionKey(namespace, TABLE_HARVEST_SUBJECT));
     definition.setType(RecordDefinitionType.PHYSICAL_TABLE);
     definition.setDescription("Per-source subject result for one schema harvest run");
-    definition.setFields(fields);
     definition.setPhysicalTable(
         physicalTableRef(targetDatabaseName, operationsSchema, TABLE_HARVEST_SUBJECT));
+    org.apache.hop.datavault.catalog.DvSourceFieldSupport.applyRowMetaLayoutToDefinition(definition, fields, null);
     definition.getTags().add("operations");
     definition.getTags().add("schema-harvest");
     return definition;
   }
 
   static RecordDefinition buildFieldDefinition(
-      String namespace, String targetDatabaseName, String operationsSchema) {
+      String namespace, String targetDatabaseName, String operationsSchema) throws org.apache.hop.core.exception.HopException {
     IRowMeta fields = new RowMeta();
     fields.addValueMeta(stringMeta("harvest_run_id", 64));
     fields.addValueMeta(stringMeta("subject_key", 512));
@@ -302,16 +302,16 @@ public final class SchemaHarvestHistoryPublisher {
     definition.setKey(new RecordDefinitionKey(namespace, TABLE_HARVEST_FIELD));
     definition.setType(RecordDefinitionType.PHYSICAL_TABLE);
     definition.setDescription("Expected and discovered field snapshots for a harvest subject");
-    definition.setFields(fields);
     definition.setPhysicalTable(
         physicalTableRef(targetDatabaseName, operationsSchema, TABLE_HARVEST_FIELD));
+    org.apache.hop.datavault.catalog.DvSourceFieldSupport.applyRowMetaLayoutToDefinition(definition, fields, null);
     definition.getTags().add("operations");
     definition.getTags().add("schema-harvest");
     return definition;
   }
 
   static RecordDefinition buildChangeDefinition(
-      String namespace, String targetDatabaseName, String operationsSchema) {
+      String namespace, String targetDatabaseName, String operationsSchema) throws org.apache.hop.core.exception.HopException {
     IRowMeta fields = new RowMeta();
     fields.addValueMeta(stringMeta("harvest_run_id", 64));
     fields.addValueMeta(new ValueMetaInteger("change_seq"));
@@ -326,16 +326,16 @@ public final class SchemaHarvestHistoryPublisher {
     definition.setKey(new RecordDefinitionKey(namespace, TABLE_HARVEST_CHANGE));
     definition.setType(RecordDefinitionType.PHYSICAL_TABLE);
     definition.setDescription("Schema drift change events for a harvest run");
-    definition.setFields(fields);
     definition.setPhysicalTable(
         physicalTableRef(targetDatabaseName, operationsSchema, TABLE_HARVEST_CHANGE));
+    org.apache.hop.datavault.catalog.DvSourceFieldSupport.applyRowMetaLayoutToDefinition(definition, fields, null);
     definition.getTags().add("operations");
     definition.getTags().add("schema-harvest");
     return definition;
   }
 
   static RecordDefinition buildFkDefinition(
-      String namespace, String targetDatabaseName, String operationsSchema) {
+      String namespace, String targetDatabaseName, String operationsSchema) throws org.apache.hop.core.exception.HopException {
     IRowMeta fields = new RowMeta();
     fields.addValueMeta(stringMeta("harvest_run_id", 64));
     fields.addValueMeta(stringMeta("subject_key", 512));
@@ -353,9 +353,9 @@ public final class SchemaHarvestHistoryPublisher {
     definition.setType(RecordDefinitionType.PHYSICAL_TABLE);
     definition.setDescription(
         "Expected and discovered foreign-key snapshots for a harvest subject");
-    definition.setFields(fields);
     definition.setPhysicalTable(
         physicalTableRef(targetDatabaseName, operationsSchema, TABLE_HARVEST_FK));
+    org.apache.hop.datavault.catalog.DvSourceFieldSupport.applyRowMetaLayoutToDefinition(definition, fields, null);
     definition.getTags().add("operations");
     definition.getTags().add("schema-harvest");
     return definition;

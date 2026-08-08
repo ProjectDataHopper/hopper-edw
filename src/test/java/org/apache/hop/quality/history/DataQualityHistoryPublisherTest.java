@@ -89,7 +89,7 @@ class DataQualityHistoryPublisherTest {
   }
 
   @Test
-  void catalogDefinitionsMatchSection23Columns() {
+  void catalogDefinitionsMatchSection23Columns() throws Exception {
     String namespace = DataQualityHistoryPublisher.operationsNamespace(variables);
     assertEquals("hop/retail-example/operations", namespace);
 

@@ -327,7 +327,7 @@ public final class RecordDefinitionCatalogWriter {
     definition.setKey(new RecordDefinitionKey(request.getNamespace(), request.getName()));
     definition.setType(recordType);
     definition.setDescription(request.getDescription());
-    definition.setFields(DvSourceFieldSupport.toRowMeta(request.getFields(), variables));
+    DvSourceFieldSupport.applyLayoutToDefinition(definition, request.getFields(), variables);
     definition.setOrigin(buildGenericOrigin(request, variables));
     applyPhysicalLocation(definition, request, variables);
     definition.getTags().add(recordType.name());

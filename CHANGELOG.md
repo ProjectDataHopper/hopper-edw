@@ -4,6 +4,22 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## Unreleased
 
+### Source modeler: JSON feeds, validation, and retail shipment path (#114)
+
+- **Source JSON** on `.hsm`: flatten a parent table/query JSON column into a catalog **`JSON`** `DV_SOURCE`; sample/propose fields, preview, publish; relationship endpoints include tables, queries, and JSON sources
+- **Validate** source tables / queries / JSON extractions / relationships from dialogs (live schema compare, length noise reduced for non-string types)
+- **JSON hub/sat/link loads**: inject static record-source indicator (or rename source-indicator field); hub sources **sort + distinct** identity fields so MergeRowsPlus CDC works on incremental loads (same as CSV/DB)
+- **Link hash key**: `resolveLinkHashKeyFieldName()` defaults blank names to `name_LK`; validation ERROR only when unresolvable; generation never uses a raw empty field
+- **Catalog field layout**: structured `dvSource.fields` / `physicalTable.fields` is authoritative (no dual-write of layout as `rowMetaXml`); type import prefers source data type / effective Hop type
+- **Retail**: Kafka-style `order_shipment_event` + Source JSON `order_shipment_tracking` → `feed_order_shipment_tracking` wired into `retail-360.hdv` (`hub_order_shipment`, `lnk_order_shipment`, `sat_order_shipment`); data generator and load pipeline updated
+- Docs: [source-modeler-overview.adoc](docs/source-modeler-overview.adoc), [getting-started-retail.adoc](docs/getting-started-retail.adoc), [datavault-source.adoc](docs/datavault-source.adoc), [retail-example/README.md](retail-example/README.md)
+
+### Update resource definition group: load-overview reports
+
+- Propagate `DV_WORKFLOW_EXECUTION_ID` / started-at onto the action and programmatic child DV/BV/DM updates so `load_run.workflow_execution_id` is set and **Markdown/HTML load overview** reports write after the wave
+- Clearer **ModelFailed** log detail (summarize child errors that were previously buried earlier in the log)
+- Docs: [update-resource-definition-group-action.adoc](docs/update-resource-definition-group-action.adoc)
+
 ### Metadata harvesting (#112)
 
 - **Harvest source metadata** workflow action: connection-batched live discovery, OPS history (`schema_harvest_run` / `subject` / `field` / `fk` / `change`), Markdown reports, variable `DV_SCHEMA_HARVEST_RUN_ID`

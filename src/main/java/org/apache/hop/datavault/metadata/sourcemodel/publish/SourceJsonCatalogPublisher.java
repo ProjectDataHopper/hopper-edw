@@ -21,6 +21,7 @@ import java.util.List;
 import org.apache.hop.catalog.discovery.RecordDefinitionCatalogWriter;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.catalog.CatalogModelRegistrySupport;
@@ -32,6 +33,7 @@ import org.apache.hop.datavault.metadata.SourceField;
 import org.apache.hop.datavault.metadata.json.DvJsonSource;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJson;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJsonField;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceJsonFieldSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
@@ -75,7 +77,7 @@ public final class SourceJsonCatalogPublisher {
             ? jsonSource.getPublishedCatalogName().trim()
             : jsonSource.getName().trim();
 
-    List<SourceField> fields = buildFieldsFromProjection(jsonSource);
+    List<SourceField> fields = buildFieldsFromProjection(model, jsonSource);
     RecordSourceIndicatorOptions indicatorOptions =
         RecordSourceIndicatorSupport.resolveForTable(null, fields, feedName);
 
@@ -110,6 +112,16 @@ public final class SourceJsonCatalogPublisher {
   }
 
   public static List<SourceField> buildFieldsFromProjection(SourceJson jsonSource) {
+    return buildFieldsFromProjection(null, jsonSource);
+  }
+
+  /**
+   * Builds catalog field layout from the JSON projection. When {@code model} is provided,
+   * pass-through fields with unset hop types inherit the parent table/query/JSON column type.
+   * Remaining unknown types default to {@link IValueMeta#TYPE_STRING}.
+   */
+  public static List<SourceField> buildFieldsFromProjection(
+      SourceModel model, SourceJson jsonSource) {
     List<SourceField> fields = new ArrayList<>();
     if (jsonSource == null) {
       return fields;
@@ -123,7 +135,11 @@ public final class SourceJsonCatalogPublisher {
         continue;
       }
       SourceField sourceField = new SourceField(name);
-      sourceField.setHopType(field.getHopType());
+      int hopType = SourceJsonFieldSupport.resolveEffectiveHopType(model, jsonSource, field);
+      if (hopType <= 0) {
+        hopType = IValueMeta.TYPE_STRING;
+      }
+      sourceField.setHopType(hopType);
       if (field.getLength() >= 0) {
         sourceField.setLength(Integer.toString(field.getLength()));
       }

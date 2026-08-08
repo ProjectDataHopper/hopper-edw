@@ -24,13 +24,15 @@ import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry.Bounds;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceEndpointKind;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceEndpointSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceRelationship;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceTable;
 
 /**
  * Computes per-relationship edge anchors with side spreading so multiple relationships on the same
- * side of a table do not stack on one midpoint.
+ * side of a node do not stack on one midpoint. Endpoints may be tables, queries, or JSON sources.
  */
 public final class SourceRelationshipEdgeLayout {
 
@@ -49,11 +51,10 @@ public final class SourceRelationshipEdgeLayout {
   public static Map<SourceRelationship, EdgeGeometry> layout(
       SourceModel model, Map<String, SourceTable> tableByName) {
     Map<SourceRelationship, EdgeGeometry> result = new HashMap<>();
-    if (model == null || tableByName == null) {
+    if (model == null) {
       return result;
     }
 
-    // Provisional mid anchors to determine facing sides.
     record Provisional(
         SourceRelationship rel, Bounds childB, Bounds parentB, Side childSide, Side parentSide) {}
     List<Provisional> provisionals = new ArrayList<>();
@@ -61,34 +62,42 @@ public final class SourceRelationshipEdgeLayout {
       if (relationship == null || !relationship.isValid()) {
         continue;
       }
-      SourceTable child = tableByName.get(relationship.getChildTableName());
-      SourceTable parent = tableByName.get(relationship.getParentTableName());
-      if (child == null
-          || parent == null
-          || child.getLocation() == null
-          || parent.getLocation() == null) {
+      Bounds childB =
+          boundsOfEndpoint(
+              model,
+              tableByName,
+              relationship.resolveChildEndpointKind(),
+              relationship.getChildTableName());
+      Bounds parentB =
+          boundsOfEndpoint(
+              model,
+              tableByName,
+              relationship.resolveParentEndpointKind(),
+              relationship.getParentTableName());
+      if (childB == null || parentB == null) {
         continue;
       }
-      Bounds childB = boundsOf(child);
-      Bounds parentB = boundsOf(parent);
       Side childSide = sideFacing(childB, parentB);
       Side parentSide = sideFacing(parentB, childB);
       provisionals.add(new Provisional(relationship, childB, parentB, childSide, parentSide));
     }
 
-    // Count edges per (tableName, side).
     Map<String, Integer> sideCounts = new HashMap<>();
     Map<String, Integer> sideIndexes = new HashMap<>();
     for (Provisional p : provisionals) {
-      String childKey = key(p.rel.getChildTableName(), p.childSide);
-      String parentKey = key(p.rel.getParentTableName(), p.parentSide);
+      String childKey =
+          key(p.rel.resolveChildEndpointKind(), p.rel.getChildTableName(), p.childSide);
+      String parentKey =
+          key(p.rel.resolveParentEndpointKind(), p.rel.getParentTableName(), p.parentSide);
       sideCounts.merge(childKey, 1, Integer::sum);
       sideCounts.merge(parentKey, 1, Integer::sum);
     }
 
     for (Provisional p : provisionals) {
-      String childKey = key(p.rel.getChildTableName(), p.childSide);
-      String parentKey = key(p.rel.getParentTableName(), p.parentSide);
+      String childKey =
+          key(p.rel.resolveChildEndpointKind(), p.rel.getChildTableName(), p.childSide);
+      String parentKey =
+          key(p.rel.resolveParentEndpointKind(), p.rel.getParentTableName(), p.parentSide);
       int childIndex = sideIndexes.getOrDefault(childKey, 0);
       int parentIndex = sideIndexes.getOrDefault(parentKey, 0);
       sideIndexes.put(childKey, childIndex + 1);
@@ -101,6 +110,32 @@ public final class SourceRelationshipEdgeLayout {
       result.put(p.rel, new EdgeGeometry(childAnchor, parentAnchor, p.childSide, p.parentSide));
     }
     return result;
+  }
+
+  static Bounds boundsOfEndpoint(
+      SourceModel model,
+      Map<String, SourceTable> tableByName,
+      SourceEndpointKind kind,
+      String name) {
+    if (Utils.isEmpty(name)) {
+      return null;
+    }
+    SourceEndpointKind resolved = kind != null ? kind : SourceEndpointKind.TABLE;
+    if (resolved == SourceEndpointKind.TABLE) {
+      SourceTable table = tableByName != null ? tableByName.get(name) : null;
+      if (table == null && model != null) {
+        table = model.findTable(name);
+      }
+      if (table == null || table.getLocation() == null) {
+        return null;
+      }
+      return boundsOf(table);
+    }
+    Point loc = SourceEndpointSupport.locationOf(model, resolved, name);
+    if (loc == null) {
+      return null;
+    }
+    return new Bounds(loc.x, loc.y, 160, 80);
   }
 
   static Side sideFacing(Bounds from, Bounds to) {
@@ -120,7 +155,7 @@ public final class SourceRelationshipEdgeLayout {
   static Point anchorOnSide(Bounds bounds, Side side, int index, int count) {
     int n = Math.max(1, count);
     int i = Math.min(Math.max(0, index), n - 1);
-    double fraction = (i + 1.0) / (n + 1.0); // spread with padding
+    double fraction = (i + 1.0) / (n + 1.0);
     int pad = 8;
     return switch (side) {
       case LEFT ->
@@ -145,8 +180,9 @@ public final class SourceRelationshipEdgeLayout {
     return new Bounds(loc.x, loc.y, w, h);
   }
 
-  private static String key(String tableName, Side side) {
-    return ConstNvl(tableName) + "|" + side.name();
+  private static String key(SourceEndpointKind kind, String name, Side side) {
+    SourceEndpointKind resolved = kind != null ? kind : SourceEndpointKind.TABLE;
+    return resolved.name() + "|" + ConstNvl(name) + "|" + side.name();
   }
 
   private static String ConstNvl(String value) {

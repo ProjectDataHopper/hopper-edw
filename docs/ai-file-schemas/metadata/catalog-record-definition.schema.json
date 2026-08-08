@@ -1,64 +1,168 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/mattcasters/hop-data-vault/docs/ai-file-schemas/metadata/catalog-record-definition.schema.json",
-  "title": "Catalog record definition (DV_SOURCE etc.)",
-  "description": "Catalog FILE store JSON for sources/targets. Models reference these by name.",
+  "title": "Catalog record definition (sources / published targets)",
+  "description": "Catalog FILE-store JSON for DV_SOURCE feeds and published model/ops tables. Column layout is always a structured fields[] list on the element that owns the layout — never a top-level Hop rowMetaXml blob on write.",
   "type": "object",
   "required": ["name", "type"],
   "additionalProperties": true,
   "properties": {
-    "namespace": { "type": "string" },
+    "namespace": {
+      "type": "string",
+      "description": "Catalog namespace path, e.g. hop/{project}/sources or hop/{project}/models/{modelName}."
+    },
     "name": {
       "type": "string",
-      "description": "Logical name used as recordSource in .hdv (e.g. CRM-customer)."
+      "description": "Logical name. For DV_SOURCE this is the recordSource name used in .hdv (e.g. CRM-customer)."
     },
     "type": {
       "type": "string",
-      "description": "Record type code, e.g. DV_SOURCE."
+      "description": "Record type code. Layout home depends on type (see catalog-record-definition.md).",
+      "enum": [
+        "DV_SOURCE",
+        "DV_HUB",
+        "DV_LINK",
+        "DV_SATELLITE",
+        "DV_REFERENCE",
+        "BV_TABLE",
+        "DIM_TABLE",
+        "FACT_TABLE",
+        "PHYSICAL_TABLE",
+        "VIEW",
+        "DV_MODEL",
+        "BV_MODEL",
+        "DM_MODEL",
+        "UNKNOWN"
+      ]
     },
     "description": { "type": "string" },
     "rowMetaXml": {
       "type": "string",
-      "description": "Embedded Hop row-meta XML (often large)."
+      "description": "LEGACY READ-ONLY. Older catalogs stored Hop IRowMeta as XML here. Current plugin versions never write this field. On load, non-empty values are migrated into dvSource.fields (DV_SOURCE) or physicalTable.fields (targets/ops) and omitted on the next save. Do not hand-edit or reintroduce."
     },
-    "origin": { "type": "object", "additionalProperties": true },
+    "origin": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Provenance (model path, workflow, timestamps)."
+    },
     "physicalTable": {
       "type": "object",
       "additionalProperties": true,
+      "description": "RDBMS location. For DV_SOURCE: location only (fields stay on dvSource). For published vault/BV/DM/ops tables: also holds authoritative column layout in fields[].",
       "properties": {
-        "databaseMetaName": { "type": "string" },
-        "schemaName": { "type": "string" },
-        "tableName": { "type": "string" }
+        "databaseMetaName": {
+          "type": "string",
+          "description": "Hop DatabaseMeta connection name (e.g. CRM, Vault)."
+        },
+        "schemaName": { "type": ["string", "null"] },
+        "tableName": { "type": "string" },
+        "fields": {
+          "type": "array",
+          "description": "Authoritative column layout when type is DV_HUB, DV_LINK, DV_SATELLITE, DV_REFERENCE, BV_TABLE, DIM_TABLE, FACT_TABLE, PHYSICAL_TABLE, or VIEW. Must be empty/absent for DV_SOURCE (use dvSource.fields).",
+          "items": { "$ref": "#/definitions/catalogField" }
+        }
       }
     },
-    "physicalFile": { "type": "object", "additionalProperties": true },
+    "physicalFile": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "File location for CSV/Parquet-style DV_SOURCE feeds. Location only; layout is on dvSource.fields."
+    },
+    "physicalIcebergTable": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Iceberg location for DV_SOURCE. Location only; layout is on dvSource.fields."
+    },
     "tags": { "type": "array", "items": { "type": "string" } },
     "glossaryTerms": { "type": "array" },
     "customProperties": { "type": "object" },
+    "qualityRules": {
+      "type": "array",
+      "description": "Optional data-quality rule bindings for this dataset."
+    },
+    "validationAcknowledgements": { "type": "array" },
     "dvSource": {
       "type": "object",
       "additionalProperties": true,
-      "description": "DV-specific source binding.",
+      "description": "DV source binding for type=DV_SOURCE (and null for most published targets).",
       "properties": {
-        "sourceType": { "type": "string", "description": "DATABASE, CSV, COMPOSITE, …" },
-        "sourceIndicator": { "type": "string" },
-        "sourceIndicatorField": { "type": "string" },
+        "sourceType": {
+          "type": "string",
+          "description": "DATABASE, CSV, PARQUET, ICEBERG, COMPOSITE, JSON, …"
+        },
+        "sourceIndicator": {
+          "type": "string",
+          "description": "Optional static record-source value for every row."
+        },
+        "sourceIndicatorField": {
+          "type": "string",
+          "description": "Optional per-row record-source column name."
+        },
         "group": { "type": ["string", "null"] },
-        "deliveryType": { "type": "string", "description": "FULL_SNAPSHOT, …" },
+        "deliveryType": {
+          "type": "string",
+          "description": "FULL_SNAPSHOT, CHANGES_ONLY, …"
+        },
         "fields": {
           "type": "array",
-          "items": {
-            "type": "object",
-            "additionalProperties": true,
-            "properties": {
-              "name": { "type": "string" },
-              "description": { "type": "string" },
-              "sourceDataType": { "type": "string" },
-              "length": { "type": "string" },
-              "precision": { "type": "string" },
-              "hopType": { "type": "integer" }
-            }
-          }
+          "description": "Authoritative field layout for DV_SOURCE only (types, PK, FK, CSV options).",
+          "items": { "$ref": "#/definitions/catalogField" }
+        },
+        "csvFormat": { "type": "object", "additionalProperties": true },
+        "compositeSourceModelFilename": { "type": "string" },
+        "compositeSourceQueryName": { "type": "string" },
+        "compositeGeneratedSql": { "type": "string" },
+        "jsonSourceModelFilename": { "type": "string" },
+        "jsonSourceName": { "type": "string" }
+      }
+    }
+  },
+  "definitions": {
+    "catalogField": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Column / stream field name."
+        },
+        "description": { "type": ["string", "null"] },
+        "sourceDataType": {
+          "type": ["string", "null"],
+          "description": "Hop type name (Integer, String, Timestamp, …) and/or native SQL label (int4, VARCHAR, DATETIME(6))."
+        },
+        "length": {
+          "type": ["string", "null"],
+          "description": "Declared length as string; empty when not applicable."
+        },
+        "precision": {
+          "type": ["string", "null"],
+          "description": "Scale / fractional seconds as string; empty when not applicable."
+        },
+        "hopType": {
+          "type": "integer",
+          "description": "Hop value-meta type code: 2=String, 3=Date, 4=Boolean, 5=Integer, 1=Number, 6=BigNumber, 8=Binary, 9=Timestamp. Must not be 0 when the type is known."
+        },
+        "primaryKeyPosition": {
+          "type": "integer",
+          "description": "1-based PK position; 0 or omitted if not part of the key."
+        },
+        "fkConstraintName": {
+          "type": ["string", "null"],
+          "description": "Optional FK constraint name (sources / harvest)."
+        },
+        "fkPosition": {
+          "type": "integer",
+          "description": "1-based position within a composite FK; 0 if not part of an FK."
+        },
+        "fkReferencedSchema": { "type": ["string", "null"] },
+        "fkReferencedTable": { "type": ["string", "null"] },
+        "fkReferencedColumn": { "type": ["string", "null"] },
+        "inputOptions": {
+          "type": ["object", "null"],
+          "additionalProperties": true,
+          "description": "Optional per-field input options (e.g. CSV format/decimal/grouping)."
         }
       }
     }

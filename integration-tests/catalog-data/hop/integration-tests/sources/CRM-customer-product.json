@@ -1,70 +1,78 @@
 {
-  "namespace" : "hop/integration-tests/sources",
-  "name" : "CRM-customer-product",
-  "type" : "DV_SOURCE",
-  "description" : "Customer-product relationship source for link satellite test case",
-  "rowMetaXml" : "<row-meta><value-meta><type>Integer</type>\n<storagetype>normal</storagetype>\n<name>customer_id</name>\n<length>9</length>\n<precision>0</precision>\n<origin/>\n<comments/>\n<conversion_Mask>####0;-####0</conversion_Mask>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>GMT</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>product_id</name>\n<length>7</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>GMT</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>Integer</type>\n<storagetype>normal</storagetype>\n<name>quantity</name>\n<length>9</length>\n<precision>0</precision>\n<origin/>\n<comments/>\n<conversion_Mask>####0;-####0</conversion_Mask>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>GMT</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>Number</type>\n<storagetype>normal</storagetype>\n<name>discount_pct</name>\n<length>5</length>\n<precision>2</precision>\n<origin/>\n<comments/>\n<conversion_Mask>####0.0#########;-####0.0#########</conversion_Mask>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>GMT</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta><value-meta><type>String</type>\n<storagetype>normal</storagetype>\n<name>record_source</name>\n<length>20</length>\n<precision>-1</precision>\n<origin/>\n<comments/>\n<conversion_Mask/>\n<decimal_symbol>.</decimal_symbol>\n<grouping_symbol>,</grouping_symbol>\n<currency_symbol>$</currency_symbol>\n<trim_type>none</trim_type>\n<case_insensitive>N</case_insensitive>\n<collator_disabled>Y</collator_disabled>\n<collator_strength>0</collator_strength>\n<sort_descending>N</sort_descending>\n<output_padding>N</output_padding>\n<date_format_lenient>N</date_format_lenient>\n<date_format_locale>en_US</date_format_locale>\n<date_format_timezone>GMT</date_format_timezone>\n<lenient_string_to_number>N</lenient_string_to_number>\n</value-meta></row-meta>",
-  "origin" : {
-    "modelType" : "DATA_VAULT_SOURCE",
-    "modelName" : "link-satellite",
-    "modelFilename" : "/integration-tests/tests//link-satellite/link-satellite.hdv",
-    "modelElementName" : "CRM-customer-product",
-    "hopProject" : "link-satellite",
-    "createdAt" : 1782129151492,
-    "updatedAt" : 1782153225404,
-    "updatedBy" : null,
-    "lastWorkflow" : "update link-satellite.hdv",
-    "lastPipeline" : null
+  "namespace": "hop/integration-tests/sources",
+  "name": "CRM-customer-product",
+  "type": "DV_SOURCE",
+  "description": "Customer-product relationship source for link satellite test case",
+  "origin": {
+    "modelType": "DATA_VAULT_SOURCE",
+    "modelName": "link-satellite",
+    "modelFilename": "/integration-tests/tests//link-satellite/link-satellite.hdv",
+    "modelElementName": "CRM-customer-product",
+    "hopProject": "link-satellite",
+    "createdAt": 1782129151492,
+    "updatedAt": 1782153225404,
+    "updatedBy": null,
+    "lastWorkflow": "update link-satellite.hdv",
+    "lastPipeline": null
   },
-  "physicalTable" : {
-    "databaseMetaName" : "CRM",
-    "schemaName" : "",
-    "tableName" : "customer_product"
+  "physicalTable": {
+    "databaseMetaName": "CRM",
+    "schemaName": "",
+    "tableName": "customer_product"
   },
-  "tags" : [ "DV Source", "FULL_SNAPSHOT" ],
-  "glossaryTerms" : [ ],
-  "customProperties" : { },
-  "dvSource" : {
-    "sourceType" : "DATABASE",
-    "sourceIndicator" : "CRM",
-    "sourceIndicatorField" : "record_source",
-    "group" : "",
-    "deliveryType" : "FULL_SNAPSHOT",
-    "fields" : [ {
-      "name" : "customer_id",
-      "description" : "Customer business key",
-      "sourceDataType" : "Integer",
-      "length" : "9",
-      "precision" : "0",
-      "hopType" : 5
-    }, {
-      "name" : "product_id",
-      "description" : "Product business key",
-      "sourceDataType" : "String",
-      "length" : "7",
-      "precision" : "",
-      "hopType" : 2
-    }, {
-      "name" : "quantity",
-      "description" : "Quantity purchased",
-      "sourceDataType" : "Integer",
-      "length" : "9",
-      "precision" : "0",
-      "hopType" : 5
-    }, {
-      "name" : "discount_pct",
-      "description" : "Discount percentage",
-      "sourceDataType" : "Number",
-      "length" : "5",
-      "precision" : "2",
-      "hopType" : 1
-    }, {
-      "name" : "record_source",
-      "description" : "Record source indicator",
-      "sourceDataType" : "String",
-      "length" : "20",
-      "precision" : "",
-      "hopType" : 2
-    } ]
+  "tags": [
+    "DV Source",
+    "FULL_SNAPSHOT"
+  ],
+  "glossaryTerms": [],
+  "customProperties": {},
+  "dvSource": {
+    "sourceType": "DATABASE",
+    "sourceIndicator": "CRM",
+    "sourceIndicatorField": "record_source",
+    "group": "",
+    "deliveryType": "FULL_SNAPSHOT",
+    "fields": [
+      {
+        "name": "customer_id",
+        "description": "Customer business key",
+        "sourceDataType": "Integer",
+        "length": "9",
+        "precision": "0",
+        "hopType": 5
+      },
+      {
+        "name": "product_id",
+        "description": "Product business key",
+        "sourceDataType": "String",
+        "length": "7",
+        "precision": "",
+        "hopType": 2
+      },
+      {
+        "name": "quantity",
+        "description": "Quantity purchased",
+        "sourceDataType": "Integer",
+        "length": "9",
+        "precision": "0",
+        "hopType": 5
+      },
+      {
+        "name": "discount_pct",
+        "description": "Discount percentage",
+        "sourceDataType": "Number",
+        "length": "5",
+        "precision": "2",
+        "hopType": 1
+      },
+      {
+        "name": "record_source",
+        "description": "Record source indicator",
+        "sourceDataType": "String",
+        "length": "20",
+        "precision": "",
+        "hopType": 2
+      }
+    ]
   }
 }

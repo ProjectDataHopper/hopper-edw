@@ -16,15 +16,27 @@
  */
 package org.apache.hop.datavault.metadata.json;
 
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DataVaultSource;
+import org.apache.hop.datavault.metadata.DvBusinessKeyPartSupport;
 import org.apache.hop.datavault.metadata.DvHub;
+import org.apache.hop.datavault.metadata.DvSourceFieldMappingSupport;
 import org.apache.hop.datavault.metadata.IDvSource;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
+import org.apache.hop.pipeline.transform.TransformMeta;
 
+/**
+ * JSON hub source: after the JsonInput graph, sort and distinct on hub identity fields so
+ * MergeRowsPlus CDC matches database ({@code ORDER BY} / {@code DISTINCT}) and file source
+ * builders. Without this, unsorted JSON rows desynchronize the merge and re-insert existing hub
+ * keys on incremental loads.
+ */
 public class DvJsonHubSourcePipelineBuilder extends DvJsonSourcePipelineBuilder {
 
   public DvJsonHubSourcePipelineBuilder(
@@ -38,5 +50,21 @@ public class DvJsonHubSourcePipelineBuilder extends DvJsonSourcePipelineBuilder 
       Point startPoint) {
     super(
         variables, metadataProvider, model, pipelineMeta, recordSource, dvSource, hub, startPoint);
+  }
+
+  @Override
+  protected TransformMeta finishSourceChain(TransformMeta predecessor) throws HopException {
+    DvHub hub = (DvHub) dvTable;
+    String sourceName = variables.resolve(recordSource.getName());
+    List<String> sortAndUniqueFields =
+        new ArrayList<>(
+            DvBusinessKeyPartSupport.resolveHubSourceIdentityStreamFields(
+                hub, sourceName, variables));
+    String targetSourceFieldName =
+        DvSourceFieldMappingSupport.findTargetSourceFieldName(configuration, recordSource, hub);
+    sortAndUniqueFields.add(variables.resolve(targetSourceFieldName));
+
+    TransformMeta sorted = addSortRows(predecessor, sortAndUniqueFields);
+    return addUniqueRows(sorted, sortAndUniqueFields);
   }
 }

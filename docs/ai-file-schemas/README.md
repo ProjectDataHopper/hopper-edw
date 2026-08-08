@@ -11,7 +11,9 @@ This pack describes **structure** (XSD / JSON Schema) and **purpose** (Markdown)
 | `.hdm` | `<dimensional-model>` | [models/hdm.md](models/hdm.md), [models/hdm.xsd](models/hdm.xsd) |
 | `.hsm` | `<source-model>` | [models/hsm.md](models/hsm.md), [models/hsm.xsd](models/hsm.xsd) |
 | Project metadata JSON | `metadata/<type>/*.json` | [metadata/](metadata/) |
-| Catalog record definitions | catalog FILE store (e.g. `…/sources/*.json`) | [metadata/catalog-record-definition.md](metadata/catalog-record-definition.md) |
+| Catalog record definitions | catalog FILE store (e.g. `…/sources/*.json`, `…/models/…/*.json`) | [metadata/catalog-record-definition.md](metadata/catalog-record-definition.md) + [schema](metadata/catalog-record-definition.schema.json) |
+
+**Catalog layout (important):** column lists live on **`dvSource.fields`** (`DV_SOURCE`) or **`physicalTable.fields`** (published targets / ops). Do **not** write top-level `rowMetaXml`.
 
 Start with **[conventions.md](conventions.md)** and **[cross-references.md](cross-references.md)**.
 
@@ -31,7 +33,8 @@ Start with **[conventions.md](conventions.md)** and **[cross-references.md](cros
 | Edit BV SCD2 | conventions + hbv.md + hdv.md (parent) + cross-references |
 | Edit source model / composite feed | conventions + hsm.md + catalog-record-definition.md |
 | Wire RDG / group update | resource-definition-group.md + cross-references |
-| Add catalog source | catalog-record-definition.md + sample JSON |
+| Add catalog source | catalog-record-definition.md + schema + `samples/catalog-CRM-customer.excerpt.json` |
+| Edit published hub/sat catalog row | catalog-record-definition.md (`physicalTable.fields`) + `samples/catalog-hub-customer.excerpt.json` |
 
 ## Schema style
 

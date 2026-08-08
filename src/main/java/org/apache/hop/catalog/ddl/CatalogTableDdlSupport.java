@@ -82,15 +82,8 @@ public final class CatalogTableDdlSupport {
 
   public static List<SourceField> sourceFieldsFromDefinition(
       RecordDefinition definition, IVariables variables) throws HopException {
-    if (definition == null) {
-      return List.of();
-    }
-    if (definition.getDvSource() != null
-        && definition.getDvSource().getFields() != null
-        && !definition.getDvSource().getFields().isEmpty()) {
-      return DvSourceFieldSupport.fromCatalogFields(definition.getDvSource().getFields());
-    }
-    return DvSourceFieldSupport.fromRowMeta(definition.getFields());
+    // variables reserved for future name resolution; layout merge is shared with import path.
+    return DvSourceFieldSupport.sourceFieldsFromDefinition(definition);
   }
 
   public static String generateCreateTableDdl(

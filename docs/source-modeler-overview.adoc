@@ -41,7 +41,7 @@ Catalog DV_SOURCE (single-table OR COMPOSITE feed)
 |Canvas card for a physical entity (v1: database table). Columns, PK position, optional link to an existing catalog source name. See image:images/source-modeler-source-table.png[Source table dialog,width=480].
 
 |**Relationship**
-|Edge for FK-style joins (child → parent columns, join type, cardinality). Imported from JDBC FKs when present, or drawn manually.
+|Edge for joins (child → parent columns, join type, crow's-foot multiplicity). Endpoints may be **tables**, **source queries**, or **Source JSON** extractions (e.g. shipment events `0..N` → `order_header` `1` on `order_id`). Imported JDBC FKs are table–table; draw Shift+drag (or middle-button drag) between any node kinds.
 
 |**Source query**
 |Named multi-table projection: driving table, ordered joins, column list, optional WHERE, generation mode (`AUTO` / `SQL` / `PIPELINE`).
@@ -64,9 +64,12 @@ image::images/source-modeler-json-source.png[Source JSON dialog — parent sourc
 ** **Sample and propose fields…** — samples non-empty JSON from the parent (database tables and SQL-mode queries) and proposes JsonPaths + types (including epoch → Date). If multiple arrays exist, pick one to expand; others can be emitted as JSON strings for chaining.
 ** **Paste sample JSON…** — offline / Kafka design without a live parent sample.
 ** **Preview data** — runs the generated parent + JsonInput pipeline with a row limit.
-. Publish to the catalog (context menu). Bind hubs/links/sats to the feed name like any other `DV_SOURCE`.
+** **Validate** — checks parent binding, JSON field, field list, and types (including Hop type resolution from `sourceDataType`).
+. Publish to the catalog (context menu or toolbar **Push to catalog**). Bind hubs/links/sats to the feed name like any other `DV_SOURCE`.
 
 Parent **SourceTable** objects currently support **database** physical types for generation and sampling. File/Kafka payloads should land in a database table (or a Source Query over database tables) first. Nested arrays: first Source JSON projects nested arrays as JSON-string fields; a second Source JSON expands that field.
+
+Table and query dialogs also support **Validate**, **Get columns** / live schema compare, and SQL generation checks so drift is caught at design time rather than only at load.
 
 Sample excerpt: link:ai-file-schemas/samples/hsm-json-excerpt.xml[hsm-json-excerpt.xml].
 
@@ -102,7 +105,7 @@ Edit them in the relationship dialog. The canvas draws standard crow's-foot symb
 
 == Source queries
 
-. **Add source query** (toolbar or canvas context), or double-click an existing query card.
+. **Add source query** (canvas context menu), or double-click an existing query card.
 . Set **driving table** on the General tab. Optional **Catalog feed name** overrides the name used when publishing to the data catalog (empty = use the query name).
 . **Joins** — prefer **Add related tables…** (graph neighbors via model relationships). Join keys resolve automatically; the **Resolved keys** column is read-only. Relationship name and left/right column combos are optional overrides when multiple edges exist.
 . **Columns** — pick table and column from combos (participants only). Set **Key** (1-based) for the logical primary key of the composed feed. **Get primary keys** seeds projection + key positions from physical PKs.
@@ -116,16 +119,24 @@ Edit them in the relationship dialog. The canvas draws standard crow's-foot symb
 --
 . **Generate SQL** / **Preview data** — SQL is pretty-printed with syntax highlighting (desktop).
 
-=== Publish to catalog
+=== Push to catalog
 
-Publishing creates or updates a catalog feed of type **`COMPOSITE`**:
+Use the toolbar **Push to catalog** button to choose which model objects to publish. A multi-select dialog lists:
+
+* **Tables** with columns → catalog type **`DATABASE`**
+* **Queries** with a projection → catalog type **`COMPOSITE`**
+* **JSON sources** with fields → catalog type **`JSON`**
+
+All items are preselected; deselect anything you do not want. Existing catalog feeds with the same name are **overwritten**. Set **Catalog connection** under **Edit model** on the source model first.
+
+Per-object context menus still offer **Publish to catalog** for a single query or JSON source.
+
+For queries, publish creates or updates a **`COMPOSITE`** feed:
 
 * Field layout from the projection (aliases become source field names).
 * **Logical primary key** from the Columns tab **Key** positions (catalog `primaryKeyPosition`) so hubs can **Get keys** from the composed feed.
 * Pointer to the `.hsm` path and query name (loads regenerate SQL from the live model when possible).
 * Optional cached SQL for fallback when the file is unavailable.
-
-Use the query context menu **Publish to catalog**, or the toolbar to publish all queries. Set **Catalog connection** under **Edit model** on the source model.
 
 After publish, bind hubs / links / satellites to the **feed name** (e.g. `feed_customer_enriched`) like any other `DV_SOURCE`. Map business keys and attributes to the **projected aliases**.
 
@@ -140,6 +151,12 @@ When **Data Vault Update** builds a pipeline for a composite source:
 * **SQL mode** — `Table Input` with an outer `SELECT` of mapped fields from `(generated join SQL) composite_src`.
 * **Pipeline mode** — injects the generated Sort / Merge Join / Select Values graph from the source query.
 
+When the bound feed is a **JSON** source:
+
+* Injects the parent read + JsonInput graph from the `.hsm` Source JSON definition.
+* Adds the vault **record source** column (static indicator Constant, or rename of a source-indicator field) — the same role database SQL plays with `'indicator' AS x_record_source`.
+* **Hub** loads also **sort and distinct** on business-key identity fields so MergeRowsPlus CDC does not re-insert existing keys on incremental waves.
+
 Prefer keeping the `.hsm` in the project so generation always reflects the latest join; re-publish when field layouts change so catalog field lists stay aligned for mapping dialogs.
 
 == Retail sample
@@ -151,16 +168,17 @@ The retail project includes:
 retail-example/models/source-tables-crm.hsm
 ----
 
-It models CRM landing tables (customer hub, address, contact, demo, prefs, orders, products, warehouses) with discovered/drawn relationships and a sample query **All customer info** that left-joins customer attributes into one feed intended to publish as `feed_customer_enriched`. The screenshot above shows that model with the query dialog open and **Generate SQL** output for the multi-table join.
+It models CRM landing tables (customer hub, address, contact, demo, prefs, orders, products, warehouses, **order_shipment_event**) with relationships, a sample query **All customer info** (`feed_customer_enriched`), and Source JSON **order_shipment_tracking** (`feed_order_shipment_tracking`). The screenshot above shows the multi-table query dialog and generated SQL.
 
 Workflow:
 
 . Open `source-tables-crm.hsm` in Hop GUI (project **retail-example**).
-. Review tables and the purple **query** card.
-. Open **All customer info** — use **Generate SQL** / **Preview data** (CRM connection required).
+. Review tables, the purple **query** card, and the teal **JSON** card.
+. Open **All customer info** — use **Generate SQL** / **Preview data** / **Validate** (CRM connection required).
+. Open **order_shipment_tracking** — sample fields / preview after CRM load; **Validate** and publish as `feed_order_shipment_tracking`.
 . Ensure model **Catalog connection** points at the project catalog (`local-catalog`).
-. Publish the query; confirm `feed_customer_enriched` in the Data Catalog.
-. Optionally bind a satellite (or a prototype sat) to that feed and map fields — the default retail `.hdv` still uses one catalog source per physical table for the tutorial path.
+. **Push to catalog** (or publish individual objects); confirm feeds in the Data Catalog.
+. `models/retail-360.hdv` already binds `feed_order_shipment_tracking` for **hub_order_shipment** / **lnk_order_shipment** / **sat_order_shipment**; classic customer/order sats still use one catalog source per physical table.
 
 == Check model
 

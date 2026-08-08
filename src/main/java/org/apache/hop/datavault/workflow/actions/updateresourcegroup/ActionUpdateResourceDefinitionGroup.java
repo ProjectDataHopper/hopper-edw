@@ -659,6 +659,14 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
             BaseMessages.getString(
                 PKG, "ActionUpdateResourceDefinitionGroup.Error.MissingWorkflowLogChannelId"));
       }
+      // beginExecution writes onto the parent workflow only. This action (and the programmatic
+      // child DV/BV/DM updates it spawns) already has its own variable map from initializeFrom —
+      // propagate so load_run.workflow_execution_id is set and overview reports can be written.
+      if (getParentWorkflow() != null) {
+        VaultUpdateExecutionSupport.propagateExecutionVariables(getParentWorkflow(), this);
+      } else if (!Utils.isEmpty(executionId)) {
+        setVariable(VaultUpdateExecutionSupport.defaultExecutionIdVariableName(), executionId);
+      }
       logBasic(
           BaseMessages.getString(
               PKG,
@@ -691,6 +699,14 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
                 "ActionUpdateResourceDefinitionGroup.Error.ModelFailed",
                 job.layer().name(),
                 job.modelFile()));
+        // Surface the child action's last error lines here — full detail is earlier in the log
+        // and easy to miss when many tables update in one model run.
+        String detail = summarizeResultErrors(modelResult);
+        if (!Utils.isEmpty(detail)) {
+          logError(
+              BaseMessages.getString(
+                  PKG, "ActionUpdateResourceDefinitionGroup.Error.ModelFailedDetail", detail));
+        }
         if (manageVaultUpdateMetrics && !doNotUpdateTargetDatabase) {
           publishOverview(executionId, catalogConnection, metricsProfile, false);
         }
@@ -869,7 +885,18 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
 
   private void prepareChildAction(IAction child) {
     if (child instanceof ActionBase base) {
-      base.copyFrom(this);
+      // Prefer the parent workflow variable map (same as LocalWorkflowEngine before each action):
+      // it holds DV_WORKFLOW_EXECUTION_ID after beginExecution. Fall back to this action's map.
+      if (getParentWorkflow() != null) {
+        base.copyFrom(getParentWorkflow());
+      } else {
+        base.copyFrom(this);
+      }
+      // Ensure correlation vars are present even if copy order or timing was awkward.
+      VaultUpdateExecutionSupport.propagateExecutionVariables(this, base);
+      if (getParentWorkflow() != null) {
+        VaultUpdateExecutionSupport.propagateExecutionVariables(getParentWorkflow(), base);
+      }
       base.setParentWorkflow(getParentWorkflow());
       base.setParentWorkflowMeta(getParentWorkflowMeta());
       base.setMetadataProvider(getMetadataProvider());
@@ -1113,6 +1140,45 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
     if (!Utils.isEmpty(from.getLogText())) {
       into.setLogText(Const.NVL(into.getLogText(), "") + from.getLogText());
     }
+  }
+
+  /**
+   * Extract a short, high-signal summary of failure lines from a child Result log so group-level
+   * "ModelFailed" is not a one-liner with the real cause buried earlier.
+   */
+  static String summarizeResultErrors(Result result) {
+    if (result == null || Utils.isEmpty(result.getLogText())) {
+      return "";
+    }
+    String[] lines = result.getLogText().split("\\R");
+    List<String> interesting = new ArrayList<>();
+    for (String line : lines) {
+      if (Utils.isEmpty(line)) {
+        continue;
+      }
+      String trimmed = line.trim();
+      String lower = trimmed.toLowerCase();
+      if (lower.contains("error")
+          || lower.contains("exception")
+          || lower.contains("failed")
+          || lower.contains("please specify")
+          || lower.startsWith("org.apache.hop")) {
+        interesting.add(trimmed);
+      }
+    }
+    if (interesting.isEmpty()) {
+      // Fall back to the last non-empty lines of the child log.
+      for (int i = lines.length - 1; i >= 0 && interesting.size() < 5; i--) {
+        if (!Utils.isEmpty(lines[i])) {
+          interesting.add(0, lines[i].trim());
+        }
+      }
+    }
+    int maxLines = 8;
+    if (interesting.size() > maxLines) {
+      interesting = interesting.subList(interesting.size() - maxLines, interesting.size());
+    }
+    return String.join(" | ", interesting);
   }
 
   @Override

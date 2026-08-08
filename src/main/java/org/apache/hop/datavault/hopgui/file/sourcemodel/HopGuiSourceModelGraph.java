@@ -51,21 +51,27 @@ import org.apache.hop.datavault.hopgui.file.sourcemodel.delegates.HopGuiSourceMo
 import org.apache.hop.datavault.metadata.DvNote;
 import org.apache.hop.datavault.metadata.DvNoteType;
 import org.apache.hop.datavault.metadata.database.DvDatabaseSourceImportSupport;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceEndpointKind;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceEndpointSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJoinType;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJson;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQuery;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceRelationship;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceRelationshipMultiplicity;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceTable;
 import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceJsonPreviewSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceQueryPreviewSupport;
+import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceTablePreviewSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.publish.SourceJsonCatalogPublisher;
 import org.apache.hop.datavault.metadata.sourcemodel.publish.SourceQueryCatalogPublisher;
+import org.apache.hop.datavault.metadata.sourcemodel.publish.SourceTableCatalogPublisher;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.pipeline.Pipeline;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
 import org.apache.hop.ui.core.dialog.CheckResultDialog;
+import org.apache.hop.ui.core.dialog.EnterSelectionDialog;
 import org.apache.hop.ui.core.dialog.EnterTextDialog;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.dialog.MessageBox;
@@ -122,12 +128,10 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       "HopGuiSourceModelGraph-ToolBar-10050-Edit-Model";
   public static final String TOOLBAR_ITEM_IMPORT_SCHEMA =
       "HopGuiSourceModelGraph-ToolBar-10055-Import-Schema";
-  public static final String TOOLBAR_ITEM_NEW_QUERY =
-      "HopGuiSourceModelGraph-ToolBar-10057-New-Query";
   public static final String TOOLBAR_ITEM_NEW_JSON =
       "HopGuiSourceModelGraph-ToolBar-10059-New-Json";
-  public static final String TOOLBAR_ITEM_PUBLISH_QUERIES =
-      "HopGuiSourceModelGraph-ToolBar-10058-Publish-Queries";
+  public static final String TOOLBAR_ITEM_PUSH_TO_CATALOG =
+      "HopGuiSourceModelGraph-ToolBar-10058-Push-To-Catalog";
   public static final String TOOLBAR_ITEM_CHECK_MODEL =
       "HopGuiSourceModelGraph-ToolBar-10060-Check-Model";
   public static final String TOOLBAR_ITEM_TOGGLE_COACH =
@@ -159,9 +163,14 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
   private SourceTable currentTable;
   private SourceQuery currentQuery;
   private SourceJson currentJsonSource;
-  private SourceTable startRelationshipTable;
+
+  /** Table, query, or JSON source — relationship drag origin. */
+  private Object startRelationshipNode;
+
   private Point relationshipDragEndLocation;
-  private SourceTable candidateRelationshipTarget;
+
+  /** Table, query, or JSON source under cursor during relationship drag. */
+  private Object candidateRelationshipTarget;
 
   public HopGuiSourceModelGraph(
       Composite parent,
@@ -257,7 +266,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       painter.setSelectionRegion(selectionRegion);
       painter.setShowingNavigationView(!propsUi.isHideViewportEnabled());
       painter.setRelationshipDragInfo(
-          startRelationshipTable, relationshipDragEndLocation, candidateRelationshipTarget);
+          startRelationshipNode, relationshipDragEndLocation, candidateRelationshipTarget);
       painter.drawSourceModel(hopGui.getMetadataProvider());
       captureNavigationViewGeometry(painter);
       CanvasFacade.setData(canvas, magnification, offset, model);
@@ -383,16 +392,6 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
 
   @GuiToolbarElement(
       root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
-      id = TOOLBAR_ITEM_NEW_QUERY,
-      toolTip = "i18n::HopGuiSourceModelGraph.Toolbar.NewQuery.Tooltip",
-      type = GuiToolbarElementType.BUTTON,
-      image = "source-model.svg")
-  public void newQueryFromToolbar() {
-    addQueryAt(lastClick != null ? lastClick : new Point(50, 50));
-  }
-
-  @GuiToolbarElement(
-      root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
       id = TOOLBAR_ITEM_NEW_JSON,
       toolTip = "i18n::HopGuiSourceModelGraph.Toolbar.NewJson.Tooltip",
       type = GuiToolbarElementType.BUTTON,
@@ -403,12 +402,12 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
 
   @GuiToolbarElement(
       root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
-      id = TOOLBAR_ITEM_PUBLISH_QUERIES,
-      toolTip = "i18n::HopGuiSourceModelGraph.Toolbar.PublishQueries.Tooltip",
+      id = TOOLBAR_ITEM_PUSH_TO_CATALOG,
+      toolTip = "i18n::HopGuiSourceModelGraph.Toolbar.PushToCatalog.Tooltip",
       type = GuiToolbarElementType.BUTTON,
       image = "ui/images/publish.svg")
-  public void publishAllQueriesFromToolbar() {
-    publishAllQueries();
+  public void pushToCatalogFromToolbar() {
+    pushSelectedSourcesToCatalog();
   }
 
   @GuiToolbarElement(
@@ -1514,6 +1513,48 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
   }
 
+  private void previewTable(SourceTable table) {
+    if (table == null) {
+      return;
+    }
+    try {
+      List<RowMetaAndData> rows =
+          SourceTablePreviewSupport.preview(
+              model,
+              table,
+              variables,
+              hopGui.getMetadataProvider(),
+              SourceTablePreviewSupport.DEFAULT_ROW_LIMIT);
+      if (rows.isEmpty()) {
+        MessageBox emptyBox = new MessageBox(getShell(), SWT.ICON_INFORMATION | SWT.OK);
+        emptyBox.setText(
+            BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Preview.Empty.Title"));
+        emptyBox.setMessage(
+            BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Preview.Empty.Message"));
+        emptyBox.open();
+        return;
+      }
+      List<Object[]> data = new ArrayList<>();
+      for (RowMetaAndData row : rows) {
+        data.add(row.getData());
+      }
+      new ShowRowsDialog(
+              getShell(),
+              variables,
+              BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Preview.Title"),
+              BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Preview.Message"),
+              rows.get(0).getRowMeta(),
+              data)
+          .open();
+    } catch (Exception e) {
+      new ErrorDialog(
+          getShell(),
+          BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Preview.Error.Title"),
+          BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Preview.Error.Message"),
+          e);
+    }
+  }
+
   private void addQueryAt(Point location) {
     if (model == null) {
       return;
@@ -1570,7 +1611,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     redraw();
   }
 
-  private void createRelationship(SourceTable from, SourceTable to) {
+  private void createRelationship(Object from, Object to) {
     if (from == null || to == null || from == to || model == null) {
       return;
     }
@@ -1578,21 +1619,38 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     cancelRelationshipDrag();
     redraw();
 
+    SourceEndpointKind fromKind = SourceEndpointSupport.kindOf(from);
+    SourceEndpointKind toKind = SourceEndpointSupport.kindOf(to);
+    String fromName = SourceEndpointSupport.nameOf(from);
+    String toName = SourceEndpointSupport.nameOf(to);
+    if (Utils.isEmpty(fromName) || Utils.isEmpty(toName)) {
+      return;
+    }
+
     byte[] beforeChange = captureUndoSnapshot();
     SourceRelationship relationship = new SourceRelationship();
-    relationship.setName(uniqueRelationshipName("fk_" + from.getName() + "_" + to.getName()));
-    relationship.setChildTableName(from.getName());
-    relationship.setParentTableName(to.getName());
+    relationship.setName(uniqueRelationshipName("rel_" + fromName + "_" + toName));
+    relationship.setChildEndpointKind(fromKind);
+    relationship.setParentEndpointKind(toKind);
+    relationship.setChildTableName(fromName);
+    relationship.setParentTableName(toName);
     relationship.setDefaultJoinType(SourceJoinType.LEFT);
-    relationship.setCardinality("N:1");
-    // Prefer matching PK columns by name as a starter mapping.
-    for (var pk : to.primaryKeyColumns()) {
-      if (pk == null || Utils.isEmpty(pk.getName())) {
+    // Default: many children to one parent (e.g. shipment events 0..N → order 1).
+    relationship.setChildMultiplicity(SourceRelationshipMultiplicity.ZERO_OR_MANY);
+    relationship.setParentMultiplicity(SourceRelationshipMultiplicity.ONE);
+    relationship.setCardinality("0..N:1");
+    // Prefer matching primary-key names on the parent to fields on the child.
+    List<String> parentKeys = SourceEndpointSupport.primaryKeyFieldNames(model, toKind, toName);
+    List<String> childFields = SourceEndpointSupport.fieldNames(model, fromKind, fromName);
+    for (String pk : parentKeys) {
+      if (Utils.isEmpty(pk)) {
         continue;
       }
-      if (from.findColumn(pk.getName()) != null) {
-        relationship.getChildColumns().add(pk.getName());
-        relationship.getParentColumns().add(pk.getName());
+      if (childFields.stream().anyMatch(f -> pk.equalsIgnoreCase(f))) {
+        String childMatch =
+            childFields.stream().filter(f -> pk.equalsIgnoreCase(f)).findFirst().orElse(pk);
+        relationship.getChildColumns().add(childMatch);
+        relationship.getParentColumns().add(pk);
       }
     }
     model.getRelationships().add(relationship);
@@ -1619,10 +1677,36 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     return name;
   }
 
+  private void startRelationshipDrag(Object node, Event e) {
+    startRelationshipNode = node;
+    relationshipDragEndLocation = new Point(e.x, e.y);
+    candidateRelationshipTarget = node;
+    mouseOverTableName = null;
+    clearTableDragState();
+    clearSelectionRegion();
+    avoidContextDialog = true;
+    redraw();
+  }
+
   private void cancelRelationshipDrag() {
-    startRelationshipTable = null;
+    startRelationshipNode = null;
     relationshipDragEndLocation = null;
     candidateRelationshipTarget = null;
+  }
+
+  private Object findRelationshipNodeAtScreen(int screenX, int screenY) {
+    Point real = screen2real(screenX, screenY);
+    AreaOwner areaOwner = getVisibleAreaOwner(real.x, real.y);
+    if (areaOwner == null) {
+      return null;
+    }
+    Object parent = areaOwner.getParent();
+    if (parent instanceof SourceTable
+        || parent instanceof SourceQuery
+        || parent instanceof SourceJson) {
+      return parent;
+    }
+    return null;
   }
 
   private SourceTable findTableAtScreen(int screenX, int screenY) {
@@ -2036,32 +2120,231 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  private void publishAllQueries() {
+  private void pushSelectedSourcesToCatalog() {
     if (model == null) {
       return;
     }
+    List<CatalogPublishCandidate> candidates = collectCatalogPublishCandidates();
+    if (candidates.isEmpty()) {
+      MessageBox emptyBox = new MessageBox(getShell(), SWT.ICON_INFORMATION | SWT.OK);
+      emptyBox.setText(
+          BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PushToCatalog.Empty.Title"));
+      emptyBox.setMessage(
+          BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PushToCatalog.Empty.Message"));
+      emptyBox.open();
+      return;
+    }
+
+    String[] labels = new String[candidates.size()];
+    List<Integer> preselected = new ArrayList<>();
+    for (int i = 0; i < candidates.size(); i++) {
+      labels[i] = candidates.get(i).label();
+      preselected.add(i);
+    }
+
+    EnterSelectionDialog pickDialog =
+        new EnterSelectionDialog(
+            getShell(),
+            labels,
+            BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PushToCatalog.Pick.Title"),
+            BaseMessages.getString(
+                PKG, "HopGuiSourceModelGraph.PushToCatalog.Pick.Message", candidates.size()));
+    pickDialog.setMulti(true);
+    pickDialog.setSelectedNrs(preselected);
+    if (pickDialog.open() == null) {
+      return;
+    }
+
+    int[] indexes = pickDialog.getSelectionIndeces();
+    if (indexes == null || indexes.length == 0) {
+      MessageBox noneBox = new MessageBox(getShell(), SWT.ICON_INFORMATION | SWT.OK);
+      noneBox.setText(
+          BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PushToCatalog.NoneSelected.Title"));
+      noneBox.setMessage(
+          BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PushToCatalog.NoneSelected.Message"));
+      noneBox.open();
+      return;
+    }
+
     try {
       ensureModelFilenameForPublish();
-      List<SourceQueryCatalogPublisher.PublishResult> results =
-          SourceQueryCatalogPublisher.publishAll(
-              model, null, variables, hopGui.getMetadataProvider());
-      DvDatabaseSourceImportSupport.refreshCatalogPerspective();
-      setChanged();
+      int successCount = 0;
+      List<String> publishedFeeds = new ArrayList<>();
+      List<String> failures = new ArrayList<>();
+      for (int index : indexes) {
+        if (index < 0 || index >= candidates.size()) {
+          continue;
+        }
+        CatalogPublishCandidate candidate = candidates.get(index);
+        try {
+          String feedName = publishCatalogCandidate(candidate);
+          successCount++;
+          if (!Utils.isEmpty(feedName)) {
+            publishedFeeds.add(feedName);
+          }
+        } catch (Exception e) {
+          String detail = e.getMessage() != null ? e.getMessage() : e.toString();
+          failures.add(candidate.label() + ": " + detail);
+        }
+      }
+
+      if (successCount > 0) {
+        DvDatabaseSourceImportSupport.refreshCatalogPerspective();
+        setChanged();
+      }
+
+      if (!failures.isEmpty() && successCount == 0) {
+        throw new HopException(String.join(Const.CR, failures));
+      }
+
       MessageBox box = new MessageBox(getShell(), SWT.ICON_INFORMATION | SWT.OK);
       box.setText(
-          BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PublishQueries.Success.Title"));
-      box.setMessage(
+          BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PushToCatalog.Success.Title"));
+      StringBuilder message = new StringBuilder();
+      message.append(
           BaseMessages.getString(
-              PKG, "HopGuiSourceModelGraph.PublishQueries.Success.Message", results.size()));
+              PKG, "HopGuiSourceModelGraph.PushToCatalog.Success.Message", successCount));
+      if (!publishedFeeds.isEmpty()) {
+        message.append(Const.CR).append(Const.CR);
+        message.append(
+            BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PushToCatalog.Success.Feeds"));
+        message.append(Const.CR);
+        for (String feed : publishedFeeds) {
+          message.append("  • ").append(feed).append(Const.CR);
+        }
+      }
+      if (!failures.isEmpty()) {
+        message.append(Const.CR);
+        message.append(
+            BaseMessages.getString(
+                PKG, "HopGuiSourceModelGraph.PushToCatalog.Partial.Failures", failures.size()));
+        message.append(Const.CR);
+        for (String failure : failures) {
+          message.append("  • ").append(failure).append(Const.CR);
+        }
+      }
+      box.setMessage(message.toString().trim());
       box.open();
     } catch (Exception e) {
       new ErrorDialog(
           getShell(),
-          BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PublishQueries.Error.Title"),
-          BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PublishQueries.Error.Message"),
+          BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PushToCatalog.Error.Title"),
+          BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PushToCatalog.Error.Message"),
           e);
     }
   }
+
+  private List<CatalogPublishCandidate> collectCatalogPublishCandidates() {
+    List<CatalogPublishCandidate> candidates = new ArrayList<>();
+    if (model == null) {
+      return candidates;
+    }
+    for (SourceTable table : model.getTables()) {
+      if (table == null || Utils.isEmpty(table.getName())) {
+        continue;
+      }
+      if (SourceTableCatalogPublisher.buildFieldsFromTable(table).isEmpty()) {
+        continue;
+      }
+      String feedName = SourceTableCatalogPublisher.resolveCatalogFeedName(table);
+      candidates.add(
+          new CatalogPublishCandidate(
+              CatalogPublishKind.TABLE,
+              table.getName(),
+              feedName,
+              formatCatalogPublishLabel(
+                  BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PushToCatalog.Kind.Table"),
+                  table.getName(),
+                  feedName)));
+    }
+    for (SourceQuery query : model.getQueries()) {
+      if (query == null || Utils.isEmpty(query.getName()) || query.getColumns().isEmpty()) {
+        continue;
+      }
+      String feedName =
+          !Utils.isEmpty(query.getPublishedCatalogName())
+              ? query.getPublishedCatalogName().trim()
+              : query.getName().trim();
+      candidates.add(
+          new CatalogPublishCandidate(
+              CatalogPublishKind.QUERY,
+              query.getName(),
+              feedName,
+              formatCatalogPublishLabel(
+                  BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PushToCatalog.Kind.Query"),
+                  query.getName(),
+                  feedName)));
+    }
+    for (SourceJson jsonSource : model.getJsonSources()) {
+      if (jsonSource == null
+          || Utils.isEmpty(jsonSource.getName())
+          || jsonSource.getFields().isEmpty()) {
+        continue;
+      }
+      String feedName =
+          !Utils.isEmpty(jsonSource.getPublishedCatalogName())
+              ? jsonSource.getPublishedCatalogName().trim()
+              : jsonSource.getName().trim();
+      candidates.add(
+          new CatalogPublishCandidate(
+              CatalogPublishKind.JSON,
+              jsonSource.getName(),
+              feedName,
+              formatCatalogPublishLabel(
+                  BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PushToCatalog.Kind.Json"),
+                  jsonSource.getName(),
+                  feedName)));
+    }
+    return candidates;
+  }
+
+  private static String formatCatalogPublishLabel(String kind, String objectName, String feedName) {
+    if (!Utils.isEmpty(feedName) && !feedName.equals(objectName)) {
+      return kind + ": " + objectName + " → " + feedName;
+    }
+    return kind + ": " + objectName;
+  }
+
+  private String publishCatalogCandidate(CatalogPublishCandidate candidate) throws HopException {
+    return switch (candidate.kind()) {
+      case TABLE -> {
+        SourceTable table = model.findTable(candidate.objectName());
+        if (table == null) {
+          throw new HopException("Source table not found: " + candidate.objectName());
+        }
+        yield SourceTableCatalogPublisher.publish(
+                model, table, null, variables, hopGui.getMetadataProvider())
+            .catalogName();
+      }
+      case QUERY -> {
+        SourceQuery query = model.findQuery(candidate.objectName());
+        if (query == null) {
+          throw new HopException("Source query not found: " + candidate.objectName());
+        }
+        yield SourceQueryCatalogPublisher.publish(
+                model, query, null, variables, hopGui.getMetadataProvider())
+            .catalogName();
+      }
+      case JSON -> {
+        SourceJson jsonSource = model.findJsonSource(candidate.objectName());
+        if (jsonSource == null) {
+          throw new HopException("Source JSON not found: " + candidate.objectName());
+        }
+        yield SourceJsonCatalogPublisher.publish(
+                model, jsonSource, null, variables, hopGui.getMetadataProvider())
+            .catalogName();
+      }
+    };
+  }
+
+  private enum CatalogPublishKind {
+    TABLE,
+    QUERY,
+    JSON
+  }
+
+  private record CatalogPublishCandidate(
+      CatalogPublishKind kind, String objectName, String feedName, String label) {}
 
   private void ensureModelFilenameForPublish() {
     if (model != null && Utils.isEmpty(model.getFilename()) && !Utils.isEmpty(getFilename())) {
@@ -2110,6 +2393,21 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
   }
 
   @GuiContextAction(
+      id = "source-model-table-preview",
+      parentId = HopGuiSourceTableContext.CONTEXT_ID,
+      type = GuiActionType.Info,
+      name = "i18n::HopGuiSourceModelGraph.Context.Table.Preview.Name",
+      tooltip = "i18n::HopGuiSourceModelGraph.Context.Table.Preview.Tooltip",
+      image = "ui/images/preview.svg",
+      category = "Basic",
+      categoryOrder = "2")
+  public void previewTableAction(HopGuiSourceTableContext context) {
+    if (context != null) {
+      previewTable(context.getTable());
+    }
+  }
+
+  @GuiContextAction(
       id = "source-model-table-delete",
       parentId = HopGuiSourceTableContext.CONTEXT_ID,
       type = GuiActionType.Delete,
@@ -2117,7 +2415,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       tooltip = "i18n::HopGuiSourceModelGraph.Context.Table.Delete.Tooltip",
       image = "ui/images/delete.svg",
       category = "Basic",
-      categoryOrder = "2")
+      categoryOrder = "3")
   public void deleteTableAction(HopGuiSourceTableContext context) {
     if (context == null || context.getTable() == null || model == null) {
       return;
@@ -2250,6 +2548,11 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
           clearTableDragState();
           return true;
         }
+        if (areaType == AreaOwner.AreaType.TRANSFORM_ICON
+            && (e.button == 2 || (e.button == 1 && shift))) {
+          startRelationshipDrag(queryHit, e);
+          return true;
+        }
         if (e.button == 1 && areaType == AreaOwner.AreaType.TRANSFORM_ICON) {
           prepareExclusiveDragSelection(
               control, queryHit.isSelected(), () -> queryHit.setSelected(true));
@@ -2273,6 +2576,11 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
           avoidContextDialog = true;
           editJsonSource(jsonHit);
           clearTableDragState();
+          return true;
+        }
+        if (areaType == AreaOwner.AreaType.TRANSFORM_ICON
+            && (e.button == 2 || (e.button == 1 && shift))) {
+          startRelationshipDrag(jsonHit, e);
           return true;
         }
         if (e.button == 1 && areaType == AreaOwner.AreaType.TRANSFORM_ICON) {
@@ -2299,14 +2607,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
 
       if (areaType == AreaOwner.AreaType.TRANSFORM_ICON
           && (e.button == 2 || (e.button == 1 && shift))) {
-        startRelationshipTable = tableHit;
-        relationshipDragEndLocation = new Point(e.x, e.y);
-        candidateRelationshipTarget = tableHit;
-        mouseOverTableName = null;
-        clearTableDragState();
-        clearSelectionRegion();
-        avoidContextDialog = true;
-        redraw();
+        startRelationshipDrag(tableHit, e);
         return true;
       }
 
@@ -2337,22 +2638,22 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
 
     @Override
     public boolean isRelationshipDragActive() {
-      return startRelationshipTable != null;
+      return startRelationshipNode != null;
     }
 
     @Override
     public void handleRelationshipMouseMove(Event e) {
       relationshipDragEndLocation = new Point(e.x, e.y);
-      candidateRelationshipTarget = findTableAtScreen(e.x, e.y);
-      if (candidateRelationshipTarget == startRelationshipTable) {
+      candidateRelationshipTarget = findRelationshipNodeAtScreen(e.x, e.y);
+      if (candidateRelationshipTarget == startRelationshipNode) {
         candidateRelationshipTarget = null;
       }
     }
 
     @Override
     public boolean handleRelationshipMouseUp(Event e, Point real) {
-      SourceTable from = startRelationshipTable;
-      SourceTable target = findTableAtScreen(e.x, e.y);
+      Object from = startRelationshipNode;
+      Object target = findRelationshipNodeAtScreen(e.x, e.y);
       // Clear the candidate line before the modal dialog so the painter stops drawing it.
       cancelRelationshipDrag();
       clearTableDragState();
@@ -2368,7 +2669,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     public boolean handleObjectMouseMove(Point real, boolean leftButtonDown) {
       if (!leftButtonDown
           || (currentTable == null && currentQuery == null && currentJsonSource == null)
-          || startRelationshipTable != null
+          || startRelationshipNode != null
           || resize != null) {
         return false;
       }
@@ -2433,7 +2734,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
 
     @Override
     public boolean hasCancellableDragState() {
-      return startRelationshipTable != null
+      return startRelationshipNode != null
           || currentTable != null
           || iconDragStart != null
           || currentNote != null
@@ -2662,22 +2963,22 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
 
     @Override
     public boolean isNoteMouseDownAllowed() {
-      return startRelationshipTable == null;
+      return startRelationshipNode == null;
     }
 
     @Override
     public boolean isLassoMoveAllowed() {
-      return startRelationshipTable == null;
+      return startRelationshipNode == null;
     }
 
     @Override
     public boolean allowEmptyLassoClearOnMouseUp() {
-      return startRelationshipTable == null;
+      return startRelationshipNode == null;
     }
 
     @Override
     public boolean isNoteResizeHoverBlocked() {
-      return startRelationshipTable != null
+      return startRelationshipNode != null
           || dragSelection
           || selectionRegion != null
           || noteWasMoved

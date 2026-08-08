@@ -24,6 +24,7 @@ limitations under the License.
   </configuration>
   <tables>
     <table>
+      <catalogSourceName>customer_address</catalogSourceName>
       <physicalType>DATABASE</physicalType>
       <databaseName>CRM</databaseName>
       <schemaName>public</schemaName>
@@ -84,11 +85,12 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
-      <xloc>1040</xloc>
-      <yloc>288</yloc>
+      <xloc>1120</xloc>
+      <yloc>224</yloc>
       <name>customer_address</name>
     </table>
     <table>
+      <catalogSourceName>customer_contact</catalogSourceName>
       <physicalType>DATABASE</physicalType>
       <databaseName>CRM</databaseName>
       <schemaName>public</schemaName>
@@ -140,11 +142,12 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
-      <xloc>1040</xloc>
-      <yloc>208</yloc>
+      <xloc>1120</xloc>
+      <yloc>144</yloc>
       <name>customer_contact</name>
     </table>
     <table>
+      <catalogSourceName>customer_demo</catalogSourceName>
       <physicalType>DATABASE</physicalType>
       <databaseName>CRM</databaseName>
       <schemaName>public</schemaName>
@@ -205,11 +208,12 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
-      <xloc>1040</xloc>
-      <yloc>128</yloc>
+      <xloc>1120</xloc>
+      <yloc>64</yloc>
       <name>customer_demo</name>
     </table>
     <table>
+      <catalogSourceName>customer_hub</catalogSourceName>
       <physicalType>DATABASE</physicalType>
       <databaseName>CRM</databaseName>
       <schemaName>public</schemaName>
@@ -243,11 +247,12 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
-      <xloc>576</xloc>
-      <yloc>208</yloc>
+      <xloc>608</xloc>
+      <yloc>288</yloc>
       <name>customer_hub</name>
     </table>
     <table>
+      <catalogSourceName>customer_prefs</catalogSourceName>
       <physicalType>DATABASE</physicalType>
       <databaseName>CRM</databaseName>
       <schemaName>public</schemaName>
@@ -308,13 +313,13 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
-      <xloc>1040</xloc>
-      <yloc>368</yloc>
+      <xloc>1120</xloc>
+      <yloc>304</yloc>
       <name>customer_prefs</name>
     </table>
     <table>
       <description/>
-      <catalogSourceName/>
+      <catalogSourceName>order_header</catalogSourceName>
       <physicalType>DATABASE</physicalType>
       <databaseName>CRM</databaseName>
       <schemaName>public</schemaName>
@@ -402,11 +407,12 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
-      <xloc>576</xloc>
-      <yloc>384</yloc>
+      <xloc>608</xloc>
+      <yloc>464</yloc>
       <name>order_header</name>
     </table>
     <table>
+      <catalogSourceName>order_line</catalogSourceName>
       <physicalType>DATABASE</physicalType>
       <databaseName>CRM</databaseName>
       <schemaName>public</schemaName>
@@ -485,11 +491,12 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
-      <xloc>576</xloc>
-      <yloc>560</yloc>
+      <xloc>608</xloc>
+      <yloc>640</yloc>
       <name>order_line</name>
     </table>
     <table>
+      <catalogSourceName>product</catalogSourceName>
       <physicalType>DATABASE</physicalType>
       <databaseName>CRM</databaseName>
       <schemaName>public</schemaName>
@@ -550,11 +557,12 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
-      <xloc>208</xloc>
-      <yloc>560</yloc>
+      <xloc>240</xloc>
+      <yloc>640</yloc>
       <name>product</name>
     </table>
     <table>
+      <catalogSourceName>warehouse</catalogSourceName>
       <physicalType>DATABASE</physicalType>
       <databaseName>CRM</databaseName>
       <schemaName>public</schemaName>
@@ -624,11 +632,12 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
-      <xloc>208</xloc>
-      <yloc>208</yloc>
+      <xloc>240</xloc>
+      <yloc>288</yloc>
       <name>warehouse</name>
     </table>
     <table>
+      <catalogSourceName>warehouse_product</catalogSourceName>
       <physicalType>DATABASE</physicalType>
       <databaseName>CRM</databaseName>
       <schemaName>public</schemaName>
@@ -689,14 +698,101 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
-      <xloc>208</xloc>
-      <yloc>384</yloc>
+      <xloc>240</xloc>
+      <yloc>464</yloc>
       <name>warehouse_product</name>
+    </table>
+    <table>
+      <description>Kafka-style consumer landing for order shipment tracking (UUID key + JSON payload + topic/partition/offset).</description>
+      <catalogSourceName>E2E-order-shipment-event</catalogSourceName>
+      <physicalType>DATABASE</physicalType>
+      <databaseName>CRM</databaseName>
+      <schemaName>public</schemaName>
+      <tableName>order_shipment_event</tableName>
+      <columns>
+        <column>
+          <name>message_id</name>
+          <description>Consumer message key (UUID)</description>
+          <sourceDataType>varchar</sourceDataType>
+          <length>36</length>
+          <precision/>
+          <hopType>2</hopType>
+          <primaryKeyPosition>1</primaryKeyPosition>
+        </column>
+        <column>
+          <name>payload</name>
+          <description>Shipment tracking JSON document</description>
+          <sourceDataType>varchar</sourceDataType>
+          <length>4000</length>
+          <precision/>
+          <hopType>2</hopType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+        </column>
+        <column>
+          <name>kafka_timestamp</name>
+          <description/>
+          <sourceDataType>timestamp</sourceDataType>
+          <length>6</length>
+          <precision/>
+          <hopType>9</hopType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+        </column>
+        <column>
+          <name>topic</name>
+          <description/>
+          <sourceDataType>varchar</sourceDataType>
+          <length>80</length>
+          <precision/>
+          <hopType>2</hopType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+        </column>
+        <column>
+          <name>partition</name>
+          <description/>
+          <sourceDataType>int4</sourceDataType>
+          <length>9</length>
+          <precision>0</precision>
+          <hopType>5</hopType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+        </column>
+        <column>
+          <name>offset</name>
+          <description/>
+          <sourceDataType>int8</sourceDataType>
+          <length>12</length>
+          <precision>0</precision>
+          <hopType>5</hopType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+        </column>
+        <column>
+          <name>load_date</name>
+          <description/>
+          <sourceDataType>timestamp</sourceDataType>
+          <length>6</length>
+          <precision/>
+          <hopType>9</hopType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+        </column>
+        <column>
+          <name>record_source</name>
+          <description/>
+          <sourceDataType>varchar</sourceDataType>
+          <length>40</length>
+          <precision/>
+          <hopType>2</hopType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+        </column>
+      </columns>
+      <xloc>1168</xloc>
+      <yloc>592</yloc>
+      <name>order_shipment_event</name>
     </table>
   </tables>
   <relationships>
     <relationship>
       <description/>
+      <childEndpointKind>TABLE</childEndpointKind>
+      <parentEndpointKind>TABLE</parentEndpointKind>
       <childTableName>customer_hub</childTableName>
       <parentTableName>customer_demo</parentTableName>
       <child_columns>
@@ -713,6 +809,8 @@ limitations under the License.
     </relationship>
     <relationship>
       <description/>
+      <childEndpointKind>TABLE</childEndpointKind>
+      <parentEndpointKind>TABLE</parentEndpointKind>
       <childTableName>customer_hub</childTableName>
       <parentTableName>customer_contact</parentTableName>
       <child_columns>
@@ -729,6 +827,8 @@ limitations under the License.
     </relationship>
     <relationship>
       <description/>
+      <childEndpointKind>TABLE</childEndpointKind>
+      <parentEndpointKind>TABLE</parentEndpointKind>
       <childTableName>customer_hub</childTableName>
       <parentTableName>customer_address</parentTableName>
       <child_columns>
@@ -745,6 +845,8 @@ limitations under the License.
     </relationship>
     <relationship>
       <description/>
+      <childEndpointKind>TABLE</childEndpointKind>
+      <parentEndpointKind>TABLE</parentEndpointKind>
       <childTableName>product</childTableName>
       <parentTableName>order_line</parentTableName>
       <child_columns>
@@ -761,6 +863,8 @@ limitations under the License.
     </relationship>
     <relationship>
       <description/>
+      <childEndpointKind>TABLE</childEndpointKind>
+      <parentEndpointKind>TABLE</parentEndpointKind>
       <childTableName>order_header</childTableName>
       <parentTableName>order_line</parentTableName>
       <child_columns>
@@ -777,6 +881,8 @@ limitations under the License.
     </relationship>
     <relationship>
       <description/>
+      <childEndpointKind>TABLE</childEndpointKind>
+      <parentEndpointKind>TABLE</parentEndpointKind>
       <childTableName>customer_hub</childTableName>
       <parentTableName>customer_prefs</parentTableName>
       <child_columns>
@@ -793,6 +899,8 @@ limitations under the License.
     </relationship>
     <relationship>
       <description/>
+      <childEndpointKind>TABLE</childEndpointKind>
+      <parentEndpointKind>TABLE</parentEndpointKind>
       <childTableName>warehouse_product</childTableName>
       <parentTableName>product</parentTableName>
       <child_columns>
@@ -809,6 +917,8 @@ limitations under the License.
     </relationship>
     <relationship>
       <description/>
+      <childEndpointKind>TABLE</childEndpointKind>
+      <parentEndpointKind>TABLE</parentEndpointKind>
       <childTableName>customer_hub</childTableName>
       <parentTableName>order_header</parentTableName>
       <child_columns>
@@ -825,6 +935,8 @@ limitations under the License.
     </relationship>
     <relationship>
       <description/>
+      <childEndpointKind>TABLE</childEndpointKind>
+      <parentEndpointKind>TABLE</parentEndpointKind>
       <childTableName>warehouse_product</childTableName>
       <parentTableName>warehouse</parentTableName>
       <child_columns>
@@ -838,6 +950,24 @@ limitations under the License.
       <childMultiplicity>ONE_OR_MANY</childMultiplicity>
       <parentMultiplicity>ONE</parentMultiplicity>
       <name>fk_warehouse_product_warehouse</name>
+    </relationship>
+    <relationship>
+      <description>Shipment tracking events (JSON feed) for an order — many events per order.</description>
+      <childEndpointKind>JSON</childEndpointKind>
+      <parentEndpointKind>TABLE</parentEndpointKind>
+      <childTableName>order_shipment_tracking</childTableName>
+      <parentTableName>order_header</parentTableName>
+      <child_columns>
+        <child_column>order_id</child_column>
+      </child_columns>
+      <parent_columns>
+        <parent_column>order_id</parent_column>
+      </parent_columns>
+      <defaultJoinType>LEFT</defaultJoinType>
+      <cardinality>0..N:1</cardinality>
+      <childMultiplicity>ZERO_OR_MANY</childMultiplicity>
+      <parentMultiplicity>ONE</parentMultiplicity>
+      <name>rel_order_shipment_tracking_order_header</name>
     </relationship>
   </relationships>
   <queries>
@@ -971,24 +1101,226 @@ limitations under the License.
       <whereClause/>
       <generationMode>AUTO</generationMode>
       <publishedCatalogName>all-customer-info</publishedCatalogName>
-      <xloc>624</xloc>
-      <yloc>48</yloc>
+      <xloc>608</xloc>
+      <yloc>64</yloc>
       <name>all-customer-info</name>
     </query>
   </queries>
+  <json-sources>
+    <json-source>
+      <description>Flatten Kafka shipment-tracking payload (order_id, status, carrier, location, …) with pass-through consumer metadata.</description>
+      <parentSourceKind>TABLE</parentSourceKind>
+      <parentSourceName>order_shipment_event</parentSourceName>
+      <jsonFieldName>payload</jsonFieldName>
+      <fields>
+        <field>
+          <name>message_id</name>
+          <path/>
+          <passThrough>Y</passThrough>
+          <parentFieldName>message_id</parentFieldName>
+          <hopType>String</hopType>
+          <length>36</length>
+          <precision>-1</precision>
+          <format/>
+          <trimType>none</trimType>
+          <primaryKeyPosition>1</primaryKeyPosition>
+          <repeated>N</repeated>
+        </field>
+        <field>
+          <name>kafka_timestamp</name>
+          <path/>
+          <passThrough>Y</passThrough>
+          <parentFieldName>kafka_timestamp</parentFieldName>
+          <hopType>Timestamp</hopType>
+          <length>-1</length>
+          <precision>-1</precision>
+          <format/>
+          <trimType>none</trimType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+          <repeated>N</repeated>
+        </field>
+        <field>
+          <name>topic</name>
+          <path/>
+          <passThrough>Y</passThrough>
+          <parentFieldName>topic</parentFieldName>
+          <hopType>String</hopType>
+          <length>80</length>
+          <precision>-1</precision>
+          <format/>
+          <trimType>none</trimType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+          <repeated>N</repeated>
+        </field>
+        <field>
+          <name>partition</name>
+          <path/>
+          <passThrough>Y</passThrough>
+          <parentFieldName>partition</parentFieldName>
+          <hopType>Integer</hopType>
+          <length>9</length>
+          <precision>0</precision>
+          <format/>
+          <trimType>none</trimType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+          <repeated>N</repeated>
+        </field>
+        <field>
+          <name>offset</name>
+          <path/>
+          <passThrough>Y</passThrough>
+          <parentFieldName>offset</parentFieldName>
+          <hopType>Integer</hopType>
+          <length>12</length>
+          <precision>0</precision>
+          <format/>
+          <trimType>none</trimType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+          <repeated>N</repeated>
+        </field>
+        <field>
+          <name>order_id</name>
+          <path>$.order_id</path>
+          <passThrough>N</passThrough>
+          <parentFieldName/>
+          <hopType>String</hopType>
+          <length>7</length>
+          <precision>-1</precision>
+          <format/>
+          <trimType>none</trimType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+          <repeated>N</repeated>
+        </field>
+        <field>
+          <name>tracking_number</name>
+          <path>$.tracking_number</path>
+          <passThrough>N</passThrough>
+          <parentFieldName/>
+          <hopType>String</hopType>
+          <length>40</length>
+          <precision>-1</precision>
+          <format/>
+          <trimType>none</trimType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+          <repeated>N</repeated>
+        </field>
+        <field>
+          <name>carrier</name>
+          <path>$.carrier</path>
+          <passThrough>N</passThrough>
+          <parentFieldName/>
+          <hopType>String</hopType>
+          <length>20</length>
+          <precision>-1</precision>
+          <format/>
+          <trimType>none</trimType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+          <repeated>N</repeated>
+        </field>
+        <field>
+          <name>status</name>
+          <path>$.status</path>
+          <passThrough>N</passThrough>
+          <parentFieldName/>
+          <hopType>String</hopType>
+          <length>30</length>
+          <precision>-1</precision>
+          <format/>
+          <trimType>none</trimType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+          <repeated>N</repeated>
+        </field>
+        <field>
+          <name>status_ts</name>
+          <path>$.status_ts</path>
+          <passThrough>N</passThrough>
+          <parentFieldName/>
+          <hopType>String</hopType>
+          <length>40</length>
+          <precision>-1</precision>
+          <format/>
+          <trimType>none</trimType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+          <repeated>N</repeated>
+        </field>
+        <field>
+          <name>city</name>
+          <path>$.location.city</path>
+          <passThrough>N</passThrough>
+          <parentFieldName/>
+          <hopType>String</hopType>
+          <length>50</length>
+          <precision>-1</precision>
+          <format/>
+          <trimType>none</trimType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+          <repeated>N</repeated>
+        </field>
+        <field>
+          <name>region</name>
+          <path>$.location.region</path>
+          <passThrough>N</passThrough>
+          <parentFieldName/>
+          <hopType>String</hopType>
+          <length>20</length>
+          <precision>-1</precision>
+          <format/>
+          <trimType>none</trimType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+          <repeated>N</repeated>
+        </field>
+        <field>
+          <name>warehouse_id</name>
+          <path>$.warehouse_id</path>
+          <passThrough>N</passThrough>
+          <parentFieldName/>
+          <hopType>String</hopType>
+          <length>9</length>
+          <precision>0</precision>
+          <format/>
+          <trimType>none</trimType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+          <repeated>N</repeated>
+        </field>
+        <field>
+          <name>notes</name>
+          <path>$.notes</path>
+          <passThrough>N</passThrough>
+          <parentFieldName/>
+          <hopType>String</hopType>
+          <length>200</length>
+          <precision>-1</precision>
+          <format/>
+          <trimType>none</trimType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+          <repeated>N</repeated>
+        </field>
+      </fields>
+      <ignoreMissingPath>Y</ignoreMissingPath>
+      <defaultPathLeafToNull>Y</defaultPathLeafToNull>
+      <sampleRowLimit>0</sampleRowLimit>
+      <publishedCatalogName>feed_order_shipment_tracking</publishedCatalogName>
+      <xloc>1120</xloc>
+      <yloc>464</yloc>
+      <name>order_shipment_tracking</name>
+    </json-source>
+  </json-sources>
   <notes>
     <note>
       <text>## Source modeler (CRM)
 
-Import schema from CRM, refine relationships, then define **source queries**.
+Import schema from CRM, refine relationships, then define **source queries** and **Source JSON**.
 
 The query **All customer info** joins hub + address + contact + demo + prefs.
 Publish it (toolbar or context menu) as catalog feed `feed_customer_enriched`.
 
+**order_shipment_event** simulates a Kafka consumer (UUID + JSON payload + topic/partition/offset).
+Source JSON **order_shipment_tracking** flattens the payload — publish as `feed_order_shipment_tracking`.
+
 See docs/source-modeler-overview.adoc.
 </text>
       <noteType>INFORMATION</noteType>
-      <xloc>16</xloc>
+      <xloc>32</xloc>
       <yloc>16</yloc>
       <width>528</width>
       <height>144</height>

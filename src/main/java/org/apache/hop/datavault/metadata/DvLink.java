@@ -131,7 +131,7 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
 
   /**
    * Optional name for the link's surrogate hash key column. If empty, defaults to the link name +
-   * "_LK".
+   * "_LK" via {@link #resolveLinkHashKeyFieldName()}.
    */
   @GuiWidgetElement(
       order = "0650",
@@ -141,6 +141,32 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
       parentId = GUI_PLUGIN_ELEMENT_PARENT_ID)
   @HopMetadataProperty
   private String linkHashKeyFieldName;
+
+  /**
+   * Effective link hash key column name used for DDL and generated pipelines.
+   *
+   * <p>When {@link #linkHashKeyFieldName} is blank, defaults to {@code getName() + "_LK"}. Callers
+   * that build SQL or transforms must use this method (or the variables overload) — never the raw
+   * field alone, or pipeline generation fails at runtime while model check only logs a comment.
+   */
+  public String resolveLinkHashKeyFieldName() {
+    if (!Utils.isEmpty(linkHashKeyFieldName)) {
+      return linkHashKeyFieldName.trim();
+    }
+    if (!Utils.isEmpty(getName())) {
+      return getName() + "_LK";
+    }
+    return "";
+  }
+
+  /** {@link #resolveLinkHashKeyFieldName()} with optional variable substitution. */
+  public String resolveLinkHashKeyFieldName(IVariables variables) {
+    String name = resolveLinkHashKeyFieldName();
+    if (variables != null && !Utils.isEmpty(name)) {
+      return variables.resolve(name);
+    }
+    return name;
+  }
 
   /**
    * Per-hub source field mappings for computing the hub hashes from this link's record source. Used
@@ -258,18 +284,27 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
       }
     }
 
-    if (Utils.isEmpty(linkHashKeyFieldName)) {
+    String resolvedLinkHash = resolveLinkHashKeyFieldName(variables);
+    if (Utils.isEmpty(resolvedLinkHash)) {
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_ERROR,
+              BaseMessages.getString(PKG, "DvLink.CheckResult.MissingResolvableLinkHashKey"),
+              this));
+    } else if (Utils.isEmpty(linkHashKeyFieldName)) {
+      // Blank stored name is valid only because resolveLinkHashKeyFieldName() defaults to name_LK.
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_COMMENT,
-              BaseMessages.getString(PKG, "DvLink.CheckResult.NoLinkHashKeyFieldName"),
+              BaseMessages.getString(
+                  PKG, "DvLink.CheckResult.NoLinkHashKeyFieldName", resolvedLinkHash),
               this));
     } else {
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_OK,
               BaseMessages.getString(
-                  PKG, "DvLink.CheckResult.HasLinkHashKeyFieldName", linkHashKeyFieldName),
+                  PKG, "DvLink.CheckResult.HasLinkHashKeyFieldName", resolvedLinkHash),
               this));
     }
 
@@ -711,12 +746,18 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
         // (source field names still in the stream at this point).
         List<String> linkHashInputFields = new ArrayList<>(hubHashNames);
         linkHashInputFields.addAll(resolveDependentChildSourceFieldNames(ctx.variables));
+        String linkHashKey = resolveLinkHashKeyFieldName(variables);
+        if (Utils.isEmpty(linkHashKey)) {
+          throw new HopException(
+              BaseMessages.getString(PKG, "DvLink.Error.MissingLinkHashKeyFieldName", getName()));
+        }
+
         TransformMeta linkHashCalc =
             addDvHashKeyForFields(
                 pipelineMeta,
                 predecessorTransform,
                 linkHashInputFields,
-                linkHashKeyFieldName,
+                linkHashKey,
                 ctx.config,
                 index);
         pipelineMeta.addPipelineHop(new PipelineHopMeta(predecessorTransform, linkHashCalc));
@@ -727,7 +768,7 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
         }
 
         TransformMeta selectTransform =
-            addSourceSelectRows(ctx, pipelineMeta, predecessorTransform);
+            addSourceSelectRows(ctx, pipelineMeta, predecessorTransform, linkHashKey);
 
         // Target side: prefer SQL ORDER BY with a hop-compatible binary/C collation when we are
         // certain it matches Hop SortRows (STRING/HEX). Linguistic DB collations can disagree on
@@ -735,9 +776,9 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
         // violations. When uncertain, SortRows the target leg. Source always SortRows (hash in
         // Hop).
         DvHashKeyOrderStrategySupport.TargetHashOrderPlan targetOrderPlan =
-            resolveTargetHashOrderPlan(ctx, linkHashKeyFieldName);
+            resolveTargetHashOrderPlan(ctx, linkHashKey);
         TransformMeta targetInputTransform =
-            addTargetTableInput(ctx, pipelineMeta, targetOrderPlan);
+            addTargetTableInput(ctx, pipelineMeta, targetOrderPlan, linkHashKey);
         if (targetInputTransform != null) {
           GeneratedPipelineMetadataSupport.stampTargetRead(
               targetInputTransform, "link", getName(), ctx.targetTableName, ctx.targetDbName);
@@ -749,8 +790,8 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
                   ctx,
                   pipelineMeta,
                   targetInputTransform,
-                  linkHashKeyFieldName,
-                  "sort_target_" + linkHashKeyFieldName,
+                  linkHashKey,
+                  "sort_target_" + linkHashKey,
                   LOCATION_START_LINE_3.x + SPACING_WIDTH,
                   LOCATION_START_LINE_3.y);
         }
@@ -760,8 +801,8 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
                 ctx,
                 pipelineMeta,
                 selectTransform,
-                linkHashKeyFieldName,
-                "sort_" + linkHashKeyFieldName,
+                linkHashKey,
+                "sort_" + linkHashKey,
                 LOCATION_START_LINE_2.x + SPACING_WIDTH * (hubNames.size() + 3),
                 LOCATION_START_LINE_2.y);
         if (sortTransform != null) {
@@ -772,7 +813,7 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
         // Collapse identical link hashes before CDC merge (source SQL DISTINCT covers DB sources;
         // this also covers file sources and any post-hash duplicates).
         TransformMeta uniqueTransform =
-            addUniqueLinkHashRows(pipelineMeta, sortTransform, linkHashKeyFieldName);
+            addUniqueLinkHashRows(pipelineMeta, sortTransform, linkHashKey);
         TransformMeta mergeInput = uniqueTransform != null ? uniqueTransform : sortTransform;
 
         TransformMeta mergeTransform =
@@ -780,7 +821,8 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
                 ctx,
                 pipelineMeta,
                 mergeInput,
-                targetMergeInput != null ? targetMergeInput : targetInputTransform);
+                targetMergeInput != null ? targetMergeInput : targetInputTransform,
+                linkHashKey);
         if (mergeTransform != null) {
           GeneratedPipelineMetadataSupport.stampCdcMerge(
               mergeTransform, "link", getName(), ctx.targetTableName, ctx.targetDbName);
@@ -862,9 +904,10 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
       DataVaultConfiguration config = model.getConfigurationOrDefault();
 
       // 1. The link's own hash key (LHK)
-      String linkHashName = getLinkHashKeyFieldName();
+      String linkHashName = resolveLinkHashKeyFieldName(variables);
       if (Utils.isEmpty(linkHashName)) {
-        linkHashName = getName() + "_LK";
+        throw new HopException(
+            BaseMessages.getString(PKG, "DvLink.Error.MissingLinkHashKeyFieldName", getName()));
       }
       HashKeyDataType hdt = config.resolveHashKeyDataType();
       HashAlgorithm algo = config.resolveHashAlgorithm();
@@ -1001,21 +1044,27 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
   }
 
   private TransformMeta addSourceSelectRows(
-      LinkUpdateContext ctx, PipelineMeta pipelineMeta, TransformMeta predecessor)
+      LinkUpdateContext ctx,
+      PipelineMeta pipelineMeta,
+      TransformMeta predecessor,
+      String linkHashKey)
       throws HopException {
 
     SelectValuesMeta selectMeta = new SelectValuesMeta();
     List<SelectField> selectFields = selectMeta.getSelectOption().getSelectFields();
 
-    // Select the link table hash key
+    // Select the link table hash key (always use the resolved name; blank stored values default
+    // to name_LK via resolveLinkHashKeyFieldName).
     //
-    String hashKeyField = ctx.variables.resolve(linkHashKeyFieldName);
+    String hashKeyField =
+        !Utils.isEmpty(linkHashKey) ? linkHashKey : resolveLinkHashKeyFieldName(ctx.variables);
     if (StringUtils.isNotEmpty(hashKeyField)) {
       SelectField selectField = new SelectField();
       selectField.setName(hashKeyField);
       selectFields.add(selectField);
     } else {
-      throw new HopException("Please specify a hash key field name for link " + getName());
+      throw new HopException(
+          BaseMessages.getString(PKG, "DvLink.Error.MissingLinkHashKeyFieldName", getName()));
     }
 
     // We want to keep only the hash keys from the hubs/aliases and the one from the link itself.
@@ -1206,7 +1255,8 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
   private TransformMeta addTargetTableInput(
       LinkUpdateContext ctx,
       PipelineMeta pipelineMeta,
-      DvHashKeyOrderStrategySupport.TargetHashOrderPlan orderPlan)
+      DvHashKeyOrderStrategySupport.TargetHashOrderPlan orderPlan,
+      String linkHashKey)
       throws HopException {
     if (ctx.targetDatabaseMeta == null) {
       return null;
@@ -1215,7 +1265,13 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
     TableInputMeta targetTableInputMeta = new TableInputMeta();
     targetTableInputMeta.setConnection(ctx.targetDbName);
 
-    String quotedLinkHash = ctx.targetDatabaseMeta.quoteField(linkHashKeyFieldName);
+    String hashKeyField =
+        !Utils.isEmpty(linkHashKey) ? linkHashKey : resolveLinkHashKeyFieldName(ctx.variables);
+    if (Utils.isEmpty(hashKeyField)) {
+      throw new HopException(
+          BaseMessages.getString(PKG, "DvLink.Error.MissingLinkHashKeyFieldName", getName()));
+    }
+    String quotedLinkHash = ctx.targetDatabaseMeta.quoteField(hashKeyField);
 
     // DISTINCT so CDC merge never sees duplicate LHKs from a dirty target (pre-PK loads).
     StringBuilder sql = new StringBuilder("SELECT DISTINCT ");
@@ -1276,10 +1332,18 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
       LinkUpdateContext ctx,
       PipelineMeta pipelineMeta,
       TransformMeta compareTransform,
-      TransformMeta referenceTransform)
+      TransformMeta referenceTransform,
+      String linkHashKey)
       throws HopException {
     if (referenceTransform == null || compareTransform == null) {
       return null;
+    }
+
+    String hashKeyField =
+        !Utils.isEmpty(linkHashKey) ? linkHashKey : resolveLinkHashKeyFieldName(ctx.variables);
+    if (Utils.isEmpty(hashKeyField)) {
+      throw new HopException(
+          BaseMessages.getString(PKG, "DvLink.Error.MissingLinkHashKeyFieldName", getName()));
     }
 
     MergeRowsPlusMeta mergeRowsMeta = new MergeRowsPlusMeta();
@@ -1290,7 +1354,7 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
     // We merge on the hash key of this table.
     //
     List<String> keyFields = new ArrayList<>();
-    keyFields.add(linkHashKeyFieldName);
+    keyFields.add(hashKeyField);
     mergeRowsMeta.setKeyFields(keyFields);
 
     // We pass through the source business hash keys, the driving keys, and the record source field
@@ -1298,9 +1362,7 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
     // data stream.
     //
     // The link table hash key
-    mergeRowsMeta
-        .getPassThroughFields()
-        .add(new PassThroughField(linkHashKeyFieldName, null, false));
+    mergeRowsMeta.getPassThroughFields().add(new PassThroughField(hashKeyField, null, false));
 
     // The hash keys of the hubs / role aliases
     for (String hubName : hubNames) {
@@ -1607,13 +1669,6 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
 
       String targetTableName =
           !Utils.isEmpty(link.getTableName()) ? link.getTableName() : link.getName();
-
-      String targetTransformName = "target " + targetTableName;
-
-      String linkHashKeyFieldName = link.getLinkHashKeyFieldName();
-      if (Utils.isEmpty(linkHashKeyFieldName)) {
-        linkHashKeyFieldName = link.getName() + "_LK";
-      }
 
       if (linkSource == null) {
         throw new HopException("Please provide a link source to create a DV link");

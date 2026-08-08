@@ -288,9 +288,8 @@ public final class SourceRecordValidationService {
           BaseMessages.getString(PKG, "SourceRecordValidationService.Error.NoDiscoveredFields"));
     }
 
-    List<SourceField> storedFields =
-        DvSourceFieldSupport.fromCatalogFields(
-            RecordDefinitionPhysicalRefSupport.requireDvSource(definition).getFields());
+    // Same layout policy as catalog UI / hub-sat import (row meta types + nested PK/options).
+    List<SourceField> storedFields = DvSourceFieldSupport.sourceFieldsFromDefinition(definition);
     List<SourceField> discoveredFields = discovery.fields();
     if (sourceType == DvSourceType.ICEBERG || !detailedDataTypeChecking) {
       return RecordDefinitionSchemaDiffSupport.diffTypesOnly(storedFields, discoveredFields);

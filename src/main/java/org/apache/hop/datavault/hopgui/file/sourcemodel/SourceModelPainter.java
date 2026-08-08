@@ -18,11 +18,12 @@ package org.apache.hop.datavault.hopgui.file.sourcemodel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.hop.core.Const;
 import org.apache.hop.core.gui.AreaOwner;
 import org.apache.hop.core.gui.AreaOwner.AreaType;
 import org.apache.hop.core.gui.IGc;
@@ -38,16 +39,22 @@ import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphTableCardLayout
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphTableNameHitArea;
 import org.apache.hop.datavault.hopgui.file.vault.BasePainter;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceColumn;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceEndpointSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJson;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceJsonParentKind;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQuery;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceQueryJoin;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceRelationship;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceTable;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.PropsUi;
 
-/** Paints a source model canvas: tables, PK/FK relationship edges, and notes. */
+/**
+ * Paints a source model canvas: tables, PK/FK relationship edges, composition dependency lines
+ * (query/JSON parents), and notes.
+ */
 @Getter
 @Setter
 public class SourceModelPainter extends BasePainter {
@@ -57,13 +64,23 @@ public class SourceModelPainter extends BasePainter {
   private static final int EMPTY_MODEL_HINT_PADDING = 16;
   private static final int EMPTY_MODEL_HINT_LINE_GAP = 6;
 
+  /** Default card size used for query/JSON nodes when measuring dependency anchors. */
+  private static final int COMPOSITION_CARD_WIDTH = 160;
+
+  private static final int COMPOSITION_CARD_HEIGHT = 80;
+
   private final SourceModel model;
   private String mouseOverTableName;
   private Map<String, SourceTable> tableByName = new HashMap<>();
   private boolean showEmptyModelHint = true;
-  private SourceTable startRelationshipTable;
+
+  /** Table, query, or JSON node where relationship drag started. */
+  private Object startRelationshipNode;
+
   private Point relationshipDragEndLocation;
-  private SourceTable candidateRelationshipTarget;
+
+  /** Table, query, or JSON node under the cursor during relationship drag. */
+  private Object candidateRelationshipTarget;
 
   public SourceModelPainter(
       SourceModel model, IGc gc, IVariables variables, int width, int height) {
@@ -72,10 +89,10 @@ public class SourceModelPainter extends BasePainter {
   }
 
   public void setRelationshipDragInfo(
-      SourceTable startRelationshipTable,
+      Object startRelationshipNode,
       Point relationshipDragEndLocation,
-      SourceTable candidateRelationshipTarget) {
-    this.startRelationshipTable = startRelationshipTable;
+      Object candidateRelationshipTarget) {
+    this.startRelationshipNode = startRelationshipNode;
     this.relationshipDragEndLocation = relationshipDragEndLocation;
     this.candidateRelationshipTarget = candidateRelationshipTarget;
   }
@@ -99,6 +116,8 @@ public class SourceModelPainter extends BasePainter {
       drawGrid();
     }
 
+    // Composition deps under solid FK edges so relationships stay visually primary.
+    drawCompositionDependencyLines();
     drawRelationshipLines();
     drawRelationshipCandidateLine();
     drawNotes(model.getNotes());
@@ -128,6 +147,167 @@ public class SourceModelPainter extends BasePainter {
     }
   }
 
+  /**
+   * Dashed, subdued lines from source tables (and other composition parents) into query and JSON
+   * cards so multi-table queries and JSON extractions show their feed dependencies without looking
+   * like FK relationships.
+   */
+  private void drawCompositionDependencyLines() {
+    if (model == null || gc == null) {
+      return;
+    }
+    try {
+      gc.setLineWidth(1);
+      gc.setLineStyle(ELineStyle.DASH);
+      gc.setForeground(EColor.GRAY);
+
+      if (model.getQueries() != null) {
+        for (SourceQuery query : model.getQueries()) {
+          if (query == null || query.getLocation() == null) {
+            continue;
+          }
+          Bounds queryBounds = queryBounds(query);
+          for (String tableName : queryParticipantTableNames(query)) {
+            Bounds parentBounds = resolveTableBounds(tableName);
+            if (parentBounds == null) {
+              continue;
+            }
+            drawCompositionEdge(parentBounds, queryBounds);
+          }
+        }
+      }
+
+      if (model.getJsonSources() != null) {
+        for (SourceJson jsonSource : model.getJsonSources()) {
+          if (jsonSource == null || jsonSource.getLocation() == null) {
+            continue;
+          }
+          Bounds jsonBounds = jsonBounds(jsonSource);
+          Bounds parentBounds =
+              resolveCompositionParentBounds(
+                  jsonSource.resolveParentSourceKind(), jsonSource.getParentSourceName());
+          if (parentBounds == null) {
+            continue;
+          }
+          drawCompositionEdge(parentBounds, jsonBounds);
+        }
+      }
+    } finally {
+      gc.setLineStyle(ELineStyle.SOLID);
+      gc.setLineWidth(1);
+      gc.setForeground(EColor.BLACK);
+    }
+  }
+
+  private void drawCompositionEdge(Bounds from, Bounds to) {
+    Point anchorFrom = ModelGraphConnectionGeometry.anchorToward(from, to);
+    Point anchorTo = ModelGraphConnectionGeometry.anchorToward(to, from);
+    Point screenFrom = real2screen(anchorFrom.x, anchorFrom.y);
+    Point screenTo = real2screen(anchorTo.x, anchorTo.y);
+    gc.drawLine(screenFrom.x, screenFrom.y, screenTo.x, screenTo.y);
+  }
+
+  /** Driving table + each join table (deduplicated, order preserved). */
+  private static Set<String> queryParticipantTableNames(SourceQuery query) {
+    Set<String> names = new LinkedHashSet<>();
+    if (query == null) {
+      return names;
+    }
+    if (!Utils.isEmpty(query.getDrivingTableName())) {
+      names.add(query.getDrivingTableName().trim());
+    }
+    if (query.getJoins() != null) {
+      for (SourceQueryJoin join : query.getJoins()) {
+        if (join != null && !Utils.isEmpty(join.getTableName())) {
+          names.add(join.getTableName().trim());
+        }
+      }
+    }
+    return names;
+  }
+
+  private Bounds resolveCompositionParentBounds(SourceJsonParentKind kind, String parentName) {
+    if (Utils.isEmpty(parentName)) {
+      return null;
+    }
+    SourceJsonParentKind resolved = kind != null ? kind : SourceJsonParentKind.TABLE;
+    return switch (resolved) {
+      case TABLE -> resolveTableBounds(parentName);
+      case QUERY -> {
+        SourceQuery query = model.findQuery(parentName);
+        yield query != null ? queryBounds(query) : null;
+      }
+      case JSON -> {
+        SourceJson parentJson = model.findJsonSource(parentName);
+        yield parentJson != null ? jsonBounds(parentJson) : null;
+      }
+    };
+  }
+
+  private Bounds resolveTableBounds(String tableName) {
+    if (Utils.isEmpty(tableName)) {
+      return null;
+    }
+    SourceTable table = tableByName.get(tableName);
+    if (table == null) {
+      table = model.findTable(tableName);
+    }
+    if (table == null || table.getLocation() == null) {
+      return null;
+    }
+    return tableBounds(table);
+  }
+
+  private Bounds queryBounds(SourceQuery query) {
+    Point loc = query.getLocation();
+    int x = loc != null ? loc.x : 0;
+    int y = loc != null ? loc.y : 0;
+    if (gc == null) {
+      return new Bounds(x, y, COMPOSITION_CARD_WIDTH, COMPOSITION_CARD_HEIGHT);
+    }
+    String label = Utils.isEmpty(query.getName()) ? "?" : query.getName();
+    String secondary =
+        Utils.isEmpty(query.getDrivingTableName()) ? "" : "from " + query.getDrivingTableName();
+    int joins = query.getJoins() != null ? query.getJoins().size() : 0;
+    String extra = joins + " join(s), " + query.getColumns().size() + " col(s)";
+    ModelGraphTableCardLayout.BoxSize boxSize =
+        ModelGraphTableCardLayout.computeBoxSize(gc, label, secondary, "QUERY", extra);
+    return new Bounds(
+        x,
+        y,
+        Math.max(COMPOSITION_CARD_WIDTH, boxSize.width()),
+        Math.max(COMPOSITION_CARD_HEIGHT, boxSize.height()));
+  }
+
+  private Bounds jsonBounds(SourceJson jsonSource) {
+    Point loc = jsonSource.getLocation();
+    int x = loc != null ? loc.x : 0;
+    int y = loc != null ? loc.y : 0;
+    if (gc == null) {
+      return new Bounds(x, y, COMPOSITION_CARD_WIDTH, COMPOSITION_CARD_HEIGHT);
+    }
+    String label = Utils.isEmpty(jsonSource.getName()) ? "?" : jsonSource.getName();
+    String secondary =
+        Utils.isEmpty(jsonSource.getParentSourceName())
+            ? ""
+            : "from " + jsonSource.getParentSourceName();
+    if (!Utils.isEmpty(jsonSource.getJsonFieldName())) {
+      secondary =
+          Utils.isEmpty(secondary)
+              ? jsonSource.getJsonFieldName()
+              : secondary + " · " + jsonSource.getJsonFieldName();
+    }
+    int fieldCount = jsonSource.getFields() != null ? jsonSource.getFields().size() : 0;
+    String extra = fieldCount + " field(s)";
+    ModelGraphTableCardLayout.BoxSize boxSize =
+        ModelGraphTableCardLayout.computeBoxSize(gc, label, secondary, "JSON", extra);
+    return new Bounds(
+        x,
+        y,
+        Math.max(COMPOSITION_CARD_WIDTH, boxSize.width()),
+        Math.max(COMPOSITION_CARD_HEIGHT, boxSize.height()));
+  }
+
   private void drawRelationshipLines() {
     gc.setLineWidth(1);
     gc.setLineStyle(ELineStyle.SOLID);
@@ -137,14 +317,19 @@ public class SourceModelPainter extends BasePainter {
       if (relationship == null) {
         continue;
       }
-      SourceTable child = tableByName.get(relationship.getChildTableName());
-      SourceTable parent = tableByName.get(relationship.getParentTableName());
-      if (child == null || parent == null) {
-        continue;
-      }
-      Point childLoc = child.getLocation();
-      Point parentLoc = parent.getLocation();
-      if (childLoc == null || parentLoc == null) {
+      Bounds childBounds =
+          SourceRelationshipEdgeLayout.boundsOfEndpoint(
+              model,
+              tableByName,
+              relationship.resolveChildEndpointKind(),
+              relationship.getChildTableName());
+      Bounds parentBounds =
+          SourceRelationshipEdgeLayout.boundsOfEndpoint(
+              model,
+              tableByName,
+              relationship.resolveParentEndpointKind(),
+              relationship.getParentTableName());
+      if (childBounds == null || parentBounds == null) {
         continue;
       }
       SourceRelationshipEdgeLayout.EdgeGeometry geometry = edgeLayout.get(relationship);
@@ -154,8 +339,6 @@ public class SourceModelPainter extends BasePainter {
         from = geometry.childAnchor();
         to = geometry.parentAnchor();
       } else {
-        Bounds childBounds = tableBounds(child);
-        Bounds parentBounds = tableBounds(parent);
         from = ModelGraphConnectionGeometry.anchorToward(childBounds, parentBounds);
         to = ModelGraphConnectionGeometry.anchorToward(parentBounds, childBounds);
       }
@@ -174,9 +357,11 @@ public class SourceModelPainter extends BasePainter {
       // Label + left-click hit target at the midpoint (edit/delete context menu).
       String baseName =
           Utils.isEmpty(relationship.getName())
-              ? (Const.NVL(relationship.getChildTableName(), "?")
+              ? (SourceEndpointSupport.displayName(
+                      relationship.resolveChildEndpointKind(), relationship.getChildTableName())
                   + " \u2192 "
-                  + Const.NVL(relationship.getParentTableName(), "?"))
+                  + SourceEndpointSupport.displayName(
+                      relationship.resolveParentEndpointKind(), relationship.getParentTableName()))
               : relationship.getName();
       String label = baseName + "  " + relationship.compactMultiplicityLabel();
       gc.setFont(EFont.SMALL);
@@ -222,14 +407,13 @@ public class SourceModelPainter extends BasePainter {
    * coords here over-scales the tip by the native zoom factor.
    */
   private void drawRelationshipCandidateLine() {
-    if (startRelationshipTable == null || relationshipDragEndLocation == null) {
+    if (startRelationshipNode == null || relationshipDragEndLocation == null) {
       return;
     }
-    Point startLoc = startRelationshipTable.getLocation();
-    if (startLoc == null) {
+    Bounds startBounds = boundsOfCanvasNode(startRelationshipNode);
+    if (startBounds == null) {
       return;
     }
-    Bounds startBounds = tableBounds(startRelationshipTable);
     Point drawStart = real2screen(startBounds.centerX(), startBounds.centerY());
     // Convert canvas mouse coords into draw space (pre-GC-scale).
     float mag = magnification > 0f ? magnification : 1f;
@@ -238,15 +422,14 @@ public class SourceModelPainter extends BasePainter {
             Math.round(relationshipDragEndLocation.x / mag),
             Math.round(relationshipDragEndLocation.y / mag));
 
-    boolean valid =
-        candidateRelationshipTarget != null && candidateRelationshipTarget.getLocation() != null;
+    Bounds targetBounds = boundsOfCanvasNode(candidateRelationshipTarget);
+    boolean valid = targetBounds != null;
     try {
       gc.setForeground(valid ? EColor.BLUE : EColor.DARKGRAY);
       gc.setLineWidth(2);
       gc.setLineStyle(ELineStyle.DASH);
       Point tip = drawEnd;
       if (valid) {
-        Bounds targetBounds = tableBounds(candidateRelationshipTarget);
         tip = real2screen(targetBounds.centerX(), targetBounds.centerY());
       }
       gc.drawLine(drawStart.x, drawStart.y, tip.x, tip.y);
@@ -258,6 +441,22 @@ public class SourceModelPainter extends BasePainter {
       gc.setLineWidth(1);
       gc.setForeground(EColor.BLACK);
     }
+  }
+
+  private Bounds boundsOfCanvasNode(Object node) {
+    if (node == null) {
+      return null;
+    }
+    if (node instanceof SourceTable table) {
+      return tableBounds(table);
+    }
+    if (node instanceof SourceQuery query) {
+      return queryBounds(query);
+    }
+    if (node instanceof SourceJson json) {
+      return jsonBounds(json);
+    }
+    return null;
   }
 
   private static Bounds tableBounds(SourceTable table) {

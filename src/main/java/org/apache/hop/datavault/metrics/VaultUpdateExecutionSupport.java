@@ -95,7 +95,14 @@ public final class VaultUpdateExecutionSupport {
 
   /**
    * Assigns the execution id on the parent workflow. Child workflows and pipelines inherit the
-   * variable through normal Hop variable propagation.
+   * variable through normal Hop variable propagation when the workflow engine re-copies variables
+   * onto each action ({@code action.copyFrom(workflow)}).
+   *
+   * <p>Actions that spawn child actions <em>programmatically</em> (e.g. Update Resource Definition
+   * Group) must also call {@link #propagateExecutionVariables(IVariables, IVariables)} onto their
+   * own variable space and each child — Hop {@code Variables.getVariable} does not walk a live
+   * parent map after {@code initializeFrom}, so setting the workflow alone is not enough for those
+   * children.
    */
   public static String beginExecution(
       IWorkflowEngine<WorkflowMeta> parentWorkflow,
@@ -124,6 +131,26 @@ public final class VaultUpdateExecutionSupport {
     parentWorkflow.setVariable(
         DvUpdateMetricsConstants.VAR_WORKFLOW_EXECUTION_STARTED_AT, formatStartedAt(new Date()));
     return executionId;
+  }
+
+  /**
+   * Copies vault-update execution correlation variables from {@code from} onto {@code to}. Use after
+   * {@link #beginExecution} when the receiving variables space was already initialized and will not
+   * re-copy from the workflow engine.
+   */
+  public static void propagateExecutionVariables(IVariables from, IVariables to) {
+    if (from == null || to == null || from == to) {
+      return;
+    }
+    String executionId = from.getVariable(DvUpdateMetricsConstants.VAR_WORKFLOW_EXECUTION_ID);
+    if (!Utils.isEmpty(executionId)) {
+      to.setVariable(DvUpdateMetricsConstants.VAR_WORKFLOW_EXECUTION_ID, executionId);
+    }
+    String startedAt =
+        from.getVariable(DvUpdateMetricsConstants.VAR_WORKFLOW_EXECUTION_STARTED_AT);
+    if (!Utils.isEmpty(startedAt)) {
+      to.setVariable(DvUpdateMetricsConstants.VAR_WORKFLOW_EXECUTION_STARTED_AT, startedAt);
+    }
   }
 
   public static String formatStartedAt(Date value) {

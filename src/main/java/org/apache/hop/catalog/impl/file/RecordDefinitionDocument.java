@@ -16,6 +16,7 @@
  */
 package org.apache.hop.catalog.impl.file;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +39,8 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.RowMeta;
+import org.apache.hop.core.util.Utils;
+import org.apache.hop.datavault.catalog.DvSourceFieldSupport;
 import org.apache.hop.quality.model.RecordQualityRuleBinding;
 
 /** JSON-serializable document stored by {@link FileDataCatalog} and catalog version snapshots. */
@@ -50,7 +53,16 @@ public class RecordDefinitionDocument {
   private String name;
   private String type;
   private String description;
+
+  /**
+   * Legacy Hop {@code IRowMeta} XML. Read-only for migration into structured field lists. Never
+   * written on new catalog saves ({@link JsonInclude.Include#NON_NULL} + left null in {@link
+   * #from}).
+   */
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  @Deprecated
   private String rowMetaXml;
+
   private RecordOrigin origin;
   private PhysicalTableRef physicalTable;
   private PhysicalFileRef physicalFile;
@@ -65,6 +77,8 @@ public class RecordDefinitionDocument {
 
   public static RecordDefinitionDocument from(RecordDefinition definition) throws HopException {
     definition.validate();
+    // Structured fields are authoritative; rebuild transient IRowMeta only (no rowMetaXml).
+    DvSourceFieldSupport.prepareForPersistence(definition);
     RecordDefinitionDocument doc = new RecordDefinitionDocument();
     doc.namespace = definition.getKey().getNamespace();
     doc.name = definition.getKey().getName();
@@ -73,7 +87,8 @@ public class RecordDefinitionDocument {
             ? definition.getType().name()
             : RecordDefinitionType.UNKNOWN.name();
     doc.description = definition.getDescription();
-    doc.rowMetaXml = RowMetaCatalogSupport.toXml(definition.getFields());
+    // Intentionally omit rowMetaXml — layout lives on dvSource.fields / physicalTable.fields.
+    doc.rowMetaXml = null;
     doc.origin = definition.getOrigin();
     doc.physicalTable = definition.getPhysicalTable();
     doc.physicalFile = definition.getPhysicalFile();
@@ -102,7 +117,6 @@ public class RecordDefinitionDocument {
     definition.setKey(new RecordDefinitionKey(namespace, name));
     definition.setType(parseType(type));
     definition.setDescription(description);
-    definition.setFields(readFieldsLenient());
     definition.setOrigin(origin);
     definition.setPhysicalTable(physicalTable);
     definition.setPhysicalFile(physicalFile);
@@ -119,21 +133,44 @@ public class RecordDefinitionDocument {
             : new ArrayList<>());
     definition.setQualityRules(
         qualityRules != null ? new ArrayList<>(qualityRules) : new ArrayList<>());
+
+    // Legacy documents: hold parsed rowMetaXml only as a temporary migration aid.
+    IRowMeta legacyRowMeta = readLegacyRowMetaLenient();
+    if (legacyRowMeta != null && !legacyRowMeta.isEmpty()) {
+      definition.setFields(legacyRowMeta);
+    } else {
+      definition.setFields(new RowMeta());
+    }
+
+    try {
+      DvSourceFieldSupport.synchronizeLayoutAfterLoad(definition);
+    } catch (HopException e) {
+      LogChannel.GENERAL.logError(
+          "Unable to synchronize catalog field layout for "
+              + namespace
+              + "/"
+              + name
+              + "; continuing with loaded fields",
+          e);
+    }
     return definition;
   }
 
-  private IRowMeta readFieldsLenient() {
+  private IRowMeta readLegacyRowMetaLenient() {
+    if (Utils.isEmpty(rowMetaXml)) {
+      return null;
+    }
     try {
       return RowMetaCatalogSupport.fromXml(rowMetaXml);
     } catch (HopException e) {
       LogChannel.GENERAL.logError(
-          "Unable to deserialize row metadata for catalog record "
+          "Unable to deserialize legacy rowMetaXml for catalog record "
               + namespace
               + "/"
               + name
-              + "; continuing without field layout",
+              + "; continuing without legacy field layout",
           e);
-      return new RowMeta();
+      return null;
     }
   }
 

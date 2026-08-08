@@ -21,12 +21,14 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import os
 import random
 import subprocess
 import sys
+import uuid
 from dataclasses import dataclass
-from datetime import date, timedelta
+from datetime import date, datetime, time, timedelta
 from itertools import chain
 from pathlib import Path
 from typing import Iterable
@@ -46,6 +48,33 @@ CATEGORIES = ("Electronics", "Apparel", "Home", "Sports", "Grocery")
 REGIONS = ("North", "South", "East", "West")
 SALES_REGIONS = ("NORTH", "SOUTH", "EAST", "WEST", "CENTRAL")
 ORDER_STATUSES = ("NEW", "SHIPPED", "DELIVERED", "CANCELLED")
+
+# Simulated Kafka topic for shipment tracking consumer landing.
+SHIPMENT_TOPIC = "retail.order.shipment"
+SHIPMENT_PARTITION_COUNT = 8
+# Fraction of orders in a wave that receive at least one shipment event.
+SHIPMENT_ORDER_FRACTION = 0.4
+CARRIERS = ("UPS", "FEDEX", "USPS", "DHL")
+CITIES = (
+    "Columbus",
+    "Memphis",
+    "Louisville",
+    "Chicago",
+    "Atlanta",
+    "Dallas",
+    "Denver",
+    "Seattle",
+)
+# Paths stop before DELIVERED unless the order is already DELIVERED.
+SHIPMENT_PATH_DEFAULT = ("LABEL_CREATED", "PICKED_UP", "IN_TRANSIT")
+SHIPMENT_PATH_DELIVERED = (
+    "LABEL_CREATED",
+    "PICKED_UP",
+    "IN_TRANSIT",
+    "OUT_FOR_DELIVERY",
+    "DELIVERED",
+)
+SHIPMENT_PATH_EXCEPTION = ("LABEL_CREATED", "PICKED_UP", "EXCEPTION")
 
 # Seed sales reps (rep_id, rep_name, region) — extended with generated names for scale.sales_reps.
 SEED_SALES_REPS = (
@@ -310,6 +339,127 @@ def order_header_rows(
     return rows
 
 
+def _deterministic_uuid(rng: random.Random) -> str:
+    """UUID string stable for a given RNG sequence (not crypto-random)."""
+    return str(uuid.UUID(int=rng.getrandbits(128), version=4))
+
+
+def _partition_for_order(order_id: str) -> int:
+    # Stable across processes (do not use built-in hash — it is salted per process).
+    return sum(ord(c) for c in order_id) % SHIPMENT_PARTITION_COUNT
+
+
+def _status_path_for_order(order_status: str, rng: random.Random) -> tuple[str, ...]:
+    if order_status == "CANCELLED":
+        return ("EXCEPTION",) if rng.random() < 0.5 else ()
+    if order_status == "DELIVERED":
+        return SHIPMENT_PATH_DELIVERED
+    if order_status == "SHIPPED":
+        # In flight: stop at IN_TRANSIT or OUT_FOR_DELIVERY
+        path = list(SHIPMENT_PATH_DEFAULT)
+        if rng.random() < 0.35:
+            path.append("OUT_FOR_DELIVERY")
+        return tuple(path)
+    if order_status == "NEW":
+        # Label only or just picked up
+        if rng.random() < 0.4:
+            return ("LABEL_CREATED",)
+        return ("LABEL_CREATED", "PICKED_UP")
+    if rng.random() < 0.1:
+        return SHIPMENT_PATH_EXCEPTION
+    return SHIPMENT_PATH_DEFAULT
+
+
+def _event_day(order_day: date, ship_day: date, delivery_day: date, status: str, step: int) -> date:
+    if status == "LABEL_CREATED":
+        return order_day
+    if status == "PICKED_UP":
+        return ship_day
+    if status in ("IN_TRANSIT", "OUT_FOR_DELIVERY", "EXCEPTION"):
+        mid = ship_day + timedelta(days=max(0, (delivery_day - ship_day).days // 2))
+        return mid + timedelta(days=min(step, 2))
+    if status == "DELIVERED":
+        return delivery_day
+    return ship_day
+
+
+def order_shipment_event_rows(
+    order_headers: list[list[object]],
+    scale: Scale,
+    rng: random.Random,
+    load_date: str,
+    max_warehouse_id: int | None = None,
+) -> list[list[object]]:
+    """Build Kafka-consumer envelope rows with shipping-tracking JSON payloads.
+
+    ``order_headers`` rows match ``order_header_rows`` column order:
+    order_id, customer_id, order_date, shipping_date, delivery_date, order_status, ...
+    """
+    warehouse_ceiling = max_warehouse_id if max_warehouse_id is not None else scale.warehouses
+    rows: list[list[object]] = []
+    offsets = [0] * SHIPMENT_PARTITION_COUNT
+
+    # Sample a fraction of orders for shipment events (always include first order when present).
+    candidates = list(order_headers)
+    if not candidates:
+        return rows
+    sample_size = max(1, int(len(candidates) * SHIPMENT_ORDER_FRACTION))
+    selected = {0}  # first header row index for a stable demo row
+    while len(selected) < min(sample_size, len(candidates)):
+        selected.add(rng.randrange(len(candidates)))
+
+    for index in sorted(selected):
+        header = candidates[index]
+        order_id = str(header[0])
+        order_day = date.fromisoformat(str(header[2]))
+        ship_day = date.fromisoformat(str(header[3]))
+        delivery_day = date.fromisoformat(str(header[4]))
+        order_status = str(header[5])
+        path = _status_path_for_order(order_status, rng)
+        if not path:
+            continue
+
+        tracking = f"1Z{rng.randint(100000, 999999)}{rng.randint(10000000, 99999999)}"
+        carrier = rng.choice(CARRIERS)
+        warehouse_id = rng.randint(1, max(1, warehouse_ceiling))
+        partition = _partition_for_order(order_id)
+
+        for step, status in enumerate(path):
+            event_day = _event_day(order_day, ship_day, delivery_day, status, step)
+            # Slight time-of-day variation without breaking CSV date formats used by the load.
+            hour = 8 + (step * 3) % 12
+            status_ts = datetime.combine(event_day, time(hour=hour, minute=rng.randint(0, 59)))
+            city = rng.choice(CITIES)
+            region = rng.choice(REGIONS)
+            payload = {
+                "order_id": order_id,
+                "tracking_number": tracking,
+                "carrier": carrier,
+                "status": status,
+                "status_ts": status_ts.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "location": {"city": city, "region": region},
+                "warehouse_id": warehouse_id,
+                "notes": f"Status update: {status.replace('_', ' ').title()}",
+            }
+            message_id = _deterministic_uuid(rng)
+            kafka_ts = event_day.isoformat()
+            offset = offsets[partition]
+            offsets[partition] = offset + 1
+            rows.append(
+                [
+                    message_id,
+                    json.dumps(payload, separators=(",", ":"), ensure_ascii=True),
+                    kafka_ts,
+                    SHIPMENT_TOPIC,
+                    partition,
+                    offset,
+                    load_date,
+                    "E2E-order-shipment-event",
+                ]
+            )
+    return rows
+
+
 def order_line_rows(
     scale: Scale,
     rng: random.Random,
@@ -544,6 +694,7 @@ def generate_initial(files_dir: Path, scale: Scale, rng: random.Random) -> str:
         ["warehouse_id", "warehouse_name", "city", "region", "capacity", "load_date", "record_source"],
         warehouse_rows(scale, rng, load_date, warehouse_subset),
     )
+    order_headers = order_header_rows(scale, rng, load_date, order_subset, anchor)
     write_csv(
         files_dir / f"order_header_{wave}.csv",
         [
@@ -557,7 +708,7 @@ def generate_initial(files_dir: Path, scale: Scale, rng: random.Random) -> str:
             "load_date",
             "record_source",
         ],
-        order_header_rows(scale, rng, load_date, order_subset, anchor),
+        order_headers,
     )
     write_csv(
         files_dir / f"order_line_{wave}.csv",
@@ -572,6 +723,20 @@ def generate_initial(files_dir: Path, scale: Scale, rng: random.Random) -> str:
             "record_source",
         ],
         order_line_rows(scale, rng, load_date, order_subset, anchor),
+    )
+    write_csv(
+        files_dir / f"order_shipment_event_{wave}.csv",
+        [
+            "message_id",
+            "payload",
+            "kafka_timestamp",
+            "topic",
+            "partition",
+            "offset",
+            "load_date",
+            "record_source",
+        ],
+        order_shipment_event_rows(order_headers, scale, rng, load_date),
     )
 
     rep_subset = sales_rep_id_range(scale)
@@ -658,6 +823,14 @@ def generate_update(files_dir: Path, scale: Scale, base_rng: random.Random, cont
         ["warehouse_id", "warehouse_name", "city", "region", "capacity", "load_date", "record_source"],
         warehouse_rows(scale, satellite_rng, load_date, new_warehouses),
     )
+    order_headers = order_header_rows(
+        scale,
+        order_rng,
+        load_date,
+        new_orders,
+        context.progress_date,
+        max_customer_id=max_customer_id,
+    )
     write_csv(
         files_dir / f"order_header_{wave}.csv",
         [
@@ -671,14 +844,7 @@ def generate_update(files_dir: Path, scale: Scale, base_rng: random.Random, cont
             "load_date",
             "record_source",
         ],
-        order_header_rows(
-            scale,
-            order_rng,
-            load_date,
-            new_orders,
-            context.progress_date,
-            max_customer_id=max_customer_id,
-        ),
+        order_headers,
     )
     write_csv(
         files_dir / f"order_line_{wave}.csv",
@@ -699,6 +865,26 @@ def generate_update(files_dir: Path, scale: Scale, base_rng: random.Random, cont
             new_orders,
             context.progress_date,
             max_product_id=max_product_id,
+        ),
+    )
+    write_csv(
+        files_dir / f"order_shipment_event_{wave}.csv",
+        [
+            "message_id",
+            "payload",
+            "kafka_timestamp",
+            "topic",
+            "partition",
+            "offset",
+            "load_date",
+            "record_source",
+        ],
+        order_shipment_event_rows(
+            order_headers,
+            scale,
+            order_rng,
+            load_date,
+            max_warehouse_id=max(new_warehouses, default=scale.warehouses),
         ),
     )
 

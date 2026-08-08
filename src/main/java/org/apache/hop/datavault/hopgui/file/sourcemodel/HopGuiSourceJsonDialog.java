@@ -20,19 +20,24 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.Const;
+import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.Props;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.hopgui.EnumDialogSupport;
 import org.apache.hop.datavault.hopgui.dialog.ShowRowsDialog;
+import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
 import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
 import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceColumn;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJson;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJsonField;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceJsonFieldSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJsonParentKind;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceJsonValidationSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQuery;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQueryColumn;
@@ -135,6 +140,9 @@ public class HopGuiSourceJsonDialog {
     Button wOk = new Button(shell, SWT.PUSH);
     wOk.setText(BaseMessages.getString(PKG, "System.Button.OK"));
     wOk.addListener(SWT.Selection, e -> ok());
+    Button wValidate = new Button(shell, SWT.PUSH);
+    wValidate.setText(BaseMessages.getString(PKG, "HopGuiSourceJsonDialog.Validate.Button"));
+    wValidate.addListener(SWT.Selection, e -> validateDefinition());
     Button wCancel = new Button(shell, SWT.PUSH);
     wCancel.setText(BaseMessages.getString(PKG, "System.Button.Cancel"));
     wCancel.addListener(SWT.Selection, e -> cancel());
@@ -143,7 +151,7 @@ public class HopGuiSourceJsonDialog {
     wPreview.addListener(SWT.Selection, e -> previewData());
     DialogHelpSupport.createHelpButton(shell, HelpTopics.IMPORT_DATABASE_TABLES_OPTIONS);
     BaseTransformDialog.positionBottomButtons(
-        shell, new Button[] {wOk, wCancel, wPreview}, margin, null);
+        shell, new Button[] {wOk, wValidate, wCancel, wPreview}, margin, null);
 
     CTabFolder wTabFolder = new CTabFolder(shell, SWT.BORDER);
     PropsUi.setLook(wTabFolder, Props.WIDGET_STYLE_TAB);
@@ -155,8 +163,6 @@ public class HopGuiSourceJsonDialog {
 
     wTabFolder.setSelection(0);
     getData();
-    refreshParentNameItems();
-    refreshJsonFieldItems();
     refreshParentFieldComboValues();
 
     BaseTransformDialog.setSize(shell, 900, 640);
@@ -222,8 +228,9 @@ public class HopGuiSourceJsonDialog {
     wParentKind.addListener(
         SWT.Selection,
         e -> {
-          refreshParentNameItems();
-          refreshJsonFieldItems();
+          // Kind changed: rebuild name list and pick a valid entry (do not keep a stale name).
+          refreshParentNameItems("");
+          refreshJsonFieldItems("");
           refreshParentFieldComboValues();
         });
 
@@ -503,11 +510,16 @@ public class HopGuiSourceJsonDialog {
           SourceJsonField pt = SourceJsonField.passThroughField(item.getText(FLD_COL_PARENT_FIELD));
           pt.setName(item.getText(FLD_COL_NAME));
           pt.setPrimaryKeyPosition(Const.toInt(item.getText(FLD_COL_KEY), 0));
-          try {
-            pt.setHopType(ValueMetaFactory.getIdForValueMeta(item.getText(FLD_COL_TYPE)));
-          } catch (Exception ignored) {
-            // default
+          int hopType = SourceJsonFieldSupport.hopTypeIdFromLabel(item.getText(FLD_COL_TYPE));
+          if (hopType <= 0) {
+            hopType =
+                SourceJsonFieldSupport.resolveParentFieldHopType(
+                    model,
+                    SourceJsonParentKind.lookupDescription(wParentKind.getText()),
+                    wParentName.getText(),
+                    item.getText(FLD_COL_PARENT_FIELD));
           }
+          pt.setHopType(hopType);
           keepPassThrough.add(pt);
         }
       }
@@ -537,21 +549,74 @@ public class HopGuiSourceJsonDialog {
     item.setText(FLD_COL_PATH, Const.NVL(field.getPath(), ""));
     item.setText(FLD_COL_PASSTHROUGH, field.isPassThrough() ? "Y" : "N");
     item.setText(FLD_COL_PARENT_FIELD, Const.NVL(field.getParentFieldName(), ""));
-    String typeName = "";
-    try {
-      if (field.getHopType() > 0) {
-        typeName = ValueMetaFactory.getValueMetaName(field.getHopType());
-      }
-    } catch (Exception ignored) {
-      // leave empty
-    }
-    item.setText(FLD_COL_TYPE, typeName);
+    int hopType = SourceJsonFieldSupport.resolveEffectiveHopType(model, workingParentContext(), field);
+    item.setText(FLD_COL_TYPE, SourceJsonFieldSupport.hopTypeLabel(hopType));
     item.setText(FLD_COL_FORMAT, Const.NVL(field.getFormat(), ""));
     item.setText(FLD_COL_LENGTH, field.getLength() >= 0 ? Integer.toString(field.getLength()) : "");
     item.setText(
         FLD_COL_PRECISION, field.getPrecision() >= 0 ? Integer.toString(field.getPrecision()) : "");
     item.setText(
         FLD_COL_KEY, field.isPrimaryKey() ? Integer.toString(field.getPrimaryKeyPosition()) : "");
+  }
+
+  /** Minimal SourceJson with parent kind/name for type resolution while the dialog is open. */
+  private SourceJson workingParentContext() {
+    SourceJson ctx = new SourceJson(Const.NVL(wName != null ? wName.getText() : input.getName(), ""));
+    if (wParentKind != null && !wParentKind.isDisposed()) {
+      ctx.setParentSourceKind(SourceJsonParentKind.lookupDescription(wParentKind.getText()));
+    } else {
+      ctx.setParentSourceKind(input.resolveParentSourceKind());
+    }
+    if (wParentName != null && !wParentName.isDisposed()) {
+      ctx.setParentSourceName(wParentName.getText());
+    } else {
+      ctx.setParentSourceName(input.getParentSourceName());
+    }
+    return ctx;
+  }
+
+  private void validateDefinition() {
+    try {
+      SourceJson draft = workingFromDialog();
+      SourceJsonFieldSupport.applyMissingPassThroughTypes(model, draft);
+      // Reflect resolved pass-through types back into the grid so the user sees them.
+      refreshFieldTypeCellsFromDraft(draft);
+      List<ICheckResult> remarks = SourceJsonValidationSupport.check(draft, model, null);
+      if (remarks.isEmpty()) {
+        remarks =
+            List.of(
+                new CheckResult(
+                    ICheckResult.TYPE_RESULT_OK,
+                    BaseMessages.getString(PKG, "HopGuiSourceJsonDialog.Validate.Ok.Message"),
+                    null));
+      }
+      ModelDialogValidationSupport.showCheckResults(shell, remarks);
+    } catch (Exception ex) {
+      new ErrorDialog(
+          shell,
+          BaseMessages.getString(PKG, "HopGuiSourceJsonDialog.Validate.Error.Title"),
+          BaseMessages.getString(
+              PKG, "HopGuiSourceJsonDialog.Validate.Error.Message", ex.getMessage()),
+          ex);
+    }
+  }
+
+  private void refreshFieldTypeCellsFromDraft(SourceJson draft) {
+    if (draft == null || wFields == null || wFields.isDisposed()) {
+      return;
+    }
+    List<SourceJsonField> fields = draft.getFields();
+    int rows = wFields.nrNonEmpty();
+    for (int i = 0; i < rows && i < fields.size(); i++) {
+      SourceJsonField field = fields.get(i);
+      if (field == null) {
+        continue;
+      }
+      int hopType = SourceJsonFieldSupport.resolveEffectiveHopType(model, draft, field);
+      if (hopType > 0) {
+        wFields.getNonEmpty(i).setText(FLD_COL_TYPE, SourceJsonFieldSupport.hopTypeLabel(hopType));
+      }
+    }
   }
 
   private void previewData() {
@@ -629,38 +694,20 @@ public class HopGuiSourceJsonDialog {
     wDescription.setText(Const.NVL(input.getDescription(), ""));
     wPublishedCatalogName.setText(Const.NVL(input.getPublishedCatalogName(), ""));
     EnumDialogSupport.selectCombo(wParentKind, input.resolveParentSourceKind());
-    wParentName.setText(Const.NVL(input.getParentSourceName(), ""));
-    wJsonField.setText(Const.NVL(input.getJsonFieldName(), ""));
+    // READ_ONLY combos only accept values present in their item list: populate items first, then
+    // select the stored parent / JSON field (do not setText before setItems).
+    refreshParentNameItems(Const.NVL(input.getParentSourceName(), ""));
+    refreshJsonFieldItems(Const.NVL(input.getJsonFieldName(), ""));
     wIgnoreMissingPath.setSelection(input.isIgnoreMissingPath());
     wDefaultPathLeafToNull.setSelection(input.isDefaultPathLeafToNull());
 
     wFields.clearAll(false);
+    SourceJsonFieldSupport.applyMissingPassThroughTypes(model, input);
     for (SourceJsonField field : input.getFields()) {
       if (field == null) {
         continue;
       }
-      TableItem item = new TableItem(wFields.table, SWT.NONE);
-      item.setText(FLD_COL_NAME, Const.NVL(field.getName(), ""));
-      item.setText(FLD_COL_PATH, Const.NVL(field.getPath(), ""));
-      item.setText(FLD_COL_PASSTHROUGH, field.isPassThrough() ? "Y" : "N");
-      item.setText(FLD_COL_PARENT_FIELD, Const.NVL(field.getParentFieldName(), ""));
-      String typeName = "";
-      try {
-        if (field.getHopType() > 0) {
-          typeName = ValueMetaFactory.getValueMetaName(field.getHopType());
-        }
-      } catch (Exception ignored) {
-        // leave empty
-      }
-      item.setText(FLD_COL_TYPE, typeName);
-      item.setText(FLD_COL_FORMAT, Const.NVL(field.getFormat(), ""));
-      item.setText(
-          FLD_COL_LENGTH, field.getLength() >= 0 ? Integer.toString(field.getLength()) : "");
-      item.setText(
-          FLD_COL_PRECISION,
-          field.getPrecision() >= 0 ? Integer.toString(field.getPrecision()) : "");
-      item.setText(
-          FLD_COL_KEY, field.isPrimaryKey() ? Integer.toString(field.getPrimaryKeyPosition()) : "");
+      addFieldToTable(field);
     }
     wFields.optimizeTableView();
   }
@@ -694,11 +741,7 @@ public class HopGuiSourceJsonDialog {
       field.setPath(path);
       field.setPassThrough(passThrough);
       field.setParentFieldName(parentField);
-      try {
-        field.setHopType(ValueMetaFactory.getIdForValueMeta(item.getText(FLD_COL_TYPE)));
-      } catch (Exception e) {
-        field.setHopType(0);
-      }
+      field.setHopType(SourceJsonFieldSupport.hopTypeIdFromLabel(item.getText(FLD_COL_TYPE)));
       field.setFormat(item.getText(FLD_COL_FORMAT));
       field.setLength(Const.toInt(item.getText(FLD_COL_LENGTH), -1));
       field.setPrecision(Const.toInt(item.getText(FLD_COL_PRECISION), -1));
@@ -706,6 +749,8 @@ public class HopGuiSourceJsonDialog {
       fields.add(field);
     }
     target.setFields(fields);
+    // Inherit parent column types for pass-through rows left blank in the grid.
+    SourceJsonFieldSupport.applyMissingPassThroughTypes(model, target);
   }
 
   private void addParentPrimaryKeys() {
@@ -739,13 +784,12 @@ public class HopGuiSourceJsonDialog {
       if (existing.contains(keyName)) {
         continue;
       }
-      TableItem item = new TableItem(wFields.table, SWT.NONE);
-      item.setText(FLD_COL_NAME, keyName);
-      item.setText(FLD_COL_PATH, "");
-      item.setText(FLD_COL_PASSTHROUGH, "Y");
-      item.setText(FLD_COL_PARENT_FIELD, keyName);
-      item.setText(FLD_COL_TYPE, "Integer");
-      item.setText(FLD_COL_KEY, Integer.toString(nextKey++));
+      int hopType =
+          SourceJsonFieldSupport.resolveParentFieldHopType(model, kind, parentName, keyName);
+      SourceJsonField pt = SourceJsonField.passThroughField(keyName);
+      pt.setHopType(hopType);
+      pt.setPrimaryKeyPosition(nextKey++);
+      addFieldToTable(pt);
     }
     wFields.optimizeTableView();
     refreshParentFieldComboValues();
@@ -792,23 +836,42 @@ public class HopGuiSourceJsonDialog {
   }
 
   private void refreshParentNameItems() {
+    refreshParentNameItems(wParentName.getText());
+  }
+
+  private void refreshParentNameItems(String preferred) {
     SourceJsonParentKind kind = SourceJsonParentKind.lookupDescription(wParentKind.getText());
-    String current = wParentName.getText();
     wParentName.setItems(parentNames(kind));
-    if (!Utils.isEmpty(current)) {
-      wParentName.setText(current);
-    } else if (wParentName.getItemCount() > 0) {
-      wParentName.select(0);
-    }
+    selectComboItem(wParentName, preferred);
   }
 
   private void refreshJsonFieldItems() {
-    String current = wJsonField.getText();
-    String[] fields = parentFieldNames();
-    wJsonField.setItems(fields);
-    if (!Utils.isEmpty(current)) {
-      wJsonField.setText(current);
+    refreshJsonFieldItems(wJsonField.getText());
+  }
+
+  private void refreshJsonFieldItems(String preferred) {
+    wJsonField.setItems(parentFieldNames());
+    selectComboItem(wJsonField, preferred);
+  }
+
+  /**
+   * Select {@code preferred} in a combo after {@link Combo#setItems(String[])}. Uses {@link
+   * Combo#select(int)} so READ_ONLY combos keep the intended value (unlike {@code setText} before
+   * items exist).
+   */
+  private static void selectComboItem(Combo combo, String preferred) {
+    if (combo == null || combo.isDisposed() || combo.getItemCount() == 0) {
+      return;
     }
+    if (!Utils.isEmpty(preferred)) {
+      int index = combo.indexOf(preferred);
+      if (index >= 0) {
+        combo.select(index);
+        return;
+      }
+    }
+    // No preferred match: leave first item selected for usability on new objects / kind change.
+    combo.select(0);
   }
 
   private void refreshParentFieldComboValues() {

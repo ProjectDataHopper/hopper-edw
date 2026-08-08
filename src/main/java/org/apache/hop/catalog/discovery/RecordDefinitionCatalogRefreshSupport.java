@@ -65,9 +65,9 @@ public final class RecordDefinitionCatalogRefreshSupport {
           BaseMessages.getString(PKG, "RecordDefinitionCatalogRefreshSupport.Error.NoFields"));
     }
 
+    RecordDefinitionPhysicalRefSupport.requireDvSource(definition);
     List<SourceField> storedFields =
-        DvSourceFieldSupport.fromCatalogFields(
-            RecordDefinitionPhysicalRefSupport.requireDvSource(definition).getFields());
+        DvSourceFieldSupport.sourceFieldsFromDefinition(definition);
     List<SourceField> discoveredFields = discovery.fields();
     RecordDefinitionSchemaDiffSupport.SchemaDiff diff;
     List<SourceField> fieldsToApply = discoveredFields;
@@ -105,17 +105,17 @@ public final class RecordDefinitionCatalogRefreshSupport {
           BaseMessages.getString(PKG, "RecordDefinitionCatalogRefreshSupport.Error.NoFields"));
     }
 
-    DvSourceRecord dvSource = RecordDefinitionPhysicalRefSupport.requireDvSource(definition);
+    RecordDefinitionPhysicalRefSupport.requireDvSource(definition);
     DvSourceType sourceType = RecordDefinitionPhysicalRefSupport.resolveSourceType(definition);
     List<SourceField> fieldsToApply = discoveredFields;
     if (sourceType == DvSourceType.ICEBERG) {
-      List<SourceField> storedFields = DvSourceFieldSupport.fromCatalogFields(dvSource.getFields());
+      List<SourceField> storedFields =
+          DvSourceFieldSupport.sourceFieldsFromDefinition(definition);
       fieldsToApply =
           RecordDefinitionIcebergRefreshSupport.mergeDiscoveredFields(
               storedFields, discoveredFields);
     }
-    dvSource.setFields(DvSourceFieldSupport.toCatalogFields(fieldsToApply));
-    definition.setFields(DvSourceFieldSupport.toRowMeta(fieldsToApply, null));
+    DvSourceFieldSupport.applyLayoutToDefinition(definition, fieldsToApply, null);
 
     RecordOrigin origin = definition.getOrigin();
     if (origin == null) {

@@ -40,9 +40,6 @@ import org.apache.hop.catalog.registry.RecordDefinitionRegistry;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.Props;
 import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.row.IRowMeta;
-import org.apache.hop.core.row.IValueMeta;
-import org.apache.hop.core.row.RowMeta;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
@@ -1347,44 +1344,35 @@ public class RecordDefinitionDetailsPanel {
 
     try {
       boolean csvSource = isCsvDvSource(definition);
-      IRowMeta rowMeta = new RowMeta();
       List<TableItem> items = wFields.getNonEmptyItems();
       List<SourceField> sourceFields = new ArrayList<>();
       for (TableItem item : items) {
         String name = item.getText(COL_NAME);
+        if (Utils.isEmpty(name)) {
+          continue;
+        }
         String typeDesc = item.getText(COL_TYPE);
         String lengthStr = item.getText(COL_LENGTH);
         String precisionStr = item.getText(COL_PRECISION);
         String primaryKeyPositionStr = item.getText(COL_PRIMARY_KEY_POSITION);
 
-        int type = ValueMetaFactory.getIdForValueMeta(typeDesc);
-        int length = Const.toInt(lengthStr, -1);
-        int precision = Const.toInt(precisionStr, -1);
-
-        IValueMeta valueMeta = ValueMetaFactory.createValueMeta(name, type, length, precision);
-        rowMeta.addValueMeta(valueMeta);
-
-        if (definition.getType() == RecordDefinitionType.DV_SOURCE) {
-          SourceField sourceField = new SourceField(name);
-          sourceField.setSourceDataType(typeDesc);
-          sourceField.setLength(lengthStr);
-          sourceField.setPrecision(precisionStr);
-          sourceField.setHopType(type);
-          sourceField.setPrimaryKeyPosition(Const.toInt(primaryKeyPositionStr, 0));
-          applyCsvOptionsFromTable(sourceField, item, csvSource);
-          sourceFields.add(sourceField);
+        SourceField sourceField = new SourceField(name);
+        sourceField.setSourceDataType(typeDesc);
+        sourceField.setLength(lengthStr);
+        sourceField.setPrecision(precisionStr);
+        // Resolve Hop names and SQL types (int4, DATETIME(6), …); do not force String for SQL labels.
+        int type = org.apache.hop.datavault.metadata.DvDataTypeSupport.resolveHopTypeId(typeDesc, null);
+        if (type <= 0) {
+          type = org.apache.hop.core.row.IValueMeta.TYPE_STRING;
         }
+        sourceField.setHopType(type);
+        sourceField.setPrimaryKeyPosition(Const.toInt(primaryKeyPositionStr, 0));
+        applyCsvOptionsFromTable(sourceField, item, csvSource);
+        sourceFields.add(sourceField);
       }
 
-      definition.setFields(rowMeta);
-      if (definition.getType() == RecordDefinitionType.DV_SOURCE) {
-        DvSourceRecord dvSource = definition.getDvSource();
-        if (dvSource == null) {
-          dvSource = new DvSourceRecord();
-          definition.setDvSource(dvSource);
-        }
-        dvSource.setFields(DvSourceFieldSupport.toCatalogFields(sourceFields));
-      }
+      // Structured fields are authoritative for DV_SOURCE; row meta is derived.
+      DvSourceFieldSupport.applyLayoutToDefinition(definition, sourceFields, activeVariables());
       persistDefinition();
     } catch (Exception e) {
       showUpdateError(e);
@@ -1605,25 +1593,44 @@ public class RecordDefinitionDetailsPanel {
   }
 
   private void populateFieldsTable(RecordDefinition definition) {
-    IRowMeta rowMeta = definition != null ? definition.getFields() : null;
     boolean csvSource = isCsvDvSource(definition);
     Map<String, CatalogSourceField> catalogFieldsByName = catalogFieldsByName(definition);
 
+    List<SourceField> layoutFields = List.of();
+    try {
+      layoutFields = DvSourceFieldSupport.sourceFieldsFromDefinition(definition);
+    } catch (Exception e) {
+      // Fall back to empty grid; do not block opening the panel.
+    }
+
     wFields.clearAll(false);
-    int count = rowMeta != null ? rowMeta.size() : 0;
-    for (int i = 0; i < count; i++) {
-      IValueMeta valueMeta = rowMeta.getValueMeta(i);
+    for (int i = 0; i < layoutFields.size(); i++) {
+      SourceField field = layoutFields.get(i);
+      if (field == null || Utils.isEmpty(field.getName())) {
+        continue;
+      }
       TableItem item;
       if (i == 0) {
         item = wFields.getTable().getItem(0);
       } else {
         item = new TableItem(wFields.getTable(), SWT.NONE);
       }
-      String name = Const.NVL(valueMeta.getName(), "");
+      String name = field.getName();
       item.setText(COL_NAME, name);
-      item.setText(COL_TYPE, Const.NVL(valueMeta.getTypeDesc(), ""));
-      item.setText(COL_LENGTH, formatDimension(valueMeta.getLength()));
-      item.setText(COL_PRECISION, formatDimension(valueMeta.getPrecision()));
+      String typeLabel = Const.NVL(field.getSourceDataType(), "");
+      if (Utils.isEmpty(typeLabel) || "-".equals(typeLabel)) {
+        try {
+          typeLabel =
+              field.getHopType() > 0
+                  ? ValueMetaFactory.getValueMetaName(field.getHopType())
+                  : "String";
+        } catch (Exception ignored) {
+          typeLabel = "String";
+        }
+      }
+      item.setText(COL_TYPE, Const.NVL(typeLabel, "String"));
+      item.setText(COL_LENGTH, Const.NVL(field.getLength(), ""));
+      item.setText(COL_PRECISION, Const.NVL(field.getPrecision(), ""));
       CatalogSourceField catalogField = catalogFieldsByName.get(name);
       item.setText(COL_PRIMARY_KEY_POSITION, formatPrimaryKeyPosition(catalogField));
       if (csvSource) {

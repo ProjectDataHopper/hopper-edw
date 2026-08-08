@@ -30,3 +30,5 @@ Models reference this via configuration `dataCatalogConnection` = `local-catalog
 
 - Pointing `storageDirectory` at a non-writable or absolute host path.  
 - Creating catalog **sources** as files under `metadata/data-catalog/` — wrong place.  
+- Putting source/target column lists in top-level `rowMetaXml` — use structured fields on the record definition (see [catalog-record-definition.md](catalog-record-definition.md)).  
+

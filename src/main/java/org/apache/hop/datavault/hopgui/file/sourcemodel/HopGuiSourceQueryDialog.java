@@ -20,7 +20,9 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.Const;
+import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.Props;
 import org.apache.hop.core.RowMetaAndData;
 import org.apache.hop.core.database.DatabaseMeta;
@@ -28,6 +30,7 @@ import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.hopgui.EnumDialogSupport;
 import org.apache.hop.datavault.hopgui.dialog.ShowRowsDialog;
+import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
 import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
 import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.datavault.metadata.DvSqlSupport;
@@ -38,6 +41,7 @@ import org.apache.hop.datavault.metadata.sourcemodel.SourceQuery;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQueryColumn;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQueryGenerationMode;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQueryJoin;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceQueryValidationSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceRelationship;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceTable;
 import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceQueryGenerationSupport;
@@ -148,6 +152,9 @@ public class HopGuiSourceQueryDialog {
     Button wOk = new Button(shell, SWT.PUSH);
     wOk.setText(BaseMessages.getString(PKG, "System.Button.OK"));
     wOk.addListener(SWT.Selection, e -> ok());
+    Button wValidate = new Button(shell, SWT.PUSH);
+    wValidate.setText(BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.Validate.Button"));
+    wValidate.addListener(SWT.Selection, e -> validateDefinition());
     Button wCancel = new Button(shell, SWT.PUSH);
     wCancel.setText(BaseMessages.getString(PKG, "System.Button.Cancel"));
     wCancel.addListener(SWT.Selection, e -> cancel());
@@ -159,7 +166,7 @@ public class HopGuiSourceQueryDialog {
     wGenerateSql.addListener(SWT.Selection, e -> refreshSqlPreview());
     DialogHelpSupport.createHelpButton(shell, HelpTopics.IMPORT_DATABASE_TABLES_OPTIONS);
     BaseTransformDialog.positionBottomButtons(
-        shell, new Button[] {wOk, wCancel, wPreview, wGenerateSql}, margin, null);
+        shell, new Button[] {wOk, wValidate, wCancel, wPreview, wGenerateSql}, margin, null);
 
     CTabFolder wTabFolder = new CTabFolder(shell, SWT.BORDER);
     PropsUi.setLook(wTabFolder, Props.WIDGET_STYLE_TAB);
@@ -907,6 +914,31 @@ public class HopGuiSourceQueryDialog {
           BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.Preview.Error.Title"),
           BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.Preview.Error.Message"),
           e);
+    }
+  }
+
+  private void validateDefinition() {
+    try {
+      refreshResolvedKeyLabels();
+      SourceQuery working = workingQueryFromDialog();
+      List<ICheckResult> remarks =
+          SourceQueryValidationSupport.check(model, working, variables, metadataProvider);
+      if (remarks.isEmpty()) {
+        remarks =
+            List.of(
+                new CheckResult(
+                    ICheckResult.TYPE_RESULT_OK,
+                    BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.Validate.Ok.Message"),
+                    null));
+      }
+      ModelDialogValidationSupport.showCheckResults(shell, remarks);
+    } catch (Exception ex) {
+      new ErrorDialog(
+          shell,
+          BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.Validate.Error.Title"),
+          BaseMessages.getString(
+              PKG, "HopGuiSourceQueryDialog.Validate.Error.Message", ex.getMessage()),
+          ex);
     }
   }
 

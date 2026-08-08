@@ -4,19 +4,26 @@ How hop-data-vault artifacts compose a typical project.
 
 ```text
   .hsm (source model)
-       │ publish tables / queries
+       │ publish tables / queries / JSON
        ▼
   Catalog FILE store
-    hop/{project}/sources/*.json   (DV_SOURCE / COMPOSITE / …)
-       │  referenced by name
+    hop/{project}/sources/*.json     type=DV_SOURCE
+         layout → dvSource.fields[]
+         location → physicalTable | physicalFile | physicalIcebergTable
+       │  referenced by name as recordSource
        ▼
   .hdv  Raw Data Vault (hubs, links, sats, ref tables, linked tables)
+       │ publish model tables
+       ▼
+  Catalog FILE store
+    hop/{project}/models/{model}/*.json   type=DV_HUB|DV_LINK|DV_SATELLITE|…
+         layout → physicalTable.fields[]
        │  dataVaultModelPath
        ▼
-  .hbv  Business Vault (SCD2, PIT, business tables)
-       │
-       ▼
-  .hdm  Dimensional (dims, facts, bridges, aliases)
+  .hbv  Business Vault  → catalog BV_TABLE (physicalTable.fields[])
+  .hdm  Dimensional     → catalog DIM_TABLE / FACT_TABLE (physicalTable.fields[])
+
+  hop/{project}/operations/*.json   type=PHYSICAL_TABLE (ops metrics; physicalTable.fields[])
 
   metadata/resource-definition-group/*.json
        lists paths to .hdv / .hbv / .hdm for validation & group update
@@ -28,6 +35,8 @@ How hop-data-vault artifacts compose a typical project.
   metadata/execution-metrics-profile/*.json
   metadata/data-quality-rule-set/*.json
 ```
+
+Layout is **never** a top-level `rowMetaXml` on write. Details: [metadata/catalog-record-definition.md](metadata/catalog-record-definition.md).
 
 ## Retail example map
 

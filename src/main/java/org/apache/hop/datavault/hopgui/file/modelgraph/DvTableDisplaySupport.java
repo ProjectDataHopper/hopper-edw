@@ -139,10 +139,7 @@ public final class DvTableDisplaySupport {
       }
       case LINK -> {
         DvLink link = (DvLink) table;
-        hashKeyFieldName = link.getLinkHashKeyFieldName();
-        if (Utils.isEmpty(hashKeyFieldName)) {
-          hashKeyFieldName = link.getName() + "_LK";
-        }
+        hashKeyFieldName = link.resolveLinkHashKeyFieldName();
       }
       case SATELLITE -> {
         DvSatellite satellite = (DvSatellite) table;
@@ -160,10 +157,7 @@ public final class DvTableDisplaySupport {
         } else if (!Utils.isEmpty(satellite.getLinkName()) && tableByName != null) {
           IDvTable linkedTable = tableByName.get(satellite.getLinkName());
           if (linkedTable instanceof DvLink linkedLink) {
-            hashKeyFieldName = linkedLink.getLinkHashKeyFieldName();
-            if (Utils.isEmpty(hashKeyFieldName)) {
-              hashKeyFieldName = linkedLink.getName() + "_LK";
-            }
+            hashKeyFieldName = linkedLink.resolveLinkHashKeyFieldName();
           }
         }
         if (Utils.isEmpty(hashKeyFieldName)) {

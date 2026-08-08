@@ -180,12 +180,48 @@ class DvDataTypeSupportTest {
   }
 
   @Test
+  void preferredDataTypeLabelCorrectsStringHopTypeUsingSourceDataType() {
+    // Catalog layouts often keep the real type in sourceDataType while hopType was defaulted to
+    // String (unset hopType normalized on save, SQL label in the type column, JDBC noise).
+    SourceField integerField = new SourceField("demo_score");
+    integerField.setSourceDataType("Integer");
+    integerField.setHopType(IValueMeta.TYPE_STRING);
+    assertEquals("Integer", DvDataTypeSupport.preferredDataTypeLabel(integerField));
+    assertEquals(
+        IValueMeta.TYPE_INTEGER, DvDataTypeSupport.resolveSourceFieldHopType(integerField));
+
+    SourceField sqlInt = new SourceField("customer_id");
+    sqlInt.setSourceDataType("int4");
+    sqlInt.setHopType(IValueMeta.TYPE_STRING);
+    assertEquals("Integer", DvDataTypeSupport.preferredDataTypeLabel(sqlInt));
+
+    SourceField timestamp = new SourceField("load_dts");
+    timestamp.setSourceDataType("DATETIME(6)");
+    timestamp.setHopType(IValueMeta.TYPE_STRING);
+    assertEquals("Timestamp", DvDataTypeSupport.preferredDataTypeLabel(timestamp));
+
+    SourceField realString = new SourceField("segment");
+    realString.setSourceDataType("String");
+    realString.setHopType(IValueMeta.TYPE_STRING);
+    assertEquals("String", DvDataTypeSupport.preferredDataTypeLabel(realString));
+  }
+
+  @Test
   void preferredDataTypeLabelFallsBackToUnknownSqlType() {
     SourceField field = new SourceField();
     field.setSourceDataType("weird_custom_type");
     field.setHopType(0);
 
     assertEquals("weird_custom_type", DvDataTypeSupport.preferredDataTypeLabel(field));
+  }
+
+  @Test
+  void preferredDataTypeLabelDefaultsToStringWhenUnset() {
+    SourceField field = new SourceField("message_id");
+    field.setHopType(0);
+    field.setSourceDataType(null);
+
+    assertEquals("String", DvDataTypeSupport.preferredDataTypeLabel(field));
   }
 
   @Test

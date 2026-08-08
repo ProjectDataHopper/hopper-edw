@@ -18,16 +18,23 @@ package org.apache.hop.datavault.hopgui.file.sourcemodel;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.Const;
+import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.hopgui.EnumDialogSupport;
+import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
 import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
 import org.apache.hop.datavault.hopgui.help.HelpTopics;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceEndpointKind;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJoinType;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceJson;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceQuery;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceRelationship;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceRelationshipMultiplicity;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceRelationshipValidationSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceTable;
 import org.apache.hop.datavault.metadata.sourcemodel.profile.SourceRelationshipProfileOptions;
 import org.apache.hop.datavault.metadata.sourcemodel.profile.SourceRelationshipProfileResult;
@@ -68,7 +75,9 @@ public class HopGuiSourceRelationshipDialog {
 
   private Text wName;
   private Text wDescription;
+  private Combo wChildKind;
   private Combo wChildTable;
+  private Combo wParentKind;
   private Combo wParentTable;
   private Combo wJoinType;
   private Combo wChildMultiplicity;
@@ -112,6 +121,10 @@ public class HopGuiSourceRelationshipDialog {
     Button wOk = new Button(shell, SWT.PUSH);
     wOk.setText(BaseMessages.getString(PKG, "System.Button.OK"));
     wOk.addListener(SWT.Selection, e -> ok());
+    Button wValidate = new Button(shell, SWT.PUSH);
+    wValidate.setText(
+        BaseMessages.getString(PKG, "HopGuiSourceRelationshipDialog.Validate.Button"));
+    wValidate.addListener(SWT.Selection, e -> validateDefinition());
     Button wCancel = new Button(shell, SWT.PUSH);
     wCancel.setText(BaseMessages.getString(PKG, "System.Button.Cancel"));
     wCancel.addListener(SWT.Selection, e -> cancel());
@@ -121,7 +134,7 @@ public class HopGuiSourceRelationshipDialog {
     wProfile.setEnabled(metadataProvider != null);
     DialogHelpSupport.createHelpButton(shell, HelpTopics.IMPORT_DATABASE_TABLES_OPTIONS);
     BaseTransformDialog.positionBottomButtons(
-        shell, new Button[] {wOk, wCancel, wProfile}, margin, null);
+        shell, new Button[] {wOk, wValidate, wCancel, wProfile}, margin, null);
 
     Label wlName = new Label(shell, SWT.RIGHT);
     wlName.setText(BaseMessages.getString(PKG, "HopGuiSourceRelationshipDialog.Name.Label"));
@@ -143,30 +156,52 @@ public class HopGuiSourceRelationshipDialog {
     wDescription.setLayoutData(
         new FormDataBuilder().left(middle, 0).top(wName, margin).right().result());
 
-    String[] tableNames = tableNames();
+    Label wlChildKind = new Label(shell, SWT.RIGHT);
+    wlChildKind.setText(
+        BaseMessages.getString(PKG, "HopGuiSourceRelationshipDialog.ChildKind.Label"));
+    PropsUi.setLook(wlChildKind);
+    wlChildKind.setLayoutData(
+        new FormDataBuilder().left().top(wDescription, margin).right(middle, -margin).result());
+    wChildKind = new Combo(shell, SWT.READ_ONLY | SWT.BORDER);
+    PropsUi.setLook(wChildKind);
+    wChildKind.setItems(SourceEndpointKind.getDescriptions());
+    wChildKind.setLayoutData(
+        new FormDataBuilder().left(middle, 0).top(wDescription, margin).right().result());
+    wChildKind.addListener(SWT.Selection, e -> refreshChildNames(""));
 
     Label wlChild = new Label(shell, SWT.RIGHT);
     wlChild.setText(BaseMessages.getString(PKG, "HopGuiSourceRelationshipDialog.ChildTable.Label"));
     PropsUi.setLook(wlChild);
     wlChild.setLayoutData(
-        new FormDataBuilder().left().top(wDescription, margin).right(middle, -margin).result());
+        new FormDataBuilder().left().top(wChildKind, margin).right(middle, -margin).result());
     wChildTable = new Combo(shell, SWT.READ_ONLY | SWT.BORDER);
     PropsUi.setLook(wChildTable);
-    wChildTable.setItems(tableNames);
     wChildTable.setLayoutData(
-        new FormDataBuilder().left(middle, 0).top(wDescription, margin).right().result());
+        new FormDataBuilder().left(middle, 0).top(wChildKind, margin).right().result());
+
+    Label wlParentKind = new Label(shell, SWT.RIGHT);
+    wlParentKind.setText(
+        BaseMessages.getString(PKG, "HopGuiSourceRelationshipDialog.ParentKind.Label"));
+    PropsUi.setLook(wlParentKind);
+    wlParentKind.setLayoutData(
+        new FormDataBuilder().left().top(wChildTable, margin).right(middle, -margin).result());
+    wParentKind = new Combo(shell, SWT.READ_ONLY | SWT.BORDER);
+    PropsUi.setLook(wParentKind);
+    wParentKind.setItems(SourceEndpointKind.getDescriptions());
+    wParentKind.setLayoutData(
+        new FormDataBuilder().left(middle, 0).top(wChildTable, margin).right().result());
+    wParentKind.addListener(SWT.Selection, e -> refreshParentNames(""));
 
     Label wlParent = new Label(shell, SWT.RIGHT);
     wlParent.setText(
         BaseMessages.getString(PKG, "HopGuiSourceRelationshipDialog.ParentTable.Label"));
     PropsUi.setLook(wlParent);
     wlParent.setLayoutData(
-        new FormDataBuilder().left().top(wChildTable, margin).right(middle, -margin).result());
+        new FormDataBuilder().left().top(wParentKind, margin).right(middle, -margin).result());
     wParentTable = new Combo(shell, SWT.READ_ONLY | SWT.BORDER);
     PropsUi.setLook(wParentTable);
-    wParentTable.setItems(tableNames);
     wParentTable.setLayoutData(
-        new FormDataBuilder().left(middle, 0).top(wChildTable, margin).right().result());
+        new FormDataBuilder().left(middle, 0).top(wParentKind, margin).right().result());
 
     Label wlJoinType = new Label(shell, SWT.RIGHT);
     wlJoinType.setText(
@@ -255,24 +290,71 @@ public class HopGuiSourceRelationshipDialog {
     return ok;
   }
 
-  private String[] tableNames() {
+  private String[] endpointNames(SourceEndpointKind kind) {
     if (model == null) {
       return new String[0];
     }
+    SourceEndpointKind resolved = kind != null ? kind : SourceEndpointKind.TABLE;
     List<String> names = new ArrayList<>();
-    for (SourceTable table : model.getTables()) {
-      if (table != null && !Utils.isEmpty(table.getName())) {
-        names.add(table.getName());
+    switch (resolved) {
+      case TABLE -> {
+        for (SourceTable table : model.getTables()) {
+          if (table != null && !Utils.isEmpty(table.getName())) {
+            names.add(table.getName());
+          }
+        }
+      }
+      case QUERY -> {
+        for (SourceQuery query : model.getQueries()) {
+          if (query != null && !Utils.isEmpty(query.getName())) {
+            names.add(query.getName());
+          }
+        }
+      }
+      case JSON -> {
+        for (SourceJson json : model.getJsonSources()) {
+          if (json != null && !Utils.isEmpty(json.getName())) {
+            names.add(json.getName());
+          }
+        }
       }
     }
     return names.toArray(new String[0]);
   }
 
+  private void refreshChildNames(String preferred) {
+    SourceEndpointKind kind = SourceEndpointKind.lookupDescription(wChildKind.getText());
+    wChildTable.setItems(endpointNames(kind));
+    selectComboItem(wChildTable, preferred);
+  }
+
+  private void refreshParentNames(String preferred) {
+    SourceEndpointKind kind = SourceEndpointKind.lookupDescription(wParentKind.getText());
+    wParentTable.setItems(endpointNames(kind));
+    selectComboItem(wParentTable, preferred);
+  }
+
+  private static void selectComboItem(Combo combo, String preferred) {
+    if (combo == null || combo.isDisposed() || combo.getItemCount() == 0) {
+      return;
+    }
+    if (!Utils.isEmpty(preferred)) {
+      int index = combo.indexOf(preferred);
+      if (index >= 0) {
+        combo.select(index);
+        return;
+      }
+    }
+    combo.select(0);
+  }
+
   private void getData() {
     wName.setText(Const.NVL(input.getName(), ""));
     wDescription.setText(Const.NVL(input.getDescription(), ""));
-    wChildTable.setText(Const.NVL(input.getChildTableName(), ""));
-    wParentTable.setText(Const.NVL(input.getParentTableName(), ""));
+    EnumDialogSupport.selectCombo(wChildKind, input.resolveChildEndpointKind());
+    EnumDialogSupport.selectCombo(wParentKind, input.resolveParentEndpointKind());
+    refreshChildNames(Const.NVL(input.getChildTableName(), ""));
+    refreshParentNames(Const.NVL(input.getParentTableName(), ""));
     EnumDialogSupport.selectCombo(wJoinType, input.resolveDefaultJoinType());
     EnumDialogSupport.selectCombo(wChildMultiplicity, input.resolveChildMultiplicity());
     EnumDialogSupport.selectCombo(wParentMultiplicity, input.resolveParentMultiplicity());
@@ -308,6 +390,8 @@ public class HopGuiSourceRelationshipDialog {
 
     input.setName(name);
     input.setDescription(wDescription.getText());
+    input.setChildEndpointKind(SourceEndpointKind.lookupDescription(wChildKind.getText()));
+    input.setParentEndpointKind(SourceEndpointKind.lookupDescription(wParentKind.getText()));
     input.setChildTableName(wChildTable.getText());
     input.setParentTableName(wParentTable.getText());
     input.setDefaultJoinType(SourceJoinType.lookupDescription(wJoinType.getText()));
@@ -345,11 +429,73 @@ public class HopGuiSourceRelationshipDialog {
     dispose();
   }
 
+  private void validateDefinition() {
+    try {
+      SourceRelationship draft = workingRelationshipFromDialog();
+      List<ICheckResult> remarks = SourceRelationshipValidationSupport.check(model, draft);
+      if (remarks.isEmpty()) {
+        remarks =
+            List.of(
+                new CheckResult(
+                    ICheckResult.TYPE_RESULT_OK,
+                    BaseMessages.getString(
+                        PKG, "HopGuiSourceRelationshipDialog.Validate.Ok.Message"),
+                    null));
+      }
+      ModelDialogValidationSupport.showCheckResults(shell, remarks);
+    } catch (Exception ex) {
+      new ErrorDialog(
+          shell,
+          BaseMessages.getString(PKG, "HopGuiSourceRelationshipDialog.Validate.Error.Title"),
+          BaseMessages.getString(
+              PKG, "HopGuiSourceRelationshipDialog.Validate.Error.Message", ex.getMessage()),
+          ex);
+    }
+  }
+
+  private SourceRelationship workingRelationshipFromDialog() {
+    SourceRelationship draft = new SourceRelationship();
+    draft.setName(wName.getText() != null ? wName.getText().trim() : "");
+    draft.setChildEndpointKind(SourceEndpointKind.lookupDescription(wChildKind.getText()));
+    draft.setParentEndpointKind(SourceEndpointKind.lookupDescription(wParentKind.getText()));
+    draft.setChildTableName(wChildTable.getText());
+    draft.setParentTableName(wParentTable.getText());
+    List<String> childCols = new ArrayList<>();
+    List<String> parentCols = new ArrayList<>();
+    int rows = wJoinColumns.nrNonEmpty();
+    for (int i = 0; i < rows; i++) {
+      TableItem item = wJoinColumns.getNonEmpty(i);
+      String child = item.getText(1);
+      String parentCol = item.getText(2);
+      if (Utils.isEmpty(child) && Utils.isEmpty(parentCol)) {
+        continue;
+      }
+      childCols.add(Const.NVL(child, "").trim());
+      parentCols.add(Const.NVL(parentCol, "").trim());
+    }
+    draft.setChildColumns(childCols);
+    draft.setParentColumns(parentCols);
+    return draft;
+  }
+
   private void profileRelationship() {
     if (metadataProvider == null || model == null) {
       return;
     }
+    SourceEndpointKind childKind = SourceEndpointKind.lookupDescription(wChildKind.getText());
+    SourceEndpointKind parentKind = SourceEndpointKind.lookupDescription(wParentKind.getText());
+    if (childKind != SourceEndpointKind.TABLE || parentKind != SourceEndpointKind.TABLE) {
+      MessageBox box = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
+      box.setText(
+          BaseMessages.getString(PKG, "HopGuiSourceRelationshipDialog.Profile.TablesOnly.Title"));
+      box.setMessage(
+          BaseMessages.getString(PKG, "HopGuiSourceRelationshipDialog.Profile.TablesOnly.Message"));
+      box.open();
+      return;
+    }
     // Apply current dialog fields so profiling uses latest join columns.
+    input.setChildEndpointKind(childKind);
+    input.setParentEndpointKind(parentKind);
     input.setChildTableName(wChildTable.getText());
     input.setParentTableName(wParentTable.getText());
     List<String> childCols = new ArrayList<>();

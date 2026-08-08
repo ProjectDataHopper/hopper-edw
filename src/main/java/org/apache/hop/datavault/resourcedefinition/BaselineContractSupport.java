@@ -58,12 +58,11 @@ public final class BaselineContractSupport {
   }
 
   public static List<SourceField> fieldsOf(RecordDefinition definition) {
-    if (definition == null
-        || definition.getDvSource() == null
-        || definition.getDvSource().getFields() == null) {
+    try {
+      return DvSourceFieldSupport.sourceFieldsFromDefinition(definition);
+    } catch (Exception e) {
       return List.of();
     }
-    return DvSourceFieldSupport.fromCatalogFields(definition.getDvSource().getFields());
   }
 
   public static SourceField findField(List<SourceField> fields, String fieldName) {

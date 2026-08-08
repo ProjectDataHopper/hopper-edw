@@ -240,10 +240,10 @@ public final class BvCatalogPublisher {
     definition.setKey(new RecordDefinitionKey(namespace, table.getName()));
     definition.setType(RecordDefinitionType.BV_TABLE);
     definition.setDescription(table.getDescription());
-    definition.setFields(layout);
     definition.setOrigin(
         buildTableOrigin(table, bvModel, originVariables, updatedAt, workflowName));
     definition.setPhysicalTable(buildPhysicalTableRef(bvModel, table, metadataProvider));
+    DvSourceFieldSupport.applyRowMetaLayoutToDefinition(definition, layout, variables);
     BvTableType tableType = table.getTableType();
     if (tableType != null) {
       definition.getTags().add("BV " + tableType.name());
