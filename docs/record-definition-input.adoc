@@ -1,10 +1,12 @@
-= Record Definition Input
+= Get Record Definition Names
 :toc: macro
 :toclevels: 3
 
 toc::[]
 
-The **Record Definition Input** transform reads record definitions from a Hop **data catalog** connection and outputs their metadata as pipeline rows. It is an input transform (category **Input**) and appears in the transform palette with the data catalog icon.
+The **Get Record Definition Names** transform (plugin id `RecordDefinitionInput`) reads record definitions from a Hop **data catalog** connection and outputs their **names and metadata** as pipeline rows (optionally one row per field). It does **not** read source data rows — for that use link:record-definition-data-input.adoc[Record Definition Input].
+
+It is an input transform (category **Input**) and appears in the transform palette with the data catalog icon.
 
 Use it when you want to drive pipelines from catalog metadata instead of hard-coding connection, schema, table, and column details. A common pattern is to read field layouts from the catalog and pass them to Hop's built-in **DDL** transform to create or recreate source tables before loading data.
 
@@ -21,7 +23,7 @@ The transform dialog has two tabs: **General Settings** and **Output Fields**.
 
 === General Settings
 
-image::images/record-definition-input-dialog-general-settings.png[Record Definition Input dialog — General Settings tab,align="center"]
+image::images/record-definition-input-dialog-general-settings.png[Get Record Definition Names dialog — General Settings tab,align="center"]
 
 [cols="1,3", options="header"]
 |===
@@ -69,13 +71,13 @@ The transform supports three ways to choose which definitions to read:
 |Yes |— |For each input row, read the definition whose namespace and name come from the configured input fields. If no definition is found, the transform still outputs a row with null catalog columns appended.
 |===
 
-When **Select from previous transform input?** is enabled, upstream transforms must supply the namespace and name fields before **Record Definition Input** runs. A **Get variables** or **Get records from stream** step works well when values come from pipeline parameters.
+When **Select from previous transform input?** is enabled, upstream transforms must supply the namespace and name fields before **Get Record Definition Names** runs. A **Get variables** or **Get records from stream** step works well when values come from pipeline parameters.
 
 === Output Fields
 
 The **Output Fields** tab lets you rename every column the transform adds to the stream. Defaults are sensible for catalog-driven DDL and filtering.
 
-image::images/record-definition-input-dialog-output-fields.png[Record Definition Input dialog — Output Fields tab,align="center"]
+image::images/record-definition-input-dialog-output-fields.png[Get Record Definition Names dialog — Output Fields tab,align="center"]
 
 [cols="2,2,3", options="header"]
 |===
@@ -138,13 +140,13 @@ Origin and physical-table columns are null when the catalog entry does not carry
 
 == Example: create source tables from the catalog
 
-The sample project uses **Record Definition Input** together with the **DDL** transform to prepare CRM source tables automatically before the Data Vault test suites run.
+The sample project uses **Get Record Definition Names** together with the **DDL** transform to prepare CRM source tables automatically before the Data Vault test suites run.
 
 === Orchestrator pipeline
 
 `integration-tests/tests/shared/create-source-tables-from-data-catalog.hpl` runs at the start of `integration-tests/tests/run-tests.hwf`:
 
-1. **Record Definition Input** — catalog connection `local-catalog`, no input selection, no namespace/name filter (all definitions), denormalized output off.
+1. **Get Record Definition Names** — catalog connection `local-catalog`, no input selection, no namespace/name filter (all definitions), denormalized output off.
 2. **Filter rows** — keeps definitions in namespace `hop/integration-tests/sources` whose name starts with `CRM`.
 3. **Select values** — passes `namespace`, `name`, `physical_database`, `physical_schema`, and `physical_table` downstream.
 4. **Pipeline executor** — calls `create-source-table-from-data-catalog.hpl` once per filtered record, mapping those fields to pipeline parameters.
@@ -154,7 +156,7 @@ The sample project uses **Record Definition Input** together with the **DDL** tr
 `integration-tests/tests/shared/create-source-table-from-data-catalog.hpl` creates one source table from a single catalog entry:
 
 1. **Get variables** — supplies `CATALOG_NAMESPACE` and `CATALOG_NAME` from pipeline parameters.
-2. **Record Definition Input** — **Select from previous transform input?** enabled; reads namespace and name from input; **Output fields metadata** enabled so each column becomes its own row.
+2. **Get Record Definition Names** — **Select from previous transform input?** enabled; reads namespace and name from input; **Output fields metadata** enabled so each column becomes its own row.
 3. **Select values** — keeps physical table coordinates plus `field_name`, `field_type`, `field_length`, and `field_precision`.
 4. **DDL** — connection, schema, and table from parameters; field metadata from the stream; **Execute DDL** and **Drop table if exists** enabled so each test run starts from a clean table that matches the catalog layout.
 
@@ -174,5 +176,5 @@ When you build a similar pipeline yourself, configure **DDL** roughly as follows
 * Use the standalone mode (no input selection) with an empty namespace and name to discover everything in a catalog, then **Filter rows** or **Switch / case** to narrow the set.
 * Turn on **Output fields metadata** whenever the next step needs per-column detail (DDL, field-level validation, or custom code generation).
 * Keep catalog connection names stable across environments; override physical database connection names in the catalog or via parameters if dev and test use different DatabaseMeta names.
-* After importing tables into the catalog from the Data Catalog perspective, re-run pipelines that depend on **Record Definition Input** so DDL reflects the latest field layout.
+* After importing tables into the catalog from the Data Catalog perspective, re-run pipelines that depend on **Get Record Definition Names** so DDL reflects the latest field layout.
 * Variables are supported on catalog connection name, namespace value, name value, and all output field renames.

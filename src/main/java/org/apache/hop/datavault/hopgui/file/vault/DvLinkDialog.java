@@ -31,20 +31,27 @@ import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
 import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.datavault.hopgui.lineage.LineageTabSupport;
 import org.apache.hop.datavault.lineage.DvModelLineageCollector;
+import org.apache.hop.datavault.catalog.DvSourceCatalogService;
 import org.apache.hop.datavault.metadata.DataVaultModel;
+import org.apache.hop.datavault.metadata.DataVaultSource;
 import org.apache.hop.datavault.metadata.DependentChildKey;
+import org.apache.hop.datavault.metadata.DvHub;
 import org.apache.hop.datavault.metadata.DvIntegrationMode;
 import org.apache.hop.datavault.metadata.DvLink;
+import org.apache.hop.datavault.metadata.DvLinkSourceSuggestSupport;
 import org.apache.hop.datavault.metadata.DvLinkedTable;
 import org.apache.hop.datavault.metadata.DvModelCheckOptions;
 import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.datavault.metadata.IDvTable;
+import org.apache.hop.datavault.metadata.SourceField;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.FormDataBuilder;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
+import org.apache.hop.ui.core.dialog.EnterTextDialog;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
+import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.core.gui.GuiResource;
 import org.apache.hop.ui.core.gui.WindowProperty;
 import org.apache.hop.ui.core.widget.ColumnInfo;
@@ -639,12 +646,25 @@ public class DvLinkDialog {
                 shell, hopGui, variables, hopGui.getMetadataProvider(), model, wLinkHubSources));
 
     Button wEditMappings = new Button(wHubSourcesComp, SWT.PUSH);
-    wEditMappings.setText("Edit hub source mappings...");
+    wEditMappings.setText(
+        BaseMessages.getString(PKG, "DvLinkDialog.EditHubSourceMappings.Label"));
     FormData fdEdit = new FormData();
     fdEdit.left = new FormAttachment(0, 0);
     fdEdit.top = new FormAttachment(wlSources, margin);
     wEditMappings.setLayoutData(fdEdit);
     wEditMappings.addListener(SWT.Selection, e -> editSelectedLinkHubSource());
+
+    Button wSuggestMappings = new Button(wHubSourcesComp, SWT.PUSH);
+    wSuggestMappings.setText(
+        BaseMessages.getString(PKG, "DvLinkDialog.SuggestHubSourceMappings.Label"));
+    wSuggestMappings.setToolTipText(
+        BaseMessages.getString(PKG, "DvLinkDialog.SuggestHubSourceMappings.ToolTip"));
+    PropsUi.setLook(wSuggestMappings);
+    FormData fdSuggest = new FormData();
+    fdSuggest.left = new FormAttachment(wEditMappings, margin);
+    fdSuggest.top = new FormAttachment(wlSources, margin);
+    wSuggestMappings.setLayoutData(fdSuggest);
+    wSuggestMappings.addListener(SWT.Selection, e -> suggestSelectedLinkHubSourceMappings());
 
     ColumnInfo[] srcCols =
         new ColumnInfo[] {
@@ -929,6 +949,178 @@ public class DvLinkDialog {
     DvLinkHubSourceDialog dlg =
         new DvLinkHubSourceDialog(shell, hopGui, detail, hubs, model, drivingKeys);
     dlg.open();
+  }
+
+  /**
+   * Suggest hub business-key field mappings for the selected catalog source using name matching
+   * against participating hubs (and, when the feed covers more hubs, optionally add those hubs).
+   */
+  private void suggestSelectedLinkHubSourceMappings() {
+    if (wLinkHubSources == null || wLinkHubSources.isDisposed() || model == null) {
+      return;
+    }
+    String sourceName =
+        RecordSourceCatalogNavigationSupport.selectedSourceName(wLinkHubSources);
+    if (Utils.isEmpty(sourceName)) {
+      MessageBox box = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
+      box.setText(BaseMessages.getString(PKG, "DvLinkDialog.SuggestHubSourceMappings.Title"));
+      box.setMessage(
+          BaseMessages.getString(PKG, "DvLinkDialog.SuggestHubSourceMappings.NoSource.Message"));
+      box.open();
+      return;
+    }
+
+    try {
+      DataVaultSource recordSource =
+          DvSourceCatalogService.resolveSource(
+              sourceName, model, variables, hopGui.getMetadataProvider());
+      if (recordSource == null) {
+        throw new HopException("Catalog source not found: " + sourceName);
+      }
+      List<SourceField> sourceFields = recordSource.getFields(hopGui.getMetadataProvider());
+      List<String> fieldNames = new ArrayList<>();
+      if (sourceFields != null) {
+        for (SourceField field : sourceFields) {
+          if (field != null && !Utils.isEmpty(field.getName())) {
+            fieldNames.add(field.getName());
+          }
+        }
+      }
+      if (fieldNames.isEmpty()) {
+        MessageBox box = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
+        box.setText(BaseMessages.getString(PKG, "DvLinkDialog.SuggestHubSourceMappings.Title"));
+        box.setMessage(
+            BaseMessages.getString(
+                PKG, "DvLinkDialog.SuggestHubSourceMappings.NoFields.Message", sourceName));
+        box.open();
+        return;
+      }
+
+      // Prefer participating hubs; if none listed yet, use all hubs fully coverable by the feed.
+      List<String> hubNames = getHubNamesFromTable();
+      List<DvHub> hubs = new ArrayList<>();
+      if (hubNames.isEmpty()) {
+        for (String name :
+            DvLinkSourceSuggestSupport.suggestParticipatingHubNames(model, fieldNames)) {
+          IDvTable table = model.findTable(name);
+          if (table instanceof DvHub hub) {
+            hubs.add(hub);
+          }
+        }
+      } else {
+        for (String name : hubNames) {
+          IDvTable table = model.findTable(name);
+          if (table instanceof DvHub hub) {
+            hubs.add(hub);
+          }
+        }
+      }
+
+      if (hubs.isEmpty()) {
+        MessageBox box = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
+        box.setText(BaseMessages.getString(PKG, "DvLinkDialog.SuggestHubSourceMappings.Title"));
+        box.setMessage(
+            BaseMessages.getString(PKG, "DvLinkDialog.SuggestHubSourceMappings.NoHubs.Message"));
+        box.open();
+        return;
+      }
+
+      DvLinkSourceSuggestSupport.SuggestResult result =
+          DvLinkSourceSuggestSupport.suggestHubSourceMappings(sourceName, fieldNames, hubs);
+
+      StringBuilder review = new StringBuilder();
+      review
+          .append(
+              BaseMessages.getString(
+                  PKG,
+                  "DvLinkDialog.SuggestHubSourceMappings.Review.Intro",
+                  sourceName,
+                  Integer.toString(result.mappedCount()),
+                  Integer.toString(result.missingCount())))
+          .append(System.lineSeparator())
+          .append(System.lineSeparator());
+      for (DvLinkSourceSuggestSupport.ProposedMapping mapping : result.mappings()) {
+        if (mapping == null) {
+          continue;
+        }
+        review
+            .append(mapping.hubName())
+            .append(" / ")
+            .append(mapping.businessKeyField())
+            .append(" → ")
+            .append(
+                mapping.matchKind() == DvLinkSourceSuggestSupport.MatchKind.MISSING
+                    ? "(missing)"
+                    : Const.NVL(mapping.sourceFieldName(), "?"))
+            .append(" [")
+            .append(mapping.matchKind().name().toLowerCase())
+            .append(']')
+            .append(System.lineSeparator());
+      }
+
+      EnterTextDialog reviewDialog =
+          new EnterTextDialog(
+              shell,
+              BaseMessages.getString(PKG, "DvLinkDialog.SuggestHubSourceMappings.Title"),
+              BaseMessages.getString(PKG, "DvLinkDialog.SuggestHubSourceMappings.Review.Message"),
+              review.toString(),
+              true);
+      reviewDialog.setReadOnly();
+      if (reviewDialog.open() == null) {
+        return;
+      }
+
+      // Ensure source appears in the hub-sources table.
+      boolean sourceInTable = false;
+      for (TableItem item : wLinkHubSources.getNonEmptyItems()) {
+        if (sourceName.equals(item.getText(1))) {
+          sourceInTable = true;
+          break;
+        }
+      }
+      if (!sourceInTable) {
+        TableItem item = new TableItem(wLinkHubSources.table, SWT.NONE);
+        item.setText(1, sourceName);
+        wLinkHubSources.optimizeTableView();
+      }
+
+      // Optionally add fully-covered hubs that were not yet participating.
+      if (hubNames.isEmpty() && !result.suggestedHubNames().isEmpty() && wHubNames != null) {
+        for (String hubName : result.suggestedHubNames()) {
+          boolean present = false;
+          for (TableItem item : wHubNames.getNonEmptyItems()) {
+            if (hubName.equals(item.getText(1))) {
+              present = true;
+              break;
+            }
+          }
+          if (!present) {
+            TableItem item = new TableItem(wHubNames.table, SWT.NONE);
+            item.setText(1, hubName);
+          }
+        }
+        wHubNames.optimizeTableView();
+      }
+
+      DvLinkSourceSuggestSupport.mergeSuggestedHubSource(
+          currentLinkHubSources, result.proposedHubSource(), true);
+
+      MessageBox done = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
+      done.setText(BaseMessages.getString(PKG, "DvLinkDialog.SuggestHubSourceMappings.Title"));
+      done.setMessage(
+          BaseMessages.getString(
+              PKG,
+              "DvLinkDialog.SuggestHubSourceMappings.Applied.Message",
+              Integer.toString(result.mappedCount()),
+              sourceName));
+      done.open();
+    } catch (Exception e) {
+      new ErrorDialog(
+          shell,
+          BaseMessages.getString(PKG, "DvLinkDialog.SuggestHubSourceMappings.Error.Title"),
+          BaseMessages.getString(PKG, "DvLinkDialog.SuggestHubSourceMappings.Error.Message"),
+          e instanceof HopException ? e : new HopException(e));
+    }
   }
 
   private void editSelectedLinkSatelliteSource() {

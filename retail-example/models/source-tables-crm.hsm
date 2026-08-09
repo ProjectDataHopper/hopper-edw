@@ -85,8 +85,8 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
-      <xloc>1120</xloc>
-      <yloc>224</yloc>
+      <xloc>1344</xloc>
+      <yloc>240</yloc>
       <name>customer_address</name>
     </table>
     <table>
@@ -142,8 +142,8 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
-      <xloc>1120</xloc>
-      <yloc>144</yloc>
+      <xloc>1344</xloc>
+      <yloc>160</yloc>
       <name>customer_contact</name>
     </table>
     <table>
@@ -208,8 +208,8 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
-      <xloc>1120</xloc>
-      <yloc>64</yloc>
+      <xloc>1344</xloc>
+      <yloc>80</yloc>
       <name>customer_demo</name>
     </table>
     <table>
@@ -247,8 +247,8 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
-      <xloc>608</xloc>
-      <yloc>288</yloc>
+      <xloc>832</xloc>
+      <yloc>304</yloc>
       <name>customer_hub</name>
     </table>
     <table>
@@ -313,8 +313,8 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
-      <xloc>1120</xloc>
-      <yloc>304</yloc>
+      <xloc>1344</xloc>
+      <yloc>320</yloc>
       <name>customer_prefs</name>
     </table>
     <table>
@@ -407,8 +407,8 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
-      <xloc>608</xloc>
-      <yloc>464</yloc>
+      <xloc>832</xloc>
+      <yloc>512</yloc>
       <name>order_header</name>
     </table>
     <table>
@@ -491,8 +491,8 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
-      <xloc>608</xloc>
-      <yloc>640</yloc>
+      <xloc>832</xloc>
+      <yloc>736</yloc>
       <name>order_line</name>
     </table>
     <table>
@@ -557,8 +557,8 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
-      <xloc>240</xloc>
-      <yloc>640</yloc>
+      <xloc>208</xloc>
+      <yloc>736</yloc>
       <name>product</name>
     </table>
     <table>
@@ -632,8 +632,8 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
-      <xloc>240</xloc>
-      <yloc>288</yloc>
+      <xloc>144</xloc>
+      <yloc>272</yloc>
       <name>warehouse</name>
     </table>
     <table>
@@ -698,8 +698,8 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
-      <xloc>240</xloc>
-      <yloc>464</yloc>
+      <xloc>160</xloc>
+      <yloc>496</yloc>
       <name>warehouse_product</name>
     </table>
     <table>
@@ -783,8 +783,8 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
-      <xloc>1168</xloc>
-      <yloc>592</yloc>
+      <xloc>1344</xloc>
+      <yloc>640</yloc>
       <name>order_shipment_event</name>
     </table>
   </tables>
@@ -969,6 +969,78 @@ limitations under the License.
       <parentMultiplicity>ONE</parentMultiplicity>
       <name>rel_order_shipment_tracking_order_header</name>
     </relationship>
+    <relationship>
+      <description/>
+      <childEndpointKind>TABLE</childEndpointKind>
+      <parentEndpointKind>PIPELINE</parentEndpointKind>
+      <childTableName>warehouse</childTableName>
+      <parentTableName>asn-package-lines</parentTableName>
+      <child_columns>
+        <child_column>warehouse_id</child_column>
+      </child_columns>
+      <parent_columns>
+        <parent_column>warehouse_id</parent_column>
+      </parent_columns>
+      <defaultJoinType>LEFT</defaultJoinType>
+      <cardinality>0..N:1</cardinality>
+      <childMultiplicity>ZERO_OR_MANY</childMultiplicity>
+      <parentMultiplicity>ONE</parentMultiplicity>
+      <name>rel_warehouse_asn-package-lines</name>
+    </relationship>
+    <relationship>
+      <description/>
+      <childEndpointKind>PIPELINE</childEndpointKind>
+      <parentEndpointKind>TABLE</parentEndpointKind>
+      <childTableName>asn-package-lines</childTableName>
+      <parentTableName>customer_hub</parentTableName>
+      <child_columns>
+        <child_column>customer_id</child_column>
+      </child_columns>
+      <parent_columns>
+        <parent_column>customer_id</parent_column>
+      </parent_columns>
+      <defaultJoinType>LEFT</defaultJoinType>
+      <cardinality>0..N:1</cardinality>
+      <childMultiplicity>ZERO_OR_MANY</childMultiplicity>
+      <parentMultiplicity>ONE</parentMultiplicity>
+      <name>rel_asn-package-lines_customer_hub</name>
+    </relationship>
+    <relationship>
+      <description/>
+      <childEndpointKind>PIPELINE</childEndpointKind>
+      <parentEndpointKind>TABLE</parentEndpointKind>
+      <childTableName>asn-package-lines</childTableName>
+      <parentTableName>order_header</parentTableName>
+      <child_columns>
+        <child_column>order_id</child_column>
+      </child_columns>
+      <parent_columns>
+        <parent_column>order_id</parent_column>
+      </parent_columns>
+      <defaultJoinType>LEFT</defaultJoinType>
+      <cardinality>0..N:1</cardinality>
+      <childMultiplicity>ZERO_OR_MANY</childMultiplicity>
+      <parentMultiplicity>ONE</parentMultiplicity>
+      <name>rel_asn-package-lines_order_header</name>
+    </relationship>
+    <relationship>
+      <description/>
+      <childEndpointKind>PIPELINE</childEndpointKind>
+      <parentEndpointKind>TABLE</parentEndpointKind>
+      <childTableName>asn-package-lines</childTableName>
+      <parentTableName>product</parentTableName>
+      <child_columns>
+        <child_column>product_id</child_column>
+      </child_columns>
+      <parent_columns>
+        <parent_column>product_id</parent_column>
+      </parent_columns>
+      <defaultJoinType>LEFT</defaultJoinType>
+      <cardinality>0..N:1</cardinality>
+      <childMultiplicity>ZERO_OR_MANY</childMultiplicity>
+      <parentMultiplicity>ONE</parentMultiplicity>
+      <name>rel_asn-package-lines_product</name>
+    </relationship>
   </relationships>
   <queries>
     <query>
@@ -1101,8 +1173,8 @@ limitations under the License.
       <whereClause/>
       <generationMode>AUTO</generationMode>
       <publishedCatalogName>all-customer-info</publishedCatalogName>
-      <xloc>608</xloc>
-      <yloc>64</yloc>
+      <xloc>832</xloc>
+      <yloc>80</yloc>
       <name>all-customer-info</name>
     </query>
   </queries>
@@ -1300,11 +1372,131 @@ limitations under the License.
       <defaultPathLeafToNull>Y</defaultPathLeafToNull>
       <sampleRowLimit>0</sampleRowLimit>
       <publishedCatalogName>feed_order_shipment_tracking</publishedCatalogName>
-      <xloc>1120</xloc>
-      <yloc>464</yloc>
+      <xloc>1344</xloc>
+      <yloc>480</yloc>
       <name>order_shipment_tracking</name>
     </json-source>
   </json-sources>
+  <pipeline-sources>
+    <pipeline-source>
+      <description/>
+      <pipelineFilename>${PROJECT_HOME}/pipelines/parse-asn-xml.hpl</pipelineFilename>
+      <outputTransformName>ASN lines</outputTransformName>
+      <pipelineRunConfiguration>local</pipelineRunConfiguration>
+      <catalogSourceName>asn-package-lines</catalogSourceName>
+      <catalog-sources/>
+      <columns>
+        <column>
+          <name>asn_id</name>
+          <length/>
+          <precision/>
+          <hopType>2</hopType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+        </column>
+        <column>
+          <name>warehouse_id</name>
+          <length/>
+          <precision>0</precision>
+          <hopType>5</hopType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+        </column>
+        <column>
+          <name>ship_date</name>
+          <length/>
+          <precision/>
+          <hopType>3</hopType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+        </column>
+        <column>
+          <name>order_id</name>
+          <length/>
+          <precision/>
+          <hopType>2</hopType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+        </column>
+        <column>
+          <name>customer_id</name>
+          <length/>
+          <precision>0</precision>
+          <hopType>5</hopType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+        </column>
+        <column>
+          <name>carrier_code</name>
+          <length/>
+          <precision/>
+          <hopType>2</hopType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+        </column>
+        <column>
+          <name>carrier_service</name>
+          <length/>
+          <precision/>
+          <hopType>2</hopType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+        </column>
+        <column>
+          <name>package_id</name>
+          <length/>
+          <precision/>
+          <hopType>2</hopType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+        </column>
+        <column>
+          <name>tracking_number</name>
+          <length/>
+          <precision/>
+          <hopType>2</hopType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+        </column>
+        <column>
+          <name>weight_kg</name>
+          <length/>
+          <precision/>
+          <hopType>1</hopType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+        </column>
+        <column>
+          <name>line_number</name>
+          <length/>
+          <precision>0</precision>
+          <hopType>5</hopType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+        </column>
+        <column>
+          <name>product_id</name>
+          <length/>
+          <precision/>
+          <hopType>2</hopType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+        </column>
+        <column>
+          <name>quantity</name>
+          <length/>
+          <precision>0</precision>
+          <hopType>5</hopType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+        </column>
+        <column>
+          <name>unit_price</name>
+          <length/>
+          <precision/>
+          <hopType>1</hopType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+        </column>
+        <column>
+          <name>record_source</name>
+          <length/>
+          <precision/>
+          <hopType>2</hopType>
+          <primaryKeyPosition>0</primaryKeyPosition>
+        </column>
+      </columns>
+      <xloc>480</xloc>
+      <yloc>432</yloc>
+      <name>asn-package-lines</name>
+    </pipeline-source>
+  </pipeline-sources>
   <notes>
     <note>
       <text>## Source modeler (CRM)
@@ -1320,8 +1512,8 @@ Source JSON **order_shipment_tracking** flattens the payload — publish as `fee
 See docs/source-modeler-overview.adoc.
 </text>
       <noteType>INFORMATION</noteType>
-      <xloc>32</xloc>
-      <yloc>16</yloc>
+      <xloc>0</xloc>
+      <yloc>0</yloc>
       <width>528</width>
       <height>144</height>
     </note>

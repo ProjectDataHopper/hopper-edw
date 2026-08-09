@@ -203,5 +203,5 @@ Locale values use the usual language and country form (`en_US`, `fr_FR`). Unders
 == Related documentation
 
 * link:dimensional-modeler-overview.adoc[Dimensional modeler overview] — `dim_date` and star schema modeling
-* link:record-definition-input.adoc[Record Definition Input] — another hop-data-vault input transform
+* link:record-definition-input.adoc[Get Record Definition Names] — catalog definition metadata as rows
 * link:datavault-plugin.adoc[Data Vault plugin overview] — shared Hop GUI and workflow infrastructure

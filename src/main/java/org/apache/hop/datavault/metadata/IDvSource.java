@@ -111,6 +111,9 @@ public interface IDvSource extends IHasName, IChanged {
       if (DvSourceType.JSON.name().equals(id)) {
         return new DvJsonSource();
       }
+      if (DvSourceType.PIPELINE.name().equals(id)) {
+        return new org.apache.hop.datavault.metadata.pipeline.DvPipelineSource();
+      }
       throw new HopException("Unable to recognize Data Vault source type with ID '" + id + "'");
     }
 

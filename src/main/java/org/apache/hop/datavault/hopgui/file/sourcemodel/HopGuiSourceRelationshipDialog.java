@@ -31,6 +31,7 @@ import org.apache.hop.datavault.metadata.sourcemodel.SourceEndpointKind;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJoinType;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJson;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
+import org.apache.hop.datavault.metadata.sourcemodel.SourcePipeline;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQuery;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceRelationship;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceRelationshipMultiplicity;
@@ -315,6 +316,13 @@ public class HopGuiSourceRelationshipDialog {
         for (SourceJson json : model.getJsonSources()) {
           if (json != null && !Utils.isEmpty(json.getName())) {
             names.add(json.getName());
+          }
+        }
+      }
+      case PIPELINE -> {
+        for (SourcePipeline pipeline : model.getPipelineSources()) {
+          if (pipeline != null && !Utils.isEmpty(pipeline.getName())) {
+            names.add(pipeline.getName());
           }
         }
       }

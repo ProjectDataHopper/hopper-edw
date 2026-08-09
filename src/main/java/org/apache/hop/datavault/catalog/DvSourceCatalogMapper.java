@@ -135,6 +135,15 @@ public final class DvSourceCatalogMapper {
         dvSourceRecord.setJsonSourceModelFilename(jsonSrc.getSourceModelFilename());
         dvSourceRecord.setJsonSourceName(jsonSrc.getSourceJsonName());
       }
+      if (source.getSourceType() == DvSourceType.PIPELINE
+          && source.getDvSourceOrDefault()
+              instanceof org.apache.hop.datavault.metadata.pipeline.DvPipelineSource pipeSrc) {
+        dvSourceRecord.setPipelineFilename(pipeSrc.getPipelineFilename());
+        dvSourceRecord.setPipelineTransformName(pipeSrc.getOutputTransformName());
+        dvSourceRecord.setPipelineRunConfiguration(pipeSrc.getPipelineRunConfiguration());
+        dvSourceRecord.setPipelineSourceModelFilename(pipeSrc.getSourceModelFilename());
+        dvSourceRecord.setPipelineSourceName(pipeSrc.getSourcePipelineName());
+      }
       definition.setDvSource(dvSourceRecord);
     }
     // Single writer: structured fields + derived row meta.
@@ -187,6 +196,12 @@ public final class DvSourceCatalogMapper {
         source, namespace, null, variables, metadataProvider, new Date(), null);
   }
 
+  /**
+   * Catalog model type for feeds published from a source model ({@code .hsm}). Kept as a string
+   * constant so this mapper does not depend on Hop GUI navigation classes.
+   */
+  public static final String ORIGIN_MODEL_TYPE_SOURCE_MODEL = "SOURCE_MODEL";
+
   private static RecordOrigin buildOrigin(
       DataVaultSource source,
       DataVaultModel model,
@@ -195,6 +210,29 @@ public final class DvSourceCatalogMapper {
       String workflowName,
       String pipelineName) {
     RecordOrigin origin = new RecordOrigin();
+    origin.setUpdatedAt(updatedAt);
+    origin.setLastDiscoveredAt(updatedAt);
+    origin.setLastWorkflow(workflowName);
+    origin.setLastPipeline(pipelineName);
+
+    // Prefer .hsm provenance stored on composite / JSON / pipeline physical sources (source modeler
+    // publish). That enables catalog "Go to origin" into the source model graph.
+    SourceModelProvenance sourceModelProvenance = extractSourceModelProvenance(source);
+    if (sourceModelProvenance != null && !Utils.isEmpty(sourceModelProvenance.modelFilename())) {
+      origin.setModelType(ORIGIN_MODEL_TYPE_SOURCE_MODEL);
+      origin.setModelFilename(
+          CatalogModelRegistrySupport.portableModelPath(
+              sourceModelProvenance.modelFilename(), variables));
+      origin.setModelElementName(
+          !Utils.isEmpty(sourceModelProvenance.elementName())
+              ? sourceModelProvenance.elementName()
+              : source.getName());
+      if (!Utils.isEmpty(sourceModelProvenance.modelName())) {
+        origin.setModelName(sourceModelProvenance.modelName());
+      }
+      return origin;
+    }
+
     origin.setModelType("DATA_VAULT_SOURCE");
     if (model != null) {
       origin.setModelName(model.getName());
@@ -203,11 +241,35 @@ public final class DvSourceCatalogMapper {
       origin.setHopProject(model.getName());
     }
     origin.setModelElementName(source.getName());
-    origin.setUpdatedAt(updatedAt);
-    origin.setLastDiscoveredAt(updatedAt);
-    origin.setLastWorkflow(workflowName);
-    origin.setLastPipeline(pipelineName);
     return origin;
+  }
+
+  private record SourceModelProvenance(
+      String modelFilename, String elementName, String modelName) {}
+
+  private static SourceModelProvenance extractSourceModelProvenance(DataVaultSource source) {
+    if (source == null) {
+      return null;
+    }
+    IDvSource dv = source.getDvSourceOrDefault();
+    if (dv instanceof org.apache.hop.datavault.metadata.pipeline.DvPipelineSource pipeSrc
+        && !Utils.isEmpty(pipeSrc.getSourceModelFilename())) {
+      return new SourceModelProvenance(
+          pipeSrc.getSourceModelFilename(),
+          pipeSrc.getSourcePipelineName(),
+          null);
+    }
+    if (dv instanceof org.apache.hop.datavault.metadata.json.DvJsonSource jsonSrc
+        && !Utils.isEmpty(jsonSrc.getSourceModelFilename())) {
+      return new SourceModelProvenance(
+          jsonSrc.getSourceModelFilename(), jsonSrc.getSourceJsonName(), null);
+    }
+    if (dv instanceof DvCompositeSource composite
+        && !Utils.isEmpty(composite.getSourceModelFilename())) {
+      return new SourceModelProvenance(
+          composite.getSourceModelFilename(), composite.getSourceQueryName(), null);
+    }
+    return null;
   }
 
   private static PhysicalTableRef buildPhysicalTableRef(IDvSource dvSource) {

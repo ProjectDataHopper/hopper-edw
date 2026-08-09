@@ -35,6 +35,7 @@ public final class SourceEndpointSupport {
       case TABLE -> model.findTable(name) != null;
       case QUERY -> model.findQuery(name) != null;
       case JSON -> model.findJsonSource(name) != null;
+      case PIPELINE -> model.findPipelineSource(name) != null;
     };
   }
 
@@ -45,6 +46,7 @@ public final class SourceEndpointSupport {
       case TABLE -> n;
       case QUERY -> "query:" + n;
       case JSON -> "json:" + n;
+      case PIPELINE -> "pipeline:" + n;
     };
   }
 
@@ -92,6 +94,16 @@ public final class SourceEndpointSupport {
           }
         }
       }
+      case PIPELINE -> {
+        SourcePipeline pipeline = model.findPipelineSource(name);
+        if (pipeline != null) {
+          for (SourceColumn column : pipeline.getFields()) {
+            if (column != null && !Utils.isEmpty(column.getName())) {
+              names.add(column.getName());
+            }
+          }
+        }
+      }
     }
     return names;
   }
@@ -134,6 +146,16 @@ public final class SourceEndpointSupport {
           }
         }
       }
+      case PIPELINE -> {
+        SourcePipeline pipeline = model.findPipelineSource(name);
+        if (pipeline != null) {
+          for (SourceColumn column : pipeline.primaryKeyFields()) {
+            if (column != null && !Utils.isEmpty(column.getName())) {
+              names.add(column.getName());
+            }
+          }
+        }
+      }
     }
     return names;
   }
@@ -156,6 +178,10 @@ public final class SourceEndpointSupport {
         SourceJson json = model.findJsonSource(name);
         yield json != null ? json.getLocation() : null;
       }
+      case PIPELINE -> {
+        SourcePipeline pipeline = model.findPipelineSource(name);
+        yield pipeline != null ? pipeline.getLocation() : null;
+      }
     };
   }
 
@@ -169,6 +195,9 @@ public final class SourceEndpointSupport {
     if (node instanceof SourceJson) {
       return SourceEndpointKind.JSON;
     }
+    if (node instanceof SourcePipeline) {
+      return SourceEndpointKind.PIPELINE;
+    }
     return SourceEndpointKind.TABLE;
   }
 
@@ -181,6 +210,9 @@ public final class SourceEndpointSupport {
     }
     if (node instanceof SourceJson json) {
       return json.getName();
+    }
+    if (node instanceof SourcePipeline pipeline) {
+      return pipeline.getName();
     }
     return null;
   }

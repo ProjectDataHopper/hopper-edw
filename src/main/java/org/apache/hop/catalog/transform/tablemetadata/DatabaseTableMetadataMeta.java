@@ -37,10 +37,11 @@ import org.apache.hop.pipeline.transform.TransformMeta;
 @Transform(
     id = "DatabaseTableMetadata",
     image = "data-catalog.svg",
-    name = "i18n::DatabaseTableMetadata.Name",
-    description = "i18n::DatabaseTableMetadata.Description",
+    name = "Database Table Metadata",
+    description =
+        "Discovers table columns as Hop types with length, precision, primary key and foreign keys",
     categoryDescription = "i18n:org.apache.hop.pipeline.transform:BaseTransform.Category.Input",
-    keywords = "i18n::DatabaseTableMetadata.keyword")
+    keywords = "database,table,metadata,catalog,fields,primary key,foreign key,hop type")
 @Getter
 @Setter
 public class DatabaseTableMetadataMeta

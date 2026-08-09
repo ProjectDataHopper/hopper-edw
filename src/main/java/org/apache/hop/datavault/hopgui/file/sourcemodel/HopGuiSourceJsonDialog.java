@@ -33,12 +33,14 @@ import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupp
 import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
 import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceColumn;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceEndpointKind;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJson;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJsonField;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJsonFieldSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJsonParentKind;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJsonValidationSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceRelationshipLifecycleSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQuery;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQueryColumn;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceTable;
@@ -988,7 +990,12 @@ public class HopGuiSourceJsonDialog {
       box.open();
       return;
     }
+    String oldName = input.getName();
     getInfo(input);
+    if (model != null) {
+      SourceRelationshipLifecycleSupport.dropRelationshipsOnRename(
+          model, SourceEndpointKind.JSON, oldName, input.getName());
+    }
     ok = true;
     dispose();
   }

@@ -4,6 +4,20 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## Unreleased
 
+### Source modeler: pipeline sources + Record Definition Input (data) (#116)
+
+- Rename catalog **metadata** transforms: **Get Record Definition Names** / **Catalog Record Definition Metadata Output** (plugin ids unchanged)
+- New **Record Definition Input** (`RecordDefinitionDataInput`): read actual data rows from a catalog record definition (same path as catalog Preview data)
+- **Source pipeline** cards on `.hsm`: pipeline file, output transform, declared fields, import catalog lineage refs from Record Definition Input transforms (0..n), open pipeline, canvas drag/select/hover-edit like other cards, relationships, push-to-catalog as `PIPELINE`
+- Catalog / DV load: `DvSourceType.PIPELINE` + MetaInject hub/link/sat builders using declared field contracts
+- **Origin / Go to origin**: pipeline (and JSON/composite) publish stores `.hsm` provenance; catalog navigation opens the source model and selects the card (`SOURCE_MODEL`)
+- **Schema harvest / gate**: rediscover pipeline feeds from the source-model field projection (or live transform) instead of failing as unavailable
+- **Relationship lifecycle**: drop edges on endpoint rename; prune dangling relationships on `.hsm` load
+- **Link dialog**: **Suggest mappings…** matches a selected catalog feed’s fields to participating hub business keys (empty maps only)
+- Preview pipeline sources activates pipeline parameter defaults (e.g. `RETAIL_CSV_WAVE`) like design-time preview
+- **Retail**: ASN XML waves + `pipelines/parse-asn-xml.hpl` + pipeline source **asn-package-lines** → `hub_package_line` / `sat_package_line` / `lnk_package_line` on `retail-360.hdv`
+- Docs: [record-definition-data-input.adoc](docs/record-definition-data-input.adoc), [source-modeler-overview.adoc](docs/source-modeler-overview.adoc), [dv-link.adoc](docs/dv-link.adoc), [datavault-source.adoc](docs/datavault-source.adoc), [getting-started-retail.adoc](docs/getting-started-retail.adoc), screenshots `docs/images/source-modeler-pipeline-source-*.png`
+
 ### Source modeler: JSON feeds, validation, and retail shipment path (#114)
 
 - **Source JSON** on `.hsm`: flatten a parent table/query JSON column into a catalog **`JSON`** `DV_SOURCE`; sample/propose fields, preview, publish; relationship endpoints include tables, queries, and JSON sources

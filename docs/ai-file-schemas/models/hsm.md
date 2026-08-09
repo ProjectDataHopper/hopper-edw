@@ -9,7 +9,7 @@
 Visual **source-side** model of CRM/staging tables, relationships, and multi-table **source queries**. Used to:
 
 - Document source structure  
-- Import/publish **catalog** feeds (`DV_SOURCE`, **COMPOSITE** multi-table queries)  
+- Import/publish **catalog** feeds (`DV_SOURCE`, **COMPOSITE** multi-table queries, **JSON**, **PIPELINE**)  
 - Feed coaching / compose multi-table source into Data Vault  
 
 Does **not** define vault hubs/sats (that is `.hdv`).
@@ -24,6 +24,7 @@ Does **not** define vault hubs/sats (that is `.hdv`).
 | `relationships` / `relationship` | PK/FK style relationships |
 | `queries` / `query` | Multi-table source queries (when present) |
 | `json-sources` / `json-source` | JSON extractions from a parent field (when present) |
+| `pipeline-sources` / `pipeline-source` | Pipeline-backed feeds (when present) |
 
 ## Table essentials
 
@@ -52,6 +53,16 @@ When present under `json-sources` / `json-source`:
 - Published catalog layout is **`dvSource.fields[]`** (types/lengths/PK), not top-level `rowMetaXml` — see [catalog-record-definition.md](../metadata/catalog-record-definition.md)
 
 Sample: [hsm-json-excerpt.xml](../samples/hsm-json-excerpt.xml).
+
+## Pipeline source essentials
+
+When present under `pipeline-sources` / `pipeline-source`:
+
+- `pipelineFilename` (`.hpl`, variables allowed), `outputTransformName`, optional `pipelineRunConfiguration`
+- `columns` / `column`: declared field contract (name, hop type, length, precision, PK position)
+- `catalogSourceName` — optional publish name (empty = card name); uses model `catalogConnection` / `catalogNamespace`
+- `catalog-sources` / `catalog-source` — zero or more lineage refs (connection, namespace, record name, transform) imported from Record Definition Input transforms in the `.hpl`
+- Publishing creates a catalog **PIPELINE** `DV_SOURCE` (MetaInject at vault load time)
 
 ## Anti-patterns
 

@@ -51,6 +51,7 @@ DROP TABLE IF EXISTS sat_lnk_warehouse_product CASCADE;
 
 DROP TABLE IF EXISTS lnk_order_shipment CASCADE;
 DROP TABLE IF EXISTS lnk_order_line CASCADE;
+DROP TABLE IF EXISTS lnk_package_line CASCADE;
 DROP TABLE IF EXISTS lnk_warehouse_product CASCADE;
 DROP TABLE IF EXISTS lnk_order_rep CASCADE;
 DROP TABLE IF EXISTS lnk_order CASCADE;
@@ -64,6 +65,7 @@ DROP TABLE IF EXISTS sat_customer_address CASCADE;
 DROP TABLE IF EXISTS sat_customer_contact CASCADE;
 DROP TABLE IF EXISTS sat_customer_demo CASCADE;
 DROP TABLE IF EXISTS sat_customer CASCADE;
+DROP TABLE IF EXISTS sat_package_line CASCADE;
 
 DROP TABLE IF EXISTS hub_order CASCADE;
 DROP TABLE IF EXISTS hub_warehouse CASCADE;
@@ -72,6 +74,7 @@ DROP TABLE IF EXISTS hub_sales_rep CASCADE;
 DROP TABLE IF EXISTS hub_secondary_rep CASCADE;
 DROP TABLE IF EXISTS hub_customer CASCADE;
 DROP TABLE IF EXISTS hub_order_shipment CASCADE;
+DROP TABLE IF EXISTS hub_package_line CASCADE;
 
 -- Staging views (dimensional / vault staging)
 DROP VIEW IF EXISTS stg_e2e_sales_agg CASCADE;

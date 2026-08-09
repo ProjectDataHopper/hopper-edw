@@ -44,7 +44,12 @@ public enum DvSourceType implements IEnumHasCodeAndDescription {
    * JSON extraction feed defined by a {@code SourceJson} in a {@code .hsm} source model (parent
    * source + JsonInput).
    */
-  JSON("JSON", BaseMessages.getString(DvSourceType.class, "DvSourceType.Json"));
+  JSON("JSON", BaseMessages.getString(DvSourceType.class, "DvSourceType.Json")),
+  /**
+   * Pipeline-backed feed defined by a {@code SourcePipeline} in a {@code .hsm} source model
+   * (MetaInject of a user {@code .hpl}).
+   */
+  PIPELINE("PIPELINE", BaseMessages.getString(DvSourceType.class, "DvSourceType.Pipeline"));
 
   private final String code;
   private final String description;

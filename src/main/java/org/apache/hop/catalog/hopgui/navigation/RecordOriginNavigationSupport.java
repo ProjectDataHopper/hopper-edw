@@ -23,10 +23,13 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
+import org.apache.hop.datavault.catalog.DvSourceCatalogMapper;
 import org.apache.hop.datavault.hopgui.file.businessvault.HopBusinessVaultFileType;
 import org.apache.hop.datavault.hopgui.file.businessvault.HopGuiBusinessVaultGraph;
 import org.apache.hop.datavault.hopgui.file.dimensional.HopDimensionalFileType;
 import org.apache.hop.datavault.hopgui.file.dimensional.HopGuiDimensionalModelGraph;
+import org.apache.hop.datavault.hopgui.file.sourcemodel.HopGuiSourceModelGraph;
+import org.apache.hop.datavault.hopgui.file.sourcemodel.HopSourceModelFileType;
 import org.apache.hop.datavault.hopgui.file.vault.HopGuiVaultGraph;
 import org.apache.hop.datavault.hopgui.file.vault.HopVaultFileType;
 import org.apache.hop.i18n.BaseMessages;
@@ -35,7 +38,8 @@ import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
 import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
 
 /**
- * Opens the originating DV, business vault, or dimensional model for a catalog record definition.
+ * Opens the originating source model, DV, business vault, or dimensional model for a catalog
+ * record definition.
  */
 public final class RecordOriginNavigationSupport {
 
@@ -43,6 +47,9 @@ public final class RecordOriginNavigationSupport {
   public static final String MODEL_TYPE_DATA_VAULT_SOURCE = "DATA_VAULT_SOURCE";
   public static final String MODEL_TYPE_BUSINESS_VAULT = "BUSINESS_VAULT_MODEL";
   public static final String MODEL_TYPE_DIMENSIONAL = "DIMENSIONAL_MODEL";
+  /** Origin model type for feeds published from a {@code .hsm} source model. */
+  public static final String MODEL_TYPE_SOURCE_MODEL =
+      DvSourceCatalogMapper.ORIGIN_MODEL_TYPE_SOURCE_MODEL;
 
   private static final Class<?> PKG = RecordOriginNavigationSupport.class;
 
@@ -86,6 +93,12 @@ public final class RecordOriginNavigationSupport {
     explorer.activate();
 
     switch (modelType) {
+      case MODEL_TYPE_SOURCE_MODEL -> {
+        HopGuiSourceModelGraph graph = openSourceModelGraph(hopGui, modelPath, variables);
+        if (!Utils.isEmpty(elementName)) {
+          graph.navigateToElement(elementName);
+        }
+      }
       case MODEL_TYPE_DATA_VAULT, MODEL_TYPE_DATA_VAULT_SOURCE -> {
         HopGuiVaultGraph graph = openVaultGraph(hopGui, modelPath, variables);
         if (MODEL_TYPE_DATA_VAULT.equals(modelType) && !Utils.isEmpty(elementName)) {
@@ -115,7 +128,19 @@ public final class RecordOriginNavigationSupport {
     return MODEL_TYPE_DATA_VAULT.equals(modelType)
         || MODEL_TYPE_DATA_VAULT_SOURCE.equals(modelType)
         || MODEL_TYPE_BUSINESS_VAULT.equals(modelType)
-        || MODEL_TYPE_DIMENSIONAL.equals(modelType);
+        || MODEL_TYPE_DIMENSIONAL.equals(modelType)
+        || MODEL_TYPE_SOURCE_MODEL.equals(modelType);
+  }
+
+  private static HopGuiSourceModelGraph openSourceModelGraph(
+      HopGui hopGui, String modelPath, IVariables variables) throws HopException {
+    HopSourceModelFileType fileType = new HopSourceModelFileType();
+    IHopFileTypeHandler handler = fileType.openFile(hopGui, modelPath, variables);
+    if (!(handler instanceof HopGuiSourceModelGraph graph)) {
+      throw new HopException(
+          BaseMessages.getString(PKG, "RecordOriginNavigationSupport.Error.UnexpectedFileHandler"));
+    }
+    return graph;
   }
 
   private static HopGuiVaultGraph openVaultGraph(

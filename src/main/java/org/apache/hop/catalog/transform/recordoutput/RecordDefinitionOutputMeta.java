@@ -40,10 +40,12 @@ import org.apache.hop.pipeline.transform.TransformMeta;
 @Transform(
     id = "RecordDefinitionOutput",
     image = "data-catalog.svg",
-    name = "i18n::RecordDefinitionOutput.Name",
-    description = "i18n::RecordDefinitionOutput.Description",
+    // Literal name — see RecordDefinitionInputMeta (plugin i18n not always applied to palette).
+    name = "Catalog Record Definition Metadata Output",
+    description =
+        "Writes record definition metadata to a data catalog from physical discovery or stream fields",
     categoryDescription = "i18n:org.apache.hop.pipeline.transform:BaseTransform.Category.Output",
-    keywords = "i18n::RecordDefinitionOutput.keyword")
+    keywords = "record,definition,catalog,output,discover,migration,fields,metadata")
 @Getter
 @Setter
 public class RecordDefinitionOutputMeta

@@ -115,7 +115,39 @@ public final class DvSourcePreviewInputSupport {
               variables,
               metadataProvider,
               rowLimit);
+      case PIPELINE ->
+          buildPipelinePreview(
+              recordSource,
+              (org.apache.hop.datavault.metadata.pipeline.DvPipelineSource) dvSource,
+              variables,
+              metadataProvider,
+              rowLimit);
     };
+  }
+
+  private static PreviewPipeline buildPipelinePreview(
+      DataVaultSource recordSource,
+      org.apache.hop.datavault.metadata.pipeline.DvPipelineSource source,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider,
+      int rowLimit)
+      throws HopException {
+    if (source == null) {
+      throw new HopException(
+          BaseMessages.getString(PKG, "DvSourcePreviewInputSupport.Error.MissingSource"));
+    }
+    org.apache.hop.pipeline.transforms.metainject.MetaInjectMeta metaInjectMeta =
+        org.apache.hop.datavault.metadata.pipeline.DvPipelineSourceSupport.buildMetaInjectMeta(
+            source, variables, metadataProvider);
+    String transformName =
+        "pipeline "
+            + (recordSource != null && !Utils.isEmpty(recordSource.getName())
+                ? recordSource.getName()
+                : Const.NVL(source.getSourcePipelineName(), "source"));
+    PipelineMeta previewMeta =
+        PipelinePreviewFactory.generatePreviewPipeline(
+            metadataProvider, metaInjectMeta, transformName);
+    return new PreviewPipeline(previewMeta, transformName);
   }
 
   private static PreviewPipeline buildJsonPreview(

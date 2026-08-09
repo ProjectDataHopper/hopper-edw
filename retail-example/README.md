@@ -38,6 +38,7 @@ DV source catalog entries use namespace **`hop/retail-example/sources`**.
 - Table **order_shipment_event** — Kafka-style consumer landing (UUID `message_id`, JSON `payload`, `kafka_timestamp`, `topic`, `partition`, `offset`). Populated by `scripts/generate-retail-data.py` during initial and update waves with **order shipping tracking** events (label created → picked up → in transit → delivered, …).
 - Source JSON **order_shipment_tracking** — flattens `payload` into columns (`order_id`, `status`, `carrier`, location, …) plus pass-through Kafka metadata. Published as catalog feed **`feed_order_shipment_tracking`** (type `JSON`).
 - Data Vault **`retail-360.hdv`** loads that feed into **`hub_order_shipment`**, **`lnk_order_shipment`**, and **`sat_order_shipment`** (JSON source pipeline: record-source constant, hub sort/distinct for CDC).
+- **ASN XML** (Advanced Shipping Notice) — nested warehouse-outbound documents under `files/asn_*.xml`. Complements shipment **tracking** JSON (status events) with planned package **contents**. Parse with **`pipelines/parse-asn-xml.hpl`** (Get data from XML → flat package-line rows). Small committed fixture: `files/asn_demo.xml` (`RETAIL_CSV_WAVE=demo`).
 
 ## Prerequisites
 
@@ -78,8 +79,8 @@ retail-example/
 │   └── data-quality-rule-set/ # retail-source-quality + retail-target-quality libraries
 ├── fixtures/
 │   └── schema-gate-baseline/  # Seed for catalog-versions tag v1.0.0 (copied into work/)
-├── pipelines/                 # create-source-tables, load-e2e-sources-to-crm
-├── files/                     # Generated CSV source files (mostly gitignored)
+├── pipelines/                 # create-source-tables, load-e2e-sources-to-crm, parse-asn-xml
+├── files/                     # Generated CSV/XML source files (mostly gitignored; asn_demo.xml tracked)
 ├── models/                    # TRACKED .hsm / .hdv / .hbv / .hdm
 ├── sql/                       # drop-source / drop-target, load control, staging views
 ├── scripts/                   # generate data, bootstrap work/, catalog sources
@@ -164,19 +165,27 @@ See [docs/data-quality.adoc](../docs/data-quality.adoc) for rule types and actio
 
 ## Data generation
 
-CSV files are written to `files/` by `scripts/generate-retail-data.py` (workflows) — kept in sync with `../scripts/end-to-end/generate-retail-data.py`:
+CSV (and ASN XML) files are written to `files/` by `scripts/generate-retail-data.py` (workflows) — kept in sync with `../scripts/end-to-end/generate-retail-data.py` where that shared copy is used:
 
 | Mode | Description |
 |------|-------------|
-| `initial` | Full snapshot wave (`*_initial.csv`) |
+| `initial` | Full snapshot wave (`*_initial.csv`, `asn_initial.xml`) |
 | `update` | Incremental wave for the current `retail_load_control.progress_date` |
 
 Default scale: 10,000 customers, 1,000 products, 100,000 orders.
 
 **Order lines** are generated at grain `(order_id, product_id, line_number)`. The same product can appear on multiple lines of one order; the first order in each wave is forced to do so (with different unit prices) so **transactional link** behaviour (`lnk_order_line` + dependent child key `line_number` in `models/retail-360.hdv`) is easy to verify.
 
+**ASN XML** (`files/asn_${wave}.xml`) is built from a subset of SHIPPED/DELIVERED orders (plus a stable first candidate) with nested packages and lines. It is intended for **pipeline parsing**, not CRM table load. Preview:
+
+```sh
+# Uses files/asn_demo.xml (RETAIL_CSV_WAVE defaults to demo on the pipeline)
+# Open pipelines/parse-asn-xml.hpl in Hop GUI and preview transform "ASN lines"
+```
+
 CSV wave selection uses Hop variable **`RETAIL_CSV_WAVE`** (for example `initial` or
 `2024-01`). `generate-retail-data.py` writes `work/retail-csv-wave.properties`; the
 workflows load it with **Set variables** before `load-e2e-sources-to-crm.hpl`, which
-reads files as `${PROJECT_HOME}/files/<table>_${RETAIL_CSV_WAVE}.csv`. The pipeline
+reads files as `${PROJECT_HOME}/files/<table>_${RETAIL_CSV_WAVE}.csv`. The same
+variable selects `asn_${RETAIL_CSV_WAVE}.xml` in `parse-asn-xml.hpl`. The pipeline
 XML is stable and is not rewritten on each run.

@@ -35,9 +35,11 @@ import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
 import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.datavault.metadata.DvSqlSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceColumn;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceEndpointKind;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJoinType;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQuery;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceRelationshipLifecycleSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQueryColumn;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQueryGenerationMode;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQueryJoin;
@@ -960,6 +962,7 @@ public class HopGuiSourceQueryDialog {
       return;
     }
     refreshResolvedKeyLabels();
+    String oldName = input.getName();
     input.setName(name);
     input.setDescription(wDescription.getText());
     // Empty catalog feed name → publish uses the query name (SourceQueryCatalogPublisher).
@@ -970,6 +973,10 @@ public class HopGuiSourceQueryDialog {
     input.setWhereClause(wWhere.getText());
     input.setJoins(readJoins());
     input.setColumns(readColumns());
+    if (model != null) {
+      SourceRelationshipLifecycleSupport.dropRelationshipsOnRename(
+          model, SourceEndpointKind.QUERY, oldName, name);
+    }
     ok = true;
     dispose();
   }

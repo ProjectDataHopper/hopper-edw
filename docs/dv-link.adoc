@@ -76,6 +76,21 @@ When a link is loaded, the generated pipeline:
 
 The comparison is done on the link hash key, so only new combinations of hubs (and dependent child keys when configured) are loaded.
 
+== Suggest hub source mappings
+
+On the link dialog **Hub sources** tab:
+
+. Add or select a Data Vault catalog source (for example a published **pipeline** feed such as `asn-package-lines`).
+. Ensure **participating hubs** are listed on the Options tab (or leave empty to let suggest propose hubs fully covered by the feed).
+. Click **Suggest mappings…**.
+. Review proposed hub business key → source field maps (`exact` / `alias` / `missing`).
+. Confirm to apply (only **empty** hub maps are filled; existing mappings are preserved).
+. Use **Edit hub source mappings…** to adjust anything that did not match.
+
+Matching uses the catalog field list for the selected source and the hub business-key names already on the model. This is especially helpful for multi-hub links fed by a flat pipeline or composite feed where most maps are identity renames.
+
+Retail example: `lnk_package_line` on `retail-360.hdv` maps `asn-package-lines` into `hub_order`, `hub_product`, `hub_warehouse`, `hub_customer`, and `hub_package_line` via the same field names on the ASN package-line feed.
+
 == Options in the Link dialog
 
 [cols="1,3", options="header"]

@@ -16,6 +16,7 @@
  */
 package org.apache.hop.catalog.discovery;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.database.Database;
@@ -24,6 +25,8 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.logging.ILoggingObject;
 import org.apache.hop.core.logging.LoggingObjectType;
 import org.apache.hop.core.logging.SimpleLoggingObject;
+import org.apache.hop.core.row.IRowMeta;
+import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metadata.DvSourceType;
@@ -32,9 +35,12 @@ import org.apache.hop.datavault.metadata.database.DvDatabaseSourceImportSupport;
 import org.apache.hop.datavault.metadata.file.CsvFileMetadataDiscovery;
 import org.apache.hop.datavault.metadata.file.ParquetFileMetadataDiscovery;
 import org.apache.hop.datavault.metadata.iceberg.IcebergTableMetadataDiscovery;
+import org.apache.hop.datavault.metadata.pipeline.DvPipelineSourceSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModelLoadSupport;
+import org.apache.hop.datavault.metadata.sourcemodel.SourcePipeline;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQuery;
+import org.apache.hop.datavault.metadata.sourcemodel.publish.SourcePipelineCatalogPublisher;
 import org.apache.hop.datavault.metadata.sourcemodel.publish.SourceQueryCatalogPublisher;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
@@ -70,6 +76,7 @@ public final class RecordDefinitionDiscoveryService {
       case ICEBERG -> discoverIceberg(physicalRef, variables);
       case COMPOSITE -> discoverComposite(physicalRef, variables, metadataProvider);
       case JSON -> discoverJson(physicalRef, variables, metadataProvider);
+      case PIPELINE -> discoverPipeline(physicalRef, variables, metadataProvider);
     };
   }
 
@@ -144,6 +151,96 @@ public final class RecordDefinitionDiscoveryService {
       throw new HopException(
           BaseMessages.getString(
               PKG, "RecordDefinitionDiscoveryService.Error.EmptyCompositeProjection", jsonName));
+    }
+    return new DiscoveryResult(fields, null);
+  }
+
+  /**
+   * Rediscover a PIPELINE feed: prefer the declared projection on the source-model pipeline card;
+   * fall back to live output-transform fields from the {@code .hpl}.
+   */
+  private static DiscoveryResult discoverPipeline(
+      PhysicalSourceRef physicalRef, IVariables variables, IHopMetadataProvider metadataProvider)
+      throws HopException {
+    if (physicalRef == null) {
+      throw new HopException(
+          BaseMessages.getString(
+              PKG, "RecordDefinitionDiscoveryService.Error.MissingPipelineRef"));
+    }
+
+    // Preferred path: rebuild from the SourcePipeline card on the .hsm (same as publish).
+    if (!Utils.isEmpty(physicalRef.getPipelineSourceModelFilename())
+        && !Utils.isEmpty(physicalRef.getPipelineSourceName())) {
+      String modelFile =
+          variables != null
+              ? variables.resolve(physicalRef.getPipelineSourceModelFilename())
+              : physicalRef.getPipelineSourceModelFilename();
+      String pipelineName =
+          variables != null
+              ? variables.resolve(physicalRef.getPipelineSourceName())
+              : physicalRef.getPipelineSourceName();
+      SourceModel model = SourceModelLoadSupport.load(modelFile, variables, metadataProvider);
+      SourcePipeline pipelineSource = model.findPipelineSource(pipelineName);
+      if (pipelineSource == null) {
+        throw new HopException(
+            BaseMessages.getString(
+                PKG,
+                "RecordDefinitionDiscoveryService.Error.PipelineSourceNotFound",
+                pipelineName,
+                modelFile));
+      }
+      List<SourceField> fields =
+          SourcePipelineCatalogPublisher.buildFieldsFromProjection(pipelineSource);
+      if (fields == null || fields.isEmpty()) {
+        throw new HopException(
+            BaseMessages.getString(
+                PKG,
+                "RecordDefinitionDiscoveryService.Error.EmptyPipelineProjection",
+                pipelineName));
+      }
+      return new DiscoveryResult(fields, null);
+    }
+
+    // Fallback: resolve fields from the output transform of the pipeline file.
+    if (Utils.isEmpty(physicalRef.getPipelineFilename())
+        || Utils.isEmpty(physicalRef.getPipelineTransformName())) {
+      throw new HopException(
+          BaseMessages.getString(
+              PKG, "RecordDefinitionDiscoveryService.Error.MissingPipelineRef"));
+    }
+    String pipelineFile =
+        variables != null
+            ? variables.resolve(physicalRef.getPipelineFilename())
+            : physicalRef.getPipelineFilename();
+    String transformName =
+        variables != null
+            ? variables.resolve(physicalRef.getPipelineTransformName())
+            : physicalRef.getPipelineTransformName();
+    IRowMeta rowMeta =
+        DvPipelineSourceSupport.resolveLiveTransformFields(
+            pipelineFile, transformName, variables, metadataProvider);
+    List<SourceField> fields = new ArrayList<>();
+    for (int i = 0; i < rowMeta.size(); i++) {
+      IValueMeta valueMeta = rowMeta.getValueMeta(i);
+      if (valueMeta == null || Utils.isEmpty(valueMeta.getName())) {
+        continue;
+      }
+      SourceField field = new SourceField(valueMeta.getName());
+      field.setHopType(valueMeta.getType());
+      if (valueMeta.getLength() >= 0) {
+        field.setLength(Integer.toString(valueMeta.getLength()));
+      }
+      if (valueMeta.getPrecision() >= 0) {
+        field.setPrecision(Integer.toString(valueMeta.getPrecision()));
+      }
+      fields.add(field);
+    }
+    if (fields.isEmpty()) {
+      throw new HopException(
+          BaseMessages.getString(
+              PKG,
+              "RecordDefinitionDiscoveryService.Error.EmptyPipelineProjection",
+              transformName));
     }
     return new DiscoveryResult(fields, null);
   }

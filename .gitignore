@@ -35,6 +35,9 @@ retail-example/files/order_header_*.csv
 retail-example/files/order_line_*.csv
 retail-example/files/product_*.csv
 retail-example/files/warehouse_*.csv
+# Generated ASN waves (keep committed demo fixture asn_demo.xml)
+retail-example/files/asn_initial.xml
+retail-example/files/asn_20*.xml
 
 integration-tests/catalog-data/**/*.json
 integration-tests/vault-catalog/**/*.json

@@ -56,14 +56,18 @@ import org.apache.hop.datavault.metadata.sourcemodel.SourceEndpointSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJoinType;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJson;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
+import org.apache.hop.datavault.metadata.sourcemodel.SourcePipeline;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQuery;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceRelationship;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceRelationshipLifecycleSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceRelationshipMultiplicity;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceTable;
 import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceJsonPreviewSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceQueryPreviewSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceTablePreviewSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.publish.SourceJsonCatalogPublisher;
+import org.apache.hop.datavault.metadata.sourcemodel.publish.SourcePipelineCatalogPublisher;
+import org.apache.hop.datavault.hopgui.file.dimensional.DmSourcePipelineOpenSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.publish.SourceQueryCatalogPublisher;
 import org.apache.hop.datavault.metadata.sourcemodel.publish.SourceTableCatalogPublisher;
 import org.apache.hop.i18n.BaseMessages;
@@ -104,7 +108,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Hop GUI editor for source system models ({@code .hsm}): tables, relationships, multi-table
- * queries, and JSON extractions.
+ * queries, JSON extractions, and pipeline sources.
  */
 @GuiPlugin(id = "HopGuiSourceModelGraph", description = "i18n::HopGuiSourceModelGraph.Description")
 @Getter
@@ -130,6 +134,8 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       "HopGuiSourceModelGraph-ToolBar-10055-Import-Schema";
   public static final String TOOLBAR_ITEM_NEW_JSON =
       "HopGuiSourceModelGraph-ToolBar-10059-New-Json";
+  public static final String TOOLBAR_ITEM_NEW_PIPELINE =
+      "HopGuiSourceModelGraph-ToolBar-10057-New-Pipeline";
   public static final String TOOLBAR_ITEM_PUSH_TO_CATALOG =
       "HopGuiSourceModelGraph-ToolBar-10058-Push-To-Catalog";
   public static final String TOOLBAR_ITEM_CHECK_MODEL =
@@ -163,8 +169,9 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
   private SourceTable currentTable;
   private SourceQuery currentQuery;
   private SourceJson currentJsonSource;
+  private SourcePipeline currentPipelineSource;
 
-  /** Table, query, or JSON source — relationship drag origin. */
+  /** Table, query, JSON, or pipeline source — relationship drag origin. */
   private Object startRelationshipNode;
 
   private Point relationshipDragEndLocation;
@@ -402,6 +409,16 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
 
   @GuiToolbarElement(
       root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
+      id = TOOLBAR_ITEM_NEW_PIPELINE,
+      toolTip = "i18n::HopGuiSourceModelGraph.Toolbar.NewPipeline.Tooltip",
+      type = GuiToolbarElementType.BUTTON,
+      image = "source-model.svg")
+  public void newPipelineFromToolbar() {
+    addPipelineAt(lastClick != null ? lastClick : new Point(50, 50));
+  }
+
+  @GuiToolbarElement(
+      root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
       id = TOOLBAR_ITEM_PUSH_TO_CATALOG,
       toolTip = "i18n::HopGuiSourceModelGraph.Toolbar.PushToCatalog.Tooltip",
       type = GuiToolbarElementType.BUTTON,
@@ -526,6 +543,11 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
         jsonSource.setSelected(true);
       }
     }
+    for (SourcePipeline pipelineSource : model.getPipelineSources()) {
+      if (pipelineSource != null) {
+        pipelineSource.setSelected(true);
+      }
+    }
     for (DvNote note : model.getNotes()) {
       if (note != null) {
         note.setSelected(true);
@@ -565,17 +587,44 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     List<SourceTable> selected = getSelectedTables();
     List<SourceQuery> selectedQueries = getSelectedQueries();
     List<SourceJson> selectedJson = getSelectedJsonSources();
+    List<SourcePipeline> selectedPipelines = getSelectedPipelineSources();
     List<DvNote> selectedNotes = getSelectedNotes();
     if (selected.isEmpty()
         && selectedQueries.isEmpty()
         && selectedJson.isEmpty()
+        && selectedPipelines.isEmpty()
         && selectedNotes.isEmpty()) {
       return;
     }
     markUndoPoint();
+    for (SourceTable table : selected) {
+      if (table != null) {
+        SourceRelationshipLifecycleSupport.removeRelationshipsReferencing(
+            model, SourceEndpointKind.TABLE, table.getName());
+      }
+    }
+    for (SourceQuery query : selectedQueries) {
+      if (query != null) {
+        SourceRelationshipLifecycleSupport.removeRelationshipsReferencing(
+            model, SourceEndpointKind.QUERY, query.getName());
+      }
+    }
+    for (SourceJson jsonSource : selectedJson) {
+      if (jsonSource != null) {
+        SourceRelationshipLifecycleSupport.removeRelationshipsReferencing(
+            model, SourceEndpointKind.JSON, jsonSource.getName());
+      }
+    }
+    for (SourcePipeline pipelineSource : selectedPipelines) {
+      if (pipelineSource != null) {
+        SourceRelationshipLifecycleSupport.removeRelationshipsReferencing(
+            model, SourceEndpointKind.PIPELINE, pipelineSource.getName());
+      }
+    }
     model.getTables().removeAll(selected);
     model.getQueries().removeAll(selectedQueries);
     model.getJsonSources().removeAll(selectedJson);
+    model.getPipelineSources().removeAll(selectedPipelines);
     model.getNotes().removeAll(selectedNotes);
     setChanged();
     redraw();
@@ -646,41 +695,84 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
   }
 
   /**
-   * Select and open a source query, JSON source, or table matching {@code componentName} (search
-   * navigation). Queries are preferred when both share a name; JSON sources next.
+   * Select and open a source query, JSON, pipeline, or table matching {@code componentName} (search
+   * navigation). Queries are preferred when names collide; then JSON, pipeline, table.
    */
   public void openSearchComponent(String componentName) {
     if (Utils.isEmpty(componentName) || model == null) {
       return;
     }
-    SourceQuery query = model.findQuery(componentName);
+    if (selectCanvasElement(componentName, true)) {
+      updateGui();
+    }
+  }
+
+  /**
+   * Select and center a table, query, JSON, or pipeline source by name (catalog "Go to origin").
+   * Does not open the edit dialog — only highlights the card on the canvas.
+   */
+  public void navigateToElement(String elementName) {
+    if (Utils.isEmpty(elementName) || model == null) {
+      return;
+    }
+    if (selectCanvasElement(elementName, false)) {
+      redraw();
+      updateGui();
+    }
+  }
+
+  /**
+   * @param openEditor when true, open the element dialog (search); when false, only select/center
+   * @return true if an element was found
+   */
+  private boolean selectCanvasElement(String elementName, boolean openEditor) {
+    SourceQuery query = model.findQuery(elementName);
     if (query != null) {
-      unselectAllCanvasObjects();
+      mouseInteractions().unselectAllOnCanvas();
       query.setSelected(true);
-      editQuery(query);
-      updateGui();
-      return;
-    }
-    SourceJson jsonSource = model.findJsonSource(componentName);
-    if (jsonSource != null) {
-      unselectAllCanvasObjects();
-      jsonSource.setSelected(true);
-      editJsonSource(jsonSource);
-      updateGui();
-      return;
-    }
-    SourceTable table = model.findTable(componentName);
-    if (table == null) {
-      return;
-    }
-    for (SourceTable t : model.getTables()) {
-      if (t != null) {
-        t.setSelected(false);
+      if (query.getLocation() != null) {
+        centerOnCanvasLocation(query.getLocation(), 160, 80);
       }
+      if (openEditor) {
+        editQuery(query);
+      }
+      return true;
     }
+    SourceJson jsonSource = model.findJsonSource(elementName);
+    if (jsonSource != null) {
+      mouseInteractions().unselectAllOnCanvas();
+      jsonSource.setSelected(true);
+      if (jsonSource.getLocation() != null) {
+        centerOnCanvasLocation(jsonSource.getLocation(), 160, 80);
+      }
+      if (openEditor) {
+        editJsonSource(jsonSource);
+      }
+      return true;
+    }
+    SourcePipeline pipelineSource = model.findPipelineSource(elementName);
+    if (pipelineSource != null) {
+      mouseInteractions().unselectAllOnCanvas();
+      pipelineSource.setSelected(true);
+      if (pipelineSource.getLocation() != null) {
+        centerOnCanvasLocation(pipelineSource.getLocation(), 160, 80);
+      }
+      if (openEditor) {
+        editPipelineSource(pipelineSource);
+      }
+      return true;
+    }
+    SourceTable table = model.findTable(elementName);
+    if (table == null) {
+      return false;
+    }
+    mouseInteractions().unselectAllOnCanvas();
     table.setSelected(true);
-    editTable(table);
-    updateGui();
+    centerOnTable(table);
+    if (openEditor) {
+      editTable(table);
+    }
+    return true;
   }
 
   @Override
@@ -1124,6 +1216,11 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       editJsonSource(jsonSource);
       return;
     }
+    SourcePipeline pipelineSource = getAreaOwnerPipelineSource(areaOwner);
+    if (pipelineSource != null) {
+      editPipelineSource(pipelineSource);
+      return;
+    }
     SourceTable table = getAreaOwnerTable(areaOwner);
     if (table != null) {
       editTable(table);
@@ -1144,6 +1241,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     currentTable = null;
     currentQuery = null;
     currentJsonSource = null;
+    currentPipelineSource = null;
     clearNavigationViewportState();
     clearSelectionRegion();
   }
@@ -1165,6 +1263,11 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     for (SourceJson j : model.getJsonSources()) {
       if (j != null) {
         j.setSelected(false);
+      }
+    }
+    for (SourcePipeline p : model.getPipelineSources()) {
+      if (p != null) {
+        p.setSelected(false);
       }
     }
   }
@@ -1215,6 +1318,19 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     return selected;
   }
 
+  private List<SourcePipeline> getSelectedPipelineSources() {
+    List<SourcePipeline> selected = new ArrayList<>();
+    if (model == null) {
+      return selected;
+    }
+    for (SourcePipeline pipelineSource : model.getPipelineSources()) {
+      if (pipelineSource != null && pipelineSource.isSelected()) {
+        selected.add(pipelineSource);
+      }
+    }
+    return selected;
+  }
+
   private boolean isQueryInLassoScreenRect(
       SourceQuery query, int lassoMinX, int lassoMinY, int lassoMaxX, int lassoMaxY) {
     return isCardInLassoScreenRect(
@@ -1225,6 +1341,16 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       SourceJson jsonSource, int lassoMinX, int lassoMinY, int lassoMaxX, int lassoMaxY) {
     return isCardInLassoScreenRect(
         jsonSource != null ? jsonSource.getLocation() : null,
+        lassoMinX,
+        lassoMinY,
+        lassoMaxX,
+        lassoMaxY);
+  }
+
+  private boolean isPipelineInLassoScreenRect(
+      SourcePipeline pipelineSource, int lassoMinX, int lassoMinY, int lassoMaxX, int lassoMaxY) {
+    return isCardInLassoScreenRect(
+        pipelineSource != null ? pipelineSource.getLocation() : null,
         lassoMinX,
         lassoMinY,
         lassoMaxX,
@@ -1251,10 +1377,12 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     List<SourceTable> selectedTables = getSelectedTables();
     List<SourceQuery> selectedQueries = getSelectedQueries();
     List<SourceJson> selectedJson = getSelectedJsonSources();
+    List<SourcePipeline> selectedPipelines = getSelectedPipelineSources();
     List<DvNote> selectedNotes = getSelectedNotes();
     if (selectedTables.isEmpty()
         && selectedQueries.isEmpty()
         && selectedJson.isEmpty()
+        && selectedPipelines.isEmpty()
         && selectedNotes.isEmpty()) {
       return;
     }
@@ -1280,6 +1408,17 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
     for (SourceJson jsonSource : selectedJson) {
       Point loc = jsonSource.getLocation();
+      if (loc != null) {
+        if (loc.x + dx < 0) {
+          dx = -loc.x;
+        }
+        if (loc.y + dy < 0) {
+          dy = -loc.y;
+        }
+      }
+    }
+    for (SourcePipeline pipelineSource : selectedPipelines) {
+      Point loc = pipelineSource.getLocation();
       if (loc != null) {
         if (loc.x + dx < 0) {
           dx = -loc.x;
@@ -1315,6 +1454,13 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       if (loc != null) {
         Point snapped = PropsUi.calculateGridPosition(new Point(loc.x + dx, loc.y + dy));
         jsonSource.setLocation(snapped);
+      }
+    }
+    for (SourcePipeline pipelineSource : selectedPipelines) {
+      Point loc = pipelineSource.getLocation();
+      if (loc != null) {
+        Point snapped = PropsUi.calculateGridPosition(new Point(loc.x + dx, loc.y + dy));
+        pipelineSource.setLocation(snapped);
       }
     }
     for (DvNote note : selectedNotes) {
@@ -1436,6 +1582,56 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       setChanged();
       redraw();
     }
+  }
+
+  private void editPipelineSource(SourcePipeline pipelineSource) {
+    if (pipelineSource == null) {
+      return;
+    }
+    byte[] beforeChange = captureUndoSnapshot();
+    boolean accepted =
+        new HopGuiSourcePipelineDialog(
+                getShell(), pipelineSource, model, variables, hopGui.getMetadataProvider())
+            .open();
+    if (accepted) {
+      commitDialogUndo(beforeChange);
+      setChanged();
+      redraw();
+    }
+  }
+
+  private void addPipelineAt(Point location) {
+    if (model == null) {
+      return;
+    }
+    byte[] beforeChange = captureUndoSnapshot();
+    SourcePipeline pipelineSource = new SourcePipeline(uniquePipelineName("pipeline"));
+    Point snapped =
+        PropsUi.calculateGridPosition(
+            new Point(location != null ? location.x : 50, location != null ? location.y : 50));
+    pipelineSource.setLocation(snapped);
+    model.getPipelineSources().add(pipelineSource);
+    boolean accepted =
+        new HopGuiSourcePipelineDialog(
+                getShell(), pipelineSource, model, variables, hopGui.getMetadataProvider())
+            .open();
+    if (accepted) {
+      commitDialogUndo(beforeChange);
+      setChanged();
+    } else {
+      model.getPipelineSources().remove(pipelineSource);
+    }
+    redraw();
+  }
+
+  private String uniquePipelineName(String base) {
+    String name = base;
+    int i = 2;
+    while (model.findPipelineSource(name) != null) {
+      name = base + i;
+      i++;
+    }
+    return name;
   }
 
   private void addJsonAt(Point location) {
@@ -1703,7 +1899,8 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     Object parent = areaOwner.getParent();
     if (parent instanceof SourceTable
         || parent instanceof SourceQuery
-        || parent instanceof SourceJson) {
+        || parent instanceof SourceJson
+        || parent instanceof SourcePipeline) {
       return parent;
     }
     return null;
@@ -1732,6 +1929,13 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
   private SourceJson getAreaOwnerJsonSource(AreaOwner areaOwner) {
     if (areaOwner != null && areaOwner.getParent() instanceof SourceJson jsonSource) {
       return jsonSource;
+    }
+    return null;
+  }
+
+  private SourcePipeline getAreaOwnerPipelineSource(AreaOwner areaOwner) {
+    if (areaOwner != null && areaOwner.getParent() instanceof SourcePipeline pipelineSource) {
+      return pipelineSource;
     }
     return null;
   }
@@ -1825,6 +2029,27 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
   }
 
+  private void showPipelineContextDialog(Event e, SourcePipeline pipelineSource) {
+    try {
+      org.eclipse.swt.graphics.Point p = getShell().getDisplay().map(canvas, null, e.x, e.y);
+      String message =
+          BaseMessages.getString(
+              PKG, "HopGuiSourceModelGraph.Context.Pipeline.Message", pipelineSource.getName());
+      IGuiContextHandler contextHandler =
+          new HopGuiSourcePipelineContext(model, this, pipelineSource, new Point(p.x, p.y));
+      GuiContextUtil.getInstance()
+          .handleActionSelection(getShell(), message, new Point(p.x, p.y), contextHandler);
+    } catch (Exception ex) {
+      new ErrorDialog(
+          getShell(),
+          BaseMessages.getString(PKG, "HopGuiSourceModelGraph.Context.Error.Header"),
+          BaseMessages.getString(PKG, "HopGuiSourceModelGraph.Context.Error.Message"),
+          ex);
+    } finally {
+      canvas.setFocus();
+    }
+  }
+
   @GuiContextAction(
       id = "source-model-graph-add-table",
       parentId = HopGuiSourceModelContext.CONTEXT_ID,
@@ -1875,6 +2100,91 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       categoryOrder = "5")
   public void addJson(HopGuiSourceModelContext context) {
     addJsonAt(lastClick != null ? lastClick : new Point(50, 50));
+  }
+
+  @GuiContextAction(
+      id = "source-model-graph-add-pipeline",
+      parentId = HopGuiSourceModelContext.CONTEXT_ID,
+      type = GuiActionType.Create,
+      name = "i18n::HopGuiSourceModelGraph.Context.AddPipeline.Name",
+      tooltip = "i18n::HopGuiSourceModelGraph.Context.AddPipeline.Tooltip",
+      image = "source-model.svg",
+      category = "Basic",
+      categoryOrder = "6")
+  public void addPipeline(HopGuiSourceModelContext context) {
+    addPipelineAt(lastClick != null ? lastClick : new Point(50, 50));
+  }
+
+  @GuiContextAction(
+      id = "source-model-pipeline-edit",
+      parentId = HopGuiSourcePipelineContext.CONTEXT_ID,
+      type = GuiActionType.Modify,
+      name = "i18n::HopGuiSourceModelGraph.Context.Pipeline.Edit.Name",
+      tooltip = "i18n::HopGuiSourceModelGraph.Context.Pipeline.Edit.Tooltip",
+      image = "ui/images/edit.svg",
+      category = "Basic",
+      categoryOrder = "1")
+  public void editPipelineAction(HopGuiSourcePipelineContext context) {
+    if (context != null) {
+      editPipelineSource(context.getPipelineSource());
+    }
+  }
+
+  @GuiContextAction(
+      id = "source-model-pipeline-open",
+      parentId = HopGuiSourcePipelineContext.CONTEXT_ID,
+      type = GuiActionType.Info,
+      name = "i18n::HopGuiSourceModelGraph.Context.Pipeline.Open.Name",
+      tooltip = "i18n::HopGuiSourceModelGraph.Context.Pipeline.Open.Tooltip",
+      image = "ui/images/open.svg",
+      category = "Basic",
+      categoryOrder = "2")
+  public void openPipelineAction(HopGuiSourcePipelineContext context) {
+    if (context != null && context.getPipelineSource() != null) {
+      DmSourcePipelineOpenSupport.openSourcePipelineFile(
+          hopGui, getShell(), variables, context.getPipelineSource().getPipelineFilename());
+    }
+  }
+
+  @GuiContextAction(
+      id = "source-model-pipeline-publish",
+      parentId = HopGuiSourcePipelineContext.CONTEXT_ID,
+      type = GuiActionType.Create,
+      name = "i18n::HopGuiSourceModelGraph.Context.Pipeline.Publish.Name",
+      tooltip = "i18n::HopGuiSourceModelGraph.Context.Pipeline.Publish.Tooltip",
+      image = "ui/images/publish.svg",
+      category = "Basic",
+      categoryOrder = "3")
+  public void publishPipelineAction(HopGuiSourcePipelineContext context) {
+    if (context != null && context.getPipelineSource() != null) {
+      publishPipelineSource(context.getPipelineSource());
+    }
+  }
+
+  private void publishPipelineSource(SourcePipeline pipelineSource) {
+    if (model == null || pipelineSource == null) {
+      return;
+    }
+    try {
+      ensureModelFilenameForPublish();
+      SourcePipelineCatalogPublisher.PublishResult result =
+          SourcePipelineCatalogPublisher.publish(
+              model, pipelineSource, null, variables, hopGui.getMetadataProvider());
+      setChanged();
+      MessageBox box = new MessageBox(getShell(), SWT.ICON_INFORMATION | SWT.OK);
+      box.setText(
+          BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PushToCatalog.Done.Title"));
+      box.setMessage(
+          BaseMessages.getString(
+              PKG, "HopGuiSourceModelGraph.PushToCatalog.Done.Message", result.catalogName()));
+      box.open();
+    } catch (Exception e) {
+      new ErrorDialog(
+          getShell(),
+          BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PushToCatalog.Error.Title"),
+          BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PushToCatalog.Error.Message"),
+          e);
+    }
   }
 
   @GuiContextAction(
@@ -1998,7 +2308,10 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       return;
     }
     markUndoPoint();
-    model.getJsonSources().remove(context.getJsonSource());
+    SourceJson jsonSource = context.getJsonSource();
+    SourceRelationshipLifecycleSupport.removeRelationshipsReferencing(
+        model, SourceEndpointKind.JSON, jsonSource.getName());
+    model.getJsonSources().remove(jsonSource);
     setChanged();
     redraw();
   }
@@ -2089,7 +2402,10 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       return;
     }
     markUndoPoint();
-    model.getQueries().remove(context.getQuery());
+    SourceQuery query = context.getQuery();
+    SourceRelationshipLifecycleSupport.removeRelationshipsReferencing(
+        model, SourceEndpointKind.QUERY, query.getName());
+    model.getQueries().remove(query);
     setChanged();
     redraw();
   }
@@ -2295,6 +2611,24 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
                   jsonSource.getName(),
                   feedName)));
     }
+    for (SourcePipeline pipelineSource : model.getPipelineSources()) {
+      if (pipelineSource == null
+          || Utils.isEmpty(pipelineSource.getName())
+          || pipelineSource.getFields().isEmpty()) {
+        continue;
+      }
+      String feedName = SourcePipelineCatalogPublisher.resolveCatalogSourceName(pipelineSource);
+      candidates.add(
+          new CatalogPublishCandidate(
+              CatalogPublishKind.PIPELINE,
+              pipelineSource.getName(),
+              feedName,
+              formatCatalogPublishLabel(
+                  BaseMessages.getString(
+                      PKG, "HopGuiSourceModelGraph.PushToCatalog.Kind.Pipeline"),
+                  pipelineSource.getName(),
+                  feedName)));
+    }
     return candidates;
   }
 
@@ -2334,13 +2668,23 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
                 model, jsonSource, null, variables, hopGui.getMetadataProvider())
             .catalogName();
       }
+      case PIPELINE -> {
+        SourcePipeline pipelineSource = model.findPipelineSource(candidate.objectName());
+        if (pipelineSource == null) {
+          throw new HopException("Source pipeline not found: " + candidate.objectName());
+        }
+        yield SourcePipelineCatalogPublisher.publish(
+                model, pipelineSource, null, variables, hopGui.getMetadataProvider())
+            .catalogName();
+      }
     };
   }
 
   private enum CatalogPublishKind {
     TABLE,
     QUERY,
-    JSON
+    JSON,
+    PIPELINE
   }
 
   private record CatalogPublishCandidate(
@@ -2421,16 +2765,32 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       return;
     }
     SourceTable table = context.getTable();
-    String tableName = table.getName();
     markUndoPoint();
+    SourceRelationshipLifecycleSupport.removeRelationshipsReferencing(
+        model, SourceEndpointKind.TABLE, table.getName());
     model.getTables().remove(table);
-    model
-        .getRelationships()
-        .removeIf(
-            r ->
-                r != null
-                    && (tableName.equals(r.getChildTableName())
-                        || tableName.equals(r.getParentTableName())));
+    setChanged();
+    redraw();
+  }
+
+  @GuiContextAction(
+      id = "source-model-pipeline-delete",
+      parentId = HopGuiSourcePipelineContext.CONTEXT_ID,
+      type = GuiActionType.Delete,
+      name = "i18n::HopGuiSourceModelGraph.Context.Pipeline.Delete.Name",
+      tooltip = "i18n::HopGuiSourceModelGraph.Context.Pipeline.Delete.Tooltip",
+      image = "ui/images/delete.svg",
+      category = "Basic",
+      categoryOrder = "4")
+  public void deletePipelineAction(HopGuiSourcePipelineContext context) {
+    if (context == null || context.getPipelineSource() == null || model == null) {
+      return;
+    }
+    markUndoPoint();
+    SourcePipeline pipelineSource = context.getPipelineSource();
+    SourceRelationshipLifecycleSupport.removeRelationshipsReferencing(
+        model, SourceEndpointKind.PIPELINE, pipelineSource.getName());
+    model.getPipelineSources().remove(pipelineSource);
     setChanged();
     redraw();
   }
@@ -2530,9 +2890,15 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       SourceTable table = getAreaOwnerTable(areaOwner);
       SourceQuery query = getAreaOwnerQuery(areaOwner);
       SourceJson jsonSource = getAreaOwnerJsonSource(areaOwner);
+      SourcePipeline pipelineSource = getAreaOwnerPipelineSource(areaOwner);
       DvNote note = getAreaOwnerNote(areaOwner);
       AreaOwner.AreaType areaType = areaOwner == null ? null : areaOwner.getAreaType();
-      Object canvasObject = query != null ? query : (jsonSource != null ? jsonSource : table);
+      Object canvasObject =
+          query != null
+              ? query
+              : (jsonSource != null
+                  ? jsonSource
+                  : (pipelineSource != null ? pipelineSource : table));
       return new ModelGraphHit(areaOwner, areaType, note, canvasObject);
     }
 
@@ -2558,6 +2924,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
               control, queryHit.isSelected(), () -> queryHit.setSelected(true));
           currentQuery = queryHit;
           currentJsonSource = null;
+          currentPipelineSource = null;
           currentTable = null;
           iconDragStart = new Point(real.x, real.y);
           iconDragCommitted = false;
@@ -2588,10 +2955,43 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
               control, jsonHit.isSelected(), () -> jsonHit.setSelected(true));
           currentJsonSource = jsonHit;
           currentQuery = null;
+          currentPipelineSource = null;
           currentTable = null;
           iconDragStart = new Point(real.x, real.y);
           iconDragCommitted = false;
           Point loc = jsonHit.getLocation() != null ? jsonHit.getLocation() : new Point(0, 0);
+          iconOffset = new Point(real.x - loc.x, real.y - loc.y);
+          clearNoteDragState();
+          clearSelectionRegion();
+          redraw();
+          return true;
+        }
+        return false;
+      }
+      if (obj instanceof SourcePipeline pipelineHit) {
+        AreaOwner.AreaType areaType = hit.areaType();
+        if (e.button == 1 && areaType == AreaOwner.AreaType.TRANSFORM_NAME) {
+          avoidContextDialog = true;
+          editPipelineSource(pipelineHit);
+          clearTableDragState();
+          return true;
+        }
+        if (areaType == AreaOwner.AreaType.TRANSFORM_ICON
+            && (e.button == 2 || (e.button == 1 && shift))) {
+          startRelationshipDrag(pipelineHit, e);
+          return true;
+        }
+        if (e.button == 1 && areaType == AreaOwner.AreaType.TRANSFORM_ICON) {
+          prepareExclusiveDragSelection(
+              control, pipelineHit.isSelected(), () -> pipelineHit.setSelected(true));
+          currentPipelineSource = pipelineHit;
+          currentJsonSource = null;
+          currentQuery = null;
+          currentTable = null;
+          iconDragStart = new Point(real.x, real.y);
+          iconDragCommitted = false;
+          Point loc =
+              pipelineHit.getLocation() != null ? pipelineHit.getLocation() : new Point(0, 0);
           iconOffset = new Point(real.x - loc.x, real.y - loc.y);
           clearNoteDragState();
           clearSelectionRegion();
@@ -2624,6 +3024,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
         currentTable = tableHit;
         currentQuery = null;
         currentJsonSource = null;
+        currentPipelineSource = null;
         iconDragStart = new Point(real.x, real.y);
         iconDragCommitted = false;
         Point loc = tableHit.getLocation() != null ? tableHit.getLocation() : new Point(0, 0);
@@ -2668,7 +3069,10 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     @Override
     public boolean handleObjectMouseMove(Point real, boolean leftButtonDown) {
       if (!leftButtonDown
-          || (currentTable == null && currentQuery == null && currentJsonSource == null)
+          || (currentTable == null
+              && currentQuery == null
+              && currentJsonSource == null
+              && currentPipelineSource == null)
           || startRelationshipNode != null
           || resize != null) {
         return false;
@@ -2682,6 +3086,9 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       if (currentJsonSource != null) {
         currentJsonSource.setSelected(true);
       }
+      if (currentPipelineSource != null) {
+        currentPipelineSource.setSelected(true);
+      }
       if (iconOffset == null) {
         iconOffset = new Point(0, 0);
       }
@@ -2692,7 +3099,10 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       }
       Point baseLoc;
       boolean selected;
-      if (currentJsonSource != null) {
+      if (currentPipelineSource != null) {
+        baseLoc = currentPipelineSource.getLocation();
+        selected = currentPipelineSource.isSelected();
+      } else if (currentJsonSource != null) {
         baseLoc = currentJsonSource.getLocation();
         selected = currentJsonSource.isSelected();
       } else if (currentQuery != null) {
@@ -2736,6 +3146,9 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     public boolean hasCancellableDragState() {
       return startRelationshipNode != null
           || currentTable != null
+          || currentQuery != null
+          || currentJsonSource != null
+          || currentPipelineSource != null
           || iconDragStart != null
           || currentNote != null
           || noteDragStart != null
@@ -2773,6 +3186,11 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
           jsonSource.setSelected(false);
         }
       }
+      for (SourcePipeline pipelineSource : model.getPipelineSources()) {
+        if (pipelineSource != null) {
+          pipelineSource.setSelected(false);
+        }
+      }
       unselectAllNotes();
     }
 
@@ -2794,6 +3212,12 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       for (SourceJson jsonSource : model.getJsonSources()) {
         if (isJsonInLassoScreenRect(jsonSource, lassoMinX, lassoMinY, lassoMaxX, lassoMaxY)) {
           jsonSource.setSelected(true);
+        }
+      }
+      for (SourcePipeline pipelineSource : model.getPipelineSources()) {
+        if (isPipelineInLassoScreenRect(
+            pipelineSource, lassoMinX, lassoMinY, lassoMaxX, lassoMaxY)) {
+          pipelineSource.setSelected(true);
         }
       }
       for (DvNote note : model.getNotes()) {
@@ -2881,6 +3305,19 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
         return true;
       }
 
+      SourcePipeline pipelineHit = getAreaOwnerPipelineSource(getVisibleAreaOwner(real.x, real.y));
+      if (pipelineHit != null) {
+        if (isControlDown(e)) {
+          avoidContextDialog = true;
+          editPipelineSource(pipelineHit);
+        } else if (!avoidContextDialog) {
+          showPipelineContextDialog(e, pipelineHit);
+        }
+        clearTableDragState();
+        avoidContextDialog = false;
+        return true;
+      }
+
       // Prefer relationship label hit over a leftover table selection from mouse-down.
       SourceRelationship relationshipHit =
           getAreaOwnerRelationship(getVisibleAreaOwner(real.x, real.y));
@@ -2946,6 +3383,9 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
         } else if (areaOwner.getParent() instanceof SourceJson sourceJson
             && sourceJson.getName() != null) {
           newOver = sourceJson.getName();
+        } else if (areaOwner.getParent() instanceof SourcePipeline sourcePipeline
+            && sourcePipeline.getName() != null) {
+          newOver = sourcePipeline.getName();
         }
       }
       if ((mouseOverTableName == null && newOver != null)

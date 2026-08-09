@@ -37,10 +37,13 @@ import org.apache.hop.pipeline.transform.TransformMeta;
 @Transform(
     id = "RecordDefinitionInput",
     image = "data-catalog.svg",
-    name = "i18n::RecordDefinitionInput.Name",
-    description = "i18n::RecordDefinitionInput.Description",
+    // Literal name: plugin-folder i18n for "i18n::Key" is not always resolved in Hop's transform
+    // palette; keep messages_* for dialogs, use plain English here for the registry/GUI list.
+    name = "Get Record Definition Names",
+    description =
+        "Lists record definition names (and optional field metadata) from a data catalog",
     categoryDescription = "i18n:org.apache.hop.pipeline.transform:BaseTransform.Category.Input",
-    keywords = "i18n::RecordDefinitionInput.keyword")
+    keywords = "record,definition,catalog,names,list,metadata,get")
 @Getter
 @Setter
 public class RecordDefinitionInputMeta

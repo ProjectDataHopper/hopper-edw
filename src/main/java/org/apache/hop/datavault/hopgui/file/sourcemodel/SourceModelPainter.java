@@ -30,6 +30,7 @@ import org.apache.hop.core.gui.IGc;
 import org.apache.hop.core.gui.IGc.EColor;
 import org.apache.hop.core.gui.IGc.EFont;
 import org.apache.hop.core.gui.IGc.ELineStyle;
+import org.apache.hop.core.Const;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
@@ -43,6 +44,7 @@ import org.apache.hop.datavault.metadata.sourcemodel.SourceEndpointSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJson;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJsonParentKind;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
+import org.apache.hop.datavault.metadata.sourcemodel.SourcePipeline;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQuery;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQueryJoin;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceRelationship;
@@ -74,12 +76,12 @@ public class SourceModelPainter extends BasePainter {
   private Map<String, SourceTable> tableByName = new HashMap<>();
   private boolean showEmptyModelHint = true;
 
-  /** Table, query, or JSON node where relationship drag started. */
+  /** Table, query, JSON, or pipeline node where relationship drag started. */
   private Object startRelationshipNode;
 
   private Point relationshipDragEndLocation;
 
-  /** Table, query, or JSON node under the cursor during relationship drag. */
+  /** Table, query, JSON, or pipeline node under the cursor during relationship drag. */
   private Object candidateRelationshipTarget;
 
   public SourceModelPainter(
@@ -124,6 +126,7 @@ public class SourceModelPainter extends BasePainter {
     drawTables();
     drawQueries();
     drawJsonSources();
+    drawPipelineSources();
     drawRect(selectionRegion);
 
     gc.setTransform(0.0f, 0.0f, 1.0f);
@@ -456,7 +459,33 @@ public class SourceModelPainter extends BasePainter {
     if (node instanceof SourceJson json) {
       return jsonBounds(json);
     }
+    if (node instanceof SourcePipeline pipeline) {
+      return pipelineBounds(pipeline);
+    }
     return null;
+  }
+
+  private Bounds pipelineBounds(SourcePipeline pipelineSource) {
+    Point loc = pipelineSource.getLocation();
+    int x = loc != null ? loc.x : 0;
+    int y = loc != null ? loc.y : 0;
+    if (gc == null) {
+      return new Bounds(x, y, COMPOSITION_CARD_WIDTH, COMPOSITION_CARD_HEIGHT);
+    }
+    String label = Utils.isEmpty(pipelineSource.getName()) ? "?" : pipelineSource.getName();
+    String secondary =
+        Utils.isEmpty(pipelineSource.getOutputTransformName())
+            ? Const.NVL(pipelineSource.getPipelineFilename(), "")
+            : pipelineSource.getOutputTransformName();
+    int fieldCount = pipelineSource.getFields() != null ? pipelineSource.getFields().size() : 0;
+    String extra = fieldCount + " field(s)";
+    ModelGraphTableCardLayout.BoxSize boxSize =
+        ModelGraphTableCardLayout.computeBoxSize(gc, label, secondary, "PIPELINE", extra);
+    return new Bounds(
+        x,
+        y,
+        Math.max(COMPOSITION_CARD_WIDTH, boxSize.width()),
+        Math.max(COMPOSITION_CARD_HEIGHT, boxSize.height()));
   }
 
   private static Bounds tableBounds(SourceTable table) {
@@ -576,6 +605,7 @@ public class SourceModelPainter extends BasePainter {
 
   /** Teal/cyan card for JSON extraction nodes (distinct from purple queries). */
   private static final int[] JSON_COLOR = new int[] {20, 130, 140};
+  private static final int[] PIPELINE_COLOR = new int[] {180, 100, 40};
 
   private void drawQueries() {
     if (model.getQueries() == null) {
@@ -715,11 +745,80 @@ public class SourceModelPainter extends BasePainter {
     }
   }
 
+  private void drawPipelineSources() {
+    if (model.getPipelineSources() == null) {
+      return;
+    }
+    for (SourcePipeline pipelineSource : model.getPipelineSources()) {
+      if (pipelineSource == null) {
+        continue;
+      }
+      Point loc = pipelineSource.getLocation();
+      if (loc == null) {
+        continue;
+      }
+      String label = Utils.isEmpty(pipelineSource.getName()) ? "?" : pipelineSource.getName();
+      String secondary =
+          Utils.isEmpty(pipelineSource.getOutputTransformName())
+              ? Const.NVL(pipelineSource.getPipelineFilename(), "")
+              : pipelineSource.getOutputTransformName();
+      String typeLabel = "PIPELINE";
+      int fieldCount = pipelineSource.getFields() != null ? pipelineSource.getFields().size() : 0;
+      String extra = fieldCount + " field(s)";
+
+      ModelGraphTableCardLayout.BoxSize boxSize =
+          ModelGraphTableCardLayout.computeBoxSize(gc, label, secondary, typeLabel, extra);
+      int boxWidth = Math.max(160, boxSize.width());
+      int boxHeight = Math.max(80, boxSize.height());
+
+      Point screenLoc = real2screen(loc.x, loc.y);
+      int x = screenLoc.x;
+      int y = screenLoc.y;
+
+      gc.setBackground(EColor.WHITE);
+      gc.fillRoundRectangle(x, y, boxWidth, boxHeight, CORNER_RADIUS_5, CORNER_RADIUS_5);
+      gc.setLineWidth(pipelineSource.isSelected() ? 2 : 1);
+      gc.setForeground(PIPELINE_COLOR[0], PIPELINE_COLOR[1], PIPELINE_COLOR[2]);
+      gc.drawRoundRectangle(x, y, boxWidth, boxHeight, CORNER_RADIUS_5, CORNER_RADIUS_5);
+      gc.setLineWidth(1);
+
+      ModelGraphTableCardLayout.drawSvgIcon(
+          gc, getClass().getClassLoader(), "source-model.svg", x, y, magnification);
+      Point nameExtent =
+          ModelGraphTableCardLayout.drawName(gc, label, x, y, label.equals(mouseOverTableName));
+      ModelGraphTableCardLayout.drawSecondaryLine(gc, secondary, x, y, nameExtent);
+      Point typeExtent = ModelGraphTableCardLayout.drawTypeBelowIcon(gc, typeLabel, x, y);
+      ModelGraphTableCardLayout.drawExtraLineBelowType(gc, extra, x, y, typeExtent, PIPELINE_COLOR);
+
+      if (areaOwners != null) {
+        areaOwners.add(
+            new AreaOwner(
+                AreaType.TRANSFORM_ICON, x, y, boxWidth, boxHeight, offset, pipelineSource, label));
+        int nameX = ModelGraphTableCardLayout.nameX(x);
+        int nameY = ModelGraphTableCardLayout.nameY(y);
+        ModelGraphTableNameHitArea.Bounds nameHit =
+            ModelGraphTableNameHitArea.bounds(nameX, nameY, nameExtent);
+        areaOwners.add(
+            new AreaOwner(
+                AreaType.TRANSFORM_NAME,
+                nameHit.x(),
+                nameHit.y(),
+                nameHit.width(),
+                nameHit.height(),
+                offset,
+                pipelineSource,
+                label));
+      }
+    }
+  }
+
   private boolean isEmptyModel() {
     boolean notesEmpty = !drawNotes || model.getNotes().isEmpty();
     boolean queriesEmpty = model.getQueries() == null || model.getQueries().isEmpty();
     boolean jsonEmpty = model.getJsonSources() == null || model.getJsonSources().isEmpty();
-    return model.getTables().isEmpty() && queriesEmpty && jsonEmpty && notesEmpty;
+    boolean pipelineEmpty =
+        model.getPipelineSources() == null || model.getPipelineSources().isEmpty();
+    return model.getTables().isEmpty() && queriesEmpty && jsonEmpty && pipelineEmpty && notesEmpty;
   }
 
   private List<String> getEmptyModelHintLines() {

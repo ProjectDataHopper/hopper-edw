@@ -4,7 +4,7 @@
 
 toc::[]
 
-The **source modeler** captures source-system structure (tables, primary keys, foreign keys, multi-table **source queries**, and **source JSON** extractions) so Data Vault designers can feed hubs, links, and satellites without hand-written SQL for every join.
+The **source modeler** captures source-system structure (tables, primary keys, foreign keys, multi-table **source queries**, **source JSON** extractions, and **pipeline sources**) so Data Vault designers can feed hubs, links, and satellites without hand-written SQL for every join—including cases that need Hop transforms for convert/filter/aggregate.
 
 Models are saved as **`.hsm`** files and open in Hop GUI with the same interaction style as `.hdv` / `.hbv` / `.hdm` (canvas, dialogs, undo, notes, check model).
 
@@ -49,9 +49,45 @@ Catalog DV_SOURCE (single-table OR COMPOSITE feed)
 |**Source JSON**
 |Named JSON extraction: parent table/query/JSON source, JSON field, projected fields (JsonPath + pass-through keys). JsonInput rules apply (top-level leaves + at most one array). Publish as catalog type `JSON`. Chain Source JSON objects for nested arrays. See image:images/source-modeler-json-source.png[Source JSON dialog,width=480].
 
+|**Source pipeline**
+|Named pipeline-backed feed: path to a `.hpl`, output transform, and **declared fields** (contract for catalog publish and MetaInject load). Uses the same **catalog connection / namespace** as the rest of the model (Edit model) for **publishing** this feed. Optional **Import** scans the pipeline for zero or more **Record Definition Input** transforms and stores catalog connection / namespace / record name for lineage (not required for load). **Catalog source name** is the published name of *this* pipeline feed (like a table). Publish as catalog type `PIPELINE`.
+
 |**Note**
 |Canvas documentation (same note pads as other modelers).
 |===
+
+== Source pipeline
+
+image::images/source-modeler-pipeline-source-graph.png[Source modeler canvas with a pipeline source card (asn-package-lines) related to CRM tables,align="center"]
+
+Pipeline sources are for feeds that **already exist as a Hop pipeline** (Get data from XML, complex transform graphs, MetaInject templates, and so on). The canvas card is not a substitute for designing the `.hpl`; it **declares the contract** the vault will load through MetaInject.
+
+image::images/source-modeler-pipeline-source-dialog.png[Source pipeline dialog — pipeline file, output transform, catalog name, import lineage, and declared fields,align="center"]
+
+. **Add pipeline source** (toolbar) or double-click an amber **PIPELINE** card.
+. **General**: name, description, **pipeline file** (Browse / Open), **output transform** (Select…), optional run configuration, **catalog source name** for publish.
+. **Import** (optional): scan the pipeline for **Record Definition Input** transforms and record catalog lineage refs (0..n). Not required for load.
+. **Fields**: declare (or **Get fields** from the output transform) the feed layout. This list is the catalog / MetaInject contract.
+. **Preview**: runs the pipeline with parameter defaults activated (same idea as design-time preview when the pipeline defines parameters such as `RETAIL_CSV_WAVE`).
+. **Validate** and **Publish to catalog** / toolbar **Push to catalog** as type **`PIPELINE`**.
+
+Canvas behaviour matches other cards: drag to move, hover underline + click name to edit, multi-select, lasso, Shift/middle-button relationship drag. Renaming a pipeline (or other endpoint) **drops** relationships that still pointed at the old name; opening an `.hsm` also prunes dangling relationship edges.
+
+=== Catalog origin and schema gate
+
+Published pipeline feeds store **source model provenance** (portable `.hsm` path + pipeline card name). In the Data Catalog record definition, **Go to origin** opens the source model and selects the card.
+
+Schema harvest / resource definition validation **rediscovers** pipeline feeds by rebuilding fields from the source-model projection (preferred) or the live output transform — same role as JSON/composite rediscovery. They are not treated as “physical table unavailable.”
+
+=== From the Data Vault modeler
+
+Bind hubs, links, and satellites to the published feed name (for example `asn-package-lines`). Generated loads inject the pipeline via **MetaInject** using the declared field layout and the vault record-source indicator.
+
+On a **link** dialog **Hub sources** tab, **Suggest mappings…** matches feed field names to participating hub business keys (exact and simple aliases). Empty maps only are filled; review with **Edit hub source mappings…**. See link:dv-link.adoc[Data Vault Link].
+
+Runtime variables such as `RETAIL_CSV_WAVE` come from the **workflow / project variable space** (not from a separate parameter map on the source card). Pipeline parameter defaults help GUI preview when those variables are unset.
+
+Sample retail pipeline: `retail-example/pipelines/parse-asn-xml.hpl` + `files/asn_demo.xml` (and wave files from `generate-retail-data.py`).
 
 == Source JSON
 
@@ -126,6 +162,7 @@ Use the toolbar **Push to catalog** button to choose which model objects to publ
 * **Tables** with columns → catalog type **`DATABASE`**
 * **Queries** with a projection → catalog type **`COMPOSITE`**
 * **JSON sources** with fields → catalog type **`JSON`**
+* **Pipeline sources** with declared fields → catalog type **`PIPELINE`**
 
 All items are preselected; deselect anything you do not want. Existing catalog feeds with the same name are **overwritten**. Set **Catalog connection** under **Edit model** on the source model first.
 
@@ -157,6 +194,12 @@ When the bound feed is a **JSON** source:
 * Adds the vault **record source** column (static indicator Constant, or rename of a source-indicator field) — the same role database SQL plays with `'indicator' AS x_record_source`.
 * **Hub** loads also **sort and distinct** on business-key identity fields so MergeRowsPlus CDC does not re-insert existing keys on incremental waves.
 
+When the bound feed is a **PIPELINE** source:
+
+* Injects a **MetaInject** step targeting the declared `.hpl` and output transform, with the catalog field contract as MetaInject output fields.
+* Adds the vault **record source** indicator the same way as other source types.
+* **Hub** loads sort/distinct identity fields for CDC as with JSON/database sources.
+
 Prefer keeping the `.hsm` in the project so generation always reflects the latest join; re-publish when field layouts change so catalog field lists stay aligned for mapping dialogs.
 
 == Retail sample
@@ -168,17 +211,18 @@ The retail project includes:
 retail-example/models/source-tables-crm.hsm
 ----
 
-It models CRM landing tables (customer hub, address, contact, demo, prefs, orders, products, warehouses, **order_shipment_event**) with relationships, a sample query **All customer info** (`feed_customer_enriched`), and Source JSON **order_shipment_tracking** (`feed_order_shipment_tracking`). The screenshot above shows the multi-table query dialog and generated SQL.
+It models CRM landing tables (customer hub, address, contact, demo, prefs, orders, products, warehouses, **order_shipment_event**) with relationships, a sample query **All customer info** (`feed_customer_enriched`), Source JSON **order_shipment_tracking** (`feed_order_shipment_tracking`), and pipeline source **asn-package-lines** (`parse-asn-xml.hpl` over ASN XML waves). The screenshots above show the multi-table query dialog, JSON source, and pipeline source graph/dialog.
 
 Workflow:
 
 . Open `source-tables-crm.hsm` in Hop GUI (project **retail-example**).
-. Review tables, the purple **query** card, and the teal **JSON** card.
+. Review tables, the purple **query** card, the teal **JSON** card, and the amber **PIPELINE** card.
 . Open **All customer info** — use **Generate SQL** / **Preview data** / **Validate** (CRM connection required).
 . Open **order_shipment_tracking** — sample fields / preview after CRM load; **Validate** and publish as `feed_order_shipment_tracking`.
+. Open **asn-package-lines** — pipeline file `pipelines/parse-asn-xml.hpl`, declared package-line fields; **Preview** / **Validate** / publish as `asn-package-lines`.
 . Ensure model **Catalog connection** points at the project catalog (`local-catalog`).
-. **Push to catalog** (or publish individual objects); confirm feeds in the Data Catalog.
-. `models/retail-360.hdv` already binds `feed_order_shipment_tracking` for **hub_order_shipment** / **lnk_order_shipment** / **sat_order_shipment**; classic customer/order sats still use one catalog source per physical table.
+. **Push to catalog** (or publish individual objects); confirm feeds in the Data Catalog. **Go to origin** on a pipeline feed returns to this `.hsm` card.
+. `models/retail-360.hdv` binds `feed_order_shipment_tracking` for shipment tracking tables and **`asn-package-lines`** for **hub_package_line** / **sat_package_line** / **lnk_package_line**; classic customer/order sats still use one catalog source per physical table.
 
 == Check model
 

@@ -105,6 +105,16 @@ Retail lands a simulated **Kafka consumer** table `order_shipment_event` (UUID `
 
 The main retail vault still uses one catalog source per physical table for classic hubs/sats, **plus** this JSON feed for shipment tracking. Use the source modeler for **composed feeds** (SQL joins or JSON extractions). Full walkthrough: link:source-modeler-overview.adoc[Source modeler overview].
 
+=== Advanced Shipping Notice XML (pipeline parse)
+
+Alongside tracking **events** (JSON), retail includes nested **ASN** documents (what left the warehouse: packages and lines).
+
+* Committed sample: `files/asn_demo.xml` (two ASNs, five package lines).
+* Generated waves: `files/asn_${RETAIL_CSV_WAVE}.xml` from `generate-retail-data.py` (subset of SHIPPED/DELIVERED orders).
+* Parse pipeline: `pipelines/parse-asn-xml.hpl` — **Get data from XML** loops `/AdvancedShipmentNotices/ASN/Packages/Package/Lines/Line`, flattens parent attributes via relative XPath, adds `record_source=E2E-asn-line`, and ends on dummy **ASN lines** (preview / pipeline-source output).
+
+Default parameter `RETAIL_CSV_WAVE=demo` reads the committed fixture. After a data generate, set the wave to `initial` or `2024-01` to parse the matching file. This path is meant for **pipeline sources** in the source modeler; it is not loaded into CRM by the default workflows.
+
 == Chapter 3 — Explore the Data Vault model
 
 . Open `models/retail-360.hdv`.

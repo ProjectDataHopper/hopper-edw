@@ -37,10 +37,11 @@ import org.apache.hop.pipeline.transform.TransformMeta;
 @Transform(
     id = "RecordDefinitionDdl",
     image = "data-catalog.svg",
-    name = "i18n::RecordDefinitionDdl.Name",
-    description = "i18n::RecordDefinitionDdl.Description",
+    name = "Record Definition DDL",
+    description =
+        "Creates or updates database tables from catalog record definitions, including primary keys",
     categoryDescription = "i18n:org.apache.hop.pipeline.transform:BaseTransform.Category.Utility",
-    keywords = "i18n::RecordDefinitionDdl.keyword")
+    keywords = "record,definition,catalog,ddl,table,create")
 @Getter
 @Setter
 public class RecordDefinitionDdlMeta

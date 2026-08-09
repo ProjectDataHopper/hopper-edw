@@ -1,17 +1,17 @@
-= Record Definition Output
+= Catalog Record Definition Metadata Output
 :toc: macro
 :toclevels: 3
 
 toc::[]
 
-The **Record Definition Output** transform writes **record definitions** to a Hop **data catalog** connection. It is an output transform (category **Output**) and appears in the transform palette with the data catalog icon.
+The **Catalog Record Definition Metadata Output** transform (plugin id `RecordDefinitionOutput`) writes **record definition metadata** to a Hop **data catalog** connection. It is an output transform (category **Output**) and appears in the transform palette with the data catalog icon.
 
 Use it when you want to **publish or migrate** catalog entries from a pipeline instead of only editing them in the Data Catalog perspective. Two field sources are supported:
 
 * **Physical discovery** — inspect a database table, CSV/Parquet file, or Iceberg table and store the discovered layout.
 * **Stream field definitions** — accept one input row per column (name, type, length, precision, primary key position, format options) and assemble complete definitions with a **field grouping** key. This path is intended for catalog migration and bulk load of existing metadata.
 
-The inverse transform is link:record-definition-input.adoc[Record Definition Input], which reads catalog entries as pipeline rows.
+The inverse transform is link:record-definition-input.adoc[Get Record Definition Names], which reads catalog entries as metadata pipeline rows. To read **actual data** from a catalog source, use link:record-definition-data-input.adoc[Record Definition Input].
 
 == Prerequisites
 
@@ -294,12 +294,12 @@ Each run discovers current columns and upserts the catalog entry. Use this for o
 * Do not confuse **Field grouping field** (row-break key for collecting columns) with **Group** on the DV Source tab (business/org tag on the source).
 * Keep catalog connection names stable across environments; override database connection names in the stream or via variables if needed.
 * Variables are supported on catalog connection name and on fixed string values; field name combos select columns from the previous transform.
-* After writing, use link:record-definition-input.adoc[Record Definition Input] (optionally with denormalized field metadata) to verify or drive DDL from the same catalog.
+* After writing, use link:record-definition-input.adoc[Get Record Definition Names] (optionally with denormalized field metadata) to verify or drive DDL from the same catalog.
 * Composite multi-table sources are not created by this transform; publish those from a link:source-modeler-overview.adoc[source model (`.hsm`)].
 
 == Related documentation
 
 * link:data-catalog.adoc[Data Catalog] — local catalog setup, namespaces, versions
-* link:record-definition-input.adoc[Record Definition Input] — read catalog definitions as rows
+* link:record-definition-input.adoc[Get Record Definition Names] — read catalog definition metadata as rows
 * link:datavault-source.adoc[Data Vault sources] — `DV_SOURCE` record definitions
 * link:datavault-source-database.adoc[Database-backed sources] — database source fields

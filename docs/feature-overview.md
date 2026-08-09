@@ -66,8 +66,9 @@ For a slide-style executive summary, see [presentations/hop-data-vault-overview.
 | Dimensional Update / Publish actions | Available | [dimensional-update-action.adoc](dimensional-update-action.adoc) |
 | Execution maps (`.hem`) | Available | [execution-maps.adoc](execution-maps.adoc) |
 | AI Help (model, pipeline, workflow) | Available | [ai-advisory.md](ai-advisory.md) |
-| Record Definition Input transform | Available | [record-definition-input.adoc](record-definition-input.adoc) |
-| Record Definition Output transform | Available | [record-definition-output.adoc](record-definition-output.adoc) |
+| Get Record Definition Names transform | Available | [record-definition-input.adoc](record-definition-input.adoc) |
+| Catalog Record Definition Metadata Output transform | Available | [record-definition-output.adoc](record-definition-output.adoc) |
+| Record Definition Input transform (data rows) | Available | [record-definition-data-input.adoc](record-definition-data-input.adoc) |
 | Date Dimension Generator transform | Available | [date-dimension-generator.adoc](date-dimension-generator.adoc) |
 | `hop svg` export | Available | [README.md](README.md#command-line-tools) |
 | BV naming rules engine | Planned | [plans/bv-naming-rules-engine-plan.md](plans/bv-naming-rules-engine-plan.md) |
@@ -113,13 +114,17 @@ Hubs, links, and satellites reference source **names**, not raw connection detai
 
 ### Source modeler (`.hsm`)
 
-Visual **source-system** modeler: import tables with PK/FK, draw relationships, compose **source queries** (joins + projections), and define **source JSON** extractions (flatten a JSON field into a feed; chain steps for nested arrays). **Validate** tables/queries/JSON/relationships at design time. Publish a query as catalog **COMPOSITE** or a JSON extraction as **JSON**; Data Vault loads generate SQL/Merge Join or parent + JsonInput pipelines (with record-source injection and hub sort/distinct for JSON). Retail sample: `retail-example/models/source-tables-crm.hsm` including Kafka-style shipment events → `feed_order_shipment_tracking` on `retail-360.hdv`. See [source-modeler-overview.adoc](source-modeler-overview.adoc).
+Visual **source-system** modeler: import tables with PK/FK, draw relationships, compose **source queries** (joins + projections), **source JSON** extractions (flatten a parent JSON field; chain steps for nested arrays), and **pipeline sources** (declare a `.hpl` + output transform + field contract; publish as catalog **`PIPELINE`**). **Validate** tables/queries/JSON/pipelines/relationships at design time. Publish queries as **`COMPOSITE`**, JSON as **`JSON`**, pipelines as **`PIPELINE`**; Data Vault loads generate SQL/Merge Join, parent + JsonInput, or MetaInject pipelines (with record-source injection and hub sort/distinct where needed). Catalog **Go to origin** opens the `.hsm` card for published pipeline/JSON/composite feeds. Retail sample: `retail-example/models/source-tables-crm.hsm` (shipment JSON + ASN pipeline) → `retail-360.hdv`. See [source-modeler-overview.adoc](source-modeler-overview.adoc).
 
 ![Source modeler — retail CRM tables with All customer info query SQL](images/source-modeler-retail-example-with-query-dialog-generated-sql.png)
 
 ![Source modeler — tables, query, and JSON source cards](images/source-modeler-example.png)
 
 ![Source JSON dialog — extract fields from a parent JSON column](images/source-modeler-json-source.png)
+
+![Source modeler — pipeline source card and relationships](images/source-modeler-pipeline-source-graph.png)
+
+![Source pipeline dialog — file, transform, and declared fields](images/source-modeler-pipeline-source-dialog.png)
 
 ### Project and metadata search (Hop 2.19)
 
@@ -185,8 +190,9 @@ The **Performance tuning** scenario can include load-run metrics and propose mod
 
 ### Pipeline transforms
 
-- **Record Definition Input** — stream catalog record definitions (or fields) as pipeline rows.
-- **Record Definition Output** — discover or migrate field layouts into the data catalog (including stream field grouping).
+- **Get Record Definition Names** — stream catalog record definition metadata (or field layouts) as pipeline rows.
+- **Catalog Record Definition Metadata Output** — discover or migrate field layouts into the data catalog (including stream field grouping).
+- **Record Definition Input** — read actual data rows from a catalog record definition (same path as catalog Preview data).
 - **Date Dimension Generator** — populate standard calendar dimension attributes.
 
 ### Operations

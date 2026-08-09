@@ -664,8 +664,8 @@ limitations under the License.
       <tableType>LINK</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>496</xloc>
-      <yloc>400</yloc>
+      <xloc>384</xloc>
+      <yloc>416</yloc>
       <name>lnk_order_line</name>
       <virtualPath/>
     </table>
@@ -710,8 +710,8 @@ limitations under the License.
       <tableType>SATELLITE</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>704</xloc>
-      <yloc>400</yloc>
+      <xloc>80</xloc>
+      <yloc>416</yloc>
       <name>sat_lnk_order_line</name>
       <virtualPath/>
     </table>
@@ -736,8 +736,8 @@ limitations under the License.
       <tableType>HUB</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>528</xloc>
-      <yloc>528</yloc>
+      <xloc>256</xloc>
+      <yloc>640</yloc>
       <name>hub_warehouse</name>
       <virtualPath/>
     </table>
@@ -793,8 +793,8 @@ limitations under the License.
       <tableType>SATELLITE</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>768</xloc>
-      <yloc>528</yloc>
+      <xloc>64</xloc>
+      <yloc>640</yloc>
       <name>sat_warehouse</name>
       <virtualPath/>
     </table>
@@ -1365,6 +1365,229 @@ limitations under the License.
       <xloc>784</xloc>
       <yloc>256</yloc>
       <name>lnk_order_shipment</name>
+      <virtualPath/>
+    </table>
+    <table>
+      <businessKeys>
+        <name>asn_id</name>
+        <description/>
+        <dataType>String</dataType>
+        <length/>
+        <composite>N</composite>
+        <sourceFieldNames/>
+        <sourceFieldName>asn_id</sourceFieldName>
+        <recordSourceName>asn-package-lines</recordSourceName>
+      </businessKeys>
+      <businessKeys>
+        <name>product_id</name>
+        <description/>
+        <dataType>String</dataType>
+        <length/>
+        <composite>N</composite>
+        <sourceFieldNames/>
+        <sourceFieldName>product_id</sourceFieldName>
+        <recordSourceName>asn-package-lines</recordSourceName>
+      </businessKeys>
+      <hashKeyFieldName>package_line_hk</hashKeyFieldName>
+      <recordSourceFieldName/>
+      <recordSources>
+        <recordSource>asn-package-lines</recordSource>
+      </recordSources>
+      <tableName>hub_package_line</tableName>
+      <description/>
+      <tableType>HUB</tableType>
+      <integrationMode>HOP_MANAGED</integrationMode>
+      <customUpdatePipelinePaths/>
+      <xloc>1056</xloc>
+      <yloc>528</yloc>
+      <name>hub_package_line</name>
+      <virtualPath/>
+    </table>
+    <table>
+      <hub>hub_package_line</hub>
+      <link/>
+      <attributes>
+        <name>ship_date</name>
+        <description/>
+        <dataType>Date</dataType>
+        <length/>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>carrier_code</name>
+        <description/>
+        <dataType>String</dataType>
+        <length/>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>carrier_service</name>
+        <description/>
+        <dataType>String</dataType>
+        <length/>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>package_id</name>
+        <description/>
+        <dataType>String</dataType>
+        <length/>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>tracking_number</name>
+        <description/>
+        <dataType>String</dataType>
+        <length/>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>weight_kg</name>
+        <description/>
+        <dataType>Number</dataType>
+        <length/>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>line_number</name>
+        <description/>
+        <dataType>Integer</dataType>
+        <length/>
+        <precision>0</precision>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>quantity</name>
+        <description/>
+        <dataType>Integer</dataType>
+        <length/>
+        <precision>0</precision>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>unit_price</name>
+        <description/>
+        <dataType>Number</dataType>
+        <length/>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <parentKeySourceFields>
+        <parentKeySourceField>asn_id</parentKeySourceField>
+        <parentKeySourceField>product_id</parentKeySourceField>
+      </parentKeySourceFields>
+      <drivingKey/>
+      <drivingKeySourceField/>
+      <recordSource>asn-package-lines</recordSource>
+      <storeRecordSource>Y</storeRecordSource>
+      <statusTrackingEnabled>N</statusTrackingEnabled>
+      <statusTableName/>
+      <statusFieldName>record_status</statusFieldName>
+      <activeStatusValue>ACTIVE</activeStatusValue>
+      <deletedStatusValue>DELETED</deletedStatusValue>
+      <tableName>sat_package_line</tableName>
+      <description/>
+      <tableType>SATELLITE</tableType>
+      <integrationMode>HOP_MANAGED</integrationMode>
+      <customUpdatePipelinePaths/>
+      <xloc>1104</xloc>
+      <yloc>640</yloc>
+      <name>sat_package_line</name>
+      <virtualPath/>
+    </table>
+    <table>
+      <hubNames>hub_customer</hubNames>
+      <hubNames>hub_product</hubNames>
+      <hubNames>hub_order</hubNames>
+      <hubNames>hub_warehouse</hubNames>
+      <hubNames>hub_package_line</hubNames>
+      <linkHubSources>
+        <linkHubSource>
+          <source>asn-package-lines</source>
+          <hubSourceKeyFields>
+            <hubSourceKeyField>
+              <hubName>hub_customer</hubName>
+              <businessKeySources>
+                <businessKeySource>
+                  <businessKeyField>customer_id</businessKeyField>
+                  <sourceFieldNames/>
+                  <sourceFieldName>customer_id</sourceFieldName>
+                </businessKeySource>
+              </businessKeySources>
+              <drivingKeySources/>
+            </hubSourceKeyField>
+            <hubSourceKeyField>
+              <hubName>hub_product</hubName>
+              <businessKeySources>
+                <businessKeySource>
+                  <businessKeyField>product_id</businessKeyField>
+                  <sourceFieldNames/>
+                  <sourceFieldName>product_id</sourceFieldName>
+                </businessKeySource>
+              </businessKeySources>
+              <drivingKeySources/>
+            </hubSourceKeyField>
+            <hubSourceKeyField>
+              <hubName>hub_order</hubName>
+              <businessKeySources>
+                <businessKeySource>
+                  <businessKeyField>order_id</businessKeyField>
+                  <sourceFieldNames/>
+                  <sourceFieldName>order_id</sourceFieldName>
+                </businessKeySource>
+              </businessKeySources>
+              <drivingKeySources/>
+            </hubSourceKeyField>
+            <hubSourceKeyField>
+              <hubName>hub_warehouse</hubName>
+              <businessKeySources>
+                <businessKeySource>
+                  <businessKeyField>warehouse_id</businessKeyField>
+                  <sourceFieldNames/>
+                  <sourceFieldName>warehouse_id</sourceFieldName>
+                </businessKeySource>
+              </businessKeySources>
+              <drivingKeySources/>
+            </hubSourceKeyField>
+            <hubSourceKeyField>
+              <hubName>hub_package_line</hubName>
+              <businessKeySources>
+                <businessKeySource>
+                  <businessKeyField>asn_id</businessKeyField>
+                  <sourceFieldNames/>
+                  <sourceFieldName>asn_id</sourceFieldName>
+                </businessKeySource>
+                <businessKeySource>
+                  <businessKeyField>product_id</businessKeyField>
+                  <sourceFieldNames/>
+                  <sourceFieldName>product_id</sourceFieldName>
+                </businessKeySource>
+              </businessKeySources>
+              <drivingKeySources/>
+            </hubSourceKeyField>
+          </hubSourceKeyFields>
+        </linkHubSource>
+      </linkHubSources>
+      <linkSatelliteSources/>
+      <dependentChildKeys/>
+      <linkHashKeyFieldName/>
+      <hubSourceKeyFields/>
+      <hasDescriptiveAttributes>N</hasDescriptiveAttributes>
+      <recordSourceFieldName/>
+      <tableName>lnk_package_line</tableName>
+      <description/>
+      <tableType>LINK</tableType>
+      <integrationMode>HOP_MANAGED</integrationMode>
+      <customUpdatePipelinePaths/>
+      <xloc>704</xloc>
+      <yloc>480</yloc>
+      <name>lnk_package_line</name>
       <virtualPath/>
     </table>
   </tables>

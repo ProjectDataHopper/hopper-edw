@@ -130,6 +130,10 @@ public final class RecordDefinitionPreviewSupport {
           definition.getDvSource() != null
               && !Utils.isEmpty(definition.getDvSource().getJsonSourceModelFilename())
               && !Utils.isEmpty(definition.getDvSource().getJsonSourceName());
+      case PIPELINE ->
+          definition.getDvSource() != null
+              && !Utils.isEmpty(definition.getDvSource().getPipelineFilename())
+              && !Utils.isEmpty(definition.getDvSource().getPipelineTransformName());
     };
   }
 

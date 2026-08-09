@@ -45,6 +45,10 @@ public final class SourceModelLoadSupport {
       }
       SourceModel model = new SourceModel();
       XmlMetadataUtil.deSerializeFromXml(rootNode, SourceModel.class, model, metadataProvider);
+      // Drop edges whose endpoints no longer exist (e.g. after a rename saved without cleanup).
+      // Does not mark the model dirty so open alone does not force a save; the next edit/save
+      // persists the pruned list.
+      SourceRelationshipLifecycleSupport.removeDanglingRelationships(model);
       model.clearChanged();
       model.setFilename(resolved);
       return model;

@@ -32,7 +32,8 @@ import org.apache.hop.datavault.metadata.sourcemodel.SourceTable;
 
 /**
  * Computes per-relationship edge anchors with side spreading so multiple relationships on the same
- * side of a node do not stack on one midpoint. Endpoints may be tables, queries, or JSON sources.
+ * side of a node do not stack on one midpoint. Endpoints may be tables, queries, JSON, or pipeline
+ * sources.
  */
 public final class SourceRelationshipEdgeLayout {
 

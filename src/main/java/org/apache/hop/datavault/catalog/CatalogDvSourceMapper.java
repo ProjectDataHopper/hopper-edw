@@ -136,6 +136,18 @@ public final class CatalogDvSourceMapper {
       jsonSource.setSourceJsonName(dvSourceRecord.getJsonSourceName());
       return jsonSource;
     }
+    if (sourceType == DvSourceType.PIPELINE) {
+      org.apache.hop.datavault.metadata.pipeline.DvPipelineSource pipelineSource =
+          new org.apache.hop.datavault.metadata.pipeline.DvPipelineSource();
+      pipelineSource.setDescription(definition.getDescription());
+      pipelineSource.setFields(fields);
+      pipelineSource.setPipelineFilename(dvSourceRecord.getPipelineFilename());
+      pipelineSource.setOutputTransformName(dvSourceRecord.getPipelineTransformName());
+      pipelineSource.setPipelineRunConfiguration(dvSourceRecord.getPipelineRunConfiguration());
+      pipelineSource.setSourceModelFilename(dvSourceRecord.getPipelineSourceModelFilename());
+      pipelineSource.setSourcePipelineName(dvSourceRecord.getPipelineSourceName());
+      return pipelineSource;
+    }
     DvDatabaseSource fallback = new DvDatabaseSource();
     fallback.setDescription(definition.getDescription());
     fallback.setFields(fields);

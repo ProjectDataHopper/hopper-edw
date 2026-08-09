@@ -76,6 +76,50 @@ class RecordDefinitionPhysicalRefSupportTest {
     assertFalse(RecordDefinitionPhysicalRefSupport.supportsRefreshFromSource(definition));
   }
 
+  @Test
+  void supportsRefreshForPipelineDvSourceWithSourceModelPointer() throws Exception {
+    RecordDefinition definition = pipelineDefinition();
+
+    assertTrue(RecordDefinitionPhysicalRefSupport.supportsRefreshFromSource(definition));
+    assertEquals(
+        DvSourceType.PIPELINE, RecordDefinitionPhysicalRefSupport.resolveSourceType(definition));
+    assertEquals(
+        "models/source-tables-crm.hsm",
+        RecordDefinitionPhysicalRefSupport.toPhysicalSourceRef(definition)
+            .getPipelineSourceModelFilename());
+    assertEquals(
+        "asn-package-lines",
+        RecordDefinitionPhysicalRefSupport.toPhysicalSourceRef(definition).getPipelineSourceName());
+    assertEquals(
+        "${PROJECT_HOME}/pipelines/parse-asn-xml.hpl",
+        RecordDefinitionPhysicalRefSupport.toPhysicalSourceRef(definition).getPipelineFilename());
+  }
+
+  @Test
+  void doesNotSupportRefreshForPipelineWithoutPointers() {
+    RecordDefinition definition = pipelineDefinition();
+    definition.getDvSource().setPipelineSourceModelFilename(null);
+    definition.getDvSource().setPipelineSourceName(null);
+    definition.getDvSource().setPipelineFilename(null);
+    definition.getDvSource().setPipelineTransformName(null);
+
+    assertFalse(RecordDefinitionPhysicalRefSupport.supportsRefreshFromSource(definition));
+  }
+
+  private static RecordDefinition pipelineDefinition() {
+    RecordDefinition definition = new RecordDefinition();
+    definition.setKey(new RecordDefinitionKey("hop/retail-example/sources", "asn-package-lines"));
+    definition.setType(RecordDefinitionType.DV_SOURCE);
+    DvSourceRecord dvSource = new DvSourceRecord();
+    dvSource.setSourceType("PIPELINE");
+    dvSource.setPipelineSourceModelFilename("models/source-tables-crm.hsm");
+    dvSource.setPipelineSourceName("asn-package-lines");
+    dvSource.setPipelineFilename("${PROJECT_HOME}/pipelines/parse-asn-xml.hpl");
+    dvSource.setPipelineTransformName("ASN lines");
+    definition.setDvSource(dvSource);
+    return definition;
+  }
+
   private static RecordDefinition compositeDefinition() {
     RecordDefinition definition = new RecordDefinition();
     definition.setKey(new RecordDefinitionKey("hop/retail-example/sources", "all-customer-info"));

@@ -35,6 +35,9 @@ import org.apache.hop.datavault.metadata.iceberg.DvIcebergSatelliteSourcePipelin
 import org.apache.hop.datavault.metadata.json.DvJsonHubSourcePipelineBuilder;
 import org.apache.hop.datavault.metadata.json.DvJsonLinkSourcePipelineBuilder;
 import org.apache.hop.datavault.metadata.json.DvJsonSatelliteSourcePipelineBuilder;
+import org.apache.hop.datavault.metadata.pipeline.DvPipelineHubSourcePipelineBuilder;
+import org.apache.hop.datavault.metadata.pipeline.DvPipelineLinkSourcePipelineBuilder;
+import org.apache.hop.datavault.metadata.pipeline.DvPipelineSatelliteSourcePipelineBuilder;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
 
@@ -106,6 +109,16 @@ public final class DvSourcePipelineBuilderFactory {
               startPoint);
       case JSON ->
           new DvJsonHubSourcePipelineBuilder(
+              variables,
+              metadataProvider,
+              model,
+              pipelineMeta,
+              recordSource,
+              dvSource,
+              hub,
+              startPoint);
+      case PIPELINE ->
+          new DvPipelineHubSourcePipelineBuilder(
               variables,
               metadataProvider,
               model,
@@ -188,6 +201,16 @@ public final class DvSourcePipelineBuilderFactory {
               dvSource,
               link,
               startPoint);
+      case PIPELINE ->
+          new DvPipelineLinkSourcePipelineBuilder(
+              variables,
+              metadataProvider,
+              model,
+              pipelineMeta,
+              recordSource,
+              dvSource,
+              link,
+              startPoint);
     };
   }
 
@@ -262,6 +285,16 @@ public final class DvSourcePipelineBuilderFactory {
               dvSource,
               satellite,
               startPoint);
+      case PIPELINE ->
+          new DvPipelineSatelliteSourcePipelineBuilder(
+              variables,
+              metadataProvider,
+              model,
+              pipelineMeta,
+              recordSource,
+              dvSource,
+              satellite,
+              startPoint);
     };
   }
 
@@ -296,7 +329,7 @@ public final class DvSourcePipelineBuilderFactory {
               dvSource,
               reference,
               startPoint);
-      case PARQUET, ICEBERG, COMPOSITE, JSON ->
+      case PARQUET, ICEBERG, COMPOSITE, JSON, PIPELINE ->
           throw new HopException(
               "Reference table FULL_REPLACE currently supports DATABASE and CSV sources only (got "
                   + recordSource.getSourceType()

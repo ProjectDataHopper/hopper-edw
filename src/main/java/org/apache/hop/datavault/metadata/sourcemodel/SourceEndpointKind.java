@@ -23,13 +23,15 @@ import org.apache.hop.metadata.api.IEnumHasCodeAndDescription;
 
 /**
  * Kind of canvas node that can participate in a {@link SourceRelationship} or as a Source JSON
- * parent: physical table, multi-table query, or JSON extraction.
+ * parent: physical table, multi-table query, JSON extraction, or pipeline source.
  */
 @Getter
 public enum SourceEndpointKind implements IEnumHasCodeAndDescription {
   TABLE("TABLE", BaseMessages.getString(SourceEndpointKind.class, "SourceEndpointKind.Table")),
   QUERY("QUERY", BaseMessages.getString(SourceEndpointKind.class, "SourceEndpointKind.Query")),
-  JSON("JSON", BaseMessages.getString(SourceEndpointKind.class, "SourceEndpointKind.Json"));
+  JSON("JSON", BaseMessages.getString(SourceEndpointKind.class, "SourceEndpointKind.Json")),
+  PIPELINE(
+      "PIPELINE", BaseMessages.getString(SourceEndpointKind.class, "SourceEndpointKind.Pipeline"));
 
   private final String code;
   private final String description;

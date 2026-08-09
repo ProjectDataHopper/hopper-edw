@@ -18,13 +18,16 @@ package org.apache.hop.datavault.hopgui.file.sourcemodel;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry.Bounds;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceEndpointKind;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
+import org.apache.hop.datavault.metadata.sourcemodel.SourcePipeline;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceRelationship;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceTable;
 import org.junit.jupiter.api.Test;
@@ -83,6 +86,43 @@ class SourceRelationshipEdgeLayoutTest {
     assertEquals(100, a.x);
     assertEquals(100, b.x);
     assertTrue(a.y < b.y);
+  }
+
+  @Test
+  void layoutIncludesPipelineEndpoints() {
+    SourceModel model = new SourceModel();
+    SourcePipeline pipeline = new SourcePipeline("asn_feed");
+    pipeline.setLocation(new Point(40, 80));
+    SourceTable order = new SourceTable("order_header");
+    order.setLocation(new Point(320, 80));
+    order.setDrawnBoxWidth(160);
+    order.setDrawnBoxHeight(90);
+    model.getPipelineSources().add(pipeline);
+    model.getTables().add(order);
+
+    SourceRelationship rel = new SourceRelationship("rel_asn_order");
+    rel.setChildEndpointKind(SourceEndpointKind.PIPELINE);
+    rel.setParentEndpointKind(SourceEndpointKind.TABLE);
+    rel.setChildTableName("asn_feed");
+    rel.setParentTableName("order_header");
+    rel.getChildColumns().add("order_id");
+    rel.getParentColumns().add("order_id");
+    model.getRelationships().add(rel);
+
+    Map<String, SourceTable> byName = new HashMap<>();
+    byName.put("order_header", order);
+
+    Map<SourceRelationship, SourceRelationshipEdgeLayout.EdgeGeometry> layout =
+        SourceRelationshipEdgeLayout.layout(model, byName);
+
+    assertEquals(1, layout.size());
+    SourceRelationshipEdgeLayout.EdgeGeometry geometry = layout.get(rel);
+    assertNotNull(geometry);
+    assertNotNull(geometry.childAnchor());
+    assertNotNull(geometry.parentAnchor());
+    // Pipeline is left of table → child anchors on its right side.
+    assertEquals(SourceRelationshipEdgeLayout.Side.RIGHT, geometry.childSide());
+    assertTrue(geometry.childAnchor().x > pipeline.getLocation().x);
   }
 
   private static SourceRelationship rel(String name, String child, String parent) {

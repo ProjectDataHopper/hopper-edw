@@ -9,7 +9,7 @@ A **Data Vault Source** is a **Data Catalog record definition** of type `DV_SOUR
 Each definition combines:
 
 * **DV semantics** — record source indicator, optional **group** for partial workflow loads
-* **Physical layout** — **database** table, **CSV** / **Parquet** / **Iceberg**, **composite** multi-table query, or **JSON** extraction from a link:source-modeler-overview.adoc[source model (`.hsm`)]
+* **Physical layout** — **database** table, **CSV** / **Parquet** / **Iceberg**, **composite** multi-table query, **JSON** extraction, or **pipeline** feed from a link:source-modeler-overview.adoc[source model (`.hsm`)]
 
 Sources live under namespace `hop/{project}/sources` in the FILE catalog storage directory (retail example: `work/edw-catalog/`) and open in the **Data Catalog** perspective. See link:data-catalog.adoc[Data Catalog] for folder layout and refresh behavior.
 
@@ -125,6 +125,19 @@ When detailed type checking is active, database sources resolve types from the l
 
 * link:data-catalog.adoc[Data Catalog]
 * link:datavault-source-database.adoc[Database source details]
-* link:record-definition-input.adoc[Record Definition Input transform]
-* link:record-definition-output.adoc[Record Definition Output transform]
+* link:record-definition-input.adoc[Get Record Definition Names transform]
+* link:record-definition-output.adoc[Catalog Record Definition Metadata Output transform]
+* link:record-definition-data-input.adoc[Record Definition Input transform] (reads data rows)
 * link:dv-hub.adoc[Hub metadata]
+== Pipeline sources
+
+Catalog type **`PIPELINE`** points at a Hop pipeline (`.hpl`) and an output transform. Field layout is the **declared** contract (from the source modeler pipeline card or catalog fields). Data Vault Update injects the pipeline with **MetaInject** using those declared output fields.
+
+Typical authoring path:
+
+. Add a **Source pipeline** card on a `.hsm` model.
+. Design convert/filter/aggregate transforms; set the **output transform**.
+. **Get fields from transform** (or edit the declared field list), mark logical keys, **Publish to catalog**.
+. Bind hubs/links/satellites to the published feed name.
+
+See link:source-modeler-overview.adoc[Source modeler overview].

@@ -49,7 +49,7 @@ import org.jspecify.annotations.NonNull;
 
 /**
  * Source-system model ({@code .hsm}): physical tables, PK/FK relationships, multi-table source
- * queries, and JSON extractions that feed Data Vault hubs, links, and satellites.
+ * queries, JSON extractions, and pipeline sources that feed Data Vault hubs, links, and satellites.
  */
 @GuiPlugin
 @Getter
@@ -105,6 +105,11 @@ public class SourceModel extends HopMetadataBase
   @Getter(AccessLevel.NONE)
   @Setter(AccessLevel.NONE)
   private List<SourceJson> jsonSources = new ArrayList<>();
+
+  @HopMetadataProperty(key = "pipeline-source", groupKey = "pipeline-sources")
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.NONE)
+  private List<SourcePipeline> pipelineSources = new ArrayList<>();
 
   @HopMetadataProperty(key = "note", groupKey = "notes")
   @Getter(AccessLevel.NONE)
@@ -169,6 +174,17 @@ public class SourceModel extends HopMetadataBase
     this.jsonSources = jsonSources != null ? jsonSources : new ArrayList<>();
   }
 
+  public @NonNull List<SourcePipeline> getPipelineSources() {
+    if (pipelineSources == null) {
+      pipelineSources = new ArrayList<>();
+    }
+    return pipelineSources;
+  }
+
+  public void setPipelineSources(List<SourcePipeline> pipelineSources) {
+    this.pipelineSources = pipelineSources != null ? pipelineSources : new ArrayList<>();
+  }
+
   public @NonNull List<DvNote> getNotes() {
     if (notes == null) {
       notes = new ArrayList<>();
@@ -185,6 +201,7 @@ public class SourceModel extends HopMetadataBase
     setRelationships(relationships);
     setQueries(queries);
     setJsonSources(jsonSources);
+    setPipelineSources(pipelineSources);
     setNotes(notes);
   }
 
@@ -268,6 +285,23 @@ public class SourceModel extends HopMetadataBase
         maxy = loc.y + boxH;
       }
     }
+    for (SourcePipeline pipelineSource : getPipelineSources()) {
+      if (pipelineSource == null) {
+        continue;
+      }
+      Point loc = pipelineSource.getLocation();
+      if (loc == null) {
+        continue;
+      }
+      int boxW = 160;
+      int boxH = 80;
+      if (loc.x + boxW > maxx) {
+        maxx = loc.x + boxW;
+      }
+      if (loc.y + boxH > maxy) {
+        maxy = loc.y + boxH;
+      }
+    }
     for (DvNote note : getNotes()) {
       Point loc = note.getLocation();
       if (loc == null) {
@@ -333,9 +367,21 @@ public class SourceModel extends HopMetadataBase
     return null;
   }
 
+  public SourcePipeline findPipelineSource(String pipelineSourceName) {
+    if (Utils.isEmpty(pipelineSourceName)) {
+      return null;
+    }
+    for (SourcePipeline pipelineSource : getPipelineSources()) {
+      if (pipelineSource != null && pipelineSourceName.equals(pipelineSource.getName())) {
+        return pipelineSource;
+      }
+    }
+    return null;
+  }
+
   /**
-   * Structural validation for the source model (tables, relationships, queries, JSON sources).
-   * Expanded in later PRs for generation-mode and catalog-publish checks.
+   * Structural validation for the source model (tables, relationships, queries, JSON sources,
+   * pipeline sources).
    */
   public List<ICheckResult> check(IHopMetadataProvider metadataProvider, IVariables variables) {
     return check(metadataProvider, variables, null);
@@ -356,7 +402,13 @@ public class SourceModel extends HopMetadataBase
     List<SourceRelationship> relationships = getRelationships();
     List<SourceQuery> queries = getQueries();
     List<SourceJson> jsonSources = getJsonSources();
-    int totalWork = tables.size() + relationships.size() + queries.size() + jsonSources.size();
+    List<SourcePipeline> pipelineSources = getPipelineSources();
+    int totalWork =
+        tables.size()
+            + relationships.size()
+            + queries.size()
+            + jsonSources.size()
+            + pipelineSources.size();
     monitor.beginTask(BaseMessages.getString(PKG, "SourceModel.Monitor.VerifyingModel"), totalWork);
 
     if (tables.isEmpty()) {
@@ -459,6 +511,25 @@ public class SourceModel extends HopMetadataBase
           BaseMessages.getString(
               PKG, "SourceModel.Monitor.VerifyingJsonSource", ConstNvl(jsonName)));
       remarks.addAll(SourceJsonValidationSupport.check(jsonSource, this, jsonSourceNames));
+      monitor.worked(1);
+    }
+
+    Set<String> pipelineSourceNames = new HashSet<>();
+    for (SourcePipeline pipelineSource : pipelineSources) {
+      if (monitor.isCanceled()) {
+        monitor.done();
+        return remarks;
+      }
+      if (pipelineSource == null) {
+        monitor.worked(1);
+        continue;
+      }
+      String pipelineName = pipelineSource.getName();
+      monitor.subTask(
+          BaseMessages.getString(
+              PKG, "SourceModel.Monitor.VerifyingPipeline", ConstNvl(pipelineName)));
+      remarks.addAll(
+          SourcePipelineValidationSupport.check(pipelineSource, this, pipelineSourceNames));
       monitor.worked(1);
     }
 

@@ -54,7 +54,10 @@ SHIPMENT_TOPIC = "retail.order.shipment"
 SHIPMENT_PARTITION_COUNT = 8
 # Fraction of orders in a wave that receive at least one shipment event.
 SHIPMENT_ORDER_FRACTION = 0.4
+# Fraction of SHIPPED/DELIVERED orders that receive an Advanced Shipping Notice XML.
+ASN_ORDER_FRACTION = 0.35
 CARRIERS = ("UPS", "FEDEX", "USPS", "DHL")
+CARRIER_SERVICES = ("GROUND", "PRIORITY", "EXPRESS", "OVERNIGHT")
 CITIES = (
     "Columbus",
     "Memphis",
@@ -199,6 +202,169 @@ def write_csv(path: Path, header: list[str], rows: list[list[object]]) -> None:
         writer = csv.writer(handle)
         writer.writerow(header)
         writer.writerows(rows)
+
+
+def _xml_attr(value: object) -> str:
+    """Escape a value for use inside a double-quoted XML attribute."""
+    text = str(value)
+    return (
+        text.replace("&", "&amp;")
+        .replace('"', "&quot;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+    )
+
+
+def write_asn_xml(
+    path: Path,
+    wave: str,
+    generated_at: str,
+    asns: list[dict[str, object]],
+) -> None:
+    """Write a multi-ASN AdvancedShipmentNotices document for Get data from XML."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lines: list[str] = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        f'<AdvancedShipmentNotices wave="{_xml_attr(wave)}" generated_at="{_xml_attr(generated_at)}">',
+    ]
+    for asn in asns:
+        lines.append(
+            f'  <ASN asn_id="{_xml_attr(asn["asn_id"])}" '
+            f'warehouse_id="{_xml_attr(asn["warehouse_id"])}" '
+            f'ship_date="{_xml_attr(asn["ship_date"])}">'
+        )
+        lines.append(
+            f'    <Order order_id="{_xml_attr(asn["order_id"])}" '
+            f'customer_id="{_xml_attr(asn["customer_id"])}"/>'
+        )
+        lines.append(
+            f'    <Carrier code="{_xml_attr(asn["carrier_code"])}" '
+            f'service="{_xml_attr(asn["carrier_service"])}"/>'
+        )
+        lines.append("    <Packages>")
+        packages = asn["packages"]
+        assert isinstance(packages, list)
+        for package in packages:
+            assert isinstance(package, dict)
+            lines.append(
+                f'      <Package package_id="{_xml_attr(package["package_id"])}" '
+                f'tracking_number="{_xml_attr(package["tracking_number"])}" '
+                f'weight_kg="{_xml_attr(package["weight_kg"])}">'
+            )
+            lines.append("        <Lines>")
+            package_lines = package["lines"]
+            assert isinstance(package_lines, list)
+            for line in package_lines:
+                assert isinstance(line, dict)
+                lines.append(
+                    f'          <Line line_number="{_xml_attr(line["line_number"])}" '
+                    f'product_id="{_xml_attr(line["product_id"])}" '
+                    f'quantity="{_xml_attr(line["quantity"])}" '
+                    f'unit_price="{_xml_attr(line["unit_price"])}"/>'
+                )
+            lines.append("        </Lines>")
+            lines.append("      </Package>")
+        lines.append("    </Packages>")
+        lines.append("  </ASN>")
+    lines.append("</AdvancedShipmentNotices>")
+    lines.append("")
+    path.write_text("\n".join(lines), encoding="utf-8")
+
+
+def build_asn_documents(
+    order_headers: list[list[object]],
+    order_lines: list[list[object]],
+    scale: Scale,
+    rng: random.Random,
+    max_warehouse_id: int | None = None,
+) -> list[dict[str, object]]:
+    """Build nested ASN documents for a subset of SHIPPED/DELIVERED orders.
+
+    Grain of the flattened parse pipeline is one row per package line.
+    ``order_headers`` column order matches ``order_header_rows``;
+    ``order_lines`` matches ``order_line_rows``.
+    """
+    warehouse_ceiling = max_warehouse_id if max_warehouse_id is not None else scale.warehouses
+    lines_by_order: dict[str, list[list[object]]] = {}
+    for line in order_lines:
+        order_id = str(line[0])
+        lines_by_order.setdefault(order_id, []).append(line)
+
+    # Prefer orders that have left the warehouse; fall back to any non-cancelled.
+    shippable: list[list[object]] = []
+    fallback: list[list[object]] = []
+    for header in order_headers:
+        status = str(header[5])
+        if status in ("SHIPPED", "DELIVERED"):
+            shippable.append(header)
+        elif status != "CANCELLED":
+            fallback.append(header)
+    candidates = shippable if shippable else fallback
+    if not candidates:
+        return []
+
+    sample_size = max(1, int(len(candidates) * ASN_ORDER_FRACTION))
+    selected = {0}  # stable first ASN for demos
+    while len(selected) < min(sample_size, len(candidates)):
+        selected.add(rng.randrange(len(candidates)))
+
+    asns: list[dict[str, object]] = []
+    for asn_seq, index in enumerate(sorted(selected), start=1):
+        header = candidates[index]
+        order_id = str(header[0])
+        customer_id = header[1]
+        ship_date = str(header[3])
+        order_line_rows_for_order = lines_by_order.get(order_id, [])
+        if not order_line_rows_for_order:
+            continue
+
+        carrier = rng.choice(CARRIERS)
+        service = rng.choice(CARRIER_SERVICES)
+        warehouse_id = rng.randint(1, max(1, warehouse_ceiling))
+
+        # Usually one package; split into two when the order has 3+ lines.
+        line_rows = list(order_line_rows_for_order)
+        if len(line_rows) >= 3 and rng.random() < 0.35:
+            split_at = max(1, len(line_rows) // 2)
+            package_groups = [line_rows[:split_at], line_rows[split_at:]]
+        else:
+            package_groups = [line_rows]
+
+        packages: list[dict[str, object]] = []
+        for pkg_index, group in enumerate(package_groups, start=1):
+            tracking = f"1Z{rng.randint(100000, 999999)}{rng.randint(10000000, 99999999)}"
+            weight = round(sum(float(row[3]) for row in group) * rng.uniform(0.15, 0.45), 2)
+            package_lines = [
+                {
+                    "line_number": int(row[2]),
+                    "product_id": str(row[1]),
+                    "quantity": int(row[3]),
+                    "unit_price": row[4],
+                }
+                for row in group
+            ]
+            packages.append(
+                {
+                    "package_id": f"PKG-{pkg_index}",
+                    "tracking_number": tracking,
+                    "weight_kg": f"{weight:.2f}",
+                    "lines": package_lines,
+                }
+            )
+
+        asns.append(
+            {
+                "asn_id": f"ASN{asn_seq:06d}",
+                "warehouse_id": warehouse_id,
+                "ship_date": ship_date,
+                "order_id": order_id,
+                "customer_id": customer_id,
+                "carrier_code": carrier,
+                "carrier_service": service,
+                "packages": packages,
+            }
+        )
+    return asns
 
 
 def customer_hub_rows(
@@ -695,6 +861,7 @@ def generate_initial(files_dir: Path, scale: Scale, rng: random.Random) -> str:
         warehouse_rows(scale, rng, load_date, warehouse_subset),
     )
     order_headers = order_header_rows(scale, rng, load_date, order_subset, anchor)
+    order_lines = order_line_rows(scale, rng, load_date, order_subset, anchor)
     write_csv(
         files_dir / f"order_header_{wave}.csv",
         [
@@ -722,7 +889,7 @@ def generate_initial(files_dir: Path, scale: Scale, rng: random.Random) -> str:
             "load_date",
             "record_source",
         ],
-        order_line_rows(scale, rng, load_date, order_subset, anchor),
+        order_lines,
     )
     write_csv(
         files_dir / f"order_shipment_event_{wave}.csv",
@@ -737,6 +904,12 @@ def generate_initial(files_dir: Path, scale: Scale, rng: random.Random) -> str:
             "record_source",
         ],
         order_shipment_event_rows(order_headers, scale, rng, load_date),
+    )
+    write_asn_xml(
+        files_dir / f"asn_{wave}.xml",
+        wave,
+        f"{load_date}T00:00:00Z",
+        build_asn_documents(order_headers, order_lines, scale, rng),
     )
 
     rep_subset = sales_rep_id_range(scale)
@@ -831,6 +1004,14 @@ def generate_update(files_dir: Path, scale: Scale, base_rng: random.Random, cont
         context.progress_date,
         max_customer_id=max_customer_id,
     )
+    order_lines = order_line_rows(
+        scale,
+        order_rng,
+        load_date,
+        new_orders,
+        context.progress_date,
+        max_product_id=max_product_id,
+    )
     write_csv(
         files_dir / f"order_header_{wave}.csv",
         [
@@ -858,15 +1039,9 @@ def generate_update(files_dir: Path, scale: Scale, base_rng: random.Random, cont
             "load_date",
             "record_source",
         ],
-        order_line_rows(
-            scale,
-            order_rng,
-            load_date,
-            new_orders,
-            context.progress_date,
-            max_product_id=max_product_id,
-        ),
+        order_lines,
     )
+    max_wh = max(new_warehouses, default=scale.warehouses)
     write_csv(
         files_dir / f"order_shipment_event_{wave}.csv",
         [
@@ -884,7 +1059,19 @@ def generate_update(files_dir: Path, scale: Scale, base_rng: random.Random, cont
             scale,
             order_rng,
             load_date,
-            max_warehouse_id=max(new_warehouses, default=scale.warehouses),
+            max_warehouse_id=max_wh,
+        ),
+    )
+    write_asn_xml(
+        files_dir / f"asn_{wave}.xml",
+        wave,
+        f"{load_date}T00:00:00Z",
+        build_asn_documents(
+            order_headers,
+            order_lines,
+            scale,
+            order_rng,
+            max_warehouse_id=max_wh,
         ),
     )
 

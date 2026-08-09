@@ -61,6 +61,18 @@ public final class PhysicalSourceRef {
   /** Source JSON object name when refreshing a JSON feed. */
   private final String jsonSourceName;
 
+  /** Path to the {@code .hsm} source model when refreshing a PIPELINE feed. */
+  private final String pipelineSourceModelFilename;
+
+  /** Source pipeline object name when refreshing a PIPELINE feed from the source model. */
+  private final String pipelineSourceName;
+
+  /** Path to the {@code .hpl} when refreshing a PIPELINE feed via live transform fields. */
+  private final String pipelineFilename;
+
+  /** Output transform name when refreshing a PIPELINE feed via live transform fields. */
+  private final String pipelineTransformName;
+
   private PhysicalSourceRef(Builder builder) {
     this.databaseConnectionName = builder.databaseConnectionName;
     this.schemaName = builder.schemaName;
@@ -83,6 +95,10 @@ public final class PhysicalSourceRef {
     this.compositeSourceQueryName = builder.compositeSourceQueryName;
     this.jsonSourceModelFilename = builder.jsonSourceModelFilename;
     this.jsonSourceName = builder.jsonSourceName;
+    this.pipelineSourceModelFilename = builder.pipelineSourceModelFilename;
+    this.pipelineSourceName = builder.pipelineSourceName;
+    this.pipelineFilename = builder.pipelineFilename;
+    this.pipelineTransformName = builder.pipelineTransformName;
   }
 
   public String getDatabaseConnectionName() {
@@ -167,6 +183,22 @@ public final class PhysicalSourceRef {
 
   public String getJsonSourceName() {
     return jsonSourceName;
+  }
+
+  public String getPipelineSourceModelFilename() {
+    return pipelineSourceModelFilename;
+  }
+
+  public String getPipelineSourceName() {
+    return pipelineSourceName;
+  }
+
+  public String getPipelineFilename() {
+    return pipelineFilename;
+  }
+
+  public String getPipelineTransformName() {
+    return pipelineTransformName;
   }
 
   public void validateIcebergLocation(IVariables variables) throws HopException {
@@ -306,6 +338,10 @@ public final class PhysicalSourceRef {
     private String compositeSourceQueryName;
     private String jsonSourceModelFilename;
     private String jsonSourceName;
+    private String pipelineSourceModelFilename;
+    private String pipelineSourceName;
+    private String pipelineFilename;
+    private String pipelineTransformName;
 
     public Builder databaseConnectionName(String value) {
       this.databaseConnectionName = value;
@@ -409,6 +445,26 @@ public final class PhysicalSourceRef {
 
     public Builder jsonSourceName(String value) {
       this.jsonSourceName = value;
+      return this;
+    }
+
+    public Builder pipelineSourceModelFilename(String value) {
+      this.pipelineSourceModelFilename = value;
+      return this;
+    }
+
+    public Builder pipelineSourceName(String value) {
+      this.pipelineSourceName = value;
+      return this;
+    }
+
+    public Builder pipelineFilename(String value) {
+      this.pipelineFilename = value;
+      return this;
+    }
+
+    public Builder pipelineTransformName(String value) {
+      this.pipelineTransformName = value;
       return this;
     }
 

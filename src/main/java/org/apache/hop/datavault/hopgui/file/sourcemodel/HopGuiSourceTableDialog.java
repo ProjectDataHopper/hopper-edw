@@ -33,7 +33,9 @@ import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupp
 import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
 import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceColumn;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceEndpointKind;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceRelationshipLifecycleSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceTable;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceTableLiveSchemaSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceTableValidationSupport;
@@ -351,6 +353,7 @@ public class HopGuiSourceTableDialog {
       return;
     }
 
+    String oldName = input.getName();
     input.setName(name);
     input.setDescription(wDescription.getText());
     input.setDatabaseName(wDatabaseName.getText());
@@ -358,6 +361,10 @@ public class HopGuiSourceTableDialog {
     input.setTableName(wTableName.getText());
     input.setCatalogSourceName(wCatalogSourceName.getText());
     input.setColumns(readColumnsFromTable());
+    if (model != null) {
+      SourceRelationshipLifecycleSupport.dropRelationshipsOnRename(
+          model, SourceEndpointKind.TABLE, oldName, name);
+    }
     ok = true;
     dispose();
   }

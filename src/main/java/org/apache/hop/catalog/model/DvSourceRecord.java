@@ -50,4 +50,19 @@ public class DvSourceRecord {
 
   /** Source JSON object name inside the model when {@link #sourceType} is {@code JSON}. */
   private String jsonSourceName;
+
+  /** Path to the source pipeline ({@code .hpl}) when {@link #sourceType} is {@code PIPELINE}. */
+  private String pipelineFilename;
+
+  /** Output transform name when {@link #sourceType} is {@code PIPELINE}. */
+  private String pipelineTransformName;
+
+  /** Optional run configuration when {@link #sourceType} is {@code PIPELINE}. */
+  private String pipelineRunConfiguration;
+
+  /** Optional path to the {@code .hsm} when {@link #sourceType} is {@code PIPELINE}. */
+  private String pipelineSourceModelFilename;
+
+  /** Optional SourcePipeline object name inside the model when type is {@code PIPELINE}. */
+  private String pipelineSourceName;
 }

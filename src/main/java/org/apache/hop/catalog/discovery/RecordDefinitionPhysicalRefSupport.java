@@ -48,6 +48,7 @@ public final class RecordDefinitionPhysicalRefSupport {
       case ICEBERG -> definition.getPhysicalIcebergTable() != null;
       case COMPOSITE -> hasCompositeSourceRef(definition);
       case JSON -> hasJsonSourceRef(definition);
+      case PIPELINE -> hasPipelineSourceRef(definition);
     };
   }
 
@@ -69,6 +70,24 @@ public final class RecordDefinitionPhysicalRefSupport {
     DvSourceRecord dvSource = definition.getDvSource();
     return !Utils.isEmpty(dvSource.getJsonSourceModelFilename())
         && !Utils.isEmpty(dvSource.getJsonSourceName());
+  }
+
+  /**
+   * PIPELINE feeds are refreshable when they point at a source-model pipeline card and/or a
+   * pipeline file + output transform (same fields set at publish time).
+   */
+  static boolean hasPipelineSourceRef(RecordDefinition definition) {
+    if (definition == null || definition.getDvSource() == null) {
+      return false;
+    }
+    DvSourceRecord dvSource = definition.getDvSource();
+    boolean fromSourceModel =
+        !Utils.isEmpty(dvSource.getPipelineSourceModelFilename())
+            && !Utils.isEmpty(dvSource.getPipelineSourceName());
+    boolean fromPipelineFile =
+        !Utils.isEmpty(dvSource.getPipelineFilename())
+            && !Utils.isEmpty(dvSource.getPipelineTransformName());
+    return fromSourceModel || fromPipelineFile;
   }
 
   public static DvSourceType resolveSourceType(RecordDefinition definition) {
@@ -106,7 +125,34 @@ public final class RecordDefinitionPhysicalRefSupport {
       case ICEBERG -> fromPhysicalIcebergTable(definition.getPhysicalIcebergTable());
       case COMPOSITE -> fromCompositeSource(definition.getDvSource());
       case JSON -> fromJsonSource(definition.getDvSource());
+      case PIPELINE -> fromPipelineSource(definition.getDvSource());
     };
+  }
+
+  private static PhysicalSourceRef fromPipelineSource(DvSourceRecord dvSource)
+      throws HopException {
+    if (dvSource == null) {
+      throw new HopException(
+          BaseMessages.getString(
+              PKG, "RecordDefinitionPhysicalRefSupport.Error.MissingPipelineRef"));
+    }
+    boolean fromSourceModel =
+        !Utils.isEmpty(dvSource.getPipelineSourceModelFilename())
+            && !Utils.isEmpty(dvSource.getPipelineSourceName());
+    boolean fromPipelineFile =
+        !Utils.isEmpty(dvSource.getPipelineFilename())
+            && !Utils.isEmpty(dvSource.getPipelineTransformName());
+    if (!fromSourceModel && !fromPipelineFile) {
+      throw new HopException(
+          BaseMessages.getString(
+              PKG, "RecordDefinitionPhysicalRefSupport.Error.MissingPipelineRef"));
+    }
+    return PhysicalSourceRef.builder()
+        .pipelineSourceModelFilename(dvSource.getPipelineSourceModelFilename())
+        .pipelineSourceName(dvSource.getPipelineSourceName())
+        .pipelineFilename(dvSource.getPipelineFilename())
+        .pipelineTransformName(dvSource.getPipelineTransformName())
+        .build();
   }
 
   private static PhysicalSourceRef fromCompositeSource(DvSourceRecord dvSource)

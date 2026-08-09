@@ -93,4 +93,17 @@ class RecordOriginNavigationSupportTest {
 
     assertFalse(RecordOriginNavigationSupport.canNavigateToOrigin(origin, new Variables()));
   }
+
+  @Test
+  void canNavigateToSourceModelOrigin() throws Exception {
+    Path modelFile = tempDir.resolve("source-tables-crm.hsm");
+    Files.writeString(modelFile, "<source-model/>");
+
+    RecordOrigin origin = new RecordOrigin();
+    origin.setModelType(RecordOriginNavigationSupport.MODEL_TYPE_SOURCE_MODEL);
+    origin.setModelFilename(modelFile.toString());
+    origin.setModelElementName("asn-package-lines");
+
+    assertTrue(RecordOriginNavigationSupport.canNavigateToOrigin(origin, new Variables()));
+  }
 }

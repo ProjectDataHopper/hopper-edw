@@ -23,9 +23,11 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.core.variables.Variables;
 import org.apache.hop.datavault.hopgui.dialog.ShowRowsDialog;
 import org.apache.hop.datavault.metadata.dimensional.DmSourceConfiguration;
 import org.apache.hop.datavault.metadata.dimensional.DmSourcePipelineSupport;
+import org.apache.hop.datavault.metadata.pipeline.DvPipelineSourceSupport;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.Pipeline;
@@ -99,6 +101,13 @@ public final class DmSourcePipelineGuiSupport {
       }
       int previewRows = settings.rowLimit > 0 ? settings.rowLimit : Math.max(1, defaultRows);
       IVariables previewVariables = settingsDialog.getPreviewExecutionVariables();
+      if (previewVariables == null) {
+        Variables fallback = new Variables();
+        if (variables != null) {
+          fallback.copyFrom(variables);
+        }
+        previewVariables = fallback;
+      }
 
       String resolvedFile = variables != null ? variables.resolve(pipelineFile) : pipelineFile;
       PipelineMeta sourcePipeline =
@@ -112,6 +121,13 @@ public final class DmSourcePipelineGuiSupport {
                 resolvedFile));
       }
       sourcePipeline.lookupReferencesAfterLoading();
+
+      // PipelinePreviewProgressDialog does not copy parameter definitions onto the engine before
+      // prepareExecution, so named-parameter defaults (e.g. RETAIL_CSV_WAVE=demo) never become
+      // variables. Activate them on the preview variable space — same effect as Hop GUI
+      // design-time preview after copyParametersFromDefinitions + activateParameters.
+      DvPipelineSourceSupport.activatePipelineParameterDefaults(sourcePipeline, previewVariables);
+      sourcePipeline.setInternalHopVariables(previewVariables);
 
       PipelinePreviewProgressDialog progressDialog =
           new PipelinePreviewProgressDialog(
