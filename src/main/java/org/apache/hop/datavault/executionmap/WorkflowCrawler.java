@@ -105,6 +105,11 @@ public final class WorkflowCrawler {
           referenceFromId = actionNode.getId();
         }
         if (action != null) {
+          // Referenced-object APIs (descriptions + load) may need project metadata; pass the crawl
+          // provider so actions like Update resource definition group can expand group models.
+          if (context.getMetadataProvider() != null) {
+            action.setMetadataProvider(context.getMetadataProvider());
+          }
           ReferencedObjectResolver.resolveAction(context, referenceFromId, action, pluginId);
         }
       }

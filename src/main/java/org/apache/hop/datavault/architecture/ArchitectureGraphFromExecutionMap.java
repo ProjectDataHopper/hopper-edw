@@ -146,6 +146,11 @@ public final class ArchitectureGraphFromExecutionMap {
         arch.setLayer(ArchitectureLayer.DIMENSIONAL);
         arch.setName(labelCapability(displayName(node), "Dimensional Update"));
       }
+      case RDG_UPDATE -> {
+        arch.setKind(ArchitectureNodeKind.CAPABILITY);
+        arch.setLayer(ArchitectureLayer.ORCHESTRATION);
+        arch.setName(labelCapability(displayName(node), "Update resource definition group"));
+      }
       case DATA_VAULT_MODEL -> {
         arch.setKind(ArchitectureNodeKind.MODEL);
         arch.setLayer(ArchitectureLayer.DATA_VAULT);

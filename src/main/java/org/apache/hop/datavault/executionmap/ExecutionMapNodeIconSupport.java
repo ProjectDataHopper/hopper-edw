@@ -40,6 +40,7 @@ public final class ExecutionMapNodeIconSupport {
       case DATA_VAULT_MODEL, DV_UPDATE -> "datavault-model.svg";
       case BUSINESS_VAULT_MODEL, BV_UPDATE -> "business-vault-model.svg";
       case DIMENSIONAL_MODEL, DM_UPDATE, DM_PUBLISH -> "dimensional-model.svg";
+      case RDG_UPDATE -> "resource-definition-group.svg";
       case WORKFLOW_ACTION -> "action.svg";
       case PIPELINE_TRANSFORM, PIPELINE_EXECUTOR, WORKFLOW_EXECUTOR, MAPPING, META_INJECT ->
           "transform.svg";
@@ -80,6 +81,7 @@ public final class ExecutionMapNodeIconSupport {
       case BV_UPDATE -> "BV Update";
       case DM_UPDATE -> "DM Update";
       case DM_PUBLISH -> "DM Publish";
+      case RDG_UPDATE -> "Update resource definition group";
       case PIPELINE_TRANSFORM -> "Transform";
       case PIPELINE_EXECUTOR -> "Pipeline Executor";
       case WORKFLOW_EXECUTOR -> "Workflow Executor";

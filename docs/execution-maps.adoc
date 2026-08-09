@@ -12,9 +12,11 @@ Starting from a **root artifact** (typically a workflow `.hwf` or model `.hdv`),
 
 * **Root workflow** — entry point actions
 * **Nested workflows** and **pipeline** references
-* **Data Vault / Business Vault / Dimensional models** referenced by update actions
+* **Data Vault / Business Vault / Dimensional models** referenced by dedicated update actions **or** by **Update resource definition group** (every selected layer on the group, in DV → BV → DM list order; include-layer flags apply)
 * **Generated pipelines** produced from models (virtual `generated://` paths)
 * **Source datasets** resolved from catalog and CRM connections (`dataset://` paths)
+
+Expanding a resource definition group requires project **metadata** for that group (same provider Hop uses when running the workflow). Without it, the RDG action node appears but model children are omitted.
 
 The map stores node positions, parent links, and crawl timestamp for reproducible layout.
 

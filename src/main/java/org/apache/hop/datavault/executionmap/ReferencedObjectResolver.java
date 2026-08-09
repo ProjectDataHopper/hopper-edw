@@ -87,6 +87,15 @@ public final class ReferencedObjectResolver {
       return;
     }
 
+    if (descriptions.length == 0
+        && "UPDATE_RESOURCE_DEFINITION_GROUP".equals(pluginId)
+        && context.getMetadataProvider() == null) {
+      context.addWarning(
+          "Update resource definition group references require a metadata provider"
+              + " to resolve the resource definition group");
+      return;
+    }
+
     for (int i = 0; i < descriptions.length; i++) {
       if (i >= enabled.length || !enabled[i]) {
         continue;
@@ -125,49 +134,15 @@ public final class ReferencedObjectResolver {
   private static void dispatchLoadedArtifact(
       ExecutionMapContext context, String fromNodeId, IHasFilename loaded, String description) {
     if (loaded instanceof DataVaultModel dvModel) {
-      String modelNodeId =
-          addModelNode(context, fromNodeId, ExecutionMapNodeType.DATA_VAULT_MODEL, dvModel);
-      context.addEdge(ExecutionMapEdgeType.REFERENCES, fromNodeId, modelNodeId, description);
-      ModelDatasetResolver.resolveDataVaultModel(context, modelNodeId, dvModel);
-      ModelPipelineResolver.resolveDataVaultModel(context, modelNodeId, dvModel);
+      expandDataVaultModel(context, fromNodeId, dvModel, description);
       return;
     }
     if (loaded instanceof BusinessVaultModel bvModel) {
-      String modelNodeId =
-          addModelNode(context, fromNodeId, ExecutionMapNodeType.BUSINESS_VAULT_MODEL, bvModel);
-      context.addEdge(ExecutionMapEdgeType.REFERENCES, fromNodeId, modelNodeId, description);
-      DataVaultModel dvModel = null;
-      try {
-        dvModel =
-            BusinessVaultDvModelResolver.buildEffectiveDataVaultModel(
-                bvModel, context.getVariables(), context.getMetadataProvider());
-        if (dvModel != null && !dvModel.getTables().isEmpty()) {
-          String dvLabel = "effective-dv-from-references";
-          if (!Utils.isEmpty(dvModel.getFilename())) {
-            dvLabel =
-                ExecutionMapPathSupport.toStoredPath(dvModel.getFilename(), context.getVariables());
-          }
-          String dvNodeId =
-              addModelNode(context, modelNodeId, ExecutionMapNodeType.DATA_VAULT_MODEL, dvModel);
-          context.addEdge(ExecutionMapEdgeType.MODEL_LINK, modelNodeId, dvNodeId, dvLabel);
-        }
-      } catch (Exception e) {
-        context.addWarning(
-            "Failed to resolve Data Vault models for BV '"
-                + bvModel.getName()
-                + "': "
-                + e.getMessage());
-      }
-      ModelDatasetResolver.resolveBusinessVaultModel(context, modelNodeId, bvModel, dvModel);
-      ModelPipelineResolver.resolveBusinessVaultModel(context, modelNodeId, bvModel, dvModel);
+      expandBusinessVaultModel(context, fromNodeId, bvModel, description);
       return;
     }
     if (loaded instanceof DimensionalModel dmModel) {
-      String modelNodeId =
-          addModelNode(context, fromNodeId, ExecutionMapNodeType.DIMENSIONAL_MODEL, dmModel);
-      context.addEdge(ExecutionMapEdgeType.REFERENCES, fromNodeId, modelNodeId, description);
-      ModelDatasetResolver.resolveDimensionalModel(context, modelNodeId, dmModel);
-      ModelPipelineResolver.resolveDimensionalModel(context, modelNodeId, dmModel);
+      expandDimensionalModel(context, fromNodeId, dmModel, description);
       return;
     }
     if (loaded instanceof WorkflowMeta workflowMeta) {
@@ -189,17 +164,113 @@ public final class ReferencedObjectResolver {
       return;
     }
     if (loaded != null && !Utils.isEmpty(loaded.getFilename())) {
-      String filename = loaded.getFilename();
-      String lower = filename.toLowerCase();
-      if (lower.endsWith(".hwf")) {
-        String workflowNodeId =
-            WorkflowCrawler.crawlWorkflow(context, filename, null, false, fromNodeId);
-        context.addEdge(ExecutionMapEdgeType.REFERENCES, fromNodeId, workflowNodeId, description);
-      } else if (lower.endsWith(".hpl")) {
-        String pipelineNodeId = resolvePipelineFile(context, fromNodeId, filename);
-        context.addEdge(ExecutionMapEdgeType.REFERENCES, fromNodeId, pipelineNodeId, description);
-      }
+      expandPathOnlyReference(context, fromNodeId, loaded.getFilename(), description);
     }
+  }
+
+  /**
+   * Expands a path-only referenced object (for example Update resource definition group returns
+   * model paths for GUI open-file, not loaded model instances).
+   */
+  private static void expandPathOnlyReference(
+      ExecutionMapContext context, String fromNodeId, String filename, String description) {
+    String resolvedPath = context.resolvePath(filename);
+    String lower =
+        (!Utils.isEmpty(resolvedPath) ? resolvedPath : filename).toLowerCase().replace('\\', '/');
+    // Extension may appear on the stored path even when PROJECT_HOME is still a variable token.
+    String extensionSource = filename.toLowerCase().replace('\\', '/');
+    if (!lower.endsWith(".hdv")
+        && !lower.endsWith(".hbv")
+        && !lower.endsWith(".hdm")
+        && !lower.endsWith(".hwf")
+        && !lower.endsWith(".hpl")) {
+      lower = extensionSource;
+    }
+
+    try {
+      if (lower.endsWith(".hdv")) {
+        DataVaultModel dvModel = loadDataVaultModel(filename, context);
+        expandDataVaultModel(context, fromNodeId, dvModel, description);
+        return;
+      }
+      if (lower.endsWith(".hbv")) {
+        BusinessVaultModel bvModel = loadBusinessVaultModel(filename, context);
+        expandBusinessVaultModel(context, fromNodeId, bvModel, description);
+        return;
+      }
+      if (lower.endsWith(".hdm")) {
+        DimensionalModel dmModel = loadDimensionalModel(filename, context);
+        expandDimensionalModel(context, fromNodeId, dmModel, description);
+        return;
+      }
+    } catch (Exception e) {
+      context.addWarning("Failed to load model reference " + filename + ": " + e.getMessage());
+      return;
+    }
+
+    if (lower.endsWith(".hwf")) {
+      String workflowNodeId =
+          WorkflowCrawler.crawlWorkflow(context, filename, null, false, fromNodeId);
+      context.addEdge(ExecutionMapEdgeType.REFERENCES, fromNodeId, workflowNodeId, description);
+    } else if (lower.endsWith(".hpl")) {
+      String pipelineNodeId = resolvePipelineFile(context, fromNodeId, filename);
+      context.addEdge(ExecutionMapEdgeType.REFERENCES, fromNodeId, pipelineNodeId, description);
+    }
+  }
+
+  private static void expandDataVaultModel(
+      ExecutionMapContext context, String fromNodeId, DataVaultModel dvModel, String description) {
+    String modelNodeId =
+        addModelNode(context, fromNodeId, ExecutionMapNodeType.DATA_VAULT_MODEL, dvModel);
+    context.addEdge(ExecutionMapEdgeType.REFERENCES, fromNodeId, modelNodeId, description);
+    ModelDatasetResolver.resolveDataVaultModel(context, modelNodeId, dvModel);
+    ModelPipelineResolver.resolveDataVaultModel(context, modelNodeId, dvModel);
+  }
+
+  private static void expandBusinessVaultModel(
+      ExecutionMapContext context,
+      String fromNodeId,
+      BusinessVaultModel bvModel,
+      String description) {
+    String modelNodeId =
+        addModelNode(context, fromNodeId, ExecutionMapNodeType.BUSINESS_VAULT_MODEL, bvModel);
+    context.addEdge(ExecutionMapEdgeType.REFERENCES, fromNodeId, modelNodeId, description);
+    DataVaultModel dvModel = null;
+    try {
+      dvModel =
+          BusinessVaultDvModelResolver.buildEffectiveDataVaultModel(
+              bvModel, context.getVariables(), context.getMetadataProvider());
+      if (dvModel != null && !dvModel.getTables().isEmpty()) {
+        String dvLabel = "effective-dv-from-references";
+        if (!Utils.isEmpty(dvModel.getFilename())) {
+          dvLabel =
+              ExecutionMapPathSupport.toStoredPath(dvModel.getFilename(), context.getVariables());
+        }
+        String dvNodeId =
+            addModelNode(context, modelNodeId, ExecutionMapNodeType.DATA_VAULT_MODEL, dvModel);
+        context.addEdge(ExecutionMapEdgeType.MODEL_LINK, modelNodeId, dvNodeId, dvLabel);
+      }
+    } catch (Exception e) {
+      context.addWarning(
+          "Failed to resolve Data Vault models for BV '"
+              + bvModel.getName()
+              + "': "
+              + e.getMessage());
+    }
+    ModelDatasetResolver.resolveBusinessVaultModel(context, modelNodeId, bvModel, dvModel);
+    ModelPipelineResolver.resolveBusinessVaultModel(context, modelNodeId, bvModel, dvModel);
+  }
+
+  private static void expandDimensionalModel(
+      ExecutionMapContext context,
+      String fromNodeId,
+      DimensionalModel dmModel,
+      String description) {
+    String modelNodeId =
+        addModelNode(context, fromNodeId, ExecutionMapNodeType.DIMENSIONAL_MODEL, dmModel);
+    context.addEdge(ExecutionMapEdgeType.REFERENCES, fromNodeId, modelNodeId, description);
+    ModelDatasetResolver.resolveDimensionalModel(context, modelNodeId, dmModel);
+    ModelPipelineResolver.resolveDimensionalModel(context, modelNodeId, dmModel);
   }
 
   public static String resolvePipelineFile(

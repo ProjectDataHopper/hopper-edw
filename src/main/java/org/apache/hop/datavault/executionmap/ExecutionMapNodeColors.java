@@ -98,6 +98,7 @@ public final class ExecutionMapNodeColors {
       case DV_UPDATE, DATA_VAULT_MODEL -> EColor.GREEN;
       case BV_UPDATE, BUSINESS_VAULT_MODEL -> EColor.CRYSTAL;
       case DM_UPDATE, DM_PUBLISH, DIMENSIONAL_MODEL -> EColor.DARKGRAY;
+      case RDG_UPDATE -> EColor.BLUE;
       case PIPELINE_EXECUTOR, WORKFLOW_EXECUTOR, MAPPING, META_INJECT -> EColor.YELLOW;
       case GENERATED_PIPELINE, ORCHESTRATOR_PIPELINE, BULK_MASTER_WORKFLOW -> EColor.LIGHTGRAY;
       case SOURCE_DATASET -> EColor.LIGHTBLUE;
@@ -115,7 +116,7 @@ public final class ExecutionMapNodeColors {
 
   private static int[] darkFillRgb(ExecutionMapNodeType nodeType) {
     return switch (nodeType) {
-      case ROOT_WORKFLOW, WORKFLOW -> WORKFLOW_FILL_RGB_DARK;
+      case ROOT_WORKFLOW, WORKFLOW, RDG_UPDATE -> WORKFLOW_FILL_RGB_DARK;
       case DV_UPDATE, DATA_VAULT_MODEL -> DV_FILL_RGB_DARK;
       case DM_UPDATE, DM_PUBLISH, DIMENSIONAL_MODEL -> DM_FILL_RGB_DARK;
       case TARGET_DATASET -> TARGET_DATASET_FILL_RGB_DARK;
@@ -126,7 +127,7 @@ public final class ExecutionMapNodeColors {
 
   private static int[] lightFillRgb(ExecutionMapNodeType nodeType) {
     return switch (nodeType) {
-      case ROOT_WORKFLOW, WORKFLOW, ROOT_PIPELINE, PIPELINE -> WORKFLOW_FILL_RGB_LIGHT;
+      case ROOT_WORKFLOW, WORKFLOW, ROOT_PIPELINE, PIPELINE, RDG_UPDATE -> WORKFLOW_FILL_RGB_LIGHT;
       case DV_UPDATE, DATA_VAULT_MODEL -> DV_FILL_RGB_LIGHT;
       case BV_UPDATE, BUSINESS_VAULT_MODEL -> BV_FILL_RGB_LIGHT;
       case DM_UPDATE, DM_PUBLISH, DIMENSIONAL_MODEL -> DM_FILL_RGB_LIGHT;

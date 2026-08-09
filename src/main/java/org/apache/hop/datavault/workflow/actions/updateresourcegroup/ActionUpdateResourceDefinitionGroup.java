@@ -1209,7 +1209,8 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
   public String[] getReferencedObjectDescriptions() {
     try {
       IVariables vars = effectiveReferencedObjectVariables(null);
-      List<ReferencedModel> models = listReferencedModels(metadataProviderForGui(), vars);
+      List<ReferencedModel> models =
+          listReferencedModels(metadataProviderForReferences(null), vars);
       String[] descriptions = new String[models.size()];
       for (int i = 0; i < models.size(); i++) {
         ReferencedModel model = models.get(i);
@@ -1228,7 +1229,8 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
   public boolean[] isReferencedObjectEnabled() {
     try {
       IVariables vars = effectiveReferencedObjectVariables(null);
-      List<ReferencedModel> models = listReferencedModels(metadataProviderForGui(), vars);
+      List<ReferencedModel> models =
+          listReferencedModels(metadataProviderForReferences(null), vars);
       boolean[] enabled = new boolean[models.size()];
       for (int i = 0; i < models.size(); i++) {
         enabled[i] = StringUtils.isNotEmpty(models.get(i).storedPath());
@@ -1250,8 +1252,7 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
       int index, IHopMetadataProvider metadataProvider, IVariables variables) throws HopException {
     try {
       IVariables vars = effectiveReferencedObjectVariables(variables);
-      IHopMetadataProvider provider =
-          metadataProvider != null ? metadataProvider : metadataProviderForGui();
+      IHopMetadataProvider provider = metadataProviderForReferences(metadataProvider);
       List<ReferencedModel> models = listReferencedModels(provider, vars);
       if (index < 0 || index >= models.size()) {
         return super.loadReferencedObject(index, metadataProvider, variables);
@@ -1269,10 +1270,26 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
         this, getParentWorkflowMeta(), preferred != null ? preferred : this);
   }
 
-  private static IHopMetadataProvider metadataProviderForGui() {
+  /**
+   * Prefer an explicit provider (execution-map crawl / loadReferencedObject), then the action's
+   * metadata provider, then Hop GUI project metadata when available.
+   */
+  private IHopMetadataProvider metadataProviderForReferences(IHopMetadataProvider preferred) {
+    if (preferred != null) {
+      return preferred;
+    }
+    try {
+      IHopMetadataProvider onAction = getMetadataProvider();
+      if (onAction != null) {
+        return onAction;
+      }
+    } catch (Exception ignored) {
+      // fall through
+    }
     try {
       return HopGui.getInstance().getMetadataProvider();
-    } catch (Exception e) {
+    } catch (Throwable e) {
+      // HopGui may be unavailable in unit tests / headless crawls (Error, not Exception).
       return null;
     }
   }
@@ -1293,18 +1310,25 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
     ResourceDefinitionGroupMeta group =
         ResourceDefinitionGroupResolver.loadGroup(groupName, metadataProvider);
     List<ReferencedModel> models = new ArrayList<>();
-    appendReferenced(
-        models,
-        group.getDataVaultModelFiles(),
-        "ActionUpdateResourceDefinitionGroup.ReferencedObject.DataVault");
-    appendReferenced(
-        models,
-        group.getBusinessVaultModelFiles(),
-        "ActionUpdateResourceDefinitionGroup.ReferencedObject.BusinessVault");
-    appendReferenced(
-        models,
-        group.getDimensionalModelFiles(),
-        "ActionUpdateResourceDefinitionGroup.ReferencedObject.Dimensional");
+    // Same layer filter as ResourceGroupModelUpdatePlanner / execute path.
+    if (includeDataVault) {
+      appendReferenced(
+          models,
+          group.getDataVaultModelFiles(),
+          "ActionUpdateResourceDefinitionGroup.ReferencedObject.DataVault");
+    }
+    if (includeBusinessVault) {
+      appendReferenced(
+          models,
+          group.getBusinessVaultModelFiles(),
+          "ActionUpdateResourceDefinitionGroup.ReferencedObject.BusinessVault");
+    }
+    if (includeDimensional) {
+      appendReferenced(
+          models,
+          group.getDimensionalModelFiles(),
+          "ActionUpdateResourceDefinitionGroup.ReferencedObject.Dimensional");
+    }
     return models;
   }
 

@@ -150,5 +150,6 @@ See link:metadata-harvesting.adoc[Metadata harvesting] for the observation step,
 * link:datavault-update-action.adoc[Data Vault Update action]
 * link:business-vault-update-action.adoc[Business Vault Update action]
 * link:dimensional-update-action.adoc[Dimensional Update action]
+* link:execution-maps.adoc[Execution maps] — crawler expands group models into the `.hem` graph
 * link:data-catalog.adoc[Data catalog] — resource definition groups
 * link:getting-started-retail.adoc[Getting started — retail]

@@ -29,6 +29,8 @@ public enum ExecutionMapNodeType implements IEnumHasCode {
   BV_UPDATE,
   DM_UPDATE,
   DM_PUBLISH,
+  /** Update resource definition group workflow action. */
+  RDG_UPDATE,
   PIPELINE_TRANSFORM,
   PIPELINE_EXECUTOR,
   WORKFLOW_EXECUTOR,

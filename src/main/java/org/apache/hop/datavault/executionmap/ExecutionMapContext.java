@@ -233,6 +233,7 @@ public final class ExecutionMapContext {
       case "BUSINESS_VAULT_UPDATE" -> ExecutionMapNodeType.BV_UPDATE;
       case "DIMENSIONAL_UPDATE" -> ExecutionMapNodeType.DM_UPDATE;
       case "DIMENSIONAL_PUBLISH" -> ExecutionMapNodeType.DM_PUBLISH;
+      case "UPDATE_RESOURCE_DEFINITION_GROUP" -> ExecutionMapNodeType.RDG_UPDATE;
       default -> ExecutionMapNodeType.WORKFLOW_ACTION;
     };
   }
@@ -242,7 +243,7 @@ public final class ExecutionMapContext {
       return false;
     }
     return switch (nodeType) {
-      case WORKFLOW_ACTION, DV_UPDATE, BV_UPDATE, DM_UPDATE, DM_PUBLISH -> true;
+      case WORKFLOW_ACTION, DV_UPDATE, BV_UPDATE, DM_UPDATE, DM_PUBLISH, RDG_UPDATE -> true;
       default -> false;
     };
   }
