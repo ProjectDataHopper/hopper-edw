@@ -22,10 +22,12 @@
       "hop/retail-example/sources/E2E-sales-rep",
       "hop/retail-example/sources/E2E-warehouse-product",
       "hop/retail-example/sources/E2E-warehouse",
-      "hop/retail-example/sources/all-customer-info"
+      "hop/retail-example/sources/all-customer-info",
+      "hop/retail-example/sources/asn-package-lines",
+      "hop/retail-example/sources/feed_order_shipment_tracking"
     ]
   },
-  "recordCount": 13,
+  "recordCount": 15,
   "contentHash": "sha256:1312f32bbcde7a76454ddd270b4afd05e66bcc14c9fa392fa90b1c2c76e7963f",
   "recordRelativePaths": [
     "hop/retail-example/sources/E2E-customer-address.json",
@@ -40,6 +42,8 @@
     "hop/retail-example/sources/E2E-sales-rep.json",
     "hop/retail-example/sources/E2E-warehouse-product.json",
     "hop/retail-example/sources/E2E-warehouse.json",
-    "hop/retail-example/sources/all-customer-info.json"
+    "hop/retail-example/sources/all-customer-info.json",
+    "hop/retail-example/sources/asn-package-lines.json",
+    "hop/retail-example/sources/feed_order_shipment_tracking.json"
   ]
 }
