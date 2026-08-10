@@ -26,6 +26,7 @@ Documentation for the **hop-datavault** plugin (development **0.9.0-SNAPSHOT**, 
 | Document | Description |
 |----------|-------------|
 | [feature-overview.md](feature-overview.md) | Major plugin capabilities, maturity, and links to deep dives |
+| [hop-web-modelers.md](hop-web-modelers.md) | **Hop Web** modelers (`.hsm`/`.hdv`/`.hbv`/`.hdm`/`.hem`): SVG canvas, interactions, Hop SPI |
 | [getting-started-retail.adoc](getting-started-retail.adoc) | Primary tutorial: retail-example (DV → BV → dimensional) |
 | [getting-started-integration-tests.adoc](getting-started-integration-tests.adoc) | Reference walkthrough: Customer 360 and integration test fixtures |
 | [search.adoc](search.adoc) | **Search Everywhere**: models (`.hsm`/`.hdv`/`.hbv`/`.hdm`) and plugin metadata |

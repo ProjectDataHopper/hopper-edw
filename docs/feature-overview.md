@@ -66,6 +66,7 @@ For a slide-style executive summary, see [presentations/hop-data-vault-overview.
 | Dimensional modeler (`.hdm`) | Available | [dimensional-modeler-overview.adoc](dimensional-modeler-overview.adoc) |
 | Dimensional Update / Publish actions | Available | [dimensional-update-action.adoc](dimensional-update-action.adoc) |
 | Execution maps (`.hem`) | Available | [execution-maps.adoc](execution-maps.adoc) |
+| Hop Web modelers (`.hsm`/`.hdv`/`.hbv`/`.hdm`/`.hem`) | Available (experimental; needs Hop canvas SPI) | [hop-web-modelers.md](hop-web-modelers.md), issue [#119](https://github.com/mattcasters/hop-data-vault/issues/119) |
 | AI Help (model, pipeline, workflow) | Available | [ai-advisory.md](ai-advisory.md) |
 | Get Record Definition Names transform | Available | [record-definition-input.adoc](record-definition-input.adoc) |
 | Catalog Record Definition Metadata Output transform | Available | [record-definition-output.adoc](record-definition-output.adoc) |

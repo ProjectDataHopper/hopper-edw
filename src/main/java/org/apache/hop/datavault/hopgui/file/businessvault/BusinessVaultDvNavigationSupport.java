@@ -32,6 +32,8 @@ import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
 import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
+import org.apache.hop.ui.hopgui.shared.CanvasSvgHelper;
+import org.apache.hop.ui.util.EnvironmentUtils;
 
 /** Opens a Data Vault model and navigates to a referenced table (linked or external path). */
 public final class BusinessVaultDvNavigationSupport {
@@ -140,5 +142,32 @@ public final class BusinessVaultDvNavigationSupport {
               PKG, "BusinessVaultDvNavigationSupport.Error.UnexpectedFileHandler"));
     }
     vaultGraph.navigateToTable(resolvedTableName);
+    // Hop Web: rebind the shared SVG canvas client to the opened tab immediately.
+    forceWebCanvasRefresh(vaultGraph);
+  }
+
+  private static void forceWebCanvasRefresh(HopGuiVaultGraph vaultGraph) {
+    if (!EnvironmentUtils.getInstance().isWeb()
+        || vaultGraph == null
+        || vaultGraph.isDisposed()
+        || vaultGraph.getCanvas() == null
+        || vaultGraph.getCanvas().isDisposed()) {
+      return;
+    }
+    // Synchronous rebind first so a trailing mouse-up paint on the previous tab cannot win the
+    // shared SVG client race. Then async paint to publish a fresh snapshot.
+    CanvasSvgHelper.notifyCanvasReady(vaultGraph.getCanvas());
+    vaultGraph
+        .getDisplay()
+        .asyncExec(
+            () -> {
+              if (vaultGraph.isDisposed()
+                  || vaultGraph.getCanvas() == null
+                  || vaultGraph.getCanvas().isDisposed()) {
+                return;
+              }
+              vaultGraph.redraw();
+              CanvasSvgHelper.notifyCanvasReady(vaultGraph.getCanvas());
+            });
   }
 }

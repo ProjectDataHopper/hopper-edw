@@ -18,6 +18,7 @@ package org.apache.hop.datavault.hopgui.file.executionmap;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.Getter;
@@ -35,19 +36,26 @@ import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.IGuiRefresher;
 import org.apache.hop.core.gui.plugin.action.GuiActionType;
 import org.apache.hop.core.gui.plugin.toolbar.GuiToolbarElement;
+import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.core.vfs.HopVfs;
+import org.apache.hop.core.gui.DPoint;
+import org.apache.hop.core.logging.LogChannel;
+import org.apache.hop.core.svg.HopSvgGraphics2D;
 import org.apache.hop.datavault.command.executionmap.ExecutionMapService;
 import org.apache.hop.datavault.command.svg.ExecutionMapExportScope;
 import org.apache.hop.datavault.command.svg.SvgExportService;
 import org.apache.hop.datavault.command.svg.SvgRenderOptions;
 import org.apache.hop.datavault.executionmap.ExecutionMapFocusContext;
+import org.apache.hop.datavault.executionmap.ExecutionMapViewFilter;
 import org.apache.hop.datavault.executionmap.ExecutionMapViewSupport;
 import org.apache.hop.datavault.hopgui.executionmap.ExecutionMapGenerationDialog;
 import org.apache.hop.datavault.hopgui.file.modelgraph.HopGuiModelGraphBase;
+import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphCanvasSvgResult;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphMouseInteractions;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphSnapshotUndo;
+import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphWebCanvasData;
 import org.apache.hop.datavault.metadata.DvNote;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapDocument;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapNode;
@@ -67,6 +75,7 @@ import org.apache.hop.ui.hopgui.file.IHopFileType;
 import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
 import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
 import org.apache.hop.ui.hopgui.shared.SwtGc;
+import org.apache.hop.ui.util.EnvironmentUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.graphics.GC;
@@ -157,6 +166,7 @@ public class HopGuiExecutionMapGraph extends HopGuiModelGraphBase
     fdCanvas.right = new FormAttachment(100, 0);
     fdCanvas.bottom = new FormAttachment(100, 0);
     canvas.setLayoutData(fdCanvas);
+    setupWebCanvas();
     canvas.addPaintListener(this::paintControl);
     registerCanvasMouseListeners();
     hopGui.replaceKeyboardShortcutListeners(this);
@@ -203,6 +213,11 @@ public class HopGuiExecutionMapGraph extends HopGuiModelGraphBase
     if (area.x == 0 || area.y == 0 || document == null) {
       return;
     }
+    if (EnvironmentUtils.getInstance().isWeb()) {
+      drawExecutionMapImageWeb(area.x, area.y);
+      fillWebCanvasBackground(e, area.x, area.y);
+      return;
+    }
     boolean needsDoubleBuffering =
         Const.isWindows() && "GUI".equalsIgnoreCase(Const.getHopPlatformRuntime());
     Image image = null;
@@ -217,6 +232,37 @@ public class HopGuiExecutionMapGraph extends HopGuiModelGraphBase
       swtGc.dispose();
       image.dispose();
     }
+  }
+
+  private void drawExecutionMapImageWeb(int width, int height) {
+    try {
+      ModelGraphCanvasSvgResult result =
+          ExecutionMapCanvasSvgRenderer.render(buildExecutionMapSvgContext(width, height));
+      applyWebCanvasRender(result, width, height, document);
+    } catch (Exception ex) {
+      logWebCanvasRenderError("Failed to render execution map SVG for Hop Web", ex);
+    }
+  }
+
+  private ExecutionMapCanvasSvgRenderer.Context buildExecutionMapSvgContext(int width, int height) {
+    PropsUi propsUi = PropsUi.getInstance();
+    float paintMagnification = (float) (magnification * PropsUi.getNativeZoomFactor());
+    ExecutionMapCanvasSvgRenderer.Context ctx = new ExecutionMapCanvasSvgRenderer.Context();
+    ctx.variables = variables;
+    ctx.document = document;
+    ctx.focusContext = focusContext;
+    ctx.exportScope = ExecutionMapExportScope.FOCUSED;
+    ctx.canvasSize = new Point(width, height);
+    ctx.offset = offset;
+    ctx.iconSize = propsUi.getIconSize();
+    ctx.gridSize = propsUi.isShowCanvasGridEnabled() ? propsUi.getCanvasGridSize() : 1;
+    ctx.magnification = paintMagnification;
+    ctx.screenMagnification = magnification;
+    ctx.zoomFactor = propsUi.getZoomFactor();
+    ctx.maximum = maximum;
+    ctx.mouseOverNodeName = mouseOverNodeName;
+    ctx.showingNavigationView = !propsUi.isHideViewportEnabled();
+    return ctx;
   }
 
   private void drawExecutionMapImage(GC swtGc, int width, int height) {
@@ -258,6 +304,38 @@ public class HopGuiExecutionMapGraph extends HopGuiModelGraphBase
     } finally {
       gc.dispose();
     }
+  }
+
+  @Override
+  public void replaceAreaOwners(List<AreaOwner> owners) {
+    areaOwners.clear();
+    if (owners != null) {
+      areaOwners.addAll(owners);
+    }
+  }
+
+  @Override
+  protected Map<String, ModelGraphWebCanvasData.NodePos> collectWebCanvasNodes() {
+    Map<String, ModelGraphWebCanvasData.NodePos> nodes = new HashMap<>();
+    if (document == null) {
+      return nodes;
+    }
+    for (ExecutionMapNode node : document.getNodesOrEmpty()) {
+      if (node == null || Utils.isEmpty(node.getName()) || node.getLocation() == null) {
+        continue;
+      }
+      // Prefer stable id when present so area owner names can match.
+      String key = !Utils.isEmpty(node.getId()) ? node.getId() : node.getName();
+      int w = ModelGraphWebCanvasData.DEFAULT_CARD_WIDTH;
+      int h = ModelGraphWebCanvasData.DEFAULT_CARD_HEIGHT;
+      // Execution map cards use painter-measured metrics when available via props later;
+      // defaults match typical node card size for client hop/drag previews.
+      nodes.put(
+          key,
+          ModelGraphWebCanvasData.NodePos.of(
+              node.getLocation().x, node.getLocation().y, node.isSelected(), w, h));
+    }
+    return nodes;
   }
 
   @Override
@@ -853,6 +931,85 @@ public class HopGuiExecutionMapGraph extends HopGuiModelGraphBase
   private void syncMaximumFromDocument() {
     if (document != null) {
       maximum = document.getMaximum();
+    }
+  }
+
+  /**
+   * Zoom-fit after breadcrumb/drill must use the <em>focused</em> subgraph size, not {@link
+   * ExecutionMapDocument#getMaximum()} (full tree). Using the full-document maximum collapses
+   * magnification to a few percent when viewing a small drill-down.
+   */
+  @Override
+  protected void performZoomFitToScreen() {
+    syncFocusedViewMaximum();
+    if (maximum == null || maximum.x <= 0 || maximum.y <= 0) {
+      syncMaximumFromDocument();
+    }
+    if (canvas == null || canvas.isDisposed()) {
+      return;
+    }
+    org.eclipse.swt.graphics.Rectangle canvasBounds = canvas.getBounds();
+    // Breadcrumb rebuild can run before layout; avoid dividing by a tiny client area.
+    if (canvasBounds.width < 50 || canvasBounds.height < 50) {
+      magnification = 1.0f;
+      offset = new DPoint(0.0, 0.0);
+      setZoomLabel();
+      redraw();
+      return;
+    }
+    super.zoomFitToScreen();
+    // zoomFitToScreen has no floor; focused-max race can still produce tiny values.
+    if (magnification < 0.1f) {
+      magnification = 0.1f;
+      setZoomLabel();
+      redraw();
+    } else if (magnification > 5.0f) {
+      magnification = 5.0f;
+      setZoomLabel();
+      redraw();
+    }
+  }
+
+  /**
+   * Layout the focused execution-map level and set {@link #maximum} to that view's bounds for
+   * zoom-fit / minimap.
+   */
+  private void syncFocusedViewMaximum() {
+    if (document == null || canvas == null || canvas.isDisposed()) {
+      return;
+    }
+    PropsUi propsUi = PropsUi.getInstance();
+    int iconSize = propsUi.getIconSize();
+    int w = Math.max(canvas.getBounds().width, 800);
+    int h = Math.max(canvas.getBounds().height, 600);
+    IGc gc = null;
+    Image image = null;
+    try {
+      if (EnvironmentUtils.getInstance().isWeb()) {
+        HopSvgGraphics2D graphics2D = HopSvgGraphics2D.newDocument();
+        gc = ModelGraphWebCanvasData.createSvgGc(graphics2D, new Point(w, h), iconSize);
+      } else {
+        image = new Image(getDisplay(), w, h);
+        GC swtGc = new GC(image);
+        gc = new SwtGc(swtGc, w, h, iconSize);
+      }
+      // Measure at native zoom so card sizes match paint at 100% user magnification.
+      float measureMag = (float) PropsUi.getNativeZoomFactor();
+      var cardMetrics =
+          ExecutionMapViewSupport.prepareFocusedView(document, focusContext, gc, measureMag);
+      maximum =
+          ExecutionMapViewSupport.computeViewMaximum(
+              ExecutionMapViewFilter.getVisibleNodes(document, focusContext), cardMetrics);
+    } catch (Exception e) {
+      LogChannel.UI.logError("Failed to measure focused execution map for zoom fit", e);
+      syncMaximumFromDocument();
+    } finally {
+      if (gc != null) {
+        gc.dispose();
+      }
+      if (image != null && !image.isDisposed()) {
+        image.dispose();
+      }
     }
   }
 

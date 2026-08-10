@@ -29,6 +29,8 @@ import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
 import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
+import org.apache.hop.ui.hopgui.shared.CanvasSvgHelper;
+import org.apache.hop.ui.util.EnvironmentUtils;
 
 /** Opens another Business Vault model and navigates to a referenced table. */
 public final class BusinessVaultBvNavigationSupport {
@@ -122,5 +124,32 @@ public final class BusinessVaultBvNavigationSupport {
               PKG, "BusinessVaultBvNavigationSupport.Error.UnexpectedFileHandler"));
     }
     bvGraph.navigateToTable(table.getName());
+    // Hop Web: rebind the shared SVG canvas client to the opened tab immediately.
+    forceWebCanvasRefresh(bvGraph);
+  }
+
+  private static void forceWebCanvasRefresh(HopGuiBusinessVaultGraph bvGraph) {
+    if (!EnvironmentUtils.getInstance().isWeb()
+        || bvGraph == null
+        || bvGraph.isDisposed()
+        || bvGraph.getCanvas() == null
+        || bvGraph.getCanvas().isDisposed()) {
+      return;
+    }
+    // Synchronous rebind first so a trailing mouse-up paint on the previous tab cannot win the
+    // shared SVG client race. Then async paint to publish a fresh snapshot.
+    CanvasSvgHelper.notifyCanvasReady(bvGraph.getCanvas());
+    bvGraph
+        .getDisplay()
+        .asyncExec(
+            () -> {
+              if (bvGraph.isDisposed()
+                  || bvGraph.getCanvas() == null
+                  || bvGraph.getCanvas().isDisposed()) {
+                return;
+              }
+              bvGraph.redraw();
+              CanvasSvgHelper.notifyCanvasReady(bvGraph.getCanvas());
+            });
   }
 }

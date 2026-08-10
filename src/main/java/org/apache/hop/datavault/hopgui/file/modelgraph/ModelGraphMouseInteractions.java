@@ -38,6 +38,14 @@ public interface ModelGraphMouseInteractions {
 
   boolean isRelationshipDragActive();
 
+  /**
+   * When a relationship hop drag is active, the canvas node name used as hop origin for Hop Web
+   * client feedback ({@code startHopNode}). Null when not applicable.
+   */
+  default String webRelationshipStartNodeName() {
+    return null;
+  }
+
   void handleRelationshipMouseMove(Event e);
 
   /** Returns true when the relationship drag was finalized (caller should return). */

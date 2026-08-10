@@ -71,9 +71,11 @@ import org.apache.hop.datavault.hopgui.ai.DvAiAdvisorDialog;
 import org.apache.hop.datavault.hopgui.coaching.ICoachableModelGraph;
 import org.apache.hop.datavault.hopgui.file.modelgraph.HopGuiModelGraphBase;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
+import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphCanvasSvgResult;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphHit;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphMouseInteractions;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphSnapshotUndo;
+import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphWebCanvasData;
 import org.apache.hop.datavault.hopgui.file.vault.delegates.HopGuiVaultClipboardDelegate;
 import org.apache.hop.datavault.hopgui.file.vault.delegates.HopGuiVaultSnapshotUndo;
 import org.apache.hop.datavault.metadata.DataVaultConfiguration;
@@ -133,6 +135,7 @@ import org.apache.hop.ui.hopgui.file.workflow.HopGuiWorkflowGraph;
 import org.apache.hop.ui.hopgui.perspective.IHopPerspective;
 import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
 import org.apache.hop.ui.hopgui.shared.SwtGc;
+import org.apache.hop.ui.util.EnvironmentUtils;
 import org.apache.hop.workflow.WorkflowHopMeta;
 import org.apache.hop.workflow.WorkflowMeta;
 import org.apache.hop.workflow.action.ActionMeta;
@@ -433,6 +436,12 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       return; // nothing to do!
     }
 
+    if (EnvironmentUtils.getInstance().isWeb()) {
+      drawVaultModelImageWeb(area.x, area.y);
+      fillWebCanvasBackground(e, area.x, area.y);
+      return;
+    }
+
     // Do double buffering to prevent flickering on Windows
     //
     boolean needsDoubleBuffering =
@@ -455,6 +464,43 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       swtGc.dispose();
       image.dispose();
     }
+  }
+
+  private void drawVaultModelImageWeb(int width, int height) {
+    try {
+      ModelGraphCanvasSvgResult result =
+          DataVaultModelCanvasSvgRenderer.render(buildVaultSvgContext(width, height));
+      applyWebCanvasRender(result, width, height, model);
+    } catch (Exception ex) {
+      logWebCanvasRenderError("Failed to render Data Vault model SVG for Hop Web", ex);
+    }
+  }
+
+  private DataVaultModelCanvasSvgRenderer.Context buildVaultSvgContext(int width, int height) {
+    PropsUi propsUi = PropsUi.getInstance();
+    maximum = model.getMaximum();
+    DataVaultModelCanvasSvgRenderer.Context ctx = new DataVaultModelCanvasSvgRenderer.Context();
+    ctx.variables = variables;
+    ctx.model = model;
+    ctx.canvasSize = new Point(width, height);
+    ctx.offset = offset;
+    ctx.selectionRegion = selectionRegion;
+    ctx.iconSize = propsUi.getIconSize();
+    ctx.gridSize = propsUi.isShowCanvasGridEnabled() ? propsUi.getCanvasGridSize() : 1;
+    ctx.magnification = (float) (magnification * PropsUi.getNativeZoomFactor());
+    ctx.screenMagnification = magnification;
+    ctx.zoomFactor = propsUi.getZoomFactor();
+    ctx.maximum = maximum;
+    ctx.mouseOverTableName = mouseOverTableName;
+    ctx.mouseOverNoteLink = mouseOverNoteLink;
+    ctx.noteImageBaseFilename = getFilename();
+    ctx.showingNavigationView = !propsUi.isHideViewportEnabled();
+    ctx.showHashKeyFieldNames = DataVaultConfigSingleton.getConfig().isDrawingHashKeysInModel();
+    ctx.metadataProvider = hopGui.getMetadataProvider();
+    ctx.startRelationshipTable = startRelationshipTable;
+    ctx.relationshipDragEndLocation = relationshipDragEndLocation;
+    ctx.candidateRelationshipTarget = candidateRelationshipTarget;
+    return ctx;
   }
 
   private void drawVaultModelImage(GC swtGc, int width, int height) {
@@ -495,6 +541,42 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     } finally {
       gc.dispose();
     }
+  }
+
+  @Override
+  public void replaceAreaOwners(List<AreaOwner> owners) {
+    areaOwners.clear();
+    if (owners != null) {
+      areaOwners.addAll(owners);
+    }
+  }
+
+  @Override
+  protected Map<String, ModelGraphWebCanvasData.NodePos> collectWebCanvasNodes() {
+    Map<String, ModelGraphWebCanvasData.NodePos> nodes = new HashMap<>();
+    if (model == null || model.getTables() == null) {
+      return nodes;
+    }
+    for (IDvTable table : model.getTables()) {
+      if (table == null || Utils.isEmpty(table.getName()) || table.getLocation() == null) {
+        continue;
+      }
+      int w = ModelGraphWebCanvasData.DEFAULT_CARD_WIDTH;
+      int h = ModelGraphWebCanvasData.DEFAULT_CARD_HEIGHT;
+      if (table instanceof DvTableBase base) {
+        if (base.getDrawnBoxWidth() > 0) {
+          w = base.getDrawnBoxWidth();
+        }
+        if (base.getDrawnBoxHeight() > 0) {
+          h = base.getDrawnBoxHeight();
+        }
+      }
+      nodes.put(
+          table.getName(),
+          ModelGraphWebCanvasData.NodePos.of(
+              table.getLocation().x, table.getLocation().y, table.isSelected(), w, h));
+    }
+    return nodes;
   }
 
   @Override
@@ -3206,6 +3288,11 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     @Override
     public boolean isRelationshipDragActive() {
       return startRelationshipTable != null;
+    }
+
+    @Override
+    public String webRelationshipStartNodeName() {
+      return startRelationshipTable != null ? startRelationshipTable.getName() : null;
     }
 
     @Override

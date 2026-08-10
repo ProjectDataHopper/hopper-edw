@@ -17,6 +17,7 @@
 package org.apache.hop.datavault.hopgui.file.sourcemodel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.Getter;
@@ -44,9 +45,11 @@ import org.apache.hop.datavault.hopgui.dialog.ShowRowsDialog;
 import org.apache.hop.datavault.hopgui.file.dimensional.DmSourcePipelineOpenSupport;
 import org.apache.hop.datavault.hopgui.file.modelgraph.HopGuiModelGraphBase;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
+import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphCanvasSvgResult;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphHit;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphMouseInteractions;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphSnapshotUndo;
+import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphWebCanvasData;
 import org.apache.hop.datavault.hopgui.file.sourcemodel.delegates.HopGuiSourceModelClipboardDelegate;
 import org.apache.hop.datavault.hopgui.file.sourcemodel.delegates.HopGuiSourceModelSnapshotUndo;
 import org.apache.hop.datavault.metadata.DvNote;
@@ -93,6 +96,7 @@ import org.apache.hop.ui.hopgui.perspective.IHopPerspective;
 import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
 import org.apache.hop.ui.hopgui.shared.SwtGc;
 import org.apache.hop.ui.pipeline.dialog.PipelinePreviewProgressDialog;
+import org.apache.hop.ui.util.EnvironmentUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.graphics.GC;
@@ -233,6 +237,12 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       return;
     }
 
+    if (EnvironmentUtils.getInstance().isWeb()) {
+      drawSourceModelImageWeb(area.x, area.y);
+      fillWebCanvasBackground(e, area.x, area.y);
+      return;
+    }
+
     boolean needsDoubleBuffering =
         Const.isWindows() && "GUI".equalsIgnoreCase(Const.getHopPlatformRuntime());
 
@@ -250,6 +260,42 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       swtGc.dispose();
       image.dispose();
     }
+  }
+
+  private void drawSourceModelImageWeb(int width, int height) {
+    try {
+      ModelGraphCanvasSvgResult result =
+          SourceModelCanvasSvgRenderer.render(buildSourceSvgContext(width, height));
+      applyWebCanvasRender(result, width, height, model);
+    } catch (Exception ex) {
+      logWebCanvasRenderError("Failed to render source model SVG for Hop Web", ex);
+    }
+  }
+
+  private SourceModelCanvasSvgRenderer.Context buildSourceSvgContext(int width, int height) {
+    PropsUi propsUi = PropsUi.getInstance();
+    maximum = model.getMaximum();
+    SourceModelCanvasSvgRenderer.Context ctx = new SourceModelCanvasSvgRenderer.Context();
+    ctx.variables = variables;
+    ctx.model = model;
+    ctx.canvasSize = new Point(width, height);
+    ctx.offset = offset;
+    ctx.selectionRegion = selectionRegion;
+    ctx.iconSize = propsUi.getIconSize();
+    ctx.gridSize = propsUi.isShowCanvasGridEnabled() ? propsUi.getCanvasGridSize() : 1;
+    ctx.magnification = (float) (magnification * PropsUi.getNativeZoomFactor());
+    ctx.screenMagnification = magnification;
+    ctx.zoomFactor = propsUi.getZoomFactor();
+    ctx.maximum = maximum;
+    ctx.mouseOverTableName = mouseOverTableName;
+    ctx.mouseOverNoteLink = mouseOverNoteLink;
+    ctx.noteImageBaseFilename = getFilename();
+    ctx.showingNavigationView = !propsUi.isHideViewportEnabled();
+    ctx.metadataProvider = hopGui.getMetadataProvider();
+    ctx.startRelationshipNode = startRelationshipNode;
+    ctx.relationshipDragEndLocation = relationshipDragEndLocation;
+    ctx.candidateRelationshipTarget = candidateRelationshipTarget;
+    return ctx;
   }
 
   private void drawSourceModelImage(GC swtGc, int width, int height) {
@@ -280,6 +326,69 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     } finally {
       gc.dispose();
     }
+  }
+
+  @Override
+  public void replaceAreaOwners(List<AreaOwner> owners) {
+    areaOwners.clear();
+    if (owners != null) {
+      areaOwners.addAll(owners);
+    }
+  }
+
+  @Override
+  protected Map<String, ModelGraphWebCanvasData.NodePos> collectWebCanvasNodes() {
+    Map<String, ModelGraphWebCanvasData.NodePos> nodes = new HashMap<>();
+    if (model == null) {
+      return nodes;
+    }
+    for (SourceTable table : model.getTables()) {
+      putWebNode(nodes, table != null ? table.getName() : null, table);
+    }
+    for (SourceQuery query : model.getQueries()) {
+      putWebNode(nodes, query != null ? query.getName() : null, query);
+    }
+    for (SourceJson json : model.getJsonSources()) {
+      putWebNode(nodes, json != null ? json.getName() : null, json);
+    }
+    for (SourcePipeline pipeline : model.getPipelineSources()) {
+      putWebNode(nodes, pipeline != null ? pipeline.getName() : null, pipeline);
+    }
+    return nodes;
+  }
+
+  private static void putWebNode(
+      Map<String, ModelGraphWebCanvasData.NodePos> nodes, String name, Object card) {
+    if (Utils.isEmpty(name) || card == null) {
+      return;
+    }
+    Point loc = null;
+    boolean selected = false;
+    int w = ModelGraphWebCanvasData.DEFAULT_CARD_WIDTH;
+    int h = ModelGraphWebCanvasData.DEFAULT_CARD_HEIGHT;
+    if (card instanceof SourceTable t) {
+      loc = t.getLocation();
+      selected = t.isSelected();
+      if (t.getDrawnBoxWidth() > 0) {
+        w = t.getDrawnBoxWidth();
+      }
+      if (t.getDrawnBoxHeight() > 0) {
+        h = t.getDrawnBoxHeight();
+      }
+    } else if (card instanceof SourceQuery q) {
+      loc = q.getLocation();
+      selected = q.isSelected();
+    } else if (card instanceof SourceJson j) {
+      loc = j.getLocation();
+      selected = j.isSelected();
+    } else if (card instanceof SourcePipeline p) {
+      loc = p.getLocation();
+      selected = p.isSelected();
+    }
+    if (loc == null) {
+      return;
+    }
+    nodes.put(name, ModelGraphWebCanvasData.NodePos.of(loc.x, loc.y, selected, w, h));
   }
 
   @Override
@@ -3038,6 +3147,23 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     @Override
     public boolean isRelationshipDragActive() {
       return startRelationshipNode != null;
+    }
+
+    @Override
+    public String webRelationshipStartNodeName() {
+      if (startRelationshipNode instanceof SourceTable t) {
+        return t.getName();
+      }
+      if (startRelationshipNode instanceof SourceQuery q) {
+        return q.getName();
+      }
+      if (startRelationshipNode instanceof SourceJson j) {
+        return j.getName();
+      }
+      if (startRelationshipNode instanceof SourcePipeline p) {
+        return p.getName();
+      }
+      return null;
     }
 
     @Override

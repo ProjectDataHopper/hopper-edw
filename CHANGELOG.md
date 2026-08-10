@@ -4,6 +4,17 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## Unreleased
 
+### Hop Web modelers (#119)
+
+- Render `.hsm` / `.hdv` / `.hbv` / `.hdm` / `.hem` graphs under **Hop Web** via the Hop SVG canvas stack (`CanvasSvgFacade.publishSnapshot`, requires Hop with [apache/hop#7873](https://github.com/apache/hop/issues/7873) / [#7874](https://github.com/apache/hop/pull/7874) and related web client fixes)
+- Shared web shell (`HopGuiModelGraphBase`): register canvas, zoom handler, hover, drag arming on mouse-down, final position apply on mouse-up, `nodes`/`notes` maps for client previews
+- Client polish (with Hop `canvas-svg.js` / `canvas-zoom.js`): card- and note-sized drag ghosts, note resize handles/outline, pan wireframe that undims on release, wheel zoom through the SVG overlay, active-tab SVG rebind (link follow / tab switch)
+- Source model minimap content; BV/DV reference link navigation rebinds the shared SVG client to the target graph
+- Execution map breadcrumb / drill zoom-fit uses the **focused** subgraph size (not full-document maximum)
+- Skip load-duration chart pane under RAP (unsupported `ScrolledComposite.addPaintListener`); coach canvas DnD desktop-only
+- Source model SVG export (`.hsm`) via `SvgExportService` / `SourceModelSvgPainter`
+- Docs: [hop-web-modelers.md](docs/hop-web-modelers.md)
+
 ### Hop database type: Apache Hop Source Model
 
 - Register **`@DatabaseMetaPlugin`** type **Apache Hop Source Model** (`HOPSOURCEMODEL`) so Hop connection metadata can use the thin hop-hsm JDBC driver against Hop Server source model services

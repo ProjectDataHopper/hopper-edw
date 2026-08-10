@@ -203,10 +203,12 @@ public class HopVaultFileType extends HopFileTypeBase {
     tabItem.setToolTipText(filename != null ? filename : "unsaved");
     tabItem.setImage(explorer.getFileTypeImage(fileType));
     vaultGraph.setData("KEY_TAB_FOLDER", targetFolder);
-    tabItem.setControl(vaultGraph);
+    // Under Hop Web, setControl can fire focus/selection → ExplorerPerspective.updateGui()
+    // before the tab is fully wired. setData + register first so getActiveFileTypeHandler()
+    // never sees a null tab payload.
     tabItem.setData(vaultGraph);
-
     ExplorerPerspectiveTabSupport.registerTabItem(explorer, tabItem, vaultGraph);
+    tabItem.setControl(vaultGraph);
 
     targetFolder.setSelection(tabItem);
 

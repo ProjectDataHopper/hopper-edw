@@ -138,7 +138,9 @@ public class ModelLoadDurationPane extends Composite {
     applyStandardBackground(scrolledComposite);
     scrolledComposite.setExpandHorizontal(false);
     scrolledComposite.setExpandVertical(false);
-    scrolledComposite.addPaintListener(this::paintScrollBackground);
+    // Use Widget.addListener — RAP ScrolledComposite does not implement addPaintListener
+    // (NoSuchMethodError under Hop Web).
+    scrolledComposite.addListener(SWT.Paint, this::paintScrollBackgroundEvent);
     FormData fdScroll = new FormData();
     fdScroll.left = new FormAttachment(0, 0);
     fdScroll.top = new FormAttachment(header, PropsUi.getMargin());
@@ -279,7 +281,10 @@ public class ModelLoadDurationPane extends Composite {
     }
   }
 
-  private void paintScrollBackground(PaintEvent event) {
+  private void paintScrollBackgroundEvent(Event event) {
+    if (event == null || event.gc == null) {
+      return;
+    }
     Color background = GuiResource.getInstance().getColorBackground();
     event.gc.setBackground(background);
     event.gc.fillRectangle(event.x, event.y, event.width, event.height);

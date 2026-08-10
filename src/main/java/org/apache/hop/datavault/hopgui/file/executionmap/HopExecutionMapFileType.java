@@ -130,10 +130,12 @@ public class HopExecutionMapFileType extends HopFileTypeBase {
     CTabItem tabItem = new CTabItem(targetFolder, SWT.CLOSE);
     tabItem.setText(document.getName() != null ? document.getName() : filename);
     tabItem.setImage(explorer.getFileTypeImage(this));
-    tabItem.setControl(graph);
+    // Under Hop Web, setControl can fire focus/selection → ExplorerPerspective.updateGui()
+    // before the tab is fully wired. setData + register first so getActiveFileTypeHandler()
+    // never sees a null tab payload.
     tabItem.setData(graph);
-
     ExplorerPerspectiveTabSupport.registerTabItem(explorer, tabItem, graph);
+    tabItem.setControl(graph);
     targetFolder.setSelection(tabItem);
     explorer.activate();
     graph.updateGui();

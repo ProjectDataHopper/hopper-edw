@@ -25,10 +25,12 @@ import java.util.Objects;
 import org.apache.hop.core.NotePadMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.AreaOwner;
+import org.apache.hop.core.gui.CanvasSvgRenderResult;
 import org.apache.hop.core.gui.IRedrawable;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.Rectangle;
 import org.apache.hop.core.gui.markdown.NoteLinkHit;
+import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.datavault.hopgui.ModelCoachPanelAuditSupport;
 import org.apache.hop.datavault.hopgui.ModelLoadDurationPaneAuditSupport;
@@ -43,7 +45,11 @@ import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.dialog.MessageBox;
+import org.apache.hop.ui.core.gui.GuiResource;
 import org.apache.hop.ui.core.gui.GuiToolbarWidgets;
+import org.apache.hop.ui.hopgui.CanvasFacade;
+import org.apache.hop.ui.hopgui.CanvasListener;
+import org.apache.hop.ui.hopgui.CanvasSvgFacade;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.hopgui.context.GuiContextUtil;
 import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
@@ -52,9 +58,12 @@ import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
 import org.apache.hop.ui.hopgui.file.delegates.HopGuiNoteLinkSupport;
 import org.apache.hop.ui.hopgui.file.shared.HopGuiAbstractGraph;
 import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
+import org.apache.hop.ui.hopgui.shared.CanvasZoomHelper;
+import org.apache.hop.ui.hopgui.shared.IWebCanvasGraph;
 import org.apache.hop.ui.util.EnvironmentUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
@@ -64,6 +73,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.jspecify.annotations.Nullable;
 
@@ -71,8 +81,20 @@ import org.jspecify.annotations.Nullable;
  * Shared graph shell for warehouse model file types (Data Vault, Business Vault, and future
  * dimensional models). Subclasses supply domain-specific painting, table CRUD, and relationship
  * rules.
+ *
+ * <p>On Hop Web, graphs render via SVG ({@link CanvasSvgFacade#publishSnapshot}) instead of
+ * painting on the RAP canvas GC.
  */
-public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implements IRedrawable {
+public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
+    implements IRedrawable, IWebCanvasGraph {
+
+  /** Optional RAP zoom remote object; set when {@link #setupWebCanvas()} runs. */
+  protected Object canvasZoomHandler;
+
+  /** Used by explorer tab-switch to rebind the shared Hop Web zoom remote. */
+  public Object getCanvasZoomHandler() {
+    return canvasZoomHandler;
+  }
 
   protected final ExplorerPerspective perspective;
   protected boolean positionChangeUndoMarked;
@@ -99,6 +121,12 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
   protected boolean iconDragCommitted;
   protected boolean dragSelection;
   protected Rectangle selectionRegion;
+  /**
+   * Last mouse button from mouse-down (pipeline graphs use the same pattern). RAP often omits
+   * {@code SWT.BUTTON1} from {@code stateMask} on mouse-move and mouse-up, so drag commits must not
+   * rely on stateMask alone.
+   */
+  protected int lastButton;
 
   private ModelGraphMouseInteractions mouseInteractions;
 
@@ -159,25 +187,147 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
     PropsUi.setLook(canvasHolder);
 
     canvas = new Canvas(canvasHolder, SWT.NO_BACKGROUND);
+    setupWebCanvas();
     registerPaintListener.run();
     registerCanvasMouseListeners();
-    if (coachableGraph != null) {
+    // SWT DropTarget is fragile under RAP; coach DnD is desktop-only for now.
+    if (coachableGraph != null && !EnvironmentUtils.getInstance().isWeb()) {
       CoachingCanvasDropSupport.register(canvas, hopGui, coachableGraph, this, variables);
     }
 
-    loadDurationPane =
-        new ModelLoadDurationPane(
-            innerModelSash,
-            hopGui,
-            variables,
-            this::getMetricsModelName,
-            this::getMetricsModelType,
-            this::getMetricsTableNames);
+    // ModelLoadDurationPane uses ScrolledComposite + paint listeners that RAP does not support
+    // (NoSuchMethodError on ScrolledComposite.addPaintListener). Skip construction under Hop Web.
+    if (!EnvironmentUtils.getInstance().isWeb()) {
+      loadDurationPane =
+          new ModelLoadDurationPane(
+              innerModelSash,
+              hopGui,
+              variables,
+              this::getMetricsModelName,
+              this::getMetricsModelType,
+              this::getMetricsTableNames);
+      innerModelSash.setWeights(new int[] {70, 30});
+    } else {
+      loadDurationPane = null;
+    }
 
     outerModelSash.setWeights(new int[] {25, 75});
-    innerModelSash.setWeights(new int[] {70, 30});
     restoreCoachPanelVisibility();
     restoreLoadDurationPanelVisibility();
+  }
+
+  /**
+   * Registers this graph with the Hop Web SVG canvas stack when running under RAP. No-op on
+   * desktop.
+   */
+  protected void setupWebCanvas() {
+    if (canvas == null || canvas.isDisposed() || !EnvironmentUtils.getInstance().isWeb()) {
+      return;
+    }
+    // ClientListener for canvas.js (hop rubber-band, note resize handles, drag/pan overlays).
+    Listener canvasListener = CanvasListener.getInstance();
+    canvas.addListener(SWT.MouseDown, canvasListener);
+    canvas.addListener(SWT.MouseMove, canvasListener);
+    canvas.addListener(SWT.MouseUp, canvasListener);
+    canvas.addListener(SWT.Paint, canvasListener);
+    canvas.addListener(SWT.MouseWheel, canvasListener);
+    canvas.addListener(SWT.MouseVerticalWheel, canvasListener);
+
+    canvasZoomHandler = CanvasZoomHelper.createZoomHandler(this, canvas, this);
+    CanvasSvgFacade.registerCanvas(canvas, this);
+    CanvasSvgFacade.ensureInteractionHandler(this, canvas);
+    // Before first paint: empty nodes/hops/notes so canvas.js Paint does not NPE.
+    ModelGraphWebCanvasData.ensureEmptyCollections(canvas);
+    if (canvasZoomHandler != null) {
+      getDisplay().asyncExec(() -> CanvasZoomHelper.notifyCanvasReady(canvasZoomHandler));
+    }
+  }
+
+  @Override
+  public void dispose() {
+    if (EnvironmentUtils.getInstance().isWeb() && canvas != null && !canvas.isDisposed()) {
+      CanvasSvgFacade.unregisterCanvas(canvas);
+    }
+    super.dispose();
+  }
+
+  /**
+   * Applies a model canvas SVG render on Hop Web: area owners, minimap geometry, snapshot publish,
+   * and widget data for the client overlay.
+   *
+   * @param result interactive SVG render result
+   * @param width canvas width in pixels
+   * @param height canvas height in pixels
+   * @param canvasDataMeta object passed to {@link CanvasFacade#setData} (model/document; not cast
+   *     to pipeline/workflow meta under the Hop Web SPI)
+   */
+  protected void applyWebCanvasRender(
+      ModelGraphCanvasSvgResult result, int width, int height, Object canvasDataMeta) {
+    if (result == null || result.getCanvasResult() == null) {
+      return;
+    }
+    CanvasSvgRenderResult canvasResult = result.getCanvasResult();
+    replaceAreaOwners(canvasResult.getAreaOwners());
+    setViewPort(canvasResult.getViewPort());
+    setGraphPort(canvasResult.getGraphPort());
+    lastNavigationScale = result.getNavigationScale();
+    lastNavigationGraphOriginX = result.getNavigationGraphOriginX();
+    lastNavigationGraphOriginY = result.getNavigationGraphOriginY();
+
+    canvas.setData("viewPort", getViewPort());
+    canvas.setData("graphPort", getGraphPort());
+    ModelGraphWebCanvasData.setNodes(canvas, collectWebCanvasNodes());
+    ModelGraphWebCanvasData.setNotes(canvas, collectWebCanvasNotes());
+    // canvas.js Paint assumes hops is a non-null array (pipelines always set it).
+    ModelGraphWebCanvasData.setHops(canvas, List.of());
+    CanvasSvgFacade.publishSnapshot(
+        canvas, canvasResult, magnification, offset, new Point(width, height));
+    CanvasFacade.setData(canvas, magnification, offset, canvasDataMeta);
+  }
+
+  /**
+   * Card/table positions for Hop Web multi-select drag previews ({@code canvas-svg.js} {@code
+   * nodes}). Subclasses return name → location; default empty (single-icon drag still works from
+   * area map once label owners are recognized client-side).
+   */
+  protected Map<String, ModelGraphWebCanvasData.NodePos> collectWebCanvasNodes() {
+    return Map.of();
+  }
+
+  /**
+   * Note pad positions for Hop Web note outlines and resize handles ({@code canvas.js} {@code
+   * notes}).
+   */
+  protected List<ModelGraphWebCanvasData.NotePos> collectWebCanvasNotes() {
+    List<DvNote> notes = getModelNotes();
+    if (notes == null || notes.isEmpty()) {
+      return List.of();
+    }
+    List<ModelGraphWebCanvasData.NotePos> result = new ArrayList<>();
+    for (DvNote note : notes) {
+      if (note == null || note.getLocation() == null) {
+        continue;
+      }
+      result.add(
+          new ModelGraphWebCanvasData.NotePos(
+              note.getLocation().x,
+              note.getLocation().y,
+              Math.max(note.getWidth(), note.getMinimumWidth()),
+              Math.max(note.getHeight(), note.getMinimumHeight()),
+              note.isSelected(),
+              note.getText() != null ? note.getText() : ""));
+    }
+    return result;
+  }
+
+  /** Fills the RAP canvas background after publishing SVG (same pattern as pipeline graphs). */
+  protected void fillWebCanvasBackground(PaintEvent e, int width, int height) {
+    e.gc.setBackground(GuiResource.getInstance().getColorBackground());
+    e.gc.fillRectangle(0, 0, width, height);
+  }
+
+  protected void logWebCanvasRenderError(String message, Exception e) {
+    LogChannel.UI.logError(message, e);
   }
 
   protected String getModelFilename() {
@@ -249,9 +399,14 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
     if (innerModelSash == null || canvas == null || loadDurationPane == null) {
       return;
     }
-    loadDurationPanelVisible =
-        ModelLoadDurationPaneAuditSupport.retrievePanelVisible(
-            getModelFilename(), defaultLoadDurationPanelVisible());
+    // Second SWT chart canvas is not on the Hop Web SVG path yet — keep hidden under RAP.
+    if (EnvironmentUtils.getInstance().isWeb()) {
+      loadDurationPanelVisible = false;
+    } else {
+      loadDurationPanelVisible =
+          ModelLoadDurationPaneAuditSupport.retrievePanelVisible(
+              getModelFilename(), defaultLoadDurationPanelVisible());
+    }
     applyLoadDurationPanelVisibility();
   }
 
@@ -266,7 +421,16 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
   }
 
   protected void applyLoadDurationPanelVisibility() {
+    if (innerModelSash == null || canvas == null || canvas.isDisposed()) {
+      return;
+    }
     Composite canvasHolder = canvas.getParent();
+    if (loadDurationPane == null) {
+      // Web (or other builds without the metrics pane): canvas fills the inner sash.
+      innerModelSash.setMaximizedControl(canvasHolder);
+      innerModelSash.layout(true, true);
+      return;
+    }
     if (loadDurationPanelVisible) {
       innerModelSash.setMaximizedControl(null);
       loadDurationPane.setVisible(true);
@@ -295,22 +459,65 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
   /**
    * Registers standard model-graph canvas mouse listeners. Call after {@code canvas} is created;
    * subclasses still add their paint listener separately.
+   *
+   * <p>On Hop Web, continuous mouse-move / wheel events are not registered (client SVG overlay +
+   * zoom handler own those); hover arrives via {@link #handleWebCanvasHover}.
    */
   protected void registerCanvasMouseListeners() {
     canvas.addListener(SWT.MouseDown, this::onMouseDown);
     canvas.addListener(SWT.MouseUp, this::onMouseUp);
-    canvas.addListener(SWT.MouseMove, this::onMouseMove);
-    canvas.addMouseWheelListener(this::mouseScrolled);
     canvas.addListener(SWT.MouseDoubleClick, this::onMouseDoubleClick);
-    canvas.addListener(SWT.MouseExit, this::onMouseExit);
+    if (!EnvironmentUtils.getInstance().isWeb()) {
+      canvas.addListener(SWT.MouseMove, this::onMouseMove);
+      canvas.addMouseWheelListener(this::mouseScrolled);
+      canvas.addListener(SWT.MouseExit, this::onMouseExit);
+    }
+  }
+
+  @Override
+  public void handleWebCanvasHover(int graphX, int graphY, int screenX, int screenY) {
+    if (!EnvironmentUtils.getInstance().isWeb()) {
+      return;
+    }
+    AreaOwner areaOwner = getVisibleAreaOwner(graphX, graphY);
+    Point real = new Point(graphX, graphY);
+    boolean interactionInProgress =
+        mouseInteractions().isRelationshipDragActive()
+            || selectionRegion != null
+            || dragSelection
+            || iconDragCommitted;
+    if (interactionInProgress) {
+      return;
+    }
+    if (mouseInteractions().updateHoverState(areaOwner, real)) {
+      redraw();
+    }
   }
 
   protected void onMouseDown(Event e) {
+    if (EnvironmentUtils.getInstance().isWeb()) {
+      // RAP does not stream hover/move; update underline/tooltip from click position.
+      Point hover = screen2real(e.x, e.y);
+      mouseInteractions().updateHoverState(getVisibleAreaOwner(hover.x, hover.y), hover);
+    }
     mouseDownEvent(e);
   }
 
   protected void onMouseUp(Event e) {
+    if (EnvironmentUtils.getInstance().isWeb()) {
+      // RAP does not deliver move-while-button-down; apply final drag/lasso geometry first.
+      // Keep lastButton so mouseMoveEvent still treats the gesture as button-held (stateMask on
+      // mouse-up no longer has BUTTON1).
+      mouseMoveEvent(e);
+    }
     mouseUpEvent(e);
+    lastButton = 0;
+    if (EnvironmentUtils.getInstance().isWeb()
+        && canvas != null
+        && !canvas.isDisposed()
+        && !mouseInteractions().isRelationshipDragActive()) {
+      ModelGraphWebCanvasData.clearMode(canvas);
+    }
   }
 
   protected void onMouseMove(Event e) {
@@ -318,6 +525,7 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
   }
 
   protected void mouseDownEvent(Event e) {
+    lastButton = e.button;
     Point real = beginMouseEvent(e);
     boolean shift = isShiftDown(e);
     boolean control = isControlDown(e);
@@ -332,10 +540,12 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
     }
 
     if (mouseInteractions().handleObjectMouseDown(e, real, hit, shift, control)) {
+      armWebObjectDragModes(e, shift, control);
       return;
     }
 
     if (handleNoteMouseDown(e, real, hit.note(), hit.areaOwner(), control)) {
+      armWebNoteDragModes(e);
       return;
     }
 
@@ -356,6 +566,54 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
       return;
     }
 
+    redraw();
+  }
+
+  /**
+   * Hop Web: arm icon drag / relationship hop mode on mouse-down (no move-while-held). Mirrors
+   * {@code HopGuiPipelineGraph} web behaviour.
+   */
+  protected void armWebObjectDragModes(Event e, boolean shift, boolean control) {
+    if (!EnvironmentUtils.getInstance().isWeb() || canvas == null || canvas.isDisposed()) {
+      return;
+    }
+    if (mouseInteractions().isRelationshipDragActive()) {
+      String startName = mouseInteractions().webRelationshipStartNodeName();
+      canvas.setData("mode", "hop");
+      canvas.setData("startHopNode", startName);
+      ModelGraphWebCanvasData.setNodes(canvas, collectWebCanvasNodes());
+      // Sync mode/nodes to client before mouse moves (canvas.js hop rubber-band).
+      redraw();
+      return;
+    }
+    if (e.button == 1 && !shift && !control && iconDragStart != null && !iconDragCommitted) {
+      iconDragCommitted = true;
+      dragSelection = true;
+      canvas.setData("mode", "drag");
+      markPositionUndoPoint();
+      ModelGraphWebCanvasData.setNodes(canvas, collectWebCanvasNodes());
+      ModelGraphWebCanvasData.setNotes(canvas, collectWebCanvasNotes());
+      redraw();
+    }
+  }
+
+  /** Hop Web: arm note drag or resize mode for client feedback. */
+  protected void armWebNoteDragModes(Event e) {
+    if (!EnvironmentUtils.getInstance().isWeb() || canvas == null || canvas.isDisposed()) {
+      return;
+    }
+    if (e.button != 1) {
+      return;
+    }
+    ModelGraphWebCanvasData.setNotes(canvas, collectWebCanvasNotes());
+    if (resize != null) {
+      canvas.setData("mode", "resize");
+      canvas.setData("resizeDirection", resize.name());
+    } else if (noteDragStart != null) {
+      canvas.setData("mode", "drag");
+      canvas.setData("resizeDirection", null);
+    }
+    // Force immediate client sync of mode / notes / resizeDirection.
     redraw();
   }
 
@@ -383,7 +641,8 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
       return;
     }
 
-    boolean leftButtonDown = (e.stateMask & SWT.BUTTON1) != 0;
+    // RAP: stateMask often lacks BUTTON1 during move/up; lastButton tracks the gesture.
+    boolean leftButtonDown = (e.stateMask & SWT.BUTTON1) != 0 || lastButton == 1;
 
     if (mouseInteractions().handleObjectMouseMove(real, leftButtonDown)) {
       doRedraw = true;
@@ -537,6 +796,14 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
     if (viewDrag) {
       viewDrag = false;
       viewDragStart = null;
+      if (EnvironmentUtils.getInstance().isWeb() && canvas != null && !canvas.isDisposed()) {
+        ModelGraphWebCanvasData.clearMode(canvas);
+        canvas.setData("panStartOffset", null);
+        canvas.setData("panCurrentOffset", null);
+        canvas.setData("panBoundaries", null);
+        // Full SVG repaint at normal opacity (client wireframe + dim ends with mode=null).
+        redraw();
+      }
     }
   }
 
@@ -554,6 +821,9 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
     if (dxs * dxs + dys * dys > threshSq) {
       iconDragCommitted = true;
       dragSelection = true;
+      if (canvas != null && !canvas.isDisposed()) {
+        canvas.setData("mode", "drag");
+      }
       markPositionUndoPoint();
       return true;
     }
@@ -587,7 +857,9 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
     Point loc = noteHit.getLocation() != null ? noteHit.getLocation() : new Point(0, 0);
     noteOffset = new Point(real.x - loc.x, real.y - loc.y);
     noteDragStart = new Point(real.x, real.y);
-    resize = getResize(areaOwner.getArea(), real);
+    // Hop Web draws 8px resize handles on the note border; use a wider hit margin than desktop's 4px
+    // so edge/handle clicks resize instead of starting a background lasso.
+    resize = getNoteResize(areaOwner.getArea(), real);
     if (resize != null) {
       markPositionUndoPoint();
       resizeArea =
@@ -601,6 +873,42 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph implement
     clearSelectionRegion();
     redraw();
     return true;
+  }
+
+  /**
+   * Note resize hit-test. On Hop Web, canvas.js paints handles around the border; a larger margin
+   * keeps those clicks from falling through as background lasso.
+   */
+  protected Resize getNoteResize(Rectangle rectangle, Point point) {
+    if (rectangle == null || point == null) {
+      return null;
+    }
+    int margin = EnvironmentUtils.getInstance().isWeb() ? 10 : 4;
+    if (point.x <= rectangle.x + margin) {
+      if (point.y <= rectangle.y + margin) {
+        return Resize.NORTH_WEST;
+      }
+      if (point.y >= rectangle.y + rectangle.height - margin) {
+        return Resize.SOUTH_WEST;
+      }
+      return Resize.WEST;
+    }
+    if (point.x >= rectangle.x + rectangle.width - margin) {
+      if (point.y <= rectangle.y + margin) {
+        return Resize.NORTH_EAST;
+      }
+      if (point.y >= rectangle.y + rectangle.height - margin) {
+        return Resize.SOUTH_EAST;
+      }
+      return Resize.EAST;
+    }
+    if (point.y <= rectangle.y + margin) {
+      return Resize.NORTH;
+    }
+    if (point.y >= rectangle.y + rectangle.height - margin) {
+      return Resize.SOUTH;
+    }
+    return null;
   }
 
   /** Left-click on empty canvas: start lasso rubber-band selection. Returns true when started. */

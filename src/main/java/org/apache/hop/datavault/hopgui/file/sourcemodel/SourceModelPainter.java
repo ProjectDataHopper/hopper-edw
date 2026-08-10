@@ -37,6 +37,7 @@ import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeome
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphTableCardLayout;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphTableNameHitArea;
 import org.apache.hop.datavault.hopgui.file.vault.BasePainter;
+import org.apache.hop.datavault.metadata.DvNote;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceColumn;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceEndpointSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJson;
@@ -134,6 +135,133 @@ public class SourceModelPainter extends BasePainter {
     }
 
     drawNavigationView();
+  }
+
+  /**
+   * Miniature of tables, queries, JSON/pipeline cards, relationships and notes inside the
+   * bottom-right navigation viewport (other model painters already override this; source model
+   * previously only drew the empty blue chrome).
+   */
+  @Override
+  protected void drawNavigationViewContent(
+      double graphX, double graphY, double scaleX, double scaleY) {
+    if (model == null) {
+      return;
+    }
+    int minSize = 4;
+    buildTableIndex();
+
+    // Relationships first (behind cards).
+    gc.setForeground(EColor.DARKGRAY);
+    gc.setLineWidth(1);
+    gc.setLineStyle(ELineStyle.SOLID);
+    if (model.getRelationships() != null) {
+      for (SourceRelationship relationship : model.getRelationships()) {
+        if (relationship == null) {
+          continue;
+        }
+        Bounds child =
+            SourceRelationshipEdgeLayout.boundsOfEndpoint(
+                model,
+                tableByName,
+                relationship.resolveChildEndpointKind(),
+                relationship.getChildTableName());
+        Bounds parent =
+            SourceRelationshipEdgeLayout.boundsOfEndpoint(
+                model,
+                tableByName,
+                relationship.resolveParentEndpointKind(),
+                relationship.getParentTableName());
+        if (child == null || parent == null) {
+          continue;
+        }
+        int x1 = (int) Math.round(graphX + child.centerX() * scaleX);
+        int y1 = (int) Math.round(graphY + child.centerY() * scaleY);
+        int x2 = (int) Math.round(graphX + parent.centerX() * scaleX);
+        int y2 = (int) Math.round(graphY + parent.centerY() * scaleY);
+        gc.drawLine(x1, y1, x2, y2);
+      }
+    }
+
+    // Tables (blue fill).
+    for (SourceTable table : model.getTables()) {
+      if (table == null || table.getLocation() == null) {
+        continue;
+      }
+      Bounds b = tableBounds(table);
+      fillNavRect(graphX, graphY, scaleX, scaleY, b, minSize, EColor.BLUE);
+    }
+
+    // Queries (dark gray fill — purple is not an EColor; still distinct from tables).
+    if (model.getQueries() != null) {
+      for (SourceQuery query : model.getQueries()) {
+        if (query == null || query.getLocation() == null) {
+          continue;
+        }
+        fillNavRect(graphX, graphY, scaleX, scaleY, queryBounds(query), minSize, EColor.DARKGRAY);
+      }
+    }
+
+    // JSON sources.
+    if (model.getJsonSources() != null) {
+      for (SourceJson jsonSource : model.getJsonSources()) {
+        if (jsonSource == null || jsonSource.getLocation() == null) {
+          continue;
+        }
+        fillNavRect(graphX, graphY, scaleX, scaleY, jsonBounds(jsonSource), minSize, EColor.GRAY);
+      }
+    }
+
+    // Pipeline sources.
+    if (model.getPipelineSources() != null) {
+      for (SourcePipeline pipelineSource : model.getPipelineSources()) {
+        if (pipelineSource == null || pipelineSource.getLocation() == null) {
+          continue;
+        }
+        fillNavRect(
+            graphX, graphY, scaleX, scaleY, pipelineBounds(pipelineSource), minSize, EColor.BLACK);
+      }
+    }
+
+    // Notes as light rectangles.
+    if (drawNotes && model.getNotes() != null) {
+      for (DvNote note : model.getNotes()) {
+        if (note == null || note.getLocation() == null) {
+          continue;
+        }
+        Bounds noteBounds =
+            new Bounds(
+                note.getLocation().x,
+                note.getLocation().y,
+                Math.max(note.getWidth(), note.getMinimumWidth()),
+                Math.max(note.getHeight(), note.getMinimumHeight()));
+        fillNavRect(graphX, graphY, scaleX, scaleY, noteBounds, minSize, EColor.LIGHTGRAY);
+      }
+    }
+
+    gc.setBackground(EColor.WHITE);
+    gc.setForeground(EColor.BLACK);
+  }
+
+  private void fillNavRect(
+      double graphX,
+      double graphY,
+      double scaleX,
+      double scaleY,
+      Bounds bounds,
+      int minSize,
+      EColor fill) {
+    if (bounds == null) {
+      return;
+    }
+    int w = Math.max(minSize, (int) Math.ceil(Math.max(1, bounds.width()) * scaleX));
+    int h = Math.max(minSize, (int) Math.ceil(Math.max(1, bounds.height()) * scaleY));
+    int x = (int) Math.round(graphX + bounds.x() * scaleX);
+    int y = (int) Math.round(graphY + bounds.y() * scaleY);
+    gc.setBackground(fill);
+    gc.setForeground(EColor.BLACK);
+    gc.fillRectangle(x, y, w, h);
+    gc.drawRectangle(x, y, w, h);
   }
 
   private void buildTableIndex() {

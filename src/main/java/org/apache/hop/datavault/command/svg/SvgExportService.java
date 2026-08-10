@@ -32,12 +32,15 @@ import org.apache.hop.datavault.hopgui.file.businessvault.HopBusinessVaultFileTy
 import org.apache.hop.datavault.hopgui.file.dimensional.DimensionalModelSvgPainter;
 import org.apache.hop.datavault.hopgui.file.dimensional.HopDimensionalFileType;
 import org.apache.hop.datavault.hopgui.file.executionmap.ExecutionMapSvgPainter;
+import org.apache.hop.datavault.hopgui.file.sourcemodel.SourceModelSvgPainter;
 import org.apache.hop.datavault.hopgui.file.vault.DataVaultModelSvgPainter;
 import org.apache.hop.datavault.hopgui.file.vault.HopVaultFileType;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapDocument;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceModelLoadSupport;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.apache.hop.pipeline.PipelineMeta;
@@ -52,18 +55,29 @@ public final class SvgExportService {
 
   public static final String EXT_HPL = "hpl";
   public static final String EXT_HWF = "hwf";
+  public static final String EXT_HSM = "hsm";
   public static final String EXT_HDV = "hdv";
   public static final String EXT_HBV = "hbv";
   public static final String EXT_HDM = "hdm";
   public static final String EXT_HEM = "hem";
 
   private static final Set<String> SUPPORTED_EXTENSIONS =
-      Set.of(EXT_HPL, EXT_HWF, EXT_HDV, EXT_HBV, EXT_HDM, EXT_HEM);
+      Set.of(EXT_HPL, EXT_HWF, EXT_HSM, EXT_HDV, EXT_HBV, EXT_HDM, EXT_HEM);
 
   private SvgExportService() {}
 
   public static boolean isSupportedExtension(String extension) {
     return extension != null && SUPPORTED_EXTENSIONS.contains(extension.toLowerCase());
+  }
+
+  public static String generateSourceModelSvg(
+      SourceModel model,
+      SvgRenderOptions options,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider)
+      throws HopException {
+    return SourceModelSvgPainter.generateSourceModelSvg(
+        model, options, variables, metadataProvider);
   }
 
   public static String generateDataVaultModelSvg(
@@ -114,6 +128,8 @@ public final class SvgExportService {
           generatePipelineSvg(resolvedFilename, renderOptions, variables, metadataProvider);
       case EXT_HWF ->
           generateWorkflowSvg(resolvedFilename, renderOptions, variables, metadataProvider);
+      case EXT_HSM ->
+          generateSourceModelSvg(resolvedFilename, renderOptions, variables, metadataProvider);
       case EXT_HDV ->
           generateDataVaultModelSvg(resolvedFilename, renderOptions, variables, metadataProvider);
       case EXT_HBV ->
@@ -191,7 +207,8 @@ public final class SvgExportService {
 
     FileObject[] childFiles =
         sourceFolder.findFiles(
-            new FileExtensionSelector(EXT_HPL, EXT_HWF, EXT_HDV, EXT_HBV, EXT_HDM, EXT_HEM));
+            new FileExtensionSelector(
+                EXT_HPL, EXT_HWF, EXT_HSM, EXT_HDV, EXT_HBV, EXT_HDM, EXT_HEM));
     for (FileObject childFile : childFiles) {
       if (!childFile.getParent().equals(sourceFolder)) {
         continue;
@@ -275,6 +292,23 @@ public final class SvgExportService {
           workflowMeta, options.getMagnification(), variables);
     } catch (Exception e) {
       throw new HopException("Unable to generate SVG for workflow " + filename, e);
+    }
+  }
+
+  private static String generateSourceModelSvg(
+      String filename,
+      SvgRenderOptions options,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider)
+      throws HopException {
+    try {
+      SourceModel model = SourceModelLoadSupport.load(filename, variables, metadataProvider);
+      return SourceModelSvgPainter.generateSourceModelSvg(
+          model, options, variables, metadataProvider);
+    } catch (HopException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new HopException("Unable to generate SVG for source model " + filename, e);
     }
   }
 

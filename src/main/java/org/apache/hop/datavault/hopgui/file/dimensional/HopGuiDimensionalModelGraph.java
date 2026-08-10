@@ -18,6 +18,7 @@ package org.apache.hop.datavault.hopgui.file.dimensional;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.Getter;
@@ -55,9 +56,11 @@ import org.apache.hop.datavault.hopgui.file.dimensional.delegates.HopGuiDimensio
 import org.apache.hop.datavault.hopgui.file.dimensional.delegates.HopGuiDimensionalSnapshotUndo;
 import org.apache.hop.datavault.hopgui.file.modelgraph.HopGuiModelGraphBase;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
+import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphCanvasSvgResult;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphHit;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphMouseInteractions;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphSnapshotUndo;
+import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphWebCanvasData;
 import org.apache.hop.datavault.metadata.DvDdlSupport;
 import org.apache.hop.datavault.metadata.DvIntegerSettingValidationSupport;
 import org.apache.hop.datavault.metadata.DvNote;
@@ -119,6 +122,7 @@ import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
 import org.apache.hop.ui.hopgui.perspective.IHopPerspective;
 import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
 import org.apache.hop.ui.hopgui.shared.SwtGc;
+import org.apache.hop.ui.util.EnvironmentUtils;
 import org.apache.hop.workflow.WorkflowMeta;
 import org.apache.hop.workflow.action.ActionMeta;
 import org.eclipse.swt.SWT;
@@ -256,6 +260,12 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
       return;
     }
 
+    if (EnvironmentUtils.getInstance().isWeb()) {
+      drawDimensionalModelImageWeb(area.x, area.y);
+      fillWebCanvasBackground(e, area.x, area.y);
+      return;
+    }
+
     boolean needsDoubleBuffering =
         Const.isWindows() && "GUI".equalsIgnoreCase(Const.getHopPlatformRuntime());
 
@@ -274,6 +284,43 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
       swtGc.dispose();
       image.dispose();
     }
+  }
+
+  private void drawDimensionalModelImageWeb(int width, int height) {
+    try {
+      ModelGraphCanvasSvgResult result =
+          DimensionalModelCanvasSvgRenderer.render(buildDimensionalSvgContext(width, height));
+      applyWebCanvasRender(result, width, height, model);
+    } catch (Exception ex) {
+      logWebCanvasRenderError("Failed to render dimensional model SVG for Hop Web", ex);
+    }
+  }
+
+  private DimensionalModelCanvasSvgRenderer.Context buildDimensionalSvgContext(
+      int width, int height) {
+    PropsUi propsUi = PropsUi.getInstance();
+    maximum = model.getMaximum();
+    DimensionalModelCanvasSvgRenderer.Context ctx = new DimensionalModelCanvasSvgRenderer.Context();
+    ctx.variables = variables;
+    ctx.model = model;
+    ctx.canvasSize = new Point(width, height);
+    ctx.offset = offset;
+    ctx.selectionRegion = selectionRegion;
+    ctx.iconSize = propsUi.getIconSize();
+    ctx.gridSize = propsUi.isShowCanvasGridEnabled() ? propsUi.getCanvasGridSize() : 1;
+    ctx.magnification = (float) (magnification * PropsUi.getNativeZoomFactor());
+    ctx.screenMagnification = magnification;
+    ctx.zoomFactor = propsUi.getZoomFactor();
+    ctx.maximum = maximum;
+    ctx.mouseOverTableName = mouseOverTableName;
+    ctx.mouseOverNoteLink = mouseOverNoteLink;
+    ctx.noteImageBaseFilename = getFilename();
+    ctx.showingNavigationView = !propsUi.isHideViewportEnabled();
+    ctx.metadataProvider = hopGui.getMetadataProvider();
+    ctx.startRelationshipTable = startRelationshipTable;
+    ctx.relationshipDragEndLocation = relationshipDragEndLocation;
+    ctx.candidateRelationshipTarget = candidateRelationshipTarget;
+    return ctx;
   }
 
   private void drawDimensionalModelImage(GC swtGc, int width, int height) {
@@ -308,6 +355,42 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     } finally {
       gc.dispose();
     }
+  }
+
+  @Override
+  public void replaceAreaOwners(List<AreaOwner> owners) {
+    areaOwners.clear();
+    if (owners != null) {
+      areaOwners.addAll(owners);
+    }
+  }
+
+  @Override
+  protected Map<String, ModelGraphWebCanvasData.NodePos> collectWebCanvasNodes() {
+    Map<String, ModelGraphWebCanvasData.NodePos> nodes = new HashMap<>();
+    if (model == null || model.getTables() == null) {
+      return nodes;
+    }
+    for (IDmTable table : model.getTables()) {
+      if (table == null || Utils.isEmpty(table.getName()) || table.getLocation() == null) {
+        continue;
+      }
+      int w = ModelGraphWebCanvasData.DEFAULT_CARD_WIDTH;
+      int h = ModelGraphWebCanvasData.DEFAULT_CARD_HEIGHT;
+      if (table instanceof DmTableBase base) {
+        if (base.getDrawnBoxWidth() > 0) {
+          w = base.getDrawnBoxWidth();
+        }
+        if (base.getDrawnBoxHeight() > 0) {
+          h = base.getDrawnBoxHeight();
+        }
+      }
+      nodes.put(
+          table.getName(),
+          ModelGraphWebCanvasData.NodePos.of(
+              table.getLocation().x, table.getLocation().y, table.isSelected(), w, h));
+    }
+    return nodes;
   }
 
   @Override
@@ -2591,6 +2674,11 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     @Override
     public boolean isRelationshipDragActive() {
       return startRelationshipTable != null;
+    }
+
+    @Override
+    public String webRelationshipStartNodeName() {
+      return startRelationshipTable != null ? startRelationshipTable.getName() : null;
     }
 
     @Override
