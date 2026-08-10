@@ -17,7 +17,8 @@ limitations under the License.
 
 # Hop Data Vault 2.0 Plugin
 
-**Model-driven Data Vault and Business Vault on Apache Hop 2.19.0**
+**Model-driven Data Vault, Business Vault, and dimensional marts on Apache Hop 2.19.0**  
+*(plugin 0.8.0-SNAPSHOT · latest release 0.7.0 · Java 21)*
 
 > For a feature checklist with documentation links, see [feature-overview.md](../feature-overview.md).  
 > For an interactive standalone HTML presentation (architecture, detail pages, roadmap & open issues), open [hop-data-vault-features.html](hop-data-vault-features.html).
@@ -41,11 +42,12 @@ Enterprise data warehouses built with hand-written pipelines drift from the mode
 
 **Model once. Generate loads and consumption layers.**
 
-1. Define sources, hubs, links, and satellites in a visual model (`.hdv`)
-2. Validate structure and types before anything runs
-3. Generate DDL and insert-only load pipelines automatically
-4. Build Business Vault SCD2 tables from satellite history (`.hbv`)
-5. Run controlled batch updates from workflow actions
+1. Model **source systems** (`.hsm`) — tables, FKs, queries, JSON, pipeline feeds; optional Free SQL
+2. Define hubs, links, and satellites in a visual vault model (`.hdv`)
+3. Validate structure, harvest metadata, and run schema / quality gates before loads
+4. Generate DDL and insert-only load pipelines automatically
+5. Build Business Vault SCD2 / PIT / SQL tables (`.hbv`) and dimensional marts (`.hdm`)
+6. Run controlled batch updates from workflow actions; explain lineage end-to-end
 
 The model is the contract — not a diagram that diverges from production.
 
@@ -149,7 +151,10 @@ CI-friendly: fail fast on model checks or DDL drift.
 # Architecture (logical)
 
 ```
-Sources (catalog / CRM)
+Source model (.hsm)  ──►  Free SQL / JDBC (optional)
+        │
+        ▼
+  Data Catalog (DV_SOURCE · COMPOSITE · JSON · PIPELINE)
         │
         ▼
   Raw Data Vault (.hdv)
@@ -161,11 +166,13 @@ Sources (catalog / CRM)
         │
         ▼
   Business Vault (.hbv)
-  SCD2 · PIT · future bridges
+  SCD2 · PIT · SQL tables
         │
         ▼
   Dimensional marts (.hdm)
 ```
+
+Cross-cutting: metadata harvest, schema gates, content quality, source-to-target lineage, OpenLineage.
 
 One metadata chain from staging to consumption.
 

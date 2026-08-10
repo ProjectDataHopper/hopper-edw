@@ -554,7 +554,7 @@
     <nav class="nav" id="sideNav" aria-label="Presentation sections">
       <div class="nav-brand">
         <div class="logo">Hop Data Vault</div>
-        <div class="meta">Features &amp; Roadmap · v0.7.0</div>
+        <div class="meta">Features &amp; Roadmap · 0.8.0-SNAPSHOT</div>
       </div>
 
       <div class="nav-section">Overview</div>
@@ -564,12 +564,13 @@
 
       <div class="nav-section">Layers</div>
       <a class="nav-link" href="#catalog" data-page="catalog">Data Catalog</a>
+      <a class="nav-link" href="#source-modeler" data-page="source-modeler">Source modeler</a>
       <a class="nav-link" href="#data-vault" data-page="data-vault">Raw Data Vault</a>
       <a class="nav-link" href="#business-vault" data-page="business-vault">Business Vault</a>
       <a class="nav-link" href="#dimensional" data-page="dimensional">Dimensional</a>
 
       <div class="nav-section">Governance</div>
-      <a class="nav-link" href="#validation" data-page="validation">Schema validation</a>
+      <a class="nav-link" href="#validation" data-page="validation">Schema &amp; harvest</a>
       <a class="nav-link" href="#data-quality" data-page="data-quality">Data quality</a>
       <a class="nav-link" href="#lineage" data-page="lineage">Lineage</a>
 
@@ -598,10 +599,11 @@
             with a shared Data Catalog, schema gates, content quality, and explainable source-to-target lineage.
           </p>
           <div class="badges">
-            <span class="chip">release 0.7.0</span>
+            <span class="chip">0.8.0-SNAPSHOT</span>
+            <span class="chip">latest release 0.7.0</span>
             <span class="chip">Apache Hop 2.19.0</span>
             <span class="chip">Java 21</span>
-            <span class="chip">.hdv · .hbv · .hdm · .hem</span>
+            <span class="chip">.hsm · .hdv · .hbv · .hdm · .hem</span>
           </div>
         </div>
 
@@ -610,7 +612,7 @@
             <strong>The problem:</strong> hand-written vault pipelines drift from the model — hashing rules diverge,
             satellite CDC is copy-pasted, and hybrid teams (Hop + dbt + SQL) lack one metadata picture.
             <strong>The approach:</strong> the visual model is the contract; Hop generates DDL, insert-only loads,
-            SCD2 consumption, and marts from that contract.
+            SCD2 consumption, and marts from that contract — from source systems through the warehouse.
           </p>
         </div>
 
@@ -619,17 +621,22 @@
           <a class="card" href="#architecture">
             <div class="card-icon cat">ARCH</div>
             <h3>Architecture</h3>
-            <p>Sources → DV → BV → DM with Catalog, validation, DQ, and lineage.</p>
+            <p>Sources → DV → BV → DM with Catalog, harvest, validation, DQ, and lineage.</p>
           </a>
           <a class="card" href="#catalog">
             <div class="card-icon sources">SRC</div>
             <h3>Data Catalog</h3>
-            <p>DV_SOURCE contracts, versions, model registry, lineage siblings.</p>
+            <p>DV_SOURCE contracts, COMPOSITE / JSON / PIPELINE feeds, versions.</p>
+          </a>
+          <a class="card" href="#source-modeler">
+            <div class="card-icon sources">HSM</div>
+            <h3>Source modeler</h3>
+            <p>.hsm tables, Free SQL, pipeline sources, Hop Server JDBC.</p>
           </a>
           <a class="card" href="#data-vault">
             <div class="card-icon dv">DV</div>
             <h3>Raw Data Vault</h3>
-            <p>Hubs, links, satellites, hybrid integration modes, Update action.</p>
+            <p>Hubs, links, satellites, hybrid modes, composite BKs, aliases.</p>
           </a>
           <a class="card" href="#business-vault">
             <div class="card-icon bv">BV</div>
@@ -643,18 +650,18 @@
           </a>
           <a class="card" href="#validation">
             <div class="card-icon val">VAL</div>
-            <h3>Schema gates</h3>
-            <p>CI/CD resource validation, blast radius, reports.</p>
+            <h3>Schema &amp; harvest</h3>
+            <p>Metadata harvest, CI/CD gates, blast radius, reports.</p>
           </a>
           <a class="card" href="#data-quality">
             <div class="card-icon dq">DQ</div>
             <h3>Data quality</h3>
-            <p>Measure → gate, content rules, pre/post load policies.</p>
+            <p>Measure → gate, Phase 2 rules, pre/post load policies.</p>
           </a>
           <a class="card" href="#lineage">
             <div class="card-icon lin">LIN</div>
             <h3>Lineage</h3>
-            <p>Table/field reasons, explainable DDL, reverse browser.</p>
+            <p>Table/field reasons, OpenLineage / Marquez, reverse browser.</p>
           </a>
           <a class="card" href="#roadmap">
             <div class="card-icon road">MAP</div>
@@ -844,33 +851,36 @@
             <tr><th>Feature</th><th>Status</th><th>Detail</th></tr>
           </thead>
           <tbody>
-            <tr><td>Data Catalog + <code>DV_SOURCE</code> record definitions</td><td><span class="badge badge-ok">Available</span></td><td><a href="#catalog">Catalog</a></td></tr>
-            <tr><td>Resource definition validation (issues, proposals, acknowledgements)</td><td><span class="badge badge-ok">Available</span></td><td><a href="#validation">Validation</a></td></tr>
-            <tr><td>Catalog version tags + schema impact simulation (CI/CD gate)</td><td><span class="badge badge-ok">Available</span></td><td><a href="#validation">Validation</a></td></tr>
-            <tr><td>Data quality measure + quality gate (Phase 2 rules)</td><td><span class="badge badge-ok">Available</span></td><td><a href="#data-quality">Data quality</a></td></tr>
+            <tr><td>Data Catalog + <code>DV_SOURCE</code> (DB / COMPOSITE / JSON / PIPELINE)</td><td><span class="badge badge-ok">Available</span></td><td><a href="#catalog">Catalog</a></td></tr>
+            <tr><td>Source modeler (<code>.hsm</code>): tables, FKs, queries, JSON, pipeline sources</td><td><span class="badge badge-ok">Available</span></td><td><a href="#source-modeler">Source modeler</a></td></tr>
+            <tr><td>Free SQL over source models (Calcite) + Source model SQL transform</td><td><span class="badge badge-ok">Available</span></td><td><a href="#source-modeler">Source modeler</a> · #117</td></tr>
+            <tr><td>Hop Server JDBC (<code>jdbc:hop-hsm:</code>) + thin DBeaver client</td><td><span class="badge badge-ok">Available</span></td><td><a href="#source-modeler">Source modeler</a></td></tr>
+            <tr><td>Metadata harvesting + schema gate <code>HARVEST_RUN</code></td><td><span class="badge badge-ok">Available</span></td><td><a href="#validation">Schema &amp; harvest</a> · #112</td></tr>
+            <tr><td>Resource definition validation (issues, proposals, acknowledgements)</td><td><span class="badge badge-ok">Available</span></td><td><a href="#validation">Schema &amp; harvest</a></td></tr>
+            <tr><td>Catalog version tags + schema impact simulation (CI/CD)</td><td><span class="badge badge-ok">Available</span></td><td><a href="#validation">Schema &amp; harvest</a></td></tr>
+            <tr><td>Data quality measure + quality gate (Phase 2 rules, persist, alerts)</td><td><span class="badge badge-ok">Available</span></td><td><a href="#data-quality">Data quality</a></td></tr>
             <tr><td>Data Vault modeler (<code>.hdv</code>) + Update action</td><td><span class="badge badge-ok">Available</span></td><td><a href="#data-vault">Raw DV</a></td></tr>
-            <tr><td>Integration modes (managed / external / custom)</td><td><span class="badge badge-ok">Available</span></td><td><a href="#data-vault">Raw DV</a></td></tr>
+            <tr><td>Composite hub BKs · hub aliases · integration modes</td><td><span class="badge badge-ok">Available</span></td><td><a href="#data-vault">Raw DV</a></td></tr>
             <tr><td>Business Vault modeler (<code>.hbv</code>): SCD2, PIT, SQL views/tables</td><td><span class="badge badge-ok">Available</span></td><td><a href="#business-vault">Business Vault</a></td></tr>
             <tr><td>Dimensional modeler (<code>.hdm</code>) + Publish / Update</td><td><span class="badge badge-ok">Available</span></td><td><a href="#dimensional">Dimensional</a></td></tr>
             <tr><td>Source-to-target lineage, explainable DDL, reverse browser</td><td><span class="badge badge-ok">Available</span></td><td><a href="#lineage">Lineage</a></td></tr>
-            <tr><td>Execution maps (<code>.hem</code>)</td><td><span class="badge badge-ok">Available</span></td><td><a href="#operations">Operations</a></td></tr>
-            <tr><td>AI Help (model, pipeline, workflow)</td><td><span class="badge badge-ok">Available</span></td><td><a href="#operations">Operations</a></td></tr>
-            <tr><td>Record Definition Input · Date Dimension Generator</td><td><span class="badge badge-ok">Available</span></td><td><a href="#operations">Operations</a></td></tr>
-            <tr><td>Marquez / OpenLineage export</td><td><span class="badge badge-available">Available</span></td><td><a href="#lineage">Lineage</a> · #101</td></tr>
+            <tr><td>Marquez / OpenLineage export</td><td><span class="badge badge-ok">Available</span></td><td><a href="#lineage">Lineage</a> · #101</td></tr>
+            <tr><td>Execution maps (<code>.hem</code>) · architecture export (Draw.io)</td><td><span class="badge badge-ok">Available</span></td><td><a href="#operations">Operations</a></td></tr>
+            <tr><td>AI Help · project Search Everywhere (Hop 2.19)</td><td><span class="badge badge-ok">Available</span></td><td><a href="#operations">Operations</a></td></tr>
+            <tr><td>Record Definition transforms · Date Dimension Generator</td><td><span class="badge badge-ok">Available</span></td><td><a href="#operations">Operations</a></td></tr>
             <tr><td>BV naming rules engine</td><td><span class="badge badge-planned">Planned</span></td><td><a href="#roadmap">Roadmap</a> · #41</td></tr>
             <tr><td>Automated execution with dependency resolution</td><td><span class="badge badge-planned">Planned</span></td><td><a href="#roadmap">Roadmap</a> · #42</td></tr>
           </tbody>
         </table>
 
         <div class="callout" style="margin-top:1.25rem">
-          <strong>Shipped in 0.5.0:</strong> OpenLineage / Marquez export (Export data lineage action, physical location facets,
-          dimension-alias symlinks); optional PK/FK in model DDL; resource-definition validation with catalog-safe length
-          remediation; portable model paths; dark-mode note fills.
+          <strong>Since 0.7.0 (toward 0.8.0):</strong> source modeler Free SQL (Calcite pushdown + residual pipelines),
+          Source model SQL transform, Hop Server <code>jdbc:hop-hsm:</code> + thin client for DBeaver;
+          pipeline sources on <code>.hsm</code>; metadata harvesting phases 1–4; richer retail CRM / ASN fixtures.
         </div>
         <div class="callout" style="margin-top:0.75rem">
-          <strong>Shipped in 0.4.0:</strong> source-to-target lineage (table + field, reason codes), Lineage tab,
-          explainable DDL, catalog lineage publish, drift gate, reverse browser; transactional link dependent child keys;
-          separate DV/BV databases for incremental SCD2/PIT; SQL Server multi-byte VARCHAR; pipeline wall-clock metrics.
+          <strong>0.5.0–0.7.0 highlights:</strong> OpenLineage / Marquez; optional PK/FK DDL; source-to-target lineage;
+          composite hub business keys; hub aliases; architecture Draw.io export; data quality Phase 2; Hop 2.19 search.
         </div>
 
         <nav class="page-nav">
@@ -892,10 +902,12 @@
         <div class="panel">
           <h2 style="margin-top:0">What lives in the catalog</h2>
           <ul>
-            <li><strong><code>DV_SOURCE</code></strong> — logical feeds with record-source indicator, optional <strong>group</strong> for partial loads, and physical layout (database table today).</li>
+            <li><strong><code>DV_SOURCE</code></strong> — logical feeds with record-source indicator, optional <strong>group</strong> for partial loads, and physical layout:
+              database table, <strong>COMPOSITE</strong> (multi-table query), <strong>JSON</strong>, or <strong>PIPELINE</strong>.</li>
             <li>Namespace pattern: <code>hop/{project}/sources</code> (e.g. <code>hop/retail-example/sources</code>).</li>
             <li>FILE catalog storage (retail: <code>work/edw-catalog/</code>) opened in the Hop <strong>Data Catalog</strong> perspective.</li>
             <li>Hubs, links, and satellites reference source <strong>names</strong>, not raw connection strings.</li>
+            <li><strong>Go to origin</strong> opens the <code>.hsm</code> card for published composite / JSON / pipeline feeds.</li>
           </ul>
         </div>
 
@@ -907,14 +919,16 @@
               <li><code>hop/{project}/business-vault/{model}/</code> — BV targets</li>
               <li><code>hop/{project}/dimensional/{model}/</code> — mart tables</li>
               <li><code>hop/{project}/lineage/{dv|bv|dm}/{model}/</code> — lineage siblings (derived, not edited)</li>
+              <li><code>hop/{project}/operations/</code> — load metrics, harvest, quality ops stubs</li>
             </ul>
           </div>
           <div class="panel soft">
-            <h3 style="margin-top:0">Catalog versions</h3>
+            <h3 style="margin-top:0">Catalog versions &amp; transforms</h3>
             <ul>
               <li><strong>Tag catalog version</strong> freezes source contracts (e.g. <code>v1.0.0</code>).</li>
-              <li>Baselines for the CI/CD schema gate (working tree vs tag, version vs version, live source).</li>
+              <li>Baselines for the CI/CD schema gate (live source, working vs tag, version vs version, harvest run).</li>
               <li>Resource definition group scopes which models participate.</li>
+              <li>Pipeline transforms: Record Definition Input / Output / Data Input.</li>
             </ul>
           </div>
         </div>
@@ -928,6 +942,80 @@
 
         <nav class="page-nav">
           <a href="#features"><span>Previous</span><strong>← Features</strong></a>
+          <a class="next" href="#source-modeler"><span>Next</span><strong>Source modeler →</strong></a>
+        </nav>
+      </section>
+
+      <!-- ========== SOURCE MODELER ========== -->
+      <section class="page" id="page-source-modeler" data-page="source-modeler">
+        <header class="page-header">
+          <span class="kicker">Source systems · Available</span>
+          <h1>Source modeler (.hsm)</h1>
+          <p class="lead">
+            Visual model of source systems: tables, relationships, multi-table queries, JSON extractions,
+            pipeline contracts — and free SQL virtualisation over the whole model.
+          </p>
+        </header>
+
+        <div class="grid-cards">
+          <div class="card">
+            <h3>Tables &amp; FKs</h3>
+            <p>Import database tables with PK/FK discovery, crow’s-foot relationships, and live schema checks.</p>
+          </div>
+          <div class="card">
+            <h3>Source queries</h3>
+            <p>Join builder + projection, or <strong>Free SQL (Calcite)</strong> with explain plan, preview, and publish as COMPOSITE.</p>
+          </div>
+          <div class="card">
+            <h3>JSON &amp; pipelines</h3>
+            <p>Flatten parent JSON fields; declare <code>.hpl</code> + output transform + fields; publish as JSON / PIPELINE.</p>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2 style="margin-top:0">Free SQL &amp; data virtualisation (#117)</h2>
+          <ul>
+            <li><strong>Apache Calcite</strong> parses SQL against the source model schema (tables, named queries, JSON, pipeline feeds).</li>
+            <li><strong>Full pushdown</strong> — single Table Input when all tables are DATABASE on one connection.</li>
+            <li><strong>Residual path</strong> — Sort + Merge Join, Filter, Group By, Calculator, MetaInject / JSON subgraphs when mixed.</li>
+            <li><strong>Source model SQL</strong> pipeline transform for runtime free SQL against a <code>.hsm</code>.</li>
+            <li><strong>Source model service</strong> metadata maps a public name to a server-side <code>.hsm</code> path.</li>
+            <li><strong>Hop Server</strong> servlet <code>/hop/sourceModelData</code> + thin client jar <code>hop-hsm-jdbc</code> for DBeaver:
+              <code>jdbc:hop-hsm://{username}:{password}@{host}:{port}/{database}</code>
+              (<code>{database}</code> = service name = JDBC schema).</li>
+          </ul>
+        </div>
+
+        <div class="two-col">
+          <div class="panel soft">
+            <h3 style="margin-top:0">Publish &amp; load</h3>
+            <ul>
+              <li>Queries → catalog <code>COMPOSITE</code></li>
+              <li>JSON → catalog <code>JSON</code> (parent + JsonInput loads)</li>
+              <li>Pipelines → catalog <code>PIPELINE</code> (MetaInject + record source)</li>
+              <li>DV Update injects generated graphs with hub sort/distinct when needed</li>
+            </ul>
+          </div>
+          <div class="panel soft">
+            <h3 style="margin-top:0">Retail sample</h3>
+            <ul>
+              <li><code>retail-example/models/source-tables-crm.hsm</code></li>
+              <li>Multi-table customer query, shipment JSON, ASN pipeline feed</li>
+              <li>Service metadata: <code>metadata/source-model-service/crm.json</code></li>
+            </ul>
+          </div>
+        </div>
+
+        <figure class="screenshot">
+          <img src="../images/source-modeler-retail-example-with-query-dialog-generated-sql.png" alt="Source modeler with query dialog" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+          <div class="img-missing">Screenshot: source modeler retail CRM with query SQL</div>
+          <figcaption>Source modeler — retail CRM tables and multi-table query SQL</figcaption>
+        </figure>
+
+        <p class="footer-note">Docs: <code>docs/source-modeler-overview.adoc</code>, <code>hop-hsm-jdbc/README.md</code>, plan <code>docs/plans/source-model-sql-virtualization-plan.md</code></p>
+
+        <nav class="page-nav">
+          <a href="#catalog"><span>Previous</span><strong>← Catalog</strong></a>
           <a class="next" href="#data-vault"><span>Next</span><strong>Raw Data Vault →</strong></a>
         </nav>
       </section>
@@ -945,15 +1033,15 @@
         <div class="grid-cards">
           <div class="card">
             <h3>Hubs</h3>
-            <p>Core business entities (Customer, Product, Order) with multi-source business keys.</p>
+            <p>Core business entities with multi-source business keys; <strong>composite BKs</strong> (multi-field → one vault column).</p>
           </div>
           <div class="card">
             <h3>Links</h3>
-            <p>Relationships between hubs; transactional links with dependent child keys.</p>
+            <p>Relationships between hubs; transactional links with dependent child keys; <strong>hub aliases</strong> (same hub twice).</p>
           </div>
           <div class="card">
             <h3>Satellites</h3>
-            <p>Descriptive history — hashdiff or load-end-date patterns; multi-active via driving keys.</p>
+            <p>Descriptive history — hashdiff or load-end-date patterns; multi-active via driving keys; JSON/pipeline sources.</p>
           </div>
         </div>
 
@@ -997,7 +1085,7 @@
         <p class="footer-note">Docs: <code>docs/datavault-plugin.adoc</code>, <code>docs/dv-hub.adoc</code>, <code>docs/dv-link.adoc</code>, <code>docs/dv-satellite.adoc</code>, <code>docs/dv-integration-modes.adoc</code></p>
 
         <nav class="page-nav">
-          <a href="#catalog"><span>Previous</span><strong>← Catalog</strong></a>
+          <a href="#source-modeler"><span>Previous</span><strong>← Source modeler</strong></a>
           <a class="next" href="#business-vault"><span>Next</span><strong>Business Vault →</strong></a>
         </nav>
       </section>
@@ -1095,7 +1183,7 @@
 
         <nav class="page-nav">
           <a href="#business-vault"><span>Previous</span><strong>← Business Vault</strong></a>
-          <a class="next" href="#validation"><span>Next</span><strong>Schema validation →</strong></a>
+          <a class="next" href="#validation"><span>Next</span><strong>Schema &amp; harvest →</strong></a>
         </nav>
       </section>
 
@@ -1103,7 +1191,7 @@
       <section class="page" id="page-validation" data-page="validation">
         <header class="page-header">
           <span class="kicker">Governance</span>
-          <h1>Schema &amp; model validation</h1>
+          <h1>Schema gates &amp; metadata harvest</h1>
           <p class="lead">
             Catch broken references and contract drift before production loads — in the GUI and as a CI/CD gate.
           </p>
@@ -1151,9 +1239,19 @@
         </div>
 
         <div class="panel soft">
+          <h3 style="margin-top:0">Metadata harvesting (phases 1–4)</h3>
+          <ul>
+            <li><strong>Harvest source metadata</strong> action — connection-batched live discovery, OPS history (<code>schema_harvest_*</code>)</li>
+            <li>Does <strong>not</strong> rewrite the catalog; observation is separate from load</li>
+            <li>Schema gate mode <code>HARVEST_RUN</code> reuses a harvest without rediscovery</li>
+            <li>History browser, PK/FK drift, apply FKs → catalog / generate <code>.hsm</code>, model-check prefers harvest for types</li>
+          </ul>
+        </div>
+
+        <div class="panel soft">
           <h3 style="margin-top:0">Validate resource definitions — CI/CD schema gate</h3>
           <ul>
-            <li><strong>Compare modes:</strong> live source vs catalog · working tree vs tagged baseline · version vs version</li>
+            <li><strong>Compare modes:</strong> live source · working vs tag · version vs version · <strong>HARVEST_RUN</strong></li>
             <li><strong>Failure severity:</strong> <code>FAIL_ON_BLOCKING</code>, <code>FAIL_ON_WARNINGS</code>, <code>WARN_ONLY</code></li>
             <li><strong>Reports:</strong> Markdown and/or HTML with blast-radius tables (e.g. under <code>work/reports/</code>)</li>
             <li>Place the action <strong>before</strong> DV/BV/DM update actions in workflows</li>
@@ -1187,7 +1285,7 @@
           <figcaption>Validate resource definitions — CI/CD schema gate</figcaption>
         </figure>
 
-        <p class="footer-note">Docs: <code>docs/resource-definition-validation.adoc</code></p>
+        <p class="footer-note">Docs: <code>docs/resource-definition-validation.adoc</code>, <code>docs/metadata-harvesting.adoc</code></p>
 
         <nav class="page-nav">
           <a href="#dimensional"><span>Previous</span><strong>← Dimensional</strong></a>
@@ -1239,7 +1337,7 @@
         <p class="footer-note">Docs: <code>docs/data-quality.adoc</code></p>
 
         <nav class="page-nav">
-          <a href="#validation"><span>Previous</span><strong>← Schema validation</strong></a>
+          <a href="#validation"><span>Previous</span><strong>← Schema &amp; harvest</strong></a>
           <a class="next" href="#lineage"><span>Next</span><strong>Lineage →</strong></a>
         </nav>
       </section>
@@ -1327,10 +1425,13 @@
         </div>
 
         <div class="panel soft">
-          <h3 style="margin-top:0">Pipeline transforms</h3>
+          <h3 style="margin-top:0">Pipeline transforms &amp; tooling</h3>
           <ul>
-            <li><strong>Record Definition Input</strong> — stream catalog record definitions (or fields) as pipeline rows</li>
+            <li><strong>Record Definition Input / Output / Data Input</strong> — catalog definitions and field layouts as rows</li>
+            <li><strong>Source model SQL</strong> — free SQL against a <code>.hsm</code> at runtime</li>
             <li><strong>Date Dimension Generator</strong> — populate standard calendar dimension attributes</li>
+            <li><strong>Architecture export</strong> — Draw.io SOLUTION / inventory / DV·BV·DM diagrams</li>
+            <li><strong>Search Everywhere</strong> — Hop 2.19 project search for models and plugin metadata</li>
             <li><strong><code>hop svg</code></strong> — export pipelines, workflows, and models to SVG</li>
           </ul>
         </div>
@@ -1374,7 +1475,9 @@
             <p><strong>Learning path</strong> — CSV → CRM → DV → BV → DM, initial and monthly updates.</p>
             <ul>
               <li>Register as Hop project <code>retail-example</code></li>
+              <li>Source model <code>source-tables-crm.hsm</code> (queries, JSON, pipeline feeds)</li>
               <li><code>workflows/run-retail-initial.hwf</code> then monthly <code>run-retail-update.hwf</code></li>
+              <li>Quality gates pre/post load; optional harvest + schema remediation samples</li>
               <li>Primary onboarding: <code>docs/getting-started-retail.adoc</code></li>
             </ul>
           </div>
@@ -1384,7 +1487,7 @@
             <ul>
               <li>Register as Hop project <code>hop-data-vault</code></li>
               <li>PostgreSQL, MySQL, SingleStore, SQL Server runners</li>
-              <li><code>./run-tests.sh</code> or Docker stack scripts</li>
+              <li><code>./run-tests.sh</code> or multi-DB Docker matrix</li>
             </ul>
           </div>
         </div>
@@ -1396,6 +1499,7 @@
             <li><strong>customer-phone</strong> — multi-active satellite</li>
             <li><strong>customer-360</strong> — four satellites merged into one BV SCD2 table</li>
             <li><strong>customer-360-external</strong> — same BV with external read-only DV satellites</li>
+            <li><strong>retail CRM HSM</strong> — Free SQL, shipment JSON, ASN pipeline, source-model-service <code>crm</code></li>
           </ul>
         </div>
 
@@ -1417,11 +1521,40 @@
           <span class="kicker">Looking ahead</span>
           <h1>Planned functionality &amp; open issues</h1>
           <p class="lead">
-            From design plans in <code>docs/plans/</code> and open GitHub issues on
+            From design plans in <code>docs/plans/</code> and GitHub issues on
             <a href="https://github.com/mattcasters/hop-data-vault/issues" target="_blank" rel="noopener">mattcasters/hop-data-vault</a>
-            (snapshot as of 2026-07-30).
+            (snapshot as of 2026-08-10). Pre-1.0 software — capabilities can still evolve.
           </p>
         </header>
+
+        <h2>Recently shipped</h2>
+        <div class="issue-grid">
+          <div class="issue">
+            <div class="num">#117 · <span class="badge badge-ok">Available</span></div>
+            <h4>Free SQL / source-model virtualisation</h4>
+            <p>Calcite free SQL, Source model SQL transform, Hop Server servlet + thin <code>hop-hsm-jdbc</code> client for DBeaver.</p>
+          </div>
+          <div class="issue">
+            <div class="num">#112 · <span class="badge badge-ok">Available</span></div>
+            <h4>Metadata harvesting</h4>
+            <p>Harvest action, OPS history, <code>HARVEST_RUN</code> gate mode, history browser, FK apply / HSM generate.</p>
+          </div>
+          <div class="issue">
+            <div class="num">#116 · <span class="badge badge-ok">Available</span></div>
+            <h4>Pipeline sources on source modeler</h4>
+            <p>Declare <code>.hpl</code> + output fields; catalog PIPELINE; MetaInject loads with record source.</p>
+          </div>
+          <div class="issue">
+            <div class="num">#101 · <span class="badge badge-ok">Available</span></div>
+            <h4>Marquez / OpenLineage export</h4>
+            <p>Export data lineage action (folder + HTTP), physical location facets, dimension-alias symlinks.</p>
+          </div>
+          <div class="issue">
+            <div class="num">#103–#106 · <span class="badge badge-ok">Available</span></div>
+            <h4>Hub aliases · Draw.io export · Search · RDG update</h4>
+            <p>Same hub twice on a link; architecture export; Hop 2.19 project search; Update resource definition group action.</p>
+          </div>
+        </div>
 
         <h2>Named plans <span class="badge badge-planned">Planned</span></h2>
         <div class="issue-grid">
@@ -1429,11 +1562,6 @@
             <div class="num">plan · #41</div>
             <h4>BV naming rules engine</h4>
             <p>Configurable naming conventions for Business Vault tables and columns.</p>
-          </div>
-          <div class="issue">
-            <div class="num">#101 · <span class="badge badge-available">Available</span></div>
-            <h4>Marquez / OpenLineage export</h4>
-            <p>Shipped in 0.5.0: Export data lineage action (folder + HTTP), physical location facets, dimension-alias symlinks.</p>
           </div>
           <div class="issue">
             <div class="num">plan</div>
@@ -1514,12 +1642,9 @@
         </div>
 
         <div class="callout">
-          <strong>Note:</strong> Issue <a href="https://github.com/mattcasters/hop-data-vault/issues/97" target="_blank" rel="noopener">#97</a>
-          tracked source-to-target lineage (shipped in <strong>0.4.0</strong>).
-          Issue <a href="https://github.com/mattcasters/hop-data-vault/issues/101" target="_blank" rel="noopener">#101</a>
-          OpenLineage / Marquez export and issue
-          <a href="https://github.com/mattcasters/hop-data-vault/issues/92" target="_blank" rel="noopener">#92</a>
-          optional PK/FK DDL shipped in <strong>0.5.0</strong>.
+          <strong>Note:</strong> Lineage (#97), OpenLineage (#101), optional PK/FK DDL (#92), Free SQL (#117),
+          harvesting (#112), and pipeline sources (#116) are <strong>available</strong> in current mainline builds.
+          Remaining open issues focus on automation (#42), macros (#72), live metrics (#79), and similar enhancements.
         </div>
 
         <nav class="page-nav">
@@ -1541,18 +1666,19 @@
         <div class="hero" style="margin-bottom:1.5rem">
           <h1 style="font-size:1.5rem">Model the warehouse. Let Hop generate the mechanics.</h1>
           <p>
-            Raw vault from <code>.hdv</code> · Business vault SCD2 from <code>.hbv</code> · Dimensional marts from <code>.hdm</code> ·
-            External tables welcomed · Validation and quality before execution · Lineage that explains every mapping.
+            Source systems from <code>.hsm</code> · Raw vault from <code>.hdv</code> · Business vault from <code>.hbv</code> ·
+            Dimensional marts from <code>.hdm</code> · Catalog, harvest, validation, quality · Free SQL / JDBC over sources ·
+            Lineage that explains every mapping.
           </p>
         </div>
 
         <div class="panel">
           <h2 style="margin-top:0">Who benefits</h2>
           <table class="role-table">
-            <tr><th>Architects</th><td>Governed hashing, naming, hybrid warehouse support, schema gates and lineage drift detection.</td></tr>
-            <tr><th>Modelers</th><td>Visual design, generated pipelines, BV without hand-written SCD2 SQL, AI proposals under review.</td></tr>
-            <tr><th>Operations</th><td>Workflow-driven batches, parallel execution, metrics, CI/CD validation gates, execution maps.</td></tr>
-            <tr><th>Analytics / BI</th><td>Functional SCD2 timelines, standardized BV columns, dimensional marts ready for reporting.</td></tr>
+            <tr><th>Architects</th><td>Governed hashing, hybrid warehouses, schema gates, harvest history, lineage drift detection.</td></tr>
+            <tr><th>Modelers</th><td>Visual design from source to mart, Free SQL, generated pipelines, BV without hand-written SCD2 SQL.</td></tr>
+            <tr><th>Operations</th><td>Workflow batches, CI/CD gates, quality pre/post load, execution maps, parallel orchestration.</td></tr>
+            <tr><th>Analytics / BI</th><td>SCD2 timelines, dimensional marts; optional DBeaver access via <code>jdbc:hop-hsm:</code> to source models.</td></tr>
           </table>
         </div>
 
@@ -1560,10 +1686,10 @@
           <div class="panel soft">
             <h3 style="margin-top:0">Get started</h3>
             <ul>
-              <li>Install plugin 0.7.0+ into Apache Hop 2.19.0</li>
+              <li>Install plugin 0.8.0-SNAPSHOT (or latest 0.7.x) into Apache Hop 2.19.0</li>
               <li>Walk <code>retail-example/</code> with <code>docs/getting-started-retail.adoc</code></li>
               <li>Deep fixtures: <code>integration-tests/</code></li>
-              <li>Markdown overview: <code>docs/presentations/hop-data-vault-overview.md</code></li>
+              <li>Feature list: <code>docs/feature-overview.md</code></li>
             </ul>
           </div>
           <div class="panel soft">
@@ -1583,7 +1709,7 @@
         </nav>
 
         <div class="footer-note">
-          Hop Data Vault plugin · presentation generated 2026-07-29 · content derived from project docs and open GitHub issues ·
+          Hop Data Vault plugin · presentation updated 2026-08-10 · content derived from project docs and GitHub issues ·
           Licensed under the Apache License, Version 2.0 ·
           https://github.com/mattcasters/hop-data-vault
         </div>
@@ -1595,7 +1721,7 @@
   <script>
     (function () {
       var pages = [
-        "home", "architecture", "features", "catalog", "data-vault",
+        "home", "architecture", "features", "catalog", "source-modeler", "data-vault",
         "business-vault", "dimensional", "validation", "data-quality",
         "lineage", "operations", "samples", "roadmap", "summary"
       ];
