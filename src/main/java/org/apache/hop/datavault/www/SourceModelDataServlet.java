@@ -146,7 +146,8 @@ public class SourceModelDataServlet extends BaseHttpServlet implements IHopServe
         // tables/columns without schema → all enabled services
         if (SourceModelDataProtocol.ACTION_TABLES.equals(action)
             || SourceModelDataProtocol.ACTION_COLUMNS.equals(action)) {
-          handleMultiSchemaMetadata(request, response, action, serializer, variables, metadataProvider);
+          handleMultiSchemaMetadata(
+              request, response, action, serializer, variables, metadataProvider);
           return;
         }
         writeJson(
@@ -401,15 +402,15 @@ public class SourceModelDataServlet extends BaseHttpServlet implements IHopServe
     return sql;
   }
 
-  private static List<SourceModelDataJson.TableInfo> listTables(
-      String schema, SourceModel model) {
+  private static List<SourceModelDataJson.TableInfo> listTables(String schema, SourceModel model) {
     List<SourceModelDataJson.TableInfo> list = new ArrayList<>();
     if (model == null) {
       return list;
     }
     for (SourceTable table : model.getTables()) {
       if (table != null && !Utils.isEmpty(table.getName())) {
-        list.add(new SourceModelDataJson.TableInfo(schema, table.getName(), "TABLE", "Source table"));
+        list.add(
+            new SourceModelDataJson.TableInfo(schema, table.getName(), "TABLE", "Source table"));
       }
     }
     for (SourceQuery query : model.getQueries()) {
@@ -443,7 +444,9 @@ public class SourceModelDataServlet extends BaseHttpServlet implements IHopServe
       return list;
     }
     for (SourceTable table : model.getTables()) {
-      if (table == null || Utils.isEmpty(table.getName()) || !matches(tablePattern, table.getName())) {
+      if (table == null
+          || Utils.isEmpty(table.getName())
+          || !matches(tablePattern, table.getName())) {
         continue;
       }
       int pos = 1;

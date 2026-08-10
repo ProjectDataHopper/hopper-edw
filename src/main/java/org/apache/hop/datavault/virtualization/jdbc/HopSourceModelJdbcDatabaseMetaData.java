@@ -1189,8 +1189,7 @@ public class HopSourceModelJdbcDatabaseMetaData implements DatabaseMetaData {
         // optional
       }
       list.add(
-          new TableEntry(
-              pipeline.getName(), "VIEW", "Source pipeline feed (logical table)", cols));
+          new TableEntry(pipeline.getName(), "VIEW", "Source pipeline feed (logical table)", cols));
     }
     return list;
   }

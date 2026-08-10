@@ -22,6 +22,19 @@ mvn -f hop-hsm-jdbc/pom.xml clean package
 
 Product docs with screenshots: [`docs/source-modeler-overview.adoc`](../docs/source-modeler-overview.adoc) (JDBC section).
 
+## Hop GUI (built-in connection type)
+
+With the **hop-datavault** plugin installed, create a relational connection of type **Apache Hop Source Model**:
+
+| Hop field | Maps to |
+|-----------|---------|
+| Host name | Hop Server host |
+| Port | Hop Server HTTP port (default **8080**) |
+| Database name | Optional default **Source model service** (JDBC schema) |
+| Username / password | Hop Server credentials |
+
+JDBC URL shape: `jdbc:hop-hsm://{host}:{port}/{service}`. Extra options use `?` / `&` (e.g. `rowLimit`, `connectTimeout`, `readTimeout`). The driver jar is bundled under `plugins/misc/datavault/lib/`.
+
 ## DBeaver setup
 
 ### Driver Manager

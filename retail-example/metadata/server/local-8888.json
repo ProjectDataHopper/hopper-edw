@@ -1,0 +1,14 @@
+{
+  "webAppName": "",
+  "enableAuth": false,
+  "sslMode": false,
+  "proxyPort": "",
+  "hostname": "localhost",
+  "nonProxyHosts": "",
+  "password": "Encrypted 2be98afc86aa7f2e4cb1aa265cd86aac8",
+  "virtualPath": "",
+  "port": "8888",
+  "name": "local-8888",
+  "proxyHostname": "",
+  "username": "cluster"
+}

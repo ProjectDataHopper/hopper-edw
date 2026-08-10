@@ -629,6 +629,31 @@
         </configuration>
       </plugin>
 
+      <!-- Build the thin hop-hsm JDBC client so the plugin zip can ship it for DatabaseMeta. -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.5.0</version>
+        <executions>
+          <execution>
+            <id>build-hop-hsm-jdbc</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <phase>prepare-package</phase>
+            <configuration>
+              <executable>mvn</executable>
+              <workingDirectory>${project.basedir}/hop-hsm-jdbc</workingDirectory>
+              <arguments>
+                <argument>-q</argument>
+                <argument>package</argument>
+                <argument>-DskipTests</argument>
+              </arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
       <!-- Assembly to create a plugin distribution zip for easy install -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

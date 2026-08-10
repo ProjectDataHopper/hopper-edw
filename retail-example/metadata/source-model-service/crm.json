@@ -3,7 +3,7 @@
   "virtualPath": "",
   "maxRowLimit": 100000,
   "name": "crm",
-  "description": "",
+  "description": "Start a server with:  sh hop server -e retail-example-docker-postgres -n local-8888",
   "modelFilename": "${PROJECT_HOME}/models/source-tables-crm.hsm",
   "enabled": true,
   "allowSchemaMetadata": true

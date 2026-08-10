@@ -52,8 +52,7 @@ class SourceModelDataJsonTest {
   void tablesIncludeSchemaField() {
     String json =
         SourceModelDataJson.tables(
-            List.of(
-                new SourceModelDataJson.TableInfo("crm", "customer", "TABLE", "Source table")));
+            List.of(new SourceModelDataJson.TableInfo("crm", "customer", "TABLE", "Source table")));
     assertTrue(json.contains("\"schema\":\"crm\""));
     assertTrue(json.contains("\"n\":\"customer\""));
   }

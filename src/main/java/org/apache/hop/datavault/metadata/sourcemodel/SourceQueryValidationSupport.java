@@ -241,7 +241,9 @@ public final class SourceQueryValidationSupport {
           SourceModelSqlEngine.plan(model, query.getFreeSql(), variables, metadataProvider);
         } catch (Exception genEx) {
           String msg = genEx.getMessage() != null ? genEx.getMessage() : genEx.toString();
-          if (msg != null && msg.toLowerCase(Locale.ROOT).contains("connection") && msg.contains("not found")) {
+          if (msg != null
+              && msg.toLowerCase(Locale.ROOT).contains("connection")
+              && msg.contains("not found")) {
             // Offline / incomplete project metadata: SQL is still structurally valid.
             remarks.add(
                 new CheckResult(

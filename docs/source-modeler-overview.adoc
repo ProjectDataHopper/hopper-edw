@@ -175,9 +175,24 @@ The transform plans with Calcite (same engine as Free SQL on the source query di
 * Driver: `org.apache.hop.datavault.virtualization.jdbc.HopSourceModelJdbcDriver`
 * Requires full Hop + plugin on the classpath (GUI / CLI / embedded)
 
-==== Remote Hop Server (thin client for DBeaver)
+==== Remote Hop Server (thin client)
 
 Expose free SQL without publishing filesystem paths. Each **Source model service** is a JDBC **schema**; tables, named queries, JSON feeds, and pipeline feeds appear as tables/views under that schema.
+
+===== Hop relational connection type
+
+With the hop-datavault plugin installed, create a connection of type **Apache Hop Source Model** (`HOPSOURCEMODEL`):
+
+|===
+| Hop field | Maps to |
+
+| Host name | Hop Server host |
+| Port number | Hop Server HTTP port (default *8080*) |
+| Database name | Optional default Source model service (JDBC schema) |
+| Username / password | Hop Server credentials |
+|===
+
+The driver class is `org.apache.hop.hsm.jdbc.HopHsmJdbcDriver`. The thin client jar is shipped under `plugins/misc/datavault/lib/` so **Table input**, Explore database, and other Hop database consumers can use the connection without a separate driver install.
 
 ===== 1. Create a Source model service (Hop)
 

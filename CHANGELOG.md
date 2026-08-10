@@ -4,6 +4,11 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## Unreleased
 
+### Hop database type: Apache Hop Source Model
+
+- Register **`@DatabaseMetaPlugin`** type **Apache Hop Source Model** (`HOPSOURCEMODEL`) so Hop connection metadata can use the thin hop-hsm JDBC driver against Hop Server source model services
+- Ship `hop-hsm-jdbc` in the plugin zip (`plugins/misc/datavault/lib/`) so Table Input / Explore DB can load `org.apache.hop.hsm.jdbc.HopHsmJdbcDriver` without a separate install
+
 ## [0.8.0] — 2026-08-10
 
 Requires **Apache Hop 2.19.0** (or a **recent 2.19.0-SNAPSHOT** until GA) and **Java 21**.

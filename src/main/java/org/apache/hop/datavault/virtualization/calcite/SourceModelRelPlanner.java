@@ -55,8 +55,8 @@ public final class SourceModelRelPlanner {
   }
 
   /**
-   * @param jdbcSchemaAlias optional JDBC / Hop Server service name so tools can write {@code
-   *     FROM service.table} (e.g. DBeaver qualifies with the active schema)
+   * @param jdbcSchemaAlias optional JDBC / Hop Server service name so tools can write {@code FROM
+   *     service.table} (e.g. DBeaver qualifies with the active schema)
    */
   public static PlannedQuery plan(SourceModel model, String sql, String jdbcSchemaAlias)
       throws SourceModelSqlException {

@@ -40,6 +40,12 @@
             <outputDirectory>plugins/misc/datavault/</outputDirectory>
             <filtered>true</filtered>
         </file>
+        <!-- Thin hop-hsm JDBC driver for DatabaseMeta type "Apache Hop Source Model" -->
+        <file>
+            <source>${project.basedir}/hop-hsm-jdbc/target/hop-hsm-jdbc-${project.version}.jar</source>
+            <outputDirectory>plugins/misc/datavault/lib</outputDirectory>
+            <destName>hop-hsm-jdbc-${project.version}.jar</destName>
+        </file>
     </files>
     <dependencySets>
         <dependencySet>
