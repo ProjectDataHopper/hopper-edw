@@ -40,8 +40,7 @@ import org.apache.hop.pipeline.transform.TransformMeta;
     // Literal name: plugin-folder i18n for "i18n::Key" is not always resolved in Hop's transform
     // palette; keep messages_* for dialogs, use plain English here for the registry/GUI list.
     name = "Get Record Definition Names",
-    description =
-        "Lists record definition names (and optional field metadata) from a data catalog",
+    description = "Lists record definition names (and optional field metadata) from a data catalog",
     categoryDescription = "i18n:org.apache.hop.pipeline.transform:BaseTransform.Category.Input",
     keywords = "record,definition,catalog,names,list,metadata,get")
 @Getter

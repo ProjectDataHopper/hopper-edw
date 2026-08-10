@@ -152,8 +152,105 @@ Edit them in the relationship dialog. The canvas draws standard crow's-foot symb
 * **Automatic** — single-connection SQL when all participants are database tables on one connection; otherwise Merge Join pipeline.
 * **SQL (Table Input)** — force SQL path (fails if mixed connections).
 * **Pipeline (Merge Join)** — force Sort + Merge Join chain.
+* **Free SQL (Calcite)** — author full `SELECT` SQL against **logical canvas names** for tables, **named source queries** (virtual tables), **Source JSON**, and **Source Pipeline** feeds (issue #117 / #115). Apache Calcite parses and validates the SQL against the source model schema, then generates a Hop pipeline: **full database pushdown** (single Table Input) when all referenced tables are DATABASE on one connection; otherwise **residual** operators (Sort + Merge Join, Filter Rows, Group By, Calculator, Select Values, MetaInject / JSON / nested query subgraphs). Supported: joins, WHERE, ORDER BY, LIMIT, **GROUP BY** with COUNT/SUM/MIN/MAX/AVG, simple residual `+ - * /` and COALESCE/NVL. Complex `CASE` works when fully pushed to the database. Use the **Free SQL** tab, **Insert tables…**, **Explain plan**, and **Preview data**.
 --
-. **Generate SQL** / **Preview data** — SQL is pretty-printed with syntax highlighting (desktop).
+. **Generate SQL** / **Preview data** / **Explain plan** — visual-query SQL is pretty-printed with syntax highlighting (desktop). Free SQL explain shows pushdown fragments and residual operators.
+
+=== Source model SQL transform
+
+Use the **Source model SQL** pipeline transform (Input category) to run free SQL against a `.hsm` at runtime:
+
+* **Source model** — path to a `.hsm` file (variables allowed)
+* **SQL** — free SQL over logical table / query / JSON / pipeline names
+* **Row limit** — optional cap (`0` = none)
+* Dialog actions: **Preview**, **Explain plan**, **View generated pipeline**
+
+The transform plans with Calcite (same engine as Free SQL on the source query dialog), executes the generated pipeline nested in the local engine, and streams the result rows.
+
+=== JDBC (`jdbc:hop-hsm:`)
+
+==== Local (in-process Hop)
+
+* URL: `jdbc:hop-hsm:file=/path/to/model.hsm` (optional `;rowLimit=N`)
+* Driver: `org.apache.hop.datavault.virtualization.jdbc.HopSourceModelJdbcDriver`
+* Requires full Hop + plugin on the classpath (GUI / CLI / embedded)
+
+==== Remote Hop Server (thin client for DBeaver)
+
+Expose free SQL without publishing filesystem paths. Each **Source model service** is a JDBC **schema**; tables, named queries, JSON feeds, and pipeline feeds appear as tables/views under that schema.
+
+===== 1. Create a Source model service (Hop)
+
+On the Hop project used by Hop Server, open **Metadata → Servers and Web Services → Source model service** and create an entry:
+
+* **Name** — public JDBC schema name (for example `crm`)
+* **Source model file** — server-side path to the `.hsm` (variables allowed; never sent to clients)
+* **Default / max row limit** — safety caps for remote queries
+* **Allow schema metadata** — when checked, DBeaver can list tables and columns
+
+image::images/hop-source-model-service-editor.png[Hop metadata editor for Source model service "crm" pointing at source-tables-crm.hsm,align="center"]
+
+Hop Server must load the hop-datavault plugin (servlet path `/hop/sourceModelData`) and have RDBMS connection metadata for the model’s sources.
+
+===== 2. Register the thin driver in DBeaver
+
+Build or take the single zero-dependency jar:
+
+```bash
+mvn -f hop-hsm-jdbc/pom.xml clean package
+# → hop-hsm-jdbc/target/hop-hsm-jdbc-*-SNAPSHOT.jar
+```
+
+In DBeaver: **Database → Driver Manager → New**, then:
+
+| Setting | Value |
+|---------|--------|
+| Driver Name | e.g. `Apache Hop Source Model` |
+| Driver Type | Generic |
+| Class Name | `org.apache.hop.hsm.jdbc.HopHsmJdbcDriver` |
+| URL Template | `jdbc:hop-hsm://{username}:{password}@{host}:{port}/{database}` |
+
+On the **Libraries** tab, add only `hop-hsm-jdbc-*.jar` (no Hop or Calcite jars).
+
+image::images/hop-source-model-jdbc-dbeaver-database-driver-manager.png[DBeaver Driver Manager settings for Apache Hop Source Model JDBC driver,align="center"]
+
+In the URL template, `{database}` is the default **schema** (Source model service name), not a relational database name.
+
+===== 3. Create a connection
+
+| Field | Example | Meaning |
+|-------|---------|---------|
+| Host | `localhost` | Hop Server host |
+| Port | `8888` | Hop Server port |
+| Database/Schema | `crm` | Source model service name (JDBC schema) |
+| Username / Password | Hop Server credentials | Basic auth |
+
+The resolved URL looks like:
+
+`jdbc:hop-hsm://{username}:{password}@localhost:8888/crm`
+
+image::images/hop-source-model-jdbc-dbeaver-database-connection.png[DBeaver connection settings for Hop Source Model (host, port, schema crm),align="center"]
+
+You can also connect without a default schema (`jdbc:hop-hsm://user:pass@host:port`) and pick a schema in the navigator later. Legacy `?schema=crm` / `?modelName=crm` still work.
+
+===== 4. Query from the SQL editor
+
+After **Test Connection**, the navigator shows the service as a schema with tables and views. Open a SQL editor on that schema (or keep the active schema set) and run free SQL. Both bare and schema-qualified names work, for example:
+
+```sql
+SELECT *
+FROM crm.order_header oh
+WHERE oh.total_amount > 1000
+ORDER BY oh.total_amount desc
+```
+
+image::images/hop-source-model-jdbc-dbeaver-query-editor.png[DBeaver SQL editor querying crm.order_header with result grid,align="center"]
+
+* Active schema selects which `.hsm` free SQL runs against on the server
+* JSON and pipeline feeds appear as JDBC **VIEW**s so the SQL dictionary includes them
+* After upgrading the jar or plugin, **Invalidate/Reconnect** so DBeaver rebuilds metadata
+
+See also link:plans/source-model-sql-virtualization-plan.md[Source model SQL virtualisation plan] and the module README `hop-hsm-jdbc/README.md`.
 
 === Push to catalog
 

@@ -33,6 +33,9 @@ import org.apache.hop.datavault.metadata.sourcemodel.SourceQueryColumn;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQueryGenerationMode;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQueryJoin;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceTable;
+import org.apache.hop.datavault.virtualization.sql.SourceModelSqlEngine;
+import org.apache.hop.datavault.virtualization.sql.SourceModelSqlOptions;
+import org.apache.hop.datavault.virtualization.sql.SourceModelSqlPlan;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineHopMeta;
 import org.apache.hop.pipeline.PipelineMeta;
@@ -64,10 +67,33 @@ public final class SourceQueryPipelineGenerator {
       throws HopException {
     SourceQueryGenerationMode mode =
         SourceQueryGenerationSupport.resolveEffectiveMode(model, query);
+    if (mode == SourceQueryGenerationMode.FREE_SQL) {
+      return generateFreeSql(model, query, variables, metadataProvider);
+    }
     if (mode == SourceQueryGenerationMode.SQL) {
       return generateSqlTableInput(model, query, variables, metadataProvider);
     }
     return generateMergeJoinPipeline(model, query, variables, metadataProvider);
+  }
+
+  private static PipelineMeta generateFreeSql(
+      SourceModel model,
+      SourceQuery query,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider)
+      throws HopException {
+    if (Utils.isEmpty(query.getFreeSql())) {
+      throw new HopException(
+          "Query '" + query.getName() + "' is FREE_SQL mode but free SQL text is empty");
+    }
+    SourceModelSqlOptions options =
+        SourceModelSqlOptions.builder()
+            .pipelineName(
+                "source-query-" + (Utils.isEmpty(query.getName()) ? "unnamed" : query.getName()))
+            .build();
+    SourceModelSqlPlan plan =
+        SourceModelSqlEngine.plan(model, query.getFreeSql(), variables, metadataProvider, options);
+    return plan.pipelineMeta();
   }
 
   private static PipelineMeta generateSqlTableInput(

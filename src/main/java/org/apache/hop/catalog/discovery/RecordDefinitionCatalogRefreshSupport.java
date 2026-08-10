@@ -19,7 +19,6 @@ package org.apache.hop.catalog.discovery;
 import java.util.Date;
 import java.util.List;
 import org.apache.hop.catalog.model.CatalogCustomProperty;
-import org.apache.hop.catalog.model.DvSourceRecord;
 import org.apache.hop.catalog.model.RecordDefinition;
 import org.apache.hop.catalog.model.RecordOrigin;
 import org.apache.hop.core.exception.HopException;
@@ -66,8 +65,7 @@ public final class RecordDefinitionCatalogRefreshSupport {
     }
 
     RecordDefinitionPhysicalRefSupport.requireDvSource(definition);
-    List<SourceField> storedFields =
-        DvSourceFieldSupport.sourceFieldsFromDefinition(definition);
+    List<SourceField> storedFields = DvSourceFieldSupport.sourceFieldsFromDefinition(definition);
     List<SourceField> discoveredFields = discovery.fields();
     RecordDefinitionSchemaDiffSupport.SchemaDiff diff;
     List<SourceField> fieldsToApply = discoveredFields;
@@ -109,8 +107,7 @@ public final class RecordDefinitionCatalogRefreshSupport {
     DvSourceType sourceType = RecordDefinitionPhysicalRefSupport.resolveSourceType(definition);
     List<SourceField> fieldsToApply = discoveredFields;
     if (sourceType == DvSourceType.ICEBERG) {
-      List<SourceField> storedFields =
-          DvSourceFieldSupport.sourceFieldsFromDefinition(definition);
+      List<SourceField> storedFields = DvSourceFieldSupport.sourceFieldsFromDefinition(definition);
       fieldsToApply =
           RecordDefinitionIcebergRefreshSupport.mergeDiscoveredFields(
               storedFields, discoveredFields);

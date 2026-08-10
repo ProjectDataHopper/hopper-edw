@@ -164,9 +164,7 @@ public class RecordDefinitionDataInput
               BaseMessages.getString(PKG, "RecordDefinitionDataInput.Error.SourceFailed"),
               data.sourceError.get());
         }
-        if (data.sourceFinished != null
-            && data.sourceFinished.get()
-            && data.rowQueue.isEmpty()) {
+        if (data.sourceFinished != null && data.sourceFinished.get() && data.rowQueue.isEmpty()) {
           if (!meta.isSelectFromInput()) {
             setOutputDone();
           }
@@ -232,7 +230,9 @@ public class RecordDefinitionDataInput
       if (runThread == null) {
         throw new HopException(
             BaseMessages.getString(
-                PKG, "RecordDefinitionDataInput.Error.PreviewTransformMissing", previewTransformName));
+                PKG,
+                "RecordDefinitionDataInput.Error.PreviewTransformMissing",
+                previewTransformName));
       }
       final IRowMeta outputMeta = expectedFields != null ? expectedFields : data.outputRowMeta;
       runThread.addRowListener(
@@ -315,9 +315,7 @@ public class RecordDefinitionDataInput
       int idx = sourceMeta.indexOfValue(fieldName);
       if (idx >= 0) {
         out[i] =
-            outputMeta
-                .getValueMeta(i)
-                .convertData(sourceMeta.getValueMeta(idx), sourceRow[idx]);
+            outputMeta.getValueMeta(i).convertData(sourceMeta.getValueMeta(idx), sourceRow[idx]);
       }
     }
     return out;

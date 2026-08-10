@@ -62,7 +62,9 @@ public final class SourcePipelineCatalogPublisher {
     if (Utils.isEmpty(pipelineSource.getPipelineFilename())) {
       throw new HopException(
           BaseMessages.getString(
-              PKG, "SourcePipelineCatalogPublisher.Error.MissingFilename", pipelineSource.getName()));
+              PKG,
+              "SourcePipelineCatalogPublisher.Error.MissingFilename",
+              pipelineSource.getName()));
     }
     if (Utils.isEmpty(pipelineSource.getOutputTransformName())) {
       throw new HopException(
@@ -75,7 +77,9 @@ public final class SourcePipelineCatalogPublisher {
     if (fields.isEmpty()) {
       throw new HopException(
           BaseMessages.getString(
-              PKG, "SourcePipelineCatalogPublisher.Error.EmptyProjection", pipelineSource.getName()));
+              PKG,
+              "SourcePipelineCatalogPublisher.Error.EmptyProjection",
+              pipelineSource.getName()));
     }
 
     String catalogConnection = resolveCatalogConnection(model, catalogConnectionName, variables);

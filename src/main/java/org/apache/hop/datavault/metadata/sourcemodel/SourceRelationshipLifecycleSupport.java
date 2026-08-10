@@ -19,12 +19,12 @@ package org.apache.hop.datavault.metadata.sourcemodel;
 import org.apache.hop.core.util.Utils;
 
 /**
- * Keeps {@link SourceRelationship} lists consistent when endpoints are renamed, deleted, or
- * already dangling after a model load.
+ * Keeps {@link SourceRelationship} lists consistent when endpoints are renamed, deleted, or already
+ * dangling after a model load.
  *
  * <p>Relationships store endpoint names as strings. Renaming a table / query / JSON / pipeline
- * without updating those strings leaves edges that fail validation, cannot be drawn (missing
- * canvas bounds), and are hard to select. Policy for this plugin: <strong>drop</strong> edges that
+ * without updating those strings leaves edges that fail validation, cannot be drawn (missing canvas
+ * bounds), and are hard to select. Policy for this plugin: <strong>drop</strong> edges that
  * reference the old name rather than rewriting them — intentional renames of join endpoints are
  * rare enough that re-drawing the relationship is safer than guessing column renames.
  */
@@ -61,9 +61,7 @@ public final class SourceRelationshipLifecycleSupport {
       return 0;
     }
     int before = model.getRelationships().size();
-    model
-        .getRelationships()
-        .removeIf(r -> referencesEndpoint(r, kind, endpointName));
+    model.getRelationships().removeIf(r -> referencesEndpoint(r, kind, endpointName));
     return Math.max(0, before - model.getRelationships().size());
   }
 

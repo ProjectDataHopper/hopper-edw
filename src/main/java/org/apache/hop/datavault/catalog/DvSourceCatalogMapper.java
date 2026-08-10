@@ -255,9 +255,7 @@ public final class DvSourceCatalogMapper {
     if (dv instanceof org.apache.hop.datavault.metadata.pipeline.DvPipelineSource pipeSrc
         && !Utils.isEmpty(pipeSrc.getSourceModelFilename())) {
       return new SourceModelProvenance(
-          pipeSrc.getSourceModelFilename(),
-          pipeSrc.getSourcePipelineName(),
-          null);
+          pipeSrc.getSourceModelFilename(), pipeSrc.getSourcePipelineName(), null);
     }
     if (dv instanceof org.apache.hop.datavault.metadata.json.DvJsonSource jsonSrc
         && !Utils.isEmpty(jsonSrc.getSourceModelFilename())) {

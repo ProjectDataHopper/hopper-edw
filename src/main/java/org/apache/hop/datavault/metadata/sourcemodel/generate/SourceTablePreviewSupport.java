@@ -53,9 +53,7 @@ public final class SourceTablePreviewSupport {
         table.getPhysicalType() != null ? table.getPhysicalType() : DvSourceType.DATABASE;
     if (physical != DvSourceType.DATABASE) {
       throw new HopException(
-          "Preview is currently available for database source tables only (got "
-              + physical
-              + ")");
+          "Preview is currently available for database source tables only (got " + physical + ")");
     }
 
     String connectionName = resolveConnectionName(model, table, variables);

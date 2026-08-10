@@ -255,8 +255,7 @@ public abstract class DvJsonSourcePipelineBuilder extends DvSourcePipelineBuilde
           configuration, model, satellite, variables);
     }
     String fieldName =
-        DvSourceFieldMappingSupport.findTargetSourceFieldName(
-            configuration, recordSource, dvTable);
+        DvSourceFieldMappingSupport.findTargetSourceFieldName(configuration, recordSource, dvTable);
     return variables != null ? variables.resolve(fieldName) : fieldName;
   }
 

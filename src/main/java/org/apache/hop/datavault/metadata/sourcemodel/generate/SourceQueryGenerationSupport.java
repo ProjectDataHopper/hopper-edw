@@ -28,13 +28,33 @@ import org.apache.hop.datavault.metadata.sourcemodel.SourceQueryColumn;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQueryGenerationMode;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQueryJoin;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceTable;
+import org.apache.hop.datavault.virtualization.sql.SourceModelFreeSqlTableSupport;
 
 /** Resolves participants and effective generation mode for a {@link SourceQuery}. */
 public final class SourceQueryGenerationSupport {
 
   private SourceQueryGenerationSupport() {}
 
-  /** Ordered unique table names: driving table first, then each join table. */
+  /**
+   * Ordered unique table names for a query.
+   *
+   * <p>Visual modes: driving table, joins, projection tables. Free SQL: tables referenced in
+   * FROM/JOIN (when parseable), falling back to visual fields if free SQL is empty/unparseable.
+   */
+  public static List<String> participantTableNames(SourceModel model, SourceQuery query) {
+    if (query != null
+        && query.resolveGenerationMode() == SourceQueryGenerationMode.FREE_SQL
+        && !Utils.isEmpty(query.getFreeSql())) {
+      List<String> fromSql =
+          SourceModelFreeSqlTableSupport.referencedTableNames(model, query.getFreeSql());
+      if (!fromSql.isEmpty()) {
+        return fromSql;
+      }
+    }
+    return participantTableNames(query);
+  }
+
+  /** Ordered unique table names: driving table first, then each join table (visual query only). */
   public static List<String> participantTableNames(SourceQuery query) {
     Set<String> names = new LinkedHashSet<>();
     if (query == null) {
@@ -61,7 +81,7 @@ public final class SourceQueryGenerationSupport {
     if (model == null || query == null) {
       return tables;
     }
-    for (String name : participantTableNames(query)) {
+    for (String name : participantTableNames(model, query)) {
       SourceTable table = model.findTable(name);
       if (table != null) {
         tables.add(table);
@@ -78,6 +98,9 @@ public final class SourceQueryGenerationSupport {
       SourceModel model, SourceQuery query) {
     SourceQueryGenerationMode mode =
         query != null ? query.resolveGenerationMode() : SourceQueryGenerationMode.AUTO;
+    if (mode == SourceQueryGenerationMode.FREE_SQL) {
+      return SourceQueryGenerationMode.FREE_SQL;
+    }
     if (mode != SourceQueryGenerationMode.AUTO) {
       return mode;
     }

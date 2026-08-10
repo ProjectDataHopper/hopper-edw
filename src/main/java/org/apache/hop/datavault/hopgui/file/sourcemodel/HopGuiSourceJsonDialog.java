@@ -40,9 +40,9 @@ import org.apache.hop.datavault.metadata.sourcemodel.SourceJsonFieldSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJsonParentKind;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJsonValidationSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
-import org.apache.hop.datavault.metadata.sourcemodel.SourceRelationshipLifecycleSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQuery;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQueryColumn;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceRelationshipLifecycleSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceTable;
 import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceJsonParentSampleSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceJsonPreviewSupport;
@@ -551,7 +551,8 @@ public class HopGuiSourceJsonDialog {
     item.setText(FLD_COL_PATH, Const.NVL(field.getPath(), ""));
     item.setText(FLD_COL_PASSTHROUGH, field.isPassThrough() ? "Y" : "N");
     item.setText(FLD_COL_PARENT_FIELD, Const.NVL(field.getParentFieldName(), ""));
-    int hopType = SourceJsonFieldSupport.resolveEffectiveHopType(model, workingParentContext(), field);
+    int hopType =
+        SourceJsonFieldSupport.resolveEffectiveHopType(model, workingParentContext(), field);
     item.setText(FLD_COL_TYPE, SourceJsonFieldSupport.hopTypeLabel(hopType));
     item.setText(FLD_COL_FORMAT, Const.NVL(field.getFormat(), ""));
     item.setText(FLD_COL_LENGTH, field.getLength() >= 0 ? Integer.toString(field.getLength()) : "");
@@ -563,7 +564,8 @@ public class HopGuiSourceJsonDialog {
 
   /** Minimal SourceJson with parent kind/name for type resolution while the dialog is open. */
   private SourceJson workingParentContext() {
-    SourceJson ctx = new SourceJson(Const.NVL(wName != null ? wName.getText() : input.getName(), ""));
+    SourceJson ctx =
+        new SourceJson(Const.NVL(wName != null ? wName.getText() : input.getName(), ""));
     if (wParentKind != null && !wParentKind.isDisposed()) {
       ctx.setParentSourceKind(SourceJsonParentKind.lookupDescription(wParentKind.getText()));
     } else {

@@ -1177,6 +1177,37 @@ limitations under the License.
       <yloc>80</yloc>
       <name>all-customer-info</name>
     </query>
+    <query>
+      <description/>
+      <drivingTableName>customer_address</drivingTableName>
+      <joins/>
+      <columns/>
+      <whereClause/>
+      <freeSql>SELECT c.customer_id, a.city
+FROM customer_hub c
+INNER JOIN customer_address a ON c.customer_id = a.customer_id
+WHERE c.customer_id > 0
+ORDER BY a.city
+LIMIT 100</freeSql>
+      <generationMode>FREE_SQL</generationMode>
+      <xloc>624</xloc>
+      <yloc>176</yloc>
+      <name>Calcite Query</name>
+    </query>
+    <query>
+      <description/>
+      <drivingTableName>customer_address</drivingTableName>
+      <joins/>
+      <columns/>
+      <whereClause/>
+      <freeSql>SELECT o.order_id, e.message_id
+FROM order_header o
+INNER JOIN order_shipment_tracking e ON o.order_id = e.order_id</freeSql>
+      <generationMode>FREE_SQL</generationMode>
+      <xloc>1088</xloc>
+      <yloc>608</yloc>
+      <name>free_order_events</name>
+    </query>
   </queries>
   <json-sources>
     <json-source>

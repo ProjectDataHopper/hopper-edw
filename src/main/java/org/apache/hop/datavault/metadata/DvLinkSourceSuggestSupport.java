@@ -26,8 +26,8 @@ import java.util.Set;
 import org.apache.hop.core.util.Utils;
 
 /**
- * Suggests link hub-source business-key mappings from a catalog feed's field names to
- * participating hubs' business keys (name matching).
+ * Suggests link hub-source business-key mappings from a catalog feed's field names to participating
+ * hubs' business keys (name matching).
  *
  * <p>Typical case: flat pipeline source {@code asn-package-lines} with {@code order_id}, {@code
  * product_id}, … and hubs already defined with those BK names — identity maps that users otherwise
@@ -152,11 +152,9 @@ public final class DvLinkSourceSuggestSupport {
               }
             }
           }
-          String displaySource =
-              mappedParts.isEmpty() ? null : String.join(", ", mappedParts);
+          String displaySource = mappedParts.isEmpty() ? null : String.join(", ", mappedParts);
           mappings.add(
-              new ProposedMapping(
-                  hub.getName(), vaultKey.vaultFieldName(), displaySource, worst));
+              new ProposedMapping(hub.getName(), vaultKey.vaultFieldName(), displaySource, worst));
           if (worst != MatchKind.MISSING && !mappedParts.isEmpty()) {
             BusinessKeySource bks = new BusinessKeySource();
             bks.setBusinessKeyField(vaultKey.vaultFieldName());
@@ -172,10 +170,7 @@ public final class DvLinkSourceSuggestSupport {
           Match match = matchField(vaultKey.vaultFieldName(), fieldByLower, fields);
           mappings.add(
               new ProposedMapping(
-                  hub.getName(),
-                  vaultKey.vaultFieldName(),
-                  match.sourceField(),
-                  match.kind()));
+                  hub.getName(), vaultKey.vaultFieldName(), match.sourceField(), match.kind()));
           if (match.kind() == MatchKind.MISSING) {
             allMapped = false;
           } else {
@@ -223,16 +218,13 @@ public final class DvLinkSourceSuggestSupport {
    * @param emptyOnly when true, only fill hubs that have no existing BK maps; never remove hubs
    */
   public static void mergeSuggestedHubSource(
-      List<DvLink.DvLinkHubSource> working,
-      DvLink.DvLinkHubSource proposed,
-      boolean emptyOnly) {
+      List<DvLink.DvLinkHubSource> working, DvLink.DvLinkHubSource proposed, boolean emptyOnly) {
     if (working == null || proposed == null || Utils.isEmpty(proposed.getSourceName())) {
       return;
     }
     DvLink.DvLinkHubSource existing = null;
     for (DvLink.DvLinkHubSource hs : working) {
-      if (hs != null
-          && proposed.getSourceName().equals(hs.getSourceName())) {
+      if (hs != null && proposed.getSourceName().equals(hs.getSourceName())) {
         existing = hs;
         break;
       }

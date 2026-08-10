@@ -1,0 +1,10 @@
+{
+  "defaultRowLimit": 10000,
+  "virtualPath": "",
+  "maxRowLimit": 100000,
+  "name": "crm",
+  "description": "",
+  "modelFilename": "${PROJECT_HOME}/models/source-tables-crm.hsm",
+  "enabled": true,
+  "allowSchemaMetadata": true
+}

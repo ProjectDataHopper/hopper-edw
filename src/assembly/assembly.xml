@@ -56,6 +56,30 @@
             <useTransitiveDependencies>true</useTransitiveDependencies>
             <useProjectArtifact>false</useProjectArtifact>
         </dependencySet>
+        <!--
+          Calcite free-SQL engine (issue #117). Includes must list transitive runtime jars
+          that do not match org.apache.calcite:* — assembly filters by groupId/artifactId.
+          Missing locationtech.jts caused NoClassDefFoundError: Geometry at PlannerImpl.rel().
+        -->
+        <dependencySet>
+            <includes>
+                <include>org.apache.calcite:*</include>
+                <include>org.apache.calcite.avatica:*</include>
+                <include>org.locationtech.jts:*</include>
+                <include>org.locationtech.jts.io:*</include>
+                <include>org.locationtech.proj4j:*</include>
+                <!-- Calcite expression compilation (Planner / Enumerable) -->
+                <include>org.codehaus.janino:janino</include>
+                <include>org.codehaus.janino:commons-compiler</include>
+                <!-- Calcite BuiltInMethod / metadata paths -->
+                <include>org.apache.commons:commons-math3</include>
+                <include>org.apache.commons:commons-text</include>
+                <include>com.jayway.jsonpath:json-path</include>
+            </includes>
+            <outputDirectory>plugins/misc/datavault/lib</outputDirectory>
+            <useTransitiveDependencies>true</useTransitiveDependencies>
+            <useProjectArtifact>false</useProjectArtifact>
+        </dependencySet>
         <dependencySet>
             <includes>
                 <include>org.eclipse.elk:*</include>

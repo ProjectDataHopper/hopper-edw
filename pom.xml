@@ -30,6 +30,8 @@
 
   <properties>
     <apache.rat.version>0.16.1</apache.rat.version>
+    <!-- Apache Calcite for source-model SQL virtualisation (issue #117). -->
+    <calcite.version>1.40.0</calcite.version>
     <commonmark.version>0.29.0</commonmark.version>
     <elk.version>0.10.0</elk.version>
     <hadoop.version>3.3.6</hadoop.version>
@@ -56,6 +58,13 @@
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
       <version>1.17.1</version>
+    </dependency>
+
+    <!-- Calcite: SQL parse / plan / RelToSql for source-model data virtualisation -->
+    <dependency>
+      <groupId>org.apache.calcite</groupId>
+      <artifactId>calcite-core</artifactId>
+      <version>${calcite.version}</version>
     </dependency>
 
     <!-- Iceberg read path: single shaded runtime jar avoids parquet classpath conflicts -->
@@ -251,6 +260,17 @@
       <groupId>org.apache.iceberg</groupId>
       <artifactId>iceberg-hive-runtime</artifactId>
       <version>${iceberg.version}</version>
+    </dependency>
+    <!-- Calcite runtime (scope runtime on calcite-core; must be on the plugin classloader). -->
+    <dependency>
+      <groupId>org.codehaus.janino</groupId>
+      <artifactId>commons-compiler</artifactId>
+      <version>3.1.12</version>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.janino</groupId>
+      <artifactId>janino</artifactId>
+      <version>3.1.12</version>
     </dependency>
 
     <!-- CommonMark markdown rendering (bundled in plugin lib/, mirrors hop-transform-textfile) -->

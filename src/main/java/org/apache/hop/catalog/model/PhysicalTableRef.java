@@ -42,8 +42,8 @@ public class PhysicalTableRef {
   @HopMetadataProperty private String tableName;
 
   /**
-   * Column layout for this physical table when the parent record definition owns the layout
-   * (vault targets, dimensional tables, generic physical tables). Empty for location-only refs.
+   * Column layout for this physical table when the parent record definition owns the layout (vault
+   * targets, dimensional tables, generic physical tables). Empty for location-only refs.
    */
   @HopMetadataProperty private List<CatalogSourceField> fields = new ArrayList<>();
 }

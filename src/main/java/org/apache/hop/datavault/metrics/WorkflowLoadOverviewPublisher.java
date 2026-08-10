@@ -178,7 +178,8 @@ public final class WorkflowLoadOverviewPublisher {
             operationsSchema,
             databaseMeta,
             WorkflowLoadOverviewDdlSupport.TABLE_WORKFLOW_LOAD_OVERVIEW));
-    org.apache.hop.datavault.catalog.DvSourceFieldSupport.applyRowMetaLayoutToDefinition(definition, fields, null);
+    org.apache.hop.datavault.catalog.DvSourceFieldSupport.applyRowMetaLayoutToDefinition(
+        definition, fields, null);
     definition.getTags().add("operations");
     definition.getTags().add("load-metrics");
     definition.getTags().add("workflow-overview");
@@ -218,7 +219,8 @@ public final class WorkflowLoadOverviewPublisher {
             operationsSchema,
             databaseMeta,
             WorkflowLoadOverviewDdlSupport.TABLE_WORKFLOW_LOAD_OVERVIEW_MODEL));
-    org.apache.hop.datavault.catalog.DvSourceFieldSupport.applyRowMetaLayoutToDefinition(definition, fields, null);
+    org.apache.hop.datavault.catalog.DvSourceFieldSupport.applyRowMetaLayoutToDefinition(
+        definition, fields, null);
     definition.getTags().add("operations");
     definition.getTags().add("load-metrics");
     definition.getTags().add("workflow-overview");

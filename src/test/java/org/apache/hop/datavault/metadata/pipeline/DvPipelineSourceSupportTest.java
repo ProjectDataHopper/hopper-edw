@@ -44,8 +44,7 @@ class DvPipelineSourceSupportTest {
     name.setLength("100");
     source.setFields(List.of(id, name));
 
-    MetaInjectMeta metaInjectMeta =
-        DvPipelineSourceSupport.buildMetaInjectMeta(source, null, null);
+    MetaInjectMeta metaInjectMeta = DvPipelineSourceSupport.buildMetaInjectMeta(source, null, null);
     assertEquals("${PROJECT_HOME}/pipelines/x.hpl", metaInjectMeta.getTemplateFileName());
     assertEquals("output", metaInjectMeta.getSourceTransformName());
     List<MetaInjectOutputField> fields = metaInjectMeta.getSourceOutputFields();

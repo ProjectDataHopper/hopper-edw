@@ -33,6 +33,7 @@ For a slide-style executive summary, see [presentations/hop-data-vault-overview.
 |---------|--------|---------------|
 | Data Catalog + `DV_SOURCE` record definitions | Available | [data-catalog.adoc](data-catalog.adoc), [datavault-source.adoc](datavault-source.adoc) |
 | Source modeler (`.hsm`) + multi-table queries / composite feeds | Available | [source-modeler-overview.adoc](source-modeler-overview.adoc) |
+| Free SQL over source models (Calcite parse/plan, pushdown + residual pipeline) | Available | [source-modeler-overview.adoc](source-modeler-overview.adoc) (JDBC + DBeaver screenshots), [plans/source-model-sql-virtualization-plan.md](plans/source-model-sql-virtualization-plan.md), Free SQL + **Source model SQL** transform, `hop-hsm-jdbc` + **Source model service** |
 | Project / Search Everywhere for models and plugin metadata | Available (Hop 2.19) | [search.adoc](search.adoc) |
 | Resource definition validation (issues, proposals, acknowledgements) | Available | [resource-definition-validation.adoc](resource-definition-validation.adoc) |
 | Metadata harvesting (live source discovery + OPS history, distinct from load) | Available (Phase 1–4) | [metadata-harvesting.adoc](metadata-harvesting.adoc) |

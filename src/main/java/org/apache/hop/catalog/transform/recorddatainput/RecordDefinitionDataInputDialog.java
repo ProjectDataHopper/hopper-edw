@@ -74,7 +74,8 @@ public class RecordDefinitionDataInputDialog extends BaseTransformDialog {
   @Override
   public String open() {
     // Separator below transform name (returned as last control).
-    Control afterName = createShell(BaseMessages.getString(PKG, "RecordDefinitionDataInputDialog.Shell.Title"));
+    Control afterName =
+        createShell(BaseMessages.getString(PKG, "RecordDefinitionDataInputDialog.Shell.Title"));
 
     buildButtonBar().ok(e -> ok()).cancel(e -> cancel()).build();
 
@@ -121,10 +122,12 @@ public class RecordDefinitionDataInputDialog extends BaseTransformDialog {
     fdSelectFromInput.right = new FormAttachment(100, 0);
     fdSelectFromInput.top = new FormAttachment(wlSelectFromInput, 0, SWT.CENTER);
     wSelectFromInput.setLayoutData(fdSelectFromInput);
-    wSelectFromInput.addListener(SWT.Selection, e -> {
-      input.setChanged();
-      setFlags();
-    });
+    wSelectFromInput.addListener(
+        SWT.Selection,
+        e -> {
+          input.setChanged();
+          setFlags();
+        });
 
     Control previous = wSelectFromInput;
 
@@ -171,7 +174,8 @@ public class RecordDefinitionDataInputDialog extends BaseTransformDialog {
     // Select record definition (fills fixed namespace/name values)
     wSelectRecordDefinition = new Button(shell, SWT.PUSH);
     wSelectRecordDefinition.setText(
-        BaseMessages.getString(PKG, "RecordDefinitionDataInputDialog.SelectRecordDefinition.Label"));
+        BaseMessages.getString(
+            PKG, "RecordDefinitionDataInputDialog.SelectRecordDefinition.Label"));
     PropsUi.setLook(wSelectRecordDefinition);
     FormData fdSelectRecord = new FormData();
     fdSelectRecord.left = new FormAttachment(middle, 0);

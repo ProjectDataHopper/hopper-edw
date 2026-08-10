@@ -74,7 +74,8 @@ public final class SourceTableLiveSchemaSupport {
     if (metadataProvider == null) {
       throw new HopException("Metadata provider is required to load the database connection");
     }
-    String connectionName = SourceTablePreviewSupport.resolveConnectionName(model, table, variables);
+    String connectionName =
+        SourceTablePreviewSupport.resolveConnectionName(model, table, variables);
     if (Utils.isEmpty(connectionName)) {
       throw new HopException(
           "No database connection is set for table '"

@@ -62,7 +62,8 @@ public final class SourceJsonValidationSupport {
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_ERROR,
-              BaseMessages.getString(PKG, "SourceModel.CheckResult.DuplicateJsonSourceName", jsonName),
+              BaseMessages.getString(
+                  PKG, "SourceModel.CheckResult.DuplicateJsonSourceName", jsonName),
               null));
     }
 

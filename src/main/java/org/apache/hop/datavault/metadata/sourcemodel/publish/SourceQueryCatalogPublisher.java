@@ -17,7 +17,10 @@
 package org.apache.hop.datavault.metadata.sourcemodel.publish;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import org.apache.hop.catalog.discovery.RecordDefinitionCatalogWriter;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.database.DatabaseMeta;
@@ -35,9 +38,12 @@ import org.apache.hop.datavault.metadata.sourcemodel.SourceColumn;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQuery;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQueryColumn;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceQueryGenerationMode;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceTable;
 import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceQueryGenerationSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceQuerySqlGenerator;
+import org.apache.hop.datavault.virtualization.sql.SourceModelSqlEngine;
+import org.apache.hop.datavault.virtualization.sql.SourceModelSqlPlan;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
@@ -63,10 +69,15 @@ public final class SourceQueryCatalogPublisher {
     if (Utils.isEmpty(query.getName())) {
       throw new HopException("Source query name is required to publish");
     }
-    if (query.getColumns().isEmpty()) {
+    boolean freeSql = query.resolveGenerationMode() == SourceQueryGenerationMode.FREE_SQL;
+    if (!freeSql && query.getColumns().isEmpty()) {
       throw new HopException(
           BaseMessages.getString(
               PKG, "SourceQueryCatalogPublisher.Error.EmptyProjection", query.getName()));
+    }
+    if (freeSql && Utils.isEmpty(query.getFreeSql())) {
+      throw new HopException(
+          "Source query '" + query.getName() + "' is Free SQL mode but free SQL text is empty");
     }
 
     String catalogConnection = resolveCatalogConnection(model, catalogConnectionName, variables);
@@ -80,7 +91,12 @@ public final class SourceQueryCatalogPublisher {
             ? query.getPublishedCatalogName().trim()
             : query.getName().trim();
 
-    List<SourceField> fields = buildFieldsFromProjection(model, query);
+    List<SourceField> fields;
+    if (freeSql) {
+      fields = buildFieldsFromFreeSql(model, query, variables, metadataProvider);
+    } else {
+      fields = buildFieldsFromProjection(model, query);
+    }
     RecordSourceIndicatorOptions indicatorOptions =
         RecordSourceIndicatorSupport.resolveForTable(null, fields, feedName);
 
@@ -102,7 +118,20 @@ public final class SourceQueryCatalogPublisher {
     composite.setSourceQueryName(query.getName());
 
     // Cache SQL when single-connection generation is available.
-    if (SourceQueryGenerationSupport.canGenerateSingleConnectionSql(model, query)) {
+    if (freeSql) {
+      try {
+        var plan =
+            org.apache.hop.datavault.virtualization.sql.SourceModelSqlEngine.plan(
+                model, query.getFreeSql(), variables, metadataProvider);
+        if (plan.fullPushdown()
+            && plan.pushdownSqlFragments() != null
+            && !plan.pushdownSqlFragments().isEmpty()) {
+          composite.setGeneratedSql(plan.pushdownSqlFragments().get(0));
+        }
+      } catch (Exception ignored) {
+        // Cache is optional; live .hsm is preferred at load time.
+      }
+    } else if (SourceQueryGenerationSupport.canGenerateSingleConnectionSql(model, query)) {
       String dbName = SourceQueryGenerationSupport.resolveSharedDatabaseName(model, query);
       DatabaseMeta databaseMeta =
           metadataProvider
@@ -144,12 +173,55 @@ public final class SourceQueryCatalogPublisher {
       if (query == null || Utils.isEmpty(query.getName())) {
         continue;
       }
-      if (query.getColumns().isEmpty()) {
+      boolean freeSql = query.resolveGenerationMode() == SourceQueryGenerationMode.FREE_SQL;
+      if (!freeSql && query.getColumns().isEmpty()) {
+        continue;
+      }
+      if (freeSql && Utils.isEmpty(query.getFreeSql())) {
         continue;
       }
       results.add(publish(model, query, catalogConnectionName, variables, metadataProvider));
     }
     return results;
+  }
+
+  public static List<SourceField> buildFieldsFromFreeSql(
+      SourceModel model,
+      SourceQuery query,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider)
+      throws HopException {
+    SourceModelSqlPlan plan =
+        SourceModelSqlEngine.plan(model, query.getFreeSql(), variables, metadataProvider);
+    List<SourceField> fields = new ArrayList<>();
+    if (plan.outputRowMeta() == null) {
+      return fields;
+    }
+    for (int i = 0; i < plan.outputRowMeta().size(); i++) {
+      var valueMeta = plan.outputRowMeta().getValueMeta(i);
+      SourceField field = new SourceField(valueMeta.getName());
+      field.setHopType(valueMeta.getType());
+      field.setLength(valueMeta.getLength() > 0 ? Integer.toString(valueMeta.getLength()) : null);
+      field.setPrecision(
+          valueMeta.getPrecision() >= 0 ? Integer.toString(valueMeta.getPrecision()) : null);
+      fields.add(field);
+    }
+    // Prefer explicit projection key positions when the modeler filled columns as metadata.
+    if (!query.getColumns().isEmpty()) {
+      Map<String, Integer> keys = new HashMap<>();
+      for (SourceQueryColumn column : query.getColumns()) {
+        if (column != null && column.isPrimaryKey()) {
+          keys.put(column.resolveAlias().toLowerCase(Locale.ROOT), column.getPrimaryKeyPosition());
+        }
+      }
+      for (SourceField field : fields) {
+        Integer pos = keys.get(field.getName().toLowerCase(Locale.ROOT));
+        if (pos != null) {
+          field.setPrimaryKeyPosition(pos);
+        }
+      }
+    }
+    return fields;
   }
 
   public static List<SourceField> buildFieldsFromProjection(SourceModel model, SourceQuery query) {

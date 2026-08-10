@@ -79,9 +79,7 @@ public final class SourceRelationshipValidationSupport {
     Set<String> childFields =
         toLowerSet(
             SourceEndpointSupport.fieldNames(
-                model,
-                relationship.resolveChildEndpointKind(),
-                relationship.getChildTableName()));
+                model, relationship.resolveChildEndpointKind(), relationship.getChildTableName()));
     Set<String> parentFields =
         toLowerSet(
             SourceEndpointSupport.fieldNames(

@@ -16,7 +16,6 @@
  */
 package org.apache.hop.datavault.metadata.pipeline;
 
-import java.util.Collections;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;

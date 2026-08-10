@@ -216,15 +216,15 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
 
         // Target DDL / catalog publish need a concrete Hop (or SQL) type on the vault BK column.
         String resolvedDataType =
-            variables != null ? variables.resolve(Const.NVL(bk.getDataType(), "")) : bk.getDataType();
+            variables != null
+                ? variables.resolve(Const.NVL(bk.getDataType(), ""))
+                : bk.getDataType();
         if (Utils.isEmpty(resolvedDataType)) {
           remarks.add(
               new CheckResult(
                   ICheckResult.TYPE_RESULT_ERROR,
                   BaseMessages.getString(
-                      PKG,
-                      "DvHub.CheckResult.BusinessKeyNoDataType",
-                      Const.NVL(bk.getName(), "?")),
+                      PKG, "DvHub.CheckResult.BusinessKeyNoDataType", Const.NVL(bk.getName(), "?")),
                   this));
         } else if (!DvDataTypeSupport.isKnownDataTypeLabel(resolvedDataType)) {
           remarks.add(
@@ -1044,7 +1044,8 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
 
   /**
    * Best-effort lookup of a catalog source field for a business key (first source part) so layout
-   * generation can fall back to the source hop type when {@link BusinessKey#getDataType()} is blank.
+   * generation can fall back to the source hop type when {@link BusinessKey#getDataType()} is
+   * blank.
    */
   private SourceField findBusinessKeySourceField(
       BusinessKey bk,
@@ -1081,8 +1082,7 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
 
     for (String sourceName : candidateSources) {
       try {
-        String resolved =
-            variables != null ? variables.resolve(sourceName) : sourceName;
+        String resolved = variables != null ? variables.resolve(sourceName) : sourceName;
         DataVaultSource recordSource =
             DvSourceCatalogService.resolveSource(resolved, model, variables, metadataProvider);
         if (recordSource == null) {
@@ -1287,7 +1287,8 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
       for (BusinessKey bk : getDistinctBusinessKeys()) {
         String vaultFieldName = variables.resolve(bk.getName());
 
-        SourceField matchingSource = findBusinessKeySourceField(bk, variables, metadataProvider, model);
+        SourceField matchingSource =
+            findBusinessKeySourceField(bk, variables, metadataProvider, model);
         int type =
             DvDataTypeSupport.resolveHopTypeId(variables.resolve(bk.getDataType()), matchingSource);
         int length = Const.toInt(variables.resolve(bk.getLength()), -1);

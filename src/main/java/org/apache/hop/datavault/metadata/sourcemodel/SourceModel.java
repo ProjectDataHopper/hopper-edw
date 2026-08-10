@@ -491,8 +491,7 @@ public class SourceModel extends HopMetadataBase
                     PKG, "SourceModel.CheckResult.DuplicateQueryName", queryName),
                 null));
       }
-      remarks.addAll(
-          SourceQueryValidationSupport.check(this, query, variables, metadataProvider));
+      remarks.addAll(SourceQueryValidationSupport.check(this, query, variables, metadataProvider));
       monitor.worked(1);
     }
 

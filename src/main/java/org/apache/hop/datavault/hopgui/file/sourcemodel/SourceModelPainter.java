@@ -18,19 +18,17 @@ package org.apache.hop.datavault.hopgui.file.sourcemodel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.hop.core.Const;
 import org.apache.hop.core.gui.AreaOwner;
 import org.apache.hop.core.gui.AreaOwner.AreaType;
 import org.apache.hop.core.gui.IGc;
 import org.apache.hop.core.gui.IGc.EColor;
 import org.apache.hop.core.gui.IGc.EFont;
 import org.apache.hop.core.gui.IGc.ELineStyle;
-import org.apache.hop.core.Const;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
@@ -46,9 +44,9 @@ import org.apache.hop.datavault.metadata.sourcemodel.SourceJsonParentKind;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
 import org.apache.hop.datavault.metadata.sourcemodel.SourcePipeline;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQuery;
-import org.apache.hop.datavault.metadata.sourcemodel.SourceQueryJoin;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceRelationship;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceTable;
+import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceQueryGenerationSupport;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.PropsUi;
@@ -170,8 +168,9 @@ public class SourceModelPainter extends BasePainter {
             continue;
           }
           Bounds queryBounds = queryBounds(query);
-          for (String tableName : queryParticipantTableNames(query)) {
-            Bounds parentBounds = resolveTableBounds(tableName);
+          for (String feedName : SourceQueryGenerationSupport.participantTableNames(model, query)) {
+            // Free SQL may reference tables, Source JSON, or Source Pipeline cards.
+            Bounds parentBounds = resolveCompositionFeedBounds(feedName);
             if (parentBounds == null) {
               continue;
             }
@@ -210,25 +209,6 @@ public class SourceModelPainter extends BasePainter {
     gc.drawLine(screenFrom.x, screenFrom.y, screenTo.x, screenTo.y);
   }
 
-  /** Driving table + each join table (deduplicated, order preserved). */
-  private static Set<String> queryParticipantTableNames(SourceQuery query) {
-    Set<String> names = new LinkedHashSet<>();
-    if (query == null) {
-      return names;
-    }
-    if (!Utils.isEmpty(query.getDrivingTableName())) {
-      names.add(query.getDrivingTableName().trim());
-    }
-    if (query.getJoins() != null) {
-      for (SourceQueryJoin join : query.getJoins()) {
-        if (join != null && !Utils.isEmpty(join.getTableName())) {
-          names.add(join.getTableName().trim());
-        }
-      }
-    }
-    return names;
-  }
-
   private Bounds resolveCompositionParentBounds(SourceJsonParentKind kind, String parentName) {
     if (Utils.isEmpty(parentName)) {
       return null;
@@ -259,6 +239,49 @@ public class SourceModelPainter extends BasePainter {
       return null;
     }
     return tableBounds(table);
+  }
+
+  /**
+   * Bounds for a composition-edge endpoint named in free SQL or a visual query: table, JSON card,
+   * or pipeline card (case-insensitive).
+   */
+  private Bounds resolveCompositionFeedBounds(String feedName) {
+    if (Utils.isEmpty(feedName)) {
+      return null;
+    }
+    Bounds tableBounds = resolveTableBounds(feedName);
+    if (tableBounds != null) {
+      return tableBounds;
+    }
+    SourceJson json = model.findJsonSource(feedName);
+    if (json == null && model.getJsonSources() != null) {
+      for (SourceJson candidate : model.getJsonSources()) {
+        if (candidate != null
+            && !Utils.isEmpty(candidate.getName())
+            && candidate.getName().equalsIgnoreCase(feedName.trim())) {
+          json = candidate;
+          break;
+        }
+      }
+    }
+    if (json != null && json.getLocation() != null) {
+      return jsonBounds(json);
+    }
+    SourcePipeline pipeline = model.findPipelineSource(feedName);
+    if (pipeline == null && model.getPipelineSources() != null) {
+      for (SourcePipeline candidate : model.getPipelineSources()) {
+        if (candidate != null
+            && !Utils.isEmpty(candidate.getName())
+            && candidate.getName().equalsIgnoreCase(feedName.trim())) {
+          pipeline = candidate;
+          break;
+        }
+      }
+    }
+    if (pipeline != null && pipeline.getLocation() != null) {
+      return pipelineBounds(pipeline);
+    }
+    return null;
   }
 
   private Bounds queryBounds(SourceQuery query) {
@@ -605,6 +628,7 @@ public class SourceModelPainter extends BasePainter {
 
   /** Teal/cyan card for JSON extraction nodes (distinct from purple queries). */
   private static final int[] JSON_COLOR = new int[] {20, 130, 140};
+
   private static final int[] PIPELINE_COLOR = new int[] {180, 100, 40};
 
   private void drawQueries() {

@@ -44,7 +44,7 @@ Documentation for the **hop-datavault** plugin (development **0.8.0-SNAPSHOT**, 
 | Document | Description |
 |----------|-------------|
 | [data-catalog.adoc](data-catalog.adoc) | Local catalog setup, namespaces, refresh, **catalog version tags** |
-| [source-modeler-overview.adoc](source-modeler-overview.adoc) | **Source modeler (`.hsm`)**: PK/FK import, multi-table queries, composite catalog feeds |
+| [source-modeler-overview.adoc](source-modeler-overview.adoc) | **Source modeler (`.hsm`)**: PK/FK import, multi-table queries, Free SQL, Source model SQL transform, **Hop Server JDBC / DBeaver** (`jdbc:hop-hsm:`) |
 | [source-to-target-lineage.adoc](source-to-target-lineage.adoc) | Field/table lineage, Lineage tab, explainable DDL, catalog publish, drift gate, reverse browser |
 | [datavault-source.adoc](datavault-source.adoc) | `DV_SOURCE` record definitions (database, file, **composite**) |
 | [datavault-source-database.adoc](datavault-source-database.adoc) | Database-backed source fields |

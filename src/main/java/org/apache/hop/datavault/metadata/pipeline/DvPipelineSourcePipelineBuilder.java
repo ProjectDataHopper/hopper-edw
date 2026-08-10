@@ -79,10 +79,10 @@ public abstract class DvPipelineSourcePipelineBuilder extends DvSourcePipelineBu
   @Override
   public void build() throws HopException {
     MetaInjectMeta metaInjectMeta =
-        DvPipelineSourceSupport.buildMetaInjectMeta(
-            pipelineSource, variables, metadataProvider);
+        DvPipelineSourceSupport.buildMetaInjectMeta(pipelineSource, variables, metadataProvider);
     TransformMeta injectTransform =
-        new TransformMeta("MetaInject", "source_" + safeName(recordSource.getName()), metaInjectMeta);
+        new TransformMeta(
+            "MetaInject", "source_" + safeName(recordSource.getName()), metaInjectMeta);
     injectTransform.setLocation(startPoint.x, startPoint.y);
     pipelineMeta.addTransform(injectTransform);
 
@@ -201,8 +201,7 @@ public abstract class DvPipelineSourcePipelineBuilder extends DvSourcePipelineBu
           configuration, model, satellite, variables);
     }
     String fieldName =
-        DvSourceFieldMappingSupport.findTargetSourceFieldName(
-            configuration, recordSource, dvTable);
+        DvSourceFieldMappingSupport.findTargetSourceFieldName(configuration, recordSource, dvTable);
     return variables != null ? variables.resolve(fieldName) : fieldName;
   }
 

@@ -55,6 +55,12 @@ public class SourceQuery extends HopMetadataBase implements IHopMetadata {
   /** Optional SQL WHERE fragment (no leading WHERE keyword). */
   @HopMetadataProperty private String whereClause;
 
+  /**
+   * Free-form SQL used when {@link #generationMode} is {@link SourceQueryGenerationMode#FREE_SQL}.
+   * Parsed and planned with Apache Calcite against the parent {@link SourceModel}.
+   */
+  @HopMetadataProperty private String freeSql;
+
   @HopMetadataProperty(storeWithCode = true)
   private SourceQueryGenerationMode generationMode = SourceQueryGenerationMode.AUTO;
 

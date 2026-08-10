@@ -64,9 +64,9 @@ public final class DvSourceFieldSupport {
   /**
    * Single read path for catalog field layout (hub/sat import, DDL, preview, validation).
    *
-   * <p>Policy: prefer the authoritative structured list for the record type; fill missing hop
-   * types / length / precision from the transient row meta only as a migration aid. If structured
-   * fields are empty, fall back to transient row meta (legacy documents mid-load).
+   * <p>Policy: prefer the authoritative structured list for the record type; fill missing hop types
+   * / length / precision from the transient row meta only as a migration aid. If structured fields
+   * are empty, fall back to transient row meta (legacy documents mid-load).
    */
   public static List<SourceField> sourceFieldsFromDefinition(RecordDefinition definition)
       throws HopException {
@@ -183,8 +183,8 @@ public final class DvSourceFieldSupport {
   }
 
   /**
-   * Before persisting a document: structured fields are authority; regenerate derived transient
-   * row meta. Does not emit {@code rowMetaXml}.
+   * Before persisting a document: structured fields are authority; regenerate derived transient row
+   * meta. Does not emit {@code rowMetaXml}.
    */
   public static void prepareForPersistence(RecordDefinition definition) throws HopException {
     if (definition == null || !hasStructuredLayoutHome(definition)) {
@@ -429,16 +429,14 @@ public final class DvSourceFieldSupport {
       if (field == null) {
         continue;
       }
-      IValueMeta vm =
-          !Utils.isEmpty(field.getName()) ? byName.get(field.getName().trim()) : null;
+      IValueMeta vm = !Utils.isEmpty(field.getName()) ? byName.get(field.getName().trim()) : null;
       if (field.getHopType() <= 0 && vm != null && vm.getType() > 0) {
         field.setHopType(vm.getType());
       }
       // Prefer sourceDataType (SQL / Hop name) over a blank hopType or a stale TYPE_STRING default.
       int resolved = DvDataTypeSupport.resolveSourceFieldHopType(field);
       if (field.getHopType() <= 0
-          || (field.getHopType() == IValueMeta.TYPE_STRING
-              && resolved != IValueMeta.TYPE_STRING)) {
+          || (field.getHopType() == IValueMeta.TYPE_STRING && resolved != IValueMeta.TYPE_STRING)) {
         field.setHopType(resolved);
       }
       if (field.getHopType() <= 0) {
@@ -476,8 +474,7 @@ public final class DvSourceFieldSupport {
       }
       int resolved = DvDataTypeSupport.resolveSourceFieldHopType(field);
       if (field.getHopType() <= 0
-          || (field.getHopType() == IValueMeta.TYPE_STRING
-              && resolved != IValueMeta.TYPE_STRING)) {
+          || (field.getHopType() == IValueMeta.TYPE_STRING && resolved != IValueMeta.TYPE_STRING)) {
         field.setHopType(resolved);
       }
       if (field.getHopType() <= 0) {

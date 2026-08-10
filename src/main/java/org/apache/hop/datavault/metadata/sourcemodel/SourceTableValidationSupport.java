@@ -34,7 +34,8 @@ public final class SourceTableValidationSupport {
 
   private SourceTableValidationSupport() {}
 
-  public static List<ICheckResult> check(SourceModel model, SourceTable table, IVariables variables) {
+  public static List<ICheckResult> check(
+      SourceModel model, SourceTable table, IVariables variables) {
     List<ICheckResult> remarks = new ArrayList<>();
     if (table == null) {
       return remarks;
@@ -49,8 +50,7 @@ public final class SourceTableValidationSupport {
       return remarks;
     }
 
-    String connection =
-        SourceTablePreviewSupport.resolveConnectionName(model, table, variables);
+    String connection = SourceTablePreviewSupport.resolveConnectionName(model, table, variables);
     if (Utils.isEmpty(connection)) {
       remarks.add(
           new CheckResult(
@@ -138,7 +138,8 @@ public final class SourceTableValidationSupport {
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_WARNING,
-              BaseMessages.getString(PKG, "SourceModel.CheckResult.TableMissingPrimaryKey", tableName),
+              BaseMessages.getString(
+                  PKG, "SourceModel.CheckResult.TableMissingPrimaryKey", tableName),
               null));
     }
     return remarks;

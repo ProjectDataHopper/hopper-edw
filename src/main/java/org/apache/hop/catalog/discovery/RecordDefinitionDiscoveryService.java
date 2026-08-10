@@ -164,8 +164,7 @@ public final class RecordDefinitionDiscoveryService {
       throws HopException {
     if (physicalRef == null) {
       throw new HopException(
-          BaseMessages.getString(
-              PKG, "RecordDefinitionDiscoveryService.Error.MissingPipelineRef"));
+          BaseMessages.getString(PKG, "RecordDefinitionDiscoveryService.Error.MissingPipelineRef"));
     }
 
     // Preferred path: rebuild from the SourcePipeline card on the .hsm (same as publish).
@@ -205,8 +204,7 @@ public final class RecordDefinitionDiscoveryService {
     if (Utils.isEmpty(physicalRef.getPipelineFilename())
         || Utils.isEmpty(physicalRef.getPipelineTransformName())) {
       throw new HopException(
-          BaseMessages.getString(
-              PKG, "RecordDefinitionDiscoveryService.Error.MissingPipelineRef"));
+          BaseMessages.getString(PKG, "RecordDefinitionDiscoveryService.Error.MissingPipelineRef"));
     }
     String pipelineFile =
         variables != null

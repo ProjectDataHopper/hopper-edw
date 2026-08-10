@@ -282,7 +282,8 @@ public final class DataQualityHistoryPublisher {
       String namespace,
       String targetDatabaseName,
       String operationsSchema,
-      DatabaseMeta databaseMeta) throws org.apache.hop.core.exception.HopException {
+      DatabaseMeta databaseMeta)
+      throws org.apache.hop.core.exception.HopException {
     IRowMeta fields = new RowMeta();
     fields.addValueMeta(stringMeta("quality_run_id", 64));
     fields.addValueMeta(new ValueMetaDate("measured_at"));
@@ -307,7 +308,8 @@ public final class DataQualityHistoryPublisher {
     definition.setDescription("Data quality measure run header and aggregate counters");
     definition.setPhysicalTable(
         physicalTableRef(targetDatabaseName, operationsSchema, TABLE_QUALITY_RUN));
-    org.apache.hop.datavault.catalog.DvSourceFieldSupport.applyRowMetaLayoutToDefinition(definition, fields, null);
+    org.apache.hop.datavault.catalog.DvSourceFieldSupport.applyRowMetaLayoutToDefinition(
+        definition, fields, null);
     definition.getTags().add("operations");
     definition.getTags().add("data-quality");
     return definition;
@@ -317,7 +319,8 @@ public final class DataQualityHistoryPublisher {
       String namespace,
       String targetDatabaseName,
       String operationsSchema,
-      DatabaseMeta databaseMeta) throws org.apache.hop.core.exception.HopException {
+      DatabaseMeta databaseMeta)
+      throws org.apache.hop.core.exception.HopException {
     IRowMeta fields = new RowMeta();
     fields.addValueMeta(stringMeta("quality_run_id", 64));
     fields.addValueMeta(stringMeta("subject_key", 512));
@@ -333,7 +336,8 @@ public final class DataQualityHistoryPublisher {
     definition.setDescription("Per-subject profile snapshot for one quality run");
     definition.setPhysicalTable(
         physicalTableRef(targetDatabaseName, operationsSchema, TABLE_QUALITY_PROFILE_SUBJECT));
-    org.apache.hop.datavault.catalog.DvSourceFieldSupport.applyRowMetaLayoutToDefinition(definition, fields, null);
+    org.apache.hop.datavault.catalog.DvSourceFieldSupport.applyRowMetaLayoutToDefinition(
+        definition, fields, null);
     definition.getTags().add("operations");
     definition.getTags().add("data-quality");
     return definition;
@@ -343,7 +347,8 @@ public final class DataQualityHistoryPublisher {
       String namespace,
       String targetDatabaseName,
       String operationsSchema,
-      DatabaseMeta databaseMeta) throws org.apache.hop.core.exception.HopException {
+      DatabaseMeta databaseMeta)
+      throws org.apache.hop.core.exception.HopException {
     IRowMeta fields = new RowMeta();
     fields.addValueMeta(stringMeta("quality_run_id", 64));
     fields.addValueMeta(stringMeta("subject_key", 512));
@@ -365,7 +370,8 @@ public final class DataQualityHistoryPublisher {
     definition.setDescription("Per-field profile metrics for one quality run subject");
     definition.setPhysicalTable(
         physicalTableRef(targetDatabaseName, operationsSchema, TABLE_QUALITY_PROFILE_FIELD));
-    org.apache.hop.datavault.catalog.DvSourceFieldSupport.applyRowMetaLayoutToDefinition(definition, fields, null);
+    org.apache.hop.datavault.catalog.DvSourceFieldSupport.applyRowMetaLayoutToDefinition(
+        definition, fields, null);
     definition.getTags().add("operations");
     definition.getTags().add("data-quality");
     return definition;
@@ -375,7 +381,8 @@ public final class DataQualityHistoryPublisher {
       String namespace,
       String targetDatabaseName,
       String operationsSchema,
-      DatabaseMeta databaseMeta) throws org.apache.hop.core.exception.HopException {
+      DatabaseMeta databaseMeta)
+      throws org.apache.hop.core.exception.HopException {
     IRowMeta fields = new RowMeta();
     fields.addValueMeta(stringMeta("quality_run_id", 64));
     fields.addValueMeta(new ValueMetaInteger("finding_seq"));
@@ -396,7 +403,8 @@ public final class DataQualityHistoryPublisher {
     definition.setDescription("Rule findings for one quality measure run");
     definition.setPhysicalTable(
         physicalTableRef(targetDatabaseName, operationsSchema, TABLE_QUALITY_FINDING));
-    org.apache.hop.datavault.catalog.DvSourceFieldSupport.applyRowMetaLayoutToDefinition(definition, fields, null);
+    org.apache.hop.datavault.catalog.DvSourceFieldSupport.applyRowMetaLayoutToDefinition(
+        definition, fields, null);
     definition.getTags().add("operations");
     definition.getTags().add("data-quality");
     return definition;
@@ -406,7 +414,8 @@ public final class DataQualityHistoryPublisher {
       String namespace,
       String targetDatabaseName,
       String operationsSchema,
-      DatabaseMeta databaseMeta) throws org.apache.hop.core.exception.HopException {
+      DatabaseMeta databaseMeta)
+      throws org.apache.hop.core.exception.HopException {
     IRowMeta fields = new RowMeta();
     fields.addValueMeta(stringMeta("quality_run_id", 64));
     fields.addValueMeta(new ValueMetaDate("alerted_at"));
@@ -420,7 +429,8 @@ public final class DataQualityHistoryPublisher {
     definition.setDescription("Gate disposition alert header for a quality run");
     definition.setPhysicalTable(
         physicalTableRef(targetDatabaseName, operationsSchema, TABLE_QUALITY_ALERT));
-    org.apache.hop.datavault.catalog.DvSourceFieldSupport.applyRowMetaLayoutToDefinition(definition, fields, null);
+    org.apache.hop.datavault.catalog.DvSourceFieldSupport.applyRowMetaLayoutToDefinition(
+        definition, fields, null);
     definition.getTags().add("operations");
     definition.getTags().add("data-quality");
     return definition;

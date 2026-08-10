@@ -250,7 +250,8 @@ public class HopGuiSourceTableDialog {
     wGetColumns.addListener(SWT.Selection, e -> getColumnsFromLiveTable());
 
     Button wShowDiff = new Button(comp, SWT.PUSH);
-    wShowDiff.setText(BaseMessages.getString(PKG, "HopGuiSourceTableDialog.ShowDifferences.Button"));
+    wShowDiff.setText(
+        BaseMessages.getString(PKG, "HopGuiSourceTableDialog.ShowDifferences.Button"));
     wShowDiff.setToolTipText(
         BaseMessages.getString(PKG, "HopGuiSourceTableDialog.ShowDifferences.ToolTip"));
     PropsUi.setLook(wShowDiff);
@@ -454,8 +455,7 @@ public class HopGuiSourceTableDialog {
           remarks.add(
               new CheckResult(
                   ICheckResult.TYPE_RESULT_OK,
-                  BaseMessages.getString(
-                      PKG, "HopGuiSourceTableDialog.Validate.LiveMatch.Message"),
+                  BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Validate.LiveMatch.Message"),
                   null));
         } else {
           remarks.addAll(SourceTableLiveSchemaSupport.diffsToRemarks(diffs));
@@ -495,12 +495,10 @@ public class HopGuiSourceTableDialog {
     try {
       SourceTable working = workingTableFromDialog();
       List<SourceColumn> live =
-          SourceTableLiveSchemaSupport.discoverColumns(
-              model, working, variables, metadataProvider);
+          SourceTableLiveSchemaSupport.discoverColumns(model, working, variables, metadataProvider);
       if (live.isEmpty()) {
         MessageBox box = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-        box.setText(
-            BaseMessages.getString(PKG, "HopGuiSourceTableDialog.GetColumns.Empty.Title"));
+        box.setText(BaseMessages.getString(PKG, "HopGuiSourceTableDialog.GetColumns.Empty.Title"));
         box.setMessage(
             BaseMessages.getString(PKG, "HopGuiSourceTableDialog.GetColumns.Empty.Message"));
         box.open();
@@ -554,8 +552,7 @@ public class HopGuiSourceTableDialog {
       SourceTable working = workingTableFromDialog();
       working.setColumns(readColumnsFromTable());
       List<SourceColumn> live =
-          SourceTableLiveSchemaSupport.discoverColumns(
-              model, working, variables, metadataProvider);
+          SourceTableLiveSchemaSupport.discoverColumns(model, working, variables, metadataProvider);
       List<SourceTableLiveSchemaSupport.ColumnDiff> diffs =
           SourceTableLiveSchemaSupport.compareColumns(working.getColumns(), live);
       List<ICheckResult> remarks = new ArrayList<>();
@@ -563,8 +560,7 @@ public class HopGuiSourceTableDialog {
         remarks.add(
             new CheckResult(
                 ICheckResult.TYPE_RESULT_OK,
-                BaseMessages.getString(
-                    PKG, "HopGuiSourceTableDialog.ShowDifferences.None.Message"),
+                BaseMessages.getString(PKG, "HopGuiSourceTableDialog.ShowDifferences.None.Message"),
                 null));
       } else {
         remarks.addAll(SourceTableLiveSchemaSupport.diffsToRemarks(diffs));
@@ -595,9 +591,7 @@ public class HopGuiSourceTableDialog {
         String hopTypeName;
         try {
           hopTypeName =
-              column.getHopType() > 0
-                  ? ValueMetaFactory.getValueMetaName(column.getHopType())
-                  : "";
+              column.getHopType() > 0 ? ValueMetaFactory.getValueMetaName(column.getHopType()) : "";
         } catch (Exception e) {
           hopTypeName = "";
         }

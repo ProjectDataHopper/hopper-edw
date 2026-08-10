@@ -32,7 +32,7 @@ import org.apache.hop.datavault.metadata.sourcemodel.SourceQuery;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQueryGenerationMode;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
-/** Interactive preview of a source query (SQL mode only in this PR). */
+/** Interactive preview of a source query (SQL mode and FREE_SQL). */
 public final class SourceQueryPreviewSupport {
 
   public static final int DEFAULT_ROW_LIMIT = 50;
@@ -48,9 +48,13 @@ public final class SourceQueryPreviewSupport {
       throws HopException {
     SourceQueryGenerationMode mode =
         SourceQueryGenerationSupport.resolveEffectiveMode(model, query);
+    if (mode == SourceQueryGenerationMode.FREE_SQL) {
+      return org.apache.hop.datavault.virtualization.execute.SourceModelSqlExecutor.preview(
+          model, query.getFreeSql(), variables, metadataProvider, rowLimit);
+    }
     if (mode != SourceQueryGenerationMode.SQL) {
       throw new HopException(
-          "Preview is currently available for single-connection SQL queries only. "
+          "Preview is currently available for single-connection SQL queries and Free SQL. "
               + "This query resolves to pipeline generation mode.");
     }
     String connectionName = SourceQueryGenerationSupport.resolveSharedDatabaseName(model, query);

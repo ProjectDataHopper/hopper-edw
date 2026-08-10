@@ -45,9 +45,7 @@ class DvLinkSourceSuggestSupportTest {
 
     DvLinkSourceSuggestSupport.SuggestResult result =
         DvLinkSourceSuggestSupport.suggestHubSourceMappings(
-            "asn-package-lines",
-            fields,
-            List.of(order, product, warehouse, customer, packageLine));
+            "asn-package-lines", fields, List.of(order, product, warehouse, customer, packageLine));
 
     assertEquals(5, result.mappedCount());
     assertEquals(0, result.missingCount());
@@ -86,9 +84,7 @@ class DvLinkSourceSuggestSupportTest {
     existing.setSourceName("asn-package-lines");
     DvLink.HubSourceKeyField existingHub = new DvLink.HubSourceKeyField();
     existingHub.setHubName("hub_order");
-    existingHub
-        .getSourceBusinessKeyFields()
-        .add(new BusinessKeySource("order_id", "ORDER_NR"));
+    existingHub.getSourceBusinessKeyFields().add(new BusinessKeySource("order_id", "ORDER_NR"));
     existing.getHubSourceKeyFields().add(existingHub);
     working.add(existing);
 

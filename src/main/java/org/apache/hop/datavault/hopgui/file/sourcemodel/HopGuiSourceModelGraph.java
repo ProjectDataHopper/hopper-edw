@@ -41,6 +41,7 @@ import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.datavault.hopgui.dialog.ShowRowsDialog;
+import org.apache.hop.datavault.hopgui.file.dimensional.DmSourcePipelineOpenSupport;
 import org.apache.hop.datavault.hopgui.file.modelgraph.HopGuiModelGraphBase;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphHit;
@@ -67,7 +68,6 @@ import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceQueryPreview
 import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceTablePreviewSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.publish.SourceJsonCatalogPublisher;
 import org.apache.hop.datavault.metadata.sourcemodel.publish.SourcePipelineCatalogPublisher;
-import org.apache.hop.datavault.hopgui.file.dimensional.DmSourcePipelineOpenSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.publish.SourceQueryCatalogPublisher;
 import org.apache.hop.datavault.metadata.sourcemodel.publish.SourceTableCatalogPublisher;
 import org.apache.hop.i18n.BaseMessages;
@@ -2172,8 +2172,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
               model, pipelineSource, null, variables, hopGui.getMetadataProvider());
       setChanged();
       MessageBox box = new MessageBox(getShell(), SWT.ICON_INFORMATION | SWT.OK);
-      box.setText(
-          BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PushToCatalog.Done.Title"));
+      box.setText(BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PushToCatalog.Done.Title"));
       box.setMessage(
           BaseMessages.getString(
               PKG, "HopGuiSourceModelGraph.PushToCatalog.Done.Message", result.catalogName()));
@@ -2624,8 +2623,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
               pipelineSource.getName(),
               feedName,
               formatCatalogPublishLabel(
-                  BaseMessages.getString(
-                      PKG, "HopGuiSourceModelGraph.PushToCatalog.Kind.Pipeline"),
+                  BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PushToCatalog.Kind.Pipeline"),
                   pipelineSource.getName(),
                   feedName)));
     }

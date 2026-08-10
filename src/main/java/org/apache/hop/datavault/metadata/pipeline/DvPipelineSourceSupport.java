@@ -28,7 +28,6 @@ import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.core.vfs.HopVfs;
 import org.apache.hop.datavault.metadata.SourceField;
-import org.apache.hop.datavault.metadata.pipeline.HeadlessPipelineFieldSupport;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.Pipeline;
@@ -296,7 +295,10 @@ public final class DvPipelineSourceSupport {
       if (runThread == null) {
         throw new HopException(
             BaseMessages.getString(
-                PKG, "DvPipelineSourceSupport.Error.UnknownTransform", transformName, pipelineFile));
+                PKG,
+                "DvPipelineSourceSupport.Error.UnknownTransform",
+                transformName,
+                pipelineFile));
       }
       runThread.addRowListener(
           new RowAdapter() {

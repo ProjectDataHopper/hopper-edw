@@ -27,7 +27,8 @@ import org.apache.hop.ui.hopgui.context.BaseGuiContextHandler;
 import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
 
 /** Context handler for clicks on a source pipeline card. */
-public class HopGuiSourcePipelineContext extends BaseGuiContextHandler implements IGuiContextHandler {
+public class HopGuiSourcePipelineContext extends BaseGuiContextHandler
+    implements IGuiContextHandler {
 
   public static final String CONTEXT_ID = "HopGuiSourcePipelineContext";
 

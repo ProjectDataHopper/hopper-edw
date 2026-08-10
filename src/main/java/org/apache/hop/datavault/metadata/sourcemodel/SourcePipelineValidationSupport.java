@@ -51,8 +51,7 @@ public final class SourcePipelineValidationSupport {
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_ERROR,
-              BaseMessages.getString(
-                  PKG, "SourceModel.CheckResult.DuplicatePipelineName", name),
+              BaseMessages.getString(PKG, "SourceModel.CheckResult.DuplicatePipelineName", name),
               null));
     }
 

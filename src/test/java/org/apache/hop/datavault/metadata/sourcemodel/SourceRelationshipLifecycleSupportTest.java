@@ -104,8 +104,7 @@ class SourceRelationshipLifecycleSupportTest {
             rel, SourceEndpointKind.QUERY, "feed"));
   }
 
-  private static SourceRelationship rel(
-      String name, SourcePipeline pipeline, SourceTable parent) {
+  private static SourceRelationship rel(String name, SourcePipeline pipeline, SourceTable parent) {
     SourceRelationship relationship = new SourceRelationship(name);
     relationship.setChildEndpointKind(SourceEndpointKind.PIPELINE);
     relationship.setParentEndpointKind(SourceEndpointKind.TABLE);

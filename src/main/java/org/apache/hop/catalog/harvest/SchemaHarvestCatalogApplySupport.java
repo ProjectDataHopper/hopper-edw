@@ -144,8 +144,7 @@ public final class SchemaHarvestCatalogApplySupport {
           // Always write FK clear/set so a re-apply with zero FKs clears stale catalog FKs.
           dvSource.setFields(catalogFields);
           // Keep CatalogSourceField FKs; only rebuild transient IRowMeta for Hop APIs.
-          definition.setFields(
-              DvSourceFieldSupport.toRowMetaFromCatalog(catalogFields, variables));
+          definition.setFields(DvSourceFieldSupport.toRowMetaFromCatalog(catalogFields, variables));
           changed = true;
           fkCount += appliedFks;
         }

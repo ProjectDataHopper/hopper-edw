@@ -33,7 +33,6 @@ import org.apache.hop.catalog.harvest.SchemaHarvestModels.HarvestStatus;
 import org.apache.hop.catalog.harvest.SchemaHarvestModels.HarvestSubjectResult;
 import org.apache.hop.catalog.harvest.SchemaHarvestModels.HarvestedField;
 import org.apache.hop.catalog.harvest.SchemaHarvestModels.HarvestedForeignKey;
-import org.apache.hop.catalog.model.DvSourceRecord;
 import org.apache.hop.catalog.model.RecordDefinition;
 import org.apache.hop.catalog.versioning.CatalogVersionService;
 import org.apache.hop.core.Const;

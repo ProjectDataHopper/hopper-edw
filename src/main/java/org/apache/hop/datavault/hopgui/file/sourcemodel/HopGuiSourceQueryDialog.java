@@ -29,6 +29,7 @@ import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.hopgui.EnumDialogSupport;
+import org.apache.hop.datavault.hopgui.ModelGeneratedArtifactOpenSupport;
 import org.apache.hop.datavault.hopgui.dialog.ShowRowsDialog;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
 import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
@@ -39,17 +40,22 @@ import org.apache.hop.datavault.metadata.sourcemodel.SourceEndpointKind;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJoinType;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQuery;
-import org.apache.hop.datavault.metadata.sourcemodel.SourceRelationshipLifecycleSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQueryColumn;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQueryGenerationMode;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQueryJoin;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQueryValidationSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceRelationship;
+import org.apache.hop.datavault.metadata.sourcemodel.SourceRelationshipLifecycleSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceTable;
 import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceQueryGenerationSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceQueryPreviewSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceQueryRelationSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceQuerySqlGenerator;
+import org.apache.hop.datavault.transform.sourcemodelsql.SourceModelSqlSupport;
+import org.apache.hop.datavault.virtualization.sql.SourceModelFreeSqlTableSupport;
+import org.apache.hop.datavault.virtualization.sql.SourceModelSqlEngine;
+import org.apache.hop.datavault.virtualization.sql.SourceModelSqlOptions;
+import org.apache.hop.datavault.virtualization.sql.SourceModelSqlPlan;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.FormDataBuilder;
@@ -65,6 +71,7 @@ import org.apache.hop.ui.core.widget.SQLStyledTextComp;
 import org.apache.hop.ui.core.widget.StyledTextComp;
 import org.apache.hop.ui.core.widget.TableView;
 import org.apache.hop.ui.core.widget.TextComposite;
+import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.apache.hop.ui.util.EnvironmentUtils;
 import org.eclipse.swt.SWT;
@@ -115,8 +122,10 @@ public class HopGuiSourceQueryDialog {
   private TableView wJoins;
   private TableView wColumns;
   private TextComposite wWhere;
+  private TextComposite wFreeSql;
   private TextComposite wSqlPreview;
   private CTabItem sqlTab;
+  private CTabItem freeSqlTab;
   private ColumnInfo colJoinTable;
   private ColumnInfo colJoinRelationship;
   private ColumnInfo colProjTable;
@@ -183,6 +192,7 @@ public class HopGuiSourceQueryDialog {
     addGeneralTab(wTabFolder, middle, margin);
     addJoinsTab(wTabFolder, margin);
     addColumnsTab(wTabFolder, margin);
+    addFreeSqlTab(wTabFolder, margin);
     addSqlTab(wTabFolder, margin);
 
     wTabFolder.addListener(
@@ -289,6 +299,108 @@ public class HopGuiSourceQueryDialog {
     PropsUi.setLook(wWhere, Props.WIDGET_STYLE_FIXED);
     wWhere.setLayoutData(
         new FormDataBuilder().left().top(wlWhere, margin).right().bottom(100, -margin).result());
+  }
+
+  private void addFreeSqlTab(CTabFolder tabFolder, int margin) {
+    freeSqlTab = new CTabItem(tabFolder, SWT.NONE);
+    freeSqlTab.setFont(GuiResource.getInstance().getFontDefault());
+    freeSqlTab.setText(BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.Tab.FreeSql.Label"));
+    Composite comp = new Composite(tabFolder, SWT.NONE);
+    PropsUi.setLook(comp);
+    comp.setLayout(new FormLayout());
+    freeSqlTab.setControl(comp);
+
+    Label wlHint = new Label(comp, SWT.LEFT | SWT.WRAP);
+    wlHint.setText(BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.FreeSql.Hint"));
+    PropsUi.setLook(wlHint);
+    wlHint.setLayoutData(new FormDataBuilder().left().top(0, margin).right().result());
+
+    Button wExplain = new Button(comp, SWT.PUSH);
+    wExplain.setText(BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.Explain.Button"));
+    wExplain.setLayoutData(new FormDataBuilder().left().top(wlHint, margin).result());
+    wExplain.addListener(SWT.Selection, e -> explainFreeSql());
+
+    Button wViewPipeline = new Button(comp, SWT.PUSH);
+    wViewPipeline.setText(
+        BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.ViewPipeline.Button"));
+    wViewPipeline.setLayoutData(
+        new FormDataBuilder().left(wExplain, margin).top(wlHint, margin).result());
+    wViewPipeline.addListener(SWT.Selection, e -> viewGeneratedPipeline());
+
+    Button wInsertTables = new Button(comp, SWT.PUSH);
+    wInsertTables.setText(
+        BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.InsertTables.Button"));
+    wInsertTables.setToolTipText(
+        BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.InsertTables.ToolTip"));
+    wInsertTables.setLayoutData(
+        new FormDataBuilder().left(wViewPipeline, margin).top(wlHint, margin).result());
+    wInsertTables.addListener(SWT.Selection, e -> insertFreeSqlTables());
+
+    // Same SQL highlighting path as the SQL / Explain tab (keywords + SqlHighlight).
+    int freeSqlStyle = SWT.MULTI | SWT.LEFT | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL;
+    if (EnvironmentUtils.getInstance().isWeb()) {
+      wFreeSql = new StyledTextComp(variables, comp, freeSqlStyle);
+    } else {
+      wFreeSql = new SQLStyledTextComp(variables, comp, freeSqlStyle);
+    }
+    wFreeSql.addLineStyleListener(getSqlReservedWords());
+    PropsUi.setLook(wFreeSql, Props.WIDGET_STYLE_FIXED);
+    wFreeSql.setLayoutData(
+        new FormDataBuilder().left().top(wExplain, margin).right().bottom(100, -margin).result());
+  }
+
+  /**
+   * Multi-select model objects (tables, queries, JSON, pipelines) and insert a starter SELECT INTO
+   * the Free SQL editor.
+   */
+  private void insertFreeSqlTables() {
+    if (wFreeSql == null) {
+      return;
+    }
+    List<String> names = SourceModelFreeSqlTableSupport.queryableObjectNames(model);
+    if (names.isEmpty()) {
+      MessageBox box = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
+      box.setText(BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.InsertTables.Empty.Title"));
+      box.setMessage(
+          BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.InsertTables.Empty.Message"));
+      box.open();
+      return;
+    }
+    EnterSelectionDialog dialog =
+        new EnterSelectionDialog(
+            shell,
+            names.toArray(new String[0]),
+            BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.InsertTables.Title"),
+            BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.InsertTables.Message"));
+    dialog.setMulti(true);
+    if (dialog.open() == null) {
+      return;
+    }
+    int[] indices = dialog.getSelectionIndeces();
+    if (indices == null || indices.length == 0) {
+      return;
+    }
+    List<String> selected = new ArrayList<>();
+    for (int idx : indices) {
+      if (idx >= 0 && idx < names.size()) {
+        selected.add(names.get(idx));
+      }
+    }
+    if (selected.isEmpty()) {
+      return;
+    }
+    String snippet = SourceModelFreeSqlTableSupport.insertTablesSqlSnippet(selected);
+    String existing = Const.NVL(wFreeSql.getText(), "");
+    if (Utils.isEmpty(existing.trim())) {
+      wFreeSql.setText(snippet);
+    } else {
+      String sep = existing.endsWith("\n") ? "" : "\n";
+      wFreeSql.setText(existing + sep + snippet);
+    }
+    // Prefer Free SQL generation mode when the user inserts a starter statement.
+    if (wGenerationMode != null) {
+      wGenerationMode.setText(SourceQueryGenerationMode.FREE_SQL.getDescription());
+    }
   }
 
   private void addJoinsTab(CTabFolder tabFolder, int margin) {
@@ -479,16 +591,25 @@ public class HopGuiSourceQueryDialog {
 
   /**
    * Database reserved words for {@link SQLStyledTextComp} highlighting (same approach as {@code
-   * ActionSqlDialog#getSqlReservedWords}).
+   * ActionSqlDialog#getSqlReservedWords}). Prefers the query's shared connection; for Free SQL /
+   * mixed sources falls back to the first DATABASE table connection on the model.
    */
   private List<String> getSqlReservedWords() {
     try {
+      String connectionName = null;
       SourceQuery working = workingQueryFromDialogSafe();
-      if (!SourceQueryGenerationSupport.canGenerateSingleConnectionSql(model, working)) {
-        return List.of();
+      if (working != null
+          && SourceQueryGenerationSupport.canGenerateSingleConnectionSql(model, working)) {
+        connectionName = SourceQueryGenerationSupport.resolveSharedDatabaseName(model, working);
       }
-      String connectionName =
-          SourceQueryGenerationSupport.resolveSharedDatabaseName(model, working);
+      if (Utils.isEmpty(connectionName) && model != null) {
+        for (SourceTable table : model.getTables()) {
+          if (table != null && !Utils.isEmpty(table.getDatabaseName())) {
+            connectionName = table.getDatabaseName().trim();
+            break;
+          }
+        }
+      }
       if (Utils.isEmpty(connectionName)) {
         return List.of();
       }
@@ -625,6 +746,9 @@ public class HopGuiSourceQueryDialog {
     wDrivingTable.setText(Const.NVL(input.getDrivingTableName(), ""));
     EnumDialogSupport.selectCombo(wGenerationMode, input.resolveGenerationMode());
     wWhere.setText(Const.NVL(input.getWhereClause(), ""));
+    if (wFreeSql != null) {
+      wFreeSql.setText(Const.NVL(input.getFreeSql(), ""));
+    }
 
     wJoins.clearAll(false);
     for (SourceQueryJoin join : input.getJoins()) {
@@ -789,6 +913,9 @@ public class HopGuiSourceQueryDialog {
     q.setDrivingTableName(wDrivingTable.getText());
     q.setGenerationMode(SourceQueryGenerationMode.lookupDescription(wGenerationMode.getText()));
     q.setWhereClause(wWhere.getText());
+    if (wFreeSql != null) {
+      q.setFreeSql(wFreeSql.getText());
+    }
     q.setJoins(readJoins());
     q.setColumns(readColumns());
     return q;
@@ -864,6 +991,13 @@ public class HopGuiSourceQueryDialog {
     try {
       refreshResolvedKeyLabels();
       SourceQuery working = workingQueryFromDialog();
+      if (working.resolveGenerationMode() == SourceQueryGenerationMode.FREE_SQL) {
+        var plan =
+            org.apache.hop.datavault.virtualization.sql.SourceModelSqlEngine.plan(
+                model, working.getFreeSql(), variables, metadataProvider);
+        wSqlPreview.setText(plan.explainText());
+        return;
+      }
       if (!SourceQueryGenerationSupport.canGenerateSingleConnectionSql(model, working)) {
         wSqlPreview.setText(
             BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.Sql.NotSingleConnection"));
@@ -880,6 +1014,94 @@ public class HopGuiSourceQueryDialog {
     } catch (Exception e) {
       wSqlPreview.setText(e.getMessage() != null ? e.getMessage() : e.toString());
     }
+  }
+
+  private void explainFreeSql() {
+    try {
+      SourceModelSqlPlan plan = planFreeSqlFromDialog();
+      if (plan == null) {
+        return;
+      }
+      if (wSqlPreview != null) {
+        wSqlPreview.setText(plan.explainText());
+      }
+      MessageBox box = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
+      box.setText(BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.Explain.Title"));
+      box.setMessage(plan.explainText());
+      box.open();
+    } catch (Exception e) {
+      new ErrorDialog(
+          shell,
+          BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.Explain.Error.Title"),
+          BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.Explain.Error.Message"),
+          e);
+    }
+  }
+
+  private void viewGeneratedPipeline() {
+    try {
+      SourceModelSqlPlan plan = planFreeSqlFromDialog();
+      if (plan == null || plan.pipelineMeta() == null) {
+        return;
+      }
+      HopGui hopGui = HopGui.getInstance();
+      if (hopGui == null) {
+        MessageBox box = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
+        box.setText(
+            BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.ViewPipeline.NoGui.Title"));
+        box.setMessage(
+            BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.ViewPipeline.NoGui.Message"));
+        box.open();
+        return;
+      }
+      // Name the tab from the query so successive opens are recognizable.
+      SourceQuery working = workingQueryFromDialog();
+      String baseName = !Utils.isEmpty(working.getName()) ? working.getName().trim() : "free-sql";
+      plan.pipelineMeta().setName("free-sql-" + baseName.replaceAll("[^a-zA-Z0-9._-]+", "_"));
+      // Configuration-perspective ELK settings (same as other generated DV pipelines).
+      SourceModelSqlSupport.applyConfiguredElkLayout(plan.pipelineMeta());
+      ModelGeneratedArtifactOpenSupport.openGeneratedPipeline(
+          hopGui, plan.pipelineMeta(), variables);
+    } catch (Exception e) {
+      new ErrorDialog(
+          shell,
+          BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.ViewPipeline.Error.Title"),
+          BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.ViewPipeline.Error.Message"),
+          e);
+    }
+  }
+
+  /**
+   * Plans free SQL from the dialog. Shows an information box and returns null when Free SQL mode /
+   * text is not ready.
+   */
+  private SourceModelSqlPlan planFreeSqlFromDialog() throws Exception {
+    SourceQuery working = workingQueryFromDialog();
+    if (working.resolveGenerationMode() != SourceQueryGenerationMode.FREE_SQL) {
+      MessageBox box = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
+      box.setText(BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.Explain.NeedFreeSql.Title"));
+      box.setMessage(
+          BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.Explain.NeedFreeSql.Message"));
+      box.open();
+      return null;
+    }
+    if (Utils.isEmpty(working.getFreeSql())) {
+      MessageBox box = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
+      box.setText(BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.FreeSql.Empty.Title"));
+      box.setMessage(BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.FreeSql.Empty.Message"));
+      box.open();
+      return null;
+    }
+    SourceModelSqlOptions options =
+        SourceModelSqlOptions.builder()
+            .pipelineName(
+                "free-sql-"
+                    + (!Utils.isEmpty(working.getName())
+                        ? working.getName().trim().replaceAll("[^a-zA-Z0-9._-]+", "_")
+                        : "query"))
+            .build();
+    return SourceModelSqlEngine.plan(
+        model, working.getFreeSql(), variables, metadataProvider, options);
   }
 
   private void previewData() {
@@ -954,7 +1176,13 @@ public class HopGuiSourceQueryDialog {
 
   private void ok() {
     String name = wName.getText().trim();
-    if (Utils.isEmpty(name) || Utils.isEmpty(wDrivingTable.getText())) {
+    SourceQueryGenerationMode mode =
+        SourceQueryGenerationMode.lookupDescription(wGenerationMode.getText());
+    boolean freeSql = mode == SourceQueryGenerationMode.FREE_SQL;
+    if (Utils.isEmpty(name) || (!freeSql && Utils.isEmpty(wDrivingTable.getText()))) {
+      return;
+    }
+    if (freeSql && (wFreeSql == null || Utils.isEmpty(wFreeSql.getText()))) {
       return;
     }
     SourceQuery existing = model.findQuery(name);
@@ -969,8 +1197,11 @@ public class HopGuiSourceQueryDialog {
     String catalogFeed = wPublishedCatalogName.getText().trim();
     input.setPublishedCatalogName(Utils.isEmpty(catalogFeed) ? null : catalogFeed);
     input.setDrivingTableName(wDrivingTable.getText());
-    input.setGenerationMode(SourceQueryGenerationMode.lookupDescription(wGenerationMode.getText()));
+    input.setGenerationMode(mode);
     input.setWhereClause(wWhere.getText());
+    if (wFreeSql != null) {
+      input.setFreeSql(wFreeSql.getText());
+    }
     input.setJoins(readJoins());
     input.setColumns(readColumns());
     if (model != null) {

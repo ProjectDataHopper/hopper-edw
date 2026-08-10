@@ -26,12 +26,12 @@ import org.apache.hop.core.Props;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.catalog.DvSourceCatalogService;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
 import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
 import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.datavault.hopgui.lineage.LineageTabSupport;
 import org.apache.hop.datavault.lineage.DvModelLineageCollector;
-import org.apache.hop.datavault.catalog.DvSourceCatalogService;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DataVaultSource;
 import org.apache.hop.datavault.metadata.DependentChildKey;
@@ -646,8 +646,7 @@ public class DvLinkDialog {
                 shell, hopGui, variables, hopGui.getMetadataProvider(), model, wLinkHubSources));
 
     Button wEditMappings = new Button(wHubSourcesComp, SWT.PUSH);
-    wEditMappings.setText(
-        BaseMessages.getString(PKG, "DvLinkDialog.EditHubSourceMappings.Label"));
+    wEditMappings.setText(BaseMessages.getString(PKG, "DvLinkDialog.EditHubSourceMappings.Label"));
     FormData fdEdit = new FormData();
     fdEdit.left = new FormAttachment(0, 0);
     fdEdit.top = new FormAttachment(wlSources, margin);
@@ -959,8 +958,7 @@ public class DvLinkDialog {
     if (wLinkHubSources == null || wLinkHubSources.isDisposed() || model == null) {
       return;
     }
-    String sourceName =
-        RecordSourceCatalogNavigationSupport.selectedSourceName(wLinkHubSources);
+    String sourceName = RecordSourceCatalogNavigationSupport.selectedSourceName(wLinkHubSources);
     if (Utils.isEmpty(sourceName)) {
       MessageBox box = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
       box.setText(BaseMessages.getString(PKG, "DvLinkDialog.SuggestHubSourceMappings.Title"));

@@ -1360,8 +1360,10 @@ public class RecordDefinitionDetailsPanel {
         sourceField.setSourceDataType(typeDesc);
         sourceField.setLength(lengthStr);
         sourceField.setPrecision(precisionStr);
-        // Resolve Hop names and SQL types (int4, DATETIME(6), …); do not force String for SQL labels.
-        int type = org.apache.hop.datavault.metadata.DvDataTypeSupport.resolveHopTypeId(typeDesc, null);
+        // Resolve Hop names and SQL types (int4, DATETIME(6), …); do not force String for SQL
+        // labels.
+        int type =
+            org.apache.hop.datavault.metadata.DvDataTypeSupport.resolveHopTypeId(typeDesc, null);
         if (type <= 0) {
           type = org.apache.hop.core.row.IValueMeta.TYPE_STRING;
         }

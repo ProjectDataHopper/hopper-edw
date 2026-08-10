@@ -38,8 +38,8 @@ import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
 import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
 
 /**
- * Opens the originating source model, DV, business vault, or dimensional model for a catalog
- * record definition.
+ * Opens the originating source model, DV, business vault, or dimensional model for a catalog record
+ * definition.
  */
 public final class RecordOriginNavigationSupport {
 
@@ -47,6 +47,7 @@ public final class RecordOriginNavigationSupport {
   public static final String MODEL_TYPE_DATA_VAULT_SOURCE = "DATA_VAULT_SOURCE";
   public static final String MODEL_TYPE_BUSINESS_VAULT = "BUSINESS_VAULT_MODEL";
   public static final String MODEL_TYPE_DIMENSIONAL = "DIMENSIONAL_MODEL";
+
   /** Origin model type for feeds published from a {@code .hsm} source model. */
   public static final String MODEL_TYPE_SOURCE_MODEL =
       DvSourceCatalogMapper.ORIGIN_MODEL_TYPE_SOURCE_MODEL;

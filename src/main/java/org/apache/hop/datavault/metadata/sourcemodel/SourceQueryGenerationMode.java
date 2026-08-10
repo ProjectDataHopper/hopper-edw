@@ -38,7 +38,14 @@ public enum SourceQueryGenerationMode implements IEnumHasCodeAndDescription {
   PIPELINE(
       "PIPELINE",
       BaseMessages.getString(
-          SourceQueryGenerationMode.class, "SourceQueryGenerationMode.Pipeline"));
+          SourceQueryGenerationMode.class, "SourceQueryGenerationMode.Pipeline")),
+  /**
+   * Free-form SQL validated and planned with Apache Calcite against the source model schema (issue
+   * #117 / #115). Generation may push down to Table Input SQL or residual pipeline ops.
+   */
+  FREE_SQL(
+      "FREE_SQL",
+      BaseMessages.getString(SourceQueryGenerationMode.class, "SourceQueryGenerationMode.FreeSql"));
 
   private final String code;
   private final String description;

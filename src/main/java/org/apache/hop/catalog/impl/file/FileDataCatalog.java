@@ -361,9 +361,8 @@ public class FileDataCatalog implements IDataCatalog {
   }
 
   /**
-   * Minimal JSON projection for listing. Unknown properties (including large field layouts and legacy
-   * {@code rowMetaXml})
-   * are ignored so listing stays cheap on large catalogs.
+   * Minimal JSON projection for listing. Unknown properties (including large field layouts and
+   * legacy {@code rowMetaXml}) are ignored so listing stays cheap on large catalogs.
    */
   @JsonIgnoreProperties(ignoreUnknown = true)
   @Getter

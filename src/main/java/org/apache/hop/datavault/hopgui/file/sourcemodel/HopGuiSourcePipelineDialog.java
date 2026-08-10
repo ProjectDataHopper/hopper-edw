@@ -196,21 +196,16 @@ public class HopGuiSourcePipelineDialog {
         new FormDataBuilder().left().top(wDescription, margin).right(middle, -margin).result());
 
     wBrowsePipeline = new Button(comp, SWT.PUSH);
-    wBrowsePipeline.setText(
-        BaseMessages.getString(PKG, "HopGuiSourcePipelineDialog.Browse.Label"));
+    wBrowsePipeline.setText(BaseMessages.getString(PKG, "HopGuiSourcePipelineDialog.Browse.Label"));
     PropsUi.setLook(wBrowsePipeline);
-    wBrowsePipeline.setLayoutData(
-        new FormDataBuilder().right().top(wDescription, margin).result());
+    wBrowsePipeline.setLayoutData(new FormDataBuilder().right().top(wDescription, margin).result());
     wBrowsePipeline.addListener(SWT.Selection, e -> browsePipelineFile());
 
     wOpenPipeline = new Button(comp, SWT.PUSH);
     wOpenPipeline.setText(BaseMessages.getString(PKG, "HopGuiSourcePipelineDialog.Open.Label"));
     PropsUi.setLook(wOpenPipeline);
     wOpenPipeline.setLayoutData(
-        new FormDataBuilder()
-            .right(wBrowsePipeline, -margin)
-            .top(wDescription, margin)
-            .result());
+        new FormDataBuilder().right(wBrowsePipeline, -margin).top(wDescription, margin).result());
     wOpenPipeline.addListener(SWT.Selection, e -> openPipeline());
 
     wImportCatalogSources = new Button(comp, SWT.PUSH);
@@ -220,10 +215,7 @@ public class HopGuiSourcePipelineDialog {
         BaseMessages.getString(PKG, "HopGuiSourcePipelineDialog.Import.ToolTip"));
     PropsUi.setLook(wImportCatalogSources);
     wImportCatalogSources.setLayoutData(
-        new FormDataBuilder()
-            .right(wOpenPipeline, -margin)
-            .top(wDescription, margin)
-            .result());
+        new FormDataBuilder().right(wOpenPipeline, -margin).top(wDescription, margin).result());
     wImportCatalogSources.addListener(SWT.Selection, e -> importCatalogSourcesFromPipeline());
 
     wPipelineFilename = new TextVar(variables, comp, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
@@ -310,8 +302,7 @@ public class HopGuiSourcePipelineDialog {
     tab.setControl(comp);
 
     Label wlInfo = new Label(comp, SWT.LEFT | SWT.WRAP);
-    wlInfo.setText(
-        BaseMessages.getString(PKG, "HopGuiSourcePipelineDialog.CatalogSources.Info"));
+    wlInfo.setText(BaseMessages.getString(PKG, "HopGuiSourcePipelineDialog.CatalogSources.Info"));
     PropsUi.setLook(wlInfo);
     wlInfo.setLayoutData(new FormDataBuilder().left().top(0, margin).right().result());
 
@@ -388,8 +379,7 @@ public class HopGuiSourcePipelineDialog {
     Button wValidate = new Button(comp, SWT.PUSH);
     wValidate.setText(BaseMessages.getString(PKG, "HopGuiSourcePipelineDialog.Validate.Label"));
     PropsUi.setLook(wValidate);
-    wValidate.setLayoutData(
-        new FormDataBuilder().left(wGetFields, margin).top(0, margin).result());
+    wValidate.setLayoutData(new FormDataBuilder().left(wGetFields, margin).top(0, margin).result());
     wValidate.addListener(SWT.Selection, e -> validate());
 
     ColumnInfo[] columns =
@@ -525,8 +515,7 @@ public class HopGuiSourcePipelineDialog {
         return;
       }
       List<SourcePipelineCatalogSource> found =
-          SourcePipelineCatalogImportSupport.importFromPipeline(
-              file, variables, metadataProvider);
+          SourcePipelineCatalogImportSupport.importFromPipeline(file, variables, metadataProvider);
       populateCatalogSourcesTable(found);
       MessageBox box = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
       box.setText(BaseMessages.getString(PKG, "HopGuiSourcePipelineDialog.Import.Done.Title"));

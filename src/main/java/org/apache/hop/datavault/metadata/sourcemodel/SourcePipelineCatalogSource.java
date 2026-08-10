@@ -48,7 +48,8 @@ public class SourcePipelineCatalogSource {
 
   @HopMetadataProperty private String nameField;
 
-  public SourcePipelineCatalogSource(String catalogConnection, String namespace, String recordName) {
+  public SourcePipelineCatalogSource(
+      String catalogConnection, String namespace, String recordName) {
     this.catalogConnection = catalogConnection;
     this.namespace = namespace;
     this.recordName = recordName;

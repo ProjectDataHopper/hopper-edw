@@ -301,8 +301,9 @@ class DvSourceFieldSupportTest {
     assertEquals(
         IValueMeta.TYPE_INTEGER, definition.getDvSource().getFields().getFirst().getHopType());
     assertEquals(IValueMeta.TYPE_INTEGER, definition.getFields().getValueMeta(0).getType());
-    assertTrue(definition.getFields().getValueMeta(0).getLength() >= 9
-        || "9".equals(definition.getDvSource().getFields().getFirst().getLength()));
+    assertTrue(
+        definition.getFields().getValueMeta(0).getLength() >= 9
+            || "9".equals(definition.getDvSource().getFields().getFirst().getLength()));
   }
 
   @Test

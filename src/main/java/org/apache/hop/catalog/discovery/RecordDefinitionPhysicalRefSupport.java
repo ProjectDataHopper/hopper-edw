@@ -129,8 +129,7 @@ public final class RecordDefinitionPhysicalRefSupport {
     };
   }
 
-  private static PhysicalSourceRef fromPipelineSource(DvSourceRecord dvSource)
-      throws HopException {
+  private static PhysicalSourceRef fromPipelineSource(DvSourceRecord dvSource) throws HopException {
     if (dvSource == null) {
       throw new HopException(
           BaseMessages.getString(

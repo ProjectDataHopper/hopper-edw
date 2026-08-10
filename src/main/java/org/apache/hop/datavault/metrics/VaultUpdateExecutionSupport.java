@@ -134,9 +134,9 @@ public final class VaultUpdateExecutionSupport {
   }
 
   /**
-   * Copies vault-update execution correlation variables from {@code from} onto {@code to}. Use after
-   * {@link #beginExecution} when the receiving variables space was already initialized and will not
-   * re-copy from the workflow engine.
+   * Copies vault-update execution correlation variables from {@code from} onto {@code to}. Use
+   * after {@link #beginExecution} when the receiving variables space was already initialized and
+   * will not re-copy from the workflow engine.
    */
   public static void propagateExecutionVariables(IVariables from, IVariables to) {
     if (from == null || to == null || from == to) {
@@ -146,8 +146,7 @@ public final class VaultUpdateExecutionSupport {
     if (!Utils.isEmpty(executionId)) {
       to.setVariable(DvUpdateMetricsConstants.VAR_WORKFLOW_EXECUTION_ID, executionId);
     }
-    String startedAt =
-        from.getVariable(DvUpdateMetricsConstants.VAR_WORKFLOW_EXECUTION_STARTED_AT);
+    String startedAt = from.getVariable(DvUpdateMetricsConstants.VAR_WORKFLOW_EXECUTION_STARTED_AT);
     if (!Utils.isEmpty(startedAt)) {
       to.setVariable(DvUpdateMetricsConstants.VAR_WORKFLOW_EXECUTION_STARTED_AT, startedAt);
     }

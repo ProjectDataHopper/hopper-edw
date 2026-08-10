@@ -28,6 +28,7 @@ import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceQueryGenerationSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceQuerySqlGenerator;
+import org.apache.hop.datavault.virtualization.sql.SourceModelSqlEngine;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
@@ -57,6 +58,11 @@ public final class SourceQueryValidationSupport {
       queryName = "?";
     }
 
+    SourceQueryGenerationMode mode = query.resolveGenerationMode();
+    if (mode == SourceQueryGenerationMode.FREE_SQL) {
+      return checkFreeSql(model, query, queryName, variables, metadataProvider, remarks);
+    }
+
     if (model == null || model.findTable(query.getDrivingTableName()) == null) {
       remarks.add(
           new CheckResult(
@@ -72,7 +78,8 @@ public final class SourceQueryValidationSupport {
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_WARNING,
-              BaseMessages.getString(PKG, "SourceModel.CheckResult.QueryEmptyProjection", queryName),
+              BaseMessages.getString(
+                  PKG, "SourceModel.CheckResult.QueryEmptyProjection", queryName),
               null));
     }
 
@@ -115,8 +122,7 @@ public final class SourceQueryValidationSupport {
                       column.getColumnName(),
                       tableName),
                   null));
-        } else if (!table.getColumns().isEmpty()
-            && !hasColumn(table, column.getColumnName())) {
+        } else if (!table.getColumns().isEmpty() && !hasColumn(table, column.getColumnName())) {
           remarks.add(
               new CheckResult(
                   ICheckResult.TYPE_RESULT_ERROR,
@@ -198,6 +204,54 @@ public final class SourceQueryValidationSupport {
               ICheckResult.TYPE_RESULT_WARNING,
               BaseMessages.getString(
                   PKG, "SourceModel.CheckResult.QueryCannotGenerateSql", queryName),
+              null));
+    }
+    return remarks;
+  }
+
+  private static List<ICheckResult> checkFreeSql(
+      SourceModel model,
+      SourceQuery query,
+      String queryName,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider,
+      List<ICheckResult> remarks) {
+    if (Utils.isEmpty(query.getFreeSql())) {
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_ERROR,
+              "Query '" + queryName + "' is Free SQL mode but free SQL text is empty",
+              null));
+      return remarks;
+    }
+    if (model == null) {
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_ERROR,
+              "Query '" + queryName + "' Free SQL requires a source model",
+              null));
+      return remarks;
+    }
+    try {
+      SourceModelSqlEngine.validate(model, query.getFreeSql(), variables);
+      if (metadataProvider != null) {
+        // Also ensure pipeline generation does not fail for basic issues.
+        org.apache.hop.datavault.virtualization.sql.SourceModelSqlEngine.plan(
+            model, query.getFreeSql(), variables, metadataProvider);
+      }
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_OK,
+              "Free SQL for query '" + queryName + "' validated successfully",
+              null));
+    } catch (Exception e) {
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_ERROR,
+              "Free SQL validation failed for query '"
+                  + queryName
+                  + "': "
+                  + (e.getMessage() != null ? e.getMessage() : e.toString()),
               null));
     }
     return remarks;
