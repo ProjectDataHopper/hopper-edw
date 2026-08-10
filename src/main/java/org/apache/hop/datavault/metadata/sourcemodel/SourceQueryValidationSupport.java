@@ -233,11 +233,28 @@ public final class SourceQueryValidationSupport {
       return remarks;
     }
     try {
+      // Parse / Calcite validate against the model schema (no RDBMS metadata required).
       SourceModelSqlEngine.validate(model, query.getFreeSql(), variables);
       if (metadataProvider != null) {
-        // Also ensure pipeline generation does not fail for basic issues.
-        org.apache.hop.datavault.virtualization.sql.SourceModelSqlEngine.plan(
-            model, query.getFreeSql(), variables, metadataProvider);
+        try {
+          // Full pipeline generation needs named connections in the metadata provider.
+          SourceModelSqlEngine.plan(model, query.getFreeSql(), variables, metadataProvider);
+        } catch (Exception genEx) {
+          String msg = genEx.getMessage() != null ? genEx.getMessage() : genEx.toString();
+          if (msg != null && msg.toLowerCase(Locale.ROOT).contains("connection") && msg.contains("not found")) {
+            // Offline / incomplete project metadata: SQL is still structurally valid.
+            remarks.add(
+                new CheckResult(
+                    ICheckResult.TYPE_RESULT_WARNING,
+                    "Free SQL for query '"
+                        + queryName
+                        + "' parsed successfully, but pipeline generation needs database metadata: "
+                        + msg,
+                    null));
+            return remarks;
+          }
+          throw genEx;
+        }
       }
       remarks.add(
           new CheckResult(

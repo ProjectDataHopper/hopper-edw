@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.util.List;
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.ICheckResult;
+import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.core.xml.XmlHandler;
@@ -68,9 +69,11 @@ class RetailSourceModelFixtureTest {
     assertNotNull(rootNode);
 
     SourceModel model = new SourceModel();
-    IHopMetadataProvider metadataProvider = new MemoryMetadataProvider();
+    MemoryMetadataProvider metadataProvider = new MemoryMetadataProvider();
     XmlMetadataUtil.deSerializeFromXml(rootNode, SourceModel.class, model, metadataProvider);
     model.setFilename(RETAIL_HSM.toString());
+    // Free SQL check() plans pipelines and needs RDBMS metadata for named connections.
+    seedDatabasesFromModel(model, metadataProvider);
 
     assertFalse(model.getTables().isEmpty());
     assertFalse(model.getRelationships().isEmpty());
@@ -105,5 +108,28 @@ class RetailSourceModelFixtureTest {
     assertEquals(query.getColumns().size(), fields.size());
     assertTrue(fields.stream().anyMatch(f -> "customer_id".equals(f.getName())));
     assertTrue(fields.stream().anyMatch(f -> "email".equals(f.getName())));
+  }
+
+  private static void seedDatabasesFromModel(SourceModel model, IHopMetadataProvider metadata)
+      throws Exception {
+    for (SourceTable table : model.getTables()) {
+      if (table == null || table.getDatabaseName() == null || table.getDatabaseName().isBlank()) {
+        continue;
+      }
+      String name = table.getDatabaseName().trim();
+      if (metadata.getSerializer(DatabaseMeta.class).exists(name)) {
+        continue;
+      }
+      DatabaseMeta db = new DatabaseMeta();
+      db.setName(name);
+      db.setDatabaseType("POSTGRESQL");
+      db.setAccessType(DatabaseMeta.TYPE_ACCESS_NATIVE);
+      db.setHostname("localhost");
+      db.setDBName("test");
+      db.setPort("5432");
+      db.setUsername("test");
+      db.setPassword("test");
+      metadata.getSerializer(DatabaseMeta.class).save(db);
+    }
   }
 }
