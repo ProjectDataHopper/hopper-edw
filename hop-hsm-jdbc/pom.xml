@@ -23,7 +23,7 @@
 
   <groupId>org.apache.hop</groupId>
   <artifactId>hop-hsm-jdbc</artifactId>
-  <version>0.8.0</version>
+  <version>0.9.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Hop Source Model JDBC (thin client)</name>
