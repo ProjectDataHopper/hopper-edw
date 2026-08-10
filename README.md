@@ -17,7 +17,7 @@ under the License.
 
 # Hop Data Vault 2.0 Plugin
 
-Apache Hop plugin for **Data Vault 2.0**, **Business Vault**, and **dimensional** modeling, validation, and model-driven loading. Version **0.8.0-SNAPSHOT** (latest release **0.7.0**) requires **Apache Hop 2.19.0** (or a **recent 2.19.0-SNAPSHOT** until GA) and **Java 21**.
+Apache Hop plugin for **Data Vault 2.0**, **Business Vault**, and **dimensional** modeling, validation, and model-driven loading. Version **0.8.0** requires **Apache Hop 2.19.0** (or a **recent 2.19.0-SNAPSHOT** until GA) and **Java 21**.
 
 **Hop 2.19 is required.** Until the GA client is on Maven Central, build Hop from source or download a recent CI snapshot of **hop-client**:
 
@@ -128,20 +128,20 @@ mvn clean package
 
 Artifacts:
 
-- `target/hop-datavault-0.8.0-SNAPSHOT.jar`
-- `target/hop-datavault-0.8.0-SNAPSHOT.zip` (ready-to-unzip plugin layout)
+- `target/hop-datavault-0.8.0.jar`
+- `target/hop-datavault-0.8.0.zip` (ready-to-unzip plugin layout)
 
-Published release artifacts for **0.7.0**:
+Published release artifacts for **0.8.0**:
 
-- **GitHub:** [v0.7.0 release](https://github.com/mattcasters/hop-data-vault/releases/tag/v0.7.0) — [hop-datavault-0.7.0.zip](https://github.com/mattcasters/hop-data-vault/releases/download/v0.7.0/hop-datavault-0.7.0.zip)
-- **Nexus (Marketplace):** [hop-datavault-0.7.0.zip](https://repository.data-hopper.com/repository/hop-community-plugins/org/apache/hop/hop-datavault/0.7.0/hop-datavault-0.7.0.zip) (`org.apache.hop:hop-datavault:0.7.0`)
+- **GitHub:** [v0.8.0 release](https://github.com/mattcasters/hop-data-vault/releases/tag/v0.8.0) — [hop-datavault-0.8.0.zip](https://github.com/mattcasters/hop-data-vault/releases/download/v0.8.0/hop-datavault-0.8.0.zip)
+- **Nexus (Marketplace):** [hop-datavault-0.8.0.zip](https://repository.data-hopper.com/repository/hop-community-plugins/org/apache/hop/hop-datavault/0.8.0/hop-datavault-0.8.0.zip) (`org.apache.hop:hop-datavault:0.8.0`)
 
 ## Installation (external plugin)
 
 1. Install **Apache Hop 2.19.0** or a **recent 2.19.0-SNAPSHOT** client ([hop-client snapshots](https://repository.apache.org/content/groups/snapshots/org/apache/hop/hop-client/2.19.0-SNAPSHOT/)).
 2. Unzip the assembly zip into your Hop installation, or manually copy the jar to:
    ```
-   $HOP_HOME/plugins/misc/datavault/hop-datavault-0.8.0-SNAPSHOT.jar
+   $HOP_HOME/plugins/misc/datavault/hop-datavault-0.8.0.jar
    ```
 3. Restart Hop GUI.
 4. New metadata types appear under **Metadata → Data Vault**. **Data Vault Update**, **Business Vault Update**, **Validate resource definitions**, **Export data lineage**, and **Update resource definition group** actions are available in workflows. `.hsm`, `.hdv`, `.hbv`, and `.hdm` files open in the visual modelers.
@@ -168,7 +168,7 @@ Updated repository 'data-hopper-community' → https://repository.data-hopper.co
 ```
 
 ```text
-| hop-datavault             | 0.7.0           | Community     | data-hopper-community |           | 2026-08-05 | Data Vault 2.0, Business Vault, and dimensional model... |
+| hop-datavault             | 0.8.0           | Community     | data-hopper-community |           | 2026-08-10 | Data Vault 2.0, Business Vault, and dimensional model... |
 ```
 
 **3. Install** the plugin (latest release or continuous SNAPSHOT when published):
@@ -178,10 +178,10 @@ Updated repository 'data-hopper-community' → https://repository.data-hopper.co
 ```
 
 ```text
-Resolved hop-datavault → org.apache.hop:hop-datavault:0.7.0 (prefer repo 'data-hopper-community')
-… Marketplace - Downloading org.apache.hop:hop-datavault:0.7.0 from https://repository.data-hopper.com/repository/hop-community-plugins/…
-… Marketplace - Installed org.apache.hop:hop-datavault:0.7.0. Restart Hop to load the plugin.
-Plugin org.apache.hop:hop-datavault:0.7.0 installed under $HOP_HOME from repo 'data-hopper-community'. Restart Hop to load it.
+Resolved hop-datavault → org.apache.hop:hop-datavault:0.8.0 (prefer repo 'data-hopper-community')
+… Marketplace - Downloading org.apache.hop:hop-datavault:0.8.0 from https://repository.data-hopper.com/repository/hop-community-plugins/…
+… Marketplace - Installed org.apache.hop:hop-datavault:0.8.0. Restart Hop to load the plugin.
+Plugin org.apache.hop:hop-datavault:0.8.0 installed under $HOP_HOME from repo 'data-hopper-community'. Restart Hop to load it.
 ```
 
 You can also use **Tools → Marketplace…** in Hop GUI: import the repository on the **Repositories** tab, then install from the **Plugins** tab.
@@ -220,7 +220,9 @@ SELECT * FROM sat_customer WHERE x_load_end_ts IS NULL
 
 ## Roadmap / releases
 
-**Shipped in 0.7.0:** optional **load cycle ID** (#111); **composite hub business keys** (VaultSpeed-style multi-part → one BK column); optional satellite **record-source column** omit; AI file-schema pack; catalog/model-check and GUI polish (MODELS export, Open in catalog, resource-group editor performance). See [CHANGELOG.md](CHANGELOG.md).
+**Shipped in 0.8.0:** **Free SQL** over source models (Calcite, #117) + **Source model SQL** transform + Hop Server **`jdbc:hop-hsm:`** thin client for DBeaver; **pipeline sources** on `.hsm` (#116); **Source JSON** / shipment path (#114); **metadata harvesting** (#112); RDG load-overview reporting. See [CHANGELOG.md](CHANGELOG.md).
+
+**Shipped in 0.7.0:** optional **load cycle ID** (#111); **composite hub business keys** (VaultSpeed-style multi-part → one BK column); optional satellite **record-source column** omit; AI file-schema pack; catalog/model-check and GUI polish (MODELS export, Open in catalog, resource-group editor performance).
 
 **Shipped in 0.6.0:** **Reference tables** (#110); **linked tables** rename (`TABLE_REFERENCE` → `LINKED_TABLE`); source modeler (`.hsm`) and composite feeds (#105); project search (#106); Draw.io architecture export (#104); hub aliases (#103); cross-engine ORDER BY COLLATE fix (#108); Hop **2.19.0** requirement.
 

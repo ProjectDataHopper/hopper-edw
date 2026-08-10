@@ -4,6 +4,26 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## Unreleased
 
+## [0.8.0] — 2026-08-10
+
+Requires **Apache Hop 2.19.0** (or a **recent 2.19.0-SNAPSHOT** until GA) and **Java 21**.
+
+**Hop runtime:** Hop **2.19.0** is not yet published to Maven Central. To use this plugin you must either **build Hop from source** (branch/tag aligned with 2.19) or **download a recent CI snapshot** of the Hop client:
+
+- [Apache Hop 2.19.0-SNAPSHOT (hop-client)](https://repository.apache.org/content/groups/snapshots/org/apache/hop/hop-client/2.19.0-SNAPSHOT/)
+
+**Downloads:** [GitHub release zip](https://github.com/mattcasters/hop-data-vault/releases/download/v0.8.0/hop-datavault-0.8.0.zip) · [Data Hopper Nexus](https://repository.data-hopper.com/repository/hop-community-plugins/org/apache/hop/hop-datavault/0.8.0/hop-datavault-0.8.0.zip) (`org.apache.hop:hop-datavault:0.8.0`)
+
+### Free SQL over source models + Hop Server JDBC (#117 / #115)
+
+- **Apache Calcite** free SQL against `.hsm` logical names: full database pushdown when safe; residual Sort / Merge Join / Filter / Group By / Calculator / MetaInject / JSON subgraphs when mixed
+- **Free SQL** generation mode on source queries: Validate, Explain plan, Preview, Insert tables…, View generated pipeline
+- Named source queries, Source JSON, and Source Pipeline feeds as SQL tables; schema-qualified names (e.g. `crm.order_header`) for DBeaver
+- **Source model SQL** pipeline transform (runtime free SQL against a `.hsm`)
+- **Source model service** metadata: public name → server-side `.hsm` path (no client filesystem exposure)
+- Hop Server servlet **`/hop/sourceModelData`** and thin zero-dependency client module **`hop-hsm-jdbc`** for DBeaver (`jdbc:hop-hsm://{username}:{password}@{host}:{port}/{database}`)
+- Docs and screenshots: [source-modeler-overview.adoc](docs/source-modeler-overview.adoc), [hop-hsm-jdbc/README.md](hop-hsm-jdbc/README.md), [plans/source-model-sql-virtualization-plan.md](docs/plans/source-model-sql-virtualization-plan.md)
+
 ### Source modeler: pipeline sources + Record Definition Input (data) (#116)
 
 - Rename catalog **metadata** transforms: **Get Record Definition Names** / **Catalog Record Definition Metadata Output** (plugin ids unchanged)
