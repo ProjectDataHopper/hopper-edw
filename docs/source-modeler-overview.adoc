@@ -203,12 +203,14 @@ mvn -f hop-hsm-jdbc/pom.xml clean package
 
 In DBeaver: **Database → Driver Manager → New**, then:
 
+|===
 | Setting | Value |
-|---------|--------|
+
 | Driver Name | e.g. `Apache Hop Source Model` |
 | Driver Type | Generic |
 | Class Name | `org.apache.hop.hsm.jdbc.HopHsmJdbcDriver` |
 | URL Template | `jdbc:hop-hsm://{username}:{password}@{host}:{port}/{database}` |
+|===
 
 On the **Libraries** tab, add only `hop-hsm-jdbc-*.jar` (no Hop or Calcite jars).
 
@@ -218,12 +220,14 @@ In the URL template, `{database}` is the default **schema** (Source model servic
 
 ===== 3. Create a connection
 
+|===
 | Field | Example | Meaning |
-|-------|---------|---------|
+
 | Host | `localhost` | Hop Server host |
 | Port | `8888` | Hop Server port |
 | Database/Schema | `crm` | Source model service name (JDBC schema) |
 | Username / Password | Hop Server credentials | Basic auth |
+|===
 
 The resolved URL looks like:
 

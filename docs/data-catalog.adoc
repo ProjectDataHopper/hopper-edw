@@ -72,19 +72,23 @@ If a record appears in the tree but fails to open, the **`namespace`** in the JS
 
 == Record definition types
 
+|===
 | Type | Role |
-|------|------|
+
 | `DV_SOURCE` | Data Vault source feed — see link:datavault-source.adoc[Data Vault Source] |
 | Other catalog types | Published model targets, conformed dimensions, pipeline inputs |
+|===
 
 == Field layout
 
 Catalog documents store column layout in **structured field lists** — never as a top-level Hop `rowMetaXml` blob.
 
+|===
 | Type | Authoritative layout |
-|------|----------------------|
+
 | `DV_SOURCE` | `dvSource.fields[]` (name, Hop type, length, precision, PK, optional FK and CSV options) |
 | Vault / BV / DM targets, ops tables | `physicalTable.fields[]` |
+|===
 
 `physicalTable` / `physicalFile` / `physicalIcebergTable` are **location** refs for sources; only target/ops records put columns on `physicalTable.fields`.
 

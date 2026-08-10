@@ -26,12 +26,14 @@ Generated maps land under the gitignored runtime tree `retail-example/work/execu
 
 Typical roots:
 
+|===
 | File (under `work/execution-maps/`) | Root |
-|------|------|
+
 | `run-retail-initial.hem` | `workflows/run-retail-initial.hwf` |
 | `run-retail-update.hem` | `workflows/run-retail-update.hwf` |
 | `update-retail-dv-bv-dm.hem` | `workflows/update-retail-dv-bv-dm.hwf` (when crawled) |
 | `simulate-6-months.hem` | multi-month simulation workflow (when crawled) |
+|===
 
 Open a `.hem` file in Hop GUI. Use filters and focus controls to collapse or expand model subtrees and generated pipeline swimlanes.
 

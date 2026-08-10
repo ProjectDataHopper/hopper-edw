@@ -8,10 +8,12 @@ Protect loads and observe warehouses with a reusable **measure → disposition**
 
 == Measure vs disposition
 
+|===
 | Stage | Responsibility | Workflow fail on findings? |
-|-------|----------------|----------------------------|
+
 | **Measure Data Quality** action | Run rules against catalog subjects; produce a report; optionally persist history | No (only infrastructure errors) |
 | **Evaluate Quality Gate** action | Apply policy to a report; optional alert sinks | Yes for `FAIL_ON_BLOCKING` / `FAIL_ON_WARNINGS`; no for `ALERT_ONLY` |
+|===
 
 Pre-update (protect the EDW):
 
@@ -54,14 +56,16 @@ Central **Data quality rule set** Hop metadata holds reusable rules. Catalog **r
 
 === Phase 2 rule types
 
+|===
 | Type | Scope | Parameters | Notes |
-|------|-------|------------|-------|
+
 | `NULL_RATIO_MAX` | field | `maxRatio` (required, **0.0–1.0 only**) | Fail when `nullCount / rowCount > maxRatio`. Use `0.05` for 5%. Empty tables yield ratio 0. |
 | `MIN_DISTINCT` | field | `min` | Prefer exact `COUNT(DISTINCT col)` on databases; SAMPLE path uses value-distribution bounds. |
 | `MAX_DISTINCT` | field | `max` | Same; if SAMPLE distribution is truncated and size ≤ max, emits a fixed **INFO** finding (not fully verified). |
 | `REGEX` | field | `pattern` (required); `matchMode`=`FULL` (default) \| `FIND`; `caseSensitive` (default true); `nullAllowed` (default true) | Prefer SQL pushdown (database regex engine). High-cardinality free text: prefer `SQL_ASSERTION`. |
 | `MIN_LENGTH` / `MAX_LENGTH` | field | `min` / `max` | Character length on non-null strings (`CHAR_LENGTH` / `LENGTH` by dialect). |
 | `SQL_ASSERTION` | dataset | `sql` (required); `expect`=`ZERO_ROWS` (default) \| `ONE_ROW_TRUE` \| `SCALAR_EQ`; `expectValue`; `queryTimeoutSeconds` (default 60) | Trusted authors only; DB grants are the real boundary (see below). |
+|===
 
 Parameters use `key=value` pairs (semicolon-separated in the rule set editor).
 
@@ -134,13 +138,15 @@ DV/BV/DM catalog publishers **preserve** existing `qualityRules` (and validation
 
 ==== Persist history (opt-in)
 
+|===
 | Field | Default | Purpose |
-|-------|---------|---------|
+
 | `persistHistory` | `false` | Write run + profile + findings to ops tables after measure |
 | `historyDatabase` | empty → resolve | Target DB connection (retail: `OPS`) |
 | `historySchema` | `dv_ops` | Schema for quality_* tables |
 | `autoCreateHistoryTables` | `true` | `CREATE TABLE IF NOT EXISTS` for all five tables |
 | `loadId` | `${DV_WORKFLOW_EXECUTION_ID}` | Correlates PRE/POST under one load |
+|===
 
 Resolution when `historyDatabase` is empty: variable `QUALITY_HISTORY_DATABASE`, else the physical DB of the first successfully profiled subject. Schema falls back to `QUALITY_HISTORY_SCHEMA` then `dv_ops`.
 
@@ -150,13 +156,15 @@ Persist failures are logged and **do not** fail measure by default. GUI **Test m
 
 Sibling tables to load-run metrics (same connection pattern: retail **OPS** / `dv_ops`):
 
+|===
 | Table | Role |
-|-------|------|
+
 | `quality_run` | Run header, aggregate finding counts, lifecycle, load/workflow ids |
 | `quality_profile_subject` | Per-subject row count + lifecycle (Phase 3 join grain) |
 | `quality_profile_field` | Field profiles (nulls, distinct, min/max, lengths, top values) |
 | `quality_finding` | Individual findings |
 | `quality_alert` | Alert header rows when the `ops_table` sink runs (DDL always created; may stay empty) |
+|===
 
 Catalog stubs for retail are published at runtime under `retail-example/work/edw-catalog/hop/retail-example/operations/`.
 
@@ -170,19 +178,23 @@ Catalog stubs for retail are published at runtime under `retail-example/work/edw
 
 Comma-separated `alertSinks` (blank → `log`):
 
+|===
 | Sink id | Behavior |
-|---------|----------|
+
 | `log` | Structured `QUALITY_ALERT` lines (runId, lifecycle, counts) + findings |
 | `ops_table` | Insert `quality_alert` (and ensure history run exists first if needed) |
+|===
 
 Wiring matrix:
 
+|===
 | Mode | Findings | Sinks |
-|------|----------|-------|
+
 | `ALERT_ONLY` | 0 | None (no noise) |
 | `ALERT_ONLY` | > 0 | Every sink listed in `alertSinks` |
 | `FAIL_ON_*` | 0 | None |
 | `FAIL_ON_*` | > 0 | `log` if listed (blank → log); `ops_table` only if listed **and** `alertOnGateFailure=true` (default false) |
+|===
 
 Gate fields for ops_table: `historyDatabase`, `historySchema`, `autoCreateHistoryTables` (same defaults as measure).
 
@@ -215,8 +227,9 @@ Subject key is always `namespace/name` (same as measure/persist).
 
 The `retail-example` project ships libraries and wiring for **both** pre-update source gates and post-update **target** alerts:
 
+|===
 | Asset | Location |
-|-------|----------|
+
 | Source rule set | `retail-example/metadata/data-quality-rule-set/retail-source-quality.json` |
 | Target rule set | `retail-example/metadata/data-quality-rule-set/retail-target-quality.json` |
 | Source bindings | `qualityRules` on each `E2E-*` catalog source (`scripts/generate-catalog-sources.py`) |
@@ -224,6 +237,7 @@ The `retail-example` project ships libraries and wiring for **both** pre-update 
 | Pre-load gate | `Measure source data quality` (`persistHistory` → OPS) → `Evaluate source quality gate` (`FAIL_ON_BLOCKING`) |
 | Post-load alert | `Measure target data quality (post)` (`POST_UPDATE`, persist OPS) → `Alert on target quality (post)` (`ALERT_ONLY`, `alertSinks=log,ops_table`, remeasure off) |
 | Ops catalog stubs | `work/edw-catalog/hop/retail-example/operations/quality_*.json` (published at runtime) |
+|===
 
 Workflows: `run-retail-initial.hwf`, `run-retail-update.hwf`.
 

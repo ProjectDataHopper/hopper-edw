@@ -48,8 +48,9 @@ Add **Validate resource definitions** to a workflow (category General) and place
 
 image::images/validate-resource-definitions-action-dialog.png[Validate resource definitions action dialog with WORKING_VS_VERSION, baseline v1.0.0, and report path under work/reports,align="center"]
 
+|===
 | Parameter | Purpose |
-|-----------|---------|
+
 | Resource definition group | Required validation scope (for example `retail-sources`) |
 | Target catalog version | Tag such as `v1.0.0` / `${TARGET_VERSION}`, or a ComboVar free-typed expression. **LIVE_SOURCE:** expected contract (empty = working tree). **VERSION_VS_VERSION:** the *actual* tag. **WORKING_VS_VERSION:** used as baseline if Baseline is empty. |
 | Compare mode | `LIVE_SOURCE` (default), `WORKING_VS_VERSION`, `VERSION_VS_VERSION`, **`HARVEST_RUN`** |
@@ -65,6 +66,7 @@ image::images/validate-resource-definitions-action-dialog.png[Validate resource 
 | Check target databases | Compare model tables to the physical target database (CREATE/ALTER DDL needed) |
 | Target tables are created automatically | When target DB checks are on: missing tables (CREATE that vault update will apply) are **not reported** — they are expected. Layout drift on **existing** tables stays a warning. |
 | Parallel checks | Max concurrent live-source / target-DB checks (default `8`, supports `${VALIDATION_PARALLELISM}`). Independent of load `parallelPipelineCopies`. |
+|===
 
 === Initial load and automatic table creation
 
@@ -74,12 +76,14 @@ On **incremental update** runs, leave the option **off** (N) so missing or alter
 
 === Compare modes
 
+|===
 | Mode | Expected (baseline) | Actual | Typical use |
-|------|---------------------|--------|-------------|
+
 | `LIVE_SOURCE` | Working tree, or Target/Baseline tag | Live physical source discovery | Daily CI against CRM/source DB |
 | `WORKING_VS_VERSION` | Baseline (or Target if Baseline empty) tag | Working-tree catalog | Detect catalog field length/type edits without a live DB |
 | `VERSION_VS_VERSION` | Baseline tag | Target tag | Offline PR review between two frozen contracts |
 | `HARVEST_RUN` | Contract already compared during harvest | Persisted harvest snapshot (OPS) | After **Harvest source metadata** — no second live discovery; see link:metadata-harvesting.adoc[Metadata harvesting] |
+|===
 
 Version fields support Hop variables (for example `${PROMOTED_TAG}`). Tag lists refresh when the resource definition group changes.
 
@@ -119,13 +123,15 @@ Each issue message is structured so you can see **what was checked** before the 
 
 The status banner also restates **compare mode** and **baseline** (current working catalog **or** a version tag such as `v1.0.0`). Selecting “current catalog” as baseline does **not** use a version tag; warnings can still appear from other axes (live discovery, target DB, models).
 
+|===
 | Kind | Typical meaning |
-|------|-----------------|
+
 | `BASELINE_CONTRACT_MISSING` | Source is used by models and in the working catalog, but **not** in the frozen baseline version |
 | `WORKING_CONTRACT_MISSING` | Models reference a source that is **not** in the working catalog yet (publish/generate first) |
 | `SOURCE_UNAVAILABLE` | **Live** discovery failed or the source is not refreshable (connection, path, COMPOSITE model) |
 | `TARGET_DDL_REQUIRED` | **EDW/target** table lags the model (often normal **before the first vault update** creates tables). Not a source-catalog field mismatch |
 | `FIELD_*` / `MODEL_ATTRIBUTE_NARROWER` | Field contract or model attribute length/type drift |
+|===
 
 === Catalog is never rewritten by length remediation
 
@@ -167,11 +173,13 @@ In the retail project, widening catalog field `address_line1` to **75** and appl
 
 `retail-example/workflows/schema-remediation/accept-address_line1/`
 
+|===
 | File | Role |
-|------|------|
+
 | `accept-address_line1-report.md` / `.html` | What changed, downstream targets, confidence |
 | `accept-address_line1-apply-ddl.sql` | Reviewable multi-table DDL (one section per table) |
 | `accept-address_line1-apply-ddl.hwf` | Hop workflow: one SQL action per table → Success |
+|===
 
 Example Markdown report (checked-in sample; paths project-relative under the retail project):
 
