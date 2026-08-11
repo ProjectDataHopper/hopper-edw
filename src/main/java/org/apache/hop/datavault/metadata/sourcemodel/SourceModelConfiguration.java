@@ -16,12 +16,18 @@
  */
 package org.apache.hop.datavault.metadata.sourcemodel;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.gui.plugin.GuiElementType;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.GuiWidgetElement;
+import org.apache.hop.core.util.Utils;
+import org.apache.hop.datavault.metadata.datatypemapping.IDataTypeMappingTarget;
 import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadata;
@@ -79,4 +85,49 @@ public class SourceModelConfiguration extends HopMetadataBase implements IHopMet
       parentId = GUI_PLUGIN_ELEMENT_PARENT_ID)
   @HopMetadataProperty
   private String catalogNamespace;
+
+  /**
+   * Comma-separated project Data type mapping profile names applied by default to newly imported
+   * (or newly added) source tables/queries/JSON/pipeline cards when they have no profiles yet.
+   */
+  @GuiWidgetElement(
+      order = "0500",
+      type = GuiElementType.TEXT,
+      variables = true,
+      label = "i18n::SourceModelConfiguration.DefaultDataTypeMappings.Label",
+      toolTip = "i18n::SourceModelConfiguration.DefaultDataTypeMappings.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_PARENT_ID)
+  @HopMetadataProperty
+  private String defaultDataTypeMappingNames;
+
+  /** Parse {@link #defaultDataTypeMappingNames} into an ordered list of profile names. */
+  public List<String> resolveDefaultDataTypeMappingNames() {
+    if (Utils.isEmpty(defaultDataTypeMappingNames)) {
+      return List.of();
+    }
+    return Arrays.stream(defaultDataTypeMappingNames.split("[,;]"))
+        .map(String::trim)
+        .filter(s -> !s.isEmpty())
+        .collect(Collectors.toCollection(ArrayList::new));
+  }
+
+  /**
+   * Attach model default data type mapping profiles to a target that has none configured yet.
+   *
+   * @return true when profiles were attached
+   */
+  public boolean applyDefaultDataTypeMappings(IDataTypeMappingTarget target) {
+    if (target == null) {
+      return false;
+    }
+    if (target.getDataTypeMappingNames() != null && !target.getDataTypeMappingNames().isEmpty()) {
+      return false;
+    }
+    List<String> defaults = resolveDefaultDataTypeMappingNames();
+    if (defaults.isEmpty()) {
+      return false;
+    }
+    target.setDataTypeMappingNames(new ArrayList<>(defaults));
+    return true;
+  }
 }

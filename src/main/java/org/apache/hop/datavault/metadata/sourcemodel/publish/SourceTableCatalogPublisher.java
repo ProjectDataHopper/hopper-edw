@@ -30,7 +30,8 @@ import org.apache.hop.datavault.metadata.DvSourceDeliveryType;
 import org.apache.hop.datavault.metadata.DvSourceType;
 import org.apache.hop.datavault.metadata.SourceField;
 import org.apache.hop.datavault.metadata.database.DvDatabaseSourceImportSupport;
-import org.apache.hop.datavault.metadata.sourcemodel.SourceColumn;
+import org.apache.hop.datavault.metadata.datatypemapping.SourceDataTypeMappingPublishSupport;
+import org.apache.hop.datavault.metadata.datatypemapping.SourceDataTypeMappingSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceTable;
 import org.apache.hop.i18n.BaseMessages;
@@ -65,7 +66,7 @@ public final class SourceTableCatalogPublisher {
           BaseMessages.getString(
               PKG, "SourceTableCatalogPublisher.Error.UnsupportedPhysicalType", physical));
     }
-    List<SourceField> fields = buildFieldsFromTable(table);
+    List<SourceField> fields = buildFieldsFromTable(table, metadataProvider);
     if (fields.isEmpty()) {
       throw new HopException(
           BaseMessages.getString(
@@ -108,27 +109,28 @@ public final class SourceTableCatalogPublisher {
     return new PublishResult(feedName, "Published database feed '" + feedName + "'");
   }
 
+  /** Physical columns only (no data type mapping). Prefer {@link #buildFieldsFromTable(SourceTable, IHopMetadataProvider)}. */
   public static List<SourceField> buildFieldsFromTable(SourceTable table) {
-    List<SourceField> fields = new ArrayList<>();
+    try {
+      return buildFieldsFromTable(table, null);
+    } catch (HopException e) {
+      // Unreachable when metadataProvider is null (no profile load).
+      return SourceDataTypeMappingPublishSupport.physicalToSourceFields(
+          SourceDataTypeMappingSupport.physicalFields(table));
+    }
+  }
+
+  /**
+   * Catalog field layout for a source table: applies project data type mapping profiles and field
+   * overrides when configured (effective names, types, lengths, conversion options).
+   */
+  public static List<SourceField> buildFieldsFromTable(
+      SourceTable table, IHopMetadataProvider metadataProvider) throws HopException {
     if (table == null) {
-      return fields;
+      return new ArrayList<>();
     }
-    for (SourceColumn column : table.getColumns()) {
-      if (column == null || Utils.isEmpty(column.getName())) {
-        continue;
-      }
-      SourceField field = new SourceField(column.getName().trim());
-      field.setDescription(column.getDescription());
-      field.setSourceDataType(column.getSourceDataType());
-      field.setLength(column.getLength());
-      field.setPrecision(column.getPrecision());
-      field.setHopType(column.getHopType());
-      if (column.getPrimaryKeyPosition() > 0) {
-        field.setPrimaryKeyPosition(column.getPrimaryKeyPosition());
-      }
-      fields.add(field);
-    }
-    return fields;
+    return SourceDataTypeMappingPublishSupport.toEffectiveSourceFields(
+        table, SourceDataTypeMappingSupport.physicalFields(table), metadataProvider);
   }
 
   public static String resolveCatalogFeedName(SourceTable table) {

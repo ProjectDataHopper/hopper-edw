@@ -27,4 +27,7 @@ import lombok.Setter;
 public class CatalogSourceFieldInputOptions {
 
   private CatalogCsvFieldOptions csv;
+
+  /** Pre-model conversion options (data type mappings). */
+  private CatalogFieldConversionOptions conversion;
 }

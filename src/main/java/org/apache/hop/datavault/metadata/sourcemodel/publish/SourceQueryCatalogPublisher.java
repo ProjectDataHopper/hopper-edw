@@ -34,6 +34,9 @@ import org.apache.hop.datavault.metadata.DataVaultSource;
 import org.apache.hop.datavault.metadata.DvSourceDeliveryType;
 import org.apache.hop.datavault.metadata.SourceField;
 import org.apache.hop.datavault.metadata.composite.DvCompositeSource;
+import org.apache.hop.datavault.metadata.datatypemapping.PhysicalSourceField;
+import org.apache.hop.datavault.metadata.datatypemapping.SourceDataTypeMappingPublishSupport;
+import org.apache.hop.datavault.metadata.datatypemapping.SourceDataTypeMappingSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceColumn;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQuery;
@@ -94,8 +97,9 @@ public final class SourceQueryCatalogPublisher {
     List<SourceField> fields;
     if (freeSql) {
       fields = buildFieldsFromFreeSql(model, query, variables, metadataProvider);
+      fields = applyDataTypeMappings(query, fields, metadataProvider);
     } else {
-      fields = buildFieldsFromProjection(model, query);
+      fields = buildFieldsFromProjection(model, query, metadataProvider);
     }
     RecordSourceIndicatorOptions indicatorOptions =
         RecordSourceIndicatorSupport.resolveForTable(null, fields, feedName);
@@ -225,37 +229,79 @@ public final class SourceQueryCatalogPublisher {
   }
 
   public static List<SourceField> buildFieldsFromProjection(SourceModel model, SourceQuery query) {
-    List<SourceField> fields = new ArrayList<>();
+    try {
+      return buildFieldsFromProjection(model, query, null);
+    } catch (HopException e) {
+      return new ArrayList<>();
+    }
+  }
+
+  public static List<SourceField> buildFieldsFromProjection(
+      SourceModel model, SourceQuery query, IHopMetadataProvider metadataProvider)
+      throws HopException {
+    SourceTable driving =
+        model != null && query != null && !Utils.isEmpty(query.getDrivingTableName())
+            ? model.findTable(query.getDrivingTableName())
+            : null;
+    // Enrich physical fields from all participant tables, not only driving.
+    List<PhysicalSourceField> physical = physicalFieldsFromQuery(model, query);
+    return SourceDataTypeMappingPublishSupport.toEffectiveSourceFields(
+        query, physical, metadataProvider);
+  }
+
+  private static List<PhysicalSourceField> physicalFieldsFromQuery(
+      SourceModel model, SourceQuery query) {
+    List<PhysicalSourceField> fields = new ArrayList<>();
+    if (query == null) {
+      return fields;
+    }
     for (SourceQueryColumn column : query.getColumns()) {
       if (column == null || Utils.isEmpty(column.getColumnName())) {
         continue;
       }
-      SourceField field = new SourceField(column.resolveAlias());
+      PhysicalSourceField physical = new PhysicalSourceField();
+      physical.setName(column.resolveAlias());
       SourceTable table =
           model != null && !Utils.isEmpty(column.getTableName())
               ? model.findTable(column.getTableName())
               : null;
       SourceColumn sourceColumn = table != null ? table.findColumn(column.getColumnName()) : null;
       if (sourceColumn != null) {
-        field.setDescription(sourceColumn.getDescription());
-        field.setSourceDataType(sourceColumn.getSourceDataType());
-        field.setLength(sourceColumn.getLength());
-        field.setPrecision(sourceColumn.getPrecision());
-        field.setHopType(sourceColumn.getHopType());
+        physical.setDescription(sourceColumn.getDescription());
+        physical.setSourceDataType(sourceColumn.getSourceDataType());
+        physical.setLength(sourceColumn.getLength());
+        physical.setPrecision(sourceColumn.getPrecision());
+        physical.setHopType(sourceColumn.getHopType());
       } else {
-        field.setHopType(2); // String default when type unknown
+        physical.setHopType(2);
       }
-      // Logical feed grain wins; fall back to physical PK when projected under natural name.
       if (column.isPrimaryKey()) {
-        field.setPrimaryKeyPosition(column.getPrimaryKeyPosition());
+        physical.setPrimaryKeyPosition(column.getPrimaryKeyPosition());
       } else if (sourceColumn != null
           && sourceColumn.isPrimaryKey()
           && column.resolveAlias().equalsIgnoreCase(sourceColumn.getName())) {
-        field.setPrimaryKeyPosition(sourceColumn.getPrimaryKeyPosition());
+        physical.setPrimaryKeyPosition(sourceColumn.getPrimaryKeyPosition());
       }
-      fields.add(field);
+      fields.add(physical);
     }
     return fields;
+  }
+
+  private static List<SourceField> applyDataTypeMappings(
+      SourceQuery query, List<SourceField> baseFields, IHopMetadataProvider metadataProvider)
+      throws HopException {
+    if (query == null || baseFields == null || baseFields.isEmpty()) {
+      return baseFields != null ? baseFields : List.of();
+    }
+    List<PhysicalSourceField> physical = new ArrayList<>();
+    for (SourceField field : baseFields) {
+      PhysicalSourceField p = PhysicalSourceField.from(field);
+      if (p != null) {
+        physical.add(p);
+      }
+    }
+    return SourceDataTypeMappingPublishSupport.toEffectiveSourceFields(
+        query, physical, metadataProvider);
   }
 
   private static String resolveCatalogConnection(

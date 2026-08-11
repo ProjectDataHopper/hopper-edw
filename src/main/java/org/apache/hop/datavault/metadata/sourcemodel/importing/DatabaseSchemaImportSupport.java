@@ -244,8 +244,10 @@ public final class DatabaseSchemaImportSupport {
     if (model == null || result == null) {
       return;
     }
+    SourceModelConfiguration config = model.getConfigurationOrDefault();
     for (SourceTable table : result.getImportedTablesOrEmpty()) {
       if (table != null) {
+        config.applyDefaultDataTypeMappings(table);
         model.getTables().add(table);
       }
     }

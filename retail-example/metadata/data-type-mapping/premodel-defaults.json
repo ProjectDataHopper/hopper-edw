@@ -1,0 +1,80 @@
+{
+  "virtualPath": "",
+  "scope": {
+    "databaseNamePattern": "",
+    "sourceKind": [],
+    "schemaNamePattern": "",
+    "catalogNamespacePattern": "",
+    "pathPattern": ""
+  },
+  "name": "premodel-defaults",
+  "description": "Retail / consulting pre-modeling defaults: bound strings, timestamp fields from string names",
+  "rule": [
+    {
+      "targetHopType": 2,
+      "matchLengthAbsent": true,
+      "enabled": true,
+      "matchSourceDataTypePattern": "",
+      "targetFieldName": "",
+      "targetLength": "2000",
+      "name": "String without length → String(2000)",
+      "targetPrecision": "",
+      "id": "string-default-length",
+      "matchFieldNamePattern": "",
+      "matchHopType": "String",
+      "conversion": {
+        "decimalSymbol": "",
+        "dateFormatTimeZone": "",
+        "lenientStringToNumber": false,
+        "conversionMask": "",
+        "dateFormatLocale": "",
+        "dateFormatLenient": false,
+        "groupingSymbol": ""
+      }
+    },
+    {
+      "targetHopType": 9,
+      "matchLengthAbsent": false,
+      "enabled": true,
+      "matchSourceDataTypePattern": "",
+      "targetFieldName": "",
+      "targetLength": "",
+      "name": "*_at String → Timestamp",
+      "targetPrecision": "",
+      "id": "timestamp-at-suffix",
+      "matchFieldNamePattern": "*_at",
+      "matchHopType": "String",
+      "conversion": {
+        "decimalSymbol": "",
+        "dateFormatTimeZone": "UTC",
+        "lenientStringToNumber": false,
+        "conversionMask": "yyyy-MM-dd HH:mm:ss",
+        "dateFormatLocale": "",
+        "dateFormatLenient": false,
+        "groupingSymbol": ""
+      }
+    },
+    {
+      "targetHopType": 9,
+      "matchLengthAbsent": false,
+      "enabled": true,
+      "matchSourceDataTypePattern": "",
+      "targetFieldName": "",
+      "targetLength": "",
+      "name": "*_ts String → Timestamp",
+      "targetPrecision": "",
+      "id": "timestamp-ts-suffix",
+      "matchFieldNamePattern": "*_ts",
+      "matchHopType": "String",
+      "conversion": {
+        "decimalSymbol": "",
+        "dateFormatTimeZone": "UTC",
+        "lenientStringToNumber": false,
+        "conversionMask": "yyyy-MM-dd HH:mm:ss",
+        "dateFormatLocale": "",
+        "dateFormatLenient": false,
+        "groupingSymbol": ""
+      }
+    }
+  ]
+}

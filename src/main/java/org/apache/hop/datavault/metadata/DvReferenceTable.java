@@ -616,6 +616,7 @@ public class DvReferenceTable extends DvTableBase
                 this,
                 new Point(LOCATION_SOURCE.x, LOCATION_SOURCE.y));
         builder.build();
+        builder.applyCatalogDataTypeMappings();
         TransformMeta sourceTransform = builder.getResultTransform();
         GeneratedPipelineMetadataSupport.stampSourceRead(sourceTransform, targetDbName);
 

@@ -35,6 +35,8 @@ import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupp
 import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
 import org.apache.hop.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.datavault.metadata.DvSqlSupport;
+import org.apache.hop.datavault.metadata.datatypemapping.PhysicalSourceField;
+import org.apache.hop.datavault.metadata.datatypemapping.SourceDataTypeMappingSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceColumn;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceEndpointKind;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJoinType;
@@ -130,6 +132,7 @@ public class HopGuiSourceQueryDialog {
   private ColumnInfo colJoinRelationship;
   private ColumnInfo colProjTable;
   private ColumnInfo colProjColumn;
+  private SourceDataTypeMappingTab dataTypeMappingTab;
 
   private boolean ok;
 
@@ -194,6 +197,30 @@ public class HopGuiSourceQueryDialog {
     addColumnsTab(wTabFolder, margin);
     addFreeSqlTab(wTabFolder, margin);
     addSqlTab(wTabFolder, margin);
+    dataTypeMappingTab =
+        new SourceDataTypeMappingTab(
+            variables,
+            metadataProvider,
+            () -> {
+              SourceQuery working = workingQueryFromDialog();
+              SourceTable driving =
+                  model != null && !Utils.isEmpty(working.getDrivingTableName())
+                      ? model.findTable(working.getDrivingTableName())
+                      : null;
+              List<PhysicalSourceField> physical =
+                  SourceDataTypeMappingSupport.physicalFields(working, driving);
+              // Enrich from all participant tables when possible.
+              if (model != null && physical != null) {
+                for (PhysicalSourceField p : physical) {
+                  if (p == null || p.getHopType() > 0) {
+                    continue;
+                  }
+                  // leave as-is; physicalFields already uses driving for type when available
+                }
+              }
+              return physical;
+            });
+    dataTypeMappingTab.addTab(wTabFolder, margin);
 
     wTabFolder.addListener(
         SWT.Selection,
@@ -779,6 +806,9 @@ public class HopGuiSourceQueryDialog {
           column.isPrimaryKey() ? Integer.toString(column.getPrimaryKeyPosition()) : "");
     }
     wColumns.optimizeTableView();
+    if (dataTypeMappingTab != null) {
+      dataTypeMappingTab.loadFrom(input);
+    }
   }
 
   private void getColumnsFromParticipants(boolean primaryKeysOnly) {
@@ -918,6 +948,9 @@ public class HopGuiSourceQueryDialog {
     }
     q.setJoins(readJoins());
     q.setColumns(readColumns());
+    if (dataTypeMappingTab != null) {
+      dataTypeMappingTab.saveTo(q);
+    }
     return q;
   }
 
@@ -1146,7 +1179,22 @@ public class HopGuiSourceQueryDialog {
       refreshResolvedKeyLabels();
       SourceQuery working = workingQueryFromDialog();
       List<ICheckResult> remarks =
-          SourceQueryValidationSupport.check(model, working, variables, metadataProvider);
+          new ArrayList<>(
+              SourceQueryValidationSupport.check(model, working, variables, metadataProvider));
+      try {
+        SourceTable driving =
+            model != null && !Utils.isEmpty(working.getDrivingTableName())
+                ? model.findTable(working.getDrivingTableName())
+                : null;
+        remarks.addAll(
+            SourceDataTypeMappingSupport.check(
+                working.getName(),
+                working,
+                SourceDataTypeMappingSupport.physicalFields(working, driving),
+                metadataProvider));
+      } catch (Exception mapEx) {
+        // best effort
+      }
       if (remarks.isEmpty()) {
         remarks =
             List.of(
@@ -1204,6 +1252,9 @@ public class HopGuiSourceQueryDialog {
     }
     input.setJoins(readJoins());
     input.setColumns(readColumns());
+    if (dataTypeMappingTab != null) {
+      dataTypeMappingTab.saveTo(input);
+    }
     if (model != null) {
       SourceRelationshipLifecycleSupport.dropRelationshipsOnRename(
           model, SourceEndpointKind.QUERY, oldName, name);

@@ -156,6 +156,8 @@ public abstract class DvFileSourcePipelineBuilder extends DvSourcePipelineBuilde
 
   private TransformMeta coerceMappedFieldTypes(
       TransformMeta predecessor, Point location, ColumnMapping mapping) throws HopException {
+    // Type-only coerce for early stream typing. Length/conversion/rename masks are applied later
+    // by DvSourcePipelineBuilder.applyCatalogDataTypeMappings() from catalog SourceField layout.
     SelectValuesMeta selectMeta = new SelectValuesMeta();
     selectMeta.getSelectOption().setSelectingAndSortingUnspecifiedFields(true);
     List<SelectMetadataChange> changes = selectMeta.getSelectOption().getMeta();
@@ -165,9 +167,29 @@ public abstract class DvFileSourcePipelineBuilder extends DvSourcePipelineBuilde
       if (sourceField == null || sourceField.getHopType() <= 0) {
         continue;
       }
+      // Skip type-only when full mapping will re-apply (avoids duplicate meta for conversion fields).
+      if (sourceField.getInputOptions() != null
+          && sourceField.getInputOptions().getConversion() != null
+          && sourceField.getInputOptions().getConversion().hasAnyAttribute()) {
+        continue;
+      }
       SelectMetadataChange change = new SelectMetadataChange();
       change.setName(rename.targetName());
       change.setType(ValueMetaFactory.getValueMetaName(sourceField.getHopType()));
+      if (!Utils.isEmpty(sourceField.getLength())) {
+        try {
+          change.setLength(Integer.parseInt(sourceField.getLength().trim()));
+        } catch (NumberFormatException ignored) {
+          // leave default
+        }
+      }
+      if (!Utils.isEmpty(sourceField.getPrecision())) {
+        try {
+          change.setPrecision(Integer.parseInt(sourceField.getPrecision().trim()));
+        } catch (NumberFormatException ignored) {
+          // leave default
+        }
+      }
       changes.add(change);
       any = true;
     }

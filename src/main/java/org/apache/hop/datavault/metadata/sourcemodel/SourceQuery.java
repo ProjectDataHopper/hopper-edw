@@ -22,6 +22,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.gui.Point;
+import org.apache.hop.datavault.metadata.datatypemapping.IDataTypeMappingTarget;
+import org.apache.hop.datavault.metadata.datatypemapping.SourceFieldTypeMapping;
 import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadata;
@@ -35,7 +37,7 @@ import org.jspecify.annotations.NonNull;
  */
 @Getter
 @Setter
-public class SourceQuery extends HopMetadataBase implements IHopMetadata {
+public class SourceQuery extends HopMetadataBase implements IHopMetadata, IDataTypeMappingTarget {
 
   @HopMetadataProperty private String description;
 
@@ -51,6 +53,16 @@ public class SourceQuery extends HopMetadataBase implements IHopMetadata {
   @Getter(AccessLevel.NONE)
   @Setter(AccessLevel.NONE)
   private List<SourceQueryColumn> columns = new ArrayList<>();
+
+  @HopMetadataProperty(key = "dataTypeMappingName", groupKey = "dataTypeMappingNames")
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.NONE)
+  private List<String> dataTypeMappingNames = new ArrayList<>();
+
+  @HopMetadataProperty(key = "fieldTypeMapping", groupKey = "fieldTypeMappings")
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.NONE)
+  private List<SourceFieldTypeMapping> fieldTypeMappings = new ArrayList<>();
 
   /** Optional SQL WHERE fragment (no leading WHERE keyword). */
   @HopMetadataProperty private String whereClause;
@@ -95,6 +107,33 @@ public class SourceQuery extends HopMetadataBase implements IHopMetadata {
       columns = new ArrayList<>();
     }
     return columns;
+  }
+
+  @Override
+  public @NonNull List<String> getDataTypeMappingNames() {
+    if (dataTypeMappingNames == null) {
+      dataTypeMappingNames = new ArrayList<>();
+    }
+    return dataTypeMappingNames;
+  }
+
+  @Override
+  public void setDataTypeMappingNames(List<String> dataTypeMappingNames) {
+    this.dataTypeMappingNames =
+        dataTypeMappingNames != null ? dataTypeMappingNames : new ArrayList<>();
+  }
+
+  @Override
+  public @NonNull List<SourceFieldTypeMapping> getFieldTypeMappings() {
+    if (fieldTypeMappings == null) {
+      fieldTypeMappings = new ArrayList<>();
+    }
+    return fieldTypeMappings;
+  }
+
+  @Override
+  public void setFieldTypeMappings(List<SourceFieldTypeMapping> fieldTypeMappings) {
+    this.fieldTypeMappings = fieldTypeMappings != null ? fieldTypeMappings : new ArrayList<>();
   }
 
   public void setColumns(List<SourceQueryColumn> columns) {

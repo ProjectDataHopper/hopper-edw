@@ -25,6 +25,7 @@ End-to-end retail data vault example demonstrating initial and incremental loads
 
 - [docs/getting-started-retail.adoc](../docs/getting-started-retail.adoc) — primary tutorial
 - [docs/source-modeler-overview.adoc](../docs/source-modeler-overview.adoc) — source modeler (`.hsm`) and composite feeds
+- [docs/data-type-mappings.adoc](../docs/data-type-mappings.adoc) — pre-modeling data type mapping profiles
 - [docs/feature-overview.md](../docs/feature-overview.md) — all plugin capabilities
 - [docs/README.md](../docs/README.md) — full documentation index
 
@@ -76,7 +77,8 @@ retail-example/
 ├── project-config.json
 ├── environments/local-docker-postgres.json
 ├── metadata/                  # CRM, Vault, local-catalog, rule sets, run configurations
-│   └── data-quality-rule-set/ # retail-source-quality + retail-target-quality libraries
+│   ├── data-quality-rule-set/ # retail-source-quality + retail-target-quality libraries
+│   └── data-type-mapping/     # premodel-defaults (String length + *_at timestamps)
 ├── fixtures/
 │   └── schema-gate-baseline/  # Seed for catalog-versions tag v1.0.0 (copied into work/)
 ├── pipelines/                 # create-source-tables, load-e2e-sources-to-crm, parse-asn-xml

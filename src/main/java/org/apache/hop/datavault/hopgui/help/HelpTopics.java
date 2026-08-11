@@ -84,6 +84,7 @@ public final class HelpTopics {
   public static final String ELK_LAYOUT = "elk-layout-dialog";
   public static final String REFRESH_RECORD_DEFINITION_FROM_SOURCE =
       "refresh-record-definition-from-source-dialog";
+  public static final String DATA_TYPE_MAPPING = "data-type-mapping-dialog";
 
   private static final Map<String, String> TITLE_KEYS =
       Map.ofEntries(
@@ -150,7 +151,8 @@ public final class HelpTopics {
           Map.entry(ELK_LAYOUT, "HelpTopics.ElkLayoutDialog.Title"),
           Map.entry(
               REFRESH_RECORD_DEFINITION_FROM_SOURCE,
-              "HelpTopics.RefreshRecordDefinitionFromSourceDialog.Title"));
+              "HelpTopics.RefreshRecordDefinitionFromSourceDialog.Title"),
+          Map.entry(DATA_TYPE_MAPPING, "HelpTopics.DataTypeMappingDialog.Title"));
 
   private HelpTopics() {}
 

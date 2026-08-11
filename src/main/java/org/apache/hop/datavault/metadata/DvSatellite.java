@@ -1240,6 +1240,7 @@ public class DvSatellite extends DvTableBase
       builder.dvLinkSatelliteSource = ctx.linkSatelliteSource;
     }
     builder.build();
+    builder.applyCatalogDataTypeMappings();
 
     return builder.getResultTransform();
   }
@@ -1949,6 +1950,7 @@ public class DvSatellite extends DvTableBase
       builder.dvLinkSatelliteSource = ctx.linkSatelliteSource;
     }
     builder.build();
+    builder.applyCatalogDataTypeMappings();
     return builder.getResultTransform();
   }
 

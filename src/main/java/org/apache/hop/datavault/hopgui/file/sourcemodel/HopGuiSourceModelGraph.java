@@ -1611,6 +1611,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
     byte[] beforeChange = captureUndoSnapshot();
     SourceTable table = new SourceTable(getUniqueTableName("table"));
+    model.getConfigurationOrDefault().applyDefaultDataTypeMappings(table);
     PropsUi.setLocation(
         table, location != null ? location.x : 50, location != null ? location.y : 50);
     model.getTables().add(table);
@@ -1715,6 +1716,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
     byte[] beforeChange = captureUndoSnapshot();
     SourcePipeline pipelineSource = new SourcePipeline(uniquePipelineName("pipeline"));
+    model.getConfigurationOrDefault().applyDefaultDataTypeMappings(pipelineSource);
     Point snapped =
         PropsUi.calculateGridPosition(
             new Point(location != null ? location.x : 50, location != null ? location.y : 50));
@@ -1749,6 +1751,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
     byte[] beforeChange = captureUndoSnapshot();
     SourceJson jsonSource = new SourceJson(uniqueJsonName("json"));
+    model.getConfigurationOrDefault().applyDefaultDataTypeMappings(jsonSource);
     if (!model.getTables().isEmpty() && model.getTables().get(0) != null) {
       jsonSource.setParentSourceName(model.getTables().get(0).getName());
     }
@@ -1866,6 +1869,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
     byte[] beforeChange = captureUndoSnapshot();
     SourceQuery query = new SourceQuery(uniqueQueryName("query"));
+    model.getConfigurationOrDefault().applyDefaultDataTypeMappings(query);
     if (!model.getTables().isEmpty() && model.getTables().get(0) != null) {
       query.setDrivingTableName(model.getTables().get(0).getName());
     }

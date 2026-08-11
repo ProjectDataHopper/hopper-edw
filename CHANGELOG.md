@@ -4,6 +4,23 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## Unreleased
 
+### Data type mappings (#113)
+
+- New project metadata type **Data type mapping** (`data-type-mapping`): ordered rules with match criteria (Hop type, source SQL type pattern, field name pattern, length absent) and target type/length/conversion options
+- Resolver with attribute-level multi-profile merge; per-source field overrides win last
+- Design-time validation for dangerous conversions (e.g. String→Date/Timestamp without conversion mask), rename collisions, unknown overrides, PK type changes, length narrowing
+- `Select Values` builder (`DataTypeMappingPipelineSupport`) for load-pipeline injection
+- HSM entities (`SourceTable`, `SourceQuery`, `SourceJson`, `SourcePipeline`) store profile refs + field overrides
+- Source table dialog **Data type mapping** tab: attach profiles, field overrides, effective-fields preview
+- **Catalog publish** writes effective fields + conversion block + optional `sourceStreamName` (rename)
+- **DV load pipelines** inject `apply data type mappings` Select Values from catalog layout after source read (hub/link/sat/reference)
+- File source coerce also applies length when present; full conversion via catalog injection
+- **Data type mapping** tab on source **query / JSON / pipeline** dialogs (shared with table)
+- Profile field actions: **Add** / **Select** / **Edit** Data type mapping metadata from the tab
+- Source model **default data type mappings** (Edit model) applied on schema import and new cards
+- Docs: [data-type-mappings.adoc](docs/data-type-mappings.adoc); retail example profile `premodel-defaults`
+- Plan: [docs/plans/data-type-mappings-plan.md](docs/plans/data-type-mappings-plan.md)
+
 ### Hop Web modelers (#119)
 
 - Render `.hsm` / `.hdv` / `.hbv` / `.hdm` / `.hem` graphs under **Hop Web** via the Hop SVG canvas stack (`CanvasSvgFacade.publishSnapshot`, requires Hop with [apache/hop#7873](https://github.com/apache/hop/issues/7873) / [#7874](https://github.com/apache/hop/pull/7874) and related web client fixes)

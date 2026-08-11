@@ -23,6 +23,7 @@ import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.metadata.datatypemapping.DataTypeMappingPipelineSupport;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
@@ -81,6 +82,27 @@ public abstract class DvSourcePipelineBuilder {
   }
 
   public abstract void build() throws HopException;
+
+  /**
+   * After the source-specific chain is built, apply catalog data type mapping metadata (lengths,
+   * conversion masks, renames) via Select Values when present on {@link #recordSource} fields.
+   */
+  public void applyCatalogDataTypeMappings() throws HopException {
+    if (resultTransform == null || recordSource == null) {
+      return;
+    }
+    Point location =
+        resultTransform.getLocation() != null
+            ? new Point(
+                resultTransform.getLocation().x + TRANSFORM_SPACING_X,
+                resultTransform.getLocation().y)
+            : (startPoint != null
+                ? new Point(startPoint.x + TRANSFORM_SPACING_X, startPoint.y)
+                : new Point(300, 100));
+    resultTransform =
+        DataTypeMappingPipelineSupport.injectFromRecordSource(
+            pipelineMeta, resultTransform, recordSource, metadataProvider, location);
+  }
 
   protected DatabaseMeta loadDatabaseMeta(String name) throws HopException {
     if (StringUtils.isEmpty(name)) {

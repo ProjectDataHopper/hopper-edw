@@ -96,6 +96,12 @@ public class SourceField {
   private int hopType;
 
   /**
+   * Physical / stream field name before pre-model rename. Empty means the stream name equals {@link
+   * #name} (the effective name used by modelers and catalog consumers).
+   */
+  @HopMetadataProperty private String sourceStreamName;
+
+  /**
    * Position of this field in the source primary key (1-based). Zero means the field is not part of
    * the primary key. Order matters for composite keys.
    */
@@ -116,5 +122,22 @@ public class SourceField {
 
   public SourceField(String name) {
     this.name = name;
+  }
+
+  /**
+   * Stream name as produced by the source input transform (physical column / file header). When
+   * empty, {@link #name} is used.
+   */
+  public String resolveStreamName() {
+    if (sourceStreamName != null && !sourceStreamName.isBlank()) {
+      return sourceStreamName.trim();
+    }
+    return name;
+  }
+
+  /** True when a pre-model rename maps a different stream name onto {@link #name}. */
+  public boolean isRenamedFromStream() {
+    String stream = resolveStreamName();
+    return stream != null && name != null && !stream.equals(name);
   }
 }

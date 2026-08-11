@@ -1018,6 +1018,7 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
       csvBuilder.setDvLinkHubSource(linkSource);
     }
     builder.build();
+    builder.applyCatalogDataTypeMappings();
     return builder.getResultTransform();
   }
 

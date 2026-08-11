@@ -1,0 +1,150 @@
+= Data type mappings (pre-modeling sources)
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+== Why
+
+Source systems rarely hand you EDW-grade types. Kafka, JSON, XML, CDC, and many files produce **String / Integer / Number without lengths** (or weak temporal typing). Downstream DDL then collapses to `TEXT` / `LONGTEXT` / CLOB, and load pipelines need ad-hoc **Select Values** transforms.
+
+**Data type mappings** make pre-modeling **explicit**:
+
+* Project-level **reusable policies** (metadata)
+* Per-source **profile attach** + **field overrides** on the source model (`.hsm`)
+* **Catalog** stores the **effective** layout (types, lengths, conversion masks, renames)
+* **DV/BV/DM load pipelines** inject Select Values so runtime matches the contract
+
+Fields remain “what the physical source produces.” Mappings remain “what the warehouse expects.”
+
+See also: link:plans/data-type-mappings-plan.md[design plan], issue https://github.com/mattcasters/hop-data-vault/issues/113[#113].
+
+== Concepts
+
+[cols="1,3", options="header"]
+|===
+|Concept |Role
+
+|**Data type mapping** (metadata)
+|Named project profile with ordered **rules** (match + target type/length/conversion) and optional **scope** (source kinds, DB/path patterns).
+
+|**Match criteria**
+|Hop type, native/SQL type pattern, field name pattern, length absent / below / above.
+
+|**Target**
+|Hop type, length, precision, rename, conversion mask, decimal/grouping symbols, locale, time zone, lenient flags.
+
+|**HSM binding**
+|Each source table / query / JSON / pipeline card can attach one or more profiles (order matters) and field-level overrides.
+
+|**Effective layout**
+|Physical fields ⊕ profiles ⊕ overrides. Catalog publish and vault modelers use this only.
+
+|**Model default profiles**
+|On **Edit model**, set comma-separated default profile names applied to newly imported tables and new cards.
+|===
+
+=== Merge semantics
+
+1. Within a profile: **first matching rule** establishes the base target for a field.
+2. Across attached profiles (list order): **attribute-level merge** — later non-empty attributes override earlier ones.
+3. Per-source **field overrides** always win last.
+
+== Project metadata editor
+
+In Hop **Metadata** perspective, create a **Data type mapping** (key `data-type-mapping`).
+
+The editor has **Name** / **Description**, then two tabs:
+
+* **Scope** — multi-select source kinds (`DATABASE`, `CSV`, …) and optional connection / schema / path / namespace patterns (`TextVar`).
+* **Rules** — ordered match → target grid (first match wins within the profile).
+
+image::images/data-type-mapping-rules.png[Data type mapping metadata editor — Rules tab with match criteria and target conversion columns,align="center"]
+
+Example **premodel-defaults** (also shipped under `retail-example/metadata/data-type-mapping/`):
+
+* String + length absent → String length **2000**
+* Field name `*_at` / `*_ts` + String → Timestamp + mask `yyyy-MM-dd HH:mm:ss`
+
+Rules without match criteria are rejected at validation. String → Date/Timestamp **without** a conversion mask is an **error**.
+
+Use the **Help** button in the editor for the full column reference (scope patterns, masks, safety tips).
+
+== Source model dialogs
+
+Every source card dialog has a **Data type mapping** tab:
+
+image::images/source-model-table-data-type-mapping.png[Source table dialog — Data type mapping tab with profiles, field overrides, and effective fields preview,align="center"]
+
+. **Profiles** — comma-separated project mapping names (applied in order), with **Add** / **Select** / **Edit** buttons:
+** **Add** — create a new Data type mapping profile and attach it.
+** **Select** — multi-select existing project profiles (pre-selects currently attached names).
+** **Edit** — edit the single attached profile, pick among attached profiles, or open the project picker when none are attached.
+. **Field overrides** — fine-tune rename, type, length, mask, symbols, locale, time zone.
+. **Effective fields** — read-only preview (**Refresh effective**).
+. **Validate** — includes mapping safety checks (missing profiles, dangerous conversions, rename collisions).
+
+Applies to:
+
+* Source **table**
+* Source **query**
+* Source **JSON**
+* Source **pipeline**
+
+=== Edit model defaults
+
+**Edit model** → **Default data type mappings**: comma-separated profile names. Used when:
+
+* Importing schema tables
+* Adding a new table / query / JSON / pipeline card that has no profiles yet
+
+== Catalog publish
+
+Publish (table / query / JSON / pipeline) writes the **effective** field list to the data catalog `DV_SOURCE`:
+
+* Effective field **name** (after rename)
+* Hop type, length, precision
+* `inputOptions.conversion` (mask, locale, symbols, …)
+* `sourceStreamName` when a rename maps a different physical/stream name
+
+Modelers that “get attributes from source” therefore see pre-modeled types (e.g. `VARCHAR`-friendly length 2000 instead of unbounded text).
+
+== Load pipelines
+
+After the source read transform (database, file, JSON, composite, pipeline inject, …), generated DV loads call **apply catalog data type mappings**:
+
+* Select Values transform name: `apply data type mappings`
+* Applies type, length, conversion mask, and rename when present on catalog fields
+
+No `.hsm` is required at generate/runtime once the catalog has been published.
+
+== Validation summary
+
+[cols="1,3", options="header"]
+|===
+|Severity |Example
+
+|ERROR
+|String → Date/Timestamp without conversion mask; override references unknown field; duplicate target names; missing attached profile name
+
+|WARNING
+|String → Number without mask; length narrowing; PK type change; Boolean-ish conversions; temporal without locale/time zone
+
+|OK
+|Physical fields unchanged and no mapping configured (legacy behaviour)
+|===
+
+== Recommended workflow (large estates)
+
+. Define org standards once as **Data type mapping** metadata (global + domain-specific profiles).
+. Set **Default data type mappings** on each `.hsm` model.
+. Import schema / add sources → profiles attach automatically.
+. Fine-tune outliers on the **Data type mapping** tab.
+. **Validate** and **Publish to catalog**.
+. Build / refresh DV/BV/DM models from catalog; generate loads.
+
+== Related
+
+* link:source-modeler-overview.adoc[Source modeler overview]
+* link:data-catalog.adoc[Data catalog]
+* link:feature-overview.md[Feature overview]

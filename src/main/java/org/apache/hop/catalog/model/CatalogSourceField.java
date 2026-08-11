@@ -33,6 +33,12 @@ public class CatalogSourceField {
   private String precision;
   private int hopType;
 
+  /**
+   * Physical / stream field name before pre-model rename. Empty means the stream name equals {@link
+   * #name} (the effective catalog name used by modelers).
+   */
+  private String sourceStreamName;
+
   /** 1-based position in the source primary key; zero when not part of the key. */
   private int primaryKeyPosition;
 

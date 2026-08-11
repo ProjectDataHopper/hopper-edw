@@ -19,6 +19,7 @@ package org.apache.hop.datavault.metadata;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.hop.datavault.metadata.datatypemapping.FieldConversionOptions;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 
 /** Format-specific input options for a Data Vault source field. */
@@ -28,4 +29,10 @@ import org.apache.hop.metadata.api.HopMetadataProperty;
 public class SourceFieldInputOptions {
 
   @HopMetadataProperty private CsvFieldOptions csv;
+
+  /**
+   * Pre-model conversion attributes published from data type mappings (masks, locale, symbols).
+   * Applied via Select Values when loading DV/BV/DM pipelines.
+   */
+  @HopMetadataProperty private FieldConversionOptions conversion;
 }

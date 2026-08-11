@@ -113,6 +113,23 @@ Sample excerpt: link:ai-file-schemas/samples/hsm-json-excerpt.xml[hsm-json-excer
 
 image::images/source-modeler-source-table.png[Source table dialog with columns and primary-key positions,align="center"]
 
+=== Data type mapping tab
+
+Every source card (table, query, JSON, pipeline) has a **Data type mapping** tab:
+
+image::images/source-model-table-data-type-mapping.png[Source table dialog — Data type mapping tab with project profiles, overrides, and effective layout,align="center"]
+
+* Attach project-level **Data type mapping** profiles (comma-separated, order matters).
+* **Add** / **Select** / **Edit** manage those profiles from project metadata without leaving the dialog.
+* Fine-tune **field overrides** (rename, type, length, conversion mask, symbols, locale, time zone).
+* Preview the **effective** field layout used by catalog publish and vault loads.
+
+Project profiles are edited in Metadata (**Scope** + **Rules** tabs):
+
+image::images/data-type-mapping-rules.png[Data type mapping metadata editor — Rules tab,align="center"]
+
+Model-level defaults live under **Edit model** → **Default data type mappings** (applied on schema import and when adding new cards). Full guide: link:data-type-mappings.adoc[Data type mappings].
+
 == Schema import
 
 Toolbar **Import schema** (or canvas context):

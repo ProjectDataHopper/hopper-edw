@@ -30,8 +30,9 @@ import org.apache.hop.datavault.catalog.RecordSourceIndicatorSupport;
 import org.apache.hop.datavault.metadata.DataVaultSource;
 import org.apache.hop.datavault.metadata.DvSourceDeliveryType;
 import org.apache.hop.datavault.metadata.SourceField;
+import org.apache.hop.datavault.metadata.datatypemapping.SourceDataTypeMappingPublishSupport;
+import org.apache.hop.datavault.metadata.datatypemapping.SourceDataTypeMappingSupport;
 import org.apache.hop.datavault.metadata.pipeline.DvPipelineSource;
-import org.apache.hop.datavault.metadata.sourcemodel.SourceColumn;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
 import org.apache.hop.datavault.metadata.sourcemodel.SourcePipeline;
 import org.apache.hop.i18n.BaseMessages;
@@ -73,7 +74,7 @@ public final class SourcePipelineCatalogPublisher {
               "SourcePipelineCatalogPublisher.Error.MissingTransform",
               pipelineSource.getName()));
     }
-    List<SourceField> fields = buildFieldsFromProjection(pipelineSource);
+    List<SourceField> fields = buildFieldsFromProjection(pipelineSource, metadataProvider);
     if (fields.isEmpty()) {
       throw new HopException(
           BaseMessages.getString(
@@ -130,35 +131,22 @@ public final class SourcePipelineCatalogPublisher {
   }
 
   public static List<SourceField> buildFieldsFromProjection(SourcePipeline pipelineSource) {
-    List<SourceField> fields = new ArrayList<>();
+    try {
+      return buildFieldsFromProjection(pipelineSource, null);
+    } catch (HopException e) {
+      return new ArrayList<>();
+    }
+  }
+
+  public static List<SourceField> buildFieldsFromProjection(
+      SourcePipeline pipelineSource, IHopMetadataProvider metadataProvider) throws HopException {
     if (pipelineSource == null) {
-      return fields;
+      return new ArrayList<>();
     }
-    for (SourceColumn column : pipelineSource.getFields()) {
-      if (column == null || Utils.isEmpty(column.getName())) {
-        continue;
-      }
-      SourceField field = new SourceField(column.getName().trim());
-      int hopType = column.getHopType();
-      if (hopType <= 0) {
-        hopType = IValueMeta.TYPE_STRING;
-      }
-      field.setHopType(hopType);
-      if (!Utils.isEmpty(column.getLength())) {
-        field.setLength(column.getLength());
-      }
-      if (!Utils.isEmpty(column.getPrecision())) {
-        field.setPrecision(column.getPrecision());
-      }
-      if (column.isPrimaryKey()) {
-        field.setPrimaryKeyPosition(column.getPrimaryKeyPosition());
-      }
-      if (!Utils.isEmpty(column.getDescription())) {
-        field.setDescription(column.getDescription());
-      }
-      fields.add(field);
-    }
-    return fields;
+    return SourceDataTypeMappingPublishSupport.toEffectiveSourceFields(
+        pipelineSource,
+        SourceDataTypeMappingSupport.physicalFields(pipelineSource),
+        metadataProvider);
   }
 
   public static String resolveCatalogSourceName(SourcePipeline pipelineSource) {

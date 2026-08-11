@@ -1,0 +1,12 @@
+{
+  "scope": {
+    "databaseNamePattern": "",
+    "sourceKind": [],
+    "schemaNamePattern": "",
+    "catalogNamespacePattern": "",
+    "pathPattern": ""
+  },
+  "name": "Strings",
+  "description": "",
+  "rule": []
+}

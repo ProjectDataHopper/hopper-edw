@@ -633,6 +633,7 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
             this,
             new Point(LOCATION_START_LINE_2.x, LOCATION_START_LINE_2.y));
     builder.build();
+    builder.applyCatalogDataTypeMappings();
 
     return builder.getResultTransform();
   }

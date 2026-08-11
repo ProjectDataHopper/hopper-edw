@@ -22,6 +22,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.gui.Point;
+import org.apache.hop.datavault.metadata.datatypemapping.IDataTypeMappingTarget;
+import org.apache.hop.datavault.metadata.datatypemapping.SourceFieldTypeMapping;
 import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadata;
@@ -40,7 +42,8 @@ import org.jspecify.annotations.NonNull;
  */
 @Getter
 @Setter
-public class SourcePipeline extends HopMetadataBase implements IHopMetadata {
+public class SourcePipeline extends HopMetadataBase
+    implements IHopMetadata, IDataTypeMappingTarget {
 
   @HopMetadataProperty private String description;
 
@@ -73,6 +76,16 @@ public class SourcePipeline extends HopMetadataBase implements IHopMetadata {
   @Setter(AccessLevel.NONE)
   private List<SourceColumn> fields = new ArrayList<>();
 
+  @HopMetadataProperty(key = "dataTypeMappingName", groupKey = "dataTypeMappingNames")
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.NONE)
+  private List<String> dataTypeMappingNames = new ArrayList<>();
+
+  @HopMetadataProperty(key = "fieldTypeMapping", groupKey = "fieldTypeMappings")
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.NONE)
+  private List<SourceFieldTypeMapping> fieldTypeMappings = new ArrayList<>();
+
   @HopMetadataProperty(inline = true)
   private Point location = new Point(50, 50);
 
@@ -93,6 +106,33 @@ public class SourcePipeline extends HopMetadataBase implements IHopMetadata {
 
   public void setFields(List<SourceColumn> fields) {
     this.fields = fields != null ? fields : new ArrayList<>();
+  }
+
+  @Override
+  public @NonNull List<String> getDataTypeMappingNames() {
+    if (dataTypeMappingNames == null) {
+      dataTypeMappingNames = new ArrayList<>();
+    }
+    return dataTypeMappingNames;
+  }
+
+  @Override
+  public void setDataTypeMappingNames(List<String> dataTypeMappingNames) {
+    this.dataTypeMappingNames =
+        dataTypeMappingNames != null ? dataTypeMappingNames : new ArrayList<>();
+  }
+
+  @Override
+  public @NonNull List<SourceFieldTypeMapping> getFieldTypeMappings() {
+    if (fieldTypeMappings == null) {
+      fieldTypeMappings = new ArrayList<>();
+    }
+    return fieldTypeMappings;
+  }
+
+  @Override
+  public void setFieldTypeMappings(List<SourceFieldTypeMapping> fieldTypeMappings) {
+    this.fieldTypeMappings = fieldTypeMappings != null ? fieldTypeMappings : new ArrayList<>();
   }
 
   public @NonNull List<SourcePipelineCatalogSource> getCatalogSources() {

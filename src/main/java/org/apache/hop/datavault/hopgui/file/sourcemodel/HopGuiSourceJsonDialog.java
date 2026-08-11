@@ -32,6 +32,7 @@ import org.apache.hop.datavault.hopgui.dialog.ShowRowsDialog;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
 import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
 import org.apache.hop.datavault.hopgui.help.HelpTopics;
+import org.apache.hop.datavault.metadata.datatypemapping.SourceDataTypeMappingSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceColumn;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceEndpointKind;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJson;
@@ -109,6 +110,7 @@ public class HopGuiSourceJsonDialog {
   private Button wDefaultPathLeafToNull;
   private TableView wFields;
   private ColumnInfo colParentField;
+  private SourceDataTypeMappingTab dataTypeMappingTab;
 
   private boolean ok;
 
@@ -162,12 +164,18 @@ public class HopGuiSourceJsonDialog {
 
     addGeneralTab(wTabFolder, middle, margin);
     addFieldsTab(wTabFolder, margin);
+    dataTypeMappingTab =
+        new SourceDataTypeMappingTab(
+            variables,
+            metadataProvider,
+            () -> SourceDataTypeMappingSupport.physicalFields(workingFromDialog()));
+    dataTypeMappingTab.addTab(wTabFolder, margin);
 
     wTabFolder.setSelection(0);
     getData();
     refreshParentFieldComboValues();
 
-    BaseTransformDialog.setSize(shell, 900, 640);
+    BaseTransformDialog.setSize(shell, 920, 680);
     BaseDialog.defaultShellHandling(shell, e -> ok(), e -> cancel());
     return ok;
   }
@@ -585,7 +593,18 @@ public class HopGuiSourceJsonDialog {
       SourceJsonFieldSupport.applyMissingPassThroughTypes(model, draft);
       // Reflect resolved pass-through types back into the grid so the user sees them.
       refreshFieldTypeCellsFromDraft(draft);
-      List<ICheckResult> remarks = SourceJsonValidationSupport.check(draft, model, null);
+      List<ICheckResult> remarks =
+          new ArrayList<>(SourceJsonValidationSupport.check(draft, model, null));
+      try {
+        remarks.addAll(
+            SourceDataTypeMappingSupport.check(
+                draft.getName(),
+                draft,
+                SourceDataTypeMappingSupport.physicalFields(draft),
+                metadataProvider));
+      } catch (Exception mapEx) {
+        // best effort
+      }
       if (remarks.isEmpty()) {
         remarks =
             List.of(
@@ -714,6 +733,9 @@ public class HopGuiSourceJsonDialog {
       addFieldToTable(field);
     }
     wFields.optimizeTableView();
+    if (dataTypeMappingTab != null) {
+      dataTypeMappingTab.loadFrom(input);
+    }
   }
 
   private void getInfo(SourceJson target) {
@@ -755,6 +777,9 @@ public class HopGuiSourceJsonDialog {
     target.setFields(fields);
     // Inherit parent column types for pass-through rows left blank in the grid.
     SourceJsonFieldSupport.applyMissingPassThroughTypes(model, target);
+    if (dataTypeMappingTab != null) {
+      dataTypeMappingTab.saveTo(target);
+    }
   }
 
   private void addParentPrimaryKeys() {

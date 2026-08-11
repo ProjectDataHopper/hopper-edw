@@ -32,6 +32,8 @@ import org.apache.hop.datavault.hopgui.dialog.ShowRowsDialog;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
 import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
 import org.apache.hop.datavault.hopgui.help.HelpTopics;
+import org.apache.hop.datavault.metadata.datatypemapping.PhysicalSourceField;
+import org.apache.hop.datavault.metadata.datatypemapping.SourceDataTypeMappingSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceColumn;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceEndpointKind;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
@@ -84,6 +86,7 @@ public class HopGuiSourceTableDialog {
   private Text wTableName;
   private Text wCatalogSourceName;
   private TableView wColumns;
+  private SourceDataTypeMappingTab dataTypeMappingTab;
 
   private boolean ok;
 
@@ -142,11 +145,26 @@ public class HopGuiSourceTableDialog {
 
     addGeneralTab(wTabFolder, middle, margin);
     addColumnsTab(wTabFolder, margin);
+    dataTypeMappingTab =
+        new SourceDataTypeMappingTab(
+            variables,
+            metadataProvider,
+            () -> {
+              List<PhysicalSourceField> fields = new ArrayList<>();
+              for (SourceColumn column : readColumnsFromTable()) {
+                PhysicalSourceField physical = PhysicalSourceField.from(column);
+                if (physical != null) {
+                  fields.add(physical);
+                }
+              }
+              return fields;
+            });
+    dataTypeMappingTab.addTab(wTabFolder, margin);
 
     wTabFolder.setSelection(0);
     getData();
 
-    BaseTransformDialog.setSize(shell, 720, 520);
+    BaseTransformDialog.setSize(shell, 780, 560);
     BaseDialog.defaultShellHandling(shell, e -> ok(), e -> cancel());
     return ok;
   }
@@ -341,6 +359,9 @@ public class HopGuiSourceTableDialog {
           column.getPrimaryKeyPosition() > 0 ? String.valueOf(column.getPrimaryKeyPosition()) : "");
     }
     wColumns.optimizeTableView();
+    if (dataTypeMappingTab != null) {
+      dataTypeMappingTab.loadFrom(input);
+    }
   }
 
   private void ok() {
@@ -362,6 +383,9 @@ public class HopGuiSourceTableDialog {
     input.setTableName(wTableName.getText());
     input.setCatalogSourceName(wCatalogSourceName.getText());
     input.setColumns(readColumnsFromTable());
+    if (dataTypeMappingTab != null) {
+      dataTypeMappingTab.saveTo(input);
+    }
     if (model != null) {
       SourceRelationshipLifecycleSupport.dropRelationshipsOnRename(
           model, SourceEndpointKind.TABLE, oldName, name);
@@ -441,8 +465,25 @@ public class HopGuiSourceTableDialog {
     try {
       SourceTable working = workingTableFromDialog();
       working.setColumns(readColumnsFromTable());
+      if (dataTypeMappingTab != null) {
+        dataTypeMappingTab.saveTo(working);
+      }
       List<ICheckResult> remarks =
           new ArrayList<>(SourceTableValidationSupport.check(model, working, variables));
+      try {
+        remarks.addAll(
+            SourceDataTypeMappingSupport.check(
+                working.getName(),
+                working,
+                SourceDataTypeMappingSupport.physicalFields(working),
+                metadataProvider));
+      } catch (Exception mapEx) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_WARNING,
+                "Data type mapping validation skipped: " + mapEx.getMessage(),
+                null));
+      }
 
       // Always try live layout comparison so add/remove/type drift is visible at design time.
       try {

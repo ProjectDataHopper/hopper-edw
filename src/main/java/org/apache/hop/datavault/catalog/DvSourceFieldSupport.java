@@ -335,6 +335,11 @@ public final class DvSourceFieldSupport {
         }
       }
       catalogField.setPrimaryKeyPosition(field.getPrimaryKeyPosition());
+      if (field.isRenamedFromStream()) {
+        catalogField.setSourceStreamName(field.resolveStreamName());
+      } else if (!Utils.isEmpty(field.getSourceStreamName())) {
+        catalogField.setSourceStreamName(field.getSourceStreamName());
+      }
       catalogField.setInputOptions(
           SourceFieldInputOptionsSupport.toCatalog(field.getInputOptions()));
       result.add(catalogField);
@@ -391,6 +396,7 @@ public final class DvSourceFieldSupport {
       sourceField.setPrecision(field.getPrecision());
       sourceField.setHopType(field.getHopType());
       sourceField.setPrimaryKeyPosition(field.getPrimaryKeyPosition());
+      sourceField.setSourceStreamName(field.getSourceStreamName());
       sourceField.setInputOptions(
           SourceFieldInputOptionsSupport.fromCatalog(field.getInputOptions()));
       result.add(sourceField);

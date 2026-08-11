@@ -28,6 +28,7 @@ import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.hopgui.file.dimensional.DmSourcePipelineGuiSupport;
 import org.apache.hop.datavault.hopgui.file.dimensional.DmSourcePipelineOpenSupport;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
+import org.apache.hop.datavault.metadata.datatypemapping.SourceDataTypeMappingSupport;
 import org.apache.hop.datavault.metadata.pipeline.DvPipelineSourceSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceColumn;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceEndpointKind;
@@ -93,6 +94,7 @@ public class HopGuiSourcePipelineDialog {
   private Text wCatalogSourceName;
   private TableView wCatalogSources;
   private TableView wFields;
+  private SourceDataTypeMappingTab dataTypeMappingTab;
 
   private boolean ok;
 
@@ -149,11 +151,21 @@ public class HopGuiSourcePipelineDialog {
     addGeneralTab(wTabFolder, middle, margin);
     addCatalogSourcesTab(wTabFolder, margin);
     addFieldsTab(wTabFolder, margin);
+    dataTypeMappingTab =
+        new SourceDataTypeMappingTab(
+            variables,
+            metadataProvider,
+            () -> {
+              SourcePipeline draft = new SourcePipeline();
+              getInfo(draft);
+              return SourceDataTypeMappingSupport.physicalFields(draft);
+            });
+    dataTypeMappingTab.addTab(wTabFolder, margin);
 
     wTabFolder.setSelection(0);
     getData();
 
-    BaseTransformDialog.setSize(shell, 780, 600);
+    BaseTransformDialog.setSize(shell, 820, 640);
     BaseDialog.defaultShellHandling(shell, e -> ok(), e -> cancel());
     return ok;
   }
@@ -432,6 +444,9 @@ public class HopGuiSourcePipelineDialog {
     wCatalogSourceName.setText(Const.NVL(input.getCatalogSourceName(), ""));
     populateCatalogSourcesTable(input.getCatalogSources());
     populateFieldsTable(input.getFields());
+    if (dataTypeMappingTab != null) {
+      dataTypeMappingTab.loadFrom(input);
+    }
   }
 
   private void populateCatalogSourcesTable(List<SourcePipelineCatalogSource> sources) {
@@ -611,7 +626,18 @@ public class HopGuiSourcePipelineDialog {
   private void validate() {
     SourcePipeline draft = new SourcePipeline();
     getInfo(draft);
-    var remarks = SourcePipelineValidationSupport.check(draft, model, null);
+    var remarks =
+        new ArrayList<>(SourcePipelineValidationSupport.check(draft, model, null));
+    try {
+      remarks.addAll(
+          SourceDataTypeMappingSupport.check(
+              draft.getName(),
+              draft,
+              SourceDataTypeMappingSupport.physicalFields(draft),
+              metadataProvider));
+    } catch (Exception mapEx) {
+      // best effort
+    }
     ModelDialogValidationSupport.showCheckResults(shell, remarks);
   }
 
@@ -674,6 +700,9 @@ public class HopGuiSourcePipelineDialog {
       fields.add(column);
     }
     target.setFields(fields);
+    if (dataTypeMappingTab != null) {
+      dataTypeMappingTab.saveTo(target);
+    }
   }
 
   private void ok() {

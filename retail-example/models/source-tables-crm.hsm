@@ -85,6 +85,8 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
+      <dataTypeMappingNames/>
+      <fieldTypeMappings/>
       <xloc>1344</xloc>
       <yloc>240</yloc>
       <name>customer_address</name>
@@ -142,6 +144,8 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
+      <dataTypeMappingNames/>
+      <fieldTypeMappings/>
       <xloc>1344</xloc>
       <yloc>160</yloc>
       <name>customer_contact</name>
@@ -208,6 +212,8 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
+      <dataTypeMappingNames/>
+      <fieldTypeMappings/>
       <xloc>1344</xloc>
       <yloc>80</yloc>
       <name>customer_demo</name>
@@ -247,6 +253,8 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
+      <dataTypeMappingNames/>
+      <fieldTypeMappings/>
       <xloc>832</xloc>
       <yloc>304</yloc>
       <name>customer_hub</name>
@@ -313,6 +321,8 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
+      <dataTypeMappingNames/>
+      <fieldTypeMappings/>
       <xloc>1344</xloc>
       <yloc>320</yloc>
       <name>customer_prefs</name>
@@ -407,6 +417,8 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
+      <dataTypeMappingNames/>
+      <fieldTypeMappings/>
       <xloc>832</xloc>
       <yloc>512</yloc>
       <name>order_header</name>
@@ -491,6 +503,8 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
+      <dataTypeMappingNames/>
+      <fieldTypeMappings/>
       <xloc>832</xloc>
       <yloc>736</yloc>
       <name>order_line</name>
@@ -557,6 +571,8 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
+      <dataTypeMappingNames/>
+      <fieldTypeMappings/>
       <xloc>208</xloc>
       <yloc>736</yloc>
       <name>product</name>
@@ -632,6 +648,8 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
+      <dataTypeMappingNames/>
+      <fieldTypeMappings/>
       <xloc>144</xloc>
       <yloc>272</yloc>
       <name>warehouse</name>
@@ -698,6 +716,8 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
+      <dataTypeMappingNames/>
+      <fieldTypeMappings/>
       <xloc>160</xloc>
       <yloc>496</yloc>
       <name>warehouse_product</name>
@@ -783,6 +803,8 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
+      <dataTypeMappingNames/>
+      <fieldTypeMappings/>
       <xloc>1344</xloc>
       <yloc>640</yloc>
       <name>order_shipment_event</name>
@@ -1170,6 +1192,8 @@ limitations under the License.
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
+      <dataTypeMappingNames/>
+      <fieldTypeMappings/>
       <whereClause/>
       <generationMode>AUTO</generationMode>
       <publishedCatalogName>all-customer-info</publishedCatalogName>
@@ -1182,6 +1206,8 @@ limitations under the License.
       <drivingTableName>customer_address</drivingTableName>
       <joins/>
       <columns/>
+      <dataTypeMappingNames/>
+      <fieldTypeMappings/>
       <whereClause/>
       <freeSql>SELECT c.customer_id, a.city
 FROM customer_hub c
@@ -1199,6 +1225,8 @@ LIMIT 100</freeSql>
       <drivingTableName>customer_address</drivingTableName>
       <joins/>
       <columns/>
+      <dataTypeMappingNames/>
+      <fieldTypeMappings/>
       <whereClause/>
       <freeSql>SELECT o.order_id, e.message_id
 FROM order_header o
@@ -1399,6 +1427,8 @@ INNER JOIN order_shipment_tracking e ON o.order_id = e.order_id</freeSql>
           <repeated>N</repeated>
         </field>
       </fields>
+      <dataTypeMappingNames/>
+      <fieldTypeMappings/>
       <ignoreMissingPath>Y</ignoreMissingPath>
       <defaultPathLeafToNull>Y</defaultPathLeafToNull>
       <sampleRowLimit>0</sampleRowLimit>
@@ -1523,6 +1553,10 @@ INNER JOIN order_shipment_tracking e ON o.order_id = e.order_id</freeSql>
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
       </columns>
+      <dataTypeMappingNames>
+        <dataTypeMappingName>premodel-defaults</dataTypeMappingName>
+      </dataTypeMappingNames>
+      <fieldTypeMappings/>
       <xloc>480</xloc>
       <yloc>432</yloc>
       <name>asn-package-lines</name>

@@ -26,6 +26,8 @@ import org.apache.hop.core.gui.IGuiPosition;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.datavault.metadata.DvSourceType;
+import org.apache.hop.datavault.metadata.datatypemapping.IDataTypeMappingTarget;
+import org.apache.hop.datavault.metadata.datatypemapping.SourceFieldTypeMapping;
 import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadata;
@@ -36,7 +38,8 @@ import org.jspecify.annotations.NonNull;
  */
 @Getter
 @Setter
-public class SourceTable extends HopMetadataBase implements IHopMetadata, IGuiPosition {
+public class SourceTable extends HopMetadataBase
+    implements IHopMetadata, IGuiPosition, IDataTypeMappingTarget {
 
   @HopMetadataProperty private String description;
 
@@ -54,6 +57,18 @@ public class SourceTable extends HopMetadataBase implements IHopMetadata, IGuiPo
   @Getter(AccessLevel.NONE)
   @Setter(AccessLevel.NONE)
   private List<SourceColumn> columns = new ArrayList<>();
+
+  /** Ordered project {@code DataTypeMappingMeta} profile names applied to this table. */
+  @HopMetadataProperty(key = "dataTypeMappingName", groupKey = "dataTypeMappingNames")
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.NONE)
+  private List<String> dataTypeMappingNames = new ArrayList<>();
+
+  /** Per-field fine-tunes applied after profiles. */
+  @HopMetadataProperty(key = "fieldTypeMapping", groupKey = "fieldTypeMappings")
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.NONE)
+  private List<SourceFieldTypeMapping> fieldTypeMappings = new ArrayList<>();
 
   @HopMetadataProperty(inline = true)
   private Point location = new Point(50, 50);
@@ -79,6 +94,33 @@ public class SourceTable extends HopMetadataBase implements IHopMetadata, IGuiPo
 
   public void setColumns(List<SourceColumn> columns) {
     this.columns = columns != null ? columns : new ArrayList<>();
+  }
+
+  @Override
+  public @NonNull List<String> getDataTypeMappingNames() {
+    if (dataTypeMappingNames == null) {
+      dataTypeMappingNames = new ArrayList<>();
+    }
+    return dataTypeMappingNames;
+  }
+
+  @Override
+  public void setDataTypeMappingNames(List<String> dataTypeMappingNames) {
+    this.dataTypeMappingNames =
+        dataTypeMappingNames != null ? dataTypeMappingNames : new ArrayList<>();
+  }
+
+  @Override
+  public @NonNull List<SourceFieldTypeMapping> getFieldTypeMappings() {
+    if (fieldTypeMappings == null) {
+      fieldTypeMappings = new ArrayList<>();
+    }
+    return fieldTypeMappings;
+  }
+
+  @Override
+  public void setFieldTypeMappings(List<SourceFieldTypeMapping> fieldTypeMappings) {
+    this.fieldTypeMappings = fieldTypeMappings != null ? fieldTypeMappings : new ArrayList<>();
   }
 
   public SourceColumn findColumn(String columnName) {

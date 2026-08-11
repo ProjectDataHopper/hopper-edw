@@ -30,6 +30,8 @@ import org.apache.hop.datavault.catalog.RecordSourceIndicatorSupport;
 import org.apache.hop.datavault.metadata.DataVaultSource;
 import org.apache.hop.datavault.metadata.DvSourceDeliveryType;
 import org.apache.hop.datavault.metadata.SourceField;
+import org.apache.hop.datavault.metadata.datatypemapping.SourceDataTypeMappingPublishSupport;
+import org.apache.hop.datavault.metadata.datatypemapping.SourceDataTypeMappingSupport;
 import org.apache.hop.datavault.metadata.json.DvJsonSource;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJson;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJsonField;
@@ -77,7 +79,7 @@ public final class SourceJsonCatalogPublisher {
             ? jsonSource.getPublishedCatalogName().trim()
             : jsonSource.getName().trim();
 
-    List<SourceField> fields = buildFieldsFromProjection(model, jsonSource);
+    List<SourceField> fields = buildFieldsFromProjection(model, jsonSource, metadataProvider);
     RecordSourceIndicatorOptions indicatorOptions =
         RecordSourceIndicatorSupport.resolveForTable(null, fields, feedName);
 
@@ -112,49 +114,53 @@ public final class SourceJsonCatalogPublisher {
   }
 
   public static List<SourceField> buildFieldsFromProjection(SourceJson jsonSource) {
-    return buildFieldsFromProjection(null, jsonSource);
+    try {
+      return buildFieldsFromProjection(null, jsonSource, null);
+    } catch (HopException e) {
+      return List.of();
+    }
+  }
+
+  public static List<SourceField> buildFieldsFromProjection(
+      SourceModel model, SourceJson jsonSource) {
+    try {
+      return buildFieldsFromProjection(model, jsonSource, null);
+    } catch (HopException e) {
+      return List.of();
+    }
   }
 
   /**
-   * Builds catalog field layout from the JSON projection. When {@code model} is provided,
-   * pass-through fields with unset hop types inherit the parent table/query/JSON column type.
-   * Remaining unknown types default to {@link IValueMeta#TYPE_STRING}.
+   * Builds catalog field layout from the JSON projection, then applies data type mappings when
+   * configured. When {@code model} is provided, pass-through fields with unset hop types inherit
+   * the parent table/query/JSON column type. Remaining unknown types default to {@link
+   * IValueMeta#TYPE_STRING}.
    */
   public static List<SourceField> buildFieldsFromProjection(
-      SourceModel model, SourceJson jsonSource) {
-    List<SourceField> fields = new ArrayList<>();
+      SourceModel model, SourceJson jsonSource, IHopMetadataProvider metadataProvider)
+      throws HopException {
     if (jsonSource == null) {
-      return fields;
+      return new ArrayList<>();
     }
-    for (SourceJsonField field : jsonSource.getFields()) {
-      if (field == null) {
+    // Physical baseline includes parse-time format from SourceJsonField via PhysicalSourceField.
+    // Enrich hop types from parent model when present (pass-through fields).
+    var physical = SourceDataTypeMappingSupport.physicalFields(jsonSource);
+    for (int i = 0; i < physical.size(); i++) {
+      SourceJsonField jsonField =
+          i < jsonSource.getFields().size() ? jsonSource.getFields().get(i) : null;
+      if (jsonField == null || physical.get(i) == null) {
         continue;
       }
-      String name = field.resolveName();
-      if (Utils.isEmpty(name)) {
-        continue;
+      int hopType = SourceJsonFieldSupport.resolveEffectiveHopType(model, jsonSource, jsonField);
+      if (hopType > 0) {
+        physical.get(i).setHopType(hopType);
       }
-      SourceField sourceField = new SourceField(name);
-      int hopType = SourceJsonFieldSupport.resolveEffectiveHopType(model, jsonSource, field);
-      if (hopType <= 0) {
-        hopType = IValueMeta.TYPE_STRING;
+      if (!Utils.isEmpty(jsonField.getPath())) {
+        physical.get(i).setDescription("JsonPath: " + jsonField.getPath());
       }
-      sourceField.setHopType(hopType);
-      if (field.getLength() >= 0) {
-        sourceField.setLength(Integer.toString(field.getLength()));
-      }
-      if (field.getPrecision() >= 0) {
-        sourceField.setPrecision(Integer.toString(field.getPrecision()));
-      }
-      if (field.isPrimaryKey()) {
-        sourceField.setPrimaryKeyPosition(field.getPrimaryKeyPosition());
-      }
-      if (!Utils.isEmpty(field.getPath())) {
-        sourceField.setDescription("JsonPath: " + field.getPath());
-      }
-      fields.add(sourceField);
     }
-    return fields;
+    return SourceDataTypeMappingPublishSupport.toEffectiveSourceFields(
+        jsonSource, physical, metadataProvider);
   }
 
   private static String resolveCatalogConnection(
