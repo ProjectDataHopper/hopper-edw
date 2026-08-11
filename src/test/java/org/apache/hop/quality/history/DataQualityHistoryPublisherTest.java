@@ -185,9 +185,10 @@ class DataQualityHistoryPublisherTest {
           throw new RuntimeException("forced mid-publish failure");
         };
     try {
+      // null log: avoid ERROR + stacktrace in CI (intentional failure path; result is asserted)
       PublishResult result =
           DataQualityHistoryPublisher.publish(
-              LogChannel.GENERAL,
+              null,
               report,
               context,
               "load-partial",

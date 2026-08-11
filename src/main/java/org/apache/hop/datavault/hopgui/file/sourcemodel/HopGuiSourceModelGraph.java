@@ -136,8 +136,6 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       "HopGuiSourceModelGraph-ToolBar-10050-Edit-Model";
   public static final String TOOLBAR_ITEM_IMPORT_SCHEMA =
       "HopGuiSourceModelGraph-ToolBar-10055-Import-Schema";
-  public static final String TOOLBAR_ITEM_NEW_JSON =
-      "HopGuiSourceModelGraph-ToolBar-10059-New-Json";
   public static final String TOOLBAR_ITEM_NEW_PIPELINE =
       "HopGuiSourceModelGraph-ToolBar-10057-New-Pipeline";
   public static final String TOOLBAR_ITEM_PUSH_TO_CATALOG =
@@ -504,16 +502,6 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
           setChanged();
           redraw();
         });
-  }
-
-  @GuiToolbarElement(
-      root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
-      id = TOOLBAR_ITEM_NEW_JSON,
-      toolTip = "i18n::HopGuiSourceModelGraph.Toolbar.NewJson.Tooltip",
-      type = GuiToolbarElementType.BUTTON,
-      image = "source-model.svg")
-  public void newJsonFromToolbar() {
-    addJsonAt(lastClick != null ? lastClick : new Point(50, 50));
   }
 
   @GuiToolbarElement(

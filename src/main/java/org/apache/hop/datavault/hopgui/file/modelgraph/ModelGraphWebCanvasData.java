@@ -65,13 +65,28 @@ public final class ModelGraphWebCanvasData {
 
   private ModelGraphWebCanvasData() {}
 
-  /** Creates an {@link SvgGc} with Hop GUI dark-mode settings (notes + theme colors). */
+  /**
+   * Creates an {@link SvgGc} with Hop GUI dark-mode settings (notes + theme colors).
+   *
+   * <p>When {@link PropsUi} cannot initialize (unit tests / headless without RCP {@code
+   * TextSizeUtilFacadeImpl}), falls back to light mode so SVG generation still works.
+   */
   public static SvgGc createSvgGc(HopSvgGraphics2D graphics2D, Point canvasSize, int iconSize)
       throws HopException {
-    PropsUi propsUi = PropsUi.getInstance();
-    boolean darkMode = propsUi.isDarkMode();
+    boolean darkMode = false;
+    Map<String, String> contrasting = null;
+    try {
+      PropsUi propsUi = PropsUi.getInstance();
+      darkMode = propsUi.isDarkMode();
+      if (darkMode) {
+        contrasting = propsUi.getContrastingColorStrings();
+      }
+    } catch (Throwable t) {
+      // PropsUi needs TextSizeUtilFacadeImpl (RCP/RAP only). Safe for SVG unit tests.
+      LogChannel.GENERAL.logDebug(
+          "PropsUi unavailable for SVG canvas; using light mode: " + t.getMessage());
+    }
     NotePadStyle.setDarkMode(darkMode);
-    Map<String, String> contrasting = darkMode ? propsUi.getContrastingColorStrings() : null;
     return new SvgGc(graphics2D, canvasSize, iconSize, 0, 0, darkMode, contrasting);
   }
 
