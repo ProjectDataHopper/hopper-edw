@@ -29,6 +29,7 @@ import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
@@ -2195,6 +2196,53 @@ public final class DmValidationSupport {
       }
       return;
     }
+    if (source.isDateGeneratorSource()) {
+      DmDateGeneratorConfiguration generator =
+          source.getDateGenerator() != null
+              ? source.getDateGenerator()
+              : DmDateGeneratorConfiguration.createDefault();
+      boolean hasField = false;
+      for (var field : generator.getFieldsOrEmpty()) {
+        if (field != null && !Utils.isEmpty(field.getName())) {
+          hasField = true;
+          break;
+        }
+      }
+      if (!hasField) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_ERROR,
+                BaseMessages.getString(
+                    PKG,
+                    "DmValidationSupport.CheckResult.MissingDateGeneratorFields",
+                    table.getName()),
+                table));
+      }
+      if (Utils.isEmpty(generator.getStartDate()) || Utils.isEmpty(generator.getEndDate())) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_ERROR,
+                BaseMessages.getString(
+                    PKG,
+                    "DmValidationSupport.CheckResult.MissingDateGeneratorRange",
+                    table.getName()),
+                table));
+      } else {
+        try {
+          DateDimensionGeneratorLogic.resolveDateRange(
+              generator.getStartDate(), generator.getEndDate(), variables);
+          DateDimensionGeneratorLogic.resolveContext(
+              generator.getReferenceDate(),
+              generator.getDayOffset(),
+              generator.getWeekOffset(),
+              generator.getMonthOffset(),
+              variables);
+        } catch (HopException e) {
+          remarks.add(new CheckResult(ICheckResult.TYPE_RESULT_ERROR, e.getMessage(), table));
+        }
+      }
+      return;
+    }
     if (source.isRecordDefinitionSource()) {
       DimensionalConfiguration config = model != null ? model.getConfigurationOrDefault() : null;
       if (Utils.isEmpty(source.resolveSourceCatalogConnection(variables))
@@ -2284,7 +2332,9 @@ public final class DmValidationSupport {
       return false;
     }
     DmSourceConfiguration source = table.getSourceOrDefault();
-    if (source.isPipelineSource() || source.isRecordDefinitionSource()) {
+    if (source.isPipelineSource()
+        || source.isRecordDefinitionSource()
+        || source.isDateGeneratorSource()) {
       if (metadataProvider == null || model == null) {
         return false;
       }

@@ -16,6 +16,8 @@
  */
 package org.apache.hop.datavault.transform.datedimensiongenerator;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.value.ValueMetaFactory;
@@ -34,6 +36,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
@@ -48,8 +51,14 @@ public class DateDimensionGeneratorDialog extends BaseTransformDialog {
 
   private Text wStartDate;
   private Text wEndDate;
+  private Text wReferenceDate;
+  private Text wDayOffset;
+  private Text wWeekOffset;
+  private Text wMonthOffset;
   private TableView wFields;
   private Button wLoadDefaults;
+  private Button wLoadRelativeDefaults;
+  private Button wLoadFiscalDefaults;
 
   public DateDimensionGeneratorDialog(
       Shell parent,
@@ -66,46 +75,68 @@ public class DateDimensionGeneratorDialog extends BaseTransformDialog {
 
     buildButtonBar().ok(e -> ok()).cancel(e -> cancel()).build();
 
-    Label wlStartDate = new Label(shell, SWT.RIGHT);
-    wlStartDate.setText(
-        BaseMessages.getString(PKG, "DateDimensionGeneratorDialog.StartDate.Label"));
-    PropsUi.setLook(wlStartDate);
-    FormData fdlStartDate = new FormData();
-    fdlStartDate.left = new FormAttachment(0, 0);
-    fdlStartDate.right = new FormAttachment(middle, -margin);
-    fdlStartDate.top = new FormAttachment(wSpacer, margin);
-    wlStartDate.setLayoutData(fdlStartDate);
-    wStartDate = new Text(shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
-    PropsUi.setLook(wStartDate);
-    FormData fdStartDate = new FormData();
-    fdStartDate.left = new FormAttachment(middle, 0);
-    fdStartDate.top = new FormAttachment(wSpacer, margin);
-    fdStartDate.right = new FormAttachment(100, 0);
-    wStartDate.setLayoutData(fdStartDate);
+    wStartDate =
+        addLabeledText(
+            BaseMessages.getString(PKG, "DateDimensionGeneratorDialog.StartDate.Label"), wSpacer);
+    wEndDate =
+        addLabeledText(
+            BaseMessages.getString(PKG, "DateDimensionGeneratorDialog.EndDate.Label"), wStartDate);
+    wReferenceDate =
+        addLabeledText(
+            BaseMessages.getString(PKG, "DateDimensionGeneratorDialog.ReferenceDate.Label"),
+            wEndDate);
+    wDayOffset =
+        addLabeledText(
+            BaseMessages.getString(PKG, "DateDimensionGeneratorDialog.DayOffset.Label"),
+            wReferenceDate);
+    wWeekOffset =
+        addLabeledText(
+            BaseMessages.getString(PKG, "DateDimensionGeneratorDialog.WeekOffset.Label"),
+            wDayOffset);
+    wMonthOffset =
+        addLabeledText(
+            BaseMessages.getString(PKG, "DateDimensionGeneratorDialog.MonthOffset.Label"),
+            wWeekOffset);
 
-    Label wlEndDate = new Label(shell, SWT.RIGHT);
-    wlEndDate.setText(BaseMessages.getString(PKG, "DateDimensionGeneratorDialog.EndDate.Label"));
-    PropsUi.setLook(wlEndDate);
-    FormData fdlEndDate = new FormData();
-    fdlEndDate.left = new FormAttachment(0, 0);
-    fdlEndDate.right = new FormAttachment(middle, -margin);
-    fdlEndDate.top = new FormAttachment(wStartDate, margin);
-    wlEndDate.setLayoutData(fdlEndDate);
-    wEndDate = new Text(shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
-    PropsUi.setLook(wEndDate);
-    FormData fdEndDate = new FormData();
-    fdEndDate.left = new FormAttachment(middle, 0);
-    fdEndDate.top = new FormAttachment(wStartDate, margin);
-    fdEndDate.right = new FormAttachment(100, 0);
-    wEndDate.setLayoutData(fdEndDate);
+    wLoadFiscalDefaults = new Button(shell, SWT.PUSH);
+    wLoadFiscalDefaults.setText(
+        BaseMessages.getString(PKG, "DateDimensionGeneratorDialog.LoadFiscalDefaults.Label"));
+    PropsUi.setLook(wLoadFiscalDefaults);
+    FormData fdLoadFiscal = new FormData();
+    fdLoadFiscal.top = new FormAttachment(wMonthOffset, margin);
+    fdLoadFiscal.right = new FormAttachment(100, 0);
+    wLoadFiscalDefaults.setLayoutData(fdLoadFiscal);
+    wLoadFiscalDefaults.addSelectionListener(
+        new SelectionAdapter() {
+          @Override
+          public void widgetSelected(SelectionEvent e) {
+            appendFields(DateDimensionGeneratorMetaFactory.fiscalDefaultFields());
+          }
+        });
+
+    wLoadRelativeDefaults = new Button(shell, SWT.PUSH);
+    wLoadRelativeDefaults.setText(
+        BaseMessages.getString(PKG, "DateDimensionGeneratorDialog.LoadRelativeDefaults.Label"));
+    PropsUi.setLook(wLoadRelativeDefaults);
+    FormData fdLoadRelative = new FormData();
+    fdLoadRelative.top = new FormAttachment(wMonthOffset, margin);
+    fdLoadRelative.right = new FormAttachment(wLoadFiscalDefaults, -margin);
+    wLoadRelativeDefaults.setLayoutData(fdLoadRelative);
+    wLoadRelativeDefaults.addSelectionListener(
+        new SelectionAdapter() {
+          @Override
+          public void widgetSelected(SelectionEvent e) {
+            appendFields(DateDimensionGeneratorMetaFactory.relativeDefaultFields());
+          }
+        });
 
     wLoadDefaults = new Button(shell, SWT.PUSH);
     wLoadDefaults.setText(
         BaseMessages.getString(PKG, "DateDimensionGeneratorDialog.LoadDefaults.Label"));
     PropsUi.setLook(wLoadDefaults);
     FormData fdLoadDefaults = new FormData();
-    fdLoadDefaults.top = new FormAttachment(wEndDate, margin);
-    fdLoadDefaults.right = new FormAttachment(100, 0);
+    fdLoadDefaults.top = new FormAttachment(wMonthOffset, margin);
+    fdLoadDefaults.right = new FormAttachment(wLoadRelativeDefaults, -margin);
     wLoadDefaults.setLayoutData(fdLoadDefaults);
     wLoadDefaults.addSelectionListener(
         new SelectionAdapter() {
@@ -175,24 +206,40 @@ public class DateDimensionGeneratorDialog extends BaseTransformDialog {
     return transformName;
   }
 
+  private Text addLabeledText(String labelText, Control top) {
+    Label label = new Label(shell, SWT.RIGHT);
+    label.setText(labelText);
+    PropsUi.setLook(label);
+    FormData fdl = new FormData();
+    fdl.left = new FormAttachment(0, 0);
+    fdl.right = new FormAttachment(middle, -margin);
+    fdl.top = new FormAttachment(top, margin);
+    label.setLayoutData(fdl);
+
+    Text text = new Text(shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+    PropsUi.setLook(text);
+    FormData fdt = new FormData();
+    fdt.left = new FormAttachment(middle, 0);
+    fdt.top = new FormAttachment(top, margin);
+    fdt.right = new FormAttachment(100, 0);
+    text.setLayoutData(fdt);
+    return text;
+  }
+
   public void getData() {
     wStartDate.setText(Const.NVL(input.getStartDate(), ""));
     wEndDate.setText(Const.NVL(input.getEndDate(), ""));
+    wReferenceDate.setText(Const.NVL(input.getReferenceDate(), ""));
+    wDayOffset.setText(Const.NVL(input.getDayOffset(), "0"));
+    wWeekOffset.setText(Const.NVL(input.getWeekOffset(), "0"));
+    wMonthOffset.setText(Const.NVL(input.getMonthOffset(), "0"));
 
     Table table = wFields.table;
     if (!input.getFields().isEmpty()) {
       table.removeAll();
     }
     for (int i = 0; i < input.getFields().size(); i++) {
-      DateDimensionGeneratorField field = input.getFields().get(i);
-      TableItem item = new TableItem(table, SWT.NONE);
-      item.setText(0, "" + (i + 1));
-      item.setText(1, Const.NVL(field.getName(), ""));
-      item.setText(2, ValueMetaFactory.getValueMetaName(field.getHopType()));
-      item.setText(3, Const.NVL(field.getLength(), ""));
-      item.setText(4, Const.NVL(field.getPrecision(), ""));
-      item.setText(5, Const.NVL(field.getFormatMask(), ""));
-      item.setText(6, Const.NVL(field.getLocale(), ""));
+      addFieldRow(table, i, input.getFields().get(i));
     }
 
     wFields.optimizeTableView();
@@ -201,25 +248,68 @@ public class DateDimensionGeneratorDialog extends BaseTransformDialog {
   private void loadDefaults() {
     wStartDate.setText(DateDimensionGeneratorMetaFactory.DEFAULT_START_DATE);
     wEndDate.setText(DateDimensionGeneratorMetaFactory.DEFAULT_END_DATE);
+    wReferenceDate.setText("");
+    wDayOffset.setText("0");
+    wWeekOffset.setText("0");
+    wMonthOffset.setText("0");
     populateFields(DateDimensionGeneratorMetaFactory.defaultFields());
     input.setChanged();
   }
 
-  private void populateFields(java.util.List<DateDimensionGeneratorField> fields) {
+  private void appendFields(List<DateDimensionGeneratorField> extraFields) {
+    List<DateDimensionGeneratorField> merged = new ArrayList<>(readFieldsFromTable());
+    for (DateDimensionGeneratorField extra : extraFields) {
+      if (extra == null || Utils.isEmpty(extra.getName())) {
+        continue;
+      }
+      boolean exists =
+          merged.stream()
+              .anyMatch(existing -> extra.getName().equalsIgnoreCase(existing.getName()));
+      if (!exists) {
+        merged.add(extra);
+      }
+    }
+    populateFields(merged);
+    input.setChanged();
+  }
+
+  private void populateFields(List<DateDimensionGeneratorField> fields) {
     Table table = wFields.table;
     table.removeAll();
     for (int i = 0; i < fields.size(); i++) {
-      DateDimensionGeneratorField field = fields.get(i);
-      TableItem item = new TableItem(table, SWT.NONE);
-      item.setText(0, "" + (i + 1));
-      item.setText(1, Const.NVL(field.getName(), ""));
-      item.setText(2, ValueMetaFactory.getValueMetaName(field.getHopType()));
-      item.setText(3, Const.NVL(field.getLength(), ""));
-      item.setText(4, Const.NVL(field.getPrecision(), ""));
-      item.setText(5, Const.NVL(field.getFormatMask(), ""));
-      item.setText(6, Const.NVL(field.getLocale(), ""));
+      addFieldRow(table, i, fields.get(i));
     }
     wFields.optimizeTableView();
+  }
+
+  private void addFieldRow(Table table, int index, DateDimensionGeneratorField field) {
+    TableItem item = new TableItem(table, SWT.NONE);
+    item.setText(0, "" + (index + 1));
+    item.setText(1, Const.NVL(field.getName(), ""));
+    item.setText(2, ValueMetaFactory.getValueMetaName(field.getHopType()));
+    item.setText(3, Const.NVL(field.getLength(), ""));
+    item.setText(4, Const.NVL(field.getPrecision(), ""));
+    item.setText(5, Const.NVL(field.getFormatMask(), ""));
+    item.setText(6, Const.NVL(field.getLocale(), ""));
+  }
+
+  private List<DateDimensionGeneratorField> readFieldsFromTable() {
+    List<DateDimensionGeneratorField> fields = new ArrayList<>();
+    for (TableItem item : wFields.getNonEmptyItems()) {
+      DateDimensionGeneratorField field = new DateDimensionGeneratorField();
+      field.setName(item.getText(1));
+      try {
+        field.setHopType(ValueMetaFactory.getIdForValueMeta(item.getText(2)));
+      } catch (Exception e) {
+        field.setHopType(IValueMeta.TYPE_STRING);
+      }
+      field.setLength(item.getText(3));
+      field.setPrecision(item.getText(4));
+      field.setFormatMask(item.getText(5));
+      field.setLocale(item.getText(6));
+      fields.add(field);
+    }
+    return fields;
   }
 
   private void cancel() {
@@ -234,23 +324,12 @@ public class DateDimensionGeneratorDialog extends BaseTransformDialog {
     transformName = wTransformName.getText();
     input.setStartDate(wStartDate.getText());
     input.setEndDate(wEndDate.getText());
-
+    input.setReferenceDate(wReferenceDate.getText());
+    input.setDayOffset(wDayOffset.getText());
+    input.setWeekOffset(wWeekOffset.getText());
+    input.setMonthOffset(wMonthOffset.getText());
     input.getFields().clear();
-    for (TableItem item : wFields.getNonEmptyItems()) {
-      DateDimensionGeneratorField field = new DateDimensionGeneratorField();
-      field.setName(item.getText(1));
-      try {
-        field.setHopType(ValueMetaFactory.getIdForValueMeta(item.getText(2)));
-      } catch (Exception e) {
-        field.setHopType(IValueMeta.TYPE_STRING);
-      }
-      field.setLength(item.getText(3));
-      field.setPrecision(item.getText(4));
-      field.setFormatMask(item.getText(5));
-      field.setLocale(item.getText(6));
-      input.getFields().add(field);
-    }
-
+    input.getFields().addAll(readFieldsFromTable());
     input.setChanged();
     dispose();
   }

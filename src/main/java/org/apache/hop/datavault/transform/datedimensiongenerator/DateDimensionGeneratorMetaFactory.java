@@ -52,6 +52,38 @@ public final class DateDimensionGeneratorMetaFactory {
     return fields;
   }
 
+  /** Optional relative-to-reference fields for dynamic reporting filters. */
+  public static List<DateDimensionGeneratorField> relativeDefaultFields() {
+    List<DateDimensionGeneratorField> fields = new ArrayList<>();
+    fields.add(field("day_rel", IValueMeta.TYPE_INTEGER, "6", "0", "@rel_day", ""));
+    fields.add(field("week_rel", IValueMeta.TYPE_INTEGER, "6", "0", "@rel_week", ""));
+    fields.add(field("month_rel", IValueMeta.TYPE_INTEGER, "6", "0", "@rel_month", ""));
+    fields.add(field("quarter_rel", IValueMeta.TYPE_INTEGER, "6", "0", "@rel_quarter", ""));
+    fields.add(field("year_rel", IValueMeta.TYPE_INTEGER, "4", "0", "@rel_year", ""));
+    fields.add(field("day_rel_label", IValueMeta.TYPE_STRING, "8", "0", "@rel_label_day", ""));
+    fields.add(field("week_rel_label", IValueMeta.TYPE_STRING, "8", "0", "@rel_label_week", ""));
+    fields.add(field("month_rel_label", IValueMeta.TYPE_STRING, "8", "0", "@rel_label_month", ""));
+    fields.add(
+        field("quarter_rel_label", IValueMeta.TYPE_STRING, "8", "0", "@rel_label_quarter", ""));
+    fields.add(field("year_rel_label", IValueMeta.TYPE_STRING, "8", "0", "@rel_label_year", ""));
+    fields.add(field("is_ytd", IValueMeta.TYPE_BOOLEAN, "", "", "@ytd", ""));
+    fields.add(field("is_ytg", IValueMeta.TYPE_BOOLEAN, "", "", "@ytg", ""));
+    fields.add(field("is_rolling12", IValueMeta.TYPE_BOOLEAN, "", "", "@rolling12", ""));
+    return fields;
+  }
+
+  /** Optional fiscal calendar fields (use with month/week/day offsets on the transform). */
+  public static List<DateDimensionGeneratorField> fiscalDefaultFields() {
+    List<DateDimensionGeneratorField> fields = new ArrayList<>();
+    fields.add(field("fiscal_year", IValueMeta.TYPE_INTEGER, "4", "0", "@fiscal_year", ""));
+    fields.add(field("fiscal_quarter", IValueMeta.TYPE_INTEGER, "1", "0", "@fiscal_quarter", ""));
+    fields.add(field("fiscal_month", IValueMeta.TYPE_INTEGER, "2", "0", "@fiscal_month", ""));
+    fields.add(field("fiscal_week", IValueMeta.TYPE_INTEGER, "2", "0", "@fiscal_week", ""));
+    fields.add(
+        field("fiscal_day_of_year", IValueMeta.TYPE_INTEGER, "3", "0", "@fiscal_day_of_year", ""));
+    return fields;
+  }
+
   private static DateDimensionGeneratorField field(
       String name, int hopType, String length, String precision, String formatMask, String locale) {
     return new DateDimensionGeneratorField(name, hopType, length, precision, formatMask, locale);

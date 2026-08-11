@@ -144,6 +144,7 @@ public class HopGuiDmTableDialog {
   private Button wSelectSourceRecord;
   private Button wSourceRecordPreviewData;
   private Button wSourceRecordPreviewFields;
+  private DmSourceDateGeneratorGuiSupport.Widgets dateGeneratorWidgets;
   private Text wDerivedLoadStrategy;
   private Combo wSurrogateKeyStrategy;
   private Text wSurrogateKeyField;
@@ -1030,6 +1031,9 @@ public class HopGuiDmTableDialog {
         new FormDataBuilder().left(wSourceRecordPreviewData, margin).bottom().result());
     wSourceRecordPreviewFields.addListener(SWT.Selection, e -> previewSourceRecordFields());
 
+    dateGeneratorWidgets =
+        DmSourceDateGeneratorGuiSupport.create(comp, variables, wSourceType, margin);
+
     refreshSourcePanelVisibility();
   }
 
@@ -1093,7 +1097,10 @@ public class HopGuiDmTableDialog {
     String previousSelection = wSourceType.getText();
     String[] options =
         junk
-            ? DmSourceType.getDescriptions()
+            ? java.util.Arrays.stream(DmSourceType.values())
+                .filter(type -> type != DmSourceType.DATE_GENERATOR)
+                .map(DmSourceType::getDescription)
+                .toArray(String[]::new)
             : java.util.Arrays.stream(DmSourceType.values())
                 .filter(type -> type != DmSourceType.FACT_TABLE)
                 .map(DmSourceType::getDescription)
@@ -1127,7 +1134,9 @@ public class HopGuiDmTableDialog {
     boolean factTableSource = isFactTableSourceSelected();
     boolean pipelineSource = isPipelineSourceSelected();
     boolean recordDefinitionSource = isRecordDefinitionSourceSelected();
-    boolean sqlSource = !factTableSource && !pipelineSource && !recordDefinitionSource;
+    boolean dateGeneratorSource = isDateGeneratorSourceSelected();
+    boolean sqlSource =
+        !factTableSource && !pipelineSource && !recordDefinitionSource && !dateGeneratorSource;
     setSourceWidgetVisible(wlSourceFactTable, factTableSource);
     setSourceWidgetVisible(wSourceFactTable, factTableSource);
     if (factTableSource) {
@@ -1155,6 +1164,11 @@ public class HopGuiDmTableDialog {
     setSourceWidgetVisible(wSelectSourceRecord, recordDefinitionSource);
     setSourceWidgetVisible(wSourceRecordPreviewData, recordDefinitionSource);
     setSourceWidgetVisible(wSourceRecordPreviewFields, recordDefinitionSource);
+    if (dateGeneratorWidgets != null) {
+      for (org.eclipse.swt.widgets.Control control : dateGeneratorWidgets.allControls()) {
+        setSourceWidgetVisible(control, dateGeneratorSource);
+      }
+    }
   }
 
   private void previewSourcePipelineData() {
@@ -1176,6 +1190,10 @@ public class HopGuiDmTableDialog {
 
   private boolean isRecordDefinitionSourceSelected() {
     return resolveSelectedSourceType() == DmSourceType.RECORD_DEFINITION;
+  }
+
+  private boolean isDateGeneratorSourceSelected() {
+    return resolveSelectedSourceType() == DmSourceType.DATE_GENERATOR;
   }
 
   private DmSourceType resolveSelectedSourceType() {
@@ -1967,6 +1985,10 @@ public class HopGuiDmTableDialog {
           }
         }
       }
+      if (dateGeneratorWidgets != null) {
+        DmSourceDateGeneratorGuiSupport.setData(
+            dateGeneratorWidgets, input.getSourceOrDefault().getDateGenerator());
+      }
       refreshSourcePanelVisibility();
       refreshOpenSourcePipelineButtonState();
     }
@@ -2269,6 +2291,12 @@ public class HopGuiDmTableDialog {
       target.getSourceOrDefault().setSourceCatalogConnection(wSourceCatalogConnection.getText());
       target.getSourceOrDefault().setSourceRecordNamespace(wSourceRecordNamespace.getText());
       target.getSourceOrDefault().setSourceRecordName(wSourceRecordName.getText());
+      if (dateGeneratorWidgets != null
+          && target.getSourceOrDefault().resolveSourceType() == DmSourceType.DATE_GENERATOR) {
+        target
+            .getSourceOrDefault()
+            .setDateGenerator(DmSourceDateGeneratorGuiSupport.readData(dateGeneratorWidgets));
+      }
     }
 
     if (range && target instanceof DmRangeDimension rangeDimension) {

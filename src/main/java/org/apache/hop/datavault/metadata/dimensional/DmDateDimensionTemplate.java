@@ -39,9 +39,11 @@ public final class DmDateDimensionTemplate {
     dimension.setDescription("Calendar date dimension");
     dimension.setScdType(DmDimensionScdType.TYPE1);
     dimension.setLocation(location != null ? location.x : 0, location != null ? location.y : 0);
-    dimension
-        .getSourceOrDefault()
-        .setSourceSql("-- Populate dim_date from a calendar generator or staging source");
+    dimension.setSurrogateKeyStrategy(DmSurrogateKeyStrategy.NONE);
+    DmSourceConfiguration source = dimension.getSourceOrDefault();
+    source.setSourceType(DmSourceType.DATE_GENERATOR);
+    source.setDateGenerator(DmDateGeneratorConfiguration.createDefault());
+    source.setSourceSql("");
     dimension.getNaturalKeys().add(new DmNaturalKeyField("date_key"));
     addAttribute(dimension, "full_date");
     addAttribute(dimension, "day_of_week");

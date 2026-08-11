@@ -29,6 +29,8 @@ public enum DmSourceType implements IEnumHasCodeAndDescription {
   RECORD_DEFINITION(
       "RECORD_DEFINITION",
       BaseMessages.getString(DmSourceType.class, "DmSourceType.RecordDefinition")),
+  DATE_GENERATOR(
+      "DATE_GENERATOR", BaseMessages.getString(DmSourceType.class, "DmSourceType.DateGenerator")),
   FACT_TABLE("FACT_TABLE", BaseMessages.getString(DmSourceType.class, "DmSourceType.FactTable"));
 
   private final String code;

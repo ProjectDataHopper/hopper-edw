@@ -18,6 +18,7 @@ package org.apache.hop.datavault.transform.datedimensiongenerator;
 
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic.DateRange;
+import org.apache.hop.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic.GeneratorContext;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.pipeline.Pipeline;
 import org.apache.hop.pipeline.PipelineMeta;
@@ -51,6 +52,13 @@ public class DateDimensionGenerator
               meta.getStartDate(), meta.getEndDate(), this);
       data.currentDate = range.startDate();
       data.endDate = range.endDate();
+      data.context =
+          DateDimensionGeneratorLogic.resolveContext(
+              meta.getReferenceDate(),
+              meta.getDayOffset(),
+              meta.getWeekOffset(),
+              meta.getMonthOffset(),
+              this);
       data.outputRowMeta =
           DateDimensionGeneratorLogic.buildOutputRowMeta(
               meta.getFields(), getTransformName(), this);
@@ -70,7 +78,9 @@ public class DateDimensionGenerator
       return false;
     }
 
-    Object[] row = DateDimensionGeneratorLogic.buildRow(data.currentDate, data.preparedFields);
+    GeneratorContext context = data.context != null ? data.context : GeneratorContext.DEFAULT;
+    Object[] row =
+        DateDimensionGeneratorLogic.buildRow(data.currentDate, data.preparedFields, context);
     putRow(data.outputRowMeta, row);
     data.currentDate = data.currentDate.plusDays(1);
 

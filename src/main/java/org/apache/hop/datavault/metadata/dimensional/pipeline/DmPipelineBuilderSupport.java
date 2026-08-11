@@ -33,6 +33,7 @@ import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
 import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataSupport;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalConfiguration;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
+import org.apache.hop.datavault.metadata.dimensional.DmDateGeneratorConfiguration;
 import org.apache.hop.datavault.metadata.dimensional.DmDimension;
 import org.apache.hop.datavault.metadata.dimensional.DmDimensionLoadStrategySupport;
 import org.apache.hop.datavault.metadata.dimensional.DmSourceConfiguration;
@@ -42,6 +43,7 @@ import org.apache.hop.datavault.metadata.dimensional.DmSurrogateKeyStrategy;
 import org.apache.hop.datavault.metadata.dimensional.DmSurrogateKeySupport;
 import org.apache.hop.datavault.metadata.dimensional.DmTableBase;
 import org.apache.hop.datavault.metadata.dimensional.DmTargetDatabaseSupport;
+import org.apache.hop.datavault.transform.datedimensiongenerator.DateDimensionGeneratorMeta;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineHopMeta;
 import org.apache.hop.pipeline.PipelineMeta;
@@ -152,6 +154,30 @@ public final class DmPipelineBuilderSupport {
         }
         DmSourceRecordDefinitionSupport.resolveCatalogConnection(
             config, source, variables, metadataProvider);
+      } else if (source.isDateGeneratorSource()) {
+        DmDateGeneratorConfiguration generator =
+            source.getDateGenerator() != null
+                ? source.getDateGenerator()
+                : DmDateGeneratorConfiguration.createDefault();
+        boolean hasField = false;
+        for (var field : generator.getFieldsOrEmpty()) {
+          if (field != null && !Utils.isEmpty(field.getName())) {
+            hasField = true;
+            break;
+          }
+        }
+        if (!hasField) {
+          throw new HopException(
+              "Dimensional table "
+                  + table.getName()
+                  + " requires date generator output fields for pipeline generation");
+        }
+        if (Utils.isEmpty(generator.getStartDate()) || Utils.isEmpty(generator.getEndDate())) {
+          throw new HopException(
+              "Dimensional table "
+                  + table.getName()
+                  + " requires date generator start and end dates for pipeline generation");
+        }
       } else {
         throw new HopException(
             "Dimensional table " + table.getName() + " has an unsupported source type");
@@ -207,6 +233,8 @@ public final class DmPipelineBuilderSupport {
       sourceTransform = addSourceMetaInject(ctx, pipelineMeta);
     } else if (ctx.source.isRecordDefinitionSource()) {
       sourceTransform = addSourceRecordDefinition(ctx, pipelineMeta);
+    } else if (ctx.source.isDateGeneratorSource()) {
+      sourceTransform = addSourceDateGenerator(ctx, pipelineMeta);
     } else {
       sourceTransform = addSourceTableInput(ctx, pipelineMeta);
     }
@@ -214,6 +242,19 @@ public final class DmPipelineBuilderSupport {
       GeneratedPipelineMetadataSupport.stampSourceRead(sourceTransform, ctx.sourceDbName);
     }
     return sourceTransform;
+  }
+
+  public static TransformMeta addSourceDateGenerator(BuildContext ctx, PipelineMeta pipelineMeta) {
+    DmDateGeneratorConfiguration config =
+        ctx.source.getDateGenerator() != null
+            ? ctx.source.getDateGenerator()
+            : DmDateGeneratorConfiguration.createDefault();
+    DateDimensionGeneratorMeta generatorMeta = config.toTransformMeta();
+    TransformMeta tm =
+        new TransformMeta("DateDimensionGenerator", "source_" + ctx.targetTableName, generatorMeta);
+    tm.setLocation(LOCATION_START.x, LOCATION_START.y);
+    pipelineMeta.addTransform(tm);
+    return tm;
   }
 
   public static TransformMeta addSourceRecordDefinition(BuildContext ctx, PipelineMeta pipelineMeta)

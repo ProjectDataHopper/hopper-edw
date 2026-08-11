@@ -59,6 +59,12 @@ public class DmSourceConfiguration {
   /** Fact table name when {@link DmSourceType#FACT_TABLE} is selected (junk dimensions). */
   @HopMetadataProperty private String sourceFactTableName;
 
+  /**
+   * Calendar generator options when {@link DmSourceType#DATE_GENERATOR} is selected. Embedded into
+   * the generated load pipeline as a Date Dimension Generator transform.
+   */
+  @HopMetadataProperty private DmDateGeneratorConfiguration dateGenerator;
+
   public DmSourceType resolveSourceType() {
     return sourceType != null ? sourceType : DmSourceType.SQL;
   }
@@ -75,8 +81,19 @@ public class DmSourceConfiguration {
     return resolveSourceType() == DmSourceType.RECORD_DEFINITION;
   }
 
+  public boolean isDateGeneratorSource() {
+    return resolveSourceType() == DmSourceType.DATE_GENERATOR;
+  }
+
   public boolean isFactTableSource() {
     return resolveSourceType() == DmSourceType.FACT_TABLE;
+  }
+
+  public DmDateGeneratorConfiguration getDateGeneratorOrDefault() {
+    if (dateGenerator == null) {
+      dateGenerator = DmDateGeneratorConfiguration.createDefault();
+    }
+    return dateGenerator;
   }
 
   public String resolveSourceConnection(DimensionalConfiguration config, IVariables variables) {

@@ -19,6 +19,7 @@ package org.apache.hop.datavault.transform.datedimensiongenerator;
 import java.time.LocalDate;
 import java.util.List;
 import org.apache.hop.core.row.IRowMeta;
+import org.apache.hop.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic.GeneratorContext;
 import org.apache.hop.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic.PreparedField;
 import org.apache.hop.pipeline.transform.BaseTransformData;
 import org.apache.hop.pipeline.transform.ITransformData;
@@ -28,6 +29,7 @@ public class DateDimensionGeneratorData extends BaseTransformData implements ITr
 
   public IRowMeta outputRowMeta;
   public List<PreparedField> preparedFields;
+  public GeneratorContext context;
   public LocalDate currentDate;
   public LocalDate endDate;
 

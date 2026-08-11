@@ -28,7 +28,12 @@ limitations under the License.
     <dateFromField>x_from_ts</dateFromField>
     <dateToField>x_to_ts</dateToField>
     <loadDateField>x_load_ts</loadDateField>
+    <storeLoadCycleId>N</storeLoadCycleId>
+    <loadCycleIdField>LOAD_CYCLE_ID</loadCycleIdField>
+    <loadCycleControlTable>dv_load_cycle</loadCycleControlTable>
     <currentFlagField>x_is_current</currentFlagField>
+    <generatePrimaryKeys>N</generatePrimaryKeys>
+    <generateForeignKeys>N</generateForeignKeys>
     <openStartSentinel>1900-01-01 00:00:00</openStartSentinel>
     <openEndSentinel>9999-12-31 23:59:59</openEndSentinel>
     <targetTableBatchSize>1000</targetTableBatchSize>
@@ -46,6 +51,9 @@ limitations under the License.
     <factPipelineNamePrefix>dm-fact-</factPipelineNamePrefix>
     <generatedWorkflowNamePrefix>DM Bulk Update - </generatedWorkflowNamePrefix>
   </configuration>
+  <coaching>
+    <coaching_sources/>
+  </coaching>
   <tables>
     <table>
       <scdType>TYPE2</scdType>
@@ -206,75 +214,6 @@ JOIN sat_product sp ON hp.product_hk = sp.product_hk</sourceSql>
       <scdType>TYPE1</scdType>
       <natural_keys>
         <natural_key>
-          <fieldName>date_key</fieldName>
-        </natural_key>
-      </natural_keys>
-      <attributes>
-        <attribute>
-          <fieldName>full_date</fieldName>
-          <scdUpdatePolicy>TYPE1</scdUpdatePolicy>
-        </attribute>
-        <attribute>
-          <fieldName>day_of_week</fieldName>
-          <scdUpdatePolicy>TYPE1</scdUpdatePolicy>
-        </attribute>
-        <attribute>
-          <fieldName>day_of_month</fieldName>
-          <scdUpdatePolicy>TYPE1</scdUpdatePolicy>
-        </attribute>
-        <attribute>
-          <fieldName>day_of_year</fieldName>
-          <scdUpdatePolicy>TYPE1</scdUpdatePolicy>
-        </attribute>
-        <attribute>
-          <fieldName>week_of_year</fieldName>
-          <scdUpdatePolicy>TYPE1</scdUpdatePolicy>
-        </attribute>
-        <attribute>
-          <fieldName>month</fieldName>
-          <scdUpdatePolicy>TYPE1</scdUpdatePolicy>
-        </attribute>
-        <attribute>
-          <fieldName>month_name</fieldName>
-          <scdUpdatePolicy>TYPE1</scdUpdatePolicy>
-        </attribute>
-        <attribute>
-          <fieldName>quarter</fieldName>
-          <scdUpdatePolicy>TYPE1</scdUpdatePolicy>
-        </attribute>
-        <attribute>
-          <fieldName>year</fieldName>
-          <scdUpdatePolicy>TYPE1</scdUpdatePolicy>
-        </attribute>
-        <attribute>
-          <fieldName>is_weekend</fieldName>
-          <scdUpdatePolicy>TYPE1</scdUpdatePolicy>
-        </attribute>
-      </attributes>
-      <outriggers/>
-      <surrogateKeyField/>
-      <surrogateKeyStrategy>NONE</surrogateKeyStrategy>
-      <surrogateKeySourceField/>
-      <tableName>d_date</tableName>
-      <description>Calendar date dimension</description>
-      <tableType>DIMENSION</tableType>
-      <sourceType>PIPELINE</sourceType>
-      <sourceConnection>Vault</sourceConnection>
-      <sourceSql>SELECT date_key, full_date, year, CURRENT_TIMESTAMP AS load_dt FROM stg_e2e_date</sourceSql>
-      <sourcePipelineFile>${PROJECT_HOME}/pipelines/generate-date-dimension-data.hpl</sourcePipelineFile>
-      <sourcePipelineTransform>OUTPUT</sourcePipelineTransform>
-      <sourcePipelineRunConfiguration>local</sourcePipelineRunConfiguration>
-      <sourceCatalogConnection/>
-      <sourceRecordNamespace/>
-      <sourceRecordName/>
-      <xloc>128</xloc>
-      <yloc>80</yloc>
-      <name>d_date</name>
-    </table>
-    <table>
-      <scdType>TYPE1</scdType>
-      <natural_keys>
-        <natural_key>
           <fieldName>warehouse_id</fieldName>
         </natural_key>
       </natural_keys>
@@ -317,6 +256,172 @@ JOIN   sat_warehouse sw ON hw.warehouse_hk = sw.warehouse_hk</sourceSql>
       <xloc>128</xloc>
       <yloc>464</yloc>
       <name>d_warehouse</name>
+    </table>
+    <table>
+      <natural_keys>
+        <natural_key>
+          <fieldName>date_key</fieldName>
+        </natural_key>
+      </natural_keys>
+      <attributes>
+        <attribute>
+          <fieldName>day_of_month</fieldName>
+          <scdUpdatePolicy>TYPE1</scdUpdatePolicy>
+        </attribute>
+        <attribute>
+          <fieldName>day_of_week</fieldName>
+          <scdUpdatePolicy>TYPE1</scdUpdatePolicy>
+        </attribute>
+        <attribute>
+          <fieldName>day_of_year</fieldName>
+          <scdUpdatePolicy>TYPE1</scdUpdatePolicy>
+        </attribute>
+        <attribute>
+          <fieldName>full_date</fieldName>
+          <scdUpdatePolicy>TYPE1</scdUpdatePolicy>
+        </attribute>
+        <attribute>
+          <fieldName>is_weekend</fieldName>
+          <scdUpdatePolicy>TYPE1</scdUpdatePolicy>
+        </attribute>
+        <attribute>
+          <fieldName>month</fieldName>
+          <scdUpdatePolicy>TYPE1</scdUpdatePolicy>
+        </attribute>
+        <attribute>
+          <fieldName>month_name</fieldName>
+          <scdUpdatePolicy>TYPE1</scdUpdatePolicy>
+        </attribute>
+        <attribute>
+          <fieldName>quarter</fieldName>
+          <scdUpdatePolicy>TYPE1</scdUpdatePolicy>
+        </attribute>
+        <attribute>
+          <fieldName>week_of_year</fieldName>
+          <scdUpdatePolicy>TYPE1</scdUpdatePolicy>
+        </attribute>
+        <attribute>
+          <fieldName>year</fieldName>
+          <scdUpdatePolicy>TYPE1</scdUpdatePolicy>
+        </attribute>
+      </attributes>
+      <outriggers/>
+      <surrogateKeyField/>
+      <surrogateKeyStrategy>NONE</surrogateKeyStrategy>
+      <surrogateKeySourceField/>
+      <tableName>d_date</tableName>
+      <description>Calendar date dimension</description>
+      <tableType>DIMENSION</tableType>
+      <sourceType>DATE_GENERATOR</sourceType>
+      <sourceConnection/>
+      <sourceSql/>
+      <sourcePipelineFile/>
+      <sourcePipelineTransform/>
+      <sourcePipelineRunConfiguration/>
+      <sourceCatalogConnection/>
+      <sourceRecordNamespace/>
+      <sourceRecordName/>
+      <dateGenerator>
+        <startDate>2000-01-01</startDate>
+        <endDate>2030-12-31</endDate>
+        <referenceDate/>
+        <dayOffset>0</dayOffset>
+        <weekOffset>0</weekOffset>
+        <monthOffset>0</monthOffset>
+        <fields>
+          <field>
+            <name>date_key</name>
+            <hopType>5</hopType>
+            <length>8</length>
+            <precision>0</precision>
+            <formatMask>yyyyMMdd</formatMask>
+            <locale>en_US</locale>
+          </field>
+          <field>
+            <name>full_date</name>
+            <hopType>3</hopType>
+            <length/>
+            <precision/>
+            <formatMask>yyyy-MM-dd</formatMask>
+            <locale>en_US</locale>
+          </field>
+          <field>
+            <name>day_of_week</name>
+            <hopType>5</hopType>
+            <length>1</length>
+            <precision>0</precision>
+            <formatMask>@day_of_week</formatMask>
+            <locale>en_US</locale>
+          </field>
+          <field>
+            <name>day_of_month</name>
+            <hopType>5</hopType>
+            <length>2</length>
+            <precision>0</precision>
+            <formatMask>d</formatMask>
+            <locale>en_US</locale>
+          </field>
+          <field>
+            <name>day_of_year</name>
+            <hopType>5</hopType>
+            <length>3</length>
+            <precision>0</precision>
+            <formatMask>D</formatMask>
+            <locale>en_US</locale>
+          </field>
+          <field>
+            <name>week_of_year</name>
+            <hopType>5</hopType>
+            <length>2</length>
+            <precision>0</precision>
+            <formatMask>w</formatMask>
+            <locale>en_US</locale>
+          </field>
+          <field>
+            <name>month</name>
+            <hopType>5</hopType>
+            <length>2</length>
+            <precision>0</precision>
+            <formatMask>M</formatMask>
+            <locale>en_US</locale>
+          </field>
+          <field>
+            <name>month_name</name>
+            <hopType>2</hopType>
+            <length>20</length>
+            <precision>0</precision>
+            <formatMask>MMMM</formatMask>
+            <locale>en_US</locale>
+          </field>
+          <field>
+            <name>quarter</name>
+            <hopType>5</hopType>
+            <length>1</length>
+            <precision>0</precision>
+            <formatMask>Q</formatMask>
+            <locale>en_US</locale>
+          </field>
+          <field>
+            <name>year</name>
+            <hopType>5</hopType>
+            <length>4</length>
+            <precision>0</precision>
+            <formatMask>yyyy</formatMask>
+            <locale>en_US</locale>
+          </field>
+          <field>
+            <name>is_weekend</name>
+            <hopType>4</hopType>
+            <length/>
+            <precision/>
+            <formatMask>@is_weekend</formatMask>
+            <locale>en_US</locale>
+          </field>
+        </fields>
+      </dateGenerator>
+      <xloc>128</xloc>
+      <yloc>80</yloc>
+      <name>d_date</name>
     </table>
   </tables>
   <conformed_dimensions/>

@@ -25,6 +25,7 @@ import org.apache.hop.core.logging.LoggingObject;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Resolves field names produced by dimensional staging sources for validation. */
@@ -71,6 +72,18 @@ public final class DmSourceFieldResolutionSupport {
     if (source.isRecordDefinitionSource()) {
       return DmSourceRecordDefinitionSupport.tryResolveSourceRowMeta(
           source, config, variables, metadataProvider);
+    }
+    if (source.isDateGeneratorSource()) {
+      try {
+        DmDateGeneratorConfiguration generator =
+            source.getDateGenerator() != null
+                ? source.getDateGenerator()
+                : DmDateGeneratorConfiguration.createDefault();
+        return DateDimensionGeneratorLogic.buildOutputRowMeta(
+            generator.getFieldsOrEmpty(), table.getName(), variables);
+      } catch (HopException ignored) {
+        return null;
+      }
     }
 
     String sourceSql = source.resolveSourceSql(variables);

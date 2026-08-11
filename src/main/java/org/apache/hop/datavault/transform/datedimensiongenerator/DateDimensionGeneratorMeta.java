@@ -58,6 +58,44 @@ public class DateDimensionGeneratorMeta
       injectionKeyDescription = "DateDimensionGenerator.Injection.END_DATE")
   private String endDate = DateDimensionGeneratorMetaFactory.DEFAULT_END_DATE;
 
+  /**
+   * Optional reference date for relative attributes ({@code @rel_*} / YTD). Empty means the JVM
+   * local date at runtime. Variables are supported.
+   */
+  @HopMetadataProperty(
+      key = "referenceDate",
+      injectionKey = "REFERENCE_DATE",
+      injectionKeyDescription = "DateDimensionGenerator.Injection.REFERENCE_DATE")
+  private String referenceDate = "";
+
+  /**
+   * Day offset applied when evaluating fiscal attributes ({@code @fiscal_*}). Variables supported.
+   */
+  @HopMetadataProperty(
+      key = "dayOffset",
+      injectionKey = "DAY_OFFSET",
+      injectionKeyDescription = "DateDimensionGenerator.Injection.DAY_OFFSET")
+  private String dayOffset = "0";
+
+  /**
+   * Week offset applied when evaluating fiscal attributes ({@code @fiscal_*}). Variables supported.
+   */
+  @HopMetadataProperty(
+      key = "weekOffset",
+      injectionKey = "WEEK_OFFSET",
+      injectionKeyDescription = "DateDimensionGenerator.Injection.WEEK_OFFSET")
+  private String weekOffset = "0";
+
+  /**
+   * Month offset applied when evaluating fiscal attributes ({@code @fiscal_*}). For example {@code
+   * 6} shifts July onto January so a July-start fiscal year is easy to express.
+   */
+  @HopMetadataProperty(
+      key = "monthOffset",
+      injectionKey = "MONTH_OFFSET",
+      injectionKeyDescription = "DateDimensionGenerator.Injection.MONTH_OFFSET")
+  private String monthOffset = "0";
+
   @HopMetadataProperty(
       groupKey = "fields",
       key = "field",
@@ -73,6 +111,10 @@ public class DateDimensionGeneratorMeta
     DateDimensionGeneratorMeta meta = new DateDimensionGeneratorMeta();
     meta.startDate = startDate;
     meta.endDate = endDate;
+    meta.referenceDate = referenceDate;
+    meta.dayOffset = dayOffset;
+    meta.weekOffset = weekOffset;
+    meta.monthOffset = monthOffset;
     for (DateDimensionGeneratorField field : fields) {
       meta.fields.add(new DateDimensionGeneratorField(field));
     }
@@ -186,6 +228,38 @@ public class DateDimensionGeneratorMeta
 
   public void setEndDate(String endDate) {
     this.endDate = endDate;
+  }
+
+  public String getReferenceDate() {
+    return referenceDate;
+  }
+
+  public void setReferenceDate(String referenceDate) {
+    this.referenceDate = referenceDate;
+  }
+
+  public String getDayOffset() {
+    return dayOffset;
+  }
+
+  public void setDayOffset(String dayOffset) {
+    this.dayOffset = dayOffset;
+  }
+
+  public String getWeekOffset() {
+    return weekOffset;
+  }
+
+  public void setWeekOffset(String weekOffset) {
+    this.weekOffset = weekOffset;
+  }
+
+  public String getMonthOffset() {
+    return monthOffset;
+  }
+
+  public void setMonthOffset(String monthOffset) {
+    this.monthOffset = monthOffset;
   }
 
   public List<DateDimensionGeneratorField> getFields() {

@@ -178,4 +178,103 @@ class DateDimensionGeneratorLogicTest {
     Object[] row = DateDimensionGeneratorLogic.buildRow(LocalDate.of(2000, 1, 1), prepared);
     assertEquals(6L, row[0]);
   }
+
+  @Test
+  void fiscalMonthOffsetShiftsCalendarAttributes() throws Exception {
+    List<PreparedField> prepared =
+        DateDimensionGeneratorLogic.prepareFields(
+            List.of(
+                new DateDimensionGeneratorField(
+                    "fiscal_year", IValueMeta.TYPE_INTEGER, "4", "0", "@fiscal_year", ""),
+                new DateDimensionGeneratorField(
+                    "fiscal_month", IValueMeta.TYPE_INTEGER, "2", "0", "@fiscal_month", ""),
+                new DateDimensionGeneratorField(
+                    "fiscal_quarter", IValueMeta.TYPE_INTEGER, "1", "0", "@fiscal_quarter", "")),
+            "generator",
+            VARIABLES);
+
+    // monthOffset=6 maps July onto January for a July-start fiscal year.
+    var context =
+        new DateDimensionGeneratorLogic.GeneratorContext(LocalDate.of(2026, 7, 15), 0, 0, 6);
+
+    Object[] july =
+        DateDimensionGeneratorLogic.buildRow(LocalDate.of(2024, 7, 1), prepared, context);
+    Object[] june =
+        DateDimensionGeneratorLogic.buildRow(LocalDate.of(2025, 6, 30), prepared, context);
+
+    assertEquals(2025L, july[0]);
+    assertEquals(1L, july[1]);
+    assertEquals(1L, july[2]);
+    assertEquals(2025L, june[0]);
+    assertEquals(12L, june[1]);
+    assertEquals(4L, june[2]);
+  }
+
+  @Test
+  void relativeAttributesUseReferenceDate() throws Exception {
+    List<PreparedField> prepared =
+        DateDimensionGeneratorLogic.prepareFields(
+            List.of(
+                new DateDimensionGeneratorField(
+                    "day_rel", IValueMeta.TYPE_INTEGER, "6", "0", "@rel_day", ""),
+                new DateDimensionGeneratorField(
+                    "day_label", IValueMeta.TYPE_STRING, "8", "0", "@rel_label_day", ""),
+                new DateDimensionGeneratorField(
+                    "month_rel", IValueMeta.TYPE_INTEGER, "6", "0", "@rel_month", ""),
+                new DateDimensionGeneratorField(
+                    "month_label", IValueMeta.TYPE_STRING, "8", "0", "@rel_label_month", ""),
+                new DateDimensionGeneratorField(
+                    "is_ytd", IValueMeta.TYPE_BOOLEAN, "", "", "@ytd", ""),
+                new DateDimensionGeneratorField(
+                    "is_ytg", IValueMeta.TYPE_BOOLEAN, "", "", "@ytg", ""),
+                new DateDimensionGeneratorField(
+                    "is_rolling12", IValueMeta.TYPE_BOOLEAN, "", "", "@rolling12", "")),
+            "generator",
+            VARIABLES);
+
+    var context =
+        new DateDimensionGeneratorLogic.GeneratorContext(LocalDate.of(2026, 7, 15), 0, 0, 0);
+
+    Object[] yesterday =
+        DateDimensionGeneratorLogic.buildRow(LocalDate.of(2026, 7, 14), prepared, context);
+    Object[] today =
+        DateDimensionGeneratorLogic.buildRow(LocalDate.of(2026, 7, 15), prepared, context);
+    Object[] tomorrow =
+        DateDimensionGeneratorLogic.buildRow(LocalDate.of(2026, 7, 16), prepared, context);
+    Object[] lastYear =
+        DateDimensionGeneratorLogic.buildRow(LocalDate.of(2025, 7, 15), prepared, context);
+
+    assertEquals(-1L, yesterday[0]);
+    assertEquals("D-1", yesterday[1]);
+    assertEquals(0L, yesterday[2]);
+    assertEquals("M", yesterday[3]);
+    assertTrue((Boolean) yesterday[4]);
+    assertFalse((Boolean) yesterday[5]);
+    assertTrue((Boolean) yesterday[6]);
+
+    assertEquals(0L, today[0]);
+    assertEquals("D", today[1]);
+    assertTrue((Boolean) today[4]);
+    assertFalse((Boolean) today[5]);
+
+    assertEquals(1L, tomorrow[0]);
+    assertEquals("D+1", tomorrow[1]);
+    assertFalse((Boolean) tomorrow[4]);
+    assertTrue((Boolean) tomorrow[5]);
+
+    assertEquals(-12L, lastYear[2]);
+    assertEquals("M-12", lastYear[3]);
+    assertFalse((Boolean) lastYear[4]);
+    assertTrue((Boolean) lastYear[6]);
+  }
+
+  @Test
+  void resolveContextParsesOffsetsAndReferenceDate() throws Exception {
+    var context =
+        DateDimensionGeneratorLogic.resolveContext("2026-07-15", "1", "2", "6", VARIABLES);
+    assertEquals(LocalDate.of(2026, 7, 15), context.referenceDate());
+    assertEquals(1, context.dayOffset());
+    assertEquals(2, context.weekOffset());
+    assertEquals(6, context.monthOffset());
+  }
 }

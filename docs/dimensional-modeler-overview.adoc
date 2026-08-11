@@ -68,11 +68,30 @@ image::images/dimensional-model-f-order-lines.png[Dimensional model — f_order_
 |Pre-computed rollup from a base fact
 |===
 
-=== Source SQL
+=== Staging sources
 
-Each table carries **source SQL** used by generated `TableInput` transforms. Model validation requires non-empty source SQL before running **Dimensional Update**.
+Each dimension or fact has a **Source** tab that defines how staging rows are obtained for generated load pipelines. Supported source types:
 
-For the standard calendar **`dim_date`** dimension, you can populate the physical table with the link:date-dimension-generator.adoc[Date Dimension Generator] transform instead of hand-written SQL or an external calendar source. The generator's **Load defaults** button matches the attributes on the modeler's date dimension template (`date_key`, `full_date`, `day_of_week`, and related columns).
+* **Database / SQL** — SQL executed by a generated `TableInput` (the traditional path)
+* **Pipeline** — a Hop `.hpl` whose output is injected via MetaInject
+* **Record definition** — a data catalog record definition
+* **Date generator** — built-in calendar generation (dimensions; see below)
+
+Model validation requires a complete source configuration for the selected type before running **Dimensional Update**.
+
+[[date-dimension]]
+==== Date dimension (`dim_date`)
+
+For the standard calendar dimension:
+
+* Canvas action **Add date dimension** creates `dim_date` / `d_date` with source type **Date generator**, default calendar fields, and TYPE1 attributes.
+* On the **Source** tab, **Date generator** embeds the link:date-dimension-generator.adoc[Date Dimension Generator] in the generated Dimensional Update pipeline: start/end dates, optional reference date, fiscal day/week/month offsets, and a field table. No external `.hpl` is required for the standard calendar.
+* Use **Load defaults**, **Add relative fields**, and **Add fiscal fields** to manage the output field pack; **Preview data** generates sample rows with the same logic as the transform.
+* Advanced customizations (holidays, bespoke SQL) can still use **Pipeline** or **SQL** sources.
+
+The generator's **Load defaults** field pack matches the modeler template (`date_key`, `full_date`, `day_of_week`, and related columns). Optional relative and fiscal field packs support dynamic reporting filters (`month_rel = 0`, YTD) and fiscal calendars.
+
+image::images/dimensional-model-date-dimension.png[Dimensional model — date dimension Source tab with Date generator,align="center"]
 
 == Workflow integration
 
@@ -85,6 +104,7 @@ Production loads and DV-to-dimensional publish use workflow actions documented i
 Left-click the dimensional canvas background to:
 
 * **Import database tables** — scaffold draft tables from an existing database schema
+* **Add date dimension** — standard calendar `dim_date` with **Date generator** source (see <<date-dimension>>)
 * Add dimension, fact, junk dimension, bridge, factless fact, or note
 
 === Data Vault canvas

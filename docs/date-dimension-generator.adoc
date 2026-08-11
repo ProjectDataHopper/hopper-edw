@@ -17,9 +17,9 @@ The transform does not read upstream rows. Incoming hops, if present, are ignore
 
 == Dialog overview
 
-The transform dialog has three areas: **Start date**, **End date**, and the **Output fields** table. A **Load defaults** button fills the standard calendar field set and the default range `2000-01-01` through `2030-12-31`.
+The transform dialog configures the date range, optional **reference date** and **fiscal offsets**, and the **Output fields** table. **Load defaults** fills the standard calendar field set and the default range `2000-01-01` through `2030-12-31`. **Add relative fields** and **Add fiscal fields** append optional packs without removing existing columns.
 
-=== Date range
+=== Date range and calendar options
 
 [cols="1,3", options="header"]
 |===
@@ -34,8 +34,20 @@ The transform dialog has three areas: **Start date**, **End date**, and the **Ou
 |End date
 |Last calendar day to emit, inclusive, in `yyyy-MM-dd` form. Variables are supported.
 
+|Reference date
+|Optional “as of” date for relative attributes (`@rel_*`, `@ytd`, `@ytg`, `@rolling12`). Empty means the JVM local date at runtime. Variables are supported (for example `${LOAD_DATE}`).
+
+|Day / week / month offset (fiscal)
+|Integer offsets applied when evaluating fiscal tokens (`@fiscal_*`). For a July-start fiscal year, set **month offset** to `6` so July maps to fiscal month 1. Variables are supported.
+
 |Load defaults
-|Replaces the date range and output field table with the built-in standard date dimension layout.
+|Replaces the date range, clears offsets/reference, and replaces the field table with the built-in standard date dimension layout.
+
+|Add relative fields
+|Appends relative-to-reference columns (`day_rel`, `month_rel_label`, `is_ytd`, …) when missing.
+
+|Add fiscal fields
+|Appends fiscal calendar columns (`fiscal_year`, `fiscal_quarter`, …) when missing.
 |===
 
 The transform validates that the start date is not after the end date. An empty or unparseable date produces a configuration error at runtime.
@@ -118,6 +130,18 @@ Some calendar attributes are easier to express as tokens than as formatter lette
 
 |`yyyyMMdd` or `YYYYMMDD`
 |Integer date key. Stored directly as `year * 10000 + month * 100 + day` for efficiency.
+
+|`@fiscal_year` / `@fiscal_quarter` / `@fiscal_month` / `@fiscal_week` / `@fiscal_day_of_year`
+|Fiscal calendar attributes computed on `row date + day/week/month offsets`. Civil `date_key` / `full_date` stay unshifted.
+
+|`@rel_day` / `@rel_week` / `@rel_month` / `@rel_quarter` / `@rel_year`
+|Integer distance from the reference date (`0` = same period as the reference).
+
+|`@rel_label_day` / `@rel_label_week` / `@rel_label_month` / `@rel_label_quarter` / `@rel_label_year`
+|Cognos-style labels such as `D`, `D-1`, `M+1`, `Y`.
+
+|`@ytd` / `@ytg` / `@rolling12`
+|Boolean flags: year-to-date (same year, on or before reference), year-to-go (same year after reference), and rolling 12 months ending at the reference (inclusive).
 |===
 
 === Hop conversion masks
@@ -197,11 +221,12 @@ Locale values use the usual language and country form (`en_US`, `fr_FR`). Unders
 * Use **Preview** on the transform to verify masks and locales before loading to the database. After fixing configuration, reload defaults if you still have the old `day_of_week` mask `u` (that letter formats the *year* in Java, not the day of week).
 * Keep `date_key` as `Integer` with mask `yyyyMMdd` for integer join keys; use `full_date` as `Date` for human-readable reporting and date arithmetic in SQL.
 * Narrow the start/end range during development to keep previews fast; widen for production loads (for example 20–30 years).
-* The transform is suitable as the source SQL replacement for `dim_date` in generated dimensional pipelines when you wire it manually; the dimensional modeler's generated pipelines still default to `TableInput` until integrated with this transform.
-* Boolean fields accept `@is_weekend` or formatted values parsed as `Y`/`N`, `true`/`false`, or `1`/`0` when you use a string-producing mask with type `Boolean`.
+* In the dimensional modeler, choose **Source type = Date generator** on a dimension (or use **Add date dimension** on the canvas) to embed this transform in the generated load pipeline — no separate `.hpl` required for the standard calendar. The modeler Source tab mirrors these options (including **Preview data**); see link:dimensional-modeler-overview.adoc#date-dimension[Dimensional modeler — date dimension].
+* For holidays or bespoke attributes, keep using a **Pipeline** source with a custom `.hpl` that starts from this transform (or SQL).
+* Boolean fields accept `@is_weekend` / `@ytd` / `@ytg` / `@rolling12` or formatted values parsed as `Y`/`N`, `true`/`false`, or `1`/`0` when you use a string-producing mask with type `Boolean`.
 
 == Related documentation
 
-* link:dimensional-modeler-overview.adoc[Dimensional modeler overview] — `dim_date` and star schema modeling
+* link:dimensional-modeler-overview.adoc[Dimensional modeler overview] — `dim_date`, date generator source, and star schema modeling
 * link:record-definition-input.adoc[Get Record Definition Names] — catalog definition metadata as rows
 * link:datavault-plugin.adoc[Data Vault plugin overview] — shared Hop GUI and workflow infrastructure
