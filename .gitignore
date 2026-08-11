@@ -49,3 +49,4 @@ docs/video-tutorials/**/output/**
 docs/video-tutorials/**/hop-project/metrics/**
 
 audit/
+/retail-example/environments/web-docker-postgres.json
