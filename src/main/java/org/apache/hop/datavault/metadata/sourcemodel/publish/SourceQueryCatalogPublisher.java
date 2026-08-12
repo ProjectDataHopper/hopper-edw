@@ -36,7 +36,6 @@ import org.apache.hop.datavault.metadata.SourceField;
 import org.apache.hop.datavault.metadata.composite.DvCompositeSource;
 import org.apache.hop.datavault.metadata.datatypemapping.PhysicalSourceField;
 import org.apache.hop.datavault.metadata.datatypemapping.SourceDataTypeMappingPublishSupport;
-import org.apache.hop.datavault.metadata.datatypemapping.SourceDataTypeMappingSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceColumn;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceQuery;

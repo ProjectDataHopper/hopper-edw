@@ -30,9 +30,8 @@ import org.apache.hop.metadata.api.IHopMetadata;
 /**
  * Project-level reusable data type mapping profile for pre-modeling sources (issue #113).
  *
- * <p>Profiles are attached to source model entities (and later catalog sources). Rules improve
- * weak source types (e.g. String without length → String(2000)) before catalog publish and vault
- * loads.
+ * <p>Profiles are attached to source model entities (and later catalog sources). Rules improve weak
+ * source types (e.g. String without length → String(2000)) before catalog publish and vault loads.
  */
 @HopMetadata(
     key = "data-type-mapping",

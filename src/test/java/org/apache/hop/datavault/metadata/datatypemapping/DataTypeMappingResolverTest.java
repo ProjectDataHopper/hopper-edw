@@ -132,8 +132,7 @@ class DataTypeMappingResolverTest {
     overrideB.setLength("50");
 
     List<EffectiveSourceField> effective =
-        DataTypeMappingResolver.resolveAll(
-            List.of(a, b), List.of(profile), List.of(overrideB));
+        DataTypeMappingResolver.resolveAll(List.of(a, b), List.of(profile), List.of(overrideB));
 
     assertEquals(2, effective.size());
     assertEquals("2000", effective.get(0).getLength());
@@ -146,8 +145,7 @@ class DataTypeMappingResolverTest {
     physical.setHopType(IValueMeta.TYPE_INTEGER);
     physical.setLength("9");
 
-    EffectiveSourceField effective =
-        DataTypeMappingResolver.resolve(physical, List.of(), null);
+    EffectiveSourceField effective = DataTypeMappingResolver.resolve(physical, List.of(), null);
 
     assertEquals(IValueMeta.TYPE_INTEGER, effective.getHopType());
     assertEquals("9", effective.getLength());

@@ -121,6 +121,7 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
   protected boolean iconDragCommitted;
   protected boolean dragSelection;
   protected Rectangle selectionRegion;
+
   /**
    * Last mouse button from mouse-down (pipeline graphs use the same pattern). RAP often omits
    * {@code SWT.BUTTON1} from {@code stateMask} on mouse-move and mouse-up, so drag commits must not
@@ -857,7 +858,8 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
     Point loc = noteHit.getLocation() != null ? noteHit.getLocation() : new Point(0, 0);
     noteOffset = new Point(real.x - loc.x, real.y - loc.y);
     noteDragStart = new Point(real.x, real.y);
-    // Hop Web draws 8px resize handles on the note border; use a wider hit margin than desktop's 4px
+    // Hop Web draws 8px resize handles on the note border; use a wider hit margin than desktop's
+    // 4px
     // so edge/handle clicks resize instead of starting a background lasso.
     resize = getNoteResize(areaOwner.getArea(), real);
     if (resize != null) {

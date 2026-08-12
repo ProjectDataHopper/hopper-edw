@@ -106,8 +106,7 @@ class DataTypeMappingCatalogPipelineTest {
     List<SourceField> restored = DvSourceFieldSupport.fromCatalogFields(catalog);
     assertEquals("customer_id", restored.get(0).getName());
     assertEquals("CUST_ID", restored.get(0).getSourceStreamName());
-    assertEquals(
-        "0", restored.get(0).getInputOptions().getConversion().getConversionMask());
+    assertEquals("0", restored.get(0).getInputOptions().getConversion().getConversionMask());
   }
 
   private static void assertNotNullConversion(CatalogSourceField field) {

@@ -19,7 +19,6 @@ package org.apache.hop.datavault.catalog;
 import org.apache.hop.catalog.model.CatalogCsvFieldOptions;
 import org.apache.hop.catalog.model.CatalogFieldConversionOptions;
 import org.apache.hop.catalog.model.CatalogSourceFieldInputOptions;
-import org.apache.hop.core.util.Utils;
 import org.apache.hop.datavault.metadata.CsvFieldOptions;
 import org.apache.hop.datavault.metadata.SourceFieldInputOptions;
 import org.apache.hop.datavault.metadata.datatypemapping.FieldConversionOptions;

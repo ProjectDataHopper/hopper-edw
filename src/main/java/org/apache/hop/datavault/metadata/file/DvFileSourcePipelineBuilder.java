@@ -167,7 +167,8 @@ public abstract class DvFileSourcePipelineBuilder extends DvSourcePipelineBuilde
       if (sourceField == null || sourceField.getHopType() <= 0) {
         continue;
       }
-      // Skip type-only when full mapping will re-apply (avoids duplicate meta for conversion fields).
+      // Skip type-only when full mapping will re-apply (avoids duplicate meta for conversion
+      // fields).
       if (sourceField.getInputOptions() != null
           && sourceField.getInputOptions().getConversion() != null
           && sourceField.getInputOptions().getConversion().hasAnyAttribute()) {

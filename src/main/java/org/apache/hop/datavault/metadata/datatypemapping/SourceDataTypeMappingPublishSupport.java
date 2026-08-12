@@ -39,8 +39,7 @@ public final class SourceDataTypeMappingPublishSupport {
       List<PhysicalSourceField> physicalFields,
       IHopMetadataProvider metadataProvider)
       throws HopException {
-    List<PhysicalSourceField> physical =
-        physicalFields != null ? physicalFields : List.of();
+    List<PhysicalSourceField> physical = physicalFields != null ? physicalFields : List.of();
     if (target == null
         || ((target.getDataTypeMappingNames() == null || target.getDataTypeMappingNames().isEmpty())
             && (target.getFieldTypeMappings() == null
@@ -50,8 +49,7 @@ public final class SourceDataTypeMappingPublishSupport {
     List<DataTypeMappingMeta> profiles =
         DataTypeMappingResolver.loadProfiles(metadataProvider, target.getDataTypeMappingNames());
     List<EffectiveSourceField> effective =
-        DataTypeMappingResolver.resolveAll(
-            physical, profiles, target.getFieldTypeMappings());
+        DataTypeMappingResolver.resolveAll(physical, profiles, target.getFieldTypeMappings());
     List<SourceField> fields = new ArrayList<>();
     for (EffectiveSourceField field : effective) {
       if (field != null) {
@@ -77,7 +75,8 @@ public final class SourceDataTypeMappingPublishSupport {
       field.setPrecision(physical.getPrecision());
       field.setHopType(physical.effectiveHopType());
       field.setPrimaryKeyPosition(physical.getPrimaryKeyPosition());
-      if (physical.getParseConversion() != null && physical.getParseConversion().hasAnyAttribute()) {
+      if (physical.getParseConversion() != null
+          && physical.getParseConversion().hasAnyAttribute()) {
         org.apache.hop.datavault.metadata.SourceFieldInputOptions inputOptions =
             new org.apache.hop.datavault.metadata.SourceFieldInputOptions();
         inputOptions.setConversion(new FieldConversionOptions(physical.getParseConversion()));

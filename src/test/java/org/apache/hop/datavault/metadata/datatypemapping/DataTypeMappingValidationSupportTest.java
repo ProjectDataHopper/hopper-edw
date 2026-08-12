@@ -125,8 +125,7 @@ class DataTypeMappingValidationSupportTest {
     eb.setHopType(IValueMeta.TYPE_STRING);
 
     List<ICheckResult> remarks =
-        DataTypeMappingValidationSupport.checkEffective(
-            "t", List.of(a, b), List.of(ea, eb), null);
+        DataTypeMappingValidationSupport.checkEffective("t", List.of(a, b), List.of(ea, eb), null);
 
     assertTrue(
         remarks.stream()

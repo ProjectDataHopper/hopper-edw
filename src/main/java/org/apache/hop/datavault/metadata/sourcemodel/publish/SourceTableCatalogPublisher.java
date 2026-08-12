@@ -109,7 +109,10 @@ public final class SourceTableCatalogPublisher {
     return new PublishResult(feedName, "Published database feed '" + feedName + "'");
   }
 
-  /** Physical columns only (no data type mapping). Prefer {@link #buildFieldsFromTable(SourceTable, IHopMetadataProvider)}. */
+  /**
+   * Physical columns only (no data type mapping). Prefer {@link #buildFieldsFromTable(SourceTable,
+   * IHopMetadataProvider)}.
+   */
   public static List<SourceField> buildFieldsFromTable(SourceTable table) {
     try {
       return buildFieldsFromTable(table, null);

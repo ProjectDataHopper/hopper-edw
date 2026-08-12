@@ -89,9 +89,7 @@ public class EffectiveSourceField {
     field.setPrecision(precision);
     field.setHopType(hopType > 0 ? hopType : IValueMeta.TYPE_STRING);
     field.setPrimaryKeyPosition(primaryKeyPosition);
-    if (renamed
-        && !Utils.isEmpty(sourceFieldName)
-        && !sourceFieldName.equals(effectiveFieldName)) {
+    if (renamed && !Utils.isEmpty(sourceFieldName) && !sourceFieldName.equals(effectiveFieldName)) {
       field.setSourceStreamName(sourceFieldName);
     }
     if (conversion != null && conversion.hasAnyAttribute()) {

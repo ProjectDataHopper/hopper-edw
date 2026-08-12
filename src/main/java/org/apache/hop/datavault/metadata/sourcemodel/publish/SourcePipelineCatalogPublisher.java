@@ -21,7 +21,6 @@ import java.util.List;
 import org.apache.hop.catalog.discovery.RecordDefinitionCatalogWriter;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.catalog.CatalogModelRegistrySupport;

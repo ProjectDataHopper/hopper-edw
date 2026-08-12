@@ -154,8 +154,7 @@ public final class SourceDataTypeMappingSupport {
       }
     }
     List<EffectiveSourceField> effective =
-        DataTypeMappingResolver.resolveAll(
-            physicalFields, profiles, target.getFieldTypeMappings());
+        DataTypeMappingResolver.resolveAll(physicalFields, profiles, target.getFieldTypeMappings());
     remarks.addAll(
         DataTypeMappingValidationSupport.checkEffective(
             sourceLabel, physicalFields, effective, target.getFieldTypeMappings()));
