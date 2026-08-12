@@ -626,8 +626,7 @@ public class HopGuiSourcePipelineDialog {
   private void validate() {
     SourcePipeline draft = new SourcePipeline();
     getInfo(draft);
-    var remarks =
-        new ArrayList<>(SourcePipelineValidationSupport.check(draft, model, null));
+    var remarks = new ArrayList<>(SourcePipelineValidationSupport.check(draft, model, null));
     try {
       remarks.addAll(
           SourceDataTypeMappingSupport.check(

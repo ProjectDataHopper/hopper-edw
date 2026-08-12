@@ -80,10 +80,7 @@ public final class DataTypeMappingValidationSupport {
             new CheckResult(
                 ICheckResult.TYPE_RESULT_WARNING,
                 BaseMessages.getString(
-                    PKG,
-                    "DataTypeMapping.Check.RuleNoTarget",
-                    ConstNvl(profile.getName()),
-                    label),
+                    PKG, "DataTypeMapping.Check.RuleNoTarget", ConstNvl(profile.getName()), label),
                 null));
       }
       if (rule.getTargetHopType() > IValueMeta.TYPE_NONE) {
@@ -148,7 +145,9 @@ public final class DataTypeMappingValidationSupport {
 
     if (overrides != null) {
       for (SourceFieldTypeMapping override : overrides) {
-        if (override == null || override.isDisabled() || Utils.isEmpty(override.getSourceFieldName())) {
+        if (override == null
+            || override.isDisabled()
+            || Utils.isEmpty(override.getSourceFieldName())) {
           continue;
         }
         if (!physicalNames.contains(override.getSourceFieldName().trim().toLowerCase())) {
@@ -196,8 +195,7 @@ public final class DataTypeMappingValidationSupport {
       List<PhysicalSourceField> physicalFields,
       EffectiveSourceField effective) {
     PhysicalSourceField physical = findPhysical(physicalFields, effective.getSourceFieldName());
-    int fromType =
-        physical != null ? physical.effectiveHopType() : IValueMeta.TYPE_STRING;
+    int fromType = physical != null ? physical.effectiveHopType() : IValueMeta.TYPE_STRING;
     int toType = effective.effectiveHopType();
     String fieldName =
         !Utils.isEmpty(effective.getEffectiveFieldName())

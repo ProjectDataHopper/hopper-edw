@@ -64,7 +64,10 @@ public class FieldConversionOptions {
     this.trimType = other.trimType;
   }
 
-  /** True when any conversion attribute is set (including boolean flags left at false only count if mask/symbols set). */
+  /**
+   * True when any conversion attribute is set (including boolean flags left at false only count if
+   * mask/symbols set).
+   */
   public boolean hasAnyAttribute() {
     return !Utils.isEmpty(conversionMask)
         || !Utils.isEmpty(decimalSymbol)

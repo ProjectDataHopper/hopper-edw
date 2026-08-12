@@ -83,8 +83,7 @@ public final class SourceDataTypeMappingTab {
   public void addTab(CTabFolder tabFolder, int margin) {
     CTabItem tab = new CTabItem(tabFolder, SWT.NONE);
     tab.setFont(GuiResource.getInstance().getFontDefault());
-    tab.setText(
-        BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Tab.DataTypeMapping.Label"));
+    tab.setText(BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Tab.DataTypeMapping.Label"));
 
     Composite comp = new Composite(tabFolder, SWT.NONE);
     PropsUi.setLook(comp);
@@ -178,12 +177,7 @@ public final class SourceDataTypeMappingTab {
             null,
             PropsUi.getInstance());
     wOverrides.setLayoutData(
-        new FormDataBuilder()
-            .left()
-            .top(wlOverrides, margin)
-            .right()
-            .bottom(55, 0)
-            .result());
+        new FormDataBuilder().left().top(wlOverrides, margin).right().bottom(55, 0).result());
 
     Label wlEffective = new Label(comp, SWT.LEFT);
     PropsUi.setLook(wlEffective);
@@ -240,8 +234,7 @@ public final class SourceDataTypeMappingTab {
       item.setText(
           3,
           mapping.getTargetHopType() > IValueMeta.TYPE_NONE
-              ? Const.NVL(
-                  DataTypeMappingPatternSupport.hopTypeName(mapping.getTargetHopType()), "")
+              ? Const.NVL(DataTypeMappingPatternSupport.hopTypeName(mapping.getTargetHopType()), "")
               : "");
       item.setText(4, Const.NVL(mapping.getLength(), ""));
       item.setText(5, Const.NVL(mapping.getPrecision(), ""));
@@ -416,8 +409,7 @@ public final class SourceDataTypeMappingTab {
   }
 
   private MetadataManager<DataTypeMappingMeta> createMetadataManager() {
-    return new MetadataManager<>(
-        variables, metadataProvider, DataTypeMappingMeta.class, shell());
+    return new MetadataManager<>(variables, metadataProvider, DataTypeMappingMeta.class, shell());
   }
 
   private Shell shell() {
@@ -509,7 +501,8 @@ public final class SourceDataTypeMappingTab {
     } catch (Exception e) {
       new ErrorDialog(
           wEffective.getShell(),
-          BaseMessages.getString(PKG, "HopGuiSourceTableDialog.DataTypeMapping.Refresh.Error.Title"),
+          BaseMessages.getString(
+              PKG, "HopGuiSourceTableDialog.DataTypeMapping.Refresh.Error.Title"),
           BaseMessages.getString(
               PKG, "HopGuiSourceTableDialog.DataTypeMapping.Refresh.Error.Message"),
           e);

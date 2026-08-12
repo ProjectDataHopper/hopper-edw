@@ -166,7 +166,8 @@ public class DataTypeMappingMetaEditor extends MetadataEditor<DataTypeMappingMet
     wlScope.setLayoutData(fdlScope);
 
     wSourceKinds =
-        new org.eclipse.swt.widgets.List(comp, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
+        new org.eclipse.swt.widgets.List(
+            comp, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
     PropsUi.setLook(wSourceKinds);
     wSourceKinds.setItems(SCOPE_SOURCE_KINDS);
     wSourceKinds.setToolTipText(scopeTip);
@@ -210,8 +211,7 @@ public class DataTypeMappingMetaEditor extends MetadataEditor<DataTypeMappingMet
     fdlSchema.right = new FormAttachment(middle, -margin);
     wlSchema.setLayoutData(fdlSchema);
 
-    wSchemaPattern =
-        new TextVar(manager.getVariables(), comp, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+    wSchemaPattern = new TextVar(manager.getVariables(), comp, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wSchemaPattern);
     wSchemaPattern.setToolTipText(patternTip);
     FormData fdSchema = new FormData();

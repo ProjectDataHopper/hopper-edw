@@ -64,8 +64,7 @@ class SourceDataTypeMappingPublishSupportTest {
     created.setLength("30");
     table.getColumns().add(created);
 
-    List<SourceField> fields =
-        SourceTableCatalogPublisher.buildFieldsFromTable(table, metadata);
+    List<SourceField> fields = SourceTableCatalogPublisher.buildFieldsFromTable(table, metadata);
 
     assertEquals(2, fields.size());
     SourceField nameField = fields.get(0);
@@ -77,8 +76,7 @@ class SourceDataTypeMappingPublishSupportTest {
     assertNotNull(createdField.getInputOptions());
     assertNotNull(createdField.getInputOptions().getConversion());
     assertEquals(
-        "yyyy-MM-dd HH:mm:ss",
-        createdField.getInputOptions().getConversion().getConversionMask());
+        "yyyy-MM-dd HH:mm:ss", createdField.getInputOptions().getConversion().getConversionMask());
   }
 
   @Test

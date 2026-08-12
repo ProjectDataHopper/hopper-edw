@@ -190,7 +190,9 @@ public final class DataTypeMappingPipelineSupport {
       TransformMeta predecessor,
       List<SourceField> sourceFields,
       Point location) {
-    if (pipelineMeta == null || predecessor == null || !needsSelectValuesFromSourceFields(sourceFields)) {
+    if (pipelineMeta == null
+        || predecessor == null
+        || !needsSelectValuesFromSourceFields(sourceFields)) {
       return predecessor;
     }
     return injectSelectValues(

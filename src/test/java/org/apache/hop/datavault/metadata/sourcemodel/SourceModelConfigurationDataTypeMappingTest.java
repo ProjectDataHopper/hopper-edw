@@ -29,7 +29,8 @@ class SourceModelConfigurationDataTypeMappingTest {
   void resolveDefaultDataTypeMappingNamesParsesList() {
     SourceModelConfiguration config = new SourceModelConfiguration();
     config.setDefaultDataTypeMappingNames(" premodel-defaults , crm-strings; ");
-    assertEquals(List.of("premodel-defaults", "crm-strings"), config.resolveDefaultDataTypeMappingNames());
+    assertEquals(
+        List.of("premodel-defaults", "crm-strings"), config.resolveDefaultDataTypeMappingNames());
   }
 
   @Test

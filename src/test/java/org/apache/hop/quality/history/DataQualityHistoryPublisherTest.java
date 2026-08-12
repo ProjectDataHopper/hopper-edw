@@ -188,14 +188,7 @@ class DataQualityHistoryPublisherTest {
       // null log: avoid ERROR + stacktrace in CI (intentional failure path; result is asserted)
       PublishResult result =
           DataQualityHistoryPublisher.publish(
-              null,
-              report,
-              context,
-              "load-partial",
-              "wf",
-              "exec",
-              variables,
-              metadataProvider);
+              null, report, context, "load-partial", "wf", "exec", variables, metadataProvider);
       assertEquals(PublishStatus.FAILED, result.status(), result.message());
       assertTrue(result.message().contains("forced mid-publish failure"));
       assertEquals(0L, countRows(DataQualityHistoryPublisher.TABLE_QUALITY_RUN, report.getRunId()));
