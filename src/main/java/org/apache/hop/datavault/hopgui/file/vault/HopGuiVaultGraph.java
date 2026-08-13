@@ -3427,7 +3427,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
 
     @Override
     public boolean handlePureClickMouseUp(Event e, Point real) {
-      if (lastClick == null || lastClick.x != real.x || lastClick.y != real.y) {
+      if (!isUnmovedClick(real)) {
         if (e.button == 1) {
           clearTableDragState();
           clearNoteDragState();

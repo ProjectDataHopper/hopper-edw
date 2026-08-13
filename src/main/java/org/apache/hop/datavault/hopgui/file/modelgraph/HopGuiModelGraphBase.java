@@ -506,10 +506,17 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
 
   protected void onMouseUp(Event e) {
     if (EnvironmentUtils.getInstance().isWeb()) {
-      // RAP does not deliver move-while-button-down; apply final drag/lasso geometry first.
-      // Keep lastButton so mouseMoveEvent still treats the gesture as button-held (stateMask on
-      // mouse-up no longer has BUTTON1).
-      mouseMoveEvent(e);
+      Point released = screen2real(e.x, e.y);
+      // RAP does not deliver move-while-button-down. Apply the final drag/lasso geometry only when
+      // the pointer actually moved; a still click must not be treated as a completed drag (that
+      // would swallow the table context dialog). Keep lastButton so mouseMoveEvent still treats
+      // the gesture as button-held (stateMask on mouse-up no longer has BUTTON1).
+      if (!isUnmovedClick(released)) {
+        if (iconDragCommitted || dragSelection) {
+          markPositionUndoPoint();
+        }
+        mouseMoveEvent(e);
+      }
     }
     mouseUpEvent(e);
     lastButton = 0;
@@ -591,7 +598,7 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
       iconDragCommitted = true;
       dragSelection = true;
       canvas.setData("mode", "drag");
-      markPositionUndoPoint();
+      // Undo is recorded on mouse-up only if the pointer actually moved.
       ModelGraphWebCanvasData.setNodes(canvas, collectWebCanvasNodes());
       ModelGraphWebCanvasData.setNotes(canvas, collectWebCanvasNotes());
       redraw();
@@ -714,7 +721,8 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
         return;
       }
 
-      if (mouseInteractions().handleCommittedDragMouseUp(e)) {
+      // Hop Web arms iconDragCommitted on mouse-down. A still click is not a completed drag.
+      if (!isUnmovedClick(real) && mouseInteractions().handleCommittedDragMouseUp(e)) {
         return;
       }
 
@@ -764,6 +772,15 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
       mouseInteractions().unselectAllOnCanvas();
       selectDragged.run();
     }
+  }
+
+  /**
+   * True when mouse-up landed on the same graph point as mouse-down (within {@link
+   * #ICON_DRAG_THRESHOLD_PX}). Distinguishes a left-click (context dialog) from a drag. Required on
+   * Hop Web because {@link #armWebObjectDragModes} sets {@code iconDragCommitted} on mouse-down.
+   */
+  protected boolean isUnmovedClick(Point real) {
+    return ModelGraphClickSupport.isUnmovedClick(lastClick, real, ICON_DRAG_THRESHOLD_PX);
   }
 
   /** Clears tooltip, converts to logical coords, and stores {@link #lastClick}. */

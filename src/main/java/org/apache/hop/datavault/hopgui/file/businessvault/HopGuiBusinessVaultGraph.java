@@ -3365,7 +3365,7 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
 
     @Override
     public boolean handlePureClickMouseUp(Event e, Point real) {
-      if (lastClick == null || lastClick.x != real.x || lastClick.y != real.y) {
+      if (!isUnmovedClick(real)) {
         return false;
       }
 

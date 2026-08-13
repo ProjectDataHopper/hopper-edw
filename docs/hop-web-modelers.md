@@ -49,7 +49,7 @@ Under **Hop Web** (RAP), the five model file graphs render through the same SVG 
 | BV/DV reference links | Follow name-click navigation; shared SVG client stays on the **target** tab (no snap-back to the previous model) |
 | Execution map breadcrumb | Drill / breadcrumb **zoom-fit uses the focused subgraph** size (not the full-document maximum) |
 | Dark mode | SVG render uses `SvgGc` dark theme + `NotePadStyle` |
-| Edit | Double-click / name-click dialogs, context menus, toolbars (standard SWT/RAP dialogs) |
+| Edit | Double-click / name-click dialogs, **left-click context dialogs** on tables/cards, toolbars (standard SWT/RAP dialogs) |
 | Hover | Name underline via Hop Web hover remote object |
 
 ## Hop core requirement
@@ -75,6 +75,7 @@ The shared client scripts (`canvas-svg.js`, `canvas-zoom.js`, explorer tab hooks
 |---------|---------|---------|
 | Paint | `SwtGc` on SWT `Canvas` | Server `SvgGc` → SVG snapshot → client overlay |
 | Drag while button held | Server mouse-move | Client outline; server applies final position on mouse-up |
+| Left-click vs drag | 3px threshold on move-while-held | Mouse-down arms a client drag ghost; mouse-up with no movement is a click (table context dialog) |
 | Load duration chart | Optional right pane | Not constructed (RAP lacks `ScrolledComposite.addPaintListener`) |
 | Coach palette DnD | DropTarget on canvas | Disabled (use toolbar / dialogs) |
 
