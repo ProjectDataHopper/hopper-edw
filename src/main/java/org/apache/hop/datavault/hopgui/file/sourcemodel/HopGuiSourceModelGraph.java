@@ -3373,7 +3373,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
         return true;
       }
 
-      if (lastClick == null || lastClick.x != real.x || lastClick.y != real.y) {
+      if (!isUnmovedClick(real)) {
         clearTableDragState();
         clearNoteDragState();
         avoidContextDialog = false;

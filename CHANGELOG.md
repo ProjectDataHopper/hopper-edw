@@ -4,6 +4,10 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## Unreleased
 
+### Hop Web table context dialog (#123)
+
+- Left-click on a table or card in the Source / Data Vault / Business Vault / Dimensional modelers again opens the context dialog under **Hop Web**. Icon-drag was armed on mouse-down (RAP has no move-while-held), so mouse-up treated every click as a completed drag.
+
 ### Data type mappings (#113)
 
 - New project metadata type **Data type mapping** (`data-type-mapping`): ordered rules with match criteria (Hop type, source SQL type pattern, field name pattern, length absent) and target type/length/conversion options
