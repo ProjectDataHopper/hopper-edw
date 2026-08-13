@@ -25,7 +25,9 @@ import org.apache.hop.core.logging.LoggingObject;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.transform.datedimensiongenerator.DateDimensionGeneratorField;
 import org.apache.hop.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic;
+import org.apache.hop.datavault.transform.datedimensiongenerator.DateDimensionGeneratorMetaFactory;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Resolves field names produced by dimensional staging sources for validation. */
@@ -79,8 +81,10 @@ public final class DmSourceFieldResolutionSupport {
             source.getDateGenerator() != null
                 ? source.getDateGenerator()
                 : DmDateGeneratorConfiguration.createDefault();
-        return DateDimensionGeneratorLogic.buildOutputRowMeta(
-            generator.getFieldsOrEmpty(), table.getName(), variables);
+        List<DateDimensionGeneratorField> fields = new ArrayList<>(generator.getFieldsOrEmpty());
+        DateDimensionGeneratorMetaFactory.ensureLoadTimestampField(
+            fields, resolveLoadDateField(config, variables));
+        return DateDimensionGeneratorLogic.buildOutputRowMeta(fields, table.getName(), variables);
       } catch (HopException ignored) {
         return null;
       }
@@ -136,6 +140,15 @@ public final class DmSourceFieldResolutionSupport {
     } catch (Exception e) {
       throw new HopException("Unable to read fields from source SQL", e);
     }
+  }
+
+  private static String resolveLoadDateField(
+      DimensionalConfiguration config, IVariables variables) {
+    if (config == null) {
+      return null;
+    }
+    String loadDateField = config.resolveLoadDateField(variables);
+    return variables != null ? variables.resolve(loadDateField) : loadDateField;
   }
 
   private static DatabaseMeta resolveSourceDatabase(

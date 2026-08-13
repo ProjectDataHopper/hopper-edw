@@ -19,12 +19,14 @@ package org.apache.hop.datavault.transform.datedimensiongenerator;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.row.IValueMeta;
+import org.apache.hop.core.util.Utils;
 
 /** Factory helpers for standard calendar date dimension field definitions. */
 public final class DateDimensionGeneratorMetaFactory {
 
   public static final String DEFAULT_START_DATE = "2000-01-01";
   public static final String DEFAULT_END_DATE = "2030-12-31";
+  public static final String DEFAULT_LOAD_TIMESTAMP_FIELD = "load_dt";
 
   private DateDimensionGeneratorMetaFactory() {}
 
@@ -70,6 +72,35 @@ public final class DateDimensionGeneratorMetaFactory {
     fields.add(field("is_ytg", IValueMeta.TYPE_BOOLEAN, "", "", "@ytg", ""));
     fields.add(field("is_rolling12", IValueMeta.TYPE_BOOLEAN, "", "", "@rolling12", ""));
     return fields;
+  }
+
+  /**
+   * Load-timestamp field for Type 1 dimension loads and warehouse audit columns. Uses {@link
+   * DateDimensionGeneratorLogic#MASK_NOW} so every generated row shares the transform init time.
+   */
+  public static DateDimensionGeneratorField loadTimestampField(String name) {
+    String fieldName = Utils.isEmpty(name) ? DEFAULT_LOAD_TIMESTAMP_FIELD : name;
+    return field(
+        fieldName, IValueMeta.TYPE_TIMESTAMP, "", "", DateDimensionGeneratorLogic.MASK_NOW, "");
+  }
+
+  /**
+   * Appends a load-timestamp field when {@code fields} does not already contain {@code fieldName}.
+   *
+   * @return {@code true} when a field was added
+   */
+  public static boolean ensureLoadTimestampField(
+      List<DateDimensionGeneratorField> fields, String fieldName) {
+    if (fields == null || Utils.isEmpty(fieldName)) {
+      return false;
+    }
+    for (DateDimensionGeneratorField field : fields) {
+      if (field != null && fieldName.equalsIgnoreCase(field.getName())) {
+        return false;
+      }
+    }
+    fields.add(loadTimestampField(fieldName));
+    return true;
   }
 
   /** Optional fiscal calendar fields (use with month/week/day offsets on the transform). */

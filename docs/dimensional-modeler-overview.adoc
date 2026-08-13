@@ -86,7 +86,8 @@ For the standard calendar dimension:
 
 * Canvas action **Add date dimension** creates `dim_date` / `d_date` with source type **Date generator**, default calendar fields, and TYPE1 attributes.
 * On the **Source** tab, **Date generator** embeds the link:date-dimension-generator.adoc[Date Dimension Generator] in the generated Dimensional Update pipeline: start/end dates, optional reference date, fiscal day/week/month offsets, and a field table. No external `.hpl` is required for the standard calendar.
-* Use **Load defaults**, **Add relative fields**, and **Add fiscal fields** to manage the output field pack; **Preview data** generates sample rows with the same logic as the transform.
+* Use **Load defaults**, **Add relative fields**, **Add fiscal fields**, and **Add load timestamp** to manage the output field pack; **Preview data** generates sample rows with the same logic as the transform.
+* Type 1 loads need the model load timestamp column (for example `x_load_ts`) on the source stream. The date generator adds that field automatically as a `Timestamp` with mask `@now` when it is not already in the field table.
 * Advanced customizations (holidays, bespoke SQL) can still use **Pipeline** or **SQL** sources.
 
 The generator's **Load defaults** field pack matches the modeler template (`date_key`, `full_date`, `day_of_week`, and related columns). Optional relative and fiscal field packs support dynamic reporting filters (`month_rel = 0`, YTD) and fiscal calendars.

@@ -73,7 +73,7 @@ For a slide-style executive summary, see [presentations/hop-data-vault-overview.
 | Catalog Record Definition Metadata Output transform | Available | [record-definition-output.adoc](record-definition-output.adoc) |
 | Record Definition Input transform (data rows) | Available | [record-definition-data-input.adoc](record-definition-data-input.adoc) |
 | Date Dimension Generator transform | Available | [date-dimension-generator.adoc](date-dimension-generator.adoc) |
-| Dimensional modeler date generator source (`DATE_GENERATOR`) | Available | Canvas **Add date dimension**; fiscal offsets + relative attrs; [date-dimension-generator.adoc](date-dimension-generator.adoc), [dimensional-modeler-overview.adoc](dimensional-modeler-overview.adoc) |
+| Dimensional modeler date generator source (`DATE_GENERATOR`) | Available | Canvas **Add date dimension**; fiscal offsets + relative attrs; `@now` load timestamp for Type 1; [date-dimension-generator.adoc](date-dimension-generator.adoc), [dimensional-modeler-overview.adoc](dimensional-modeler-overview.adoc) |
 | `hop svg` export | Available | [README.md](README.md#command-line-tools) |
 | BV naming rules engine | Planned | [plans/bv-naming-rules-engine-plan.md](plans/bv-naming-rules-engine-plan.md) |
 | Marquez / OpenLineage export | Available | [openlineage-export.adoc](openlineage-export.adoc) |

@@ -86,6 +86,15 @@ public class DmDateGeneratorConfiguration {
   }
 
   public DateDimensionGeneratorMeta toTransformMeta() {
+    return toTransformMeta(null);
+  }
+
+  /**
+   * Maps this configuration to a transform meta. When {@code loadTimestampField} is not empty and
+   * not already present in the field table, a {@code @now} Timestamp field is appended so Type 1
+   * loads can populate the model load timestamp column.
+   */
+  public DateDimensionGeneratorMeta toTransformMeta(String loadTimestampField) {
     DateDimensionGeneratorMeta meta = new DateDimensionGeneratorMeta();
     meta.setStartDate(startDate);
     meta.setEndDate(endDate);
@@ -97,6 +106,7 @@ public class DmDateGeneratorConfiguration {
     for (DateDimensionGeneratorField field : getFieldsOrEmpty()) {
       copy.add(new DateDimensionGeneratorField(field));
     }
+    DateDimensionGeneratorMetaFactory.ensureLoadTimestampField(copy, loadTimestampField);
     meta.setFields(copy);
     return meta;
   }

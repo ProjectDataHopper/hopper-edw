@@ -249,7 +249,9 @@ public final class DmPipelineBuilderSupport {
         ctx.source.getDateGenerator() != null
             ? ctx.source.getDateGenerator()
             : DmDateGeneratorConfiguration.createDefault();
-    DateDimensionGeneratorMeta generatorMeta = config.toTransformMeta();
+    String loadDateField =
+        ctx.config != null ? ctx.config.resolveLoadDateField(ctx.variables) : null;
+    DateDimensionGeneratorMeta generatorMeta = config.toTransformMeta(loadDateField);
     TransformMeta tm =
         new TransformMeta("DateDimensionGenerator", "source_" + ctx.targetTableName, generatorMeta);
     tm.setLocation(LOCATION_START.x, LOCATION_START.y);

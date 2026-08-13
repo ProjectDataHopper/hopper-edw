@@ -1134,8 +1134,11 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     }
     graph.markUndoPoint();
     Point click = context.getClick();
+    String loadDateField =
+        dmModel.getConfigurationOrDefault().resolveLoadDateField(graph.getVariables());
     DmDimension dateDimension =
-        DmDateDimensionTemplate.createDateDimension(click != null ? click : new Point(50, 50));
+        DmDateDimensionTemplate.createDateDimension(
+            click != null ? click : new Point(50, 50), loadDateField);
     graph.addTableAtClick(dateDimension, click);
     MessageBox box = new MessageBox(graph.getShell(), SWT.YES | SWT.NO | SWT.ICON_QUESTION);
     box.setText(

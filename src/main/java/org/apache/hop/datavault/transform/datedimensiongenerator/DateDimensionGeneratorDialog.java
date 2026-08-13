@@ -59,6 +59,7 @@ public class DateDimensionGeneratorDialog extends BaseTransformDialog {
   private Button wLoadDefaults;
   private Button wLoadRelativeDefaults;
   private Button wLoadFiscalDefaults;
+  private Button wLoadLoadTimestamp;
 
   public DateDimensionGeneratorDialog(
       Shell parent,
@@ -143,6 +144,27 @@ public class DateDimensionGeneratorDialog extends BaseTransformDialog {
           @Override
           public void widgetSelected(SelectionEvent e) {
             loadDefaults();
+          }
+        });
+
+    wLoadLoadTimestamp = new Button(shell, SWT.PUSH);
+    wLoadLoadTimestamp.setText(
+        BaseMessages.getString(PKG, "DateDimensionGeneratorDialog.LoadLoadTimestamp.Label"));
+    wLoadLoadTimestamp.setToolTipText(
+        BaseMessages.getString(PKG, "DateDimensionGeneratorDialog.LoadLoadTimestamp.ToolTip"));
+    PropsUi.setLook(wLoadLoadTimestamp);
+    FormData fdLoadTimestamp = new FormData();
+    fdLoadTimestamp.top = new FormAttachment(wMonthOffset, margin);
+    fdLoadTimestamp.right = new FormAttachment(wLoadDefaults, -margin);
+    wLoadLoadTimestamp.setLayoutData(fdLoadTimestamp);
+    wLoadLoadTimestamp.addSelectionListener(
+        new SelectionAdapter() {
+          @Override
+          public void widgetSelected(SelectionEvent e) {
+            appendFields(
+                List.of(
+                    DateDimensionGeneratorMetaFactory.loadTimestampField(
+                        DateDimensionGeneratorMetaFactory.DEFAULT_LOAD_TIMESTAMP_FIELD)));
           }
         });
 

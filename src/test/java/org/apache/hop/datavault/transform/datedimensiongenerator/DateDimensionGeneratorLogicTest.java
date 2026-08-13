@@ -276,5 +276,58 @@ class DateDimensionGeneratorLogicTest {
     assertEquals(1, context.dayOffset());
     assertEquals(2, context.weekOffset());
     assertEquals(6, context.monthOffset());
+    assertTrue(context.now() != null);
+  }
+
+  @Test
+  void nowTokenUsesContextTimestampForEveryDay() throws Exception {
+    Date fixed = new Date(1_700_000_000_000L);
+    List<PreparedField> prepared =
+        DateDimensionGeneratorLogic.prepareFields(
+            List.of(
+                DateDimensionGeneratorMetaFactory.loadTimestampField("x_load_ts"),
+                new DateDimensionGeneratorField(
+                    "also_now", IValueMeta.TYPE_TIMESTAMP, "", "", "", "")),
+            "generator",
+            VARIABLES);
+    var context =
+        new DateDimensionGeneratorLogic.GeneratorContext(LocalDate.of(2026, 7, 15), 0, 0, 0, fixed);
+
+    Object[] first =
+        DateDimensionGeneratorLogic.buildRow(LocalDate.of(2000, 1, 1), prepared, context);
+    Object[] last =
+        DateDimensionGeneratorLogic.buildRow(LocalDate.of(2030, 12, 31), prepared, context);
+
+    assertTrue(first[0] instanceof Date);
+    assertEquals(fixed.getTime(), ((Date) first[0]).getTime());
+    assertEquals(fixed.getTime(), ((Date) last[0]).getTime());
+    assertEquals(fixed.getTime(), ((Date) first[1]).getTime());
+    assertEquals(
+        DateDimensionGeneratorLogic.FieldKind.NOW,
+        DateDimensionGeneratorLogic.resolveFieldKind(IValueMeta.TYPE_TIMESTAMP, "@now"));
+    assertEquals(
+        DateDimensionGeneratorLogic.FieldKind.NOW,
+        DateDimensionGeneratorLogic.resolveFieldKind(IValueMeta.TYPE_TIMESTAMP, ""));
+    assertEquals(
+        DateDimensionGeneratorLogic.FieldKind.NOW,
+        DateDimensionGeneratorLogic.resolveFieldKind(IValueMeta.TYPE_DATE, "@load_ts"));
+  }
+
+  @Test
+  void ensureLoadTimestampFieldIsIdempotent() {
+    List<DateDimensionGeneratorField> fields =
+        new java.util.ArrayList<>(DateDimensionGeneratorMetaFactory.defaultFields());
+
+    assertTrue(DateDimensionGeneratorMetaFactory.ensureLoadTimestampField(fields, "x_load_ts"));
+    assertFalse(DateDimensionGeneratorMetaFactory.ensureLoadTimestampField(fields, "x_load_ts"));
+    assertEquals(
+        1, fields.stream().filter(field -> "x_load_ts".equalsIgnoreCase(field.getName())).count());
+    assertEquals(
+        DateDimensionGeneratorLogic.MASK_NOW,
+        fields.stream()
+            .filter(field -> "x_load_ts".equalsIgnoreCase(field.getName()))
+            .findFirst()
+            .orElseThrow()
+            .getFormatMask());
   }
 }

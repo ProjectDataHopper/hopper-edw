@@ -114,7 +114,8 @@ Modelers that “get attributes from source” therefore see pre-modeled types (
 After the source read transform (database, file, JSON, composite, pipeline inject, …), generated DV loads call **apply catalog data type mappings**:
 
 * Select Values transform name: `apply data type mappings`
-* Applies type, length, conversion mask, and rename when present on catalog fields
+* Applies length, conversion mask, and rename when present on catalog fields that are **on the incoming stream**
+* Hub and link loads typically `SELECT` only relationship keys and alias the source indicator (`record_source AS x_record_source`). Satellite attributes on the same catalog feed (`stock_qty`, `order_status`, `quantity`, …) and source `load_date` are not mapped. The source-indicator mapping is applied to the **vault alias**. If the generated stream layout cannot be determined, mappings are skipped rather than applied to the full catalog.
 
 No `.hsm` is required at generate/runtime once the catalog has been published.
 

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.datavault.transform.datedimensiongenerator.DateDimensionGeneratorMetaFactory;
 
 /** Factory for a standard calendar date dimension and common role-playing aliases. */
 public final class DmDateDimensionTemplate {
@@ -33,6 +34,10 @@ public final class DmDateDimensionTemplate {
   private DmDateDimensionTemplate() {}
 
   public static DmDimension createDateDimension(Point location) {
+    return createDateDimension(location, DimensionalConfiguration.DEFAULT_LOAD_DATE_FIELD);
+  }
+
+  public static DmDimension createDateDimension(Point location, String loadDateField) {
     DmDimension dimension = new DmDimension();
     dimension.setName(DEFAULT_DIMENSION_NAME);
     dimension.setTableName(DEFAULT_TABLE_NAME);
@@ -43,6 +48,8 @@ public final class DmDateDimensionTemplate {
     DmSourceConfiguration source = dimension.getSourceOrDefault();
     source.setSourceType(DmSourceType.DATE_GENERATOR);
     source.setDateGenerator(DmDateGeneratorConfiguration.createDefault());
+    DateDimensionGeneratorMetaFactory.ensureLoadTimestampField(
+        source.getDateGenerator().getFields(), loadDateField);
     source.setSourceSql("");
     dimension.getNaturalKeys().add(new DmNaturalKeyField("date_key"));
     addAttribute(dimension, "full_date");

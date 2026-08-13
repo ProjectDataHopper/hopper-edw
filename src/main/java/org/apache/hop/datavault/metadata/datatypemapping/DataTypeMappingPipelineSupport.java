@@ -17,7 +17,11 @@
 package org.apache.hop.datavault.metadata.datatypemapping;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.row.IValueMeta;
@@ -190,13 +194,29 @@ public final class DataTypeMappingPipelineSupport {
       TransformMeta predecessor,
       List<SourceField> sourceFields,
       Point location) {
-    if (pipelineMeta == null
-        || predecessor == null
-        || !needsSelectValuesFromSourceFields(sourceFields)) {
+    return injectFromSourceFields(pipelineMeta, predecessor, sourceFields, location, null);
+  }
+
+  /**
+   * Same as {@link #injectFromSourceFields(PipelineMeta, TransformMeta, List, Point)} but ignores
+   * catalog fields that are not on the incoming stream. Hub/link loads typically {@code SELECT}
+   * only business keys; applying metadata to unused catalog columns (for example {@code load_date})
+   * makes Select Values fail at runtime.
+   *
+   * @param streamFieldNames incoming field names; {@code null} means do not filter
+   */
+  public static TransformMeta injectFromSourceFields(
+      PipelineMeta pipelineMeta,
+      TransformMeta predecessor,
+      List<SourceField> sourceFields,
+      Point location,
+      Collection<String> streamFieldNames) {
+    List<SourceField> fields = filterToStreamFields(sourceFields, streamFieldNames);
+    if (pipelineMeta == null || predecessor == null || !needsSelectValuesFromSourceFields(fields)) {
       return predecessor;
     }
     return injectSelectValues(
-        pipelineMeta, predecessor, buildSelectValuesMetaFromSourceFields(sourceFields), location);
+        pipelineMeta, predecessor, buildSelectValuesMetaFromSourceFields(fields), location);
   }
 
   /**
@@ -210,11 +230,93 @@ public final class DataTypeMappingPipelineSupport {
       IHopMetadataProvider metadataProvider,
       Point location)
       throws HopException {
+    return injectFromRecordSource(
+        pipelineMeta, predecessor, recordSource, metadataProvider, location, null);
+  }
+
+  /**
+   * Load fields from the record source and inject Select Values for those present on the incoming
+   * stream.
+   *
+   * @param streamFieldNames incoming field names; {@code null} means do not filter
+   */
+  public static TransformMeta injectFromRecordSource(
+      PipelineMeta pipelineMeta,
+      TransformMeta predecessor,
+      DataVaultSource recordSource,
+      IHopMetadataProvider metadataProvider,
+      Point location,
+      Collection<String> streamFieldNames)
+      throws HopException {
     if (recordSource == null) {
       return predecessor;
     }
     List<SourceField> fields = recordSource.getFields(metadataProvider);
-    return injectFromSourceFields(pipelineMeta, predecessor, fields, location);
+    return injectFromSourceFields(pipelineMeta, predecessor, fields, location, streamFieldNames);
+  }
+
+  /**
+   * Hub/link source SQL aliases the source-indicator column to the vault record-source field
+   * ({@code record_source AS x_record_source}). Catalog mappings still use the physical name.
+   * Rewrite the lookup name to the alias and do not rename the stream back.
+   */
+  public static List<SourceField> rewriteSourceIndicatorLookup(
+      List<SourceField> sourceFields, String sourceIndicatorField, String targetRecordSourceField) {
+    if (sourceFields == null || sourceFields.isEmpty()) {
+      return sourceFields == null ? List.of() : sourceFields;
+    }
+    if (Utils.isEmpty(sourceIndicatorField)
+        || Utils.isEmpty(targetRecordSourceField)
+        || sourceIndicatorField.equalsIgnoreCase(targetRecordSourceField)) {
+      return sourceFields;
+    }
+    List<SourceField> rewritten = new ArrayList<>();
+    for (SourceField field : sourceFields) {
+      if (field == null) {
+        continue;
+      }
+      if (sourceIndicatorField.equalsIgnoreCase(field.getName())
+          || sourceIndicatorField.equalsIgnoreCase(field.resolveStreamName())) {
+        SourceField copy = new SourceField(field);
+        copy.setName(targetRecordSourceField);
+        copy.setSourceStreamName(null);
+        rewritten.add(copy);
+      } else {
+        rewritten.add(field);
+      }
+    }
+    return rewritten;
+  }
+
+  /**
+   * Keeps catalog fields whose stream name or effective name appears in {@code streamFieldNames}.
+   * {@code null} stream names means no filtering. Comparison is case-insensitive.
+   */
+  public static List<SourceField> filterToStreamFields(
+      List<SourceField> sourceFields, Collection<String> streamFieldNames) {
+    if (sourceFields == null || sourceFields.isEmpty() || streamFieldNames == null) {
+      return sourceFields == null ? List.of() : sourceFields;
+    }
+    Set<String> present = new LinkedHashSet<>();
+    for (String name : streamFieldNames) {
+      if (!Utils.isEmpty(name)) {
+        present.add(name.trim().toLowerCase(Locale.ROOT));
+      }
+    }
+    if (present.isEmpty()) {
+      return List.of();
+    }
+    List<SourceField> filtered = new ArrayList<>();
+    for (SourceField field : sourceFields) {
+      if (field == null || Utils.isEmpty(field.getName())) {
+        continue;
+      }
+      if (present.contains(field.getName().trim().toLowerCase(Locale.ROOT))
+          || present.contains(field.resolveStreamName().trim().toLowerCase(Locale.ROOT))) {
+        filtered.add(field);
+      }
+    }
+    return filtered;
   }
 
   /**
@@ -268,11 +370,7 @@ public final class DataTypeMappingPipelineSupport {
         selectFields.add(selectField);
         anyRename = true;
       }
-      if (field.getHopType() > 0
-          || !Utils.isEmpty(field.getLength())
-          || !Utils.isEmpty(field.getPrecision())
-          || field.isRenamedFromStream()
-          || hasConversion(field)) {
+      if (needsMetadataChange(field)) {
         metaChanges.add(toMetadataChange(field));
       }
     }
@@ -363,6 +461,20 @@ public final class DataTypeMappingPipelineSupport {
     if (!Utils.isEmpty(conv.getStorageType())) {
       change.setStorageType(conv.getStorageType());
     }
+  }
+
+  /**
+   * True when Select Values must rewrite this field. A hop type alone is not enough: catalog
+   * layouts always carry types, including columns the generated source SQL does not read.
+   */
+  static boolean needsMetadataChange(SourceField field) {
+    if (field == null || Utils.isEmpty(field.getName())) {
+      return false;
+    }
+    return field.isRenamedFromStream()
+        || hasConversion(field)
+        || !Utils.isEmpty(field.getLength())
+        || !Utils.isEmpty(field.getPrecision());
   }
 
   private static boolean hasConversion(SourceField field) {

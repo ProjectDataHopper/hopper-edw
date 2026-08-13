@@ -1031,8 +1031,10 @@ public class HopGuiDmTableDialog {
         new FormDataBuilder().left(wSourceRecordPreviewData, margin).bottom().result());
     wSourceRecordPreviewFields.addListener(SWT.Selection, e -> previewSourceRecordFields());
 
+    String loadDateField =
+        model != null ? model.getConfigurationOrDefault().resolveLoadDateField(variables) : null;
     dateGeneratorWidgets =
-        DmSourceDateGeneratorGuiSupport.create(comp, variables, wSourceType, margin);
+        DmSourceDateGeneratorGuiSupport.create(comp, variables, wSourceType, margin, loadDateField);
 
     refreshSourcePanelVisibility();
   }

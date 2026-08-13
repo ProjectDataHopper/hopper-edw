@@ -71,6 +71,75 @@ class DataTypeMappingCatalogPipelineTest {
   }
 
   @Test
+  void typeOnlyCatalogFieldDoesNotProduceMetaChange() {
+    SourceField loadDate = new SourceField("load_date");
+    loadDate.setHopType(IValueMeta.TYPE_TIMESTAMP);
+    SourceField customerId = new SourceField("customer_id");
+    customerId.setHopType(IValueMeta.TYPE_INTEGER);
+    customerId.setLength("9");
+
+    SelectValuesMeta select =
+        DataTypeMappingPipelineSupport.buildSelectValuesMetaFromSourceFields(
+            List.of(customerId, loadDate));
+    List<SelectMetadataChange> meta = select.getSelectOption().getMeta();
+    assertEquals(1, meta.size());
+    assertEquals("customer_id", meta.get(0).getName());
+    assertFalse(DataTypeMappingPipelineSupport.needsMetadataChange(loadDate));
+    assertTrue(DataTypeMappingPipelineSupport.needsMetadataChange(customerId));
+  }
+
+  @Test
+  void rewriteSourceIndicatorLooksUpVaultAlias() {
+    SourceField recordSource = new SourceField("record_source");
+    recordSource.setHopType(IValueMeta.TYPE_STRING);
+    recordSource.setLength("30");
+    SourceField customerId = new SourceField("customer_id");
+    customerId.setHopType(IValueMeta.TYPE_INTEGER);
+    customerId.setLength("9");
+
+    List<SourceField> aligned =
+        DataTypeMappingPipelineSupport.rewriteSourceIndicatorLookup(
+            List.of(customerId, recordSource), "record_source", "x_record_source");
+    List<SourceField> onStream =
+        DataTypeMappingPipelineSupport.filterToStreamFields(
+            aligned, List.of("customer_id", "x_record_source"));
+
+    SelectValuesMeta select =
+        DataTypeMappingPipelineSupport.buildSelectValuesMetaFromSourceFields(onStream);
+    List<String> metaNames =
+        select.getSelectOption().getMeta().stream().map(SelectMetadataChange::getName).toList();
+    assertTrue(metaNames.contains("customer_id"));
+    assertTrue(metaNames.contains("x_record_source"));
+    assertFalse(metaNames.contains("record_source"));
+  }
+
+  @Test
+  void filterToStreamFieldsDropsColumnsNotOnTheSourceStream() {
+    SourceField loadDate = new SourceField("load_date");
+    loadDate.setHopType(IValueMeta.TYPE_TIMESTAMP);
+    FieldConversionOptions conv = new FieldConversionOptions();
+    conv.setConversionMask("yyyy-MM-dd");
+    SourceFieldInputOptions inputOptions = new SourceFieldInputOptions();
+    inputOptions.setConversion(conv);
+    loadDate.setInputOptions(inputOptions);
+    SourceField customerId = new SourceField("customer_id");
+    customerId.setHopType(IValueMeta.TYPE_INTEGER);
+    customerId.setLength("9");
+
+    List<SourceField> filtered =
+        DataTypeMappingPipelineSupport.filterToStreamFields(
+            List.of(customerId, loadDate), List.of("customer_id", "record_source"));
+
+    assertEquals(1, filtered.size());
+    assertEquals("customer_id", filtered.get(0).getName());
+    SelectValuesMeta select =
+        DataTypeMappingPipelineSupport.buildSelectValuesMetaFromSourceFields(filtered);
+    assertTrue(
+        select.getSelectOption().getMeta().stream()
+            .noneMatch(change -> "load_date".equalsIgnoreCase(change.getName())));
+  }
+
+  @Test
   void renameUsesStreamNameInMeta() {
     SourceField field = new SourceField("customer_id");
     field.setSourceStreamName("CUST_ID");

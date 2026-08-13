@@ -34,6 +34,7 @@ import org.apache.hop.core.exception.HopPluginException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.RowMeta;
+import org.apache.hop.core.row.value.ValueMetaBase;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
@@ -47,6 +48,8 @@ public final class DateDimensionGeneratorLogic {
   public static final String MASK_IS_WEEKEND = "@is_weekend";
   public static final String MASK_DAY_OF_WEEK = "@day_of_week";
   public static final String MASK_DATE_KEY = "yyyyMMdd";
+  public static final String MASK_NOW = "@now";
+  public static final String MASK_LOAD_TS = "@load_ts";
 
   public static final String MASK_FISCAL_YEAR = "@fiscal_year";
   public static final String MASK_FISCAL_QUARTER = "@fiscal_quarter";
@@ -82,9 +85,24 @@ public final class DateDimensionGeneratorLogic {
    * to the JVM local date at prepare time.
    */
   public record GeneratorContext(
-      LocalDate referenceDate, int dayOffset, int weekOffset, int monthOffset) {
+      LocalDate referenceDate, int dayOffset, int weekOffset, int monthOffset, Date now) {
 
-    public static final GeneratorContext DEFAULT = new GeneratorContext(LocalDate.now(), 0, 0, 0);
+    public static final GeneratorContext DEFAULT =
+        new GeneratorContext(LocalDate.now(), 0, 0, 0, new Date());
+
+    public GeneratorContext(
+        LocalDate referenceDate, int dayOffset, int weekOffset, int monthOffset) {
+      this(referenceDate, dayOffset, weekOffset, monthOffset, new Date());
+    }
+
+    public GeneratorContext {
+      if (referenceDate == null) {
+        referenceDate = LocalDate.now();
+      }
+      if (now == null) {
+        now = new Date();
+      }
+    }
 
     public LocalDate fiscalDate(LocalDate rowDate) {
       return rowDate.plusDays(dayOffset).plusWeeks(weekOffset).plusMonths(monthOffset);
@@ -113,7 +131,8 @@ public final class DateDimensionGeneratorLogic {
     REL_LABEL_YEAR,
     YTD,
     YTG,
-    ROLLING12
+    ROLLING12,
+    NOW
   }
 
   public record PreparedField(IValueMeta valueMeta, DateTimeFormatter formatter, FieldKind kind) {}
@@ -147,7 +166,7 @@ public final class DateDimensionGeneratorLogic {
     int dayOffset = parseOffset(dayOffsetValue, variables, "day offset");
     int weekOffset = parseOffset(weekOffsetValue, variables, "week offset");
     int monthOffset = parseOffset(monthOffsetValue, variables, "month offset");
-    return new GeneratorContext(referenceDate, dayOffset, weekOffset, monthOffset);
+    return new GeneratorContext(referenceDate, dayOffset, weekOffset, monthOffset, new Date());
   }
 
   public static IRowMeta buildOutputRowMeta(
@@ -234,7 +253,18 @@ public final class DateDimensionGeneratorLogic {
     return new PreparedField(valueMeta, formatter, kind);
   }
 
+  static boolean isNowMask(String mask) {
+    if (Utils.isEmpty(mask)) {
+      return false;
+    }
+    String normalized = mask.trim();
+    return MASK_NOW.equalsIgnoreCase(normalized) || MASK_LOAD_TS.equalsIgnoreCase(normalized);
+  }
+
   static FieldKind resolveFieldKind(int hopType, String mask) {
+    if (isNowMask(mask) || (hopType == IValueMeta.TYPE_TIMESTAMP && Utils.isEmpty(mask))) {
+      return FieldKind.NOW;
+    }
     if (hopType == IValueMeta.TYPE_BOOLEAN
         && (Utils.isEmpty(mask) || MASK_IS_WEEKEND.equalsIgnoreCase(mask))) {
       return FieldKind.WEEKEND;
@@ -287,7 +317,13 @@ public final class DateDimensionGeneratorLogic {
     // preview/output (e.g. integer 20000101 shown as "yyyyMMdd20000101").
     String mask = resolve(field.getFormatMask(), variables);
     FieldKind kind = resolveFieldKind(hopType, mask);
-    if ((hopType == IValueMeta.TYPE_DATE || hopType == IValueMeta.TYPE_TIMESTAMP)
+    if (kind == FieldKind.NOW) {
+      if (hopType == IValueMeta.TYPE_DATE || hopType == IValueMeta.TYPE_TIMESTAMP) {
+        valueMeta.setConversionMask(ValueMetaBase.DEFAULT_DATE_FORMAT_MASK);
+      } else if (hopType == IValueMeta.TYPE_STRING && !isNowMask(mask) && !Utils.isEmpty(mask)) {
+        valueMeta.setConversionMask(mask);
+      }
+    } else if ((hopType == IValueMeta.TYPE_DATE || hopType == IValueMeta.TYPE_TIMESTAMP)
         && kind == FieldKind.FORMATTER
         && !Utils.isEmpty(mask)) {
       valueMeta.setConversionMask(mask);
@@ -338,6 +374,7 @@ public final class DateDimensionGeneratorLogic {
       case YTD -> isYearToDate(date, context.referenceDate());
       case YTG -> isYearToGo(date, context.referenceDate());
       case ROLLING12 -> isRolling12(date, context.referenceDate());
+      case NOW -> convertNowValue(context.now(), preparedField.valueMeta());
       case FORMATTER -> {
         String formatted = date.format(preparedField.formatter());
         yield convertFormattedValue(formatted, date, preparedField.valueMeta());
@@ -436,6 +473,30 @@ public final class DateDimensionGeneratorLogic {
               BaseMessages.getString(
                   PKG, "DateDimensionGeneratorLogic.Error.InvalidBoolean", fieldName, formatted));
     };
+  }
+
+  private static Object convertNowValue(Date now, IValueMeta valueMeta) throws HopException {
+    Date value = now != null ? now : new Date();
+    return switch (valueMeta.getType()) {
+      case IValueMeta.TYPE_DATE -> value;
+      case IValueMeta.TYPE_TIMESTAMP -> new java.sql.Timestamp(value.getTime());
+      case IValueMeta.TYPE_STRING -> formatNowString(value, valueMeta);
+      default ->
+          throw new HopException(
+              BaseMessages.getString(
+                  PKG,
+                  "DateDimensionGeneratorLogic.Error.UnsupportedFieldType",
+                  valueMeta.getName(),
+                  ValueMetaFactory.getValueMetaName(valueMeta.getType())));
+    };
+  }
+
+  private static String formatNowString(Date value, IValueMeta valueMeta) {
+    String mask = valueMeta.getConversionMask();
+    if (Utils.isEmpty(mask) || isNowMask(mask)) {
+      mask = ValueMetaBase.DEFAULT_DATE_FORMAT_MASK;
+    }
+    return new java.text.SimpleDateFormat(mask).format(value);
   }
 
   private static Date toDate(LocalDate date) {

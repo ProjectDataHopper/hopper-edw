@@ -27,7 +27,10 @@ import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
+import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.variables.Variables;
+import org.apache.hop.datavault.transform.datedimensiongenerator.DateDimensionGeneratorField;
+import org.apache.hop.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic;
 import org.apache.hop.datavault.transform.datedimensiongenerator.DateDimensionGeneratorMeta;
 import org.apache.hop.datavault.transform.datedimensiongenerator.DateDimensionGeneratorMetaFactory;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
@@ -67,6 +70,7 @@ class DmDateGeneratorSourceTest {
     assertTrue(rowMeta != null && rowMeta.size() > 0);
     assertTrue(rowMeta.indexOfValue("date_key") >= 0);
     assertTrue(rowMeta.indexOfValue("full_date") >= 0);
+    assertTrue(rowMeta.indexOfValue("load_dt") >= 0);
   }
 
   @Test
@@ -88,6 +92,62 @@ class DmDateGeneratorSourceTest {
                         && r.getText() != null
                         && r.getText().toLowerCase().contains("source sql"));
     assertFalse(missingSql, () -> "Unexpected SQL errors: " + remarks);
+    boolean missingLoadDate =
+        remarks.stream()
+            .anyMatch(
+                r ->
+                    r.getType() == ICheckResult.TYPE_RESULT_ERROR
+                        && r.getText() != null
+                        && r.getText().toLowerCase().contains("load timestamp"));
+    assertFalse(missingLoadDate, () -> "Unexpected load timestamp errors: " + remarks);
+  }
+
+  @Test
+  void fieldResolutionInjectsModelLoadTimestampWhenMissingFromGenerator() {
+    DimensionalModel model = new DimensionalModel();
+    model.setName("test");
+    model.getConfigurationOrDefault().setLoadDateField("x_load_ts");
+    DmDimension dimension = DmDateDimensionTemplate.createDateDimension(null);
+    dimension
+        .getSourceOrDefault()
+        .getDateGeneratorOrDefault()
+        .setFields(new ArrayList<>(DateDimensionGeneratorMetaFactory.defaultFields()));
+    model.getTables().add(dimension);
+
+    IRowMeta rowMeta =
+        DmSourceFieldResolutionSupport.tryResolveSourceRowMeta(
+            new MemoryMetadataProvider(), new Variables(), model, dimension);
+
+    assertTrue(rowMeta != null && rowMeta.indexOfValue("x_load_ts") >= 0);
+    assertEquals(
+        IValueMeta.TYPE_TIMESTAMP,
+        rowMeta.getValueMeta(rowMeta.indexOfValue("x_load_ts")).getType());
+  }
+
+  @Test
+  void validationAcceptsDateGeneratorWithoutManualLoadTimestampField() {
+    DimensionalModel model = new DimensionalModel();
+    model.setName("test");
+    model.getConfigurationOrDefault().setTargetDatabase("Vault");
+    model.getConfigurationOrDefault().setLoadDateField("x_load_ts");
+    DmDimension dimension = DmDateDimensionTemplate.createDateDimension(null);
+    dimension
+        .getSourceOrDefault()
+        .getDateGeneratorOrDefault()
+        .setFields(new ArrayList<>(DateDimensionGeneratorMetaFactory.defaultFields()));
+    model.getTables().add(dimension);
+
+    List<ICheckResult> remarks = new ArrayList<>();
+    dimension.check(remarks, new MemoryMetadataProvider(), new Variables(), model);
+
+    boolean missingLoadDate =
+        remarks.stream()
+            .anyMatch(
+                r ->
+                    r.getType() == ICheckResult.TYPE_RESULT_ERROR
+                        && r.getText() != null
+                        && r.getText().contains("x_load_ts"));
+    assertFalse(missingLoadDate, () -> "Unexpected x_load_ts errors: " + remarks);
   }
 
   @Test
@@ -102,6 +162,18 @@ class DmDateGeneratorSourceTest {
     assertEquals("2026-07-15", meta.getReferenceDate());
     assertEquals("6", meta.getMonthOffset());
     assertFalse(meta.getFields().isEmpty());
+    assertTrue(
+        config.toTransformMeta().getFields().stream()
+            .noneMatch(field -> "x_load_ts".equalsIgnoreCase(field.getName())));
+
+    DateDimensionGeneratorMeta withLoad = config.toTransformMeta("x_load_ts");
+    DateDimensionGeneratorField loadField =
+        withLoad.getFields().stream()
+            .filter(field -> "x_load_ts".equalsIgnoreCase(field.getName()))
+            .findFirst()
+            .orElseThrow();
+    assertEquals(IValueMeta.TYPE_TIMESTAMP, loadField.getHopType());
+    assertEquals(DateDimensionGeneratorLogic.MASK_NOW, loadField.getFormatMask());
   }
 
   @Test

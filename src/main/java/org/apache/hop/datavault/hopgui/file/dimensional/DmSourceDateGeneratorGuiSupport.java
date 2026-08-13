@@ -74,9 +74,11 @@ public final class DmSourceDateGeneratorGuiSupport {
     public Button wLoadDefaults;
     public Button wLoadRelativeDefaults;
     public Button wLoadFiscalDefaults;
+    public Button wLoadLoadTimestamp;
     public Button wPreviewData;
     public Label wlFields;
     public TableView wFields;
+    public String loadTimestampFieldName;
 
     public Control[] allControls() {
       return new Control[] {
@@ -95,6 +97,7 @@ public final class DmSourceDateGeneratorGuiSupport {
         wLoadDefaults,
         wLoadRelativeDefaults,
         wLoadFiscalDefaults,
+        wLoadLoadTimestamp,
         wPreviewData,
         wlFields,
         wFields
@@ -103,7 +106,17 @@ public final class DmSourceDateGeneratorGuiSupport {
   }
 
   public static Widgets create(Composite parent, IVariables variables, Control top, int margin) {
+    return create(parent, variables, top, margin, null);
+  }
+
+  public static Widgets create(
+      Composite parent,
+      IVariables variables,
+      Control top,
+      int margin,
+      String loadTimestampFieldName) {
     Widgets w = new Widgets();
+    w.loadTimestampFieldName = loadTimestampFieldName;
     int middle = PropsUi.getInstance().getMiddlePct();
     Shell shell = parent.getShell();
 
@@ -174,6 +187,21 @@ public final class DmSourceDateGeneratorGuiSupport {
             .top(w.wMonthOffset, margin)
             .result());
     w.wLoadDefaults.addListener(SWT.Selection, e -> loadDefaults(w));
+
+    w.wLoadLoadTimestamp =
+        button(parent, "HopGuiDmTableDialog.DateGenerator.LoadLoadTimestamp.Label");
+    w.wLoadLoadTimestamp.setToolTipText(
+        BaseMessages.getString(PKG, "HopGuiDmTableDialog.DateGenerator.LoadLoadTimestamp.ToolTip"));
+    w.wLoadLoadTimestamp.setLayoutData(
+        new FormDataBuilder().right(w.wLoadDefaults, -margin).top(w.wMonthOffset, margin).result());
+    w.wLoadLoadTimestamp.addListener(
+        SWT.Selection,
+        e ->
+            appendFields(
+                w,
+                List.of(
+                    DateDimensionGeneratorMetaFactory.loadTimestampField(
+                        resolveLoadTimestampFieldName(w)))));
 
     w.wPreviewData = button(parent, "HopGuiDmTableDialog.DateGenerator.PreviewData.Label");
     w.wPreviewData.setToolTipText(
@@ -247,8 +275,12 @@ public final class DmSourceDateGeneratorGuiSupport {
         return;
       }
       DmDateGeneratorConfiguration config = readData(widgets);
-      if (config.getFieldsOrEmpty().isEmpty()
-          || config.getFieldsOrEmpty().stream()
+      List<DateDimensionGeneratorField> previewFields = new ArrayList<>(config.getFieldsOrEmpty());
+      DateDimensionGeneratorMetaFactory.ensureLoadTimestampField(
+          previewFields, resolveLoadTimestampFieldName(widgets));
+      config.setFields(previewFields);
+      if (previewFields.isEmpty()
+          || previewFields.stream()
               .noneMatch(field -> field != null && !Utils.isEmpty(field.getName()))) {
         throw new HopException(
             BaseMessages.getString(PKG, "HopGuiDmTableDialog.DateGenerator.Preview.NoFields"));
@@ -449,5 +481,12 @@ public final class DmSourceDateGeneratorGuiSupport {
 
   private static String textValue(Text text) {
     return text != null && !text.isDisposed() ? text.getText() : "";
+  }
+
+  private static String resolveLoadTimestampFieldName(Widgets w) {
+    if (w != null && !Utils.isEmpty(w.loadTimestampFieldName)) {
+      return w.loadTimestampFieldName;
+    }
+    return DateDimensionGeneratorMetaFactory.DEFAULT_LOAD_TIMESTAMP_FIELD;
   }
 }

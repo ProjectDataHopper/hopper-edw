@@ -48,6 +48,9 @@ The transform dialog configures the date range, optional **reference date** and 
 
 |Add fiscal fields
 |Appends fiscal calendar columns (`fiscal_year`, `fiscal_quarter`, …) when missing.
+
+|Add load timestamp
+|Appends a `Timestamp` field (`load_dt` in the transform dialog, or the dimensional model's load timestamp column on the Source tab) with mask `@now`. The value is the transform init time and is the same on every generated day. Rename the field when the target column uses another name (for example `x_load_ts`).
 |===
 
 The transform validates that the start date is not after the end date. An empty or unparseable date produces a configuration error at runtime.
@@ -142,6 +145,9 @@ Some calendar attributes are easier to express as tokens than as formatter lette
 
 |`@ytd` / `@ytg` / `@rolling12`
 |Boolean flags: year-to-date (same year, on or before reference), year-to-go (same year after reference), and rolling 12 months ending at the reference (inclusive).
+
+|`@now` or `@load_ts`
+|Current timestamp captured once at transform init (not the calendar day). Use with type `Timestamp` (or `Date` / `String`) for warehouse load-audit columns. An empty mask on a `Timestamp` field is treated as `@now`.
 |===
 
 === Hop conversion masks
@@ -221,7 +227,7 @@ Locale values use the usual language and country form (`en_US`, `fr_FR`). Unders
 * Use **Preview** on the transform to verify masks and locales before loading to the database. After fixing configuration, reload defaults if you still have the old `day_of_week` mask `u` (that letter formats the *year* in Java, not the day of week).
 * Keep `date_key` as `Integer` with mask `yyyyMMdd` for integer join keys; use `full_date` as `Date` for human-readable reporting and date arithmetic in SQL.
 * Narrow the start/end range during development to keep previews fast; widen for production loads (for example 20–30 years).
-* In the dimensional modeler, choose **Source type = Date generator** on a dimension (or use **Add date dimension** on the canvas) to embed this transform in the generated load pipeline — no separate `.hpl` required for the standard calendar. The modeler Source tab mirrors these options (including **Preview data**); see link:dimensional-modeler-overview.adoc#date-dimension[Dimensional modeler — date dimension].
+* In the dimensional modeler, choose **Source type = Date generator** on a dimension (or use **Add date dimension** on the canvas) to embed this transform in the generated load pipeline — no separate `.hpl` required for the standard calendar. The modeler Source tab mirrors these options (including **Preview data**); see link:dimensional-modeler-overview.adoc#date-dimension[Dimensional modeler — date dimension]. Type 1 date-dimension loads require the model load timestamp column on the source stream; the generator adds it automatically (`@now`) when it is missing from the field table.
 * For holidays or bespoke attributes, keep using a **Pipeline** source with a custom `.hpl` that starts from this transform (or SQL).
 * Boolean fields accept `@is_weekend` / `@ytd` / `@ytg` / `@rolling12` or formatted values parsed as `Y`/`N`, `true`/`false`, or `1`/`0` when you use a string-producing mask with type `Boolean`.
 

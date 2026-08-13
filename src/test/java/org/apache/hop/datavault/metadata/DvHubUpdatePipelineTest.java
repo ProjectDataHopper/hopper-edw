@@ -45,6 +45,8 @@ import org.apache.hop.datavault.transform.mergerowsplus.MergeRowsPlusMeta;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transforms.concatfields.ConcatFieldsMeta;
+import org.apache.hop.pipeline.transforms.selectvalues.SelectMetadataChange;
+import org.apache.hop.pipeline.transforms.selectvalues.SelectValuesMeta;
 import org.apache.hop.pipeline.transforms.sort.SortRowsMeta;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
 import org.junit.jupiter.api.BeforeAll;
@@ -57,6 +59,46 @@ class DvHubUpdatePipelineTest {
     HopEnvironment.init();
     new RegisterDataCatalogMetadataExtensionPoint()
         .callExtensionPoint(LogChannel.GENERAL, new Variables(), PluginRegistry.getInstance());
+  }
+
+  @Test
+  void hubDataTypeMappingsUseVaultRecordSourceAlias() throws Exception {
+    DvHub hub = new DvHub("hub_customer");
+    hub.setHashKeyFieldName("customer_hk");
+    hub.setRecordSourceFieldName("x_record_source");
+    hub.setBusinessKeys(List.of(businessKey("customer_id", "customer_id", "E2E-customer-hub")));
+
+    DataVaultSource source = e2eCustomerHubSource();
+    DataVaultModel model = new DataVaultModel();
+    model.getConfigurationOrDefault().setRecordSourceField("x_record_source");
+
+    PipelineMeta pipelineMeta = new PipelineMeta();
+    DvDatabaseHubSourcePipelineBuilder builder =
+        new DvDatabaseHubSourcePipelineBuilder(
+            new Variables(),
+            testMetadataProvider(),
+            model,
+            pipelineMeta,
+            source,
+            source.getDvSourceOrDefault(),
+            hub,
+            new Point(0, 0));
+    builder.build();
+    builder.applyCatalogDataTypeMappings();
+
+    SelectValuesMeta selectMeta =
+        (SelectValuesMeta)
+            pipelineMeta.getTransforms().stream()
+                .filter(t -> "apply data type mappings".equals(t.getName()))
+                .findFirst()
+                .orElseThrow()
+                .getTransform();
+    List<String> metaNames =
+        selectMeta.getSelectOption().getMeta().stream().map(SelectMetadataChange::getName).toList();
+    assertTrue(metaNames.contains("customer_id"), metaNames::toString);
+    assertTrue(metaNames.contains("x_record_source"), metaNames::toString);
+    assertFalse(metaNames.contains("record_source"), metaNames::toString);
+    assertFalse(metaNames.contains("load_date"), metaNames::toString);
   }
 
   @Test
@@ -273,6 +315,30 @@ class DvHubUpdatePipelineTest {
     }
     hub.setBusinessKeys(keys);
     return hub;
+  }
+
+  private static DataVaultSource e2eCustomerHubSource() {
+    DataVaultSource source = new DataVaultSource("E2E-customer-hub");
+    source.setSourceIndicatorField("record_source");
+    DvDatabaseSource dbSource = new DvDatabaseSource();
+    dbSource.setDatabaseName("CRM");
+    dbSource.setSchemaName("public");
+    dbSource.setTableName("customer_hub");
+    source.setSource(dbSource);
+    List<SourceField> fields = new ArrayList<>();
+    SourceField customerId = new SourceField("customer_id");
+    customerId.setHopType(IValueMeta.TYPE_INTEGER);
+    customerId.setLength("9");
+    fields.add(customerId);
+    SourceField loadDate = new SourceField("load_date");
+    loadDate.setHopType(IValueMeta.TYPE_TIMESTAMP);
+    fields.add(loadDate);
+    SourceField recordSource = new SourceField("record_source");
+    recordSource.setHopType(IValueMeta.TYPE_STRING);
+    recordSource.setLength("30");
+    fields.add(recordSource);
+    source.getDvSourceOrDefault().setFields(fields);
+    return source;
   }
 
   private static DataVaultSource customerPrefsSource() {

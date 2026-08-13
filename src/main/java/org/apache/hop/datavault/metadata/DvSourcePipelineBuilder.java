@@ -16,14 +16,20 @@
  */
 package org.apache.hop.datavault.metadata;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.Point;
+import org.apache.hop.core.row.IRowMeta;
+import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metadata.datatypemapping.DataTypeMappingPipelineSupport;
+import org.apache.hop.datavault.metadata.datatypemapping.DvCatalogMappingStreamFieldsSupport;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
@@ -99,9 +105,74 @@ public abstract class DvSourcePipelineBuilder {
             : (startPoint != null
                 ? new Point(startPoint.x + TRANSFORM_SPACING_X, startPoint.y)
                 : new Point(300, 100));
+    List<SourceField> fields = recordSource.getFields(metadataProvider);
+    String sourceIndicator = resolveSourceIndicatorField();
+    String targetRecordSource = resolveTargetRecordSourceField();
+    fields =
+        DataTypeMappingPipelineSupport.rewriteSourceIndicatorLookup(
+            fields, sourceIndicator, targetRecordSource);
     resultTransform =
-        DataTypeMappingPipelineSupport.injectFromRecordSource(
-            pipelineMeta, resultTransform, recordSource, metadataProvider, location);
+        DataTypeMappingPipelineSupport.injectFromSourceFields(
+            pipelineMeta,
+            resultTransform,
+            fields,
+            location,
+            resolveIncomingStreamFieldNames(targetRecordSource));
+  }
+
+  /**
+   * Runtime field names after the generated source SQL / file projection. Never returns {@code
+   * null}: an unknown layout yields an empty list so catalog mappings are skipped instead of being
+   * applied to unused source columns (link loads must not rewrite satellite attributes).
+   */
+  protected Collection<String> resolveIncomingStreamFieldNames(String targetRecordSourceField) {
+    List<String> expected =
+        DvCatalogMappingStreamFieldsSupport.expectedStreamFieldNames(
+            dvTable, recordSource, model, variables, targetRecordSourceField, dvLinkHubSource);
+    if (!expected.isEmpty()) {
+      return expected;
+    }
+    Collection<String> live = resolveLiveTransformFieldNames();
+    return live != null ? live : List.of();
+  }
+
+  private String resolveSourceIndicatorField() {
+    if (recordSource == null) {
+      return null;
+    }
+    String field = recordSource.getSourceIndicatorField();
+    return variables != null ? variables.resolve(field) : field;
+  }
+
+  private String resolveTargetRecordSourceField() {
+    try {
+      return DvSourceFieldMappingSupport.resolveRecordSourceFieldName(
+          configuration, dvTable, variables);
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  private Collection<String> resolveLiveTransformFieldNames() {
+    if (pipelineMeta == null || resultTransform == null) {
+      return null;
+    }
+    try {
+      IRowMeta rowMeta = pipelineMeta.getTransformFields(variables, resultTransform);
+      if (rowMeta == null || rowMeta.isEmpty()) {
+        return null;
+      }
+      List<String> names = new ArrayList<>();
+      for (int i = 0; i < rowMeta.size(); i++) {
+        String name = rowMeta.getValueMeta(i).getName();
+        if (!Utils.isEmpty(name)) {
+          names.add(name);
+        }
+      }
+      return names.isEmpty() ? null : names;
+    } catch (Exception e) {
+      return null;
+    }
   }
 
   protected DatabaseMeta loadDatabaseMeta(String name) throws HopException {

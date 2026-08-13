@@ -124,6 +124,21 @@ public class SourceField {
     this.name = name;
   }
 
+  public SourceField(SourceField other) {
+    if (other == null) {
+      return;
+    }
+    this.name = other.name;
+    this.description = other.description;
+    this.sourceDataType = other.sourceDataType;
+    this.length = other.length;
+    this.precision = other.precision;
+    this.hopType = other.hopType;
+    this.sourceStreamName = other.sourceStreamName;
+    this.primaryKeyPosition = other.primaryKeyPosition;
+    this.inputOptions = other.inputOptions;
+  }
+
   /**
    * Stream name as produced by the source input transform (physical column / file header). When
    * empty, {@link #name} is used.

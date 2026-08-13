@@ -4,6 +4,20 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## Unreleased
 
+### Catalog data type mappings on hub/link loads
+
+- `apply data type mappings` no longer rewrites catalog columns that the generated source stream does not read (for example source `load_date` on a hub that only selects business keys)
+- Source-indicator mappings use the vault alias (`record_source AS x_record_source`) so Select Values does not look up a physical name that left the stream
+- Link loads map only hub keys / dependent child keys / the record-source alias — not satellite attributes on the same catalog feed (`stock_qty`, `quantity`, `order_status`)
+- If the generated stream layout cannot be determined, mappings are skipped instead of applying the full catalog
+- Select Values metadata is emitted only when a field actually needs length, precision, conversion, or rename — a hop type alone is not enough
+
+### Date generator load timestamp
+
+- Date Dimension Generator token `@now` / `@load_ts` emits the transform init timestamp (same value on every calendar row); empty mask on a `Timestamp` field is treated as `@now`
+- **Add load timestamp** on the transform dialog and dimensional Source tab appends that field (`load_dt`, or the model's load timestamp column)
+- Type 1 date-dimension loads auto-inject the model load timestamp when the generator field table does not already include it, so generated calendars satisfy the required source `x_load_ts` / `load_dt` mapping
+
 ### Hop Web table context dialog (#123)
 
 - Left-click on a table or card in the Source / Data Vault / Business Vault / Dimensional modelers again opens the context dialog under **Hop Web**. Icon-drag was armed on mouse-down (RAP has no move-while-held), so mouse-up treated every click as a completed drag.

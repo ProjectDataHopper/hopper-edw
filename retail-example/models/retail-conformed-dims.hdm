@@ -417,6 +417,14 @@ JOIN   sat_warehouse sw ON hw.warehouse_hk = sw.warehouse_hk</sourceSql>
             <formatMask>@is_weekend</formatMask>
             <locale>en_US</locale>
           </field>
+          <field>
+            <name>x_load_ts</name>
+            <hopType>9</hopType>
+            <length/>
+            <precision/>
+            <formatMask>@now</formatMask>
+            <locale/>
+          </field>
         </fields>
       </dateGenerator>
       <xloc>128</xloc>
