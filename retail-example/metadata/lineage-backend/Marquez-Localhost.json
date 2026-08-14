@@ -1,0 +1,18 @@
+{
+  "settings": {
+    "MARQUEZ": {
+      "defaultDatasetNamespace": "${MARQUEZ_NAMESPACE_DATASET}",
+      "baseUrl": "${MARQUEZ_API}",
+      "defaultJobNamespace": "${MARQUEZ_NAMESPACE_JOB}",
+      "apiKey": "Encrypted ",
+      "pluginId": "MARQUEZ",
+      "timeoutMs": "30000",
+      "uiBaseUrl": "",
+      "apiKeyHeader": ""
+    }
+  },
+  "virtualPath": "",
+  "name": "Marquez-Localhost",
+  "description": "",
+  "enabled": true
+}

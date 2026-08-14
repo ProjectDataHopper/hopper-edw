@@ -71,8 +71,8 @@ public final class DmDimensionAliasNavigationSupport {
           BaseMessages.getString(PKG, "DmDimensionAliasNavigationSupport.Error.MissingAlias"));
     }
 
-    SourceDimensionTarget target =
-        resolveSourceDimension(model, alias, variables, metadataProvider);
+    DimensionPipelineSource target =
+        resolvePipelineSource(model, alias, variables, metadataProvider);
 
     if (target.sameModel()) {
       HopGuiDimensionalModelGraph graph = currentGraph;
@@ -87,7 +87,20 @@ public final class DmDimensionAliasNavigationSupport {
     graph.navigateToTable(target.dimensionName());
   }
 
-  private static SourceDimensionTarget resolveSourceDimension(
+  /**
+   * Where the alias's update pipeline actually lives: same model for role-playing aliases, or the
+   * referenced {@code .hdm} for cross-model shared dimensions.
+   */
+  public static DimensionPipelineSource resolvePipelineSource(
+      DimensionalModel model,
+      DmDimensionAlias alias,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider)
+      throws HopException {
+    return resolveSourceDimension(model, alias, variables, metadataProvider);
+  }
+
+  private static DimensionPipelineSource resolveSourceDimension(
       DimensionalModel model,
       DmDimensionAlias alias,
       IVariables variables,
@@ -115,7 +128,7 @@ public final class DmDimensionAliasNavigationSupport {
                 dimensionName,
                 modelPath));
       }
-      return new SourceDimensionTarget(modelPath, dimensionName, false);
+      return new DimensionPipelineSource(modelPath, dimensionName, false);
     }
 
     if (!isDimensionTable(model, dimensionName)) {
@@ -125,7 +138,7 @@ public final class DmDimensionAliasNavigationSupport {
               "DmDimensionAliasNavigationSupport.Error.DimensionNotFoundInModel",
               dimensionName));
     }
-    return new SourceDimensionTarget(null, dimensionName, true);
+    return new DimensionPipelineSource(null, dimensionName, true);
   }
 
   private static boolean isDimensionTable(DimensionalModel model, String dimensionName) {
@@ -161,5 +174,6 @@ public final class DmDimensionAliasNavigationSupport {
     return variables != null ? variables.resolve(value) : value;
   }
 
-  private record SourceDimensionTarget(String modelPath, String dimensionName, boolean sameModel) {}
+  public record DimensionPipelineSource(
+      String modelPath, String dimensionName, boolean sameModel) {}
 }

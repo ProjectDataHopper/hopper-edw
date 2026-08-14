@@ -58,6 +58,16 @@ Marquez accepts **one** RunEvent object per `POST /api/v1/lineage` request. The 
 
 Each file is a single pretty-printed RunEvent (not an array). A non-OpenLineage `export-summary.json` lists counts, paths, and errors.
 
+== Viewing lineage in Hop
+
+After export, stay in Hop GUI with a **Hop Lineage View** (`.hlv`) pointed at a **lineage backend**. The view queries Marquez (or the export folder, or local models) and can open the responsible `.hdv` / `.hbv` / `.hdm`, catalog record, or generated pipeline.
+
+Export events are **model-derived COMPLETE** documents. Marquez “latest run” is the last *export*, not the last *load*. Load duration on the view comes from the Hop OPS database — see link:hop-lineage-view.adoc[Hop Lineage View].
+
+The Marquez **base URL** on a lineage backend is the host root (`${MARQUEZ_BASE_URL}` = `http://localhost:5001`). The export action still posts to `${MARQUEZ_API}` (`http://localhost:5001/api/v1/lineage`). Pasting `${MARQUEZ_API}` into the backend field is accepted: the `/api/v1/lineage` suffix is stripped.
+
+Retail sample view: `retail-example/models/f_orders-upstream.hlv` (backend `Marquez-Localhost`).
+
 == Viewing lineage in Marquez
 
 After export, open the Marquez UI and inspect job and dataset graphs.
@@ -110,7 +120,8 @@ Besides identity (`namespace` / `name`) and column `schema`, each dataset may in
 |===
 | Facet | Contents
 | `dataSource` | Standard OpenLineage facet: `name` (connection or kind) and `uri` (JDBC URL without credentials, `file://…` mask, Iceberg catalog path, or `hop://…` fallback)
-| `hop_location` | Structured hop-data-vault details: `kind` (`DATABASE` / `CSV` / `PARQUET` / `ICEBERG` / `STAGING`), `connectionName`, `schemaName`, `tableName`, file folder/masks, Iceberg catalog/warehouse/namespace/table/branch/snapshot
+| `hop_location` | Structured hop-data-vault details: `kind` (`DATABASE` / `CSV` / `PARQUET` / `ICEBERG` / `STAGING`), `connectionName`, `schemaName`, `tableName`, file folder/masks, Iceberg catalog/warehouse/namespace/table/branch/snapshot, plus `catalogKey` and `catalogConnection` when the dataset is a catalog feed |
+| `hop_export` (run) | Hop identity for deep-links: `modelLayer`, `modelName`, `modelFilename`, `tableType`, `logicalName`, `exportRunId`, plus `projectKey`, `resourceGroup`, `catalogConnection`, `physicalTableName`, `targetDatabase` |
 | `symlinks` | Alternate identifiers: `schema.table` for DB targets, and for **dimension aliases** the shared physical dimension (e.g. `d_shipping_date` → `d_date`)
 |===
 
@@ -133,6 +144,8 @@ Example `hop_location` for a database source feed:
   "kind": "DATABASE",
   "connectionName": "CRM",
   "tableName": "customer_prefs",
+  "catalogKey": "hop/retail/sources/E2E-customer-prefs",
+  "catalogConnection": "edw-catalog",
   "uri": "jdbc:postgresql://localhost:54320/..."
 }
 ----
@@ -155,6 +168,8 @@ Ports avoid common conflicts with macOS Control Center (5000) and local Postgres
 
 Example action HTTP URL: `http://localhost:5001/api/v1/lineage` (or a project variable such as `${MARQUEZ_API}`).
 
+A Hop Lineage View backend wants the **host root** `${MARQUEZ_BASE_URL}` = `http://localhost:5001`. Do not document `${MARQUEZ_API}` as the backend URL; if you paste it anyway, the `/api/v1/lineage` suffix is stripped. See link:hop-lineage-view.adoc[Hop Lineage View].
+
 Stop with `./scripts/run-marquez.sh down`. Reset data with `./scripts/run-marquez.sh reset`.
 
 == Relationship to other features
@@ -162,8 +177,9 @@ Stop with `./scripts/run-marquez.sh down`. Reset data with `./scripts/run-marque
 |===
 | Feature | Relationship
 | link:source-to-target-lineage.adoc[Source-to-target lineage] | Same collectors; OpenLineage is an external serialization
+| link:hop-lineage-view.adoc[Hop Lineage View] | In-GUI query of this export (or local collectors). Structure from OL; load times from OPS
 | link:execution-maps.adoc[Execution maps] | Optional table-level OpenLineage from crawled pipeline graphs (job names = pipeline names). Complementary, not column-level
-| Load-run metrics | Optional enrichment only; not a substitute for lineage structure
+| Load-run metrics | Optional enrichment on export; **not** what Hop Lineage View uses for duration badges
 | Catalog lineage siblings | Internal discovery + drift gate; OpenLineage is for external catalogs
 |===
 

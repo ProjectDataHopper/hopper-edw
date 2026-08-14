@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.hop.catalog.model.DvSourceRecord;
@@ -60,6 +61,25 @@ class OpenLineageDatasetFacetSupportTest {
     assertEquals(
         "hub_customer", dataset.path("facets").path("hop_location").path("tableName").asText());
     assertTrue(dataset.path("facets").has("symlinks"));
+  }
+
+  @Test
+  void hopLocationIncludesCatalogIdentity() {
+    DatasetLocation location =
+        DatasetLocation.builder()
+            .kind(DatasetLocationKind.DATABASE)
+            .connectionName("CRM")
+            .tableName("customer_prefs")
+            .catalogKey("hop/retail/sources/E2E-customer-prefs")
+            .catalogConnection("edw-catalog")
+            .uri("jdbc:postgresql://localhost:54320/crm")
+            .build();
+    ObjectNode dataset = MAPPER.createObjectNode();
+    dataset.put("name", "E2E-customer-prefs");
+    OpenLineageDatasetFacetSupport.attachLocationFacets(dataset, location);
+    JsonNode hop = dataset.path("facets").path("hop_location");
+    assertEquals("hop/retail/sources/E2E-customer-prefs", hop.path("catalogKey").asText());
+    assertEquals("edw-catalog", hop.path("catalogConnection").asText());
   }
 
   @Test
@@ -129,6 +149,7 @@ class OpenLineageDatasetFacetSupportTest {
     DatasetLocation csvLoc = OpenLineageDatasetLocationResolver.fromRecordDefinition(csv, null);
     assertEquals(DatasetLocationKind.CSV, csvLoc.getKind());
     assertTrue(csvLoc.getUri().contains("data/customer"));
+    assertEquals("ns/E2E-customer", csvLoc.getCatalogKey());
 
     RecordDefinition iceberg = new RecordDefinition();
     iceberg.setKey(new RecordDefinitionKey("ns", "ice-cust"));
@@ -140,6 +161,17 @@ class OpenLineageDatasetFacetSupportTest {
     DatasetLocation iceLoc = OpenLineageDatasetLocationResolver.fromRecordDefinition(iceberg, null);
     assertEquals(DatasetLocationKind.ICEBERG, iceLoc.getKind());
     assertTrue(iceLoc.getUri().contains("customers"));
+  }
+
+  @Test
+  void catalogSourceWithoutRegistryStillKeepsCatalogIdentity() {
+    OpenLineageLocationContext context = new OpenLineageLocationContext(null, null, "edw-catalog");
+    DatasetLocation loc =
+        OpenLineageDatasetLocationResolver.forCatalogSource(
+            "E2E-customer-prefs", "hop/retail/sources/E2E-customer-prefs", context);
+    assertEquals("hop/retail/sources/E2E-customer-prefs", loc.getCatalogKey());
+    assertEquals("edw-catalog", loc.getCatalogConnection());
+    assertEquals("E2E-customer-prefs", loc.getTableName());
   }
 
   @Test

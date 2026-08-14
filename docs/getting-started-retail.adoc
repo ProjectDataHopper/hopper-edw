@@ -213,6 +213,23 @@ The **simulate-6-months** map crawls `workflows/simulate-6-months.hwf`: an initi
 
 Reference: link:execution-maps.adoc[Execution maps].
 
+== Chapter 7b — Hop Lineage View (optional)
+
+. Start Marquez: `./scripts/run-marquez.sh up`.
+. Export model-derived lineage: `./scripts/run-hop.sh retail-example workflows/send-lineage-to-marquez.hwf` (or enable the export hop on `run-retail-update-models.hwf`).
+. Open `models/f_orders-upstream.hlv` — or click a fact such as `f_pit_inventory` / `f_orders` and choose **Show lineage**.
++
+image::images/lineage-view-model-context-action.png[Show lineage on dimensional fact f_pit_inventory,align="center"]
+. Walk **upstream** into BV/DV/source. Click a node to open the model, catalog record, or generated pipeline.
+. Duration badges (when **Overlay OPS load times** is on) come from the Hop OPS database. Marquez “latest run” is the last *export*, not the last *load*.
+. Click a node **name** to fill the right-hand Markdown details pane (**View as HTML** opens the same document in a browser).
+
+image::images/lineage-view-with-information-pane.png[Hop Lineage View — lineage-f-order-lines with OPS badges and details for dm/retail-f-inventory/d_product,align="center"]
+
+Backend `Marquez-Localhost` uses `${MARQUEZ_API}` (suffix stripped to the host). Prefer `${MARQUEZ_BASE_URL}` = `http://localhost:5001` on new backends. Namespaces must match the export (`${MARQUEZ_NAMESPACE_JOB}` / `${MARQUEZ_NAMESPACE_DATASET}`).
+
+Reference: link:hop-lineage-view.adoc[Hop Lineage View], link:openlineage-export.adoc[OpenLineage export].
+
 == Chapter 8 — Troubleshooting
 
 [cols="1,3", options="header"]
@@ -233,6 +250,9 @@ Reference: link:execution-maps.adoc[Execution maps].
 
 |Need clean slate
 |`./scripts/run-postgres.sh reset` then `up`, rerun initial workflow
+
+|Lineage view empty / `SEED_NOT_FOUND`
+|Marquez up (`./scripts/run-marquez.sh status`); export ran; `${MARQUEZ_NAMESPACE_JOB}` / `${MARQUEZ_NAMESPACE_DATASET}` match the backend. See link:hop-lineage-view.adoc[Hop Lineage View].
 |===
 
 == Next steps
@@ -252,4 +272,7 @@ Reference: link:execution-maps.adoc[Execution maps].
 
 |Operations (Docker, partial loads)
 |link:operations.adoc[operations.adoc]
+
+|Hop Lineage View (`.hlv`)
+|link:hop-lineage-view.adoc[hop-lineage-view.adoc]
 |===

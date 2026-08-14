@@ -1509,7 +1509,7 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
       tooltip = "i18n::HopGuiDimensionalModelGraph.Context.PreviewTargetLayout.Tooltip",
       image = "ui/images/preview.svg",
       category = "Dimensional",
-      categoryOrder = "6")
+      categoryOrder = "7")
   public void previewTargetLayoutAction(HopGuiDimensionalTableContext context) {
     IDmTable table = context.getTable();
     DimensionalModel dmModel = context.getModel();
@@ -1702,10 +1702,68 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
   }
 
   public void openUpdatePipeline(IDmTable table) {
+    if (table instanceof DmDimensionAlias alias) {
+      try {
+        openUpdatePipelineForAlias(alias);
+      } catch (HopException e) {
+        new ErrorDialog(
+            hopGui.getShell(),
+            BaseMessages.getString(PKG, "HopGuiDimensionalModelGraph.Debug.Error.Title"),
+            BaseMessages.getString(
+                PKG,
+                "HopGuiDimensionalModelGraph.Debug.Error.Pipeline",
+                Const.NVL(alias.getName(), "alias")),
+            e);
+      }
+      return;
+    }
     if (!validateModelForDebug()) {
       return;
     }
     openUpdatePipeline(table, getVariables());
+  }
+
+  /**
+   * Dimension aliases have no load pipeline. Follow the referenced dimension (possibly in another
+   * {@code .hdm}) and generate that update pipeline instead.
+   */
+  private void openUpdatePipelineForAlias(DmDimensionAlias alias) throws HopException {
+    DmDimensionAliasNavigationSupport.DimensionPipelineSource source =
+        DmDimensionAliasNavigationSupport.resolvePipelineSource(
+            model, alias, getVariables(), hopGui.getMetadataProvider());
+    if (source.sameModel()) {
+      IDmTable target = model != null ? model.findTable(source.dimensionName()) : null;
+      if (target == null || target instanceof DmDimensionAlias) {
+        throw new HopException(
+            BaseMessages.getString(
+                PKG, "HopGuiDimensionalModelGraph.Debug.Error.Pipeline", source.dimensionName()));
+      }
+      openUpdatePipeline(target);
+      return;
+    }
+    HopDimensionalFileType fileType = new HopDimensionalFileType();
+    IHopFileTypeHandler handler = fileType.openFile(hopGui, source.modelPath(), getVariables());
+    if (!(handler instanceof HopGuiDimensionalModelGraph targetGraph)) {
+      throw new HopException(
+          BaseMessages.getString(
+              PKG, "HopGuiDimensionalModelGraph.Debug.Error.Pipeline", source.dimensionName()));
+    }
+    IDmTable target =
+        targetGraph.getModel() != null
+            ? targetGraph.getModel().findTable(source.dimensionName())
+            : null;
+    if (target == null) {
+      throw new HopException(
+          BaseMessages.getString(
+              PKG, "HopGuiDimensionalModelGraph.Debug.Error.Pipeline", source.dimensionName()));
+    }
+    org.eclipse.swt.widgets.Display display = hopGui.getDisplay();
+    if (display == null || display.isDisposed()) {
+      targetGraph.openUpdatePipeline(target);
+      return;
+    }
+    IDmTable pipelineTable = target;
+    display.asyncExec(() -> targetGraph.openUpdatePipeline(pipelineTable));
   }
 
   private static boolean hasCheckErrors(List<ICheckResult> remarks) {

@@ -2054,7 +2054,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       tooltip = "i18n::HopGuiVaultGraph.Context.PreviewTargetLayout.Tooltip",
       image = "ui/images/preview.svg",
       category = "Data Vault",
-      categoryOrder = "4")
+      categoryOrder = "5")
   public void previewTargetLayoutAction(HopGuiVaultTableContext context) {
     IDvTable table = context.getTable();
     DataVaultModel dvModel = context.getModel();

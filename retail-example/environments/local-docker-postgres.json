@@ -43,7 +43,12 @@
     {
       "name" : "MARQUEZ_API",
       "value" : "http://localhost:5001/api/v1/lineage",
-      "description" : "The Marquez lineage API "
+      "description" : "Export data lineage HTTP POST URL (one RunEvent per request)"
+    },
+    {
+      "name" : "MARQUEZ_BASE_URL",
+      "value" : "http://localhost:5001",
+      "description" : "Marquez host root for Hop Lineage View backends (no /api/v1/lineage)"
     },
     {
       "name" : "MARQUEZ_NAMESPACE_DATASET",

@@ -27,6 +27,7 @@ End-to-end retail data vault example demonstrating initial and incremental loads
 - [docs/source-modeler-overview.adoc](../docs/source-modeler-overview.adoc) — source modeler (`.hsm`) and composite feeds
 - [docs/data-type-mappings.adoc](../docs/data-type-mappings.adoc) — pre-modeling data type mapping profiles
 - [docs/feature-overview.md](../docs/feature-overview.md) — all plugin capabilities
+- [docs/hop-lineage-view.adoc](../docs/hop-lineage-view.adoc) — Hop Lineage View (`.hlv`) over Marquez / local models
 - [docs/README.md](../docs/README.md) — full documentation index
 
 DV source catalog entries use namespace **`hop/retail-example/sources`**.
@@ -78,12 +79,13 @@ retail-example/
 ├── environments/local-docker-postgres.json
 ├── metadata/                  # CRM, Vault, local-catalog, rule sets, run configurations
 │   ├── data-quality-rule-set/ # retail-source-quality + retail-target-quality libraries
-│   └── data-type-mapping/     # premodel-defaults (String length + *_at timestamps)
+│   ├── data-type-mapping/     # premodel-defaults (String length + *_at timestamps)
+│   └── lineage-backend/       # Marquez-Localhost (Hop Lineage View)
 ├── fixtures/
 │   └── schema-gate-baseline/  # Seed for catalog-versions tag v1.0.0 (copied into work/)
 ├── pipelines/                 # create-source-tables, load-e2e-sources-to-crm, parse-asn-xml
 ├── files/                     # Generated CSV/XML source files (mostly gitignored; asn_demo.xml tracked)
-├── models/                    # TRACKED .hsm / .hdv / .hbv / .hdm
+├── models/                    # TRACKED .hsm / .hdv / .hbv / .hdm / .hlv
 ├── sql/                       # drop-source / drop-target, load control, staging views
 ├── scripts/                   # generate data, bootstrap work/, catalog sources
 ├── work/                      # GITIGNORED runtime tree (created on first run)
@@ -94,6 +96,7 @@ retail-example/
 └── workflows/
     ├── run-retail-initial.hwf
     ├── run-retail-update.hwf
+    ├── send-lineage-to-marquez.hwf
     └── simulate-n-months.hwf
 ```
 
@@ -116,6 +119,19 @@ From the repository root:
 # Incremental load: read control, generate update wave, load CRM, DV + BV + DM, advance control
 ./scripts/run-hop.sh retail-example workflows/run-retail-update.hwf
 ```
+
+## Hop Lineage View (optional)
+
+After a vault load, export model-derived OpenLineage to a local Marquez and open the sample view:
+
+```sh
+./scripts/run-marquez.sh up
+./scripts/run-hop.sh retail-example workflows/send-lineage-to-marquez.hwf
+```
+
+Then open `models/f_orders-upstream.hlv` in Hop GUI (backend **Marquez-Localhost**). **Show lineage** on a DV/BV/DM table also works when that backend is the only enabled one.
+
+`${MARQUEZ_API}` is the export POST URL. `${MARQUEZ_BASE_URL}` (`http://localhost:5001`) is the preferred lineage-backend host. Export is not a load — duration badges on the view come from OPS, not Marquez `latestRun`. See [docs/hop-lineage-view.adoc](../docs/hop-lineage-view.adoc).
 
 ## Schema validation gate
 

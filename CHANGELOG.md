@@ -4,6 +4,69 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## Unreleased
 
+### Hop Lineage View show pipeline
+
+- **Show update/build pipeline** uses the opened model graph (not the active tab) and starts generation after the context menu finishes, so the validation progress dialog is not cancelled by the tab switch
+- Dimension aliases (for example `dm/retail-f-inventory/d_product`) follow the referenced dimension and open that update pipeline instead of staying on the consuming fact model
+
+### Hop Lineage View details pane
+
+- Right-hand node details are Markdown, rendered with the same viewer as dialog Help, plus **View as HTML**
+
+### Hop Lineage View name hover
+
+- Node names underline on mouse-over; clicking the name updates the details pane only. The context dialog opens from a click on the rest of the card, same as the other modelers
+
+### Hop Lineage View card labels
+
+- Long job/dataset names use the card width instead of a 22-character cap, and overflow keeps the tail (`…/retail-f-order-lines/d_product`)
+
+### Hop Lineage View connectors
+
+- Lineage edges clip to card borders and show a small filled square at each attachment so lines that pass under other cards stay readable
+
+### Hop Lineage View docs and retail sample (issue #79, PR 8)
+
+- User guide: [docs/hop-lineage-view.adoc](docs/hop-lineage-view.adoc) — export is not a load, `${MARQUEZ_BASE_URL}` vs `${MARQUEZ_API}`, backends, Show lineage, OPS overlay
+- Retail sample view `retail-example/models/f_orders-upstream.hlv`; optional `./scripts/smoke-lineage-view.sh` (not in `mvn test` or the DB matrix)
+- Environment variable `${MARQUEZ_BASE_URL}` (`http://localhost:5001`) alongside existing `${MARQUEZ_API}`
+
+### Hop Lineage View file type (issue #79, PR 4)
+
+- Authorable `.hlv` view definition (File → New wizard, Explorer tab, save, search)
+- Canvas refresh queries the selected lineage backend in the background and lays out an upstream table graph
+- Toolbar zoom, SVG export of the session graph, and a read-only details pane for the selected node
+- Tab name follows the `.hlv` filename; Marquez seeds fall back to search when the stored namespace does not match export (`retail-job` / `retail-dataset`)
+
+### Hop Lineage View navigation (issue #79, PR 5)
+
+- Click a lineage node to open the Hop model/table, catalog record, or generated update/build pipeline when `hop_export` / `hop_location` are present
+- Marquez nodes fetch missing facets in the background on select before the context menu is shown
+
+### Hop Lineage View OPS overlay (issue #79, PR 6)
+
+- Optional last-load badges on lineage cards from the Hop OPS database (`dv` / `bv` / `dm`), with a stale export-time `hop_ops` fallback
+- Never treats Marquez `latestRun.durationMs` as load telemetry
+
+### Hop Lineage View from model tables (issue #79, PR 7)
+
+- **Show lineage** on DV / BV / DM table context menus opens an unsaved upstream `.hlv` tab for that table
+- Uses the single enabled lineage backend, or asks when several are enabled; passes the open model as `extraSnapshots` for Local-models
+
+### Hop Lineage View query SPI (issue #79, PR 2–3)
+
+- Headless `ILineageQueryService` with graph DTOs and `LineageGraphOps` (direction clip, depth, hide-jobs, layer filter)
+- Adapters: Marquez 0.50, export-folder JSON, and local model collectors (`extraSnapshots` override)
+- `@HopMetadata` **Lineage backend** (`lineage-backend`) with Marquez / folder / local-models editor and Test connection
+- `latestRun.durationMs` is never treated as load telemetry
+
+### OpenLineage hop identity facets (issue #79, PR 1)
+
+- `hop_export` now includes `projectKey`, `resourceGroup`, `catalogConnection`, `physicalTableName`, and `targetDatabase` so a future Hop Lineage View can deep-link to models and catalog records
+- `hop_location` now includes `catalogKey` and `catalogConnection` on source datasets
+- Export stamps `resourceGroup` and a fallback `catalogConnection` onto each lineage snapshot before mapping
+- Design: [docs/plans/hop-lineage-view-plan.md](docs/plans/hop-lineage-view-plan.md)
+
 ### Catalog data type mappings on hub/link loads
 
 - `apply data type mappings` no longer rewrites catalog columns that the generated source stream does not read (for example source `load_date` on a hub that only selects business keys)

@@ -60,6 +60,7 @@ For a slide-style executive summary, see [presentations/hop-data-vault-overview.
 | BV SQL views / tables (`ref` / `source`) | Available | [business-vault-sql-view.adoc](business-vault-sql-view.adoc) (`vault1.hbv` + `retail-sql.hbv` samples) |
 | Catalog model registry (DV/BV/DM index) | Available | Published on catalog publish; short `ref('model', 'table')` lookup |
 | Source-to-target lineage (table + field, reason codes) | Available | [source-to-target-lineage.adoc](source-to-target-lineage.adoc) |
+| Hop Lineage View (`.hlv`) over Marquez / export folder / local models | Available | [hop-lineage-view.adoc](hop-lineage-view.adoc), issue [#79](https://github.com/mattcasters/hop-data-vault/issues/79) |
 | Explainable DDL + lineage drift gate | Available | [source-to-target-lineage.adoc](source-to-target-lineage.adoc), [resource-definition-validation.adoc](resource-definition-validation.adoc) |
 | Reverse lineage browser (source field → consumers) | Available | [source-to-target-lineage.adoc](source-to-target-lineage.adoc) |
 | BV→BV canvas references (multi-step BV) | Available | Alias cards + SQL `ref()` to tables in another `.hbv` |
@@ -67,7 +68,7 @@ For a slide-style executive summary, see [presentations/hop-data-vault-overview.
 | Dimensional modeler (`.hdm`) | Available | [dimensional-modeler-overview.adoc](dimensional-modeler-overview.adoc) |
 | Dimensional Update / Publish actions | Available | [dimensional-update-action.adoc](dimensional-update-action.adoc) |
 | Execution maps (`.hem`) | Available | [execution-maps.adoc](execution-maps.adoc) |
-| Hop Web modelers (`.hsm`/`.hdv`/`.hbv`/`.hdm`/`.hem`) | Available (experimental; needs Hop canvas SPI) | [hop-web-modelers.md](hop-web-modelers.md), issue [#119](https://github.com/mattcasters/hop-data-vault/issues/119) |
+| Hop Web modelers (`.hsm`/`.hdv`/`.hbv`/`.hdm`/`.hem`/`.hlv`) | Available (experimental; needs Hop canvas SPI) | [hop-web-modelers.md](hop-web-modelers.md), issue [#119](https://github.com/mattcasters/hop-data-vault/issues/119) |
 | AI Help (model, pipeline, workflow) | Available | [ai-advisory.md](ai-advisory.md) |
 | Get Record Definition Names transform | Available | [record-definition-input.adoc](record-definition-input.adoc) |
 | Catalog Record Definition Metadata Output transform | Available | [record-definition-output.adoc](record-definition-output.adoc) |
@@ -139,6 +140,7 @@ Hop **Search Everywhere** / project search includes hop-data-vault models and me
 | `.hsm` | Source tables, relationships, multi-table **query** names, WHERE text, published feed names |
 | `.hdv` | Hub / link / satellite names, physical names, configuration, canvas notes |
 | `.hbv` / `.hdm` | BV and dimensional table names, paths, configuration, notes |
+| `.hlv` | Lineage backend name, logical table, dataset/job names, model file |
 | Resource definition group | Group name, catalog connection, listed `.hdv` / `.hbv` / `.hdm` paths |
 | Data catalog, metrics profile, quality rule set | Connection paths, rule field names, metrics folder |
 
@@ -183,6 +185,12 @@ Kimball star/snowflake modeling: dimensions, facts, junk dimensions, bridges, sn
 Crawl a root workflow or model and persist a graph of workflows, models, generated pipelines, and source datasets. Open `.hem` files in Hop GUI for execution and lineage views. The retail example includes maps for its main update workflow and the six-month simulation.
 
 ![Execution map in Hop GUI — simulate-6-months](images/execution-map-in-hop-gui-simulate-six-months.png)
+
+### Hop Lineage View (`.hlv`)
+
+Author a small view definition (seed table, depth, backend) and query **Marquez**, a folder of exported OpenLineage events, or the current models. The graph is not stored in the file. **Show lineage** on a DV/BV/DM table opens an unsaved upstream tab. Load-time badges come from the Hop OPS database — Marquez `latestRun` is the last *export*, not the last *load*. Retail sample: `retail-example/models/f_orders-upstream.hlv`. See [hop-lineage-view.adoc](hop-lineage-view.adoc).
+
+![Hop Lineage View — upstream graph and Markdown details pane](images/lineage-view-with-information-pane.png)
 
 ### AI Help
 

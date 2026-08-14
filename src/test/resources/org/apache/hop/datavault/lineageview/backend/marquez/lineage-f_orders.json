@@ -1,0 +1,113 @@
+{
+  "graph": [
+    {
+      "id": "dataset:retail-dataset:f_orders",
+      "type": "DATASET",
+      "data": {
+        "namespace": "retail-dataset",
+        "name": "f_orders",
+        "fields": [{ "name": "order_amount" }, { "name": "customer_hk" }],
+        "facets": {}
+      },
+      "inEdges": [
+        {
+          "origin": "job:retail-job:dm/retail-pos/f_orders",
+          "destination": "dataset:retail-dataset:f_orders"
+        }
+      ],
+      "outEdges": []
+    },
+    {
+      "id": "job:retail-job:dm/retail-pos/f_orders",
+      "type": "JOB",
+      "data": {
+        "namespace": "retail-job",
+        "name": "dm/retail-pos/f_orders",
+        "latestRun": {
+          "id": "11111111-1111-1111-1111-111111111111",
+          "startedAt": "2026-08-14T10:00:00Z",
+          "endedAt": "2026-08-14T10:00:01Z",
+          "durationMs": 999999,
+          "facets": {}
+        },
+        "facets": {}
+      },
+      "inEdges": [
+        {
+          "origin": "dataset:retail-dataset:customer_360_bv",
+          "destination": "job:retail-job:dm/retail-pos/f_orders"
+        }
+      ],
+      "outEdges": [
+        {
+          "origin": "job:retail-job:dm/retail-pos/f_orders",
+          "destination": "dataset:retail-dataset:f_orders"
+        }
+      ]
+    },
+    {
+      "id": "dataset:retail-dataset:customer_360_bv",
+      "type": "DATASET",
+      "data": {
+        "namespace": "retail-dataset",
+        "name": "customer_360_bv",
+        "fields": [{ "name": "customer_id" }]
+      },
+      "inEdges": [
+        {
+          "origin": "job:retail-job:bv/retail-360/customer_360_bv",
+          "destination": "dataset:retail-dataset:customer_360_bv"
+        }
+      ],
+      "outEdges": [
+        {
+          "origin": "dataset:retail-dataset:customer_360_bv",
+          "destination": "job:retail-job:dm/retail-pos/f_orders"
+        }
+      ]
+    },
+    {
+      "id": "job:retail-job:bv/retail-360/customer_360_bv",
+      "type": "JOB",
+      "data": {
+        "namespace": "retail-job",
+        "name": "bv/retail-360/customer_360_bv"
+      },
+      "inEdges": [
+        {
+          "origin": "dataset:retail-dataset:sat_customer_demo",
+          "destination": "job:retail-job:bv/retail-360/customer_360_bv"
+        }
+      ],
+      "outEdges": [
+        {
+          "origin": "job:retail-job:bv/retail-360/customer_360_bv",
+          "destination": "dataset:retail-dataset:customer_360_bv"
+        }
+      ]
+    },
+    {
+      "id": "dataset:retail-dataset:sat_customer_demo",
+      "type": "DATASET",
+      "data": {
+        "namespace": "retail-dataset",
+        "name": "sat_customer_demo",
+        "facets": {
+          "hop_location": {
+            "kind": "DATABASE",
+            "tableName": "sat_customer_demo",
+            "catalogKey": "hop/retail/sources/E2E-customer-demo",
+            "catalogConnection": "edw-catalog"
+          }
+        }
+      },
+      "inEdges": [],
+      "outEdges": [
+        {
+          "origin": "dataset:retail-dataset:sat_customer_demo",
+          "destination": "job:retail-job:bv/retail-360/customer_360_bv"
+        }
+      ]
+    }
+  ]
+}

@@ -192,6 +192,38 @@ class OpenLineageSnapshotMapperTest {
   }
 
   @Test
+  void hopExportIncludesHopIdentityFields() {
+    LineageSnapshot snapshot = DvModelLineageCollector.collect(model, variables);
+    snapshot.setProjectKey("retail");
+    snapshot.setResourceGroup("retail-sources");
+    snapshot.setCatalogConnection("edw-catalog");
+    snapshot
+        .getTables()
+        .forEach(
+            t -> {
+              if (t.getTargetDatabaseMetaName() == null
+                  || t.getTargetDatabaseMetaName().isBlank()) {
+                t.setTargetDatabaseMetaName("Vault");
+              }
+            });
+    List<ObjectNode> events =
+        OpenLineageSnapshotMapper.toRunEvents(snapshot, "hop-data-vault", true, "export-id");
+    ObjectNode hubEvent =
+        events.stream()
+            .filter(e -> e.path("job").path("name").asText("").contains("hub_customer"))
+            .findFirst()
+            .orElseThrow();
+    JsonNode hopExport = hubEvent.path("run").path("facets").path("hop_export");
+    assertEquals("retail", hopExport.path("projectKey").asText());
+    assertEquals("retail-sources", hopExport.path("resourceGroup").asText());
+    assertEquals("edw-catalog", hopExport.path("catalogConnection").asText());
+    assertEquals("hub_customer", hopExport.path("physicalTableName").asText());
+    assertEquals("Vault", hopExport.path("targetDatabase").asText());
+    assertEquals("HUB", hopExport.path("tableType").asText());
+    assertFalse(hopExport.path("logicalName").asText().isBlank());
+  }
+
+  @Test
   void fileNameForEventUsesJobName() {
     ObjectNode event = MAPPER.createObjectNode();
     ObjectNode job = MAPPER.createObjectNode();

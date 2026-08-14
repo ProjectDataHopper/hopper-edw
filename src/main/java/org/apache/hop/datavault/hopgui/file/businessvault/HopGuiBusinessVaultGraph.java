@@ -1773,7 +1773,7 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
       tooltip = "i18n::HopGuiBusinessVaultGraph.Context.PreviewTargetLayout.Tooltip",
       image = "ui/images/preview.svg",
       category = "Business Vault",
-      categoryOrder = "4")
+      categoryOrder = "5")
   public void previewTargetLayoutAction(HopGuiBusinessVaultTableContext context) {
     IBvTable table = context.getTable();
     BusinessVaultModel bvModel = context.getModel();

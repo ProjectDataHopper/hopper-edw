@@ -95,6 +95,83 @@ public final class ModelGraphConnectionGeometry {
     return new ConnectionAnchors(anchorToward(a, b), anchorToward(b, a));
   }
 
+  /**
+   * Where the center-to-center line leaves {@code from} toward {@code to}. Falls back to {@link
+   * #anchorToward(Bounds, Bounds)} when the target center is inside {@code from}.
+   */
+  public static Point borderToward(Bounds from, Bounds to) {
+    if (from == null) {
+      return new Point(0, 0);
+    }
+    if (to == null) {
+      return new Point(from.centerX(), from.centerY());
+    }
+    Point hit = lineBoxExit(from, from.centerX(), from.centerY(), to.centerX(), to.centerY());
+    return hit != null ? hit : anchorToward(from, to);
+  }
+
+  /** Border attachment on each box of the center-to-center line. */
+  public static ConnectionAnchors borderAnchorsBetween(Bounds a, Bounds b) {
+    return new ConnectionAnchors(borderToward(a, b), borderToward(b, a));
+  }
+
+  /**
+   * First intersection of the segment ({@code x0},{@code y0})→({@code x1},{@code y1}) with {@code
+   * box}'s border, starting from a point inside the box. {@code null} when the segment does not
+   * leave the box.
+   */
+  static Point lineBoxExit(Bounds box, int x0, int y0, int x1, int y1) {
+    if (box == null) {
+      return null;
+    }
+    double dx = x1 - x0;
+    double dy = y1 - y0;
+    if (dx == 0 && dy == 0) {
+      return null;
+    }
+    double left = box.x();
+    double right = box.x() + box.width();
+    double top = box.y();
+    double bottom = box.y() + box.height();
+    double bestT = Double.POSITIVE_INFINITY;
+    double hitX = 0;
+    double hitY = 0;
+    if (dx != 0) {
+      double[] xs = {left, right};
+      for (double edgeX : xs) {
+        double t = (edgeX - x0) / dx;
+        if (t <= 1e-6 || t > 1.0 + 1e-6 || t >= bestT) {
+          continue;
+        }
+        double y = y0 + t * dy;
+        if (y + 1e-6 >= top && y - 1e-6 <= bottom) {
+          bestT = t;
+          hitX = edgeX;
+          hitY = y;
+        }
+      }
+    }
+    if (dy != 0) {
+      double[] ys = {top, bottom};
+      for (double edgeY : ys) {
+        double t = (edgeY - y0) / dy;
+        if (t <= 1e-6 || t > 1.0 + 1e-6 || t >= bestT) {
+          continue;
+        }
+        double x = x0 + t * dx;
+        if (x + 1e-6 >= left && x - 1e-6 <= right) {
+          bestT = t;
+          hitX = x;
+          hitY = edgeY;
+        }
+      }
+    }
+    if (bestT == Double.POSITIVE_INFINITY) {
+      return null;
+    }
+    return new Point(roundCoordinate(hitX), roundCoordinate(hitY));
+  }
+
   /** Degenerate bounds centered on a point (for drag lines toward the cursor). */
   public static Bounds pointBounds(int x, int y) {
     return new Bounds(x, y, 1, 1);

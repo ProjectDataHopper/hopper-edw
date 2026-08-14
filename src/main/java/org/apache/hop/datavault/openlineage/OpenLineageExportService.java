@@ -75,6 +75,7 @@ public final class OpenLineageExportService {
     String exportRunId = UUID.randomUUID().toString();
     OpenLineageExportResult result = new OpenLineageExportResult(exportRunId);
     List<ObjectNode> events = new ArrayList<>();
+    String resourceGroupName = models.group() != null ? models.group().getName() : null;
 
     // Prefer a catalog connection from the first loaded model for source physical resolution.
     String defaultCatalog = null;
@@ -95,6 +96,7 @@ public final class OpenLineageExportService {
         LineageSnapshot snapshot =
             DvModelLineageCollector.collect(
                 loaded.model(), variables, metadataProvider, loaded.catalogConnection());
+        stampHopIdentity(snapshot, resourceGroupName, loaded.catalogConnection());
         OpenLineageLocationContext locationContext =
             new OpenLineageLocationContext(variables, metadataProvider, loaded.catalogConnection());
         events.addAll(
@@ -113,6 +115,12 @@ public final class OpenLineageExportService {
           continue;
         }
         LineageSnapshot snapshot = BvModelLineageCollector.collect(loaded.model(), variables);
+        stampHopIdentity(
+            snapshot,
+            resourceGroupName,
+            !Utils.isEmpty(loaded.catalogConnection())
+                ? loaded.catalogConnection()
+                : defaultCatalog);
         OpenLineageLocationContext locationContext =
             new OpenLineageLocationContext(
                 variables,
@@ -137,6 +145,12 @@ public final class OpenLineageExportService {
         }
         LineageSnapshot snapshot =
             DmModelLineageCollector.collect(loaded.model(), variables, metadataProvider);
+        stampHopIdentity(
+            snapshot,
+            resourceGroupName,
+            !Utils.isEmpty(loaded.catalogConnection())
+                ? loaded.catalogConnection()
+                : defaultCatalog);
         OpenLineageLocationContext locationContext =
             new OpenLineageLocationContext(
                 variables,
@@ -271,5 +285,22 @@ public final class OpenLineageExportService {
       log.logBasic("OpenLineage snapshot export: events=" + result.getEventCount());
     }
     return result;
+  }
+
+  /**
+   * Fills Hop-identity fields used by {@code hop_export} when collectors left them empty. Does not
+   * overwrite a catalog connection the collector already set (DV).
+   */
+  public static void stampHopIdentity(
+      LineageSnapshot snapshot, String resourceGroup, String catalogConnection) {
+    if (snapshot == null) {
+      return;
+    }
+    if (Utils.isEmpty(snapshot.getResourceGroup()) && !Utils.isEmpty(resourceGroup)) {
+      snapshot.setResourceGroup(resourceGroup);
+    }
+    if (Utils.isEmpty(snapshot.getCatalogConnection()) && !Utils.isEmpty(catalogConnection)) {
+      snapshot.setCatalogConnection(catalogConnection);
+    }
   }
 }

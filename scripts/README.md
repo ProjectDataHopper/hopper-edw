@@ -25,7 +25,10 @@ Docker runners and retail data generators used by `integration-tests/` and `reta
 ./scripts/run-postgres.sh up
 ./scripts/run-marquez.sh up   # OpenLineage / Marquez (API :5001, UI :3001)
 ./scripts/run-hop.sh <hop-project-dir> <workflow>
+./scripts/smoke-lineage-view.sh   # optional Marquez GET /lineage + hop_export check
 ```
+
+`${MARQUEZ_API}` (`http://localhost:5001/api/v1/lineage`) is the **Export data lineage** POST URL. `${MARQUEZ_BASE_URL}` (`http://localhost:5001`) is the Marquez host root for a **lineage backend**. See [docs/hop-lineage-view.adoc](../docs/hop-lineage-view.adoc). `smoke-lineage-view.sh` is not part of `mvn test` or `run-tests-all-databases.sh`.
 
 | Project folder | Example |
 |----------------|---------|

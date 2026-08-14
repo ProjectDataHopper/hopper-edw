@@ -86,6 +86,8 @@ public final class OpenLineageDatasetFacetSupport {
     putIfPresent(hop, "branch", location.getBranch());
     putIfPresent(hop, "snapshotId", location.getSnapshotId());
     putIfPresent(hop, "uri", safeUri != null ? safeUri : location.getUri());
+    putIfPresent(hop, "catalogKey", location.getCatalogKey());
+    putIfPresent(hop, "catalogConnection", location.getCatalogConnection());
     facets.set("hop_location", hop);
     // Publish facets before symlink merge so attachSymlink sees dataSource/hop_location.
     dataset.set("facets", facets);

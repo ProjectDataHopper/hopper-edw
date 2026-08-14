@@ -1,0 +1,20 @@
+{
+  "facets": {
+    "hop_export": {
+      "modelLayer": "DM",
+      "modelName": "retail-pos",
+      "logicalName": "f_orders",
+      "physicalTableName": "f_orders",
+      "projectKey": "retail",
+      "resourceGroup": "retail-sources",
+      "catalogConnection": "edw-catalog",
+      "targetDatabase": "Vault"
+    },
+    "hop_ops": {
+      "lastSuccessAt": "2026-08-14T09:04:00Z",
+      "loadRunId": "load-1",
+      "pipelineName": "f_orders",
+      "durationMs": 42000
+    }
+  }
+}

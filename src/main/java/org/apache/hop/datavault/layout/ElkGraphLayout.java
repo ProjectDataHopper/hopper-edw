@@ -83,6 +83,15 @@ public final class ElkGraphLayout {
     this.edges = edges;
   }
 
+  /** Layout an already-built node/edge list (lineage view, architecture export, …). */
+  public static ElkGraphLayout fromLayoutGraph(
+      String name, List<ElkLayoutNode> nodes, List<ElkLayoutEdge> edges) {
+    return new ElkGraphLayout(
+        name,
+        nodes != null ? List.copyOf(nodes) : List.of(),
+        edges != null ? List.copyOf(edges) : List.of());
+  }
+
   /** Applies nested ELK layout to an execution map document. */
   public static void layoutExecutionMap(
       ExecutionMapDocument document, ExecutionMapLayoutOptions options, ElkLayout layout)

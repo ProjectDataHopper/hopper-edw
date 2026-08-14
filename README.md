@@ -25,7 +25,7 @@ Apache Hop plugin for **Data Vault 2.0**, **Business Vault**, and **dimensional*
 
 Hop **2.18.x** (including 2.18.1) is **not** supported for this release.
 
-**Model once. Generate loads and consumption layers.** Sources live in the Hop **Data Catalog**; visual **`.hsm`**, **`.hdv`**, **`.hbv`**, and **`.hdm`** models drive workflow actions and optional **execution maps** (`.hem`).
+**Model once. Generate loads and consumption layers.** Sources live in the Hop **Data Catalog**; visual **`.hsm`**, **`.hdv`**, **`.hbv`**, and **`.hdm`** models drive workflow actions, optional **execution maps** (`.hem`), and **Hop Lineage Views** (`.hlv`).
 
 ## Tutorials
 
@@ -42,11 +42,12 @@ Highlights:
 - **Data Catalog** — `DV_SOURCE` record definitions under `hop/{project}/sources`; catalog validation with proposals and acknowledgements
 - **Catalog versions + schema gate** — tag source contracts, **Validate resource definitions** CI action, impact blast radius, Markdown/HTML reports
 - **Source-to-target lineage** — field/table lineage with reason codes, Lineage tab, explainable DDL, catalog publish, drift gate, reverse browser ([docs](docs/source-to-target-lineage.adoc))
+- **Hop Lineage View** — authorable `.hlv` over Marquez, an export folder, or local models; **Show lineage** from a table; OPS load-time overlay (not Marquez export duration) ([docs](docs/hop-lineage-view.adoc))
 - **OpenLineage / Marquez export** — **Export data lineage** workflow action (folder + HTTP), physical location facets, dimension-alias symlinks ([docs](docs/openlineage-export.adoc))
 - **Raw Data Vault** — `.hdv` modeler, Check model, Data Vault Update action, hybrid integration modes
 - **Business Vault** — `.hbv` SCD2 (single and multi-satellite), PIT tables, Business Vault Update action
 - **Dimensional modeler** — `.hdm` Kimball loads, Dimensional Publish/Update actions
-- **Execution maps** — crawl workflows and models into `.hem` lineage graphs
+- **Execution maps** — crawl workflows and models into `.hem` execution graphs
 - **AI Help** — optional LLM advisory on models, pipelines, and workflows
 
 ![Edit Data Vault Model](docs/images/data-vault-model-dialog.png)
@@ -85,7 +86,7 @@ Full index: **[docs/README.md](docs/README.md)**
 | [`docs/business-vault-configuration.adoc`](docs/business-vault-configuration.adoc) | Embedded `.hbv` configuration |
 | [`docs/business-vault-update-action.adoc`](docs/business-vault-update-action.adoc) | Business Vault Update action |
 
-Also: [`docs/source-to-target-lineage.adoc`](docs/source-to-target-lineage.adoc), [`docs/openlineage-export.adoc`](docs/openlineage-export.adoc), [`docs/resource-definition-validation.adoc`](docs/resource-definition-validation.adoc), [`docs/ai-advisory.md`](docs/ai-advisory.md), [`docs/datavault-source.adoc`](docs/datavault-source.adoc), [`docs/datavault-source-database.adoc`](docs/datavault-source-database.adoc), [`docs/record-definition-input.adoc`](docs/record-definition-input.adoc), [`docs/date-dimension-generator.adoc`](docs/date-dimension-generator.adoc).
+Also: [`docs/source-to-target-lineage.adoc`](docs/source-to-target-lineage.adoc), [`docs/hop-lineage-view.adoc`](docs/hop-lineage-view.adoc), [`docs/openlineage-export.adoc`](docs/openlineage-export.adoc), [`docs/resource-definition-validation.adoc`](docs/resource-definition-validation.adoc), [`docs/ai-advisory.md`](docs/ai-advisory.md), [`docs/datavault-source.adoc`](docs/datavault-source.adoc), [`docs/datavault-source-database.adoc`](docs/datavault-source-database.adoc), [`docs/record-definition-input.adoc`](docs/record-definition-input.adoc), [`docs/date-dimension-generator.adoc`](docs/date-dimension-generator.adoc).
 
 Screenshots are in [`docs/images/`](docs/images/).
 
@@ -144,7 +145,7 @@ Published release artifacts for **0.8.0**:
    $HOP_HOME/plugins/misc/datavault/hop-datavault-0.9.0-SNAPSHOT.jar
    ```
 3. Restart Hop GUI.
-4. New metadata types appear under **Metadata → Data Vault**. **Data Vault Update**, **Business Vault Update**, **Validate resource definitions**, **Export data lineage**, and **Update resource definition group** actions are available in workflows. `.hsm`, `.hdv`, `.hbv`, and `.hdm` files open in the visual modelers.
+4. New metadata types appear under **Metadata → Data Vault**. **Data Vault Update**, **Business Vault Update**, **Validate resource definitions**, **Export data lineage**, and **Update resource definition group** actions are available in workflows. `.hsm`, `.hdv`, `.hbv`, `.hdm`, and `.hlv` files open in Explorer tabs.
 
 ### Hop Marketplace
 

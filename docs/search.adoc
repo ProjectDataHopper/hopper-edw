@@ -28,7 +28,7 @@ image::images/search-panel-model-results.png[Search panel — CRM-party-transfer
 
 == Model files
 
-These extensions participate when the plugin is installed:
+These extensions participate when the plugin is installed (including Hop Lineage View `.hlv` definitions):
 
 [cols="1,2,3", options="header"]
 |===
@@ -49,6 +49,10 @@ These extensions participate when the plugin is installed:
 |`.hdm`
 |Dimensional Model
 |Model name/description; dimension/fact/bridge names; configuration; nested mappings; notes
+
+|`.hlv`
+|Hop Lineage View
+|Filename/description; lineage backend name; logical table; dataset and job names; model file
 |===
 
 === Opening a result
@@ -87,6 +91,10 @@ Project `@HopMetadata` objects are always listed by Hop; the plugin adds **conte
 |Data quality rule set
 |`data-quality-rule-set`
 |Name, description; each rule id, name, field name, parameter values
+
+|Lineage backend
+|`lineage-backend`
+|Name and description (Hop lists metadata by name; URL/folder stay on the editor)
 |===
 
 Opening a metadata hit uses Hop’s standard metadata editor (`editMetadata`).
@@ -102,6 +110,7 @@ Retail example: search `retail-360.hdv` or `retail-sources` to land on the **ret
 == Related documentation
 
 * link:feature-overview.md[Feature overview] — maturity matrix
+* link:hop-lineage-view.adoc[Hop Lineage View]
 * link:datavault-plugin.adoc[Data Vault plugin] — visual editor overview
 * link:source-modeler-overview.adoc[Source modeler]
 * link:data-catalog.adoc[Data catalog]

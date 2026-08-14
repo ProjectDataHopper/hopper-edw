@@ -30,6 +30,7 @@ Under **Hop Web** (RAP), the five model file graphs render through the same SVG 
 | `.hbv` | Business Vault modeler |
 | `.hdm` | Dimensional modeler |
 | `.hem` | Execution map viewer |
+| `.hlv` | Hop Lineage View (session graph; experimental, same bar as `.hem`) |
 
 ## What works
 

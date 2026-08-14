@@ -70,6 +70,30 @@ class ModelGraphConnectionGeometryTest {
   }
 
   @Test
+  void borderTowardHitsRightEdgeOnHorizontalLink() {
+    Bounds right = new Bounds(200, 5, 80, 40);
+    ConnectionAnchors anchors = ModelGraphConnectionGeometry.borderAnchorsBetween(BOX_A, right);
+    assertEquals(new Point(100, 25), anchors.from());
+    assertEquals(new Point(200, 25), anchors.to());
+  }
+
+  @Test
+  void borderTowardHitsBottomEdgeOnVerticalLink() {
+    Bounds below = new Bounds(10, 120, 80, 40);
+    ConnectionAnchors anchors = ModelGraphConnectionGeometry.borderAnchorsBetween(BOX_A, below);
+    assertEquals(new Point(50, 50), anchors.from());
+    assertEquals(new Point(50, 120), anchors.to());
+  }
+
+  @Test
+  void borderTowardHitsSideOnDiagonalLink() {
+    Bounds diagonal = new Bounds(200, 50, 80, 40);
+    Point from = ModelGraphConnectionGeometry.borderToward(BOX_A, diagonal);
+    assertEquals(100, from.x);
+    assertTrue(from.y > 25 && from.y < 50);
+  }
+
+  @Test
   void overlappingBoxesRemainStable() {
     Bounds overlap = new Bounds(40, 10, 60, 30);
     ConnectionAnchors anchors = ModelGraphConnectionGeometry.anchorsBetween(BOX_A, overlap);

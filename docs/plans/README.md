@@ -23,6 +23,7 @@ For product documentation, start at [../README.md](../README.md) or [../feature-
 
 | Plan | Topic |
 |------|--------|
+| [hop-lineage-view-plan.md](hop-lineage-view-plan.md) | Issue #79 — Hop Lineage View (`.hlv`) over OpenLineage backends |
 | [data-type-mappings-plan.md](data-type-mappings-plan.md) | Issue #113 — project data type mappings / pre-modeling sources |
 | [late-arriving-dimensions-plan.md](late-arriving-dimensions-plan.md) | Issue #109 — late-arriving dimensions / inferred members (deferred) |
 | (session plan / issue #112) | Metadata harvesting as distinct EDW phase — product doc: [../metadata-harvesting.adoc](../metadata-harvesting.adoc) |

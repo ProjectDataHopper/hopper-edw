@@ -188,6 +188,7 @@ Use this when you need the inverse of the Lineage tab: *given a staging column, 
 
 |===
 | Feature | Relationship
+| link:hop-lineage-view.adoc[Hop Lineage View] (`.hlv`) | In-GUI **upstream** graph over Marquez, an export folder, or local models. Same collectors; not a second place to edit mappings
 | link:execution-maps.adoc[Execution maps] (`.hem`) | Workflow / pipeline / dataset *execution* graph; not field-level mapping reasons
 | Marquez / OpenLineage | External table- and column-level job lineage via **Export data lineage** action — link:openlineage-export.adoc[OpenLineage export] (screenshots of the action and Marquez graphs)
 | link:resource-definition-validation.adoc[Resource definition validation] | Source schema contracts + impact; lineage drift is an additional section of the same gate
@@ -203,3 +204,4 @@ Use this when you need the inverse of the Lineage tab: *given a staging column, 
 * link:dimensional-update-action.adoc[Dimensional Update action]
 * link:feature-overview.md[Feature overview]
 * link:execution-maps.adoc[Execution maps]
+* link:hop-lineage-view.adoc[Hop Lineage View]

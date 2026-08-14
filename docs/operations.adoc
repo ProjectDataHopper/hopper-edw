@@ -17,10 +17,15 @@ From the repository root:
 # PostgreSQL on port 54320
 ./scripts/run-postgres.sh up
 
+# Optional local Marquez (OpenLineage API :5001, UI :3001)
+./scripts/run-marquez.sh up
+
 # Run a workflow in a Hop container
 ./scripts/run-hop.sh retail-example workflows/run-retail-initial.hwf
 ./scripts/run-hop.sh integration-tests tests/run-tests.hwf
 ----
+
+After Marquez is up, export model-derived lineage with `retail-example/workflows/send-lineage-to-marquez.hwf` and open a link:hop-lineage-view.adoc[Hop Lineage View] (`.hlv`). Optional smoke: `./scripts/smoke-lineage-view.sh` (not part of `mvn test` or the multi-database suite). `${MARQUEZ_API}` is the export POST URL; `${MARQUEZ_BASE_URL}` is the Marquez host root used by the lineage backend.
 
 See link:../scripts/README.md[scripts/README.md] and link:../integration-tests/PROJECT.md[integration-tests/PROJECT.md] for multi-database CI runs.
 

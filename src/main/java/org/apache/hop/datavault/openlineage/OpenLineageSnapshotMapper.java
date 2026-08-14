@@ -248,6 +248,21 @@ public final class OpenLineageSnapshotMapper {
     if (!Utils.isEmpty(table.getLogicalName())) {
       hopExport.put("logicalName", table.getLogicalName());
     }
+    if (snapshot != null && !Utils.isEmpty(snapshot.getProjectKey())) {
+      hopExport.put("projectKey", snapshot.getProjectKey());
+    }
+    if (snapshot != null && !Utils.isEmpty(snapshot.getResourceGroup())) {
+      hopExport.put("resourceGroup", snapshot.getResourceGroup());
+    }
+    if (snapshot != null && !Utils.isEmpty(snapshot.getCatalogConnection())) {
+      hopExport.put("catalogConnection", snapshot.getCatalogConnection());
+    }
+    if (!Utils.isEmpty(table.getPhysicalTableName())) {
+      hopExport.put("physicalTableName", table.getPhysicalTableName());
+    }
+    if (!Utils.isEmpty(table.getTargetDatabaseMetaName())) {
+      hopExport.put("targetDatabase", table.getTargetDatabaseMetaName());
+    }
     runFacets.set("hop_export", hopExport);
     run.set("facets", runFacets);
     event.set("run", run);
@@ -570,7 +585,7 @@ public final class OpenLineageSnapshotMapper {
     return MAPPER.writeValueAsString(event);
   }
 
-  static String resolveJobNamespace(String configured, String projectKey) {
+  public static String resolveJobNamespace(String configured, String projectKey) {
     String base =
         Utils.isEmpty(configured) ? OpenLineageConstants.DEFAULT_JOB_NAMESPACE : configured.trim();
     if (!Utils.isEmpty(projectKey) && !base.contains("/")) {
@@ -579,7 +594,7 @@ public final class OpenLineageSnapshotMapper {
     return base;
   }
 
-  static String sanitizePathSegment(String value) {
+  public static String sanitizePathSegment(String value) {
     if (Utils.isEmpty(value)) {
       return "unknown";
     }

@@ -72,6 +72,17 @@ public final class RecordOriginNavigationSupport {
 
   public static void navigateToOrigin(HopGui hopGui, RecordOrigin origin, IVariables variables)
       throws HopException {
+    openOrigin(hopGui, origin, variables, true);
+  }
+
+  /**
+   * Opens the origin model and returns its Explorer handler. When {@code selectElement} is false
+   * the file is opened without navigating to a table (used before generating a pipeline so a
+   * progress dialog is not cancelled by a tab-focus change).
+   */
+  public static IHopFileTypeHandler openOrigin(
+      HopGui hopGui, RecordOrigin origin, IVariables variables, boolean selectElement)
+      throws HopException {
     if (hopGui == null) {
       throw new HopException(
           BaseMessages.getString(PKG, "RecordOriginNavigationSupport.Error.MissingHopGui"));
@@ -93,36 +104,42 @@ public final class RecordOriginNavigationSupport {
     hopGui.setActivePerspective(explorer);
     explorer.activate();
 
-    switch (modelType) {
+    return switch (modelType) {
       case MODEL_TYPE_SOURCE_MODEL -> {
         HopGuiSourceModelGraph graph = openSourceModelGraph(hopGui, modelPath, variables);
-        if (!Utils.isEmpty(elementName)) {
+        if (selectElement && !Utils.isEmpty(elementName)) {
           graph.navigateToElement(elementName);
         }
+        yield graph;
       }
       case MODEL_TYPE_DATA_VAULT, MODEL_TYPE_DATA_VAULT_SOURCE -> {
         HopGuiVaultGraph graph = openVaultGraph(hopGui, modelPath, variables);
-        if (MODEL_TYPE_DATA_VAULT.equals(modelType) && !Utils.isEmpty(elementName)) {
+        if (selectElement
+            && MODEL_TYPE_DATA_VAULT.equals(modelType)
+            && !Utils.isEmpty(elementName)) {
           graph.navigateToTable(elementName);
         }
+        yield graph;
       }
       case MODEL_TYPE_BUSINESS_VAULT -> {
         HopGuiBusinessVaultGraph graph = openBusinessVaultGraph(hopGui, modelPath, variables);
-        if (!Utils.isEmpty(elementName)) {
+        if (selectElement && !Utils.isEmpty(elementName)) {
           graph.navigateToTable(elementName);
         }
+        yield graph;
       }
       case MODEL_TYPE_DIMENSIONAL -> {
         HopGuiDimensionalModelGraph graph = openDimensionalGraph(hopGui, modelPath, variables);
-        if (!Utils.isEmpty(elementName)) {
+        if (selectElement && !Utils.isEmpty(elementName)) {
           graph.navigateToTable(elementName);
         }
+        yield graph;
       }
       default ->
           throw new HopException(
               BaseMessages.getString(
                   PKG, "RecordOriginNavigationSupport.Error.UnsupportedModelType", modelType));
-    }
+    };
   }
 
   private static boolean isSupportedModelType(String modelType) {

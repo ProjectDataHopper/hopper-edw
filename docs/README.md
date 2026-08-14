@@ -17,7 +17,7 @@ limitations under the License.
 
 # Hop Data Vault documentation index
 
-Documentation for the **hop-datavault** plugin (development **0.9.0-SNAPSHOT**, latest release **0.8.0**). Requires **Apache Hop 2.19.0** or a recent **2.19.0-SNAPSHOT** ([hop-client snapshots](https://repository.apache.org/content/groups/snapshots/org/apache/hop/hop-client/2.19.0-SNAPSHOT/)). Highlights include **Free SQL / hop-hsm JDBC**, **source modeler** (`.hsm` with JSON and pipeline sources), **metadata harvesting**, optional **load cycle IDs**, **composite hub business keys**, **OpenLineage / Marquez export**, **source-to-target lineage**, catalog version tags, schema validation, multi-DB hardening, and Business Vault incremental loading. See [CHANGELOG.md](../CHANGELOG.md).
+Documentation for the **hop-datavault** plugin (development **0.9.0-SNAPSHOT**, latest release **0.8.0**). Requires **Apache Hop 2.19.0** or a recent **2.19.0-SNAPSHOT** ([hop-client snapshots](https://repository.apache.org/content/groups/snapshots/org/apache/hop/hop-client/2.19.0-SNAPSHOT/)). Highlights include **Free SQL / hop-hsm JDBC**, **source modeler** (`.hsm` with JSON and pipeline sources), **metadata harvesting**, optional **load cycle IDs**, **composite hub business keys**, **OpenLineage / Marquez export**, **Hop Lineage View** (`.hlv`), **source-to-target lineage**, catalog version tags, schema validation, multi-DB hardening, and Business Vault incremental loading. See [CHANGELOG.md](../CHANGELOG.md).
 
 **New here?** Read [feature-overview.md](feature-overview.md), then follow [getting-started-retail.adoc](getting-started-retail.adoc).
 
@@ -26,10 +26,10 @@ Documentation for the **hop-datavault** plugin (development **0.9.0-SNAPSHOT**, 
 | Document | Description |
 |----------|-------------|
 | [feature-overview.md](feature-overview.md) | Major plugin capabilities, maturity, and links to deep dives |
-| [hop-web-modelers.md](hop-web-modelers.md) | **Hop Web** modelers (`.hsm`/`.hdv`/`.hbv`/`.hdm`/`.hem`): SVG canvas, interactions, Hop SPI |
+| [hop-web-modelers.md](hop-web-modelers.md) | **Hop Web** modelers (`.hsm`/`.hdv`/`.hbv`/`.hdm`/`.hem`/`.hlv`): SVG canvas, interactions, Hop SPI |
 | [getting-started-retail.adoc](getting-started-retail.adoc) | Primary tutorial: retail-example (DV → BV → dimensional) |
 | [getting-started-integration-tests.adoc](getting-started-integration-tests.adoc) | Reference walkthrough: Customer 360 and integration test fixtures |
-| [search.adoc](search.adoc) | **Search Everywhere**: models (`.hsm`/`.hdv`/`.hbv`/`.hdm`) and plugin metadata |
+| [search.adoc](search.adoc) | **Search Everywhere**: models (`.hsm`/`.hdv`/`.hbv`/`.hdm`/`.hlv`) and plugin metadata |
 | [ai-file-schemas/README.md](ai-file-schemas/README.md) | **AI context pack**: XSD/JSON Schema + purpose markdown for models and metadata (Gemini/external AIs) |
 
 ## Managers and architects
@@ -48,6 +48,7 @@ Documentation for the **hop-datavault** plugin (development **0.9.0-SNAPSHOT**, 
 | [source-modeler-overview.adoc](source-modeler-overview.adoc) | **Source modeler (`.hsm`)**: PK/FK import, multi-table queries, Free SQL, Source model SQL transform, **Hop Server JDBC / DBeaver** (`jdbc:hop-hsm:`) |
 | [data-type-mappings.adoc](data-type-mappings.adoc) | **Data type mappings**: project pre-model policies, HSM tab, catalog effective layout, load Select Values |
 | [source-to-target-lineage.adoc](source-to-target-lineage.adoc) | Field/table lineage, Lineage tab, explainable DDL, catalog publish, drift gate, reverse browser |
+| [hop-lineage-view.adoc](hop-lineage-view.adoc) | **Hop Lineage View** (`.hlv`): in-GUI upstream graph over Marquez, export folder, or local models |
 | [datavault-source.adoc](datavault-source.adoc) | `DV_SOURCE` record definitions (database, file, **composite**) |
 | [datavault-source-database.adoc](datavault-source-database.adoc) | Database-backed source fields |
 | [resource-definition-validation.adoc](resource-definition-validation.adoc) | Schema gate action, GUI validate, impact, proposals, HTML/MD reports, DTAP |
@@ -97,6 +98,7 @@ Documentation for the **hop-datavault** plugin (development **0.9.0-SNAPSHOT**, 
 | [update-resource-definition-group-action.adoc](update-resource-definition-group-action.adoc) | Preferred multi-model update action (group-scoped) |
 | [search.adoc](search.adoc) | Project search for models and plugin metadata (Hop 2.19) |
 | [execution-maps.adoc](execution-maps.adoc) | `.hem` execution and lineage graphs |
+| [hop-lineage-view.adoc](hop-lineage-view.adoc) | `.hlv` view definitions over OpenLineage backends (OPS overlay, not Marquez run duration) |
 | [performance-tuning.md](performance-tuning.md) | Sort memory and pipeline tuning |
 | [ai-advisory.md](ai-advisory.md) | AI Help setup and usage |
 

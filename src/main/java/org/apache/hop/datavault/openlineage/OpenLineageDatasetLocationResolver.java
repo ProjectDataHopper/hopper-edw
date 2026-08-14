@@ -52,13 +52,16 @@ public final class OpenLineageDatasetLocationResolver {
       return null;
     }
     String uri = resolveJdbcUri(connection, context);
-    return DatasetLocation.builder()
-        .kind(DatasetLocationKind.DATABASE)
-        .connectionName(connection)
-        .schemaName(schema)
-        .tableName(tableName)
-        .dataSourceName(!Utils.isEmpty(connection) ? connection : "DATABASE")
-        .uri(uri)
+    return withCatalog(
+            DatasetLocation.builder()
+                .kind(DatasetLocationKind.DATABASE)
+                .connectionName(connection)
+                .schemaName(schema)
+                .tableName(tableName)
+                .dataSourceName(!Utils.isEmpty(connection) ? connection : "DATABASE")
+                .uri(uri),
+            null,
+            context)
         .build();
   }
 
@@ -112,11 +115,14 @@ public final class OpenLineageDatasetLocationResolver {
     IHopMetadataProvider metadataProvider = context.getMetadataProvider();
     IVariables variables = context.getVariables();
     if (metadataProvider == null || Utils.isEmpty(context.getCatalogConnection())) {
-      return DatasetLocation.builder()
-          .kind(DatasetLocationKind.UNKNOWN)
-          .dataSourceName("catalog")
-          .tableName(sourceName)
-          .uri("hop://catalog/" + sourceName)
+      return withCatalog(
+              DatasetLocation.builder()
+                  .kind(DatasetLocationKind.UNKNOWN)
+                  .dataSourceName("catalog")
+                  .tableName(sourceName)
+                  .uri("hop://catalog/" + sourceName),
+              catalogKey,
+              context)
           .build();
     }
     try {
@@ -143,20 +149,33 @@ public final class OpenLineageDatasetLocationResolver {
                     metadataProvider);
       }
       if (definition == null) {
-        return DatasetLocation.builder()
-            .kind(DatasetLocationKind.UNKNOWN)
-            .dataSourceName("catalog")
-            .tableName(sourceName)
-            .uri("hop://catalog/" + sourceName)
+        return withCatalog(
+                DatasetLocation.builder()
+                    .kind(DatasetLocationKind.UNKNOWN)
+                    .dataSourceName("catalog")
+                    .tableName(sourceName)
+                    .uri("hop://catalog/" + sourceName),
+                catalogKey,
+                context)
             .build();
       }
-      return fromRecordDefinition(definition, context);
+      DatasetLocation resolved = fromRecordDefinition(definition, context);
+      if (resolved == null) {
+        return null;
+      }
+      if (Utils.isEmpty(resolved.getCatalogKey()) && !Utils.isEmpty(catalogKey)) {
+        return resolved.toBuilder().catalogKey(catalogKey).build();
+      }
+      return resolved;
     } catch (Exception e) {
-      return DatasetLocation.builder()
-          .kind(DatasetLocationKind.UNKNOWN)
-          .dataSourceName("catalog")
-          .tableName(sourceName)
-          .uri("hop://catalog/" + sourceName)
+      return withCatalog(
+              DatasetLocation.builder()
+                  .kind(DatasetLocationKind.UNKNOWN)
+                  .dataSourceName("catalog")
+                  .tableName(sourceName)
+                  .uri("hop://catalog/" + sourceName),
+              catalogKey,
+              context)
           .build();
     }
   }
@@ -170,13 +189,16 @@ public final class OpenLineageDatasetLocationResolver {
     if (table != null
         && (!Utils.isEmpty(table.getTableName()) || !Utils.isEmpty(table.getDatabaseMetaName()))) {
       String connection = table.getDatabaseMetaName();
-      return DatasetLocation.builder()
-          .kind(DatasetLocationKind.DATABASE)
-          .connectionName(connection)
-          .schemaName(table.getSchemaName())
-          .tableName(table.getTableName())
-          .dataSourceName(!Utils.isEmpty(connection) ? connection : "DATABASE")
-          .uri(resolveJdbcUri(connection, context))
+      return withCatalog(
+              DatasetLocation.builder()
+                  .kind(DatasetLocationKind.DATABASE)
+                  .connectionName(connection)
+                  .schemaName(table.getSchemaName())
+                  .tableName(table.getTableName())
+                  .dataSourceName(!Utils.isEmpty(connection) ? connection : "DATABASE")
+                  .uri(resolveJdbcUri(connection, context)),
+              catalogKeyOf(definition),
+              context)
           .build();
     }
     PhysicalIcebergTableRef iceberg = definition.getPhysicalIcebergTable();
@@ -184,16 +206,19 @@ public final class OpenLineageDatasetLocationResolver {
       String tableName = iceberg.getTableName();
       String ns = iceberg.getNamespace();
       String uri = buildIcebergUri(iceberg);
-      return DatasetLocation.builder()
-          .kind(DatasetLocationKind.ICEBERG)
-          .catalogUri(iceberg.getCatalogUri())
-          .warehouse(iceberg.getWarehouse())
-          .icebergNamespace(ns)
-          .icebergTableName(tableName)
-          .branch(iceberg.getBranch())
-          .snapshotId(iceberg.getSnapshotId())
-          .dataSourceName("ICEBERG")
-          .uri(uri)
+      return withCatalog(
+              DatasetLocation.builder()
+                  .kind(DatasetLocationKind.ICEBERG)
+                  .catalogUri(iceberg.getCatalogUri())
+                  .warehouse(iceberg.getWarehouse())
+                  .icebergNamespace(ns)
+                  .icebergTableName(tableName)
+                  .branch(iceberg.getBranch())
+                  .snapshotId(iceberg.getSnapshotId())
+                  .dataSourceName("ICEBERG")
+                  .uri(uri),
+              catalogKeyOf(definition),
+              context)
           .build();
     }
     PhysicalFileRef file = definition.getPhysicalFile();
@@ -210,20 +235,26 @@ public final class OpenLineageDatasetLocationResolver {
       }
       String folder = file.getFolder();
       String mask = file.getIncludeFileMask();
-      return DatasetLocation.builder()
-          .kind(kind)
-          .folder(folder)
-          .includeFileMask(mask)
-          .excludeFileMask(file.getExcludeFileMask())
-          .includeSubfolders(file.isIncludeSubfolders())
-          .dataSourceName(kind.name())
-          .uri(OpenLineageDatasetFacetSupport.toFileUri(folder, mask))
+      return withCatalog(
+              DatasetLocation.builder()
+                  .kind(kind)
+                  .folder(folder)
+                  .includeFileMask(mask)
+                  .excludeFileMask(file.getExcludeFileMask())
+                  .includeSubfolders(file.isIncludeSubfolders())
+                  .dataSourceName(kind.name())
+                  .uri(OpenLineageDatasetFacetSupport.toFileUri(folder, mask)),
+              catalogKeyOf(definition),
+              context)
           .build();
     }
-    return DatasetLocation.builder()
-        .kind(DatasetLocationKind.UNKNOWN)
-        .dataSourceName("catalog")
-        .tableName(definition.getKey() != null ? definition.getKey().getName() : null)
+    return withCatalog(
+            DatasetLocation.builder()
+                .kind(DatasetLocationKind.UNKNOWN)
+                .dataSourceName("catalog")
+                .tableName(definition.getKey() != null ? definition.getKey().getName() : null),
+            catalogKeyOf(definition),
+            context)
         .build();
   }
 
@@ -238,13 +269,16 @@ public final class OpenLineageDatasetLocationResolver {
     }
     String connection = consumingTable != null ? consumingTable.getTargetDatabaseMetaName() : null;
     String schema = consumingTable != null ? consumingTable.getSchemaName() : null;
-    return DatasetLocation.builder()
-        .kind(DatasetLocationKind.DATABASE)
-        .connectionName(connection)
-        .schemaName(schema)
-        .tableName(tableName)
-        .dataSourceName(!Utils.isEmpty(connection) ? connection : "DATABASE")
-        .uri(resolveJdbcUri(connection, context))
+    return withCatalog(
+            DatasetLocation.builder()
+                .kind(DatasetLocationKind.DATABASE)
+                .connectionName(connection)
+                .schemaName(schema)
+                .tableName(tableName)
+                .dataSourceName(!Utils.isEmpty(connection) ? connection : "DATABASE")
+                .uri(resolveJdbcUri(connection, context)),
+            null,
+            context)
         .build();
   }
 
@@ -313,5 +347,38 @@ public final class OpenLineageDatasetLocationResolver {
 
   private static String nvl(String value) {
     return value != null ? value : "";
+  }
+
+  private static String catalogKeyOf(RecordDefinition definition) {
+    if (definition == null || definition.getKey() == null) {
+      return null;
+    }
+    RecordDefinitionKey key = definition.getKey();
+    if (Utils.isEmpty(key.getNamespace()) && Utils.isEmpty(key.getName())) {
+      return null;
+    }
+    if (Utils.isEmpty(key.getNamespace())) {
+      return key.getName();
+    }
+    if (Utils.isEmpty(key.getName())) {
+      return key.getNamespace();
+    }
+    return key.getNamespace() + "/" + key.getName();
+  }
+
+  private static DatasetLocation.DatasetLocationBuilder withCatalog(
+      DatasetLocation.DatasetLocationBuilder builder,
+      String catalogKey,
+      OpenLineageLocationContext context) {
+    if (builder == null) {
+      return null;
+    }
+    if (!Utils.isEmpty(catalogKey)) {
+      builder.catalogKey(catalogKey);
+    }
+    if (context != null && !Utils.isEmpty(context.getCatalogConnection())) {
+      builder.catalogConnection(context.getCatalogConnection());
+    }
+    return builder;
   }
 }

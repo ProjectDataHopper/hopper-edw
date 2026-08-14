@@ -25,7 +25,7 @@ import lombok.Getter;
  * <p>Identity (namespace/name) is separate; this describes <em>where</em> the data lives.
  */
 @Getter
-@Builder
+@Builder(toBuilder = true)
 public class DatasetLocation {
 
   @Builder.Default private final DatasetLocationKind kind = DatasetLocationKind.UNKNOWN;
@@ -61,6 +61,15 @@ public class DatasetLocation {
   /** Human label for dataSource.name (connection name, CSV, ICEBERG, …). */
   private final String dataSourceName;
 
+  /**
+   * Catalog record key for source feeds, typically {@code hop/{project}/sources/{feed}} (last-slash
+   * splits namespace vs name).
+   */
+  private final String catalogKey;
+
+  /** Hop Data Catalog connection name used to open the record. */
+  private final String catalogConnection;
+
   public boolean hasStructuredFields() {
     return (kind != null && kind != DatasetLocationKind.UNKNOWN)
         || notEmpty(connectionName)
@@ -73,7 +82,9 @@ public class DatasetLocation {
         || notEmpty(icebergNamespace)
         || notEmpty(icebergTableName)
         || notEmpty(uri)
-        || notEmpty(dataSourceName);
+        || notEmpty(dataSourceName)
+        || notEmpty(catalogKey)
+        || notEmpty(catalogConnection);
   }
 
   private static boolean notEmpty(String value) {

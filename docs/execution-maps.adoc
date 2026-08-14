@@ -45,12 +45,17 @@ Maps are produced by crawling from a workflow or model in Hop GUI (execution map
 
 Re-crawl after model or workflow changes so generated pipeline nodes stay current.
 
-== Relationship to lineage export
+== Relationship to lineage export and Hop Lineage View
 
-Execution maps provide **in-project** execution graphs and optional table-level OpenLineage JSON next to the `.hem` file. Model-derived table **and** column OpenLineage export (Marquez / HTTP) is provided by the **Export data lineage** action — see link:openlineage-export.adoc[OpenLineage export].
+Execution maps provide **in-project** execution graphs and optional table-level OpenLineage JSON next to the `.hem` file. A `.hem` *is* the crawled graph.
+
+A **Hop Lineage View** (`.hlv`) is the opposite persistence model: a small view definition that *queries* Marquez, an export folder, or local model collectors. See link:hop-lineage-view.adoc[Hop Lineage View].
+
+Model-derived table **and** column OpenLineage export (Marquez / HTTP) is provided by the **Export data lineage** action — see link:openlineage-export.adoc[OpenLineage export].
 
 == Related documents
 
 * link:getting-started-retail.adoc[Getting started — retail example] (Chapter 7)
+* link:hop-lineage-view.adoc[Hop Lineage View]
 * link:operations.adoc[Operations]
 * link:feature-overview.md[Feature overview]
