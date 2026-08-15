@@ -59,7 +59,7 @@ public final class CoachingInsightSupport {
       insights.add(
           CoachingInsight.builder()
               .severity(CoachingInsight.Severity.INFO)
-              .message("Not mapped. Drag to canvas")
+              .message("Not mapped. Use Generate DV or drag to canvas")
               .build());
     }
     appendFilteredChecks(

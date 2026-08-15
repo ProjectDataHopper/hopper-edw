@@ -88,6 +88,7 @@ You can control what metadata is sent to the LLM to balance response accuracy an
 
 * **Include model check results**: Automatically validates your open model (using **Check model**) and appends validation results (errors, warnings, checks) to the prompt.
 * **Include catalog sources**: Includes metadata schemas (Record Definitions) from your catalog. Click **Change catalog sources** to select specific sources (remembered throughout the conversation).
+* **Source-model classification** (always, when sibling `.hsm` files sit next to the open `.hdv`): compact JSON from the same Generate Data Vault classifier (tables, queries, JSON, pipelines, reference tables, hierarchy aliases). Use it with **Source Analysis** or **Data Vault Modeling**.
 * **Include full model XML**: Sends the entire `.hdv` model XML. This is larger but allows the AI to perform comprehensive reviews. *Note: Full XML is sent on the first turn only to conserve tokens.*
 * **Include load-run metrics and insights** (DV/DM/BV modelers): Appends recent `load_run` data, per-transform metrics, and rule-based insights from the OPS catalog when asking performance or tuning questions. Auto-enables when you select the **Performance tuning** scenario.
 

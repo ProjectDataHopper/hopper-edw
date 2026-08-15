@@ -68,6 +68,7 @@ public class ModelCoachPanel extends Composite {
   private final Supplier<String> modelFilenameSupplier;
   private final Supplier<ICoachingModelAdapter> adapterSupplier;
   private final Runnable modelChangeCallback;
+  private final ICoachableModelGraph coachableGraph;
 
   private final Label titleLabel;
   private final Button addButton;
@@ -77,6 +78,7 @@ public class ModelCoachPanel extends Composite {
   private final Button mapButton;
   private final Button openTableButton;
   private final Button importButton;
+  private final Button generateButton;
   private final Tree tree;
 
   public ModelCoachPanel(
@@ -85,13 +87,15 @@ public class ModelCoachPanel extends Composite {
       IVariables variables,
       Supplier<String> modelFilenameSupplier,
       Supplier<ICoachingModelAdapter> adapterSupplier,
-      Runnable modelChangeCallback) {
+      Runnable modelChangeCallback,
+      ICoachableModelGraph coachableGraph) {
     super(parent, SWT.BORDER);
     this.hopGui = hopGui;
     this.variables = variables;
     this.modelFilenameSupplier = modelFilenameSupplier;
     this.adapterSupplier = adapterSupplier;
     this.modelChangeCallback = modelChangeCallback;
+    this.coachableGraph = coachableGraph;
 
     setLayout(new FormLayout());
     PropsUi.setLook(this);
@@ -111,6 +115,10 @@ public class ModelCoachPanel extends Composite {
     openTableButton = createToolbarButton(BaseMessages.getString(PKG, "ModelCoachPanel.OpenTable"));
     importButton =
         createToolbarButton(BaseMessages.getString(PKG, "ModelCoachPanel.ImportSources"));
+    generateButton =
+        createToolbarButton(BaseMessages.getString(PKG, "ModelCoachPanel.GenerateFromSource"));
+    generateButton.setToolTipText(
+        BaseMessages.getString(PKG, "ModelCoachPanel.GenerateFromSource.Tooltip"));
     refreshOnOpenButton = new Button(this, SWT.CHECK);
     refreshOnOpenButton.setText(BaseMessages.getString(PKG, "ModelCoachPanel.RefreshOnOpen"));
     PropsUi.setLook(refreshOnOpenButton);
@@ -152,6 +160,11 @@ public class ModelCoachPanel extends Composite {
     fdImport.top = new FormAttachment(addButton, PropsUi.getMargin());
     importButton.setLayoutData(fdImport);
 
+    FormData fdGenerate = new FormData();
+    fdGenerate.left = new FormAttachment(importButton, PropsUi.getMargin());
+    fdGenerate.top = new FormAttachment(addButton, PropsUi.getMargin());
+    generateButton.setLayoutData(fdGenerate);
+
     FormData fdRefreshOnOpen = new FormData();
     fdRefreshOnOpen.left = new FormAttachment(0, PropsUi.getMargin());
     fdRefreshOnOpen.top = new FormAttachment(mapButton, PropsUi.getMargin());
@@ -172,6 +185,7 @@ public class ModelCoachPanel extends Composite {
     mapButton.addListener(SWT.Selection, e -> mapSelectedSource());
     openTableButton.addListener(SWT.Selection, e -> openSelectedTarget());
     importButton.addListener(SWT.Selection, e -> openImportSources());
+    generateButton.addListener(SWT.Selection, e -> generateFromSourceModel());
     tree.addListener(SWT.Selection, e -> updateToolbarState());
 
     installDragSource();
@@ -281,6 +295,8 @@ public class ModelCoachPanel extends Composite {
     mapButton.setEnabled(KIND_SOURCE.equals(kind));
     openTableButton.setEnabled(KIND_TARGET.equals(kind) || KIND_INSIGHT.equals(kind));
     importButton.setEnabled(true);
+    generateButton.setEnabled(
+        coachableGraph != null && coachableGraph.canGenerateFromSourceModel());
   }
 
   private boolean isRemovableSource(TreeItem item) {
@@ -372,6 +388,14 @@ public class ModelCoachPanel extends Composite {
     if (adapter != null) {
       adapter.openTableEditor(tableName);
     }
+  }
+
+  private void generateFromSourceModel() {
+    if (coachableGraph == null || !coachableGraph.canGenerateFromSourceModel()) {
+      return;
+    }
+    coachableGraph.generateFromSourceModel();
+    refresh();
   }
 
   private void openImportSources() {

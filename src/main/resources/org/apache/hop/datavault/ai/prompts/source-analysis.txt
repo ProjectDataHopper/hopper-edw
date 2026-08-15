@@ -1,3 +1,5 @@
 Scenario: Source analysis.
 
-Analyze the record definitions and catalog metadata. Identify business keys, degenerate fields, potential hubs, links, and satellites. Note data quality or naming issues. Recommend how sources should map into the current or proposed Data Vault model.
+Analyze the record definitions and catalog metadata. Identify business keys, degenerate fields, potential hubs, links, satellites, and reference tables. Note data quality or naming issues. Recommend how sources should map into the current or proposed Data Vault model.
+
+When a source-model Data Vault classification JSON is provided, treat it as the deterministic PK/FK heuristic already used by Generate Data Vault (tables, queries, JSON extractions, pipelines, lookup reference tables, and self-FK hierarchy aliases). Review and refine those proposals; do not ignore them or invent a conflicting grain without saying why.

@@ -196,6 +196,8 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
 
   public static final String TOOLBAR_ITEM_CHECK_MODEL =
       "HopGuiVaultGraph-ToolBar-10060-Check-Model";
+  public static final String TOOLBAR_ITEM_GENERATE_FROM_SOURCE =
+      "HopGuiVaultGraph-ToolBar-10062-Generate-From-Source";
   public static final String TOOLBAR_ITEM_AI_HELP = "HopGuiVaultGraph-ToolBar-10065-AI-Help";
 
   public static final String TOOLBAR_ITEM_RUN_DATA_VAULT_UPDATE =
@@ -837,6 +839,22 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       return;
     }
     showCheckResultsDialog(new ArrayList<>(result.remarks()));
+  }
+
+  @Override
+  public boolean canGenerateFromSourceModel() {
+    return getModel() != null;
+  }
+
+  @GuiToolbarElement(
+      root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
+      id = TOOLBAR_ITEM_GENERATE_FROM_SOURCE,
+      toolTip = "i18n::HopGuiVaultGraph.Toolbar.GenerateFromSource.Tooltip",
+      image = "source-model.svg")
+  @Override
+  public void generateFromSourceModel() {
+    org.apache.hop.datavault.hopgui.tovault.SourceToVaultGenerationSupport.generateFromVaultModel(
+        hopGui, this);
   }
 
   @GuiToolbarElement(
@@ -1852,6 +1870,22 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     }
     org.apache.hop.datavault.hopgui.file.sourcemodel.HopGuiSourceQueryComposeSupport
         .composeAndPublish(realGraph.hopGui, realGraph.getShell());
+  }
+
+  @GuiContextAction(
+      id = "vault-graph-generate-from-source",
+      parentId = HopGuiVaultContext.CONTEXT_ID,
+      type = GuiActionType.Create,
+      name = "i18n::HopGuiVaultGraph.Context.GenerateFromSource.Name",
+      tooltip = "i18n::HopGuiVaultGraph.Context.GenerateFromSource.Tooltip",
+      image = "source-model.svg",
+      category = "Data Vault",
+      categoryOrder = "6")
+  public void generateFromSourceModel(HopGuiVaultContext context) {
+    HopGuiVaultGraph realGraph = context != null ? context.getVaultGraph() : this;
+    if (realGraph != null) {
+      realGraph.generateFromSourceModel();
+    }
   }
 
   @GuiContextAction(

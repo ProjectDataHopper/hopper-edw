@@ -35,4 +35,16 @@ public interface ICoachableModelGraph {
       CoachingSourceRef sourceRef, String tableType, String tableName, Point location);
 
   void refreshCoachPanel();
+
+  /**
+   * Whether this graph can open the source-model → Data Vault review dialog for the current model.
+   */
+  default boolean canGenerateFromSourceModel() {
+    return false;
+  }
+
+  /** Opens the source-model → Data Vault review dialog when supported. */
+  default void generateFromSourceModel() {
+    // Only the Data Vault canvas implements generation.
+  }
 }

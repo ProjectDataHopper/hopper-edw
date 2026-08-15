@@ -117,6 +117,9 @@ public final class DvAiContextBuilder {
         .checkResultsJson(checkResultsJson)
         .loadRunMetricsJson(loadRunMetricsJson)
         .executionInfoJson(executionInfoJson)
+        .sourceClassificationJson(
+            SourceToVaultAiContextBuilder.buildSourceClassificationContext(
+                model, variables, metadataProvider))
         .logsExcerpt(truncate(request.getLogsExcerpt(), MAX_LOG_CHARS))
         .followUp(request.isFollowUp())
         .appliedChangeSummaries(

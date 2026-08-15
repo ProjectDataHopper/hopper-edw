@@ -29,7 +29,7 @@ The generated load processes follow the standard Data Vault 2.0 "insert-only" ap
 == Typical workflow
 
 1. Define **Data Vault Sources** that describe where your raw data lives (database connection, table, column layout, and record-source semantics). Optionally model multi-table joins in a **source model** (`.hsm`) and publish composite feeds.
-2. Create **Hub**, **Link**, and **Satellite** definitions and group them into a **Data Vault Model** (saved as a `.hdv` file). Each model carries its own embedded **configuration** (target database, hashing rules, column names, sentinel records, and pipeline options).
+2. Create **Hub**, **Link**, and **Satellite** definitions and group them into a **Data Vault Model** (saved as a `.hdv` file). From a source model you can **Generate Data Vault…** to propose those objects from primary keys and relationships (review-and-apply). Each model carries its own embedded **configuration** (target database, hashing rules, column names, sentinel records, and pipeline options).
 3. Lay objects out on the visual canvas, connect relationships, and add annotation notes where helpful.
 4. Use the **Check model** toolbar button to catch missing pieces or broken references early.
 5. Use **Generate DDL** to preview CREATE/ALTER statements, or **Debug** to generate and open a sample update pipeline for selected tables.

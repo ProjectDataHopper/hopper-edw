@@ -178,7 +178,8 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
               if (coachableGraph != null) {
                 coachableGraph.notifyCoachModelChanged();
               }
-            });
+            },
+            coachableGraph);
 
     innerModelSash = new SashForm(outerModelSash, SWT.HORIZONTAL);
     PropsUi.setLook(innerModelSash);

@@ -119,7 +119,7 @@ Hubs, links, and satellites reference source **names**, not raw connection detai
 
 ### Source modeler (`.hsm`)
 
-Visual **source-system** modeler: import tables with PK/FK, draw relationships, compose **source queries** (joins + projections), **source JSON** extractions (flatten a parent JSON field; chain steps for nested arrays), and **pipeline sources** (declare a `.hpl` + output transform + field contract; publish as catalog **`PIPELINE`**). **Validate** tables/queries/JSON/pipelines/relationships at design time. Publish queries as **`COMPOSITE`**, JSON as **`JSON`**, pipelines as **`PIPELINE`**; Data Vault loads generate SQL/Merge Join, parent + JsonInput, or MetaInject pipelines (with record-source injection and hub sort/distinct where needed). Catalog **Go to origin** opens the `.hsm` card for published pipeline/JSON/composite feeds. Retail sample: `retail-example/models/source-tables-crm.hsm` (shipment JSON + ASN pipeline) → `retail-360.hdv`. See [source-modeler-overview.adoc](source-modeler-overview.adoc).
+Visual **source-system** modeler: import tables with PK/FK, draw relationships, **generate a raw Data Vault** (hubs, links, satellites, reference tables, hierarchy aliases) from selected tables, queries, JSON extractions, and pipelines after review, compose **source queries** (joins + projections), **source JSON** extractions (flatten a parent JSON field; chain steps for nested arrays), and **pipeline sources** (declare a `.hpl` + output transform + field contract; publish as catalog **`PIPELINE`**). **Validate** tables/queries/JSON/pipelines/relationships at design time. Publish queries as **`COMPOSITE`**, JSON as **`JSON`**, pipelines as **`PIPELINE`**; Data Vault loads generate SQL/Merge Join, parent + JsonInput, or MetaInject pipelines (with record-source injection and hub sort/distinct where needed). Catalog **Go to origin** opens the `.hsm` card for published pipeline/JSON/composite feeds. Retail sample: `retail-example/models/source-tables-crm.hsm` (shipment JSON + ASN pipeline) → `retail-360.hdv`. See [source-modeler-overview.adoc](source-modeler-overview.adoc).
 
 ![Source modeler — retail CRM tables with All customer info query SQL](images/source-modeler-retail-example-with-query-dialog-generated-sql.png)
 
@@ -130,6 +130,8 @@ Visual **source-system** modeler: import tables with PK/FK, draw relationships, 
 ![Source modeler — pipeline source card and relationships](images/source-modeler-pipeline-source-graph.png)
 
 ![Source pipeline dialog — file, transform, and declared fields](images/source-modeler-pipeline-source-dialog.png)
+
+![Generate Data Vault from source model — review proposed hubs, links, and satellites](images/source-modeler-generate-data-vault-model-dialog.png)
 
 ### Project and metadata search (Hop 2.19)
 

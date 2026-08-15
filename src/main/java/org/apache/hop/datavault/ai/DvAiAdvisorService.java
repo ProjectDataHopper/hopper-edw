@@ -122,6 +122,12 @@ public final class DvAiAdvisorService {
       }
     }
 
+    if (!Utils.isEmpty(context.getSourceClassificationJson())) {
+      prompt
+          .append("Source-model Data Vault classification JSON:\n")
+          .append(context.getSourceClassificationJson())
+          .append("\n\n");
+    }
     if (!Utils.isEmpty(context.getCheckResultsJson())) {
       prompt
           .append("Model check results JSON:\n")

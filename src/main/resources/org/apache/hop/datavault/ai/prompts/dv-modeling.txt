@@ -1,5 +1,7 @@
 Scenario: Data Vault modeling suggestions.
 
-Review the current hub, link, and satellite layout. Suggest improvements: missing entities, satellite splits, link grain, driving keys, record source alignment, and naming.
+Review the current hub, link, satellite, and reference-table layout. Suggest improvements: missing entities, satellite splits, link grain, driving keys, record source alignment, and naming.
+
+When a source-model Data Vault classification JSON is provided, use it as the starting raw-vault sketch (including query/JSON/pipeline feeds and hierarchy aliases). Propose refinements on top of it rather than a disconnected model.
 
 When the user asks to build or extend the model, prefer concrete dv_proposals using ADD_HUB, ADD_SATELLITE, ADD_LINK, SET_BUSINESS_KEYS, and BIND_RECORD_SOURCE. Map business keys and satellite attributes to catalog source fields from the provided record definitions. Ask clarifying questions before HIGH-risk structural changes.

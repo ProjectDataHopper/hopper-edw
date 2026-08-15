@@ -140,6 +140,8 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       "HopGuiSourceModelGraph-ToolBar-10057-New-Pipeline";
   public static final String TOOLBAR_ITEM_PUSH_TO_CATALOG =
       "HopGuiSourceModelGraph-ToolBar-10058-Push-To-Catalog";
+  public static final String TOOLBAR_ITEM_GENERATE_VAULT =
+      "HopGuiSourceModelGraph-ToolBar-10059-Generate-Vault";
   public static final String TOOLBAR_ITEM_CHECK_MODEL =
       "HopGuiSourceModelGraph-ToolBar-10060-Check-Model";
   public static final String TOOLBAR_ITEM_TOGGLE_COACH =
@@ -522,6 +524,17 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       image = "ui/images/publish.svg")
   public void pushToCatalogFromToolbar() {
     pushSelectedSourcesToCatalog();
+  }
+
+  @GuiToolbarElement(
+      root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
+      id = TOOLBAR_ITEM_GENERATE_VAULT,
+      toolTip = "i18n::HopGuiSourceModelGraph.Toolbar.GenerateVault.Tooltip",
+      type = GuiToolbarElementType.BUTTON,
+      image = "datavault-model.svg")
+  public void generateDataVaultFromToolbar() {
+    org.apache.hop.datavault.hopgui.tovault.SourceToVaultGenerationSupport.generateFromSourceModel(
+        hopGui, this);
   }
 
   @GuiToolbarElement(
@@ -2175,6 +2188,19 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       categoryOrder = "2")
   public void importSchemaFromContext(HopGuiSourceModelContext context) {
     importSchema();
+  }
+
+  @GuiContextAction(
+      id = "source-model-graph-generate-vault",
+      parentId = HopGuiSourceModelContext.CONTEXT_ID,
+      type = GuiActionType.Create,
+      name = "i18n::HopGuiSourceModelGraph.Context.GenerateVault.Name",
+      tooltip = "i18n::HopGuiSourceModelGraph.Context.GenerateVault.Tooltip",
+      image = "datavault-model.svg",
+      category = "Basic",
+      categoryOrder = "3")
+  public void generateDataVaultFromContext(HopGuiSourceModelContext context) {
+    generateDataVaultFromToolbar();
   }
 
   @GuiContextAction(

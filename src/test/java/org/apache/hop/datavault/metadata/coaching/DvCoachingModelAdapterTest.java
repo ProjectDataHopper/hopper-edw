@@ -18,6 +18,7 @@ package org.apache.hop.datavault.metadata.coaching;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import org.apache.hop.core.HopEnvironment;
@@ -72,5 +73,6 @@ class DvCoachingModelAdapterTest {
     List<CoachingInsight> insights =
         adapter.resolveInsightsForSource(sourceRef, new Variables(), null);
     assertFalse(insights.isEmpty());
+    assertTrue(insights.stream().anyMatch(insight -> insight.getMessage().contains("Generate DV")));
   }
 }

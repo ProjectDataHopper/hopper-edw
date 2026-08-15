@@ -4,6 +4,16 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## Unreleased
 
+### Generate Data Vault from a source model (issue #125)
+
+- Source modeler **Generate Data Vault…** and vault modeler **Generate from source model…** classify selected `.hsm` tables (PKs + relationships) and add hubs, satellites, and links after a review screen
+- Same-PK clusters become one hub; junction/transaction tables become links (optional dependent child keys and link satellites); leftover FKs become binary links
+- Existing vault hubs are reused when business keys or catalog feeds already match; catalog publish is optional
+- Queries, JSON extractions, and pipeline cards classify with the same grain rules; multi-FK feeds can emit one n-ary transactional link
+- Lookup / code tables can become **reference tables**; self-FKs become a hub alias plus a hierarchy link
+- Coach panel **Generate DV** and unmapped-source insight; AI Help includes sibling `.hsm` classification JSON
+- Guide: [docs/generating-data-vault-from-source-model.adoc](docs/generating-data-vault-from-source-model.adoc)
+
 ### Hop Web lineage view (issue #79, plan PR 12)
 
 - `.hlv` uses the same experimental Hop Web SVG canvas stack as `.hsm` / `.hdv` / `.hbv` / `.hdm` / `.hem` (not part of #119)

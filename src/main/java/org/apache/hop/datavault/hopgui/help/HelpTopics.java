@@ -85,6 +85,7 @@ public final class HelpTopics {
   public static final String REFRESH_RECORD_DEFINITION_FROM_SOURCE =
       "refresh-record-definition-from-source-dialog";
   public static final String DATA_TYPE_MAPPING = "data-type-mapping-dialog";
+  public static final String SOURCE_TO_VAULT_REVIEW = "source-to-vault-review-dialog";
 
   private static final Map<String, String> TITLE_KEYS =
       Map.ofEntries(
@@ -152,7 +153,8 @@ public final class HelpTopics {
           Map.entry(
               REFRESH_RECORD_DEFINITION_FROM_SOURCE,
               "HelpTopics.RefreshRecordDefinitionFromSourceDialog.Title"),
-          Map.entry(DATA_TYPE_MAPPING, "HelpTopics.DataTypeMappingDialog.Title"));
+          Map.entry(DATA_TYPE_MAPPING, "HelpTopics.DataTypeMappingDialog.Title"),
+          Map.entry(SOURCE_TO_VAULT_REVIEW, "HelpTopics.SourceToVaultReviewDialog.Title"));
 
   private HelpTopics() {}
 
