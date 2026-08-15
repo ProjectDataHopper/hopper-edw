@@ -1666,3 +1666,4 @@ Each PR is independently reviewable. PR 2 is **three** merges. PR 6 can land in 
 
 - **Depends on:** PR 4
 - **Description:** Experimental, same bar as `.hem`. Must not regress desktop.
+- **Status:** Implemented — SVG banners, RAP click snapshot / unmoved mouse-up, details sash on web, settings scroll, docs. See `docs/hop-web-modelers.md` and `CHANGELOG.md`.

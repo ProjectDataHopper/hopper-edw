@@ -52,6 +52,8 @@ public final class LineageViewCanvasSvgRenderer {
     public Point maximum;
     public boolean showingNavigationView;
     public org.apache.hop.datavault.lineageview.LineageViewOpsOverlay opsOverlay;
+    public String bannerText;
+    public boolean bannerError;
   }
 
   public static ModelGraphCanvasSvgResult render(Context ctx) throws HopException {
@@ -84,6 +86,7 @@ public final class LineageViewCanvasSvgRenderer {
       painter.setAreaOwners(areaOwners);
       painter.setShowingNavigationView(ctx.showingNavigationView);
       painter.setMouseOverTableName(ctx.mouseOverTableName);
+      painter.setBanner(ctx.bannerText, ctx.bannerError);
       painter.draw();
       CanvasSvgRenderResult canvasResult =
           new CanvasSvgRenderResult(

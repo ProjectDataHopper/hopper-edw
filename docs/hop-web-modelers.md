@@ -19,7 +19,7 @@ limitations under the License.
 
 Status: **available (experimental)** — issue [#119](https://github.com/mattcasters/hop-data-vault/issues/119).
 
-Under **Hop Web** (RAP), the five model file graphs render through the same SVG canvas stack as pipelines and workflows, with plugin-specific painters and client interaction polish.
+Under **Hop Web** (RAP), the six model file graphs (the original five plus Hop Lineage View) render through the same SVG canvas stack as pipelines and workflows, with plugin-specific painters and client interaction polish.
 
 ## File types
 
@@ -30,7 +30,7 @@ Under **Hop Web** (RAP), the five model file graphs render through the same SVG 
 | `.hbv` | Business Vault modeler |
 | `.hdm` | Dimensional modeler |
 | `.hem` | Execution map viewer |
-| `.hlv` | Hop Lineage View (session graph; experimental, same bar as `.hem`) |
+| `.hlv` | Hop Lineage View (live session graph; experimental, same bar as `.hem`) |
 
 ## What works
 
@@ -49,6 +49,8 @@ Under **Hop Web** (RAP), the five model file graphs render through the same SVG 
 | Tab switch | SVG + zoom rebind so the active tab paints without an extra click |
 | BV/DV reference links | Follow name-click navigation; shared SVG client stays on the **target** tab (no snap-back to the previous model) |
 | Execution map breadcrumb | Drill / breadcrumb **zoom-fit uses the focused subgraph** size (not the full-document maximum) |
+| Lineage view details | Same right-hand Markdown sash as desktop (`StyledText`); **View as HTML** still works |
+| Lineage view empty/error | Painted in the SVG snapshot (not only the status `Label`) |
 | Dark mode | SVG render uses `SvgGc` dark theme + `NotePadStyle` |
 | Edit | Double-click / name-click dialogs, **left-click context dialogs** on tables/cards, toolbars (standard SWT/RAP dialogs) |
 | Hover | Name underline via Hop Web hover remote object |
@@ -90,8 +92,9 @@ HopGuiModelGraphBase
   └── armWeb*DragModes()        mode=drag|resize|hop for client ghosts
 
 ModelGraphWebCanvasData         RAP-safe setData for nodes/notes/hops/mode
-*ModelCanvasSvgRenderer         Source / DV / BV / DM / EM wrappers
+*ModelCanvasSvgRenderer         Source / DV / BV / DM / EM / HLV wrappers
 SourceModelSvgPainter           headless .hsm SVG export
+LineageViewCanvasSvgRenderer    live .hlv session graph (not a persisted snapshot)
 ```
 
 Painters already target `IGc`. Interactive web path uses the `*ModelCanvasSvgRenderer` wrappers, collects `AreaOwner` hit regions, and publishes via `CanvasSvgFacade.publishSnapshot`.
@@ -108,6 +111,8 @@ Painters already target `IGc`. Interactive web path uses the `*ModelCanvasSvgRen
 
 - Continuous “live” card motion while the button is held is client-outline only; the authoritative model updates on mouse-up (RAP).
 - Load-duration overview and coach drag-from-palette remain desktop-first.
+- Lineage view cards are **not** user-draggable (ELK owns layout). Click is select / context only.
+- Marquez, export-folder, and OPS queries run in the **Hop Web server JVM**. `${MARQUEZ_BASE_URL}=http://localhost:5001` is localhost inside that process (or container), not the browser. Use a URL or folder the server can reach, or the **Local models** backend / **Show lineage**.
 - Requires the Hop SPI and client fixes above; older Hop Web builds will not compile or run this plugin version correctly.
 
 ## Related

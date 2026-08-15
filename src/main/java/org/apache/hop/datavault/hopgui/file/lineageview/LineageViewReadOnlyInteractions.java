@@ -49,7 +49,7 @@ public class LineageViewReadOnlyInteractions implements ModelGraphMouseInteracti
     if (hit.areaType() == AreaOwner.AreaType.TRANSFORM_NAME) {
       graph.selectNodeName(node.getId());
     } else {
-      graph.selectNode(node.getId(), e);
+      graph.beginCardClick(node.getId(), LineageViewClickPoint.of(e));
     }
     return true;
   }
@@ -101,12 +101,17 @@ public class LineageViewReadOnlyInteractions implements ModelGraphMouseInteracti
 
   @Override
   public boolean handleCommittedDragMouseUp(Event e) {
+    graph.cancelPendingContext();
     return false;
   }
 
   @Override
   public boolean handlePureClickMouseUp(Event e, Point real) {
-    return false;
+    if (e.button != 1) {
+      graph.cancelPendingContext();
+      return false;
+    }
+    return graph.finishCardClick(real);
   }
 
   @Override

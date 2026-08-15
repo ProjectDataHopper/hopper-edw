@@ -40,13 +40,14 @@ class LineageViewReadOnlyInteractionsTest {
             10,
             10,
             new DPoint(0, 0),
-            "dataset:ns:a",
-            node);
+            node,
+            "dataset:ns:a");
     AreaOwner name =
         new AreaOwner(AreaOwner.AreaType.TRANSFORM_NAME, 0, 0, 10, 10, new DPoint(0, 0), node, "a");
     assertSame(node, LineageViewReadOnlyInteractions.nodeOf(icon));
     assertSame(node, LineageViewReadOnlyInteractions.nodeOf(name));
-    assertEquals("a", ((LineageNode) name.getParent()).getName());
+    assertEquals("a", name.getOwner());
+    assertEquals("dataset:ns:a", icon.getOwner());
     assertNull(LineageViewReadOnlyInteractions.nodeOf(null));
   }
 }

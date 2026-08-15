@@ -165,6 +165,10 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
   private List<LineageSnapshot> extraSnapshots = List.of();
   private AtomicBoolean refreshCancelled = new AtomicBoolean(false);
   private AtomicBoolean followUpCancelled = new AtomicBoolean(false);
+  private boolean refreshInProgress;
+  private LineageViewClickPoint pendingContextClick;
+  private LineageViewClickPoint followUpContextClick;
+  private boolean wantContextAfterFollowUp;
 
   public HopGuiLineageViewGraph(
       Composite parent,
@@ -189,46 +193,35 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
     fdStatus.top = new FormAttachment(0, toolBar.getBounds().height);
     fdStatus.right = new FormAttachment(100, 0);
     statusLabel.setLayoutData(fdStatus);
-    boolean web = EnvironmentUtils.getInstance().isWeb();
-    if (!web) {
-      SashForm sash = new SashForm(this, SWT.HORIZONTAL);
-      FormData fdSash = new FormData();
-      fdSash.left = new FormAttachment(0, 0);
-      fdSash.top = new FormAttachment(statusLabel, 0);
-      fdSash.right = new FormAttachment(100, 0);
-      fdSash.bottom = new FormAttachment(100, 0);
-      sash.setLayoutData(fdSash);
-      canvas = new Canvas(sash, SWT.NO_BACKGROUND);
-      Composite detailsPane = new Composite(sash, SWT.NONE);
-      PropsUi.setLook(detailsPane);
-      detailsPane.setLayout(new FormLayout());
-      int detailsMargin = PropsUi.getMargin();
-      Button viewHtml = new Button(detailsPane, SWT.PUSH);
-      viewHtml.setText(BaseMessages.getString(PKG, "HopGuiLineageViewGraph.Details.ViewHtml"));
-      PropsUi.setLook(viewHtml);
-      FormData fdViewHtml = new FormData();
-      fdViewHtml.left = new FormAttachment(0, detailsMargin);
-      fdViewHtml.top = new FormAttachment(0, detailsMargin);
-      viewHtml.setLayoutData(fdViewHtml);
-      viewHtml.addListener(SWT.Selection, event -> openDetailsAsHtml());
-      detailsMarkdown = new MarkdownStyledTextComp(detailsPane, SWT.NONE);
-      FormData fdDetails = new FormData();
-      fdDetails.left = new FormAttachment(0, 0);
-      fdDetails.right = new FormAttachment(100, 0);
-      fdDetails.top = new FormAttachment(viewHtml, detailsMargin);
-      fdDetails.bottom = new FormAttachment(100, 0);
-      detailsMarkdown.setLayoutData(fdDetails);
-      setDetailsMarkdown(LineageViewDetailsSupport.emptySelection());
-      sash.setWeights(78, 22);
-    } else {
-      canvas = new Canvas(this, SWT.NO_BACKGROUND);
-      FormData fdCanvas = new FormData();
-      fdCanvas.left = new FormAttachment(0, 0);
-      fdCanvas.top = new FormAttachment(statusLabel, 0);
-      fdCanvas.right = new FormAttachment(100, 0);
-      fdCanvas.bottom = new FormAttachment(100, 0);
-      canvas.setLayoutData(fdCanvas);
-    }
+    SashForm sash = new SashForm(this, SWT.HORIZONTAL);
+    FormData fdSash = new FormData();
+    fdSash.left = new FormAttachment(0, 0);
+    fdSash.top = new FormAttachment(statusLabel, 0);
+    fdSash.right = new FormAttachment(100, 0);
+    fdSash.bottom = new FormAttachment(100, 0);
+    sash.setLayoutData(fdSash);
+    canvas = new Canvas(sash, SWT.NO_BACKGROUND);
+    Composite detailsPane = new Composite(sash, SWT.NONE);
+    PropsUi.setLook(detailsPane);
+    detailsPane.setLayout(new FormLayout());
+    int detailsMargin = PropsUi.getMargin();
+    Button viewHtml = new Button(detailsPane, SWT.PUSH);
+    viewHtml.setText(BaseMessages.getString(PKG, "HopGuiLineageViewGraph.Details.ViewHtml"));
+    PropsUi.setLook(viewHtml);
+    FormData fdViewHtml = new FormData();
+    fdViewHtml.left = new FormAttachment(0, detailsMargin);
+    fdViewHtml.top = new FormAttachment(0, detailsMargin);
+    viewHtml.setLayoutData(fdViewHtml);
+    viewHtml.addListener(SWT.Selection, event -> openDetailsAsHtml());
+    detailsMarkdown = new MarkdownStyledTextComp(detailsPane, SWT.NONE);
+    FormData fdDetails = new FormData();
+    fdDetails.left = new FormAttachment(0, 0);
+    fdDetails.right = new FormAttachment(100, 0);
+    fdDetails.top = new FormAttachment(viewHtml, detailsMargin);
+    fdDetails.bottom = new FormAttachment(100, 0);
+    detailsMarkdown.setLayoutData(fdDetails);
+    setDetailsMarkdown(LineageViewDetailsSupport.emptySelection());
+    sash.setWeights(78, 22);
     setupWebCanvas();
     canvas.addPaintListener(this::paintControl);
     registerCanvasMouseListeners();
@@ -278,6 +271,7 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
     AtomicBoolean cancelled = new AtomicBoolean(false);
     refreshCancelled = cancelled;
     errorBanner = null;
+    refreshInProgress = true;
     setRefreshEnabled(false);
     setStatusText(BaseMessages.getString(PKG, "HopGuiLineageViewGraph.Status.Loading"));
     redraw();
@@ -389,6 +383,7 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
     display.asyncExec(
         () -> {
           if (cancelled.get() || isDisposed()) {
+            refreshInProgress = false;
             return;
           }
           if (error != null) {
@@ -411,31 +406,78 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
                     PKG, "HopGuiLineageViewGraph.Status.Ready", Const.NVL(structure, "")));
           }
           updateDetails();
+          refreshInProgress = false;
           setRefreshEnabled(true);
           redraw();
         });
   }
 
   public void selectNode(String nodeId) {
-    selectNode(nodeId, null);
+    selectNode(nodeId, false);
   }
 
   /** Name click: refresh the details pane only — no context dialog. */
   public void selectNodeName(String nodeId) {
     avoidContextDialog = true;
-    selectNode(nodeId, null);
+    pendingContextClick = null;
+    wantContextAfterFollowUp = false;
+    followUpContextClick = null;
+    selectNode(nodeId, true);
   }
 
-  public void selectNode(String nodeId, Event contextEvent) {
+  /**
+   * Card mouse-down: select the node and start facet follow-up. Context waits for an unmoved
+   * mouse-up so Hop Web does not treat the click as a drag.
+   */
+  public void beginCardClick(String nodeId, LineageViewClickPoint click) {
+    avoidContextDialog = false;
+    pendingContextClick = click;
+    wantContextAfterFollowUp = false;
+    followUpContextClick = click;
+    selectNode(nodeId, false);
+  }
+
+  /** Card mouse-up that did not move: open the context dialog, or wait for facet follow-up. */
+  public boolean finishCardClick(Point real) {
+    if (!isUnmovedClick(real)) {
+      cancelPendingContext();
+      return false;
+    }
+    if (avoidContextDialog) {
+      avoidContextDialog = false;
+      pendingContextClick = null;
+      wantContextAfterFollowUp = false;
+      return true;
+    }
+    LineageViewClickPoint click = pendingContextClick;
+    pendingContextClick = null;
+    if (click == null) {
+      return false;
+    }
+    LineageNode node = findSessionNode(selectedNodeId);
+    if (needsFollowUp(node)) {
+      wantContextAfterFollowUp = true;
+      followUpContextClick = click;
+      return true;
+    }
+    wantContextAfterFollowUp = false;
+    showNodeContextDialog(click, node);
+    return true;
+  }
+
+  public void cancelPendingContext() {
+    pendingContextClick = null;
+    wantContextAfterFollowUp = false;
+    followUpContextClick = null;
+  }
+
+  private void selectNode(String nodeId, boolean nameClick) {
     this.selectedNodeId = nodeId;
     updateDetails();
     redraw();
-    LineageNode node = findSessionNode(nodeId);
-    if (contextEvent != null && !needsFollowUp(node)) {
-      showNodeContextDialog(contextEvent, node);
-      return;
+    if (!nameClick) {
+      startFollowUp(nodeId);
     }
-    startFollowUp(nodeId, contextEvent);
   }
 
   boolean needsFollowUp(LineageNode node) {
@@ -451,7 +493,7 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
     return false;
   }
 
-  private void startFollowUp(String nodeId, Event contextEvent) {
+  private void startFollowUp(String nodeId) {
     followUpCancelled.set(true);
     LineageNode node = findSessionNode(nodeId);
     if (!needsFollowUp(node)) {
@@ -468,10 +510,10 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
                     LineageQueryServiceFactory.open(
                         backend, variables, hopGui.getMetadataProvider(), hopGui.getLog())) {
                   LineageNode updated = enrichNode(service, node);
-                  applyFollowUp(nodeId, updated, contextEvent, cancelled);
+                  applyFollowUp(nodeId, updated, cancelled);
                 }
               } catch (Exception ignored) {
-                applyFollowUp(nodeId, node, contextEvent, cancelled);
+                applyFollowUp(nodeId, node, cancelled);
               }
             },
             "hlv-follow-up");
@@ -533,8 +575,7 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
     return node;
   }
 
-  private void applyFollowUp(
-      String nodeId, LineageNode updated, Event contextEvent, AtomicBoolean cancelled) {
+  private void applyFollowUp(String nodeId, LineageNode updated, AtomicBoolean cancelled) {
     Display display = getDisplay();
     if (display == null || display.isDisposed()) {
       return;
@@ -547,8 +588,11 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
           replaceSessionNode(updated);
           updateDetails();
           redraw();
-          if (contextEvent != null && updated != null) {
-            showNodeContextDialog(contextEvent, updated);
+          if (wantContextAfterFollowUp && followUpContextClick != null && updated != null) {
+            wantContextAfterFollowUp = false;
+            LineageViewClickPoint click = followUpContextClick;
+            followUpContextClick = null;
+            showNodeContextDialog(click, updated);
           }
         });
   }
@@ -564,14 +608,14 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
     sessionGraph = sessionGraph.toBuilder().nodes(List.copyOf(nodes)).build();
   }
 
-  void showNodeContextDialog(Event e, LineageNode node) {
-    if (node == null || e == null || canvas == null || canvas.isDisposed()) {
+  void showNodeContextDialog(LineageViewClickPoint click, LineageNode node) {
+    if (node == null || click == null || canvas == null || canvas.isDisposed()) {
       return;
     }
     try {
-      Point real = screen2real(e.x, e.y);
+      Point real = screen2real(click.x(), click.y());
       org.eclipse.swt.graphics.Point screenPoint =
-          getShell().getDisplay().map(canvas, null, e.x, e.y);
+          getShell().getDisplay().map(canvas, null, click.x(), click.y());
       String message =
           BaseMessages.getString(
               PKG,
@@ -686,8 +730,10 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
       ctx.screenMagnification = (float) propsUi.getZoomFactor();
       ctx.zoomFactor = propsUi.getZoomFactor();
       ctx.maximum = maximum;
-      ctx.showingNavigationView = true;
+      ctx.showingNavigationView = !propsUi.isHideViewportEnabled();
       ctx.opsOverlay = opsOverlay;
+      ctx.bannerText = canvasBannerText();
+      ctx.bannerError = LineageViewCanvasBanner.error(errorBanner);
       ModelGraphCanvasSvgResult result = LineageViewCanvasSvgRenderer.render(ctx);
       applyWebCanvasRender(result, width, height, document);
     } catch (Exception ex) {
@@ -711,16 +757,10 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
       painter.setIconSize(propsUi.getIconSize());
       painter.setMaximum(maximum);
       painter.setAreaOwners(areaOwners);
-      painter.setShowingNavigationView(true);
+      painter.setShowingNavigationView(!propsUi.isHideViewportEnabled());
       painter.setMouseOverTableName(mouseOverTableName);
+      painter.setBanner(canvasBannerText(), LineageViewCanvasBanner.error(errorBanner));
       painter.draw();
-      if (errorBanner != null) {
-        gc.setForeground(IGc.EColor.RED);
-        gc.drawText(errorBanner, 16, 16);
-      } else if (sessionGraph == null || sessionGraph.getNodesOrEmpty().isEmpty()) {
-        gc.setForeground(IGc.EColor.DARKGRAY);
-        gc.drawText(BaseMessages.getString(PKG, "HopGuiLineageViewGraph.Empty"), 16, 16);
-      }
       captureNavigationViewGeometry(painter);
       CanvasFacade.setData(canvas, magnification, offset, document);
     } finally {
@@ -1321,5 +1361,14 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
 
   public LineageNode findSessionNode(String nodeId) {
     return sessionGraph != null ? sessionGraph.findNode(nodeId) : null;
+  }
+
+  String canvasBannerText() {
+    return LineageViewCanvasBanner.text(
+        errorBanner,
+        sessionGraph,
+        refreshInProgress,
+        BaseMessages.getString(PKG, "HopGuiLineageViewGraph.Status.Loading"),
+        BaseMessages.getString(PKG, "HopGuiLineageViewGraph.Empty"));
   }
 }

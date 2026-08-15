@@ -4,6 +4,14 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## Unreleased
 
+### Hop Web lineage view (issue #79, plan PR 12)
+
+- `.hlv` uses the same experimental Hop Web SVG canvas stack as `.hsm` / `.hdv` / `.hbv` / `.hdm` / `.hem` (not part of #119)
+- Details sash and Markdown pane are constructed under RAP; settings dialog fields scroll so the wizard fits a browser viewport
+- Empty / loading / error text is painted in the SVG snapshot, not only the status label
+- Card context waits for an unmoved mouse-up and snapshots click coordinates so RAP does not reuse a request-scoped `Event` after facet follow-up
+- Lineage cards are not user-draggable; Marquez / folder / OPS URLs resolve in the Hop Web server JVM
+
 ### Hop Lineage View show pipeline
 
 - **Show update/build pipeline** uses the opened model graph (not the active tab) and starts generation after the context menu finishes, so the validation progress dialog is not cancelled by the tab switch

@@ -35,11 +35,13 @@ import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
@@ -103,50 +105,83 @@ public class LineageViewSettingsDialog {
     int middle = PropsUi.getInstance().getMiddlePct();
     int margin = PropsUi.getMargin();
 
-    wBackend = addCombo(shell, "LineageViewSettingsDialog.Backend.Label", null, middle, margin);
+    Button wOk = new Button(shell, SWT.PUSH);
+    wOk.setText(BaseMessages.getString(BaseDialog.class, "System.Button.OK"));
+    Button wCancel = new Button(shell, SWT.PUSH);
+    wCancel.setText(BaseMessages.getString(BaseDialog.class, "System.Button.Cancel"));
+    BaseTransformDialog.positionBottomButtons(shell, new Button[] {wOk, wCancel}, margin, null);
+    wOk.addListener(SWT.Selection, e -> ok());
+    wCancel.addListener(SWT.Selection, e -> cancel());
+    DialogHelpSupport.installLocalHelpButton(shell, "lineage-view-settings-dialog");
+
+    ScrolledComposite scrolled = new ScrolledComposite(shell, SWT.V_SCROLL | SWT.H_SCROLL);
+    PropsUi.setLook(scrolled);
+    scrolled.setExpandHorizontal(true);
+    scrolled.setExpandVertical(true);
+    FormData fdScrolled = new FormData();
+    fdScrolled.left = new FormAttachment(0, 0);
+    fdScrolled.top = new FormAttachment(0, 0);
+    fdScrolled.right = new FormAttachment(100, 0);
+    fdScrolled.bottom = new FormAttachment(wOk, -margin);
+    scrolled.setLayoutData(fdScrolled);
+
+    Composite content = new Composite(scrolled, SWT.NONE);
+    PropsUi.setLook(content);
+    FormLayout contentLayout = new FormLayout();
+    contentLayout.marginWidth = margin;
+    contentLayout.marginHeight = margin;
+    content.setLayout(contentLayout);
+    scrolled.setContent(content);
+
+    wBackend = addCombo(content, "LineageViewSettingsDialog.Backend.Label", null, middle, margin);
     wSeedKind =
-        addCombo(shell, "LineageViewSettingsDialog.SeedKind.Label", wBackend, middle, margin);
+        addCombo(content, "LineageViewSettingsDialog.SeedKind.Label", wBackend, middle, margin);
     wModelLayer =
-        addCombo(shell, "LineageViewSettingsDialog.ModelLayer.Label", wSeedKind, middle, margin);
+        addCombo(content, "LineageViewSettingsDialog.ModelLayer.Label", wSeedKind, middle, margin);
     wModelName =
-        addText(shell, "LineageViewSettingsDialog.ModelName.Label", wModelLayer, middle, margin);
+        addText(content, "LineageViewSettingsDialog.ModelName.Label", wModelLayer, middle, margin);
     wLogicalTable =
-        addText(shell, "LineageViewSettingsDialog.LogicalTable.Label", wModelName, middle, margin);
+        addText(
+            content, "LineageViewSettingsDialog.LogicalTable.Label", wModelName, middle, margin);
     wModelFilename =
         addText(
-            shell, "LineageViewSettingsDialog.ModelFilename.Label", wLogicalTable, middle, margin);
+            content,
+            "LineageViewSettingsDialog.ModelFilename.Label",
+            wLogicalTable,
+            middle,
+            margin);
     wDatasetNamespace =
         addText(
-            shell,
+            content,
             "LineageViewSettingsDialog.DatasetNamespace.Label",
             wModelFilename,
             middle,
             margin);
     wDatasetName =
         addText(
-            shell,
+            content,
             "LineageViewSettingsDialog.DatasetName.Label",
             wDatasetNamespace,
             middle,
             margin);
     wJobNamespace =
         addText(
-            shell, "LineageViewSettingsDialog.JobNamespace.Label", wDatasetName, middle, margin);
+            content, "LineageViewSettingsDialog.JobNamespace.Label", wDatasetName, middle, margin);
     wJobName =
-        addText(shell, "LineageViewSettingsDialog.JobName.Label", wJobNamespace, middle, margin);
+        addText(content, "LineageViewSettingsDialog.JobName.Label", wJobNamespace, middle, margin);
     wResourceGroup =
-        addText(shell, "LineageViewSettingsDialog.ResourceGroup.Label", wJobName, middle, margin);
+        addText(content, "LineageViewSettingsDialog.ResourceGroup.Label", wJobName, middle, margin);
     wDirection =
         addCombo(
-            shell, "LineageViewSettingsDialog.Direction.Label", wResourceGroup, middle, margin);
+            content, "LineageViewSettingsDialog.Direction.Label", wResourceGroup, middle, margin);
 
-    Label wlDepth = label(shell, "LineageViewSettingsDialog.Depth.Label");
+    Label wlDepth = label(content, "LineageViewSettingsDialog.Depth.Label");
     FormData fdlDepth = new FormData();
     fdlDepth.left = new FormAttachment(0, 0);
     fdlDepth.right = new FormAttachment(middle, -margin);
     fdlDepth.top = new FormAttachment(wDirection, margin);
     wlDepth.setLayoutData(fdlDepth);
-    wDepth = new Spinner(shell, SWT.BORDER);
+    wDepth = new Spinner(content, SWT.BORDER);
     PropsUi.setLook(wDepth);
     wDepth.setMinimum(1);
     wDepth.setMaximum(20);
@@ -156,20 +191,20 @@ public class LineageViewSettingsDialog {
     wDepth.setLayoutData(fdDepth);
 
     wIncludeJobs =
-        check(shell, "LineageViewSettingsDialog.IncludeJobs.Label", wDepth, middle, margin);
+        check(content, "LineageViewSettingsDialog.IncludeJobs.Label", wDepth, middle, margin);
     wIncludeOps =
-        check(shell, "LineageViewSettingsDialog.IncludeOps.Label", wIncludeJobs, middle, margin);
+        check(content, "LineageViewSettingsDialog.IncludeOps.Label", wIncludeJobs, middle, margin);
 
-    Label wlLayers = label(shell, "LineageViewSettingsDialog.Layers.Label");
+    Label wlLayers = label(content, "LineageViewSettingsDialog.Layers.Label");
     FormData fdlLayers = new FormData();
     fdlLayers.left = new FormAttachment(0, 0);
     fdlLayers.right = new FormAttachment(middle, -margin);
     fdlLayers.top = new FormAttachment(wIncludeOps, margin);
     wlLayers.setLayoutData(fdlLayers);
-    wLayerSource = new Button(shell, SWT.CHECK);
-    wLayerDv = new Button(shell, SWT.CHECK);
-    wLayerBv = new Button(shell, SWT.CHECK);
-    wLayerDm = new Button(shell, SWT.CHECK);
+    wLayerSource = new Button(content, SWT.CHECK);
+    wLayerDv = new Button(content, SWT.CHECK);
+    wLayerBv = new Button(content, SWT.CHECK);
+    wLayerDm = new Button(content, SWT.CHECK);
     wLayerSource.setText(BaseMessages.getString(PKG, "LineageViewSettingsDialog.Layer.SOURCE"));
     wLayerDv.setText(BaseMessages.getString(PKG, "LineageViewSettingsDialog.Layer.DV"));
     wLayerBv.setText(BaseMessages.getString(PKG, "LineageViewSettingsDialog.Layer.BV"));
@@ -195,21 +230,15 @@ public class LineageViewSettingsDialog {
     fdLm.top = new FormAttachment(wlLayers, 0, SWT.CENTER);
     wLayerDm.setLayoutData(fdLm);
 
-    Button wOk = new Button(shell, SWT.PUSH);
-    wOk.setText(BaseMessages.getString(BaseDialog.class, "System.Button.OK"));
-    Button wCancel = new Button(shell, SWT.PUSH);
-    wCancel.setText(BaseMessages.getString(BaseDialog.class, "System.Button.Cancel"));
-    BaseTransformDialog.positionBottomButtons(
-        shell, new Button[] {wOk, wCancel}, margin, wLayerSource);
-    wOk.addListener(SWT.Selection, e -> ok());
-    wCancel.addListener(SWT.Selection, e -> cancel());
-
     populateCombos();
     setWidgets();
     wSeedKind.addListener(SWT.Selection, e -> updateSeedFields());
     updateSeedFields();
 
-    DialogHelpSupport.installLocalHelpButton(shell, "lineage-view-settings-dialog");
+    content.layout(true, true);
+    scrolled.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+    int zoom = Math.max(1, (int) Math.round(PropsUi.getNativeZoomFactor()));
+    shell.setSize(720 * zoom, 560 * zoom);
     BaseDialog.defaultShellHandling(shell, c -> ok(), c -> cancel());
     return ok;
   }
@@ -385,15 +414,15 @@ public class LineageViewSettingsDialog {
   }
 
   private Text addText(
-      Shell parentShell, String labelKey, Control previous, int middle, int margin) {
-    Label label = label(parentShell, labelKey);
+      Composite parent, String labelKey, Control previous, int middle, int margin) {
+    Label label = label(parent, labelKey);
     FormData fdl = new FormData();
     fdl.left = new FormAttachment(0, 0);
     fdl.right = new FormAttachment(middle, -margin);
     fdl.top =
         previous == null ? new FormAttachment(0, margin) : new FormAttachment(previous, margin);
     label.setLayoutData(fdl);
-    Text text = new Text(parentShell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+    Text text = new Text(parent, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(text);
     FormData fd = new FormData();
     fd.left = new FormAttachment(middle, 0);
@@ -404,15 +433,15 @@ public class LineageViewSettingsDialog {
   }
 
   private Combo addCombo(
-      Shell parentShell, String labelKey, Control previous, int middle, int margin) {
-    Label label = label(parentShell, labelKey);
+      Composite parent, String labelKey, Control previous, int middle, int margin) {
+    Label label = label(parent, labelKey);
     FormData fdl = new FormData();
     fdl.left = new FormAttachment(0, 0);
     fdl.right = new FormAttachment(middle, -margin);
     fdl.top =
         previous == null ? new FormAttachment(0, margin) : new FormAttachment(previous, margin);
     label.setLayoutData(fdl);
-    Combo combo = new Combo(parentShell, SWT.SINGLE | SWT.LEFT | SWT.BORDER | SWT.READ_ONLY);
+    Combo combo = new Combo(parent, SWT.SINGLE | SWT.LEFT | SWT.BORDER | SWT.READ_ONLY);
     PropsUi.setLook(combo);
     FormData fd = new FormData();
     fd.left = new FormAttachment(middle, 0);
@@ -423,8 +452,8 @@ public class LineageViewSettingsDialog {
   }
 
   private Button check(
-      Shell parentShell, String labelKey, Control previous, int middle, int margin) {
-    Button button = new Button(parentShell, SWT.CHECK);
+      Composite parent, String labelKey, Control previous, int middle, int margin) {
+    Button button = new Button(parent, SWT.CHECK);
     PropsUi.setLook(button);
     button.setText(BaseMessages.getString(PKG, labelKey));
     FormData fd = new FormData();
@@ -434,8 +463,8 @@ public class LineageViewSettingsDialog {
     return button;
   }
 
-  private Label label(Shell parentShell, String key) {
-    Label label = new Label(parentShell, SWT.RIGHT);
+  private Label label(Composite parent, String key) {
+    Label label = new Label(parent, SWT.RIGHT);
     PropsUi.setLook(label);
     label.setText(BaseMessages.getString(PKG, key));
     return label;

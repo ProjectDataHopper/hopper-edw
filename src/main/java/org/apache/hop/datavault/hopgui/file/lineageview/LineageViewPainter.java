@@ -56,6 +56,8 @@ public class LineageViewPainter extends BasePainter {
   private final Map<String, ElkLayoutBox> boxes;
   private final String selectedNodeId;
   private final LineageViewOpsOverlay opsOverlay;
+  private String bannerText;
+  private boolean bannerError;
 
   public LineageViewPainter(
       LineageGraph graph,
@@ -90,6 +92,11 @@ public class LineageViewPainter extends BasePainter {
     this.offset = new DPoint(0, 0);
   }
 
+  public void setBanner(String bannerText, boolean bannerError) {
+    this.bannerText = bannerText;
+    this.bannerError = bannerError;
+  }
+
   public void draw() {
     if (gc == null) {
       return;
@@ -97,9 +104,17 @@ public class LineageViewPainter extends BasePainter {
     gc.setTransform(0.0f, 0.0f, 1.0f);
     gc.setBackground(EColor.BACKGROUND);
     gc.fillRectangle(0, 0, area.x, area.y);
-    if (graph == null) {
-      return;
+    if (graph != null) {
+      drawGraph();
     }
+    gc.setTransform(0.0f, 0.0f, 1.0f);
+    if (!Utils.isEmpty(bannerText)) {
+      gc.setForeground(bannerError ? EColor.RED : EColor.DARKGRAY);
+      gc.drawText(bannerText, 16, 16);
+    }
+  }
+
+  private void drawGraph() {
     gc.setTransform(0.0f, 0.0f, magnification);
     if (gridSize > 1) {
       drawGrid();
@@ -194,8 +209,10 @@ public class LineageViewPainter extends BasePainter {
       gc.drawText(fitLabel(badge.label(), textWidth), x + TEXT_PAD, y + 44);
     }
     if (areaOwners != null) {
+      // String owner → Hop Web AreaOwner JSON kind=label; LineageNode stays in parent for hit
+      // tests.
       areaOwners.add(
-          new AreaOwner(AreaType.TRANSFORM_ICON, x, y, width, height, offset, node.getId(), node));
+          new AreaOwner(AreaType.TRANSFORM_ICON, x, y, width, height, offset, node, node.getId()));
       ModelGraphTableNameHitArea.Bounds nameHit =
           ModelGraphTableNameHitArea.bounds(nameX, nameY, nameExtent);
       areaOwners.add(

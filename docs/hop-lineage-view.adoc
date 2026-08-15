@@ -203,6 +203,20 @@ Unit tests cover parsers, URL strip, graph clip/depth, XML round-trip, navigatio
 
 Column-level *path highlight* (not a full column hairball) is a later increment. Runtime OpenLineage from update actions (`START`/`COMPLETE`/`FAIL` with `load_run` ids) is also later — until then, "what happened when" is the OPS overlay.
 
+== Hop Web
+
+Hop Lineage View uses the same experimental SVG canvas stack as the other model files (`.hsm` / `.hdv` / `.hbv` / `.hdm` / `.hem`). See link:hop-web-modelers.md[Hop Web modelers].
+
+What to expect:
+
+* Open, File → New (wizard first), save, zoom, pan, refresh, and **View settings** work in the browser.
+* The session graph is an SVG overlay. Empty, loading, and error text are painted on that snapshot as well as the status line.
+* Name-click updates the right-hand Markdown details pane. Card-click opens the context dialog after an unmoved mouse-up (same RAP click-vs-drag split as the other modelers).
+* **Show lineage** from a DV/BV/DM table opens an unsaved `.hlv` tab.
+* Lineage cards are not draggable; ELK still owns positions.
+
+Marquez, the export folder, and OPS are queried by the **Hop Web server**, not the browser. `${MARQUEZ_BASE_URL}` of `http://localhost:5001` means localhost *inside that JVM* (or container). Point the lineage backend at a host the server can reach, or use **Local models** / **Show lineage**.
+
 == Related documents
 
 * link:source-to-target-lineage.adoc[Source-to-target lineage]
@@ -211,4 +225,5 @@ Column-level *path highlight* (not a full column hairball) is a later increment.
 * link:operations.adoc[Operations]
 * link:getting-started-retail.adoc[Getting started — retail example]
 * link:feature-overview.md[Feature overview]
+* link:hop-web-modelers.md[Hop Web modelers]
 * link:../scripts/README.md[Shared scripts]

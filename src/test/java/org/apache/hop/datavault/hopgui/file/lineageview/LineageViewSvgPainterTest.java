@@ -111,5 +111,24 @@ class LineageViewSvgPainterTest {
     assertTrue(
         owners.get(owners.size() - 1).getAreaType() == AreaOwner.AreaType.TRANSFORM_NAME
             || owners.stream().anyMatch(a -> a.getAreaType() == AreaOwner.AreaType.TRANSFORM_NAME));
+    assertTrue(
+        owners.stream()
+            .filter(a -> a.getAreaType() == AreaOwner.AreaType.TRANSFORM_ICON)
+            .allMatch(a -> a.getOwner() instanceof String && a.getParent() instanceof Object));
+  }
+
+  @Test
+  void drawsBannerWhenGraphIsEmpty() throws Exception {
+    Point size = new Point(400, 300);
+    var gc = ModelGraphWebCanvasData.createSvgGc(HopSvgGraphics2D.newDocument(), size, 32);
+    LineageViewPainter painter =
+        new LineageViewPainter(null, Map.of(), null, gc, new Variables(), size.x, size.y);
+    painter.setBanner("backend down", true);
+    painter.setMagnification(1.0f);
+    painter.setOffset(new DPoint(0, 0));
+    painter.setGridSize(1);
+    painter.setShowingNavigationView(false);
+    painter.setAreaOwners(new ArrayList<>());
+    painter.draw();
   }
 }
