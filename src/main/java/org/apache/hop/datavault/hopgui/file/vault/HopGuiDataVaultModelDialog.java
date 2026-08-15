@@ -65,6 +65,7 @@ public class HopGuiDataVaultModelDialog {
   private Composite wGeneralTabComp;
   private Composite wUnknownTabComp;
   private Composite wInvalidTabComp;
+  private Composite wOrphanTabComp;
   private Composite wColumnsTabComp;
   private Composite wTargetLoadTabComp;
   private Composite wGeneratedPipelinesTabComp;
@@ -163,6 +164,11 @@ public class HopGuiDataVaultModelDialog {
             wTabFolder,
             BaseMessages.getString(PKG, "HopGuiDataVaultModelDialog.Tab.Invalid.Label"),
             BaseMessages.getString(PKG, "HopGuiDataVaultModelDialog.Tab.Invalid.ToolTip"));
+    wOrphanTabComp =
+        createTabComposite(
+            wTabFolder,
+            BaseMessages.getString(PKG, "HopGuiDataVaultModelDialog.Tab.Orphan.Label"),
+            BaseMessages.getString(PKG, "HopGuiDataVaultModelDialog.Tab.Orphan.ToolTip"));
     wColumnsTabComp =
         createTabComposite(
             wTabFolder,
@@ -199,6 +205,12 @@ public class HopGuiDataVaultModelDialog {
         null,
         wInvalidTabComp,
         DataVaultConfiguration.GUI_PLUGIN_ELEMENT_INVALID_TAB_ID,
+        null);
+    widgets.createCompositeWidgets(
+        configuration,
+        null,
+        wOrphanTabComp,
+        DataVaultConfiguration.GUI_PLUGIN_ELEMENT_ORPHAN_TAB_ID,
         null);
     widgets.createCompositeWidgets(
         configuration,
@@ -284,6 +296,8 @@ public class HopGuiDataVaultModelDialog {
       widgets.setWidgetsContents(
           configuration, wInvalidTabComp, DataVaultConfiguration.GUI_PLUGIN_ELEMENT_INVALID_TAB_ID);
       widgets.setWidgetsContents(
+          configuration, wOrphanTabComp, DataVaultConfiguration.GUI_PLUGIN_ELEMENT_ORPHAN_TAB_ID);
+      widgets.setWidgetsContents(
           configuration, wColumnsTabComp, DataVaultConfiguration.GUI_PLUGIN_ELEMENT_COLUMNS_TAB_ID);
       widgets.setWidgetsContents(
           configuration,
@@ -309,6 +323,8 @@ public class HopGuiDataVaultModelDialog {
         configuration, DataVaultConfiguration.GUI_PLUGIN_ELEMENT_UNKNOWN_TAB_ID);
     widgets.getWidgetsContents(
         configuration, DataVaultConfiguration.GUI_PLUGIN_ELEMENT_INVALID_TAB_ID);
+    widgets.getWidgetsContents(
+        configuration, DataVaultConfiguration.GUI_PLUGIN_ELEMENT_ORPHAN_TAB_ID);
     widgets.getWidgetsContents(
         configuration, DataVaultConfiguration.GUI_PLUGIN_ELEMENT_COLUMNS_TAB_ID);
     widgets.getWidgetsContents(

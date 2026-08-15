@@ -62,6 +62,12 @@ public class SourceToVaultOptions {
   private boolean includeNonTableSources = true;
 
   /**
+   * When true, applying a link or hub-satellite also lists that child feed as a record source on
+   * each participating parent hub (BK mappings copied from the link/sat).
+   */
+  private boolean seedParentHubsFromChildFeeds;
+
+  /**
    * Extra technical column names (matched case-insensitively) in addition to the model load-date
    * and record-source fields.
    */

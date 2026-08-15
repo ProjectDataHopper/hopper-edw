@@ -64,6 +64,7 @@ import org.apache.hop.datavault.metadata.DvLoadDateSupport;
 import org.apache.hop.datavault.metadata.DvModelBulkUpdateExecutionSupport;
 import org.apache.hop.datavault.metadata.DvModelCheckOptions;
 import org.apache.hop.datavault.metadata.DvMultiSourceUpdateWorkflowSupport;
+import org.apache.hop.datavault.metadata.DvOrphanHandlingSupport;
 import org.apache.hop.datavault.metadata.DvPipelineOrchestratorSupport;
 import org.apache.hop.datavault.metadata.DvSpecialRecordSupport;
 import org.apache.hop.datavault.metadata.DvTableType;
@@ -624,6 +625,23 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
       if (doNotUpdateTargetDatabase) {
         logBasic(BaseMessages.getString(PKG, "ActionDataVaultUpdate.Log.SkippingDataUpdate"));
         return finishExecution(result, success, totalErrors, model);
+      }
+
+      if (DvOrphanHandlingSupport.modelUsesQuarantine(model)) {
+        try {
+          DatabaseMeta targetDatabase =
+              DvSpecialRecordSupport.loadTargetDatabase(
+                  getMetadataProvider(), model.getConfigurationOrDefault());
+          DvOrphanHandlingSupport.ensureQuarantineTable(
+              targetDatabase,
+              getVariables(),
+              this,
+              model.getConfigurationOrDefault().resolveQuarantineTableName(getVariables()));
+        } catch (Exception e) {
+          logError("Unable to ensure orphan quarantine table", e);
+          totalErrors++;
+          success = false;
+        }
       }
 
       if (ensureSpecialRecords) {

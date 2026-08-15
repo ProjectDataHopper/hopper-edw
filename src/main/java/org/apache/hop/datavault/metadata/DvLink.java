@@ -200,6 +200,12 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
   @HopMetadataProperty
   private String recordSourceFieldName;
 
+  /**
+   * Optional override of the model orphan policy for this link. Empty or {@code INHERIT} uses the
+   * Data Vault configuration default.
+   */
+  @HopMetadataProperty private String orphanPolicy;
+
   public DvLink() {
     super();
     this.tableType = DvTableType.LINK;
@@ -645,6 +651,10 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
       DvFieldMappingValidationSupport.validateLinkRecordSourceFields(
           this, model, options, metadataProvider, variables, this, remarks);
     }
+    if (model != null) {
+      DvOrphanHandlingSupport.checkLink(
+          this, model, model.getConfigurationOrDefault(), variables, remarks);
+    }
   }
 
   @Override
@@ -741,6 +751,17 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
           pipelineMeta.addPipelineHop(new PipelineHopMeta(predecessorTransform, checkSumTransform));
           predecessorTransform = checkSumTransform;
         }
+
+        predecessorTransform =
+            applyOrphanHandling(
+                pipelineMeta,
+                predecessorTransform,
+                ctx,
+                linkSource,
+                model,
+                metadataProvider,
+                variables,
+                loadDate);
 
         // Final checksum for the Link Hash itself: hub hashes + dependent child key values
         // (source field names still in the stream at this point).
@@ -864,6 +885,61 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
     } catch (Exception e) {
       throw new HopException("Error generating update pipeline for Link target " + getName(), e);
     }
+  }
+
+  private TransformMeta applyOrphanHandling(
+      PipelineMeta pipelineMeta,
+      TransformMeta predecessor,
+      LinkUpdateContext ctx,
+      DvLinkHubSource linkSource,
+      DataVaultModel model,
+      IHopMetadataProvider metadataProvider,
+      IVariables variables,
+      Date loadDate)
+      throws HopException {
+    DataVaultConfiguration config = ctx.config;
+    DvOrphanPolicy linkPolicy = DvOrphanHandlingSupport.resolveEffective(getOrphanPolicy(), config);
+    if (!linkPolicy.changesRuntimeGraph()) {
+      return predecessor;
+    }
+    List<DvOrphanHandlingSupport.ParentOrphanContext> parents = new ArrayList<>();
+    for (String hubName : hubNames) {
+      DvHub hub = model.findHub(hubName, variables, metadataProvider);
+      if (hub == null) {
+        continue;
+      }
+      String hubHashName =
+          variables.resolve(
+              DvTableResolutionSupport.resolveParticipatingHubHashColumn(
+                  model, hubName, variables, metadataProvider));
+      List<String> sourceFields =
+          resolveHubSourceBusinessKeyFields(linkSource, hubName, hub, variables);
+      DvLink.HubSourceKeyField mapping =
+          DvLinkHubSourceKeyFieldSupport.findHubSourceKeyFieldOrNull(linkSource, hubName);
+      parents.add(
+          new DvOrphanHandlingSupport.ParentOrphanContext(
+              hub,
+              linkPolicy,
+              hubHashName,
+              sourceFields,
+              mapping != null ? mapping.getSourceBusinessKeyFields() : List.of()));
+    }
+    Point location =
+        predecessor != null && predecessor.getLocation() != null
+            ? new Point(predecessor.getLocation().x, predecessor.getLocation().y + SPACING_WIDTH)
+            : new Point(LOCATION_START_LINE_2.x, LOCATION_START_LINE_2.y + SPACING_WIDTH);
+    return DvOrphanHandlingSupport.applyAfterParentHashes(
+        pipelineMeta,
+        predecessor,
+        parents,
+        config,
+        model,
+        metadataProvider,
+        variables,
+        loadDate,
+        getName(),
+        linkSource != null ? linkSource.getSourceName() : null,
+        location);
   }
 
   @Override

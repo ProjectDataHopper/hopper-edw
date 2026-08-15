@@ -90,6 +90,30 @@ class SourceToVaultApplySupportTest {
   }
 
   @Test
+  void seedParentHubsAddsOrderFeedToCustomerHub() throws Exception {
+    SourceModel source = retailLikeModel();
+    DataVaultModel vault = new DataVaultModel();
+    SourceToVaultClassification classification = SourceToVaultClassifier.classify(source);
+    SourceToVaultOptions options = SourceToVaultOptions.defaults();
+    options.setSeedParentHubsFromChildFeeds(true);
+
+    SourceToVaultApplySupport.apply(
+        source,
+        vault,
+        classification,
+        false,
+        new Variables(),
+        new MemoryMetadataProvider(),
+        options);
+
+    DvHub customer = vault.findHub("hub_customer");
+    assertNotNull(customer);
+    assertTrue(
+        customer.getRecordSources().stream().anyMatch(s -> s != null && s.contains("order")),
+        "customer hub should also be loaded from an order/link feed");
+  }
+
+  @Test
   void secondApplyDoesNotDuplicateExistingHub() throws Exception {
     SourceModel source = retailLikeModel();
     DataVaultModel vault = new DataVaultModel();

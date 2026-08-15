@@ -53,6 +53,9 @@ public class DataVaultConfiguration implements IDvTargetLoadConfiguration {
   public static final String GUI_PLUGIN_ELEMENT_INVALID_TAB_ID =
       "DATAVAULT_CONFIGURATION_INVALID_TAB";
 
+  public static final String GUI_PLUGIN_ELEMENT_ORPHAN_TAB_ID =
+      "DATAVAULT_CONFIGURATION_ORPHAN_TAB";
+
   public static final String GUI_PLUGIN_ELEMENT_COLUMNS_TAB_ID =
       "DATAVAULT_CONFIGURATION_COLUMNS_TAB";
 
@@ -233,6 +236,58 @@ public class DataVaultConfiguration implements IDvTargetLoadConfiguration {
       parentId = GUI_PLUGIN_ELEMENT_INVALID_TAB_ID)
   @HopMetadataProperty
   private String invalidRecordSource;
+
+  // --- Optional orphan handling (child-before-parent / incomplete identity) ---
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.NONE)
+  @GuiWidgetElement(
+      order = "0300",
+      type = GuiElementType.COMBO,
+      label = "i18n::DataVaultConfiguration.OrphanPolicy.Label",
+      toolTip = "i18n::DataVaultConfiguration.OrphanPolicy.ToolTip",
+      comboValuesMethod = "getOrphanPolicyOptions",
+      parentId = GUI_PLUGIN_ELEMENT_ORPHAN_TAB_ID)
+  @HopMetadataProperty
+  private String orphanPolicy = DvOrphanPolicy.PASS.name();
+
+  @GuiWidgetElement(
+      order = "0310",
+      type = GuiElementType.TEXT,
+      variables = true,
+      label = "i18n::DataVaultConfiguration.InferredRecordSource.Label",
+      toolTip = "i18n::DataVaultConfiguration.InferredRecordSource.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_ORPHAN_TAB_ID)
+  @HopMetadataProperty
+  private String inferredRecordSource;
+
+  @GuiWidgetElement(
+      order = "0320",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::DataVaultConfiguration.StoreInferredFlag.Label",
+      toolTip = "i18n::DataVaultConfiguration.StoreInferredFlag.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_ORPHAN_TAB_ID)
+  @HopMetadataProperty
+  private boolean storeInferredFlag;
+
+  @GuiWidgetElement(
+      order = "0330",
+      type = GuiElementType.TEXT,
+      variables = true,
+      label = "i18n::DataVaultConfiguration.InferredFlagField.Label",
+      toolTip = "i18n::DataVaultConfiguration.InferredFlagField.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_ORPHAN_TAB_ID)
+  @HopMetadataProperty
+  private String inferredFlagField;
+
+  @GuiWidgetElement(
+      order = "0340",
+      type = GuiElementType.TEXT,
+      variables = true,
+      label = "i18n::DataVaultConfiguration.QuarantineTable.Label",
+      toolTip = "i18n::DataVaultConfiguration.QuarantineTable.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_ORPHAN_TAB_ID)
+  @HopMetadataProperty
+  private String quarantineTable;
 
   @Getter(AccessLevel.NONE)
   @Setter(AccessLevel.NONE)
@@ -581,6 +636,10 @@ public class DataVaultConfiguration implements IDvTargetLoadConfiguration {
     this.invalidHashKeyValue = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
     this.invalidLinkHashKeyValue = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
     this.invalidRecordSource = "INVALID";
+    this.orphanPolicy = DvOrphanPolicy.PASS.name();
+    this.inferredRecordSource = DvOrphanHandlingSupport.DEFAULT_INFERRED_RECORD_SOURCE;
+    this.inferredFlagField = DvOrphanHandlingSupport.DEFAULT_INFERRED_FLAG_FIELD;
+    this.quarantineTable = DvOrphanHandlingSupport.DEFAULT_QUARANTINE_TABLE;
   }
 
   /**
@@ -644,6 +703,58 @@ public class DataVaultConfiguration implements IDvTargetLoadConfiguration {
   public List<String> getHashContentCasingOptions(
       ILogChannel log, IHopMetadataProvider metadataProvider) {
     return enumNames(HashContentCasing.class);
+  }
+
+  /** Concrete orphan policies for the model default (INHERIT is table-level only). */
+  public List<String> getOrphanPolicyOptions(
+      ILogChannel log, IHopMetadataProvider metadataProvider) {
+    return List.of(
+        DvOrphanPolicy.PASS.name(),
+        DvOrphanPolicy.INFER.name(),
+        DvOrphanPolicy.SENTINEL.name(),
+        DvOrphanPolicy.QUARANTINE.name(),
+        DvOrphanPolicy.FAIL.name());
+  }
+
+  public String getOrphanPolicy() {
+    return resolveOrphanPolicy().name();
+  }
+
+  public void setOrphanPolicy(String value) {
+    orphanPolicy = parseOrphanPolicy(value, DvOrphanPolicy.PASS).name();
+  }
+
+  public DvOrphanPolicy resolveOrphanPolicy() {
+    DvOrphanPolicy parsed = parseOrphanPolicy(orphanPolicy, DvOrphanPolicy.PASS);
+    return parsed == DvOrphanPolicy.INHERIT ? DvOrphanPolicy.PASS : parsed;
+  }
+
+  public String resolveInferredRecordSource(IVariables variables) {
+    String value = inferredRecordSource;
+    if (variables != null) {
+      value = variables.resolve(value);
+    }
+    return Utils.isEmpty(value) ? DvOrphanHandlingSupport.DEFAULT_INFERRED_RECORD_SOURCE : value;
+  }
+
+  public String resolveInferredFlagField(IVariables variables) {
+    String value = inferredFlagField;
+    if (variables != null) {
+      value = variables.resolve(value);
+    }
+    return Utils.isEmpty(value) ? DvOrphanHandlingSupport.DEFAULT_INFERRED_FLAG_FIELD : value;
+  }
+
+  public String resolveQuarantineTableName(IVariables variables) {
+    String value = quarantineTable;
+    if (variables != null) {
+      value = variables.resolve(value);
+    }
+    return Utils.isEmpty(value) ? DvOrphanHandlingSupport.DEFAULT_QUARANTINE_TABLE : value;
+  }
+
+  private static DvOrphanPolicy parseOrphanPolicy(String value, DvOrphanPolicy defaultValue) {
+    return DvOrphanPolicy.parse(value, defaultValue);
   }
 
   /** Combo items for the target load mode widget (localized descriptions). */

@@ -70,7 +70,7 @@ Use the **Import keys from sources** button on the **Keys** tab to populate busi
 
 Do **not** list feeds that only load satellites of this hub. Satellite feeds are independent in Data Vault 2.0; each satellite has its own record source. Parent hash keys on satellites are computed from parent identity *values* on the satellite feed (hub vault key names, or ordered source *parts* for composite hub keys — not a stored composed BK column on the satellite).
 
-You can attach as many hub-load sources as you need. The generated load process will handle each source (typically producing one pipeline per source) but all of them write into the same physical hub table. This is the recommended way to handle a single business concept that receives identity from multiple upstream systems (for example a Customer hub that is populated from both a CRM system and an ERP system).
+You can attach as many hub-load sources as you need. The generated load process will handle each source (typically producing one pipeline per source) but all of them write into the same physical hub table. This is the recommended way to handle a single business concept that receives identity from multiple upstream systems (for example a Customer hub that is populated from both a CRM system and an ERP system). It is also the cheapest way to prevent dangling hashes when a *child* feed (orders, invoices) arrives before the parent master: add that child feed as another hub record source (link dialog **Also load parent hubs...**, or the source-to-vault seed option). See link:datavault-configuration.adoc#_orphan_handling_tab[Orphan handling].
 |===
 
 == Integration mode

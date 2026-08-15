@@ -76,6 +76,7 @@ public class SourceToVaultReviewDialog {
   private Button wCreateHierarchyLinks;
   private Button wCreateNaryLinks;
   private Button wIncludeNonTableSources;
+  private Button wSeedParentHubs;
   private Button wPublishCatalog;
   private Button wNewModel;
   private Button wExistingModel;
@@ -130,7 +131,8 @@ public class SourceToVaultReviewDialog {
     wCreateHierarchyLinks = optionCheckbox("CreateHierarchyLinks", wCreateReferenceTables);
     wCreateNaryLinks = optionCheckbox("CreateNaryLinks", wCreateHierarchyLinks);
     wIncludeNonTableSources = optionCheckbox("IncludeNonTableSources", wCreateNaryLinks);
-    wPublishCatalog = optionCheckbox("PublishCatalog", wIncludeNonTableSources);
+    wSeedParentHubs = optionCheckbox("SeedParentHubs", wIncludeNonTableSources);
+    wPublishCatalog = optionCheckbox("PublishCatalog", wSeedParentHubs);
     wCreateFkLinks.setSelection(options.isCreateFkLinks());
     wCreateHubSats.setSelection(options.isCreateHubSatellites());
     wExcludeTechnical.setSelection(options.isExcludeTechnicalColumns());
@@ -139,6 +141,7 @@ public class SourceToVaultReviewDialog {
     wCreateHierarchyLinks.setSelection(options.isCreateHierarchyLinks());
     wCreateNaryLinks.setSelection(options.isCreateNaryLinksForMultiFkFeeds());
     wIncludeNonTableSources.setSelection(options.isIncludeNonTableSources());
+    wSeedParentHubs.setSelection(options.isSeedParentHubsFromChildFeeds());
     wPublishCatalog.setSelection(true);
 
     org.eclipse.swt.widgets.Control last = wPublishCatalog;
@@ -361,6 +364,7 @@ public class SourceToVaultReviewDialog {
     options.setCreateHierarchyLinks(wCreateHierarchyLinks.getSelection());
     options.setCreateNaryLinksForMultiFkFeeds(wCreateNaryLinks.getSelection());
     options.setIncludeNonTableSources(wIncludeNonTableSources.getSelection());
+    options.setSeedParentHubsFromChildFeeds(wSeedParentHubs.getSelection());
   }
 
   private void ok() {

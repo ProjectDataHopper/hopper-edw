@@ -152,6 +152,12 @@ public class DvSatellite extends DvTableBase
   private List<String> parentKeySourceFields = new ArrayList<>();
 
   /**
+   * Optional override of the model orphan policy for this satellite. Empty or {@code INHERIT} uses
+   * the Data Vault configuration default.
+   */
+  @HopMetadataProperty private String orphanPolicy;
+
+  /**
    * Name of the driving key column for multi-active satellites (e.g. multiple phone numbers per
    * customer). Leave empty for a standard single-active satellite.
    */
@@ -443,6 +449,10 @@ public class DvSatellite extends DvTableBase
           this, model, effectiveOptions, metadataProvider, variables, this, remarks);
       checkSatelliteHubRecordSourceConsistency(remarks, metadataProvider, variables, model);
     }
+    if (model != null) {
+      DvOrphanHandlingSupport.checkSatellite(
+          this, model, model.getConfigurationOrDefault(), variables, remarks);
+    }
   }
 
   /**
@@ -614,6 +624,16 @@ public class DvSatellite extends DvTableBase
             hashChainEndTransform, "satellite", getName(), ctx.targetTableName);
       }
 
+      hashChainEndTransform =
+          applyOrphanHandling(
+              pipelineMeta,
+              hashChainEndTransform,
+              ctx,
+              model,
+              metadataProvider,
+              variables,
+              loadDate);
+
       TransformMeta sourceSelectTransform =
           addSourceSelectRows(ctx, pipelineMeta, hashChainEndTransform);
 
@@ -697,6 +717,56 @@ public class DvSatellite extends DvTableBase
       throw new HopException(
           "Error generating update pipeline for Satellite target " + getName(), e);
     }
+  }
+
+  private TransformMeta applyOrphanHandling(
+      PipelineMeta pipelineMeta,
+      TransformMeta predecessor,
+      SatelliteUpdateContext ctx,
+      DataVaultModel model,
+      IHopMetadataProvider metadataProvider,
+      IVariables variables,
+      Date loadDate)
+      throws HopException {
+    if (predecessor == null || ctx.linkSatellite || Utils.isEmpty(hubName)) {
+      return predecessor;
+    }
+    DataVaultConfiguration config = ctx.config;
+    DvOrphanPolicy policy = DvOrphanHandlingSupport.resolveEffective(getOrphanPolicy(), config);
+    if (!policy.changesRuntimeGraph()) {
+      return predecessor;
+    }
+    DvHub hub = model.findHub(hubName, variables, metadataProvider);
+    if (hub == null) {
+      return predecessor;
+    }
+    List<BusinessKeySource> mappings = new ArrayList<>();
+    List<BusinessKey> vaultKeys = hub.getDistinctBusinessKeys();
+    for (int i = 0; i < vaultKeys.size(); i++) {
+      String sourceField =
+          ctx.pkSourceFieldNames != null && i < ctx.pkSourceFieldNames.size()
+              ? ctx.pkSourceFieldNames.get(i)
+              : vaultKeys.get(i).getName();
+      mappings.add(new BusinessKeySource(vaultKeys.get(i).getName(), sourceField));
+    }
+    Point location =
+        predecessor.getLocation() != null
+            ? new Point(predecessor.getLocation().x, predecessor.getLocation().y + SPACING_WIDTH)
+            : new Point(LOCATION_START_LINE_2.x, LOCATION_START_LINE_2.y + SPACING_WIDTH);
+    return DvOrphanHandlingSupport.applyAfterParentHashes(
+        pipelineMeta,
+        predecessor,
+        List.of(
+            new DvOrphanHandlingSupport.ParentOrphanContext(
+                hub, policy, ctx.hashKeyFieldName, ctx.pkSourceFieldNames, mappings)),
+        config,
+        model,
+        metadataProvider,
+        variables,
+        loadDate,
+        getName(),
+        getRecordSourceName(),
+        location);
   }
 
   @Override

@@ -103,6 +103,36 @@ image::images/data-vault-model-dialog-invalid-records-tab.png[Invalid records ta
 |RECORD_SOURCE value for invalid sentinel rows (default `INVALID`).
 |===
 
+=== Orphan handling tab
+
+Optional policy when a *child* feed (link or satellite) arrives before its parent hub, or with a null business key. Default is **PASS** (same as previous releases): generated loads hash the key and insert the child even if the hub row does not exist yet.
+
+This is **not** a new warehouse layer. It is a model policy plus generated pipeline fragments. Late-arriving *dimensions* (facts before dim members) are a separate dimensional feature (issue #109).
+
+[cols="1,3", options="header"]
+|===
+|Option |Description
+
+|Orphan handling policy
+|`PASS` — current behavior (dangling hashes if FKs are off). `INFER` — insert a placeholder hub row with the real business key and `RECORD_SOURCE=INFERRED`. `SENTINEL` — remap null or missing parents to the unknown ghost row. `QUARANTINE` — write the child row to the quarantine table and skip the load. `FAIL` — abort the pipeline.
+
+|Inferred record source
+|Value stamped on placeholder hub rows (`INFERRED` by default).
+
+|Store inferred flag
+|When enabled, hub tables gain a boolean column (default `is_inferred`). Off by default so existing DDL does not change.
+
+|Inferred flag field
+|Column name for that flag.
+
+|Quarantine table
+|Shared table on the vault database (`dv_orphan_quarantine` by default). Created on first Data Vault Update when any table uses `QUARANTINE`.
+|===
+
+Link and satellite dialogs can override the model policy (value `INHERIT` keeps the model default). The hub dialog has **Allow inferred inserts** (on for managed hubs; infer is refused for external hubs).
+
+The cheapest fix for valid child-before-parent keys is still to **also load the parent hub from the child feed**: use **Also load parent hubs...** on the link (or satellite) dialog, or enable **Also load parent hubs from child/link feeds** when generating a vault from a source model. That reuses the existing hub→link→sat load order.
+
 === Standard columns tab
 
 Names and patterns for columns present on every Data Vault table.
@@ -141,7 +171,7 @@ image::images/data-vault-model-dialog-standard-columns-tab.png[Standard columns 
 |When enabled, generated **CREATE TABLE** statements include a `PRIMARY KEY` on table identity columns: hub hash key; link hash key; satellite parent hash key + multi-active driving key (if any) + load date. Off by default. Does not retrofit constraints onto existing tables via ALTER. Enabling foreign keys also adds primary keys on parent hubs/links so references are valid.
 
 |Generate foreign keys in DDL
-|When enabled, generated **CREATE TABLE** statements include `FOREIGN KEY` constraints for model relationships (link → hubs, satellite/STS → parent hub or link). Off by default. Skipped on engines that do not support foreign keys (for example SingleStore). Applies only to CREATE TABLE, not ALTER drift.
+|When enabled, generated **CREATE TABLE** statements include `FOREIGN KEY` constraints for model relationships (link → hubs, satellite/STS → parent hub or link). Off by default. Skipped on engines that do not support foreign keys (for example SingleStore). Applies only to CREATE TABLE, not ALTER drift. A child feed that is not listed as a hub record source is the usual Data Vault pattern and is not a model-check error. If that child can arrive before the parent, seed the hub or use an orphan policy other than `PASS`.
 
 |Caution (hub multi-source + bulk load)
 |Hubs and links with **multiple record sources** generate one pipeline per source. The Data Vault Update action wraps those pipelines in a **serial multi-source workflow** so sources for the same physical table run one after another (each subsequent source sees keys already loaded). Free pipelines (satellites, single-source hubs/links) still run in the parallel orchestrator. This is required for safe primary-key enforcement under bulk load.

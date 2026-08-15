@@ -117,6 +117,8 @@ When **Store record source indicator** is off, the feed does not need a static o
 * Attach satellites to links when the descriptive information truly belongs to the relationship rather than to one of the participating hubs.
 * When the parent hub is fed by multiple record sources, it is common and recommended to create a separate satellite definition for each source (even if they track the same attributes). This keeps the incoming data, record source values, and change history cleanly separated per origin system while still describing the same parent hub.
 
+If this satellite feed can introduce a parent business key that is not yet in the hub, use **Also load parent hub...** on the satellite dialog or an orphan policy other than `PASS`. See link:datavault-configuration.adoc#_orphan_handling_tab[Orphan handling].
+
 == Satellites on multi-source hubs
 
 If your hub definition lists several record sources, you will normally also create multiple satellites (one per source) that all point to the same parent hub. Each satellite only needs to reference the Data Vault Source that is relevant to it. This pattern gives you clean per-source history while keeping the hub itself as a single unified business key table.

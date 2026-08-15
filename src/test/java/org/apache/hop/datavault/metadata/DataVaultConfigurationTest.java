@@ -61,6 +61,17 @@ class DataVaultConfigurationTest {
   }
 
   @Test
+  void newConfigurationDefaultsOrphanPolicyToPass() {
+    DataVaultConfiguration configuration = new DataVaultConfiguration();
+    assertEquals(DvOrphanPolicy.PASS.name(), configuration.getOrphanPolicy());
+    assertEquals(DvOrphanPolicy.PASS, configuration.resolveOrphanPolicy());
+    assertEquals("INFERRED", configuration.resolveInferredRecordSource(null));
+    assertEquals("is_inferred", configuration.resolveInferredFlagField(null));
+    assertEquals("dv_orphan_quarantine", configuration.resolveQuarantineTableName(null));
+    assertEquals(false, configuration.isStoreInferredFlag());
+  }
+
+  @Test
   void newConfigurationDefaultsStoreLoadCycleIdToFalse() {
     DataVaultConfiguration configuration = new DataVaultConfiguration();
     assertEquals(false, configuration.isStoreLoadCycleId());

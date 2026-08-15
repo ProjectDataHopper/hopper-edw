@@ -4,6 +4,14 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## Unreleased
 
+### Optional Data Vault orphan handling (issue #77)
+
+- Model **Orphan handling** policy (`PASS` default, plus `INFER` / `SENTINEL` / `QUARANTINE` / `FAIL`) with link/satellite overrides and hub **Allow inferred inserts**
+- **Also load parent hubs...** on link/satellite dialogs and optional source-to-vault seed so child feeds can populate parent hubs
+- Generated load fragments for non-`PASS` policies; Data Vault Update creates the quarantine table when needed
+- Model check does **not** treat a child/link source that is absent from the parent hub as an error (`PASS` is the usual hub-from-parent / link-from-child pattern)
+- Guide: [docs/datavault-configuration.adoc](docs/datavault-configuration.adoc), plan [docs/plans/orphan-prevention-plan.md](docs/plans/orphan-prevention-plan.md)
+
 ### Generate Data Vault from a source model (issue #125)
 
 - Source modeler **Generate Data Vault…** and vault modeler **Generate from source model…** classify selected `.hsm` tables (PKs + relationships) and add hubs, satellites, and links after a review screen

@@ -91,6 +91,7 @@ public class DvHubDialog {
   private Combo wIntegrationMode;
   private Text wHashKeyFieldName;
   private Text wRecordSourceFieldName;
+  private Button wAllowInferredInsert;
   private TableView wBusinessKeys;
   private TableView wSources;
   private DvCustomPipelinesTabSupport customPipelinesTab;
@@ -288,6 +289,17 @@ public class DvHubDialog {
     fdRecordSourceFieldName.right = new FormAttachment(100, 0);
     wRecordSourceFieldName.setLayoutData(fdRecordSourceFieldName);
 
+    wAllowInferredInsert = new Button(wOptionsComp, SWT.CHECK);
+    wAllowInferredInsert.setText(
+        BaseMessages.getString(PKG, "DvHubDialog.AllowInferredInsert.Label"));
+    wAllowInferredInsert.setToolTipText(
+        BaseMessages.getString(PKG, "DvHubDialog.AllowInferredInsert.ToolTip"));
+    PropsUi.setLook(wAllowInferredInsert);
+    FormData fdAllowInfer = new FormData();
+    fdAllowInfer.left = new FormAttachment(middle, 0);
+    fdAllowInfer.top = new FormAttachment(wRecordSourceFieldName, margin);
+    wAllowInferredInsert.setLayoutData(fdAllowInfer);
+
     wOptionsComp.layout();
     wOptionsTab.setControl(wOptionsComp);
   }
@@ -464,6 +476,7 @@ public class DvHubDialog {
     wIntegrationMode.setText(integrationMode.getDescription());
     wHashKeyFieldName.setText(Const.NVL(input.getHashKeyFieldName(), ""));
     wRecordSourceFieldName.setText(Const.NVL(input.getRecordSourceFieldName(), ""));
+    wAllowInferredInsert.setSelection(input.isAllowInferredInsert());
 
     // The business keys
     //
@@ -547,6 +560,7 @@ public class DvHubDialog {
     target.setIntegrationMode(DvIntegrationMode.lookupDescription(wIntegrationMode.getText()));
     target.setHashKeyFieldName(wHashKeyFieldName.getText());
     target.setRecordSourceFieldName(wRecordSourceFieldName.getText());
+    target.setAllowInferredInsert(wAllowInferredInsert.getSelection());
 
     List<BusinessKey> keys = new ArrayList<>();
     for (TableItem item : wBusinessKeys.getNonEmptyItems()) {

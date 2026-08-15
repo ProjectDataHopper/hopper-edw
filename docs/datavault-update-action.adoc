@@ -13,6 +13,7 @@ At runtime the action:
 * Loads the model from the `.hdv` file.
 * Optionally validates the model before any work is done.
 * Optionally ensures unknown and invalid sentinel rows exist in hubs and links (per the model configuration).
+* When any table uses orphan policy `QUARANTINE`, creates the shared quarantine table if it is missing.
 * Optionally generates DDL (CREATE/ALTER statements) for the model's target database. DDL handling is independent of the data load: you can execute it on the database, write it to a SQL file, require that no DDL is needed, or combine these options.
 * Generates update pipelines for every hub, link, and satellite in the model (unless you choose to skip the data load or filter by record source group).
 * For **multi-source hubs and links**, also generates a **serial multi-source workflow** that runs each source pipeline one after another so keys written by an earlier source are visible to the next (required when primary keys are enabled).

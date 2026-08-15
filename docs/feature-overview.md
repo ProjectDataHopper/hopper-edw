@@ -52,6 +52,7 @@ For a slide-style executive summary, see [presentations/hop-data-vault-overview.
 | Architecture export (Draw.io) | Available (SOLUTION + DATA inventory + aggregated DV/BV/DM ELK) | [architecture-export.adoc](architecture-export.adoc) |
 | Model validation (Check model, type checking) | Available | [datavault-update-action.adoc](datavault-update-action.adoc) |
 | Data Vault Update action | Available | [datavault-update-action.adoc](datavault-update-action.adoc) |
+| Optional DV orphan handling (seed parent hubs, INFER / SENTINEL / QUARANTINE / FAIL) | Available | [datavault-configuration.adoc](datavault-configuration.adoc), [plans/orphan-prevention-plan.md](plans/orphan-prevention-plan.md), issue [#77](https://github.com/mattcasters/hop-data-vault/issues/77) |
 | Update resource definition group action | Available | [update-resource-definition-group-action.adoc](update-resource-definition-group-action.adoc) |
 | Integration modes (managed / external / custom) | Available | [dv-integration-modes.adoc](dv-integration-modes.adoc) |
 | Business Vault modeler (`.hbv`) | Available | [business-vault-overview.adoc](business-vault-overview.adoc) |

@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -134,6 +135,15 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
   @HopMetadataProperty(key = "recordSource", groupKey = "recordSources")
   protected List<String> recordSources = new ArrayList<>();
 
+  /**
+   * When false, generated loads must not insert placeholder hub rows for this table (external or
+   * curated identity). Null/absent (existing models) means allowed.
+   */
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.NONE)
+  @HopMetadataProperty
+  private Boolean allowInferredInsert;
+
   public DvHub() {
     super();
     this.tableType = DvTableType.HUB;
@@ -142,6 +152,19 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
   public DvHub(String name) {
     super(name);
     this.tableType = DvTableType.HUB;
+  }
+
+  /** Absent value (legacy models) means inferred inserts are allowed. */
+  public boolean isAllowInferredInsert() {
+    return allowInferredInsert == null || allowInferredInsert;
+  }
+
+  /**
+   * Hop XML deserialization looks up this setter by the field type ({@link Boolean}), not {@code
+   * boolean}.
+   */
+  public void setAllowInferredInsert(Boolean allowInferredInsert) {
+    this.allowInferredInsert = allowInferredInsert;
   }
 
   public void setBusinessKeys(List<BusinessKey> businessKeys) {
@@ -1345,6 +1368,7 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
 
       DvLoadCycleSupport.appendToLayout(
           rowMeta, config.isStoreLoadCycleId(), config.getLoadCycleIdField(), variables);
+      DvOrphanHandlingSupport.appendInferredFlagToHubLayout(rowMeta, config, variables);
 
       return rowMeta;
 

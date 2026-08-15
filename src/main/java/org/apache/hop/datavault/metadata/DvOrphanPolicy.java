@@ -1,0 +1,60 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.hop.datavault.metadata;
+
+import org.apache.hop.core.util.Utils;
+
+/**
+ * How generated Data Vault loads treat a missing parent identity (null business key or hub row not
+ * yet loaded).
+ *
+ * <p>{@link #INHERIT} is for per-table / per-role overrides only; the model default must be a
+ * concrete policy (normally {@link #PASS}).
+ */
+public enum DvOrphanPolicy {
+  /** Use the model default ({@link DataVaultConfiguration#resolveOrphanPolicy()}). */
+  INHERIT,
+  /** Today's behavior: hash nulls with the null placeholder; insert the child anyway. */
+  PASS,
+  /** Insert a per-natural-key placeholder hub; null keys use the unknown sentinel. */
+  INFER,
+  /** Remap null or missing parents to the shared unknown/invalid sentinel. */
+  SENTINEL,
+  /** Do not load the child row; write it to the quarantine table. */
+  QUARANTINE,
+  /** Abort the pipeline when a null key or missing parent is seen. */
+  FAIL;
+
+  public static DvOrphanPolicy parse(String value, DvOrphanPolicy defaultValue) {
+    if (Utils.isEmpty(value)) {
+      return defaultValue;
+    }
+    try {
+      return DvOrphanPolicy.valueOf(value.trim());
+    } catch (IllegalArgumentException ignored) {
+      return defaultValue;
+    }
+  }
+
+  public boolean isConcrete() {
+    return this != INHERIT;
+  }
+
+  public boolean changesRuntimeGraph() {
+    return this == INFER || this == SENTINEL || this == QUARANTINE || this == FAIL;
+  }
+}

@@ -76,6 +76,8 @@ When a link is loaded, the generated pipeline:
 
 The comparison is done on the link hash key, so only new combinations of hubs (and dependent child keys when configured) are loaded.
 
+If this feed can see a hub business key that is not yet in the parent hub, either add the feed as a hub record source (**Also load parent hubs...**) or set an orphan policy other than `PASS` on the model or this link. See link:datavault-configuration.adoc#_orphan_handling_tab[Orphan handling].
+
 == Suggest hub source mappings
 
 On the link dialog **Hub sources** tab:

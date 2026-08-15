@@ -41,6 +41,8 @@ import org.apache.hop.datavault.metadata.DvLink;
 import org.apache.hop.datavault.metadata.DvLinkSourceSuggestSupport;
 import org.apache.hop.datavault.metadata.DvLinkedTable;
 import org.apache.hop.datavault.metadata.DvModelCheckOptions;
+import org.apache.hop.datavault.metadata.DvOrphanHandlingSupport;
+import org.apache.hop.datavault.metadata.DvOrphanPolicy;
 import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.datavault.metadata.IDvTable;
@@ -102,6 +104,7 @@ public class DvLinkDialog {
   private Text wLinkHashKeyFieldName;
   private Text wRecordSourceFieldName;
   private Button wHasDescriptiveAttributes;
+  private Combo wOrphanPolicy;
   private TableView wHubNames;
   private TableView wLinkSatelliteNames;
 
@@ -364,13 +367,32 @@ public class DvLinkDialog {
     fdHasDescriptive.top = new FormAttachment(wlHasDescriptive, 0, SWT.CENTER);
     wHasDescriptiveAttributes.setLayoutData(fdHasDescriptive);
 
+    Label wlOrphanPolicy = new Label(wOptionsComp, SWT.RIGHT);
+    wlOrphanPolicy.setText(BaseMessages.getString(PKG, "DvLinkDialog.OrphanPolicy.Label"));
+    PropsUi.setLook(wlOrphanPolicy);
+    FormData fdlOrphanPolicy = new FormData();
+    fdlOrphanPolicy.left = new FormAttachment(0, 0);
+    fdlOrphanPolicy.top = new FormAttachment(wHasDescriptiveAttributes, margin);
+    fdlOrphanPolicy.right = new FormAttachment(middle, -margin);
+    wlOrphanPolicy.setLayoutData(fdlOrphanPolicy);
+
+    wOrphanPolicy = new Combo(wOptionsComp, SWT.READ_ONLY | SWT.BORDER);
+    PropsUi.setLook(wOrphanPolicy);
+    wOrphanPolicy.setItems(orphanPolicyItems());
+    wOrphanPolicy.setToolTipText(BaseMessages.getString(PKG, "DvLinkDialog.OrphanPolicy.ToolTip"));
+    FormData fdOrphanPolicy = new FormData();
+    fdOrphanPolicy.left = new FormAttachment(middle, 0);
+    fdOrphanPolicy.top = new FormAttachment(wlOrphanPolicy, 0, SWT.CENTER);
+    fdOrphanPolicy.right = new FormAttachment(100, 0);
+    wOrphanPolicy.setLayoutData(fdOrphanPolicy);
+
     // Participating hubs (single column table) inside options
     Label wlHubNames = new Label(wOptionsComp, SWT.LEFT);
     wlHubNames.setText(BaseMessages.getString(PKG, "DvLinkDialog.HubNames.Label"));
     PropsUi.setLook(wlHubNames);
     FormData fdlHubNames = new FormData();
     fdlHubNames.left = new FormAttachment(0, 0);
-    fdlHubNames.top = new FormAttachment(wHasDescriptiveAttributes, margin);
+    fdlHubNames.top = new FormAttachment(wOrphanPolicy, margin);
     wlHubNames.setLayoutData(fdlHubNames);
 
     List<String> hubNames = getModelHubNames();
@@ -664,6 +686,17 @@ public class DvLinkDialog {
     fdSuggest.top = new FormAttachment(wlSources, margin);
     wSuggestMappings.setLayoutData(fdSuggest);
     wSuggestMappings.addListener(SWT.Selection, e -> suggestSelectedLinkHubSourceMappings());
+
+    Button wSeedParentHubs = new Button(wHubSourcesComp, SWT.PUSH);
+    wSeedParentHubs.setText(BaseMessages.getString(PKG, "DvLinkDialog.SeedParentHubs.Label"));
+    wSeedParentHubs.setToolTipText(
+        BaseMessages.getString(PKG, "DvLinkDialog.SeedParentHubs.ToolTip"));
+    PropsUi.setLook(wSeedParentHubs);
+    FormData fdSeed = new FormData();
+    fdSeed.left = new FormAttachment(wSuggestMappings, margin);
+    fdSeed.top = new FormAttachment(wlSources, margin);
+    wSeedParentHubs.setLayoutData(fdSeed);
+    wSeedParentHubs.addListener(SWT.Selection, e -> seedParentHubsFromSelectedSource());
 
     ColumnInfo[] srcCols =
         new ColumnInfo[] {
@@ -1161,6 +1194,50 @@ public class DvLinkDialog {
     dlg.open();
   }
 
+  private void seedParentHubsFromSelectedSource() {
+    applyLinkHubSourcesToTable(input);
+    List<DvLink.DvLinkHubSource> sources = input.getLinkHubSources();
+    if (sources == null || sources.isEmpty()) {
+      MessageBox box = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
+      box.setText(BaseMessages.getString(PKG, "DvLinkDialog.SeedParentHubs.Title"));
+      box.setMessage(BaseMessages.getString(PKG, "DvLinkDialog.SeedParentHubs.NoSource.Message"));
+      box.open();
+      return;
+    }
+    String selected = null;
+    if (wLinkHubSources != null
+        && !wLinkHubSources.isDisposed()
+        && wLinkHubSources.table.getSelectionCount() > 0) {
+      selected = wLinkHubSources.table.getSelection()[0].getText(1);
+    }
+    int added = 0;
+    for (DvLink.DvLinkHubSource source : sources) {
+      if (source == null || Utils.isEmpty(source.getSourceName())) {
+        continue;
+      }
+      if (!Utils.isEmpty(selected) && !selected.equals(source.getSourceName())) {
+        continue;
+      }
+      added += DvOrphanHandlingSupport.seedParentHubsFromLink(model, input, source, variables);
+    }
+    MessageBox done = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
+    done.setText(BaseMessages.getString(PKG, "DvLinkDialog.SeedParentHubs.Title"));
+    done.setMessage(
+        BaseMessages.getString(PKG, "DvLinkDialog.SeedParentHubs.Applied.Message", added));
+    done.open();
+  }
+
+  private static String[] orphanPolicyItems() {
+    return new String[] {
+      DvOrphanPolicy.INHERIT.name(),
+      DvOrphanPolicy.PASS.name(),
+      DvOrphanPolicy.INFER.name(),
+      DvOrphanPolicy.SENTINEL.name(),
+      DvOrphanPolicy.QUARANTINE.name(),
+      DvOrphanPolicy.FAIL.name()
+    };
+  }
+
   private void getData() {
     wName.setText(Const.NVL(input.getName(), ""));
     wDescription.setText(Const.NVL(input.getDescription(), ""));
@@ -1173,6 +1250,9 @@ public class DvLinkDialog {
     wLinkHashKeyFieldName.setText(Const.NVL(input.getLinkHashKeyFieldName(), ""));
     wRecordSourceFieldName.setText(Const.NVL(input.getRecordSourceFieldName(), ""));
     wHasDescriptiveAttributes.setSelection(input.isHasDescriptiveAttributes());
+    if (wOrphanPolicy != null) {
+      wOrphanPolicy.setText(Const.NVL(input.getOrphanPolicy(), DvOrphanPolicy.INHERIT.name()));
+    }
 
     // Avoid TableView.clearAll() — it schedules async edit(0,1) and forces CCOMBO listeners
     // (including catalog source listing) during open.
@@ -1305,6 +1385,9 @@ public class DvLinkDialog {
     target.setLinkHashKeyFieldName(wLinkHashKeyFieldName.getText());
     target.setRecordSourceFieldName(wRecordSourceFieldName.getText());
     target.setHasDescriptiveAttributes(wHasDescriptiveAttributes.getSelection());
+    if (wOrphanPolicy != null) {
+      target.setOrphanPolicy(wOrphanPolicy.getText());
+    }
 
     List<String> hubs = new ArrayList<>();
     for (TableItem item : wHubNames.getNonEmptyItems()) {

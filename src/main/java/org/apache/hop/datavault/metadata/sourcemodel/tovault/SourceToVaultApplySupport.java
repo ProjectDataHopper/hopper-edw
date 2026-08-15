@@ -31,6 +31,7 @@ import org.apache.hop.datavault.metadata.DependentChildKey;
 import org.apache.hop.datavault.metadata.DvHub;
 import org.apache.hop.datavault.metadata.DvLink;
 import org.apache.hop.datavault.metadata.DvLinkedTable;
+import org.apache.hop.datavault.metadata.DvOrphanHandlingSupport;
 import org.apache.hop.datavault.metadata.DvReferenceTable;
 import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.DvTableType;
@@ -62,6 +63,25 @@ public final class SourceToVaultApplySupport {
       boolean publishToCatalog,
       IVariables variables,
       IHopMetadataProvider metadataProvider)
+      throws HopException {
+    return apply(
+        sourceModel,
+        vaultModel,
+        classification,
+        publishToCatalog,
+        variables,
+        metadataProvider,
+        SourceToVaultOptions.defaults());
+  }
+
+  public static SourceToVaultApplyResult apply(
+      SourceModel sourceModel,
+      DataVaultModel vaultModel,
+      SourceToVaultClassification classification,
+      boolean publishToCatalog,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider,
+      SourceToVaultOptions options)
       throws HopException {
     SourceToVaultApplyResult result = new SourceToVaultApplyResult();
     if (sourceModel == null) {
@@ -115,8 +135,29 @@ public final class SourceToVaultApplySupport {
       applySatellite(sourceModel, vaultModel, object, result, actualNames);
     }
 
+    if (options != null && options.isSeedParentHubsFromChildFeeds()) {
+      seedParentHubsFromAppliedChildren(vaultModel, variables);
+    }
+
     vaultModel.setChanged(true);
     return result;
+  }
+
+  private static void seedParentHubsFromAppliedChildren(
+      DataVaultModel vaultModel, IVariables variables) {
+    if (vaultModel == null || vaultModel.getTables() == null) {
+      return;
+    }
+    for (IDvTable table : vaultModel.getTables()) {
+      if (table instanceof DvLink link && link.getLinkHubSources() != null) {
+        for (DvLink.DvLinkHubSource source : link.getLinkHubSources()) {
+          DvOrphanHandlingSupport.seedParentHubsFromLink(vaultModel, link, source, variables);
+        }
+      }
+      if (table instanceof DvSatellite satellite) {
+        DvOrphanHandlingSupport.seedParentHubFromSatellite(vaultModel, satellite, variables);
+      }
+    }
   }
 
   private static void collectIncluded(

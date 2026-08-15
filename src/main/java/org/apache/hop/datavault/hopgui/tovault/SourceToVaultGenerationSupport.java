@@ -137,7 +137,8 @@ public final class SourceToVaultGenerationSupport {
                     dialog.getClassification(),
                     dialog.isPublishToCatalog(),
                     hopGui.getVariables(),
-                    hopGui.getMetadataProvider());
+                    hopGui.getMetadataProvider(),
+                    dialog.getOptions());
             layoutQuietly(vaultGraph.getModel(), holder[0]);
           });
       vaultGraph.redraw();
@@ -182,7 +183,8 @@ public final class SourceToVaultGenerationSupport {
             dialog.getClassification(),
             dialog.isPublishToCatalog(),
             variables,
-            hopGui.getMetadataProvider());
+            hopGui.getMetadataProvider(),
+            dialog.getOptions());
     layoutQuietly(vault, result);
     ModelXmlWriteSupport.writeModelXml(HopVaultFileType.XML_TAG, vault, realFilename, variables);
     hopGui.fileDelegate.fileOpen(realFilename);
@@ -218,7 +220,8 @@ public final class SourceToVaultGenerationSupport {
                     dialog.getClassification(),
                     dialog.isPublishToCatalog(),
                     variables,
-                    hopGui.getMetadataProvider());
+                    hopGui.getMetadataProvider(),
+                    dialog.getOptions());
             layoutQuietly(openGraph.getModel(), holder[0]);
           });
       openGraph.redraw();
@@ -234,7 +237,8 @@ public final class SourceToVaultGenerationSupport {
             dialog.getClassification(),
             dialog.isPublishToCatalog(),
             variables,
-            hopGui.getMetadataProvider());
+            hopGui.getMetadataProvider(),
+            dialog.getOptions());
     layoutQuietly(vault, result);
     ModelXmlWriteSupport.writeModelXml(HopVaultFileType.XML_TAG, vault, realFilename, variables);
     hopGui.fileDelegate.fileOpen(realFilename);

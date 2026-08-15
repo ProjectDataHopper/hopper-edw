@@ -95,6 +95,8 @@ public class DvSatelliteDialog {
   private Text wDrivingKey;
   private Combo wDrivingKeySourceField;
   private Button wStoreRecordSource;
+  private Combo wOrphanPolicy;
+  private Button wSeedParentHub;
   private TableView wAttributes;
   private TableView wParentKeys;
   private Label wlParentKeysHint;
@@ -344,6 +346,41 @@ public class DvSatelliteDialog {
     PropsUi.setLook(wDrivingKeySourceField);
     wDrivingKeySourceField.setLayoutData(
         new FormDataBuilder().left(middle, 0).top(wDrivingKey, margin).right().result());
+
+    Label wlOrphanPolicy = new Label(comp, SWT.RIGHT);
+    wlOrphanPolicy.setText(BaseMessages.getString(PKG, "DvSatelliteDialog.OrphanPolicy.Label"));
+    PropsUi.setLook(wlOrphanPolicy);
+    wlOrphanPolicy.setLayoutData(
+        new FormDataBuilder()
+            .left()
+            .top(wDrivingKeySourceField, margin)
+            .right(middle, -margin)
+            .result());
+
+    wOrphanPolicy = new Combo(comp, SWT.READ_ONLY | SWT.BORDER);
+    PropsUi.setLook(wOrphanPolicy);
+    wOrphanPolicy.setItems(
+        new String[] {
+          org.apache.hop.datavault.metadata.DvOrphanPolicy.INHERIT.name(),
+          org.apache.hop.datavault.metadata.DvOrphanPolicy.PASS.name(),
+          org.apache.hop.datavault.metadata.DvOrphanPolicy.INFER.name(),
+          org.apache.hop.datavault.metadata.DvOrphanPolicy.SENTINEL.name(),
+          org.apache.hop.datavault.metadata.DvOrphanPolicy.QUARANTINE.name(),
+          org.apache.hop.datavault.metadata.DvOrphanPolicy.FAIL.name()
+        });
+    wOrphanPolicy.setToolTipText(
+        BaseMessages.getString(PKG, "DvSatelliteDialog.OrphanPolicy.ToolTip"));
+    wOrphanPolicy.setLayoutData(
+        new FormDataBuilder().left(middle, 0).top(wDrivingKeySourceField, margin).right().result());
+
+    wSeedParentHub = new Button(comp, SWT.PUSH);
+    wSeedParentHub.setText(BaseMessages.getString(PKG, "DvSatelliteDialog.SeedParentHub.Label"));
+    wSeedParentHub.setToolTipText(
+        BaseMessages.getString(PKG, "DvSatelliteDialog.SeedParentHub.ToolTip"));
+    PropsUi.setLook(wSeedParentHub);
+    wSeedParentHub.setLayoutData(
+        new FormDataBuilder().left(middle, 0).top(wOrphanPolicy, margin).result());
+    wSeedParentHub.addListener(SWT.Selection, e -> seedParentHub());
   }
 
   private void addParentKeysTab() {
@@ -668,6 +705,18 @@ public class DvSatelliteDialog {
     }
   }
 
+  private void seedParentHub() {
+    applyWidgetsToTable(input);
+    int added =
+        org.apache.hop.datavault.metadata.DvOrphanHandlingSupport.seedParentHubFromSatellite(
+            model, input, variables);
+    MessageBox done = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
+    done.setText(BaseMessages.getString(PKG, "DvSatelliteDialog.SeedParentHub.Title"));
+    done.setMessage(
+        BaseMessages.getString(PKG, "DvSatelliteDialog.SeedParentHub.Applied.Message", added));
+    done.open();
+  }
+
   private void getData() {
     wName.setText(Const.NVL(input.getName(), ""));
     wTableName.setText(Const.NVL(input.getTableName(), ""));
@@ -680,6 +729,12 @@ public class DvSatelliteDialog {
     // Catalog source names load lazily on combo focus (wait cursor).
     wRecordSource.setText(Const.NVL(input.getRecordSourceName(), ""));
     wStoreRecordSource.setSelection(input.isStoreRecordSource());
+    if (wOrphanPolicy != null) {
+      wOrphanPolicy.setText(
+          Const.NVL(
+              input.getOrphanPolicy(),
+              org.apache.hop.datavault.metadata.DvOrphanPolicy.INHERIT.name()));
+    }
     refreshHubNameItems();
     selectComboValue(wHubName, Const.NVL(input.getHubName(), ""));
     refreshLinkNameItems();
@@ -781,6 +836,9 @@ public class DvSatelliteDialog {
     target.setIntegrationMode(DvIntegrationMode.lookupDescription(wIntegrationMode.getText()));
     target.setRecordSourceName(wRecordSource.getText());
     target.setStoreRecordSource(wStoreRecordSource.getSelection());
+    if (wOrphanPolicy != null) {
+      target.setOrphanPolicy(wOrphanPolicy.getText());
+    }
     target.setHubName(wHubName.getText());
     target.setLinkName(wLinkName.getText());
     target.setDrivingKey(wDrivingKey.getText());
