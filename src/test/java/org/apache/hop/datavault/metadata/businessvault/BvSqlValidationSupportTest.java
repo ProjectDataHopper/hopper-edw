@@ -81,13 +81,34 @@ class BvSqlValidationSupportTest {
   }
 
   @Test
+  void jinjaForLoopWithResolvedRefIsNotMalformed() {
+    BusinessVaultModel model = modelWithTarget();
+    BvScd2Table scd2 = new BvScd2Table();
+    scd2.setName("s_product");
+    scd2.setTableName("s_product");
+    model.getTables().add(scd2);
+
+    BvBusinessTable table = bareTable("v1");
+    table.setSqlQuery(
+        "{% set cols = ['a'] %}SELECT {% for c in cols %}{{ c }}{% endfor %} FROM {{ ref('s_product') }}");
+    model.getTables().add(table);
+
+    List<ICheckResult> remarks = check(table, model, new DataVaultModel());
+    assertFalse(hasError(remarks), () -> remarks.toString());
+  }
+
+  @Test
   void malformedTemplateIsError() {
     BusinessVaultModel model = modelWithTarget();
     BvBusinessTable table = bareTable("v1");
     table.setSqlQuery("SELECT * FROM {{ ref('ok') }} AND {{ broken");
 
     List<ICheckResult> remarks = check(table, model, new DataVaultModel());
-    assertTrue(hasErrorContaining(remarks, "malformed") || hasErrorContaining(remarks, "template"));
+    assertTrue(
+        hasErrorContaining(remarks, "malformed")
+            || hasErrorContaining(remarks, "template")
+            || hasErrorContaining(remarks, "Jinja")
+            || hasErrorContaining(remarks, "render"));
   }
 
   @Test

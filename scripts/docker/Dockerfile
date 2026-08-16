@@ -51,7 +51,7 @@ COPY --from=build /src/target/hop-datavault-*.zip /tmp/hop-datavault.zip
 
 RUN unzip -q /tmp/hop-datavault.zip -d /opt/hop \
   && rm /tmp/hop-datavault.zip \
-  && chown -R hop:hop /opt/hop/plugins/misc/datavault /opt/hop/lib/jdbc
+  && chown -R hop:hop /opt/hop/plugins/misc/datavault /opt/hop/lib/jdbc /opt/hop/lib/core
 
 COPY scripts/docker/entrypoint-init.sh /opt/hop-datavault/entrypoint-init.sh
 COPY scripts/docker/entrypoint-prepare.sh /opt/hop-datavault/entrypoint-prepare.sh

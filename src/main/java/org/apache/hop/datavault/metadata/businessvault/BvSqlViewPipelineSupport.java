@@ -177,7 +177,8 @@ public final class BvSqlViewPipelineSupport {
     }
 
     String quotedTarget =
-        BvSqlRefResolver.quoteTable(targetDatabaseMeta, variables, null, targetTableName);
+        BvSqlRefResolver.quoteTable(
+            targetDatabaseMeta, variables, businessTable.getSchemaName(), targetTableName);
     BvSqlMaterialization materialization = businessTable.getMaterializationOrDefault();
     String query = stripTrailingSemicolon(resolvedQuery.trim());
     // Portable authoring SQL often uses ANSI TIMESTAMP '…'; rewrite for SQL Server / MySQL.

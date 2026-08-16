@@ -58,8 +58,7 @@ public final class DvCatalogMappingStreamFieldsSupport {
       addLinkFields(names, link, recordSource, model, variables, linkHubSource);
       addField(names, targetRecordSourceField, variables);
     } else if (table instanceof DvSatellite satellite) {
-      addSatelliteHashInputFields(
-          names, satellite, recordSource, model, variables, linkHubSource);
+      addSatelliteHashInputFields(names, satellite, recordSource, model, variables, linkHubSource);
       addSatelliteFields(names, satellite, variables);
       if (satellite.isStoreRecordSource()) {
         addField(names, targetRecordSourceField, variables);
@@ -142,8 +141,7 @@ public final class DvCatalogMappingStreamFieldsSupport {
 
   /**
    * Parent-key / link-key columns used as DvHashKey inputs. Catalog mappings must include these
-   * (not only satellite attributes) so Integer business keys keep the same conversion as hub
-   * loads.
+   * (not only satellite attributes) so Integer business keys keep the same conversion as hub loads.
    */
   private static void addSatelliteHashInputFields(
       List<String> names,

@@ -13,6 +13,25 @@ See: https://x.ai
 
 ---
 
+HubSpot Jinjava (com.hubspot.jinjava:jinjava)
+
+This product bundles HubSpot Jinjava to render dbt-style Jinja templates in
+Business Vault SQL business tables (issue #72). Those jars unpack into Hop
+`lib/core` (system classpath), plus compile-scope runtime libraries Hop does
+not already ship:
+
+* com.hubspot.immutables:immutables-exceptions (Apache-2.0)
+* com.hubspot:algebra (Apache-2.0)
+* com.googlecode.java-ipv6:java-ipv6 (Apache-2.0)
+* ch.obermuhlner:big-math (MIT License) — https://github.com/eobermuhlner/big-math
+
+Copyright HubSpot, Inc. (Jinjava, immutables-exceptions, algebra)
+Copyright Jan Van Besien (java-ipv6)
+Copyright Eric Obermuhlner (big-math)
+https://github.com/HubSpot/jinjava
+
+---
+
 Bundled Apache Hop development guidance (hop-standards prompt resources)
 
 Condensed extracts used in Pipeline & Workflow AI Help Milestone 2 prompts are

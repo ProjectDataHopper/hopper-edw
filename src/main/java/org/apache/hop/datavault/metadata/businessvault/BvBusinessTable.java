@@ -49,6 +49,17 @@ public class BvBusinessTable extends BvTableBase {
   @HopMetadataProperty(storeWithCode = true)
   private BvSqlMaterialization materialization = BvSqlMaterialization.VIEW;
 
+  /** Optional target schema (dbt {@code schema} / {@code +schema}). */
+  @HopMetadataProperty private String schemaName;
+
+  /**
+   * Portable relative path of the originating dbt model, e.g. {@code models/marts/customers.sql}.
+   */
+  @HopMetadataProperty private String originDbtPath;
+
+  @HopMetadataProperty(key = "column_note", groupKey = "column_notes")
+  private List<BvSqlColumnNote> columnNotes = new ArrayList<>();
+
   @HopMetadataProperty(key = "sql_source", groupKey = "sql_sources")
   private List<BvSqlSource> sources = new ArrayList<>();
 
@@ -71,6 +82,13 @@ public class BvBusinessTable extends BvTableBase {
       sqlRefs = new ArrayList<>();
     }
     return sqlRefs;
+  }
+
+  public List<BvSqlColumnNote> getColumnNotes() {
+    if (columnNotes == null) {
+      columnNotes = new ArrayList<>();
+    }
+    return columnNotes;
   }
 
   public BvSqlReferenceStyle getReferenceStyleOrDefault() {

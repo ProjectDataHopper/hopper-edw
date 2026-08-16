@@ -56,6 +56,16 @@ class BvSqlViewPipelineSupportTest {
   }
 
   @Test
+  void viewScriptIncludesOptionalSchema() throws Exception {
+    BvBusinessTable table = viewTable("customers", "SELECT 1");
+    table.setSchemaName("marts");
+    BvSqlViewPipelineSupport.CreateScript script =
+        BvSqlViewPipelineSupport.buildCreateScript(
+            table, new TestDatabaseMeta("Vault", "POSTGRESQL"), new Variables(), "SELECT 1");
+    assertTrue(script.sql().contains("marts.customers"), () -> script.sql());
+  }
+
+  @Test
   void viewScriptSqlServerUsesCreateOrAlter() throws Exception {
     BvBusinessTable table = viewTable("v1", "SELECT 1");
     BvSqlViewPipelineSupport.CreateScript script =

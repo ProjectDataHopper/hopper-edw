@@ -406,7 +406,8 @@ After the raw vault load in `update-vault1.hwf`, the suite rebuilds Business Vau
 - **SQL views (issue #57):**
   - `sat_customer_hb_v` — `SELECT … FROM {{ ref('sat_customer_hb') }}` (BV→BV dependency; CREATE VIEW after SCD2)
   - `satb_customer_hb` — phase-1 historical LEAD validity over `{{ ref('sat_customer') }}` (DV satellite)
-- **Validation:** `validate-sat-customer-hb UNIT`, `validate-sat-customer-hb-v UNIT` (same golden as SCD2), `validate-pit-customer UNIT`
+  - `sat_customer_hb_jinja` — Jinja `{% for %}` column list over `sat_customer_hb` (issue #72)
+- **Validation:** `validate-sat-customer-hb UNIT`, `validate-sat-customer-hb-v UNIT`, `validate-sat-customer-hb-jinja UNIT` (same golden as SCD2), `validate-pit-customer UNIT`
 - **Standalone BV workflow:** `tests/basic/update-bv-vault1.hwf` (optional; BV only)
 
 See [docs/business-vault-scd2.adoc](../docs/business-vault-scd2.adoc) and [docs/business-vault-sql-view.adoc](../docs/business-vault-sql-view.adoc).

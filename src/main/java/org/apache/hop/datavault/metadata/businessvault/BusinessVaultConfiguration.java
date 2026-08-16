@@ -16,6 +16,7 @@
  */
 package org.apache.hop.datavault.metadata.businessvault;
 
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -198,6 +199,19 @@ public class BusinessVaultConfiguration extends HopMetadataBase
   @HopMetadataProperty
   private boolean generateForeignKeys = false;
 
+  /**
+   * Optional comma-separated Jinja macro library names. Empty means every enabled library in the
+   * project metadata provider is in scope.
+   */
+  @GuiWidgetElement(
+      order = "0220",
+      type = GuiElementType.TEXT,
+      label = "i18n::BusinessVaultConfiguration.JinjaMacroLibraries.Label",
+      toolTip = "i18n::BusinessVaultConfiguration.JinjaMacroLibraries.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_GENERAL_TAB_ID)
+  @HopMetadataProperty
+  private String jinjaMacroLibraries;
+
   @GuiWidgetElement(
       order = "0510",
       type = GuiElementType.TEXT,
@@ -335,6 +349,23 @@ public class BusinessVaultConfiguration extends HopMetadataBase
       ILogChannel log, IHopMetadataProvider metadataProvider) {
     return DvTargetLoadConfigurationSupport.getTargetLoadModeOptions(
         log, metadataProvider, targetDatabase);
+  }
+
+  /**
+   * Parsed library names from {@link #jinjaMacroLibraries}. Empty means every enabled library is in
+   * scope.
+   */
+  public List<String> getJinjaMacroLibraryNames() {
+    List<String> names = new ArrayList<>();
+    if (Utils.isEmpty(jinjaMacroLibraries)) {
+      return names;
+    }
+    for (String part : jinjaMacroLibraries.split(",")) {
+      if (part != null && !Utils.isEmpty(part.trim())) {
+        names.add(part.trim());
+      }
+    }
+    return names;
   }
 
   public String getTargetLoadMode() {

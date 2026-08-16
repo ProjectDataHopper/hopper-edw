@@ -4,6 +4,18 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## Unreleased
 
+### Jinja macros and dbt-core import (issue #72)
+
+- Business Vault SQL tables render `{% set %}` / `{% if %}` / `{% for %}` and project macros via sandboxed Jinjava (whitespace matches dbt-core: `trim_blocks` / `lstrip_blocks` off)
+- Plugin zip unpacks Jinjava runtime jars into Hop `lib/core` (`jinjava`, `immutables-exceptions`, `algebra`, `big-math`, `java-ipv6`, `jackson-dataformat-yaml`) so Hop GUI's application classloader can load `ExtendedSyntaxBuilder` and `FromYamlFilter`
+- Jinja render also sets the plugin thread context classloader as a fallback when only the plugin folder is copied
+- New **Jinja macro library** metadata (editor + test-render); `var()` prefers Hop variables
+- **Import dbt models** on the BV canvas (scan `dbt_project.yml` + SQL + YAML + macros)
+- Workflow action **Import dbt project** for CI re-import
+- One-arg `ref()` also resolves sibling `.hbv` files; optional table schema and column notes
+- Integration fixture: `sat_customer_hb_jinja` in `vault1.hbv`
+- Guide: [docs/dbt-import.adoc](docs/dbt-import.adoc)
+
 ### Target type mappings (issue #127)
 
 - New project metadata **Target type mapping**: ordered Hop-type + length/precision rules emit native SQL types (`CHAR(1)`, `NVARCHAR({length})`, `timestamp(6) with time zone`) **before** Hop dialect DDL

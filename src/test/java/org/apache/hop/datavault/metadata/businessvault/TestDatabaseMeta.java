@@ -46,6 +46,9 @@ final class TestDatabaseMeta extends DatabaseMeta {
 
   @Override
   public String getQuotedSchemaTableCombination(IVariables variables, String schema, String table) {
-    return table;
+    if (schema == null || schema.isEmpty()) {
+      return table;
+    }
+    return schema + "." + table;
   }
 }

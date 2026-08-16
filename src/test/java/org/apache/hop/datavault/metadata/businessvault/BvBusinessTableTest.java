@@ -55,6 +55,9 @@ class BvBusinessTableTest {
     original.setName("product_enriched");
     original.setTableName("product_enriched");
     original.setSqlQuery("SELECT * FROM {{ ref('s_product') }}");
+    original.setSchemaName("marts");
+    original.setOriginDbtPath("models/marts/product_enriched.sql");
+    original.getColumnNotes().add(new BvSqlColumnNote("product_id", "Product key"));
     original.setMaterialization(BvSqlMaterialization.TABLE);
     original.setReferenceStyle(BvSqlReferenceStyle.DBT);
     original.getSources().add(new BvSqlSource("refdata", "Vault", "ref", "lookup"));
@@ -68,6 +71,10 @@ class BvBusinessTableTest {
     XmlMetadataUtil.deSerializeFromXml(rootNode, BvBusinessTable.class, restored, null);
 
     assertEquals("SELECT * FROM {{ ref('s_product') }}", restored.getSqlQuery());
+    assertEquals("marts", restored.getSchemaName());
+    assertEquals("models/marts/product_enriched.sql", restored.getOriginDbtPath());
+    assertEquals(1, restored.getColumnNotes().size());
+    assertEquals("product_id", restored.getColumnNotes().get(0).getName());
     assertEquals(BvSqlMaterialization.TABLE, restored.getMaterializationOrDefault());
     assertEquals(1, restored.getSources().size());
     assertEquals("refdata", restored.getSources().get(0).getSourceName());

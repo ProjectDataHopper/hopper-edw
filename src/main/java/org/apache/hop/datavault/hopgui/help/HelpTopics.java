@@ -53,6 +53,7 @@ public final class HelpTopics {
   public static final String ACTION_VALIDATE_RESOURCE_DEFINITIONS =
       "action-validate-resource-definitions-dialog";
   public static final String ACTION_EXPORT_DATA_LINEAGE = "action-export-data-lineage-dialog";
+  public static final String ACTION_IMPORT_DBT = "action-import-dbt-project-dialog";
 
   public static final String IMPORT_DATABASE_TABLES_CATALOG =
       "import-database-tables-catalog-dialog";
@@ -84,6 +85,8 @@ public final class HelpTopics {
   public static final String ELK_LAYOUT = "elk-layout-dialog";
   public static final String REFRESH_RECORD_DEFINITION_FROM_SOURCE =
       "refresh-record-definition-from-source-dialog";
+  public static final String JINJA_MACRO_LIBRARY = "jinja-macro-library-dialog";
+  public static final String BV_DBT_IMPORT = "bv-dbt-import-dialog";
   public static final String DATA_TYPE_MAPPING = "data-type-mapping-dialog";
   public static final String TARGET_TYPE_MAPPING = "target-type-mapping-dialog";
   public static final String SOURCE_TO_VAULT_REVIEW = "source-to-vault-review-dialog";
@@ -120,6 +123,7 @@ public final class HelpTopics {
               ACTION_VALIDATE_RESOURCE_DEFINITIONS,
               "HelpTopics.ActionValidateResourceDefinitionsDialog.Title"),
           Map.entry(ACTION_EXPORT_DATA_LINEAGE, "HelpTopics.ActionExportDataLineageDialog.Title"),
+          Map.entry(ACTION_IMPORT_DBT, "HelpTopics.ActionImportDbtProjectDialog.Title"),
           Map.entry(
               IMPORT_DATABASE_TABLES_CATALOG, "HelpTopics.ImportDatabaseTablesCatalogDialog.Title"),
           Map.entry(
@@ -154,6 +158,8 @@ public final class HelpTopics {
           Map.entry(
               REFRESH_RECORD_DEFINITION_FROM_SOURCE,
               "HelpTopics.RefreshRecordDefinitionFromSourceDialog.Title"),
+          Map.entry(JINJA_MACRO_LIBRARY, "HelpTopics.JinjaMacroLibraryDialog.Title"),
+          Map.entry(BV_DBT_IMPORT, "HelpTopics.BvDbtImportDialog.Title"),
           Map.entry(DATA_TYPE_MAPPING, "HelpTopics.DataTypeMappingDialog.Title"),
           Map.entry(TARGET_TYPE_MAPPING, "HelpTopics.TargetTypeMappingDialog.Title"),
           Map.entry(SOURCE_TO_VAULT_REVIEW, "HelpTopics.SourceToVaultReviewDialog.Title"));

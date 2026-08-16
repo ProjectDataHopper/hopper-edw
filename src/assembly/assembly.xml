@@ -111,6 +111,28 @@
             <useTransitiveDependencies>true</useTransitiveDependencies>
             <useProjectArtifact>false</useProjectArtifact>
         </dependencySet>
+        <!--
+          Jinjava (issue #72) on Hop's system classpath. Shaded JUEL loads
+          ExtendedSyntaxBuilder via the application TCCL; plugin-lib isolation
+          made that ClassNotFoundException in Hop GUI. Do not also copy these
+          into plugins/misc/datavault/lib (two copies of the same classes).
+          Guava, Jackson core/databind, jsoup, javassist, re2j, and snakeyaml
+          are already in Hop lib/core. jackson-dataformat-yaml is not — Jinjava
+          FromYamlFilter needs YAMLMapper on the same loader as jinjava.
+        -->
+        <dependencySet>
+            <includes>
+                <include>com.hubspot.jinjava:jinjava</include>
+                <include>com.hubspot.immutables:immutables-exceptions</include>
+                <include>com.hubspot:algebra</include>
+                <include>ch.obermuhlner:big-math</include>
+                <include>com.googlecode.java-ipv6:java-ipv6</include>
+                <include>com.fasterxml.jackson.dataformat:jackson-dataformat-yaml</include>
+            </includes>
+            <outputDirectory>lib/core</outputDirectory>
+            <useTransitiveDependencies>true</useTransitiveDependencies>
+            <useProjectArtifact>false</useProjectArtifact>
+        </dependencySet>
         <dependencySet>
             <includes>
                 <include>org.apache.hop:hop-action-sql:jar</include>

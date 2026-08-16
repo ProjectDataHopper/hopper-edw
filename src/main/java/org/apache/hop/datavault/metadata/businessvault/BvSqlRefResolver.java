@@ -23,6 +23,8 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.jinja.BvSqlJinjaRenderResult;
+import org.apache.hop.datavault.jinja.BvSqlJinjaSupport;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DvModelLoadSupport;
 import org.apache.hop.datavault.metadata.IDvTable;
@@ -57,6 +59,20 @@ public final class BvSqlRefResolver {
       IHopMetadataProvider metadataProvider) {
     if (table == null) {
       return List.of();
+    }
+    BvSqlModelPathSupport.clearModelCache();
+    if (BvSqlJinjaSupport.needsJinjaRender(table.getSqlQuery())) {
+      try {
+        BvSqlJinjaRenderResult rendered =
+            BvSqlJinjaSupport.render(table, bvModel, dvModel, metadataProvider, variables, null);
+        List<BvSqlRef> refs = new ArrayList<>(rendered.refs());
+        table.setSqlRefs(refs);
+        syncDerivativesFromResolvedRefs(table, refs);
+        return refs;
+      } catch (HopException e) {
+        table.setSqlRefs(new ArrayList<>());
+        return table.getSqlRefs();
+      }
     }
     List<BvSqlRef> refs = BvSqlTemplateParser.extractRefs(table.getSqlQuery());
     for (BvSqlRef ref : refs) {
@@ -153,7 +169,35 @@ public final class BvSqlRefResolver {
         modelPath = dvModel.getFilename();
       }
       applyDvResolution(ref, dvTable, modelPath, bvModel, variables);
+      return;
     }
+    tryResolveInNearbyHbvFiles(ref, objectName, bvModel, variables, metadataProvider);
+  }
+
+  private static boolean tryResolveInNearbyHbvFiles(
+      BvSqlRef ref,
+      String objectName,
+      BusinessVaultModel referringBv,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider) {
+    if (referringBv == null || Utils.isEmpty(objectName)) {
+      return false;
+    }
+    for (String path :
+        BvSqlModelPathSupport.listNearbyHbvFiles(referringBv.getFilename(), variables)) {
+      try {
+        BusinessVaultModel sibling =
+            BvSqlModelPathSupport.loadBusinessVaultModelCached(path, metadataProvider);
+        IBvTable found = findBvTable(sibling, objectName, null);
+        if (found != null) {
+          applyBvResolution(ref, found, sibling, variables);
+          return true;
+        }
+      } catch (Exception ignored) {
+        // skip unreadable sibling
+      }
+    }
+    return false;
   }
 
   private static void resolveTwoArgRef(
@@ -629,6 +673,15 @@ public final class BvSqlRefResolver {
     if (table == null || Utils.isEmpty(table.getSqlQuery())) {
       return table != null ? table.getSqlQuery() : null;
     }
+    BvSqlModelPathSupport.clearModelCache();
+    if (BvSqlJinjaSupport.needsJinjaRender(table.getSqlQuery())) {
+      BvSqlJinjaRenderResult rendered =
+          BvSqlJinjaSupport.render(
+              table, bvModel, dvModel, metadataProvider, variables, defaultDatabaseMeta);
+      table.setSqlRefs(new ArrayList<>(rendered.refs()));
+      syncDerivativesFromResolvedRefs(table, table.getSqlRefs());
+      return rendered.renderedSql();
+    }
     List<BvSqlRef> refs = table.getSqlRefs();
     if (refs == null || refs.isEmpty()) {
       refs = syncRefsFromSql(table, bvModel, dvModel, variables, metadataProvider);
@@ -743,7 +796,7 @@ public final class BvSqlRefResolver {
     return null;
   }
 
-  static String quoteTable(
+  public static String quoteTable(
       DatabaseMeta databaseMeta, IVariables variables, String schema, String tableName) {
     if (Utils.isEmpty(tableName)) {
       return tableName;

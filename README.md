@@ -145,10 +145,7 @@ Published release artifacts for **0.9.0**:
 ## Installation (external plugin)
 
 1. Install **Apache Hop 2.19.0** or a **recent 2.19.0-SNAPSHOT** client ([hop-client snapshots](https://repository.apache.org/content/groups/snapshots/org/apache/hop/hop-client/2.19.0-SNAPSHOT/)).
-2. Unzip the assembly zip into your Hop installation, or manually copy the jar to:
-   ```
-   $HOP_HOME/plugins/misc/datavault/hop-datavault-0.10.0-SNAPSHOT.jar
-   ```
+2. Unzip the assembly zip into your Hop installation root (`$HOP_HOME`) so both `plugins/misc/datavault/` and `lib/core/` (Jinjava) are updated. Copying only the plugin jar is not enough for Jinja SQL.
 3. Restart Hop GUI.
 4. New metadata types appear under **Metadata → Data Vault**. **Data Vault Update**, **Business Vault Update**, **Validate resource definitions**, **Export data lineage**, and **Update resource definition group** actions are available in workflows. `.hsm`, `.hdv`, `.hbv`, `.hdm`, and `.hlv` files open in Explorer tabs.
 

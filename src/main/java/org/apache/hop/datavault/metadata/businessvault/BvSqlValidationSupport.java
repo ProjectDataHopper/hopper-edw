@@ -28,6 +28,8 @@ import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.jinja.BvSqlJinjaRenderResult;
+import org.apache.hop.datavault.jinja.BvSqlJinjaSupport;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.IDvTable;
 import org.apache.hop.i18n.BaseMessages;
@@ -80,15 +82,36 @@ public final class BvSqlValidationSupport {
           error(table, "BvBusinessTable.CheckResult.UnsupportedReferenceStyle", tableLabel(table)));
     }
 
-    validateMalformedTemplates(remarks, table);
     validateDeclaredSources(remarks, table);
 
-    List<BvSqlRef> refs =
-        BvSqlRefResolver.syncRefsFromSql(table, bvModel, dvModel, variables, metadataProvider);
-    validateRefs(remarks, table, refs);
-    validateSourcesUsedInSql(remarks, table);
-    validateSelfReferences(remarks, table, refs);
-    validateBareTableIdentifiers(remarks, table, bvModel, dvModel);
+    List<BvSqlRef> refs;
+    if (BvSqlJinjaSupport.needsJinjaRender(table.getSqlQuery())) {
+      try {
+        BvSqlJinjaRenderResult rendered =
+            BvSqlJinjaSupport.render(table, bvModel, dvModel, metadataProvider, variables, null);
+        refs = new java.util.ArrayList<>(rendered.refs());
+        table.setSqlRefs(refs);
+        BvSqlRefResolver.syncDerivativesFromResolvedRefs(table, refs);
+        validateRefs(remarks, table, refs);
+        validateJinjaSourcesUsed(remarks, table, rendered.sourceUsages());
+        validateSelfReferences(remarks, table, refs);
+        validateBareTableIdentifiers(remarks, table, bvModel, dvModel, rendered.renderedSql());
+      } catch (HopException e) {
+        remarks.add(
+            error(
+                table,
+                "BvBusinessTable.CheckResult.JinjaRenderFailed",
+                tableLabel(table),
+                e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()));
+      }
+    } else {
+      validateMalformedTemplates(remarks, table);
+      refs = BvSqlRefResolver.syncRefsFromSql(table, bvModel, dvModel, variables, metadataProvider);
+      validateRefs(remarks, table, refs);
+      validateSourcesUsedInSql(remarks, table);
+      validateSelfReferences(remarks, table, refs);
+      validateBareTableIdentifiers(remarks, table, bvModel, dvModel);
+    }
     validateTargetDatabase(remarks, table, bvModel, metadataProvider);
   }
 
@@ -251,6 +274,68 @@ public final class BvSqlValidationSupport {
    * Warns when SQL appears to name a known BV/DV table without using {@code ref()} / {@code
    * source()} (optional hygiene from the design plan).
    */
+  static void validateJinjaSourcesUsed(
+      List<ICheckResult> remarks, BvBusinessTable table, List<BvSqlSource> used) {
+    Set<String> usedSources = new HashSet<>();
+    if (used != null) {
+      for (BvSqlSource usage : used) {
+        if (usage == null || Utils.isEmpty(usage.getSourceName())) {
+          continue;
+        }
+        String key =
+            usage.getSourceName().trim().toLowerCase(Locale.ROOT)
+                + "\0"
+                + (usage.getTableName() != null
+                    ? usage.getTableName().trim().toLowerCase(Locale.ROOT)
+                    : "");
+        usedSources.add(key);
+        if (BvSqlRefResolver.findSource(table, usage.getSourceName(), usage.getTableName())
+            == null) {
+          remarks.add(
+              error(
+                  table,
+                  "BvBusinessTable.CheckResult.MissingSourceDeclaration",
+                  tableLabel(table),
+                  usage.getSourceName(),
+                  usage.getTableName()));
+        }
+      }
+    }
+    for (BvSqlSource source : table.getSources()) {
+      if (source == null || Utils.isEmpty(source.getSourceName())) {
+        continue;
+      }
+      String key =
+          source.getSourceName().trim().toLowerCase(Locale.ROOT)
+              + "\0"
+              + (source.getTableName() != null
+                  ? source.getTableName().trim().toLowerCase(Locale.ROOT)
+                  : "");
+      if (!usedSources.contains(key)) {
+        remarks.add(
+            warning(
+                table,
+                "BvBusinessTable.CheckResult.UnusedSource",
+                tableLabel(table),
+                source.getSourceName(),
+                source.getTableName()));
+      }
+    }
+  }
+
+  static void validateBareTableIdentifiers(
+      List<ICheckResult> remarks,
+      BvBusinessTable table,
+      BusinessVaultModel bvModel,
+      DataVaultModel dvModel,
+      String alreadyStrippedSql) {
+    String stripped = alreadyStrippedSql;
+    if (Utils.isEmpty(stripped)) {
+      return;
+    }
+    warnBareIdentifiers(remarks, table, bvModel, dvModel, stripped);
+  }
+
   static void validateBareTableIdentifiers(
       List<ICheckResult> remarks,
       BvBusinessTable table,
@@ -260,7 +345,15 @@ public final class BvSqlValidationSupport {
     if (Utils.isEmpty(sql)) {
       return;
     }
-    String stripped = stripMacros(sql);
+    warnBareIdentifiers(remarks, table, bvModel, dvModel, stripMacros(sql));
+  }
+
+  private static void warnBareIdentifiers(
+      List<ICheckResult> remarks,
+      BvBusinessTable table,
+      BusinessVaultModel bvModel,
+      DataVaultModel dvModel,
+      String stripped) {
     Set<String> reported = new HashSet<>();
 
     if (bvModel != null) {

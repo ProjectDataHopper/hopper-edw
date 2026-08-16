@@ -138,6 +138,14 @@ For a slide-style executive summary, see link:presentations/hop-data-vault-overv
 |Available
 |link:business-vault-sql-view.adoc[Business Vault SQL] (`vault1.hbv` + `retail-sql.hbv` samples)
 
+|Jinja macros for BV SQL (Jinjava + metadata library)
+|Available
+|link:business-vault-sql-view.adoc[Business Vault SQL], issue https://github.com/mattcasters/hop-data-vault/issues/72[#72]
+
+|dbt-core importer (`.sql` + YAML → `.hbv`)
+|Available
+|link:dbt-import.adoc[Import dbt models] — BV canvas dialog + **Import dbt project** workflow action, issue https://github.com/mattcasters/hop-data-vault/issues/72[#72]
+
 |Catalog model registry (DV/BV/DM index)
 |Available
 |Published on catalog publish; short `ref('model', 'table')` lookup
@@ -312,7 +320,9 @@ image::images/validate-resource-definitions-action-dialog.png[Validate resource 
 
 === Business Vault (`.hbv`)
 
-Linked to a `.hdv` model. Defines **SCD2** consumption tables (single- or multi-satellite merge) and **PIT** helpers. **Business Vault Update** validates, optionally publishes target layouts to the catalog, generates SCD2 build pipelines, and orchestrates parallel execution.
+Linked to a `.hdv` model. Defines **SCD2** consumption tables (single- or multi-satellite merge), **PIT** helpers, and **SQL views/tables** (dbt-style `ref` / `source`, optional Jinja macros). **Import dbt models** on the canvas (and the **Import dbt project** workflow action) loads a dbt-core project as SQL business tables. **Business Vault Update** validates, optionally publishes target layouts to the catalog, generates SCD2 build pipelines, and orchestrates parallel execution.
+
+image::images/business-vault-dbt-import-models-dialog.png[Import dbt models dialog — project folder, model list, destination, and macro library,align="center"]
 
 === Dimensional modeler (`.hdm`)
 

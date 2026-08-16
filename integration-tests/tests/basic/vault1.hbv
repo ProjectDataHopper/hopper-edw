@@ -20,25 +20,12 @@ limitations under the License.
   <description/>
   <dataVaultModelPath>${PROJECT_HOME}/tests/basic/vault1.hdv</dataVaultModelPath>
   <configurationName>business-vault</configurationName>
-  <configuration>
-    <targetDatabase>Vault</targetDatabase>
-    <dataCatalogConnection>local-catalog</dataCatalogConnection>
-    <generatedPipelineFolder/>
-    <scd2PipelineNamePrefix>bv-scd2-</scd2PipelineNamePrefix>
-    <pitPipelineNamePrefix>bv-pit-</pitPipelineNamePrefix>
-    <businessTablePipelineNamePrefix>bv-biz-</businessTablePipelineNamePrefix>
-    <openStartSentinel>1900-01-01 00:00:00</openStartSentinel>
-    <openEndSentinel>9999-12-31 23:59:59</openEndSentinel>
-    <scd2DefaultsFolder/>
-    <functionalTimestampField/>
-    <loadDateFieldFallback>x_load_ts</loadDateFieldFallback>
-    <validFromField>x_from_ts</validFromField>
-    <validToField>x_to_ts</validToField>
-    <targetTableBatchSize>1000</targetTableBatchSize>
-    <targetTableParallelCopies>1</targetTableParallelCopies>
-  </configuration>
+  <coaching>
+    <coaching_sources/>
+  </coaching>
   <tables>
     <table>
+      <buildMode>FULL_REBUILD</buildMode>
       <functionalTimestampField>x_load_ts</functionalTimestampField>
       <validFromField/>
       <validToField/>
@@ -99,6 +86,7 @@ limitations under the License.
 FROM {{ ref('sat_customer_hb') }}</sqlQuery>
       <referenceStyle>DBT</referenceStyle>
       <materialization>VIEW</materialization>
+      <column_notes/>
       <sql_sources/>
       <sql_refs>
         <sql_ref>
@@ -135,6 +123,7 @@ FROM {{ ref('sat_customer_hb') }}</sqlQuery>
 FROM {{ ref('sat_customer') }}</sqlQuery>
       <referenceStyle>DBT</referenceStyle>
       <materialization>VIEW</materialization>
+      <column_notes/>
       <sql_sources/>
       <sql_refs>
         <sql_ref>
@@ -157,23 +146,52 @@ FROM {{ ref('sat_customer') }}</sqlQuery>
       <yloc>304</yloc>
       <name>satb_customer_hb</name>
     </table>
+    <table>
+      <sqlQuery>{% set cols = ['customer_hk', 'name', 'email', 'address', 'city', 'x_record_source', 'x_load_ts', 'x_from_ts', 'x_to_ts'] %}
+SELECT
+{% for c in cols %}
+  {{ c }}{% if not loop.last %},{% endif %}
+{% endfor %}
+FROM {{ ref('sat_customer_hb') }}</sqlQuery>
+      <referenceStyle>DBT</referenceStyle>
+      <materialization>VIEW</materialization>
+      <schemaName/>
+      <originDbtPath/>
+      <column_notes/>
+      <sql_sources/>
+      <sql_refs>
+        <sql_ref>
+          <objectName>sat_customer_hb</objectName>
+          <resolvedKind>BV_TABLE</resolvedKind>
+          <resolvedModelFilename>${PROJECT_HOME}/tests/basic/vault1.hbv</resolvedModelFilename>
+          <resolvedTableName>sat_customer_hb</resolvedTableName>
+        </sql_ref>
+      </sql_refs>
+      <tableName>sat_customer_hb_jinja</tableName>
+      <description>Jinja {% for %} column list over sat_customer_hb (issue #72 fixture)</description>
+      <tableType>BUSINESS_TABLE</tableType>
+      <derivatives/>
+      <xloc>720</xloc>
+      <yloc>432</yloc>
+      <name>sat_customer_hb_jinja</name>
+    </table>
   </tables>
   <notes>
     <note>
       <text>Check out [Apache Hop!](https://hop.apache.org)!</text>
       <noteType>GENERAL</noteType>
-      <xloc>64</xloc>
-      <yloc>336</yloc>
-      <width>32</width>
-      <height>32</height>
+      <xloc>128</xloc>
+      <yloc>352</yloc>
+      <width>256</width>
+      <height>48</height>
     </note>
     <note>
       <text>Link to [sat_customer_hb](sat_customer_hb) : click on it!</text>
       <noteType>GENERAL</noteType>
-      <xloc>304</xloc>
-      <yloc>336</yloc>
+      <xloc>128</xloc>
+      <yloc>304</yloc>
       <width>256</width>
-      <height>32</height>
+      <height>48</height>
     </note>
   </notes>
   <dv_references>
@@ -190,5 +208,6 @@ FROM {{ ref('sat_customer') }}</sqlQuery>
       <yloc>192</yloc>
     </dv_reference>
   </dv_references>
+  <bv_references/>
   <name>vault1</name>
 </business-vault-model>

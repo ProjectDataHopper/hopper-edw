@@ -1,0 +1,6 @@
+version: 2
+models:
+  - name: customers
+    description: Customer mart
+    config:
+      materialized: table

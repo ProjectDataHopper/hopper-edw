@@ -113,6 +113,7 @@
     </action>
     <action>
       <sql>DROP VIEW IF EXISTS sat_customer_hb_v;
+DROP VIEW IF EXISTS sat_customer_hb_jinja;
 DROP VIEW IF EXISTS satb_customer_hb;
 DROP TABLE IF EXISTS hub_customer;
 DROP TABLE IF EXISTS sat_customer;
@@ -294,6 +295,9 @@ DROP TABLE IF EXISTS pit_customer;
         </test_name>
         <test_name>
           <name>validate-sat-customer-hb-v UNIT</name>
+        </test_name>
+        <test_name>
+          <name>validate-sat-customer-hb-jinja UNIT</name>
         </test_name>
         <test_name>
           <name>validate-pit-customer UNIT</name>

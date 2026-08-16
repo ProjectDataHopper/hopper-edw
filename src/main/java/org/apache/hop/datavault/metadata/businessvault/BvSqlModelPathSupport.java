@@ -17,10 +17,14 @@
 package org.apache.hop.datavault.metadata.businessvault;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileType;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
@@ -55,7 +59,14 @@ public final class BvSqlModelPathSupport {
   public record ResolvedModelPath(
       String authoringArg, String loadPath, String storedPath, ModelFileKind kind) {}
 
+  private static final ThreadLocal<Map<String, BusinessVaultModel>> HBV_CACHE =
+      ThreadLocal.withInitial(HashMap::new);
+
   private BvSqlModelPathSupport() {}
+
+  public static void clearModelCache() {
+    HBV_CACHE.remove();
+  }
 
   /**
    * Builds candidate paths and returns the first existing model file. Throws if none exist.
@@ -138,6 +149,101 @@ public final class BvSqlModelPathSupport {
       throw new HopException("Resolved model path is required");
     }
     return loadBusinessVaultModelUncached(resolved.loadPath(), metadataProvider);
+  }
+
+  public static BusinessVaultModel loadBusinessVaultModelCached(
+      String resolvedPath, IHopMetadataProvider metadataProvider) throws HopException {
+    if (Utils.isEmpty(resolvedPath)) {
+      throw new HopException("Resolved model path is required");
+    }
+    Map<String, BusinessVaultModel> cache = HBV_CACHE.get();
+    if (cache.containsKey(resolvedPath)) {
+      return cache.get(resolvedPath);
+    }
+    BusinessVaultModel model = loadBusinessVaultModelUncached(resolvedPath, metadataProvider);
+    cache.put(resolvedPath, model);
+    return model;
+  }
+
+  /**
+   * {@code .hbv} files in the referring model's directory and, when set, {@code
+   * ${PROJECT_HOME}/models}.
+   */
+  public static List<String> listNearbyHbvFiles(String referringBvFilename, IVariables variables) {
+    Set<String> paths = new LinkedHashSet<>();
+    addHbvFilesInParent(paths, referringBvFilename);
+    if (variables != null) {
+      String projectHome = variables.getVariable("PROJECT_HOME");
+      if (!Utils.isEmpty(projectHome) && !projectHome.contains("${")) {
+        String models = projectHome.replace('\\', '/');
+        if (models.endsWith("/")) {
+          models = models.substring(0, models.length() - 1);
+        }
+        addHbvFilesInDirectory(paths, models + "/models");
+      }
+    }
+    if (!Utils.isEmpty(referringBvFilename)) {
+      String self = referringBvFilename.replace('\\', '/');
+      paths.removeIf(path -> path != null && sameFile(path, self));
+    }
+    return new ArrayList<>(paths);
+  }
+
+  private static void addHbvFilesInDirectory(Set<String> paths, String directory) {
+    if (Utils.isEmpty(directory)) {
+      return;
+    }
+    try {
+      FileObject folder = HopVfs.getFileObject(directory);
+      if (folder == null || !folder.exists() || folder.getType() != FileType.FOLDER) {
+        return;
+      }
+      collectHbvChildren(paths, folder);
+    } catch (Exception ignored) {
+      // directory missing or not listable
+    }
+  }
+
+  private static void addHbvFilesInParent(Set<String> paths, String fileInFolder) {
+    if (Utils.isEmpty(fileInFolder)) {
+      return;
+    }
+    try {
+      FileObject file = HopVfs.getFileObject(fileInFolder);
+      FileObject folder =
+          file.exists() && file.getType() == FileType.FOLDER ? file : file.getParent();
+      if (folder == null || !folder.exists() || folder.getType() != FileType.FOLDER) {
+        return;
+      }
+      collectHbvChildren(paths, folder);
+    } catch (Exception ignored) {
+      // directory missing or not listable
+    }
+  }
+
+  private static void collectHbvChildren(Set<String> paths, FileObject folder) throws Exception {
+    FileObject[] children = folder.getChildren();
+    if (children == null) {
+      return;
+    }
+    for (FileObject child : children) {
+      if (child == null || child.getName() == null) {
+        continue;
+      }
+      String base = child.getName().getBaseName();
+      if (base != null && base.toLowerCase(Locale.ROOT).endsWith(".hbv")) {
+        paths.add(HopVfs.getFilename(child));
+      }
+    }
+  }
+
+  private static boolean sameFile(String left, String right) {
+    if (left == null || right == null) {
+      return false;
+    }
+    String a = left.replace('\\', '/');
+    String b = right.replace('\\', '/');
+    return a.equalsIgnoreCase(b);
   }
 
   public static BusinessVaultModel loadBusinessVaultModelUncached(

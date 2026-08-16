@@ -58,6 +58,7 @@
     </action>
     <action>
       <sql>DROP VIEW IF EXISTS sat_customer_hb_v;
+DROP VIEW IF EXISTS sat_customer_hb_jinja;
 DROP VIEW IF EXISTS satb_customer_hb;
 DROP TABLE IF EXISTS sat_customer_hb;
 DROP TABLE IF EXISTS pit_customer;

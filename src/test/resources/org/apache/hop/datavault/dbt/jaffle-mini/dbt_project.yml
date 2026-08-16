@@ -1,0 +1,13 @@
+name: jaffle_mini
+model-paths: ["models"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+vars:
+  start_date: "2020-01-01"
+models:
+  jaffle_mini:
+    staging:
+      +materialized: view
+      +schema: staging
+    marts:
+      +materialized: table

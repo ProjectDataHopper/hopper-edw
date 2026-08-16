@@ -160,6 +160,8 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
       "HopGuiBusinessVaultGraph-ToolBar-10050-Edit-Model";
   public static final String TOOLBAR_ITEM_CHECK_MODEL =
       "HopGuiBusinessVaultGraph-ToolBar-10060-Check-Model";
+  public static final String TOOLBAR_ITEM_IMPORT_DBT =
+      "HopGuiBusinessVaultGraph-ToolBar-10062-Import-Dbt";
   public static final String TOOLBAR_ITEM_AI_HELP =
       "HopGuiBusinessVaultGraph-ToolBar-10065-AI-Help";
   public static final String TOOLBAR_ITEM_EXPORT_SVG =
@@ -1565,6 +1567,23 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
   }
 
   @GuiContextAction(
+      id = "bv-graph-import-dbt",
+      parentId = HopGuiBusinessVaultContext.CONTEXT_ID,
+      type = GuiActionType.Create,
+      name = "i18n::HopGuiBusinessVaultGraph.Context.ImportDbt.Name",
+      tooltip = "i18n::HopGuiBusinessVaultGraph.Context.ImportDbt.Tooltip",
+      image = "jinja-macro-library.svg",
+      category = "Business Vault",
+      categoryOrder = "5")
+  public void importDbtModelsContext(HopGuiBusinessVaultContext context) {
+    HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
+    if (graph == null) {
+      return;
+    }
+    HopGuiDbtImportSupport.importDbtProject(hopGui, graph);
+  }
+
+  @GuiContextAction(
       id = "bv-graph-add-note",
       parentId = HopGuiBusinessVaultContext.CONTEXT_ID,
       type = GuiActionType.Create,
@@ -1842,6 +1861,15 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
       return;
     }
     showCheckResultsDialog(new ArrayList<>(result.remarks()));
+  }
+
+  @GuiToolbarElement(
+      root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
+      id = TOOLBAR_ITEM_IMPORT_DBT,
+      toolTip = "i18n::HopGuiBusinessVaultGraph.Toolbar.ImportDbt.Tooltip",
+      image = "jinja-macro-library.svg")
+  public void importDbtModels() {
+    HopGuiDbtImportSupport.importDbtProject(hopGui, this);
   }
 
   @GuiToolbarElement(

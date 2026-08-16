@@ -1,0 +1,13 @@
+version: 2
+sources:
+  - name: jaffle
+    schema: raw
+    tables:
+      - name: raw_customers
+        description: Raw customers
+models:
+  - name: stg_customers
+    description: Staged customers
+    columns:
+      - name: customer_id
+        description: Customer key

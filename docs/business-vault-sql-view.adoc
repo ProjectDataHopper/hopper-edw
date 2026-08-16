@@ -32,7 +32,10 @@ Add **SQL view / table** from the Business Vault canvas (type `BUSINESS_TABLE` i
 |`dbt` only in the current release
 
 |SQL query
-|Authoring SQL with optional macros
+|Authoring SQL with optional macros and Jinja
+
+|Schema
+|Optional target schema for `CREATE` and `{{ this }}`
 
 |Sources
 |Explicit list for `{{ source('name', 'table') }}`
@@ -40,7 +43,19 @@ Add **SQL view / table** from the Business Vault canvas (type `BUSINESS_TABLE` i
 |References
 |Parsed from SQL; used for canvas edges and update order
 
-== Template language (dbt style)
+== Template language (dbt + Jinja)
+
+Simple SQL that only uses single-quoted `ref()` / `source()` still uses the original regex fast path. Anything else (`{% %}`, `{# #}`, other `{{ }}` expressions, user macros) is rendered with **sandboxed Jinjava**.
+
+Macros live in project metadata: **Jinja macro library**. Enable the library, then call `{{ my_macro(...) }}` from SQL. `{{ var('name') }}` reads a Hop variable of that name first, then a library default.
+
+image::images/jinja-macro-library-editor.png[Jinja macro library editor — macros, variables, and test render,align="center"]
+
+Built-ins: `ref`, `source`, `config()` (empty at render), `var`, `this`, `is_incremental()` (always false), `adapter.quote`. Unsupported dbt calls such as `run_query` and `adapter.dispatch` fail at Check model / materialization with a clear error.
+
+To load a dbt-core `macros/` folder (and the models that call them), use **Import dbt models** on the Business Vault canvas. See link:dbt-import.adoc[Import dbt-core models].
+
+== Template language (dbt style) — `ref` / `source`
 
 [cols="2,3", options="header"]
 |===
@@ -200,7 +215,11 @@ Multi-statement scripts (Postgres/SQL Server TABLE, SingleStore VIEW) run with E
 
 |ERROR
 |Malformed template braces
-|Residual `{{` / `}}` after parsing known macros
+|Residual `{{` / `}}` after parsing known macros (simple `ref`/`source` SQL only)
+
+|ERROR
+|Jinja render failed
+|Control tags, macros, or other expressions could not be rendered
 
 |ERROR
 |Every `ref()` resolves
@@ -247,7 +266,7 @@ Use **Validate** in the SQL business table dialog for a single-table check witho
 * Pipeline name prefix comes from BV configuration (`businessTablePipelineNamePrefix`, default `bv-biz-`).
 * **Portable timestamp literals:** authoring SQL may use Postgres/ANSI `TIMESTAMP 'yyyy-MM-dd HH:mm:ss'`. At materialization time those literals are rewritten for the BV target dialect (SQL Server → `CAST('…' AS datetime2)`, MySQL/SingleStore → `CAST('…' AS DATETIME)`). Prefer that form in shared fixtures over engine-specific casts.
 * Iceberg / engines without classic CREATE VIEW support are not specially handled yet — treat as generic Postgres-style SQL and verify on your warehouse.
-* Full Jinja, multi-file dbt projects, and incremental merge strategies are out of scope.
+* Incremental merge, dbt packages, `run_query`, Relation methods (`.identifier`), snapshots, tests, and export back to dbt are out of scope. `{% set %}` / `{% if %}` / `{% for %}` and project macros **are** supported via Jinja.
 
 == Samples and integration fixture
 
@@ -283,12 +302,17 @@ FROM {{ ref('retail-360', 'sat_product') }}
 |`satb_customer_hb`
 |`LEAD(x_load_ts)` validity over `{{ ref('sat_customer') }}`
 |Created by BV Update (existence required for view materialisation); content not golden-tested yet
+
+|`sat_customer_hb_jinja`
+|Jinja `{% for %}` column list over `{{ ref('sat_customer_hb') }}`
+|`validate-sat-customer-hb-jinja UNIT` — same golden as `sat_customer_hb`
 |===
 
 Drop SQL in the suite removes both views before vault tables.
 
 == Related
 
+* link:dbt-import.adoc[Import dbt-core models]
 * link:business-vault-overview.adoc[Business Vault overview]
 * link:business-vault-update-action.adoc[Business Vault Update action]
 * link:../integration-tests/PROJECT.md[Integration tests project notes]

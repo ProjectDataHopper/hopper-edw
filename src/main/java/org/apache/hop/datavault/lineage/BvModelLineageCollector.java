@@ -24,10 +24,14 @@ import org.apache.hop.datavault.catalog.CatalogModelRegistrySupport;
 import org.apache.hop.datavault.catalog.DvCatalogNamespaces;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultConfiguration;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
+import org.apache.hop.datavault.metadata.businessvault.BvBusinessTable;
 import org.apache.hop.datavault.metadata.businessvault.BvDerivativeRef;
 import org.apache.hop.datavault.metadata.businessvault.BvPitTable;
 import org.apache.hop.datavault.metadata.businessvault.BvScd2FieldMapping;
 import org.apache.hop.datavault.metadata.businessvault.BvScd2Table;
+import org.apache.hop.datavault.metadata.businessvault.BvSqlRef;
+import org.apache.hop.datavault.metadata.businessvault.BvSqlResolvedKind;
+import org.apache.hop.datavault.metadata.businessvault.BvSqlSource;
 import org.apache.hop.datavault.metadata.businessvault.BvTableType;
 import org.apache.hop.datavault.metadata.businessvault.IBvTable;
 
@@ -64,6 +68,8 @@ public final class BvModelLineageCollector {
         tableLineage = collectScd2(scd2, model, config, variables, targetDb);
       } else if (table instanceof BvPitTable pit) {
         tableLineage = collectPit(pit, model, config, variables, targetDb);
+      } else if (table instanceof BvBusinessTable business) {
+        tableLineage = collectBusinessTable(business, model, variables, targetDb);
       } else {
         tableLineage = collectGeneric(table, model, variables, targetDb);
       }
@@ -164,6 +170,41 @@ public final class BvModelLineageCollector {
     String snapshotDate =
         firstNonEmpty(resolve(table.getSnapshotDateField(), variables), "snapshot_date");
     addTechnicalConfigField(lineage, snapshotDate, "snapshotDateField");
+    return lineage;
+  }
+
+  private static TableLineage collectBusinessTable(
+      BvBusinessTable table, BusinessVaultModel model, IVariables variables, String targetDb) {
+    TableLineage lineage = collectGeneric(table, model, variables, targetDb);
+    if (table.getSqlRefs() != null) {
+      for (BvSqlRef ref : table.getSqlRefs()) {
+        if (ref == null || Utils.isEmpty(ref.getObjectName())) {
+          continue;
+        }
+        String name =
+            !Utils.isEmpty(ref.getResolvedTableName())
+                ? ref.getResolvedTableName()
+                : ref.getObjectName();
+        TableSourceKind kind =
+            ref.getResolvedKind() == BvSqlResolvedKind.DV_TABLE
+                ? TableSourceKind.DV_TABLE
+                : TableSourceKind.BV_TABLE;
+        lineage.addSource(new TableSourceRef(kind, name, TableSourceRole.OTHER));
+      }
+    }
+    if (table.getSources() != null) {
+      for (BvSqlSource source : table.getSources()) {
+        if (source == null || Utils.isEmpty(source.getTableName())) {
+          continue;
+        }
+        String label =
+            !Utils.isEmpty(source.getSourceName())
+                ? source.getSourceName() + "." + source.getTableName()
+                : source.getTableName();
+        lineage.addSource(
+            new TableSourceRef(TableSourceKind.DV_SOURCE, label, TableSourceRole.OTHER));
+      }
+    }
     return lineage;
   }
 

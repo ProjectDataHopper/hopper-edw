@@ -86,6 +86,7 @@ Architecture pictures are **committed SVGs** (`docs/images/diagrams/`) generated
 
 | Document | Description |
 |----------|-------------|
+| [dbt-import.adoc](dbt-import.adoc) | Import dbt-core models into Business Vault SQL tables |
 | [business-vault-overview.adoc](business-vault-overview.adoc) | `.hbv` modeler and table types |
 | [business-vault-scd2.adoc](business-vault-scd2.adoc) | SCD2 generation, multi-satellite mappings |
 | [business-vault-pit.adoc](business-vault-pit.adoc) | PIT snapshot schedule, layout, pipelines |

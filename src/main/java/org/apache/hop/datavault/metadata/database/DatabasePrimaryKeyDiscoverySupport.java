@@ -101,5 +101,4 @@ public final class DatabasePrimaryKeyDiscoverySupport {
         .map(Map.Entry::getValue)
         .toList();
   }
-
 }

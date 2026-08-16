@@ -34,6 +34,7 @@ import org.apache.hop.datavault.lineage.BvModelLineageCollector;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
 import org.apache.hop.datavault.metadata.businessvault.BvBusinessTable;
+import org.apache.hop.datavault.metadata.businessvault.BvSqlColumnNote;
 import org.apache.hop.datavault.metadata.businessvault.BvSqlMaterialization;
 import org.apache.hop.datavault.metadata.businessvault.BvSqlRef;
 import org.apache.hop.datavault.metadata.businessvault.BvSqlRefResolver;
@@ -83,6 +84,8 @@ public class HopGuiBvBusinessTableDialog {
 
   private Text wName;
   private Text wTableName;
+  private Text wSchemaName;
+  private Text wOriginDbtPath;
   private Text wDescription;
   private Combo wMaterialization;
   private Combo wReferenceStyle;
@@ -91,6 +94,7 @@ public class HopGuiBvBusinessTableDialog {
   private CTabFolder wTabFolder;
   private CTabItem generatedSqlTab;
   private TableView wSources;
+  private TableView wColumns;
   private TableView wRefs;
 
   private boolean ok;
@@ -156,13 +160,49 @@ public class HopGuiBvBusinessTableDialog {
     fdTableName.right = new FormAttachment(100, 0);
     wTableName.setLayoutData(fdTableName);
 
+    Label wlSchemaName = new Label(shell, SWT.RIGHT);
+    wlSchemaName.setText(
+        BaseMessages.getString(PKG, "HopGuiBvBusinessTableDialog.SchemaName.Label"));
+    PropsUi.setLook(wlSchemaName);
+    FormData fdlSchemaName = new FormData();
+    fdlSchemaName.left = new FormAttachment(0, 0);
+    fdlSchemaName.top = new FormAttachment(wTableName, margin);
+    fdlSchemaName.right = new FormAttachment(middle, -margin);
+    wlSchemaName.setLayoutData(fdlSchemaName);
+
+    wSchemaName = new Text(shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+    PropsUi.setLook(wSchemaName);
+    FormData fdSchemaName = new FormData();
+    fdSchemaName.left = new FormAttachment(middle, 0);
+    fdSchemaName.top = new FormAttachment(wTableName, margin);
+    fdSchemaName.right = new FormAttachment(100, 0);
+    wSchemaName.setLayoutData(fdSchemaName);
+
+    Label wlOrigin = new Label(shell, SWT.RIGHT);
+    wlOrigin.setText(
+        BaseMessages.getString(PKG, "HopGuiBvBusinessTableDialog.OriginDbtPath.Label"));
+    PropsUi.setLook(wlOrigin);
+    FormData fdlOrigin = new FormData();
+    fdlOrigin.left = new FormAttachment(0, 0);
+    fdlOrigin.top = new FormAttachment(wSchemaName, margin);
+    fdlOrigin.right = new FormAttachment(middle, -margin);
+    wlOrigin.setLayoutData(fdlOrigin);
+
+    wOriginDbtPath = new Text(shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+    PropsUi.setLook(wOriginDbtPath);
+    FormData fdOrigin = new FormData();
+    fdOrigin.left = new FormAttachment(middle, 0);
+    fdOrigin.top = new FormAttachment(wSchemaName, margin);
+    fdOrigin.right = new FormAttachment(100, 0);
+    wOriginDbtPath.setLayoutData(fdOrigin);
+
     Label wlDescription = new Label(shell, SWT.RIGHT);
     wlDescription.setText(
         BaseMessages.getString(PKG, "HopGuiBvBusinessTableDialog.Description.Label"));
     PropsUi.setLook(wlDescription);
     FormData fdlDescription = new FormData();
     fdlDescription.left = new FormAttachment(0, 0);
-    fdlDescription.top = new FormAttachment(wTableName, margin);
+    fdlDescription.top = new FormAttachment(wOriginDbtPath, margin);
     fdlDescription.right = new FormAttachment(middle, -margin);
     wlDescription.setLayoutData(fdlDescription);
 
@@ -170,7 +210,7 @@ public class HopGuiBvBusinessTableDialog {
     PropsUi.setLook(wDescription);
     FormData fdDescription = new FormData();
     fdDescription.left = new FormAttachment(middle, 0);
-    fdDescription.top = new FormAttachment(wTableName, margin);
+    fdDescription.top = new FormAttachment(wOriginDbtPath, margin);
     fdDescription.right = new FormAttachment(100, 0);
     wDescription.setLayoutData(fdDescription);
 
@@ -356,6 +396,41 @@ public class HopGuiBvBusinessTableDialog {
     fdSources.bottom = new FormAttachment(100, 0);
     wSources.setLayoutData(fdSources);
 
+    // --- Columns tab ---
+    CTabItem columnsTab = new CTabItem(wTabFolder, SWT.NONE);
+    columnsTab.setText(BaseMessages.getString(PKG, "HopGuiBvBusinessTableDialog.Tab.Columns"));
+    Composite columnsComp = new Composite(wTabFolder, SWT.NONE);
+    PropsUi.setLook(columnsComp);
+    columnsComp.setLayout(new FormLayout());
+    columnsTab.setControl(columnsComp);
+
+    ColumnInfo[] columnCols =
+        new ColumnInfo[] {
+          new ColumnInfo(
+              BaseMessages.getString(PKG, "HopGuiBvBusinessTableDialog.Columns.Column.Name"),
+              ColumnInfo.COLUMN_TYPE_TEXT,
+              false),
+          new ColumnInfo(
+              BaseMessages.getString(PKG, "HopGuiBvBusinessTableDialog.Columns.Column.Description"),
+              ColumnInfo.COLUMN_TYPE_TEXT,
+              false),
+        };
+    wColumns =
+        new TableView(
+            variables,
+            columnsComp,
+            SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI,
+            columnCols,
+            1,
+            null,
+            PropsUi.getInstance());
+    FormData fdColumns = new FormData();
+    fdColumns.left = new FormAttachment(0, 0);
+    fdColumns.top = new FormAttachment(0, margin);
+    fdColumns.right = new FormAttachment(100, 0);
+    fdColumns.bottom = new FormAttachment(100, 0);
+    wColumns.setLayoutData(fdColumns);
+
     // --- Refs tab ---
     CTabItem refsTab = new CTabItem(wTabFolder, SWT.NONE);
     refsTab.setText(BaseMessages.getString(PKG, "HopGuiBvBusinessTableDialog.Tab.References"));
@@ -457,12 +532,33 @@ public class HopGuiBvBusinessTableDialog {
   private void getData() {
     wName.setText(Const.NVL(input.getName(), ""));
     wTableName.setText(Const.NVL(input.getTableName(), ""));
+    wSchemaName.setText(Const.NVL(input.getSchemaName(), ""));
+    wOriginDbtPath.setText(Const.NVL(input.getOriginDbtPath(), ""));
     wDescription.setText(Const.NVL(input.getDescription(), ""));
     EnumDialogSupport.selectCombo(wMaterialization, input.getMaterializationOrDefault());
     EnumDialogSupport.selectCombo(wReferenceStyle, input.getReferenceStyleOrDefault());
     wSqlQuery.setText(Const.NVL(input.getSqlQuery(), ""));
     populateSources(input.getSources());
+    populateColumns(input.getColumnNotes());
     populateRefs(input.getSqlRefs());
+  }
+
+  private void populateColumns(List<BvSqlColumnNote> notes) {
+    wColumns.table.removeAll();
+    if (notes != null) {
+      for (BvSqlColumnNote note : notes) {
+        if (note == null) {
+          continue;
+        }
+        TableItem item = new TableItem(wColumns.table, SWT.NONE);
+        item.setText(1, Const.NVL(note.getName(), ""));
+        item.setText(2, Const.NVL(note.getDescription(), ""));
+      }
+    }
+    if (wColumns.table.getItemCount() == 0) {
+      new TableItem(wColumns.table, SWT.NONE);
+    }
+    wColumns.optimizeTableView();
   }
 
   private void populateSources(List<BvSqlSource> sources) {
@@ -510,7 +606,10 @@ public class HopGuiBvBusinessTableDialog {
   private void applyTo(BvBusinessTable target) {
     target.setName(wName.getText());
     target.setTableName(wTableName.getText());
+    target.setSchemaName(wSchemaName.getText());
+    target.setOriginDbtPath(wOriginDbtPath.getText());
     target.setDescription(wDescription.getText());
+    target.setColumnNotes(readColumns());
     target.setMaterialization(BvSqlMaterialization.lookupDescription(wMaterialization.getText()));
     target.setReferenceStyle(BvSqlReferenceStyle.lookupDescription(wReferenceStyle.getText()));
     target.setSqlQuery(wSqlQuery.getText());
@@ -540,6 +639,19 @@ public class HopGuiBvBusinessTableDialog {
       sources.add(source);
     }
     return sources;
+  }
+
+  private List<BvSqlColumnNote> readColumns() {
+    List<BvSqlColumnNote> notes = new ArrayList<>();
+    for (int i = 0; i < wColumns.nrNonEmpty(); i++) {
+      TableItem item = wColumns.getNonEmpty(i);
+      String name = item.getText(1);
+      if (Utils.isEmpty(name) && Utils.isEmpty(item.getText(2))) {
+        continue;
+      }
+      notes.add(new BvSqlColumnNote(name, item.getText(2)));
+    }
+    return notes;
   }
 
   private void syncRefsFromSqlUi() {
@@ -615,7 +727,7 @@ public class HopGuiBvBusinessTableDialog {
           BvSqlViewPipelineSupport.buildCreateStatement(
               draft, targetDatabase, variables, resolvedQuery);
       wGeneratedSql.setText(Const.NVL(ddl, ""));
-    } catch (Exception e) {
+    } catch (Throwable e) {
       wGeneratedSql.setText(
           BaseMessages.getString(
               PKG,

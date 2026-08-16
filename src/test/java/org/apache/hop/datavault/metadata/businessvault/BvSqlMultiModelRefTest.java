@@ -160,6 +160,40 @@ class BvSqlMultiModelRefTest {
   }
 
   @Test
+  void oneArgRefResolvesSiblingHbvTable() throws Exception {
+    Path models = tempDir.resolve("models");
+    Files.createDirectories(models);
+    Files.writeString(
+        models.resolve("staging.hbv"), hbvWithBusinessTable("staging", "stg_customers"));
+    Path marts = models.resolve("marts.hbv");
+    Files.writeString(marts, "<!-- consumer -->");
+
+    BusinessVaultModel bvModel = new BusinessVaultModel();
+    bvModel.setFilename(marts.toString());
+    bvModel.setName("marts");
+
+    BvBusinessTable sqlTable = new BvBusinessTable();
+    sqlTable.setName("customers");
+    sqlTable.setTableName("customers");
+    sqlTable.setSqlQuery("SELECT * FROM {{ ref('stg_customers') }}");
+    bvModel.getTables().add(sqlTable);
+
+    Variables variables = new Variables();
+    variables.setVariable("PROJECT_HOME", tempDir.toString());
+
+    List<BvSqlRef> refs =
+        BvSqlRefResolver.syncRefsFromSql(sqlTable, bvModel, new DataVaultModel(), variables, null);
+
+    assertEquals(1, refs.size());
+    assertEquals(BvSqlResolvedKind.BV_TABLE, refs.get(0).getResolvedKind());
+    assertEquals("stg_customers", refs.get(0).getResolvedTableName());
+    assertNotNull(refs.get(0).getResolvedModelFilename());
+    assertTrue(
+        refs.get(0).getResolvedModelFilename().replace('\\', '/').contains("staging.hbv")
+            || refs.get(0).getResolvedModelFilename().contains("staging"));
+  }
+
+  @Test
   void sameBasenameStillResolvesDvObjectInHdv() throws Exception {
     Path models = tempDir.resolve("models");
     Files.createDirectories(models);

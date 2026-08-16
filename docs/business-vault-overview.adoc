@@ -35,7 +35,7 @@ The Business Vault editor uses the same touch-friendly interaction model as the 
 
 * **Left-click context menus** with icon actions (no right-click)
 * Drag tables to position them
-* Toolbar: **Edit model**, **Check model**, **Reload DV model**, **Debug** (generate build pipelines), zoom
+* Toolbar: **Edit model**, **Check model**, **Reload DV model**, **Import dbt models**, **Debug** (generate build pipelines), zoom
 
 === Navigate to raw vault tables
 
