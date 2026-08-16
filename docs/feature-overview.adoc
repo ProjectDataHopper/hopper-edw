@@ -34,6 +34,10 @@ For a slide-style executive summary, see link:presentations/hop-data-vault-overv
 |Available
 |link:data-type-mappings.adoc[Data type mappings], issue https://github.com/mattcasters/hop-data-vault/issues/113[#113]
 
+|Target type mappings (Hop type to DDL)
+|Available
+|link:target-type-mappings.adoc[Target type mappings], issue https://github.com/mattcasters/hop-data-vault/issues/127[#127]
+
 |Free SQL over source models (Calcite parse/plan, pushdown + residual pipeline)
 |Available
 |link:source-modeler-overview.adoc[Source modeler] (JDBC + DBeaver screenshots), link:plans/source-model-sql-virtualization-plan.md[source-model SQL plan], Free SQL + **Source model SQL** transform, `hop-hsm-jdbc` + **Source model service**
@@ -185,6 +189,10 @@ For a slide-style executive summary, see link:presentations/hop-data-vault-overv
 |Get Record Definition Names transform
 |Available
 |link:record-definition-input.adoc[Get Record Definition Names]
+
+|Record Definition DDL transform
+|Available
+|link:record-definition-ddl.adoc[Record Definition DDL], link:target-type-mappings.adoc[Target type mappings]
 
 |Catalog Record Definition Metadata Output transform
 |Available

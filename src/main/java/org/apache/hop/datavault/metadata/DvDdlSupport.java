@@ -32,6 +32,9 @@ import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.metadata.targettypemapping.TargetTypeMappingContext;
+import org.apache.hop.datavault.metadata.targettypemapping.TargetTypeMappingResolver;
+import org.apache.hop.datavault.metadata.targettypemapping.TargetTypeSqlSupport;
 
 /** Helpers for generating Data Vault target table DDL. */
 public final class DvDdlSupport {
@@ -176,7 +179,13 @@ public final class DvDdlSupport {
    */
   public static String getTargetTableDdl(Database db, String tableName, IRowMeta fields)
       throws HopDatabaseException {
-    return getTargetTableDdl(db, tableName, fields, null, List.of(), List.of());
+    return getTargetTableDdl(db, tableName, fields, null, List.of(), List.of(), null);
+  }
+
+  public static String getTargetTableDdl(
+      Database db, String tableName, IRowMeta fields, TargetTypeMappingContext context)
+      throws HopDatabaseException {
+    return getTargetTableDdl(db, tableName, fields, null, List.of(), List.of(), context);
   }
 
   /**
@@ -190,6 +199,19 @@ public final class DvDdlSupport {
       String[] shardKeyColumns,
       List<String> primaryKeyFieldNames,
       List<ForeignKeySpec> foreignKeys)
+      throws HopDatabaseException {
+    return getTargetTableDdl(
+        db, tableName, fields, shardKeyColumns, primaryKeyFieldNames, foreignKeys, null);
+  }
+
+  public static String getTargetTableDdl(
+      Database db,
+      String tableName,
+      IRowMeta fields,
+      String[] shardKeyColumns,
+      List<String> primaryKeyFieldNames,
+      List<ForeignKeySpec> foreignKeys,
+      TargetTypeMappingContext context)
       throws HopDatabaseException {
     if (db == null || Utils.isEmpty(tableName) || fields == null || fields.isEmpty()) {
       return "";
@@ -206,8 +228,9 @@ public final class DvDdlSupport {
         (primaryKeyFieldNames != null && !primaryKeyFieldNames.isEmpty())
             || (foreignKeys != null && !foreignKeys.isEmpty())
             || (shardKeyColumns != null && shardKeyColumns.length > 0);
+    boolean hasMapping = context != null && context.hasMapping();
     if (isCreateTableDdl(hopDdl)
-        && (hasConstraints || DvSqlOrderBySupport.isSqlServer(databaseMeta))) {
+        && (hasConstraints || DvSqlOrderBySupport.isSqlServer(databaseMeta) || hasMapping)) {
       return buildCreateTableStatement(
           databaseMeta,
           db,
@@ -216,7 +239,12 @@ public final class DvDdlSupport {
           shardKeyColumns,
           primaryKeyFieldNames,
           foreignKeys,
-          true);
+          true,
+          true,
+          context);
+    }
+    if (!isCreateTableDdl(hopDdl) && hasMapping) {
+      return generateAlterDdl(db, tableName, layout, context, true);
     }
     return enrichSqlServerDdl(databaseMeta, hopDdl);
   }
@@ -390,7 +418,8 @@ public final class DvDdlSupport {
         primaryKeyFieldNames,
         foreignKeys,
         semicolon,
-        true);
+        true,
+        null);
   }
 
   /**
@@ -407,6 +436,35 @@ public final class DvDdlSupport {
       List<ForeignKeySpec> foreignKeys,
       boolean semicolon,
       boolean applySqlServerUtf8EdwPolicy) {
+    return buildCreateTableStatement(
+        databaseMeta,
+        variables,
+        tableName,
+        fields,
+        shardKeyColumns,
+        primaryKeyFieldNames,
+        foreignKeys,
+        semicolon,
+        applySqlServerUtf8EdwPolicy,
+        null);
+  }
+
+  /**
+   * @param applySqlServerUtf8EdwPolicy vault/EDW {@code true} (UTF-8 COLLATE + length ×3); catalog
+   *     / CRM staging {@code false} (Hop native types, character lengths preserved)
+   * @param context optional target type mapping; {@code null} keeps Hop dialect types
+   */
+  public static String buildCreateTableStatement(
+      DatabaseMeta databaseMeta,
+      IVariables variables,
+      String tableName,
+      IRowMeta fields,
+      String[] shardKeyColumns,
+      List<String> primaryKeyFieldNames,
+      List<ForeignKeySpec> foreignKeys,
+      boolean semicolon,
+      boolean applySqlServerUtf8EdwPolicy,
+      TargetTypeMappingContext context) {
     if (databaseMeta == null || Utils.isEmpty(tableName) || fields == null || fields.isEmpty()) {
       return "";
     }
@@ -424,7 +482,7 @@ public final class DvDdlSupport {
       IValueMeta valueMeta = fields.getValueMeta(i);
       // Use a table-level PRIMARY KEY clause so JDBC discovery finds the constraint and
       // PostgreSQL does not emit BIGSERIAL for the first key column.
-      ddl.append(getFieldDefinition(databaseMeta, valueMeta, applySqlServerUtf8EdwPolicy));
+      ddl.append(getFieldDefinition(databaseMeta, valueMeta, applySqlServerUtf8EdwPolicy, context));
     }
 
     if (supportsPrimaryKeyConstraints(databaseMeta)) {
@@ -515,7 +573,7 @@ public final class DvDdlSupport {
    * boolean)} with {@code applySqlServerUtf8EdwPolicy=false} so character lengths are not expanded.
    */
   public static String getFieldDefinition(DatabaseMeta databaseMeta, IValueMeta valueMeta) {
-    return getFieldDefinition(databaseMeta, valueMeta, true);
+    return getFieldDefinition(databaseMeta, valueMeta, true, null);
   }
 
   /**
@@ -525,8 +583,26 @@ public final class DvDdlSupport {
    */
   public static String getFieldDefinition(
       DatabaseMeta databaseMeta, IValueMeta valueMeta, boolean applySqlServerUtf8EdwPolicy) {
+    return getFieldDefinition(databaseMeta, valueMeta, applySqlServerUtf8EdwPolicy, null);
+  }
+
+  /**
+   * @param context when a rule matches, the user SQL type is used and SQL Server UTF-8 rewrite is
+   *     skipped for that column
+   */
+  public static String getFieldDefinition(
+      DatabaseMeta databaseMeta,
+      IValueMeta valueMeta,
+      boolean applySqlServerUtf8EdwPolicy,
+      TargetTypeMappingContext context) {
     if (databaseMeta == null || valueMeta == null) {
       return "";
+    }
+    String customType = resolveCustomSqlType(valueMeta, context);
+    if (!Utils.isEmpty(customType)) {
+      String hopDefinition = databaseMeta.getFieldDefinition(valueMeta, null, null, false);
+      String hopType = hopTypeOnly(databaseMeta, valueMeta);
+      return TargetTypeSqlSupport.replaceTypeToken(hopDefinition, hopType, customType);
     }
     // addFieldname=true matches Database#getCreateTableStatement field lines.
     String definition = databaseMeta.getFieldDefinition(valueMeta, null, null, false);
@@ -534,6 +610,105 @@ public final class DvDdlSupport {
       return definition;
     }
     return enrichSqlServerFieldDefinition(databaseMeta, definition);
+  }
+
+  /** Native SQL type only (no field name), after mapping rules and optional UTF-8 policy. */
+  public static String getSqlType(
+      DatabaseMeta databaseMeta,
+      IValueMeta valueMeta,
+      boolean applySqlServerUtf8EdwPolicy,
+      TargetTypeMappingContext context) {
+    if (databaseMeta == null || valueMeta == null) {
+      return "";
+    }
+    String customType = resolveCustomSqlType(valueMeta, context);
+    if (!Utils.isEmpty(customType)) {
+      return customType;
+    }
+    String hopType = hopTypeOnly(databaseMeta, valueMeta);
+    if (!applySqlServerUtf8EdwPolicy) {
+      return hopType;
+    }
+    return TargetTypeSqlSupport.stripTrailingWhitespace(
+        enrichSqlServerFieldDefinition(databaseMeta, hopType));
+  }
+
+  static String generateAlterDdl(
+      Database db,
+      String tableName,
+      IRowMeta fields,
+      TargetTypeMappingContext context,
+      boolean applySqlServerUtf8EdwPolicy)
+      throws HopDatabaseException {
+    if (db == null || Utils.isEmpty(tableName) || fields == null || fields.isEmpty()) {
+      return "";
+    }
+    DatabaseMeta databaseMeta = db.getDatabaseMeta();
+    IRowMeta tabFields = db.getTableFields(tableName);
+    if (tabFields == null) {
+      tabFields = new org.apache.hop.core.row.RowMeta();
+    }
+    databaseMeta.quoteReservedWords(tabFields);
+
+    StringBuilder ddl = new StringBuilder();
+    for (int i = 0; i < fields.size(); i++) {
+      IValueMeta desired = fields.getValueMeta(i);
+      if (tabFields.searchValueMeta(desired.getName()) == null) {
+        String hopAdd =
+            databaseMeta.getAddColumnStatement(tableName, desired, null, false, null, true);
+        ddl.append(
+            TargetTypeSqlSupport.replaceTypeToken(
+                hopAdd,
+                hopTypeOnly(databaseMeta, desired),
+                getSqlType(databaseMeta, desired, applySqlServerUtf8EdwPolicy, context)));
+      }
+    }
+
+    for (int i = 0; i < tabFields.size(); i++) {
+      IValueMeta current = tabFields.getValueMeta(i);
+      if (fields.searchValueMeta(current.getName()) == null) {
+        ddl.append(
+            databaseMeta.getDropColumnStatement(tableName, current, null, false, null, true));
+      }
+    }
+
+    for (int i = 0; i < fields.size(); i++) {
+      IValueMeta desired = fields.getValueMeta(i);
+      IValueMeta current = tabFields.searchValueMeta(desired.getName());
+      if (current == null) {
+        continue;
+      }
+      String desiredType = getSqlType(databaseMeta, desired, applySqlServerUtf8EdwPolicy, context);
+      String currentType = TargetTypeSqlSupport.physicalSqlType(current);
+      if (Utils.isEmpty(currentType)) {
+        currentType = hopTypeOnly(databaseMeta, current);
+      }
+      if (TargetTypeSqlSupport.sameNormalizedType(desiredType, currentType)) {
+        continue;
+      }
+      String hopModify =
+          databaseMeta.getModifyColumnStatement(tableName, desired, null, false, null, true);
+      ddl.append(
+          TargetTypeSqlSupport.replaceTypeToken(
+              hopModify, hopTypeOnly(databaseMeta, desired), desiredType));
+    }
+    return ddl.toString();
+  }
+
+  static String resolveCustomSqlType(IValueMeta valueMeta, TargetTypeMappingContext context) {
+    if (context == null || !context.hasMapping()) {
+      return null;
+    }
+    return TargetTypeMappingResolver.resolveSqlType(
+        valueMeta, context.getMapping(), context.getVariables());
+  }
+
+  static String hopTypeOnly(DatabaseMeta databaseMeta, IValueMeta valueMeta) {
+    if (databaseMeta == null || valueMeta == null) {
+      return "";
+    }
+    return TargetTypeSqlSupport.stripTrailingWhitespace(
+        databaseMeta.getFieldDefinition(valueMeta, null, null, false, false, false));
   }
 
   /**

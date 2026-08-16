@@ -36,6 +36,7 @@ import org.apache.hop.core.logging.SimpleLoggingObject;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.metadata.targettypemapping.TargetTypeMappingSupport;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
@@ -496,7 +497,13 @@ public abstract class DvTableBase extends HopMetadataBase implements IHopMetadat
               statusTrackingSatellite);
 
       return DvDdlSupport.getTargetTableDdl(
-          db, targetTableName, targetFields, shardKeyColumns, primaryKeyColumns, foreignKeys);
+          db,
+          targetTableName,
+          targetFields,
+          shardKeyColumns,
+          primaryKeyColumns,
+          foreignKeys,
+          TargetTypeMappingSupport.resolve(null, targetDatabaseMeta, metadataProvider, variables));
     } catch (Exception e) {
       throw new HopException("Error getting DDL for target table: " + targetTableName, e);
     }

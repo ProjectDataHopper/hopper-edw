@@ -36,6 +36,7 @@ import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metadata.DvConstraintDdlSupport;
 import org.apache.hop.datavault.metadata.DvDdlSupport;
 import org.apache.hop.datavault.metadata.ForeignKeySpec;
+import org.apache.hop.datavault.metadata.targettypemapping.TargetTypeMappingSupport;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
@@ -120,7 +121,14 @@ public abstract class DmTableBase extends HopMetadataBase implements IHopMetadat
               this, model, config, targetDatabaseMeta, variables, metadataProvider);
       String ddl =
           DvDdlSupport.getTargetTableDdl(
-              db, targetTableName, targetFields, null, primaryKeyColumns, foreignKeys);
+              db,
+              targetTableName,
+              targetFields,
+              null,
+              primaryKeyColumns,
+              foreignKeys,
+              TargetTypeMappingSupport.resolve(
+                  null, targetDatabaseMeta, metadataProvider, variables));
       if (!Utils.isEmpty(ddl)) {
         result.add(ddl);
       }

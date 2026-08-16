@@ -32,6 +32,8 @@ import org.apache.hop.core.row.RowDataUtil;
 import org.apache.hop.core.row.RowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.datavault.metadata.SourceField;
+import org.apache.hop.datavault.metadata.targettypemapping.TargetTypeMappingContext;
+import org.apache.hop.datavault.metadata.targettypemapping.TargetTypeMappingSupport;
 import org.apache.hop.pipeline.Pipeline;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.BaseTransform;
@@ -223,6 +225,9 @@ public class RecordDefinitionDdl
                 + "empty-field definitions are intentional.");
       }
 
+      TargetTypeMappingContext mappingContext =
+          TargetTypeMappingSupport.resolve(
+              resolve(meta.getTargetTypeMappingName()), databaseMeta, metadataProvider, this);
       DdlResult result =
           CatalogTableDdlSupport.applyTableDdl(
               databaseMeta,
@@ -234,7 +239,8 @@ public class RecordDefinitionDdl
               meta.isExecuteDdl(),
               meta.isSkipIfTableExists(),
               meta.isAppendSemicolon(),
-              this);
+              this,
+              mappingContext);
 
       outputRow[ddlIndex] = result.ddl();
       outputRow[statusIndex] = result.status().name();

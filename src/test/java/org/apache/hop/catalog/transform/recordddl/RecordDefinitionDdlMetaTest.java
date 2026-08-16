@@ -69,8 +69,10 @@ class RecordDefinitionDdlMetaTest {
     assertTrue(meta.isFailIfNoFields());
 
     meta.setFailIfNoFields(false);
+    meta.setTargetTypeMappingName("postgres-target-type-rules");
     RecordDefinitionDdlMeta clone = meta.clone();
     assertEquals(false, clone.isFailIfNoFields());
+    assertEquals("postgres-target-type-rules", clone.getTargetTypeMappingName());
 
     RecordDefinitionDdlMeta defaults = new RecordDefinitionDdlMeta();
     assertTrue(defaults.clone().isFailIfNoFields());

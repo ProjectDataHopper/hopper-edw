@@ -24,12 +24,14 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.metadata.targettypemapping.TargetTypeMappingMeta;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataSerializer;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
+import org.apache.hop.ui.core.widget.MetaSelectionLine;
 import org.apache.hop.ui.core.widget.TextVar;
 import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.eclipse.swt.SWT;
@@ -59,6 +61,7 @@ public class RecordDefinitionDdlDialog extends BaseTransformDialog {
   private CCombo wOverrideConnection;
   private TextVar wOverrideSchema;
   private TextVar wOverrideTable;
+  private MetaSelectionLine<TargetTypeMappingMeta> wTargetTypeMapping;
   private Button wExecuteDdl;
   private Button wDropTableIfExists;
   private Button wSkipIfTableExists;
@@ -286,6 +289,26 @@ public class RecordDefinitionDdlDialog extends BaseTransformDialog {
     fdOverrideTable.right = new FormAttachment(100, -margin);
     fdOverrideTable.top = new FormAttachment(wOverrideSchema, margin);
     wOverrideTable.setLayoutData(fdOverrideTable);
+
+    wTargetTypeMapping =
+        new MetaSelectionLine<>(
+            variables,
+            metadataProvider,
+            TargetTypeMappingMeta.class,
+            comp,
+            SWT.SINGLE | SWT.LEFT | SWT.BORDER,
+            BaseMessages.getString(PKG, "RecordDefinitionDdlDialog.TargetTypeMapping.Label"),
+            BaseMessages.getString(PKG, "RecordDefinitionDdlDialog.TargetTypeMapping.ToolTip"));
+    FormData fdMapping = new FormData();
+    fdMapping.left = new FormAttachment(0, 0);
+    fdMapping.right = new FormAttachment(100, -margin);
+    fdMapping.top = new FormAttachment(wOverrideTable, margin);
+    wTargetTypeMapping.setLayoutData(fdMapping);
+    try {
+      wTargetTypeMapping.fillItems();
+    } catch (HopException e) {
+      logError("Unable to list target type mappings", e);
+    }
   }
 
   private void addDdlTab(CTabFolder tabFolder, int middle, int margin) {
@@ -457,6 +480,7 @@ public class RecordDefinitionDdlDialog extends BaseTransformDialog {
     wOverrideConnection.setText(Const.NVL(input.getOverrideConnectionName(), ""));
     wOverrideSchema.setText(Const.NVL(input.getOverrideSchemaName(), ""));
     wOverrideTable.setText(Const.NVL(input.getOverrideTableName(), ""));
+    wTargetTypeMapping.setText(Const.NVL(input.getTargetTypeMappingName(), ""));
     wExecuteDdl.setSelection(input.isExecuteDdl());
     wDropTableIfExists.setSelection(input.isDropTableIfExists());
     wSkipIfTableExists.setSelection(input.isSkipIfTableExists());
@@ -485,6 +509,7 @@ public class RecordDefinitionDdlDialog extends BaseTransformDialog {
     input.setOverrideConnectionName(wOverrideConnection.getText());
     input.setOverrideSchemaName(wOverrideSchema.getText());
     input.setOverrideTableName(wOverrideTable.getText());
+    input.setTargetTypeMappingName(wTargetTypeMapping.getText());
     input.setExecuteDdl(wExecuteDdl.getSelection());
     input.setDropTableIfExists(wDropTableIfExists.getSelection());
     input.setSkipIfTableExists(wSkipIfTableExists.getSelection());

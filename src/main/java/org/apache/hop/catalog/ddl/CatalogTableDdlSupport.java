@@ -32,6 +32,7 @@ import org.apache.hop.datavault.catalog.DvSourceFieldSupport;
 import org.apache.hop.datavault.metadata.DvDdlSupport;
 import org.apache.hop.datavault.metadata.SourceField;
 import org.apache.hop.datavault.metadata.SourceFieldPrimaryKeySupport;
+import org.apache.hop.datavault.metadata.targettypemapping.TargetTypeMappingContext;
 
 /** Generates and optionally executes CREATE TABLE DDL from catalog record definitions. */
 public final class CatalogTableDdlSupport {
@@ -94,6 +95,19 @@ public final class CatalogTableDdlSupport {
       List<SourceField> sourceFields,
       boolean appendSemicolon)
       throws HopException {
+    return generateCreateTableDdl(
+        databaseMeta, variables, schemaName, tableName, sourceFields, appendSemicolon, null);
+  }
+
+  public static String generateCreateTableDdl(
+      DatabaseMeta databaseMeta,
+      IVariables variables,
+      String schemaName,
+      String tableName,
+      List<SourceField> sourceFields,
+      boolean appendSemicolon,
+      TargetTypeMappingContext targetTypeMapping)
+      throws HopException {
     if (databaseMeta == null) {
       throw new HopException("Database connection is required to generate DDL.");
     }
@@ -121,7 +135,8 @@ public final class CatalogTableDdlSupport {
         primaryKeyFieldNames,
         List.of(),
         appendSemicolon,
-        false);
+        false,
+        targetTypeMapping);
   }
 
   public static String generateDropTableDdl(
@@ -148,9 +163,36 @@ public final class CatalogTableDdlSupport {
       boolean dropTableIfExists,
       boolean appendSemicolon)
       throws HopException {
+    return buildTableDdlScript(
+        databaseMeta,
+        variables,
+        schemaName,
+        tableName,
+        sourceFields,
+        dropTableIfExists,
+        appendSemicolon,
+        null);
+  }
+
+  public static String buildTableDdlScript(
+      DatabaseMeta databaseMeta,
+      IVariables variables,
+      String schemaName,
+      String tableName,
+      List<SourceField> sourceFields,
+      boolean dropTableIfExists,
+      boolean appendSemicolon,
+      TargetTypeMappingContext targetTypeMapping)
+      throws HopException {
     String createDdl =
         generateCreateTableDdl(
-            databaseMeta, variables, schemaName, tableName, sourceFields, appendSemicolon);
+            databaseMeta,
+            variables,
+            schemaName,
+            tableName,
+            sourceFields,
+            appendSemicolon,
+            targetTypeMapping);
     if (!dropTableIfExists) {
       return createDdl;
     }
@@ -171,6 +213,33 @@ public final class CatalogTableDdlSupport {
       boolean appendSemicolon,
       ILoggingObject loggingObject)
       throws HopException {
+    return applyTableDdl(
+        databaseMeta,
+        variables,
+        schemaName,
+        tableName,
+        sourceFields,
+        dropTableIfExists,
+        executeDdl,
+        skipIfTableExists,
+        appendSemicolon,
+        loggingObject,
+        null);
+  }
+
+  public static DdlResult applyTableDdl(
+      DatabaseMeta databaseMeta,
+      IVariables variables,
+      String schemaName,
+      String tableName,
+      List<SourceField> sourceFields,
+      boolean dropTableIfExists,
+      boolean executeDdl,
+      boolean skipIfTableExists,
+      boolean appendSemicolon,
+      ILoggingObject loggingObject,
+      TargetTypeMappingContext targetTypeMapping)
+      throws HopException {
     String ddl =
         buildTableDdlScript(
             databaseMeta,
@@ -179,7 +248,8 @@ public final class CatalogTableDdlSupport {
             tableName,
             sourceFields,
             dropTableIfExists,
-            appendSemicolon);
+            appendSemicolon,
+            targetTypeMapping);
     if (!executeDdl) {
       return new DdlResult(ddl, DdlStatus.OUTPUT_ONLY, null);
     }

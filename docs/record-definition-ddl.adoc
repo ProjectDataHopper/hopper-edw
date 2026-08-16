@@ -1,0 +1,38 @@
+= Record Definition DDL
+:toc: macro
+:toclevels: 2
+
+toc::[]
+
+== Description
+
+The **Record Definition DDL** transform (plugin id `RecordDefinitionDdl`) creates or updates database tables from catalog **record definitions**, including primary-key clauses. It is the catalog/CRM staging counterpart to model-driven vault DDL.
+
+Typical pipeline:
+
+. link:record-definition-input.adoc[Get Record Definition Names] (optionally with field metadata)
+. **Record Definition DDL** — generate and/or execute `CREATE TABLE`
+
+== Dialog
+
+=== Source
+
+Catalog connection, optional filter by namespace/name (fixed values or input fields).
+
+=== Target
+
+Optional override connection / schema / table when the catalog physical table ref should not be used.
+
+**Target type mapping** (optional): a project link:target-type-mappings.adoc[Target type mapping] applied before Hop dialect types. Empty uses unique auto-match on the resolved target connection. Variables are allowed.
+
+=== DDL
+
+Execute on the database, drop-if-exists, skip-if-exists, semicolon, fail if no fields, output field names (`ddl`, `ddl_status`).
+
+Catalog/CRM staging does **not** apply the vault SQL Server UTF-8 length ×3 policy. A matching target type rule still wins over Hop defaults.
+
+== Related
+
+* link:record-definition-input.adoc[Get Record Definition Names]
+* link:target-type-mappings.adoc[Target type mappings]
+* link:data-catalog.adoc[Data catalog]

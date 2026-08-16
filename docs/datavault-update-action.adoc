@@ -76,6 +76,9 @@ image::images/action-data-vault-update.png[Data Vault Update action dialog,align
 |Update target database structure
 |When enabled (default: on), generates CREATE/ALTER DDL for every table and executes it on the model's target database before running data load pipelines. Disable when you manage schemas externally.
 
+|Target type mapping
+|Optional link:target-type-mappings.adoc[Target type mapping] applied before Hop dialect types. Empty uses unique auto-match on the model target connection.
+
 |DDL SQL filename
 |Optional path where generated DDL is written when schema changes are needed. Variables supported. The file begins with a `-- Target database: <connection name>` header followed by the statements. DDL is written only when changes are actually required. You can use this without executing DDL on the database.
 

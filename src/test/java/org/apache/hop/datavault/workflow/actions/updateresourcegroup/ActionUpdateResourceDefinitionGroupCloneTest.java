@@ -46,6 +46,7 @@ class ActionUpdateResourceDefinitionGroupCloneTest {
     original.setModelCheckParallelism("${MODEL_CHECK_PARALLELISM}");
     original.setDetailedDataTypeChecking(false);
     original.setUpdateTargetDatabaseStructure(false);
+    original.setTargetTypeMapping("postgres-target-type-rules");
     original.setIgnoreModelCheckWarnings(true);
     original.setWriteValidationReport(true);
     original.setValidationReportFolder("${PROJECT_HOME}/reports");
@@ -60,6 +61,7 @@ class ActionUpdateResourceDefinitionGroupCloneTest {
     assertEquals("${MODEL_CHECK_PARALLELISM}", copy.getModelCheckParallelism());
     assertFalse(copy.isDetailedDataTypeChecking());
     assertFalse(copy.isUpdateTargetDatabaseStructure());
+    assertEquals("postgres-target-type-rules", copy.getTargetTypeMapping());
     assertTrue(copy.isIgnoreModelCheckWarnings());
     assertTrue(copy.isWriteValidationReport());
     assertEquals("${PROJECT_HOME}/reports", copy.getValidationReportFolder());

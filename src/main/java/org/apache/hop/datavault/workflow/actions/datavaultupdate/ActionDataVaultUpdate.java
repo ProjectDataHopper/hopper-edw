@@ -74,6 +74,8 @@ import org.apache.hop.datavault.metadata.DvUpdateWorkflowSupport;
 import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
 import org.apache.hop.datavault.metadata.IDvTable;
 import org.apache.hop.datavault.metadata.ModelConfigurationResolver;
+import org.apache.hop.datavault.metadata.targettypemapping.TargetTypeMappingMeta;
+import org.apache.hop.datavault.metadata.targettypemapping.TargetTypeMappingSupport;
 import org.apache.hop.datavault.metrics.ExecutionMetricsProfileResolver;
 import org.apache.hop.datavault.metrics.ResolvedExecutionMetrics;
 import org.apache.hop.datavault.metrics.metadata.ExecutionMetricsProfileMeta;
@@ -269,6 +271,17 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
   private boolean updateTargetDatabaseStructure = true;
 
   @GuiWidgetElement(
+      order = "0150",
+      type = GuiElementType.METADATA,
+      metadata = TargetTypeMappingMeta.class,
+      variables = true,
+      label = "i18n::ActionDataVaultUpdate.TargetTypeMapping.Label",
+      toolTip = "i18n::ActionDataVaultUpdate.TargetTypeMapping.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_DDL_TAB_ID)
+  @HopMetadataProperty
+  private String targetTypeMapping;
+
+  @GuiWidgetElement(
       order = "0200",
       type = GuiElementType.FILENAME,
       label = "i18n::ActionDataVaultUpdate.DdlSqlFilename.Label",
@@ -347,6 +360,7 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
     this.harvestRunId = meta.harvestRunId;
     this.harvestHistoryDatabase = meta.harvestHistoryDatabase;
     this.updateTargetDatabaseStructure = meta.updateTargetDatabaseStructure;
+    this.targetTypeMapping = meta.targetTypeMapping;
     this.ddlSqlFilename = meta.ddlSqlFilename;
     this.failIfDdlNeeded = meta.failIfDdlNeeded;
     this.ensureSpecialRecords = meta.ensureSpecialRecords;
@@ -483,6 +497,7 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
       }
 
       String realDdlSqlFilename = resolve(ddlSqlFilename);
+      TargetTypeMappingSupport.applyExplicitName(getVariables(), targetTypeMapping);
       boolean processDdl =
           updateTargetDatabaseStructure || failIfDdlNeeded || !Utils.isEmpty(realDdlSqlFilename);
 

@@ -56,6 +56,7 @@ Architecture pictures are **committed SVGs** (`docs/images/diagrams/`) generated
 | [source-modeler-overview.adoc](source-modeler-overview.adoc) | **Source modeler (`.hsm`)**: PK/FK import, multi-table queries, Free SQL, Source model SQL transform, **Hop Server JDBC / DBeaver** (`jdbc:hop-hsm:`) |
 | [generating-data-vault-from-source-model.adoc](generating-data-vault-from-source-model.adoc) | **Generate a raw Data Vault** from source-model tables, queries, JSON, and pipelines (issue #125) |
 | [data-type-mappings.adoc](data-type-mappings.adoc) | **Data type mappings**: project pre-model policies, HSM tab, catalog effective layout, load Select Values |
+| [target-type-mappings.adoc](target-type-mappings.adoc) | **Target type mappings**: Hop type → native SQL type preferences for generated DDL |
 | [source-to-target-lineage.adoc](source-to-target-lineage.adoc) | Field/table lineage, Lineage tab, explainable DDL, catalog publish, drift gate, reverse browser |
 | [hop-lineage-view.adoc](hop-lineage-view.adoc) | **Hop Lineage View** (`.hlv`): in-GUI upstream graph over Marquez, export folder, or local models |
 | [datavault-source.adoc](datavault-source.adoc) | `DV_SOURCE` record definitions (database, file, **composite**) |
@@ -66,6 +67,7 @@ Architecture pictures are **committed SVGs** (`docs/images/diagrams/`) generated
 | [record-definition-input.adoc](record-definition-input.adoc) | Pipeline transform: **Get Record Definition Names** (catalog definition list/metadata) |
 | [record-definition-data-input.adoc](record-definition-data-input.adoc) | Pipeline transform: read **data rows** from a catalog record definition |
 | [record-definition-output.adoc](record-definition-output.adoc) | Pipeline transform: write/discover/migrate catalog definitions |
+| [record-definition-ddl.adoc](record-definition-ddl.adoc) | Pipeline transform: CREATE/ALTER tables from catalog record definitions |
 | [database-table-metadata.adoc](database-table-metadata.adoc) | Pipeline transform: Hop-typed table columns + PK/FK (empty tables OK) |
 
 ## Data Vault reference (AsciiDoc)

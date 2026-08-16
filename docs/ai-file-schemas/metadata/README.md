@@ -14,6 +14,7 @@ ${PROJECT_HOME}/metadata/<metadata-key>/<name>.json
 | `resource-definition-group` | [resource-definition-group.md](resource-definition-group.md) | [resource-definition-group.schema.json](resource-definition-group.schema.json) |
 | `execution-metrics-profile` | [execution-metrics-profile.md](execution-metrics-profile.md) | [execution-metrics-profile.schema.json](execution-metrics-profile.schema.json) |
 | `data-quality-rule-set` | [data-quality-rule-set.md](data-quality-rule-set.md) | [data-quality-rule-set.schema.json](data-quality-rule-set.schema.json) |
+| `target-type-mapping` | [target-type-mapping.md](target-type-mapping.md) | (see that page; no JSON Schema yet) |
 
 ## Catalog FILE store (not under metadata/)
 

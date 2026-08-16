@@ -64,6 +64,7 @@ import org.apache.hop.datavault.metadata.businessvault.IBvTable;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.datavault.metadata.dimensional.DmTargetDatabaseSupport;
 import org.apache.hop.datavault.metadata.dimensional.IDmTable;
+import org.apache.hop.datavault.metadata.targettypemapping.TargetTypeMappingSupport;
 import org.apache.hop.datavault.resourcedefinition.RemediationDdlWorkflowSupport.GeneratedArtifacts;
 import org.apache.hop.datavault.resourcedefinition.RemediationDdlWorkflowSupport.TableDdl;
 import org.apache.hop.datavault.resourcedefinition.SchemaRemediationArtifactsSupport.RemediationPackage;
@@ -1065,7 +1066,13 @@ public final class RemediationProposalApplySupport {
             null);
     try (Database db = new Database(logging, context.variables(), targetDatabaseMeta)) {
       db.connect();
-      String ddl = DvDdlSupport.getTargetTableDdl(db, tableName, forced);
+      String ddl =
+          DvDdlSupport.getTargetTableDdl(
+              db,
+              tableName,
+              forced,
+              TargetTypeMappingSupport.resolve(
+                  null, targetDatabaseMeta, context.metadataProvider(), context.variables()));
       if (Utils.isEmpty(ddl)) {
         return List.of(
             "-- "

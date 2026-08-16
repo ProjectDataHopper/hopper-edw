@@ -30,6 +30,9 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.datavault.metadata.SourceField;
+import org.apache.hop.datavault.metadata.targettypemapping.TargetTypeMappingContext;
+import org.apache.hop.datavault.metadata.targettypemapping.TargetTypeMappingMeta;
+import org.apache.hop.datavault.metadata.targettypemapping.TargetTypeMappingRule;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -126,6 +129,40 @@ class CatalogTableDdlSupportTest {
     assertTrue(ddl.contains("PRIMARY KEY"));
     assertTrue(ddl.contains("tenant_id"));
     assertTrue(ddl.contains("customer_id"));
+  }
+
+  @Test
+  void generateCreateTableDdlAppliesTargetTypeMapping() throws HopException {
+    SourceField flag = field("flag", IValueMeta.TYPE_STRING);
+    flag.setLength("1");
+    SourceField name = field("name", IValueMeta.TYPE_STRING);
+    name.setLength("80");
+
+    TargetTypeMappingMeta mapping = new TargetTypeMappingMeta("rules");
+    TargetTypeMappingRule char1 = new TargetTypeMappingRule();
+    char1.setMatchHopType("String");
+    char1.setMatchMinLength("1");
+    char1.setMatchMaxLength("1");
+    char1.setTargetSqlType("CHAR(1)");
+    mapping.getRules().add(char1);
+    TargetTypeMappingRule nvarchar = new TargetTypeMappingRule();
+    nvarchar.setMatchHopType("String");
+    nvarchar.setMatchMaxLength("2000");
+    nvarchar.setTargetSqlType("NVARCHAR({length})");
+    mapping.getRules().add(nvarchar);
+
+    String ddl =
+        CatalogTableDdlSupport.generateCreateTableDdl(
+            postgreSqlDatabaseMeta(),
+            new Variables(),
+            "",
+            "sample",
+            List.of(flag, name),
+            true,
+            new TargetTypeMappingContext(mapping, new Variables()));
+
+    assertTrue(ddl.contains("CHAR(1)"));
+    assertTrue(ddl.contains("NVARCHAR(80)"));
   }
 
   private static SourceField field(String name, int hopType) {

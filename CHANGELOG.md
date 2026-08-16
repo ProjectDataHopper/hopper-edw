@@ -4,6 +4,15 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## Unreleased
 
+### Target type mappings (issue #127)
+
+- New project metadata **Target type mapping**: ordered Hop-type + length/precision rules emit native SQL types (`CHAR(1)`, `NVARCHAR({length})`, `timestamp(6) with time zone`) **before** Hop dialect DDL
+- Select the mapping on **Record Definition DDL**, **Update resource definition group**, and single-model DV / BV / DM Update; unique auto-match when exactly one mapping names the target connection
+- `{length}` / `{precision}` placeholders and Hop `'${variables}'`; SQL Server UTF-8 rewrite is skipped for rule-matched columns
+- Retail sample: `vault-target-mapping` (String length 1 → `CHAR({length})`) selected on `run-retail-update-models.hwf`
+- Editor screenshots: Rules and Preview tabs
+- Guide: [docs/target-type-mappings.adoc](docs/target-type-mappings.adoc)
+
 ### Jenkins / Maven docs rewrite
 
 - Generated-docs `.adoc` href rewrite runs in Java (`RewriteAdocHrefs`) so `mvn verify` no longer requires `python3` on CI agents

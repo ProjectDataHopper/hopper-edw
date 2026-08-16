@@ -60,6 +60,9 @@ Load date, pipeline / workflow run configurations, parallel pipeline copies, and
 |Update target database structure / Fail if DDL is needed
 |Same DDL policy as the dedicated update actions, applied per model.
 
+|Target type mapping
+|Optional link:target-type-mappings.adoc[Target type mapping] applied before Hop dialect types. Copied to each child DV / BV / DM update. Empty uses unique auto-match on the model target connection.
+
 |Do not update target database
 |**Dry run.** Runs the parallel model checks (and optional DDL when structure update or fail-if-DDL is on) but **skips data load pipelines** on every child DV/BV/DM update — same semantics as Data Vault Update. With structure update and fail-if-DDL both off, only validation runs and reports (no per-model update step).
 |===

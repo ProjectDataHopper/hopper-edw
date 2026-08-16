@@ -66,6 +66,8 @@ import org.apache.hop.datavault.metadata.dimensional.DmTargetDatabaseSupport;
 import org.apache.hop.datavault.metadata.dimensional.IDmTable;
 import org.apache.hop.datavault.metadata.dimensional.pipeline.DmGeneratedPipelineSupport;
 import org.apache.hop.datavault.metadata.dimensional.pipeline.DmUpdateExecutionSupport;
+import org.apache.hop.datavault.metadata.targettypemapping.TargetTypeMappingMeta;
+import org.apache.hop.datavault.metadata.targettypemapping.TargetTypeMappingSupport;
 import org.apache.hop.datavault.metrics.DvUpdateMetricsCollector;
 import org.apache.hop.datavault.metrics.ExecutionMetricsProfileResolver;
 import org.apache.hop.datavault.metrics.ResolvedExecutionMetrics;
@@ -231,6 +233,17 @@ public class ActionDimensionalUpdate extends ActionBase implements Cloneable, IA
   private boolean updateTargetDatabaseStructure = true;
 
   @GuiWidgetElement(
+      order = "0150",
+      type = GuiElementType.METADATA,
+      metadata = TargetTypeMappingMeta.class,
+      variables = true,
+      label = "i18n::ActionDimensionalUpdate.TargetTypeMapping.Label",
+      toolTip = "i18n::ActionDimensionalUpdate.TargetTypeMapping.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_DDL_TAB_ID)
+  @HopMetadataProperty
+  private String targetTypeMapping;
+
+  @GuiWidgetElement(
       order = "0200",
       type = GuiElementType.FILENAME,
       label = "i18n::ActionDimensionalUpdate.DdlSqlFilename.Label",
@@ -272,6 +285,7 @@ public class ActionDimensionalUpdate extends ActionBase implements Cloneable, IA
     this.publishToCatalog = meta.publishToCatalog;
     this.dataCatalogConnection = meta.dataCatalogConnection;
     this.updateTargetDatabaseStructure = meta.updateTargetDatabaseStructure;
+    this.targetTypeMapping = meta.targetTypeMapping;
     this.ddlSqlFilename = meta.ddlSqlFilename;
     this.failIfDdlNeeded = meta.failIfDdlNeeded;
   }
@@ -365,6 +379,7 @@ public class ActionDimensionalUpdate extends ActionBase implements Cloneable, IA
       boolean success = true;
       int totalErrors = 0;
       String realDdlSqlFilename = resolve(ddlSqlFilename);
+      TargetTypeMappingSupport.applyExplicitName(getVariables(), targetTypeMapping);
       boolean processDdl =
           updateTargetDatabaseStructure || failIfDdlNeeded || !Utils.isEmpty(realDdlSqlFilename);
 

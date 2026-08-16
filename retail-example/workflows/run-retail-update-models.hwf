@@ -279,12 +279,15 @@ limitations under the License.
       <detailedDataTypeChecking>Y</detailedDataTypeChecking>
       <preferHarvestForTypeChecks>N</preferHarvestForTypeChecks>
       <harvestRunId>${DV_SCHEMA_HARVEST_RUN_ID}</harvestRunId>
+      <harvestHistoryDatabase/>
       <modelCheckParallelism>8</modelCheckParallelism>
       <ignoreModelCheckWarnings>N</ignoreModelCheckWarnings>
       <writeValidationReport>N</writeValidationReport>
       <validationReportFolder>${PROJECT_HOME}/work/reports</validationReportFolder>
+      <validationReportBaseName/>
       <validationReportFormat>MARKDOWN</validationReportFormat>
       <updateTargetDatabaseStructure>Y</updateTargetDatabaseStructure>
+      <targetTypeMapping>vault-target-mapping</targetTypeMapping>
       <failIfDdlNeeded>N</failIfDdlNeeded>
       <doNotUpdateTargetDatabase>N</doNotUpdateTargetDatabase>
       <publishToCatalog>Y</publishToCatalog>

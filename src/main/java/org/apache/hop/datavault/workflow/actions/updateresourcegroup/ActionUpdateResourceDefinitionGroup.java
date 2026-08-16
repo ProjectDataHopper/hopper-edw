@@ -37,6 +37,7 @@ import org.apache.hop.core.gui.plugin.GuiWidgetElement;
 import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.datavault.metadata.targettypemapping.TargetTypeMappingMeta;
 import org.apache.hop.datavault.metrics.VaultUpdateExecutionSupport;
 import org.apache.hop.datavault.metrics.WorkflowLoadOverviewFileWriter;
 import org.apache.hop.datavault.metrics.WorkflowLoadOverviewLoader;
@@ -333,6 +334,17 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
   private boolean updateTargetDatabaseStructure = true;
 
   @GuiWidgetElement(
+      order = "0605",
+      type = GuiElementType.METADATA,
+      metadata = TargetTypeMappingMeta.class,
+      variables = true,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.TargetTypeMapping.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.TargetTypeMapping.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_OPERATIONS_TAB_ID)
+  @HopMetadataProperty
+  private String targetTypeMapping;
+
+  @GuiWidgetElement(
       order = "0610",
       type = GuiElementType.CHECKBOX,
       label = "i18n::ActionUpdateResourceDefinitionGroup.FailIfDdlNeeded.Label",
@@ -546,6 +558,7 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
             ? meta.validationReportFormat
             : GroupModelValidationReportFileWriter.ReportFormat.MARKDOWN.name();
     this.updateTargetDatabaseStructure = meta.updateTargetDatabaseStructure;
+    this.targetTypeMapping = meta.targetTypeMapping;
     this.failIfDdlNeeded = meta.failIfDdlNeeded;
     this.doNotUpdateTargetDatabase = meta.doNotUpdateTargetDatabase;
     this.publishToCatalog = meta.publishToCatalog;
@@ -921,6 +934,7 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
     action.setHarvestRunId(harvestRunId);
     action.setHarvestHistoryDatabase(harvestHistoryDatabase);
     action.setUpdateTargetDatabaseStructure(updateTargetDatabaseStructure);
+    action.setTargetTypeMapping(targetTypeMapping);
     action.setFailIfDdlNeeded(failIfDdlNeeded);
     action.setPublishToCatalog(publishToCatalog && !doNotUpdateTargetDatabase);
     action.setDataCatalogConnection(catalogConnection);
@@ -946,6 +960,7 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
     action.setLogModelCheckFailures(!skipChildModelCheck && logModelCheckFailures);
     action.setAbortOnModelCheckFailures(!skipChildModelCheck && abortOnModelCheckFailures);
     action.setUpdateTargetDatabaseStructure(updateTargetDatabaseStructure);
+    action.setTargetTypeMapping(targetTypeMapping);
     action.setFailIfDdlNeeded(failIfDdlNeeded);
     action.setPublishToCatalog(publishToCatalog && !doNotUpdateTargetDatabase);
     action.setDataCatalogConnection(catalogConnection);
@@ -968,6 +983,7 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
     action.setLogModelCheckFailures(!skipChildModelCheck && logModelCheckFailures);
     action.setAbortOnModelCheckFailures(!skipChildModelCheck && abortOnModelCheckFailures);
     action.setUpdateTargetDatabaseStructure(updateTargetDatabaseStructure);
+    action.setTargetTypeMapping(targetTypeMapping);
     action.setFailIfDdlNeeded(failIfDdlNeeded);
     action.setPublishToCatalog(publishToCatalog && !doNotUpdateTargetDatabase);
     action.setDataCatalogConnection(catalogConnection);

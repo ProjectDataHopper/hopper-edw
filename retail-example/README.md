@@ -28,6 +28,7 @@ End-to-end retail data vault example demonstrating initial and incremental loads
 - [docs/getting-started-retail.adoc](../docs/getting-started-retail.adoc) — tour this finished sample
 - [docs/source-modeler-overview.adoc](../docs/source-modeler-overview.adoc) — source modeler (`.hsm`) and composite feeds
 - [docs/data-type-mappings.adoc](../docs/data-type-mappings.adoc) — pre-modeling data type mapping profiles
+- [docs/target-type-mappings.adoc](../docs/target-type-mappings.adoc) — Hop type → native SQL type preferences for generated DDL
 - [docs/feature-overview.adoc](../docs/feature-overview.adoc) — all plugin capabilities
 - [docs/hop-lineage-view.adoc](../docs/hop-lineage-view.adoc) — Hop Lineage View (`.hlv`) over Marquez / local models
 - [docs/README.md](../docs/README.md) — full documentation index
@@ -82,6 +83,7 @@ retail-example/
 ├── metadata/                  # CRM, Vault, local-catalog, rule sets, run configurations
 │   ├── data-quality-rule-set/ # retail-source-quality + retail-target-quality libraries
 │   ├── data-type-mapping/     # premodel-defaults (String length + *_at timestamps)
+│   ├── target-type-mapping/   # vault-target-mapping (String length 1 → CHAR)
 │   └── lineage-backend/       # Marquez-Localhost (Hop Lineage View)
 ├── fixtures/
 │   └── schema-gate-baseline/  # Seed for catalog-versions tag v1.0.0 (copied into work/)

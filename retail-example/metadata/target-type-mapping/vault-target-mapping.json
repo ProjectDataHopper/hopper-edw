@@ -1,0 +1,21 @@
+{
+  "virtualPath": "",
+  "name": "vault-target-mapping",
+  "description": "",
+  "rule": [
+    {
+      "matchMaxLength": "1",
+      "matchMinLength": "1",
+      "name": "One character",
+      "targetSqlType": "CHAR({length})",
+      "id": "one-char",
+      "matchMinPrecision": "",
+      "matchMaxPrecision": "",
+      "matchLengthAbsent": false,
+      "enabled": true,
+      "matchFieldNamePattern": "",
+      "matchHopType": "String"
+    }
+  ],
+  "targetDatabase": "Vault"
+}

@@ -74,6 +74,9 @@ public class RecordDefinitionDdlMeta
   @HopMetadataProperty(key = "override_table")
   private String overrideTableName;
 
+  @HopMetadataProperty(key = "target_type_mapping")
+  private String targetTypeMappingName;
+
   @HopMetadataProperty(key = "execute_ddl")
   private boolean executeDdl = true;
 
@@ -116,6 +119,7 @@ public class RecordDefinitionDdlMeta
     meta.overrideConnectionName = overrideConnectionName;
     meta.overrideSchemaName = overrideSchemaName;
     meta.overrideTableName = overrideTableName;
+    meta.targetTypeMappingName = targetTypeMappingName;
     meta.executeDdl = executeDdl;
     meta.dropTableIfExists = dropTableIfExists;
     meta.skipIfTableExists = skipIfTableExists;
