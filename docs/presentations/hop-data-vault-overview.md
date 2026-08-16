@@ -18,7 +18,7 @@ limitations under the License.
 # Hop Data Vault 2.0 Plugin
 
 **Model-driven Data Vault, Business Vault, and dimensional marts on Apache Hop 2.19.0**  
-*(plugin 0.8.0 · Apache Hop 2.19.0 · Java 21)*
+*(plugin 0.9.0 · Apache Hop 2.19.0 · Java 21)*
 
 > For a feature checklist with documentation links, see [feature-overview.adoc](../feature-overview.adoc).  
 > For an interactive standalone HTML presentation (architecture, detail pages, roadmap & open issues), open [hop-data-vault-features.html](hop-data-vault-features.html).
@@ -258,7 +258,7 @@ Choose per table — mixed models are supported.
 | **Implementers** | [README.md](../../README.md) and [integration-tests/PROJECT.md](../../integration-tests/PROJECT.md) |
 | **Reference** | [docs/README.md](../README.md) — full doc index |
 
-Open `retail-example/` for the tutorial, or `integration-tests/` as **`hop-data-vault`** for regression suites. Configure **CRM** and **Vault** connections, install plugin **0.8.0** on Apache Hop **2.19.0** / recent **2.19.0-SNAPSHOT**.
+Open `retail-example/` for the tutorial, or `integration-tests/` as **`hop-data-vault`** for regression suites. Configure **CRM** and **Vault** connections, install plugin **0.9.0** on Apache Hop **2.19.0** / recent **2.19.0-SNAPSHOT**.
 
 ---
 

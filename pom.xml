@@ -21,7 +21,7 @@
 
   <groupId>org.apache.hop</groupId>
   <artifactId>hop-datavault</artifactId>
-  <version>0.9.0-SNAPSHOT</version>
+  <version>0.9.0</version>
   <packaging>jar</packaging>
 
   <name>Hop Data Vault 2.0 Metadata</name>

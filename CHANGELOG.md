@@ -4,6 +4,16 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## Unreleased
 
+## [0.9.0] — 2026-08-16
+
+Requires **Apache Hop 2.19.0** (or a **recent 2.19.0-SNAPSHOT** until GA) and **Java 21**.
+
+**Hop runtime:** Hop **2.19.0** is not yet published to Maven Central. To use this plugin you must either **build Hop from source** (branch/tag aligned with 2.19) or **download a recent CI snapshot** of the Hop client:
+
+- [Apache Hop 2.19.0-SNAPSHOT (hop-client)](https://repository.apache.org/content/groups/snapshots/org/apache/hop/hop-client/2.19.0-SNAPSHOT/)
+
+**Downloads:** [GitHub release zip](https://github.com/mattcasters/hop-data-vault/releases/download/v0.9.0/hop-datavault-0.9.0.zip) · [Data Hopper Nexus](https://repository.data-hopper.com/repository/hop-community-plugins/org/apache/hop/hop-datavault/0.9.0/hop-datavault-0.9.0.zip) (`org.apache.hop:hop-datavault:0.9.0`)
+
 ### SQL Server live source schema
 
 - JDBC catalog lookup now resolves `${DB_NAME}` (and similar) before `DatabaseMetaData.getColumns`. SQL Server treats catalog as a real database name and failed model check with `Database '${DB_NAME}' does not exist`.
