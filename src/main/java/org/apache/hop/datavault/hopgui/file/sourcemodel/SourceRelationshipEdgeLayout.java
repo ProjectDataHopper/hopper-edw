@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.Map;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
-import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry.Bounds;
+import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphEdgeLayout;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceEndpointKind;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceEndpointSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
@@ -140,37 +140,28 @@ public final class SourceRelationshipEdgeLayout {
   }
 
   static Side sideFacing(Bounds from, Bounds to) {
-    Point mid = ModelGraphConnectionGeometry.anchorToward(from, to);
-    if (mid.x <= from.x()) {
-      return Side.LEFT;
-    }
-    if (mid.x >= from.x() + from.width()) {
-      return Side.RIGHT;
-    }
-    if (mid.y <= from.y()) {
-      return Side.TOP;
-    }
-    return Side.BOTTOM;
+    return fromShared(ModelGraphEdgeLayout.sideFacing(from, to));
   }
 
   static Point anchorOnSide(Bounds bounds, Side side, int index, int count) {
-    int n = Math.max(1, count);
-    int i = Math.min(Math.max(0, index), n - 1);
-    double fraction = (i + 1.0) / (n + 1.0);
-    int pad = 8;
+    return ModelGraphEdgeLayout.anchorOnSide(bounds, toShared(side), index, count);
+  }
+
+  private static ModelGraphEdgeLayout.Side toShared(Side side) {
     return switch (side) {
-      case LEFT ->
-          new Point(bounds.x(), bounds.y() + pad + (int) ((bounds.height() - 2 * pad) * fraction));
-      case RIGHT ->
-          new Point(
-              bounds.x() + bounds.width(),
-              bounds.y() + pad + (int) ((bounds.height() - 2 * pad) * fraction));
-      case TOP ->
-          new Point(bounds.x() + pad + (int) ((bounds.width() - 2 * pad) * fraction), bounds.y());
-      case BOTTOM ->
-          new Point(
-              bounds.x() + pad + (int) ((bounds.width() - 2 * pad) * fraction),
-              bounds.y() + bounds.height());
+      case LEFT -> ModelGraphEdgeLayout.Side.LEFT;
+      case RIGHT -> ModelGraphEdgeLayout.Side.RIGHT;
+      case TOP -> ModelGraphEdgeLayout.Side.TOP;
+      case BOTTOM -> ModelGraphEdgeLayout.Side.BOTTOM;
+    };
+  }
+
+  private static Side fromShared(ModelGraphEdgeLayout.Side side) {
+    return switch (side) {
+      case LEFT -> Side.LEFT;
+      case RIGHT -> Side.RIGHT;
+      case TOP -> Side.TOP;
+      case BOTTOM -> Side.BOTTOM;
     };
   }
 

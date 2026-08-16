@@ -36,6 +36,7 @@ import org.apache.hop.datavault.catalog.DvSourceCatalogService;
 import org.apache.hop.datavault.hopgui.file.modelgraph.DvTableDisplaySupport;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry.Bounds;
+import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphEdgeLayout;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphTableCardLayout;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphTableNameHitArea;
 import org.apache.hop.datavault.metadata.DataVaultModel;
@@ -52,13 +53,14 @@ import org.apache.hop.i18n.BaseMessages;
 
 /**
  * Basic painter for a Data Vault model using IGc. Draws tables (hubs, links, satellites) at their
- * locations with icons and names. Draws simple lines from links to their participating hubs. Draws
- * simple lines from satellites to their parent hubs (or links). Supports mouse-over underline on
- * table names (for hyperlink style) and populates AreaOwners for name (TRANSFORM_NAME) vs body
- * (TRANSFORM_ICON) to support differentiated clicks. If a table has a non-empty description, draws
- * a small INFO_DISABLED icon at top-left and registers a TRANSFORM_INFO_ICON area (for tooltip on
- * hover). Optionally shows the resolved hash key field name in small print below the table name
- * ({@link #setShowHashKeyFieldNames(boolean)}).
+ * locations with icons and names. Draws straight, side-spread relationship lines from links to
+ * their participating hubs and from satellites to their parent hubs (or links), with a square
+ * attachment point on each table edge. Supports mouse-over underline on table names (for hyperlink
+ * style) and populates AreaOwners for name (TRANSFORM_NAME) vs body (TRANSFORM_ICON) to support
+ * differentiated clicks. If a table has a non-empty description, draws a small INFO_DISABLED icon
+ * at top-left and registers a TRANSFORM_INFO_ICON area (for tooltip on hover). Optionally shows the
+ * resolved hash key field name in small print below the table name ({@link
+ * #setShowHashKeyFieldNames(boolean)}).
  */
 @Getter
 @Setter
@@ -162,14 +164,7 @@ public class DataVaultModelPainter extends BasePainter {
     // Draw connections first (behind tables)
     gc.setForeground(IGc.EColor.BLACK);
     gc.setLineWidth(1);
-    for (IDvTable table : model.getTables()) {
-      if (table.getTableType() == DvTableType.LINK) {
-        drawLinkConnections((DvLink) table);
-      }
-      if (table.getTableType() == DvTableType.SATELLITE) {
-        drawSatelliteConnections(table);
-      }
-    }
+    Map<String, ModelGraphEdgeLayout.EdgeGeometry> connections = drawTableConnections();
 
     // Draw the (temporary) candidate relationship line (if dragging), before tables so it renders
     // underneath the table cards, just like permanent connections. Uses logical coords under the
@@ -187,59 +182,102 @@ public class DataVaultModelPainter extends BasePainter {
       }
       drawTable(table, loc.x, loc.y);
     }
+
+    // Attachment squares sit on table edges, so they are painted after the cards.
+    gc.setForeground(IGc.EColor.BLACK);
+    gc.setLineWidth(1);
+    ModelGraphConnectionGeometry.drawAnchorSquares(gc, connections.values());
   }
 
-  private void drawLinkConnections(DvLink link) {
-    Point linkLocation = link.getLocation();
-    if (linkLocation == null) return;
-    Point linkLoc = real2screen(linkLocation.x, linkLocation.y);
+  private Map<String, ModelGraphEdgeLayout.EdgeGeometry> drawTableConnections() {
+    List<ModelGraphEdgeLayout.Edge> edges = collectTableConnectionEdges();
+    Map<String, ModelGraphEdgeLayout.EdgeGeometry> layout = ModelGraphEdgeLayout.layout(edges);
+    for (ModelGraphEdgeLayout.Edge edge : edges) {
+      ModelGraphEdgeLayout.EdgeGeometry geometry = layout.get(edge.id());
+      if (geometry == null) {
+        continue;
+      }
+      ModelGraphConnectionGeometry.drawStraightConnection(
+          gc, geometry.fromAnchor(), geometry.toAnchor());
+    }
+    return layout;
+  }
 
-    // Raw model coords; transform handles mag + pan
-    Point linkBox = calculateTableBoxSize(link);
-    Bounds linkBounds = new Bounds(linkLoc.x, linkLoc.y, linkBox.x, linkBox.y);
+  private List<ModelGraphEdgeLayout.Edge> collectTableConnectionEdges() {
+    List<ModelGraphEdgeLayout.Edge> edges = new ArrayList<>();
+    for (IDvTable table : model.getTables()) {
+      if (table.getTableType() == DvTableType.LINK && table instanceof DvLink link) {
+        collectLinkConnectionEdges(link, edges);
+      }
+      if (table.getTableType() == DvTableType.SATELLITE) {
+        collectSatelliteConnectionEdges(table, edges);
+      }
+    }
+    return edges;
+  }
 
+  private void collectLinkConnectionEdges(DvLink link, List<ModelGraphEdgeLayout.Edge> edges) {
+    Bounds linkBounds = tableBounds(link);
+    if (linkBounds == null) {
+      return;
+    }
+    String linkKey = tableKey(link);
     for (String hubName : link.getHubNames()) {
       IDvTable hub = tableByName.get(hubName);
-      if (hub != null) {
-        Point hubLoc = hub.getLocation();
-        if (hubLoc != null) {
-          Point hLoc = real2screen(hubLoc.x, hubLoc.y);
-          Point hubBox = calculateTableBoxSize(hub);
-          Bounds hubBounds = new Bounds(hLoc.x, hLoc.y, hubBox.x, hubBox.y);
-          ModelGraphConnectionGeometry.drawConnectionSpline(gc, hubBounds, linkBounds);
-        }
+      Bounds hubBounds = tableBounds(hub);
+      if (hubBounds == null) {
+        continue;
       }
+      edges.add(
+          new ModelGraphEdgeLayout.Edge(
+              "link-hub|" + linkKey + "|" + tableKey(hub),
+              linkKey,
+              linkBounds,
+              tableKey(hub),
+              hubBounds));
     }
   }
 
-  private void drawSatelliteConnections(IDvTable sat) {
-    Point satLocation = sat.getLocation();
-    if (satLocation == null) return;
-    Point satLoc = real2screen(satLocation.x, satLocation.y);
-
-    // Raw model coords; transform handles mag + pan
-    Point satBox = calculateTableBoxSize(sat);
-    Bounds satBounds = new Bounds(satLoc.x, satLoc.y, satBox.x, satBox.y);
-
-    if (sat instanceof DvSatellite satellite) {
-      // Prefer hub, as per standard DV2.0; fall back to link if no hub
-      String parentName = satellite.getHubName();
-      if (parentName == null || parentName.isEmpty()) {
-        parentName = satellite.getLinkName();
-      }
-      if (parentName != null && !parentName.isEmpty()) {
-        IDvTable parent = tableByName.get(parentName);
-        if (parent != null) {
-          Point pLocation = parent.getLocation();
-          if (pLocation != null) {
-            Point pLoc = real2screen(pLocation.x, pLocation.y);
-            Point pBox = calculateTableBoxSize(parent);
-            Bounds parentBounds = new Bounds(pLoc.x, pLoc.y, pBox.x, pBox.y);
-            ModelGraphConnectionGeometry.drawConnectionSpline(gc, parentBounds, satBounds);
-          }
-        }
-      }
+  private void collectSatelliteConnectionEdges(
+      IDvTable sat, List<ModelGraphEdgeLayout.Edge> edges) {
+    if (!(sat instanceof DvSatellite satellite)) {
+      return;
     }
+    Bounds satBounds = tableBounds(sat);
+    if (satBounds == null) {
+      return;
+    }
+    // Prefer hub, as per standard DV2.0; fall back to link if no hub
+    String parentName = satellite.getHubName();
+    if (parentName == null || parentName.isEmpty()) {
+      parentName = satellite.getLinkName();
+    }
+    if (parentName == null || parentName.isEmpty()) {
+      return;
+    }
+    IDvTable parent = tableByName.get(parentName);
+    Bounds parentBounds = tableBounds(parent);
+    if (parentBounds == null) {
+      return;
+    }
+    String satKey = tableKey(sat);
+    String parentKey = tableKey(parent);
+    edges.add(
+        new ModelGraphEdgeLayout.Edge(
+            "sat-parent|" + satKey + "|" + parentKey, satKey, satBounds, parentKey, parentBounds));
+  }
+
+  private Bounds tableBounds(IDvTable table) {
+    if (table == null || table.getLocation() == null) {
+      return null;
+    }
+    Point loc = real2screen(table.getLocation().x, table.getLocation().y);
+    Point box = calculateTableBoxSize(table);
+    return new Bounds(loc.x, loc.y, box.x, box.y);
+  }
+
+  private static String tableKey(IDvTable table) {
+    return "table|" + (table.getName() != null ? table.getName() : "?");
   }
 
   private boolean isEmptyModel() {
@@ -576,12 +614,11 @@ public class DataVaultModelPainter extends BasePainter {
                 candidateRelationshipTarget.getLocation().y);
         Point targetBox = calculateTableBoxSize(candidateRelationshipTarget);
         Bounds targetBounds = new Bounds(targetLoc.x, targetLoc.y, targetBox.x, targetBox.y);
-        ModelGraphConnectionGeometry.drawConnectionSpline(gc, sourceBounds, targetBounds);
+        ModelGraphConnectionGeometry.drawStraightConnection(gc, sourceBounds, targetBounds);
       } else {
         Bounds cursorBounds = ModelGraphConnectionGeometry.pointBounds(logEnd.x, logEnd.y);
         Point lineStart = ModelGraphConnectionGeometry.anchorToward(sourceBounds, cursorBounds);
-        ModelGraphConnectionGeometry.drawConnectionSpline(
-            gc, lineStart, logEnd, sourceBounds, cursorBounds);
+        ModelGraphConnectionGeometry.drawStraightConnection(gc, lineStart, logEnd);
       }
 
       // Small endpoint marker (approx circle using round rect)

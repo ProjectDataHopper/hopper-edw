@@ -34,6 +34,7 @@ import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.hopgui.file.modelgraph.DmTableDisplaySupport;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry.Bounds;
+import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphEdgeLayout;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphTableCardLayout;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphTableNameHitArea;
 import org.apache.hop.datavault.hopgui.file.vault.BasePainter;
@@ -108,10 +109,13 @@ public class DimensionalModelPainter extends BasePainter {
       drawGrid();
     }
 
-    drawRelationshipLines();
+    Map<String, ModelGraphEdgeLayout.EdgeGeometry> connections = drawRelationshipLines();
     drawRelationshipCandidateLine();
     drawNotes(model.getNotes());
     drawTables(metadataProvider);
+    gc.setForeground(EColor.BLACK);
+    gc.setLineWidth(1);
+    ModelGraphConnectionGeometry.drawAnchorSquares(gc, connections.values());
     drawRect(selectionRegion);
 
     gc.setTransform(0.0f, 0.0f, 1.0f);
@@ -135,28 +139,55 @@ public class DimensionalModelPainter extends BasePainter {
     }
   }
 
-  private void drawRelationshipLines() {
+  private Map<String, ModelGraphEdgeLayout.EdgeGeometry> drawRelationshipLines() {
+    List<ModelGraphEdgeLayout.Edge> edges = collectRelationshipEdges();
+    Map<String, ModelGraphEdgeLayout.EdgeGeometry> layout = ModelGraphEdgeLayout.layout(edges);
     gc.setForeground(EColor.BLACK);
     gc.setLineWidth(1);
-    for (IDmTable table : model.getTables()) {
-      if (table instanceof IDmFactLikeTable factLike) {
-        drawFactDimensionConnections(factLike);
-        drawFactJunkDimensionConnections(factLike);
-        drawFactRangeDimensionConnections(factLike);
+    for (ModelGraphEdgeLayout.Edge edge : edges) {
+      ModelGraphEdgeLayout.EdgeGeometry geometry = layout.get(edge.id());
+      if (geometry == null) {
+        continue;
       }
-      if (table instanceof DmBridge bridge) {
-        drawBridgeDimensionConnections(bridge);
+      boolean dotted = edge.id().startsWith("alias|");
+      if (dotted) {
+        gc.setLineStyle(ELineStyle.DOT);
+        gc.setForeground(EColor.DARKGRAY);
+      } else {
+        gc.setLineStyle(ELineStyle.SOLID);
+        gc.setForeground(EColor.BLACK);
       }
-      if (table instanceof DmDimension dimension) {
-        drawOutriggerConnections(dimension);
-      }
-      if (table instanceof DmDimensionAlias alias) {
-        drawAliasInheritanceConnection(alias);
-      }
+      ModelGraphConnectionGeometry.drawStraightConnection(
+          gc, geometry.fromAnchor(), geometry.toAnchor());
     }
+    gc.setLineStyle(ELineStyle.SOLID);
+    gc.setForeground(EColor.BLACK);
+    return layout;
   }
 
-  private void drawAliasInheritanceConnection(DmDimensionAlias alias) {
+  private List<ModelGraphEdgeLayout.Edge> collectRelationshipEdges() {
+    List<ModelGraphEdgeLayout.Edge> edges = new ArrayList<>();
+    for (IDmTable table : model.getTables()) {
+      if (table instanceof IDmFactLikeTable factLike) {
+        collectFactDimensionEdges(factLike, edges);
+        collectFactJunkDimensionEdges(factLike, edges);
+        collectFactRangeDimensionEdges(factLike, edges);
+      }
+      if (table instanceof DmBridge bridge) {
+        collectBridgeDimensionEdges(bridge, edges);
+      }
+      if (table instanceof DmDimension dimension) {
+        collectOutriggerEdges(dimension, edges);
+      }
+      if (table instanceof DmDimensionAlias alias) {
+        collectAliasInheritanceEdge(alias, edges);
+      }
+    }
+    return edges;
+  }
+
+  private void collectAliasInheritanceEdge(
+      DmDimensionAlias alias, List<ModelGraphEdgeLayout.Edge> edges) {
     if (alias == null || Utils.isEmpty(alias.getReferencedDimensionName())) {
       return;
     }
@@ -166,20 +197,34 @@ public class DimensionalModelPainter extends BasePainter {
     }
     Bounds aliasBounds = tableBounds(alias, alias.getLocation());
     Bounds referencedBounds = tableBounds(referenced, referenced.getLocation());
-    gc.setLineStyle(ELineStyle.DOT);
-    gc.setForeground(EColor.DARKGRAY);
-    ModelGraphConnectionGeometry.drawConnectionSpline(gc, aliasBounds, referencedBounds);
-    gc.setLineStyle(ELineStyle.SOLID);
-    gc.setForeground(EColor.BLACK);
+    if (aliasBounds == null || referencedBounds == null) {
+      return;
+    }
+    String aliasKey = tableKey(alias);
+    String referencedKey = tableKey(referenced);
+    edges.add(
+        new ModelGraphEdgeLayout.Edge(
+            "alias|" + aliasKey + "|" + referencedKey,
+            aliasKey,
+            aliasBounds,
+            referencedKey,
+            referencedBounds));
   }
 
-  private void drawFactDimensionConnections(IDmFactLikeTable fact) {
+  private void collectFactDimensionEdges(
+      IDmFactLikeTable fact, List<ModelGraphEdgeLayout.Edge> edges) {
     Point factLocation = fact.getLocation();
     if (factLocation == null) {
       return;
     }
     Bounds factBounds = tableBounds(fact, factLocation);
+    if (factBounds == null) {
+      return;
+    }
+    String factKey = tableKey(fact);
+    int roleIndex = 0;
     for (DmFactDimensionRole role : fact.getDimensionRolesOrEmpty()) {
+      int index = roleIndex++;
       if (role == null || Utils.isEmpty(role.getDimensionTableName())) {
         continue;
       }
@@ -188,17 +233,34 @@ public class DimensionalModelPainter extends BasePainter {
         continue;
       }
       Bounds dimensionBounds = tableBounds(dimension, dimension.getLocation());
-      ModelGraphConnectionGeometry.drawConnectionSpline(gc, dimensionBounds, factBounds);
+      if (dimensionBounds == null) {
+        continue;
+      }
+      String dimKey = tableKey(dimension);
+      edges.add(
+          new ModelGraphEdgeLayout.Edge(
+              "fact-dim|" + factKey + "|" + index + "|" + dimKey,
+              dimKey,
+              dimensionBounds,
+              factKey,
+              factBounds));
     }
   }
 
-  private void drawFactRangeDimensionConnections(IDmFactLikeTable fact) {
+  private void collectFactRangeDimensionEdges(
+      IDmFactLikeTable fact, List<ModelGraphEdgeLayout.Edge> edges) {
     Point factLocation = fact.getLocation();
     if (factLocation == null) {
       return;
     }
     Bounds factBounds = tableBounds(fact, factLocation);
+    if (factBounds == null) {
+      return;
+    }
+    String factKey = tableKey(fact);
+    int roleIndex = 0;
     for (DmFactRangeDimensionRole role : fact.getRangeDimensionRolesOrEmpty()) {
+      int index = roleIndex++;
       if (role == null || Utils.isEmpty(role.getRangeDimensionTableName())) {
         continue;
       }
@@ -207,17 +269,34 @@ public class DimensionalModelPainter extends BasePainter {
         continue;
       }
       Bounds rangeBounds = tableBounds(range, range.getLocation());
-      ModelGraphConnectionGeometry.drawConnectionSpline(gc, rangeBounds, factBounds);
+      if (rangeBounds == null) {
+        continue;
+      }
+      String rangeKey = tableKey(range);
+      edges.add(
+          new ModelGraphEdgeLayout.Edge(
+              "fact-range|" + factKey + "|" + index + "|" + rangeKey,
+              rangeKey,
+              rangeBounds,
+              factKey,
+              factBounds));
     }
   }
 
-  private void drawFactJunkDimensionConnections(IDmFactLikeTable fact) {
+  private void collectFactJunkDimensionEdges(
+      IDmFactLikeTable fact, List<ModelGraphEdgeLayout.Edge> edges) {
     Point factLocation = fact.getLocation();
     if (factLocation == null) {
       return;
     }
     Bounds factBounds = tableBounds(fact, factLocation);
+    if (factBounds == null) {
+      return;
+    }
+    String factKey = tableKey(fact);
+    int roleIndex = 0;
     for (DmFactJunkDimensionRole role : fact.getJunkDimensionRolesOrEmpty()) {
+      int index = roleIndex++;
       if (role == null || Utils.isEmpty(role.getJunkDimensionTableName())) {
         continue;
       }
@@ -226,17 +305,33 @@ public class DimensionalModelPainter extends BasePainter {
         continue;
       }
       Bounds junkBounds = tableBounds(junk, junk.getLocation());
-      ModelGraphConnectionGeometry.drawConnectionSpline(gc, junkBounds, factBounds);
+      if (junkBounds == null) {
+        continue;
+      }
+      String junkKey = tableKey(junk);
+      edges.add(
+          new ModelGraphEdgeLayout.Edge(
+              "fact-junk|" + factKey + "|" + index + "|" + junkKey,
+              junkKey,
+              junkBounds,
+              factKey,
+              factBounds));
     }
   }
 
-  private void drawBridgeDimensionConnections(DmBridge bridge) {
+  private void collectBridgeDimensionEdges(DmBridge bridge, List<ModelGraphEdgeLayout.Edge> edges) {
     Point bridgeLocation = bridge.getLocation();
     if (bridgeLocation == null) {
       return;
     }
     Bounds bridgeBounds = tableBounds(bridge, bridgeLocation);
+    if (bridgeBounds == null) {
+      return;
+    }
+    String bridgeKey = tableKey(bridge);
+    int refIndex = 0;
     for (DmBridgeDimensionRef ref : bridge.getDimensionRefsOrEmpty()) {
+      int index = refIndex++;
       if (ref == null || Utils.isEmpty(ref.getDimensionTableName())) {
         continue;
       }
@@ -245,17 +340,33 @@ public class DimensionalModelPainter extends BasePainter {
         continue;
       }
       Bounds dimensionBounds = tableBounds(dimension, dimension.getLocation());
-      ModelGraphConnectionGeometry.drawConnectionSpline(gc, dimensionBounds, bridgeBounds);
+      if (dimensionBounds == null) {
+        continue;
+      }
+      String dimKey = tableKey(dimension);
+      edges.add(
+          new ModelGraphEdgeLayout.Edge(
+              "bridge-dim|" + bridgeKey + "|" + index + "|" + dimKey,
+              dimKey,
+              dimensionBounds,
+              bridgeKey,
+              bridgeBounds));
     }
   }
 
-  private void drawOutriggerConnections(DmDimension dimension) {
+  private void collectOutriggerEdges(DmDimension dimension, List<ModelGraphEdgeLayout.Edge> edges) {
     Point dimensionLocation = dimension.getLocation();
     if (dimensionLocation == null) {
       return;
     }
     Bounds dimensionBounds = tableBounds(dimension, dimensionLocation);
+    if (dimensionBounds == null) {
+      return;
+    }
+    String dimensionKey = tableKey(dimension);
+    int outriggerIndex = 0;
     for (DmDimensionOutriggerRef outrigger : dimension.getOutriggersOrEmpty()) {
+      int index = outriggerIndex++;
       if (outrigger == null || Utils.isEmpty(outrigger.getDimensionTableName())) {
         continue;
       }
@@ -264,8 +375,22 @@ public class DimensionalModelPainter extends BasePainter {
         continue;
       }
       Bounds outriggerBounds = tableBounds(outriggerTable, outriggerTable.getLocation());
-      ModelGraphConnectionGeometry.drawConnectionSpline(gc, dimensionBounds, outriggerBounds);
+      if (outriggerBounds == null) {
+        continue;
+      }
+      String outriggerKey = tableKey(outriggerTable);
+      edges.add(
+          new ModelGraphEdgeLayout.Edge(
+              "outrigger|" + dimensionKey + "|" + index + "|" + outriggerKey,
+              dimensionKey,
+              dimensionBounds,
+              outriggerKey,
+              outriggerBounds));
     }
+  }
+
+  private static String tableKey(IDmTable table) {
+    return "table|" + (table != null && table.getName() != null ? table.getName() : "?");
   }
 
   private void drawRelationshipCandidateLine() {
@@ -292,12 +417,11 @@ public class DimensionalModelPainter extends BasePainter {
           && validTarget) {
         Bounds targetBounds =
             tableBounds(candidateRelationshipTarget, candidateRelationshipTarget.getLocation());
-        ModelGraphConnectionGeometry.drawConnectionSpline(gc, sourceBounds, targetBounds);
+        ModelGraphConnectionGeometry.drawStraightConnection(gc, sourceBounds, targetBounds);
       } else {
         Bounds cursorBounds = ModelGraphConnectionGeometry.pointBounds(logEnd.x, logEnd.y);
         Point lineStart = ModelGraphConnectionGeometry.anchorToward(sourceBounds, cursorBounds);
-        ModelGraphConnectionGeometry.drawConnectionSpline(
-            gc, lineStart, logEnd, sourceBounds, cursorBounds);
+        ModelGraphConnectionGeometry.drawStraightConnection(gc, lineStart, logEnd);
       }
       gc.setLineStyle(ELineStyle.SOLID);
       int marker = 4;

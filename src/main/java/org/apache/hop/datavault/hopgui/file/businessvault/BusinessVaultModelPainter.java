@@ -16,6 +16,7 @@
  */
 package org.apache.hop.datavault.hopgui.file.businessvault;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,7 @@ import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.hopgui.file.modelgraph.DvTableDisplaySupport;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry.Bounds;
+import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphEdgeLayout;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphTableCardLayout;
 import org.apache.hop.datavault.hopgui.file.modelgraph.ModelGraphTableNameHitArea;
 import org.apache.hop.datavault.hopgui.file.vault.BasePainter;
@@ -119,12 +121,16 @@ public class BusinessVaultModelPainter extends BasePainter {
     Map<String, BvBvTableReference> bvRefByName = indexBvReferences();
     prepareDvReferenceBoxSizes();
     prepareBvReferenceBoxSizes();
-    drawDerivativeConnections(dvRefByName, bvRefByName);
+    Map<String, ModelGraphEdgeLayout.EdgeGeometry> connections =
+        drawDerivativeConnections(dvRefByName, bvRefByName);
     drawRelationshipCandidateLine();
     drawNotes(model.getNotes());
     drawDvTableReferences();
     drawBvTableReferences();
     drawBusinessVaultTables();
+    gc.setForeground(EColor.DARKGRAY);
+    gc.setLineWidth(1);
+    ModelGraphConnectionGeometry.drawAnchorSquares(gc, connections.values());
     drawRect(selectionRegion);
 
     gc.setTransform(0.0f, 0.0f, 1.0f);
@@ -188,7 +194,7 @@ public class BusinessVaultModelPainter extends BasePainter {
                 target.getDrawnBoxWidth(),
                 target.getDrawnBoxHeight(),
                 minSize);
-        ModelGraphConnectionGeometry.drawConnectionSpline(gc, bvBounds, dvBounds);
+        ModelGraphConnectionGeometry.drawStraightConnection(gc, bvBounds, dvBounds);
       }
       if (bvTable instanceof BvBusinessTable businessTable) {
         for (BvSqlRef ref : businessTable.getSqlRefs()) {
@@ -201,7 +207,7 @@ public class BusinessVaultModelPainter extends BasePainter {
               resolveSqlBvRefNavBounds(
                   ref.getObjectName(), graphX, graphY, scaleX, scaleY, minSize, bvRefByName);
           if (targetBounds != null) {
-            ModelGraphConnectionGeometry.drawConnectionSpline(gc, bvBounds, targetBounds);
+            ModelGraphConnectionGeometry.drawStraightConnection(gc, bvBounds, targetBounds);
           }
         }
       }
@@ -283,20 +289,42 @@ public class BusinessVaultModelPainter extends BasePainter {
     return byName;
   }
 
-  private void drawDerivativeConnections(
+  private Map<String, ModelGraphEdgeLayout.EdgeGeometry> drawDerivativeConnections(
       Map<String, BvDvTableReference> dvRefByName, Map<String, BvBvTableReference> bvRefByName) {
+    List<ModelGraphEdgeLayout.Edge> edges =
+        collectDerivativeConnectionEdges(dvRefByName, bvRefByName);
+    Map<String, ModelGraphEdgeLayout.EdgeGeometry> layout = ModelGraphEdgeLayout.layout(edges);
     gc.setLineWidth(1);
     gc.setLineStyle(ELineStyle.SOLID);
     gc.setForeground(EColor.DARKGRAY);
-    for (IBvTable bvTable : model.getTables()) {
-      if (!(bvTable instanceof BvTableBase base)) {
+    for (ModelGraphEdgeLayout.Edge edge : edges) {
+      ModelGraphEdgeLayout.EdgeGeometry geometry = layout.get(edge.id());
+      if (geometry == null) {
         continue;
       }
-      if (base.getLocation() == null) {
+      ModelGraphConnectionGeometry.drawStraightConnection(
+          gc, geometry.fromAnchor(), geometry.toAnchor());
+    }
+    gc.setLineStyle(ELineStyle.SOLID);
+    gc.setForeground(EColor.BLACK);
+    return layout;
+  }
+
+  private List<ModelGraphEdgeLayout.Edge> collectDerivativeConnectionEdges(
+      Map<String, BvDvTableReference> dvRefByName, Map<String, BvBvTableReference> bvRefByName) {
+    List<ModelGraphEdgeLayout.Edge> edges = new ArrayList<>();
+    for (IBvTable bvTable : model.getTables()) {
+      if (!(bvTable instanceof BvTableBase base) || base.getLocation() == null) {
         continue;
       }
       Bounds bvBounds = getBvTableBounds(base);
+      if (bvBounds == null) {
+        continue;
+      }
+      String bvKey = bvTableKey(base);
+      int derivativeIndex = 0;
       for (BvDerivativeRef derivative : base.getDerivatives()) {
+        int index = derivativeIndex++;
         if (derivative == null || Utils.isEmpty(derivative.getDvTableName())) {
           continue;
         }
@@ -305,45 +333,103 @@ public class BusinessVaultModelPainter extends BasePainter {
           continue;
         }
         Bounds dvBounds = getDvReferenceBounds(target);
-        ModelGraphConnectionGeometry.drawConnectionSpline(gc, bvBounds, dvBounds);
+        if (dvBounds == null) {
+          continue;
+        }
+        String dvKey = dvReferenceKey(target);
+        edges.add(
+            new ModelGraphEdgeLayout.Edge(
+                "der|" + bvKey + "|" + index + "|" + dvKey, bvKey, bvBounds, dvKey, dvBounds));
       }
       if (bvTable instanceof BvBusinessTable businessTable) {
-        drawSqlRefConnections(businessTable, bvBounds, dvRefByName, bvRefByName);
+        collectSqlRefConnectionEdges(
+            businessTable, bvKey, bvBounds, dvRefByName, bvRefByName, edges);
       }
     }
-    gc.setLineStyle(ELineStyle.SOLID);
-    gc.setForeground(EColor.BLACK);
+    return edges;
   }
 
   /**
-   * Draws edges from a SQL business table to its {@code ref()} targets: same-model BV tables,
+   * Collects edges from a SQL business table to its {@code ref()} targets: same-model BV tables,
    * canvas BV references (external .hbv), and canvas DV references when SQL resolved a DV table.
    */
-  private void drawSqlRefConnections(
+  private void collectSqlRefConnectionEdges(
       BvBusinessTable businessTable,
+      String sourceKey,
       Bounds sourceBounds,
       Map<String, BvDvTableReference> dvRefByName,
-      Map<String, BvBvTableReference> bvRefByName) {
+      Map<String, BvBvTableReference> bvRefByName,
+      List<ModelGraphEdgeLayout.Edge> edges) {
     if (businessTable == null || sourceBounds == null) {
       return;
     }
+    int sqlIndex = 0;
     for (BvSqlRef ref : businessTable.getSqlRefs()) {
+      int index = sqlIndex++;
       if (ref == null || Utils.isEmpty(ref.getObjectName())) {
         continue;
       }
       Bounds targetBounds = null;
+      String targetKey = null;
       if (ref.getResolvedKind() == BvSqlResolvedKind.BV_TABLE) {
         targetBounds = resolveSqlBvRefBounds(ref.getObjectName(), bvRefByName);
+        targetKey = sqlBvRefKey(ref.getObjectName(), bvRefByName);
       } else if (ref.getResolvedKind() == BvSqlResolvedKind.DV_TABLE) {
         BvDvTableReference dvRef = dvRefByName.get(ref.getObjectName().toLowerCase());
         if (dvRef != null && dvRef.getLocation() != null) {
           targetBounds = getDvReferenceBounds(dvRef);
+          targetKey = dvReferenceKey(dvRef);
         }
       }
-      if (targetBounds != null) {
-        ModelGraphConnectionGeometry.drawConnectionSpline(gc, sourceBounds, targetBounds);
+      if (targetBounds == null || Utils.isEmpty(targetKey)) {
+        continue;
+      }
+      edges.add(
+          new ModelGraphEdgeLayout.Edge(
+              "sql|" + sourceKey + "|" + index + "|" + targetKey,
+              sourceKey,
+              sourceBounds,
+              targetKey,
+              targetBounds));
+    }
+  }
+
+  private String sqlBvRefKey(String objectName, Map<String, BvBvTableReference> bvRefByName) {
+    IBvTable local = findBvTableByName(objectName);
+    if (local instanceof BvTableBase) {
+      return bvTableKey(local);
+    }
+    if (bvRefByName != null && !Utils.isEmpty(objectName)) {
+      BvBvTableReference alias = bvRefByName.get(objectName.toLowerCase());
+      if (alias != null) {
+        return bvReferenceKey(alias);
       }
     }
+    return "bv|" + objectName;
+  }
+
+  private static String bvTableKey(IBvTable table) {
+    return "bv|" + (table != null && table.getName() != null ? table.getName() : "?");
+  }
+
+  private static String dvReferenceKey(BvDvTableReference reference) {
+    return "dvref|"
+        + (reference != null && reference.getDvTableName() != null
+            ? reference.getDvTableName()
+            : "?");
+  }
+
+  private static String bvReferenceKey(BvBvTableReference reference) {
+    if (reference == null) {
+      return "bvref|?";
+    }
+    if (!Utils.isEmpty(reference.getBvTableName())) {
+      return "bvref|" + reference.getBvTableName();
+    }
+    if (!Utils.isEmpty(reference.getPhysicalTableName())) {
+      return "bvref|" + reference.getPhysicalTableName();
+    }
+    return "bvref|?";
   }
 
   private Bounds resolveSqlBvRefBounds(
@@ -435,12 +521,11 @@ public class BusinessVaultModelPainter extends BasePainter {
     gc.setLineStyle(ELineStyle.DASH);
     Bounds targetBounds = validTarget ? getCandidateTargetBounds() : null;
     if (targetBounds != null) {
-      ModelGraphConnectionGeometry.drawConnectionSpline(gc, sourceBounds, targetBounds);
+      ModelGraphConnectionGeometry.drawStraightConnection(gc, sourceBounds, targetBounds);
     } else {
       Bounds cursorBounds = ModelGraphConnectionGeometry.pointBounds(logEnd.x, logEnd.y);
       Point lineStart = ModelGraphConnectionGeometry.anchorToward(sourceBounds, cursorBounds);
-      ModelGraphConnectionGeometry.drawConnectionSpline(
-          gc, lineStart, logEnd, sourceBounds, cursorBounds);
+      ModelGraphConnectionGeometry.drawStraightConnection(gc, lineStart, logEnd);
     }
     gc.setLineStyle(ELineStyle.SOLID);
     gc.setLineWidth(1);

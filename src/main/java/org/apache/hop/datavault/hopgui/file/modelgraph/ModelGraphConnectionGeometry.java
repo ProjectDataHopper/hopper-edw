@@ -246,12 +246,60 @@ public final class ModelGraphConnectionGeometry {
     return polyline;
   }
 
+  /** Size of the square drawn where a relationship attaches to a table card. */
+  public static final int ANCHOR_SQUARE_SIZE = 6;
+
   /** Draws a straight line between the centers of two table bounds. */
   public static void drawConnectionCenterLine(IGc gc, Bounds fromBounds, Bounds toBounds) {
     if (gc == null || fromBounds == null || toBounds == null) {
       return;
     }
     gc.drawLine(fromBounds.centerX(), fromBounds.centerY(), toBounds.centerX(), toBounds.centerY());
+  }
+
+  /** Draws a straight line between facing mid-side anchors of two table bounds. */
+  public static void drawStraightConnection(IGc gc, Bounds fromBounds, Bounds toBounds) {
+    if (gc == null || fromBounds == null || toBounds == null) {
+      return;
+    }
+    ConnectionAnchors anchors = anchorsBetween(fromBounds, toBounds);
+    drawStraightConnection(gc, anchors.from(), anchors.to());
+  }
+
+  /** Draws a straight line between two explicit endpoints. */
+  public static void drawStraightConnection(IGc gc, Point from, Point to) {
+    if (gc == null || from == null || to == null) {
+      return;
+    }
+    gc.drawLine(from.x, from.y, to.x, to.y);
+  }
+
+  /** Draws a small outlined square centered on a relationship attachment point. */
+  public static void drawAnchorSquare(IGc gc, Point anchor) {
+    if (gc == null || anchor == null) {
+      return;
+    }
+    int size = ANCHOR_SQUARE_SIZE;
+    int x = anchor.x - size / 2;
+    int y = anchor.y - size / 2;
+    gc.setBackground(IGc.EColor.WHITE);
+    gc.fillRectangle(x, y, size, size);
+    gc.drawRectangle(x, y, size, size);
+  }
+
+  /** Draws attachment squares for every laid-out relationship endpoint. */
+  public static void drawAnchorSquares(
+      IGc gc, Iterable<ModelGraphEdgeLayout.EdgeGeometry> geometries) {
+    if (gc == null || geometries == null) {
+      return;
+    }
+    for (ModelGraphEdgeLayout.EdgeGeometry geometry : geometries) {
+      if (geometry == null) {
+        continue;
+      }
+      drawAnchorSquare(gc, geometry.fromAnchor());
+      drawAnchorSquare(gc, geometry.toAnchor());
+    }
   }
 
   /** Draws a spline between the edge anchors on two table bounds. */
