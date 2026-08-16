@@ -130,8 +130,8 @@ limitations under the License.
           <dvTableType>SATELLITE</dvTableType>
         </derivative>
       </derivatives>
-      <xloc>496</xloc>
-      <yloc>208</yloc>
+      <xloc>528</xloc>
+      <yloc>176</yloc>
       <name>customer_360_bv</name>
     </table>
   </tables>

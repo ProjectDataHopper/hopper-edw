@@ -87,6 +87,24 @@ class ModelGraphEdgeLayoutTest {
   }
 
   @Test
+  void skipsSelfEdgesSoTheyDoNotStealSideSlots() {
+    Bounds warehouse = new Bounds(320, 48, 160, 80);
+    Bounds fact = new Bounds(320, 192, 180, 90);
+    Map<String, EdgeGeometry> layout =
+        ModelGraphEdgeLayout.layout(
+            List.of(
+                new Edge("alias-self", "d_warehouse", warehouse, "d_warehouse", warehouse),
+                new Edge("fact-dim", "d_warehouse", warehouse, "fact", fact)));
+
+    assertEquals(1, layout.size());
+    EdgeGeometry geometry = layout.get("fact-dim");
+    assertNotNull(geometry);
+    assertEquals(Side.BOTTOM, geometry.fromSide());
+    assertEquals(warehouse.centerX(), geometry.fromAnchor().x);
+    assertEquals(warehouse.y() + warehouse.height(), geometry.fromAnchor().y);
+  }
+
+  @Test
   void skipsIncompleteEdges() {
     Bounds box = new Bounds(0, 0, 40, 40);
     Map<String, EdgeGeometry> layout =

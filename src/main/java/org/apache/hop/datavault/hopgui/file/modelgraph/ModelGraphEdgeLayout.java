@@ -62,6 +62,7 @@ public final class ModelGraphEdgeLayout {
           || Utils.isEmpty(edge.id())
           || Utils.isEmpty(edge.fromKey())
           || Utils.isEmpty(edge.toKey())
+          || edge.fromKey().equals(edge.toKey())
           || edge.fromBounds() == null
           || edge.toBounds() == null) {
         continue;

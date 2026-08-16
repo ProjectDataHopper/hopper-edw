@@ -188,10 +188,7 @@ public class DimensionalModelPainter extends BasePainter {
 
   private void collectAliasInheritanceEdge(
       DmDimensionAlias alias, List<ModelGraphEdgeLayout.Edge> edges) {
-    if (alias == null || Utils.isEmpty(alias.getReferencedDimensionName())) {
-      return;
-    }
-    IDmTable referenced = tableByName.get(alias.getReferencedDimensionName());
+    IDmTable referenced = resolveLocalInheritanceTarget(alias, tableByName);
     if (referenced == null || referenced.getLocation() == null || alias.getLocation() == null) {
       return;
     }
@@ -391,6 +388,23 @@ public class DimensionalModelPainter extends BasePainter {
 
   private static String tableKey(IDmTable table) {
     return "table|" + (table != null && table.getName() != null ? table.getName() : "?");
+  }
+
+  /**
+   * Local canvas target for a dotted alias-inheritance line. External conformed aliases often share
+   * the referenced dimension's name ({@code d_product} → {@code d_product} in another .hdm); that
+   * lookup hits the alias itself and must not become a self-loop.
+   */
+  static IDmTable resolveLocalInheritanceTarget(
+      DmDimensionAlias alias, Map<String, IDmTable> tableByName) {
+    if (alias == null || tableByName == null || Utils.isEmpty(alias.getReferencedDimensionName())) {
+      return null;
+    }
+    IDmTable referenced = tableByName.get(alias.getReferencedDimensionName());
+    if (referenced == null || referenced == alias) {
+      return null;
+    }
+    return referenced;
   }
 
   private void drawRelationshipCandidateLine() {
