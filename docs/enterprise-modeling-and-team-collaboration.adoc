@@ -27,7 +27,16 @@ It does **not** replace the technical reference pages. It explains *how to organ
 |Day-2 runners, partial loads, metrics
 |link:operations.adoc[Operations]
 
-|Learn the stack on one small project
+|Architecture (catalog, RDG, four controls)
+|link:architecture.adoc[Architecture]
+
+|Build an EDW from scratch
+|link:getting-started-edw.adoc[Getting started — building an EDW]
+
+|Resource definition group
+|link:resource-definition-group.adoc[Resource definition group]
+
+|Tour the finished retail sample
 |link:getting-started-retail.adoc[Getting started — retail]
 |===
 
@@ -305,58 +314,9 @@ Reporting users usually connect BI tools to **BV or dimensional** schemas, not r
 
 == Worked sketch: people, files, systems
 
-```mermaid
-flowchart TB
-  subgraph people [People]
-    Admin[DV platform admin]
-    Subj[Subject DV modeler]
-    Stew[Source steward]
-    Ops[Daily operations]
-    BV[BV / DM modelers]
-    Analyst[Analysts / reporting]
-  end
+image::images/diagrams/enterprise-people-files-systems.svg[People, git models, catalog, and databases in a large Data Vault program,align="center"]
 
-  subgraph git [Git project]
-    Core[models/core/*.hdv]
-    SubHdv[models/subject/*.hdv]
-    Hbv[models/business/*.hbv]
-    Hdm[models/marts/*.hdm]
-    Wf[workflows/*.hwf]
-  end
-
-  subgraph catalog [Data Catalog]
-    Src[DV_SOURCE contracts]
-    Pub[Published targets + lineage]
-    Tags[Version tags]
-  end
-
-  subgraph db [Databases]
-    CRM[Source / CRM]
-    Vault[Raw vault]
-    Mart[BV / marts]
-  end
-
-  Stew --> Src
-  Admin --> Core
-  Admin --> Tags
-  Subj --> SubHdv
-  SubHdv -->|linked tables| Core
-  BV --> Hbv
-  BV --> Hdm
-  Ops --> Wf
-  Wf --> Vault
-  Wf --> Mart
-  Src --> SubHdv
-  Core --> Vault
-  SubHdv --> Vault
-  Hbv --> Mart
-  Hdm --> Mart
-  Vault --> Pub
-  Mart --> Pub
-  Analyst --> Pub
-  Analyst --> Mart
-  CRM --> Src
-```
+PlantUML source: link:diagrams/enterprise-people-files-systems.puml[enterprise-people-files-systems.puml].
 
 == Where to go next
 

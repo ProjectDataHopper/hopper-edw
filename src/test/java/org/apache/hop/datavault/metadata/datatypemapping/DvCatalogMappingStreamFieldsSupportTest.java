@@ -28,12 +28,36 @@ import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DataVaultSource;
 import org.apache.hop.datavault.metadata.DvHub;
 import org.apache.hop.datavault.metadata.DvLink;
+import org.apache.hop.datavault.metadata.DvSatellite;
+import org.apache.hop.datavault.metadata.SatelliteAttribute;
 import org.apache.hop.datavault.metadata.SourceField;
 import org.apache.hop.pipeline.transforms.selectvalues.SelectMetadataChange;
 import org.apache.hop.pipeline.transforms.selectvalues.SelectValuesMeta;
 import org.junit.jupiter.api.Test;
 
 class DvCatalogMappingStreamFieldsSupportTest {
+
+  @Test
+  void satelliteExpectedFieldsIncludeParentKeyAndAttributes() {
+    DataVaultModel model = new DataVaultModel();
+    model.getTables().add(hub("hub_customer", "customer_id"));
+    DvSatellite satellite = new DvSatellite("sat_customer");
+    satellite.setHubName("hub_customer");
+    satellite.setStoreRecordSource(true);
+    SatelliteAttribute name = new SatelliteAttribute("name");
+    satellite.getAttributes().add(name);
+    model.getTables().add(satellite);
+    DataVaultSource source = new DataVaultSource("CRM-customer-csv");
+
+    List<String> expected =
+        DvCatalogMappingStreamFieldsSupport.expectedStreamFieldNames(
+            satellite, source, model, new Variables(), "x_record_source", null);
+
+    assertTrue(expected.contains("customer_id"), expected::toString);
+    assertTrue(expected.contains("name"), expected::toString);
+    assertTrue(expected.contains("x_record_source"), expected::toString);
+    assertFalse(expected.contains("load_date"), expected::toString);
+  }
 
   @Test
   void linkExpectedFieldsExcludeSatelliteAttributes() {

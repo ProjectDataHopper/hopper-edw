@@ -1,0 +1,23 @@
+@startuml d5-four-controls
+!pragma layout smetana
+title D5 — Four controls, four jobs
+skinparam backgroundColor #fafbfc
+skinparam defaultFontName SansSerif
+skinparam shadowing false
+skinparam ArrowColor #5a6a7e
+skinparam rectangle {
+  FontSize 13
+  BorderThickness 2
+}
+
+left to right direction
+
+rectangle "Harvest\nobserve" as Harvest #e6f4f8
+rectangle "Schema gate\ndecide" as Gate #fff3df
+rectangle "Quality gate\ncontent" as Quality #fff3df
+rectangle "Update RDG\nload + publish" as Load #e7f6ed
+
+Harvest --> Gate
+Gate --> Quality
+Quality --> Load
+@enduml

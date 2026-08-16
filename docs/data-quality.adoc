@@ -245,8 +245,10 @@ Target rules include table-not-empty, hub business-key not-null / min-distinct, 
 
 == Related
 
+* link:architecture.adoc#d5-four-controls[Architecture — four controls]
 * link:resource-definition-validation.adoc[Resource definition validation] (schema contracts)
 * link:data-catalog.adoc[Data Catalog]
+* link:getting-started-edw.adoc[Getting started — building an EDW]
 * link:getting-started-retail.adoc[Getting started — retail]
 * link:plans/data-quality-architecture-plan.md[Architecture plan]
 * link:plans/data-quality-phase2-design.md[Phase 2 design]

@@ -1,0 +1,38 @@
+@startuml d4-build-vs-run
+!pragma layout smetana
+title D4 — Build-time vs run-time
+skinparam backgroundColor #fafbfc
+skinparam defaultFontName SansSerif
+skinparam shadowing false
+skinparam ArrowColor #5a6a7e
+skinparam rectangle {
+  FontSize 12
+  BorderThickness 1
+}
+
+package "Design — once or when the model changes" as design #fff6e8 {
+  rectangle "Configure EDW" as C0
+  rectangle ".hsm +\npublish sources" as C1
+  rectangle "Generate /\nrefine .hdv" as C2
+  rectangle "Resource definition\ngroup" as C3
+  rectangle "Add .hbv / .hdm\nwhen ready" as C4
+  rectangle "Retag sources if\nthe contract changed" as C5
+  C0 --> C1
+  C1 --> C2
+  C2 --> C3
+  C3 --> C4
+  C4 --> C5
+}
+
+package "Operate — every load wave" as operate #e6f4f8 {
+  rectangle "Harvest source\nmetadata" as R0
+  rectangle "Schema gate" as R1
+  rectangle "Source quality\ngate" as R2
+  rectangle "Update resource\ndefinition group" as R3
+  rectangle "Optional target quality /\nlineage export" as R4
+  R0 --> R1
+  R1 --> R2
+  R2 --> R3
+  R3 --> R4
+}
+@enduml

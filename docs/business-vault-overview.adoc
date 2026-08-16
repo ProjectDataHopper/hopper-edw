@@ -67,17 +67,9 @@ See link:business-vault-update-action.adoc[Business Vault Update Action].
 
 == Relationship to raw Data Vault
 
-```mermaid
-flowchart LR
-  Hdv[".hdv Data Vault model"]
-  VaultDB["Vault database"]
-  Hbv[".hbv Business Vault model"]
-  BvDB["BV target database"]
-  Hdv --> VaultDB
-  Hdv --> Hbv
-  Hbv --> VaultDB
-  Hbv --> BvDB
-```
+image::images/diagrams/bv-raw-vault-relationship.svg[Business Vault reads the raw vault and writes to the BV target database,align="center"]
+
+PlantUML source: link:diagrams/bv-raw-vault-relationship.puml[bv-raw-vault-relationship.puml].
 
 Business Vault **reads** hub and satellite history from the Data Vault target database (configured on the `.hdv` model). It **writes** SCD2 and PIT tables to the Business Vault target database (configured on the `.hbv` model). Both connections must exist in Hop project metadata. SCD2 and PIT are independent data paths; Business Vault Update runs SCD2 build pipelines first, then PIT.
 

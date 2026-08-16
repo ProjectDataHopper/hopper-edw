@@ -1,6 +1,8 @@
 = Data Vault Source
 :toc: macro
 :toclevels: 3
+:openvar: ${
+:closevar: }
 
 toc::[]
 
@@ -11,11 +13,11 @@ Each definition combines:
 * **DV semantics** — record source indicator, optional **group** for partial workflow loads
 * **Physical layout** — **database** table, **CSV** / **Parquet** / **Iceberg**, **composite** multi-table query, **JSON** extraction, or **pipeline** feed from a link:source-modeler-overview.adoc[source model (`.hsm`)]
 
-Sources live under namespace `hop/{project}/sources` in the FILE catalog storage directory (retail example: `work/edw-catalog/`) and open in the **Data Catalog** perspective. See link:data-catalog.adoc[Data Catalog] for folder layout and refresh behavior.
+Sources live under namespace `hop/\{project\}/sources` in the FILE catalog storage directory (retail example: `work/edw-catalog/`) and open in the **Data Catalog** perspective. See link:data-catalog.adoc[Data Catalog] for folder layout and refresh behavior.
 
 Field layout is stored on structured homes (`dvSource.fields` and, for table-backed sources, physical table fields). Do not invent a parallel layout blob in catalog JSON.
 
-=== Composite sources
+== Composite sources
 
 A **COMPOSITE** `DV_SOURCE` is published from a source-model **source query**. It stores:
 
@@ -25,7 +27,7 @@ A **COMPOSITE** `DV_SOURCE` is published from a source-model **source query**. I
 
 Data Vault Update builds either a single-connection `Table Input` or a Merge Join pipeline depending on the query's generation mode. See link:source-modeler-overview.adoc[Source modeler overview].
 
-=== JSON sources
+== JSON sources
 
 A **JSON** `DV_SOURCE` is published from a source-model **Source JSON** object. It stores:
 
@@ -44,7 +46,7 @@ Retail sample: `feed_order_shipment_tracking` over `order_shipment_event.payload
 
 . Open the Hop project.
 . Open the **Data Catalog** perspective.
-. Under `hop/{project}/sources`, create or open a `DV_SOURCE` record.
+. Under `hop/\{project\}/sources`, create or open a `DV_SOURCE` record.
 . Set connection, table, and fields (database-backed sources).
 . Configure record source indicator and optional group.
 

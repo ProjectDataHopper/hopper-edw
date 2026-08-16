@@ -4,7 +4,9 @@
 
 toc::[]
 
-**Metadata harvesting** is a first-class operational step that discovers **live source schemas**, compares them to the catalog (or a catalog version tag), and **persists** snapshots and drift history — without loading the EDW and without rewriting the working catalog.
+**Metadata harvesting** is a first-class **operational** step that discovers **live source schemas**, compares them to the catalog (or a catalog version tag), and **persists** snapshots and drift history — without loading the EDW and without rewriting the working catalog.
+
+Harvest is **not** a greenfield first step. It needs a link:resource-definition-group.adoc[resource definition group] whose models already reference catalog sources. To *start* a warehouse, publish from a source model first — link:getting-started-edw.adoc[Getting started — building an EDW]. **Generate .hsm from harvest…** is a day-2 discovery path after you have already loaded (or at least modeled) those sources.
 
 This is separate from:
 
@@ -232,6 +234,9 @@ This avoids a third full source-schema discovery after harvest + gate in the ret
 
 == Related documentation
 
+* link:architecture.adoc#d5-four-controls[Architecture — four controls]
+* link:getting-started-edw.adoc[Getting started — building an EDW] (harvest is day-2, not chapter 1)
+* link:resource-definition-group.adoc[Resource definition group]
 * link:data-catalog.adoc[Data catalog]
 * link:source-modeler-overview.adoc[Source modeler]
 * link:resource-definition-validation.adoc[Resource definition validation]

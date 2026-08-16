@@ -1,0 +1,36 @@
+@startuml d3-rdg-spine
+!pragma layout smetana
+title D3 — Resource definition group as the spine
+skinparam backgroundColor #fafbfc
+skinparam defaultFontName SansSerif
+skinparam shadowing false
+skinparam ArrowColor #5a6a7e
+skinparam rectangle {
+  FontSize 12
+  BorderThickness 1
+}
+
+rectangle "Resource definition group" as Rdg #4a5568;text:white
+
+rectangle ".hdv files" as Hdv #e8f0fb
+rectangle ".hbv files" as Hbv #f3ebfb
+rectangle ".hdm files" as Hdm #e7f6ed
+rectangle "Default catalog connection" as Cat #edf0f4
+rectangle "Harvest source metadata" as Harvest #e6f4f8
+rectangle "Validate sources /\nschema-gate action" as Gate #e6f4f8
+rectangle "Update RDG\nDV then BV then DM" as Update #fff3df
+rectangle "Tag / List catalog versions" as Tag #edf0f4
+rectangle "Browse lineage" as Lin #f3ebfb
+rectangle "Architecture /\nOpenLineage export" as Export #f3ebfb
+
+Rdg --> Hdv
+Rdg --> Hbv
+Rdg --> Hdm
+Rdg --> Cat
+Rdg --> Harvest
+Rdg --> Gate
+Rdg --> Update
+Rdg --> Tag
+Rdg --> Lin
+Rdg --> Export
+@enduml

@@ -109,7 +109,7 @@ Retail example: search `retail-360.hdv` or `retail-sources` to land on the **ret
 
 == Related documentation
 
-* link:feature-overview.md[Feature overview] — maturity matrix
+* link:feature-overview.adoc[Feature overview] — maturity matrix
 * link:hop-lineage-view.adoc[Hop Lineage View]
 * link:datavault-plugin.adoc[Data Vault plugin] — visual editor overview
 * link:source-modeler-overview.adoc[Source modeler]

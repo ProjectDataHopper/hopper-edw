@@ -33,24 +33,9 @@ PIT complements SCD2: SCD2 collapses history into functional `valid_from` / `val
 
 == Relationship to raw vault and SCD2
 
-```mermaid
-flowchart LR
-  subgraph dv [Raw vault DB]
-    Hub[hub_customer]
-    Sat[sat_customer]
-  end
-  subgraph bv [BV target DB]
-    Scd2[sat_customer_hb SCD2]
-    Pit[pit_customer PIT]
-  end
-  Hdv["vault1.hdv"] --> Hub
-  Hdv --> Sat
-  Hbv["vault1.hbv"] --> Scd2
-  Hbv --> Pit
-  Hub --> Pit
-  Sat --> Pit
-  Sat --> Scd2
-```
+image::images/diagrams/bv-pit-scd2.svg[PIT reads raw hub and satellite history; SCD2 is an independent sibling,align="center"]
+
+PlantUML source: link:diagrams/bv-pit-scd2.puml[bv-pit-scd2.puml].
 
 * PIT reads **raw** hub/satellite history — not SCD2 output
 * SCD2 and PIT are independent siblings in the same Business Vault Update run (SCD2 tables run first, then PIT)
@@ -249,7 +234,7 @@ Suggested issue comment when closing or rewriting #26:
 ____
 Implemented as Business Vault PIT (`BvPitTable` in `.hbv`), not raw-vault `DvPit`.
 
-* Documentation: link:business-vault-pit.adoc[business-vault-pit.adoc] (and link:business-vault-overview.adoc[business-vault-overview.adoc])
+* Documentation: link:business-vault-pit.adoc[business-vault-pit] (and link:business-vault-overview.adoc[business-vault-overview])
 * MVP: hub + one satellite, daily EOD snapshots, incremental append, Postgres SQL
 * Sample: `integration-tests/tests/basic/vault1.hbv` → `pit_customer`, validated by `update-vault1.hwf`
 * Execution: Business Vault Update runs SCD2 tables first, then PIT tables

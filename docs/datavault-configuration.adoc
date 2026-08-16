@@ -12,11 +12,14 @@ There is one target database per configuration. Hashing and naming rules apply t
 
 The same pattern exists for source models, Business Vault, and dimensional models.
 
+[[configure-edw-setup]]
 == Configure EDW setup
 
 A new Hop project is offered the standard catalog and the four configuration objects the first time you open a source, Data Vault, Business Vault, or dimensional model.
 
 If you dismissed that prompt, or want to create only the elements that are still missing, open **Tools → Configure EDW setup...**. The same dialog is shown even when “Do not show this message again” was checked. Existing elements stay selected and disabled; missing ones can still be created. Uncheck **Do not show this message again** to restore the automatic first-time prompt.
+
+The dialog does **not** create a link:resource-definition-group.adoc[resource definition group]. After you have a `.hdv`, create the group yourself — link:getting-started-edw.adoc#chapter-3[Getting started, chapter 3].
 
 image::images/configure-edw-dialog.png[Configure EDW setup — standard catalog and model-configuration elements,align="center"]
 

@@ -4,7 +4,9 @@
 
 toc::[]
 
-This is the **primary tutorial** for the hop-datavault plugin. You will run a full retail pipeline: source data → Data Vault → Business Vault → dimensional marts, including an incremental update wave.
+This is a **tour of the finished retail sample**: source data → Data Vault → Business Vault → dimensional marts, including an incremental update wave. The project already has a source model, catalog feeds, models, and a resource definition group (`retail-sources`). You run the workflows; you do not build those artifacts from scratch here.
+
+To **build an EDW from scratch** (source model → catalog → `.hdv` → resource definition group → load → BV/DM), see link:getting-started-edw.adoc[Getting started — building an EDW]. Architecture pictures: link:architecture.adoc[Architecture].
 
 For Customer 360 and other regression fixtures, see link:getting-started-integration-tests.adoc[Getting started — integration test fixtures].
 
@@ -261,18 +263,24 @@ Reference: link:hop-lineage-view.adoc[Hop Lineage View], link:openlineage-export
 |===
 |Topic |Document
 
+|Build an EDW from scratch
+|link:getting-started-edw.adoc[getting-started-edw]
+
+|Architecture
+|link:architecture.adoc[architecture]
+
 |All major features
-|link:feature-overview.md[feature-overview.md]
+|link:feature-overview.adoc[feature-overview]
 
 |Integration test fixtures (Customer 360, external read-only)
-|link:getting-started-integration-tests.adoc[getting-started-integration-tests.adoc]
+|link:getting-started-integration-tests.adoc[getting-started-integration-tests]
 
 |Catalog validation UX
-|link:resource-definition-validation.adoc[resource-definition-validation.adoc]
+|link:resource-definition-validation.adoc[resource-definition-validation]
 
 |Operations (Docker, partial loads)
-|link:operations.adoc[operations.adoc]
+|link:operations.adoc[operations]
 
 |Hop Lineage View (`.hlv`)
-|link:hop-lineage-view.adoc[hop-lineage-view.adoc]
+|link:hop-lineage-view.adoc[hop-lineage-view]
 |===

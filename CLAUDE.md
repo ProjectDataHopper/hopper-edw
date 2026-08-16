@@ -19,7 +19,7 @@ limitations under the License.
 
 This file is for **AI coding assistants** and third-party contributors. Read it before changing Java, metadata, workflows, Docker test runners, or integration fixtures.
 
-**Product docs** live under [`docs/`](docs/) (start at [`docs/README.md`](docs/README.md) and [`docs/feature-overview.md`](docs/feature-overview.md)). Do not restate them here.
+**Product docs** live under [`docs/`](docs/) (start at [`docs/README.md`](docs/README.md) and [`docs/feature-overview.adoc`](docs/feature-overview.adoc)). Do not restate them here.
 
 ## What this project is
 
@@ -109,8 +109,9 @@ Do **not** “fix” Hop core inside this repo. Core Hop changes belong in **apa
 Requirements: **JDK 21**, **Maven 3.x**.
 
 ```bash
-mvn clean package          # unit tests + jar + plugin zip
+mvn clean package          # unit tests + jar + plugin zip (includes plugins/misc/datavault/docs/)
 mvn test                   # unit tests only
+mvn generate-resources     # refresh docs/images/diagrams/*.svg from docs/diagrams/*.puml
 mvn spotless:apply         # format before commit (Google Java Format)
 mvn spotless:check         # CI-style format check
 ```
@@ -200,8 +201,9 @@ These are easy for agents to violate:
 
 | Need | Document |
 |------|----------|
-| Capabilities and maturity | [`docs/feature-overview.md`](docs/feature-overview.md) |
-| Tutorial / retail flow | [`docs/getting-started-retail.adoc`](docs/getting-started-retail.adoc), [`retail-example/README.md`](retail-example/README.md) |
+| Capabilities and maturity | [`docs/feature-overview.adoc`](docs/feature-overview.adoc) |
+| Build an EDW (first-time order) | [`docs/getting-started-edw.adoc`](docs/getting-started-edw.adoc), [`docs/architecture.adoc`](docs/architecture.adoc) |
+| Tutorial / retail tour | [`docs/getting-started-retail.adoc`](docs/getting-started-retail.adoc), [`retail-example/README.md`](retail-example/README.md) |
 | Integration fixtures | [`docs/getting-started-integration-tests.adoc`](docs/getting-started-integration-tests.adoc), [`integration-tests/PROJECT.md`](integration-tests/PROJECT.md) |
 | Shared scripts | [`scripts/README.md`](scripts/README.md), [`integration-tests/SCRIPTS.md`](integration-tests/SCRIPTS.md) |
 | Docs index | [`docs/README.md`](docs/README.md) |

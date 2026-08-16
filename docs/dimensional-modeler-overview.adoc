@@ -172,5 +172,6 @@ Unit tests: `DmBasicStarPipelineTest`, `DmCatalogPipelineTest`, `DvToDimensional
 == Related documents
 
 * link:dimensional-update-action.adoc[Dimensional Update and Publish actions]
+* link:getting-started-edw.adoc#after-first-load[Getting started — after the first load]
 * link:getting-started-retail.adoc[Getting started — retail example]
 * link:datavault-plugin.adoc[Data Vault plugin overview]

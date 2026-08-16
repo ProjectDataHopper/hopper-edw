@@ -99,6 +99,8 @@ Existing vault tables are **reused** when a hub already has the same business-ke
 
 == Related documentation
 
+* link:getting-started-edw.adoc#chapter-2[Getting started — generate the Data Vault]
+* link:architecture.adoc[Architecture]
 * link:source-modeler-overview.adoc[Source modeler overview]
 * link:dv-hub.adoc[Hubs]
 * link:dv-link.adoc[Links]

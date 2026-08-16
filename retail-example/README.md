@@ -23,10 +23,12 @@ End-to-end retail data vault example demonstrating initial and incremental loads
 
 ## Documentation
 
-- [docs/getting-started-retail.adoc](../docs/getting-started-retail.adoc) — primary tutorial
+- [docs/getting-started-edw.adoc](../docs/getting-started-edw.adoc) — build an EDW from scratch
+- [docs/architecture.adoc](../docs/architecture.adoc) — catalog, resource definition group, build vs run
+- [docs/getting-started-retail.adoc](../docs/getting-started-retail.adoc) — tour this finished sample
 - [docs/source-modeler-overview.adoc](../docs/source-modeler-overview.adoc) — source modeler (`.hsm`) and composite feeds
 - [docs/data-type-mappings.adoc](../docs/data-type-mappings.adoc) — pre-modeling data type mapping profiles
-- [docs/feature-overview.md](../docs/feature-overview.md) — all plugin capabilities
+- [docs/feature-overview.adoc](../docs/feature-overview.adoc) — all plugin capabilities
 - [docs/hop-lineage-view.adoc](../docs/hop-lineage-view.adoc) — Hop Lineage View (`.hlv`) over Marquez / local models
 - [docs/README.md](../docs/README.md) — full documentation index
 

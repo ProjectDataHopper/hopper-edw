@@ -1,0 +1,24 @@
+@startuml bv-raw-vault-relationship
+!pragma layout smetana
+title Business Vault and raw Data Vault
+skinparam backgroundColor #fafbfc
+skinparam defaultFontName SansSerif
+skinparam shadowing false
+skinparam ArrowColor #5a6a7e
+skinparam rectangle {
+  FontSize 13
+  BorderThickness 2
+}
+
+left to right direction
+
+rectangle ".hdv Data Vault model" as Hdv #e8f0fb
+database "Vault database" as VaultDB #e8f0fb
+rectangle ".hbv Business Vault model" as Hbv #f3ebfb
+database "BV target database" as BvDB #f3ebfb
+
+Hdv --> VaultDB
+Hdv --> Hbv
+Hbv --> VaultDB
+Hbv --> BvDB
+@enduml

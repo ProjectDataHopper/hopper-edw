@@ -1,0 +1,160 @@
+= Resource definition group
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+A **resource definition group** is the project's list of warehouse models plus the default Data Catalog connection. It is the spine for harvest, the schema gate, catalog version tags, lineage browse, architecture / OpenLineage export, and the preferred load action **Update resource definition group**.
+
+It is *not* a folder of catalog record definitions. Source feeds live in the catalog; the group *points at* the `.hdv` / `.hbv` / `.hdm` files that use those feeds.
+
+Architecture picture: link:architecture.adoc#d3-rdg-spine[Architecture — D3]. Build order: link:getting-started-edw.adoc[Getting started — building an EDW].
+
+== When to create one
+
+As soon as the first Data Vault model (`.hdv`) exists and checks clean. Business Vault and dimensional paths can stay empty.
+
+Add `.hbv` and `.hdm` files to the **same** group when you author them. Create a second group only when teams need separate load waves — see link:enterprise-modeling-and-team-collaboration.adoc[Organizing large Data Vault programs].
+
+Retail sample: metadata **`retail-sources`** (`retail-example/metadata/resource-definition-group/retail-sources.json`).
+
+== Create and edit (Hop GUI)
+
+. Open the Hop project so `${PROJECT_HOME}` resolves.
+. Metadata perspective → type **Resource definition group** → New.
+. Set **Name** (for example `sales-edw`) and **Default catalog connection** (Configure EDW typically created `local-catalog`).
+. On the **Data Vault models** tab, **Add models** and select the `.hdv` file(s). Prefer `${PROJECT_HOME}/models/….hdv`.
+. Leave **Business Vault models** and **Dimensional models** empty until those files exist.
+. Save.
+
+image::images/resource-definition-group-editor.png[Resource definition group editor — model lists, harvest actions, lineage, catalog versions, and Validate sources,align="center"]
+
+=== Fields
+
+[cols="1,3", options="header"]
+|===
+|Field |Purpose
+
+|Name
+|Metadata name used by workflow actions (for example `retail-sources`).
+
+|Description
+|Optional.
+
+|Default catalog connection
+|FILE catalog used when harvest, validate, tag, and Update RDG do not override it. Individual models may still name a catalog.
+
+|Preview row limit
+|Rows attempted for file-source readability checks during validation.
+
+|Detailed data type checking
+|When on, validation / model checks can compare live source metadata to stored catalog contracts (higher latency).
+
+|Data Vault models tab
+|`.hdv` paths. **List order is update order** within the DV layer.
+
+|Business Vault models tab
+|`.hbv` paths. Update order within the BV layer.
+
+|Dimensional models tab
+|`.hdm` paths. Update order within the DM layer.
+|===
+
+Layer order for **Update resource definition group** is always **all DV, then all BV, then all DM**. You cannot interleave layers by shuffling the three lists.
+
+Use **Add models** to pick project files. Filter the path list when the project has many models.
+
+=== Bottom button bar
+
+[cols="1,3", options="header"]
+|===
+|Button |What it does
+
+|**Generate .hsm from harvest…**
+|Day-2: build or merge a source model from the latest harvest FK inventory. Not a greenfield first step.
+
+|**Apply harvest to catalog…**
+|Day-2: copy discovered FKs (and optionally field layouts) into working-tree `DV_SOURCE` contracts. Harvest alone never does this.
+
+|**Harvest history…**
+|Browse OPS `schema_harvest_*` runs for sources used by this group.
+
+|**Browse lineage…**
+|Reverse source-to-target lineage across models in the group.
+
+|**List catalog versions**
+|Review tags already stored under the catalog `catalog-versions/` folder.
+
+|**Tag catalog version**
+|Freeze **source** contracts currently referenced by the group's models (for example `v1.0.0`).
+
+|**Validate sources**
+|Design-time schema check: options dialog (baseline + axes), then results and optional remediation.
+|===
+
+== What the group scopes
+
+[cols="1,3", options="header"]
+|===
+|Surface |How it uses the group
+
+|**Harvest source metadata** action
+|Harvests every catalog source referenced by the listed models.
+
+|**Validate resource definitions** action / **Validate sources**
+|Schema gate scope (live, version, harvest run, target DDL, impact).
+
+|**Update resource definition group** action
+|Loads every listed model (layer includes on the action can skip BV or DM).
+
+|**Tag / List catalog version**
+|Source-contract snapshot for feeds used by the listed models.
+
+|**Browse lineage…**
+|Reverse browser across the group's models.
+
+|**Export architecture** / **Export data lineage**
+|Model file list for Draw.io and OpenLineage when the group is selected.
+
+|Execution-map crawl
+|Expands group models into the `.hem` graph.
+|===
+
+The group does **not** list catalog JSON paths. Putting `hop/{project}/sources/*.json` in a model tab is an anti-pattern.
+
+== Catalog publish on update
+
+When **Update resource definition group** (or a per-model Update) has **Publish target tables to catalog** enabled, each successful model write upserts:
+
+* Target table layouts under `models/`, `business-vault/`, or `dimensional/`
+* Lineage siblings under `lineage/`
+* Model-registry entries used by BV/DM `ref('model', 'table')`
+
+That is why an RDG update **changes the catalog** even though you never edited a source feed. Picture: link:architecture.adoc#d2-catalog-bus[Architecture — D2].
+
+== Growing the group
+
+. First `.hdv` only → first load (raw vault + publish `models/`).
+. Author `.hbv` → add it on the Business Vault tab → update again.
+. Author `.hdm` → add it on the Dimensional tab → update again.
+
+Same group, same action, more layers. See link:getting-started-edw.adoc#after-first-load[Getting started — after the first load].
+
+== Anti-patterns
+
+* Listing the same model twice.
+* Host-absolute paths instead of `${PROJECT_HOME}/models/…`.
+* Putting catalog source JSON paths in the model arrays.
+* One group per layer (DV group, BV group, DM group) when a single warehouse should load as one wave.
+* Expecting harvest or **Validate sources** to create the group or the models — they only *use* the group.
+
+== Related documents
+
+* link:architecture.adoc[Architecture]
+* link:getting-started-edw.adoc[Getting started — building an EDW]
+* link:update-resource-definition-group-action.adoc[Update resource definition group action]
+* link:resource-definition-validation.adoc[Resource definition validation]
+* link:metadata-harvesting.adoc[Metadata harvesting]
+* link:data-catalog.adoc#catalog-versions[Catalog versions]
+* link:source-to-target-lineage.adoc[Source-to-target lineage]
+* AI schema notes: link:ai-file-schemas/metadata/resource-definition-group.md[resource-definition-group.md]

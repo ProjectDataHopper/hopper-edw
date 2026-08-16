@@ -10,8 +10,8 @@
     "modelElementName" : "order_shipment_event",
     "hopProject" : null,
     "createdAt" : null,
-    "updatedAt" : 1786805103987,
-    "lastDiscoveredAt" : 1786805103987,
+    "updatedAt" : 1786873634648,
+    "lastDiscoveredAt" : 1786873634648,
     "updatedBy" : null,
     "lastWorkflow" : null,
     "lastPipeline" : null

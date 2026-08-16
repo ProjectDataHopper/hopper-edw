@@ -253,7 +253,7 @@ No new runtime graph. Reuses hub-before-link.
 
 - DDL for shared quarantine table; write path from the reject stream.
 - Counts in Data Vault Update log / load-run metrics (quarantined rows, inferred hubs).
-- Docs: `datavault-configuration.adoc`, `dv-hub.adoc`, `dv-link.adoc`, `dv-satellite.adoc`, `datavault-update-action.adoc`, `feature-overview.md`.
+- Docs: `datavault-configuration.adoc`, `dv-hub.adoc`, `dv-link.adoc`, `dv-satellite.adoc`, `datavault-update-action.adoc`, `feature-overview.adoc`.
 - Optional DQ `SQL_ASSERTION` example: inferred or quarantine count.
 
 ### Phase 5 (later, not required to close #77)

@@ -148,4 +148,4 @@ No `.hsm` is required at generate/runtime once the catalog has been published.
 
 * link:source-modeler-overview.adoc[Source modeler overview]
 * link:data-catalog.adoc[Data catalog]
-* link:feature-overview.md[Feature overview]
+* link:feature-overview.adoc[Feature overview]

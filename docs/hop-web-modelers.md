@@ -117,6 +117,6 @@ Painters already target `IGc`. Interactive web path uses the `*ModelCanvasSvgRen
 
 ## Related
 
-- Feature matrix: [feature-overview.md](feature-overview.md)
+- Feature matrix: [feature-overview.adoc](feature-overview.adoc)
 - Changelog: [../CHANGELOG.md](../CHANGELOG.md)
 - Hop SPI: [apache/hop#7873](https://github.com/apache/hop/issues/7873), [PR #7874](https://github.com/apache/hop/pull/7874)

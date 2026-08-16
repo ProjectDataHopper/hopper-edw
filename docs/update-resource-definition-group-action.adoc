@@ -6,6 +6,8 @@ toc::[]
 
 == Description
 
+This is the **normal** load action once you have a link:resource-definition-group.adoc[resource definition group] — including a group that lists only one `.hdv`. Build order: link:getting-started-edw.adoc#chapter-4[Getting started — first load]. Per-model Data Vault / Business Vault / Dimensional Update actions remain available; **Begin/End Vault Update** is the advanced way to bracket a custom multi-action graph.
+
 The **Update resource definition group** workflow action loads every Data Vault (`.hdv`), Business Vault (`.hbv`), and dimensional (`.hdm`) model listed on a **Resource definition group**, in a fixed layer order:
 
 1. All **Data Vault** models (list order on the group)
@@ -134,22 +136,26 @@ From the workflow canvas context menu, **Open referenced object** lists every no
 
 == Typical chain
 
-```
+[source,text]
+----
 Harvest source metadata
   → Schema gate (Validate resource definitions)
   → Measure / Evaluate source quality
   → Update resource definition group (retail-sources)
   → Advance load control
-```
+----
 
 See link:metadata-harvesting.adoc[Metadata harvesting] for the observation step, link:operations.adoc[Operations] for Docker runners and load overview screenshots, and link:resource-definition-validation.adoc[Resource definition validation] for the schema gate.
 
 == Related documentation
 
+* link:resource-definition-group.adoc[Resource definition group]
+* link:getting-started-edw.adoc[Getting started — building an EDW]
+* link:architecture.adoc[Architecture]
 * link:operations.adoc[Operations]
 * link:datavault-update-action.adoc[Data Vault Update action]
 * link:business-vault-update-action.adoc[Business Vault Update action]
 * link:dimensional-update-action.adoc[Dimensional Update action]
 * link:execution-maps.adoc[Execution maps] — crawler expands group models into the `.hem` graph
-* link:data-catalog.adoc[Data catalog] — resource definition groups
+* link:data-catalog.adoc[Data catalog]
 * link:getting-started-retail.adoc[Getting started — retail]

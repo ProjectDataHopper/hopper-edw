@@ -19,7 +19,7 @@ limitations under the License.
 
 Planning and implementation documents for features in progress. These are **not** end-user documentation.
 
-For product documentation, start at [../README.md](../README.md) or [../feature-overview.md](../feature-overview.md).
+For product documentation, start at [../README.md](../README.md) or [../feature-overview.adoc](../feature-overview.adoc).
 
 | Plan | Topic |
 |------|--------|

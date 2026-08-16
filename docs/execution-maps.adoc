@@ -58,4 +58,4 @@ Model-derived table **and** column OpenLineage export (Marquez / HTTP) is provid
 * link:getting-started-retail.adoc[Getting started — retail example] (Chapter 7)
 * link:hop-lineage-view.adoc[Hop Lineage View]
 * link:operations.adoc[Operations]
-* link:feature-overview.md[Feature overview]
+* link:feature-overview.adoc[Feature overview]

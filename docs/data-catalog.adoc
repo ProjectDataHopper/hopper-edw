@@ -4,7 +4,14 @@
 
 toc::[]
 
-The hop-datavault plugin stores **record definitions** — especially Data Vault sources (`DV_SOURCE`) — in the Hop **Data Catalog**. Modelers work in the **Data Catalog** perspective; generated pipelines and transforms resolve definitions by namespace and name.
+The hop-datavault plugin stores **record definitions** in the Hop **Data Catalog**. Modelers work in the **Data Catalog** perspective; generated pipelines and transforms resolve definitions by namespace and name.
+
+The catalog is a **contract bus** (picture: link:architecture.adoc#d2-catalog-bus[Architecture — D2]):
+
+* **In:** source feeds (`DV_SOURCE` / `COMPOSITE` / `JSON` / `PIPELINE`) published from a source model or imported in this perspective.
+* **Out:** published DV / BV / DM table layouts, lineage siblings, and operations stubs — written when **Update resource definition group** (or a per-model Update) has catalog publish enabled.
+
+Harvest does **not** rewrite working-tree contracts. Apply-harvest and Refresh from source are explicit. Build order: link:getting-started-edw.adoc[Getting started — building an EDW]. The list of models that publish and validate together is a link:resource-definition-group.adoc[resource definition group].
 
 == Local file catalog
 
@@ -164,6 +171,9 @@ Use tagged versions as the expected contract for the **Validate resource definit
 
 == Related documents
 
+* link:architecture.adoc[Architecture]
+* link:resource-definition-group.adoc[Resource definition group]
+* link:getting-started-edw.adoc[Getting started — building an EDW]
 * link:datavault-source.adoc[Data Vault Source]
 * link:metadata-harvesting.adoc[Metadata harvesting]
 * link:record-definition-input.adoc[Get Record Definition Names transform]

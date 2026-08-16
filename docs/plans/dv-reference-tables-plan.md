@@ -549,7 +549,7 @@ Incoming delta rows are the **set of natural keys to refresh**. For each key in 
 | `docs/datavault-update-action.adoc` | REF in update orchestration |
 | `docs/datavault-configuration.adoc` | Standard columns apply to REF |
 | `docs/enterprise-modeling-and-team-collaboration.adoc` | Optional `refs/` split models |
-| `docs/feature-overview.md` | Feature bullet |
+| `docs/feature-overview.adoc` | Feature bullet |
 | `CHANGELOG.md` | Release notes per phase |
 
 ---

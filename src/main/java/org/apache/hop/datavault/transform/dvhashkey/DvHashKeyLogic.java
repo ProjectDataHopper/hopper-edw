@@ -105,7 +105,9 @@ public final class DvHashKeyLogic {
           part = new String(bytes, StandardCharsets.ISO_8859_1);
         }
       } else {
-        part = rowMeta.getString(row, fieldIndex);
+        // Compatible string, not getString(): Integer/Number length + DecimalFormat would
+        // otherwise hash padded values such as " 000001001" while JDBC/hub loads hash "1001".
+        part = valueMeta.getCompatibleString(value);
         if (Utils.isEmpty(part)) {
           if (Utils.isEmpty(nullPlaceholder)) {
             continue;

@@ -465,7 +465,7 @@ Do **not** edit golden CSVs unless intentional behaviour change; prefer new fixt
 ## 10. Documentation
 
 - New: `docs/data-type-mappings.adoc` (concept, profile rules, HSM tab, publish/load behaviour, validation table)  
-- Update: `docs/source-modeler-overview.adoc`, `docs/feature-overview.md`, `docs/ai-file-schemas/models/hsm.md`  
+- Update: `docs/source-modeler-overview.adoc`, `docs/feature-overview.adoc`, `docs/ai-file-schemas/models/hsm.md`  
 - Plan archive: `docs/plans/data-type-mappings-plan.md` (copy of this plan after approval)  
 - CHANGELOG entry under Unreleased
 

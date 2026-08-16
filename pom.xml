@@ -30,6 +30,8 @@
 
   <properties>
     <apache.rat.version>0.16.1</apache.rat.version>
+    <!-- 3.x requires Maven 3.8.8+; 2.2.6 works on 3.8.7 (common distro pin). -->
+    <asciidoctor.maven.plugin.version>2.2.6</asciidoctor.maven.plugin.version>
     <!-- Apache Calcite for source-model SQL virtualisation (issue #117). -->
     <calcite.version>1.40.0</calcite.version>
     <commonmark.version>0.29.0</commonmark.version>
@@ -42,6 +44,7 @@
     <lombok.version>1.18.42</lombok.version>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
+    <plantuml.version>1.2025.4</plantuml.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <spotless-maven-plugin.version>2.43.0</spotless-maven-plugin.version>
   </properties>
@@ -634,12 +637,53 @@
         </configuration>
       </plugin>
 
-      <!-- Build the thin hop-hsm JDBC client so the plugin zip can ship it for DatabaseMeta. -->
+      <!-- PlantUML jar is a build tool only — never a project/runtime dependency. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.8.1</version>
+        <executions>
+          <execution>
+            <id>copy-plantuml</id>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>net.sourceforge.plantuml</groupId>
+                  <artifactId>plantuml</artifactId>
+                  <version>${plantuml.version}</version>
+                  <outputDirectory>${project.build.directory}/tools</outputDirectory>
+                  <destFileName>plantuml.jar</destFileName>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Render docs/diagrams/*.puml to committed SVGs (Smetana layout; no Graphviz). -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <version>3.5.0</version>
         <executions>
+          <execution>
+            <id>plantuml-docs</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <executable>bash</executable>
+              <arguments>
+                <argument>-c</argument>
+                <argument>shopt -s nullglob; files=("${project.basedir}"/docs/diagrams/*.puml); if [ ${#files[@]} -eq 0 ]; then echo "No PlantUML sources; using committed SVGs"; exit 0; fi; java -Djava.awt.headless=true -jar "${project.build.directory}/tools/plantuml.jar" -tsvg -o "${project.basedir}/docs/images/diagrams" "${files[@]}"</argument>
+              </arguments>
+            </configuration>
+          </execution>
           <execution>
             <id>build-hop-hsm-jdbc</id>
             <goals>
@@ -647,13 +691,90 @@
             </goals>
             <phase>prepare-package</phase>
             <configuration>
-              <executable>mvn</executable>
-              <workingDirectory>${project.basedir}/hop-hsm-jdbc</workingDirectory>
+              <executable>bash</executable>
               <arguments>
-                <argument>-q</argument>
-                <argument>package</argument>
-                <argument>-DskipTests</argument>
+                <argument>-c</argument>
+                <argument>if [ ! -f "${project.basedir}/hop-hsm-jdbc/pom.xml" ]; then echo "Skipping hop-hsm-jdbc (no module POM)"; exit 0; fi; mvn -q -f "${project.basedir}/hop-hsm-jdbc/pom.xml" package -DskipTests</argument>
               </arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- HTML user guide for the plugin zip (plugins/misc/datavault/docs/). -->
+      <plugin>
+        <groupId>org.asciidoctor</groupId>
+        <artifactId>asciidoctor-maven-plugin</artifactId>
+        <version>${asciidoctor.maven.plugin.version}</version>
+        <executions>
+          <execution>
+            <id>generate-html-docs</id>
+            <goals>
+              <goal>process-asciidoc</goal>
+            </goals>
+            <phase>prepare-package</phase>
+            <configuration>
+              <backend>html5</backend>
+              <doctype>article</doctype>
+              <sourceDirectory>${project.basedir}/docs</sourceDirectory>
+              <outputDirectory>${project.build.directory}/generated-docs</outputDirectory>
+              <preserveDirectories>true</preserveDirectories>
+              <attributes>
+                <sectanchors>true</sectanchors>
+                <idprefix></idprefix>
+                <idseparator>-</idseparator>
+                <source-highlighter>coderay</source-highlighter>
+              </attributes>
+              <resources>
+                <resource>
+                  <directory>${project.basedir}/docs/images</directory>
+                  <targetPath>images</targetPath>
+                </resource>
+                <resource>
+                  <directory>${project.basedir}/docs/diagrams</directory>
+                  <targetPath>diagrams</targetPath>
+                </resource>
+                <resource>
+                  <directory>${project.basedir}/docs/presentations</directory>
+                  <targetPath>presentations</targetPath>
+                  <includes>
+                    <include>*.html</include>
+                    <include>*.md</include>
+                  </includes>
+                </resource>
+                <resource>
+                  <directory>${project.basedir}/docs</directory>
+                  <includes>
+                    <include>hop-web-modelers.md</include>
+                    <include>ai-advisory.md</include>
+                    <include>performance-tuning.md</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- link:page.adoc[] is a hard URL; rewrite sibling hrefs so the zip HTML navigates. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <id>rewrite-adoc-hrefs</id>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <phase>prepare-package</phase>
+            <configuration>
+              <target>
+                <exec executable="bash" failonerror="true">
+                  <arg value="-c"></arg>
+                  <arg value="if [ ! -f '${project.basedir}/scripts/rewrite-adoc-hrefs.py' ]; then echo 'Skipping href rewrite (no script)'; exit 0; fi; python3 '${project.basedir}/scripts/rewrite-adoc-hrefs.py' '${project.build.directory}/generated-docs'"></arg>
+                </exec>
+              </target>
             </configuration>
           </execution>
         </executions>

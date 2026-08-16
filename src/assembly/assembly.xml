@@ -47,6 +47,12 @@
             <destName>hop-hsm-jdbc-${project.version}.jar</destName>
         </file>
     </files>
+    <fileSets>
+        <fileSet>
+            <directory>${project.build.directory}/generated-docs</directory>
+            <outputDirectory>plugins/misc/datavault/docs</outputDirectory>
+        </fileSet>
+    </fileSets>
     <dependencySets>
         <dependencySet>
             <includes>

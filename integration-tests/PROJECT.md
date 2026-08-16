@@ -9,7 +9,7 @@
 > - Testing has been done with **PostgreSQL**, **MySQL**, **SingleStore**, and **Microsoft SQL Server** (see [Docker multi-database tests](#docker-multi-database-tests) below).
 > - For Hop GUI use, install the **hop-datavault** plugin in your Hop **2.19.0** environment.
 
-**CI and regression reference** — not the primary tutorial. For learning, use [retail-example](../retail-example/) and [docs/getting-started-retail.adoc](../docs/getting-started-retail.adoc). Documentation index: [docs/README.md](../docs/README.md).
+**CI and regression reference** — not the first-time tutorial. Build an EDW: [docs/getting-started-edw.adoc](../docs/getting-started-edw.adoc). Tour the sample: [retail-example](../retail-example/) and [docs/getting-started-retail.adoc](../docs/getting-started-retail.adoc). Documentation index: [docs/README.md](../docs/README.md).
 
 This folder is a sample Hop project demonstrating the Data Vault 2.0 and Business Vault plugin: model-driven DDL, pipeline generation, initial and incremental loads, multi-active satellites, link satellites, load end date satellites, status tracking, multi-source hubs, **multi-satellite Business Vault SCD2**, external read-only DV tables, and golden-dataset unit tests.
 

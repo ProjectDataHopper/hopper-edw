@@ -77,4 +77,6 @@ Fixture: `integration-tests/tests/basic/publish-vault1-draft.hwf`
 
 * link:dimensional-modeler-overview.adoc[Dimensional modeler overview]
 * link:date-dimension-generator.adoc[Date Dimension Generator]
+* link:getting-started-edw.adoc#after-first-load[Getting started — after the first load]
+* link:resource-definition-group.adoc[Resource definition group]
 * link:getting-started-retail.adoc[Getting started — retail example]

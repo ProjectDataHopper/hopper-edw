@@ -309,6 +309,9 @@ Design-time expand of `address_line1` to 75 is illustrated under `retail-example
 
 == Related documents
 
+* link:architecture.adoc#d5-four-controls[Architecture — four controls]
+* link:resource-definition-group.adoc[Resource definition group]
+* link:getting-started-edw.adoc[Getting started — building an EDW]
 * link:data-catalog.adoc[Data Catalog]
 * link:datavault-source.adoc[Data Vault Source]
 * link:datavault-update-action.adoc[Data Vault Update action] (model check options)

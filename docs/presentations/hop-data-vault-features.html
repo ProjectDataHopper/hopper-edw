@@ -620,7 +620,7 @@
           <a class="card" href="#architecture">
             <div class="card-icon cat">ARCH</div>
             <h3>Architecture</h3>
-            <p>Sources → DV → BV → DM with Catalog, harvest, validation, DQ, and lineage.</p>
+            <p>.hsm → catalog → DV → BV → DM. Resource definition group is the spine.</p>
           </a>
           <a class="card" href="#catalog">
             <div class="card-icon sources">SRC</div>
@@ -681,8 +681,10 @@
           <span class="kicker">System view</span>
           <h1>Architectural overview</h1>
           <p class="lead">
-            One metadata chain from staging to consumption: left-to-right layers, Data Catalog underneath,
-            and cross-cutting schema validation, data quality, and lineage.
+            Source model (<code>.hsm</code>) publishes contracts into the Data Catalog; a
+            <strong>resource definition group</strong> lists the warehouse models and is the spine for harvest,
+            the schema gate, and Update resource definition group. Full pictures:
+            <code>docs/architecture.adoc</code>. Build order: <code>docs/getting-started-edw.adoc</code>.
           </p>
         </header>
 
@@ -714,10 +716,10 @@
               <rect x="40" y="70" width="175" height="36" rx="12" fill="#c47a12"/>
               <rect x="40" y="90" width="175" height="16" fill="#c47a12"/>
               <text x="127" y="94" text-anchor="middle" fill="#fff" font-family="Segoe UI, system-ui, sans-serif" font-size="14" font-weight="700">Sources</text>
-              <text x="127" y="128" text-anchor="middle" fill="#7a4a08" font-family="Segoe UI, system-ui, sans-serif" font-size="12" font-weight="600">CRM · CSV · DB · Iceberg</text>
-              <text x="127" y="150" text-anchor="middle" fill="#5a6a7e" font-family="Segoe UI, system-ui, sans-serif" font-size="11">DV_SOURCE records</text>
-              <text x="127" y="170" text-anchor="middle" fill="#5a6a7e" font-family="Segoe UI, system-ui, sans-serif" font-size="11">record source · groups</text>
-              <text x="127" y="198" text-anchor="middle" fill="#c47a12" font-family="ui-monospace, monospace" font-size="11">catalog feeds</text>
+              <text x="127" y="128" text-anchor="middle" fill="#7a4a08" font-family="Segoe UI, system-ui, sans-serif" font-size="12" font-weight="600">.hsm · CRM · files · JSON</text>
+              <text x="127" y="150" text-anchor="middle" fill="#5a6a7e" font-family="Segoe UI, system-ui, sans-serif" font-size="11">Push to catalog</text>
+              <text x="127" y="170" text-anchor="middle" fill="#5a6a7e" font-family="Segoe UI, system-ui, sans-serif" font-size="11">DV_SOURCE · COMPOSITE</text>
+              <text x="127" y="198" text-anchor="middle" fill="#c47a12" font-family="ui-monospace, monospace" font-size="11">catalog feeds in</text>
             </g>
 
             <!-- DV -->
@@ -771,7 +773,7 @@
             <g filter="url(#softShadow)">
               <rect x="40" y="280" width="880" height="88" rx="12" fill="#edf0f4" stroke="#4a5568" stroke-width="2"/>
               <text x="480" y="310" text-anchor="middle" fill="#1a2332" font-family="Segoe UI, system-ui, sans-serif" font-size="15" font-weight="700">Data Catalog</text>
-              <text x="480" y="332" text-anchor="middle" fill="#4a5568" font-family="Segoe UI, system-ui, sans-serif" font-size="12">DV_SOURCE · version tags · published table layouts · model registry · lineage siblings</text>
+              <text x="480" y="332" text-anchor="middle" fill="#4a5568" font-family="Segoe UI, system-ui, sans-serif" font-size="12">Sources in · published DV/BV/DM layouts out · version tags · lineage · ops stubs</text>
               <text x="480" y="352" text-anchor="middle" fill="#64748b" font-family="ui-monospace, monospace" font-size="11">hop/{project}/sources · models · business-vault · dimensional · lineage</text>
             </g>
 
@@ -800,7 +802,7 @@
             <line x1="480" y1="368" x2="480" y2="400" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3 2"/>
             <line x1="780" y1="368" x2="780" y2="400" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="3 2"/>
           </svg>
-          <p class="diagram-caption">Sources → Raw DV → Business Vault → Dimensional (left to right). Catalog is the shared foundation; validation, DQ, and lineage cut across all layers.</p>
+          <p class="diagram-caption">Source model publishes feeds <em>into</em> the catalog. Update resource definition group publishes target layouts <em>out</em>. Harvest observes; it does not rewrite contracts.</p>
         </div>
 
         <div class="legend">
@@ -809,6 +811,25 @@
           <span><i class="swatch" style="background:var(--bv)"></i> Business Vault</span>
           <span><i class="swatch" style="background:var(--dm)"></i> Dimensional</span>
           <span><i class="swatch" style="background:var(--catalog)"></i> Catalog</span>
+        </div>
+
+        <div class="two-col">
+          <div class="panel">
+            <h3 style="margin-top:0">Build order</h3>
+            <ol>
+              <li>Configure EDW (catalog + shared configs)</li>
+              <li>Source model <code>.hsm</code> → <strong>Push to catalog</strong></li>
+              <li>Generate / refine <code>.hdv</code> → Check model</li>
+              <li>Resource definition group (list the <code>.hdv</code>)</li>
+              <li>Update resource definition group (DDL + load + publish targets)</li>
+              <li>Add <code>.hbv</code> / <code>.hdm</code> to the <em>same</em> group and update again</li>
+            </ol>
+          </div>
+          <div class="panel soft">
+            <h3 style="margin-top:0">Resource definition group</h3>
+            <p>The project’s list of warehouse models plus the default catalog. Harvest, the schema gate, version tags, lineage browse, and the preferred load action all take a group — not a folder of catalog JSON.</p>
+            <p>Docs: <code>docs/resource-definition-group.adoc</code>, <code>docs/getting-started-edw.adoc</code></p>
+          </div>
         </div>
 
         <h2>Hybrid integration modes (per table)</h2>
@@ -926,7 +947,7 @@
             <ul>
               <li><strong>Tag catalog version</strong> freezes source contracts (e.g. <code>v1.0.0</code>).</li>
               <li>Baselines for the CI/CD schema gate (live source, working vs tag, version vs version, harvest run).</li>
-              <li>Resource definition group scopes which models participate.</li>
+              <li><strong>Resource definition group</strong> is the spine: model lists + default catalog; harvest, schema gate, versions, and Update RDG all take a group.</li>
               <li>Pipeline transforms: Record Definition Input / Output / Data Input.</li>
             </ul>
           </div>
@@ -937,7 +958,7 @@
           including hybrid warehouses where some tables are loaded outside Hop.
         </div>
 
-        <p class="footer-note">Docs: <code>docs/data-catalog.adoc</code>, <code>docs/datavault-source.adoc</code></p>
+        <p class="footer-note">Docs: <code>docs/architecture.adoc</code>, <code>docs/data-catalog.adoc</code>, <code>docs/resource-definition-group.adoc</code>, <code>docs/datavault-source.adoc</code></p>
 
         <nav class="page-nav">
           <a href="#features"><span>Previous</span><strong>← Features</strong></a>
@@ -1688,7 +1709,7 @@
               <li>Install plugin <strong>0.8.0</strong> into Apache Hop 2.19.0</li>
               <li>Walk <code>retail-example/</code> with <code>docs/getting-started-retail.adoc</code></li>
               <li>Deep fixtures: <code>integration-tests/</code></li>
-              <li>Feature list: <code>docs/feature-overview.md</code></li>
+              <li>Feature list: <code>docs/feature-overview.adoc</code></li>
             </ul>
           </div>
           <div class="panel soft">
@@ -1697,7 +1718,7 @@
               <li><a href="https://github.com/mattcasters/hop-data-vault" target="_blank" rel="noopener">GitHub repository</a></li>
               <li><a href="https://github.com/mattcasters/hop-data-vault/releases" target="_blank" rel="noopener">Releases</a></li>
               <li><a href="https://github.com/mattcasters/hop-data-vault/issues" target="_blank" rel="noopener">Open issues</a></li>
-              <li><a href="../feature-overview.md">Feature overview (docs)</a></li>
+              <li><a href="../feature-overview.html">Feature overview (docs)</a></li>
             </ul>
           </div>
         </div>

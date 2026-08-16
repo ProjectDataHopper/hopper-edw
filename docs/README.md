@@ -19,16 +19,22 @@ limitations under the License.
 
 Documentation for the **hop-datavault** plugin (development **0.9.0-SNAPSHOT**, latest release **0.8.0**). Requires **Apache Hop 2.19.0** or a recent **2.19.0-SNAPSHOT** ([hop-client snapshots](https://repository.apache.org/content/groups/snapshots/org/apache/hop/hop-client/2.19.0-SNAPSHOT/)). Highlights include **Free SQL / hop-hsm JDBC**, **source modeler** (`.hsm` with JSON and pipeline sources), **metadata harvesting**, optional **load cycle IDs**, **composite hub business keys**, **OpenLineage / Marquez export**, **Hop Lineage View** (`.hlv`), **source-to-target lineage**, catalog version tags, schema validation, multi-DB hardening, and Business Vault incremental loading. See [CHANGELOG.md](../CHANGELOG.md).
 
-**New here?** Read [feature-overview.md](feature-overview.md), then follow [getting-started-retail.adoc](getting-started-retail.adoc).
+**New here?** Read [architecture.adoc](architecture.adoc) (catalog, models, resource definition group), then [getting-started-edw.adoc](getting-started-edw.adoc) to **build** an EDW. To **tour** a finished sample, use [getting-started-retail.adoc](getting-started-retail.adoc). Capability list: [feature-overview.adoc](feature-overview.adoc).
+
+Architecture pictures are **committed SVGs** (`docs/images/diagrams/`) generated from PlantUML (`docs/diagrams/`). Do not put Mermaid or Markdown ` ``` ` fences in `.adoc` files.
+
+`mvn package` writes an HTML copy of this guide to `target/generated-docs/` and into the plugin zip at `plugins/misc/datavault/docs/` (open `index.html`).
 
 ## Start here
 
 | Document | Description |
 |----------|-------------|
-| [feature-overview.md](feature-overview.md) | Major plugin capabilities, maturity, and links to deep dives |
-| [hop-web-modelers.md](hop-web-modelers.md) | **Hop Web** modelers (`.hsm`/`.hdv`/`.hbv`/`.hdm`/`.hem`/`.hlv`): SVG canvas, interactions, Hop SPI |
-| [getting-started-retail.adoc](getting-started-retail.adoc) | Primary tutorial: retail-example (DV → BV → dimensional) |
+| [architecture.adoc](architecture.adoc) | Catalog in/out, resource definition group spine, build vs run, four controls |
+| [getting-started-edw.adoc](getting-started-edw.adoc) | **Build an EDW:** source model → catalog → Data Vault → resource definition group → load → BV/DM |
+| [getting-started-retail.adoc](getting-started-retail.adoc) | **Tour** the finished retail-example (run the sample workflows) |
+| [feature-overview.adoc](feature-overview.adoc) | Major plugin capabilities, maturity, and links to deep dives |
 | [getting-started-integration-tests.adoc](getting-started-integration-tests.adoc) | Reference walkthrough: Customer 360 and integration test fixtures |
+| [hop-web-modelers.md](hop-web-modelers.md) | **Hop Web** modelers (`.hsm`/`.hdv`/`.hbv`/`.hdm`/`.hem`/`.hlv`): SVG canvas, interactions, Hop SPI |
 | [search.adoc](search.adoc) | **Search Everywhere**: models (`.hsm`/`.hdv`/`.hbv`/`.hdm`/`.hlv`) and plugin metadata |
 | [ai-file-schemas/README.md](ai-file-schemas/README.md) | **AI context pack**: XSD/JSON Schema + purpose markdown for models and metadata (Gemini/external AIs) |
 
@@ -37,6 +43,7 @@ Documentation for the **hop-datavault** plugin (development **0.9.0-SNAPSHOT**, 
 | Document | Description |
 |----------|-------------|
 | [enterprise-modeling-and-team-collaboration.adoc](enterprise-modeling-and-team-collaboration.adoc) | **Large programs:** multi-file models, personas, git/catalog, load order, ops and analyst discovery |
+| [architecture.adoc](architecture.adoc) | Plugin architecture: catalog, models, resource definition group, validation vs quality |
 | [architecture-export.adoc](architecture-export.adoc) | Export SOLUTION architecture, DATA inventory, and aggregated DV/BV/DM ELK Draw.io diagrams |
 | [presentations/hop-data-vault-overview.md](presentations/hop-data-vault-overview.md) | High-level slide deck: goals, architecture, hybrid warehouses |
 
@@ -45,6 +52,7 @@ Documentation for the **hop-datavault** plugin (development **0.9.0-SNAPSHOT**, 
 | Document | Description |
 |----------|-------------|
 | [data-catalog.adoc](data-catalog.adoc) | Local catalog setup, namespaces, refresh, **catalog version tags** |
+| [resource-definition-group.adoc](resource-definition-group.adoc) | **Resource definition group:** model lists, catalog connection, harvest / gate / load / versions |
 | [source-modeler-overview.adoc](source-modeler-overview.adoc) | **Source modeler (`.hsm`)**: PK/FK import, multi-table queries, Free SQL, Source model SQL transform, **Hop Server JDBC / DBeaver** (`jdbc:hop-hsm:`) |
 | [generating-data-vault-from-source-model.adoc](generating-data-vault-from-source-model.adoc) | **Generate a raw Data Vault** from source-model tables, queries, JSON, and pipelines (issue #125) |
 | [data-type-mappings.adoc](data-type-mappings.adoc) | **Data type mappings**: project pre-model policies, HSM tab, catalog effective layout, load Select Values |

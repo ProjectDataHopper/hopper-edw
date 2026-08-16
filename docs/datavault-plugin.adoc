@@ -28,12 +28,16 @@ The generated load processes follow the standard Data Vault 2.0 "insert-only" ap
 
 == Typical workflow
 
-1. Define **Data Vault Sources** that describe where your raw data lives (database connection, table, column layout, and record-source semantics). Optionally model multi-table joins in a **source model** (`.hsm`) and publish composite feeds.
-2. Create **Hub**, **Link**, and **Satellite** definitions and group them into a **Data Vault Model** (saved as a `.hdv` file). From a source model you can **Generate Data Vault…** to propose those objects from primary keys and relationships (review-and-apply). Prefer a shared **Data Vault configuration** (Tools → **Configure EDW setup...**, or the first-time project prompt) and point each model at it.
-3. Lay objects out on the visual canvas, connect relationships, and add annotation notes where helpful.
-4. Use the **Check model** toolbar button to catch missing pieces or broken references early.
-5. Use **Generate DDL** to preview CREATE/ALTER statements, or **Debug** to generate and open a sample update pipeline for selected tables.
-6. In a workflow, add the **Data Vault Update** action (or **Update resource definition group** for multi-model waves), point it at your model(s), choose a pipeline run configuration, and run the full load (with optional model checks and DDL handling).
+Recommended order (full walkthrough: link:getting-started-edw.adoc[Getting started — building an EDW]; pictures: link:architecture.adoc[Architecture]):
+
+1. **Tools → Configure EDW setup...** (or the first-time prompt) — FILE catalog and shared source / DV / BV / DM configurations.
+2. Model landing tables in a **source model** (`.hsm`): **Import schema**, draw relationships, then toolbar **Push to catalog**. Feeds become catalog `DV_SOURCE` / `COMPOSITE` / `JSON` / `PIPELINE` records under `hop/{project}/sources`.
+3. **Generate Data Vault…** from the `.hsm` into a `.hdv` (review hubs, links, satellites). Prefer the shared **Data Vault configuration** on **Edit model**. **Check model**.
+4. Create a **Resource definition group**, list the `.hdv` (BV/DM later), set the default catalog connection. See link:resource-definition-group.adoc[Resource definition group].
+5. In a workflow, add **Update resource definition group**, enable **Update target database structure** and **Publish target tables to catalog**, and run. Single-model **Data Vault Update** remains available for one file.
+6. Add a **Business Vault model** (`.hbv`) and dimensional models (`.hdm`) to the **same** group and update again.
+
+You can still add hubs, links, and satellites by hand (or from the coach panel) instead of generating from the source model. **Generate DDL** and **Debug** on the `.hdv` toolbar preview CREATE/ALTER and a sample update pipeline without loading.
 
 This approach gives you consistent, maintainable Data Vault loads that stay in sync with your model.
 
@@ -247,7 +251,7 @@ See link:ai-advisory.md[Data Vault AI Help and advisory].
 
 == Getting started
 
-New modelers should follow link:getting-started-retail.adoc[Getting started — retail example] for a hands-on path, then link:getting-started-integration-tests.adoc[integration test fixtures] for Customer 360 patterns.
+Build from scratch: link:getting-started-edw.adoc[Getting started — building an EDW]. Tour the finished sample: link:getting-started-retail.adoc[Getting started — retail example]. Advanced fixtures: link:getting-started-integration-tests.adoc[integration test fixtures].
 
 image::images/data-vault-model-retail-example.png[Retail example Data Vault model — customer, order, product, and warehouse entities,align="center"]
 

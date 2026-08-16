@@ -1,0 +1,32 @@
+@startuml d1-logical-layers
+!pragma layout smetana
+title D1 — Logical layers
+skinparam backgroundColor #fafbfc
+skinparam defaultFontName SansSerif
+skinparam shadowing false
+skinparam ArrowColor #5a6a7e
+skinparam rectangle {
+  FontSize 13
+  BorderThickness 2
+}
+
+left to right direction
+
+rectangle "Landing\nCRM · files · JSON" as Landing #fff6e8
+rectangle "Source model\n.hsm" as Hsm #fff6e8
+rectangle "Catalog sources\nhop/{project}/sources" as Catalog #edf0f4
+rectangle "Raw Data Vault\n.hdv" as Hdv #e8f0fb
+rectangle "Business Vault\n.hbv" as Hbv #f3ebfb
+rectangle "Dimensional\n.hdm" as Hdm #e7f6ed
+database "Vault / EDW" as Vault #e8f0fb
+
+Landing --> Hsm
+Hsm --> Catalog : Push to catalog
+Catalog --> Hdv
+Hdv --> Vault
+Hdv --> Hbv
+Hbv --> Vault
+Hbv --> Hdm
+Hdv --> Hdm
+Hdm --> Vault
+@enduml

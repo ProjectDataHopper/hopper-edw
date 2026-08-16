@@ -6,7 +6,7 @@ toc::[]
 
 **Reference walkthrough** for advanced Data Vault and Business Vault patterns in the `integration-tests/` project: multi-satellite Customer 360, external read-only raw vault tables, and golden-dataset regression suites.
 
-For the primary learning path (retail CSV → DV → BV → dimensional), start with link:getting-started-retail.adoc[Getting started — retail example].
+To **build** an EDW from scratch, start with link:getting-started-edw.adoc[Getting started — building an EDW]. To **tour** the finished retail sample (CSV → DV → BV → dimensional), see link:getting-started-retail.adoc[Getting started — retail example].
 
 Estimated time: half a day with Hop GUI, or follow along read-only first.
 
@@ -158,16 +158,16 @@ Reference: link:business-vault-update-action.adoc[Business Vault Update action].
 |Topic |Document
 
 |Primary tutorial (retail)
-|link:getting-started-retail.adoc[getting-started-retail.adoc]
+|link:getting-started-retail.adoc[getting-started-retail]
 
 |Feature overview
-|link:feature-overview.md[feature-overview.md]
+|link:feature-overview.adoc[feature-overview]
 
 |Plugin overview
-|link:datavault-plugin.adoc[datavault-plugin.adoc]
+|link:datavault-plugin.adoc[datavault-plugin]
 
 |Business Vault reference
-|link:business-vault-overview.adoc[business-vault-overview.adoc]
+|link:business-vault-overview.adoc[business-vault-overview]
 
 |CI / regression project
 |link:../integration-tests/PROJECT.md[integration-tests/PROJECT.md]

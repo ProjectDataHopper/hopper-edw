@@ -20,7 +20,8 @@ Without a source modeler, hop-data-vault typically maps each physical table to i
 
 Desired flow:
 
-```
+[source,text]
+----
 Source Model (.hsm)  ──import PK/FK──► tables + relationships
         │
         │  Source queries (joins / projections)
@@ -29,7 +30,7 @@ Catalog DV_SOURCE (single-table OR COMPOSITE feed)
         │
         ▼
   Raw Data Vault (.hdv)  → SQL Table Input OR Merge-Join pipeline
-```
+----
 
 == Concepts
 
@@ -228,10 +229,11 @@ Hop Server must load the hop-datavault plugin (servlet path `/hop/sourceModelDat
 
 Build or take the single zero-dependency jar:
 
-```bash
+[source,bash]
+----
 mvn -f hop-hsm-jdbc/pom.xml clean package
 # → hop-hsm-jdbc/target/hop-hsm-jdbc-*-SNAPSHOT.jar
-```
+----
 
 In DBeaver: **Database → Driver Manager → New**, then:
 
@@ -273,12 +275,13 @@ You can also connect without a default schema (`jdbc:hop-hsm://user:pass@host:po
 
 After **Test Connection**, the navigator shows the service as a schema with tables and views. Open a SQL editor on that schema (or keep the active schema set) and run free SQL. Both bare and schema-qualified names work, for example:
 
-```sql
+[source,sql]
+----
 SELECT *
 FROM crm.order_header oh
 WHERE oh.total_amount > 1000
 ORDER BY oh.total_amount desc
-```
+----
 
 image::images/hop-source-model-jdbc-dbeaver-query-editor.png[DBeaver SQL editor querying crm.order_header with result grid,align="center"]
 
@@ -383,5 +386,7 @@ image::images/source-modeler-generate-data-vault-model-dialog.png[Review dialog 
 * link:metadata-harvesting.adoc[Metadata harvesting] — generate or merge a `.hsm` from harvested FK inventory
 * link:generating-data-vault-from-source-model.adoc[Generate a Data Vault from a source model]
 * link:datavault-plugin.adoc[Data Vault plugin]
+* link:getting-started-edw.adoc[Getting started — building an EDW]
+* link:architecture.adoc[Architecture]
 * link:getting-started-retail.adoc[Getting started — retail]
 * Plan: link:plans/source-modeler-hsm-plan.md[Source modeler plan (issue #105)]

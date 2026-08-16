@@ -20,30 +20,6 @@ limitations under the License.
   <description>Retail customer 360 business vault: four satellites merged into one functional SCD2 table</description>
   <dataVaultModelPath>${PROJECT_HOME}/models/retail-360.hdv</dataVaultModelPath>
   <configurationName>business-vault</configurationName>
-  <configuration>
-    <targetDatabase>Vault</targetDatabase>
-    <dataCatalogConnection>local-catalog</dataCatalogConnection>
-    <scd2DefaultsFolder/>
-    <functionalTimestampField/>
-    <loadDateFieldFallback>x_load_ts</loadDateFieldFallback>
-    <validFromField>x_from_ts</validFromField>
-    <validToField>x_to_ts</validToField>
-    <targetTableBatchSize>1000</targetTableBatchSize>
-    <targetTableParallelCopies>1</targetTableParallelCopies>
-    <target_load_mode>Table Output</target_load_mode>
-    <bulkLoadStagingFolder>${java.io.tmpdir}/dv2/bulk/</bulkLoadStagingFolder>
-    <bulkLoadDelimiter>,</bulkLoadDelimiter>
-    <bulkLoadEnclosure>"</bulkLoadEnclosure>
-    <bulkLoadEncoding>UTF-8</bulkLoadEncoding>
-    <bulkLoadLocalFileRequired>N</bulkLoadLocalFileRequired>
-    <generatedPipelineFolder/>
-    <scd2PipelineNamePrefix>bv-scd2-</scd2PipelineNamePrefix>
-    <pitPipelineNamePrefix>bv-pit-</pitPipelineNamePrefix>
-    <businessTablePipelineNamePrefix>bv-biz-</businessTablePipelineNamePrefix>
-    <generatedWorkflowNamePrefix>BV Bulk Update - </generatedWorkflowNamePrefix>
-    <openStartSentinel>1900-01-01 00:00:00</openStartSentinel>
-    <openEndSentinel>9999-12-31 23:59:59</openEndSentinel>
-  </configuration>
   <coaching>
     <coaching_sources/>
   </coaching>
@@ -166,7 +142,7 @@ It is possible to load incrementally as well.</text>
       <noteType>INFORMATION</noteType>
       <xloc>48</xloc>
       <yloc>416</yloc>
-      <width>32</width>
+      <width>352</width>
       <height>32</height>
     </note>
   </notes>

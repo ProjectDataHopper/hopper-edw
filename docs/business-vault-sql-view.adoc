@@ -104,10 +104,11 @@ Lookup order for `ref('model', 'object')`: current/linked model basename → cat
 
 **Same basename DV + BV:** Projects often use `retail-360.hdv` and `retail-360.hbv`. Short refs try the Data Vault model first, then the Business Vault model, and succeed when the object exists in either file. Example data product:
 
-```sql
+[source,sql]
+----
 SELECT customer_hk, segment
 FROM {{ ref('retail-360', 'customer_360_bv') }}
-```
+----
 
 resolves to the BV table even if the catalog also has `retail-360.hdv`.
 

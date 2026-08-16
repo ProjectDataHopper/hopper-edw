@@ -224,6 +224,6 @@ Marquez, the export folder, and OPS are queried by the **Hop Web server**, not t
 * link:execution-maps.adoc[Execution maps]
 * link:operations.adoc[Operations]
 * link:getting-started-retail.adoc[Getting started — retail example]
-* link:feature-overview.md[Feature overview]
+* link:feature-overview.adoc[Feature overview]
 * link:hop-web-modelers.md[Hop Web modelers]
 * link:../scripts/README.md[Shared scripts]

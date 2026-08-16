@@ -448,7 +448,7 @@ Do **not** edit golden CSVs without intentional behaviour change + suite re-run.
 
 - `docs/source-modeler-overview.adoc` — Free SQL + virtualisation section  
 - `docs/plans/source-model-sql-virtualization-plan.md` — copy of this plan (repo-facing)  
-- `docs/feature-overview.md` — maturity row  
+- `docs/feature-overview.adoc` — maturity row  
 - `CHANGELOG.md` when shipping  
 - AI file schemas: free SQL field on query if serialized in `.hsm`
 

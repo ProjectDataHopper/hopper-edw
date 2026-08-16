@@ -20,7 +20,7 @@ limitations under the License.
 **Model-driven Data Vault, Business Vault, and dimensional marts on Apache Hop 2.19.0**  
 *(plugin 0.8.0 · Apache Hop 2.19.0 · Java 21)*
 
-> For a feature checklist with documentation links, see [feature-overview.md](../feature-overview.md).  
+> For a feature checklist with documentation links, see [feature-overview.adoc](../feature-overview.adoc).  
 > For an interactive standalone HTML presentation (architecture, detail pages, roadmap & open issues), open [hop-data-vault-features.html](hop-data-vault-features.html).
 
 ---
@@ -42,12 +42,14 @@ Enterprise data warehouses built with hand-written pipelines drift from the mode
 
 **Model once. Generate loads and consumption layers.**
 
-1. Model **source systems** (`.hsm`) — tables, FKs, queries, JSON, pipeline feeds; optional Free SQL
-2. Define hubs, links, and satellites in a visual vault model (`.hdv`)
-3. Validate structure, harvest metadata, and run schema / quality gates before loads
-4. Generate DDL and insert-only load pipelines automatically
-5. Build Business Vault SCD2 / PIT / SQL tables (`.hbv`) and dimensional marts (`.hdm`)
-6. Run controlled batch updates from workflow actions; explain lineage end-to-end
+1. **Configure EDW** — FILE catalog + shared source / DV / BV / DM configurations
+2. Model **source systems** (`.hsm`) — tables, FKs, queries, JSON, pipeline feeds — and **publish to the catalog**
+3. **Generate** hubs, links, and satellites into a `.hdv`; **Check model**
+4. Create a **resource definition group** (list the `.hdv`; add BV/DM later)
+5. **Update resource definition group** — DDL, insert-only loads, publish target layouts back to the catalog
+6. Add Business Vault (`.hbv`) and dimensional (`.hdm`) models to the **same** group; harvest / schema / quality gates on later waves
+
+Pictures: [architecture.adoc](../architecture.adoc). Walkthrough: [getting-started-edw.adoc](../getting-started-edw.adoc).
 
 The model is the contract — not a diagram that diverges from production.
 
@@ -249,7 +251,9 @@ Choose per table — mixed models are supported.
 
 | Audience | Start here |
 |----------|------------|
-| **Modelers** | [docs/getting-started-retail.adoc](../getting-started-retail.adoc) |
+| **Build an EDW** | [docs/getting-started-edw.adoc](../getting-started-edw.adoc) |
+| **Architecture** | [docs/architecture.adoc](../architecture.adoc) |
+| **Tour the sample** | [docs/getting-started-retail.adoc](../getting-started-retail.adoc) |
 | **Advanced fixtures** | [docs/getting-started-integration-tests.adoc](../getting-started-integration-tests.adoc) |
 | **Implementers** | [README.md](../../README.md) and [integration-tests/PROJECT.md](../../integration-tests/PROJECT.md) |
 | **Reference** | [docs/README.md](../README.md) — full doc index |

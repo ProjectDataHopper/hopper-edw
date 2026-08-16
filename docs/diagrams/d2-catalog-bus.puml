@@ -1,0 +1,60 @@
+@startuml d2-catalog-bus
+!pragma layout smetana
+title D2 — Catalog as the contract bus
+skinparam backgroundColor #fafbfc
+skinparam defaultFontName SansSerif
+skinparam shadowing false
+skinparam ArrowColor #5a6a7e
+skinparam rectangle {
+  FontSize 12
+  BorderThickness 1
+}
+skinparam package {
+  FontSize 13
+  BorderColor #4a5568
+  BackgroundColor #ffffff
+}
+
+package "Writers into the catalog" as writers #fff6e8 {
+  rectangle ".hsm Push to catalog" as HsmPub
+  rectangle "Catalog Import tables" as Import
+  rectangle "Apply harvest /\nRefresh from source" as ApplyH
+  rectangle "Tag catalog version" as Tag
+  rectangle "Update RDG\nPublish target tables" as Upd
+  rectangle "Harvest persist /\nquality / metrics" as Ops
+}
+
+package "Data Catalog" as catalog #edf0f4 {
+  rectangle "hop/{project}/sources" as Sources
+  rectangle "catalog-versions/" as Versions
+  rectangle "models / business-vault /\ndimensional" as Models
+  rectangle "lineage/ siblings" as Lineage
+  rectangle "operations/ stubs" as Operations
+}
+
+package "Readers from the catalog" as readers #e8f0fb {
+  rectangle ".hdv bind by source name" as Hdv
+  rectangle "Check model" as Check
+  rectangle "Harvest source metadata" as Harvest
+  rectangle "Validate resource definitions" as Gate
+  rectangle "Measure data quality" as Quality
+  rectangle "Lineage browser /\n.hlv / ref()" as Hlv
+}
+
+HsmPub --> Sources
+Import --> Sources
+ApplyH --> Sources
+Tag --> Versions
+Upd --> Models
+Upd --> Lineage
+Ops --> Operations
+
+Sources --> Hdv
+Sources --> Check
+Sources --> Harvest
+Sources --> Gate
+Sources --> Quality
+Models --> Quality
+Models --> Hlv
+Lineage --> Hlv
+@enduml

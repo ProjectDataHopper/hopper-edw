@@ -1,0 +1,33 @@
+@startuml bv-pit-scd2
+!pragma layout smetana
+title PIT, SCD2, and the raw vault
+skinparam backgroundColor #fafbfc
+skinparam defaultFontName SansSerif
+skinparam shadowing false
+skinparam ArrowColor #5a6a7e
+skinparam rectangle {
+  FontSize 12
+  BorderThickness 1
+}
+
+package "Raw vault DB" as dv #e8f0fb {
+  rectangle "hub_customer" as Hub
+  rectangle "sat_customer" as Sat
+}
+
+package "BV target DB" as bv #f3ebfb {
+  rectangle "sat_customer_hb\nSCD2" as Scd2
+  rectangle "pit_customer\nPIT" as Pit
+}
+
+rectangle "vault1.hdv" as Hdv #e8f0fb
+rectangle "vault1.hbv" as Hbv #f3ebfb
+
+Hdv --> Hub
+Hdv --> Sat
+Hbv --> Scd2
+Hbv --> Pit
+Hub --> Pit
+Sat --> Pit
+Sat --> Scd2
+@enduml

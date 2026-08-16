@@ -30,13 +30,14 @@ import org.apache.hop.datavault.metadata.DvLink;
 import org.apache.hop.datavault.metadata.DvLinkHubSourceKeyFieldSupport;
 import org.apache.hop.datavault.metadata.DvReferenceTable;
 import org.apache.hop.datavault.metadata.DvSatellite;
+import org.apache.hop.datavault.metadata.DvSatelliteParentKeySupport;
 import org.apache.hop.datavault.metadata.IDvTable;
 import org.apache.hop.datavault.metadata.SatelliteAttribute;
 
 /**
  * Stream field names produced by generated DV source SQL / file projections. Catalog data type
  * mappings must be restricted to this set: hubs and links do not read satellite attributes or
- * source audit columns such as {@code load_date}.
+ * source audit columns such as {@code load_date}. Satellites do include parent-key hash inputs.
  */
 public final class DvCatalogMappingStreamFieldsSupport {
 
@@ -57,6 +58,8 @@ public final class DvCatalogMappingStreamFieldsSupport {
       addLinkFields(names, link, recordSource, model, variables, linkHubSource);
       addField(names, targetRecordSourceField, variables);
     } else if (table instanceof DvSatellite satellite) {
+      addSatelliteHashInputFields(
+          names, satellite, recordSource, model, variables, linkHubSource);
       addSatelliteFields(names, satellite, variables);
       if (satellite.isStoreRecordSource()) {
         addField(names, targetRecordSourceField, variables);
@@ -134,6 +137,42 @@ public final class DvCatalogMappingStreamFieldsSupport {
       if (attribute != null) {
         addField(names, attribute.getName(), variables);
       }
+    }
+  }
+
+  /**
+   * Parent-key / link-key columns used as DvHashKey inputs. Catalog mappings must include these
+   * (not only satellite attributes) so Integer business keys keep the same conversion as hub
+   * loads.
+   */
+  private static void addSatelliteHashInputFields(
+      List<String> names,
+      DvSatellite satellite,
+      DataVaultSource recordSource,
+      DataVaultModel model,
+      IVariables variables,
+      DvLink.DvLinkHubSource linkHubSource) {
+    if (satellite == null || model == null) {
+      return;
+    }
+    if (!Utils.isEmpty(satellite.getHubName())) {
+      DvHub hub = model.findHub(satellite.getHubName());
+      if (hub == null) {
+        return;
+      }
+      try {
+        for (DvSatelliteParentKeySupport.ParentKeyField field :
+            DvSatelliteParentKeySupport.resolveParentKeyFields(hub, satellite, variables)) {
+          addField(names, field.getBusinessKeyName(), variables);
+        }
+      } catch (Exception ignored) {
+        // Best-effort stream filter; missing hub keys skip catalog mapping for those fields.
+      }
+      return;
+    }
+    if (!Utils.isEmpty(satellite.getLinkName())) {
+      DvLink link = model.findLink(satellite.getLinkName());
+      addLinkFields(names, link, recordSource, model, variables, linkHubSource);
     }
   }
 

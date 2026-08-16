@@ -50,7 +50,11 @@ Narration voice is set under `tutorial.tts.voice_id` (default: `ursa`). Override
 
 The bundled Hop project under `hop-project/` matches the screenshots. Open `hop-project/retail-model.hdv` in Hop GUI to reproduce or update captures.
 
+This video uses **catalog Import tables** and the coach panel, then a per-model Data Vault load. The current recommended **build order** is source model → publish to catalog → generate Data Vault → resource definition group → **Update resource definition group**: [Getting started — building an EDW](../../getting-started-edw.adoc). Pictures: [Architecture](../../architecture.adoc).
+
 ## Related documentation
 
+- [Getting started — building an EDW](../../getting-started-edw.adoc)
+- [Architecture](../../architecture.adoc)
 - [Data Vault plugin guide](../../datavault-plugin.adoc)
 - [Getting started — retail example](../../getting-started-retail.adoc)

@@ -51,7 +51,8 @@ image::images/architecture-export-retail-example-dimensional-model-drawio.png[Re
 
 == Example artifact set (retail)
 
-```text
+[source,text]
+----
 work/architecture/retail-solution.drawio       # process architecture only
 work/architecture/data-inventory.drawio        # short default inventory name
 work/architecture/models/data-vault.drawio     # all .hdv tables unioned + ELK
@@ -63,7 +64,7 @@ work/architecture/models/data-vault/retail-360.drawio
 work/architecture/models/business-vault/retail-360.drawio
 work/architecture/models/dimensional/retail-f-orders.drawio
 work/architecture/models/dimensional/retail-conformed-dims.drawio
-```
+----
 
 == Formats (current)
 
@@ -94,12 +95,13 @@ To document every model on a resource definition group **without** solution arch
 
 Output layout:
 
-```text
+[source,text]
+----
 {models folder}/
   data-vault/{basename}.drawio
   business-vault/{basename}.drawio
   dimensional/{basename}.drawio
-```
+----
 
 Basename is the model file name without extension (`models/subdir/retail-360.hdv` → `retail-360.drawio`).
 
@@ -161,7 +163,8 @@ hop architecture-export \
 
 == How it is built
 
-```
+[source,text]
+----
 workflow / .hem     →  Execution map crawl  →  ArchitectureGraph (SOLUTION)
 model lineage       →  ArchitectureGraph (DATA inventory, no ER edges)
 all .hdv / .hbv / .hdm
@@ -172,7 +175,7 @@ each .hdv / .hbv / .hdm
   →  ElkGraphLayout (single file)
   →  ArchitectureGraph (MODELS freeform)
   →  {type}/{basename}.drawio
-```
+----
 
 * ELK coordinates are computed in memory and **do not** rewrite table positions in model files on disk.
 * Does **not** replace OpenLineage/Marquez or `hop svg` (canvas fidelity per file).
@@ -183,4 +186,4 @@ each .hdv / .hbv / .hdm
 * link:execution-maps.adoc[Execution maps]
 * link:source-to-target-lineage.adoc[Source-to-target lineage]
 * link:openlineage-export.adoc[OpenLineage export]
-* link:feature-overview.md[Feature overview]
+* link:feature-overview.adoc[Feature overview]

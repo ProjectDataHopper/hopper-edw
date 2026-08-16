@@ -1,0 +1,57 @@
+= Architecture diagram sources
+
+PlantUML (`.puml`) is the source of truth for the user-facing architecture pictures. Maven renders them to committed SVGs under `../images/diagrams/` so AsciiDoc preview and GitHub show images — no Mermaid license, and no Markdown fences in `.adoc` files.
+
+Use `!pragma layout smetana` in every file so Graphviz is not required.
+
+== Files
+
+[cols="1,2", options="header"]
+|===
+|Source |Used from
+
+|link:d1-logical-layers.puml[d1-logical-layers.puml]
+|link:../architecture.adoc#d1-logical-layers[architecture D1], feature-overview
+
+|link:d2-catalog-bus.puml[d2-catalog-bus.puml]
+|link:../architecture.adoc#d2-catalog-bus[architecture D2]
+
+|link:d3-rdg-spine.puml[d3-rdg-spine.puml]
+|link:../architecture.adoc#d3-rdg-spine[architecture D3]
+
+|link:d4-build-vs-run.puml[d4-build-vs-run.puml]
+|link:../architecture.adoc#d4-build-vs-run[architecture D4]
+
+|link:d5-four-controls.puml[d5-four-controls.puml]
+|link:../architecture.adoc#d5-four-controls[architecture D5]
+
+|link:d6-grow-the-warehouse.puml[d6-grow-the-warehouse.puml]
+|link:../architecture.adoc#d6-grow-the-warehouse[architecture D6]
+
+|link:bv-raw-vault-relationship.puml[bv-raw-vault-relationship.puml]
+|link:../business-vault-overview.adoc[business-vault-overview]
+
+|link:bv-pit-scd2.puml[bv-pit-scd2.puml]
+|link:../business-vault-pit.adoc[business-vault-pit]
+
+|link:enterprise-people-files-systems.puml[enterprise-people-files-systems.puml]
+|link:../enterprise-modeling-and-team-collaboration.adoc[enterprise-modeling-and-team-collaboration]
+|===
+
+== Render locally or via Maven
+
+Maven (`generate-resources`) writes SVGs next to the screenshots:
+
+[source,bash]
+----
+mvn generate-resources
+----
+
+Or with a PlantUML jar (same version as `plantuml.version` in the root `pom.xml`):
+
+[source,bash]
+----
+java -jar plantuml.jar -tsvg -o ../images/diagrams .
+----
+
+Commit both the `.puml` change and the updated `.svg`.

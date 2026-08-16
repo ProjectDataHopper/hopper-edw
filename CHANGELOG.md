@@ -4,6 +4,35 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## Unreleased
 
+### SQL Server live source schema
+
+- JDBC catalog lookup now resolves `${DB_NAME}` (and similar) before `DatabaseMetaData.getColumns`. SQL Server treats catalog as a real database name and failed model check with `Database '${DB_NAME}' does not exist`.
+
+### CSV satellite hash keys
+
+- `DvHashKey` now hashes the compatible (unformatted) integer/number string, so file sources that apply catalog `Integer` length no longer produce padded keys such as ` 000001001` while the hub hashes `1001`
+- Satellite catalog mappings include parent-key hash inputs, not only attributes
+
+### EDW logo and in-GUI documentation
+
+- Navy/cyan **EDW** wordmark (`edw-logo.svg`) in Hop’s logo palette
+- Main toolbar button and **Help → EDW documentation** open the plugin-shipped `docs/index.html`
+
+- Converted [docs/feature-overview.adoc](docs/feature-overview.adoc) so the plugin HTML set includes `feature-overview.html`
+
+### Offline HTML docs and architecture SVGs
+
+- Architecture pictures are committed SVGs under `docs/images/diagrams/`, generated from PlantUML (`docs/diagrams/`, Smetana layout)
+- User-facing `.adoc` files no longer use Markdown fences or live Mermaid listings
+- `mvn package` writes `target/generated-docs/` and includes `plugins/misc/datavault/docs/` in the plugin zip
+
+### First-time EDW architecture and getting-started guide
+
+- [docs/architecture.adoc](docs/architecture.adoc) — catalog as contract bus, resource definition group spine, build vs run, four controls
+- [docs/getting-started-edw.adoc](docs/getting-started-edw.adoc) — build-from-scratch order: Configure EDW → `.hsm` → catalog → `.hdv` → resource definition group → Update RDG → same group for BV/DM
+- [docs/resource-definition-group.adoc](docs/resource-definition-group.adoc) — first-class RDG page (was only implied by validation / update docs)
+- Retail tutorial reframed as a **tour** of the finished sample; README Usage and plugin “Typical workflow” follow the golden path
+
 ### Shared model configuration metadata (issue #126)
 
 - Four project metadata types: Source Model, Data Vault, Business Vault, and Dimensional configuration
@@ -242,7 +271,7 @@ Requires **Apache Hop 2.19.0** (or a **recent 2.19.0-SNAPSHOT** until GA) and **
 - GUI: hub Keys composite column + multi-part source fields; satellite parent-key defaults/hints; link hub source mapping multi-part rows
 - Integration suite `tests/composite-hub-bk/`: EXT two-part feed → `hub_burger` (`IKL#12278170`) + VS-style hash (`parts + #` + trailing `#`), satellite parent parts; wired into `run-tests.hwf` / SQL Server orchestrator
 - Bundle `hop-transform-concatfields` in the plugin assembly (required for generated compose steps)
-- Docs: [dv-hub.adoc](docs/dv-hub.adoc#composite-hub-business-keys), [dv-satellite.adoc](docs/dv-satellite.adoc), [dv-link.adoc](docs/dv-link.adoc), [datavault-configuration.adoc](docs/datavault-configuration.adoc), [feature-overview.md](docs/feature-overview.md); AI schema notes in [docs/ai-file-schemas/models/hdv.md](docs/ai-file-schemas/models/hdv.md)
+- Docs: [dv-hub.adoc](docs/dv-hub.adoc#composite-hub-business-keys), [dv-satellite.adoc](docs/dv-satellite.adoc), [dv-link.adoc](docs/dv-link.adoc), [datavault-configuration.adoc](docs/datavault-configuration.adoc), [feature-overview.adoc](docs/feature-overview.adoc); AI schema notes in [docs/ai-file-schemas/models/hdv.md](docs/ai-file-schemas/models/hdv.md)
 
 ### Optional satellite record-source column (VaultSpeed)
 

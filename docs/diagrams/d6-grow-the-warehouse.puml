@@ -1,0 +1,33 @@
+@startuml d6-grow-the-warehouse
+!pragma layout smetana
+title D6 — After the first raw-vault load
+skinparam backgroundColor #fafbfc
+skinparam defaultFontName SansSerif
+skinparam shadowing false
+skinparam ArrowColor #5a6a7e
+skinparam rectangle {
+  FontSize 12
+  BorderThickness 1
+}
+
+left to right direction
+
+rectangle ".hdv in\nthe group" as Hdv #e8f0fb
+rectangle "Update RDG" as U1 #fff3df
+rectangle "Catalog\nhop/{project}/models" as CatDv #edf0f4
+rectangle "Author .hbv" as Hbv #f3ebfb
+rectangle "Add .hbv to\nthe same group" as AddBv #f3ebfb
+rectangle "Update RDG" as U2 #fff3df
+rectangle "Author .hdm" as Hdm #e7f6ed
+rectangle "Add .hdm to\nthe same group" as AddDm #e7f6ed
+rectangle "Update RDG" as U3 #fff3df
+
+Hdv --> U1
+U1 --> CatDv
+CatDv --> Hbv
+Hbv --> AddBv
+AddBv --> U2
+U2 --> Hdm
+Hdm --> AddDm
+AddDm --> U3
+@enduml

@@ -1,0 +1,62 @@
+@startuml enterprise-people-files-systems
+!pragma layout smetana
+title People, files, and systems
+skinparam backgroundColor #fafbfc
+skinparam defaultFontName SansSerif
+skinparam shadowing false
+skinparam ArrowColor #5a6a7e
+skinparam rectangle {
+  FontSize 11
+  BorderThickness 1
+}
+
+package "People" as people #fff6e8 {
+  rectangle "DV platform admin" as Admin
+  rectangle "Subject DV modeler" as Subj
+  rectangle "Source steward" as Stew
+  rectangle "Daily operations" as Ops
+  rectangle "BV / DM modelers" as BV
+  rectangle "Analysts / reporting" as Analyst
+}
+
+package "Git project" as git #e8f0fb {
+  rectangle "models/core/*.hdv" as Core
+  rectangle "models/subject/*.hdv" as SubHdv
+  rectangle "models/business/*.hbv" as Hbv
+  rectangle "models/marts/*.hdm" as Hdm
+  rectangle "workflows/*.hwf" as Wf
+}
+
+package "Data Catalog" as catalog #edf0f4 {
+  rectangle "DV_SOURCE contracts" as Src
+  rectangle "Published targets\n+ lineage" as Pub
+  rectangle "Version tags" as Tags
+}
+
+package "Databases" as db #e7f6ed {
+  rectangle "Source / CRM" as CRM
+  rectangle "Raw vault" as Vault
+  rectangle "BV / marts" as Mart
+}
+
+Stew --> Src
+Admin --> Core
+Admin --> Tags
+Subj --> SubHdv
+SubHdv --> Core : linked tables
+BV --> Hbv
+BV --> Hdm
+Ops --> Wf
+Wf --> Vault
+Wf --> Mart
+Src --> SubHdv
+Core --> Vault
+SubHdv --> Vault
+Hbv --> Mart
+Hdm --> Mart
+Vault --> Pub
+Mart --> Pub
+Analyst --> Pub
+Analyst --> Mart
+CRM --> Src
+@enduml

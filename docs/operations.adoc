@@ -6,7 +6,9 @@ toc::[]
 
 Day-to-day operation of hop-datavault loads: environments, Docker runners, batch orchestration, and partial model updates.
 
-For **multi-team programs** (who owns core vs subject models, catalog contracts, git vs runtime, analyst discovery), see link:enterprise-modeling-and-team-collaboration.adoc[Organizing large Data Vault programs]. This page stays focused on *how to run* loads.
+How you *got* the models and the resource definition group is design-time — see link:architecture.adoc#d4-build-vs-run[Architecture — build vs run] and link:getting-started-edw.adoc[Getting started — building an EDW]. This page is the operate lane.
+
+For **multi-team programs** (who owns core vs subject models, catalog contracts, git vs runtime, analyst discovery), see link:enterprise-modeling-and-team-collaboration.adoc[Organizing large Data Vault programs].
 
 == Docker runners
 
@@ -68,13 +70,14 @@ Full option reference: link:update-resource-definition-group-action.adoc[Update 
 
 Retail example (`run-retail-update.hwf` / `run-retail-update-models.hwf`):
 
-```
+[source,text]
+----
 Harvest source metadata (optional Phase 1 wiring)
   → Schema gate (Validate resource definitions)
   → Measure / Evaluate source quality
   → Update resource definition group (retail-sources)
   → Advance load control
-```
+----
 
 Metadata harvest details: link:metadata-harvesting.adoc[Metadata harvesting].
 
@@ -119,4 +122,7 @@ Day-to-day operators and modelers can use Hop **Search Everywhere** to jump to h
 * link:update-resource-definition-group-action.adoc[Update resource definition group action]
 * link:search.adoc[Project and metadata search]
 * link:execution-maps.adoc[Execution maps]
+* link:architecture.adoc[Architecture]
+* link:getting-started-edw.adoc[Getting started — building an EDW]
+* link:resource-definition-group.adoc[Resource definition group]
 * link:getting-started-retail.adoc[Getting started — retail example]

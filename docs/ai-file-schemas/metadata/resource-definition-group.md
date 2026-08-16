@@ -2,6 +2,7 @@
 
 **Java:** `org.apache.hop.catalog.metadata.ResourceDefinitionGroupMeta`  
 **Schema:** [resource-definition-group.schema.json](resource-definition-group.schema.json)  
+**User guide:** [../../resource-definition-group.adoc](../../resource-definition-group.adoc)  
 **Example:** `retail-example/metadata/resource-definition-group/retail-sources.json`
 
 ## Purpose
@@ -9,7 +10,8 @@
 Lists model files for:
 
 - **Validate resource definitions** (schema/catalog gates)  
-- **Update resource definition group** (run DV → BV → DM models in order)  
+- **Update resource definition group** (run DV → BV → DM models in order)
+- Harvest, catalog version tags, lineage browse, architecture / OpenLineage export  
 
 ## Key fields
 

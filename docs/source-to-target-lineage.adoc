@@ -202,6 +202,6 @@ Use this when you need the inverse of the Lineage tab: *given a staging column, 
 * link:datavault-update-action.adoc[Data Vault Update action]
 * link:business-vault-update-action.adoc[Business Vault Update action]
 * link:dimensional-update-action.adoc[Dimensional Update action]
-* link:feature-overview.md[Feature overview]
+* link:feature-overview.adoc[Feature overview]
 * link:execution-maps.adoc[Execution maps]
 * link:hop-lineage-view.adoc[Hop Lineage View]

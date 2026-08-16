@@ -39,7 +39,7 @@ public final class DatabasePrimaryKeyDiscoverySupport {
       return List.of();
     }
 
-    String catalog = resolveCatalog(databaseMeta);
+    String catalog = DatabaseJdbcCatalogSupport.resolveCatalog(db, databaseMeta);
     String schema = Utils.isEmpty(schemaName) ? null : schemaName.trim();
     String table = DvDatabaseSourceImportSupport.stripTableNameQuotes(tableName).trim();
 
@@ -102,11 +102,4 @@ public final class DatabasePrimaryKeyDiscoverySupport {
         .toList();
   }
 
-  private static String resolveCatalog(DatabaseMeta databaseMeta) {
-    if (databaseMeta == null) {
-      return null;
-    }
-    String databaseName = databaseMeta.getDatabaseName();
-    return Utils.isEmpty(databaseName) ? null : databaseName.trim();
-  }
 }

@@ -17,6 +17,8 @@ under the License.
 
 # Hop Data Vault 2.0 Plugin
 
+![EDW](docs/images/edw-logo.svg)
+
 Apache Hop plugin for **Data Vault 2.0**, **Business Vault**, and **dimensional** modeling, validation, and model-driven loading. Version **0.9.0-SNAPSHOT** (latest release **0.8.0**) requires **Apache Hop 2.19.0** (or a **recent 2.19.0-SNAPSHOT** until GA) and **Java 21**.
 
 **Hop 2.19 is required.** Until the GA client is on Maven Central, build Hop from source or download a recent CI snapshot of **hop-client**:
@@ -34,7 +36,7 @@ Hop **2.18.x** (including 2.18.1) is **not** supported for this release.
 
 ## Features
 
-Full capability list with maturity labels: **[docs/feature-overview.md](docs/feature-overview.md)**  
+Full capability list with maturity labels: **[docs/feature-overview.adoc](docs/feature-overview.adoc)**  
 Release notes: **[CHANGELOG.md](CHANGELOG.md)**
 
 Highlights:
@@ -60,10 +62,13 @@ Highlights:
 
 Full index: **[docs/README.md](docs/README.md)**
 
+`mvn package` also builds an HTML copy of the user guide into `target/generated-docs/` and ships it in the plugin zip at `plugins/misc/datavault/docs/index.html`. Architecture diagrams are committed SVGs generated from PlantUML (`docs/diagrams/`).
+
 | Audience | Document |
 |----------|----------|
-| Everyone (start here) | [`docs/feature-overview.md`](docs/feature-overview.md) |
-| Modelers (tutorial) | [`docs/getting-started-retail.adoc`](docs/getting-started-retail.adoc) |
+| Everyone (start here) | [`docs/architecture.adoc`](docs/architecture.adoc) then [`docs/getting-started-edw.adoc`](docs/getting-started-edw.adoc) |
+| Feature list | [`docs/feature-overview.adoc`](docs/feature-overview.adoc) |
+| Tour the sample | [`docs/getting-started-retail.adoc`](docs/getting-started-retail.adoc) |
 | Advanced fixtures | [`docs/getting-started-integration-tests.adoc`](docs/getting-started-integration-tests.adoc) |
 | Managers / architects | [`docs/presentations/hop-data-vault-overview.md`](docs/presentations/hop-data-vault-overview.md) |
 
@@ -191,12 +196,16 @@ You can also use **Tools → Marketplace…** in Hop GUI: import the repository 
 
 ## Usage
 
-1. Define **Data Vault Sources** as catalog `DV_SOURCE` records (`hop/{project}/sources`) for your staging / CRM tables.
-2. Create a **Data Vault Model** (`.hdv`): add hubs, links, and satellites on the canvas, connect relationships, and add notes as needed.
-3. Click **Edit model** to set the target database, hashing rules, sentinel records, and pipeline options.
-4. Use **Check model**, **Generate DDL**, or **Debug** on the toolbar to validate and inspect before production loads. Use the canvas or table **context menus** (icon actions) to add and edit objects.
-5. Add a **Data Vault Update** action to a workflow, point it at the `.hdv` file, and run.
-6. Optionally create a **Business Vault model** (`.hbv`), link it to the `.hdv`, define SCD2 tables, and run **Business Vault Update**.
+Recommended build order (details: [`docs/getting-started-edw.adoc`](docs/getting-started-edw.adoc), pictures: [`docs/architecture.adoc`](docs/architecture.adoc)):
+
+1. **Tools → Configure EDW setup...** — FILE catalog (`local-catalog`) and shared source / DV / BV / DM configurations.
+2. Create a **source model** (`.hsm`), **Import schema**, then toolbar **Push to catalog** (`hop/{project}/sources`).
+3. **Generate Data Vault…** from the `.hsm`. **Check model** on the `.hdv`.
+4. Create a **Resource definition group**, list the `.hdv` (BV/DM can wait), set the default catalog connection.
+5. Workflow **Update resource definition group**: update target structure, **Publish target tables to catalog**.
+6. Add `.hbv` then `.hdm` to the **same** group and update again (layer order is always DV → BV → DM).
+
+Single-model **Data Vault Update** / **Business Vault Update** / **Dimensional Update** still exist; prefer the group action once you have a group.
 
 For multi-active satellites, set **`drivingKey`** (vault column) and **`drivingKeySourceField`** (source column). For scheduled partial loads, tag sources with **`group`** and set **`recordSourceGroup`** on the update action.
 
