@@ -32,6 +32,8 @@ import org.apache.hop.datavault.hopgui.file.businessvault.HopBusinessVaultFileTy
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
 import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataSupport;
+import org.apache.hop.datavault.metadata.ModelConfigurationResolver;
+import org.apache.hop.datavault.metadata.ModelConfigurationTestSupport;
 import org.apache.hop.datavault.metadata.businessvault.BvScd2PipelineSupport.Scd2BuildContext;
 import org.apache.hop.datavault.transform.sortedschemamerge.SortedSchemaMergeMeta;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
@@ -337,21 +339,26 @@ class BvScd2MultiSatelliteFixtureTest {
     Document document = XmlHandler.loadXmlFile(path.toFile());
     Node rootNode = XmlHandler.getSubNode(document, "data-vault-model");
     DataVaultModel model = new DataVaultModel();
-    XmlMetadataUtil.deSerializeFromXml(rootNode, DataVaultModel.class, model, null);
+    IHopMetadataProvider provider = testMetadataProvider();
+    XmlMetadataUtil.deSerializeFromXml(rootNode, DataVaultModel.class, model, provider);
+    ModelConfigurationResolver.attach(model, provider);
     return model;
   }
 
-  private static IHopMetadataProvider testMetadataProvider() throws HopException {
+  private static IHopMetadataProvider testMetadataProvider() throws Exception {
     MemoryMetadataProvider metadataProvider = new MemoryMetadataProvider();
     metadataProvider.getSerializer(DatabaseMeta.class).save(new TestDatabaseMeta("Vault"));
-    return metadataProvider;
+    return ModelConfigurationTestSupport.prepare(
+        metadataProvider, ModelConfigurationTestSupport.INTEGRATION_TESTS);
   }
 
   private static BusinessVaultModel loadBusinessVaultModel(Path path) throws Exception {
     Document document = XmlHandler.loadXmlFile(path.toFile());
     Node rootNode = XmlHandler.getSubNode(document, HopBusinessVaultFileType.XML_TAG);
     BusinessVaultModel model = new BusinessVaultModel();
-    XmlMetadataUtil.deSerializeFromXml(rootNode, BusinessVaultModel.class, model, null);
+    IHopMetadataProvider provider = testMetadataProvider();
+    XmlMetadataUtil.deSerializeFromXml(rootNode, BusinessVaultModel.class, model, provider);
+    ModelConfigurationResolver.attach(model, provider);
     model.setDataVaultModelPath(DV_PATH.toString());
     return model;
   }

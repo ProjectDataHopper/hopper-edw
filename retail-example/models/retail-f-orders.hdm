@@ -18,6 +18,7 @@ limitations under the License.
 <dimensional-model>
   <name_sync_with_filename>Y</name_sync_with_filename>
   <description>Retail warehouse star schema with date role-playing and extended catalog tables</description>
+  <configurationName>dimensional-orders</configurationName>
   <configuration>
     <targetDatabase>Vault</targetDatabase>
     <sourceDatabase/>

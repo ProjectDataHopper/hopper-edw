@@ -1,49 +1,7 @@
 <data-vault-model>
   <name_sync_with_filename>Y</name_sync_with_filename>
-  <configuration>
-    <hashAlgorithm>MD5</hashAlgorithm>
-    <hashKeyDataType>HEX</hashKeyDataType>
-    <generateUnknownRecord>Y</generateUnknownRecord>
-    <unknownHashKeyValue>00000000000000000000000000000000</unknownHashKeyValue>
-    <unknownLinkHashKeyValue>00000000000000000000000000000000</unknownLinkHashKeyValue>
-    <unknownRecordSource>UNKNOWN</unknownRecordSource>
-    <generateInvalidRecord>Y</generateInvalidRecord>
-    <invalidHashKeyValue>FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF</invalidHashKeyValue>
-    <invalidLinkHashKeyValue>FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF</invalidLinkHashKeyValue>
-    <invalidRecordSource>INVALID</invalidRecordSource>
-    <hashContentCasing>UPPER</hashContentCasing>
-    <businessKeyDelimiter>||</businessKeyDelimiter>
-    <nullPlaceholder>^^</nullPlaceholder>
-    <trimBusinessKeys>Y</trimBusinessKeys>
-    <hashUsesComposedBusinessKey>N</hashUsesComposedBusinessKey>
-    <loadDateField>LOAD_DATE</loadDateField>
-    <loadEndDateField>LOAD_END_DATE</loadEndDateField>
-    <recordSourceField>RECORD_SOURCE</recordSourceField>
-    <recordSourceFieldLength>100</recordSourceFieldLength>
-    <storeLoadCycleId>N</storeLoadCycleId>
-    <loadCycleIdField>LOAD_CYCLE_ID</loadCycleIdField>
-    <loadCycleControlTable>dv_load_cycle</loadCycleControlTable>
-    <useLoadEndDate>N</useLoadEndDate>
-    <generatePrimaryKeys>N</generatePrimaryKeys>
-    <generateForeignKeys>N</generateForeignKeys>
-    <targetTableBatchSize>1000</targetTableBatchSize>
-    <targetTableParallelCopies>1</targetTableParallelCopies>
-    <target_load_mode>Table Output</target_load_mode>
-    <bulkLoadStagingFolder>${java.io.tmpdir}/dv2/bulk/</bulkLoadStagingFolder>
-    <bulkLoadDelimiter>,</bulkLoadDelimiter>
-    <bulkLoadEnclosure>"</bulkLoadEnclosure>
-    <bulkLoadEncoding>UTF-8</bulkLoadEncoding>
-    <bulkLoadLocalFileRequired>Y</bulkLoadLocalFileRequired>
-    <sortRowsSize>1000000</sortRowsSize>
-    <execution_log_level>Basic</execution_log_level>
-    <singleStoreShardKeyOnHashKey>N</singleStoreShardKeyOnHashKey>
-    <singleStoreShardKeyIncludeDrivingKeys>Y</singleStoreShardKeyIncludeDrivingKeys>
-    <hubPipelineNamePrefix>hub-</hubPipelineNamePrefix>
-    <linkPipelineNamePrefix>link-</linkPipelineNamePrefix>
-    <satellitePipelineNamePrefix>sat-</satellitePipelineNamePrefix>
-    <generatedWorkflowNamePrefix>DV Bulk Update - </generatedWorkflowNamePrefix>
-    <stsPipelineNamePrefix>sts-</stsPipelineNamePrefix>
-  </configuration>
+  <description/>
+  <configurationName>data-vault</configurationName>
   <coaching>
     <coaching_sources/>
   </coaching>
@@ -64,12 +22,13 @@
       <recordSources>
         <recordSource>customer_hub</recordSource>
       </recordSources>
+      <allowInferredInsert>Y</allowInferredInsert>
       <tableName>hub_customer</tableName>
       <tableType>HUB</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>256</xloc>
-      <yloc>624</yloc>
+      <xloc>496</xloc>
+      <yloc>80</yloc>
       <name>hub_customer</name>
       <virtualPath/>
     </table>
@@ -89,12 +48,13 @@
       <recordSources>
         <recordSource>order_header</recordSource>
       </recordSources>
+      <allowInferredInsert>Y</allowInferredInsert>
       <tableName>hub_order</tableName>
       <tableType>HUB</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>64</xloc>
-      <yloc>64</yloc>
+      <xloc>928</xloc>
+      <yloc>432</yloc>
       <name>hub_order</name>
       <virtualPath/>
     </table>
@@ -114,12 +74,13 @@
       <recordSources>
         <recordSource>order_rep</recordSource>
       </recordSources>
+      <allowInferredInsert>Y</allowInferredInsert>
       <tableName>hub_order_rep</tableName>
       <tableType>HUB</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>528</xloc>
-      <yloc>64</yloc>
+      <xloc>784</xloc>
+      <yloc>864</yloc>
       <name>hub_order_rep</name>
       <virtualPath/>
     </table>
@@ -139,12 +100,13 @@
       <recordSources>
         <recordSource>product</recordSource>
       </recordSources>
+      <allowInferredInsert>Y</allowInferredInsert>
       <tableName>hub_product</tableName>
       <tableType>HUB</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>320</xloc>
-      <yloc>336</yloc>
+      <xloc>336</xloc>
+      <yloc>720</yloc>
       <name>hub_product</name>
       <virtualPath/>
     </table>
@@ -164,12 +126,13 @@
       <recordSources>
         <recordSource>sales_rep</recordSource>
       </recordSources>
+      <allowInferredInsert>Y</allowInferredInsert>
       <tableName>hub_sales_rep</tableName>
       <tableType>HUB</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>752</xloc>
-      <yloc>64</yloc>
+      <xloc>1328</xloc>
+      <yloc>864</yloc>
       <name>hub_sales_rep</name>
       <virtualPath/>
     </table>
@@ -189,12 +152,13 @@
       <recordSources>
         <recordSource>warehouse</recordSource>
       </recordSources>
+      <allowInferredInsert>Y</allowInferredInsert>
       <tableName>hub_warehouse</tableName>
       <tableType>HUB</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>720</xloc>
-      <yloc>624</yloc>
+      <xloc>288</xloc>
+      <yloc>400</yloc>
       <name>hub_warehouse</name>
       <virtualPath/>
     </table>
@@ -239,8 +203,8 @@
       <tableType>LINK</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>64</xloc>
-      <yloc>480</yloc>
+      <xloc>512</xloc>
+      <yloc>336</yloc>
       <name>lnk_order</name>
       <virtualPath/>
     </table>
@@ -306,8 +270,8 @@
       <tableType>LINK</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>512</xloc>
-      <yloc>480</yloc>
+      <xloc>784</xloc>
+      <yloc>720</yloc>
       <name>lnk_order_line</name>
       <virtualPath/>
     </table>
@@ -352,8 +316,8 @@
       <tableType>LINK</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>736</xloc>
-      <yloc>224</yloc>
+      <xloc>1040</xloc>
+      <yloc>864</yloc>
       <name>lnk_order_rep_sales_rep</name>
       <virtualPath/>
     </table>
@@ -399,9 +363,56 @@
       <tableType>LINK</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>256</xloc>
-      <yloc>64</yloc>
+      <xloc>304</xloc>
+      <yloc>592</yloc>
       <name>lnk_warehouse_product</name>
+      <virtualPath/>
+    </table>
+    <table>
+      <hubNames>hub_warehouse</hubNames>
+      <hubNames>hub_order</hubNames>
+      <linkSatelliteNames>sat_lnk_shipment_events</linkSatelliteNames>
+      <linkHubSources>
+        <linkHubSource>
+          <source>shipment_events</source>
+          <hubSourceKeyFields>
+            <hubSourceKeyField>
+              <hubName>hub_warehouse</hubName>
+              <businessKeySources>
+                <businessKeySource>
+                  <businessKeyField>warehouse_id</businessKeyField>
+                  <sourceFieldNames/>
+                  <sourceFieldName>warehouse_id</sourceFieldName>
+                </businessKeySource>
+              </businessKeySources>
+              <drivingKeySources/>
+            </hubSourceKeyField>
+            <hubSourceKeyField>
+              <hubName>hub_order</hubName>
+              <businessKeySources>
+                <businessKeySource>
+                  <businessKeyField>order_id</businessKeyField>
+                  <sourceFieldNames/>
+                  <sourceFieldName>order_id</sourceFieldName>
+                </businessKeySource>
+              </businessKeySources>
+              <drivingKeySources/>
+            </hubSourceKeyField>
+          </hubSourceKeyFields>
+        </linkHubSource>
+      </linkHubSources>
+      <linkSatelliteSources/>
+      <dependentChildKeys/>
+      <linkHashKeyFieldName>lnk_shipment_events_hk</linkHashKeyFieldName>
+      <hubSourceKeyFields/>
+      <hasDescriptiveAttributes>Y</hasDescriptiveAttributes>
+      <tableName>lnk_shipment_events</tableName>
+      <tableType>LINK</tableType>
+      <integrationMode>HOP_MANAGED</integrationMode>
+      <customUpdatePipelinePaths/>
+      <xloc>592</xloc>
+      <yloc>432</yloc>
+      <name>lnk_shipment_events</name>
       <virtualPath/>
     </table>
     <table>
@@ -443,8 +454,8 @@
       <tableType>SATELLITE</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>320</xloc>
-      <yloc>720</yloc>
+      <xloc>816</xloc>
+      <yloc>16</yloc>
       <name>sat_customer_address</name>
       <virtualPath/>
     </table>
@@ -479,8 +490,8 @@
       <tableType>SATELLITE</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>752</xloc>
-      <yloc>336</yloc>
+      <xloc>832</xloc>
+      <yloc>80</yloc>
       <name>sat_customer_contact</name>
       <virtualPath/>
     </table>
@@ -523,8 +534,8 @@
       <tableType>SATELLITE</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>64</xloc>
-      <yloc>336</yloc>
+      <xloc>864</xloc>
+      <yloc>208</yloc>
       <name>sat_customer_demo</name>
       <virtualPath/>
     </table>
@@ -567,8 +578,8 @@
       <tableType>SATELLITE</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>480</xloc>
-      <yloc>624</yloc>
+      <xloc>848</xloc>
+      <yloc>144</yloc>
       <name>sat_customer_prefs</name>
       <virtualPath/>
     </table>
@@ -627,8 +638,8 @@
       <tableType>SATELLITE</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>64</xloc>
-      <yloc>208</yloc>
+      <xloc>1136</xloc>
+      <yloc>432</yloc>
       <name>sat_order</name>
       <virtualPath/>
     </table>
@@ -669,8 +680,8 @@
       <tableType>SATELLITE</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>528</xloc>
-      <yloc>336</yloc>
+      <xloc>1040</xloc>
+      <yloc>720</yloc>
       <name>sat_lnk_order_line</name>
       <virtualPath/>
     </table>
@@ -713,8 +724,8 @@
       <tableType>SATELLITE</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>64</xloc>
-      <yloc>624</yloc>
+      <xloc>128</xloc>
+      <yloc>720</yloc>
       <name>sat_product</name>
       <virtualPath/>
     </table>
@@ -749,8 +760,8 @@
       <tableType>SATELLITE</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>544</xloc>
-      <yloc>208</yloc>
+      <xloc>1552</xloc>
+      <yloc>864</yloc>
       <name>sat_sales_rep</name>
       <virtualPath/>
     </table>
@@ -801,8 +812,8 @@
       <tableType>SATELLITE</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>736</xloc>
-      <yloc>480</yloc>
+      <xloc>288</xloc>
+      <yloc>288</yloc>
       <name>sat_warehouse</name>
       <virtualPath/>
     </table>
@@ -835,9 +846,62 @@
       <tableType>SATELLITE</tableType>
       <integrationMode>HOP_MANAGED</integrationMode>
       <customUpdatePipelinePaths/>
-      <xloc>256</xloc>
-      <yloc>208</yloc>
+      <xloc>32</xloc>
+      <yloc>592</yloc>
       <name>sat_lnk_warehouse_product</name>
+      <virtualPath/>
+    </table>
+    <table>
+      <link>lnk_shipment_events</link>
+      <attributes>
+        <name>carrier</name>
+        <dataType>String</dataType>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>city</name>
+        <dataType>String</dataType>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>region</name>
+        <dataType>String</dataType>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>notes</name>
+        <dataType>String</dataType>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>status</name>
+        <dataType>String</dataType>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>status_ts</name>
+        <dataType>Timestamp</dataType>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>tracking_number</name>
+        <dataType>String</dataType>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <parentKeySourceFields/>
+      <recordSource>shipment_events</recordSource>
+      <storeRecordSource>Y</storeRecordSource>
+      <statusTrackingEnabled>N</statusTrackingEnabled>
+      <statusFieldName>record_status</statusFieldName>
+      <activeStatusValue>ACTIVE</activeStatusValue>
+      <deletedStatusValue>DELETED</deletedStatusValue>
+      <tableName>sat_lnk_shipment_events</tableName>
+      <tableType>SATELLITE</tableType>
+      <integrationMode>HOP_MANAGED</integrationMode>
+      <customUpdatePipelinePaths/>
+      <xloc>576</xloc>
+      <yloc>544</yloc>
+      <name>sat_lnk_shipment_events</name>
       <virtualPath/>
     </table>
   </tables>

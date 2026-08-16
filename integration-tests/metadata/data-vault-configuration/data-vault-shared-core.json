@@ -1,0 +1,14 @@
+{
+  "targetDatabase": "Vault",
+  "dataCatalogConnection": "local-catalog",
+  "hashAlgorithm": "MD5",
+  "hashKeyDataType": "STRING",
+  "loadDateField": "x_load_ts",
+  "recordSourceField": "x_record_source",
+  "recordSourceFieldLength": "100",
+  "targetTableBatchSize": "1000",
+  "targetTableParallelCopies": "1",
+  "name": "data-vault-shared-core",
+  "description": "",
+  "virtualPath": ""
+}

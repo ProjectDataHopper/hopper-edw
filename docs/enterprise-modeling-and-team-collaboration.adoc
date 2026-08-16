@@ -52,7 +52,7 @@ Roles often overlap in small teams; at scale, keep **accountable owners** even i
 |Persona |Primary artifacts |Catalog |Typical Hop surfaces
 
 |**DV platform / admin**
-|Shared-core `.hdv`, naming and hash/config standards, resource definition groups, CI gates
+|Shared-core `.hdv`, **Data Vault configuration** metadata (hashing, naming, target database), resource definition groups, CI gates
 |Owns source-contract process and catalog **version tags**; sets conventions for namespaces
 |Model check standards, Validate resource definitions action, core Data Vault Update
 

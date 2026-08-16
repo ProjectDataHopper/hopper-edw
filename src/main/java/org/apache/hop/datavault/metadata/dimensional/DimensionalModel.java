@@ -43,6 +43,7 @@ import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metadata.DvNote;
 import org.apache.hop.datavault.metadata.DvTargetLoadModelCheckSupport;
 import org.apache.hop.datavault.metadata.DvTargetUnicodeCapabilitySupport;
+import org.apache.hop.datavault.metadata.ModelConfigurationResolver;
 import org.apache.hop.datavault.metadata.coaching.ModelCoachingConfiguration;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataBase;
@@ -81,8 +82,21 @@ public class DimensionalModel extends HopMetadataBase
   @HopMetadataProperty
   private String description;
 
+  @GuiWidgetElement(
+      order = "0150",
+      type = GuiElementType.METADATA,
+      metadata = DimensionalConfiguration.class,
+      label = "i18n::DimensionalModel.ConfigurationName.Label",
+      toolTip = "i18n::DimensionalModel.ConfigurationName.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_PARENT_ID)
+  @HopMetadataProperty
+  private String configurationName;
+
   @HopMetadataProperty(key = "configuration")
   private DimensionalConfiguration configuration;
+
+  /** Runtime metadata provider for {@link #configurationName}. Never serialized. */
+  private transient IHopMetadataProvider metadataProvider;
 
   @HopMetadataProperty private ModelCoachingConfiguration coaching;
 
@@ -109,6 +123,12 @@ public class DimensionalModel extends HopMetadataBase
   }
 
   public DimensionalConfiguration getConfigurationOrDefault() {
+    DimensionalConfiguration named =
+        ModelConfigurationResolver.resolveNamed(
+            configurationName, metadataProvider, DimensionalConfiguration.class);
+    if (named != null) {
+      return named;
+    }
     if (configuration == null) {
       configuration = DimensionalConfiguration.createFromPluginDefaults();
     }
@@ -295,6 +315,13 @@ public class DimensionalModel extends HopMetadataBase
     List<IDmTable> tables = getTables();
     monitor.beginTask(
         BaseMessages.getString(PKG, "DimensionalModel.Monitor.VerifyingModel"), tables.size());
+    ModelConfigurationResolver.attach(this, metadataProvider);
+    ModelConfigurationResolver.checkNamedConfiguration(
+        remarks,
+        configurationName,
+        configuration,
+        metadataProvider,
+        DimensionalConfiguration.class);
 
     DmValidationSupport.validateConfiguration(remarks, this, metadataProvider, variables);
     DimensionalConfiguration config = getConfigurationOrDefault();

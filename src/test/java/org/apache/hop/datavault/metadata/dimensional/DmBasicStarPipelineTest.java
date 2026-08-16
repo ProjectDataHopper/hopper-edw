@@ -30,6 +30,8 @@ import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.datavault.hopgui.file.dimensional.HopDimensionalFileType;
+import org.apache.hop.datavault.metadata.ModelConfigurationResolver;
+import org.apache.hop.datavault.metadata.ModelConfigurationTestSupport;
 import org.apache.hop.datavault.metadata.dimensional.pipeline.DmUpdateExecutionSupport;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
@@ -228,10 +230,11 @@ class DmBasicStarPipelineTest {
     assertEquals("fact_sales", ordered.get(2).getName());
   }
 
-  private static IHopMetadataProvider testMetadataProvider() throws HopException {
+  private static IHopMetadataProvider testMetadataProvider() throws Exception {
     MemoryMetadataProvider metadataProvider = new MemoryMetadataProvider();
     metadataProvider.getSerializer(DatabaseMeta.class).save(new TestDatabaseMeta("Vault"));
-    return metadataProvider;
+    return ModelConfigurationTestSupport.prepare(
+        metadataProvider, ModelConfigurationTestSupport.INTEGRATION_TESTS);
   }
 
   private static DimensionalModel loadBasicStarModel() throws Exception {
@@ -247,7 +250,9 @@ class DmBasicStarPipelineTest {
     Document document = XmlHandler.loadXmlFile(fixture.toFile());
     Node rootNode = XmlHandler.getSubNode(document, HopDimensionalFileType.XML_TAG);
     DimensionalModel model = new DimensionalModel();
-    XmlMetadataUtil.deSerializeFromXml(rootNode, DimensionalModel.class, model, null);
+    IHopMetadataProvider provider = testMetadataProvider();
+    XmlMetadataUtil.deSerializeFromXml(rootNode, DimensionalModel.class, model, provider);
+    ModelConfigurationResolver.attach(model, provider);
     return model;
   }
 }

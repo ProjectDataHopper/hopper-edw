@@ -24,10 +24,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.ICheckResult;
-import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.datavault.hopgui.file.dimensional.HopDimensionalFileType;
+import org.apache.hop.datavault.metadata.ModelConfigurationTestSupport;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -37,8 +37,9 @@ import org.w3c.dom.Node;
 class DimensionalModelTest {
 
   @BeforeAll
-  static void initHop() throws HopException {
+  static void initHop() throws Exception {
     HopEnvironment.init();
+    ModelConfigurationTestSupport.registerTypes();
   }
 
   @Test

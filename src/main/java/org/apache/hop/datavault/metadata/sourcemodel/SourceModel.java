@@ -39,6 +39,7 @@ import org.apache.hop.core.undo.ChangeAction;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.metadata.DvNote;
+import org.apache.hop.datavault.metadata.ModelConfigurationResolver;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
@@ -83,8 +84,21 @@ public class SourceModel extends HopMetadataBase
   @HopMetadataProperty
   private String description;
 
+  @GuiWidgetElement(
+      order = "0150",
+      type = GuiElementType.METADATA,
+      metadata = SourceModelConfiguration.class,
+      label = "i18n::SourceModel.ConfigurationName.Label",
+      toolTip = "i18n::SourceModel.ConfigurationName.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_PARENT_ID)
+  @HopMetadataProperty
+  private String configurationName;
+
   @HopMetadataProperty(key = "configuration")
   private SourceModelConfiguration configuration;
+
+  /** Runtime metadata provider for {@link #configurationName}. Never serialized. */
+  private transient IHopMetadataProvider metadataProvider;
 
   @HopMetadataProperty(key = "table", groupKey = "tables")
   @Getter(AccessLevel.NONE)
@@ -124,6 +138,12 @@ public class SourceModel extends HopMetadataBase
   }
 
   public SourceModelConfiguration getConfigurationOrDefault() {
+    SourceModelConfiguration named =
+        ModelConfigurationResolver.resolveNamed(
+            configurationName, metadataProvider, SourceModelConfiguration.class);
+    if (named != null) {
+      return named;
+    }
     if (configuration == null) {
       configuration = SourceModelConfiguration.createDefault();
     }
@@ -398,6 +418,13 @@ public class SourceModel extends HopMetadataBase
     }
 
     List<ICheckResult> remarks = new ArrayList<>();
+    ModelConfigurationResolver.attach(this, metadataProvider);
+    ModelConfigurationResolver.checkNamedConfiguration(
+        remarks,
+        configurationName,
+        configuration,
+        metadataProvider,
+        SourceModelConfiguration.class);
     List<SourceTable> tables = getTables();
     List<SourceRelationship> relationships = getRelationships();
     List<SourceQuery> queries = getQueries();

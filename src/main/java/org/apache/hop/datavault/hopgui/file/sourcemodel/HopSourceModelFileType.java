@@ -29,8 +29,10 @@ import org.apache.hop.core.search.ISearchable;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
 import org.apache.hop.core.xml.XmlHandler;
+import org.apache.hop.datavault.hopgui.StandardProjectElementsOfferSupport;
 import org.apache.hop.datavault.hopgui.file.ExplorerPerspectiveTabSupport;
 import org.apache.hop.datavault.hopgui.search.HopGuiSourceModelSearchable;
+import org.apache.hop.datavault.metadata.ModelConfigurationResolver;
 import org.apache.hop.datavault.metadata.ModelXmlWriteSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModelLoadSupport;
@@ -135,6 +137,7 @@ public class HopSourceModelFileType extends HopFileTypeBase {
       SourceModel model = new SourceModel();
       IHopMetadataProvider provider = hopGui.getMetadataProvider();
       XmlMetadataUtil.deSerializeFromXml(rootNode, SourceModel.class, model, provider);
+      ModelConfigurationResolver.attach(model, provider);
       model.clearChanged();
       model.setFilename(filename);
 
@@ -150,6 +153,8 @@ public class HopSourceModelFileType extends HopFileTypeBase {
       SourceModel model = new SourceModel();
       model.setName(
           BaseMessages.getString(PKG, "HopSourceModelFileType.New.Text", "New Source Model"));
+      ModelConfigurationResolver.attach(model, hopGui.getMetadataProvider());
+      ModelConfigurationResolver.applyDefaultNameIfPresent(model, hopGui.getMetadataProvider());
       return addSourceModelToExplorer(hopGui, model, null, this);
     } catch (Exception e) {
       throw new HopException("Error creating new source model", e);
@@ -181,6 +186,9 @@ public class HopSourceModelFileType extends HopFileTypeBase {
 
     targetFolder.setSelection(tabItem);
     explorer.activate();
+    targetFolder
+        .getDisplay()
+        .asyncExec(() -> StandardProjectElementsOfferSupport.maybeOffer(hopGui, model));
 
     return graph;
   }

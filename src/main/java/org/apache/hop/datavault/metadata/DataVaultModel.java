@@ -106,16 +106,47 @@ public class DataVaultModel extends HopMetadataBase
   private String description;
 
   /**
+   * Named project {@link DataVaultConfiguration}. When set, this is the source of hashing, target
+   * database, and load settings. Inline {@link #configuration} is only a fallback for older files.
+   */
+  @GuiWidgetElement(
+      order = "0150",
+      type = GuiElementType.METADATA,
+      metadata = DataVaultConfiguration.class,
+      label = "i18n::DataVaultModel.ConfigurationName.Label",
+      toolTip = "i18n::DataVaultModel.ConfigurationName.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_PARENT_ID)
+  @HopMetadataProperty
+  private String configurationName;
+
+  /**
    * Configuration for hashing, target database and physical strategy used by objects in this model.
+   * Used when {@link #configurationName} is empty (legacy embedded models).
    */
   @HopMetadataProperty(key = "configuration")
-  private DataVaultConfiguration configuration = new DataVaultConfiguration();
+  private DataVaultConfiguration configuration;
+
+  /**
+   * Runtime metadata provider used to resolve {@link #configurationName}. Never serialized —
+   * loaders bind this from the Hop GUI / action / test context.
+   */
+  private transient IHopMetadataProvider metadataProvider;
 
   /** Curated coaching sources for the model coach panel. */
   @HopMetadataProperty private ModelCoachingConfiguration coaching;
 
-  /** Returns the embedded configuration, or a new default instance if none is set. */
+  /**
+   * Returns the effective configuration: the named project metadata object when {@link
+   * #configurationName} resolves, otherwise the embedded inline object (creating a default if
+   * needed).
+   */
   public DataVaultConfiguration getConfigurationOrDefault() {
+    DataVaultConfiguration named =
+        ModelConfigurationResolver.resolveNamed(
+            configurationName, metadataProvider, DataVaultConfiguration.class);
+    if (named != null) {
+      return named;
+    }
     if (configuration == null) {
       configuration = new DataVaultConfiguration();
     }
@@ -263,6 +294,13 @@ public class DataVaultModel extends HopMetadataBase
         BaseMessages.getString(PKG, "DataVaultModel.Monitor.VerifyingModel"), tables.size());
 
     try {
+      ModelConfigurationResolver.attach(this, metadataProvider);
+      ModelConfigurationResolver.checkNamedConfiguration(
+          remarks,
+          configurationName,
+          configuration,
+          metadataProvider,
+          DataVaultConfiguration.class);
       List<String> sourceNames =
           loadDataVaultSourceNames(metadataProvider, variables, remarks, options.getCache());
       if (monitor.isCanceled()) {

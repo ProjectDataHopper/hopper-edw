@@ -28,6 +28,7 @@ import org.apache.hop.datavault.hopgui.file.vault.HopVaultFileType;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DvModelLoadSupport;
 import org.apache.hop.datavault.metadata.IDvTable;
+import org.apache.hop.datavault.metadata.ModelConfigurationResolver;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
@@ -69,6 +70,7 @@ public final class BusinessVaultDvModelResolver {
       }
       DataVaultModel model = new DataVaultModel();
       XmlMetadataUtil.deSerializeFromXml(rootNode, DataVaultModel.class, model, metadataProvider);
+      ModelConfigurationResolver.attach(model, metadataProvider);
       model.setFilename(resolvedPath);
       model.clearChanged();
       return model;

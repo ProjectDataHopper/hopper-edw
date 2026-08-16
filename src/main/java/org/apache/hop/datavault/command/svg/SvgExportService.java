@@ -36,6 +36,7 @@ import org.apache.hop.datavault.hopgui.file.sourcemodel.SourceModelSvgPainter;
 import org.apache.hop.datavault.hopgui.file.vault.DataVaultModelSvgPainter;
 import org.apache.hop.datavault.hopgui.file.vault.HopVaultFileType;
 import org.apache.hop.datavault.metadata.DataVaultModel;
+import org.apache.hop.datavault.metadata.ModelConfigurationResolver;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.datavault.metadata.executionmap.ExecutionMapDocument;
@@ -368,6 +369,7 @@ public final class SvgExportService {
     Node rootNode = XmlHandler.getSubNode(document, HopVaultFileType.XML_TAG);
     DataVaultModel model = new DataVaultModel();
     XmlMetadataUtil.deSerializeFromXml(rootNode, DataVaultModel.class, model, metadataProvider);
+    ModelConfigurationResolver.attach(model, metadataProvider);
     return model;
   }
 
@@ -377,6 +379,7 @@ public final class SvgExportService {
     Node rootNode = XmlHandler.getSubNode(document, HopBusinessVaultFileType.XML_TAG);
     BusinessVaultModel model = new BusinessVaultModel();
     XmlMetadataUtil.deSerializeFromXml(rootNode, BusinessVaultModel.class, model, metadataProvider);
+    ModelConfigurationResolver.attach(model, metadataProvider);
     return model;
   }
 
@@ -386,6 +389,7 @@ public final class SvgExportService {
     Node rootNode = XmlHandler.getSubNode(document, HopDimensionalFileType.XML_TAG);
     DimensionalModel model = new DimensionalModel();
     XmlMetadataUtil.deSerializeFromXml(rootNode, DimensionalModel.class, model, metadataProvider);
+    ModelConfigurationResolver.attach(model, metadataProvider);
     return model;
   }
 

@@ -78,7 +78,7 @@ public final class LocalCatalogOfferSupport {
     createLocalCatalog(hopGui, model);
   }
 
-  static boolean hasProjectDataCatalog(IHopMetadataProvider metadataProvider) {
+  public static boolean hasProjectDataCatalog(IHopMetadataProvider metadataProvider) {
     if (metadataProvider == null) {
       return false;
     }
@@ -116,7 +116,7 @@ public final class LocalCatalogOfferSupport {
     }
   }
 
-  static DataCatalogMeta newDefaultLocalCatalog() {
+  public static DataCatalogMeta newDefaultLocalCatalog() {
     DataCatalogMeta meta = new DataCatalogMeta(DEFAULT_LOCAL_CATALOG_NAME);
     meta.setDescription(BaseMessages.getString(PKG, "LocalCatalogOffer.DefaultDescription"));
     meta.setEnabled(true);

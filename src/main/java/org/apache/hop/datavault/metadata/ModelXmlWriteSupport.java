@@ -37,7 +37,12 @@ public final class ModelXmlWriteSupport {
 
   public static String formatModelXml(String xmlTag, Object model, IVariables variables)
       throws HopException {
-    return formatModelXml(xmlTag, XmlMetadataUtil.serializeObjectToXml(model), variables);
+    Object savedInline = ModelConfigurationResolver.detachInlineForSave(model);
+    try {
+      return formatModelXml(xmlTag, XmlMetadataUtil.serializeObjectToXml(model), variables);
+    } finally {
+      ModelConfigurationResolver.restoreInlineAfterSave(model, savedInline);
+    }
   }
 
   public static String formatModelXml(String xmlTag, String innerXml, IVariables variables)

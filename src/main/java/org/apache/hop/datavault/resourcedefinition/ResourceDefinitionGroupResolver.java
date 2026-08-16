@@ -29,6 +29,7 @@ import org.apache.hop.datavault.hopgui.file.businessvault.HopBusinessVaultFileTy
 import org.apache.hop.datavault.hopgui.file.dimensional.HopDimensionalFileType;
 import org.apache.hop.datavault.hopgui.file.vault.HopVaultFileType;
 import org.apache.hop.datavault.metadata.DataVaultModel;
+import org.apache.hop.datavault.metadata.ModelConfigurationResolver;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultDvModelResolver;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
@@ -186,6 +187,7 @@ public final class ResourceDefinitionGroupResolver {
       }
       T model = modelClass.getDeclaredConstructor().newInstance();
       XmlMetadataUtil.deSerializeFromXml(rootNode, modelClass, model, metadataProvider);
+      ModelConfigurationResolver.attach(model, metadataProvider);
       if (model instanceof DataVaultModel dvModel) {
         dvModel.setFilename(resolvedPath);
         dvModel.clearChanged();

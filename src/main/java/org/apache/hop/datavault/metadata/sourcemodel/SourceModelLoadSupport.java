@@ -20,6 +20,7 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
 import org.apache.hop.core.xml.XmlHandler;
+import org.apache.hop.datavault.metadata.ModelConfigurationResolver;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.w3c.dom.Document;
@@ -45,6 +46,7 @@ public final class SourceModelLoadSupport {
       }
       SourceModel model = new SourceModel();
       XmlMetadataUtil.deSerializeFromXml(rootNode, SourceModel.class, model, metadataProvider);
+      ModelConfigurationResolver.attach(model, metadataProvider);
       // Drop edges whose endpoints no longer exist (e.g. after a rename saved without cleanup).
       // Does not mark the model dirty so open alone does not force a save; the next edit/save
       // persists the pruned list.

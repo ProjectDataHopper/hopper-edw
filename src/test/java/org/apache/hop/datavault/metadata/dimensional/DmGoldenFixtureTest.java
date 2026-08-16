@@ -29,6 +29,8 @@ import org.apache.hop.core.variables.Variables;
 import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.datavault.hopgui.file.dimensional.HopDimensionalFileType;
 import org.apache.hop.datavault.metadata.DataVaultModel;
+import org.apache.hop.datavault.metadata.ModelConfigurationResolver;
+import org.apache.hop.datavault.metadata.ModelConfigurationTestSupport;
 import org.apache.hop.datavault.metadata.dimensional.publish.DvPublishModelSupport;
 import org.apache.hop.datavault.metadata.dimensional.publish.DvToDimensionalPublish;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
@@ -83,7 +85,7 @@ class DmGoldenFixtureTest {
     assertFalse(published.getDescription().isBlank());
   }
 
-  private static void assertModelChecksWithoutErrors(DimensionalModel model) throws HopException {
+  private static void assertModelChecksWithoutErrors(DimensionalModel model) throws Exception {
     var remarks = model.check(testMetadataProvider(), new Variables());
     assertTrue(remarks.stream().anyMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_OK));
     assertFalse(remarks.stream().anyMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_ERROR));
@@ -94,13 +96,16 @@ class DmGoldenFixtureTest {
     Document document = XmlHandler.loadXmlFile(fixture.toFile());
     Node rootNode = XmlHandler.getSubNode(document, HopDimensionalFileType.XML_TAG);
     DimensionalModel model = new DimensionalModel();
-    XmlMetadataUtil.deSerializeFromXml(rootNode, DimensionalModel.class, model, null);
+    IHopMetadataProvider provider = testMetadataProvider();
+    XmlMetadataUtil.deSerializeFromXml(rootNode, DimensionalModel.class, model, provider);
+    ModelConfigurationResolver.attach(model, provider);
     return model;
   }
 
-  private static IHopMetadataProvider testMetadataProvider() throws HopException {
+  private static IHopMetadataProvider testMetadataProvider() throws Exception {
     MemoryMetadataProvider metadataProvider = new MemoryMetadataProvider();
     metadataProvider.getSerializer(DatabaseMeta.class).save(new TestDatabaseMeta("Vault"));
-    return metadataProvider;
+    return ModelConfigurationTestSupport.prepare(
+        metadataProvider, ModelConfigurationTestSupport.INTEGRATION_TESTS);
   }
 }

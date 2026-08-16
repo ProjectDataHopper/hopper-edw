@@ -28,11 +28,25 @@ import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.GuiWidgetElement;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.datavault.metadata.datatypemapping.IDataTypeMappingTarget;
+import org.apache.hop.metadata.api.HopMetadata;
 import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
+import org.apache.hop.metadata.api.HopMetadataPropertyType;
 import org.apache.hop.metadata.api.IHopMetadata;
 
-/** Default connection and naming settings for a {@link SourceModel}. */
+/**
+ * Default connection and naming settings for source models.
+ *
+ * <p>Project metadata that many {@link SourceModel} files can share. Older {@code .hsm} files may
+ * still embed a copy inline; prefer a named reference via {@code configurationName}.
+ */
+@HopMetadata(
+    key = "source-model-configuration",
+    name = "i18n::SourceModelConfiguration.name",
+    description = "i18n::SourceModelConfiguration.description",
+    image = "source-model.svg",
+    documentationUrl = "/metadata-types/source-model-configuration.html",
+    hopMetadataPropertyType = HopMetadataPropertyType.NONE)
 @GuiPlugin
 @Getter
 @Setter
@@ -43,6 +57,8 @@ public class SourceModelConfiguration extends HopMetadataBase implements IHopMet
   public static SourceModelConfiguration createDefault() {
     return new SourceModelConfiguration();
   }
+
+  @HopMetadataProperty private String description;
 
   @GuiWidgetElement(
       order = "0100",

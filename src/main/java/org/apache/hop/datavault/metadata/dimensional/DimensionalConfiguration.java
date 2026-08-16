@@ -33,12 +33,26 @@ import org.apache.hop.datavault.metadata.DvLoadCycleSupport;
 import org.apache.hop.datavault.metadata.DvTargetLoadConfigurationSupport;
 import org.apache.hop.datavault.metadata.DvTargetLoadMode;
 import org.apache.hop.datavault.metadata.IDvTargetLoadConfiguration;
+import org.apache.hop.metadata.api.HopMetadata;
 import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
+import org.apache.hop.metadata.api.HopMetadataPropertyType;
 import org.apache.hop.metadata.api.IHopMetadata;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
-/** Warehouse configuration for a dimensional model. */
+/**
+ * Warehouse configuration for dimensional models.
+ *
+ * <p>Project metadata that many {@link DimensionalModel} files can share. Older {@code .hdm} files
+ * may still embed a copy inline; prefer a named reference via {@code configurationName}.
+ */
+@HopMetadata(
+    key = "dimensional-configuration",
+    name = "i18n::DimensionalConfiguration.name",
+    description = "i18n::DimensionalConfiguration.description",
+    image = "dimensional-model.svg",
+    documentationUrl = "/metadata-types/dimensional-configuration.html",
+    hopMetadataPropertyType = HopMetadataPropertyType.NONE)
 @GuiPlugin
 @Getter
 @Setter
@@ -74,6 +88,8 @@ public class DimensionalConfiguration extends HopMetadataBase
     DataVaultConfigSingleton.getConfig().getDimensionalDefaultFieldNames().applyTo(configuration);
     return configuration;
   }
+
+  @HopMetadataProperty private String description;
 
   @GuiWidgetElement(
       order = "0100",

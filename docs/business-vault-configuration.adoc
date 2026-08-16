@@ -4,7 +4,7 @@
 
 toc::[]
 
-Each `.hbv` file embeds a **configuration** object edited via **Edit model** on the Business Vault toolbar.
+**Business Vault configuration** is project metadata that many `.hbv` files can share. Create it in the Metadata perspective and select it on **Edit model**. Older `.hbv` files may still embed a `<configuration>` block; **Extract to project configuration…** promotes that copy.
 
 == General settings
 

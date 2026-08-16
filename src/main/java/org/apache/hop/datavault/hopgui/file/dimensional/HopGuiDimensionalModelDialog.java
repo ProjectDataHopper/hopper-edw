@@ -16,10 +16,14 @@
  */
 package org.apache.hop.datavault.hopgui.file.dimensional;
 
+import org.apache.hop.core.Const;
 import org.apache.hop.core.Props;
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.datavault.hopgui.help.DialogHelpSupport;
 import org.apache.hop.datavault.hopgui.help.HelpTopics;
+import org.apache.hop.datavault.metadata.ModelConfigurationExtractSupport;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalConfiguration;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.i18n.BaseMessages;
@@ -30,6 +34,7 @@ import org.apache.hop.ui.core.gui.GuiCompositeWidgets;
 import org.apache.hop.ui.core.gui.GuiCompositeWidgetsAdapter;
 import org.apache.hop.ui.core.gui.GuiResource;
 import org.apache.hop.ui.core.gui.WindowProperty;
+import org.apache.hop.ui.core.widget.MetaSelectionLine;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.eclipse.swt.SWT;
@@ -58,6 +63,10 @@ public class HopGuiDimensionalModelDialog {
 
   private Text wName;
   private Text wDescription;
+  private MetaSelectionLine<DimensionalConfiguration> wConfiguration;
+  private Button wExtract;
+  private Label wlNamedHint;
+  private CTabFolder wTabFolder;
   private GuiCompositeWidgets widgets;
   private Composite wGeneralTabComp;
   private Composite wTargetLoadTabComp;
@@ -123,6 +132,46 @@ public class HopGuiDimensionalModelDialog {
     wDescription.setLayoutData(fdDescription);
     wDescription.addModifyListener(e -> input.setChanged());
 
+    wConfiguration =
+        new MetaSelectionLine<>(
+            variables,
+            hopGui.getMetadataProvider(),
+            DimensionalConfiguration.class,
+            shell,
+            SWT.SINGLE | SWT.LEFT | SWT.BORDER,
+            BaseMessages.getString(PKG, "HopGuiDimensionalModelDialog.Configuration.Label"),
+            BaseMessages.getString(PKG, "HopGuiDimensionalModelDialog.Configuration.ToolTip"));
+    FormData fdConfiguration = new FormData();
+    fdConfiguration.left = new FormAttachment(0, 0);
+    fdConfiguration.top = new FormAttachment(wDescription, margin);
+    fdConfiguration.right = new FormAttachment(100, 0);
+    wConfiguration.setLayoutData(fdConfiguration);
+    try {
+      wConfiguration.fillItems();
+    } catch (HopException e) {
+      // best effort
+    }
+    wConfiguration.addModifyListener(e -> updateConfigurationMode());
+
+    wExtract = new Button(shell, SWT.PUSH);
+    wExtract.setText(BaseMessages.getString(PKG, "HopGuiDimensionalModelDialog.Extract.Label"));
+    PropsUi.setLook(wExtract);
+    FormData fdExtract = new FormData();
+    fdExtract.left = new FormAttachment(middle, 0);
+    fdExtract.top = new FormAttachment(wConfiguration, margin);
+    wExtract.setLayoutData(fdExtract);
+    wExtract.addListener(SWT.Selection, e -> extractConfiguration());
+
+    wlNamedHint = new Label(shell, SWT.WRAP);
+    PropsUi.setLook(wlNamedHint);
+    wlNamedHint.setText(
+        BaseMessages.getString(PKG, "HopGuiDimensionalModelDialog.NamedHint.Label"));
+    FormData fdNamedHint = new FormData();
+    fdNamedHint.left = new FormAttachment(0, 0);
+    fdNamedHint.top = new FormAttachment(wExtract, margin);
+    fdNamedHint.right = new FormAttachment(100, 0);
+    wlNamedHint.setLayoutData(fdNamedHint);
+
     Button wOk = new Button(shell, SWT.PUSH);
     wOk.setText(BaseMessages.getString(PKG, "System.Button.OK"));
     wOk.addListener(SWT.Selection, e -> ok());
@@ -133,12 +182,12 @@ public class HopGuiDimensionalModelDialog {
 
     BaseTransformDialog.positionBottomButtons(shell, new Button[] {wOk, wCancel}, margin, null);
 
-    CTabFolder wTabFolder = new CTabFolder(shell, SWT.BORDER);
+    wTabFolder = new CTabFolder(shell, SWT.BORDER);
     PropsUi.setLook(wTabFolder, Props.WIDGET_STYLE_TAB);
     wTabFolder.setLayoutData(
         new FormDataBuilder()
             .left()
-            .top(new FormAttachment(wDescription, margin))
+            .top(new FormAttachment(wExtract, margin))
             .right()
             .bottom(new FormAttachment(wOk, -margin))
             .result());
@@ -227,6 +276,8 @@ public class HopGuiDimensionalModelDialog {
       if (input.getDescription() != null) {
         wDescription.setText(input.getDescription());
       }
+      wConfiguration.setText(Const.NVL(input.getConfigurationName(), ""));
+      updateConfigurationMode();
       DimensionalConfiguration configuration = input.getConfigurationOrDefault();
       widgets.setWidgetsContents(
           configuration, wGeneralTabComp, DimensionalConfiguration.GUI_PLUGIN_ELEMENT_PARENT_ID);
@@ -246,16 +297,47 @@ public class HopGuiDimensionalModelDialog {
   private void ok() {
     input.setName(wName.getText());
     input.setDescription(wDescription.getText());
-    DimensionalConfiguration configuration = input.getConfigurationOrDefault();
-    widgets.getWidgetsContents(
-        configuration, DimensionalConfiguration.GUI_PLUGIN_ELEMENT_PARENT_ID);
-    widgets.getWidgetsContents(
-        configuration, DimensionalConfiguration.GUI_PLUGIN_ELEMENT_TARGET_LOAD_TAB_ID);
-    widgets.getWidgetsContents(
-        configuration, DimensionalConfiguration.GUI_PLUGIN_ELEMENT_GENERATED_ARTIFACTS_TAB_ID);
-    input.setConfiguration(configuration);
+    String configurationName = Const.NVL(wConfiguration.getText(), "").trim();
+    input.setConfigurationName(configurationName);
+    if (Utils.isEmpty(configurationName)) {
+      DimensionalConfiguration configuration = input.getConfigurationOrDefault();
+      widgets.getWidgetsContents(
+          configuration, DimensionalConfiguration.GUI_PLUGIN_ELEMENT_PARENT_ID);
+      widgets.getWidgetsContents(
+          configuration, DimensionalConfiguration.GUI_PLUGIN_ELEMENT_TARGET_LOAD_TAB_ID);
+      widgets.getWidgetsContents(
+          configuration, DimensionalConfiguration.GUI_PLUGIN_ELEMENT_GENERATED_ARTIFACTS_TAB_ID);
+      input.setConfiguration(configuration);
+    } else {
+      input.setConfiguration(null);
+    }
     ok = true;
     dispose();
+  }
+
+  private void updateConfigurationMode() {
+    boolean named = !Utils.isEmpty(wConfiguration.getText());
+    if (wTabFolder != null && !wTabFolder.isDisposed()) {
+      wTabFolder.setVisible(!named);
+    }
+    if (wlNamedHint != null && !wlNamedHint.isDisposed()) {
+      wlNamedHint.setVisible(named);
+    }
+    if (wExtract != null && !wExtract.isDisposed()) {
+      wExtract.setEnabled(!named);
+    }
+  }
+
+  private void extractConfiguration() {
+    if (ModelConfigurationExtractSupport.extract(hopGui, input)) {
+      wConfiguration.setText(Const.NVL(input.getConfigurationName(), ""));
+      try {
+        wConfiguration.fillItems();
+      } catch (HopException ignored) {
+        // combo already has the new name
+      }
+      updateConfigurationMode();
+    }
   }
 
   private void cancel() {

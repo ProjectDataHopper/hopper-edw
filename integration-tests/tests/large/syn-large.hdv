@@ -18,6 +18,7 @@ limitations under the License.
 <data-vault-model>
   <name_sync_with_filename>Y</name_sync_with_filename>
   <description/>
+  <configurationName>data-vault-binary</configurationName>
   <configuration>
     <targetDatabase>Vault</targetDatabase>
     <dataCatalogConnection>local-catalog</dataCatalogConnection>

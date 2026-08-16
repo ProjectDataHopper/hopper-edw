@@ -58,6 +58,7 @@ import org.apache.hop.datavault.metadata.DvLoadCycleSupport;
 import org.apache.hop.datavault.metadata.DvModelBulkUpdateExecutionSupport;
 import org.apache.hop.datavault.metadata.DvTargetLoadMode;
 import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
+import org.apache.hop.datavault.metadata.ModelConfigurationResolver;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalConfiguration;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.datavault.metadata.dimensional.DmSourceRecordDefinitionSupport;
@@ -829,6 +830,7 @@ public class ActionDimensionalUpdate extends ActionBase implements Cloneable, IA
 
     DimensionalModel model = new DimensionalModel();
     XmlMetadataUtil.deSerializeFromXml(rootNode, DimensionalModel.class, model, provider);
+    ModelConfigurationResolver.attach(model, provider);
     model.setFilename(realModelFile);
     return model;
   }

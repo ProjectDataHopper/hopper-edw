@@ -233,6 +233,7 @@ public final class DvModelLoadSupport {
       }
       DataVaultModel model = new DataVaultModel();
       XmlMetadataUtil.deSerializeFromXml(rootNode, DataVaultModel.class, model, metadataProvider);
+      ModelConfigurationResolver.attach(model, metadataProvider);
       model.setFilename(resolvedPath);
       model.clearChanged();
       return model;

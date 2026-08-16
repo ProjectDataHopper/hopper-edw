@@ -32,14 +32,31 @@ import org.apache.hop.datavault.metadata.DvLoadCycleSupport;
 import org.apache.hop.datavault.metadata.DvTargetLoadConfigurationSupport;
 import org.apache.hop.datavault.metadata.DvTargetLoadMode;
 import org.apache.hop.datavault.metadata.IDvTargetLoadConfiguration;
+import org.apache.hop.metadata.api.HopMetadata;
+import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
+import org.apache.hop.metadata.api.HopMetadataPropertyType;
+import org.apache.hop.metadata.api.IHopMetadata;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
-/** Configuration embedded in a {@link BusinessVaultModel}. */
+/**
+ * Configuration for Business Vault physical implementation and update strategy.
+ *
+ * <p>Project metadata that many {@link BusinessVaultModel} files can share. Older {@code .hbv}
+ * files may still embed a copy inline; prefer a named reference via {@code configurationName}.
+ */
+@HopMetadata(
+    key = "business-vault-configuration",
+    name = "i18n::BusinessVaultConfiguration.name",
+    description = "i18n::BusinessVaultConfiguration.description",
+    image = "business-vault-model.svg",
+    documentationUrl = "/metadata-types/business-vault-configuration.html",
+    hopMetadataPropertyType = HopMetadataPropertyType.NONE)
 @Getter
 @Setter
 @GuiPlugin
-public class BusinessVaultConfiguration implements IDvTargetLoadConfiguration {
+public class BusinessVaultConfiguration extends HopMetadataBase
+    implements IHopMetadata, IDvTargetLoadConfiguration {
 
   public static final String GUI_PLUGIN_ELEMENT_GENERAL_TAB_ID =
       "BUSINESS_VAULT_CONFIGURATION_GENERAL_TAB";
@@ -58,6 +75,8 @@ public class BusinessVaultConfiguration implements IDvTargetLoadConfiguration {
   public static final String DEFAULT_VALID_TO_FIELD = "valid_to";
   public static final String DEFAULT_TARGET_TABLE_BATCH_SIZE = "1000";
   public static final String DEFAULT_TARGET_TABLE_PARALLEL_COPIES = "1";
+
+  @HopMetadataProperty private String description;
 
   @GuiWidgetElement(
       order = "0050",

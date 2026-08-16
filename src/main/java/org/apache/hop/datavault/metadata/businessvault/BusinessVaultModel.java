@@ -46,6 +46,7 @@ import org.apache.hop.datavault.metadata.DvNote;
 import org.apache.hop.datavault.metadata.DvTargetLoadModelCheckSupport;
 import org.apache.hop.datavault.metadata.DvTargetUnicodeCapabilitySupport;
 import org.apache.hop.datavault.metadata.IDvTable;
+import org.apache.hop.datavault.metadata.ModelConfigurationResolver;
 import org.apache.hop.datavault.metadata.coaching.ModelCoachingConfiguration;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataBase;
@@ -92,8 +93,21 @@ public class BusinessVaultModel extends HopMetadataBase
    */
   @HopMetadataProperty private String dataVaultModelPath;
 
+  @GuiWidgetElement(
+      order = "0150",
+      type = GuiElementType.METADATA,
+      metadata = BusinessVaultConfiguration.class,
+      label = "i18n::BusinessVaultModel.ConfigurationName.Label",
+      toolTip = "i18n::BusinessVaultModel.ConfigurationName.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_PARENT_ID)
+  @HopMetadataProperty
+  private String configurationName;
+
   @HopMetadataProperty(key = "configuration")
-  private BusinessVaultConfiguration configuration = new BusinessVaultConfiguration();
+  private BusinessVaultConfiguration configuration;
+
+  /** Runtime metadata provider for {@link #configurationName}. Never serialized. */
+  private transient IHopMetadataProvider metadataProvider;
 
   @HopMetadataProperty private ModelCoachingConfiguration coaching;
 
@@ -129,6 +143,12 @@ public class BusinessVaultModel extends HopMetadataBase
   }
 
   public BusinessVaultConfiguration getConfigurationOrDefault() {
+    BusinessVaultConfiguration named =
+        ModelConfigurationResolver.resolveNamed(
+            configurationName, metadataProvider, BusinessVaultConfiguration.class);
+    if (named != null) {
+      return named;
+    }
     if (configuration == null) {
       configuration = new BusinessVaultConfiguration();
     }
@@ -341,6 +361,13 @@ public class BusinessVaultModel extends HopMetadataBase
     List<IBvTable> tables = getTables();
     monitor.beginTask(
         BaseMessages.getString(PKG, "BusinessVaultModel.Monitor.VerifyingModel"), tables.size());
+    ModelConfigurationResolver.attach(this, metadataProvider);
+    ModelConfigurationResolver.checkNamedConfiguration(
+        remarks,
+        configurationName,
+        configuration,
+        metadataProvider,
+        BusinessVaultConfiguration.class);
 
     // DV tables come from canvas Hub/Link/Satellite references (multi-model capable).
     // Optional legacy dataVaultModelPath is only a default when an alias has no path.

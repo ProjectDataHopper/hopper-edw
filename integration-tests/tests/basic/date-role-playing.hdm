@@ -18,6 +18,7 @@ limitations under the License.
 <dimensional-model>
   <name_sync_with_filename>Y</name_sync_with_filename>
   <description>Date dimension with role-playing aliases on an order fact</description>
+  <configurationName>dimensional</configurationName>
   <configuration>
     <targetDatabase>Vault</targetDatabase>
     <dimKeyField>dim_key</dimKeyField>

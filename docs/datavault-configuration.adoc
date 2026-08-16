@@ -4,14 +4,26 @@
 
 toc::[]
 
-Each **Data Vault Model** (`.hdv` file) embeds its own configuration. The settings control how hash keys are computed, how target tables are named and created, how sentinel rows are handled, and how generated update pipelines write to the database.
+**Data Vault configuration** is project metadata that many `.hdv` files can share. Put hashing, naming, target database, catalog, and load settings in one object (Metadata perspective → **Data Vault configuration**) and point each model at it with **Configuration** on the Edit model dialog.
 
-There is one target database per model. Hashing and naming rules defined here apply to every hub, link, and satellite in that model unless a table dialog provides a specific column-name override (for example a per-hub hash key field name).
+Older models may still embed a `<configuration>` block. Those files keep working. Use **Extract to project configuration…** when you want to stop copying the same settings across hub and link models.
+
+There is one target database per configuration. Hashing and naming rules apply to every hub, link, and satellite in models that reference that configuration, unless a table dialog provides a specific column-name override (for example a per-hub hash key field name).
+
+The same pattern exists for source models, Business Vault, and dimensional models.
+
+== Configure EDW setup
+
+A new Hop project is offered the standard catalog and the four configuration objects the first time you open a source, Data Vault, Business Vault, or dimensional model.
+
+If you dismissed that prompt, or want to create only the elements that are still missing, open **Tools → Configure EDW setup...**. The same dialog is shown even when “Do not show this message again” was checked. Existing elements stay selected and disabled; missing ones can still be created. Uncheck **Do not show this message again** to restore the automatic first-time prompt.
+
+image::images/configure-edw-dialog.png[Configure EDW setup — standard catalog and model-configuration elements,align="center"]
 
 [#_edit_model_dialog]
 == Edit model dialog
 
-Open the configuration from the visual model editor with the **Edit model** toolbar button. The dialog has a name and description at the top, then six tabs for the embedded configuration.
+Open the configuration from the visual model editor with the **Edit model** toolbar button. The dialog has a name, description, and a **Configuration** picker at the top. When the picker is empty (legacy embedded model), the same tabs edit the copy stored in the `.hdv` file. When a project configuration is selected, edit the shared object from the Metadata perspective (or the picker's New / Edit buttons).
 
 image::images/data-vault-model-dialog.png[Edit Data Vault Model — General tab (target database and hashing),align="center"]
 

@@ -30,19 +30,31 @@ import org.apache.hop.core.logging.ILogChannel;
 import org.apache.hop.core.logging.LogLevel;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.HopMetadata;
+import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
+import org.apache.hop.metadata.api.HopMetadataPropertyType;
+import org.apache.hop.metadata.api.IHopMetadata;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Configuration for Data Vault 2.0 physical implementation and update strategy.
  *
- * <p>Embedded inline in {@link DataVaultModel} so each model carries its own hashing, naming and
- * target database settings.
+ * <p>Project metadata that many {@link DataVaultModel} files can share. Older {@code .hdv} files
+ * may still embed a copy inline; prefer a named reference via {@code configurationName}.
  */
+@HopMetadata(
+    key = "data-vault-configuration",
+    name = "i18n::DataVaultConfiguration.name",
+    description = "i18n::DataVaultConfiguration.description",
+    image = "datavault-configuration.svg",
+    documentationUrl = "/metadata-types/data-vault-configuration.html",
+    hopMetadataPropertyType = HopMetadataPropertyType.NONE)
 @Getter
 @Setter
 @GuiPlugin
-public class DataVaultConfiguration implements IDvTargetLoadConfiguration {
+public class DataVaultConfiguration extends HopMetadataBase
+    implements IHopMetadata, IDvTargetLoadConfiguration {
 
   public static final String GUI_PLUGIN_ELEMENT_GENERAL_TAB_ID =
       "DATAVAULT_CONFIGURATION_GENERAL_TAB";
@@ -87,6 +99,8 @@ public class DataVaultConfiguration implements IDvTargetLoadConfiguration {
   public static final String DEFAULT_BULK_LOAD_DELIMITER = ",";
   public static final String DEFAULT_BULK_LOAD_ENCLOSURE = "\"";
   public static final String DEFAULT_BULK_LOAD_ENCODING = "UTF-8";
+
+  @HopMetadataProperty private String description;
 
   /**
    * The target database (DatabaseMeta) in which the Data Vault will be implemented. This makes the
@@ -630,6 +644,7 @@ public class DataVaultConfiguration implements IDvTargetLoadConfiguration {
   @HopMetadataProperty private String stsPipelineNamePrefix = DEFAULT_STS_PIPELINE_NAME_PREFIX;
 
   public DataVaultConfiguration() {
+    super();
     this.unknownHashKeyValue = "00000000000000000000000000000000";
     this.unknownLinkHashKeyValue = "00000000000000000000000000000000";
     this.unknownRecordSource = "UNKNOWN";

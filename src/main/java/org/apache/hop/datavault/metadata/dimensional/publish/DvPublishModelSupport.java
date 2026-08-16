@@ -24,6 +24,7 @@ import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.datavault.hopgui.file.dimensional.HopDimensionalFileType;
 import org.apache.hop.datavault.hopgui.file.vault.HopVaultFileType;
 import org.apache.hop.datavault.metadata.DataVaultModel;
+import org.apache.hop.datavault.metadata.ModelConfigurationResolver;
 import org.apache.hop.datavault.metadata.ModelXmlWriteSupport;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
 import org.apache.hop.i18n.BaseMessages;
@@ -55,6 +56,7 @@ public final class DvPublishModelSupport {
       }
       DataVaultModel model = new DataVaultModel();
       XmlMetadataUtil.deSerializeFromXml(rootNode, DataVaultModel.class, model, metadataProvider);
+      ModelConfigurationResolver.attach(model, metadataProvider);
       model.setFilename(resolvedPath);
       model.clearChanged();
       return model;
@@ -84,6 +86,7 @@ public final class DvPublishModelSupport {
       }
       DimensionalModel model = new DimensionalModel();
       XmlMetadataUtil.deSerializeFromXml(rootNode, DimensionalModel.class, model, metadataProvider);
+      ModelConfigurationResolver.attach(model, metadataProvider);
       model.setFilename(resolvedPath);
       model.clearChanged();
       return model;

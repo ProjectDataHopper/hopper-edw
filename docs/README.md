@@ -65,7 +65,7 @@ Documentation for the **hop-datavault** plugin (development **0.9.0-SNAPSHOT**, 
 | Document | Description |
 |----------|-------------|
 | [datavault-plugin.adoc](datavault-plugin.adoc) | Plugin overview, visual editor, workflows |
-| [datavault-configuration.adoc](datavault-configuration.adoc) | Embedded `.hdv` configuration |
+| [datavault-configuration.adoc](datavault-configuration.adoc) | Shared Data Vault configuration metadata |
 | [dv-hub.adoc](dv-hub.adoc) | Hub metadata |
 | [dv-link.adoc](dv-link.adoc) | Link metadata |
 | [dv-satellite.adoc](dv-satellite.adoc) | Satellite metadata |

@@ -27,7 +27,6 @@ import org.apache.hop.catalog.xp.RegisterDataCatalogMetadataExtensionPoint;
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.database.DatabaseMeta;
-import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.plugins.PluginRegistry;
 import org.apache.hop.core.variables.Variables;
@@ -48,14 +47,15 @@ class RetailDataVaultModelCheckTest {
   private MemoryMetadataProvider metadataProvider;
 
   @BeforeAll
-  static void initHop() throws HopException {
+  static void initHop() throws Exception {
     HopEnvironment.init();
     new RegisterDataCatalogMetadataExtensionPoint()
         .callExtensionPoint(LogChannel.GENERAL, new Variables(), PluginRegistry.getInstance());
+    ModelConfigurationTestSupport.registerTypes();
   }
 
   @BeforeEach
-  void setUp() throws HopException {
+  void setUp() throws Exception {
     variables = new Variables();
     variables.setVariable(
         "PROJECT_HOME", Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
@@ -83,11 +83,13 @@ class RetailDataVaultModelCheckTest {
     metadataProvider.getSerializer(DataCatalogMeta.class).save(catalog);
 
     RecordDefinitionRegistry.getInstance().invalidate();
+    ModelConfigurationTestSupport.loadProjectMetadata(
+        metadataProvider, Path.of("retail-example").toAbsolutePath());
   }
 
   @Test
   void retail360ModelCheckLoadsCatalogSources() throws Exception {
-    DataVaultModel model = loadModel("retail-example/models/retail-360.hdv");
+    DataVaultModel model = loadModel("retail-example/models/retail-360.hdv", metadataProvider);
     // Offline unit test: no live JDBC and no Hop bulk-loader transform plugins on the classpath.
     // The retail model uses native bulk load at runtime; force Table Output for model-check only.
     model
@@ -115,12 +117,14 @@ class RetailDataVaultModelCheckTest {
                     .toList());
   }
 
-  private static DataVaultModel loadModel(String relativePath) throws Exception {
+  private static DataVaultModel loadModel(
+      String relativePath, MemoryMetadataProvider metadataProvider) throws Exception {
     Path fixture = Path.of(relativePath).toAbsolutePath().normalize();
     Document document = XmlHandler.loadXmlFile(fixture.toFile());
     Node rootNode = XmlHandler.getSubNode(document, HopVaultFileType.XML_TAG);
     DataVaultModel model = new DataVaultModel();
-    XmlMetadataUtil.deSerializeFromXml(rootNode, DataVaultModel.class, model, null);
+    XmlMetadataUtil.deSerializeFromXml(rootNode, DataVaultModel.class, model, metadataProvider);
+    ModelConfigurationResolver.attach(model, metadataProvider);
     return model;
   }
 }

@@ -1,0 +1,20 @@
+{
+  "targetDatabase": "Vault",
+  "dataCatalogConnection": "local-catalog",
+  "generatedPipelineFolder": "",
+  "scd2PipelineNamePrefix": "bv-scd2-",
+  "pitPipelineNamePrefix": "bv-pit-",
+  "businessTablePipelineNamePrefix": "bv-biz-",
+  "openStartSentinel": "1900-01-01 00:00:00",
+  "openEndSentinel": "9999-12-31 23:59:59",
+  "scd2DefaultsFolder": "",
+  "functionalTimestampField": "",
+  "loadDateFieldFallback": "x_load_ts",
+  "validFromField": "x_from_ts",
+  "validToField": "x_to_ts",
+  "targetTableBatchSize": "1000",
+  "targetTableParallelCopies": "1",
+  "name": "business-vault",
+  "description": "",
+  "virtualPath": ""
+}

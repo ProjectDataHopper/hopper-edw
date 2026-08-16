@@ -25,6 +25,7 @@ import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
 import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.datavault.hopgui.file.dimensional.HopDimensionalFileType;
+import org.apache.hop.datavault.metadata.ModelConfigurationResolver;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
@@ -157,6 +158,7 @@ public final class DmModelLoadSupport {
       }
       DimensionalModel model = new DimensionalModel();
       XmlMetadataUtil.deSerializeFromXml(rootNode, DimensionalModel.class, model, metadataProvider);
+      ModelConfigurationResolver.attach(model, metadataProvider);
       model.setFilename(resolvedPath);
       model.clearChanged();
       return model;

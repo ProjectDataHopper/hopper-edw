@@ -20,7 +20,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import org.apache.hop.catalog.hopgui.LocalCatalogOfferSupport;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.file.IHasFilename;
@@ -30,9 +29,11 @@ import org.apache.hop.core.search.ISearchable;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
 import org.apache.hop.core.xml.XmlHandler;
+import org.apache.hop.datavault.hopgui.StandardProjectElementsOfferSupport;
 import org.apache.hop.datavault.hopgui.file.ExplorerPerspectiveTabSupport;
 import org.apache.hop.datavault.hopgui.search.HopGuiDataVaultModelSearchable;
 import org.apache.hop.datavault.metadata.DataVaultModel;
+import org.apache.hop.datavault.metadata.ModelConfigurationResolver;
 import org.apache.hop.datavault.metadata.ModelXmlWriteSupport;
 import org.apache.hop.datavault.resourcedefinition.ResourceDefinitionGroupResolver;
 import org.apache.hop.i18n.BaseMessages;
@@ -153,6 +154,7 @@ public class HopVaultFileType extends HopFileTypeBase {
       DataVaultModel model = new DataVaultModel();
       IHopMetadataProvider provider = hopGui.getMetadataProvider();
       XmlMetadataUtil.deSerializeFromXml(rootNode, DataVaultModel.class, model, provider);
+      ModelConfigurationResolver.attach(model, provider);
       model.clearChanged(); // freshly loaded is not changed
 
       // Set the (current) filename on the model so that getName() can derive from basename if
@@ -174,6 +176,8 @@ public class HopVaultFileType extends HopFileTypeBase {
       DataVaultModel model = new DataVaultModel();
       model.setName(
           BaseMessages.getString(PKG, "HopVaultFileType.New.Text", "New Data Vault Model"));
+      ModelConfigurationResolver.attach(model, hopGui.getMetadataProvider());
+      ModelConfigurationResolver.applyDefaultNameIfPresent(model, hopGui.getMetadataProvider());
 
       return addVaultToExplorer(hopGui, model, null, this);
 
@@ -214,7 +218,9 @@ public class HopVaultFileType extends HopFileTypeBase {
 
     explorer.activate();
 
-    targetFolder.getDisplay().asyncExec(() -> LocalCatalogOfferSupport.maybeOffer(hopGui, model));
+    targetFolder
+        .getDisplay()
+        .asyncExec(() -> StandardProjectElementsOfferSupport.maybeOffer(hopGui, model));
 
     return vaultGraph;
   }

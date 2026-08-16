@@ -4,6 +4,16 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## Unreleased
 
+### Shared model configuration metadata (issue #126)
+
+- Four project metadata types: Source Model, Data Vault, Business Vault, and Dimensional configuration
+- Models reference a named configuration (`configurationName`); older embedded `<configuration>` blocks still load
+- Edit model dialogs pick a shared configuration or extract an embedded copy; settings live in the Metadata perspective
+- New-project dialog offers a local catalog plus the four standard configuration elements
+- **Tools → Configure EDW setup...** reopens that dialog after it was dismissed
+- retail-example and integration-tests now use shared configuration objects instead of duplicating settings in every model file
+- Guide: [docs/datavault-configuration.adoc](docs/datavault-configuration.adoc)
+
 ### Optional Data Vault orphan handling (issue #77)
 
 - Model **Orphan handling** policy (`PASS` default, plus `INFER` / `SENTINEL` / `QUARANTINE` / `FAIL`) with link/satellite overrides and hub **Allow inferred inserts**

@@ -29,8 +29,10 @@ import org.apache.hop.core.search.ISearchable;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
 import org.apache.hop.core.xml.XmlHandler;
+import org.apache.hop.datavault.hopgui.StandardProjectElementsOfferSupport;
 import org.apache.hop.datavault.hopgui.file.ExplorerPerspectiveTabSupport;
 import org.apache.hop.datavault.hopgui.search.HopGuiBusinessVaultModelSearchable;
+import org.apache.hop.datavault.metadata.ModelConfigurationResolver;
 import org.apache.hop.datavault.metadata.ModelXmlWriteSupport;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
 import org.apache.hop.datavault.resourcedefinition.ResourceDefinitionGroupResolver;
@@ -138,6 +140,7 @@ public class HopBusinessVaultFileType extends HopFileTypeBase {
       BusinessVaultModel model = new BusinessVaultModel();
       IHopMetadataProvider provider = hopGui.getMetadataProvider();
       XmlMetadataUtil.deSerializeFromXml(rootNode, BusinessVaultModel.class, model, provider);
+      ModelConfigurationResolver.attach(model, provider);
       model.clearChanged();
       model.setFilename(filename);
 
@@ -154,6 +157,8 @@ public class HopBusinessVaultFileType extends HopFileTypeBase {
       model.setName(
           BaseMessages.getString(
               PKG, "HopBusinessVaultFileType.New.Text", "New Business Vault Model"));
+      ModelConfigurationResolver.attach(model, hopGui.getMetadataProvider());
+      ModelConfigurationResolver.applyDefaultNameIfPresent(model, hopGui.getMetadataProvider());
       return addBusinessVaultToExplorer(hopGui, model, null, this);
     } catch (Exception e) {
       throw new HopException("Error creating new Business Vault model", e);
@@ -185,6 +190,9 @@ public class HopBusinessVaultFileType extends HopFileTypeBase {
 
     targetFolder.setSelection(tabItem);
     explorer.activate();
+    targetFolder
+        .getDisplay()
+        .asyncExec(() -> StandardProjectElementsOfferSupport.maybeOffer(hopGui, model));
 
     return graph;
   }

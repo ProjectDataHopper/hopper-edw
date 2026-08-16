@@ -30,6 +30,7 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.datavault.hopgui.file.dimensional.HopDimensionalFileType;
+import org.apache.hop.datavault.metadata.ModelConfigurationTestSupport;
 import org.apache.hop.datavault.metadata.dimensional.pipeline.DmUpdateExecutionSupport;
 import org.apache.hop.datavault.transform.junkdimension.JunkDimensionMeta;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
@@ -199,10 +200,11 @@ class DmCatalogPipelineTest {
     assertEquals(DmTableType.AGGREGATE_FACT, ordered.get(9).getTableType());
   }
 
-  private static IHopMetadataProvider testMetadataProvider() throws HopException {
+  private static IHopMetadataProvider testMetadataProvider() throws Exception {
     MemoryMetadataProvider metadataProvider = new MemoryMetadataProvider();
     metadataProvider.getSerializer(DatabaseMeta.class).save(new TestDatabaseMeta("Vault"));
-    return metadataProvider;
+    return ModelConfigurationTestSupport.prepare(
+        metadataProvider, ModelConfigurationTestSupport.INTEGRATION_TESTS);
   }
 
   private static DimensionalModel loadExtendedCatalogModel() throws Exception {

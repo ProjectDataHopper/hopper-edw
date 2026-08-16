@@ -72,7 +72,7 @@ Full index: **[docs/README.md](docs/README.md)**
 | Document | Topic |
 |----------|--------|
 | [`docs/datavault-plugin.adoc`](docs/datavault-plugin.adoc) | Plugin overview, visual editor, workflows |
-| [`docs/datavault-configuration.adoc`](docs/datavault-configuration.adoc) | Embedded `.hdv` configuration |
+| [`docs/datavault-configuration.adoc`](docs/datavault-configuration.adoc) | Shared Data Vault configuration metadata |
 | [`docs/dv-integration-modes.adoc`](docs/dv-integration-modes.adoc) | Hop managed / external / custom pipelines |
 | [`docs/dv-hub.adoc`](docs/dv-hub.adoc) / [`dv-link.adoc`](docs/dv-link.adoc) / [`dv-satellite.adoc`](docs/dv-satellite.adoc) | Table metadata |
 | [`docs/datavault-update-action.adoc`](docs/datavault-update-action.adoc) | Data Vault Update action |

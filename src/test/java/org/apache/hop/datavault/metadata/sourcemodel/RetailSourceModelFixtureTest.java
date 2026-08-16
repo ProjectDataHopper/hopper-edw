@@ -27,9 +27,10 @@ import java.util.List;
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.database.DatabaseMeta;
-import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.core.xml.XmlHandler;
+import org.apache.hop.datavault.metadata.ModelConfigurationResolver;
+import org.apache.hop.datavault.metadata.ModelConfigurationTestSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceQueryGenerationSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.generate.SourceQuerySqlGenerator;
 import org.apache.hop.datavault.metadata.sourcemodel.publish.SourceQueryCatalogPublisher;
@@ -52,8 +53,9 @@ class RetailSourceModelFixtureTest {
       Path.of("retail-example/models/source-tables-crm.hsm").toAbsolutePath().normalize();
 
   @BeforeAll
-  static void initHop() throws HopException {
+  static void initHop() throws Exception {
     HopEnvironment.init();
+    ModelConfigurationTestSupport.registerTypes();
   }
 
   static boolean retailHsmPresent() {
@@ -71,6 +73,9 @@ class RetailSourceModelFixtureTest {
     SourceModel model = new SourceModel();
     MemoryMetadataProvider metadataProvider = new MemoryMetadataProvider();
     XmlMetadataUtil.deSerializeFromXml(rootNode, SourceModel.class, model, metadataProvider);
+    ModelConfigurationTestSupport.loadProjectMetadata(
+        metadataProvider, Path.of("retail-example").toAbsolutePath());
+    ModelConfigurationResolver.attach(model, metadataProvider);
     model.setFilename(RETAIL_HSM.toString());
     // Free SQL check() plans pipelines and needs RDBMS metadata for named connections.
     seedDatabasesFromModel(model, metadataProvider);

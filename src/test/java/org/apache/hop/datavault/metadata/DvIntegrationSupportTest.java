@@ -136,7 +136,11 @@ class DvIntegrationSupportTest {
     Document document = XmlHandler.loadXmlFile(path.toFile());
     Node rootNode = XmlHandler.getSubNode(document, "data-vault-model");
     DataVaultModel model = new DataVaultModel();
-    XmlMetadataUtil.deSerializeFromXml(rootNode, DataVaultModel.class, model, null);
+    IHopMetadataProvider provider =
+        ModelConfigurationTestSupport.prepare(
+            null, ModelConfigurationTestSupport.INTEGRATION_TESTS);
+    XmlMetadataUtil.deSerializeFromXml(rootNode, DataVaultModel.class, model, provider);
+    ModelConfigurationResolver.attach(model, provider);
     return model;
   }
 
@@ -144,16 +148,21 @@ class DvIntegrationSupportTest {
     Document document = XmlHandler.loadXmlFile(path.toFile());
     Node rootNode = XmlHandler.getSubNode(document, HopBusinessVaultFileType.XML_TAG);
     BusinessVaultModel model = new BusinessVaultModel();
-    XmlMetadataUtil.deSerializeFromXml(rootNode, BusinessVaultModel.class, model, null);
+    IHopMetadataProvider provider =
+        ModelConfigurationTestSupport.prepare(
+            null, ModelConfigurationTestSupport.INTEGRATION_TESTS);
+    XmlMetadataUtil.deSerializeFromXml(rootNode, BusinessVaultModel.class, model, provider);
+    ModelConfigurationResolver.attach(model, provider);
     model.setDataVaultModelPath(DV_PATH.toString());
     return model;
   }
 
-  private static IHopMetadataProvider testMetadataProvider() throws HopException {
+  private static IHopMetadataProvider testMetadataProvider() throws Exception {
     MemoryMetadataProvider metadataProvider = new MemoryMetadataProvider();
     DatabaseMeta databaseMeta = new DatabaseMeta();
     databaseMeta.setName("Vault");
     metadataProvider.getSerializer(DatabaseMeta.class).save(databaseMeta);
-    return metadataProvider;
+    return ModelConfigurationTestSupport.prepare(
+        metadataProvider, ModelConfigurationTestSupport.INTEGRATION_TESTS);
   }
 }

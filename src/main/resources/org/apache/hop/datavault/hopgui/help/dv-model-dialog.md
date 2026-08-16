@@ -17,9 +17,13 @@
 
 # Data Vault model settings
 
-Open with **Edit model** on the Data Vault graph toolbar. The name and description at the top belong to this `.hdv` file. The tabs below are the model's embedded configuration: they apply to every hub, link, and satellite unless a table dialog overrides a column name.
+Open with **Edit model** on the Data Vault graph toolbar. The name and description at the top belong to this `.hdv` file. **Configuration** points at a shared project Data Vault configuration (recommended). Leave it empty only for a legacy model that still embeds its settings.
 
-There is one target database per model. Settings are stored in the `.hdv` file and travel with the model.
+When a project configuration is selected, edit hashing, naming, and load options there — they apply to every model that references it. When the picker is empty, the tabs below edit the embedded copy.
+
+If the project does not have a shared configuration yet, use **Tools → Configure EDW setup...** to create the standard catalog and configuration objects.
+
+There is one target database per configuration. Table dialogs can still override a column name.
 
 ## General tab
 

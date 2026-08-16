@@ -58,6 +58,7 @@ import org.apache.hop.datavault.metadata.DvLoadCycleSupport;
 import org.apache.hop.datavault.metadata.DvModelBulkUpdateExecutionSupport;
 import org.apache.hop.datavault.metadata.DvTargetLoadMode;
 import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
+import org.apache.hop.datavault.metadata.ModelConfigurationResolver;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultConfiguration;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultDvModelResolver;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
@@ -862,6 +863,7 @@ public class ActionBusinessVaultUpdate extends ActionBase implements Cloneable, 
 
     BusinessVaultModel model = new BusinessVaultModel();
     XmlMetadataUtil.deSerializeFromXml(rootNode, BusinessVaultModel.class, model, provider);
+    ModelConfigurationResolver.attach(model, provider);
     model.setFilename(realModelFile);
     return model;
   }

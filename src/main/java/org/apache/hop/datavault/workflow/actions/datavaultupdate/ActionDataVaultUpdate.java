@@ -73,6 +73,7 @@ import org.apache.hop.datavault.metadata.DvUpdateExecutionSupport;
 import org.apache.hop.datavault.metadata.DvUpdateWorkflowSupport;
 import org.apache.hop.datavault.metadata.GeneratedPipelineMetadataConstants;
 import org.apache.hop.datavault.metadata.IDvTable;
+import org.apache.hop.datavault.metadata.ModelConfigurationResolver;
 import org.apache.hop.datavault.metrics.ExecutionMetricsProfileResolver;
 import org.apache.hop.datavault.metrics.ResolvedExecutionMetrics;
 import org.apache.hop.datavault.metrics.metadata.ExecutionMetricsProfileMeta;
@@ -1325,6 +1326,7 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
 
     DataVaultModel model = new DataVaultModel();
     XmlMetadataUtil.deSerializeFromXml(rootNode, DataVaultModel.class, model, provider);
+    ModelConfigurationResolver.attach(model, provider);
     model.setFilename(realModelFile);
 
     return model;

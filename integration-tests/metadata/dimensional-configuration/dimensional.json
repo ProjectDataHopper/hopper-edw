@@ -1,0 +1,16 @@
+{
+  "targetDatabase": "Vault",
+  "dimKeyField": "dim_key",
+  "versionField": "version",
+  "dateFromField": "date_from",
+  "dateToField": "date_to",
+  "loadDateField": "load_dt",
+  "currentFlagField": "is_current",
+  "openStartSentinel": "1900-01-01 00:00:00",
+  "openEndSentinel": "9999-12-31 23:59:59",
+  "targetTableBatchSize": "1000",
+  "targetTableParallelCopies": "1",
+  "name": "dimensional",
+  "description": "",
+  "virtualPath": ""
+}

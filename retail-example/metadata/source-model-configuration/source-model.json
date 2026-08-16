@@ -1,0 +1,8 @@
+{
+  "defaultDatabase": "CRM",
+  "defaultSchema": "public",
+  "catalogConnection": "local-catalog",
+  "name": "source-model",
+  "description": "",
+  "virtualPath": ""
+}

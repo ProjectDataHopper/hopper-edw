@@ -32,6 +32,7 @@ import org.apache.hop.datavault.hopgui.file.vault.HopVaultFileType;
 import org.apache.hop.datavault.layout.ElkGraphLayout;
 import org.apache.hop.datavault.layout.ElkLayout;
 import org.apache.hop.datavault.metadata.DataVaultModel;
+import org.apache.hop.datavault.metadata.ModelConfigurationResolver;
 import org.apache.hop.datavault.metadata.ModelXmlWriteSupport;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceJson;
 import org.apache.hop.datavault.metadata.sourcemodel.SourceModel;
@@ -255,6 +256,7 @@ public final class SourceToVaultGenerationSupport {
       }
       DataVaultModel model = new DataVaultModel();
       XmlMetadataUtil.deSerializeFromXml(rootNode, DataVaultModel.class, model, metadataProvider);
+      ModelConfigurationResolver.attach(model, metadataProvider);
       model.setFilename(filename);
       return model;
     } catch (HopException e) {
