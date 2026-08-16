@@ -24,16 +24,11 @@ FROM maven:3.9-eclipse-temurin-21 AS build
 ARG MYSQL_JDBC_VERSION
 ARG SINGLESTORE_JDBC_VERSION
 
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends python3 \
-  && rm -rf /var/lib/apt/lists/*
-
 WORKDIR /src
 COPY pom.xml README.md ./
 COPY src ./src
 COPY hop-hsm-jdbc ./hop-hsm-jdbc
 COPY docs ./docs
-COPY scripts/rewrite-adoc-hrefs.py ./scripts/rewrite-adoc-hrefs.py
 
 RUN mvn -q package -DskipTests
 

@@ -4,6 +4,10 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## Unreleased
 
+### Jenkins / Maven docs rewrite
+
+- Generated-docs `.adoc` href rewrite runs in Java (`RewriteAdocHrefs`) so `mvn verify` no longer requires `python3` on CI agents
+
 ## [0.9.0] — 2026-08-16
 
 Requires **Apache Hop 2.19.0** (or a **recent 2.19.0-SNAPSHOT** until GA) and **Java 21**.

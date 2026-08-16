@@ -756,7 +756,7 @@
         </executions>
       </plugin>
 
-      <!-- link:page.adoc[] is a hard URL; rewrite sibling hrefs so the zip HTML navigates. -->
+      <!-- After Asciidoctor so generated-docs exists. Java only — Jenkins hop-build has no python3. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
@@ -770,9 +770,11 @@
             <phase>prepare-package</phase>
             <configuration>
               <target>
-                <exec executable="bash" failonerror="true">
-                  <arg value="-c"></arg>
-                  <arg value="if [ ! -f '${project.basedir}/scripts/rewrite-adoc-hrefs.py' ]; then echo 'Skipping href rewrite (no script)'; exit 0; fi; python3 '${project.basedir}/scripts/rewrite-adoc-hrefs.py' '${project.build.directory}/generated-docs'"></arg>
+                <exec executable="${java.home}/bin/java" failonerror="true">
+                  <arg value="-cp"></arg>
+                  <arg value="${project.build.outputDirectory}"></arg>
+                  <arg value="org.apache.hop.datavault.docs.RewriteAdocHrefs"></arg>
+                  <arg value="${project.build.directory}/generated-docs"></arg>
                 </exec>
               </target>
             </configuration>

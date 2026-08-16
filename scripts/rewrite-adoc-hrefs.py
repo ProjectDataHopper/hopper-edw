@@ -13,7 +13,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Rewrite generated Asciidoctor HTML so published docs navigate as HTML.
+"""Optional local helper. Maven prepare-package uses RewriteAdocHrefs (Java), not this file.
+
+Rewrite generated Asciidoctor HTML so published docs navigate as HTML.
 
 AsciiDoc ``link:page.adoc[page.adoc]`` is a hard URL, so HTML keeps the .adoc
 suffix on both the href and the visible label. This pass:
