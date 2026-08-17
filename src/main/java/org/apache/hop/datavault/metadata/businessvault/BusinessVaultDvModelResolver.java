@@ -102,7 +102,8 @@ public final class BusinessVaultDvModelResolver {
   /**
    * Builds a working {@link DataVaultModel} for SCD2/PIT/SQL that includes every table reachable
    * from canvas DV references (and the optional legacy linked path). Tables from multiple {@code
-   * .hdv} files are unioned; the first loaded model's configuration is used as default DV config.
+   * .hdv} files are unioned; the first loaded model's named and inline configuration is copied onto
+   * the working model.
    *
    * @return non-null model (may be empty of tables)
    */
@@ -167,11 +168,31 @@ public final class BusinessVaultDvModelResolver {
     }
 
     effective.getTables().addAll(byName.values());
-    if (firstConfigSource != null && firstConfigSource.getConfiguration() != null) {
-      effective.setConfiguration(firstConfigSource.getConfiguration());
-    }
+    copyDvConfiguration(firstConfigSource, effective, metadataProvider);
     effective.clearChanged();
     return effective;
+  }
+
+  /**
+   * Copies named and inline DV configuration onto the unioned working model.
+   *
+   * <p>Shared-config {@code .hdv} files store only {@code configurationName} (no inline {@code
+   * <configuration>}). Copying {@link DataVaultModel#getConfiguration()} alone would leave the
+   * working model on the {@code LOAD_DATE} default and break SCD2 timestamp checks for satellites
+   * whose load-date column is {@code x_load_ts}.
+   */
+  static void copyDvConfiguration(
+      DataVaultModel source, DataVaultModel target, IHopMetadataProvider metadataProvider) {
+    if (source == null || target == null) {
+      return;
+    }
+    target.setConfigurationName(source.getConfigurationName());
+    IHopMetadataProvider provider =
+        metadataProvider != null ? metadataProvider : source.getMetadataProvider();
+    ModelConfigurationResolver.attach(target, provider);
+    // Resolved config is also stored inline so later lookups still see load-date / hash
+    // settings if the metadata provider is not available on a later call.
+    target.setConfiguration(source.getConfigurationOrDefault());
   }
 
   /**

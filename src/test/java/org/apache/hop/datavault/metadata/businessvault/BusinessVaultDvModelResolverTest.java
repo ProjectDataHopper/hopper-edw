@@ -17,19 +17,31 @@
 package org.apache.hop.datavault.metadata.businessvault;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
+import java.util.List;
 import org.apache.hop.core.HopEnvironment;
+import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.Variables;
+import org.apache.hop.core.xml.XmlHandler;
+import org.apache.hop.datavault.hopgui.file.businessvault.HopBusinessVaultFileType;
 import org.apache.hop.datavault.metadata.DataVaultModel;
 import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.datavault.metadata.IDvTable;
+import org.apache.hop.datavault.metadata.ModelConfigurationResolver;
+import org.apache.hop.datavault.metadata.ModelConfigurationTestSupport;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
+import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 class BusinessVaultDvModelResolverTest {
 
@@ -84,5 +96,77 @@ class BusinessVaultDvModelResolverTest {
         BusinessVaultDvModelResolver.buildEffectiveDataVaultModel(bv, new Variables(), null);
     assertNotNull(effective);
     assertTrue(effective.getTables().isEmpty());
+  }
+
+  @Test
+  void copyDvConfigurationKeepsNamedLoadDateWhenInlineConfigIsAbsent() throws Exception {
+    IHopMetadataProvider metadataProvider = retailMetadataProvider();
+    DataVaultModel source = new DataVaultModel();
+    source.setConfigurationName("data-vault");
+    source.setConfiguration(null);
+    ModelConfigurationResolver.attach(source, metadataProvider);
+
+    DataVaultModel target = new DataVaultModel();
+    BusinessVaultDvModelResolver.copyDvConfiguration(source, target, metadataProvider);
+
+    assertEquals("data-vault", target.getConfigurationName());
+    assertEquals("x_load_ts", target.getConfigurationOrDefault().getLoadDateField());
+    assertEquals("x_load_ts", target.getConfiguration().getLoadDateField());
+  }
+
+  @Test
+  void effectiveRetail360ModelKeepsNamedLoadDateField() throws Exception {
+    IHopMetadataProvider metadataProvider = retailMetadataProvider();
+    Variables variables = retailVariables();
+    BusinessVaultModel bv = loadRetailBusinessVault(metadataProvider);
+
+    DataVaultModel effective =
+        BusinessVaultDvModelResolver.buildEffectiveDataVaultModel(bv, variables, metadataProvider);
+
+    assertEquals("data-vault", effective.getConfigurationName());
+    assertEquals("x_load_ts", effective.getConfigurationOrDefault().getLoadDateField());
+    assertNotNull(effective.findTable("sat_customer_demo"));
+  }
+
+  @Test
+  void retail360Scd2CheckResolvesSatelliteLoadTimestamp() throws Exception {
+    IHopMetadataProvider metadataProvider = retailMetadataProvider();
+    Variables variables = retailVariables();
+    BusinessVaultModel bv = loadRetailBusinessVault(metadataProvider);
+
+    List<ICheckResult> remarks = bv.check(metadataProvider, variables);
+
+    assertFalse(
+        remarks.stream()
+            .anyMatch(
+                remark ->
+                    remark.getType() == ICheckResult.TYPE_RESULT_ERROR
+                        && remark.getText() != null
+                        && remark.getText().contains("cannot resolve functional timestamp")),
+        () -> remarks.stream().map(ICheckResult::getText).toList().toString());
+  }
+
+  private static Variables retailVariables() {
+    Variables variables = new Variables();
+    variables.setVariable(
+        "PROJECT_HOME", Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
+    return variables;
+  }
+
+  private static IHopMetadataProvider retailMetadataProvider() throws Exception {
+    return ModelConfigurationTestSupport.prepare(
+        new MemoryMetadataProvider(), ModelConfigurationTestSupport.RETAIL_EXAMPLE);
+  }
+
+  private static BusinessVaultModel loadRetailBusinessVault(IHopMetadataProvider metadataProvider)
+      throws Exception {
+    Path hbv = Path.of("retail-example/models/retail-360.hbv").toAbsolutePath().normalize();
+    Document document = XmlHandler.loadXmlFile(hbv.toFile());
+    Node rootNode = XmlHandler.getSubNode(document, HopBusinessVaultFileType.XML_TAG);
+    BusinessVaultModel model = new BusinessVaultModel();
+    XmlMetadataUtil.deSerializeFromXml(rootNode, BusinessVaultModel.class, model, metadataProvider);
+    ModelConfigurationResolver.attach(model, metadataProvider);
+    model.setFilename(hbv.toString());
+    return model;
   }
 }
