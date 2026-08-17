@@ -19,13 +19,9 @@ under the License.
 
 ![EDW](docs/images/edw-logo.svg)
 
-Apache Hop plugin for **Data Vault 2.0**, **Business Vault**, and **dimensional** modeling, validation, and model-driven loading. Version **0.10.0-SNAPSHOT** (latest release **0.9.0**) requires **Apache Hop 2.19.0** (or a **recent 2.19.0-SNAPSHOT** until GA) and **Java 21**.
+Apache Hop plugin for **Data Vault 2.0**, **Business Vault**, and **dimensional** modeling, validation, and model-driven loading. Version **0.10.0-SNAPSHOT** (latest release **0.9.0**) requires **Apache Hop 2.19.0** and **Java 21**.
 
-**Hop 2.19 is required.** Until the GA client is on Maven Central, build Hop from source or download a recent CI snapshot of **hop-client**:
-
-- https://repository.apache.org/content/groups/snapshots/org/apache/hop/hop-client/2.19.0-SNAPSHOT/
-
-Hop **2.18.x** (including 2.18.1) is **not** supported for this release.
+**Hop 2.19.0 is required.** Hop **2.18.x** (including 2.18.1) is **not** supported for this release.
 
 **Model once. Generate loads and consumption layers.** Sources live in the Hop **Data Catalog**; visual **`.hsm`**, **`.hdv`**, **`.hbv`**, and **`.hdm`** models drive workflow actions, optional **execution maps** (`.hem`), and **Hop Lineage Views** (`.hlv`).
 
@@ -144,7 +140,7 @@ Published release artifacts for **0.9.0**:
 
 ## Installation (external plugin)
 
-1. Install **Apache Hop 2.19.0** or a **recent 2.19.0-SNAPSHOT** client ([hop-client snapshots](https://repository.apache.org/content/groups/snapshots/org/apache/hop/hop-client/2.19.0-SNAPSHOT/)).
+1. Install **Apache Hop 2.19.0**.
 2. Unzip the assembly zip into your Hop installation root (`$HOP_HOME`) so both `plugins/misc/datavault/` and `lib/core/` (Jinjava) are updated. Copying only the plugin jar is not enough for Jinja SQL.
 3. Restart Hop GUI.
 4. New metadata types appear under **Metadata → Data Vault**. **Data Vault Update**, **Business Vault Update**, **Validate resource definitions**, **Export data lineage**, and **Update resource definition group** actions are available in workflows. `.hsm`, `.hdv`, `.hbv`, `.hdm`, and `.hlv` files open in Explorer tabs.
@@ -189,7 +185,7 @@ Plugin org.apache.hop:hop-datavault:0.9.0 installed under $HOP_HOME from repo 'd
 
 You can also use **Tools → Marketplace…** in Hop GUI: import the repository on the **Repositories** tab, then install from the **Plugins** tab.
 
-**Restart Hop** after install so the plugin registry reloads. This plugin requires **Hop 2.19.0** or a **recent 2.19.0-SNAPSHOT** build ([hop-client snapshots](https://repository.apache.org/content/groups/snapshots/org/apache/hop/hop-client/2.19.0-SNAPSHOT/)).
+**Restart Hop** after install so the plugin registry reloads. This plugin requires **Hop 2.19.0**.
 
 ## Usage
 

@@ -15,7 +15,7 @@ Estimated time: 2–3 hours with Hop GUI, or follow command-line steps only in u
 == Prerequisites
 
 . Install Docker with Compose v2 and Python 3 (stdlib only).
-. Build or download the plugin for Apache Hop **2.19.0** (or current **2.19.0-SNAPSHOT** until GA; see link:../README.md[repository README]).
+. Build or download the plugin for Apache Hop **2.19.0** (see link:../README.md[repository README]).
 . Register `retail-example/` as a Hop project named **`retail-example`**.
 . Configure database connections **`CRM`** and **`Vault`** from project metadata.
 . Start PostgreSQL: from repo root, `./scripts/run-postgres.sh up`.
@@ -248,7 +248,7 @@ Reference: link:hop-lineage-view.adoc[Hop Lineage View], link:openlineage-export
 |CRM tables exist; run initial workflow's CRM load first; validate catalog fields vs live schema
 
 |Stale plugin behavior
-|Restart Hop GUI after installing **0.8.0** (on Apache Hop **2.19.0** / recent **2.19.0-SNAPSHOT**)
+|Restart Hop GUI after installing **0.8.0** (on Apache Hop **2.19.0**)
 
 |Need clean slate
 |`./scripts/run-postgres.sh reset` then `up`, rerun initial workflow

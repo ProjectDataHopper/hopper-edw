@@ -37,8 +37,8 @@
     <commonmark.version>0.29.0</commonmark.version>
     <elk.version>0.10.0</elk.version>
     <hadoop.version>3.3.6</hadoop.version>
-    <!-- Required runtime: Hop 2.19.0 (use 2.19.0-SNAPSHOT until GA is published). -->
-    <hop.version>2.19.0-SNAPSHOT</hop.version>
+    <!-- Required runtime: Apache Hop 2.19.0. -->
+    <hop.version>2.19.0</hop.version>
     <iceberg.version>1.6.1</iceberg.version>
     <jandex.version>3.5.3</jandex.version>
     <!-- HubSpot Jinjava: dbt-style Jinja for BV SQL (issue #72). Do not drop below 2.8.3. -->
@@ -441,19 +441,9 @@
   </dependencies>
 
   <!--
-    Hop 2.19.0 is not yet on Maven Central; compile dependencies use 2.19.0-SNAPSHOT from
-    the ASF Nexus snapshots repository. Without this declaration, clean CI agents
-    (Jenkins, GitHub Actions, etc.) fail with "Could not find artifact ... 2.19.0-SNAPSHOT".
-    Local builds often work anyway because Hop was installed into ~/.m2 via `mvn install`.
-    Download a recent hop-client snapshot:
-    https://repository.apache.org/content/groups/snapshots/org/apache/hop/hop-client/2.19.0-SNAPSHOT/
-    Remove (or leave harmless) once hop.version points at a released version on Central.
-
-    updatePolicy=always: SNAPSHOT artifacts change often (new Hop APIs, bugfixes). Maven's
-    default "daily" policy reuses the first snapshot resolved that calendar day on the agent,
-    so Jenkins can compile against a stale hop-ui and miss methods such as SwtGc#getNativeGc
-    even after a newer 2.19.0-SNAPSHOT was published to repository.apache.org. Always
-    re-check metadata. CI may still pass -U for belt-and-suspenders.
+    Optional ASF snapshots repository. Hop 2.19.0 is released and resolved from Maven
+    Central via hop.version. Keep this block only if a compile dependency still needs a
+    SNAPSHOT; it is harmless for released artifacts (releases are disabled).
   -->
   <repositories>
     <repository>

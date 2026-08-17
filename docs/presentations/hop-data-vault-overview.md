@@ -258,7 +258,7 @@ Choose per table — mixed models are supported.
 | **Implementers** | [README.md](../../README.md) and [integration-tests/PROJECT.md](../../integration-tests/PROJECT.md) |
 | **Reference** | [docs/README.md](../README.md) — full doc index |
 
-Open `retail-example/` for the tutorial, or `integration-tests/` as **`hop-data-vault`** for regression suites. Configure **CRM** and **Vault** connections, install plugin **0.9.0** on Apache Hop **2.19.0** / recent **2.19.0-SNAPSHOT**.
+Open `retail-example/` for the tutorial, or `integration-tests/` as **`hop-data-vault`** for regression suites. Configure **CRM** and **Vault** connections, install plugin **0.9.0** on Apache Hop **2.19.0**.
 
 ---
 

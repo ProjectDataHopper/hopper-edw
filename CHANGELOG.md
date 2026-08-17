@@ -31,11 +31,7 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 ## [0.9.0] — 2026-08-16
 
-Requires **Apache Hop 2.19.0** (or a **recent 2.19.0-SNAPSHOT** until GA) and **Java 21**.
-
-**Hop runtime:** Hop **2.19.0** is not yet published to Maven Central. To use this plugin you must either **build Hop from source** (branch/tag aligned with 2.19) or **download a recent CI snapshot** of the Hop client:
-
-- [Apache Hop 2.19.0-SNAPSHOT (hop-client)](https://repository.apache.org/content/groups/snapshots/org/apache/hop/hop-client/2.19.0-SNAPSHOT/)
+Requires **Apache Hop 2.19.0** and **Java 21**.
 
 **Downloads:** [GitHub release zip](https://github.com/mattcasters/hop-data-vault/releases/download/v0.9.0/hop-datavault-0.9.0.zip) · [Data Hopper Nexus](https://repository.data-hopper.com/repository/hop-community-plugins/org/apache/hop/hop-datavault/0.9.0/hop-datavault-0.9.0.zip) (`org.apache.hop:hop-datavault:0.9.0`)
 
@@ -220,11 +216,7 @@ Requires **Apache Hop 2.19.0** (or a **recent 2.19.0-SNAPSHOT** until GA) and **
 
 ## [0.8.0] — 2026-08-10
 
-Requires **Apache Hop 2.19.0** (or a **recent 2.19.0-SNAPSHOT** until GA) and **Java 21**.
-
-**Hop runtime:** Hop **2.19.0** is not yet published to Maven Central. To use this plugin you must either **build Hop from source** (branch/tag aligned with 2.19) or **download a recent CI snapshot** of the Hop client:
-
-- [Apache Hop 2.19.0-SNAPSHOT (hop-client)](https://repository.apache.org/content/groups/snapshots/org/apache/hop/hop-client/2.19.0-SNAPSHOT/)
+Requires **Apache Hop 2.19.0** and **Java 21**.
 
 **Downloads:** [GitHub release zip](https://github.com/mattcasters/hop-data-vault/releases/download/v0.8.0/hop-datavault-0.8.0.zip) · [Data Hopper Nexus](https://repository.data-hopper.com/repository/hop-community-plugins/org/apache/hop/hop-datavault/0.8.0/hop-datavault-0.8.0.zip) (`org.apache.hop:hop-datavault:0.8.0`)
 
@@ -281,11 +273,7 @@ Requires **Apache Hop 2.19.0** (or a **recent 2.19.0-SNAPSHOT** until GA) and **
 
 ## [0.7.0] — 2026-08-05
 
-Requires **Apache Hop 2.19.0** (or a **recent 2.19.0-SNAPSHOT** until GA) and **Java 21**.
-
-**Hop runtime:** Hop **2.19.0** is not yet published to Maven Central. To use this plugin you must either **build Hop from source** (branch/tag aligned with 2.19) or **download a recent CI snapshot** of the Hop client:
-
-- [Apache Hop 2.19.0-SNAPSHOT (hop-client)](https://repository.apache.org/content/groups/snapshots/org/apache/hop/hop-client/2.19.0-SNAPSHOT/)
+Requires **Apache Hop 2.19.0** and **Java 21**.
 
 **Downloads:** [GitHub release zip](https://github.com/mattcasters/hop-data-vault/releases/download/v0.7.0/hop-datavault-0.7.0.zip) · [Data Hopper Nexus](https://repository.data-hopper.com/repository/hop-community-plugins/org/apache/hop/hop-datavault/0.7.0/hop-datavault-0.7.0.zip) (`org.apache.hop:hop-datavault:0.7.0`)
 
@@ -334,11 +322,7 @@ Requires **Apache Hop 2.19.0** (or a **recent 2.19.0-SNAPSHOT** until GA) and **
 
 ## [0.6.0] — 2026-08-03
 
-Requires **Apache Hop 2.19.0** (or a **recent 2.19.0-SNAPSHOT** until GA) and **Java 21**.
-
-**Hop runtime:** Hop **2.19.0** is not yet published to Maven Central. To use this plugin you must either **build Hop from source** (branch/tag aligned with 2.19) or **download a recent CI snapshot** of the Hop client:
-
-- [Apache Hop 2.19.0-SNAPSHOT (hop-client)](https://repository.apache.org/content/groups/snapshots/org/apache/hop/hop-client/2.19.0-SNAPSHOT/)
+Requires **Apache Hop 2.19.0** and **Java 21**.
 
 Older Hop **2.18.x** (including 2.18.1) is **not** supported for 0.6.0.
 
@@ -425,7 +409,7 @@ In **0.6.0**, canvas **cross-model pointers** and **hub aliases** are stored as 
 
 ### Hop 2.19 platform requirements
 
-- Development and runtime target is **Apache Hop 2.19.0** (use **2.19.0-SNAPSHOT** until GA)
+- Development and runtime target is **Apache Hop 2.19.0**
 - Enables database-backed execution information (e.g. OPS `hop_executions`), BINARY hash key sorting ([apache/hop#7346](https://github.com/apache/hop/issues/7346)), and Hop Marketplace install
 - Markdown notes on DV/BV/DM model canvases (Hop 2.19 note API)
 - Apache snapshots repository `updatePolicy=always` for reliable CI resolution of Hop SNAPSHOTs

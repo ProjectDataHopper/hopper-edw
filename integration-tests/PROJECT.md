@@ -26,7 +26,7 @@ integration-tests/
 ├── run-svg.sh                   # Export DV/BV/pipeline SVGs via hop svg in Docker
 ├── SCRIPTS.md                   # How the shell scripts work together
 ../scripts/docker/               # Docker image, compose files (shared with retail-example)
-│   ├── Dockerfile               # Extends apache/hop:2.19.0-SNAPSHOT with plugin + JDBC drivers
+│   ├── Dockerfile               # Extends apache/hop:2.19.0 with plugin + JDBC drivers
 │   ├── compose.hop.yml          # Hop-only (host network, for run-tests.sh)
 │   ├── compose.postgres-local.yml # PostgreSQL only on port 54320 (for run-postgres.sh)
 │   ├── compose.<engine>.yml     # Database + Hop (for run-tests-all-databases.sh)
@@ -193,13 +193,13 @@ HOP_COMMAND_PARAMETERS="-f tests/multi-satellite-bv/customer-360.hdv \
 ./run-svg.sh -s tests/multi-satellite-bv -t ../docs/images/generated -r --no-notes
 ```
 
-Optional: `HOP_IMAGE_VERSION=2.19.0-SNAPSHOT` (or `2.19.0` after GA) when building the image to pin the base `apache/hop` tag.
+Optional: `HOP_IMAGE_VERSION=2.19.0` when building the image to pin the base `apache/hop` tag.
 
 With a local Hop install and plugin, you can also run `hop svg` directly (see [docs/README.md](../docs/README.md)). Convert `.svg` to `.png` if your docs use PNG screenshots.
 
 ### Docker multi-database tests
 
-A custom image extends `apache/hop:2.19.0-SNAPSHOT` with the **hop-datavault** plugin and JDBC drivers (fetched at image build time via Maven). The project folder is bind-mounted into the container at `/project`.
+A custom image extends `apache/hop:2.19.0` with the **hop-datavault** plugin and JDBC drivers (fetched at image build time via Maven). The project folder is bind-mounted into the container at `/project`.
 
 **Requirements:** Docker with Compose v2. SingleStore needs ~6 GB RAM for the dev image.
 
