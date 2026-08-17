@@ -102,7 +102,7 @@ JOIN hub_product hp ON lwp.product_hk = hp.product_hk </sourceSql>
       <tableType>DIMENSION_ALIAS</tableType>
       <sourceType>SQL</sourceType>
       <xloc>320</xloc>
-      <yloc>48</yloc>
+      <yloc>64</yloc>
       <name>d_warehouse</name>
     </table>
     <table>

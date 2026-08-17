@@ -150,7 +150,7 @@ It is possible to load incrementally as well.</text>
     <dv_reference>
       <dvTableName>sat_customer_demo</dvTableName>
       <dvTableType>SATELLITE</dvTableType>
-      <xloc>96</xloc>
+      <xloc>112</xloc>
       <yloc>112</yloc>
     </dv_reference>
     <dv_reference>
