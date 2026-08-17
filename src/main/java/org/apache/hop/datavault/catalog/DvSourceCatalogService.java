@@ -280,6 +280,9 @@ public final class DvSourceCatalogService {
   private static List<DataCatalogMeta> listEnabledCatalogConnections(
       IHopMetadataProvider metadataProvider) throws HopException {
     List<DataCatalogMeta> connections = new ArrayList<>();
+    if (metadataProvider == null) {
+      return connections;
+    }
     IHopMetadataSerializer<DataCatalogMeta> serializer =
         metadataProvider.getSerializer(DataCatalogMeta.class);
     for (String name : serializer.listObjectNames()) {

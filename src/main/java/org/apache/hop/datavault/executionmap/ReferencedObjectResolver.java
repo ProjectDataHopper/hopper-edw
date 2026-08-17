@@ -24,6 +24,7 @@ import org.apache.hop.datavault.hopgui.file.businessvault.HopBusinessVaultFileTy
 import org.apache.hop.datavault.hopgui.file.dimensional.HopDimensionalFileType;
 import org.apache.hop.datavault.hopgui.file.vault.HopVaultFileType;
 import org.apache.hop.datavault.metadata.DataVaultModel;
+import org.apache.hop.datavault.metadata.ModelConfigurationResolver;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultDvModelResolver;
 import org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel;
 import org.apache.hop.datavault.metadata.dimensional.DimensionalModel;
@@ -357,6 +358,7 @@ public final class ReferencedObjectResolver {
       }
       T model = type.getDeclaredConstructor().newInstance();
       XmlMetadataUtil.deSerializeFromXml(rootNode, type, model, context.getMetadataProvider());
+      ModelConfigurationResolver.attach(model, context.getMetadataProvider());
       if (model instanceof DataVaultModel dataVaultModel) {
         dataVaultModel.setFilename(resolvedPath);
       } else if (model instanceof BusinessVaultModel businessVaultModel) {

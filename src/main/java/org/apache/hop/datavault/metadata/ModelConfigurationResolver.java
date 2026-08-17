@@ -72,6 +72,9 @@ public final class ModelConfigurationResolver {
   }
 
   public static void attach(Object model, IHopMetadataProvider metadataProvider) {
+    if (metadataProvider == null) {
+      return;
+    }
     if (model instanceof DataVaultModel dataVaultModel) {
       dataVaultModel.setMetadataProvider(metadataProvider);
     } else if (model instanceof SourceModel sourceModel) {

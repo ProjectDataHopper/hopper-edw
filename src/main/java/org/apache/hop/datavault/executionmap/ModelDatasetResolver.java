@@ -157,7 +157,7 @@ public final class ModelDatasetResolver {
     try {
       return DvSourceCatalogService.resolveCatalogConnection(
           model, context.getVariables(), context.getMetadataProvider());
-    } catch (HopException e) {
+    } catch (Exception e) {
       return null;
     }
   }
@@ -170,7 +170,7 @@ public final class ModelDatasetResolver {
     try {
       return DvSourceCatalogService.resolvePreferredCatalogConnection(
           null, context.getVariables(), context.getMetadataProvider());
-    } catch (HopException e) {
+    } catch (Exception e) {
       return null;
     }
   }
@@ -186,7 +186,7 @@ public final class ModelDatasetResolver {
     try {
       return DvSourceCatalogService.resolvePreferredCatalogConnection(
           null, context.getVariables(), context.getMetadataProvider());
-    } catch (HopException e) {
+    } catch (Exception e) {
       return null;
     }
   }

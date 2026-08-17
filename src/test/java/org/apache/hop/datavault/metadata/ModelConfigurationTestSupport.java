@@ -61,6 +61,12 @@ public final class ModelConfigurationTestSupport {
     ModelConfigurationResolver.attach(model, provider);
   }
 
+  public static void attachRetailExample(Object model, IHopMetadataProvider existing)
+      throws Exception {
+    IHopMetadataProvider provider = prepare(existing, RETAIL_EXAMPLE);
+    ModelConfigurationResolver.attach(model, provider);
+  }
+
   public static void loadProjectMetadata(IHopMetadataProvider provider, Path projectHome)
       throws Exception {
     if (provider == null || projectHome == null) {

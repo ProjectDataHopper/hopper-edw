@@ -40,6 +40,7 @@ import org.apache.hop.datavault.metadata.DvReferenceTable;
 import org.apache.hop.datavault.metadata.DvSatellite;
 import org.apache.hop.datavault.metadata.DvTableType;
 import org.apache.hop.datavault.metadata.IDvTable;
+import org.apache.hop.datavault.metadata.ModelConfigurationResolver;
 import org.apache.hop.datavault.metadata.SatelliteAttribute;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 
@@ -76,6 +77,7 @@ public final class DvModelLineageCollector {
         CatalogModelRegistrySupport.portableModelPath(model.getFilename(), variables));
     snapshot.setCatalogConnection(catalogConnection);
 
+    ModelConfigurationResolver.attach(model, metadataProvider);
     DataVaultConfiguration config = model.getConfigurationOrDefault();
     String targetDb = config != null ? config.getTargetDatabase() : null;
     String sourcesNamespace =

@@ -56,6 +56,21 @@ class ModelConfigurationResolverTest {
   }
 
   @Test
+  void attachDoesNotClearExistingProviderWhenArgumentIsNull() throws Exception {
+    DataVaultConfiguration shared = new DataVaultConfiguration();
+    shared.setName("data-vault");
+    shared.setLoadDateField("x_load_ts");
+    metadataProvider.getSerializer(DataVaultConfiguration.class).save(shared);
+
+    DataVaultModel model = new DataVaultModel();
+    model.setConfigurationName("data-vault");
+    ModelConfigurationResolver.attach(model, metadataProvider);
+    ModelConfigurationResolver.attach(model, null);
+
+    assertEquals("x_load_ts", model.getConfigurationOrDefault().getLoadDateField());
+  }
+
+  @Test
   void inlineConfigurationIsUsedWhenNameIsEmpty() {
     DataVaultModel model = new DataVaultModel();
     model.getConfigurationOrDefault().setTargetDatabase("Vault");
