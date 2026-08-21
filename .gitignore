@@ -50,3 +50,7 @@ docs/video-tutorials/**/hop-project/metrics/**
 
 audit/
 /retail-example/environments/web-docker-postgres.json
+
+/retail-example/files/sales_rep*.csv
+/retail-example/files/order_shipment_event*.csv
+/retail-example/files/order_rep*.csv

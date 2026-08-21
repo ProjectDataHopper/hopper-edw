@@ -249,6 +249,23 @@ exec python3 "${PROJECT_HOME}/scripts/generate-retail-data.py" --mode initial --
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
+    <action>
+      <sql/>
+      <connection>OPS</connection>
+      <useVariableSubstitution>N</useVariableSubstitution>
+      <sqlfromfile>Y</sqlfromfile>
+      <sqlfilename>${PROJECT_HOME}/sql/ops-create-hop-executions-table-indexes.sql</sqlfilename>
+      <sqlfilename_encoding/>
+      <sendOneStatement>N</sendOneStatement>
+      <name>ops-create-hop-executions-table-indexes.sql</name>
+      <description/>
+      <type>SQL</type>
+      <attributes/>
+      <xloc>992</xloc>
+      <yloc>48</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
   </actions>
   <hops>
     <hop>
@@ -308,15 +325,22 @@ exec python3 "${PROJECT_HOME}/scripts/generate-retail-data.py" --mode initial --
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>create-load-metrics-tables.sql</from>
-      <to>bootstrap-retail-work.py</to>
+      <from>bootstrap-retail-work.py</from>
+      <to>generate-retail-data.py</to>
       <evaluation>Y</evaluation>
       <unconditional>N</unconditional>
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>bootstrap-retail-work.py</from>
-      <to>generate-retail-data.py</to>
+      <from>create-load-metrics-tables.sql</from>
+      <to>ops-create-hop-executions-table-indexes.sql</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>ops-create-hop-executions-table-indexes.sql</from>
+      <to>bootstrap-retail-work.py</to>
       <evaluation>Y</evaluation>
       <unconditional>N</unconditional>
       <enabled>Y</enabled>
