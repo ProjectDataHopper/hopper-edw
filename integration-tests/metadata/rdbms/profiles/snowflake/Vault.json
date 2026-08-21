@@ -1,0 +1,29 @@
+{
+  "virtualPath": "",
+  "rdbms": {
+    "SNOWFLAKE": {
+      "databaseName": "${DB_NAME}",
+      "pluginId": "SNOWFLAKE",
+      "accessType": 0,
+      "hostname": "${DB_HOST}",
+      "password": "${DB_PASSWORD}",
+      "pluginName": "Snowflake",
+      "port": "${DB_PORT}",
+      "warehouse": "${DB_WAREHOUSE}",
+      "attributes": {
+        "SUPPORTS_TIMESTAMP_DATA_TYPE": "Y",
+        "QUOTE_ALL_FIELDS": "Y",
+        "SUPPORTS_BOOLEAN_DATA_TYPE": "Y",
+        "FORCE_IDENTIFIERS_TO_LOWERCASE": "N",
+        "PRESERVE_RESERVED_WORD_CASE": "Y",
+        "SQL_CONNECT": "CREATE WAREHOUSE IF NOT EXISTS COMPUTE_WH WAREHOUSE_SIZE='XSMALL' AUTO_SUSPEND=60 AUTO_RESUME=TRUE; USE WAREHOUSE COMPUTE_WH; CREATE DATABASE IF NOT EXISTS TEST; USE DATABASE TEST; CREATE SCHEMA IF NOT EXISTS PUBLIC; USE SCHEMA PUBLIC;",
+        "FORCE_IDENTIFIERS_TO_UPPERCASE": "N",
+        "PREFERRED_SCHEMA_NAME": "PUBLIC",
+        "EXTRA_OPTION_SNOWFLAKE.ssl": "off"
+      },
+      "manualUrl": "jdbc:snowflake://${DB_HOST}:${DB_PORT}/?account=test&db=${DB_NAME}&warehouse=${DB_WAREHOUSE}&schema=PUBLIC&ssl=off",
+      "username": "${DB_USER}"
+    }
+  },
+  "name": "Vault"
+}

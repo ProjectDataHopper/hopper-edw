@@ -115,6 +115,14 @@ class DvTargetUnicodeCapabilitySupportTest {
   }
 
   @Test
+  void snowflakeIsCapableWithoutProbe() {
+    var assessment = DvTargetUnicodeCapabilitySupport.evaluate(snowflakeMeta(), null);
+    assertEquals(DvTargetUnicodeCapabilitySupport.Status.CAPABLE, assessment.status());
+    assertTrue(assessment.isCapable());
+    assertTrue(assessment.detail().toLowerCase().contains("utf-8"));
+  }
+
+  @Test
   void capabilityQueriesMatchEngines() {
     assertTrue(
         DvTargetUnicodeCapabilitySupport.buildCapabilityQuery(sqlServerMeta())
@@ -137,6 +145,10 @@ class DvTargetUnicodeCapabilitySupportTest {
 
   private static DatabaseMeta mysqlMeta() {
     return databaseMetaWithPluginId(DvBulkLoadPluginSupport.MYSQL_DB_PLUGIN_ID);
+  }
+
+  private static DatabaseMeta snowflakeMeta() {
+    return databaseMetaWithPluginId(DvBulkLoadPluginSupport.SNOWFLAKE_DB_PLUGIN_ID);
   }
 
   private static DatabaseMeta databaseMetaWithPluginId(String pluginId) {

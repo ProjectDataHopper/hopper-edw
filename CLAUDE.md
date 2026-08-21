@@ -138,6 +138,7 @@ cd integration-tests
 ./run-tests-all-databases.sh                 # postgres mysql singlestore sqlserver
 ./run-tests-all-databases.sh postgres        # one engine
 ./run-tests-all-databases.sh postgres mysql  # several engines
+LOCALSTACK_AUTH_TOKEN=... ./run-tests-all-databases.sh snowflake  # opt-in; skipped if token unset
 ```
 
 Facts agents must not miss:
@@ -150,6 +151,7 @@ Facts agents must not miss:
 - Backs up and restores `integration-tests/metadata/rdbms/CRM.json` and `Vault.json` so local GUI connections are not left swapped
 - SingleStore needs substantial RAM (~**6 GB** recommended for the dev image)
 - Multi-satellite Business Vault golden suites currently run only when `DB_TYPE` is unset or `postgres` (other engines skip them in `tests/run-tests.hwf` — not a false “failure to run”)
+- Snowflake is an **opt-in** fifth engine (`compose.snowflake.yml`, LocalStack image). Do not add it to the default four-engine matrix. Requires `LOCALSTACK_AUTH_TOKEN`. Use HEX hash keys and quoted identifiers; Hop Snowflake JDBC URLs need `manualUrl` for LocalStack.
 - Postgres + SQL Server exercise French source collation vs UTF-8 vault remediation (see `integration-tests/PROJECT.md`)
 
 Deeper reference: [`integration-tests/PROJECT.md`](integration-tests/PROJECT.md), [`integration-tests/SCRIPTS.md`](integration-tests/SCRIPTS.md).

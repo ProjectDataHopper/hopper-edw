@@ -21,6 +21,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import org.apache.hop.core.Const;
+import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.plugins.PluginRegistry;
 import org.apache.hop.core.plugins.TransformPluginType;
@@ -49,9 +51,13 @@ public final class DvBulkLoadTransformSupport {
       "org.apache.hop.pipeline.transforms.monetdbbulkloader.MonetDbBulkLoaderMeta$MonetDbField";
   private static final String VERTICA_FIELD_CLASS =
       "org.apache.hop.pipeline.transforms.vertica.bulkloader.VerticaBulkLoaderField";
-  private static final int SNOWFLAKE_LOCATION_TYPE_INTERNAL_STAGE = 2;
+
+  /** Hop {@code LOCATION_TYPE_USER} — user stage {@code @~/table}, no CREATE STAGE required. */
+  static final int SNOWFLAKE_LOCATION_TYPE_USER = 0;
+
   private static final int SNOWFLAKE_DATA_TYPE_CSV = 0;
   private static final int SNOWFLAKE_ON_ERROR_ABORT = 3;
+  static final String SNOWFLAKE_DEFAULT_SCHEMA = "PUBLIC";
 
   private DvBulkLoadTransformSupport() {}
 
@@ -193,6 +199,25 @@ public final class DvBulkLoadTransformSupport {
     setOraMappings(meta, targetLayout, excludeFields);
   }
 
+  /**
+   * Snowflake schema for {@code COPY INTO schema.table}. Prefers the connection preferred schema;
+   * defaults to {@code PUBLIC} when empty.
+   */
+  public static String resolveSnowflakeTargetSchema(
+      DatabaseMeta targetDatabase, IVariables variables) {
+    String schema = "";
+    if (targetDatabase != null) {
+      schema = Const.NVL(targetDatabase.getPreferredSchemaName(), "");
+    }
+    if (variables != null) {
+      schema = variables.resolve(schema);
+    }
+    if (Utils.isEmpty(schema)) {
+      return SNOWFLAKE_DEFAULT_SCHEMA;
+    }
+    return schema;
+  }
+
   private static void configureSnowflakeBulkLoader(
       ITransformMeta meta,
       DvTargetLoadSupport.TargetLoadContext ctx,
@@ -201,7 +226,11 @@ public final class DvBulkLoadTransformSupport {
       throws HopException {
     invoke(meta, "setConnection", String.class, ctx.targetDbName);
     invoke(meta, "setTargetTable", String.class, ctx.targetTableName);
-    invoke(meta, "setTargetSchema", String.class, "");
+    invoke(
+        meta,
+        "setTargetSchema",
+        String.class,
+        resolveSnowflakeTargetSchema(ctx.targetDatabaseMeta, ctx.variables));
     invoke(
         meta,
         "setWorkDirectory",
@@ -209,7 +238,8 @@ public final class DvBulkLoadTransformSupport {
         ctx.config.resolveBulkLoadStagingFolder(ctx.variables, ctx.modelName));
     invoke(meta, "setRemoveFiles", boolean.class, true);
     invoke(meta, "setTrimWhitespace", boolean.class, false);
-    invoke(meta, "setLocationTypeById", int.class, SNOWFLAKE_LOCATION_TYPE_INTERNAL_STAGE);
+    // User stage (@~/table). Internal stage requires a stage name that we do not generate.
+    invoke(meta, "setLocationTypeById", int.class, SNOWFLAKE_LOCATION_TYPE_USER);
     invoke(meta, "setDataTypeById", int.class, SNOWFLAKE_DATA_TYPE_CSV);
     invoke(meta, "setOnErrorById", int.class, SNOWFLAKE_ON_ERROR_ABORT);
     setSnowflakeFields(meta, targetLayout, excludeFields);

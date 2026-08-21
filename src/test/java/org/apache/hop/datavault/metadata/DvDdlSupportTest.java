@@ -28,7 +28,10 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.RowMeta;
 import org.apache.hop.core.row.value.ValueMetaBinary;
+import org.apache.hop.core.row.value.ValueMetaDate;
+import org.apache.hop.core.row.value.ValueMetaInteger;
 import org.apache.hop.core.row.value.ValueMetaString;
+import org.apache.hop.core.row.value.ValueMetaTimestamp;
 import org.apache.hop.core.variables.Variables;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -304,6 +307,76 @@ class DvDdlSupportTest {
         databaseMetaWithPluginId(DvBulkLoadPluginSupport.POSTGRESQL_DB_PLUGIN_ID);
     String ddl = "CREATE TABLE t (name VARCHAR(50));";
     assertEquals(ddl, DvDdlSupport.enrichSqlServerDdl(postgres, ddl));
+  }
+
+  @Test
+  void isSnowflakeDetectsPluginId() {
+    assertTrue(
+        DvDdlSupport.isSnowflake(
+            databaseMetaWithPluginId(DvBulkLoadPluginSupport.SNOWFLAKE_DB_PLUGIN_ID)));
+    assertFalse(DvDdlSupport.isSnowflake(postgresDatabaseMeta()));
+    assertFalse(DvDdlSupport.isSnowflake(null));
+  }
+
+  @Test
+  void enrichSnowflakeFieldDefinitionRewritesBinaryVariantAndTimestamps() {
+    DatabaseMeta snowflake =
+        databaseMetaWithPluginId(DvBulkLoadPluginSupport.SNOWFLAKE_DB_PLUGIN_ID);
+    ValueMetaBinary hashKey = new ValueMetaBinary("customer_hk");
+    hashKey.setLength(16);
+    assertEquals(
+        "customer_hk BINARY(16)",
+        DvDdlSupport.enrichSnowflakeFieldDefinition(snowflake, hashKey, "customer_hk VARIANT"));
+
+    assertEquals(
+        "x_load_ts TIMESTAMP_NTZ",
+        DvDdlSupport.enrichSnowflakeFieldDefinition(
+            snowflake, new ValueMetaTimestamp("x_load_ts"), "x_load_ts TIMESTAMP_LTZ"));
+    assertEquals(
+        "order_date DATE",
+        DvDdlSupport.enrichSnowflakeFieldDefinition(
+            snowflake, new ValueMetaDate("order_date"), "order_date TIMESTAMP_LTZ"));
+  }
+
+  @Test
+  void enrichSnowflakeFieldDefinitionLeavesJsonVariantAndOtherEngines() {
+    DatabaseMeta snowflake =
+        databaseMetaWithPluginId(DvBulkLoadPluginSupport.SNOWFLAKE_DB_PLUGIN_ID);
+    assertEquals(
+        "payload VARIANT",
+        DvDdlSupport.enrichSnowflakeFieldDefinition(
+            snowflake, new ValueMetaInteger("payload"), "payload VARIANT"));
+    assertEquals(
+        "customer_hk VARIANT",
+        DvDdlSupport.enrichSnowflakeFieldDefinition(
+            postgresDatabaseMeta(), new ValueMetaBinary("customer_hk"), "customer_hk VARIANT"));
+  }
+
+  @Test
+  void enrichSnowflakeDdlRewritesTimestampLtzOnly() {
+    DatabaseMeta snowflake =
+        databaseMetaWithPluginId(DvBulkLoadPluginSupport.SNOWFLAKE_DB_PLUGIN_ID);
+    String ddl =
+        "CREATE TABLE hub_customer (customer_hk VARIANT, x_load_ts TIMESTAMP_LTZ, payload VARIANT);";
+    String rewritten = DvDdlSupport.enrichSnowflakeDdl(snowflake, ddl);
+    assertTrue(rewritten.contains("TIMESTAMP_NTZ"));
+    assertFalse(rewritten.contains("TIMESTAMP_LTZ"));
+    assertTrue(rewritten.contains("customer_hk VARIANT"));
+    assertEquals(ddl, DvDdlSupport.enrichSnowflakeDdl(postgresDatabaseMeta(), ddl));
+  }
+
+  @Test
+  void snowflakePhysicalSqlTypeMapsBinaryTimestampAndDate() {
+    ValueMetaBinary md5 = new ValueMetaBinary("hk");
+    md5.setLength(16);
+    assertEquals("BINARY(16)", DvDdlSupport.snowflakePhysicalSqlType(md5));
+    ValueMetaBinary unbounded = new ValueMetaBinary("blob");
+    unbounded.setLength(-1);
+    assertEquals("BINARY", DvDdlSupport.snowflakePhysicalSqlType(unbounded));
+    assertEquals(
+        "TIMESTAMP_NTZ", DvDdlSupport.snowflakePhysicalSqlType(new ValueMetaTimestamp("ts")));
+    assertEquals("DATE", DvDdlSupport.snowflakePhysicalSqlType(new ValueMetaDate("d")));
+    assertEquals(null, DvDdlSupport.snowflakePhysicalSqlType(new ValueMetaString("name")));
   }
 
   private static DatabaseMeta singleStoreDatabaseMeta() {

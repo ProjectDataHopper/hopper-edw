@@ -1,0 +1,39 @@
+{
+  "variables": [
+    {
+      "name": "DB_HOST",
+      "value": "snowflake.localhost.localstack.cloud",
+      "description": "LocalStack Snowflake hostname (compose network alias on db)"
+    },
+    {
+      "name": "DB_PORT",
+      "value": "4566",
+      "description": "LocalStack Snowflake non-SSL JDBC port"
+    },
+    {
+      "name": "DB_USER",
+      "value": "test",
+      "description": "LocalStack Snowflake username"
+    },
+    {
+      "name": "DB_PASSWORD",
+      "value": "test",
+      "description": "LocalStack Snowflake password"
+    },
+    {
+      "name": "DB_NAME",
+      "value": "TEST",
+      "description": "Snowflake database name"
+    },
+    {
+      "name": "DB_WAREHOUSE",
+      "value": "COMPUTE_WH",
+      "description": "Snowflake warehouse"
+    },
+    {
+      "name": "DB_TYPE",
+      "value": "snowflake",
+      "description": "Engine profile name used by suite gating"
+    }
+  ]
+}

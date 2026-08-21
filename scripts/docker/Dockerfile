@@ -18,11 +18,13 @@
 ARG HOP_IMAGE_VERSION=2.19.0
 ARG MYSQL_JDBC_VERSION=8.4.0
 ARG SINGLESTORE_JDBC_VERSION=1.2.8
+ARG SNOWFLAKE_JDBC_VERSION=4.3.1
 
 FROM maven:3.9-eclipse-temurin-21 AS build
 
 ARG MYSQL_JDBC_VERSION
 ARG SINGLESTORE_JDBC_VERSION
+ARG SNOWFLAKE_JDBC_VERSION
 
 WORKDIR /src
 COPY pom.xml README.md ./
@@ -37,6 +39,9 @@ RUN mvn -q org.apache.maven.plugins:maven-dependency-plugin:3.6.1:copy \
       -DoutputDirectory=/jdbc \
   && mvn -q org.apache.maven.plugins:maven-dependency-plugin:3.6.1:copy \
       -Dartifact=com.singlestore:singlestore-jdbc-client:${SINGLESTORE_JDBC_VERSION} \
+      -DoutputDirectory=/jdbc \
+  && mvn -q org.apache.maven.plugins:maven-dependency-plugin:3.6.1:copy \
+      -Dartifact=net.snowflake:snowflake-jdbc:${SNOWFLAKE_JDBC_VERSION} \
       -DoutputDirectory=/jdbc
 
 FROM apache/hop:${HOP_IMAGE_VERSION}

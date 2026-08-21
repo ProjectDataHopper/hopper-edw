@@ -309,6 +309,44 @@ class BvPitSnapshotSpineSupportTest {
   }
 
   @Test
+  void buildDynamicSnapshotSpineCteUsesGeneratorForSnowflake() {
+    DatabaseMeta snowflake = new TestDatabaseMeta("Vault", "SNOWFLAKE");
+
+    String sql =
+        BvPitSnapshotSpineSupport.buildDynamicSnapshotSpineCte(
+            snowflake,
+            "snapshot_spine",
+            "snapshot_date",
+            "bounds",
+            BvPitSnapshotAnchor.END_OF_PERIOD);
+
+    assertEquals(
+        BvPitSnapshotSpineSupport.PitSqlDialect.SNOWFLAKE,
+        BvPitSnapshotSpineSupport.resolveDialect(snowflake));
+    assertTrue(sql.contains("GENERATOR(ROWCOUNT =>"));
+    assertTrue(sql.contains("DATEADD(day, g.n, b.start_date)"));
+    assertTrue(sql.contains("TIMESTAMP_NTZ"));
+    assertFalse(sql.contains("generate_series"));
+    assertFalse(sql.contains("WITH RECURSIVE"));
+  }
+
+  @Test
+  void snowflakeLiteralsKeepAnsiTimestamps() {
+    DatabaseMeta snowflake = new TestDatabaseMeta("Vault", "SNOWFLAKE");
+    assertEquals(
+        "TIMESTAMP '1900-01-01 00:00:00'",
+        BvPitSnapshotSpineSupport.timestampLiteral(snowflake, "1900-01-01 00:00:00"));
+    assertEquals(
+        "DATEADD(day, -1, CURRENT_DATE)",
+        BvPitSnapshotSpineSupport.currentDateMinusDaysExpression(snowflake, 1));
+    assertEquals(
+        "CAST(earliest_load AS DATE)",
+        BvPitSnapshotSpineSupport.castToDateExpression(snowflake, "earliest_load"));
+    String sql = "SELECT TIMESTAMP '9999-12-31 23:59:59'";
+    assertEquals(sql, BvPitSnapshotSpineSupport.normalizeAnsiTimestampLiterals(snowflake, sql));
+  }
+
+  @Test
   void normalizeAnsiTimestampLiteralsLeavesPostgresUnchanged() {
     DatabaseMeta postgres = new TestDatabaseMeta("Vault", "POSTGRESQL");
     String sql = "SELECT TIMESTAMP '1900-01-01 00:00:00'";

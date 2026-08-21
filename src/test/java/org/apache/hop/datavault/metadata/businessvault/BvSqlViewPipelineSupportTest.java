@@ -146,6 +146,28 @@ class BvSqlViewPipelineSupportTest {
   }
 
   @Test
+  void viewScriptSnowflakeUsesCreateOrReplace() throws Exception {
+    BvBusinessTable table = viewTable("satb_product_hb", "SELECT 1");
+    BvSqlViewPipelineSupport.CreateScript script =
+        BvSqlViewPipelineSupport.buildCreateScript(
+            table, new TestDatabaseMeta("Vault", "SNOWFLAKE"), new Variables(), "SELECT 1");
+
+    assertTrue(script.singleStatement());
+    assertTrue(script.sql().startsWith("CREATE OR REPLACE VIEW satb_product_hb AS"));
+  }
+
+  @Test
+  void tableScriptSnowflakeUsesCreateOrReplaceTable() throws Exception {
+    BvBusinessTable table = tableMaterialization("t1", "SELECT 2");
+    BvSqlViewPipelineSupport.CreateScript script =
+        BvSqlViewPipelineSupport.buildCreateScript(
+            table, new TestDatabaseMeta("Vault", "SNOWFLAKE"), new Variables(), "SELECT 2");
+
+    assertTrue(script.singleStatement());
+    assertTrue(script.sql().startsWith("CREATE OR REPLACE TABLE t1 AS"));
+  }
+
+  @Test
   void tableScriptMysqlUsesCreateOrReplaceTable() throws Exception {
     BvBusinessTable table = tableMaterialization("t1", "SELECT 2");
     BvSqlViewPipelineSupport.CreateScript script =

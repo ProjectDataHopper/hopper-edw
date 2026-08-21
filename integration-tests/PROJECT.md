@@ -6,7 +6,7 @@
 > - Configure the two database connections **`CRM`** and **`Vault`** in project metadata (`metadata/rdbms/CRM.json` and `metadata/rdbms/Vault.json`).
 > - **Docker** with Compose v2 — used by `run-tests.sh` and `run-tests-all-databases.sh` to run workflows in a short-lived Hop container (`docker-hop:latest`). No local Hop installation is required for command-line testing.
 > - **Python 3** — used by the test scripts to print the metrics overview table at the end of a run (stdlib only; no extra packages).
-> - Testing has been done with **PostgreSQL**, **MySQL**, **SingleStore**, and **Microsoft SQL Server** (see [Docker multi-database tests](#docker-multi-database-tests) below).
+> - Testing has been done with **PostgreSQL**, **MySQL**, **SingleStore**, and **Microsoft SQL Server** (see [Docker multi-database tests](#docker-multi-database-tests) below). **Snowflake** is an opt-in fifth engine via LocalStack (`LOCALSTACK_AUTH_TOKEN` required); it is not part of the default matrix.
 > - For Hop GUI use, install the **hop-datavault** plugin in your Hop **2.19.0** environment.
 
 **CI and regression reference** — not the first-time tutorial. Build an EDW: [docs/getting-started-edw.adoc](../docs/getting-started-edw.adoc). Tour the sample: [retail-example](../retail-example/) and [docs/getting-started-retail.adoc](../docs/getting-started-retail.adoc). Documentation index: [docs/README.md](../docs/README.md).
@@ -22,7 +22,7 @@ integration-tests/
 ├── project-config.json          # Hop project settings (metadata, datasets, unit tests)
 ├── run-postgres.sh              # Wrapper → ../scripts/run-postgres.sh
 ├── run-tests.sh                 # Wrapper → ../scripts/run-hop.sh integration-tests …
-├── run-tests-all-databases.sh   # Full suite against Docker PostgreSQL, MySQL, SingleStore, SQL Server
+├── run-tests-all-databases.sh   # Full suite against Docker PostgreSQL, MySQL, SingleStore, SQL Server (Snowflake opt-in)
 ├── run-svg.sh                   # Export DV/BV/pipeline SVGs via hop svg in Docker
 ├── SCRIPTS.md                   # How the shell scripts work together
 ../scripts/docker/               # Docker image, compose files (shared with retail-example)
@@ -105,15 +105,18 @@ COLLECT_METRICS=N ./run-tests.sh
 
 See [`SCRIPTS.md`](SCRIPTS.md) for full script reference.
 
-**`run-tests-all-databases.sh`** — run the full suite against containerised PostgreSQL, MySQL, SingleStore, and Microsoft SQL Server (no host database required).
+**`run-tests-all-databases.sh`** — run the full suite against containerised PostgreSQL, MySQL, SingleStore, and Microsoft SQL Server (no host database required). Snowflake is **opt-in**: `./run-tests-all-databases.sh snowflake` with `LOCALSTACK_AUTH_TOKEN` set (LocalStack for Snowflake image; skipped with a message when the token is unset).
 
 ```bash
-# All engines (postgres → mysql → singlestore → sqlserver)
+# Default engines (postgres → mysql → singlestore → sqlserver)
 ./run-tests-all-databases.sh
 
 # One engine
 ./run-tests-all-databases.sh postgres
 ./run-tests-all-databases.sh sqlserver
+
+# Opt-in Snowflake emulator (requires LOCALSTACK_AUTH_TOKEN)
+LOCALSTACK_AUTH_TOKEN=... ./run-tests-all-databases.sh snowflake
 ```
 
 Each engine uses `scripts/docker/compose.<engine>.yml`: a database service (`db`) and a short-lived `hop` service that runs the suite with the matching environment file under `integration-tests/environments/`. Connection metadata is swapped in at container start from `integration-tests/metadata/rdbms/profiles/<engine>/`.
@@ -127,7 +130,9 @@ Each engine uses `scripts/docker/compose.<engine>.yml`: a database service (`db`
 
 SQL Server compose (`compose.sqlserver.yml`) still runs `tests/run-tests-sqlserver.hwf` (shared suites + collation). Profile name for Postgres is **`postgres`** (not `postgresql`).
 
-Multi-satellite Business Vault suites (`multi-satellite-bv*`) run only when `DB_TYPE` is unset or `postgres`. MySQL, SingleStore, and SQL Server skip them in `tests/run-tests.hwf` because the current-state golden still reflects Postgres multi-open sparse SCD2 rows (≈453) while those engines currently yield one open row per customer (≈300).
+Multi-satellite Business Vault suites (`multi-satellite-bv*`) run only when `DB_TYPE` is unset or `postgres`. MySQL, SingleStore, SQL Server, and Snowflake skip them in `tests/run-tests.hwf` because the current-state golden still reflects Postgres multi-open sparse SCD2 rows (≈453) while those engines currently yield one open row per customer (≈300).
+
+Snowflake notes: connections quote identifiers (`QUOTE_ALL_FIELDS=Y`) so modeled lowercase names are preserved; Hop's Snowflake JDBC URL always appends `.snowflakecomputing.com`, so the Docker profile uses `manualUrl` against `snowflake.localhost.localstack.cloud:4566`. Prefer **HEX** hash keys until BINARY DDL is proven (Hop maps BINARY → VARIANT). LocalStack does not currently advertise `TRUNCATE TABLE`; reference-table FULL_REPLACE may need a real Snowflake smoke. The emulator is not a substitute for a production Snowflake account.
 
 `run-tests-all-databases.sh` backs up your local `metadata/rdbms/CRM.json` and `Vault.json` before the run and restores them when finished (including on failure or interrupt), so GUI and `run-tests.sh` keep using your configured connections.
 

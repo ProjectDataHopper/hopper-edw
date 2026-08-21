@@ -40,6 +40,7 @@ import org.apache.hop.i18n.BaseMessages;
  *       collations for VARCHAR)
  *   <li>PostgreSQL: database encoding is UTF8
  *   <li>MySQL / MariaDB / SingleStore: schema character set is utf8mb4
+ *   <li>Snowflake: VARCHAR is UTF-8 (no live probe)
  * </ul>
  */
 public final class DvTargetUnicodeCapabilitySupport {
@@ -219,6 +220,10 @@ public final class DvTargetUnicodeCapabilitySupport {
       return new Assessment(Status.UNKNOWN, "unknown database type", null);
     }
 
+    if (DvDdlSupport.isSnowflake(databaseMeta)) {
+      return new Assessment(Status.CAPABLE, "Snowflake VARCHAR is UTF-8", null);
+    }
+
     if (!isUnicodeCheckSupported(databaseMeta)) {
       return new Assessment(
           Status.UNSUPPORTED_ENGINE, pluginId, "No automated Unicode check for this engine");
@@ -276,6 +281,9 @@ public final class DvTargetUnicodeCapabilitySupport {
    * Pure evaluation of a probed encoding/collation value for unit tests without a live connection.
    */
   public static Assessment evaluate(DatabaseMeta databaseMeta, String probedValue) {
+    if (DvDdlSupport.isSnowflake(databaseMeta)) {
+      return new Assessment(Status.CAPABLE, "Snowflake VARCHAR is UTF-8", null);
+    }
     if (DvSqlOrderBySupport.isSqlServer(databaseMeta)) {
       return evaluateSqlServer(probedValue);
     }

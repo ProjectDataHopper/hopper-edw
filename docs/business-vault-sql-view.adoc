@@ -164,7 +164,7 @@ The BV **target database** plugin id selects the script shape (same dialect dete
 |Materialization |Dialect |Generated script (conceptually)
 
 |VIEW
-|PostgreSQL, MySQL, other
+|PostgreSQL, MySQL, Snowflake, other
 |`CREATE OR REPLACE VIEW t AS <query>`
 
 |VIEW
@@ -176,7 +176,7 @@ The BV **target database** plugin id selects the script shape (same dialect dete
 |`DROP VIEW IF EXISTS t;` + `CREATE VIEW t AS <query>` (no `CREATE OR REPLACE VIEW`)
 
 |TABLE
-|MySQL, SingleStore
+|MySQL, SingleStore, Snowflake
 |`CREATE OR REPLACE TABLE t AS <query>`
 
 |TABLE

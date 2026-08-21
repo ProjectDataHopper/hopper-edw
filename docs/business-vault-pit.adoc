@@ -181,7 +181,7 @@ PIT pipeline generation requires:
 * **Data Vault target database** — on the linked `.hdv` configuration (read hub and satellite history)
 * **Business Vault target database** — on the `.hbv` configuration (write PIT table)
 
-Both connection names must resolve in Hop project metadata. Generated SQL targets **PostgreSQL** first (`generate_series`, dynamic bounds CTEs).
+Both connection names must resolve in Hop project metadata. Generated SQL is dialect-aware: **PostgreSQL** (`generate_series`), **SQL Server**, **MySQL**, **SingleStore**, and **Snowflake** (`GENERATOR` + `DATEADD`, `TIMESTAMP_NTZ`).
 
 If you change the linked `.hdv` file on disk, use **Reload DV model** on the Business Vault toolbar before generating pipelines.
 

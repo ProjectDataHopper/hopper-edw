@@ -63,6 +63,16 @@ class LoadRunMetricsDdlSupportTest {
   }
 
   @Test
+  void snowflakePipelineMetricDdlMatchesPostgresShape() {
+    List<String> statements =
+        LoadRunMetricsDdlSupport.buildCreateStatements(
+            databaseMetaWithPluginId(DvBulkLoadPluginSupport.SNOWFLAKE_DB_PLUGIN_ID));
+    assertTrue(
+        statements.stream().anyMatch(sql -> sql.contains("CREATE TABLE IF NOT EXISTS load_run")));
+    assertPipelineMetricTimingColumns(statements);
+  }
+
+  @Test
   void mysqlPipelineMetricDdlIncludesTimingColumns() {
     List<String> statements =
         LoadRunMetricsDdlSupport.buildCreateStatements(

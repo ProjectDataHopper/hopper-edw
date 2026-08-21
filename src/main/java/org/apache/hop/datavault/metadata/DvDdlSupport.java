@@ -90,6 +90,13 @@ public final class DvDdlSupport {
     return databaseMeta != null && "SINGLESTORE".equalsIgnoreCase(databaseMeta.getPluginId());
   }
 
+  /** True when the Hop database plugin id is {@code SNOWFLAKE}. */
+  public static boolean isSnowflake(DatabaseMeta databaseMeta) {
+    return databaseMeta != null
+        && DvBulkLoadPluginSupport.SNOWFLAKE_DB_PLUGIN_ID.equalsIgnoreCase(
+            databaseMeta.getPluginId());
+  }
+
   /**
    * Whether the target engine supports emitting table-level PRIMARY KEY clauses in CREATE TABLE.
    * All current EDW targets used by this plugin do.
@@ -159,7 +166,7 @@ public final class DvDdlSupport {
       return "";
     }
     if (!isCreateTableDdl(existingDdl)) {
-      return enrichSqlServerDdl(databaseMeta, existingDdl);
+      return enrichEngineDdl(databaseMeta, existingDdl);
     }
 
     return buildCreateTableStatement(
@@ -230,7 +237,10 @@ public final class DvDdlSupport {
             || (shardKeyColumns != null && shardKeyColumns.length > 0);
     boolean hasMapping = context != null && context.hasMapping();
     if (isCreateTableDdl(hopDdl)
-        && (hasConstraints || DvSqlOrderBySupport.isSqlServer(databaseMeta) || hasMapping)) {
+        && (hasConstraints
+            || DvSqlOrderBySupport.isSqlServer(databaseMeta)
+            || isSnowflake(databaseMeta)
+            || hasMapping)) {
       return buildCreateTableStatement(
           databaseMeta,
           db,
@@ -243,10 +253,10 @@ public final class DvDdlSupport {
           true,
           context);
     }
-    if (!isCreateTableDdl(hopDdl) && hasMapping) {
+    if (!isCreateTableDdl(hopDdl) && (hasMapping || isSnowflake(databaseMeta))) {
       return generateAlterDdl(db, tableName, layout, context, true);
     }
-    return enrichSqlServerDdl(databaseMeta, hopDdl);
+    return enrichEngineDdl(databaseMeta, hopDdl);
   }
 
   static boolean isCreateTableDdl(String ddl) {
@@ -606,6 +616,7 @@ public final class DvDdlSupport {
     }
     // addFieldname=true matches Database#getCreateTableStatement field lines.
     String definition = databaseMeta.getFieldDefinition(valueMeta, null, null, false);
+    definition = enrichSnowflakeFieldDefinition(databaseMeta, valueMeta, definition);
     if (!applySqlServerUtf8EdwPolicy) {
       return definition;
     }
@@ -626,6 +637,7 @@ public final class DvDdlSupport {
       return customType;
     }
     String hopType = hopTypeOnly(databaseMeta, valueMeta);
+    hopType = snowflakePhysicalSqlTypeOrHop(databaseMeta, valueMeta, hopType);
     if (!applySqlServerUtf8EdwPolicy) {
       return hopType;
     }
@@ -709,6 +721,81 @@ public final class DvDdlSupport {
     }
     return TargetTypeSqlSupport.stripTrailingWhitespace(
         databaseMeta.getFieldDefinition(valueMeta, null, null, false, false, false));
+  }
+
+  /**
+   * Applies SQL Server UTF-8 collation rewrite and Snowflake TIMESTAMP/BINARY workarounds to Hop
+   * CREATE/ALTER DDL.
+   */
+  static String enrichEngineDdl(DatabaseMeta databaseMeta, String ddl) {
+    return enrichSnowflakeDdl(databaseMeta, enrichSqlServerDdl(databaseMeta, ddl));
+  }
+
+  /**
+   * Hop's Snowflake dialect maps {@code TYPE_BINARY} to {@code VARIANT} (JSON) and DATE/TIMESTAMP
+   * to {@code TIMESTAMP_LTZ}. For Data Vault hash keys and load dates those mappings are wrong:
+   * emit {@code BINARY(n)} and {@code TIMESTAMP_NTZ} / {@code DATE} instead.
+   *
+   * <p>{@code TYPE_JSON} stays {@code VARIANT}.
+   */
+  public static String enrichSnowflakeFieldDefinition(
+      DatabaseMeta databaseMeta, IValueMeta valueMeta, String fieldDefinition) {
+    if (!isSnowflake(databaseMeta) || Utils.isEmpty(fieldDefinition) || valueMeta == null) {
+      return fieldDefinition;
+    }
+    String desired = snowflakePhysicalSqlType(valueMeta);
+    if (Utils.isEmpty(desired)) {
+      return fieldDefinition;
+    }
+    String hopToken =
+        switch (valueMeta.getType()) {
+          case IValueMeta.TYPE_BINARY -> "VARIANT";
+          case IValueMeta.TYPE_TIMESTAMP, IValueMeta.TYPE_DATE -> "TIMESTAMP_LTZ";
+          default -> null;
+        };
+    if (Utils.isEmpty(hopToken) || hopToken.equalsIgnoreCase(desired)) {
+      return fieldDefinition;
+    }
+    return TargetTypeSqlSupport.replaceTypeToken(fieldDefinition, hopToken, desired);
+  }
+
+  /**
+   * Statement-level Snowflake workaround: rewrite {@code TIMESTAMP_LTZ} to {@code TIMESTAMP_NTZ}.
+   * Does not touch {@code VARIANT} (cannot distinguish JSON from BINARY without field metadata).
+   */
+  public static String enrichSnowflakeDdl(DatabaseMeta databaseMeta, String ddl) {
+    if (!isSnowflake(databaseMeta) || Utils.isEmpty(ddl)) {
+      return ddl;
+    }
+    return ddl.replace("TIMESTAMP_LTZ", "TIMESTAMP_NTZ");
+  }
+
+  /**
+   * Native Snowflake SQL type this plugin wants for a Hop value, or {@code null} to keep Hop's
+   * dialect string.
+   */
+  public static String snowflakePhysicalSqlType(IValueMeta valueMeta) {
+    if (valueMeta == null) {
+      return null;
+    }
+    return switch (valueMeta.getType()) {
+      case IValueMeta.TYPE_BINARY -> {
+        int length = valueMeta.getLength();
+        yield length > 0 ? "BINARY(" + length + ")" : "BINARY";
+      }
+      case IValueMeta.TYPE_TIMESTAMP -> "TIMESTAMP_NTZ";
+      case IValueMeta.TYPE_DATE -> "DATE";
+      default -> null;
+    };
+  }
+
+  static String snowflakePhysicalSqlTypeOrHop(
+      DatabaseMeta databaseMeta, IValueMeta valueMeta, String hopType) {
+    if (!isSnowflake(databaseMeta)) {
+      return hopType;
+    }
+    String desired = snowflakePhysicalSqlType(valueMeta);
+    return Utils.isEmpty(desired) ? hopType : desired;
   }
 
   /**

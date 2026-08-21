@@ -83,6 +83,7 @@ public final class LoadRunMetricsDdlSupport {
       case DvBulkLoadPluginSupport.MSSQL_DB_PLUGIN_ID,
               DvBulkLoadPluginSupport.MSSQLNATIVE_DB_PLUGIN_ID ->
           mssqlStatements(schema);
+      case DvBulkLoadPluginSupport.SNOWFLAKE_DB_PLUGIN_ID -> postgresStatements(schema);
       default -> postgresStatements(schema);
     };
   }

@@ -50,10 +50,11 @@ HOP_ENVIRONMENT_CONFIG_FILE_NAME_PATHS=/project/environments/local-postgres.json
 Runs the full test suite against containerised databases — no host database required. Each engine gets its own isolated compose stack (database + Hop on a Docker network).
 
 ```bash
-./run-tests-all-databases.sh                  # all: postgres mysql singlestore sqlserver
+./run-tests-all-databases.sh                  # default: postgres mysql singlestore sqlserver
 ./run-tests-all-databases.sh postgres         # one engine (PostgreSQL + French ICU collation suite)
 ./run-tests-all-databases.sh postgres mysql   # several engines
 ./run-tests-all-databases.sh sqlserver        # SQL Server + Unicode/collation suite
+LOCALSTACK_AUTH_TOKEN=... ./run-tests-all-databases.sh snowflake  # opt-in LocalStack Snowflake
 # Invalid names (e.g. postgresql) exit immediately with usage help.
 ```
 

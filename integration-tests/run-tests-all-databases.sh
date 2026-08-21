@@ -31,12 +31,14 @@ INTEGRATION_TESTS_HOST="${SCRIPTS_DIR}/../integration-tests"
 RDBMS_METADATA_DIR="${INTEGRATION_TESTS_HOST}/metadata/rdbms"
 BACKUP_DIR=""
 
-# Allowed engines (must match scripts/docker/compose.<name>.yml).
+# Default matrix (must match scripts/docker/compose.<name>.yml).
 ALL_DATABASES="postgres mysql singlestore sqlserver"
+# Opt-in engines: allowed by name, not run when the script is invoked with no arguments.
+OPT_IN_DATABASES="snowflake"
 
 is_allowed_database() {
   candidate="$1"
-  for allowed in ${ALL_DATABASES}; do
+  for allowed in ${ALL_DATABASES} ${OPT_IN_DATABASES}; do
     if [ "${candidate}" = "${allowed}" ]; then
       return 0
     fi
@@ -46,11 +48,13 @@ is_allowed_database() {
 
 usage() {
   echo "Usage: $(basename "$0") [engine]..." >&2
-  echo "  Allowed engines: ${ALL_DATABASES}" >&2
-  echo "  No arguments: run the suite against all engines." >&2
+  echo "  Default engines: ${ALL_DATABASES}" >&2
+  echo "  Opt-in engines: ${OPT_IN_DATABASES} (requires LOCALSTACK_AUTH_TOKEN)" >&2
+  echo "  No arguments: run the suite against the default engines." >&2
   echo "  One or more arguments: each must be a known engine name." >&2
   echo "  Example: $(basename "$0") postgres" >&2
   echo "  Example: $(basename "$0") postgres mysql" >&2
+  echo "  Example: LOCALSTACK_AUTH_TOKEN=... $(basename "$0") snowflake" >&2
 }
 
 if [ "$#" -eq 0 ]; then
@@ -60,7 +64,7 @@ else
   for arg in "$@"; do
     if ! is_allowed_database "${arg}"; then
       echo "Unknown database profile '${arg}'." >&2
-      echo "Allowed: ${ALL_DATABASES}" >&2
+      echo "Allowed: ${ALL_DATABASES} ${OPT_IN_DATABASES}" >&2
       usage
       exit 1
     fi
@@ -74,6 +78,7 @@ FAIL=0
 METRICS_FAIL=0
 FAILED_ENGINES=""
 PASSED_ENGINES=""
+SKIPPED_ENGINES=""
 ACTIVE_COMPOSE=""
 
 export HOST_UID="$(id -u)"
@@ -120,6 +125,13 @@ ensure_hop_image "${HOP_COMPOSE_FILE}"
 backup_rdbms_connections
 
 for db in ${DATABASES}; do
+  if [ "${db}" = "snowflake" ] && [ -z "${LOCALSTACK_AUTH_TOKEN:-}" ]; then
+    echo "=== Skipping snowflake: LOCALSTACK_AUTH_TOKEN is not set ==="
+    echo "LocalStack for Snowflake is proprietary and opt-in. Export LOCALSTACK_AUTH_TOKEN to run."
+    SKIPPED_ENGINES="${SKIPPED_ENGINES} ${db}"
+    continue
+  fi
+
   COMPOSE_FILE="${DOCKER_DIR}/compose.${db}.yml"
   if [ ! -f "${COMPOSE_FILE}" ]; then
     echo "Missing compose file for allowed profile '${db}': ${COMPOSE_FILE}" >&2
@@ -182,6 +194,9 @@ if [ -n "${PASSED_ENGINES}" ]; then
 else
   echo "Passed engines: (none)"
 fi
+if [ -n "${SKIPPED_ENGINES}" ]; then
+  echo "Skipped engines:${SKIPPED_ENGINES}"
+fi
 if [ -n "${FAILED_ENGINES}" ]; then
   echo "Failed engines:${FAILED_ENGINES}" >&2
 else
@@ -208,4 +223,8 @@ if [ "${FAIL}" -ne 0 ]; then
 fi
 
 echo ""
-echo "All database test runs passed."
+if [ -z "${PASSED_ENGINES}" ] && [ -n "${SKIPPED_ENGINES}" ]; then
+  echo "No database engines ran (all requested engines were skipped)."
+else
+  echo "All database test runs passed."
+fi

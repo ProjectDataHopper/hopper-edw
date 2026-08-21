@@ -382,7 +382,7 @@ if (dbType == null) {
 dbType == "" || dbType == "postgres";
 </script>
       <name>run multi-satellite BV?</name>
-      <description>Skip multi-satellite BV on MySQL/SingleStore/SQL Server: current-row golden is Postgres-oriented (multiple open-end sparse rows)</description>
+      <description>Skip multi-satellite BV on MySQL/SingleStore/SQL Server/Snowflake: current-row golden is Postgres-oriented (multiple open-end sparse rows)</description>
       <type>EVAL</type>
       <attributes/>
       <xloc>448</xloc>

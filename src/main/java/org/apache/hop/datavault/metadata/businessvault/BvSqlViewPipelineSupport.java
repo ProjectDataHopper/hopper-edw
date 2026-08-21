@@ -208,7 +208,7 @@ public final class BvSqlViewPipelineSupport {
                   + " AS\n"
                   + query,
               false);
-      case POSTGRES, MYSQL ->
+      case POSTGRES, MYSQL, SNOWFLAKE ->
           new CreateScript("CREATE OR REPLACE VIEW " + quotedTarget + " AS\n" + query, true);
     };
   }
@@ -227,7 +227,7 @@ public final class BvSqlViewPipelineSupport {
                   + query
                   + "\n) AS _bv_sql_src",
               false);
-      case MYSQL, SINGLESTORE ->
+      case MYSQL, SINGLESTORE, SNOWFLAKE ->
           new CreateScript("CREATE OR REPLACE TABLE " + quotedTarget + " AS\n" + query, true);
       case POSTGRES ->
           // Postgres has no CREATE OR REPLACE TABLE; drop then CTAS.

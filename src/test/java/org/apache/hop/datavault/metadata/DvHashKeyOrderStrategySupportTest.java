@@ -124,9 +124,36 @@ class DvHashKeyOrderStrategySupportTest {
   }
 
   @Test
+  void binaryHashSnowflakeUsesPlainSqlOrderBy() {
+    DataVaultConfiguration config = new DataVaultConfiguration();
+    config.setHashKeyDataType(HashKeyDataType.BINARY.name());
+    DatabaseMeta db = databaseMetaWithPluginId(DvBulkLoadPluginSupport.SNOWFLAKE_DB_PLUGIN_ID);
+
+    var plan =
+        DvHashKeyOrderStrategySupport.resolve(
+            db, config, new Variables(), "\"order_lhk\"", null, false);
+
+    assertTrue(plan.useSqlOrderBy());
+    assertEquals(" ORDER BY \"order_lhk\"", plan.orderBySqlSuffix());
+  }
+
+  @Test
+  void stringHashSnowflakeUsesHopSortRows() {
+    DataVaultConfiguration config = stringHashConfig();
+    DatabaseMeta db = databaseMetaWithPluginId(DvBulkLoadPluginSupport.SNOWFLAKE_DB_PLUGIN_ID);
+
+    var plan =
+        DvHashKeyOrderStrategySupport.resolve(
+            db, config, new Variables(), "\"order_lhk\"", null, false);
+
+    assertTrue(plan.useHopSortRows());
+    assertNull(plan.orderBySqlSuffix());
+  }
+
+  @Test
   void unknownEngineFallsBackToHopSortRows() {
     DataVaultConfiguration config = stringHashConfig();
-    DatabaseMeta db = databaseMetaWithPluginId("SNOWFLAKE");
+    DatabaseMeta db = databaseMetaWithPluginId("GENERIC");
 
     var plan =
         DvHashKeyOrderStrategySupport.resolve(

@@ -40,6 +40,40 @@ class DvBulkLoadCommandSupportTest {
   }
 
   @Test
+  void snowflakeHasNoStagingFileAction() {
+    DatabaseMeta snowflake =
+        databaseMetaWithPluginId(DvBulkLoadPluginSupport.SNOWFLAKE_DB_PLUGIN_ID);
+    assertEquals(null, DvBulkLoadCommandSupport.resolveStagingBulkActionPluginId(snowflake));
+  }
+
+  @Test
+  void snowflakeTargetSchemaDefaultsToPublic() {
+    DatabaseMeta snowflake =
+        new DatabaseMeta() {
+          @Override
+          public String getPluginId() {
+            return DvBulkLoadPluginSupport.SNOWFLAKE_DB_PLUGIN_ID;
+          }
+
+          @Override
+          public String getPreferredSchemaName() {
+            return "";
+          }
+        };
+    assertEquals(
+        "PUBLIC", DvBulkLoadTransformSupport.resolveSnowflakeTargetSchema(snowflake, null));
+    DatabaseMeta withSchema =
+        new DatabaseMeta() {
+          @Override
+          public String getPreferredSchemaName() {
+            return "MARTS";
+          }
+        };
+    assertEquals(
+        "MARTS", DvBulkLoadTransformSupport.resolveSnowflakeTargetSchema(withSchema, null));
+  }
+
+  @Test
   void resolvesPostgresStagingActionAsPipelineWhenPgBulkLoaderInstalled() {
     DatabaseMeta postgres =
         new DatabaseMeta(

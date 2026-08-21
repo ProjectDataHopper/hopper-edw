@@ -1,0 +1,74 @@
+#  Licensed to the Apache Software Foundation (ASF) under one or more
+#  contributor license agreements.  See the NOTICE file distributed with
+#  this work for additional information regarding copyright ownership.
+#  The ASF licenses this file to You under the Apache License, Version 2.0
+#  (the "License"); you may not use this file except in compliance with
+#  the License.  You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+#
+
+# Opt-in Snowflake emulator. Requires LOCALSTACK_AUTH_TOKEN.
+# Not part of the default run-tests-all-databases.sh matrix.
+
+services:
+  db:
+    image: localstack/snowflake:${LOCALSTACK_SNOWFLAKE_VERSION:-2026.07.0}
+    environment:
+      LOCALSTACK_AUTH_TOKEN: ${LOCALSTACK_AUTH_TOKEN:?LOCALSTACK_AUTH_TOKEN is required for the Snowflake emulator}
+    ports:
+      - "4566:4566"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -sf http://localhost:4566/_localstack/health >/dev/null || wget -q -O- http://localhost:4566/_localstack/health >/dev/null || exit 1",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 36
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+    networks:
+      hop-test:
+        aliases:
+          - snowflake.localhost.localstack.cloud
+
+  hop:
+    build:
+      context: ../..
+      dockerfile: scripts/docker/Dockerfile
+    image: docker-hop:latest
+    user: root
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      HOP_LOG_LEVEL: Basic
+      HOP_PROJECT_NAME: hop-data-vault
+      HOP_PROJECT_FOLDER: /workspace/integration-tests
+      HOP_FILE_PATH: /workspace/integration-tests/tests/run-tests.hwf
+      HOP_RUN_CONFIG: local
+      HOP_RUN_PARAMETERS: METRICS_FOLDER=${METRICS_FOLDER:-/workspace/integration-tests/metrics/${DB_TYPE}}
+      HOP_ENVIRONMENT_NAME: test-db
+      HOP_ENVIRONMENT_CONFIG_FILE_NAME_PATHS: /workspace/integration-tests/environments/docker-snowflake.json
+      HOP_CUSTOM_ENTRYPOINT_EXTENSION_SHELL_FILE_PATH: /opt/hop-datavault/entrypoint-prepare.sh
+      DB_TYPE: snowflake
+      HOST_UID: ${HOST_UID:-0}
+      HOST_GID: ${HOST_GID:-0}
+    volumes:
+      - ../../:/workspace
+    networks:
+      - hop-test
+
+networks:
+  hop-test:

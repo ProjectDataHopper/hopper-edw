@@ -26,6 +26,7 @@ For product documentation, start at [../README.md](../README.md) or [../feature-
 | [hop-lineage-view-plan.md](hop-lineage-view-plan.md) | Issue #79 — Hop Lineage View (`.hlv`) over OpenLineage backends |
 | [data-type-mappings-plan.md](data-type-mappings-plan.md) | Issue #113 — project data type mappings / pre-modeling sources |
 | [target-type-mappings-plan.md](target-type-mappings-plan.md) | Issue #127 — Hop type → native SQL type preferences for DDL |
+| [snowflake-support-plan.md](snowflake-support-plan.md) | Snowflake as a fifth EDW engine (dialect done; live LocalStack/real-account completion) |
 | [jinja-dbt-import-plan.md](jinja-dbt-import-plan.md) | Issue #72 — Jinja macros + dbt-core importer for BV SQL |
 | [late-arriving-dimensions-plan.md](late-arriving-dimensions-plan.md) | Issue #109 — late-arriving dimensions / inferred members (deferred) |
 | [orphan-prevention-plan.md](orphan-prevention-plan.md) | Issue #77 — optional DV orphan handling / placeholder hubs |

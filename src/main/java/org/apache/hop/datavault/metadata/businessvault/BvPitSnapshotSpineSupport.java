@@ -137,7 +137,11 @@ public final class BvPitSnapshotSpineSupport {
     SQL_SERVER,
     MYSQL,
     /** MySQL-compatible types; non-recursive number spine (recursive CTE limits differ). */
-    SINGLESTORE
+    SINGLESTORE,
+    /**
+     * Snowflake: ANSI timestamps, {@code GENERATOR}/{@code DATEADD} spine, {@code TIMESTAMP_NTZ}.
+     */
+    SNOWFLAKE
   }
 
   public static PitSqlDialect resolveDialect(DatabaseMeta databaseMeta) {
@@ -154,6 +158,9 @@ public final class BvPitSnapshotSpineSupport {
     }
     if (DvBulkLoadPluginSupport.MYSQL_DB_PLUGIN_ID.equalsIgnoreCase(pluginId)) {
       return PitSqlDialect.MYSQL;
+    }
+    if (DvBulkLoadPluginSupport.SNOWFLAKE_DB_PLUGIN_ID.equalsIgnoreCase(pluginId)) {
+      return PitSqlDialect.SNOWFLAKE;
     }
     // PostgreSQL and unknown engines: Postgres-style SQL (historical default)
     return PitSqlDialect.POSTGRES;
@@ -173,7 +180,7 @@ public final class BvPitSnapshotSpineSupport {
     return switch (resolveDialect(databaseMeta)) {
       case SQL_SERVER -> "CAST(NULL AS datetime2)";
       case MYSQL, SINGLESTORE -> "CAST(NULL AS DATETIME)";
-      case POSTGRES -> "CAST(NULL AS timestamp)";
+      case POSTGRES, SNOWFLAKE -> "CAST(NULL AS timestamp)";
     };
   }
 
@@ -181,7 +188,7 @@ public final class BvPitSnapshotSpineSupport {
     return switch (resolveDialect(databaseMeta)) {
       case SQL_SERVER -> "CAST('" + value + "' AS datetime2)";
       case MYSQL, SINGLESTORE -> "CAST('" + value + "' AS DATETIME)";
-      case POSTGRES -> "TIMESTAMP '" + value + "'";
+      case POSTGRES, SNOWFLAKE -> "TIMESTAMP '" + value + "'";
     };
   }
 
@@ -200,8 +207,9 @@ public final class BvPitSnapshotSpineSupport {
     if (Utils.isEmpty(sql) || databaseMeta == null) {
       return sql;
     }
-    // Postgres authoring form is already the target dialect — avoid no-op churn.
-    if (resolveDialect(databaseMeta) == PitSqlDialect.POSTGRES) {
+    // Postgres/Snowflake authoring form is already the target dialect — avoid no-op churn.
+    PitSqlDialect dialect = resolveDialect(databaseMeta);
+    if (dialect == PitSqlDialect.POSTGRES || dialect == PitSqlDialect.SNOWFLAKE) {
       return sql;
     }
     Matcher matcher = ANSI_TIMESTAMP_LITERAL.matcher(sql);
@@ -219,14 +227,14 @@ public final class BvPitSnapshotSpineSupport {
     return switch (resolveDialect(databaseMeta)) {
       case SQL_SERVER -> "CAST('" + yyyyMmDd + "' AS date)";
       case MYSQL, SINGLESTORE -> "CAST('" + yyyyMmDd + "' AS DATE)";
-      case POSTGRES -> "DATE '" + yyyyMmDd + "'";
+      case POSTGRES, SNOWFLAKE -> "DATE '" + yyyyMmDd + "'";
     };
   }
 
   public static String currentDateExpression(DatabaseMeta databaseMeta) {
     return switch (resolveDialect(databaseMeta)) {
       case SQL_SERVER -> "CAST(GETDATE() AS date)";
-      case MYSQL, SINGLESTORE, POSTGRES -> "CURRENT_DATE";
+      case MYSQL, SINGLESTORE, POSTGRES, SNOWFLAKE -> "CURRENT_DATE";
     };
   }
 
@@ -235,6 +243,7 @@ public final class BvPitSnapshotSpineSupport {
       case SQL_SERVER -> "CAST(" + expression + " AS date)";
       case MYSQL, SINGLESTORE -> "DATE(" + expression + ")";
       case POSTGRES -> expression + "::date";
+      case SNOWFLAKE -> "CAST(" + expression + " AS DATE)";
     };
   }
 
@@ -246,6 +255,7 @@ public final class BvPitSnapshotSpineSupport {
           "DATEADD(day, -" + horizon + ", " + currentDateExpression(databaseMeta) + ")";
       case MYSQL, SINGLESTORE -> "DATE_SUB(CURRENT_DATE, INTERVAL " + horizon + " DAY)";
       case POSTGRES -> "(CURRENT_DATE - INTERVAL '" + horizon + " day')::date";
+      case SNOWFLAKE -> "DATEADD(day, -" + horizon + ", CURRENT_DATE)";
     };
   }
 
@@ -304,6 +314,9 @@ public final class BvPitSnapshotSpineSupport {
           buildMysqlDynamicSnapshotSpineCte(cteName, snapshotColumnAlias, boundsCteName, anchor);
       case SINGLESTORE ->
           buildSinglestoreDynamicSnapshotSpineCte(
+              cteName, snapshotColumnAlias, boundsCteName, anchor);
+      case SNOWFLAKE ->
+          buildSnowflakeDynamicSnapshotSpineCte(
               cteName, snapshotColumnAlias, boundsCteName, anchor);
       case POSTGRES ->
           buildPostgresDynamicSnapshotSpineCte(cteName, snapshotColumnAlias, boundsCteName, anchor);
@@ -435,6 +448,37 @@ public final class BvPitSnapshotSpineSupport {
         + ")";
   }
 
+  /**
+   * Snowflake date spine using {@code GENERATOR} + {@code DATEADD}. Does not use Postgres {@code
+   * generate_series}. Caps the span at {@link #SINGLESTORE_SPINE_MAX_DAY_OFFSET} days because
+   * {@code GENERATOR(ROWCOUNT)} is a constant.
+   */
+  public static String buildSnowflakeDynamicSnapshotSpineCte(
+      String cteName,
+      String snapshotColumnAlias,
+      String boundsCteName,
+      BvPitSnapshotAnchor anchor) {
+    String snapshotExpression = snowflakeSnapshotExpression(anchor);
+    return cteName
+        + " AS ("
+        + "SELECT "
+        + snapshotExpression
+        + " AS "
+        + snapshotColumnAlias
+        + " FROM ("
+        + "SELECT DATEADD(day, g.n, b.start_date) AS spine_day "
+        + "FROM "
+        + boundsCteName
+        + " b "
+        + "CROSS JOIN (SELECT SEQ4() - 1 AS n FROM TABLE(GENERATOR(ROWCOUNT => "
+        + SINGLESTORE_SPINE_MAX_DAY_OFFSET
+        + "))) g "
+        + "WHERE b.start_date IS NOT NULL AND b.end_date IS NOT NULL AND b.start_date <= b.end_date "
+        + "AND g.n <= DATEDIFF('day', b.start_date, b.end_date)"
+        + ") spine"
+        + ")";
+  }
+
   public static String buildPostgresSnapshotSpineCte(
       String cteName, String snapshotColumnAlias, SpineBounds bounds, BvPitSnapshotAnchor anchor) {
     if (bounds == null || !bounds.isValid()) {
@@ -518,6 +562,13 @@ public final class BvPitSnapshotSpineSupport {
       return "TIMESTAMP(spine_day)";
     }
     return "TIMESTAMP(spine_day) + INTERVAL 23 HOUR + INTERVAL 59 MINUTE + INTERVAL 59 SECOND";
+  }
+
+  static String snowflakeSnapshotExpression(BvPitSnapshotAnchor anchor) {
+    if (anchor == BvPitSnapshotAnchor.START_OF_PERIOD) {
+      return "CAST(spine.spine_day AS TIMESTAMP_NTZ)";
+    }
+    return "DATEADD(second, 86399, CAST(spine.spine_day AS TIMESTAMP_NTZ))";
   }
 
   private static LocalDate resolveEndDate(
