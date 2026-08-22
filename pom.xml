@@ -828,7 +828,7 @@
                 <exec executable="${java.home}/bin/java" failonerror="true">
                   <arg value="-cp"></arg>
                   <arg value="${project.build.outputDirectory}"></arg>
-                  <arg value="org.apache.hop.datavault.docs.RewriteAdocHrefs"></arg>
+                  <arg value="org.hopper.edw.datavault.docs.RewriteAdocHrefs"></arg>
                   <arg value="${project.build.directory}/generated-docs"></arg>
                 </exec>
               </target>

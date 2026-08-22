@@ -1,0 +1,81 @@
+/*
+ * Copyright 2026 i-Bridge bv
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.hopper.edw.datavault.hopgui.markdown;
+
+import java.util.List;
+import org.apache.hop.core.util.Utils;
+import org.commonmark.Extension;
+import org.commonmark.ext.footnotes.FootnotesExtension;
+import org.commonmark.ext.gfm.tables.TablesExtension;
+import org.commonmark.ext.task.list.items.TaskListItemsExtension;
+import org.commonmark.node.Node;
+import org.commonmark.parser.Parser;
+import org.commonmark.renderer.html.HtmlRenderer;
+
+/** Shared CommonMark parser and HTML renderer (mirrors hop-transform-textfile). */
+public final class CommonMarkSupport {
+
+  public static final List<Extension> MARKDOWN_EXTENSIONS =
+      List.of(
+          TablesExtension.create(), TaskListItemsExtension.create(), FootnotesExtension.create());
+
+  private static volatile Parser parser;
+  private static volatile HtmlRenderer htmlRenderer;
+
+  private CommonMarkSupport() {}
+
+  public static Node parse(String markdown) {
+    if (Utils.isEmpty(markdown)) {
+      return parser().parse("");
+    }
+    return parser().parse(markdown);
+  }
+
+  public static String toHtmlBody(String markdown) {
+    if (Utils.isEmpty(markdown)) {
+      return "";
+    }
+    return htmlRenderer().render(parse(markdown));
+  }
+
+  private static Parser parser() {
+    Parser local = parser;
+    if (local == null) {
+      synchronized (CommonMarkSupport.class) {
+        local = parser;
+        if (local == null) {
+          local = Parser.builder().extensions(MARKDOWN_EXTENSIONS).build();
+          parser = local;
+        }
+      }
+    }
+    return local;
+  }
+
+  private static HtmlRenderer htmlRenderer() {
+    HtmlRenderer local = htmlRenderer;
+    if (local == null) {
+      synchronized (CommonMarkSupport.class) {
+        local = htmlRenderer;
+        if (local == null) {
+          local = HtmlRenderer.builder().extensions(MARKDOWN_EXTENSIONS).build();
+          htmlRenderer = local;
+        }
+      }
+    }
+    return local;
+  }
+}

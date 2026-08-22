@@ -1,7 +1,7 @@
 # `.hsm` — Source model
 
 **Root element:** `<source-model>`  
-**Java:** `org.apache.hop.datavault.metadata.sourcemodel.SourceModel`  
+**Java:** `org.hopper.edw.datavault.metadata.sourcemodel.SourceModel`  
 **Schema:** [hsm.xsd](hsm.xsd) · **Excerpt:** [../samples/hsm-excerpt.xml](../samples/hsm-excerpt.xml)
 
 ## Purpose

@@ -82,7 +82,7 @@ CREATE / ALTER / schema-check expected type
 
 ### 3.2 New project metadata: `TargetTypeMappingMeta`
 
-Package: `org.apache.hop.datavault.metadata.targettypemapping`
+Package: `org.hopper.edw.datavault.metadata.targettypemapping`
 
 ```
 @HopMetadata(key = "target-type-mapping",
@@ -178,7 +178,7 @@ Absent mapping / empty selector / no unique auto-match = **100% backward compati
 ### 4.1 Classes
 
 ```
-org.apache.hop.datavault.metadata.targettypemapping/
+org.hopper.edw.datavault.metadata.targettypemapping/
   TargetTypeMappingMeta
   TargetTypeMappingRule
   TargetTypeMappingResolver          // match + placeholder substitution
@@ -203,7 +203,7 @@ Mirror `DataTypeMappingMetaEditor` (simpler: no Scope tab).
 - **Preview** (same editor): sample Hop type + length + precision + field name → resolved SQL (or “dialect default”). Uses the mapping’s target connection for fallback.
 - Help topic (`HelpTopics.TARGET_TYPE_MAPPING`) describing placeholders, first-match, UTF-8 interaction, and the difference from Data type mapping
 
-i18n: `src/main/resources/org/apache/hop/datavault/metadata/targettypemapping/messages/messages_en_US.properties`  
+i18n: `src/main/resources/org/hopper/edw/datavault/metadata/targettypemapping/messages/messages_en_US.properties`  
 Escape `=` / `:` / spaces; wrap `'${VARIABLE}'` and `'{length}'` as in existing bundles.
 
 Icon: new `src/main/resources/target-type-mapping.svg` (same visual family as `data-type-mapping.svg`).
@@ -377,7 +377,7 @@ No SWT automation required for v1. Manual smoke: create mapping, preview, select
 - New `docs/record-definition-ddl.adoc` (transform is currently only mentioned in passing) **or** a section under catalog transform docs — include the mapping selector.
 - `docs/ai-file-schemas/metadata/target-type-mapping.md` (+ list in that README).
 - `docs/plans/target-type-mappings-plan.md` — copy of this plan after approval.
-- Help markdown under `src/main/resources/org/apache/hop/datavault/hopgui/help/`.
+- Help markdown under `src/main/resources/org/hopper/edw/datavault/hopgui/help/`.
 - `CHANGELOG.md` Unreleased.
 
 Do **not** add a mapping to `retail-example` or `integration-tests` project metadata unless the new suite needs it — auto-match would change existing vault DDL goldens.

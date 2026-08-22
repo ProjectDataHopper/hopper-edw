@@ -29,11 +29,11 @@ flowchart LR
 
 | Asset | Location | Reuse for |
 |-------|----------|-----------|
-| Catalog `DV_SOURCE` tree + import | [`DataCatalogPerspective.java`](../../src/main/java/org/apache/hop/catalog/hopgui/perspective/DataCatalogPerspective.java) | Source-first navigation root |
-| Reverse usage index | [`SourceUsageIndexBuilder.java`](../../src/main/java/org/apache/hop/datavault/resourcedefinition/SourceUsageIndexBuilder.java) | "This source feeds hub X, sat Y" |
-| Source→target validation | [`DvFieldMappingValidationSupport.java`](../../src/main/java/org/apache/hop/datavault/metadata/DvFieldMappingValidationSupport.java) | Coverage / completeness signals |
-| Explicit mapping grid + **Suggest mappings** | [`HopGuiBvScd2TableDialog.java`](../../src/main/java/org/apache/hop/datavault/hopgui/file/businessvault/HopGuiBvScd2TableDialog.java) | Proven pattern to port to raw DV |
-| AI proposals (batch review, not steps) | [`DvAiAdvisorDialog.java`](../../src/main/java/org/apache/hop/datavault/hopgui/ai/DvAiAdvisorDialog.java) | Advisory overlay, not primary path |
+| Catalog `DV_SOURCE` tree + import | [`DataCatalogPerspective.java`](../../src/main/java/org/hopper/edw/catalog/hopgui/perspective/DataCatalogPerspective.java) | Source-first navigation root |
+| Reverse usage index | [`SourceUsageIndexBuilder.java`](../../src/main/java/org/hopper/edw/datavault/resourcedefinition/SourceUsageIndexBuilder.java) | "This source feeds hub X, sat Y" |
+| Source→target validation | [`DvFieldMappingValidationSupport.java`](../../src/main/java/org/hopper/edw/datavault/metadata/DvFieldMappingValidationSupport.java) | Coverage / completeness signals |
+| Explicit mapping grid + **Suggest mappings** | [`HopGuiBvScd2TableDialog.java`](../../src/main/java/org/hopper/edw/datavault/hopgui/file/businessvault/HopGuiBvScd2TableDialog.java) | Proven pattern to port to raw DV |
+| AI proposals (batch review, not steps) | [`DvAiAdvisorDialog.java`](../../src/main/java/org/hopper/edw/datavault/hopgui/ai/DvAiAdvisorDialog.java) | Advisory overlay, not primary path |
 | Load from source | Hub/Sat dialogs | Bulk seeding inside target-first editors |
 
 The BV SCD2 dialog already shows the richer interaction users expect: **Source field | Target field** columns plus one-click suggestions. Raw DV hub/satellite dialogs are asymmetric (target-first, implicit naming).
@@ -283,13 +283,13 @@ flowchart TB
 2. **Port Suggest mappings** from BV SCD2 to Hub Keys and Satellite Attributes grids (explicit `source_field | target_field` columns).
 3. **Deep links** from coach items → correct dialog tab (Record sources, Keys, etc.).
 
-Files to extend: [`DvHubDialog.java`](../../src/main/java/org/apache/hop/datavault/hopgui/file/vault/DvHubDialog.java), [`DvSatelliteDialog.java`](../../src/main/java/org/apache/hop/datavault/hopgui/file/vault/DvSatelliteDialog.java), [`HopGuiVaultGraph.java`](../../src/main/java/org/apache/hop/datavault/hopgui/file/vault/HopGuiVaultGraph.java).
+Files to extend: [`DvHubDialog.java`](../../src/main/java/org/hopper/edw/datavault/hopgui/file/vault/DvHubDialog.java), [`DvSatelliteDialog.java`](../../src/main/java/org/hopper/edw/datavault/hopgui/file/vault/DvSatelliteDialog.java), [`HopGuiVaultGraph.java`](../../src/main/java/org/hopper/edw/datavault/hopgui/file/vault/HopGuiVaultGraph.java).
 
 ### Phase 2 — Source-first lens (primary alternative to wizard)
 
 4. New **Mapping perspective** with **Coverage Matrix** default view and optional **Source tree** drill-down.
 5. Cell/popover editors write through to existing metadata types (`BusinessKey`, `SatelliteAttribute`, `DvLinkHubSource`).
-6. Reuse [`SourceUsageIndexBuilder`](../../src/main/java/org/apache/hop/datavault/resourcedefinition/SourceUsageIndexBuilder.java) for row status and navigation into vault dialogs.
+6. Reuse [`SourceUsageIndexBuilder`](../../src/main/java/org/hopper/edw/datavault/resourcedefinition/SourceUsageIndexBuilder.java) for row status and navigation into vault dialogs.
 
 ### Phase 3 — Onboarding acceleration (not a wizard)
 
@@ -323,7 +323,7 @@ No UI pattern needs its own ad-hoc guessing logic.
 
 ## Copy and terminology (reduce "record source" confusion)
 
-The hub help doc already documents three meanings of "record source" ([`dv-hub-dialog.md`](../../src/main/resources/org/apache/hop/datavault/hopgui/help/dv-hub-dialog.md)). In source-first views, use distinct labels:
+The hub help doc already documents three meanings of "record source" ([`dv-hub-dialog.md`](../../src/main/resources/org/hopper/edw/datavault/hopgui/help/dv-hub-dialog.md)). In source-first views, use distinct labels:
 
 - **Feed** (catalog `DV_SOURCE`)
 - **Lineage value** (indicator / indicator field)

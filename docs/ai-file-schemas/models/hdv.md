@@ -1,7 +1,7 @@
 # `.hdv` — Raw Data Vault model
 
 **Root element:** `<data-vault-model>`  
-**Java:** `org.apache.hop.datavault.metadata.DataVaultModel`  
+**Java:** `org.hopper.edw.datavault.metadata.DataVaultModel`  
 **Schema:** [hdv.xsd](hdv.xsd) · **Excerpt:** [../samples/hdv-excerpt.xml](../samples/hdv-excerpt.xml)
 
 ## Purpose

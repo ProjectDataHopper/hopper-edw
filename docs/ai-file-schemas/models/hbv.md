@@ -1,7 +1,7 @@
 # `.hbv` — Business Vault model
 
 **Root element:** `<business-vault-model>`  
-**Java:** `org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel`  
+**Java:** `org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel`  
 **Schema:** [hbv.xsd](hbv.xsd) · **Excerpt:** [../samples/hbv-excerpt.xml](../samples/hbv-excerpt.xml)
 
 ## Purpose

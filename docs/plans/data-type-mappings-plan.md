@@ -111,7 +111,7 @@ Same tab pattern later on catalog `DV_SOURCE` editors (phase 2) for non-HSM sour
 
 ### 3.1 New project metadata: `DataTypeMappingMeta`
 
-Package: `org.apache.hop.datavault.metadata.datatypemapping` (or `…metadata.mapping`)
+Package: `org.hopper.edw.datavault.metadata.datatypemapping` (or `…metadata.mapping`)
 
 ```
 @HopMetadata(key = "data-type-mapping", …)
@@ -541,7 +541,7 @@ flowchart TB
 ## 14. Implementation order (when leaving plan mode)
 
 1. Confirm open decisions above (especially catalog conversion storage + merge semantics).  
-2. Implement Phase A in `src/main/java/org/apache/hop/datavault/metadata/datatypemapping/`.  
+2. Implement Phase A in `src/main/java/org/hopper/edw/datavault/metadata/datatypemapping/`.  
 3. Phase B GUI shared tab.  
 4. Phase C publishers + `DataTypeMappingPipelineSupport` + tests.  
 5. Docs + retail example profile.  

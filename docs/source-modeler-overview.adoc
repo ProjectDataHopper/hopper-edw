@@ -190,7 +190,7 @@ The transform plans with Calcite (same engine as Free SQL on the source query di
 ==== Local (in-process Hop)
 
 * URL: `jdbc:hop-hsm:file=/path/to/model.hsm` (optional `;rowLimit=N`)
-* Driver: `org.apache.hop.datavault.virtualization.jdbc.HopSourceModelJdbcDriver`
+* Driver: `org.hopper.edw.datavault.virtualization.jdbc.HopSourceModelJdbcDriver`
 * Requires full Hop + plugin on the classpath (GUI / CLI / embedded)
 
 ==== Remote Hop Server (thin client)
@@ -210,7 +210,7 @@ With Data Hopper EDW installed, create a connection of type **Apache Hop Source 
 | Username / password | Hop Server credentials |
 |===
 
-The driver class is `org.apache.hop.hsm.jdbc.HopHsmJdbcDriver`. The thin client jar is shipped under `plugins/misc/datavault/lib/` so **Table input**, Explore database, and other Hop database consumers can use the connection without a separate driver install.
+The driver class is `org.hopper.edw.hsm.jdbc.HopHsmJdbcDriver`. The thin client jar is shipped under `plugins/misc/datavault/lib/` so **Table input**, Explore database, and other Hop database consumers can use the connection without a separate driver install.
 
 ===== 1. Create a Source model service (Hop)
 
@@ -242,7 +242,7 @@ In DBeaver: **Database → Driver Manager → New**, then:
 
 | Driver Name | e.g. `Apache Hop Source Model` |
 | Driver Type | Generic |
-| Class Name | `org.apache.hop.hsm.jdbc.HopHsmJdbcDriver` |
+| Class Name | `org.hopper.edw.hsm.jdbc.HopHsmJdbcDriver` |
 | URL Template | `jdbc:hop-hsm://{username}:{password}@{host}:{port}/{database}` |
 |===
 

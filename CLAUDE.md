@@ -84,9 +84,9 @@ Do **not** “fix” Hop core inside this repo. Core Hop changes belong in **apa
 
 | Path | Role |
 |------|------|
-| `src/main/java/org/apache/hop/datavault/` | Models, workflow actions, GUI, lineage, metrics, AI, transforms |
-| `src/main/java/org/apache/hop/catalog/` | Data catalog (record definitions, validation, GUI) |
-| `src/main/java/org/apache/hop/quality/` | Data quality rules, gates, profiling |
+| `src/main/java/org/hopper/edw/datavault/` | Models, workflow actions, GUI, lineage, metrics, AI, transforms |
+| `src/main/java/org/hopper/edw/catalog/` | Data catalog (record definitions, validation, GUI) |
+| `src/main/java/org/hopper/edw/quality/` | Data quality rules, gates, profiling |
 | `src/main/resources/` | i18n `messages_*.properties`, SVG icons, `version.xml`, `dependencies.xml`, AI prompts |
 | `src/test/java/` | JUnit 5 unit tests |
 | `integration-tests/` | Golden-dataset regression suites (Docker) |
@@ -187,7 +187,7 @@ These are easy for agents to violate:
 4. **i18n** — UI strings belong in package `messages/messages_*.properties` and must be **properly escaped** for Java Properties (`=`, `:`, spaces, newlines, unicode). Use the existing BaseMessages / key patterns for that package.
 5. **License headers** — Spotless injects the i-Bridge bv Apache-2.0 header on Java; Apache RAT enforces headers on most source/text. New `.java` / `.sh` (and many other text files) need headers. `docs/`, many `integration-tests/**` fixtures, models (`.hdv`/`.hbv`/`.hdm`), and JSON are largely excluded (see `pom.xml` RAT config). Header template: `license-header.txt`.
 6. **Formatting** — Google Java Format via Spotless (`mvn spotless:apply` before commit).
-7. **Package placement** — Put new code under `org.apache.hop.datavault`, `.catalog`, or `.quality`, following existing layering (`metadata`, `hopgui`, `workflow/actions`, `transform`, services). Mirror Hop patterns: `*Meta` + dialog/editor; transforms often `*Meta` / `*Data` / `*`; actions under `.../workflow/actions/...`.
+7. **Package placement** — Put new code under `org.hopper.edw.datavault`, `.catalog`, or `.quality`, following existing layering (`metadata`, `hopgui`, `workflow/actions`, `transform`, services). Mirror Hop patterns: `*Meta` + dialog/editor; transforms often `*Meta` / `*Data` / `*`; actions under `.../workflow/actions/...`.
 8. **Plugin isolation** — Treat classloaders carefully. The assembly deliberately bundles selected third-party libs (ELK, CommonMark, Iceberg, some Hop actions). Prefer `provided` for Hop itself.
 
 ## Anti-patterns (do not)

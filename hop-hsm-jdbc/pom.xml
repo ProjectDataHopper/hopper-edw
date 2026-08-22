@@ -68,7 +68,7 @@
         <configuration>
           <archive>
             <manifestEntries>
-              <Automatic-Module-Name>org.apache.hop.hsm.jdbc</Automatic-Module-Name>
+              <Automatic-Module-Name>org.hopper.edw.hsm.jdbc</Automatic-Module-Name>
               <Implementation-Title>Data Hopper Source Model JDBC</Implementation-Title>
               <Implementation-Version>${project.version}</Implementation-Version>
             </manifestEntries>

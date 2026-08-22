@@ -25,4 +25,4 @@ CP_FILE="${REPO_HOME}/target/migrate-sources-cp.txt"
 cd "${REPO_HOME}"
 mvn -q compile dependency:build-classpath -Dmdep.outputFile="${CP_FILE}"
 java -cp "target/classes:$(cat "${CP_FILE}")" \
-  org.apache.hop.datavault.catalog.DvLegacySourceMigrator "${PROJECT_HOME}" local-catalog
+  org.hopper.edw.datavault.catalog.DvLegacySourceMigrator "${PROJECT_HOME}" local-catalog

@@ -1,6 +1,6 @@
 # `metadata/data-catalog` — Data catalog connection
 
-**Java:** `org.apache.hop.catalog.metadata.DataCatalogMeta`  
+**Java:** `org.hopper.edw.catalog.metadata.DataCatalogMeta`  
 **Schema:** [data-catalog.schema.json](data-catalog.schema.json)  
 **Example:** `retail-example/metadata/data-catalog/local-catalog.json`
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   Relaxed structural schema for Business Vault .hbv files (AI guidance).
-  Source of truth: org.apache.hop.datavault.metadata.businessvault.BusinessVaultModel
+  Source of truth: org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel
 -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
 

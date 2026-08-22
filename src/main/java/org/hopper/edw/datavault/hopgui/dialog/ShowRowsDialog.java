@@ -1,0 +1,252 @@
+/*
+ * Copyright 2026 i-Bridge bv
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.hopper.edw.datavault.hopgui.dialog;
+
+import java.util.List;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.hop.core.Const;
+import org.apache.hop.core.config.HopConfig;
+import org.apache.hop.core.exception.HopValueException;
+import org.apache.hop.core.logging.LogChannel;
+import org.apache.hop.core.row.IRowMeta;
+import org.apache.hop.core.row.IValueMeta;
+import org.apache.hop.core.util.Utils;
+import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.ui.core.PropsUi;
+import org.apache.hop.ui.core.dialog.PreviewRowsDialog;
+import org.apache.hop.ui.core.gui.GuiResource;
+import org.apache.hop.ui.core.gui.WindowProperty;
+import org.apache.hop.ui.core.widget.ColumnInfo;
+import org.apache.hop.ui.core.widget.TableView;
+import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TableItem;
+
+/**
+ * Read-only row viewer with a title and header message; no action buttons.
+ *
+ * <p>Binary fields are formatted like Hop's {@link PreviewRowsDialog}: hexadecimal by default, or
+ * via {@link IValueMeta#getString(Object)} when system variable {@code
+ * HOP_BINARY_FIELDS_AVOID_HEX_PREVIEW} is true.
+ */
+public final class ShowRowsDialog {
+
+  private static final Class<?> PKG = ShowRowsDialog.class;
+
+  private static final int MAX_BINARY_STRING_PREVIEW_SIZE =
+      PreviewRowsDialog.MAX_BINARY_STRING_PREVIEW_SIZE;
+
+  private static final boolean AVOID_BINARY_IN_HEX =
+      Const.toBoolean(
+          HopConfig.readStringVariable(Const.HOP_BINARY_FIELDS_AVOID_HEX_PREVIEW, "false"));
+
+  private final Shell parentShell;
+  private final IVariables variables;
+  private final String title;
+  private final String message;
+  private final IRowMeta rowMeta;
+  private final List<Object[]> rows;
+
+  private Shell shell;
+  private TableView tableView;
+  private int lineNr;
+
+  public ShowRowsDialog(
+      Shell parent,
+      IVariables variables,
+      String title,
+      String message,
+      IRowMeta rowMeta,
+      List<Object[]> rows) {
+    this.parentShell = parent;
+    this.variables = variables;
+    this.title = title;
+    this.message = message;
+    this.rowMeta = rowMeta;
+    this.rows = rows;
+  }
+
+  public void open() {
+    if (parentShell == null || parentShell.isDisposed()) {
+      return;
+    }
+    if (rowMeta == null || Utils.isEmpty(rows)) {
+      MessageBox messageBox =
+          new MessageBox(parentShell, SWT.OK | SWT.ICON_INFORMATION | SWT.APPLICATION_MODAL);
+      messageBox.setText(Utils.isEmpty(title) ? "" : title);
+      messageBox.setMessage(BaseMessages.getString(PKG, "ShowRowsDialog.NoRows.Message"));
+      messageBox.open();
+      return;
+    }
+
+    shell = new Shell(parentShell, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MAX | SWT.MIN);
+    PropsUi.setLook(shell);
+    shell.setImage(GuiResource.getInstance().getImageHopUi());
+    shell.setText(Utils.isEmpty(title) ? "" : title);
+    shell.setLayout(new FormLayout());
+    shell.addListener(SWT.Close, event -> saveWindowProperty());
+
+    int margin = PropsUi.getMargin();
+    Label messageLabel = new Label(shell, SWT.LEFT);
+    messageLabel.setText(Utils.isEmpty(message) ? "" : message);
+    PropsUi.setLook(messageLabel);
+    FormData fdMessage = new FormData();
+    fdMessage.left = new FormAttachment(0, 0);
+    fdMessage.right = new FormAttachment(100, 0);
+    fdMessage.top = new FormAttachment(0, margin);
+    messageLabel.setLayoutData(fdMessage);
+
+    tableView = buildTableView(margin, messageLabel);
+    populateRows();
+
+    BaseTransformDialog.setSize(shell);
+    Shell dialogShell = shell;
+    dialogShell.open();
+
+    Display display = parentShell.getDisplay();
+    while (dialogShell != null && !dialogShell.isDisposed()) {
+      if (display == null || display.isDisposed()) {
+        break;
+      }
+      if (!display.readAndDispatch()) {
+        display.sleep();
+      }
+    }
+  }
+
+  private TableView buildTableView(int margin, Label messageLabel) {
+    ColumnInfo[] columns = new ColumnInfo[rowMeta.size()];
+    for (int i = 0; i < rowMeta.size(); i++) {
+      IValueMeta valueMeta = rowMeta.getValueMeta(i);
+      columns[i] =
+          new ColumnInfo(valueMeta.getName(), ColumnInfo.COLUMN_TYPE_TEXT, valueMeta.isNumeric());
+      columns[i].setToolTip(valueMeta.toStringMeta());
+      columns[i].setValueMeta(valueMeta);
+      columns[i].setImage(GuiResource.getInstance().getImage(valueMeta));
+      columns[i].setReadOnly(true);
+    }
+
+    TableView view =
+        new TableView(
+            variables,
+            shell,
+            SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI,
+            columns,
+            0,
+            null,
+            PropsUi.getInstance());
+    view.setShowingBlueNullValues(true);
+    view.setSortable(true);
+
+    FormData fdTable = new FormData();
+    fdTable.left = new FormAttachment(0, 0);
+    fdTable.top = new FormAttachment(messageLabel, margin);
+    fdTable.right = new FormAttachment(100, 0);
+    fdTable.bottom = new FormAttachment(100, -margin);
+    view.setLayoutData(fdTable);
+    return view;
+  }
+
+  private void populateRows() {
+    lineNr = 0;
+    for (int i = 0; i < rows.size(); i++) {
+      TableItem item;
+      if (i == 0) {
+        item = tableView.table.getItem(0);
+      } else {
+        item = new TableItem(tableView.table, SWT.NONE);
+      }
+      fillRow(item, rows.get(i));
+    }
+    if (!tableView.isDisposed()) {
+      // Cap column width for wide preview grids (optimizeTableView uses unbounded optWidth).
+      tableView.removeEmptyRows();
+      tableView.setRowNums();
+      tableView.optWidth(true, 200);
+    }
+  }
+
+  private void fillRow(TableItem item, Object[] row) {
+    if (row == null) {
+      return;
+    }
+
+    lineNr++;
+    String rowNumber;
+    try {
+      rowNumber = tableView.getNumberColumn().getValueMeta().getString((long) lineNr);
+    } catch (Exception e) {
+      rowNumber = Integer.toString(lineNr);
+    }
+    item.setText(0, rowNumber);
+
+    for (int column = 0; column < rowMeta.size(); column++) {
+      IValueMeta valueMeta = rowMeta.getValueMeta(column);
+      String displayValue;
+      try {
+        displayValue = formatCellValue(valueMeta, row[column]);
+      } catch (HopValueException | ArrayIndexOutOfBoundsException e) {
+        new LogChannel(PKG).logError("Unable to format preview cell", e);
+        displayValue = null;
+      }
+
+      if (displayValue != null) {
+        item.setText(column + 1, TableView.formatCellValueForDisplay(displayValue));
+        item.setForeground(column + 1, GuiResource.getInstance().getColorBlack());
+      } else {
+        item.setText(column + 1, "<null>");
+        item.setForeground(column + 1, GuiResource.getInstance().getColorBlue());
+      }
+    }
+  }
+
+  /**
+   * Formats a cell for preview display. Binary values use hex encoding unless {@code
+   * HOP_BINARY_FIELDS_AVOID_HEX_PREVIEW} is enabled (same contract as Hop GUI preview dialogs).
+   */
+  static String formatCellValue(IValueMeta valueMeta, Object value) throws HopValueException {
+    if (valueMeta == null) {
+      return null;
+    }
+    if (valueMeta.isBinary()) {
+      byte[] bytes = valueMeta.getBinary(value);
+      if (bytes == null) {
+        return null;
+      }
+      String show = AVOID_BINARY_IN_HEX ? valueMeta.getString(bytes) : Hex.encodeHexString(bytes);
+      if (show != null && show.length() > MAX_BINARY_STRING_PREVIEW_SIZE) {
+        return show.substring(0, MAX_BINARY_STRING_PREVIEW_SIZE);
+      }
+      return show;
+    }
+    return valueMeta.getString(value);
+  }
+
+  private void saveWindowProperty() {
+    if (shell == null || shell.isDisposed()) {
+      return;
+    }
+    PropsUi.getInstance().setScreen(new WindowProperty(shell));
+  }
+}

@@ -1,0 +1,896 @@
+/*
+ * Copyright 2026 i-Bridge bv
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.hopper.edw.datavault.transform.junkdimension;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import org.apache.hop.core.Const;
+import org.apache.hop.core.RowMetaAndData;
+import org.apache.hop.core.SqlStatement;
+import org.apache.hop.core.database.Database;
+import org.apache.hop.core.database.DatabaseMeta;
+import org.apache.hop.core.exception.HopConfigException;
+import org.apache.hop.core.exception.HopDatabaseException;
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.exception.HopTransformException;
+import org.apache.hop.core.exception.HopValueException;
+import org.apache.hop.core.row.IRowMeta;
+import org.apache.hop.core.row.IValueMeta;
+import org.apache.hop.core.row.RowMeta;
+import org.apache.hop.core.row.value.ValueMetaDate;
+import org.apache.hop.core.row.value.ValueMetaInteger;
+import org.apache.hop.core.row.value.ValueMetaString;
+import org.apache.hop.core.util.Utils;
+import org.hopper.edw.datavault.metadata.dimensional.DmJunkHashCodeStrategy;
+import org.hopper.edw.datavault.metadata.dimensional.DmJunkSurrogateKeyStrategy;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.pipeline.Pipeline;
+import org.apache.hop.pipeline.PipelineMeta;
+import org.apache.hop.pipeline.transform.BaseTransform;
+import org.apache.hop.pipeline.transform.TransformMeta;
+import org.apache.hop.pipeline.transforms.combinationlookup.CFields;
+import org.apache.hop.pipeline.transforms.combinationlookup.KeyField;
+import org.apache.hop.pipeline.transforms.combinationlookup.ReturnFields;
+
+/**
+ * Manages or looks up information in a Type 1 or junk dimension. <br>
+ * 1) Lookup combination field1..n in a dimension <br>
+ * 2) If this combination exists, return technical key <br>
+ * 3) If this combination doesn't exist, insert &amp; return technical key <br>
+ * 4) if replace is Y, remove all key fields from output.
+ */
+public class JunkDimension extends BaseTransform<JunkDimensionMeta, JunkDimensionData> {
+
+  private static final Class<?> PKG = JunkDimensionMeta.class;
+
+  private static final int CREATION_METHOD_AUTOINC = 1;
+  private static final int CREATION_METHOD_SEQUENCE = 2;
+  private static final int CREATION_METHOD_TABLEMAX = 3;
+  public static final String CONST_UNABLE_TO_RETRIEVE_AUTO_INCREMENT_OF_COMBI_INSERT_KEY =
+      "Unable to retrieve auto-increment of combi insert key : ";
+  public static final String CONST_COMBINATION_LOOKUP_LOG_UNEXPECTED_ERROR =
+      "JunkDimension.Log.UnexpectedError";
+
+  private int techKeyCreation;
+
+  public JunkDimension(
+      TransformMeta transformMeta,
+      JunkDimensionMeta meta,
+      JunkDimensionData data,
+      int copyNr,
+      PipelineMeta pipelineMeta,
+      Pipeline pipeline) {
+    super(transformMeta, meta, data, copyNr, pipelineMeta, pipeline);
+  }
+
+  private void setTechKeyCreation(int method) {
+    techKeyCreation = method;
+  }
+
+  private int getTechKeyCreation() {
+    return techKeyCreation;
+  }
+
+  private void determineTechKeyCreation() {
+    String keyCreation = meta.getFields().getReturnFields().getTechKeyCreation();
+    DatabaseMeta databaseMeta = getPipelineMeta().findDatabase(meta.getConnectionName(), variables);
+    if (databaseMeta.supportsAutoinc()
+        && JunkDimensionMeta.CREATION_METHOD_AUTOINC.equals(keyCreation)) {
+      setTechKeyCreation(CREATION_METHOD_AUTOINC);
+    } else if (databaseMeta.supportsSequences()
+        && JunkDimensionMeta.CREATION_METHOD_SEQUENCE.equals(keyCreation)) {
+      setTechKeyCreation(CREATION_METHOD_SEQUENCE);
+    } else {
+      setTechKeyCreation(CREATION_METHOD_TABLEMAX);
+    }
+  }
+
+  private Object lookupInCache(IRowMeta rowMeta, Object[] row) {
+    // Short circuit if cache is disabled.
+    if (meta.getCacheSize() == -1) {
+      return null;
+    }
+
+    // try to find the row in the cache...
+    //
+    return data.cache.get(new RowMetaAndData(rowMeta, row));
+  }
+
+  /**
+   * Adds a row to the cache In case we are doing updates, we need to store the complete rows from
+   * the database. These are the values we need to store
+   *
+   * <p>Key: - natural key fields Value: - Technical key - lookup fields / extra fields (allows us
+   * to compare or retrieve) - Date_from - Date_to
+   *
+   * @param rowMeta
+   * @param row
+   * @param tk
+   * @throws HopValueException
+   */
+  private void addToCache(IRowMeta rowMeta, Object[] row, Object tk) throws HopValueException {
+    // Short circuit if cache is disabled.
+    if (meta.getCacheSize() == -1) {
+      return;
+    }
+
+    // store it in the cache if needed.
+    data.cache.put(new RowMetaAndData(rowMeta, row), tk);
+
+    // check if the size is not too big...
+    // Allow for a buffer overrun of 20% and then remove those 20% in one go.
+    // Just to keep performance in track.
+    //
+    int tenPercent = meta.getCacheSize() / 10;
+    if (!meta.usesStringTechnicalKey()
+        && meta.getCacheSize() > 0
+        && data.cache.size() > meta.getCacheSize() + tenPercent) {
+      // Which cache entries do we delete here?
+      // We delete those with the lowest technical key...
+      // Those would arguably be the "oldest" dimension entries.
+      // Oh well... Nothing is going to be perfect here...
+      //
+      // Getting the lowest 20% requires some kind of sorting algorithm and I'm not sure we want to
+      // do that.
+      // Sorting is slow and even in the best case situation we need to do 2 passes over the cache
+      // entries...
+      //
+      // Perhaps we should get 20% random values and delete everything below the lowest but one TK.
+      //
+      List<RowMetaAndData> keys = new ArrayList<>(data.cache.keySet());
+      int sizeBefore = keys.size();
+      List<Long> samples = new ArrayList<>();
+
+      // Take 10 sample technical keys....
+      int transformsize = keys.size() / 5;
+      if (transformsize < 1) {
+        transformsize = 1; // make sure we have no endless loop
+      }
+      for (int i = 0; i < keys.size(); i += transformsize) {
+        RowMetaAndData key = keys.get(i);
+        Object value = data.cache.get(key);
+        if (value instanceof Long longValue) {
+          samples.add(longValue);
+        }
+      }
+      // Sort these 5 elements...
+      Collections.sort(samples);
+
+      // What is the smallest?
+      // Take the second, not the fist in the list, otherwise we would be removing a single entry =
+      // not good.
+      if (samples.size() > 1) {
+        data.smallestCacheKey = samples.get(1);
+      } else { // except when there is only one sample
+        data.smallestCacheKey = samples.get(0);
+      }
+
+      // Remove anything in the cache <= smallest.
+      // This makes it almost single pass...
+      // This algorithm is not 100% correct, but I guess it beats sorting the whole cache all the
+      // time.
+      //
+      for (RowMetaAndData key : keys) {
+        Object value = data.cache.get(key);
+        if (value instanceof Long longValue && longValue <= data.smallestCacheKey) {
+          data.cache.remove(key); // this one has to go.
+        }
+      }
+
+      int sizeAfter = data.cache.size();
+      if (isDetailed()) {
+        logDetailed("Reduced the lookup cache from " + sizeBefore + " to " + sizeAfter + " rows.");
+      }
+    }
+
+    if (isRowLevel()) {
+      logRowlevel("Cache store: key=" + rowMeta.getString(row) + "    key=" + tk);
+    }
+  }
+
+  protected boolean isAutoIncrement() {
+    return techKeyCreation == CREATION_METHOD_AUTOINC;
+  }
+
+  private Object[] lookupValues(IRowMeta rowMeta, Object[] row) throws HopException {
+    Object valKey = null;
+    Object valHash = null;
+    Object[] hashRow = null;
+    CFields fields = meta.getFields();
+    List<KeyField> keyFields = fields.getKeyFields();
+    ReturnFields returnFields = fields.getReturnFields();
+
+    Object[] lookupRow = new Object[data.lookupRowMeta.size()];
+    int lookupIndex = 0;
+
+    if (meta.isUseHash() || meta.getCacheSize() >= 0) {
+      hashRow = new Object[data.hashRowMeta.size()];
+      for (int i = 0; i < keyFields.size(); i++) {
+        hashRow[i] = row[data.keynrs[i]];
+      }
+
+      DmJunkHashCodeStrategy hashStrategy = JunkDimensionHashSupport.resolveStrategy(meta);
+      if (hashStrategy.usesHashColumn()) {
+        valHash = JunkDimensionHashSupport.computeHash(hashStrategy, data.hashRowMeta, hashRow);
+        lookupRow[lookupIndex] = valHash;
+        lookupIndex++;
+      }
+    }
+
+    for (int i = 0; i < keyFields.size(); i++) {
+      // Determine the index of this Key Field in the row meta/data
+      int rowIndex = data.keynrs[i];
+      lookupRow[lookupIndex] = row[rowIndex]; // KEYi = ?
+      lookupIndex++;
+
+      DatabaseMeta databaseMeta =
+          getPipelineMeta().findDatabase(meta.getConnectionName(), variables);
+      if (databaseMeta.requiresCastToVariousForIsNull()
+          && rowMeta.getValueMeta(rowIndex).getType() == IValueMeta.TYPE_STRING) {
+        lookupRow[lookupIndex] =
+            rowMeta.getValueMeta(rowIndex).isNull(row[rowIndex]) ? null : "NotNull"; // KEYi IS
+        // NULL or
+        // ? IS
+        // NULL
+      } else {
+        lookupRow[lookupIndex] = row[data.keynrs[i]]; // KEYi IS NULL or ? IS NULL
+      }
+      lookupIndex++;
+    }
+
+    // Before doing the actual lookup in the database, see if it's not in the cache...
+    valKey = lookupInCache(data.hashRowMeta, hashRow);
+    if (valKey == null) {
+      data.db.setValues(data.lookupRowMeta, lookupRow, data.prepStatementLookup);
+      Object[] add = data.db.getLookup(data.prepStatementLookup);
+      incrementLinesInput();
+
+      if (add == null) { // The dimension entry was not found, we need to add it!
+        DmJunkSurrogateKeyStrategy surrogateStrategy = meta.resolveJunkSurrogateKeyStrategy();
+        if (surrogateStrategy == DmJunkSurrogateKeyStrategy.USE_SOURCE_FIELD
+            || surrogateStrategy == DmJunkSurrogateKeyStrategy.COMPUTE_HASH_KEY) {
+          valKey =
+              JunkDimensionHashSupport.computeTechnicalKey(
+                  surrogateStrategy,
+                  JunkDimensionHashSupport.resolveStrategy(meta),
+                  rowMeta,
+                  row,
+                  data.keynrs,
+                  meta.getSurrogateKeySourceField());
+        } else {
+          switch (getTechKeyCreation()) {
+            case CREATION_METHOD_TABLEMAX:
+              valKey =
+                  data.db.getNextValue(
+                      data.realSchemaName, data.realTableName, returnFields.getTechnicalKeyField());
+              break;
+            case CREATION_METHOD_AUTOINC:
+              valKey = 0L;
+              break;
+            case CREATION_METHOD_SEQUENCE:
+              valKey =
+                  data.db.getNextSequenceValue(
+                      data.realSchemaName,
+                      fields.getSequenceFrom(),
+                      returnFields.getTechnicalKeyField());
+              if (valKey != null && isRowLevel()) {
+                logRowlevel(
+                    BaseMessages.getString(PKG, "JunkDimension.Log.FoundNextSequenceValue")
+                        + valKey.toString());
+              }
+              break;
+            default:
+              break;
+          }
+        }
+
+        valKey = combiInsert(rowMeta, row, valKey, valHash);
+        incrementLinesOutput();
+
+        if (isRowLevel()) {
+          logRowlevel(
+              BaseMessages.getString(PKG, "JunkDimension.Log.AddedDimensionEntry") + valKey);
+        }
+
+        // Also store it in our Hashtable...
+        addToCache(data.hashRowMeta, hashRow, valKey);
+      } else {
+        // Entry already exists...
+        //
+        IRowMeta returnRowMeta = data.db.getReturnRowMeta();
+        IValueMeta returnValueMeta = returnRowMeta.getValueMeta(0);
+        if (returnValueMeta.isInteger()) {
+          valKey = returnRowMeta.getInteger(add, 0);
+        } else {
+          valKey = returnRowMeta.getString(add, 0);
+        }
+        addToCache(data.hashRowMeta, hashRow, valKey);
+      }
+    }
+
+    Object[] outputRow = new Object[data.outputRowMeta.size()];
+    int outputIndex = 0;
+
+    // See if we need to replace the fields with the technical key
+    if (meta.isReplaceFields()) {
+      for (int i = 0; i < rowMeta.size(); i++) {
+        if (!data.removeField[i]) {
+          outputRow[outputIndex] = row[i];
+          outputIndex++;
+        }
+      }
+    } else {
+      // Just copy the input row and add the technical key
+      for (outputIndex = 0; outputIndex < rowMeta.size(); outputIndex++) {
+        outputRow[outputIndex] = row[outputIndex];
+      }
+    }
+
+    // Add the technical key...
+    outputRow[outputIndex] = valKey;
+
+    return outputRow;
+  }
+
+  @Override
+  public boolean processRow() throws HopException {
+    Object[] r = getRow(); // Get row from input rowset & set row busy!
+    // if no more input to be expected set done
+    if (r == null) {
+      setOutputDone();
+      return false;
+    }
+
+    if (first) {
+      first = false;
+
+      data.outputRowMeta = getInputRowMeta().clone();
+      meta.getFields(data.outputRowMeta, getTransformName(), null, null, this, metadataProvider);
+
+      DatabaseMeta databaseMeta =
+          getPipelineMeta().findDatabase(meta.getConnectionName(), variables);
+      data.schemaTable =
+          databaseMeta.getQuotedSchemaTableCombination(
+              this, data.realSchemaName, data.realTableName);
+
+      determineTechKeyCreation();
+
+      List<KeyField> keyFields = meta.getFields().getKeyFields();
+
+      // The indexes of the key values...
+      //
+      data.keynrs = new int[keyFields.size()];
+
+      for (int i = 0; i < keyFields.size(); i++) {
+        KeyField keyField = keyFields.get(i);
+        data.keynrs[i] = getInputRowMeta().indexOfValue(keyField.getName());
+        if (data.keynrs[i] < 0) {
+          // couldn't find field!
+          throw new HopTransformException(
+              BaseMessages.getString(
+                  PKG, "JunkDimension.Exception.FieldNotFound", keyField.getName()));
+        }
+      }
+
+      // Determine for each input field if we want it removed or not.
+      //
+      data.removeField = new boolean[getInputRowMeta().size()];
+
+      // Sort lookup values keys so that we
+      //
+      for (int i = 0; i < getInputRowMeta().size(); i++) {
+        IValueMeta valueMeta = getInputRowMeta().getValueMeta(i);
+        // Is this one of the keys?
+        int idx = meta.getFields().indexOfKeyField(valueMeta.getName());
+        data.removeField[i] = idx >= 0;
+      }
+
+      // Determine the metadata row to calculate hashcodes.
+      //
+      data.hashRowMeta = new RowMeta();
+      for (int i = 0; i < meta.getFields().getKeyFields().size(); i++) {
+        data.hashRowMeta.addValueMeta(getInputRowMeta().getValueMeta(data.keynrs[i])); // KEYi = ?
+      }
+
+      ensureTargetTable(getInputRowMeta());
+      setCombiLookup(getInputRowMeta());
+      preloadCache(data.hashRowMeta);
+    }
+
+    try {
+      Object[] outputRow =
+          lookupValues(getInputRowMeta(), r); // add new values to the row in rowset[0].
+      putRow(data.outputRowMeta, outputRow); // copy row to output rowset(s)
+
+      if (checkFeedback(getLinesRead()) && isBasic()) {
+        logBasic(BaseMessages.getString(PKG, "JunkDimension.Log.LineNumber") + getLinesRead());
+      }
+    } catch (HopException e) {
+      if (getTransformMeta().isDoingErrorHandling()) {
+        putError(getInputRowMeta(), r, 1L, Const.getStackTracker(e), null, "CBL001");
+      } else {
+        logError(
+            BaseMessages.getString(PKG, "JunkDimension.Log.ErrorInTransformRunning")
+                + e.getMessage());
+        setErrors(1);
+        stopAll();
+        setOutputDone(); // signal end to receiver(s)
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private void ensureTargetTable(IRowMeta inputRowMeta) throws HopException {
+    SqlStatement sqlStatement =
+        meta.getSqlStatements(
+            variables, getPipelineMeta(), getTransformMeta(), inputRowMeta, metadataProvider);
+    if (sqlStatement.hasError()) {
+      throw new HopException(sqlStatement.getError());
+    }
+    if (!sqlStatement.hasSql()) {
+      return;
+    }
+    if (isBasic()) {
+      logBasic(
+          BaseMessages.getString(PKG, "JunkDimension.Log.EnsuringTargetTable", data.schemaTable));
+    }
+    data.db.execStatements(sqlStatement.getSql());
+  }
+
+  /**
+   * JunkDimension table: dimension table keys[]: which dim-fields do we use to look up key? retval:
+   * name of the key to return
+   */
+  public void setCombiLookup(IRowMeta inputRowMeta) throws HopDatabaseException {
+    DatabaseMeta databaseMeta = getPipelineMeta().findDatabase(meta.getConnectionName(), variables);
+    CFields fields = meta.getFields();
+    List<KeyField> keyFields = fields.getKeyFields();
+    ReturnFields returnFields = fields.getReturnFields();
+
+    String sql = "";
+    boolean comma;
+    data.lookupRowMeta = new RowMeta();
+
+    /*
+     * SELECT <retval> FROM <table> WHERE ( ( <key1> = ? ) OR ( <key1> IS NULL AND ? IS NULL ) ) AND ( ( <key2> = ? ) OR
+     * ( <key1> IS NULL AND ? IS NULL ) ) ...
+     *
+     * OR
+     *
+     * SELECT <retval> FROM <table> WHERE <crcfield> = ? AND ( ( <key1> = ? ) OR ( <key1> IS NULL AND ? IS NULL ) ) AND
+     * ( ( <key2> = ? ) OR ( <key1> IS NULL AND ? IS NULL ) ) ...
+     */
+
+    sql += "SELECT " + databaseMeta.quoteField(returnFields.getTechnicalKeyField()) + Const.CR;
+    sql += "FROM " + data.schemaTable + Const.CR;
+    sql += "WHERE ";
+    comma = false;
+
+    DmJunkHashCodeStrategy hashStrategy = JunkDimensionHashSupport.resolveStrategy(meta);
+    if (hashStrategy.usesHashColumn()) {
+      sql += databaseMeta.quoteField(meta.getHashField()) + " = ? " + Const.CR;
+      comma = true;
+      if (JunkDimensionHashSupport.usesStringHashColumn(hashStrategy)) {
+        data.lookupRowMeta.addValueMeta(new ValueMetaString(meta.getHashField()));
+      } else {
+        data.lookupRowMeta.addValueMeta(new ValueMetaInteger(meta.getHashField()));
+      }
+    } else {
+      sql += "( ( ";
+    }
+
+    for (int i = 0; i < keyFields.size(); i++) {
+      KeyField keyField = keyFields.get(i);
+      if (comma) {
+        sql += " AND ( ( ";
+      } else {
+        comma = true;
+      }
+      sql +=
+          databaseMeta.quoteField(keyField.getLookup())
+              + " = ? ) OR ( "
+              + databaseMeta.quoteField(keyField.getLookup());
+      data.lookupRowMeta.addValueMeta(inputRowMeta.getValueMeta(data.keynrs[i]));
+
+      sql += " IS NULL AND ";
+      if (databaseMeta.requiresCastToVariousForIsNull()) {
+        sql += "CAST(? AS VARCHAR(256)) IS NULL";
+      } else {
+        sql += "? IS NULL";
+      }
+      // Add the ValueMeta for the null check, BUT cloning needed.
+      // Otherwise the field gets renamed and gives problems when referenced by previous transforms.
+      data.lookupRowMeta.addValueMeta(inputRowMeta.getValueMeta(data.keynrs[i]).clone());
+
+      sql += " ) )";
+      sql += Const.CR;
+    }
+
+    try {
+      if (isDebug()) {
+        logDebug("preparing combi-lookup statement:" + Const.CR + sql);
+      }
+      data.prepStatementLookup =
+          data.db.getConnection().prepareStatement(databaseMeta.stripCR(sql));
+      if (databaseMeta.supportsSetMaxRows()) {
+        data.prepStatementLookup.setMaxRows(1); // alywas get only 1 line back!
+      }
+    } catch (SQLException ex) {
+      throw new HopDatabaseException("Unable to prepare combi-lookup statement", ex);
+    }
+  }
+
+  /** This inserts new record into a junk dimension */
+  public Object combiInsert(IRowMeta rowMeta, Object[] row, Object valKey, Object valCrc)
+      throws HopDatabaseException {
+    String debug = "Combination insert";
+    DatabaseMeta databaseMeta = getPipelineMeta().findDatabase(meta.getConnectionName(), variables);
+    CFields fields = meta.getFields();
+    List<KeyField> keyFields = fields.getKeyFields();
+    ReturnFields returnFields = fields.getReturnFields();
+    DmJunkHashCodeStrategy hashStrategy = JunkDimensionHashSupport.resolveStrategy(meta);
+
+    try {
+      if (data.prepStatementInsert == null) { // first time: construct prepared statement
+        debug = "First: construct prepared statement";
+
+        data.insertRowMeta = new RowMeta();
+
+        /*
+         * Construct the SQL statement...
+         *
+         * INSERT INTO d_test(keyfield, [crcfield,] keylookup[]) VALUES(val_key, [val_crc], row values with keynrs[])
+         */
+
+        String sql = "";
+        sql += "INSERT INTO " + data.schemaTable + ("( ");
+        boolean comma = false;
+
+        if (!isAutoIncrement()) {
+          sql += databaseMeta.quoteField(returnFields.getTechnicalKeyField());
+          if (meta.usesStringTechnicalKey()) {
+            data.insertRowMeta.addValueMeta(
+                new ValueMetaString(returnFields.getTechnicalKeyField()));
+          } else {
+            data.insertRowMeta.addValueMeta(
+                new ValueMetaInteger(returnFields.getTechnicalKeyField()));
+          }
+          comma = true;
+        } else if (databaseMeta.needsPlaceHolder()) {
+          sql += "0"; // placeholder on informix! Will be replaced in table by real autoinc value.
+          data.insertRowMeta.addValueMeta(
+              new ValueMetaInteger(returnFields.getTechnicalKeyField()));
+          comma = true;
+        }
+
+        if (hashStrategy.usesHashColumn() && !meta.hashFieldSameAsTechnicalKey()) {
+          if (comma) {
+            sql += ", ";
+          }
+          sql += databaseMeta.quoteField(meta.getHashField());
+          if (JunkDimensionHashSupport.usesStringHashColumn(hashStrategy)) {
+            data.insertRowMeta.addValueMeta(new ValueMetaString(meta.getHashField()));
+          } else {
+            data.insertRowMeta.addValueMeta(new ValueMetaInteger(meta.getHashField()));
+          }
+          comma = true;
+        }
+
+        if (!Utils.isEmpty(returnFields.getLastUpdateField())) {
+          if (comma) {
+            sql += ", ";
+          }
+          sql += databaseMeta.quoteField(returnFields.getLastUpdateField());
+          data.insertRowMeta.addValueMeta(new ValueMetaDate(returnFields.getLastUpdateField()));
+          comma = true;
+        }
+
+        for (int i = 0; i < keyFields.size(); i++) {
+          KeyField keyField = keyFields.get(i);
+          if (comma) {
+            sql += ", ";
+          }
+          sql += databaseMeta.quoteField(keyField.getLookup());
+          data.insertRowMeta.addValueMeta(rowMeta.getValueMeta(data.keynrs[i]));
+          comma = true;
+        }
+
+        sql += ") VALUES (";
+
+        comma = false;
+
+        if (!isAutoIncrement()) {
+          sql += '?';
+          comma = true;
+        }
+        if (hashStrategy.usesHashColumn() && !meta.hashFieldSameAsTechnicalKey()) {
+          if (comma) {
+            sql += ',';
+          }
+          sql += '?';
+          comma = true;
+        }
+        if (!Utils.isEmpty(returnFields.getLastUpdateField())) {
+          if (comma) {
+            sql += ',';
+          }
+          sql += '?';
+          comma = true;
+        }
+
+        for (int i = 0; i < keyFields.size(); i++) {
+          if (comma) {
+            sql += ',';
+          } else {
+            comma = true;
+          }
+          sql += '?';
+        }
+
+        sql += " )";
+
+        String sqlStatement = sql;
+        try {
+          debug = "First: prepare statement";
+          if (isAutoIncrement() && databaseMeta.supportsAutoGeneratedKeys()) {
+            if (isDetailed()) {
+              logDetailed("SQL with return keys: " + sqlStatement);
+            }
+            data.prepStatementInsert =
+                data.db
+                    .getConnection()
+                    .prepareStatement(
+                        databaseMeta.stripCR(sqlStatement), Statement.RETURN_GENERATED_KEYS);
+          } else {
+            if (isDetailed()) {
+              logDetailed("SQL without return keys: " + sqlStatement);
+            }
+            data.prepStatementInsert =
+                data.db.getConnection().prepareStatement(databaseMeta.stripCR(sqlStatement));
+          }
+        } catch (Exception ex) {
+          throw new HopDatabaseException(
+              "Unable to prepare combi insert statement : " + Const.CR + sqlStatement, ex);
+        }
+      }
+
+      debug = "Create new insert row rins";
+      Object[] insertRow = new Object[data.insertRowMeta.size()];
+      int insertIndex = 0;
+
+      if (!isAutoIncrement()) {
+        insertRow[insertIndex] = valKey;
+        insertIndex++;
+      }
+      if (hashStrategy.usesHashColumn() && !meta.hashFieldSameAsTechnicalKey()) {
+        insertRow[insertIndex] = valCrc;
+        insertIndex++;
+      }
+      if (!Utils.isEmpty(returnFields.getLastUpdateField())) {
+        insertRow[insertIndex] = new Date();
+        insertIndex++;
+      }
+      for (int i = 0; i < data.keynrs.length; i++) {
+        insertRow[insertIndex] = row[data.keynrs[i]];
+        insertIndex++;
+      }
+
+      if (isRowLevel()) {
+        logRowlevel("rins=" + data.insertRowMeta.getString(insertRow));
+      }
+
+      debug = "Set values on insert";
+      // INSERT NEW VALUE!
+      data.db.setValues(data.insertRowMeta, insertRow, data.prepStatementInsert);
+
+      debug = "Insert row";
+      data.db.insertRow(data.prepStatementInsert);
+
+      debug = "Retrieve key";
+      if (isAutoIncrement() && databaseMeta.supportsAutoGeneratedKeys()) {
+        ResultSet keys = null;
+        try {
+          keys = data.prepStatementInsert.getGeneratedKeys(); // 1 key
+          if (keys.next()) {
+            valKey = keys.getLong(1);
+          } else {
+            throw new HopDatabaseException(
+                CONST_UNABLE_TO_RETRIEVE_AUTO_INCREMENT_OF_COMBI_INSERT_KEY
+                    + returnFields.getTechnicalKeyField()
+                    + ", no fields in resultset");
+          }
+        } catch (SQLException ex) {
+          throw new HopDatabaseException(
+              CONST_UNABLE_TO_RETRIEVE_AUTO_INCREMENT_OF_COMBI_INSERT_KEY
+                  + returnFields.getTechnicalKeyField(),
+              ex);
+        } finally {
+          try {
+            if (keys != null) {
+              keys.close();
+            }
+          } catch (SQLException ex) {
+            throw new HopDatabaseException(
+                CONST_UNABLE_TO_RETRIEVE_AUTO_INCREMENT_OF_COMBI_INSERT_KEY
+                    + returnFields.getTechnicalKeyField(),
+                ex);
+          }
+        }
+      }
+    } catch (Exception e) {
+      logError(Const.getStackTracker(e));
+      throw new HopDatabaseException(
+          "Unexpected error in combination insert in part [" + debug + "] : " + e.toString(), e);
+    }
+
+    return valKey;
+  }
+
+  @Override
+  public boolean init() {
+    if (super.init()) {
+      data.realSchemaName = resolve(meta.getSchemaName());
+      data.realTableName = resolve(meta.getTableName());
+
+      if (meta.getCacheSize() > 0) {
+        data.cache = HashMap.newHashMap((int) (meta.getCacheSize() * 1.5));
+      } else {
+        data.cache = new HashMap<>();
+      }
+      DatabaseMeta databaseMeta =
+          getPipelineMeta().findDatabase(meta.getConnectionName(), variables);
+      if (databaseMeta == null) {
+        logError(
+            BaseMessages.getString(
+                PKG, "JunkDimension.Init.ConnectionMissing", getTransformName()));
+        return false;
+      }
+      data.db = new Database(this, this, databaseMeta);
+      try {
+        data.db.connect();
+
+        if (isDetailed()) {
+          logDetailed(BaseMessages.getString(PKG, "JunkDimension.Log.ConnectedToDB"));
+        }
+        data.db.setCommit(meta.getCommitSize());
+
+        return true;
+      } catch (HopDatabaseException dbe) {
+        logError(
+            BaseMessages.getString(PKG, "JunkDimension.Log.UnableToConnectDB") + dbe.getMessage());
+      }
+    }
+    return false;
+  }
+
+  @Override
+  public void dispose() {
+    if (data.db != null) {
+      try {
+        if (!data.db.isAutoCommit()) {
+          if (getErrors() == 0) {
+            data.db.commit();
+          } else {
+            data.db.rollback();
+          }
+        }
+      } catch (HopDatabaseException e) {
+        logError(
+            BaseMessages.getString(PKG, CONST_COMBINATION_LOOKUP_LOG_UNEXPECTED_ERROR)
+                + " : "
+                + e.toString());
+      } finally {
+        data.db.disconnect();
+      }
+    }
+
+    super.dispose();
+  }
+
+  /**
+   * Preload the cache
+   *
+   * @param hashRowMeta The RowMeta of the hashRow
+   * @throws HopDatabaseException If something went wrong while selecting the values from the db
+   * @throws HopValueException If something went wrong while adding the data to the cache
+   * @throws HopConfigException If the transform configuration is incomplete
+   */
+  private void preloadCache(IRowMeta hashRowMeta)
+      throws HopDatabaseException, HopValueException, HopConfigException {
+    // fast exit if no preload cache or no cache
+    if (meta.isPreloadCache() && meta.getCacheSize() >= 0) {
+      if (hashRowMeta == null) {
+        throw new HopConfigException(
+            BaseMessages.getString(PKG, CONST_COMBINATION_LOOKUP_LOG_UNEXPECTED_ERROR));
+      }
+      DatabaseMeta databaseMeta =
+          getPipelineMeta().findDatabase(meta.getConnectionName(), variables);
+      if (databaseMeta == null) {
+        throw new HopConfigException(
+            BaseMessages.getString(PKG, CONST_COMBINATION_LOOKUP_LOG_UNEXPECTED_ERROR));
+      }
+      String lookupKeys = "";
+      String sql = "";
+      List<Object[]> cacheValues;
+
+      /* build SQl Statement to preload cache
+       *
+       * SELECT
+       * min(<retval>) as <retval>,
+       * key1,
+       * key2,
+       * key3
+       * FROM   <table>
+       *
+       * GROUP BY key1,
+       * key2,
+       * key3;
+       *
+       */
+
+      CFields fields = meta.getFields();
+      List<KeyField> keyFields = fields.getKeyFields();
+      ReturnFields returnFields = fields.getReturnFields();
+
+      // Build a string representation of the lookupKeys
+      for (int i = 0; i < keyFields.size(); i++) {
+        KeyField keyField = keyFields.get(i);
+        lookupKeys += databaseMeta.quoteField(keyField.getLookup());
+
+        // No comma after last field
+        if (i < keyFields.size() - 1) {
+          lookupKeys += "," + Const.CR;
+        }
+      }
+
+      // Use min in case of disambiguation
+      sql += "SELECT " + Const.CR;
+      sql +=
+          "MIN("
+              + databaseMeta.quoteField(returnFields.getTechnicalKeyField())
+              + ") as "
+              + databaseMeta.quoteField(returnFields.getTechnicalKeyField())
+              + ","
+              + Const.CR;
+      sql += lookupKeys + Const.CR;
+      sql += "FROM " + data.schemaTable + Const.CR;
+      sql += "GROUP BY" + Const.CR;
+      sql += lookupKeys + Const.CR;
+
+      if (isDebug()) {
+        logDebug("Using preload cache statement:" + Const.CR + sql);
+      }
+      cacheValues = data.db.getRows(databaseMeta.stripCR(sql), meta.getCacheSize());
+      for (Object[] cacheRow : cacheValues) {
+        // Create a correctly structured array for the cache
+        Object[] hashRow = new Object[data.hashRowMeta.size()];
+        // Assumes the technical key is at position 0 !!
+        System.arraycopy(cacheRow, 1, hashRow, 0, hashRow.length);
+        // Potential Cache Overflow is ahndled inside
+        addToCache(hashRowMeta, hashRow, cacheRow[0]);
+        incrementLinesInput();
+      }
+    }
+  }
+}

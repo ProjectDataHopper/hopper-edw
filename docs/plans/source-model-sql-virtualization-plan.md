@@ -109,7 +109,7 @@ Compared to the old Kettle JDBC driver:
 Prefer a dedicated virtualisation package (not further bloating `sourcemodel.generate`):
 
 ```
-org.apache.hop.datavault.virtualization/
+org.hopper.edw.datavault.virtualization/
   sql/
     SourceModelSqlEngine.java          # parse → plan → generate entry
     SourceModelSqlOptions.java         # limits, row limit, dialect prefs

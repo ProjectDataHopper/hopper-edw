@@ -1,6 +1,6 @@
 # `metadata/data-quality-rule-set` — Data quality rule set
 
-**Java:** `org.apache.hop.quality.metadata.DataQualityRuleSetMeta`  
+**Java:** `org.hopper.edw.quality.metadata.DataQualityRuleSetMeta`  
 **Schema:** [data-quality-rule-set.schema.json](data-quality-rule-set.schema.json)  
 **Example:** `retail-example/metadata/data-quality-rule-set/retail-source-quality.json`
 
