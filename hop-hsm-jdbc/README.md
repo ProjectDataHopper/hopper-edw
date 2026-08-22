@@ -33,7 +33,7 @@ With the **Data Hopper EDW** plugin installed, create a relational connection of
 | Database name | Optional default **Source model service** (JDBC schema) |
 | Username / password | Hop Server credentials |
 
-JDBC URL shape: `jdbc:hop-hsm://{host}:{port}/{service}`. Extra options use `?` / `&` (e.g. `rowLimit`, `connectTimeout`, `readTimeout`). The driver jar is bundled under `plugins/misc/datavault/lib/`.
+JDBC URL shape: `jdbc:hop-hsm://{host}:{port}/{service}`. Extra options use `?` / `&` (e.g. `rowLimit`, `connectTimeout`, `readTimeout`). The driver jar is bundled under `plugins/misc/hopper-edw/lib/`.
 
 ## DBeaver setup
 

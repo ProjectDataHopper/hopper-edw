@@ -17,7 +17,7 @@
 <assembly xmlns="http://maven.apache.org/ASSEMBLY/2.2.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.2.0 http://maven.apache.org/xsd/assembly-2.2.0.xsd">
-    <id>hop-misc-datavault</id>
+    <id>hopper-edw</id>
     <formats>
         <format>zip</format>
     </formats>
@@ -25,44 +25,44 @@
     <files>
         <file>
             <source>${project.basedir}/src/main/resources/version.xml</source>
-            <outputDirectory>plugins/misc/datavault/</outputDirectory>
+            <outputDirectory>plugins/misc/hopper-edw/</outputDirectory>
             <filtered>true</filtered>
         </file>
         <file>
             <source>${project.basedir}/README.md</source>
-            <outputDirectory>plugins/misc/datavault/</outputDirectory>
+            <outputDirectory>plugins/misc/hopper-edw/</outputDirectory>
             <filtered>true</filtered>
         </file>
         <file>
             <source>${project.basedir}/src/main/resources/dependencies.xml</source>
-            <outputDirectory>plugins/misc/datavault/</outputDirectory>
+            <outputDirectory>plugins/misc/hopper-edw/</outputDirectory>
             <filtered>true</filtered>
         </file>
         <!-- Thin hop-hsm JDBC driver for DatabaseMeta type "Apache Hop Source Model" -->
         <file>
             <source>${project.basedir}/hop-hsm-jdbc/target/hop-hsm-jdbc-${project.version}.jar</source>
-            <outputDirectory>plugins/misc/datavault/lib</outputDirectory>
+            <outputDirectory>plugins/misc/hopper-edw/lib</outputDirectory>
             <destName>hop-hsm-jdbc-${project.version}.jar</destName>
         </file>
     </files>
     <fileSets>
         <fileSet>
             <directory>${project.build.directory}/generated-docs</directory>
-            <outputDirectory>plugins/misc/datavault/docs</outputDirectory>
+            <outputDirectory>plugins/misc/hopper-edw/docs</outputDirectory>
         </fileSet>
     </fileSets>
     <dependencySets>
         <dependencySet>
             <includes>
-                <include>org.projectdatahopper.hop:hopper-edw:jar</include>
+                <include>org.hopper:hopper-edw:jar</include>
             </includes>
-            <outputDirectory>plugins/misc/datavault/</outputDirectory>
+            <outputDirectory>plugins/misc/hopper-edw/</outputDirectory>
         </dependencySet>
         <dependencySet>
             <includes>
                 <include>org.commonmark:*</include>
             </includes>
-            <outputDirectory>plugins/misc/datavault/lib</outputDirectory>
+            <outputDirectory>plugins/misc/hopper-edw/lib</outputDirectory>
             <useTransitiveDependencies>true</useTransitiveDependencies>
             <useProjectArtifact>false</useProjectArtifact>
         </dependencySet>
@@ -86,7 +86,7 @@
                 <include>org.apache.commons:commons-text</include>
                 <include>com.jayway.jsonpath:json-path</include>
             </includes>
-            <outputDirectory>plugins/misc/datavault/lib</outputDirectory>
+            <outputDirectory>plugins/misc/hopper-edw/lib</outputDirectory>
             <useTransitiveDependencies>true</useTransitiveDependencies>
             <useProjectArtifact>false</useProjectArtifact>
         </dependencySet>
@@ -95,7 +95,7 @@
                 <include>org.eclipse.elk:*</include>
                 <include>org.eclipse.emf:*</include>
             </includes>
-            <outputDirectory>plugins/misc/datavault/lib</outputDirectory>
+            <outputDirectory>plugins/misc/hopper-edw/lib</outputDirectory>
             <useTransitiveDependencies>true</useTransitiveDependencies>
             <useProjectArtifact>false</useProjectArtifact>
         </dependencySet>
@@ -105,7 +105,7 @@
                 <include>org.apache.hadoop:*</include>
                 <include>org.apache.httpcomponents:*</include>
             </includes>
-            <outputDirectory>plugins/misc/datavault/lib</outputDirectory>
+            <outputDirectory>plugins/misc/hopper-edw/lib</outputDirectory>
             <useTransitiveDependencies>true</useTransitiveDependencies>
             <useProjectArtifact>false</useProjectArtifact>
         </dependencySet>
@@ -113,7 +113,7 @@
           Jinjava (issue #72) on Hop's system classpath. Shaded JUEL loads
           ExtendedSyntaxBuilder via the application TCCL; plugin-lib isolation
           made that ClassNotFoundException in Hop GUI. Do not also copy these
-          into plugins/misc/datavault/lib (two copies of the same classes).
+          into plugins/misc/hopper-edw/lib (two copies of the same classes).
           Guava, Jackson core/databind, jsoup, javassist, re2j, and snakeyaml
           are already in Hop lib/core. jackson-dataformat-yaml is not — Jinjava
           FromYamlFilter needs YAMLMapper on the same loader as jinjava.
@@ -167,7 +167,7 @@
                 <include>org.apache.hop:hop-transform-uniquerowsbyhashset:jar</include>
                 <include>org.apache.hop:hop-transform-update:jar</include>
             </includes>
-            <outputDirectory>plugins/misc/datavault/lib</outputDirectory>
+            <outputDirectory>plugins/misc/hopper-edw/lib</outputDirectory>
         </dependencySet>
     </dependencySets>
 </assembly>

@@ -215,7 +215,7 @@ Jinjava has a history of sandbox escapes. Basics must:
 - Restrict EL to registered functions + Jinja builtins; no `getClass`, no interpreter exposure.
 - Unit-test that `{{ ''.class }}` / Java method probes fail.
 
-Bundle Jinjava + required transitives (Guava, JSoup, shaded JUEL, etc. as needed) in `src/assembly/assembly.xml` under `plugins/misc/datavault/lib`. Attribute Apache-2.0 in `NOTICE`.
+Bundle Jinjava + required transitives (Guava, JSoup, shaded JUEL, etc. as needed) in `src/assembly/assembly.xml` under `plugins/misc/hopper-edw/lib`. Attribute Apache-2.0 in `NOTICE`.
 
 ### 4.4 YAML
 

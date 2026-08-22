@@ -28,8 +28,8 @@
 # plugins: optional metadata that enriches names/categories and can pin version.
 # Restart Hop after install so the plugin registry reloads.
 #
-# Cutover: 0.9.0 and earlier were published as org.apache.hop:hop-datavault.
-# Remove plugins/misc/datavault from an old install before installing hopper-edw.
+# Cutover: 0.9.0 and earlier were published as org.apache.hop:hop-datavault
+# and unpacked to plugins/misc/datavault. Remove that folder before installing hopper-edw.
 #
 schemaVersion: "1.0"
 kind: hop-marketplace-repository
@@ -51,7 +51,7 @@ description: >
 # minHopVersion: only show when the running Hop is >= this version
 # version: pin of the published base version (Nexus resolves latest SNAPSHOT timestamp)
 plugins:
-  - groupId: org.projectdatahopper.hop
+  - groupId: org.hopper
     artifactId: hopper-edw
     version: 0.10.0
     minHopVersion: "2.19.0"
@@ -61,4 +61,4 @@ plugins:
       Apache Hop plugins to build an Enterprise Data Warehouse: source models,
       Data Catalog, Data Vault 2.0, Business Vault, dimensional models, quality,
       and lineage.
-    installPath: plugins/misc/datavault
+    installPath: plugins/misc/hopper-edw

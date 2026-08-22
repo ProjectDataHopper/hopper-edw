@@ -56,7 +56,7 @@ COPY --from=build /src/target/hopper-edw-*.zip /tmp/hopper-edw.zip
 
 RUN unzip -q /tmp/hopper-edw.zip -d /opt/hop \
   && rm /tmp/hopper-edw.zip \
-  && chown -R hop:hop /opt/hop/plugins/misc/datavault /opt/hop/lib/jdbc /opt/hop/lib/core
+  && chown -R hop:hop /opt/hop/plugins/misc/hopper-edw /opt/hop/lib/jdbc /opt/hop/lib/core
 
 COPY scripts/docker/entrypoint-init.sh /opt/hop-datavault/entrypoint-init.sh
 COPY scripts/docker/entrypoint-prepare.sh /opt/hop-datavault/entrypoint-prepare.sh

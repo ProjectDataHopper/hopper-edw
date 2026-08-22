@@ -36,12 +36,14 @@ class EdwDocsSupportTest {
     assertFalse(candidates.isEmpty());
     assertTrue(
         candidates.stream()
-            .anyMatch(path -> path.endsWith(Path.of("misc", "datavault", "docs", "index.html"))));
+            .anyMatch(
+                path -> path.endsWith(Path.of("misc", "hopper-edw", "docs", "index.html"))));
   }
 
   @Test
   void findIndexHtmlUsesPluginBaseFolder() throws Exception {
-    Path index = tempDir.resolve("misc").resolve("datavault").resolve("docs").resolve("index.html");
+    Path index =
+        tempDir.resolve("misc").resolve("hopper-edw").resolve("docs").resolve("index.html");
     Files.createDirectories(index.getParent());
     Files.writeString(index, "<html><title>EDW</title></html>");
 
@@ -62,7 +64,7 @@ class EdwDocsSupportTest {
   @Test
   void findHtmlPageUsesPluginBaseFolder() throws Exception {
     Path page =
-        tempDir.resolve("misc").resolve("datavault").resolve("docs").resolve("edw-journey.html");
+        tempDir.resolve("misc").resolve("hopper-edw").resolve("docs").resolve("edw-journey.html");
     Files.createDirectories(page.getParent());
     Files.writeString(page, "<html><title>Journey</title></html>");
 

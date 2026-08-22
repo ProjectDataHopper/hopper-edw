@@ -102,7 +102,7 @@ Painters already target `IGc`. Interactive web path uses the `*ModelCanvasSvgRen
 
 1. Install Hop with the canvas SPI and current web client scripts (`core` / `engine` / `ui` / `rap` as needed).
 2. Build this plugin: `mvn clean package -DskipTests`
-3. Unzip `target/hopper-edw-*-SNAPSHOT.zip` into the Hop Web home (not only `plugins/misc/datavault/`) so Jinjava jars land in `lib/core`.
+3. Unzip `target/hopper-edw-*-SNAPSHOT.zip` into the Hop Web home (not only `plugins/misc/hopper-edw/`) so Jinjava jars land in `lib/core`.
 4. Start Hop Web (for example `docker/run-hop-web-local.sh --quick` from a Hop checkout that mounts the plugin).
 5. Create or open a model under the explorer.
 

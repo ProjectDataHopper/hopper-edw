@@ -17,7 +17,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.projectdatahopper.hop</groupId>
+  <groupId>org.hopper</groupId>
   <artifactId>hopper-edw</artifactId>
   <version>0.10.0-SNAPSHOT</version>
   <packaging>jar</packaging>
@@ -756,7 +756,7 @@
         </executions>
       </plugin>
 
-      <!-- HTML user guide for the plugin zip (plugins/misc/datavault/docs/). -->
+      <!-- HTML user guide for the plugin zip (plugins/misc/hopper-edw/docs/). -->
       <plugin>
         <groupId>org.asciidoctor</groupId>
         <artifactId>asciidoctor-maven-plugin</artifactId>

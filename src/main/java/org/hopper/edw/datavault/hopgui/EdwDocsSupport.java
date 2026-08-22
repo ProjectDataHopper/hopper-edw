@@ -41,7 +41,7 @@ public final class EdwDocsSupport {
   private EdwDocsSupport() {}
 
   /**
-   * Locate {@code plugins/misc/datavault/docs/index.html} next to the plugin jar, via the plugin
+   * Locate {@code plugins/misc/hopper-edw/docs/index.html} next to the plugin jar, via the plugin
    * registry, or under {@code HOP_PLUGIN_BASE_FOLDERS}.
    *
    * @return absolute path, or {@code null} when no file exists
@@ -51,7 +51,7 @@ public final class EdwDocsSupport {
   }
 
   /**
-   * Locate a page under {@code plugins/misc/datavault/docs/} (for example {@code
+   * Locate a page under {@code plugins/misc/hopper-edw/docs/} (for example {@code
    * source-modeler-overview.html}).
    *
    * @param pageName file name, optionally with a {@code docs/} prefix
@@ -163,7 +163,7 @@ public final class EdwDocsSupport {
       if (Utils.isEmpty(trimmed)) {
         continue;
       }
-      candidates.add(Paths.get(trimmed, "misc", "datavault").resolve(relativePath));
+      candidates.add(Paths.get(trimmed, "misc", "hopper-edw").resolve(relativePath));
     }
   }
 }
