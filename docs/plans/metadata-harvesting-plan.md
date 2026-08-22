@@ -12,7 +12,7 @@ Today, looking up **live source metadata** is intertwined with the warehouse upd
 | **Catalog versions** | Design-time **freeze of working-tree** contracts | Immutable tags under FILE catalog — **not** time-series of live systems |
 | **Database Table Metadata** transform | One-shot discovery for import pipelines | Rows in a pipeline stream only |
 
-[Issue #112](https://github.com/mattcasters/hop-data-vault/issues/112) asks for:
+[Issue #112](https://github.com/ProjectDataHopper/hopper-edw/issues/112) asks for:
 
 1. **Transparency** — treat “gather source metadata into the catalog world” as a first-class operational step, not a side effect of load.
 2. **Scale** — thousands of record sources; a full pass over a catalog or a **Resource definition group** (all sources used by DV/BV/DM models).

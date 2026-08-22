@@ -6,7 +6,7 @@
 
 toc::[]
 
-This page is the **plugin architecture** picture: what the Data Catalog is for, how the model files relate, and which workflow actions sit on that spine.
+This page is the **Data Hopper EDW architecture** picture: what the Data Catalog is for, how the model files relate, and which workflow actions sit on that spine.
 
 It is *not* a Draw.io export of one project. For those derived diagrams see link:architecture-export.adoc[Architecture export].
 

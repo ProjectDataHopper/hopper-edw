@@ -4,7 +4,7 @@
 
 toc::[]
 
-hop-data-vault can emit **OpenLineage** `RunEvent` documents for every Data Vault (DV), Business Vault (BV), and dimensional (DM) target table. Events are **model-derived** from the same lineage collectors that power the modeler Lineage tab, explainable DDL, and catalog lineage siblings.
+Data Hopper EDW can emit **OpenLineage** `RunEvent` documents for every Data Vault (DV), Business Vault (BV), and dimensional (DM) target table. Events are **model-derived** from the same lineage collectors that power the modeler Lineage tab, explainable DDL, and catalog lineage siblings.
 
 Use this to feed platforms such as **Marquez** or any OpenLineage-compatible HTTP endpoint (including Collibra OL integrations).
 
@@ -120,7 +120,7 @@ Besides identity (`namespace` / `name`) and column `schema`, each dataset may in
 |===
 | Facet | Contents
 | `dataSource` | Standard OpenLineage facet: `name` (connection or kind) and `uri` (JDBC URL without credentials, `file://…` mask, Iceberg catalog path, or `hop://…` fallback)
-| `hop_location` | Structured hop-data-vault details: `kind` (`DATABASE` / `CSV` / `PARQUET` / `ICEBERG` / `STAGING`), `connectionName`, `schemaName`, `tableName`, file folder/masks, Iceberg catalog/warehouse/namespace/table/branch/snapshot, plus `catalogKey` and `catalogConnection` when the dataset is a catalog feed |
+| `hop_location` | Structured Data Hopper EDW details: `kind` (`DATABASE` / `CSV` / `PARQUET` / `ICEBERG` / `STAGING`), `connectionName`, `schemaName`, `tableName`, file folder/masks, Iceberg catalog/warehouse/namespace/table/branch/snapshot, plus `catalogKey` and `catalogConnection` when the dataset is a catalog feed |
 | `hop_export` (run) | Hop identity for deep-links: `modelLayer`, `modelName`, `modelFilename`, `tableType`, `logicalName`, `exportRunId`, plus `projectKey`, `resourceGroup`, `catalogConnection`, `physicalTableName`, `targetDatabase` |
 | `symlinks` | Alternate identifiers: `schema.table` for DB targets, and for **dimension aliases** the shared physical dimension (e.g. `d_shipping_date` → `d_date`)
 |===

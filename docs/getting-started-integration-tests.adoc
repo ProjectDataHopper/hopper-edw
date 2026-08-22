@@ -12,9 +12,9 @@ Estimated time: half a day with Hop GUI, or follow along read-only first.
 
 == Prerequisites
 
-. Register `integration-tests/` as a Hop project named **`hop-data-vault`**.
+. Register `integration-tests/` as a Hop project named **`hopper-edw`**.
 . Configure database connections **`CRM`** and **`Vault`** in project metadata (`metadata/rdbms/CRM.json`, `metadata/rdbms/Vault.json`).
-. Install the **hop-datavault** plugin in Apache Hop **2.19.0**.
+. Install **Data Hopper EDW** plugin in Apache Hop **2.19.0**.
 . Open the project in Hop GUI so `${PROJECT_HOME}` resolves.
 
 Full environment details: link:../integration-tests/PROJECT.md[Integration tests Hop project].

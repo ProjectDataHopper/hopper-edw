@@ -4,7 +4,7 @@
 
 toc::[]
 
-The hop-datavault plugin captures **source-to-target lineage** for every Data Vault (DV), Business Vault (BV), and dimensional (DM) target table and field. Lineage answers three questions that production gates and opaque model generators often leave open:
+Data Hopper EDW captures **source-to-target lineage** for every Data Vault (DV), Business Vault (BV), and dimensional (DM) target table and field. Lineage answers three questions that production gates and opaque model generators often leave open:
 
 . *Which* catalog feed or parent table contributes to a target?
 . *How* is each target column derived (identity, rename, hash, standard technical column)?
@@ -16,7 +16,7 @@ Models (`.hdv` / `.hbv` / `.hdm`) remain the **source of truth** for loads and D
 
 Model-driven vault tools can silently rename hubs, satellites, links, or columns between versions. A workflow option such as **Fail if DDL is needed** correctly blocks structure changes, but without lineage the log only says that DDL is required — not *why*.
 
-hop-data-vault avoids that opacity by:
+Data Hopper EDW avoids that opacity by:
 
 * Deriving table- and field-level lineage from model metadata
 * Explaining every required DDL statement with those edges

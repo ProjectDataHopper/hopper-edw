@@ -15,7 +15,7 @@
  */
 package org.apache.hop.hsm.jdbc;
 
-/** Wire protocol constants (must match hop-datavault SourceModelDataProtocol). */
+/** Wire protocol constants (must match hopper-edw SourceModelDataProtocol). */
 public final class HsmProtocol {
 
   public static final String JDBC_PREFIX = "jdbc:hop-hsm:";

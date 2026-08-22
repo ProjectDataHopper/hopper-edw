@@ -89,7 +89,7 @@ public final class OpsLineageEnricher {
             run.has("facets") ? (ObjectNode) run.get("facets") : MAPPER.createObjectNode();
         ObjectNode ops = MAPPER.createObjectNode();
         ops.put("_producer", OpenLineageConstants.PRODUCER);
-        ops.put("_schemaURL", "https://github.com/mattcasters/hop-data-vault#hop-ops-facet");
+        ops.put("_schemaURL", "https://github.com/ProjectDataHopper/hopper-edw#hop-ops-facet");
         if (metric.lastSuccessAt != null) {
           ops.put("lastSuccessAt", metric.lastSuccessAt);
         }

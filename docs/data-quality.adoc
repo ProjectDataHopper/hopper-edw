@@ -252,4 +252,4 @@ Target rules include table-not-empty, hub business-key not-null / min-distinct, 
 * link:getting-started-retail.adoc[Getting started — retail]
 * link:plans/data-quality-architecture-plan.md[Architecture plan]
 * link:plans/data-quality-phase2-design.md[Phase 2 design]
-* Issue https://github.com/mattcasters/hop-data-vault/issues/66[#66]
+* Issue https://github.com/ProjectDataHopper/hopper-edw/issues/66[#66]

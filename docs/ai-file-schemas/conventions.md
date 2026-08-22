@@ -1,6 +1,6 @@
 # Shared conventions (AI)
 
-Hop Data Vault project files are **Hop metadata** serializations, not free-form XML/JSON.
+Data Hopper EDW project files are **Hop metadata** serializations, not free-form XML/JSON.
 
 ## Boolean values
 

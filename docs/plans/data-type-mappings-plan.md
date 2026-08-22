@@ -1,6 +1,6 @@
 # Plan: Data Type Mappings (Issue #113)
 
-**Issue:** [#113 — Data type mappings](https://github.com/mattcasters/hop-data-vault/issues/113)  
+**Issue:** [#113 — Data type mappings](https://github.com/ProjectDataHopper/hopper-edw/issues/113)  
 **Branch:** `issue-113`  
 **Goal:** Make source→pre-model type improvement **explicit, reusable, and validated** so Kafka/JSON/XML/CDC/file feeds stop collapsing into unbounded `TEXT`/`LONGTEXT` (and other generic types) in DV/BV/DM.
 

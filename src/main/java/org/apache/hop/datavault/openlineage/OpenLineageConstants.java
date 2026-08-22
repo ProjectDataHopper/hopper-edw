@@ -18,7 +18,7 @@ package org.apache.hop.datavault.openlineage;
 /** Shared OpenLineage constants for model lineage export and execution-map export. */
 public final class OpenLineageConstants {
 
-  public static final String PRODUCER = "https://github.com/mattcasters/hop-data-vault";
+  public static final String PRODUCER = "https://github.com/ProjectDataHopper/hopper-edw";
 
   public static final String DEFAULT_JOB_NAMESPACE = "hop-data-vault";
 

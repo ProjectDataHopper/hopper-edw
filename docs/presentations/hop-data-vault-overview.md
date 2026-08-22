@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Hop Data Vault 2.0 Plugin
+# Data Hopper EDW
 
 **Model-driven Data Vault, Business Vault, and dimensional marts on Apache Hop 2.19.0**  
 *(plugin 0.9.0 · Apache Hop 2.19.0 · Java 21)*
@@ -203,7 +203,7 @@ Under `integration-tests/tests/`:
 
 ![Customer 360 Business Vault model](../images/business-vault-model-customer-360.png)
 
-Runnable via `integration-tests/run-tests.sh` or Hop GUI with the `hop-data-vault` project open. For a full-stack learning path, use `retail-example/` — see [getting-started-retail.adoc](../getting-started-retail.adoc).
+Runnable via `integration-tests/run-tests.sh` or Hop GUI with the `hopper-edw` project open. For a full-stack learning path, use `retail-example/` — see [getting-started-retail.adoc](../getting-started-retail.adoc).
 
 ![Retail 360 Data Vault model](../images/data-vault-model-retail-example.png)
 
@@ -257,13 +257,13 @@ Choose per table — mixed models are supported.
 | **Implementers** | [README.md](../../README.md) and [integration-tests/PROJECT.md](../../integration-tests/PROJECT.md) |
 | **Reference** | [docs/README.md](../README.md) — full doc index |
 
-Open `retail-example/` for the tutorial, or `integration-tests/` as **`hop-data-vault`** for regression suites. Configure **CRM** and **Vault** connections, install plugin **0.9.0** on Apache Hop **2.19.0**.
+Open `retail-example/` for the tutorial, or `integration-tests/` as **`hopper-edw`** for regression suites. Configure **CRM** and **Vault** connections, install plugin **0.9.0** on Apache Hop **2.19.0**.
 
 ---
 
 # Summary
 
-The Hop Data Vault plugin turns Data Vault 2.0 from a pile of pipelines into a **governed, model-driven platform**:
+The Data Hopper EDW turns Data Vault 2.0 from a pile of pipelines into a **governed, model-driven platform**:
 
 - Raw vault loads generated from `.hdv`
 - Business vault SCD2 from `.hbv`

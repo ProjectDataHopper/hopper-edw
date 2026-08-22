@@ -12,7 +12,7 @@ Integration mode is set on the **Options** tab of the hub, link, or satellite di
 
 Real enterprises rarely have a single tool loading every raw vault table. Teams use dbt, hand-written SQL, legacy ETL, or bespoke Hop pipelines alongside model-driven loads.
 
-Integration modes let all of those tables **participate in one Hop Data Vault model** for:
+Integration modes let all of those tables **participate in one Data Vault model** for:
 
 * Visual lineage and documentation
 * Model validation

@@ -34,7 +34,7 @@ Runs Hop test workflows in a short-lived container using **host networking**, so
 COLLECT_METRICS=N ./run-tests.sh                        # skip metrics overview
 ```
 
-- Docker image: `docker-hop:latest` (built on first use from [`scripts/docker/Dockerfile`](../scripts/docker/Dockerfile); also rebuilt when `target/hop-datavault-*.zip` is newer than the image)
+- Docker image: `docker-hop:latest` (built on first use from [`scripts/docker/Dockerfile`](../scripts/docker/Dockerfile); also rebuilt when `target/hopper-edw-*.zip` is newer than the image)
 - Compose file: [`scripts/docker/compose.hop.yml`](../scripts/docker/compose.hop.yml)
 - Environment: [`environments/local-docker-postgres.json`](environments/local-docker-postgres.json) — supplies `${DB_HOST}`, `${DB_PORT}`, `${DB_USER}`, `${DB_PASSWORD}`, `${DB_NAME}` to [`metadata/rdbms/CRM.json`](metadata/rdbms/CRM.json) and [`metadata/rdbms/Vault.json`](metadata/rdbms/Vault.json)
 - Metrics: `metrics/local/` (gitignored)
@@ -105,7 +105,7 @@ localhost:54320  ◄──── run-tests.sh ────►  Hop container (ho
 
 Used by the test and SVG scripts. Provides:
 
-- Hop image build (`ensure_hop_image`) — creates `docker-hop:latest` when missing, and rebuilds when a host plugin package (`target/hop-datavault-*.zip` from `mvn package`) is newer than the image. Force a rebuild anytime with `./scripts/rebuild-hop.sh`. Set `HOP_IMAGE_SKIP_FRESHNESS=1` to only build when the image is missing.
+- Hop image build (`ensure_hop_image`) — creates `docker-hop:latest` when missing, and rebuilds when a host plugin package (`target/hopper-edw-*.zip` from `mvn package`) is newer than the image. Force a rebuild anytime with `./scripts/rebuild-hop.sh`. Set `HOP_IMAGE_SKIP_FRESHNESS=1` to only build when the image is missing.
 - Workflow path translation for containers
 - Local Postgres readiness checks (`local_postgres_ready`, `wait_for_local_postgres`, `require_local_postgres`)
 - Metrics and vault-catalog ownership fix-up after Docker runs (Hop container runs as root)

@@ -4,7 +4,7 @@
 
 toc::[]
 
-This guide is the **operating model** for hop-datavault when many people share one vault: hundreds of tables, concurrent modelers, version control, a shared data catalog, and distinct roles from raw vault through reporting.
+This guide is the **operating model** for Data Hopper EDW when many people share one vault: hundreds of tables, concurrent modelers, version control, a shared data catalog, and distinct roles from raw vault through reporting.
 
 It does **not** replace the technical reference pages. It explains *how to organize work* and points at the feature docs for *how the product works*.
 
@@ -50,7 +50,7 @@ A single giant `.hdv` works for tutorials. It fails for programs:
 * **Clear authority** — business keys and hash definitions for a hub live in *one* owning model.
 * **Cognitive load** — canvases stay readable; execution maps stay useful.
 
-hop-datavault supports this with **cross-model linked tables** (subject models point at core hubs without copying metadata), optional **hub aliases** for role-playing inside a model, multi-model **Business Vault** and **dimensional** references, and a **catalog** that publishes contracts for everyone else.
+Data Hopper EDW supports this with **cross-model linked tables** (subject models point at core hubs without copying metadata), optional **hub aliases** for role-playing inside a model, multi-model **Business Vault** and **dimensional** references, and a **catalog** that publishes contracts for everyone else.
 
 == Personas and responsibilities
 

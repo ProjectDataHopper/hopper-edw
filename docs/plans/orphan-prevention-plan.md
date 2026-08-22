@@ -16,8 +16,8 @@ limitations under the License.
 
 # Plan: Optional orphan handling for Data Vault (#77), related to #109
 
-**Issue:** [#77 — Smart "Ghost Record" & Early-Arriving Fact Automations](https://github.com/mattcasters/hop-data-vault/issues/77)  
-**Related:** [#109 — Late arriving dimensions](https://github.com/mattcasters/hop-data-vault/issues/109) — design at [late-arriving-dimensions-plan.md](late-arriving-dimensions-plan.md)  
+**Issue:** [#77 — Smart "Ghost Record" & Early-Arriving Fact Automations](https://github.com/ProjectDataHopper/hopper-edw/issues/77)  
+**Related:** [#109 — Late arriving dimensions](https://github.com/ProjectDataHopper/hopper-edw/issues/109) — design at [late-arriving-dimensions-plan.md](late-arriving-dimensions-plan.md)  
 **Status:** Implemented (opt-in, default `PASS`) — evaluation remains the design record
 
 This document is both the **evaluation** of the “orphan prevention layer” idea and the **implementation plan** to support it optionally.

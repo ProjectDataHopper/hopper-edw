@@ -17,9 +17,9 @@ Source systems rarely hand you EDW-grade types. Kafka, JSON, XML, CDC, and many 
 
 Fields remain “what the physical source produces.” Mappings remain “what the warehouse expects.”
 
-See also: link:plans/data-type-mappings-plan.md[design plan], issue https://github.com/mattcasters/hop-data-vault/issues/113[#113].
+See also: link:plans/data-type-mappings-plan.md[design plan], issue https://github.com/ProjectDataHopper/hopper-edw/issues/113[#113].
 
-For **Hop type → native SQL type** on CREATE/ALTER, use link:target-type-mappings.adoc[Target type mappings] (issue https://github.com/mattcasters/hop-data-vault/issues/127[#127]). Do not put dialect tokens such as `CHAR(1)` or `timestamptz` in a Data type mapping.
+For **Hop type → native SQL type** on CREATE/ALTER, use link:target-type-mappings.adoc[Target type mappings] (issue https://github.com/ProjectDataHopper/hopper-edw/issues/127[#127]). Do not put dialect tokens such as `CHAR(1)` or `timestamptz` in a Data type mapping.
 
 == Concepts
 

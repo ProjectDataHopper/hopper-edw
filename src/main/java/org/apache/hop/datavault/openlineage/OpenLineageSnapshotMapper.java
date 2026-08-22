@@ -232,7 +232,7 @@ public final class OpenLineageSnapshotMapper {
     ObjectNode runFacets = MAPPER.createObjectNode();
     ObjectNode hopExport = MAPPER.createObjectNode();
     hopExport.put("_producer", OpenLineageConstants.PRODUCER);
-    hopExport.put("_schemaURL", "https://github.com/mattcasters/hop-data-vault#hop-export-facet");
+    hopExport.put("_schemaURL", "https://github.com/ProjectDataHopper/hopper-edw#hop-export-facet");
     hopExport.put("modelLayer", layer != null ? layer.name() : LineageLayer.DV.name());
     hopExport.put("modelName", modelName);
     if (!Utils.isEmpty(exportCorrelationId)) {

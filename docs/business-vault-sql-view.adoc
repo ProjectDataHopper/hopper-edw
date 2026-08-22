@@ -8,7 +8,7 @@ SQL business tables let you author consumption SQL on the Business Vault canvas 
 
 == Why
 
-Raw Data Vault and generated SCD2/PIT tables cover the mechanical patterns. Real projects still need arbitrary SQL for business rules, enrichments, and lookups. dbt handles this with `ref()` / `source()` and dependency ordering. Hop Data Vault brings the same idea onto the `.hbv` model:
+Raw Data Vault and generated SCD2/PIT tables cover the mechanical patterns. Real projects still need arbitrary SQL for business rules, enrichments, and lookups. dbt handles this with `ref()` / `source()` and dependency ordering. Data Hopper EDW brings the same idea onto the `.hbv` model:
 
 * Author SQL with templates
 * Declare sources used by the query

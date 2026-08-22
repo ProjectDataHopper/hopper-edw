@@ -18,7 +18,7 @@ limitations under the License.
 
 Overview of this dialog and its fields.
 
-Documentation for this screen is being expanded. See the project docs under `docs/` in the hop-data-vault repository for related guides.
+Documentation for this screen is being expanded. See the project docs under `docs/` in the hopper-edw repository for related guides.
 
 ## Tips
 

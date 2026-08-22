@@ -2,7 +2,7 @@
 
 ## Context
 
-[Issue #66](https://github.com/mattcasters/hop-data-vault/issues/66) asks for **data-profiling / data-quality validations** beyond today’s schema-contract checks:
+[Issue #66](https://github.com/ProjectDataHopper/hopper-edw/issues/66) asks for **data-profiling / data-quality validations** beyond today’s schema-contract checks:
 
 - Table not empty
 - Column `gender` expected domain: `M` / `F` / `U` / null

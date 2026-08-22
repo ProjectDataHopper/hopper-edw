@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/mattcasters/hop-data-vault/docs/ai-file-schemas/metadata/data-quality-rule-set.schema.json",
+  "$id": "https://github.com/ProjectDataHopper/hopper-edw/docs/ai-file-schemas/metadata/data-quality-rule-set.schema.json",
   "title": "Data quality rule set",
   "description": "metadata/data-quality-rule-set/*.json",
   "type": "object",

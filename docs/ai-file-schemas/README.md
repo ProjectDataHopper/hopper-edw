@@ -1,6 +1,6 @@
 # AI file-schema pack (models + metadata)
 
-Portable context for external AIs (e.g. Google Gemini) that edit hop-data-vault project files.
+Portable context for external AIs (e.g. Google Gemini) that edit Data Hopper EDW project files.
 
 This pack describes **structure** (XSD / JSON Schema) and **purpose** (Markdown) for:
 

@@ -1,4 +1,4 @@
-# Integration tests — Hop Data Vault project
+# Integration tests — Data Hopper EDW project
 
 > **Prerequisites**
 >
@@ -7,7 +7,7 @@
 > - **Docker** with Compose v2 — used by `run-tests.sh` and `run-tests-all-databases.sh` to run workflows in a short-lived Hop container (`docker-hop:latest`). No local Hop installation is required for command-line testing.
 > - **Python 3** — used by the test scripts to print the metrics overview table at the end of a run (stdlib only; no extra packages).
 > - Testing has been done with **PostgreSQL**, **MySQL**, **SingleStore**, and **Microsoft SQL Server** (see [Docker multi-database tests](#docker-multi-database-tests) below). **Snowflake** is an opt-in fifth engine via LocalStack (`LOCALSTACK_AUTH_TOKEN` required); it is not part of the default matrix.
-> - For Hop GUI use, install the **hop-datavault** plugin in your Hop **2.19.0** environment.
+> - For Hop GUI use, install the **Data Hopper EDW** plugin in your Hop **2.19.0** environment.
 
 **CI and regression reference** — not the first-time tutorial. Build an EDW: [docs/getting-started-edw.adoc](../docs/getting-started-edw.adoc). Tour the sample: [retail-example](../retail-example/) and [docs/getting-started-retail.adoc](../docs/getting-started-retail.adoc). Documentation index: [docs/README.md](../docs/README.md).
 
@@ -78,7 +78,7 @@ integration-tests/
 
 ### Command line (Docker)
 
-Both test scripts use the same Hop Docker image (`docker-hop:latest`). The image is built automatically on first use, and **rebuilt when `target/hop-datavault-*.zip` is newer than the image** (so a local `mvn package` without `./scripts/rebuild-hop.sh` does not leave Docker tests on a stale plugin). Shared logic lives in `scripts/hop-docker-lib.sh`.
+Both test scripts use the same Hop Docker image (`docker-hop:latest`). The image is built automatically on first use, and **rebuilt when `target/hopper-edw-*.zip` is newer than the image** (so a local `mvn package` without `./scripts/rebuild-hop.sh` does not leave Docker tests on a stale plugin). Shared logic lives in `scripts/hop-docker-lib.sh`.
 
 **`run-postgres.sh`** — start a local PostgreSQL 16 container on port **54320** (`test` / `test` / `test`). Required before `run-tests.sh`.
 
@@ -138,7 +138,7 @@ Snowflake notes: connections quote identifiers (`QUOTE_ALL_FIELDS=Y`) so modeled
 
 ### Hop GUI
 
-Open this folder as a Hop project and run **`tests/run-tests.hwf`**, or run any child workflow directly. Requires a local Hop 2.19.0 installation with the hop-datavault plugin.
+Open this folder as a Hop project and run **`tests/run-tests.hwf`**, or run any child workflow directly. Requires a local Hop 2.19.0 installation with Data Hopper EDW.
 
 ![run-tests orchestrator workflow](images/workflow-run-tests-screenshot.png)
 
@@ -178,7 +178,7 @@ METRICS_FOLDER=/project/metrics/custom ./run-tests-all-databases.sh postgres
 
 ### Regenerating documentation SVG images
 
-Use **`run-svg.sh`** to export canvases via the same Docker image as the test runner (`docker-hop:latest` = `apache/hop` + **hop-datavault** plugin). Host paths are translated to `/workspace/...` inside the container (repository root is mounted).
+Use **`run-svg.sh`** to export canvases via the same Docker image as the test runner (`docker-hop:latest` = `apache/hop` + **Data Hopper EDW** plugin). Host paths are translated to `/workspace/...` inside the container (repository root is mounted).
 
 ```bash
 cd project
@@ -204,7 +204,7 @@ With a local Hop install and plugin, you can also run `hop svg` directly (see [d
 
 ### Docker multi-database tests
 
-A custom image extends `apache/hop:2.19.0` with the **hop-datavault** plugin and JDBC drivers (fetched at image build time via Maven). The project folder is bind-mounted into the container at `/project`.
+A custom image extends `apache/hop:2.19.0` with the **Data Hopper EDW** plugin and JDBC drivers (fetched at image build time via Maven). The project folder is bind-mounted into the container at `/project`.
 
 **Requirements:** Docker with Compose v2. SingleStore needs ~6 GB RAM for the dev image.
 

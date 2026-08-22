@@ -18,7 +18,7 @@ limitations under the License.
 
 Internal copy of the approved implementation plan. Authoritative session plan lives with the coding session; this file is the in-repo design note.
 
-**Issue:** https://github.com/mattcasters/hop-data-vault/issues/125
+**Issue:** https://github.com/ProjectDataHopper/hopper-edw/issues/125
 
 ## Summary
 

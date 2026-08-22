@@ -328,7 +328,7 @@ class ArchitectureExportTest {
     org.apache.hop.core.variables.Variables variables =
         new org.apache.hop.core.variables.Variables();
     variables.setVariable(
-        "PROJECT_HOME", "/home/matt/git/mattcasters/hop-data-vault/retail-example");
+        "PROJECT_HOME", "/home/matt/git/ProjectDataHopper/hopper-edw/retail-example");
 
     assertEquals(
         "models/retail-360.hdv",
@@ -337,12 +337,12 @@ class ArchitectureExportTest {
     assertEquals(
         "models/retail-360.hdv",
         ArchitecturePathSupport.toProjectRelativePath(
-            "/home/matt/git/mattcasters/hop-data-vault/retail-example/models/retail-360.hdv",
+            "/home/matt/git/ProjectDataHopper/hopper-edw/retail-example/models/retail-360.hdv",
             variables));
     assertEquals(
         "pipelines/generate-date-dimension-data.hpl",
         ArchitecturePathSupport.toProjectRelativePath(
-            "/home/matt/git/mattcasters/hop-data-vault/retail-example/pipelines/generate-date-dimension-data.hpl",
+            "/home/matt/git/ProjectDataHopper/hopper-edw/retail-example/pipelines/generate-date-dimension-data.hpl",
             variables));
     // Free-text edge labels stay unchanged
     assertEquals(
@@ -372,7 +372,7 @@ class ArchitectureExportTest {
     link.setFromNodeId("model-bv");
     link.setToNodeId("model-dv");
     link.setEdgeType(ExecutionMapEdgeType.MODEL_LINK);
-    link.setLabel("/home/matt/git/mattcasters/hop-data-vault/retail-example/models/retail-360.hdv");
+    link.setLabel("/home/matt/git/ProjectDataHopper/hopper-edw/retail-example/models/retail-360.hdv");
     map.getEdgesOrEmpty().add(link);
 
     ArchitectureGraph graph = ArchitectureGraphFromExecutionMap.build(map);

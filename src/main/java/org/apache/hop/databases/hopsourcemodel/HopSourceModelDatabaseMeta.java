@@ -44,7 +44,7 @@ import org.apache.hop.core.util.Utils;
     typeDescription = "Apache Hop Source Model",
     image = "source-model.svg",
     documentationUrl =
-        "https://github.com/mattcasters/hop-data-vault/blob/main/hop-hsm-jdbc/README.md")
+        "https://github.com/ProjectDataHopper/hopper-edw/blob/main/hop-hsm-jdbc/README.md")
 @GuiPlugin(id = "GUI-HopSourceModelDatabaseMeta")
 public class HopSourceModelDatabaseMeta extends BaseDatabaseMeta implements IDatabase {
 
@@ -104,7 +104,7 @@ public class HopSourceModelDatabaseMeta extends BaseDatabaseMeta implements IDat
 
   @Override
   public String getExtraOptionsHelpText() {
-    return "https://github.com/mattcasters/hop-data-vault/blob/main/hop-hsm-jdbc/README.md";
+    return "https://github.com/ProjectDataHopper/hopper-edw/blob/main/hop-hsm-jdbc/README.md";
   }
 
   @Override

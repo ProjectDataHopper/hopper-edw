@@ -26,7 +26,7 @@ public final class OpenLineageDatasetFacetSupport {
   private static final ObjectMapper MAPPER = new ObjectMapper();
 
   public static final String HOP_LOCATION_SCHEMA_URL =
-      "https://github.com/mattcasters/hop-data-vault#hop-location-facet";
+      "https://github.com/ProjectDataHopper/hopper-edw#hop-location-facet";
 
   private OpenLineageDatasetFacetSupport() {}
 

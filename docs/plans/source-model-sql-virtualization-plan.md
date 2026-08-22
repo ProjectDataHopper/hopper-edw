@@ -1,7 +1,7 @@
 # Plan: SQL-driven data virtualization over Source Models (Issue #117)
 
-**Issue:** [#117 — SQL parser for Hop source models](https://github.com/mattcasters/hop-data-vault/issues/117)  
-**Related:** [#115 — Free Query source](https://github.com/mattcasters/hop-data-vault/issues/115) (natural first GUI consumer)  
+**Issue:** [#117 — SQL parser for Hop source models](https://github.com/ProjectDataHopper/hopper-edw/issues/117)  
+**Related:** [#115 — Free Query source](https://github.com/ProjectDataHopper/hopper-edw/issues/115) (natural first GUI consumer)  
 **Historical parallel:** Pentaho / Kettle JDBC driver (query any transform step for Mondrian / Metadata) — incomplete “data virtualisation”; this plan aims for a **relationship-aware**, **pushdown-capable** virtualisation layer on `.hsm`.
 
 ---
