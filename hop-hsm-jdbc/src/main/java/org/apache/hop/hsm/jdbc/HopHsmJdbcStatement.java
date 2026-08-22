@@ -1,10 +1,9 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Copyright 2026 i-Bridge bv
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -45,8 +44,7 @@ public class HopHsmJdbcStatement implements Statement {
     connection.checkOpen();
     checkOpen();
     int limit = maxRows > 0 ? maxRows : connection.config().rowLimit();
-    Map<String, Object> response =
-        connection.http().query(connection.requireSchema(), sql, limit);
+    Map<String, Object> response = connection.http().query(connection.requireSchema(), sql, limit);
     current = HopHsmJdbcResultSet.fromQueryResponse(this, response);
     updateCount = -1;
     return current;

@@ -6,8 +6,8 @@
   "config" : {
     "variables" : [ {
       "name" : "HOP_LICENSE_HEADER_FILE",
-      "value" : "${PROJECT_HOME}/../../../../asf-header.txt",
-      "description" : "Serialize the ASF license header into DV, BV, DM, and execution-map XML files"
+      "value" : "${PROJECT_HOME}/../../../../license-header.txt",
+      "description" : "Serialize the Apache-2.0 license header into DV, BV, DM, and execution-map XML files"
     } ]
   }
 }

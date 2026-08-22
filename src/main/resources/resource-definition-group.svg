@@ -1,10 +1,9 @@
 <!--
-  - Licensed to the Apache Software Foundation (ASF) under one or more
-  - contributor license agreements.  See the NOTICE file distributed with
-  - this work for additional information regarding copyright ownership.
-  - The ASF licenses this file to You under the Apache License, Version 2.0
-  - (the "License"); you may not use this file except in compliance with
-  - the License.  You may obtain a copy of the License at
+  - Copyright 2026 i-Bridge bv
+  -
+  - Licensed under the Apache License, Version 2.0 (the "License");
+  - you may not use this file except in compliance with the License.
+  - You may obtain a copy of the License at
   -
   -      http://www.apache.org/licenses/LICENSE-2.0
   -
@@ -15,7 +14,6 @@
   - limitations under the License.
   -
   -->
-
 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
     <rect x="2" y="2" width="27" height="27" fill="#1e3a5f"/>
     <text x="16" y="19" font-size="11" fill="white" text-anchor="middle">RDG</text></svg>

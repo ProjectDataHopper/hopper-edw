@@ -1,10 +1,9 @@
 <!--
-Licensed to the Apache Software Foundation (ASF) under one or more
-contributor license agreements.  See the NOTICE file distributed with
-this work for additional information regarding copyright ownership.
-The ASF licenses this file to You under the Apache License, Version 2.0
-(the "License"); you may not use this file except in compliance with
-the License.  You may obtain a copy of the License at
+Copyright 2026 i-Bridge bv
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
      http://www.apache.org/licenses/LICENSE-2.0
 
@@ -186,7 +185,7 @@ These are easy for agents to violate:
 2. **Lombok** — Prefer `@Getter` / `@Setter` / related annotations over hand-written boilerplate. Keep the Lombok version aligned with Hop.
 3. **I/O via Hop VFS** — Prefer `HopVfs.getInputStream()` / `HopVfs.getOutputStream()` (and related Hop VFS APIs) over raw `java.io.File` / NIO unless there is no alternative.
 4. **i18n** — UI strings belong in package `messages/messages_*.properties` and must be **properly escaped** for Java Properties (`=`, `:`, spaces, newlines, unicode). Use the existing BaseMessages / key patterns for that package.
-5. **ASF license headers** — Spotless injects the standard header on Java; Apache RAT enforces headers on most source/text. New `.java` / `.sh` (and many other text files) need headers. `docs/`, many `integration-tests/**` fixtures, models (`.hdv`/`.hbv`/`.hdm`), and JSON are largely excluded (see `pom.xml` RAT config). Header template: `asf-header.txt`.
+5. **License headers** — Spotless injects the i-Bridge bv Apache-2.0 header on Java; Apache RAT enforces headers on most source/text. New `.java` / `.sh` (and many other text files) need headers. `docs/`, many `integration-tests/**` fixtures, models (`.hdv`/`.hbv`/`.hdm`), and JSON are largely excluded (see `pom.xml` RAT config). Header template: `license-header.txt`.
 6. **Formatting** — Google Java Format via Spotless (`mvn spotless:apply` before commit).
 7. **Package placement** — Put new code under `org.apache.hop.datavault`, `.catalog`, or `.quality`, following existing layering (`metadata`, `hopgui`, `workflow/actions`, `transform`, services). Mirror Hop patterns: `*Meta` + dialog/editor; transforms often `*Meta` / `*Data` / `*`; actions under `.../workflow/actions/...`.
 8. **Plugin isolation** — Treat classloaders carefully. The assembly deliberately bundles selected third-party libs (ELK, CommonMark, Iceberg, some Hop actions). Prefer `provided` for Hop itself.

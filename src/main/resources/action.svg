@@ -1,10 +1,9 @@
 <!--
-  - Licensed to the Apache Software Foundation (ASF) under one or more
-  - contributor license agreements.  See the NOTICE file distributed with
-  - this work for additional information regarding copyright ownership.
-  - The ASF licenses this file to You under the Apache License, Version 2.0
-  - (the "License"); you may not use this file except in compliance with
-  - the License.  You may obtain a copy of the License at
+  - Copyright 2026 i-Bridge bv
+  -
+  - Licensed under the Apache License, Version 2.0 (the "License");
+  - you may not use this file except in compliance with the License.
+  - You may obtain a copy of the License at
   -
   -      http://www.apache.org/licenses/LICENSE-2.0
   -
@@ -15,7 +14,6 @@
   - limitations under the License.
   -
   -->
-
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
   <rect x="4" y="6" width="24" height="20" rx="3" fill="#f5a623" stroke="#333" stroke-width="1.5"/>
   <path d="M10 16h12M16 10v12" stroke="#333" stroke-width="2" stroke-linecap="round"/>

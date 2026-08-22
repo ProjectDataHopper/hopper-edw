@@ -339,7 +339,7 @@ RAT: `.hlv` is **not** excluded in `pom.xml` (neither is `.hem`). `LineageViewPe
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Licensed to the Apache Software Foundation (ASF) under one or more ... -->
+<!-- Copyright 2026 i-Bridge bv. Licensed under the Apache License, Version 2.0. -->
 <hop-lineage-view>
   <name>f_orders upstream</name>
   <description>Upstream sources of the POS fact</description>
