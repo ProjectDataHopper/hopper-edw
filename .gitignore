@@ -1,6 +1,9 @@
 
 target/**
 
+# Local scratch (compiled dumps, experiments)
+tmp/
+
 .idea
 **/*.iml
 
