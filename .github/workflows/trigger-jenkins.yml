@@ -84,8 +84,10 @@ jobs:
           HOP_VERSION: ${{ steps.pom.outputs.hop_version }}
           GROUP_ID: ${{ steps.pom.outputs.group_id }}
           ARTIFACT_ID: ${{ steps.pom.outputs.artifact_id }}
-          # Exact commit that triggered this workflow (Jenkins GitSCM branch name accepts a SHA)
-          GIT_REF: ${{ github.sha }}
+          # Push: github.sha is on refs/heads/* and Jenkins fetches it.
+          # pull_request: github.sha is the hidden merge commit (refs/pull/N/merge),
+          # which a heads-only clone never contains. Use the PR head commit instead.
+          GIT_REF: ${{ github.event.pull_request.head.sha || github.sha }}
           GIT_URL: ${{ github.server_url }}/${{ github.repository }}.git
           # Optional tuning (seconds)
           POLL_INTERVAL: "15"
