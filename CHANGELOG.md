@@ -1,8 +1,17 @@
 # Changelog
 
-All notable changes to the hop-datavault plugin are documented in this file.
+All notable changes to Data Hopper EDW (formerly the hop-datavault plugin) are documented in this file.
 
 ## Unreleased
+
+### Product identity: Data Hopper EDW
+
+- Repository home: [ProjectDataHopper/hopper-edw](https://github.com/ProjectDataHopper/hopper-edw) (transferred from `mattcasters/hop-data-vault`; old GitHub URLs redirect)
+- Product name: **Data Hopper EDW** — Apache Hop plugins to build an Enterprise Data Warehouse, not a Data Vault-only tool
+- Maven coordinates: `org.projectdatahopper.hop:hopper-edw` (was `org.apache.hop:hop-datavault`). Marketplace: `./hop marketplace install hopper-edw`
+- Assembly zip: `target/hopper-edw-*.zip`. Unzip layout stays `plugins/misc/datavault/`
+- License remains Apache License 2.0; copyright **i-Bridge bv**. Not an Apache Software Foundation release
+- **0.9.0 cutover:** uninstall `$HOP_HOME/plugins/misc/datavault` from the old `hop-datavault` artifact, re-import [`hop-marketplace-repo.yaml`](hop-marketplace-repo.yaml), then install `hopper-edw`. Release 0.9.0 remains at `org.apache.hop:hop-datavault` on Nexus
 
 ### Jinja macros and dbt-core import (issue #72)
 

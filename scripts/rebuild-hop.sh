@@ -36,7 +36,7 @@ HOP_VERSION="$(strip_carriage_returns "${HOP_IMAGE_VERSION:-}")"
 
 usage() {
   echo "Usage: $0 [--no-cache] [--hop-version VERSION]" >&2
-  echo "Rebuild ${HOP_IMAGE_NAME} (apache/hop + hop-datavault plugin)." >&2
+  echo "Rebuild ${HOP_IMAGE_NAME} (apache/hop + Data Hopper EDW plugin)." >&2
   echo "" >&2
   echo "Options:" >&2
   echo "  --no-cache              Build without Docker layer cache" >&2

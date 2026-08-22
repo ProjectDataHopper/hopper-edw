@@ -1,12 +1,18 @@
-Apache Hop Data Vault
-Copyright 2026 The Apache Software Foundation
+Data Hopper EDW
+Copyright 2026 i-Bridge bv
 
-This project contains code generated with the assistance of Grok,
-developed by xAI.
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
 
-The use of Grok was instrumental in accelerating development of
-the Data Vault 2.0 metadata model, loading patterns, and related
-components for Apache Hop.
+This is a third-party plugin for Apache Hop. It is NOT an Apache Software
+Foundation release and is not distributed by the ASF.
+
+"Apache Hop" and "Apache" are trademarks of the Apache Software Foundation.
+Data Vault 2.0 is a methodology; this product implements modeling and load
+generation for that methodology among other EDW capabilities.
+
+This project contains code generated with the assistance of Grok, developed
+by xAI. The use of Grok was instrumental in accelerating development of the
+Data Vault 2.0 metadata model, loading patterns, and related components.
 
 See: https://x.ai
      https://github.com/apache/hop/issues/7077
@@ -41,5 +47,3 @@ https://github.com/DeBortoliWines/skill-apache-hop-development
 Copyright 2026 De Bortoli Wines Pty Limited. Licensed under the Apache License,
 Version 2.0. See src/main/resources/org/apache/hop/datavault/ai/prompts/hop-standards/
 NOTICE-debortoli-hop-skill.txt for full attribution.
-
-

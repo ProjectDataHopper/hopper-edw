@@ -138,7 +138,7 @@ strip_carriage_returns() {
 # Newest host-side plugin assembly under target/ (signal that Maven package ran).
 latest_plugin_zip() {
   # shellcheck disable=SC2012
-  ls -1t "${REPO_ROOT}"/target/hop-datavault-*.zip 2>/dev/null | head -n 1
+  ls -1t "${REPO_ROOT}"/target/hopper-edw-*.zip 2>/dev/null | head -n 1
 }
 
 # Epoch seconds for a file mtime (GNU or BSD stat).
@@ -203,7 +203,7 @@ build_hop_image() {
   fi
 }
 
-# Ensure docker-hop:latest exists and is at least as new as target/hop-datavault-*.zip.
+# Ensure docker-hop:latest exists and is at least as new as target/hopper-edw-*.zip.
 # Rebuilds when the image is missing or when a host plugin package is newer than the image
 # (common after "mvn package" without "./scripts/rebuild-hop.sh").
 # Set HOP_IMAGE_SKIP_FRESHNESS=1 to only build when the image is missing.

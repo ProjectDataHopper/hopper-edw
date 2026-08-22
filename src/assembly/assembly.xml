@@ -56,7 +56,7 @@
     <dependencySets>
         <dependencySet>
             <includes>
-                <include>org.apache.hop:hop-datavault:jar</include>
+                <include>org.projectdatahopper.hop:hopper-edw:jar</include>
             </includes>
             <outputDirectory>plugins/misc/datavault/</outputDirectory>
         </dependencySet>

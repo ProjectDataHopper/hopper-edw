@@ -15,15 +15,17 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-# Hop Data Vault 2.0 Plugin
+# Data Hopper EDW
 
 ![EDW](docs/images/edw-logo.svg)
 
-Apache Hop plugin for **Data Vault 2.0**, **Business Vault**, and **dimensional** modeling, validation, and model-driven loading. Version **0.10.0-SNAPSHOT** (latest release **0.9.0**) requires **Apache Hop 2.19.0** and **Java 21**.
+Apache Hop plugins to design, generate, and operate an **Enterprise Data Warehouse**: Data Catalog, source models, **Data Vault 2.0**, **Business Vault**, **dimensional** models, quality, lineage, and the **EDW Journey** map. Version **0.10.0-SNAPSHOT** (latest release **0.9.0** as `hop-datavault`) requires **Apache Hop 2.19.0** and **Java 21**.
 
 **Hop 2.19.0 is required.** Hop **2.18.x** (including 2.18.1) is **not** supported for this release.
 
 **Model once. Generate loads and consumption layers.** Sources live in the Hop **Data Catalog**; visual **`.hsm`**, **`.hdv`**, **`.hbv`**, and **`.hdm`** models drive workflow actions, optional **execution maps** (`.hem`), and **Hop Lineage Views** (`.hlv`).
+
+This repository is the **build-the-warehouse** plugin in the [Data Hopper](https://data-hopper.com) family. **hopperShip** (run a Hop environment) and **hopperHarbor** (fleet control) are the online operations platform, made available separately. Copyright **i-Bridge bv**; licensed under Apache License 2.0. Not an Apache Software Foundation release. Support and services for this plugin and the online platform: [data-hopper.com](https://data-hopper.com).
 
 ## Tutorials
 
@@ -101,7 +103,7 @@ Screenshots are in [`docs/images/`](docs/images/).
 
 ### Integration tests
 
-Register `integration-tests/` as Hop project **`hop-data-vault`**. Configure **`CRM`** and **`Vault`** database connections, install the plugin, then:
+Register `integration-tests/` as a Hop project (name **`hopper-edw`** is fine). Configure **`CRM`** and **`Vault`** database connections, install the plugin, then:
 
 ```bash
 ./scripts/run-postgres.sh up
@@ -130,12 +132,14 @@ mvn clean package
 
 Artifacts:
 
-- `target/hop-datavault-0.10.0-SNAPSHOT.jar`
-- `target/hop-datavault-0.10.0-SNAPSHOT.zip` (ready-to-unzip plugin layout)
+- `target/hopper-edw-0.10.0-SNAPSHOT.jar`
+- `target/hopper-edw-0.10.0-SNAPSHOT.zip` (ready-to-unzip plugin layout)
 
-Published release artifacts for **0.9.0**:
+Maven coordinates from **0.10.0** onward: `org.projectdatahopper.hop:hopper-edw`. Release **0.9.0** was published as `org.apache.hop:hop-datavault`.
 
-- **GitHub:** [v0.9.0 release](https://github.com/mattcasters/hop-data-vault/releases/tag/v0.9.0) — [hop-datavault-0.9.0.zip](https://github.com/mattcasters/hop-data-vault/releases/download/v0.9.0/hop-datavault-0.9.0.zip)
+Published release artifacts for **0.9.0** (previous coordinates):
+
+- **GitHub:** [v0.9.0 release](https://github.com/ProjectDataHopper/hopper-edw/releases/tag/v0.9.0) — [hop-datavault-0.9.0.zip](https://github.com/ProjectDataHopper/hopper-edw/releases/download/v0.9.0/hop-datavault-0.9.0.zip)
 - **Nexus (Marketplace):** [hop-datavault-0.9.0.zip](https://repository.data-hopper.com/repository/hop-community-plugins/org/apache/hop/hop-datavault/0.9.0/hop-datavault-0.9.0.zip) (`org.apache.hop:hop-datavault:0.9.0`)
 
 ## Installation (external plugin)
@@ -153,34 +157,36 @@ Continuous Jenkins builds publish the latest SNAPSHOT zip to the Data Hopper com
 
 ```bash
 ./hop marketplace repo import \
-  https://raw.githubusercontent.com/mattcasters/hop-data-vault/refs/heads/main/hop-marketplace-repo.yaml
+  https://raw.githubusercontent.com/ProjectDataHopper/hopper-edw/refs/heads/main/hop-marketplace-repo.yaml
 ```
 
 ```text
 Updated repository 'data-hopper-community' → https://repository.data-hopper.com/repository/hop-community-plugins/ (browse enabled)
 ```
 
+If you previously installed **0.9.0** as `hop-datavault`, remove `$HOP_HOME/plugins/misc/datavault` first so the folders do not stack.
+
 **2. Query** available plugins (filter for this one):
 
 ```bash
-./hop marketplace query | grep vault
+./hop marketplace query | grep -i hopper
 ```
 
 ```text
-| hop-datavault             | 0.9.0           | Community     | data-hopper-community |           | 2026-08-16 | Data Vault 2.0, Business Vault, and dimensional model... |
+| hopper-edw                | 0.10.0-SNAPSHOT | Community     | data-hopper-community |           |            | Apache Hop plugins to build an Enterprise Data Wareho... |
 ```
 
 **3. Install** the plugin (latest release or continuous SNAPSHOT when published):
 
 ```bash
-./hop marketplace install hop-datavault
+./hop marketplace install hopper-edw
 ```
 
 ```text
-Resolved hop-datavault → org.apache.hop:hop-datavault:0.9.0 (prefer repo 'data-hopper-community')
-… Marketplace - Downloading org.apache.hop:hop-datavault:0.9.0 from https://repository.data-hopper.com/repository/hop-community-plugins/…
-… Marketplace - Installed org.apache.hop:hop-datavault:0.9.0. Restart Hop to load the plugin.
-Plugin org.apache.hop:hop-datavault:0.9.0 installed under $HOP_HOME from repo 'data-hopper-community'. Restart Hop to load it.
+Resolved hopper-edw → org.projectdatahopper.hop:hopper-edw:0.10.0-SNAPSHOT (prefer repo 'data-hopper-community')
+… Marketplace - Downloading org.projectdatahopper.hop:hopper-edw:0.10.0-SNAPSHOT from https://repository.data-hopper.com/repository/hop-community-plugins/…
+… Marketplace - Installed org.projectdatahopper.hop:hopper-edw:0.10.0-SNAPSHOT. Restart Hop to load the plugin.
+Plugin org.projectdatahopper.hop:hopper-edw:0.10.0-SNAPSHOT installed under $HOP_HOME from repo 'data-hopper-community'. Restart Hop to load it.
 ```
 
 You can also use **Tools → Marketplace…** in Hop GUI: import the repository on the **Repositories** tab, then install from the **Plugins** tab.

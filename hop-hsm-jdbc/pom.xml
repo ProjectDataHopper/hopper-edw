@@ -21,15 +21,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.apache.hop</groupId>
+  <groupId>org.projectdatahopper.hop</groupId>
   <artifactId>hop-hsm-jdbc</artifactId>
   <version>0.10.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>Hop Source Model JDBC (thin client)</name>
+  <name>Data Hopper Source Model JDBC (thin client)</name>
   <description>
     Single-jar, zero-dependency JDBC driver for free SQL against a Hop Server source model service.
-    Install this jar alone in DBeaver / SQuirreL / BI tools. Server side lives in hop-datavault.
+    Install this jar alone in DBeaver / SQuirreL / BI tools. Server side lives in hopper-edw (Data Hopper EDW).
   </description>
 
   <properties>
@@ -71,7 +71,7 @@
           <archive>
             <manifestEntries>
               <Automatic-Module-Name>org.apache.hop.hsm.jdbc</Automatic-Module-Name>
-              <Implementation-Title>Hop Source Model JDBC</Implementation-Title>
+              <Implementation-Title>Data Hopper Source Model JDBC</Implementation-Title>
               <Implementation-Version>${project.version}</Implementation-Version>
             </manifestEntries>
           </archive>

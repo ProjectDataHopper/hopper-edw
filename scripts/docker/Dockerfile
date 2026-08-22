@@ -52,10 +52,10 @@ USER root
 RUN apk add --no-cache python3
 
 COPY --from=build /jdbc/*.jar /opt/hop/lib/jdbc/
-COPY --from=build /src/target/hop-datavault-*.zip /tmp/hop-datavault.zip
+COPY --from=build /src/target/hopper-edw-*.zip /tmp/hopper-edw.zip
 
-RUN unzip -q /tmp/hop-datavault.zip -d /opt/hop \
-  && rm /tmp/hop-datavault.zip \
+RUN unzip -q /tmp/hopper-edw.zip -d /opt/hop \
+  && rm /tmp/hopper-edw.zip \
   && chown -R hop:hop /opt/hop/plugins/misc/datavault /opt/hop/lib/jdbc /opt/hop/lib/core
 
 COPY scripts/docker/entrypoint-init.sh /opt/hop-datavault/entrypoint-init.sh

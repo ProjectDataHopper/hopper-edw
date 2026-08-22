@@ -13,7 +13,7 @@ mvn -f hop-hsm-jdbc/pom.xml clean package
 
 ## Server setup
 
-1. Install the **hop-datavault** plugin on Hop Server (includes the `/hop/sourceModelData` servlet).
+1. Install the **Data Hopper EDW** (`hopper-edw`) plugin on Hop Server (includes the `/hop/sourceModelData` servlet).
 2. In the Hop Server project metadata, create one or more **Source model service** entries (**Servers and Web Services**):
    - **Name** — becomes the **JDBC schema** name in DBeaver
    - **Source model file** — server-side VFS path to the `.hsm` (never exposed to clients)
@@ -24,7 +24,7 @@ Product docs with screenshots: [`docs/source-modeler-overview.adoc`](../docs/sou
 
 ## Hop GUI (built-in connection type)
 
-With the **hop-datavault** plugin installed, create a relational connection of type **Apache Hop Source Model**:
+With the **Data Hopper EDW** plugin installed, create a relational connection of type **Apache Hop Source Model**:
 
 | Hop field | Maps to |
 |-----------|---------|
