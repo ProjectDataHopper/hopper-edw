@@ -16,7 +16,7 @@ image::images/source-modeler-example.png[Source modeler canvas with tables, rela
 
 Many source systems expose sparse or normalized tables: product + product type, customer hub + address/contact/demo/prefs, order line + status dictionary. VaultSpeed-style tooling treats the **source ER** as a first-class model, then composes **queries** that become load feeds.
 
-Without a source modeler, hop-data-vault typically maps each physical table to its own catalog `DV_SOURCE` and often its own satellite. That is correct for true independent history, but expensive when one satellite (or hub load) should read a join.
+Without a source modeler, Data Hopper EDW typically maps each physical table to its own catalog `DV_SOURCE` and often its own satellite. That is correct for true independent history, but expensive when one satellite (or hub load) should read a join.
 
 Desired flow:
 
@@ -199,7 +199,7 @@ Expose free SQL without publishing filesystem paths. Each **Source model service
 
 ===== Hop relational connection type
 
-With the hop-datavault plugin installed, create a connection of type **Apache Hop Source Model** (`HOPSOURCEMODEL`):
+With Data Hopper EDW installed, create a connection of type **Apache Hop Source Model** (`HOPSOURCEMODEL`):
 
 |===
 | Hop field | Maps to |
@@ -223,7 +223,7 @@ On the Hop project used by Hop Server, open **Metadata → Servers and Web Servi
 
 image::images/hop-source-model-service-editor.png[Hop metadata editor for Source model service "crm" pointing at source-tables-crm.hsm,align="center"]
 
-Hop Server must load the hop-datavault plugin (servlet path `/hop/sourceModelData`) and have RDBMS connection metadata for the model’s sources.
+Hop Server must load Data Hopper EDW (servlet path `/hop/sourceModelData`) and have RDBMS connection metadata for the model’s sources.
 
 ===== 2. Register the thin driver in DBeaver
 

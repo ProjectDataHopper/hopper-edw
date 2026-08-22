@@ -1,4 +1,4 @@
-= Hop Data Vault plugin — feature overview
+= Data Hopper EDW — feature overview
 :toc: macro
 :toclevels: 3
 :openvar: ${
@@ -6,7 +6,7 @@
 
 toc::[]
 
-Apache Hop plugin for **model-driven Data Vault 2.0**, **Business Vault**, and **dimensional** loading. Version **0.10.0-SNAPSHOT** (latest release **0.9.0**) requires **Apache Hop 2.19.0** and **Java 21**.
+**Data Hopper EDW** is a set of Apache Hop plugins for an **Enterprise Data Warehouse**: catalog, source models, **model-driven Data Vault 2.0**, **Business Vault**, and **dimensional** loading. Version **0.10.0-SNAPSHOT** (latest release **0.9.0**) requires **Apache Hop 2.19.0** and **Java 21**.
 
 **Model once. Generate loads and consumption layers.** The visual models (`.hsm`, `.hdv`, `.hbv`, `.hdm`) are the contract between architects, modelers, and operations.
 
@@ -32,11 +32,11 @@ For a slide-style executive summary, see link:presentations/hop-data-vault-overv
 
 |Data type mappings (pre-modeling sources)
 |Available
-|link:data-type-mappings.adoc[Data type mappings], issue https://github.com/mattcasters/hop-data-vault/issues/113[#113]
+|link:data-type-mappings.adoc[Data type mappings], issue https://github.com/ProjectDataHopper/hopper-edw/issues/113[#113]
 
 |Target type mappings (Hop type to DDL)
 |Available
-|link:target-type-mappings.adoc[Target type mappings], issue https://github.com/mattcasters/hop-data-vault/issues/127[#127]
+|link:target-type-mappings.adoc[Target type mappings], issue https://github.com/ProjectDataHopper/hopper-edw/issues/127[#127]
 
 |Free SQL over source models (Calcite parse/plan, pushdown + residual pipeline)
 |Available
@@ -112,7 +112,7 @@ For a slide-style executive summary, see link:presentations/hop-data-vault-overv
 
 |Optional DV orphan handling (seed parent hubs, INFER / SENTINEL / QUARANTINE / FAIL)
 |Available
-|link:datavault-configuration.adoc[Data Vault configuration], link:plans/orphan-prevention-plan.md[orphan-prevention plan], issue https://github.com/mattcasters/hop-data-vault/issues/77[#77]
+|link:datavault-configuration.adoc[Data Vault configuration], link:plans/orphan-prevention-plan.md[orphan-prevention plan], issue https://github.com/ProjectDataHopper/hopper-edw/issues/77[#77]
 
 |Update resource definition group action
 |Available
@@ -140,11 +140,11 @@ For a slide-style executive summary, see link:presentations/hop-data-vault-overv
 
 |Jinja macros for BV SQL (Jinjava + metadata library)
 |Available
-|link:business-vault-sql-view.adoc[Business Vault SQL], issue https://github.com/mattcasters/hop-data-vault/issues/72[#72]
+|link:business-vault-sql-view.adoc[Business Vault SQL], issue https://github.com/ProjectDataHopper/hopper-edw/issues/72[#72]
 
 |dbt-core importer (`.sql` + YAML → `.hbv`)
 |Available
-|link:dbt-import.adoc[Import dbt models] — BV canvas dialog + **Import dbt project** workflow action, issue https://github.com/mattcasters/hop-data-vault/issues/72[#72]
+|link:dbt-import.adoc[Import dbt models] — BV canvas dialog + **Import dbt project** workflow action, issue https://github.com/ProjectDataHopper/hopper-edw/issues/72[#72]
 
 |Catalog model registry (DV/BV/DM index)
 |Available
@@ -156,7 +156,7 @@ For a slide-style executive summary, see link:presentations/hop-data-vault-overv
 
 |Hop Lineage View (`.hlv`) over Marquez / export folder / local models
 |Available
-|link:hop-lineage-view.adoc[Hop Lineage View], issue https://github.com/mattcasters/hop-data-vault/issues/79[#79]
+|link:hop-lineage-view.adoc[Hop Lineage View], issue https://github.com/ProjectDataHopper/hopper-edw/issues/79[#79]
 
 |Explainable DDL + lineage drift gate
 |Available
@@ -192,7 +192,7 @@ For a slide-style executive summary, see link:presentations/hop-data-vault-overv
 
 |Hop Web modelers (`.hsm`/`.hdv`/`.hbv`/`.hdm`/`.hem`/`.hlv`)
 |Available (experimental; needs Hop canvas SPI)
-|link:hop-web-modelers.md[Hop Web modelers], issue https://github.com/mattcasters/hop-data-vault/issues/119[#119]
+|link:hop-web-modelers.md[Hop Web modelers], issue https://github.com/ProjectDataHopper/hopper-edw/issues/119[#119]
 
 |AI Help (model, pipeline, workflow)
 |Available
@@ -269,7 +269,7 @@ image::images/source-modeler-generate-data-vault-model-dialog.png[Generate Data 
 
 === Project and metadata search (Hop 2.19)
 
-Hop **Search Everywhere** / project search includes hop-data-vault models and metadata:
+Hop **Search Everywhere** / project search includes Data Hopper EDW models and metadata:
 
 [cols="1,3", options="header"]
 |===

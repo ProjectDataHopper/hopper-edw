@@ -1,10 +1,9 @@
 <!--
-Licensed to the Apache Software Foundation (ASF) under one or more
-contributor license agreements.  See the NOTICE file distributed with
-this work for additional information regarding copyright ownership.
-The ASF licenses this file to You under the Apache License, Version 2.0
-(the "License"); you may not use this file except in compliance with
-the License.  You may obtain a copy of the License at
+Copyright 2026 i-Bridge bv
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
      http://www.apache.org/licenses/LICENSE-2.0
 
@@ -17,8 +16,8 @@ limitations under the License.
 
 # Plan: Optional orphan handling for Data Vault (#77), related to #109
 
-**Issue:** [#77 — Smart "Ghost Record" & Early-Arriving Fact Automations](https://github.com/mattcasters/hop-data-vault/issues/77)  
-**Related:** [#109 — Late arriving dimensions](https://github.com/mattcasters/hop-data-vault/issues/109) — design at [late-arriving-dimensions-plan.md](late-arriving-dimensions-plan.md)  
+**Issue:** [#77 — Smart "Ghost Record" & Early-Arriving Fact Automations](https://github.com/ProjectDataHopper/hopper-edw/issues/77)  
+**Related:** [#109 — Late arriving dimensions](https://github.com/ProjectDataHopper/hopper-edw/issues/109) — design at [late-arriving-dimensions-plan.md](late-arriving-dimensions-plan.md)  
 **Status:** Implemented (opt-in, default `PASS`) — evaluation remains the design record
 
 This document is both the **evaluation** of the “orphan prevention layer” idea and the **implementation plan** to support it optionally.

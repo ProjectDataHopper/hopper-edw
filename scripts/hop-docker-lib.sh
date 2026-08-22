@@ -1,11 +1,10 @@
 #!/bin/sh
 #
-# Licensed to the Apache Software Foundation (ASF) under one or more
-# contributor license agreements.  See the NOTICE file distributed with
-# this work for additional information regarding copyright ownership.
-# The ASF licenses this file to You under the Apache License, Version 2.0
-# (the "License"); you may not use this file except in compliance with
-# the License.  You may obtain a copy of the License at
+# Copyright 2026 i-Bridge bv
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
 #      http://www.apache.org/licenses/LICENSE-2.0
 #
@@ -15,8 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-#
-
 # Shared helpers for running Apache Hop in Docker across Hop projects in this repo.
 # Source after setting SCRIPT_DIR to the scripts/ directory.
 
@@ -138,7 +135,7 @@ strip_carriage_returns() {
 # Newest host-side plugin assembly under target/ (signal that Maven package ran).
 latest_plugin_zip() {
   # shellcheck disable=SC2012
-  ls -1t "${REPO_ROOT}"/target/hop-datavault-*.zip 2>/dev/null | head -n 1
+  ls -1t "${REPO_ROOT}"/target/hopper-edw-*.zip 2>/dev/null | head -n 1
 }
 
 # Epoch seconds for a file mtime (GNU or BSD stat).
@@ -203,7 +200,7 @@ build_hop_image() {
   fi
 }
 
-# Ensure docker-hop:latest exists and is at least as new as target/hop-datavault-*.zip.
+# Ensure docker-hop:latest exists and is at least as new as target/hopper-edw-*.zip.
 # Rebuilds when the image is missing or when a host plugin package is newer than the image
 # (common after "mvn package" without "./scripts/rebuild-hop.sh").
 # Set HOP_IMAGE_SKIP_FRESHNESS=1 to only build when the image is missing.

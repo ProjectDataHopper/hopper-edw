@@ -1,6 +1,6 @@
 # Plan: Jinja macros + dbt-core importer for Business Vault SQL (Issue #72)
 
-**Issue:** [#72 — Support dbt-style macros in the SQL Business Vault Table](https://github.com/mattcasters/hop-data-vault/issues/72)  
+**Issue:** [#72 — Support dbt-style macros in the SQL Business Vault Table](https://github.com/ProjectDataHopper/hopper-edw/issues/72)  
 **Branch:** `issue-72`  
 **Goal of this plan:** implement the *basics* of a Hop alternative for teams leaving dbt — not a full dbt-core clone.
 

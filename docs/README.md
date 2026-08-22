@@ -1,10 +1,9 @@
 <!--
-Licensed to the Apache Software Foundation (ASF) under one or more
-contributor license agreements.  See the NOTICE file distributed with
-this work for additional information regarding copyright ownership.
-The ASF licenses this file to You under the Apache License, Version 2.0
-(the "License"); you may not use this file except in compliance with
-the License.  You may obtain a copy of the License at
+Copyright 2026 i-Bridge bv
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
      http://www.apache.org/licenses/LICENSE-2.0
 
@@ -15,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Hop Data Vault documentation index
+# Data Hopper EDW documentation index
 
-Documentation for the **hop-datavault** plugin (development **0.10.0-SNAPSHOT**, latest release **0.9.0**). Requires **Apache Hop 2.19.0**. Highlights include **Free SQL / hop-hsm JDBC**, **source modeler** (`.hsm` with JSON and pipeline sources), **metadata harvesting**, optional **load cycle IDs**, **composite hub business keys**, **OpenLineage / Marquez export**, **Hop Lineage View** (`.hlv`), **source-to-target lineage**, catalog version tags, schema validation, multi-DB hardening, and Business Vault incremental loading. See [CHANGELOG.md](../CHANGELOG.md).
+Documentation for the **Data Hopper EDW** plugin (development **0.10.0-SNAPSHOT**, latest release **0.9.0**). Requires **Apache Hop 2.19.0**. Highlights include **Free SQL / hop-hsm JDBC**, **source modeler** (`.hsm` with JSON and pipeline sources), **metadata harvesting**, optional **load cycle IDs**, **composite hub business keys**, **OpenLineage / Marquez export**, **Hop Lineage View** (`.hlv`), **source-to-target lineage**, catalog version tags, schema validation, multi-DB hardening, and Business Vault incremental loading. See [CHANGELOG.md](../CHANGELOG.md).
 
 **New here?** Read [architecture.adoc](architecture.adoc) (catalog, models, resource definition group), then [getting-started-edw.adoc](getting-started-edw.adoc) to **build** an EDW. To **tour** a finished sample, use [getting-started-retail.adoc](getting-started-retail.adoc). Capability list: [feature-overview.adoc](feature-overview.adoc).
 

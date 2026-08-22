@@ -4,7 +4,7 @@
 
 toc::[]
 
-The hop-datavault plugin stores **record definitions** in the Hop **Data Catalog**. Modelers work in the **Data Catalog** perspective; generated pipelines and transforms resolve definitions by namespace and name.
+Data Hopper EDW stores **record definitions** in the Hop **Data Catalog**. Modelers work in the **Data Catalog** perspective; generated pipelines and transforms resolve definitions by namespace and name.
 
 The catalog is a **contract bus** (picture: link:architecture.adoc#d2-catalog-bus[Architecture — D2]):
 

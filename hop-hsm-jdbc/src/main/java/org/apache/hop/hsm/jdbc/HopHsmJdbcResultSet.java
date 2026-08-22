@@ -1,10 +1,9 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Copyright 2026 i-Bridge bv
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -73,7 +72,8 @@ public class HopHsmJdbcResultSet implements ResultSet {
         String name = HsmJson.str(m, "n");
         String typeName = HsmJson.str(m, "t");
         int sqlType = HsmJson.integer(m, "j", Types.VARCHAR);
-        columnList.add(new Column(name != null ? name : "c" + columnList.size(), typeName, sqlType));
+        columnList.add(
+            new Column(name != null ? name : "c" + columnList.size(), typeName, sqlType));
       }
     }
     List<Object[]> data = new ArrayList<>();
@@ -94,7 +94,8 @@ public class HopHsmJdbcResultSet implements ResultSet {
     return new HopHsmJdbcResultSet(statement, columnList.toArray(new Column[0]), data);
   }
 
-  static HopHsmJdbcResultSet of(Statement statement, String[] names, int[] sqlTypes, List<Object[]> rows) {
+  static HopHsmJdbcResultSet of(
+      Statement statement, String[] names, int[] sqlTypes, List<Object[]> rows) {
     Column[] cols = new Column[names.length];
     for (int i = 0; i < names.length; i++) {
       cols[i] = new Column(names[i], typeName(sqlTypes[i]), sqlTypes[i]);

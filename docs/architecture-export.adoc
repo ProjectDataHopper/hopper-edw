@@ -107,7 +107,7 @@ Basename is the model file name without extension (`models/subdir/retail-360.hdv
 
 == CLI
 
-With the hop-datavault plugin installed. Enable a Hop **project** or **lifecycle environment** the same way as `hop-run` (projects plugin mixins). Use **one** of `-j` / `--project` **or** `-e` / `--environment` (not both).
+With Data Hopper EDW installed. Enable a Hop **project** or **lifecycle environment** the same way as `hop-run` (projects plugin mixins). Use **one** of `-j` / `--project` **or** `-e` / `--environment` (not both).
 
 Relative paths resolve under `${PROJECT_HOME}`. Paths inside diagrams are project-relative (e.g. `models/retail-360.hdv`).
 

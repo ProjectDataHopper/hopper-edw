@@ -1,10 +1,10 @@
-= Apache Hop Data Vault 2.0 Plugin
+= Data Hopper EDW
 :toc: macro
 :toclevels: 3
 
 toc::[]
 
-The Data Vault 2.0 plugin helps you design and load a Data Vault 2.0 data warehouse using Apache Hop. Instead of writing many similar pipelines by hand, you create a visual model of your Hubs, Links, and Satellites. Hop then generates the pipelines needed to load data into those structures.
+**Data Hopper EDW** helps you design and load a Data Vault 2.0 data warehouse using Apache Hop — as one layer of a full EDW (catalog, source models, Business Vault, dimensional). Instead of writing many similar pipelines by hand, you create a visual model of your Hubs, Links, and Satellites. Hop then generates the pipelines needed to load data into those structures.
 
 == What the plugin is for
 
@@ -259,7 +259,7 @@ With an execution metrics profile and OPS database, the model canvas can show re
 
 image::images/data-vault-retail-360-model-with-duration-metrics.png[Retail 360 Data Vault model with load duration overview pane,align="center"]
 
-Executives and architects can review link:presentations/hop-data-vault-overview.md[Hop Data Vault overview slides].
+Executives and architects can review link:presentations/hop-data-vault-overview.md[Data Hopper EDW overview slides].
 
 == Current capabilities
 

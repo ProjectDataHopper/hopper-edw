@@ -1,6 +1,6 @@
 # Plan: Target type mappings for DDL (Issue #127)
 
-**Issue:** [#127 — Allow preferences for target data type and DDL](https://github.com/mattcasters/hop-data-vault/issues/127)
+**Issue:** [#127 — Allow preferences for target data type and DDL](https://github.com/ProjectDataHopper/hopper-edw/issues/127)
 
 **Goal:** Let users declare reusable, first-match rules that map **Hop types** (plus length/precision) to **native SQL types** used in generated DDL. Custom rules run **before** Hop’s dialect `getFieldDefinition`. Unmatched columns keep today’s database-specific defaults.
 

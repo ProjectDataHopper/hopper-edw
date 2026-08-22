@@ -4,7 +4,7 @@
 
 toc::[]
 
-Day-to-day operation of hop-datavault loads: environments, Docker runners, batch orchestration, and partial model updates.
+Day-to-day operation of Data Hopper EDW loads: environments, Docker runners, batch orchestration, and partial model updates.
 
 How you *got* the models and the resource definition group is design-time — see link:architecture.adoc#d4-build-vs-run[Architecture — build vs run] and link:getting-started-edw.adoc[Getting started — building an EDW]. This page is the operate lane.
 

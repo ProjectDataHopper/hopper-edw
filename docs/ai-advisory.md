@@ -1,6 +1,6 @@
 # Data Vault AI Help & Advisory
 
-The Apache Hop Data Vault plugin includes an AI-powered assistant (the **AI Help** or **AI Advisor**) designed to accelerate enterprise data warehousing modeling and integration. By integrating a Large Language Model (LLM), the AI Helper can analyze catalog sources, validate models, suggest layout updates, perform type mappings, build hubs, links, and satellites, and troubleshoot integration errors.
+The Data Hopper EDW includes an AI-powered assistant (the **AI Help** or **AI Advisor**) designed to accelerate enterprise data warehousing modeling and integration. By integrating a Large Language Model (LLM), the AI Helper can analyze catalog sources, validate models, suggest layout updates, perform type mappings, build hubs, links, and satellites, and troubleshoot integration errors.
 
 ![Data Vault AI Help Dialog](images/data-vault-ai-help-dialog.png)
 
@@ -149,7 +149,7 @@ The AI can suggest the following structured modifications:
 
 ## Privacy & Security
 
-The Hop Data Vault AI Helper values the security of your enterprise metadata:
+The Data Hopper EDW AI Helper values the security of your enterprise metadata:
 * **No Secret Leaks**: API keys are securely stored in your local Hop configuration file; they are never sent inside prompts.
 * **Redacted Database Connections**: Database metadata connection descriptions are limited to the name, type, database name, and host. **Usernames, passwords, ports, and connection URLs are explicitly excluded** before sending.
 * **Data Scoping**: Only catalog source schemas and model components that you explicitly check and approve are uploaded to your chosen LLM provider.

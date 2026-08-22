@@ -1,10 +1,9 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Copyright 2026 i-Bridge bv
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -329,7 +328,7 @@ class ArchitectureExportTest {
     org.apache.hop.core.variables.Variables variables =
         new org.apache.hop.core.variables.Variables();
     variables.setVariable(
-        "PROJECT_HOME", "/home/matt/git/mattcasters/hop-data-vault/retail-example");
+        "PROJECT_HOME", "/home/matt/git/ProjectDataHopper/hopper-edw/retail-example");
 
     assertEquals(
         "models/retail-360.hdv",
@@ -338,12 +337,12 @@ class ArchitectureExportTest {
     assertEquals(
         "models/retail-360.hdv",
         ArchitecturePathSupport.toProjectRelativePath(
-            "/home/matt/git/mattcasters/hop-data-vault/retail-example/models/retail-360.hdv",
+            "/home/matt/git/ProjectDataHopper/hopper-edw/retail-example/models/retail-360.hdv",
             variables));
     assertEquals(
         "pipelines/generate-date-dimension-data.hpl",
         ArchitecturePathSupport.toProjectRelativePath(
-            "/home/matt/git/mattcasters/hop-data-vault/retail-example/pipelines/generate-date-dimension-data.hpl",
+            "/home/matt/git/ProjectDataHopper/hopper-edw/retail-example/pipelines/generate-date-dimension-data.hpl",
             variables));
     // Free-text edge labels stay unchanged
     assertEquals(
@@ -373,7 +372,7 @@ class ArchitectureExportTest {
     link.setFromNodeId("model-bv");
     link.setToNodeId("model-dv");
     link.setEdgeType(ExecutionMapEdgeType.MODEL_LINK);
-    link.setLabel("/home/matt/git/mattcasters/hop-data-vault/retail-example/models/retail-360.hdv");
+    link.setLabel("/home/matt/git/ProjectDataHopper/hopper-edw/retail-example/models/retail-360.hdv");
     map.getEdgesOrEmpty().add(link);
 
     ArchitectureGraph graph = ArchitectureGraphFromExecutionMap.build(map);

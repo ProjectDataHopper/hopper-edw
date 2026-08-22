@@ -6,7 +6,7 @@
 | **Author** | TBD |
 | **Date** | 2026-08-14 |
 | **Status** | Draft (rev 4 — user decisions locked 2026-08-14) |
-| **Issue** | [mattcasters/hop-data-vault#79](https://github.com/mattcasters/hop-data-vault/issues/79) |
+| **Issue** | [ProjectDataHopper/hopper-edw#79](https://github.com/ProjectDataHopper/hopper-edw/issues/79) |
 | **Related shipped work** | [#101 OpenLineage export](docs/plans/marquez-lineage-plan.md) (0.5.0), source-to-target lineage, execution maps (`.hem`), load-duration pane |
 | **Audience** | hop-data-vault maintainers; assumes Hop 2.19.0 plugin + Explorer file-type patterns |
 
@@ -339,7 +339,7 @@ RAT: `.hlv` is **not** excluded in `pom.xml` (neither is `.hem`). `LineageViewPe
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Licensed to the Apache Software Foundation (ASF) under one or more ... -->
+<!-- Copyright 2026 i-Bridge bv. Licensed under the Apache License, Version 2.0. -->
 <hop-lineage-view>
   <name>f_orders upstream</name>
   <description>Upstream sources of the POS fact</description>
@@ -1567,7 +1567,7 @@ Rollback: stop opening `.hlv`. No schema migration.
 
 ## References
 
-- Issue: https://github.com/mattcasters/hop-data-vault/issues/79
+- Issue: https://github.com/ProjectDataHopper/hopper-edw/issues/79
 - `docs/openlineage-export.adoc`, `docs/plans/marquez-lineage-plan.md`, `docs/source-to-target-lineage.adoc`, `docs/execution-maps.adoc`, `docs/operations.adoc`, `docs/hop-web-modelers.md`
 - Export: `src/main/java/org/apache/hop/datavault/openlineage/*`
 - Collectors: `src/main/java/org/apache/hop/datavault/lineage/*`

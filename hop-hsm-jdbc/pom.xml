@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Licensed to the Apache Software Foundation (ASF) under one or more
-  ~ contributor license agreements.  See the NOTICE file distributed with
-  ~ this work for additional information regarding copyright ownership.
-  ~ The ASF licenses this file to You under the Apache License, Version 2.0
-  ~ (the "License"); you may not use this file except in compliance with
-  ~ the License.  You may obtain a copy of the License at
+  ~ Copyright 2026 i-Bridge bv
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
   ~
   ~      http://www.apache.org/licenses/LICENSE-2.0
   ~
@@ -14,22 +13,21 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
-  ~
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.apache.hop</groupId>
+  <groupId>org.projectdatahopper.hop</groupId>
   <artifactId>hop-hsm-jdbc</artifactId>
   <version>0.10.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>Hop Source Model JDBC (thin client)</name>
+  <name>Data Hopper Source Model JDBC (thin client)</name>
   <description>
     Single-jar, zero-dependency JDBC driver for free SQL against a Hop Server source model service.
-    Install this jar alone in DBeaver / SQuirreL / BI tools. Server side lives in hop-datavault.
+    Install this jar alone in DBeaver / SQuirreL / BI tools. Server side lives in hopper-edw (Data Hopper EDW).
   </description>
 
   <properties>
@@ -71,7 +69,7 @@
           <archive>
             <manifestEntries>
               <Automatic-Module-Name>org.apache.hop.hsm.jdbc</Automatic-Module-Name>
-              <Implementation-Title>Hop Source Model JDBC</Implementation-Title>
+              <Implementation-Title>Data Hopper Source Model JDBC</Implementation-Title>
               <Implementation-Version>${project.version}</Implementation-Version>
             </manifestEntries>
           </archive>

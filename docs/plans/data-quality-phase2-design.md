@@ -1018,7 +1018,7 @@ Rejected as primary approach — fights catalog-centric goal; still useful as em
 - `src/main/java/org/apache/hop/catalog/hopgui/perspective/RecordDefinitionDetailsPanel.java`
 - `retail-example/catalog-data/hop/retail-example/operations/load_run.json` — OPS / dv_ops
 - `retail-example/workflows/run-retail-update.hwf` — source-only post path today
-- Issue https://github.com/mattcasters/hop-data-vault/issues/66
+- Issue https://github.com/ProjectDataHopper/hopper-edw/issues/66
 
 ---
 

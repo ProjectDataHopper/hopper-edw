@@ -1,10 +1,9 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Copyright 2026 i-Bridge bv
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -22,8 +21,9 @@ import org.apache.hop.core.util.Utils;
 /** Normalizes classpath markdown help topics for display. */
 public final class MarkdownHelpContentSupport {
 
+  /** Leading HTML license comment (i-Bridge Apache-2.0 or historical ASF boilerplate). */
   private static final Pattern LEADING_LICENSE_COMMENT =
-      Pattern.compile("(?s)^\\s*<!--.*?Licensed to the Apache Software Foundation.*?-->\\s*");
+      Pattern.compile("(?s)^\\s*<!--(?:(?!-->).)*?Apache License(?:(?!-->).)*?-->\\s*");
 
   private MarkdownHelpContentSupport() {}
 

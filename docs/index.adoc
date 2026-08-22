@@ -1,4 +1,4 @@
-= Hop Data Vault documentation
+= Data Hopper EDW documentation
 :toc: left
 :toclevels: 2
 :sectanchors:
@@ -126,4 +126,4 @@ From the repository root (JDK 21, Maven 3):
 mvn package -DskipTests
 ----
 
-Then open `target/generated-docs/index.html`, or unzip `target/hop-datavault-*-SNAPSHOT.zip` and open `plugins/misc/datavault/docs/index.html`.
+Then open `target/generated-docs/index.html`, or unzip `target/hopper-edw-*-SNAPSHOT.zip` and open `plugins/misc/datavault/docs/index.html`.

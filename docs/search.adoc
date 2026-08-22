@@ -4,7 +4,7 @@
 
 toc::[]
 
-Hop 2.19 can search **any registered file type** that opts into project search, plus project **metadata** objects. The hop-data-vault plugin uses that API so modelers can find vault tables, source queries, group model paths, and related configuration without browsing the file tree by hand.
+Hop 2.19 can search **any registered file type** that opts into project search, plus project **metadata** objects. Data Hopper EDW uses that API so modelers can find vault tables, source queries, group model paths, and related configuration without browsing the file tree by hand.
 
 Requires **Apache Hop 2.19.0**.
 

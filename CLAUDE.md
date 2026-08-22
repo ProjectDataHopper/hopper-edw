@@ -1,10 +1,9 @@
 <!--
-Licensed to the Apache Software Foundation (ASF) under one or more
-contributor license agreements.  See the NOTICE file distributed with
-this work for additional information regarding copyright ownership.
-The ASF licenses this file to You under the Apache License, Version 2.0
-(the "License"); you may not use this file except in compliance with
-the License.  You may obtain a copy of the License at
+Copyright 2026 i-Bridge bv
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
      http://www.apache.org/licenses/LICENSE-2.0
 
@@ -15,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Agent Guide for hop-data-vault
+# Agent Guide for Data Hopper EDW (hopper-edw)
 
 This file is for **AI coding assistants** and third-party contributors. Read it before changing Java, metadata, workflows, Docker test runners, or integration fixtures.
 
@@ -23,11 +22,13 @@ This file is for **AI coding assistants** and third-party contributors. Read it 
 
 ## What this project is
 
-**hop-datavault** is an Apache Hop plugin for **Data Vault 2.0**, **Business Vault**, and **dimensional** modeling: visual models (`.hsm` / `.hdv` / `.hbv` / `.hdm`), catalog-first sources (including multi-table composite feeds), model-driven DDL and load pipelines, lineage, schema validation gates, data quality, execution maps (`.hem`), Hop Lineage Views (`.hlv`), and optional AI help.
+**Data Hopper EDW** (`hopper-edw`) is a set of Apache Hop plugins to build an **Enterprise Data Warehouse**: visual models (`.hsm` / `.hdv` / `.hbv` / `.hdm`), catalog-first sources (including multi-table composite feeds), model-driven DDL and load pipelines, lineage, schema validation gates, data quality, execution maps (`.hem`), Hop Lineage Views (`.hlv`), the **EDW Journey** perspective, and optional AI help.
 
-- Maven artifact: `org.apache.hop:hop-datavault` (see `pom.xml` for current version)
+- Maven artifact: `org.projectdatahopper.hop:hopper-edw` (see `pom.xml` for current version)
 - Install layout: `plugins/misc/datavault/` (from the assembly zip under `target/`)
-- Upstream repo: https://github.com/mattcasters/hop-data-vault
+- Upstream repo: https://github.com/ProjectDataHopper/hopper-edw
+- Legal: Apache License 2.0, copyright i-Bridge bv. Not an ASF release.
+- Do **not** rename Java packages, plugin IDs, file extensions, metadata keys, or `jdbc:hop-hsm:`.
 
 ## Hard version pins
 
@@ -118,14 +119,14 @@ mvn spotless:check         # CI-style format check
 
 Artifacts:
 
-- `target/hop-datavault-*-SNAPSHOT.jar`
-- `target/hop-datavault-*-SNAPSHOT.zip` — unzip into `$HOP_HOME` (layout: `plugins/misc/datavault/`)
+- `target/hopper-edw-*-SNAPSHOT.jar`
+- `target/hopper-edw-*-SNAPSHOT.zip` — unzip into `$HOP_HOME` (layout: `plugins/misc/datavault/`)
 
 Notes:
 
-- Surefire sets `HOP_AUDIT_FOLDER=/tmp/hop-data-vault-audit` — do not commit audit output.
+- Surefire sets `HOP_AUDIT_FOLDER=/tmp/hopper-edw-audit` — do not commit audit output.
 - Unit tests alone are **not** enough for DDL, SQL dialect, collation, Unicode, or load-path changes (see below).
-- After packaging, Docker-based tests need a Hop image that includes the plugin. Runners call `ensure_hop_image` (in `scripts/hop-docker-lib.sh`): build when `docker-hop:latest` is missing, or when `target/hop-datavault-*.zip` is newer than the image. Force rebuild with `./scripts/rebuild-hop.sh`.
+- After packaging, Docker-based tests need a Hop image that includes the plugin. Runners call `ensure_hop_image` (in `scripts/hop-docker-lib.sh`): build when `docker-hop:latest` is missing, or when `target/hopper-edw-*.zip` is newer than the image. Force rebuild with `./scripts/rebuild-hop.sh`.
 
 ## Integration tests (multi-database)
 
@@ -184,7 +185,7 @@ These are easy for agents to violate:
 2. **Lombok** — Prefer `@Getter` / `@Setter` / related annotations over hand-written boilerplate. Keep the Lombok version aligned with Hop.
 3. **I/O via Hop VFS** — Prefer `HopVfs.getInputStream()` / `HopVfs.getOutputStream()` (and related Hop VFS APIs) over raw `java.io.File` / NIO unless there is no alternative.
 4. **i18n** — UI strings belong in package `messages/messages_*.properties` and must be **properly escaped** for Java Properties (`=`, `:`, spaces, newlines, unicode). Use the existing BaseMessages / key patterns for that package.
-5. **ASF license headers** — Spotless injects the standard header on Java; Apache RAT enforces headers on most source/text. New `.java` / `.sh` (and many other text files) need headers. `docs/`, many `integration-tests/**` fixtures, models (`.hdv`/`.hbv`/`.hdm`), and JSON are largely excluded (see `pom.xml` RAT config). Header template: `asf-header.txt`.
+5. **License headers** — Spotless injects the i-Bridge bv Apache-2.0 header on Java; Apache RAT enforces headers on most source/text. New `.java` / `.sh` (and many other text files) need headers. `docs/`, many `integration-tests/**` fixtures, models (`.hdv`/`.hbv`/`.hdm`), and JSON are largely excluded (see `pom.xml` RAT config). Header template: `license-header.txt`.
 6. **Formatting** — Google Java Format via Spotless (`mvn spotless:apply` before commit).
 7. **Package placement** — Put new code under `org.apache.hop.datavault`, `.catalog`, or `.quality`, following existing layering (`metadata`, `hopgui`, `workflow/actions`, `transform`, services). Mirror Hop patterns: `*Meta` + dialog/editor; transforms often `*Meta` / `*Data` / `*`; actions under `.../workflow/actions/...`.
 8. **Plugin isolation** — Treat classloaders carefully. The assembly deliberately bundles selected third-party libs (ELK, CommonMark, Iceberg, some Hop actions). Prefer `provided` for Hop itself.

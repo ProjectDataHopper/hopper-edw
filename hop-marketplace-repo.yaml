@@ -1,9 +1,8 @@
-# Licensed to the Apache Software Foundation (ASF) under one or more
-# contributor license agreements.  See the NOTICE file distributed with
-# this work for additional information regarding copyright ownership.
-# The ASF licenses this file to You under the Apache License, Version 2.0
-# (the "License"); you may not use this file except in compliance with
-# the License.  You may obtain a copy of the License at
+# Copyright 2026 i-Bridge bv
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
 #       http://www.apache.org/licenses/LICENSE-2.0
 #
@@ -13,21 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Hop marketplace repository definition for hop-datavault (Hop 2.19+).
+# Hop marketplace repository definition for hopper-edw (Data Hopper EDW, Hop 2.19+).
 #
 # Jenkins publishes continuous SNAPSHOT zips to this Nexus after project changes.
 # Import into Hop so the plugin appears in marketplace query / install:
 #
 #   ./hop marketplace repo import \
-#     https://raw.githubusercontent.com/mattcasters/hop-data-vault/refs/heads/main/hop-marketplace-repo.yaml
+#     https://raw.githubusercontent.com/ProjectDataHopper/hopper-edw/refs/heads/main/hop-marketplace-repo.yaml
 #   # or a local path: ./hop marketplace repo import hop-marketplace-repo.yaml
 #
-#   ./hop marketplace query | grep vault
-#   ./hop marketplace install hop-datavault
+#   ./hop marketplace query | grep -i hopper
+#   ./hop marketplace install hopper-edw
 #
 # browse: true → Hop lists *.zip from this Nexus live (no cache).
 # plugins: optional metadata that enriches names/categories and can pin version.
 # Restart Hop after install so the plugin registry reloads.
+#
+# Cutover: 0.9.0 and earlier were published as org.apache.hop:hop-datavault.
+# Remove plugins/misc/datavault from an old install before installing hopper-edw.
 #
 schemaVersion: "1.0"
 kind: hop-marketplace-repository
@@ -39,21 +41,24 @@ primary: false
 enabled: true
 browse: true
 includeSnapshots: true
-homepage: https://github.com/mattcasters/hop-data-vault
+homepage: https://github.com/ProjectDataHopper/hopper-edw
 description: >
-  Community Maven repository with continuous Jenkins builds of hop-datavault
-  (Data Vault 2.0, Business Vault, and dimensional modeling for Apache Hop).
+  Community Maven repository with Project Data Hopper plugins for Apache Hop,
+  including Data Hopper EDW (source models, Data Vault 2.0, Business Vault,
+  dimensional models, quality, and lineage).
 
 # Optional metadata (enriches live Nexus list; not a cache)
 # minHopVersion: only show when the running Hop is >= this version
 # version: pin of the published base version (Nexus resolves latest SNAPSHOT timestamp)
 plugins:
-  - groupId: org.apache.hop
-    artifactId: hop-datavault
-    version: 0.9.0
+  - groupId: org.projectdatahopper.hop
+    artifactId: hopper-edw
+    version: 0.10.0
     minHopVersion: "2.19.0"
-    name: Data Vault
+    name: Data Hopper EDW
     category: Community
     description: >
-      Data Vault 2.0, Business Vault, and dimensional modeling for Apache Hop
+      Apache Hop plugins to build an Enterprise Data Warehouse: source models,
+      Data Catalog, Data Vault 2.0, Business Vault, dimensional models, quality,
+      and lineage.
     installPath: plugins/misc/datavault

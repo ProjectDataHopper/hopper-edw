@@ -1,9 +1,9 @@
-# Licensed to the Apache Software Foundation (ASF) under one or more
-# contributor license agreements.  See the NOTICE file distributed with
-# this work for additional information regarding copyright ownership.
-# The ASF licenses this file to You under the Apache License, Version 2.0
-# (the "License"); you may not use this file except in compliance with
-# the License.  You may obtain a copy of the License at
+#
+# Copyright 2026 i-Bridge bv
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
 #      http://www.apache.org/licenses/LICENSE-2.0
 #
@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+#
 # syntax=docker/dockerfile:1
 
 ARG HOP_IMAGE_VERSION=2.19.0
@@ -52,10 +52,10 @@ USER root
 RUN apk add --no-cache python3
 
 COPY --from=build /jdbc/*.jar /opt/hop/lib/jdbc/
-COPY --from=build /src/target/hop-datavault-*.zip /tmp/hop-datavault.zip
+COPY --from=build /src/target/hopper-edw-*.zip /tmp/hopper-edw.zip
 
-RUN unzip -q /tmp/hop-datavault.zip -d /opt/hop \
-  && rm /tmp/hop-datavault.zip \
+RUN unzip -q /tmp/hopper-edw.zip -d /opt/hop \
+  && rm /tmp/hopper-edw.zip \
   && chown -R hop:hop /opt/hop/plugins/misc/datavault /opt/hop/lib/jdbc /opt/hop/lib/core
 
 COPY scripts/docker/entrypoint-init.sh /opt/hop-datavault/entrypoint-init.sh

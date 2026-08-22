@@ -4,7 +4,7 @@
 
 toc::[]
 
-The dimensional modeler adds Kimball star/snowflake modeling to the hop-data-vault plugin. Models are saved as `.hdm` files and drive native Hop warehouse transforms for dimension and fact loads.
+The dimensional modeler adds Kimball star/snowflake modeling to Data Hopper EDW. Models are saved as `.hdm` files and drive native Hop warehouse transforms for dimension and fact loads.
 
 == Why a separate modeler
 

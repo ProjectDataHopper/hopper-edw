@@ -14,7 +14,7 @@ A **Target type mapping** is a reusable metadata element with ordered rules. Mat
 
 On **Snowflake**, the plugin then rewrites Hop’s dialect defaults that are wrong for Data Vault: `TYPE_BINARY` → `BINARY(n)` instead of `VARIANT`, timestamps → `TIMESTAMP_NTZ`, dates → `DATE`. A target type mapping still wins when a rule matches.
 
-Issue https://github.com/mattcasters/hop-data-vault/issues/127[#127].
+Issue https://github.com/ProjectDataHopper/hopper-edw/issues/127[#127].
 
 == Concepts
 

@@ -1,10 +1,9 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Copyright 2026 i-Bridge bv
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -233,7 +232,7 @@ public final class OpenLineageSnapshotMapper {
     ObjectNode runFacets = MAPPER.createObjectNode();
     ObjectNode hopExport = MAPPER.createObjectNode();
     hopExport.put("_producer", OpenLineageConstants.PRODUCER);
-    hopExport.put("_schemaURL", "https://github.com/mattcasters/hop-data-vault#hop-export-facet");
+    hopExport.put("_schemaURL", "https://github.com/ProjectDataHopper/hopper-edw#hop-export-facet");
     hopExport.put("modelLayer", layer != null ? layer.name() : LineageLayer.DV.name());
     hopExport.put("modelName", modelName);
     if (!Utils.isEmpty(exportCorrelationId)) {

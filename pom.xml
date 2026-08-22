@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Licensed to the Apache Software Foundation (ASF) under one or more
-  ~ contributor license agreements.  See the NOTICE file distributed with
-  ~ this work for additional information regarding copyright ownership.
-  ~ The ASF licenses this file to You under the Apache License, Version 2.0
-  ~ (the "License"); you may not use this file except in compliance with
-  ~ the License.  You may obtain a copy of the License at
+  ~ Copyright 2026 i-Bridge bv
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
   ~
   ~      http://www.apache.org/licenses/LICENSE-2.0
   ~
@@ -14,19 +13,46 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
-  ~
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.apache.hop</groupId>
-  <artifactId>hop-datavault</artifactId>
+  <groupId>org.projectdatahopper.hop</groupId>
+  <artifactId>hopper-edw</artifactId>
   <version>0.10.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>Hop Data Vault 2.0 Metadata</name>
-  <description>Metadata definitions for Data Vault 2.0 models (Hubs, Links, Satellites) and update configurations for Apache Hop</description>
-  <url>https://github.com/mattcasters/hop-data-vault</url>
+  <name>Data Hopper EDW</name>
+  <description>Apache Hop plugins to design, generate, and operate an Enterprise Data Warehouse: source models, Data Catalog, Data Vault 2.0, Business Vault, dimensional models, quality, lineage, and the EDW Journey</description>
+  <url>https://github.com/ProjectDataHopper/hopper-edw</url>
+
+  <organization>
+    <name>i-Bridge bv</name>
+    <url>https://data-hopper.com</url>
+  </organization>
+
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>mattcasters</id>
+      <name>Matt Casters</name>
+      <organization>i-Bridge bv</organization>
+      <organizationUrl>https://data-hopper.com</organizationUrl>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:https://github.com/ProjectDataHopper/hopper-edw.git</connection>
+    <developerConnection>scm:git:git@github.com:ProjectDataHopper/hopper-edw.git</developerConnection>
+    <url>https://github.com/ProjectDataHopper/hopper-edw</url>
+  </scm>
 
   <properties>
     <apache.rat.version>0.16.1</apache.rat.version>
@@ -470,7 +496,7 @@
           <classpathDependencyScopeExclude>none</classpathDependencyScopeExclude>
           <!-- Hop defaults audit state to ${user.dir}/audit; keep unit-test noise out of the repo. -->
           <systemPropertyVariables>
-            <HOP_AUDIT_FOLDER>/tmp/hop-data-vault-audit</HOP_AUDIT_FOLDER>
+            <HOP_AUDIT_FOLDER>/tmp/hopper-edw-audit</HOP_AUDIT_FOLDER>
           </systemPropertyVariables>
         </configuration>
       </plugin>
@@ -518,18 +544,18 @@
           <java>
             <includes>
               <include>src/**/*.java</include>
+              <include>hop-hsm-jdbc/src/**/*.java</include>
             </includes>
             <googleJavaFormat></googleJavaFormat>
             <importOrder></importOrder>
             <removeUnusedImports></removeUnusedImports>
             <licenseHeader>
               <content><![CDATA[/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Copyright 2026 i-Bridge bv
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *

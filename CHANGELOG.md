@@ -1,8 +1,17 @@
 # Changelog
 
-All notable changes to the hop-datavault plugin are documented in this file.
+All notable changes to Data Hopper EDW (formerly Data Hopper EDW) are documented in this file.
 
 ## Unreleased
+
+### Product identity: Data Hopper EDW
+
+- Repository home: [ProjectDataHopper/hopper-edw](https://github.com/ProjectDataHopper/hopper-edw) (transferred from `ProjectDataHopper/hopper-edw`; old GitHub URLs redirect)
+- Product name: **Data Hopper EDW** — Apache Hop plugins to build an Enterprise Data Warehouse, not a Data Vault-only tool
+- Maven coordinates: `org.projectdatahopper.hop:hopper-edw` (was `org.apache.hop:hop-datavault`). Marketplace: `./hop marketplace install hopper-edw`
+- Assembly zip: `target/hopper-edw-*.zip`. Unzip layout stays `plugins/misc/datavault/`
+- License remains Apache License 2.0; copyright **i-Bridge bv**. Not an Apache Software Foundation release
+- **0.9.0 cutover:** uninstall `$HOP_HOME/plugins/misc/datavault` from the old `hop-datavault` artifact, re-import [`hop-marketplace-repo.yaml`](hop-marketplace-repo.yaml), then install `hopper-edw`. Release 0.9.0 remains at `org.apache.hop:hop-datavault` on Nexus
 
 ### Jinja macros and dbt-core import (issue #72)
 
@@ -33,7 +42,7 @@ All notable changes to the hop-datavault plugin are documented in this file.
 
 Requires **Apache Hop 2.19.0** and **Java 21**.
 
-**Downloads:** [GitHub release zip](https://github.com/mattcasters/hop-data-vault/releases/download/v0.9.0/hop-datavault-0.9.0.zip) · [Data Hopper Nexus](https://repository.data-hopper.com/repository/hop-community-plugins/org/apache/hop/hop-datavault/0.9.0/hop-datavault-0.9.0.zip) (`org.apache.hop:hop-datavault:0.9.0`)
+**Downloads:** [GitHub release zip](https://github.com/ProjectDataHopper/hopper-edw/releases/download/v0.9.0/hop-datavault-0.9.0.zip) · [Data Hopper Nexus](https://repository.data-hopper.com/repository/hop-community-plugins/org/apache/hop/hop-datavault/0.9.0/hop-datavault-0.9.0.zip) (`org.apache.hop:hop-datavault:0.9.0`)
 
 ### SQL Server live source schema
 
@@ -218,7 +227,7 @@ Requires **Apache Hop 2.19.0** and **Java 21**.
 
 Requires **Apache Hop 2.19.0** and **Java 21**.
 
-**Downloads:** [GitHub release zip](https://github.com/mattcasters/hop-data-vault/releases/download/v0.8.0/hop-datavault-0.8.0.zip) · [Data Hopper Nexus](https://repository.data-hopper.com/repository/hop-community-plugins/org/apache/hop/hop-datavault/0.8.0/hop-datavault-0.8.0.zip) (`org.apache.hop:hop-datavault:0.8.0`)
+**Downloads:** [GitHub release zip](https://github.com/ProjectDataHopper/hopper-edw/releases/download/v0.8.0/hop-datavault-0.8.0.zip) · [Data Hopper Nexus](https://repository.data-hopper.com/repository/hop-community-plugins/org/apache/hop/hop-datavault/0.8.0/hop-datavault-0.8.0.zip) (`org.apache.hop:hop-datavault:0.8.0`)
 
 ### Free SQL over source models + Hop Server JDBC (#117 / #115)
 
@@ -275,7 +284,7 @@ Requires **Apache Hop 2.19.0** and **Java 21**.
 
 Requires **Apache Hop 2.19.0** and **Java 21**.
 
-**Downloads:** [GitHub release zip](https://github.com/mattcasters/hop-data-vault/releases/download/v0.7.0/hop-datavault-0.7.0.zip) · [Data Hopper Nexus](https://repository.data-hopper.com/repository/hop-community-plugins/org/apache/hop/hop-datavault/0.7.0/hop-datavault-0.7.0.zip) (`org.apache.hop:hop-datavault:0.7.0`)
+**Downloads:** [GitHub release zip](https://github.com/ProjectDataHopper/hopper-edw/releases/download/v0.7.0/hop-datavault-0.7.0.zip) · [Data Hopper Nexus](https://repository.data-hopper.com/repository/hop-community-plugins/org/apache/hop/hop-datavault/0.7.0/hop-datavault-0.7.0.zip) (`org.apache.hop:hop-datavault:0.7.0`)
 
 ### Optional load cycle ID (#111)
 
@@ -326,7 +335,7 @@ Requires **Apache Hop 2.19.0** and **Java 21**.
 
 Older Hop **2.18.x** (including 2.18.1) is **not** supported for 0.6.0.
 
-**Downloads:** [GitHub release zip](https://github.com/mattcasters/hop-data-vault/releases/download/v0.6.0/hop-datavault-0.6.0.zip) · [Data Hopper Nexus](https://repository.data-hopper.com/repository/hop-community-plugins/org/apache/hop/hop-datavault/0.6.0/hop-datavault-0.6.0.zip) (`org.apache.hop:hop-datavault:0.6.0`)
+**Downloads:** [GitHub release zip](https://github.com/ProjectDataHopper/hopper-edw/releases/download/v0.6.0/hop-datavault-0.6.0.zip) · [Data Hopper Nexus](https://repository.data-hopper.com/repository/hop-community-plugins/org/apache/hop/hop-datavault/0.6.0/hop-datavault-0.6.0.zip) (`org.apache.hop:hop-datavault:0.6.0`)
 
 ### Metadata note — linked tables vs reference tables
 
@@ -418,7 +427,7 @@ In **0.6.0**, canvas **cross-model pointers** and **hub aliases** are stored as 
 
 - Canvas SVG icon cache / SWT handle-leak hardening (`ModelGraphSvgIconCache`; reflective `SwtGc#getNativeGc` for mixed hop-ui snapshots)
 - FILE catalog mkdir when `PROJECT_HOME` is unresolved
-- Docker test image freshness: rebuild `docker-hop:latest` when `target/hop-datavault-*.zip` is newer than the image
+- Docker test image freshness: rebuild `docker-hop:latest` when `target/hopper-edw-*.zip` is newer than the image
 
 ## [0.5.0] — 2026-07-30
 

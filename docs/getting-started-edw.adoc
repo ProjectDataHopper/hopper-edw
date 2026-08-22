@@ -1,4 +1,4 @@
-= Getting started — building an EDW with Apache Hop
+= Getting started — building an EDW with Data Hopper EDW
 :toc: macro
 :toclevels: 3
 

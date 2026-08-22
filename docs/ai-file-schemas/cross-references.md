@@ -1,6 +1,6 @@
 # Cross-file relationships (AI)
 
-How hop-data-vault artifacts compose a typical project.
+How Data Hopper EDW artifacts compose a typical project.
 
 ```text
   .hsm (source model)

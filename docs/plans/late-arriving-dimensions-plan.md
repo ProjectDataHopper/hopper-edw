@@ -1,6 +1,6 @@
 # Plan: Late-arriving dimensions / inferred members (Issue #109)
 
-**Issue:** [#109 — Late arriving dimensions](https://github.com/mattcasters/hop-data-vault/issues/109)  
+**Issue:** [#109 — Late arriving dimensions](https://github.com/ProjectDataHopper/hopper-edw/issues/109)  
 **Status:** Deferred — design only; implement later  
 **Goal:** When a fact references a natural key that is not yet in the dimension, create a **stable surrogate-key skeleton (inferred member)**, load the fact, and later **promote** that row when real dimension attributes arrive—without breaking SCD1 / SCD2 / hybrid semantics.
 

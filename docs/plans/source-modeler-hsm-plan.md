@@ -1,6 +1,6 @@
 # Plan: Hop Source Modeler (`.hsm`) — Issue #105
 
-**Issue:** [Create a modeler for record sources](https://github.com/mattcasters/hop-data-vault/issues/105)  
+**Issue:** [Create a modeler for record sources](https://github.com/ProjectDataHopper/hopper-edw/issues/105)  
 **Goal:** A fourth visual modeler that captures source-system structure (tables, PK/FK, multi-table queries) so DV designers can efficiently feed hubs, links, and satellites—including the common case of joining small lookup/key-value tables into one satellite load.
 
 ---

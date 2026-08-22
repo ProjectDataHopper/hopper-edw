@@ -1,10 +1,9 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Copyright 2026 i-Bridge bv
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -19,7 +18,7 @@ package org.apache.hop.datavault.openlineage;
 /** Shared OpenLineage constants for model lineage export and execution-map export. */
 public final class OpenLineageConstants {
 
-  public static final String PRODUCER = "https://github.com/mattcasters/hop-data-vault";
+  public static final String PRODUCER = "https://github.com/ProjectDataHopper/hopper-edw";
 
   public static final String DEFAULT_JOB_NAMESPACE = "hop-data-vault";
 
