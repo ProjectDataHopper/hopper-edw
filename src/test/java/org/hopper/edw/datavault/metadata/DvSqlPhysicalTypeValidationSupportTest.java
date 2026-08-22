@@ -1,0 +1,76 @@
+/*
+ * Copyright 2026 i-Bridge bv
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.hopper.edw.datavault.metadata;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.apache.hop.core.HopEnvironment;
+import org.apache.hop.core.exception.HopException;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+class DvSqlPhysicalTypeValidationSupportTest {
+
+  @BeforeAll
+  static void initHop() throws HopException {
+    HopEnvironment.init();
+  }
+
+  @Test
+  void detectsNvarcharVersusVarcharMismatch() {
+    assertTrue(
+        DvSqlPhysicalTypeValidationSupport.isSortSensitiveStringTypeMismatch(
+            "NVARCHAR", "VARCHAR"));
+  }
+
+  @Test
+  void acceptsMatchingSqlTypes() {
+    assertFalse(
+        DvSqlPhysicalTypeValidationSupport.isSortSensitiveStringTypeMismatch(
+            "NVARCHAR", "NVARCHAR"));
+    assertFalse(
+        DvSqlPhysicalTypeValidationSupport.isSortSensitiveStringTypeMismatch("VARCHAR", "VARCHAR"));
+  }
+
+  @Test
+  void hubRemediationMentionsAutoCollate() {
+    String hint =
+        DvSqlPhysicalTypeValidationSupport.remediationHint(
+            DvSqlPhysicalTypeValidationSupport.RemediationKind.HUB_BUSINESS_KEY);
+    assertTrue(hint.toLowerCase().contains("collate") || hint.toLowerCase().contains("auto"));
+    assertFalse(hint.toLowerCase().contains("hub merge on hash key"));
+  }
+
+  @Test
+  void satelliteAttributeRemediationDoesNotClaimHubMergeFixesCdc() {
+    String hint =
+        DvSqlPhysicalTypeValidationSupport.remediationHint(
+            DvSqlPhysicalTypeValidationSupport.RemediationKind.SATELLITE_ATTRIBUTE);
+    assertTrue(hint.toLowerCase().contains("align target") || hint.contains("NVARCHAR"));
+    assertTrue(
+        hint.toLowerCase().contains("does not fix")
+            || hint.toLowerCase().contains("attribute value comparison"));
+  }
+
+  @Test
+  void extractsSqlTypeFromFieldDefinition() {
+    assertEquals("varchar", DvSqlPhysicalTypeValidationSupport.extractSqlTypeName("varchar(20)"));
+    assertEquals(
+        "NVARCHAR", DvSqlPhysicalTypeValidationSupport.extractSqlTypeName("NVARCHAR (20)"));
+  }
+}

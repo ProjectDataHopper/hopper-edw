@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   Relaxed structural schema for Data Hopper EDW .hdv files (AI guidance).
-  Source of truth: org.apache.hop.datavault.metadata.DataVaultModel and table classes.
+  Source of truth: org.hopper.edw.datavault.metadata.DataVaultModel and table classes.
   Not a full formal validation of every optional field.
 -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">

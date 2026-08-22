@@ -1,0 +1,45 @@
+/*
+ * Copyright 2026 i-Bridge bv
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.hopper.edw.datavault.www;
+
+/**
+ * Wire protocol constants shared by the Hop Server servlet and the thin {@code hop-hsm-jdbc}
+ * client. Keep this surface small so the client jar needs no Hop libraries.
+ */
+public final class SourceModelDataProtocol {
+
+  public static final String CONTEXT_PATH = "/hop/sourceModelData";
+
+  /** Protocol version written into every JSON response. */
+  public static final int VERSION = 1;
+
+  public static final String PARAM_MODEL_NAME = "modelName";
+  public static final String PARAM_SQL = "sql";
+  public static final String PARAM_ROW_LIMIT = "rowLimit";
+  public static final String PARAM_ACTION = "action";
+  public static final String PARAM_TABLE = "table";
+  public static final String PARAM_SCHEMA = "schema";
+
+  public static final String ACTION_QUERY = "query";
+  public static final String ACTION_TABLES = "tables";
+  public static final String ACTION_COLUMNS = "columns";
+  public static final String ACTION_SCHEMAS = "schemas";
+  public static final String ACTION_PING = "ping";
+
+  public static final String CONTENT_TYPE_JSON = "application/json; charset=UTF-8";
+
+  private SourceModelDataProtocol() {}
+}

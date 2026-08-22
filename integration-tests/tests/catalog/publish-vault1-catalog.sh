@@ -29,6 +29,6 @@ echo "Project home: ${PROJECT_HOME}"
 cd "${REPO_HOME}"
 mvn -q compile dependency:build-classpath -Dmdep.outputFile="${CP_FILE}"
 java -cp "target/classes:$(cat "${CP_FILE}")" \
-  org.apache.hop.datavault.catalog.smoke.DvCatalogPublishSmoke "${PROJECT_HOME}"
+  org.hopper.edw.datavault.catalog.smoke.DvCatalogPublishSmoke "${PROJECT_HOME}"
 
 echo "Publish smoke test completed successfully."

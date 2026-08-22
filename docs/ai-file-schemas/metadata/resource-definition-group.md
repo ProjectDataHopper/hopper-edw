@@ -1,6 +1,6 @@
 # `metadata/resource-definition-group` — Resource definition group
 
-**Java:** `org.apache.hop.catalog.metadata.ResourceDefinitionGroupMeta`  
+**Java:** `org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta`  
 **Schema:** [resource-definition-group.schema.json](resource-definition-group.schema.json)  
 **User guide:** [../../resource-definition-group.adoc](../../resource-definition-group.adoc)  
 **Example:** `retail-example/metadata/resource-definition-group/retail-sources.json`

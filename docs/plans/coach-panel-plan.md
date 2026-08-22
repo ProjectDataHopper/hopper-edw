@@ -15,8 +15,8 @@ Supersedes the conceptual Coach panel section in [source-to-data-vault-mapping-p
 
 ## Architecture
 
-- **Metadata:** `org.apache.hop.datavault.metadata.coaching`
-- **GUI:** `org.apache.hop.datavault.hopgui.coaching`
+- **Metadata:** `org.hopper.edw.datavault.metadata.coaching`
+- **GUI:** `org.hopper.edw.datavault.hopgui.coaching`
 - **Audit:** `ModelCoachPanelAuditSupport` (mirrors `ModelLoadDurationPaneAuditSupport`)
 - **Shell:** nested sash in `HopGuiModelGraphBase` — coach (left), canvas + durations (right)
 

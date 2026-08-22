@@ -44,7 +44,7 @@ That is **not** an overlay on a single `.hdv`. A fact’s sources live in other 
 
 | Capability | Where | What it is / is not |
 | --- | --- | --- |
-| Model-derived lineage | `org.apache.hop.datavault.lineage.*` (`DvModelLineageCollector`, `BvModelLineageCollector`, `DmModelLineageCollector`, `LineageSnapshot`, `FieldContribution`) | Source of truth for *mappings*. Per-model snapshots, **not** a cross-model graph. |
+| Model-derived lineage | `org.hopper.edw.datavault.lineage.*` (`DvModelLineageCollector`, `BvModelLineageCollector`, `DmModelLineageCollector`, `LineageSnapshot`, `FieldContribution`) | Source of truth for *mappings*. Per-model snapshots, **not** a cross-model graph. |
 | Lineage tab | `hopgui/lineage/LineageTabSupport.java` | Per-table reasons + field grid. |
 | Reverse browser | `hopgui/lineage/ReverseLineageBrowserDialog.java` | Source field → consumers, **two hops max**. Opens model element. |
 | Catalog siblings + drift | `LineageCatalogPublisher`, validate-resource-definitions | Discovery + rename gate. |
@@ -52,7 +52,7 @@ That is **not** an overlay on a single `.hdv`. A fact’s sources live in other 
 | Local Marquez | `scripts/run-marquez.sh`, `scripts/docker/compose.marquez.yml` | **Marquez 0.50.0**, API `http://localhost:5001`, UI `:3001`. |
 | Execution maps | `.hem`, `HopExecutionMapFileType`, `HopGuiExecutionMapGraph` | **Persisted crawled execution graph**. Opposite persistence model of a lineage *view*. |
 | Catalog perspective | `DataCatalogPerspective` (`IHopPerspective`) | Singleton browser of **stored** catalog records. |
-| Impact graph | `org.apache.hop.datavault.impact` | **Downstream** blast radius from catalog sources. Not visual, not OL, not upstream. |
+| Impact graph | `org.hopper.edw.datavault.impact` | **Downstream** blast radius from catalog sources. Not visual, not OL, not upstream. |
 | Architecture export | `ArchitectureGraphFromLineage` | Draw.io inventory; **`setOmitEdges(true)`**. Not interactive. |
 
 ### Pain points this design addresses
@@ -533,9 +533,9 @@ Signature on the editor: `void testConnection()` catches `HopException`, shows `
 - **Test connection** button.
 - `apiKey` is masked only if the widget is `TEXT` + `password = true` as above. `@HopMetadataProperty(password = true)` alone encrypts storage and still paints a plain text box.
 
-**XP:** `org.apache.hop.datavault.metadata.lineage.xp.RegisterLineageBackendMetadataExtensionPoint` — copy `RegisterExecutionMetricsProfileMetadataExtensionPoint` (`HopEnvironmentAfterInit`, register `LineageBackendMeta` on `MetadataPluginType`).
+**XP:** `org.hopper.edw.datavault.metadata.lineage.xp.RegisterLineageBackendMetadataExtensionPoint` — copy `RegisterExecutionMetricsProfileMetadataExtensionPoint` (`HopEnvironmentAfterInit`, register `LineageBackendMeta` on `MetadataPluginType`).
 
-**Help:** `src/main/resources/org/apache/hop/datavault/hopgui/help/lineage-backend-dialog.md`
+**Help:** `src/main/resources/org/hopper/edw/datavault/hopgui/help/lineage-backend-dialog.md`
 
 **Default backend for “Show lineage” (locked):** if exactly one enabled `LineageBackendMeta` exists, use it; otherwise **ask** (picker if several are enabled; New wizard / create-backend if none). No default checkbox on the metadata type. Never silently query Marquez when the user configured File. If the chosen backend is Local-models and the open model is not on a group, still open the tab with `extraSnapshots` only (single-model graph).
 
@@ -543,7 +543,7 @@ Signature on the editor: `void testConnection()` catches `HopException`, shows `
 
 ## SPI contracts
 
-Package: `org.apache.hop.datavault.lineageview.backend` (no SWT).
+Package: `org.hopper.edw.datavault.lineageview.backend` (no SWT).
 
 ### Error / empty policy
 
@@ -1181,11 +1181,11 @@ Save: portableize `modelFilename` via `CatalogModelRegistrySupport.portableModel
 
 | Package | Role |
 | --- | --- |
-| `org.apache.hop.datavault.lineageview` | Document, persistence, `LineageViewSeedSupport` |
-| `org.apache.hop.datavault.lineageview.backend` | SPI, DTOs, `LineageGraphOps`, event BFS, three adapters |
-| `org.apache.hop.datavault.metadata.lineage` | `LineageBackendMeta`, settings, factory, editor, XP |
-| `org.apache.hop.datavault.hopgui.file.lineageview` | File type, graph, painter, node context, new wizard |
-| `org.apache.hop.datavault.hopgui.lineageview` | `LineageViewGuiPlugin` — Show lineage |
+| `org.hopper.edw.datavault.lineageview` | Document, persistence, `LineageViewSeedSupport` |
+| `org.hopper.edw.datavault.lineageview.backend` | SPI, DTOs, `LineageGraphOps`, event BFS, three adapters |
+| `org.hopper.edw.datavault.metadata.lineage` | `LineageBackendMeta`, settings, factory, editor, XP |
+| `org.hopper.edw.datavault.hopgui.file.lineageview` | File type, graph, painter, node context, new wizard |
+| `org.hopper.edw.datavault.hopgui.lineageview` | `LineageViewGuiPlugin` — Show lineage |
 
 **`HopGuiLineageViewGraph` extends `HopGuiModelGraphBase` using the execution-map constructor pattern** (`HopGuiExecutionMapGraph`):
 
@@ -1343,11 +1343,11 @@ Quote `'${VARIABLE}'` and escape `=` / `:` in all properties files.
 
 | Bundle | Path |
 | --- | --- |
-| File type / graph / wizard | `src/main/resources/org/apache/hop/datavault/hopgui/file/lineageview/messages/messages_en_US.properties` |
-| Show lineage plugin | `src/main/resources/org/apache/hop/datavault/hopgui/lineageview/messages/messages_en_US.properties` |
-| Backend metadata + editor | `src/main/resources/org/apache/hop/datavault/metadata/lineage/messages/messages_en_US.properties` |
-| Help: backend editor | `src/main/resources/org/apache/hop/datavault/hopgui/help/lineage-backend-dialog.md` |
-| Help: new/settings wizard | `src/main/resources/org/apache/hop/datavault/hopgui/help/lineage-view-settings-dialog.md` |
+| File type / graph / wizard | `src/main/resources/org/hopper/edw/datavault/hopgui/file/lineageview/messages/messages_en_US.properties` |
+| Show lineage plugin | `src/main/resources/org/hopper/edw/datavault/hopgui/lineageview/messages/messages_en_US.properties` |
+| Backend metadata + editor | `src/main/resources/org/hopper/edw/datavault/metadata/lineage/messages/messages_en_US.properties` |
+| Help: backend editor | `src/main/resources/org/hopper/edw/datavault/hopgui/help/lineage-backend-dialog.md` |
+| Help: new/settings wizard | `src/main/resources/org/hopper/edw/datavault/hopgui/help/lineage-view-settings-dialog.md` |
 | Icon | `src/main/resources/lineage-view.svg` |
 
 ---
@@ -1569,8 +1569,8 @@ Rollback: stop opening `.hlv`. No schema migration.
 
 - Issue: https://github.com/ProjectDataHopper/hopper-edw/issues/79
 - `docs/openlineage-export.adoc`, `docs/plans/marquez-lineage-plan.md`, `docs/source-to-target-lineage.adoc`, `docs/execution-maps.adoc`, `docs/operations.adoc`, `docs/hop-web-modelers.md`
-- Export: `src/main/java/org/apache/hop/datavault/openlineage/*`
-- Collectors: `src/main/java/org/apache/hop/datavault/lineage/*`
+- Export: `src/main/java/org/hopper/edw/datavault/openlineage/*`
+- Collectors: `src/main/java/org/hopper/edw/datavault/lineage/*`
 - `.hem`: `HopExecutionMapFileType`, `HopGuiExecutionMapGraph`, `ExecutionMapDocument`
 - Vault New/save: `HopVaultFileType.getContextHandlers` / `saveFile`, `HopGuiVaultGraph.save`
 - Catalog: `DataCatalogMeta`, `DataCatalogMetaObjectFactory`, `DataCatalogPerspective.selectRecordDefinition`

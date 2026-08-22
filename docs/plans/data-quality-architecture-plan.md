@@ -142,10 +142,10 @@ flowchart TB
 
 | Package | Responsibility | Upstream potential |
 |---------|----------------|--------------------|
-| `org.apache.hop.quality` | Rule model, measure engine, report, gate/alert policies | High — general Hop DI |
-| `org.apache.hop.catalog.model` | Bindings on `RecordDefinition`, document persistence | Medium |
-| `org.apache.hop.catalog.quality` | Catalog physical ref → measure context (source **or** target) | Medium |
-| `org.apache.hop.quality.workflow…` | Measure / gate / alert actions | High |
+| `org.hopper.edw.quality` | Rule model, measure engine, report, gate/alert policies | High — general Hop DI |
+| `org.hopper.edw.catalog.model` | Bindings on `RecordDefinition`, document persistence | Medium |
+| `org.hopper.edw.catalog.quality` | Catalog physical ref → measure context (source **or** target) | Medium |
+| `org.hopper.edw.quality.workflow…` | Measure / gate / alert actions | High |
 | DV docs & examples | Wire pre-gate before update, post-alert after update | Product-specific |
 
 **Do not** bury the engine under `datavault.resourcedefinition` only.
@@ -362,7 +362,7 @@ Shipped (see [data-quality.adoc](../data-quality.adoc) and [data-quality-phase2-
 - Pipeline transform for measure mid-flow
 - Export field rules → Hop Validator
 - Custom evaluator SPI polish
-- Upstream `org.apache.hop.quality` toward Apache Hop
+- Upstream `org.hopper.edw.quality` toward Apache Hop
 
 ---
 
@@ -443,7 +443,7 @@ Post-alert / history view emphasizes “notify” and trends.
 
 ### New (core)
 
-- `src/main/java/org/apache/hop/quality/**` — model, measure service, evaluators, report, disposition
+- `src/main/java/org/hopper/edw/quality/**` — model, measure service, evaluators, report, disposition
 - `…/quality/metadata/DataQualityRuleSetMeta.java` (+ editor, register XP)
 - `…/quality/workflow/actions/measuredataquality/*` — Measure Data Quality action
 - `…/quality/workflow/actions/evaluatequalitygate/*` — Evaluate Quality Gate action
@@ -452,7 +452,7 @@ Post-alert / history view emphasizes “notify” and trends.
 
 - `RecordDefinition.java`, `RecordDefinitionDocument.java` — bindings/acks  
 - `RecordDefinitionDetailsPanel.java` — Quality UI  
-- `org.apache.hop.catalog.quality.*` — subject resolution for source **and** target physical refs  
+- `org.hopper.edw.catalog.quality.*` — subject resolution for source **and** target physical refs  
 
 ### Product glue
 
@@ -544,7 +544,7 @@ Manual E2E:
 | Choice | Recommendation | Rationale |
 |--------|----------------|-----------|
 | One action vs two | **Two actions** (Measure + Evaluate Quality Gate); pure measure service underneath | User preference; measure never fails on findings; gate owns policy |
-| Action package | `org.apache.hop.quality.workflow…` | Reusable outside DV |
+| Action package | `org.hopper.edw.quality.workflow…` | Reusable outside DV |
 | Report type | New `DataQualityReport` | Don’t overload schema `IssueKind` |
 | Phase 1 post-update | Disposition supported; retail example can be Phase 2 | Ticket is source-first |
 | Persist timing | Ephemeral Phase 1; persist Phase 2 | Ship gate value first |

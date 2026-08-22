@@ -300,7 +300,7 @@ Useful early ship: **PR1 alone** already fixes the common “orders before custo
 
 - `HopGuiDataVaultModelDialog` (orphan tab — same pattern as Unknown/Invalid)
 - `DvLinkDialog`, `DvSatellite` dialog, hub dialog allow-flag
-- `org/apache/hop/datavault/metadata/messages/messages_*.properties`
+- `org/hopper/edw/datavault/metadata/messages/messages_*.properties`
 - `hopgui/file/vault/messages/messages_*.properties`
 
 **Tests / fixtures**

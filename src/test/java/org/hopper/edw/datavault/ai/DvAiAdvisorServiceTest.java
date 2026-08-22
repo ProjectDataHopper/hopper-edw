@@ -1,0 +1,63 @@
+/*
+ * Copyright 2026 i-Bridge bv
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.hopper.edw.datavault.ai;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
+import org.junit.jupiter.api.Test;
+
+class DvAiAdvisorServiceTest {
+
+  @Test
+  void buildUserPromptIncludesQuestionAndSummary() {
+    DvAiContextBundle context =
+        DvAiContextBundle.builder()
+            .scenario(DvAiScenario.DV_MODELING)
+            .userPrompt("Suggest a hub for customer")
+            .modelSummaryJson("{\"name\":\"demo\"}")
+            .build();
+
+    String prompt = DvAiAdvisorService.buildUserPrompt(context);
+
+    assertTrue(prompt.contains("Suggest a hub for customer"));
+    assertTrue(prompt.contains("{\"name\":\"demo\"}"));
+  }
+
+  @Test
+  void followUpPromptOmitsFullCatalogContext() {
+    DvAiContextBundle context =
+        DvAiContextBundle.builder()
+            .scenario(DvAiScenario.GENERAL)
+            .userPrompt("What next?")
+            .modelStructureJson("{\"tables\":[]}")
+            .modelSummaryJson("{\"name\":\"demo\"}")
+            .recordDefinitionsJson("{\"sources\":[]}")
+            .checkResultsJson("{\"results\":[]}")
+            .followUp(true)
+            .appliedChangeSummaries(List.of("RENAME_TABLE: Hub -> HUB_CUSTOMER"))
+            .build();
+
+    String prompt = DvAiAdvisorService.buildFollowUpUserPrompt(context);
+
+    assertTrue(prompt.contains("What next?"));
+    assertTrue(prompt.contains("Model structure JSON"));
+    assertTrue(prompt.contains("RENAME_TABLE: Hub -> HUB_CUSTOMER"));
+    assertFalse(prompt.contains("Catalog record definitions JSON"));
+    assertFalse(prompt.contains("Model summary JSON"));
+  }
+}

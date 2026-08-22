@@ -1,6 +1,6 @@
 # `metadata/execution-metrics-profile` — Execution metrics profile
 
-**Java:** `org.apache.hop.datavault.metrics.metadata.ExecutionMetricsProfileMeta`  
+**Java:** `org.hopper.edw.datavault.metrics.metadata.ExecutionMetricsProfileMeta`  
 **Schema:** [execution-metrics-profile.schema.json](execution-metrics-profile.schema.json)  
 **Example:** `retail-example/metadata/execution-metrics-profile/retail-execution-metrics.json`
 

@@ -261,7 +261,7 @@ No new `BvSqlReferenceStyle`. Style `DBT` now means “dbt + Jinja.” Existing 
 
 ### 6.1 Parse (headless, unit-testable)
 
-New package `org.apache.hop.datavault.dbt`:
+New package `org.hopper.edw.datavault.dbt`:
 
 | Class | Role |
 |-------|------|
@@ -310,7 +310,7 @@ Toolbar button on `HopGuiBusinessVaultGraph` (same family as Check model / ELK l
 
 When splitting: write additional `.hbv` files next to the current model (or a user-chosen folder) with `HopVfs.getOutputStream`, same BV configuration name as the current model, then offer to open them.
 
-Help topic: `docs` + `src/main/resources/org/apache/hop/datavault/hopgui/help/bv-dbt-import-dialog.md`.
+Help topic: `docs` + `src/main/resources/org/hopper/edw/datavault/hopgui/help/bv-dbt-import-dialog.md`.
 
 ### 6.3 Macro editor GUI
 
@@ -347,13 +347,13 @@ Name collisions across files: ERROR on check model (dbt would also forbid duplic
 ## 8. Package / file map (expected)
 
 ```
-src/main/java/org/apache/hop/datavault/jinja/
+src/main/java/org/hopper/edw/datavault/jinja/
   BvSqlJinjaSupport.java
   JinjaSandboxFactory.java
   DbtJinjaBuiltins.java          // ref, source, config, var, this, …
   JinjaMacroLibraryLoader.java
 
-src/main/java/org/apache/hop/datavault/metadata/jinja/
+src/main/java/org/hopper/edw/datavault/metadata/jinja/
   JinjaMacroLibraryMeta.java
   JinjaMacroDefinition.java
   JinjaMacroVar.java
@@ -361,7 +361,7 @@ src/main/java/org/apache/hop/datavault/metadata/jinja/
   JinjaMacroLibrarySearchableAnalyser.java
   xp/RegisterJinjaMacroLibraryMetadataExtensionPoint.java
 
-src/main/java/org/apache/hop/datavault/dbt/
+src/main/java/org/hopper/edw/datavault/dbt/
   DbtProjectParser.java
   DbtSchemaYamlParser.java
   DbtSqlModelReader.java
@@ -371,12 +371,12 @@ src/main/java/org/apache/hop/datavault/dbt/
   DbtImportReport.java
   DbtModelDraft.java
 
-src/main/java/org/apache/hop/datavault/hopgui/file/businessvault/
+src/main/java/org/hopper/edw/datavault/hopgui/file/businessvault/
   HopGuiDbtImportDialog.java
   HopGuiDbtImportSupport.java
   (+ toolbar/context on HopGuiBusinessVaultGraph)
 
-src/test/resources/org/apache/hop/datavault/dbt/jaffle-mini/
+src/test/resources/org/hopper/edw/datavault/dbt/jaffle-mini/
   dbt_project.yml, models/…, macros/…, models/schema.yml
 ```
 

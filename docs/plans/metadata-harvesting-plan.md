@@ -387,7 +387,7 @@ Deliverables:
 ## Implementation sketch (packages)
 
 ```text
-org.apache.hop.catalog.harvest/
+org.hopper.edw.catalog.harvest/
   SchemaHarvestModels.java          # records
   SchemaHarvestService.java         # orchestrate resolve → discover → diff
   SchemaHarvestSubjectResolver.java # RDG / namespace scope
@@ -397,11 +397,11 @@ org.apache.hop.catalog.harvest/
     SchemaHarvestHistoryPublisher.java
     SchemaHarvestHistoryReader.java
 
-org.apache.hop.datavault.workflow.actions.harvestmetadata/
+org.hopper.edw.datavault.workflow.actions.harvestmetadata/
   ActionHarvestSourceMetadata.java
   ActionHarvestSourceMetadataDialog.java
 
-org.apache.hop.catalog.hopgui.perspective/
+org.hopper.edw.catalog.hopgui.perspective/
   SchemaHarvestHistoryBrowserDialog.java   # Phase 3
 ```
 
@@ -442,7 +442,7 @@ Prefer **catalog** package for harvest (source-agnostic observation); workflow a
 | Parallelism unit | Per database connection |
 | Field storage | Full discovered field list per subject per run (simpler, space later) |
 | Fail action on drift | No — only infrastructure failures; drift via gate |
-| Package home for engine | `org.apache.hop.catalog.harvest` |
+| Package home for engine | `org.hopper.edw.catalog.harvest` |
 
 ---
 

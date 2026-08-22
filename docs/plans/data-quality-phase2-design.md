@@ -6,7 +6,7 @@
 | **Author** | _TBD_ |
 | **Date** | 2026-07-10 |
 | **Status** | Delivered (Phase 2 implemented; user docs in `docs/data-quality.adoc`) |
-| **Related** | Issue #66; [data-quality-architecture-plan.md](docs/plans/data-quality-architecture-plan.md); Phase 1 under `org.apache.hop.quality` |
+| **Related** | Issue #66; [data-quality-architecture-plan.md](docs/plans/data-quality-architecture-plan.md); Phase 1 under `org.hopper.edw.quality` |
 | **Audience** | Senior engineers implementing hop-data-vault quality features |
 
 ---
@@ -36,7 +36,7 @@ GUI history browse on the catalog Quality tab completes the ops loop for humans.
 
 | Layer | Location | Behavior |
 |-------|----------|----------|
-| Model | `org.apache.hop.quality.model.*` | `DataQualityRule`, `DataQualityRuleType` (6 types), `DataQualityReport`, `DataQualityFinding`, bindings, severity, lifecycle, mode |
+| Model | `org.hopper.edw.quality.model.*` | `DataQualityRule`, `DataQualityRuleType` (6 types), `DataQualityReport`, `DataQualityFinding`, bindings, severity, lifecycle, mode |
 | Measure | `DataQualityMeasureService` | Resolve bindings → collect `DataProfileSnapshot` → evaluate via registry |
 | Profile | `DatabaseProfileCollector`, `RowProfileCollector`, `FieldProfile` | Row count, null/empty counts, min/max, value distribution (max 200 distinct) |
 | Disposition | `QualityDisposition` | `FAIL_ON_BLOCKING` \| `FAIL_ON_WARNINGS` \| `ALERT_ONLY` |
@@ -103,7 +103,7 @@ Evidence:
 - File/Iceberg SAMPLE scanners (still deferred; DB SQL pushdown remains primary).
 - Dedicated third workflow action `ALERT_ON_QUALITY_REPORT` (ALERT_ONLY + sinks on Evaluate Quality Gate is sufficient for Phase 2).
 - Mail/Slack/webhook plugins beyond the SPI (SPI only).
-- Upstream of `org.apache.hop.quality` into Apache Hop core (Phase 4).
+- Upstream of `org.hopper.edw.quality` into Apache Hop core (Phase 4).
 - Current-row / multi-version satellite filters (`sqlFilter`) — Phase 2 measures the physical table as-is.
 
 ---
@@ -121,7 +121,7 @@ Evidence:
 | K7 | **Alert sinks on Gate with explicit matrix** | See §3.3. Blank `alertSinks` → `log`. No publish when findings==0 on ALERT_ONLY. Fail modes: log when **any** findings > 0 if `log` listed; `ops_table` only if listed + `alertOnGateFailure`. |
 | K8 | **Retail targets**: `hub_customer`, `sat_customer_demo`, `hub_order` (minimum set) | High-signal tables; physical tables on Vault. Measure grain = full physical table (all sat versions). |
 | K9 | **GUI history**: button **History…** on Quality tab | Concrete resolution order in §6; subject key via `CatalogQualitySubjectSupport.subjectKey`. |
-| K10 | **Layered dependencies** | `org.apache.hop.quality.history` stays free of `datavault.metrics` (duplicate small DDL dialect switch). **Workflow actions** already depend on datavault for resource groups and **may** call `VaultUpdateExecutionSupport` / `DvUpdateMetricsConstants` for load-id resolution — no extra adapter required. Shared string `"dv_ops"` may be duplicated. |
+| K10 | **Layered dependencies** | `org.hopper.edw.quality.history` stays free of `datavault.metrics` (duplicate small DDL dialect switch). **Workflow actions** already depend on datavault for resource groups and **may** call `VaultUpdateExecutionSupport` / `DvUpdateMetricsConstants` for load-id resolution — no extra adapter required. Shared string `"dv_ops"` may be duplicated. |
 | K11 | **Acknowledgements for quality findings**: **out of scope** for Phase 2 MVP | Schema acks exist; quality acks add UX without blocking persist/rules. |
 | K12 | **Preserve `qualityRules` on DV/BV/DM catalog republish** | Phase 2 prerequisite (PR 0). Without merge, target bindings are not durable. Also preserve `validationAcknowledgements` while touching upsert. |
 | K13 | **Immutable quality runs** | If `quality_run_id` PK already exists, publisher **skips** (no replace). Gate ops_table sink must not re-insert full findings for an existing run. |
@@ -534,7 +534,7 @@ Indexes (DDL):
 
 ### 2.4 Publisher API
 
-Package: `org.apache.hop.quality.history`
+Package: `org.hopper.edw.quality.history`
 
 ```java
 public final class DataQualityHistoryPublisher {
@@ -585,7 +585,7 @@ public final class DataQualityHistoryPublisher {
 - `catalogConnection` — reuse measure action catalog field.
 - Flags: `publishCatalogDefinitions` default true when catalog set; `autoCreateTables` default true (creates all five tables including `quality_alert`).
 
-**Dependency:** `org.apache.hop.quality.history` does **not** import `datavault.metrics`. Duplicate Postgres/MySQL DDL switch. Actions may use datavault helpers for load id only.
+**Dependency:** `org.hopper.edw.quality.history` does **not** import `datavault.metrics`. Duplicate Postgres/MySQL DDL switch. Actions may use datavault helpers for load id only.
 
 ### 2.5 Report hand-off Measure ↔ Gate (persist on)
 
@@ -606,7 +606,7 @@ Gate prefers in-process report; **no requirement** that gate read from DB for di
 
 ### 3.1 Interface
 
-Package: `org.apache.hop.quality.alert`
+Package: `org.hopper.edw.quality.alert`
 
 ```java
 public interface IQualityAlertSink {
@@ -808,7 +808,7 @@ LIMIT 50
 | Permission / SQL error | ErrorDialog with message |
 | Zero rows | “No history for this subject yet.” |
 
-Helper: `DataQualityHistoryReader` in `org.apache.hop.quality.history`.
+Helper: `DataQualityHistoryReader` in `org.hopper.edw.quality.history`.
 
 ---
 
@@ -867,13 +867,13 @@ Update `retail-example/README.md` quality section.
 ### New packages
 
 ```text
-org.apache.hop.quality.engine.evaluators.*  (Phase 2 profile evaluators)
-org.apache.hop.quality.profile.SqlAssertionRunner
-org.apache.hop.quality.history.*
+org.hopper.edw.quality.engine.evaluators.*  (Phase 2 profile evaluators)
+org.hopper.edw.quality.profile.SqlAssertionRunner
+org.hopper.edw.quality.history.*
   DataQualityHistoryPublisher
   DataQualityHistoryDdlSupport
   DataQualityHistoryReader
-org.apache.hop.quality.alert.*
+org.hopper.edw.quality.alert.*
   IQualityAlertSink, QualityAlertContext
   LogQualityAlertSink, OpsTableQualityAlertSink
   QualityAlertSupport
@@ -1009,13 +1009,13 @@ Rejected as primary approach — fights catalog-centric goal; still useful as em
 - [docs/plans/data-quality-architecture-plan.md](docs/plans/data-quality-architecture-plan.md)
 - [docs/plans/load-run-metrics-plan.md](docs/plans/load-run-metrics-plan.md)
 - [docs/data-quality.adoc](docs/data-quality.adoc) — Phase 1; target post path aspirational until PR 6/7
-- `src/main/java/org/apache/hop/quality/**`
-- `src/main/java/org/apache/hop/datavault/metrics/LoadRunMetricsCatalogPublisher.java`
-- `src/main/java/org/apache/hop/datavault/metrics/LoadRunMetricsDdlSupport.java`
-- `src/main/java/org/apache/hop/datavault/metrics/VaultUpdateExecutionSupport.java`
-- `src/main/java/org/apache/hop/datavault/metrics/DvUpdateMetricsConstants.java` — `DV_WORKFLOW_EXECUTION_ID`
-- `src/main/java/org/apache/hop/datavault/catalog/DvCatalogPublisher.java` — preserve-on-publish gap
-- `src/main/java/org/apache/hop/catalog/hopgui/perspective/RecordDefinitionDetailsPanel.java`
+- `src/main/java/org/hopper/edw/quality/**`
+- `src/main/java/org/hopper/edw/datavault/metrics/LoadRunMetricsCatalogPublisher.java`
+- `src/main/java/org/hopper/edw/datavault/metrics/LoadRunMetricsDdlSupport.java`
+- `src/main/java/org/hopper/edw/datavault/metrics/VaultUpdateExecutionSupport.java`
+- `src/main/java/org/hopper/edw/datavault/metrics/DvUpdateMetricsConstants.java` — `DV_WORKFLOW_EXECUTION_ID`
+- `src/main/java/org/hopper/edw/datavault/catalog/DvCatalogPublisher.java` — preserve-on-publish gap
+- `src/main/java/org/hopper/edw/catalog/hopgui/perspective/RecordDefinitionDetailsPanel.java`
 - `retail-example/catalog-data/hop/retail-example/operations/load_run.json` — OPS / dv_ops
 - `retail-example/workflows/run-retail-update.hwf` — source-only post path today
 - Issue https://github.com/ProjectDataHopper/hopper-edw/issues/66
@@ -1058,7 +1058,7 @@ Rejected as primary approach — fights catalog-centric goal; still useful as em
 
 - **Title:** `quality: persist quality runs, findings, and profile snapshots to dv_ops`
 - **Files/components:**
-  - `org.apache.hop.quality.history.*` (publisher with PublishResult; `ensureTables` creates **five** tables including `quality_alert`)
+  - `org.hopper.edw.quality.history.*` (publisher with PublishResult; `ensureTables` creates **five** tables including `quality_alert`)
   - Catalog def generation 1:1 with §2.3 columns (including `quality_alert`)
   - `ActionMeasureDataQuality` + dialog + i18n (`persistHistory`, OPS-oriented fields, `${DV_WORKFLOW_EXECUTION_ID}`)
   - DDL/transaction/skip tests; REGEX pattern-escape unit tests if collector helpers land here
@@ -1069,7 +1069,7 @@ Rejected as primary approach — fights catalog-centric goal; still useful as em
 
 - **Title:** `quality: alert sinks for ALERT_ONLY (log + ops table)`
 - **Files/components:**
-  - `org.apache.hop.quality.alert.*`
+  - `org.hopper.edw.quality.alert.*`
   - `ActionEvaluateQualityGate` + dialog (sink matrix, `alertOnGateFailure`)
   - Tests for zero-findings no-op and ALERT_ONLY path
 - **Dependencies:** PR 3 for ops_table; log sink can land with PR 3

@@ -1,0 +1,192 @@
+/*
+ * Copyright 2026 i-Bridge bv
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.hopper.edw.datavault.metadata;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
+import org.apache.hop.core.HopEnvironment;
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.variables.Variables;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+class DvLinkHubSourceKeyFieldSupportTest {
+
+  @BeforeAll
+  static void initHop() throws HopException {
+    HopEnvironment.init();
+  }
+
+  @Test
+  void resolveBusinessKeySourcesUsesHubBusinessKeyNamesWhenMappingEmpty() {
+    DvHub hub = new DvHub("hub_customer");
+    hub.setBusinessKeys(List.of(businessKey("customer_id"), businessKey("region_code")));
+
+    DvLink.HubSourceKeyField hubSourceKeyField = new DvLink.HubSourceKeyField();
+    hubSourceKeyField.setHubName("hub_customer");
+
+    List<DvLinkHubSourceKeyFieldSupport.ResolvedBusinessKeySource> resolved =
+        DvLinkHubSourceKeyFieldSupport.resolveBusinessKeySources(
+            hub, hubSourceKeyField, new Variables());
+
+    assertEquals(2, resolved.size());
+    assertEquals("customer_id", resolved.get(0).getSourceFieldName());
+    assertEquals("region_code", resolved.get(1).getSourceFieldName());
+  }
+
+  @Test
+  void resolveBusinessKeySourcesDeduplicatesRepeatedBusinessKeyNamesPerRecordSource() {
+    DvHub hub = new DvHub("hub_customer");
+    hub.setBusinessKeys(
+        List.of(
+            businessKeyForSource("customer_id", "E2E-customer-hub"),
+            businessKeyForSource("customer_id", "E2E-customer-address"),
+            businessKeyForSource("customer_id", "E2E-customer-contact")));
+
+    DvLink.HubSourceKeyField hubSourceKeyField = new DvLink.HubSourceKeyField();
+    hubSourceKeyField.setHubName("hub_customer");
+    hubSourceKeyField
+        .getSourceBusinessKeyFields()
+        .add(new BusinessKeySource("customer_id", "customer_id"));
+
+    List<String> sourceFieldNames =
+        DvLinkHubSourceKeyFieldSupport.resolveSourceFieldNames(
+            hub, hubSourceKeyField, new Variables());
+
+    assertEquals(List.of("customer_id"), sourceFieldNames);
+  }
+
+  @Test
+  void resolveBusinessKeySourcesUsesExplicitSourceFieldNamesWhenProvided() {
+    DvHub hub = new DvHub("hub_customer");
+    hub.setBusinessKeys(List.of(businessKey("customer_id")));
+
+    DvLink.HubSourceKeyField hubSourceKeyField = new DvLink.HubSourceKeyField();
+    hubSourceKeyField.setHubName("hub_customer");
+    hubSourceKeyField
+        .getSourceBusinessKeyFields()
+        .add(new BusinessKeySource("customer_id", "cust_fk"));
+
+    List<String> sourceFieldNames =
+        DvLinkHubSourceKeyFieldSupport.resolveSourceFieldNames(
+            hub, hubSourceKeyField, new Variables());
+
+    assertEquals(List.of("cust_fk"), sourceFieldNames);
+  }
+
+  @Test
+  void resolveSourceFieldNamesThrowsWhenHubMappingRowMissing() {
+    DvLink.DvLinkHubSource linkHubSource = new DvLink.DvLinkHubSource();
+    linkHubSource.setSourceName("order-header");
+
+    HopException ex =
+        assertThrows(
+            HopException.class,
+            () ->
+                DvLinkHubSourceKeyFieldSupport.resolveSourceFieldNames(
+                    linkHubSource, "hub_customer", new DvHub("hub_customer"), new Variables()));
+
+    assertTrue(ex.getMessage().contains("hub_customer"));
+    assertTrue(ex.getMessage().contains("order-header"));
+  }
+
+  @Test
+  void resolveBusinessKeySourcesExpandsCompositeParts() {
+    DvHub hub = new DvHub("hub_burger");
+    BusinessKey bk = businessKey("burger_bk");
+    bk.setComposite(true);
+    bk.setSourceFieldNames(List.of("num_seq_bkcc_bk", "num_seq_bk"));
+    hub.setBusinessKeys(List.of(bk));
+
+    DvLink.HubSourceKeyField hubSourceKeyField = new DvLink.HubSourceKeyField();
+    hubSourceKeyField.setHubName("hub_burger");
+    BusinessKeySource mapping = new BusinessKeySource();
+    mapping.setBusinessKeyField("burger_bk");
+    mapping.setSourceFieldNames(List.of("src_cc", "src_seq"));
+    hubSourceKeyField.getSourceBusinessKeyFields().add(mapping);
+
+    List<DvLinkHubSourceKeyFieldSupport.ResolvedBusinessKeySource> resolved =
+        DvLinkHubSourceKeyFieldSupport.resolveBusinessKeySources(
+            hub, hubSourceKeyField, new Variables());
+
+    assertEquals(2, resolved.size());
+    assertEquals("burger_bk", resolved.get(0).getBusinessKeyField());
+    assertEquals("src_cc", resolved.get(0).getSourceFieldName());
+    assertTrue(resolved.get(0).isCompositePart());
+    assertEquals(0, resolved.get(0).getPartIndex());
+    assertEquals("src_seq", resolved.get(1).getSourceFieldName());
+    assertEquals(1, resolved.get(1).getPartIndex());
+
+    assertEquals(
+        List.of("src_cc", "src_seq"),
+        DvLinkHubSourceKeyFieldSupport.resolveSourceFieldNames(
+            hub, hubSourceKeyField, new Variables()));
+  }
+
+  @Test
+  void resolveBusinessKeySourcesFallsBackToHubPartsWhenLinkMappingEmpty() {
+    DvHub hub = new DvHub("hub_burger");
+    BusinessKey bk = businessKey("burger_bk");
+    bk.setComposite(true);
+    bk.setSourceFieldNames(List.of("num_seq_bkcc_bk", "num_seq_bk"));
+    hub.setBusinessKeys(List.of(bk));
+
+    DvLink.HubSourceKeyField hubSourceKeyField = new DvLink.HubSourceKeyField();
+    hubSourceKeyField.setHubName("hub_burger");
+
+    assertEquals(
+        List.of("num_seq_bkcc_bk", "num_seq_bk"),
+        DvLinkHubSourceKeyFieldSupport.resolveSourceFieldNames(
+            hub, hubSourceKeyField, new Variables()));
+  }
+
+  @Test
+  void findCompositePartCountMismatchesDetectsWrongPartCount() {
+    DvHub hub = new DvHub("hub_burger");
+    BusinessKey bk = businessKey("burger_bk");
+    bk.setComposite(true);
+    bk.setSourceFieldNames(List.of("a", "b"));
+    hub.setBusinessKeys(List.of(bk));
+
+    DvLink.HubSourceKeyField hubSourceKeyField = new DvLink.HubSourceKeyField();
+    BusinessKeySource mapping = new BusinessKeySource();
+    mapping.setBusinessKeyField("burger_bk");
+    mapping.setSourceFieldNames(List.of("only_one"));
+    hubSourceKeyField.getSourceBusinessKeyFields().add(mapping);
+
+    List<String> errors =
+        DvLinkHubSourceKeyFieldSupport.findCompositePartCountMismatches(
+            hub, hubSourceKeyField, new Variables());
+    assertEquals(1, errors.size());
+    assertTrue(errors.get(0).contains("burger_bk"));
+  }
+
+  private static BusinessKey businessKey(String name) {
+    BusinessKey key = new BusinessKey(name);
+    key.setDataType("String");
+    key.setLength("20");
+    return key;
+  }
+
+  private static BusinessKey businessKeyForSource(String name, String recordSourceName) {
+    BusinessKey key = businessKey(name);
+    key.setRecordSourceName(recordSourceName);
+    return key;
+  }
+}

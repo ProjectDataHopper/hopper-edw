@@ -1,7 +1,7 @@
 # `.hdm` — Dimensional model
 
 **Root element:** `<dimensional-model>`  
-**Java:** `org.apache.hop.datavault.metadata.dimensional.DimensionalModel`  
+**Java:** `org.hopper.edw.datavault.metadata.dimensional.DimensionalModel`  
 **Schema:** [hdm.xsd](hdm.xsd) · **Excerpt:** [../samples/hdm-excerpt.xml](../samples/hdm-excerpt.xml)
 
 ## Purpose

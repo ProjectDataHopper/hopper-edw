@@ -322,13 +322,13 @@ Do not start E or a README engine-list change before B is green. Do not add Snow
 
 **Already touched (baseline):**
 
-- `src/main/java/org/apache/hop/datavault/metadata/DvDdlSupport.java`
-- `src/main/java/org/apache/hop/datavault/metadata/DvBulkLoadTransformSupport.java`
-- `src/main/java/org/apache/hop/datavault/metadata/DvTargetUnicodeCapabilitySupport.java`
-- `src/main/java/org/apache/hop/datavault/metadata/businessvault/BvPitSnapshotSpineSupport.java`
-- `src/main/java/org/apache/hop/datavault/metadata/businessvault/BvSqlViewPipelineSupport.java`
-- `src/main/java/org/apache/hop/datavault/metrics/LoadRunMetricsDdlSupport.java`
-- `src/main/java/org/apache/hop/datavault/metrics/WorkflowLoadOverviewDdlSupport.java`
+- `src/main/java/org/hopper/edw/datavault/metadata/DvDdlSupport.java`
+- `src/main/java/org/hopper/edw/datavault/metadata/DvBulkLoadTransformSupport.java`
+- `src/main/java/org/hopper/edw/datavault/metadata/DvTargetUnicodeCapabilitySupport.java`
+- `src/main/java/org/hopper/edw/datavault/metadata/businessvault/BvPitSnapshotSpineSupport.java`
+- `src/main/java/org/hopper/edw/datavault/metadata/businessvault/BvSqlViewPipelineSupport.java`
+- `src/main/java/org/hopper/edw/datavault/metrics/LoadRunMetricsDdlSupport.java`
+- `src/main/java/org/hopper/edw/datavault/metrics/WorkflowLoadOverviewDdlSupport.java`
 - `scripts/docker/compose.snowflake.yml`, `Dockerfile`, `jdbc-versions.env`, `snowflake-init.sql`
 - `integration-tests/metadata/rdbms/profiles/snowflake/`
 - `integration-tests/environments/docker-snowflake.json`
@@ -341,4 +341,4 @@ Do not start E or a README engine-list change before B is green. Do not add Snow
 - Optional skip for `reference-table` when `DB_TYPE=snowflake`
 - `docs/performance-tuning.md`, then Phase E user docs
 - Optional: `DvHashKeyOrderStrategySupport.candidateCollations` / `hasStaticTrust` after probe
-- Optional: `org.apache.hop.quality.history.DataQualityHistoryDdlSupport`
+- Optional: `org.hopper.edw.quality.history.DataQualityHistoryDdlSupport`

@@ -45,5 +45,5 @@ derived from the Apache Hop Development Skill by De Bortoli Wines Pty Limited:
 https://github.com/DeBortoliWines/skill-apache-hop-development
 
 Copyright 2026 De Bortoli Wines Pty Limited. Licensed under the Apache License,
-Version 2.0. See src/main/resources/org/apache/hop/datavault/ai/prompts/hop-standards/
+Version 2.0. See src/main/resources/org/hopper/edw/datavault/ai/prompts/hop-standards/
 NOTICE-debortoli-hop-skill.txt for full attribution.

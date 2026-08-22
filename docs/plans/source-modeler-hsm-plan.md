@@ -154,7 +154,7 @@ Satellite `sat_product` binds to catalog feed `feed_product_enriched` and loads 
 ### 3.1 Package layout (mirror existing modelers)
 
 ```
-org.apache.hop.datavault.metadata.sourcemodel/
+org.hopper.edw.datavault.metadata.sourcemodel/
   SourceModel.java
   SourceModelConfiguration.java
   SourceTable.java                 # canvas node
@@ -179,7 +179,7 @@ org.apache.hop.datavault.metadata.sourcemodel/
     SourceQueryCatalogPublisher.java   # → DV_SOURCE COMPOSITE
   pipeline/  (if needed by generators)
 
-org.apache.hop.datavault.hopgui.file.sourcemodel/
+org.hopper.edw.datavault.hopgui.file.sourcemodel/
   HopSourceModelFileType.java          # .hsm
   HopGuiSourceModelGraph.java
   SourceModelPainter.java
@@ -192,7 +192,7 @@ org.apache.hop.datavault.hopgui.file.sourcemodel/
   delegates/ (clipboard, undo)
   SourceElkLayout.java (or under layout/)
 
-org.apache.hop.datavault.metadata/
+org.hopper.edw.datavault.metadata/
   (extend) DvSourceType + IDvSource factory for COMPOSITE
   (extend) hub/link/sat pipeline builders to consume composite sources
 ```

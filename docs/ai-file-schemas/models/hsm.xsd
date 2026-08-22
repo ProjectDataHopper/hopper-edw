@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   Relaxed structural schema for Source model .hsm files (AI guidance).
-  Source of truth: org.apache.hop.datavault.metadata.sourcemodel.SourceModel
+  Source of truth: org.hopper.edw.datavault.metadata.sourcemodel.SourceModel
 -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
 

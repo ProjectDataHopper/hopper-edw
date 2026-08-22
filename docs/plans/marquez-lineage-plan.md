@@ -18,7 +18,7 @@ This supersedes the earlier table-only “hook into Data Vault Update” MVP dra
 
 | Component | Location |
 |-----------|----------|
-| Snapshot → RunEvent mapper | `org.apache.hop.datavault.openlineage.OpenLineageSnapshotMapper` |
+| Snapshot → RunEvent mapper | `org.hopper.edw.datavault.openlineage.OpenLineageSnapshotMapper` |
 | File writer | `OpenLineageFileWriter` |
 | HTTP client | `OpenLineageHttpClient` |
 | Orchestration | `OpenLineageExportService` |

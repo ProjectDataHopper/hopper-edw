@@ -18,7 +18,7 @@ Three audiences, one rules engine:
 
 ## 1. Rules engine (unchanged core)
 
-Package: `org.apache.hop.datavault.metadata.businessvault.naming`
+Package: `org.hopper.edw.datavault.metadata.businessvault.naming`
 
 **Rules:** `technical_field`, `control_column`, `type_suffix`, `redundant_table_prefix`, `vague_token`, `language_mismatch`, `name_collision`
 
@@ -42,7 +42,7 @@ Feasibility: excellent for structural rules; good for redundancy/collisions; med
 
 ## 2. Acknowledge warning with comment (Phase A)
 
-Extend [BvScd2FieldMapping](../src/main/java/org/apache/hop/datavault/metadata/businessvault/BvScd2FieldMapping.java):
+Extend [BvScd2FieldMapping](../src/main/java/org/hopper/edw/datavault/metadata/businessvault/BvScd2FieldMapping.java):
 
 ```java
 @HopMetadataProperty(key = "naming_ack", groupKey = "naming_acks")
@@ -149,7 +149,7 @@ flowchart LR
 | Channel | Phase | Notes |
 |---------|-------|-------|
 | **Hop GUI** | A | BV toolbar → *Export naming review report…* (Markdown/JSON/CSV file chooser) |
-| **Hop CLI** | A | New command plugin mirroring [SvgExportCommand](../src/main/java/org/apache/hop/datavault/command/svg/SvgExportCommand.java): `hop bv naming-report <path.hbv> [--table name] [--format md\|json\|csv] [-o output]` |
+| **Hop CLI** | A | New command plugin mirroring [SvgExportCommand](../src/main/java/org/hopper/edw/datavault/command/svg/SvgExportCommand.java): `hop bv naming-report <path.hbv> [--table name] [--format md\|json\|csv] [-o output]` |
 | **Docker script** | A | `integration-tests/run-bv-naming-report.sh` — same pattern as `run-svg.sh` for reviewers without local Hop |
 | **CI / PR** | A doc, B automation | Document running script on changed `.hbv` files; upload `naming-review.md` as artifact; optional GitHub Action later |
 
@@ -178,7 +178,7 @@ flowchart LR
 |------|-------|
 | Report core | `BvNamingReviewReport`, `BvNamingReviewReportSupport`, `BvNamingReviewMarkdownWriter`, `BvNamingReviewJsonWriter` |
 | CLI | `BvNamingReportCommand` (register like `SvgExportCommand`) |
-| GUI | [HopGuiBusinessVaultGraph](../src/main/java/org/apache/hop/datavault/hopgui/file/businessvault/HopGuiBusinessVaultGraph.java) toolbar action |
+| GUI | [HopGuiBusinessVaultGraph](../src/main/java/org/hopper/edw/datavault/hopgui/file/businessvault/HopGuiBusinessVaultGraph.java) toolbar action |
 | Docker | `integration-tests/run-bv-naming-report.sh`, note in [PROJECT.md](../../integration-tests/PROJECT.md) |
 | Tests | `BvNamingReviewReportTest` — Customer 360 fixture produces expected Markdown sections |
 

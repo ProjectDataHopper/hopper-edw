@@ -4,6 +4,12 @@ All notable changes to Data Hopper EDW (formerly Data Hopper EDW) are documented
 
 ## Unreleased
 
+### Java packages `org.hopper.edw`
+
+- Plugin code lives under `org.hopper.edw.datavault`, `org.hopper.edw.catalog`, `org.hopper.edw.quality`, `org.hopper.edw.databases.hopsourcemodel`, and `org.hopper.edw.hsm.jdbc` (was `org.apache.hop.*` for those trees)
+- Apache Hop API packages (`org.apache.hop.core`, `org.apache.hop.ui`, …) are unchanged
+- JDBC SPI and the thin client `Automatic-Module-Name` follow the new names; `jdbc:hop-hsm:` is unchanged
+
 ### Product identity: Data Hopper EDW
 
 - Repository home: [ProjectDataHopper/hopper-edw](https://github.com/ProjectDataHopper/hopper-edw) (transferred from `ProjectDataHopper/hopper-edw`; old GitHub URLs redirect)
@@ -221,7 +227,7 @@ Requires **Apache Hop 2.19.0** and **Java 21**.
 ### Hop database type: Apache Hop Source Model
 
 - Register **`@DatabaseMetaPlugin`** type **Apache Hop Source Model** (`HOPSOURCEMODEL`) so Hop connection metadata can use the thin hop-hsm JDBC driver against Hop Server source model services
-- Ship `hop-hsm-jdbc` in the plugin zip (`plugins/misc/datavault/lib/`) so Table Input / Explore DB can load `org.apache.hop.hsm.jdbc.HopHsmJdbcDriver` without a separate install
+- Ship `hop-hsm-jdbc` in the plugin zip (`plugins/misc/datavault/lib/`) so Table Input / Explore DB can load `org.hopper.edw.hsm.jdbc.HopHsmJdbcDriver` without a separate install
 
 ## [0.8.0] — 2026-08-10
 

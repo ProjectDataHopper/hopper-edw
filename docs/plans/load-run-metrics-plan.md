@@ -26,9 +26,9 @@ flowchart LR
 
 Key files:
 
-- Collector: `src/main/java/org/apache/hop/datavault/metrics/DvUpdatePipelineCompletedExtensionPoint.java`
-- Extraction (name heuristics only): `src/main/java/org/apache/hop/datavault/metrics/DvUpdateMetricsExtractor.java`
-- Report shape: `src/main/java/org/apache/hop/datavault/metrics/DvUpdateMetricsReport.java`
+- Collector: `src/main/java/org/hopper/edw/datavault/metrics/DvUpdatePipelineCompletedExtensionPoint.java`
+- Extraction (name heuristics only): `src/main/java/org/hopper/edw/datavault/metrics/DvUpdateMetricsExtractor.java`
+- Report shape: `src/main/java/org/hopper/edw/datavault/metrics/DvUpdateMetricsReport.java`
 
 **Gaps relative to the goal:**
 
@@ -84,7 +84,7 @@ flowchart TB
 
 ## 1. Metadata contract (`attributesMap`)
 
-Introduce a single namespace constant class, e.g. `GeneratedPipelineMetadataSupport` (new under `src/main/java/org/apache/hop/datavault/metadata/`).
+Introduce a single namespace constant class, e.g. `GeneratedPipelineMetadataSupport` (new under `src/main/java/org/hopper/edw/datavault/metadata/`).
 
 **Namespace:** `hop-datavault`
 

@@ -14,7 +14,7 @@ Phase 1 ships a new `IHopPerspective` (`360-EdwJourneyPerspective`) that maps on
 
 ## Packages
 
-`org.apache.hop.datavault.hopgui.perspective.journey`
+`org.hopper.edw.datavault.hopgui.perspective.journey`
 
 Reuse: `RecordOriginNavigationSupport`, `ResourceDefinitionGroupResolver`, `SourceUsageIndexBuilder`, harvest/validation GUI supports, `ModelSearchOpenSupport`.
 

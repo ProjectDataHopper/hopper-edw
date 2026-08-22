@@ -162,16 +162,16 @@ For headless, automated, or test environments, the underlying AI services can be
 
 **Data Vault modeler**
 
-* [DvAiContextBuilder](../src/main/java/org/apache/hop/datavault/ai/DvAiContextBuilder.java): Assembles and redacts context bundles, combining scenario details, model XML, structures, and catalog schemas.
-* [DvAiAdvisorService](../src/main/java/org/apache/hop/datavault/ai/DvAiAdvisorService.java): Communicates directly with the configured language model.
-* [DvAiConversationSession](../src/main/java/org/apache/hop/datavault/ai/DvAiConversationSession.java): Manages state and conversation turns for interactive applications.
-* [DvAiProposalApplier](../src/main/java/org/apache/hop/datavault/ai/DvAiProposalApplier.java): Validates and writes approved proposals directly back to the model memory.
+* [DvAiContextBuilder](../src/main/java/org/hopper/edw/datavault/ai/DvAiContextBuilder.java): Assembles and redacts context bundles, combining scenario details, model XML, structures, and catalog schemas.
+* [DvAiAdvisorService](../src/main/java/org/hopper/edw/datavault/ai/DvAiAdvisorService.java): Communicates directly with the configured language model.
+* [DvAiConversationSession](../src/main/java/org/hopper/edw/datavault/ai/DvAiConversationSession.java): Manages state and conversation turns for interactive applications.
+* [DvAiProposalApplier](../src/main/java/org/hopper/edw/datavault/ai/DvAiProposalApplier.java): Validates and writes approved proposals directly back to the model memory.
 
 **Pipeline and workflow (M2)**
 
-* [PipelineAiAdvisorService](../src/main/java/org/apache/hop/datavault/ai/pipeline/PipelineAiAdvisorService.java) / [WorkflowAiAdvisorService](../src/main/java/org/apache/hop/datavault/ai/workflow/WorkflowAiAdvisorService.java): LLM calls with M2 prompt supplement and `hop_proposals` parsing.
-* [HopAiProposalParser](../src/main/java/org/apache/hop/datavault/ai/HopAiProposalParser.java): Extracts proposals from raw assistant text.
-* [PipelineAiProposalValidator](../src/main/java/org/apache/hop/datavault/ai/pipeline/PipelineAiProposalValidator.java) / [WorkflowAiProposalValidator](../src/main/java/org/apache/hop/datavault/ai/workflow/WorkflowAiProposalValidator.java): Topology validation before apply.
-* [PipelineAiProposalApplier](../src/main/java/org/apache/hop/datavault/ai/pipeline/PipelineAiProposalApplier.java) / [WorkflowAiProposalApplier](../src/main/java/org/apache/hop/datavault/ai/workflow/WorkflowAiProposalApplier.java): Applies selected proposals.
+* [PipelineAiAdvisorService](../src/main/java/org/hopper/edw/datavault/ai/pipeline/PipelineAiAdvisorService.java) / [WorkflowAiAdvisorService](../src/main/java/org/hopper/edw/datavault/ai/workflow/WorkflowAiAdvisorService.java): LLM calls with M2 prompt supplement and `hop_proposals` parsing.
+* [HopAiProposalParser](../src/main/java/org/hopper/edw/datavault/ai/HopAiProposalParser.java): Extracts proposals from raw assistant text.
+* [PipelineAiProposalValidator](../src/main/java/org/hopper/edw/datavault/ai/pipeline/PipelineAiProposalValidator.java) / [WorkflowAiProposalValidator](../src/main/java/org/hopper/edw/datavault/ai/workflow/WorkflowAiProposalValidator.java): Topology validation before apply.
+* [PipelineAiProposalApplier](../src/main/java/org/hopper/edw/datavault/ai/pipeline/PipelineAiProposalApplier.java) / [WorkflowAiProposalApplier](../src/main/java/org/hopper/edw/datavault/ai/workflow/WorkflowAiProposalApplier.java): Applies selected proposals.
 
 Full M2 design and proposal tables: [plans/hop-ai-assistant-m2.md](plans/hop-ai-assistant-m2.md).

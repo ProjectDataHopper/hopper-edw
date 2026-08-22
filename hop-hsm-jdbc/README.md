@@ -44,7 +44,7 @@ JDBC URL shape: `jdbc:hop-hsm://{host}:{port}/{service}`. Extra options use `?` 
 | Setting | Value |
 |---------|--------|
 | Driver Name | e.g. `Apache Hop Source Model` |
-| Class Name | `org.apache.hop.hsm.jdbc.HopHsmJdbcDriver` |
+| Class Name | `org.hopper.edw.hsm.jdbc.HopHsmJdbcDriver` |
 | URL Template | `jdbc:hop-hsm://{username}:{password}@{host}:{port}/{database}` |
 | Libraries | Add `hop-hsm-jdbc-*-SNAPSHOT.jar` only |
 
@@ -114,7 +114,7 @@ jdbc:hop-hsm://{username}:{password}@{host}:{port}/{database}
 | `/{database}` or `?schema=` | Default **schema** = Source model service name |
 | Servlet path | Defaults to `/hop/sourceModelData` |
 
-Driver class (ServiceLoader): `org.apache.hop.hsm.jdbc.HopHsmJdbcDriver`
+Driver class (ServiceLoader): `org.hopper.edw.hsm.jdbc.HopHsmJdbcDriver`
 
 **JDBC model**
 

@@ -1,0 +1,44 @@
+/*
+ * Copyright 2026 i-Bridge bv
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.hopper.edw.datavault.hopgui.file.lineageview;
+
+import org.apache.hop.core.util.Utils;
+import org.hopper.edw.datavault.lineageview.backend.LineageGraph;
+
+/** Canvas overlay text for empty, loading, and error lineage views (desktop and Hop Web SVG). */
+public final class LineageViewCanvasBanner {
+
+  private LineageViewCanvasBanner() {}
+
+  public static String text(
+      String errorBanner,
+      LineageGraph graph,
+      boolean loading,
+      String loadingText,
+      String emptyText) {
+    if (!Utils.isEmpty(errorBanner)) {
+      return errorBanner;
+    }
+    if (graph == null || graph.getNodesOrEmpty().isEmpty()) {
+      return loading ? loadingText : emptyText;
+    }
+    return null;
+  }
+
+  public static boolean error(String errorBanner) {
+    return !Utils.isEmpty(errorBanner);
+  }
+}

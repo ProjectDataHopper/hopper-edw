@@ -32,5 +32,5 @@ See the session plan for literature (Krneta 2014, Linstedt/Olschimke, VaultSpeed
 
 ## Packages
 
-- `org.apache.hop.datavault.metadata.sourcemodel.tovault` — classifier + apply
-- `org.apache.hop.datavault.hopgui.file.sourcemodel` / `...vault` — toolbar + review dialog
+- `org.hopper.edw.datavault.metadata.sourcemodel.tovault` — classifier + apply
+- `org.hopper.edw.datavault.hopgui.file.sourcemodel` / `...vault` — toolbar + review dialog
