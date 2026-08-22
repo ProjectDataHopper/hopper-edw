@@ -17,6 +17,7 @@
 package org.apache.hop.datavault.hopgui;
 
 import java.nio.file.Path;
+import org.apache.hop.core.Const;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.menu.GuiMenuElement;
 import org.apache.hop.core.gui.plugin.toolbar.GuiToolbarElement;
@@ -63,17 +64,25 @@ public class EdwDocsGuiPlugin {
       toolTip = "i18n::EdwDocsGuiPlugin.Toolbar.Tooltip",
       separator = true)
   public void openDocumentation() {
-    HopGui hopGui = HopGui.getInstance();
+    openHtml(HopGui.getInstance(), "index.html");
+  }
+
+  /** Open a plugin-shipped HTML page (for example {@code edw-journey.html}) in the browser. */
+  public static void openHtml(HopGui hopGui, String pageName) {
+    if (hopGui == null) {
+      return;
+    }
+    String page = Const.NVL(pageName, "index.html");
     try {
-      Path index = EdwDocsSupport.findIndexHtml();
-      if (index == null) {
+      Path html = EdwDocsSupport.findHtmlPage(page);
+      if (html == null) {
         MessageBox box = new MessageBox(hopGui.getShell(), SWT.OK | SWT.ICON_INFORMATION);
         box.setText(BaseMessages.getString(PKG, "EdwDocsGuiPlugin.Error.Title"));
-        box.setMessage(BaseMessages.getString(PKG, "EdwDocsGuiPlugin.Error.NotFound"));
+        box.setMessage(BaseMessages.getString(PKG, "EdwDocsGuiPlugin.Error.NotFound", page));
         box.open();
         return;
       }
-      EnvironmentUtils.getInstance().openUrl(index.toUri().toString());
+      EnvironmentUtils.getInstance().openUrl(html.toUri().toString());
     } catch (Exception e) {
       new ErrorDialog(
           hopGui.getShell(),

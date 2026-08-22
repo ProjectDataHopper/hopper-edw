@@ -186,6 +186,10 @@ For a slide-style executive summary, see link:presentations/hop-data-vault-overv
 |Available
 |link:execution-maps.adoc[Execution maps]
 
+|EDW Journey perspective
+|Available (map, Open, last-run, grow, contextual docs)
+|link:edw-journey.adoc[EDW Journey]
+
 |Hop Web modelers (`.hsm`/`.hdv`/`.hbv`/`.hdm`/`.hem`/`.hlv`)
 |Available (experimental; needs Hop canvas SPI)
 |link:hop-web-modelers.md[Hop Web modelers], issue https://github.com/mattcasters/hop-data-vault/issues/119[#119]

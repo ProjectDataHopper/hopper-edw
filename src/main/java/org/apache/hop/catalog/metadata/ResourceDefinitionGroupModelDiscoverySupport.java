@@ -169,7 +169,7 @@ public final class ResourceDefinitionGroupModelDiscoverySupport {
     return normalized.toLowerCase(Locale.ROOT);
   }
 
-  static String resolveProjectHome(IVariables variables) {
+  public static String resolveProjectHome(IVariables variables) {
     if (variables == null) {
       return null;
     }

@@ -117,6 +117,8 @@ Sort memory, parallel pipeline/table copies, and large-model notes: link:perform
 
 Day-to-day operators and modelers can use Hop **Search Everywhere** to jump to hubs, satellites, source queries, resource definition groups, or metrics profiles by name without walking the project tree. See link:search.adoc[Project and metadata search].
 
+The **EDW Journey** perspective lists the same group's sources, controls, models, operate workflows, and reports in load order — see link:edw-journey.adoc[EDW Journey].
+
 == Related documents
 
 * link:update-resource-definition-group-action.adoc[Update resource definition group action]

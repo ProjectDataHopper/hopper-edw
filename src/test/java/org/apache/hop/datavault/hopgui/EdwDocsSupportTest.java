@@ -59,4 +59,40 @@ class EdwDocsSupportTest {
       }
     }
   }
+
+  @Test
+  void findHtmlPageUsesPluginBaseFolder() throws Exception {
+    Path page =
+        tempDir.resolve("misc").resolve("datavault").resolve("docs").resolve("edw-journey.html");
+    Files.createDirectories(page.getParent());
+    Files.writeString(page, "<html><title>Journey</title></html>");
+
+    String previous = System.getProperty(Const.HOP_PLUGIN_BASE_FOLDERS);
+    System.setProperty(Const.HOP_PLUGIN_BASE_FOLDERS, tempDir.toString());
+    try {
+      Path found = EdwDocsSupport.findHtmlPage(EdwDocsSupport.class, null, "edw-journey.html");
+      assertEquals(page.toAbsolutePath().normalize(), found);
+      assertEquals(
+          page.toAbsolutePath().normalize(),
+          EdwDocsSupport.findHtmlPage(EdwDocsSupport.class, null, "docs/edw-journey"));
+    } finally {
+      if (previous == null) {
+        System.clearProperty(Const.HOP_PLUGIN_BASE_FOLDERS);
+      } else {
+        System.setProperty(Const.HOP_PLUGIN_BASE_FOLDERS, previous);
+      }
+    }
+  }
+
+  @Test
+  void docsRelativeRejectsPathTraversal() {
+    assertEquals("docs/index.html", EdwDocsSupport.docsRelative(null));
+    assertEquals("docs/index.html", EdwDocsSupport.docsRelative(""));
+    assertEquals("docs/edw-journey.html", EdwDocsSupport.docsRelative("edw-journey.html"));
+    assertEquals("docs/edw-journey.html", EdwDocsSupport.docsRelative("docs/edw-journey.html"));
+    assertEquals("docs/edw-journey.html", EdwDocsSupport.docsRelative("edw-journey"));
+    assertEquals(null, EdwDocsSupport.docsRelative("../secret.html"));
+    assertEquals(null, EdwDocsSupport.docsRelative("docs/../secret.html"));
+    assertEquals(null, EdwDocsSupport.docsRelative("presentations/overview.html"));
+  }
 }

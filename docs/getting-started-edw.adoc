@@ -123,6 +123,8 @@ image::images/resource-definition-group-editor.png[Resource definition group edi
 
 Checkpoint: harvest, **Validate sources**, and **Update resource definition group** now have a scope.
 
+Open the **EDW Journey** sidebar (after Data catalog) and select this group. The tree is the warehouse map: sources, controls, DV (then empty BV/DM), workflows, reports. Details buttons open the catalog, models, and group editor; **Documentation** buttons open the matching HTML guide. See link:edw-journey.adoc[EDW Journey perspective].
+
 Do **not** wait for BV/DM to create the group. Add those files to this same group in chapter 5.
 
 Reference: link:resource-definition-group.adoc[Resource definition group].

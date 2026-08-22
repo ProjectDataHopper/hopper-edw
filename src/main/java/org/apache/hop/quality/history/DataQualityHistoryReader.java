@@ -74,6 +74,18 @@ public final class DataQualityHistoryReader {
       Long blockingCount,
       String loadId) {}
 
+  /** One quality_run header (newest-first browse). */
+  public record QualityRunSummary(
+      String qualityRunId,
+      Date measuredAt,
+      String lifecycle,
+      Long subjectCount,
+      Long findingCount,
+      Long blockingCount,
+      Long warningCount,
+      Boolean success,
+      String workflowName) {}
+
   /** One finding row for a quality run (double-click drill-down). */
   public record FindingEntry(
       long findingSeq,
@@ -230,6 +242,69 @@ public final class DataQualityHistoryReader {
                 longValue(rowMeta, row, "finding_count"),
                 longValue(rowMeta, row, "blocking_count"),
                 stringValue(rowMeta, row, "load_id")));
+      }
+      return entries;
+    } finally {
+      db.disconnect();
+    }
+  }
+
+  /**
+   * Recent {@code quality_run} rows, newest first. Optional lifecycle filter ({@code PRE_UPDATE},
+   * {@code POST_UPDATE}, {@code AD_HOC}); empty means all.
+   */
+  public static List<QualityRunSummary> listRecentRuns(
+      DatabaseMeta databaseMeta,
+      String operationsSchema,
+      String lifecycle,
+      IVariables variables,
+      int limit)
+      throws HopException {
+    if (databaseMeta == null) {
+      throw new HopException("Quality history database meta is null");
+    }
+    String schema =
+        DataQualityHistoryDdlSupport.resolvePhysicalSchema(operationsSchema, databaseMeta);
+    int rowLimit = limit > 0 ? limit : DEFAULT_HISTORY_LIMIT;
+
+    LoggingObject loggingObject = new LoggingObject(DataQualityHistoryReader.class);
+    Database db = new Database(loggingObject, variables, databaseMeta);
+    try {
+      db.connect();
+      if (!historyTablesExist(db, schema)) {
+        throw new QualityHistoryTablesMissingException(MSG_TABLES_MISSING);
+      }
+      String runTable =
+          databaseMeta.getQuotedSchemaTableCombination(
+              db, schema, DataQualityHistoryPublisher.TABLE_QUALITY_RUN);
+      StringBuilder sql = new StringBuilder();
+      sql.append("SELECT quality_run_id, measured_at, lifecycle, subject_count, finding_count,")
+          .append(" blocking_count, warning_count, success, workflow_name FROM ")
+          .append(runTable);
+      if (!Utils.isEmpty(lifecycle)) {
+        sql.append(" WHERE lifecycle = ")
+            .append(DataQualityHistoryPublisher.sqlLiteral(lifecycle.trim()));
+      }
+      sql.append(" ORDER BY measured_at DESC");
+      db.setQueryLimit(rowLimit);
+      List<Object[]> rows = db.getRows(sql.toString(), rowLimit);
+      IRowMeta rowMeta = db.getReturnRowMeta();
+      if (rows == null || rows.isEmpty() || rowMeta == null) {
+        return Collections.emptyList();
+      }
+      List<QualityRunSummary> entries = new ArrayList<>(rows.size());
+      for (Object[] row : rows) {
+        entries.add(
+            new QualityRunSummary(
+                stringValue(rowMeta, row, "quality_run_id"),
+                dateValue(rowMeta, row, "measured_at"),
+                stringValue(rowMeta, row, "lifecycle"),
+                longValue(rowMeta, row, "subject_count"),
+                longValue(rowMeta, row, "finding_count"),
+                longValue(rowMeta, row, "blocking_count"),
+                longValue(rowMeta, row, "warning_count"),
+                booleanValue(rowMeta, row, "success"),
+                stringValue(rowMeta, row, "workflow_name")));
       }
       return entries;
     } finally {
@@ -429,6 +504,32 @@ public final class DataQualityHistoryReader {
         return n.longValue();
       }
       return rowMeta.getValueMeta(index).getInteger(value);
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  private static Boolean booleanValue(IRowMeta rowMeta, Object[] row, String fieldName) {
+    try {
+      int index = indexOf(rowMeta, fieldName);
+      if (index < 0) {
+        return null;
+      }
+      Object value = row[index];
+      if (value == null) {
+        return null;
+      }
+      if (value instanceof Boolean b) {
+        return b;
+      }
+      if (value instanceof Number n) {
+        return n.longValue() != 0L;
+      }
+      String text = rowMeta.getValueMeta(index).getString(value);
+      if (Utils.isEmpty(text)) {
+        return null;
+      }
+      return "Y".equalsIgnoreCase(text) || "true".equalsIgnoreCase(text) || "1".equals(text);
     } catch (Exception e) {
       return null;
     }

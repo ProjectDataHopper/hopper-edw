@@ -181,6 +181,17 @@ Then day-2: harvest history and apply FKs, catalog version tags + CI gate, quali
 
 Walkthrough: link:getting-started-edw.adoc#after-first-load[Getting started — after the first load].
 
+[[d7-edw-journey]]
+== D7 — EDW Journey perspective
+
+The Hop GUI map of D1 + D3 + D5 is the **EDW Journey** perspective: a tree of one resource definition group in operate order (sources → controls → DV → BV → DM → orchestration → outputs). Selecting a node opens the existing catalog, modeler, metadata, workflow, or report — it does not replace those editors.
+
+image::images/diagrams/d7-edw-journey.svg[D7 — EDW Journey perspective over a resource definition group,align="center"]
+
+PlantUML source: link:diagrams/d7-edw-journey.puml[d7-edw-journey.puml].
+
+User guide: link:edw-journey.adoc[EDW Journey perspective].
+
 == Related documents
 
 [cols="1,2", options="header"]
@@ -198,6 +209,9 @@ Walkthrough: link:getting-started-edw.adoc#after-first-load[Getting started — 
 
 |Preferred load action
 |link:update-resource-definition-group-action.adoc[Update resource definition group]
+
+|GUI map of the warehouse
+|link:edw-journey.adoc[EDW Journey perspective]
 
 |Day-2 runners
 |link:operations.adoc[Operations]

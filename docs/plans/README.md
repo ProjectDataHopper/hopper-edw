@@ -24,6 +24,7 @@ For product documentation, start at [../README.md](../README.md) or [../feature-
 | Plan | Topic |
 |------|--------|
 | [hop-lineage-view-plan.md](hop-lineage-view-plan.md) | Issue #79 — Hop Lineage View (`.hlv`) over OpenLineage backends |
+| [edw-journey-perspective-plan.md](edw-journey-perspective-plan.md) | EDW Journey perspective (canonical tree over a resource definition group) |
 | [data-type-mappings-plan.md](data-type-mappings-plan.md) | Issue #113 — project data type mappings / pre-modeling sources |
 | [target-type-mappings-plan.md](target-type-mappings-plan.md) | Issue #127 — Hop type → native SQL type preferences for DDL |
 | [snowflake-support-plan.md](snowflake-support-plan.md) | Snowflake as a fifth EDW engine (dialect done; live LocalStack/real-account completion) |

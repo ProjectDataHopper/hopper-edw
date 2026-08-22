@@ -253,6 +253,17 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
     fdApplyHarvestCatalog.bottom = new FormAttachment(100, 0);
     wApplyHarvestCatalog.setLayoutData(fdApplyHarvestCatalog);
 
+    Button wOpenJourney = new Button(parent, SWT.PUSH);
+    wOpenJourney.setText(
+        BaseMessages.getString(PKG, "ResourceDefinitionGroupMetaEditor.OpenJourney.Label"));
+    wOpenJourney.setToolTipText(
+        BaseMessages.getString(PKG, "ResourceDefinitionGroupMetaEditor.OpenJourney.ToolTip"));
+    wOpenJourney.addListener(SWT.Selection, e -> openEdwJourney());
+    FormData fdOpenJourney = new FormData();
+    fdOpenJourney.right = new FormAttachment(wApplyHarvestCatalog, -margin);
+    fdOpenJourney.bottom = new FormAttachment(100, 0);
+    wOpenJourney.setLayoutData(fdOpenJourney);
+
     Button wGenerateHsmFromHarvest = new Button(parent, SWT.PUSH);
     wGenerateHsmFromHarvest.setText(
         BaseMessages.getString(
@@ -262,7 +273,7 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
             PKG, "ResourceDefinitionGroupMetaEditor.GenerateHsmFromHarvest.ToolTip"));
     wGenerateHsmFromHarvest.addListener(SWT.Selection, e -> generateHsmFromHarvest());
     FormData fdGenerateHsmFromHarvest = new FormData();
-    fdGenerateHsmFromHarvest.right = new FormAttachment(wApplyHarvestCatalog, -margin);
+    fdGenerateHsmFromHarvest.right = new FormAttachment(wOpenJourney, -margin);
     fdGenerateHsmFromHarvest.bottom = new FormAttachment(100, 0);
     wGenerateHsmFromHarvest.setLayoutData(fdGenerateHsmFromHarvest);
 
@@ -526,6 +537,17 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
     getWidgetsContent(draft);
     org.apache.hop.catalog.harvest.SchemaHarvestApplyGuiSupport.generateHsmFromHarvest(
         HopGui.getInstance(), draft);
+  }
+
+  private void openEdwJourney() {
+    ResourceDefinitionGroupMeta draft = new ResourceDefinitionGroupMeta();
+    getWidgetsContent(draft);
+    org.apache.hop.datavault.hopgui.perspective.journey.EdwJourneyPerspective perspective =
+        org.apache.hop.datavault.hopgui.perspective.journey.EdwJourneyPerspective.getInstance();
+    if (perspective == null) {
+      return;
+    }
+    perspective.select(draft.getName(), null);
   }
 
   @Override

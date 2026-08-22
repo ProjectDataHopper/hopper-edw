@@ -70,6 +70,9 @@ Use **Add models** to pick project files. Filter the path list when the project 
 |===
 |Button |What it does
 
+|**Open in EDW Journey**
+|Switch to the link:edw-journey.adoc[EDW Journey] perspective for this group (sources through outputs).
+
 |**Generate .hsm from harvest…**
 |Day-2: build or merge a source model from the latest harvest FK inventory. Not a greenfield first step.
 

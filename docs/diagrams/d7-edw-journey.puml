@@ -1,0 +1,36 @@
+@startuml d7-edw-journey
+!pragma layout smetana
+title D7 — EDW Journey perspective
+skinparam backgroundColor #fafbfc
+skinparam defaultFontName SansSerif
+skinparam shadowing false
+skinparam ArrowColor #5a6a7e
+skinparam rectangle {
+  FontSize 12
+  BorderThickness 1
+}
+
+rectangle "EDW Journey\nperspective" as Journey #033d5d;text:white
+
+rectangle "Resource definition group" as Rdg #4a5568;text:white
+rectangle "1. Sources\n.hsm + catalog feeds" as Sources #fff6e8
+rectangle "2. Controls\nharvest · gate · quality" as Controls #e6f4f8
+rectangle "3. Raw Data Vault\n.hdv" as Dv #e8f0fb
+rectangle "4. Business Vault\n.hbv" as Bv #f3ebfb
+rectangle "5. Dimensional\n.hdm" as Dm #e7f6ed
+rectangle "7. Orchestration\n.hwf" as Orch #fff3df
+rectangle "8. Outputs\nreports · .hem · .hlv" as Out #edf0f4
+
+Journey --> Rdg
+Rdg --> Sources
+Rdg --> Controls
+Rdg --> Dv
+Rdg --> Bv
+Rdg --> Dm
+Rdg --> Orch
+Rdg --> Out
+Sources --> Controls
+Controls --> Dv
+Dv --> Bv
+Bv --> Dm
+@enduml

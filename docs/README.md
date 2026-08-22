@@ -29,7 +29,8 @@ Architecture pictures are **committed SVGs** (`docs/images/diagrams/`) generated
 
 | Document | Description |
 |----------|-------------|
-| [architecture.adoc](architecture.adoc) | Catalog in/out, resource definition group spine, build vs run, four controls |
+| [architecture.adoc](architecture.adoc) | Catalog in/out, resource definition group spine, build vs run, four controls, EDW Journey |
+| [edw-journey.adoc](edw-journey.adoc) | **EDW Journey** perspective: sources → controls → DV/BV/DM → workflows → reports |
 | [getting-started-edw.adoc](getting-started-edw.adoc) | **Build an EDW:** source model → catalog → Data Vault → resource definition group → load → BV/DM |
 | [getting-started-retail.adoc](getting-started-retail.adoc) | **Tour** the finished retail-example (run the sample workflows) |
 | [feature-overview.adoc](feature-overview.adoc) | Major plugin capabilities, maturity, and links to deep dives |
@@ -107,6 +108,7 @@ Architecture pictures are **committed SVGs** (`docs/images/diagrams/`) generated
 | Document | Description |
 |----------|-------------|
 | [operations.adoc](operations.adoc) | Docker runners, batch orchestration, partial loads, load overview |
+| [edw-journey.adoc](edw-journey.adoc) | **EDW Journey** perspective (warehouse map in operate order) |
 | [update-resource-definition-group-action.adoc](update-resource-definition-group-action.adoc) | Preferred multi-model update action (group-scoped) |
 | [search.adoc](search.adoc) | Project search for models and plugin metadata (Hop 2.19) |
 | [execution-maps.adoc](execution-maps.adoc) | `.hem` execution and lineage graphs |
