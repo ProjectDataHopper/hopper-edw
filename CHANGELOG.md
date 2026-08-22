@@ -1,8 +1,14 @@
 # Changelog
 
-All notable changes to Data Hopper EDW (formerly Data Hopper EDW) are documented in this file.
+All notable changes to Data Hopper EDW (formerly hop-datavault) are documented in this file.
 
 ## Unreleased
+
+### Maven coordinates and install path
+
+- Maven: `org.hopper:hopper-edw` (was `org.apache.hop:hop-datavault`; the rebrand briefly used `org.projectdatahopper.hop`)
+- Plugin zip unpacks to `plugins/misc/hopper-edw/` (was `plugins/misc/datavault/`). Remove the old folder before installing this build
+- Thin JDBC module groupId is `org.hopper` as well (`hop-hsm-jdbc`)
 
 ### Java packages `org.hopper.edw`
 
@@ -12,10 +18,10 @@ All notable changes to Data Hopper EDW (formerly Data Hopper EDW) are documented
 
 ### Product identity: Data Hopper EDW
 
-- Repository home: [ProjectDataHopper/hopper-edw](https://github.com/ProjectDataHopper/hopper-edw) (transferred from `ProjectDataHopper/hopper-edw`; old GitHub URLs redirect)
+- Repository home: [ProjectDataHopper/hopper-edw](https://github.com/ProjectDataHopper/hopper-edw) (transferred from `mattcasters/hop-data-vault`; old GitHub URLs redirect)
 - Product name: **Data Hopper EDW** — Apache Hop plugins to build an Enterprise Data Warehouse, not a Data Vault-only tool
-- Maven coordinates: `org.projectdatahopper.hop:hopper-edw` (was `org.apache.hop:hop-datavault`). Marketplace: `./hop marketplace install hopper-edw`
-- Assembly zip: `target/hopper-edw-*.zip`. Unzip layout stays `plugins/misc/datavault/`
+- Maven coordinates: `org.hopper:hopper-edw`. Marketplace: `./hop marketplace install hopper-edw`
+- Assembly zip: `target/hopper-edw-*.zip`. Unzip layout: `plugins/misc/hopper-edw/`
 - License remains Apache License 2.0; copyright **i-Bridge bv**. Not an Apache Software Foundation release
 - **0.9.0 cutover:** uninstall `$HOP_HOME/plugins/misc/datavault` from the old `hop-datavault` artifact, re-import [`hop-marketplace-repo.yaml`](hop-marketplace-repo.yaml), then install `hopper-edw`. Release 0.9.0 remains at `org.apache.hop:hop-datavault` on Nexus
 

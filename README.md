@@ -59,7 +59,7 @@ Highlights:
 
 Full index: **[docs/README.md](docs/README.md)**
 
-`mvn package` also builds an HTML copy of the user guide into `target/generated-docs/` and ships it in the plugin zip at `plugins/misc/datavault/docs/index.html`. Architecture diagrams are committed SVGs generated from PlantUML (`docs/diagrams/`).
+`mvn package` also builds an HTML copy of the user guide into `target/generated-docs/` and ships it in the plugin zip at `plugins/misc/hopper-edw/docs/index.html`. Architecture diagrams are committed SVGs generated from PlantUML (`docs/diagrams/`).
 
 | Audience | Document |
 |----------|----------|
@@ -134,7 +134,7 @@ Artifacts:
 - `target/hopper-edw-0.10.0-SNAPSHOT.jar`
 - `target/hopper-edw-0.10.0-SNAPSHOT.zip` (ready-to-unzip plugin layout)
 
-Maven coordinates from **0.10.0** onward: `org.projectdatahopper.hop:hopper-edw`. Release **0.9.0** was published as `org.apache.hop:hop-datavault`.
+Maven coordinates from **0.10.0** onward: `org.hopper:hopper-edw`. Release **0.9.0** was published as `org.apache.hop:hop-datavault` and unpacked under `plugins/misc/datavault/`.
 
 Published release artifacts for **0.9.0** (previous coordinates):
 
@@ -144,7 +144,7 @@ Published release artifacts for **0.9.0** (previous coordinates):
 ## Installation (external plugin)
 
 1. Install **Apache Hop 2.19.0**.
-2. Unzip the assembly zip into your Hop installation root (`$HOP_HOME`) so both `plugins/misc/datavault/` and `lib/core/` (Jinjava) are updated. Copying only the plugin jar is not enough for Jinja SQL.
+2. Unzip the assembly zip into your Hop installation root (`$HOP_HOME`) so both `plugins/misc/hopper-edw/` and `lib/core/` (Jinjava) are updated. Copying only the plugin jar is not enough for Jinja SQL.
 3. Restart Hop GUI.
 4. New metadata types appear under **Metadata → Data Vault**. **Data Vault Update**, **Business Vault Update**, **Validate resource definitions**, **Export data lineage**, and **Update resource definition group** actions are available in workflows. `.hsm`, `.hdv`, `.hbv`, `.hdm`, and `.hlv` files open in Explorer tabs.
 
@@ -163,7 +163,7 @@ Continuous Jenkins builds publish the latest SNAPSHOT zip to the Data Hopper com
 Updated repository 'data-hopper-community' → https://repository.data-hopper.com/repository/hop-community-plugins/ (browse enabled)
 ```
 
-If you previously installed **0.9.0** as `hop-datavault`, remove `$HOP_HOME/plugins/misc/datavault` first so the folders do not stack.
+If you previously installed **0.9.0** as `hop-datavault`, remove `$HOP_HOME/plugins/misc/datavault` first so the old and new folders do not stack.
 
 **2. Query** available plugins (filter for this one):
 
@@ -182,10 +182,10 @@ If you previously installed **0.9.0** as `hop-datavault`, remove `$HOP_HOME/plug
 ```
 
 ```text
-Resolved hopper-edw → org.projectdatahopper.hop:hopper-edw:0.10.0-SNAPSHOT (prefer repo 'data-hopper-community')
-… Marketplace - Downloading org.projectdatahopper.hop:hopper-edw:0.10.0-SNAPSHOT from https://repository.data-hopper.com/repository/hop-community-plugins/…
-… Marketplace - Installed org.projectdatahopper.hop:hopper-edw:0.10.0-SNAPSHOT. Restart Hop to load the plugin.
-Plugin org.projectdatahopper.hop:hopper-edw:0.10.0-SNAPSHOT installed under $HOP_HOME from repo 'data-hopper-community'. Restart Hop to load it.
+Resolved hopper-edw → org.hopper:hopper-edw:0.10.0-SNAPSHOT (prefer repo 'data-hopper-community')
+… Marketplace - Downloading org.hopper:hopper-edw:0.10.0-SNAPSHOT from https://repository.data-hopper.com/repository/hop-community-plugins/…
+… Marketplace - Installed org.hopper:hopper-edw:0.10.0-SNAPSHOT. Restart Hop to load the plugin.
+Plugin org.hopper:hopper-edw:0.10.0-SNAPSHOT installed under $HOP_HOME from repo 'data-hopper-community'. Restart Hop to load it.
 ```
 
 You can also use **Tools → Marketplace…** in Hop GUI: import the repository on the **Repositories** tab, then install from the **Plugins** tab.

@@ -22,7 +22,7 @@ Documentation for the **Data Hopper EDW** plugin (development **0.10.0-SNAPSHOT*
 
 Architecture pictures are **committed SVGs** (`docs/images/diagrams/`) generated from PlantUML (`docs/diagrams/`). Do not put Mermaid or Markdown ` ``` ` fences in `.adoc` files.
 
-`mvn package` writes an HTML copy of this guide to `target/generated-docs/` and into the plugin zip at `plugins/misc/datavault/docs/` (open `index.html`).
+`mvn package` writes an HTML copy of this guide to `target/generated-docs/` and into the plugin zip at `plugins/misc/hopper-edw/docs/` (open `index.html`).
 
 ## Start here
 

@@ -24,11 +24,12 @@ This file is for **AI coding assistants** and third-party contributors. Read it 
 
 **Data Hopper EDW** (`hopper-edw`) is a set of Apache Hop plugins to build an **Enterprise Data Warehouse**: visual models (`.hsm` / `.hdv` / `.hbv` / `.hdm`), catalog-first sources (including multi-table composite feeds), model-driven DDL and load pipelines, lineage, schema validation gates, data quality, execution maps (`.hem`), Hop Lineage Views (`.hlv`), the **EDW Journey** perspective, and optional AI help.
 
-- Maven artifact: `org.projectdatahopper.hop:hopper-edw` (see `pom.xml` for current version)
-- Install layout: `plugins/misc/datavault/` (from the assembly zip under `target/`)
+- Maven artifact: `org.hopper:hopper-edw` (see `pom.xml` for current version)
+- Install layout: `plugins/misc/hopper-edw/` (from the assembly zip under `target/`)
+- Java packages: `org.hopper.edw.datavault`, `.catalog`, `.quality`, `.databases.hopsourcemodel`, `.hsm.jdbc`
 - Upstream repo: https://github.com/ProjectDataHopper/hopper-edw
 - Legal: Apache License 2.0, copyright i-Bridge bv. Not an ASF release.
-- Do **not** rename Java packages, plugin IDs, file extensions, metadata keys, or `jdbc:hop-hsm:`.
+- Do **not** rename plugin IDs, file extensions, metadata keys, or `jdbc:hop-hsm:`.
 
 ## Hard version pins
 
@@ -110,7 +111,7 @@ Do **not** “fix” Hop core inside this repo. Core Hop changes belong in **apa
 Requirements: **JDK 21**, **Maven 3.x**.
 
 ```bash
-mvn clean package          # unit tests + jar + plugin zip (includes plugins/misc/datavault/docs/)
+mvn clean package          # unit tests + jar + plugin zip (includes plugins/misc/hopper-edw/docs/)
 mvn test                   # unit tests only
 mvn generate-resources     # refresh docs/images/diagrams/*.svg from docs/diagrams/*.puml
 mvn spotless:apply         # format before commit (Google Java Format)
@@ -120,7 +121,7 @@ mvn spotless:check         # CI-style format check
 Artifacts:
 
 - `target/hopper-edw-*-SNAPSHOT.jar`
-- `target/hopper-edw-*-SNAPSHOT.zip` — unzip into `$HOP_HOME` (layout: `plugins/misc/datavault/`)
+- `target/hopper-edw-*-SNAPSHOT.zip` — unzip into `$HOP_HOME` (layout: `plugins/misc/hopper-edw/`)
 
 Notes:
 

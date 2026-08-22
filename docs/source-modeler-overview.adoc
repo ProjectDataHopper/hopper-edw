@@ -210,7 +210,7 @@ With Data Hopper EDW installed, create a connection of type **Apache Hop Source 
 | Username / password | Hop Server credentials |
 |===
 
-The driver class is `org.hopper.edw.hsm.jdbc.HopHsmJdbcDriver`. The thin client jar is shipped under `plugins/misc/datavault/lib/` so **Table input**, Explore database, and other Hop database consumers can use the connection without a separate driver install.
+The driver class is `org.hopper.edw.hsm.jdbc.HopHsmJdbcDriver`. The thin client jar is shipped under `plugins/misc/hopper-edw/lib/` so **Table input**, Explore database, and other Hop database consumers can use the connection without a separate driver install.
 
 ===== 1. Create a Source model service (Hop)
 
