@@ -23,13 +23,13 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.hopgui.file.vault.HopGuiDataVaultModelDialog;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataSerializer;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
+import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
@@ -44,6 +44,10 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.catalog.discovery.CatalogDiscoverySnapshot;
+import org.hopper.edw.catalog.discovery.CatalogDiscoverySupport;
+import org.hopper.edw.catalog.hopgui.CatalogDiscoveryPreviewDialog;
+import org.hopper.edw.datavault.hopgui.file.vault.HopGuiDataVaultModelDialog;
 
 public class RecordDefinitionInputDialog extends BaseTransformDialog {
 
@@ -58,6 +62,8 @@ public class RecordDefinitionInputDialog extends BaseTransformDialog {
   private Text wNamespaceValue;
   private Text wNameValue;
   private Button wOutputFieldsMetadata;
+  private Button wFailIfNoDefinitions;
+  private Button wPreviewCatalog;
 
   // Output fields renaming controls
   private Text wOutNamespace;
@@ -209,6 +215,8 @@ public class RecordDefinitionInputDialog extends BaseTransformDialog {
     wlNamespaceValue.setLayoutData(fdlNamespaceValue);
 
     wNamespaceValue = new Text(wGeneralTabComp, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+    wNamespaceValue.setToolTipText(
+        BaseMessages.getString(PKG, "RecordDefinitionInputDialog.NamespaceValue.ToolTip"));
     PropsUi.setLook(wNamespaceValue);
     FormData fdNamespaceValue = new FormData();
     fdNamespaceValue.left = new FormAttachment(middle, 0);
@@ -252,6 +260,37 @@ public class RecordDefinitionInputDialog extends BaseTransformDialog {
     fdOutputFieldsMetadata.right = new FormAttachment(100, 0);
     fdOutputFieldsMetadata.top = new FormAttachment(wlOutputFieldsMetadata, 0, SWT.CENTER);
     wOutputFieldsMetadata.setLayoutData(fdOutputFieldsMetadata);
+
+    Label wlFailIfNoDefinitions = new Label(wGeneralTabComp, SWT.RIGHT);
+    wlFailIfNoDefinitions.setText(
+        BaseMessages.getString(PKG, "RecordDefinitionInputDialog.FailIfNoDefinitions.Label"));
+    PropsUi.setLook(wlFailIfNoDefinitions);
+    FormData fdlFailIfNoDefinitions = new FormData();
+    fdlFailIfNoDefinitions.left = new FormAttachment(0, 0);
+    fdlFailIfNoDefinitions.right = new FormAttachment(middle, -margin);
+    fdlFailIfNoDefinitions.top = new FormAttachment(wOutputFieldsMetadata, margin);
+    wlFailIfNoDefinitions.setLayoutData(fdlFailIfNoDefinitions);
+
+    wFailIfNoDefinitions = new Button(wGeneralTabComp, SWT.CHECK);
+    wFailIfNoDefinitions.setToolTipText(
+        BaseMessages.getString(PKG, "RecordDefinitionInputDialog.FailIfNoDefinitions.ToolTip"));
+    PropsUi.setLook(wFailIfNoDefinitions);
+    FormData fdFailIfNoDefinitions = new FormData();
+    fdFailIfNoDefinitions.left = new FormAttachment(middle, 0);
+    fdFailIfNoDefinitions.right = new FormAttachment(100, 0);
+    fdFailIfNoDefinitions.top = new FormAttachment(wlFailIfNoDefinitions, 0, SWT.CENTER);
+    wFailIfNoDefinitions.setLayoutData(fdFailIfNoDefinitions);
+
+    wPreviewCatalog = new Button(wGeneralTabComp, SWT.PUSH);
+    wPreviewCatalog.setText(
+        BaseMessages.getString(PKG, "RecordDefinitionInputDialog.PreviewCatalog.Label"));
+    PropsUi.setLook(wPreviewCatalog);
+    FormData fdPreviewCatalog = new FormData();
+    fdPreviewCatalog.left = new FormAttachment(middle, 0);
+    fdPreviewCatalog.right = new FormAttachment(100, 0);
+    fdPreviewCatalog.top = new FormAttachment(wFailIfNoDefinitions, margin);
+    wPreviewCatalog.setLayoutData(fdPreviewCatalog);
+    wPreviewCatalog.addListener(SWT.Selection, e -> previewCatalogContents());
 
     // Output Fields Tab (renaming)
     Composite wFieldsTabComp =
@@ -589,6 +628,28 @@ public class RecordDefinitionInputDialog extends BaseTransformDialog {
     wNameField.setEnabled(fromInput);
     wNamespaceValue.setEnabled(!fromInput);
     wNameValue.setEnabled(!fromInput);
+    wFailIfNoDefinitions.setEnabled(!fromInput);
+    wPreviewCatalog.setEnabled(!fromInput);
+  }
+
+  private void previewCatalogContents() {
+    try {
+      String connectionName = variables.resolve(wConnectionName.getText());
+      CatalogDiscoverySnapshot snapshot =
+          CatalogDiscoverySupport.inspectConnection(
+              connectionName,
+              variables.resolve(wNamespaceValue.getText()),
+              variables.resolve(wNameValue.getText()),
+              variables,
+              metadataProvider);
+      CatalogDiscoveryPreviewDialog.open(shell, snapshot);
+    } catch (Exception e) {
+      new ErrorDialog(
+          shell,
+          BaseMessages.getString(PKG, "RecordDefinitionInputDialog.PreviewCatalog.Error.Title"),
+          BaseMessages.getString(PKG, "RecordDefinitionInputDialog.PreviewCatalog.Error.Message"),
+          e);
+    }
   }
 
   public void getData() {
@@ -597,6 +658,7 @@ public class RecordDefinitionInputDialog extends BaseTransformDialog {
     wNamespaceValue.setText(Const.NVL(input.getNamespaceValue(), ""));
     wNameValue.setText(Const.NVL(input.getNameValue(), ""));
     wOutputFieldsMetadata.setSelection(input.isOutputFieldsMetadata());
+    wFailIfNoDefinitions.setSelection(input.isFailIfNoDefinitions());
 
     wOutNamespace.setText(Const.NVL(input.getOutputNamespaceField(), ""));
     wOutName.setText(Const.NVL(input.getOutputNameField(), ""));
@@ -648,6 +710,7 @@ public class RecordDefinitionInputDialog extends BaseTransformDialog {
     input.setNamespaceValue(wNamespaceValue.getText());
     input.setNameValue(wNameValue.getText());
     input.setOutputFieldsMetadata(wOutputFieldsMetadata.getSelection());
+    input.setFailIfNoDefinitions(wFailIfNoDefinitions.getSelection());
 
     input.setOutputNamespaceField(wOutNamespace.getText());
     input.setOutputNameField(wOutName.getText());

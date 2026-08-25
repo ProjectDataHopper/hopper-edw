@@ -24,6 +24,7 @@
     <namespace_value/>
     <name_value/>
     <output_fields_metadata>N</output_fields_metadata>
+    <fail_if_no_definitions>Y</fail_if_no_definitions>
     <output_namespace_field>namespace</output_namespace_field>
     <output_name_field>name</output_name_field>
     <output_type_field>type</output_type_field>

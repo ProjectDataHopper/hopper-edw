@@ -27,15 +27,7 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hopper.edw.catalog.discovery.HopVariableResolutionSupport;
-import org.hopper.edw.catalog.metadata.DataCatalogMeta;
-import org.hopper.edw.catalog.model.RecordDefinition;
-import org.hopper.edw.catalog.model.RecordDefinitionKey;
-import org.hopper.edw.catalog.model.RecordDefinitionQuery;
-import org.hopper.edw.catalog.model.RecordDefinitionRef;
-import org.hopper.edw.catalog.model.RecordDefinitionType;
-import org.hopper.edw.catalog.spi.IDataCatalog;
-import org.hopper.edw.catalog.versioning.CatalogVersionStore;
+import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.plugin.GuiElementType;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
@@ -46,6 +38,15 @@ import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.catalog.discovery.HopVariableResolutionSupport;
+import org.hopper.edw.catalog.metadata.DataCatalogMeta;
+import org.hopper.edw.catalog.model.RecordDefinition;
+import org.hopper.edw.catalog.model.RecordDefinitionKey;
+import org.hopper.edw.catalog.model.RecordDefinitionQuery;
+import org.hopper.edw.catalog.model.RecordDefinitionRef;
+import org.hopper.edw.catalog.model.RecordDefinitionType;
+import org.hopper.edw.catalog.spi.IDataCatalog;
+import org.hopper.edw.catalog.versioning.CatalogVersionStore;
 
 /**
  * File-based data catalog: stores record definitions as JSON files under a configurable directory.
@@ -79,6 +80,7 @@ public class FileDataCatalog implements IDataCatalog {
 
   private transient Path resolvedRoot;
   private transient String connectionName;
+  private transient int lastSkippedUnreadable;
 
   @Override
   public void connect(
@@ -106,12 +108,19 @@ public class FileDataCatalog implements IDataCatalog {
     } catch (IOException e) {
       throw new HopException("Unable to create catalog storage directory: " + resolvedRoot, e);
     }
+    LogChannel.GENERAL.logBasic(
+        BaseMessages.getString(
+            PKG,
+            "FileDataCatalog.Log.Connected",
+            Const.NVL(connectionName, ""),
+            resolvedRoot.toString()));
   }
 
   @Override
   public void disconnect() {
     resolvedRoot = null;
     connectionName = null;
+    lastSkippedUnreadable = 0;
   }
 
   @Override
@@ -176,6 +185,7 @@ public class FileDataCatalog implements IDataCatalog {
   @Override
   public List<RecordDefinitionRef> list(RecordDefinitionQuery query) throws HopException {
     ensureConnected();
+    lastSkippedUnreadable = 0;
     RecordDefinitionQuery effectiveQuery = query != null ? query : new RecordDefinitionQuery();
     List<RecordDefinitionRef> results = new ArrayList<>();
     Path versionsRoot = resolvedRoot.resolve(CatalogVersionStore.VERSIONS_DIRECTORY_NAME);
@@ -183,25 +193,44 @@ public class FileDataCatalog implements IDataCatalog {
     if (walkRoot == null) {
       return results;
     }
+    int skipped = 0;
     try (Stream<Path> paths = Files.walk(walkRoot)) {
-      paths
-          .filter(Files::isRegularFile)
-          .filter(path -> path.toString().endsWith(".json"))
-          .filter(path -> !isUnderDirectory(path, versionsRoot))
-          .forEach(
-              path -> {
-                try {
-                  RecordDefinition skeleton = readListSkeleton(path);
-                  if (effectiveQuery.matches(skeleton)) {
-                    results.add(RecordDefinitionRef.of(connectionName, skeleton));
-                  }
-                } catch (HopException e) {
-                  LogChannel.GENERAL.logError(
-                      "Skipping unreadable catalog record definition: " + path, e);
-                }
-              });
+      List<Path> jsonFiles =
+          paths
+              .filter(Files::isRegularFile)
+              .filter(path -> path.toString().endsWith(".json"))
+              .filter(path -> !isUnderDirectory(path, versionsRoot))
+              .toList();
+      for (Path path : jsonFiles) {
+        try {
+          RecordDefinition skeleton = readListSkeleton(path);
+          if (skeleton.getKey() == null
+              || Utils.isEmpty(skeleton.getKey().getNamespace())
+              || Utils.isEmpty(skeleton.getKey().getName())) {
+            skipped++;
+            LogChannel.GENERAL.logError(
+                BaseMessages.getString(PKG, "FileDataCatalog.Log.SkipMissingKey", path.toString()));
+            continue;
+          }
+          if (effectiveQuery.matches(skeleton)) {
+            results.add(RecordDefinitionRef.of(connectionName, skeleton));
+          }
+        } catch (HopException e) {
+          skipped++;
+          LogChannel.GENERAL.logError(
+              BaseMessages.getString(PKG, "FileDataCatalog.Log.SkipUnreadable", path.toString())
+                  + Const.CR
+                  + Const.NVL(e.getMessage(), e.getClass().getSimpleName()));
+        }
+      }
     } catch (IOException e) {
       throw new HopException("Unable to list record definitions under " + walkRoot, e);
+    }
+    lastSkippedUnreadable = skipped;
+    if (skipped > 0) {
+      LogChannel.GENERAL.logBasic(
+          BaseMessages.getString(
+              PKG, "FileDataCatalog.Log.SkippedCount", skipped, walkRoot.toString()));
     }
     return results;
   }
@@ -245,6 +274,27 @@ public class FileDataCatalog implements IDataCatalog {
    */
   public Path getResolvedRoot() {
     return resolvedRoot;
+  }
+
+  @Override
+  public String describeLocation() {
+    return resolvedRoot != null ? resolvedRoot.toString() : storageDirectory;
+  }
+
+  @Override
+  public int getLastSkippedUnreadable() {
+    return lastSkippedUnreadable;
+  }
+
+  @Override
+  public boolean hasVersionSnapshots() {
+    if (resolvedRoot == null) {
+      return false;
+    }
+    return Files.isRegularFile(
+        resolvedRoot
+            .resolve(CatalogVersionStore.VERSIONS_DIRECTORY_NAME)
+            .resolve(CatalogVersionStore.VERSIONS_MANIFEST_FILE));
   }
 
   private void ensureConnected() throws HopException {

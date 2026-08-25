@@ -15,12 +15,20 @@
  */
 package org.hopper.edw.catalog.registry;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.util.Utils;
+import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.metadata.api.IHopMetadataSerializer;
+import org.hopper.edw.catalog.discovery.HopVariableResolutionSupport;
+import org.hopper.edw.catalog.impl.file.FileDataCatalog;
 import org.hopper.edw.catalog.metadata.DataCatalogMeta;
 import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.catalog.model.RecordDefinitionKey;
@@ -29,11 +37,6 @@ import org.hopper.edw.catalog.model.RecordDefinitionRef;
 import org.hopper.edw.catalog.model.RecordDefinitionType;
 import org.hopper.edw.catalog.spi.DataCatalogPluginFactory;
 import org.hopper.edw.catalog.spi.IDataCatalog;
-import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.util.Utils;
-import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.metadata.api.IHopMetadataSerializer;
 
 /**
  * Central facade that aggregates CRUD operations across all enabled {@link DataCatalogMeta}
@@ -109,13 +112,12 @@ public final class RecordDefinitionRegistry {
       IVariables variables,
       IHopMetadataProvider metadataProvider)
       throws HopException {
+    IDataCatalog catalog = getConnectedCatalog(catalogConnectionName, variables, metadataProvider);
     String cacheKey = listCacheKey(catalogConnectionName, query);
     List<RecordDefinitionRef> cached = listCache.get(cacheKey);
     if (cached != null) {
       return copyRefs(cached);
     }
-
-    IDataCatalog catalog = getConnectedCatalog(catalogConnectionName, variables, metadataProvider);
     List<RecordDefinitionRef> results = new ArrayList<>();
     for (RecordDefinitionRef ref : catalog.list(query)) {
       if (ref == null) {
@@ -139,6 +141,7 @@ public final class RecordDefinitionRegistry {
       IVariables variables,
       IHopMetadataProvider metadataProvider)
       throws HopException {
+    getConnectedCatalog(catalogConnectionName, variables, metadataProvider);
     String cacheKey = listCacheKey(catalogConnectionName, query);
     List<String> cachedNames = nameListCache.get(cacheKey);
     if (cachedNames != null) {
@@ -168,6 +171,7 @@ public final class RecordDefinitionRegistry {
       IVariables variables,
       IHopMetadataProvider metadataProvider)
       throws HopException {
+    IDataCatalog catalog = getConnectedCatalog(catalogConnectionName, variables, metadataProvider);
     String cacheKey = listCacheKey(catalogConnectionName, query);
     Boolean cached = anyMatchCache.get(cacheKey);
     if (cached != null) {
@@ -179,7 +183,6 @@ public final class RecordDefinitionRegistry {
       anyMatchCache.put(cacheKey, has);
       return has;
     }
-    IDataCatalog catalog = getConnectedCatalog(catalogConnectionName, variables, metadataProvider);
     boolean has = catalog.anyMatch(query);
     anyMatchCache.put(cacheKey, has);
     return has;
@@ -245,6 +248,25 @@ public final class RecordDefinitionRegistry {
     clearListCache();
   }
 
+  /**
+   * Returns the live catalog for {@code connectionName}, connecting if needed. Reconnects when the
+   * FILE storage directory resolved from the current variables no longer matches the cached
+   * connection.
+   */
+  public IDataCatalog requireConnectedCatalog(
+      String connectionName, IVariables variables, IHopMetadataProvider metadataProvider)
+      throws HopException {
+    return getConnectedCatalog(connectionName, variables, metadataProvider);
+  }
+
+  /** Whether {@code catalog} is the cached instance for {@code connectionName}. */
+  public boolean isConnected(String connectionName, IDataCatalog catalog) {
+    if (Utils.isEmpty(connectionName) || catalog == null) {
+      return false;
+    }
+    return catalog == connectedCatalogs.get(connectionName);
+  }
+
   private IDataCatalog getConnectedCatalog(
       String connectionName, IVariables variables, IHopMetadataProvider metadataProvider)
       throws HopException {
@@ -252,20 +274,67 @@ public final class RecordDefinitionRegistry {
       throw new HopException("Catalog connection name is required");
     }
     IDataCatalog cached = connectedCatalogs.get(connectionName);
-    if (cached != null) {
+    if (cached != null && isSameResolvedLocation(cached, variables)) {
       return cached;
     }
+    DataCatalogMeta meta = loadConnection(connectionName, metadataProvider);
     synchronized (connectedCatalogs) {
       cached = connectedCatalogs.get(connectionName);
-      if (cached != null) {
+      if (cached != null && isSameLocation(cached, meta, variables)) {
         return cached;
       }
-      DataCatalogMeta meta = loadConnection(connectionName, metadataProvider);
+      if (cached != null) {
+        try {
+          cached.disconnect();
+        } catch (Exception ignored) {
+          // Best effort before replacing a stale connection.
+        }
+        connectedCatalogs.remove(connectionName);
+        clearListCacheForConnection(connectionName);
+      }
       IDataCatalog catalog =
           DataCatalogPluginFactory.createConnected(meta, variables, metadataProvider);
       connectedCatalogs.put(connectionName, catalog);
       return catalog;
     }
+  }
+
+  private static boolean isSameResolvedLocation(IDataCatalog cached, IVariables variables) {
+    if (!(cached instanceof FileDataCatalog cachedFile)) {
+      return true;
+    }
+    return resolvedStorageMatches(cachedFile, cachedFile.getStorageDirectory(), variables);
+  }
+
+  private static boolean isSameLocation(
+      IDataCatalog cached, DataCatalogMeta meta, IVariables variables) {
+    if (!(cached instanceof FileDataCatalog cachedFile)) {
+      return true;
+    }
+    if (!(meta.getCatalogOrDefault() instanceof FileDataCatalog fileMeta)) {
+      return false;
+    }
+    return resolvedStorageMatches(cachedFile, fileMeta.getStorageDirectory(), variables);
+  }
+
+  private static boolean resolvedStorageMatches(
+      FileDataCatalog cachedFile, String storageDirectory, IVariables variables) {
+    String expected = HopVariableResolutionSupport.resolve(variables, storageDirectory);
+    if (Utils.isEmpty(expected)
+        || HopVariableResolutionSupport.containsUnresolvedVariables(expected)) {
+      return false;
+    }
+    if (cachedFile.getResolvedRoot() == null) {
+      return false;
+    }
+    return cachedFile.getResolvedRoot().equals(Path.of(expected).toAbsolutePath().normalize());
+  }
+
+  private void clearListCacheForConnection(String connectionName) {
+    String prefix = nullToEmpty(connectionName) + "\u0001";
+    listCache.keySet().removeIf(key -> key.startsWith(prefix));
+    nameListCache.keySet().removeIf(key -> key.startsWith(prefix));
+    anyMatchCache.keySet().removeIf(key -> key.startsWith(prefix));
   }
 
   private List<DataCatalogMeta> listEnabledConnections(IHopMetadataProvider metadataProvider)

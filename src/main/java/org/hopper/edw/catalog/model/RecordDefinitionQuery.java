@@ -36,6 +36,10 @@ public class RecordDefinitionQuery {
     if (definition == null || definition.getKey() == null) {
       return false;
     }
+    if (Utils.isEmpty(definition.getKey().getNamespace())
+        || Utils.isEmpty(definition.getKey().getName())) {
+      return false;
+    }
     if (!Utils.isEmpty(namespacePrefix)
         && (definition.getKey().getNamespace() == null
             || !definition.getKey().getNamespace().startsWith(namespacePrefix))) {

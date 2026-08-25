@@ -18,8 +18,16 @@ package org.hopper.edw.catalog.registry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import org.apache.hop.core.HopEnvironment;
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.logging.LogChannel;
+import org.apache.hop.core.plugins.PluginRegistry;
+import org.apache.hop.core.row.RowMeta;
+import org.apache.hop.core.variables.Variables;
+import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.hopper.edw.catalog.impl.file.FileDataCatalog;
 import org.hopper.edw.catalog.metadata.DataCatalogMeta;
 import org.hopper.edw.catalog.model.RecordDefinition;
@@ -28,13 +36,6 @@ import org.hopper.edw.catalog.model.RecordDefinitionQuery;
 import org.hopper.edw.catalog.model.RecordDefinitionRef;
 import org.hopper.edw.catalog.model.RecordDefinitionType;
 import org.hopper.edw.catalog.xp.RegisterDataCatalogMetadataExtensionPoint;
-import org.apache.hop.core.HopEnvironment;
-import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.logging.LogChannel;
-import org.apache.hop.core.plugins.PluginRegistry;
-import org.apache.hop.core.row.RowMeta;
-import org.apache.hop.core.variables.Variables;
-import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -109,6 +110,35 @@ class RecordDefinitionRegistryListCacheTest {
     assertEquals(List.of("alpha"), names);
     assertEquals(
         List.of("alpha"), registry.listNames("local-catalog", query, variables, metadataProvider));
+  }
+
+  @Test
+  void reconnectsWhenResolvedStorageDirectoryChanges() throws Exception {
+    Path first = tempDir.resolve("first");
+    Path second = tempDir.resolve("second");
+    Files.createDirectories(first);
+    Files.createDirectories(second);
+
+    DataCatalogMeta catalog = new DataCatalogMeta();
+    catalog.setName("relocating-catalog");
+    catalog.setEnabled(true);
+    FileDataCatalog fileCatalog = new FileDataCatalog();
+    fileCatalog.setStorageDirectory("${PROJECT_HOME}/catalog");
+    catalog.setCatalog(fileCatalog);
+    metadataProvider.getSerializer(DataCatalogMeta.class).save(catalog);
+
+    Variables firstVars = new Variables();
+    firstVars.setVariable("PROJECT_HOME", first.toAbsolutePath().normalize().toString());
+    RecordDefinitionRegistry registry = RecordDefinitionRegistry.getInstance();
+    registry.create("relocating-catalog", source("alpha"), firstVars, metadataProvider);
+    assertEquals(
+        1, registry.list("relocating-catalog", sourcesQuery(), firstVars, metadataProvider).size());
+
+    Variables secondVars = new Variables();
+    secondVars.setVariable("PROJECT_HOME", second.toAbsolutePath().normalize().toString());
+    assertEquals(
+        0,
+        registry.list("relocating-catalog", sourcesQuery(), secondVars, metadataProvider).size());
   }
 
   @Test

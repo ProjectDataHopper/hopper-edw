@@ -94,12 +94,18 @@ public final class DataCatalogTreeNavigation {
       if (catalogItem == null || catalogItem.isDisposed()) {
         continue;
       }
+      if (!catalogItem.getExpanded()) {
+        catalogItem.setExpanded(true);
+        TreeMemory.getInstance().storeExpanded(treeMemoryKey, catalogItem, true);
+      }
+      TreeItem workingRoot = findWorkingRoot(catalogItem);
+      if (workingRoot != null && !workingRoot.isDisposed()) {
+        workingRoot.setExpanded(true);
+        TreeMemory.getInstance().storeExpanded(treeMemoryKey, workingRoot, true);
+      }
       if (groupByNamespace) {
-        if (!catalogItem.getExpanded()) {
-          catalogItem.setExpanded(true);
-          TreeMemory.getInstance().storeExpanded(treeMemoryKey, catalogItem, true);
-        }
-        for (TreeItem child : catalogItem.getItems()) {
+        TreeItem namespaceParent = workingRoot != null ? workingRoot : catalogItem;
+        for (TreeItem child : namespaceParent.getItems()) {
           if (child == null || child.isDisposed() || !isNamespaceItem(child)) {
             continue;
           }
@@ -123,5 +129,22 @@ public final class DataCatalogTreeNavigation {
     Object data = item.getData();
     return data instanceof DataCatalogTreeNode node
         && node.getType() == DataCatalogTreeNode.Type.NAMESPACE;
+  }
+
+  static TreeItem findWorkingRoot(TreeItem catalogItem) {
+    if (catalogItem == null || catalogItem.isDisposed()) {
+      return null;
+    }
+    for (TreeItem child : catalogItem.getItems()) {
+      if (child == null || child.isDisposed()) {
+        continue;
+      }
+      Object data = child.getData();
+      if (data instanceof DataCatalogTreeNode node
+          && node.getType() == DataCatalogTreeNode.Type.WORKING_ROOT) {
+        return child;
+      }
+    }
+    return null;
   }
 }

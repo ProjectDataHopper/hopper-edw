@@ -22,17 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import lombok.Getter;
-import org.hopper.edw.catalog.hopgui.perspective.importmenu.DataCatalogImportMenu;
-import org.hopper.edw.catalog.hopgui.preview.RecordDefinitionPreviewRunner;
-import org.hopper.edw.catalog.hopgui.preview.RecordDefinitionPreviewSupport;
-import org.hopper.edw.catalog.metadata.DataCatalogMeta;
-import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupModelDiscoverySupport;
-import org.hopper.edw.catalog.model.RecordDefinition;
-import org.hopper.edw.catalog.model.RecordDefinitionKey;
-import org.hopper.edw.catalog.model.RecordDefinitionQuery;
-import org.hopper.edw.catalog.model.RecordDefinitionRef;
-import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
-import org.hopper.edw.catalog.versioning.CatalogVersionGuiSupport;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.Props;
 import org.apache.hop.core.exception.HopException;
@@ -70,6 +59,17 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
+import org.hopper.edw.catalog.hopgui.perspective.importmenu.DataCatalogImportMenu;
+import org.hopper.edw.catalog.hopgui.preview.RecordDefinitionPreviewRunner;
+import org.hopper.edw.catalog.hopgui.preview.RecordDefinitionPreviewSupport;
+import org.hopper.edw.catalog.metadata.DataCatalogMeta;
+import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupModelDiscoverySupport;
+import org.hopper.edw.catalog.model.RecordDefinition;
+import org.hopper.edw.catalog.model.RecordDefinitionKey;
+import org.hopper.edw.catalog.model.RecordDefinitionQuery;
+import org.hopper.edw.catalog.model.RecordDefinitionRef;
+import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
+import org.hopper.edw.catalog.versioning.CatalogVersionGuiSupport;
 
 /** Hop GUI perspective for browsing data catalog connections and record definitions. */
 @HopPerspectivePlugin(
@@ -567,7 +567,9 @@ public class DataCatalogPerspective implements IHopPerspective {
       TreeItem catalogItem = new TreeItem(tree, SWT.NONE);
       catalogItem.setText(Const.NVL(connection.getName(), ""));
       catalogItem.setData(DataCatalogTreeNode.catalog(connection.getName()));
-      populateConnectionItems(catalogItem, connection.getName(), refs);
+      boolean versionsPresent =
+          hasVersionSnapshots(connection.getName(), variables, metadataProvider);
+      populateConnectionItems(catalogItem, connection.getName(), refs, versionsPresent);
       populateVersionItems(catalogItem, connection.getName(), variables, metadataProvider);
     }
   }
@@ -639,14 +641,33 @@ public class DataCatalogPerspective implements IHopPerspective {
   }
 
   private void populateConnectionItems(
-      TreeItem catalogItem, String connectionName, List<RecordDefinitionRef> refs) {
+      TreeItem catalogItem,
+      String connectionName,
+      List<RecordDefinitionRef> refs,
+      boolean versionsPresent) {
+    TreeItem workingRoot = new TreeItem(catalogItem, SWT.NONE);
+    workingRoot.setText(
+        BaseMessages.getString(
+            PKG, "DataCatalogPerspective.Tree.WorkingCatalog.Label", refs.size()));
+    workingRoot.setData(DataCatalogTreeNode.workingRoot(connectionName));
+    if (refs.isEmpty()) {
+      TreeItem hint = new TreeItem(workingRoot, SWT.NONE);
+      hint.setText(
+          BaseMessages.getString(
+              PKG,
+              versionsPresent
+                  ? "DataCatalogPerspective.Tree.WorkingCatalog.EmptyWithVersions"
+                  : "DataCatalogPerspective.Tree.WorkingCatalog.Empty"));
+      hint.setData(DataCatalogTreeNode.workingEmptyHint(connectionName));
+      return;
+    }
     if (groupByNamespace) {
       for (Map.Entry<String, List<RecordDefinitionRef>> entry :
           DataCatalogTreeBuilder.groupByNamespace(refs).entrySet()) {
         if (entry.getValue().isEmpty()) {
           continue;
         }
-        TreeItem namespaceItem = new TreeItem(catalogItem, SWT.NONE);
+        TreeItem namespaceItem = new TreeItem(workingRoot, SWT.NONE);
         namespaceItem.setText(entry.getKey());
         namespaceItem.setData(DataCatalogTreeNode.namespace(connectionName, entry.getKey()));
         for (RecordDefinitionRef ref : entry.getValue()) {
@@ -657,7 +678,19 @@ public class DataCatalogPerspective implements IHopPerspective {
     }
 
     for (RecordDefinitionRef ref : refs) {
-      addRecordItem(catalogItem, connectionName, ref);
+      addRecordItem(workingRoot, connectionName, ref);
+    }
+  }
+
+  private boolean hasVersionSnapshots(
+      String connectionName, IVariables variables, IHopMetadataProvider metadataProvider) {
+    try {
+      List<org.hopper.edw.catalog.versioning.CatalogVersionEntry> versions =
+          org.hopper.edw.catalog.versioning.CatalogVersionService.listVersions(
+              connectionName, variables, metadataProvider);
+      return versions != null && !versions.isEmpty();
+    } catch (HopException ignored) {
+      return false;
     }
   }
 

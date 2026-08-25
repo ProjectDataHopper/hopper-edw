@@ -16,18 +16,7 @@
 package org.hopper.edw.catalog.transform.recordinput;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import org.hopper.edw.catalog.model.CatalogSourceField;
-import org.hopper.edw.catalog.model.DvSourceRecord;
-import org.hopper.edw.catalog.model.PhysicalTableRef;
-import org.hopper.edw.catalog.model.RecordDefinition;
-import org.hopper.edw.catalog.model.RecordDefinitionKey;
-import org.hopper.edw.catalog.model.RecordDefinitionQuery;
-import org.hopper.edw.catalog.model.RecordDefinitionRef;
-import org.hopper.edw.catalog.model.RecordOrigin;
-import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.IValueMeta;
@@ -38,6 +27,15 @@ import org.apache.hop.pipeline.Pipeline;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.BaseTransform;
 import org.apache.hop.pipeline.transform.TransformMeta;
+import org.hopper.edw.catalog.discovery.RecordDefinitionCatalogLoadSupport;
+import org.hopper.edw.catalog.discovery.RecordDefinitionLoadResult;
+import org.hopper.edw.catalog.model.CatalogSourceField;
+import org.hopper.edw.catalog.model.DvSourceRecord;
+import org.hopper.edw.catalog.model.PhysicalTableRef;
+import org.hopper.edw.catalog.model.RecordDefinition;
+import org.hopper.edw.catalog.model.RecordDefinitionKey;
+import org.hopper.edw.catalog.model.RecordOrigin;
+import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
 
 public class RecordDefinitionInput
     extends BaseTransform<RecordDefinitionInputMeta, RecordDefinitionInputData> {
@@ -86,41 +84,16 @@ public class RecordDefinitionInput
         meta.getFields(data.outputRowMeta, getTransformName(), null, null, this, metadataProvider);
 
         String resolvedConnectionName = resolve(meta.getCatalogConnectionName());
-        if (Utils.isEmpty(resolvedConnectionName)) {
-          throw new HopException("Data catalog connection name is not configured.");
-        }
-
-        List<RecordDefinition> definitions = new ArrayList<>();
-        String resolvedNamespace = resolve(meta.getNamespaceValue());
-        String resolvedName = resolve(meta.getNameValue());
-
-        if (Utils.isEmpty(resolvedNamespace) && Utils.isEmpty(resolvedName)) {
-          List<RecordDefinitionRef> allRefs =
-              RecordDefinitionRegistry.getInstance()
-                  .listAll(new RecordDefinitionQuery(), this, metadataProvider);
-          for (RecordDefinitionRef ref : allRefs) {
-            if (resolvedConnectionName.equalsIgnoreCase(ref.getCatalogConnectionName())) {
-              RecordDefinition def =
-                  RecordDefinitionRegistry.getInstance()
-                      .read(resolvedConnectionName, ref.getKey(), this, metadataProvider);
-              if (def != null) {
-                definitions.add(def);
-              }
-            }
-          }
-        } else {
-          RecordDefinition def =
-              RecordDefinitionRegistry.getInstance()
-                  .read(
-                      resolvedConnectionName,
-                      new RecordDefinitionKey(resolvedNamespace, resolvedName),
-                      this,
-                      metadataProvider);
-          if (def != null) {
-            definitions.add(def);
-          }
-        }
-        data.definitionsToOutput = definitions;
+        RecordDefinitionLoadResult loadResult =
+            RecordDefinitionCatalogLoadSupport.loadDefinitions(
+                resolvedConnectionName,
+                resolve(meta.getNamespaceValue()),
+                resolve(meta.getNameValue()),
+                this,
+                metadataProvider);
+        RecordDefinitionCatalogLoadSupport.emitLogs(getLogChannel(), loadResult);
+        RecordDefinitionCatalogLoadSupport.throwIfEmpty(loadResult, meta.isFailIfNoDefinitions());
+        data.definitionsToOutput = loadResult.getDefinitions();
       }
     }
 
@@ -144,7 +117,13 @@ public class RecordDefinitionInput
       if (definition != null) {
         emitRecordRows(row, startIdx, definition);
       } else {
-        // Output a row with nulls if definition not found
+        logBasic(
+            "Catalog record definition not found for "
+                + resolvedConnectionName
+                + " "
+                + namespace
+                + "::"
+                + name);
         Object[] outputRow = RowDataUtil.createResizedCopy(row, data.outputRowMeta.size());
         for (int i = startIdx; i < data.outputRowMeta.size(); i++) {
           outputRow[i] = null;

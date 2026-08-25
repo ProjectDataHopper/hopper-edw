@@ -46,7 +46,7 @@ When enabled, the transform reads every input row and looks up one record defini
 |Enabled when **Select from previous transform input?** is on. Name of the incoming field that holds the record definition name (for example `CRM-customer`).
 
 |Namespace value
-|Enabled when **Select from previous transform input?** is off. Optional fixed namespace to read. Leave empty together with **Name value** to output *all* record definitions stored under the selected catalog connection.
+|Enabled when **Select from previous transform input?** is off. Optional namespace. Leave empty together with **Name value** to list every working-tree record. Set this without **Name value** to list a namespace prefix. Version snapshots are not listed.
 
 |Name value
 |Enabled when **Select from previous transform input?** is off. Optional fixed record name to read. When set (with or without **Namespace value**), only that single definition is output.
@@ -54,19 +54,27 @@ When enabled, the transform reads every input row and looks up one record defini
 |Output fields metadata (denormalized rows)?
 |When disabled (default), each output row describes one record definition (one row per catalog entry).
 When enabled, the transform emits one output row per *column* in the record's field layout, repeating the record-level metadata on every row. This is the shape expected by the **DDL** transform when you map `field_name`, `field_type`, `field_length`, and `field_precision` from the stream.
+
+|Fail if no record definitions found?
+|When disabled (default), an empty working-tree list succeeds with 0 rows (and a log warning). When enabled, the transform fails instead. Use this on pipelines such as retail `create-source-tables-from-data-catalog.hpl` so a missing bootstrap or a catalog pointed at snapshots is not silent. **Catalog sources versions** snapshots are never listed.
+
+|Preview catalog contents
+|Opens a dialog with the resolved FILE storage directory, working-tree count, skipped unreadable JSON files, and a table of namespace / name / type. Version snapshots are not shown.
 |===
 
 === Selection modes
 
-The transform supports three ways to choose which definitions to read:
+The transform supports these ways to choose which definitions to read:
 
 [cols="1,1,3", options="header"]
 |===
 |Select from input |Namespace / name values |Behavior
 
-|No |Both empty |List every record definition in the catalog connection and output one row per definition (or one row per field when denormalized).
+|No |Both empty |List every *working-tree* record definition in the catalog connection (not version snapshots) and output one row per definition (or one row per field when denormalized).
 
-|No |Namespace and/or name set |Read the single definition identified by the given namespace and name.
+|No |Namespace set, name empty |List working-tree records whose namespace starts with the given value (prefix).
+
+|No |Name set (with or without namespace) |Read the single definition identified by the given namespace and name.
 
 |Yes |— |For each input row, read the definition whose namespace and name come from the configured input fields. If no definition is found, the transform still outputs a row with null catalog columns appended.
 |===
@@ -146,7 +154,7 @@ The sample project uses **Get Record Definition Names** together with the **DDL*
 
 `integration-tests/tests/shared/create-source-tables-from-data-catalog.hpl` runs at the start of `integration-tests/tests/run-tests.hwf`:
 
-1. **Get Record Definition Names** — catalog connection `local-catalog`, no input selection, no namespace/name filter (all definitions), denormalized output off.
+1. **Get Record Definition Names** — catalog connection `local-catalog`, no input selection, no namespace/name filter (all working-tree definitions), denormalized output off. Enable **Fail if no record definitions found?** when an empty catalog should stop the pipeline.
 2. **Filter rows** — keeps definitions in namespace `hop/integration-tests/sources` whose name starts with `CRM`.
 3. **Select values** — passes `namespace`, `name`, `physical_database`, `physical_schema`, and `physical_table` downstream.
 4. **Pipeline executor** — calls `create-source-table-from-data-catalog.hpl` once per filtered record, mapping those fields to pipeline parameters.

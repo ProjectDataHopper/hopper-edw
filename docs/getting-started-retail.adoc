@@ -75,7 +75,7 @@ Key files:
 . Expand `hop/retail-example/sources` — entries such as `E2E-customer-hub`, `E2E-order-header`.
 . Open one source — note **physical table** on CRM, **record source** field, and column layout.
 
-Sources are JSON under the FILE catalog root (`work/edw-catalog/` for retail); the namespace in each file must match its folder path (`hop/retail-example/sources`). Initial setup runs `scripts/bootstrap-retail-work.py` to create the `work/` tree and generate E2E sources.
+Sources are JSON under the FILE catalog root (`work/edw-catalog/` for retail); the namespace in each file must match its folder path (`hop/retail-example/sources`). Initial setup runs `scripts/bootstrap-retail-work.py` to create the `work/` tree, generate E2E DATABASE sources, and seed COMPOSITE / JSON / PIPELINE feeds (`all-customer-info`, `feed_order_shipment_tracking`, `asn-package-lines`) that `retail-360.hdv` requires.
 
 If entries appear in the tree but fail to open, press **F5** to refresh the catalog.
 

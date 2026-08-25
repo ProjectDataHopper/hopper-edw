@@ -16,16 +16,16 @@
 package org.hopper.edw.catalog.spi;
 
 import java.util.List;
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.HopMetadataObject;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.catalog.metadata.DataCatalogMeta;
 import org.hopper.edw.catalog.metadata.DataCatalogMetaObjectFactory;
 import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.hopper.edw.catalog.model.RecordDefinitionQuery;
 import org.hopper.edw.catalog.model.RecordDefinitionRef;
-import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.metadata.api.HopMetadataObject;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * SPI for interacting with an external data catalog (DataHub, file store, OpenMetadata, ...).
@@ -68,5 +68,29 @@ public interface IDataCatalog {
   default boolean anyMatch(RecordDefinitionQuery query) throws HopException {
     List<RecordDefinitionRef> refs = list(query);
     return refs != null && !refs.isEmpty();
+  }
+
+  /**
+   * Human-readable storage location after {@link #connect} (for example the resolved FILE
+   * directory). Used in transform logs and Verify remarks.
+   */
+  default String describeLocation() {
+    return getPluginId();
+  }
+
+  /**
+   * Number of JSON files skipped as unreadable during the most recent {@link #list} call. Default
+   * {@code 0} for catalogs that do not walk files.
+   */
+  default int getLastSkippedUnreadable() {
+    return 0;
+  }
+
+  /**
+   * Whether this catalog currently has version snapshots beside the working tree. FILE catalogs use
+   * a {@code catalog-versions/} directory; other backends return {@code false}.
+   */
+  default boolean hasVersionSnapshots() {
+    return false;
   }
 }

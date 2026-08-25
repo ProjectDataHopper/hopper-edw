@@ -21,7 +21,13 @@ limitations under the License.
     <transform_performance_capturing_size_limit>100</transform_performance_capturing_size_limit>
     <pipeline_type>Normal</pipeline_type>
     <pipeline_status>-1</pipeline_status>
-    <parameters/>
+    <parameters>
+      <parameter>
+        <name>CATALOG_NAMESPACE</name>
+        <default_value>hop/retail-example/sources</default_value>
+        <description>Working-tree FILE catalog namespace of retail E2E sources</description>
+      </parameter>
+    </parameters>
     <name>create-source-tables-from-data-catalog</name>
     <name_sync_with_filename>Y</name_sync_with_filename>
     <created_user>-</created_user>
@@ -36,9 +42,10 @@ limitations under the License.
     <select_from_input>N</select_from_input>
     <namespace_field/>
     <name_field/>
-    <namespace_value/>
+    <namespace_value>${CATALOG_NAMESPACE}</namespace_value>
     <name_value/>
     <output_fields_metadata>Y</output_fields_metadata>
+    <fail_if_no_definitions>Y</fail_if_no_definitions>
     <output_namespace_field>namespace</output_namespace_field>
     <output_name_field>name</output_name_field>
     <output_type_field>type</output_type_field>
@@ -85,12 +92,12 @@ limitations under the License.
       <condition>
         <negated>N</negated>
         <operator>-</operator>
-        <leftvalue>namespace</leftvalue>
-        <function>=</function>
+        <leftvalue>name</leftvalue>
+        <function>STARTS WITH</function>
         <value>
           <name>constant</name>
           <type>String</type>
-          <text>hop/retail-example/sources</text>
+          <text>E2E</text>
           <length>-1</length>
           <precision>-1</precision>
           <isnull>N</isnull>
@@ -99,52 +106,19 @@ limitations under the License.
         <conditions>
           <condition>
             <negated>N</negated>
-            <operator>-</operator>
-            <leftvalue>namespace</leftvalue>
+            <operator>AND</operator>
+            <leftvalue>dv_source_type</leftvalue>
             <function>=</function>
             <value>
               <name>constant</name>
               <type>String</type>
-              <text>hop/retail-example/sources</text>
+              <text>DATABASE</text>
               <length>-1</length>
               <precision>-1</precision>
               <isnull>N</isnull>
               <mask/>
             </value>
             <conditions/>
-          </condition>
-          <condition>
-            <negated>N</negated>
-            <operator>AND</operator>
-            <leftvalue>name</leftvalue>
-            <function>STARTS WITH</function>
-            <value>
-              <name>constant</name>
-              <type>String</type>
-              <text>E2E</text>
-              <length>-1</length>
-              <precision>-1</precision>
-              <isnull>N</isnull>
-              <mask/>
-            </value>
-            <conditions>
-              <condition>
-                <negated>N</negated>
-                <operator>AND</operator>
-                <leftvalue>dv_source_type</leftvalue>
-                <function>=</function>
-                <value>
-                  <name>constant</name>
-                  <type>String</type>
-                  <text>DATABASE</text>
-                  <length>-1</length>
-                  <precision>-1</precision>
-                  <isnull>N</isnull>
-                  <mask/>
-                </value>
-                <conditions/>
-              </condition>
-            </conditions>
           </condition>
         </conditions>
       </condition>
