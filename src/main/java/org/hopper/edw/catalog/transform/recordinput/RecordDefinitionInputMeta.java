@@ -70,6 +70,13 @@ public class RecordDefinitionInputMeta
   @HopMetadataProperty(key = "output_fields_metadata")
   private boolean outputFieldsMetadata;
 
+  /**
+   * When true, fail the transform if the working-tree catalog list is empty instead of succeeding
+   * with 0 rows. Version snapshots are never listed.
+   */
+  @HopMetadataProperty(key = "fail_if_no_definitions")
+  private boolean failIfNoDefinitions;
+
   @HopMetadataProperty(key = "output_namespace_field")
   private String outputNamespaceField = "namespace";
 
@@ -166,6 +173,7 @@ public class RecordDefinitionInputMeta
     meta.namespaceValue = namespaceValue;
     meta.nameValue = nameValue;
     meta.outputFieldsMetadata = outputFieldsMetadata;
+    meta.failIfNoDefinitions = failIfNoDefinitions;
     meta.outputNamespaceField = outputNamespaceField;
     meta.outputNameField = outputNameField;
     meta.outputTypeField = outputTypeField;
@@ -289,19 +297,16 @@ public class RecordDefinitionInputMeta
       IVariables variables,
       IHopMetadataProvider metadataProvider) {
 
-    if (Utils.isEmpty(catalogConnectionName)) {
-      remarks.add(
-          new CheckResult(
-              ICheckResult.TYPE_RESULT_ERROR,
-              "Catalog connection name is missing.",
-              transformMeta));
-    } else {
-      remarks.add(
-          new CheckResult(
-              ICheckResult.TYPE_RESULT_OK,
-              "Catalog connection name is configured.",
-              transformMeta));
-    }
+    org.hopper.edw.catalog.discovery.CatalogDiscoverySupport.addCheckRemarks(
+        remarks,
+        transformMeta,
+        variables != null ? variables.resolve(catalogConnectionName) : catalogConnectionName,
+        variables != null ? variables.resolve(namespaceValue) : namespaceValue,
+        variables != null ? variables.resolve(nameValue) : nameValue,
+        selectFromInput,
+        failIfNoDefinitions,
+        variables,
+        metadataProvider);
 
     if (selectFromInput) {
       if (prev == null || prev.isEmpty()) {

@@ -19,8 +19,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.hopper.edw.catalog.impl.file.FileDataCatalog;
-import org.hopper.edw.catalog.spi.IDataCatalog;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
@@ -43,6 +41,11 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.catalog.discovery.CatalogDiscoverySnapshot;
+import org.hopper.edw.catalog.discovery.CatalogDiscoverySupport;
+import org.hopper.edw.catalog.hopgui.CatalogDiscoveryPreviewDialog;
+import org.hopper.edw.catalog.impl.file.FileDataCatalog;
+import org.hopper.edw.catalog.spi.IDataCatalog;
 
 /** Editor for {@link DataCatalogMeta} with type-specific catalog configuration. */
 @GuiPlugin(description = "Editor for Data Catalog metadata")
@@ -54,6 +57,7 @@ public class DataCatalogMetaEditor extends MetadataEditor<DataCatalogMeta> {
   private Text wDescription;
   private Button wEnabled;
   private Combo wCatalogType;
+  private Button wTestConnection;
   private Composite wCatalogSpecificComp;
   private GuiCompositeWidgets guiCompositeWidgets;
   private Map<String, IDataCatalog> catalogByType;
@@ -144,6 +148,17 @@ public class DataCatalogMetaEditor extends MetadataEditor<DataCatalogMeta> {
     fdCatalogType.right = new FormAttachment(100, 0);
     wCatalogType.setLayoutData(fdCatalogType);
     lastControl = wCatalogType;
+
+    wTestConnection = new Button(parent, SWT.PUSH);
+    PropsUi.setLook(wTestConnection);
+    wTestConnection.setText(
+        BaseMessages.getString(PKG, "DataCatalogMetaEditor.TestConnection.Label"));
+    FormData fdTestConnection = new FormData();
+    fdTestConnection.left = new FormAttachment(middle, 0);
+    fdTestConnection.top = new FormAttachment(lastControl, margin);
+    wTestConnection.setLayoutData(fdTestConnection);
+    wTestConnection.addListener(SWT.Selection, e -> testConnection());
+    lastControl = wTestConnection;
 
     wCatalogSpecificComp = new Composite(parent, SWT.BACKGROUND);
     wCatalogSpecificComp.setLayout(new FormLayout());
@@ -303,6 +318,23 @@ public class DataCatalogMetaEditor extends MetadataEditor<DataCatalogMeta> {
     if (guiCompositeWidgets != null && !guiCompositeWidgets.getWidgetsMap().isEmpty()) {
       guiCompositeWidgets.getWidgetsContents(
           meta.getCatalogOrDefault(), getGuiPluginElementParentId(meta.getCatalogOrDefault()));
+    }
+  }
+
+  private void testConnection() {
+    try {
+      DataCatalogMeta meta = getMetadata();
+      getWidgetsContent(meta);
+      CatalogDiscoverySnapshot snapshot =
+          CatalogDiscoverySupport.inspectMeta(
+              meta, manager.getVariables(), manager.getMetadataProvider());
+      CatalogDiscoveryPreviewDialog.open(getShell(), snapshot);
+    } catch (Exception e) {
+      new ErrorDialog(
+          getShell(),
+          BaseMessages.getString(PKG, "DataCatalogMetaEditor.TestConnection.Error.Title"),
+          BaseMessages.getString(PKG, "DataCatalogMetaEditor.TestConnection.Error.Message"),
+          e);
     }
   }
 

@@ -133,7 +133,7 @@ Versions live under the catalog storage directory in a **non-hidden** folder nam
         └── records/hop/.../*.json  # immutable copies
 ----
 
-The working-tree catalog **list** API ignores `catalog-versions/` so snapshots never appear as live records. Retail stores the live catalog under gitignored `work/edw-catalog/`; a **seed** for demo tag `v1.0.0` lives in `fixtures/schema-gate-baseline/` and is copied by `bootstrap-retail-work.py`.
+The working-tree catalog **list** API ignores `catalog-versions/` so snapshots never appear as live records. The Data Catalog perspective shows live records under **Working catalog (N)** and snapshots under **Catalog sources versions**. Get Record Definition Names reads only the working catalog. Retail stores the live catalog under gitignored `work/edw-catalog/`; a **seed** for demo tag `v1.0.0` lives in `fixtures/schema-gate-baseline/` and is copied by `bootstrap-retail-work.py`.
 
 === Tagging from Hop GUI
 

@@ -15,28 +15,27 @@
  */
 package org.hopper.edw.catalog.transform.recordddl;
 
-import java.util.ArrayList;
 import java.util.List;
-import org.hopper.edw.catalog.ddl.CatalogTableDdlSupport;
-import org.hopper.edw.catalog.ddl.CatalogTableDdlSupport.DdlResult;
-import org.hopper.edw.catalog.ddl.CatalogTableDdlSupport.ResolvedTarget;
-import org.hopper.edw.catalog.model.RecordDefinition;
-import org.hopper.edw.catalog.model.RecordDefinitionKey;
-import org.hopper.edw.catalog.model.RecordDefinitionQuery;
-import org.hopper.edw.catalog.model.RecordDefinitionRef;
-import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.RowDataUtil;
 import org.apache.hop.core.row.RowMeta;
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.metadata.SourceField;
-import org.hopper.edw.datavault.metadata.targettypemapping.TargetTypeMappingContext;
-import org.hopper.edw.datavault.metadata.targettypemapping.TargetTypeMappingSupport;
 import org.apache.hop.pipeline.Pipeline;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.BaseTransform;
 import org.apache.hop.pipeline.transform.TransformMeta;
+import org.hopper.edw.catalog.ddl.CatalogTableDdlSupport;
+import org.hopper.edw.catalog.ddl.CatalogTableDdlSupport.DdlResult;
+import org.hopper.edw.catalog.ddl.CatalogTableDdlSupport.ResolvedTarget;
+import org.hopper.edw.catalog.discovery.RecordDefinitionCatalogLoadSupport;
+import org.hopper.edw.catalog.discovery.RecordDefinitionLoadResult;
+import org.hopper.edw.catalog.model.RecordDefinition;
+import org.hopper.edw.catalog.model.RecordDefinitionKey;
+import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
+import org.hopper.edw.datavault.metadata.SourceField;
+import org.hopper.edw.datavault.metadata.targettypemapping.TargetTypeMappingContext;
+import org.hopper.edw.datavault.metadata.targettypemapping.TargetTypeMappingSupport;
 
 public class RecordDefinitionDdl
     extends BaseTransform<RecordDefinitionDdlMeta, RecordDefinitionDdlData> {
@@ -119,42 +118,15 @@ public class RecordDefinitionDdl
       return;
     }
 
-    String catalogConnectionName = resolve(meta.getCatalogConnectionName());
-    if (Utils.isEmpty(catalogConnectionName)) {
-      throw new HopException("Data catalog connection name is not configured.");
-    }
-
-    List<RecordDefinition> definitions = new ArrayList<>();
-    String resolvedNamespace = resolve(meta.getNamespaceValue());
-    String resolvedName = resolve(meta.getNameValue());
-
-    if (Utils.isEmpty(resolvedNamespace) && Utils.isEmpty(resolvedName)) {
-      List<RecordDefinitionRef> allRefs =
-          RecordDefinitionRegistry.getInstance()
-              .listAll(new RecordDefinitionQuery(), this, metadataProvider);
-      for (RecordDefinitionRef ref : allRefs) {
-        if (catalogConnectionName.equalsIgnoreCase(ref.getCatalogConnectionName())) {
-          RecordDefinition definition =
-              RecordDefinitionRegistry.getInstance()
-                  .read(catalogConnectionName, ref.getKey(), this, metadataProvider);
-          if (definition != null) {
-            definitions.add(definition);
-          }
-        }
-      }
-    } else {
-      RecordDefinition definition =
-          RecordDefinitionRegistry.getInstance()
-              .read(
-                  catalogConnectionName,
-                  new RecordDefinitionKey(resolvedNamespace, resolvedName),
-                  this,
-                  metadataProvider);
-      if (definition != null) {
-        definitions.add(definition);
-      }
-    }
-    data.definitionsToProcess = definitions;
+    RecordDefinitionLoadResult loadResult =
+        RecordDefinitionCatalogLoadSupport.loadDefinitions(
+            resolve(meta.getCatalogConnectionName()),
+            resolve(meta.getNamespaceValue()),
+            resolve(meta.getNameValue()),
+            this,
+            metadataProvider);
+    RecordDefinitionCatalogLoadSupport.emitLogs(getLogChannel(), loadResult);
+    data.definitionsToProcess = loadResult.getDefinitions();
   }
 
   private void emitResult(Object[] inputRow, String namespace, String recordName)

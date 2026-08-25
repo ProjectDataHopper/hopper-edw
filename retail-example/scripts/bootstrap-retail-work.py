@@ -2,8 +2,9 @@
 """Prepare gitignored work/ tree for the retail example.
 
 Creates work/{edw-catalog,reports,execution-maps,metrics}, writes E2E catalog
-source contracts under work/edw-catalog, and copies the schema-gate baseline
-fixture (v1.0.0) into work/edw-catalog/catalog-versions when missing.
+source contracts plus COMPOSITE/JSON/PIPELINE model feeds under work/edw-catalog,
+and copies the schema-gate baseline fixture (v1.0.0) into
+work/edw-catalog/catalog-versions when missing.
 """
 #
 # Copyright 2026 i-Bridge bv
@@ -54,7 +55,7 @@ def main() -> None:
         (work / rel).mkdir(parents=True, exist_ok=True)
         print(f"Ensured {work / rel}")
 
-    # E2E source contracts (generate-catalog-sources writes under work/edw-catalog).
+    # E2E source contracts plus model feeds from the schema-gate baseline snapshot.
     gen = SCRIPT_DIR / "generate-catalog-sources.py"
     subprocess.check_call(
         [sys.executable, str(gen), "--project-home", str(project_home)],

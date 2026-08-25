@@ -187,19 +187,16 @@ public class RecordDefinitionDdlMeta
       IRowMeta info,
       IVariables variables,
       IHopMetadataProvider metadataProvider) {
-    if (Utils.isEmpty(catalogConnectionName)) {
-      remarks.add(
-          new CheckResult(
-              ICheckResult.TYPE_RESULT_ERROR,
-              "Catalog connection name is missing.",
-              transformMeta));
-    } else {
-      remarks.add(
-          new CheckResult(
-              ICheckResult.TYPE_RESULT_OK,
-              "Catalog connection name is configured.",
-              transformMeta));
-    }
+    org.hopper.edw.catalog.discovery.CatalogDiscoverySupport.addCheckRemarks(
+        remarks,
+        transformMeta,
+        variables != null ? variables.resolve(catalogConnectionName) : catalogConnectionName,
+        variables != null ? variables.resolve(namespaceValue) : namespaceValue,
+        variables != null ? variables.resolve(nameValue) : nameValue,
+        selectFromInput,
+        false,
+        variables,
+        metadataProvider);
 
     if (selectFromInput) {
       if (prev == null || prev.isEmpty()) {

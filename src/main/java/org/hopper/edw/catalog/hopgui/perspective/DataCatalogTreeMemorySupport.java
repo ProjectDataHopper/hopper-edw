@@ -36,8 +36,13 @@ public final class DataCatalogTreeMemorySupport {
         continue;
       }
       applyItemExpanded(catalogItem, treeKey, seededPaths, true);
+      TreeItem workingRoot = DataCatalogTreeNavigation.findWorkingRoot(catalogItem);
+      if (workingRoot != null) {
+        applyItemExpanded(workingRoot, treeKey, seededPaths, true);
+      }
       if (groupByNamespace) {
-        for (TreeItem child : catalogItem.getItems()) {
+        TreeItem namespaceParent = workingRoot != null ? workingRoot : catalogItem;
+        for (TreeItem child : namespaceParent.getItems()) {
           if (child != null && !child.isDisposed() && isNamespaceItem(child)) {
             applyItemExpanded(child, treeKey, seededPaths, true);
           }

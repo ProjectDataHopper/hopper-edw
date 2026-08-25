@@ -49,4 +49,16 @@ class RecordDefinitionQueryTest {
     query.setNameContains("hop/retail-example/sources::crm-customer");
     assertTrue(query.matches(definition));
   }
+
+  @Test
+  void matchesRejectsMissingNamespaceOrName() {
+    RecordDefinitionQuery query = new RecordDefinitionQuery();
+    RecordDefinition missingName = new RecordDefinition();
+    missingName.setKey(new RecordDefinitionKey("hop/project/sources", null));
+    assertFalse(query.matches(missingName));
+
+    RecordDefinition missingNamespace = new RecordDefinition();
+    missingNamespace.setKey(new RecordDefinitionKey(null, "CRM-customer"));
+    assertFalse(query.matches(missingNamespace));
+  }
 }

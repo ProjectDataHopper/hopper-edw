@@ -23,6 +23,10 @@ public final class DataCatalogTreeNode {
 
   public enum Type {
     CATALOG,
+    /** Live working-tree records (what Get Record Definition Names lists). */
+    WORKING_ROOT,
+    /** Placeholder when the working tree is empty. */
+    WORKING_EMPTY_HINT,
     NAMESPACE,
     RECORD,
     /** Virtual folder listing catalog version tags. */
@@ -54,6 +58,14 @@ public final class DataCatalogTreeNode {
 
   public static DataCatalogTreeNode catalog(String connectionName) {
     return new DataCatalogTreeNode(Type.CATALOG, connectionName, null, null, null);
+  }
+
+  public static DataCatalogTreeNode workingRoot(String connectionName) {
+    return new DataCatalogTreeNode(Type.WORKING_ROOT, connectionName, null, null, null);
+  }
+
+  public static DataCatalogTreeNode workingEmptyHint(String connectionName) {
+    return new DataCatalogTreeNode(Type.WORKING_EMPTY_HINT, connectionName, null, null, null);
   }
 
   public static DataCatalogTreeNode namespace(String connectionName, String namespace) {

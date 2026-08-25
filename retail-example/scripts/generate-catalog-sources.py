@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Create E2E-* catalog source JSON entries for the retail example project."""
+"""Create retail catalog source JSON under work/edw-catalog.
+
+Writes E2E-* DATABASE source contracts, then seeds COMPOSITE / JSON / PIPELINE
+feeds that retail-360.hdv uses (all-customer-info, feed_order_shipment_tracking,
+asn-package-lines) from the committed schema-gate baseline snapshot when they
+are missing from the working tree.
+"""
 #
 # Copyright 2026 i-Bridge bv
 #
@@ -19,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -285,45 +292,6 @@ SOURCE_DEFINITIONS = {
     },
 }
 
-
-def build_row_meta_xml(fields: list[tuple]) -> str:
-    value_metas = []
-    for name, _data_type, length, precision, hop_type in fields:
-        type_name = HOP_TYPE_NAMES[hop_type]
-        length_val = length if length else "-1"
-        precision_val = precision if precision not in ("", None) else "-1"
-        if hop_type == 5:
-            precision_val = precision or "0"
-            conversion_mask = "####0;-####0"
-        else:
-            conversion_mask = ""
-        value_metas.append(
-            f"<value-meta><type>{type_name}</type>\n"
-            f"<storagetype>normal</storagetype>\n"
-            f"<name>{name}</name>\n"
-            f"<length>{length_val}</length>\n"
-            f"<precision>{precision_val}</precision>\n"
-            f"<origin/>\n"
-            f"<comments/>\n"
-            f"<conversion_Mask>{conversion_mask}</conversion_Mask>\n"
-            f"<decimal_symbol>.</decimal_symbol>\n"
-            f"<grouping_symbol>,</grouping_symbol>\n"
-            f"<currency_symbol>$</currency_symbol>\n"
-            f"<trim_type>none</trim_type>\n"
-            f"<case_insensitive>N</case_insensitive>\n"
-            f"<collator_disabled>Y</collator_disabled>\n"
-            f"<collator_strength>0</collator_strength>\n"
-            f"<sort_descending>N</sort_descending>\n"
-            f"<output_padding>N</output_padding>\n"
-            f"<date_format_lenient>N</date_format_lenient>\n"
-            f"<date_format_locale>en_US</date_format_locale>\n"
-            f"<date_format_timezone>GMT</date_format_timezone>\n"
-            f"<lenient_string_to_number>N</lenient_string_to_number>\n"
-            f"</value-meta>"
-        )
-    return "<row-meta>" + "".join(value_metas) + "</row-meta>"
-
-
 def field_entry(
     name: str,
     data_type: str,
@@ -383,7 +351,6 @@ def build_source(name: str, definition: dict, namespace: str) -> dict:
         "name": name,
         "type": "DV_SOURCE",
         "description": definition["description"],
-        "rowMetaXml": build_row_meta_xml(definition["fields"]),
         "origin": {
             "modelType": "DATA_VAULT_SOURCE",
             "modelName": "retail-360",
@@ -421,6 +388,49 @@ def build_source(name: str, definition: dict, namespace: str) -> dict:
     }
 
 
+def baseline_snapshot_sources_dir(project_home: Path) -> Path | None:
+    """Committed v1.0.0 snapshot records used as working-tree seed for model feeds."""
+    snapshots = project_home / "fixtures" / "schema-gate-baseline" / "snapshots"
+    if not snapshots.is_dir():
+        return None
+    snapshot_dirs = sorted(path for path in snapshots.iterdir() if path.is_dir())
+    if not snapshot_dirs:
+        return None
+    sources = snapshot_dirs[0] / "records" / "hop" / "retail-example" / "sources"
+    return sources if sources.is_dir() else None
+
+
+def seed_model_feeds_from_baseline(project_home: Path, catalog_dir: Path, namespace: str) -> None:
+    """Copy non-E2E source contracts referenced by retail-360.hdv into the working tree.
+
+    generate-catalog-sources always regenerates E2E-* DATABASE feeds. Schema validation
+    also requires COMPOSITE (all-customer-info), JSON (feed_order_shipment_tracking), and
+    PIPELINE (asn-package-lines) contracts. Those live in the schema-gate baseline
+    snapshot; skip files that already exist so a later catalog publish is not overwritten.
+    """
+    sources = baseline_snapshot_sources_dir(project_home)
+    if sources is None:
+        print(
+            "WARNING: missing schema-gate baseline snapshot sources; "
+            "model feeds were not seeded",
+            file=sys.stderr,
+        )
+        return
+
+    catalog_dir.mkdir(parents=True, exist_ok=True)
+    for src in sorted(sources.glob("*.json")):
+        if src.stem in SOURCE_DEFINITIONS:
+            continue
+        dest = catalog_dir / src.name
+        if dest.exists():
+            print(f"Keeping existing {dest}")
+            continue
+        payload = json.loads(src.read_text(encoding="utf-8"))
+        payload["namespace"] = namespace
+        dest.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+        print(f"Seeded {dest}")
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project-home", type=Path, default=DEFAULT_PROJECT_HOME)
@@ -438,6 +448,8 @@ def main() -> None:
         payload = build_source(name, definition, namespace)
         path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
         print(f"Wrote {path}")
+
+    seed_model_feeds_from_baseline(args.project_home, catalog_dir, namespace)
 
 
 if __name__ == "__main__":

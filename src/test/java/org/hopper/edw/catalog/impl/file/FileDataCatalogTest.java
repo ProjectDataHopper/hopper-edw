@@ -26,17 +26,17 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.row.RowMeta;
+import org.apache.hop.core.row.value.ValueMetaString;
+import org.apache.hop.core.variables.Variables;
+import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.hopper.edw.catalog.metadata.DataCatalogMeta;
 import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.hopper.edw.catalog.model.RecordDefinitionQuery;
 import org.hopper.edw.catalog.model.RecordDefinitionRef;
 import org.hopper.edw.catalog.model.RecordDefinitionType;
-import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.row.RowMeta;
-import org.apache.hop.core.row.value.ValueMetaString;
-import org.apache.hop.core.variables.Variables;
-import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -138,6 +138,35 @@ class FileDataCatalogTest {
       Set<String> names = refs.stream().map(r -> r.getKey().getName()).collect(Collectors.toSet());
       assertEquals(Set.of("src-a", "src-b"), names);
       assertTrue(refs.stream().allMatch(r -> r.getType() == RecordDefinitionType.DV_SOURCE));
+    } finally {
+      catalog.disconnect();
+    }
+  }
+
+  @Test
+  void list_countsUnreadableJsonAndIgnoresMissingKeys() throws Exception {
+    FileDataCatalog catalog = connectedCatalog();
+    try {
+      Files.writeString(catalog.getResolvedRoot().resolve("broken.json"), "{not-json");
+      Files.writeString(
+          catalog.getResolvedRoot().resolve("no-key.json"), "{\"description\":\"x\"}\n");
+      catalog.create(definition("hop/demo/sources", "ok", RecordDefinitionType.DV_SOURCE));
+
+      List<RecordDefinitionRef> refs = catalog.list(new RecordDefinitionQuery());
+      assertEquals(1, refs.size());
+      assertEquals("ok", refs.get(0).getKey().getName());
+      assertEquals(2, catalog.getLastSkippedUnreadable());
+    } finally {
+      catalog.disconnect();
+    }
+  }
+
+  @Test
+  void hasVersionSnapshots_isFalseWithoutManifest() throws Exception {
+    FileDataCatalog catalog = connectedCatalog();
+    try {
+      assertFalse(catalog.hasVersionSnapshots());
+      assertTrue(catalog.describeLocation().contains("catalog-data"));
     } finally {
       catalog.disconnect();
     }
