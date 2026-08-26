@@ -48,6 +48,8 @@ import org.hopper.edw.catalog.discovery.CatalogDiscoverySnapshot;
 import org.hopper.edw.catalog.discovery.CatalogDiscoverySupport;
 import org.hopper.edw.catalog.hopgui.CatalogDiscoveryPreviewDialog;
 import org.hopper.edw.datavault.hopgui.file.vault.HopGuiDataVaultModelDialog;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 
 public class RecordDefinitionInputDialog extends BaseTransformDialog {
 
@@ -110,6 +112,7 @@ public class RecordDefinitionInputDialog extends BaseTransformDialog {
     createShell(BaseMessages.getString(PKG, "RecordDefinitionInputDialog.Shell.Title"));
 
     buildButtonBar().ok(e -> ok()).cancel(e -> cancel()).build();
+    DialogHelpSupport.installLocalHelpButton(shell, HelpTopics.RECORD_DEFINITION_INPUT);
 
     CTabFolder wTabFolder = new CTabFolder(shell, SWT.BORDER);
     PropsUi.setLook(wTabFolder, Props.WIDGET_STYLE_TAB);

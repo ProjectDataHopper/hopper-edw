@@ -27,20 +27,6 @@ import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.hopgui.dialog.ShowRowsDialog;
-import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
-import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
-import org.hopper.edw.datavault.hopgui.help.HelpTopics;
-import org.hopper.edw.datavault.metadata.datatypemapping.PhysicalSourceField;
-import org.hopper.edw.datavault.metadata.datatypemapping.SourceDataTypeMappingSupport;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceColumn;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceEndpointKind;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceRelationshipLifecycleSupport;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceTableLiveSchemaSupport;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceTableValidationSupport;
-import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceTablePreviewSupport;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.FormDataBuilder;
@@ -65,6 +51,20 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.hopgui.dialog.ShowRowsDialog;
+import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
+import org.hopper.edw.datavault.metadata.datatypemapping.PhysicalSourceField;
+import org.hopper.edw.datavault.metadata.datatypemapping.SourceDataTypeMappingSupport;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceColumn;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceEndpointKind;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceRelationshipLifecycleSupport;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceTableLiveSchemaSupport;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceTableValidationSupport;
+import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceTablePreviewSupport;
 
 /** Dialog to edit a {@link SourceTable} (identity, physical location, columns). */
 public class HopGuiSourceTableDialog {
@@ -128,7 +128,7 @@ public class HopGuiSourceTableDialog {
     Button wPreview = new Button(shell, SWT.PUSH);
     wPreview.setText(BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Preview.Button"));
     wPreview.addListener(SWT.Selection, e -> previewData());
-    DialogHelpSupport.createHelpButton(shell, HelpTopics.IMPORT_DATABASE_TABLES_OPTIONS);
+    DialogHelpSupport.createHelpButton(shell, HelpTopics.SOURCE_TABLE);
     BaseTransformDialog.positionBottomButtons(
         shell, new Button[] {wOk, wValidate, wCancel, wPreview}, margin, null);
 

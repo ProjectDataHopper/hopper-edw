@@ -17,8 +17,6 @@ package org.hopper.edw.datavault.workflow.actions.dimensionalpublish;
 
 import org.apache.hop.core.Const;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
-import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.FormDataBuilder;
 import org.apache.hop.ui.core.PropsUi;
@@ -37,6 +35,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 
 public class ActionDimensionalPublishDialog extends ActionDialog {
   private static final Class<?> PKG = ActionDimensionalPublish.class;
@@ -81,7 +81,7 @@ public class ActionDimensionalPublishDialog extends ActionDialog {
     wCancel.setText(BaseMessages.getString(PKG, "System.Button.Cancel"));
     wCancel.addListener(SWT.Selection, e -> cancel());
 
-    DialogHelpSupport.createHelpButton(shell, HelpTopics.ACTION_DIMENSIONAL_PUBLISH);
+    DialogHelpSupport.installLocalHelpButton(shell, HelpTopics.ACTION_DIMENSIONAL_PUBLISH);
 
     BaseTransformDialog.positionBottomButtons(shell, new Button[] {wOK, wCancel}, margin, null);
 

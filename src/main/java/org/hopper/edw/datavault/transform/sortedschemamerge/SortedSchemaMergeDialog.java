@@ -32,6 +32,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 
 public class SortedSchemaMergeDialog extends BaseTransformDialog {
 
@@ -60,6 +62,7 @@ public class SortedSchemaMergeDialog extends BaseTransformDialog {
         .get(e -> getSourceTransformNames())
         .cancel(e -> cancel())
         .build();
+    DialogHelpSupport.installLocalHelpButton(shell, HelpTopics.SORTED_SCHEMA_MERGE);
 
     changed = input.hasChanged();
     ModifyListener lsMod = e -> input.setChanged();

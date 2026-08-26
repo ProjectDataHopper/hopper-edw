@@ -1,0 +1,40 @@
+= Business Vault model settings
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../business-vault-overview.adoc[business-vault-overview].
+
+
+
+Open with **Edit model** on the Business Vault graph toolbar.
+
+== Header
+
+- **Name** / **Description** — model identity (name may sync with the `.hbv` filename).
+
+== General tab
+
+- **Target database** — connection where Business Vault tables and views are created and loaded.
+- **Data catalog** — metadata catalog connection (`MetaSelectionLine`). Used for catalog publish and model-registry lookups. Business Vault Update falls back to this when the action leaves catalog empty.
+- **SCD2 defaults** — functional timestamp, load-date fallback, valid-from / valid-to column names.
+
+== Data Vault tables (canvas, not this dialog)
+
+There is **no** single “linked Data Vault model file” setting. Reference hubs, links, and satellites from **one or more** `.hdv` models by placing canvas aliases:
+
+- Context menu: **Add Hub / Satellite / Link reference**
+- Pick a catalog-registered DV model or browse a `.hdv`
+- Each alias stores an optional `referencedModelFilename` for multi-model sources
+
+SCD2, PIT, SQL `ref()`, and Business Vault Update resolve DV tables from those aliases.
+
+== Target loading / Generated artifacts tabs
+
+Shared target-load mode (table output vs staging file), batch size, parallel copies, and generated pipeline / workflow name prefixes.
+
+== Tips
+
+- Use **Check model** on the graph before running Business Vault Update.
+- Multi-step BV layers can also reference other `.hbv` files via SQL `ref()` or canvas **Business Vault references**.

@@ -1,0 +1,11 @@
+= Bridge table
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../dimensional-modeler-overview.adoc[dimensional-modeler-overview].
+
+A **bridge** resolves many-to-many relationships between dimensions (for example customer–account).
+
+List the dimension references that form the composite grain. Optional **Generate primary keys** / **Generate foreign keys** on the model emit DDL constraints when the target engine supports them.

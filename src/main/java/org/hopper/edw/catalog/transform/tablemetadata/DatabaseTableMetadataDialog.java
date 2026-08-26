@@ -43,6 +43,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 
 public class DatabaseTableMetadataDialog extends BaseTransformDialog {
 
@@ -89,6 +91,7 @@ public class DatabaseTableMetadataDialog extends BaseTransformDialog {
   public String open() {
     createShell(BaseMessages.getString(PKG, "DatabaseTableMetadataDialog.Shell.Title"));
     buildButtonBar().ok(e -> ok()).cancel(e -> cancel()).build();
+    DialogHelpSupport.installLocalHelpButton(shell, HelpTopics.DATABASE_TABLE_METADATA);
 
     CTabFolder wTabFolder = new CTabFolder(shell, SWT.BORDER);
     PropsUi.setLook(wTabFolder, Props.WIDGET_STYLE_TAB);

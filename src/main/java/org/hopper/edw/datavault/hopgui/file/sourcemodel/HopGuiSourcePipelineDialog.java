@@ -24,19 +24,6 @@ import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.hopgui.file.dimensional.DmSourcePipelineGuiSupport;
-import org.hopper.edw.datavault.hopgui.file.dimensional.DmSourcePipelineOpenSupport;
-import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
-import org.hopper.edw.datavault.metadata.datatypemapping.SourceDataTypeMappingSupport;
-import org.hopper.edw.datavault.metadata.pipeline.DvPipelineSourceSupport;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceColumn;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceEndpointKind;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourcePipeline;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourcePipelineCatalogSource;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourcePipelineValidationSupport;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceRelationshipLifecycleSupport;
-import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourcePipelineCatalogImportSupport;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.config.PipelineRunConfiguration;
@@ -65,6 +52,21 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.hopgui.file.dimensional.DmSourcePipelineGuiSupport;
+import org.hopper.edw.datavault.hopgui.file.dimensional.DmSourcePipelineOpenSupport;
+import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
+import org.hopper.edw.datavault.metadata.datatypemapping.SourceDataTypeMappingSupport;
+import org.hopper.edw.datavault.metadata.pipeline.DvPipelineSourceSupport;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceColumn;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceEndpointKind;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourcePipeline;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourcePipelineCatalogSource;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourcePipelineValidationSupport;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceRelationshipLifecycleSupport;
+import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourcePipelineCatalogImportSupport;
 
 /**
  * Dialog to edit a {@link SourcePipeline}: pipeline file, output transform, declared fields, and
@@ -134,6 +136,7 @@ public class HopGuiSourcePipelineDialog {
     Button wCancel = new Button(shell, SWT.PUSH);
     wCancel.setText(BaseMessages.getString(PKG, "System.Button.Cancel"));
     wCancel.addListener(SWT.Selection, e -> cancel());
+    DialogHelpSupport.createHelpButton(shell, HelpTopics.SOURCE_PIPELINE);
     BaseTransformDialog.positionBottomButtons(
         shell, new Button[] {wOk, wPreview, wCancel}, margin, null);
 

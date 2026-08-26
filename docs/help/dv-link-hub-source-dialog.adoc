@@ -1,0 +1,114 @@
+= Link hub source
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../dv-link.adoc[dv-link].
+
+
+
+A **link hub source** connects one catalog **DV_SOURCE** feed to the link table. It answers: *from this relationship source table, which columns identify each participating hub?*
+
+Hop generates one link update pipeline per hub source entry on the link's **Hub sources** tab.
+
+== When you need this dialog
+
+Open it from the link editor → **Hub sources** tab → select a source row → **Edit hub source mappings…**
+
+You need at least one hub source for every Hop-managed link. **Check model** reports an error when hub sources are missing.
+
+== Data Vault Source
+
+Select the catalog **DV_SOURCE** that supplies relationship rows — typically a bridge, junction, or fact table containing foreign keys to the participating hubs (e.g. `order_line` with `order_id` and `product_id`).
+
+This is a **catalog feed name**, not a raw database connection. Configure the physical table, field list, and record source indicator in the **Data Catalog** perspective before mapping.
+
+== Hub key field mappings
+
+For **each participating hub** listed on the link's Options tab, add one hub mapping row and click **Edit mappings** to open the per-hub detail dialog.
+
+=== Business key mappings (required)
+
+Map each hub business key to a column in **this** source:
+
+[cols="1,1", options="header"]
+|===
+
+|Hub business key field
+|Source field name
+
+|Column on the hub definition (e.g. `order_id`)
+|Column in the link source (e.g. `order_id` or `cust_order_fk`)
+
+|===
+
+Rules:
+
+- Include **every** business key on the hub, in the **same order** as on the hub's Keys tab.
+- Composite hubs need one mapping row per business key column.
+- Mappings are **per source** — the same hub can use different column names in different feeds.
+- If names differ between hub and link source (very common), map explicitly; do not assume the loader will guess.
+
+Example: `hub_customer` uses business key `customer_id`, but the order header source has `cust_fk`. Map `customer_id` → `cust_fk`.
+
+=== Driving key mappings (when applicable)
+
+If the link defines driving keys on its **Driving keys** tab, map each driving key to a source column in the same per-hub dialog:
+
+[cols="1,1", options="header"]
+|===
+
+|Driving key
+|Source field name
+
+|Target driving key name (e.g. `FROM_LOCATION_HK`)
+|Source column supplying that value
+
+|===
+
+Driving keys disambiguate when the same hub appears multiple times in one link.
+
+== Step-by-step workflow
+
+1. On the link **Options** tab, list all **participating hubs** (at least two).
+2. On **Hub sources**, add a row and pick the catalog **DV_SOURCE**.
+3. Click **Edit hub source mappings…**
+4. Click **Add hub mapping** for each participating hub (or select an existing row and **Edit mappings**).
+5. In the hub key field dialog, fill business key → source column for every hub key.
+6. Add driving key → source column rows when the link uses driving keys.
+7. Confirm with OK on each dialog.
+
+Repeat steps 2–7 for additional catalog feeds (multi-source links).
+
+== What the pipeline reads
+
+For the selected source, the generated SQL selects only:
+
+- Mapped business key columns (per hub)
+- Mapped driving key columns (when configured)
+- The record source indicator (static value or indicator column from the catalog source)
+
+Those values are hashed into hub keys, then into the link hash key. Unmapped columns are ignored for link loading.
+
+== Multi-source links
+
+A link can have several hub source rows — one per catalog feed that supplies relationships. Each feed gets its own pipeline (`link-<table>-<source>`). Use **Record source group** on Data Vault Update when you want to load only selected feeds in a run.
+
+== Validation
+
+**Check model** verifies:
+
+- Every hub source has a catalog source name
+- Mapped source columns exist in the catalog field list
+- Business key fields exist on the referenced hub
+- Source and hub business key types are compatible (when detailed type checking is enabled)
+
+Fix catalog field lists and mappings before running updates.
+
+== Tips
+
+- Define and load hubs first; link pipelines hash business keys the same way hub pipelines do.
+- One hub mapping row per participating hub — missing a hub causes pipeline generation to fail.
+- Column names in relationship tables often differ from hub staging tables; explicit mappings avoid extra SQL views.
+- The record source **value** comes from the catalog DV_SOURCE (indicator or indicator field), not from this mapping dialog.

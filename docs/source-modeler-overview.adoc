@@ -185,6 +185,7 @@ Use the **Source model SQL** pipeline transform (Input category) to run free SQL
 
 The transform plans with Calcite (same engine as Free SQL on the source query dialog), executes the generated pipeline nested in the local engine, and streams the result rows.
 
+[[hop-server-jdbc-dbeaver]]
 === JDBC (`jdbc:hop-hsm:`)
 
 ==== Local (in-process Hop)

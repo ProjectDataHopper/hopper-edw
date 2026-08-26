@@ -1,0 +1,17 @@
+= Source model SQL transform
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../source-modeler-overview.adoc[source-modeler-overview].
+
+The **Source model SQL** transform runs Free SQL against a `.hsm` model through the `jdbc:hop-hsm:` virtualization layer (Calcite). Use it in pipelines when you need ad-hoc SQL over source tables, queries, JSON extractions, or pipeline cards.
+
+== Options
+
+* **Source model file** — Path to the `.hsm`.
+* **SQL** — SELECT against virtual tables named after source-model objects.
+* **Preview / Explain** — Design-time sample and plan.
+
+See link:../source-modeler-overview.adoc#source-queries[Source queries] and the JDBC section of that guide.

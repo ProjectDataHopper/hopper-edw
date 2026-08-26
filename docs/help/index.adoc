@@ -1,0 +1,210 @@
+= Dialog help
+:toc: macro
+:toclevels: 2
+
+toc::[]
+
+These pages are opened from Hop GUI **Help** buttons on Data Hopper EDW dialogs.
+They ship as HTML in `plugins/misc/hopper-edw/docs/help/` after `mvn package`.
+Guides for the same features live in the parent folder (link:../index.adoc[documentation index]).
+
+[cols="1,2", options="header"]
+|===
+|Page |Dialog
+
+|link:acknowledge-validation-issue-dialog.adoc[acknowledge-validation-issue-dialog]
+|Acknowledge validation issue
+
+|link:action-begin-vault-update-dialog.adoc[action-begin-vault-update-dialog]
+|Begin Vault Update
+
+|link:action-end-vault-update-dialog.adoc[action-end-vault-update-dialog]
+|End Vault Update
+
+|link:action-export-data-lineage-dialog.adoc[action-export-data-lineage-dialog]
+|Export data lineage
+
+|link:action-import-dbt-project-dialog.adoc[action-import-dbt-project-dialog]
+|Import dbt project action
+
+|link:bv-ai-advisor-dialog.adoc[bv-ai-advisor-dialog]
+|Business Vault AI advisor
+
+|link:bv-business-table-dialog.adoc[bv-business-table-dialog]
+|SQL business table
+
+|link:bv-dbt-import-dialog.adoc[bv-dbt-import-dialog]
+|Import dbt models
+
+|link:bv-model-dialog.adoc[bv-model-dialog]
+|Business Vault model settings
+
+|link:bv-scd2-table-dialog.adoc[bv-scd2-table-dialog]
+|Business Vault SCD2 table
+
+|link:bv-table-dialog.adoc[bv-table-dialog]
+|Business Vault table
+
+|link:data-type-mapping-dialog.adoc[data-type-mapping-dialog]
+|Data type mapping profile
+
+|link:dm-ai-advisor-dialog.adoc[dm-ai-advisor-dialog]
+|Dimensional model AI advisor
+
+|link:dm-bridge-dialog.adoc[dm-bridge-dialog]
+|Bridge table
+
+|link:dm-date-dimension-dialog.adoc[dm-date-dimension-dialog]
+|Date dimension
+
+|link:dm-dimension-alias-dialog.adoc[dm-dimension-alias-dialog]
+|Dimension alias
+
+|link:dm-dimension-dialog.adoc[dm-dimension-dialog]
+|Dimension table
+
+|link:dm-fact-dialog.adoc[dm-fact-dialog]
+|Fact table
+
+|link:dm-junk-dimension-dialog.adoc[dm-junk-dimension-dialog]
+|Junk dimension
+
+|link:dm-model-dialog.adoc[dm-model-dialog]
+|Dimensional model settings
+
+|link:dm-range-dimension-dialog.adoc[dm-range-dimension-dialog]
+|Range dimension
+
+|link:dv-ai-advisor-dialog.adoc[dv-ai-advisor-dialog]
+|Data Vault AI advisor
+
+|link:dv-ai-proposal-review-dialog.adoc[dv-ai-proposal-review-dialog]
+|Data Vault proposal review
+
+|link:dv-hash-key-dialog.adoc[dv-hash-key-dialog]
+|Data Vault hash key
+
+|link:dv-hub-dialog.adoc[dv-hub-dialog]
+|Hub editor
+
+|link:dv-hub-source-key-field-dialog.adoc[dv-hub-source-key-field-dialog]
+|Hub source key mapping
+
+|link:dv-link-dialog.adoc[dv-link-dialog]
+|Link editor
+
+|link:dv-link-hub-source-dialog.adoc[dv-link-hub-source-dialog]
+|Link hub source
+
+|link:dv-link-satellite-source-dialog.adoc[dv-link-satellite-source-dialog]
+|Link satellite source
+
+|link:dv-model-dialog.adoc[dv-model-dialog]
+|Data Vault model settings
+
+|link:dv-note-dialog.adoc[dv-note-dialog]
+|Model note
+
+|link:dv-reference-dialog.adoc[dv-reference-dialog]
+|Reference table editor
+
+|link:dv-satellite-dialog.adoc[dv-satellite-dialog]
+|Satellite editor
+
+|link:dv-satellite-source-key-field-dialog.adoc[dv-satellite-source-key-field-dialog]
+|Satellite source key mapping
+
+|link:elk-layout-dialog.adoc[elk-layout-dialog]
+|Graph layout
+
+|link:hop-ai-proposal-review-dialog.adoc[hop-ai-proposal-review-dialog]
+|Hop proposal review
+
+|link:import-csv-file-options-dialog.adoc[import-csv-file-options-dialog]
+|Import CSV file
+
+|link:import-database-tables-catalog-dialog.adoc[import-database-tables-catalog-dialog]
+|Import database tables
+
+|link:import-database-tables-options-dialog.adoc[import-database-tables-options-dialog]
+|Import database table options
+
+|link:import-dm-database-tables-options-dialog.adoc[import-dm-database-tables-options-dialog]
+|Import dimensional tables
+
+|link:import-iceberg-table-dialog.adoc[import-iceberg-table-dialog]
+|Import Iceberg table
+
+|link:import-iceberg-table-options-dialog.adoc[import-iceberg-table-options-dialog]
+|Iceberg import options
+
+|link:import-parquet-file-options-dialog.adoc[import-parquet-file-options-dialog]
+|Import Parquet file
+
+|link:import-source-schema-options-dialog.adoc[import-source-schema-options-dialog]
+|Import source schema
+
+|link:jinja-macro-library-dialog.adoc[jinja-macro-library-dialog]
+|Jinja macro library
+
+|link:junk-dimension-transform-dialog.adoc[junk-dimension-transform-dialog]
+|Junk Dimension transform
+
+|link:lineage-backend-dialog.adoc[lineage-backend-dialog]
+|Lineage backend
+
+|link:lineage-view-settings-dialog.adoc[lineage-view-settings-dialog]
+|Lineage view settings
+
+|link:merge-rows-plus-dialog.adoc[merge-rows-plus-dialog]
+|Merge rows plus
+
+|link:model-ai-proposal-review-dialog.adoc[model-ai-proposal-review-dialog]
+|Model proposal review
+
+|link:pipeline-ai-advisor-dialog.adoc[pipeline-ai-advisor-dialog]
+|Pipeline AI advisor
+
+|link:refresh-record-definition-from-source-dialog.adoc[refresh-record-definition-from-source-dialog]
+|Refresh record definition
+
+|link:resource-definition-issue-dialog.adoc[resource-definition-issue-dialog]
+|Remediation Proposals
+
+|link:resource-definition-validation-options-dialog.adoc[resource-definition-validation-options-dialog]
+|Validate resource definitions — options
+
+|link:resource-definition-validation-results-dialog.adoc[resource-definition-validation-results-dialog]
+|Resource Definition Validation Results
+
+|link:sorted-schema-merge-dialog.adoc[sorted-schema-merge-dialog]
+|Sorted schema merge
+
+|link:source-json-dialog.adoc[source-json-dialog]
+|Source JSON
+
+|link:source-model-dialog.adoc[source-model-dialog]
+|Source model settings
+
+|link:source-model-sql-dialog.adoc[source-model-sql-dialog]
+|Source model SQL transform
+
+|link:source-query-dialog.adoc[source-query-dialog]
+|Source query
+
+|link:source-relationship-dialog.adoc[source-relationship-dialog]
+|Source relationship
+
+|link:source-table-dialog.adoc[source-table-dialog]
+|Source table
+
+|link:source-to-vault-review-dialog.adoc[source-to-vault-review-dialog]
+|Generate Data Vault from a source model
+
+|link:target-type-mapping-dialog.adoc[target-type-mapping-dialog]
+|Target type mapping
+
+|link:workflow-ai-advisor-dialog.adoc[workflow-ai-advisor-dialog]
+|Workflow AI advisor
+
+|===

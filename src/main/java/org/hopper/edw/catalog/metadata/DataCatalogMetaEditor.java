@@ -40,12 +40,15 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hopper.edw.catalog.discovery.CatalogDiscoverySnapshot;
 import org.hopper.edw.catalog.discovery.CatalogDiscoverySupport;
 import org.hopper.edw.catalog.hopgui.CatalogDiscoveryPreviewDialog;
 import org.hopper.edw.catalog.impl.file.FileDataCatalog;
 import org.hopper.edw.catalog.spi.IDataCatalog;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 
 /** Editor for {@link DataCatalogMeta} with type-specific catalog configuration. */
 @GuiPlugin(description = "Editor for Data Catalog metadata")
@@ -69,6 +72,11 @@ public class DataCatalogMetaEditor extends MetadataEditor<DataCatalogMeta> {
     catalogByType = populateCatalogMap();
     IDataCatalog current = getMetadata().getCatalogOrDefault();
     catalogByType.put(current.getPluginId(), current);
+  }
+
+  @Override
+  protected Button createHelpButton(Shell shell) {
+    return DialogHelpSupport.createHelpButton(shell, HelpTopics.DATA_CATALOG);
   }
 
   @Override

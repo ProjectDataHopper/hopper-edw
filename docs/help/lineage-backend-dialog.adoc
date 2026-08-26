@@ -1,0 +1,21 @@
+= Lineage backend
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../hop-lineage-view.adoc[hop-lineage-view].
+
+
+
+A **lineage backend** is the server or folder a Hop Lineage View (`.hlv`) queries. It is **not** the lineage graph itself.
+
+== Types
+
+- **Marquez** — `GET /api/v1/lineage` on a Marquez 0.50 API. Set the **base URL** to the host (`http://localhost:5001` or `${MARQUEZ_BASE_URL}`). If you paste `${MARQUEZ_API}` (`…/api/v1/lineage`), the suffix is stripped.
+- **Export folder** — folder of RunEvent JSON written by **Export data lineage**.
+- **Local models** — walk current DV/BV/DM collectors. Set **job / dataset namespace** to the same values as the export action (`${MARQUEZ_NAMESPACE_JOB}` / `${MARQUEZ_NAMESPACE_DATASET}`) so seeds match Marquez.
+
+API keys stay on this metadata object, not in `.hlv` files.
+
+Use **Test connection** to verify namespaces, the folder, or the resource definition group.

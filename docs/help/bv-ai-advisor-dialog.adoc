@@ -1,0 +1,11 @@
+= Business Vault AI advisor
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../ai-advisory.md[ai-advisory.md].
+
+Ask the AI advisor about the open `.hbv` model: SCD2/PIT design, SQL business tables, dbt import, and generated pipelines.
+
+Requires an AI provider in Hop configuration. Review any proposed edits before applying them. See link:../ai-advisory.md[AI advisory].

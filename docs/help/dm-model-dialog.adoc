@@ -1,0 +1,11 @@
+= Dimensional model settings
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../dimensional-modeler-overview.adoc[dimensional-modeler-overview].
+
+**Edit model** on a `.hdm` file: target database, default standard column names (`dim_key`, `date_from`, `date_to`, …), pipeline naming, and optional **Generate primary keys** / **Generate foreign keys** for CREATE TABLE DDL.
+
+Per-table dialogs override surrogate-key strategy and source configuration.

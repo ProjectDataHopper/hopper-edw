@@ -1,0 +1,15 @@
+= Business Vault table
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../business-vault-pit.adoc[business-vault-pit].
+
+Edit a Business Vault **PIT** (or other non-SCD2 / non-SQL) table on the `.hbv` canvas.
+
+== PIT
+
+Point-in-time helpers snapshot hub grain × satellite load timestamps for as-of queries. Choose the parent hub, satellites to include, and snapshot schedule.
+
+SCD2 tables have a dedicated dialog (link:bv-scd2-table-dialog.adoc[SCD2 table]). SQL views/tables use link:bv-business-table-dialog.adoc[SQL business table].

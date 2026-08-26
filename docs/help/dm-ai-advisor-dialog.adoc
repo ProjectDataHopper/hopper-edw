@@ -1,0 +1,11 @@
+= Dimensional model AI advisor
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../ai-advisory.md[ai-advisory.md].
+
+Ask the AI advisor about the open `.hdm` model: grains, SCD policies, junk/range dimensions, and generated loads.
+
+Requires an AI provider in Hop configuration. Review proposed edits before applying. See link:../ai-advisory.md[AI advisory].

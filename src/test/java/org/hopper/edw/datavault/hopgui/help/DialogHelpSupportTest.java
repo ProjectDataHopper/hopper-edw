@@ -16,44 +16,24 @@
 package org.hopper.edw.datavault.hopgui.help;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.exception.HopException;
-import org.hopper.edw.datavault.hopgui.widget.MarkdownStyleRenderer;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class DialogHelpSupportTest {
 
-  @BeforeAll
-  static void initHop() throws HopException {
-    HopEnvironment.init();
-  }
-
   @Test
-  void loadMarkdownReadsClasspathResource() throws HopException {
-    String markdown = DialogHelpSupport.loadMarkdown("test-topic");
-    assertTrue(markdown.contains("# Test topic"));
-    assertTrue(markdown.contains("fixture"));
-  }
-
-  @Test
-  void loadMarkdownThrowsForMissingTopic() {
+  void requirePageRejectsUnknownTopic() {
     HopException ex =
-        assertThrows(HopException.class, () -> DialogHelpSupport.loadMarkdown("missing-topic-xyz"));
+        assertThrows(HopException.class, () -> HelpTopics.requirePage("missing-topic-xyz"));
     assertTrue(ex.getMessage().contains("missing-topic-xyz"));
   }
 
   @Test
-  void hubHelpTopicIsRegistered() throws HopException {
-    String markdown = DialogHelpSupport.loadMarkdown(HelpTopics.DV_HUB);
-    assertFalse(markdown.startsWith("<!--"));
-    assertTrue(markdown.contains("Hub editor"));
-    MarkdownStyleRenderer.RenderedMarkdown rendered = MarkdownStyleRenderer.render(markdown);
-    assertTrue(rendered.displayText().contains("Hub editor"));
+  void titleKeyFallsBackForUnknownTopic() {
+    assertEquals("HelpTopics.Default.Title", HelpTopics.titleKey("not-a-topic"));
     assertEquals("HelpTopics.DvHubDialog.Title", HelpTopics.titleKey(HelpTopics.DV_HUB));
   }
 }

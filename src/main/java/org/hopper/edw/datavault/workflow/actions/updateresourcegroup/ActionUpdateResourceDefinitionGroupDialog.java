@@ -21,9 +21,6 @@ import org.apache.hop.core.Const;
 import org.apache.hop.core.Props;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.hopgui.file.vault.HopGuiDataVaultModelDialog;
-import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
-import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.FormDataBuilder;
 import org.apache.hop.ui.core.PropsUi;
@@ -40,6 +37,9 @@ import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.datavault.hopgui.file.vault.HopGuiDataVaultModelDialog;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 
 /**
  * Dialog for {@link ActionUpdateResourceDefinitionGroup}. Options are grouped into topic tabs
@@ -74,7 +74,7 @@ public class ActionUpdateResourceDefinitionGroupDialog extends ActionDialog {
         action);
 
     buildButtonBar().ok(e -> ok()).cancel(e -> cancel()).build();
-    DialogHelpSupport.installLocalHelpButton(shell, HelpTopics.ACTION_DATAVAULT_UPDATE);
+    DialogHelpSupport.installLocalHelpButton(shell, HelpTopics.ACTION_UPDATE_RESOURCE_GROUP);
 
     CTabFolder wTabFolder = new CTabFolder(shell, SWT.BORDER);
     PropsUi.setLook(wTabFolder, Props.WIDGET_STYLE_TAB);

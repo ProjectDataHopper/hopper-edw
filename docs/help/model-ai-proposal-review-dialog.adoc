@@ -1,0 +1,9 @@
+= Model proposal review
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../ai-advisory.md[ai-advisory.md].
+
+Review AI-proposed changes to a source, Data Vault, Business Vault, or dimensional model before they are applied. See link:../ai-advisory.md[AI advisory].

@@ -1,0 +1,30 @@
+= Export data lineage
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../openlineage-export.adoc[openlineage-export].
+
+
+
+Exports **model-derived** OpenLineage events for every Data Vault, Business Vault, and dimensional table in a **resource definition group**.
+
+Events include table-level inputs/outputs and, when enabled, **column-level lineage** facets. Destinations:
+
+- **FILE** — one JSON `RunEvent` per target table under the output folder, plus `export-summary.json`
+- **HTTP** — `POST` each event to an OpenLineage endpoint (for example Marquez `http://localhost:5001/api/v1/lineage`)
+- **FILE_AND_HTTP** — both
+
+== Namespaces
+
+- **Job namespace** — OpenLineage jobs (default `hop-data-vault` + project key)
+- **Dataset namespace** — optional override for **all** input/output datasets; leave empty to use Hop connection names (e.g. `Vault`), catalog sources, or staging labels
+
+== Tips
+
+- Start Marquez locally with `scripts/run-marquez.sh up` before HTTP export.
+- Column lineage is derived from the same collectors that power the modeler **Lineage** tab — models remain the source of truth.
+- Operational metrics enrichment is optional and reads `load_pipeline_metric` when an ops database is configured.
+
+See `docs/openlineage-export.adoc` for dataset naming conventions and Marquez setup.

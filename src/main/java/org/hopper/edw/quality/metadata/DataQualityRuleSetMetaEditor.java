@@ -22,9 +22,6 @@ import java.util.Map;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.i18n.BaseMessages;
-import org.hopper.edw.quality.model.DataQualityRule;
-import org.hopper.edw.quality.model.DataQualityRuleType;
-import org.hopper.edw.quality.model.QualitySeverity;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.metadata.MetadataEditor;
 import org.apache.hop.ui.core.metadata.MetadataManager;
@@ -34,10 +31,17 @@ import org.apache.hop.ui.hopgui.HopGui;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
+import org.hopper.edw.quality.model.DataQualityRule;
+import org.hopper.edw.quality.model.DataQualityRuleType;
+import org.hopper.edw.quality.model.QualitySeverity;
 
 /** Simple table editor for a data quality rule set. */
 @GuiPlugin(description = "Editor for Data Quality Rule Set metadata")
@@ -54,6 +58,11 @@ public class DataQualityRuleSetMetaEditor extends MetadataEditor<DataQualityRule
       MetadataManager<DataQualityRuleSetMeta> manager,
       DataQualityRuleSetMeta metadata) {
     super(hopGui, manager, metadata);
+  }
+
+  @Override
+  protected Button createHelpButton(Shell shell) {
+    return DialogHelpSupport.createHelpButton(shell, HelpTopics.DATA_QUALITY_RULE_SET);
   }
 
   @Override

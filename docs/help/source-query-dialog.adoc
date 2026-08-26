@@ -1,0 +1,23 @@
+= Source query
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../source-modeler-overview.adoc[source-modeler-overview].
+
+A **source query** is a named multi-table projection on a `.hsm` canvas. It becomes a catalog feed (`COMPOSITE` or SQL) that hubs, links, and satellites can load.
+
+== General
+
+* **Name** — Canvas identity and default catalog source name.
+* **Driving table** — First table in the join graph.
+* **Generation mode** — `AUTO` (plugin SQL), `SQL` (authored), or `PIPELINE`.
+
+== Joins and columns
+
+Ordered joins (inner / left) plus the projected column list. Optional WHERE clause. Use **Generate SQL** to inspect the composed statement.
+
+== Preview
+
+Runs the query with project variables (and pipeline parameter defaults when the mode is pipeline-backed).

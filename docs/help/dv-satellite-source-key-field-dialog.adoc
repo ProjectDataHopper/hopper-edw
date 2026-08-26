@@ -1,0 +1,14 @@
+= Satellite source key mapping
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../dv-satellite.adoc[dv-satellite].
+
+Map a satellite parent-key or attribute to a physical field on a catalog feed.
+
+* **Source field name** — Column on the selected feed.
+* **Source system** — Catalog `DV_SOURCE` listed on the satellite Record sources tab.
+
+Parent hash keys are computed from parent identity values on the satellite feed (hub/link key names, or ordered parts for composite hub keys).

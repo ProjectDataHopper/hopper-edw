@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import org.hopper.edw.catalog.metadata.DataCatalogMeta;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.Props;
@@ -27,6 +26,36 @@ import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.pipeline.config.PipelineRunConfiguration;
+import org.apache.hop.ui.core.ConstUi;
+import org.apache.hop.ui.core.FormDataBuilder;
+import org.apache.hop.ui.core.PropsUi;
+import org.apache.hop.ui.core.dialog.BaseDialog;
+import org.apache.hop.ui.core.dialog.EnterSelectionDialog;
+import org.apache.hop.ui.core.dialog.ErrorDialog;
+import org.apache.hop.ui.core.gui.WindowProperty;
+import org.apache.hop.ui.core.widget.ColumnInfo;
+import org.apache.hop.ui.core.widget.MetaSelectionLine;
+import org.apache.hop.ui.core.widget.SQLStyledTextComp;
+import org.apache.hop.ui.core.widget.StyledTextComp;
+import org.apache.hop.ui.core.widget.TableView;
+import org.apache.hop.ui.core.widget.TextComposite;
+import org.apache.hop.ui.hopgui.HopGui;
+import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
+import org.apache.hop.ui.util.EnvironmentUtils;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.catalog.metadata.DataCatalogMeta;
 import org.hopper.edw.datavault.hopgui.EnumDialogSupport;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
 import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
@@ -72,35 +101,6 @@ import org.hopper.edw.datavault.metadata.dimensional.DmTableBase;
 import org.hopper.edw.datavault.metadata.dimensional.DmTableType;
 import org.hopper.edw.datavault.metadata.dimensional.IDmFactLikeTable;
 import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.pipeline.config.PipelineRunConfiguration;
-import org.apache.hop.ui.core.ConstUi;
-import org.apache.hop.ui.core.FormDataBuilder;
-import org.apache.hop.ui.core.PropsUi;
-import org.apache.hop.ui.core.dialog.BaseDialog;
-import org.apache.hop.ui.core.dialog.EnterSelectionDialog;
-import org.apache.hop.ui.core.dialog.ErrorDialog;
-import org.apache.hop.ui.core.gui.WindowProperty;
-import org.apache.hop.ui.core.widget.ColumnInfo;
-import org.apache.hop.ui.core.widget.MetaSelectionLine;
-import org.apache.hop.ui.core.widget.SQLStyledTextComp;
-import org.apache.hop.ui.core.widget.StyledTextComp;
-import org.apache.hop.ui.core.widget.TableView;
-import org.apache.hop.ui.core.widget.TextComposite;
-import org.apache.hop.ui.hopgui.HopGui;
-import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
-import org.apache.hop.ui.util.EnvironmentUtils;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CTabFolder;
-import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.Text;
 
 /** Dialog to edit a dimension or fact table on the dimensional model canvas. */
 public class HopGuiDmTableDialog {
@@ -209,6 +209,28 @@ public class HopGuiDmTableDialog {
     this.factless = tableType == DmTableType.FACTLESS_FACT;
   }
 
+  private String helpTopicId() {
+    if (dimensionAlias) {
+      return HelpTopics.DM_DIMENSION_ALIAS;
+    }
+    if (junk) {
+      return HelpTopics.DM_JUNK_DIMENSION;
+    }
+    if (range) {
+      return HelpTopics.DM_RANGE_DIMENSION;
+    }
+    if (bridge) {
+      return HelpTopics.DM_BRIDGE;
+    }
+    if (factLike || factless) {
+      return HelpTopics.DM_FACT;
+    }
+    if (dimension && input.getSourceOrDefault().isDateGeneratorSource()) {
+      return HelpTopics.DM_DATE_DIMENSION;
+    }
+    return HelpTopics.DM_DIMENSION;
+  }
+
   public boolean open() {
     shell = new Shell(parent, BaseDialog.getDefaultDialogStyle());
     PropsUi.setLook(shell);
@@ -236,7 +258,7 @@ public class HopGuiDmTableDialog {
     Button wCancel = new Button(shell, SWT.PUSH);
     wCancel.setText(BaseMessages.getString(PKG, "System.Button.Cancel"));
     wCancel.addListener(SWT.Selection, e -> cancel());
-    DialogHelpSupport.createHelpButton(shell, HelpTopics.DM_TABLE);
+    DialogHelpSupport.createHelpButton(shell, helpTopicId());
 
     BaseTransformDialog.positionBottomButtons(
         shell, new Button[] {wOk, wValidate, wCancel}, margin, null);

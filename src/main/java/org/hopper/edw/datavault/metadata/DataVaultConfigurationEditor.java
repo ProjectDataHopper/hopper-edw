@@ -19,7 +19,6 @@ import org.apache.hop.core.Const;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.hopgui.file.vault.HopGuiDataVaultModelDialog;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.gui.GuiCompositeWidgets;
@@ -31,10 +30,15 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.hopgui.file.vault.HopGuiDataVaultModelDialog;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 
 /** Editor for project-level {@link DataVaultConfiguration} metadata. */
 @GuiPlugin(description = "Editor for Data Vault configuration metadata")
@@ -60,6 +64,11 @@ public class DataVaultConfigurationEditor extends MetadataEditor<DataVaultConfig
       MetadataManager<DataVaultConfiguration> manager,
       DataVaultConfiguration metadata) {
     super(hopGui, manager, metadata);
+  }
+
+  @Override
+  protected Button createHelpButton(Shell shell) {
+    return DialogHelpSupport.createHelpButton(shell, HelpTopics.DV_CONFIGURATION);
   }
 
   @Override

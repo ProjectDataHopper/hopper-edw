@@ -1,0 +1,11 @@
+= Import CSV file
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../datavault-source.adoc[datavault-source].
+
+Create a file-backed `DV_SOURCE` from a CSV (or similar delimited) file.
+
+Set the file path, delimiter, enclosure, header row, and preview a sample. Fields become the catalog record layout used by generated Table Input / Text File Input pipelines.

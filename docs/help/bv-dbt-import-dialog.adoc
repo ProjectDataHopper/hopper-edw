@@ -1,0 +1,52 @@
+= Import dbt models
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../dbt-import.adoc[dbt-import].
+
+
+
+Scan a **dbt-core** project (`dbt_project.yml` + `models/**/*.sql` + YAML + `macros/`) and create SQL business tables on the current Business Vault canvas.
+
+== Steps
+
+1. Browse to the dbt project folder (or any folder under it).
+2. **Scan** lists models: name, path, materialization, description, issues.
+3. Filter and select the models to import.
+4. Choose destination:
+   - **Current model** — add cards to this `.hbv`
+   - **New .hbv file** — write a new model next to this file
+   - **Split by first-level folder** — one `.hbv` per `models/staging`, `models/marts`, …
+5. Optionally import `{% macro %}` files into a **Jinja macro library**.
+6. **Import**. Authoring SQL stays Jinja; `ref()` / `source()` are not rewritten.
+
+== Mapping
+
+[cols="1,1", options="header"]
+|===
+
+|dbt
+|Hop
+
+|`view`
+|VIEW
+
+|`table`
+|TABLE
+
+|`incremental`
+|TABLE (full refresh; warning)
+
+|`ephemeral`
+|VIEW (not inlined; warning)
+
+|snapshots / seeds / Python
+|skipped
+
+|===
+
+YAML descriptions and column notes are copied onto the table. Sources used in SQL are pre-declared on the Sources tab.
+
+See `docs/dbt-import.adoc`.

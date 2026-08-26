@@ -22,24 +22,6 @@ import org.apache.hop.core.Const;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.hopgui.EnumDialogSupport;
-import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
-import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
-import org.hopper.edw.datavault.hopgui.help.HelpTopics;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceEndpointKind;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceJoinType;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceJson;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourcePipeline;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceQuery;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceRelationship;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceRelationshipMultiplicity;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceRelationshipValidationSupport;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
-import org.hopper.edw.datavault.metadata.sourcemodel.profile.SourceRelationshipProfileOptions;
-import org.hopper.edw.datavault.metadata.sourcemodel.profile.SourceRelationshipProfileResult;
-import org.hopper.edw.datavault.metadata.sourcemodel.profile.SourceRelationshipProfileStrategy;
-import org.hopper.edw.datavault.metadata.sourcemodel.profile.SourceRelationshipProfiler;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.FormDataBuilder;
@@ -60,6 +42,24 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.hopgui.EnumDialogSupport;
+import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceEndpointKind;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceJoinType;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceJson;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourcePipeline;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceQuery;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceRelationship;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceRelationshipMultiplicity;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceRelationshipValidationSupport;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
+import org.hopper.edw.datavault.metadata.sourcemodel.profile.SourceRelationshipProfileOptions;
+import org.hopper.edw.datavault.metadata.sourcemodel.profile.SourceRelationshipProfileResult;
+import org.hopper.edw.datavault.metadata.sourcemodel.profile.SourceRelationshipProfileStrategy;
+import org.hopper.edw.datavault.metadata.sourcemodel.profile.SourceRelationshipProfiler;
 
 /** Dialog to edit a {@link SourceRelationship} (child→parent join definition). */
 public class HopGuiSourceRelationshipDialog {
@@ -132,7 +132,7 @@ public class HopGuiSourceRelationshipDialog {
     wProfile.setText(BaseMessages.getString(PKG, "HopGuiSourceRelationshipDialog.Profile.Button"));
     wProfile.addListener(SWT.Selection, e -> profileRelationship());
     wProfile.setEnabled(metadataProvider != null);
-    DialogHelpSupport.createHelpButton(shell, HelpTopics.IMPORT_DATABASE_TABLES_OPTIONS);
+    DialogHelpSupport.createHelpButton(shell, HelpTopics.SOURCE_RELATIONSHIP);
     BaseTransformDialog.positionBottomButtons(
         shell, new Button[] {wOk, wValidate, wCancel, wProfile}, margin, null);
 

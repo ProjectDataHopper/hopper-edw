@@ -126,6 +126,7 @@ DV/BV/DM catalog publishers **preserve** existing `qualityRules` (and validation
 
 == Workflow actions
 
+[[measure-data-quality-action]]
 === Measure data quality
 
 * Scope: resource definition group, and/or `namespace/name` keys, and/or namespace prefix
@@ -168,6 +169,7 @@ Sibling tables to load-run metrics (same connection pattern: retail **OPS** / `d
 
 Catalog stubs for retail are published at runtime under `retail-example/work/edw-catalog/hop/retail-example/operations/`.
 
+[[evaluate-quality-gate-action]]
 === Evaluate quality gate
 
 * Disposition: `FAIL_ON_BLOCKING`, `FAIL_ON_WARNINGS`, `ALERT_ONLY`

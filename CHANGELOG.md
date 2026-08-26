@@ -4,6 +4,14 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Dialog Help opens plugin HTML (issue #133)
+
+- Help buttons open the plugin-shipped AsciiDoc HTML (`plugins/misc/hopper-edw/docs/`), not classpath markdown stubs or hop.apache.org 404s
+- Help opens the HTML file in the system browser (file URL) so in-page links such as `../business-vault-sql-view.html` resolve; Hop's explorer HTML tab uses `Browser.setText()` and has no document base
+- New `docs/help/` dialog pages plus type-specific topics (source table/query/JSON/pipeline, BV SQL table, dimensional table types)
+- Harvest action name field is filled and saved; Source Pipeline dialog has a Help button
+- Metadata editors and remaining plugin transforms/actions use the same Help path
+
 ### Maven coordinates and install path
 
 - Maven: `org.hopper:hopper-edw` (was `org.apache.hop:hop-datavault`; the rebrand briefly used `org.projectdatahopper.hop`)

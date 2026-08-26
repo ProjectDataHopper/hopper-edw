@@ -1,0 +1,11 @@
+= Import database table options
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../datavault-source-database.adoc[datavault-source-database].
+
+Per-table options after picking database tables: target catalog namespace, source indicator, optional schema/table overrides, and whether to include keys.
+
+These options apply to the import you are about to run; they are not a substitute for the source-table dialog on a `.hsm` canvas.

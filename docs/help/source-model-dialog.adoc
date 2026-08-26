@@ -1,0 +1,11 @@
+= Source model settings
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../source-modeler-overview.adoc[source-modeler-overview].
+
+**Edit model** sets defaults for the whole `.hsm` file: catalog connection, namespace, optional default database, and notes used when publishing tables, queries, JSON, and pipeline sources.
+
+Individual cards still override catalog source names. Use **Push to catalog** on the toolbar after the model checks clean.

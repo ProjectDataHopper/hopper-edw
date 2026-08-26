@@ -1,0 +1,18 @@
+= Junk Dimension transform
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../dimensional-modeler-overview.adoc[dimensional-modeler-overview].
+
+Pipeline transform that looks up or inserts flag combinations (Hop Combination Lookup with EDW surrogate/hash options). Dimensional Update generates this transform for junk dimension tables; you can also place it by hand.
+
+== Options
+
+* **Connection / schema / table** — Junk dimension target.
+* **Keys** — Incoming flag fields.
+* **Technical key** — Surrogate column written to the stream.
+* **Hash code** — Optional combination hash strategy.
+
+Prefer modelling the junk dimension on the `.hdm` canvas so DDL, catalog publish, and facts stay consistent.

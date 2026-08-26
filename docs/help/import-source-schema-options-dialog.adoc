@@ -1,0 +1,11 @@
+= Import source schema
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../source-modeler-overview.adoc[source-modeler-overview].
+
+Import tables, primary keys, and foreign keys from a live database into a `.hsm` source model.
+
+Choose the connection, optional schema filter, and which tables to add. Imported FKs become relationship edges. You can still add queries, JSON, and pipeline cards afterwards.

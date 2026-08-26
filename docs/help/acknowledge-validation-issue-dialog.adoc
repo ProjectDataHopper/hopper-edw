@@ -1,0 +1,11 @@
+= Acknowledge validation issue
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../resource-definition-validation.adoc[resource-definition-validation].
+
+Record why a schema-gate finding is accepted for this catalog version (false positive, deferred, or known exception).
+
+Enter a reason. The acknowledgement is stored with the resource definition group / catalog version so later harvests and gates can skip or downgrade the same issue until you clear it.

@@ -1,0 +1,24 @@
+= Import dbt project action
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../dbt-import.adoc[dbt-import].
+
+
+
+Workflow action that scans a **dbt-core** project and writes SQL business tables into `.hbv` file(s). Use this for CI re-import. Interactive import lives on the Business Vault canvas (**Import dbt models**).
+
+== Settings
+
+- **dbt project folder** — contains `dbt_project.yml`
+- **Target .hbv file** — model to update (`CURRENT_MODEL`) or create (`NEW_MODEL`)
+- **Destination** — current file, new file, or split by first-level `models/` folder
+- **Output folder** — required for split
+- **If table exists** — skip or replace
+- **Import macros** — upsert a Jinja Macro Library from `macros/` and `vars:`
+
+All importable models are selected (incremental → TABLE, ephemeral → VIEW, with warnings in the log). Snapshots and Python models are skipped.
+
+See `docs/dbt-import.adoc`.

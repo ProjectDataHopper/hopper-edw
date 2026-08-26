@@ -1,0 +1,21 @@
+= Source JSON
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../source-modeler-overview.adoc[source-modeler-overview].
+
+A **Source JSON** card extracts fields from a JSON column on a parent table, query, or another JSON source.
+
+== General
+
+* **Name** — Canvas and catalog identity.
+* **Parent** — Table, query, or JSON source that supplies the JSON field.
+* **JSON field** — Column containing JSON text.
+
+== Fields
+
+JsonPath expressions plus pass-through keys. JsonInput rules apply: top-level leaves and at most one array. Chain Source JSON cards for nested arrays.
+
+Publish as catalog type `JSON`.

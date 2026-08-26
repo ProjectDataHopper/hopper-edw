@@ -1,0 +1,11 @@
+= Refresh record definition
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../data-catalog.adoc[data-catalog].
+
+Re-read live source metadata (database, file, JSON, or pipeline contract) into an existing catalog record definition without a full harvest run.
+
+Choose the definition and whether to update field types/lengths. Schema-gate policies still apply on the next validate.

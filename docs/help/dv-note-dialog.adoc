@@ -1,0 +1,11 @@
+= Model note
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../datavault-plugin.adoc[datavault-plugin].
+
+Canvas notes document a model for other designers. They do not generate tables or pipelines.
+
+Set the note text (markdown is rendered on the canvas) and optionally the size. Notes exist on `.hsm`, `.hdv`, `.hbv`, and `.hdm` graphs.

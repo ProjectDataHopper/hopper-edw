@@ -49,6 +49,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 
 public class MergeRowsPlusDialog extends BaseTransformDialog {
   private static final Class<?> PKG = MergeRowsPlusMeta.class;
@@ -86,6 +88,7 @@ public class MergeRowsPlusDialog extends BaseTransformDialog {
     createShell(BaseMessages.getString(PKG, "MergeRowsPlusDialog.Shell.Label"));
 
     buildButtonBar().ok(e -> ok()).cancel(e -> cancel()).build();
+    DialogHelpSupport.installLocalHelpButton(shell, HelpTopics.MERGE_ROWS_PLUS);
 
     lsMod = e -> input.setChanged();
     backupChanged = input.hasChanged();

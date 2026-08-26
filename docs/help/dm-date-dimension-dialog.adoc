@@ -1,0 +1,13 @@
+= Date dimension
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../dimensional-modeler-overview.adoc[dimensional-modeler-overview].
+
+A date dimension uses the **Date generator** staging source: the load pipeline emits calendar rows instead of reading a table.
+
+Configure the date range, optional reference date, fiscal offsets, and output field list (or **Load defaults** for the standard `dim_date` layout).
+
+The same generator is available as a pipeline transform; see link:../date-dimension-generator.adoc[Date Dimension Generator].

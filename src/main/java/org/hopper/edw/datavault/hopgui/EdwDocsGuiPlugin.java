@@ -20,12 +20,14 @@ import org.apache.hop.core.Const;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.menu.GuiMenuElement;
 import org.apache.hop.core.gui.plugin.toolbar.GuiToolbarElement;
+import org.apache.hop.core.util.Utils;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.util.EnvironmentUtils;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Shell;
 
 /** Main toolbar and Help menu entry that opens the plugin-shipped HTML documentation. */
 @GuiPlugin
@@ -68,23 +70,45 @@ public class EdwDocsGuiPlugin {
 
   /** Open a plugin-shipped HTML page (for example {@code edw-journey.html}) in the browser. */
   public static void openHtml(HopGui hopGui, String pageName) {
-    if (hopGui == null) {
-      return;
-    }
+    openHtml(hopGui == null ? null : hopGui.getShell(), pageName, null);
+  }
+
+  /**
+   * Open a plugin-shipped HTML page, optionally at an in-page fragment ({@code #section-id}).
+   *
+   * @param shell parent for error dialogs; may be null
+   * @param pageName file under {@code docs/}, optionally {@code help/name.html}
+   * @param fragment optional AsciiDoc section id without {@code #}
+   */
+  public static void openHtml(Shell shell, String pageName, String fragment) {
     String page = Const.NVL(pageName, "index.html");
     try {
       Path html = EdwDocsSupport.findHtmlPage(page);
       if (html == null) {
-        MessageBox box = new MessageBox(hopGui.getShell(), SWT.OK | SWT.ICON_INFORMATION);
+        if (shell == null || shell.isDisposed()) {
+          return;
+        }
+        MessageBox box = new MessageBox(shell, SWT.OK | SWT.ICON_INFORMATION);
         box.setText(BaseMessages.getString(PKG, "EdwDocsGuiPlugin.Error.Title"));
         box.setMessage(BaseMessages.getString(PKG, "EdwDocsGuiPlugin.Error.NotFound", page));
         box.open();
         return;
       }
-      EnvironmentUtils.getInstance().openUrl(html.toUri().toString());
+      String url = html.toUri().toString();
+      if (!Utils.isEmpty(fragment)) {
+        String id = fragment.startsWith("#") ? fragment.substring(1) : fragment;
+        url = url + "#" + id;
+      }
+      // Open the real file:// URL in the system browser. Hop's HTML explorer tab uses
+      // Browser.setText(), which has no document base, so relative links such as
+      // ../business-vault-sql-view.html resolve to /business-vault-sql-view.html.
+      EnvironmentUtils.getInstance().openUrl(url);
     } catch (Exception e) {
+      if (shell == null || shell.isDisposed()) {
+        return;
+      }
       new ErrorDialog(
-          hopGui.getShell(),
+          shell,
           BaseMessages.getString(PKG, "EdwDocsGuiPlugin.Error.Title"),
           BaseMessages.getString(PKG, "EdwDocsGuiPlugin.Error.Message"),
           e);

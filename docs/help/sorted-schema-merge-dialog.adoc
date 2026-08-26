@@ -1,0 +1,11 @@
+= Sorted schema merge
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../business-vault-scd2.adoc[business-vault-scd2].
+
+**Sorted Schema Merge** concatenates several already-sorted streams that share a key layout (used when merging multi-satellite history into one SCD2 build).
+
+List the input hops in merge order and the key fields. Prefer generating this from a Business Vault SCD2 table rather than hand-wiring it.

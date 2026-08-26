@@ -1,0 +1,11 @@
+= End Vault Update
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../datavault-update-action.adoc[datavault-update-action].
+
+**End Vault Update** closes the load cycle started by **Begin Vault Update**. It writes finish timestamps and roll-up metrics used by the load overview and canvas duration bars.
+
+Keep begin/end on the same workflow path so partial failures still close the interval.

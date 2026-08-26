@@ -1,0 +1,9 @@
+= Hop proposal review
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../ai-advisory.md[ai-advisory.md].
+
+Review AI-proposed changes to a Hop pipeline or workflow (transforms, hops, names) before they are applied. See link:../ai-advisory.md[AI advisory].

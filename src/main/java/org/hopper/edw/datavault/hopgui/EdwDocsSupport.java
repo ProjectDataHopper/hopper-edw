@@ -37,6 +37,7 @@ public final class EdwDocsSupport {
 
   private static final Pattern PAGE_NAME =
       Pattern.compile("[A-Za-z0-9][A-Za-z0-9._-]*\\.(html|md)");
+  private static final String HELP_DIR = "help/";
 
   private EdwDocsSupport() {}
 
@@ -93,13 +94,23 @@ public final class EdwDocsSupport {
     if (name.startsWith("docs/")) {
       name = name.substring("docs/".length());
     }
-    if (name.contains("/") || name.contains("..")) {
+    if (name.contains("..")) {
       return null;
     }
-    if (!name.contains(".")) {
-      name = name + ".html";
+    String fileName = name;
+    if (name.startsWith(HELP_DIR)) {
+      fileName = name.substring(HELP_DIR.length());
+      if (fileName.contains("/")) {
+        return null;
+      }
+    } else if (name.contains("/")) {
+      return null;
     }
-    if (!PAGE_NAME.matcher(name).matches()) {
+    if (!fileName.contains(".")) {
+      fileName = fileName + ".html";
+      name = name.contains("/") ? HELP_DIR + fileName : fileName;
+    }
+    if (!PAGE_NAME.matcher(fileName).matches()) {
       return null;
     }
     return "docs/" + name;

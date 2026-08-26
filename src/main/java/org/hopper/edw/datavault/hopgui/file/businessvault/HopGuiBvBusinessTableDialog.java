@@ -23,25 +23,6 @@ import org.apache.hop.core.Props;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.hopgui.EnumDialogSupport;
-import org.hopper.edw.datavault.hopgui.file.dimensional.DmSourceSqlGuiSupport;
-import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
-import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
-import org.hopper.edw.datavault.hopgui.help.HelpTopics;
-import org.hopper.edw.datavault.hopgui.lineage.LineageTabSupport;
-import org.hopper.edw.datavault.lineage.BvModelLineageCollector;
-import org.hopper.edw.datavault.metadata.DataVaultModel;
-import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
-import org.hopper.edw.datavault.metadata.businessvault.BvBusinessTable;
-import org.hopper.edw.datavault.metadata.businessvault.BvSqlColumnNote;
-import org.hopper.edw.datavault.metadata.businessvault.BvSqlMaterialization;
-import org.hopper.edw.datavault.metadata.businessvault.BvSqlRef;
-import org.hopper.edw.datavault.metadata.businessvault.BvSqlRefResolver;
-import org.hopper.edw.datavault.metadata.businessvault.BvSqlReferenceStyle;
-import org.hopper.edw.datavault.metadata.businessvault.BvSqlSource;
-import org.hopper.edw.datavault.metadata.businessvault.BvSqlTemplateParser;
-import org.hopper.edw.datavault.metadata.businessvault.BvSqlViewPipelineSupport;
-import org.hopper.edw.datavault.metadata.businessvault.BvTargetDatabaseSupport;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.PropsUi;
@@ -69,6 +50,25 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.hopgui.EnumDialogSupport;
+import org.hopper.edw.datavault.hopgui.file.dimensional.DmSourceSqlGuiSupport;
+import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
+import org.hopper.edw.datavault.hopgui.lineage.LineageTabSupport;
+import org.hopper.edw.datavault.lineage.BvModelLineageCollector;
+import org.hopper.edw.datavault.metadata.DataVaultModel;
+import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
+import org.hopper.edw.datavault.metadata.businessvault.BvBusinessTable;
+import org.hopper.edw.datavault.metadata.businessvault.BvSqlColumnNote;
+import org.hopper.edw.datavault.metadata.businessvault.BvSqlMaterialization;
+import org.hopper.edw.datavault.metadata.businessvault.BvSqlRef;
+import org.hopper.edw.datavault.metadata.businessvault.BvSqlRefResolver;
+import org.hopper.edw.datavault.metadata.businessvault.BvSqlReferenceStyle;
+import org.hopper.edw.datavault.metadata.businessvault.BvSqlSource;
+import org.hopper.edw.datavault.metadata.businessvault.BvSqlTemplateParser;
+import org.hopper.edw.datavault.metadata.businessvault.BvSqlViewPipelineSupport;
+import org.hopper.edw.datavault.metadata.businessvault.BvTargetDatabaseSupport;
 
 /** Dialog to edit a SQL-sourced Business Vault business table (view or table materialization). */
 public class HopGuiBvBusinessTableDialog {
@@ -503,7 +503,7 @@ public class HopGuiBvBusinessTableDialog {
     Button wCancel = new Button(shell, SWT.PUSH);
     wCancel.setText(BaseMessages.getString(PKG, "System.Button.Cancel"));
     wCancel.addListener(SWT.Selection, e -> cancel());
-    DialogHelpSupport.createHelpButton(shell, HelpTopics.BV_TABLE);
+    DialogHelpSupport.createHelpButton(shell, HelpTopics.BV_BUSINESS_TABLE);
 
     BaseTransformDialog.positionBottomButtons(
         shell, new Button[] {wOk, wValidate, wCancel}, margin, null);

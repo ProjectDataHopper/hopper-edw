@@ -52,6 +52,7 @@ The action follows the same pattern as link:datavault-update-action.adoc[Data Va
 * `integration-tests/tests/basic/update-dm-extended-catalog.hwf` — full Kimball catalog (pipeline/DDL focus)
 * `retail-example/workflows/run-retail-initial.hwf` — production-style DV + BV + DM chain
 
+[[dimensional-publish]]
 == Dimensional Publish (`DIMENSIONAL_PUBLISH`)
 
 Converts a **Data Vault model** (`.hdv`) into a **draft** dimensional model (`.hdm`) for human review. Does **not** run ETL.

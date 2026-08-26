@@ -1,0 +1,63 @@
+= Validate resource definitions — options
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../resource-definition-validation.adoc[resource-definition-validation].
+
+
+
+Shown when you click **Validate sources** on a **Resource definition group**. Choose the baseline and check axes **before** validation runs.
+
+== Baseline (truth)
+
+[cols="1,1", options="header"]
+|===
+
+|Choice
+|When to use
+
+|**Current working catalog**
+|After automatic source refresh / drift notification. The catalog is the contract of record.
+
+|**Catalog version tag**
+|Compare against a frozen snapshot under `catalog-versions/`. Snapshots are immutable.
+
+|===
+
+Validation **never** modifies the baseline. Catalog version snapshots are never rewritten by remediation either.
+
+== What to check
+
+[cols="1,1", options="header"]
+|===
+
+|Axis
+|Meaning
+
+|**Live source systems**
+|Physical source schema vs baseline contract
+
+|**Working catalog vs version**
+|Detect catalog field edits relative to a tag
+
+|**Target models**
+|DV/BV/DM attributes narrower than the baseline contract
+
+|**Target databases**
+|Physical EDW tables that need DDL to match models
+
+|**Downstream impact / lineage**
+|Blast radius annotations
+
+|===
+
+== Reports
+
+Optionally write HTML and Markdown reports (same format as the CI schema gate) under a Hop VFS path.
+
+== Related
+
+- Results dialog after validation
+- Remediation proposals (expand field lengths in models/schemas vs refuse longer live fields using a version baseline)

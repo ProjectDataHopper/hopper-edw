@@ -1,0 +1,9 @@
+= Pipeline AI advisor
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../ai-advisory.md[ai-advisory.md].
+
+Ask the AI advisor about the open Hop pipeline: transform choice, error handling, and performance. See link:../ai-advisory.md[AI advisory].

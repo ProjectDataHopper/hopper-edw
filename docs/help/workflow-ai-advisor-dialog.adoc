@@ -1,0 +1,9 @@
+= Workflow AI advisor
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../ai-advisory.md[ai-advisory.md].
+
+Ask the AI advisor about the open Hop workflow: action choice, error hops, and orchestration. See link:../ai-advisory.md[AI advisory].

@@ -15,6 +15,7 @@
  */
 package org.hopper.edw.datavault.workflow.actions.harvestmetadata;
 
+import org.apache.hop.core.Const;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
@@ -30,6 +31,8 @@ import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 
 public class ActionHarvestSourceMetadataDialog extends ActionDialog {
 
@@ -58,6 +61,7 @@ public class ActionHarvestSourceMetadataDialog extends ActionDialog {
         BaseMessages.getString(PKG, "ActionHarvestSourceMetadata.Title", action.getName()), action);
 
     buildButtonBar().ok(e -> ok()).cancel(e -> cancel()).build();
+    DialogHelpSupport.installLocalHelpButton(shell, HelpTopics.ACTION_HARVEST_SOURCE_METADATA);
 
     wSettingsComp = new Composite(shell, SWT.NONE);
     PropsUi.setLook(wSettingsComp);
@@ -80,6 +84,7 @@ public class ActionHarvestSourceMetadataDialog extends ActionDialog {
 
     setWidgetsContent();
     boolean changedBeforeOpen = action.hasChanged();
+    focusActionName();
     BaseDialog.defaultShellHandling(shell, c -> ok(), c -> cancel());
     if (cancelled) {
       action.setChanged(changedBeforeOpen);
@@ -88,12 +93,19 @@ public class ActionHarvestSourceMetadataDialog extends ActionDialog {
     return action;
   }
 
+  @Override
+  protected void onActionNameModified() {
+    action.setChanged();
+  }
+
   private void setWidgetsContent() {
+    wName.setText(Const.NVL(action.getName(), ""));
     widgets.setWidgetsContents(
         action, wSettingsComp, ActionHarvestSourceMetadata.GUI_PLUGIN_ELEMENT_PARENT_ID);
   }
 
   private void getWidgetsContent() {
+    action.setName(wName.getText());
     widgets.getWidgetsContents(action, ActionHarvestSourceMetadata.GUI_PLUGIN_ELEMENT_PARENT_ID);
   }
 

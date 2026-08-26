@@ -41,6 +41,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 
 public class DateDimensionGeneratorDialog extends BaseTransformDialog {
 
@@ -74,6 +76,7 @@ public class DateDimensionGeneratorDialog extends BaseTransformDialog {
     createShell(BaseMessages.getString(PKG, "DateDimensionGeneratorDialog.Shell.Title"));
 
     buildButtonBar().ok(e -> ok()).cancel(e -> cancel()).build();
+    DialogHelpSupport.installLocalHelpButton(shell, HelpTopics.DATE_DIMENSION_GENERATOR);
 
     wStartDate =
         addLabeledText(

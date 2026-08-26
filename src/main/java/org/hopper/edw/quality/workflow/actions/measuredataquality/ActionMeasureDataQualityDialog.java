@@ -31,6 +31,8 @@ import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 
 public class ActionMeasureDataQualityDialog extends ActionDialog {
 
@@ -59,6 +61,7 @@ public class ActionMeasureDataQualityDialog extends ActionDialog {
         BaseMessages.getString(PKG, "ActionMeasureDataQuality.Title", action.getName()), action);
 
     buildButtonBar().ok(e -> ok()).cancel(e -> cancel()).build();
+    DialogHelpSupport.installLocalHelpButton(shell, HelpTopics.ACTION_MEASURE_DATA_QUALITY);
 
     wSettingsComp = new Composite(shell, SWT.NONE);
     PropsUi.setLook(wSettingsComp);

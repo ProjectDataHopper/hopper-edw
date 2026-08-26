@@ -1,0 +1,14 @@
+= Hub source key mapping
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../dv-hub.adoc[dv-hub].
+
+Map one hub business-key column (or composite part) to a physical field on a catalog feed.
+
+* **Source field name** — Column on the selected feed.
+* **Source system** — Catalog `DV_SOURCE` that this mapping belongs to (must appear on the hub Record sources tab).
+
+Use separate rows when the same logical key arrives from different systems under different column names.

@@ -23,10 +23,6 @@ import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.catalog.RecordSourceIndicatorOptions;
-import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
-import org.hopper.edw.datavault.hopgui.help.HelpTopics;
-import org.hopper.edw.datavault.metadata.RecordSourceIndicatorDatabaseImportSection;
 import org.apache.hop.history.AuditManager;
 import org.apache.hop.history.AuditState;
 import org.apache.hop.i18n.BaseMessages;
@@ -44,6 +40,10 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.catalog.RecordSourceIndicatorOptions;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
+import org.hopper.edw.datavault.metadata.RecordSourceIndicatorDatabaseImportSection;
 
 /** Collects connection/schema options before importing tables into a source model. */
 @Getter
@@ -119,7 +119,7 @@ public class ImportSourceSchemaOptionsDialog {
     wCancel.addListener(SWT.Selection, e -> cancel());
 
     // Reuse database import help topic until a dedicated help page exists.
-    DialogHelpSupport.createHelpButton(shell, HelpTopics.IMPORT_DATABASE_TABLES_OPTIONS);
+    DialogHelpSupport.createHelpButton(shell, HelpTopics.IMPORT_SOURCE_SCHEMA_OPTIONS);
 
     BaseTransformDialog.positionBottomButtons(shell, new Button[] {wOk, wCancel}, margin, null);
 

@@ -1,0 +1,9 @@
+= Iceberg import options
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../datavault-source.adoc[datavault-source].
+
+Options for an Iceberg source: snapshot/scan behaviour, field selection, and catalog source name. Used together with the Iceberg table import dialog.

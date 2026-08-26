@@ -1,0 +1,24 @@
+= Dimension table
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../dimensional-modeler-overview.adoc[dimensional-modeler-overview].
+
+Edit a Kimball **dimension** on a `.hdm` canvas.
+
+== General
+
+Name, physical table, description, and staging **source** (SQL, pipeline, record definition, or date generator).
+
+== Keys and attributes
+
+* **Surrogate key** — Strategy (none, auto-increment, source field such as a DV hash) and column name.
+* **Natural keys** — Business identity used for lookup.
+* **Attributes** — Type 1 / Type 2 / hybrid columns and SCD policy.
+* **Outriggers** — Optional snowflake references.
+
+== Source
+
+Configure how staging rows are read for generated **Dimensional Update** pipelines. Validation requires a complete source for the selected type.

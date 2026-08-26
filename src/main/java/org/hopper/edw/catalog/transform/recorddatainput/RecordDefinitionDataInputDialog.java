@@ -17,13 +17,11 @@ package org.hopper.edw.catalog.transform.recorddatainput;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.hopper.edw.catalog.metadata.DataCatalogMeta;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.hopgui.file.dimensional.DmSourceRecordDefinitionGuiSupport;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataSerializer;
 import org.apache.hop.pipeline.PipelineMeta;
@@ -43,6 +41,10 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.catalog.metadata.DataCatalogMeta;
+import org.hopper.edw.datavault.hopgui.file.dimensional.DmSourceRecordDefinitionGuiSupport;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 
 public class RecordDefinitionDataInputDialog extends BaseTransformDialog {
 
@@ -77,6 +79,7 @@ public class RecordDefinitionDataInputDialog extends BaseTransformDialog {
         createShell(BaseMessages.getString(PKG, "RecordDefinitionDataInputDialog.Shell.Title"));
 
     buildButtonBar().ok(e -> ok()).cancel(e -> cancel()).build();
+    DialogHelpSupport.installLocalHelpButton(shell, HelpTopics.RECORD_DEFINITION_DATA_INPUT);
 
     ModifyListener lsMod = e -> input.setChanged();
 

@@ -41,7 +41,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 
 /** Editor for {@link LineageBackendMeta} with type-specific settings. */
 @GuiPlugin(description = "Editor for Lineage Backend metadata")
@@ -65,6 +68,11 @@ public class LineageBackendMetaEditor extends MetadataEditor<LineageBackendMeta>
     settingsByType = populateSettingsMap();
     ILineageBackendSettings current = getMetadata().getSettingsOrDefault();
     settingsByType.put(current.getPluginId(), current);
+  }
+
+  @Override
+  protected Button createHelpButton(Shell shell) {
+    return DialogHelpSupport.createHelpButton(shell, HelpTopics.LINEAGE_BACKEND);
   }
 
   @Override

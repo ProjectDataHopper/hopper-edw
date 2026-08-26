@@ -36,6 +36,7 @@ Architecture pictures are **committed SVGs** (`docs/images/diagrams/`) generated
 | [getting-started-integration-tests.adoc](getting-started-integration-tests.adoc) | Reference walkthrough: Customer 360 and integration test fixtures |
 | [hop-web-modelers.md](hop-web-modelers.md) | **Hop Web** modelers (`.hsm`/`.hdv`/`.hbv`/`.hdm`/`.hem`/`.hlv`): SVG canvas, interactions, Hop SPI |
 | [search.adoc](search.adoc) | **Search Everywhere**: models (`.hsm`/`.hdv`/`.hbv`/`.hdm`/`.hlv`) and plugin metadata |
+| [help/index.adoc](help/index.adoc) | **Dialog help**: HTML opened from Hop GUI Help buttons |
 | [ai-file-schemas/README.md](ai-file-schemas/README.md) | **AI context pack**: XSD/JSON Schema + purpose markdown for models and metadata (Gemini/external AIs) |
 
 ## Managers and architects

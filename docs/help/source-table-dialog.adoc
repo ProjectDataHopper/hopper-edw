@@ -1,0 +1,28 @@
+= Source table
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../source-modeler-overview.adoc[source-modeler-overview].
+
+A **source table** is a physical entity on a `.hsm` canvas (typically a database table). Use this dialog to name the card, bind it to a catalog source, and declare columns including primary-key order.
+
+== General
+
+* **Name** — Canvas and catalog identity for this table.
+* **Description** — Optional business note.
+* **Connection / schema / table** — Physical location used for preview, harvest, and generated SQL.
+* **Catalog source name** — Name published as a `DV_SOURCE` record definition.
+
+== Columns
+
+Declare every column the vault will see: name, Hop type, length, precision, and primary-key position. **Get fields** reads the live database (or file) layout.
+
+== Data type mapping
+
+Optional per-table type mapping profile. See link:../data-type-mappings.adoc[Data type mappings].
+
+== Preview and validate
+
+**Preview** runs a sample read. **Validate** checks required identity, PK, and catalog name before publish.

@@ -1,0 +1,17 @@
+= Junk dimension
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../dimensional-modeler-overview.adoc[dimensional-modeler-overview].
+
+A **junk dimension** stores low-cardinality flag combinations. Generated loads use the **Junk Dimension** transform (Combination Lookup).
+
+== Options
+
+* **Source** — SQL, pipeline, catalog record, or **fact table** (distinct flags from a source fact).
+* **Surrogate key / hash code** — How the combination identity is stored.
+* **Attributes** — Flag columns that form the combination.
+
+See also the pipeline transform help: link:junk-dimension-transform-dialog.adoc[Junk Dimension transform].

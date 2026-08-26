@@ -23,7 +23,6 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.targettypemapping.TargetTypeMappingMeta;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataSerializer;
 import org.apache.hop.pipeline.PipelineMeta;
@@ -44,6 +43,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
+import org.hopper.edw.datavault.metadata.targettypemapping.TargetTypeMappingMeta;
 
 public class RecordDefinitionDdlDialog extends BaseTransformDialog {
 
@@ -84,6 +86,7 @@ public class RecordDefinitionDdlDialog extends BaseTransformDialog {
   public String open() {
     createShell(BaseMessages.getString(PKG, "RecordDefinitionDdlDialog.Shell.Title"));
     buildButtonBar().ok(e -> ok()).cancel(e -> cancel()).build();
+    DialogHelpSupport.installLocalHelpButton(shell, HelpTopics.RECORD_DEFINITION_DDL);
 
     int middle = props.getMiddlePct();
     int margin = PropsUi.getMargin();

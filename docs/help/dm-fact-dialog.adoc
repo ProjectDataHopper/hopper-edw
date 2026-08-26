@@ -1,0 +1,22 @@
+= Fact table
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../dimensional-modeler-overview.adoc[dimensional-modeler-overview].
+
+Edit a **fact** (transaction, factless, snapshot, or aggregate) on a `.hdm` canvas.
+
+== General and source
+
+Name, physical table, and staging source (SQL, pipeline, or catalog record).
+
+== Grain
+
+* **Dimension roles** — Conformed dimensions (including date aliases) with join source fields and optional lookup date.
+* **Range / junk roles** — Band and flag dimensions.
+* **Measures** — Additive / semi-additive facts.
+* **Degenerate dimensions** — Degenerate keys stored on the fact.
+
+**Validate** checks grain completeness before Dimensional Update.

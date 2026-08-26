@@ -36,7 +36,7 @@ In short:
 3. Prefer **hybrid Type 1 + Type 2 in the dimensional / information mart layer** for reporting rules.
 4. Treat hybrid Type 1 *inside* a historized BV SCD2 table as a last resort outside this builder, not core plugin behaviour.
 
-Dialog help (Hop GUI **?** on the SCD2 table dialog): `src/main/resources/org/hopper/edw/datavault/hopgui/help/bv-scd2-table-dialog.md`.
+Dialog help (Hop GUI **Help** on the SCD2 table dialog): link:help/bv-scd2-table-dialog.adoc[SCD2 table dialog].
 
 == What gets generated
 

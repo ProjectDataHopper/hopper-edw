@@ -1,0 +1,18 @@
+= Range dimension
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../dimensional-modeler-overview.adoc[dimensional-modeler-overview].
+
+A **range dimension** (band) maps a numeric or date source value to labelled buckets (age bands, income ranges).
+
+== Fields
+
+* **Name / physical table**
+* **Source field** — Value to band on the fact or staging row.
+* **Range bands** — From/to bounds and labels.
+* **Fall-back label** — Bucket when the value is null or outside every band.
+
+Facts attach range roles on the fact dialog.

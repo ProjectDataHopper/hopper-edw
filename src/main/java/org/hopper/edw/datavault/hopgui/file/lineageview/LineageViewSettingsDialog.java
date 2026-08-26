@@ -19,13 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
-import org.hopper.edw.datavault.lineage.LineageLayer;
-import org.hopper.edw.datavault.lineageview.HopLineageViewDocument;
-import org.hopper.edw.datavault.lineageview.LineageBackendSelectionSupport;
-import org.hopper.edw.datavault.lineageview.backend.LineageDirection;
-import org.hopper.edw.datavault.lineageview.backend.LineageGraphLayer;
-import org.hopper.edw.datavault.lineageview.backend.LineageSeedKind;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
@@ -46,6 +39,14 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
+import org.hopper.edw.datavault.lineage.LineageLayer;
+import org.hopper.edw.datavault.lineageview.HopLineageViewDocument;
+import org.hopper.edw.datavault.lineageview.LineageBackendSelectionSupport;
+import org.hopper.edw.datavault.lineageview.backend.LineageDirection;
+import org.hopper.edw.datavault.lineageview.backend.LineageGraphLayer;
+import org.hopper.edw.datavault.lineageview.backend.LineageSeedKind;
 
 /** New-wizard and settings dialog for a lineage view definition. */
 public class LineageViewSettingsDialog {
@@ -111,7 +112,7 @@ public class LineageViewSettingsDialog {
     BaseTransformDialog.positionBottomButtons(shell, new Button[] {wOk, wCancel}, margin, null);
     wOk.addListener(SWT.Selection, e -> ok());
     wCancel.addListener(SWT.Selection, e -> cancel());
-    DialogHelpSupport.installLocalHelpButton(shell, "lineage-view-settings-dialog");
+    DialogHelpSupport.installLocalHelpButton(shell, HelpTopics.LINEAGE_VIEW_SETTINGS);
 
     ScrolledComposite scrolled = new ScrolledComposite(shell, SWT.V_SCROLL | SWT.H_SCROLL);
     PropsUi.setLook(scrolled);

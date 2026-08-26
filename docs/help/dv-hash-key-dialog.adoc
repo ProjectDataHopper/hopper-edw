@@ -1,0 +1,11 @@
+= Data Vault hash key
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../datavault-configuration.adoc[datavault-configuration].
+
+The **DV Hash Key** transform computes a Data Vault hash from ordered business-key parts using the model hash algorithm (MD5/SHA). Generated hub, link, and satellite pipelines include it; use the dialog when you build a custom pipeline.
+
+Select the incoming fields in hub/link key order and the output hash field name. Integer/number values use the unformatted compatible string so file and database sources hash the same.

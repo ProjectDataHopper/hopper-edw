@@ -1,0 +1,11 @@
+= Graph layout
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../datavault-plugin.adoc[datavault-plugin].
+
+Run an **ELK** layout pass on the current model canvas (source, Data Vault, Business Vault, dimensional, or execution map).
+
+Choose direction and spacing. Layout only moves boxes; it does not change metadata. Undo is available afterwards.

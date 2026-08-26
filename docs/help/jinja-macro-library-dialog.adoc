@@ -1,0 +1,39 @@
+= Jinja macro library
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../dbt-import.adoc[dbt-import].
+
+
+
+A **Jinja macro library** is project metadata: named macros and default `var()` values used when Business Vault SQL is rendered.
+
+== When to use
+
+SQL business tables that need more than `{{ ref() }}` / `{{ source() }}` — loops, `{% set %}`, `{% if %}`, and reusable `{% macro %}` helpers.
+
+== Fields
+
+- **Name** — metadata object name (for example `retail-macros`)
+- **Package name** — optional dbt package / project hint
+- **Enabled** — disabled libraries are ignored at render time
+- **Variables** — defaults for `{{ var('name') }}` when no Hop variable of that name is set (Hop variables win)
+- **Macros** — name, description, optional origin path, and Jinja source
+
+Prefer a full block:
+
+----
+{% macro cents_to_dollars(col) -%}
+  (({{ col }}) / 100.0)
+{%- endmacro %}
+----
+
+**Test render** expands a snippet against the macros and vars in this editor (with dummy `ref` / `source` names).
+
+== Scope
+
+Business Vault configuration can list library names (comma-separated). Empty means every enabled library.
+
+See `docs/business-vault-sql-view.adoc`.

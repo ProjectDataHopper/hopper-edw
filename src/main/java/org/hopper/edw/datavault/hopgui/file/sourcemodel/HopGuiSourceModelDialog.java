@@ -20,11 +20,6 @@ import org.apache.hop.core.Props;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
-import org.hopper.edw.datavault.hopgui.help.HelpTopics;
-import org.hopper.edw.datavault.metadata.ModelConfigurationExtractSupport;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceModelConfiguration;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.FormDataBuilder;
 import org.apache.hop.ui.core.PropsUi;
@@ -48,6 +43,11 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
+import org.hopper.edw.datavault.metadata.ModelConfigurationExtractSupport;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceModelConfiguration;
 import org.jspecify.annotations.NonNull;
 
 /** Dialog to edit {@link SourceModel} name, description, and configuration. */
@@ -173,7 +173,7 @@ public class HopGuiSourceModelDialog {
     Button wCancel = new Button(shell, SWT.PUSH);
     wCancel.setText(BaseMessages.getString(PKG, "System.Button.Cancel"));
     wCancel.addListener(SWT.Selection, e -> cancel());
-    DialogHelpSupport.createHelpButton(shell, HelpTopics.IMPORT_DATABASE_TABLES_OPTIONS);
+    DialogHelpSupport.createHelpButton(shell, HelpTopics.SOURCE_MODEL);
 
     BaseTransformDialog.positionBottomButtons(shell, new Button[] {wOk, wCancel}, margin, null);
 

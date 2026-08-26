@@ -28,9 +28,6 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.hopgui.EnumDialogSupport;
-import org.hopper.edw.datavault.metadata.dimensional.DmJunkHashCodeStrategy;
-import org.hopper.edw.datavault.metadata.dimensional.DmJunkSurrogateKeyStrategy;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
@@ -74,6 +71,11 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.hopgui.EnumDialogSupport;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
+import org.hopper.edw.datavault.metadata.dimensional.DmJunkHashCodeStrategy;
+import org.hopper.edw.datavault.metadata.dimensional.DmJunkSurrogateKeyStrategy;
 
 public class JunkDimensionDialog extends BaseTransformDialog {
   private static final Class<?> PKG = JunkDimensionMeta.class;
@@ -150,6 +152,7 @@ public class JunkDimensionDialog extends BaseTransformDialog {
     databaseMeta = resolveDatabase(input.getConnectionName());
 
     buildButtonBar().ok(e -> ok()).get(e -> get()).sql(e -> create()).cancel(e -> cancel()).build();
+    DialogHelpSupport.installLocalHelpButton(shell, HelpTopics.JUNK_DIMENSION);
 
     wTabFolder = new CTabFolder(shell, SWT.BORDER);
     PropsUi.setLook(wTabFolder, Props.WIDGET_STYLE_TAB);

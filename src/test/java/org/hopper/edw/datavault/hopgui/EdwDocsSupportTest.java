@@ -36,8 +36,7 @@ class EdwDocsSupportTest {
     assertFalse(candidates.isEmpty());
     assertTrue(
         candidates.stream()
-            .anyMatch(
-                path -> path.endsWith(Path.of("misc", "hopper-edw", "docs", "index.html"))));
+            .anyMatch(path -> path.endsWith(Path.of("misc", "hopper-edw", "docs", "index.html"))));
   }
 
   @Test
@@ -95,5 +94,40 @@ class EdwDocsSupportTest {
     assertEquals(null, EdwDocsSupport.docsRelative("../secret.html"));
     assertEquals(null, EdwDocsSupport.docsRelative("docs/../secret.html"));
     assertEquals(null, EdwDocsSupport.docsRelative("presentations/overview.html"));
+    assertEquals(
+        "docs/help/dv-hub-dialog.html", EdwDocsSupport.docsRelative("help/dv-hub-dialog.html"));
+    assertEquals(
+        "docs/help/dv-hub-dialog.html",
+        EdwDocsSupport.docsRelative("docs/help/dv-hub-dialog.html"));
+    assertEquals("docs/help/dv-hub-dialog.html", EdwDocsSupport.docsRelative("help/dv-hub-dialog"));
+    assertEquals(null, EdwDocsSupport.docsRelative("help/../secret.html"));
+    assertEquals(null, EdwDocsSupport.docsRelative("help/a/b.html"));
+  }
+
+  @Test
+  void findHtmlPageResolvesHelpSubdirectory() throws Exception {
+    Path page =
+        tempDir
+            .resolve("misc")
+            .resolve("hopper-edw")
+            .resolve("docs")
+            .resolve("help")
+            .resolve("dv-hub-dialog.html");
+    Files.createDirectories(page.getParent());
+    Files.writeString(page, "<html><title>Hub</title></html>");
+
+    String previous = System.getProperty(Const.HOP_PLUGIN_BASE_FOLDERS);
+    System.setProperty(Const.HOP_PLUGIN_BASE_FOLDERS, tempDir.toString());
+    try {
+      Path found =
+          EdwDocsSupport.findHtmlPage(EdwDocsSupport.class, null, "help/dv-hub-dialog.html");
+      assertEquals(page.toAbsolutePath().normalize(), found);
+    } finally {
+      if (previous == null) {
+        System.clearProperty(Const.HOP_PLUGIN_BASE_FOLDERS);
+      } else {
+        System.setProperty(Const.HOP_PLUGIN_BASE_FOLDERS, previous);
+      }
+    }
   }
 }

@@ -18,9 +18,6 @@ package org.hopper.edw.datavault.workflow.actions.dimensionalupdate;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.Props;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.hopgui.file.dimensional.HopGuiDimensionalModelDialog;
-import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
-import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.FormDataBuilder;
 import org.apache.hop.ui.core.PropsUi;
@@ -40,6 +37,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.hopgui.file.dimensional.HopGuiDimensionalModelDialog;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 
 public class ActionDimensionalUpdateDialog extends ActionDialog {
   private static final Class<?> PKG = ActionDimensionalUpdate.class;
@@ -85,7 +85,7 @@ public class ActionDimensionalUpdateDialog extends ActionDialog {
     wCancel.setText(BaseMessages.getString(PKG, "System.Button.Cancel"));
     wCancel.addListener(SWT.Selection, e -> cancel());
 
-    DialogHelpSupport.createHelpButton(shell, HelpTopics.ACTION_DIMENSIONAL_UPDATE);
+    DialogHelpSupport.installLocalHelpButton(shell, HelpTopics.ACTION_DIMENSIONAL_UPDATE);
 
     BaseTransformDialog.positionBottomButtons(shell, new Button[] {wOK, wCancel}, margin, null);
 

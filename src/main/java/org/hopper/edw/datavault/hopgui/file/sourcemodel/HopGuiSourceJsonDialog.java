@@ -26,27 +26,6 @@ import org.apache.hop.core.Props;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.hopgui.EnumDialogSupport;
-import org.hopper.edw.datavault.hopgui.dialog.ShowRowsDialog;
-import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
-import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
-import org.hopper.edw.datavault.hopgui.help.HelpTopics;
-import org.hopper.edw.datavault.metadata.datatypemapping.SourceDataTypeMappingSupport;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceColumn;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceEndpointKind;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceJson;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceJsonField;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceJsonFieldSupport;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceJsonParentKind;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceJsonValidationSupport;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceQuery;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceQueryColumn;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceRelationshipLifecycleSupport;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
-import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceJsonParentSampleSupport;
-import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceJsonPreviewSupport;
-import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceJsonSampleSupport;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.Pipeline;
@@ -74,6 +53,27 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.hopgui.EnumDialogSupport;
+import org.hopper.edw.datavault.hopgui.dialog.ShowRowsDialog;
+import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
+import org.hopper.edw.datavault.metadata.datatypemapping.SourceDataTypeMappingSupport;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceColumn;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceEndpointKind;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceJson;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceJsonField;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceJsonFieldSupport;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceJsonParentKind;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceJsonValidationSupport;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceQuery;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceQueryColumn;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceRelationshipLifecycleSupport;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
+import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceJsonParentSampleSupport;
+import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceJsonPreviewSupport;
+import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceJsonSampleSupport;
 
 /**
  * Dialog to define a {@link SourceJson} extraction (parent source, JSON field, projected fields).
@@ -152,7 +152,7 @@ public class HopGuiSourceJsonDialog {
     Button wPreview = new Button(shell, SWT.PUSH);
     wPreview.setText(BaseMessages.getString(PKG, "HopGuiSourceJsonDialog.Preview.Button"));
     wPreview.addListener(SWT.Selection, e -> previewData());
-    DialogHelpSupport.createHelpButton(shell, HelpTopics.IMPORT_DATABASE_TABLES_OPTIONS);
+    DialogHelpSupport.createHelpButton(shell, HelpTopics.SOURCE_JSON);
     BaseTransformDialog.positionBottomButtons(
         shell, new Button[] {wOk, wValidate, wCancel, wPreview}, margin, null);
 

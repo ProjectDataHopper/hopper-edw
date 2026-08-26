@@ -34,6 +34,9 @@ Sources are the AsciiDoc files in the repository `docs/` folder. Architecture pi
 
 |link:search.adoc[search]
 |Search Everywhere for models and plugin metadata
+
+|link:help/index.adoc[Dialog help]
+|Per-dialog HTML opened from Hop GUI **Help** buttons
 |===
 
 == Managers and architects

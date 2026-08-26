@@ -1,0 +1,18 @@
+= Source relationship
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../source-modeler-overview.adoc[source-modeler-overview].
+
+A relationship is a join edge on the source modeler. Endpoints may be tables, source queries, or Source JSON cards.
+
+== Fields
+
+* **Child / parent** — Endpoint names.
+* **Join columns** — Child column(s) to parent column(s).
+* **Join type** — Inner or left (used when composing source-query SQL).
+* **Multiplicity** — Crow's-foot cardinality for the canvas.
+
+Imported JDBC foreign keys are table–table. Draw Shift+drag (or middle-button drag) to connect other node kinds.

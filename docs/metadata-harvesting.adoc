@@ -43,6 +43,7 @@ Harvest source metadata          ← observation (this page)
 
 Harvest **observes**. The schema gate **decides** whether drift should fail the workflow. Quality measures **content**. Update **loads**.
 
+[[harvest-action-dialog]]
 == Workflow action: Harvest source metadata
 
 Category **General**. Plugin id `HARVEST_SOURCE_METADATA`.

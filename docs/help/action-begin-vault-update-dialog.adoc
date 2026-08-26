@@ -1,0 +1,11 @@
+= Begin Vault Update
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../datavault-update-action.adoc[datavault-update-action].
+
+**Begin Vault Update** records the start of a load cycle (optional load-cycle id, OPS connection, timestamps). Pair it with **End Vault Update** around Data Vault / resource-group update actions so duration metrics and load-overview reports have a matching interval.
+
+Name the action; remaining fields come from the resource definition group or Data Vault configuration when left empty.

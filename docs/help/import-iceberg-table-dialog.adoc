@@ -1,0 +1,11 @@
+= Import Iceberg table
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../datavault-source.adoc[datavault-source].
+
+Register an Apache Iceberg table as a catalog `DV_SOURCE`. Provide catalog/warehouse settings and the table identifier, then preview fields.
+
+Generated loads use the Iceberg input transform.

@@ -1,0 +1,11 @@
+= Import dimensional tables
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../dimensional-modeler-overview.adoc[dimensional-modeler-overview].
+
+Import existing warehouse tables into a `.hdm` model (dimensions/facts already in the target database).
+
+Choose the connection, tables, and how they map to Kimball types. Review each imported table dialog afterwards (keys, roles, measures).

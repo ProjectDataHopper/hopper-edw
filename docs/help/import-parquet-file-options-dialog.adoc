@@ -1,0 +1,9 @@
+= Import Parquet file
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../datavault-source.adoc[datavault-source].
+
+Create a file-backed `DV_SOURCE` from a Parquet file (or folder of files). Preview the schema, then publish. Generated loads use Parquet input.

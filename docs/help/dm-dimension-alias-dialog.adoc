@@ -1,0 +1,11 @@
+= Dimension alias
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../dimensional-modeler-overview.adoc[dimensional-modeler-overview].
+
+A **dimension alias** is a role-playing reference to a conformed dimension already on this model or in a referenced `.hdm` file (typical for multiple date roles).
+
+Set the logical name, referenced model/file, and referenced dimension. Facts join to the alias; generated pipelines still load the physical dimension once.

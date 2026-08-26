@@ -22,10 +22,6 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.hopgui.EnumDialogSupport;
-import org.hopper.edw.datavault.metadata.HashAlgorithm;
-import org.hopper.edw.datavault.metadata.HashContentCasing;
-import org.hopper.edw.datavault.metadata.HashKeyDataType;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
@@ -47,6 +43,12 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.hopgui.EnumDialogSupport;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
+import org.hopper.edw.datavault.metadata.HashAlgorithm;
+import org.hopper.edw.datavault.metadata.HashContentCasing;
+import org.hopper.edw.datavault.metadata.HashKeyDataType;
 
 public class DvHashKeyDialog extends BaseTransformDialog {
   private static final Class<?> PKG = DvHashKeyMeta.class;
@@ -79,6 +81,7 @@ public class DvHashKeyDialog extends BaseTransformDialog {
     createShell(BaseMessages.getString(PKG, "DvHashKeyDialog.Shell.Title"));
 
     buildButtonBar().ok(e -> ok()).get(e -> get()).cancel(e -> cancel()).build();
+    DialogHelpSupport.installLocalHelpButton(shell, HelpTopics.DV_HASH_KEY);
 
     Label wlHashAlgorithm = new Label(shell, SWT.RIGHT);
     wlHashAlgorithm.setText(BaseMessages.getString(PKG, "DvHashKeyDialog.HashAlgorithm.Label"));

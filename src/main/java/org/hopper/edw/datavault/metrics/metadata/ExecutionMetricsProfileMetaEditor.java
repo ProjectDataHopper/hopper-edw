@@ -19,7 +19,6 @@ import org.apache.hop.core.Const;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
-import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.PropsUi;
@@ -39,7 +38,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 
 /** Editor for {@link ExecutionMetricsProfileMeta}. */
 @GuiPlugin(description = "Editor for Execution Metrics Profile metadata")
@@ -67,6 +70,11 @@ public class ExecutionMetricsProfileMetaEditor extends MetadataEditor<ExecutionM
       MetadataManager<ExecutionMetricsProfileMeta> manager,
       ExecutionMetricsProfileMeta metadata) {
     super(hopGui, manager, metadata);
+  }
+
+  @Override
+  protected Button createHelpButton(Shell shell) {
+    return DialogHelpSupport.createHelpButton(shell, HelpTopics.EXECUTION_METRICS_PROFILE);
   }
 
   @Override

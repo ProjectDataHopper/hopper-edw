@@ -15,10 +15,7 @@
  */
 package org.hopper.edw.datavault.hopgui.help;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.util.Utils;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
@@ -30,17 +27,17 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.datavault.hopgui.EdwDocsGuiPlugin;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics.HelpPage;
 
-/** Loads classpath markdown help topics and wires Help buttons on plugin dialogs. */
+/** Wires Help buttons on plugin dialogs to plugin-shipped HTML documentation. */
 public final class DialogHelpSupport {
 
   private static final Class<?> PKG = DialogHelpSupport.class;
 
-  public static final String HELP_RESOURCE_ROOT = "/org/hopper/edw/datavault/hopgui/help/";
-
   private DialogHelpSupport() {}
 
-  /** Replaces any existing Hop URL Help button on the shell, then adds local markdown Help. */
+  /** Replaces any existing Hop URL Help button on the shell, then adds plugin HTML Help. */
   public static Button installLocalHelpButton(Shell shell, String topicId) {
     removeExistingHelpButtons(shell);
     return createHelpButton(shell, topicId);
@@ -65,31 +62,11 @@ public final class DialogHelpSupport {
       return;
     }
     try {
-      String markdown = loadMarkdown(topicId);
-      String title = BaseMessages.getString(PKG, HelpTopics.titleKey(topicId), topicId);
-      MarkdownHelpDialog.open(parentShell, title, markdown, topicId);
+      HelpPage page = HelpTopics.requirePage(topicId);
+      EdwDocsGuiPlugin.openHtml(parentShell, page.htmlPage(), page.anchor());
     } catch (HopException ex) {
-      new ErrorDialog(parentShell, getErrorTitle(), ex.getMessage(), ex);
-    }
-  }
-
-  public static String loadMarkdown(String topicId) throws HopException {
-    if (Utils.isEmpty(topicId)) {
-      throw new HopException(BaseMessages.getString(PKG, "DialogHelp.MissingTopic", "(empty)"));
-    }
-    String fileName = topicId.endsWith(".md") ? topicId : topicId + ".md";
-    String path = HELP_RESOURCE_ROOT + fileName;
-    try (InputStream in = DialogHelpSupport.class.getResourceAsStream(path)) {
-      if (in == null) {
-        throw new HopException(BaseMessages.getString(PKG, "DialogHelp.MissingTopic", topicId));
-      }
-      return MarkdownHelpContentSupport.stripLicenseHeader(
-          new String(in.readAllBytes(), StandardCharsets.UTF_8));
-    } catch (HopException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new HopException(
-          BaseMessages.getString(PKG, "DialogHelp.LoadFailed", topicId, e.getMessage()), e);
+      new ErrorDialog(
+          parentShell, BaseMessages.getString(PKG, "DialogHelp.Error.Title"), ex.getMessage(), ex);
     }
   }
 
@@ -100,9 +77,5 @@ public final class DialogHelpSupport {
         child.dispose();
       }
     }
-  }
-
-  private static String getErrorTitle() {
-    return BaseMessages.getString(PKG, "DialogHelp.Error.Title");
   }
 }

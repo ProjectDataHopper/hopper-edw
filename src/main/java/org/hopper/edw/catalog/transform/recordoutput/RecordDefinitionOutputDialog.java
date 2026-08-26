@@ -17,7 +17,6 @@ package org.hopper.edw.catalog.transform.recordoutput;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.hopper.edw.catalog.model.RecordDefinitionType;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.Props;
 import org.apache.hop.core.database.DatabaseMeta;
@@ -25,9 +24,6 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.hopgui.EnumDialogSupport;
-import org.hopper.edw.datavault.metadata.DvSourceDeliveryType;
-import org.hopper.edw.datavault.metadata.DvSourceType;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IEnumHasCodeAndDescription;
 import org.apache.hop.metadata.api.IHopMetadataSerializer;
@@ -51,6 +47,12 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.catalog.model.RecordDefinitionType;
+import org.hopper.edw.datavault.hopgui.EnumDialogSupport;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
+import org.hopper.edw.datavault.metadata.DvSourceDeliveryType;
+import org.hopper.edw.datavault.metadata.DvSourceType;
 
 public class RecordDefinitionOutputDialog extends BaseTransformDialog {
 
@@ -139,6 +141,7 @@ public class RecordDefinitionOutputDialog extends BaseTransformDialog {
   public String open() {
     createShell(BaseMessages.getString(PKG, "RecordDefinitionOutputDialog.Shell.Title"));
     buildButtonBar().ok(e -> ok()).cancel(e -> cancel()).build();
+    DialogHelpSupport.installLocalHelpButton(shell, HelpTopics.RECORD_DEFINITION_OUTPUT);
 
     CTabFolder wTabFolder = new CTabFolder(shell, SWT.BORDER);
     PropsUi.setLook(wTabFolder, Props.WIDGET_STYLE_TAB);

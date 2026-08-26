@@ -1,0 +1,11 @@
+= Merge rows plus
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../datavault-plugin.adoc[datavault-plugin].
+
+**Merge Rows (Plus)** compares two sorted streams (reference vs compare) and flags identical, changed, new, and deleted rows. Satellite loads use it for change detection.
+
+Specify key fields and value fields, plus the flag field name. Both inputs must be sorted on the keys.
