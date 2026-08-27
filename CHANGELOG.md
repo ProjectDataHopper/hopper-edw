@@ -4,6 +4,12 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### BV SCD2 does not read omitted satellite record-source columns (issue #138)
+
+- Generated SCD2 satellite `TableInput` SQL omits the vault record-source / source-indicator column when **Store record source indicator** is off on that satellite
+- Multi-satellite SCD2 pipelines never select that physical column (BV record source comes from `_bv_source` / satellite config)
+- When the column is omitted, a Constant still fills the BV SCD2 record-source field from the satellite config or satellite name
+
 ### Dialog Help opens plugin HTML (issue #133)
 
 - Help buttons open the plugin-shipped AsciiDoc HTML (`plugins/misc/hopper-edw/docs/`), not classpath markdown stubs or hop.apache.org 404s

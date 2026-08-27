@@ -52,6 +52,7 @@ import org.hopper.edw.datavault.metadata.DvHub;
 import org.hopper.edw.datavault.metadata.DvLink;
 import org.hopper.edw.datavault.metadata.DvLoadCycleSupport;
 import org.hopper.edw.datavault.metadata.DvSatellite;
+import org.hopper.edw.datavault.metadata.DvSourceFieldMappingSupport;
 import org.hopper.edw.datavault.metadata.DvSpecialRecordSupport;
 import org.hopper.edw.datavault.metadata.DvSqlSupport;
 import org.hopper.edw.datavault.metadata.DvTableType;
@@ -750,6 +751,22 @@ public final class BvScd2PipelineSupport {
     return satellites;
   }
 
+  /**
+   * True when this SCD2 satellite leg should {@code SELECT} the physical vault record-source
+   * column. Multi-satellite pipelines never do: BV RS is {@link #SOURCE_INDICATOR_FIELD} renamed
+   * after Repeat. A missing satellite defaults to omit so JDBC cannot request a column the table
+   * may not have.
+   */
+  static boolean shouldSelectPhysicalRecordSource(Scd2BuildContext ctx, SatelliteLeg leg) {
+    return ctx != null && !ctx.isMultiSatellite() && storesPhysicalRecordSource(leg);
+  }
+
+  static boolean storesPhysicalRecordSource(SatelliteLeg leg) {
+    return leg != null
+        && leg.satellite != null
+        && DvSourceFieldMappingSupport.shouldStoreRecordSource(leg.satellite);
+  }
+
   public static String resolveRecordSourceField(
       DataVaultConfiguration dvConfig, IVariables variables) {
     String rsFieldName = "RECORD_SOURCE";
@@ -1015,7 +1032,9 @@ public final class BvScd2PipelineSupport {
         selectFields.add(ctx.sourceDatabaseMeta.quoteField(attr));
       }
     }
-    if (leg.satellite == null || leg.satellite.isStoreRecordSource()) {
+    // Multi-sat BV RS comes from _bv_source (post-repeat rename). Never read the physical
+    // satellite column — VaultSpeed-style sats omit it and JDBC would fail.
+    if (shouldSelectPhysicalRecordSource(ctx, leg)) {
       selectFields.add(ctx.sourceDatabaseMeta.quoteField(ctx.recordSourceField));
     }
     selectFields.add(
@@ -1465,13 +1484,6 @@ public final class BvScd2PipelineSupport {
     ConstantField indicatorField =
         new ConstantField(SOURCE_INDICATOR_FIELD, "String", leg.sourceIndicatorValue);
     constantMeta.getFields().add(indicatorField);
-    // When the DV satellite does not store a record-source column, materialize the BV RS value
-    // from the configured leg indicator (or satellite name) so downstream collapse still has it.
-    if (leg.satellite != null && !leg.satellite.isStoreRecordSource()) {
-      constantMeta
-          .getFields()
-          .add(new ConstantField(ctx.recordSourceField, "String", leg.sourceIndicatorValue));
-    }
 
     TransformMeta tm =
         new TransformMeta("Constant", "source_" + leg.satellite.getName(), constantMeta);
@@ -1495,7 +1507,7 @@ public final class BvScd2PipelineSupport {
     if (predecessor == null
         || leg == null
         || leg.satellite == null
-        || leg.satellite.isStoreRecordSource()) {
+        || storesPhysicalRecordSource(leg)) {
       return predecessor;
     }
     ConstantMeta constantMeta = new ConstantMeta();
@@ -1535,7 +1547,6 @@ public final class BvScd2PipelineSupport {
       String targetFieldName = ctx.variables.resolve(mapping.getTargetFieldName());
       selectFields.add(selectField(sourceFieldName, targetFieldName));
     }
-    selectFields.add(selectField(ctx.recordSourceField, null));
     if (!leg.sourceFunctionalTimestampField.equals(ctx.functionalTimestampField)) {
       selectFields.add(
           selectField(leg.sourceFunctionalTimestampField, ctx.functionalTimestampField));

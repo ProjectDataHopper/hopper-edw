@@ -42,8 +42,8 @@ Dialog help (Hop GUI **Help** on the SCD2 table dialog): link:help/bv-scd2-table
 
 For each SCD2 table the plugin builds a Hop pipeline that:
 
-1. Reads satellite history via `TableInput` SQL (grain + functional timestamp + attributes)
-2. Adds source indicators when multiple satellites feed one BV table
+1. Reads satellite history via `TableInput` SQL (grain + functional timestamp + attributes). The vault record-source / source-indicator column is **not** selected when a satellite has **Store record source indicator** off (VaultSpeed-style mono-source sats). Multi-satellite pipelines never read that physical column; merge identity is the synthetic `_bv_source` value.
+2. Adds source indicators when multiple satellites feed one BV table. When a satellite omits the physical column, a Constant supplies the BV record-source value from the satellite config (or the satellite name).
 3. Merges streams (multi-satellite) with `SortedSchemaMerge`
 4. Repeats sparse attribute columns across merged rows
 5. Computes validity bounds with `Analytic Query` (LAG/LEAD)
@@ -160,7 +160,7 @@ Open intervals use sentinels from configuration (default `1900-01-01 00:00:00` a
 |Required for multi-satellite tables. Maps satellite attribute → BV column.
 
 |Satellite configs
-|Per-satellite functional timestamp and source indicator for multi-satellite merges.
+|Per-satellite functional timestamp and source indicator for multi-satellite merges. The source indicator is the merge tag (`_bv_source`) and the BV record-source value when the satellite does not store a physical source-indicator column. Honor **Store record source indicator** on each DV satellite — SCD2 Table Input SQL never requests a column the satellite table does not have.
 |===
 
 The Customer 360 sample uses all three SCD2 dialog areas:
