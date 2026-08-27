@@ -26,9 +26,9 @@ import org.apache.hop.core.logging.ILogChannel;
 import org.apache.hop.core.plugins.IPlugin;
 import org.apache.hop.core.plugins.PluginRegistry;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.targettypemapping.TargetTypeMappingMeta;
 import org.apache.hop.metadata.api.HopMetadata;
 import org.apache.hop.metadata.plugin.MetadataPluginType;
+import org.hopper.edw.datavault.metadata.targettypemapping.TargetTypeMappingMeta;
 
 /** Registers {@link TargetTypeMappingMeta} with Hop metadata after environment init. */
 @ExtensionPoint(

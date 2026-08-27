@@ -21,9 +21,6 @@ import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.action.GuiActionType;
 import org.apache.hop.core.gui.plugin.toolbar.GuiToolbarElement;
 import org.apache.hop.core.vfs.HopVfs;
-import org.hopper.edw.datavault.command.executionmap.ExecutionMapService;
-import org.hopper.edw.datavault.executionmap.ExecutionMapSubRootSupport;
-import org.hopper.edw.datavault.hopgui.file.executionmap.HopExecutionMapFileType;
 import org.apache.hop.ui.core.dialog.BaseDialog;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.dialog.MessageBox;
@@ -37,6 +34,9 @@ import org.apache.hop.ui.hopgui.file.workflow.context.HopGuiWorkflowActionContex
 import org.apache.hop.ui.hopgui.file.workflow.context.HopGuiWorkflowContext;
 import org.apache.hop.workflow.WorkflowMeta;
 import org.eclipse.swt.SWT;
+import org.hopper.edw.datavault.command.executionmap.ExecutionMapService;
+import org.hopper.edw.datavault.executionmap.ExecutionMapSubRootSupport;
+import org.hopper.edw.datavault.hopgui.file.executionmap.HopExecutionMapFileType;
 
 /** Toolbar and context-menu entry points for generating execution maps. */
 @GuiPlugin(description = "i18n::ExecutionMapGuiPlugin.Description")

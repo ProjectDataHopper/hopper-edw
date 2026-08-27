@@ -15,13 +15,17 @@
  */
 package org.hopper.edw.datavault.lineageview;
 
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.util.Utils;
+import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.ui.core.dialog.ErrorDialog;
+import org.apache.hop.ui.hopgui.HopGui;
+import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
+import org.eclipse.swt.widgets.Display;
 import org.hopper.edw.catalog.hopgui.navigation.RecordOriginNavigationSupport;
 import org.hopper.edw.catalog.hopgui.perspective.DataCatalogPerspective;
 import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.hopper.edw.catalog.model.RecordOrigin;
-import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.util.Utils;
-import org.apache.hop.core.variables.IVariables;
 import org.hopper.edw.datavault.hopgui.file.businessvault.HopGuiBusinessVaultGraph;
 import org.hopper.edw.datavault.hopgui.file.dimensional.DmDimensionAliasNavigationSupport;
 import org.hopper.edw.datavault.hopgui.file.dimensional.HopDimensionalFileType;
@@ -39,10 +43,6 @@ import org.hopper.edw.datavault.metadata.businessvault.IBvTable;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimensionAlias;
 import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
-import org.apache.hop.ui.core.dialog.ErrorDialog;
-import org.apache.hop.ui.hopgui.HopGui;
-import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
-import org.eclipse.swt.widgets.Display;
 
 /** Maps lineage facets to existing Hop openers. */
 public final class LineageViewNavigationSupport {

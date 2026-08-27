@@ -19,14 +19,6 @@ import java.util.List;
 import java.util.function.Supplier;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.hopgui.GuiBusySupport;
-import org.hopper.edw.datavault.hopgui.ModelCoachPanelAuditSupport;
-import org.hopper.edw.datavault.metadata.coaching.CoachingInsight;
-import org.hopper.edw.datavault.metadata.coaching.CoachingSourceNode;
-import org.hopper.edw.datavault.metadata.coaching.CoachingSourceRef;
-import org.hopper.edw.datavault.metadata.coaching.CoachingSourceResolver;
-import org.hopper.edw.datavault.metadata.coaching.CoachingTargetUsage;
-import org.hopper.edw.datavault.metadata.coaching.ICoachingModelAdapter;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.PropsUi;
@@ -47,6 +39,14 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
+import org.hopper.edw.datavault.hopgui.GuiBusySupport;
+import org.hopper.edw.datavault.hopgui.ModelCoachPanelAuditSupport;
+import org.hopper.edw.datavault.metadata.coaching.CoachingInsight;
+import org.hopper.edw.datavault.metadata.coaching.CoachingSourceNode;
+import org.hopper.edw.datavault.metadata.coaching.CoachingSourceRef;
+import org.hopper.edw.datavault.metadata.coaching.CoachingSourceResolver;
+import org.hopper.edw.datavault.metadata.coaching.CoachingTargetUsage;
+import org.hopper.edw.datavault.metadata.coaching.ICoachingModelAdapter;
 
 /** Left-hand coach panel for DV/BV/DM model graphs. */
 public class ModelCoachPanel extends Composite {

@@ -6,6 +6,8 @@ toc::[]
 
 Every hub, link, and satellite in a `.hdv` model has an **integration mode** that controls how Hop treats the physical table in the warehouse.
 
+To document an **entire** existing raw vault (Hop must not load or alter any table) use **Read-only existing vault** on the Data Vault configuration instead of setting External read-only on every card. See link:datavault-configuration.adoc[Data Vault configuration]. That flag refuses Data Vault Update, Generate DDL, and Debug, and model check keeps referential integrity only so Business Vault and dimensional models can sit on top. Per-table External read-only remains the mixed-ownership mode (Hop still runs Update and skips those tables).
+
 Integration mode is set on the **Options** tab of the hub, link, or satellite dialog (combo: *Hop managed*, *External read-only*, *Custom pipelines*).
 
 == Why integration modes exist

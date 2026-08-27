@@ -24,14 +24,6 @@ import org.apache.hop.core.Const;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.datatypemapping.DataTypeMappingMeta;
-import org.hopper.edw.datavault.metadata.datatypemapping.DataTypeMappingPatternSupport;
-import org.hopper.edw.datavault.metadata.datatypemapping.DataTypeMappingResolver;
-import org.hopper.edw.datavault.metadata.datatypemapping.EffectiveSourceField;
-import org.hopper.edw.datavault.metadata.datatypemapping.FieldConversionOptions;
-import org.hopper.edw.datavault.metadata.datatypemapping.IDataTypeMappingTarget;
-import org.hopper.edw.datavault.metadata.datatypemapping.PhysicalSourceField;
-import org.hopper.edw.datavault.metadata.datatypemapping.SourceFieldTypeMapping;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.FormDataBuilder;
@@ -53,6 +45,14 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.metadata.datatypemapping.DataTypeMappingMeta;
+import org.hopper.edw.datavault.metadata.datatypemapping.DataTypeMappingPatternSupport;
+import org.hopper.edw.datavault.metadata.datatypemapping.DataTypeMappingResolver;
+import org.hopper.edw.datavault.metadata.datatypemapping.EffectiveSourceField;
+import org.hopper.edw.datavault.metadata.datatypemapping.FieldConversionOptions;
+import org.hopper.edw.datavault.metadata.datatypemapping.IDataTypeMappingTarget;
+import org.hopper.edw.datavault.metadata.datatypemapping.PhysicalSourceField;
+import org.hopper.edw.datavault.metadata.datatypemapping.SourceFieldTypeMapping;
 
 /**
  * Shared HSM dialog tab: attach project data type mapping profiles, field overrides, and preview

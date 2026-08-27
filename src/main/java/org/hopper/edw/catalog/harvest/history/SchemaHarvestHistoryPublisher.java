@@ -17,16 +17,6 @@ package org.hopper.edw.catalog.harvest.history;
 
 import java.nio.file.Path;
 import java.util.Date;
-import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestChange;
-import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestResult;
-import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestSubjectResult;
-import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestedField;
-import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestedForeignKey;
-import org.hopper.edw.catalog.model.PhysicalTableRef;
-import org.hopper.edw.catalog.model.RecordDefinition;
-import org.hopper.edw.catalog.model.RecordDefinitionKey;
-import org.hopper.edw.catalog.model.RecordDefinitionType;
-import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.RowMetaAndData;
 import org.apache.hop.core.database.Database;
@@ -43,6 +33,16 @@ import org.apache.hop.core.row.value.ValueMetaString;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestChange;
+import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestResult;
+import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestSubjectResult;
+import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestedField;
+import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestedForeignKey;
+import org.hopper.edw.catalog.model.PhysicalTableRef;
+import org.hopper.edw.catalog.model.RecordDefinition;
+import org.hopper.edw.catalog.model.RecordDefinitionKey;
+import org.hopper.edw.catalog.model.RecordDefinitionType;
+import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
 
 /**
  * Persists schema harvest results to OPS tables. Immutable: existing {@code harvest_run_id} is

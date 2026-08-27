@@ -16,9 +16,6 @@
 package org.hopper.edw.catalog.hopgui.perspective;
 
 import java.util.List;
-import org.hopper.edw.catalog.harvest.SchemaHarvestModels.FieldRole;
-import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestChange;
-import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestedField;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
@@ -39,6 +36,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
+import org.hopper.edw.catalog.harvest.SchemaHarvestModels.FieldRole;
+import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestChange;
+import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestedField;
 
 /** Drill-down: field changes and expected vs discovered field snapshots for one harvest subject. */
 public final class SchemaHarvestChangesDialog {

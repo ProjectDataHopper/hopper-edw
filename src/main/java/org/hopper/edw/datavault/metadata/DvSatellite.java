@@ -54,11 +54,6 @@ import org.apache.hop.core.row.value.ValueMetaString;
 import org.apache.hop.core.row.value.ValueMetaTimestamp;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
-import org.hopper.edw.datavault.metadata.database.DvDatabaseSource;
-import org.hopper.edw.datavault.transform.dvhashkey.DvHashKeyMeta;
-import org.hopper.edw.datavault.transform.dvhashkey.DvHashKeyMetaFactory;
-import org.hopper.edw.datavault.transform.mergerowsplus.MergeRowsPlusMeta;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHasName;
@@ -87,6 +82,11 @@ import org.apache.hop.pipeline.transforms.update.UpdateField;
 import org.apache.hop.pipeline.transforms.update.UpdateKeyField;
 import org.apache.hop.pipeline.transforms.update.UpdateLookupField;
 import org.apache.hop.pipeline.transforms.update.UpdateMeta;
+import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
+import org.hopper.edw.datavault.metadata.database.DvDatabaseSource;
+import org.hopper.edw.datavault.transform.dvhashkey.DvHashKeyMeta;
+import org.hopper.edw.datavault.transform.dvhashkey.DvHashKeyMetaFactory;
+import org.hopper.edw.datavault.transform.mergerowsplus.MergeRowsPlusMeta;
 
 /**
  * Data Vault 2.0 Satellite metadata definition.
@@ -293,7 +293,7 @@ public class DvSatellite extends DvTableBase
       DataVaultModel model) {
     super.check(remarks, metadataProvider, variables, options, model);
 
-    if (!DvIntegrationSupport.relaxesSourceValidation(this)) {
+    if (!DvIntegrationSupport.relaxesSourceValidation(this, model)) {
       if (Utils.isEmpty(recordSource)) {
         remarks.add(
             new CheckResult(
@@ -378,7 +378,7 @@ public class DvSatellite extends DvTableBase
       }
 
       // Verify that all specified attributes exist in the record source's fields.
-      if (!DvIntegrationSupport.relaxesSourceValidation(this)
+      if (!DvIntegrationSupport.relaxesSourceValidation(this, model)
           && !Utils.isEmpty(recordSource)
           && metadataProvider != null
           && !Utils.isEmpty(attributes)) {
@@ -439,7 +439,7 @@ public class DvSatellite extends DvTableBase
       checkStatusTracking(remarks, metadataProvider, variables, model);
     }
 
-    if (!DvIntegrationSupport.relaxesSourceValidation(this) && metadataProvider != null) {
+    if (!DvIntegrationSupport.relaxesSourceValidation(this, model) && metadataProvider != null) {
       DvModelCheckOptions effectiveOptions =
           options != null ? options : DvModelCheckOptions.fastOnly();
       DvFieldMappingValidationSupport.validateSatelliteMappings(
@@ -448,7 +448,7 @@ public class DvSatellite extends DvTableBase
           this, model, effectiveOptions, metadataProvider, variables, this, remarks);
       checkSatelliteHubRecordSourceConsistency(remarks, metadataProvider, variables, model);
     }
-    if (model != null) {
+    if (model != null && !DvReadOnlyExistingVaultSupport.isReadOnly(model)) {
       DvOrphanHandlingSupport.checkSatellite(
           this, model, model.getConfigurationOrDefault(), variables, remarks);
     }
@@ -500,30 +500,32 @@ public class DvSatellite extends DvTableBase
       IHopMetadataProvider metadataProvider,
       IVariables variables,
       DataVaultModel model) {
-    if (Utils.isEmpty(recordSource)) {
-      remarks.add(
-          new CheckResult(
-              ICheckResult.TYPE_RESULT_ERROR,
-              BaseMessages.getString(PKG, "DvSatellite.CheckResult.StsNoRecordSource"),
-              this));
-      return;
-    }
-    try {
-      DataVaultSource resolvedSource = resolveRecordSource(variables, metadataProvider, model);
-      if (!resolvedSource.isFullSnapshotFeed()) {
+    if (!DvReadOnlyExistingVaultSupport.isReadOnly(model)) {
+      if (Utils.isEmpty(recordSource)) {
         remarks.add(
             new CheckResult(
                 ICheckResult.TYPE_RESULT_ERROR,
-                BaseMessages.getString(
-                    PKG, "DvSatellite.CheckResult.StsRequiresFullSnapshot", recordSource),
+                BaseMessages.getString(PKG, "DvSatellite.CheckResult.StsNoRecordSource"),
+                this));
+        return;
+      }
+      try {
+        DataVaultSource resolvedSource = resolveRecordSource(variables, metadataProvider, model);
+        if (!resolvedSource.isFullSnapshotFeed()) {
+          remarks.add(
+              new CheckResult(
+                  ICheckResult.TYPE_RESULT_ERROR,
+                  BaseMessages.getString(
+                      PKG, "DvSatellite.CheckResult.StsRequiresFullSnapshot", recordSource),
+                  this));
+        }
+      } catch (HopException e) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_ERROR,
+                "Error loading record source for status tracking: " + e.getMessage(),
                 this));
       }
-    } catch (HopException e) {
-      remarks.add(
-          new CheckResult(
-              ICheckResult.TYPE_RESULT_ERROR,
-              "Error loading record source for status tracking: " + e.getMessage(),
-              this));
     }
     String stsTable = resolveStatusTableName(variables, null);
     if (Utils.isEmpty(stsTable)) {
@@ -576,6 +578,7 @@ public class DvSatellite extends DvTableBase
       if (metadataProvider == null || model == null) {
         return emptyList();
       }
+      DvReadOnlyExistingVaultSupport.refuseUpdate(model);
 
       if (DvIntegrationSupport.isExternalRead(this)) {
         return emptyList();

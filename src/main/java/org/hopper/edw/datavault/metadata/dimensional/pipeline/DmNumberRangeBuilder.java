@@ -18,15 +18,15 @@ package org.hopper.edw.datavault.metadata.dimensional.pipeline;
 import java.util.List;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.pipeline.PipelineHopMeta;
+import org.apache.hop.pipeline.PipelineMeta;
+import org.apache.hop.pipeline.transform.TransformMeta;
+import org.apache.hop.pipeline.transforms.numberrange.NumberRangeMeta;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
 import org.hopper.edw.datavault.metadata.dimensional.DmFactRangeDimensionRole;
 import org.hopper.edw.datavault.metadata.dimensional.DmRangeBand;
 import org.hopper.edw.datavault.metadata.dimensional.DmRangeDimension;
 import org.hopper.edw.datavault.metadata.dimensional.DmRangeDimensionSupport;
-import org.apache.hop.pipeline.PipelineHopMeta;
-import org.apache.hop.pipeline.PipelineMeta;
-import org.apache.hop.pipeline.transform.TransformMeta;
-import org.apache.hop.pipeline.transforms.numberrange.NumberRangeMeta;
 
 /** Configures NumberRange transforms for fact range dimension roles. */
 public final class DmNumberRangeBuilder {

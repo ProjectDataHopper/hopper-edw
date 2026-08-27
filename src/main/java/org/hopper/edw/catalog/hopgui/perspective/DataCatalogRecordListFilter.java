@@ -16,9 +16,9 @@
 package org.hopper.edw.catalog.hopgui.perspective;
 
 import java.util.List;
+import org.apache.hop.i18n.BaseMessages;
 import org.hopper.edw.catalog.model.RecordDefinitionQuery;
 import org.hopper.edw.catalog.model.RecordDefinitionType;
-import org.apache.hop.i18n.BaseMessages;
 
 /** Quick filters for the data catalog record tree. */
 public enum DataCatalogRecordListFilter {

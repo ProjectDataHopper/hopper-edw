@@ -23,6 +23,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.vfs2.FileObject;
+import org.apache.hop.core.Const;
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.util.Utils;
+import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.core.vfs.HopVfs;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupModelDiscoverySupport;
 import org.hopper.edw.catalog.model.RecordDefinition;
@@ -31,11 +38,6 @@ import org.hopper.edw.catalog.model.RecordOrigin;
 import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
 import org.hopper.edw.catalog.versioning.CatalogVersionEntry;
 import org.hopper.edw.catalog.versioning.CatalogVersionService;
-import org.apache.hop.core.Const;
-import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.util.Utils;
-import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.core.vfs.HopVfs;
 import org.hopper.edw.datavault.catalog.DvSourceCatalogMapper;
 import org.hopper.edw.datavault.hopgui.file.lineageview.HopLineageViewFileType;
 import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneySnapshot.CatalogFeed;
@@ -53,8 +55,6 @@ import org.hopper.edw.datavault.resourcedefinition.ResourceDefinitionGroupResolv
 import org.hopper.edw.datavault.resourcedefinition.SourceUsage;
 import org.hopper.edw.datavault.resourcedefinition.SourceUsageIndexBuilder;
 import org.hopper.edw.datavault.resourcedefinition.ValidationModels;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Loads one resource definition group's journey snapshot from metadata, models, and the project.

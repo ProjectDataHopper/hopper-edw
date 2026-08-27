@@ -18,8 +18,8 @@ package org.hopper.edw.datavault.metadata.datatypemapping;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.exception.HopException;
-import org.hopper.edw.datavault.metadata.SourceField;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.datavault.metadata.SourceField;
 
 /**
  * Resolves physical source fields through data type mappings into the catalog {@link SourceField}

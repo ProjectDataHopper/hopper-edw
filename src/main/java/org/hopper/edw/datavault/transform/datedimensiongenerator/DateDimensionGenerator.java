@@ -16,13 +16,13 @@
 package org.hopper.edw.datavault.transform.datedimensiongenerator;
 
 import org.apache.hop.core.exception.HopException;
-import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic.DateRange;
-import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic.GeneratorContext;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.pipeline.Pipeline;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.BaseTransform;
 import org.apache.hop.pipeline.transform.TransformMeta;
+import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic.DateRange;
+import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic.GeneratorContext;
 
 /** Generates one row per day between a start and end date with configurable calendar fields. */
 public class DateDimensionGenerator

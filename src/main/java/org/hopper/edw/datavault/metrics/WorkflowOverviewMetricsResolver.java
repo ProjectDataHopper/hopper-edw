@@ -18,8 +18,8 @@ package org.hopper.edw.datavault.metrics;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metrics.metadata.ExecutionMetricsProfileMeta;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.datavault.metrics.metadata.ExecutionMetricsProfileMeta;
 
 /** Resolves OPS database and catalog settings for workflow overview publishing. */
 public final class WorkflowOverviewMetricsResolver {

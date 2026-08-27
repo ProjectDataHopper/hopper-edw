@@ -26,7 +26,6 @@ import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.core.vfs.HopVfs;
-import org.hopper.edw.datavault.metadata.SourceField;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.Pipeline;
@@ -36,6 +35,7 @@ import org.apache.hop.pipeline.transform.ITransform;
 import org.apache.hop.pipeline.transform.RowAdapter;
 import org.apache.hop.pipeline.transforms.metainject.MetaInjectMeta;
 import org.apache.hop.pipeline.transforms.metainject.MetaInjectOutputField;
+import org.hopper.edw.datavault.metadata.SourceField;
 
 /** Helpers for {@link DvPipelineSource}: load pipeline meta, MetaInject, and preview. */
 public final class DvPipelineSourceSupport {

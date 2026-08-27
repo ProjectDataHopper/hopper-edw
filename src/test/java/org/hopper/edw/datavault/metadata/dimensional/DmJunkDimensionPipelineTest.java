@@ -24,13 +24,13 @@ import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.Variables;
-import org.hopper.edw.datavault.transform.junkdimension.JunkDimensionMeta;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transforms.dimensionlookup.DimensionLookupMeta;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
+import org.hopper.edw.datavault.transform.junkdimension.JunkDimensionMeta;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

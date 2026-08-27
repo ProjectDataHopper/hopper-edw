@@ -17,10 +17,10 @@ package org.hopper.edw.datavault.jinja;
 
 import com.hubspot.jinjava.el.ext.NamedParameter;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.i18n.BaseMessages;
 import org.hopper.edw.datavault.metadata.businessvault.BvSqlRef;
 import org.hopper.edw.datavault.metadata.businessvault.BvSqlRefResolver;
 import org.hopper.edw.datavault.metadata.businessvault.BvSqlSource;
-import org.apache.hop.i18n.BaseMessages;
 
 /**
  * dbt-shaped Jinja functions registered on the sandboxed engine. They read the current {@link

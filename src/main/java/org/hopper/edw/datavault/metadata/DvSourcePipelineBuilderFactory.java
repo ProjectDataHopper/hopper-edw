@@ -18,6 +18,8 @@ package org.hopper.edw.datavault.metadata;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.pipeline.PipelineMeta;
 import org.hopper.edw.datavault.metadata.composite.DvCompositeHubSourcePipelineBuilder;
 import org.hopper.edw.datavault.metadata.composite.DvCompositeLinkSourcePipelineBuilder;
 import org.hopper.edw.datavault.metadata.composite.DvCompositeSatelliteSourcePipelineBuilder;
@@ -37,8 +39,6 @@ import org.hopper.edw.datavault.metadata.json.DvJsonSatelliteSourcePipelineBuild
 import org.hopper.edw.datavault.metadata.pipeline.DvPipelineHubSourcePipelineBuilder;
 import org.hopper.edw.datavault.metadata.pipeline.DvPipelineLinkSourcePipelineBuilder;
 import org.hopper.edw.datavault.metadata.pipeline.DvPipelineSatelliteSourcePipelineBuilder;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.pipeline.PipelineMeta;
 
 /** Creates the correct {@link DvSourcePipelineBuilder} for a record source type and DV table. */
 public final class DvSourcePipelineBuilderFactory {

@@ -17,6 +17,10 @@ package org.hopper.edw.datavault.catalog;
 
 import java.util.Date;
 import java.util.List;
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.util.Utils;
+import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.catalog.model.DvCsvFormatRecord;
 import org.hopper.edw.catalog.model.DvSourceRecord;
 import org.hopper.edw.catalog.model.PhysicalFileRef;
@@ -26,9 +30,6 @@ import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.hopper.edw.catalog.model.RecordDefinitionType;
 import org.hopper.edw.catalog.model.RecordOrigin;
-import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.util.Utils;
-import org.apache.hop.core.variables.IVariables;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DataVaultSource;
 import org.hopper.edw.datavault.metadata.DvSourceType;
@@ -42,7 +43,6 @@ import org.hopper.edw.datavault.metadata.file.DvFileLocationSupport;
 import org.hopper.edw.datavault.metadata.file.IDvFileBasedSource;
 import org.hopper.edw.datavault.metadata.iceberg.DvIcebergLocationSupport;
 import org.hopper.edw.datavault.metadata.iceberg.DvIcebergSource;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Maps {@link DataVaultSource} to catalog {@link RecordDefinition} entries. */
 public final class DvSourceCatalogMapper {

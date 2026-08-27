@@ -17,15 +17,15 @@ package org.hopper.edw.quality.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.hopper.edw.catalog.model.PhysicalTableRef;
-import org.hopper.edw.catalog.model.RecordDefinition;
-import org.hopper.edw.catalog.quality.CatalogQualitySubjectSupport;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.logging.ILogChannel;
 import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.catalog.model.PhysicalTableRef;
+import org.hopper.edw.catalog.model.RecordDefinition;
+import org.hopper.edw.catalog.quality.CatalogQualitySubjectSupport;
 import org.hopper.edw.quality.engine.DataQualityRuleEvaluatorRegistry;
 import org.hopper.edw.quality.engine.QualityEvaluationContext;
 import org.hopper.edw.quality.model.DataQualityFinding;

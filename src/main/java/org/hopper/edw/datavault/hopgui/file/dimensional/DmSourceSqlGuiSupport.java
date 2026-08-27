@@ -25,8 +25,6 @@ import org.apache.hop.core.logging.LoggingObject;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.hopgui.dialog.ShowRowsDialog;
-import org.hopper.edw.datavault.metadata.DvSqlSupport;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.Pipeline;
@@ -39,6 +37,8 @@ import org.apache.hop.ui.core.dialog.EnterTextDialog;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.pipeline.dialog.PipelinePreviewProgressDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.datavault.hopgui.dialog.ShowRowsDialog;
+import org.hopper.edw.datavault.metadata.DvSqlSupport;
 
 /** Preview and field discovery helpers for dimensional source SQL in Hop GUI dialogs. */
 public final class DmSourceSqlGuiSupport {

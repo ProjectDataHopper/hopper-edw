@@ -19,6 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.pipeline.PipelineHopMeta;
+import org.apache.hop.pipeline.PipelineMeta;
+import org.apache.hop.pipeline.transform.TransformMeta;
+import org.apache.hop.pipeline.transforms.dimensionlookup.DimensionLookupMeta;
 import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataSupport;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalConfiguration;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
@@ -30,11 +35,6 @@ import org.hopper.edw.datavault.metadata.dimensional.DmLayoutSupport;
 import org.hopper.edw.datavault.metadata.dimensional.DmScdUpdatePolicy;
 import org.hopper.edw.datavault.metadata.dimensional.DmSurrogateKeyStrategy;
 import org.hopper.edw.datavault.metadata.dimensional.DmSurrogateKeySupport;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.pipeline.PipelineHopMeta;
-import org.apache.hop.pipeline.PipelineMeta;
-import org.apache.hop.pipeline.transform.TransformMeta;
-import org.apache.hop.pipeline.transforms.dimensionlookup.DimensionLookupMeta;
 
 /** Builds Dimension Lookup transforms for fact FK resolution and hybrid / Type 3 dimensions. */
 public final class DmDimensionLookupBuilder {

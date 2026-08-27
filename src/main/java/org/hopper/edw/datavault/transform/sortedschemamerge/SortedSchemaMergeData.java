@@ -18,9 +18,9 @@ package org.hopper.edw.datavault.transform.sortedschemamerge;
 import java.util.Comparator;
 import java.util.List;
 import org.apache.hop.core.row.IRowMeta;
-import org.hopper.edw.datavault.transform.sortedschemamerge.SortedSchemaMergeLogic.SchemaMapping;
 import org.apache.hop.pipeline.transform.BaseTransformData;
 import org.apache.hop.pipeline.transform.ITransformData;
+import org.hopper.edw.datavault.transform.sortedschemamerge.SortedSchemaMergeLogic.SchemaMapping;
 
 @SuppressWarnings("java:S1104")
 public class SortedSchemaMergeData extends BaseTransformData implements ITransformData {

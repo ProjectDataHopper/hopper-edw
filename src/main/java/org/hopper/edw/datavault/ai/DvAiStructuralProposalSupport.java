@@ -26,6 +26,7 @@ import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.json.HopJson;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
 import org.hopper.edw.datavault.metadata.BusinessKey;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
@@ -36,7 +37,6 @@ import org.hopper.edw.datavault.metadata.DvSatellite;
 import org.hopper.edw.datavault.metadata.IDvTable;
 import org.hopper.edw.datavault.metadata.SatelliteAttribute;
 import org.hopper.edw.datavault.metadata.SourceField;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Parses, validates, and applies structural Data Vault modeling proposals. */
 final class DvAiStructuralProposalSupport {

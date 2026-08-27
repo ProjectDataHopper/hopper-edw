@@ -26,6 +26,7 @@ import org.apache.hop.core.logging.SimpleLoggingObject;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.DvSourceType;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceJson;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceJsonParentKind;
@@ -33,7 +34,6 @@ import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceQuery;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceQueryGenerationMode;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Samples JSON document strings from a {@link SourceJson} parent (table / query / chained JSON).

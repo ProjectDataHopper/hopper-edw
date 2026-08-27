@@ -26,9 +26,6 @@ import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.metadata.DataVaultSource;
-import org.hopper.edw.datavault.metadata.SourceField;
-import org.hopper.edw.datavault.metadata.SourceFieldInputOptions;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineHopMeta;
 import org.apache.hop.pipeline.PipelineMeta;
@@ -36,6 +33,9 @@ import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transforms.selectvalues.SelectField;
 import org.apache.hop.pipeline.transforms.selectvalues.SelectMetadataChange;
 import org.apache.hop.pipeline.transforms.selectvalues.SelectValuesMeta;
+import org.hopper.edw.datavault.metadata.DataVaultSource;
+import org.hopper.edw.datavault.metadata.SourceField;
+import org.hopper.edw.datavault.metadata.SourceFieldInputOptions;
 
 /**
  * Builds and injects Select Values transforms that apply the effective data type mapping layout.

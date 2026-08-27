@@ -33,6 +33,13 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataSerializer;
+import org.apache.hop.metadata.serializer.json.JsonMetadataProvider;
+import org.apache.hop.metadata.serializer.multi.MultiMetadataProvider;
+import org.apache.hop.metadata.util.HopMetadataUtil;
+import org.apache.hop.www.BaseHttpServlet;
+import org.apache.hop.www.IHopServerPlugin;
+import org.apache.hop.www.PipelineMap;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceColumn;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceJson;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
@@ -44,13 +51,6 @@ import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
 import org.hopper.edw.datavault.metadata.sourcemodel.service.SourceModelService;
 import org.hopper.edw.datavault.virtualization.execute.SourceModelSqlExecutor;
 import org.hopper.edw.datavault.virtualization.jdbc.HopSourceModelJdbcResultSet;
-import org.apache.hop.metadata.api.IHopMetadataSerializer;
-import org.apache.hop.metadata.serializer.json.JsonMetadataProvider;
-import org.apache.hop.metadata.serializer.multi.MultiMetadataProvider;
-import org.apache.hop.metadata.util.HopMetadataUtil;
-import org.apache.hop.www.BaseHttpServlet;
-import org.apache.hop.www.IHopServerPlugin;
-import org.apache.hop.www.PipelineMap;
 
 /**
  * Hop Server servlet for free SQL over {@link SourceModelService} metadata.

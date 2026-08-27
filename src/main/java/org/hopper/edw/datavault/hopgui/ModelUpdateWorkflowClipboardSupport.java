@@ -23,10 +23,6 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.xml.XmlHandler;
-import org.hopper.edw.datavault.config.DvRunConfigurationSupport;
-import org.hopper.edw.datavault.workflow.actions.businessvaultupdate.ActionBusinessVaultUpdate;
-import org.hopper.edw.datavault.workflow.actions.datavaultupdate.ActionDataVaultUpdate;
-import org.hopper.edw.datavault.workflow.actions.dimensionalupdate.ActionDimensionalUpdate;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.config.PipelineRunConfiguration;
@@ -37,6 +33,10 @@ import org.apache.hop.workflow.WorkflowMeta;
 import org.apache.hop.workflow.action.ActionMeta;
 import org.apache.hop.workflow.action.IAction;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.datavault.config.DvRunConfigurationSupport;
+import org.hopper.edw.datavault.workflow.actions.businessvaultupdate.ActionBusinessVaultUpdate;
+import org.hopper.edw.datavault.workflow.actions.datavaultupdate.ActionDataVaultUpdate;
+import org.hopper.edw.datavault.workflow.actions.dimensionalupdate.ActionDimensionalUpdate;
 
 /** Copies a model-update workflow action to the Hop workflow clipboard format. */
 public final class ModelUpdateWorkflowClipboardSupport {

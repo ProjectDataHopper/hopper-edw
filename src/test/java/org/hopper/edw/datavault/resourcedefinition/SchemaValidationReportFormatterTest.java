@@ -20,10 +20,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
 import java.util.List;
-import org.hopper.edw.catalog.discovery.RecordDefinitionSchemaDiffSupport;
-import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.exception.HopException;
+import org.hopper.edw.catalog.discovery.RecordDefinitionSchemaDiffSupport;
+import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.hopper.edw.datavault.impact.ImpactGraph;
 import org.hopper.edw.datavault.resourcedefinition.ValidationReport.IssueKind;
 import org.hopper.edw.datavault.resourcedefinition.ValidationReport.IssueSeverity;

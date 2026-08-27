@@ -20,7 +20,6 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import org.hopper.edw.catalog.metadata.DataCatalogMeta;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.gui.plugin.GuiElementType;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
@@ -28,16 +27,17 @@ import org.apache.hop.core.gui.plugin.GuiWidgetElement;
 import org.apache.hop.core.logging.ILogChannel;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.DvLoadCycleSupport;
-import org.hopper.edw.datavault.metadata.DvTargetLoadConfigurationSupport;
-import org.hopper.edw.datavault.metadata.DvTargetLoadMode;
-import org.hopper.edw.datavault.metadata.IDvTargetLoadConfiguration;
 import org.apache.hop.metadata.api.HopMetadata;
 import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.HopMetadataPropertyType;
 import org.apache.hop.metadata.api.IHopMetadata;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.catalog.metadata.DataCatalogMeta;
+import org.hopper.edw.datavault.metadata.DvLoadCycleSupport;
+import org.hopper.edw.datavault.metadata.DvTargetLoadConfigurationSupport;
+import org.hopper.edw.datavault.metadata.DvTargetLoadMode;
+import org.hopper.edw.datavault.metadata.IDvTargetLoadConfiguration;
 
 /**
  * Configuration for Business Vault physical implementation and update strategy.

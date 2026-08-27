@@ -23,13 +23,6 @@ import org.apache.hop.core.Const;
 import org.apache.hop.core.Props;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.hopgui.GuiBusySupport;
-import org.hopper.edw.datavault.lineage.FieldContribution;
-import org.hopper.edw.datavault.lineage.FieldLineage;
-import org.hopper.edw.datavault.lineage.LineageReason;
-import org.hopper.edw.datavault.lineage.LineageSnapshot;
-import org.hopper.edw.datavault.lineage.TableLineage;
-import org.hopper.edw.datavault.lineage.TableSourceRef;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.FormDataBuilder;
 import org.apache.hop.ui.core.PropsUi;
@@ -51,6 +44,13 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.hopgui.GuiBusySupport;
+import org.hopper.edw.datavault.lineage.FieldContribution;
+import org.hopper.edw.datavault.lineage.FieldLineage;
+import org.hopper.edw.datavault.lineage.LineageReason;
+import org.hopper.edw.datavault.lineage.LineageSnapshot;
+import org.hopper.edw.datavault.lineage.TableLineage;
+import org.hopper.edw.datavault.lineage.TableSourceRef;
 
 /**
  * Read-only Lineage tab for DV/BV/DM table dialogs: table reasons plus a field contribution grid.

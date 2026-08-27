@@ -26,8 +26,8 @@ import org.apache.hop.core.logging.SimpleLoggingObject;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.DvModelCheckCache;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.datavault.metadata.DvModelCheckCache;
 
 /** Resolves live table column metadata for {@link DvDatabaseSource}. */
 public final class DvDatabaseSourceLiveSchemaSupport {

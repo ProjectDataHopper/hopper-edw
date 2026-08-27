@@ -23,6 +23,7 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultConfiguration;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BvBusinessTable;
@@ -45,7 +46,6 @@ import org.hopper.edw.datavault.metadata.dimensional.DmLayoutSupport;
 import org.hopper.edw.datavault.metadata.dimensional.DmSurrogateKeySupport;
 import org.hopper.edw.datavault.metadata.dimensional.DmTableBase;
 import org.hopper.edw.datavault.metadata.dimensional.IDmFactLikeTable;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Resolves optional primary-key and foreign-key columns for Data Vault, Business Vault, and

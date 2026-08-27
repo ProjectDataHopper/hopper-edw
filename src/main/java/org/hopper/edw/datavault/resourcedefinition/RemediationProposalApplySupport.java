@@ -24,13 +24,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.hopper.edw.catalog.discovery.RecordDefinitionCatalogRefreshSupport;
-import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
-import org.hopper.edw.catalog.model.CatalogSourceField;
-import org.hopper.edw.catalog.model.RecordDefinition;
-import org.hopper.edw.catalog.model.RecordDefinitionKey;
-import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
-import org.hopper.edw.catalog.versioning.CatalogVersionService;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.database.Database;
 import org.apache.hop.core.database.DatabaseMeta;
@@ -43,6 +36,16 @@ import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.row.value.ValueMetaString;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.ui.hopgui.HopGui;
+import org.hopper.edw.catalog.discovery.RecordDefinitionCatalogRefreshSupport;
+import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
+import org.hopper.edw.catalog.model.CatalogSourceField;
+import org.hopper.edw.catalog.model.RecordDefinition;
+import org.hopper.edw.catalog.model.RecordDefinitionKey;
+import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
+import org.hopper.edw.catalog.versioning.CatalogVersionService;
 import org.hopper.edw.datavault.ai.DvAiProposal;
 import org.hopper.edw.datavault.ai.DvAiProposalApplier;
 import org.hopper.edw.datavault.catalog.DvSourceFieldSupport;
@@ -52,6 +55,7 @@ import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvDataTypeSupport;
 import org.hopper.edw.datavault.metadata.DvDdlSupport;
 import org.hopper.edw.datavault.metadata.DvHub;
+import org.hopper.edw.datavault.metadata.DvReadOnlyExistingVaultSupport;
 import org.hopper.edw.datavault.metadata.DvSatellite;
 import org.hopper.edw.datavault.metadata.DvSpecialRecordSupport;
 import org.hopper.edw.datavault.metadata.IDvTable;
@@ -70,9 +74,6 @@ import org.hopper.edw.datavault.resourcedefinition.SchemaRemediationArtifactsSup
 import org.hopper.edw.datavault.resourcedefinition.ValidationReport.RecordDefinitionValidation;
 import org.hopper.edw.datavault.resourcedefinition.ValidationReport.RemediationProposal;
 import org.hopper.edw.datavault.resourcedefinition.ValidationReport.ValidationIssue;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.ui.hopgui.HopGui;
 
 /** Applies remediation proposals produced by source validation. */
 public final class RemediationProposalApplySupport {
@@ -574,6 +575,9 @@ public final class RemediationProposalApplySupport {
                 usage.modelFilename(), context.variables(), context.metadataProvider());
         modelsByFilename.put(usage.modelFilename(), model);
       }
+      if (DvReadOnlyExistingVaultSupport.isReadOnly(model)) {
+        continue;
+      }
       IDvTable table = model.findTable(usage.modelElementName());
       if (!(table instanceof DvSatellite satellite)) {
         continue;
@@ -781,6 +785,9 @@ public final class RemediationProposalApplySupport {
       DvSatellite satellite,
       ProposalContext context)
       throws HopException {
+    if (DvReadOnlyExistingVaultSupport.isReadOnly(model)) {
+      return;
+    }
     DataVaultConfiguration config = model.getConfigurationOrDefault();
     DatabaseMeta targetDatabaseMeta =
         DvSpecialRecordSupport.loadTargetDatabase(context.metadataProvider(), config);

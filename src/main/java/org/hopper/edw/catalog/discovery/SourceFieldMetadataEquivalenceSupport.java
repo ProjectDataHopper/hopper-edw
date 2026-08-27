@@ -20,10 +20,10 @@ import java.util.List;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.i18n.BaseMessages;
 import org.hopper.edw.datavault.metadata.DvDataTypeSupport;
 import org.hopper.edw.datavault.metadata.DvSqlStringTypeSupport;
 import org.hopper.edw.datavault.metadata.SourceField;
-import org.apache.hop.i18n.BaseMessages;
 
 /**
  * Compares {@link SourceField} length/precision using Hop value-meta semantics.

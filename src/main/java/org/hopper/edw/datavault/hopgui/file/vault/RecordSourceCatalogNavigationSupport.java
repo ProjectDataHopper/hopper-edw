@@ -15,13 +15,9 @@
  */
 package org.hopper.edw.datavault.hopgui.file.vault;
 
-import org.hopper.edw.catalog.hopgui.perspective.DataCatalogPerspective;
-import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
-import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
@@ -30,6 +26,10 @@ import org.apache.hop.ui.hopgui.HopGui;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
+import org.hopper.edw.catalog.hopgui.perspective.DataCatalogPerspective;
+import org.hopper.edw.catalog.model.RecordDefinitionKey;
+import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
+import org.hopper.edw.datavault.metadata.DataVaultModel;
 
 /** Opens a catalog Data Vault source (record definition) from a model dialog source list. */
 public final class RecordSourceCatalogNavigationSupport {

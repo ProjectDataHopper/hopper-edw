@@ -25,14 +25,6 @@ import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.hopgui.dialog.ShowRowsDialog;
-import org.hopper.edw.datavault.metadata.dimensional.DmDateGeneratorConfiguration;
-import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorField;
-import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic;
-import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic.DateRange;
-import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic.GeneratorContext;
-import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic.PreparedField;
-import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorMetaFactory;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.FormDataBuilder;
 import org.apache.hop.ui.core.PropsUi;
@@ -49,6 +41,14 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.hopgui.dialog.ShowRowsDialog;
+import org.hopper.edw.datavault.metadata.dimensional.DmDateGeneratorConfiguration;
+import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorField;
+import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic;
+import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic.DateRange;
+import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic.GeneratorContext;
+import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic.PreparedField;
+import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorMetaFactory;
 
 /** Source-tab widgets for dimensional tables that use the date generator source type. */
 public final class DmSourceDateGeneratorGuiSupport {

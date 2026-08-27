@@ -20,7 +20,6 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import org.hopper.edw.catalog.metadata.DataCatalogMeta;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.gui.plugin.GuiElementType;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
@@ -35,6 +34,7 @@ import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.HopMetadataPropertyType;
 import org.apache.hop.metadata.api.IHopMetadata;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.catalog.metadata.DataCatalogMeta;
 
 /**
  * Configuration for Data Vault 2.0 physical implementation and update strategy.
@@ -114,6 +114,19 @@ public class DataVaultConfiguration extends HopMetadataBase
       parentId = GUI_PLUGIN_ELEMENT_GENERAL_TAB_ID)
   @HopMetadataProperty(key = "targetDatabase")
   private String targetDatabase;
+
+  /**
+   * When true, models that use this configuration document an already-built raw vault. Hop must not
+   * generate DDL or load pipelines; model check keeps referential integrity only.
+   */
+  @GuiWidgetElement(
+      order = "0055",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::DataVaultConfiguration.ReadOnlyExistingVault.Label",
+      toolTip = "i18n::DataVaultConfiguration.ReadOnlyExistingVault.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_GENERAL_TAB_ID)
+  @HopMetadataProperty
+  private boolean readOnlyExistingVault;
 
   @GuiWidgetElement(
       order = "0060",

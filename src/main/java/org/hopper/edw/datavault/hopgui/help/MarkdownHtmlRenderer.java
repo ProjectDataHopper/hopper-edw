@@ -16,8 +16,8 @@
 package org.hopper.edw.datavault.hopgui.help;
 
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.hopgui.markdown.CommonMarkSupport;
 import org.apache.hop.ui.core.PropsUi;
+import org.hopper.edw.datavault.hopgui.markdown.CommonMarkSupport;
 
 /** Converts markdown to HTML using CommonMark (mirrors hop-transform-textfile preview). */
 public final class MarkdownHtmlRenderer {

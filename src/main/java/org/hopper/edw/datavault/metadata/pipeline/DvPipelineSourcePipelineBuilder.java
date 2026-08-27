@@ -23,14 +23,6 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.DataVaultModel;
-import org.hopper.edw.datavault.metadata.DataVaultSource;
-import org.hopper.edw.datavault.metadata.DvSatellite;
-import org.hopper.edw.datavault.metadata.DvSortRowsSupport;
-import org.hopper.edw.datavault.metadata.DvSourceFieldMappingSupport;
-import org.hopper.edw.datavault.metadata.DvSourcePipelineBuilder;
-import org.hopper.edw.datavault.metadata.IDvSource;
-import org.hopper.edw.datavault.metadata.IDvTable;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineHopMeta;
 import org.apache.hop.pipeline.PipelineMeta;
@@ -43,6 +35,14 @@ import org.apache.hop.pipeline.transforms.selectvalues.SelectValuesMeta;
 import org.apache.hop.pipeline.transforms.sort.SortRowsField;
 import org.apache.hop.pipeline.transforms.sort.SortRowsMeta;
 import org.apache.hop.pipeline.transforms.uniquerowsbyhashset.UniqueRowsByHashSetMeta;
+import org.hopper.edw.datavault.metadata.DataVaultModel;
+import org.hopper.edw.datavault.metadata.DataVaultSource;
+import org.hopper.edw.datavault.metadata.DvSatellite;
+import org.hopper.edw.datavault.metadata.DvSortRowsSupport;
+import org.hopper.edw.datavault.metadata.DvSourceFieldMappingSupport;
+import org.hopper.edw.datavault.metadata.DvSourcePipelineBuilder;
+import org.hopper.edw.datavault.metadata.IDvSource;
+import org.hopper.edw.datavault.metadata.IDvTable;
 
 /**
  * Base builder for {@link DvPipelineSource}: MetaInject of the user pipeline, then record-source

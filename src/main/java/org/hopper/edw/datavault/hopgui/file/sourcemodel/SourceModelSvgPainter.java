@@ -19,10 +19,10 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.DPoint;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.command.svg.SvgRenderOptions;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphCanvasSvgResult;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Headless SVG export for a {@link SourceModel}. */
 public final class SourceModelSvgPainter {

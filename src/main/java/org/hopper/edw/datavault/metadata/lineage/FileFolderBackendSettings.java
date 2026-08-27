@@ -27,10 +27,10 @@ import org.apache.hop.core.logging.ILogChannel;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
-import org.hopper.edw.datavault.lineageview.backend.LineageBackendKind;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.datavault.lineageview.backend.LineageBackendKind;
 
 /** Folder of exported OpenLineage RunEvent JSON files. */
 @GuiPlugin(id = "GUI-FileFolderLineageBackend")

@@ -15,14 +15,9 @@
  */
 package org.hopper.edw.catalog.hopgui.preview;
 
-import org.hopper.edw.catalog.hopgui.perspective.DataCatalogPerspective;
-import org.hopper.edw.catalog.model.RecordDefinition;
-import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.apache.hop.core.Props;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.hopgui.dialog.ShowRowsDialog;
-import org.hopper.edw.datavault.metadata.DvSourcePreviewInputSupport;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.Pipeline;
@@ -33,6 +28,11 @@ import org.apache.hop.ui.core.dialog.EnterTextDialog;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.pipeline.dialog.PipelinePreviewProgressDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.catalog.hopgui.perspective.DataCatalogPerspective;
+import org.hopper.edw.catalog.model.RecordDefinition;
+import org.hopper.edw.catalog.model.RecordDefinitionKey;
+import org.hopper.edw.datavault.hopgui.dialog.ShowRowsDialog;
+import org.hopper.edw.datavault.metadata.DvSourcePreviewInputSupport;
 
 /** Runs a record-definition preview using the standard Hop transform preview flow. */
 public final class RecordDefinitionPreviewRunner {

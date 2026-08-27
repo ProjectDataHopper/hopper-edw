@@ -21,10 +21,10 @@ import lombok.Getter;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.plugin.action.GuiAction;
 import org.apache.hop.core.gui.plugin.action.GuiActionLambdaBuilder;
-import org.hopper.edw.datavault.lineageview.HopLineageViewDocument;
-import org.hopper.edw.datavault.lineageview.backend.LineageNode;
 import org.apache.hop.ui.hopgui.context.BaseGuiContextHandler;
 import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
+import org.hopper.edw.datavault.lineageview.HopLineageViewDocument;
+import org.hopper.edw.datavault.lineageview.backend.LineageNode;
 
 /** Context handler for clicks on lineage view nodes. */
 @Getter

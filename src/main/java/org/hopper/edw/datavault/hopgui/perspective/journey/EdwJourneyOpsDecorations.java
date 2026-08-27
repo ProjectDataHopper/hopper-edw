@@ -17,9 +17,9 @@ package org.hopper.edw.datavault.hopgui.perspective.journey;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader.HarvestRunSummary;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.util.Utils;
+import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader.HarvestRunSummary;
 import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneyOpsOverlay.LoadOverviewSummary;
 import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneyOpsOverlay.ModelLoadSummary;
 import org.hopper.edw.quality.history.DataQualityHistoryReader.QualityRunSummary;

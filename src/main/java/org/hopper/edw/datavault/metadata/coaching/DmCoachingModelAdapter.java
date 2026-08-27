@@ -25,13 +25,13 @@ import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
 import org.hopper.edw.datavault.metadata.dimensional.DmSourceConfiguration;
 import org.hopper.edw.datavault.metadata.dimensional.DmSourceType;
 import org.hopper.edw.datavault.metadata.dimensional.DmTableBase;
 import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Coaching adapter for dimensional models. */
 public class DmCoachingModelAdapter implements ICoachingModelAdapter {

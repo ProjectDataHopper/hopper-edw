@@ -21,13 +21,13 @@ import java.util.Set;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvModelCheckOptions;
 import org.hopper.edw.datavault.metadata.DvNote;
 import org.hopper.edw.datavault.metadata.DvNoteType;
 import org.hopper.edw.datavault.metadata.IDvTable;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Previews and applies validated AI proposals to an open model. */
 public final class DvAiProposalApplier {

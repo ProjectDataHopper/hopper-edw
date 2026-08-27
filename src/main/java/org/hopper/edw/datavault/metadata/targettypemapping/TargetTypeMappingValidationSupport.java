@@ -23,9 +23,9 @@ import java.util.Map;
 import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.metadata.datatypemapping.DataTypeMappingPatternSupport;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.datavault.metadata.datatypemapping.DataTypeMappingPatternSupport;
 
 /** Design-time checks for target type mapping profiles. */
 public final class TargetTypeMappingValidationSupport {

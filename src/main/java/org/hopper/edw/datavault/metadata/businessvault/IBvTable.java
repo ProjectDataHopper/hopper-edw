@@ -24,12 +24,12 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.IGuiPosition;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.apache.hop.metadata.api.HopMetadataObject;
 import org.apache.hop.metadata.api.IHasName;
 import org.apache.hop.metadata.api.IHopMetadataObjectFactory;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
+import org.hopper.edw.datavault.metadata.DataVaultModel;
 
 /** Common interface for Business Vault tables on a {@link BusinessVaultModel} canvas. */
 @HopMetadataObject(xmlKey = "tableType", objectFactory = IBvTable.BvTableFactory.class)

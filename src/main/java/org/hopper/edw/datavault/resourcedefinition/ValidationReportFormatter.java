@@ -15,13 +15,13 @@
  */
 package org.hopper.edw.datavault.resourcedefinition;
 
-import org.hopper.edw.catalog.discovery.RecordDefinitionSchemaDiffSupport;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.i18n.BaseMessages;
+import org.hopper.edw.catalog.discovery.RecordDefinitionSchemaDiffSupport;
 import org.hopper.edw.datavault.resourcedefinition.ValidationReport.RecordDefinitionValidation;
 import org.hopper.edw.datavault.resourcedefinition.ValidationReport.RemediationProposal;
 import org.hopper.edw.datavault.resourcedefinition.ValidationReport.ValidationIssue;
-import org.apache.hop.i18n.BaseMessages;
 
 /** Formats validation reports for logs and export. */
 public final class ValidationReportFormatter {

@@ -25,8 +25,6 @@ import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.GuiWidgetElement;
 import org.apache.hop.core.logging.ILogChannel;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.executionmap.ExecutionMapLineStyle;
-import org.hopper.edw.datavault.layout.ElkLayoutValues;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHasHopMetadataProvider;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
@@ -37,6 +35,8 @@ import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.hopgui.perspective.configuration.tabs.ConfigPluginOptionsTab;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Control;
+import org.hopper.edw.datavault.executionmap.ExecutionMapLineStyle;
+import org.hopper.edw.datavault.layout.ElkLayoutValues;
 import picocli.CommandLine;
 
 @ConfigPlugin(

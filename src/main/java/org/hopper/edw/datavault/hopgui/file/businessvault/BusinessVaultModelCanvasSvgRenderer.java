@@ -26,13 +26,13 @@ import org.apache.hop.core.gui.Rectangle;
 import org.apache.hop.core.gui.markdown.NoteLinkHit;
 import org.apache.hop.core.svg.HopSvgGraphics2D;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphCanvasSvgResult;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphWebCanvasData;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BvDvTableReference;
 import org.hopper.edw.datavault.metadata.businessvault.IBvTable;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Renders a Business Vault model to SVG for Hop Web. */
 public final class BusinessVaultModelCanvasSvgRenderer {

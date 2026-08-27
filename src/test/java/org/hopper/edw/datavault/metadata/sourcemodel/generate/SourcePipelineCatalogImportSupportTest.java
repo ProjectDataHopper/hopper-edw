@@ -20,11 +20,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
-import org.hopper.edw.catalog.transform.recorddatainput.RecordDefinitionDataInputMeta;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourcePipelineCatalogSource;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transforms.dummy.DummyMeta;
+import org.hopper.edw.catalog.transform.recorddatainput.RecordDefinitionDataInputMeta;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourcePipelineCatalogSource;
 import org.junit.jupiter.api.Test;
 
 class SourcePipelineCatalogImportSupportTest {

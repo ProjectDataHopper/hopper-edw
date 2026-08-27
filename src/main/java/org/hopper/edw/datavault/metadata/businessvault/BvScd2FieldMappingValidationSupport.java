@@ -25,12 +25,12 @@ import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
 import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvSatellite;
 import org.hopper.edw.datavault.metadata.DvTableType;
 import org.hopper.edw.datavault.metadata.SatelliteAttribute;
-import org.apache.hop.i18n.BaseMessages;
 
 /** Validation rules for explicit satellite-to-BV SCD2 field mappings. */
 final class BvScd2FieldMappingValidationSupport {

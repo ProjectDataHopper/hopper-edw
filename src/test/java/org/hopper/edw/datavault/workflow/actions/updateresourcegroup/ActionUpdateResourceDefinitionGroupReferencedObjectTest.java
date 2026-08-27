@@ -21,14 +21,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
-import org.hopper.edw.catalog.xp.RegisterResourceDefinitionGroupMetadataExtensionPoint;
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.file.IHasFilename;
 import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.plugins.PluginRegistry;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
+import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
+import org.hopper.edw.catalog.xp.RegisterResourceDefinitionGroupMetadataExtensionPoint;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

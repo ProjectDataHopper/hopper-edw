@@ -21,13 +21,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import org.hopper.edw.catalog.model.RecordDefinition;
-import org.hopper.edw.catalog.model.RecordDefinitionType;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.catalog.CatalogModelRegistrySupport;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.catalog.model.RecordDefinition;
+import org.hopper.edw.catalog.model.RecordDefinitionType;
+import org.hopper.edw.datavault.catalog.CatalogModelRegistrySupport;
 
 /** Helpers for Business Vault canvas references to tables in other BV models. */
 public final class BusinessVaultBvReferenceSupport {

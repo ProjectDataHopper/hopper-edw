@@ -18,7 +18,6 @@ package org.hopper.edw.catalog.versioning;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
@@ -34,6 +33,7 @@ import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 
 /** GUI entry points for tagging and listing catalog versions. */
 public final class CatalogVersionGuiSupport {

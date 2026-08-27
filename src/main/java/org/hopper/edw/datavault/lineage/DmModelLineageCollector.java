@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.UUID;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.catalog.CatalogModelRegistrySupport;
 import org.hopper.edw.datavault.catalog.DvCatalogNamespaces;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalConfiguration;
@@ -35,7 +36,6 @@ import org.hopper.edw.datavault.metadata.dimensional.DmNaturalKeyField;
 import org.hopper.edw.datavault.metadata.dimensional.DmSourceConfiguration;
 import org.hopper.edw.datavault.metadata.dimensional.DmTableType;
 import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Builds a {@link LineageSnapshot} from a dimensional (Kimball) model. */
 public final class DmModelLineageCollector {

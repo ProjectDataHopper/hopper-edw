@@ -16,9 +16,9 @@
 package org.hopper.edw.datavault.hopgui.coaching;
 
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.ui.hopgui.HopGui;
 import org.hopper.edw.datavault.metadata.coaching.CoachingSourceRef;
 import org.hopper.edw.datavault.metadata.coaching.ICoachingModelAdapter;
-import org.apache.hop.ui.hopgui.HopGui;
 
 public final class CoachingMappingDialogSupport {
 

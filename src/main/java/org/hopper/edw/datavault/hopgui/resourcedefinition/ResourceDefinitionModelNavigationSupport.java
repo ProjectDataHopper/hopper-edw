@@ -15,14 +15,14 @@
  */
 package org.hopper.edw.datavault.hopgui.resourcedefinition;
 
-import org.hopper.edw.catalog.hopgui.navigation.RecordOriginNavigationSupport;
-import org.hopper.edw.catalog.model.RecordOrigin;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.ui.hopgui.HopGui;
+import org.hopper.edw.catalog.hopgui.navigation.RecordOriginNavigationSupport;
+import org.hopper.edw.catalog.model.RecordOrigin;
 import org.hopper.edw.datavault.resourcedefinition.SourceUsage;
 import org.hopper.edw.datavault.resourcedefinition.SourceUsageIndexBuilder;
-import org.apache.hop.ui.hopgui.HopGui;
 
 /** Opens DV, BV, or DM model elements referenced by validation usages. */
 public final class ResourceDefinitionModelNavigationSupport {

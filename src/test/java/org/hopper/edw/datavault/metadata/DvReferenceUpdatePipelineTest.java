@@ -26,10 +26,10 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.variables.Variables;
-import org.hopper.edw.datavault.metadata.database.DvDatabaseSource;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
+import org.hopper.edw.datavault.metadata.database.DvDatabaseSource;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

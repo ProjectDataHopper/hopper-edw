@@ -20,6 +20,7 @@ import java.util.List;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceColumn;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceJson;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceJsonField;
@@ -27,7 +28,6 @@ import org.hopper.edw.datavault.metadata.sourcemodel.SourcePipeline;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceQuery;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceQueryColumn;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Resolve and validate data type mappings for source-model entities. */
 public final class SourceDataTypeMappingSupport {

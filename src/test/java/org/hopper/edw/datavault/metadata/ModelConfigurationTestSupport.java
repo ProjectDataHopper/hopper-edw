@@ -22,13 +22,13 @@ import java.nio.file.Path;
 import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.plugins.PluginRegistry;
 import org.apache.hop.core.variables.Variables;
+import org.apache.hop.metadata.api.IHopMetadata;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultConfiguration;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalConfiguration;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModelConfiguration;
 import org.hopper.edw.datavault.metadata.xp.RegisterModelConfigurationMetadataExtensionPoint;
-import org.apache.hop.metadata.api.IHopMetadata;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 
 /** Test helper to register and load shared model-configuration metadata. */
 public final class ModelConfigurationTestSupport {

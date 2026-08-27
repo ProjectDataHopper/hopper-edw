@@ -23,10 +23,6 @@ import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.variables.Variables;
-import org.hopper.edw.datavault.hopgui.dialog.ShowRowsDialog;
-import org.hopper.edw.datavault.metadata.dimensional.DmSourceConfiguration;
-import org.hopper.edw.datavault.metadata.dimensional.DmSourcePipelineSupport;
-import org.hopper.edw.datavault.metadata.pipeline.DvPipelineSourceSupport;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.Pipeline;
@@ -37,6 +33,10 @@ import org.apache.hop.ui.core.dialog.EnterTextDialog;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.pipeline.dialog.PipelinePreviewProgressDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.datavault.hopgui.dialog.ShowRowsDialog;
+import org.hopper.edw.datavault.metadata.dimensional.DmSourceConfiguration;
+import org.hopper.edw.datavault.metadata.dimensional.DmSourcePipelineSupport;
+import org.hopper.edw.datavault.metadata.pipeline.DvPipelineSourceSupport;
 
 /** Preview and field discovery helpers for dimensional pipeline sources in Hop GUI dialogs. */
 public final class DmSourcePipelineGuiSupport {

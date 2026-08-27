@@ -17,11 +17,15 @@ package org.hopper.edw.catalog.hopgui.navigation;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.hopper.edw.catalog.model.RecordOrigin;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.ui.hopgui.HopGui;
+import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
+import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
+import org.hopper.edw.catalog.model.RecordOrigin;
 import org.hopper.edw.datavault.catalog.DvSourceCatalogMapper;
 import org.hopper.edw.datavault.hopgui.file.businessvault.HopBusinessVaultFileType;
 import org.hopper.edw.datavault.hopgui.file.businessvault.HopGuiBusinessVaultGraph;
@@ -31,10 +35,6 @@ import org.hopper.edw.datavault.hopgui.file.sourcemodel.HopGuiSourceModelGraph;
 import org.hopper.edw.datavault.hopgui.file.sourcemodel.HopSourceModelFileType;
 import org.hopper.edw.datavault.hopgui.file.vault.HopGuiVaultGraph;
 import org.hopper.edw.datavault.hopgui.file.vault.HopVaultFileType;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.ui.hopgui.HopGui;
-import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
-import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
 
 /**
  * Opens the originating source model, DV, business vault, or dimensional model for a catalog record

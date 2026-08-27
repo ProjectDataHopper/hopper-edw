@@ -16,9 +16,9 @@
 package org.hopper.edw.datavault.hopgui.file.sourcemodel.delegates;
 
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphSnapshotUndo;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Gzip-compressed XML snapshots of a {@link SourceModel} for undo/redo. */
 public class HopGuiSourceModelSnapshotUndo {

@@ -19,6 +19,12 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.ui.hopgui.HopGui;
+import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
+import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
+import org.apache.hop.ui.hopgui.shared.CanvasSvgHelper;
+import org.apache.hop.ui.util.EnvironmentUtils;
 import org.hopper.edw.datavault.hopgui.file.vault.HopGuiVaultGraph;
 import org.hopper.edw.datavault.hopgui.file.vault.HopVaultFileType;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
@@ -27,12 +33,6 @@ import org.hopper.edw.datavault.metadata.IDvTable;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultDvModelResolver;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BvDvTableReference;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.ui.hopgui.HopGui;
-import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
-import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
-import org.apache.hop.ui.hopgui.shared.CanvasSvgHelper;
-import org.apache.hop.ui.util.EnvironmentUtils;
 
 /** Opens a Data Vault model and navigates to a referenced table (linked or external path). */
 public final class BusinessVaultDvNavigationSupport {

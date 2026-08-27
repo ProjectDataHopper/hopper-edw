@@ -22,8 +22,6 @@ import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
-import org.hopper.edw.catalog.metadata.DataCatalogMeta;
-import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.Result;
 import org.apache.hop.core.annotations.Action;
@@ -36,6 +34,18 @@ import org.apache.hop.core.gui.plugin.GuiWidgetElement;
 import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.HopMetadataProperty;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.pipeline.config.PipelineRunConfiguration;
+import org.apache.hop.ui.hopgui.HopGui;
+import org.apache.hop.workflow.action.ActionBase;
+import org.apache.hop.workflow.action.IAction;
+import org.apache.hop.workflow.config.WorkflowRunConfiguration;
+import org.hopper.edw.catalog.metadata.DataCatalogMeta;
+import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
+import org.hopper.edw.datavault.metadata.DataVaultModel;
+import org.hopper.edw.datavault.metadata.DvReadOnlyExistingVaultSupport;
 import org.hopper.edw.datavault.metadata.targettypemapping.TargetTypeMappingMeta;
 import org.hopper.edw.datavault.metrics.VaultUpdateExecutionSupport;
 import org.hopper.edw.datavault.metrics.WorkflowLoadOverviewFileWriter;
@@ -53,14 +63,6 @@ import org.hopper.edw.datavault.workflow.actions.datavaultupdate.ActionDataVault
 import org.hopper.edw.datavault.workflow.actions.dimensionalupdate.ActionDimensionalUpdate;
 import org.hopper.edw.datavault.workflow.actions.updateresourcegroup.ResourceGroupModelUpdatePlanner.ModelUpdateJob;
 import org.hopper.edw.datavault.workflow.actions.updateresourcegroup.ResourceGroupModelValidationSupport.ModelCheckOutcome;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.HopMetadataProperty;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.pipeline.config.PipelineRunConfiguration;
-import org.apache.hop.ui.hopgui.HopGui;
-import org.apache.hop.workflow.action.ActionBase;
-import org.apache.hop.workflow.action.IAction;
-import org.apache.hop.workflow.config.WorkflowRunConfiguration;
 
 /**
  * Updates every DV / BV / DM model listed on a resource definition group, in layer order (DV → BV →
@@ -689,6 +691,14 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
     int index = 0;
     for (ModelUpdateJob job : jobs) {
       index++;
+      if (shouldSkipReadOnlyDataVaultJob(job)) {
+        logBasic(
+            BaseMessages.getString(
+                PKG,
+                "ActionUpdateResourceDefinitionGroup.Log.SkippingReadOnlyExistingVault",
+                job.modelFile()));
+        continue;
+      }
       logBasic(
           BaseMessages.getString(
               PKG,
@@ -861,6 +871,20 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
       return GroupModelValidationReportFileWriter.ReportFormat.valueOf(raw.trim().toUpperCase());
     } catch (IllegalArgumentException e) {
       return GroupModelValidationReportFileWriter.ReportFormat.MARKDOWN;
+    }
+  }
+
+  private boolean shouldSkipReadOnlyDataVaultJob(ModelUpdateJob job) {
+    if (job == null || job.layer() != ResourceGroupModelUpdatePlanner.ModelLayer.DATA_VAULT) {
+      return false;
+    }
+    try {
+      DataVaultModel model =
+          ResourceDefinitionGroupResolver.loadDataVaultModel(
+              job.modelFile(), this, getMetadataProvider());
+      return DvReadOnlyExistingVaultSupport.skipDataVaultUpdateInResourceGroup(true, model);
+    } catch (Exception e) {
+      return false;
     }
   }
 

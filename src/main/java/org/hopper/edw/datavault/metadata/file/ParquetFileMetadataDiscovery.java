@@ -24,7 +24,6 @@ import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.SourceField;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineHopMeta;
@@ -38,6 +37,7 @@ import org.apache.hop.pipeline.transforms.getfilenames.FileItem;
 import org.apache.hop.pipeline.transforms.getfilenames.FilterItem;
 import org.apache.hop.pipeline.transforms.getfilenames.GetFileNamesMeta;
 import org.apache.hop.pipeline.transforms.metastructure.TransformMetaStructureMeta;
+import org.hopper.edw.datavault.metadata.SourceField;
 
 /** Discovers Parquet file layout by running an anonymous Hop pipeline in the Parquet plugin. */
 public final class ParquetFileMetadataDiscovery {

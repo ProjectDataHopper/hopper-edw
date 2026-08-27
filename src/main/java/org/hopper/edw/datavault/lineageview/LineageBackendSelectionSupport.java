@@ -19,9 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.metadata.lineage.LineageBackendMeta;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.api.IHopMetadataSerializer;
+import org.hopper.edw.datavault.metadata.lineage.LineageBackendMeta;
 
 /** Lists lineage backends and picks the single enabled one when a view has no backend yet. */
 public final class LineageBackendSelectionSupport {

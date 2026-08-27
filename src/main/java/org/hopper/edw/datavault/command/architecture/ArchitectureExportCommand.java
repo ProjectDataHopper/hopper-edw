@@ -29,14 +29,14 @@ import org.apache.hop.core.logging.ILogChannel;
 import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.architecture.ArchitectureExportService;
-import org.hopper.edw.datavault.architecture.ArchitectureExportService.ExportResult;
-import org.hopper.edw.datavault.architecture.ArchitectureViewType;
 import org.apache.hop.hop.Hop;
 import org.apache.hop.hop.plugin.HopCommand;
 import org.apache.hop.hop.plugin.IHopCommand;
 import org.apache.hop.metadata.api.IHasHopMetadataProvider;
 import org.apache.hop.metadata.serializer.multi.MultiMetadataProvider;
+import org.hopper.edw.datavault.architecture.ArchitectureExportService;
+import org.hopper.edw.datavault.architecture.ArchitectureExportService.ExportResult;
+import org.hopper.edw.datavault.architecture.ArchitectureViewType;
 import picocli.CommandLine;
 
 /**

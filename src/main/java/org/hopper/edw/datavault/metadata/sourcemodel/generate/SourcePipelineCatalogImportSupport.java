@@ -17,16 +17,16 @@ package org.hopper.edw.datavault.metadata.sourcemodel.generate;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.hopper.edw.catalog.transform.recorddatainput.RecordDefinitionDataInputMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.pipeline.DvPipelineSourceSupport;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourcePipelineCatalogSource;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.ITransformMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
+import org.hopper.edw.catalog.transform.recorddatainput.RecordDefinitionDataInputMeta;
+import org.hopper.edw.datavault.metadata.pipeline.DvPipelineSourceSupport;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourcePipelineCatalogSource;
 
 /**
  * Scans a Hop pipeline for {@link RecordDefinitionDataInputMeta} transforms and builds catalog

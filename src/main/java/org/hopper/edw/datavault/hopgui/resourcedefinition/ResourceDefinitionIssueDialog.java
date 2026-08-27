@@ -16,21 +16,9 @@
 package org.hopper.edw.datavault.hopgui.resourcedefinition;
 
 import java.util.List;
-import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
-import org.hopper.edw.catalog.model.RecordDefinition;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
-import org.hopper.edw.datavault.hopgui.help.HelpTopics;
-import org.hopper.edw.datavault.resourcedefinition.RemediationProposalApplySupport;
-import org.hopper.edw.datavault.resourcedefinition.RemediationProposalApplySupport.ApplyResult;
-import org.hopper.edw.datavault.resourcedefinition.RemediationProposalApplySupport.ProposalContext;
-import org.hopper.edw.datavault.resourcedefinition.ValidationReport.IssueSeverity;
-import org.hopper.edw.datavault.resourcedefinition.ValidationReport.ProposalType;
-import org.hopper.edw.datavault.resourcedefinition.ValidationReport.RecordDefinitionValidation;
-import org.hopper.edw.datavault.resourcedefinition.ValidationReport.RemediationProposal;
-import org.hopper.edw.datavault.resourcedefinition.ValidationReport.ValidationIssue;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
@@ -52,6 +40,18 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
+import org.hopper.edw.catalog.model.RecordDefinition;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
+import org.hopper.edw.datavault.resourcedefinition.RemediationProposalApplySupport;
+import org.hopper.edw.datavault.resourcedefinition.RemediationProposalApplySupport.ApplyResult;
+import org.hopper.edw.datavault.resourcedefinition.RemediationProposalApplySupport.ProposalContext;
+import org.hopper.edw.datavault.resourcedefinition.ValidationReport.IssueSeverity;
+import org.hopper.edw.datavault.resourcedefinition.ValidationReport.ProposalType;
+import org.hopper.edw.datavault.resourcedefinition.ValidationReport.RecordDefinitionValidation;
+import org.hopper.edw.datavault.resourcedefinition.ValidationReport.RemediationProposal;
+import org.hopper.edw.datavault.resourcedefinition.ValidationReport.ValidationIssue;
 
 /**
  * Remediation proposals dialog for a single validation issue: read-only summary list on top, full

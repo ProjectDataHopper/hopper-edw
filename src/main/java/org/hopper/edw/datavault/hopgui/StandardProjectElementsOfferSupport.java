@@ -16,10 +16,16 @@
 package org.hopper.edw.datavault.hopgui;
 
 import java.util.List;
-import org.hopper.edw.catalog.hopgui.LocalCatalogOfferSupport;
-import org.hopper.edw.catalog.metadata.DataCatalogMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadata;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.ui.core.dialog.ErrorDialog;
+import org.apache.hop.ui.hopgui.HopGui;
+import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
+import org.hopper.edw.catalog.hopgui.LocalCatalogOfferSupport;
+import org.hopper.edw.catalog.metadata.DataCatalogMeta;
 import org.hopper.edw.datavault.config.DataVaultConfig;
 import org.hopper.edw.datavault.config.DataVaultConfigSingleton;
 import org.hopper.edw.datavault.hopgui.file.businessvault.HopGuiBusinessVaultGraph;
@@ -35,12 +41,6 @@ import org.hopper.edw.datavault.metadata.dimensional.DimensionalConfiguration;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModelConfiguration;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadata;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.ui.core.dialog.ErrorDialog;
-import org.apache.hop.ui.hopgui.HopGui;
-import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
 
 /**
  * Offers to create the standard project catalog plus the four shared model-configuration metadata

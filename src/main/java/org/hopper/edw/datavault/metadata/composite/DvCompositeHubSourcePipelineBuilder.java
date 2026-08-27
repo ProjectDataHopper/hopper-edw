@@ -19,6 +19,8 @@ import java.util.List;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.pipeline.PipelineMeta;
 import org.hopper.edw.datavault.metadata.BusinessKey;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DataVaultSource;
@@ -26,8 +28,6 @@ import org.hopper.edw.datavault.metadata.DvHub;
 import org.hopper.edw.datavault.metadata.DvSqlOrderByCollationSupport;
 import org.hopper.edw.datavault.metadata.DvSqlOrderBySupport;
 import org.hopper.edw.datavault.metadata.IDvSource;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.pipeline.PipelineMeta;
 
 /** Hub load from a composite (multi-table) source query. */
 public class DvCompositeHubSourcePipelineBuilder extends DvCompositeSourcePipelineBuilder {

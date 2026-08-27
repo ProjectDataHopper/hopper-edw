@@ -18,14 +18,6 @@ package org.hopper.edw.catalog.smoke;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import org.hopper.edw.catalog.metadata.DataCatalogMetaObjectFactory;
-import org.hopper.edw.catalog.model.RecordDefinition;
-import org.hopper.edw.catalog.model.RecordDefinitionKey;
-import org.hopper.edw.catalog.model.RecordDefinitionQuery;
-import org.hopper.edw.catalog.model.RecordDefinitionRef;
-import org.hopper.edw.catalog.model.RecordDefinitionType;
-import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
-import org.hopper.edw.catalog.xp.RegisterDataCatalogMetadataExtensionPoint;
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.logging.LogChannel;
@@ -36,6 +28,14 @@ import org.apache.hop.core.row.value.ValueMetaInteger;
 import org.apache.hop.core.row.value.ValueMetaString;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.metadata.serializer.json.JsonMetadataProvider;
+import org.hopper.edw.catalog.metadata.DataCatalogMetaObjectFactory;
+import org.hopper.edw.catalog.model.RecordDefinition;
+import org.hopper.edw.catalog.model.RecordDefinitionKey;
+import org.hopper.edw.catalog.model.RecordDefinitionQuery;
+import org.hopper.edw.catalog.model.RecordDefinitionRef;
+import org.hopper.edw.catalog.model.RecordDefinitionType;
+import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
+import org.hopper.edw.catalog.xp.RegisterDataCatalogMetadataExtensionPoint;
 
 /**
  * Manual smoke runner for catalog CRUD. Invoked from {@code

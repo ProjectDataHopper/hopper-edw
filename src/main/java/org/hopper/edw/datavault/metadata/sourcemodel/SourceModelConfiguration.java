@@ -26,12 +26,12 @@ import org.apache.hop.core.gui.plugin.GuiElementType;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.GuiWidgetElement;
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.metadata.datatypemapping.IDataTypeMappingTarget;
 import org.apache.hop.metadata.api.HopMetadata;
 import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.HopMetadataPropertyType;
 import org.apache.hop.metadata.api.IHopMetadata;
+import org.hopper.edw.datavault.metadata.datatypemapping.IDataTypeMappingTarget;
 
 /**
  * Default connection and naming settings for source models.

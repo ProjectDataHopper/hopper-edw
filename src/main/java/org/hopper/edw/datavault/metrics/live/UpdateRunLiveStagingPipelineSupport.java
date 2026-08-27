@@ -22,7 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.apache.hop.core.Result;
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.metadata.dimensional.DimensionalConfiguration;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.engine.IPipelineEngine;
 import org.apache.hop.workflow.IActionListener;
@@ -30,6 +29,7 @@ import org.apache.hop.workflow.WorkflowMeta;
 import org.apache.hop.workflow.action.ActionMeta;
 import org.apache.hop.workflow.action.IAction;
 import org.apache.hop.workflow.engine.IWorkflowEngine;
+import org.hopper.edw.datavault.metadata.dimensional.DimensionalConfiguration;
 
 /** Tracks running pipeline actions inside generated staging-file bulk workflows. */
 public final class UpdateRunLiveStagingPipelineSupport {

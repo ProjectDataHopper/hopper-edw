@@ -18,10 +18,10 @@ package org.hopper.edw.datavault.layout;
 import java.util.List;
 import org.apache.hop.core.gui.IGuiPosition;
 import org.apache.hop.core.gui.Point;
-import org.hopper.edw.datavault.config.DataVaultConfigSingleton;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.datavault.config.DataVaultConfigSingleton;
 
 /** Shared GUI helpers for ELK layout toolbar actions. */
 public final class ElkLayoutGuiSupport {

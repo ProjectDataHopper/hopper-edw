@@ -21,6 +21,7 @@ import lombok.Getter;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.executionmap.CrawlOptions;
 import org.hopper.edw.datavault.executionmap.ExecutionMapCrawler;
 import org.hopper.edw.datavault.executionmap.ExecutionMapDiffSupport;
@@ -28,7 +29,6 @@ import org.hopper.edw.datavault.executionmap.ExecutionMapDiffSupport.DiffResult;
 import org.hopper.edw.datavault.executionmap.ExecutionMapPersistence;
 import org.hopper.edw.datavault.executionmap.OpenLineageExportSupport;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapDocument;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Generates and persists Hop execution map documents. */
 public final class ExecutionMapService {

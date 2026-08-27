@@ -17,10 +17,10 @@ package org.hopper.edw.datavault.hopgui.search;
 
 import org.apache.hop.core.search.ISearchable;
 import org.apache.hop.core.search.ISearchableCallback;
+import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
 import org.hopper.edw.datavault.hopgui.file.businessvault.HopBusinessVaultFileType;
 import org.hopper.edw.datavault.hopgui.file.businessvault.HopGuiBusinessVaultGraph;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
-import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
 
 /** Project / open-tab searchable for a Business Vault model ({@code .hbv}). */
 public class HopGuiBusinessVaultModelSearchable implements ISearchable<BusinessVaultModel> {

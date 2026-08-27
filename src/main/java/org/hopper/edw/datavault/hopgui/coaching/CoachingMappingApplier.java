@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DataVaultSource;
@@ -30,7 +31,6 @@ import org.hopper.edw.datavault.metadata.coaching.CoachingSourceRef;
 import org.hopper.edw.datavault.metadata.coaching.CoachingSourceType;
 import org.hopper.edw.datavault.metadata.coaching.DvCoachingModelAdapter;
 import org.hopper.edw.datavault.metadata.coaching.ICoachingModelAdapter;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Seeds DV table metadata from a coaching source before opening the table editor. */
 public final class CoachingMappingApplier {

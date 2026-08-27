@@ -18,11 +18,11 @@ package org.hopper.edw.datavault.metadata.dimensional.pipeline;
 import java.util.List;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.pipeline.PipelineMeta;
 import org.hopper.edw.datavault.layout.DvPipelineElkLayout;
 import org.hopper.edw.datavault.metadata.DvGeneratedPipelineSupport;
 import org.hopper.edw.datavault.metadata.IDvTargetLoadConfiguration;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalConfiguration;
-import org.apache.hop.pipeline.PipelineMeta;
 
 /** Saves generated dimensional update pipelines when configured to do so. */
 public final class DmGeneratedPipelineSupport {

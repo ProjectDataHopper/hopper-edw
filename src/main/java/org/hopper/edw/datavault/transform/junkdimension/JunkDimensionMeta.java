@@ -38,8 +38,6 @@ import org.apache.hop.core.row.value.ValueMetaString;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.xml.XmlHandler;
-import org.hopper.edw.datavault.metadata.dimensional.DmJunkHashCodeStrategy;
-import org.hopper.edw.datavault.metadata.dimensional.DmJunkSurrogateKeyStrategy;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.HopMetadataPropertyType;
@@ -52,6 +50,8 @@ import org.apache.hop.pipeline.transforms.combinationlookup.CFields;
 import org.apache.hop.pipeline.transforms.combinationlookup.KeyField;
 import org.apache.hop.pipeline.transforms.combinationlookup.ReturnFields;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
+import org.hopper.edw.datavault.metadata.dimensional.DmJunkHashCodeStrategy;
+import org.hopper.edw.datavault.metadata.dimensional.DmJunkSurrogateKeyStrategy;
 import org.w3c.dom.Node;
 
 @Transform(

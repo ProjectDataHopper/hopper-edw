@@ -22,10 +22,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import java.util.List;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.variables.Variables;
-import org.hopper.edw.datavault.metadata.SourceField;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transforms.metainject.MetaInjectMeta;
 import org.apache.hop.pipeline.transforms.metainject.MetaInjectOutputField;
+import org.hopper.edw.datavault.metadata.SourceField;
 import org.junit.jupiter.api.Test;
 
 class DvPipelineSourceSupportTest {

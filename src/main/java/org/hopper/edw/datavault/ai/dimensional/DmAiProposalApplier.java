@@ -22,6 +22,7 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.ai.DvAiProposal;
 import org.hopper.edw.datavault.ai.DvTargetLoadAiConfigurationSupport;
 import org.hopper.edw.datavault.metadata.DvNote;
@@ -29,7 +30,6 @@ import org.hopper.edw.datavault.metadata.DvNoteType;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalConfiguration;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
 import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Previews and applies validated AI proposals to an open dimensional model. */
 public final class DmAiProposalApplier {

@@ -33,10 +33,10 @@ import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.SourceField;
 import org.hopper.edw.datavault.metadata.database.DvDatabaseSourceImportSupport;
 import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceTablePreviewSupport;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Live database column discovery and compare for source-model tables (Get columns / Show

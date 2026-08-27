@@ -19,7 +19,6 @@ import java.util.List;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
-import org.hopper.edw.quality.history.DataQualityHistoryReader.FindingEntry;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.gui.GuiResource;
 import org.apache.hop.ui.core.gui.WindowProperty;
@@ -35,6 +34,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
+import org.hopper.edw.quality.history.DataQualityHistoryReader.FindingEntry;
 
 /** Read-only TableView of findings for one quality run. */
 public final class QualityHistoryFindingsDialog {

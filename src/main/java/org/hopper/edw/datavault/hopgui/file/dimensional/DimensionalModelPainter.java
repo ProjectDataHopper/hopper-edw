@@ -30,6 +30,8 @@ import org.apache.hop.core.gui.IGc.ELineStyle;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.DmTableDisplaySupport;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry.Bounds;
@@ -52,8 +54,6 @@ import org.hopper.edw.datavault.metadata.dimensional.DmTableBase;
 import org.hopper.edw.datavault.metadata.dimensional.DmTableType;
 import org.hopper.edw.datavault.metadata.dimensional.IDmFactLikeTable;
 import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Paints a dimensional model canvas with dimension/fact tables, relationships, and notes. */
 @Getter

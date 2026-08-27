@@ -24,13 +24,6 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.DvSqlSupport;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceJson;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceJsonField;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceJsonParentKind;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceQuery;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineHopMeta;
 import org.apache.hop.pipeline.PipelineMeta;
@@ -40,6 +33,13 @@ import org.apache.hop.pipeline.transforms.jsoninput.JsonInputMeta;
 import org.apache.hop.pipeline.transforms.selectvalues.SelectField;
 import org.apache.hop.pipeline.transforms.selectvalues.SelectValuesMeta;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
+import org.hopper.edw.datavault.metadata.DvSqlSupport;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceJson;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceJsonField;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceJsonParentKind;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceQuery;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
 
 /**
  * Builds a Hop pipeline that materialises a {@link SourceJson} extraction: parent source input +

@@ -45,8 +45,6 @@ import org.apache.hop.core.undo.ChangeAction;
 import org.apache.hop.core.util.StringUtil;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
-import org.hopper.edw.datavault.metadata.coaching.ModelCoachingConfiguration;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
@@ -54,6 +52,8 @@ import org.apache.hop.metadata.api.IHasName;
 import org.apache.hop.metadata.api.IHopMetadata;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
+import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
+import org.hopper.edw.datavault.metadata.coaching.ModelCoachingConfiguration;
 import org.jspecify.annotations.NonNull;
 
 /**
@@ -150,6 +150,10 @@ public class DataVaultModel extends HopMetadataBase
       configuration = new DataVaultConfiguration();
     }
     return configuration;
+  }
+
+  public boolean isReadOnlyExistingVault() {
+    return DvReadOnlyExistingVaultSupport.isReadOnly(this);
   }
 
   public ModelCoachingConfiguration getCoachingOrDefault() {
@@ -300,15 +304,28 @@ public class DataVaultModel extends HopMetadataBase
           configuration,
           metadataProvider,
           DataVaultConfiguration.class);
-      List<String> sourceNames =
-          loadDataVaultSourceNames(metadataProvider, variables, remarks, options.getCache());
+      boolean readOnly = DvReadOnlyExistingVaultSupport.isReadOnly(this);
+      if (readOnly) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_OK,
+                BaseMessages.getString(PKG, "DataVaultModel.CheckResult.ReadOnlyExistingVault"),
+                null));
+      }
+      List<String> sourceNames = new ArrayList<>();
+      if (!readOnly) {
+        sourceNames =
+            loadDataVaultSourceNames(metadataProvider, variables, remarks, options.getCache());
+      }
       if (monitor.isCanceled()) {
         return remarks;
       }
-      checkTargetDatabase(remarks, metadataProvider, variables, options.getCache());
-      checkTargetLoadMode(remarks, metadataProvider);
-      checkTargetLoadModeGuidance(remarks, variables, metadataProvider);
-      checkTargetLoadingIntegerSettings(remarks, variables);
+      checkTargetDatabase(remarks, metadataProvider, variables, options.getCache(), !readOnly);
+      if (!readOnly) {
+        checkTargetLoadMode(remarks, metadataProvider);
+        checkTargetLoadModeGuidance(remarks, variables, metadataProvider);
+        checkTargetLoadingIntegerSettings(remarks, variables);
+      }
       checkTablesPresent(remarks);
       checkTables(
           remarks, metadataProvider, variables, collectDefinedHubAndLinkNames(), options, monitor);
@@ -316,7 +333,9 @@ public class DataVaultModel extends HopMetadataBase
         checkDuplicateTableNames(remarks);
         checkDuplicateTargetTableNames(remarks);
         checkDuplicateStsTableNames(remarks, variables);
-        checkDuplicateSourceNames(remarks, sourceNames);
+        if (!readOnly) {
+          checkDuplicateSourceNames(remarks, sourceNames);
+        }
       }
       return remarks;
     } finally {
@@ -480,7 +499,8 @@ public class DataVaultModel extends HopMetadataBase
       List<ICheckResult> remarks,
       IHopMetadataProvider metadataProvider,
       IVariables variables,
-      DvModelCheckCache cache) {
+      DvModelCheckCache cache,
+      boolean includeUnicodeCapability) {
     DataVaultConfiguration config = getConfigurationOrDefault();
     if (Utils.isEmpty(config.getTargetDatabase())) {
       remarks.add(
@@ -502,8 +522,10 @@ public class DataVaultModel extends HopMetadataBase
     try {
       org.apache.hop.core.database.DatabaseMeta targetDatabase =
           DvSpecialRecordSupport.loadTargetDatabase(metadataProvider, config);
-      DvTargetUnicodeCapabilitySupport.checkTargetUnicodeCapability(
-          remarks, targetDatabase, variables, config.getTargetDatabase(), cache);
+      if (includeUnicodeCapability) {
+        DvTargetUnicodeCapabilitySupport.checkTargetUnicodeCapability(
+            remarks, targetDatabase, variables, config.getTargetDatabase(), cache);
+      }
     } catch (HopException e) {
       remarks.add(
           new CheckResult(

@@ -16,12 +16,12 @@
 package org.hopper.edw.datavault.hopgui.file.executionmap;
 
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.executionmap.DatasetNodeSupport;
-import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapNode;
-import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapNodeType;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.dialog.EnterTextDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.datavault.executionmap.DatasetNodeSupport;
+import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapNode;
+import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapNodeType;
 
 /** Read-only viewer for dataset node metadata in execution maps. */
 public final class ExecutionMapDatasetDetailsViewer {

@@ -17,10 +17,10 @@ package org.hopper.edw.datavault.hopgui.search;
 
 import org.apache.hop.core.search.ISearchable;
 import org.apache.hop.core.search.ISearchableCallback;
+import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
 import org.hopper.edw.datavault.hopgui.file.dimensional.HopDimensionalFileType;
 import org.hopper.edw.datavault.hopgui.file.dimensional.HopGuiDimensionalModelGraph;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
-import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
 
 /** Project / open-tab searchable for a dimensional model ({@code .hdm}). */
 public class HopGuiDimensionalModelSearchable implements ISearchable<DimensionalModel> {

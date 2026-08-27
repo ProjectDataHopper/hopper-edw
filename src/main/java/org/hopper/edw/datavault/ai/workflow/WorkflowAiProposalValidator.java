@@ -22,11 +22,11 @@ import java.util.Set;
 import org.apache.hop.core.plugins.ActionPluginType;
 import org.apache.hop.core.plugins.PluginRegistry;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.workflow.WorkflowMeta;
+import org.apache.hop.workflow.action.ActionMeta;
 import org.hopper.edw.datavault.ai.HopAiProposal;
 import org.hopper.edw.datavault.ai.HopAiProposalParamSupport;
 import org.hopper.edw.datavault.ai.HopAiProposalValidation;
-import org.apache.hop.workflow.WorkflowMeta;
-import org.apache.hop.workflow.action.ActionMeta;
 
 /** Validates AI workflow proposals against the open graph before the user applies them. */
 public final class WorkflowAiProposalValidator {

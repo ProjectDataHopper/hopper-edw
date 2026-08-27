@@ -18,13 +18,13 @@ package org.hopper.edw.datavault.metadata.iceberg;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.hopper.edw.catalog.discovery.PhysicalSourceRef;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.variables.Variables;
-import org.hopper.edw.datavault.metadata.SourceField;
 import org.apache.iceberg.Schema;
 import org.apache.iceberg.types.Types;
+import org.hopper.edw.catalog.discovery.PhysicalSourceRef;
+import org.hopper.edw.datavault.metadata.SourceField;
 import org.junit.jupiter.api.Test;
 
 class IcebergTableMetadataDiscoveryTest {

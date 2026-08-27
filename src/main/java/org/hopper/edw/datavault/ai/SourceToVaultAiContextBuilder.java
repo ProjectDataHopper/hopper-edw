@@ -21,6 +21,7 @@ import org.apache.commons.vfs2.FileObject;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModelLoadSupport;
@@ -29,7 +30,6 @@ import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceToVaultClassi
 import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceToVaultClassifier;
 import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceToVaultOptions;
 import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceToVaultProposal;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Compact source-model classification JSON for Data Vault AI Help. Discovers sibling {@code .hsm}

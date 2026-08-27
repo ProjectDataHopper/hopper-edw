@@ -30,13 +30,13 @@ import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.util.Utils;
+import org.apache.hop.i18n.BaseMessages;
 import org.hopper.edw.catalog.impl.file.FileDataCatalog;
 import org.hopper.edw.catalog.impl.file.RecordDefinitionDocument;
 import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.catalog.model.RecordDefinitionKey;
-import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.util.Utils;
-import org.apache.hop.i18n.BaseMessages;
 
 /**
  * File IO for catalog version manifests and immutable snapshot trees under a file catalog storage

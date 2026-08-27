@@ -21,9 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.ai.DvAiProposal;
-import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
-import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.gui.WindowProperty;
@@ -39,6 +36,9 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.ai.DvAiProposal;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 
 /** Review and selectively apply AI-proposed model changes (DV, BV, or DM). */
 public class ModelAiProposalReviewDialog {

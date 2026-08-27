@@ -18,9 +18,9 @@ package org.hopper.edw.datavault.metadata.lineage;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.logging.ILogChannel;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.lineageview.backend.LineageBackendKind;
 import org.apache.hop.metadata.api.HopMetadataObject;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.datavault.lineageview.backend.LineageBackendKind;
 
 /** Nested settings for a lineage backend connection. */
 @HopMetadataObject(objectFactory = LineageBackendSettingsFactory.class)

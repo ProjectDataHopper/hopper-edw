@@ -22,12 +22,13 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
-import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
-import org.hopper.edw.catalog.xp.RegisterResourceDefinitionGroupMetadataExtensionPoint;
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.plugins.PluginRegistry;
 import org.apache.hop.core.variables.Variables;
+import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
+import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
+import org.hopper.edw.catalog.xp.RegisterResourceDefinitionGroupMetadataExtensionPoint;
 import org.hopper.edw.datavault.lineage.LineageLayer;
 import org.hopper.edw.datavault.lineage.LineageSnapshot;
 import org.hopper.edw.datavault.lineage.TableLineage;
@@ -42,7 +43,6 @@ import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapEdge;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapEdgeType;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapNode;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapNodeType;
-import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.junit.jupiter.api.Test;
 
 class ArchitectureExportTest {
@@ -372,7 +372,8 @@ class ArchitectureExportTest {
     link.setFromNodeId("model-bv");
     link.setToNodeId("model-dv");
     link.setEdgeType(ExecutionMapEdgeType.MODEL_LINK);
-    link.setLabel("/home/matt/git/ProjectDataHopper/hopper-edw/retail-example/models/retail-360.hdv");
+    link.setLabel(
+        "/home/matt/git/ProjectDataHopper/hopper-edw/retail-example/models/retail-360.hdv");
     map.getEdgesOrEmpty().add(link);
 
     ArchitectureGraph graph = ArchitectureGraphFromExecutionMap.build(map);

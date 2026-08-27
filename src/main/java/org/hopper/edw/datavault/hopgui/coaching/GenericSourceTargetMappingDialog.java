@@ -17,8 +17,6 @@ package org.hopper.edw.datavault.hopgui.coaching;
 
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.coaching.CoachingSourceRef;
-import org.hopper.edw.datavault.metadata.coaching.ICoachingModelAdapter;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.widget.TextVar;
 import org.apache.hop.ui.hopgui.HopGui;
@@ -28,6 +26,8 @@ import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.datavault.metadata.coaching.CoachingSourceRef;
+import org.hopper.edw.datavault.metadata.coaching.ICoachingModelAdapter;
 
 /** Applies coaching bindings then opens the modeler table editor for refinement. */
 public class GenericSourceTargetMappingDialog {

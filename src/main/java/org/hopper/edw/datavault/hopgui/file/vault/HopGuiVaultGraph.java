@@ -27,8 +27,6 @@ import java.util.Map;
 import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
-import org.hopper.edw.catalog.hopgui.perspective.DataCatalogPerspective;
-import org.hopper.edw.catalog.hopgui.perspective.importmenu.DataCatalogImportMenu;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.DbCache;
 import org.apache.hop.core.ICheckResult;
@@ -59,52 +57,6 @@ import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.core.vfs.HopVfs;
 import org.apache.hop.core.xml.XmlHandler;
-import org.hopper.edw.datavault.command.svg.SvgExportService;
-import org.hopper.edw.datavault.command.svg.SvgRenderOptions;
-import org.hopper.edw.datavault.config.DataVaultConfigSingleton;
-import org.hopper.edw.datavault.hopgui.ModelGeneratedArtifactOpenSupport;
-import org.hopper.edw.datavault.hopgui.ModelTableLayoutPreviewSupport;
-import org.hopper.edw.datavault.hopgui.ModelUpdateActionAuditSupport;
-import org.hopper.edw.datavault.hopgui.ModelUpdateWorkflowClipboardSupport;
-import org.hopper.edw.datavault.hopgui.ai.DvAiAdvisorDialog;
-import org.hopper.edw.datavault.hopgui.coaching.ICoachableModelGraph;
-import org.hopper.edw.datavault.hopgui.file.modelgraph.HopGuiModelGraphBase;
-import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
-import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphCanvasSvgResult;
-import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphHit;
-import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphMouseInteractions;
-import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphSnapshotUndo;
-import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphWebCanvasData;
-import org.hopper.edw.datavault.hopgui.file.vault.delegates.HopGuiVaultClipboardDelegate;
-import org.hopper.edw.datavault.hopgui.file.vault.delegates.HopGuiVaultSnapshotUndo;
-import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
-import org.hopper.edw.datavault.metadata.DataVaultModel;
-import org.hopper.edw.datavault.metadata.DvHub;
-import org.hopper.edw.datavault.metadata.DvIntegerSettingValidationSupport;
-import org.hopper.edw.datavault.metadata.DvIntegrationSupport;
-import org.hopper.edw.datavault.metadata.DvLink;
-import org.hopper.edw.datavault.metadata.DvLinkedTable;
-import org.hopper.edw.datavault.metadata.DvLinkedTableSupport;
-import org.hopper.edw.datavault.metadata.DvModelCheckOptions;
-import org.hopper.edw.datavault.metadata.DvModelLoadSupport;
-import org.hopper.edw.datavault.metadata.DvNote;
-import org.hopper.edw.datavault.metadata.DvNoteType;
-import org.hopper.edw.datavault.metadata.DvReferenceTable;
-import org.hopper.edw.datavault.metadata.DvSatellite;
-import org.hopper.edw.datavault.metadata.DvSpecialRecordSupport;
-import org.hopper.edw.datavault.metadata.DvTableBase;
-import org.hopper.edw.datavault.metadata.DvTableResolutionSupport;
-import org.hopper.edw.datavault.metadata.DvTableType;
-import org.hopper.edw.datavault.metadata.DvTargetLoadMode;
-import org.hopper.edw.datavault.metadata.DvUpdateExecutionSupport;
-import org.hopper.edw.datavault.metadata.DvUpdateWorkflowSupport;
-import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataConstants;
-import org.hopper.edw.datavault.metadata.IDvTable;
-import org.hopper.edw.datavault.metadata.coaching.CoachingSourceRef;
-import org.hopper.edw.datavault.metadata.coaching.DvCoachingModelAdapter;
-import org.hopper.edw.datavault.metadata.coaching.ICoachingModelAdapter;
-import org.hopper.edw.datavault.workflow.actions.datavaultupdate.ActionDataVaultUpdate;
-import org.hopper.edw.datavault.workflow.actions.datavaultupdate.ActionDataVaultUpdateDialog;
 import org.apache.hop.history.AuditManager;
 import org.apache.hop.history.AuditState;
 import org.apache.hop.i18n.BaseMessages;
@@ -152,6 +104,55 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.catalog.hopgui.perspective.DataCatalogPerspective;
+import org.hopper.edw.catalog.hopgui.perspective.importmenu.DataCatalogImportMenu;
+import org.hopper.edw.datavault.command.svg.SvgExportService;
+import org.hopper.edw.datavault.command.svg.SvgRenderOptions;
+import org.hopper.edw.datavault.config.DataVaultConfigSingleton;
+import org.hopper.edw.datavault.hopgui.ModelGeneratedArtifactOpenSupport;
+import org.hopper.edw.datavault.hopgui.ModelTableLayoutPreviewSupport;
+import org.hopper.edw.datavault.hopgui.ModelUpdateActionAuditSupport;
+import org.hopper.edw.datavault.hopgui.ModelUpdateWorkflowClipboardSupport;
+import org.hopper.edw.datavault.hopgui.ai.DvAiAdvisorDialog;
+import org.hopper.edw.datavault.hopgui.coaching.ICoachableModelGraph;
+import org.hopper.edw.datavault.hopgui.file.modelgraph.HopGuiModelGraphBase;
+import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
+import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphCanvasSvgResult;
+import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphHit;
+import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphMouseInteractions;
+import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphSnapshotUndo;
+import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphWebCanvasData;
+import org.hopper.edw.datavault.hopgui.file.vault.delegates.HopGuiVaultClipboardDelegate;
+import org.hopper.edw.datavault.hopgui.file.vault.delegates.HopGuiVaultSnapshotUndo;
+import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
+import org.hopper.edw.datavault.metadata.DataVaultModel;
+import org.hopper.edw.datavault.metadata.DvHub;
+import org.hopper.edw.datavault.metadata.DvIntegerSettingValidationSupport;
+import org.hopper.edw.datavault.metadata.DvIntegrationSupport;
+import org.hopper.edw.datavault.metadata.DvLink;
+import org.hopper.edw.datavault.metadata.DvLinkedTable;
+import org.hopper.edw.datavault.metadata.DvLinkedTableSupport;
+import org.hopper.edw.datavault.metadata.DvModelCheckOptions;
+import org.hopper.edw.datavault.metadata.DvModelLoadSupport;
+import org.hopper.edw.datavault.metadata.DvNote;
+import org.hopper.edw.datavault.metadata.DvNoteType;
+import org.hopper.edw.datavault.metadata.DvReadOnlyExistingVaultSupport;
+import org.hopper.edw.datavault.metadata.DvReferenceTable;
+import org.hopper.edw.datavault.metadata.DvSatellite;
+import org.hopper.edw.datavault.metadata.DvSpecialRecordSupport;
+import org.hopper.edw.datavault.metadata.DvTableBase;
+import org.hopper.edw.datavault.metadata.DvTableResolutionSupport;
+import org.hopper.edw.datavault.metadata.DvTableType;
+import org.hopper.edw.datavault.metadata.DvTargetLoadMode;
+import org.hopper.edw.datavault.metadata.DvUpdateExecutionSupport;
+import org.hopper.edw.datavault.metadata.DvUpdateWorkflowSupport;
+import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataConstants;
+import org.hopper.edw.datavault.metadata.IDvTable;
+import org.hopper.edw.datavault.metadata.coaching.CoachingSourceRef;
+import org.hopper.edw.datavault.metadata.coaching.DvCoachingModelAdapter;
+import org.hopper.edw.datavault.metadata.coaching.ICoachingModelAdapter;
+import org.hopper.edw.datavault.workflow.actions.datavaultupdate.ActionDataVaultUpdate;
+import org.hopper.edw.datavault.workflow.actions.datavaultupdate.ActionDataVaultUpdateDialog;
 import org.jspecify.annotations.Nullable;
 import org.w3c.dom.Node;
 
@@ -889,6 +890,9 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     if (model == null) {
       return;
     }
+    if (refuseReadOnlyExistingVaultUpdate()) {
+      return;
+    }
     if (!ensureModelSavedBeforeRun()) {
       return;
     }
@@ -1107,6 +1111,20 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
   }
 
   /**
+   * Returns true when this model documents a read-only existing vault (update/DDL/debug refused).
+   */
+  private boolean refuseReadOnlyExistingVaultUpdate() {
+    if (!DvReadOnlyExistingVaultSupport.isReadOnly(model)) {
+      return false;
+    }
+    MessageBox box = new MessageBox(hopGui.getShell(), SWT.OK | SWT.ICON_ERROR);
+    box.setText(BaseMessages.getString(PKG, "HopGuiVaultGraph.ReadOnlyExistingVault.Title"));
+    box.setMessage(DvReadOnlyExistingVaultSupport.refuseUpdateMessage());
+    box.open();
+    return true;
+  }
+
+  /**
    * Returns false when the model has check errors (dialog already shown) or check was cancelled.
    */
   private boolean validateModelForDebug() {
@@ -1140,6 +1158,9 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       image = "ui/images/database.svg")
   public void generateModelDdl() {
     if (model == null) {
+      return;
+    }
+    if (refuseReadOnlyExistingVaultUpdate()) {
       return;
     }
 
@@ -1206,6 +1227,9 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       image = "ui/images/debug.svg")
   public void debugPipelines() {
     if (model == null) {
+      return;
+    }
+    if (refuseReadOnlyExistingVaultUpdate()) {
       return;
     }
     if (!validateModelForDebug()) {
@@ -1298,6 +1322,9 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
   }
 
   public void openUpdatePipeline(IDvTable table) {
+    if (refuseReadOnlyExistingVaultUpdate()) {
+      return;
+    }
     if (!validateModelForDebug()) {
       return;
     }

@@ -22,17 +22,6 @@ import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
-import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
-import org.hopper.edw.datavault.hopgui.help.HelpTopics;
-import org.hopper.edw.datavault.hopgui.lineage.LineageTabSupport;
-import org.hopper.edw.datavault.lineage.DmModelLineageCollector;
-import org.hopper.edw.datavault.lineage.LineageSnapshot;
-import org.hopper.edw.datavault.lineage.TableLineage;
-import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
-import org.hopper.edw.datavault.metadata.dimensional.DmRangeBand;
-import org.hopper.edw.datavault.metadata.dimensional.DmRangeDimension;
-import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.FormDataBuilder;
@@ -49,6 +38,17 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
+import org.hopper.edw.datavault.hopgui.lineage.LineageTabSupport;
+import org.hopper.edw.datavault.lineage.DmModelLineageCollector;
+import org.hopper.edw.datavault.lineage.LineageSnapshot;
+import org.hopper.edw.datavault.lineage.TableLineage;
+import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
+import org.hopper.edw.datavault.metadata.dimensional.DmRangeBand;
+import org.hopper.edw.datavault.metadata.dimensional.DmRangeDimension;
+import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
 
 /** Dialog to edit a metadata-only {@link DmRangeDimension} (NumberRange band definitions). */
 public class HopGuiDmRangeDimensionDialog {

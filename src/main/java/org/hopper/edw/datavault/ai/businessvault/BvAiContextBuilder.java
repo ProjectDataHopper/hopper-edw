@@ -22,6 +22,8 @@ import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.hopper.edw.datavault.ai.DvAiContextBuilder;
 import org.hopper.edw.datavault.ai.DvTargetLoadAiConfigurationSupport;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
@@ -36,8 +38,6 @@ import org.hopper.edw.datavault.metadata.businessvault.BvScd2Table;
 import org.hopper.edw.datavault.metadata.businessvault.IBvTable;
 import org.hopper.edw.datavault.metrics.ExecutionInfoAiContextBuilder;
 import org.hopper.edw.datavault.metrics.MetricsAiContextBuilder;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 
 /** Assembles redacted context for Business Vault AI advisory calls. */
 public final class BvAiContextBuilder {

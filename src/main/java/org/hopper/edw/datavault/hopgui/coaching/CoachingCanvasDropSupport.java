@@ -17,9 +17,6 @@ package org.hopper.edw.datavault.hopgui.coaching;
 
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.coaching.CoachingSourceRef;
-import org.hopper.edw.datavault.metadata.coaching.CoachingSourceResolver;
-import org.hopper.edw.datavault.metadata.coaching.ICoachingModelAdapter;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.hopgui.file.shared.HopGuiAbstractGraph;
 import org.eclipse.swt.dnd.DND;
@@ -29,6 +26,9 @@ import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Canvas;
+import org.hopper.edw.datavault.metadata.coaching.CoachingSourceRef;
+import org.hopper.edw.datavault.metadata.coaching.CoachingSourceResolver;
+import org.hopper.edw.datavault.metadata.coaching.ICoachingModelAdapter;
 
 public final class CoachingCanvasDropSupport {
 

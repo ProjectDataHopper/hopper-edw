@@ -18,8 +18,8 @@ package org.hopper.edw.datavault.executionmap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.apache.hop.core.variables.Variables;
+import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapDocument;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapNode;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapNodeType;

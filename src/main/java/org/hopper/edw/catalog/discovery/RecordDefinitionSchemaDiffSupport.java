@@ -22,9 +22,9 @@ import java.util.Locale;
 import java.util.Map;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.i18n.BaseMessages;
 import org.hopper.edw.datavault.metadata.SourceField;
 import org.hopper.edw.datavault.metadata.SourceFieldPrimaryKeySupport;
-import org.apache.hop.i18n.BaseMessages;
 
 /** Compares stored catalog field contracts against freshly discovered source fields. */
 public final class RecordDefinitionSchemaDiffSupport {

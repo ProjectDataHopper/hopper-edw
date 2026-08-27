@@ -19,18 +19,18 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.logging.ILogChannel;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.hopper.edw.datavault.lineage.BvModelLineageCollector;
 import org.hopper.edw.datavault.lineage.DmModelLineageCollector;
 import org.hopper.edw.datavault.lineage.DvModelLineageCollector;
 import org.hopper.edw.datavault.lineage.LineageSnapshot;
 import org.hopper.edw.datavault.resourcedefinition.ResourceDefinitionGroupResolver;
 import org.hopper.edw.datavault.resourcedefinition.ValidationModels;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Collects model lineage and exports OpenLineage events to file and/or HTTP. */
 public final class OpenLineageExportService {

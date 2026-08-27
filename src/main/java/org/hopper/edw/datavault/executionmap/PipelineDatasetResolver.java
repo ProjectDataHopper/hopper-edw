@@ -19,13 +19,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapEdgeType;
-import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapNodeType;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.ITransformMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
 import org.apache.hop.pipeline.transforms.tableoutput.TableOutputMeta;
+import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapEdgeType;
+import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapNodeType;
 
 /** Adds dataset leaf nodes from TableInput and TableOutput transforms in pipelines. */
 public final class PipelineDatasetResolver {

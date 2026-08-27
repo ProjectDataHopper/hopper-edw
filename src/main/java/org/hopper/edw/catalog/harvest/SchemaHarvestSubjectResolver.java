@@ -20,20 +20,20 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
-import org.hopper.edw.catalog.model.RecordDefinition;
-import org.hopper.edw.catalog.model.RecordDefinitionKey;
-import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
+import org.hopper.edw.catalog.model.RecordDefinition;
+import org.hopper.edw.catalog.model.RecordDefinitionKey;
+import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
 import org.hopper.edw.datavault.catalog.DvCatalogNamespaces;
 import org.hopper.edw.datavault.resourcedefinition.ResourceDefinitionGroupResolver;
 import org.hopper.edw.datavault.resourcedefinition.SourceUsage;
 import org.hopper.edw.datavault.resourcedefinition.SourceUsageIndexBuilder;
 import org.hopper.edw.datavault.resourcedefinition.ValidationModels;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Resolves harvest subjects from a resource definition group. */
 public final class SchemaHarvestSubjectResolver {

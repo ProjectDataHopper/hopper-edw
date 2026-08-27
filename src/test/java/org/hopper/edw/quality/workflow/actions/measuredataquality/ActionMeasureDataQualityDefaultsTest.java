@@ -20,10 +20,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import org.apache.hop.core.variables.Variables;
 import org.hopper.edw.catalog.model.PhysicalTableRef;
 import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.catalog.model.RecordDefinitionKey;
-import org.apache.hop.core.variables.Variables;
 import org.hopper.edw.datavault.metrics.DvUpdateMetricsConstants;
 import org.hopper.edw.quality.history.DataQualityHistoryPublisher;
 import org.hopper.edw.quality.model.DataQualityReport;

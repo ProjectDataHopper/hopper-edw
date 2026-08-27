@@ -17,18 +17,18 @@ package org.hopper.edw.datavault.hopgui.resourcedefinition;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.hopper.edw.catalog.hopgui.perspective.DataCatalogPerspective;
-import org.hopper.edw.catalog.model.RecordDefinition;
-import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.ui.hopgui.HopGui;
+import org.hopper.edw.catalog.hopgui.perspective.DataCatalogPerspective;
+import org.hopper.edw.catalog.model.RecordDefinition;
+import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
 import org.hopper.edw.datavault.resourcedefinition.SourceUsage;
 import org.hopper.edw.datavault.resourcedefinition.ValidationAcknowledgementSupport;
 import org.hopper.edw.datavault.resourcedefinition.ValidationReport.RecordDefinitionValidation;
 import org.hopper.edw.datavault.resourcedefinition.ValidationReport.ValidationIssue;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.ui.hopgui.HopGui;
 
 /** Shared non-widget actions for validation issue navigation and acknowledgement. */
 public final class ValidationIssueGuiActions {

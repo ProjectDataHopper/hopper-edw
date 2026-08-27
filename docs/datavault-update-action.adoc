@@ -8,6 +8,8 @@ toc::[]
 
 The **Data Vault Update** workflow action is the main way to load a complete Data Vault model in Apache Hop. You point it at a saved Data Vault Model (`.hdv` file), choose a pipeline run configuration, and the action takes care of the rest.
 
+If the model's Data Vault configuration has **Read-only existing vault** enabled, the action **fails immediately** after loading the model. Hop will not generate DDL, insert sentinels, or run load pipelines. Document the `.hdv` for Business Vault and dimensional layers instead; use **Update resource definition group** to skip that Data Vault job and continue BV/DM.
+
 At runtime the action:
 
 * Loads the model from the `.hdv` file.

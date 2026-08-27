@@ -17,10 +17,6 @@ package org.hopper.edw.catalog.hopgui.perspective;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
-import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestChange;
-import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestedField;
-import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader;
-import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader.HarvestSubjectSummary;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.util.Utils;
@@ -44,6 +40,10 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
+import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestChange;
+import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestedField;
+import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader;
+import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader.HarvestSubjectSummary;
 
 /** Subject-level timeline of schema harvest results. Double-click opens changes + fields. */
 public final class SchemaHarvestSubjectHistoryDialog {

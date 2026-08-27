@@ -20,12 +20,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.hadoop.conf.Configuration;
-import org.hopper.edw.catalog.discovery.PhysicalSourceRef;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.SourceField;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.iceberg.CatalogProperties;
 import org.apache.iceberg.CatalogUtil;
@@ -35,6 +33,8 @@ import org.apache.iceberg.catalog.Catalog;
 import org.apache.iceberg.catalog.TableIdentifier;
 import org.apache.iceberg.types.Type;
 import org.apache.iceberg.types.Types;
+import org.hopper.edw.catalog.discovery.PhysicalSourceRef;
+import org.hopper.edw.datavault.metadata.SourceField;
 
 /** Discovers Iceberg table layout from a REST catalog and S3-compatible warehouse. */
 public final class IcebergTableMetadataDiscovery {

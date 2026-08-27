@@ -17,16 +17,16 @@ package org.hopper.edw.catalog.hopgui.perspective.importmenu;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.hopper.edw.catalog.hopgui.perspective.DataCatalogPerspective;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.gui.plugin.action.GuiAction;
 import org.apache.hop.core.gui.plugin.action.GuiActionType;
-import org.hopper.edw.datavault.hopgui.GuiBusySupport;
-import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.hopgui.context.GuiContextUtil;
 import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
+import org.hopper.edw.catalog.hopgui.perspective.DataCatalogPerspective;
+import org.hopper.edw.datavault.hopgui.GuiBusySupport;
+import org.hopper.edw.datavault.metadata.DataVaultModel;
 
 /** Shows the import menu for the Data Catalog perspective. */
 public final class DataCatalogImportMenu {

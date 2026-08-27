@@ -23,11 +23,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
 import org.hopper.edw.datavault.resourcedefinition.ValidationModels;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Builds a {@link ReverseLineageIndex} from model-derived lineage, including one-hop expansion so a

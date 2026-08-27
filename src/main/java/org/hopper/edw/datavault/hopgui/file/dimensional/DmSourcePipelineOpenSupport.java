@@ -18,14 +18,14 @@ package org.hopper.edw.datavault.hopgui.file.dimensional;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.dimensional.DmSourceConfiguration;
-import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
 import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.datavault.metadata.dimensional.DmSourceConfiguration;
+import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
 
 /** Opens the configured staging pipeline for a dimensional table. */
 public final class DmSourcePipelineOpenSupport {

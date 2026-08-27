@@ -18,6 +18,7 @@ package org.hopper.edw.datavault.lineageview;
 import java.util.List;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.catalog.DvCatalogNamespaces;
 import org.hopper.edw.datavault.lineage.BvModelLineageCollector;
 import org.hopper.edw.datavault.lineage.DmModelLineageCollector;
@@ -37,7 +38,6 @@ import org.hopper.edw.datavault.metadata.lineage.LineageBackendMeta;
 import org.hopper.edw.datavault.metadata.lineage.LocalModelsBackendSettings;
 import org.hopper.edw.datavault.metadata.lineage.MarquezBackendSettings;
 import org.hopper.edw.datavault.openlineage.OpenLineageSnapshotMapper;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Resolves OpenLineage seed ids from a view definition and the current backend. */
 public final class LineageViewSeedSupport {

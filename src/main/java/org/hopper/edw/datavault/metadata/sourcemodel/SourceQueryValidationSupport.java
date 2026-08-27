@@ -25,11 +25,11 @@ import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceQueryGenerationSupport;
 import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceQuerySqlGenerator;
 import org.hopper.edw.datavault.virtualization.sql.SourceModelSqlEngine;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Structural and SQL-generation checks for a {@link SourceQuery}. */
 public final class SourceQueryValidationSupport {

@@ -27,6 +27,8 @@ import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.pipeline.PipelineMeta;
 import org.hopper.edw.datavault.layout.DvPipelineElkLayout;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModelLoadSupport;
@@ -35,8 +37,6 @@ import org.hopper.edw.datavault.virtualization.generate.RelToPipelineGenerator;
 import org.hopper.edw.datavault.virtualization.sql.SourceModelSqlEngine;
 import org.hopper.edw.datavault.virtualization.sql.SourceModelSqlOptions;
 import org.hopper.edw.datavault.virtualization.sql.SourceModelSqlPlan;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.pipeline.PipelineMeta;
 
 /** Shared planning/execution helpers for the Source Model SQL transform and dialog. */
 public final class SourceModelSqlSupport {

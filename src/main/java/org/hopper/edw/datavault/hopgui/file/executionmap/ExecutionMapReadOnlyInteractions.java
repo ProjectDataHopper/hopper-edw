@@ -18,10 +18,10 @@ package org.hopper.edw.datavault.hopgui.file.executionmap;
 import org.apache.hop.core.gui.AreaOwner;
 import org.apache.hop.core.gui.AreaOwner.AreaType;
 import org.apache.hop.core.gui.Point;
+import org.eclipse.swt.widgets.Event;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphHit;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphMouseInteractions;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapNode;
-import org.eclipse.swt.widgets.Event;
 
 /** Read-only mouse interactions for execution map graphs. */
 public class ExecutionMapReadOnlyInteractions implements ModelGraphMouseInteractions {

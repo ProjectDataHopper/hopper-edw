@@ -16,8 +16,6 @@
 package org.hopper.edw.catalog.ddl;
 
 import java.util.List;
-import org.hopper.edw.catalog.model.PhysicalTableRef;
-import org.hopper.edw.catalog.model.RecordDefinition;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.database.Database;
 import org.apache.hop.core.database.DatabaseMeta;
@@ -27,6 +25,8 @@ import org.apache.hop.core.logging.ILoggingObject;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.hopper.edw.catalog.model.PhysicalTableRef;
+import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.datavault.catalog.DvSourceFieldSupport;
 import org.hopper.edw.datavault.metadata.DvDdlSupport;
 import org.hopper.edw.datavault.metadata.SourceField;

@@ -27,8 +27,8 @@ import org.apache.hop.core.logging.LoggingObjectType;
 import org.apache.hop.core.logging.SimpleLoggingObject;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.config.DataVaultConfigSingleton;
 import org.apache.hop.i18n.BaseMessages;
+import org.hopper.edw.datavault.config.DataVaultConfigSingleton;
 
 /**
  * Validates that a DV/BV/DM target database can store full Unicode in string columns — a baseline

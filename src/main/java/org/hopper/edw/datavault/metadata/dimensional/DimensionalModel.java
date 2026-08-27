@@ -39,17 +39,17 @@ import org.apache.hop.core.gui.plugin.GuiWidgetElement;
 import org.apache.hop.core.undo.ChangeAction;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.DvNote;
-import org.hopper.edw.datavault.metadata.DvTargetLoadModelCheckSupport;
-import org.hopper.edw.datavault.metadata.DvTargetUnicodeCapabilitySupport;
-import org.hopper.edw.datavault.metadata.ModelConfigurationResolver;
-import org.hopper.edw.datavault.metadata.coaching.ModelCoachingConfiguration;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHasName;
 import org.apache.hop.metadata.api.IHopMetadata;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.datavault.metadata.DvNote;
+import org.hopper.edw.datavault.metadata.DvTargetLoadModelCheckSupport;
+import org.hopper.edw.datavault.metadata.DvTargetUnicodeCapabilitySupport;
+import org.hopper.edw.datavault.metadata.ModelConfigurationResolver;
+import org.hopper.edw.datavault.metadata.coaching.ModelCoachingConfiguration;
 import org.jspecify.annotations.NonNull;
 
 /** Kimball dimensional model (star/snowflake scaffold). */

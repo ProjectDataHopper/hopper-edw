@@ -18,9 +18,6 @@ package org.hopper.edw.datavault.hopgui.file.executionmap;
 import java.util.List;
 import java.util.function.Consumer;
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.executionmap.ExecutionMapFocusContext;
-import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapDocument;
-import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapNode;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.PropsUi;
 import org.eclipse.swt.SWT;
@@ -30,6 +27,9 @@ import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+import org.hopper.edw.datavault.executionmap.ExecutionMapFocusContext;
+import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapDocument;
+import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapNode;
 
 /** Breadcrumb navigation for execution map drill-down. */
 public class ExecutionMapBreadcrumbBar extends Composite {

@@ -25,13 +25,13 @@ import java.util.List;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.pipeline.transforms.languagemodelchat.LanguageModelChatMeta;
+import org.apache.hop.pipeline.transforms.languagemodelchat.internals.LanguageModelFacade;
 import org.hopper.edw.datavault.ai.DvAiLanguageModelFactory;
 import org.hopper.edw.datavault.ai.DvAiProposalParser;
 import org.hopper.edw.datavault.ai.DvAiResponse;
 import org.hopper.edw.datavault.ai.HopAiAdvisorEngine;
 import org.hopper.edw.datavault.ai.HopAiConfig;
-import org.apache.hop.pipeline.transforms.languagemodelchat.LanguageModelChatMeta;
-import org.apache.hop.pipeline.transforms.languagemodelchat.internals.LanguageModelFacade;
 
 /** Calls the configured LLM and parses Business Vault advisory responses. */
 public final class BvAiAdvisorService {

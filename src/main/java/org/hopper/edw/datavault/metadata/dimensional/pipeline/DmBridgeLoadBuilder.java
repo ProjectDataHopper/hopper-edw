@@ -19,10 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataSupport;
-import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
-import org.hopper.edw.datavault.metadata.dimensional.DmBridge;
-import org.hopper.edw.datavault.metadata.dimensional.DmBridgeDimensionRef;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineHopMeta;
 import org.apache.hop.pipeline.PipelineMeta;
@@ -31,6 +27,10 @@ import org.apache.hop.pipeline.transforms.insertupdate.InsertUpdateKeyField;
 import org.apache.hop.pipeline.transforms.insertupdate.InsertUpdateLookupField;
 import org.apache.hop.pipeline.transforms.insertupdate.InsertUpdateMeta;
 import org.apache.hop.pipeline.transforms.insertupdate.InsertUpdateValue;
+import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataSupport;
+import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
+import org.hopper.edw.datavault.metadata.dimensional.DmBridge;
+import org.hopper.edw.datavault.metadata.dimensional.DmBridgeDimensionRef;
 
 /** Generates bridge table load pipelines using Insert/Update on dimension key combinations. */
 public final class DmBridgeLoadBuilder {

@@ -77,7 +77,9 @@ Business Vault **reads** hub and satellite history from the Data Vault target da
 
 When raw vault tables are loaded outside Hop (dbt, SQL, custom ETL), set **Integration mode** to **External read-only** on the DV table. Business Vault SCD2 generation still works as long as the `.hdv` metadata accurately describes the warehouse tables.
 
-See link:dv-integration-modes.adoc[Data Vault integration modes].
+To document a **whole** existing raw vault and only build Business Vault and dimensional layers in Hop, enable **Read-only existing vault** on a dedicated Data Vault configuration instead. Model the hubs, links, and satellites (hash keys, parents, attributes, table names) without record sources; Hop will not load or alter those tables.
+
+See link:dv-integration-modes.adoc[Data Vault integration modes] and link:datavault-configuration.adoc[Data Vault configuration].
 
 == Sample models
 

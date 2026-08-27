@@ -18,11 +18,11 @@ package org.hopper.edw.datavault.hopgui.lineageview;
 import org.apache.hop.core.action.GuiContextAction;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.action.GuiActionType;
+import org.apache.hop.ui.hopgui.HopGui;
 import org.hopper.edw.datavault.hopgui.file.businessvault.HopGuiBusinessVaultTableContext;
 import org.hopper.edw.datavault.hopgui.file.dimensional.HopGuiDimensionalTableContext;
 import org.hopper.edw.datavault.hopgui.file.vault.HopGuiVaultTableContext;
 import org.hopper.edw.datavault.lineage.LineageLayer;
-import org.apache.hop.ui.hopgui.HopGui;
 
 /** Table context actions that open an unsaved Hop Lineage View. */
 @GuiPlugin(description = "i18n::LineageViewGuiPlugin.Description")

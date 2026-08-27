@@ -28,15 +28,15 @@ import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.core.xml.XmlHandler;
-import org.hopper.edw.datavault.hopgui.file.businessvault.HopBusinessVaultFileType;
-import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
-import org.hopper.edw.datavault.metadata.businessvault.BvScd2PipelineSupport;
-import org.hopper.edw.datavault.metadata.businessvault.BvScd2Table;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
+import org.hopper.edw.datavault.hopgui.file.businessvault.HopBusinessVaultFileType;
+import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
+import org.hopper.edw.datavault.metadata.businessvault.BvScd2PipelineSupport;
+import org.hopper.edw.datavault.metadata.businessvault.BvScd2Table;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
@@ -71,6 +71,14 @@ class DvIntegrationSupportTest {
     hub.setIntegrationMode(DvIntegrationMode.CUSTOM_PIPELINES);
     assertTrue(DvIntegrationSupport.isCustomPipelines(hub));
     assertEquals("custom", DvIntegrationSupport.integrationCanvasSuffix(hub));
+
+    DataVaultConfiguration configuration = new DataVaultConfiguration();
+    configuration.setReadOnlyExistingVault(true);
+    DataVaultModel model = new DataVaultModel();
+    model.setConfiguration(configuration);
+    DvHub managed = new DvHub("hub_party");
+    assertEquals("doc", DvIntegrationSupport.integrationCanvasSuffix(managed, model));
+    assertTrue(DvIntegrationSupport.relaxesSourceValidation(managed, model));
   }
 
   @Test

@@ -20,13 +20,6 @@ import java.util.List;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.hopgui.file.lineageview.HopLineageViewFileType;
-import org.hopper.edw.datavault.lineage.LineageLayer;
-import org.hopper.edw.datavault.lineage.LineageSnapshot;
-import org.hopper.edw.datavault.lineageview.HopLineageViewDocument;
-import org.hopper.edw.datavault.lineageview.LineageBackendSelectionSupport;
-import org.hopper.edw.datavault.lineageview.LineageViewSeedSupport;
-import org.hopper.edw.datavault.metadata.lineage.LineageBackendMeta;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.api.IHopMetadataSerializer;
@@ -35,6 +28,13 @@ import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.eclipse.swt.SWT;
+import org.hopper.edw.datavault.hopgui.file.lineageview.HopLineageViewFileType;
+import org.hopper.edw.datavault.lineage.LineageLayer;
+import org.hopper.edw.datavault.lineage.LineageSnapshot;
+import org.hopper.edw.datavault.lineageview.HopLineageViewDocument;
+import org.hopper.edw.datavault.lineageview.LineageBackendSelectionSupport;
+import org.hopper.edw.datavault.lineageview.LineageViewSeedSupport;
+import org.hopper.edw.datavault.metadata.lineage.LineageBackendMeta;
 
 /** Opens an unsaved lineage view from a model table. */
 public final class LineageViewLaunchSupport {

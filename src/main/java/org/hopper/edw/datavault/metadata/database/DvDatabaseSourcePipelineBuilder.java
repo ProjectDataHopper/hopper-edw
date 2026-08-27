@@ -24,6 +24,13 @@ import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.pipeline.PipelineHopMeta;
+import org.apache.hop.pipeline.PipelineMeta;
+import org.apache.hop.pipeline.transform.TransformMeta;
+import org.apache.hop.pipeline.transforms.selectvalues.SelectMetadataChange;
+import org.apache.hop.pipeline.transforms.selectvalues.SelectValuesMeta;
+import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
 import org.hopper.edw.datavault.metadata.BusinessKey;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DataVaultSource;
@@ -34,13 +41,6 @@ import org.hopper.edw.datavault.metadata.DvSqlOrderBySupport;
 import org.hopper.edw.datavault.metadata.DvSqlSupport;
 import org.hopper.edw.datavault.metadata.IDvSource;
 import org.hopper.edw.datavault.metadata.IDvTable;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.pipeline.PipelineHopMeta;
-import org.apache.hop.pipeline.PipelineMeta;
-import org.apache.hop.pipeline.transform.TransformMeta;
-import org.apache.hop.pipeline.transforms.selectvalues.SelectMetadataChange;
-import org.apache.hop.pipeline.transforms.selectvalues.SelectValuesMeta;
-import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
 import org.jspecify.annotations.NonNull;
 
 @Getter

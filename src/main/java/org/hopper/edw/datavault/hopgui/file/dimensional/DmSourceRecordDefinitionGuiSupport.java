@@ -18,6 +18,15 @@ package org.hopper.edw.datavault.hopgui.file.dimensional;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.row.IRowMeta;
+import org.apache.hop.core.util.Utils;
+import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.ui.core.dialog.EnterTextDialog;
+import org.apache.hop.ui.core.dialog.ErrorDialog;
+import org.eclipse.swt.widgets.Shell;
 import org.hopper.edw.catalog.hopgui.preview.RecordDefinitionPreviewRunner;
 import org.hopper.edw.catalog.hopgui.preview.RecordDefinitionPreviewSupport;
 import org.hopper.edw.catalog.model.RecordDefinition;
@@ -25,18 +34,9 @@ import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.hopper.edw.catalog.model.RecordDefinitionQuery;
 import org.hopper.edw.catalog.model.RecordDefinitionRef;
 import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
-import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.row.IRowMeta;
-import org.apache.hop.core.util.Utils;
-import org.apache.hop.core.variables.IVariables;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalConfiguration;
 import org.hopper.edw.datavault.metadata.dimensional.DmSourceConfiguration;
 import org.hopper.edw.datavault.metadata.dimensional.DmSourceRecordDefinitionSupport;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.ui.core.dialog.EnterTextDialog;
-import org.apache.hop.ui.core.dialog.ErrorDialog;
-import org.eclipse.swt.widgets.Shell;
 
 /** GUI helpers for dimensional record-definition staging sources. */
 public final class DmSourceRecordDefinitionGuiSupport {

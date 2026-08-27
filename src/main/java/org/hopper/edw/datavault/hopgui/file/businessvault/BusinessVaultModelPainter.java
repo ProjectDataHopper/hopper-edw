@@ -31,6 +31,8 @@ import org.apache.hop.core.gui.IGc.ELineStyle;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.DvTableDisplaySupport;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry.Bounds;
@@ -52,8 +54,6 @@ import org.hopper.edw.datavault.metadata.businessvault.BvSqlResolvedKind;
 import org.hopper.edw.datavault.metadata.businessvault.BvTableBase;
 import org.hopper.edw.datavault.metadata.businessvault.BvTableType;
 import org.hopper.edw.datavault.metadata.businessvault.IBvTable;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Paints a Business Vault model canvas with DV references, BV tables, and derivative links. */
 @Getter

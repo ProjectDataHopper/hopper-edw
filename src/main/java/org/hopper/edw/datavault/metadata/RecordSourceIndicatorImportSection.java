@@ -18,8 +18,6 @@ package org.hopper.edw.datavault.metadata;
 import java.util.List;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.catalog.RecordSourceIndicatorOptions;
-import org.hopper.edw.datavault.catalog.RecordSourceIndicatorSupport;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.PropsUi;
 import org.eclipse.swt.SWT;
@@ -33,6 +31,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.catalog.RecordSourceIndicatorOptions;
+import org.hopper.edw.datavault.catalog.RecordSourceIndicatorSupport;
 
 /** Reusable SWT section for choosing static record source vs source column during import. */
 public final class RecordSourceIndicatorImportSection {

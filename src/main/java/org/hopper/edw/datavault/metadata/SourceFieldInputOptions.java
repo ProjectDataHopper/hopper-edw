@@ -18,8 +18,8 @@ package org.hopper.edw.datavault.metadata;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hopper.edw.datavault.metadata.datatypemapping.FieldConversionOptions;
 import org.apache.hop.metadata.api.HopMetadataProperty;
+import org.hopper.edw.datavault.metadata.datatypemapping.FieldConversionOptions;
 
 /** Format-specific input options for a Data Vault source field. */
 @Getter

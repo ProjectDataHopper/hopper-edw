@@ -18,12 +18,6 @@ package org.hopper.edw.catalog.hopgui.perspective;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestChange;
-import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestedField;
-import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader;
-import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader.HarvestRunSummary;
-import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader.HarvestSubjectSummary;
-import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.util.Utils;
@@ -51,6 +45,12 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestChange;
+import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestedField;
+import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader;
+import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader.HarvestRunSummary;
+import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader.HarvestSubjectSummary;
+import org.hopper.edw.catalog.model.RecordDefinitionKey;
 
 /**
  * Group-scoped schema harvest browser: harvest runs (master) and subjects (detail) with filters.

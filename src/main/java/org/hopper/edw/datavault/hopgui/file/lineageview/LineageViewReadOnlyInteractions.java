@@ -17,10 +17,10 @@ package org.hopper.edw.datavault.hopgui.file.lineageview;
 
 import org.apache.hop.core.gui.AreaOwner;
 import org.apache.hop.core.gui.Point;
+import org.eclipse.swt.widgets.Event;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphHit;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphMouseInteractions;
 import org.hopper.edw.datavault.lineageview.backend.LineageNode;
-import org.eclipse.swt.widgets.Event;
 
 /** Pan/zoom/select only — no drag or create. */
 public class LineageViewReadOnlyInteractions implements ModelGraphMouseInteractions {

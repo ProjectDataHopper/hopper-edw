@@ -23,10 +23,10 @@ import java.util.Set;
 import org.apache.hop.core.gui.IGuiPosition;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.ui.core.PropsUi;
 import org.hopper.edw.datavault.metadata.DvNote;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.IBvTable;
-import org.apache.hop.ui.core.PropsUi;
 
 /** Helpers for renaming and offsetting objects pasted onto a Business Vault model canvas. */
 final class BusinessVaultClipboardPasteSupport {

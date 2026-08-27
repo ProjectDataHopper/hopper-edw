@@ -17,6 +17,12 @@ package org.hopper.edw.catalog.discovery;
 
 import java.util.Date;
 import org.apache.commons.vfs2.FileObject;
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.util.Utils;
+import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.core.vfs.HopVfs;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.catalog.model.DvCsvFormatRecord;
 import org.hopper.edw.catalog.model.PhysicalTableRef;
 import org.hopper.edw.catalog.model.RecordDefinition;
@@ -24,10 +30,6 @@ import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.hopper.edw.catalog.model.RecordDefinitionType;
 import org.hopper.edw.catalog.model.RecordOrigin;
 import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
-import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.util.Utils;
-import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.core.vfs.HopVfs;
 import org.hopper.edw.datavault.catalog.CatalogModelRegistrySupport;
 import org.hopper.edw.datavault.catalog.DvSourceCatalogMapper;
 import org.hopper.edw.datavault.catalog.DvSourceFieldSupport;
@@ -44,8 +46,6 @@ import org.hopper.edw.datavault.metadata.file.DvFileLocationSupport;
 import org.hopper.edw.datavault.metadata.file.DvParquetSource;
 import org.hopper.edw.datavault.metadata.file.IDvFileBasedSource;
 import org.hopper.edw.datavault.metadata.iceberg.DvIcebergSource;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Persists discovered record definitions to a data catalog connection. */
 public final class RecordDefinitionCatalogWriter {

@@ -15,6 +15,11 @@
  */
 package org.hopper.edw.catalog.hopgui.preview;
 
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.util.Utils;
+import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.catalog.hopgui.perspective.DataCatalogPerspective;
 import org.hopper.edw.catalog.model.DvCsvFormatRecord;
 import org.hopper.edw.catalog.model.DvSourceRecord;
@@ -23,9 +28,6 @@ import org.hopper.edw.catalog.model.PhysicalIcebergTableRef;
 import org.hopper.edw.catalog.model.PhysicalTableRef;
 import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.catalog.model.RecordDefinitionType;
-import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.util.Utils;
-import org.apache.hop.core.variables.IVariables;
 import org.hopper.edw.datavault.catalog.CatalogDvSourceMapper;
 import org.hopper.edw.datavault.catalog.DvSourceFieldSupport;
 import org.hopper.edw.datavault.metadata.DataVaultSource;
@@ -33,8 +35,6 @@ import org.hopper.edw.datavault.metadata.DvSourcePreviewInputSupport;
 import org.hopper.edw.datavault.metadata.DvSourceType;
 import org.hopper.edw.datavault.metadata.IDvSource;
 import org.hopper.edw.datavault.metadata.database.DvDatabaseSource;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Builds preview pipelines from catalog record definitions. */
 public final class RecordDefinitionPreviewSupport {

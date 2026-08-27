@@ -50,10 +50,6 @@ import org.apache.hop.core.row.value.ValueMetaString;
 import org.apache.hop.core.row.value.ValueMetaTimestamp;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
-import org.hopper.edw.datavault.transform.dvhashkey.DvHashKeyMeta;
-import org.hopper.edw.datavault.transform.dvhashkey.DvHashKeyMetaFactory;
-import org.hopper.edw.datavault.transform.mergerowsplus.MergeRowsPlusMeta;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHasName;
@@ -69,6 +65,10 @@ import org.apache.hop.pipeline.transforms.constant.ConstantMeta;
 import org.apache.hop.pipeline.transforms.filterrows.FilterRowsMeta;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
 import org.apache.hop.workflow.WorkflowMeta;
+import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
+import org.hopper.edw.datavault.transform.dvhashkey.DvHashKeyMeta;
+import org.hopper.edw.datavault.transform.dvhashkey.DvHashKeyMetaFactory;
+import org.hopper.edw.datavault.transform.mergerowsplus.MergeRowsPlusMeta;
 import org.jspecify.annotations.NonNull;
 
 /**
@@ -196,7 +196,7 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
       DataVaultModel model) {
     super.check(remarks, metadataProvider, variables, options, model);
 
-    if (!DvIntegrationSupport.relaxesSourceValidation(this)) {
+    if (!DvIntegrationSupport.relaxesSourceValidation(this, model)) {
       if (recordSources == null || recordSources.isEmpty()) {
         remarks.add(
             new CheckResult(
@@ -262,7 +262,7 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
 
         // Validate that source field(s) (sourceFieldNames / sourceFieldName or fallback to name)
         // of this business key exist in the DataVaultSource referenced by its recordSourceName.
-        if (DvIntegrationSupport.relaxesSourceValidation(this)) {
+        if (DvIntegrationSupport.relaxesSourceValidation(this, model)) {
           continue;
         }
         List<String> sourceParts = bk.resolveSourceParts();
@@ -368,11 +368,20 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
     }
 
     if (Utils.isEmpty(hashKeyFieldName)) {
-      remarks.add(
-          new CheckResult(
-              ICheckResult.TYPE_RESULT_COMMENT,
-              BaseMessages.getString(PKG, "DvHub.CheckResult.NoHashKeyFieldName"),
-              this));
+      if (DvReadOnlyExistingVaultSupport.isReadOnly(model)) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_ERROR,
+                BaseMessages.getString(
+                    PKG, "DvHub.CheckResult.ReadOnlyMissingHashKeyFieldName", getName()),
+                this));
+      } else {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_COMMENT,
+                BaseMessages.getString(PKG, "DvHub.CheckResult.NoHashKeyFieldName"),
+                this));
+      }
     } else {
       remarks.add(
           new CheckResult(
@@ -397,7 +406,7 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
               this));
     }
 
-    if (!DvIntegrationSupport.relaxesSourceValidation(this)
+    if (!DvIntegrationSupport.relaxesSourceValidation(this, model)
         && metadataProvider != null
         && recordSources != null
         && options != null) {
@@ -467,6 +476,7 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
       if (metadataProvider == null || model == null) {
         return result;
       }
+      DvReadOnlyExistingVaultSupport.refuseUpdate(model);
 
       if (DvIntegrationSupport.isExternalRead(this)) {
         return result;

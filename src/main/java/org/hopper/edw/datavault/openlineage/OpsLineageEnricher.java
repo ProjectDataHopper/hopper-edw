@@ -29,8 +29,8 @@ import org.apache.hop.core.logging.LoggingObject;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.variables.Variables;
-import org.hopper.edw.datavault.metrics.LoadRunMetricsCatalogPublisher;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.datavault.metrics.LoadRunMetricsCatalogPublisher;
 
 /**
  * Optionally attaches last-load operational facts from {@code load_pipeline_metric} onto

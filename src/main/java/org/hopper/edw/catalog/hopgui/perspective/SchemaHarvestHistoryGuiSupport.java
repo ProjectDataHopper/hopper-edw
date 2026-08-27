@@ -16,13 +16,6 @@
 package org.hopper.edw.catalog.hopgui.perspective;
 
 import java.util.List;
-import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader;
-import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader.HarvestRunSummary;
-import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader.HarvestSubjectSummary;
-import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader.HistoryConnection;
-import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
-import org.hopper.edw.catalog.model.RecordDefinition;
-import org.hopper.edw.catalog.quality.CatalogQualitySubjectSupport;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
@@ -35,6 +28,13 @@ import org.apache.hop.ui.hopgui.HopGui;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader;
+import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader.HarvestRunSummary;
+import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader.HarvestSubjectSummary;
+import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader.HistoryConnection;
+import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
+import org.hopper.edw.catalog.model.RecordDefinition;
+import org.hopper.edw.catalog.quality.CatalogQualitySubjectSupport;
 
 /** Opens schema harvest history browsers from group editor or catalog detail panel. */
 public final class SchemaHarvestHistoryGuiSupport {

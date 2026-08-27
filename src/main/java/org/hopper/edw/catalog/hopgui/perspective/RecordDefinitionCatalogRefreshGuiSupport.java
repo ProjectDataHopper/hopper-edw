@@ -16,10 +16,6 @@
 package org.hopper.edw.catalog.hopgui.perspective;
 
 import java.util.Date;
-import org.hopper.edw.catalog.discovery.RecordDefinitionCatalogRefreshSupport;
-import org.hopper.edw.catalog.discovery.RecordDefinitionPhysicalRefSupport;
-import org.hopper.edw.catalog.model.RecordDefinition;
-import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
@@ -29,6 +25,10 @@ import org.apache.hop.ui.hopgui.HopGui;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.catalog.discovery.RecordDefinitionCatalogRefreshSupport;
+import org.hopper.edw.catalog.discovery.RecordDefinitionPhysicalRefSupport;
+import org.hopper.edw.catalog.model.RecordDefinition;
+import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
 
 /** GUI workflow for refreshing a catalog record definition from its physical source. */
 public final class RecordDefinitionCatalogRefreshGuiSupport {

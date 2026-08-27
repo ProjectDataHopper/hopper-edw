@@ -18,10 +18,10 @@ package org.hopper.edw.datavault.metadata.json;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceJson;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModelLoadSupport;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Loads a live {@link SourceJson} for a {@link DvJsonSource}. */
 public final class DvJsonSourceResolver {

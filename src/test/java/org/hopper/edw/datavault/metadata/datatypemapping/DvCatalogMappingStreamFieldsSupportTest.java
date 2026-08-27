@@ -21,6 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.variables.Variables;
+import org.apache.hop.pipeline.transforms.selectvalues.SelectMetadataChange;
+import org.apache.hop.pipeline.transforms.selectvalues.SelectValuesMeta;
 import org.hopper.edw.datavault.metadata.BusinessKey;
 import org.hopper.edw.datavault.metadata.BusinessKeySource;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
@@ -30,8 +32,6 @@ import org.hopper.edw.datavault.metadata.DvLink;
 import org.hopper.edw.datavault.metadata.DvSatellite;
 import org.hopper.edw.datavault.metadata.SatelliteAttribute;
 import org.hopper.edw.datavault.metadata.SourceField;
-import org.apache.hop.pipeline.transforms.selectvalues.SelectMetadataChange;
-import org.apache.hop.pipeline.transforms.selectvalues.SelectValuesMeta;
 import org.junit.jupiter.api.Test;
 
 class DvCatalogMappingStreamFieldsSupportTest {

@@ -31,6 +31,9 @@ import org.apache.hop.core.gui.IGc.ELineStyle;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.ui.core.PropsUi;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry.Bounds;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphTableCardLayout;
@@ -47,9 +50,6 @@ import org.hopper.edw.datavault.metadata.sourcemodel.SourceQuery;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceRelationship;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
 import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceQueryGenerationSupport;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.ui.core.PropsUi;
 
 /**
  * Paints a source model canvas: tables, PK/FK relationship edges, composition dependency lines

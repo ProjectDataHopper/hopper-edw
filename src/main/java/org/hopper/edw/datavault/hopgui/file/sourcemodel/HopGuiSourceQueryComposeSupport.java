@@ -19,12 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.ModelXmlWriteSupport;
-import org.hopper.edw.datavault.metadata.database.DvDatabaseSourceImportSupport;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceModelLoadSupport;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceQuery;
-import org.hopper.edw.datavault.metadata.sourcemodel.publish.SourceQueryCatalogPublisher;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.dialog.BaseDialog;
@@ -33,6 +27,12 @@ import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.datavault.metadata.ModelXmlWriteSupport;
+import org.hopper.edw.datavault.metadata.database.DvDatabaseSourceImportSupport;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceModelLoadSupport;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceQuery;
+import org.hopper.edw.datavault.metadata.sourcemodel.publish.SourceQueryCatalogPublisher;
 
 /**
  * Opens the source query builder from outside {@code .hsm} (e.g. Data Vault modeler), saves the

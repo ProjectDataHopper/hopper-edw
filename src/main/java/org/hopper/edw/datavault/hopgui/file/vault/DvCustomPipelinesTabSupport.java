@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.Set;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.DvIntegrationMode;
-import org.hopper.edw.datavault.metadata.DvTableBase;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.FormDataBuilder;
 import org.apache.hop.ui.core.PropsUi;
@@ -44,6 +42,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
+import org.hopper.edw.datavault.metadata.DvIntegrationMode;
+import org.hopper.edw.datavault.metadata.DvTableBase;
 
 /** Shared "Custom pipelines" tab for hub, satellite, and link table editors. */
 public final class DvCustomPipelinesTabSupport {

@@ -25,12 +25,12 @@ import org.apache.hop.core.plugins.IPlugin;
 import org.apache.hop.core.plugins.PluginRegistry;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.ai.HopAiCheckResultsSerializer;
-import org.hopper.edw.datavault.ai.HopAiTextUtil;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.workflow.WorkflowHopMeta;
 import org.apache.hop.workflow.WorkflowMeta;
 import org.apache.hop.workflow.action.ActionMeta;
+import org.hopper.edw.datavault.ai.HopAiCheckResultsSerializer;
+import org.hopper.edw.datavault.ai.HopAiTextUtil;
 
 public final class WorkflowAiContextBuilder {
 

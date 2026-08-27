@@ -19,13 +19,13 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.i18n.BaseMessages;
 import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneySnapshot.ActionRef;
 import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneySnapshot.CatalogFeed;
 import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneySnapshot.ModelRef;
 import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneySnapshot.OutputRef;
 import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneySnapshot.WorkflowRef;
 import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneyTreeNode.Kind;
-import org.apache.hop.i18n.BaseMessages;
 
 /** Projects an {@link EdwJourneySnapshot} into a stable, ordered tree. */
 public final class EdwJourneyTreeBuilder {

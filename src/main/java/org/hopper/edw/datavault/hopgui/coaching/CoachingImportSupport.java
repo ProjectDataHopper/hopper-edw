@@ -15,13 +15,13 @@
  */
 package org.hopper.edw.datavault.hopgui.coaching;
 
-import org.hopper.edw.catalog.hopgui.perspective.importmenu.DataCatalogImportMenu;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.ui.hopgui.HopGui;
+import org.hopper.edw.catalog.hopgui.perspective.importmenu.DataCatalogImportMenu;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.coaching.DvCoachingModelAdapter;
 import org.hopper.edw.datavault.metadata.coaching.ICoachingModelAdapter;
-import org.apache.hop.ui.hopgui.HopGui;
 
 /** Opens catalog import flows from the coach panel without leaving the modeler. */
 public final class CoachingImportSupport {

@@ -27,8 +27,8 @@ import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.apache.hop.core.util.Utils;
+import org.hopper.edw.catalog.model.RecordDefinitionKey;
 
 /** Immutable directed graph of source → DV → BV → DM dependencies. */
 public final class ImpactGraph {

@@ -15,6 +15,10 @@
  */
 package org.hopper.edw.datavault.openlineage;
 
+import org.apache.hop.core.database.DatabaseMeta;
+import org.apache.hop.core.util.Utils;
+import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.catalog.model.DvSourceRecord;
 import org.hopper.edw.catalog.model.PhysicalFileRef;
 import org.hopper.edw.catalog.model.PhysicalIcebergTableRef;
@@ -22,14 +26,10 @@ import org.hopper.edw.catalog.model.PhysicalTableRef;
 import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
-import org.apache.hop.core.database.DatabaseMeta;
-import org.apache.hop.core.util.Utils;
-import org.apache.hop.core.variables.IVariables;
 import org.hopper.edw.datavault.lineage.FieldContribution;
 import org.hopper.edw.datavault.lineage.TableLineage;
 import org.hopper.edw.datavault.lineage.TableSourceKind;
 import org.hopper.edw.datavault.lineage.TableSourceRef;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Resolves physical dataset locations from model lineage + catalog + DatabaseMeta. */
 public final class OpenLineageDatasetLocationResolver {

@@ -16,10 +16,15 @@
 package org.hopper.edw.datavault.hopgui.resourcedefinition;
 
 import java.util.List;
-import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.ui.core.dialog.ErrorDialog;
+import org.apache.hop.ui.hopgui.HopGui;
+import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.hopper.edw.datavault.resourcedefinition.SchemaCompareMode;
 import org.hopper.edw.datavault.resourcedefinition.SchemaImpactSimulationRequest;
 import org.hopper.edw.datavault.resourcedefinition.SchemaImpactSimulationResult;
@@ -27,11 +32,6 @@ import org.hopper.edw.datavault.resourcedefinition.SchemaImpactSimulationService
 import org.hopper.edw.datavault.resourcedefinition.SchemaValidationReportFileWriter;
 import org.hopper.edw.datavault.resourcedefinition.ValidationOptions;
 import org.hopper.edw.datavault.resourcedefinition.ValidationReport;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.ui.core.dialog.ErrorDialog;
-import org.apache.hop.ui.hopgui.HopGui;
-import org.eclipse.swt.widgets.Shell;
 
 /** GUI entry points for resource definition group validation with impact enrichment. */
 public final class ResourceDefinitionValidationGuiSupport {

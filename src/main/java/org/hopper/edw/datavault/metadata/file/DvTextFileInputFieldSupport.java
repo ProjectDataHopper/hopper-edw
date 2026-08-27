@@ -20,9 +20,9 @@ import org.apache.hop.core.file.TextFileInputField;
 import org.apache.hop.core.gui.ITextFileInputField;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.pipeline.transforms.csvinput.CsvInputField;
 import org.hopper.edw.datavault.metadata.CsvFieldOptions;
 import org.hopper.edw.datavault.metadata.SourceField;
-import org.apache.hop.pipeline.transforms.csvinput.CsvInputField;
 
 /** Applies {@link SourceField} typing and CSV parsing options to Hop text-file input fields. */
 public final class DvTextFileInputFieldSupport {

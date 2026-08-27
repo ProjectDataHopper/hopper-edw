@@ -31,6 +31,7 @@ import org.apache.hop.core.gui.IGc.EFont;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
 import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.DvTableDisplaySupport;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry;
@@ -48,7 +49,6 @@ import org.hopper.edw.datavault.metadata.DvTableBase;
 import org.hopper.edw.datavault.metadata.DvTableResolutionSupport;
 import org.hopper.edw.datavault.metadata.DvTableType;
 import org.hopper.edw.datavault.metadata.IDvTable;
-import org.apache.hop.i18n.BaseMessages;
 
 /**
  * Basic painter for a Data Vault model using IGc. Draws tables (hubs, links, satellites) at their
@@ -522,7 +522,7 @@ public class DataVaultModelPainter extends BasePainter {
                   .equalsIgnoreCase(Const.NVL(reference.getReferencedTableName(), ""));
       base = base + (sameModelAlias ? " (alias)" : " (linked)");
     }
-    String suffix = DvIntegrationSupport.integrationCanvasSuffix(table);
+    String suffix = DvIntegrationSupport.integrationCanvasSuffix(table, model);
     if (Utils.isEmpty(suffix)) {
       return base;
     }

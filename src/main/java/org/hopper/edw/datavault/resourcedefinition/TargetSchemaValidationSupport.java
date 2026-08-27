@@ -29,8 +29,11 @@ import org.apache.hop.core.logging.LoggingObjectType;
 import org.apache.hop.core.logging.SimpleLoggingObject;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
+import org.hopper.edw.datavault.metadata.DvReadOnlyExistingVaultSupport;
 import org.hopper.edw.datavault.metadata.DvSatellite;
 import org.hopper.edw.datavault.metadata.DvSpecialRecordSupport;
 import org.hopper.edw.datavault.metadata.IDvTable;
@@ -40,8 +43,6 @@ import org.hopper.edw.datavault.resourcedefinition.ValidationReport.ProposalType
 import org.hopper.edw.datavault.resourcedefinition.ValidationReport.RecordDefinitionValidation;
 import org.hopper.edw.datavault.resourcedefinition.ValidationReport.RemediationProposal;
 import org.hopper.edw.datavault.resourcedefinition.ValidationReport.ValidationIssue;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Detects DV target tables whose physical layout lags the model (DDL required). Does not invent
@@ -185,6 +186,9 @@ public final class TargetSchemaValidationSupport {
       DataVaultModel model =
           ResourceDefinitionGroupResolver.loadDataVaultModel(
               usage.modelFilename(), variables, metadataProvider);
+      if (DvReadOnlyExistingVaultSupport.isReadOnly(model)) {
+        return TargetCheckResult.empty();
+      }
       IDvTable table = model.findTable(usage.modelElementName());
       if (!(table instanceof DvSatellite satellite)) {
         return TargetCheckResult.empty();

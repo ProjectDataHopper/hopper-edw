@@ -22,12 +22,12 @@ import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.i18n.BaseMessages;
 import org.hopper.edw.datavault.catalog.RecordSourceIndicatorSupport;
 import org.hopper.edw.datavault.metadata.CsvFieldOptions;
 import org.hopper.edw.datavault.metadata.DvSourceDeliveryType;
 import org.hopper.edw.datavault.metadata.SourceField;
 import org.hopper.edw.datavault.metadata.SourceFieldInputOptions;
-import org.apache.hop.i18n.BaseMessages;
 
 /** Pure helpers for mapping stream rows to catalog {@link SourceField} definitions. */
 public final class RecordDefinitionOutputFieldSupport {

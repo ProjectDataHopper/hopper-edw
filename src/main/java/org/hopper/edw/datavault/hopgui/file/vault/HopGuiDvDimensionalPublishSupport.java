@@ -20,12 +20,6 @@ import org.apache.hop.core.Const;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
-import org.hopper.edw.datavault.hopgui.file.dimensional.HopDimensionalFileType;
-import org.hopper.edw.datavault.metadata.DataVaultModel;
-import org.hopper.edw.datavault.metadata.dimensional.publish.DvPublishModelSupport;
-import org.hopper.edw.datavault.metadata.dimensional.publish.DvPublishOptions;
-import org.hopper.edw.datavault.metadata.dimensional.publish.DvPublishResult;
-import org.hopper.edw.datavault.metadata.dimensional.publish.DvToDimensionalPublish;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.dialog.BaseDialog;
@@ -33,6 +27,12 @@ import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.eclipse.swt.SWT;
+import org.hopper.edw.datavault.hopgui.file.dimensional.HopDimensionalFileType;
+import org.hopper.edw.datavault.metadata.DataVaultModel;
+import org.hopper.edw.datavault.metadata.dimensional.publish.DvPublishModelSupport;
+import org.hopper.edw.datavault.metadata.dimensional.publish.DvPublishOptions;
+import org.hopper.edw.datavault.metadata.dimensional.publish.DvPublishResult;
+import org.hopper.edw.datavault.metadata.dimensional.publish.DvToDimensionalPublish;
 
 /** GUI helper for publishing a Data Vault model to a draft dimensional model. */
 public final class HopGuiDvDimensionalPublishSupport {

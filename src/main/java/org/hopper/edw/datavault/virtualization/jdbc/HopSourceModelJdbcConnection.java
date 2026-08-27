@@ -35,8 +35,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 
 /** Read-only JDBC connection bound to a loaded {@link SourceModel}. */
 public class HopSourceModelJdbcConnection implements Connection {

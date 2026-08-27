@@ -39,7 +39,10 @@ Target database and hashing strategy.
 |Option |Description
 
 |Target database
-|The Hop database connection (DatabaseMeta) where Data Vault tables are created and loaded. Used for DDL generation, SQL quoting, and all generated pipelines that write to the vault.
+|The Hop database connection where Data Vault tables live. Hop-managed models create and load tables here. Read-only existing vaults only read from this connection (Business Vault and dimensional loads).
+
+|Read-only existing vault
+|When enabled, every `.hdv` that uses this configuration **documents** an already-built raw vault. Hop refuses Data Vault Update, Generate DDL, and Debug. Model check keeps referential integrity only (hash keys, parent hubs/links, names, attributes). Use a **dedicated** configuration object — do not share it with Hop-managed models. Mixed tables in one file still use per-table link:dv-integration-modes.adoc[External read-only].
 
 |Hash algorithm
 |Algorithm for surrogate hash keys (MD5, SHA-256, SHA-1, SHA-512). Affects computation and maximum key length.
@@ -285,8 +288,9 @@ There is no longer a separate per-table "configuration picker" metadata referenc
 
 == How the configuration affects daily work
 
-* The target database connection is required for **Generate DDL**, **Debug**, and the **Data Vault Update** action. Business Vault SCD2 generation also reads satellite history from this connection when a `.hbv` model links to the `.hdv` file.
-* Tables marked **External read-only** do not require Hop to load data, but the target database name must still be set so downstream features can resolve the connection. See link:dv-integration-modes.adoc[Data Vault integration modes].
+* The target database connection is required for **Generate DDL**, **Debug**, and the **Data Vault Update** action on Hop-managed models. Business Vault SCD2 generation also reads satellite history from this connection when a `.hbv` model links to the `.hdv` file.
+* **Read-only existing vault** refuses those load/DDL actions. The target database name must still be set so Business Vault and dimensional models can read the documented tables. See link:dv-integration-modes.adoc[Data Vault integration modes].
+* Tables marked **External read-only** do not require Hop to load data, but the target database name must still be set so downstream features can resolve the connection.
 * Hash algorithm and data type directly influence storage size and join performance.
 * Naming settings (LOAD_DATE, RECORD_SOURCE, etc.) should be agreed early with consumers of the Data Vault.
 * Unknown and invalid sentinel settings matter when downstream facts or links must reference "missing" or "bad" keys.

@@ -27,12 +27,6 @@ import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.GuiWidgetElement;
 import org.apache.hop.core.logging.ILogChannel;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.ai.DvAiProviderPreset;
-import org.hopper.edw.datavault.ai.HopAiConfig;
-import org.hopper.edw.datavault.ai.HopAiConfigSingleton;
-import org.hopper.edw.datavault.ai.HopAiHealthCheckSupport;
-import org.hopper.edw.datavault.ai.HopAiProviderSettings;
-import org.hopper.edw.datavault.ai.HopAiProviderSettingsSupport;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHasHopMetadataProvider;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
@@ -51,6 +45,12 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.ai.DvAiProviderPreset;
+import org.hopper.edw.datavault.ai.HopAiConfig;
+import org.hopper.edw.datavault.ai.HopAiConfigSingleton;
+import org.hopper.edw.datavault.ai.HopAiHealthCheckSupport;
+import org.hopper.edw.datavault.ai.HopAiProviderSettings;
+import org.hopper.edw.datavault.ai.HopAiProviderSettingsSupport;
 import picocli.CommandLine;
 
 @ConfigPlugin(

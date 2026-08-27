@@ -24,9 +24,6 @@ import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.CsvFieldOptions;
-import org.hopper.edw.datavault.metadata.SourceField;
-import org.hopper.edw.datavault.metadata.SourceFieldInputOptions;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineHopMeta;
@@ -36,6 +33,9 @@ import org.apache.hop.pipeline.anon.AnonymousPipelineRunner;
 import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transforms.dummy.DummyMeta;
 import org.apache.hop.pipeline.transforms.filemetadata.FileMetadataMeta;
+import org.hopper.edw.datavault.metadata.CsvFieldOptions;
+import org.hopper.edw.datavault.metadata.SourceField;
+import org.hopper.edw.datavault.metadata.SourceFieldInputOptions;
 
 /** Discovers CSV / delimited file layout using the Hop File Metadata transform. */
 public final class CsvFileMetadataDiscovery {

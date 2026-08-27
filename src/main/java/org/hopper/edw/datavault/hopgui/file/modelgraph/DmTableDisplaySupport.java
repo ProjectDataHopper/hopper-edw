@@ -17,6 +17,7 @@ package org.hopper.edw.datavault.hopgui.file.modelgraph;
 
 import org.apache.hop.core.Const;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalConfiguration;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimension;
@@ -27,7 +28,6 @@ import org.hopper.edw.datavault.metadata.dimensional.DmRangeDimension;
 import org.hopper.edw.datavault.metadata.dimensional.DmSurrogateKeySupport;
 import org.hopper.edw.datavault.metadata.dimensional.DmTableBase;
 import org.hopper.edw.datavault.metadata.dimensional.DmTableType;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Resolves dimensional table display metadata for model graph painters. */
 public final class DmTableDisplaySupport {

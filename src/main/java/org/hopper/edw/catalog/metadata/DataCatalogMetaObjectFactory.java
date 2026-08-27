@@ -16,10 +16,10 @@
 package org.hopper.edw.catalog.metadata;
 
 import java.util.List;
-import org.hopper.edw.catalog.impl.file.FileDataCatalog;
-import org.hopper.edw.catalog.spi.IDataCatalog;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.metadata.api.IHopMetadataObjectFactory;
+import org.hopper.edw.catalog.impl.file.FileDataCatalog;
+import org.hopper.edw.catalog.spi.IDataCatalog;
 
 /**
  * Instantiates {@link IDataCatalog} implementations from a persisted type id (same pattern as

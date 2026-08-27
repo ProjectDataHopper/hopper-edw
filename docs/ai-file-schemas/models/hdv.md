@@ -25,7 +25,7 @@ Visual **raw Data Vault 2.0** model: hubs, links, satellites, physical **referen
 |---------|------|
 | `name_sync_with_filename` | Y/N — keep model name aligned with file basename |
 | `description` | Free text |
-| `configuration` | Target DB, hash algorithm/type, load/record-source fields, bulk options, PK/FK flags |
+| `configuration` | Target DB, hash algorithm/type, load/record-source fields, bulk options, PK/FK flags, optional `readOnlyExistingVault` |
 | `coaching` | Optional coach-panel sources |
 | `tables` / `table` | Polymorphic vault objects |
 | `notes` / `note` | Canvas documentation only |

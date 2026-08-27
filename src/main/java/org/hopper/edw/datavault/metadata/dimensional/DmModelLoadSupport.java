@@ -23,11 +23,11 @@ import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
 import org.apache.hop.core.xml.XmlHandler;
-import org.hopper.edw.datavault.hopgui.file.dimensional.HopDimensionalFileType;
-import org.hopper.edw.datavault.metadata.ModelConfigurationResolver;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
+import org.hopper.edw.datavault.hopgui.file.dimensional.HopDimensionalFileType;
+import org.hopper.edw.datavault.metadata.ModelConfigurationResolver;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 

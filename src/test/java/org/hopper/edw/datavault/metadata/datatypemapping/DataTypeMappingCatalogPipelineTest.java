@@ -20,15 +20,15 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import org.apache.hop.core.row.IValueMeta;
+import org.apache.hop.pipeline.transforms.selectvalues.SelectMetadataChange;
+import org.apache.hop.pipeline.transforms.selectvalues.SelectValuesMeta;
 import org.hopper.edw.catalog.model.CatalogFieldConversionOptions;
 import org.hopper.edw.catalog.model.CatalogSourceField;
 import org.hopper.edw.catalog.model.CatalogSourceFieldInputOptions;
-import org.apache.hop.core.row.IValueMeta;
 import org.hopper.edw.datavault.catalog.DvSourceFieldSupport;
 import org.hopper.edw.datavault.metadata.SourceField;
 import org.hopper.edw.datavault.metadata.SourceFieldInputOptions;
-import org.apache.hop.pipeline.transforms.selectvalues.SelectMetadataChange;
-import org.apache.hop.pipeline.transforms.selectvalues.SelectValuesMeta;
 import org.junit.jupiter.api.Test;
 
 class DataTypeMappingCatalogPipelineTest {

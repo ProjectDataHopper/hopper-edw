@@ -17,13 +17,13 @@ package org.hopper.edw.catalog.metadata;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.hopper.edw.catalog.impl.file.FileDataCatalog;
-import org.hopper.edw.catalog.spi.IDataCatalog;
 import org.apache.hop.metadata.api.HopMetadata;
 import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.HopMetadataPropertyType;
 import org.apache.hop.metadata.api.IHopMetadata;
+import org.hopper.edw.catalog.impl.file.FileDataCatalog;
+import org.hopper.edw.catalog.spi.IDataCatalog;
 
 /**
  * Hop metadata connection to an external data catalog. Plugin-specific options are stored in the

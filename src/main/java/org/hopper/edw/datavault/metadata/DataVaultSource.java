@@ -22,9 +22,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.database.DvDatabaseSource;
 import org.apache.hop.metadata.api.IHasName;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.datavault.metadata.database.DvDatabaseSource;
 
 /**
  * In-memory Data Vault record source loaded from the data catalog: DV semantics (indicator, group)

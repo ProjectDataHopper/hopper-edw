@@ -40,8 +40,6 @@ import org.apache.hop.core.row.value.ValueMetaDate;
 import org.apache.hop.core.row.value.ValueMetaInteger;
 import org.apache.hop.core.row.value.ValueMetaString;
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.metadata.dimensional.DmJunkHashCodeStrategy;
-import org.hopper.edw.datavault.metadata.dimensional.DmJunkSurrogateKeyStrategy;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.pipeline.Pipeline;
 import org.apache.hop.pipeline.PipelineMeta;
@@ -50,6 +48,8 @@ import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transforms.combinationlookup.CFields;
 import org.apache.hop.pipeline.transforms.combinationlookup.KeyField;
 import org.apache.hop.pipeline.transforms.combinationlookup.ReturnFields;
+import org.hopper.edw.datavault.metadata.dimensional.DmJunkHashCodeStrategy;
+import org.hopper.edw.datavault.metadata.dimensional.DmJunkSurrogateKeyStrategy;
 
 /**
  * Manages or looks up information in a Type 1 or junk dimension. <br>

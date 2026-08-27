@@ -16,10 +16,10 @@
 package org.hopper.edw.datavault.hopgui.file.dimensional.delegates;
 
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.hopgui.file.dimensional.HopDimensionalFileType;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphSnapshotUndo;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Gzip-compressed XML snapshots of a {@link DimensionalModel} for undo/redo. */
 public class HopGuiDimensionalSnapshotUndo {

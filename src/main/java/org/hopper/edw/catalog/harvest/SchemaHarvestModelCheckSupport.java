@@ -20,14 +20,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import org.hopper.edw.catalog.harvest.SchemaHarvestModels.DiscoveryStatus;
-import org.hopper.edw.catalog.harvest.SchemaHarvestModels.FieldRole;
-import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestResult;
-import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestSubjectResult;
-import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestedField;
-import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryPublisher;
-import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader;
-import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader.HistoryConnection;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
@@ -37,11 +29,19 @@ import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.catalog.harvest.SchemaHarvestModels.DiscoveryStatus;
+import org.hopper.edw.catalog.harvest.SchemaHarvestModels.FieldRole;
+import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestResult;
+import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestSubjectResult;
+import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestedField;
+import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryPublisher;
+import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader;
+import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader.HistoryConnection;
 import org.hopper.edw.datavault.catalog.DvSourceFieldSupport;
 import org.hopper.edw.datavault.metadata.DvModelCheckCache;
 import org.hopper.edw.datavault.metadata.DvModelCheckOptions;
 import org.hopper.edw.datavault.metadata.SourceField;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Warms {@link DvModelCheckCache} with DISCOVERED field layouts from a schema harvest so detailed

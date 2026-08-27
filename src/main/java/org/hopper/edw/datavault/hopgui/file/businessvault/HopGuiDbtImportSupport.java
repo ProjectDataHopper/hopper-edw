@@ -16,6 +16,11 @@
 package org.hopper.edw.datavault.hopgui.file.businessvault;
 
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.ui.core.dialog.ErrorDialog;
+import org.apache.hop.ui.core.dialog.MessageBox;
+import org.apache.hop.ui.hopgui.HopGui;
+import org.eclipse.swt.SWT;
 import org.hopper.edw.datavault.dbt.DbtImportDestination;
 import org.hopper.edw.datavault.dbt.DbtImportOptions;
 import org.hopper.edw.datavault.dbt.DbtImportResult;
@@ -24,11 +29,6 @@ import org.hopper.edw.datavault.layout.ElkGraphLayout;
 import org.hopper.edw.datavault.layout.ElkLayout;
 import org.hopper.edw.datavault.layout.ElkLayoutAlgorithm;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.ui.core.dialog.ErrorDialog;
-import org.apache.hop.ui.core.dialog.MessageBox;
-import org.apache.hop.ui.hopgui.HopGui;
-import org.eclipse.swt.SWT;
 
 /** Runs the dbt import dialog against the open Business Vault graph. */
 public final class HopGuiDbtImportSupport {

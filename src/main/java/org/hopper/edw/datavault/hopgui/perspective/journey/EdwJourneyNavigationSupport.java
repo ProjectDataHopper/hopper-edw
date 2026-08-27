@@ -15,23 +15,23 @@
  */
 package org.hopper.edw.datavault.hopgui.perspective.journey;
 
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.util.Utils;
+import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.core.vfs.HopVfs;
+import org.apache.hop.ui.core.metadata.MetadataManager;
+import org.apache.hop.ui.hopgui.HopGui;
+import org.apache.hop.ui.hopgui.file.HopFileTypeRegistry;
+import org.apache.hop.ui.hopgui.file.IHopFileType;
+import org.apache.hop.ui.hopgui.perspective.metadata.MetadataPerspective;
 import org.hopper.edw.catalog.hopgui.navigation.RecordOriginNavigationSupport;
 import org.hopper.edw.catalog.hopgui.perspective.DataCatalogPerspective;
 import org.hopper.edw.catalog.hopgui.perspective.SchemaHarvestHistoryGuiSupport;
 import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.hopper.edw.catalog.model.RecordOrigin;
 import org.hopper.edw.catalog.versioning.CatalogVersionGuiSupport;
-import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.util.Utils;
-import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.core.vfs.HopVfs;
 import org.hopper.edw.datavault.hopgui.resourcedefinition.ResourceDefinitionValidationGuiSupport;
 import org.hopper.edw.datavault.hopgui.search.ModelSearchOpenSupport;
-import org.apache.hop.ui.core.metadata.MetadataManager;
-import org.apache.hop.ui.hopgui.HopGui;
-import org.apache.hop.ui.hopgui.file.HopFileTypeRegistry;
-import org.apache.hop.ui.hopgui.file.IHopFileType;
-import org.apache.hop.ui.hopgui.perspective.metadata.MetadataPerspective;
 
 /** Opens existing Hop surfaces from an EDW Journey tree node. */
 public final class EdwJourneyNavigationSupport {

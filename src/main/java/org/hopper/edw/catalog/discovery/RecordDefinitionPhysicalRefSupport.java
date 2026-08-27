@@ -15,16 +15,16 @@
  */
 package org.hopper.edw.catalog.discovery;
 
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.util.Utils;
+import org.apache.hop.i18n.BaseMessages;
 import org.hopper.edw.catalog.model.DvSourceRecord;
 import org.hopper.edw.catalog.model.PhysicalFileRef;
 import org.hopper.edw.catalog.model.PhysicalIcebergTableRef;
 import org.hopper.edw.catalog.model.PhysicalTableRef;
 import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.catalog.model.RecordDefinitionType;
-import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.util.Utils;
 import org.hopper.edw.datavault.metadata.DvSourceType;
-import org.apache.hop.i18n.BaseMessages;
 
 /** Builds physical discovery references from catalog record definitions. */
 public final class RecordDefinitionPhysicalRefSupport {

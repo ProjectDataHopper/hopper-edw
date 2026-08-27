@@ -20,6 +20,7 @@ import java.util.List;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.catalog.BvCatalogNamespaces;
 import org.hopper.edw.datavault.catalog.DmCatalogNamespaces;
 import org.hopper.edw.datavault.catalog.DvCatalogNamespaces;
@@ -27,7 +28,6 @@ import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
 import org.hopper.edw.datavault.resourcedefinition.ValidationModels;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Builds current lineage from loaded models and diffs against catalog-published lineage baselines.

@@ -25,16 +25,6 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.DvSqlSupport;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceQuery;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceQueryColumn;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceQueryGenerationMode;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceQueryJoin;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
-import org.hopper.edw.datavault.virtualization.sql.SourceModelSqlEngine;
-import org.hopper.edw.datavault.virtualization.sql.SourceModelSqlOptions;
-import org.hopper.edw.datavault.virtualization.sql.SourceModelSqlPlan;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineHopMeta;
 import org.apache.hop.pipeline.PipelineMeta;
@@ -45,6 +35,16 @@ import org.apache.hop.pipeline.transforms.selectvalues.SelectValuesMeta;
 import org.apache.hop.pipeline.transforms.sort.SortRowsField;
 import org.apache.hop.pipeline.transforms.sort.SortRowsMeta;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
+import org.hopper.edw.datavault.metadata.DvSqlSupport;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceQuery;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceQueryColumn;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceQueryGenerationMode;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceQueryJoin;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
+import org.hopper.edw.datavault.virtualization.sql.SourceModelSqlEngine;
+import org.hopper.edw.datavault.virtualization.sql.SourceModelSqlOptions;
+import org.hopper.edw.datavault.virtualization.sql.SourceModelSqlPlan;
 
 /**
  * Builds a Hop pipeline that materialises a {@link SourceQuery}.

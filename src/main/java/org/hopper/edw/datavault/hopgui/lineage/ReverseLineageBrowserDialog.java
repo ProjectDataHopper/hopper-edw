@@ -16,18 +16,9 @@
 package org.hopper.edw.datavault.hopgui.lineage;
 
 import java.util.List;
-import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.hopgui.resourcedefinition.ResourceDefinitionModelNavigationSupport;
-import org.hopper.edw.datavault.lineage.ReverseLineageConsumer;
-import org.hopper.edw.datavault.lineage.ReverseLineageIndex;
-import org.hopper.edw.datavault.lineage.ReverseLineageIndexBuilder;
-import org.hopper.edw.datavault.resourcedefinition.ResourceDefinitionGroupResolver;
-import org.hopper.edw.datavault.resourcedefinition.SourceUsage;
-import org.hopper.edw.datavault.resourcedefinition.SourceUsageIndexBuilder;
-import org.hopper.edw.datavault.resourcedefinition.ValidationModels;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.FormDataBuilder;
@@ -47,6 +38,15 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
+import org.hopper.edw.datavault.hopgui.resourcedefinition.ResourceDefinitionModelNavigationSupport;
+import org.hopper.edw.datavault.lineage.ReverseLineageConsumer;
+import org.hopper.edw.datavault.lineage.ReverseLineageIndex;
+import org.hopper.edw.datavault.lineage.ReverseLineageIndexBuilder;
+import org.hopper.edw.datavault.resourcedefinition.ResourceDefinitionGroupResolver;
+import org.hopper.edw.datavault.resourcedefinition.SourceUsage;
+import org.hopper.edw.datavault.resourcedefinition.SourceUsageIndexBuilder;
+import org.hopper.edw.datavault.resourcedefinition.ValidationModels;
 
 /**
  * Cross-model reverse lineage browser: filter by source feed/field and list DV/BV/DM consumers with

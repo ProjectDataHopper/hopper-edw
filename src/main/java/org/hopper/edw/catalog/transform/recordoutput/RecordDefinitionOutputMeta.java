@@ -18,7 +18,6 @@ package org.hopper.edw.catalog.transform.recordoutput;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
-import org.hopper.edw.catalog.model.RecordDefinitionType;
 import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.annotations.Transform;
@@ -28,13 +27,14 @@ import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.DvSourceDeliveryType;
-import org.hopper.edw.datavault.metadata.DvSourceType;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.BaseTransformMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
+import org.hopper.edw.catalog.model.RecordDefinitionType;
+import org.hopper.edw.datavault.metadata.DvSourceDeliveryType;
+import org.hopper.edw.datavault.metadata.DvSourceType;
 
 @Transform(
     id = "RecordDefinitionOutput",

@@ -15,10 +15,10 @@
  */
 package org.hopper.edw.datavault.executionmap;
 
-import org.hopper.edw.datavault.config.DataVaultConfigSingleton;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IEnumHasCode;
 import org.apache.hop.metadata.api.IEnumHasCodeAndDescription;
+import org.hopper.edw.datavault.config.DataVaultConfigSingleton;
 
 /** Edge drawing style for execution map graphs and SVG export. */
 public enum ExecutionMapLineStyle implements IEnumHasCodeAndDescription {

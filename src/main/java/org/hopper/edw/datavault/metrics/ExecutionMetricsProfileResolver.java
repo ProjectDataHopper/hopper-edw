@@ -18,10 +18,10 @@ package org.hopper.edw.datavault.metrics;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metrics.metadata.ExecutionMetricsProfileMeta;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.workflow.WorkflowMeta;
 import org.apache.hop.workflow.engine.IWorkflowEngine;
+import org.hopper.edw.datavault.metrics.metadata.ExecutionMetricsProfileMeta;
 
 /** Resolves execution metrics settings from a profile reference and legacy action fields. */
 public final class ExecutionMetricsProfileResolver {

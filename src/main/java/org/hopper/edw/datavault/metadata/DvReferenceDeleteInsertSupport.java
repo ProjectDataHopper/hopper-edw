@@ -22,7 +22,6 @@ import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.database.DvDatabaseSource;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.workflow.WorkflowHopMeta;
@@ -30,6 +29,7 @@ import org.apache.hop.workflow.WorkflowMeta;
 import org.apache.hop.workflow.action.ActionMeta;
 import org.apache.hop.workflow.actions.sql.ActionSql;
 import org.apache.hop.workflow.actions.start.ActionStart;
+import org.hopper.edw.datavault.metadata.database.DvDatabaseSource;
 
 /**
  * DELETE_INSERT helpers for {@link DvReferenceTable}: same-database delete-by-natural-key SQL and
