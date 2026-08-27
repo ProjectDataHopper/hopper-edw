@@ -186,6 +186,107 @@ class BvScd2PipelineSupportTest {
   }
 
   @Test
+  void satelliteTableInputSqlOmitsRecordSourceWhenSatelliteDoesNotStoreIt() throws Exception {
+    Scd2BuildContext ctx = singleSatelliteContext(BvScd2BuildMode.FULL_REBUILD, null);
+    ctx.getSatellite().setStoreRecordSource(false);
+
+    String sql = BvScd2PipelineSupport.buildSatelliteTableInputSql(ctx);
+
+    assertTrue(sql.contains("FROM sat_customer"));
+    assertTrue(sql.contains("customer_hk"));
+    assertTrue(sql.contains("x_load_ts"));
+    assertFalse(sql.contains("x_record_source"));
+    assertFalse(BvScd2PipelineSupport.shouldSelectPhysicalRecordSource(ctx, ctx.legs.get(0)));
+  }
+
+  @Test
+  void singleSatellitePipelineInjectsRecordSourceConstantWhenNotStored() throws Exception {
+    Scd2BuildContext ctx = singleSatelliteContext(BvScd2BuildMode.FULL_REBUILD, null);
+    ctx.getSatellite().setStoreRecordSource(false);
+
+    PipelineMeta pipelineMeta = BvScd2PipelineSupport.generatePipeline(ctx);
+
+    TableInputMeta satInput =
+        (TableInputMeta)
+            pipelineMeta.getTransforms().stream()
+                .filter(t -> "read_sat_customer".equals(t.getName()))
+                .findFirst()
+                .orElseThrow()
+                .getTransform();
+    assertFalse(satInput.getSql().contains("x_record_source"));
+
+    TransformMeta constantTransform =
+        pipelineMeta.getTransforms().stream()
+            .filter(t -> "record_source_sat_customer".equals(t.getName()))
+            .findFirst()
+            .orElseThrow();
+    ConstantMeta constantMeta = (ConstantMeta) constantTransform.getTransform();
+    assertTrue(
+        constantMeta.getFields().stream()
+            .anyMatch(
+                field ->
+                    "x_record_source".equals(field.getFieldName())
+                        && "sat_customer".equals(field.getValue())));
+
+    GroupByMeta groupByMeta =
+        (GroupByMeta)
+            pipelineMeta.getTransforms().stream()
+                .filter(t -> t.getTransform() instanceof GroupByMeta)
+                .findFirst()
+                .orElseThrow()
+                .getTransform();
+    assertEquals("x_record_source", groupByMeta.getAggregations().get(2).getField());
+
+    var layout =
+        BvScd2PipelineSupport.buildTargetTableLayout(
+            ctx.scd2Table, ctx.bvConfig, ctx.dvModel, ctx.getSatellite(), new Variables());
+    assertTrue(
+        layout.getValueMetaList().stream().anyMatch(vm -> "x_record_source".equals(vm.getName())));
+  }
+
+  @Test
+  void incrementalSatelliteSqlOmitsRecordSourceWhenNotStored() throws Exception {
+    Scd2BuildContext ctx = singleSatelliteContext(BvScd2BuildMode.INCREMENTAL, null);
+    ctx.getSatellite().setStoreRecordSource(false);
+
+    String satSql = BvScd2PipelineSupport.buildSatelliteTableInputSql(ctx);
+    assertTrue(satSql.contains("x_load_ts > ?"));
+    assertFalse(satSql.contains("x_record_source"));
+
+    String openSql = BvScd2PipelineSupport.buildOpenTargetTableInputSql(ctx);
+    assertTrue(openSql.contains("FROM bv_customer_scd2"));
+    assertTrue(openSql.contains("x_record_source"));
+  }
+
+  @Test
+  void satelliteXmlRoundTripPreservesStoreRecordSourceOff() throws Exception {
+    DvSatellite original = new DvSatellite("sat_customer");
+    original.setStoreRecordSource(false);
+
+    String xml = XmlHandler.aroundTag("table", XmlMetadataUtil.serializeObjectToXml(original));
+    assertTrue(xml.contains("<storeRecordSource>N</storeRecordSource>"));
+
+    Document document = XmlHandler.loadXmlString(xml);
+    Node rootNode = XmlHandler.getSubNode(document, "table");
+    DvSatellite restored = new DvSatellite();
+    XmlMetadataUtil.deSerializeFromXml(rootNode, DvSatellite.class, restored, null);
+
+    assertFalse(restored.isStoreRecordSource());
+  }
+
+  @Test
+  void satelliteXmlMissingStoreRecordSourceDefaultsToTrue() throws Exception {
+    String xml =
+        XmlHandler.aroundTag("table", "<name>sat_customer</name><tableType>SATELLITE</tableType>");
+    Document document = XmlHandler.loadXmlString(xml);
+    Node rootNode = XmlHandler.getSubNode(document, "table");
+    DvSatellite restored = new DvSatellite();
+    XmlMetadataUtil.deSerializeFromXml(rootNode, DvSatellite.class, restored, null);
+
+    assertTrue(restored.isStoreRecordSource());
+  }
+
+  @Test
   void buildIncrementalSatelliteFilterSqlUsesPositionalParameter() {
     assertEquals(
         "x_load_ts > ?", BvScd2PipelineSupport.buildIncrementalSatelliteFilterSql("x_load_ts"));
@@ -745,8 +846,12 @@ class BvScd2PipelineSupportTest {
     String customerSql = BvScd2PipelineSupport.buildLegTableInputSql(ctx, ctx.legs.get(0));
     assertTrue(customerSql.contains("name"));
     assertFalse(customerSql.contains("demo_score"));
+    assertFalse(customerSql.contains("x_record_source"));
     assertTrue(customerSql.contains("ORDER BY"));
     assertTrue(customerSql.indexOf("ORDER BY") < customerSql.lastIndexOf("x_load_ts"));
+
+    String demoSql = BvScd2PipelineSupport.buildLegTableInputSql(ctx, ctx.legs.get(1));
+    assertFalse(demoSql.contains("x_record_source"));
 
     PipelineMeta pipelineMeta = BvScd2PipelineSupport.generatePipeline(ctx);
     List<TransformMeta> transforms = pipelineMeta.getTransforms();
@@ -760,6 +865,7 @@ class BvScd2PipelineSupportTest {
           GeneratedPipelineMetadataConstants.ROLE_SOURCE_READ,
           GeneratedPipelineMetadataSupport.getTransformAttribute(
               transform, GeneratedPipelineMetadataConstants.LOGICAL_ROLE));
+      assertFalse(((TableInputMeta) transform.getTransform()).getSql().contains("x_record_source"));
     }
     assertEquals(
         2, transforms.stream().filter(t -> t.getTransform() instanceof ConstantMeta).count());
@@ -825,6 +931,16 @@ class BvScd2PipelineSupportTest {
     assertEquals("x_load_ts", postRepeatFields.get(1).getName());
     assertEquals(BvScd2PipelineSupport.SOURCE_INDICATOR_FIELD, postRepeatFields.get(2).getName());
     assertEquals("x_record_source", postRepeatFields.get(2).getRename());
+    SelectValuesMeta customerSelectMeta =
+        (SelectValuesMeta)
+            transforms.stream()
+                .filter(t -> "select_sat_customer".equals(t.getName()))
+                .findFirst()
+                .orElseThrow()
+                .getTransform();
+    assertTrue(
+        customerSelectMeta.getSelectOption().getSelectFields().stream()
+            .noneMatch(field -> "x_record_source".equals(field.getName())));
     assertEquals("_r_customer_name", postRepeatFields.get(3).getName());
     assertEquals("customer_name", postRepeatFields.get(3).getRename());
     assertEquals("_r_demo_score", postRepeatFields.get(4).getName());
@@ -852,6 +968,78 @@ class BvScd2PipelineSupportTest {
                 hop ->
                     hop.getFromTransform().getName().startsWith("select_")
                         && hop.getToTransform().equals(mergeTransform)));
+  }
+
+  @Test
+  void multiSatelliteTableInputOmitsRecordSourceEvenWhenOneSatelliteStoresIt() throws Exception {
+    DataVaultModel dvModel = loadVault1ModelWithDemoSatellite();
+    DvSatellite customerSatellite = (DvSatellite) dvModel.findTable("sat_customer");
+    DvSatellite demoSatellite = (DvSatellite) dvModel.findTable("sat_customer_demo");
+    customerSatellite.setStoreRecordSource(true);
+    demoSatellite.setStoreRecordSource(false);
+    DatabaseMeta databaseMeta = new TestDatabaseMeta("Vault");
+
+    BvScd2Table scd2Table = new BvScd2Table();
+    scd2Table.setName("customer_bv");
+    scd2Table.setTableName("customer_bv");
+    scd2Table.setFunctionalTimestampField("x_load_ts");
+    scd2Table.getDerivatives().add(new BvDerivativeRef("sat_customer", DvTableType.SATELLITE));
+    scd2Table.getDerivatives().add(new BvDerivativeRef("sat_customer_demo", DvTableType.SATELLITE));
+    scd2Table
+        .getFieldMappings()
+        .add(new BvScd2FieldMapping("sat_customer", "name", "customer_name"));
+    scd2Table
+        .getFieldMappings()
+        .add(new BvScd2FieldMapping("sat_customer_demo", "demo_score", "demo_score"));
+
+    Scd2BuildContext ctx =
+        new Scd2BuildContext(
+            scd2Table,
+            List.of(
+                new SatelliteLeg(
+                    customerSatellite,
+                    "sat_customer",
+                    "sat_customer",
+                    "x_load_ts",
+                    List.of(scd2Table.getFieldMappings().get(0))),
+                new SatelliteLeg(
+                    demoSatellite,
+                    "sat_customer_demo",
+                    "DEMO",
+                    "x_load_ts",
+                    List.of(scd2Table.getFieldMappings().get(1)))),
+            true,
+            List.of("customer_name", "demo_score"),
+            new BusinessVaultModel(),
+            dvModel,
+            new BusinessVaultConfiguration(),
+            dvModel.getConfigurationOrDefault(),
+            null,
+            new Variables(),
+            databaseMeta,
+            "Vault",
+            databaseMeta,
+            "Vault",
+            "sat_customer",
+            "customer_bv",
+            "bv-scd2-customer_bv-customer_bv",
+            "customer_hk",
+            null,
+            List.of("customer_name", "demo_score"),
+            "x_load_ts",
+            "valid_from",
+            "valid_to",
+            "x_record_source",
+            BusinessVaultConfiguration.DEFAULT_OPEN_START_SENTINEL,
+            BusinessVaultConfiguration.DEFAULT_OPEN_END_SENTINEL,
+            true);
+
+    assertFalse(
+        BvScd2PipelineSupport.buildLegTableInputSql(ctx, ctx.legs.get(0))
+            .contains("x_record_source"));
+    assertFalse(
+        BvScd2PipelineSupport.buildLegTableInputSql(ctx, ctx.legs.get(1))
+            .contains("x_record_source"));
   }
 
   @Test

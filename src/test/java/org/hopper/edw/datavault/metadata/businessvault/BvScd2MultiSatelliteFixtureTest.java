@@ -139,6 +139,12 @@ class BvScd2MultiSatelliteFixtureTest {
     assertEquals(19, transforms.size());
     assertEquals(
         4, transforms.stream().filter(t -> t.getTransform() instanceof TableInputMeta).count());
+    for (TransformMeta transform :
+        transforms.stream().filter(t -> t.getTransform() instanceof TableInputMeta).toList()) {
+      assertFalse(
+          ((TableInputMeta) transform.getTransform()).getSql().contains("x_record_source"),
+          transform.getName());
+    }
     assertEquals(
         4, transforms.stream().filter(t -> t.getTransform() instanceof ConstantMeta).count());
     assertEquals(

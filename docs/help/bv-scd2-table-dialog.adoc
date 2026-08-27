@@ -83,7 +83,9 @@ Single-satellite tables can pass attributes through under DV names unless you ad
 Optional per-satellite settings for multi-satellite merges:
 
 - Functional timestamp override for that satellite
-- Source indicator value when you need to tag which satellite contributed a version
+- Source indicator value when you need to tag which satellite contributed a version (and to fill the BV record-source column when that satellite does not store a physical source-indicator column)
+
+If a derivative satellite has **Store record source indicator** unchecked, generated satellite `TableInput` SQL does not select the vault record-source column. The BV table still receives a record-source value from this config (or the satellite name).
 
 == Type 1 vs Type 2 (important)
 
@@ -126,6 +128,7 @@ Longer guidance: project doc `docs/business-vault-scd2.adoc` (section *Type 1 vs
 - After changing the linked `.hdv` on disk, use **Reload DV model** on the Business Vault toolbar.
 - External read-only satellites are skipped by Data Vault Update but remain valid SCD2 sources if the vault DB can read them.
 - Multi-satellite example: `integration-tests/tests/multi-satellite-bv/customer-360.hbv`.
+- Mono-source satellites often omit the physical source-indicator column. Uncheck **Store record source indicator** on the satellite; SCD2 loads still run.
 
 == Related docs
 
