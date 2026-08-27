@@ -19,12 +19,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.hopper.edw.catalog.model.RecordDefinition;
-import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.catalog.model.RecordDefinition;
+import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.hopper.edw.datavault.catalog.DvCatalogNamespaces;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvSatellite;
@@ -37,8 +39,6 @@ import org.hopper.edw.datavault.resourcedefinition.ValidationReport.ProposalType
 import org.hopper.edw.datavault.resourcedefinition.ValidationReport.RecordDefinitionValidation;
 import org.hopper.edw.datavault.resourcedefinition.ValidationReport.RemediationProposal;
 import org.hopper.edw.datavault.resourcedefinition.ValidationReport.ValidationIssue;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Compares baseline catalog contracts to mapped DV model attributes. Baseline fields never come

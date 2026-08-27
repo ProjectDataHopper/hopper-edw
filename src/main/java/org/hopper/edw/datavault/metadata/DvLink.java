@@ -52,10 +52,6 @@ import org.apache.hop.core.row.value.ValueMetaString;
 import org.apache.hop.core.row.value.ValueMetaTimestamp;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
-import org.hopper.edw.datavault.transform.dvhashkey.DvHashKeyMeta;
-import org.hopper.edw.datavault.transform.dvhashkey.DvHashKeyMetaFactory;
-import org.hopper.edw.datavault.transform.mergerowsplus.MergeRowsPlusMeta;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHasName;
@@ -74,6 +70,10 @@ import org.apache.hop.pipeline.transforms.sort.SortRowsMeta;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
 import org.apache.hop.pipeline.transforms.uniquerowsbyhashset.UniqueRowsByHashSetMeta;
 import org.apache.hop.workflow.WorkflowMeta;
+import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
+import org.hopper.edw.datavault.transform.dvhashkey.DvHashKeyMeta;
+import org.hopper.edw.datavault.transform.dvhashkey.DvHashKeyMetaFactory;
+import org.hopper.edw.datavault.transform.mergerowsplus.MergeRowsPlusMeta;
 import org.jspecify.annotations.NonNull;
 
 /**
@@ -386,7 +386,7 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
     }
 
     // Hub record source validation
-    if (!DvIntegrationSupport.relaxesSourceValidation(this)
+    if (!DvIntegrationSupport.relaxesSourceValidation(this, model)
         && !DvIntegrationSupport.isCustomPipelines(this)) {
       if (linkHubSources == null || linkHubSources.isEmpty()) {
         remarks.add(
@@ -412,7 +412,9 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
         }
       }
     }
-    if (linkHubSources != null && !linkHubSources.isEmpty()) {
+    if (!DvIntegrationSupport.relaxesSourceValidation(this, model)
+        && linkHubSources != null
+        && !linkHubSources.isEmpty()) {
       for (DvLinkHubSource ls : linkHubSources) {
         if (ls != null && !Utils.isEmpty(ls.getSourceName())) {
           DataVaultSource source;
@@ -533,7 +535,9 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
       }
     }
 
-    if (linkSatelliteSources != null && !linkSatelliteSources.isEmpty()) {
+    if (!DvIntegrationSupport.relaxesSourceValidation(this, model)
+        && linkSatelliteSources != null
+        && !linkSatelliteSources.isEmpty()) {
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_OK,
@@ -641,7 +645,7 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
               this));
     }
 
-    if (!DvIntegrationSupport.relaxesSourceValidation(this)
+    if (!DvIntegrationSupport.relaxesSourceValidation(this, model)
         && metadataProvider != null
         && options != null
         && model != null) {
@@ -650,7 +654,7 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
       DvFieldMappingValidationSupport.validateLinkRecordSourceFields(
           this, model, options, metadataProvider, variables, this, remarks);
     }
-    if (model != null) {
+    if (model != null && !DvReadOnlyExistingVaultSupport.isReadOnly(model)) {
       DvOrphanHandlingSupport.checkLink(
           this, model, model.getConfigurationOrDefault(), variables, remarks);
     }
@@ -668,6 +672,7 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
       if (metadataProvider == null || model == null) {
         return Collections.emptyList();
       }
+      DvReadOnlyExistingVaultSupport.refuseUpdate(model);
 
       if (DvIntegrationSupport.isExternalRead(this)) {
         return Collections.emptyList();

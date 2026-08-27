@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import org.apache.hop.core.variables.Variables;
 import org.hopper.edw.catalog.discovery.RecordDefinitionSchemaDiffSupport.ChangeKind;
 import org.hopper.edw.catalog.discovery.RecordDefinitionSchemaDiffSupport.SchemaDiff;
 import org.hopper.edw.catalog.harvest.SchemaHarvestModels.DiscoveryStatus;
@@ -27,7 +28,6 @@ import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestChange;
 import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestResult;
 import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestStatus;
 import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestSubjectResult;
-import org.apache.hop.core.variables.Variables;
 import org.hopper.edw.datavault.resourcedefinition.ValidationReport.IssueKind;
 import org.hopper.edw.datavault.resourcedefinition.ValidationReport.IssueSeverity;
 import org.hopper.edw.datavault.resourcedefinition.ValidationReport.RecordDefinitionValidation;

@@ -24,6 +24,8 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.pipeline.PipelineMeta;
 import org.hopper.edw.datavault.metadata.AttributeSource;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DataVaultSource;
@@ -34,8 +36,6 @@ import org.hopper.edw.datavault.metadata.DvSatellite;
 import org.hopper.edw.datavault.metadata.DvSatelliteParentKeySupport;
 import org.hopper.edw.datavault.metadata.IDvSource;
 import org.hopper.edw.datavault.metadata.SatelliteAttribute;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.pipeline.PipelineMeta;
 
 /** Satellite load from a composite (multi-table) source query. */
 public class DvCompositeSatelliteSourcePipelineBuilder extends DvCompositeSourcePipelineBuilder {

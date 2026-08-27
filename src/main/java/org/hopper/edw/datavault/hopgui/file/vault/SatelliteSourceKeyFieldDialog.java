@@ -22,18 +22,6 @@ import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
-import org.hopper.edw.datavault.hopgui.help.HelpTopics;
-import org.hopper.edw.datavault.metadata.AttributeSource;
-import org.hopper.edw.datavault.metadata.DataVaultModel;
-import org.hopper.edw.datavault.metadata.DataVaultSource;
-import org.hopper.edw.datavault.metadata.DrivingKeySource;
-import org.hopper.edw.datavault.metadata.DvLink;
-import org.hopper.edw.datavault.metadata.DvSatellite;
-import org.hopper.edw.datavault.metadata.DvTableType;
-import org.hopper.edw.datavault.metadata.IDvTable;
-import org.hopper.edw.datavault.metadata.SatelliteAttribute;
-import org.hopper.edw.datavault.metadata.SourceField;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
@@ -51,6 +39,18 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
+import org.hopper.edw.datavault.metadata.AttributeSource;
+import org.hopper.edw.datavault.metadata.DataVaultModel;
+import org.hopper.edw.datavault.metadata.DataVaultSource;
+import org.hopper.edw.datavault.metadata.DrivingKeySource;
+import org.hopper.edw.datavault.metadata.DvLink;
+import org.hopper.edw.datavault.metadata.DvSatellite;
+import org.hopper.edw.datavault.metadata.DvTableType;
+import org.hopper.edw.datavault.metadata.IDvTable;
+import org.hopper.edw.datavault.metadata.SatelliteAttribute;
+import org.hopper.edw.datavault.metadata.SourceField;
 
 /**
  * Dialog to edit the source field mappings for one link satellite within one DvLinkSatelliteSource.

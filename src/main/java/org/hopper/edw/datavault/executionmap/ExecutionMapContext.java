@@ -28,6 +28,7 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapArtifactSnapshot;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapArtifactType;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapDocument;
@@ -35,7 +36,6 @@ import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapEdge;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapEdgeType;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapNode;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapNodeType;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Mutable crawl state shared by workflow and pipeline crawlers. */
 public final class ExecutionMapContext {

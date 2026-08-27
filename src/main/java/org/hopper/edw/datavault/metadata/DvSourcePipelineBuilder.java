@@ -27,11 +27,11 @@ import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.datatypemapping.DataTypeMappingPipelineSupport;
-import org.hopper.edw.datavault.metadata.datatypemapping.DvCatalogMappingStreamFieldsSupport;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
+import org.hopper.edw.datavault.metadata.datatypemapping.DataTypeMappingPipelineSupport;
+import org.hopper.edw.datavault.metadata.datatypemapping.DvCatalogMappingStreamFieldsSupport;
 
 /**
  * When reading from a DataVaultSource we can have different types of sources: Databases, files, and

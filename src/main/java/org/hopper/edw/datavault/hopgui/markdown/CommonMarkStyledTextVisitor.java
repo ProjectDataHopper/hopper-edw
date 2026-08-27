@@ -19,9 +19,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.hopgui.widget.MarkdownStyleRenderer.RenderedMarkdown;
-import org.hopper.edw.datavault.hopgui.widget.MarkdownStyleRenderer.SpanKind;
-import org.hopper.edw.datavault.hopgui.widget.MarkdownStyleRenderer.StyleSpan;
 import org.commonmark.ext.gfm.tables.TableBlock;
 import org.commonmark.ext.gfm.tables.TableCell;
 import org.commonmark.ext.gfm.tables.TableRow;
@@ -45,6 +42,9 @@ import org.commonmark.node.Paragraph;
 import org.commonmark.node.SoftLineBreak;
 import org.commonmark.node.StrongEmphasis;
 import org.commonmark.node.Text;
+import org.hopper.edw.datavault.hopgui.widget.MarkdownStyleRenderer.RenderedMarkdown;
+import org.hopper.edw.datavault.hopgui.widget.MarkdownStyleRenderer.SpanKind;
+import org.hopper.edw.datavault.hopgui.widget.MarkdownStyleRenderer.StyleSpan;
 
 /** Walks a CommonMark AST and produces SWT StyledText display text and style spans. */
 public final class CommonMarkStyledTextVisitor extends AbstractVisitor {

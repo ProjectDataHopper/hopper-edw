@@ -21,18 +21,6 @@ import java.util.List;
 import lombok.Getter;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
-import org.hopper.edw.datavault.hopgui.help.HelpTopics;
-import org.hopper.edw.datavault.metadata.DataVaultModel;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceEndpointKind;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
-import org.hopper.edw.datavault.metadata.sourcemodel.tovault.ProposedObjectKind;
-import org.hopper.edw.datavault.metadata.sourcemodel.tovault.ProposedVaultObject;
-import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceTableRole;
-import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceToVaultClassification;
-import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceToVaultClassifier;
-import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceToVaultOptions;
-import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceToVaultProposal;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
@@ -47,6 +35,18 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
+import org.hopper.edw.datavault.metadata.DataVaultModel;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceEndpointKind;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
+import org.hopper.edw.datavault.metadata.sourcemodel.tovault.ProposedObjectKind;
+import org.hopper.edw.datavault.metadata.sourcemodel.tovault.ProposedVaultObject;
+import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceTableRole;
+import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceToVaultClassification;
+import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceToVaultClassifier;
+import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceToVaultOptions;
+import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceToVaultProposal;
 
 /** Review-and-apply screen for source-model → raw Data Vault proposals. */
 public class SourceToVaultReviewDialog {

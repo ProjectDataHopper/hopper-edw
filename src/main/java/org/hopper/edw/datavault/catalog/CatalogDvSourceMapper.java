@@ -16,14 +16,14 @@
 package org.hopper.edw.datavault.catalog;
 
 import java.util.List;
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.util.Utils;
+import org.apache.hop.core.variables.IVariables;
 import org.hopper.edw.catalog.model.DvCsvFormatRecord;
 import org.hopper.edw.catalog.model.DvSourceRecord;
 import org.hopper.edw.catalog.model.PhysicalTableRef;
 import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.catalog.model.RecordDefinitionType;
-import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.util.Utils;
-import org.apache.hop.core.variables.IVariables;
 import org.hopper.edw.datavault.metadata.DataVaultSource;
 import org.hopper.edw.datavault.metadata.DvSourceDeliveryType;
 import org.hopper.edw.datavault.metadata.DvSourceType;

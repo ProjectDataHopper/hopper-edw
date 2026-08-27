@@ -15,22 +15,11 @@
  */
 package org.hopper.edw.catalog.harvest;
 
-import org.hopper.edw.catalog.harvest.SchemaHarvestCatalogApplySupport.ApplyOptions;
-import org.hopper.edw.catalog.harvest.SchemaHarvestCatalogApplySupport.ApplyResult;
-import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestResult;
-import org.hopper.edw.catalog.harvest.SchemaHarvestSourceModelGenerator.GenerateOptions;
-import org.hopper.edw.catalog.harvest.SchemaHarvestSourceModelGenerator.GenerateResult;
-import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryPublisher;
-import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader;
-import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader.HistoryConnection;
-import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceModelLoadSupport;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.dialog.EnterSelectionDialog;
@@ -40,6 +29,17 @@ import org.apache.hop.ui.hopgui.HopGui;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.catalog.harvest.SchemaHarvestCatalogApplySupport.ApplyOptions;
+import org.hopper.edw.catalog.harvest.SchemaHarvestCatalogApplySupport.ApplyResult;
+import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestResult;
+import org.hopper.edw.catalog.harvest.SchemaHarvestSourceModelGenerator.GenerateOptions;
+import org.hopper.edw.catalog.harvest.SchemaHarvestSourceModelGenerator.GenerateResult;
+import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryPublisher;
+import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader;
+import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader.HistoryConnection;
+import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceModelLoadSupport;
 
 /**
  * GUI entry points for applying harvest results to catalog contracts and generating .hsm models.

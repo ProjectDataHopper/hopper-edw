@@ -15,9 +15,9 @@
  */
 package org.hopper.edw.datavault.hopgui.perspective.journey;
 
-import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.util.Utils;
+import org.hopper.edw.catalog.model.RecordDefinitionKey;
 
 /** Stable tree node ids for selection restore and {@code select(group, nodeId)}. */
 public final class EdwJourneyIds {

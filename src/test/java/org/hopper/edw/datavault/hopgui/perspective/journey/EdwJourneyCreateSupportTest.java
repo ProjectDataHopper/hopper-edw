@@ -19,8 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.apache.hop.core.variables.Variables;
+import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.junit.jupiter.api.Test;
 
 class EdwJourneyCreateSupportTest {

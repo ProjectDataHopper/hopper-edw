@@ -18,7 +18,6 @@ package org.hopper.edw.catalog.transform.recorddatainput;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
-import org.hopper.edw.catalog.model.RecordDefinition;
 import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.annotations.Transform;
@@ -32,6 +31,7 @@ import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.BaseTransformMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
+import org.hopper.edw.catalog.model.RecordDefinition;
 
 /**
  * Reads actual data rows from a catalog record definition (same source path as catalog Preview

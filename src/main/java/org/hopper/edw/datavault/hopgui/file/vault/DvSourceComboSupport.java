@@ -20,12 +20,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
-import org.hopper.edw.datavault.hopgui.GuiBusySupport;
-import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.widget.ColumnInfo;
 import org.eclipse.swt.widgets.Control;
+import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
+import org.hopper.edw.datavault.hopgui.GuiBusySupport;
+import org.hopper.edw.datavault.metadata.DataVaultModel;
 
 /**
  * Builds Data Vault source CCOMBO columns that load catalog names only when the user focuses the

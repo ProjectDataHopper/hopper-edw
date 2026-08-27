@@ -21,8 +21,6 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import org.hopper.edw.catalog.discovery.RecordDefinitionCatalogWriter;
-import org.hopper.edw.catalog.hopgui.perspective.DataCatalogPerspective;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.database.Database;
 import org.apache.hop.core.database.DatabaseMeta;
@@ -37,13 +35,6 @@ import org.apache.hop.core.row.RowMeta;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
-import org.hopper.edw.datavault.catalog.RecordSourceIndicatorOptions;
-import org.hopper.edw.datavault.catalog.RecordSourceIndicatorSupport;
-import org.hopper.edw.datavault.metadata.DataVaultModel;
-import org.hopper.edw.datavault.metadata.DataVaultSource;
-import org.hopper.edw.datavault.metadata.SourceField;
-import org.hopper.edw.datavault.metadata.SourceFieldPrimaryKeySupport;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.dialog.EditRowsDialog;
@@ -53,6 +44,15 @@ import org.apache.hop.ui.hopgui.HopGui;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.catalog.discovery.RecordDefinitionCatalogWriter;
+import org.hopper.edw.catalog.hopgui.perspective.DataCatalogPerspective;
+import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
+import org.hopper.edw.datavault.catalog.RecordSourceIndicatorOptions;
+import org.hopper.edw.datavault.catalog.RecordSourceIndicatorSupport;
+import org.hopper.edw.datavault.metadata.DataVaultModel;
+import org.hopper.edw.datavault.metadata.DataVaultSource;
+import org.hopper.edw.datavault.metadata.SourceField;
+import org.hopper.edw.datavault.metadata.SourceFieldPrimaryKeySupport;
 
 /** Shared helpers for importing database tables as record definitions in the data catalog. */
 public final class DvDatabaseSourceImportSupport {

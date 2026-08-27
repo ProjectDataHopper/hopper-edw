@@ -17,12 +17,12 @@ package org.hopper.edw.datavault.metrics.metadata;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.hopper.edw.datavault.metrics.LoadRunInsightEngine;
 import org.apache.hop.metadata.api.HopMetadata;
 import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.HopMetadataPropertyType;
 import org.apache.hop.metadata.api.IHopMetadata;
+import org.hopper.edw.datavault.metrics.LoadRunInsightEngine;
 
 /**
  * Reusable configuration for load-run metrics collection, catalog publishing, and insight rules on

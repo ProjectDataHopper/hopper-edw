@@ -27,12 +27,12 @@ import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.variables.Variables;
-import org.hopper.edw.datavault.metadata.pipeline.HeadlessPipelineFieldSupport;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transforms.metainject.MetaInjectMeta;
 import org.apache.hop.pipeline.transforms.metainject.MetaInjectOutputField;
+import org.hopper.edw.datavault.metadata.pipeline.HeadlessPipelineFieldSupport;
 
 /** Helpers for dimensional tables that use a Hop pipeline as the staging source. */
 public final class DmSourcePipelineSupport {

@@ -29,8 +29,8 @@ import org.apache.hop.core.logging.SimpleLoggingObject;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.SourceField;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.datavault.metadata.SourceField;
 
 /** Reads sample rows from a {@link DvDatabaseSource} table for interactive preview. */
 public final class DvDatabaseSourcePreviewSupport {

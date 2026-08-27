@@ -20,6 +20,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.apache.hop.core.Const;
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.logging.ILogChannel;
+import org.apache.hop.core.util.Utils;
+import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.catalog.discovery.RecordDefinitionPhysicalRefSupport;
 import org.hopper.edw.catalog.discovery.RecordDefinitionSchemaDiffSupport;
 import org.hopper.edw.catalog.harvest.SchemaHarvestModels.BaselineMode;
@@ -34,16 +40,10 @@ import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestedField;
 import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestedForeignKey;
 import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.catalog.versioning.CatalogVersionService;
-import org.apache.hop.core.Const;
-import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.logging.ILogChannel;
-import org.apache.hop.core.util.Utils;
-import org.apache.hop.core.variables.IVariables;
 import org.hopper.edw.datavault.catalog.DvSourceFieldSupport;
 import org.hopper.edw.datavault.metadata.DvSourceType;
 import org.hopper.edw.datavault.metadata.SourceField;
 import org.hopper.edw.datavault.resourcedefinition.ParallelValidationSupport;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Orchestrates schema metadata harvesting: resolve subjects → connection-batched discovery → diff

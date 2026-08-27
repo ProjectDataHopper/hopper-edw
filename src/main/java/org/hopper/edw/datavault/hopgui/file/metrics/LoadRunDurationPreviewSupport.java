@@ -26,11 +26,11 @@ import org.apache.hop.core.row.value.ValueMetaDate;
 import org.apache.hop.core.row.value.ValueMetaNumber;
 import org.apache.hop.core.row.value.ValueMetaString;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
+import org.eclipse.swt.widgets.Shell;
 import org.hopper.edw.datavault.hopgui.dialog.ShowRowsDialog;
 import org.hopper.edw.datavault.metrics.LoadRunDurationRun;
 import org.hopper.edw.datavault.metrics.LoadRunDurationSnapshot;
-import org.apache.hop.i18n.BaseMessages;
-import org.eclipse.swt.widgets.Shell;
 
 /** Builds tabular previews of load duration metrics for {@link ShowRowsDialog}. */
 public final class LoadRunDurationPreviewSupport {

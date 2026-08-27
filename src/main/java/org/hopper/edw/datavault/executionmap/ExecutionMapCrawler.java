@@ -21,9 +21,9 @@ import lombok.Getter;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapDocument;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapRootArtifactType;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Entry point for building a Hop execution map from a root workflow or pipeline. */
 public final class ExecutionMapCrawler {

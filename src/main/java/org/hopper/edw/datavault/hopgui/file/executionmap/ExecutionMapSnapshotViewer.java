@@ -18,14 +18,14 @@ package org.hopper.edw.datavault.hopgui.file.executionmap;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.xml.XmlFormatter;
-import org.hopper.edw.datavault.executionmap.ArtifactSnapshotSupport;
-import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapArtifactSnapshot;
-import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapDocument;
-import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapNode;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.dialog.EnterTextDialog;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.datavault.executionmap.ArtifactSnapshotSupport;
+import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapArtifactSnapshot;
+import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapDocument;
+import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapNode;
 
 /** Read-only viewer for gzip+Base64 XML snapshots stored in execution maps. */
 public final class ExecutionMapSnapshotViewer {

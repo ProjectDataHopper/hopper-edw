@@ -38,9 +38,9 @@ import org.apache.hop.core.gui.markdown.MarkdownNoteRenderer.PositionedLink;
 import org.apache.hop.core.gui.markdown.NoteLinkHit;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.DvNote;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.PropsUi;
+import org.hopper.edw.datavault.metadata.DvNote;
 
 @Getter
 @Setter

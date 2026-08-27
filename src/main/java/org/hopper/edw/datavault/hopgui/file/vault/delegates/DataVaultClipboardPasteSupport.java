@@ -24,13 +24,13 @@ import java.util.Set;
 import org.apache.hop.core.gui.IGuiPosition;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.ui.core.PropsUi;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvLink;
 import org.hopper.edw.datavault.metadata.DvNote;
 import org.hopper.edw.datavault.metadata.DvSatellite;
 import org.hopper.edw.datavault.metadata.DvTableType;
 import org.hopper.edw.datavault.metadata.IDvTable;
-import org.apache.hop.ui.core.PropsUi;
 
 /** Helpers for renaming and offsetting objects pasted onto a Data Vault model canvas. */
 final class DataVaultClipboardPasteSupport {

@@ -19,10 +19,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.apache.hop.core.file.TextFileInputField;
 import org.apache.hop.core.row.IValueMeta;
+import org.apache.hop.pipeline.transforms.csvinput.CsvInputField;
 import org.hopper.edw.datavault.metadata.CsvFieldOptions;
 import org.hopper.edw.datavault.metadata.SourceField;
 import org.hopper.edw.datavault.metadata.SourceFieldInputOptions;
-import org.apache.hop.pipeline.transforms.csvinput.CsvInputField;
 import org.junit.jupiter.api.Test;
 
 class DvTextFileInputFieldSupportTest {

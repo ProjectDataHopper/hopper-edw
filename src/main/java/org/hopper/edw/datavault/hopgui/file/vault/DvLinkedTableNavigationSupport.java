@@ -18,16 +18,16 @@ package org.hopper.edw.datavault.hopgui.file.vault;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.DataVaultModel;
-import org.hopper.edw.datavault.metadata.DvLinkedTable;
-import org.hopper.edw.datavault.metadata.DvModelLoadSupport;
-import org.hopper.edw.datavault.metadata.DvTableResolutionSupport;
-import org.hopper.edw.datavault.metadata.IDvTable;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
 import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
+import org.hopper.edw.datavault.metadata.DataVaultModel;
+import org.hopper.edw.datavault.metadata.DvLinkedTable;
+import org.hopper.edw.datavault.metadata.DvModelLoadSupport;
+import org.hopper.edw.datavault.metadata.DvTableResolutionSupport;
+import org.hopper.edw.datavault.metadata.IDvTable;
 
 /** Navigates from a cross-model table reference to its source table in another or the same .hdv. */
 public final class DvLinkedTableNavigationSupport {

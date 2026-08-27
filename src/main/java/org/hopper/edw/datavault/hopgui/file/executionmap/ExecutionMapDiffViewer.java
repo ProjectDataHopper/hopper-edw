@@ -15,10 +15,10 @@
  */
 package org.hopper.edw.datavault.hopgui.file.executionmap;
 
-import org.hopper.edw.datavault.executionmap.ExecutionMapDiffSupport.DiffResult;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.dialog.EnterTextDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.datavault.executionmap.ExecutionMapDiffSupport.DiffResult;
 
 /** Read-only viewer for execution map refresh diffs. */
 public final class ExecutionMapDiffViewer {

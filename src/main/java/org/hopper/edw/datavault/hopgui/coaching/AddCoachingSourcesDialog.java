@@ -15,15 +15,9 @@
  */
 package org.hopper.edw.datavault.hopgui.coaching;
 
-import org.hopper.edw.catalog.metadata.DataCatalogMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.catalog.DvCatalogNamespaces;
-import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
-import org.hopper.edw.datavault.hopgui.GuiBusySupport;
-import org.hopper.edw.datavault.metadata.coaching.CoachingSourceRef;
-import org.hopper.edw.datavault.metadata.coaching.ICoachingModelAdapter;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
@@ -38,6 +32,12 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.catalog.metadata.DataCatalogMeta;
+import org.hopper.edw.datavault.catalog.DvCatalogNamespaces;
+import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
+import org.hopper.edw.datavault.hopgui.GuiBusySupport;
+import org.hopper.edw.datavault.metadata.coaching.CoachingSourceRef;
+import org.hopper.edw.datavault.metadata.coaching.ICoachingModelAdapter;
 
 /** Picks catalog record sources to add to the model coaching configuration. */
 public class AddCoachingSourcesDialog {

@@ -26,11 +26,11 @@ import org.apache.hop.core.gui.plugin.GuiWidgetElement;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.HopMetadataProperty;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.DvSourceBase;
 import org.hopper.edw.datavault.metadata.DvSourceType;
 import org.hopper.edw.datavault.metadata.SourceField;
-import org.apache.hop.metadata.api.HopMetadataProperty;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Iceberg table implementation of a Data Vault source. */
 @Getter

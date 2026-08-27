@@ -26,6 +26,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.util.Utils;
+import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.catalog.impl.file.FileDataCatalog;
 import org.hopper.edw.catalog.metadata.DataCatalogMeta;
 import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
@@ -33,17 +38,12 @@ import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
 import org.hopper.edw.catalog.spi.IDataCatalog;
-import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.util.Utils;
-import org.apache.hop.core.variables.IVariables;
 import org.hopper.edw.datavault.catalog.DvCatalogNamespaces;
 import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
 import org.hopper.edw.datavault.resourcedefinition.ResourceDefinitionGroupResolver;
 import org.hopper.edw.datavault.resourcedefinition.SourceUsage;
 import org.hopper.edw.datavault.resourcedefinition.SourceUsageIndexBuilder;
 import org.hopper.edw.datavault.resourcedefinition.ValidationModels;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Creates and loads semantic catalog version tags for file-based data catalogs. Snapshots freeze

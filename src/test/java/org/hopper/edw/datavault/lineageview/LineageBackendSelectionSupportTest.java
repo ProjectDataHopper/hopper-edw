@@ -20,8 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.exception.HopException;
-import org.hopper.edw.datavault.metadata.lineage.LineageBackendMeta;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
+import org.hopper.edw.datavault.metadata.lineage.LineageBackendMeta;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

@@ -17,12 +17,19 @@ package org.hopper.edw.datavault.metadata.iceberg;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import org.hopper.edw.catalog.discovery.PhysicalSourceRef;
-import org.hopper.edw.catalog.discovery.RecordDefinitionCatalogWriter;
-import org.hopper.edw.catalog.discovery.RecordDefinitionDiscoveryService;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.ui.core.dialog.ErrorDialog;
+import org.apache.hop.ui.hopgui.HopGui;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.catalog.discovery.PhysicalSourceRef;
+import org.hopper.edw.catalog.discovery.RecordDefinitionCatalogWriter;
+import org.hopper.edw.catalog.discovery.RecordDefinitionDiscoveryService;
 import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
 import org.hopper.edw.datavault.catalog.RecordSourceIndicatorOptions;
 import org.hopper.edw.datavault.catalog.RecordSourceIndicatorSupport;
@@ -32,13 +39,6 @@ import org.hopper.edw.datavault.metadata.DvSourceType;
 import org.hopper.edw.datavault.metadata.SourceField;
 import org.hopper.edw.datavault.metadata.database.DvDatabaseSourceImportSupport;
 import org.hopper.edw.datavault.metadata.database.ImportDatabaseTablesCatalogDialog;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.ui.core.dialog.ErrorDialog;
-import org.apache.hop.ui.hopgui.HopGui;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Shell;
 
 /** Imports an Iceberg table as a catalog-backed record definition. */
 public final class DvIcebergSourceImportSupport {

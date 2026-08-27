@@ -26,11 +26,11 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.xml.XmlHandler;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.hopper.edw.datavault.config.DataVaultConfigSingleton;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 

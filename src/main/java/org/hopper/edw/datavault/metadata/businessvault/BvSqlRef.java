@@ -18,8 +18,8 @@ package org.hopper.edw.datavault.metadata.businessvault;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hopper.edw.datavault.metadata.DvTableType;
 import org.apache.hop.metadata.api.HopMetadataProperty;
+import org.hopper.edw.datavault.metadata.DvTableType;
 
 /**
  * A parsed {@code ref()} from SQL, optionally enriched with resolution results for canvas

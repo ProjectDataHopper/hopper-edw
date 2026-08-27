@@ -15,10 +15,6 @@
  */
 package org.hopper.edw.catalog.hopgui.perspective;
 
-import org.hopper.edw.catalog.discovery.RecordDefinitionCatalogRefreshSupport;
-import org.hopper.edw.catalog.discovery.RecordDefinitionSchemaDiffSupport;
-import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
-import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
@@ -31,6 +27,10 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.catalog.discovery.RecordDefinitionCatalogRefreshSupport;
+import org.hopper.edw.catalog.discovery.RecordDefinitionSchemaDiffSupport;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 
 /** Shows schema drift and asks whether to refresh the catalog contract from the live source. */
 public final class RefreshRecordDefinitionFromSourceDialog {

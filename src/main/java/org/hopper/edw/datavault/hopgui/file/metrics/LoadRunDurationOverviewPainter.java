@@ -27,11 +27,11 @@ import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.Rectangle;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.ui.core.PropsUi;
 import org.hopper.edw.datavault.hopgui.file.vault.BasePainter;
 import org.hopper.edw.datavault.metrics.LoadRunDurationRun;
 import org.hopper.edw.datavault.metrics.LoadRunDurationSnapshot;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.ui.core.PropsUi;
 
 /** Airflow-style duration bars for recent load runs, one row per model table. */
 public class LoadRunDurationOverviewPainter extends BasePainter {

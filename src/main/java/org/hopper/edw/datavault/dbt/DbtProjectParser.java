@@ -21,8 +21,8 @@ import java.util.Locale;
 import java.util.Map;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.metadata.businessvault.BvSqlTemplateParser;
 import org.apache.hop.i18n.BaseMessages;
+import org.hopper.edw.datavault.metadata.businessvault.BvSqlTemplateParser;
 
 /** Scans a dbt-core project folder into {@link DbtProjectScan} drafts. */
 public final class DbtProjectParser {

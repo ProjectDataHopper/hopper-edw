@@ -41,7 +41,6 @@ import org.apache.hop.core.row.value.ValueMetaString;
 import org.apache.hop.core.row.value.ValueMetaTimestamp;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHasName;
@@ -52,6 +51,7 @@ import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transforms.constant.ConstantField;
 import org.apache.hop.pipeline.transforms.constant.ConstantMeta;
 import org.apache.hop.workflow.WorkflowMeta;
+import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
 
 /**
  * Data Vault reference (code / catalog) table: natural keys and attributes with DV load metadata,
@@ -139,7 +139,7 @@ public class DvReferenceTable extends DvTableBase
       DataVaultModel model) {
     super.check(remarks, metadataProvider, variables, options, model);
 
-    if (!DvIntegrationSupport.relaxesSourceValidation(this)) {
+    if (!DvIntegrationSupport.relaxesSourceValidation(this, model)) {
       if (recordSources == null || recordSources.isEmpty()) {
         remarks.add(
             new CheckResult(
@@ -176,7 +176,9 @@ public class DvReferenceTable extends DvTableBase
 
     checkAttributeNames(remarks);
     checkNameCollisionsWithStandardColumns(remarks, variables, model);
-    checkLoadMode(remarks, metadataProvider, variables, model);
+    if (!DvReadOnlyExistingVaultSupport.isReadOnly(model)) {
+      checkLoadMode(remarks, metadataProvider, variables, model);
+    }
   }
 
   private void checkLoadMode(
@@ -534,6 +536,7 @@ public class DvReferenceTable extends DvTableBase
       if (metadataProvider == null || model == null) {
         return result;
       }
+      DvReadOnlyExistingVaultSupport.refuseUpdate(model);
       if (DvIntegrationSupport.isExternalRead(this)) {
         return result;
       }

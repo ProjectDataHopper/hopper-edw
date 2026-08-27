@@ -17,18 +17,18 @@ package org.hopper.edw.catalog.discovery;
 
 import java.util.Date;
 import java.util.List;
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.catalog.model.CatalogCustomProperty;
 import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.catalog.model.RecordOrigin;
-import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.variables.IVariables;
 import org.hopper.edw.datavault.catalog.DvSourceFieldSupport;
 import org.hopper.edw.datavault.metadata.DvSourceType;
 import org.hopper.edw.datavault.metadata.SourceField;
 import org.hopper.edw.datavault.metadata.iceberg.IcebergConnectionSettings;
 import org.hopper.edw.datavault.metadata.iceberg.IcebergTableMetadataDiscovery;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Re-discovers physical source schemas and refreshes catalog record-definition contracts. */
 public final class RecordDefinitionCatalogRefreshSupport {

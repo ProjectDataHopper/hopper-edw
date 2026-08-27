@@ -28,9 +28,9 @@ import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic;
 
 /** Kimball validation rules for dimensional model tables. */
 public final class DmValidationSupport {

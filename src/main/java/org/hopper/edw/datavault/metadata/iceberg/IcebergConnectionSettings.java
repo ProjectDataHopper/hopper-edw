@@ -15,11 +15,11 @@
  */
 package org.hopper.edw.datavault.metadata.iceberg;
 
-import org.hopper.edw.catalog.discovery.HopVariableResolutionSupport;
-import org.hopper.edw.catalog.discovery.PhysicalSourceRef;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.hopper.edw.catalog.discovery.HopVariableResolutionSupport;
+import org.hopper.edw.catalog.discovery.PhysicalSourceRef;
 import org.hopper.edw.datavault.transform.iceberginput.IcebergTableInputMeta;
 
 /** Resolved Iceberg REST catalog and warehouse connection settings. */

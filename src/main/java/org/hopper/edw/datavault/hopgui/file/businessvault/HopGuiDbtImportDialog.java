@@ -19,15 +19,6 @@ import java.util.Locale;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.dbt.DbtImportConflictPolicy;
-import org.hopper.edw.datavault.dbt.DbtImportDestination;
-import org.hopper.edw.datavault.dbt.DbtImportOptions;
-import org.hopper.edw.datavault.dbt.DbtImportService;
-import org.hopper.edw.datavault.dbt.DbtModelDraft;
-import org.hopper.edw.datavault.dbt.DbtProjectParser;
-import org.hopper.edw.datavault.dbt.DbtProjectScan;
-import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
-import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
@@ -47,6 +38,15 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.dbt.DbtImportConflictPolicy;
+import org.hopper.edw.datavault.dbt.DbtImportDestination;
+import org.hopper.edw.datavault.dbt.DbtImportOptions;
+import org.hopper.edw.datavault.dbt.DbtImportService;
+import org.hopper.edw.datavault.dbt.DbtModelDraft;
+import org.hopper.edw.datavault.dbt.DbtProjectParser;
+import org.hopper.edw.datavault.dbt.DbtProjectScan;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 
 /** Scan a dbt-core project and choose models to import into Business Vault. */
 public class HopGuiDbtImportDialog {

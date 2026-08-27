@@ -17,9 +17,9 @@ package org.hopper.edw.datavault.hopgui.file.lineageview;
 
 import org.apache.hop.core.search.ISearchable;
 import org.apache.hop.core.search.ISearchableCallback;
+import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
 import org.hopper.edw.datavault.hopgui.search.ModelSearchOpenSupport;
 import org.hopper.edw.datavault.lineageview.HopLineageViewDocument;
-import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
 
 /** Project search for a {@code .hlv} view definition. */
 public class HopGuiLineageViewSearchable implements ISearchable<HopLineageViewDocument> {

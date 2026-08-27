@@ -23,9 +23,9 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
-import org.hopper.edw.datavault.layout.DvPipelineElkLayout;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.workflow.WorkflowMeta;
+import org.hopper.edw.datavault.layout.DvPipelineElkLayout;
 
 /** Saves generated update pipelines and workflows when configured to do so. */
 public final class DvGeneratedPipelineSupport {

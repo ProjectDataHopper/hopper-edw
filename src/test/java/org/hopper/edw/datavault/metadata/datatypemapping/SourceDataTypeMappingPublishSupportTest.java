@@ -21,11 +21,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import org.apache.hop.core.row.IValueMeta;
+import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.hopper.edw.datavault.metadata.SourceField;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceColumn;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
 import org.hopper.edw.datavault.metadata.sourcemodel.publish.SourceTableCatalogPublisher;
-import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.junit.jupiter.api.Test;
 
 class SourceDataTypeMappingPublishSupportTest {

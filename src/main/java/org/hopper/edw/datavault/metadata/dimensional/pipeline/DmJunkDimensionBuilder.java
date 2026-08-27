@@ -19,6 +19,13 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.pipeline.PipelineHopMeta;
+import org.apache.hop.pipeline.PipelineMeta;
+import org.apache.hop.pipeline.transform.TransformMeta;
+import org.apache.hop.pipeline.transforms.combinationlookup.CFields;
+import org.apache.hop.pipeline.transforms.combinationlookup.KeyField;
+import org.apache.hop.pipeline.transforms.combinationlookup.ReturnFields;
 import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataSupport;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalConfiguration;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
@@ -30,13 +37,6 @@ import org.hopper.edw.datavault.metadata.dimensional.DmJunkSurrogateKeyStrategy;
 import org.hopper.edw.datavault.metadata.dimensional.DmNaturalKeyField;
 import org.hopper.edw.datavault.metadata.dimensional.DmSurrogateKeySupport;
 import org.hopper.edw.datavault.transform.junkdimension.JunkDimensionMeta;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.pipeline.PipelineHopMeta;
-import org.apache.hop.pipeline.PipelineMeta;
-import org.apache.hop.pipeline.transform.TransformMeta;
-import org.apache.hop.pipeline.transforms.combinationlookup.CFields;
-import org.apache.hop.pipeline.transforms.combinationlookup.KeyField;
-import org.apache.hop.pipeline.transforms.combinationlookup.ReturnFields;
 
 /** Generates junk dimension pipelines using the project-local JunkDimension transform. */
 public final class DmJunkDimensionBuilder {

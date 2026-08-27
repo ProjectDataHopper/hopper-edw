@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import org.hopper.edw.catalog.discovery.RecordDefinitionCatalogWriter;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.database.Database;
 import org.apache.hop.core.database.DatabaseMeta;
@@ -33,6 +32,9 @@ import org.apache.hop.core.logging.LoggingObjectType;
 import org.apache.hop.core.logging.SimpleLoggingObject;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.catalog.discovery.RecordDefinitionCatalogWriter;
 import org.hopper.edw.datavault.catalog.RecordSourceIndicatorOptions;
 import org.hopper.edw.datavault.catalog.RecordSourceIndicatorSupport;
 import org.hopper.edw.datavault.metadata.DataVaultSource;
@@ -47,8 +49,6 @@ import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModelConfiguration;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceRelationship;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Imports database tables (columns, PKs) and FK relationships into a {@link SourceModel}.

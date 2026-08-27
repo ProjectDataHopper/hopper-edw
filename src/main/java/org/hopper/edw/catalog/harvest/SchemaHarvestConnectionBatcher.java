@@ -21,10 +21,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import org.hopper.edw.catalog.discovery.PhysicalSourceRef;
-import org.hopper.edw.catalog.discovery.RecordDefinitionDiscoveryService;
-import org.hopper.edw.catalog.discovery.RecordDefinitionPhysicalRefSupport;
-import org.hopper.edw.catalog.model.RecordDefinition;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.database.Database;
 import org.apache.hop.core.database.DatabaseMeta;
@@ -34,10 +30,14 @@ import org.apache.hop.core.logging.LoggingObjectType;
 import org.apache.hop.core.logging.SimpleLoggingObject;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.catalog.discovery.PhysicalSourceRef;
+import org.hopper.edw.catalog.discovery.RecordDefinitionDiscoveryService;
+import org.hopper.edw.catalog.discovery.RecordDefinitionPhysicalRefSupport;
+import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.datavault.metadata.DvSourceType;
 import org.hopper.edw.datavault.metadata.SourceField;
 import org.hopper.edw.datavault.metadata.database.DvDatabaseSourceImportSupport;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Discovers live field layouts for harvest subjects, batching all DATABASE subjects that share a

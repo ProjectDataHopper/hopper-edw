@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
-import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.apache.hop.core.Result;
 import org.apache.hop.core.annotations.Action;
 import org.apache.hop.core.exception.HopException;
@@ -29,14 +28,15 @@ import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.GuiWidgetElement;
 import org.apache.hop.core.logging.ILogChannel;
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.architecture.ArchitectureExportService;
-import org.hopper.edw.datavault.architecture.ArchitectureExportService.ExportResult;
-import org.hopper.edw.datavault.architecture.ArchitectureViewType;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.workflow.action.ActionBase;
 import org.apache.hop.workflow.action.IAction;
+import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
+import org.hopper.edw.datavault.architecture.ArchitectureExportService;
+import org.hopper.edw.datavault.architecture.ArchitectureExportService.ExportResult;
+import org.hopper.edw.datavault.architecture.ArchitectureViewType;
 
 /**
  * Exports a Draw.io architecture diagram from a workflow root (SOLUTION view) and/or model lineage

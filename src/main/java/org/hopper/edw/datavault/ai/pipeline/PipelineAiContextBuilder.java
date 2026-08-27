@@ -25,12 +25,12 @@ import org.apache.hop.core.plugins.PluginRegistry;
 import org.apache.hop.core.plugins.TransformPluginType;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.ai.HopAiCheckResultsSerializer;
-import org.hopper.edw.datavault.ai.HopAiTextUtil;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineHopMeta;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
+import org.hopper.edw.datavault.ai.HopAiCheckResultsSerializer;
+import org.hopper.edw.datavault.ai.HopAiTextUtil;
 
 public final class PipelineAiContextBuilder {
 

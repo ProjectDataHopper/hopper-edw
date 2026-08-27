@@ -19,10 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.ai.DvAiProposal;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.IBvTable;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Validates AI proposals against the open Business Vault model before the user applies them. */
 public final class BvAiProposalValidator {

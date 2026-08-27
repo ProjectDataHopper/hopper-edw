@@ -19,9 +19,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
-import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
+import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.junit.jupiter.api.Test;
 
 class CatalogVersionGuiSupportTest {

@@ -21,6 +21,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import org.apache.hop.core.Const;
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.util.Utils;
+import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.catalog.discovery.RecordDefinitionCatalogRefreshSupport;
 import org.hopper.edw.catalog.harvest.SchemaHarvestModels.DiscoveryStatus;
 import org.hopper.edw.catalog.harvest.SchemaHarvestModels.FieldRole;
@@ -34,13 +39,8 @@ import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.hopper.edw.catalog.model.RecordOrigin;
 import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
-import org.apache.hop.core.Const;
-import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.util.Utils;
-import org.apache.hop.core.variables.IVariables;
 import org.hopper.edw.datavault.catalog.DvSourceFieldSupport;
 import org.hopper.edw.datavault.metadata.SourceField;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Applies harvested DISCOVERED field layouts and/or foreign keys onto working-tree catalog source

@@ -26,10 +26,10 @@ import org.apache.hop.core.gui.Rectangle;
 import org.apache.hop.core.gui.markdown.NoteLinkHit;
 import org.apache.hop.core.svg.HopSvgGraphics2D;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphCanvasSvgResult;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphWebCanvasData;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Renders a source model to SVG for Hop Web using {@link SourceModelPainter}. */
 public final class SourceModelCanvasSvgRenderer {

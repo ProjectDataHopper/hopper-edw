@@ -19,13 +19,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import java.util.List;
+import org.apache.hop.core.variables.Variables;
 import org.hopper.edw.catalog.model.CatalogSourceField;
 import org.hopper.edw.catalog.model.DvSourceRecord;
 import org.hopper.edw.catalog.model.PhysicalIcebergTableRef;
 import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.hopper.edw.catalog.model.RecordDefinitionType;
-import org.apache.hop.core.variables.Variables;
 import org.hopper.edw.datavault.metadata.DataVaultSource;
 import org.hopper.edw.datavault.metadata.DvSourceDeliveryType;
 import org.hopper.edw.datavault.metadata.DvSourceType;

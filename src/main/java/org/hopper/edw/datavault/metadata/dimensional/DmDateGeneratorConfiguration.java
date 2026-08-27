@@ -19,10 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorField;
 import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorMeta;
 import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorMetaFactory;
-import org.apache.hop.metadata.api.HopMetadataProperty;
 
 /**
  * Calendar generator options stored on a dimensional table with {@link

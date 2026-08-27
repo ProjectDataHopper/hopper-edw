@@ -17,24 +17,24 @@ package org.hopper.edw.datavault.catalog;
 
 import java.util.Date;
 import lombok.Getter;
+import org.apache.hop.core.database.DatabaseMeta;
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.row.IRowMeta;
+import org.apache.hop.core.util.Utils;
+import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.catalog.model.PhysicalTableRef;
 import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.hopper.edw.catalog.model.RecordDefinitionType;
 import org.hopper.edw.catalog.model.RecordOrigin;
 import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
-import org.apache.hop.core.database.DatabaseMeta;
-import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.row.IRowMeta;
-import org.apache.hop.core.util.Utils;
-import org.apache.hop.core.variables.IVariables;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultConfiguration;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BvBusinessTable;
 import org.hopper.edw.datavault.metadata.businessvault.BvTableType;
 import org.hopper.edw.datavault.metadata.businessvault.IBvTable;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Publishes Business Vault target table record definitions to a configured data catalog. */
 public final class BvCatalogPublisher {

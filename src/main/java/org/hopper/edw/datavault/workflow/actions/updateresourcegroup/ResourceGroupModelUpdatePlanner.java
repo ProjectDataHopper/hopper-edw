@@ -17,9 +17,9 @@ package org.hopper.edw.datavault.workflow.actions.updateresourcegroup;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 
 /**
  * Builds the ordered list of model update jobs for a resource definition group.

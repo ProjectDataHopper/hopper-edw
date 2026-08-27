@@ -22,9 +22,6 @@ import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
-import org.hopper.edw.quality.history.DataQualityHistoryReader;
-import org.hopper.edw.quality.history.DataQualityHistoryReader.FindingEntry;
-import org.hopper.edw.quality.history.DataQualityHistoryReader.SubjectHistoryEntry;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.gui.GuiResource;
@@ -42,6 +39,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
+import org.hopper.edw.quality.history.DataQualityHistoryReader;
+import org.hopper.edw.quality.history.DataQualityHistoryReader.FindingEntry;
+import org.hopper.edw.quality.history.DataQualityHistoryReader.SubjectHistoryEntry;
 
 /**
  * TableView dialog listing recent quality profile snapshots for a subject. Double-click a row to

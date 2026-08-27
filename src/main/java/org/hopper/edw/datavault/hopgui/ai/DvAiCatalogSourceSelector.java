@@ -22,10 +22,6 @@ import java.util.Set;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.ai.DvAiContextBuilder;
-import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
-import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
-import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.dialog.EnterSelectionDialog;
@@ -33,6 +29,10 @@ import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.dialog.MessageBox;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.datavault.ai.DvAiContextBuilder;
+import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
+import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
+import org.hopper.edw.datavault.metadata.DataVaultModel;
 
 /**
  * Resolves the model catalog connection and lets the user pick record definitions for AI context.

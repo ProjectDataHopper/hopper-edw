@@ -17,11 +17,6 @@ package org.hopper.edw.datavault.hopgui.coaching;
 
 import java.util.Arrays;
 import java.util.List;
-import org.hopper.edw.datavault.metadata.coaching.BvCoachingModelAdapter;
-import org.hopper.edw.datavault.metadata.coaching.CoachingSourceRef;
-import org.hopper.edw.datavault.metadata.coaching.DmCoachingModelAdapter;
-import org.hopper.edw.datavault.metadata.coaching.DvCoachingModelAdapter;
-import org.hopper.edw.datavault.metadata.coaching.ICoachingModelAdapter;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
@@ -35,6 +30,11 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.metadata.coaching.BvCoachingModelAdapter;
+import org.hopper.edw.datavault.metadata.coaching.CoachingSourceRef;
+import org.hopper.edw.datavault.metadata.coaching.DmCoachingModelAdapter;
+import org.hopper.edw.datavault.metadata.coaching.DvCoachingModelAdapter;
+import org.hopper.edw.datavault.metadata.coaching.ICoachingModelAdapter;
 
 public class CoachingTableTypeDialog {
 

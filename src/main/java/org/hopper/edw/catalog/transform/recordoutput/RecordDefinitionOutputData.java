@@ -18,9 +18,9 @@ package org.hopper.edw.catalog.transform.recordoutput;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.row.IRowMeta;
-import org.hopper.edw.datavault.metadata.SourceField;
 import org.apache.hop.pipeline.transform.BaseTransformData;
 import org.apache.hop.pipeline.transform.ITransformData;
+import org.hopper.edw.datavault.metadata.SourceField;
 
 public class RecordDefinitionOutputData extends BaseTransformData implements ITransformData {
 

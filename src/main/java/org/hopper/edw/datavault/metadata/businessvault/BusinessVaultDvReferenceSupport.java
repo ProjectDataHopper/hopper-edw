@@ -19,17 +19,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import org.hopper.edw.catalog.model.RecordDefinition;
-import org.hopper.edw.catalog.model.RecordDefinitionType;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.catalog.model.RecordDefinition;
+import org.hopper.edw.catalog.model.RecordDefinitionType;
 import org.hopper.edw.datavault.catalog.CatalogModelRegistrySupport;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvModelLoadSupport;
 import org.hopper.edw.datavault.metadata.DvTableType;
 import org.hopper.edw.datavault.metadata.IDvTable;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Helpers for Business Vault canvas references to Data Vault tables (linked or multi-model). */
 public final class BusinessVaultDvReferenceSupport {

@@ -22,11 +22,11 @@ import java.util.Set;
 import org.apache.hop.core.plugins.PluginRegistry;
 import org.apache.hop.core.plugins.TransformPluginType;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.pipeline.PipelineMeta;
+import org.apache.hop.pipeline.transform.TransformMeta;
 import org.hopper.edw.datavault.ai.HopAiProposal;
 import org.hopper.edw.datavault.ai.HopAiProposalParamSupport;
 import org.hopper.edw.datavault.ai.HopAiProposalValidation;
-import org.apache.hop.pipeline.PipelineMeta;
-import org.apache.hop.pipeline.transform.TransformMeta;
 
 /** Validates AI pipeline proposals against the open graph before the user applies them. */
 public final class PipelineAiProposalValidator {

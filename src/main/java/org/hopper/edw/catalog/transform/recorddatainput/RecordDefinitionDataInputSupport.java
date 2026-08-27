@@ -15,19 +15,19 @@
  */
 package org.hopper.edw.catalog.transform.recorddatainput;
 
-import org.hopper.edw.catalog.hopgui.preview.RecordDefinitionPreviewSupport;
-import org.hopper.edw.catalog.model.RecordDefinition;
-import org.hopper.edw.catalog.model.RecordDefinitionKey;
-import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.catalog.hopgui.preview.RecordDefinitionPreviewSupport;
+import org.hopper.edw.catalog.model.RecordDefinition;
+import org.hopper.edw.catalog.model.RecordDefinitionKey;
+import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
 import org.hopper.edw.datavault.catalog.DvSourceFieldSupport;
 import org.hopper.edw.datavault.metadata.DvSourcePreviewInputSupport;
 import org.hopper.edw.datavault.metadata.SourceField;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Shared helpers for reading actual data rows from a catalog record definition. */
 public final class RecordDefinitionDataInputSupport {

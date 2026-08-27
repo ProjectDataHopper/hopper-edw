@@ -17,10 +17,10 @@ package org.hopper.edw.datavault.virtualization.sql;
 
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 import org.hopper.edw.datavault.virtualization.calcite.SourceModelRelPlanner;
 import org.hopper.edw.datavault.virtualization.generate.RelToPipelineGenerator;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Entry point for free SQL against a {@link SourceModel}: parse → plan → Hop pipeline generation.

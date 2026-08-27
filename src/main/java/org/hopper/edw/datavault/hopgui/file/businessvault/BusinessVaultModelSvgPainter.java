@@ -22,11 +22,11 @@ import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.SvgGc;
 import org.apache.hop.core.svg.HopSvgGraphics2D;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.command.svg.ModelBoundsSupport;
 import org.hopper.edw.datavault.command.svg.SvgRenderOptions;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultDvModelResolver;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Renders a {@link BusinessVaultModel} to SVG using {@link BusinessVaultModelPainter}. */
 public final class BusinessVaultModelSvgPainter {

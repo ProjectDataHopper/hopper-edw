@@ -17,10 +17,10 @@ package org.hopper.edw.catalog.hopgui.perspective.importmenu;
 
 import lombok.Getter;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.datavault.metadata.DataVaultModel;
 
 /** Runtime context passed to data catalog import actions. */
 @Getter

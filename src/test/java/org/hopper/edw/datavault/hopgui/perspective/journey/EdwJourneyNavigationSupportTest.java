@@ -19,9 +19,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.apache.hop.core.variables.Variables;
 import org.hopper.edw.catalog.hopgui.navigation.RecordOriginNavigationSupport;
 import org.hopper.edw.catalog.model.RecordDefinitionKey;
-import org.apache.hop.core.variables.Variables;
 import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneyTreeNode.Kind;
 import org.junit.jupiter.api.Test;
 

@@ -16,7 +16,6 @@
 package org.hopper.edw.datavault.hopgui.ai;
 
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.hopgui.widget.MarkdownStyledTextComp;
 import org.apache.hop.ui.core.PropsUi;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -28,6 +27,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.hopgui.widget.MarkdownStyledTextComp;
 
 /** Scrollable conversation transcript used by Hop AI advisory dialogs. */
 public final class HopAiTranscriptPanel {

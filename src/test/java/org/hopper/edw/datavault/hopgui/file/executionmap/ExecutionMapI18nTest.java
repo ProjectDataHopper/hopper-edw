@@ -20,8 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.exception.HopException;
-import org.hopper.edw.datavault.hopgui.executionmap.ExecutionMapGuiPlugin;
 import org.apache.hop.i18n.BaseMessages;
+import org.hopper.edw.datavault.hopgui.executionmap.ExecutionMapGuiPlugin;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.Variables;
+import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimension;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimensionAlias;
@@ -31,7 +32,6 @@ import org.hopper.edw.datavault.metadata.dimensional.DmNaturalKeyField;
 import org.hopper.edw.datavault.metadata.dimensional.DmRangeBand;
 import org.hopper.edw.datavault.metadata.dimensional.DmRangeDimension;
 import org.hopper.edw.datavault.metadata.dimensional.DmTableType;
-import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

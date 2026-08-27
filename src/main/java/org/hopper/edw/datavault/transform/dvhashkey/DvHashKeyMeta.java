@@ -28,15 +28,15 @@ import org.apache.hop.core.row.value.ValueMetaBinary;
 import org.apache.hop.core.row.value.ValueMetaString;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.HashAlgorithm;
-import org.hopper.edw.datavault.metadata.HashContentCasing;
-import org.hopper.edw.datavault.metadata.HashKeyDataType;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.BaseTransformMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
+import org.hopper.edw.datavault.metadata.HashAlgorithm;
+import org.hopper.edw.datavault.metadata.HashContentCasing;
+import org.hopper.edw.datavault.metadata.HashKeyDataType;
 
 @Transform(
     id = "DvHashKey",

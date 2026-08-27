@@ -302,7 +302,7 @@ image::images/search-panel-model-results.png[Search panel — Data Vault model m
 
 === Raw Data Vault (`.hdv`)
 
-Visual modeler for hubs, links, and satellites with embedded configuration (target database, hashing, sentinels, column names, pipeline options). Toolbar actions: **Edit model**, **Import sources**, **Check model**, **Generate DDL**, **Debug**, optional **AI Help**.
+Visual modeler for hubs, links, and satellites with embedded configuration (target database, hashing, sentinels, column names, pipeline options). Toolbar actions: **Edit model**, **Import sources**, **Check model**, **Generate DDL**, **Debug**, optional **AI Help**. A configuration **Read-only existing vault** checkbox documents an already-built vault so Business Vault and dimensional models can sit on top without Hop loading or altering those tables.
 
 **Data Vault Update** workflow action validates (optionally), generates DDL, stages update pipelines, and runs them in parallel with a shared load timestamp.
 

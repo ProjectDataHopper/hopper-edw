@@ -18,8 +18,6 @@ package org.hopper.edw.catalog.xp;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import org.hopper.edw.catalog.metadata.DataCatalogMeta;
-import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.extension.ExtensionPoint;
 import org.apache.hop.core.extension.ExtensionPointPluginType;
@@ -30,6 +28,8 @@ import org.apache.hop.core.plugins.PluginRegistry;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.metadata.api.HopMetadata;
 import org.apache.hop.metadata.plugin.MetadataPluginType;
+import org.hopper.edw.catalog.metadata.DataCatalogMeta;
+import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
 
 /**
  * Registers {@link DataCatalogMeta} with Hop metadata after environment init (neo4j-style). Catalog

@@ -20,6 +20,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.util.Utils;
+import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.catalog.model.CatalogCustomProperty;
 import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.catalog.model.RecordDefinitionKey;
@@ -28,14 +32,10 @@ import org.hopper.edw.catalog.model.RecordDefinitionRef;
 import org.hopper.edw.catalog.model.RecordDefinitionType;
 import org.hopper.edw.catalog.model.RecordOrigin;
 import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
-import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.util.Utils;
-import org.apache.hop.core.variables.IVariables;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvModelLoadSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Project-wide catalog index of DV / BV / DM model files for multi-model {@code ref()} resolution

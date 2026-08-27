@@ -23,8 +23,8 @@ import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceTablePreviewSupport;
 import org.apache.hop.i18n.BaseMessages;
+import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceTablePreviewSupport;
 
 /** Structural checks for a single {@link SourceTable}. */
 public final class SourceTableValidationSupport {

@@ -20,13 +20,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.Date;
 import java.util.List;
+import org.apache.hop.core.row.IValueMeta;
 import org.hopper.edw.catalog.model.CatalogSourceField;
 import org.hopper.edw.catalog.model.DvSourceRecord;
 import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.hopper.edw.catalog.model.RecordDefinitionType;
 import org.hopper.edw.catalog.model.RecordOrigin;
-import org.apache.hop.core.row.IValueMeta;
 import org.hopper.edw.datavault.metadata.SourceField;
 import org.junit.jupiter.api.Test;
 

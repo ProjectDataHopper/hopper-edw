@@ -22,10 +22,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.hopper.edw.datavault.lineage.BvModelLineageCollector;
 import org.hopper.edw.datavault.lineage.DmModelLineageCollector;
 import org.hopper.edw.datavault.lineage.DvModelLineageCollector;
@@ -35,7 +36,6 @@ import org.hopper.edw.datavault.openlineage.OpenLineageLocationContext;
 import org.hopper.edw.datavault.openlineage.OpenLineageSnapshotMapper;
 import org.hopper.edw.datavault.resourcedefinition.ResourceDefinitionGroupResolver;
 import org.hopper.edw.datavault.resourcedefinition.ValidationModels;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Builds a lineage graph from current DV/BV/DM collectors. No HopGui — unsaved models enter as

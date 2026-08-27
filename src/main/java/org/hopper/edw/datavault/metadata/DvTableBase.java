@@ -35,7 +35,6 @@ import org.apache.hop.core.logging.SimpleLoggingObject;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.targettypemapping.TargetTypeMappingSupport;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
@@ -46,6 +45,7 @@ import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transforms.dummy.DummyMeta;
 import org.apache.hop.workflow.WorkflowMeta;
+import org.hopper.edw.datavault.metadata.targettypemapping.TargetTypeMappingSupport;
 import org.jspecify.annotations.NonNull;
 
 /**
@@ -374,6 +374,7 @@ public abstract class DvTableBase extends HopMetadataBase implements IHopMetadat
   public List<String> generateUpdateDdl(
       IHopMetadataProvider metadataProvider, IVariables variables, DataVaultModel model)
       throws HopException {
+    DvReadOnlyExistingVaultSupport.refuseUpdate(model);
     if (DvIntegrationSupport.shouldSkipDdl(this)) {
       return Collections.emptyList();
     }

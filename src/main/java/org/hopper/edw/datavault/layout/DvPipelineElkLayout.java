@@ -17,8 +17,8 @@ package org.hopper.edw.datavault.layout;
 
 import java.util.List;
 import org.apache.hop.core.exception.HopException;
-import org.hopper.edw.datavault.config.DataVaultConfigSingleton;
 import org.apache.hop.pipeline.PipelineMeta;
+import org.hopper.edw.datavault.config.DataVaultConfigSingleton;
 
 /** Applies {@link ElkLayout} to Hop {@link PipelineMeta} graphs using the Eclipse Layout Kernel. */
 public final class DvPipelineElkLayout {

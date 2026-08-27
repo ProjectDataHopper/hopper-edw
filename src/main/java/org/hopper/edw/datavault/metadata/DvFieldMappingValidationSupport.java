@@ -34,11 +34,11 @@ import org.apache.hop.core.row.value.ValueMetaBase;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.config.DataVaultConfigSingleton;
 import org.hopper.edw.datavault.metadata.database.DvDatabaseSource;
 import org.hopper.edw.datavault.metadata.database.DvDatabaseSourceLiveSchemaSupport;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Validates source-to-target field type mappings for Data Vault load pipelines. */
 public final class DvFieldMappingValidationSupport {

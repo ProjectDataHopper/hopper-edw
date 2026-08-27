@@ -21,14 +21,14 @@ import org.apache.hop.core.NotePadMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.ai.HopAiProposal;
-import org.hopper.edw.datavault.ai.HopAiProposalParamSupport;
-import org.hopper.edw.datavault.ai.HopAiTransformPluginSupport;
 import org.apache.hop.pipeline.PipelineHopMeta;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.ITransformMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.ui.hopgui.HopGui;
+import org.hopper.edw.datavault.ai.HopAiProposal;
+import org.hopper.edw.datavault.ai.HopAiProposalParamSupport;
+import org.hopper.edw.datavault.ai.HopAiTransformPluginSupport;
 
 /** Previews and applies validated AI proposals to an open pipeline. */
 public final class PipelineAiProposalApplier {

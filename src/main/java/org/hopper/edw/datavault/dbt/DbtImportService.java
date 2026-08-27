@@ -23,6 +23,9 @@ import java.util.Map;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.metadata.api.IHopMetadataSerializer;
 import org.hopper.edw.datavault.hopgui.file.businessvault.HopBusinessVaultFileType;
 import org.hopper.edw.datavault.metadata.ModelXmlWriteSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
@@ -33,9 +36,6 @@ import org.hopper.edw.datavault.metadata.businessvault.IBvTable;
 import org.hopper.edw.datavault.metadata.jinja.JinjaMacroDefinition;
 import org.hopper.edw.datavault.metadata.jinja.JinjaMacroLibraryMeta;
 import org.hopper.edw.datavault.metadata.jinja.JinjaMacroVar;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.metadata.api.IHopMetadataSerializer;
 
 /** Applies a {@link DbtProjectScan} to Business Vault model(s) and a Jinja macro library. */
 public final class DbtImportService {

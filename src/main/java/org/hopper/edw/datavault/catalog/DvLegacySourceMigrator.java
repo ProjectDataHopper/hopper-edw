@@ -26,8 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
-import org.hopper.edw.catalog.xp.RegisterDataCatalogMetadataExtensionPoint;
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.logging.LogChannel;
@@ -35,14 +33,16 @@ import org.apache.hop.core.plugins.PluginRegistry;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.variables.Variables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.metadata.serializer.json.JsonMetadataProvider;
+import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
+import org.hopper.edw.catalog.xp.RegisterDataCatalogMetadataExtensionPoint;
 import org.hopper.edw.datavault.metadata.DataVaultSource;
 import org.hopper.edw.datavault.metadata.DvSourceDeliveryType;
 import org.hopper.edw.datavault.metadata.DvSourceType;
 import org.hopper.edw.datavault.metadata.IDvSource;
 import org.hopper.edw.datavault.metadata.SourceField;
 import org.hopper.edw.datavault.metadata.database.DvDatabaseSource;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.metadata.serializer.json.JsonMetadataProvider;
 
 /** One-time migration of legacy {@code data-vault-source} Hop metadata JSON into the catalog. */
 public final class DvLegacySourceMigrator {

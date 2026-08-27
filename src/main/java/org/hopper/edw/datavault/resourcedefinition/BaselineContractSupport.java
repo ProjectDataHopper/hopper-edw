@@ -17,16 +17,16 @@ package org.hopper.edw.datavault.resourcedefinition;
 
 import java.util.List;
 import java.util.Optional;
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.util.Utils;
+import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
 import org.hopper.edw.catalog.versioning.CatalogVersionService;
-import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.util.Utils;
-import org.apache.hop.core.variables.IVariables;
 import org.hopper.edw.datavault.catalog.DvSourceFieldSupport;
 import org.hopper.edw.datavault.metadata.SourceField;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Resolves baseline (truth) field contracts from the working catalog or an immutable catalog

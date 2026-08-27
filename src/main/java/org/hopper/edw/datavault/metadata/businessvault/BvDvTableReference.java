@@ -19,8 +19,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.hop.core.gui.Point;
-import org.hopper.edw.datavault.metadata.DvTableType;
 import org.apache.hop.metadata.api.HopMetadataProperty;
+import org.hopper.edw.datavault.metadata.DvTableType;
 
 /**
  * A placed reference on a Business Vault canvas to a Hub, Link, or Satellite table in the linked

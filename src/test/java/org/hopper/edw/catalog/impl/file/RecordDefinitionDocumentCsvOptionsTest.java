@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
+import org.apache.hop.core.variables.Variables;
 import org.hopper.edw.catalog.model.CatalogCsvFieldOptions;
 import org.hopper.edw.catalog.model.CatalogSourceField;
 import org.hopper.edw.catalog.model.CatalogSourceFieldInputOptions;
@@ -28,7 +29,6 @@ import org.hopper.edw.catalog.model.DvSourceRecord;
 import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.hopper.edw.catalog.model.RecordDefinitionType;
-import org.apache.hop.core.variables.Variables;
 import org.hopper.edw.datavault.catalog.DvSourceCatalogMapper;
 import org.hopper.edw.datavault.metadata.CsvFieldOptions;
 import org.hopper.edw.datavault.metadata.DataVaultSource;

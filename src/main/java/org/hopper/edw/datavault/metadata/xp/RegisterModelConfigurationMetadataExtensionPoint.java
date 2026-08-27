@@ -26,12 +26,12 @@ import org.apache.hop.core.logging.ILogChannel;
 import org.apache.hop.core.plugins.IPlugin;
 import org.apache.hop.core.plugins.PluginRegistry;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.HopMetadata;
+import org.apache.hop.metadata.plugin.MetadataPluginType;
 import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultConfiguration;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalConfiguration;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModelConfiguration;
-import org.apache.hop.metadata.api.HopMetadata;
-import org.apache.hop.metadata.plugin.MetadataPluginType;
 
 /** Registers the four shared model-configuration metadata types after environment init. */
 @ExtensionPoint(

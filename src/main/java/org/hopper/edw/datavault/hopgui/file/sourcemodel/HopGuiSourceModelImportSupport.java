@@ -27,12 +27,6 @@ import org.apache.hop.core.logging.LoggingObjectType;
 import org.apache.hop.core.logging.SimpleLoggingObject;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.database.DvDatabaseSourceImportSupport;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
-import org.hopper.edw.datavault.metadata.sourcemodel.importing.DatabaseSchemaImportSupport;
-import org.hopper.edw.datavault.metadata.sourcemodel.importing.ImportSourceSchemaOptionsDialog;
-import org.hopper.edw.datavault.metadata.sourcemodel.importing.SourceSchemaImportOptions;
-import org.hopper.edw.datavault.metadata.sourcemodel.importing.SourceSchemaImportResult;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.dialog.EnterSelectionDialog;
@@ -41,6 +35,12 @@ import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.datavault.metadata.database.DvDatabaseSourceImportSupport;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
+import org.hopper.edw.datavault.metadata.sourcemodel.importing.DatabaseSchemaImportSupport;
+import org.hopper.edw.datavault.metadata.sourcemodel.importing.ImportSourceSchemaOptionsDialog;
+import org.hopper.edw.datavault.metadata.sourcemodel.importing.SourceSchemaImportOptions;
+import org.hopper.edw.datavault.metadata.sourcemodel.importing.SourceSchemaImportResult;
 
 /** GUI helper for importing database schema (tables + PK/FK) into a source model. */
 public final class HopGuiSourceModelImportSupport {

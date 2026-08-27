@@ -18,9 +18,6 @@ package org.hopper.edw.datavault.hopgui.widget;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.hopgui.widget.MarkdownStyleRenderer.RenderedMarkdown;
-import org.hopper.edw.datavault.hopgui.widget.MarkdownStyleRenderer.SpanKind;
-import org.hopper.edw.datavault.hopgui.widget.MarkdownStyleRenderer.StyleSpan;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.gui.GuiResource;
 import org.eclipse.swt.SWT;
@@ -34,6 +31,9 @@ import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.hopper.edw.datavault.hopgui.widget.MarkdownStyleRenderer.RenderedMarkdown;
+import org.hopper.edw.datavault.hopgui.widget.MarkdownStyleRenderer.SpanKind;
+import org.hopper.edw.datavault.hopgui.widget.MarkdownStyleRenderer.StyleSpan;
 
 /** Read-only composite that renders markdown advice with SWT StyledText style ranges. */
 public class MarkdownStyledTextComp extends Composite {

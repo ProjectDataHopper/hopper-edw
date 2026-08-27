@@ -29,18 +29,6 @@ import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.composite.DvCompositeSource;
-import org.hopper.edw.datavault.metadata.composite.DvCompositeSourceResolver;
-import org.hopper.edw.datavault.metadata.database.DvDatabaseSource;
-import org.hopper.edw.datavault.metadata.database.DvDatabaseSourcePreviewSupport;
-import org.hopper.edw.datavault.metadata.file.DvCsvSource;
-import org.hopper.edw.datavault.metadata.file.DvParquetPluginSupport;
-import org.hopper.edw.datavault.metadata.file.DvParquetSource;
-import org.hopper.edw.datavault.metadata.file.DvTextFileInputFieldSupport;
-import org.hopper.edw.datavault.metadata.file.IDvFileBasedSource;
-import org.hopper.edw.datavault.metadata.iceberg.DvIcebergSource;
-import org.hopper.edw.datavault.transform.iceberginput.IcebergTableInputField;
-import org.hopper.edw.datavault.transform.iceberginput.IcebergTableInputMeta;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineHopMeta;
@@ -59,6 +47,18 @@ import org.apache.hop.pipeline.transforms.selectvalues.DeleteField;
 import org.apache.hop.pipeline.transforms.selectvalues.SelectField;
 import org.apache.hop.pipeline.transforms.selectvalues.SelectValuesMeta;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
+import org.hopper.edw.datavault.metadata.composite.DvCompositeSource;
+import org.hopper.edw.datavault.metadata.composite.DvCompositeSourceResolver;
+import org.hopper.edw.datavault.metadata.database.DvDatabaseSource;
+import org.hopper.edw.datavault.metadata.database.DvDatabaseSourcePreviewSupport;
+import org.hopper.edw.datavault.metadata.file.DvCsvSource;
+import org.hopper.edw.datavault.metadata.file.DvParquetPluginSupport;
+import org.hopper.edw.datavault.metadata.file.DvParquetSource;
+import org.hopper.edw.datavault.metadata.file.DvTextFileInputFieldSupport;
+import org.hopper.edw.datavault.metadata.file.IDvFileBasedSource;
+import org.hopper.edw.datavault.metadata.iceberg.DvIcebergSource;
+import org.hopper.edw.datavault.transform.iceberginput.IcebergTableInputField;
+import org.hopper.edw.datavault.transform.iceberginput.IcebergTableInputMeta;
 
 /** Builds preview pipelines with the correct input transform for a Data Vault source. */
 public final class DvSourcePreviewInputSupport {

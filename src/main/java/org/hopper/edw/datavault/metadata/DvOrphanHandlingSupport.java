@@ -38,8 +38,6 @@ import org.apache.hop.core.row.value.ValueMetaString;
 import org.apache.hop.core.row.value.ValueMetaTimestamp;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.transform.mergerowsplus.MergeRowsPlusMeta;
-import org.hopper.edw.datavault.transform.mergerowsplus.MergeRowsPlusMetaFactory;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineHopMeta;
@@ -61,6 +59,8 @@ import org.apache.hop.pipeline.transforms.sort.SortRowsMeta;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
 import org.apache.hop.pipeline.transforms.tableoutput.TableOutputField;
 import org.apache.hop.pipeline.transforms.tableoutput.TableOutputMeta;
+import org.hopper.edw.datavault.transform.mergerowsplus.MergeRowsPlusMeta;
+import org.hopper.edw.datavault.transform.mergerowsplus.MergeRowsPlusMetaFactory;
 
 /**
  * Optional orphan handling for Data Vault loads: seed parent hubs from child feeds, validate

@@ -18,10 +18,10 @@ package org.hopper.edw.datavault.transform.datedimensiongenerator;
 import java.time.LocalDate;
 import java.util.List;
 import org.apache.hop.core.row.IRowMeta;
-import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic.GeneratorContext;
-import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic.PreparedField;
 import org.apache.hop.pipeline.transform.BaseTransformData;
 import org.apache.hop.pipeline.transform.ITransformData;
+import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic.GeneratorContext;
+import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic.PreparedField;
 
 @SuppressWarnings("java:S1104")
 public class DateDimensionGeneratorData extends BaseTransformData implements ITransformData {

@@ -16,10 +16,10 @@
 package org.hopper.edw.datavault.hopgui.file.vault.delegates;
 
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphSnapshotUndo;
 import org.hopper.edw.datavault.hopgui.file.vault.HopVaultFileType;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Gzip-compressed XML snapshots of a {@link DataVaultModel} for undo/redo. */
 public class HopGuiVaultSnapshotUndo {

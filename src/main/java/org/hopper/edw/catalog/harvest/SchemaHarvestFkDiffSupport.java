@@ -20,12 +20,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import org.apache.hop.core.Const;
+import org.apache.hop.core.util.Utils;
 import org.hopper.edw.catalog.harvest.SchemaHarvestModels.FieldRole;
 import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestChange;
 import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestedForeignKey;
 import org.hopper.edw.catalog.model.CatalogSourceField;
-import org.apache.hop.core.Const;
-import org.apache.hop.core.util.Utils;
 import org.hopper.edw.datavault.metadata.database.DiscoveredForeignKey;
 
 /** Compares catalog (or empty) FK contracts to live discovered foreign keys. */

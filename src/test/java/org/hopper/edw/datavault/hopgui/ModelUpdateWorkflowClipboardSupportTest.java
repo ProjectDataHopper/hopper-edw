@@ -20,9 +20,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.List;
 import org.apache.hop.core.variables.Variables;
-import org.hopper.edw.datavault.workflow.actions.dimensionalupdate.ActionDimensionalUpdate;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.apache.hop.pipeline.config.PipelineRunConfiguration;
+import org.hopper.edw.datavault.workflow.actions.dimensionalupdate.ActionDimensionalUpdate;
 import org.junit.jupiter.api.Test;
 
 class ModelUpdateWorkflowClipboardSupportTest {

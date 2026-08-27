@@ -75,11 +75,19 @@ public final class DvIntegrationSupport {
     return isLinkedTable(table) || isExternalRead(table);
   }
 
+  public static boolean relaxesSourceValidation(IDvTable table, DataVaultModel model) {
+    return relaxesSourceValidation(table) || DvReadOnlyExistingVaultSupport.isReadOnly(model);
+  }
+
   public static boolean shouldSkipUpdatePipeline(IDvTable table) {
     return isLinkedTable(table) || isExternalRead(table);
   }
 
   public static String integrationCanvasSuffix(IDvTable table) {
+    return integrationCanvasSuffix(table, null);
+  }
+
+  public static String integrationCanvasSuffix(IDvTable table, DataVaultModel model) {
     if (isLinkedTable(table)) {
       return "ref";
     }
@@ -88,6 +96,9 @@ public final class DvIntegrationSupport {
     }
     if (isCustomPipelines(table)) {
       return "custom";
+    }
+    if (DvReadOnlyExistingVaultSupport.isReadOnly(model)) {
+      return "doc";
     }
     return null;
   }
@@ -178,6 +189,10 @@ public final class DvIntegrationSupport {
                   ICheckResult.TYPE_RESULT_OK,
                   BaseMessages.getString(PKG, "DvIntegrationSupport.CheckResult.HopManaged"),
                   table));
+    }
+
+    if (DvReadOnlyExistingVaultSupport.isReadOnly(model)) {
+      return;
     }
 
     if (mode == DvIntegrationMode.EXTERNAL_READ && model != null && metadataProvider != null) {

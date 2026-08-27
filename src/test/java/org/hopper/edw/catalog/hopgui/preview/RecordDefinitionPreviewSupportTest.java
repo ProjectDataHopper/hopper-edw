@@ -19,6 +19,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.apache.hop.core.row.IValueMeta;
+import org.apache.hop.core.variables.Variables;
+import org.apache.hop.pipeline.transforms.csvinput.CsvInputField;
+import org.apache.hop.pipeline.transforms.csvinput.CsvInputMeta;
+import org.apache.hop.pipeline.transforms.fileinput.text.TextFileInputMeta;
 import org.hopper.edw.catalog.model.DvCsvFormatRecord;
 import org.hopper.edw.catalog.model.DvSourceRecord;
 import org.hopper.edw.catalog.model.PhysicalFileRef;
@@ -26,16 +31,11 @@ import org.hopper.edw.catalog.model.PhysicalTableRef;
 import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.hopper.edw.catalog.model.RecordDefinitionType;
-import org.apache.hop.core.row.IValueMeta;
-import org.apache.hop.core.variables.Variables;
 import org.hopper.edw.datavault.metadata.CsvFieldOptions;
 import org.hopper.edw.datavault.metadata.DvSourcePreviewInputSupport;
 import org.hopper.edw.datavault.metadata.SourceField;
 import org.hopper.edw.datavault.metadata.SourceFieldInputOptions;
 import org.hopper.edw.datavault.metadata.file.DvCsvSource;
-import org.apache.hop.pipeline.transforms.csvinput.CsvInputField;
-import org.apache.hop.pipeline.transforms.csvinput.CsvInputMeta;
-import org.apache.hop.pipeline.transforms.fileinput.text.TextFileInputMeta;
 import org.junit.jupiter.api.Test;
 
 class RecordDefinitionPreviewSupportTest {

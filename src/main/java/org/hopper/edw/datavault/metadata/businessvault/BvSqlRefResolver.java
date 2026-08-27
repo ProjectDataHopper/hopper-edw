@@ -22,12 +22,12 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.jinja.BvSqlJinjaRenderResult;
 import org.hopper.edw.datavault.jinja.BvSqlJinjaSupport;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvModelLoadSupport;
 import org.hopper.edw.datavault.metadata.IDvTable;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Resolves {@code ref()} / {@code source()} macros against Business Vault and Data Vault models and

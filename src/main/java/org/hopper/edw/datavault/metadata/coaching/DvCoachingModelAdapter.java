@@ -19,15 +19,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import lombok.Getter;
-import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.hopper.edw.datavault.catalog.DvCatalogNamespaces;
 import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Coaching adapter for Data Vault models. */
 public class DvCoachingModelAdapter implements ICoachingModelAdapter {

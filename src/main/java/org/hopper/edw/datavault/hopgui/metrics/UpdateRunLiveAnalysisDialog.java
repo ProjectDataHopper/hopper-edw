@@ -26,12 +26,6 @@ import org.apache.hop.core.row.RowMeta;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.hopgui.dialog.ShowRowsDialog;
-import org.hopper.edw.datavault.hopgui.widget.MarkdownStyledTextComp;
-import org.hopper.edw.datavault.metrics.live.PipelineLiveMetrics;
-import org.hopper.edw.datavault.metrics.live.TransformLiveMetrics;
-import org.hopper.edw.datavault.metrics.live.UpdateRunLiveRegistry;
-import org.hopper.edw.datavault.metrics.live.UpdateRunLiveSnapshot;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.MessageBox;
@@ -47,6 +41,12 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.datavault.hopgui.dialog.ShowRowsDialog;
+import org.hopper.edw.datavault.hopgui.widget.MarkdownStyledTextComp;
+import org.hopper.edw.datavault.metrics.live.PipelineLiveMetrics;
+import org.hopper.edw.datavault.metrics.live.TransformLiveMetrics;
+import org.hopper.edw.datavault.metrics.live.UpdateRunLiveRegistry;
+import org.hopper.edw.datavault.metrics.live.UpdateRunLiveSnapshot;
 
 /** Shows a live snapshot of an in-flight model update run. */
 public final class UpdateRunLiveAnalysisDialog {

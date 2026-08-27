@@ -15,10 +15,10 @@
  */
 package org.hopper.edw.datavault.layout;
 
-import org.hopper.edw.datavault.hopgui.EnumDialogSupport;
 import org.apache.hop.metadata.api.IEnumHasCode;
 import org.apache.hop.metadata.api.IEnumHasCodeAndDescription;
 import org.eclipse.swt.widgets.Combo;
+import org.hopper.edw.datavault.hopgui.EnumDialogSupport;
 
 /** Shared parsing and enum helpers for {@link ElkLayout} editors. */
 public final class ElkLayoutValues {

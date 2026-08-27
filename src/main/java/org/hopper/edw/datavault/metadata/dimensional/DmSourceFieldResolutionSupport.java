@@ -24,10 +24,10 @@ import org.apache.hop.core.logging.LoggingObject;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorField;
 import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic;
 import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorMetaFactory;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Resolves field names produced by dimensional staging sources for validation. */
 public final class DmSourceFieldResolutionSupport {

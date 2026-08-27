@@ -71,6 +71,12 @@ class DataVaultConfigurationTest {
   }
 
   @Test
+  void newConfigurationDefaultsReadOnlyExistingVaultToFalse() {
+    DataVaultConfiguration configuration = new DataVaultConfiguration();
+    assertEquals(false, configuration.isReadOnlyExistingVault());
+  }
+
+  @Test
   void newConfigurationDefaultsStoreLoadCycleIdToFalse() {
     DataVaultConfiguration configuration = new DataVaultConfiguration();
     assertEquals(false, configuration.isStoreLoadCycleId());

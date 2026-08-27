@@ -17,13 +17,13 @@ package org.hopper.edw.catalog.discovery;
 
 import java.util.regex.Pattern;
 import org.apache.commons.vfs2.FileObject;
-import org.hopper.edw.catalog.model.PhysicalIcebergTableRef;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
 import org.apache.hop.i18n.BaseMessages;
+import org.hopper.edw.catalog.model.PhysicalIcebergTableRef;
 
 /** Resolved physical location used for record-definition schema discovery. */
 public final class PhysicalSourceRef {

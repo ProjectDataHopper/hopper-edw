@@ -25,9 +25,9 @@ import java.nio.file.Path;
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.Variables;
+import org.apache.hop.ui.hopgui.file.IHopFileType;
 import org.hopper.edw.datavault.lineageview.HopLineageViewDocument;
 import org.hopper.edw.datavault.lineageview.LineageViewPersistence;
-import org.apache.hop.ui.hopgui.file.IHopFileType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

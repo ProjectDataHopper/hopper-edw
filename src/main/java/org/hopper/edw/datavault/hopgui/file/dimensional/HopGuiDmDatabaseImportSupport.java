@@ -30,12 +30,6 @@ import org.apache.hop.core.row.RowMeta;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
-import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
-import org.hopper.edw.datavault.metadata.dimensional.dbimport.DmDatabaseImportOptions;
-import org.hopper.edw.datavault.metadata.dimensional.dbimport.DmDatabaseImportResult;
-import org.hopper.edw.datavault.metadata.dimensional.dbimport.DmDatabaseTableImportSupport;
-import org.hopper.edw.datavault.metadata.dimensional.dbimport.ImportDmDatabaseTablesOptionsDialog;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.dialog.EditRowsDialog;
@@ -44,6 +38,12 @@ import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
+import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
+import org.hopper.edw.datavault.metadata.dimensional.dbimport.DmDatabaseImportOptions;
+import org.hopper.edw.datavault.metadata.dimensional.dbimport.DmDatabaseImportResult;
+import org.hopper.edw.datavault.metadata.dimensional.dbimport.DmDatabaseTableImportSupport;
+import org.hopper.edw.datavault.metadata.dimensional.dbimport.ImportDmDatabaseTablesOptionsDialog;
 
 /** GUI helper for importing database tables into a dimensional model. */
 public final class HopGuiDmDatabaseImportSupport {

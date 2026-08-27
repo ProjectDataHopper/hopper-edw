@@ -30,13 +30,6 @@ import org.apache.hop.core.row.value.ValueMetaDate;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.row.value.ValueMetaString;
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.metadata.DvSqlSupport;
-import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataSupport;
-import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
-import org.hopper.edw.datavault.metadata.dimensional.DmDimension;
-import org.hopper.edw.datavault.metadata.dimensional.DmSurrogateKeyStrategy;
-import org.hopper.edw.datavault.metadata.dimensional.DmSurrogateKeySupport;
-import org.hopper.edw.datavault.transform.mergerowsplus.MergeRowsPlusMeta;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineHopMeta;
 import org.apache.hop.pipeline.PipelineMeta;
@@ -63,6 +56,13 @@ import org.apache.hop.pipeline.transforms.update.UpdateField;
 import org.apache.hop.pipeline.transforms.update.UpdateKeyField;
 import org.apache.hop.pipeline.transforms.update.UpdateLookupField;
 import org.apache.hop.pipeline.transforms.update.UpdateMeta;
+import org.hopper.edw.datavault.metadata.DvSqlSupport;
+import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataSupport;
+import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
+import org.hopper.edw.datavault.metadata.dimensional.DmDimension;
+import org.hopper.edw.datavault.metadata.dimensional.DmSurrogateKeyStrategy;
+import org.hopper.edw.datavault.metadata.dimensional.DmSurrogateKeySupport;
+import org.hopper.edw.datavault.transform.mergerowsplus.MergeRowsPlusMeta;
 
 /** Generates SCD Type 2 dimension pipelines using the proven satellite MergeRowsPlus pattern. */
 public final class DmScd2DimensionBuilder {

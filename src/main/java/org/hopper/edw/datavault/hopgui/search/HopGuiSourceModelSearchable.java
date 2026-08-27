@@ -17,10 +17,10 @@ package org.hopper.edw.datavault.hopgui.search;
 
 import org.apache.hop.core.search.ISearchable;
 import org.apache.hop.core.search.ISearchableCallback;
+import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
 import org.hopper.edw.datavault.hopgui.file.sourcemodel.HopGuiSourceModelGraph;
 import org.hopper.edw.datavault.hopgui.file.sourcemodel.HopSourceModelFileType;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
-import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
 
 /** Project / open-tab searchable for a source model ({@code .hsm}). */
 public class HopGuiSourceModelSearchable implements ISearchable<SourceModel> {

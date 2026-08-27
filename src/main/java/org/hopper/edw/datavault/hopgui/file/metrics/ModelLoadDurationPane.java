@@ -20,8 +20,6 @@ import org.apache.hop.core.Const;
 import org.apache.hop.core.gui.IGc;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metrics.LoadRunDurationMetricsLoader;
-import org.hopper.edw.datavault.metrics.LoadRunDurationSnapshot;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.PropsUi;
@@ -45,6 +43,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.hopper.edw.datavault.metrics.LoadRunDurationMetricsLoader;
+import org.hopper.edw.datavault.metrics.LoadRunDurationSnapshot;
 
 /** Right-hand duration overview panel for DV/BV/DM model graphs. */
 public class ModelLoadDurationPane extends Composite {

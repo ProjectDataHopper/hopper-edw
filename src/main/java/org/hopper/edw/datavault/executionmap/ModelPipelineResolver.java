@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.List;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.pipeline.PipelineMeta;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvUpdateExecutionSupport;
 import org.hopper.edw.datavault.metadata.IDvTable;
@@ -33,7 +34,6 @@ import org.hopper.edw.datavault.metadata.dimensional.pipeline.DmUpdateExecutionS
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapEdgeType;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapNode;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapNodeType;
-import org.apache.hop.pipeline.PipelineMeta;
 
 /** Resolves statically generated pipelines from DV/BV/DM models during crawl. */
 public final class ModelPipelineResolver {

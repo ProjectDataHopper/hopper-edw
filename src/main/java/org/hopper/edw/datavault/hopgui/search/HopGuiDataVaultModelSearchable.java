@@ -17,10 +17,10 @@ package org.hopper.edw.datavault.hopgui.search;
 
 import org.apache.hop.core.search.ISearchable;
 import org.apache.hop.core.search.ISearchableCallback;
+import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
 import org.hopper.edw.datavault.hopgui.file.vault.HopGuiVaultGraph;
 import org.hopper.edw.datavault.hopgui.file.vault.HopVaultFileType;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
-import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
 
 /** Project / open-tab searchable for a Data Vault model ({@code .hdv}). */
 public class HopGuiDataVaultModelSearchable implements ISearchable<DataVaultModel> {

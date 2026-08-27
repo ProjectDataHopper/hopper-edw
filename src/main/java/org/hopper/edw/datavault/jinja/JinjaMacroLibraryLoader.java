@@ -21,13 +21,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.metadata.api.IHopMetadataSerializer;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultConfiguration;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.jinja.JinjaMacroDefinition;
 import org.hopper.edw.datavault.metadata.jinja.JinjaMacroLibraryMeta;
 import org.hopper.edw.datavault.metadata.jinja.JinjaMacroVar;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.metadata.api.IHopMetadataSerializer;
 
 /** Loads enabled {@link JinjaMacroLibraryMeta} objects for a Business Vault render. */
 public final class JinjaMacroLibraryLoader {

@@ -20,9 +20,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Map;
+import org.apache.hop.core.variables.Variables;
 import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.hopper.edw.catalog.model.RecordDefinitionKey;
-import org.apache.hop.core.variables.Variables;
 import org.hopper.edw.datavault.metadata.BusinessKey;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvHub;

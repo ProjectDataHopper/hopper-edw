@@ -26,10 +26,10 @@ import org.apache.hop.core.logging.SimpleLoggingObject;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.DvSourceType;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Interactive preview of a {@link SourceTable} (database tables). */
 public final class SourceTablePreviewSupport {

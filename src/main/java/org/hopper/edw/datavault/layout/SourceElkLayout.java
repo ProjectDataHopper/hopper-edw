@@ -18,9 +18,9 @@ package org.hopper.edw.datavault.layout;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.toolbar.GuiToolbarElement;
+import org.apache.hop.ui.hopgui.HopGui;
 import org.hopper.edw.datavault.hopgui.file.sourcemodel.HopGuiSourceModelGraph;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
-import org.apache.hop.ui.hopgui.HopGui;
 
 /** GUI plugin that applies ELK layout to the active source model graph. */
 @GuiPlugin

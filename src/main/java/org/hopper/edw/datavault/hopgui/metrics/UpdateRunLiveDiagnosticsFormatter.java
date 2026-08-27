@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.i18n.BaseMessages;
 import org.hopper.edw.datavault.hopgui.widget.MarkdownAsciiTable;
 import org.hopper.edw.datavault.hopgui.widget.MarkdownAsciiTable.Align;
 import org.hopper.edw.datavault.metrics.live.PipelineLiveMetrics;
@@ -26,7 +27,6 @@ import org.hopper.edw.datavault.metrics.live.TransformLiveMetrics;
 import org.hopper.edw.datavault.metrics.live.UpdateRunLiveBottleneck;
 import org.hopper.edw.datavault.metrics.live.UpdateRunLiveSnapshot;
 import org.hopper.edw.datavault.metrics.live.UpdateRunLiveState;
-import org.apache.hop.i18n.BaseMessages;
 
 /** Formats live update snapshots as markdown for the analysis dialog and clipboard export. */
 public final class UpdateRunLiveDiagnosticsFormatter {

@@ -19,9 +19,9 @@ import java.util.List;
 import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.i18n.BaseMessages;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.IDvTable;
-import org.apache.hop.i18n.BaseMessages;
 
 final class BusinessVaultDerivativeValidationSupport {
 

@@ -16,9 +16,9 @@
 package org.hopper.edw.datavault.transform.iceberginput;
 
 import org.apache.hop.core.row.IRowMeta;
-import org.hopper.edw.datavault.metadata.iceberg.IcebergTableReader;
 import org.apache.hop.pipeline.transform.BaseTransformData;
 import org.apache.hop.pipeline.transform.ITransformData;
+import org.hopper.edw.datavault.metadata.iceberg.IcebergTableReader;
 
 @SuppressWarnings("java:S1104")
 public class IcebergTableInputData extends BaseTransformData implements ITransformData {

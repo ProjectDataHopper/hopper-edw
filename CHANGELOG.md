@@ -4,6 +4,13 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Read-only existing Data Vault models
+
+- Data Vault configuration checkbox **Read-only existing vault** documents an already-built raw vault so Business Vault and dimensional models can sit on top
+- Data Vault Update, Generate DDL, and Debug are refused; Update resource definition group skips that `.hdv` and continues BV/DM
+- Model check keeps referential integrity only (hash keys, parent hubs/links, names, attributes) and does not require record sources or load settings
+- Use a dedicated configuration object; per-table **External read-only** remains the mixed-ownership mode
+
 ### BV SCD2 does not read omitted satellite record-source columns (issue #138)
 
 - Generated SCD2 satellite `TableInput` SQL omits the vault record-source / source-indicator column when **Store record source indicator** is off on that satellite

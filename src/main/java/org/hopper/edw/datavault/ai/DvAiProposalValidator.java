@@ -20,9 +20,9 @@ import java.util.List;
 import java.util.Set;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.IDvTable;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Validates AI proposals against the open model before the user applies them. */
 public final class DvAiProposalValidator {

@@ -23,10 +23,10 @@ import java.util.Set;
 import org.apache.hop.core.gui.IGuiPosition;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.ui.core.PropsUi;
 import org.hopper.edw.datavault.metadata.DvNote;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
 import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
-import org.apache.hop.ui.core.PropsUi;
 
 /** Helpers for renaming and offsetting objects pasted onto a dimensional model canvas. */
 final class DimensionalClipboardPasteSupport {

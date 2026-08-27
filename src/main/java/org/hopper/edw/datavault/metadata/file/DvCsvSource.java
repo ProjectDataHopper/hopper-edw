@@ -19,10 +19,10 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.gui.plugin.GuiElementType;
 import org.apache.hop.core.gui.plugin.GuiWidgetElement;
+import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.hopper.edw.datavault.metadata.DvSourceBase;
 import org.hopper.edw.datavault.metadata.DvSourceType;
 import org.hopper.edw.datavault.metadata.IDvSource;
-import org.apache.hop.metadata.api.HopMetadataProperty;
 
 /**
  * CSV / delimited text file implementation of {@link IDvSource}, embedded in {@link

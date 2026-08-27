@@ -20,10 +20,10 @@ import java.util.List;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.plugin.action.GuiAction;
 import org.apache.hop.core.gui.plugin.action.GuiActionLambdaBuilder;
-import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
-import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
 import org.apache.hop.ui.hopgui.context.BaseGuiContextHandler;
 import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
+import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
+import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
 
 /** Context handler for clicks on a dimension or fact table. */
 public class HopGuiDimensionalTableContext extends BaseGuiContextHandler

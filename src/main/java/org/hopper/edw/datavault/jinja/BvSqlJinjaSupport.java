@@ -25,6 +25,8 @@ import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BvBusinessTable;
@@ -32,8 +34,6 @@ import org.hopper.edw.datavault.metadata.businessvault.BvSqlRefResolver;
 import org.hopper.edw.datavault.metadata.businessvault.BvSqlTemplateParser;
 import org.hopper.edw.datavault.metadata.businessvault.BvTargetDatabaseSupport;
 import org.hopper.edw.datavault.metadata.jinja.JinjaMacroDefinition;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Renders Business Vault authoring SQL through sandboxed Jinja when the query is more than simple

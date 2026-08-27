@@ -18,12 +18,12 @@ package org.hopper.edw.datavault.metadata.dimensional.pipeline;
 import java.util.List;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.pipeline.PipelineMeta;
+import org.apache.hop.pipeline.transform.TransformMeta;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
 import org.hopper.edw.datavault.metadata.dimensional.DmFactJunkDimensionRole;
 import org.hopper.edw.datavault.metadata.dimensional.DmJunkDimension;
 import org.hopper.edw.datavault.metadata.dimensional.DmJunkDimensionSupport;
-import org.apache.hop.pipeline.PipelineMeta;
-import org.apache.hop.pipeline.transform.TransformMeta;
 
 /** Configures JunkDimension transforms for fact junk dimension roles. */
 public final class DmFactJunkDimensionJoinBuilder {

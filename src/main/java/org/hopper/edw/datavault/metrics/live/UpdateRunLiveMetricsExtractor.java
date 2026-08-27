@@ -19,9 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataConstants;
-import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataSupport;
-import org.hopper.edw.datavault.metrics.DvUpdateMetricsConstants;
 import org.apache.hop.pipeline.Pipeline;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.engine.EngineMetrics;
@@ -29,6 +26,9 @@ import org.apache.hop.pipeline.engine.IEngineComponent;
 import org.apache.hop.pipeline.engine.IEngineMetric;
 import org.apache.hop.pipeline.engine.IPipelineEngine;
 import org.apache.hop.pipeline.transform.TransformMeta;
+import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataConstants;
+import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataSupport;
+import org.hopper.edw.datavault.metrics.DvUpdateMetricsConstants;
 
 /** Samples live engine metrics from the orchestrator and its active child pipelines. */
 public final class UpdateRunLiveMetricsExtractor {

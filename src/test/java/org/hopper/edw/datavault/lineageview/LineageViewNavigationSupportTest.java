@@ -22,10 +22,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
+import org.apache.hop.core.variables.Variables;
 import org.hopper.edw.catalog.hopgui.navigation.RecordOriginNavigationSupport;
 import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.hopper.edw.catalog.model.RecordOrigin;
-import org.apache.hop.core.variables.Variables;
 import org.hopper.edw.datavault.lineageview.backend.HopExportFacet;
 import org.hopper.edw.datavault.lineageview.backend.HopLocationFacet;
 import org.hopper.edw.datavault.lineageview.backend.LineageNode;

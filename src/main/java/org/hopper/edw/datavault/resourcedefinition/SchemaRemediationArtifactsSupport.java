@@ -24,9 +24,9 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
+import org.apache.hop.i18n.BaseMessages;
 import org.hopper.edw.datavault.config.DataVaultConfig;
 import org.hopper.edw.datavault.config.DataVaultConfigSingleton;
-import org.apache.hop.i18n.BaseMessages;
 
 /**
  * Resolves the schema-remediation root folder from plugin settings and writes named remediation

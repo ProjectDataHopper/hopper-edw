@@ -25,12 +25,12 @@ import org.apache.hop.core.gui.plugin.GuiWidgetElement;
 import org.apache.hop.core.logging.ILogChannel;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.lineageview.backend.LineageBackendKind;
-import org.hopper.edw.datavault.lineageview.backend.marquez.MarquezLineageQueryService;
-import org.hopper.edw.datavault.lineageview.backend.marquez.MarquezUrls;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.datavault.lineageview.backend.LineageBackendKind;
+import org.hopper.edw.datavault.lineageview.backend.marquez.MarquezLineageQueryService;
+import org.hopper.edw.datavault.lineageview.backend.marquez.MarquezUrls;
 
 /** Marquez 0.50 HTTP query settings. */
 @GuiPlugin(id = "GUI-MarquezLineageBackend")

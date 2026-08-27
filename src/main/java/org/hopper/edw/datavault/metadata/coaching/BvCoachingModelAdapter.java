@@ -25,6 +25,7 @@ import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvTableType;
@@ -33,7 +34,6 @@ import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BvDerivativeRef;
 import org.hopper.edw.datavault.metadata.businessvault.BvDvTableReference;
 import org.hopper.edw.datavault.metadata.businessvault.IBvTable;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Coaching adapter for Business Vault models (DV derivatives only for auto sources). */
 public class BvCoachingModelAdapter implements ICoachingModelAdapter {

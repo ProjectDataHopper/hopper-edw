@@ -25,10 +25,10 @@ import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.database.DvDatabaseSource;
-import org.hopper.edw.datavault.metadata.database.DvDatabaseSourcePipelineBuilder;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
+import org.hopper.edw.datavault.metadata.database.DvDatabaseSource;
+import org.hopper.edw.datavault.metadata.database.DvDatabaseSourcePipelineBuilder;
 
 @Getter
 @Setter

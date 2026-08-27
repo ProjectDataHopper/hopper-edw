@@ -20,14 +20,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import org.apache.hop.core.HopEnvironment;
+import org.apache.hop.core.exception.HopException;
 import org.hopper.edw.catalog.harvest.SchemaHarvestModels.DiscoveryStatus;
 import org.hopper.edw.catalog.harvest.SchemaHarvestModels.FieldRole;
 import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestResult;
 import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestSubjectResult;
 import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestedField;
 import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestedForeignKey;
-import org.apache.hop.core.HopEnvironment;
-import org.apache.hop.core.exception.HopException;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceRelationship;
 import org.junit.jupiter.api.BeforeAll;

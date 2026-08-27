@@ -17,13 +17,13 @@ package org.hopper.edw.datavault.metadata.dimensional.pipeline;
 
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.pipeline.PipelineMeta;
+import org.apache.hop.pipeline.transform.TransformMeta;
 import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataSupport;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
 import org.hopper.edw.datavault.metadata.dimensional.DmTableBase;
 import org.hopper.edw.datavault.metadata.dimensional.IDmFactLikeTable;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.pipeline.PipelineMeta;
-import org.apache.hop.pipeline.transform.TransformMeta;
 
 /** Generates fact-like load pipelines with role-playing dimension lookups. */
 public final class DmFactLikeLoadBuilder {

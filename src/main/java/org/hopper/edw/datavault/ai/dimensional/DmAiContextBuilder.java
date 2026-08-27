@@ -22,6 +22,8 @@ import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.hopper.edw.datavault.ai.DvAiContextBuilder;
 import org.hopper.edw.datavault.ai.DvTargetLoadAiConfigurationSupport;
 import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataConstants;
@@ -41,8 +43,6 @@ import org.hopper.edw.datavault.metadata.dimensional.IDmFactLikeTable;
 import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
 import org.hopper.edw.datavault.metrics.ExecutionInfoAiContextBuilder;
 import org.hopper.edw.datavault.metrics.MetricsAiContextBuilder;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 
 /** Assembles redacted context for dimensional model AI advisory calls. */
 public final class DmAiContextBuilder {

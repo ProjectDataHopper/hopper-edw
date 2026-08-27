@@ -23,8 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.Variables;
-import org.hopper.edw.datavault.executionmap.CrawlOptions;
 import org.apache.hop.i18n.BaseMessages;
+import org.hopper.edw.datavault.executionmap.CrawlOptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

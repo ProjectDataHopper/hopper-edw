@@ -18,11 +18,11 @@ package org.hopper.edw.datavault.resourcedefinition;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import org.apache.hop.core.Const;
+import org.apache.hop.core.util.Utils;
 import org.hopper.edw.catalog.discovery.RecordDefinitionSchemaDiffSupport;
 import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.catalog.model.RecordDefinitionValidationAcknowledgement;
-import org.apache.hop.core.Const;
-import org.apache.hop.core.util.Utils;
 import org.hopper.edw.datavault.resourcedefinition.ValidationReport.IssueKind;
 
 /** Stable issue identifiers and acknowledgement lifecycle helpers. */

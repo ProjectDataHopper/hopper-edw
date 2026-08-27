@@ -16,14 +16,8 @@
 package org.hopper.edw.catalog.hopgui;
 
 import java.util.List;
-import org.hopper.edw.catalog.impl.file.FileDataCatalog;
-import org.hopper.edw.catalog.metadata.DataCatalogMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.config.DataVaultConfig;
-import org.hopper.edw.datavault.config.DataVaultConfigSingleton;
-import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
-import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.api.IHopMetadataSerializer;
@@ -32,6 +26,12 @@ import org.apache.hop.ui.core.dialog.MessageDialogWithToggle;
 import org.apache.hop.ui.core.metadata.MetadataManager;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.eclipse.swt.SWT;
+import org.hopper.edw.catalog.impl.file.FileDataCatalog;
+import org.hopper.edw.catalog.metadata.DataCatalogMeta;
+import org.hopper.edw.datavault.config.DataVaultConfig;
+import org.hopper.edw.datavault.config.DataVaultConfigSingleton;
+import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
+import org.hopper.edw.datavault.metadata.DataVaultModel;
 
 /** Offers to create a local file-based data catalog when a project has none yet. */
 public final class LocalCatalogOfferSupport {

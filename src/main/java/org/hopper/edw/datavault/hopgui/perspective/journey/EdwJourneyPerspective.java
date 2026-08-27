@@ -18,8 +18,6 @@ package org.hopper.edw.datavault.hopgui.perspective.journey;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
-import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
-import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupModelDiscoverySupport;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.Props;
 import org.apache.hop.core.exception.HopException;
@@ -28,8 +26,6 @@ import org.apache.hop.core.gui.plugin.key.GuiKeyboardShortcut;
 import org.apache.hop.core.gui.plugin.key.GuiOsxKeyboardShortcut;
 import org.apache.hop.core.gui.plugin.toolbar.GuiToolbarElement;
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.hopgui.GuiBusySupport;
-import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneyTreeNode.Kind;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.api.IHopMetadataSerializer;
@@ -56,6 +52,10 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
+import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
+import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupModelDiscoverySupport;
+import org.hopper.edw.datavault.hopgui.GuiBusySupport;
+import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneyTreeNode.Kind;
 
 /** Hop GUI perspective for the EDW data journey of a resource definition group. */
 @HopPerspectivePlugin(

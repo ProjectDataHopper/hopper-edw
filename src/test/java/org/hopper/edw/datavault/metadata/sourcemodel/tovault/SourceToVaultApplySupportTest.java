@@ -24,6 +24,7 @@ import java.util.List;
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.Variables;
+import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.hopper.edw.datavault.metadata.BusinessKey;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvHub;
@@ -34,7 +35,6 @@ import org.hopper.edw.datavault.metadata.sourcemodel.SourceEndpointKind;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceRelationship;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
-import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

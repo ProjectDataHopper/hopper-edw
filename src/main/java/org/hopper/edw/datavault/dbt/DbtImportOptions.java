@@ -20,8 +20,8 @@ import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 
 @Getter
 @Setter

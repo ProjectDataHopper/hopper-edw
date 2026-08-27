@@ -20,12 +20,12 @@ import java.util.List;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.plugin.action.GuiAction;
 import org.apache.hop.core.gui.plugin.action.GuiActionLambdaBuilder;
+import org.apache.hop.ui.hopgui.context.BaseGuiContextHandler;
+import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BvPitTable;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2Table;
 import org.hopper.edw.datavault.metadata.businessvault.IBvTable;
-import org.apache.hop.ui.hopgui.context.BaseGuiContextHandler;
-import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
 
 /** Context handler for clicks on a Business Vault table on the canvas. */
 public class HopGuiBusinessVaultTableContext extends BaseGuiContextHandler

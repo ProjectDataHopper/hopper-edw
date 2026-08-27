@@ -20,9 +20,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.i18n.BaseMessages;
 import org.hopper.edw.datavault.hopgui.file.sourcemodel.HopGuiSourceModelGraph;
 import org.hopper.edw.datavault.hopgui.file.vault.HopGuiVaultGraph;
-import org.apache.hop.i18n.BaseMessages;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

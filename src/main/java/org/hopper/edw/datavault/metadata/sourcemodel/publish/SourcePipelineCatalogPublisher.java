@@ -17,11 +17,13 @@ package org.hopper.edw.datavault.metadata.sourcemodel.publish;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.hopper.edw.catalog.discovery.RecordDefinitionCatalogWriter;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.catalog.discovery.RecordDefinitionCatalogWriter;
 import org.hopper.edw.datavault.catalog.CatalogModelRegistrySupport;
 import org.hopper.edw.datavault.catalog.RecordSourceIndicatorOptions;
 import org.hopper.edw.datavault.catalog.RecordSourceIndicatorSupport;
@@ -33,8 +35,6 @@ import org.hopper.edw.datavault.metadata.datatypemapping.SourceDataTypeMappingSu
 import org.hopper.edw.datavault.metadata.pipeline.DvPipelineSource;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourcePipeline;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Publishes a {@link SourcePipeline} as a catalog {@code DV_SOURCE} of type {@code PIPELINE}. */
 public final class SourcePipelineCatalogPublisher {

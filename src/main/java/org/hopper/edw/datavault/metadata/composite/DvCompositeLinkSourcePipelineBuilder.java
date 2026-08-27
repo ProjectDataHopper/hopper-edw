@@ -22,6 +22,8 @@ import java.util.Map;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.pipeline.PipelineMeta;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DataVaultSource;
 import org.hopper.edw.datavault.metadata.DependentChildKey;
@@ -30,8 +32,6 @@ import org.hopper.edw.datavault.metadata.DvHub;
 import org.hopper.edw.datavault.metadata.DvLink;
 import org.hopper.edw.datavault.metadata.DvLinkHubSourceKeyFieldSupport;
 import org.hopper.edw.datavault.metadata.IDvSource;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.pipeline.PipelineMeta;
 
 /** Link load from a composite (multi-table) source query. */
 public class DvCompositeLinkSourcePipelineBuilder extends DvCompositeSourcePipelineBuilder {

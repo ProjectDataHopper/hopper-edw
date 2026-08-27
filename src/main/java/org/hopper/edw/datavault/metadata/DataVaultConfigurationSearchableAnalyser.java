@@ -74,6 +74,15 @@ public class DataVaultConfigurationSearchableAnalyser
         "hash algorithm",
         configuration.getHashAlgorithm(),
         getMetadataComponent());
+    if (configuration.isReadOnlyExistingVault()) {
+      matchProperty(
+          searchable,
+          results,
+          searchQuery,
+          "read-only existing vault",
+          "true",
+          getMetadataComponent());
+    }
     return results;
   }
 }

@@ -26,13 +26,13 @@ import lombok.Getter;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BvBusinessTable;
 import org.hopper.edw.datavault.metadata.businessvault.BvSqlRef;
 import org.hopper.edw.datavault.metadata.businessvault.BvSqlResolvedKind;
 import org.hopper.edw.datavault.metadata.businessvault.BvSqlSource;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Mutable per-render state shared with {@link DbtJinjaBuiltins}. */
 @Getter

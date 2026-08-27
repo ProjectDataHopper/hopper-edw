@@ -22,14 +22,6 @@ import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
-import org.hopper.edw.datavault.metadata.dimensional.DmDimension;
-import org.hopper.edw.datavault.metadata.dimensional.DmDimensionResolutionSupport;
-import org.hopper.edw.datavault.metadata.dimensional.DmFactDimensionJoinValidationSupport;
-import org.hopper.edw.datavault.metadata.dimensional.DmFactDimensionRole;
-import org.hopper.edw.datavault.metadata.dimensional.DmLayoutSupport;
-import org.hopper.edw.datavault.metadata.dimensional.DmSurrogateKeySupport;
-import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineHopMeta;
 import org.apache.hop.pipeline.PipelineMeta;
@@ -38,6 +30,14 @@ import org.apache.hop.pipeline.transforms.dimensionlookup.DimensionLookupMeta;
 import org.apache.hop.pipeline.transforms.selectvalues.SelectField;
 import org.apache.hop.pipeline.transforms.selectvalues.SelectMetadataChange;
 import org.apache.hop.pipeline.transforms.selectvalues.SelectValuesMeta;
+import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
+import org.hopper.edw.datavault.metadata.dimensional.DmDimension;
+import org.hopper.edw.datavault.metadata.dimensional.DmDimensionResolutionSupport;
+import org.hopper.edw.datavault.metadata.dimensional.DmFactDimensionJoinValidationSupport;
+import org.hopper.edw.datavault.metadata.dimensional.DmFactDimensionRole;
+import org.hopper.edw.datavault.metadata.dimensional.DmLayoutSupport;
+import org.hopper.edw.datavault.metadata.dimensional.DmSurrogateKeySupport;
+import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic;
 
 /** Prepares fact stream fields and dimension lookups for fact-to-dimension joins. */
 public final class DmFactDimensionJoinBuilder {

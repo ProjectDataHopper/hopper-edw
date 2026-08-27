@@ -16,10 +16,10 @@
 package org.hopper.edw.datavault.hopgui.file.vault;
 
 import org.apache.hop.core.gui.IGc;
-import org.hopper.edw.datavault.metadata.DvNoteType;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.gui.GuiResource;
 import org.eclipse.swt.graphics.Color;
+import org.hopper.edw.datavault.metadata.DvNoteType;
 
 /**
  * Fixed visual styles for {@link org.hopper.edw.datavault.metadata.DvNote} types. Centralizes

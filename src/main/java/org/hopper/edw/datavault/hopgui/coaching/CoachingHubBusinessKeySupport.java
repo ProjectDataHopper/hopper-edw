@@ -18,12 +18,12 @@ package org.hopper.edw.datavault.hopgui.coaching;
 import java.util.List;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.BusinessKey;
 import org.hopper.edw.datavault.metadata.DataVaultSource;
 import org.hopper.edw.datavault.metadata.DvHub;
 import org.hopper.edw.datavault.metadata.SourceField;
 import org.hopper.edw.datavault.metadata.SourceFieldPrimaryKeySupport;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Seeds hub business keys from catalog source primary-key metadata. */
 public final class CoachingHubBusinessKeySupport {

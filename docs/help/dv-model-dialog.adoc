@@ -20,7 +20,8 @@ There is one target database per configuration. Table dialogs can still override
 
 Target database and hashing strategy.
 
-- **Target database** — Hop connection where vault tables are created and loaded (DDL, quoting, generated pipelines). Required for Generate DDL, Debug, and Data Vault Update.
+- **Target database** — Hop connection where vault tables live. Hop-managed models create and load here; read-only existing vaults only read from it (Business Vault and dimensional loads). Required for Generate DDL, Debug, and Data Vault Update on Hop-managed models.
+- **Read-only existing vault** — Documents an already-built raw vault. Hop refuses Data Vault Update, Generate DDL, and Debug. Model check keeps referential integrity only. Use a dedicated configuration; do not share it with Hop-managed models.
 - **Data catalog connection** — Optional catalog used when resolving `DV_SOURCE` feeds for this model.
 - **Hash algorithm** — Surrogate key algorithm (MD5, SHA-256, SHA-1, SHA-512).
 - **Hash key data type** — Physical storage: HEX (default), STRING, or BINARY. BINARY needs Hop 2.19.0+ for correct sort order.

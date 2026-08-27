@@ -25,6 +25,7 @@ import java.util.Set;
 import lombok.Value;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.lineageview.backend.HopExportFacet;
 import org.hopper.edw.datavault.lineageview.backend.HopOpsFacet;
 import org.hopper.edw.datavault.lineageview.backend.LineageGraph;
@@ -33,7 +34,6 @@ import org.hopper.edw.datavault.lineageview.backend.LineageNodeKind;
 import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataConstants;
 import org.hopper.edw.datavault.metrics.LoadRunDurationMetricsLoader;
 import org.hopper.edw.datavault.metrics.LoadRunDurationSnapshot;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * OPS last-load overlay for a lineage graph. Groups nodes by {@code (modelName, dv|bv|dm)} and

@@ -22,9 +22,9 @@ import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import org.hopper.edw.catalog.discovery.RecordDefinitionSchemaDiffSupport;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.util.Utils;
+import org.hopper.edw.catalog.discovery.RecordDefinitionSchemaDiffSupport;
 import org.hopper.edw.datavault.metadata.SourceField;
 
 /** Immutable-ish domain types for schema metadata harvesting (observation only). */

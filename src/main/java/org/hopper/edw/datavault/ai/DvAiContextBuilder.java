@@ -19,15 +19,17 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import org.hopper.edw.catalog.model.RecordDefinition;
-import org.hopper.edw.catalog.model.RecordDefinitionKey;
-import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
+import org.hopper.edw.catalog.model.RecordDefinition;
+import org.hopper.edw.catalog.model.RecordDefinitionKey;
+import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
 import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
 import org.hopper.edw.datavault.metadata.BusinessKey;
 import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
@@ -41,8 +43,6 @@ import org.hopper.edw.datavault.metadata.IDvTable;
 import org.hopper.edw.datavault.metadata.SatelliteAttribute;
 import org.hopper.edw.datavault.metrics.ExecutionInfoAiContextBuilder;
 import org.hopper.edw.datavault.metrics.MetricsAiContextBuilder;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 
 /** Assembles redacted context for AI advisory calls. */
 public final class DvAiContextBuilder {

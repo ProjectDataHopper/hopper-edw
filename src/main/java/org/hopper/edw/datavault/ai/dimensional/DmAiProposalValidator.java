@@ -19,10 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.ai.DvAiProposal;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
 import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Validates AI proposals against the open dimensional model before the user applies them. */
 public final class DmAiProposalValidator {

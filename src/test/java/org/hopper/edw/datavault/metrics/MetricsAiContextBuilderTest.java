@@ -19,8 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.hopper.edw.datavault.metrics.metadata.ExecutionMetricsProfileMeta;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
+import org.hopper.edw.datavault.metrics.metadata.ExecutionMetricsProfileMeta;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

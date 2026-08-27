@@ -20,11 +20,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.List;
 import java.util.Map;
 import org.apache.hop.core.HopEnvironment;
-import org.hopper.edw.datavault.ai.HopAiProposal;
-import org.hopper.edw.datavault.ai.HopAiProposalValidation;
 import org.apache.hop.pipeline.PipelineHopMeta;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
+import org.hopper.edw.datavault.ai.HopAiProposal;
+import org.hopper.edw.datavault.ai.HopAiProposalValidation;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

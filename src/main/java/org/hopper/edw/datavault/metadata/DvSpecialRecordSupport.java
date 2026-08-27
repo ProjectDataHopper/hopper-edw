@@ -32,8 +32,8 @@ import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.StringUtil;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.transform.dvhashkey.DvHashKeyLogic;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.datavault.transform.dvhashkey.DvHashKeyLogic;
 
 /**
  * Ensures unknown and invalid (error) sentinel rows exist in hub and link target tables using

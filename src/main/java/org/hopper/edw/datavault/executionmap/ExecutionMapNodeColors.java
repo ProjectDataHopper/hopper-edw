@@ -17,9 +17,9 @@ package org.hopper.edw.datavault.executionmap;
 
 import org.apache.hop.core.gui.IGc;
 import org.apache.hop.core.gui.IGc.EColor;
+import org.apache.hop.ui.core.PropsUi;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapNode;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapNodeType;
-import org.apache.hop.ui.core.PropsUi;
 
 /** Node fill colors for execution map painting. */
 public final class ExecutionMapNodeColors {

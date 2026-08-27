@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.i18n.BaseMessages;
 import org.hopper.edw.datavault.metadata.BusinessKey;
 import org.hopper.edw.datavault.metadata.BusinessKeySource;
 import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
@@ -53,7 +54,6 @@ import org.hopper.edw.datavault.metadata.dimensional.DmScdUpdatePolicy;
 import org.hopper.edw.datavault.metadata.dimensional.DmSurrogateKeyStrategy;
 import org.hopper.edw.datavault.metadata.dimensional.DmTableBase;
 import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
-import org.apache.hop.i18n.BaseMessages;
 
 /**
  * Publishes a Data Vault model to a draft Kimball dimensional model.

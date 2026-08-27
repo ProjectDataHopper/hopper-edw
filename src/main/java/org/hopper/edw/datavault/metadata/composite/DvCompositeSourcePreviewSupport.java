@@ -25,8 +25,8 @@ import org.apache.hop.core.logging.LoggingObjectType;
 import org.apache.hop.core.logging.SimpleLoggingObject;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceQueryPreviewSupport;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceQueryPreviewSupport;
 
 /** Preview rows for a {@link DvCompositeSource} (SQL mode only). */
 public final class DvCompositeSourcePreviewSupport {

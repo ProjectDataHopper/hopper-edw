@@ -16,10 +16,10 @@
 package org.hopper.edw.catalog.transform.recordinput;
 
 import java.util.List;
-import org.hopper.edw.catalog.model.RecordDefinition;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.pipeline.transform.BaseTransformData;
 import org.apache.hop.pipeline.transform.ITransformData;
+import org.hopper.edw.catalog.model.RecordDefinition;
 
 public class RecordDefinitionInputData extends BaseTransformData implements ITransformData {
 

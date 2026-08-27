@@ -15,13 +15,13 @@
  */
 package org.hopper.edw.catalog.spi;
 
-import org.hopper.edw.catalog.impl.file.FileDataCatalog;
-import org.hopper.edw.catalog.metadata.DataCatalogMeta;
-import org.hopper.edw.catalog.metadata.DataCatalogMetaObjectFactory;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.catalog.impl.file.FileDataCatalog;
+import org.hopper.edw.catalog.metadata.DataCatalogMeta;
+import org.hopper.edw.catalog.metadata.DataCatalogMetaObjectFactory;
 
 /**
  * Creates connected {@link IDataCatalog} instances from {@link DataCatalogMeta} connections using

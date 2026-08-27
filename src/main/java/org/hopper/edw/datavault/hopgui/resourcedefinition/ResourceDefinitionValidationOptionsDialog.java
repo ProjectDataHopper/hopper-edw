@@ -17,19 +17,9 @@ package org.hopper.edw.datavault.hopgui.resourcedefinition;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
-import org.hopper.edw.catalog.versioning.CatalogVersionEntry;
-import org.hopper.edw.catalog.versioning.CatalogVersionService;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
-import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
-import org.hopper.edw.datavault.hopgui.help.HelpTopics;
-import org.hopper.edw.datavault.resourcedefinition.ParallelValidationSupport;
-import org.hopper.edw.datavault.resourcedefinition.SchemaValidationReportFileWriter.ReportFormat;
-import org.hopper.edw.datavault.resourcedefinition.ValidationOptions;
-import org.hopper.edw.datavault.resourcedefinition.ValidationOptions.BaselineKind;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.PropsUi;
@@ -50,6 +40,16 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Spinner;
+import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
+import org.hopper.edw.catalog.versioning.CatalogVersionEntry;
+import org.hopper.edw.catalog.versioning.CatalogVersionService;
+import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
+import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.help.HelpTopics;
+import org.hopper.edw.datavault.resourcedefinition.ParallelValidationSupport;
+import org.hopper.edw.datavault.resourcedefinition.SchemaValidationReportFileWriter.ReportFormat;
+import org.hopper.edw.datavault.resourcedefinition.ValidationOptions;
+import org.hopper.edw.datavault.resourcedefinition.ValidationOptions.BaselineKind;
 
 /**
  * Asks the DV administrator what baseline (truth) and which check axes to use before validating a

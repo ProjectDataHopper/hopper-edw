@@ -27,10 +27,6 @@ import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.GuiWidgetElement;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.command.executionmap.ExecutionMapService;
-import org.hopper.edw.datavault.command.executionmap.ExecutionMapService.GenerateResult;
-import org.hopper.edw.datavault.executionmap.CrawlOptions;
-import org.hopper.edw.datavault.executionmap.ExecutionMapPersistence;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
@@ -38,6 +34,10 @@ import org.apache.hop.workflow.WorkflowMeta;
 import org.apache.hop.workflow.action.ActionBase;
 import org.apache.hop.workflow.action.IAction;
 import org.apache.hop.workflow.engine.IWorkflowEngine;
+import org.hopper.edw.datavault.command.executionmap.ExecutionMapService;
+import org.hopper.edw.datavault.command.executionmap.ExecutionMapService.GenerateResult;
+import org.hopper.edw.datavault.executionmap.CrawlOptions;
+import org.hopper.edw.datavault.executionmap.ExecutionMapPersistence;
 
 /** Crawls a workflow or pipeline and writes a read-only execution map (.hem) file. */
 @Action(

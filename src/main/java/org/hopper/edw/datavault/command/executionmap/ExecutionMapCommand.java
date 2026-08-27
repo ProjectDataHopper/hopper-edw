@@ -26,13 +26,13 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.logging.ILogChannel;
 import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.command.executionmap.ExecutionMapService.GenerateResult;
-import org.hopper.edw.datavault.executionmap.CrawlOptions;
 import org.apache.hop.hop.Hop;
 import org.apache.hop.hop.plugin.HopCommand;
 import org.apache.hop.hop.plugin.IHopCommand;
 import org.apache.hop.metadata.api.IHasHopMetadataProvider;
 import org.apache.hop.metadata.serializer.multi.MultiMetadataProvider;
+import org.hopper.edw.datavault.command.executionmap.ExecutionMapService.GenerateResult;
+import org.hopper.edw.datavault.executionmap.CrawlOptions;
 import picocli.CommandLine;
 
 @Getter

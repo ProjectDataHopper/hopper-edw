@@ -20,11 +20,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.variables.Variables;
 import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.hopper.edw.catalog.model.RecordDefinitionValidationAcknowledgement;
-import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.variables.Variables;
 import org.junit.jupiter.api.Test;
 
 class ValidationAcknowledgementSupportTest {

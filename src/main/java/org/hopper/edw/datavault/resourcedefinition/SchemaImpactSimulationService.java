@@ -20,6 +20,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.apache.hop.core.Const;
+import org.apache.hop.core.database.DatabaseMeta;
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.util.Utils;
+import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.catalog.discovery.RecordDefinitionDiscoveryService;
 import org.hopper.edw.catalog.discovery.RecordDefinitionPhysicalRefSupport;
 import org.hopper.edw.catalog.discovery.RecordDefinitionSchemaDiffSupport;
@@ -33,11 +40,6 @@ import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
 import org.hopper.edw.catalog.versioning.CatalogVersionService;
-import org.apache.hop.core.Const;
-import org.apache.hop.core.database.DatabaseMeta;
-import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.util.Utils;
-import org.apache.hop.core.variables.IVariables;
 import org.hopper.edw.datavault.catalog.DvCatalogNamespaces;
 import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
 import org.hopper.edw.datavault.catalog.DvSourceFieldSupport;
@@ -50,8 +52,6 @@ import org.hopper.edw.datavault.metadata.SourceField;
 import org.hopper.edw.datavault.resourcedefinition.ValidationReport.IssueKind;
 import org.hopper.edw.datavault.resourcedefinition.ValidationReport.RecordDefinitionValidation;
 import org.hopper.edw.datavault.resourcedefinition.ValidationReport.ValidationIssue;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Orchestrates schema gap analysis (catalog/version vs live or version) and optional downstream

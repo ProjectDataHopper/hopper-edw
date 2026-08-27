@@ -24,6 +24,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.catalog.CatalogModelRegistrySupport;
 import org.hopper.edw.datavault.catalog.DvCatalogNamespaces;
 import org.hopper.edw.datavault.metadata.AttributeSource;
@@ -41,7 +42,6 @@ import org.hopper.edw.datavault.metadata.DvTableType;
 import org.hopper.edw.datavault.metadata.IDvTable;
 import org.hopper.edw.datavault.metadata.ModelConfigurationResolver;
 import org.hopper.edw.datavault.metadata.SatelliteAttribute;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Builds a {@link LineageSnapshot} from a Data Vault model by walking hubs, links, and satellites.

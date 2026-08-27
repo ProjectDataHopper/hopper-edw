@@ -24,12 +24,12 @@ import org.apache.hop.core.changed.ChangedFlag;
 import org.apache.hop.core.gui.IGuiPosition;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.metadata.DvSourceType;
-import org.hopper.edw.datavault.metadata.datatypemapping.IDataTypeMappingTarget;
-import org.hopper.edw.datavault.metadata.datatypemapping.SourceFieldTypeMapping;
 import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadata;
+import org.hopper.edw.datavault.metadata.DvSourceType;
+import org.hopper.edw.datavault.metadata.datatypemapping.IDataTypeMappingTarget;
+import org.hopper.edw.datavault.metadata.datatypemapping.SourceFieldTypeMapping;
 import org.jspecify.annotations.NonNull;
 
 /**

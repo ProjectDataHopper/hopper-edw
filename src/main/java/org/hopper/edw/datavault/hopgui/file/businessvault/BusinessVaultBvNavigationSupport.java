@@ -19,17 +19,17 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
-import org.hopper.edw.datavault.metadata.DvModelLoadSupport;
-import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
-import org.hopper.edw.datavault.metadata.businessvault.BvBvTableReference;
-import org.hopper.edw.datavault.metadata.businessvault.BvSqlModelPathSupport;
-import org.hopper.edw.datavault.metadata.businessvault.IBvTable;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
 import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
 import org.apache.hop.ui.hopgui.shared.CanvasSvgHelper;
 import org.apache.hop.ui.util.EnvironmentUtils;
+import org.hopper.edw.datavault.metadata.DvModelLoadSupport;
+import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
+import org.hopper.edw.datavault.metadata.businessvault.BvBvTableReference;
+import org.hopper.edw.datavault.metadata.businessvault.BvSqlModelPathSupport;
+import org.hopper.edw.datavault.metadata.businessvault.IBvTable;
 
 /** Opens another Business Vault model and navigates to a referenced table. */
 public final class BusinessVaultBvNavigationSupport {

@@ -15,8 +15,8 @@
  */
 package org.hopper.edw.datavault.metadata.file;
 
-import org.hopper.edw.catalog.model.PhysicalFileRef;
 import org.apache.hop.core.util.Utils;
+import org.hopper.edw.catalog.model.PhysicalFileRef;
 
 /** Shared helpers for file-based Data Vault source locations. */
 public final class DvFileLocationSupport {

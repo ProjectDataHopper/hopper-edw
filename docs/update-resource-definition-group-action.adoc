@@ -16,6 +16,8 @@ The **Update resource definition group** workflow action loads every Data Vault 
 
 Each model runs through the same update path as the dedicated **Data Vault Update** / **Business Vault Update** / **Dimensional Update** actions (model check options, DDL policy, parallel pipeline copies, optional catalog publish).
 
+If a listed `.hdv` uses a **read-only existing vault** configuration, that Data Vault job is **skipped** (logged) so Business Vault and dimensional updates still run. A standalone Data Vault Update action pointed at the same file still errors.
+
 Optionally the action **manages vault update metrics** for the whole wave: it assigns `DV_WORKFLOW_EXECUTION_ID` at the start (Begin-style) and publishes a workflow load overview at the end (End-style). You do not need separate Begin/End Vault Update actions or hand-wired per-model hops for a standard multi-layer load.
 
 Retail example workflows `run-retail-update.hwf` and `run-retail-update-models.hwf` use this action with group **`retail-sources`**.

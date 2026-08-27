@@ -18,24 +18,24 @@ package org.hopper.edw.datavault.metadata.dimensional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.hopper.edw.catalog.hopgui.preview.RecordDefinitionPreviewSupport;
-import org.hopper.edw.catalog.model.RecordDefinition;
-import org.hopper.edw.catalog.model.RecordDefinitionKey;
-import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
-import org.hopper.edw.datavault.catalog.DvSourceFieldSupport;
-import org.hopper.edw.datavault.metadata.DvSourcePreviewInputSupport;
-import org.hopper.edw.datavault.metadata.SourceField;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineHopMeta;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
+import org.hopper.edw.catalog.hopgui.preview.RecordDefinitionPreviewSupport;
+import org.hopper.edw.catalog.model.RecordDefinition;
+import org.hopper.edw.catalog.model.RecordDefinitionKey;
+import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
+import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
+import org.hopper.edw.datavault.catalog.DvSourceFieldSupport;
+import org.hopper.edw.datavault.metadata.DvSourcePreviewInputSupport;
+import org.hopper.edw.datavault.metadata.SourceField;
 
 /**
  * Helpers for dimensional tables that use a data-catalog record definition as the staging source.

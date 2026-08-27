@@ -23,10 +23,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.hop.core.logging.LogLevel;
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.config.DataVaultConfigSingleton;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.engine.IPipelineEngine;
+import org.hopper.edw.datavault.config.DataVaultConfigSingleton;
 
 /** Polls a running orchestrator engine and publishes live update snapshots. */
 public final class UpdateRunLiveMonitor implements AutoCloseable {

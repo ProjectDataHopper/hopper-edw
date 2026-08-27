@@ -32,6 +32,8 @@ import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalConfiguration;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
 import org.hopper.edw.datavault.metadata.dimensional.DmBridge;
@@ -48,8 +50,6 @@ import org.hopper.edw.datavault.metadata.dimensional.DmScdUpdatePolicy;
 import org.hopper.edw.datavault.metadata.dimensional.DmTableBase;
 import org.hopper.edw.datavault.metadata.dimensional.DmTableType;
 import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Imports existing database tables as draft dimensional model tables.

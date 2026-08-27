@@ -18,8 +18,8 @@ package org.hopper.edw.datavault.executionmap;
 import java.util.Comparator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.hopper.edw.catalog.model.RecordDefinitionType;
 import org.apache.hop.core.util.Utils;
+import org.hopper.edw.catalog.model.RecordDefinitionType;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapNode;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapNodeType;
 

@@ -26,12 +26,12 @@ import java.util.logging.Logger;
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.Variables;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceModelLoadSupport;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.apache.hop.metadata.util.HopMetadataInstance;
 import org.apache.hop.metadata.util.HopMetadataUtil;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceModelLoadSupport;
 
 /**
  * In-process JDBC driver for free SQL against a local {@code .hsm} file (requires full Hop).

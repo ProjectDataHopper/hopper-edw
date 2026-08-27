@@ -18,17 +18,17 @@ package org.hopper.edw.datavault.hopgui.file.dimensional;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.ui.hopgui.HopGui;
+import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
+import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimension;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimensionAlias;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimensionResolutionSupport;
 import org.hopper.edw.datavault.metadata.dimensional.DmModelLoadSupport;
 import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.ui.hopgui.HopGui;
-import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
-import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
 
 /** Navigates from a dimension alias to its referenced source dimension table. */
 public final class DmDimensionAliasNavigationSupport {

@@ -20,8 +20,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataConstants;
-import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataSupport;
 import org.apache.hop.pipeline.Pipeline;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.engine.EngineMetrics;
@@ -29,6 +27,8 @@ import org.apache.hop.pipeline.engine.IEngineComponent;
 import org.apache.hop.pipeline.engine.IEngineMetric;
 import org.apache.hop.pipeline.engine.IPipelineEngine;
 import org.apache.hop.pipeline.transform.TransformMeta;
+import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataConstants;
+import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataSupport;
 
 /**
  * Resolves pipeline and transform metrics from stamped metadata attributes, with name-heuristic

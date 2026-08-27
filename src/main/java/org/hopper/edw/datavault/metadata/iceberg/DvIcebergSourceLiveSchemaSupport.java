@@ -15,14 +15,14 @@
  */
 package org.hopper.edw.datavault.metadata.iceberg;
 
-import org.hopper.edw.catalog.discovery.HopVariableResolutionSupport;
-import org.hopper.edw.catalog.discovery.PhysicalSourceRef;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.catalog.DvSourceFieldSupport;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.catalog.discovery.HopVariableResolutionSupport;
+import org.hopper.edw.catalog.discovery.PhysicalSourceRef;
+import org.hopper.edw.datavault.catalog.DvSourceFieldSupport;
 
 /** Resolves live Iceberg table column metadata for {@link DvIcebergSource}. */
 public final class DvIcebergSourceLiveSchemaSupport {

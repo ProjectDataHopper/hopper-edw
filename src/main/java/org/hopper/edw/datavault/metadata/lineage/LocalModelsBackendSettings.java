@@ -17,7 +17,6 @@ package org.hopper.edw.datavault.metadata.lineage;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.plugin.GuiElementType;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
@@ -25,12 +24,13 @@ import org.apache.hop.core.gui.plugin.GuiWidgetElement;
 import org.apache.hop.core.logging.ILogChannel;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.lineageview.backend.LineageBackendKind;
-import org.hopper.edw.datavault.resourcedefinition.ResourceDefinitionGroupResolver;
-import org.hopper.edw.datavault.resourcedefinition.ValidationModels;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
+import org.hopper.edw.datavault.lineageview.backend.LineageBackendKind;
+import org.hopper.edw.datavault.resourcedefinition.ResourceDefinitionGroupResolver;
+import org.hopper.edw.datavault.resourcedefinition.ValidationModels;
 
 /** Collects lineage from current DV/BV/DM models in a resource definition group. */
 @GuiPlugin(id = "GUI-LocalModelsLineageBackend")

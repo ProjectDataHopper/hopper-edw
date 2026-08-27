@@ -23,11 +23,11 @@ import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.Variables;
+import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvHub;
 import org.hopper.edw.datavault.metadata.DvModelCheckOptions;
 import org.hopper.edw.datavault.metadata.IDvTable;
-import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

@@ -33,9 +33,9 @@ import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.RowMeta;
 import org.apache.hop.core.variables.Variables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic.DateRange;
 import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic.PreparedField;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

@@ -26,9 +26,9 @@ import org.apache.hop.core.logging.LoggingObject;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.ai.DvAiContextBuilder;
 import org.hopper.edw.datavault.metrics.metadata.ExecutionMetricsProfileMeta;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Loads recent load-run metrics and insights for AI performance advisory context. */
 public final class MetricsAiContextBuilder {

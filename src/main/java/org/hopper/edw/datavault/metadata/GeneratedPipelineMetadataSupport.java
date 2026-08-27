@@ -16,14 +16,14 @@
 package org.hopper.edw.datavault.metadata;
 
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.pipeline.PipelineMeta;
+import org.apache.hop.pipeline.transform.TransformMeta;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimension;
 import org.hopper.edw.datavault.metadata.dimensional.DmFactDimensionRole;
 import org.hopper.edw.datavault.metadata.dimensional.DmTableBase;
 import org.hopper.edw.datavault.metadata.dimensional.DmTableType;
 import org.hopper.edw.datavault.metadata.dimensional.pipeline.DmPipelineBuilderSupport;
-import org.apache.hop.pipeline.PipelineMeta;
-import org.apache.hop.pipeline.transform.TransformMeta;
 
 /** Stamps logical model context onto generated pipeline and transform metadata attributes. */
 public final class GeneratedPipelineMetadataSupport {

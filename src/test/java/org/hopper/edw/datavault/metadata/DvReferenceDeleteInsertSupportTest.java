@@ -25,7 +25,6 @@ import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.Variables;
-import org.hopper.edw.datavault.metadata.database.DvDatabaseSource;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.workflow.WorkflowMeta;
@@ -33,6 +32,7 @@ import org.apache.hop.workflow.action.ActionBase;
 import org.apache.hop.workflow.action.ActionMeta;
 import org.apache.hop.workflow.action.IAction;
 import org.apache.hop.workflow.actions.sql.ActionSql;
+import org.hopper.edw.datavault.metadata.database.DvDatabaseSource;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

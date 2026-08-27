@@ -21,16 +21,16 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import org.hopper.edw.catalog.discovery.RecordDefinitionSchemaDiffSupport;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.i18n.BaseMessages;
+import org.hopper.edw.catalog.discovery.RecordDefinitionSchemaDiffSupport;
 import org.hopper.edw.datavault.lineage.LineageDiffReportFormatter;
 import org.hopper.edw.datavault.resourcedefinition.ValidationFindingFormatter.StructuredFinding;
 import org.hopper.edw.datavault.resourcedefinition.ValidationReport.IssueKind;
 import org.hopper.edw.datavault.resourcedefinition.ValidationReport.IssueSeverity;
 import org.hopper.edw.datavault.resourcedefinition.ValidationReport.RecordDefinitionValidation;
 import org.hopper.edw.datavault.resourcedefinition.ValidationReport.ValidationIssue;
-import org.apache.hop.i18n.BaseMessages;
 
 /**
  * Formats schema impact simulation results for logs, Markdown CI artifacts, and HTML.

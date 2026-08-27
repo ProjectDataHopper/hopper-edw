@@ -31,7 +31,6 @@ import org.apache.hop.core.logging.LoggingObject;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.ai.DvAiContextBuilder;
 import org.apache.hop.execution.Execution;
 import org.apache.hop.execution.ExecutionState;
 import org.apache.hop.execution.ExecutionStateComponentMetrics;
@@ -39,6 +38,7 @@ import org.apache.hop.execution.ExecutionType;
 import org.apache.hop.execution.IExecutionInfoLocation;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.Pipeline;
+import org.hopper.edw.datavault.ai.DvAiContextBuilder;
 
 /** Loads recent execution logs and transform metrics from Hop Execution Information Locations. */
 public final class ExecutionInfoAiContextBuilder {

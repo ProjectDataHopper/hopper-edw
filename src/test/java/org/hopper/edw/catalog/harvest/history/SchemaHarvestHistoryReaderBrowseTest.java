@@ -21,6 +21,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.UUID;
+import org.apache.hop.core.HopEnvironment;
+import org.apache.hop.core.database.DatabaseMeta;
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.logging.LogChannel;
+import org.apache.hop.core.variables.Variables;
+import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.hopper.edw.catalog.harvest.SchemaHarvestModels.DiscoveryStatus;
 import org.hopper.edw.catalog.harvest.SchemaHarvestModels.FieldRole;
 import org.hopper.edw.catalog.harvest.SchemaHarvestModels.HarvestChange;
@@ -33,12 +39,6 @@ import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryPublisher.Publ
 import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryPublisher.PublishStatus;
 import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader.HarvestRunSummary;
 import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader.HarvestSubjectSummary;
-import org.apache.hop.core.HopEnvironment;
-import org.apache.hop.core.database.DatabaseMeta;
-import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.logging.LogChannel;
-import org.apache.hop.core.variables.Variables;
-import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

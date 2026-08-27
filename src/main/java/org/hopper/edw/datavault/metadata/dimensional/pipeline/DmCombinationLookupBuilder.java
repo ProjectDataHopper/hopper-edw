@@ -16,10 +16,10 @@
 package org.hopper.edw.datavault.metadata.dimensional.pipeline;
 
 import org.apache.hop.core.exception.HopException;
-import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
-import org.hopper.edw.datavault.metadata.dimensional.DmJunkDimension;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
+import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
+import org.hopper.edw.datavault.metadata.dimensional.DmJunkDimension;
 
 /**
  * @deprecated Use {@link DmJunkDimensionBuilder} instead.

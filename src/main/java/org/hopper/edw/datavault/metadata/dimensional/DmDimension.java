@@ -25,13 +25,13 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.HopMetadataProperty;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.pipeline.PipelineMeta;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimensionLoadStrategySupport.DmDimensionLoadStrategy;
 import org.hopper.edw.datavault.metadata.dimensional.pipeline.DmDimensionLookupBuilder;
 import org.hopper.edw.datavault.metadata.dimensional.pipeline.DmInsertUpdateBuilder;
 import org.hopper.edw.datavault.metadata.dimensional.pipeline.DmScd2DimensionBuilder;
-import org.apache.hop.metadata.api.HopMetadataProperty;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.pipeline.PipelineMeta;
 
 /** Kimball dimension table. */
 @Getter

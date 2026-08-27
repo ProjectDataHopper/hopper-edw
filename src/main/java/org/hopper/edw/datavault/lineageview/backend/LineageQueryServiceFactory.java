@@ -19,13 +19,13 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.logging.ILogChannel;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.lineageview.backend.marquez.MarquezLineageQueryService;
 import org.hopper.edw.datavault.metadata.lineage.FileFolderBackendSettings;
 import org.hopper.edw.datavault.metadata.lineage.ILineageBackendSettings;
 import org.hopper.edw.datavault.metadata.lineage.LineageBackendMeta;
 import org.hopper.edw.datavault.metadata.lineage.LocalModelsBackendSettings;
 import org.hopper.edw.datavault.metadata.lineage.MarquezBackendSettings;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Opens a headless {@link ILineageQueryService} for a lineage-backend metadata object. */
 public final class LineageQueryServiceFactory {

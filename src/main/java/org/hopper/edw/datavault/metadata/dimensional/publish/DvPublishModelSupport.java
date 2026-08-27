@@ -20,15 +20,15 @@ import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
 import org.apache.hop.core.xml.XmlHandler;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.hopper.edw.datavault.hopgui.file.dimensional.HopDimensionalFileType;
 import org.hopper.edw.datavault.hopgui.file.vault.HopVaultFileType;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.ModelConfigurationResolver;
 import org.hopper.edw.datavault.metadata.ModelXmlWriteSupport;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 

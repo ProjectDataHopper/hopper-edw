@@ -18,9 +18,6 @@ package org.hopper.edw.datavault.metadata.dimensional.pipeline;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.exception.HopException;
-import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataSupport;
-import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
-import org.hopper.edw.datavault.metadata.dimensional.DmDimension;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineHopMeta;
 import org.apache.hop.pipeline.PipelineMeta;
@@ -29,6 +26,9 @@ import org.apache.hop.pipeline.transforms.insertupdate.InsertUpdateKeyField;
 import org.apache.hop.pipeline.transforms.insertupdate.InsertUpdateLookupField;
 import org.apache.hop.pipeline.transforms.insertupdate.InsertUpdateMeta;
 import org.apache.hop.pipeline.transforms.insertupdate.InsertUpdateValue;
+import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataSupport;
+import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
+import org.hopper.edw.datavault.metadata.dimensional.DmDimension;
 
 /** Generates SCD Type 1 dimension load pipelines using Insert/Update. */
 public final class DmInsertUpdateBuilder {

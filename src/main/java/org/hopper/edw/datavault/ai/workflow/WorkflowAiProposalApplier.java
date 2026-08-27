@@ -21,13 +21,13 @@ import org.apache.hop.core.NotePadMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.ai.HopAiActionPluginSupport;
-import org.hopper.edw.datavault.ai.HopAiProposal;
-import org.hopper.edw.datavault.ai.HopAiProposalParamSupport;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.workflow.WorkflowHopMeta;
 import org.apache.hop.workflow.WorkflowMeta;
 import org.apache.hop.workflow.action.ActionMeta;
+import org.hopper.edw.datavault.ai.HopAiActionPluginSupport;
+import org.hopper.edw.datavault.ai.HopAiProposal;
+import org.hopper.edw.datavault.ai.HopAiProposalParamSupport;
 
 /** Previews and applies validated AI proposals to an open workflow. */
 public final class WorkflowAiProposalApplier {

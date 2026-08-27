@@ -23,6 +23,7 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.BusinessKey;
 import org.hopper.edw.datavault.metadata.BusinessKeySource;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
@@ -43,7 +44,6 @@ import org.hopper.edw.datavault.metadata.sourcemodel.publish.SourceJsonCatalogPu
 import org.hopper.edw.datavault.metadata.sourcemodel.publish.SourcePipelineCatalogPublisher;
 import org.hopper.edw.datavault.metadata.sourcemodel.publish.SourceQueryCatalogPublisher;
 import org.hopper.edw.datavault.metadata.sourcemodel.publish.SourceTableCatalogPublisher;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Writes accepted {@link SourceToVaultProposal}s into a {@link DataVaultModel} (new or existing).

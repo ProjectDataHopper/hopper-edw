@@ -26,10 +26,10 @@ import org.apache.hop.core.logging.SimpleLoggingObject;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceQuery;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceQueryGenerationMode;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Interactive preview of a source query (SQL mode and FREE_SQL). */
 public final class SourceQueryPreviewSupport {

@@ -29,8 +29,8 @@ import org.apache.hop.core.row.value.ValueMetaString;
 import org.apache.hop.core.row.value.ValueMetaTimestamp;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
-import org.hopper.edw.datavault.metadata.DvLoadCycleSupport;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.datavault.metadata.DvLoadCycleSupport;
 
 /** Target table layout helpers aligned with Hop warehouse transform contracts. */
 public final class DmLayoutSupport {

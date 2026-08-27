@@ -19,6 +19,8 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
+import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.hopgui.file.businessvault.HopBusinessVaultFileType;
 import org.hopper.edw.datavault.hopgui.file.dimensional.HopDimensionalFileType;
 import org.hopper.edw.datavault.hopgui.file.vault.HopVaultFileType;
@@ -26,8 +28,6 @@ import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.ModelXmlWriteSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
-import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Persists DV, BV, and DM models referenced by resource definition validation. */
 public final class ResourceDefinitionModelPersistenceSupport {

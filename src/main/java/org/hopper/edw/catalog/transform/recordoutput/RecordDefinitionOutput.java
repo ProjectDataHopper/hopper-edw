@@ -18,22 +18,22 @@ package org.hopper.edw.catalog.transform.recordoutput;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.hopper.edw.catalog.discovery.PhysicalSourceRef;
-import org.hopper.edw.catalog.discovery.RecordDefinitionCatalogWriter;
-import org.hopper.edw.catalog.discovery.RecordDefinitionDiscoveryService;
-import org.hopper.edw.catalog.discovery.RecordDefinitionWriteRequest;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.RowDataUtil;
 import org.apache.hop.core.row.RowMeta;
 import org.apache.hop.core.util.Utils;
-import org.hopper.edw.datavault.metadata.DvSourceDeliveryType;
-import org.hopper.edw.datavault.metadata.SourceField;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.pipeline.Pipeline;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.BaseTransform;
 import org.apache.hop.pipeline.transform.TransformMeta;
+import org.hopper.edw.catalog.discovery.PhysicalSourceRef;
+import org.hopper.edw.catalog.discovery.RecordDefinitionCatalogWriter;
+import org.hopper.edw.catalog.discovery.RecordDefinitionDiscoveryService;
+import org.hopper.edw.catalog.discovery.RecordDefinitionWriteRequest;
+import org.hopper.edw.datavault.metadata.DvSourceDeliveryType;
+import org.hopper.edw.datavault.metadata.SourceField;
 
 public class RecordDefinitionOutput
     extends BaseTransform<RecordDefinitionOutputMeta, RecordDefinitionOutputData> {

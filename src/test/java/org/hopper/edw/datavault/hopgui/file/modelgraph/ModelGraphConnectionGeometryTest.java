@@ -19,9 +19,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.hop.core.gui.Point;
+import org.apache.hop.ui.core.PropsUi;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry.Bounds;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry.ConnectionAnchors;
-import org.apache.hop.ui.core.PropsUi;
 import org.junit.jupiter.api.Test;
 
 class ModelGraphConnectionGeometryTest {
