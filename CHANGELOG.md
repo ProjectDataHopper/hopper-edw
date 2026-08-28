@@ -10,6 +10,15 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 - Cancel stops before the next table; already-written catalog records and imported canvas tables are kept
 - CSV / Parquet / Iceberg catalog import shows a wait cursor while discovering the file or table schema
 
+### Partition large BV SCD2 loads (issue #141)
+
+- SCD2 table option **Hash-key partitions** (None / 4 / 8 / 16) splits a Full rebuild so each satellite `ORDER BY` covers a first-byte slice of the parent hash key
+- A generated workflow truncates the BV target once, then a driver pipeline runs the parameterized SCD2 pipeline for partition numbers `0 .. N-1` (`'${PARTITION_COUNT}'`, `'${PARTITION_NUMBER}'`)
+- Truncate is always a SQL action; Table Output and Native bulk then append each partition
+- Staging file writes `{pipeline}-${PARTITION_NUMBER}-${copy}.csv` per partition, then bulk-loads those files from the wrapper workflow
+- Incremental build mode cannot be combined with hash-key partitions
+- Business Vault Update runs partitioned SCD2 wrapper workflows before the free-pipeline orchestrator
+
 ### Read-only existing Data Vault models
 
 - Data Vault configuration checkbox **Read-only existing vault** documents an already-built raw vault so Business Vault and dimensional models can sit on top

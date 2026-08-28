@@ -41,7 +41,8 @@ Inspect real retail samples for exact nested tags (`satellite_config`, `field_ma
 
 - Parent DV hub (via references)  
 - One or more **satellite configs** (`satelliteName`, source indicator, field mappings `sourceFieldName` → `targetFieldName`)  
-- Timeline fields from configuration (`validFromField`, `validToField`, open sentinels)  
+- Timeline fields from configuration (`validFromField`, `validToField`, open sentinels)
+- Optional `hashKeyPartitionCount` (`NONE`, `4`, `8`, `16`) for large full rebuilds — SQL truncate once, then Table Output, Native bulk, or Staging file (one CSV set per partition)  
 
 ## Anti-patterns
 

@@ -37,5 +37,8 @@ class BvAiContextBuilderTest {
 
     assertTrue(summary.contains("\"targetLoadMode\":\"STAGING_FILE\""));
     assertTrue(summary.contains("\"name\":\"BV_TEST\""));
+    assertTrue(
+        BvAiContextBuilder.serializeModelStructure(model)
+            .contains("\"hashKeyPartitionCount\":\"NONE\""));
   }
 }

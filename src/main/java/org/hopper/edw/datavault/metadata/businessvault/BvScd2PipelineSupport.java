@@ -75,6 +75,7 @@ import org.apache.hop.pipeline.transforms.update.UpdateField;
 import org.apache.hop.pipeline.transforms.update.UpdateKeyField;
 import org.apache.hop.pipeline.transforms.update.UpdateLookupField;
 import org.apache.hop.pipeline.transforms.update.UpdateMeta;
+import org.apache.hop.workflow.WorkflowMeta;
 import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvHub;
@@ -85,6 +86,7 @@ import org.hopper.edw.datavault.metadata.DvSourceFieldMappingSupport;
 import org.hopper.edw.datavault.metadata.DvSpecialRecordSupport;
 import org.hopper.edw.datavault.metadata.DvSqlSupport;
 import org.hopper.edw.datavault.metadata.DvTableType;
+import org.hopper.edw.datavault.metadata.DvTargetLoadMode;
 import org.hopper.edw.datavault.metadata.DvTargetLoadSupport;
 import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataSupport;
 import org.hopper.edw.datavault.metadata.HashAlgorithm;
@@ -179,10 +181,12 @@ public final class BvScd2PipelineSupport {
   }
 
   public static PipelineMeta generatePipeline(Scd2BuildContext ctx) throws HopException {
-    if (ctx.isMultiSatellite()) {
-      return generateMultiSatellitePipeline(ctx);
-    }
-    return generateSingleSatellitePipeline(ctx);
+    PipelineMeta pipelineMeta =
+        ctx.isMultiSatellite()
+            ? generateMultiSatellitePipeline(ctx)
+            : generateSingleSatellitePipeline(ctx);
+    applyPartitionParameters(pipelineMeta, ctx);
+    return pipelineMeta;
   }
 
   private static PipelineMeta generateSingleSatellitePipeline(Scd2BuildContext ctx)
@@ -1049,6 +1053,7 @@ public final class BvScd2PipelineSupport {
     sql.append(
         ctx.sourceDatabaseMeta.getQuotedSchemaTableCombination(
             ctx.variables, null, leg.satelliteTableName));
+    boolean hasWhere = false;
     if (ctx.scd2Table != null && ctx.scd2Table.isIncrementalBuild()) {
       String sourceTimestampField =
           ctx.isMultiSatellite()
@@ -1057,6 +1062,19 @@ public final class BvScd2PipelineSupport {
       String sourceTimestampColumn = ctx.sourceDatabaseMeta.quoteField(sourceTimestampField);
       sql.append(" WHERE ");
       sql.append(buildIncrementalSatelliteFilterSql(sourceTimestampColumn));
+      hasWhere = true;
+    }
+    if (isHashKeyPartitioned(ctx) && ctx.sourceDatabaseMeta != null) {
+      String quotedHashKey = ctx.sourceDatabaseMeta.quoteField(ctx.hashKeyFieldName);
+      String predicate =
+          BvScd2HashPartitionSqlSupport.buildPredicate(
+              ctx.sourceDatabaseMeta,
+              ctx.dvConfig != null ? ctx.dvConfig.resolveHashKeyDataType() : null,
+              quotedHashKey);
+      if (!Utils.isEmpty(predicate)) {
+        sql.append(hasWhere ? " AND " : " WHERE ");
+        sql.append(predicate);
+      }
     }
     sql.append(" ORDER BY ");
     if (ctx.includeHashKey) {
@@ -1266,6 +1284,9 @@ public final class BvScd2PipelineSupport {
     TableInputMeta tableInputMeta = new TableInputMeta();
     tableInputMeta.setConnection(ctx.sourceDbName);
     DvSqlSupport.assignDisplaySql(tableInputMeta, buildLegTableInputSql(ctx, leg));
+    if (isHashKeyPartitioned(ctx)) {
+      tableInputMeta.setVariableReplacementActive(true);
+    }
     if (watermarkParam != null) {
       // Single ? for watermark — bound from param Constant info stream.
       tableInputMeta.setLookup(watermarkParam.getName());
@@ -1860,9 +1881,16 @@ public final class BvScd2PipelineSupport {
             ? LOCATION_START.x + 9 * SPACING_WIDTH
             : LOCATION_START.x + 4 * SPACING_WIDTH;
 
+    boolean truncateTable = ctx.scd2Table == null || !ctx.scd2Table.isHashKeyPartitioned();
     DvTargetLoadSupport.TargetLoadResult result =
         addScd2TargetLoad(
-            ctx, pipelineMeta, targetLayout, predecessor, tableOutputX, LOCATION_START.y, true);
+            ctx,
+            pipelineMeta,
+            targetLayout,
+            predecessor,
+            tableOutputX,
+            LOCATION_START.y,
+            truncateTable);
     return result.transformMeta;
   }
 
@@ -2080,6 +2108,12 @@ public final class BvScd2PipelineSupport {
       boolean truncateTable,
       Set<String> excludeFields)
       throws HopException {
+    String stagingFileInfix = null;
+    if (isHashKeyPartitioned(ctx)
+        && ctx.bvConfig != null
+        && ctx.bvConfig.resolveTargetLoadMode() == DvTargetLoadMode.STAGING_FILE) {
+      stagingFileInfix = BvScd2HashPartitionSqlSupport.PARTITION_NUMBER_REF;
+    }
     DvTargetLoadSupport.TargetLoadContext targetCtx =
         new DvTargetLoadSupport.TargetLoadContext(
             ctx.bvConfig,
@@ -2090,7 +2124,8 @@ public final class BvScd2PipelineSupport {
             ctx.pipelineName,
             ctx.bvModel.getName(),
             locationX,
-            locationY);
+            locationY,
+            stagingFileInfix);
 
     return DvTargetLoadSupport.addTargetLoad(
         targetCtx, pipelineMeta, targetLayout, predecessor, excludeFields, truncateTable);
@@ -2110,12 +2145,68 @@ public final class BvScd2PipelineSupport {
       if (ctx == null) {
         return List.of();
       }
-      return List.of(generatePipeline(ctx));
+      PipelineMeta scd2Pipeline = generatePipeline(ctx);
+      if (!isHashKeyPartitioned(ctx)) {
+        return List.of(scd2Pipeline);
+      }
+      PipelineMeta driverPipeline =
+          BvScd2PartitionWorkflowSupport.buildDriverPipeline(ctx, scd2Pipeline);
+      return List.of(scd2Pipeline, driverPipeline);
     } catch (Exception e) {
       throw new HopException(
           "Error generating SCD2 build pipeline for Business Vault table " + scd2Table.getName(),
           e);
     }
+  }
+
+  public static List<WorkflowMeta> generateBuildWorkflows(
+      IHopMetadataProvider metadataProvider,
+      IVariables variables,
+      BusinessVaultModel bvModel,
+      DataVaultModel dvModel,
+      BvScd2Table scd2Table)
+      throws HopException {
+    if (scd2Table == null || !scd2Table.isHashKeyPartitioned()) {
+      return List.of();
+    }
+    try {
+      DbCache.clearAll();
+      Scd2BuildContext ctx =
+          createContext(metadataProvider, variables, bvModel, dvModel, scd2Table);
+      if (ctx == null) {
+        return List.of();
+      }
+      PipelineMeta scd2Pipeline = generatePipeline(ctx);
+      PipelineMeta driverPipeline =
+          BvScd2PartitionWorkflowSupport.buildDriverPipeline(ctx, scd2Pipeline);
+      return List.of(
+          BvScd2PartitionWorkflowSupport.buildWorkflow(ctx, driverPipeline, scd2Pipeline));
+    } catch (Exception e) {
+      throw new HopException(
+          "Error generating SCD2 partition workflow for Business Vault table "
+              + scd2Table.getName(),
+          e);
+    }
+  }
+
+  static boolean isHashKeyPartitioned(Scd2BuildContext ctx) {
+    return ctx != null && ctx.scd2Table != null && ctx.scd2Table.isHashKeyPartitioned();
+  }
+
+  static void applyPartitionParameters(PipelineMeta pipelineMeta, Scd2BuildContext ctx)
+      throws HopException {
+    if (pipelineMeta == null || !isHashKeyPartitioned(ctx)) {
+      return;
+    }
+    int count = ctx.scd2Table.getHashKeyPartitionCountOrDefault().getPartitionCount();
+    pipelineMeta.addParameterDefinition(
+        BvScd2HashPartitionSqlSupport.PARTITION_COUNT_VARIABLE,
+        Integer.toString(count),
+        "Hash-key partition count for this SCD2 full rebuild");
+    pipelineMeta.addParameterDefinition(
+        BvScd2HashPartitionSqlSupport.PARTITION_NUMBER_VARIABLE,
+        "0",
+        "Zero-based hash-key partition number");
   }
 
   /** Resolved inputs for one satellite branch in a generated SCD2 build pipeline. */

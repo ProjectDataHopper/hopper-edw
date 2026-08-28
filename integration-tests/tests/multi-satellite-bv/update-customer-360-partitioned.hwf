@@ -1,0 +1,558 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow>
+  <name>update-customer-360-partitioned</name>
+  <name_sync_with_filename>Y</name_sync_with_filename>
+  <description>Load hub and four satellites from CSV waves, rebuild customer_360_bv with 4 hash-key partitions, and validate</description>
+  <extended_description/>
+  <created_user>-</created_user>
+  <modified_user>-</modified_user>
+  <created_date>2026/06/26 23:45:00.000</created_date>
+  <modified_date>2026/06/26 23:45:00.000</modified_date>
+  <workflow_version/>
+  <parameters>
+    <parameter>
+      <name>DV_INITIAL_LOAD_DATE</name>
+      <description>Fixed load date for initial Data Vault Update actions</description>
+      <default_value>2026/01/01 00:00:00.000</default_value>
+    </parameter>
+    <parameter>
+      <name>OUTPUT_COPIES</name>
+      <description>Valid in the current workflow</description>
+      <default_value>1</default_value>
+    </parameter>
+    <parameter>
+      <name>DV_UPDATE2_LOAD_DATE</name>
+      <description>Load date for satellite update wave 2</description>
+      <default_value>2026/03/01 00:00:00.000</default_value>
+    </parameter>
+    <parameter>
+      <name>METRICS_FOLDER</name>
+      <description>Valid in the current workflow</description>
+      <default_value>${PROJECT_HOME}/metrics</default_value>
+    </parameter>
+    <parameter>
+      <name>PIPELINE_COPIES</name>
+      <description>Valid in the current workflow</description>
+      <default_value>3</default_value>
+    </parameter>
+    <parameter>
+      <name>DV_UPDATE4_LOAD_DATE</name>
+      <description>Load date for satellite update wave 4</description>
+      <default_value>2026/05/01 00:00:00.000</default_value>
+    </parameter>
+    <parameter>
+      <name>DV_UPDATE1_LOAD_DATE</name>
+      <description>Load date for satellite update wave 1</description>
+      <default_value>2026/02/01 00:00:00.000</default_value>
+    </parameter>
+    <parameter>
+      <name>DV_UPDATE3_LOAD_DATE</name>
+      <description>Load date for satellite update wave 3</description>
+      <default_value>2026/04/01 00:00:00.000</default_value>
+    </parameter>
+  </parameters>
+  <actions>
+    <action>
+      <repeat>N</repeat>
+      <schedulerType>0</schedulerType>
+      <intervalSeconds>0</intervalSeconds>
+      <intervalMinutes>60</intervalMinutes>
+      <DayOfMonth>1</DayOfMonth>
+      <weekDay>1</weekDay>
+      <minutes>0</minutes>
+      <hour>12</hour>
+      <doNotWaitOnFirstExecution>N</doNotWaitOnFirstExecution>
+      <name>Start</name>
+      <description/>
+      <type>SPECIAL</type>
+      <attributes/>
+      <xloc>64</xloc>
+      <yloc>64</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <sql>DROP TABLE IF EXISTS hub_customer;
+DROP TABLE IF EXISTS sat_customer_demo;
+DROP TABLE IF EXISTS sat_customer_contact;
+DROP TABLE IF EXISTS sat_customer_address;
+DROP TABLE IF EXISTS sat_customer_prefs;
+DROP TABLE IF EXISTS customer_360_bv;
+</sql>
+      <connection>Vault</connection>
+      <useVariableSubstitution>N</useVariableSubstitution>
+      <sqlfromfile>N</sqlfromfile>
+      <sqlfilename/>
+      <sqlfilename_encoding/>
+      <sendOneStatement>N</sendOneStatement>
+      <name>Drop Vault tables</name>
+      <description/>
+      <type>SQL</type>
+      <attributes/>
+      <xloc>240</xloc>
+      <yloc>64</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <filename/>
+      <work_directory>${PROJECT_HOME}</work_directory>
+      <arguments/>
+      <arg_from_previous>N</arg_from_previous>
+      <set_logfile>N</set_logfile>
+      <logfile/>
+      <logext/>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <loglevel>Basic</loglevel>
+      <exec_per_row>N</exec_per_row>
+      <set_append_logfile>N</set_append_logfile>
+      <insertScript>Y</insertScript>
+      <script>#!/bin/sh
+exec python3 "${PROJECT_HOME}/tests/multi-satellite-bv/activate-source-wave.py" load1</script>
+      <name>activate load1 sources</name>
+      <description/>
+      <type>SHELL</type>
+      <attributes/>
+      <xloc>448</xloc>
+      <yloc>64</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <dataVaultModelFile>${PROJECT_HOME}/tests/multi-satellite-bv/customer-360.hdv</dataVaultModelFile>
+      <pipelineRunConfiguration>local</pipelineRunConfiguration>
+      <logModelCheckFailures>Y</logModelCheckFailures>
+      <abortOnModelCheckFailures>Y</abortOnModelCheckFailures>
+      <detailedDataTypeChecking>Y</detailedDataTypeChecking>
+      <parallelPipelineCopies>${PIPELINE_COPIES}</parallelPipelineCopies>
+      <pipelineStagingFolder/>
+      <metricsOutputFolder>${METRICS_FOLDER}</metricsOutputFolder>
+      <publishToCatalog>N</publishToCatalog>
+      <dataCatalogConnection>vault-catalog</dataCatalogConnection>
+      <updateTargetDatabaseStructure>Y</updateTargetDatabaseStructure>
+      <ddlSqlFilename>${java.io.tmpdir}/ddl-customer-360.sql</ddlSqlFilename>
+      <failIfDdlNeeded>N</failIfDdlNeeded>
+      <loadDate>${DV_INITIAL_LOAD_DATE}</loadDate>
+      <recordSourceGroup/>
+      <ensureSpecialRecords>Y</ensureSpecialRecords>
+      <doNotUpdateTargetDatabase>N</doNotUpdateTargetDatabase>
+      <name>update customer-360 load1</name>
+      <description/>
+      <type>DATA_VAULT_UPDATE</type>
+      <attributes/>
+      <xloc>688</xloc>
+      <yloc>64</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <filename/>
+      <work_directory>${PROJECT_HOME}</work_directory>
+      <arguments/>
+      <arg_from_previous>N</arg_from_previous>
+      <set_logfile>N</set_logfile>
+      <logfile/>
+      <logext/>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <loglevel>Basic</loglevel>
+      <exec_per_row>N</exec_per_row>
+      <set_append_logfile>N</set_append_logfile>
+      <insertScript>Y</insertScript>
+      <script>#!/bin/sh
+exec python3 "${PROJECT_HOME}/tests/multi-satellite-bv/activate-source-wave.py" update1</script>
+      <name>activate update1 sources</name>
+      <description/>
+      <type>SHELL</type>
+      <attributes/>
+      <xloc>64</xloc>
+      <yloc>160</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <dataVaultModelFile>${PROJECT_HOME}/tests/multi-satellite-bv/customer-360.hdv</dataVaultModelFile>
+      <pipelineRunConfiguration>local</pipelineRunConfiguration>
+      <logModelCheckFailures>N</logModelCheckFailures>
+      <abortOnModelCheckFailures>N</abortOnModelCheckFailures>
+      <detailedDataTypeChecking>N</detailedDataTypeChecking>
+      <parallelPipelineCopies>${PIPELINE_COPIES}</parallelPipelineCopies>
+      <pipelineStagingFolder/>
+      <metricsOutputFolder>${METRICS_FOLDER}</metricsOutputFolder>
+      <publishToCatalog>N</publishToCatalog>
+      <updateTargetDatabaseStructure>N</updateTargetDatabaseStructure>
+      <ddlSqlFilename/>
+      <failIfDdlNeeded>N</failIfDdlNeeded>
+      <loadDate>${DV_UPDATE1_LOAD_DATE}</loadDate>
+      <recordSourceGroup/>
+      <ensureSpecialRecords>N</ensureSpecialRecords>
+      <doNotUpdateTargetDatabase>N</doNotUpdateTargetDatabase>
+      <name>update customer-360 update1</name>
+      <description/>
+      <type>DATA_VAULT_UPDATE</type>
+      <attributes/>
+      <xloc>320</xloc>
+      <yloc>160</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <filename/>
+      <work_directory>${PROJECT_HOME}</work_directory>
+      <arguments/>
+      <arg_from_previous>N</arg_from_previous>
+      <set_logfile>N</set_logfile>
+      <logfile/>
+      <logext/>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <loglevel>Basic</loglevel>
+      <exec_per_row>N</exec_per_row>
+      <set_append_logfile>N</set_append_logfile>
+      <insertScript>Y</insertScript>
+      <script>#!/bin/sh
+exec python3 "${PROJECT_HOME}/tests/multi-satellite-bv/activate-source-wave.py" update2</script>
+      <name>activate update2 sources</name>
+      <description/>
+      <type>SHELL</type>
+      <attributes/>
+      <xloc>608</xloc>
+      <yloc>160</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <dataVaultModelFile>${PROJECT_HOME}/tests/multi-satellite-bv/customer-360.hdv</dataVaultModelFile>
+      <pipelineRunConfiguration>local</pipelineRunConfiguration>
+      <logModelCheckFailures>N</logModelCheckFailures>
+      <abortOnModelCheckFailures>N</abortOnModelCheckFailures>
+      <detailedDataTypeChecking>N</detailedDataTypeChecking>
+      <parallelPipelineCopies>${PIPELINE_COPIES}</parallelPipelineCopies>
+      <pipelineStagingFolder/>
+      <metricsOutputFolder>${METRICS_FOLDER}</metricsOutputFolder>
+      <publishToCatalog>N</publishToCatalog>
+      <updateTargetDatabaseStructure>N</updateTargetDatabaseStructure>
+      <ddlSqlFilename/>
+      <failIfDdlNeeded>N</failIfDdlNeeded>
+      <loadDate>${DV_UPDATE2_LOAD_DATE}</loadDate>
+      <recordSourceGroup/>
+      <ensureSpecialRecords>N</ensureSpecialRecords>
+      <doNotUpdateTargetDatabase>N</doNotUpdateTargetDatabase>
+      <name>update customer-360 update2</name>
+      <description/>
+      <type>DATA_VAULT_UPDATE</type>
+      <attributes/>
+      <xloc>64</xloc>
+      <yloc>256</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <filename/>
+      <work_directory>${PROJECT_HOME}</work_directory>
+      <arguments/>
+      <arg_from_previous>N</arg_from_previous>
+      <set_logfile>N</set_logfile>
+      <logfile/>
+      <logext/>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <loglevel>Basic</loglevel>
+      <exec_per_row>N</exec_per_row>
+      <set_append_logfile>N</set_append_logfile>
+      <insertScript>Y</insertScript>
+      <script>#!/bin/sh
+exec python3 "${PROJECT_HOME}/tests/multi-satellite-bv/activate-source-wave.py" update3</script>
+      <name>activate update3 sources</name>
+      <description/>
+      <type>SHELL</type>
+      <attributes/>
+      <xloc>352</xloc>
+      <yloc>256</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <dataVaultModelFile>${PROJECT_HOME}/tests/multi-satellite-bv/customer-360.hdv</dataVaultModelFile>
+      <pipelineRunConfiguration>local</pipelineRunConfiguration>
+      <logModelCheckFailures>N</logModelCheckFailures>
+      <abortOnModelCheckFailures>N</abortOnModelCheckFailures>
+      <detailedDataTypeChecking>N</detailedDataTypeChecking>
+      <parallelPipelineCopies>${PIPELINE_COPIES}</parallelPipelineCopies>
+      <pipelineStagingFolder/>
+      <metricsOutputFolder>${METRICS_FOLDER}</metricsOutputFolder>
+      <publishToCatalog>N</publishToCatalog>
+      <updateTargetDatabaseStructure>N</updateTargetDatabaseStructure>
+      <ddlSqlFilename/>
+      <failIfDdlNeeded>N</failIfDdlNeeded>
+      <loadDate>${DV_UPDATE3_LOAD_DATE}</loadDate>
+      <recordSourceGroup/>
+      <ensureSpecialRecords>N</ensureSpecialRecords>
+      <doNotUpdateTargetDatabase>N</doNotUpdateTargetDatabase>
+      <name>update customer-360 update3</name>
+      <description/>
+      <type>DATA_VAULT_UPDATE</type>
+      <attributes/>
+      <xloc>608</xloc>
+      <yloc>256</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <filename/>
+      <work_directory>${PROJECT_HOME}</work_directory>
+      <arguments/>
+      <arg_from_previous>N</arg_from_previous>
+      <set_logfile>N</set_logfile>
+      <logfile/>
+      <logext/>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <loglevel>Basic</loglevel>
+      <exec_per_row>N</exec_per_row>
+      <set_append_logfile>N</set_append_logfile>
+      <insertScript>Y</insertScript>
+      <script>#!/bin/sh
+exec python3 "${PROJECT_HOME}/tests/multi-satellite-bv/activate-source-wave.py" update4</script>
+      <name>activate update4 sources</name>
+      <description/>
+      <type>SHELL</type>
+      <attributes/>
+      <xloc>64</xloc>
+      <yloc>352</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <dataVaultModelFile>${PROJECT_HOME}/tests/multi-satellite-bv/customer-360.hdv</dataVaultModelFile>
+      <pipelineRunConfiguration>local</pipelineRunConfiguration>
+      <logModelCheckFailures>N</logModelCheckFailures>
+      <abortOnModelCheckFailures>N</abortOnModelCheckFailures>
+      <detailedDataTypeChecking>N</detailedDataTypeChecking>
+      <parallelPipelineCopies>${PIPELINE_COPIES}</parallelPipelineCopies>
+      <pipelineStagingFolder/>
+      <metricsOutputFolder>${METRICS_FOLDER}</metricsOutputFolder>
+      <publishToCatalog>N</publishToCatalog>
+      <updateTargetDatabaseStructure>N</updateTargetDatabaseStructure>
+      <ddlSqlFilename/>
+      <failIfDdlNeeded>N</failIfDdlNeeded>
+      <loadDate>${DV_UPDATE4_LOAD_DATE}</loadDate>
+      <recordSourceGroup/>
+      <ensureSpecialRecords>N</ensureSpecialRecords>
+      <doNotUpdateTargetDatabase>N</doNotUpdateTargetDatabase>
+      <name>update customer-360 update4</name>
+      <description/>
+      <type>DATA_VAULT_UPDATE</type>
+      <attributes/>
+      <xloc>320</xloc>
+      <yloc>352</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <businessVaultModelFile>${PROJECT_HOME}/tests/multi-satellite-bv/customer-360-partitioned.hbv</businessVaultModelFile>
+      <pipelineRunConfiguration>local</pipelineRunConfiguration>
+      <logModelCheckFailures>Y</logModelCheckFailures>
+      <abortOnModelCheckFailures>Y</abortOnModelCheckFailures>
+      <parallelPipelineCopies>1</parallelPipelineCopies>
+      <pipelineStagingFolder/>
+      <metricsOutputFolder/>
+      <publishToCatalog>N</publishToCatalog>
+      <dataCatalogConnection>vault-catalog</dataCatalogConnection>
+      <selectedTableNames/>
+      <doNotUpdateTargetDatabase>N</doNotUpdateTargetDatabase>
+      <updateTargetDatabaseStructure>Y</updateTargetDatabaseStructure>
+      <ddlSqlFilename/>
+      <failIfDdlNeeded>N</failIfDdlNeeded>
+      <name>customer-360-partitioned.hbv</name>
+      <description/>
+      <type>BUSINESS_VAULT_UPDATE</type>
+      <attributes/>
+      <xloc>608</xloc>
+      <yloc>352</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <test_names>
+        <test_name>
+          <name>validate-customer-360-bv UNIT</name>
+        </test_name>
+      </test_names>
+      <name>Validate customer 360 BV</name>
+      <description/>
+      <type>RunPipelineTests</type>
+      <attributes/>
+      <xloc>848</xloc>
+      <yloc>352</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <name>Success</name>
+      <description/>
+      <type>SUCCESS</type>
+      <attributes/>
+      <xloc>1056</xloc>
+      <yloc>464</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <businessVaultModelFile>${PROJECT_HOME}/tests/multi-satellite-bv/customer-360-external.hbv</businessVaultModelFile>
+      <pipelineRunConfiguration>local</pipelineRunConfiguration>
+      <logModelCheckFailures>Y</logModelCheckFailures>
+      <abortOnModelCheckFailures>Y</abortOnModelCheckFailures>
+      <parallelPipelineCopies>1</parallelPipelineCopies>
+      <pipelineStagingFolder/>
+      <metricsOutputFolder/>
+      <publishToCatalog>N</publishToCatalog>
+      <dataCatalogConnection>vault-catalog</dataCatalogConnection>
+      <selectedTableNames/>
+      <doNotUpdateTargetDatabase>N</doNotUpdateTargetDatabase>
+      <updateTargetDatabaseStructure>Y</updateTargetDatabaseStructure>
+      <ddlSqlFilename/>
+      <failIfDdlNeeded>N</failIfDdlNeeded>
+      <name>customer-360-external.hbv</name>
+      <description/>
+      <type>BUSINESS_VAULT_UPDATE</type>
+      <attributes/>
+      <xloc>608</xloc>
+      <yloc>464</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <test_names>
+        <test_name>
+          <name>validate-customer-360-bv UNIT</name>
+        </test_name>
+      </test_names>
+      <name>Validate customer 360 BV </name>
+      <description/>
+      <type>RunPipelineTests</type>
+      <attributes/>
+      <xloc>848</xloc>
+      <yloc>464</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+  </actions>
+  <hops>
+    <hop>
+      <from>Start</from>
+      <to>Drop Vault tables</to>
+      <evaluation>Y</evaluation>
+      <unconditional>Y</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Drop Vault tables</from>
+      <to>activate load1 sources</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>activate load1 sources</from>
+      <to>update customer-360 load1</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>update customer-360 load1</from>
+      <to>activate update1 sources</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>activate update1 sources</from>
+      <to>update customer-360 update1</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>update customer-360 update1</from>
+      <to>activate update2 sources</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>activate update2 sources</from>
+      <to>update customer-360 update2</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>update customer-360 update2</from>
+      <to>activate update3 sources</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>activate update3 sources</from>
+      <to>update customer-360 update3</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>update customer-360 update3</from>
+      <to>activate update4 sources</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>activate update4 sources</from>
+      <to>update customer-360 update4</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>update customer-360 update4</from>
+      <to>customer-360-partitioned.hbv</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>customer-360-partitioned.hbv</from>
+      <to>Validate customer 360 BV</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>customer-360-external.hbv</from>
+      <to>Validate customer 360 BV </to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Validate customer 360 BV</from>
+      <to>customer-360-external.hbv</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Validate customer 360 BV </from>
+      <to>Success</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+  </hops>
+  <notepads/>
+  <attributes/>
+</workflow>

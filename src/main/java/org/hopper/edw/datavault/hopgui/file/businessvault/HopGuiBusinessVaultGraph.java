@@ -2224,6 +2224,17 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
         ModelGeneratedArtifactOpenSupport.openGeneratedPipeline(
             hopGui, pipelineMeta, debugVariables);
       }
+
+      List<WorkflowMeta> workflowMetas =
+          table.generateBuildWorkflows(
+              hopGui.getMetadataProvider(), debugVariables, model, dataVaultModel);
+      if (workflowMetas != null) {
+        for (WorkflowMeta workflowMeta : workflowMetas) {
+          if (workflowMeta != null) {
+            ModelGeneratedArtifactOpenSupport.openGeneratedWorkflow(workflowMeta);
+          }
+        }
+      }
     } catch (Exception e) {
       new ErrorDialog(
           hopGui.getShell(),

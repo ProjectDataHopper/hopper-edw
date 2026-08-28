@@ -29,6 +29,7 @@ import org.apache.hop.metadata.api.IHasName;
 import org.apache.hop.metadata.api.IHopMetadataObjectFactory;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
+import org.apache.hop.workflow.WorkflowMeta;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 
 /** Common interface for Business Vault tables on a {@link BusinessVaultModel} canvas. */
@@ -59,6 +60,17 @@ public interface IBvTable extends IGuiPosition, IBaseMeta, IHasName, IChanged, I
       DataVaultModel dataVaultModel);
 
   List<PipelineMeta> generateBuildPipelines(
+      IHopMetadataProvider metadataProvider,
+      IVariables variables,
+      BusinessVaultModel model,
+      DataVaultModel dataVaultModel)
+      throws HopException;
+
+  /**
+   * Wrapper workflows for a table's build pipelines (for example hash-key partitioned SCD2:
+   * truncate then sequential partition loads). Empty when the table is a single free pipeline.
+   */
+  List<WorkflowMeta> generateBuildWorkflows(
       IHopMetadataProvider metadataProvider,
       IVariables variables,
       BusinessVaultModel model,

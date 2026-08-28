@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
@@ -51,6 +52,7 @@ import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.config.PipelineRunConfiguration;
+import org.apache.hop.workflow.WorkflowMeta;
 import org.apache.hop.workflow.action.ActionBase;
 import org.apache.hop.workflow.action.IAction;
 import org.apache.hop.workflow.config.WorkflowRunConfiguration;
@@ -64,7 +66,10 @@ import org.hopper.edw.datavault.metadata.DvDdlSupport;
 import org.hopper.edw.datavault.metadata.DvIntegerSettingValidationSupport;
 import org.hopper.edw.datavault.metadata.DvLoadCycleSupport;
 import org.hopper.edw.datavault.metadata.DvModelBulkUpdateExecutionSupport;
+import org.hopper.edw.datavault.metadata.DvMultiSourceUpdateWorkflowSupport;
+import org.hopper.edw.datavault.metadata.DvPipelineOrchestratorSupport;
 import org.hopper.edw.datavault.metadata.DvTargetLoadMode;
+import org.hopper.edw.datavault.metadata.DvUpdateWorkflowSupport;
 import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataConstants;
 import org.hopper.edw.datavault.metadata.ModelConfigurationResolver;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultConfiguration;
@@ -72,6 +77,7 @@ import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultDvModelResol
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultUpdateExecutionSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BvGeneratedPipelineSupport;
+import org.hopper.edw.datavault.metadata.businessvault.BvScd2PartitionWorkflowSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BvTargetDatabaseSupport;
 import org.hopper.edw.datavault.metadata.businessvault.IBvTable;
 import org.hopper.edw.datavault.metadata.targettypemapping.TargetTypeMappingMeta;
@@ -535,6 +541,7 @@ public class ActionBusinessVaultUpdate extends ActionBase implements Cloneable, 
       validatePipelineIntegerSettings(pipelineConfig);
 
       List<PipelineMeta> allPipelineMetas = new ArrayList<>();
+      List<PartitionedScd2Unit> partitionedUnits = new ArrayList<>();
 
       for (IBvTable table : tables) {
         if (table == null
@@ -572,6 +579,7 @@ public class ActionBusinessVaultUpdate extends ActionBase implements Cloneable, 
           continue;
         }
 
+        List<PipelineMeta> nestedPipelines = new ArrayList<>();
         for (PipelineMeta pipelineMeta : pipelineMetas) {
           if (pipelineMeta == null) {
             logError(
@@ -583,7 +591,7 @@ public class ActionBusinessVaultUpdate extends ActionBase implements Cloneable, 
           }
 
           pipelineMeta.lookupReferencesAfterLoading();
-          allPipelineMetas.add(pipelineMeta);
+          nestedPipelines.add(pipelineMeta);
 
           String savedPipelineFile =
               BvGeneratedPipelineSupport.saveBeforeExecution(
@@ -597,9 +605,34 @@ public class ActionBusinessVaultUpdate extends ActionBase implements Cloneable, 
                     savedPipelineFile));
           }
         }
+
+        List<WorkflowMeta> workflowMetas =
+            table.generateBuildWorkflows(getMetadataProvider(), getVariables(), bvModel, dvModel);
+        if (workflowMetas != null && !workflowMetas.isEmpty()) {
+          for (WorkflowMeta workflowMeta : workflowMetas) {
+            if (workflowMeta == null) {
+              continue;
+            }
+            partitionedUnits.add(
+                new PartitionedScd2Unit(table.getName(), workflowMeta, nestedPipelines));
+            String savedWorkflowFile =
+                BvGeneratedPipelineSupport.saveWorkflowBeforeExecution(
+                    pipelineConfig, getVariables(), workflowMeta);
+            if (!Utils.isEmpty(savedWorkflowFile)) {
+              logBasic(
+                  BaseMessages.getString(
+                      PKG,
+                      "ActionBusinessVaultUpdate.Log.SavedGeneratedWorkflow",
+                      workflowMeta.getName(),
+                      savedWorkflowFile));
+            }
+          }
+        } else {
+          allPipelineMetas.addAll(nestedPipelines);
+        }
       }
 
-      if (!allPipelineMetas.isEmpty()) {
+      if (!partitionedUnits.isEmpty() || !allPipelineMetas.isEmpty()) {
         ResolvedExecutionMetrics executionMetrics =
             ExecutionMetricsProfileResolver.resolve(
                 resolve(executionMetricsProfile),
@@ -617,47 +650,93 @@ public class ActionBusinessVaultUpdate extends ActionBase implements Cloneable, 
 
         DvModelBulkUpdateExecutionSupport.ExecutionOutcome outcome;
         if (pipelineConfig.resolveTargetLoadMode() == DvTargetLoadMode.STAGING_FILE) {
-          DatabaseMeta targetDatabase =
-              BvTargetDatabaseSupport.loadTargetDatabase(getMetadataProvider(), pipelineConfig);
-          outcome =
-              DvModelBulkUpdateExecutionSupport.executeStagingFileUpdate(
-                  result,
-                  bvModel.getName(),
-                  pipelineConfig,
-                  allPipelineMetas,
-                  realRunConfig,
-                  realWorkflowRunConfig,
-                  getLogLevel(),
-                  pipelineStagingFolder,
-                  targetDatabase,
-                  pipelineConfig.getTargetDatabase(),
-                  resolvedMetricsOutputFolder,
-                  metricsPublishContext,
-                  resolve(businessVaultModelFile),
-                  getParentWorkflow(),
-                  success,
-                  totalErrors,
-                  getVariables(),
-                  this,
-                  getMetadataProvider());
+          if (!partitionedUnits.isEmpty()) {
+            DvUpdateWorkflowSupport.prepareBulkStagingFolder(
+                getVariables()
+                    .resolve(
+                        pipelineConfig.resolveBulkLoadStagingFolder(
+                            getVariables(), bvModel.getName())),
+                getVariables());
+            DvModelBulkUpdateExecutionSupport.ExecutionOutcome partitionedOutcome =
+                runPartitionedScd2Units(
+                    result,
+                    bvModel.getName(),
+                    partitionedUnits,
+                    realRunConfig,
+                    realWorkflowRunConfig,
+                    success,
+                    totalErrors);
+            success = partitionedOutcome.success();
+            totalErrors = partitionedOutcome.totalErrors();
+            if (!success) {
+              return finishExecution(result, success, totalErrors, bvModel, dvModel);
+            }
+          }
+          if (allPipelineMetas.isEmpty()) {
+            outcome = new DvModelBulkUpdateExecutionSupport.ExecutionOutcome(success, totalErrors);
+          } else {
+            DatabaseMeta targetDatabase =
+                BvTargetDatabaseSupport.loadTargetDatabase(getMetadataProvider(), pipelineConfig);
+            outcome =
+                DvModelBulkUpdateExecutionSupport.executeStagingFileUpdate(
+                    result,
+                    bvModel.getName(),
+                    pipelineConfig,
+                    allPipelineMetas,
+                    realRunConfig,
+                    realWorkflowRunConfig,
+                    getLogLevel(),
+                    pipelineStagingFolder,
+                    targetDatabase,
+                    pipelineConfig.getTargetDatabase(),
+                    resolvedMetricsOutputFolder,
+                    metricsPublishContext,
+                    resolve(businessVaultModelFile),
+                    getParentWorkflow(),
+                    success,
+                    totalErrors,
+                    getVariables(),
+                    this,
+                    getMetadataProvider());
+          }
         } else {
-          outcome =
-              DvModelBulkUpdateExecutionSupport.executeOrchestratorUpdate(
-                  result,
-                  bvModel.getName(),
-                  allPipelineMetas,
-                  realRunConfig,
-                  getLogLevel(),
-                  pipelineStagingFolder,
-                  parallelPipelineCopies,
-                  resolvedMetricsOutputFolder,
-                  metricsPublishContext,
-                  success,
-                  totalErrors,
-                  getVariables(),
-                  this,
-                  getParentWorkflow(),
-                  getMetadataProvider());
+          if (!partitionedUnits.isEmpty()) {
+            DvModelBulkUpdateExecutionSupport.ExecutionOutcome partitionedOutcome =
+                runPartitionedScd2Units(
+                    result,
+                    bvModel.getName(),
+                    partitionedUnits,
+                    realRunConfig,
+                    realWorkflowRunConfig,
+                    success,
+                    totalErrors);
+            success = partitionedOutcome.success();
+            totalErrors = partitionedOutcome.totalErrors();
+            if (!success) {
+              return finishExecution(result, success, totalErrors, bvModel, dvModel);
+            }
+          }
+          if (allPipelineMetas.isEmpty()) {
+            outcome = new DvModelBulkUpdateExecutionSupport.ExecutionOutcome(success, totalErrors);
+          } else {
+            outcome =
+                DvModelBulkUpdateExecutionSupport.executeOrchestratorUpdate(
+                    result,
+                    bvModel.getName(),
+                    allPipelineMetas,
+                    realRunConfig,
+                    getLogLevel(),
+                    pipelineStagingFolder,
+                    parallelPipelineCopies,
+                    resolvedMetricsOutputFolder,
+                    metricsPublishContext,
+                    success,
+                    totalErrors,
+                    getVariables(),
+                    this,
+                    getParentWorkflow(),
+                    getMetadataProvider());
+          }
         }
         success = outcome.success();
         totalErrors = outcome.totalErrors();
@@ -671,6 +750,115 @@ public class ActionBusinessVaultUpdate extends ActionBase implements Cloneable, 
       result.setNrErrors(1);
       return result;
     }
+  }
+
+  private record PartitionedScd2Unit(
+      String tableName, WorkflowMeta workflowMeta, List<PipelineMeta> nestedPipelines) {}
+
+  private DvModelBulkUpdateExecutionSupport.ExecutionOutcome runPartitionedScd2Units(
+      Result result,
+      String modelName,
+      List<PartitionedScd2Unit> partitionedUnits,
+      String realRunConfig,
+      String realWorkflowRunConfig,
+      boolean success,
+      int totalErrors)
+      throws HopException {
+    String stagingRoot =
+        getVariables()
+            .resolve(
+                DvPipelineOrchestratorSupport.resolveStagingFolder(
+                    pipelineStagingFolder, getVariables(), modelName));
+    String workflowRunConfig =
+        !Utils.isEmpty(realWorkflowRunConfig) ? realWorkflowRunConfig : realRunConfig;
+
+    for (PartitionedScd2Unit unit : partitionedUnits) {
+      if (unit == null || unit.workflowMeta() == null) {
+        continue;
+      }
+      List<PipelineMeta> nested =
+          unit.nestedPipelines() != null ? unit.nestedPipelines() : List.of();
+      String unitFolder =
+          DvPipelineOrchestratorSupport.resolveStagingFolder(
+              stagingRoot + "part-" + sanitizeModelName(unit.tableName()) + "/",
+              getVariables(),
+              unit.tableName());
+      try {
+        DvPipelineOrchestratorSupport.prepareStagingFolder(unitFolder, getVariables());
+        Map<String, String> predictedPaths = predictedStagedPipelinePaths(unitFolder, nested);
+        BvScd2PartitionWorkflowSupport.applyStagedPipelineExecutorFilenames(nested, predictedPaths);
+        BvScd2PartitionWorkflowSupport.applyPipelineExecutorRunConfiguration(nested, realRunConfig);
+        DvPipelineOrchestratorSupport.stageNamedPipelines(unitFolder, getVariables(), nested);
+        Map<String, String> stagedPaths =
+            DvMultiSourceUpdateWorkflowSupport.mapStagedPipelinePaths(nested);
+        DvMultiSourceUpdateWorkflowSupport.applyStagedPipelineFilenames(
+            unit.workflowMeta(), stagedPaths);
+        DvMultiSourceUpdateWorkflowSupport.applyPipelineRunConfiguration(
+            unit.workflowMeta(), realRunConfig);
+        DvPipelineOrchestratorSupport.stageWorkflow(
+            unitFolder, getVariables(), unit.workflowMeta());
+
+        logBasic(
+            BaseMessages.getString(
+                PKG,
+                "ActionBusinessVaultUpdate.Log.RunningPartitionedScd2",
+                unit.tableName(),
+                unit.workflowMeta().getName(),
+                nested.size()));
+
+        Result workflowResult =
+            DvUpdateWorkflowSupport.runMasterWorkflow(
+                unit.workflowMeta(),
+                workflowRunConfig,
+                getLogLevel(),
+                this,
+                getVariables(),
+                getMetadataProvider());
+        if (workflowResult == null) {
+          workflowResult = new Result();
+        }
+        DvPipelineOrchestratorSupport.mergeResult(result, workflowResult);
+        if (workflowResult.getNrErrors() > 0 || !workflowResult.getResult()) {
+          logError(
+              BaseMessages.getString(
+                  PKG,
+                  "ActionBusinessVaultUpdate.Error.PartitionedScd2Failed",
+                  unit.workflowMeta().getName(),
+                  unit.tableName()));
+          success = false;
+          totalErrors += Math.max(1, (int) workflowResult.getNrErrors());
+          return new DvModelBulkUpdateExecutionSupport.ExecutionOutcome(success, totalErrors);
+        }
+      } finally {
+        try {
+          DvPipelineOrchestratorSupport.cleanupStagingFolder(unitFolder, getVariables());
+        } catch (HopException e) {
+          logError(
+              BaseMessages.getString(
+                  PKG, "ActionBusinessVaultUpdate.Error.StagingCleanupFailed", unitFolder),
+              e);
+        }
+      }
+    }
+    return new DvModelBulkUpdateExecutionSupport.ExecutionOutcome(success, totalErrors);
+  }
+
+  private static Map<String, String> predictedStagedPipelinePaths(
+      String folder, List<PipelineMeta> pipelines) {
+    Map<String, String> map = new java.util.LinkedHashMap<>();
+    if (Utils.isEmpty(folder) || pipelines == null) {
+      return map;
+    }
+    String prefix = folder.endsWith("/") || folder.endsWith("\\") ? folder : folder + "/";
+    for (PipelineMeta pipelineMeta : pipelines) {
+      if (pipelineMeta == null || Utils.isEmpty(pipelineMeta.getName())) {
+        continue;
+      }
+      String path = prefix + pipelineMeta.getName() + PipelineMeta.PIPELINE_EXTENSION;
+      map.put(pipelineMeta.getName(), path);
+      map.put(pipelineMeta.getName() + PipelineMeta.PIPELINE_EXTENSION, path);
+    }
+    return map;
   }
 
   private Result finishExecution(

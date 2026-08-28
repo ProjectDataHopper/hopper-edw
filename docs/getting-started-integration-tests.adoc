@@ -104,6 +104,8 @@ Run `integration-tests/tests/multi-satellite-bv/update-customer-360.hwf` for end
 
 For incremental SCD2, open `customer-360-incremental.hbv` (same mappings, `buildMode=INCREMENTAL`) and run `update-customer-360-incremental.hwf`. That workflow runs the same DV load waves, then **Business Vault Update** with the incremental pipeline, and validates against the same golden current-state dataset.
 
+For a large-table Full rebuild split, open `customer-360-partitioned.hbv` (`hashKeyPartitionCount=4`) and run `update-customer-360-partitioned.hwf`. Same golden current-state dataset; the target is truncated once, then four hash-key slices are loaded.
+
 == Chapter 7 — External read-only raw vault tables
 
 When dbt or another tool loads raw vault tables, Hop can still model them for Business Vault.
