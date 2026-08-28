@@ -21,6 +21,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.ICheckResult;
+import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
@@ -29,9 +30,12 @@ import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
+import org.apache.hop.workflow.WorkflowMeta;
 import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
+import org.hopper.edw.datavault.metadata.DvBulkLoadPluginSupport;
 import org.hopper.edw.datavault.metadata.DvTableType;
+import org.hopper.edw.datavault.metadata.DvTargetLoadMode;
 
 /** Business Vault SCD2 table derived from one or more DV satellites. */
 @Getter
@@ -42,6 +46,9 @@ public class BvScd2Table extends BvTableBase {
 
   @HopMetadataProperty(storeWithCode = true)
   private BvScd2BuildMode buildMode = BvScd2BuildMode.FULL_REBUILD;
+
+  @HopMetadataProperty(storeWithCode = true)
+  private BvScd2HashPartitionCount hashKeyPartitionCount = BvScd2HashPartitionCount.NONE;
 
   @HopMetadataProperty private String functionalTimestampField;
 
@@ -83,6 +90,14 @@ public class BvScd2Table extends BvTableBase {
 
   public boolean isIncrementalBuild() {
     return getBuildModeOrDefault() == BvScd2BuildMode.INCREMENTAL;
+  }
+
+  public BvScd2HashPartitionCount getHashKeyPartitionCountOrDefault() {
+    return hashKeyPartitionCount != null ? hashKeyPartitionCount : BvScd2HashPartitionCount.NONE;
+  }
+
+  public boolean isHashKeyPartitioned() {
+    return getHashKeyPartitionCountOrDefault().isPartitioned();
   }
 
   public String resolveIncrementalWatermarkField(
@@ -148,6 +163,36 @@ public class BvScd2Table extends BvTableBase {
       validateIncrementalMultiSatelliteHints(remarks, variables);
     }
 
+    if (isHashKeyPartitioned()) {
+      if (isIncrementalBuild()) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_ERROR,
+                BaseMessages.getString(
+                    PKG, "BvScd2Table.CheckResult.HashKeyPartitionIncremental", getName()),
+                this));
+      }
+      if (bvConfig.resolveTargetLoadMode() == DvTargetLoadMode.STAGING_FILE
+          && metadataProvider != null) {
+        try {
+          DatabaseMeta targetDatabase =
+              BvTargetDatabaseSupport.loadTargetDatabase(metadataProvider, bvConfig);
+          if (targetDatabase != null
+              && !DvBulkLoadPluginSupport.isModeAvailable(
+                  targetDatabase, DvTargetLoadMode.STAGING_FILE)) {
+            remarks.add(
+                new CheckResult(
+                    ICheckResult.TYPE_RESULT_ERROR,
+                    BaseMessages.getString(
+                        PKG, "BvScd2Table.CheckResult.HashKeyPartitionStagingFile", getName()),
+                    this));
+          }
+        } catch (HopException e) {
+          remarks.add(new CheckResult(ICheckResult.TYPE_RESULT_ERROR, e.getMessage(), this));
+        }
+      }
+    }
+
     if (dataVaultModel != null) {
       BvScd2FieldMappingValidationSupport.validate(
           remarks, this, bvConfig, dvConfig, dataVaultModel, variables);
@@ -196,6 +241,17 @@ public class BvScd2Table extends BvTableBase {
       DataVaultModel dataVaultModel)
       throws HopException {
     return BvScd2PipelineSupport.generateBuildPipelines(
+        metadataProvider, variables, model, dataVaultModel, this);
+  }
+
+  @Override
+  public List<WorkflowMeta> generateBuildWorkflows(
+      IHopMetadataProvider metadataProvider,
+      IVariables variables,
+      BusinessVaultModel model,
+      DataVaultModel dataVaultModel)
+      throws HopException {
+    return BvScd2PipelineSupport.generateBuildWorkflows(
         metadataProvider, variables, model, dataVaultModel, this);
   }
 

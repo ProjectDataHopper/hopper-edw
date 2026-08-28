@@ -289,10 +289,8 @@ public final class DvUpdateWorkflowSupport {
       throws HopException {
     TransformMeta stagingTransform = findStagingTransform(pipelineMeta);
     if (stagingTransform == null) {
-      throw new HopException(
-          "Pipeline '"
-              + pipelineMeta.getName()
-              + "' does not contain a Text File Output staging transform");
+      // Partition driver pipelines (and similar orchestrators) have no CSV writer.
+      return null;
     }
 
     String targetTableName =

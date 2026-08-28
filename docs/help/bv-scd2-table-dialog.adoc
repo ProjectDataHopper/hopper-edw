@@ -46,6 +46,9 @@ Raw vault satellites remain insert-only (technical load history). SCD2 rewrites 
 |**Build mode**
 |`FULL_REBUILD` (truncate and reload) or `INCREMENTAL` (watermark, append, close open rows).
 
+|**Hash-key partitions**
+|`None` (default) or 4 / 8 / 16. Full rebuild only: truncate once, then load hash-key slices so each satellite `ORDER BY` is smaller. Works with Table Output, Native bulk, and Staging file (one CSV set per partition, then bulk-load).
+
 |**Incremental watermark field**
 |Optional BV column for `MAX(...)` watermark reads; defaults to the functional timestamp.
 
@@ -69,8 +72,9 @@ The functional timestamp drives interval boundaries — not the technical load d
 
 - **Full rebuild** — truncate and reload the BV table from satellite history.
 - **Incremental** — read satellite deltas above a watermark, close the prior open version, append new versions. Prefer after an initial full load when history is large.
+- **Hash-key partitions** — optional 4 / 8 / 16 split on Full rebuild. A wrapper workflow truncates the target, then runs the SCD2 pipeline per partition with `'${PARTITION_COUNT}'` and `'${PARTITION_NUMBER}'`. Honors Table Output, Native bulk, and Staging file. Disabled for Incremental.
 
-Use **Debug** or **Show build pipeline** on the canvas to inspect the generated Hop pipeline before workflow runs.
+Use **Debug** or **Show build pipeline** on the canvas to inspect the generated Hop pipeline (and the partition workflow when enabled) before workflow runs.
 
 == Field mappings
 

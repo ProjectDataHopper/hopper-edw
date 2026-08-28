@@ -14,7 +14,8 @@ At runtime the action:
 * Optionally validates both models before any work is done
 * Optionally generates CREATE TABLE DDL for Business Vault tables on the BV target database
 * Generates **build pipelines** for each selected SCD2 and PIT table (and other supported types when implemented)
-* Stages pipelines and runs them through a parallel orchestrator
+* For SCD2 tables with **hash-key partitions**, generates a wrapper workflow (truncate once, then sequential partition loads; Staging file mode then bulk-loads each partition CSV) and runs it before the free-pipeline orchestrator
+* Stages remaining pipelines and runs them through a parallel orchestrator
 * Optionally publishes BV target table layouts to the data catalog
 * Aggregates pipeline results into the workflow action result
 
@@ -102,5 +103,6 @@ SCD2 and PIT read independent data paths (PIT does not consume SCD2 output). Ord
 Sample workflows:
 
 * `integration-tests/tests/multi-satellite-bv/update-customer-360.hwf` — multi-satellite SCD2 (full rebuild)
+* `integration-tests/tests/multi-satellite-bv/update-customer-360-partitioned.hwf` — same golden as full rebuild, SCD2 hash-key partitions = 4
 * `integration-tests/tests/multi-satellite-bv/update-customer-360-incremental.hwf` — multi-satellite SCD2 incremental build mode
 * `integration-tests/tests/basic/update-vault1.hwf` — SCD2 + PIT on the introductory vault1 model

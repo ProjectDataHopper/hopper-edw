@@ -63,6 +63,7 @@ import org.hopper.edw.datavault.metadata.businessvault.BvDerivativeRef;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2BuildMode;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2FieldMapping;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2FieldMappingDialogSupport;
+import org.hopper.edw.datavault.metadata.businessvault.BvScd2HashPartitionCount;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2SatelliteConfig;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2Table;
 import org.hopper.edw.datavault.metadata.businessvault.IBvTable;
@@ -84,6 +85,7 @@ public class HopGuiBvScd2TableDialog {
   private Text wTableName;
   private Combo wIncludeHashKey;
   private Combo wBuildMode;
+  private Combo wHashKeyPartitions;
   private Text wFunctionalTimestamp;
   private Text wIncrementalWatermark;
   private Text wValidFromField;
@@ -260,17 +262,34 @@ public class HopGuiBvScd2TableDialog {
         new FormDataBuilder().left(middle, 0).top(wIncludeHashKey, margin).right().result());
     wBuildMode.addListener(SWT.Selection, e -> updateIncrementalFieldState());
 
+    Label wlHashKeyPartitions = new Label(comp, SWT.RIGHT);
+    wlHashKeyPartitions.setText(
+        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.HashKeyPartitions.Label"));
+    PropsUi.setLook(wlHashKeyPartitions);
+    wlHashKeyPartitions.setLayoutData(
+        new FormDataBuilder().left().top(wBuildMode, margin).right(middle, -margin).result());
+
+    wHashKeyPartitions = new Combo(comp, SWT.BORDER | SWT.READ_ONLY);
+    PropsUi.setLook(wHashKeyPartitions);
+    EnumDialogSupport.populateCombo(wHashKeyPartitions, BvScd2HashPartitionCount.class);
+    wHashKeyPartitions.setLayoutData(
+        new FormDataBuilder().left(middle, 0).top(wBuildMode, margin).right().result());
+
     Label wlFunctionalTimestamp = new Label(comp, SWT.RIGHT);
     wlFunctionalTimestamp.setText(
         BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.FunctionalTimestamp.Label"));
     PropsUi.setLook(wlFunctionalTimestamp);
     wlFunctionalTimestamp.setLayoutData(
-        new FormDataBuilder().left().top(wBuildMode, margin).right(middle, -margin).result());
+        new FormDataBuilder()
+            .left()
+            .top(wHashKeyPartitions, margin)
+            .right(middle, -margin)
+            .result());
 
     wFunctionalTimestamp = new Text(comp, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wFunctionalTimestamp);
     wFunctionalTimestamp.setLayoutData(
-        new FormDataBuilder().left(middle, 0).top(wBuildMode, margin).right().result());
+        new FormDataBuilder().left(middle, 0).top(wHashKeyPartitions, margin).right().result());
 
     Label wlIncrementalWatermark = new Label(comp, SWT.RIGHT);
     wlIncrementalWatermark.setText(
@@ -658,6 +677,7 @@ public class HopGuiBvScd2TableDialog {
     }
     wIncludeHashKey.select(input.isIncludeHashKey() ? 0 : 1);
     EnumDialogSupport.selectCombo(wBuildMode, input.getBuildModeOrDefault());
+    EnumDialogSupport.selectCombo(wHashKeyPartitions, input.getHashKeyPartitionCountOrDefault());
     if (!Utils.isEmpty(input.getFunctionalTimestampField())) {
       wFunctionalTimestamp.setText(input.getFunctionalTimestampField());
     }
@@ -818,6 +838,9 @@ public class HopGuiBvScd2TableDialog {
     target.setBuildMode(
         EnumDialogSupport.readCombo(
             wBuildMode, BvScd2BuildMode.class, BvScd2BuildMode.FULL_REBUILD));
+    target.setHashKeyPartitionCount(
+        EnumDialogSupport.readCombo(
+            wHashKeyPartitions, BvScd2HashPartitionCount.class, BvScd2HashPartitionCount.NONE));
     target.setFunctionalTimestampField(wFunctionalTimestamp.getText());
     target.setIncrementalWatermarkField(wIncrementalWatermark.getText());
     target.setValidFromField(wValidFromField.getText());
@@ -873,6 +896,9 @@ public class HopGuiBvScd2TableDialog {
         EnumDialogSupport.readCombo(wBuildMode, BvScd2BuildMode.class, BvScd2BuildMode.FULL_REBUILD)
             == BvScd2BuildMode.INCREMENTAL;
     wIncrementalWatermark.setEnabled(incremental);
+    if (wHashKeyPartitions != null && !wHashKeyPartitions.isDisposed()) {
+      wHashKeyPartitions.setEnabled(!incremental);
+    }
   }
 
   private void applyScd2FieldTooltips() {
@@ -882,6 +908,8 @@ public class HopGuiBvScd2TableDialog {
             : new BusinessVaultConfiguration();
     wBuildMode.setToolTipText(
         BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.BuildMode.Tooltip"));
+    wHashKeyPartitions.setToolTipText(
+        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.HashKeyPartitions.Tooltip"));
     wIncrementalWatermark.setToolTipText(
         BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.IncrementalWatermark.Tooltip"));
     wFunctionalTimestamp.setToolTipText(

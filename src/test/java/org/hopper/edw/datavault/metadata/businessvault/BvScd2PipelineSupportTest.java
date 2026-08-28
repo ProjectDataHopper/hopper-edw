@@ -45,13 +45,17 @@ import org.apache.hop.pipeline.transforms.selectvalues.SelectValuesMeta;
 import org.apache.hop.pipeline.transforms.sort.SortRowsMeta;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
 import org.apache.hop.pipeline.transforms.tableoutput.TableOutputMeta;
+import org.apache.hop.pipeline.transforms.textfileoutput.TextFileOutputMeta;
 import org.apache.hop.pipeline.transforms.update.UpdateMeta;
 import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
+import org.hopper.edw.datavault.metadata.DvBulkLoadPluginSupport;
 import org.hopper.edw.datavault.metadata.DvSatellite;
 import org.hopper.edw.datavault.metadata.DvTableType;
+import org.hopper.edw.datavault.metadata.DvTargetLoadMode;
 import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataConstants;
 import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataSupport;
+import org.hopper.edw.datavault.metadata.HashKeyDataType;
 import org.hopper.edw.datavault.metadata.SatelliteAttribute;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2PipelineSupport.SatelliteLeg;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2PipelineSupport.Scd2BuildContext;
@@ -753,6 +757,206 @@ class BvScd2PipelineSupportTest {
     TableOutputMeta tableOutputMeta = (TableOutputMeta) transforms.get(4).getTransform();
     assertTrue(tableOutputMeta.isTruncateTable());
     assertEquals("bv_customer_scd2", tableOutputMeta.getTableName());
+  }
+
+  @Test
+  void partitionedSatelliteSqlFiltersOnHashKeyModAndDoesNotTruncate() throws Exception {
+    DataVaultModel dvModel = loadVault1Model();
+    dvModel.getConfigurationOrDefault().setHashKeyDataType(HashKeyDataType.HEX.name());
+    DvSatellite satellite = (DvSatellite) dvModel.findTable("sat_customer");
+    DatabaseMeta databaseMeta = new TestDatabaseMeta("Vault", "POSTGRESQL");
+
+    BvScd2Table scd2Table = new BvScd2Table();
+    scd2Table.setName("bv_customer_scd2");
+    scd2Table.setTableName("bv_customer_scd2");
+    scd2Table.setFunctionalTimestampField("x_load_ts");
+    scd2Table.setHashKeyPartitionCount(BvScd2HashPartitionCount.FOUR);
+    scd2Table.getDerivatives().add(new BvDerivativeRef("sat_customer", DvTableType.SATELLITE));
+
+    BusinessVaultModel bvModel = new BusinessVaultModel();
+    bvModel.getConfigurationOrDefault().setTargetDatabase("Vault");
+
+    Scd2BuildContext ctx =
+        new Scd2BuildContext(
+            scd2Table,
+            satellite,
+            bvModel,
+            dvModel,
+            bvModel.getConfigurationOrDefault(),
+            dvModel.getConfigurationOrDefault(),
+            null,
+            new Variables(),
+            databaseMeta,
+            "Vault",
+            databaseMeta,
+            "Vault",
+            "sat_customer",
+            "bv_customer_scd2",
+            "bv-scd2-bv_customer_scd2-sat_customer",
+            "customer_hk",
+            null,
+            BvScd2PipelineSupport.resolveAttributeFieldNames(satellite),
+            "x_load_ts",
+            "valid_from",
+            "valid_to",
+            "x_record_source",
+            BusinessVaultConfiguration.DEFAULT_OPEN_START_SENTINEL,
+            BusinessVaultConfiguration.DEFAULT_OPEN_END_SENTINEL,
+            true);
+
+    String sql = BvScd2PipelineSupport.buildSatelliteTableInputSql(ctx);
+    assertTrue(sql.contains(" WHERE "));
+    assertTrue(sql.contains("substr(customer_hk, 1, 2)"));
+    assertTrue(sql.contains("${PARTITION_COUNT}"));
+    assertTrue(sql.contains("${PARTITION_NUMBER}"));
+    assertTrue(sql.indexOf(" WHERE ") < sql.indexOf(" ORDER BY "));
+
+    PipelineMeta pipelineMeta = BvScd2PipelineSupport.generatePipeline(ctx);
+    TableInputMeta tableInputMeta =
+        (TableInputMeta)
+            pipelineMeta.getTransforms().stream()
+                .map(TransformMeta::getTransform)
+                .filter(t -> t instanceof TableInputMeta)
+                .findFirst()
+                .orElseThrow();
+    assertTrue(tableInputMeta.isVariableReplacementActive());
+
+    TableOutputMeta tableOutputMeta =
+        (TableOutputMeta)
+            pipelineMeta.getTransforms().stream()
+                .map(TransformMeta::getTransform)
+                .filter(t -> t instanceof TableOutputMeta)
+                .findFirst()
+                .orElseThrow();
+    assertFalse(tableOutputMeta.isTruncateTable());
+
+    List<String> parameters = List.of(pipelineMeta.listParameters());
+    assertTrue(parameters.contains(BvScd2HashPartitionSqlSupport.PARTITION_COUNT_VARIABLE));
+    assertTrue(parameters.contains(BvScd2HashPartitionSqlSupport.PARTITION_NUMBER_VARIABLE));
+    assertEquals(
+        "4",
+        pipelineMeta.getParameterDefault(BvScd2HashPartitionSqlSupport.PARTITION_COUNT_VARIABLE));
+  }
+
+  @Test
+  void partitionedStagingFileNameIncludesPartitionNumber() throws Exception {
+    DataVaultModel dvModel = loadVault1Model();
+    DvSatellite satellite = (DvSatellite) dvModel.findTable("sat_customer");
+    DatabaseMeta databaseMeta = new TestDatabaseMeta("Vault", "MYSQL");
+
+    BvScd2Table scd2Table = new BvScd2Table();
+    scd2Table.setName("bv_customer_scd2");
+    scd2Table.setTableName("bv_customer_scd2");
+    scd2Table.setFunctionalTimestampField("x_load_ts");
+    scd2Table.setHashKeyPartitionCount(BvScd2HashPartitionCount.FOUR);
+    scd2Table.getDerivatives().add(new BvDerivativeRef("sat_customer", DvTableType.SATELLITE));
+
+    BusinessVaultModel bvModel = new BusinessVaultModel();
+    bvModel.getConfigurationOrDefault().setTargetDatabase("Vault");
+    bvModel.getConfigurationOrDefault().setTargetLoadMode(DvTargetLoadMode.STAGING_FILE.getCode());
+    bvModel.getConfigurationOrDefault().setBulkLoadStagingFolder("/tmp/dv2/bulk/");
+
+    Scd2BuildContext ctx =
+        new Scd2BuildContext(
+            scd2Table,
+            satellite,
+            bvModel,
+            dvModel,
+            bvModel.getConfigurationOrDefault(),
+            dvModel.getConfigurationOrDefault(),
+            null,
+            new Variables(),
+            databaseMeta,
+            "Vault",
+            databaseMeta,
+            "Vault",
+            "sat_customer",
+            "bv_customer_scd2",
+            "bv-scd2-bv_customer_scd2-sat_customer",
+            "customer_hk",
+            null,
+            BvScd2PipelineSupport.resolveAttributeFieldNames(satellite),
+            "x_load_ts",
+            "valid_from",
+            "valid_to",
+            "x_record_source",
+            BusinessVaultConfiguration.DEFAULT_OPEN_START_SENTINEL,
+            BusinessVaultConfiguration.DEFAULT_OPEN_END_SENTINEL,
+            true);
+
+    PipelineMeta pipelineMeta = BvScd2PipelineSupport.generatePipeline(ctx);
+    TextFileOutputMeta textFileOutputMeta =
+        (TextFileOutputMeta)
+            pipelineMeta.getTransforms().stream()
+                .map(TransformMeta::getTransform)
+                .filter(t -> t instanceof TextFileOutputMeta)
+                .findFirst()
+                .orElseThrow();
+    String fileName = textFileOutputMeta.getFileSettings().getFileName();
+    assertTrue(fileName.contains("${PARTITION_NUMBER}"), fileName);
+    assertTrue(fileName.contains("${Internal.Transform.CopyNr}"), fileName);
+    assertEquals(
+        "/tmp/dv2/bulk/bv-scd2-bv_customer_scd2-sat_customer-0-${Internal.Transform.CopyNr}",
+        BvScd2PartitionWorkflowSupport.resolvePartitionedStagingFileBase(fileName, 0));
+  }
+
+  @Test
+  void partitionedNativeBulkUsesBulkLoaderWhenPluginInstalled() throws Exception {
+    if (!DvBulkLoadPluginSupport.isTransformPluginAvailable(
+        DvBulkLoadPluginSupport.MYSQL_BULK_LOADER_ID)) {
+      return;
+    }
+    DataVaultModel dvModel = loadVault1Model();
+    DvSatellite satellite = (DvSatellite) dvModel.findTable("sat_customer");
+    DatabaseMeta databaseMeta =
+        new DatabaseMeta("Vault", "MySQL", "Native", "", "localhost", "test", "root", "");
+
+    BvScd2Table scd2Table = new BvScd2Table();
+    scd2Table.setName("bv_customer_scd2");
+    scd2Table.setTableName("bv_customer_scd2");
+    scd2Table.setFunctionalTimestampField("x_load_ts");
+    scd2Table.setHashKeyPartitionCount(BvScd2HashPartitionCount.FOUR);
+    scd2Table.getDerivatives().add(new BvDerivativeRef("sat_customer", DvTableType.SATELLITE));
+
+    BusinessVaultModel bvModel = new BusinessVaultModel();
+    bvModel.getConfigurationOrDefault().setTargetDatabase("Vault");
+    bvModel.getConfigurationOrDefault().setTargetLoadMode(DvTargetLoadMode.NATIVE_BULK.getCode());
+
+    Scd2BuildContext ctx =
+        new Scd2BuildContext(
+            scd2Table,
+            satellite,
+            bvModel,
+            dvModel,
+            bvModel.getConfigurationOrDefault(),
+            dvModel.getConfigurationOrDefault(),
+            null,
+            new Variables(),
+            databaseMeta,
+            "Vault",
+            databaseMeta,
+            "Vault",
+            "sat_customer",
+            "bv_customer_scd2",
+            "bv-scd2-bv_customer_scd2-sat_customer",
+            "customer_hk",
+            null,
+            BvScd2PipelineSupport.resolveAttributeFieldNames(satellite),
+            "x_load_ts",
+            "valid_from",
+            "valid_to",
+            "x_record_source",
+            BusinessVaultConfiguration.DEFAULT_OPEN_START_SENTINEL,
+            BusinessVaultConfiguration.DEFAULT_OPEN_END_SENTINEL,
+            true);
+
+    PipelineMeta pipelineMeta = BvScd2PipelineSupport.generatePipeline(ctx);
+    assertTrue(
+        pipelineMeta.getTransforms().stream()
+            .anyMatch(tm -> DvBulkLoadPluginSupport.MYSQL_BULK_LOADER_ID.equals(tm.getPluginId())));
+    assertFalse(
+        pipelineMeta.getTransforms().stream()
+            .anyMatch(tm -> tm.getTransform() instanceof TableOutputMeta));
   }
 
   @Test

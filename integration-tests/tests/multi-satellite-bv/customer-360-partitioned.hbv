@@ -1,10 +1,31 @@
+<!--
+Copyright 2026 i-Bridge bv
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
 <business-vault-model>
   <name_sync_with_filename>Y</name_sync_with_filename>
-  <description>Retail customer 360 business vault: four satellites merged into one functional SCD2 table</description>
-  <dataVaultModelPath>${PROJECT_HOME}/models/retail-360.hdv</dataVaultModelPath>
+  <description>Customer 360 business vault (4 hash-key partitions): four satellites merged into one functional SCD2 table</description>
+  <dataVaultModelPath>${PROJECT_HOME}/tests/multi-satellite-bv/customer-360.hdv</dataVaultModelPath>
+  <configurationName>business-vault-customer-360</configurationName>
   <configuration>
     <targetDatabase>Vault</targetDatabase>
-    <dataCatalogConnection>local-catalog</dataCatalogConnection>
+    <generatedPipelineFolder/>
+    <scd2PipelineNamePrefix>bv-scd2-</scd2PipelineNamePrefix>
+    <pitPipelineNamePrefix>bv-pit-</pitPipelineNamePrefix>
+    <businessTablePipelineNamePrefix>bv-biz-</businessTablePipelineNamePrefix>
+    <openStartSentinel>1900-01-01 00:00:00</openStartSentinel>
+    <openEndSentinel>9999-12-31 23:59:59</openEndSentinel>
     <scd2DefaultsFolder/>
     <functionalTimestampField/>
     <loadDateFieldFallback>x_load_ts</loadDateFieldFallback>
@@ -12,32 +33,14 @@
     <validToField>x_to_ts</validToField>
     <targetTableBatchSize>1000</targetTableBatchSize>
     <targetTableParallelCopies>1</targetTableParallelCopies>
-    <target_load_mode>Table Output</target_load_mode>
-    <bulkLoadStagingFolder>${java.io.tmpdir}/dv2/bulk/</bulkLoadStagingFolder>
-    <bulkLoadDelimiter>,</bulkLoadDelimiter>
-    <bulkLoadEnclosure>"</bulkLoadEnclosure>
-    <bulkLoadEncoding>UTF-8</bulkLoadEncoding>
-    <bulkLoadLocalFileRequired>N</bulkLoadLocalFileRequired>
-    <generatedPipelineFolder/>
-    <scd2PipelineNamePrefix>bv-scd2-</scd2PipelineNamePrefix>
-    <pitPipelineNamePrefix>bv-pit-</pitPipelineNamePrefix>
-    <businessTablePipelineNamePrefix>bv-biz-</businessTablePipelineNamePrefix>
-    <generatedWorkflowNamePrefix>BV Bulk Update - </generatedWorkflowNamePrefix>
-    <openStartSentinel>1900-01-01 00:00:00</openStartSentinel>
-    <openEndSentinel>9999-12-31 23:59:59</openEndSentinel>
   </configuration>
-  <coaching>
-    <coaching_sources/>
-  </coaching>
-  
-<tables>
-<table>
-      <buildMode>FULL_REBUILD</buildMode>
-      <hashKeyPartitionCount>NONE</hashKeyPartitionCount>
+  <tables>
+    <table>
       <functionalTimestampField>x_load_ts</functionalTimestampField>
       <validFromField/>
       <validToField/>
       <includeHashKey>Y</includeHashKey>
+      <hashKeyPartitionCount>4</hashKeyPartitionCount>
       <field_mappings>
         <field_mapping>
           <satelliteName>sat_customer_demo</satelliteName>
@@ -142,5 +145,51 @@
       <yloc>208</yloc>
       <name>customer_360_bv</name>
     </table>
-</tables>
+  </tables>
+  <notes>
+    <note>
+      <text>This SCD2 exercise uses the input from 4 different satellites to build 
+one "Customer 360" Type II Slowly Changing Dimension.
+
+The way it does this is by reading from all 4 sources at the same time and 
+using a Sorted Schema Merge (new transform) feeding into the [Repeat Fields](https://hop.apache.org/manual/latest/pipeline/transforms/repeatfields.html#_current_when_indicated) transform 
+
+to build combined records of what is essentially a timeline per customer hash key.  
+What you get is a clear indication of which record version was valid at which point in time.
+
+Click on the [customer_360_bv](customer_360_bv) table and select "Show build pipeline" to see the full pipeline.</text>
+      <noteType>INFORMATION</noteType>
+      <xloc>144</xloc>
+      <yloc>384</yloc>
+      <width>624</width>
+      <height>224</height>
+    </note>
+  </notes>
+  <dv_references>
+    <dv_reference>
+      <dvTableName>sat_customer_demo</dvTableName>
+      <dvTableType>SATELLITE</dvTableType>
+      <xloc>240</xloc>
+      <yloc>112</yloc>
+    </dv_reference>
+    <dv_reference>
+      <dvTableName>sat_customer_contact</dvTableName>
+      <dvTableType>SATELLITE</dvTableType>
+      <xloc>144</xloc>
+      <yloc>208</yloc>
+    </dv_reference>
+    <dv_reference>
+      <dvTableName>sat_customer_address</dvTableName>
+      <dvTableType>SATELLITE</dvTableType>
+      <xloc>144</xloc>
+      <yloc>304</yloc>
+    </dv_reference>
+    <dv_reference>
+      <dvTableName>sat_customer_prefs</dvTableName>
+      <dvTableType>SATELLITE</dvTableType>
+      <xloc>448</xloc>
+      <yloc>80</yloc>
+    </dv_reference>
+  </dv_references>
+  <name>customer-360-partitioned</name>
 </business-vault-model>

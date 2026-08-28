@@ -53,6 +53,25 @@ For each SCD2 table the plugin builds a Hop pipeline that:
 
 Use **Debug** or **Show build pipeline** on an SCD2 table in the `.hbv` editor to inspect the generated pipeline before running a workflow.
 
+=== Hash-key partitions (large full rebuilds)
+
+When a satellite is too large to `ORDER BY` hash key and load date in one pass, set **Hash-key partitions** to 4, 8, or 16 on the SCD2 table. Full rebuild then:
+
+1. Truncates the BV target **once** with a workflow SQL action (`TRUNCATE TABLE` via the Hop database dialect).
+2. Generates partition numbers `0 .. N-1` and runs the SCD2 pipeline once per part, passing `'${PARTITION_COUNT}'` and `'${PARTITION_NUMBER}'`.
+3. Filters each satellite `TableInput` with a first-byte modulus of the parent hash key (BINARY: first octet; HEX: first two hex characters; STRING: first dash-separated token). Every version of a hub/link key stays in one partition.
+4. Writes with `TableOutput` **truncate off**, so later partitions append.
+
+**Show build pipeline** opens the parameterized SCD2 pipeline, the partition driver, and the wrapper workflow. Running the inner pipeline alone with defaults loads partition 0 of N.
+
+Constraints:
+
+* Full rebuild only (Incremental already filters by watermark).
+* Target load mode is honored: **Table Output** and **Native bulk** append after the SQL truncate; **Staging file** writes one CSV set per partition (`…-${PARTITION_NUMBER}-${Internal.Transform.CopyNr}.csv`) then bulk-loads those files in the wrapper workflow.
+* Sequential partition execution (lower peak memory, not parallel wall-clock).
+
+Integration test: `integration-tests/tests/multi-satellite-bv/update-customer-360-partitioned.hwf` uses `customer-360-partitioned.hbv` (4 parts) and the same golden current-state dataset as the unpartitioned full rebuild.
+
 === Incremental build mode
 
 Set **Build mode** to *Incremental* on the SCD2 table when you want to append new functional versions instead of truncating and reloading the BV table on every run.
@@ -79,7 +98,7 @@ The watermark is always read from the **Business Vault target table** (`MAX(wate
 
 On the first incremental run against an empty BV table the sentinel (`1900-01-01 00:00:00`) applies, so behaviour matches a full rebuild. Later runs process only satellite deltas and close prior open rows in place.
 
-Integration test: `integration-tests/tests/multi-satellite-bv/update-customer-360-incremental.hwf` loads four DV satellite waves, runs **Business Vault Update** once on `customer-360-incremental.hbv`, then validates current open rows against the same golden dataset as the full-rebuild fixture. Multi-run close-and-append behaviour is covered by unit tests in `BvScd2PipelineSupportTest`.
+Integration test: `integration-tests/tests/multi-satellite-bv/update-customer-360-incremental.hwf` loads four DV satellite waves, runs **Business Vault Update** once on `customer-360-incremental.hbv`, then validates current open rows against the same golden dataset as the full-rebuild fixture. Multi-run close-and-append behaviour is covered by unit tests in `BvScd2PipelineSupportTest`. Hash-key partitioned full rebuild: `update-customer-360-partitioned.hwf` / `customer-360-partitioned.hbv` (4 parts, same golden).
 
 == Single-satellite SCD2
 
@@ -149,6 +168,9 @@ Open intervals use sentinels from configuration (default `1900-01-01 00:00:00` a
 
 |Build mode
 |`FULL_REBUILD` (default) truncates and reloads the BV table; `INCREMENTAL` filters satellite history and appends/closes versions.
+
+|Hash-key partitions
+|`None` (default), or `4` / `8` / `16` parts for a large full rebuild. See <<Hash-key partitions (large full rebuilds)>>.
 
 |Incremental watermark field
 |Optional BV column used for `MAX(...)` watermark reads and incremental write filtering. Defaults to the resolved functional timestamp field.
