@@ -29,7 +29,9 @@ import org.apache.hop.core.variables.Variables;
 import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
+import org.hopper.edw.datavault.metadata.DvSatellite;
 import org.hopper.edw.datavault.metadata.DvTableType;
+import org.hopper.edw.datavault.metadata.SatelliteAttribute;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
@@ -126,6 +128,36 @@ class BvScd2FieldMappingDialogSupportTest {
     assertTrue(BvScd2FieldMappingDialogSupport.hasValidationErrors(remarks));
     assertTrue(
         BvScd2FieldMappingDialogSupport.formatValidationErrors(remarks).contains("field mappings"));
+  }
+
+  @Test
+  void validateForDialogReportsModelConfigurationErrors() {
+    BvScd2Table table = new BvScd2Table();
+    table.setName("customer_scd2");
+    table.setTableName("customer_scd2");
+    table.setBuildMode(BvScd2BuildMode.INCREMENTAL);
+    table.setFunctionalTimestampField("LOAD_DATE");
+    table.getDerivatives().add(new BvDerivativeRef("sat_customer", DvTableType.SATELLITE));
+
+    BusinessVaultConfiguration bvConfig = new BusinessVaultConfiguration();
+    bvConfig.setOpenEndSentinel("");
+    bvConfig.setTargetDatabase("");
+    BusinessVaultModel bvModel = new BusinessVaultModel();
+    bvModel.setConfiguration(bvConfig);
+
+    DataVaultModel dvModel = new DataVaultModel();
+    DvSatellite satellite = new DvSatellite("sat_customer");
+    satellite.setHubName("hub_customer");
+    satellite.getAttributes().add(new SatelliteAttribute("segment"));
+    dvModel.getTables().add(satellite);
+
+    List<org.apache.hop.core.ICheckResult> remarks =
+        BvScd2FieldMappingDialogSupport.validateForDialog(table, bvModel, dvModel, new Variables());
+
+    assertTrue(BvScd2FieldMappingDialogSupport.hasValidationErrors(remarks));
+    String formatted = BvScd2FieldMappingDialogSupport.formatValidationErrors(remarks);
+    assertTrue(formatted.contains("open-end sentinel"));
+    assertTrue(formatted.contains("target database"));
   }
 
   private static BvScd2Table customer360Table() {

@@ -127,6 +127,7 @@ Longer guidance: project doc `docs/business-vault-scd2.adoc` (section *Type 1 vs
 
 == Tips
 
+- **OK** can save the table even when Check reports errors. Some issues live in Business Vault or Data Vault configuration and cannot be fixed in this dialog. Use **Validate** or **Check model** to review them; **Business Vault Update** still fails until they are fixed.
 - Run **Check model** on the `.hbv` file before **Business Vault Update** or Debug.
 - Confirm **Data Vault target** (read satellites) and **Business Vault target** (write SCD2) connections both resolve in project metadata.
 - After changing the linked `.hdv` on disk, use **Reload DV model** on the Business Vault toolbar.

@@ -31,6 +31,7 @@ import org.apache.hop.ui.core.FormDataBuilder;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
+import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.core.gui.WindowProperty;
 import org.apache.hop.ui.core.widget.ColumnInfo;
 import org.apache.hop.ui.core.widget.TableView;
@@ -767,22 +768,34 @@ public class HopGuiBvScd2TableDialog {
   }
 
   private void ok() {
-    applyWidgetsToTable(input);
-
+    BvScd2Table draft = new BvScd2Table();
+    applyWidgetsToTable(draft);
     List<ICheckResult> remarks =
         BvScd2FieldMappingDialogSupport.validateForDialog(
-            input, businessVaultModel, dataVaultModel, variables);
-    if (BvScd2FieldMappingDialogSupport.hasValidationErrors(remarks)) {
-      new ErrorDialog(
-          shell,
-          BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.ValidationError.Title"),
-          BvScd2FieldMappingDialogSupport.formatValidationErrors(remarks),
-          null);
+            draft, businessVaultModel, dataVaultModel, variables);
+    if (BvScd2FieldMappingDialogSupport.hasValidationErrors(remarks)
+        && !confirmSaveWithValidationErrors(remarks)) {
       return;
     }
 
+    applyWidgetsToTable(input);
     ok = true;
     dispose();
+  }
+
+  /**
+   * Shows check errors without discarding dialog edits. Some remarks come from model or satellite
+   * configuration that cannot be fixed in this shell.
+   */
+  private boolean confirmSaveWithValidationErrors(List<ICheckResult> remarks) {
+    MessageBox box = new MessageBox(shell, SWT.YES | SWT.NO | SWT.ICON_WARNING);
+    box.setText(BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.ValidationError.Title"));
+    box.setMessage(
+        BaseMessages.getString(
+            PKG,
+            "HopGuiBvScd2TableDialog.ValidationError.SaveAnyway",
+            BvScd2FieldMappingDialogSupport.formatValidationErrors(remarks)));
+    return box.open() == SWT.YES;
   }
 
   private void validate() {
