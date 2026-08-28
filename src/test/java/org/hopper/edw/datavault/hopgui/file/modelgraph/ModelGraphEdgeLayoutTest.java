@@ -71,6 +71,20 @@ class ModelGraphEdgeLayoutTest {
   }
 
   @Test
+  void shallowDiagonalPrefersLeftRightSides() {
+    Bounds from = new Bounds(0, 0, 200, 40);
+    // ~30° down-right (Δx=220, Δy=127): wide cards used to attach on top/bottom here.
+    Bounds to = new Bounds(220, 127, 200, 40);
+    Map<String, EdgeGeometry> layout =
+        ModelGraphEdgeLayout.layout(List.of(new Edge("one", "from", from, "to", to)));
+
+    EdgeGeometry geometry = layout.get("one");
+    assertNotNull(geometry);
+    assertEquals(Side.RIGHT, geometry.fromSide());
+    assertEquals(Side.LEFT, geometry.toSide());
+  }
+
+  @Test
   void singleEdgeCentersOnFacingSide() {
     Bounds from = new Bounds(0, 0, 100, 80);
     Bounds to = new Bounds(200, 0, 100, 80);

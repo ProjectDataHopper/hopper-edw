@@ -23,6 +23,16 @@ import org.apache.hop.ui.core.PropsUi;
 public final class ModelGraphConnectionGeometry {
   public static final int DEFAULT_NUMBER_OF_SPLINE_SEGMENTS = 20;
 
+  /**
+   * Inclination from horizontal (degrees) at which routing switches from left/right to top/bottom
+   * anchors. Table cards are wide with horizontal labels, so side routing should persist through
+   * about 45–55° rather than following the box aspect ratio (~25–30° for a typical 2:1 card).
+   */
+  static final double SIDE_ROUTING_MAX_INCLINATION_DEGREES = 50.0;
+
+  private static final double SIDE_ROUTING_MAX_SLOPE =
+      Math.tan(Math.toRadians(SIDE_ROUTING_MAX_INCLINATION_DEGREES));
+
   private ModelGraphConnectionGeometry() {}
 
   /** Returns the configured number of segments used to approximate each connection spline. */
@@ -52,15 +62,18 @@ public final class ModelGraphConnectionGeometry {
   private record Normal(int x, int y) {}
 
   /**
-   * Returns the midpoint on the side of {@code from} that faces {@code to}, using dominant-axis
-   * routing (horizontal when |dx|*h dominates, otherwise vertical; ties prefer vertical).
+   * Returns the midpoint on the side of {@code from} that faces {@code to}. Uses the inclination of
+   * the center-to-center line: left/right when the angle from horizontal is at most {@link
+   * #SIDE_ROUTING_MAX_INCLINATION_DEGREES}, otherwise top/bottom. Overlapping boxes always use
+   * vertical routing. Equal inclination prefers sides.
    */
   public static Point anchorToward(Bounds from, Bounds to) {
     int dx = to.centerX() - from.centerX();
     int dy = to.centerY() - from.centerY();
 
     boolean horizontal =
-        !rectanglesOverlap(from, to) && Math.abs(dx) * from.height() > Math.abs(dy) * from.width();
+        !rectanglesOverlap(from, to)
+            && Math.abs(dx) * SIDE_ROUTING_MAX_SLOPE >= Math.abs((double) dy);
     if (horizontal) {
       if (dx > 0) {
         return rightMid(from);

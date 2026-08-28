@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Relationship lines prefer side attachments (issue #135)
+
+- Table-to-table relationship lines stay on left/right edges until about 50° of inclination (was ~25–30° for typical wide cards)
+
 ### Import tables shows progress (issue #134)
 
 - Catalog **Import database tables**, source-model **Import schema**, and dimensional **Import database tables** run JDBC listing and per-table import under Hop's cancelable progress dialog (wait cursor on Hop Web)
