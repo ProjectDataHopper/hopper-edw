@@ -322,6 +322,32 @@ limitations under the License.
       <attributes_hac/>
     </action>
     <action>
+      <filename>${PROJECT_HOME}/tests/multi-satellite-bv/update-customer-360-partitioned.hwf</filename>
+      <params_from_previous>N</params_from_previous>
+      <exec_per_row>N</exec_per_row>
+      <set_logfile>N</set_logfile>
+      <logfile/>
+      <logext/>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <loglevel>Nothing</loglevel>
+      <set_append_logfile>N</set_append_logfile>
+      <create_parent_folder>N</create_parent_folder>
+      <wait_until_finished>Y</wait_until_finished>
+      <parameters>
+        <pass_all_parameters>Y</pass_all_parameters>
+      </parameters>
+      <run_configuration>local</run_configuration>
+      <name>multi-satellite-bv-partitioned</name>
+      <description>Customer 360 SCD2 full rebuild split into 4 hash-key partitions</description>
+      <type>WORKFLOW</type>
+      <attributes/>
+      <xloc>624</xloc>
+      <yloc>496</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
       <filename>${PROJECT_HOME}/tests/multi-source-hub/update-multi-source-hub.hwf</filename>
       <params_from_previous>N</params_from_previous>
       <exec_per_row>N</exec_per_row>
@@ -668,6 +694,13 @@ dbType == "" || dbType == "postgres";
     </hop>
     <hop>
       <from>multi-satellite-bv</from>
+      <to>multi-satellite-bv-partitioned</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>multi-satellite-bv-partitioned</from>
       <to>multi-satellite-bv-incremental</to>
       <evaluation>Y</evaluation>
       <unconditional>N</unconditional>

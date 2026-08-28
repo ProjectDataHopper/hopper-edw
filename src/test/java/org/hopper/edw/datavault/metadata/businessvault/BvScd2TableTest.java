@@ -30,6 +30,7 @@ import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvTableType;
+import org.hopper.edw.datavault.metadata.DvTargetLoadMode;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
@@ -47,6 +48,8 @@ class BvScd2TableTest {
     BvScd2Table table = new BvScd2Table();
     assertEquals(BvScd2BuildMode.FULL_REBUILD, table.getBuildModeOrDefault());
     assertFalse(table.isIncrementalBuild());
+    assertEquals(BvScd2HashPartitionCount.NONE, table.getHashKeyPartitionCountOrDefault());
+    assertFalse(table.isHashKeyPartitioned());
   }
 
   @Test
@@ -85,6 +88,7 @@ class BvScd2TableTest {
     original.setBuildMode(BvScd2BuildMode.INCREMENTAL);
     original.setFunctionalTimestampField("x_load_ts");
     original.setIncrementalWatermarkField("event_ts");
+    original.setHashKeyPartitionCount(BvScd2HashPartitionCount.EIGHT);
     original.getDerivatives().add(new BvDerivativeRef("sat_customer", DvTableType.SATELLITE));
 
     String xml = XmlHandler.aroundTag("table", XmlMetadataUtil.serializeObjectToXml(original));
@@ -96,7 +100,52 @@ class BvScd2TableTest {
 
     assertEquals(BvScd2BuildMode.INCREMENTAL, restored.getBuildModeOrDefault());
     assertEquals("event_ts", restored.getIncrementalWatermarkField());
+    assertEquals(BvScd2HashPartitionCount.EIGHT, restored.getHashKeyPartitionCountOrDefault());
     assertTrue(restored.isIncrementalBuild());
+  }
+
+  @Test
+  void hashKeyPartitionWithIncrementalIsError() {
+    BvScd2Table table = new BvScd2Table();
+    table.setName("customer_bv");
+    table.setTableName("customer_bv");
+    table.setBuildMode(BvScd2BuildMode.INCREMENTAL);
+    table.setFunctionalTimestampField("x_load_ts");
+    table.setHashKeyPartitionCount(BvScd2HashPartitionCount.FOUR);
+    table.getDerivatives().add(new BvDerivativeRef("sat_customer", DvTableType.SATELLITE));
+
+    List<ICheckResult> remarks = check(table, new DataVaultModel());
+
+    assertTrue(
+        remarks.stream()
+            .anyMatch(
+                r ->
+                    r.getType() == ICheckResult.TYPE_RESULT_ERROR
+                        && r.getText() != null
+                        && r.getText().contains("hash-key partitions")));
+  }
+
+  @Test
+  void hashKeyPartitionAllowsStagingFileWhenCatalogIsUnavailable() {
+    BvScd2Table table = new BvScd2Table();
+    table.setName("customer_bv");
+    table.setTableName("customer_bv");
+    table.setFunctionalTimestampField("x_load_ts");
+    table.setHashKeyPartitionCount(BvScd2HashPartitionCount.SIXTEEN);
+    table.getDerivatives().add(new BvDerivativeRef("sat_customer", DvTableType.SATELLITE));
+
+    List<ICheckResult> remarks = new ArrayList<>();
+    BusinessVaultModel bvModel = new BusinessVaultModel();
+    bvModel.getConfigurationOrDefault().setTargetLoadMode(DvTargetLoadMode.STAGING_FILE.getCode());
+    table.check(remarks, null, new Variables(), bvModel, new DataVaultModel());
+
+    assertFalse(
+        remarks.stream()
+            .anyMatch(
+                r ->
+                    r.getText() != null
+                        && r.getText().contains("Staging file")
+                        && r.getType() == ICheckResult.TYPE_RESULT_ERROR));
   }
 
   @Test

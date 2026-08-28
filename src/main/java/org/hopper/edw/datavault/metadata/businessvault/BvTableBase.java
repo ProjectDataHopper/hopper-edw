@@ -39,6 +39,7 @@ import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadata;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
+import org.apache.hop.workflow.WorkflowMeta;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvConstraintDdlSupport;
 import org.hopper.edw.datavault.metadata.DvDdlSupport;
@@ -146,6 +147,16 @@ public abstract class BvTableBase extends HopMetadataBase implements IHopMetadat
 
   @Override
   public List<PipelineMeta> generateBuildPipelines(
+      IHopMetadataProvider metadataProvider,
+      IVariables variables,
+      BusinessVaultModel model,
+      DataVaultModel dataVaultModel)
+      throws HopException {
+    return List.of();
+  }
+
+  @Override
+  public List<WorkflowMeta> generateBuildWorkflows(
       IHopMetadataProvider metadataProvider,
       IVariables variables,
       BusinessVaultModel model,

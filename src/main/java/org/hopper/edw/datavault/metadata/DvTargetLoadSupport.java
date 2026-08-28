@@ -58,6 +58,9 @@ public final class DvTargetLoadSupport {
     public final int locationX;
     public final int locationY;
 
+    /** Optional extra token in the staged CSV base (for example {@code ${PARTITION_NUMBER}}). */
+    public final String stagingFileInfix;
+
     public TargetLoadContext(
         IDvTargetLoadConfiguration config,
         IVariables variables,
@@ -68,6 +71,30 @@ public final class DvTargetLoadSupport {
         String modelName,
         int locationX,
         int locationY) {
+      this(
+          config,
+          variables,
+          targetDatabaseMeta,
+          targetDbName,
+          targetTableName,
+          pipelineName,
+          modelName,
+          locationX,
+          locationY,
+          null);
+    }
+
+    public TargetLoadContext(
+        IDvTargetLoadConfiguration config,
+        IVariables variables,
+        DatabaseMeta targetDatabaseMeta,
+        String targetDbName,
+        String targetTableName,
+        String pipelineName,
+        String modelName,
+        int locationX,
+        int locationY,
+        String stagingFileInfix) {
       this.config = config;
       this.variables = variables;
       this.targetDatabaseMeta = targetDatabaseMeta;
@@ -77,6 +104,7 @@ public final class DvTargetLoadSupport {
       this.modelName = modelName;
       this.locationX = locationX;
       this.locationY = locationY;
+      this.stagingFileInfix = stagingFileInfix;
     }
   }
 
@@ -141,8 +169,16 @@ public final class DvTargetLoadSupport {
    */
   public static String buildStagingFileBase(
       String stagingFolder, String pipelineName, boolean includeCopyVariable) {
+    return buildStagingFileBase(stagingFolder, pipelineName, includeCopyVariable, null);
+  }
+
+  public static String buildStagingFileBase(
+      String stagingFolder, String pipelineName, boolean includeCopyVariable, String extraInfix) {
     String base =
         ensureTrailingSlash(stagingFolder) + stripStagedPipelineSequencePrefix(pipelineName);
+    if (!Utils.isEmpty(extraInfix)) {
+      base = base + "-" + extraInfix;
+    }
     if (includeCopyVariable) {
       base = base + "-" + STAGING_FILE_COPY_VARIABLE_PATTERN;
     }
@@ -212,7 +248,8 @@ public final class DvTargetLoadSupport {
 
     try {
       String stagingFolder = ctx.config.resolveBulkLoadStagingFolder(ctx.variables, ctx.modelName);
-      String fileBase = buildStagingFileBase(stagingFolder, ctx.pipelineName, true);
+      String fileBase =
+          buildStagingFileBase(stagingFolder, ctx.pipelineName, true, ctx.stagingFileInfix);
       String stagingFilePattern = fileBase + "." + STAGING_FILE_EXTENSION;
 
       TextFileOutputMeta textFileOutputMeta = new TextFileOutputMeta();

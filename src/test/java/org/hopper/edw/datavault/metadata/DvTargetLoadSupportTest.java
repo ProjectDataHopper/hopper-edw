@@ -187,6 +187,14 @@ class DvTargetLoadSupportTest {
   }
 
   @Test
+  void buildStagingFileBaseAppendsExtraInfixBeforeCopyVariable() {
+    assertEquals(
+        "/tmp/dv2/bulk/bv-scd2-customer-${PARTITION_NUMBER}-${Internal.Transform.CopyNr}",
+        DvTargetLoadSupport.buildStagingFileBase(
+            "/tmp/dv2/bulk/", "bv-scd2-customer", true, "${PARTITION_NUMBER}"));
+  }
+
+  @Test
   void buildStagingFileBaseStripsSequencedPipelinePrefix() {
     assertEquals(
         "/tmp/dv2/bulk/dm-fact-f_orders-${Internal.Transform.CopyNr}",
