@@ -15,6 +15,8 @@
  */
 package org.hopper.edw.datavault.hopgui;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.widgets.Control;
@@ -25,6 +27,31 @@ import org.eclipse.swt.widgets.Shell;
 public final class GuiBusySupport {
 
   private GuiBusySupport() {}
+
+  /**
+   * Runs {@code callable} under the wait cursor and returns its value. Checked exceptions from
+   * {@code callable} are rethrown to the caller after the cursor is restored.
+   */
+  public static <T> T callWhile(Control control, Callable<T> callable) throws Exception {
+    if (callable == null) {
+      return null;
+    }
+    AtomicReference<T> value = new AtomicReference<>();
+    AtomicReference<Exception> error = new AtomicReference<>();
+    showWhile(
+        control,
+        () -> {
+          try {
+            value.set(callable.call());
+          } catch (Exception e) {
+            error.set(e);
+          }
+        });
+    if (error.get() != null) {
+      throw error.get();
+    }
+    return value.get();
+  }
 
   public static void showWhile(Control control, Runnable runnable) {
     if (runnable == null) {

@@ -38,6 +38,7 @@ import org.hopper.edw.catalog.hopgui.perspective.DataCatalogPerspective;
 import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
 import org.hopper.edw.datavault.catalog.RecordSourceIndicatorOptions;
 import org.hopper.edw.datavault.catalog.RecordSourceIndicatorSupport;
+import org.hopper.edw.datavault.hopgui.GuiBusySupport;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DataVaultSource;
 import org.hopper.edw.datavault.metadata.DvSourceType;
@@ -81,11 +82,14 @@ public final class DvCsvSourceImportSupport {
     RecordDefinitionDiscoveryService.DiscoveryResult discovery;
     try {
       discovery =
-          RecordDefinitionDiscoveryService.discover(
-              DvSourceType.CSV,
-              PhysicalSourceRef.builder().filePath(resolvedFile).build(),
-              variables,
-              metadataProvider);
+          GuiBusySupport.callWhile(
+              shell,
+              () ->
+                  RecordDefinitionDiscoveryService.discover(
+                      DvSourceType.CSV,
+                      PhysicalSourceRef.builder().filePath(resolvedFile).build(),
+                      variables,
+                      metadataProvider));
     } catch (Exception e) {
       new ErrorDialog(
           shell,

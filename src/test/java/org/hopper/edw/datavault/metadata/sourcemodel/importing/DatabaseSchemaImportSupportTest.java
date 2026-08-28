@@ -26,8 +26,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.hop.core.HopEnvironment;
+import org.apache.hop.core.IProgressMonitor;
+import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.Point;
+import org.apache.hop.core.variables.Variables;
+import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.hopper.edw.datavault.metadata.SourceField;
 import org.hopper.edw.datavault.metadata.database.DiscoveredForeignKey;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceColumn;
@@ -202,5 +206,52 @@ class DatabaseSchemaImportSupportTest {
   void sanitizeNameRemovesOddCharacters() {
     assertEquals("order_header", DatabaseSchemaImportSupport.sanitizeName("order header"));
     assertFalse(DatabaseSchemaImportSupport.sanitizeName("!!!").isEmpty());
+  }
+
+  @Test
+  void importTablesEmptyListReturnsEmptyWithoutProgress() throws Exception {
+    SourceModel model = new SourceModel();
+    DatabaseMeta databaseMeta = new DatabaseMeta();
+    databaseMeta.setName("crm");
+    CountingMonitor monitor = new CountingMonitor();
+
+    SourceSchemaImportResult result =
+        DatabaseSchemaImportSupport.importTables(
+            model,
+            databaseMeta,
+            null,
+            List.of(),
+            new Variables(),
+            new MemoryMetadataProvider(),
+            monitor);
+
+    assertTrue(result.getImportedTablesOrEmpty().isEmpty());
+    assertEquals(0, monitor.beginTaskWork);
+  }
+
+  private static final class CountingMonitor implements IProgressMonitor {
+    int beginTaskWork;
+
+    @Override
+    public void beginTask(String message, int nrWorks) {
+      beginTaskWork = nrWorks;
+    }
+
+    @Override
+    public void subTask(String message) {}
+
+    @Override
+    public boolean isCanceled() {
+      return false;
+    }
+
+    @Override
+    public void worked(int nrWorks) {}
+
+    @Override
+    public void done() {}
+
+    @Override
+    public void setTaskName(String taskName) {}
   }
 }

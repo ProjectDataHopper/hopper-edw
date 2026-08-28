@@ -19,12 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import org.apache.hop.core.Const;
-import org.apache.hop.core.database.Database;
 import org.apache.hop.core.database.DatabaseMeta;
-import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.logging.ILoggingObject;
-import org.apache.hop.core.logging.LoggingObjectType;
-import org.apache.hop.core.logging.SimpleLoggingObject;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
@@ -35,6 +30,7 @@ import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.datavault.hopgui.GuiProgressSupport;
 import org.hopper.edw.datavault.metadata.database.DvDatabaseSourceImportSupport;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 import org.hopper.edw.datavault.metadata.sourcemodel.importing.DatabaseSchemaImportSupport;
@@ -108,62 +104,56 @@ public final class HopGuiSourceModelImportSupport {
       return;
     }
 
-    List<String> selectedTables;
-    try {
-      selectedTables = promptForTables(shell, variables, databaseMeta, options);
-    } catch (HopException e) {
-      new ErrorDialog(
-          shell,
-          BaseMessages.getString(PKG, "HopGuiSourceModelImportSupport.Error.Title"),
-          BaseMessages.getString(PKG, "HopGuiSourceModelImportSupport.Error.Message"),
-          e);
-      return;
-    }
+    List<String> selectedTables = promptForTables(shell, variables, databaseMeta, options);
     if (selectedTables == null || selectedTables.isEmpty()) {
       return;
     }
 
-    try {
-      SourceSchemaImportResult result =
-          DatabaseSchemaImportSupport.importTables(
-              model, databaseMeta, options, selectedTables, variables, metadataProvider);
-      DatabaseSchemaImportSupport.applyImportResult(model, result);
-      if (options.isPublishToCatalog()) {
-        DvDatabaseSourceImportSupport.refreshCatalogPerspective();
-      }
-      if (onChanged != null) {
-        onChanged.run();
-      }
-      showResultDialog(shell, result);
-    } catch (Exception e) {
-      new ErrorDialog(
-          shell,
-          BaseMessages.getString(PKG, "HopGuiSourceModelImportSupport.Error.Title"),
-          BaseMessages.getString(PKG, "HopGuiSourceModelImportSupport.Error.Message"),
-          e);
+    GuiProgressSupport.ProgressResult<SourceSchemaImportResult> progress =
+        GuiProgressSupport.run(
+            shell,
+            true,
+            monitor ->
+                DatabaseSchemaImportSupport.importTables(
+                    model,
+                    databaseMeta,
+                    options,
+                    selectedTables,
+                    variables,
+                    metadataProvider,
+                    monitor));
+    if (progress.value() == null) {
+      return;
     }
+    SourceSchemaImportResult result = progress.value();
+    DatabaseSchemaImportSupport.applyImportResult(model, result);
+    if (options.isPublishToCatalog()) {
+      DvDatabaseSourceImportSupport.refreshCatalogPerspective();
+    }
+    if (onChanged != null) {
+      onChanged.run();
+    }
+    showResultDialog(shell, result, progress.cancelled());
   }
 
   private static List<String> promptForTables(
       Shell shell,
       IVariables variables,
       DatabaseMeta databaseMeta,
-      SourceSchemaImportOptions options)
-      throws HopException {
-    String schemaName = variables != null ? variables.resolve(options.getSchemaName()) : "";
-    String[] tableNames;
-    ILoggingObject loggingObject =
-        new SimpleLoggingObject("SourceSchemaImport", LoggingObjectType.GENERAL, null);
-    try (Database database = new Database(loggingObject, variables, databaseMeta)) {
-      database.connect();
-      tableNames = database.getTablenames(schemaName, false);
-    } catch (Exception e) {
-      throw new HopException(
-          BaseMessages.getString(PKG, "HopGuiSourceModelImportSupport.ErrorListingTables.Message"),
-          e);
+      SourceSchemaImportOptions options) {
+    GuiProgressSupport.ProgressResult<String[]> listed =
+        GuiProgressSupport.run(
+            shell,
+            true,
+            monitor ->
+                DvDatabaseSourceImportSupport.listTableNames(
+                    databaseMeta, variables, options.getSchemaName(), monitor));
+    if (listed.cancelled() || listed.value() == null) {
+      return null;
     }
+    String[] tableNames = listed.value();
 
-    if (tableNames == null || tableNames.length == 0) {
+    if (tableNames.length == 0) {
       MessageBox mb = new MessageBox(shell, SWT.OK | SWT.ICON_INFORMATION);
       mb.setText(BaseMessages.getString(PKG, "HopGuiSourceModelImportSupport.NoTablesFound.Title"));
       mb.setMessage(
@@ -203,8 +193,17 @@ public final class HopGuiSourceModelImportSupport {
     return new ArrayList<>(picked);
   }
 
-  private static void showResultDialog(Shell shell, SourceSchemaImportResult result) {
+  private static void showResultDialog(
+      Shell shell, SourceSchemaImportResult result, boolean cancelled) {
     StringBuilder message = new StringBuilder();
+    if (cancelled) {
+      message.append(
+          BaseMessages.getString(
+              PKG,
+              "HopGuiSourceModelImportSupport.Cancelled.Message",
+              result.getImportedTablesOrEmpty().size()));
+      message.append(Const.CR).append(Const.CR);
+    }
     message.append(
         BaseMessages.getString(
             PKG,

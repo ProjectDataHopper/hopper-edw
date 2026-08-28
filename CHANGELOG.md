@@ -4,6 +4,12 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Import tables shows progress (issue #134)
+
+- Catalog **Import database tables**, source-model **Import schema**, and dimensional **Import database tables** run JDBC listing and per-table import under Hop's cancelable progress dialog (wait cursor on Hop Web)
+- Cancel stops before the next table; already-written catalog records and imported canvas tables are kept
+- CSV / Parquet / Iceberg catalog import shows a wait cursor while discovering the file or table schema
+
 ### Read-only existing Data Vault models
 
 - Data Vault configuration checkbox **Read-only existing vault** documents an already-built raw vault so Business Vault and dimensional models can sit on top

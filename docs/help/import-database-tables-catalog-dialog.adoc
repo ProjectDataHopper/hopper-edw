@@ -9,3 +9,5 @@ Related guide: link:../datavault-source-database.adoc[datavault-source-database]
 Select a Hop database connection and tables to import as catalog `DV_SOURCE` record definitions (or onto a source model).
 
 Filter by schema, multi-select tables, and optionally import primary/foreign keys. Existing catalog names are not overwritten without confirmation.
+
+Listing tables and importing selected tables each show a progress dialog (table name as the current step). Cancel stops before the next table; records already written to the catalog are kept. On Hop Web, a wait cursor is shown instead of a progress bar.
