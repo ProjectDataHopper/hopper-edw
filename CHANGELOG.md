@@ -4,6 +4,12 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### SCD2 table dialog OK is not blocked by configuration errors (issue #137)
+
+- Closing the Business Vault SCD2 table dialog with **OK** still shows validation errors, then offers **Save the table anyway?**
+- Model and satellite configuration issues (missing target database, open-end sentinel, and similar) no longer force **Cancel** and lost edits
+- **Validate** and **Check model** still report the same errors; Business Vault Update still fails until they are fixed
+
 ### Relationship lines prefer side attachments (issue #135)
 
 - Table-to-table relationship lines stay on left/right edges until about 50° of inclination (was ~25–30° for typical wide cards)
