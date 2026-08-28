@@ -23,6 +23,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.apache.hop.core.Const;
+import org.apache.hop.core.IProgressMonitor;
+import org.apache.hop.core.ProgressNullMonitorListener;
 import org.apache.hop.core.database.Database;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
@@ -75,6 +77,19 @@ public final class DatabaseSchemaImportSupport {
       IVariables variables,
       IHopMetadataProvider metadataProvider)
       throws HopException {
+    return importTables(
+        model, databaseMeta, options, tableNames, variables, metadataProvider, null);
+  }
+
+  public static SourceSchemaImportResult importTables(
+      SourceModel model,
+      DatabaseMeta databaseMeta,
+      SourceSchemaImportOptions options,
+      List<String> tableNames,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider,
+      IProgressMonitor monitor)
+      throws HopException {
     if (model == null) {
       throw new HopException(
           BaseMessages.getString(PKG, "DatabaseSchemaImportSupport.Error.NoModel"));
@@ -108,6 +123,11 @@ public final class DatabaseSchemaImportSupport {
     Map<String, String> physicalToLogical = new HashMap<>();
     List<String> cleanedTableNames = new ArrayList<>();
 
+    IProgressMonitor progress = monitor != null ? monitor : new ProgressNullMonitorListener();
+    progress.beginTask(
+        BaseMessages.getString(PKG, "DatabaseSchemaImportSupport.Progress.Task", tableNames.size()),
+        tableNames.size() + 1);
+
     ILoggingObject loggingObject =
         new SimpleLoggingObject("SourceSchemaImport", LoggingObjectType.GENERAL, null);
     try (Database database = new Database(loggingObject, variables, databaseMeta)) {
@@ -115,10 +135,15 @@ public final class DatabaseSchemaImportSupport {
 
       int layoutIndex = 0;
       for (String rawTableName : tableNames) {
+        if (progress.isCanceled()) {
+          break;
+        }
         String tableName = DvDatabaseSourceImportSupport.stripTableNameQuotes(rawTableName);
         if (Utils.isEmpty(tableName)) {
+          progress.worked(1);
           continue;
         }
+        progress.subTask(tableName);
         cleanedTableNames.add(tableName);
         try {
           List<SourceField> fields =
@@ -184,36 +209,42 @@ public final class DatabaseSchemaImportSupport {
                   tableName,
                   e.getMessage()));
         }
+        progress.worked(1);
       }
 
-      // Include existing model tables in the name map so FKs to already-modeled parents resolve.
-      for (SourceTable existing : model.getTables()) {
-        if (existing == null || Utils.isEmpty(existing.getTableName())) {
-          continue;
+      if (!progress.isCanceled()) {
+        // Include existing model tables in the name map so FKs to already-modeled parents resolve.
+        for (SourceTable existing : model.getTables()) {
+          if (existing == null || Utils.isEmpty(existing.getTableName())) {
+            continue;
+          }
+          String key = normalizePhysicalKey(existing.getSchemaName(), existing.getTableName());
+          physicalToLogical.putIfAbsent(key, existing.getName());
+          // Also map bare table name for drivers that omit schema on parent side.
+          physicalToLogical.putIfAbsent(
+              normalizePhysicalKey(null, existing.getTableName()), existing.getName());
         }
-        String key = normalizePhysicalKey(existing.getSchemaName(), existing.getTableName());
-        physicalToLogical.putIfAbsent(key, existing.getName());
-        // Also map bare table name for drivers that omit schema on parent side.
-        physicalToLogical.putIfAbsent(
-            normalizePhysicalKey(null, existing.getTableName()), existing.getName());
-      }
-      for (SourceTable imported : importedTables) {
-        physicalToLogical.putIfAbsent(
-            normalizePhysicalKey(null, imported.getTableName()), imported.getName());
-      }
+        for (SourceTable imported : importedTables) {
+          physicalToLogical.putIfAbsent(
+              normalizePhysicalKey(null, imported.getTableName()), imported.getName());
+        }
 
-      try {
-        List<DiscoveredForeignKey> foreignKeys =
-            DatabaseForeignKeyDiscoverySupport.discoverImportedForeignKeysForTables(
-                database, databaseMeta, schemaName, cleanedTableNames);
-        List<SourceRelationship> relationships =
-            buildRelationshipsFromForeignKeys(
-                foreignKeys, physicalToLogical, model, importedRelationships, warnings);
-        importedRelationships.addAll(relationships);
-      } catch (Exception e) {
-        warnings.add(
-            BaseMessages.getString(
-                PKG, "DatabaseSchemaImportSupport.Warning.FkDiscoveryFailed", e.getMessage()));
+        progress.subTask(
+            BaseMessages.getString(PKG, "DatabaseSchemaImportSupport.Progress.ForeignKeys"));
+        try {
+          List<DiscoveredForeignKey> foreignKeys =
+              DatabaseForeignKeyDiscoverySupport.discoverImportedForeignKeysForTables(
+                  database, databaseMeta, schemaName, cleanedTableNames);
+          List<SourceRelationship> relationships =
+              buildRelationshipsFromForeignKeys(
+                  foreignKeys, physicalToLogical, model, importedRelationships, warnings);
+          importedRelationships.addAll(relationships);
+        } catch (Exception e) {
+          warnings.add(
+              BaseMessages.getString(
+                  PKG, "DatabaseSchemaImportSupport.Warning.FkDiscoveryFailed", e.getMessage()));
+        }
+        progress.worked(1);
       }
     } catch (Exception e) {
       throw new HopException(

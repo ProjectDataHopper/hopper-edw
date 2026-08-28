@@ -18,12 +18,8 @@ package org.hopper.edw.datavault.hopgui.file.dimensional;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.Const;
-import org.apache.hop.core.database.Database;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
-import org.apache.hop.core.logging.ILoggingObject;
-import org.apache.hop.core.logging.LoggingObjectType;
-import org.apache.hop.core.logging.SimpleLoggingObject;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.RowMeta;
@@ -38,6 +34,8 @@ import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.datavault.hopgui.GuiProgressSupport;
+import org.hopper.edw.datavault.metadata.database.DvDatabaseSourceImportSupport;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
 import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
 import org.hopper.edw.datavault.metadata.dimensional.dbimport.DmDatabaseImportOptions;
@@ -102,10 +100,24 @@ public final class HopGuiDmDatabaseImportSupport {
       return;
     }
 
+    GuiProgressSupport.ProgressResult<DmDatabaseImportResult> progress =
+        GuiProgressSupport.run(
+            shell,
+            true,
+            monitor ->
+                DmDatabaseTableImportSupport.importTables(
+                    model,
+                    databaseMeta,
+                    options,
+                    selectedTables,
+                    variables,
+                    metadataProvider,
+                    monitor));
+    if (progress.value() == null) {
+      return;
+    }
+    DmDatabaseImportResult result = progress.value();
     try {
-      DmDatabaseImportResult result =
-          DmDatabaseTableImportSupport.importTables(
-              model, databaseMeta, options, selectedTables, variables, metadataProvider);
       for (IDmTable table : result.getImportedTablesOrEmpty()) {
         model.getTables().add(table);
       }
@@ -113,12 +125,20 @@ public final class HopGuiDmDatabaseImportSupport {
         onChanged.run();
       }
 
-      StringBuilder message =
-          new StringBuilder(
-              BaseMessages.getString(
-                  PKG,
-                  "HopGuiDmDatabaseImportSupport.Success.Message",
-                  result.getImportedTablesOrEmpty().size()));
+      StringBuilder message = new StringBuilder();
+      if (progress.cancelled()) {
+        message.append(
+            BaseMessages.getString(
+                PKG,
+                "HopGuiDmDatabaseImportSupport.Cancelled.Message",
+                result.getImportedTablesOrEmpty().size()));
+        message.append(Const.CR).append(Const.CR);
+      }
+      message.append(
+          BaseMessages.getString(
+              PKG,
+              "HopGuiDmDatabaseImportSupport.Success.Message",
+              result.getImportedTablesOrEmpty().size()));
 
       if (!result.getWarningsOrEmpty().isEmpty()) {
         message.append(Const.CR).append(Const.CR);
@@ -159,25 +179,19 @@ public final class HopGuiDmDatabaseImportSupport {
   private static List<String> promptForTableSelection(
       Shell shell, IVariables variables, DatabaseMeta databaseMeta, DmDatabaseImportOptions options)
       throws HopException {
-    String schemaName = variables.resolve(options.getSchemaName());
-    String[] tableNames;
-    ILoggingObject loggingObject =
-        new SimpleLoggingObject("DmDatabaseTableImport", LoggingObjectType.GENERAL, null);
-    try (Database database = new Database(loggingObject, variables, databaseMeta)) {
-      database.connect();
-      tableNames = database.getTablenames(schemaName, false);
-    } catch (Exception e) {
-      new ErrorDialog(
-          shell,
-          BaseMessages.getString(
-              PKG, "ImportDmDatabaseTablesOptionsDialog.ErrorListingTables.Title"),
-          BaseMessages.getString(
-              PKG, "ImportDmDatabaseTablesOptionsDialog.ErrorListingTables.Message"),
-          e);
+    GuiProgressSupport.ProgressResult<String[]> listed =
+        GuiProgressSupport.run(
+            shell,
+            true,
+            monitor ->
+                DvDatabaseSourceImportSupport.listTableNames(
+                    databaseMeta, variables, options.getSchemaName(), monitor));
+    if (listed.cancelled() || listed.value() == null) {
       return null;
     }
+    String[] tableNames = listed.value();
 
-    if (tableNames == null || tableNames.length == 0) {
+    if (tableNames.length == 0) {
       MessageBox mb = new MessageBox(shell, SWT.OK | SWT.ICON_INFORMATION);
       mb.setText(
           BaseMessages.getString(PKG, "ImportDmDatabaseTablesOptionsDialog.NoTablesFound.Title"));

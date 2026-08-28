@@ -25,7 +25,6 @@ import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.hopgui.context.GuiContextUtil;
 import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
 import org.hopper.edw.catalog.hopgui.perspective.DataCatalogPerspective;
-import org.hopper.edw.datavault.hopgui.GuiBusySupport;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 
 /** Shows the import menu for the Data Catalog perspective. */
@@ -88,15 +87,12 @@ public final class DataCatalogImportMenu {
               label,
               tooltip,
               image,
-              (shiftClicked, controlClicked, parameters) ->
-                  GuiBusySupport.showWhile(
-                      context.getShell(),
-                      () -> {
-                        importer.execute(context);
-                        if (context.getOnComplete() != null) {
-                          context.getOnComplete().run();
-                        }
-                      })));
+              (shiftClicked, controlClicked, parameters) -> {
+                importer.execute(context);
+                if (context.getOnComplete() != null) {
+                  context.getOnComplete().run();
+                }
+              }));
     }
     return actions;
   }

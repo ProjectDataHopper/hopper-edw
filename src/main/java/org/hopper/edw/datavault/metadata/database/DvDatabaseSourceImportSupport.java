@@ -22,6 +22,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.hop.core.Const;
+import org.apache.hop.core.IProgressMonitor;
+import org.apache.hop.core.ProgressNullMonitorListener;
 import org.apache.hop.core.database.Database;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopDatabaseException;
@@ -49,6 +51,7 @@ import org.hopper.edw.catalog.hopgui.perspective.DataCatalogPerspective;
 import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
 import org.hopper.edw.datavault.catalog.RecordSourceIndicatorOptions;
 import org.hopper.edw.datavault.catalog.RecordSourceIndicatorSupport;
+import org.hopper.edw.datavault.hopgui.GuiProgressSupport;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DataVaultSource;
 import org.hopper.edw.datavault.metadata.SourceField;
@@ -61,6 +64,23 @@ public final class DvDatabaseSourceImportSupport {
 
   /** Above this count, the table pick dialog starts with no tables pre-selected. */
   static final int LARGE_SCHEMA_TABLE_THRESHOLD = 25;
+
+  /** Table selected for catalog import, with the record-definition name to write. */
+  public record TableImportRequest(String tableName, String recordDefinitionName) {}
+
+  /** Outcome of a bulk catalog table import. */
+  public record CatalogTableImportResult(
+      int importedCount, List<String> errors, boolean cancelled) {
+    public CatalogTableImportResult {
+      errors = errors != null ? List.copyOf(errors) : List.of();
+    }
+  }
+
+  @FunctionalInterface
+  interface TableImportWork {
+    /** Imports one table. Per-table failures should be handled by the implementation. */
+    void importOne(TableImportRequest request) throws Exception;
+  }
 
   private DvDatabaseSourceImportSupport() {}
 
@@ -125,22 +145,15 @@ public final class DvDatabaseSourceImportSupport {
     }
 
     String schemaName = Const.NVL(options.getSchemaName(), "");
-    String[] tableNames;
-    ILoggingObject loggingObject =
-        new SimpleLoggingObject("DvDatabaseSourceImport", LoggingObjectType.GENERAL, null);
-    try (Database db = new Database(loggingObject, variables, databaseMeta)) {
-      db.connect();
-      tableNames = db.getTablenames(schemaName, false);
-    } catch (Exception e) {
-      new ErrorDialog(
-          shell,
-          BaseMessages.getString(PKG, "DvDatabaseSourceEditor.ErrorListingTables.DialogTitle"),
-          BaseMessages.getString(PKG, "DvDatabaseSourceEditor.ErrorListingTables.DialogMessage"),
-          e);
+    GuiProgressSupport.ProgressResult<String[]> listed =
+        GuiProgressSupport.run(
+            shell, true, monitor -> listTableNames(databaseMeta, variables, schemaName, monitor));
+    if (listed.cancelled() || listed.value() == null) {
       return;
     }
+    String[] tableNames = listed.value();
 
-    if (tableNames == null || tableNames.length == 0) {
+    if (tableNames.length == 0) {
       MessageBox mb = new MessageBox(shell, SWT.OK | SWT.ICON_INFORMATION);
       mb.setMessage(
           BaseMessages.getString(PKG, "DvDatabaseSourceEditor.NoTablesFound.DialogMessage"));
@@ -211,74 +224,246 @@ public final class DvDatabaseSourceImportSupport {
       return;
     }
 
-    int importedCount = 0;
-    List<String> errors = new ArrayList<>();
-    try (Database db = new Database(loggingObject, variables, databaseMeta)) {
-      db.connect();
+    List<TableImportRequest> requests = tableImportRequestsFromRows(selectedRows);
+    if (requests.isEmpty()) {
+      return;
+    }
 
-      for (Object[] row : selectedRows) {
-        if (row == null || row.length < 2) {
-          continue;
-        }
-        String tableName = stripTableNameQuotes(row[0] != null ? row[0].toString() : null);
-        String dataVaultSourceName = row[1] != null ? row[1].toString() : null;
-        if (Utils.isEmpty(tableName) || Utils.isEmpty(dataVaultSourceName)) {
-          continue;
-        }
-
-        try {
-          if (DvSourceCatalogService.exists(
-              dataVaultSourceName, catalogConnectionName, variables, metadataProvider)) {
-            errors.add(
-                BaseMessages.getString(
-                    PKG,
-                    "DvDatabaseSourceEditor.ImportTables.Exists.Message",
-                    dataVaultSourceName,
-                    tableName));
-            continue;
-          }
-
-          List<SourceField> fields = importFieldsFromTable(db, variables, schemaName, tableName);
-          RecordSourceIndicatorOptions tableRecordSource =
-              RecordSourceIndicatorSupport.resolveForTable(
-                  options.getRecordSourceOptions(), fields, dataVaultSourceName);
-          DataVaultSource imported =
-              createDataVaultSource(
-                  dataVaultSourceName,
-                  connectionName,
-                  schemaName,
-                  tableName,
-                  fields,
-                  tableRecordSource);
-          RecordDefinitionCatalogWriter.upsertDataVaultSource(
-              imported,
-              catalogConnectionName,
-              model,
-              variables,
-              metadataProvider,
-              null,
-              null,
-              null);
-          importedCount++;
-        } catch (Exception e) {
-          errors.add(
-              BaseMessages.getString(
-                  PKG,
-                  "DvDatabaseSourceEditor.ImportTables.TableError.Message",
-                  tableName,
-                  e.getMessage()));
-        }
-      }
-    } catch (Exception e) {
-      new ErrorDialog(
-          shell,
-          BaseMessages.getString(PKG, "DvDatabaseSourceEditor.ErrorImportingTables.DialogTitle"),
-          BaseMessages.getString(PKG, "DvDatabaseSourceEditor.ErrorImportingTables.DialogMessage"),
-          e);
+    GuiProgressSupport.ProgressResult<CatalogTableImportResult> progress =
+        GuiProgressSupport.run(
+            shell,
+            true,
+            monitor ->
+                importSelectedTables(
+                    databaseMeta,
+                    connectionName,
+                    schemaName,
+                    catalogConnectionName,
+                    model,
+                    variables,
+                    metadataProvider,
+                    requests,
+                    options.getRecordSourceOptions(),
+                    monitor));
+    if (progress.value() == null) {
       return;
     }
 
     refreshCatalogPerspective();
+    showCatalogImportResult(shell, progress.value(), progress.cancelled());
+  }
+
+  /**
+   * Lists physical table names for {@code schemaName} (empty schema = connection default). Returns
+   * an empty array when none are found. Returns {@code null} when the user cancelled.
+   */
+  public static String[] listTableNames(
+      DatabaseMeta databaseMeta, IVariables variables, String schemaName, IProgressMonitor monitor)
+      throws HopException {
+    if (databaseMeta == null) {
+      throw new HopException(
+          BaseMessages.getString(PKG, "DvDatabaseSourceEditor.ErrorListingTables.DialogMessage"));
+    }
+    IProgressMonitor progress = monitor != null ? monitor : new ProgressNullMonitorListener();
+    if (progress.isCanceled()) {
+      return null;
+    }
+    String resolvedSchema =
+        variables != null
+            ? Const.NVL(variables.resolve(schemaName), "")
+            : Const.NVL(schemaName, "");
+    String connectionName = Const.NVL(databaseMeta.getName(), "");
+    progress.beginTask(
+        BaseMessages.getString(PKG, "DvDatabaseSourceEditor.ListTables.Progress.Task"), 1);
+    if (Utils.isEmpty(resolvedSchema)) {
+      progress.subTask(
+          BaseMessages.getString(
+              PKG, "DvDatabaseSourceEditor.ListTables.Progress.SubTask", connectionName));
+    } else {
+      progress.subTask(
+          BaseMessages.getString(
+              PKG,
+              "DvDatabaseSourceEditor.ListTables.Progress.SubTaskSchema",
+              connectionName,
+              resolvedSchema));
+    }
+    ILoggingObject loggingObject =
+        new SimpleLoggingObject("DatabaseTableList", LoggingObjectType.GENERAL, null);
+    try (Database db = new Database(loggingObject, variables, databaseMeta)) {
+      db.connect();
+      if (progress.isCanceled()) {
+        return null;
+      }
+      String[] tableNames = db.getTablenames(resolvedSchema, false);
+      progress.worked(1);
+      if (progress.isCanceled()) {
+        return null;
+      }
+      return tableNames != null ? tableNames : new String[0];
+    } catch (Exception e) {
+      throw new HopException(
+          BaseMessages.getString(PKG, "DvDatabaseSourceEditor.ErrorListingTables.DialogMessage"),
+          e);
+    }
+  }
+
+  /**
+   * Imports selected tables into the data catalog. SWT-free so unit tests and {@link
+   * GuiProgressSupport} can drive it with an {@link IProgressMonitor}. Does not call {@code
+   * monitor.done()}.
+   */
+  public static CatalogTableImportResult importSelectedTables(
+      DatabaseMeta databaseMeta,
+      String connectionName,
+      String schemaName,
+      String catalogConnectionName,
+      DataVaultModel model,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider,
+      List<TableImportRequest> requests,
+      RecordSourceIndicatorOptions recordSourceOptions,
+      IProgressMonitor monitor)
+      throws HopException {
+    List<TableImportRequest> workItems = requests != null ? requests : List.of();
+    String taskName =
+        BaseMessages.getString(
+            PKG, "DvDatabaseSourceEditor.ImportTables.Progress.Task", workItems.size());
+    List<String> errors = new ArrayList<>();
+    int[] importedCount = {0};
+    ILoggingObject loggingObject =
+        new SimpleLoggingObject("DvDatabaseSourceImport", LoggingObjectType.GENERAL, null);
+    try (Database db = new Database(loggingObject, variables, databaseMeta)) {
+      db.connect();
+      boolean cancelled =
+          forEachTableImport(
+              workItems,
+              taskName,
+              monitor,
+              request -> {
+                String tableName = stripTableNameQuotes(request.tableName());
+                String dataVaultSourceName = Const.NVL(request.recordDefinitionName(), "").trim();
+                if (Utils.isEmpty(tableName) || Utils.isEmpty(dataVaultSourceName)) {
+                  return;
+                }
+                try {
+                  if (DvSourceCatalogService.exists(
+                      dataVaultSourceName, catalogConnectionName, variables, metadataProvider)) {
+                    errors.add(
+                        BaseMessages.getString(
+                            PKG,
+                            "DvDatabaseSourceEditor.ImportTables.Exists.Message",
+                            dataVaultSourceName,
+                            tableName));
+                    return;
+                  }
+                  List<SourceField> fields =
+                      importFieldsFromTable(db, variables, schemaName, tableName);
+                  RecordSourceIndicatorOptions tableRecordSource =
+                      RecordSourceIndicatorSupport.resolveForTable(
+                          recordSourceOptions, fields, dataVaultSourceName);
+                  DataVaultSource imported =
+                      createDataVaultSource(
+                          dataVaultSourceName,
+                          connectionName,
+                          schemaName,
+                          tableName,
+                          fields,
+                          tableRecordSource);
+                  RecordDefinitionCatalogWriter.upsertDataVaultSource(
+                      imported,
+                      catalogConnectionName,
+                      model,
+                      variables,
+                      metadataProvider,
+                      null,
+                      null,
+                      null);
+                  importedCount[0]++;
+                } catch (Exception e) {
+                  errors.add(
+                      BaseMessages.getString(
+                          PKG,
+                          "DvDatabaseSourceEditor.ImportTables.TableError.Message",
+                          tableName,
+                          e.getMessage()));
+                }
+              });
+      return new CatalogTableImportResult(importedCount[0], errors, cancelled);
+    } catch (HopException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new HopException(
+          BaseMessages.getString(PKG, "DvDatabaseSourceEditor.ErrorImportingTables.DialogMessage"),
+          e);
+    }
+  }
+
+  static boolean forEachTableImport(
+      List<TableImportRequest> requests,
+      String taskName,
+      IProgressMonitor monitor,
+      TableImportWork work)
+      throws Exception {
+    IProgressMonitor progress = monitor != null ? monitor : new ProgressNullMonitorListener();
+    List<TableImportRequest> items = requests != null ? requests : List.of();
+    progress.beginTask(Const.NVL(taskName, ""), items.size());
+    boolean cancelled = false;
+    for (TableImportRequest request : items) {
+      if (progress.isCanceled()) {
+        cancelled = true;
+        break;
+      }
+      String tableName = request != null ? Const.NVL(request.tableName(), "") : "";
+      progress.subTask(tableName);
+      if (request != null && work != null) {
+        work.importOne(request);
+      }
+      progress.worked(1);
+    }
+    return cancelled || progress.isCanceled();
+  }
+
+  static List<TableImportRequest> tableImportRequestsFromRows(List<Object[]> selectedRows) {
+    List<TableImportRequest> requests = new ArrayList<>();
+    if (selectedRows == null) {
+      return requests;
+    }
+    for (Object[] row : selectedRows) {
+      if (row == null || row.length < 2) {
+        continue;
+      }
+      String tableName = stripTableNameQuotes(row[0] != null ? row[0].toString() : null);
+      String dataVaultSourceName = row[1] != null ? row[1].toString() : null;
+      if (Utils.isEmpty(tableName) || Utils.isEmpty(dataVaultSourceName)) {
+        continue;
+      }
+      requests.add(new TableImportRequest(tableName, dataVaultSourceName));
+    }
+    return requests;
+  }
+
+  private static void showCatalogImportResult(
+      Shell shell, CatalogTableImportResult result, boolean cancelled) {
+    int importedCount = result != null ? result.importedCount() : 0;
+    List<String> errors = result != null ? result.errors() : List.of();
+    boolean wasCancelled = cancelled || (result != null && result.cancelled());
+
+    if (wasCancelled) {
+      MessageBox mb = new MessageBox(shell, SWT.OK | SWT.ICON_INFORMATION);
+      mb.setText(
+          BaseMessages.getString(PKG, "DvDatabaseSourceEditor.ImportTables.Cancelled.Title"));
+      StringBuilder message = new StringBuilder();
+      message.append(
+          BaseMessages.getString(
+              PKG, "DvDatabaseSourceEditor.ImportTables.Cancelled.Message", importedCount));
+      if (!errors.isEmpty()) {
+        message.append(Const.CR).append(Const.CR);
+        message.append(String.join(Const.CR, errors));
+      }
+      mb.setMessage(message.toString());
+      mb.open();
+      return;
+    }
 
     if (!errors.isEmpty()) {
       new ErrorDialog(

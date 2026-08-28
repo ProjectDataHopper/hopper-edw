@@ -20,6 +20,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import org.apache.hop.core.IProgressMonitor;
+import org.apache.hop.core.ProgressNullMonitorListener;
 import org.apache.hop.core.database.Database;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopDatabaseException;
@@ -71,6 +73,19 @@ public final class DmDatabaseTableImportSupport {
       IVariables variables,
       IHopMetadataProvider metadataProvider)
       throws HopException {
+    return importTables(
+        model, databaseMeta, options, tableNames, variables, metadataProvider, null);
+  }
+
+  public static DmDatabaseImportResult importTables(
+      DimensionalModel model,
+      DatabaseMeta databaseMeta,
+      DmDatabaseImportOptions options,
+      List<String> tableNames,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider,
+      IProgressMonitor monitor)
+      throws HopException {
     if (model == null) {
       throw new HopException(
           BaseMessages.getString(PKG, "DmDatabaseTableImportSupport.Error.NoModel"));
@@ -94,14 +109,25 @@ public final class DmDatabaseTableImportSupport {
         new SimpleLoggingObject("DmDatabaseTableImport", LoggingObjectType.GENERAL, null);
     String schemaName = variables != null ? variables.resolve(resolvedOptions.getSchemaName()) : "";
 
+    IProgressMonitor progress = monitor != null ? monitor : new ProgressNullMonitorListener();
+    progress.beginTask(
+        BaseMessages.getString(
+            PKG, "DmDatabaseTableImportSupport.Progress.Task", tableNames.size()),
+        tableNames.size());
+
     try (Database database = new Database(loggingObject, variables, databaseMeta)) {
       database.connect();
       int index = 0;
       for (String rawTableName : tableNames) {
+        if (progress.isCanceled()) {
+          break;
+        }
         String tableName = stripTableNameQuotes(rawTableName);
         if (Utils.isEmpty(tableName)) {
+          progress.worked(1);
           continue;
         }
+        progress.subTask(tableName);
         try {
           IRowMeta rowMeta = database.getTableFieldsMeta(schemaName, tableName);
           if (rowMeta == null || rowMeta.isEmpty()) {
@@ -133,6 +159,7 @@ public final class DmDatabaseTableImportSupport {
                   tableName,
                   e.getMessage()));
         }
+        progress.worked(1);
       }
     } catch (HopDatabaseException e) {
       throw new HopException(
