@@ -62,10 +62,41 @@ class ModelGraphConnectionGeometryTest {
   }
 
   @Test
-  void tieBreakPrefersVertical() {
-    Bounds diagonal = new Bounds(100, 50, 80, 40);
-    Point fromAnchor = ModelGraphConnectionGeometry.anchorToward(BOX_WIDE, diagonal);
-    assertEquals(new Point(100, 40), fromAnchor);
+  void shallowInclinationUsesSideEvenOnWideCards() {
+    // ~30° (tan 30° ≈ 0.577). A 2:1 card used to attach top/bottom past ~26°.
+    Bounds target = boundsOffsetFrom(BOX_WIDE, 200, 115);
+    Point fromAnchor = ModelGraphConnectionGeometry.anchorToward(BOX_WIDE, target);
+    assertEquals(new Point(BOX_WIDE.x() + BOX_WIDE.width(), BOX_WIDE.centerY()), fromAnchor);
+  }
+
+  @Test
+  void fortyFiveDegreeInclinationUsesSide() {
+    Bounds target = boundsOffsetFrom(BOX_A, 120, 120);
+    Point fromAnchor = ModelGraphConnectionGeometry.anchorToward(BOX_A, target);
+    assertEquals(new Point(BOX_A.x() + BOX_A.width(), BOX_A.centerY()), fromAnchor);
+  }
+
+  @Test
+  void thresholdInclinationPrefersSide() {
+    int dx = 200;
+    int dy =
+        (int)
+            Math.floor(
+                dx
+                    * Math.tan(
+                        Math.toRadians(
+                            ModelGraphConnectionGeometry.SIDE_ROUTING_MAX_INCLINATION_DEGREES)));
+    Bounds target = boundsOffsetFrom(BOX_A, dx, dy);
+    Point fromAnchor = ModelGraphConnectionGeometry.anchorToward(BOX_A, target);
+    assertEquals(new Point(BOX_A.x() + BOX_A.width(), BOX_A.centerY()), fromAnchor);
+  }
+
+  @Test
+  void steepInclinationUsesTopBottom() {
+    // ~55° (tan 55° ≈ 1.428), past the 50° side-routing threshold.
+    Bounds target = boundsOffsetFrom(BOX_WIDE, 200, 286);
+    Point fromAnchor = ModelGraphConnectionGeometry.anchorToward(BOX_WIDE, target);
+    assertEquals(new Point(BOX_WIDE.centerX(), BOX_WIDE.y() + BOX_WIDE.height()), fromAnchor);
   }
 
   @Test
@@ -152,6 +183,13 @@ class ModelGraphConnectionGeometryTest {
     assertTrue(
         ModelGraphConnectionGeometry.effectiveSegmentCount(300, 20)
             <= ModelGraphConnectionGeometry.effectiveSegmentCount(5000, 20));
+  }
+
+  /** Target box whose center is offset from {@code from}'s center by {@code dx},{@code dy}. */
+  private static Bounds boundsOffsetFrom(Bounds from, int dx, int dy) {
+    int cx = from.centerX() + dx;
+    int cy = from.centerY() + dy;
+    return new Bounds(cx - 40, cy - 20, 80, 40);
   }
 
   private static int expectedSegmentCount(
