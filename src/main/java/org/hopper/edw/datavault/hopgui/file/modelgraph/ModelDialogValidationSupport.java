@@ -38,6 +38,7 @@ import org.hopper.edw.datavault.hopgui.file.businessvault.HopBusinessVaultFileTy
 import org.hopper.edw.datavault.hopgui.file.dimensional.HopDimensionalFileType;
 import org.hopper.edw.datavault.hopgui.file.vault.HopVaultFileType;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
+import org.hopper.edw.datavault.metadata.ModelConfigurationResolver;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
 import org.w3c.dom.Document;
@@ -264,6 +265,8 @@ public final class ModelDialogValidationSupport {
     if (model == null) {
       throw new HopException("Cannot clone a null model");
     }
+    IHopMetadataProvider provider =
+        metadataProvider != null ? metadataProvider : metadataProviderOf(model);
     try {
       String xml = XmlHandler.aroundTag(xmlRootTag, XmlMetadataUtil.serializeObjectToXml(model));
       Document document = XmlHandler.loadXmlString(xml);
@@ -272,14 +275,29 @@ public final class ModelDialogValidationSupport {
         rootNode = document.getDocumentElement();
       }
       M clone = modelFactory.get();
-      XmlMetadataUtil.deSerializeFromXml(rootNode, modelClass, clone, metadataProvider);
+      XmlMetadataUtil.deSerializeFromXml(rootNode, modelClass, clone, provider);
       preserveFilename(model, clone);
+      // Named configuration is metadata, not XML; metadataProvider is transient.
+      ModelConfigurationResolver.attach(clone, provider);
       return clone;
     } catch (HopException e) {
       throw e;
     } catch (Exception e) {
       throw new HopException("Error cloning model for validation", e);
     }
+  }
+
+  private static IHopMetadataProvider metadataProviderOf(Object model) {
+    if (model instanceof DataVaultModel dataVaultModel) {
+      return dataVaultModel.getMetadataProvider();
+    }
+    if (model instanceof BusinessVaultModel businessVaultModel) {
+      return businessVaultModel.getMetadataProvider();
+    }
+    if (model instanceof DimensionalModel dimensionalModel) {
+      return dimensionalModel.getMetadataProvider();
+    }
+    return null;
   }
 
   private static void preserveFilename(Object source, Object clone) {
