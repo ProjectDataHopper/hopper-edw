@@ -265,7 +265,7 @@ public final class BusinessVaultDvReferenceSupport {
       IVariables variables,
       IHopMetadataProvider metadataProvider)
       throws Exception {
-    return DvModelLoadSupport.loadDataVaultModel(
+    return DvModelLoadSupport.loadDataVaultModelFresh(
         modelFilename, referringBvFilename, variables, metadataProvider);
   }
 

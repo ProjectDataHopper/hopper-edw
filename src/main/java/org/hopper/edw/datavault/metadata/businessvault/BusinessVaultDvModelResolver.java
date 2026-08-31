@@ -48,6 +48,39 @@ public final class BusinessVaultDvModelResolver {
   private BusinessVaultDvModelResolver() {}
 
   /**
+   * Drops cached copies of every Data Vault model this Business Vault references so the next load
+   * reads the current {@code .hdv} files from disk.
+   */
+  public static void invalidateReferencedModelCaches(
+      BusinessVaultModel bvModel, IVariables variables) {
+    if (bvModel == null) {
+      return;
+    }
+    String referring = bvModel.getFilename();
+    invalidateQuietly(bvModel.getDataVaultModelPath(), referring, variables);
+    if (bvModel.getDvReferences() == null) {
+      return;
+    }
+    for (BvDvTableReference reference : bvModel.getDvReferences()) {
+      if (reference != null) {
+        invalidateQuietly(reference.getReferencedModelFilename(), referring, variables);
+      }
+    }
+  }
+
+  private static void invalidateQuietly(
+      String modelPath, String referringModelFilename, IVariables variables) {
+    if (Utils.isEmpty(modelPath)) {
+      return;
+    }
+    try {
+      DvModelLoadSupport.invalidateCachedModel(modelPath, referringModelFilename, variables);
+    } catch (HopException ignored) {
+      // Broken paths surface when the model is loaded.
+    }
+  }
+
+  /**
    * Loads a single DV model file by path. Prefer {@link #buildEffectiveDataVaultModel} or {@link
    * #resolveDvTable} for Business Vault resolution.
    */

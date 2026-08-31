@@ -480,6 +480,7 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     }
     try {
       // Union of canvas DV aliases (multi-model) + optional legacy linked path.
+      BusinessVaultDvModelResolver.invalidateReferencedModelCaches(model, getVariables());
       dataVaultModel =
           BusinessVaultDvModelResolver.buildEffectiveDataVaultModel(
               model, getVariables(), hopGui.getMetadataProvider());
@@ -1164,18 +1165,20 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
             BusinessVaultDvReferenceSupport.loadDvModel(
                 browsed, model.getFilename(), getVariables(), hopGui.getMetadataProvider());
       } else if (chosenSource.linkedModel()) {
-        sourceModel = dataVaultModel;
-        if (sourceModel == null) {
-          // Optional legacy default path on older models.
+        // Persist path on the alias so multi-model resolution does not need a global default.
+        modelFilenameForAlias = chosenSource.modelFilename();
+        if (!Utils.isEmpty(modelFilenameForAlias)) {
+          // Load the current .hdv from disk; the in-memory union may be a stale cache.
           sourceModel =
               BusinessVaultDvReferenceSupport.loadDvModel(
-                  chosenSource.modelFilename(),
+                  modelFilenameForAlias,
                   model.getFilename(),
                   getVariables(),
                   hopGui.getMetadataProvider());
+        } else {
+          reloadDataVaultModel();
+          sourceModel = dataVaultModel;
         }
-        // Persist path on the alias so multi-model resolution does not need a global default.
-        modelFilenameForAlias = chosenSource.modelFilename();
       } else {
         sourceModel =
             BusinessVaultDvReferenceSupport.loadDvModel(

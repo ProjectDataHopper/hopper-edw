@@ -58,6 +58,20 @@ public final class DvModelLoadSupport {
     }
   }
 
+  /**
+   * Loads a Data Vault model from disk after dropping any cached copy of the same path. GUI pickers
+   * use this so satellites (and other tables) added or removed since the last load are visible.
+   */
+  public static DataVaultModel loadDataVaultModelFresh(
+      String modelPath,
+      String referringModelFilename,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider)
+      throws HopException {
+    invalidateCachedModel(modelPath, referringModelFilename, variables);
+    return loadDataVaultModel(modelPath, referringModelFilename, variables, metadataProvider);
+  }
+
   public static DataVaultModel loadDataVaultModel(
       String modelPath,
       String referringModelFilename,
