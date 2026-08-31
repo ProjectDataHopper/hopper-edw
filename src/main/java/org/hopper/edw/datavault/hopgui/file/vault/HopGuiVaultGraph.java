@@ -1646,7 +1646,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
             DvModelLoadSupport.toStoredModelPath(selectedFile, model.getFilename(), getVariables());
       }
       DataVaultModel externalModel =
-          DvModelLoadSupport.loadDataVaultModel(
+          DvModelLoadSupport.loadDataVaultModelFresh(
               storedPath,
               model.getFilename(),
               getVariables(),

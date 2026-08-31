@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import org.apache.hop.core.HopEnvironment;
@@ -33,20 +34,36 @@ import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.hopper.edw.datavault.hopgui.file.businessvault.HopBusinessVaultFileType;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
+import org.hopper.edw.datavault.metadata.DvModelLoadSupport;
 import org.hopper.edw.datavault.metadata.DvTableType;
 import org.hopper.edw.datavault.metadata.IDvTable;
 import org.hopper.edw.datavault.metadata.ModelConfigurationResolver;
 import org.hopper.edw.datavault.metadata.ModelConfigurationTestSupport;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 class BusinessVaultDvModelResolverTest {
 
+  @TempDir Path tempDir;
+
   @BeforeAll
   static void initHop() throws HopException {
     HopEnvironment.init();
+  }
+
+  @BeforeEach
+  void clearCache() {
+    DvModelLoadSupport.clearCache();
+  }
+
+  @AfterEach
+  void tearDown() {
+    DvModelLoadSupport.clearCache();
   }
 
   @Test
@@ -79,6 +96,49 @@ class BusinessVaultDvModelResolverTest {
         BusinessVaultDvModelResolver.resolveDvTable(bv, "sat_customer", new Variables(), null);
     assertNotNull(table);
     assertEquals("sat_customer", table.getName());
+  }
+
+  @Test
+  void linkedSatellitePickerSeesSavedHdvEditsAfterCacheInvalidate() throws Exception {
+    Path fixture = Path.of("integration-tests/tests/basic/vault1.hdv").toAbsolutePath().normalize();
+    Path tempModel = tempDir.resolve("vault1.hdv");
+    Files.copy(fixture, tempModel);
+
+    BusinessVaultModel bv = new BusinessVaultModel();
+    bv.setFilename(tempDir.resolve("vault1.hbv").toString());
+    BvDvTableReference satRef = new BvDvTableReference("sat_product", DvTableType.SATELLITE);
+    satRef.setReferencedModelFilename(tempModel.toString());
+    bv.getDvReferences().add(satRef);
+
+    Variables variables = new Variables();
+    DataVaultModel first =
+        BusinessVaultDvModelResolver.buildEffectiveDataVaultModel(bv, variables, null);
+    List<String> firstChoices =
+        BusinessVaultDvReferenceSupport.listAvailableDvTableNames(
+            first, bv, DvTableType.SATELLITE, tempModel.toString());
+    assertTrue(firstChoices.contains("sat_customer"));
+    assertFalse(firstChoices.contains("sat_customer_new"));
+
+    String xml = Files.readString(tempModel);
+    Files.writeString(
+        tempModel, xml.replace("<name>sat_customer</name>", "<name>sat_customer_new</name>"));
+
+    DataVaultModel stale =
+        BusinessVaultDvModelResolver.buildEffectiveDataVaultModel(bv, variables, null);
+    List<String> staleChoices =
+        BusinessVaultDvReferenceSupport.listAvailableDvTableNames(
+            stale, bv, DvTableType.SATELLITE, tempModel.toString());
+    assertTrue(staleChoices.contains("sat_customer"));
+    assertFalse(staleChoices.contains("sat_customer_new"));
+
+    BusinessVaultDvModelResolver.invalidateReferencedModelCaches(bv, variables);
+    DataVaultModel fresh =
+        BusinessVaultDvModelResolver.buildEffectiveDataVaultModel(bv, variables, null);
+    List<String> freshChoices =
+        BusinessVaultDvReferenceSupport.listAvailableDvTableNames(
+            fresh, bv, DvTableType.SATELLITE, tempModel.toString());
+    assertFalse(freshChoices.contains("sat_customer"));
+    assertTrue(freshChoices.contains("sat_customer_new"));
   }
 
   @Test

@@ -49,6 +49,7 @@ import org.hopper.edw.datavault.hopgui.StandardProjectElementsOfferSupport;
 import org.hopper.edw.datavault.hopgui.file.ExplorerPerspectiveTabSupport;
 import org.hopper.edw.datavault.hopgui.search.HopGuiDataVaultModelSearchable;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
+import org.hopper.edw.datavault.metadata.DvModelLoadSupport;
 import org.hopper.edw.datavault.metadata.ModelConfigurationResolver;
 import org.hopper.edw.datavault.metadata.ModelXmlWriteSupport;
 import org.hopper.edw.datavault.resourcedefinition.ResourceDefinitionGroupResolver;
@@ -335,6 +336,8 @@ public class HopVaultFileType extends HopFileTypeBase {
       throws HopException {
     try {
       ModelXmlWriteSupport.writeModelXml(XML_TAG, model, filename, variables);
+      DvModelLoadSupport.invalidateCachedModelByResolvedPath(
+          HopVfs.normalize(variables.resolve(filename)));
     } catch (Exception e) {
       throw new HopException("Error saving Data Vault model to '" + filename + "'", e);
     }
