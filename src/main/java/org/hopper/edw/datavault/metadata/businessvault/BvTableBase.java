@@ -44,6 +44,7 @@ import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvConstraintDdlSupport;
 import org.hopper.edw.datavault.metadata.DvDdlSupport;
 import org.hopper.edw.datavault.metadata.ForeignKeySpec;
+import org.hopper.edw.datavault.metadata.ModelConfigurationResolver;
 import org.hopper.edw.datavault.metadata.targettypemapping.TargetTypeMappingSupport;
 
 @Getter
@@ -128,6 +129,10 @@ public abstract class BvTableBase extends HopMetadataBase implements IHopMetadat
       IVariables variables,
       BusinessVaultModel model,
       DataVaultModel dataVaultModel) {
+    // Table-dialog Validate calls this without BusinessVaultModel.check(), which attaches
+    // the provider so named BusinessVaultConfiguration / DataVaultConfiguration resolve.
+    ModelConfigurationResolver.attach(model, metadataProvider);
+    ModelConfigurationResolver.attach(dataVaultModel, metadataProvider);
     if (Utils.isEmpty(getName())) {
       remarks.add(
           new CheckResult(
