@@ -157,6 +157,9 @@ public final class SqlExpressionEvaluator {
       case "DATE_FORMAT" ->
           SqlExpressionMysqlFunctions.dateFormat(
               eval(operands.get(0), rowMeta, row), eval(operands.get(1), rowMeta, row));
+      case "TO_DATE" ->
+          SqlExpressionMysqlFunctions.toDate(
+              eval(operands.get(0), rowMeta, row), eval(operands.get(1), rowMeta, row));
       default -> throw new SqlExpressionException("Unsupported function '" + name + "'");
     };
   }

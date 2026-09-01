@@ -143,6 +143,11 @@ public final class SqlExpressionPatterns {
               "SqlExpressionPattern.DateFormat.Label",
               "DATE_FORMAT(, '%Y-%m-%d %H:%i:%s')",
               "SqlExpressionPattern.DateFormat.Hint"),
+          p(
+              CAT_DATETIME,
+              "SqlExpressionPattern.ToDate.Label",
+              "TO_DATE(, 'MM/DD/YYYY')",
+              "SqlExpressionPattern.ToDate.Hint"),
           p(CAT_ARITH, "SqlExpressionPattern.Add.Label", " + ", "SqlExpressionPattern.Arith.Hint"),
           p(
               CAT_ARITH,

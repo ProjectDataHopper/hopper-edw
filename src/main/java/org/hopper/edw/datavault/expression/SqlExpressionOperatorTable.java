@@ -27,7 +27,7 @@ import org.apache.calcite.sql.util.SqlOperatorTables;
 
 /**
  * Calcite operators for SQL Expression, including MySQL / SingleStore-style {@code CONCAT}, {@code
- * HEX}, {@code UNHEX}, {@code MD5}, and {@code DATE_FORMAT}.
+ * HEX}, {@code UNHEX}, {@code MD5}, {@code DATE_FORMAT}, and {@code TO_DATE}.
  */
 public final class SqlExpressionOperatorTable {
 
@@ -57,10 +57,17 @@ public final class SqlExpressionOperatorTable {
           OperandTypes.ANY_ANY,
           SqlFunctionCategory.TIMEDATE);
 
+  static final SqlFunction TO_DATE =
+      SqlBasicFunction.create(
+          "TO_DATE",
+          ReturnTypes.TIMESTAMP_NULLABLE,
+          OperandTypes.STRING_STRING,
+          SqlFunctionCategory.TIMEDATE);
+
   private static final SqlOperatorTable INSTANCE =
       SqlOperatorTables.chain(
           SqlStdOperatorTable.instance(),
-          SqlOperatorTables.of(CONCAT, HEX, UNHEX, MD5, DATE_FORMAT));
+          SqlOperatorTables.of(CONCAT, HEX, UNHEX, MD5, DATE_FORMAT, TO_DATE));
 
   private SqlExpressionOperatorTable() {}
 

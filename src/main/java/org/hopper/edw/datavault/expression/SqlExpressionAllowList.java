@@ -81,6 +81,7 @@ public final class SqlExpressionAllowList {
           "UNHEX",
           "MD5",
           "DATE_FORMAT",
+          "TO_DATE",
           "CHAR_LENGTH",
           "CHARACTER_LENGTH",
           "LENGTH",

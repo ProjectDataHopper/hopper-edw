@@ -18,9 +18,11 @@ package org.hopper.edw.datavault.expression;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.exception.HopException;
@@ -115,6 +117,75 @@ class SqlExpressionMysqlFunctionsTest {
   @Test
   void hexUtf8Bytes() {
     assertEquals("C3A9", SqlExpressionMysqlFunctions.hex("é".getBytes(StandardCharsets.UTF_8)));
+  }
+
+  @Test
+  void toDateHelperParsesDatetime() throws Exception {
+    assertEquals(
+        Timestamp.valueOf("2019-03-01 10:40:27"),
+        SqlExpressionMysqlFunctions.toDate("03/01/2019 10:40:27", "MM/DD/YYYY HH:MI:SS"));
+    assertEquals(
+        Timestamp.valueOf("2019-03-01 14:01:00"),
+        SqlExpressionMysqlFunctions.toDate("03/01/2019 14:01:00", "MM/DD/YYYY HH24:MI:SS"));
+  }
+
+  @Test
+  void toDateMatchesSinglestoreExamples() throws Exception {
+    IRowMeta rowMeta = new RowMeta();
+    rowMeta.addValueMeta(new ValueMetaString("s"));
+
+    assertEquals(
+        Timestamp.valueOf("2019-03-01 00:00:00"),
+        eval("TO_DATE(s, 'MM/DD/YYYY')", rowMeta, new Object[] {"03/01/2019"}));
+    assertEquals(
+        Timestamp.valueOf("2019-03-01 10:40:27"),
+        eval("TO_DATE(s, 'MM/DD/YYYY HH:MI:SS')", rowMeta, new Object[] {"03/01/2019 10:40:27"}));
+    assertEquals(
+        Timestamp.valueOf("2019-03-01 00:00:00"),
+        eval(
+            "TO_DATE(s, 'The day is MONTH DD, YYYY')",
+            rowMeta,
+            new Object[] {"The day is March 01, 2019"}));
+    assertEquals(
+        Timestamp.valueOf("2019-03-01 14:01:00"),
+        eval("TO_DATE(s, 'MM/DD/YYYY HH:MI PM')", rowMeta, new Object[] {"03/01/2019 02:01 PM"}));
+  }
+
+  @Test
+  void toDateAllowsMismatchedPunctuationAndFillsMissingParts() throws Exception {
+    IRowMeta rowMeta = new RowMeta();
+    rowMeta.addValueMeta(new ValueMetaString("s"));
+    LocalDate today = LocalDate.now();
+
+    assertEquals(
+        Timestamp.valueOf("2019-03-01 00:00:00"),
+        eval("TO_DATE(s, 'MM/DD/YYYY')", rowMeta, new Object[] {"03-01-2019"}));
+    assertEquals(
+        Timestamp.valueOf(LocalDate.of(2019, today.getMonth(), 1).atStartOfDay()),
+        eval("TO_DATE(s, 'YYYY')", rowMeta, new Object[] {"2019"}));
+    assertEquals(
+        Timestamp.valueOf(LocalDate.of(today.getYear(), 11, 1).atStartOfDay()),
+        eval("TO_DATE(s, 'MM')", rowMeta, new Object[] {"11"}));
+    assertEquals(
+        Timestamp.valueOf(LocalDate.of(today.getYear(), today.getMonth(), 15).atStartOfDay()),
+        eval("TO_DATE(s, 'DD')", rowMeta, new Object[] {"15"}));
+  }
+
+  @Test
+  void toDateNullAndLiteralMismatch() throws Exception {
+    IRowMeta rowMeta = new RowMeta();
+    rowMeta.addValueMeta(new ValueMetaString("s"));
+    assertNull(eval("TO_DATE(s, 'MM/DD/YYYY')", rowMeta, new Object[] {null}));
+    assertNull(eval("TO_DATE(s, 'MM/DD/YYYY')", rowMeta, new Object[] {"not-a-date"}));
+  }
+
+  @Test
+  void toDateRejectsInvalidCalendarDay() {
+    IRowMeta rowMeta = new RowMeta();
+    rowMeta.addValueMeta(new ValueMetaString("s"));
+    assertThrows(
+        SqlExpressionException.class,
+        () -> eval("TO_DATE(s, 'MM/DD/YYYY')", rowMeta, new Object[] {"02/30/2019"}));
   }
 
   private static Object eval(String sql, IRowMeta rowMeta, Object[] row) throws Exception {
