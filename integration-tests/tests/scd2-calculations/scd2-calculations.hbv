@@ -114,6 +114,79 @@ limitations under the License.
       <yloc>64</yloc>
       <name>sat_customer_calc_bv</name>
     </table>
+    <table>
+      <buildMode>FULL_REBUILD</buildMode>
+      <hashKeyPartitionCount>NONE</hashKeyPartitionCount>
+      <functionalTimestampField>x_load_ts</functionalTimestampField>
+      <validFromField/>
+      <validToField/>
+      <includeHashKey>Y</includeHashKey>
+      <includeHubBusinessKeys>Y</includeHubBusinessKeys>
+      <field_mappings>
+        <field_mapping>
+          <satelliteName>sat_customer_calc</satelliteName>
+          <sourceFieldName>name</sourceFieldName>
+          <targetFieldName>name</targetFieldName>
+        </field_mapping>
+        <field_mapping>
+          <satelliteName>sat_customer_calc</satelliteName>
+          <sourceFieldName>deleted_flag</sourceFieldName>
+          <targetFieldName>deleted_flag</targetFieldName>
+          <calculationOnly>Y</calculationOnly>
+        </field_mapping>
+        <field_mapping>
+          <satelliteName>sat_customer_calc</satelliteName>
+          <sourceFieldName>event_date</sourceFieldName>
+          <targetFieldName>event_date</targetFieldName>
+        </field_mapping>
+        <field_mapping>
+          <satelliteName>sat_customer_calc</satelliteName>
+          <sourceFieldName>description</sourceFieldName>
+          <targetFieldName>description</targetFieldName>
+        </field_mapping>
+      </field_mappings>
+      <satellite_configs/>
+      <calculations>
+        <calculation>
+          <targetFieldName>x_date</targetFieldName>
+          <expression>CASE WHEN deleted_flag = 'Y' THEN NULL ELSE event_date END</expression>
+          <hopTypeName>Timestamp</hopTypeName>
+          <length>-1</length>
+          <precision>-1</precision>
+          <description>Null the event date when deleted; uses calculation-only deleted_flag</description>
+        </calculation>
+        <calculation>
+          <targetFieldName>some_description</targetFieldName>
+          <expression>COALESCE(description, CAST('Default value' AS VARCHAR(720)))</expression>
+          <hopTypeName>String</hopTypeName>
+          <length>720</length>
+          <precision>-1</precision>
+          <description>CAST default VARCHAR(720) when description is null</description>
+        </calculation>
+        <calculation>
+          <targetFieldName>id_label</targetFieldName>
+          <expression>CONCAT(CAST(customer_id AS VARCHAR(20)), '-', COALESCE(name, ''))</expression>
+          <hopTypeName>String</hopTypeName>
+          <length>60</length>
+          <precision>-1</precision>
+          <description>Issue 153: hub business key used in a calculation</description>
+        </calculation>
+      </calculations>
+      <calculation_tests/>
+      <collapse_tests/>
+      <tableName>sat_customer_calc_hub_bv</tableName>
+      <description>SCD2 with hub BK customer_id and calculation-only deleted_flag</description>
+      <tableType>SCD2</tableType>
+      <derivatives>
+        <derivative>
+          <dvTableName>sat_customer_calc</dvTableName>
+          <dvTableType>SATELLITE</dvTableType>
+        </derivative>
+      </derivatives>
+      <xloc>560</xloc>
+      <yloc>224</yloc>
+      <name>sat_customer_calc_hub_bv</name>
+    </table>
   </tables>
   <notes/>
   <name>scd2-calculations</name>

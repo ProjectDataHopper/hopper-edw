@@ -32,10 +32,26 @@ public class BvScd2FieldMapping {
 
   @HopMetadataProperty private String targetFieldName;
 
+  /**
+   * When true the mapped column is kept on the SCD2 stream for calculations and versioning but is
+   * not written to the Business Vault target table. Stored as the uncommon case so older {@code
+   * .hbv} files without this tag deserialize as false (column is loaded).
+   */
+  @HopMetadataProperty private boolean calculationOnly;
+
   public BvScd2FieldMapping(String satelliteName, String sourceFieldName, String targetFieldName) {
+    this(satelliteName, sourceFieldName, targetFieldName, true);
+  }
+
+  public BvScd2FieldMapping(
+      String satelliteName,
+      String sourceFieldName,
+      String targetFieldName,
+      boolean includeInTarget) {
     this.satelliteName = satelliteName;
     this.sourceFieldName = sourceFieldName;
     this.targetFieldName = targetFieldName;
+    this.calculationOnly = !includeInTarget;
   }
 
   public BvScd2FieldMapping(BvScd2FieldMapping other) {
@@ -43,6 +59,16 @@ public class BvScd2FieldMapping {
       satelliteName = other.satelliteName;
       sourceFieldName = other.sourceFieldName;
       targetFieldName = other.targetFieldName;
+      calculationOnly = other.calculationOnly;
     }
+  }
+
+  /** Inverse of {@link #calculationOnly}; missing XML tag means the column is loaded. */
+  public boolean isIncludeInTarget() {
+    return !calculationOnly;
+  }
+
+  public void setIncludeInTarget(boolean includeInTarget) {
+    this.calculationOnly = !includeInTarget;
   }
 }

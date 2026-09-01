@@ -60,6 +60,12 @@ public class BvScd2Table extends BvTableBase {
 
   @HopMetadataProperty private boolean includeHashKey = true;
 
+  /**
+   * When true, parent-hub business key columns are merged into the SCD2 stream (and target table)
+   * as identity fields. They do not drive new versions.
+   */
+  @HopMetadataProperty private boolean includeHubBusinessKeys;
+
   @HopMetadataProperty(key = "field_mapping", groupKey = "field_mappings")
   private List<BvScd2FieldMapping> fieldMappings = new ArrayList<>();
 

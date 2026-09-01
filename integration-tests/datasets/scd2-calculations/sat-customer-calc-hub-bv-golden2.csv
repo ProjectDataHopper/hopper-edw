@@ -1,0 +1,4 @@
+customer_id,name,event_date,description,x_date,some_description,id_label
+1001,Alice,2023/06/15 10:00:00.000000000,Alice desc,,Alice desc,1001-Alice
+1002,Bob,2023/07/01 00:00:00.000000000,Bob gone,,Bob gone,1002-Bob
+1003,Carol,2023/08/01 12:00:00.000000000,Carol now,2023/08/01 12:00:00.000000000,Carol now,1003-Carol

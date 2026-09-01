@@ -28,6 +28,7 @@ import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.hopper.edw.datavault.catalog.DvCatalogNamespaces;
+import org.hopper.edw.datavault.metadata.BusinessKey;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvHub;
 import org.hopper.edw.datavault.metadata.DvLink;
@@ -38,6 +39,7 @@ import org.hopper.edw.datavault.metadata.businessvault.BvBusinessTable;
 import org.hopper.edw.datavault.metadata.businessvault.BvDerivativeRef;
 import org.hopper.edw.datavault.metadata.businessvault.BvPitTable;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2FieldMapping;
+import org.hopper.edw.datavault.metadata.businessvault.BvScd2FieldMappingValidationSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2SatelliteConfig;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2Table;
 import org.hopper.edw.datavault.metadata.businessvault.BvSqlRef;
@@ -331,13 +333,18 @@ public final class ImpactGraphBuilder {
         }
       }
 
+      if (scd2.isIncludeHubBusinessKeys() && dvModel != null) {
+        addScd2HubBusinessKeys(bvModel, dvModel, scd2, bvTable);
+      }
+
       if (scd2.getFieldMappings() == null) {
         return;
       }
       for (BvScd2FieldMapping mapping : scd2.getFieldMappings()) {
         if (mapping == null
             || Utils.isEmpty(mapping.getSatelliteName())
-            || Utils.isEmpty(mapping.getSourceFieldName())) {
+            || Utils.isEmpty(mapping.getSourceFieldName())
+            || !mapping.isIncludeInTarget()) {
           continue;
         }
         String satName = resolve(mapping.getSatelliteName());
@@ -371,6 +378,59 @@ public final class ImpactGraphBuilder {
                     null));
         addEdge(ImpactEdgeType.DV_TO_BV_SCD2, dvField, bvField);
         addEdge(ImpactEdgeType.DV_TO_BV_SCD2, dvField, bvTable);
+      }
+    }
+
+    private void addScd2HubBusinessKeys(
+        BusinessVaultModel bvModel, DataVaultModel dvModel, BvScd2Table scd2, ImpactNode bvTable) {
+      List<DvSatellite> satellites =
+          BvScd2FieldMappingValidationSupport.resolveSatelliteDerivatives(scd2, dvModel);
+      DvHub hub = BvScd2FieldMappingValidationSupport.resolveSharedParentHub(satellites, dvModel);
+      if (hub == null) {
+        return;
+      }
+      ImpactNode hubNode =
+          addNode(
+              new ImpactNode(
+                  ImpactNodeKind.DV_TABLE,
+                  SourceUsageIndexBuilder.MODEL_TYPE_DATA_VAULT,
+                  dvModel.getName(),
+                  dvModel.getFilename(),
+                  hub.getName(),
+                  null,
+                  null,
+                  null));
+      indexTableName(hubNode);
+      addEdge(ImpactEdgeType.DV_TO_BV_SCD2, hubNode, bvTable);
+      for (BusinessKey businessKey : hub.getDistinctBusinessKeys()) {
+        if (businessKey == null || Utils.isEmpty(businessKey.getName())) {
+          continue;
+        }
+        String fieldName = resolve(businessKey.getName());
+        ImpactNode hubField =
+            addNode(
+                new ImpactNode(
+                    ImpactNodeKind.DV_FIELD,
+                    SourceUsageIndexBuilder.MODEL_TYPE_DATA_VAULT,
+                    dvModel.getName(),
+                    dvModel.getFilename(),
+                    hub.getName(),
+                    fieldName,
+                    null,
+                    null));
+        ImpactNode bvField =
+            addNode(
+                new ImpactNode(
+                    ImpactNodeKind.BV_FIELD,
+                    SourceUsageIndexBuilder.MODEL_TYPE_BUSINESS_VAULT,
+                    bvModel.getName(),
+                    bvModel.getFilename(),
+                    scd2.getName(),
+                    fieldName,
+                    null,
+                    null));
+        addEdge(ImpactEdgeType.DV_TO_BV_SCD2, hubField, bvField);
+        addEdge(ImpactEdgeType.DV_TO_BV_SCD2, hubField, bvTable);
       }
     }
 

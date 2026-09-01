@@ -40,6 +40,9 @@ Raw vault satellites remain insert-only (technical load history). SCD2 rewrites 
 |**Include hash key**
 |When enabled, the parent hub/link hash key is written to the BV table.
 
+|**Include hub business keys**
+|When enabled, parent-hub business key columns are merged via Sorted schema merge. They are stored on the BV table and available for calculations, but they do not drive new versions. Requires Include hash key and a shared hub parent.
+
 |**Functional timestamp**
 |Column used as the timeline for validity bounds (see resolution order below).
 
@@ -80,7 +83,9 @@ Use **Debug** or **Show build pipeline** on the canvas to inspect the generated 
 
 Required when **two or more** satellites feed the table. Map each `(satellite, source field)` to a BV target column name. Validation checks parent hub/link consistency, source field existence, and unique target columns.
 
-Single-satellite tables can pass attributes through under DV names unless you add explicit mappings for renaming or subsetting.
+**Load** (Yes/No, default Yes): No keeps the column on the stream for SQL calculations and versioning but does not write it to the BV table. Load=No is full rebuild only.
+
+Single-satellite tables can pass attributes through under DV names unless you add explicit mappings for renaming, subsetting, or calculation-only columns.
 
 == Satellite configs
 

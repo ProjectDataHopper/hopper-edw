@@ -28,6 +28,7 @@ import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.hopper.edw.datavault.hopgui.file.businessvault.HopBusinessVaultFileType;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2Calculation;
+import org.hopper.edw.datavault.metadata.businessvault.BvScd2FieldMapping;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2Table;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -98,6 +99,22 @@ class BvModelLineageCollectorTest {
     assertTrue(
         calc.getContributions().get(0).getReasons().stream()
             .anyMatch(r -> r.getCode() == LineageReasonCode.BV_SCD2_CALCULATION));
+  }
+
+  @Test
+  void calculationOnlyMappingIsOmittedFromStoredFieldLineage() {
+    BvScd2Table table =
+        (BvScd2Table)
+            model.getTables().stream()
+                .filter(t -> t instanceof BvScd2Table && "customer_360_bv".equals(t.getName()))
+                .findFirst()
+                .orElseThrow();
+    table
+        .getFieldMappings()
+        .add(new BvScd2FieldMapping("sat_customer_demo", "score", "raw_score", false));
+    LineageSnapshot snapshot = BvModelLineageCollector.collect(model, variables);
+    TableLineage tableLineage = snapshot.findTableByLogicalName("customer_360_bv").orElseThrow();
+    assertTrue(tableLineage.findField("raw_score").isEmpty());
   }
 
   @Test

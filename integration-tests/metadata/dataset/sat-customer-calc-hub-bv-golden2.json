@@ -1,0 +1,65 @@
+{
+  "base_filename": "scd2-calculations/sat-customer-calc-hub-bv-golden2.csv",
+  "virtualPath": "/scd2-calculations",
+  "name": "sat-customer-calc-hub-bv-golden2",
+  "description": "Current SCD2 hub-BK calculation rows after update load",
+  "dataset_fields": [
+    {
+      "field_comment": "customer_id",
+      "field_length": 9,
+      "field_type": 5,
+      "field_precision": 0,
+      "field_name": "customer_id",
+      "field_format": "#"
+    },
+    {
+      "field_comment": "name",
+      "field_length": 50,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "name",
+      "field_format": ""
+    },
+    {
+      "field_comment": "event_date",
+      "field_length": 6,
+      "field_type": 9,
+      "field_precision": -1,
+      "field_name": "event_date",
+      "field_format": "yyyy/MM/dd HH:mm:ss.SSSSSSSSS"
+    },
+    {
+      "field_comment": "description",
+      "field_length": 100,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "description",
+      "field_format": ""
+    },
+    {
+      "field_comment": "x_date",
+      "field_length": 6,
+      "field_type": 9,
+      "field_precision": -1,
+      "field_name": "x_date",
+      "field_format": "yyyy/MM/dd HH:mm:ss.SSSSSSSSS"
+    },
+    {
+      "field_comment": "some_description",
+      "field_length": 720,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "some_description",
+      "field_format": ""
+    },
+    {
+      "field_comment": "id_label",
+      "field_length": 60,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "id_label",
+      "field_format": ""
+    }
+  ],
+  "folder_name": ""
+}

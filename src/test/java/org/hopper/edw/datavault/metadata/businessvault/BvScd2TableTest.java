@@ -105,6 +105,22 @@ class BvScd2TableTest {
   }
 
   @Test
+  void xmlRoundTripPreservesIncludeHubBusinessKeys() throws Exception {
+    BvScd2Table original = new BvScd2Table();
+    original.setName("customer_bv");
+    original.setIncludeHubBusinessKeys(true);
+    original.getDerivatives().add(new BvDerivativeRef("sat_customer", DvTableType.SATELLITE));
+
+    String xml = XmlHandler.aroundTag("table", XmlMetadataUtil.serializeObjectToXml(original));
+    Document document = XmlHandler.loadXmlString(xml);
+    Node rootNode = XmlHandler.getSubNode(document, "table");
+    BvScd2Table restored = new BvScd2Table();
+    XmlMetadataUtil.deSerializeFromXml(rootNode, BvScd2Table.class, restored, null);
+
+    assertTrue(restored.isIncludeHubBusinessKeys());
+  }
+
+  @Test
   void xmlRoundTripPreservesCalculationsAndTests() throws Exception {
     BvScd2Table original = new BvScd2Table();
     original.setName("customer_bv");

@@ -26,14 +26,16 @@ import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
+import org.hopper.edw.datavault.metadata.BusinessKey;
 import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
+import org.hopper.edw.datavault.metadata.DvHub;
 import org.hopper.edw.datavault.metadata.DvSatellite;
 import org.hopper.edw.datavault.metadata.DvTableType;
 import org.hopper.edw.datavault.metadata.SatelliteAttribute;
 
 /** Validation rules for explicit satellite-to-BV SCD2 field mappings. */
-final class BvScd2FieldMappingValidationSupport {
+public final class BvScd2FieldMappingValidationSupport {
 
   private static final Class<?> PKG = BvScd2FieldMappingValidationSupport.class;
 
@@ -67,11 +69,6 @@ final class BvScd2FieldMappingValidationSupport {
                   "BvScd2FieldMappingValidationSupport.Error.MappingsRequiredForMultiSatellite",
                   scd2Table.getName()),
               scd2Table));
-      return;
-    }
-
-    if (!hasMappings) {
-      return;
     }
 
     Set<String> derivativeNames = new HashSet<>();
@@ -80,6 +77,13 @@ final class BvScd2FieldMappingValidationSupport {
     }
 
     validateSharedParent(remarks, scd2Table, satellites);
+    validateHubBusinessKeys(
+        remarks, scd2Table, satellites, bvConfig, dvConfig, dataVaultModel, variables);
+    validateCalculationOnlyMappings(remarks, scd2Table, variables);
+
+    if (!hasMappings) {
+      return;
+    }
 
     Set<String> targetFieldNames = new HashSet<>();
     Map<String, Integer> mappingsPerSatellite = new HashMap<>();
@@ -169,6 +173,256 @@ final class BvScd2FieldMappingValidationSupport {
 
     validateSatelliteConfigs(remarks, scd2Table, satellites, derivativeNames, variables);
     validateFunctionalTimestamps(remarks, scd2Table, satellites, bvConfig, dvConfig, variables);
+  }
+
+  static void validateHubBusinessKeys(
+      List<ICheckResult> remarks,
+      BvScd2Table scd2Table,
+      List<DvSatellite> satellites,
+      BusinessVaultConfiguration bvConfig,
+      DataVaultConfiguration dvConfig,
+      DataVaultModel dataVaultModel,
+      IVariables variables) {
+    if (scd2Table == null || !scd2Table.isIncludeHubBusinessKeys()) {
+      return;
+    }
+    if (!scd2Table.isIncludeHashKey()) {
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_ERROR,
+              BaseMessages.getString(
+                  PKG,
+                  "BvScd2FieldMappingValidationSupport.Error.HubBusinessKeysNeedHashKey",
+                  scd2Table.getName()),
+              scd2Table));
+      return;
+    }
+
+    ParentKind parentKind = resolveParentKind(satellites);
+    if (parentKind == ParentKind.LINK || parentKind == ParentKind.MIXED) {
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_ERROR,
+              BaseMessages.getString(
+                  PKG,
+                  parentKind == ParentKind.LINK
+                      ? "BvScd2FieldMappingValidationSupport.Error.HubBusinessKeysLinkParent"
+                      : "BvScd2FieldMappingValidationSupport.Error.HubBusinessKeysNeedHubParent",
+                  scd2Table.getName()),
+              scd2Table));
+      return;
+    }
+    if (parentKind != ParentKind.HUB) {
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_ERROR,
+              BaseMessages.getString(
+                  PKG,
+                  "BvScd2FieldMappingValidationSupport.Error.HubBusinessKeysNeedHubParent",
+                  scd2Table.getName()),
+              scd2Table));
+      return;
+    }
+
+    String hubName = resolveSharedHubName(satellites);
+    if (Utils.isEmpty(hubName)) {
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_ERROR,
+              BaseMessages.getString(
+                  PKG,
+                  "BvScd2FieldMappingValidationSupport.Error.HubBusinessKeysNeedHubParent",
+                  scd2Table.getName()),
+              scd2Table));
+      return;
+    }
+
+    DvHub hub = dataVaultModel != null ? dataVaultModel.findHub(hubName) : null;
+    if (hub == null) {
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_ERROR,
+              BaseMessages.getString(
+                  PKG,
+                  "BvScd2FieldMappingValidationSupport.Error.HubBusinessKeysUnknownHub",
+                  scd2Table.getName(),
+                  hubName),
+              scd2Table));
+      return;
+    }
+    List<BusinessKey> businessKeys = hub.getDistinctBusinessKeys();
+    if (businessKeys == null || businessKeys.isEmpty()) {
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_ERROR,
+              BaseMessages.getString(
+                  PKG,
+                  "BvScd2FieldMappingValidationSupport.Error.HubBusinessKeysMissing",
+                  scd2Table.getName(),
+                  hubName),
+              scd2Table));
+      return;
+    }
+
+    for (DvSatellite satellite : satellites) {
+      if (satellite != null && satellite.hasDrivingKey()) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_ERROR,
+                BaseMessages.getString(
+                    PKG,
+                    "BvScd2FieldMappingValidationSupport.Error.HubBusinessKeysDrivingKey",
+                    scd2Table.getName()),
+                scd2Table));
+        return;
+      }
+    }
+
+    Set<String> reserved = reservedScd2ColumnNames(scd2Table, bvConfig, dvConfig, variables);
+    addReserved(reserved, variables.resolve(hub.getHashKeyFieldName()));
+    for (BusinessKey businessKey : businessKeys) {
+      if (businessKey == null || Utils.isEmpty(businessKey.getName())) {
+        continue;
+      }
+      String bkName = variables.resolve(businessKey.getName());
+      if (reserved.contains(bkName.toLowerCase())) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_ERROR,
+                BaseMessages.getString(
+                    PKG,
+                    "BvScd2FieldMappingValidationSupport.Error.HubBusinessKeyCollision",
+                    scd2Table.getName(),
+                    bkName),
+                scd2Table));
+      }
+    }
+  }
+
+  private static void validateCalculationOnlyMappings(
+      List<ICheckResult> remarks, BvScd2Table scd2Table, IVariables variables) {
+    if (scd2Table == null
+        || !scd2Table.isIncrementalBuild()
+        || scd2Table.getFieldMappings() == null) {
+      return;
+    }
+    for (BvScd2FieldMapping mapping : scd2Table.getFieldMappings()) {
+      if (mapping == null || mapping.isIncludeInTarget()) {
+        continue;
+      }
+      String targetFieldName = variables.resolve(mapping.getTargetFieldName());
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_ERROR,
+              BaseMessages.getString(
+                  PKG,
+                  "BvScd2FieldMappingValidationSupport.Error.CalculationOnlyIncremental",
+                  scd2Table.getName(),
+                  Utils.isEmpty(targetFieldName) ? mapping.getSourceFieldName() : targetFieldName),
+              scd2Table));
+    }
+  }
+
+  private static Set<String> reservedScd2ColumnNames(
+      BvScd2Table scd2Table,
+      BusinessVaultConfiguration bvConfig,
+      DataVaultConfiguration dvConfig,
+      IVariables variables) {
+    Set<String> names = new HashSet<>();
+    addReserved(
+        names,
+        BvScd2PipelineSupport.resolveFunctionalTimestampField(
+            scd2Table, bvConfig, dvConfig, variables));
+    addReserved(names, BvScd2PipelineSupport.resolveValidFromField(scd2Table, bvConfig, variables));
+    addReserved(names, BvScd2PipelineSupport.resolveValidToField(scd2Table, bvConfig, variables));
+    addReserved(names, BvScd2PipelineSupport.resolveRecordSourceField(dvConfig, variables));
+    if (scd2Table.getFieldMappings() != null) {
+      for (BvScd2FieldMapping mapping : scd2Table.getFieldMappings()) {
+        if (mapping != null) {
+          addReserved(names, variables.resolve(mapping.getTargetFieldName()));
+        }
+      }
+    }
+    if (scd2Table.getCalculations() != null) {
+      for (BvScd2Calculation calculation : scd2Table.getCalculations()) {
+        if (calculation != null) {
+          addReserved(names, variables.resolve(calculation.getTargetFieldName()));
+        }
+      }
+    }
+    return names;
+  }
+
+  private static void addReserved(Set<String> names, String name) {
+    if (!Utils.isEmpty(name)) {
+      names.add(name.toLowerCase());
+    }
+  }
+
+  public static DvHub resolveSharedParentHub(
+      List<DvSatellite> satellites, DataVaultModel dataVaultModel) {
+    String hubName = resolveSharedHubName(satellites);
+    if (Utils.isEmpty(hubName) || dataVaultModel == null) {
+      return null;
+    }
+    return dataVaultModel.findHub(hubName);
+  }
+
+  static String resolveSharedHubName(List<DvSatellite> satellites) {
+    if (satellites == null
+        || satellites.isEmpty()
+        || resolveParentKind(satellites) != ParentKind.HUB) {
+      return null;
+    }
+    for (DvSatellite satellite : satellites) {
+      if (satellite != null && !Utils.isEmpty(satellite.getHubName())) {
+        return satellite.getHubName();
+      }
+    }
+    return null;
+  }
+
+  private enum ParentKind {
+    HUB,
+    LINK,
+    MIXED,
+    NONE
+  }
+
+  private static ParentKind resolveParentKind(List<DvSatellite> satellites) {
+    boolean hub = false;
+    boolean link = false;
+    String hubName = null;
+    String linkName = null;
+    for (DvSatellite satellite : satellites) {
+      if (satellite == null) {
+        continue;
+      }
+      if (!Utils.isEmpty(satellite.getHubName())) {
+        if (hubName != null && !hubName.equals(satellite.getHubName())) {
+          return ParentKind.MIXED;
+        }
+        hubName = satellite.getHubName();
+        hub = true;
+      }
+      if (!Utils.isEmpty(satellite.getLinkName())) {
+        if (linkName != null && !linkName.equals(satellite.getLinkName())) {
+          return ParentKind.MIXED;
+        }
+        linkName = satellite.getLinkName();
+        link = true;
+      }
+    }
+    if (hub && link) {
+      return ParentKind.MIXED;
+    }
+    if (hub) {
+      return ParentKind.HUB;
+    }
+    if (link) {
+      return ParentKind.LINK;
+    }
+    return ParentKind.NONE;
   }
 
   private static void validateSharedParent(
@@ -314,7 +568,7 @@ final class BvScd2FieldMappingValidationSupport {
     }
   }
 
-  static List<DvSatellite> resolveSatelliteDerivatives(
+  public static List<DvSatellite> resolveSatelliteDerivatives(
       BvScd2Table scd2Table, DataVaultModel dataVaultModel) {
     List<DvSatellite> satellites = new ArrayList<>();
     for (BvDerivativeRef derivative : scd2Table.getDerivatives()) {

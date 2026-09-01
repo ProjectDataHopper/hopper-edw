@@ -50,6 +50,7 @@ import org.apache.hop.pipeline.transforms.update.UpdateMeta;
 import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvBulkLoadPluginSupport;
+import org.hopper.edw.datavault.metadata.DvHub;
 import org.hopper.edw.datavault.metadata.DvSatellite;
 import org.hopper.edw.datavault.metadata.DvTableType;
 import org.hopper.edw.datavault.metadata.DvTargetLoadMode;
@@ -1365,6 +1366,157 @@ class BvScd2PipelineSupportTest {
   private static Scd2BuildContext singleSatelliteContext(
       BvScd2BuildMode buildMode, String incrementalWatermarkField) throws Exception {
     return singleSatelliteContext(buildMode, incrementalWatermarkField, "Vault", "Vault");
+  }
+
+  @Test
+  void hubBusinessKeySqlSelectsHashAndBkAndOrdersByHash() throws Exception {
+    Scd2BuildContext ctx = singleSatelliteContextWithHubBusinessKeys();
+    String sql = BvScd2PipelineSupport.buildHubTableInputSql(ctx);
+    assertTrue(sql.contains("customer_hk"));
+    assertTrue(sql.contains("customer_id"));
+    assertTrue(sql.contains("FROM hub_customer"));
+    assertTrue(sql.contains("ORDER BY"));
+    assertFalse(sql.contains("x_load_ts"));
+  }
+
+  @Test
+  void singleSatellitePipelineMergesHubBusinessKeys() throws Exception {
+    Scd2BuildContext ctx = singleSatelliteContextWithHubBusinessKeys();
+    PipelineMeta pipelineMeta = BvScd2PipelineSupport.generatePipeline(ctx);
+
+    assertTrue(
+        pipelineMeta.getTransforms().stream()
+            .anyMatch(t -> "read_hub_customer".equals(t.getName())));
+    assertTrue(
+        pipelineMeta.getTransforms().stream()
+            .anyMatch(t -> t.getTransform() instanceof SortedSchemaMergeMeta));
+    assertTrue(
+        pipelineMeta.getTransforms().stream()
+            .anyMatch(t -> "filter_hub_bk_rows".equals(t.getName())));
+
+    RepeatFieldsMeta repeatMeta =
+        (RepeatFieldsMeta)
+            pipelineMeta.getTransforms().stream()
+                .filter(t -> t.getTransform() instanceof RepeatFieldsMeta)
+                .findFirst()
+                .orElseThrow()
+                .getTransform();
+    assertTrue(
+        repeatMeta.getRepeats().stream()
+            .anyMatch(
+                repeat ->
+                    RepeatType.PreviousWhenNull == repeat.getType()
+                        && "customer_id".equals(repeat.getSourceField())));
+
+    GroupByMeta groupByMeta =
+        (GroupByMeta)
+            pipelineMeta.getTransforms().stream()
+                .filter(t -> t.getTransform() instanceof GroupByMeta)
+                .findFirst()
+                .orElseThrow()
+                .getTransform();
+    assertTrue(
+        groupByMeta.getAggregations().stream()
+            .anyMatch(
+                agg -> "customer_id".equals(agg.getField()) && "LAST".equals(agg.getTypeLabel())));
+    assertTrue(
+        groupByMeta.getGroupingFields().stream()
+            .noneMatch(field -> "customer_id".equals(field.getName())));
+
+    var layout =
+        BvScd2PipelineSupport.buildTargetTableLayout(
+            ctx.scd2Table, ctx.bvConfig, ctx.dvModel, ctx.variables);
+    assertTrue(
+        layout.getValueMetaList().stream().anyMatch(vm -> "customer_id".equals(vm.getName())));
+  }
+
+  @Test
+  void targetLayoutOmitsCalculationOnlyMappings() throws Exception {
+    Scd2BuildContext ctx = singleSatelliteContext(BvScd2BuildMode.FULL_REBUILD, null);
+    ctx.scd2Table
+        .getFieldMappings()
+        .add(new BvScd2FieldMapping("sat_customer", "name", "customer_name"));
+    ctx.scd2Table
+        .getFieldMappings()
+        .add(new BvScd2FieldMapping("sat_customer", "email", "email", false));
+
+    var layout =
+        BvScd2PipelineSupport.buildTargetTableLayout(
+            ctx.scd2Table, ctx.bvConfig, ctx.dvModel, ctx.variables);
+    assertTrue(
+        layout.getValueMetaList().stream().anyMatch(vm -> "customer_name".equals(vm.getName())));
+    assertTrue(layout.getValueMetaList().stream().noneMatch(vm -> "email".equals(vm.getName())));
+
+    var collapse =
+        BvScd2PipelineSupport.buildCollapseRowLayout(
+            ctx.scd2Table, ctx.bvConfig, ctx.dvModel, ctx.variables);
+    assertTrue(collapse.getValueMetaList().stream().anyMatch(vm -> "email".equals(vm.getName())));
+  }
+
+  @Test
+  void hubBusinessKeyIsAvailableToCalculations() throws Exception {
+    Scd2BuildContext ctx = singleSatelliteContextWithHubBusinessKeys();
+    ctx.scd2Table
+        .getCalculations()
+        .add(
+            new BvScd2Calculation(
+                "id_label", "CONCAT(CAST(customer_id AS VARCHAR(20)), '-', COALESCE(name, ''))"));
+    var collapse =
+        BvScd2PipelineSupport.buildCollapseRowLayout(
+            ctx.scd2Table, ctx.bvConfig, ctx.dvModel, ctx.variables);
+    assertTrue(
+        collapse.getValueMetaList().stream().anyMatch(vm -> "customer_id".equals(vm.getName())));
+    var layout =
+        BvScd2PipelineSupport.buildTargetTableLayout(
+            ctx.scd2Table, ctx.bvConfig, ctx.dvModel, ctx.variables);
+    assertTrue(layout.getValueMetaList().stream().anyMatch(vm -> "id_label".equals(vm.getName())));
+  }
+
+  private static Scd2BuildContext singleSatelliteContextWithHubBusinessKeys() throws Exception {
+    DataVaultModel dvModel = loadVault1Model();
+    DvSatellite satellite = (DvSatellite) dvModel.findTable("sat_customer");
+    DvHub hub = dvModel.findHub("hub_customer");
+    DatabaseMeta databaseMeta = new TestDatabaseMeta("Vault");
+
+    BvScd2Table scd2Table = new BvScd2Table();
+    scd2Table.setName("bv_customer_scd2");
+    scd2Table.setTableName("bv_customer_scd2");
+    scd2Table.setFunctionalTimestampField("x_load_ts");
+    scd2Table.setIncludeHubBusinessKeys(true);
+    scd2Table.getDerivatives().add(new BvDerivativeRef("sat_customer", DvTableType.SATELLITE));
+
+    BusinessVaultModel bvModel = new BusinessVaultModel();
+    bvModel.getConfigurationOrDefault().setTargetDatabase("Vault");
+
+    return new Scd2BuildContext(
+        scd2Table,
+        satellite,
+        bvModel,
+        dvModel,
+        bvModel.getConfigurationOrDefault(),
+        dvModel.getConfigurationOrDefault(),
+        null,
+        new Variables(),
+        databaseMeta,
+        "Vault",
+        databaseMeta,
+        "Vault",
+        "sat_customer",
+        "bv_customer_scd2",
+        "bv-scd2-bv_customer_scd2-sat_customer",
+        "customer_hk",
+        null,
+        BvScd2PipelineSupport.resolveAttributeFieldNames(satellite),
+        "x_load_ts",
+        "valid_from",
+        "valid_to",
+        "x_record_source",
+        BusinessVaultConfiguration.DEFAULT_OPEN_START_SENTINEL,
+        BusinessVaultConfiguration.DEFAULT_OPEN_END_SENTINEL,
+        true,
+        hub,
+        "hub_customer",
+        List.of("customer_id"));
   }
 
   private static Scd2BuildContext singleSatelliteContext(

@@ -106,7 +106,8 @@ After collapse, each SCD2 table can compute extra target columns with determinis
 
 * Expressions run **after** Group By collapse and **before** Table Output / incremental write.
 * They do **not** create new versions. Mapped satellite attributes remain the grouping keys.
-* Target names must be **new columns** (they cannot overwrite mapped attributes, hash keys, or validity fields). Raw mapped columns stay on the table so incremental runs can recompute expressions.
+* Target names must be **new columns** (they cannot overwrite mapped attributes, hash keys, hub business keys, or validity fields). Raw mapped columns stay on the table so incremental runs can recompute expressions, unless **Load** is **No** on the mapping (calculation-only; full rebuild only).
+* Optional **Include hub business keys** (General tab) merges parent-hub BK columns through Sorted schema merge. They are identity fields: available for calculations and stored on the table, but they do not open new versions.
 * Syntax is SQL: `CASE WHEN …`, `COALESCE`, `CAST(x AS VARCHAR(n))`. `x :> VARCHAR(n)` and `x::TYPE` are accepted. MySQL / SingleStore-style `CONCAT`, `HEX`, `UNHEX`, `MD5`, `DATE_FORMAT`, and `TO_DATE` are available for migration.
 * Not allowed: `NOW()`, `CURRENT_TIMESTAMP`, `RANDOM`, subqueries, aggregates, Jinja.
 
@@ -116,7 +117,7 @@ image::images/sql-expression-dialog.png[SQL Expression transform dialog — Keep
 
 The SQL Expression transform can also **link a Business Vault model file and SCD2 table**. When both are set, it loads calculations from that table at runtime (inline expressions are ignored). Production generate still copies expressions so load pipelines do not depend on opening the `.hbv` at run time. Help for the transform: link:help/sql-expression-dialog.adoc[SQL Expression].
 
-Integration fixture: `integration-tests/tests/scd2-calculations/update-scd2-calculations.hwf` — deleted-flag `CASE` plus `CAST('Default value' AS VARCHAR(720))` on a single-satellite SCD2 table, golden current-state after initial and update loads.
+Integration fixture: `integration-tests/tests/scd2-calculations/update-scd2-calculations.hwf` — deleted-flag `CASE` plus `CAST('Default value' AS VARCHAR(720))` on a single-satellite SCD2 table, golden current-state after initial and update loads. The same workflow also builds `sat_customer_calc_hub_bv` (issue #153): hub `customer_id` on the stream/table, `deleted_flag` mapped with **Load=No**.
 
 === Tests
 
@@ -211,6 +212,12 @@ Open intervals use sentinels from configuration (default `1900-01-01 00:00:00` a
 
 |Include hash key
 |When enabled, the parent hash key column is included in the BV table.
+
+|Include hub business keys
+|When enabled, parent-hub business key columns are merged in as an extra Sorted schema merge input. Identity only (not version drivers). Requires Include hash key and hub-parent satellites. Not supported for link satellites or driving keys.
+
+|Field mappings Load column
+|**Yes** (default) writes the mapped column to the BV table. **No** keeps it on the stream for calculations and versioning only. Full rebuild only — Incremental plus Load=No is a Check-model error.
 
 |Functional timestamp
 |Column on the satellite stream used as the timeline (see resolution order above).

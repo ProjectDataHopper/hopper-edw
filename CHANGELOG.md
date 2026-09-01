@@ -4,6 +4,13 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### BV SCD2 hub business keys and calculation-only mappings (issue #153)
+
+- SCD2 **Include hub business keys** merges parent-hub BK columns as an extra Sorted schema merge input (identity only; not version drivers)
+- Field mappings **Load** column: No keeps the column for calculations and versioning but does not write it to the BV table (full rebuild only)
+- Hub rows sort first via the open-start sentinel, Repeat Fields carries BKs, then hub-only rows are filtered out
+- Check model errors: Load=No with Incremental; hub BKs without Include hash key, on link/driving-key satellites, or with name collisions
+
 ### Multi-satellite SCD2 sorts hash keys the way Hop merges them
 
 - Generated SCD2 `TableInput` `ORDER BY` for STRING/HEX hash keys uses a Java `String.compareTo` collation (Postgres `COLLATE "C"`, SQL Server `Latin1_General_100_BIN2`, MySQL/SingleStore `BINARY`)

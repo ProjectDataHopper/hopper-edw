@@ -61,6 +61,8 @@ DROP TABLE IF EXISTS sat_customer_calc
 ;
 DROP TABLE IF EXISTS sat_customer_calc_bv
 ;
+DROP TABLE IF EXISTS sat_customer_calc_hub_bv
+;
 </sql>
       <connection>Vault</connection>
       <useVariableSubstitution>N</useVariableSubstitution>
@@ -205,6 +207,9 @@ DROP TABLE IF EXISTS sat_customer_calc_bv
         <test_name>
           <name>validate-sat-customer-calc-bv UNIT</name>
         </test_name>
+        <test_name>
+          <name>validate-sat-customer-calc-hub-bv UNIT</name>
+        </test_name>
       </test_names>
       <name>test after initial</name>
       <description/>
@@ -315,6 +320,9 @@ DROP TABLE IF EXISTS sat_customer_calc_bv
       <test_names>
         <test_name>
           <name>validate-sat-customer-calc-bv2 UNIT</name>
+        </test_name>
+        <test_name>
+          <name>validate-sat-customer-calc-hub-bv2 UNIT</name>
         </test_name>
       </test_names>
       <name>test after update</name>

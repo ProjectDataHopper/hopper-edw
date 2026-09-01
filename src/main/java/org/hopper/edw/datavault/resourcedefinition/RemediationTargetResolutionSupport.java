@@ -221,7 +221,8 @@ public final class RemediationTargetResolutionSupport {
         for (BvScd2FieldMapping mapping : scd2.getFieldMappings()) {
           if (mapping == null
               || Utils.isEmpty(mapping.getSourceFieldName())
-              || Utils.isEmpty(mapping.getTargetFieldName())) {
+              || Utils.isEmpty(mapping.getTargetFieldName())
+              || !mapping.isIncludeInTarget()) {
             continue;
           }
           String source =

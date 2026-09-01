@@ -207,6 +207,18 @@ public final class LineageReasonFactory {
         evidence);
   }
 
+  public static LineageReason bvScd2HubBusinessKey(String targetField, String hubName) {
+    Map<String, String> evidence = new LinkedHashMap<>();
+    evidence.put("targetField", nvl(targetField));
+    evidence.put("hubName", nvl(hubName));
+    return new LineageReason(
+        LineageReasonCode.BV_SCD2_HUB_BK,
+        BaseMessages.getString(
+            PKG, "LineageReason.BvScd2HubBusinessKey", nvl(targetField), nvl(hubName)),
+        LineageConfidence.EXPLICIT,
+        evidence);
+  }
+
   public static LineageReason bvScd2Calculation(String targetField, String expression) {
     Map<String, String> evidence = new LinkedHashMap<>();
     evidence.put("targetField", nvl(targetField));

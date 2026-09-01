@@ -68,6 +68,7 @@ For each target column:
 | `MULTI_SOURCE_HUB` | Same BK column fed by multiple record sources
 | `LINK_HUB_KEY_MAPPING` | Link maps source columns to participating hub keys
 | `BV_SCD2_FIELD_MAP` | Explicit Business Vault SCD2 field mapping
+| `BV_SCD2_HUB_BK` | Parent hub business key copied onto a BV SCD2 table
 | `DM_ROLE_MAPPING` | Dimensional role, measure, or staging mapping 
 |===
 

@@ -78,8 +78,10 @@ import org.apache.hop.pipeline.transforms.update.UpdateMeta;
 import org.apache.hop.workflow.WorkflowMeta;
 import org.hopper.edw.datavault.expression.SqlExpressionException;
 import org.hopper.edw.datavault.expression.SqlExpressionProgram;
+import org.hopper.edw.datavault.metadata.BusinessKey;
 import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
+import org.hopper.edw.datavault.metadata.DvDataTypeSupport;
 import org.hopper.edw.datavault.metadata.DvHub;
 import org.hopper.edw.datavault.metadata.DvLink;
 import org.hopper.edw.datavault.metadata.DvLoadCycleSupport;
@@ -114,6 +116,9 @@ public final class BvScd2PipelineSupport {
   private static final int SPACING_WIDTH = 160;
   private static final int LEG_SPACING_HEIGHT = 96;
   static final String SOURCE_INDICATOR_FIELD = "_bv_source";
+  static final String HUB_ROW_FLAG_FIELD = "_bv_hub_row";
+  static final String HUB_ROW_FLAG_VALUE = "Y";
+  public static final String PARAM_HUB_WATERMARK_TRANSFORM = "param_hub_delta_keys";
   public static final String BASELINE_SOURCE_INDICATOR = "BASELINE";
   static final String RECORD_SOURCE_CONCAT_SEPARATOR = ", ";
   public static final String DEFAULT_INCREMENTAL_SENTINEL = "1900-01-01 00:00:00";
@@ -221,16 +226,35 @@ public final class BvScd2PipelineSupport {
     TransformMeta legStream =
         injectRecordSourceConstantIfNeeded(
             ctx, ctx.legs.get(0), pipelineMeta, tableInput, LOCATION_START);
-    TransformMeta mergeInput = legStream;
+    List<TransformMeta> mergeInputs = new ArrayList<>();
+    mergeInputs.add(legStream);
+    int extraLeg = 1;
     if (ctx.scd2Table != null && ctx.scd2Table.isIncrementalBuild()) {
-      TransformMeta baselineOutput =
+      mergeInputs.add(
           addIncrementalBaselineLeg(
               ctx,
               pipelineMeta,
-              new Point(LOCATION_START.x, LOCATION_START.y + LEG_SPACING_HEIGHT),
+              new Point(LOCATION_START.x, LOCATION_START.y + extraLeg * LEG_SPACING_HEIGHT),
               false,
-              openRowFilterParam);
-      mergeInput = addSortedSchemaMerge(ctx, pipelineMeta, List.of(legStream, baselineOutput));
+              openRowFilterParam));
+      extraLeg++;
+    }
+    if (ctx.includeHubBusinessKeys()) {
+      mergeInputs.add(
+          addHubBusinessKeyLeg(
+              ctx,
+              pipelineMeta,
+              new Point(LOCATION_START.x, LOCATION_START.y + extraLeg * LEG_SPACING_HEIGHT),
+              watermarkParam));
+    }
+    TransformMeta mergeInput = legStream;
+    if (mergeInputs.size() >= 2) {
+      mergeInput = addSortedSchemaMerge(ctx, pipelineMeta, mergeInputs);
+    }
+    if (ctx.includeHubBusinessKeys()) {
+      TransformMeta repeatFields = addRepeatFields(ctx, pipelineMeta, mergeInput);
+      TransformMeta filtered = addFilterHubBkRows(ctx, pipelineMeta, repeatFields);
+      mergeInput = addPostRepeatSelectValues(ctx, pipelineMeta, filtered);
     }
     TransformMeta analyticQuery = addAnalyticQuery(ctx, pipelineMeta, mergeInput);
     TransformMeta ifNull = addIfNull(ctx, pipelineMeta, analyticQuery);
@@ -282,16 +306,30 @@ public final class BvScd2PipelineSupport {
           addLegSourceIndicatorConstant(ctx, leg, pipelineMeta, tableInput, legLocation);
       legOutputs.add(addLegSelectValues(ctx, leg, pipelineMeta, sourceConstant, legLocation));
     }
+    int extraLeg = ctx.legs.size();
     if (ctx.scd2Table != null && ctx.scd2Table.isIncrementalBuild()) {
       Point baselineLocation =
-          new Point(LOCATION_START.x, LOCATION_START.y + ctx.legs.size() * LEG_SPACING_HEIGHT);
+          new Point(LOCATION_START.x, LOCATION_START.y + extraLeg * LEG_SPACING_HEIGHT);
       legOutputs.add(
           addIncrementalBaselineLeg(ctx, pipelineMeta, baselineLocation, true, openRowFilterParam));
+      extraLeg++;
+    }
+    if (ctx.includeHubBusinessKeys()) {
+      legOutputs.add(
+          addHubBusinessKeyLeg(
+              ctx,
+              pipelineMeta,
+              new Point(LOCATION_START.x, LOCATION_START.y + extraLeg * LEG_SPACING_HEIGHT),
+              watermarkParam));
     }
 
     TransformMeta sortedMerge = addSortedSchemaMerge(ctx, pipelineMeta, legOutputs);
     TransformMeta repeatFields = addRepeatFields(ctx, pipelineMeta, sortedMerge);
-    TransformMeta postRepeatSelect = addPostRepeatSelectValues(ctx, pipelineMeta, repeatFields);
+    TransformMeta afterRepeat = repeatFields;
+    if (ctx.includeHubBusinessKeys()) {
+      afterRepeat = addFilterHubBkRows(ctx, pipelineMeta, repeatFields);
+    }
+    TransformMeta postRepeatSelect = addPostRepeatSelectValues(ctx, pipelineMeta, afterRepeat);
     TransformMeta analyticQuery = addAnalyticQuery(ctx, pipelineMeta, postRepeatSelect);
     TransformMeta ifNull = addIfNull(ctx, pipelineMeta, analyticQuery);
     TransformMeta groupBy = addGroupBy(ctx, pipelineMeta, ifNull);
@@ -383,7 +421,8 @@ public final class BvScd2PipelineSupport {
         resources.recordSourceField,
         resources.openStartSentinel,
         resources.openEndSentinel,
-        scd2Table.isIncludeHashKey());
+        scd2Table.isIncludeHashKey(),
+        resolveHubBkAttachment(scd2Table, dvModel, List.of(satellite), variables));
   }
 
   private static Scd2BuildContext createMultiSatelliteContext(
@@ -455,7 +494,43 @@ public final class BvScd2PipelineSupport {
         resources.recordSourceField,
         resources.openStartSentinel,
         resources.openEndSentinel,
-        scd2Table.isIncludeHashKey());
+        scd2Table.isIncludeHashKey(),
+        resolveHubBkAttachment(scd2Table, dvModel, satellites, variables));
+  }
+
+  private static HubBkAttachment resolveHubBkAttachment(
+      BvScd2Table scd2Table,
+      DataVaultModel dvModel,
+      List<DvSatellite> satellites,
+      IVariables variables)
+      throws HopException {
+    if (scd2Table == null || !scd2Table.isIncludeHubBusinessKeys()) {
+      return HubBkAttachment.none();
+    }
+    DvHub hub = BvScd2FieldMappingValidationSupport.resolveSharedParentHub(satellites, dvModel);
+    if (hub == null) {
+      throw new HopException(
+          "SCD2 table "
+              + scd2Table.getName()
+              + " cannot include hub business keys without a shared hub parent");
+    }
+    String tableName = !Utils.isEmpty(hub.getTableName()) ? hub.getTableName() : hub.getName();
+    List<String> fieldNames = new ArrayList<>();
+    for (BusinessKey businessKey : hub.getDistinctBusinessKeys()) {
+      if (businessKey == null || Utils.isEmpty(businessKey.getName())) {
+        continue;
+      }
+      fieldNames.add(variables.resolve(businessKey.getName()));
+    }
+    if (fieldNames.isEmpty()) {
+      throw new HopException(
+          "SCD2 table "
+              + scd2Table.getName()
+              + " cannot include hub business keys because hub "
+              + hub.getName()
+              + " has none");
+    }
+    return new HubBkAttachment(true, hub, tableName, fieldNames);
   }
 
   private static SharedScd2Resources resolveSharedResources(
@@ -652,6 +727,7 @@ public final class BvScd2PipelineSupport {
       if (Utils.isEmpty(satelliteName)
           || Utils.isEmpty(sourceFieldName)
           || Utils.isEmpty(targetFieldName)
+          || !mapping.isIncludeInTarget()
           || !addedTargets.add(targetFieldName)) {
         continue;
       }
@@ -780,6 +856,8 @@ public final class BvScd2PipelineSupport {
       rowMeta.addValueMeta(hashMeta);
     }
 
+    appendHubBusinessKeyFields(rowMeta, scd2Table, dvModel, satellites, variables);
+
     for (DvSatellite satellite : satellites) {
       if (!satellite.hasDrivingKey()) {
         continue;
@@ -825,6 +903,78 @@ public final class BvScd2PipelineSupport {
     return scd2Table != null
         && scd2Table.getFieldMappings() != null
         && !scd2Table.getFieldMappings().isEmpty();
+  }
+
+  static List<String> resolveLoadedTargetFieldNames(BvScd2Table scd2Table, IVariables variables) {
+    if (scd2Table == null || scd2Table.getFieldMappings() == null) {
+      return List.of();
+    }
+    Set<String> names = new LinkedHashSet<>();
+    for (BvScd2FieldMapping mapping : scd2Table.getFieldMappings()) {
+      if (mapping == null || !mapping.isIncludeInTarget()) {
+        continue;
+      }
+      String targetFieldName = variables.resolve(mapping.getTargetFieldName());
+      if (!Utils.isEmpty(targetFieldName)) {
+        names.add(targetFieldName);
+      }
+    }
+    return new ArrayList<>(names);
+  }
+
+  static List<String> resolveCalculationOnlyTargetFieldNames(
+      BvScd2Table scd2Table, IVariables variables) {
+    if (scd2Table == null || scd2Table.getFieldMappings() == null) {
+      return List.of();
+    }
+    Set<String> names = new LinkedHashSet<>();
+    for (BvScd2FieldMapping mapping : scd2Table.getFieldMappings()) {
+      if (mapping == null || mapping.isIncludeInTarget()) {
+        continue;
+      }
+      String targetFieldName = variables.resolve(mapping.getTargetFieldName());
+      if (!Utils.isEmpty(targetFieldName)) {
+        names.add(targetFieldName);
+      }
+    }
+    return new ArrayList<>(names);
+  }
+
+  private static void appendHubBusinessKeyFields(
+      RowMeta rowMeta,
+      BvScd2Table scd2Table,
+      DataVaultModel dvModel,
+      List<DvSatellite> satellites,
+      IVariables variables)
+      throws HopException {
+    if (scd2Table == null || !scd2Table.isIncludeHubBusinessKeys() || dvModel == null) {
+      return;
+    }
+    DvHub hub = BvScd2FieldMappingValidationSupport.resolveSharedParentHub(satellites, dvModel);
+    if (hub == null) {
+      return;
+    }
+    for (BusinessKey businessKey : hub.getDistinctBusinessKeys()) {
+      if (businessKey == null || Utils.isEmpty(businessKey.getName())) {
+        continue;
+      }
+      String fieldName = variables.resolve(businessKey.getName());
+      if (Utils.isEmpty(fieldName) || rowMeta.indexOfValue(fieldName) >= 0) {
+        continue;
+      }
+      int typeId = DvDataTypeSupport.resolveHopTypeId(businessKey.getDataType(), null);
+      if (typeId <= 0) {
+        typeId = IValueMeta.TYPE_STRING;
+      }
+      try {
+        IValueMeta valueMeta = ValueMetaFactory.createValueMeta(fieldName, typeId);
+        valueMeta.setLength(Const.toInt(variables.resolve(businessKey.getLength()), -1));
+        valueMeta.setPrecision(Const.toInt(variables.resolve(businessKey.getPrecision()), -1));
+        rowMeta.addValueMeta(valueMeta);
+      } catch (org.apache.hop.core.exception.HopPluginException e) {
+        throw new HopException("Error creating value meta for hub business key " + fieldName, e);
+      }
+    }
   }
 
   public static String resolveFunctionalTimestampFieldForSatellite(
@@ -972,10 +1122,13 @@ public final class BvScd2PipelineSupport {
     if (ctx.includeHashKey) {
       selectFields.add(ctx.targetDatabaseMeta.quoteField(ctx.hashKeyFieldName));
     }
+    for (String hubBk : ctx.hubBusinessKeyFieldNames()) {
+      selectFields.add(ctx.targetDatabaseMeta.quoteField(hubBk));
+    }
     if (ctx.hasDrivingKey()) {
       selectFields.add(ctx.targetDatabaseMeta.quoteField(ctx.drivingKeyFieldName));
     }
-    for (String attr : ctx.collapseAttributeFieldNames()) {
+    for (String attr : ctx.persistedAttributeFieldNames()) {
       if (ctx.hasDrivingKey() && ctx.drivingKeyFieldName.equals(attr)) {
         continue;
       }
@@ -1180,6 +1333,46 @@ public final class BvScd2PipelineSupport {
         ctx.isMultiSatellite() ? leg.sourceFunctionalTimestampField : ctx.functionalTimestampField,
         selectFields);
 
+    return sql.toString();
+  }
+
+  static String buildHubTableInputSql(Scd2BuildContext ctx) {
+    if (ctx == null || !ctx.includeHubBusinessKeys()) {
+      return "";
+    }
+    List<String> selectFields = new ArrayList<>();
+    selectFields.add(ctx.sourceDatabaseMeta.quoteField(ctx.hashKeyFieldName));
+    for (String hubBk : ctx.hubBusinessKeyFieldNames()) {
+      selectFields.add(ctx.sourceDatabaseMeta.quoteField(hubBk));
+    }
+    StringBuilder sql = new StringBuilder("SELECT ");
+    sql.append(String.join(", ", selectFields));
+    sql.append(" FROM ");
+    sql.append(
+        ctx.sourceDatabaseMeta.getQuotedSchemaTableCombination(
+            ctx.variables, null, ctx.hubTableName));
+    boolean hasWhere = false;
+    if (ctx.scd2Table != null && ctx.scd2Table.isIncrementalBuild()) {
+      sql.append(" WHERE ");
+      sql.append(ctx.sourceDatabaseMeta.quoteField(ctx.hashKeyFieldName));
+      sql.append(" IN (");
+      sql.append(buildDeltaHashKeysSubquerySql(ctx));
+      sql.append(")");
+      hasWhere = true;
+    }
+    if (isHashKeyPartitioned(ctx) && ctx.sourceDatabaseMeta != null) {
+      String quotedHashKey = ctx.sourceDatabaseMeta.quoteField(ctx.hashKeyFieldName);
+      String predicate =
+          BvScd2HashPartitionSqlSupport.buildPredicate(
+              ctx.sourceDatabaseMeta,
+              ctx.dvConfig != null ? ctx.dvConfig.resolveHashKeyDataType() : null,
+              quotedHashKey);
+      if (!Utils.isEmpty(predicate)) {
+        sql.append(hasWhere ? " AND " : " WHERE ");
+        sql.append(predicate);
+      }
+    }
+    appendScd2OrderBy(sql, ctx, ctx.sourceDatabaseMeta, false, null, selectFields);
     return sql.toString();
   }
 
@@ -1432,6 +1625,89 @@ public final class BvScd2PipelineSupport {
     return tm;
   }
 
+  private static TransformMeta addHubBusinessKeyLeg(
+      Scd2BuildContext ctx, PipelineMeta pipelineMeta, Point location, TransformMeta watermarkParam)
+      throws HopException {
+    TransformMeta hubWatermarkParam = watermarkParam;
+    if (ctx.scd2Table != null && ctx.scd2Table.isIncrementalBuild()) {
+      hubWatermarkParam =
+          addHubDeltaWatermarkParam(
+              ctx, pipelineMeta, new Point(location.x - SPACING_WIDTH, location.y));
+    }
+
+    TableInputMeta tableInputMeta = new TableInputMeta();
+    tableInputMeta.setConnection(ctx.sourceDbName);
+    DvSqlSupport.assignDisplaySql(tableInputMeta, buildHubTableInputSql(ctx));
+    if (isHashKeyPartitioned(ctx)) {
+      tableInputMeta.setVariableReplacementActive(true);
+    }
+    if (hubWatermarkParam != null && ctx.scd2Table != null && ctx.scd2Table.isIncrementalBuild()) {
+      tableInputMeta.setLookup(hubWatermarkParam.getName());
+    }
+
+    TransformMeta tableInput =
+        new TransformMeta("TableInput", "read_" + ctx.hubTableName, tableInputMeta);
+    tableInput.setLocation(location);
+    pipelineMeta.addTransform(tableInput);
+    if (tableInput != null) {
+      GeneratedPipelineMetadataSupport.stampSourceRead(tableInput, ctx.sourceDbName);
+    }
+    if (hubWatermarkParam != null && ctx.scd2Table != null && ctx.scd2Table.isIncrementalBuild()) {
+      wireTableInputParameterStream(pipelineMeta, tableInputMeta, hubWatermarkParam, tableInput);
+    }
+
+    ConstantMeta constantMeta = new ConstantMeta();
+    ConstantField timestamp =
+        new ConstantField(ctx.functionalTimestampField, "Timestamp", ctx.openStartSentinel);
+    timestamp.setFieldFormat("yyyy-MM-dd HH:mm:ss");
+    constantMeta.getFields().add(timestamp);
+    constantMeta
+        .getFields()
+        .add(new ConstantField(HUB_ROW_FLAG_FIELD, "String", HUB_ROW_FLAG_VALUE));
+    if (ctx.isMultiSatellite()) {
+      constantMeta.getFields().add(new ConstantField(SOURCE_INDICATOR_FIELD, "String", ""));
+    }
+
+    TransformMeta constant =
+        new TransformMeta("Constant", "hub_bk_" + ctx.hubTableName, constantMeta);
+    constant.setLocation(location.x + SPACING_WIDTH, location.y);
+    pipelineMeta.addTransform(constant);
+    pipelineMeta.addPipelineHop(new PipelineHopMeta(tableInput, constant));
+    return constant;
+  }
+
+  private static TransformMeta addHubDeltaWatermarkParam(
+      Scd2BuildContext ctx, PipelineMeta pipelineMeta, Point location) {
+    String watermark = resolveIncrementalWatermarkValue(ctx);
+    int watermarkParams = Math.max(1, countDeltaHashKeyWatermarkPlaceholders(ctx));
+    List<GeneratorField> fields = new ArrayList<>();
+    for (int i = 0; i < watermarkParams; i++) {
+      fields.add(timestampGeneratorField(INCREMENTAL_WATERMARK_FIELD + "_" + i, watermark));
+    }
+    return addParameterRowGenerator(pipelineMeta, PARAM_HUB_WATERMARK_TRANSFORM, location, fields);
+  }
+
+  private static TransformMeta addFilterHubBkRows(
+      Scd2BuildContext ctx, PipelineMeta pipelineMeta, TransformMeta predecessor)
+      throws HopException {
+    FilterRowsMeta filterRowsMeta = new FilterRowsMeta();
+    try {
+      filterRowsMeta
+          .getCompare()
+          .setCondition(new Condition(HUB_ROW_FLAG_FIELD, Condition.Function.NULL, null, null));
+    } catch (HopValueException e) {
+      throw new HopException("Error creating hub business-key row filter condition", e);
+    }
+    TransformMeta tm = new TransformMeta("FilterRows", "filter_hub_bk_rows", filterRowsMeta);
+    Point location = predecessor.getLocation();
+    tm.setLocation(
+        location != null ? location.x + SPACING_WIDTH : LOCATION_START.x,
+        location != null ? location.y : LOCATION_START.y);
+    pipelineMeta.addTransform(tm);
+    pipelineMeta.addPipelineHop(new PipelineHopMeta(predecessor, tm));
+    return tm;
+  }
+
   private static TransformMeta addOpenTargetTableInput(
       Scd2BuildContext ctx,
       PipelineMeta pipelineMeta,
@@ -1605,10 +1881,13 @@ public final class BvScd2PipelineSupport {
     if (ctx.includeHashKey) {
       selectFields.add(selectField(ctx.hashKeyFieldName, null));
     }
+    for (String hubBk : ctx.hubBusinessKeyFieldNames()) {
+      selectFields.add(selectField(hubBk, null));
+    }
     if (ctx.hasDrivingKey()) {
       selectFields.add(selectField(ctx.drivingKeyFieldName, null));
     }
-    for (String attr : ctx.collapseAttributeFieldNames()) {
+    for (String attr : ctx.persistedAttributeFieldNames()) {
       if (ctx.hasDrivingKey() && ctx.drivingKeyFieldName.equals(attr)) {
         continue;
       }
@@ -1758,40 +2037,49 @@ public final class BvScd2PipelineSupport {
       repeatFieldsMeta.getGroupFields().add(ctx.drivingKeyFieldName);
     }
 
-    for (BvScd2FieldMapping mapping : ctx.scd2Table.getFieldMappings()) {
-      if (mapping == null) {
-        continue;
-      }
-      String targetFieldName = ctx.variables.resolve(mapping.getTargetFieldName());
-      String satelliteName = ctx.variables.resolve(mapping.getSatelliteName());
-      if (Utils.isEmpty(targetFieldName) || Utils.isEmpty(satelliteName)) {
-        continue;
-      }
-      SatelliteLeg leg = findLeg(ctx, satelliteName);
-      if (leg == null) {
-        continue;
-      }
-      Repeat repeat = new Repeat();
-      repeat.setType(RepeatType.CurrentWhenIndicated);
-      repeat.setSourceField(targetFieldName);
-      repeat.setTargetField(repeatTargetFieldName(targetFieldName));
-      repeat.setIndicatorFieldName(SOURCE_INDICATOR_FIELD);
-      repeat.setIndicatorValue(leg.sourceIndicatorValue);
-      repeatFieldsMeta.getRepeats().add(repeat);
-    }
-    if (ctx.scd2Table != null && ctx.scd2Table.isIncrementalBuild()) {
-      for (String targetFieldName : ctx.collapseAttributeFieldNames()) {
-        if (ctx.hasDrivingKey() && ctx.drivingKeyFieldName.equals(targetFieldName)) {
+    if (ctx.isMultiSatellite()) {
+      for (BvScd2FieldMapping mapping : ctx.scd2Table.getFieldMappings()) {
+        if (mapping == null) {
           continue;
         }
-        Repeat baselineRepeat = new Repeat();
-        baselineRepeat.setType(RepeatType.CurrentWhenIndicated);
-        baselineRepeat.setSourceField(targetFieldName);
-        baselineRepeat.setTargetField(repeatTargetFieldName(targetFieldName));
-        baselineRepeat.setIndicatorFieldName(SOURCE_INDICATOR_FIELD);
-        baselineRepeat.setIndicatorValue(BASELINE_SOURCE_INDICATOR);
-        repeatFieldsMeta.getRepeats().add(baselineRepeat);
+        String targetFieldName = ctx.variables.resolve(mapping.getTargetFieldName());
+        String satelliteName = ctx.variables.resolve(mapping.getSatelliteName());
+        if (Utils.isEmpty(targetFieldName) || Utils.isEmpty(satelliteName)) {
+          continue;
+        }
+        SatelliteLeg leg = findLeg(ctx, satelliteName);
+        if (leg == null) {
+          continue;
+        }
+        Repeat repeat = new Repeat();
+        repeat.setType(RepeatType.CurrentWhenIndicated);
+        repeat.setSourceField(targetFieldName);
+        repeat.setTargetField(repeatTargetFieldName(targetFieldName));
+        repeat.setIndicatorFieldName(SOURCE_INDICATOR_FIELD);
+        repeat.setIndicatorValue(leg.sourceIndicatorValue);
+        repeatFieldsMeta.getRepeats().add(repeat);
       }
+      if (ctx.scd2Table != null && ctx.scd2Table.isIncrementalBuild()) {
+        for (String targetFieldName : ctx.persistedAttributeFieldNames()) {
+          if (ctx.hasDrivingKey() && ctx.drivingKeyFieldName.equals(targetFieldName)) {
+            continue;
+          }
+          Repeat baselineRepeat = new Repeat();
+          baselineRepeat.setType(RepeatType.CurrentWhenIndicated);
+          baselineRepeat.setSourceField(targetFieldName);
+          baselineRepeat.setTargetField(repeatTargetFieldName(targetFieldName));
+          baselineRepeat.setIndicatorFieldName(SOURCE_INDICATOR_FIELD);
+          baselineRepeat.setIndicatorValue(BASELINE_SOURCE_INDICATOR);
+          repeatFieldsMeta.getRepeats().add(baselineRepeat);
+        }
+      }
+    }
+    for (String hubBk : ctx.hubBusinessKeyFieldNames()) {
+      Repeat hubRepeat = new Repeat();
+      hubRepeat.setType(RepeatType.PreviousWhenNull);
+      hubRepeat.setSourceField(hubBk);
+      hubRepeat.setTargetField(repeatTargetFieldName(hubBk));
+      repeatFieldsMeta.getRepeats().add(hubRepeat);
     }
 
     TransformMeta tm = new TransformMeta("RepeatFields", "repeat_sparse", repeatFieldsMeta);
@@ -1810,16 +2098,29 @@ public final class BvScd2PipelineSupport {
     if (ctx.includeHashKey) {
       selectFields.add(selectField(ctx.hashKeyFieldName, null));
     }
+    for (String hubBk : ctx.hubBusinessKeyFieldNames()) {
+      selectFields.add(selectField(repeatTargetFieldName(hubBk), hubBk));
+    }
     if (ctx.hasDrivingKey()) {
       selectFields.add(selectField(ctx.drivingKeyFieldName, null));
     }
     selectFields.add(selectField(ctx.functionalTimestampField, null));
-    selectFields.add(selectField(SOURCE_INDICATOR_FIELD, ctx.recordSourceField));
-    for (String attr : ctx.collapseAttributeFieldNames()) {
-      if (ctx.hasDrivingKey() && ctx.drivingKeyFieldName.equals(attr)) {
-        continue;
+    if (ctx.isMultiSatellite()) {
+      selectFields.add(selectField(SOURCE_INDICATOR_FIELD, ctx.recordSourceField));
+      for (String attr : ctx.collapseAttributeFieldNames()) {
+        if (ctx.hasDrivingKey() && ctx.drivingKeyFieldName.equals(attr)) {
+          continue;
+        }
+        selectFields.add(selectField(repeatTargetFieldName(attr), attr));
       }
-      selectFields.add(selectField(repeatTargetFieldName(attr), attr));
+    } else {
+      selectFields.add(selectField(ctx.recordSourceField, null));
+      for (String attr : ctx.collapseAttributeFieldNames()) {
+        if (ctx.hasDrivingKey() && ctx.drivingKeyFieldName.equals(attr)) {
+          continue;
+        }
+        selectFields.add(selectField(attr, null));
+      }
     }
 
     TransformMeta tm = new TransformMeta("SelectValues", "select_repeated", selectMeta);
@@ -1947,6 +2248,14 @@ public final class BvScd2PipelineSupport {
     tsAgg.setTypeLabel("MAX");
     aggregations.add(tsAgg);
 
+    for (String hubBk : ctx.hubBusinessKeyFieldNames()) {
+      Aggregation bkAgg = new Aggregation();
+      bkAgg.setSubject(hubBk);
+      bkAgg.setField(hubBk);
+      bkAgg.setTypeLabel("LAST");
+      aggregations.add(bkAgg);
+    }
+
     groupByMeta.setAggregations(aggregations);
 
     String collapseTransformName =
@@ -2034,6 +2343,9 @@ public final class BvScd2PipelineSupport {
             : LOCATION_START.x + 4 * SPACING_WIDTH;
 
     boolean truncateTable = ctx.scd2Table == null || !ctx.scd2Table.isHashKeyPartitioned();
+    Set<String> excludeFields =
+        new LinkedHashSet<>(resolveCalculationOnlyTargetFieldNames(ctx.scd2Table, ctx.variables));
+    excludeFields.add(HUB_ROW_FLAG_FIELD);
     DvTargetLoadSupport.TargetLoadResult result =
         addScd2TargetLoad(
             ctx,
@@ -2042,7 +2354,8 @@ public final class BvScd2PipelineSupport {
             predecessor,
             tableOutputX,
             LOCATION_START.y,
-            truncateTable);
+            truncateTable,
+            excludeFields);
     return result.transformMeta;
   }
 
@@ -2051,7 +2364,11 @@ public final class BvScd2PipelineSupport {
       throws HopException {
     IRowMeta targetLayout =
         buildTargetTableLayout(ctx.scd2Table, ctx.bvConfig, ctx.dvModel, ctx.variables);
-    Set<String> excludeFields = Set.of(INCREMENTAL_WATERMARK_FIELD, CLOSE_LOOKUP_VALID_FROM_FIELD);
+    Set<String> excludeFields = new LinkedHashSet<>();
+    excludeFields.add(INCREMENTAL_WATERMARK_FIELD);
+    excludeFields.add(CLOSE_LOOKUP_VALID_FROM_FIELD);
+    excludeFields.addAll(resolveCalculationOnlyTargetFieldNames(ctx.scd2Table, ctx.variables));
+    excludeFields.add(HUB_ROW_FLAG_FIELD);
 
     int x = predecessor.getLocation().x + SPACING_WIDTH;
     int y = predecessor.getLocation().y;
@@ -2361,6 +2678,27 @@ public final class BvScd2PipelineSupport {
         "Zero-based hash-key partition number");
   }
 
+  private static final class HubBkAttachment {
+    final boolean enabled;
+    final DvHub hub;
+    final String tableName;
+    final List<String> fieldNames;
+
+    HubBkAttachment(boolean enabled, DvHub hub, String tableName, List<String> fieldNames) {
+      this.enabled = enabled;
+      this.hub = hub;
+      this.tableName = tableName;
+      this.fieldNames =
+          fieldNames == null
+              ? List.of()
+              : Collections.unmodifiableList(new ArrayList<>(fieldNames));
+    }
+
+    static HubBkAttachment none() {
+      return new HubBkAttachment(false, null, null, List.of());
+    }
+  }
+
   /** Resolved inputs for one satellite branch in a generated SCD2 build pipeline. */
   public static final class SatelliteLeg {
     final DvSatellite satellite;
@@ -2460,6 +2798,10 @@ public final class BvScd2PipelineSupport {
     final String openStartSentinel;
     final String openEndSentinel;
     final boolean includeHashKey;
+    final boolean includeHubBusinessKeys;
+    final DvHub parentHub;
+    final String hubTableName;
+    final List<String> hubBusinessKeyFieldNames;
 
     Scd2BuildContext(
         BvScd2Table scd2Table,
@@ -2489,6 +2831,66 @@ public final class BvScd2PipelineSupport {
         String openStartSentinel,
         String openEndSentinel,
         boolean includeHashKey) {
+      this(
+          scd2Table,
+          legs,
+          multiSatellite,
+          mappedAttributeFieldNames,
+          bvModel,
+          dvModel,
+          bvConfig,
+          dvConfig,
+          metadataProvider,
+          variables,
+          sourceDatabaseMeta,
+          sourceDbName,
+          targetDatabaseMeta,
+          targetDbName,
+          satelliteTableName,
+          bvTargetTableName,
+          pipelineName,
+          hashKeyFieldName,
+          drivingKeyFieldName,
+          attributeFieldNames,
+          functionalTimestampField,
+          validFromField,
+          validToField,
+          recordSourceField,
+          openStartSentinel,
+          openEndSentinel,
+          includeHashKey,
+          HubBkAttachment.none());
+    }
+
+    Scd2BuildContext(
+        BvScd2Table scd2Table,
+        List<SatelliteLeg> legs,
+        boolean multiSatellite,
+        List<String> mappedAttributeFieldNames,
+        BusinessVaultModel bvModel,
+        DataVaultModel dvModel,
+        BusinessVaultConfiguration bvConfig,
+        DataVaultConfiguration dvConfig,
+        IHopMetadataProvider metadataProvider,
+        IVariables variables,
+        DatabaseMeta sourceDatabaseMeta,
+        String sourceDbName,
+        DatabaseMeta targetDatabaseMeta,
+        String targetDbName,
+        String satelliteTableName,
+        String bvTargetTableName,
+        String pipelineName,
+        String hashKeyFieldName,
+        String drivingKeyFieldName,
+        List<String> attributeFieldNames,
+        String functionalTimestampField,
+        String validFromField,
+        String validToField,
+        String recordSourceField,
+        String openStartSentinel,
+        String openEndSentinel,
+        boolean includeHashKey,
+        HubBkAttachment hubBkAttachment) {
       this.scd2Table = scd2Table;
       this.legs = Collections.unmodifiableList(new ArrayList<>(legs));
       this.multiSatellite = multiSatellite;
@@ -2519,6 +2921,12 @@ public final class BvScd2PipelineSupport {
       this.openStartSentinel = openStartSentinel;
       this.openEndSentinel = openEndSentinel;
       this.includeHashKey = includeHashKey;
+      HubBkAttachment attachment =
+          hubBkAttachment != null ? hubBkAttachment : HubBkAttachment.none();
+      this.includeHubBusinessKeys = attachment.enabled;
+      this.parentHub = attachment.hub;
+      this.hubTableName = attachment.tableName;
+      this.hubBusinessKeyFieldNames = attachment.fieldNames;
     }
 
     /** Legacy test constructor for single-satellite contexts. */
@@ -2581,7 +2989,81 @@ public final class BvScd2PipelineSupport {
           recordSourceField,
           openStartSentinel,
           openEndSentinel,
-          includeHashKey);
+          includeHashKey,
+          HubBkAttachment.none());
+    }
+
+    /** Test constructor that attaches hub business keys to a single-satellite context. */
+    public Scd2BuildContext(
+        BvScd2Table scd2Table,
+        DvSatellite satellite,
+        BusinessVaultModel bvModel,
+        DataVaultModel dvModel,
+        BusinessVaultConfiguration bvConfig,
+        DataVaultConfiguration dvConfig,
+        IHopMetadataProvider metadataProvider,
+        IVariables variables,
+        DatabaseMeta sourceDatabaseMeta,
+        String sourceDbName,
+        DatabaseMeta targetDatabaseMeta,
+        String targetDbName,
+        String satelliteTableName,
+        String bvTargetTableName,
+        String pipelineName,
+        String hashKeyFieldName,
+        String drivingKeyFieldName,
+        List<String> attributeFieldNames,
+        String functionalTimestampField,
+        String validFromField,
+        String validToField,
+        String recordSourceField,
+        String openStartSentinel,
+        String openEndSentinel,
+        boolean includeHashKey,
+        DvHub parentHub,
+        String hubTableName,
+        List<String> hubBusinessKeyFieldNames) {
+      this(
+          scd2Table,
+          List.of(
+              new SatelliteLeg(
+                  satellite,
+                  satelliteTableName,
+                  satellite.getName(),
+                  functionalTimestampField,
+                  List.of())),
+          false,
+          List.of(),
+          bvModel,
+          dvModel,
+          bvConfig,
+          dvConfig,
+          metadataProvider,
+          variables,
+          sourceDatabaseMeta,
+          sourceDbName,
+          targetDatabaseMeta,
+          targetDbName,
+          satelliteTableName,
+          bvTargetTableName,
+          pipelineName,
+          hashKeyFieldName,
+          drivingKeyFieldName,
+          attributeFieldNames,
+          functionalTimestampField,
+          validFromField,
+          validToField,
+          recordSourceField,
+          openStartSentinel,
+          openEndSentinel,
+          includeHashKey,
+          new HubBkAttachment(
+              parentHub != null
+                  && hubBusinessKeyFieldNames != null
+                  && !hubBusinessKeyFieldNames.isEmpty(),
+              parentHub,
+              hubTableName,
+              hubBusinessKeyFieldNames));
     }
 
     public DvSatellite getSatellite() {
@@ -2594,6 +3076,23 @@ public final class BvScd2PipelineSupport {
 
     List<String> collapseAttributeFieldNames() {
       return multiSatellite ? mappedAttributeFieldNames : attributeFieldNames;
+    }
+
+    List<String> persistedAttributeFieldNames() {
+      if (hasFieldMappings(scd2Table)) {
+        return resolveLoadedTargetFieldNames(scd2Table, variables);
+      }
+      return collapseAttributeFieldNames();
+    }
+
+    boolean includeHubBusinessKeys() {
+      return includeHubBusinessKeys
+          && hubBusinessKeyFieldNames != null
+          && !hubBusinessKeyFieldNames.isEmpty();
+    }
+
+    List<String> hubBusinessKeyFieldNames() {
+      return hubBusinessKeyFieldNames == null ? List.of() : hubBusinessKeyFieldNames;
     }
 
     boolean hasDrivingKey() {

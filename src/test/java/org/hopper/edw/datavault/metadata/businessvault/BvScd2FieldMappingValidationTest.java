@@ -158,6 +158,77 @@ class BvScd2FieldMappingValidationTest {
     assertEquals(1, restored.getSatelliteConfigs().size());
     assertEquals("sat_customer_demo", restored.getSatelliteConfigs().get(0).getSatelliteName());
     assertEquals("DEMO", restored.getSatelliteConfigs().get(0).getSourceIndicatorValue());
+    assertTrue(restored.getFieldMappings().get(0).isIncludeInTarget());
+  }
+
+  @Test
+  void xmlRoundTripPreservesIncludeInTargetFalse() throws Exception {
+    BvScd2Table original = multiSatTable();
+    original.setName("customer_bv");
+    original
+        .getFieldMappings()
+        .add(new BvScd2FieldMapping("sat_customer", "name", "customer_name", false));
+
+    String xml = XmlHandler.aroundTag("table", XmlMetadataUtil.serializeObjectToXml(original));
+    Document document = XmlHandler.loadXmlString(xml);
+    Node rootNode = XmlHandler.getSubNode(document, "table");
+    BvScd2Table restored = new BvScd2Table();
+    XmlMetadataUtil.deSerializeFromXml(rootNode, BvScd2Table.class, restored, null);
+
+    assertFalse(restored.getFieldMappings().get(0).isIncludeInTarget());
+  }
+
+  @Test
+  void missingIncludeInTargetDeserializesAsTrue() throws Exception {
+    String xml =
+        """
+        <table>
+          <name>customer_bv</name>
+          <field_mappings>
+            <field_mapping>
+              <satelliteName>sat_customer</satelliteName>
+              <sourceFieldName>name</sourceFieldName>
+              <targetFieldName>customer_name</targetFieldName>
+            </field_mapping>
+          </field_mappings>
+        </table>
+        """;
+    Document document = XmlHandler.loadXmlString(xml);
+    Node rootNode = XmlHandler.getSubNode(document, "table");
+    BvScd2Table restored = new BvScd2Table();
+    XmlMetadataUtil.deSerializeFromXml(rootNode, BvScd2Table.class, restored, null);
+
+    assertEquals(1, restored.getFieldMappings().size());
+    assertTrue(restored.getFieldMappings().get(0).isIncludeInTarget());
+  }
+
+  @Test
+  void hubBusinessKeysRequireHashKey() throws Exception {
+    BvScd2Table table = new BvScd2Table();
+    table.setName("customer_bv");
+    table.setFunctionalTimestampField("x_load_ts");
+    table.setIncludeHashKey(false);
+    table.setIncludeHubBusinessKeys(true);
+    table.getDerivatives().add(new BvDerivativeRef("sat_customer", DvTableType.SATELLITE));
+
+    List<ICheckResult> remarks = check(table, loadVault1ModelFromFile());
+    assertTrue(hasError(remarks, "Include hash key"));
+  }
+
+  @Test
+  void calculationOnlyMappingRejectedForIncremental() throws Exception {
+    BvScd2Table table = new BvScd2Table();
+    table.setName("customer_bv");
+    table.setTableName("customer_bv");
+    table.setFunctionalTimestampField("x_load_ts");
+    table.setBuildMode(BvScd2BuildMode.INCREMENTAL);
+    table.getDerivatives().add(new BvDerivativeRef("sat_customer", DvTableType.SATELLITE));
+    table
+        .getFieldMappings()
+        .add(new BvScd2FieldMapping("sat_customer", "name", "customer_name", false));
+
+    List<ICheckResult> remarks = check(table, loadVault1ModelFromFile());
+    assertTrue(hasError(remarks, "calculation-only"));
   }
 
   private static BvScd2Table multiSatTable() throws Exception {

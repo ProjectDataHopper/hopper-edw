@@ -102,7 +102,9 @@ public final class BvModelLineageCollector {
 
     if (table.getFieldMappings() != null && !table.getFieldMappings().isEmpty()) {
       for (BvScd2FieldMapping mapping : table.getFieldMappings()) {
-        if (mapping == null || Utils.isEmpty(mapping.getTargetFieldName())) {
+        if (mapping == null
+            || Utils.isEmpty(mapping.getTargetFieldName())
+            || !mapping.isIncludeInTarget()) {
           continue;
         }
         String target = resolve(mapping.getTargetFieldName(), variables);
@@ -161,6 +163,11 @@ public final class BvModelLineageCollector {
     if (table.isIncludeHashKey()) {
       lineage.addReason(
           LineageReasonFactory.standardColumn("parent_hash_key", "includeHashKey", "true"));
+    }
+    if (table.isIncludeHubBusinessKeys()) {
+      lineage.addReason(
+          LineageReasonFactory.standardColumn(
+              "hub_business_keys", "includeHubBusinessKeys", "true"));
     }
 
     return lineage;

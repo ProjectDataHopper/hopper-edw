@@ -30,61 +30,73 @@ limitations under the License.
       <validFromField/>
       <validToField/>
       <includeHashKey>Y</includeHashKey>
+      <includeHubBusinessKeys>Y</includeHubBusinessKeys>
       <field_mappings>
         <field_mapping>
           <satelliteName>sat_customer_demo</satelliteName>
           <sourceFieldName>segment</sourceFieldName>
           <targetFieldName>cust_segment</targetFieldName>
+          <calculationOnly>N</calculationOnly>
         </field_mapping>
         <field_mapping>
           <satelliteName>sat_customer_demo</satelliteName>
           <sourceFieldName>loyalty_tier</sourceFieldName>
           <targetFieldName>cust_loyalty_tier</targetFieldName>
+          <calculationOnly>N</calculationOnly>
         </field_mapping>
         <field_mapping>
           <satelliteName>sat_customer_demo</satelliteName>
           <sourceFieldName>demo_score</sourceFieldName>
           <targetFieldName>cust_demo_score</targetFieldName>
+          <calculationOnly>N</calculationOnly>
         </field_mapping>
         <field_mapping>
           <satelliteName>sat_customer_contact</satelliteName>
           <sourceFieldName>email</sourceFieldName>
           <targetFieldName>cust_email</targetFieldName>
+          <calculationOnly>N</calculationOnly>
         </field_mapping>
         <field_mapping>
           <satelliteName>sat_customer_contact</satelliteName>
           <sourceFieldName>phone</sourceFieldName>
           <targetFieldName>cust_phone</targetFieldName>
+          <calculationOnly>N</calculationOnly>
         </field_mapping>
         <field_mapping>
           <satelliteName>sat_customer_address</satelliteName>
           <sourceFieldName>address_line1</sourceFieldName>
           <targetFieldName>cust_address</targetFieldName>
+          <calculationOnly>N</calculationOnly>
         </field_mapping>
         <field_mapping>
           <satelliteName>sat_customer_address</satelliteName>
           <sourceFieldName>city</sourceFieldName>
           <targetFieldName>cust_city</targetFieldName>
+          <calculationOnly>N</calculationOnly>
         </field_mapping>
         <field_mapping>
           <satelliteName>sat_customer_address</satelliteName>
           <sourceFieldName>postal_code</sourceFieldName>
           <targetFieldName>cust_postal_code</targetFieldName>
+          <calculationOnly>N</calculationOnly>
         </field_mapping>
         <field_mapping>
           <satelliteName>sat_customer_prefs</satelliteName>
           <sourceFieldName>newsletter_opt_in</sourceFieldName>
           <targetFieldName>cust_newsletter</targetFieldName>
+          <calculationOnly>N</calculationOnly>
         </field_mapping>
         <field_mapping>
           <satelliteName>sat_customer_prefs</satelliteName>
           <sourceFieldName>preferred_channel</sourceFieldName>
           <targetFieldName>cust_channel</targetFieldName>
+          <calculationOnly>N</calculationOnly>
         </field_mapping>
         <field_mapping>
           <satelliteName>sat_customer_prefs</satelliteName>
           <sourceFieldName>language_code</sourceFieldName>
           <targetFieldName>cust_language</targetFieldName>
+          <calculationOnly>N</calculationOnly>
         </field_mapping>
       </field_mappings>
       <satellite_configs>
