@@ -25,6 +25,7 @@ public final class SqlExpressionPatterns {
   public static final String CAT_CAST = "SqlExpressionPattern.Category.Cast";
   public static final String CAT_COMPARE = "SqlExpressionPattern.Category.Comparison";
   public static final String CAT_STRING = "SqlExpressionPattern.Category.String";
+  public static final String CAT_DATETIME = "SqlExpressionPattern.Category.Datetime";
   public static final String CAT_ARITH = "SqlExpressionPattern.Category.Arithmetic";
 
   private static final List<SqlExpressionPattern> PATTERNS =
@@ -125,6 +126,28 @@ public final class SqlExpressionPatterns {
               "SqlExpressionPattern.Concat.Label",
               "CONCAT(, )",
               "SqlExpressionPattern.Concat.Hint"),
+          p(
+              CAT_STRING,
+              "SqlExpressionPattern.Concat3.Label",
+              "CONCAT(, , )",
+              "SqlExpressionPattern.Concat.Hint"),
+          p(CAT_STRING, "SqlExpressionPattern.Hex.Label", "HEX()", "SqlExpressionPattern.Hex.Hint"),
+          p(
+              CAT_STRING,
+              "SqlExpressionPattern.Unhex.Label",
+              "UNHEX()",
+              "SqlExpressionPattern.Unhex.Hint"),
+          p(CAT_STRING, "SqlExpressionPattern.Md5.Label", "MD5()", "SqlExpressionPattern.Md5.Hint"),
+          p(
+              CAT_DATETIME,
+              "SqlExpressionPattern.DateFormat.Label",
+              "DATE_FORMAT(, '%Y-%m-%d %H:%i:%s')",
+              "SqlExpressionPattern.DateFormat.Hint"),
+          p(
+              CAT_DATETIME,
+              "SqlExpressionPattern.ToDate.Label",
+              "TO_DATE(, 'MM/DD/YYYY')",
+              "SqlExpressionPattern.ToDate.Hint"),
           p(CAT_ARITH, "SqlExpressionPattern.Add.Label", " + ", "SqlExpressionPattern.Arith.Hint"),
           p(
               CAT_ARITH,

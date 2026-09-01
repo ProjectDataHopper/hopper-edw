@@ -38,6 +38,7 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 - Calculated columns are extra target fields; mapped attributes stay stored so incremental rebuilds can recompute expressions
 - SQL expression editor (shared with the SQL Expression transform): result name, type, length, precision, description, field/pattern insertion, large SQL widget
 - Residual source-model Free SQL / `jdbc:hop-hsm:` Project with `CASE`, real `CAST`, and N-arg `COALESCE` emits **SQL Expression** (Calculator still handles `+ - * /` and 2-arg NVL)
+- SQL Expression MySQL / SingleStore scalars for migration: n-arg `CONCAT` (null in, null out), `HEX`, `UNHEX`, `MD5`, `DATE_FORMAT`, SingleStore `TO_DATE`
 
 ### SCD2 table dialog OK is not blocked by configuration errors (issue #137)
 

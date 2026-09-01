@@ -107,7 +107,7 @@ After collapse, each SCD2 table can compute extra target columns with determinis
 * Expressions run **after** Group By collapse and **before** Table Output / incremental write.
 * They do **not** create new versions. Mapped satellite attributes remain the grouping keys.
 * Target names must be **new columns** (they cannot overwrite mapped attributes, hash keys, or validity fields). Raw mapped columns stay on the table so incremental runs can recompute expressions.
-* Syntax is SQL: `CASE WHEN …`, `COALESCE`, `CAST(x AS VARCHAR(n))`. `x :> VARCHAR(n)` and `x::TYPE` are accepted.
+* Syntax is SQL: `CASE WHEN …`, `COALESCE`, `CAST(x AS VARCHAR(n))`. `x :> VARCHAR(n)` and `x::TYPE` are accepted. MySQL / SingleStore-style `CONCAT`, `HEX`, `UNHEX`, `MD5`, `DATE_FORMAT`, and `TO_DATE` are available for migration.
 * Not allowed: `NOW()`, `CURRENT_TIMESTAMP`, `RANDOM`, subqueries, aggregates, Jinja.
 
 Configure them on the SCD2 table **Calculations** tab. **Add** / **Edit** opens the SQL expression editor (fields + `CASE` / `COALESCE` / `CAST` patterns, large SQL widget, type and description). Generated **production** pipelines insert an **SQL Expression** transform (`calculate_<table>`) after `collapse_*` with a copy of the expressions.

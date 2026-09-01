@@ -28,7 +28,16 @@ Each calculated field has:
 * **Type / length / precision** — optional Hop overrides. Leave type empty to infer from Calcite.
 * **Description** — optional documentation.
 
-Supported: `CASE`, `COALESCE` / `NVL`, `CAST`, comparisons, `AND` / `OR` / `NOT`, `IS NULL`, arithmetic, `NULLIF`, `TRIM`, `UPPER` / `LOWER`, `SUBSTRING`, `CONCAT` / `||`.
+Supported: `CASE`, `COALESCE` / `NVL`, `CAST`, comparisons, `AND` / `OR` / `NOT`, `IS NULL`, arithmetic, `NULLIF`, `TRIM`, `UPPER` / `LOWER`, `SUBSTRING`, `CONCAT` / `||`, and MySQL / SingleStore-style `HEX`, `UNHEX`, `MD5`, `DATE_FORMAT`, `TO_DATE`.
+
+MySQL-style notes:
+
+* `CONCAT` — any number of arguments; if any argument is null the result is null
+* `HEX` — uppercase hex of a string's UTF-8 bytes, or of an integer (`HEX(255)` is `FF`)
+* `UNHEX` — inverse of string `HEX`; invalid hex returns null; odd length is padded with a leading `0`
+* `MD5` — 32-character lowercase hex digest (UTF-8 bytes of the argument)
+* `DATE_FORMAT` — MySQL format specifiers such as `%Y`, `%m`, `%d`, `%H`, `%i`, `%s`, `%T`, `%r`, `%W`, `%M`, `%p`
+* `TO_DATE` — SingleStore `TO_DATE(string, format)` with `YYYY`, `YY`, `RR`, `MM`, `MON`, `MONTH`, `DD`, `HH24`, `HH12`/`HH`, `MI`, `SS`, `AM`/`PM`. Punctuation in the format may differ from the value. Missing year/month/day default to the current year, current month, and day 1. Literal text must match or the result is null; an invalid calendar date is an error.
 
 Dialect CAST forms `expr :> VARCHAR(n)` and `expr::TYPE` are rewritten to standard `CAST`.
 
