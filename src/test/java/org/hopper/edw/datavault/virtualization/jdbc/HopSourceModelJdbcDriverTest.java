@@ -30,17 +30,26 @@ import java.util.List;
 import java.util.Properties;
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.RowMetaAndData;
+import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.RowMeta;
 import org.apache.hop.core.row.value.ValueMetaInteger;
 import org.apache.hop.core.row.value.ValueMetaString;
+import org.apache.hop.core.variables.Variables;
+import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceColumn;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceJson;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceJsonField;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceJsonParentKind;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceQuery;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
+import org.hopper.edw.datavault.transform.sqlexpression.SqlExpressionMeta;
 import org.hopper.edw.datavault.virtualization.sql.SourceModelFreeSqlTableSupport;
+import org.hopper.edw.datavault.virtualization.sql.SourceModelSqlEngine;
+import org.hopper.edw.datavault.virtualization.sql.SourceModelSqlPlan;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -180,6 +189,53 @@ class HopSourceModelJdbcDriverTest {
         SourceModelFreeSqlTableSupport.insertTablesSqlSnippet(List.of("customer", "address"));
     assertTrue(snippet.contains("FROM customer"));
     assertTrue(snippet.contains("address"));
+  }
+
+  @Test
+  void jdbcPlannerEmitsSqlExpressionForResidualCase() throws Exception {
+    SourceModel model = new SourceModel();
+    model.setName("crm");
+    SourceTable orders = new SourceTable("orders");
+    orders.setDatabaseName("CRM");
+    orders.setTableName("orders");
+    SourceColumn payload = new SourceColumn("payload");
+    payload.setHopType(IValueMeta.TYPE_STRING);
+    orders.getColumns().add(payload);
+    model.getTables().add(orders);
+
+    SourceJson json = new SourceJson("order_events");
+    json.setParentSourceKind(SourceJsonParentKind.TABLE);
+    json.setParentSourceName("orders");
+    json.setJsonFieldName("payload");
+    SourceJsonField eventId = new SourceJsonField();
+    eventId.setName("event_id");
+    eventId.setHopType(IValueMeta.TYPE_STRING);
+    eventId.setPath("$.event_id");
+    json.getFields().add(eventId);
+    model.getJsonSources().add(json);
+
+    MemoryMetadataProvider metadata = new MemoryMetadataProvider();
+    DatabaseMeta db = new DatabaseMeta();
+    db.setName("CRM");
+    db.setDatabaseType("POSTGRESQL");
+    db.setAccessType(DatabaseMeta.TYPE_ACCESS_NATIVE);
+    db.setHostname("localhost");
+    db.setDBName("test");
+    db.setPort("5432");
+    metadata.getSerializer(DatabaseMeta.class).save(db);
+
+    SourceModelSqlPlan plan =
+        SourceModelSqlEngine.plan(
+            model,
+            "SELECT CASE WHEN event_id IS NULL THEN 'n' ELSE event_id END AS event_or_n FROM order_events",
+            new Variables(),
+            metadata);
+
+    assertFalse(plan.fullPushdown(), plan.explainText());
+    assertTrue(
+        plan.pipelineMeta().getTransforms().stream()
+            .anyMatch(t -> t.getTransform() instanceof SqlExpressionMeta),
+        plan.explainText());
   }
 
   @Test

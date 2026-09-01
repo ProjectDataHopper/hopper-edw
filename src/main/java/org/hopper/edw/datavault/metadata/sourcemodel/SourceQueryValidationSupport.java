@@ -59,7 +59,10 @@ public final class SourceQueryValidationSupport {
 
     SourceQueryGenerationMode mode = query.resolveGenerationMode();
     if (mode == SourceQueryGenerationMode.FREE_SQL) {
-      return checkFreeSql(model, query, queryName, variables, metadataProvider, remarks);
+      checkFreeSql(model, query, queryName, variables, metadataProvider, remarks);
+      remarks.addAll(
+          SourceCatalogPublishSyncSupport.checkQuery(model, query, variables, metadataProvider));
+      return remarks;
     }
 
     if (model == null || model.findTable(query.getDrivingTableName()) == null) {
@@ -205,6 +208,8 @@ public final class SourceQueryValidationSupport {
                   PKG, "SourceModel.CheckResult.QueryCannotGenerateSql", queryName),
               null));
     }
+    remarks.addAll(
+        SourceCatalogPublishSyncSupport.checkQuery(model, query, variables, metadataProvider));
     return remarks;
   }
 

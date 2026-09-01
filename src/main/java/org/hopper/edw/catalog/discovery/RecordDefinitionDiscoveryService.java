@@ -81,7 +81,7 @@ public final class RecordDefinitionDiscoveryService {
 
   /**
    * Rediscover a COMPOSITE feed from its {@code .hsm} source model query projection (same path as
-   * publish).
+   * catalog publish, including attached data type mapping profiles).
    */
   private static DiscoveryResult discoverComposite(
       PhysicalSourceRef physicalRef, IVariables variables, IHopMetadataProvider metadataProvider)
@@ -108,7 +108,8 @@ public final class RecordDefinitionDiscoveryService {
           BaseMessages.getString(
               PKG, "RecordDefinitionDiscoveryService.Error.QueryNotFound", queryName, modelFile));
     }
-    List<SourceField> fields = SourceQueryCatalogPublisher.buildFieldsFromProjection(model, query);
+    List<SourceField> fields =
+        SourceQueryCatalogPublisher.buildFieldsFromProjection(model, query, metadataProvider);
     if (fields == null || fields.isEmpty()) {
       throw new HopException(
           BaseMessages.getString(
@@ -117,6 +118,10 @@ public final class RecordDefinitionDiscoveryService {
     return new DiscoveryResult(fields, null);
   }
 
+  /**
+   * Rediscover a JSON feed from its {@code .hsm} source JSON projection (same path as catalog
+   * publish, including attached data type mapping profiles).
+   */
   private static DiscoveryResult discoverJson(
       PhysicalSourceRef physicalRef, IVariables variables, IHopMetadataProvider metadataProvider)
       throws HopException {
@@ -145,7 +150,7 @@ public final class RecordDefinitionDiscoveryService {
     }
     List<SourceField> fields =
         org.hopper.edw.datavault.metadata.sourcemodel.publish.SourceJsonCatalogPublisher
-            .buildFieldsFromProjection(jsonSource);
+            .buildFieldsFromProjection(model, jsonSource, metadataProvider);
     if (fields == null || fields.isEmpty()) {
       throw new HopException(
           BaseMessages.getString(
@@ -155,8 +160,9 @@ public final class RecordDefinitionDiscoveryService {
   }
 
   /**
-   * Rediscover a PIPELINE feed: prefer the declared projection on the source-model pipeline card;
-   * fall back to live output-transform fields from the {@code .hpl}.
+   * Rediscover a PIPELINE feed: prefer the declared projection on the source-model pipeline card
+   * (same path as catalog publish, including attached data type mapping profiles); fall back to
+   * live output-transform fields from the {@code .hpl}.
    */
   private static DiscoveryResult discoverPipeline(
       PhysicalSourceRef physicalRef, IVariables variables, IHopMetadataProvider metadataProvider)
@@ -188,7 +194,8 @@ public final class RecordDefinitionDiscoveryService {
                 modelFile));
       }
       List<SourceField> fields =
-          SourcePipelineCatalogPublisher.buildFieldsFromProjection(pipelineSource);
+          SourcePipelineCatalogPublisher.buildFieldsFromProjection(
+              pipelineSource, metadataProvider);
       if (fields == null || fields.isEmpty()) {
         throw new HopException(
             BaseMessages.getString(

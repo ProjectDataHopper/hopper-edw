@@ -468,7 +468,8 @@ public class HopGuiSourceTableDialog {
         dataTypeMappingTab.saveTo(working);
       }
       List<ICheckResult> remarks =
-          new ArrayList<>(SourceTableValidationSupport.check(model, working, variables));
+          new ArrayList<>(
+              SourceTableValidationSupport.check(model, working, variables, metadataProvider));
       try {
         remarks.addAll(
             SourceDataTypeMappingSupport.check(

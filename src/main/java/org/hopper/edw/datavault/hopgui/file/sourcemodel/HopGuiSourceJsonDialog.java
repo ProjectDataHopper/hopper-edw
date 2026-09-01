@@ -593,7 +593,8 @@ public class HopGuiSourceJsonDialog {
       // Reflect resolved pass-through types back into the grid so the user sees them.
       refreshFieldTypeCellsFromDraft(draft);
       List<ICheckResult> remarks =
-          new ArrayList<>(SourceJsonValidationSupport.check(draft, model, null));
+          new ArrayList<>(
+              SourceJsonValidationSupport.check(draft, model, null, variables, metadataProvider));
       try {
         remarks.addAll(
             SourceDataTypeMappingSupport.check(

@@ -46,6 +46,7 @@ integration-tests/
     ├── link-satellite/
     ├── link-satellite-driving-key/
     ├── load-end-date/
+    ├── scd2-calculations/
     ├── reference-table/
     ├── composite-hub-bk/
     ├── status-tracking/
@@ -69,6 +70,7 @@ integration-tests/
 | `tests/link-satellite/link-satellite.hdv` | Hubs + link + link satellite (customer–product relationship attributes) |
 | `tests/link-satellite-driving-key/link-satellite-driving-key.hdv` | Hubs + link + multi-active link satellite (`line_number` driving key) |
 | `tests/load-end-date/load-end-date.hdv` | Hub + standard satellite with load end date (`x_load_end_ts`) |
+| `tests/scd2-calculations/` | BV SCD2 SQL calculations: deleted-flag `CASE` + `CAST` default `VARCHAR(720)` |
 | `tests/reference-table/reference-table.hdv` | Physical **Reference table** (`ref_country`) FULL_REPLACE two-wave load (issue #110) |
 | `tests/composite-hub-bk/composite-hub-bk.hdv` | Composite hub business key (`burger_bk` from two EXT parts) + satellite parent parts |
 
@@ -168,7 +170,9 @@ Every **Data Vault Update** action in the test workflows writes per-run metrics 
 | `run-tests.sh` | `metrics/local/` | `project/metrics/local/vault1-<channel>.json` |
 | `run-tests-all-databases.sh` | `metrics/<engine>/` | `project/metrics/postgres/vault1-<channel>.json` |
 
-After a run, the scripts execute `tests/shared/collect-metrics-results.hpl` in a short-lived Hop container. That pipeline reads all `metrics/**/*.json` files and writes `project/metrics/metrics-overview.csv`. A formatted summary table is then printed to the console using **Python 3** (stdlib `csv` module only).
+After a run, the scripts execute `tests/shared/collect-metrics-results.hpl` in a short-lived Hop container. That pipeline reads all `metrics/**/*.json` files and writes `integration-tests/metrics/metrics-overview.csv`. A formatted summary table is then printed to the console using **Python 3** (stdlib `csv` module only).
+
+The CSV `success` column on ordinary rows is **only** “this Data Vault / Business Vault **load pipeline** had zero Hop errors”. Golden `RunPipelineTests` mismatches and Check model aborts do **not** flip those rows. After each Hop run the scripts also write `metrics/<engine>/_hop-run.json` (`modelName=_hop-run`): that suite row is `success=false` when the orchestrator exits non-zero. The printed table lists `_hop-run` first and prints a **FAILURE ROW(S)** block when any row is not successful.
 
 The `project/metrics/` tree is gitignored. Override the metrics folder:
 

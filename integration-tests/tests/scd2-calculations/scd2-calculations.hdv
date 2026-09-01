@@ -1,0 +1,100 @@
+<!--
+Copyright 2026 i-Bridge bv
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<data-vault-model>
+  <name_sync_with_filename>Y</name_sync_with_filename>
+  <description>Single-satellite DV for BV SCD2 SQL calculations (deleted-flag CASE + CAST default)</description>
+  <configurationName>data-vault-vault1</configurationName>
+  <tables>
+    <table>
+      <businessKeys>
+        <name>customer_id</name>
+        <description>Customer business key</description>
+        <dataType>Integer</dataType>
+        <length>9</length>
+        <sourceFieldName>customer_id</sourceFieldName>
+        <recordSourceName>CRM-scd2-calculations</recordSourceName>
+      </businessKeys>
+      <hashKeyFieldName>customer_hk</hashKeyFieldName>
+      <recordSourceFieldName/>
+      <recordSources>
+        <recordSource>CRM-scd2-calculations</recordSource>
+      </recordSources>
+      <tableName>hub_customer_calc</tableName>
+      <description>Hub for SCD2 calculation fixture customers</description>
+      <tableType>HUB</tableType>
+      <integrationMode>HOP_MANAGED</integrationMode>
+      <customUpdatePipelinePaths/>
+      <xloc>64</xloc>
+      <yloc>64</yloc>
+      <name>hub_customer_calc</name>
+      <virtualPath/>
+    </table>
+    <table>
+      <hub>hub_customer_calc</hub>
+      <link/>
+      <attributes>
+        <name>name</name>
+        <description>Customer name</description>
+        <dataType>String</dataType>
+        <length>50</length>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>deleted_flag</name>
+        <description>Y when the source row is deleted</description>
+        <dataType>String</dataType>
+        <length>1</length>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>event_date</name>
+        <description>Business event timestamp</description>
+        <dataType>Timestamp</dataType>
+        <length>6</length>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>description</name>
+        <description>Optional description</description>
+        <dataType>String</dataType>
+        <length>100</length>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <parentKeySourceFields/>
+      <drivingKey/>
+      <recordSource>CRM-scd2-calculations</recordSource>
+      <statusTrackingEnabled>N</statusTrackingEnabled>
+      <statusFieldName>record_status</statusFieldName>
+      <activeStatusValue>ACTIVE</activeStatusValue>
+      <deletedStatusValue>DELETED</deletedStatusValue>
+      <tableName>sat_customer_calc</tableName>
+      <description>Satellite feeding BV SCD2 calculations</description>
+      <tableType>SATELLITE</tableType>
+      <integrationMode>HOP_MANAGED</integrationMode>
+      <customUpdatePipelinePaths/>
+      <xloc>320</xloc>
+      <yloc>64</yloc>
+      <name>sat_customer_calc</name>
+      <virtualPath/>
+    </table>
+  </tables>
+  <notes/>
+  <name>scd2-calculations</name>
+</data-vault-model>

@@ -89,6 +89,8 @@ import org.hopper.edw.datavault.hopgui.file.sourcemodel.delegates.HopGuiSourceMo
 import org.hopper.edw.datavault.metadata.DvNote;
 import org.hopper.edw.datavault.metadata.DvNoteType;
 import org.hopper.edw.datavault.metadata.database.DvDatabaseSourceImportSupport;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceCatalogPublishSyncSupport.SourceCardKind;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceCatalogPublishSyncSupport.StalePublishedFeed;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceEndpointKind;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceEndpointSupport;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceJoinType;
@@ -2749,6 +2751,86 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       return kind + ": " + objectName + " → " + feedName;
     }
     return kind + ": " + objectName;
+  }
+
+  void publishStaleCatalogFeeds(List<StalePublishedFeed> staleFeeds) {
+    if (staleFeeds == null || staleFeeds.isEmpty() || model == null) {
+      return;
+    }
+    try {
+      ensureModelFilenameForPublish();
+      int successCount = 0;
+      List<String> publishedFeeds = new ArrayList<>();
+      List<String> failures = new ArrayList<>();
+      for (var feed : staleFeeds) {
+        if (feed == null || feed.kind() == null || Utils.isEmpty(feed.cardName())) {
+          continue;
+        }
+        CatalogPublishCandidate candidate =
+            new CatalogPublishCandidate(
+                toPublishKind(feed.kind()), feed.cardName(), feed.feedName(), feed.cardName());
+        try {
+          String feedName = publishCatalogCandidate(candidate);
+          successCount++;
+          if (!Utils.isEmpty(feedName)) {
+            publishedFeeds.add(feedName);
+          }
+        } catch (Exception e) {
+          String detail = e.getMessage() != null ? e.getMessage() : e.toString();
+          failures.add(feed.cardName() + ": " + detail);
+        }
+      }
+      if (successCount > 0) {
+        DvDatabaseSourceImportSupport.refreshCatalogPerspective();
+        setChanged();
+      }
+      if (!failures.isEmpty() && successCount == 0) {
+        throw new HopException(String.join(Const.CR, failures));
+      }
+      MessageBox box = new MessageBox(getShell(), SWT.ICON_INFORMATION | SWT.OK);
+      box.setText(
+          BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PushToCatalog.Success.Title"));
+      StringBuilder message = new StringBuilder();
+      message.append(
+          BaseMessages.getString(
+              PKG, "HopGuiSourceModelGraph.PushToCatalog.Success.Message", successCount));
+      if (!publishedFeeds.isEmpty()) {
+        message.append(Const.CR).append(Const.CR);
+        message.append(
+            BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PushToCatalog.Success.Feeds"));
+        message.append(Const.CR);
+        for (String feed : publishedFeeds) {
+          message.append("  • ").append(feed).append(Const.CR);
+        }
+      }
+      if (!failures.isEmpty()) {
+        message.append(Const.CR);
+        message.append(
+            BaseMessages.getString(
+                PKG, "HopGuiSourceModelGraph.PushToCatalog.Partial.Failures", failures.size()));
+        message.append(Const.CR);
+        for (String failure : failures) {
+          message.append("  • ").append(failure).append(Const.CR);
+        }
+      }
+      box.setMessage(message.toString().trim());
+      box.open();
+    } catch (Exception e) {
+      new ErrorDialog(
+          getShell(),
+          BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PushToCatalog.Error.Title"),
+          BaseMessages.getString(PKG, "HopGuiSourceModelGraph.PushToCatalog.Error.Message"),
+          e);
+    }
+  }
+
+  private static CatalogPublishKind toPublishKind(SourceCardKind kind) {
+    return switch (kind) {
+      case TABLE -> CatalogPublishKind.TABLE;
+      case QUERY -> CatalogPublishKind.QUERY;
+      case JSON -> CatalogPublishKind.JSON;
+      case PIPELINE -> CatalogPublishKind.PIPELINE;
+    };
   }
 
   private String publishCatalogCandidate(CatalogPublishCandidate candidate) throws HopException {

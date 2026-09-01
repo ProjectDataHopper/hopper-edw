@@ -1,0 +1,62 @@
+{
+  "namespace": "hop/integration-tests/sources",
+  "name": "CRM-item-collation",
+  "type": "DV_SOURCE",
+  "description": "Item source for string collation tests (French source vs UTF-8 vault)",
+  "origin": {
+    "modelType": "DATA_VAULT_SOURCE",
+    "modelName": "string-collation",
+    "modelFilename": "${PROJECT_HOME}/tests/sqlserver-collation/string-collation.hdv",
+    "modelElementName": "CRM-item-collation",
+    "hopProject": "hop-data-vault",
+    "createdAt": 1783000000000,
+    "updatedAt": 1783000000000,
+    "updatedBy": null,
+    "lastWorkflow": null,
+    "lastPipeline": null
+  },
+  "physicalTable": {
+    "databaseMetaName": "CRM",
+    "schemaName": "",
+    "tableName": "item_collation"
+  },
+  "tags": [
+    "DV Source",
+    "FULL_SNAPSHOT"
+  ],
+  "glossaryTerms": [],
+  "customProperties": {},
+  "dvSource": {
+    "sourceType": "DATABASE",
+    "sourceIndicator": "CRM",
+    "sourceIndicatorField": "record_source",
+    "group": "",
+    "deliveryType": "FULL_SNAPSHOT",
+    "fields": [
+      {
+        "name": "item_code",
+        "description": "String business key (source NVARCHAR / French collation)",
+        "sourceDataType": "String",
+        "length": "50",
+        "precision": "",
+        "hopType": 2
+      },
+      {
+        "name": "description",
+        "description": "Item description",
+        "sourceDataType": "String",
+        "length": "100",
+        "precision": "",
+        "hopType": 2
+      },
+      {
+        "name": "record_source",
+        "description": "Record source indicator",
+        "sourceDataType": "String",
+        "length": "20",
+        "precision": "",
+        "hopType": 2
+      }
+    ]
+  }
+}

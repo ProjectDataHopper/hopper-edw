@@ -11,7 +11,7 @@ The **Source model SQL** transform runs Free SQL against a `.hsm` model through 
 == Options
 
 * **Source model file** — Path to the `.hsm`.
-* **SQL** — SELECT against virtual tables named after source-model objects.
+* **SQL** — SELECT against virtual tables named after source-model objects. Residual (non-pushdown) `CASE`, `CAST`, and N-arg `COALESCE` run as the **SQL Expression** transform; simple `+ - * /` and 2-arg `COALESCE`/`NVL` still use Calculator.
 * **Preview / Explain** — Design-time sample and plan.
 
 See link:../source-modeler-overview.adoc#source-queries[Source queries] and the JDBC section of that guide.

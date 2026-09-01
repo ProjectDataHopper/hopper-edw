@@ -42,7 +42,7 @@ Dialog help (Hop GUI **Help** on the SCD2 table dialog): link:help/bv-scd2-table
 
 For each SCD2 table the plugin builds a Hop pipeline that:
 
-1. Reads satellite history via `TableInput` SQL (grain + functional timestamp + attributes). The vault record-source / source-indicator column is **not** selected when a satellite has **Store record source indicator** off (VaultSpeed-style mono-source sats). Multi-satellite pipelines never read that physical column; merge identity is the synthetic `_bv_source` value.
+1. Reads satellite history via `TableInput` SQL (grain + functional timestamp + attributes), `ORDER BY` hash key in **Java `String.compareTo` order** (Postgres `COLLATE "C"`, SQL Server `BIN2`, MySQL `BINARY`) so `SortedSchemaMerge` sees a stream that is already sorted the way Hop compares strings. Locale collations such as Postgres `en_US.utf8` sort `10-` before `1-` and would split the same key across satellite legs. The vault record-source / source-indicator column is **not** selected when a satellite has **Store record source indicator** off (VaultSpeed-style mono-source sats). Multi-satellite pipelines never read that physical column; merge identity is the synthetic `_bv_source` value.
 2. Adds source indicators when multiple satellites feed one BV table. When a satellite omits the physical column, a Constant supplies the BV record-source value from the satellite config (or the satellite name).
 3. Merges streams (multi-satellite) with `SortedSchemaMerge`
 4. Repeats sparse attribute columns across merged rows
@@ -59,7 +59,7 @@ When a satellite is too large to `ORDER BY` hash key and load date in one pass, 
 
 1. Truncates the BV target **once** with a workflow SQL action (`TRUNCATE TABLE` via the Hop database dialect).
 2. Generates partition numbers `0 .. N-1` and runs the SCD2 pipeline once per part, passing `'${PARTITION_COUNT}'` and `'${PARTITION_NUMBER}'`.
-3. Filters each satellite `TableInput` with a first-byte modulus of the parent hash key (BINARY: first octet; HEX: first two hex characters; STRING: first dash-separated token). Every version of a hub/link key stays in one partition.
+3. Filters each satellite `TableInput` with a first-byte modulus of the parent hash key (BINARY: first octet; HEX: first two hex characters; STRING: first dash-separated token). Every version of a hub/link key stays in one partition. STRING/HEX hash keys still `ORDER BY` with a Java-matching binary collation inside each slice.
 4. Writes with `TableOutput` **truncate off**, so later partitions append.
 
 **Show build pipeline** opens the parameterized SCD2 pipeline, the partition driver, and the wrapper workflow. Running the inner pipeline alone with defaults loads partition 0 of N.
@@ -99,6 +99,55 @@ The watermark is always read from the **Business Vault target table** (`MAX(wate
 On the first incremental run against an empty BV table the sentinel (`1900-01-01 00:00:00`) applies, so behaviour matches a full rebuild. Later runs process only satellite deltas and close prior open rows in place.
 
 Integration test: `integration-tests/tests/multi-satellite-bv/update-customer-360-incremental.hwf` loads four DV satellite waves, runs **Business Vault Update** once on `customer-360-incremental.hbv`, then validates current open rows against the same golden dataset as the full-rebuild fixture. Multi-run close-and-append behaviour is covered by unit tests in `BvScd2PipelineSupportTest`. Hash-key partitioned full rebuild: `update-customer-360-partitioned.hwf` / `customer-360-partitioned.hbv` (4 parts, same golden).
+
+== Calculations (SQL expressions)
+
+After collapse, each SCD2 table can compute extra target columns with deterministic SQL scalars. This is the replacement for per-entity `CASE` / `COALESCE` / `CAST` in dbt-core SCD2 models.
+
+* Expressions run **after** Group By collapse and **before** Table Output / incremental write.
+* They do **not** create new versions. Mapped satellite attributes remain the grouping keys.
+* Target names must be **new columns** (they cannot overwrite mapped attributes, hash keys, or validity fields). Raw mapped columns stay on the table so incremental runs can recompute expressions.
+* Syntax is SQL: `CASE WHEN …`, `COALESCE`, `CAST(x AS VARCHAR(n))`. `x :> VARCHAR(n)` and `x::TYPE` are accepted.
+* Not allowed: `NOW()`, `CURRENT_TIMESTAMP`, `RANDOM`, subqueries, aggregates, Jinja.
+
+Configure them on the SCD2 table **Calculations** tab. **Add** / **Edit** opens the SQL expression editor (fields + `CASE` / `COALESCE` / `CAST` patterns, large SQL widget, type and description). Generated **production** pipelines insert an **SQL Expression** transform (`calculate_<table>`) after `collapse_*` with a copy of the expressions.
+
+image::images/sql-expression-dialog.png[SQL Expression transform dialog — Keep input fields, optional Business Vault model and SCD2 table, expression list,align="center"]
+
+The SQL Expression transform can also **link a Business Vault model file and SCD2 table**. When both are set, it loads calculations from that table at runtime (inline expressions are ignored). Production generate still copies expressions so load pipelines do not depend on opening the `.hbv` at run time. Help for the transform: link:help/sql-expression-dialog.adoc[SQL Expression].
+
+Integration fixture: `integration-tests/tests/scd2-calculations/update-scd2-calculations.hwf` — deleted-flag `CASE` plus `CAST('Default value' AS VARCHAR(720))` on a single-satellite SCD2 table, golden current-state after initial and update loads.
+
+=== Tests
+
+When the table is ready, use **Generate calculation unit test** on the SCD2 table (canvas context menu or the **Tests** tab). That creates:
+
+image::images/generate-calculations-unit-test-scd2-context-action.png[SCD2 table context menu — Generate calculation unit test on customer_360_bv,align="center"]
+
+* A slim pipeline `Dummy collapse_sample` → **SQL Expression** (linked to this table) → `Dummy calculated_out`
+* Input data set `bv-scd2-<table>-collapse` and golden data set `bv-scd2-<table>-calculated`
+* A Hop **pipeline unit test** that injects at `collapse_sample` and compares golden output at `calculated_out`
+* A **capture** pipeline: the SCD2 build up to Group By, then Reservoir Sampling (100 rows), then the linked SQL Expression. Optional: run it once against the warehouse to fill the data sets
+
+image::images/generate-calculations-unit-test-scd2-confirmation-dialog.png[Sample warehouse rows confirmation — 100 reservoir-sampled collapsed rows,align="center"]
+
+image::images/bv-scd2-calculations-pipeline-unit-test.png[Generated calculation unit-test pipeline — collapse_sample to SQL Expression (linked to the SCD2 table) to calculated_out,align="center"]
+
+Production SCD2 loads are **not** reservoir-sampled. After capture, re-run the unit test from the pipeline Testing toolbar (no database).
+
+image::images/generate-calculations-unit-test-scd2-completion-report.png[Calculation unit test completion report with pipeline, input data set, and golden data set names,align="center"]
+
+Check model still compiles expressions. Legacy column-level / CSV tests stored on older `.hbv` files still run if present.
+
+=== Migrating from dbt SCD2 SQL
+
+Keep using link:dbt-import.adoc[Import dbt models] for arbitrary SQL business tables. For SCD2-like models:
+
+. Model the raw satellites on `.hdv` (Hop-managed or External read-only).
+. Create a BV SCD2 table with field mappings, including CASE inputs such as deleted flags.
+. Copy SELECT-list expressions onto **Calculations**.
+. Generate a Hop pipeline unit test and sample collapsed rows once.
+. Optional: a BV SQL view that projects the calculated columns without the raw flags.
 
 == Single-satellite SCD2
 

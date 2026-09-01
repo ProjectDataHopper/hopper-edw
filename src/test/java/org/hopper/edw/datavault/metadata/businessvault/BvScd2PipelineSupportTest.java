@@ -60,6 +60,7 @@ import org.hopper.edw.datavault.metadata.SatelliteAttribute;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2PipelineSupport.SatelliteLeg;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2PipelineSupport.Scd2BuildContext;
 import org.hopper.edw.datavault.transform.sortedschemamerge.SortedSchemaMergeMeta;
+import org.hopper.edw.datavault.transform.sqlexpression.SqlExpressionMeta;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
@@ -347,7 +348,7 @@ class BvScd2PipelineSupportTest {
     assertTrue(sql.contains("FROM sat_customer WHERE"));
     assertTrue(sql.contains("x_load_ts > ?"));
     assertFalse(sql.contains("TIMESTAMP '"));
-    assertTrue(sql.contains("ORDER BY customer_hk, x_load_ts"));
+    assertTrue(sql.contains("ORDER BY customer_hk COLLATE \"C\", x_load_ts"));
   }
 
   @Test
@@ -361,7 +362,7 @@ class BvScd2PipelineSupportTest {
     assertTrue(sql.contains("valid_to = ?"));
     assertFalse(sql.contains("customer_hk IN ("));
     assertFalse(sql.contains("sat_customer"));
-    assertTrue(sql.contains("ORDER BY customer_hk, x_load_ts"));
+    assertTrue(sql.contains("ORDER BY customer_hk COLLATE \"C\", x_load_ts"));
   }
 
   @Test
@@ -810,6 +811,7 @@ class BvScd2PipelineSupportTest {
     assertTrue(sql.contains("${PARTITION_COUNT}"));
     assertTrue(sql.contains("${PARTITION_NUMBER}"));
     assertTrue(sql.indexOf(" WHERE ") < sql.indexOf(" ORDER BY "));
+    assertTrue(sql.contains("customer_hk COLLATE \"C\""), sql);
 
     PipelineMeta pipelineMeta = BvScd2PipelineSupport.generatePipeline(ctx);
     TableInputMeta tableInputMeta =
@@ -836,6 +838,55 @@ class BvScd2PipelineSupportTest {
     assertEquals(
         "4",
         pipelineMeta.getParameterDefault(BvScd2HashPartitionSqlSupport.PARTITION_COUNT_VARIABLE));
+  }
+
+  @Test
+  void binaryHashKeyOrderByDoesNotInjectStringCollation() throws Exception {
+    DataVaultModel dvModel = loadVault1Model();
+    dvModel.getConfigurationOrDefault().setHashKeyDataType(HashKeyDataType.BINARY.name());
+    DvSatellite satellite = (DvSatellite) dvModel.findTable("sat_customer");
+    DatabaseMeta databaseMeta = new TestDatabaseMeta("Vault", "POSTGRESQL");
+
+    BvScd2Table scd2Table = new BvScd2Table();
+    scd2Table.setName("bv_customer_scd2");
+    scd2Table.setTableName("bv_customer_scd2");
+    scd2Table.setFunctionalTimestampField("x_load_ts");
+    scd2Table.getDerivatives().add(new BvDerivativeRef("sat_customer", DvTableType.SATELLITE));
+
+    BusinessVaultModel bvModel = new BusinessVaultModel();
+    bvModel.getConfigurationOrDefault().setTargetDatabase("Vault");
+
+    Scd2BuildContext ctx =
+        new Scd2BuildContext(
+            scd2Table,
+            satellite,
+            bvModel,
+            dvModel,
+            bvModel.getConfigurationOrDefault(),
+            dvModel.getConfigurationOrDefault(),
+            null,
+            new Variables(),
+            databaseMeta,
+            "Vault",
+            databaseMeta,
+            "Vault",
+            "sat_customer",
+            "bv_customer_scd2",
+            "bv-scd2-bv_customer_scd2-sat_customer",
+            "customer_hk",
+            null,
+            BvScd2PipelineSupport.resolveAttributeFieldNames(satellite),
+            "x_load_ts",
+            "valid_from",
+            "valid_to",
+            "x_record_source",
+            BusinessVaultConfiguration.DEFAULT_OPEN_START_SENTINEL,
+            BusinessVaultConfiguration.DEFAULT_OPEN_END_SENTINEL,
+            true);
+
+    String sql = BvScd2PipelineSupport.buildSatelliteTableInputSql(ctx);
+    assertTrue(sql.contains(" ORDER BY customer_hk, x_load_ts"), sql);
+    assertFalse(sql.contains("COLLATE"), sql);
   }
 
   @Test
@@ -1244,6 +1295,54 @@ class BvScd2PipelineSupportTest {
     assertFalse(
         BvScd2PipelineSupport.buildLegTableInputSql(ctx, ctx.legs.get(1))
             .contains("x_record_source"));
+  }
+
+  @Test
+  void calculationsInsertSqlExpressionAfterGroupBy() throws Exception {
+    Scd2BuildContext ctx = singleSatelliteContext(BvScd2BuildMode.FULL_REBUILD, null);
+    ctx.scd2Table
+        .getCalculations()
+        .add(
+            new BvScd2Calculation(
+                "name_or_default", "COALESCE(name, 'Default value' :> VARCHAR(720))"));
+
+    PipelineMeta pipelineMeta = BvScd2PipelineSupport.generatePipeline(ctx);
+    TransformMeta calc =
+        pipelineMeta.getTransforms().stream()
+            .filter(t -> "SqlExpression".equals(t.getTransformPluginId()))
+            .findFirst()
+            .orElseThrow();
+    assertEquals("calculate_bv_customer_scd2", calc.getName());
+    SqlExpressionMeta sqlMeta = (SqlExpressionMeta) calc.getTransform();
+    assertTrue(
+        sqlMeta.getFields().stream().anyMatch(f -> "name_or_default".equals(f.getFieldName())));
+    assertTrue(
+        sqlMeta.getBusinessVaultModelFilename() == null
+            || sqlMeta.getBusinessVaultModelFilename().isEmpty());
+    assertTrue(sqlMeta.getScd2TableName() == null || sqlMeta.getScd2TableName().isEmpty());
+
+    boolean hopFromGroupBy =
+        pipelineMeta.getPipelineHops().stream()
+            .anyMatch(
+                hop ->
+                    hop.getFromTransform().getTransform() instanceof GroupByMeta
+                        && hop.getToTransform() == calc);
+    assertTrue(hopFromGroupBy);
+
+    var layout =
+        BvScd2PipelineSupport.buildTargetTableLayout(
+            ctx.scd2Table, ctx.bvConfig, ctx.dvModel, ctx.getSatellite(), new Variables());
+    assertTrue(
+        layout.getValueMetaList().stream().anyMatch(vm -> "name_or_default".equals(vm.getName())));
+  }
+
+  @Test
+  void emptyCalculationsDoNotAddSqlExpression() throws Exception {
+    Scd2BuildContext ctx = singleSatelliteContext(BvScd2BuildMode.FULL_REBUILD, null);
+    PipelineMeta pipelineMeta = BvScd2PipelineSupport.generatePipeline(ctx);
+    assertTrue(
+        pipelineMeta.getTransforms().stream()
+            .noneMatch(t -> "SqlExpression".equals(t.getTransformPluginId())));
   }
 
   @Test

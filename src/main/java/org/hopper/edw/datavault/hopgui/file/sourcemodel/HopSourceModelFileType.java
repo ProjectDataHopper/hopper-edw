@@ -254,6 +254,7 @@ public class HopSourceModelFileType extends HopFileTypeBase {
     }
     saveModelToFile(graph.getModel(), filename, hopGui.getVariables());
     graph.clearChanged();
+    SourceModelSaveCatalogReminder.offerAfterSave(hopGui, graph);
   }
 
   public void saveFileAs(HopGui hopGui, HopGuiSourceModelGraph graph, String filename)
@@ -289,6 +290,7 @@ public class HopSourceModelFileType extends HopFileTypeBase {
     saveModelToFile(graph.getModel(), filename, hopGui.getVariables());
     graph.setFilename(filename);
     graph.clearChanged();
+    SourceModelSaveCatalogReminder.offerAfterSave(hopGui, graph);
   }
 
   private void saveModelToFile(SourceModel model, String filename, IVariables variables)

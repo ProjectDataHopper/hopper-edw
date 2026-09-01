@@ -232,7 +232,12 @@ public final class SourceRecordValidationService {
 
     List<ValidationIssue> allIssues =
         RemediationProposalSupport.buildIssues(
-            diff, usages, unavailableMessage, IssueKind.SOURCE_UNAVAILABLE, recordKey);
+            diff,
+            usages,
+            unavailableMessage,
+            IssueKind.SOURCE_UNAVAILABLE,
+            recordKey,
+            sourceTypeName);
     int acknowledgedIssueCount = ValidationIssueSupport.countAcknowledged(definition, allIssues);
     List<ValidationIssue> visibleIssues =
         ValidationIssueSupport.filterAcknowledged(definition, allIssues);

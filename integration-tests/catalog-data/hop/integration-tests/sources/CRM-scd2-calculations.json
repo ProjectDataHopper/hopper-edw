@@ -1,0 +1,86 @@
+{
+  "namespace": "hop/integration-tests/sources",
+  "name": "CRM-scd2-calculations",
+  "type": "DV_SOURCE",
+  "description": "Customer source for BV SCD2 SQL calculation tests (deleted-flag CASE + CAST default)",
+  "origin": {
+    "modelType": "DATA_VAULT_SOURCE",
+    "modelName": "scd2-calculations",
+    "modelFilename": "${PROJECT_HOME}/tests/scd2-calculations/scd2-calculations.hdv",
+    "modelElementName": "CRM-scd2-calculations",
+    "hopProject": "hop-data-vault",
+    "createdAt": 1783000000000,
+    "updatedAt": 1783000000000,
+    "updatedBy": null,
+    "lastWorkflow": null,
+    "lastPipeline": null
+  },
+  "physicalTable": {
+    "databaseMetaName": "CRM",
+    "schemaName": "",
+    "tableName": "customer_calc"
+  },
+  "tags": [
+    "DV Source",
+    "FULL_SNAPSHOT"
+  ],
+  "glossaryTerms": [],
+  "customProperties": {},
+  "dvSource": {
+    "sourceType": "DATABASE",
+    "sourceIndicator": "CRM",
+    "sourceIndicatorField": "record_source",
+    "group": "",
+    "deliveryType": "FULL_SNAPSHOT",
+    "fields": [
+      {
+        "name": "customer_id",
+        "description": "Customer business key",
+        "sourceDataType": "Integer",
+        "length": "9",
+        "precision": "0",
+        "hopType": 5
+      },
+      {
+        "name": "name",
+        "description": "Customer name",
+        "sourceDataType": "String",
+        "length": "50",
+        "precision": "",
+        "hopType": 2
+      },
+      {
+        "name": "deleted_flag",
+        "description": "Y when the source row is deleted",
+        "sourceDataType": "String",
+        "length": "1",
+        "precision": "",
+        "hopType": 2
+      },
+      {
+        "name": "event_date",
+        "description": "Business event timestamp nulled when deleted",
+        "sourceDataType": "Timestamp",
+        "length": "6",
+        "precision": "",
+        "hopType": 9
+      },
+      {
+        "name": "description",
+        "description": "Optional description; nulls become a CAST default",
+        "sourceDataType": "String",
+        "length": "100",
+        "precision": "",
+        "hopType": 2
+      },
+      {
+        "name": "record_source",
+        "description": "Record source indicator",
+        "sourceDataType": "String",
+        "length": "20",
+        "precision": "",
+        "hopType": 2
+      }
+    ]
+  }
+}

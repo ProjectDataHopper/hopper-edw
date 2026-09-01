@@ -24,6 +24,7 @@ import org.apache.hop.core.Const;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.Props;
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
@@ -48,6 +49,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.hopper.edw.datavault.expression.SqlExpressionDraft;
 import org.hopper.edw.datavault.hopgui.EnumDialogSupport;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
 import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
@@ -62,12 +64,16 @@ import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultDerivativeSu
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BvDerivativeRef;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2BuildMode;
+import org.hopper.edw.datavault.metadata.businessvault.BvScd2Calculation;
+import org.hopper.edw.datavault.metadata.businessvault.BvScd2CalculationUnitTestSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2FieldMapping;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2FieldMappingDialogSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2HashPartitionCount;
+import org.hopper.edw.datavault.metadata.businessvault.BvScd2PipelineSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2SatelliteConfig;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2Table;
 import org.hopper.edw.datavault.metadata.businessvault.IBvTable;
+import org.hopper.edw.datavault.transform.sqlexpression.SqlExpressionEditorDialog;
 
 /** Tabbed dialog to edit a Business Vault SCD2 table, including multi-satellite field mappings. */
 public class HopGuiBvScd2TableDialog {
@@ -100,6 +106,8 @@ public class HopGuiBvScd2TableDialog {
   private Button wDeleteMapping;
   private Button wSuggestMappings;
   private TableView wSatelliteConfigs;
+  private TableView wCalculations;
+  private Label wlUnitTestArtifacts;
   private CTabFolder wTabFolder;
 
   private ColumnInfo mappingsSatelliteColumn;
@@ -162,6 +170,7 @@ public class HopGuiBvScd2TableDialog {
     wName = new Text(shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wName);
     wName.setLayoutData(new FormDataBuilder().left(middle, 0).top(0, margin).right().result());
+    wName.addModifyListener(e -> refreshUnitTestArtifactLabel());
 
     Label wlDescription = new Label(shell, SWT.RIGHT);
     wlDescription.setText(BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Description.Label"));
@@ -189,6 +198,8 @@ public class HopGuiBvScd2TableDialog {
     addDerivativesTab();
     addFieldMappingsTab();
     addSatelliteSettingsTab();
+    addCalculationsTab();
+    addCalculationTestsTab();
     addLineageTab();
     wTabFolder.setSelection(0);
     shell.layout(true, true);
@@ -531,6 +542,199 @@ public class HopGuiBvScd2TableDialog {
     wSatelliteConfigs.optimizeTableView();
   }
 
+  private void addCalculationsTab() {
+    Composite comp =
+        HopGuiBusinessVaultModelDialog.createTabComposite(
+            wTabFolder,
+            BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Tab.Calculations.Label"),
+            BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Tab.Calculations.ToolTip"));
+
+    Label hint = new Label(comp, SWT.LEFT | SWT.WRAP);
+    hint.setText(BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Calculations.Hint"));
+    PropsUi.setLook(hint);
+    hint.setLayoutData(new FormDataBuilder().left().top(0, margin).right().result());
+
+    Button wAdd = new Button(comp, SWT.PUSH);
+    wAdd.setText(BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Calculations.Add"));
+    PropsUi.setLook(wAdd);
+    wAdd.setLayoutData(new FormDataBuilder().left().top(hint, margin).result());
+    wAdd.addListener(SWT.Selection, e -> openCalculationEditor(-1));
+
+    Button wEdit = new Button(comp, SWT.PUSH);
+    wEdit.setText(BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Calculations.Edit"));
+    PropsUi.setLook(wEdit);
+    wEdit.setLayoutData(new FormDataBuilder().left(wAdd, margin).top(hint, margin).result());
+    wEdit.addListener(SWT.Selection, e -> openCalculationEditor(wCalculations.getSelectionIndex()));
+
+    Button wDelete = new Button(comp, SWT.PUSH);
+    wDelete.setText(BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Calculations.Delete"));
+    PropsUi.setLook(wDelete);
+    wDelete.setLayoutData(new FormDataBuilder().left(wEdit, margin).top(hint, margin).result());
+    wDelete.addListener(
+        SWT.Selection,
+        e -> {
+          int idx = wCalculations.getSelectionIndex();
+          if (idx >= 0) {
+            wCalculations.table.remove(idx);
+            wCalculations.optimizeTableView();
+          }
+        });
+
+    ColumnInfo expressionCol =
+        new ColumnInfo(
+            BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Calculations.Column.Expression"),
+            ColumnInfo.COLUMN_TYPE_TEXT,
+            false);
+    expressionCol.setReadOnly(true);
+    ColumnInfo[] cols =
+        new ColumnInfo[] {
+          new ColumnInfo(
+              BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Calculations.Column.Target"),
+              ColumnInfo.COLUMN_TYPE_TEXT,
+              false),
+          expressionCol,
+          new ColumnInfo(
+              BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Calculations.Column.Type"),
+              ColumnInfo.COLUMN_TYPE_TEXT,
+              false,
+              true),
+          new ColumnInfo(
+              BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Calculations.Column.Length"),
+              ColumnInfo.COLUMN_TYPE_TEXT,
+              false,
+              true),
+          new ColumnInfo(
+              BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Calculations.Column.Precision"),
+              ColumnInfo.COLUMN_TYPE_TEXT,
+              false,
+              true),
+          new ColumnInfo(
+              BaseMessages.getString(
+                  PKG, "HopGuiBvScd2TableDialog.Calculations.Column.Description"),
+              ColumnInfo.COLUMN_TYPE_TEXT,
+              false,
+              true),
+        };
+    wCalculations =
+        new TableView(
+            variables,
+            comp,
+            SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI,
+            cols,
+            1,
+            null,
+            PropsUi.getInstance());
+    wCalculations.setLayoutData(
+        new FormDataBuilder().left().top(wAdd, margin).right().bottom(100, margin).result());
+    wCalculations.optimizeTableView();
+    wCalculations.table.addListener(
+        SWT.DefaultSelection, e -> openCalculationEditor(wCalculations.getSelectionIndex()));
+  }
+
+  private void openCalculationEditor(int rowIndex) {
+    SqlExpressionDraft draft = new SqlExpressionDraft();
+    if (rowIndex >= 0 && rowIndex < wCalculations.table.getItemCount()) {
+      TableItem item = wCalculations.table.getItem(rowIndex);
+      draft.setFieldName(item.getText(1));
+      draft.setExpression(item.getText(2));
+      draft.setHopTypeName(item.getText(3));
+      draft.setLength(Const.toInt(item.getText(4), -1));
+      draft.setPrecision(Const.toInt(item.getText(5), -1));
+      draft.setDescription(item.getText(6));
+    }
+    IRowMeta compileMeta = calculationCompileRowMeta();
+    SqlExpressionEditorDialog editor =
+        new SqlExpressionEditorDialog(
+            shell, variables, draft, calculationFieldNames(compileMeta), compileMeta, true);
+    SqlExpressionDraft result = editor.open();
+    if (result == null) {
+      return;
+    }
+    TableItem item;
+    if (rowIndex >= 0 && rowIndex < wCalculations.table.getItemCount()) {
+      item = wCalculations.table.getItem(rowIndex);
+    } else {
+      item = new TableItem(wCalculations.table, SWT.NONE);
+    }
+    item.setText(1, Const.NVL(result.getFieldName(), ""));
+    item.setText(2, Const.NVL(result.getExpression(), ""));
+    item.setText(3, Const.NVL(result.getHopTypeName(), ""));
+    item.setText(4, result.getLength() >= 0 ? String.valueOf(result.getLength()) : "");
+    item.setText(5, result.getPrecision() >= 0 ? String.valueOf(result.getPrecision()) : "");
+    item.setText(6, Const.NVL(result.getDescription(), ""));
+    wCalculations.optimizeTableView();
+  }
+
+  private IRowMeta calculationCompileRowMeta() {
+    try {
+      BvScd2Table draftTable = new BvScd2Table();
+      applyWidgetsToTable(draftTable);
+      return BvScd2PipelineSupport.buildCollapseRowLayout(
+          draftTable,
+          businessVaultModel != null
+              ? businessVaultModel.getConfigurationOrDefault()
+              : new BusinessVaultConfiguration(),
+          dataVaultModel,
+          variables);
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  private String[] calculationFieldNames(IRowMeta compileMeta) {
+    List<String> names = new ArrayList<>();
+    if (compileMeta != null) {
+      for (int i = 0; i < compileMeta.size(); i++) {
+        String name = compileMeta.getValueMeta(i).getName();
+        if (!Utils.isEmpty(name)) {
+          names.add(name);
+        }
+      }
+    }
+    if (wMappings != null) {
+      for (TableItem item : wMappings.getNonEmptyItems()) {
+        String target = item.getText(3);
+        if (!Utils.isEmpty(target) && !names.contains(target)) {
+          names.add(target);
+        }
+      }
+    }
+    if (wCalculations != null) {
+      for (TableItem item : wCalculations.getNonEmptyItems()) {
+        String target = item.getText(1);
+        if (!Utils.isEmpty(target) && !names.contains(target)) {
+          names.add(target);
+        }
+      }
+    }
+    return names.toArray(new String[0]);
+  }
+
+  private void addCalculationTestsTab() {
+    Composite comp =
+        HopGuiBusinessVaultModelDialog.createTabComposite(
+            wTabFolder,
+            BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Tab.Tests.Label"),
+            BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Tab.Tests.ToolTip"));
+
+    Label wlHint = new Label(comp, SWT.WRAP);
+    wlHint.setText(BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Tests.Hint"));
+    PropsUi.setLook(wlHint);
+    wlHint.setLayoutData(new FormDataBuilder().left().top(0, margin).right().result());
+
+    Button wGenerate = new Button(comp, SWT.PUSH);
+    wGenerate.setText(BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Tests.Generate.Label"));
+    PropsUi.setLook(wGenerate);
+    wGenerate.setLayoutData(new FormDataBuilder().left().top(wlHint, margin).result());
+    wGenerate.addListener(SWT.Selection, e -> generateCalculationUnitTest());
+
+    wlUnitTestArtifacts = new Label(comp, SWT.WRAP);
+    PropsUi.setLook(wlUnitTestArtifacts);
+    wlUnitTestArtifacts.setLayoutData(
+        new FormDataBuilder().left().top(wGenerate, margin).right().bottom().result());
+    refreshUnitTestArtifactLabel();
+  }
+
   private void refreshDynamicTabs() {
     CTabItem selected = wTabFolder.getSelection();
     if (selected == null) {
@@ -542,6 +746,36 @@ public class HopGuiBvScd2TableDialog {
             .equals(title)) {
       refreshSatelliteDependentTabs();
     }
+    if (BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Tab.Tests.Label").equals(title)) {
+      refreshUnitTestArtifactLabel();
+    }
+  }
+
+  private void refreshUnitTestArtifactLabel() {
+    if (wlUnitTestArtifacts == null || wlUnitTestArtifacts.isDisposed()) {
+      return;
+    }
+    String tableName = wName != null ? wName.getText() : input.getName();
+    var names = BvScd2CalculationUnitTestSupport.namesFor(tableName);
+    wlUnitTestArtifacts.setText(
+        BaseMessages.getString(
+            PKG,
+            "HopGuiBvScd2TableDialog.Tests.Artifacts",
+            names.unitTestName(),
+            names.collapseDataSetName(),
+            names.calculatedDataSetName(),
+            names.unitTestPipelineName() + ".hpl",
+            names.capturePipelineName() + ".hpl"));
+  }
+
+  private void generateCalculationUnitTest() {
+    applyWidgetsToTable(input);
+    HopGui hopGui = HopGui.getInstance();
+    if (hopGui == null) {
+      return;
+    }
+    BvScd2CalculationUnitTestGuiSupport.generate(
+        hopGui, shell, variables, businessVaultModel, dataVaultModel, input);
   }
 
   private void refreshSatelliteDependentTabs() {
@@ -706,6 +940,8 @@ public class HopGuiBvScd2TableDialog {
     }
     wDerivatives.optimizeTableView();
     loadMappingsTable();
+    loadCalculationsTable();
+    refreshUnitTestArtifactLabel();
     refreshSatelliteDependentTabs();
   }
 
@@ -724,6 +960,24 @@ public class HopGuiBvScd2TableDialog {
     }
     wMappings.optimizeTableView();
     refreshMappingSourceCombos();
+  }
+
+  private void loadCalculationsTable() {
+    wCalculations.clearAll();
+    for (BvScd2Calculation calculation : input.getCalculations()) {
+      if (calculation == null) {
+        continue;
+      }
+      TableItem item = new TableItem(wCalculations.table, SWT.NONE);
+      item.setText(1, Const.NVL(calculation.getTargetFieldName(), ""));
+      item.setText(2, Const.NVL(calculation.getExpression(), ""));
+      item.setText(3, Const.NVL(calculation.getHopTypeName(), ""));
+      item.setText(4, calculation.getLength() >= 0 ? String.valueOf(calculation.getLength()) : "");
+      item.setText(
+          5, calculation.getPrecision() >= 0 ? String.valueOf(calculation.getPrecision()) : "");
+      item.setText(6, Const.NVL(calculation.getDescription(), ""));
+    }
+    wCalculations.optimizeTableView();
   }
 
   private void loadSatelliteConfigsTable(String[] satelliteNames) {
@@ -888,6 +1142,21 @@ public class HopGuiBvScd2TableDialog {
       config.setFunctionalTimestampField(item.getText(2));
       config.setSourceIndicatorValue(item.getText(3));
       target.getSatelliteConfigs().add(config);
+    }
+
+    target.getCalculations().clear();
+    for (TableItem item : wCalculations.getNonEmptyItems()) {
+      String targetField = item.getText(1);
+      String expression = item.getText(2);
+      if (Utils.isEmpty(targetField) || Utils.isEmpty(expression)) {
+        continue;
+      }
+      BvScd2Calculation calculation = new BvScd2Calculation(targetField, expression);
+      calculation.setHopTypeName(item.getText(3));
+      calculation.setLength(Const.toInt(item.getText(4), -1));
+      calculation.setPrecision(Const.toInt(item.getText(5), -1));
+      calculation.setDescription(item.getText(6));
+      target.getCalculations().add(calculation);
     }
   }
 

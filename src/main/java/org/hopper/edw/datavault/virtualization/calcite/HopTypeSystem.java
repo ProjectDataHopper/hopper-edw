@@ -31,6 +31,28 @@ public final class HopTypeSystem {
 
   public static RelDataType toRelType(RelDataTypeFactory typeFactory, SourceColumn column) {
     int hopType = column != null ? column.getHopType() : IValueMeta.TYPE_STRING;
+    int varcharLen = parsePositiveInt(column != null ? column.getLength() : null, 1024);
+    int decimalPrecision = parsePositiveInt(column != null ? column.getLength() : null, 38);
+    int decimalScale = parseNonNegativeInt(column != null ? column.getPrecision() : null, 10);
+    return toRelType(typeFactory, hopType, varcharLen, decimalPrecision, decimalScale);
+  }
+
+  public static RelDataType toRelType(RelDataTypeFactory typeFactory, IValueMeta valueMeta) {
+    int hopType = valueMeta != null ? valueMeta.getType() : IValueMeta.TYPE_STRING;
+    int length = valueMeta != null ? valueMeta.getLength() : -1;
+    int scale = valueMeta != null ? valueMeta.getPrecision() : -1;
+    int varcharLen = length > 0 ? length : 1024;
+    int decimalPrecision = length > 0 ? length : 38;
+    int decimalScale = scale >= 0 ? scale : 10;
+    return toRelType(typeFactory, hopType, varcharLen, decimalPrecision, decimalScale);
+  }
+
+  private static RelDataType toRelType(
+      RelDataTypeFactory typeFactory,
+      int hopType,
+      int varcharLen,
+      int decimalPrecision,
+      int decimalScale) {
     if (hopType <= 0) {
       hopType = IValueMeta.TYPE_STRING;
     }
@@ -46,12 +68,9 @@ public final class HopTypeSystem {
         };
     RelDataType type;
     if (sqlType == SqlTypeName.VARCHAR) {
-      int len = parsePositiveInt(column != null ? column.getLength() : null, 1024);
-      type = typeFactory.createSqlType(sqlType, len);
+      type = typeFactory.createSqlType(sqlType, varcharLen);
     } else if (sqlType == SqlTypeName.DECIMAL) {
-      int precision = parsePositiveInt(column != null ? column.getLength() : null, 38);
-      int scale = parseNonNegativeInt(column != null ? column.getPrecision() : null, 10);
-      type = typeFactory.createSqlType(sqlType, precision, scale);
+      type = typeFactory.createSqlType(sqlType, decimalPrecision, decimalScale);
     } else {
       type = typeFactory.createSqlType(sqlType);
     }
@@ -75,6 +94,29 @@ public final class HopTypeSystem {
       case BINARY, VARBINARY -> IValueMeta.TYPE_BINARY;
       default -> IValueMeta.TYPE_STRING;
     };
+  }
+
+  public static int toHopLength(RelDataType type) {
+    if (type == null) {
+      return -1;
+    }
+    SqlTypeName name = type.getSqlTypeName();
+    if (name == SqlTypeName.VARCHAR
+        || name == SqlTypeName.CHAR
+        || name == SqlTypeName.DECIMAL
+        || name == SqlTypeName.BINARY
+        || name == SqlTypeName.VARBINARY) {
+      int precision = type.getPrecision();
+      return precision > 0 ? precision : -1;
+    }
+    return -1;
+  }
+
+  public static int toHopScale(RelDataType type) {
+    if (type == null || type.getSqlTypeName() != SqlTypeName.DECIMAL) {
+      return -1;
+    }
+    return type.getScale();
   }
 
   public static org.apache.hop.core.row.IRowMeta toRowMeta(RelDataType rowType) {

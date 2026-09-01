@@ -128,6 +128,23 @@ class SortedSchemaMergeLogicTest {
   }
 
   @Test
+  void compareRowsUsesJavaStringCompareToForDashSeparatedHashKeys() throws Exception {
+    IRowMeta layout = row("hub_hk");
+    List<SortedSchemaMergeSortKey> sortKeys = SortedSchemaMergeMetaFactory.sortKeys("hub_hk");
+    int[][] sortKeyIndices =
+        SortedSchemaMergeLogic.resolveSortKeyIndices(new IRowMeta[] {layout}, sortKeys);
+
+    SortedSchemaMergeRow oneDash =
+        new SortedSchemaMergeRow(0, null, layout, new Object[] {"1-136-232-184-176-20-130-158"});
+    SortedSchemaMergeRow tenDash =
+        new SortedSchemaMergeRow(0, null, layout, new Object[] {"10-10-12-138-170-0-173-229"});
+
+    // Java compareTo: "1-" < "10-". Locale collations (Postgres en_US.utf8) reverse that.
+    assertTrue(SortedSchemaMergeLogic.compareRows(oneDash, tenDash, sortKeyIndices, sortKeys) < 0);
+    assertTrue(SortedSchemaMergeLogic.compareRows(tenDash, oneDash, sortKeyIndices, sortKeys) > 0);
+  }
+
+  @Test
   void compareRowsHonorsDescendingSortKey() throws Exception {
     IRowMeta layout = row("seq");
 

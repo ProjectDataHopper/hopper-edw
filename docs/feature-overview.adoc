@@ -130,6 +130,10 @@ For a slide-style executive summary, see link:presentations/hop-data-vault-overv
 |Available
 |link:business-vault-scd2.adoc[Business Vault SCD2]
 
+|BV SCD2 SQL calculations (`CASE` / `COALESCE` / `CAST`) + Hop pipeline unit tests
+|Available
+|link:business-vault-scd2.adoc[Business Vault SCD2], issue https://github.com/ProjectDataHopper/hopper-edw/issues/150[#150]
+
 |BV PIT tables
 |Available
 |link:business-vault-pit.adoc[Business Vault PIT]

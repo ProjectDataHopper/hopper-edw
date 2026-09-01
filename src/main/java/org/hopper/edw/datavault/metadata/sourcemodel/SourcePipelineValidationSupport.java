@@ -22,7 +22,9 @@ import java.util.Set;
 import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /** Design-time checks for a {@link SourcePipeline}. */
 public final class SourcePipelineValidationSupport {
@@ -33,6 +35,15 @@ public final class SourcePipelineValidationSupport {
 
   public static List<ICheckResult> check(
       SourcePipeline pipeline, SourceModel model, Set<String> knownPipelineNames) {
+    return check(pipeline, model, knownPipelineNames, null, null);
+  }
+
+  public static List<ICheckResult> check(
+      SourcePipeline pipeline,
+      SourceModel model,
+      Set<String> knownPipelineNames,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider) {
     List<ICheckResult> remarks = new ArrayList<>();
     if (pipeline == null) {
       return remarks;
@@ -103,6 +114,9 @@ public final class SourcePipelineValidationSupport {
       }
     }
 
+    remarks.addAll(
+        SourceCatalogPublishSyncSupport.checkPipeline(
+            model, pipeline, variables, metadataProvider));
     return remarks;
   }
 

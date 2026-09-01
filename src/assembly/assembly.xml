@@ -15,8 +15,8 @@
   -->
 
 <assembly xmlns="http://maven.apache.org/ASSEMBLY/2.2.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.2.0 http://maven.apache.org/xsd/assembly-2.2.0.xsd">
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.2.0 http://maven.apache.org/xsd/assembly-2.2.0.xsd">
     <id>hopper-edw</id>
     <formats>
         <format>zip</format>
@@ -135,6 +135,7 @@
             <includes>
                 <include>org.apache.hop:hop-action-sql:jar</include>
                 <include>org.apache.hop:hop-action-success:jar</include>
+                <include>org.apache.hop:hop-misc-testing:jar</include>
                 <include>org.apache.hop:hop-transform-addsequence:jar</include>
                 <include>org.apache.hop:hop-transform-analyticquery:jar</include>
                 <include>org.apache.hop:hop-transform-append:jar</include>
@@ -158,6 +159,7 @@
                 <include>org.apache.hop:hop-transform-numberrange:jar</include>
                 <include>org.apache.hop:hop-transform-pipelineexecutor:jar</include>
                 <include>org.apache.hop:hop-transform-repeatfields:jar</include>
+                <include>org.apache.hop:hop-transform-reservoirsampling:jar</include>
                 <include>org.apache.hop:hop-transform-rowgenerator:jar</include>
                 <include>org.apache.hop:hop-transform-selectvalues:jar</include>
                 <include>org.apache.hop:hop-transform-sort:jar</include>

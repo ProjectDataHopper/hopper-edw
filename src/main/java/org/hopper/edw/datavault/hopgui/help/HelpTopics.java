@@ -132,6 +132,7 @@ public final class HelpTopics {
   public static final String DV_HASH_KEY = "dv-hash-key-dialog";
   public static final String MERGE_ROWS_PLUS = "merge-rows-plus-dialog";
   public static final String SORTED_SCHEMA_MERGE = "sorted-schema-merge-dialog";
+  public static final String SQL_EXPRESSION = "sql-expression-dialog";
   public static final String JUNK_DIMENSION = "junk-dimension-transform-dialog";
 
   public static final String DATA_CATALOG = "data-catalog-dialog";
@@ -426,6 +427,10 @@ public final class HelpTopics {
               SORTED_SCHEMA_MERGE,
               "help/sorted-schema-merge-dialog.html",
               "HelpTopics.SortedSchemaMergeDialog.Title"),
+          p(
+              SQL_EXPRESSION,
+              "help/sql-expression-dialog.html",
+              "HelpTopics.SqlExpressionDialog.Title"),
           p(
               JUNK_DIMENSION,
               "help/junk-dimension-transform-dialog.html",

@@ -245,6 +245,12 @@
         <precision>-2</precision>
       </field>
       <field>
+        <name>errors</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>
+      <field>
         <name>success</name>
         <rename/>
         <length>-2</length>
@@ -379,6 +385,19 @@
       </field>
       <field>
         <name>targetRowsRead</name>
+        <type>String</type>
+        <format/>
+        <length>-1</length>
+        <precision>-1</precision>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>both</trim_type>
+        <roundingType>half_even</roundingType>
+      </field>
+      <field>
+        <name>errors</name>
         <type>String</type>
         <format/>
         <length>-1</length>

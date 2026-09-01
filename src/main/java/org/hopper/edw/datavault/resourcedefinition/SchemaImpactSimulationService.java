@@ -748,7 +748,8 @@ public final class SchemaImpactSimulationService {
             usages,
             unavailableMessage,
             unavailableKind != null ? unavailableKind : IssueKind.SOURCE_UNAVAILABLE,
-            recordKey);
+            recordKey,
+            sourceTypeName);
     int acknowledgedIssueCount =
         ackDefinition != null
             ? ValidationIssueSupport.countAcknowledged(ackDefinition, allIssues)

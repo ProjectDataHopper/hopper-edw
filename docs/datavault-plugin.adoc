@@ -216,6 +216,7 @@ Under **Hop GUI → Configuration → Data Vault 2.0** you can set options that 
 image::images/hopgui-configuration-perspecive-data-vault-options.png[Data Vault 2.0 options in the Hop configuration perspective,align="center"]
 
 * **Draw hash keys in model** – When enabled, hash key column names are shown on table cards in the visual editor.
+* **Remind to publish catalog feeds when saving a source model** – When enabled (default), saving a `.hsm` whose published catalog feeds lag the canvas asks whether to publish them. The dialog has **Don't remind me after save**; you can turn the option back on here.
 * **Maximum undo/redo operations kept in memory** – Size of the snapshot undo stack for `.hdv` files (default 200).
 
 == Business Vault

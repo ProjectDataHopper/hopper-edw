@@ -26,6 +26,7 @@ import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BvBusinessTable;
 import org.hopper.edw.datavault.metadata.businessvault.BvDerivativeRef;
 import org.hopper.edw.datavault.metadata.businessvault.BvPitTable;
+import org.hopper.edw.datavault.metadata.businessvault.BvScd2Calculation;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2FieldMapping;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2Table;
 import org.hopper.edw.datavault.metadata.businessvault.BvSqlRef;
@@ -119,6 +120,24 @@ public final class BvModelLineageCollector {
         contribution.setTransform(
             target.equals(sourceField) ? FieldTransform.IDENTITY : FieldTransform.RENAME);
         contribution.addReason(LineageReasonFactory.bvScd2FieldMap(target, sat, sourceField));
+        field.addContribution(contribution);
+        lineage.addField(field);
+      }
+    }
+
+    if (table.getCalculations() != null) {
+      for (BvScd2Calculation calculation : table.getCalculations()) {
+        if (calculation == null || Utils.isEmpty(calculation.getTargetFieldName())) {
+          continue;
+        }
+        String target = resolve(calculation.getTargetFieldName(), variables);
+        FieldLineage field = new FieldLineage(target);
+        field.setTechnical(false);
+        FieldContribution contribution = new FieldContribution();
+        contribution.setTransform(FieldTransform.DERIVED);
+        contribution.addReason(
+            LineageReasonFactory.bvScd2Calculation(
+                target, resolve(calculation.getExpression(), variables)));
         field.addContribution(contribution);
         lineage.addField(field);
       }

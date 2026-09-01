@@ -66,6 +66,10 @@ public class HopGuiBusinessVaultTableContext extends BaseGuiContextHandler
             && !(table instanceof BvScd2Table || table instanceof BvPitTable)) {
           continue;
         }
+        if ("bv-graph-generate-scd2-calc-unit-test".equals(pluginAction.getId())
+            && !(table instanceof BvScd2Table)) {
+          continue;
+        }
         actions.add(lambdaBuilder.createLambda(pluginAction, this, businessVaultGraph));
       }
     }

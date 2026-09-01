@@ -330,6 +330,34 @@ class DvSqlOrderBySupportTest {
     assertFalse(out.contains("[hk] COLLATE"));
   }
 
+  @Test
+  void javaStringCompareOrderExpressionUsesBinaryCollationPerDialect() {
+    assertEquals(
+        "customer_hk COLLATE \"C\"",
+        DvSqlOrderBySupport.javaStringCompareOrderExpression(
+            databaseMetaWithPluginId(DvBulkLoadPluginSupport.POSTGRESQL_DB_PLUGIN_ID),
+            "customer_hk"));
+    assertEquals(
+        "customer_hk COLLATE Latin1_General_100_BIN2",
+        DvSqlOrderBySupport.javaStringCompareOrderExpression(
+            databaseMetaWithPluginId(DvBulkLoadPluginSupport.MSSQLNATIVE_DB_PLUGIN_ID),
+            "customer_hk"));
+    assertEquals(
+        "BINARY customer_hk",
+        DvSqlOrderBySupport.javaStringCompareOrderExpression(
+            databaseMetaWithPluginId(DvBulkLoadPluginSupport.MYSQL_DB_PLUGIN_ID), "customer_hk"));
+    assertEquals(
+        "BINARY customer_hk",
+        DvSqlOrderBySupport.javaStringCompareOrderExpression(
+            databaseMetaWithPluginId(DvBulkLoadPluginSupport.SINGLESTORE_DB_PLUGIN_ID),
+            "customer_hk"));
+    assertEquals(
+        "customer_hk",
+        DvSqlOrderBySupport.javaStringCompareOrderExpression(
+            databaseMetaWithPluginId(DvBulkLoadPluginSupport.SNOWFLAKE_DB_PLUGIN_ID),
+            "customer_hk"));
+  }
+
   private static DatabaseMeta mssqlDatabaseMeta() {
     return databaseMetaWithPluginId(DvBulkLoadPluginSupport.MSSQLNATIVE_DB_PLUGIN_ID);
   }

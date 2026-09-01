@@ -207,6 +207,18 @@ public final class LineageReasonFactory {
         evidence);
   }
 
+  public static LineageReason bvScd2Calculation(String targetField, String expression) {
+    Map<String, String> evidence = new LinkedHashMap<>();
+    evidence.put("targetField", nvl(targetField));
+    evidence.put("expression", nvl(expression));
+    return new LineageReason(
+        LineageReasonCode.BV_SCD2_CALCULATION,
+        BaseMessages.getString(
+            PKG, "LineageReason.BvScd2Calculation", nvl(targetField), nvl(expression)),
+        LineageConfidence.DERIVED,
+        evidence);
+  }
+
   public static LineageReason bvPassthrough(String fieldName, String satelliteName) {
     Map<String, String> evidence = new LinkedHashMap<>();
     evidence.put("fieldName", nvl(fieldName));
