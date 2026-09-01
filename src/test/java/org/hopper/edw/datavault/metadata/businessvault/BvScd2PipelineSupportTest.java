@@ -1380,33 +1380,46 @@ class BvScd2PipelineSupportTest {
   }
 
   @Test
-  void singleSatellitePipelineMergesHubBusinessKeys() throws Exception {
+  void singleSatellitePipelineJoinsHubBusinessKeysAfterCollapse() throws Exception {
     Scd2BuildContext ctx = singleSatelliteContextWithHubBusinessKeys();
     PipelineMeta pipelineMeta = BvScd2PipelineSupport.generatePipeline(ctx);
 
     assertTrue(
         pipelineMeta.getTransforms().stream()
             .anyMatch(t -> "read_hub_customer".equals(t.getName())));
-    assertTrue(
+    assertFalse(
         pipelineMeta.getTransforms().stream()
             .anyMatch(t -> t.getTransform() instanceof SortedSchemaMergeMeta));
-    assertTrue(
+    assertFalse(
+        pipelineMeta.getTransforms().stream()
+            .anyMatch(t -> t.getTransform() instanceof RepeatFieldsMeta));
+    assertFalse(
         pipelineMeta.getTransforms().stream()
             .anyMatch(t -> "filter_hub_bk_rows".equals(t.getName())));
 
-    RepeatFieldsMeta repeatMeta =
-        (RepeatFieldsMeta)
-            pipelineMeta.getTransforms().stream()
-                .filter(t -> t.getTransform() instanceof RepeatFieldsMeta)
-                .findFirst()
-                .orElseThrow()
-                .getTransform();
+    TransformMeta join =
+        pipelineMeta.getTransforms().stream()
+            .filter(t -> BvScd2PipelineSupport.JOIN_HUB_BK_TRANSFORM.equals(t.getName()))
+            .findFirst()
+            .orElseThrow();
+    MergeJoinMeta joinMeta = (MergeJoinMeta) join.getTransform();
+    assertEquals("LEFT OUTER", joinMeta.getJoinType());
+    assertEquals("customer_hk", joinMeta.getKeyFields1().get(0));
+    assertEquals("customer_hk", joinMeta.getKeyFields2().get(0));
     assertTrue(
-        repeatMeta.getRepeats().stream()
+        pipelineMeta.getPipelineHops().stream()
             .anyMatch(
-                repeat ->
-                    RepeatType.PreviousWhenNull == repeat.getType()
-                        && "customer_id".equals(repeat.getSourceField())));
+                hop ->
+                    "read_hub_customer".equals(hop.getFromTransform().getName())
+                        && BvScd2PipelineSupport.JOIN_HUB_BK_TRANSFORM.equals(
+                            hop.getToTransform().getName())));
+    assertTrue(
+        pipelineMeta.getPipelineHops().stream()
+            .anyMatch(
+                hop ->
+                    hop.getFromTransform().getTransform() instanceof GroupByMeta
+                        && BvScd2PipelineSupport.JOIN_HUB_BK_TRANSFORM.equals(
+                            hop.getToTransform().getName())));
 
     GroupByMeta groupByMeta =
         (GroupByMeta)
@@ -1417,8 +1430,7 @@ class BvScd2PipelineSupportTest {
                 .getTransform();
     assertTrue(
         groupByMeta.getAggregations().stream()
-            .anyMatch(
-                agg -> "customer_id".equals(agg.getField()) && "LAST".equals(agg.getTypeLabel())));
+            .noneMatch(agg -> "customer_id".equals(agg.getField())));
     assertTrue(
         groupByMeta.getGroupingFields().stream()
             .noneMatch(field -> "customer_id".equals(field.getName())));
@@ -1451,6 +1463,29 @@ class BvScd2PipelineSupportTest {
         BvScd2PipelineSupport.buildCollapseRowLayout(
             ctx.scd2Table, ctx.bvConfig, ctx.dvModel, ctx.variables);
     assertTrue(collapse.getValueMetaList().stream().anyMatch(vm -> "email".equals(vm.getName())));
+  }
+
+  @Test
+  void targetLayoutOmitsHubBusinessKeysWhenNotLoaded() throws Exception {
+    Scd2BuildContext ctx = singleSatelliteContextWithHubBusinessKeys();
+    ctx.scd2Table.setLoadHubBusinessKeys(false);
+
+    PipelineMeta pipelineMeta = BvScd2PipelineSupport.generatePipeline(ctx);
+    assertTrue(
+        pipelineMeta.getTransforms().stream()
+            .anyMatch(t -> BvScd2PipelineSupport.JOIN_HUB_BK_TRANSFORM.equals(t.getName())));
+
+    var collapse =
+        BvScd2PipelineSupport.buildCollapseRowLayout(
+            ctx.scd2Table, ctx.bvConfig, ctx.dvModel, ctx.variables);
+    assertTrue(
+        collapse.getValueMetaList().stream().anyMatch(vm -> "customer_id".equals(vm.getName())));
+
+    var layout =
+        BvScd2PipelineSupport.buildTargetTableLayout(
+            ctx.scd2Table, ctx.bvConfig, ctx.dvModel, ctx.variables);
+    assertTrue(
+        layout.getValueMetaList().stream().noneMatch(vm -> "customer_id".equals(vm.getName())));
   }
 
   @Test

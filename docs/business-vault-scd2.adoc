@@ -107,7 +107,7 @@ After collapse, each SCD2 table can compute extra target columns with determinis
 * Expressions run **after** Group By collapse and **before** Table Output / incremental write.
 * They do **not** create new versions. Mapped satellite attributes remain the grouping keys.
 * Target names must be **new columns** (they cannot overwrite mapped attributes, hash keys, hub business keys, or validity fields). Raw mapped columns stay on the table so incremental runs can recompute expressions, unless **Load** is **No** on the mapping (calculation-only; full rebuild only).
-* Optional **Include hub business keys** (General tab) merges parent-hub BK columns through Sorted schema merge. They are identity fields: available for calculations and stored on the table, but they do not open new versions.
+* Optional **Include hub business keys** (General tab) left-outer Merge Joins parent-hub BK columns onto the collapsed stream **immediately before** SQL calculations. They are identity fields: available for calculations, but they do not open new versions. **Load hub business keys** (default on) writes them to the BV table; uncheck to keep them on the stream only. The SCD2 merge / repeat / incremental chain is unchanged. The Lineage tab lists every loaded column, including hub business keys when those are loaded.
 * Syntax is SQL: `CASE WHEN …`, `COALESCE`, `CAST(x AS VARCHAR(n))`. `x :> VARCHAR(n)` and `x::TYPE` are accepted. MySQL / SingleStore-style `CONCAT`, `HEX`, `UNHEX`, `MD5`, `DATE_FORMAT`, and `TO_DATE` are available for migration.
 * Not allowed: `NOW()`, `CURRENT_TIMESTAMP`, `RANDOM`, subqueries, aggregates, Jinja.
 
@@ -214,10 +214,13 @@ Open intervals use sentinels from configuration (default `1900-01-01 00:00:00` a
 |When enabled, the parent hash key column is included in the BV table.
 
 |Include hub business keys
-|When enabled, parent-hub business key columns are merged in as an extra Sorted schema merge input. Identity only (not version drivers). Requires Include hash key and hub-parent satellites. Not supported for link satellites or driving keys.
+|When enabled, parent-hub business key columns are Merge Joined after collapse, before calculations. Identity only (not version drivers). Requires Include hash key and hub-parent satellites. Not supported for link satellites.
 
-|Field mappings Load column
-|**Yes** (default) writes the mapped column to the BV table. **No** keeps it on the stream for calculations and versioning only. Full rebuild only — Incremental plus Load=No is a Check-model error.
+|Load hub business keys
+|Enabled with Include hub business keys. Checked (default) writes hub BK columns to the BV table. Unchecked keeps them on the stream for calculations only.
+
+|Field mappings Load checkbox
+|Checked (default) writes the mapped column to the BV table. Unchecked keeps it on the stream for calculations and versioning only. Full rebuild only — Incremental plus Load unchecked is a Check-model error.
 
 |Functional timestamp
 |Column on the satellite stream used as the timeline (see resolution order above).

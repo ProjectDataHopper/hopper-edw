@@ -61,10 +61,18 @@ public class BvScd2Table extends BvTableBase {
   @HopMetadataProperty private boolean includeHashKey = true;
 
   /**
-   * When true, parent-hub business key columns are merged into the SCD2 stream (and target table)
-   * as identity fields. They do not drive new versions.
+   * When true, parent-hub business key columns are merged into the SCD2 stream as identity fields
+   * for SQL calculations. They do not drive new versions. Persist them with {@link
+   * #isLoadHubBusinessKeys()}.
    */
   @HopMetadataProperty private boolean includeHubBusinessKeys;
+
+  /**
+   * When true, hub business keys are joined for calculations but not written to the BV table.
+   * Stored as the uncommon case so older {@code .hbv} files without this tag deserialize as false
+   * (keys are loaded when Include hub business keys is enabled).
+   */
+  @HopMetadataProperty private boolean hubBusinessKeysCalculationOnly;
 
   @HopMetadataProperty(key = "field_mapping", groupKey = "field_mappings")
   private List<BvScd2FieldMapping> fieldMappings = new ArrayList<>();
@@ -138,6 +146,15 @@ public class BvScd2Table extends BvTableBase {
 
   public boolean isHashKeyPartitioned() {
     return getHashKeyPartitionCountOrDefault().isPartitioned();
+  }
+
+  /** Inverse of {@link #hubBusinessKeysCalculationOnly}; missing XML means the keys are loaded. */
+  public boolean isLoadHubBusinessKeys() {
+    return !hubBusinessKeysCalculationOnly;
+  }
+
+  public void setLoadHubBusinessKeys(boolean loadHubBusinessKeys) {
+    this.hubBusinessKeysCalculationOnly = !loadHubBusinessKeys;
   }
 
   public String resolveIncrementalWatermarkField(

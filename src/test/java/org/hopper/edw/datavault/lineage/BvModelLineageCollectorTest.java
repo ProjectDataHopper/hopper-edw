@@ -102,6 +102,44 @@ class BvModelLineageCollectorTest {
   }
 
   @Test
+  void loadedHubBusinessKeysAndHashKeyAppearInFieldLineage() {
+    LineageSnapshot snapshot = BvModelLineageCollector.collect(model, variables);
+    TableLineage tableLineage = snapshot.findTableByLogicalName("customer_360_bv").orElseThrow();
+
+    FieldLineage hubBk =
+        tableLineage
+            .findField("customer_id")
+            .orElseThrow(() -> new AssertionError("customer_id hub business key missing"));
+    assertFalse(hubBk.isTechnical());
+    assertEquals("hub_customer", hubBk.getContributions().get(0).getSourceName());
+    assertTrue(
+        hubBk.getContributions().get(0).getReasons().stream()
+            .anyMatch(r -> r.getCode() == LineageReasonCode.BV_SCD2_HUB_BK));
+
+    FieldLineage hashKey =
+        tableLineage
+            .findField("customer_hk")
+            .orElseThrow(() -> new AssertionError("customer_hk missing"));
+    assertTrue(hashKey.isTechnical());
+    assertTrue(tableLineage.findField("cust_segment").isPresent());
+  }
+
+  @Test
+  void unloadedHubBusinessKeysAreOmittedFromStoredFieldLineage() {
+    BvScd2Table table =
+        (BvScd2Table)
+            model.getTables().stream()
+                .filter(t -> t instanceof BvScd2Table && "customer_360_bv".equals(t.getName()))
+                .findFirst()
+                .orElseThrow();
+    table.setLoadHubBusinessKeys(false);
+    LineageSnapshot snapshot = BvModelLineageCollector.collect(model, variables);
+    TableLineage tableLineage = snapshot.findTableByLogicalName("customer_360_bv").orElseThrow();
+    assertTrue(tableLineage.findField("customer_id").isEmpty());
+    assertTrue(tableLineage.findField("cust_segment").isPresent());
+  }
+
+  @Test
   void calculationOnlyMappingIsOmittedFromStoredFieldLineage() {
     BvScd2Table table =
         (BvScd2Table)

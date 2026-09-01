@@ -6,10 +6,12 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ### BV SCD2 hub business keys and calculation-only mappings (issue #153)
 
-- SCD2 **Include hub business keys** merges parent-hub BK columns as an extra Sorted schema merge input (identity only; not version drivers)
-- Field mappings **Load** column: No keeps the column for calculations and versioning but does not write it to the BV table (full rebuild only)
-- Hub rows sort first via the open-start sentinel, Repeat Fields carries BKs, then hub-only rows are filtered out
-- Check model errors: Load=No with Incremental; hub BKs without Include hash key, on link/driving-key satellites, or with name collisions
+- SCD2 **Include hub business keys** left-outer Merge Joins parent-hub BK columns after collapse, immediately before SQL calculations (identity only; not version drivers). The SCD2 merge/repeat/incremental chain is unchanged
+- **Load hub business keys** (enabled with Include hub business keys) writes those columns to the BV table; uncheck to keep them on the stream for calculations only
+- Field mappings **Load** checkbox: unchecked keeps the column for calculations and versioning but does not write it to the BV table (full rebuild only)
+- Include hash key, Include hub business keys, and Load hub business keys are checkboxes
+- Lineage tab lists every loaded column, including hub business keys and the parent hash key
+- Check model errors: Load=No with Incremental; hub BKs without Include hash key, on link-parent satellites, or with name collisions
 
 ### Multi-satellite SCD2 sorts hash keys the way Hop merges them
 

@@ -16,18 +16,29 @@
 package org.hopper.edw.datavault.lineage;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
+import org.apache.hop.core.row.IRowMeta;
+import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.hopper.edw.datavault.catalog.CatalogModelRegistrySupport;
 import org.hopper.edw.datavault.catalog.DvCatalogNamespaces;
+import org.hopper.edw.datavault.metadata.BusinessKey;
+import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
+import org.hopper.edw.datavault.metadata.DataVaultModel;
+import org.hopper.edw.datavault.metadata.DvHub;
+import org.hopper.edw.datavault.metadata.DvSatellite;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultConfiguration;
+import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultDvModelResolver;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BvBusinessTable;
 import org.hopper.edw.datavault.metadata.businessvault.BvDerivativeRef;
 import org.hopper.edw.datavault.metadata.businessvault.BvPitTable;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2Calculation;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2FieldMapping;
+import org.hopper.edw.datavault.metadata.businessvault.BvScd2FieldMappingValidationSupport;
+import org.hopper.edw.datavault.metadata.businessvault.BvScd2PipelineSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2Table;
 import org.hopper.edw.datavault.metadata.businessvault.BvSqlRef;
 import org.hopper.edw.datavault.metadata.businessvault.BvSqlResolvedKind;
@@ -43,6 +54,11 @@ public final class BvModelLineageCollector {
   private BvModelLineageCollector() {}
 
   public static LineageSnapshot collect(BusinessVaultModel model, IVariables variables) {
+    return collect(model, variables, null);
+  }
+
+  public static LineageSnapshot collect(
+      BusinessVaultModel model, IVariables variables, DataVaultModel dataVaultModel) {
     if (model == null) {
       throw new IllegalArgumentException("Business Vault model is required");
     }
@@ -58,6 +74,8 @@ public final class BvModelLineageCollector {
 
     BusinessVaultConfiguration config = model.getConfigurationOrDefault();
     String targetDb = config != null ? config.getTargetDatabase() : null;
+    DataVaultModel dvModel =
+        dataVaultModel != null ? dataVaultModel : resolveDataVaultModel(model, variables);
 
     for (IBvTable table : model.getTables()) {
       if (table == null || Utils.isEmpty(table.getName())) {
@@ -65,7 +83,7 @@ public final class BvModelLineageCollector {
       }
       TableLineage tableLineage;
       if (table instanceof BvScd2Table scd2) {
-        tableLineage = collectScd2(scd2, model, config, variables, targetDb);
+        tableLineage = collectScd2(scd2, model, config, variables, targetDb, dvModel);
       } else if (table instanceof BvPitTable pit) {
         tableLineage = collectPit(pit, model, config, variables, targetDb);
       } else if (table instanceof BvBusinessTable business) {
@@ -80,12 +98,32 @@ public final class BvModelLineageCollector {
     return snapshot;
   }
 
+  /**
+   * Field lineage for one SCD2 table (dialog Lineage tab). Uses {@code dataVaultModel} when present
+   * so hub business keys and other loaded columns can be named.
+   */
+  public static TableLineage collectScd2Table(
+      BvScd2Table table,
+      BusinessVaultModel model,
+      DataVaultModel dataVaultModel,
+      IVariables variables) {
+    if (table == null || model == null) {
+      return null;
+    }
+    BusinessVaultConfiguration config = model.getConfigurationOrDefault();
+    String targetDb = config != null ? config.getTargetDatabase() : null;
+    DataVaultModel dvModel =
+        dataVaultModel != null ? dataVaultModel : resolveDataVaultModel(model, variables);
+    return collectScd2(table, model, config, variables, targetDb, dvModel);
+  }
+
   private static TableLineage collectScd2(
       BvScd2Table table,
       BusinessVaultModel model,
       BusinessVaultConfiguration config,
       IVariables variables,
-      String targetDb) {
+      String targetDb,
+      DataVaultModel dvModel) {
     TableLineage lineage = baseTable(table, model, variables, targetDb, BvTableType.SCD2.name());
     addNamingReasons(lineage, table);
 
@@ -127,12 +165,17 @@ public final class BvModelLineageCollector {
       }
     }
 
+    addScd2HubAndHashFields(lineage, table, dvModel, variables);
+
     if (table.getCalculations() != null) {
       for (BvScd2Calculation calculation : table.getCalculations()) {
         if (calculation == null || Utils.isEmpty(calculation.getTargetFieldName())) {
           continue;
         }
         String target = resolve(calculation.getTargetFieldName(), variables);
+        if (lineage.findField(target).isPresent()) {
+          continue;
+        }
         FieldLineage field = new FieldLineage(target);
         field.setTechnical(false);
         FieldContribution contribution = new FieldContribution();
@@ -160,6 +203,18 @@ public final class BvModelLineageCollector {
             "valid_to");
     addTechnicalConfigField(lineage, validTo, "validToField");
 
+    DataVaultConfiguration dvConfig = dvModel != null ? dvModel.getConfigurationOrDefault() : null;
+    if (variables != null) {
+      addTechnicalConfigField(
+          lineage,
+          BvScd2PipelineSupport.resolveFunctionalTimestampField(table, config, dvConfig, variables),
+          "functionalTimestampField");
+      addTechnicalConfigField(
+          lineage,
+          BvScd2PipelineSupport.resolveRecordSourceField(dvConfig, variables),
+          "recordSourceField");
+    }
+
     if (table.isIncludeHashKey()) {
       lineage.addReason(
           LineageReasonFactory.standardColumn("parent_hash_key", "includeHashKey", "true"));
@@ -170,7 +225,125 @@ public final class BvModelLineageCollector {
               "hub_business_keys", "includeHubBusinessKeys", "true"));
     }
 
+    addRemainingLoadedFields(lineage, table, config, dvModel, variables);
     return lineage;
+  }
+
+  private static void addScd2HubAndHashFields(
+      TableLineage lineage, BvScd2Table table, DataVaultModel dvModel, IVariables variables) {
+    if (table == null || dvModel == null) {
+      return;
+    }
+    List<DvSatellite> satellites =
+        BvScd2FieldMappingValidationSupport.resolveSatelliteDerivatives(table, dvModel);
+    DvHub hub = BvScd2FieldMappingValidationSupport.resolveSharedParentHub(satellites, dvModel);
+    if (hub == null) {
+      return;
+    }
+    String hubName = resolve(hub.getName(), variables);
+    if (table.isIncludeHashKey()) {
+      String hashField = resolve(hub.getHashKeyFieldName(), variables);
+      if (!Utils.isEmpty(hashField) && lineage.findField(hashField).isEmpty()) {
+        FieldLineage field = new FieldLineage(hashField);
+        field.setTechnical(true);
+        FieldContribution contribution = new FieldContribution();
+        contribution.setSourceKind(TableSourceKind.DV_TABLE);
+        contribution.setSourceName(hubName);
+        contribution.setSourceFieldName(hashField);
+        contribution.setTransform(FieldTransform.IDENTITY);
+        contribution.addReason(LineageReasonFactory.parentHashKey(hashField, hubName, hashField));
+        field.addContribution(contribution);
+        lineage.addField(field);
+      }
+    }
+    if (!table.isIncludeHubBusinessKeys()) {
+      return;
+    }
+    lineage.addSource(
+        new TableSourceRef(TableSourceKind.DV_TABLE, hubName, TableSourceRole.PARENT_HUB));
+    if (!table.isLoadHubBusinessKeys() || hub.getDistinctBusinessKeys() == null) {
+      return;
+    }
+    for (BusinessKey businessKey : hub.getDistinctBusinessKeys()) {
+      if (businessKey == null || Utils.isEmpty(businessKey.getName())) {
+        continue;
+      }
+      String bkName = resolve(businessKey.getName(), variables);
+      if (Utils.isEmpty(bkName) || lineage.findField(bkName).isPresent()) {
+        continue;
+      }
+      FieldLineage field = new FieldLineage(bkName);
+      field.setTechnical(false);
+      FieldContribution contribution = new FieldContribution();
+      contribution.setSourceKind(TableSourceKind.DV_TABLE);
+      contribution.setSourceName(hubName);
+      contribution.setSourceFieldName(bkName);
+      contribution.setTransform(FieldTransform.IDENTITY);
+      contribution.addReason(LineageReasonFactory.bvScd2HubBusinessKey(bkName, hubName));
+      field.addContribution(contribution);
+      lineage.addField(field);
+    }
+  }
+
+  private static void addRemainingLoadedFields(
+      TableLineage lineage,
+      BvScd2Table table,
+      BusinessVaultConfiguration config,
+      DataVaultModel dvModel,
+      IVariables variables) {
+    if (lineage == null || table == null || dvModel == null) {
+      return;
+    }
+    try {
+      IRowMeta layout =
+          BvScd2PipelineSupport.buildTargetTableLayout(table, config, dvModel, variables);
+      if (layout == null) {
+        return;
+      }
+      String passthroughSource = firstSatelliteName(table, variables);
+      for (IValueMeta valueMeta : layout.getValueMetaList()) {
+        if (valueMeta == null || Utils.isEmpty(valueMeta.getName())) {
+          continue;
+        }
+        String fieldName = valueMeta.getName();
+        if (lineage.findField(fieldName).isPresent()) {
+          continue;
+        }
+        FieldLineage field = new FieldLineage(fieldName);
+        field.setTechnical(false);
+        FieldContribution contribution = new FieldContribution();
+        contribution.setSourceKind(TableSourceKind.DV_TABLE);
+        contribution.setSourceName(passthroughSource);
+        contribution.setSourceFieldName(fieldName);
+        contribution.setTransform(FieldTransform.IDENTITY);
+        contribution.addReason(LineageReasonFactory.bvPassthrough(fieldName, passthroughSource));
+        field.addContribution(contribution);
+        lineage.addField(field);
+      }
+    } catch (Exception ignored) {
+      // Layout needs a complete DV model; mapping/calculation rows already recorded.
+    }
+  }
+
+  private static String firstSatelliteName(BvScd2Table table, IVariables variables) {
+    if (table == null || table.getDerivatives() == null) {
+      return "";
+    }
+    for (BvDerivativeRef ref : table.getDerivatives()) {
+      if (ref != null && !Utils.isEmpty(ref.getDvTableName())) {
+        return resolve(ref.getDvTableName(), variables);
+      }
+    }
+    return "";
+  }
+
+  private static DataVaultModel resolveDataVaultModel(
+      BusinessVaultModel model, IVariables variables) {
+    try {
+      return BusinessVaultDvModelResolver.buildEffectiveDataVaultModel(model, variables, null);
+    } catch (Exception e) {
+      return null;
+    }
   }
 
   private static TableLineage collectPit(

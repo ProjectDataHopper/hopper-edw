@@ -203,6 +203,41 @@ class BvScd2FieldMappingValidationTest {
   }
 
   @Test
+  void missingHubBusinessKeysCalculationOnlyDeserializesAsLoadTrue() throws Exception {
+    String xml =
+        """
+        <table>
+          <name>customer_bv</name>
+          <includeHubBusinessKeys>Y</includeHubBusinessKeys>
+        </table>
+        """;
+    Document document = XmlHandler.loadXmlString(xml);
+    Node rootNode = XmlHandler.getSubNode(document, "table");
+    BvScd2Table restored = new BvScd2Table();
+    XmlMetadataUtil.deSerializeFromXml(rootNode, BvScd2Table.class, restored, null);
+
+    assertTrue(restored.isIncludeHubBusinessKeys());
+    assertTrue(restored.isLoadHubBusinessKeys());
+  }
+
+  @Test
+  void xmlRoundTripPreservesLoadHubBusinessKeysFalse() throws Exception {
+    BvScd2Table original = new BvScd2Table();
+    original.setName("customer_bv");
+    original.setIncludeHubBusinessKeys(true);
+    original.setLoadHubBusinessKeys(false);
+
+    String xml = XmlHandler.aroundTag("table", XmlMetadataUtil.serializeObjectToXml(original));
+    Document document = XmlHandler.loadXmlString(xml);
+    Node rootNode = XmlHandler.getSubNode(document, "table");
+    BvScd2Table restored = new BvScd2Table();
+    XmlMetadataUtil.deSerializeFromXml(rootNode, BvScd2Table.class, restored, null);
+
+    assertTrue(restored.isIncludeHubBusinessKeys());
+    assertFalse(restored.isLoadHubBusinessKeys());
+  }
+
+  @Test
   void hubBusinessKeysRequireHashKey() throws Exception {
     BvScd2Table table = new BvScd2Table();
     table.setName("customer_bv");

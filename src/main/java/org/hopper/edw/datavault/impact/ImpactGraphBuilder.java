@@ -402,6 +402,9 @@ public final class ImpactGraphBuilder {
                   null));
       indexTableName(hubNode);
       addEdge(ImpactEdgeType.DV_TO_BV_SCD2, hubNode, bvTable);
+      if (!scd2.isLoadHubBusinessKeys()) {
+        return;
+      }
       for (BusinessKey businessKey : hub.getDistinctBusinessKeys()) {
         if (businessKey == null || Utils.isEmpty(businessKey.getName())) {
           continue;

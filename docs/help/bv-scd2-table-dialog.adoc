@@ -41,7 +41,10 @@ Raw vault satellites remain insert-only (technical load history). SCD2 rewrites 
 |When enabled, the parent hub/link hash key is written to the BV table.
 
 |**Include hub business keys**
-|When enabled, parent-hub business key columns are merged via Sorted schema merge. They are stored on the BV table and available for calculations, but they do not drive new versions. Requires Include hash key and a shared hub parent.
+|When enabled, parent-hub business key columns are left-outer Merge Joined after collapse, immediately before SQL calculations. They are available for calculations but they do not drive new versions. Requires Include hash key and a shared hub parent. The SCD2 merge/repeat/incremental path is unchanged.
+
+|**Load hub business keys**
+|Enabled when Include hub business keys is selected. When checked (default), hub business key columns are written to the BV table. Uncheck to keep them on the stream for SQL calculations only.
 
 |**Functional timestamp**
 |Column used as the timeline for validity bounds (see resolution order below).
@@ -83,7 +86,7 @@ Use **Debug** or **Show build pipeline** on the canvas to inspect the generated 
 
 Required when **two or more** satellites feed the table. Map each `(satellite, source field)` to a BV target column name. Validation checks parent hub/link consistency, source field existence, and unique target columns.
 
-**Load** (Yes/No, default Yes): No keeps the column on the stream for SQL calculations and versioning but does not write it to the BV table. Load=No is full rebuild only.
+**Load** (row checkbox, default checked): Unchecked keeps the column on the stream for SQL calculations and versioning but does not write it to the BV table. Unchecked Load is full rebuild only. The Lineage tab lists every loaded column, including hub business keys when those are loaded.
 
 Single-satellite tables can pass attributes through under DV names unless you add explicit mappings for renaming, subsetting, or calculation-only columns.
 

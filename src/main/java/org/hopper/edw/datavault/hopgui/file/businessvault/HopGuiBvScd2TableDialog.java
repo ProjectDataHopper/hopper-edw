@@ -90,8 +90,9 @@ public class HopGuiBvScd2TableDialog {
   private Text wName;
   private Text wDescription;
   private Text wTableName;
-  private Combo wIncludeHashKey;
-  private Combo wIncludeHubBusinessKeys;
+  private Button wIncludeHashKey;
+  private Button wIncludeHubBusinessKeys;
+  private Button wLoadHubBusinessKeys;
   private Combo wBuildMode;
   private Combo wHashKeyPartitions;
   private Text wFunctionalTimestamp;
@@ -223,8 +224,10 @@ public class HopGuiBvScd2TableDialog {
           if (businessVaultModel == null) {
             return null;
           }
-          return LineageTabSupport.findTable(
-              BvModelLineageCollector.collect(businessVaultModel, variables), input.getName());
+          BvScd2Table draft = new BvScd2Table();
+          applyWidgetsToTable(draft);
+          return BvModelLineageCollector.collectScd2Table(
+              draft, businessVaultModel, dataVaultModel, variables);
         });
   }
 
@@ -248,19 +251,23 @@ public class HopGuiBvScd2TableDialog {
     Label wlIncludeHashKey = new Label(comp, SWT.RIGHT);
     wlIncludeHashKey.setText(
         BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.IncludeHashKey.Label"));
+    wlIncludeHashKey.setToolTipText(
+        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.IncludeHashKey.Tooltip"));
     PropsUi.setLook(wlIncludeHashKey);
     wlIncludeHashKey.setLayoutData(
         new FormDataBuilder().left().top(wTableName, margin).right(middle, -margin).result());
 
-    wIncludeHashKey = new Combo(comp, SWT.BORDER | SWT.READ_ONLY);
+    wIncludeHashKey = new Button(comp, SWT.CHECK);
     PropsUi.setLook(wIncludeHashKey);
-    wIncludeHashKey.setItems(
-        new String[] {
-          BaseMessages.getString(PKG, "System.Combo.Yes"),
-          BaseMessages.getString(PKG, "System.Combo.No")
-        });
+    wIncludeHashKey.setToolTipText(
+        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.IncludeHashKey.Tooltip"));
     wIncludeHashKey.setLayoutData(
-        new FormDataBuilder().left(middle, 0).top(wTableName, margin).right().result());
+        new FormDataBuilder()
+            .left(middle, 0)
+            .top(wlIncludeHashKey, 0, SWT.CENTER)
+            .right()
+            .result());
+    wIncludeHashKey.addListener(SWT.Selection, e -> updateHubBusinessKeyOptionState());
 
     Label wlIncludeHubBusinessKeys = new Label(comp, SWT.RIGHT);
     wlIncludeHubBusinessKeys.setText(
@@ -269,19 +276,43 @@ public class HopGuiBvScd2TableDialog {
         BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.IncludeHubBusinessKeys.Tooltip"));
     PropsUi.setLook(wlIncludeHubBusinessKeys);
     wlIncludeHubBusinessKeys.setLayoutData(
-        new FormDataBuilder().left().top(wIncludeHashKey, margin).right(middle, -margin).result());
+        new FormDataBuilder().left().top(wlIncludeHashKey, margin).right(middle, -margin).result());
 
-    wIncludeHubBusinessKeys = new Combo(comp, SWT.BORDER | SWT.READ_ONLY);
+    wIncludeHubBusinessKeys = new Button(comp, SWT.CHECK);
     PropsUi.setLook(wIncludeHubBusinessKeys);
-    wIncludeHubBusinessKeys.setItems(
-        new String[] {
-          BaseMessages.getString(PKG, "System.Combo.Yes"),
-          BaseMessages.getString(PKG, "System.Combo.No")
-        });
     wIncludeHubBusinessKeys.setToolTipText(
         BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.IncludeHubBusinessKeys.Tooltip"));
     wIncludeHubBusinessKeys.setLayoutData(
-        new FormDataBuilder().left(middle, 0).top(wIncludeHashKey, margin).right().result());
+        new FormDataBuilder()
+            .left(middle, 0)
+            .top(wlIncludeHubBusinessKeys, 0, SWT.CENTER)
+            .right()
+            .result());
+    wIncludeHubBusinessKeys.addListener(SWT.Selection, e -> updateHubBusinessKeyOptionState());
+
+    Label wlLoadHubBusinessKeys = new Label(comp, SWT.RIGHT);
+    wlLoadHubBusinessKeys.setText(
+        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.LoadHubBusinessKeys.Label"));
+    wlLoadHubBusinessKeys.setToolTipText(
+        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.LoadHubBusinessKeys.Tooltip"));
+    PropsUi.setLook(wlLoadHubBusinessKeys);
+    wlLoadHubBusinessKeys.setLayoutData(
+        new FormDataBuilder()
+            .left()
+            .top(wlIncludeHubBusinessKeys, margin)
+            .right(middle, -margin)
+            .result());
+
+    wLoadHubBusinessKeys = new Button(comp, SWT.CHECK);
+    PropsUi.setLook(wLoadHubBusinessKeys);
+    wLoadHubBusinessKeys.setToolTipText(
+        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.LoadHubBusinessKeys.Tooltip"));
+    wLoadHubBusinessKeys.setLayoutData(
+        new FormDataBuilder()
+            .left(middle, 0)
+            .top(wlLoadHubBusinessKeys, 0, SWT.CENTER)
+            .right()
+            .result());
 
     Label wlBuildMode = new Label(comp, SWT.RIGHT);
     wlBuildMode.setText(BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.BuildMode.Label"));
@@ -289,7 +320,7 @@ public class HopGuiBvScd2TableDialog {
     wlBuildMode.setLayoutData(
         new FormDataBuilder()
             .left()
-            .top(wIncludeHubBusinessKeys, margin)
+            .top(wlLoadHubBusinessKeys, margin)
             .right(middle, -margin)
             .result());
 
@@ -297,11 +328,7 @@ public class HopGuiBvScd2TableDialog {
     PropsUi.setLook(wBuildMode);
     EnumDialogSupport.populateCombo(wBuildMode, BvScd2BuildMode.class);
     wBuildMode.setLayoutData(
-        new FormDataBuilder()
-            .left(middle, 0)
-            .top(wIncludeHubBusinessKeys, margin)
-            .right()
-            .result());
+        new FormDataBuilder().left(middle, 0).top(wLoadHubBusinessKeys, margin).right().result());
     wBuildMode.addListener(SWT.Selection, e -> updateIncrementalFieldState());
 
     Label wlHashKeyPartitions = new Label(comp, SWT.RIGHT);
@@ -375,11 +402,7 @@ public class HopGuiBvScd2TableDialog {
     wValidToField = new Text(comp, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wValidToField);
     wValidToField.setLayoutData(
-        new FormDataBuilder()
-            .left(middle, 0)
-            .top(wValidFromField, margin)
-            .right()
-            .result());
+        new FormDataBuilder().left(middle, 0).top(wValidFromField, margin).right().result());
   }
 
   private void addDerivativesTab() {
@@ -494,18 +517,6 @@ public class HopGuiBvScd2TableDialog {
             getSatelliteNamesFromDerivativesTable(),
             false);
 
-    ColumnInfo loadColumn =
-        new ColumnInfo(
-            BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Mappings.Column.Load"),
-            ColumnInfo.COLUMN_TYPE_CCOMBO,
-            new String[] {
-              BaseMessages.getString(PKG, "System.Combo.Yes"),
-              BaseMessages.getString(PKG, "System.Combo.No")
-            },
-            false);
-    loadColumn.setToolTip(
-        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Mappings.Column.Load.Tooltip"));
-
     ColumnInfo[] mappingCols =
         new ColumnInfo[] {
           mappingsSatelliteColumn,
@@ -514,21 +525,25 @@ public class HopGuiBvScd2TableDialog {
               BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Mappings.Column.TargetField"),
               ColumnInfo.COLUMN_TYPE_TEXT,
               false),
-          loadColumn,
         };
 
     wMappings =
         new TableView(
             variables,
             comp,
-            SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI,
+            SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI | SWT.CHECK,
             mappingCols,
             1,
             null,
             PropsUi.getInstance());
+    wMappings.table.setToolTipText(
+        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Mappings.Column.Load.Tooltip"));
     wMappings.setLayoutData(
         new FormDataBuilder().left().top(wAddMapping, margin).right().bottom(100, margin).result());
     wMappings.optimizeTableView();
+    if (wMappings.table.getItemCount() > 0) {
+      checkMappingLoadDefault(wMappings.table.getItem(0));
+    }
     wMappings.table.addListener(SWT.Modify, e -> refreshMappingSourceCombos());
   }
 
@@ -908,7 +923,7 @@ public class HopGuiBvScd2TableDialog {
 
   private void addMappingRow() {
     TableItem item = new TableItem(wMappings.table, SWT.NONE);
-    item.setText(4, BaseMessages.getString(PKG, "System.Combo.Yes"));
+    checkMappingLoadDefault(item);
     wMappings.optimizeTableView();
     refreshMappingSourceCombos();
   }
@@ -935,7 +950,7 @@ public class HopGuiBvScd2TableDialog {
       }
       BvScd2FieldMapping existing =
           new BvScd2FieldMapping(satelliteName, sourceFieldName, targetFieldName);
-      existing.setIncludeInTarget(isLoadYes(item.getText(4)));
+      existing.setIncludeInTarget(item.getChecked());
       input.getFieldMappings().add(existing);
     }
     input
@@ -954,8 +969,10 @@ public class HopGuiBvScd2TableDialog {
     if (!Utils.isEmpty(input.getDescription())) {
       wDescription.setText(input.getDescription());
     }
-    wIncludeHashKey.select(input.isIncludeHashKey() ? 0 : 1);
-    wIncludeHubBusinessKeys.select(input.isIncludeHubBusinessKeys() ? 0 : 1);
+    wIncludeHashKey.setSelection(input.isIncludeHashKey());
+    wIncludeHubBusinessKeys.setSelection(input.isIncludeHubBusinessKeys());
+    wLoadHubBusinessKeys.setSelection(input.isLoadHubBusinessKeys());
+    updateHubBusinessKeyOptionState();
     EnumDialogSupport.selectCombo(wBuildMode, input.getBuildModeOrDefault());
     EnumDialogSupport.selectCombo(wHashKeyPartitions, input.getHashKeyPartitionCountOrDefault());
     if (!Utils.isEmpty(input.getFunctionalTimestampField())) {
@@ -1002,11 +1019,7 @@ public class HopGuiBvScd2TableDialog {
       item.setText(1, mapping.getSatelliteName());
       item.setText(2, Const.NVL(mapping.getSourceFieldName(), ""));
       item.setText(3, Const.NVL(mapping.getTargetFieldName(), ""));
-      item.setText(
-          4,
-          mapping.isIncludeInTarget()
-              ? BaseMessages.getString(PKG, "System.Combo.Yes")
-              : BaseMessages.getString(PKG, "System.Combo.No"));
+      item.setChecked(mapping.isIncludeInTarget());
     }
     wMappings.optimizeTableView();
     refreshMappingSourceCombos();
@@ -1151,8 +1164,10 @@ public class HopGuiBvScd2TableDialog {
     target.setName(wName.getText());
     target.setDescription(wDescription.getText());
     target.setTableName(wTableName.getText());
-    target.setIncludeHashKey(wIncludeHashKey.getSelectionIndex() == 0);
-    target.setIncludeHubBusinessKeys(wIncludeHubBusinessKeys.getSelectionIndex() == 0);
+    target.setIncludeHashKey(wIncludeHashKey.getSelection());
+    target.setIncludeHubBusinessKeys(
+        wIncludeHashKey.getSelection() && wIncludeHubBusinessKeys.getSelection());
+    target.setLoadHubBusinessKeys(wLoadHubBusinessKeys.getSelection());
     target.setBuildMode(
         EnumDialogSupport.readCombo(
             wBuildMode, BvScd2BuildMode.class, BvScd2BuildMode.FULL_REBUILD));
@@ -1180,7 +1195,7 @@ public class HopGuiBvScd2TableDialog {
       }
       BvScd2FieldMapping mapping =
           new BvScd2FieldMapping(satelliteName, sourceFieldName, targetFieldName);
-      mapping.setIncludeInTarget(isLoadYes(item.getText(4)));
+      mapping.setIncludeInTarget(item.getChecked());
       target.getFieldMappings().add(mapping);
     }
 
@@ -1212,9 +1227,16 @@ public class HopGuiBvScd2TableDialog {
     }
   }
 
-  private static boolean isLoadYes(String value) {
-    return Utils.isEmpty(value)
-        || !BaseMessages.getString(PKG, "System.Combo.No").equalsIgnoreCase(value.trim());
+  private static void checkMappingLoadDefault(TableItem item) {
+    if (item != null) {
+      item.setChecked(true);
+    }
+  }
+
+  private void updateHubBusinessKeyOptionState() {
+    boolean hashKey = wIncludeHashKey.getSelection();
+    wIncludeHubBusinessKeys.setEnabled(hashKey);
+    wLoadHubBusinessKeys.setEnabled(hashKey && wIncludeHubBusinessKeys.getSelection());
   }
 
   private void cancel() {

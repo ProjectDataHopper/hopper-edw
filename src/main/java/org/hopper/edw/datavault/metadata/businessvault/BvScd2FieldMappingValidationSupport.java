@@ -264,20 +264,6 @@ public final class BvScd2FieldMappingValidationSupport {
       return;
     }
 
-    for (DvSatellite satellite : satellites) {
-      if (satellite != null && satellite.hasDrivingKey()) {
-        remarks.add(
-            new CheckResult(
-                ICheckResult.TYPE_RESULT_ERROR,
-                BaseMessages.getString(
-                    PKG,
-                    "BvScd2FieldMappingValidationSupport.Error.HubBusinessKeysDrivingKey",
-                    scd2Table.getName()),
-                scd2Table));
-        return;
-      }
-    }
-
     Set<String> reserved = reservedScd2ColumnNames(scd2Table, bvConfig, dvConfig, variables);
     addReserved(reserved, variables.resolve(hub.getHashKeyFieldName()));
     for (BusinessKey businessKey : businessKeys) {
