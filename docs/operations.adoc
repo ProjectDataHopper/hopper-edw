@@ -109,6 +109,14 @@ image::images/data-vault-retail-360-model-with-duration-metrics.png[Retail 360 D
 
 See link:plans/load-run-metrics-plan.md[load-run metrics plan] for the metadata contract and catalog schema.
 
+=== Load-run metrics tables (OPS)
+
+Tables such as `load_run` and `load_pipeline_metric` live on the **OPS** connection (retail schema `dv_ops`), not in the Vault EDW.
+
+A data engineer who needs the DDL should open metadata **Execution metrics profile**, set the target database and operations schema, and click **Generate SQL**. That opens Hop's SQL editor with dialect-specific `CREATE` statements (Postgres / MySQL / SQL Server / Snowflake). Review, copy for a DBA, or execute. Auto-create on first publish is optional; **Generate SQL** is the supported way to know which SQL to run. Retail's `sql/create-load-metrics-tables.sql` is only a Postgres bootstrap for the sample.
+
+Help: link:help/execution-metrics-profile-dialog.adoc[Execution metrics profile].
+
 == Performance
 
 Sort memory, parallel pipeline/table copies, and large-model notes: link:performance-tuning.md[performance-tuning.md].

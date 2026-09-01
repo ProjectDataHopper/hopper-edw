@@ -463,7 +463,7 @@ public final class HelpTopics {
               "HelpTopics.SourceModelServiceDialog.Title"),
           p(
               EXECUTION_METRICS_PROFILE,
-              "operations.html",
+              "help/execution-metrics-profile-dialog.html",
               "HelpTopics.ExecutionMetricsProfileDialog.Title"),
           p(
               DATA_QUALITY_RULE_SET,

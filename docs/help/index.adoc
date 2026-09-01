@@ -117,6 +117,9 @@ Guides for the same features live in the parent folder (link:../index.adoc[docum
 |link:elk-layout-dialog.adoc[elk-layout-dialog]
 |Graph layout
 
+|link:execution-metrics-profile-dialog.adoc[execution-metrics-profile-dialog]
+|Execution metrics profile
+
 |link:hop-ai-proposal-review-dialog.adoc[hop-ai-proposal-review-dialog]
 |Hop proposal review
 

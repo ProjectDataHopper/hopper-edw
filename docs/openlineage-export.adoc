@@ -40,7 +40,7 @@ The retail sample includes a dedicated workflow (`retail-example/workflows/send-
 | Include DV / BV / DM | Layer filters (default: all on)
 | Include column-level lineage | Emit OpenLineage column facets (default: on)
 | Include operational load metrics | Attach last pipeline run facts when an ops DB is configured
-| Ops metrics database / schema | Hop connection (and optional schema) for `load_pipeline_metric`
+| Ops metrics database / schema | Hop connection (and optional schema) for `load_pipeline_metric`. Blank schema inherits the Execution metrics profile (retail: `dv_ops`)
 | Destination | `FILE`, `HTTP`, or `FILE_AND_HTTP`
 | Output folder | One `{layer}_{model}_{table}.json` per event + `export-summary.json`
 | OpenLineage HTTP URL | e.g. `http://localhost:5001/api/v1/lineage` or `${MARQUEZ_API}`
@@ -190,4 +190,4 @@ Stop with `./scripts/run-marquez.sh down`. Reset data with `./scripts/run-marque
 * **Missing column facets** — enable *Include column-level lineage*.
 * **Datasets still show connection name (e.g. Vault)** — set **Dataset namespace** on the action if you want a single override namespace.
 * **Dimensions/facts missing after location facets** — Marquez 500s when `dataSource.uri` contains spaces or unresolved `${variables}` (maps to null `sources.connection_url`). Rebuild with the URI encoding fix; with **Fail on HTTP error** enabled, a single bad event previously aborted the rest of the export (including later DM jobs).
-* **Ops enrichment skipped** — configure ops database/schema and ensure `load_pipeline_metric` exists; enrichment never fails the export by itself.
+* **Ops enrichment skipped** — configure an ops database. Leave **Ops schema** blank to inherit the Execution metrics profile (retail: `dv_ops` on **OPS**). If the log says `relation "load_pipeline_metric" does not exist`, the query ran against the connection default schema instead of `dv_ops`, or the tables were never created. Open the **Execution metrics profile** and use **Generate SQL** to review or execute the dialect-specific `CREATE` statements. Enrichment never fails the export by itself.

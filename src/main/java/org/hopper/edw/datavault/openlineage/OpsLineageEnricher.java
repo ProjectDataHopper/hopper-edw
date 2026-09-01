@@ -31,6 +31,7 @@ import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metrics.LoadRunMetricsCatalogPublisher;
+import org.hopper.edw.datavault.metrics.MetricsAiContextBuilder;
 
 /**
  * Optionally attaches last-load operational facts from {@code load_pipeline_metric} onto
@@ -67,10 +68,32 @@ public final class OpsLineageEnricher {
         return;
       }
       IVariables vars = variables != null ? variables : new Variables();
-      Map<String, PipelineMetricRow> byPipeline =
-          loadLatestMetrics(databaseMeta, options, vars, log);
+      MetricsQuery query = loadLatestMetrics(databaseMeta, options, vars, metadataProvider);
+      if (query.failed()) {
+        String warning =
+            "Could not query "
+                + LoadRunMetricsCatalogPublisher.TABLE_LOAD_PIPELINE_METRIC
+                + " in "
+                + query.location()
+                + " on "
+                + databaseMeta.getName()
+                + " ("
+                + query.queryError()
+                + "). Open the Execution metrics profile and choose Generate SQL to create the load-run metrics tables.";
+        result.addWarning(warning);
+        if (log != null) {
+          log.logBasic(warning);
+        }
+        return;
+      }
+      Map<String, PipelineMetricRow> byPipeline = query.byPipeline();
       if (byPipeline.isEmpty()) {
-        result.addWarning("No load_pipeline_metric rows found for operational enrichment");
+        result.addWarning(
+            "No load_pipeline_metric rows found in "
+                + query.location()
+                + " on "
+                + databaseMeta.getName()
+                + " for operational enrichment");
         return;
       }
       int enriched = 0;
@@ -114,19 +137,37 @@ public final class OpsLineageEnricher {
     }
   }
 
-  private static Map<String, PipelineMetricRow> loadLatestMetrics(
+  /**
+   * Action schema wins when set. Otherwise inherit from the enabled Execution metrics profile so
+   * OpenLineage enrichment looks in the same place load-run metrics are published.
+   */
+  static String resolveOpsSchema(
+      OpenLineageExportOptions options,
+      IHopMetadataProvider metadataProvider,
+      IVariables variables) {
+    if (options != null && !Utils.isEmpty(options.getOpsSchema())) {
+      return options.getOpsSchema().trim();
+    }
+    return MetricsAiContextBuilder.resolveOperationsSchema(metadataProvider, variables);
+  }
+
+  private static MetricsQuery loadLatestMetrics(
       DatabaseMeta databaseMeta,
       OpenLineageExportOptions options,
       IVariables variables,
-      ILogChannel log)
+      IHopMetadataProvider metadataProvider)
       throws Exception {
     Map<String, PipelineMetricRow> map = new HashMap<>();
     String schema =
-        Utils.isEmpty(options.getOpsSchema())
-            ? LoadRunMetricsCatalogPublisher.DEFAULT_SCHEMA_NAME
-            : options.getOpsSchema();
+        LoadRunMetricsCatalogPublisher.resolvePhysicalOperationsSchema(
+            resolveOpsSchema(options, metadataProvider, variables), databaseMeta);
     String table = LoadRunMetricsCatalogPublisher.TABLE_LOAD_PIPELINE_METRIC;
     String qualified = databaseMeta.getQuotedSchemaTableCombination(variables, schema, table);
+    String location =
+        LoadRunMetricsCatalogPublisher.qualifyOperationsTable(schema, table)
+            + " ("
+            + LoadRunMetricsCatalogPublisher.describeOperationsLocation(schema)
+            + ")";
 
     Database db =
         new Database(new LoggingObject("OpenLineageOpsEnricher"), variables, databaseMeta);
@@ -156,6 +197,7 @@ public final class OpsLineageEnricher {
           }
           map.put(pipelineName.toLowerCase(), row);
         }
+        return new MetricsQuery(map, location, null);
       } catch (Exception primary) {
         String fallback = "SELECT pipeline_name, run_id FROM " + qualified;
         try (Statement st = db.getConnection().createStatement();
@@ -170,20 +212,17 @@ public final class OpsLineageEnricher {
             row.runId = rs.getString(2);
             map.put(pipelineName.toLowerCase(), row);
           }
+          return new MetricsQuery(map, location, null);
         } catch (Exception secondary) {
-          if (log != null) {
-            log.logBasic(
-                "Could not query load_pipeline_metric ("
-                    + secondary.getMessage()
-                    + "); primary error: "
-                    + primary.getMessage());
-          }
+          return new MetricsQuery(
+              Map.of(),
+              location,
+              secondary.getMessage() + "; primary error: " + primary.getMessage());
         }
       }
     } finally {
       db.disconnect();
     }
-    return map;
   }
 
   private static String tableSegment(String jobName) {
@@ -214,5 +253,12 @@ public final class OpsLineageEnricher {
     private String runId;
     private String lastSuccessAt;
     private Long durationMs;
+  }
+
+  private record MetricsQuery(
+      Map<String, PipelineMetricRow> byPipeline, String location, String queryError) {
+    private boolean failed() {
+      return queryError != null;
+    }
   }
 }

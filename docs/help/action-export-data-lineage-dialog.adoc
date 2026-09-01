@@ -26,5 +26,6 @@ Events include table-level inputs/outputs and, when enabled, **column-level line
 - Start Marquez locally with `scripts/run-marquez.sh up` before HTTP export.
 - Column lineage is derived from the same collectors that power the modeler **Lineage** tab — models remain the source of truth.
 - Operational metrics enrichment is optional and reads `load_pipeline_metric` when an ops database is configured.
+- **Ops schema** may be left blank: the action inherits the schema from the enabled **Execution metrics profile**. If that table is missing, open the profile and use **Generate SQL**.
 
 See `docs/openlineage-export.adoc` for dataset naming conventions and Marquez setup.

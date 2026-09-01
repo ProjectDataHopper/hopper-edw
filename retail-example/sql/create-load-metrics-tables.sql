@@ -16,7 +16,8 @@
 
 -- Load-run metrics tables for catalog-backed operations telemetry (Phase 1).
 -- Target database: OPS connection (${DB_OPS_NAME}, e.g. test_ops). Not the Vault EDW.
--- Optional manual bootstrap: metrics publishing also auto-creates these tables on first run.
+-- Optional Postgres bootstrap for the retail sample. Prefer Generate SQL on the
+-- Execution metrics profile for dialect-aware DDL (auto-create also runs on first publish).
 
 CREATE SCHEMA IF NOT EXISTS dv_ops;
 
@@ -29,6 +30,7 @@ CREATE TABLE IF NOT EXISTS dv_ops.load_run (
   workflow_name    VARCHAR(255) NULL,
   workflow_execution_id VARCHAR(64) NULL,
   log_channel_id   VARCHAR(64)  NULL,
+  pipeline_run_configuration VARCHAR(255) NULL,
   success          BOOLEAN      NULL,
   error_count      BIGINT       NULL,
   PRIMARY KEY (run_id)

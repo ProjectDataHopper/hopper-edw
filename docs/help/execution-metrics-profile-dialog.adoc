@@ -1,0 +1,30 @@
+= Execution metrics profile
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../operations.adoc[operations].
+
+Reusable configuration for **load-run metrics**: JSON files, optional OPS database tables (`load_run`, `load_pipeline_metric`, `load_transform_metric`, `load_insight`, workflow overview), catalog record definitions, and insight thresholds.
+
+Update actions (and **Update resource definition group**) reference this profile by name.
+
+== Publishing
+
+* **Target database connection** — usually **OPS**, not the Vault EDW.
+* **Operations schema** — optional isolation schema (retail: `dv_ops`). Blank means the connection default.
+* **Auto-create metrics tables** — on first publish, create missing tables. Turn this off when a DBA owns DDL.
+
+== Generate SQL
+
+Use **Generate SQL** on the metadata editor button bar when you need the statements yourself:
+
+. Set **Target database connection** and **Operations schema** (the current form values are used; you do not have to save first).
+. Click **Generate SQL**.
+. Hop opens the SQL editor with dialect-specific `CREATE` statements (`CREATE SCHEMA` when a schema is set, then the metrics and workflow-overview tables).
+. Review, copy for a DBA, or execute against OPS.
+
+This is the supported way to learn which SQL to run. The retail `sql/create-load-metrics-tables.sql` file is a Postgres bootstrap for the sample project and can lag behind the live generator.
+
+OpenLineage **Export data lineage** optional ops enrichment reads `load_pipeline_metric` from the same connection/schema. Leave the action's **Ops schema** blank to inherit this profile.

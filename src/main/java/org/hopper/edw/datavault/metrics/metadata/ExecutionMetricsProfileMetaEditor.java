@@ -16,13 +16,17 @@
 package org.hopper.edw.datavault.metrics.metadata;
 
 import org.apache.hop.core.Const;
+import org.apache.hop.core.DbCache;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
+import org.apache.hop.core.util.Utils;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.PropsUi;
+import org.apache.hop.ui.core.database.dialog.SqlEditor;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
+import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.core.metadata.MetadataEditor;
 import org.apache.hop.ui.core.metadata.MetadataManager;
 import org.apache.hop.ui.hopgui.HopGui;
@@ -43,6 +47,7 @@ import org.eclipse.swt.widgets.Text;
 import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
 import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
 import org.hopper.edw.datavault.hopgui.help.HelpTopics;
+import org.hopper.edw.datavault.metrics.LoadRunMetricsDdlSupport;
 
 /** Editor for {@link ExecutionMetricsProfileMeta}. */
 @GuiPlugin(description = "Editor for Execution Metrics Profile metadata")
@@ -242,6 +247,8 @@ public class ExecutionMetricsProfileMetaEditor extends MetadataEditor<ExecutionM
             last,
             "ExecutionMetricsProfileMetaEditor.OperationsSchema.Label",
             wOperationsSchema);
+    wOperationsSchema.setToolTipText(
+        BaseMessages.getString(PKG, "ExecutionMetricsProfileMetaEditor.OperationsSchema.ToolTip"));
 
     last =
         addCheckbox(
@@ -252,6 +259,8 @@ public class ExecutionMetricsProfileMetaEditor extends MetadataEditor<ExecutionM
             "ExecutionMetricsProfileMetaEditor.AutoCreateTables.Label",
             wAutoCreateTables = new Button(comp, SWT.CHECK));
     wAutoCreateTables.setSelection(true);
+    wAutoCreateTables.setToolTipText(
+        BaseMessages.getString(PKG, "ExecutionMetricsProfileMetaEditor.AutoCreateTables.ToolTip"));
 
     last =
         addCheckbox(
@@ -465,5 +474,75 @@ public class ExecutionMetricsProfileMetaEditor extends MetadataEditor<ExecutionM
       return false;
     }
     return wName.setFocus();
+  }
+
+  @Override
+  public Button[] createButtonsForButtonBar(Composite parent) {
+    Button wGenerateSql = new Button(parent, SWT.PUSH);
+    wGenerateSql.setText(
+        BaseMessages.getString(PKG, "ExecutionMetricsProfileMetaEditor.GenerateSql.Button"));
+    wGenerateSql.setToolTipText(
+        BaseMessages.getString(PKG, "ExecutionMetricsProfileMetaEditor.GenerateSql.ToolTip"));
+    wGenerateSql.addListener(SWT.Selection, e -> generateSql());
+    return new Button[] {wGenerateSql};
+  }
+
+  /**
+   * Opens Hop's SQL editor with dialect-specific CREATE statements for {@code load_run}, {@code
+   * load_pipeline_metric}, and the other operations tables on the selected OPS connection.
+   */
+  private void generateSql() {
+    ExecutionMetricsProfileMeta preview = new ExecutionMetricsProfileMeta();
+    getWidgetsContent(preview);
+    String connectionName =
+        hopGui.getVariables().resolve(Const.NVL(preview.getTargetDatabaseConnection(), ""));
+    if (Utils.isEmpty(connectionName)) {
+      MessageBox box = new MessageBox(getShell(), SWT.OK | SWT.ICON_ERROR);
+      box.setText(
+          BaseMessages.getString(
+              PKG, "ExecutionMetricsProfileMetaEditor.GenerateSql.MissingDatabase.Title"));
+      box.setMessage(
+          BaseMessages.getString(
+              PKG, "ExecutionMetricsProfileMetaEditor.GenerateSql.MissingDatabase.Message"));
+      box.open();
+      return;
+    }
+    try {
+      IHopMetadataProvider metadataProvider = hopGui.getMetadataProvider();
+      DatabaseMeta databaseMeta =
+          metadataProvider.getSerializer(DatabaseMeta.class).load(connectionName);
+      if (databaseMeta == null) {
+        MessageBox box = new MessageBox(getShell(), SWT.OK | SWT.ICON_ERROR);
+        box.setText(
+            BaseMessages.getString(
+                PKG, "ExecutionMetricsProfileMetaEditor.GenerateSql.MissingDatabase.Title"));
+        box.setMessage(
+            BaseMessages.getString(
+                PKG,
+                "ExecutionMetricsProfileMetaEditor.GenerateSql.UnknownDatabase.Message",
+                connectionName));
+        box.open();
+        return;
+      }
+      String schema =
+          hopGui.getVariables().resolve(Const.NVL(preview.getOperationsSchemaOrDefault(), ""));
+      String sql = LoadRunMetricsDdlSupport.buildPreviewSql(databaseMeta, schema);
+      SqlEditor sqlEditor =
+          new SqlEditor(
+              getShell(),
+              SWT.NONE,
+              hopGui.getVariables(),
+              databaseMeta,
+              DbCache.getInstance(),
+              sql);
+      sqlEditor.open();
+    } catch (Exception e) {
+      new ErrorDialog(
+          getShell(),
+          BaseMessages.getString(PKG, "ExecutionMetricsProfileMetaEditor.GenerateSql.Error.Title"),
+          BaseMessages.getString(
+              PKG, "ExecutionMetricsProfileMetaEditor.GenerateSql.Error.Message"),
+          e);
+    }
   }
 }

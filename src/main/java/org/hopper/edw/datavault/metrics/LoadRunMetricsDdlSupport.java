@@ -63,6 +63,25 @@ public final class LoadRunMetricsDdlSupport {
     WorkflowLoadOverviewDdlSupport.ensureOverviewTables(db, databaseMeta, schema, log);
   }
 
+  /**
+   * Dialect-specific CREATE statements for load-run metrics and workflow overview tables. Used by
+   * the Execution metrics profile <em>Generate SQL</em> action so data engineers can review or run
+   * DDL instead of relying on auto-create.
+   */
+  public static List<String> buildPreviewStatements(
+      DatabaseMeta databaseMeta, String operationsSchema) {
+    List<String> statements =
+        new ArrayList<>(buildCreateStatements(databaseMeta, operationsSchema));
+    statements.addAll(
+        WorkflowLoadOverviewDdlSupport.buildCreateStatements(databaseMeta, operationsSchema));
+    return List.copyOf(statements);
+  }
+
+  /** Semicolon-separated preview script for {@link #buildPreviewStatements}. */
+  public static String buildPreviewSql(DatabaseMeta databaseMeta, String operationsSchema) {
+    return String.join(";\n\n", buildPreviewStatements(databaseMeta, operationsSchema)) + ";\n";
+  }
+
   static List<String> buildCreateStatements(DatabaseMeta databaseMeta) {
     return buildCreateStatements(databaseMeta, LoadRunMetricsCatalogPublisher.DEFAULT_SCHEMA_NAME);
   }

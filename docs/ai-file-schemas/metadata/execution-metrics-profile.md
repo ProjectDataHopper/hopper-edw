@@ -16,9 +16,12 @@ Configures **load-run metrics** collection/publication for Data Vault / BV / DM 
 | `enabled` | Master switch |
 | `metricsOutputFolder` | e.g. `${PROJECT_HOME}/work/metrics` |
 | `targetDatabaseConnection` | Often OPS |
-| `operationsSchema` | e.g. `dv_ops` |
+| `operationsSchema` | e.g. `dv_ops` (blank = connection default) |
+| `autoCreateTables` | Create missing OPS tables on first publish |
 | `dataCatalogConnection` | Catalog for publishing metric record defs |
 | Threshold fields | Alert/tuning heuristics |
+
+GUI: **Generate SQL** on the metadata editor emits dialect-specific `CREATE` statements for `load_run`, `load_pipeline_metric`, and related tables.
 
 ## Anti-patterns
 

@@ -4,6 +4,12 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Execution metrics Generate SQL and OpenLineage OPS schema
+
+- **Generate SQL** on the Execution metrics profile opens dialect-specific `CREATE` statements for `load_run` / `load_pipeline_metric` / related OPS tables
+- OpenLineage ops enrichment inherits the profile schema when the export action leaves **Ops schema** blank (retail tables are `dv_ops.load_pipeline_metric`, not the connection default)
+- Missing-table warnings name the connection and schema and point at Generate SQL instead of looking like an empty result
+
 ### BV SCD2 hub business keys and calculation-only mappings (issue #153)
 
 - SCD2 **Include hub business keys** left-outer Merge Joins parent-hub BK columns after collapse, immediately before SQL calculations (identity only; not version drivers). The SCD2 merge/repeat/incremental chain is unchanged

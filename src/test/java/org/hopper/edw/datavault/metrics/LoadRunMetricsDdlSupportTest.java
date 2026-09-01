@@ -108,6 +108,26 @@ class LoadRunMetricsDdlSupportTest {
   }
 
   @Test
+  void previewSqlIncludesMetricsAndOverviewTables() {
+    List<String> statements =
+        LoadRunMetricsDdlSupport.buildPreviewStatements(
+            databaseMetaWithPluginId(DvBulkLoadPluginSupport.POSTGRESQL_DB_PLUGIN_ID), "dv_ops");
+    String sql =
+        LoadRunMetricsDdlSupport.buildPreviewSql(
+            databaseMetaWithPluginId(DvBulkLoadPluginSupport.POSTGRESQL_DB_PLUGIN_ID), "dv_ops");
+
+    assertTrue(statements.stream().anyMatch(s -> s.contains("CREATE SCHEMA IF NOT EXISTS dv_ops")));
+    assertTrue(
+        statements.stream()
+            .anyMatch(s -> s.contains("CREATE TABLE IF NOT EXISTS dv_ops.load_pipeline_metric")));
+    assertTrue(
+        statements.stream()
+            .anyMatch(s -> s.contains("CREATE TABLE IF NOT EXISTS dv_ops.workflow_load_overview")));
+    assertTrue(sql.contains("dv_ops.load_pipeline_metric"));
+    assertTrue(sql.contains("dv_ops.workflow_load_overview_model"));
+  }
+
+  @Test
   void postgresDdlUsesCustomOperationsSchema() {
     List<String> statements =
         LoadRunMetricsDdlSupport.buildCreateStatements(

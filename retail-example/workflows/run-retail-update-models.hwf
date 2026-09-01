@@ -245,7 +245,7 @@ limitations under the License.
       <includeColumnLineage>Y</includeColumnLineage>
       <includeOperationalMetrics>Y</includeOperationalMetrics>
       <opsDatabase>OPS</opsDatabase>
-      <opsSchema/>
+      <opsSchema>dv_ops</opsSchema>
       <destinationMode>HTTP</destinationMode>
       <outputFolder/>
       <httpUrl>${MARQUEZ_API}</httpUrl>
