@@ -151,6 +151,12 @@ public final class SqlExpressionEvaluator {
         Object v = eval(operands.get(0), rowMeta, row);
         yield v == null ? null : (long) String.valueOf(v).length();
       }
+      case "HEX" -> SqlExpressionMysqlFunctions.hex(eval(operands.get(0), rowMeta, row));
+      case "UNHEX" -> SqlExpressionMysqlFunctions.unhex(eval(operands.get(0), rowMeta, row));
+      case "MD5" -> SqlExpressionMysqlFunctions.md5(eval(operands.get(0), rowMeta, row));
+      case "DATE_FORMAT" ->
+          SqlExpressionMysqlFunctions.dateFormat(
+              eval(operands.get(0), rowMeta, row), eval(operands.get(1), rowMeta, row));
       default -> throw new SqlExpressionException("Unsupported function '" + name + "'");
     };
   }
@@ -551,6 +557,7 @@ public final class SqlExpressionEvaluator {
       case IValueMeta.TYPE_NUMBER -> javaValue instanceof Double;
       case IValueMeta.TYPE_BIGNUMBER -> javaValue instanceof BigDecimal;
       case IValueMeta.TYPE_DATE, IValueMeta.TYPE_TIMESTAMP -> javaValue instanceof Date;
+      case IValueMeta.TYPE_BINARY -> javaValue instanceof byte[];
       default -> false;
     };
   }

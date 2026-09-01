@@ -31,6 +31,9 @@ class SqlExpressionPatternsTest {
     assertTrue(
         SqlExpressionPatterns.all().stream()
             .anyMatch(p -> p.snippet().startsWith("COALESCE(, , , , , )")));
+    assertTrue(SqlExpressionPatterns.all().stream().anyMatch(p -> p.snippet().startsWith("HEX()")));
+    assertTrue(
+        SqlExpressionPatterns.all().stream().anyMatch(p -> p.snippet().startsWith("DATE_FORMAT(")));
     assertFalse(SqlExpressionPatterns.all().isEmpty());
     for (SqlExpressionPattern pattern : SqlExpressionPatterns.all()) {
       assertFalse(pattern.snippet().isBlank());

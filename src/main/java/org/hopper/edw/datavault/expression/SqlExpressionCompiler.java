@@ -113,6 +113,7 @@ public final class SqlExpressionCompiler {
         Frameworks.newConfigBuilder()
             .defaultSchema(rootSchema.getSubSchema("expr"))
             .parserConfig(parserConfig)
+            .operatorTable(SqlExpressionOperatorTable.instance())
             .build();
 
     try (Planner planner = Frameworks.getPlanner(config)) {
