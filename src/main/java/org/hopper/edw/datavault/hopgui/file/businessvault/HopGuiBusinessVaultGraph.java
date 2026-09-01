@@ -1787,6 +1787,35 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
   }
 
   @GuiContextAction(
+      id = "bv-graph-generate-scd2-calc-unit-test",
+      parentId = HopGuiBusinessVaultTableContext.CONTEXT_ID,
+      type = GuiActionType.Create,
+      name = "i18n::HopGuiBusinessVaultGraph.Context.GenerateCalcUnitTest.Name",
+      tooltip = "i18n::HopGuiBusinessVaultGraph.Context.GenerateCalcUnitTest.Tooltip",
+      image = "ui/images/debug.svg",
+      category = "Business Vault",
+      categoryOrder = "4")
+  public void generateScd2CalculationUnitTestAction(HopGuiBusinessVaultTableContext context) {
+    IBvTable table = context.getTable();
+    HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
+    if (!(table instanceof BvScd2Table scd2Table) || graph == null) {
+      return;
+    }
+    graph.generateScd2CalculationUnitTest(scd2Table);
+  }
+
+  public void generateScd2CalculationUnitTest(BvScd2Table table) {
+    if (table == null) {
+      return;
+    }
+    if (!ensureDataVaultModelLoaded()) {
+      return;
+    }
+    BvScd2CalculationUnitTestGuiSupport.generate(
+        hopGui, hopGui.getShell(), getVariables(), model, dataVaultModel, table);
+  }
+
+  @GuiContextAction(
       id = "bv-graph-preview-target-layout",
       parentId = HopGuiBusinessVaultTableContext.CONTEXT_ID,
       type = GuiActionType.Info,

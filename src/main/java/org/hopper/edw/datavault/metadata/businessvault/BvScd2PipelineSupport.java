@@ -76,6 +76,8 @@ import org.apache.hop.pipeline.transforms.update.UpdateKeyField;
 import org.apache.hop.pipeline.transforms.update.UpdateLookupField;
 import org.apache.hop.pipeline.transforms.update.UpdateMeta;
 import org.apache.hop.workflow.WorkflowMeta;
+import org.hopper.edw.datavault.expression.SqlExpressionException;
+import org.hopper.edw.datavault.expression.SqlExpressionProgram;
 import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvHub;
@@ -84,6 +86,7 @@ import org.hopper.edw.datavault.metadata.DvLoadCycleSupport;
 import org.hopper.edw.datavault.metadata.DvSatellite;
 import org.hopper.edw.datavault.metadata.DvSourceFieldMappingSupport;
 import org.hopper.edw.datavault.metadata.DvSpecialRecordSupport;
+import org.hopper.edw.datavault.metadata.DvSqlOrderBySupport;
 import org.hopper.edw.datavault.metadata.DvSqlSupport;
 import org.hopper.edw.datavault.metadata.DvTableType;
 import org.hopper.edw.datavault.metadata.DvTargetLoadMode;
@@ -96,6 +99,8 @@ import org.hopper.edw.datavault.metadata.SatelliteAttribute;
 import org.hopper.edw.datavault.transform.sortedschemamerge.SortedSchemaMergeMeta;
 import org.hopper.edw.datavault.transform.sortedschemamerge.SortedSchemaMergeMetaFactory;
 import org.hopper.edw.datavault.transform.sortedschemamerge.SortedSchemaMergeSortKey;
+import org.hopper.edw.datavault.transform.sqlexpression.SqlExpressionMeta;
+import org.hopper.edw.datavault.transform.sqlexpression.SqlExpressionMetaFactory;
 
 /**
  * Generates SCD2 build pipelines from DV satellite history using Analytic Query (LAG/LEAD validity
@@ -230,7 +235,8 @@ public final class BvScd2PipelineSupport {
     TransformMeta analyticQuery = addAnalyticQuery(ctx, pipelineMeta, mergeInput);
     TransformMeta ifNull = addIfNull(ctx, pipelineMeta, analyticQuery);
     TransformMeta groupBy = addGroupBy(ctx, pipelineMeta, ifNull);
-    TransformMeta writeTransform = addTableOutput(ctx, pipelineMeta, groupBy);
+    TransformMeta calculated = addCalculations(ctx, pipelineMeta, groupBy);
+    TransformMeta writeTransform = addTableOutput(ctx, pipelineMeta, calculated);
     if (writeTransform != null) {
       GeneratedPipelineMetadataSupport.stampWriteTarget(
           writeTransform, "scd2", ctx.scd2Table.getName(), ctx.bvTargetTableName, ctx.targetDbName);
@@ -289,7 +295,8 @@ public final class BvScd2PipelineSupport {
     TransformMeta analyticQuery = addAnalyticQuery(ctx, pipelineMeta, postRepeatSelect);
     TransformMeta ifNull = addIfNull(ctx, pipelineMeta, analyticQuery);
     TransformMeta groupBy = addGroupBy(ctx, pipelineMeta, ifNull);
-    TransformMeta writeTransform = addTableOutput(ctx, pipelineMeta, groupBy);
+    TransformMeta calculated = addCalculations(ctx, pipelineMeta, groupBy);
+    TransformMeta writeTransform = addTableOutput(ctx, pipelineMeta, calculated);
     if (writeTransform != null) {
       GeneratedPipelineMetadataSupport.stampWriteTarget(
           writeTransform, "scd2", ctx.scd2Table.getName(), ctx.bvTargetTableName, ctx.targetDbName);
@@ -610,7 +617,9 @@ public final class BvScd2PipelineSupport {
       }
     }
 
-    appendControlFields(rowMeta, scd2Table, bvConfig, dvModel, variables);
+    appendSourceAndValidityFields(rowMeta, scd2Table, bvConfig, dvModel, variables);
+    applyCalculations(rowMeta, scd2Table, variables);
+    appendLoadCycleField(rowMeta, bvConfig, variables);
     return rowMeta;
   }
 
@@ -658,8 +667,101 @@ public final class BvScd2PipelineSupport {
       rowMeta.addValueMeta(cloneValueMetaWithName(sourceMeta, targetFieldName));
     }
 
-    appendControlFields(rowMeta, scd2Table, bvConfig, dvModel, variables);
+    appendSourceAndValidityFields(rowMeta, scd2Table, bvConfig, dvModel, variables);
+    applyCalculations(rowMeta, scd2Table, variables);
+    appendLoadCycleField(rowMeta, bvConfig, variables);
     return rowMeta;
+  }
+
+  public static IRowMeta buildCollapseRowLayout(
+      BvScd2Table scd2Table,
+      BusinessVaultConfiguration bvConfig,
+      DataVaultModel dvModel,
+      IVariables variables)
+      throws HopException {
+    RowMeta collapse = new RowMeta();
+    if (hasFieldMappings(scd2Table)) {
+      appendGrainFields(
+          collapse,
+          scd2Table,
+          dvModel,
+          BvScd2FieldMappingValidationSupport.resolveSatelliteDerivatives(scd2Table, dvModel),
+          variables);
+      appendMappedAttributes(collapse, scd2Table, dvModel, variables);
+    } else {
+      DvSatellite satellite = resolveSourceSatellite(scd2Table, dvModel);
+      appendGrainFields(collapse, scd2Table, dvModel, List.of(satellite), variables);
+      for (String attrName : resolveAttributeFieldNames(satellite)) {
+        if (satellite.hasDrivingKey()
+            && attrName.equals(variables.resolve(satellite.getDrivingKey()))) {
+          continue;
+        }
+        IValueMeta attrMeta = findAttributeValueMeta(satellite, attrName);
+        if (attrMeta != null) {
+          collapse.addValueMeta(attrMeta);
+        }
+      }
+    }
+    appendSourceAndValidityFields(collapse, scd2Table, bvConfig, dvModel, variables);
+    return collapse;
+  }
+
+  private static void appendMappedAttributes(
+      RowMeta rowMeta, BvScd2Table scd2Table, DataVaultModel dvModel, IVariables variables)
+      throws HopException {
+    List<DvSatellite> satellites =
+        BvScd2FieldMappingValidationSupport.resolveSatelliteDerivatives(scd2Table, dvModel);
+    Set<String> addedTargets = new LinkedHashSet<>();
+    for (BvScd2FieldMapping mapping : scd2Table.getFieldMappings()) {
+      if (mapping == null) {
+        continue;
+      }
+      String satelliteName = variables.resolve(mapping.getSatelliteName());
+      String sourceFieldName = variables.resolve(mapping.getSourceFieldName());
+      String targetFieldName = variables.resolve(mapping.getTargetFieldName());
+      if (Utils.isEmpty(satelliteName)
+          || Utils.isEmpty(sourceFieldName)
+          || Utils.isEmpty(targetFieldName)
+          || !addedTargets.add(targetFieldName)
+          || rowMeta.indexOfValue(targetFieldName) >= 0) {
+        continue;
+      }
+      DvSatellite satellite = findSatelliteByName(satellites, satelliteName);
+      if (satellite == null) {
+        continue;
+      }
+      IValueMeta sourceMeta = findAttributeValueMeta(satellite, sourceFieldName);
+      if (sourceMeta == null) {
+        continue;
+      }
+      rowMeta.addValueMeta(cloneValueMetaWithName(sourceMeta, targetFieldName));
+    }
+  }
+
+  private static void applyCalculations(
+      IRowMeta rowMeta, BvScd2Table scd2Table, IVariables variables) throws HopException {
+    if (scd2Table == null || !scd2Table.hasCalculations()) {
+      return;
+    }
+    try {
+      SqlExpressionProgram program =
+          SqlExpressionProgram.compile(
+              BvScd2CalculationValidationSupport.toSpecs(scd2Table.getCalculations(), variables),
+              rowMeta,
+              variables);
+      IRowMeta withCalcs = program.getOutputRowMeta();
+      rowMeta.clear();
+      for (int i = 0; i < withCalcs.size(); i++) {
+        rowMeta.addValueMeta(withCalcs.getValueMeta(i).clone());
+      }
+    } catch (SqlExpressionException e) {
+      throw new HopException(
+          "Unable to apply SCD2 calculations on table "
+              + scd2Table.getName()
+              + ": "
+              + e.getMessage(),
+          e);
+    }
   }
 
   private static void appendGrainFields(
@@ -693,7 +795,7 @@ public final class BvScd2PipelineSupport {
     }
   }
 
-  private static void appendControlFields(
+  private static void appendSourceAndValidityFields(
       RowMeta rowMeta,
       BvScd2Table scd2Table,
       BusinessVaultConfiguration bvConfig,
@@ -709,6 +811,10 @@ public final class BvScd2PipelineSupport {
         new ValueMetaTimestamp(resolveValidFromField(scd2Table, bvConfig, variables)));
     rowMeta.addValueMeta(
         new ValueMetaTimestamp(resolveValidToField(scd2Table, bvConfig, variables)));
+  }
+
+  private static void appendLoadCycleField(
+      IRowMeta rowMeta, BusinessVaultConfiguration bvConfig, IVariables variables) {
     if (bvConfig != null) {
       DvLoadCycleSupport.appendToLayout(
           rowMeta, bvConfig.isStoreLoadCycleId(), bvConfig.getLoadCycleIdField(), variables);
@@ -897,12 +1003,7 @@ public final class BvScd2PipelineSupport {
       sql.append(buildDeltaHashKeysSubquerySql(ctx));
       sql.append(")");
     }
-    sql.append(" ORDER BY ");
-    if (ctx.includeHashKey) {
-      sql.append(ctx.targetDatabaseMeta.quoteField(ctx.hashKeyFieldName));
-      sql.append(", ");
-    }
-    sql.append(ctx.targetDatabaseMeta.quoteField(ctx.functionalTimestampField));
+    appendScd2OrderBy(sql, ctx, ctx.targetDatabaseMeta, true, ctx.functionalTimestampField, null);
     return sql.toString();
   }
 
@@ -937,12 +1038,7 @@ public final class BvScd2PipelineSupport {
       sql.append(buildDeltaHashKeysSubquerySql(ctx));
       sql.append(")");
     }
-    sql.append(" ORDER BY ");
-    if (ctx.includeHashKey) {
-      sql.append(ctx.targetDatabaseMeta.quoteField(ctx.hashKeyFieldName));
-    } else if (ctx.hasDrivingKey()) {
-      sql.append(ctx.targetDatabaseMeta.quoteField(ctx.drivingKeyFieldName));
-    }
+    appendScd2OrderBy(sql, ctx, ctx.targetDatabaseMeta, false, null, null);
     return sql.toString();
   }
 
@@ -1076,26 +1172,60 @@ public final class BvScd2PipelineSupport {
         sql.append(predicate);
       }
     }
-    sql.append(" ORDER BY ");
-    if (ctx.includeHashKey) {
-      sql.append(ctx.sourceDatabaseMeta.quoteField(ctx.hashKeyFieldName));
-    } else if (ctx.hasDrivingKey()) {
-      sql.append(ctx.sourceDatabaseMeta.quoteField(ctx.drivingKeyFieldName));
-    } else if (!selectFields.isEmpty()) {
-      sql.append(selectFields.get(0));
-    }
-    if (ctx.hasDrivingKey() && ctx.includeHashKey) {
-      sql.append(", ");
-      sql.append(ctx.sourceDatabaseMeta.quoteField(ctx.drivingKeyFieldName));
-    }
-    sql.append(", ");
-    sql.append(
-        ctx.sourceDatabaseMeta.quoteField(
-            ctx.isMultiSatellite()
-                ? leg.sourceFunctionalTimestampField
-                : ctx.functionalTimestampField));
+    appendScd2OrderBy(
+        sql,
+        ctx,
+        ctx.sourceDatabaseMeta,
+        true,
+        ctx.isMultiSatellite() ? leg.sourceFunctionalTimestampField : ctx.functionalTimestampField,
+        selectFields);
 
     return sql.toString();
+  }
+
+  /**
+   * Hash-key (and optional driving-key / timestamp) ORDER BY matching {@link String#compareTo()}
+   * for STRING/HEX keys so {@code SortedSchemaMerge} sees pre-sorted streams.
+   */
+  static void appendScd2OrderBy(
+      StringBuilder sql,
+      Scd2BuildContext ctx,
+      DatabaseMeta databaseMeta,
+      boolean includeTimestamp,
+      String timestampField,
+      List<String> selectFieldsFallback) {
+    sql.append(" ORDER BY ");
+    List<String> terms = new ArrayList<>();
+    if (ctx.includeHashKey) {
+      terms.add(hashKeyOrderByTerm(databaseMeta, ctx));
+    } else if (ctx.hasDrivingKey()) {
+      terms.add(databaseMeta.quoteField(ctx.drivingKeyFieldName));
+    } else if (selectFieldsFallback != null && !selectFieldsFallback.isEmpty()) {
+      terms.add(selectFieldsFallback.get(0));
+    }
+    if (ctx.hasDrivingKey() && ctx.includeHashKey) {
+      terms.add(databaseMeta.quoteField(ctx.drivingKeyFieldName));
+    }
+    if (includeTimestamp && !Utils.isEmpty(timestampField)) {
+      terms.add(databaseMeta.quoteField(timestampField));
+    }
+    sql.append(String.join(", ", terms));
+  }
+
+  static String hashKeyOrderByTerm(DatabaseMeta databaseMeta, Scd2BuildContext ctx) {
+    String quoted = databaseMeta.quoteField(ctx.hashKeyFieldName);
+    if (!hashKeyStoredAsString(ctx)) {
+      return quoted;
+    }
+    return DvSqlOrderBySupport.javaStringCompareOrderExpression(databaseMeta, quoted);
+  }
+
+  static boolean hashKeyStoredAsString(Scd2BuildContext ctx) {
+    HashKeyDataType type =
+        ctx != null && ctx.dvConfig != null
+            ? ctx.dvConfig.resolveHashKeyDataType()
+            : HashKeyDataType.HEX;
+    return type != HashKeyDataType.BINARY;
   }
 
   public static String resolveFunctionalTimestampField(
@@ -1744,6 +1874,28 @@ public final class BvScd2PipelineSupport {
             : LOCATION_START.x + SPACING_WIDTH;
     TransformMeta tm = new TransformMeta("AnalyticQuery", analyticTransformName, analyticQueryMeta);
     tm.setLocation(analyticX, LOCATION_START.y);
+    pipelineMeta.addTransform(tm);
+    pipelineMeta.addPipelineHop(new PipelineHopMeta(predecessor, tm));
+    return tm;
+  }
+
+  private static TransformMeta addCalculations(
+      Scd2BuildContext ctx, PipelineMeta pipelineMeta, TransformMeta predecessor) {
+    if (ctx == null || ctx.scd2Table == null || !ctx.scd2Table.hasCalculations()) {
+      return predecessor;
+    }
+    SqlExpressionMeta meta =
+        SqlExpressionMetaFactory.create(
+            BvScd2CalculationValidationSupport.toSpecs(
+                ctx.scd2Table.getCalculations(), ctx.variables));
+    String name = "calculate_" + ctx.bvTargetTableName;
+    int x =
+        predecessor.getLocation() != null
+            ? predecessor.getLocation().x + SPACING_WIDTH
+            : LOCATION_START.x;
+    int y = predecessor.getLocation() != null ? predecessor.getLocation().y : LOCATION_START.y;
+    TransformMeta tm = new TransformMeta("SqlExpression", name, meta);
+    tm.setLocation(x, y);
     pipelineMeta.addTransform(tm);
     pipelineMeta.addPipelineHop(new PipelineHopMeta(predecessor, tm));
     return tm;

@@ -152,6 +152,15 @@ for db in ${DATABASES}; do
   reclaim_rdbms_connection_ownership
   reclaim_metrics_folder_ownership "${db}" "${COMPOSE_FILE}"
   reclaim_vault_catalog_ownership "${COMPOSE_FILE}"
+  hop_workflow="tests/run-tests.hwf"
+  if [ "${db}" = "sqlserver" ]; then
+    hop_workflow="tests/run-tests-sqlserver.hwf"
+  fi
+  if [ "${EXIT_CODE}" -eq 0 ]; then
+    write_hop_run_metrics "${INTEGRATION_TESTS_HOST}/metrics/${db}" true 0 "${hop_workflow}"
+  else
+    write_hop_run_metrics "${INTEGRATION_TESTS_HOST}/metrics/${db}" false "${EXIT_CODE}" "${hop_workflow}"
+  fi
 
   # Banner is easy to miss in docker noise if we only print a single short line.
   echo ""

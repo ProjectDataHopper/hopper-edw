@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-     http://www.apache.org/licenses/LICENSE-2.0
+      http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,7 +24,9 @@ limitations under the License.
   <tables>
     <table>
       <buildMode>FULL_REBUILD</buildMode>
+      <hashKeyPartitionCount>NONE</hashKeyPartitionCount>
       <functionalTimestampField>x_load_ts</functionalTimestampField>
+      <incrementalWatermarkField/>
       <validFromField/>
       <validToField/>
       <includeHashKey>Y</includeHashKey>
@@ -107,6 +109,18 @@ limitations under the License.
           <sourceIndicatorValue>PREFS</sourceIndicatorValue>
         </satellite_config>
       </satellite_configs>
+      <calculations>
+        <calculation>
+          <targetFieldName>online_indicator</targetFieldName>
+          <expression>CASE WHEN cust_segment = 'ONLINE' THEN 'OL' ELSE 'OT' END</expression>
+          <hopTypeName>String</hopTypeName>
+          <length>2</length>
+          <precision>-1</precision>
+          <description>Shortened online=OL, Other=OT</description>
+        </calculation>
+      </calculations>
+      <calculation_tests/>
+      <collapse_tests/>
       <tableName>customer_360_bv</tableName>
       <description>Functional customer 360 view merged from four satellites</description>
       <tableType>SCD2</tableType>

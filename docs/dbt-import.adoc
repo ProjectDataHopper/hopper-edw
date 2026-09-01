@@ -80,6 +80,8 @@ Snapshots, seeds, analyses, and Python models are skipped.
 
 Those models still import as cards. **Check model** reports Jinja render errors so you can rewrite them as Hop SQL, SCD2, or pipelines.
 
+SCD2-like dbt models (historization plus `CASE` / `COALESCE` / `CAST`) should not stay as imported SQL. Rebuild them as a BV SCD2 table with **Calculations** — see link:business-vault-scd2.adoc[Business Vault SCD2].
+
 == Workflow action
 
 **Import dbt project** (`IMPORT_DBT_PROJECT`) is the headless counterpart of the canvas dialog. Point it at a dbt folder and a target `.hbv` (or an output folder for split). It imports every importable model. Use this in CI after the canvas import has been proven.

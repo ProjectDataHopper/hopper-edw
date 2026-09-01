@@ -185,7 +185,14 @@ public final class HarvestBackedValidationSupport {
 
     SchemaDiff diff = toSchemaDiff(subject.getChanges());
     List<ValidationIssue> allIssues =
-        new ArrayList<>(RemediationProposalSupport.buildIssues(diff, usages, null));
+        new ArrayList<>(
+            RemediationProposalSupport.buildIssues(
+                diff,
+                usages,
+                null,
+                IssueKind.SOURCE_UNAVAILABLE,
+                subject.getSubjectKey(),
+                sourceType));
     allIssues.addAll(foreignKeyIssues(subject.getChanges()));
     // Annotate messages with harvest provenance for gate logs.
     if (!Utils.isEmpty(harvestRunId) && !allIssues.isEmpty()) {

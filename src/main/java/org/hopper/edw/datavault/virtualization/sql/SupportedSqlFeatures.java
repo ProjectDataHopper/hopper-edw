@@ -24,9 +24,10 @@ public final class SupportedSqlFeatures {
       "Supported: SELECT columns/*, INNER/LEFT/RIGHT/FULL JOIN, WHERE comparisons "
           + "(AND/OR, IS NULL, IN, BETWEEN), ORDER BY, LIMIT/FETCH, "
           + "GROUP BY with COUNT/SUM/MIN/MAX/AVG, "
-          + "simple residual expressions (+ - * / and COALESCE/NVL), "
+          + "residual expressions (+ - * / and 2-arg COALESCE/NVL via Calculator; "
+          + "CASE WHEN, CAST, N-arg COALESCE via SQL Expression), "
           + "source tables, Source JSON, and Source Pipeline feeds as tables. "
           + "Full DB pushdown when all tables are DATABASE on one connection "
           + "(then dialect SQL may include CASE and more). "
-          + "Not yet: subqueries/CTEs, window functions, residual CASE WHEN, DML.";
+          + "Not yet: subqueries/CTEs, window functions, DML.";
 }

@@ -4,6 +4,41 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Multi-satellite SCD2 sorts hash keys the way Hop merges them
+
+- Generated SCD2 `TableInput` `ORDER BY` for STRING/HEX hash keys uses a Java `String.compareTo` collation (Postgres `COLLATE "C"`, SQL Server `Latin1_General_100_BIN2`, MySQL/SingleStore `BINARY`)
+- Locale collations such as Postgres `en_US.utf8` sort `10-` before `1-`; Hop's `SortedSchemaMerge` does the opposite, so Repeat Fields missed some keys and Customer 360 current-state row counts drifted under hash-key partitions (396 vs 453)
+- `customer-360-bv-current-golden` is the carried-forward current 360 (one open row per hash key)
+
+### Integration-test metrics overview shows suite failures
+
+- Each Hop run writes `metrics/<engine>/_hop-run.json`; collect-metrics includes it as `modelName=_hop-run` with `success=false` when the orchestrator exits non-zero
+- Overview CSV also has an `errors` column (load-pipeline Hop errors). The printed table lists the suite row first and a **FAILURE ROW(S)** block so golden / Check model failures are visible
+
+### Harvest applies data type mappings on rediscovery
+
+- PIPELINE, JSON, and COMPOSITE schema harvest / validation reload attached **Data type mapping** profiles (same path as catalog publish)
+- String fields without length that map to length 2000 (`premodel-defaults`) no longer fail the schema gate as `FIELD_TYPE_CHANGED` against the catalog contract (retail `asn-package-lines`)
+
+### Stale catalog vs source model is explicit
+
+- Source model **Check model** and card **Validate** compare the published catalog feed to the current effective layout and error when the catalog still has the last publish
+- Schema-gate `FIELD_TYPE_CHANGED` on PIPELINE / JSON / COMPOSITE says to **publish the source model card**, and offers republish instead of widening hub/link keys from the stale catalog length
+- Saving a `.hsm` asks to publish stale catalog feeds (MessageDialogWithToggle **Don't remind me after save**). Option: **Configuration → Data Vault 2.0 → Remind to publish catalog feeds when saving a source model** (default on)
+
+### BV SCD2 calculations (issue #150)
+
+- SCD2 tables can attach deterministic SQL scalars (`CASE`, `COALESCE`, `CAST`, …) that run **after** Group By collapse and do not drive new versions
+- New **SQL Expression** transform (Calcite, database-independent) is reused by generated SCD2 pipelines
+- Dialect CAST forms `expr :> TYPE` and `expr::TYPE` are rewritten to standard `CAST`
+- SQL Expression can optionally link a Business Vault model file and SCD2 table; runtime then loads calculations from that table
+- **Generate calculation unit test** on an SCD2 table creates a Hop pipeline unit test (input/golden data sets + slim Dummy → SQL Expression → Dummy pipeline). Optional capture samples 100 collapsed warehouse rows; production loads are not sampled
+- Integration fixture `tests/scd2-calculations/`: deleted-flag `CASE` + `CAST('Default value' AS VARCHAR(720))` on a single-satellite SCD2 table, golden current-state after initial and update loads
+- Check model column tests convert Timestamp/Date inputs from text instead of treating the string as a native value
+- Calculated columns are extra target fields; mapped attributes stay stored so incremental rebuilds can recompute expressions
+- SQL expression editor (shared with the SQL Expression transform): result name, type, length, precision, description, field/pattern insertion, large SQL widget
+- Residual source-model Free SQL / `jdbc:hop-hsm:` Project with `CASE`, real `CAST`, and N-arg `COALESCE` emits **SQL Expression** (Calculator still handles `+ - * /` and 2-arg NVL)
+
 ### SCD2 table dialog OK is not blocked by configuration errors (issue #137)
 
 - Closing the Business Vault SCD2 table dialog with **OK** still shows validation errors, then offers **Save the table anyway?**

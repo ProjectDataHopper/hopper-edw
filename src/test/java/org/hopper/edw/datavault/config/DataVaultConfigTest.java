@@ -84,6 +84,18 @@ class DataVaultConfigTest {
   }
 
   @Test
+  void defaultsRemindUnpublishedCatalogOnSourceModelSaveToTrue() {
+    assertTrue(new DataVaultConfig().isRemindUnpublishedCatalogOnSourceModelSave());
+  }
+
+  @Test
+  void copiesRemindUnpublishedCatalogOnSourceModelSave() {
+    DataVaultConfig source = new DataVaultConfig();
+    source.setRemindUnpublishedCatalogOnSourceModelSave(false);
+    assertFalse(new DataVaultConfig(source).isRemindUnpublishedCatalogOnSourceModelSave());
+  }
+
+  @Test
   void defaultsSchemaRemediationFolder() {
     DataVaultConfig config = new DataVaultConfig();
     assertEquals(

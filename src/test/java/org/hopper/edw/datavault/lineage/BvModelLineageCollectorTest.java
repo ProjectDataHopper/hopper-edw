@@ -27,6 +27,8 @@ import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.hopper.edw.datavault.hopgui.file.businessvault.HopBusinessVaultFileType;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
+import org.hopper.edw.datavault.metadata.businessvault.BvScd2Calculation;
+import org.hopper.edw.datavault.metadata.businessvault.BvScd2Table;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -75,6 +77,27 @@ class BvModelLineageCollectorTest {
     assertEquals(FieldTransform.RENAME, c.getTransform());
     assertTrue(
         c.getReasons().stream().anyMatch(r -> r.getCode() == LineageReasonCode.BV_SCD2_FIELD_MAP));
+  }
+
+  @Test
+  void scd2CalculationIsDerivedLineage() {
+    BvScd2Table table =
+        (BvScd2Table)
+            model.getTables().stream()
+                .filter(t -> t instanceof BvScd2Table && "customer_360_bv".equals(t.getName()))
+                .findFirst()
+                .orElseThrow();
+    table.getCalculations().add(new BvScd2Calculation("cust_email_upper", "UPPER(cust_email)"));
+    LineageSnapshot snapshot = BvModelLineageCollector.collect(model, variables);
+    TableLineage tableLineage = snapshot.findTableByLogicalName("customer_360_bv").orElseThrow();
+    FieldLineage calc =
+        tableLineage
+            .findField("cust_email_upper")
+            .orElseThrow(() -> new AssertionError("cust_email_upper"));
+    assertEquals(FieldTransform.DERIVED, calc.getContributions().get(0).getTransform());
+    assertTrue(
+        calc.getContributions().get(0).getReasons().stream()
+            .anyMatch(r -> r.getCode() == LineageReasonCode.BV_SCD2_CALCULATION));
   }
 
   @Test

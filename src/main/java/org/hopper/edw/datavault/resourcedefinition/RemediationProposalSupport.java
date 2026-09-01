@@ -18,6 +18,7 @@ package org.hopper.edw.datavault.resourcedefinition;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.util.Utils;
@@ -53,6 +54,21 @@ public final class RemediationProposalSupport {
       String sourceUnavailableMessage,
       IssueKind unavailableKind,
       String recordKey) {
+    return buildIssues(diff, usages, sourceUnavailableMessage, unavailableKind, recordKey, null);
+  }
+
+  /**
+   * @param sourceType catalog/harvest source kind ({@code PIPELINE}, {@code JSON}, {@code
+   *     COMPOSITE}, …). When the actual side is a source-model projection, findings tell the
+   *     operator to republish rather than treat it as live JDBC drift.
+   */
+  public static List<ValidationIssue> buildIssues(
+      RecordDefinitionSchemaDiffSupport.SchemaDiff diff,
+      List<SourceUsage> usages,
+      String sourceUnavailableMessage,
+      IssueKind unavailableKind,
+      String recordKey,
+      String sourceType) {
     List<ValidationIssue> issues = new ArrayList<>();
     if (!Utils.isEmpty(sourceUnavailableMessage)) {
       IssueKind kind = unavailableKind != null ? unavailableKind : IssueKind.SOURCE_UNAVAILABLE;
@@ -75,7 +91,7 @@ public final class RemediationProposalSupport {
       if (change == null) {
         continue;
       }
-      issues.add(buildIssueForChange(change, usages));
+      issues.add(buildIssueForChange(change, usages, sourceType));
     }
     return issues;
   }
@@ -115,7 +131,9 @@ public final class RemediationProposalSupport {
   }
 
   private static ValidationIssue buildIssueForChange(
-      RecordDefinitionSchemaDiffSupport.FieldChange change, List<SourceUsage> usages) {
+      RecordDefinitionSchemaDiffSupport.FieldChange change,
+      List<SourceUsage> usages,
+      String sourceType) {
     String fieldName = change.fieldName();
     boolean mapped = isFieldMapped(fieldName, usages);
     return switch (change.kind()) {
@@ -149,10 +167,12 @@ public final class RemediationProposalSupport {
               fieldName,
               BaseMessages.getString(
                   PKG,
-                  "RemediationProposalSupport.Issue.FieldChanged",
+                  isSourceModelBacked(sourceType)
+                      ? "RemediationProposalSupport.Issue.FieldChangedSourceModel"
+                      : "RemediationProposalSupport.Issue.FieldChanged",
                   fieldName,
                   Utils.isEmpty(change.details()) ? "" : change.details()),
-              proposalsForChangedField(fieldName, change.details(), mapped, usages));
+              proposalsForChangedField(fieldName, change.details(), mapped, usages, sourceType));
       case PRIMARY_KEY_CHANGED ->
           new ValidationIssue(
               ValidationIssueSupport.buildIssueId(IssueKind.PRIMARY_KEY_CHANGED, change),
@@ -246,9 +266,33 @@ public final class RemediationProposalSupport {
   }
 
   private static List<RemediationProposal> proposalsForChangedField(
-      String fieldName, String details, boolean mapped, List<SourceUsage> usages) {
+      String fieldName,
+      String details,
+      boolean mapped,
+      List<SourceUsage> usages,
+      String sourceType) {
     List<RemediationProposal> proposals = new ArrayList<>();
     String change = Utils.isEmpty(details) ? "" : details;
+    if (isSourceModelBacked(sourceType)) {
+      proposals.add(
+          new RemediationProposal(
+              ProposalType.REFRESH_CATALOG_CONTRACT,
+              BaseMessages.getString(
+                  PKG, "RemediationProposalSupport.RepublishSourceModel.Summary"),
+              BaseMessages.getString(
+                  PKG,
+                  "RemediationProposalSupport.RepublishSourceModel.Details",
+                  fieldName,
+                  change)));
+      if (mapped) {
+        proposals.add(
+            new RemediationProposal(
+                ProposalType.REVIEW_MAPPINGS,
+                BaseMessages.getString(PKG, "RemediationProposalSupport.ReviewMappings.Summary"),
+                formatUsageDetails(fieldName, usages)));
+      }
+      return proposals;
+    }
     LengthDirection direction = lengthDirection(change);
 
     // Catalog is never modified by remediation. The catalog length is the value used to expand
@@ -308,6 +352,14 @@ public final class RemediationProposalSupport {
               formatUsageDetails(fieldName, usages)));
     }
     return proposals;
+  }
+
+  static boolean isSourceModelBacked(String sourceType) {
+    if (Utils.isEmpty(sourceType)) {
+      return false;
+    }
+    String kind = sourceType.trim().toUpperCase(Locale.ROOT);
+    return "PIPELINE".equals(kind) || "JSON".equals(kind) || "COMPOSITE".equals(kind);
   }
 
   enum LengthDirection {

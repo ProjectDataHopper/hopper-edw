@@ -145,7 +145,7 @@ public final class SortedSchemaMergeLogic {
       IValueMeta rightMeta = right.getRowMeta().getValueMeta(rightFieldIndex);
       Object leftValue = left.getRowData()[leftFieldIndex];
       Object rightValue = right.getRowData()[rightFieldIndex];
-      int compare = leftMeta.compare(leftValue, rightMeta, rightValue);
+      int compare = compareSortValues(leftMeta, leftValue, rightMeta, rightValue);
       if (!sortKey.isAscending()) {
         compare = -compare;
       }
@@ -154,5 +154,32 @@ public final class SortedSchemaMergeLogic {
       }
     }
     return Integer.compare(left.getStreamIndex(), right.getStreamIndex());
+  }
+
+  /**
+   * String keys use {@link String#compareTo(String)} so merge order matches JDBC {@code ORDER BY}
+   * with a binary / {@code C} collation, not the JVM collator or the database locale.
+   */
+  static int compareSortValues(
+      IValueMeta leftMeta, Object leftValue, IValueMeta rightMeta, Object rightValue)
+      throws HopValueException {
+    if (leftMeta != null
+        && rightMeta != null
+        && leftMeta.getType() == IValueMeta.TYPE_STRING
+        && rightMeta.getType() == IValueMeta.TYPE_STRING) {
+      String leftString = leftMeta.getString(leftValue);
+      String rightString = rightMeta.getString(rightValue);
+      if (leftString == null && rightString == null) {
+        return 0;
+      }
+      if (leftString == null) {
+        return -1;
+      }
+      if (rightString == null) {
+        return 1;
+      }
+      return leftString.compareTo(rightString);
+    }
+    return leftMeta.compare(leftValue, rightMeta, rightValue);
   }
 }

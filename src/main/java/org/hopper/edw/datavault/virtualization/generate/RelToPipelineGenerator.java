@@ -65,6 +65,9 @@ import org.apache.hop.pipeline.transforms.selectvalues.SelectValuesMeta;
 import org.apache.hop.pipeline.transforms.sort.SortRowsField;
 import org.apache.hop.pipeline.transforms.sort.SortRowsMeta;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
+import org.hopper.edw.datavault.expression.SqlExpressionException;
+import org.hopper.edw.datavault.expression.SqlExpressionProgram;
+import org.hopper.edw.datavault.expression.SqlExpressionSpec;
 import org.hopper.edw.datavault.metadata.DvSourceType;
 import org.hopper.edw.datavault.metadata.DvSqlSupport;
 import org.hopper.edw.datavault.metadata.SourceField;
@@ -76,6 +79,8 @@ import org.hopper.edw.datavault.metadata.sourcemodel.SourcePipeline;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceQuery;
 import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceJsonPipelineGenerator;
 import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceQueryPipelineGenerator;
+import org.hopper.edw.datavault.transform.sqlexpression.SqlExpressionMeta;
+import org.hopper.edw.datavault.transform.sqlexpression.SqlExpressionMetaFactory;
 import org.hopper.edw.datavault.virtualization.calcite.HopTypeSystem;
 import org.hopper.edw.datavault.virtualization.calcite.SourceModelJsonTable;
 import org.hopper.edw.datavault.virtualization.calcite.SourceModelPipelineTable;
@@ -496,6 +501,10 @@ public final class RelToPipelineGenerator {
     if (allSimpleRefs) {
       return convertSimpleProject(project, input, ctx, location, projects, fieldNames, inputNames);
     }
+    if (projects.stream().anyMatch(e -> !calculatorSupported(e))) {
+      return convertSqlExpressionProject(
+          project, input, ctx, location, projects, fieldNames, inputNames);
+    }
     return convertExpressionProject(
         project, input, ctx, location, projects, fieldNames, inputNames);
   }
@@ -547,6 +556,134 @@ public final class RelToPipelineGenerator {
     ctx.pipelineMeta.addPipelineHop(new PipelineHopMeta(input, select));
     ctx.residualOps.add("Project → Select Values");
     return select;
+  }
+
+  private static TransformMeta convertSqlExpressionProject(
+      Project project,
+      TransformMeta input,
+      GenerationContext ctx,
+      Point location,
+      List<RexNode> projects,
+      List<String> fieldNames,
+      List<String> inputNames)
+      throws SourceModelSqlException {
+    List<SqlExpressionSpec> specs = new ArrayList<>();
+    List<SelectField> finalSelect = new ArrayList<>();
+    for (int i = 0; i < projects.size(); i++) {
+      RexNode expr = projects.get(i);
+      String outputName = fieldNames.get(i);
+      if (expr instanceof RexInputRef ref) {
+        SelectField field = new SelectField();
+        field.setName(inputNames.get(ref.getIndex()));
+        if (!inputNames.get(ref.getIndex()).equals(outputName)) {
+          field.setRename(outputName);
+        }
+        finalSelect.add(field);
+        continue;
+      }
+      SqlExpressionSpec spec = new SqlExpressionSpec();
+      spec.setFieldName(outputName);
+      spec.setExpression(RexToSqlExpression.toSql(expr, inputNames));
+      applyInferredType(spec, expr);
+      specs.add(spec);
+      SelectField field = new SelectField();
+      field.setName(outputName);
+      finalSelect.add(field);
+    }
+
+    try {
+      SqlExpressionProgram.compile(
+          specs, HopTypeSystem.toRowMeta(project.getInput().getRowType()), ctx.variables);
+    } catch (SqlExpressionException e) {
+      throw new SourceModelSqlException(
+          "Unsupported residual expression: "
+              + e.getMessage()
+              + ". "
+              + SupportedSqlFeatures.SUMMARY,
+          e);
+    }
+
+    SqlExpressionMeta sqlMeta = SqlExpressionMetaFactory.create(specs);
+    String sqlName = uniqueName(ctx, "SQL Expression");
+    TransformMeta sqlTransform = new TransformMeta("SqlExpression", sqlName, sqlMeta);
+    sqlTransform.setLocation(location.x, location.y);
+    ctx.pipelineMeta.addTransform(sqlTransform);
+    ctx.pipelineMeta.addPipelineHop(new PipelineHopMeta(input, sqlTransform));
+    ctx.residualOps.add("Project expressions → SQL Expression (" + specs.size() + ")");
+
+    SelectValuesMeta selectMeta = new SelectValuesMeta();
+    selectMeta.getSelectOption().setSelectFields(finalSelect);
+    selectMeta.getSelectOption().setSelectingAndSortingUnspecifiedFields(false);
+    String name = uniqueName(ctx, "Project");
+    TransformMeta select = new TransformMeta("SelectValues", name, selectMeta);
+    select.setLocation(location.x + 160, location.y);
+    ctx.pipelineMeta.addTransform(select);
+    ctx.pipelineMeta.addPipelineHop(new PipelineHopMeta(sqlTransform, select));
+    ctx.residualOps.add("Project → Select Values");
+    return select;
+  }
+
+  private static void applyInferredType(SqlExpressionSpec spec, RexNode expr) {
+    if (expr == null || expr.getType() == null) {
+      return;
+    }
+    try {
+      int hopType = HopTypeSystem.toHopType(expr.getType());
+      spec.setHopTypeName(ValueMetaFactory.getValueMetaName(hopType));
+      spec.setLength(HopTypeSystem.toHopLength(expr.getType()));
+      spec.setPrecision(HopTypeSystem.toHopScale(expr.getType()));
+    } catch (Exception ignored) {
+      // Keep Calcite-inferred types from the SQL Expression compiler.
+    }
+  }
+
+  /**
+   * Calculator residual path: column refs, literals, {@code + - * /}, 2-arg COALESCE/NVL, and CAST
+   * wrappers around those operators. Root CAST of a column/literal, CASE, and N-arg COALESCE use
+   * {@link #convertSqlExpressionProject}.
+   */
+  private static boolean calculatorSupported(RexNode expr) {
+    return calculatorSupported(expr, false);
+  }
+
+  private static boolean calculatorSupported(RexNode expr, boolean unwrapCast) {
+    if (expr instanceof RexInputRef || expr instanceof RexLiteral) {
+      return true;
+    }
+    if (!(expr instanceof RexCall call)) {
+      return false;
+    }
+    SqlKind kind = call.getKind();
+    if (kind == SqlKind.CAST && call.getOperands().size() == 1) {
+      RexNode inner = call.getOperands().get(0);
+      if (unwrapCast) {
+        return calculatorSupported(inner, true);
+      }
+      // Coercion CAST around arithmetic/NVL stays on Calculator; CAST(column) is SQL Expression.
+      return inner instanceof RexCall innerCall
+          && isCalculatorOperator(innerCall.getKind())
+          && calculatorSupported(inner, true);
+    }
+    if ((kind == SqlKind.COALESCE || kind == SqlKind.NVL) && call.getOperands().size() == 2) {
+      return calculatorSupported(call.getOperands().get(0), true)
+          && calculatorSupported(call.getOperands().get(1), true);
+    }
+    if (isArithmetic(kind) && call.getOperands().size() == 2) {
+      return calculatorSupported(call.getOperands().get(0), true)
+          && calculatorSupported(call.getOperands().get(1), true);
+    }
+    return false;
+  }
+
+  private static boolean isCalculatorOperator(SqlKind kind) {
+    return isArithmetic(kind) || kind == SqlKind.COALESCE || kind == SqlKind.NVL;
+  }
+
+  private static boolean isArithmetic(SqlKind kind) {
+    return kind == SqlKind.PLUS
+        || kind == SqlKind.MINUS
+        || kind == SqlKind.TIMES
+        || kind == SqlKind.DIVIDE;
   }
 
   private static TransformMeta convertExpressionProject(
@@ -612,7 +749,7 @@ public final class RelToPipelineGenerator {
 
   /**
    * Emits Calculator steps for a residual expression. Returns the output field name produced.
-   * Supports column refs, literals, + - * /, and COALESCE/NVL of two args.
+   * Supports column refs, literals, + - * /, 2-arg COALESCE/NVL, and CAST pass-through of those.
    */
   private static String emitExpression(
       RexNode expr,

@@ -22,7 +22,9 @@ import java.util.Set;
 import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 
 /**
  * Design-time checks for a single {@link SourceJson} (dialog Validate and model check). Catches
@@ -45,6 +47,15 @@ public final class SourceJsonValidationSupport {
    */
   public static List<ICheckResult> check(
       SourceJson jsonSource, SourceModel model, Set<String> knownJsonNames) {
+    return check(jsonSource, model, knownJsonNames, null, null);
+  }
+
+  public static List<ICheckResult> check(
+      SourceJson jsonSource,
+      SourceModel model,
+      Set<String> knownJsonNames,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider) {
     List<ICheckResult> remarks = new ArrayList<>();
     if (jsonSource == null) {
       return remarks;
@@ -224,6 +235,8 @@ public final class SourceJsonValidationSupport {
                   PKG, "SourceModel.CheckResult.JsonSourceParentCycle", nvl(jsonName)),
               null));
     }
+    remarks.addAll(
+        SourceCatalogPublishSyncSupport.checkJson(model, jsonSource, variables, metadataProvider));
     return remarks;
   }
 

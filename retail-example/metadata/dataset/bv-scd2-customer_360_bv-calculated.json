@@ -1,0 +1,126 @@
+{
+  "base_filename": "bv-scd2-customer_360_bv-calculated.csv",
+  "name": "bv-scd2-customer_360_bv-calculated",
+  "description": "Calculated SCD2 golden for customer_360_bv",
+  "dataset_fields": [
+    {
+      "field_comment": "customer_hk",
+      "field_length": 63,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "customer_hk"
+    },
+    {
+      "field_comment": "segment",
+      "field_length": 20,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "cust_segment"
+    },
+    {
+      "field_comment": "loyalty_tier",
+      "field_length": 20,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "cust_loyalty_tier"
+    },
+    {
+      "field_comment": "demo_score",
+      "field_length": 4,
+      "field_type": 5,
+      "field_precision": 0,
+      "field_name": "cust_demo_score",
+      "field_format": "####0;-####0"
+    },
+    {
+      "field_comment": "email",
+      "field_length": 50,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "cust_email"
+    },
+    {
+      "field_comment": "phone",
+      "field_length": 20,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "cust_phone"
+    },
+    {
+      "field_comment": "address_line1",
+      "field_length": 50,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "cust_address"
+    },
+    {
+      "field_comment": "city",
+      "field_length": 50,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "cust_city"
+    },
+    {
+      "field_comment": "postal_code",
+      "field_length": 10,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "cust_postal_code"
+    },
+    {
+      "field_comment": "newsletter_opt_in",
+      "field_length": 1,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "cust_newsletter"
+    },
+    {
+      "field_comment": "preferred_channel",
+      "field_length": 10,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "cust_channel"
+    },
+    {
+      "field_comment": "language_code",
+      "field_length": 5,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "cust_language"
+    },
+    {
+      "field_comment": "x_load_ts",
+      "field_length": 6,
+      "field_type": 9,
+      "field_precision": -1,
+      "field_name": "x_from_ts"
+    },
+    {
+      "field_comment": "x_load_ts",
+      "field_length": 6,
+      "field_type": 9,
+      "field_precision": -1,
+      "field_name": "x_to_ts"
+    },
+    {
+      "field_length": 0,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "x_record_source"
+    },
+    {
+      "field_comment": "x_load_ts",
+      "field_length": 6,
+      "field_type": 9,
+      "field_precision": -1,
+      "field_name": "x_load_ts"
+    },
+    {
+      "field_length": 2,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "online_indicator"
+    }
+  ],
+  "folder_name": "${HOP_DATASETS_FOLDER}"
+}

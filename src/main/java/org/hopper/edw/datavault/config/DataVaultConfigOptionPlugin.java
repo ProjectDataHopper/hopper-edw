@@ -74,6 +74,8 @@ public class DataVaultConfigOptionPlugin
       "10100-live-update-poll-interval-seconds";
   private static final String WIDGET_ID_SCHEMA_REMEDIATION_FOLDER =
       "10110-schema-remediation-folder";
+  private static final String WIDGET_ID_REMIND_UNPUBLISHED_CATALOG_ON_SAVE =
+      "10120-remind-unpublished-catalog-on-save";
 
   @GuiWidgetElement(
       id = WIDGET_ID_DRAW_HASH_KEYS_IN_MODEL,
@@ -209,6 +211,18 @@ public class DataVaultConfigOptionPlugin
       description = "Root folder for schema-remediation packages (workflow, SQL, HTML/MD report)")
   private String schemaRemediationFolder;
 
+  @GuiWidgetElement(
+      id = WIDGET_ID_REMIND_UNPUBLISHED_CATALOG_ON_SAVE,
+      parentId = ConfigPluginOptionsTab.GUI_WIDGETS_PARENT_ID,
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::DataVaultConfigOptionPlugin.RemindUnpublishedCatalogOnSave.Message",
+      toolTip = "i18n::DataVaultConfigOptionPlugin.RemindUnpublishedCatalogOnSave.ToolTip")
+  @CommandLine.Option(
+      names = {"--dv-remind-unpublished-catalog-on-save"},
+      description =
+          "When true (default), saving a source model asks to publish catalog feeds that lag the canvas")
+  private Boolean remindUnpublishedCatalogOnSourceModelSave;
+
   public static DataVaultConfigOptionPlugin getInstance() {
     DataVaultConfigOptionPlugin instance = new DataVaultConfigOptionPlugin();
     DataVaultConfig config = DataVaultConfigSingleton.getConfig();
@@ -228,6 +242,8 @@ public class DataVaultConfigOptionPlugin
     instance.liveUpdatePollIntervalSeconds =
         Integer.toString(config.getLiveUpdatePollIntervalSeconds());
     instance.schemaRemediationFolder = config.getSchemaRemediationFolderOrDefault();
+    instance.remindUnpublishedCatalogOnSourceModelSave =
+        config.isRemindUnpublishedCatalogOnSourceModelSave();
     return instance;
   }
 
@@ -276,6 +292,15 @@ public class DataVaultConfigOptionPlugin
             "Set live model-update poll interval to "
                 + config.getLiveUpdatePollIntervalSeconds()
                 + " seconds");
+        changed = true;
+      }
+      if (remindUnpublishedCatalogOnSourceModelSave != null) {
+        config.setRemindUnpublishedCatalogOnSourceModelSave(
+            remindUnpublishedCatalogOnSourceModelSave);
+        log.logBasic(
+            remindUnpublishedCatalogOnSourceModelSave
+                ? "Enabled reminder to publish stale catalog feeds when saving a source model"
+                : "Disabled reminder to publish stale catalog feeds when saving a source model");
         changed = true;
       }
       if (changed) {
@@ -365,6 +390,11 @@ public class DataVaultConfigOptionPlugin
         case WIDGET_ID_SCHEMA_REMEDIATION_FOLDER:
           schemaRemediationFolder = getTextValue(control);
           config.setSchemaRemediationFolder(schemaRemediationFolder);
+          break;
+        case WIDGET_ID_REMIND_UNPUBLISHED_CATALOG_ON_SAVE:
+          remindUnpublishedCatalogOnSourceModelSave = ((Button) control).getSelection();
+          config.setRemindUnpublishedCatalogOnSourceModelSave(
+              remindUnpublishedCatalogOnSourceModelSave);
           break;
         default:
           break;

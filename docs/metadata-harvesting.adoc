@@ -91,6 +91,8 @@ Optional Markdown report path (Hop VFS folder or `.md` file). The action also se
 | `schema_harvest_change` | Diff events (field ADDED/REMOVED/CHANGED, PRIMARY_KEY_CHANGED, FOREIGN_KEY_*, severity)
 |===
 
+Harvest compares the catalog **effective** layout (after link:data-type-mappings.adoc[data type mappings]) to rediscovered source projections. PIPELINE, JSON, and COMPOSITE feeds reload attached mapping profiles on rediscovery, so a mapped default String length is not reported as `FIELD_TYPE_CHANGED` against a physical String with no length.
+
 === Primary keys and foreign keys
 
 * **PK drift** — catalog field `primaryKeyPosition` vs live key composition (`PRIMARY_KEY_CHANGED`, typically **BLOCKING**).

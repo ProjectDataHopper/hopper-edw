@@ -42,6 +42,61 @@ INTEGRATION_TESTS_DIR="${REPO_ROOT}/integration-tests"
 METRICS_OVERVIEW_CSV="${INTEGRATION_TESTS_DIR}/metrics/metrics-overview.csv"
 COLLECT_METRICS_PIPELINE="${WORKSPACE_PREFIX}/integration-tests/tests/shared/collect-metrics-results.hpl"
 
+# Map a container metrics folder (/workspace/...) to the host path.
+host_metrics_dir() {
+  container_or_host="${1:-}"
+  case "${container_or_host}" in
+    "${WORKSPACE_PREFIX}"/*)
+      printf '%s/%s\n' "${REPO_ROOT}" "${container_or_host#${WORKSPACE_PREFIX}/}"
+      ;;
+    *)
+      printf '%s\n' "${container_or_host}"
+      ;;
+  esac
+}
+
+# Write a synthetic DV-metrics JSON so collect-metrics-results.hpl includes the Hop
+# workflow/orchestrator result. Table-level success is only "this load pipeline had 0 errors".
+write_hop_run_metrics() {
+  metrics_dir="$(host_metrics_dir "${1:-}")"
+  hop_ok="${2:-false}"
+  hop_exit="${3:-1}"
+  workflow="${4:-unknown}"
+  if [ -z "${metrics_dir}" ]; then
+    return 0
+  fi
+  mkdir -p "${metrics_dir}"
+  python3 - "${metrics_dir}/_hop-run.json" "${hop_ok}" "${hop_exit}" "${workflow}" <<'PY'
+import json
+import sys
+
+path, ok, code_s, workflow = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+success = ok.lower() in ("true", "1", "yes", "y")
+try:
+    code = int(code_s)
+except ValueError:
+    code = 1 if not success else 0
+doc = {
+    "pipelines": [
+        {
+            "modelName": "_hop-run",
+            "tableName": workflow,
+            "tableType": "suite",
+            "sourceName": "",
+            "sourceRowsRead": 0,
+            "targetRowsInserted": 0,
+            "targetRowsRead": 0,
+            "errors": 0 if success else max(code, 1),
+            "success": success,
+        }
+    ]
+}
+with open(path, "w", encoding="utf-8") as handle:
+    json.dump(doc, handle, indent=2)
+    handle.write("\n")
+PY
+}
+
 hop_project_host_dir() {
   printf '%s/%s\n' "${REPO_ROOT}" "${HOP_PROJECT_DIR}"
 }
@@ -497,13 +552,64 @@ rows = list(csv.reader(path.open(encoding="utf-8")))
 if not rows:
     sys.exit(0)
 
-widths = [max(len(row[i]) for row in rows) for i in range(len(rows[0]))]
-for row in rows:
-    print("  ".join(row[i].ljust(widths[i]) for i in range(len(row))))
+header = rows[0]
+data = rows[1:]
 
-data_rows = max(len(rows) - 1, 0)
+def col(*names):
+    lower = [n.lower() for n in header]
+    for name in names:
+        if name.lower() in lower:
+            return lower.index(name.lower())
+    return None
+
+idx_model = col("modelName", "model")
+idx_success = col("success")
+idx_errors = col("errors")
+
+def is_false_success(row):
+    if idx_success is None or idx_success >= len(row):
+        return False
+    return row[idx_success].strip().lower() not in ("true", "y", "yes", "1")
+
+def has_errors(row):
+    if idx_errors is None or idx_errors >= len(row):
+        return False
+    text = row[idx_errors].strip()
+    if not text:
+        return False
+    try:
+        return int(float(text)) > 0
+    except ValueError:
+        return text.lower() not in ("0", "false", "n", "")
+
+def is_suite(row):
+    return idx_model is not None and idx_model < len(row) and row[idx_model] == "_hop-run"
+
+ordered = [row for row in data if is_suite(row)] + [row for row in data if not is_suite(row)]
+display = [header] + ordered
+widths = [max(len(row[i]) if i < len(row) else 0 for row in display) for i in range(len(header))]
+for row in display:
+    padded = [(row[i] if i < len(row) else "") for i in range(len(header))]
+    print("  ".join(padded[i].ljust(widths[i]) for i in range(len(header))))
+
+failures = [row for row in data if is_false_success(row) or has_errors(row)]
 print("")
-print(f"Rows: {data_rows}  File: {path}")
+print(
+    "Table-level success is only 'this Data Vault/Business Vault load pipeline had 0 Hop errors'."
+)
+print(
+    "Golden unit tests, Check model aborts, and workflow failures are the _hop-run / suite row."
+)
+if failures:
+    print("")
+    print(f"*** {len(failures)} FAILURE ROW(S) ***")
+    for row in failures:
+        print("  " + ",".join(row))
+else:
+    print("No failure rows in this CSV (suite row success=true and load errors=0).")
+
+print("")
+print(f"Rows: {len(data)}  File: {path}")
 PY
 }
 
@@ -539,5 +645,12 @@ run_hop_docker_short_lived() {
   fi
   run_exit=$?
   set -e
+  if [ "${HOP_PROJECT_DIR}" = "integration-tests" ]; then
+    if [ "${run_exit}" -eq 0 ]; then
+      write_hop_run_metrics "${metrics_folder}" true 0 "${hop_file_path}"
+    else
+      write_hop_run_metrics "${metrics_folder}" false "${run_exit}" "${hop_file_path}"
+    fi
+  fi
   return "${run_exit}"
 }

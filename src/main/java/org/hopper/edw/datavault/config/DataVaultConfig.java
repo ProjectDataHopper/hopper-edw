@@ -50,6 +50,12 @@ public class DataVaultConfig {
    */
   private boolean warnTimestampFractionalPrecisionLoss = true;
 
+  /**
+   * When true (default), saving a source model ({@code .hsm}) that has published catalog feeds
+   * behind the canvas asks whether to publish. {@code null} in stored Hop config means default on.
+   */
+  private Boolean remindUnpublishedCatalogOnSourceModelSave;
+
   private int maxUndoOperations = DEFAULT_MAX_UNDO_OPERATIONS;
   private DmDefaultFieldNames dimensionalDefaultFieldNames = new DmDefaultFieldNames();
   private ElkLayout elkLayout = ElkLayout.createDefault();
@@ -71,6 +77,8 @@ public class DataVaultConfig {
     drawingHashKeysInModel = config.drawingHashKeysInModel;
     enforceTargetUnicodeCapability = config.enforceTargetUnicodeCapability;
     warnTimestampFractionalPrecisionLoss = config.warnTimestampFractionalPrecisionLoss;
+    remindUnpublishedCatalogOnSourceModelSave =
+        config.isRemindUnpublishedCatalogOnSourceModelSave();
     suppressLocalCatalogOffer = config.suppressLocalCatalogOffer;
     setMaxUndoOperations(config.maxUndoOperations);
     setDimensionalDefaultFieldNames(
@@ -81,6 +89,16 @@ public class DataVaultConfig {
     setLiveUpdatePollIntervalSeconds(config.getLiveUpdatePollIntervalSeconds());
     setExecutionMapLineStyle(config.getExecutionMapLineStyleOrDefault());
     setSchemaRemediationFolder(config.getSchemaRemediationFolderOrDefault());
+  }
+
+  public boolean isRemindUnpublishedCatalogOnSourceModelSave() {
+    return remindUnpublishedCatalogOnSourceModelSave == null
+        || remindUnpublishedCatalogOnSourceModelSave;
+  }
+
+  public void setRemindUnpublishedCatalogOnSourceModelSave(
+      boolean remindUnpublishedCatalogOnSourceModelSave) {
+    this.remindUnpublishedCatalogOnSourceModelSave = remindUnpublishedCatalogOnSourceModelSave;
   }
 
   public String getSchemaRemediationFolderOrDefault() {

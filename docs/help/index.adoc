@@ -180,6 +180,9 @@ Guides for the same features live in the parent folder (link:../index.adoc[docum
 |link:sorted-schema-merge-dialog.adoc[sorted-schema-merge-dialog]
 |Sorted schema merge
 
+|link:sql-expression-dialog.adoc[sql-expression-dialog]
+|SQL Expression
+
 |link:source-json-dialog.adoc[source-json-dialog]
 |Source JSON
 

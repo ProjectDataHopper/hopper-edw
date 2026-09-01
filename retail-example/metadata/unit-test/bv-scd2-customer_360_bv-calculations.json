@@ -1,0 +1,196 @@
+{
+  "database_replacements": [],
+  "autoOpening": true,
+  "description": "SCD2 calculation unit test for customer_360_bv",
+  "test_type": "UNIT_TEST",
+  "variableValues": [],
+  "basePath": "${HOP_UNIT_TESTS_FOLDER}",
+  "golden_data_sets": [
+    {
+      "field_mappings": [
+        {
+          "transform_field": "customer_hk",
+          "data_set_field": "customer_hk"
+        },
+        {
+          "transform_field": "cust_segment",
+          "data_set_field": "cust_segment"
+        },
+        {
+          "transform_field": "cust_loyalty_tier",
+          "data_set_field": "cust_loyalty_tier"
+        },
+        {
+          "transform_field": "cust_demo_score",
+          "data_set_field": "cust_demo_score"
+        },
+        {
+          "transform_field": "cust_email",
+          "data_set_field": "cust_email"
+        },
+        {
+          "transform_field": "cust_phone",
+          "data_set_field": "cust_phone"
+        },
+        {
+          "transform_field": "cust_address",
+          "data_set_field": "cust_address"
+        },
+        {
+          "transform_field": "cust_city",
+          "data_set_field": "cust_city"
+        },
+        {
+          "transform_field": "cust_postal_code",
+          "data_set_field": "cust_postal_code"
+        },
+        {
+          "transform_field": "cust_newsletter",
+          "data_set_field": "cust_newsletter"
+        },
+        {
+          "transform_field": "cust_channel",
+          "data_set_field": "cust_channel"
+        },
+        {
+          "transform_field": "cust_language",
+          "data_set_field": "cust_language"
+        },
+        {
+          "transform_field": "x_from_ts",
+          "data_set_field": "x_from_ts"
+        },
+        {
+          "transform_field": "x_to_ts",
+          "data_set_field": "x_to_ts"
+        },
+        {
+          "transform_field": "x_record_source",
+          "data_set_field": "x_record_source"
+        },
+        {
+          "transform_field": "x_load_ts",
+          "data_set_field": "x_load_ts"
+        },
+        {
+          "transform_field": "online_indicator",
+          "data_set_field": "online_indicator"
+        }
+      ],
+      "field_order": [
+        "customer_hk",
+        "cust_segment",
+        "cust_loyalty_tier",
+        "cust_demo_score",
+        "cust_email",
+        "cust_phone",
+        "cust_address",
+        "cust_city",
+        "cust_postal_code",
+        "cust_newsletter",
+        "cust_channel",
+        "cust_language",
+        "x_from_ts",
+        "x_to_ts",
+        "x_record_source",
+        "x_load_ts",
+        "online_indicator"
+      ],
+      "data_set_name": "bv-scd2-customer_360_bv-calculated",
+      "transform_name": "calculated_out"
+    }
+  ],
+  "input_data_sets": [
+    {
+      "field_mappings": [
+        {
+          "transform_field": "customer_hk",
+          "data_set_field": "customer_hk"
+        },
+        {
+          "transform_field": "cust_segment",
+          "data_set_field": "cust_segment"
+        },
+        {
+          "transform_field": "cust_loyalty_tier",
+          "data_set_field": "cust_loyalty_tier"
+        },
+        {
+          "transform_field": "cust_demo_score",
+          "data_set_field": "cust_demo_score"
+        },
+        {
+          "transform_field": "cust_email",
+          "data_set_field": "cust_email"
+        },
+        {
+          "transform_field": "cust_phone",
+          "data_set_field": "cust_phone"
+        },
+        {
+          "transform_field": "cust_address",
+          "data_set_field": "cust_address"
+        },
+        {
+          "transform_field": "cust_city",
+          "data_set_field": "cust_city"
+        },
+        {
+          "transform_field": "cust_postal_code",
+          "data_set_field": "cust_postal_code"
+        },
+        {
+          "transform_field": "cust_newsletter",
+          "data_set_field": "cust_newsletter"
+        },
+        {
+          "transform_field": "cust_channel",
+          "data_set_field": "cust_channel"
+        },
+        {
+          "transform_field": "cust_language",
+          "data_set_field": "cust_language"
+        },
+        {
+          "transform_field": "x_from_ts",
+          "data_set_field": "x_from_ts"
+        },
+        {
+          "transform_field": "x_to_ts",
+          "data_set_field": "x_to_ts"
+        },
+        {
+          "transform_field": "x_record_source",
+          "data_set_field": "x_record_source"
+        },
+        {
+          "transform_field": "x_load_ts",
+          "data_set_field": "x_load_ts"
+        }
+      ],
+      "field_order": [
+        "customer_hk",
+        "cust_segment",
+        "cust_loyalty_tier",
+        "cust_demo_score",
+        "cust_email",
+        "cust_phone",
+        "cust_address",
+        "cust_city",
+        "cust_postal_code",
+        "cust_newsletter",
+        "cust_channel",
+        "cust_language",
+        "x_from_ts",
+        "x_to_ts",
+        "x_record_source",
+        "x_load_ts"
+      ],
+      "data_set_name": "bv-scd2-customer_360_bv-collapse",
+      "transform_name": "collapse_sample"
+    }
+  ],
+  "name": "bv-scd2-customer_360_bv-calculations",
+  "trans_test_tweaks": [],
+  "pipeline_filename": "test/test-scd2-calc-customer_360_bv.hpl"
+}

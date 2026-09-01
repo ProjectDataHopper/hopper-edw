@@ -91,6 +91,24 @@ Optional per-satellite settings for multi-satellite merges:
 
 If a derivative satellite has **Store record source indicator** unchecked, generated satellite `TableInput` SQL does not select the vault record-source column. The BV table still receives a record-source value from this config (or the satellite name).
 
+== Calculations
+
+Optional SQL scalars applied **after** collapse. **Add** / **Edit** / double-click opens the SQL expression editor: result field name, type, length, precision, and description as widgets; a large SQL box; Fields and Patterns (`CASE WHEN`, `COALESCE`, `CAST`, …) insert at the caret.
+
+Target names must be new columns. Expressions do not drive new SCD2 versions.
+
+See link:../business-vault-scd2.adoc[Business Vault SCD2] and link:sql-expression-dialog.adoc[SQL Expression].
+
+== Tests
+
+When calculations are ready, **Generate unit test...** (or the table context action **Generate calculation unit test**) creates a Hop pipeline unit test: input data set of collapsed rows, golden calculated rows, and a slim pipeline whose SQL Expression transform is linked to this table. Optionally sample 100 warehouse rows into those data sets. Production SCD2 loads are not sampled.
+
+image::../images/generate-calculations-unit-test-scd2-context-action.png[SCD2 table context menu — Generate calculation unit test,align="center"]
+
+image::../images/generate-calculations-unit-test-scd2-confirmation-dialog.png[Sample warehouse rows confirmation — 100 reservoir-sampled collapsed rows,align="center"]
+
+image::../images/generate-calculations-unit-test-scd2-completion-report.png[Calculation unit test completion report with pipeline and data set names,align="center"]
+
 == Type 1 vs Type 2 (important)
 
 **This dialog builds pure SCD Type 2 only.** Every mapped business attribute is carried on version rows; history is not rewritten when a “current” value changes later.

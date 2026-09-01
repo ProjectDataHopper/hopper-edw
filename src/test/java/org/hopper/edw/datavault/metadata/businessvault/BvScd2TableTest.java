@@ -105,6 +105,38 @@ class BvScd2TableTest {
   }
 
   @Test
+  void xmlRoundTripPreservesCalculationsAndTests() throws Exception {
+    BvScd2Table original = new BvScd2Table();
+    original.setName("customer_bv");
+    BvScd2Calculation calculation =
+        new BvScd2Calculation(
+            "x_date", "CASE WHEN deleted_flag = 'Y' THEN NULL ELSE event_date END");
+    original.getCalculations().add(calculation);
+    BvScd2CalculationTestCase testCase = new BvScd2CalculationTestCase("deleted-nulls-date");
+    testCase.getInputs().add(new BvScd2NamedValue("deleted_flag", "Y"));
+    testCase.getExpected().add(new BvScd2NamedValue("x_date", ""));
+    original.getCalculationTests().add(testCase);
+    original
+        .getCollapseTests()
+        .add(
+            new BvScd2CollapseTestCase(
+                "wave1", "${PROJECT_HOME}/in.csv", "${PROJECT_HOME}/out.csv"));
+
+    String xml = XmlHandler.aroundTag("table", XmlMetadataUtil.serializeObjectToXml(original));
+    Document document = XmlHandler.loadXmlString(xml);
+    Node rootNode = XmlHandler.getSubNode(document, "table");
+    BvScd2Table restored = new BvScd2Table();
+    XmlMetadataUtil.deSerializeFromXml(rootNode, BvScd2Table.class, restored, null);
+
+    assertEquals(1, restored.getCalculations().size());
+    assertEquals("x_date", restored.getCalculations().get(0).getTargetFieldName());
+    assertEquals(1, restored.getCalculationTests().size());
+    assertEquals("deleted-nulls-date", restored.getCalculationTests().get(0).getName());
+    assertEquals(1, restored.getCollapseTests().size());
+    assertEquals("wave1", restored.getCollapseTests().get(0).getName());
+  }
+
+  @Test
   void hashKeyPartitionWithIncrementalIsError() {
     BvScd2Table table = new BvScd2Table();
     table.setName("customer_bv");

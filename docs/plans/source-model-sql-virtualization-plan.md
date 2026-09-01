@@ -381,7 +381,7 @@ Resource definition rediscovery:
 |----|--------|--------|
 | **B1** | Aggregates → GroupBy residual; full pushdown via RelToSql | Done |
 | **B2** | SourceJson / SourcePipeline as Calcite tables + residual expansion | Done |
-| **B3** | Residual Calculator for `+ - * /`, COALESCE/NVL, CAST pass-through; CASE via full pushdown | Done (residual CASE deferred) |
+| **B3** | Residual Calculator for `+ - * /`, 2-arg COALESCE/NVL; residual CASE / CAST / N-arg COALESCE via SQL Expression | Done |
 | **B4** | Unify visual query → Rel builder (optional) | Deferred |
 
 ### Phase C — Runtime transform + polish — **mostly implemented**

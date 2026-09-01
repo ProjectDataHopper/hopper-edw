@@ -270,6 +270,9 @@ image::images/hopgui-configuration-perspecive-data-vault-options.png[Hop GUI Dat
 |Warn when timestamp fractional precision is reduced
 |When enabled (**default**), model check reports a **warning** if a source date/time has more fractional-second digits than the target layout or engine allows (for example nanosecond timestamps stored as SingleStore/MySQL `DATETIME(6)` microseconds — the best available mapping). Never an error. Disable when truncation is accepted.
 
+|Remind to publish catalog feeds when saving a source model
+|When enabled (**default**), saving a `.hsm` file compares published catalog feeds to the canvas (effective layout, including data type mappings). If any published feed is stale, a dialog asks whether to publish those feeds. **Don't remind me after save** turns this option off; re-enable it here.
+
 |Maximum undo/redo operations kept in memory
 |Number of gzip-compressed XML snapshots kept for undo/redo on `.hdv` files (default 200). Older snapshots are discarded when the limit is exceeded.
 |===

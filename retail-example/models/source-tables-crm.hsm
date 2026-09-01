@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-     http://www.apache.org/licenses/LICENSE-2.0
+      http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,11 +16,6 @@ limitations under the License.
 <source-model>
   <name_sync_with_filename>Y</name_sync_with_filename>
   <configurationName>source-model</configurationName>
-  <configuration>
-    <defaultDatabase>CRM</defaultDatabase>
-    <defaultSchema>public</defaultSchema>
-    <catalogConnection>local-catalog</catalogConnection>
-  </configuration>
   <tables>
     <table>
       <catalogSourceName>customer_address</catalogSourceName>
@@ -1448,14 +1443,14 @@ INNER JOIN order_shipment_tracking e ON o.order_id = e.order_id</freeSql>
       <columns>
         <column>
           <name>asn_id</name>
-          <length/>
+          <length>9</length>
           <precision/>
           <hopType>2</hopType>
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
         <column>
           <name>warehouse_id</name>
-          <length/>
+          <length>7</length>
           <precision>0</precision>
           <hopType>5</hopType>
           <primaryKeyPosition>0</primaryKeyPosition>
@@ -1469,14 +1464,14 @@ INNER JOIN order_shipment_tracking e ON o.order_id = e.order_id</freeSql>
         </column>
         <column>
           <name>order_id</name>
-          <length/>
+          <length>7</length>
           <precision/>
           <hopType>2</hopType>
           <primaryKeyPosition>0</primaryKeyPosition>
         </column>
         <column>
           <name>customer_id</name>
-          <length/>
+          <length>7</length>
           <precision>0</precision>
           <hopType>5</hopType>
           <primaryKeyPosition>0</primaryKeyPosition>
@@ -1497,7 +1492,7 @@ INNER JOIN order_shipment_tracking e ON o.order_id = e.order_id</freeSql>
         </column>
         <column>
           <name>package_id</name>
-          <length/>
+          <length>7</length>
           <precision/>
           <hopType>2</hopType>
           <primaryKeyPosition>0</primaryKeyPosition>
@@ -1525,7 +1520,7 @@ INNER JOIN order_shipment_tracking e ON o.order_id = e.order_id</freeSql>
         </column>
         <column>
           <name>product_id</name>
-          <length/>
+          <length>7</length>
           <precision/>
           <hopType>2</hopType>
           <primaryKeyPosition>0</primaryKeyPosition>

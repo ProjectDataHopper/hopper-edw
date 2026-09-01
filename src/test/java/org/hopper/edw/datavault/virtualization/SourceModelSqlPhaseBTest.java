@@ -30,7 +30,9 @@ import org.hopper.edw.datavault.metadata.sourcemodel.SourceJson;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceJsonField;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
+import org.hopper.edw.datavault.transform.sqlexpression.SqlExpressionMeta;
 import org.hopper.edw.datavault.virtualization.sql.SourceModelSqlEngine;
+import org.hopper.edw.datavault.virtualization.sql.SourceModelSqlOptions;
 import org.hopper.edw.datavault.virtualization.sql.SourceModelSqlPlan;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -156,6 +158,151 @@ class SourceModelSqlPhaseBTest {
         plan.explainText());
     // Residual plan should include JSON expansion subgraph and a join.
     assertTrue(plan.pipelineMeta().nrTransforms() > 1, plan.explainText());
+  }
+
+  @Test
+  void residualCaseWhenEmitsSqlExpression() throws Exception {
+    SourceModelSqlPlan plan =
+        residualPlan(
+            "SELECT order_id, CASE WHEN city = 'Paris' THEN amount ELSE 0 END AS x_amt FROM orders");
+
+    assertFalse(plan.fullPushdown(), plan.explainText());
+    SqlExpressionMeta sqlMeta = findSqlExpression(plan);
+    assertNotNull(sqlMeta, plan.explainText());
+    assertTrue(
+        sqlMeta.getFields().stream()
+            .anyMatch(
+                f -> f.getExpression() != null && f.getExpression().toUpperCase().contains("CASE")),
+        plan.explainText());
+    assertTrue(
+        plan.residualOperators().stream().anyMatch(s -> s.toLowerCase().contains("sql expression")),
+        plan.explainText());
+  }
+
+  @Test
+  void residualNargCoalesceEmitsSqlExpression() throws Exception {
+    SourceModelSqlPlan plan =
+        residualPlan("SELECT COALESCE(city, 'n/a', 'unknown') AS city_or_default FROM orders");
+
+    assertFalse(plan.fullPushdown(), plan.explainText());
+    SqlExpressionMeta sqlMeta = findSqlExpression(plan);
+    assertNotNull(sqlMeta, plan.explainText());
+    // Calcite rewrites N-arg COALESCE to nested CASE / IS NOT NULL.
+    assertTrue(
+        sqlMeta.getFields().stream()
+            .anyMatch(
+                f ->
+                    f.getExpression() != null
+                        && (f.getExpression().toUpperCase().contains("COALESCE")
+                            || f.getExpression().toUpperCase().contains("CASE"))),
+        plan.explainText()
+            + " fields="
+            + sqlMeta.getFields().stream().map(f -> f.getExpression()).toList());
+  }
+
+  @Test
+  void residualCastEmitsSqlExpression() throws Exception {
+    SourceModelSqlPlan plan =
+        residualPlan("SELECT CAST(city AS VARCHAR(720)) AS city_wide FROM orders");
+
+    assertFalse(plan.fullPushdown(), plan.explainText());
+    SqlExpressionMeta sqlMeta = findSqlExpression(plan);
+    assertNotNull(sqlMeta, plan.explainText());
+    assertTrue(
+        sqlMeta.getFields().stream()
+            .anyMatch(
+                f ->
+                    f.getExpression() != null
+                        && f.getExpression().toUpperCase().contains("CAST")
+                        && f.getExpression().contains("720")),
+        plan.explainText());
+  }
+
+  @Test
+  void residualArithmeticStillUsesCalculator() throws Exception {
+    SourceModelSqlPlan plan =
+        residualPlan("SELECT order_id, amount * 1.1 AS amount_tax FROM orders");
+
+    assertFalse(plan.fullPushdown(), plan.explainText());
+    assertTrue(
+        plan.pipelineMeta().getTransforms().stream()
+            .anyMatch(t -> "Calculator".equals(t.getTransformPluginId())),
+        plan.explainText());
+    assertTrue(findSqlExpression(plan) == null, plan.explainText());
+  }
+
+  @Test
+  void singleConnectionCaseStillPushesDown() throws Exception {
+    SourceModel model = sampleDbModel("CRM");
+    IHopMetadataProvider metadata = memoryWithDb("CRM");
+    SourceModelSqlPlan plan =
+        SourceModelSqlEngine.plan(
+            model,
+            "SELECT order_id, CASE WHEN city = 'Paris' THEN amount ELSE 0 END AS x_amt FROM orders",
+            new Variables(),
+            metadata);
+
+    assertTrue(plan.fullPushdown(), plan.explainText());
+    assertEqualsOneTableInput(plan);
+    assertTrue(findSqlExpression(plan) == null, plan.explainText());
+  }
+
+  @Test
+  void jsonResidualCaseEmitsSqlExpression() throws Exception {
+    SourceModel model = sampleDbModel("CRM");
+    SourceTable orders = model.findTable("orders");
+    orders.getColumns().add(col("payload", 2));
+
+    SourceJson json = new SourceJson("order_events");
+    json.setParentSourceKind(
+        org.hopper.edw.datavault.metadata.sourcemodel.SourceJsonParentKind.TABLE);
+    json.setParentSourceName("orders");
+    json.setJsonFieldName("payload");
+    SourceJsonField f = new SourceJsonField();
+    f.setName("event_id");
+    f.setHopType(2);
+    f.setPath("$.event_id");
+    json.getFields().add(f);
+    model.getJsonSources().add(json);
+
+    IHopMetadataProvider metadata = memoryWithDb("CRM");
+    SourceModelSqlPlan plan =
+        SourceModelSqlEngine.plan(
+            model,
+            "SELECT CASE WHEN event_id IS NULL THEN 'n' ELSE event_id END AS event_or_n FROM order_events",
+            new Variables(),
+            metadata);
+
+    assertFalse(plan.fullPushdown(), plan.explainText());
+    SqlExpressionMeta sqlMeta = findSqlExpression(plan);
+    assertNotNull(sqlMeta, plan.explainText());
+    assertTrue(
+        sqlMeta.getFields().stream()
+            .anyMatch(
+                field ->
+                    field.getExpression() != null
+                        && field.getExpression().toUpperCase().contains("CASE")),
+        plan.explainText());
+  }
+
+  private static SourceModelSqlPlan residualPlan(String sql) throws Exception {
+    SourceModel model = sampleDbModel("CRM");
+    IHopMetadataProvider metadata = memoryWithDb("CRM");
+    return SourceModelSqlEngine.plan(
+        model,
+        sql,
+        new Variables(),
+        metadata,
+        SourceModelSqlOptions.builder().preferFullPushdown(false).build());
+  }
+
+  private static SqlExpressionMeta findSqlExpression(SourceModelSqlPlan plan) {
+    return plan.pipelineMeta().getTransforms().stream()
+        .map(t -> t.getTransform())
+        .filter(SqlExpressionMeta.class::isInstance)
+        .map(SqlExpressionMeta.class::cast)
+        .findFirst()
+        .orElse(null);
   }
 
   private static void assertEqualsOneTableInput(SourceModelSqlPlan plan) {

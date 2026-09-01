@@ -466,7 +466,7 @@ public class SourceModel extends HopMetadataBase
                     PKG, "SourceModel.CheckResult.DuplicateTableName", tableName),
                 null));
       }
-      remarks.addAll(SourceTableValidationSupport.check(this, table, variables));
+      remarks.addAll(SourceTableValidationSupport.check(this, table, variables, metadataProvider));
       monitor.worked(1);
     }
 
@@ -535,7 +535,9 @@ public class SourceModel extends HopMetadataBase
       monitor.subTask(
           BaseMessages.getString(
               PKG, "SourceModel.Monitor.VerifyingJsonSource", ConstNvl(jsonName)));
-      remarks.addAll(SourceJsonValidationSupport.check(jsonSource, this, jsonSourceNames));
+      remarks.addAll(
+          SourceJsonValidationSupport.check(
+              jsonSource, this, jsonSourceNames, variables, metadataProvider));
       monitor.worked(1);
     }
 
@@ -554,7 +556,8 @@ public class SourceModel extends HopMetadataBase
           BaseMessages.getString(
               PKG, "SourceModel.Monitor.VerifyingPipeline", ConstNvl(pipelineName)));
       remarks.addAll(
-          SourcePipelineValidationSupport.check(pipelineSource, this, pipelineSourceNames));
+          SourcePipelineValidationSupport.check(
+              pipelineSource, this, pipelineSourceNames, variables, metadataProvider));
       monitor.worked(1);
     }
 

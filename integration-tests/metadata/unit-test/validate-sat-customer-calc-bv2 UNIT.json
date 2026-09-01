@@ -1,0 +1,48 @@
+{
+  "database_replacements": [],
+  "autoOpening": true,
+  "description": "Current sat_customer_calc_bv rows after SCD2 calculation update load",
+  "persist_filename": "",
+  "test_type": "UNIT_TEST",
+  "variableValues": [],
+  "basePath": "${HOP_UNIT_TESTS_FOLDER}",
+  "golden_data_sets": [
+    {
+      "field_mappings": [
+        {
+          "transform_field": "name",
+          "data_set_field": "name"
+        },
+        {
+          "transform_field": "deleted_flag",
+          "data_set_field": "deleted_flag"
+        },
+        {
+          "transform_field": "event_date",
+          "data_set_field": "event_date"
+        },
+        {
+          "transform_field": "description",
+          "data_set_field": "description"
+        },
+        {
+          "transform_field": "x_date",
+          "data_set_field": "x_date"
+        },
+        {
+          "transform_field": "some_description",
+          "data_set_field": "some_description"
+        }
+      ],
+      "field_order": [
+        "name"
+      ],
+      "data_set_name": "sat-customer-calc-bv-golden2",
+      "transform_name": "Validate"
+    }
+  ],
+  "input_data_sets": [],
+  "name": "validate-sat-customer-calc-bv2 UNIT",
+  "trans_test_tweaks": [],
+  "pipeline_filename": "./tests/scd2-calculations/validate-sat-customer-calc-bv.hpl"
+}

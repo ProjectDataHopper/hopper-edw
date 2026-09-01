@@ -111,6 +111,10 @@ Publish (table / query / JSON / pipeline) writes the **effective** field list to
 
 Modelers that “get attributes from source” therefore see pre-modeled types (e.g. `VARCHAR`-friendly length 2000 instead of unbounded text).
 
+Harvest, catalog refresh, and **Validate resource definitions** rediscover **PIPELINE**, **JSON**, and **COMPOSITE** feeds through the same projection path as publish, including attached mapping profiles.
+
+The catalog is a **second model**. Editing lengths or mappings on the `.hsm` card does not change vault loads or the schema gate until you **publish**. Source-model **Check model** / dialog **Validate** report a stale catalog feed; harvest findings for those source kinds say to republish rather than to widen hub/link keys to the last published length.
+
 == Load pipelines
 
 After the source read transform (database, file, JSON, composite, pipeline inject, …), generated DV loads call **apply catalog data type mappings**:

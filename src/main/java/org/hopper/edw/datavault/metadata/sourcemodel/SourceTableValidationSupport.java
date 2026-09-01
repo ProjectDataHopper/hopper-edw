@@ -24,6 +24,7 @@ import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceTablePreviewSupport;
 
 /** Structural checks for a single {@link SourceTable}. */
@@ -35,6 +36,14 @@ public final class SourceTableValidationSupport {
 
   public static List<ICheckResult> check(
       SourceModel model, SourceTable table, IVariables variables) {
+    return check(model, table, variables, null);
+  }
+
+  public static List<ICheckResult> check(
+      SourceModel model,
+      SourceTable table,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider) {
     List<ICheckResult> remarks = new ArrayList<>();
     if (table == null) {
       return remarks;
@@ -141,6 +150,8 @@ public final class SourceTableValidationSupport {
                   PKG, "SourceModel.CheckResult.TableMissingPrimaryKey", tableName),
               null));
     }
+    remarks.addAll(
+        SourceCatalogPublishSyncSupport.checkTable(model, table, variables, metadataProvider));
     return remarks;
   }
 

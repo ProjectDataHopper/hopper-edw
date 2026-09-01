@@ -135,6 +135,39 @@ class RemediationProposalSupportTest {
   }
 
   @Test
+  void pipelineSourceModelDriftOffersRepublishNotExpandFromStaleCatalog() {
+    RecordDefinitionSchemaDiffSupport.SchemaDiff diff =
+        new RecordDefinitionSchemaDiffSupport.SchemaDiff(
+            List.of(
+                new RecordDefinitionSchemaDiffSupport.FieldChange(
+                    RecordDefinitionSchemaDiffSupport.ChangeKind.CHANGED,
+                    "asn_id",
+                    "expected length 2000 → actual length 7")));
+
+    List<SourceUsage> usages =
+        List.of(
+            SourceUsage.builder()
+                .modelType(SourceUsageIndexBuilder.MODEL_TYPE_DATA_VAULT)
+                .modelName("retail-360")
+                .modelElementName("lnk_package_line")
+                .mappedField("asn_id")
+                .build());
+
+    List<ValidationIssue> issues =
+        RemediationProposalSupport.buildIssues(
+            diff, usages, null, IssueKind.SOURCE_UNAVAILABLE, "hop/retail/sources/asn", "PIPELINE");
+    assertEquals(1, issues.size());
+    ValidationIssue issue = issues.getFirst();
+    assertEquals(IssueKind.FIELD_TYPE_CHANGED, issue.kind());
+    assertTrue(issue.message().toLowerCase().contains("publish"), issue.message());
+    assertEquals(ProposalType.REFRESH_CATALOG_CONTRACT, issue.proposals().getFirst().type());
+    assertTrue(
+        issue.proposals().stream()
+            .noneMatch(p -> p.type() == ProposalType.ALIGN_MODELS_TO_BASELINE),
+        "must not widen hubs/links from a stale catalog length");
+  }
+
+  @Test
   void isActualLengthLongerDetectsGrowthDirection() {
     assertTrue(RemediationProposalSupport.isActualLengthLonger("length 50 -> 75"));
     assertTrue(

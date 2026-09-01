@@ -152,6 +152,21 @@ class SourceFieldMetadataEquivalenceSupportTest {
   }
 
   @Test
+  void mappedDefaultStringLengthIsNotEquivalentToAbsentPhysicalLength() {
+    // Catalog stores the effective length from premodel-defaults; live XML/pipeline projection
+    // still reports String with no length until mappings are applied on rediscovery.
+    SourceField catalog = field("asn_id", "String", IValueMeta.TYPE_STRING);
+    catalog.setLength("2000");
+    SourceField physical = field("asn_id", "String", IValueMeta.TYPE_STRING);
+    physical.setLength("");
+
+    assertFalse(SourceFieldMetadataEquivalenceSupport.dimensionsEquivalent(catalog, physical));
+    String details =
+        SourceFieldMetadataEquivalenceSupport.describeDimensionDifference(catalog, physical);
+    assertTrue(details != null && details.contains("2000"), details);
+  }
+
+  @Test
   void stringLengthDifferencesAreReported() {
     SourceField stored = field("segment", "String", IValueMeta.TYPE_STRING);
     stored.setLength("50");

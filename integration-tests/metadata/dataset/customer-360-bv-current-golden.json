@@ -2,7 +2,7 @@
   "base_filename": "multi-satellite-bv/customer-360-bv-current-golden.csv",
   "virtualPath": "/business-vault",
   "name": "customer-360-bv-current-golden",
-  "description": "Expected current customer_360_bv rows after five DV loads and one BV rebuild",
+  "description": "Expected current customer_360_bv rows after five DV loads and one BV rebuild (one carried-forward open row per customer hash key)",
   "dataset_fields": [
     {
       "field_comment": "customer_hk",

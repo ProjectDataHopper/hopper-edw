@@ -1,0 +1,47 @@
+= SQL Expression
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../business-vault-scd2.adoc[business-vault-scd2].
+
+**SQL Expression** evaluates deterministic SQL scalars on each incoming row using Apache Calcite. It is the engine behind Business Vault SCD2 calculations (`CASE`, `COALESCE`, `CAST`) and can be used in any pipeline.
+
+image::../images/sql-expression-dialog.png[SQL Expression transform dialog — Keep input fields, optional Business Vault model and SCD2 table, expression list,align="center"]
+
+== Expression editor
+
+**Add** / **Edit** / double-click a row opens the SQL expression editor (same editor as Business Vault SCD2 **Calculations**):
+
+* **Result field name**, **type**, **length**, **precision**, and **description** are widgets at the top.
+* The SQL box fills most of the dialog (`SQLStyledTextComp`).
+* Left tree: incoming **Fields** and **Patterns** (`CASE WHEN … END`, `COALESCE`, `CAST`, deleted-flag nulling, string and arithmetic). Double-click inserts at the caret.
+* **Validate** compiles the current SQL against incoming fields (Calcite, no database).
+
+== Expressions
+
+Each calculated field has:
+
+* **Field name** — output column. Replaces an incoming field of the same name, otherwise appended.
+* **SQL expression** — a scalar such as `CASE WHEN deleted_flag = 'Y' THEN NULL ELSE event_date END`.
+* **Type / length / precision** — optional Hop overrides. Leave type empty to infer from Calcite.
+* **Description** — optional documentation.
+
+Supported: `CASE`, `COALESCE` / `NVL`, `CAST`, comparisons, `AND` / `OR` / `NOT`, `IS NULL`, arithmetic, `NULLIF`, `TRIM`, `UPPER` / `LOWER`, `SUBSTRING`, `CONCAT` / `||`.
+
+Dialect CAST forms `expr :> VARCHAR(n)` and `expr::TYPE` are rewritten to standard `CAST`.
+
+Not allowed: `NOW()`, `CURRENT_TIMESTAMP`, `RANDOM`, subqueries, aggregates, window functions.
+
+== Options
+
+**Keep input fields** (default on) adds calculated columns to the incoming row. Turn it off to output only the calculated fields.
+
+=== Business Vault SCD2 table (optional)
+
+**Business Vault model** (`.hbv`) and **SCD2 table** bind this transform to calculations stored on a Business Vault SCD2 table. When both are set, expressions are loaded from that table at runtime and the list below is ignored. **Load from table** copies the current calculations into the list for inspection.
+
+Production SCD2 generate still copies expressions into the transform. The table link is for reusable unit-test pipelines so they pick up model edits without regenerating the expression list.
+
+Use **Validate** to compile expressions against the previous transform's field layout.

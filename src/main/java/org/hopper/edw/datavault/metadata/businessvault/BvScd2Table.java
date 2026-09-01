@@ -66,6 +66,15 @@ public class BvScd2Table extends BvTableBase {
   @HopMetadataProperty(key = "satellite_config", groupKey = "satellite_configs")
   private List<BvScd2SatelliteConfig> satelliteConfigs = new ArrayList<>();
 
+  @HopMetadataProperty(key = "calculation", groupKey = "calculations")
+  private List<BvScd2Calculation> calculations = new ArrayList<>();
+
+  @HopMetadataProperty(key = "calculation_test", groupKey = "calculation_tests")
+  private List<BvScd2CalculationTestCase> calculationTests = new ArrayList<>();
+
+  @HopMetadataProperty(key = "collapse_test", groupKey = "collapse_tests")
+  private List<BvScd2CollapseTestCase> collapseTests = new ArrayList<>();
+
   public BvScd2Table() {
     super(BvTableType.SCD2);
   }
@@ -82,6 +91,31 @@ public class BvScd2Table extends BvTableBase {
       satelliteConfigs = new ArrayList<>();
     }
     return satelliteConfigs;
+  }
+
+  public List<BvScd2Calculation> getCalculations() {
+    if (calculations == null) {
+      calculations = new ArrayList<>();
+    }
+    return calculations;
+  }
+
+  public List<BvScd2CalculationTestCase> getCalculationTests() {
+    if (calculationTests == null) {
+      calculationTests = new ArrayList<>();
+    }
+    return calculationTests;
+  }
+
+  public List<BvScd2CollapseTestCase> getCollapseTests() {
+    if (collapseTests == null) {
+      collapseTests = new ArrayList<>();
+    }
+    return collapseTests;
+  }
+
+  public boolean hasCalculations() {
+    return !getCalculations().isEmpty();
   }
 
   public BvScd2BuildMode getBuildModeOrDefault() {
@@ -196,6 +230,8 @@ public class BvScd2Table extends BvTableBase {
     if (dataVaultModel != null) {
       BvScd2FieldMappingValidationSupport.validate(
           remarks, this, bvConfig, dvConfig, dataVaultModel, variables);
+      BvScd2CalculationValidationSupport.validate(
+          remarks, this, bvConfig, dataVaultModel, variables);
       BvScd2PipelineSupport.validateTargetDatabases(
           remarks, metadataProvider, model, dataVaultModel, this);
     }

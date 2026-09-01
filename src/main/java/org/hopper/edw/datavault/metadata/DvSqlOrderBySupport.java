@@ -219,6 +219,50 @@ public final class DvSqlOrderBySupport {
         databaseMeta.getPluginId());
   }
 
+  public static boolean isMysqlFamily(DatabaseMeta databaseMeta) {
+    if (databaseMeta == null || Utils.isEmpty(databaseMeta.getPluginId())) {
+      return false;
+    }
+    String pluginId = databaseMeta.getPluginId();
+    return DvBulkLoadPluginSupport.MYSQL_DB_PLUGIN_ID.equalsIgnoreCase(pluginId)
+        || DvBulkLoadPluginSupport.SINGLESTORE_DB_PLUGIN_ID.equalsIgnoreCase(pluginId);
+  }
+
+  public static boolean isSnowflake(DatabaseMeta databaseMeta) {
+    if (databaseMeta == null || Utils.isEmpty(databaseMeta.getPluginId())) {
+      return false;
+    }
+    return DvBulkLoadPluginSupport.SNOWFLAKE_DB_PLUGIN_ID.equalsIgnoreCase(
+        databaseMeta.getPluginId());
+  }
+
+  /**
+   * ORDER BY term whose order matches {@link String#compareTo()} (Hop's default string compare with
+   * the collator disabled). Use this when a later Hop merge assumes the JDBC stream is already
+   * sorted the way Java compares strings.
+   *
+   * <p>Locale collations such as Postgres {@code en_US.utf8} sort {@code 10-} before {@code 1-};
+   * Java does the opposite, which splits the same hash key across {@code SortedSchemaMerge} output
+   * and breaks Repeat Fields carry-forward.
+   */
+  public static String javaStringCompareOrderExpression(
+      DatabaseMeta databaseMeta, String quotedColumn) {
+    if (Utils.isEmpty(quotedColumn)) {
+      return quotedColumn;
+    }
+    if (isSqlServer(databaseMeta)) {
+      return quotedColumn + " COLLATE Latin1_General_100_BIN2";
+    }
+    if (isMysqlFamily(databaseMeta)) {
+      return "BINARY " + quotedColumn;
+    }
+    if (isSnowflake(databaseMeta)) {
+      return quotedColumn;
+    }
+    // PostgreSQL and unknown engines (historical default)
+    return quotedColumn + " COLLATE \"C\"";
+  }
+
   /** Maps a Hop database plugin id to a collation engine family (issue #108). */
   public static CollationEngineFamily collationEngineFamily(String pluginId) {
     if (Utils.isEmpty(pluginId)) {

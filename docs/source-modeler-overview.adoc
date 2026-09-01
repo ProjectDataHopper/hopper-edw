@@ -170,7 +170,7 @@ Edit them in the relationship dialog. The canvas draws standard crow's-foot symb
 * **Automatic** — single-connection SQL when all participants are database tables on one connection; otherwise Merge Join pipeline.
 * **SQL (Table Input)** — force SQL path (fails if mixed connections).
 * **Pipeline (Merge Join)** — force Sort + Merge Join chain.
-* **Free SQL (Calcite)** — author full `SELECT` SQL against **logical canvas names** for tables, **named source queries** (virtual tables), **Source JSON**, and **Source Pipeline** feeds (issue #117 / #115). Apache Calcite parses and validates the SQL against the source model schema, then generates a Hop pipeline: **full database pushdown** (single Table Input) when all referenced tables are DATABASE on one connection; otherwise **residual** operators (Sort + Merge Join, Filter Rows, Group By, Calculator, Select Values, MetaInject / JSON / nested query subgraphs). Supported: joins, WHERE, ORDER BY, LIMIT, **GROUP BY** with COUNT/SUM/MIN/MAX/AVG, simple residual `+ - * /` and COALESCE/NVL. Complex `CASE` works when fully pushed to the database. Use the **Free SQL** tab, **Insert tables…**, **Explain plan**, and **Preview data**.
+* **Free SQL (Calcite)** — author full `SELECT` SQL against **logical canvas names** for tables, **named source queries** (virtual tables), **Source JSON**, and **Source Pipeline** feeds (issue #117 / #115). Apache Calcite parses and validates the SQL against the source model schema, then generates a Hop pipeline: **full database pushdown** (single Table Input) when all referenced tables are DATABASE on one connection; otherwise **residual** operators (Sort + Merge Join, Filter Rows, Group By, Calculator, **SQL Expression**, Select Values, MetaInject / JSON / nested query subgraphs). Supported: joins, WHERE, ORDER BY, LIMIT, **GROUP BY** with COUNT/SUM/MIN/MAX/AVG, residual `+ - * /` and 2-arg COALESCE/NVL (Calculator), residual `CASE` / `CAST` / N-arg `COALESCE` (SQL Expression). Use the **Free SQL** tab, **Insert tables…**, **Explain plan**, and **Preview data**.
 --
 . **Generate SQL** / **Preview data** / **Explain plan** — visual-query SQL is pretty-printed with syntax highlighting (desktop). Free SQL explain shows pushdown fragments and residual operators.
 
@@ -369,6 +369,11 @@ Source model **Check model** validates:
 * Relationship endpoints
 * Query driving table / join tables present
 * Non-empty projection (warning)
+* **Catalog publish is current** — when a table / query / JSON / pipeline card already has a catalog feed name and a catalog connection, Check compares the card's **effective** layout (including data type mappings) to the published `DV_SOURCE`. A stale catalog is an **error**: the canvas is not the contract vault loads use. Publish the card (or **Push to catalog**), then re-harvest / re-validate.
+
+The same catalog-stale check runs from **Validate** on the table, query, JSON, and pipeline dialogs.
+
+Saving the `.hsm` also compares published feeds. When any published catalog feed lags the canvas, a dialog asks **Do you want to publish these?** (with **Don't remind me after save**). The reminder is on by default under **Configuration → Data Vault 2.0**. Never-published draft cards are not included.
 
 Vault **Check model** continues to validate hub/sat field mappings against catalog field lists for composite feeds like any other source.
 
