@@ -33,6 +33,7 @@ import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.ui.core.PropsUi;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.DvTableDisplaySupport;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry.Bounds;
@@ -67,6 +68,10 @@ public class BusinessVaultModelPainter extends BasePainter {
   private static final int DERIVATIVES_BOTTOM_PADDING = 12;
   private static final int DV_ICON_SIZE = ModelGraphTableCardLayout.ICON_SIZE;
   private static final int DV_MARGIN = ModelGraphTableCardLayout.MARGIN;
+  private static final int TABLE_TEXT_INSET = 8;
+  private static final int LOGO_SIZE = 22;
+  private static final int LOGO_INSET = 6;
+  private static final int LOGO_TEXT_GAP = 6;
 
   private final BusinessVaultModel model;
   private DataVaultModel dataVaultModel;
@@ -874,13 +879,24 @@ public class BusinessVaultModelPainter extends BasePainter {
       int x = screenLoc.x;
       int y = screenLoc.y;
       int[] color = tableTypeColor(base.getTableType());
+      int[] fill = tableTypeFillColor(base.getTableType());
+      String logoLetter = tableTypeLogoLetter(base.getTableType());
 
-      gc.setBackground(EColor.WHITE);
+      if (fill != null) {
+        gc.setBackground(fill[0], fill[1], fill[2]);
+      } else {
+        gc.setBackground(EColor.WHITE);
+      }
       gc.fillRoundRectangle(x, y, boxWidth, boxHeight, 8, 8);
       gc.setLineWidth(base.isSelected() ? 2 : 1);
       gc.setForeground(color[0], color[1], color[2]);
       gc.drawRoundRectangle(x, y, boxWidth, boxHeight, 8, 8);
       gc.setLineWidth(1);
+
+      if (logoLetter != null) {
+        drawLetterLogo(tableTypeLogoColor(base.getTableType()), logoLetter, x, y);
+      }
+      int textX = tableContentX(base, x);
 
       String label = Const.NVL(base.getName(), base.getTableType().name());
       gc.setFont(EFont.GRAPH);
@@ -888,11 +904,15 @@ public class BusinessVaultModelPainter extends BasePainter {
       boolean underline = label.equals(mouseOverBvTableName);
       if (underline) {
         gc.setLineWidth(1);
-        gc.drawText(label, x + 8, y + 8, true);
+        gc.drawText(label, textX, y + TABLE_TEXT_INSET, true);
         Point extent = gc.textExtent(label);
-        gc.drawLine(x + 8, y + 8 + extent.y, x + 8 + extent.x, y + 8 + extent.y);
+        gc.drawLine(
+            textX,
+            y + TABLE_TEXT_INSET + extent.y,
+            textX + extent.x,
+            y + TABLE_TEXT_INSET + extent.y);
       } else {
-        gc.drawText(label, x + 8, y + 8, true);
+        gc.drawText(label, textX, y + TABLE_TEXT_INSET, true);
       }
 
       gc.setFont(EFont.SMALL);
@@ -900,19 +920,20 @@ public class BusinessVaultModelPainter extends BasePainter {
       if (base instanceof BvBusinessTable businessTable) {
         typeLabel = typeLabel + " / " + businessTable.getMaterializationOrDefault().getCode();
       }
-      gc.drawText(typeLabel, x + 8, y + 28, true);
-      drawDerivativeReferences(base, x, y);
+      gc.drawText(typeLabel, textX, y + 28, true);
+      drawDerivativeReferences(base, textX, y);
       if (base instanceof BvBusinessTable businessTable) {
-        drawSqlRefSummary(businessTable, x, y);
+        drawSqlRefSummary(businessTable, textX, y);
       }
 
       if (areaOwners != null) {
         areaOwners.add(
             new AreaOwner(
                 AreaType.TRANSFORM_ICON, x, y, boxWidth, boxHeight, offset, table, label));
+        gc.setFont(EFont.GRAPH);
         Point nameExtent = gc.textExtent(label);
         ModelGraphTableNameHitArea.Bounds nameHit =
-            ModelGraphTableNameHitArea.bounds(x + 8, y + 8, nameExtent);
+            ModelGraphTableNameHitArea.bounds(textX, y + TABLE_TEXT_INSET, nameExtent);
         areaOwners.add(
             new AreaOwner(
                 AreaType.TRANSFORM_NAME,
@@ -942,7 +963,7 @@ public class BusinessVaultModelPainter extends BasePainter {
       }
       String typeLabel =
           derivative.getDvTableType() != null ? derivative.getDvTableType().name() : "?";
-      gc.drawText(typeLabel + ": " + derivative.getDvTableName(), x + 8, yRef, true);
+      gc.drawText(typeLabel + ": " + derivative.getDvTableName(), x, yRef, true);
       yRef += lineHeight;
     }
     gc.setForeground(EColor.BLACK);
@@ -966,30 +987,32 @@ public class BusinessVaultModelPainter extends BasePainter {
           Utils.isEmpty(ref.getModelName())
               ? "ref: " + ref.getObjectName() + " (" + kind + ")"
               : "ref: " + ref.getModelName() + "." + ref.getObjectName() + " (" + kind + ")";
-      gc.drawText(label, x + 8, yRef, true);
+      gc.drawText(label, x, yRef, true);
       yRef += lineHeight;
     }
     gc.setForeground(EColor.BLACK);
   }
 
   private int computeBoxWidth(BvTableBase base) {
+    int textPad = TABLE_TEXT_INSET * 2 + tableLogoColumnWidth(base);
     int width = 120;
     gc.setFont(EFont.GRAPH);
     String label = Const.NVL(base.getName(), base.getTableType().name());
-    width = Math.max(width, gc.textExtent(label).x + 16);
+    width = Math.max(width, gc.textExtent(label).x + textPad);
     gc.setFont(EFont.SMALL);
     String typeLabel = base.getTableType().name();
     if (base instanceof BvBusinessTable businessTable) {
       typeLabel = typeLabel + " / " + businessTable.getMaterializationOrDefault().getCode();
     }
-    width = Math.max(width, gc.textExtent(typeLabel).x + 16);
+    width = Math.max(width, gc.textExtent(typeLabel).x + textPad);
     for (BvDerivativeRef derivative : base.getDerivatives()) {
       if (derivative == null || Utils.isEmpty(derivative.getDvTableName())) {
         continue;
       }
       String derLabel =
           derivative.getDvTableType() != null ? derivative.getDvTableType().name() : "?";
-      width = Math.max(width, gc.textExtent(derLabel + ": " + derivative.getDvTableName()).x + 16);
+      width =
+          Math.max(width, gc.textExtent(derLabel + ": " + derivative.getDvTableName()).x + textPad);
     }
     if (base instanceof BvBusinessTable businessTable) {
       for (BvSqlRef ref : businessTable.getSqlRefs()) {
@@ -1001,7 +1024,7 @@ public class BusinessVaultModelPainter extends BasePainter {
             Utils.isEmpty(ref.getModelName())
                 ? "ref: " + ref.getObjectName() + " (" + kind + ")"
                 : "ref: " + ref.getModelName() + "." + ref.getObjectName() + " (" + kind + ")";
-        width = Math.max(width, gc.textExtent(refLabel).x + 16);
+        width = Math.max(width, gc.textExtent(refLabel).x + textPad);
       }
     }
     return width;
@@ -1045,6 +1068,77 @@ public class BusinessVaultModelPainter extends BasePainter {
       case BUSINESS_TABLE -> new int[] {40, 120, 60};
       case SOURCE_QUERY -> new int[] {90, 90, 110};
     };
+  }
+
+  /** Card fill: pastel in light mode, dark in dark mode so inverted (white) text stays readable. */
+  private int[] tableTypeFillColor(BvTableType tableType) {
+    if (tableType == null) {
+      return null;
+    }
+    boolean dark = isDarkMode();
+    return switch (tableType) {
+      case SCD2 -> dark ? new int[] {16, 36, 54} : new int[] {228, 240, 248};
+      case SOURCE_QUERY -> dark ? new int[] {30, 24, 44} : new int[] {236, 234, 246};
+      default -> null;
+    };
+  }
+
+  private static boolean isDarkMode() {
+    try {
+      return PropsUi.getInstance().isDarkMode();
+    } catch (Throwable ignored) {
+      return false;
+    }
+  }
+
+  /** Badge fill: steel blue for SCD2, muted violet for source query. */
+  private int[] tableTypeLogoColor(BvTableType tableType) {
+    if (tableType == null) {
+      return null;
+    }
+    return switch (tableType) {
+      case SCD2 -> new int[] {88, 148, 186};
+      case SOURCE_QUERY -> new int[] {130, 118, 168};
+      default -> null;
+    };
+  }
+
+  private static String tableTypeLogoLetter(BvTableType tableType) {
+    if (tableType == null) {
+      return null;
+    }
+    return switch (tableType) {
+      case SCD2 -> "2";
+      case SOURCE_QUERY -> "Q";
+      default -> null;
+    };
+  }
+
+  private static int tableLogoColumnWidth(BvTableBase base) {
+    if (base == null || tableTypeLogoLetter(base.getTableType()) == null) {
+      return 0;
+    }
+    return LOGO_INSET + LOGO_SIZE + LOGO_TEXT_GAP - TABLE_TEXT_INSET;
+  }
+
+  private int tableContentX(BvTableBase base, int boxX) {
+    return boxX + TABLE_TEXT_INSET + tableLogoColumnWidth(base);
+  }
+
+  private void drawLetterLogo(int[] logoRgb, String letter, int boxX, int boxY) {
+    if (logoRgb == null || Utils.isEmpty(letter)) {
+      return;
+    }
+    int x = boxX + LOGO_INSET;
+    int y = boxY + LOGO_INSET;
+    gc.setBackground(logoRgb[0], logoRgb[1], logoRgb[2]);
+    gc.fillRoundRectangle(x, y, LOGO_SIZE, LOGO_SIZE, 6, 6);
+    gc.setFont(EFont.GRAPH);
+    gc.setForeground(255, 255, 255);
+    Point extent = gc.textExtent(letter);
+    int tx = x + Math.max(0, (LOGO_SIZE - extent.x) / 2);
+    int ty = y + Math.max(0, (LOGO_SIZE - extent.y) / 2);
+    gc.drawText(letter, tx, ty, true);
   }
 
   private void drawEmptyHint() {
