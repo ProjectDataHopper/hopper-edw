@@ -1,0 +1,31 @@
+= Business Vault source query
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guides: link:../business-vault-scd2.adoc[business-vault-scd2], link:../business-vault-pit.adoc[business-vault-pit].
+
+A **source query** is a satellite-shaped input on a Business Vault canvas: a table/view or SQL statement that SCD2 and PIT tables can hop to. Use it when history lives outside the Data Vault target connection (for example a corrective view on another database).
+
+The Data Vault model still has **one** target database. This object is the exception on the BV side.
+
+== General
+
+* **Name** — Canvas identity. SCD2 field mappings and satellite configs use this name as the source.
+* **Database connection** — Hop RDBMS used by the generated Table Input. Empty means the Data Vault target.
+* **Source kind** — Table/view, or authored SQL.
+* **Table / view** — Physical name when kind is table. Optional schema.
+* **SQL** — Inner SELECT when kind is SQL. Trailing `;` is stripped. The generated Table Input wraps this as a subquery so the plugin can add `WHERE` (hash-key partitions, incremental watermark) and `ORDER BY` (hash key + date).
+* **Hash key field** — Required. Grain column in the source result. Aliased to the SCD2/PIT hash key when names differ.
+* **Functional timestamp** — Optional SCD2 timeline column (else SCD2 table / model / load-date fallback).
+* **Load date field** — Optional PIT pointer column (else Data Vault load date).
+* **Parent hub** — Optional DV hub name for shared-parent / hub business-key checks.
+
+== Columns
+
+**Get fields** and **Preview** run against the chosen connection. Persist the column list so Check model and SCD2 mappings work without a live JDBC round-trip at generate time.
+
+== Linking
+
+Drag a hop between this object and an SCD2 or PIT table, or list the source query on the SCD2 Derivatives tab. Mixed SCD2 (DV satellites + source queries) is supported. PIT source queries must use the Data Vault target connection (PIT is one SQL join).

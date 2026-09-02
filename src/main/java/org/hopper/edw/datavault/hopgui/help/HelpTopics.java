@@ -46,6 +46,7 @@ public final class HelpTopics {
   public static final String BV_TABLE = "bv-table-dialog";
   public static final String BV_SCD2_TABLE = "bv-scd2-table-dialog";
   public static final String BV_BUSINESS_TABLE = "bv-business-table-dialog";
+  public static final String BV_SOURCE_QUERY = "bv-source-query-dialog";
 
   public static final String DM_MODEL = "dm-model-dialog";
   public static final String DM_TABLE = "dm-table-dialog";
@@ -190,6 +191,10 @@ public final class HelpTopics {
               BV_BUSINESS_TABLE,
               "help/bv-business-table-dialog.html",
               "HelpTopics.BvBusinessTableDialog.Title"),
+          p(
+              BV_SOURCE_QUERY,
+              "help/bv-source-query-dialog.html",
+              "HelpTopics.BvSourceQueryDialog.Title"),
           p(DM_MODEL, "help/dm-model-dialog.html", "HelpTopics.DmModelDialog.Title"),
           p(DM_TABLE, "help/dm-dimension-dialog.html", "HelpTopics.DmTableDialog.Title"),
           p(DM_DIMENSION, "help/dm-dimension-dialog.html", "HelpTopics.DmDimensionDialog.Title"),

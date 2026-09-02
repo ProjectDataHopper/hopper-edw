@@ -219,7 +219,8 @@ public final class BvScd2PipelineSupport {
 
     TransformMeta tableInput = addSatelliteTableInput(ctx, pipelineMeta, watermarkParam);
     if (tableInput != null) {
-      GeneratedPipelineMetadataSupport.stampSourceRead(tableInput, ctx.sourceDbName);
+      GeneratedPipelineMetadataSupport.stampSourceRead(
+          tableInput, ctx.legs.get(0).connectionName(ctx));
     }
     TransformMeta legStream =
         injectRecordSourceConstantIfNeeded(
@@ -280,7 +281,7 @@ public final class BvScd2PipelineSupport {
       TransformMeta tableInput =
           addLegTableInput(ctx, leg, pipelineMeta, legLocation, watermarkParam);
       if (tableInput != null) {
-        GeneratedPipelineMetadataSupport.stampSourceRead(tableInput, ctx.sourceDbName);
+        GeneratedPipelineMetadataSupport.stampSourceRead(tableInput, leg.connectionName(ctx));
       }
       TransformMeta sourceConstant =
           addLegSourceIndicatorConstant(ctx, leg, pipelineMeta, tableInput, legLocation);
@@ -322,10 +323,24 @@ public final class BvScd2PipelineSupport {
       return null;
     }
 
-    List<DvSatellite> satellites = resolveSourceSatellites(scd2Table, dvModel);
-    if (satellites.size() >= 2) {
+    List<DvSatellite> satellites =
+        BvScd2FieldMappingValidationSupport.resolveSatelliteDerivatives(scd2Table, dvModel);
+    List<BvSourceQuery> sourceQueries =
+        BusinessVaultSourceQuerySupport.resolveSourceQueries(scd2Table, bvModel);
+    if (satellites.isEmpty() && sourceQueries.isEmpty()) {
+      throw new HopException(
+          "SCD2 table "
+              + scd2Table.getName()
+              + " must hop to a Data Vault satellite or source query");
+    }
+    int inputCount = satellites.size() + sourceQueries.size();
+    if (inputCount >= 2) {
       return createMultiSatelliteContext(
-          metadataProvider, variables, bvModel, dvModel, scd2Table, satellites);
+          metadataProvider, variables, bvModel, dvModel, scd2Table, satellites, sourceQueries);
+    }
+    if (!sourceQueries.isEmpty()) {
+      return createSingleSourceQueryContext(
+          metadataProvider, variables, bvModel, dvModel, scd2Table, sourceQueries.get(0));
     }
     return createSingleSatelliteContext(
         metadataProvider, variables, bvModel, dvModel, scd2Table, satellites.get(0));
@@ -400,6 +415,19 @@ public final class BvScd2PipelineSupport {
       BvScd2Table scd2Table,
       List<DvSatellite> satellites)
       throws HopException {
+    return createMultiSatelliteContext(
+        metadataProvider, variables, bvModel, dvModel, scd2Table, satellites, List.of());
+  }
+
+  private static Scd2BuildContext createMultiSatelliteContext(
+      IHopMetadataProvider metadataProvider,
+      IVariables variables,
+      BusinessVaultModel bvModel,
+      DataVaultModel dvModel,
+      BvScd2Table scd2Table,
+      List<DvSatellite> satellites,
+      List<BvSourceQuery> sourceQueries)
+      throws HopException {
     if (!hasFieldMappings(scd2Table)) {
       throw new HopException(
           "SCD2 table "
@@ -409,11 +437,11 @@ public final class BvScd2PipelineSupport {
 
     SharedScd2Resources resources =
         resolveSharedResources(metadataProvider, bvModel, dvModel, scd2Table, variables);
-    DvSatellite anchorSatellite = satellites.get(0);
     String pipelineName =
         resources.bvConfig.buildScd2PipelineName(
             variables, resources.bvTargetTableName, scd2Table.getName());
-    String hashKeyFieldName = resolveHashKeyFieldName(anchorSatellite, dvModel, variables);
+    String hashKeyFieldName =
+        resolveSharedHashKeyFieldName(satellites, sourceQueries, dvModel, variables);
     String drivingKeyFieldName = resolveSharedDrivingKeyFieldName(satellites, variables);
     List<String> mappedAttributeFieldNames = resolveMappedTargetFieldNames(scd2Table, variables);
 
@@ -433,6 +461,13 @@ public final class BvScd2PipelineSupport {
                   scd2Table, satelliteConfig, resources.bvConfig, resources.dvConfig, variables),
               resolveFieldMappingsForSatellite(scd2Table, satellite.getName(), variables)));
     }
+    for (BvSourceQuery sourceQuery : sourceQueries) {
+      legs.add(
+          createSourceQueryLeg(
+              metadataProvider, variables, bvModel, dvModel, scd2Table, sourceQuery, resources));
+    }
+    String anchorTableName =
+        !satellites.isEmpty() ? satellites.get(0).getName() : sourceQueries.get(0).getName();
 
     return new Scd2BuildContext(
         scd2Table,
@@ -449,7 +484,7 @@ public final class BvScd2PipelineSupport {
         resources.sourceDbName,
         resources.targetDatabaseMeta,
         resources.targetDbName,
-        anchorSatellite.getName(),
+        anchorTableName,
         resources.bvTargetTableName,
         pipelineName,
         hashKeyFieldName,
@@ -462,7 +497,155 @@ public final class BvScd2PipelineSupport {
         resources.openStartSentinel,
         resources.openEndSentinel,
         scd2Table.isIncludeHashKey(),
-        resolveHubBkAttachment(scd2Table, dvModel, satellites, variables));
+        resolveHubBkAttachment(scd2Table, dvModel, satellites, sourceQueries, variables));
+  }
+
+  private static Scd2BuildContext createSingleSourceQueryContext(
+      IHopMetadataProvider metadataProvider,
+      IVariables variables,
+      BusinessVaultModel bvModel,
+      DataVaultModel dvModel,
+      BvScd2Table scd2Table,
+      BvSourceQuery sourceQuery)
+      throws HopException {
+    SharedScd2Resources resources =
+        resolveSharedResources(metadataProvider, bvModel, dvModel, scd2Table, variables);
+    SatelliteLeg leg =
+        createSourceQueryLeg(
+            metadataProvider, variables, bvModel, dvModel, scd2Table, sourceQuery, resources);
+    String pipelineName =
+        resources.bvConfig.buildScd2PipelineName(
+            variables, resources.bvTargetTableName, sourceQuery.getName());
+    String hashKeyFieldName =
+        resolveSharedHashKeyFieldName(List.of(), List.of(sourceQuery), dvModel, variables);
+    List<String> attributeFieldNames =
+        BvSourceQuerySqlSupport.attributeFieldNames(sourceQuery, variables);
+    return new Scd2BuildContext(
+        scd2Table,
+        List.of(leg),
+        false,
+        List.of(),
+        bvModel,
+        dvModel,
+        resources.bvConfig,
+        resources.dvConfig,
+        metadataProvider,
+        variables,
+        leg.databaseMeta != null ? leg.databaseMeta : resources.sourceDatabaseMeta,
+        !Utils.isEmpty(leg.connectionName) ? leg.connectionName : resources.sourceDbName,
+        resources.targetDatabaseMeta,
+        resources.targetDbName,
+        leg.satelliteTableName,
+        resources.bvTargetTableName,
+        pipelineName,
+        hashKeyFieldName,
+        null,
+        attributeFieldNames,
+        leg.sourceFunctionalTimestampField,
+        resources.validFromField,
+        resources.validToField,
+        resources.recordSourceField,
+        resources.openStartSentinel,
+        resources.openEndSentinel,
+        scd2Table.isIncludeHashKey(),
+        resolveHubBkAttachment(scd2Table, dvModel, List.of(), List.of(sourceQuery), variables));
+  }
+
+  private static SatelliteLeg createSourceQueryLeg(
+      IHopMetadataProvider metadataProvider,
+      IVariables variables,
+      BusinessVaultModel bvModel,
+      DataVaultModel dvModel,
+      BvScd2Table scd2Table,
+      BvSourceQuery sourceQuery,
+      SharedScd2Resources resources)
+      throws HopException {
+    BvScd2SatelliteConfig config =
+        BvScd2FieldMappingValidationSupport.findSatelliteConfig(
+            scd2Table, sourceQuery.getName(), variables);
+    String connectionName =
+        BusinessVaultSourceQuerySupport.resolveConnectionName(sourceQuery, dvModel, variables);
+    DatabaseMeta databaseMeta =
+        BusinessVaultSourceQuerySupport.loadConnection(
+            sourceQuery, dvModel, metadataProvider, variables);
+    if (databaseMeta == null) {
+      databaseMeta = resources.sourceDatabaseMeta;
+    }
+    if (Utils.isEmpty(connectionName)) {
+      connectionName = resources.sourceDbName;
+    }
+    String timestamp =
+        resolveFunctionalTimestampFieldForSourceQuery(
+            scd2Table, sourceQuery, config, resources.bvConfig, resources.dvConfig, variables);
+    String tableName =
+        !Utils.isEmpty(sourceQuery.getTableName())
+            ? sourceQuery.getTableName()
+            : sourceQuery.getName();
+    String fromClause = BvSourceQuerySqlSupport.fromClause(databaseMeta, variables, sourceQuery);
+    String hashKey =
+        variables != null
+            ? variables.resolve(sourceQuery.getHashKeyField())
+            : sourceQuery.getHashKeyField();
+    String indicator = resolveSourceIndicatorValue(scd2Table, null, config, variables);
+    if (Utils.isEmpty(indicator)) {
+      indicator = sourceQuery.getName();
+    }
+    return new SatelliteLeg(
+        null,
+        sourceQuery,
+        tableName,
+        indicator,
+        timestamp,
+        resolveFieldMappingsForSatellite(scd2Table, sourceQuery.getName(), variables),
+        databaseMeta,
+        connectionName,
+        hashKey,
+        fromClause);
+  }
+
+  static String resolveFunctionalTimestampFieldForSourceQuery(
+      BvScd2Table scd2Table,
+      BvSourceQuery sourceQuery,
+      BvScd2SatelliteConfig config,
+      BusinessVaultConfiguration bvConfig,
+      DataVaultConfiguration dvConfig,
+      IVariables variables) {
+    if (config != null && !Utils.isEmpty(config.getFunctionalTimestampField())) {
+      return variables.resolve(config.getFunctionalTimestampField());
+    }
+    if (sourceQuery != null && !Utils.isEmpty(sourceQuery.getFunctionalTimestampField())) {
+      return variables.resolve(sourceQuery.getFunctionalTimestampField());
+    }
+    return resolveFunctionalTimestampField(scd2Table, bvConfig, dvConfig, variables);
+  }
+
+  static String resolveSharedHashKeyFieldName(
+      List<DvSatellite> satellites,
+      List<BvSourceQuery> sourceQueries,
+      DataVaultModel dvModel,
+      IVariables variables) {
+    if (satellites != null && !satellites.isEmpty()) {
+      return resolveHashKeyFieldName(satellites.get(0), dvModel, variables);
+    }
+    if (sourceQueries != null && !sourceQueries.isEmpty()) {
+      BvSourceQuery first = sourceQueries.get(0);
+      if (first != null && !Utils.isEmpty(first.getHashKeyField())) {
+        return variables != null
+            ? variables.resolve(first.getHashKeyField())
+            : first.getHashKeyField();
+      }
+    }
+    return null;
+  }
+
+  private static HubBkAttachment resolveHubBkAttachment(
+      BvScd2Table scd2Table,
+      DataVaultModel dvModel,
+      List<DvSatellite> satellites,
+      List<BvSourceQuery> sourceQueries,
+      IVariables variables)
+      throws HopException {
+    return resolveHubBkAttachment(scd2Table, dvModel, satellites, variables);
   }
 
   private static HubBkAttachment resolveHubBkAttachment(
@@ -985,13 +1168,7 @@ public final class BvScd2PipelineSupport {
 
   public static List<DvSatellite> resolveSourceSatellites(BvScd2Table table, DataVaultModel dvModel)
       throws HopException {
-    List<DvSatellite> satellites =
-        BvScd2FieldMappingValidationSupport.resolveSatelliteDerivatives(table, dvModel);
-    if (satellites.isEmpty()) {
-      throw new HopException(
-          "SCD2 table " + table.getName() + " must reference a Data Vault satellite derivative");
-    }
-    return satellites;
+    return BvScd2FieldMappingValidationSupport.resolveSatelliteDerivatives(table, dvModel);
   }
 
   /**
@@ -1053,6 +1230,25 @@ public final class BvScd2PipelineSupport {
         && ctx.sourceDbName.equals(ctx.targetDbName);
   }
 
+  static boolean legSharesTargetConnection(Scd2BuildContext ctx, SatelliteLeg leg) {
+    return ctx != null
+        && leg != null
+        && !Utils.isEmpty(ctx.targetDbName)
+        && ctx.targetDbName.equals(leg.connectionName(ctx));
+  }
+
+  static boolean hasLegSharingTargetConnection(Scd2BuildContext ctx) {
+    if (ctx == null || ctx.legs == null) {
+      return false;
+    }
+    for (SatelliteLeg leg : ctx.legs) {
+      if (legSharesTargetConnection(ctx, leg)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /**
    * Distinct hash keys from DV satellites that have rows after the watermark parameter. Each UNION
    * branch uses its own positional {@code ?} for the watermark — JDBC does not reuse bind values
@@ -1064,17 +1260,26 @@ public final class BvScd2PipelineSupport {
   static String buildDeltaHashKeysSubquerySql(Scd2BuildContext ctx) {
     List<String> unionBranches = new ArrayList<>();
     for (SatelliteLeg leg : ctx.legs) {
-      String hashKeyColumn = ctx.sourceDatabaseMeta.quoteField(ctx.hashKeyFieldName);
-      String satelliteTable =
-          ctx.sourceDatabaseMeta.getQuotedSchemaTableCombination(
-              ctx.variables, null, leg.satelliteTableName);
+      if (!legSharesTargetConnection(ctx, leg)) {
+        continue;
+      }
+      DatabaseMeta databaseMeta = leg.databaseMeta(ctx);
+      String hashKeyColumn = databaseMeta.quoteField(leg.hashKeyField(ctx));
+      String fromClause =
+          !Utils.isEmpty(leg.fromClause)
+              ? leg.fromClause
+              : databaseMeta.getQuotedSchemaTableCombination(
+                  ctx.variables, null, leg.satelliteTableName);
       String sourceTimestampField =
           ctx.isMultiSatellite()
               ? leg.sourceFunctionalTimestampField
               : ctx.functionalTimestampField;
-      String sourceTimestampColumn = ctx.sourceDatabaseMeta.quoteField(sourceTimestampField);
+      if (leg.isSourceQuery() && !Utils.isEmpty(leg.sourceFunctionalTimestampField)) {
+        sourceTimestampField = leg.sourceFunctionalTimestampField;
+      }
+      String sourceTimestampColumn = databaseMeta.quoteField(sourceTimestampField);
       String filter = buildIncrementalSatelliteFilterSql(sourceTimestampColumn);
-      unionBranches.add("SELECT " + hashKeyColumn + " FROM " + satelliteTable + " WHERE " + filter);
+      unionBranches.add("SELECT " + hashKeyColumn + " FROM " + fromClause + " WHERE " + filter);
     }
     if (unionBranches.isEmpty()) {
       String hashKeyColumn = ctx.sourceDatabaseMeta.quoteField(ctx.hashKeyFieldName);
@@ -1096,7 +1301,13 @@ public final class BvScd2PipelineSupport {
     if (ctx == null || ctx.legs == null || ctx.legs.isEmpty()) {
       return 0;
     }
-    return ctx.legs.size();
+    int count = 0;
+    for (SatelliteLeg leg : ctx.legs) {
+      if (legSharesTargetConnection(ctx, leg)) {
+        count++;
+      }
+    }
+    return count;
   }
 
   public static String buildOpenTargetTableInputSql(Scd2BuildContext ctx) {
@@ -1129,7 +1340,7 @@ public final class BvScd2PipelineSupport {
     sql.append(" = ?");
     // Delta hash-key pushdown references DV satellites — only valid on a shared connection.
     // One ? per UNION branch for the watermark (parameter row repeats the value).
-    if (ctx.includeHashKey && usesSharedTargetConnection(ctx)) {
+    if (ctx.includeHashKey && hasLegSharingTargetConnection(ctx)) {
       sql.append(" AND ");
       sql.append(ctx.targetDatabaseMeta.quoteField(ctx.hashKeyFieldName));
       sql.append(" IN (");
@@ -1164,7 +1375,7 @@ public final class BvScd2PipelineSupport {
     sql.append(ctx.targetDatabaseMeta.quoteField(ctx.validToField));
     sql.append(" = ?");
     // Delta hash-key pushdown references DV satellites — only valid on a shared connection.
-    if (ctx.includeHashKey && usesSharedTargetConnection(ctx)) {
+    if (ctx.includeHashKey && hasLegSharingTargetConnection(ctx)) {
       sql.append(" AND ");
       sql.append(ctx.targetDatabaseMeta.quoteField(ctx.hashKeyFieldName));
       sql.append(" IN (");
@@ -1241,77 +1452,87 @@ public final class BvScd2PipelineSupport {
   }
 
   static String buildLegTableInputSql(Scd2BuildContext ctx, SatelliteLeg leg) {
+    DatabaseMeta databaseMeta = leg.databaseMeta(ctx);
     List<String> selectFields = new ArrayList<>();
+    String outputHashKey = ctx.hashKeyFieldName;
+    String sourceHashKey = leg.hashKeyField(ctx);
+    String outputTimestamp =
+        ctx.isMultiSatellite() ? leg.sourceFunctionalTimestampField : ctx.functionalTimestampField;
+    String sourceTimestamp =
+        !Utils.isEmpty(leg.sourceFunctionalTimestampField)
+            ? leg.sourceFunctionalTimestampField
+            : outputTimestamp;
 
     if (ctx.includeHashKey) {
-      selectFields.add(ctx.sourceDatabaseMeta.quoteField(ctx.hashKeyFieldName));
+      selectFields.add(
+          BvSourceQuerySqlSupport.selectExpression(databaseMeta, sourceHashKey, outputHashKey));
     }
     if (ctx.hasDrivingKey()) {
-      selectFields.add(ctx.sourceDatabaseMeta.quoteField(ctx.drivingKeyFieldName));
+      selectFields.add(databaseMeta.quoteField(ctx.drivingKeyFieldName));
     }
     if (ctx.isMultiSatellite()) {
       for (BvScd2FieldMapping mapping : leg.fieldMappings) {
         if (mapping != null && !Utils.isEmpty(mapping.getSourceFieldName())) {
           selectFields.add(
-              ctx.sourceDatabaseMeta.quoteField(
-                  ctx.variables.resolve(mapping.getSourceFieldName())));
+              databaseMeta.quoteField(ctx.variables.resolve(mapping.getSourceFieldName())));
         }
+      }
+    } else if (leg.isSourceQuery()) {
+      for (String attr :
+          BvSourceQuerySqlSupport.attributeFieldNames(leg.sourceQuery, ctx.variables)) {
+        if (ctx.hasDrivingKey() && ctx.drivingKeyFieldName.equals(attr)) {
+          continue;
+        }
+        selectFields.add(databaseMeta.quoteField(attr));
       }
     } else {
       for (String attr : ctx.attributeFieldNames) {
         if (ctx.hasDrivingKey() && ctx.drivingKeyFieldName.equals(attr)) {
           continue;
         }
-        selectFields.add(ctx.sourceDatabaseMeta.quoteField(attr));
+        selectFields.add(databaseMeta.quoteField(attr));
       }
     }
     // Multi-sat BV RS comes from _bv_source (post-repeat rename). Never read the physical
     // satellite column — VaultSpeed-style sats omit it and JDBC would fail.
     if (shouldSelectPhysicalRecordSource(ctx, leg)) {
-      selectFields.add(ctx.sourceDatabaseMeta.quoteField(ctx.recordSourceField));
+      selectFields.add(databaseMeta.quoteField(ctx.recordSourceField));
     }
     selectFields.add(
-        ctx.sourceDatabaseMeta.quoteField(
-            ctx.isMultiSatellite()
-                ? leg.sourceFunctionalTimestampField
-                : ctx.functionalTimestampField));
+        BvSourceQuerySqlSupport.selectExpression(databaseMeta, sourceTimestamp, outputTimestamp));
+
+    String fromClause =
+        !Utils.isEmpty(leg.fromClause)
+            ? leg.fromClause
+            : databaseMeta.getQuotedSchemaTableCombination(
+                ctx.variables, null, leg.satelliteTableName);
+
+    List<String> whereClauses = new ArrayList<>();
+    if (ctx.scd2Table != null && ctx.scd2Table.isIncrementalBuild()) {
+      whereClauses.add(
+          buildIncrementalSatelliteFilterSql(databaseMeta.quoteField(sourceTimestamp)));
+    }
+    if (isHashKeyPartitioned(ctx) && databaseMeta != null) {
+      String quotedHashKey = databaseMeta.quoteField(sourceHashKey);
+      String predicate =
+          BvScd2HashPartitionSqlSupport.buildPredicate(
+              databaseMeta,
+              ctx.dvConfig != null ? ctx.dvConfig.resolveHashKeyDataType() : null,
+              quotedHashKey);
+      if (!Utils.isEmpty(predicate)) {
+        whereClauses.add(predicate);
+      }
+    }
 
     StringBuilder sql = new StringBuilder("SELECT ");
     sql.append(String.join(", ", selectFields));
     sql.append(" FROM ");
-    sql.append(
-        ctx.sourceDatabaseMeta.getQuotedSchemaTableCombination(
-            ctx.variables, null, leg.satelliteTableName));
-    boolean hasWhere = false;
-    if (ctx.scd2Table != null && ctx.scd2Table.isIncrementalBuild()) {
-      String sourceTimestampField =
-          ctx.isMultiSatellite()
-              ? leg.sourceFunctionalTimestampField
-              : ctx.functionalTimestampField;
-      String sourceTimestampColumn = ctx.sourceDatabaseMeta.quoteField(sourceTimestampField);
+    sql.append(fromClause);
+    if (!whereClauses.isEmpty()) {
       sql.append(" WHERE ");
-      sql.append(buildIncrementalSatelliteFilterSql(sourceTimestampColumn));
-      hasWhere = true;
+      sql.append(String.join(" AND ", whereClauses));
     }
-    if (isHashKeyPartitioned(ctx) && ctx.sourceDatabaseMeta != null) {
-      String quotedHashKey = ctx.sourceDatabaseMeta.quoteField(ctx.hashKeyFieldName);
-      String predicate =
-          BvScd2HashPartitionSqlSupport.buildPredicate(
-              ctx.sourceDatabaseMeta,
-              ctx.dvConfig != null ? ctx.dvConfig.resolveHashKeyDataType() : null,
-              quotedHashKey);
-      if (!Utils.isEmpty(predicate)) {
-        sql.append(hasWhere ? " AND " : " WHERE ");
-        sql.append(predicate);
-      }
-    }
-    appendScd2OrderBy(
-        sql,
-        ctx,
-        ctx.sourceDatabaseMeta,
-        true,
-        ctx.isMultiSatellite() ? leg.sourceFunctionalTimestampField : ctx.functionalTimestampField,
-        selectFields);
+    appendScd2OrderBy(sql, ctx, databaseMeta, true, outputTimestamp, selectFields, sourceHashKey);
 
     return sql.toString();
   }
@@ -1358,10 +1579,28 @@ public final class BvScd2PipelineSupport {
       boolean includeTimestamp,
       String timestampField,
       List<String> selectFieldsFallback) {
+    appendScd2OrderBy(
+        sql,
+        ctx,
+        databaseMeta,
+        includeTimestamp,
+        timestampField,
+        selectFieldsFallback,
+        ctx.hashKeyFieldName);
+  }
+
+  static void appendScd2OrderBy(
+      StringBuilder sql,
+      Scd2BuildContext ctx,
+      DatabaseMeta databaseMeta,
+      boolean includeTimestamp,
+      String timestampField,
+      List<String> selectFieldsFallback,
+      String hashKeyField) {
     sql.append(" ORDER BY ");
     List<String> terms = new ArrayList<>();
     if (ctx.includeHashKey) {
-      terms.add(hashKeyOrderByTerm(databaseMeta, ctx));
+      terms.add(hashKeyOrderByTerm(databaseMeta, ctx, hashKeyField));
     } else if (ctx.hasDrivingKey()) {
       terms.add(databaseMeta.quoteField(ctx.drivingKeyFieldName));
     } else if (selectFieldsFallback != null && !selectFieldsFallback.isEmpty()) {
@@ -1377,7 +1616,13 @@ public final class BvScd2PipelineSupport {
   }
 
   static String hashKeyOrderByTerm(DatabaseMeta databaseMeta, Scd2BuildContext ctx) {
-    String quoted = databaseMeta.quoteField(ctx.hashKeyFieldName);
+    return hashKeyOrderByTerm(databaseMeta, ctx, ctx.hashKeyFieldName);
+  }
+
+  static String hashKeyOrderByTerm(
+      DatabaseMeta databaseMeta, Scd2BuildContext ctx, String hashKeyField) {
+    String field = !Utils.isEmpty(hashKeyField) ? hashKeyField : ctx.hashKeyFieldName;
+    String quoted = databaseMeta.quoteField(field);
     if (!hashKeyStoredAsString(ctx)) {
       return quoted;
     }
@@ -1576,7 +1821,7 @@ public final class BvScd2PipelineSupport {
       Point location,
       TransformMeta watermarkParam) {
     TableInputMeta tableInputMeta = new TableInputMeta();
-    tableInputMeta.setConnection(ctx.sourceDbName);
+    tableInputMeta.setConnection(leg.connectionName(ctx));
     DvSqlSupport.assignDisplaySql(tableInputMeta, buildLegTableInputSql(ctx, leg));
     if (isHashKeyPartitioned(ctx)) {
       tableInputMeta.setVariableReplacementActive(true);
@@ -1586,8 +1831,7 @@ public final class BvScd2PipelineSupport {
       tableInputMeta.setLookup(watermarkParam.getName());
     }
 
-    TransformMeta tm =
-        new TransformMeta("TableInput", "read_" + leg.satelliteTableName, tableInputMeta);
+    TransformMeta tm = new TransformMeta("TableInput", "read_" + leg.sourceName(), tableInputMeta);
     tm.setLocation(location);
     pipelineMeta.addTransform(tm);
     if (watermarkParam != null) {
@@ -1742,7 +1986,7 @@ public final class BvScd2PipelineSupport {
       Scd2BuildContext ctx, PipelineMeta pipelineMeta, Point location) {
     List<GeneratorField> fields = new ArrayList<>();
     fields.add(timestampGeneratorField(OPEN_END_PARAM_FIELD, ctx.openEndSentinel));
-    if (ctx.includeHashKey && usesSharedTargetConnection(ctx)) {
+    if (ctx.includeHashKey && hasLegSharingTargetConnection(ctx)) {
       String watermark = resolveIncrementalWatermarkValue(ctx);
       int watermarkParams = countDeltaHashKeyWatermarkPlaceholders(ctx);
       for (int i = 0; i < watermarkParams; i++) {
@@ -2603,13 +2847,18 @@ public final class BvScd2PipelineSupport {
     }
   }
 
-  /** Resolved inputs for one satellite branch in a generated SCD2 build pipeline. */
+  /** Resolved inputs for one satellite or source-query branch in a generated SCD2 pipeline. */
   public static final class SatelliteLeg {
     final DvSatellite satellite;
+    final BvSourceQuery sourceQuery;
     final String satelliteTableName;
     final String sourceIndicatorValue;
     final String sourceFunctionalTimestampField;
     final List<BvScd2FieldMapping> fieldMappings;
+    final DatabaseMeta databaseMeta;
+    final String connectionName;
+    final String sourceHashKeyField;
+    final String fromClause;
 
     SatelliteLeg(
         DvSatellite satellite,
@@ -2617,7 +2866,32 @@ public final class BvScd2PipelineSupport {
         String sourceIndicatorValue,
         String sourceFunctionalTimestampField,
         List<BvScd2FieldMapping> fieldMappings) {
+      this(
+          satellite,
+          null,
+          satelliteTableName,
+          sourceIndicatorValue,
+          sourceFunctionalTimestampField,
+          fieldMappings,
+          null,
+          null,
+          null,
+          null);
+    }
+
+    SatelliteLeg(
+        DvSatellite satellite,
+        BvSourceQuery sourceQuery,
+        String satelliteTableName,
+        String sourceIndicatorValue,
+        String sourceFunctionalTimestampField,
+        List<BvScd2FieldMapping> fieldMappings,
+        DatabaseMeta databaseMeta,
+        String connectionName,
+        String sourceHashKeyField,
+        String fromClause) {
       this.satellite = satellite;
+      this.sourceQuery = sourceQuery;
       this.satelliteTableName = satelliteTableName;
       this.sourceIndicatorValue = sourceIndicatorValue;
       this.sourceFunctionalTimestampField = sourceFunctionalTimestampField;
@@ -2625,6 +2899,33 @@ public final class BvScd2PipelineSupport {
           fieldMappings == null
               ? List.of()
               : Collections.unmodifiableList(new ArrayList<>(fieldMappings));
+      this.databaseMeta = databaseMeta;
+      this.connectionName = connectionName;
+      this.sourceHashKeyField = sourceHashKeyField;
+      this.fromClause = fromClause;
+    }
+
+    boolean isSourceQuery() {
+      return sourceQuery != null;
+    }
+
+    String sourceName() {
+      if (sourceQuery != null && !Utils.isEmpty(sourceQuery.getName())) {
+        return sourceQuery.getName();
+      }
+      return satellite != null ? satellite.getName() : satelliteTableName;
+    }
+
+    DatabaseMeta databaseMeta(Scd2BuildContext ctx) {
+      return databaseMeta != null ? databaseMeta : ctx.sourceDatabaseMeta;
+    }
+
+    String connectionName(Scd2BuildContext ctx) {
+      return !Utils.isEmpty(connectionName) ? connectionName : ctx.sourceDbName;
+    }
+
+    String hashKeyField(Scd2BuildContext ctx) {
+      return !Utils.isEmpty(sourceHashKeyField) ? sourceHashKeyField : ctx.hashKeyFieldName;
     }
   }
 

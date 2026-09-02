@@ -66,6 +66,7 @@ import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultConfiguratio
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultDerivativeSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultDvModelResolver;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
+import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultSourceQuerySupport;
 import org.hopper.edw.datavault.metadata.businessvault.BvDerivativeRef;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2BuildMode;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2Calculation;
@@ -76,6 +77,7 @@ import org.hopper.edw.datavault.metadata.businessvault.BvScd2HashPartitionCount;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2PipelineSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2SatelliteConfig;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2Table;
+import org.hopper.edw.datavault.metadata.businessvault.BvSourceQueryRef;
 import org.hopper.edw.datavault.transform.sqlexpression.SqlExpressionEditorDialog;
 
 /** Tabbed dialog to edit a Business Vault SCD2 table, including multi-satellite field mappings. */
@@ -105,6 +107,9 @@ public class HopGuiBvScd2TableDialog {
   private TableView wDerivatives;
   private Button wAddDerivative;
   private Button wDeleteDerivative;
+  private TableView wSourceQueries;
+  private Button wAddSourceQuery;
+  private Button wDeleteSourceQuery;
   private Label wlMappingsHint;
   private TableView wMappings;
   private Button wAddMapping;
@@ -460,7 +465,7 @@ public class HopGuiBvScd2TableDialog {
             .left()
             .top(wAddDerivative, margin)
             .right()
-            .bottom(100, margin)
+            .bottom(55, -margin)
             .result());
     wDerivatives.optimizeTableView();
     wDerivatives.table.addListener(
@@ -476,6 +481,51 @@ public class HopGuiBvScd2TableDialog {
       wlDerivatives.setText(
           BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Derivatives.MissingDvModel"));
     }
+
+    Label wlSourceQueries = new Label(comp, SWT.LEFT);
+    wlSourceQueries.setText(
+        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.SourceQueries.Label"));
+    PropsUi.setLook(wlSourceQueries);
+    wlSourceQueries.setLayoutData(
+        new FormDataBuilder().left().top(wDerivatives, margin).right().result());
+
+    wAddSourceQuery = new Button(comp, SWT.PUSH);
+    wAddSourceQuery.setText(
+        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.SourceQueries.Add"));
+    PropsUi.setLook(wAddSourceQuery);
+    wAddSourceQuery.setLayoutData(
+        new FormDataBuilder().left().top(wlSourceQueries, margin).result());
+    wAddSourceQuery.addListener(SWT.Selection, e -> addSourceQueryRow());
+
+    wDeleteSourceQuery = new Button(comp, SWT.PUSH);
+    wDeleteSourceQuery.setText(
+        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.SourceQueries.Delete"));
+    PropsUi.setLook(wDeleteSourceQuery);
+    wDeleteSourceQuery.setLayoutData(
+        new FormDataBuilder().left(wAddSourceQuery, margin).top(wlSourceQueries, margin).result());
+    wDeleteSourceQuery.addListener(SWT.Selection, e -> removeSourceQueryRows());
+
+    ColumnInfo[] sourceQueryCols =
+        new ColumnInfo[] {
+          new ColumnInfo(
+              BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.SourceQueries.Column.Name"),
+              ColumnInfo.COLUMN_TYPE_CCOMBO,
+              getEligibleSourceQueryNames(),
+              false),
+        };
+    wSourceQueries =
+        new TableView(
+            variables,
+            comp,
+            SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI,
+            sourceQueryCols,
+            1,
+            null,
+            PropsUi.getInstance());
+    wSourceQueries.setLayoutData(
+        new FormDataBuilder().left().top(wAddSourceQuery, margin).right().bottom().result());
+    wSourceQueries.optimizeTableView();
+    wSourceQueries.table.addListener(SWT.Modify, e -> refreshSatelliteDependentTabs());
   }
 
   private void addFieldMappingsTab() {
@@ -863,13 +913,14 @@ public class HopGuiBvScd2TableDialog {
     if (!Utils.isEmpty(satelliteName)) {
       List<String> names =
           BvScd2FieldMappingDialogSupport.satelliteAttributeNames(
-              satelliteName, dv, variables, provider);
+              satelliteName, dv, businessVaultModel, variables, provider);
       return names.toArray(new String[0]);
     }
     Set<String> union = new LinkedHashSet<>();
     for (String name : getSatelliteNamesFromDerivativesTable()) {
       union.addAll(
-          BvScd2FieldMappingDialogSupport.satelliteAttributeNames(name, dv, variables, provider));
+          BvScd2FieldMappingDialogSupport.satelliteAttributeNames(
+              name, dv, businessVaultModel, variables, provider));
     }
     return union.toArray(new String[0]);
   }
@@ -939,17 +990,44 @@ public class HopGuiBvScd2TableDialog {
   }
 
   private String[] getSatelliteNamesFromDerivativesTable() {
-    if (wDerivatives == null) {
-      return new String[0];
-    }
     List<String> names = new ArrayList<>();
-    for (TableItem item : wDerivatives.getNonEmptyItems()) {
-      String name = item.getText(1);
-      if (!Utils.isEmpty(name)) {
-        names.add(name);
+    if (wDerivatives != null) {
+      for (TableItem item : wDerivatives.getNonEmptyItems()) {
+        String name = item.getText(1);
+        if (!Utils.isEmpty(name)) {
+          names.add(name);
+        }
+      }
+    }
+    if (wSourceQueries != null) {
+      for (TableItem item : wSourceQueries.getNonEmptyItems()) {
+        String name = item.getText(1);
+        if (!Utils.isEmpty(name)) {
+          names.add(name);
+        }
       }
     }
     return names.toArray(new String[0]);
+  }
+
+  private String[] getEligibleSourceQueryNames() {
+    return BusinessVaultSourceQuerySupport.listSourceQueryNames(businessVaultModel)
+        .toArray(new String[0]);
+  }
+
+  private void addSourceQueryRow() {
+    new TableItem(wSourceQueries.table, SWT.NONE);
+    wSourceQueries.optimizeTableView();
+    refreshSatelliteDependentTabs();
+  }
+
+  private void removeSourceQueryRows() {
+    int idx = wSourceQueries.getSelectionIndex();
+    if (idx >= 0) {
+      wSourceQueries.table.remove(idx);
+      wSourceQueries.optimizeTableView();
+      refreshSatelliteDependentTabs();
+    }
   }
 
   private void addDerivativeRow() {
@@ -1110,6 +1188,15 @@ public class HopGuiBvScd2TableDialog {
       }
     }
     wDerivatives.optimizeTableView();
+    wSourceQueries.clearAll();
+    for (BvSourceQueryRef ref : input.getSourceQueryRefs()) {
+      if (ref == null || Utils.isEmpty(ref.getSourceQueryName())) {
+        continue;
+      }
+      TableItem item = new TableItem(wSourceQueries.table, SWT.NONE);
+      item.setText(1, ref.getSourceQueryName());
+    }
+    wSourceQueries.optimizeTableView();
     loadMappingsTable();
     loadCalculationsTable();
     refreshUnitTestArtifactLabel();
@@ -1162,6 +1249,20 @@ public class HopGuiBvScd2TableDialog {
       item.setText(3, Const.NVL(config.getSourceIndicatorValue(), ""));
     }
     wSatelliteConfigs.optimizeTableView();
+  }
+
+  private void applySourceQueriesToTable(BvScd2Table target) {
+    target.getSourceQueryRefs().clear();
+    if (wSourceQueries == null) {
+      return;
+    }
+    for (TableItem item : wSourceQueries.getNonEmptyItems()) {
+      String name = item.getText(1);
+      if (Utils.isEmpty(name) || BusinessVaultSourceQuerySupport.hasSourceQuery(target, name)) {
+        continue;
+      }
+      target.getSourceQueryRefs().add(new BvSourceQueryRef(name));
+    }
   }
 
   private void applyDerivativesToTable(BvScd2Table target) {
@@ -1294,6 +1395,7 @@ public class HopGuiBvScd2TableDialog {
     target.setValidToField(wValidToField.getText());
 
     applyDerivativesToTable(target);
+    applySourceQueriesToTable(target);
     Set<String> activeSatellites = new HashSet<>(List.of(getSatelliteNamesFromDerivativesTable()));
     BvScd2FieldMappingDialogSupport.pruneMappingsAndConfigs(target, activeSatellites);
 

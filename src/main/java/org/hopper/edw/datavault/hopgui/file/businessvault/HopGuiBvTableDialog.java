@@ -55,6 +55,7 @@ import org.hopper.edw.datavault.metadata.DvTableType;
 import org.hopper.edw.datavault.metadata.IDvTable;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultDerivativeSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
+import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultSourceQuerySupport;
 import org.hopper.edw.datavault.metadata.businessvault.BvDerivativeRef;
 import org.hopper.edw.datavault.metadata.businessvault.BvPitCadence;
 import org.hopper.edw.datavault.metadata.businessvault.BvPitRangeEnd;
@@ -62,6 +63,8 @@ import org.hopper.edw.datavault.metadata.businessvault.BvPitRangeStart;
 import org.hopper.edw.datavault.metadata.businessvault.BvPitSnapshotAnchor;
 import org.hopper.edw.datavault.metadata.businessvault.BvPitSnapshotSchedule;
 import org.hopper.edw.datavault.metadata.businessvault.BvPitTable;
+import org.hopper.edw.datavault.metadata.businessvault.BvSourceQueryRef;
+import org.hopper.edw.datavault.metadata.businessvault.BvTableBase;
 import org.hopper.edw.datavault.metadata.businessvault.BvTableType;
 import org.hopper.edw.datavault.metadata.businessvault.IBvTable;
 
@@ -102,6 +105,9 @@ public class HopGuiBvTableDialog {
   private TableView wDerivatives;
   private Button wAddDerivative;
   private Button wDeleteDerivative;
+  private TableView wSourceQueries;
+  private Button wAddSourceQuery;
+  private Button wDeleteSourceQuery;
 
   private boolean ok;
   private boolean pit;
@@ -300,8 +306,12 @@ public class HopGuiBvTableDialog {
     fdDerivatives.left = new FormAttachment(0, 0);
     fdDerivatives.top = new FormAttachment(wAddDerivative, margin);
     fdDerivatives.right = new FormAttachment(100, 0);
-    fdDerivatives.bottom = new FormAttachment(100, -50);
+    fdDerivatives.bottom = pit ? new FormAttachment(62, -margin) : new FormAttachment(100, -50);
     wDerivatives.setLayoutData(fdDerivatives);
+
+    if (pit) {
+      addSourceQueryWidgets(margin);
+    }
 
     boolean dvAvailable = dataVaultModel != null && !dataVaultModel.getTables().isEmpty();
     wAddDerivative.setEnabled(dvAvailable);
@@ -481,6 +491,17 @@ public class HopGuiBvTableDialog {
       }
     }
     wDerivatives.optimizeTableView();
+    if (wSourceQueries != null && input instanceof BvTableBase sourceQueryHost) {
+      wSourceQueries.clearAll();
+      for (BvSourceQueryRef ref : sourceQueryHost.getSourceQueryRefs()) {
+        if (ref == null || Utils.isEmpty(ref.getSourceQueryName())) {
+          continue;
+        }
+        TableItem sqItem = new TableItem(wSourceQueries.table, SWT.NONE);
+        sqItem.setText(1, ref.getSourceQueryName());
+      }
+      wSourceQueries.optimizeTableView();
+    }
   }
 
   private void ok() {
@@ -581,6 +602,84 @@ public class HopGuiBvTableDialog {
         target.getDerivatives().add(new BvDerivativeRef(dvName, dvType));
       }
     }
+    if (target instanceof BvTableBase base && wSourceQueries != null) {
+      base.getSourceQueryRefs().clear();
+      for (TableItem item : wSourceQueries.getNonEmptyItems()) {
+        String name = item.getText(1);
+        if (Utils.isEmpty(name) || BusinessVaultSourceQuerySupport.hasSourceQuery(target, name)) {
+          continue;
+        }
+        base.getSourceQueryRefs().add(new BvSourceQueryRef(name));
+      }
+    }
+  }
+
+  private void addSourceQueryWidgets(int widgetMargin) {
+    Label wlSourceQueries = new Label(shell, SWT.LEFT);
+    wlSourceQueries.setText(BaseMessages.getString(PKG, "HopGuiBvTableDialog.SourceQueries.Label"));
+    PropsUi.setLook(wlSourceQueries);
+    FormData fdlSourceQueries = new FormData();
+    fdlSourceQueries.left = new FormAttachment(0, 0);
+    fdlSourceQueries.top = new FormAttachment(wDerivatives, widgetMargin);
+    fdlSourceQueries.right = new FormAttachment(100, 0);
+    wlSourceQueries.setLayoutData(fdlSourceQueries);
+
+    wAddSourceQuery = new Button(shell, SWT.PUSH);
+    wAddSourceQuery.setText(BaseMessages.getString(PKG, "HopGuiBvTableDialog.SourceQueries.Add"));
+    PropsUi.setLook(wAddSourceQuery);
+    FormData fdAddSourceQuery = new FormData();
+    fdAddSourceQuery.left = new FormAttachment(0, 0);
+    fdAddSourceQuery.top = new FormAttachment(wlSourceQueries, widgetMargin);
+    wAddSourceQuery.setLayoutData(fdAddSourceQuery);
+    wAddSourceQuery.addListener(
+        SWT.Selection,
+        e -> {
+          new TableItem(wSourceQueries.table, SWT.NONE);
+          wSourceQueries.optimizeTableView();
+        });
+
+    wDeleteSourceQuery = new Button(shell, SWT.PUSH);
+    wDeleteSourceQuery.setText(
+        BaseMessages.getString(PKG, "HopGuiBvTableDialog.SourceQueries.Delete"));
+    PropsUi.setLook(wDeleteSourceQuery);
+    FormData fdDeleteSourceQuery = new FormData();
+    fdDeleteSourceQuery.left = new FormAttachment(wAddSourceQuery, widgetMargin);
+    fdDeleteSourceQuery.top = new FormAttachment(wlSourceQueries, widgetMargin);
+    wDeleteSourceQuery.setLayoutData(fdDeleteSourceQuery);
+    wDeleteSourceQuery.addListener(
+        SWT.Selection,
+        e -> {
+          int idx = wSourceQueries.getSelectionIndex();
+          if (idx >= 0) {
+            wSourceQueries.table.remove(idx);
+            wSourceQueries.optimizeTableView();
+          }
+        });
+
+    ColumnInfo[] sourceQueryCols =
+        new ColumnInfo[] {
+          new ColumnInfo(
+              BaseMessages.getString(PKG, "HopGuiBvTableDialog.SourceQueries.Column.Name"),
+              ColumnInfo.COLUMN_TYPE_CCOMBO,
+              BusinessVaultSourceQuerySupport.listSourceQueryNames(businessVaultModel)
+                  .toArray(new String[0]),
+              false),
+        };
+    wSourceQueries =
+        new TableView(
+            variables,
+            shell,
+            SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI,
+            sourceQueryCols,
+            1,
+            null,
+            PropsUi.getInstance());
+    FormData fdSourceQueries = new FormData();
+    fdSourceQueries.left = new FormAttachment(0, 0);
+    fdSourceQueries.top = new FormAttachment(wAddSourceQuery, widgetMargin);
+    fdSourceQueries.right = new FormAttachment(100, 0);
+    fdSourceQueries.bottom = new FormAttachment(100, -50);
+    wSourceQueries.setLayoutData(fdSourceQueries);
   }
 
   private static int parseHorizonDays(String text) {

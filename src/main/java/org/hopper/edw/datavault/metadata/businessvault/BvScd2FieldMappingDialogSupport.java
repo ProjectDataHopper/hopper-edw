@@ -145,9 +145,27 @@ public final class BvScd2FieldMappingDialogSupport {
       DataVaultModel dataVaultModel,
       IVariables variables,
       IHopMetadataProvider metadataProvider) {
+    return satelliteAttributeNames(
+        satelliteName, dataVaultModel, null, variables, metadataProvider);
+  }
+
+  public static List<String> satelliteAttributeNames(
+      String satelliteName,
+      DataVaultModel dataVaultModel,
+      BusinessVaultModel bvModel,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider) {
     DvSatellite satellite =
         resolveSatellite(dataVaultModel, satelliteName, variables, metadataProvider);
-    return attributeNamesOf(satellite);
+    if (satellite != null) {
+      return attributeNamesOf(satellite);
+    }
+    BvSourceQuery sourceQuery =
+        BusinessVaultSourceQuerySupport.findSourceQuery(bvModel, satelliteName);
+    if (sourceQuery != null) {
+      return BvSourceQuerySqlSupport.attributeFieldNames(sourceQuery, variables);
+    }
+    return List.of();
   }
 
   public static List<BvScd2FieldMapping> suggestMappings(

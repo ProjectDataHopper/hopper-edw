@@ -150,6 +150,14 @@ Keep using link:dbt-import.adoc[Import dbt models] for arbitrary SQL business ta
 . Generate a Hop pipeline unit test and sample collapsed rows once.
 . Optional: a BV SQL view that projects the calculated columns without the raw flags.
 
+== Source queries (other tables, views, or SQL)
+
+When a satellite-shaped input is **not** on the Data Vault target — for example a corrective view on another database — add a **Source query** on the BV canvas and hop it to the SCD2 table. The Data Vault model still has one target database; the source query is the BV-side exception.
+
+Each generated `TableInput` uses that source's Hop connection. Table/view names are read directly. Authored SQL is wrapped as a subquery so the plugin can add partition `WHERE` and hash-key/date `ORDER BY` outside the inner statement. The source query must name its **hash key field**.
+
+Mixed SCD2 (DV satellites plus source queries) is supported; two or more inputs still require field mappings. The mapping **Source** column is the satellite name or the source-query name.
+
 == Single-satellite SCD2
 
 The simplest case: one DV satellite derivative → one BV table.

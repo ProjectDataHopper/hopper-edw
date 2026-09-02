@@ -55,7 +55,7 @@ public final class BvPitLayoutSupport {
       throw new HopException(
           "PIT table " + pitTable.getName() + " must reference a hub derivative");
     }
-    if (satellites.isEmpty()) {
+    if (satellites.isEmpty() && !hasSourceQuery(pitTable)) {
       throw new HopException(
           "PIT table " + pitTable.getName() + " must reference at least one satellite derivative");
     }
@@ -68,16 +68,27 @@ public final class BvPitLayoutSupport {
     rowMeta.addValueMeta(BvScd2PipelineSupport.resolveHashKeyValueMeta(hashKeyName, dvModel));
     rowMeta.addValueMeta(new ValueMetaTimestamp(snapshotField));
 
-    for (DvSatellite satellite : satellites) {
-      String pointerName = resolveSatellitePointerColumnName(satellite, schedule, variables);
-      if (rowMeta.indexOfValue(pointerName) >= 0) {
-        throw new HopException(
-            "Duplicate PIT satellite pointer column '"
-                + pointerName
-                + "' on table "
-                + pitTable.getName());
+    if (satellites.isEmpty()) {
+      for (BvSourceQueryRef ref : pitTable.getSourceQueryRefs()) {
+        if (ref == null || Utils.isEmpty(ref.getSourceQueryName())) {
+          continue;
+        }
+        String pointerName =
+            resolveSourceQueryPointerColumnName(ref.getSourceQueryName(), schedule, variables);
+        rowMeta.addValueMeta(new ValueMetaTimestamp(pointerName));
       }
-      rowMeta.addValueMeta(new ValueMetaTimestamp(pointerName));
+    } else {
+      for (DvSatellite satellite : satellites) {
+        String pointerName = resolveSatellitePointerColumnName(satellite, schedule, variables);
+        if (rowMeta.indexOfValue(pointerName) >= 0) {
+          throw new HopException(
+              "Duplicate PIT satellite pointer column '"
+                  + pointerName
+                  + "' on table "
+                  + pitTable.getName());
+        }
+        rowMeta.addValueMeta(new ValueMetaTimestamp(pointerName));
+      }
     }
     if (bvConfig != null) {
       DvLoadCycleSupport.appendToLayout(
@@ -108,6 +119,41 @@ public final class BvPitLayoutSupport {
       suffix = BvPitSnapshotSchedule.DEFAULT_SATELLITE_POINTER_SUFFIX;
     }
     return baseName + suffix;
+  }
+
+  public static String resolveSourceQueryPointerColumnName(
+      BvSourceQuery sourceQuery, BvPitSnapshotSchedule schedule, IVariables variables) {
+    String baseName =
+        sourceQuery != null
+            ? (!Utils.isEmpty(sourceQuery.getTableName())
+                ? sourceQuery.getTableName()
+                : sourceQuery.getName())
+            : "source_query";
+    return resolveSourceQueryPointerColumnName(baseName, schedule, variables);
+  }
+
+  static String resolveSourceQueryPointerColumnName(
+      String baseName, BvPitSnapshotSchedule schedule, IVariables variables) {
+    String suffix = schedule != null ? schedule.getSatellitePointerSuffix() : null;
+    if (variables != null) {
+      suffix = variables.resolve(suffix);
+    }
+    if (Utils.isEmpty(suffix)) {
+      suffix = BvPitSnapshotSchedule.DEFAULT_SATELLITE_POINTER_SUFFIX;
+    }
+    return (Utils.isEmpty(baseName) ? "source_query" : baseName) + suffix;
+  }
+
+  private static boolean hasSourceQuery(BvPitTable pitTable) {
+    if (pitTable == null) {
+      return false;
+    }
+    for (BvSourceQueryRef ref : pitTable.getSourceQueryRefs()) {
+      if (ref != null && !Utils.isEmpty(ref.getSourceQueryName())) {
+        return true;
+      }
+    }
+    return false;
   }
 
   static String resolveSatellitePhysicalName(DvSatellite satellite) {

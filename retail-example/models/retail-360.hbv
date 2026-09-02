@@ -31,6 +31,7 @@ limitations under the License.
       <validToField/>
       <includeHashKey>Y</includeHashKey>
       <includeHubBusinessKeys>Y</includeHubBusinessKeys>
+      <hubBusinessKeysCalculationOnly>N</hubBusinessKeysCalculationOnly>
       <field_mappings>
         <field_mapping>
           <satelliteName>sat_customer_demo</satelliteName>
@@ -154,6 +155,7 @@ limitations under the License.
           <dvTableType>SATELLITE</dvTableType>
         </derivative>
       </derivatives>
+      <source_query_refs/>
       <xloc>528</xloc>
       <yloc>176</yloc>
       <name>customer_360_bv</name>

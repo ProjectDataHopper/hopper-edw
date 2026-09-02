@@ -314,6 +314,75 @@ class BvScd2PipelineSupportTest {
   }
 
   @Test
+  void sourceQueryLegUsesOwnConnectionAndWrapsSql() throws Exception {
+    Scd2BuildContext ctx =
+        singleSatelliteContext(BvScd2BuildMode.FULL_REBUILD, null, "Vault", "Vault");
+    BvSourceQuery source = new BvSourceQuery();
+    source.setName("sat_customer_corrected");
+    source.setSourceKind(BvSourceQueryKind.SQL);
+    source.setSqlQuery(
+        "WITH x AS (SELECT customer_hk, name, x_load_ts FROM sat_customer) SELECT * FROM x");
+    source.setHashKeyField("customer_hk");
+    source.setFunctionalTimestampField("x_load_ts");
+    BvSourceQueryColumn nameCol = new BvSourceQueryColumn("name");
+    source.getColumns().add(nameCol);
+    source.getColumns().add(new BvSourceQueryColumn("customer_hk"));
+    source.getColumns().add(new BvSourceQueryColumn("x_load_ts"));
+    DatabaseMeta crm = new TestDatabaseMeta("CRM");
+    SatelliteLeg leg =
+        new SatelliteLeg(
+            null,
+            source,
+            "sat_customer_corrected",
+            "sat_customer_corrected",
+            "x_load_ts",
+            List.of(),
+            crm,
+            "CRM",
+            "customer_hk",
+            BvSourceQuerySqlSupport.fromClause(crm, ctx.variables, source));
+    Scd2BuildContext sourceCtx =
+        new Scd2BuildContext(
+            ctx.scd2Table,
+            List.of(leg),
+            false,
+            List.of(),
+            ctx.bvModel,
+            ctx.dvModel,
+            ctx.bvConfig,
+            ctx.dvConfig,
+            ctx.metadataProvider,
+            ctx.variables,
+            ctx.sourceDatabaseMeta,
+            ctx.sourceDbName,
+            ctx.targetDatabaseMeta,
+            ctx.targetDbName,
+            "sat_customer_corrected",
+            ctx.bvTargetTableName,
+            ctx.pipelineName,
+            ctx.hashKeyFieldName,
+            ctx.drivingKeyFieldName,
+            List.of("name"),
+            ctx.functionalTimestampField,
+            ctx.validFromField,
+            ctx.validToField,
+            ctx.recordSourceField,
+            ctx.openStartSentinel,
+            ctx.openEndSentinel,
+            true);
+
+    String sql = BvScd2PipelineSupport.buildLegTableInputSql(sourceCtx, leg);
+    assertTrue(sql.contains("(WITH x AS"));
+    assertTrue(sql.contains(") src"));
+    assertTrue(sql.contains(" ORDER BY "));
+    assertTrue(sql.indexOf("FROM (") < sql.indexOf(" ORDER BY "));
+    assertFalse(sql.contains(";"));
+
+    assertEquals("CRM", leg.connectionName(sourceCtx));
+    assertFalse(BvScd2PipelineSupport.legSharesTargetConnection(sourceCtx, leg));
+  }
+
+  @Test
   void buildLegTableInputSqlCrossDbDoesNotReferenceBvTable() throws Exception {
     Scd2BuildContext ctx =
         singleSatelliteContext(BvScd2BuildMode.INCREMENTAL, null, "Vault", "BusinessVault");

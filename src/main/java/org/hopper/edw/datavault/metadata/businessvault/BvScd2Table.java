@@ -177,7 +177,10 @@ public class BvScd2Table extends BvTableBase {
     boolean hasSatellite =
         getDerivatives().stream()
             .anyMatch(ref -> ref != null && ref.getDvTableType() == DvTableType.SATELLITE);
-    if (!hasSatellite) {
+    boolean hasSourceQuery =
+        getSourceQueryRefs().stream()
+            .anyMatch(ref -> ref != null && !Utils.isEmpty(ref.getSourceQueryName()));
+    if (!hasSatellite && !hasSourceQuery) {
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_ERROR,
@@ -185,6 +188,7 @@ public class BvScd2Table extends BvTableBase {
                   PKG, "BvScd2Table.CheckResult.MissingSatelliteDerivative", getName()),
               this));
     }
+    BusinessVaultSourceQuerySupport.validateRefs(remarks, this, model);
     BusinessVaultConfiguration bvConfig =
         model != null ? model.getConfigurationOrDefault() : new BusinessVaultConfiguration();
     DataVaultConfiguration dvConfig =
@@ -264,7 +268,7 @@ public class BvScd2Table extends BvTableBase {
       }
     } else {
       BvScd2FieldMappingValidationSupport.validate(
-          remarks, this, bvConfig, dvConfig, dataVaultModel, variables, metadataProvider);
+          remarks, this, bvConfig, dvConfig, dataVaultModel, model, variables, metadataProvider);
       BvScd2CalculationValidationSupport.validate(
           remarks, this, bvConfig, dataVaultModel, variables);
       BvScd2PipelineSupport.validateTargetDatabases(

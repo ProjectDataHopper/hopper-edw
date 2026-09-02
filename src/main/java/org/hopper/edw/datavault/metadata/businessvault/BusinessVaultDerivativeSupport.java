@@ -32,6 +32,7 @@ public final class BusinessVaultDerivativeSupport {
       case SCD2 -> dvTableType == DvTableType.SATELLITE;
       case PIT -> dvTableType == DvTableType.HUB || dvTableType == DvTableType.SATELLITE;
       case BUSINESS_TABLE -> true;
+      case SOURCE_QUERY -> false;
     };
   }
 

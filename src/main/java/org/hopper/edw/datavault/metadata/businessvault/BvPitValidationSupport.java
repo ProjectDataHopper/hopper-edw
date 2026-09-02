@@ -52,6 +52,8 @@ final class BvPitValidationSupport {
 
     validateSnapshotDateField(remarks, pitTable, variables);
     validateDerivatives(remarks, pitTable, dvModel);
+    BusinessVaultSourceQuerySupport.validateRefs(remarks, pitTable, bvModel);
+    validateSourceQueryConnection(remarks, pitTable, bvModel, dvModel, variables);
     validateSchedule(remarks, pitTable, variables);
 
     if (dvModel != null) {
@@ -156,7 +158,14 @@ final class BvPitValidationSupport {
               pitTable));
     }
 
-    if (satelliteCount == 0) {
+    int sourceQueryCount = 0;
+    for (BvSourceQueryRef ref : pitTable.getSourceQueryRefs()) {
+      if (ref != null && !Utils.isEmpty(ref.getSourceQueryName())) {
+        sourceQueryCount++;
+      }
+    }
+
+    if (satelliteCount == 0 && sourceQueryCount == 0) {
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_ERROR,
@@ -164,6 +173,16 @@ final class BvPitValidationSupport {
                   PKG, "BvPitTable.CheckResult.MissingSatelliteDerivative", pitTable.getName()),
               pitTable));
       return;
+    }
+    if (satelliteCount + sourceQueryCount > 1) {
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_ERROR,
+              BaseMessages.getString(
+                  PKG,
+                  "BvPitPipelineSupport.Error.MultiSatelliteNotImplemented",
+                  pitTable.getName()),
+              pitTable));
     }
 
     if (hubCount != 1 || dvModel == null || Utils.isEmpty(hubDerivativeName)) {
@@ -325,6 +344,32 @@ final class BvPitValidationSupport {
                     pitTable.getName(),
                     satellite.getName(),
                     hubName),
+                pitTable));
+      }
+    }
+  }
+
+  private static void validateSourceQueryConnection(
+      List<ICheckResult> remarks,
+      BvPitTable pitTable,
+      BusinessVaultModel bvModel,
+      DataVaultModel dvModel,
+      IVariables variables) {
+    if (pitTable == null || dvModel == null) {
+      return;
+    }
+    for (BvSourceQuery sourceQuery :
+        BusinessVaultSourceQuerySupport.resolveSourceQueries(pitTable, bvModel)) {
+      if (!BusinessVaultSourceQuerySupport.usesDvTargetConnection(
+          sourceQuery, dvModel, variables)) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_ERROR,
+                BaseMessages.getString(
+                    PKG,
+                    "BvPitValidationSupport.Error.SourceQueryDifferentConnection",
+                    pitTable.getName(),
+                    sourceQuery.getName()),
                 pitTable));
       }
     }

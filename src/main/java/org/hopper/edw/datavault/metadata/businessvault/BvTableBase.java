@@ -63,6 +63,9 @@ public abstract class BvTableBase extends HopMetadataBase implements IHopMetadat
   @HopMetadataProperty(key = "derivative", groupKey = "derivatives")
   private List<BvDerivativeRef> derivatives = new ArrayList<>();
 
+  @HopMetadataProperty(key = "source_query_ref", groupKey = "source_query_refs")
+  private List<BvSourceQueryRef> sourceQueryRefs = new ArrayList<>();
+
   @HopMetadataProperty(inline = true)
   private Point location = new Point(0, 0);
 
@@ -82,6 +85,17 @@ public abstract class BvTableBase extends HopMetadataBase implements IHopMetadat
       derivatives = new ArrayList<>();
     }
     return derivatives;
+  }
+
+  public List<BvSourceQueryRef> getSourceQueryRefs() {
+    if (sourceQueryRefs == null) {
+      sourceQueryRefs = new ArrayList<>();
+    }
+    return sourceQueryRefs;
+  }
+
+  public void setSourceQueryRefs(List<BvSourceQueryRef> sourceQueryRefs) {
+    this.sourceQueryRefs = sourceQueryRefs;
   }
 
   @Override

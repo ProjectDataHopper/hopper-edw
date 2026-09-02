@@ -100,7 +100,9 @@ public final class BvCatalogPublisher {
     int errorCount = 0;
 
     for (IBvTable table : bvModel.getTables()) {
-      if (table == null || Utils.isEmpty(table.getName())) {
+      if (table == null
+          || Utils.isEmpty(table.getName())
+          || table.getTableType() == BvTableType.SOURCE_QUERY) {
         continue;
       }
       try {

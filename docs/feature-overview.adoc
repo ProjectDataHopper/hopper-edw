@@ -138,6 +138,10 @@ For a slide-style executive summary, see link:presentations/hop-data-vault-overv
 |Available
 |link:business-vault-scd2.adoc[Business Vault SCD2], issue https://github.com/ProjectDataHopper/hopper-edw/issues/153[#153]
 
+|BV source query (table/view or SQL on another connection for SCD2/PIT)
+|Preview
+|link:help/bv-source-query-dialog.adoc[Source query dialog], link:business-vault-scd2.adoc[Business Vault SCD2]
+
 |BV PIT tables
 |Available
 |link:business-vault-pit.adoc[Business Vault PIT]

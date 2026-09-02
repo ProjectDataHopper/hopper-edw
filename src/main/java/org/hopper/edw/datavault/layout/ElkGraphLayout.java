@@ -47,6 +47,7 @@ import org.hopper.edw.datavault.metadata.DvTableType;
 import org.hopper.edw.datavault.metadata.IDvTable;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BvDerivativeRef;
+import org.hopper.edw.datavault.metadata.businessvault.BvSourceQueryRef;
 import org.hopper.edw.datavault.metadata.businessvault.BvTableBase;
 import org.hopper.edw.datavault.metadata.businessvault.IBvTable;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
@@ -501,6 +502,17 @@ public final class ElkGraphLayout {
             if (dvTableByName.containsKey(derivative.getDvTableName())) {
               referencedDv.add(derivative.getDvTableName());
               addEdgeOnce(edges, edgeKeys, bvTable.getName(), derivative.getDvTableName());
+            }
+          }
+          if (bvTable instanceof BvTableBase base) {
+            for (BvSourceQueryRef sourceQueryRef : base.getSourceQueryRefs()) {
+              if (sourceQueryRef == null || Utils.isEmpty(sourceQueryRef.getSourceQueryName())) {
+                continue;
+              }
+              if (bvByName.containsKey(sourceQueryRef.getSourceQueryName())) {
+                addEdgeOnce(
+                    edges, edgeKeys, bvTable.getName(), sourceQueryRef.getSourceQueryName());
+              }
             }
           }
         }

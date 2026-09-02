@@ -34,6 +34,7 @@ Must point at the parent raw vault model. Without it, DV references cannot resol
 | `SCD2` | History table from one or more DV satellites |
 | `PIT` | Point-in-time snapshot helper |
 | `BUSINESS_TABLE` | SQL or other BV table shape |
+| `SOURCE_QUERY` | Satellite-shaped table/view or SQL that SCD2/PIT hop to (optional other connection) |
 
 Inspect real retail samples for exact nested tags (`satellite_config`, `field_mapping`, `dv_reference`, …).
 

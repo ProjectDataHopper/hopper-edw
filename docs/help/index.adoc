@@ -42,6 +42,9 @@ Guides for the same features live in the parent folder (link:../index.adoc[docum
 |link:bv-scd2-table-dialog.adoc[bv-scd2-table-dialog]
 |Business Vault SCD2 table
 
+|link:bv-source-query-dialog.adoc[bv-source-query-dialog]
+|Business Vault source query
+
 |link:bv-table-dialog.adoc[bv-table-dialog]
 |Business Vault table
 

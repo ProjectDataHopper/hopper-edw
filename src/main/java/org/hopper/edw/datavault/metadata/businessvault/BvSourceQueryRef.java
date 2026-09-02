@@ -15,10 +15,24 @@
  */
 package org.hopper.edw.datavault.metadata.businessvault;
 
-/** Business Vault table kinds modeled on a {@link BusinessVaultModel} canvas. */
-public enum BvTableType {
-  SCD2,
-  PIT,
-  BUSINESS_TABLE,
-  SOURCE_QUERY
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.apache.hop.metadata.api.HopMetadataProperty;
+
+/**
+ * Hop from an SCD2 or PIT table to a {@link BvSourceQuery} on the same Business Vault canvas.
+ *
+ * <p>Stored separately from {@link BvDerivativeRef} so existing DV satellite/hub XML is unchanged.
+ */
+@Getter
+@Setter
+@NoArgsConstructor
+public class BvSourceQueryRef {
+
+  @HopMetadataProperty private String sourceQueryName;
+
+  public BvSourceQueryRef(String sourceQueryName) {
+    this.sourceQueryName = sourceQueryName;
+  }
 }

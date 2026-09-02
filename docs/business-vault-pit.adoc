@@ -6,7 +6,7 @@ toc::[]
 
 Point-in-time (PIT) tables accelerate **as-of** queries against raw Data Vault hub and satellite history. For each snapshot timestamp and hub grain key, the plugin stores the load timestamp of the satellite row that was effective at that moment.
 
-PIT tables live in the **Business Vault** (`.hbv`) model alongside SCD2 tables. They read **raw** hub and satellite tables on the Data Vault target database and write the PIT table to the Business Vault target database.
+PIT tables live in the **Business Vault** (`.hbv`) model alongside SCD2 tables. They read **raw** hub and satellite tables on the Data Vault target database and write the PIT table to the Business Vault target database. A **source query** can replace the satellite (same connection as the Data Vault target); the hub remains a DV alias. Cross-database PIT is not supported because the generated SQL joins hub and satellite in one statement.
 
 == What PIT solves
 

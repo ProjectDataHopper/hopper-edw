@@ -49,20 +49,35 @@ public final class BvScd2FieldMappingValidationSupport {
       DataVaultModel dataVaultModel,
       IVariables variables,
       IHopMetadataProvider metadataProvider) {
+    validate(
+        remarks, scd2Table, bvConfig, dvConfig, dataVaultModel, null, variables, metadataProvider);
+  }
+
+  static void validate(
+      List<ICheckResult> remarks,
+      BvScd2Table scd2Table,
+      BusinessVaultConfiguration bvConfig,
+      DataVaultConfiguration dvConfig,
+      DataVaultModel dataVaultModel,
+      BusinessVaultModel bvModel,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider) {
     if (scd2Table == null || dataVaultModel == null) {
       return;
     }
 
     List<DvSatellite> satellites =
         resolveSatelliteDerivatives(scd2Table, dataVaultModel, variables, metadataProvider);
-    if (satellites.isEmpty()) {
+    List<BvSourceQuery> sourceQueries =
+        BusinessVaultSourceQuerySupport.resolveSourceQueries(scd2Table, bvModel);
+    if (satellites.isEmpty() && sourceQueries.isEmpty()) {
       return;
     }
 
     List<BvScd2FieldMapping> mappings = scd2Table.getFieldMappings();
     boolean hasMappings = mappings != null && !mappings.isEmpty();
 
-    if (satellites.size() > 1 && !hasMappings) {
+    if (satellites.size() + sourceQueries.size() > 1 && !hasMappings) {
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_ERROR,
@@ -76,6 +91,11 @@ public final class BvScd2FieldMappingValidationSupport {
     Set<String> derivativeNames = new HashSet<>();
     for (DvSatellite satellite : satellites) {
       derivativeNames.add(satellite.getName());
+    }
+    for (BvSourceQuery sourceQuery : sourceQueries) {
+      if (sourceQuery != null && !Utils.isEmpty(sourceQuery.getName())) {
+        derivativeNames.add(sourceQuery.getName());
+      }
     }
 
     validateSharedParent(remarks, scd2Table, satellites);
@@ -141,7 +161,21 @@ public final class BvScd2FieldMappingValidationSupport {
       }
 
       DvSatellite satellite = findSatellite(satellites, satelliteName);
+      BvSourceQuery sourceQuery = findSourceQuery(sourceQueries, satelliteName);
       if (satellite != null && !satelliteDefinesAttribute(satellite, sourceFieldName)) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_ERROR,
+                BaseMessages.getString(
+                    PKG,
+                    "BvScd2FieldMappingValidationSupport.Error.MissingSourceField",
+                    scd2Table.getName(),
+                    satelliteName,
+                    sourceFieldName),
+                scd2Table));
+      } else if (sourceQuery != null
+          && !sourceQuery.getColumns().isEmpty()
+          && !sourceQuery.definesColumn(sourceFieldName)) {
         remarks.add(
             new CheckResult(
                 ICheckResult.TYPE_RESULT_ERROR,
@@ -157,7 +191,7 @@ public final class BvScd2FieldMappingValidationSupport {
       mappingsPerSatellite.merge(satelliteName, 1, Integer::sum);
     }
 
-    if (satellites.size() > 1) {
+    if (satellites.size() + sourceQueries.size() > 1) {
       for (Map.Entry<String, Integer> entry : mappingsPerSatellite.entrySet()) {
         if (entry.getValue() == 0) {
           remarks.add(
@@ -175,6 +209,7 @@ public final class BvScd2FieldMappingValidationSupport {
 
     validateSatelliteConfigs(remarks, scd2Table, satellites, derivativeNames, variables);
     validateFunctionalTimestamps(remarks, scd2Table, satellites, bvConfig, dvConfig, variables);
+    validateSourceQueryTimestamps(remarks, scd2Table, sourceQueries, bvConfig, dvConfig, variables);
   }
 
   static void validateHubBusinessKeys(
@@ -632,5 +667,63 @@ public final class BvScd2FieldMappingValidationSupport {
       }
     }
     return null;
+  }
+
+  private static BvSourceQuery findSourceQuery(List<BvSourceQuery> sourceQueries, String name) {
+    if (sourceQueries == null || Utils.isEmpty(name)) {
+      return null;
+    }
+    for (BvSourceQuery sourceQuery : sourceQueries) {
+      if (sourceQuery != null && name.equalsIgnoreCase(sourceQuery.getName())) {
+        return sourceQuery;
+      }
+    }
+    return null;
+  }
+
+  private static void validateSourceQueryTimestamps(
+      List<ICheckResult> remarks,
+      BvScd2Table scd2Table,
+      List<BvSourceQuery> sourceQueries,
+      BusinessVaultConfiguration bvConfig,
+      DataVaultConfiguration dvConfig,
+      IVariables variables) {
+    if (sourceQueries == null || sourceQueries.isEmpty()) {
+      return;
+    }
+    for (BvSourceQuery sourceQuery : sourceQueries) {
+      if (sourceQuery == null) {
+        continue;
+      }
+      BvScd2SatelliteConfig config =
+          findSatelliteConfig(scd2Table, sourceQuery.getName(), variables);
+      String timestamp =
+          BvScd2PipelineSupport.resolveFunctionalTimestampFieldForSourceQuery(
+              scd2Table, sourceQuery, config, bvConfig, dvConfig, variables);
+      if (Utils.isEmpty(timestamp)) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_ERROR,
+                BaseMessages.getString(
+                    PKG,
+                    "BvScd2FieldMappingValidationSupport.Error.MissingFunctionalTimestampForSatellite",
+                    scd2Table.getName(),
+                    sourceQuery.getName()),
+                scd2Table));
+        continue;
+      }
+      if (!sourceQuery.getColumns().isEmpty() && !sourceQuery.definesColumn(timestamp)) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_ERROR,
+                BaseMessages.getString(
+                    PKG,
+                    "BvScd2FieldMappingValidationSupport.Error.MissingFunctionalTimestampColumn",
+                    scd2Table.getName(),
+                    sourceQuery.getName(),
+                    timestamp),
+                scd2Table));
+      }
+    }
   }
 }

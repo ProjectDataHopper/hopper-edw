@@ -281,6 +281,7 @@ public final class BvSqlDependencySupport {
       case SCD2 -> 0;
       case PIT -> 1;
       case BUSINESS_TABLE -> 2;
+      case SOURCE_QUERY -> 99;
     };
   }
 }

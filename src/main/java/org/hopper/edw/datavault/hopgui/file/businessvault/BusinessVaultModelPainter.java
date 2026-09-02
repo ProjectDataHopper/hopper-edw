@@ -49,6 +49,7 @@ import org.hopper.edw.datavault.metadata.businessvault.BvBusinessTable;
 import org.hopper.edw.datavault.metadata.businessvault.BvBvTableReference;
 import org.hopper.edw.datavault.metadata.businessvault.BvDerivativeRef;
 import org.hopper.edw.datavault.metadata.businessvault.BvDvTableReference;
+import org.hopper.edw.datavault.metadata.businessvault.BvSourceQueryRef;
 import org.hopper.edw.datavault.metadata.businessvault.BvSqlRef;
 import org.hopper.edw.datavault.metadata.businessvault.BvSqlResolvedKind;
 import org.hopper.edw.datavault.metadata.businessvault.BvTableBase;
@@ -339,6 +340,29 @@ public class BusinessVaultModelPainter extends BasePainter {
         edges.add(
             new ModelGraphEdgeLayout.Edge(
                 "der|" + bvKey + "|" + index + "|" + dvKey, bvKey, bvBounds, dvKey, dvBounds));
+      }
+      int sourceQueryIndex = 0;
+      for (BvSourceQueryRef sourceQueryRef : base.getSourceQueryRefs()) {
+        int index = sourceQueryIndex++;
+        if (sourceQueryRef == null || Utils.isEmpty(sourceQueryRef.getSourceQueryName())) {
+          continue;
+        }
+        IBvTable sourceTable = model.findTable(sourceQueryRef.getSourceQueryName());
+        if (!(sourceTable instanceof BvTableBase sourceBase) || sourceBase.getLocation() == null) {
+          continue;
+        }
+        Bounds sourceBounds = getBvTableBounds(sourceBase);
+        if (sourceBounds == null) {
+          continue;
+        }
+        String sourceKey = bvTableKey(sourceBase);
+        edges.add(
+            new ModelGraphEdgeLayout.Edge(
+                "sq|" + bvKey + "|" + index + "|" + sourceKey,
+                bvKey,
+                bvBounds,
+                sourceKey,
+                sourceBounds));
       }
       if (bvTable instanceof BvBusinessTable businessTable) {
         collectSqlRefConnectionEdges(
@@ -1019,6 +1043,7 @@ public class BusinessVaultModelPainter extends BasePainter {
       case SCD2 -> new int[] {20, 90, 160};
       case PIT -> new int[] {120, 70, 20};
       case BUSINESS_TABLE -> new int[] {40, 120, 60};
+      case SOURCE_QUERY -> new int[] {90, 90, 110};
     };
   }
 

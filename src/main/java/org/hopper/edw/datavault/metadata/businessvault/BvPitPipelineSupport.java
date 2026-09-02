@@ -99,22 +99,35 @@ public final class BvPitPipelineSupport {
     DvHub hub = BvPitLayoutSupport.resolveHubDerivative(pitTable, dvModel);
     List<DvSatellite> satellites =
         BvPitLayoutSupport.resolveSatelliteDerivatives(pitTable, dvModel);
+    List<BvSourceQuery> sourceQueries =
+        BusinessVaultSourceQuerySupport.resolveSourceQueries(pitTable, bvModel);
     if (hub == null) {
       throw new HopException(
           BaseMessages.getString(PKG, "BvPitPipelineSupport.Error.MissingHub", pitTable.getName()));
     }
-    if (satellites.isEmpty()) {
+    if (satellites.isEmpty() && sourceQueries.isEmpty()) {
       throw new HopException(
           BaseMessages.getString(
               PKG, "BvPitPipelineSupport.Error.MissingSatellite", pitTable.getName()));
     }
-    if (satellites.size() > 1) {
+    if (satellites.size() + sourceQueries.size() > 1) {
       throw new HopException(
           BaseMessages.getString(
               PKG, "BvPitPipelineSupport.Error.MultiSatelliteNotImplemented", pitTable.getName()));
     }
+    if (!sourceQueries.isEmpty()
+        && !BusinessVaultSourceQuerySupport.usesDvTargetConnection(
+            sourceQueries.get(0), dvModel, variables)) {
+      throw new HopException(
+          BaseMessages.getString(
+              PKG,
+              "BvPitValidationSupport.Error.SourceQueryDifferentConnection",
+              pitTable.getName(),
+              sourceQueries.get(0).getName()));
+    }
 
-    DvSatellite satellite = satellites.get(0);
+    DvSatellite satellite = satellites.isEmpty() ? null : satellites.get(0);
+    BvSourceQuery sourceQuery = sourceQueries.isEmpty() ? null : sourceQueries.get(0);
     BvPitSnapshotSchedule schedule = pitTable.getSnapshotScheduleOrDefault();
     if (schedule.getCadence() != BvPitCadence.DAILY) {
       throw new HopException(
@@ -130,11 +143,22 @@ public final class BvPitPipelineSupport {
     String pipelineName = bvConfig.buildPitPipelineName(variables, bvTargetTableName);
     String hashKeyFieldName = BvPitLayoutSupport.resolveHubHashKeyFieldName(hub, variables);
     String snapshotDateField = BvPitLayoutSupport.resolveSnapshotDateField(pitTable, variables);
-    String loadDateField = BvPitSnapshotSpineSupport.resolveLoadDateField(dvConfig, variables);
+    String loadDateField =
+        sourceQuery != null && !Utils.isEmpty(sourceQuery.getLoadDateField())
+            ? variables.resolve(sourceQuery.getLoadDateField())
+            : BvPitSnapshotSpineSupport.resolveLoadDateField(dvConfig, variables);
     String satellitePointerColumnName =
-        BvPitLayoutSupport.resolveSatellitePointerColumnName(satellite, schedule, variables);
+        sourceQuery != null
+            ? BvPitLayoutSupport.resolveSourceQueryPointerColumnName(
+                sourceQuery, schedule, variables)
+            : BvPitLayoutSupport.resolveSatellitePointerColumnName(satellite, schedule, variables);
     String hubTableName = !Utils.isEmpty(hub.getTableName()) ? hub.getTableName() : hub.getName();
-    String satelliteTableName = BvPitLayoutSupport.resolveSatellitePhysicalName(satellite);
+    String satelliteTableName =
+        sourceQuery != null
+            ? (!Utils.isEmpty(sourceQuery.getTableName())
+                ? sourceQuery.getTableName()
+                : sourceQuery.getName())
+            : BvPitLayoutSupport.resolveSatellitePhysicalName(satellite);
 
     return new PitBuildContext(
         pitTable,
@@ -177,12 +201,19 @@ public final class BvPitPipelineSupport {
 
     if (needsSatelliteLoadCte) {
       sql.append("earliest_satellite_load AS (");
-      sql.append(
-          BvPitSnapshotSpineSupport.buildEarliestParticipatingSatelliteLoadSql(
-              ctx.sourceDatabaseMeta(),
-              ctx.variables(),
-              List.of(ctx.satellite()),
-              ctx.loadDateField()));
+      if (ctx.satellite() == null) {
+        sql.append("SELECT MIN(")
+            .append(ctx.sourceDatabaseMeta().quoteField(ctx.loadDateField()))
+            .append(") AS earliest_load FROM ")
+            .append(satelliteRelation(ctx, "sat"));
+      } else {
+        sql.append(
+            BvPitSnapshotSpineSupport.buildEarliestParticipatingSatelliteLoadSql(
+                ctx.sourceDatabaseMeta(),
+                ctx.variables(),
+                List.of(ctx.satellite()),
+                ctx.loadDateField()));
+      }
       sql.append("), ");
     }
     if (needsHubLoadCte) {
@@ -246,9 +277,7 @@ public final class BvPitPipelineSupport {
     String quotedLoadDate = ctx.sourceDatabaseMeta().quoteField(ctx.loadDateField());
     String quotedSnapshotField = ctx.sourceDatabaseMeta().quoteField(ctx.snapshotDateField());
     String quotedPointer = ctx.sourceDatabaseMeta().quoteField(ctx.satellitePointerColumnName());
-    String quotedSatelliteTable =
-        ctx.sourceDatabaseMeta()
-            .getQuotedSchemaTableCombination(ctx.variables(), null, ctx.satelliteTableName());
+    String quotedSatelliteTable = satelliteRelation(ctx, "sat");
     String incremental = buildIncrementalSnapshotFilter(ctx);
 
     return "SELECT hk."
@@ -265,7 +294,7 @@ public final class BvPitPipelineSupport {
         + "CROSS JOIN snapshot_spine spine "
         + "LEFT JOIN "
         + quotedSatelliteTable
-        + " sat ON sat."
+        + " ON sat."
         + quotedHashKey
         + " = hk."
         + quotedHashKey
@@ -422,6 +451,31 @@ public final class BvPitPipelineSupport {
     return result.transformMeta;
   }
 
+  private static String satelliteRelation(PitBuildContext ctx, String alias) {
+    BvSourceQuery sourceQuery =
+        BusinessVaultSourceQuerySupport.resolveSourceQueries(ctx.pitTable(), ctx.bvModel()).stream()
+            .findFirst()
+            .orElse(null);
+    if (sourceQuery != null) {
+      if (sourceQuery.isSqlSource()) {
+        return BvSourceQuerySqlSupport.wrapSqlAsSubquery(sourceQuery.getSqlQuery(), alias);
+      }
+      String table =
+          BvSourceQuerySqlSupport.quotedTable(
+              ctx.sourceDatabaseMeta(),
+              ctx.variables(),
+              sourceQuery.getSchemaName(),
+              !Utils.isEmpty(sourceQuery.getTableName())
+                  ? sourceQuery.getTableName()
+                  : sourceQuery.getName());
+      return table + " " + alias;
+    }
+    return ctx.sourceDatabaseMeta()
+            .getQuotedSchemaTableCombination(ctx.variables(), null, ctx.satelliteTableName())
+        + " "
+        + alias;
+  }
+
   private static String buildIncrementalSnapshotFilter(PitBuildContext ctx) {
     // Positional ? bound from param_snapshot_watermark Constant (dialect-neutral).
     return BvPitSnapshotSpineSupport.buildIncrementalSnapshotFilterSql("spine.snapshot_date");
@@ -479,17 +533,13 @@ public final class BvPitPipelineSupport {
     String quotedHashKey = ctx.sourceDatabaseMeta().quoteField(ctx.hashKeyFieldName());
     String quotedLoadDate = ctx.sourceDatabaseMeta().quoteField(ctx.loadDateField());
     String satelliteAlias = "sat";
-    String quotedSatelliteTable =
-        ctx.sourceDatabaseMeta()
-            .getQuotedSchemaTableCombination(ctx.variables(), null, ctx.satelliteTableName());
+    String quotedSatelliteTable = satelliteRelation(ctx, satelliteAlias);
     return "(SELECT MAX("
         + satelliteAlias
         + "."
         + quotedLoadDate
         + ") FROM "
         + quotedSatelliteTable
-        + " "
-        + satelliteAlias
         + " WHERE "
         + satelliteAlias
         + "."

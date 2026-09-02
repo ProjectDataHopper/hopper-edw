@@ -119,12 +119,14 @@ import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultDerivativeSu
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultDvModelResolver;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultDvReferenceSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
+import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultSourceQuerySupport;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultUpdateExecutionSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BvBusinessTable;
 import org.hopper.edw.datavault.metadata.businessvault.BvBvTableReference;
 import org.hopper.edw.datavault.metadata.businessvault.BvDvTableReference;
 import org.hopper.edw.datavault.metadata.businessvault.BvPitTable;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2Table;
+import org.hopper.edw.datavault.metadata.businessvault.BvSourceQuery;
 import org.hopper.edw.datavault.metadata.businessvault.BvTableBase;
 import org.hopper.edw.datavault.metadata.businessvault.BvTargetDatabaseSupport;
 import org.hopper.edw.datavault.metadata.businessvault.IBvTable;
@@ -738,6 +740,10 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
           new HopGuiBvBusinessTableDialog(
                   getShell(), businessTable, model, dataVaultModel, variables)
               .open();
+    } else if (table instanceof BvSourceQuery sourceQuery) {
+      accepted =
+          new HopGuiBvSourceQueryDialog(getShell(), sourceQuery, model, dataVaultModel, variables)
+              .open();
     } else {
       accepted =
           new HopGuiBvTableDialog(getShell(), table, model, dataVaultModel, variables).open();
@@ -811,12 +817,38 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
       createDerivativeRelationship(startRelationshipBvTable, targetDvReference);
     } else if (startRelationshipDvReference != null && targetBvTable != null) {
       createDerivativeRelationship(targetBvTable, startRelationshipDvReference);
+    } else if (startRelationshipBvTable != null && targetBvTable != null) {
+      createSourceQueryRelationship(startRelationshipBvTable, targetBvTable);
     }
 
     cancelRelationshipDrag();
     clearCanvasDragState();
     avoidContextDialog = true;
     redraw();
+  }
+
+  private void createSourceQueryRelationship(IBvTable from, IBvTable to) {
+    IBvTable consumer;
+    BvSourceQuery sourceQuery;
+    if (from instanceof BvSourceQuery query && BusinessVaultSourceQuerySupport.isConsumer(to)) {
+      sourceQuery = query;
+      consumer = to;
+    } else if (to instanceof BvSourceQuery query
+        && BusinessVaultSourceQuerySupport.isConsumer(from)) {
+      sourceQuery = query;
+      consumer = from;
+    } else {
+      return;
+    }
+    if (!BusinessVaultSourceQuerySupport.canAddSourceQuery(consumer, sourceQuery)) {
+      return;
+    }
+    byte[] beforeChange = captureUndoSnapshot();
+    if (BusinessVaultSourceQuerySupport.addSourceQuery(consumer, sourceQuery)) {
+      commitDialogUndo(beforeChange);
+      setChanged();
+      redraw();
+    }
   }
 
   private void createDerivativeRelationship(IBvTable bvTable, BvDvTableReference dvReference) {
@@ -1607,6 +1639,26 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     }
     graph.markUndoPoint();
     graph.addBvTableAtClick(new BvBusinessTable(), context.getClick());
+    graph.setChanged();
+    graph.redraw();
+  }
+
+  @GuiContextAction(
+      id = "bv-graph-add-source-query",
+      parentId = HopGuiBusinessVaultContext.CONTEXT_ID,
+      type = GuiActionType.Create,
+      name = "i18n::HopGuiBusinessVaultGraph.Context.AddSourceQuery.Name",
+      tooltip = "i18n::HopGuiBusinessVaultGraph.Context.AddSourceQuery.Tooltip",
+      image = "business-vault-model.svg",
+      category = "Business Vault",
+      categoryOrder = "3")
+  public void addSourceQuery(HopGuiBusinessVaultContext context) {
+    HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
+    if (graph == null || context.getModel() == null) {
+      return;
+    }
+    graph.markUndoPoint();
+    graph.addBvTableAtClick(new BvSourceQuery(), context.getClick());
     graph.setChanged();
     graph.redraw();
   }
