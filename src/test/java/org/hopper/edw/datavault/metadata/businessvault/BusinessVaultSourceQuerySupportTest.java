@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.Variables;
@@ -26,6 +27,8 @@ import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.hopper.edw.datavault.hopgui.file.businessvault.HopBusinessVaultFileType;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
+import org.hopper.edw.datavault.metadata.DvHub;
+import org.hopper.edw.datavault.metadata.DvTableType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
@@ -50,6 +53,18 @@ class BusinessVaultSourceQuerySupportTest {
     assertTrue(BusinessVaultSourceQuerySupport.hasSourceQuery(scd2, "sat_customer_corrected"));
     assertTrue(BusinessVaultSourceQuerySupport.removeSourceQuery(scd2, "sat_customer_corrected"));
     assertFalse(BusinessVaultSourceQuerySupport.hasSourceQuery(scd2, "sat_customer_corrected"));
+  }
+
+  @Test
+  void listParentHubNamesUsesCanvasAliasesThenDvModel() {
+    BusinessVaultModel bvModel = new BusinessVaultModel();
+    bvModel.getDvReferences().add(new BvDvTableReference("hub_customer", DvTableType.HUB));
+    DataVaultModel dvModel = new DataVaultModel();
+    DvHub product = new DvHub("hub_product");
+    dvModel.getTables().add(product);
+
+    List<String> names = BusinessVaultSourceQuerySupport.listParentHubNames(bvModel, dvModel);
+    assertEquals(List.of("hub_customer", "hub_product"), names);
   }
 
   @Test

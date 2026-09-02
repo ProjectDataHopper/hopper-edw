@@ -22,6 +22,9 @@ import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.Props;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.row.IRowMeta;
+import org.apache.hop.core.row.IValueMeta;
+import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
@@ -86,7 +89,7 @@ public class HopGuiBvSourceQueryDialog {
   private Text wHashKeyField;
   private Text wFunctionalTimestamp;
   private Text wLoadDateField;
-  private Text wParentHubName;
+  private Combo wParentHubName;
   private TextComposite wSqlQuery;
   private TableView wColumns;
   private CTabFolder wTabFolder;
@@ -175,7 +178,16 @@ public class HopGuiBvSourceQueryDialog {
     lastLabel =
         addRightLabel(
             "HopGuiBvSourceQueryDialog.ParentHubName.Label", wLoadDateField, middle, margin);
-    wParentHubName = addText(lastLabel, middle);
+    wParentHubName = new Combo(shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+    PropsUi.setLook(wParentHubName);
+    wParentHubName.setToolTipText(
+        BaseMessages.getString(PKG, "HopGuiBvSourceQueryDialog.ParentHubName.ToolTip"));
+    FormData fdParentHub = new FormData();
+    fdParentHub.left = new FormAttachment(middle, 0);
+    fdParentHub.top = new FormAttachment(lastLabel, 0, SWT.TOP);
+    fdParentHub.right = new FormAttachment(100, 0);
+    wParentHubName.setLayoutData(fdParentHub);
+    populateParentHubCombo();
 
     wTabFolder = new CTabFolder(shell, SWT.BORDER);
     PropsUi.setLook(wTabFolder);
@@ -270,7 +282,8 @@ public class HopGuiBvSourceQueryDialog {
               false),
           new ColumnInfo(
               BaseMessages.getString(PKG, "HopGuiBvSourceQueryDialog.Columns.Type"),
-              ColumnInfo.COLUMN_TYPE_TEXT,
+              ColumnInfo.COLUMN_TYPE_CCOMBO,
+              ValueMetaFactory.getValueMetaNames(),
               false),
           new ColumnInfo(
               BaseMessages.getString(PKG, "HopGuiBvSourceQueryDialog.Columns.Length"),
@@ -309,6 +322,19 @@ public class HopGuiBvSourceQueryDialog {
     fd.right = new FormAttachment(middle, -margin);
     label.setLayoutData(fd);
     return label;
+  }
+
+  private void populateParentHubCombo() {
+    String current = wParentHubName.getText();
+    wParentHubName.removeAll();
+    wParentHubName.add("");
+    for (String hubName :
+        BusinessVaultSourceQuerySupport.listParentHubNames(businessVaultModel, dataVaultModel)) {
+      wParentHubName.add(hubName);
+    }
+    if (!Utils.isEmpty(current)) {
+      wParentHubName.setText(current);
+    }
   }
 
   private Text addText(Label label, int middle) {
@@ -396,15 +422,30 @@ public class HopGuiBvSourceQueryDialog {
                 metadataProvider, businessVaultModel.getConfigurationOrDefault());
       }
       String sql = BvSourceQuerySqlSupport.previewSql(databaseMeta, variables, draft);
-      List<String> names = DmSourceSqlGuiSupport.resolveFieldNames(variables, databaseMeta, sql);
+      IRowMeta rowMeta = DmSourceSqlGuiSupport.resolveFieldRowMeta(variables, databaseMeta, sql);
       wColumns.clearAll();
-      for (String name : names) {
+      String firstName = null;
+      for (int i = 0; i < rowMeta.size(); i++) {
+        IValueMeta valueMeta = rowMeta.getValueMeta(i);
+        BvSourceQueryColumn column = BvSourceQuerySqlSupport.fromValueMeta(valueMeta);
+        if (column == null) {
+          continue;
+        }
+        if (firstName == null) {
+          firstName = column.getName();
+        }
         TableItem item = new TableItem(wColumns.table, SWT.NONE);
-        item.setText(1, name);
+        item.setText(1, Const.NVL(column.getName(), ""));
+        item.setText(2, Const.NVL(column.getDataType(), ""));
+        item.setText(3, Const.NVL(column.getLength(), ""));
+        item.setText(4, Const.NVL(column.getPrecision(), ""));
       }
       wColumns.optimizeTableView();
-      if (Utils.isEmpty(wHashKeyField.getText()) && !names.isEmpty()) {
-        wHashKeyField.setText(names.get(0));
+      if (Utils.isEmpty(wHashKeyField.getText()) && !Utils.isEmpty(firstName)) {
+        wHashKeyField.setText(firstName);
+      }
+      if (wTabFolder.getItemCount() > 1) {
+        wTabFolder.setSelection(1);
       }
     } catch (Exception e) {
       new ErrorDialog(

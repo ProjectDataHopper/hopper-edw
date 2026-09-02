@@ -20,11 +20,11 @@ The Data Vault model still has **one** target database. This object is the excep
 * **Hash key field** — Required. Grain column in the source result. Aliased to the SCD2/PIT hash key when names differ.
 * **Functional timestamp** — Optional SCD2 timeline column (else SCD2 table / model / load-date fallback).
 * **Load date field** — Optional PIT pointer column (else Data Vault load date).
-* **Parent hub** — Optional DV hub name for shared-parent / hub business-key checks.
+* **Parent hub** — Optional. Pick the **Linked Hub** on this canvas whose grain (hash key) the query shares — the same hub a satellite of this entity would hop to. Needed when this source query is mixed with DV satellites on one SCD2 table, or when the SCD2 table includes hub business keys. Leave empty for a source-query-only SCD2/PIT hop.
 
 == Columns
 
-**Get fields** and **Preview** run against the chosen connection. Persist the column list so Check model and SCD2 mappings work without a live JDBC round-trip at generate time.
+**Get fields** and **Preview** run against the chosen connection. Get fields copies name, Hop type, length, and precision from JDBC metadata. Persist the column list so Check model and SCD2 mappings work without a live JDBC round-trip at generate time.
 
 == Linking
 

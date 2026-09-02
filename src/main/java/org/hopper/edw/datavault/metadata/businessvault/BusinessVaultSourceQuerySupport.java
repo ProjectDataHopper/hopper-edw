@@ -16,7 +16,10 @@
 package org.hopper.edw.datavault.metadata.businessvault;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.database.DatabaseMeta;
@@ -27,7 +30,10 @@ import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
+import org.hopper.edw.datavault.metadata.DvHub;
 import org.hopper.edw.datavault.metadata.DvSpecialRecordSupport;
+import org.hopper.edw.datavault.metadata.DvTableType;
+import org.hopper.edw.datavault.metadata.IDvTable;
 
 /** Rules for hops from SCD2/PIT tables to {@link BvSourceQuery} canvas objects. */
 public final class BusinessVaultSourceQuerySupport {
@@ -148,6 +154,34 @@ public final class BusinessVaultSourceQuerySupport {
       }
     }
     return names;
+  }
+
+  /**
+   * Hub names a source query can claim as parent: Linked Hub aliases on the BV canvas, then hubs in
+   * the loaded Data Vault model.
+   */
+  public static List<String> listParentHubNames(
+      BusinessVaultModel bvModel, DataVaultModel dvModel) {
+    Set<String> names = new LinkedHashSet<>();
+    if (bvModel != null && bvModel.getDvReferences() != null) {
+      for (BvDvTableReference reference : bvModel.getDvReferences()) {
+        if (reference != null
+            && reference.getDvTableType() == DvTableType.HUB
+            && !Utils.isEmpty(reference.getDvTableName())) {
+          names.add(reference.getDvTableName());
+        }
+      }
+    }
+    if (dvModel != null && dvModel.getTables() != null) {
+      for (IDvTable table : dvModel.getTables()) {
+        if (table instanceof DvHub && !Utils.isEmpty(table.getName())) {
+          names.add(table.getName());
+        }
+      }
+    }
+    List<String> sorted = new ArrayList<>(names);
+    Collections.sort(sorted);
+    return sorted;
   }
 
   /**

@@ -50,6 +50,22 @@ public final class DmSourceSqlGuiSupport {
 
   public static List<String> resolveFieldNames(
       IVariables variables, DatabaseMeta databaseMeta, String sourceSql) throws HopException {
+    IRowMeta rowMeta = resolveFieldRowMeta(variables, databaseMeta, sourceSql);
+    List<String> fieldNames = new ArrayList<>();
+    for (int i = 0; i < rowMeta.size(); i++) {
+      String name = rowMeta.getValueMeta(i).getName();
+      if (!Utils.isEmpty(name)) {
+        fieldNames.add(name);
+      }
+    }
+    if (fieldNames.isEmpty()) {
+      throw new HopException(BaseMessages.getString(PKG, "DmSourceSqlGuiSupport.Error.NoFields"));
+    }
+    return fieldNames;
+  }
+
+  public static IRowMeta resolveFieldRowMeta(
+      IVariables variables, DatabaseMeta databaseMeta, String sourceSql) throws HopException {
     if (databaseMeta == null) {
       throw new HopException(
           BaseMessages.getString(PKG, "DmSourceSqlGuiSupport.Error.MissingConnection"));
@@ -66,17 +82,7 @@ public final class DmSourceSqlGuiSupport {
       if (rowMeta == null || rowMeta.isEmpty()) {
         throw new HopException(BaseMessages.getString(PKG, "DmSourceSqlGuiSupport.Error.NoFields"));
       }
-      List<String> fieldNames = new ArrayList<>();
-      for (int i = 0; i < rowMeta.size(); i++) {
-        String name = rowMeta.getValueMeta(i).getName();
-        if (!Utils.isEmpty(name)) {
-          fieldNames.add(name);
-        }
-      }
-      if (fieldNames.isEmpty()) {
-        throw new HopException(BaseMessages.getString(PKG, "DmSourceSqlGuiSupport.Error.NoFields"));
-      }
-      return fieldNames;
+      return rowMeta;
     } catch (HopException e) {
       throw e;
     } catch (Exception e) {

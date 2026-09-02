@@ -21,10 +21,38 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import org.apache.hop.core.database.DatabaseMeta;
+import org.apache.hop.core.row.IValueMeta;
+import org.apache.hop.core.row.value.ValueMetaInteger;
+import org.apache.hop.core.row.value.ValueMetaString;
+import org.apache.hop.core.row.value.ValueMetaTimestamp;
 import org.apache.hop.core.variables.Variables;
 import org.junit.jupiter.api.Test;
 
 class BvSourceQuerySqlSupportTest {
+
+  @Test
+  void fromValueMetaCopiesTypeLengthAndPrecision() {
+    ValueMetaString name = new ValueMetaString("customer_name");
+    name.setLength(100);
+    BvSourceQueryColumn nameCol = BvSourceQuerySqlSupport.fromValueMeta(name);
+    assertEquals("customer_name", nameCol.getName());
+    assertEquals("String", nameCol.getDataType());
+    assertEquals("100", nameCol.getLength());
+    assertEquals(null, nameCol.getPrecision());
+
+    ValueMetaInteger score = new ValueMetaInteger("demo_score");
+    score.setLength(9);
+    score.setPrecision(0);
+    BvSourceQueryColumn scoreCol = BvSourceQuerySqlSupport.fromValueMeta(score);
+    assertEquals("Integer", scoreCol.getDataType());
+    assertEquals("9", scoreCol.getLength());
+    assertEquals("0", scoreCol.getPrecision());
+
+    IValueMeta loadTs = new ValueMetaTimestamp("x_load_ts");
+    BvSourceQueryColumn tsCol = BvSourceQuerySqlSupport.fromValueMeta(loadTs);
+    assertEquals("Timestamp", tsCol.getDataType());
+    assertEquals(null, tsCol.getLength());
+  }
 
   @Test
   void stripTrailingSemicolonRemovesTerminator() {

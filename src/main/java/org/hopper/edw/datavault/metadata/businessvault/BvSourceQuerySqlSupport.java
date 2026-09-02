@@ -18,6 +18,8 @@ package org.hopper.edw.datavault.metadata.businessvault;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.database.DatabaseMeta;
+import org.apache.hop.core.row.IValueMeta;
+import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 
@@ -30,6 +32,22 @@ public final class BvSourceQuerySqlSupport {
   public static final String DEFAULT_ALIAS = "src";
 
   private BvSourceQuerySqlSupport() {}
+
+  /** Copies Hop query metadata into a persisted source-query column (type, length, precision). */
+  public static BvSourceQueryColumn fromValueMeta(IValueMeta valueMeta) {
+    if (valueMeta == null || Utils.isEmpty(valueMeta.getName())) {
+      return null;
+    }
+    BvSourceQueryColumn column = new BvSourceQueryColumn(valueMeta.getName());
+    column.setDataType(ValueMetaFactory.getValueMetaName(valueMeta.getType()));
+    if (valueMeta.getLength() >= 0) {
+      column.setLength(Integer.toString(valueMeta.getLength()));
+    }
+    if (valueMeta.getPrecision() >= 0) {
+      column.setPrecision(Integer.toString(valueMeta.getPrecision()));
+    }
+    return column;
+  }
 
   public static String stripTrailingSemicolon(String sql) {
     if (sql == null) {
