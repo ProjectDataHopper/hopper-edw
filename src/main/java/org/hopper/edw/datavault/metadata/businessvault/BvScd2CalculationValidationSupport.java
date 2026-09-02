@@ -19,15 +19,23 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.hop.core.CheckResult;
+import org.apache.hop.core.Const;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.row.IRowMeta;
+import org.apache.hop.core.row.IValueMeta;
+import org.apache.hop.core.row.RowMeta;
+import org.apache.hop.core.row.value.ValueMetaFactory;
+import org.apache.hop.core.row.value.ValueMetaString;
+import org.apache.hop.core.row.value.ValueMetaTimestamp;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
 import org.hopper.edw.datavault.expression.SqlExpressionException;
 import org.hopper.edw.datavault.expression.SqlExpressionProgram;
 import org.hopper.edw.datavault.expression.SqlExpressionSpec;
+import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
+import org.hopper.edw.datavault.metadata.DvSatellite;
 
 /** Check-model rules for SCD2 SQL calculations and their stored tests. */
 final class BvScd2CalculationValidationSupport {
@@ -42,7 +50,17 @@ final class BvScd2CalculationValidationSupport {
       BusinessVaultConfiguration bvConfig,
       DataVaultModel dataVaultModel,
       IVariables variables) {
-    if (scd2Table == null || dataVaultModel == null) {
+    validate(remarks, scd2Table, bvConfig, dataVaultModel, null, variables);
+  }
+
+  static void validate(
+      List<ICheckResult> remarks,
+      BvScd2Table scd2Table,
+      BusinessVaultConfiguration bvConfig,
+      DataVaultModel dataVaultModel,
+      BusinessVaultModel bvModel,
+      IVariables variables) {
+    if (scd2Table == null) {
       return;
     }
     List<BvScd2Calculation> calculations = scd2Table.getCalculations();
@@ -52,15 +70,8 @@ final class BvScd2CalculationValidationSupport {
       return;
     }
 
-    IRowMeta collapseLayout;
-    try {
-      collapseLayout =
-          BvScd2PipelineSupport.buildCollapseRowLayout(
-              scd2Table, bvConfig, dataVaultModel, variables);
-    } catch (Exception e) {
-      remarks.add(new CheckResult(ICheckResult.TYPE_RESULT_ERROR, e.getMessage(), scd2Table));
-      return;
-    }
+    IRowMeta collapseLayout =
+        collapseLayoutForCheck(scd2Table, bvConfig, dataVaultModel, bvModel, variables);
 
     Set<String> reserved = reservedNames(collapseLayout);
     Set<String> calcNames = new HashSet<>();
@@ -102,6 +113,21 @@ final class BvScd2CalculationValidationSupport {
                     scd2Table.getName(),
                     name),
                 scd2Table));
+      }
+      if (!Utils.isEmpty(calculation.getHopTypeName())) {
+        int typeId = ValueMetaFactory.getIdForValueMeta(calculation.getHopTypeName());
+        if (typeId == IValueMeta.TYPE_NONE) {
+          remarks.add(
+              new CheckResult(
+                  ICheckResult.TYPE_RESULT_ERROR,
+                  BaseMessages.getString(
+                      PKG,
+                      "BvScd2CalculationValidationSupport.Error.UnknownHopType",
+                      scd2Table.getName(),
+                      name,
+                      calculation.getHopTypeName()),
+                  scd2Table));
+        }
       }
     }
 
@@ -150,5 +176,129 @@ final class BvScd2CalculationValidationSupport {
       }
     }
     return names;
+  }
+
+  static IRowMeta collapseLayoutForCheck(
+      BvScd2Table scd2Table,
+      BusinessVaultConfiguration bvConfig,
+      DataVaultModel dataVaultModel,
+      BusinessVaultModel bvModel,
+      IVariables variables) {
+    IRowMeta layout = null;
+    if (dataVaultModel != null) {
+      try {
+        layout =
+            BvScd2PipelineSupport.buildCollapseRowLayout(
+                scd2Table, bvConfig, dataVaultModel, variables);
+      } catch (Exception ignored) {
+        layout = null;
+      }
+    }
+    if (layout == null) {
+      layout = new RowMeta();
+    }
+    addMissingCheckFields(layout, scd2Table, bvConfig, dataVaultModel, bvModel, variables);
+    return layout;
+  }
+
+  private static void addMissingCheckFields(
+      IRowMeta layout,
+      BvScd2Table scd2Table,
+      BusinessVaultConfiguration bvConfig,
+      DataVaultModel dataVaultModel,
+      BusinessVaultModel bvModel,
+      IVariables variables) {
+    DataVaultConfiguration dvConfig =
+        dataVaultModel != null ? dataVaultModel.getConfigurationOrDefault() : null;
+    List<DvSatellite> satellites =
+        BvScd2FieldMappingValidationSupport.resolveSatelliteDerivatives(scd2Table, dataVaultModel);
+    List<BvSourceQuery> sourceQueries =
+        BusinessVaultSourceQuerySupport.resolveSourceQueries(scd2Table, bvModel);
+    addIfMissing(
+        layout,
+        stringOrTimestamp(
+            BvScd2PipelineSupport.resolveSharedHashKeyFieldName(
+                scd2Table, satellites, sourceQueries, dataVaultModel, variables),
+            false));
+    if (scd2Table.getFieldMappings() != null) {
+      for (BvScd2FieldMapping mapping : scd2Table.getFieldMappings()) {
+        if (mapping == null || Utils.isEmpty(mapping.getTargetFieldName())) {
+          continue;
+        }
+        String target = variables.resolve(mapping.getTargetFieldName());
+        IValueMeta meta = valueMetaForMappedField(mapping, target, sourceQueries, variables);
+        addIfMissing(layout, meta);
+      }
+    }
+    addIfMissing(
+        layout,
+        new ValueMetaString(BvScd2PipelineSupport.resolveRecordSourceField(dvConfig, variables)));
+    addIfMissing(
+        layout,
+        new ValueMetaTimestamp(
+            BvScd2PipelineSupport.resolveFunctionalTimestampField(
+                scd2Table, bvConfig, dvConfig, variables)));
+    addIfMissing(
+        layout,
+        new ValueMetaTimestamp(
+            BvScd2PipelineSupport.resolveValidFromField(scd2Table, bvConfig, variables)));
+    addIfMissing(
+        layout,
+        new ValueMetaTimestamp(
+            BvScd2PipelineSupport.resolveValidToField(scd2Table, bvConfig, variables)));
+  }
+
+  private static IValueMeta valueMetaForMappedField(
+      BvScd2FieldMapping mapping,
+      String targetName,
+      List<BvSourceQuery> sourceQueries,
+      IVariables variables) {
+    String sourceName = variables.resolve(mapping.getSatelliteName());
+    String sourceField = variables.resolve(mapping.getSourceFieldName());
+    for (BvSourceQuery sourceQuery : sourceQueries) {
+      if (sourceQuery == null || !sourceName.equalsIgnoreCase(sourceQuery.getName())) {
+        continue;
+      }
+      for (BvSourceQueryColumn column : sourceQuery.getColumns()) {
+        if (column != null && sourceField.equalsIgnoreCase(column.getName())) {
+          return valueMetaFromColumn(targetName, column);
+        }
+      }
+    }
+    return new ValueMetaString(targetName);
+  }
+
+  private static IValueMeta valueMetaFromColumn(String name, BvSourceQueryColumn column) {
+    int typeId = IValueMeta.TYPE_STRING;
+    if (!Utils.isEmpty(column.getDataType())) {
+      typeId = ValueMetaFactory.getIdForValueMeta(column.getDataType());
+      if (typeId <= 0) {
+        typeId = IValueMeta.TYPE_STRING;
+      }
+    }
+    try {
+      IValueMeta meta = ValueMetaFactory.createValueMeta(name, typeId);
+      meta.setLength(Const.toInt(column.getLength(), -1));
+      meta.setPrecision(Const.toInt(column.getPrecision(), -1));
+      return meta;
+    } catch (Exception e) {
+      return new ValueMetaString(name);
+    }
+  }
+
+  private static IValueMeta stringOrTimestamp(String name, boolean timestamp) {
+    if (Utils.isEmpty(name)) {
+      return null;
+    }
+    return timestamp ? new ValueMetaTimestamp(name) : new ValueMetaString(name);
+  }
+
+  private static void addIfMissing(IRowMeta layout, IValueMeta meta) {
+    if (layout == null || meta == null || Utils.isEmpty(meta.getName())) {
+      return;
+    }
+    if (layout.indexOfValue(meta.getName()) < 0) {
+      layout.addValueMeta(meta);
+    }
   }
 }

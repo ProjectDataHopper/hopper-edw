@@ -443,6 +443,114 @@ class BvScd2PipelineSupportTest {
   }
 
   @Test
+  void repeatFieldsIncludesSourceQueryMappedAttributes() throws Exception {
+    DataVaultModel dvModel = loadVault1Model();
+    DvSatellite customerSatellite = (DvSatellite) dvModel.findTable("sat_customer");
+    DatabaseMeta databaseMeta = new TestDatabaseMeta("Vault");
+
+    BvSourceQuery source = new BvSourceQuery();
+    source.setName("sq_customer_view");
+    source.setSourceKind(BvSourceQueryKind.TABLE);
+    source.setTableName("vw_customer");
+    source.setHashKeyField("customer_hk");
+    source.setFunctionalTimestampField("x_load_ts");
+    source.getColumns().add(new BvSourceQueryColumn("customer_hk"));
+    source.getColumns().add(new BvSourceQueryColumn("x_load_ts"));
+    source.getColumns().add(new BvSourceQueryColumn("loyalty_tier"));
+
+    BvScd2Table scd2Table = new BvScd2Table();
+    scd2Table.setName("customer_bv");
+    scd2Table.setTableName("customer_bv");
+    scd2Table.setFunctionalTimestampField("x_load_ts");
+    scd2Table.getDerivatives().add(new BvDerivativeRef("sat_customer", DvTableType.SATELLITE));
+    scd2Table.getSourceQueryRefs().add(new BvSourceQueryRef("sq_customer_view"));
+    scd2Table
+        .getFieldMappings()
+        .add(new BvScd2FieldMapping("sat_customer", "name", "customer_name"));
+    scd2Table
+        .getFieldMappings()
+        .add(new BvScd2FieldMapping("sq_customer_view", "loyalty_tier", "loyalty_tier"));
+
+    BusinessVaultModel bvModel = new BusinessVaultModel();
+    bvModel.getConfigurationOrDefault().setTargetDatabase("Vault");
+    bvModel.getTables().add(source);
+
+    Scd2BuildContext ctx =
+        new Scd2BuildContext(
+            scd2Table,
+            List.of(
+                new SatelliteLeg(
+                    customerSatellite,
+                    "sat_customer",
+                    "sat_customer",
+                    "x_load_ts",
+                    List.of(scd2Table.getFieldMappings().get(0))),
+                new SatelliteLeg(
+                    null,
+                    source,
+                    "vw_customer",
+                    "sq_customer_view",
+                    "x_load_ts",
+                    List.of(scd2Table.getFieldMappings().get(1)),
+                    databaseMeta,
+                    "Vault",
+                    "customer_hk",
+                    BvSourceQuerySqlSupport.fromClause(databaseMeta, new Variables(), source))),
+            true,
+            List.of("customer_name", "loyalty_tier"),
+            bvModel,
+            dvModel,
+            bvModel.getConfigurationOrDefault(),
+            dvModel.getConfigurationOrDefault(),
+            null,
+            new Variables(),
+            databaseMeta,
+            "Vault",
+            databaseMeta,
+            "Vault",
+            "sat_customer",
+            "customer_bv",
+            "bv-scd2-customer_bv-customer_bv",
+            "customer_hk",
+            null,
+            List.of("customer_name", "loyalty_tier"),
+            "x_load_ts",
+            "valid_from",
+            "valid_to",
+            "x_record_source",
+            BusinessVaultConfiguration.DEFAULT_OPEN_START_SENTINEL,
+            BusinessVaultConfiguration.DEFAULT_OPEN_END_SENTINEL,
+            true);
+
+    PipelineMeta pipelineMeta = BvScd2PipelineSupport.generatePipeline(ctx);
+    RepeatFieldsMeta repeatMeta =
+        (RepeatFieldsMeta)
+            pipelineMeta.getTransforms().stream()
+                .filter(t -> t.getTransform() instanceof RepeatFieldsMeta)
+                .findFirst()
+                .orElseThrow()
+                .getTransform();
+
+    Repeat satelliteRepeat =
+        repeatMeta.getRepeats().stream()
+            .filter(repeat -> "customer_name".equals(repeat.getSourceField()))
+            .findFirst()
+            .orElseThrow();
+    assertEquals("sat_customer", satelliteRepeat.getIndicatorValue());
+    assertEquals("_r_customer_name", satelliteRepeat.getTargetField());
+
+    Repeat sourceQueryRepeat =
+        repeatMeta.getRepeats().stream()
+            .filter(repeat -> "loyalty_tier".equals(repeat.getSourceField()))
+            .findFirst()
+            .orElseThrow();
+    assertEquals("sq_customer_view", sourceQueryRepeat.getIndicatorValue());
+    assertEquals("_r_loyalty_tier", sourceQueryRepeat.getTargetField());
+    assertEquals(
+        BvScd2PipelineSupport.SOURCE_INDICATOR_FIELD, sourceQueryRepeat.getIndicatorFieldName());
+  }
+
+  @Test
   void scd2ParentHubIsTheMergeGrainForSourceQueryHashKey() throws Exception {
     DataVaultModel dvModel = loadVault1Model();
     BvScd2Table scd2 = new BvScd2Table();

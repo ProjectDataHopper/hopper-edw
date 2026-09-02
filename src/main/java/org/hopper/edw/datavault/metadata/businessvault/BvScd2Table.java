@@ -273,13 +273,21 @@ public class BvScd2Table extends BvTableBase {
                     PKG, "BvScd2Table.CheckResult.MissingDataVaultModel", getName()),
                 this));
       }
-    } else {
-      BvScd2FieldMappingValidationSupport.validate(
-          remarks, this, bvConfig, dvConfig, dataVaultModel, model, variables, metadataProvider);
-      BvScd2CalculationValidationSupport.validate(
-          remarks, this, bvConfig, dataVaultModel, variables);
+    }
+    BvScd2FieldMappingValidationSupport.validate(
+        remarks, this, bvConfig, dvConfig, dataVaultModel, model, variables, metadataProvider);
+    BvScd2CalculationValidationSupport.validate(
+        remarks, this, bvConfig, dataVaultModel, model, variables);
+    if (dataVaultModel != null) {
       BvScd2PipelineSupport.validateTargetDatabases(
           remarks, metadataProvider, model, dataVaultModel, this);
+    } else if (Utils.isEmpty(bvConfig.getTargetDatabase())) {
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_ERROR,
+              BaseMessages.getString(
+                  PKG, "BvScd2PipelineSupport.CheckResult.MissingBvTargetDatabase", getName()),
+              this));
     }
   }
 
@@ -289,7 +297,11 @@ public class BvScd2Table extends BvTableBase {
         getDerivatives().stream()
             .filter(ref -> ref != null && ref.getDvTableType() == DvTableType.SATELLITE)
             .count();
-    if (satelliteCount <= 1) {
+    long sourceQueryCount =
+        getSourceQueryRefs().stream()
+            .filter(ref -> ref != null && !Utils.isEmpty(ref.getSourceQueryName()))
+            .count();
+    if (satelliteCount + sourceQueryCount <= 1) {
       return;
     }
     long configuredIndicators =

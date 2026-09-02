@@ -2350,8 +2350,11 @@ public final class BvScd2PipelineSupport {
   }
 
   private static SatelliteLeg findLeg(Scd2BuildContext ctx, String satelliteName) {
+    if (ctx == null || Utils.isEmpty(satelliteName)) {
+      return null;
+    }
     for (SatelliteLeg leg : ctx.legs) {
-      if (leg.satellite != null && satelliteName.equals(leg.satellite.getName())) {
+      if (satelliteName.equals(leg.sourceName())) {
         return leg;
       }
     }
