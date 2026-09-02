@@ -30,8 +30,8 @@ Supersedes the conceptual Coach panel section in [source-to-data-vault-mapping-p
 
 ## UI flows
 
-1. **Add sources (`+`)** — `AddCoachingSourcesDialog`: catalog gate, multi-select `DV_SOURCE`, embedded import via `DataCatalogImportMenu`.
-2. **Tree** — source node → target children (mapped tables) → insight children (validation gaps).
+1. **Add sources (`+`)** — `AddCoachingSourcesDialog`: catalog gate, filter box, multi-select `DV_SOURCE`, embedded import via `DataCatalogImportMenu`.
+2. **Tree** — filter box, then source node → target children (mapped tables) → insight children (validation gaps).
 3. **Drag source → canvas** — `CoachingTableTypeDialog` → create table → `GenericSourceTargetMappingDialog`.
 4. **Map to target** — toolbar on selected source; opens mapping dialog then native table editor.
 

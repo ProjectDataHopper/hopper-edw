@@ -37,6 +37,9 @@ import org.hopper.edw.datavault.metadata.DvSourcePreviewInputSupport;
 /** Runs a record-definition preview using the standard Hop transform preview flow. */
 public final class RecordDefinitionPreviewRunner {
 
+  /** Hard cap so catalog preview never issues an unbounded table scan. */
+  public static final int MAX_PREVIEW_ROWS = 1000;
+
   private static final Class<?> PKG = DataCatalogPerspective.class;
 
   private RecordDefinitionPreviewRunner() {}
@@ -52,14 +55,14 @@ public final class RecordDefinitionPreviewRunner {
 
     try {
       PropsUi props = PropsUi.getInstance();
-      int defaultRows = props.getDefaultPreviewSize();
+      int defaultRows = Math.min(Math.max(1, props.getDefaultPreviewSize()), MAX_PREVIEW_ROWS);
       PreviewTableSettingsDialog settingsDialog =
-          new PreviewTableSettingsDialog(shell, Math.max(1, defaultRows), variables, true);
+          new PreviewTableSettingsDialog(shell, defaultRows, variables, true);
       PreviewTableSettingsDialog.Settings settings = settingsDialog.open();
       if (settings == null) {
         return;
       }
-      int previewRows = settings.rowLimit > 0 ? settings.rowLimit : Math.max(1, defaultRows);
+      int previewRows = cappedPreviewRows(settings.rowLimit > 0 ? settings.rowLimit : defaultRows);
       IVariables previewVariables = settingsDialog.getPreviewExecutionVariables();
 
       DvSourcePreviewInputSupport.PreviewPipeline preview =
@@ -113,6 +116,11 @@ public final class RecordDefinitionPreviewRunner {
           BaseMessages.getString(PKG, "RecordDefinitionPreviewRunner.Error.Message"),
           e instanceof HopException ? e : new HopException(e));
     }
+  }
+
+  public static int cappedPreviewRows(int requested) {
+    int n = requested > 0 ? requested : 1;
+    return Math.min(n, MAX_PREVIEW_ROWS);
   }
 
   private static String resolveDefinitionLabel(RecordDefinition definition) {

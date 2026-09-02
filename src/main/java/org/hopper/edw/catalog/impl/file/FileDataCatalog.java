@@ -108,7 +108,7 @@ public class FileDataCatalog implements IDataCatalog {
     } catch (IOException e) {
       throw new HopException("Unable to create catalog storage directory: " + resolvedRoot, e);
     }
-    LogChannel.GENERAL.logBasic(
+    LogChannel.GENERAL.logDetailed(
         BaseMessages.getString(
             PKG,
             "FileDataCatalog.Log.Connected",

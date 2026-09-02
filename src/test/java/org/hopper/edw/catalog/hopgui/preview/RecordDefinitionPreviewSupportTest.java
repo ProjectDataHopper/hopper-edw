@@ -41,6 +41,14 @@ import org.junit.jupiter.api.Test;
 class RecordDefinitionPreviewSupportTest {
 
   @Test
+  void catalogPreviewRowsAreCappedAt1000() {
+    assertEquals(1000, RecordDefinitionPreviewRunner.MAX_PREVIEW_ROWS);
+    assertEquals(1000, RecordDefinitionPreviewRunner.cappedPreviewRows(5000));
+    assertEquals(50, RecordDefinitionPreviewRunner.cappedPreviewRows(50));
+    assertEquals(1, RecordDefinitionPreviewRunner.cappedPreviewRows(0));
+  }
+
+  @Test
   void supportsPreview_falseWhenDefinitionIsNull() {
     assertFalse(RecordDefinitionPreviewSupport.supportsPreview(null));
   }

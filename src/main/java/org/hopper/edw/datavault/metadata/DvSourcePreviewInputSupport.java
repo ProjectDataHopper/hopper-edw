@@ -288,12 +288,15 @@ public final class DvSourcePreviewInputSupport {
               variables, source.getSchemaName(), source.getTableName());
       previewSql = "SELECT * FROM " + qualifiedTable;
     }
+    int effectiveLimit = Math.max(0, rowLimit);
+    previewSql =
+        DvDatabaseSourcePreviewSupport.applyRowLimit(databaseMeta, previewSql, effectiveLimit);
 
     TableInputMeta tableInputMeta = new TableInputMeta();
     tableInputMeta.setConnection(databaseMeta.getName());
     DvSqlSupport.assignDisplaySql(tableInputMeta, previewSql);
-    if (rowLimit > 0) {
-      tableInputMeta.setRowLimit(Integer.toString(rowLimit));
+    if (effectiveLimit > 0) {
+      tableInputMeta.setRowLimit(Integer.toString(effectiveLimit));
     }
 
     PipelineMeta previewMeta =

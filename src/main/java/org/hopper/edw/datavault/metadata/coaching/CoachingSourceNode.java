@@ -20,6 +20,7 @@ import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Singular;
+import org.apache.hop.core.util.Utils;
 
 /** Resolved coaching source entry for the coach panel tree. */
 @Getter
@@ -37,6 +38,37 @@ public class CoachingSourceNode {
 
   public List<CoachingInsight> getInsightsOrEmpty() {
     return insights == null ? List.of() : insights;
+  }
+
+  /** Case-insensitive substring match on the source label, type, or mapped table names. */
+  public boolean matchesFilter(String filter) {
+    if (Utils.isEmpty(filter)) {
+      return true;
+    }
+    String needle = filter.trim().toLowerCase();
+    if (containsIgnoreCase(displayLabel, needle) || containsIgnoreCase(typeLabel, needle)) {
+      return true;
+    }
+    if (sourceRef != null
+        && (containsIgnoreCase(sourceRef.getRecordName(), needle)
+            || containsIgnoreCase(sourceRef.resolvedDisplayLabel(), needle))) {
+      return true;
+    }
+    for (CoachingTargetUsage target : getTargetsOrEmpty()) {
+      if (target == null) {
+        continue;
+      }
+      if (containsIgnoreCase(target.getTableName(), needle)
+          || containsIgnoreCase(target.getTableRole(), needle)
+          || containsIgnoreCase(target.getSummary(), needle)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static boolean containsIgnoreCase(String value, String needle) {
+    return !Utils.isEmpty(value) && value.toLowerCase().contains(needle);
   }
 
   public static CoachingSourceNode fromRef(CoachingSourceRef ref) {

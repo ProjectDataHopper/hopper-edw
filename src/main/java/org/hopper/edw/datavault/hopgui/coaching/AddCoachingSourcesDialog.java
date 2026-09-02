@@ -15,6 +15,9 @@
  */
 package org.hopper.edw.datavault.hopgui.coaching;
 
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
@@ -32,6 +35,7 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.hopper.edw.catalog.metadata.DataCatalogMeta;
 import org.hopper.edw.datavault.catalog.DvCatalogNamespaces;
 import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
@@ -51,7 +55,9 @@ public class AddCoachingSourcesDialog {
 
   private Shell shell;
   private MetaSelectionLine<DataCatalogMeta> wCatalogConnection;
+  private Text wFilter;
   private org.eclipse.swt.widgets.List wSources;
+  private List<String> allSourceNames = new ArrayList<>();
   private boolean cancelled = true;
 
   public AddCoachingSourcesDialog(
@@ -108,12 +114,33 @@ public class AddCoachingSourcesDialog {
       fdCatalog.right = new FormAttachment(100, -margin);
       wCatalogConnection.setLayoutData(fdCatalog);
 
+      Label wlFilter = new Label(shell, SWT.RIGHT);
+      wlFilter.setText(BaseMessages.getString(PKG, "AddCoachingSourcesDialog.Filter.Label"));
+      PropsUi.setLook(wlFilter);
+      FormData fdWlFilter = new FormData();
+      fdWlFilter.left = new FormAttachment(0, 0);
+      fdWlFilter.top = new FormAttachment(wCatalogConnection, margin);
+      wlFilter.setLayoutData(fdWlFilter);
+
+      wFilter = new Text(shell, SWT.SEARCH | SWT.ICON_CANCEL | SWT.ICON_SEARCH | SWT.BORDER);
+      wFilter.setMessage(
+          BaseMessages.getString(PKG, "AddCoachingSourcesDialog.Filter.Placeholder"));
+      wFilter.setToolTipText(
+          BaseMessages.getString(PKG, "AddCoachingSourcesDialog.Filter.Tooltip"));
+      PropsUi.setLook(wFilter);
+      FormData fdFilter = new FormData();
+      fdFilter.left = new FormAttachment(wlFilter, margin);
+      fdFilter.top = new FormAttachment(wCatalogConnection, margin);
+      fdFilter.right = new FormAttachment(100, -margin);
+      wFilter.setLayoutData(fdFilter);
+      wFilter.addListener(SWT.Modify, e -> applySourceFilter());
+
       Label wlSources = new Label(shell, SWT.RIGHT);
       wlSources.setText(BaseMessages.getString(PKG, "AddCoachingSourcesDialog.Sources.Label"));
       PropsUi.setLook(wlSources);
       FormData fdWlSources = new FormData();
       fdWlSources.left = new FormAttachment(0, 0);
-      fdWlSources.top = new FormAttachment(wCatalogConnection, margin);
+      fdWlSources.top = new FormAttachment(wFilter, margin);
       wlSources.setLayoutData(fdWlSources);
 
       Button wImport = new Button(shell, SWT.PUSH);
@@ -141,7 +168,7 @@ public class AddCoachingSourcesDialog {
       PropsUi.setLook(wSources);
       FormData fdSources = new FormData();
       fdSources.left = new FormAttachment(wlSources, margin);
-      fdSources.top = new FormAttachment(wCatalogConnection, margin);
+      fdSources.top = new FormAttachment(wFilter, margin);
       fdSources.right = new FormAttachment(100, -margin);
       fdSources.bottom = new FormAttachment(wImport, -margin);
       wSources.setLayoutData(fdSources);
@@ -181,26 +208,50 @@ public class AddCoachingSourcesDialog {
     GuiBusySupport.showWhile(
         shell,
         () -> {
-          wSources.removeAll();
+          allSourceNames = new ArrayList<>();
           String catalogConnection = wCatalogConnection.getText();
           if (Utils.isEmpty(catalogConnection)) {
+            applySourceFilter();
             return;
           }
           try {
-            java.util.List<String> names =
+            List<String> names =
                 DvSourceCatalogService.listSourceNames(
                     catalogConnection, variables, hopGui.getMetadataProvider());
-            if (names.isEmpty()) {
-              wSources.add(BaseMessages.getString(PKG, "AddCoachingSourcesDialog.NoSources"));
-              return;
+            if (names != null) {
+              allSourceNames.addAll(names);
             }
-            for (String name : names) {
-              wSources.add(name);
-            }
+            applySourceFilter();
           } catch (HopException e) {
+            applySourceFilter();
             new ErrorDialog(shell, "Sources", e.getMessage(), e);
           }
         });
+  }
+
+  private void applySourceFilter() {
+    if (wSources == null || wSources.isDisposed()) {
+      return;
+    }
+    wSources.removeAll();
+    if (allSourceNames.isEmpty()) {
+      wSources.add(BaseMessages.getString(PKG, "AddCoachingSourcesDialog.NoSources"));
+      return;
+    }
+    String filter =
+        wFilter != null && !wFilter.isDisposed() ? Const.NVL(wFilter.getText(), "").trim() : "";
+    String needle = filter.toLowerCase();
+    int shown = 0;
+    for (String name : allSourceNames) {
+      if (Utils.isEmpty(needle) || (name != null && name.toLowerCase().contains(needle))) {
+        wSources.add(name);
+        shown++;
+      }
+    }
+    if (shown == 0) {
+      wSources.add(
+          BaseMessages.getString(PKG, "AddCoachingSourcesDialog.Filter.NoMatches", filter));
+    }
   }
 
   private void ok(Runnable onAccepted) {
@@ -216,9 +267,7 @@ public class AddCoachingSourcesDialog {
     String[] selection = wSources.getSelection();
     if (selection != null && selection.length > 0) {
       for (String sourceName : selection) {
-        if (Utils.isEmpty(sourceName)
-            || sourceName.equals(
-                BaseMessages.getString(PKG, "AddCoachingSourcesDialog.NoSources"))) {
+        if (Utils.isEmpty(sourceName) || !allSourceNames.contains(sourceName)) {
           continue;
         }
         adapter

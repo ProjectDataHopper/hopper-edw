@@ -124,6 +124,30 @@ public final class DvDatabaseSourcePreviewSupport {
     return "SELECT " + String.join(", ", quotedFields) + " FROM " + schemaTable;
   }
 
+  /**
+   * Appends the database dialect's first-rows clause ({@code LIMIT n} on Postgres/MySQL) so catalog
+   * preview does not scan an unbounded table. No-op when the SQL already contains a limit or the
+   * dialect has no suffix clause (Hop 2.19.0).
+   */
+  public static String applyRowLimit(DatabaseMeta databaseMeta, String sql, int rowLimit) {
+    if (databaseMeta == null || Utils.isEmpty(sql) || rowLimit <= 0) {
+      return sql;
+    }
+    String suffix = Const.NVL(databaseMeta.getLimitClause(rowLimit), "");
+    if (Utils.isEmpty(suffix)) {
+      return sql;
+    }
+    String result = sql.trim();
+    String upper = result.toUpperCase();
+    if (upper.contains(" LIMIT ")
+        || upper.contains(" TOP ")
+        || upper.contains(" FETCH FIRST ")
+        || upper.contains(" FETCH NEXT ")) {
+      return sql;
+    }
+    return result + suffix;
+  }
+
   private static List<RowMetaAndData> toRowMetaAndDataList(IRowMeta rowMeta, List<Object[]> rows) {
     List<RowMetaAndData> result = new ArrayList<>();
     if (rowMeta == null || rows == null || rows.isEmpty()) {

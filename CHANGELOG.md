@@ -4,6 +4,12 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Coach source filter, catalog preview limit, quieter catalog connect (issues #154–#156)
+
+- Coach panel and **Add coaching sources** have a filter box so a long source list is searchable
+- Catalog record-definition **Preview rows** caps at 1000 and adds a dialect `LIMIT`/`TOP` clause to the preview SQL
+- File data catalog connect message is **Detailed** instead of Basic, so it no longer repeats on every catalog touch at normal log level
+
 ### BV SCD2 field mappings: fresh Data Vault attributes, honest Suggest/Validate
 
 - **Suggest mappings** reloads the linked `.hdv` instead of using the BV canvas snapshot, so satellite attributes appear without closing the DV/BV tabs

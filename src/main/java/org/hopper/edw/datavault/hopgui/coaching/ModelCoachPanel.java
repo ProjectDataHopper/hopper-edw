@@ -15,8 +15,10 @@
  */
 package org.hopper.edw.datavault.hopgui.coaching;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
+import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
@@ -37,6 +39,7 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.hopper.edw.datavault.hopgui.GuiBusySupport;
@@ -78,7 +81,11 @@ public class ModelCoachPanel extends Composite {
   private final Button openTableButton;
   private final Button importButton;
   private final Button generateButton;
+  private final Text filterText;
   private final Tree tree;
+
+  private List<CoachingSourceNode> lastNodes = List.of();
+  private boolean lastIncludeValidation;
 
   public ModelCoachPanel(
       Composite parent,
@@ -169,11 +176,22 @@ public class ModelCoachPanel extends Composite {
     fdRefreshOnOpen.top = new FormAttachment(mapButton, PropsUi.getMargin());
     refreshOnOpenButton.setLayoutData(fdRefreshOnOpen);
 
+    filterText = new Text(this, SWT.SEARCH | SWT.ICON_CANCEL | SWT.ICON_SEARCH | SWT.BORDER);
+    filterText.setMessage(BaseMessages.getString(PKG, "ModelCoachPanel.Filter.Placeholder"));
+    filterText.setToolTipText(BaseMessages.getString(PKG, "ModelCoachPanel.Filter.Tooltip"));
+    PropsUi.setLook(filterText);
+    FormData fdFilter = new FormData();
+    fdFilter.left = new FormAttachment(0, PropsUi.getMargin());
+    fdFilter.top = new FormAttachment(refreshOnOpenButton, PropsUi.getMargin());
+    fdFilter.right = new FormAttachment(100, -PropsUi.getMargin());
+    filterText.setLayoutData(fdFilter);
+    filterText.addListener(SWT.Modify, e -> populateTree(lastNodes, lastIncludeValidation));
+
     tree = new Tree(this, SWT.SINGLE | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
     PropsUi.setLook(tree);
     FormData fdTree = new FormData();
     fdTree.left = new FormAttachment(0, 0);
-    fdTree.top = new FormAttachment(refreshOnOpenButton, PropsUi.getMargin());
+    fdTree.top = new FormAttachment(filterText, PropsUi.getMargin());
     fdTree.right = new FormAttachment(100, 0);
     fdTree.bottom = new FormAttachment(100, 0);
     tree.setLayoutData(fdTree);
@@ -220,7 +238,9 @@ public class ModelCoachPanel extends Composite {
                     ? CoachingSourceResolver.resolve(adapter, variables, metadataProvider)
                     : CoachingSourceResolver.resolveSourcesOnly(
                         adapter, variables, metadataProvider);
-            populateTree(nodes, includeValidation);
+            lastNodes = nodes != null ? nodes : List.of();
+            lastIncludeValidation = includeValidation;
+            populateTree(lastNodes, lastIncludeValidation);
           } catch (Exception e) {
             new ErrorDialog(
                 hopGui.getShell(),
@@ -233,16 +253,34 @@ public class ModelCoachPanel extends Composite {
   }
 
   private void populateTree(List<CoachingSourceNode> nodes, boolean includeValidation) {
-    if (nodes.isEmpty()) {
+    if (tree == null || tree.isDisposed()) {
+      return;
+    }
+    tree.removeAll();
+    if (nodes == null || nodes.isEmpty()) {
       TreeItem emptyItem = new TreeItem(tree, SWT.NONE);
       emptyItem.setText(BaseMessages.getString(PKG, "ModelCoachPanel.Empty"));
+      return;
+    }
+    String filter = filterText != null && !filterText.isDisposed() ? filterText.getText() : "";
+    List<CoachingSourceNode> visible = new ArrayList<>();
+    for (CoachingSourceNode node : nodes) {
+      if (node != null && node.matchesFilter(filter)) {
+        visible.add(node);
+      }
+    }
+    if (visible.isEmpty()) {
+      TreeItem emptyItem = new TreeItem(tree, SWT.NONE);
+      emptyItem.setText(
+          BaseMessages.getString(
+              PKG, "ModelCoachPanel.Filter.NoMatches", Const.NVL(filter, "").trim()));
       return;
     }
     if (!includeValidation) {
       TreeItem hintItem = new TreeItem(tree, SWT.NONE);
       hintItem.setText(BaseMessages.getString(PKG, "ModelCoachPanel.PressRefreshToAnalyse"));
     }
-    for (CoachingSourceNode node : nodes) {
+    for (CoachingSourceNode node : visible) {
       TreeItem sourceItem = new TreeItem(tree, SWT.NONE);
       CoachingSourceRef ref = node.getSourceRef();
       sourceItem.setText(node.getDisplayLabel() + " [" + node.getTypeLabel() + "]");
