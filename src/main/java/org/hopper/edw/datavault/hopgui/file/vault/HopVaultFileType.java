@@ -47,6 +47,7 @@ import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.hopper.edw.datavault.hopgui.StandardProjectElementsOfferSupport;
 import org.hopper.edw.datavault.hopgui.file.ExplorerPerspectiveTabSupport;
+import org.hopper.edw.datavault.hopgui.file.businessvault.HopGuiBusinessVaultGraph;
 import org.hopper.edw.datavault.hopgui.search.HopGuiDataVaultModelSearchable;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvModelLoadSupport;
@@ -336,8 +337,9 @@ public class HopVaultFileType extends HopFileTypeBase {
       throws HopException {
     try {
       ModelXmlWriteSupport.writeModelXml(XML_TAG, model, filename, variables);
-      DvModelLoadSupport.invalidateCachedModelByResolvedPath(
-          HopVfs.normalize(variables.resolve(filename)));
+      String resolved = HopVfs.normalize(variables.resolve(filename));
+      DvModelLoadSupport.invalidateCachedModelByResolvedPath(resolved);
+      HopGuiBusinessVaultGraph.reloadOpenGraphsReferencingDvModel(resolved, variables);
     } catch (Exception e) {
       throw new HopException("Error saving Data Vault model to '" + filename + "'", e);
     }

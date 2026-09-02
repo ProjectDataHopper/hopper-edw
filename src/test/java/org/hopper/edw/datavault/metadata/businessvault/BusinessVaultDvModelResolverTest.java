@@ -35,6 +35,7 @@ import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.hopper.edw.datavault.hopgui.file.businessvault.HopBusinessVaultFileType;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvModelLoadSupport;
+import org.hopper.edw.datavault.metadata.DvSatellite;
 import org.hopper.edw.datavault.metadata.DvTableType;
 import org.hopper.edw.datavault.metadata.IDvTable;
 import org.hopper.edw.datavault.metadata.ModelConfigurationResolver;
@@ -139,6 +140,68 @@ class BusinessVaultDvModelResolverTest {
             fresh, bv, DvTableType.SATELLITE, tempModel.toString());
     assertFalse(freshChoices.contains("sat_customer"));
     assertTrue(freshChoices.contains("sat_customer_new"));
+  }
+
+  @Test
+  void invalidateRestoresSatelliteAttributesClearedOnCachedModel() throws Exception {
+    Path fixture =
+        Path.of("integration-tests/tests/multi-satellite-bv/customer-360.hdv")
+            .toAbsolutePath()
+            .normalize();
+    Path tempModel = tempDir.resolve("customer-360.hdv");
+    Files.copy(fixture, tempModel);
+
+    BusinessVaultModel bv = new BusinessVaultModel();
+    bv.setFilename(tempDir.resolve("customer-360.hbv").toString());
+    BvDvTableReference satRef = new BvDvTableReference("sat_customer_demo", DvTableType.SATELLITE);
+    satRef.setReferencedModelFilename(tempModel.toString());
+    bv.getDvReferences().add(satRef);
+
+    Variables variables = new Variables();
+    DataVaultModel first =
+        BusinessVaultDvModelResolver.buildEffectiveDataVaultModel(bv, variables, null);
+    DvSatellite demo = (DvSatellite) first.findTable("sat_customer_demo");
+    assertNotNull(demo);
+    assertFalse(demo.getAttributes().isEmpty());
+    demo.getAttributes().clear();
+    assertTrue(
+        BvScd2FieldMappingDialogSupport.satelliteAttributeNames("sat_customer_demo", first)
+            .isEmpty());
+
+    DataVaultModel stale =
+        BusinessVaultDvModelResolver.buildEffectiveDataVaultModel(bv, variables, null);
+    assertTrue(
+        BvScd2FieldMappingDialogSupport.satelliteAttributeNames("sat_customer_demo", stale)
+            .isEmpty());
+
+    BusinessVaultDvModelResolver.invalidateReferencedModelCaches(bv, variables);
+    DataVaultModel fresh =
+        BusinessVaultDvModelResolver.buildEffectiveDataVaultModel(bv, variables, null);
+    assertEquals(
+        List.of("segment", "loyalty_tier", "demo_score"),
+        BvScd2FieldMappingDialogSupport.satelliteAttributeNames("sat_customer_demo", fresh));
+  }
+
+  @Test
+  void referencesDvModelMatchesLinkedPathAndAlias() {
+    Path dvPath = Path.of("integration-tests/tests/basic/vault1.hdv").toAbsolutePath().normalize();
+    BusinessVaultModel bv = new BusinessVaultModel();
+    bv.setFilename(Path.of("integration-tests/tests/basic/vault1.hbv").toAbsolutePath().toString());
+    bv.setDataVaultModelPath(dvPath.toString());
+    Variables variables = new Variables();
+
+    assertTrue(BusinessVaultDvModelResolver.referencesDvModel(bv, dvPath.toString(), variables));
+    assertTrue(BusinessVaultDvModelResolver.referencesDvModel(bv, "vault1.hdv", variables));
+
+    BusinessVaultModel aliasOnly = new BusinessVaultModel();
+    aliasOnly.setFilename(bv.getFilename());
+    BvDvTableReference satRef = new BvDvTableReference("sat_customer", DvTableType.SATELLITE);
+    satRef.setReferencedModelFilename(dvPath.toString());
+    aliasOnly.getDvReferences().add(satRef);
+    assertTrue(
+        BusinessVaultDvModelResolver.referencesDvModel(aliasOnly, dvPath.toString(), variables));
+    assertFalse(
+        BusinessVaultDvModelResolver.referencesDvModel(aliasOnly, "other-model.hdv", variables));
   }
 
   @Test

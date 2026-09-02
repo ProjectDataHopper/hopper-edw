@@ -29,6 +29,7 @@ import org.apache.hop.core.variables.Variables;
 import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
+import org.hopper.edw.datavault.metadata.DvLinkedTable;
 import org.hopper.edw.datavault.metadata.DvSatellite;
 import org.hopper.edw.datavault.metadata.DvTableType;
 import org.hopper.edw.datavault.metadata.SatelliteAttribute;
@@ -80,6 +81,104 @@ class BvScd2FieldMappingDialogSupportTest {
                 mapping ->
                     "sat_customer_demo".equals(mapping.getSatelliteName())
                         && "segment".equals(mapping.getSourceFieldName())));
+  }
+
+  @Test
+  void analyzeWithoutDvModelReportsMissingModel() {
+    BvScd2Table table = customer360Table();
+    BvScd2FieldMappingDialogSupport.MappingSuggestion suggestion =
+        BvScd2FieldMappingDialogSupport.analyze(table, null, new Variables(), null);
+
+    assertFalse(suggestion.dvModelPresent());
+    assertEquals(0, suggestion.dvTableCount());
+    assertTrue(suggestion.suggestedMappings().isEmpty());
+    assertEquals(4, suggestion.missingNames().size());
+  }
+
+  @Test
+  void analyzeReportsMissingSatellites() {
+    BvScd2Table table = customer360Table();
+    DataVaultModel dvModel = new DataVaultModel();
+
+    BvScd2FieldMappingDialogSupport.MappingSuggestion suggestion =
+        BvScd2FieldMappingDialogSupport.analyze(table, dvModel, new Variables(), null);
+
+    assertTrue(suggestion.dvModelPresent());
+    assertEquals(0, suggestion.dvTableCount());
+    assertTrue(suggestion.suggestedMappings().isEmpty());
+    assertTrue(suggestion.missingNames().contains("sat_customer_demo"));
+  }
+
+  @Test
+  void analyzeReportsEmptyAttributes() {
+    BvScd2Table table = new BvScd2Table();
+    table.setName("customer_scd2");
+    table.getDerivatives().add(new BvDerivativeRef("sat_customer", DvTableType.SATELLITE));
+    DataVaultModel dvModel = new DataVaultModel();
+    dvModel.getTables().add(new DvSatellite("sat_customer"));
+
+    BvScd2FieldMappingDialogSupport.MappingSuggestion suggestion =
+        BvScd2FieldMappingDialogSupport.analyze(table, dvModel, new Variables(), null);
+
+    assertEquals(List.of("sat_customer"), suggestion.emptyAttributeNames());
+    assertTrue(suggestion.suggestedMappings().isEmpty());
+  }
+
+  @Test
+  void analyzeFollowsLinkedTableToSatelliteAttributes() throws Exception {
+    DataVaultModel dvModel = loadCustomer360DvModel();
+    DvLinkedTable alias = new DvLinkedTable();
+    alias.setName("sat_customer_demo_link");
+    alias.setReferencedTableName("sat_customer_demo");
+    alias.setReferencedTableType(DvTableType.SATELLITE);
+    dvModel.getTables().add(alias);
+
+    BvScd2Table table = new BvScd2Table();
+    table.setName("customer_scd2");
+    table
+        .getDerivatives()
+        .add(new BvDerivativeRef("sat_customer_demo_link", DvTableType.SATELLITE));
+
+    assertEquals(
+        List.of("segment", "loyalty_tier", "demo_score"),
+        BvScd2FieldMappingDialogSupport.satelliteAttributeNames(
+            "sat_customer_demo_link", dvModel, new Variables(), null));
+
+    BvScd2FieldMappingDialogSupport.MappingSuggestion suggestion =
+        BvScd2FieldMappingDialogSupport.analyze(table, dvModel, new Variables(), null);
+    assertTrue(suggestion.resolvedNames().contains("sat_customer_demo_link"));
+    assertTrue(
+        suggestion.suggestedMappings().stream()
+            .anyMatch(
+                mapping ->
+                    "sat_customer_demo_link".equals(mapping.getSatelliteName())
+                        && "segment".equals(mapping.getSourceFieldName())));
+  }
+
+  @Test
+  void analyzeKeepsExistingMappingsAndAddsOnlyNewSources() throws Exception {
+    BvScd2Table table = customer360Table();
+    table
+        .getFieldMappings()
+        .add(new BvScd2FieldMapping("sat_customer_demo", "segment", "cust_segment"));
+    DataVaultModel dvModel = loadCustomer360DvModel();
+
+    BvScd2FieldMappingDialogSupport.MappingSuggestion suggestion =
+        BvScd2FieldMappingDialogSupport.analyze(table, dvModel, new Variables(), null);
+
+    assertEquals(1, suggestion.alreadyMappedCount());
+    assertFalse(
+        suggestion.suggestedMappings().stream()
+            .anyMatch(
+                mapping ->
+                    "sat_customer_demo".equals(mapping.getSatelliteName())
+                        && "segment".equals(mapping.getSourceFieldName())));
+    assertTrue(
+        suggestion.suggestedMappings().stream()
+            .anyMatch(
+                mapping ->
+                    "sat_customer_demo".equals(mapping.getSatelliteName())
+                        && "loyalty_tier".equals(mapping.getSourceFieldName())));
   }
 
   @Test

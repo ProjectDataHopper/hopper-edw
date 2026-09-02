@@ -69,6 +69,7 @@ import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
 import org.apache.hop.ui.hopgui.file.IHopFileType;
 import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
 import org.apache.hop.ui.hopgui.perspective.IHopPerspective;
+import org.apache.hop.ui.hopgui.perspective.TabItemHandler;
 import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
 import org.apache.hop.ui.hopgui.shared.SwtGc;
 import org.apache.hop.ui.util.EnvironmentUtils;
@@ -493,6 +494,48 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
       dataVaultLoadError = e.getMessage();
     }
     redraw();
+  }
+
+  public BusinessVaultModel getModel() {
+    return model;
+  }
+
+  public DataVaultModel getDataVaultModel() {
+    return dataVaultModel;
+  }
+
+  public String getDataVaultLoadError() {
+    return dataVaultLoadError;
+  }
+
+  /**
+   * Replaces the in-memory DV snapshot used by this canvas (for example after the SCD2 dialog
+   * reloads from disk). Does not invalidate caches.
+   */
+  public void replaceDataVaultModel(DataVaultModel loaded, String loadError) {
+    dataVaultModel = loaded;
+    dataVaultLoadError = loadError;
+  }
+
+  /**
+   * Reloads the effective Data Vault model on every open Business Vault tab that references {@code
+   * savedHdvPath}. Called after an {@code .hdv} save so SCD2 field mapping does not keep a stale
+   * satellite snapshot.
+   */
+  public static void reloadOpenGraphsReferencingDvModel(String savedHdvPath, IVariables variables) {
+    ExplorerPerspective explorer = ExplorerPerspective.getInstance();
+    if (explorer == null || Utils.isEmpty(savedHdvPath)) {
+      return;
+    }
+    for (TabItemHandler item : explorer.getItems()) {
+      if (item == null || !(item.getTypeHandler() instanceof HopGuiBusinessVaultGraph graph)) {
+        continue;
+      }
+      if (BusinessVaultDvModelResolver.referencesDvModel(
+          graph.getModel(), savedHdvPath, variables)) {
+        graph.reloadDataVaultModel();
+      }
+    }
   }
 
   public static HopGuiBusinessVaultGraph getInstance() {

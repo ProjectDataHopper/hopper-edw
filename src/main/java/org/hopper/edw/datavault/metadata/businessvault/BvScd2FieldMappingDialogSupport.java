@@ -25,9 +25,12 @@ import java.util.Set;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvSatellite;
+import org.hopper.edw.datavault.metadata.DvTableResolutionSupport;
 import org.hopper.edw.datavault.metadata.DvTableType;
+import org.hopper.edw.datavault.metadata.IDvTable;
 import org.hopper.edw.datavault.metadata.SatelliteAttribute;
 
 /** Pure helpers for the SCD2 field-mapping dialog. */
@@ -35,55 +38,139 @@ public final class BvScd2FieldMappingDialogSupport {
 
   private BvScd2FieldMappingDialogSupport() {}
 
-  public static List<String> satelliteDerivativeNames(
-      BvScd2Table scd2Table, DataVaultModel dataVaultModel) {
-    List<String> names = new ArrayList<>();
-    if (scd2Table == null) {
+  /**
+   * One derivative name from the SCD2 table after lookup in the (possibly unioned) Data Vault
+   * model.
+   */
+  public record SatelliteResolution(
+      String requestedName, DvSatellite satellite, List<String> attributeNames) {
+
+    public SatelliteResolution {
+      attributeNames = attributeNames != null ? List.copyOf(attributeNames) : List.of();
+    }
+
+    public boolean resolved() {
+      return satellite != null;
+    }
+
+    public boolean hasAttributes() {
+      return !attributeNames.isEmpty();
+    }
+  }
+
+  /** Outcome of Suggest mappings / Field mappings diagnostics. Never an empty silent list. */
+  public record MappingSuggestion(
+      boolean dvModelPresent,
+      int dvTableCount,
+      String dvModelFilename,
+      List<SatelliteResolution> satellites,
+      List<BvScd2FieldMapping> suggestedMappings,
+      int alreadyMappedCount) {
+
+    public MappingSuggestion {
+      satellites = satellites != null ? List.copyOf(satellites) : List.of();
+      suggestedMappings = suggestedMappings != null ? List.copyOf(suggestedMappings) : List.of();
+    }
+
+    public List<String> resolvedNames() {
+      List<String> names = new ArrayList<>();
+      for (SatelliteResolution satellite : satellites) {
+        if (satellite.resolved()) {
+          names.add(satellite.requestedName());
+        }
+      }
       return names;
     }
-    for (BvDerivativeRef derivative : scd2Table.getDerivatives()) {
-      if (derivative == null
-          || derivative.getDvTableType() != DvTableType.SATELLITE
-          || Utils.isEmpty(derivative.getDvTableName())) {
-        continue;
+
+    public List<String> missingNames() {
+      List<String> names = new ArrayList<>();
+      for (SatelliteResolution satellite : satellites) {
+        if (!satellite.resolved()) {
+          names.add(satellite.requestedName());
+        }
       }
-      if (dataVaultModel != null
-          && !(dataVaultModel.findTable(derivative.getDvTableName()) instanceof DvSatellite)) {
-        continue;
+      return names;
+    }
+
+    public List<String> emptyAttributeNames() {
+      List<String> names = new ArrayList<>();
+      for (SatelliteResolution satellite : satellites) {
+        if (satellite.resolved() && !satellite.hasAttributes()) {
+          names.add(satellite.requestedName());
+        }
       }
-      names.add(derivative.getDvTableName());
+      return names;
+    }
+
+    public String attributeCountSummary() {
+      StringBuilder builder = new StringBuilder();
+      for (SatelliteResolution satellite : satellites) {
+        if (builder.length() > 0) {
+          builder.append(", ");
+        }
+        builder
+            .append(satellite.requestedName())
+            .append(": ")
+            .append(satellite.attributeNames().size());
+      }
+      return builder.toString();
+    }
+  }
+
+  public static List<String> satelliteDerivativeNames(
+      BvScd2Table scd2Table, DataVaultModel dataVaultModel) {
+    return satelliteDerivativeNames(scd2Table, dataVaultModel, null, null);
+  }
+
+  public static List<String> satelliteDerivativeNames(
+      BvScd2Table scd2Table,
+      DataVaultModel dataVaultModel,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider) {
+    List<String> names = new ArrayList<>();
+    for (SatelliteResolution satellite :
+        resolveSatellites(scd2Table, dataVaultModel, variables, metadataProvider)) {
+      names.add(satellite.requestedName());
     }
     return names;
   }
 
   public static List<String> satelliteAttributeNames(
       String satelliteName, DataVaultModel dataVaultModel) {
-    List<String> names = new ArrayList<>();
-    if (dataVaultModel == null || Utils.isEmpty(satelliteName)) {
-      return names;
-    }
-    if (dataVaultModel.findTable(satelliteName) instanceof DvSatellite satellite) {
-      if (satellite.getAttributes() != null) {
-        for (SatelliteAttribute attribute : satellite.getAttributes()) {
-          if (attribute != null && !Utils.isEmpty(attribute.getName())) {
-            names.add(attribute.getName());
-          }
-        }
-      }
-    }
-    return names;
+    return satelliteAttributeNames(satelliteName, dataVaultModel, null, null);
+  }
+
+  public static List<String> satelliteAttributeNames(
+      String satelliteName,
+      DataVaultModel dataVaultModel,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider) {
+    DvSatellite satellite =
+        resolveSatellite(dataVaultModel, satelliteName, variables, metadataProvider);
+    return attributeNamesOf(satellite);
   }
 
   public static List<BvScd2FieldMapping> suggestMappings(
       BvScd2Table scd2Table, DataVaultModel dataVaultModel) {
-    List<BvScd2FieldMapping> suggestions = new ArrayList<>();
-    if (scd2Table == null || dataVaultModel == null) {
-      return suggestions;
-    }
+    return analyze(scd2Table, dataVaultModel, null, null).suggestedMappings();
+  }
+
+  public static MappingSuggestion analyze(
+      BvScd2Table scd2Table,
+      DataVaultModel dataVaultModel,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider) {
+    boolean dvPresent = dataVaultModel != null;
+    int tableCount =
+        dvPresent && dataVaultModel.getTables() != null ? dataVaultModel.getTables().size() : 0;
+    String filename = dvPresent ? dataVaultModel.getFilename() : null;
+    List<SatelliteResolution> satellites =
+        resolveSatellites(scd2Table, dataVaultModel, variables, metadataProvider);
 
     Set<String> existingKeys = new LinkedHashSet<>();
     Set<String> usedTargets = new HashSet<>();
-    if (scd2Table.getFieldMappings() != null) {
+    int alreadyMapped = 0;
+    if (scd2Table != null && scd2Table.getFieldMappings() != null) {
       for (BvScd2FieldMapping mapping : scd2Table.getFieldMappings()) {
         if (mapping == null) {
           continue;
@@ -92,23 +179,94 @@ public final class BvScd2FieldMappingDialogSupport {
         if (!Utils.isEmpty(mapping.getTargetFieldName())) {
           usedTargets.add(mapping.getTargetFieldName());
         }
+        if (!Utils.isEmpty(mapping.getSatelliteName())
+            && !Utils.isEmpty(mapping.getSourceFieldName())
+            && !Utils.isEmpty(mapping.getTargetFieldName())) {
+          alreadyMapped++;
+        }
       }
     }
 
-    for (String satelliteName : satelliteDerivativeNames(scd2Table, dataVaultModel)) {
-      for (String sourceFieldName : satelliteAttributeNames(satelliteName, dataVaultModel)) {
-        String key = mappingKey(satelliteName, sourceFieldName);
+    List<BvScd2FieldMapping> suggestions = new ArrayList<>();
+    for (SatelliteResolution satellite : satellites) {
+      if (!satellite.resolved()) {
+        continue;
+      }
+      for (String sourceFieldName : satellite.attributeNames()) {
+        String key = mappingKey(satellite.requestedName(), sourceFieldName);
         if (existingKeys.contains(key)) {
           continue;
         }
         String targetFieldName =
-            suggestTargetFieldName(satelliteName, sourceFieldName, usedTargets);
+            suggestTargetFieldName(satellite.requestedName(), sourceFieldName, usedTargets);
         usedTargets.add(targetFieldName);
         existingKeys.add(key);
-        suggestions.add(new BvScd2FieldMapping(satelliteName, sourceFieldName, targetFieldName));
+        suggestions.add(
+            new BvScd2FieldMapping(satellite.requestedName(), sourceFieldName, targetFieldName));
       }
     }
-    return suggestions;
+    return new MappingSuggestion(
+        dvPresent, tableCount, filename, satellites, suggestions, alreadyMapped);
+  }
+
+  public static List<SatelliteResolution> resolveSatellites(
+      BvScd2Table scd2Table,
+      DataVaultModel dataVaultModel,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider) {
+    List<SatelliteResolution> resolved = new ArrayList<>();
+    if (scd2Table == null) {
+      return resolved;
+    }
+    Set<String> seen = new LinkedHashSet<>();
+    for (BvDerivativeRef derivative : scd2Table.getDerivatives()) {
+      if (derivative == null || Utils.isEmpty(derivative.getDvTableName())) {
+        continue;
+      }
+      if (derivative.getDvTableType() != null
+          && derivative.getDvTableType() != DvTableType.SATELLITE
+          && !derivative.getDvTableType().isLinkedTable()) {
+        continue;
+      }
+      String name = derivative.getDvTableName();
+      if (!seen.add(name)) {
+        continue;
+      }
+      DvSatellite satellite = resolveSatellite(dataVaultModel, name, variables, metadataProvider);
+      resolved.add(new SatelliteResolution(name, satellite, attributeNamesOf(satellite)));
+    }
+    return resolved;
+  }
+
+  public static DvSatellite resolveSatellite(
+      DataVaultModel dataVaultModel,
+      String satelliteName,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider) {
+    if (dataVaultModel == null || Utils.isEmpty(satelliteName)) {
+      return null;
+    }
+    DvSatellite satellite =
+        DvTableResolutionSupport.resolveSatellite(
+            dataVaultModel, satelliteName, variables, metadataProvider);
+    if (satellite != null) {
+      return satellite;
+    }
+    IDvTable table = dataVaultModel.findTable(satelliteName);
+    return table instanceof DvSatellite found ? found : null;
+  }
+
+  static List<String> attributeNamesOf(DvSatellite satellite) {
+    List<String> names = new ArrayList<>();
+    if (satellite == null || satellite.getAttributes() == null) {
+      return names;
+    }
+    for (SatelliteAttribute attribute : satellite.getAttributes()) {
+      if (attribute != null && !Utils.isEmpty(attribute.getName())) {
+        names.add(attribute.getName());
+      }
+    }
+    return names;
   }
 
   public static void pruneMappingsAndConfigs(BvScd2Table scd2Table, Set<String> activeSatellites) {
@@ -158,11 +316,20 @@ public final class BvScd2FieldMappingDialogSupport {
       BusinessVaultModel businessVaultModel,
       DataVaultModel dataVaultModel,
       IVariables variables) {
+    return validateForDialog(scd2Table, businessVaultModel, dataVaultModel, variables, null);
+  }
+
+  public static List<ICheckResult> validateForDialog(
+      BvScd2Table scd2Table,
+      BusinessVaultModel businessVaultModel,
+      DataVaultModel dataVaultModel,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider) {
     List<ICheckResult> remarks = new ArrayList<>();
     if (scd2Table == null) {
       return remarks;
     }
-    scd2Table.check(remarks, null, variables, businessVaultModel, dataVaultModel);
+    scd2Table.check(remarks, metadataProvider, variables, businessVaultModel, dataVaultModel);
     return remarks;
   }
 

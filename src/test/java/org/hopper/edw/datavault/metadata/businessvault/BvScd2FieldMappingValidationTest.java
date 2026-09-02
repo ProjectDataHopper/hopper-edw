@@ -251,6 +251,18 @@ class BvScd2FieldMappingValidationTest {
   }
 
   @Test
+  void missingDataVaultModelIsAnErrorWhenDerivativesExist() {
+    BvScd2Table table = new BvScd2Table();
+    table.setName("customer_bv");
+    table.setTableName("customer_bv");
+    table.setFunctionalTimestampField("LOAD_DATE");
+    table.getDerivatives().add(new BvDerivativeRef("sat_customer", DvTableType.SATELLITE));
+
+    List<ICheckResult> remarks = check(table, null);
+    assertTrue(hasError(remarks, "no Data Vault model is loaded"));
+  }
+
+  @Test
   void calculationOnlyMappingRejectedForIncremental() throws Exception {
     BvScd2Table table = new BvScd2Table();
     table.setName("customer_bv");

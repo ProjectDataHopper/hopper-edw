@@ -219,8 +219,8 @@ Open intervals use sentinels from configuration (default `1900-01-01 00:00:00` a
 |Load hub business keys
 |Enabled with Include hub business keys. Checked (default) writes hub BK columns to the BV table. Unchecked keeps them on the stream for calculations only.
 
-|Field mappings Load checkbox
-|Checked (default) writes the mapped column to the BV table. Unchecked keeps it on the stream for calculations and versioning only. Full rebuild only — Incremental plus Load unchecked is a Check-model error.
+|Suggest mappings
+|Reloads the linked `.hdv` and fills unmapped satellite attributes. Reports a clear reason when satellites are listed but no fields appear (stale or missing Data Vault model, unresolved satellite, empty Attributes tab).
 
 |Functional timestamp
 |Column on the satellite stream used as the timeline (see resolution order above).

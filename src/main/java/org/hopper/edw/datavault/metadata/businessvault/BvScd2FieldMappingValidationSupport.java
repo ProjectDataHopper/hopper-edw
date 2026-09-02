@@ -26,12 +26,12 @@ import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.BusinessKey;
 import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvHub;
 import org.hopper.edw.datavault.metadata.DvSatellite;
-import org.hopper.edw.datavault.metadata.DvTableType;
 import org.hopper.edw.datavault.metadata.SatelliteAttribute;
 
 /** Validation rules for explicit satellite-to-BV SCD2 field mappings. */
@@ -47,12 +47,14 @@ public final class BvScd2FieldMappingValidationSupport {
       BusinessVaultConfiguration bvConfig,
       DataVaultConfiguration dvConfig,
       DataVaultModel dataVaultModel,
-      IVariables variables) {
+      IVariables variables,
+      IHopMetadataProvider metadataProvider) {
     if (scd2Table == null || dataVaultModel == null) {
       return;
     }
 
-    List<DvSatellite> satellites = resolveSatelliteDerivatives(scd2Table, dataVaultModel);
+    List<DvSatellite> satellites =
+        resolveSatelliteDerivatives(scd2Table, dataVaultModel, variables, metadataProvider);
     if (satellites.isEmpty()) {
       return;
     }
@@ -556,15 +558,23 @@ public final class BvScd2FieldMappingValidationSupport {
 
   public static List<DvSatellite> resolveSatelliteDerivatives(
       BvScd2Table scd2Table, DataVaultModel dataVaultModel) {
+    return resolveSatelliteDerivatives(scd2Table, dataVaultModel, null, null);
+  }
+
+  public static List<DvSatellite> resolveSatelliteDerivatives(
+      BvScd2Table scd2Table,
+      DataVaultModel dataVaultModel,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider) {
     List<DvSatellite> satellites = new ArrayList<>();
-    for (BvDerivativeRef derivative : scd2Table.getDerivatives()) {
-      if (derivative == null
-          || derivative.getDvTableType() != DvTableType.SATELLITE
-          || Utils.isEmpty(derivative.getDvTableName())) {
-        continue;
-      }
-      if (dataVaultModel.findTable(derivative.getDvTableName()) instanceof DvSatellite satellite) {
-        satellites.add(satellite);
+    if (scd2Table == null) {
+      return satellites;
+    }
+    for (BvScd2FieldMappingDialogSupport.SatelliteResolution resolution :
+        BvScd2FieldMappingDialogSupport.resolveSatellites(
+            scd2Table, dataVaultModel, variables, metadataProvider)) {
+      if (resolution.resolved()) {
+        satellites.add(resolution.satellite());
       }
     }
     return satellites;

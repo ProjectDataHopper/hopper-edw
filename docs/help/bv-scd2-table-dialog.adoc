@@ -86,9 +86,13 @@ Use **Debug** or **Show build pipeline** on the canvas to inspect the generated 
 
 Required when **two or more** satellites feed the table. Map each `(satellite, source field)` to a BV target column name. Validation checks parent hub/link consistency, source field existence, and unique target columns.
 
-**Load** (row checkbox, default checked): Unchecked keeps the column on the stream for SQL calculations and versioning but does not write it to the BV table. Unchecked Load is full rebuild only. The Lineage tab lists every loaded column, including hub business keys when those are loaded.
+**Suggest mappings** reloads the linked `.hdv` from disk, then adds one row per unmapped satellite attribute (unique target names on collisions). If nothing is added, a message explains why: Data Vault model not loaded, satellite not in that model, or the satellite has no attributes (use **Get attributes** on the satellite, then suggest again). You do not need to close the BV tab after editing the `.hdv`.
 
-Single-satellite tables can pass attributes through under DV names unless you add explicit mappings for renaming, subsetting, or calculation-only columns.
+The Field mappings tab shows how many tables were loaded and how many attributes each linked satellite has.
+
+Single-satellite tables can pass attributes through under DV names unless you add explicit mappings for renaming or subsetting.
+
+**Validate** always shows a result, including a short Data Vault resolution summary. It is not a silent no-op when there are no errors.
 
 == Satellite configs
 
@@ -156,7 +160,7 @@ Longer guidance: project doc `docs/business-vault-scd2.adoc` (section *Type 1 vs
 - **OK** can save the table even when Check reports errors. Some issues live in Business Vault or Data Vault configuration and cannot be fixed in this dialog. Use **Validate** or **Check model** to review them; **Business Vault Update** still fails until they are fixed.
 - Run **Check model** on the `.hbv` file before **Business Vault Update** or Debug.
 - Confirm **Data Vault target** (read satellites) and **Business Vault target** (write SCD2) connections both resolve in project metadata.
-- After changing the linked `.hdv` on disk, use **Reload DV model** on the Business Vault toolbar.
+- After changing the linked `.hdv` on disk, **Suggest mappings** and **Validate** reload it automatically. Saving the `.hdv` also refreshes open Business Vault tabs that reference it. **Reload DV model** on the Business Vault toolbar remains available.
 - External read-only satellites are skipped by Data Vault Update but remain valid SCD2 sources if the vault DB can read them.
 - Multi-satellite example: `integration-tests/tests/multi-satellite-bv/customer-360.hbv`.
 - Mono-source satellites often omit the physical source-indicator column. Uncheck **Store record source indicator** on the satellite; SCD2 loads still run.

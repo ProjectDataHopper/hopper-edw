@@ -276,4 +276,63 @@ public final class BusinessVaultDvModelResolver {
     }
     return null;
   }
+
+  /**
+   * True when this Business Vault reads {@code savedHdvPath} via the legacy linked path or a canvas
+   * DV alias.
+   */
+  public static boolean referencesDvModel(
+      BusinessVaultModel bvModel, String savedHdvPath, IVariables variables) {
+    if (bvModel == null || Utils.isEmpty(savedHdvPath)) {
+      return false;
+    }
+    String savedResolved = resolveForCompare(savedHdvPath, bvModel.getFilename(), variables);
+    if (pathMatches(
+        savedResolved, bvModel.getDataVaultModelPath(), bvModel.getFilename(), variables)) {
+      return true;
+    }
+    if (bvModel.getDvReferences() == null) {
+      return false;
+    }
+    for (BvDvTableReference reference : bvModel.getDvReferences()) {
+      if (reference == null) {
+        continue;
+      }
+      String path = reference.getReferencedModelFilename();
+      if (Utils.isEmpty(path)) {
+        path = bvModel.getDataVaultModelPath();
+      }
+      if (pathMatches(savedResolved, path, bvModel.getFilename(), variables)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static boolean pathMatches(
+      String savedResolved, String candidate, String referring, IVariables variables) {
+    if (Utils.isEmpty(candidate) || Utils.isEmpty(savedResolved)) {
+      return false;
+    }
+    String resolvedCandidate = resolveForCompare(candidate, referring, variables);
+    if (savedResolved.equalsIgnoreCase(resolvedCandidate)) {
+      return true;
+    }
+    return basename(savedResolved).equalsIgnoreCase(basename(resolvedCandidate));
+  }
+
+  private static String resolveForCompare(String path, String referring, IVariables variables) {
+    try {
+      return DvModelLoadSupport.resolveModelPath(path, referring, variables).replace('\\', '/');
+    } catch (HopException e) {
+      String resolved = variables != null ? variables.resolve(path) : path;
+      return resolved != null ? resolved.replace('\\', '/') : "";
+    }
+  }
+
+  private static String basename(String path) {
+    String normalized = path.replace('\\', '/');
+    int slash = normalized.lastIndexOf('/');
+    return slash >= 0 ? normalized.substring(slash + 1) : normalized;
+  }
 }

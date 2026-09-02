@@ -4,6 +4,14 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### BV SCD2 field mappings: fresh Data Vault attributes, honest Suggest/Validate
+
+- **Suggest mappings** reloads the linked `.hdv` instead of using the BV canvas snapshot, so satellite attributes appear without closing the DV/BV tabs
+- Saving a `.hdv` refreshes open Business Vault tabs that reference it
+- Suggest and Validate explain missing Data Vault models, unresolved satellites, and empty attribute lists instead of staying silent
+- Field mappings row checkbox (Load) removed; dialog-authored mappings always load to the BV table (`calculationOnly` in existing `.hbv` files is unchanged)
+- Check model errors when an SCD2 table has satellite derivatives but no Data Vault model is loaded
+
 ### Execution metrics Generate SQL and OpenLineage OPS schema
 
 - **Generate SQL** on the Execution metrics profile opens dialect-specific `CREATE` statements for `load_run` / `load_pipeline_metric` / related OPS tables
@@ -14,7 +22,6 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 - SCD2 **Include hub business keys** left-outer Merge Joins parent-hub BK columns after collapse, immediately before SQL calculations (identity only; not version drivers). The SCD2 merge/repeat/incremental chain is unchanged
 - **Load hub business keys** (enabled with Include hub business keys) writes those columns to the BV table; uncheck to keep them on the stream for calculations only
-- Field mappings **Load** checkbox: unchecked keeps the column for calculations and versioning but does not write it to the BV table (full rebuild only)
 - Include hash key, Include hub business keys, and Load hub business keys are checkboxes
 - Lineage tab lists every loaded column, including hub business keys and the parent hash key
 - Check model errors: Load=No with Incremental; hub BKs without Include hash key, on link-parent satellites, or with name collisions

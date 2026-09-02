@@ -20,14 +20,15 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.Props;
-import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.FormDataBuilder;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
@@ -52,15 +53,18 @@ import org.eclipse.swt.widgets.Text;
 import org.hopper.edw.datavault.expression.SqlExpressionDraft;
 import org.hopper.edw.datavault.hopgui.EnumDialogSupport;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
+import org.hopper.edw.datavault.hopgui.file.vault.TableViewPopulateSupport;
 import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
 import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 import org.hopper.edw.datavault.hopgui.lineage.LineageTabSupport;
 import org.hopper.edw.datavault.lineage.BvModelLineageCollector;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
+import org.hopper.edw.datavault.metadata.DvSatellite;
 import org.hopper.edw.datavault.metadata.DvTableType;
 import org.hopper.edw.datavault.metadata.IDvTable;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultConfiguration;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultDerivativeSupport;
+import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultDvModelResolver;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BvDerivativeRef;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2BuildMode;
@@ -72,7 +76,6 @@ import org.hopper.edw.datavault.metadata.businessvault.BvScd2HashPartitionCount;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2PipelineSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2SatelliteConfig;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2Table;
-import org.hopper.edw.datavault.metadata.businessvault.IBvTable;
 import org.hopper.edw.datavault.transform.sqlexpression.SqlExpressionEditorDialog;
 
 /** Tabbed dialog to edit a Business Vault SCD2 table, including multi-satellite field mappings. */
@@ -82,9 +85,9 @@ public class HopGuiBvScd2TableDialog {
   private final Shell parent;
   private final BvScd2Table input;
   private final BusinessVaultModel businessVaultModel;
-  private final DataVaultModel dataVaultModel;
+  private DataVaultModel dataVaultModel;
+  private String dataVaultLoadError;
   private final IVariables variables;
-  private final int originalTableIndex;
   private Shell shell;
 
   private Text wName;
@@ -129,8 +132,6 @@ public class HopGuiBvScd2TableDialog {
     this.businessVaultModel = businessVaultModel;
     this.dataVaultModel = dataVaultModel;
     this.variables = variables;
-    this.originalTableIndex =
-        businessVaultModel != null ? businessVaultModel.getTables().indexOf(table) : -1;
   }
 
   public boolean open() {
@@ -227,7 +228,7 @@ public class HopGuiBvScd2TableDialog {
           BvScd2Table draft = new BvScd2Table();
           applyWidgetsToTable(draft);
           return BvModelLineageCollector.collectScd2Table(
-              draft, businessVaultModel, dataVaultModel, variables);
+              draft, businessVaultModel, currentDataVaultModel(false), variables);
         });
   }
 
@@ -462,6 +463,12 @@ public class HopGuiBvScd2TableDialog {
             .bottom(100, margin)
             .result());
     wDerivatives.optimizeTableView();
+    wDerivatives.table.addListener(
+        SWT.Modify,
+        e -> {
+          fillDerivativeTypes();
+          refreshSatelliteDependentTabs();
+        });
 
     boolean dvAvailable = dataVaultModel != null && !dataVaultModel.getTables().isEmpty();
     wAddDerivative.setEnabled(dvAvailable);
@@ -509,6 +516,8 @@ public class HopGuiBvScd2TableDialog {
             ColumnInfo.COLUMN_TYPE_CCOMBO,
             new String[] {},
             false);
+    mappingsSourceColumn.setComboValuesSelectionListener(
+        (item, rowNr, colNr) -> sourceFieldChoicesForRow(item));
 
     mappingsSatelliteColumn =
         new ColumnInfo(
@@ -531,20 +540,14 @@ public class HopGuiBvScd2TableDialog {
         new TableView(
             variables,
             comp,
-            SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI | SWT.CHECK,
+            SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI,
             mappingCols,
             1,
             null,
             PropsUi.getInstance());
-    wMappings.table.setToolTipText(
-        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Mappings.Column.Load.Tooltip"));
     wMappings.setLayoutData(
         new FormDataBuilder().left().top(wAddMapping, margin).right().bottom(100, margin).result());
     wMappings.optimizeTableView();
-    if (wMappings.table.getItemCount() > 0) {
-      checkMappingLoadDefault(wMappings.table.getItem(0));
-    }
-    wMappings.table.addListener(SWT.Modify, e -> refreshMappingSourceCombos());
   }
 
   private void addSatelliteSettingsTab() {
@@ -731,7 +734,7 @@ public class HopGuiBvScd2TableDialog {
           businessVaultModel != null
               ? businessVaultModel.getConfigurationOrDefault()
               : new BusinessVaultConfiguration(),
-          dataVaultModel,
+          currentDataVaultModel(false),
           variables);
     } catch (Exception e) {
       return null;
@@ -801,6 +804,7 @@ public class HopGuiBvScd2TableDialog {
     if (BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Tab.FieldMappings.Label").equals(title)
         || BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Tab.SatelliteSettings.Label")
             .equals(title)) {
+      currentDataVaultModel(true);
       refreshSatelliteDependentTabs();
     }
     if (BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Tab.Tests.Label").equals(title)) {
@@ -832,7 +836,7 @@ public class HopGuiBvScd2TableDialog {
       return;
     }
     BvScd2CalculationUnitTestGuiSupport.generate(
-        hopGui, shell, variables, businessVaultModel, dataVaultModel, input);
+        hopGui, shell, variables, businessVaultModel, currentDataVaultModel(true), input);
   }
 
   private void refreshSatelliteDependentTabs() {
@@ -849,38 +853,80 @@ public class HopGuiBvScd2TableDialog {
     if (wMappings == null || mappingsSourceColumn == null) {
       return;
     }
+    mappingsSourceColumn.setComboValues(sourceFieldChoicesForRow(null));
+  }
+
+  private String[] sourceFieldChoicesForRow(TableItem item) {
+    String satelliteName = item != null ? item.getText(1) : "";
+    DataVaultModel dv = currentDataVaultModel(false);
+    IHopMetadataProvider provider = metadataProvider();
+    if (!Utils.isEmpty(satelliteName)) {
+      List<String> names =
+          BvScd2FieldMappingDialogSupport.satelliteAttributeNames(
+              satelliteName, dv, variables, provider);
+      return names.toArray(new String[0]);
+    }
     Set<String> union = new LinkedHashSet<>();
-    for (TableItem item : wMappings.getNonEmptyItems()) {
-      String satelliteName = item.getText(1);
+    for (String name : getSatelliteNamesFromDerivativesTable()) {
       union.addAll(
-          BvScd2FieldMappingDialogSupport.satelliteAttributeNames(satelliteName, dataVaultModel));
+          BvScd2FieldMappingDialogSupport.satelliteAttributeNames(name, dv, variables, provider));
     }
-    if (union.isEmpty()) {
-      for (String satelliteName : getSatelliteNamesFromDerivativesTable()) {
-        union.addAll(
-            BvScd2FieldMappingDialogSupport.satelliteAttributeNames(satelliteName, dataVaultModel));
-      }
-    }
-    mappingsSourceColumn.setComboValues(union.toArray(new String[0]));
+    return union.toArray(new String[0]);
   }
 
   private void updateMappingsHint() {
-    int satelliteCount = getSatelliteNamesFromDerivativesTable().length;
-    if (satelliteCount > 1) {
+    if (wlMappingsHint == null || wlMappingsHint.isDisposed()) {
+      return;
+    }
+    if (!Utils.isEmpty(dataVaultLoadError)) {
       wlMappingsHint.setText(
-          BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Mappings.Hint.MultiSatellite"));
+          BaseMessages.getString(
+              PKG, "HopGuiBvScd2TableDialog.Mappings.Hint.LoadError", dataVaultLoadError));
+      return;
+    }
+    BvScd2Table draft = new BvScd2Table();
+    applyDerivativesToTable(draft);
+    BvScd2FieldMappingDialogSupport.MappingSuggestion suggestion =
+        BvScd2FieldMappingDialogSupport.analyze(
+            draft, currentDataVaultModel(false), variables, metadataProvider());
+    int satelliteCount = getSatelliteNamesFromDerivativesTable().length;
+    String counts = suggestion.attributeCountSummary();
+    if (!suggestion.dvModelPresent()) {
+      wlMappingsHint.setText(
+          BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Mappings.Hint.NoDvModel"));
+    } else if (satelliteCount > 1) {
+      wlMappingsHint.setText(
+          BaseMessages.getString(
+              PKG,
+              "HopGuiBvScd2TableDialog.Mappings.Hint.MultiSatellite",
+              suggestion.dvTableCount(),
+              Utils.isEmpty(counts)
+                  ? BaseMessages.getString(
+                      PKG, "HopGuiBvScd2TableDialog.Mappings.Hint.NoAttributes")
+                  : counts));
     } else {
       wlMappingsHint.setText(
-          BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Mappings.Hint.SingleSatellite"));
+          BaseMessages.getString(
+              PKG,
+              "HopGuiBvScd2TableDialog.Mappings.Hint.SingleSatellite",
+              suggestion.dvTableCount(),
+              Utils.isEmpty(counts)
+                  ? BaseMessages.getString(
+                      PKG, "HopGuiBvScd2TableDialog.Mappings.Hint.NoAttributes")
+                  : counts));
+    }
+    if (wSuggestMappings != null && !wSuggestMappings.isDisposed()) {
+      wSuggestMappings.setEnabled(satelliteCount > 0 && suggestion.dvModelPresent());
     }
   }
 
   private String[] getEligibleDvTableNames() {
     List<String> names = new ArrayList<>();
-    if (dataVaultModel == null) {
+    DataVaultModel dv = currentDataVaultModel(false);
+    if (dv == null) {
       return names.toArray(new String[0]);
     }
-    for (IDvTable table : dataVaultModel.getTables()) {
+    for (IDvTable table : dv.getTables()) {
       if (table == null
           || Utils.isEmpty(table.getName())
           || !BusinessVaultDerivativeSupport.isValidDerivativePair(
@@ -922,8 +968,7 @@ public class HopGuiBvScd2TableDialog {
   }
 
   private void addMappingRow() {
-    TableItem item = new TableItem(wMappings.table, SWT.NONE);
-    checkMappingLoadDefault(item);
+    new TableItem(wMappings.table, SWT.NONE);
     wMappings.optimizeTableView();
     refreshMappingSourceCombos();
   }
@@ -937,26 +982,90 @@ public class HopGuiBvScd2TableDialog {
   }
 
   private void suggestMappings() {
-    applyDerivativesToTable(input);
-    input.getFieldMappings().clear();
-    for (TableItem item : wMappings.getNonEmptyItems()) {
-      String satelliteName = item.getText(1);
-      String sourceFieldName = item.getText(2);
-      String targetFieldName = item.getText(3);
-      if (Utils.isEmpty(satelliteName)
-          || Utils.isEmpty(sourceFieldName)
-          || Utils.isEmpty(targetFieldName)) {
-        continue;
-      }
-      BvScd2FieldMapping existing =
-          new BvScd2FieldMapping(satelliteName, sourceFieldName, targetFieldName);
-      existing.setIncludeInTarget(item.getChecked());
-      input.getFieldMappings().add(existing);
+    DataVaultModel dv = currentDataVaultModel(true);
+    if (!Utils.isEmpty(dataVaultLoadError)) {
+      showMappingMessage(
+          SWT.ICON_ERROR,
+          "HopGuiBvScd2TableDialog.Mappings.Suggest.Title",
+          BaseMessages.getString(
+              PKG, "HopGuiBvScd2TableDialog.Mappings.Suggest.LoadError", dataVaultLoadError));
+      updateMappingsHint();
+      return;
     }
-    input
-        .getFieldMappings()
-        .addAll(BvScd2FieldMappingDialogSupport.suggestMappings(input, dataVaultModel));
-    loadMappingsTable();
+    BvScd2Table draft = new BvScd2Table();
+    applyWidgetsToTable(draft);
+    BvScd2FieldMappingDialogSupport.MappingSuggestion suggestion =
+        BvScd2FieldMappingDialogSupport.analyze(draft, dv, variables, metadataProvider());
+    updateMappingsHint();
+
+    if (!suggestion.dvModelPresent() || suggestion.dvTableCount() == 0) {
+      showMappingMessage(
+          SWT.ICON_ERROR,
+          "HopGuiBvScd2TableDialog.Mappings.Suggest.Title",
+          BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Mappings.Suggest.NoDvModel"));
+      return;
+    }
+    if (suggestion.resolvedNames().isEmpty()) {
+      String missing = String.join(", ", suggestion.missingNames());
+      showMappingMessage(
+          SWT.ICON_ERROR,
+          "HopGuiBvScd2TableDialog.Mappings.Suggest.Title",
+          BaseMessages.getString(
+              PKG,
+              "HopGuiBvScd2TableDialog.Mappings.Suggest.Unresolved",
+              Utils.isEmpty(missing)
+                  ? BaseMessages.getString(
+                      PKG, "HopGuiBvScd2TableDialog.Mappings.Hint.NoAttributes")
+                  : missing));
+      return;
+    }
+    if (suggestion.suggestedMappings().isEmpty() && !suggestion.emptyAttributeNames().isEmpty()) {
+      showMappingMessage(
+          SWT.ICON_ERROR,
+          "HopGuiBvScd2TableDialog.Mappings.Suggest.Title",
+          BaseMessages.getString(
+              PKG,
+              "HopGuiBvScd2TableDialog.Mappings.Suggest.NoAttributes",
+              String.join(", ", suggestion.emptyAttributeNames())));
+      return;
+    }
+    if (suggestion.suggestedMappings().isEmpty()) {
+      showMappingMessage(
+          SWT.ICON_INFORMATION,
+          "HopGuiBvScd2TableDialog.Mappings.Suggest.Title",
+          BaseMessages.getString(
+              PKG,
+              "HopGuiBvScd2TableDialog.Mappings.Suggest.NoneNew",
+              suggestion.alreadyMappedCount()));
+      return;
+    }
+
+    for (BvScd2FieldMapping mapping : suggestion.suggestedMappings()) {
+      TableItem item = new TableItem(wMappings.table, SWT.NONE);
+      item.setText(1, Const.NVL(mapping.getSatelliteName(), ""));
+      item.setText(2, Const.NVL(mapping.getSourceFieldName(), ""));
+      item.setText(3, Const.NVL(mapping.getTargetFieldName(), ""));
+    }
+    wMappings.optimizeTableView();
+    refreshMappingSourceCombos();
+    updateMappingsHint();
+    String extra = "";
+    if (!suggestion.emptyAttributeNames().isEmpty()) {
+      extra =
+          BaseMessages.getString(
+              PKG,
+              "HopGuiBvScd2TableDialog.Mappings.Suggest.PartialEmpty",
+              String.join(", ", suggestion.emptyAttributeNames()));
+    }
+    showMappingMessage(
+        SWT.ICON_INFORMATION,
+        "HopGuiBvScd2TableDialog.Mappings.Suggest.Title",
+        BaseMessages.getString(
+                PKG,
+                "HopGuiBvScd2TableDialog.Mappings.Suggest.Added",
+                suggestion.suggestedMappings().size(),
+                suggestion.attributeCountSummary())
+            + extra);
   }
 
   private void getData() {
@@ -1008,7 +1117,7 @@ public class HopGuiBvScd2TableDialog {
   }
 
   private void loadMappingsTable() {
-    wMappings.clearAll();
+    TableViewPopulateSupport.clearRows(wMappings);
     for (BvScd2FieldMapping mapping : input.getFieldMappings()) {
       if (mapping == null
           || Utils.isEmpty(mapping.getSatelliteName())
@@ -1019,7 +1128,6 @@ public class HopGuiBvScd2TableDialog {
       item.setText(1, mapping.getSatelliteName());
       item.setText(2, Const.NVL(mapping.getSourceFieldName(), ""));
       item.setText(3, Const.NVL(mapping.getTargetFieldName(), ""));
-      item.setChecked(mapping.isIncludeInTarget());
     }
     wMappings.optimizeTableView();
     refreshMappingSourceCombos();
@@ -1064,10 +1172,18 @@ public class HopGuiBvScd2TableDialog {
         continue;
       }
       DvTableType dvType = null;
-      if (dataVaultModel != null) {
-        IDvTable dvTable = dataVaultModel.findTable(dvName);
-        if (dvTable != null) {
-          dvType = dvTable.getTableType();
+      DataVaultModel dv = currentDataVaultModel(false);
+      if (dv != null) {
+        DvSatellite resolved =
+            BvScd2FieldMappingDialogSupport.resolveSatellite(
+                dv, dvName, variables, metadataProvider());
+        if (resolved != null) {
+          dvType = DvTableType.SATELLITE;
+        } else {
+          IDvTable dvTable = dv.findTable(dvName);
+          if (dvTable != null) {
+            dvType = dvTable.getTableType();
+          }
         }
       }
       if (dvType == null && !Utils.isEmpty(item.getText(2))) {
@@ -1089,7 +1205,7 @@ public class HopGuiBvScd2TableDialog {
     applyWidgetsToTable(draft);
     List<ICheckResult> remarks =
         BvScd2FieldMappingDialogSupport.validateForDialog(
-            draft, businessVaultModel, dataVaultModel, variables);
+            draft, businessVaultModel, currentDataVaultModel(true), variables, metadataProvider());
     if (BvScd2FieldMappingDialogSupport.hasValidationErrors(remarks)
         && !confirmSaveWithValidationErrors(remarks)) {
       return;
@@ -1117,22 +1233,31 @@ public class HopGuiBvScd2TableDialog {
 
   private void validate() {
     try {
+      DataVaultModel dv = currentDataVaultModel(true);
       List<ICheckResult> remarks =
           ModelDialogValidationSupport.runChecksWithBusyCursor(
               shell,
               () -> {
-                BusinessVaultModel draft =
-                    ModelDialogValidationSupport.cloneBusinessVaultModel(
-                        businessVaultModel, HopGui.getInstance().getMetadataProvider());
-                BvScd2Table draftTable = locateDraftTable(draft);
+                BvScd2Table draftTable = new BvScd2Table();
                 applyWidgetsToTable(draftTable);
                 List<ICheckResult> tableRemarks = new ArrayList<>();
+                BvScd2FieldMappingDialogSupport.MappingSuggestion suggestion =
+                    BvScd2FieldMappingDialogSupport.analyze(
+                        draftTable, dv, variables, metadataProvider());
+                tableRemarks.add(
+                    new CheckResult(
+                        ICheckResult.TYPE_RESULT_OK,
+                        BaseMessages.getString(
+                            PKG,
+                            "HopGuiBvScd2TableDialog.Validate.Resolution",
+                            suggestion.dvModelPresent() ? suggestion.dvTableCount() : 0,
+                            Utils.isEmpty(suggestion.attributeCountSummary())
+                                ? BaseMessages.getString(
+                                    PKG, "HopGuiBvScd2TableDialog.Mappings.Hint.NoAttributes")
+                                : suggestion.attributeCountSummary()),
+                        draftTable));
                 draftTable.check(
-                    tableRemarks,
-                    HopGui.getInstance().getMetadataProvider(),
-                    variables,
-                    draft,
-                    dataVaultModel);
+                    tableRemarks, metadataProvider(), variables, businessVaultModel, dv);
                 return tableRemarks;
               });
       ModelDialogValidationSupport.showCheckResults(shell, remarks);
@@ -1147,17 +1272,6 @@ public class HopGuiBvScd2TableDialog {
               ex.getMessage()),
           ex);
     }
-  }
-
-  private BvScd2Table locateDraftTable(BusinessVaultModel draft) throws HopException {
-    if (draft == null || originalTableIndex < 0 || originalTableIndex >= draft.getTables().size()) {
-      throw new HopException("Unable to locate table in validation model");
-    }
-    IBvTable table = draft.getTables().get(originalTableIndex);
-    if (!(table instanceof BvScd2Table scd2Table)) {
-      throw new HopException("Validation model table type mismatch");
-    }
-    return scd2Table;
   }
 
   private void applyWidgetsToTable(BvScd2Table target) {
@@ -1195,7 +1309,6 @@ public class HopGuiBvScd2TableDialog {
       }
       BvScd2FieldMapping mapping =
           new BvScd2FieldMapping(satelliteName, sourceFieldName, targetFieldName);
-      mapping.setIncludeInTarget(item.getChecked());
       target.getFieldMappings().add(mapping);
     }
 
@@ -1227,10 +1340,74 @@ public class HopGuiBvScd2TableDialog {
     }
   }
 
-  private static void checkMappingLoadDefault(TableItem item) {
-    if (item != null) {
-      item.setChecked(true);
+  private DataVaultModel currentDataVaultModel(boolean forceReload) {
+    if (!forceReload && dataVaultModel != null) {
+      return dataVaultModel;
     }
+    dataVaultLoadError = null;
+    if (businessVaultModel == null) {
+      dataVaultModel = null;
+      return null;
+    }
+    try {
+      if (forceReload) {
+        BusinessVaultDvModelResolver.invalidateReferencedModelCaches(businessVaultModel, variables);
+      }
+      DataVaultModel loaded =
+          BusinessVaultDvModelResolver.buildEffectiveDataVaultModel(
+              businessVaultModel, variables, metadataProvider());
+      if (loaded.getTables().isEmpty()
+          && businessVaultModel.getDvReferences().isEmpty()
+          && Utils.isEmpty(businessVaultModel.getDataVaultModelPath())) {
+        loaded = null;
+      }
+      dataVaultModel = loaded;
+      HopGuiBusinessVaultGraph graph = HopGuiBusinessVaultGraph.getInstance();
+      if (graph != null && graph.getModel() == businessVaultModel) {
+        graph.replaceDataVaultModel(dataVaultModel, dataVaultLoadError);
+      }
+      return dataVaultModel;
+    } catch (Exception e) {
+      dataVaultLoadError = e.getMessage();
+      dataVaultModel = null;
+      HopGuiBusinessVaultGraph graph = HopGuiBusinessVaultGraph.getInstance();
+      if (graph != null && graph.getModel() == businessVaultModel) {
+        graph.replaceDataVaultModel(null, dataVaultLoadError);
+      }
+      return null;
+    }
+  }
+
+  private IHopMetadataProvider metadataProvider() {
+    HopGui hopGui = HopGui.getInstance();
+    return hopGui != null ? hopGui.getMetadataProvider() : null;
+  }
+
+  private void fillDerivativeTypes() {
+    DataVaultModel dv = currentDataVaultModel(false);
+    if (wDerivatives == null || dv == null) {
+      return;
+    }
+    for (TableItem item : wDerivatives.table.getItems()) {
+      String name = item.getText(1);
+      if (Utils.isEmpty(name)) {
+        continue;
+      }
+      IDvTable table = dv.findTable(name);
+      if (table != null && table.getTableType() != null) {
+        String description = table.getTableType().getDescription();
+        if (!description.equals(item.getText(2))) {
+          item.setText(2, description);
+        }
+      }
+    }
+  }
+
+  private void showMappingMessage(int icon, String titleKey, String message) {
+    MessageBox box = new MessageBox(shell, SWT.OK | icon);
+    box.setText(BaseMessages.getString(PKG, titleKey));
+    box.setMessage(Const.NVL(message, ""));
+    box.open();
   }
 
   private void updateHubBusinessKeyOptionState() {

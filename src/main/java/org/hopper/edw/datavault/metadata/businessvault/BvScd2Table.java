@@ -250,9 +250,21 @@ public class BvScd2Table extends BvTableBase {
       }
     }
 
-    if (dataVaultModel != null) {
+    if (dataVaultModel == null) {
+      boolean hasDerivative =
+          getDerivatives().stream()
+              .anyMatch(ref -> ref != null && !Utils.isEmpty(ref.getDvTableName()));
+      if (hasDerivative) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_ERROR,
+                BaseMessages.getString(
+                    PKG, "BvScd2Table.CheckResult.MissingDataVaultModel", getName()),
+                this));
+      }
+    } else {
       BvScd2FieldMappingValidationSupport.validate(
-          remarks, this, bvConfig, dvConfig, dataVaultModel, variables);
+          remarks, this, bvConfig, dvConfig, dataVaultModel, variables, metadataProvider);
       BvScd2CalculationValidationSupport.validate(
           remarks, this, bvConfig, dataVaultModel, variables);
       BvScd2PipelineSupport.validateTargetDatabases(

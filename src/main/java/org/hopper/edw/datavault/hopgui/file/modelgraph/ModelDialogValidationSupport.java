@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
+import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.IProgressMonitor;
 import org.apache.hop.core.exception.HopException;
@@ -251,7 +252,16 @@ public final class ModelDialogValidationSupport {
     if (shell == null || shell.isDisposed()) {
       return;
     }
-    CheckResultDialog dialog = new CheckResultDialog(shell, remarks);
+    List<ICheckResult> toShow = remarks;
+    if (toShow == null || toShow.isEmpty()) {
+      toShow =
+          List.of(
+              new CheckResult(
+                  ICheckResult.TYPE_RESULT_OK,
+                  BaseMessages.getString(PKG, "ModelDialogValidationSupport.Check.NoIssues"),
+                  null));
+    }
+    CheckResultDialog dialog = new CheckResultDialog(shell, toShow);
     dialog.open();
   }
 
