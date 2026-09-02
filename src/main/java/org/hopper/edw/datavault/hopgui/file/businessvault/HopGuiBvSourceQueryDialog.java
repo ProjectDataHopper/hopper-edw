@@ -87,9 +87,9 @@ public class HopGuiBvSourceQueryDialog {
   private Text wSchemaName;
   private Text wTableName;
   private Text wHashKeyField;
+  private Text wHubHashKeyField;
   private Text wFunctionalTimestamp;
   private Text wLoadDateField;
-  private Combo wParentHubName;
   private TextComposite wSqlQuery;
   private TableView wColumns;
   private CTabFolder wTabFolder;
@@ -167,33 +167,31 @@ public class HopGuiBvSourceQueryDialog {
     lastLabel =
         addRightLabel("HopGuiBvSourceQueryDialog.HashKeyField.Label", wTableName, middle, margin);
     wHashKeyField = addText(lastLabel, middle);
+    wHashKeyField.setToolTipText(
+        BaseMessages.getString(PKG, "HopGuiBvSourceQueryDialog.HashKeyField.ToolTip"));
     lastLabel =
         addRightLabel(
-            "HopGuiBvSourceQueryDialog.FunctionalTimestamp.Label", wHashKeyField, middle, margin);
+            "HopGuiBvSourceQueryDialog.HubHashKeyField.Label", wHashKeyField, middle, margin);
+    wHubHashKeyField = addText(lastLabel, middle);
+    wHubHashKeyField.setToolTipText(
+        BaseMessages.getString(PKG, "HopGuiBvSourceQueryDialog.HubHashKeyField.ToolTip"));
+    lastLabel =
+        addRightLabel(
+            "HopGuiBvSourceQueryDialog.FunctionalTimestamp.Label",
+            wHubHashKeyField,
+            middle,
+            margin);
     wFunctionalTimestamp = addText(lastLabel, middle);
     lastLabel =
         addRightLabel(
             "HopGuiBvSourceQueryDialog.LoadDateField.Label", wFunctionalTimestamp, middle, margin);
     wLoadDateField = addText(lastLabel, middle);
-    lastLabel =
-        addRightLabel(
-            "HopGuiBvSourceQueryDialog.ParentHubName.Label", wLoadDateField, middle, margin);
-    wParentHubName = new Combo(shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
-    PropsUi.setLook(wParentHubName);
-    wParentHubName.setToolTipText(
-        BaseMessages.getString(PKG, "HopGuiBvSourceQueryDialog.ParentHubName.ToolTip"));
-    FormData fdParentHub = new FormData();
-    fdParentHub.left = new FormAttachment(middle, 0);
-    fdParentHub.top = new FormAttachment(lastLabel, 0, SWT.TOP);
-    fdParentHub.right = new FormAttachment(100, 0);
-    wParentHubName.setLayoutData(fdParentHub);
-    populateParentHubCombo();
 
     wTabFolder = new CTabFolder(shell, SWT.BORDER);
     PropsUi.setLook(wTabFolder);
     FormData fdTabFolder = new FormData();
     fdTabFolder.left = new FormAttachment(0, 0);
-    fdTabFolder.top = new FormAttachment(wParentHubName, margin);
+    fdTabFolder.top = new FormAttachment(wLoadDateField, margin);
     fdTabFolder.right = new FormAttachment(100, 0);
     fdTabFolder.bottom = new FormAttachment(100, -50);
     wTabFolder.setLayoutData(fdTabFolder);
@@ -324,19 +322,6 @@ public class HopGuiBvSourceQueryDialog {
     return label;
   }
 
-  private void populateParentHubCombo() {
-    String current = wParentHubName.getText();
-    wParentHubName.removeAll();
-    wParentHubName.add("");
-    for (String hubName :
-        BusinessVaultSourceQuerySupport.listParentHubNames(businessVaultModel, dataVaultModel)) {
-      wParentHubName.add(hubName);
-    }
-    if (!Utils.isEmpty(current)) {
-      wParentHubName.setText(current);
-    }
-  }
-
   private Text addText(Label label, int middle) {
     Text text = new Text(shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(text);
@@ -363,9 +348,9 @@ public class HopGuiBvSourceQueryDialog {
     wSchemaName.setText(Const.NVL(input.getSchemaName(), ""));
     wTableName.setText(Const.NVL(input.getTableName(), ""));
     wHashKeyField.setText(Const.NVL(input.getHashKeyField(), ""));
+    wHubHashKeyField.setText(Const.NVL(input.getHubHashKeyField(), ""));
     wFunctionalTimestamp.setText(Const.NVL(input.getFunctionalTimestampField(), ""));
     wLoadDateField.setText(Const.NVL(input.getLoadDateField(), ""));
-    wParentHubName.setText(Const.NVL(input.getParentHubName(), ""));
     wSqlQuery.setText(Const.NVL(input.getSqlQuery(), ""));
     wColumns.clearAll();
     for (BvSourceQueryColumn column : input.getColumns()) {
@@ -390,9 +375,9 @@ public class HopGuiBvSourceQueryDialog {
     target.setSchemaName(wSchemaName.getText());
     target.setTableName(wTableName.getText());
     target.setHashKeyField(wHashKeyField.getText());
+    target.setHubHashKeyField(wHubHashKeyField.getText());
     target.setFunctionalTimestampField(wFunctionalTimestamp.getText());
     target.setLoadDateField(wLoadDateField.getText());
-    target.setParentHubName(wParentHubName.getText());
     target.setSqlQuery(wSqlQuery.getText());
     target.getColumns().clear();
     for (TableItem item : wColumns.getNonEmptyItems()) {

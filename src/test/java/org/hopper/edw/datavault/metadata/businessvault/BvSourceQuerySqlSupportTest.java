@@ -31,6 +31,19 @@ import org.junit.jupiter.api.Test;
 class BvSourceQuerySqlSupportTest {
 
   @Test
+  void hashKeyMappingIsExplicitWhenNamesDiffer() {
+    BvSourceQuery source = new BvSourceQuery();
+    source.setHashKeyField("burger_hkey");
+    assertFalse(source.hashKeyNeedsRename(new Variables()));
+    assertEquals("burger_hkey", source.resolvedHubHashKeyField(new Variables()));
+
+    source.setHubHashKeyField("hub_burger_hkey");
+    assertTrue(source.hashKeyNeedsRename(new Variables()));
+    assertEquals("burger_hkey", source.resolvedHashKeyField(new Variables()));
+    assertEquals("hub_burger_hkey", source.resolvedHubHashKeyField(new Variables()));
+  }
+
+  @Test
   void fromValueMetaCopiesTypeLengthAndPrecision() {
     ValueMetaString name = new ValueMetaString("customer_name");
     name.setLength(100);

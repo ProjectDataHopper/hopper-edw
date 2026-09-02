@@ -383,6 +383,81 @@ class BvScd2PipelineSupportTest {
   }
 
   @Test
+  void sourceQueryTableInputKeepsPhysicalHashKeyColumn() throws Exception {
+    Scd2BuildContext ctx =
+        singleSatelliteContext(BvScd2BuildMode.FULL_REBUILD, null, "Vault", "Vault");
+    BvSourceQuery source = new BvSourceQuery();
+    source.setName("sat_burger_view");
+    source.setSourceKind(BvSourceQueryKind.TABLE);
+    source.setTableName("vw_burger");
+    source.setHashKeyField("burger_hkey");
+    source.setHubHashKeyField("hub_burger_hkey");
+    source.setFunctionalTimestampField("x_load_ts");
+    DatabaseMeta crm = new TestDatabaseMeta("CRM");
+    SatelliteLeg leg =
+        new SatelliteLeg(
+            null,
+            source,
+            "vw_burger",
+            "sat_burger_view",
+            "x_load_ts",
+            List.of(),
+            crm,
+            "CRM",
+            "burger_hkey",
+            BvSourceQuerySqlSupport.fromClause(crm, ctx.variables, source));
+    Scd2BuildContext sourceCtx =
+        new Scd2BuildContext(
+            ctx.scd2Table,
+            List.of(leg),
+            false,
+            List.of(),
+            ctx.bvModel,
+            ctx.dvModel,
+            ctx.bvConfig,
+            ctx.dvConfig,
+            ctx.metadataProvider,
+            ctx.variables,
+            ctx.sourceDatabaseMeta,
+            ctx.sourceDbName,
+            ctx.targetDatabaseMeta,
+            ctx.targetDbName,
+            "vw_burger",
+            ctx.bvTargetTableName,
+            ctx.pipelineName,
+            "hub_burger_hkey",
+            ctx.drivingKeyFieldName,
+            List.of("name"),
+            ctx.functionalTimestampField,
+            ctx.validFromField,
+            ctx.validToField,
+            ctx.recordSourceField,
+            ctx.openStartSentinel,
+            ctx.openEndSentinel,
+            true);
+
+    String sql = BvScd2PipelineSupport.buildLegTableInputSql(sourceCtx, leg);
+    assertTrue(sql.contains("burger_hkey"));
+    assertFalse(sql.contains("burger_hkey AS hub_burger_hkey"));
+    assertTrue(sql.contains(" ORDER BY "));
+  }
+
+  @Test
+  void scd2ParentHubIsTheMergeGrainForSourceQueryHashKey() throws Exception {
+    DataVaultModel dvModel = loadVault1Model();
+    BvScd2Table scd2 = new BvScd2Table();
+    scd2.setParentHubName("hub_customer");
+    BvSourceQuery source = new BvSourceQuery();
+    source.setHashKeyField("view_hk");
+    source.setHubHashKeyField("customer_hk");
+
+    assertEquals(
+        "customer_hk",
+        BvScd2PipelineSupport.resolveSharedHashKeyFieldName(
+            scd2, List.of(), List.of(source), dvModel, new Variables()));
+  }
+
+  @Test
   void buildLegTableInputSqlCrossDbDoesNotReferenceBvTable() throws Exception {
     Scd2BuildContext ctx =
         singleSatelliteContext(BvScd2BuildMode.INCREMENTAL, null, "Vault", "BusinessVault");

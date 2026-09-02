@@ -6,7 +6,7 @@ toc::[]
 
 Related guides: link:../business-vault-scd2.adoc[business-vault-scd2], link:../business-vault-pit.adoc[business-vault-pit].
 
-A **source query** is a satellite-shaped input on a Business Vault canvas: a table/view or SQL statement that SCD2 and PIT tables can hop to. Use it when history lives outside the Data Vault target connection (for example a corrective view on another database).
+A **source query** is a satellite-shaped input on a Business Vault canvas: a table/view or SQL statement that SCD2 and PIT tables can hop to. Use it when history lives outside the Data Vault target connection (for example a corrective view on another database). SCD2 does not care where the rows come from, only that they sort on the same hub hash key and date as the other streams. The hub itself is set on the SCD2 table.
 
 The Data Vault model still has **one** target database. This object is the exception on the BV side.
 
@@ -17,14 +17,14 @@ The Data Vault model still has **one** target database. This object is the excep
 * **Source kind** — Table/view, or authored SQL.
 * **Table / view** — Physical name when kind is table. Optional schema.
 * **SQL** — Inner SELECT when kind is SQL. Trailing `;` is stripped. The generated Table Input wraps this as a subquery so the plugin can add `WHERE` (hash-key partitions, incremental watermark) and `ORDER BY` (hash key + date).
-* **Hash key field** — Required. Grain column in the source result. Aliased to the SCD2/PIT hash key when names differ.
+* **Hash key (source column)** — Required. Column name in this table, view, or SQL (for example `burger_hkey`).
+* **Hash key (hub field)** — Hub hash key name used as the SCD2 grain when it does not match the source column (for example `hub_burger_hkey`). Leave empty when the names already match. The generated pipeline maps this with a Select Values transform after Table Input; the SQL is not rewritten.
 * **Functional timestamp** — Optional SCD2 timeline column (else SCD2 table / model / load-date fallback).
 * **Load date field** — Optional PIT pointer column (else Data Vault load date).
-* **Parent hub** — Optional. Pick the **Linked Hub** on this canvas whose grain (hash key) the query shares — the same hub a satellite of this entity would hop to. Needed when this source query is mixed with DV satellites on one SCD2 table, or when the SCD2 table includes hub business keys. Leave empty for a source-query-only SCD2/PIT hop.
 
 == Columns
 
-**Get fields** and **Preview** run against the chosen connection. Get fields copies name, Hop type, length, and precision from JDBC metadata. Persist the column list so Check model and SCD2 mappings work without a live JDBC round-trip at generate time.
+**Get fields** and **Preview** run against the chosen connection. Get fields copies name, Hop type, length, and precision from JDBC metadata. Persist the column list so Check model and SCD2 **Suggest mappings** work without a live JDBC round-trip at generate time. Hash key, functional timestamp, and load date are not suggested as mapped attributes.
 
 == Linking
 

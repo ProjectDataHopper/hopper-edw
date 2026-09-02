@@ -39,18 +39,25 @@ public final class BvScd2FieldMappingDialogSupport {
   private BvScd2FieldMappingDialogSupport() {}
 
   /**
-   * One derivative name from the SCD2 table after lookup in the (possibly unioned) Data Vault
-   * model.
+   * One SCD2 input name after lookup: a DV satellite (or linked satellite) or a BV source query.
    */
   public record SatelliteResolution(
-      String requestedName, DvSatellite satellite, List<String> attributeNames) {
+      String requestedName,
+      DvSatellite satellite,
+      List<String> attributeNames,
+      BvSourceQuery sourceQuery) {
 
     public SatelliteResolution {
       attributeNames = attributeNames != null ? List.copyOf(attributeNames) : List.of();
     }
 
+    public SatelliteResolution(
+        String requestedName, DvSatellite satellite, List<String> attributeNames) {
+      this(requestedName, satellite, attributeNames, null);
+    }
+
     public boolean resolved() {
-      return satellite != null;
+      return satellite != null || sourceQuery != null;
     }
 
     public boolean hasAttributes() {
@@ -127,9 +134,18 @@ public final class BvScd2FieldMappingDialogSupport {
       DataVaultModel dataVaultModel,
       IVariables variables,
       IHopMetadataProvider metadataProvider) {
+    return satelliteDerivativeNames(scd2Table, dataVaultModel, null, variables, metadataProvider);
+  }
+
+  public static List<String> satelliteDerivativeNames(
+      BvScd2Table scd2Table,
+      DataVaultModel dataVaultModel,
+      BusinessVaultModel bvModel,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider) {
     List<String> names = new ArrayList<>();
     for (SatelliteResolution satellite :
-        resolveSatellites(scd2Table, dataVaultModel, variables, metadataProvider)) {
+        resolveSatellites(scd2Table, dataVaultModel, bvModel, variables, metadataProvider)) {
       names.add(satellite.requestedName());
     }
     return names;
@@ -170,7 +186,12 @@ public final class BvScd2FieldMappingDialogSupport {
 
   public static List<BvScd2FieldMapping> suggestMappings(
       BvScd2Table scd2Table, DataVaultModel dataVaultModel) {
-    return analyze(scd2Table, dataVaultModel, null, null).suggestedMappings();
+    return analyze(scd2Table, dataVaultModel, null, null, null).suggestedMappings();
+  }
+
+  public static List<BvScd2FieldMapping> suggestMappings(
+      BvScd2Table scd2Table, DataVaultModel dataVaultModel, BusinessVaultModel bvModel) {
+    return analyze(scd2Table, dataVaultModel, bvModel, null, null).suggestedMappings();
   }
 
   public static MappingSuggestion analyze(
@@ -178,12 +199,21 @@ public final class BvScd2FieldMappingDialogSupport {
       DataVaultModel dataVaultModel,
       IVariables variables,
       IHopMetadataProvider metadataProvider) {
+    return analyze(scd2Table, dataVaultModel, null, variables, metadataProvider);
+  }
+
+  public static MappingSuggestion analyze(
+      BvScd2Table scd2Table,
+      DataVaultModel dataVaultModel,
+      BusinessVaultModel bvModel,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider) {
     boolean dvPresent = dataVaultModel != null;
     int tableCount =
         dvPresent && dataVaultModel.getTables() != null ? dataVaultModel.getTables().size() : 0;
     String filename = dvPresent ? dataVaultModel.getFilename() : null;
     List<SatelliteResolution> satellites =
-        resolveSatellites(scd2Table, dataVaultModel, variables, metadataProvider);
+        resolveSatellites(scd2Table, dataVaultModel, bvModel, variables, metadataProvider);
 
     Set<String> existingKeys = new LinkedHashSet<>();
     Set<String> usedTargets = new HashSet<>();
@@ -232,6 +262,15 @@ public final class BvScd2FieldMappingDialogSupport {
       DataVaultModel dataVaultModel,
       IVariables variables,
       IHopMetadataProvider metadataProvider) {
+    return resolveSatellites(scd2Table, dataVaultModel, null, variables, metadataProvider);
+  }
+
+  public static List<SatelliteResolution> resolveSatellites(
+      BvScd2Table scd2Table,
+      DataVaultModel dataVaultModel,
+      BusinessVaultModel bvModel,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider) {
     List<SatelliteResolution> resolved = new ArrayList<>();
     if (scd2Table == null) {
       return resolved;
@@ -252,6 +291,21 @@ public final class BvScd2FieldMappingDialogSupport {
       }
       DvSatellite satellite = resolveSatellite(dataVaultModel, name, variables, metadataProvider);
       resolved.add(new SatelliteResolution(name, satellite, attributeNamesOf(satellite)));
+    }
+    for (BvSourceQueryRef ref : scd2Table.getSourceQueryRefs()) {
+      if (ref == null || Utils.isEmpty(ref.getSourceQueryName())) {
+        continue;
+      }
+      String name = ref.getSourceQueryName();
+      if (!seen.add(name)) {
+        continue;
+      }
+      BvSourceQuery sourceQuery = BusinessVaultSourceQuerySupport.findSourceQuery(bvModel, name);
+      List<String> attributes =
+          sourceQuery != null
+              ? BvSourceQuerySqlSupport.attributeFieldNames(sourceQuery, variables)
+              : List.of();
+      resolved.add(new SatelliteResolution(name, null, attributes, sourceQuery));
     }
     return resolved;
   }

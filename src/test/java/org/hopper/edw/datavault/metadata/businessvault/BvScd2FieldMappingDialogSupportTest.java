@@ -156,6 +156,151 @@ class BvScd2FieldMappingDialogSupportTest {
   }
 
   @Test
+  void analyzeSuggestsSourceQueryColumnsWithoutDvModel() {
+    BvSourceQuery sourceQuery = burgerSourceQuery();
+    BusinessVaultModel bvModel = new BusinessVaultModel();
+    bvModel.getTables().add(sourceQuery);
+
+    BvScd2Table table = new BvScd2Table();
+    table.setName("burger_scd2");
+    table.getSourceQueryRefs().add(new BvSourceQueryRef("sq_burger_view"));
+
+    BvScd2FieldMappingDialogSupport.MappingSuggestion suggestion =
+        BvScd2FieldMappingDialogSupport.analyze(table, null, bvModel, new Variables(), null);
+
+    assertFalse(suggestion.dvModelPresent());
+    assertEquals(List.of("sq_burger_view"), suggestion.resolvedNames());
+    assertEquals(
+        List.of("sauce", "patty"),
+        BvScd2FieldMappingDialogSupport.satelliteAttributeNames(
+            "sq_burger_view", null, bvModel, new Variables(), null));
+    assertEquals(2, suggestion.suggestedMappings().size());
+    assertTrue(
+        suggestion.suggestedMappings().stream()
+            .anyMatch(
+                mapping ->
+                    "sq_burger_view".equals(mapping.getSatelliteName())
+                        && "sauce".equals(mapping.getSourceFieldName())
+                        && "sauce".equals(mapping.getTargetFieldName())));
+    assertTrue(
+        suggestion.suggestedMappings().stream()
+            .noneMatch(mapping -> "burger_hkey".equals(mapping.getSourceFieldName())));
+    assertTrue(
+        suggestion.suggestedMappings().stream()
+            .noneMatch(mapping -> "effective_ts".equals(mapping.getSourceFieldName())));
+    assertTrue(
+        suggestion.suggestedMappings().stream()
+            .noneMatch(mapping -> "x_load_ts".equals(mapping.getSourceFieldName())));
+  }
+
+  @Test
+  void analyzeReportsMissingSourceQueryWhenBvModelLacksIt() {
+    BvScd2Table table = new BvScd2Table();
+    table.setName("burger_scd2");
+    table.getSourceQueryRefs().add(new BvSourceQueryRef("sq_burger_view"));
+
+    BvScd2FieldMappingDialogSupport.MappingSuggestion suggestion =
+        BvScd2FieldMappingDialogSupport.analyze(
+            table, null, new BusinessVaultModel(), new Variables(), null);
+
+    assertEquals(List.of("sq_burger_view"), suggestion.missingNames());
+    assertTrue(suggestion.suggestedMappings().isEmpty());
+  }
+
+  @Test
+  void analyzeReportsEmptySourceQueryColumns() {
+    BvSourceQuery sourceQuery = new BvSourceQuery();
+    sourceQuery.setName("sq_empty");
+    sourceQuery.setHashKeyField("hk");
+    BusinessVaultModel bvModel = new BusinessVaultModel();
+    bvModel.getTables().add(sourceQuery);
+
+    BvScd2Table table = new BvScd2Table();
+    table.setName("empty_scd2");
+    table.getSourceQueryRefs().add(new BvSourceQueryRef("sq_empty"));
+
+    BvScd2FieldMappingDialogSupport.MappingSuggestion suggestion =
+        BvScd2FieldMappingDialogSupport.analyze(table, null, bvModel, new Variables(), null);
+
+    assertEquals(List.of("sq_empty"), suggestion.emptyAttributeNames());
+    assertTrue(suggestion.suggestedMappings().isEmpty());
+  }
+
+  @Test
+  void analyzeMixesSatelliteAndSourceQueryMappings() throws Exception {
+    BvScd2Table table = customer360Table();
+    table.getSourceQueryRefs().add(new BvSourceQueryRef("sq_burger_view"));
+    BusinessVaultModel bvModel = new BusinessVaultModel();
+    bvModel.getTables().add(burgerSourceQuery());
+    DataVaultModel dvModel = loadCustomer360DvModel();
+
+    BvScd2FieldMappingDialogSupport.MappingSuggestion suggestion =
+        BvScd2FieldMappingDialogSupport.analyze(table, dvModel, bvModel, new Variables(), null);
+
+    assertTrue(suggestion.resolvedNames().contains("sat_customer_demo"));
+    assertTrue(suggestion.resolvedNames().contains("sq_burger_view"));
+    assertTrue(
+        suggestion.suggestedMappings().stream()
+            .anyMatch(
+                mapping ->
+                    "sat_customer_demo".equals(mapping.getSatelliteName())
+                        && "segment".equals(mapping.getSourceFieldName())));
+    assertTrue(
+        suggestion.suggestedMappings().stream()
+            .anyMatch(
+                mapping ->
+                    "sq_burger_view".equals(mapping.getSatelliteName())
+                        && "patty".equals(mapping.getSourceFieldName())));
+  }
+
+  @Test
+  void analyzeKeepsExistingSourceQueryMappingsAndAddsOnlyNewColumns() {
+    BvSourceQuery sourceQuery = burgerSourceQuery();
+    BusinessVaultModel bvModel = new BusinessVaultModel();
+    bvModel.getTables().add(sourceQuery);
+
+    BvScd2Table table = new BvScd2Table();
+    table.setName("burger_scd2");
+    table.getSourceQueryRefs().add(new BvSourceQueryRef("sq_burger_view"));
+    table.getFieldMappings().add(new BvScd2FieldMapping("sq_burger_view", "sauce", "burger_sauce"));
+
+    BvScd2FieldMappingDialogSupport.MappingSuggestion suggestion =
+        BvScd2FieldMappingDialogSupport.analyze(table, null, bvModel, new Variables(), null);
+
+    assertEquals(1, suggestion.alreadyMappedCount());
+    assertTrue(
+        suggestion.suggestedMappings().stream()
+            .noneMatch(
+                mapping ->
+                    "sq_burger_view".equals(mapping.getSatelliteName())
+                        && "sauce".equals(mapping.getSourceFieldName())));
+    assertTrue(
+        suggestion.suggestedMappings().stream()
+            .anyMatch(
+                mapping ->
+                    "sq_burger_view".equals(mapping.getSatelliteName())
+                        && "patty".equals(mapping.getSourceFieldName())));
+  }
+
+  @Test
+  void resolveSatelliteDerivativesIgnoresSourceQueries() {
+    BvScd2Table table = new BvScd2Table();
+    table.getDerivatives().add(new BvDerivativeRef("sat_customer", DvTableType.SATELLITE));
+    table.getSourceQueryRefs().add(new BvSourceQueryRef("sq_burger_view"));
+
+    DataVaultModel dvModel = new DataVaultModel();
+    DvSatellite satellite = new DvSatellite("sat_customer");
+    satellite.getAttributes().add(new SatelliteAttribute("segment"));
+    dvModel.getTables().add(satellite);
+
+    List<DvSatellite> satellites =
+        BvScd2FieldMappingValidationSupport.resolveSatelliteDerivatives(
+            table, dvModel, new Variables(), null);
+    assertEquals(1, satellites.size());
+    assertEquals("sat_customer", satellites.get(0).getName());
+  }
+
+  @Test
   void analyzeKeepsExistingMappingsAndAddsOnlyNewSources() throws Exception {
     BvScd2Table table = customer360Table();
     table
@@ -257,6 +402,21 @@ class BvScd2FieldMappingDialogSupportTest {
     String formatted = BvScd2FieldMappingDialogSupport.formatValidationErrors(remarks);
     assertTrue(formatted.contains("open-end sentinel"));
     assertTrue(formatted.contains("target database"));
+  }
+
+  private static BvSourceQuery burgerSourceQuery() {
+    BvSourceQuery sourceQuery = new BvSourceQuery();
+    sourceQuery.setName("sq_burger_view");
+    sourceQuery.setHashKeyField("burger_hkey");
+    sourceQuery.setHubHashKeyField("hub_burger_hkey");
+    sourceQuery.setFunctionalTimestampField("effective_ts");
+    sourceQuery.setLoadDateField("x_load_ts");
+    sourceQuery.getColumns().add(new BvSourceQueryColumn("burger_hkey"));
+    sourceQuery.getColumns().add(new BvSourceQueryColumn("effective_ts"));
+    sourceQuery.getColumns().add(new BvSourceQueryColumn("x_load_ts"));
+    sourceQuery.getColumns().add(new BvSourceQueryColumn("sauce"));
+    sourceQuery.getColumns().add(new BvSourceQueryColumn("patty"));
+    return sourceQuery;
   }
 
   private static BvScd2Table customer360Table() {

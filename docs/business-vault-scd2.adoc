@@ -154,9 +154,13 @@ Keep using link:dbt-import.adoc[Import dbt models] for arbitrary SQL business ta
 
 When a satellite-shaped input is **not** on the Data Vault target — for example a corrective view on another database — add a **Source query** on the BV canvas and hop it to the SCD2 table. The Data Vault model still has one target database; the source query is the BV-side exception.
 
-Each generated `TableInput` uses that source's Hop connection. Table/view names are read directly. Authored SQL is wrapped as a subquery so the plugin can add partition `WHERE` and hash-key/date `ORDER BY` outside the inner statement. The source query must name its **hash key field**.
+Each generated `TableInput` uses that source's Hop connection. Table/view names are read directly. Authored SQL is wrapped as a subquery so the plugin can add partition `WHERE` and hash-key/date `ORDER BY` outside the inner statement.
 
-Mixed SCD2 (DV satellites plus source queries) is supported; two or more inputs still require field mappings. The mapping **Source** column is the satellite name or the source-query name.
+On the source query, set **Hash key (source column)** to the physical name (`burger_hkey`) and **Hash key (hub field)** to the hub grain name when they differ (`hub_burger_hkey`). The pipeline maps that with Select Values after Table Input; it does not rename columns in SQL.
+
+SCD2 merges those streams with satellite history on the **same hub grain**. Set **Parent hub** on the SCD2 table. Origin does not matter.
+
+Mixed SCD2 (DV satellites plus source queries) is supported; two or more inputs still require field mappings. The mapping **Source** column is the satellite name or the source-query name. **Suggest mappings** fills unmapped fields from both.
 
 == Single-satellite SCD2
 
@@ -216,7 +220,7 @@ Open intervals use sentinels from configuration (default `1900-01-01 00:00:00` a
 |Target table in the Business Vault database.
 
 |Derivatives
-|One or more DV satellite references. At least one satellite is required.
+|DV satellite references and/or source queries. At least one satellite or source query is required.
 
 |Include hash key
 |When enabled, the parent hash key column is included in the BV table.
@@ -228,7 +232,7 @@ Open intervals use sentinels from configuration (default `1900-01-01 00:00:00` a
 |Enabled with Include hub business keys. Checked (default) writes hub BK columns to the BV table. Unchecked keeps them on the stream for calculations only.
 
 |Suggest mappings
-|Reloads the linked `.hdv` and fills unmapped satellite attributes. Reports a clear reason when satellites are listed but no fields appear (stale or missing Data Vault model, unresolved satellite, empty Attributes tab).
+|Reloads the linked `.hdv` and fills unmapped satellite attributes **and** source-query columns (hash key / timestamps on the source query are skipped). Reports a clear reason when sources are listed but no fields appear (stale or missing Data Vault model, unresolved satellite or source query, empty satellite Attributes tab, or source query without **Get fields**).
 
 |Functional timestamp
 |Column on the satellite stream used as the timeline (see resolution order above).

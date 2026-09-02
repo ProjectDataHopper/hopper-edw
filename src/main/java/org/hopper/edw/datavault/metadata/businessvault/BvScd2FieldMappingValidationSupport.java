@@ -98,7 +98,7 @@ public final class BvScd2FieldMappingValidationSupport {
       }
     }
 
-    validateSharedParent(remarks, scd2Table, satellites);
+    validateSharedParent(remarks, scd2Table, satellites, variables);
     validateHubBusinessKeys(
         remarks, scd2Table, satellites, bvConfig, dvConfig, dataVaultModel, variables);
     validateCalculationOnlyMappings(remarks, scd2Table, variables);
@@ -210,6 +210,8 @@ public final class BvScd2FieldMappingValidationSupport {
     validateSatelliteConfigs(remarks, scd2Table, satellites, derivativeNames, variables);
     validateFunctionalTimestamps(remarks, scd2Table, satellites, bvConfig, dvConfig, variables);
     validateSourceQueryTimestamps(remarks, scd2Table, sourceQueries, bvConfig, dvConfig, variables);
+    validateSourceQueryHashKeyMapping(
+        remarks, scd2Table, sourceQueries, satellites, dataVaultModel, variables);
   }
 
   static void validateHubBusinessKeys(
@@ -249,19 +251,8 @@ public final class BvScd2FieldMappingValidationSupport {
               scd2Table));
       return;
     }
-    if (parentKind != ParentKind.HUB) {
-      remarks.add(
-          new CheckResult(
-              ICheckResult.TYPE_RESULT_ERROR,
-              BaseMessages.getString(
-                  PKG,
-                  "BvScd2FieldMappingValidationSupport.Error.HubBusinessKeysNeedHubParent",
-                  scd2Table.getName()),
-              scd2Table));
-      return;
-    }
 
-    String hubName = resolveSharedHubName(satellites);
+    String hubName = resolveParentHubName(scd2Table, satellites, variables);
     if (Utils.isEmpty(hubName)) {
       remarks.add(
           new CheckResult(
@@ -384,11 +375,29 @@ public final class BvScd2FieldMappingValidationSupport {
 
   public static DvHub resolveSharedParentHub(
       List<DvSatellite> satellites, DataVaultModel dataVaultModel) {
-    String hubName = resolveSharedHubName(satellites);
+    return resolveSharedParentHub(null, satellites, dataVaultModel, null);
+  }
+
+  public static DvHub resolveSharedParentHub(
+      BvScd2Table scd2Table,
+      List<DvSatellite> satellites,
+      DataVaultModel dataVaultModel,
+      IVariables variables) {
+    String hubName = resolveParentHubName(scd2Table, satellites, variables);
     if (Utils.isEmpty(hubName) || dataVaultModel == null) {
       return null;
     }
     return dataVaultModel.findHub(hubName);
+  }
+
+  static String resolveParentHubName(
+      BvScd2Table scd2Table, List<DvSatellite> satellites, IVariables variables) {
+    if (scd2Table != null && !Utils.isEmpty(scd2Table.getParentHubName())) {
+      return variables != null
+          ? variables.resolve(scd2Table.getParentHubName())
+          : scd2Table.getParentHubName();
+    }
+    return resolveSharedHubName(satellites);
   }
 
   static String resolveSharedHubName(List<DvSatellite> satellites) {
@@ -449,8 +458,17 @@ public final class BvScd2FieldMappingValidationSupport {
   }
 
   private static void validateSharedParent(
-      List<ICheckResult> remarks, BvScd2Table scd2Table, List<DvSatellite> satellites) {
-    String anchorHub = null;
+      List<ICheckResult> remarks,
+      BvScd2Table scd2Table,
+      List<DvSatellite> satellites,
+      IVariables variables) {
+    String declaredHub =
+        scd2Table != null && !Utils.isEmpty(scd2Table.getParentHubName())
+            ? (variables != null
+                ? variables.resolve(scd2Table.getParentHubName())
+                : scd2Table.getParentHubName())
+            : null;
+    String anchorHub = declaredHub;
     String anchorLink = null;
     for (DvSatellite satellite : satellites) {
       if (!Utils.isEmpty(satellite.getHubName())) {
@@ -608,7 +626,7 @@ public final class BvScd2FieldMappingValidationSupport {
     for (BvScd2FieldMappingDialogSupport.SatelliteResolution resolution :
         BvScd2FieldMappingDialogSupport.resolveSatellites(
             scd2Table, dataVaultModel, variables, metadataProvider)) {
-      if (resolution.resolved()) {
+      if (resolution.satellite() != null) {
         satellites.add(resolution.satellite());
       }
     }
@@ -722,6 +740,57 @@ public final class BvScd2FieldMappingValidationSupport {
                     scd2Table.getName(),
                     sourceQuery.getName(),
                     timestamp),
+                scd2Table));
+      }
+    }
+  }
+
+  private static void validateSourceQueryHashKeyMapping(
+      List<ICheckResult> remarks,
+      BvScd2Table scd2Table,
+      List<BvSourceQuery> sourceQueries,
+      List<DvSatellite> satellites,
+      DataVaultModel dataVaultModel,
+      IVariables variables) {
+    if (sourceQueries == null || sourceQueries.isEmpty()) {
+      return;
+    }
+    String grainHashKey =
+        BvScd2PipelineSupport.resolveSharedHashKeyFieldName(
+            scd2Table, satellites, sourceQueries, dataVaultModel, variables);
+    for (BvSourceQuery sourceQuery : sourceQueries) {
+      if (sourceQuery == null) {
+        continue;
+      }
+      String sourceColumn = sourceQuery.resolvedHashKeyField(variables);
+      String mappedHubField = sourceQuery.resolvedHubHashKeyField(variables);
+      if (Utils.isEmpty(sourceColumn) || Utils.isEmpty(grainHashKey)) {
+        continue;
+      }
+      if (!sourceColumn.equals(grainHashKey) && Utils.isEmpty(sourceQuery.getHubHashKeyField())) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_ERROR,
+                BaseMessages.getString(
+                    PKG,
+                    "BvScd2FieldMappingValidationSupport.Error.SourceQueryHashKeyMappingRequired",
+                    scd2Table.getName(),
+                    sourceQuery.getName(),
+                    sourceColumn,
+                    grainHashKey),
+                scd2Table));
+      } else if (sourceQuery.hashKeyNeedsRename(variables)
+          && !mappedHubField.equals(grainHashKey)) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_ERROR,
+                BaseMessages.getString(
+                    PKG,
+                    "BvScd2FieldMappingValidationSupport.Error.SourceQueryHashKeyMappingMismatch",
+                    scd2Table.getName(),
+                    sourceQuery.getName(),
+                    mappedHubField,
+                    grainHashKey),
                 scd2Table));
       }
     }

@@ -251,6 +251,16 @@ class BvScd2FieldMappingValidationTest {
   }
 
   @Test
+  void parentHubOnScd2TableIsUsedWhenSatellitesDoNotShareAHub() {
+    BvScd2Table table = new BvScd2Table();
+    table.setParentHubName("hub_customer");
+    assertEquals(
+        "hub_customer",
+        BvScd2FieldMappingValidationSupport.resolveParentHubName(
+            table, List.of(), new Variables()));
+  }
+
+  @Test
   void missingDataVaultModelIsAnErrorWhenDerivativesExist() {
     BvScd2Table table = new BvScd2Table();
     table.setName("customer_bv");

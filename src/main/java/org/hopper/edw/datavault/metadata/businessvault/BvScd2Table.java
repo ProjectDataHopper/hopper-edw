@@ -68,6 +68,13 @@ public class BvScd2Table extends BvTableBase {
   @HopMetadataProperty private boolean includeHubBusinessKeys;
 
   /**
+   * Hub whose hash key is the SCD2 grain. All satellite and source-query streams are sorted and
+   * merged on that key (plus the functional timestamp). Empty means infer from linked satellite
+   * parents.
+   */
+  @HopMetadataProperty private String parentHubName;
+
+  /**
    * When true, hub business keys are joined for calculations but not written to the BV table.
    * Stored as the uncommon case so older {@code .hbv} files without this tag deserialize as false
    * (keys are loaded when Include hub business keys is enabled).

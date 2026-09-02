@@ -35,13 +35,16 @@ Raw vault satellites remain insert-only (technical load history). SCD2 rewrites 
 |Target table in the Business Vault database.
 
 |**Derivatives**
-|One or more DV satellite references. At least one satellite is required.
+|DV satellite references and/or source queries. At least one satellite or source query is required.
 
 |**Include hash key**
-|When enabled, the parent hub/link hash key is written to the BV table.
+|When enabled, the parent hub hash key is written to the BV table.
+
+|**Parent hub**
+|The hub this SCD2 timeline is for. Linked satellites and source queries are all sorted and merged on that hub's hash key plus the functional timestamp. Origin does not matter. Leave empty to infer from linked satellites. Set this when the SCD2 is fed only by source queries.
 
 |**Include hub business keys**
-|When enabled, parent-hub business key columns are left-outer Merge Joined after collapse, immediately before SQL calculations. They are available for calculations but they do not drive new versions. Requires Include hash key and a shared hub parent. The SCD2 merge/repeat/incremental path is unchanged.
+|When enabled, that hub's business key columns are left-outer Merge Joined after collapse, immediately before SQL calculations. They are available for calculations but they do not drive new versions. Requires Include hash key. The SCD2 merge/repeat/incremental path is unchanged.
 
 |**Load hub business keys**
 |Enabled when Include hub business keys is selected. When checked (default), hub business key columns are written to the BV table. Uncheck to keep them on the stream for SQL calculations only.
@@ -86,9 +89,9 @@ Use **Debug** or **Show build pipeline** on the canvas to inspect the generated 
 
 Required when **two or more** satellites feed the table. Map each `(satellite, source field)` to a BV target column name. Validation checks parent hub/link consistency, source field existence, and unique target columns.
 
-**Suggest mappings** reloads the linked `.hdv` from disk, then adds one row per unmapped satellite attribute (unique target names on collisions). If nothing is added, a message explains why: Data Vault model not loaded, satellite not in that model, or the satellite has no attributes (use **Get attributes** on the satellite, then suggest again). You do not need to close the BV tab after editing the `.hdv`.
+**Suggest mappings** reloads the linked `.hdv` from disk, then adds one row per unmapped satellite attribute **and** per unmapped source-query column (hash key, functional timestamp, and load date on the source query are skipped). Target names stay unique on collisions. If nothing is added, a message explains why: Data Vault model not loaded (satellites only), satellite not in that model, source query not on the canvas, the satellite has no attributes (use **Get attributes**), or the source query has no columns (use **Get fields**). You do not need to close the BV tab after editing the `.hdv` or a source query.
 
-The Field mappings tab shows how many tables were loaded and how many attributes each linked satellite has.
+The Field mappings tab shows how many Data Vault tables were loaded and how many attributes each linked satellite or source query has.
 
 Single-satellite tables can pass attributes through under DV names unless you add explicit mappings for renaming or subsetting.
 

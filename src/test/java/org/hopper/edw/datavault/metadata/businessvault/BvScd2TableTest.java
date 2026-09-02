@@ -109,6 +109,7 @@ class BvScd2TableTest {
     BvScd2Table original = new BvScd2Table();
     original.setName("customer_bv");
     original.setIncludeHubBusinessKeys(true);
+    original.setParentHubName("hub_customer");
     original.getDerivatives().add(new BvDerivativeRef("sat_customer", DvTableType.SATELLITE));
 
     String xml = XmlHandler.aroundTag("table", XmlMetadataUtil.serializeObjectToXml(original));
@@ -118,6 +119,7 @@ class BvScd2TableTest {
     XmlMetadataUtil.deSerializeFromXml(rootNode, BvScd2Table.class, restored, null);
 
     assertTrue(restored.isIncludeHubBusinessKeys());
+    assertEquals("hub_customer", restored.getParentHubName());
   }
 
   @Test

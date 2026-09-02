@@ -98,6 +98,8 @@ public class HopGuiBvScd2TableDialog {
   private Button wIncludeHashKey;
   private Button wIncludeHubBusinessKeys;
   private Button wLoadHubBusinessKeys;
+  private Combo wParentHubName;
+  private Label wlParentHubName;
   private Combo wBuildMode;
   private Combo wHashKeyPartitions;
   private Text wFunctionalTimestamp;
@@ -275,6 +277,22 @@ public class HopGuiBvScd2TableDialog {
             .result());
     wIncludeHashKey.addListener(SWT.Selection, e -> updateHubBusinessKeyOptionState());
 
+    wlParentHubName = new Label(comp, SWT.RIGHT);
+    wlParentHubName.setText(BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.ParentHub.Label"));
+    wlParentHubName.setToolTipText(
+        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.ParentHub.Tooltip"));
+    PropsUi.setLook(wlParentHubName);
+    wlParentHubName.setLayoutData(
+        new FormDataBuilder().left().top(wlIncludeHashKey, margin).right(middle, -margin).result());
+
+    wParentHubName = new Combo(comp, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+    PropsUi.setLook(wParentHubName);
+    wParentHubName.setToolTipText(
+        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.ParentHub.Tooltip"));
+    wParentHubName.setLayoutData(
+        new FormDataBuilder().left(middle, 0).top(wlIncludeHashKey, margin).right().result());
+    populateParentHubCombo();
+
     Label wlIncludeHubBusinessKeys = new Label(comp, SWT.RIGHT);
     wlIncludeHubBusinessKeys.setText(
         BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.IncludeHubBusinessKeys.Label"));
@@ -282,7 +300,7 @@ public class HopGuiBvScd2TableDialog {
         BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.IncludeHubBusinessKeys.Tooltip"));
     PropsUi.setLook(wlIncludeHubBusinessKeys);
     wlIncludeHubBusinessKeys.setLayoutData(
-        new FormDataBuilder().left().top(wlIncludeHashKey, margin).right(middle, -margin).result());
+        new FormDataBuilder().left().top(wParentHubName, margin).right(middle, -margin).result());
 
     wIncludeHubBusinessKeys = new Button(comp, SWT.CHECK);
     PropsUi.setLook(wIncludeHubBusinessKeys);
@@ -334,7 +352,7 @@ public class HopGuiBvScd2TableDialog {
     PropsUi.setLook(wBuildMode);
     EnumDialogSupport.populateCombo(wBuildMode, BvScd2BuildMode.class);
     wBuildMode.setLayoutData(
-        new FormDataBuilder().left(middle, 0).top(wLoadHubBusinessKeys, margin).right().result());
+        new FormDataBuilder().left(middle, 0).top(wlLoadHubBusinessKeys, margin).right().result());
     wBuildMode.addListener(SWT.Selection, e -> updateIncrementalFieldState());
 
     Label wlHashKeyPartitions = new Label(comp, SWT.RIGHT);
@@ -897,6 +915,38 @@ public class HopGuiBvScd2TableDialog {
     }
     loadSatelliteConfigsTable(satelliteNames);
     updateMappingsHint();
+    suggestParentHubFromSatellites();
+  }
+
+  private void suggestParentHubFromSatellites() {
+    if (wParentHubName == null
+        || wParentHubName.isDisposed()
+        || !Utils.isEmpty(wParentHubName.getText())) {
+      return;
+    }
+    DataVaultModel dv = currentDataVaultModel(false);
+    if (dv == null || wDerivatives == null) {
+      return;
+    }
+    String inferred = null;
+    for (TableItem item : wDerivatives.getNonEmptyItems()) {
+      String name = item.getText(1);
+      if (Utils.isEmpty(name)) {
+        continue;
+      }
+      IDvTable table = dv.findTable(name);
+      if (!(table instanceof DvSatellite satellite) || Utils.isEmpty(satellite.getHubName())) {
+        continue;
+      }
+      if (inferred == null) {
+        inferred = satellite.getHubName();
+      } else if (!inferred.equals(satellite.getHubName())) {
+        return;
+      }
+    }
+    if (!Utils.isEmpty(inferred)) {
+      wParentHubName.setText(inferred);
+    }
   }
 
   private void refreshMappingSourceCombos() {
@@ -929,20 +979,24 @@ public class HopGuiBvScd2TableDialog {
     if (wlMappingsHint == null || wlMappingsHint.isDisposed()) {
       return;
     }
-    if (!Utils.isEmpty(dataVaultLoadError)) {
+    boolean hasDvDerivatives = hasNonEmptyTableItems(wDerivatives);
+    boolean hasSourceQueries = hasNonEmptyTableItems(wSourceQueries);
+    if (!Utils.isEmpty(dataVaultLoadError) && hasDvDerivatives && !hasSourceQueries) {
       wlMappingsHint.setText(
           BaseMessages.getString(
               PKG, "HopGuiBvScd2TableDialog.Mappings.Hint.LoadError", dataVaultLoadError));
+      if (wSuggestMappings != null && !wSuggestMappings.isDisposed()) {
+        wSuggestMappings.setEnabled(false);
+      }
       return;
     }
     BvScd2Table draft = new BvScd2Table();
     applyDerivativesToTable(draft);
-    BvScd2FieldMappingDialogSupport.MappingSuggestion suggestion =
-        BvScd2FieldMappingDialogSupport.analyze(
-            draft, currentDataVaultModel(false), variables, metadataProvider());
+    applySourceQueriesToTable(draft);
+    BvScd2FieldMappingDialogSupport.MappingSuggestion suggestion = analyzeMappings(draft, false);
     int satelliteCount = getSatelliteNamesFromDerivativesTable().length;
     String counts = suggestion.attributeCountSummary();
-    if (!suggestion.dvModelPresent()) {
+    if (!suggestion.dvModelPresent() && hasDvDerivatives && !hasSourceQueries) {
       wlMappingsHint.setText(
           BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Mappings.Hint.NoDvModel"));
     } else if (satelliteCount > 1) {
@@ -967,7 +1021,7 @@ public class HopGuiBvScd2TableDialog {
                   : counts));
     }
     if (wSuggestMappings != null && !wSuggestMappings.isDisposed()) {
-      wSuggestMappings.setEnabled(satelliteCount > 0 && suggestion.dvModelPresent());
+      wSuggestMappings.setEnabled(satelliteCount > 0);
     }
   }
 
@@ -1060,23 +1114,27 @@ public class HopGuiBvScd2TableDialog {
   }
 
   private void suggestMappings() {
-    DataVaultModel dv = currentDataVaultModel(true);
-    if (!Utils.isEmpty(dataVaultLoadError)) {
+    BvScd2Table draft = new BvScd2Table();
+    applyWidgetsToTable(draft);
+    boolean hasDvDerivatives = !draft.getDerivatives().isEmpty();
+    boolean hasSourceQueries = !draft.getSourceQueryRefs().isEmpty();
+    BvScd2FieldMappingDialogSupport.MappingSuggestion suggestion = analyzeMappings(draft, true);
+    updateMappingsHint();
+
+    if (!Utils.isEmpty(dataVaultLoadError)
+        && hasDvDerivatives
+        && suggestion.resolvedNames().isEmpty()) {
       showMappingMessage(
           SWT.ICON_ERROR,
           "HopGuiBvScd2TableDialog.Mappings.Suggest.Title",
           BaseMessages.getString(
               PKG, "HopGuiBvScd2TableDialog.Mappings.Suggest.LoadError", dataVaultLoadError));
-      updateMappingsHint();
       return;
     }
-    BvScd2Table draft = new BvScd2Table();
-    applyWidgetsToTable(draft);
-    BvScd2FieldMappingDialogSupport.MappingSuggestion suggestion =
-        BvScd2FieldMappingDialogSupport.analyze(draft, dv, variables, metadataProvider());
-    updateMappingsHint();
-
-    if (!suggestion.dvModelPresent() || suggestion.dvTableCount() == 0) {
+    if (suggestion.resolvedNames().isEmpty()
+        && hasDvDerivatives
+        && !hasSourceQueries
+        && (!suggestion.dvModelPresent() || suggestion.dvTableCount() == 0)) {
       showMappingMessage(
           SWT.ICON_ERROR,
           "HopGuiBvScd2TableDialog.Mappings.Suggest.Title",
@@ -1159,6 +1217,10 @@ public class HopGuiBvScd2TableDialog {
     wIncludeHashKey.setSelection(input.isIncludeHashKey());
     wIncludeHubBusinessKeys.setSelection(input.isIncludeHubBusinessKeys());
     wLoadHubBusinessKeys.setSelection(input.isLoadHubBusinessKeys());
+    populateParentHubCombo();
+    if (!Utils.isEmpty(input.getParentHubName())) {
+      wParentHubName.setText(input.getParentHubName());
+    }
     updateHubBusinessKeyOptionState();
     EnumDialogSupport.selectCombo(wBuildMode, input.getBuildModeOrDefault());
     EnumDialogSupport.selectCombo(wHashKeyPartitions, input.getHashKeyPartitionCountOrDefault());
@@ -1343,8 +1405,7 @@ public class HopGuiBvScd2TableDialog {
                 applyWidgetsToTable(draftTable);
                 List<ICheckResult> tableRemarks = new ArrayList<>();
                 BvScd2FieldMappingDialogSupport.MappingSuggestion suggestion =
-                    BvScd2FieldMappingDialogSupport.analyze(
-                        draftTable, dv, variables, metadataProvider());
+                    analyzeMappings(draftTable, false);
                 tableRemarks.add(
                     new CheckResult(
                         ICheckResult.TYPE_RESULT_OK,
@@ -1383,6 +1444,7 @@ public class HopGuiBvScd2TableDialog {
     target.setIncludeHubBusinessKeys(
         wIncludeHashKey.getSelection() && wIncludeHubBusinessKeys.getSelection());
     target.setLoadHubBusinessKeys(wLoadHubBusinessKeys.getSelection());
+    target.setParentHubName(wParentHubName.getText());
     target.setBuildMode(
         EnumDialogSupport.readCombo(
             wBuildMode, BvScd2BuildMode.class, BvScd2BuildMode.FULL_REBUILD));
@@ -1440,6 +1502,20 @@ public class HopGuiBvScd2TableDialog {
       calculation.setDescription(item.getText(6));
       target.getCalculations().add(calculation);
     }
+  }
+
+  private BvScd2FieldMappingDialogSupport.MappingSuggestion analyzeMappings(
+      BvScd2Table draft, boolean forceReload) {
+    return BvScd2FieldMappingDialogSupport.analyze(
+        draft,
+        currentDataVaultModel(forceReload),
+        businessVaultModel,
+        variables,
+        metadataProvider());
+  }
+
+  private static boolean hasNonEmptyTableItems(TableView tableView) {
+    return tableView != null && !tableView.getNonEmptyItems().isEmpty();
   }
 
   private DataVaultModel currentDataVaultModel(boolean forceReload) {
@@ -1514,8 +1590,26 @@ public class HopGuiBvScd2TableDialog {
 
   private void updateHubBusinessKeyOptionState() {
     boolean hashKey = wIncludeHashKey.getSelection();
+    boolean hubKeys = hashKey && wIncludeHubBusinessKeys.getSelection();
     wIncludeHubBusinessKeys.setEnabled(hashKey);
-    wLoadHubBusinessKeys.setEnabled(hashKey && wIncludeHubBusinessKeys.getSelection());
+    wLoadHubBusinessKeys.setEnabled(hubKeys);
+  }
+
+  private void populateParentHubCombo() {
+    if (wParentHubName == null || wParentHubName.isDisposed()) {
+      return;
+    }
+    String current = wParentHubName.getText();
+    wParentHubName.removeAll();
+    wParentHubName.add("");
+    for (String hubName :
+        BusinessVaultSourceQuerySupport.listParentHubNames(
+            businessVaultModel, currentDataVaultModel(false))) {
+      wParentHubName.add(hubName);
+    }
+    if (!Utils.isEmpty(current)) {
+      wParentHubName.setText(current);
+    }
   }
 
   private void cancel() {

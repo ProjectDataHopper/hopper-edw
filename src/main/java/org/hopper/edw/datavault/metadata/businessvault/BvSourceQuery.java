@@ -57,13 +57,19 @@ public class BvSourceQuery extends BvTableBase {
 
   @HopMetadataProperty private String sqlQuery;
 
+  /** Column name in this table, view, or SQL result. */
   @HopMetadataProperty private String hashKeyField;
+
+  /**
+   * Hub / SCD2 grain hash-key name when it differs from {@link #hashKeyField} (for example source
+   * {@code burger_hkey} mapped to {@code hub_burger_hkey}). Empty means the source column is used
+   * as-is. Applied with Select Values after Table Input, not as SQL {@code AS}.
+   */
+  @HopMetadataProperty private String hubHashKeyField;
 
   @HopMetadataProperty private String functionalTimestampField;
 
   @HopMetadataProperty private String loadDateField;
-
-  @HopMetadataProperty private String parentHubName;
 
   @HopMetadataProperty(key = "column", groupKey = "columns")
   private List<BvSourceQueryColumn> columns = new ArrayList<>();
@@ -78,6 +84,25 @@ public class BvSourceQuery extends BvTableBase {
 
   public boolean isSqlSource() {
     return getSourceKindOrDefault() == BvSourceQueryKind.SQL;
+  }
+
+  public String resolvedHashKeyField(IVariables variables) {
+    return resolve(hashKeyField, variables);
+  }
+
+  /** Grain name after mapping; same as the source column when {@link #hubHashKeyField} is empty. */
+  public String resolvedHubHashKeyField(IVariables variables) {
+    String hubField = resolve(hubHashKeyField, variables);
+    if (!Utils.isEmpty(hubField)) {
+      return hubField;
+    }
+    return resolvedHashKeyField(variables);
+  }
+
+  public boolean hashKeyNeedsRename(IVariables variables) {
+    String source = resolvedHashKeyField(variables);
+    String hub = resolvedHubHashKeyField(variables);
+    return !Utils.isEmpty(source) && !Utils.isEmpty(hub) && !source.equals(hub);
   }
 
   public List<BvSourceQueryColumn> getColumns() {
