@@ -50,6 +50,9 @@ public class BvScd2Table extends BvTableBase {
   @HopMetadataProperty(storeWithCode = true)
   private BvScd2HashPartitionCount hashKeyPartitionCount = BvScd2HashPartitionCount.NONE;
 
+  @HopMetadataProperty(storeWithCode = true)
+  private BvScd2SqlExpressionCopyCount sqlExpressionCopyCount = BvScd2SqlExpressionCopyCount.ONE;
+
   @HopMetadataProperty private String functionalTimestampField;
 
   @HopMetadataProperty private String incrementalWatermarkField;
@@ -153,6 +156,12 @@ public class BvScd2Table extends BvTableBase {
 
   public boolean isHashKeyPartitioned() {
     return getHashKeyPartitionCountOrDefault().isPartitioned();
+  }
+
+  public BvScd2SqlExpressionCopyCount getSqlExpressionCopyCountOrDefault() {
+    return sqlExpressionCopyCount != null
+        ? sqlExpressionCopyCount
+        : BvScd2SqlExpressionCopyCount.ONE;
   }
 
   /** Inverse of {@link #hubBusinessKeysCalculationOnly}; missing XML means the keys are loaded. */

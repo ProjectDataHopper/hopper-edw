@@ -1581,12 +1581,39 @@ class BvScd2PipelineSupportTest {
                     hop.getFromTransform().getTransform() instanceof GroupByMeta
                         && hop.getToTransform() == calc);
     assertTrue(hopFromGroupBy);
+    assertEquals(1, calc.getCopies(new Variables()));
 
     var layout =
         BvScd2PipelineSupport.buildTargetTableLayout(
             ctx.scd2Table, ctx.bvConfig, ctx.dvModel, ctx.getSatellite(), new Variables());
     assertTrue(
         layout.getValueMetaList().stream().anyMatch(vm -> "name_or_default".equals(vm.getName())));
+  }
+
+  @Test
+  void sqlExpressionCopiesAreSetOnGeneratedTransform() throws Exception {
+    Scd2BuildContext ctx = singleSatelliteContext(BvScd2BuildMode.FULL_REBUILD, null);
+    ctx.scd2Table.setSqlExpressionCopyCount(BvScd2SqlExpressionCopyCount.FOUR);
+    ctx.scd2Table
+        .getCalculations()
+        .add(
+            new BvScd2Calculation(
+                "name_or_default", "COALESCE(name, 'Default value' :> VARCHAR(720))"));
+
+    PipelineMeta pipelineMeta = BvScd2PipelineSupport.generatePipeline(ctx);
+    TransformMeta calc =
+        pipelineMeta.getTransforms().stream()
+            .filter(t -> "SqlExpression".equals(t.getTransformPluginId()))
+            .findFirst()
+            .orElseThrow();
+    assertEquals(4, calc.getCopies(new Variables()));
+    TransformMeta from =
+        pipelineMeta.getPipelineHops().stream()
+            .filter(hop -> hop.getToTransform() == calc)
+            .map(hop -> hop.getFromTransform())
+            .findFirst()
+            .orElseThrow();
+    assertTrue(from.isDistributes());
   }
 
   @Test

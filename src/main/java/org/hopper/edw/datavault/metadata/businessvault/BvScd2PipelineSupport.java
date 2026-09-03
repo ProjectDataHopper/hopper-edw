@@ -2415,6 +2415,11 @@ public final class BvScd2PipelineSupport {
     int y = predecessor.getLocation() != null ? predecessor.getLocation().y : LOCATION_START.y;
     TransformMeta tm = new TransformMeta("SqlExpression", name, meta);
     tm.setLocation(x, y);
+    int copies = ctx.scd2Table.getSqlExpressionCopyCountOrDefault().getCopyCount();
+    tm.setCopiesString(Integer.toString(Math.max(1, copies)));
+    if (copies > 1 && predecessor != null) {
+      predecessor.setDistributes(true);
+    }
     pipelineMeta.addTransform(tm);
     pipelineMeta.addPipelineHop(new PipelineHopMeta(predecessor, tm));
     return tm;

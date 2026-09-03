@@ -50,6 +50,7 @@ class BvScd2TableTest {
     assertFalse(table.isIncrementalBuild());
     assertEquals(BvScd2HashPartitionCount.NONE, table.getHashKeyPartitionCountOrDefault());
     assertFalse(table.isHashKeyPartitioned());
+    assertEquals(BvScd2SqlExpressionCopyCount.ONE, table.getSqlExpressionCopyCountOrDefault());
   }
 
   @Test
@@ -89,6 +90,7 @@ class BvScd2TableTest {
     original.setFunctionalTimestampField("x_load_ts");
     original.setIncrementalWatermarkField("event_ts");
     original.setHashKeyPartitionCount(BvScd2HashPartitionCount.EIGHT);
+    original.setSqlExpressionCopyCount(BvScd2SqlExpressionCopyCount.FOUR);
     original.getDerivatives().add(new BvDerivativeRef("sat_customer", DvTableType.SATELLITE));
 
     String xml = XmlHandler.aroundTag("table", XmlMetadataUtil.serializeObjectToXml(original));
@@ -101,6 +103,7 @@ class BvScd2TableTest {
     assertEquals(BvScd2BuildMode.INCREMENTAL, restored.getBuildModeOrDefault());
     assertEquals("event_ts", restored.getIncrementalWatermarkField());
     assertEquals(BvScd2HashPartitionCount.EIGHT, restored.getHashKeyPartitionCountOrDefault());
+    assertEquals(BvScd2SqlExpressionCopyCount.FOUR, restored.getSqlExpressionCopyCountOrDefault());
     assertTrue(restored.isIncrementalBuild());
   }
 

@@ -78,6 +78,7 @@ import org.hopper.edw.datavault.metadata.businessvault.BvScd2FieldMappingDialogS
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2HashPartitionCount;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2PipelineSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2SatelliteConfig;
+import org.hopper.edw.datavault.metadata.businessvault.BvScd2SqlExpressionCopyCount;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2Table;
 import org.hopper.edw.datavault.metadata.businessvault.BvSourceQueryRef;
 import org.hopper.edw.datavault.transform.sqlexpression.SqlExpressionEditorDialog;
@@ -104,6 +105,7 @@ public class HopGuiBvScd2TableDialog {
   private Label wlParentHubName;
   private Combo wBuildMode;
   private Combo wHashKeyPartitions;
+  private Combo wSqlExpressionCopies;
   private Text wFunctionalTimestamp;
   private Text wIncrementalWatermark;
   private Text wValidFromField;
@@ -372,6 +374,23 @@ public class HopGuiBvScd2TableDialog {
     wHashKeyPartitions.setLayoutData(
         new FormDataBuilder().left(middle, 0).top(wBuildMode, margin).right().result());
 
+    Label wlSqlExpressionCopies = new Label(comp, SWT.RIGHT);
+    wlSqlExpressionCopies.setText(
+        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.SqlExpressionCopies.Label"));
+    PropsUi.setLook(wlSqlExpressionCopies);
+    wlSqlExpressionCopies.setLayoutData(
+        new FormDataBuilder()
+            .left()
+            .top(wHashKeyPartitions, margin)
+            .right(middle, -margin)
+            .result());
+
+    wSqlExpressionCopies = new Combo(comp, SWT.BORDER | SWT.READ_ONLY);
+    PropsUi.setLook(wSqlExpressionCopies);
+    EnumDialogSupport.populateCombo(wSqlExpressionCopies, BvScd2SqlExpressionCopyCount.class);
+    wSqlExpressionCopies.setLayoutData(
+        new FormDataBuilder().left(middle, 0).top(wHashKeyPartitions, margin).right().result());
+
     Label wlFunctionalTimestamp = new Label(comp, SWT.RIGHT);
     wlFunctionalTimestamp.setText(
         BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.FunctionalTimestamp.Label"));
@@ -379,14 +398,14 @@ public class HopGuiBvScd2TableDialog {
     wlFunctionalTimestamp.setLayoutData(
         new FormDataBuilder()
             .left()
-            .top(wHashKeyPartitions, margin)
+            .top(wSqlExpressionCopies, margin)
             .right(middle, -margin)
             .result());
 
     wFunctionalTimestamp = new Text(comp, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wFunctionalTimestamp);
     wFunctionalTimestamp.setLayoutData(
-        new FormDataBuilder().left(middle, 0).top(wHashKeyPartitions, margin).right().result());
+        new FormDataBuilder().left(middle, 0).top(wSqlExpressionCopies, margin).right().result());
 
     Label wlIncrementalWatermark = new Label(comp, SWT.RIGHT);
     wlIncrementalWatermark.setText(
@@ -1239,6 +1258,7 @@ public class HopGuiBvScd2TableDialog {
     updateHubBusinessKeyOptionState();
     EnumDialogSupport.selectCombo(wBuildMode, input.getBuildModeOrDefault());
     EnumDialogSupport.selectCombo(wHashKeyPartitions, input.getHashKeyPartitionCountOrDefault());
+    EnumDialogSupport.selectCombo(wSqlExpressionCopies, input.getSqlExpressionCopyCountOrDefault());
     if (!Utils.isEmpty(input.getFunctionalTimestampField())) {
       wFunctionalTimestamp.setText(input.getFunctionalTimestampField());
     }
@@ -1466,6 +1486,11 @@ public class HopGuiBvScd2TableDialog {
     target.setHashKeyPartitionCount(
         EnumDialogSupport.readCombo(
             wHashKeyPartitions, BvScd2HashPartitionCount.class, BvScd2HashPartitionCount.NONE));
+    target.setSqlExpressionCopyCount(
+        EnumDialogSupport.readCombo(
+            wSqlExpressionCopies,
+            BvScd2SqlExpressionCopyCount.class,
+            BvScd2SqlExpressionCopyCount.ONE));
     target.setFunctionalTimestampField(wFunctionalTimestamp.getText());
     target.setIncrementalWatermarkField(wIncrementalWatermark.getText());
     target.setValidFromField(wValidFromField.getText());
@@ -1751,6 +1776,8 @@ public class HopGuiBvScd2TableDialog {
         BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.BuildMode.Tooltip"));
     wHashKeyPartitions.setToolTipText(
         BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.HashKeyPartitions.Tooltip"));
+    wSqlExpressionCopies.setToolTipText(
+        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.SqlExpressionCopies.Tooltip"));
     wIncrementalWatermark.setToolTipText(
         BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.IncrementalWatermark.Tooltip"));
     wFunctionalTimestamp.setToolTipText(
