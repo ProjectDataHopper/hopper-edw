@@ -52,7 +52,7 @@ public final class SqlExpressionEvaluator {
       throw new SqlExpressionException("Compiled expression is required");
     }
     try {
-      Object javaValue = eval(compiled.getRexNode(), compiled.getInputRowMeta(), row);
+      Object javaValue = eval(compiled.getRexNode(), compiled.getInputValueMetas(), row);
       return convertToHop(javaValue, compiled.getOutputValueMeta());
     } catch (SqlExpressionException e) {
       throw e;
@@ -63,128 +63,131 @@ public final class SqlExpressionEvaluator {
     }
   }
 
-  private static Object eval(RexNode node, IRowMeta rowMeta, Object[] row)
+  private static Object eval(RexNode node, IValueMeta[] valueMetas, Object[] row)
       throws HopException, SqlExpressionException {
     if (node == null) {
       return null;
     }
     if (node instanceof RexInputRef ref) {
-      return hopToJava(rowMeta, row, ref.getIndex());
+      return hopToJava(valueMetas, row, ref.getIndex());
     }
     if (node instanceof RexLiteral lit) {
       return literalToJava(lit);
     }
     if (node instanceof RexCall call) {
-      return evalCall(call, rowMeta, row);
+      return evalCall(call, valueMetas, row);
     }
     throw new SqlExpressionException("Unsupported expression node: " + node.getKind());
   }
 
-  private static Object evalCall(RexCall call, IRowMeta rowMeta, Object[] row)
+  private static Object evalCall(RexCall call, IValueMeta[] valueMetas, Object[] row)
       throws HopException, SqlExpressionException {
     SqlKind kind = call.getKind();
     List<RexNode> operands = call.getOperands();
     return switch (kind) {
-      case CASE -> evalCase(operands, rowMeta, row);
-      case CAST -> evalCast(operands.isEmpty() ? null : eval(operands.get(0), rowMeta, row), call);
-      case COALESCE, NVL -> evalCoalesce(operands, rowMeta, row);
-      case AND -> evalAnd(operands, rowMeta, row);
-      case OR -> evalOr(operands, rowMeta, row);
-      case NOT -> not3(asBoolean(eval(operands.get(0), rowMeta, row)));
-      case IS_NULL -> eval(operands.get(0), rowMeta, row) == null;
-      case IS_NOT_NULL -> eval(operands.get(0), rowMeta, row) != null;
-      case IS_TRUE -> Boolean.TRUE.equals(asBoolean(eval(operands.get(0), rowMeta, row)));
-      case IS_FALSE -> Boolean.FALSE.equals(asBoolean(eval(operands.get(0), rowMeta, row)));
-      case IS_NOT_TRUE -> !Boolean.TRUE.equals(asBoolean(eval(operands.get(0), rowMeta, row)));
-      case IS_NOT_FALSE -> !Boolean.FALSE.equals(asBoolean(eval(operands.get(0), rowMeta, row)));
-      case EQUALS -> eq(eval(operands.get(0), rowMeta, row), eval(operands.get(1), rowMeta, row));
+      case CASE -> evalCase(operands, valueMetas, row);
+      case CAST ->
+          evalCast(operands.isEmpty() ? null : eval(operands.get(0), valueMetas, row), call);
+      case COALESCE, NVL -> evalCoalesce(operands, valueMetas, row);
+      case AND -> evalAnd(operands, valueMetas, row);
+      case OR -> evalOr(operands, valueMetas, row);
+      case NOT -> not3(asBoolean(eval(operands.get(0), valueMetas, row)));
+      case IS_NULL -> eval(operands.get(0), valueMetas, row) == null;
+      case IS_NOT_NULL -> eval(operands.get(0), valueMetas, row) != null;
+      case IS_TRUE -> Boolean.TRUE.equals(asBoolean(eval(operands.get(0), valueMetas, row)));
+      case IS_FALSE -> Boolean.FALSE.equals(asBoolean(eval(operands.get(0), valueMetas, row)));
+      case IS_NOT_TRUE -> !Boolean.TRUE.equals(asBoolean(eval(operands.get(0), valueMetas, row)));
+      case IS_NOT_FALSE -> !Boolean.FALSE.equals(asBoolean(eval(operands.get(0), valueMetas, row)));
+      case EQUALS ->
+          eq(eval(operands.get(0), valueMetas, row), eval(operands.get(1), valueMetas, row));
       case NOT_EQUALS -> {
         Boolean equal =
-            eq(eval(operands.get(0), rowMeta, row), eval(operands.get(1), rowMeta, row));
+            eq(eval(operands.get(0), valueMetas, row), eval(operands.get(1), valueMetas, row));
         yield not3(equal);
       }
       case LESS_THAN ->
-          cmp(eval(operands.get(0), rowMeta, row), eval(operands.get(1), rowMeta, row), -1);
+          cmp(eval(operands.get(0), valueMetas, row), eval(operands.get(1), valueMetas, row), -1);
       case LESS_THAN_OR_EQUAL ->
-          cmpLe(eval(operands.get(0), rowMeta, row), eval(operands.get(1), rowMeta, row));
+          cmpLe(eval(operands.get(0), valueMetas, row), eval(operands.get(1), valueMetas, row));
       case GREATER_THAN ->
-          cmp(eval(operands.get(0), rowMeta, row), eval(operands.get(1), rowMeta, row), 1);
+          cmp(eval(operands.get(0), valueMetas, row), eval(operands.get(1), valueMetas, row), 1);
       case GREATER_THAN_OR_EQUAL ->
-          cmpGe(eval(operands.get(0), rowMeta, row), eval(operands.get(1), rowMeta, row));
-      case PLUS -> add(eval(operands.get(0), rowMeta, row), eval(operands.get(1), rowMeta, row));
+          cmpGe(eval(operands.get(0), valueMetas, row), eval(operands.get(1), valueMetas, row));
+      case PLUS ->
+          add(eval(operands.get(0), valueMetas, row), eval(operands.get(1), valueMetas, row));
       case MINUS ->
-          subtract(eval(operands.get(0), rowMeta, row), eval(operands.get(1), rowMeta, row));
+          subtract(eval(operands.get(0), valueMetas, row), eval(operands.get(1), valueMetas, row));
       case TIMES ->
-          multiply(eval(operands.get(0), rowMeta, row), eval(operands.get(1), rowMeta, row));
+          multiply(eval(operands.get(0), valueMetas, row), eval(operands.get(1), valueMetas, row));
       case DIVIDE ->
-          divide(eval(operands.get(0), rowMeta, row), eval(operands.get(1), rowMeta, row));
-      case PLUS_PREFIX -> eval(operands.get(0), rowMeta, row);
-      case MINUS_PREFIX -> negate(eval(operands.get(0), rowMeta, row));
-      case TRIM -> evalTrim(operands, rowMeta, row);
-      case OTHER_FUNCTION, OTHER -> evalFunction(call, operands, rowMeta, row);
+          divide(eval(operands.get(0), valueMetas, row), eval(operands.get(1), valueMetas, row));
+      case PLUS_PREFIX -> eval(operands.get(0), valueMetas, row);
+      case MINUS_PREFIX -> negate(eval(operands.get(0), valueMetas, row));
+      case TRIM -> evalTrim(operands, valueMetas, row);
+      case OTHER_FUNCTION, OTHER -> evalFunction(call, operands, valueMetas, row);
       default ->
           throw new SqlExpressionException("Unsupported operator '" + call.getOperator() + "'");
     };
   }
 
   private static Object evalFunction(
-      RexCall call, List<RexNode> operands, IRowMeta rowMeta, Object[] row)
+      RexCall call, List<RexNode> operands, IValueMeta[] valueMetas, Object[] row)
       throws HopException, SqlExpressionException {
-    String name = call.getOperator().getName().trim().toUpperCase(Locale.ROOT);
-    if ("||".equals(call.getOperator().getName()) || "CONCAT".equals(name)) {
-      return evalConcat(operands, rowMeta, row);
+    String name = call.getOperator().getName();
+    if ("||".equals(name) || "CONCAT".equalsIgnoreCase(name)) {
+      return evalConcat(operands, valueMetas, row);
     }
-    return switch (name) {
-      case "COALESCE", "NVL" -> evalCoalesce(operands, rowMeta, row);
-      case "NULLIF" -> evalNullIf(operands, rowMeta, row);
+    return switch (name.toUpperCase(Locale.ROOT)) {
+      case "COALESCE", "NVL" -> evalCoalesce(operands, valueMetas, row);
+      case "NULLIF" -> evalNullIf(operands, valueMetas, row);
       case "UPPER" -> {
-        Object v = eval(operands.get(0), rowMeta, row);
+        Object v = eval(operands.get(0), valueMetas, row);
         yield v == null ? null : String.valueOf(v).toUpperCase(Locale.ROOT);
       }
       case "LOWER" -> {
-        Object v = eval(operands.get(0), rowMeta, row);
+        Object v = eval(operands.get(0), valueMetas, row);
         yield v == null ? null : String.valueOf(v).toLowerCase(Locale.ROOT);
       }
-      case "TRIM" -> evalTrim(operands, rowMeta, row);
-      case "SUBSTRING", "SUBSTR" -> evalSubstring(operands, rowMeta, row);
+      case "TRIM" -> evalTrim(operands, valueMetas, row);
+      case "SUBSTRING", "SUBSTR" -> evalSubstring(operands, valueMetas, row);
       case "CHAR_LENGTH", "CHARACTER_LENGTH", "LENGTH" -> {
-        Object v = eval(operands.get(0), rowMeta, row);
+        Object v = eval(operands.get(0), valueMetas, row);
         yield v == null ? null : (long) String.valueOf(v).length();
       }
-      case "HEX" -> SqlExpressionMysqlFunctions.hex(eval(operands.get(0), rowMeta, row));
-      case "UNHEX" -> SqlExpressionMysqlFunctions.unhex(eval(operands.get(0), rowMeta, row));
-      case "MD5" -> SqlExpressionMysqlFunctions.md5(eval(operands.get(0), rowMeta, row));
+      case "HEX" -> SqlExpressionMysqlFunctions.hex(eval(operands.get(0), valueMetas, row));
+      case "UNHEX" -> SqlExpressionMysqlFunctions.unhex(eval(operands.get(0), valueMetas, row));
+      case "MD5" -> SqlExpressionMysqlFunctions.md5(eval(operands.get(0), valueMetas, row));
       case "DATE_FORMAT" ->
           SqlExpressionMysqlFunctions.dateFormat(
-              eval(operands.get(0), rowMeta, row), eval(operands.get(1), rowMeta, row));
+              eval(operands.get(0), valueMetas, row), eval(operands.get(1), valueMetas, row));
       case "TO_DATE" ->
           SqlExpressionMysqlFunctions.toDate(
-              eval(operands.get(0), rowMeta, row), eval(operands.get(1), rowMeta, row));
+              eval(operands.get(0), valueMetas, row), eval(operands.get(1), valueMetas, row));
       default -> throw new SqlExpressionException("Unsupported function '" + name + "'");
     };
   }
 
-  private static Object evalCase(List<RexNode> operands, IRowMeta rowMeta, Object[] row)
+  private static Object evalCase(List<RexNode> operands, IValueMeta[] valueMetas, Object[] row)
       throws HopException, SqlExpressionException {
     int i = 0;
     while (i + 1 < operands.size()) {
-      Object when = eval(operands.get(i), rowMeta, row);
+      Object when = eval(operands.get(i), valueMetas, row);
       RexNode thenNode = operands.get(i + 1);
       i += 2;
       if (Boolean.TRUE.equals(asBoolean(when))) {
-        return eval(thenNode, rowMeta, row);
+        return eval(thenNode, valueMetas, row);
       }
     }
     if (i < operands.size()) {
-      return eval(operands.get(i), rowMeta, row);
+      return eval(operands.get(i), valueMetas, row);
     }
     return null;
   }
 
-  private static Object evalCoalesce(List<RexNode> operands, IRowMeta rowMeta, Object[] row)
+  private static Object evalCoalesce(List<RexNode> operands, IValueMeta[] valueMetas, Object[] row)
       throws HopException, SqlExpressionException {
     for (RexNode operand : operands) {
-      Object value = eval(operand, rowMeta, row);
+      Object value = eval(operand, valueMetas, row);
       if (value != null) {
         return value;
       }
@@ -192,10 +195,10 @@ public final class SqlExpressionEvaluator {
     return null;
   }
 
-  private static Object evalNullIf(List<RexNode> operands, IRowMeta rowMeta, Object[] row)
+  private static Object evalNullIf(List<RexNode> operands, IValueMeta[] valueMetas, Object[] row)
       throws HopException, SqlExpressionException {
-    Object left = eval(operands.get(0), rowMeta, row);
-    Object right = eval(operands.get(1), rowMeta, row);
+    Object left = eval(operands.get(0), valueMetas, row);
+    Object right = eval(operands.get(1), valueMetas, row);
     Boolean equal = eq(left, right);
     if (Boolean.TRUE.equals(equal)) {
       return null;
@@ -203,11 +206,11 @@ public final class SqlExpressionEvaluator {
     return left;
   }
 
-  private static Object evalConcat(List<RexNode> operands, IRowMeta rowMeta, Object[] row)
+  private static Object evalConcat(List<RexNode> operands, IValueMeta[] valueMetas, Object[] row)
       throws HopException, SqlExpressionException {
     StringBuilder builder = new StringBuilder();
     for (RexNode operand : operands) {
-      Object value = eval(operand, rowMeta, row);
+      Object value = eval(operand, valueMetas, row);
       if (value == null) {
         return null;
       }
@@ -216,7 +219,7 @@ public final class SqlExpressionEvaluator {
     return builder.toString();
   }
 
-  private static Object evalTrim(List<RexNode> operands, IRowMeta rowMeta, Object[] row)
+  private static Object evalTrim(List<RexNode> operands, IValueMeta[] valueMetas, Object[] row)
       throws HopException, SqlExpressionException {
     if (operands.isEmpty()) {
       return null;
@@ -224,21 +227,21 @@ public final class SqlExpressionEvaluator {
     // Calcite TRIM(flag, char, string) or TRIM(string)
     Object value;
     if (operands.size() >= 3) {
-      value = eval(operands.get(2), rowMeta, row);
+      value = eval(operands.get(2), valueMetas, row);
     } else {
-      value = eval(operands.get(operands.size() - 1), rowMeta, row);
+      value = eval(operands.get(operands.size() - 1), valueMetas, row);
     }
     return value == null ? null : String.valueOf(value).trim();
   }
 
-  private static Object evalSubstring(List<RexNode> operands, IRowMeta rowMeta, Object[] row)
+  private static Object evalSubstring(List<RexNode> operands, IValueMeta[] valueMetas, Object[] row)
       throws HopException, SqlExpressionException {
-    Object source = eval(operands.get(0), rowMeta, row);
+    Object source = eval(operands.get(0), valueMetas, row);
     if (source == null) {
       return null;
     }
     String text = String.valueOf(source);
-    Object startObj = eval(operands.get(1), rowMeta, row);
+    Object startObj = eval(operands.get(1), valueMetas, row);
     if (startObj == null) {
       return null;
     }
@@ -256,7 +259,7 @@ public final class SqlExpressionEvaluator {
     if (operands.size() < 3) {
       return text.substring(from);
     }
-    Object lenObj = eval(operands.get(2), rowMeta, row);
+    Object lenObj = eval(operands.get(2), valueMetas, row);
     if (lenObj == null) {
       return null;
     }
@@ -265,11 +268,11 @@ public final class SqlExpressionEvaluator {
     return text.substring(from, to);
   }
 
-  private static Boolean evalAnd(List<RexNode> operands, IRowMeta rowMeta, Object[] row)
+  private static Boolean evalAnd(List<RexNode> operands, IValueMeta[] valueMetas, Object[] row)
       throws HopException, SqlExpressionException {
     Boolean result = Boolean.TRUE;
     for (RexNode operand : operands) {
-      result = and3(result, asBoolean(eval(operand, rowMeta, row)));
+      result = and3(result, asBoolean(eval(operand, valueMetas, row)));
       if (Boolean.FALSE.equals(result)) {
         return false;
       }
@@ -277,11 +280,11 @@ public final class SqlExpressionEvaluator {
     return result;
   }
 
-  private static Boolean evalOr(List<RexNode> operands, IRowMeta rowMeta, Object[] row)
+  private static Boolean evalOr(List<RexNode> operands, IValueMeta[] valueMetas, Object[] row)
       throws HopException, SqlExpressionException {
     Boolean result = Boolean.FALSE;
     for (RexNode operand : operands) {
-      result = or3(result, asBoolean(eval(operand, rowMeta, row)));
+      result = or3(result, asBoolean(eval(operand, valueMetas, row)));
       if (Boolean.TRUE.equals(result)) {
         return true;
       }
@@ -486,12 +489,12 @@ public final class SqlExpressionEvaluator {
     return Timestamp.valueOf(String.valueOf(value));
   }
 
-  private static Object hopToJava(IRowMeta rowMeta, Object[] row, int index)
+  private static Object hopToJava(IValueMeta[] valueMetas, Object[] row, int index)
       throws HopValueException {
-    if (rowMeta == null || index < 0 || index >= rowMeta.size()) {
+    if (valueMetas == null || index < 0 || index >= valueMetas.length) {
       return null;
     }
-    IValueMeta valueMeta = rowMeta.getValueMeta(index);
+    IValueMeta valueMeta = valueMetas[index];
     Object value = row != null && index < row.length ? row[index] : null;
     if (valueMeta == null || valueMeta.isNull(value)) {
       return null;

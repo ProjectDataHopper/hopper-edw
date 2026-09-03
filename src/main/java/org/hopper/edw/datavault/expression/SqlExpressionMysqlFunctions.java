@@ -33,6 +33,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * MySQL / SingleStore scalar semantics for SQL Expression ({@code HEX}, {@code UNHEX}, {@code MD5},
@@ -41,10 +42,15 @@ import java.util.Locale;
 public final class SqlExpressionMysqlFunctions {
 
   private static final char[] HEX_DIGITS = "0123456789ABCDEF".toCharArray();
+  private static final char[] HEX_DIGITS_LOWER = "0123456789abcdef".toCharArray();
   private static final DateTimeFormatter ISO_DATE_TIME =
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
   private static final DateTimeFormatter ISO_DATE_TIME_FRACTION =
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS");
+  private static final ConcurrentHashMap<String, MysqlFormat> DATE_FORMAT_CACHE =
+      new ConcurrentHashMap<>();
+  private static final ThreadLocal<MessageDigest> MD5 =
+      ThreadLocal.withInitial(SqlExpressionMysqlFunctions::newMd5);
 
   private SqlExpressionMysqlFunctions() {}
 
@@ -91,9 +97,14 @@ public final class SqlExpressionMysqlFunctions {
     }
     byte[] input =
         value instanceof byte[] bytes ? bytes : mysqlString(value).getBytes(StandardCharsets.UTF_8);
+    MessageDigest digest = MD5.get();
+    digest.reset();
+    return toHex(digest.digest(input), HEX_DIGITS_LOWER);
+  }
+
+  private static MessageDigest newMd5() {
     try {
-      byte[] digest = MessageDigest.getInstance("MD5").digest(input);
-      return toHex(digest).toLowerCase(Locale.ROOT);
+      return MessageDigest.getInstance("MD5");
     } catch (NoSuchAlgorithmException e) {
       throw new IllegalStateException("MD5 is not available", e);
     }
@@ -164,11 +175,15 @@ public final class SqlExpressionMysqlFunctions {
   }
 
   private static String toHex(byte[] bytes) {
+    return toHex(bytes, HEX_DIGITS);
+  }
+
+  private static String toHex(byte[] bytes, char[] digits) {
     char[] chars = new char[bytes.length * 2];
     for (int i = 0; i < bytes.length; i++) {
       int value = bytes[i] & 0xFF;
-      chars[i * 2] = HEX_DIGITS[value >>> 4];
-      chars[i * 2 + 1] = HEX_DIGITS[value & 0x0F];
+      chars[i * 2] = digits[value >>> 4];
+      chars[i * 2 + 1] = digits[value & 0x0F];
     }
     return new String(chars);
   }
@@ -216,57 +231,83 @@ public final class SqlExpressionMysqlFunctions {
   }
 
   static String formatMysql(LocalDateTime dateTime, String format) {
-    StringBuilder out = new StringBuilder(format.length() * 2);
-    for (int i = 0; i < format.length(); i++) {
-      char current = format.charAt(i);
-      if (current != '%' || i + 1 >= format.length()) {
-        out.append(current);
-        continue;
+    if (format == null) {
+      return null;
+    }
+    MysqlFormat compiled =
+        DATE_FORMAT_CACHE.computeIfAbsent(format, SqlExpressionMysqlFunctions::compileFormat);
+    StringBuilder out = new StringBuilder(compiled.estimatedLength);
+    for (FormatPart part : compiled.parts) {
+      if (part.specifier != 0) {
+        appendSpecifier(out, dateTime, part.specifier);
+      } else {
+        out.append(part.literal);
       }
-      i++;
-      out.append(specifier(dateTime, format.charAt(i)));
     }
     return out.toString();
   }
 
-  private static String specifier(LocalDateTime dateTime, char spec) {
-    return switch (spec) {
-      case '%' -> "%";
-      case 'a' -> dateTime.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.US);
-      case 'b' -> dateTime.getMonth().getDisplayName(TextStyle.SHORT, Locale.US);
-      case 'c' -> Integer.toString(dateTime.getMonthValue());
-      case 'd' -> pad2(dateTime.getDayOfMonth());
-      case 'e' -> Integer.toString(dateTime.getDayOfMonth());
-      case 'f' -> pad6(dateTime.getNano() / 1000);
-      case 'H' -> pad2(dateTime.getHour());
-      case 'h', 'I' -> pad2(hour12(dateTime.getHour()));
-      case 'i' -> pad2(dateTime.getMinute());
-      case 'j' -> pad3(dateTime.getDayOfYear());
-      case 'k' -> Integer.toString(dateTime.getHour());
-      case 'l' -> Integer.toString(hour12(dateTime.getHour()));
-      case 'M' -> dateTime.getMonth().getDisplayName(TextStyle.FULL, Locale.US);
-      case 'm' -> pad2(dateTime.getMonthValue());
-      case 'p' -> dateTime.getHour() < 12 ? "AM" : "PM";
-      case 'r' ->
-          pad2(hour12(dateTime.getHour()))
-              + ":"
-              + pad2(dateTime.getMinute())
-              + ":"
-              + pad2(dateTime.getSecond())
-              + (dateTime.getHour() < 12 ? " AM" : " PM");
-      case 's', 'S' -> pad2(dateTime.getSecond());
-      case 'T' ->
-          pad2(dateTime.getHour())
-              + ":"
-              + pad2(dateTime.getMinute())
-              + ":"
-              + pad2(dateTime.getSecond());
-      case 'W' -> dateTime.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.US);
-      case 'w' -> Integer.toString(dateTime.getDayOfWeek().getValue() % 7);
-      case 'Y' -> Integer.toString(dateTime.getYear());
-      case 'y' -> pad2(dateTime.getYear() % 100);
-      default -> Character.toString(spec);
-    };
+  private static MysqlFormat compileFormat(String format) {
+    List<FormatPart> parts = new ArrayList<>();
+    StringBuilder literal = new StringBuilder();
+    for (int i = 0; i < format.length(); i++) {
+      char current = format.charAt(i);
+      if (current == '%' && i + 1 < format.length()) {
+        if (literal.length() > 0) {
+          parts.add(FormatPart.literal(literal.toString()));
+          literal.setLength(0);
+        }
+        parts.add(FormatPart.specifier(format.charAt(++i)));
+      } else {
+        literal.append(current);
+      }
+    }
+    if (literal.length() > 0) {
+      parts.add(FormatPart.literal(literal.toString()));
+    }
+    return new MysqlFormat(List.copyOf(parts), format.length() * 2);
+  }
+
+  private static void appendSpecifier(StringBuilder out, LocalDateTime dateTime, char spec) {
+    switch (spec) {
+      case '%' -> out.append('%');
+      case 'a' -> out.append(dateTime.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.US));
+      case 'b' -> out.append(dateTime.getMonth().getDisplayName(TextStyle.SHORT, Locale.US));
+      case 'c' -> out.append(dateTime.getMonthValue());
+      case 'd' -> appendPad2(out, dateTime.getDayOfMonth());
+      case 'e' -> out.append(dateTime.getDayOfMonth());
+      case 'f' -> appendPad6(out, dateTime.getNano() / 1000);
+      case 'H' -> appendPad2(out, dateTime.getHour());
+      case 'h', 'I' -> appendPad2(out, hour12(dateTime.getHour()));
+      case 'i' -> appendPad2(out, dateTime.getMinute());
+      case 'j' -> appendPad3(out, dateTime.getDayOfYear());
+      case 'k' -> out.append(dateTime.getHour());
+      case 'l' -> out.append(hour12(dateTime.getHour()));
+      case 'M' -> out.append(dateTime.getMonth().getDisplayName(TextStyle.FULL, Locale.US));
+      case 'm' -> appendPad2(out, dateTime.getMonthValue());
+      case 'p' -> out.append(dateTime.getHour() < 12 ? "AM" : "PM");
+      case 'r' -> {
+        appendPad2(out, hour12(dateTime.getHour()));
+        out.append(':');
+        appendPad2(out, dateTime.getMinute());
+        out.append(':');
+        appendPad2(out, dateTime.getSecond());
+        out.append(dateTime.getHour() < 12 ? " AM" : " PM");
+      }
+      case 's', 'S' -> appendPad2(out, dateTime.getSecond());
+      case 'T' -> {
+        appendPad2(out, dateTime.getHour());
+        out.append(':');
+        appendPad2(out, dateTime.getMinute());
+        out.append(':');
+        appendPad2(out, dateTime.getSecond());
+      }
+      case 'W' -> out.append(dateTime.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.US));
+      case 'w' -> out.append(dateTime.getDayOfWeek().getValue() % 7);
+      case 'Y' -> out.append(dateTime.getYear());
+      case 'y' -> appendPad2(out, dateTime.getYear() % 100);
+      default -> out.append(spec);
+    }
   }
 
   private static int hour12(int hour24) {
@@ -274,27 +315,53 @@ public final class SqlExpressionMysqlFunctions {
     return mod == 0 ? 12 : mod;
   }
 
-  private static String pad2(int value) {
-    return value < 10 ? "0" + value : Integer.toString(value);
-  }
-
-  private static String pad3(int value) {
+  private static void appendPad2(StringBuilder out, int value) {
     if (value < 10) {
-      return "00" + value;
+      out.append('0');
     }
-    if (value < 100) {
-      return "0" + value;
-    }
-    return Integer.toString(value);
+    out.append(value);
   }
 
-  private static String pad6(int value) {
-    String text = Integer.toString(Math.max(value, 0));
-    if (text.length() >= 6) {
-      return text.substring(0, 6);
+  private static void appendPad3(StringBuilder out, int value) {
+    if (value < 10) {
+      out.append("00");
+    } else if (value < 100) {
+      out.append('0');
     }
-    return "000000".substring(text.length()) + text;
+    out.append(value);
   }
+
+  private static void appendPad6(StringBuilder out, int value) {
+    int micros = Math.max(value, 0);
+    if (micros >= 100000) {
+      out.append(micros);
+      return;
+    }
+    if (micros >= 10000) {
+      out.append('0');
+    } else if (micros >= 1000) {
+      out.append("00");
+    } else if (micros >= 100) {
+      out.append("000");
+    } else if (micros >= 10) {
+      out.append("0000");
+    } else {
+      out.append("00000");
+    }
+    out.append(micros);
+  }
+
+  private record FormatPart(char specifier, String literal) {
+    static FormatPart specifier(char specifier) {
+      return new FormatPart(specifier, null);
+    }
+
+    static FormatPart literal(String literal) {
+      return new FormatPart((char) 0, literal);
+    }
+  }
+
+  private record MysqlFormat(List<FormatPart> parts, int estimatedLength) {}
 
   private static int toHour24(int hour12, Boolean afternoon) {
     if (afternoon == null) {

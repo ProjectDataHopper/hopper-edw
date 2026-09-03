@@ -157,7 +157,8 @@ public class BvSourceQuery extends BvTableBase {
               BaseMessages.getString(PKG, "BvSourceQuery.CheckResult.MissingTableName", getName()),
               this));
     }
-    if (kind == BvSourceQueryKind.SQL && Utils.isEmpty(sqlQuery)) {
+    if (kind == BvSourceQueryKind.SQL
+        && Utils.isEmpty(BvSourceQuerySqlSupport.prepareSql(sqlQuery))) {
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_ERROR,

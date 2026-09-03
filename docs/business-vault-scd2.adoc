@@ -154,7 +154,7 @@ Keep using link:dbt-import.adoc[Import dbt models] for arbitrary SQL business ta
 
 When a satellite-shaped input is **not** on the Data Vault target — for example a corrective view on another database — add a **Source query** on the BV canvas and hop it to the SCD2 table. The Data Vault model still has one target database; the source query is the BV-side exception.
 
-Each generated `TableInput` uses that source's Hop connection. Table/view names are read directly. Authored SQL is wrapped as a subquery so the plugin can add partition `WHERE` and hash-key/date `ORDER BY` outside the inner statement.
+Each generated `TableInput` uses that source's Hop connection. Table/view names are read directly. Authored SQL has `--` line comments and `/* */` block comments stripped, then is wrapped as a subquery so the plugin can add partition `WHERE` and hash-key/date `ORDER BY` outside the inner statement.
 
 On the source query, set **Hash key (source column)** to the physical name (`burger_hkey`) and **Hash key (hub field)** to the hub grain name when they differ (`hub_burger_hkey`). The pipeline maps that with Select Values after Table Input; it does not rename columns in SQL.
 

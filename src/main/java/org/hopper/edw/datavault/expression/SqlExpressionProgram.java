@@ -34,16 +34,22 @@ public final class SqlExpressionProgram {
   private final IRowMeta outputRowMeta;
   private final List<SqlCompiledExpression> expressions;
   private final boolean keepInputFields;
+  private final int workingRowSize;
+  private final int[] expressionWriteIndexes;
 
   private SqlExpressionProgram(
       IRowMeta inputRowMeta,
       IRowMeta outputRowMeta,
       List<SqlCompiledExpression> expressions,
-      boolean keepInputFields) {
+      boolean keepInputFields,
+      int workingRowSize,
+      int[] expressionWriteIndexes) {
     this.inputRowMeta = inputRowMeta;
     this.outputRowMeta = outputRowMeta;
     this.expressions = expressions;
     this.keepInputFields = keepInputFields;
+    this.workingRowSize = workingRowSize;
+    this.expressionWriteIndexes = expressionWriteIndexes;
   }
 
   public static SqlExpressionProgram compile(
@@ -63,6 +69,7 @@ public final class SqlExpressionProgram {
     }
     IRowMeta working = inputRowMeta.clone();
     List<SqlCompiledExpression> compiled = new ArrayList<>();
+    List<Integer> writeIndexes = new ArrayList<>();
     if (specs != null) {
       for (SqlExpressionSpec spec : specs) {
         if (spec == null
@@ -74,8 +81,10 @@ public final class SqlExpressionProgram {
         compiled.add(expression);
         int existing = working.indexOfValue(expression.getFieldName());
         if (existing >= 0) {
+          writeIndexes.add(existing);
           working.setValueMeta(existing, expression.getOutputValueMeta().clone());
         } else {
+          writeIndexes.add(working.size());
           working.addValueMeta(expression.getOutputValueMeta().clone());
         }
       }
@@ -86,41 +95,31 @@ public final class SqlExpressionProgram {
     } else {
       output = SqlExpressionEvaluator.outputRowMeta(null, compiled);
     }
-    return new SqlExpressionProgram(inputRowMeta.clone(), output, compiled, keepInputFields);
+    int[] expressionWriteIndexes = new int[writeIndexes.size()];
+    for (int i = 0; i < writeIndexes.size(); i++) {
+      expressionWriteIndexes[i] = writeIndexes.get(i);
+    }
+    return new SqlExpressionProgram(
+        inputRowMeta.clone(),
+        output,
+        compiled,
+        keepInputFields,
+        working.size(),
+        expressionWriteIndexes);
   }
 
   public Object[] evaluate(Object[] inputRow) throws SqlExpressionException {
-    Object[] working = inputRow == null ? new Object[inputRowMeta.size()] : inputRow.clone();
-    IRowMeta workingMeta = inputRowMeta.clone();
-    for (SqlCompiledExpression expression : expressions) {
-      Object value = SqlExpressionEvaluator.evaluate(expression, working);
-      int existing = workingMeta.indexOfValue(expression.getFieldName());
-      if (existing >= 0) {
-        working[existing] = value;
-      } else {
-        working = RowDataUtil.addValueData(working, workingMeta.size(), value);
-        workingMeta.addValueMeta(expression.getOutputValueMeta().clone());
-      }
+    Object[] working = RowDataUtil.resizeArray(inputRow, workingRowSize);
+    for (int i = 0; i < expressions.size(); i++) {
+      working[expressionWriteIndexes[i]] =
+          SqlExpressionEvaluator.evaluate(expressions.get(i), working);
     }
     if (keepInputFields) {
-      return alignToOutput(working, workingMeta);
+      return working;
     }
     Object[] output = RowDataUtil.allocateRowData(outputRowMeta.size());
     for (int i = 0; i < expressions.size(); i++) {
-      int idx = workingMeta.indexOfValue(expressions.get(i).getFieldName());
-      output[i] = idx >= 0 ? working[idx] : null;
-    }
-    return output;
-  }
-
-  private Object[] alignToOutput(Object[] working, IRowMeta workingMeta) {
-    Object[] output = RowDataUtil.allocateRowData(outputRowMeta.size());
-    for (int i = 0; i < outputRowMeta.size(); i++) {
-      String name = outputRowMeta.getValueMeta(i).getName();
-      int idx = workingMeta.indexOfValue(name);
-      if (idx >= 0 && idx < working.length) {
-        output[i] = working[idx];
-      }
+      output[i] = working[expressionWriteIndexes[i]];
     }
     return output;
   }

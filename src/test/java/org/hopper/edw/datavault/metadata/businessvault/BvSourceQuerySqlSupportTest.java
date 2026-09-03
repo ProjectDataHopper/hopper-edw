@@ -74,6 +74,58 @@ class BvSourceQuerySqlSupportTest {
   }
 
   @Test
+  void prepareSqlStripsLineAndBlockComments() {
+    String prepared =
+        BvSourceQuerySqlSupport.prepareSql(
+            "SELECT hk, ts -- hash and date\nFROM sat_customer /* active rows */");
+    assertFalse(prepared.contains("--"));
+    assertFalse(prepared.contains("/*"));
+    assertTrue(prepared.contains("SELECT hk, ts"));
+    assertTrue(prepared.contains("FROM sat_customer"));
+  }
+
+  @Test
+  void wrapSqlAsSubqueryStripsTrailingLineCommentSoClosingParenIsNotCommentedOut() {
+    String wrapped =
+        BvSourceQuerySqlSupport.wrapSqlAsSubquery(
+            "SELECT hk FROM sat_customer -- corrected view", "src");
+    assertEquals("(SELECT hk FROM sat_customer) src", wrapped);
+  }
+
+  @Test
+  void prepareSqlKeepsCommentMarkersInsideStrings() {
+    assertEquals(
+        "SELECT 'http://x.com -- not a comment' AS u, 'a /* b */ c' AS n",
+        BvSourceQuerySqlSupport.prepareSql(
+            "SELECT 'http://x.com -- not a comment' AS u, 'a /* b */ c' AS n"));
+  }
+
+  @Test
+  void prepareSqlPreservesOracleHint() {
+    String sql = "SELECT /*+ INDEX(t pk) */ hk FROM t";
+    assertEquals(sql, BvSourceQuerySqlSupport.prepareSql(sql));
+  }
+
+  @Test
+  void fromClauseSqlStripsComments() {
+    BvSourceQuery source = new BvSourceQuery();
+    source.setName("sat_customer_corrected");
+    source.setSourceKind(BvSourceQueryKind.SQL);
+    source.setSqlQuery("SELECT customer_hk /* pk */, x_load_ts FROM sat_customer -- hist");
+
+    String from = BvSourceQuerySqlSupport.fromClause(null, new Variables(), source);
+    assertEquals("(SELECT customer_hk , x_load_ts FROM sat_customer) src", from);
+  }
+
+  @Test
+  void previewSqlStripsComments() {
+    BvSourceQuery source = new BvSourceQuery();
+    source.setSourceKind(BvSourceQueryKind.SQL);
+    source.setSqlQuery("SELECT 1 -- demo\nFROM dual /* x */;");
+    assertEquals("SELECT 1 \nFROM dual", BvSourceQuerySqlSupport.previewSql(null, null, source));
+  }
+
+  @Test
   void wrapSqlAsSubqueryKeepsInnerWith() {
     String wrapped =
         BvSourceQuerySqlSupport.wrapSqlAsSubquery(

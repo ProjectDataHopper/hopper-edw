@@ -4,10 +4,17 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### SQL Expression transform throughput
+
+- Per-row evaluation no longer clones the input layout or looks up output fields by name (precomputed write indexes + cached value metas). Wide SCD2 rows with a few calculations avoid O(n) name scans
+- New calculated fields are written into Hop's over-allocated row (`RowDataUtil.resizeArray`); the Object[] is copied only when there are not enough spare slots
+- `MD5()` reuses a thread-local digest; `DATE_FORMAT()` compiles the format string once and writes into a shared buffer
+
 ### BV source query SQL highlighting
 
 - Source query dialog SQL editor uses Hop's StyledText SQL highlighter (keywords, comments, strings, connection reserved words)
 - Source query dialog OK warns and refuses to save when another Business Vault table already uses that name
+- Authored source-query SQL strips `--` line comments and `/* */` block comments before Get fields, Preview, and generated Table Input (so a trailing `--` cannot comment out the wrapping subquery)
 
 ### BV SCD2 Suggest mappings source picker
 

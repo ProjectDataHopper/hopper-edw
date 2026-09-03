@@ -16,7 +16,7 @@ The Data Vault model still has **one** target database. This object is the excep
 * **Database connection** — Hop RDBMS used by the generated Table Input. Empty means the Data Vault target.
 * **Source kind** — Table/view, or authored SQL.
 * **Table / view** — Physical name when kind is table. Optional schema.
-* **SQL** — Inner SELECT when kind is SQL. Trailing `;` is stripped. The generated Table Input wraps this as a subquery so the plugin can add `WHERE` (hash-key partitions, incremental watermark) and `ORDER BY` (hash key + date). On desktop the editor is Hop's StyledText SQL highlighter (keywords, comments, strings, dialect reserved words from the chosen connection).
+* **SQL** — Inner SELECT when kind is SQL. Line comments (`--`) and block comments (`/* */`) are stripped before Get fields, Preview, and generated Table Input SQL (string literals are left alone; Oracle `/*+ */` hints are kept). Trailing `;` is stripped. The generated Table Input wraps this as a subquery so the plugin can add `WHERE` (hash-key partitions, incremental watermark) and `ORDER BY` (hash key + date). On desktop the editor is Hop's StyledText SQL highlighter (keywords, comments, strings, dialect reserved words from the chosen connection).
 * **Hash key (source column)** — Required. Column name in this table, view, or SQL (for example `burger_hkey`).
 * **Hash key (hub field)** — Hub hash key name used as the SCD2 grain when it does not match the source column (for example `hub_burger_hkey`). Leave empty when the names already match. The generated pipeline maps this with a Select Values transform after Table Input; the SQL is not rewritten.
 * **Functional timestamp** — Optional SCD2 timeline column (else SCD2 table / model / load-date fallback).

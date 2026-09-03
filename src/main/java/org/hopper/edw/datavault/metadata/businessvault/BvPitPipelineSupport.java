@@ -458,7 +458,8 @@ public final class BvPitPipelineSupport {
             .orElse(null);
     if (sourceQuery != null) {
       if (sourceQuery.isSqlSource()) {
-        return BvSourceQuerySqlSupport.wrapSqlAsSubquery(sourceQuery.getSqlQuery(), alias);
+        return BvSourceQuerySqlSupport.wrapSqlAsSubquery(
+            sourceQuery.getSqlQuery(), alias, ctx.sourceDatabaseMeta());
       }
       String table =
           BvSourceQuerySqlSupport.quotedTable(

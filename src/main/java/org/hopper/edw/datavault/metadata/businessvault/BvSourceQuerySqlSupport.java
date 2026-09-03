@@ -18,6 +18,7 @@ package org.hopper.edw.datavault.metadata.businessvault;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.database.DatabaseMeta;
+import org.apache.hop.core.database.SqlScriptParser;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
@@ -60,8 +61,28 @@ public final class BvSourceQuerySqlSupport {
     return trimmed;
   }
 
+  /**
+   * Strips {@code --} line comments and {@code /*}…{@code *}{@code /} block comments, then trailing
+   * semicolons, before the SQL is wrapped or executed. String literals are left alone. Oracle
+   * optimizer hints ({@code /*+}…{@code *}{@code /}) are kept.
+   */
+  public static String prepareSql(String sql) {
+    return prepareSql(sql, null);
+  }
+
+  public static String prepareSql(String sql, DatabaseMeta databaseMeta) {
+    if (sql == null) {
+      return null;
+    }
+    return stripTrailingSemicolon(sqlScriptParser(databaseMeta).removeComments(sql));
+  }
+
   public static String wrapSqlAsSubquery(String sql, String alias) {
-    String inner = stripTrailingSemicolon(sql);
+    return wrapSqlAsSubquery(sql, alias, null);
+  }
+
+  public static String wrapSqlAsSubquery(String sql, String alias, DatabaseMeta databaseMeta) {
+    String inner = prepareSql(sql, databaseMeta);
     if (Utils.isEmpty(inner)) {
       return inner;
     }
@@ -92,7 +113,7 @@ public final class BvSourceQuerySqlSupport {
       return null;
     }
     if (sourceQuery.isSqlSource()) {
-      return wrapSqlAsSubquery(sourceQuery.getSqlQuery(), alias);
+      return wrapSqlAsSubquery(sourceQuery.getSqlQuery(), alias, databaseMeta);
     }
     String tableName =
         !Utils.isEmpty(sourceQuery.getTableName())
@@ -107,7 +128,7 @@ public final class BvSourceQuerySqlSupport {
       return null;
     }
     if (sourceQuery.isSqlSource()) {
-      return stripTrailingSemicolon(sourceQuery.getSqlQuery());
+      return prepareSql(sourceQuery.getSqlQuery(), databaseMeta);
     }
     String from = fromClause(databaseMeta, variables, sourceQuery);
     if (Utils.isEmpty(from)) {
@@ -170,6 +191,13 @@ public final class BvSourceQuerySqlSupport {
       names.add(name);
     }
     return names;
+  }
+
+  private static SqlScriptParser sqlScriptParser(DatabaseMeta databaseMeta) {
+    if (databaseMeta != null && databaseMeta.getIDatabase() != null) {
+      return databaseMeta.getIDatabase().createSqlScriptParser();
+    }
+    return new SqlScriptParser(true);
   }
 
   private static String sanitizeAlias(String alias) {

@@ -30,6 +30,7 @@ public final class SqlCompiledExpression {
   private final RexNode rexNode;
   private final RelDataType relType;
   private final IRowMeta inputRowMeta;
+  private final IValueMeta[] inputValueMetas;
   private final IValueMeta outputValueMeta;
 
   public SqlCompiledExpression(
@@ -44,6 +45,18 @@ public final class SqlCompiledExpression {
     this.rexNode = rexNode;
     this.relType = relType;
     this.inputRowMeta = inputRowMeta;
+    this.inputValueMetas = snapshot(inputRowMeta);
     this.outputValueMeta = outputValueMeta;
+  }
+
+  private static IValueMeta[] snapshot(IRowMeta rowMeta) {
+    if (rowMeta == null) {
+      return new IValueMeta[0];
+    }
+    IValueMeta[] metas = new IValueMeta[rowMeta.size()];
+    for (int i = 0; i < metas.length; i++) {
+      metas[i] = rowMeta.getValueMeta(i);
+    }
+    return metas;
   }
 }

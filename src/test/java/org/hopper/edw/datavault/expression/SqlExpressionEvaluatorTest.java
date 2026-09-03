@@ -16,7 +16,9 @@
 package org.hopper.edw.datavault.expression;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -25,6 +27,7 @@ import java.util.List;
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
+import org.apache.hop.core.row.RowDataUtil;
 import org.apache.hop.core.row.RowMeta;
 import org.apache.hop.core.row.value.ValueMetaInteger;
 import org.apache.hop.core.row.value.ValueMetaString;
@@ -170,6 +173,83 @@ class SqlExpressionEvaluatorTest {
     Object[] out = program.evaluate(new Object[] {null});
     assertEquals("x", out[1]);
     assertEquals("X", out[2]);
+  }
+
+  @Test
+  void evaluateReplacesExistingFieldByIndex() throws Exception {
+    IRowMeta rowMeta = new RowMeta();
+    rowMeta.addValueMeta(new ValueMetaString("fieldA"));
+    SqlExpressionProgram program =
+        SqlExpressionProgram.compile(
+            List.of(new SqlExpressionSpec("fieldA", "UPPER(fieldA)")), rowMeta, new Variables());
+    Object[] out = program.evaluate(new Object[] {"ab"});
+    assertEquals(1, program.getOutputRowMeta().size());
+    assertEquals("AB", out[0]);
+  }
+
+  @Test
+  void evaluateDropsInputWhenKeepInputFieldsFalse() throws Exception {
+    IRowMeta rowMeta = new RowMeta();
+    rowMeta.addValueMeta(new ValueMetaString("fieldA"));
+    SqlExpressionProgram program =
+        SqlExpressionProgram.compile(
+            List.of(new SqlExpressionSpec("upper_a", "UPPER(fieldA)")),
+            rowMeta,
+            new Variables(),
+            false);
+    Object[] out = program.evaluate(new Object[] {"ab"});
+    assertEquals(1, program.getOutputRowMeta().size());
+    assertEquals("AB", out[0]);
+  }
+
+  @Test
+  void evaluateWideRowAppendsCalculatedFieldWithoutNameScan() throws Exception {
+    IRowMeta rowMeta = new RowMeta();
+    Object[] row = new Object[180];
+    for (int i = 0; i < 180; i++) {
+      rowMeta.addValueMeta(new ValueMetaString("f" + i));
+      row[i] = "v" + i;
+    }
+    SqlExpressionProgram program =
+        SqlExpressionProgram.compile(
+            List.of(new SqlExpressionSpec("calc", "CONCAT(f0, '#', f179)")),
+            rowMeta,
+            new Variables());
+    Object[] out = program.evaluate(row);
+    assertEquals(181, program.getOutputRowMeta().size());
+    assertEquals("v0", out[0]);
+    assertEquals("v179", out[179]);
+    assertEquals("v0#v179", out[180]);
+  }
+
+  @Test
+  void evaluateReusesOverAllocatedInputRow() throws Exception {
+    IRowMeta rowMeta = new RowMeta();
+    rowMeta.addValueMeta(new ValueMetaString("fieldA"));
+    SqlExpressionProgram program =
+        SqlExpressionProgram.compile(
+            List.of(new SqlExpressionSpec("calc", "UPPER(fieldA)")), rowMeta, new Variables());
+    Object[] row = RowDataUtil.allocateRowData(1);
+    row[0] = "ab";
+    Object[] out = program.evaluate(row);
+    assertSame(row, out);
+    assertEquals("ab", out[0]);
+    assertEquals("AB", out[1]);
+  }
+
+  @Test
+  void evaluateCopiesWhenInputHasNoSpareSlots() throws Exception {
+    IRowMeta rowMeta = new RowMeta();
+    rowMeta.addValueMeta(new ValueMetaString("fieldA"));
+    SqlExpressionProgram program =
+        SqlExpressionProgram.compile(
+            List.of(new SqlExpressionSpec("calc", "UPPER(fieldA)")), rowMeta, new Variables());
+    Object[] row = new Object[] {"ab"};
+    Object[] out = program.evaluate(row);
+    assertNotSame(row, out);
+    assertEquals("ab", out[0]);
+    assertEquals("AB", out[1]);
+    assertEquals("ab", row[0]);
   }
 
   @Test
