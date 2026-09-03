@@ -16,6 +16,7 @@
 package org.hopper.edw.datavault.hopgui.file.businessvault;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -32,6 +33,7 @@ import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.FormDataBuilder;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
+import org.apache.hop.ui.core.dialog.EnterSelectionDialog;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.core.gui.WindowProperty;
@@ -127,6 +129,8 @@ public class HopGuiBvScd2TableDialog {
   private int margin;
   private int middle;
   private boolean ok;
+
+  private record SuggestSourceChoice(String name, boolean sourceQuery) {}
 
   public HopGuiBvScd2TableDialog(
       Shell parent,
@@ -573,6 +577,8 @@ public class HopGuiBvScd2TableDialog {
     wSuggestMappings = new Button(comp, SWT.PUSH);
     wSuggestMappings.setText(
         BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Mappings.Suggest"));
+    wSuggestMappings.setToolTipText(
+        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Mappings.Suggest.Tooltip"));
     PropsUi.setLook(wSuggestMappings);
     wSuggestMappings.setLayoutData(
         new FormDataBuilder().left(wDeleteMapping, margin).top(wlMappingsHint, margin).result());
@@ -1116,9 +1122,18 @@ public class HopGuiBvScd2TableDialog {
   private void suggestMappings() {
     BvScd2Table draft = new BvScd2Table();
     applyWidgetsToTable(draft);
+    List<SuggestSourceChoice> choices = listSuggestSourceChoices(draft);
+    Collection<String> selectedSources = null;
+    if (!choices.isEmpty()) {
+      selectedSources = promptSourcesToSuggest(choices);
+      if (selectedSources == null) {
+        return;
+      }
+    }
     boolean hasDvDerivatives = !draft.getDerivatives().isEmpty();
     boolean hasSourceQueries = !draft.getSourceQueryRefs().isEmpty();
-    BvScd2FieldMappingDialogSupport.MappingSuggestion suggestion = analyzeMappings(draft, true);
+    BvScd2FieldMappingDialogSupport.MappingSuggestion suggestion =
+        analyzeMappings(draft, true, selectedSources);
     updateMappingsHint();
 
     if (!Utils.isEmpty(dataVaultLoadError)
@@ -1504,14 +1519,106 @@ public class HopGuiBvScd2TableDialog {
     }
   }
 
+  /**
+   * Asks which linked satellites and source queries to suggest mappings for.
+   *
+   * @return selected names, or {@code null} if the user cancelled or selected none
+   */
+  private Collection<String> promptSourcesToSuggest(List<SuggestSourceChoice> choices) {
+    String[] labels = new String[choices.size()];
+    int[] selectedNrs = new int[choices.size()];
+    for (int i = 0; i < choices.size(); i++) {
+      SuggestSourceChoice choice = choices.get(i);
+      labels[i] =
+          BaseMessages.getString(
+              PKG,
+              choice.sourceQuery()
+                  ? "HopGuiBvScd2TableDialog.Mappings.Suggest.Select.SourceQuery"
+                  : "HopGuiBvScd2TableDialog.Mappings.Suggest.Select.Satellite",
+              choice.name());
+      selectedNrs[i] = i;
+    }
+    EnterSelectionDialog dialog =
+        new EnterSelectionDialog(
+            shell,
+            labels,
+            BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Mappings.Suggest.Select.Title"),
+            BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Mappings.Suggest.Select.Message"));
+    dialog.setMulti(true);
+    dialog.setSelectedNrs(selectedNrs);
+    if (dialog.open() == null) {
+      return null;
+    }
+    int[] indices = dialog.getSelectionIndeces();
+    if (indices == null || indices.length == 0) {
+      showMappingMessage(
+          SWT.ICON_INFORMATION,
+          "HopGuiBvScd2TableDialog.Mappings.Suggest.Title",
+          BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Mappings.Suggest.NoneSelected"));
+      return null;
+    }
+    List<String> selected = new ArrayList<>();
+    Set<String> seen = new LinkedHashSet<>();
+    for (int index : indices) {
+      if (index < 0 || index >= choices.size()) {
+        continue;
+      }
+      String name = choices.get(index).name();
+      if (seen.add(name)) {
+        selected.add(name);
+      }
+    }
+    if (selected.isEmpty()) {
+      showMappingMessage(
+          SWT.ICON_INFORMATION,
+          "HopGuiBvScd2TableDialog.Mappings.Suggest.Title",
+          BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Mappings.Suggest.NoneSelected"));
+      return null;
+    }
+    return selected;
+  }
+
+  private List<SuggestSourceChoice> listSuggestSourceChoices(BvScd2Table draft) {
+    List<SuggestSourceChoice> choices = new ArrayList<>();
+    Set<String> seen = new LinkedHashSet<>();
+    if (draft == null) {
+      return choices;
+    }
+    for (BvDerivativeRef derivative : draft.getDerivatives()) {
+      if (derivative == null || Utils.isEmpty(derivative.getDvTableName())) {
+        continue;
+      }
+      if (!seen.add(derivative.getDvTableName())) {
+        continue;
+      }
+      choices.add(new SuggestSourceChoice(derivative.getDvTableName(), false));
+    }
+    for (BvSourceQueryRef ref : draft.getSourceQueryRefs()) {
+      if (ref == null || Utils.isEmpty(ref.getSourceQueryName())) {
+        continue;
+      }
+      if (!seen.add(ref.getSourceQueryName())) {
+        continue;
+      }
+      choices.add(new SuggestSourceChoice(ref.getSourceQueryName(), true));
+    }
+    return choices;
+  }
+
   private BvScd2FieldMappingDialogSupport.MappingSuggestion analyzeMappings(
       BvScd2Table draft, boolean forceReload) {
+    return analyzeMappings(draft, forceReload, null);
+  }
+
+  private BvScd2FieldMappingDialogSupport.MappingSuggestion analyzeMappings(
+      BvScd2Table draft, boolean forceReload, Collection<String> selectedSourceNames) {
     return BvScd2FieldMappingDialogSupport.analyze(
         draft,
         currentDataVaultModel(forceReload),
         businessVaultModel,
         variables,
-        metadataProvider());
+        metadataProvider(),
+        selectedSourceNames);
   }
 
   private static boolean hasNonEmptyTableItems(TableView tableView) {

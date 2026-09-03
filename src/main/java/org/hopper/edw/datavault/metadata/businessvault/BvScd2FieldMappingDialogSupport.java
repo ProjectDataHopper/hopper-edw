@@ -16,6 +16,7 @@
 package org.hopper.edw.datavault.metadata.businessvault;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -208,12 +209,30 @@ public final class BvScd2FieldMappingDialogSupport {
       BusinessVaultModel bvModel,
       IVariables variables,
       IHopMetadataProvider metadataProvider) {
+    return analyze(scd2Table, dataVaultModel, bvModel, variables, metadataProvider, null);
+  }
+
+  /**
+   * Suggest mappings for linked satellites and source queries.
+   *
+   * @param selectedSourceNames {@code null} means every linked source; otherwise only those names
+   */
+  public static MappingSuggestion analyze(
+      BvScd2Table scd2Table,
+      DataVaultModel dataVaultModel,
+      BusinessVaultModel bvModel,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider,
+      Collection<String> selectedSourceNames) {
     boolean dvPresent = dataVaultModel != null;
     int tableCount =
         dvPresent && dataVaultModel.getTables() != null ? dataVaultModel.getTables().size() : 0;
     String filename = dvPresent ? dataVaultModel.getFilename() : null;
+    Set<String> selectedFilter = selectedSourceSet(selectedSourceNames);
     List<SatelliteResolution> satellites =
-        resolveSatellites(scd2Table, dataVaultModel, bvModel, variables, metadataProvider);
+        filterSelectedSatellites(
+            resolveSatellites(scd2Table, dataVaultModel, bvModel, variables, metadataProvider),
+            selectedFilter);
 
     Set<String> existingKeys = new LinkedHashSet<>();
     Set<String> usedTargets = new HashSet<>();
@@ -229,7 +248,8 @@ public final class BvScd2FieldMappingDialogSupport {
         }
         if (!Utils.isEmpty(mapping.getSatelliteName())
             && !Utils.isEmpty(mapping.getSourceFieldName())
-            && !Utils.isEmpty(mapping.getTargetFieldName())) {
+            && !Utils.isEmpty(mapping.getTargetFieldName())
+            && (selectedFilter == null || selectedFilter.contains(mapping.getSatelliteName()))) {
           alreadyMapped++;
         }
       }
@@ -449,6 +469,33 @@ public final class BvScd2FieldMappingDialogSupport {
       suffix++;
     }
     return candidate + suffix;
+  }
+
+  private static Set<String> selectedSourceSet(Collection<String> selectedSourceNames) {
+    if (selectedSourceNames == null) {
+      return null;
+    }
+    Set<String> selected = new LinkedHashSet<>();
+    for (String name : selectedSourceNames) {
+      if (!Utils.isEmpty(name)) {
+        selected.add(name);
+      }
+    }
+    return selected;
+  }
+
+  private static List<SatelliteResolution> filterSelectedSatellites(
+      List<SatelliteResolution> satellites, Set<String> selectedFilter) {
+    if (selectedFilter == null) {
+      return satellites;
+    }
+    List<SatelliteResolution> filtered = new ArrayList<>();
+    for (SatelliteResolution satellite : satellites) {
+      if (selectedFilter.contains(satellite.requestedName())) {
+        filtered.add(satellite);
+      }
+    }
+    return filtered;
   }
 
   private static String mappingKey(String satelliteName, String sourceFieldName) {

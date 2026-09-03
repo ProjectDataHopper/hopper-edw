@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### BV SCD2 Suggest mappings source picker
+
+- **Suggest mappings** on the SCD2 Field mappings tab asks which linked satellites and source queries to fill, so you can map a subset without adding every source at once
+
 ### Coach source filter, catalog preview limit, quieter catalog connect (issues #154–#156)
 
 - Coach panel and **Add coaching sources** have a filter box so a long source list is searchable

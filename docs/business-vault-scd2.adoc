@@ -160,7 +160,7 @@ On the source query, set **Hash key (source column)** to the physical name (`bur
 
 SCD2 merges those streams with satellite history on the **same hub grain**. Set **Parent hub** on the SCD2 table. Origin does not matter.
 
-Mixed SCD2 (DV satellites plus source queries) is supported; two or more inputs still require field mappings. The mapping **Source** column is the satellite name or the source-query name. **Suggest mappings** fills unmapped fields from both.
+Mixed SCD2 (DV satellites plus source queries) is supported; two or more inputs still require field mappings. The mapping **Source** column is the satellite name or the source-query name. **Suggest mappings** lets you pick one or more of those linked satellites and source queries, then fills unmapped fields from the selection.
 
 == Single-satellite SCD2
 
@@ -232,7 +232,7 @@ Open intervals use sentinels from configuration (default `1900-01-01 00:00:00` a
 |Enabled with Include hub business keys. Checked (default) writes hub BK columns to the BV table. Unchecked keeps them on the stream for calculations only.
 
 |Suggest mappings
-|Reloads the linked `.hdv` and fills unmapped satellite attributes **and** source-query columns (hash key / timestamps on the source query are skipped). Reports a clear reason when sources are listed but no fields appear (stale or missing Data Vault model, unresolved satellite or source query, empty satellite Attributes tab, or source query without **Get fields**).
+|Asks which linked satellites and source queries to fill, reloads the linked `.hdv`, and adds unmapped satellite attributes **and** source-query columns for that selection (hash key / timestamps on the source query are skipped). Reports a clear reason when sources are listed but no fields appear (stale or missing Data Vault model, unresolved satellite or source query, empty satellite Attributes tab, or source query without **Get fields**).
 
 |Functional timestamp
 |Column on the satellite stream used as the timeline (see resolution order above).

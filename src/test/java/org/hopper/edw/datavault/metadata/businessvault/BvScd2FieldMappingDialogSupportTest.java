@@ -227,6 +227,167 @@ class BvScd2FieldMappingDialogSupportTest {
   }
 
   @Test
+  void analyzeSuggestsOnlySelectedSatellite() throws Exception {
+    BvScd2Table table = customer360Table();
+    DataVaultModel dvModel = loadCustomer360DvModel();
+
+    BvScd2FieldMappingDialogSupport.MappingSuggestion suggestion =
+        BvScd2FieldMappingDialogSupport.analyze(
+            table, dvModel, null, new Variables(), null, List.of("sat_customer_demo"));
+
+    assertEquals(List.of("sat_customer_demo"), suggestion.resolvedNames());
+    assertFalse(suggestion.suggestedMappings().isEmpty());
+    assertTrue(
+        suggestion.suggestedMappings().stream()
+            .allMatch(mapping -> "sat_customer_demo".equals(mapping.getSatelliteName())));
+    assertTrue(
+        suggestion.suggestedMappings().stream()
+            .anyMatch(mapping -> "segment".equals(mapping.getSourceFieldName())));
+    assertTrue(
+        suggestion.suggestedMappings().stream()
+            .noneMatch(mapping -> "sat_customer_contact".equals(mapping.getSatelliteName())));
+  }
+
+  @Test
+  void analyzeSuggestsOnlySelectedSourceQueryInMix() throws Exception {
+    BvScd2Table table = customer360Table();
+    table.getSourceQueryRefs().add(new BvSourceQueryRef("sq_burger_view"));
+    BusinessVaultModel bvModel = new BusinessVaultModel();
+    bvModel.getTables().add(burgerSourceQuery());
+    DataVaultModel dvModel = loadCustomer360DvModel();
+
+    BvScd2FieldMappingDialogSupport.MappingSuggestion suggestion =
+        BvScd2FieldMappingDialogSupport.analyze(
+            table, dvModel, bvModel, new Variables(), null, List.of("sq_burger_view"));
+
+    assertEquals(List.of("sq_burger_view"), suggestion.resolvedNames());
+    assertEquals(2, suggestion.suggestedMappings().size());
+    assertTrue(
+        suggestion.suggestedMappings().stream()
+            .allMatch(mapping -> "sq_burger_view".equals(mapping.getSatelliteName())));
+  }
+
+  @Test
+  void analyzeSuggestsSelectedSatelliteAndSourceQuery() throws Exception {
+    BvScd2Table table = customer360Table();
+    table.getSourceQueryRefs().add(new BvSourceQueryRef("sq_burger_view"));
+    BusinessVaultModel bvModel = new BusinessVaultModel();
+    bvModel.getTables().add(burgerSourceQuery());
+    DataVaultModel dvModel = loadCustomer360DvModel();
+
+    BvScd2FieldMappingDialogSupport.MappingSuggestion suggestion =
+        BvScd2FieldMappingDialogSupport.analyze(
+            table,
+            dvModel,
+            bvModel,
+            new Variables(),
+            null,
+            List.of("sat_customer_prefs", "sq_burger_view"));
+
+    assertEquals(List.of("sat_customer_prefs", "sq_burger_view"), suggestion.resolvedNames());
+    assertTrue(
+        suggestion.suggestedMappings().stream()
+            .anyMatch(
+                mapping ->
+                    "sat_customer_prefs".equals(mapping.getSatelliteName())
+                        && "newsletter_opt_in".equals(mapping.getSourceFieldName())));
+    assertTrue(
+        suggestion.suggestedMappings().stream()
+            .anyMatch(
+                mapping ->
+                    "sq_burger_view".equals(mapping.getSatelliteName())
+                        && "patty".equals(mapping.getSourceFieldName())));
+    assertTrue(
+        suggestion.suggestedMappings().stream()
+            .noneMatch(mapping -> "sat_customer_demo".equals(mapping.getSatelliteName())));
+  }
+
+  @Test
+  void analyzeIgnoresSelectedNamesThatAreNotLinked() throws Exception {
+    BvScd2Table table = customer360Table();
+    DataVaultModel dvModel = loadCustomer360DvModel();
+
+    BvScd2FieldMappingDialogSupport.MappingSuggestion suggestion =
+        BvScd2FieldMappingDialogSupport.analyze(
+            table,
+            dvModel,
+            null,
+            new Variables(),
+            null,
+            List.of("sat_customer_demo", "sat_not_linked"));
+
+    assertEquals(List.of("sat_customer_demo"), suggestion.resolvedNames());
+    assertTrue(
+        suggestion.suggestedMappings().stream()
+            .allMatch(mapping -> "sat_customer_demo".equals(mapping.getSatelliteName())));
+  }
+
+  @Test
+  void analyzeEmptySelectionSuggestsNothing() throws Exception {
+    BvScd2Table table = customer360Table();
+    DataVaultModel dvModel = loadCustomer360DvModel();
+
+    BvScd2FieldMappingDialogSupport.MappingSuggestion suggestion =
+        BvScd2FieldMappingDialogSupport.analyze(
+            table, dvModel, null, new Variables(), null, List.of());
+
+    assertTrue(suggestion.resolvedNames().isEmpty());
+    assertTrue(suggestion.suggestedMappings().isEmpty());
+    assertEquals(0, suggestion.alreadyMappedCount());
+  }
+
+  @Test
+  void analyzeSelectedSourceCountsAlreadyMappedForThatSourceOnly() throws Exception {
+    BvScd2Table table = customer360Table();
+    table
+        .getFieldMappings()
+        .add(new BvScd2FieldMapping("sat_customer_demo", "segment", "cust_segment"));
+    table
+        .getFieldMappings()
+        .add(new BvScd2FieldMapping("sat_customer_contact", "email", "cust_email"));
+    DataVaultModel dvModel = loadCustomer360DvModel();
+
+    BvScd2FieldMappingDialogSupport.MappingSuggestion suggestion =
+        BvScd2FieldMappingDialogSupport.analyze(
+            table, dvModel, null, new Variables(), null, List.of("sat_customer_demo"));
+
+    assertEquals(1, suggestion.alreadyMappedCount());
+    assertTrue(
+        suggestion.suggestedMappings().stream()
+            .noneMatch(
+                mapping ->
+                    "sat_customer_demo".equals(mapping.getSatelliteName())
+                        && "segment".equals(mapping.getSourceFieldName())));
+    assertTrue(
+        suggestion.suggestedMappings().stream()
+            .anyMatch(
+                mapping ->
+                    "sat_customer_demo".equals(mapping.getSatelliteName())
+                        && "loyalty_tier".equals(mapping.getSourceFieldName())));
+  }
+
+  @Test
+  void analyzeSelectedSatellitePrefixesTargetWhenOtherSourceAlreadyUsesName() throws Exception {
+    BvScd2Table table = customer360Table();
+    table
+        .getFieldMappings()
+        .add(new BvScd2FieldMapping("sat_customer_contact", "email", "segment"));
+    DataVaultModel dvModel = loadCustomer360DvModel();
+
+    BvScd2FieldMappingDialogSupport.MappingSuggestion suggestion =
+        BvScd2FieldMappingDialogSupport.analyze(
+            table, dvModel, null, new Variables(), null, List.of("sat_customer_demo"));
+
+    assertTrue(
+        suggestion.suggestedMappings().stream()
+            .anyMatch(
+                mapping ->
+                    "sat_customer_demo".equals(mapping.getSatelliteName())
+                        && "segment".equals(mapping.getSourceFieldName())
+                        && !"segment".equals(mapping.getTargetFieldName())));
+  }
+
+  @Test
   void analyzeMixesSatelliteAndSourceQueryMappings() throws Exception {
     BvScd2Table table = customer360Table();
     table.getSourceQueryRefs().add(new BvSourceQueryRef("sq_burger_view"));
