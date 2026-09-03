@@ -32,6 +32,7 @@ import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
+import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.core.gui.WindowProperty;
 import org.apache.hop.ui.core.widget.ColumnInfo;
 import org.apache.hop.ui.core.widget.MetaSelectionLine;
@@ -255,6 +256,7 @@ public class HopGuiBvSourceQueryDialog {
     } else {
       wSqlQuery = new SQLStyledTextComp(variables, sqlComp, sqlStyle);
     }
+    wSqlQuery.addLineStyleListener(getSqlReservedWords());
     PropsUi.setLook(wSqlQuery, Props.WIDGET_STYLE_FIXED);
     FormData fdSqlQuery = new FormData();
     fdSqlQuery.left = new FormAttachment(0, 0);
@@ -367,7 +369,7 @@ public class HopGuiBvSourceQueryDialog {
   }
 
   private void applyWidgetsToTable(BvSourceQuery target) {
-    target.setName(wName.getText());
+    target.setName(Const.trim(wName.getText()));
     target.setDescription(wDescription.getText());
     target.setConnectionName(wConnection.getText());
     target.setSourceKind(
@@ -466,9 +468,29 @@ public class HopGuiBvSourceQueryDialog {
   }
 
   private void ok() {
+    String newName = Const.trim(wName.getText());
+    if (Utils.isEmpty(newName)) {
+      showNameWarning(
+          "HopGuiBvSourceQueryDialog.NameRequired.Title",
+          BaseMessages.getString(PKG, "HopGuiBvSourceQueryDialog.NameRequired.Message"));
+      return;
+    }
+    if (businessVaultModel != null && businessVaultModel.hasOtherTableNamed(input, newName)) {
+      showNameWarning(
+          "HopGuiBvSourceQueryDialog.DuplicateName.Title",
+          BaseMessages.getString(PKG, "HopGuiBvSourceQueryDialog.DuplicateName.Message", newName));
+      return;
+    }
     applyWidgetsToTable(input);
     ok = true;
     dispose();
+  }
+
+  private void showNameWarning(String titleKey, String message) {
+    MessageBox box = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
+    box.setText(BaseMessages.getString(PKG, titleKey));
+    box.setMessage(Const.NVL(message, ""));
+    box.open();
   }
 
   private void validate() {
@@ -511,5 +533,53 @@ public class HopGuiBvSourceQueryDialog {
     WindowProperty windowProperty = new WindowProperty(shell);
     PropsUi.getInstance().setScreen(windowProperty);
     shell.dispose();
+  }
+
+  /**
+   * Database reserved words for {@link SQLStyledTextComp} highlighting. Prefers this source query's
+   * connection, then the Data Vault / Business Vault target database.
+   */
+  private List<String> getSqlReservedWords() {
+    try {
+      DatabaseMeta databaseMeta = loadSqlHighlightDatabase();
+      if (databaseMeta == null) {
+        return List.of();
+      }
+      String[] reserved = databaseMeta.getReservedWords();
+      return reserved != null ? List.of(reserved) : List.of();
+    } catch (Exception e) {
+      return List.of();
+    }
+  }
+
+  private DatabaseMeta loadSqlHighlightDatabase() throws HopException {
+    HopGui hopGui = HopGui.getInstance();
+    IHopMetadataProvider metadataProvider = hopGui != null ? hopGui.getMetadataProvider() : null;
+    if (metadataProvider == null) {
+      return null;
+    }
+    BvSourceQuery draft = new BvSourceQuery();
+    String connectionName = null;
+    if (wConnection != null && !wConnection.isDisposed()) {
+      connectionName = wConnection.getText();
+    }
+    if (Utils.isEmpty(connectionName) && input != null) {
+      connectionName = input.getConnectionName();
+    }
+    if (!Utils.isEmpty(connectionName) && variables.resolve(connectionName).startsWith("${")) {
+      return null;
+    }
+    draft.setConnectionName(connectionName);
+    DatabaseMeta databaseMeta =
+        BusinessVaultSourceQuerySupport.loadConnection(
+            draft, dataVaultModel, metadataProvider, variables);
+    if (databaseMeta != null) {
+      return databaseMeta;
+    }
+    if (businessVaultModel == null) {
+      return null;
+    }
+    return BvTargetDatabaseSupport.loadTargetDatabase(
+        metadataProvider, businessVaultModel.getConfigurationOrDefault());
   }
 }

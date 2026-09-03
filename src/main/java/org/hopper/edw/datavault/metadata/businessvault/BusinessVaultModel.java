@@ -318,6 +318,12 @@ public class BusinessVaultModel extends HopMetadataBase
     return null;
   }
 
+  /** True when another canvas table already uses {@code name} (not {@code current} itself). */
+  public boolean hasOtherTableNamed(IBvTable current, String name) {
+    IBvTable existing = findTable(name);
+    return existing != null && existing != current;
+  }
+
   public BvDvTableReference findDvReference(String dvTableName) {
     if (Utils.isEmpty(dvTableName)) {
       return null;

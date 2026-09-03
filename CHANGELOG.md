@@ -4,6 +4,11 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### BV source query SQL highlighting
+
+- Source query dialog SQL editor uses Hop's StyledText SQL highlighter (keywords, comments, strings, connection reserved words)
+- Source query dialog OK warns and refuses to save when another Business Vault table already uses that name
+
 ### BV SCD2 Suggest mappings source picker
 
 - **Suggest mappings** on the SCD2 Field mappings tab asks which linked satellites and source queries to fill, so you can map a subset without adding every source at once

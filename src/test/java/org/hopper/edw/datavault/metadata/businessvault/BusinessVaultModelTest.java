@@ -41,6 +41,37 @@ class BusinessVaultModelTest {
   }
 
   @Test
+  void hasOtherTableNamedDetectsDuplicateSourceQuery() {
+    BusinessVaultModel model = new BusinessVaultModel();
+    BvSourceQuery first = new BvSourceQuery();
+    first.setName("sq_burger");
+    BvSourceQuery second = new BvSourceQuery();
+    second.setName("sq_other");
+    model.getTables().add(first);
+    model.getTables().add(second);
+
+    assertFalse(model.hasOtherTableNamed(first, "sq_burger"));
+    assertTrue(model.hasOtherTableNamed(second, "sq_burger"));
+    assertFalse(model.hasOtherTableNamed(second, "sq_other"));
+    assertFalse(model.hasOtherTableNamed(first, "missing"));
+    assertFalse(model.hasOtherTableNamed(first, null));
+  }
+
+  @Test
+  void hasOtherTableNamedDetectsCollisionWithOtherBvTableType() {
+    BusinessVaultModel model = new BusinessVaultModel();
+    BvScd2Table scd2 = new BvScd2Table();
+    scd2.setName("customer");
+    BvSourceQuery sourceQuery = new BvSourceQuery();
+    sourceQuery.setName("sq_customer");
+    model.getTables().add(scd2);
+    model.getTables().add(sourceQuery);
+
+    assertTrue(model.hasOtherTableNamed(sourceQuery, "customer"));
+    assertFalse(model.hasOtherTableNamed(scd2, "customer"));
+  }
+
+  @Test
   void checkAllowsEmptyLinkedPathWhenNoDvReferences() {
     BusinessVaultModel model = new BusinessVaultModel();
     // No required single DV model path; empty model is warning-only (no tables).
