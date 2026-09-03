@@ -261,6 +261,30 @@ class BvScd2FieldMappingValidationTest {
   }
 
   @Test
+  void hubDerivativeIsUsedAsParentHubWhenParentHubNameIsEmpty() {
+    BvScd2Table table = new BvScd2Table();
+    table.getDerivatives().add(new BvDerivativeRef("hub_customer", DvTableType.HUB));
+    assertEquals(
+        "hub_customer",
+        BvScd2FieldMappingValidationSupport.resolveParentHubName(
+            table, List.of(), new Variables()));
+  }
+
+  @Test
+  void twoHubDerivativesOnScd2AreAnError() throws Exception {
+    BvScd2Table table = new BvScd2Table();
+    table.setName("customer_bv");
+    table.setTableName("customer_bv");
+    table.setFunctionalTimestampField("x_load_ts");
+    table.getDerivatives().add(new BvDerivativeRef("hub_customer", DvTableType.HUB));
+    table.getDerivatives().add(new BvDerivativeRef("hub_party", DvTableType.HUB));
+    table.getDerivatives().add(new BvDerivativeRef("sat_customer", DvTableType.SATELLITE));
+
+    List<ICheckResult> remarks = check(table, loadVault1ModelFromFile());
+    assertTrue(hasError(remarks, "only one parent hub"));
+  }
+
+  @Test
   void unknownParentHubIsAnError() throws Exception {
     BvScd2Table table = new BvScd2Table();
     table.setName("customer_bv");

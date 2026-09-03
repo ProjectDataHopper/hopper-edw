@@ -6,6 +6,8 @@ toc::[]
 
 SCD2 tables are the primary Business Vault output today. They materialize **functional timelines** from raw Data Vault satellite history.
 
+On the `.hbv` canvas, link **one parent hub** to the SCD2 table (drag a Linked Hub, or set **Parent hub** on the table dialog). That line is the grain: it shows which hub the timeline belongs to and where the business key(s) live. Satellite derivatives remain the history feeds. Optional **Include hub business keys** copies those keys onto the SCD2 stream/table; the hub link is still useful when keys stay on the hub.
+
 == Type 1 vs Type 2 and hybrid attributes
 
 Business Vault SCD2 tables are **pure SCD Type 2**: each functional change produces a version row with `valid_from` / `valid_to` (or your configured validity columns). The plugin does **not** support a per-column Type 1 mode that rewrites every historical version when a “current” value changes.

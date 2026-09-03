@@ -452,10 +452,9 @@ public final class BvScd2FieldMappingValidationSupport {
 
   static String resolveParentHubName(
       BvScd2Table scd2Table, List<DvSatellite> satellites, IVariables variables) {
-    if (scd2Table != null && !Utils.isEmpty(scd2Table.getParentHubName())) {
-      return variables != null
-          ? variables.resolve(scd2Table.getParentHubName())
-          : scd2Table.getParentHubName();
+    String declared = BusinessVaultDerivativeSupport.resolveDeclaredParentHubName(scd2Table);
+    if (!Utils.isEmpty(declared)) {
+      return variables != null ? variables.resolve(declared) : declared;
     }
     return resolveSharedHubName(satellites);
   }

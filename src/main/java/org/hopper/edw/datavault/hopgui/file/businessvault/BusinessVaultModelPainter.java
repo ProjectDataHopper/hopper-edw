@@ -50,6 +50,7 @@ import org.hopper.edw.datavault.metadata.businessvault.BvBusinessTable;
 import org.hopper.edw.datavault.metadata.businessvault.BvBvTableReference;
 import org.hopper.edw.datavault.metadata.businessvault.BvDerivativeRef;
 import org.hopper.edw.datavault.metadata.businessvault.BvDvTableReference;
+import org.hopper.edw.datavault.metadata.businessvault.BvScd2Table;
 import org.hopper.edw.datavault.metadata.businessvault.BvSourceQueryRef;
 import org.hopper.edw.datavault.metadata.businessvault.BvSqlRef;
 import org.hopper.edw.datavault.metadata.businessvault.BvSqlResolvedKind;
@@ -185,7 +186,7 @@ public class BusinessVaultModelPainter extends BasePainter {
         if (derivative == null || Utils.isEmpty(derivative.getDvTableName())) {
           continue;
         }
-        BvDvTableReference target = dvRefByName.get(derivative.getDvTableName());
+        BvDvTableReference target = dvRefByName.get(derivative.getDvTableName().toLowerCase());
         if (target == null || target.getLocation() == null) {
           continue;
         }
@@ -201,6 +202,8 @@ public class BusinessVaultModelPainter extends BasePainter {
                 minSize);
         ModelGraphConnectionGeometry.drawStraightConnection(gc, bvBounds, dvBounds);
       }
+      addNavigationParentHubConnection(
+          base, bvBounds, dvRefByName, graphX, graphY, scaleX, scaleY, minSize);
       if (bvTable instanceof BvBusinessTable businessTable) {
         for (BvSqlRef ref : businessTable.getSqlRefs()) {
           if (ref == null
@@ -346,6 +349,7 @@ public class BusinessVaultModelPainter extends BasePainter {
             new ModelGraphEdgeLayout.Edge(
                 "der|" + bvKey + "|" + index + "|" + dvKey, bvKey, bvBounds, dvKey, dvBounds));
       }
+      addScd2ParentHubConnection(base, bvKey, bvBounds, dvRefByName, edges);
       int sourceQueryIndex = 0;
       for (BvSourceQueryRef sourceQueryRef : base.getSourceQueryRefs()) {
         int index = sourceQueryIndex++;
@@ -589,6 +593,76 @@ public class BusinessVaultModelPainter extends BasePainter {
     int w = Math.max(1, reference.getDrawnBoxWidth());
     int h = Math.max(1, reference.getDrawnBoxHeight());
     return new Bounds(screenLoc.x, screenLoc.y, w, h);
+  }
+
+  private void addScd2ParentHubConnection(
+      BvTableBase base,
+      String bvKey,
+      Bounds bvBounds,
+      Map<String, BvDvTableReference> dvRefByName,
+      List<ModelGraphEdgeLayout.Edge> edges) {
+    BvDvTableReference hubRef = findCanvasParentHubReference(base, dvRefByName);
+    if (hubRef == null || bvBounds == null) {
+      return;
+    }
+    Bounds dvBounds = getDvReferenceBounds(hubRef);
+    if (dvBounds == null) {
+      return;
+    }
+    String dvKey = dvReferenceKey(hubRef);
+    edges.add(
+        new ModelGraphEdgeLayout.Edge(
+            "hub|" + bvKey + "|" + dvKey, bvKey, bvBounds, dvKey, dvBounds));
+  }
+
+  private void addNavigationParentHubConnection(
+      BvTableBase base,
+      Bounds bvBounds,
+      Map<String, BvDvTableReference> dvRefByName,
+      double graphX,
+      double graphY,
+      double scaleX,
+      double scaleY,
+      int minSize) {
+    BvDvTableReference hubRef = findCanvasParentHubReference(base, dvRefByName);
+    if (hubRef == null || hubRef.getLocation() == null || bvBounds == null) {
+      return;
+    }
+    Bounds dvBounds =
+        navigationBounds(
+            graphX,
+            graphY,
+            scaleX,
+            scaleY,
+            hubRef.getLocation(),
+            hubRef.getDrawnBoxWidth(),
+            hubRef.getDrawnBoxHeight(),
+            minSize);
+    ModelGraphConnectionGeometry.drawStraightConnection(gc, bvBounds, dvBounds);
+  }
+
+  /**
+   * Extra canvas line from the SCD2 parent hub when that hub is on the canvas but not already a
+   * derivative (older models that only set Parent hub, or inferred shared satellite parents).
+   */
+  private BvDvTableReference findCanvasParentHubReference(
+      BvTableBase base, Map<String, BvDvTableReference> dvRefByName) {
+    if (!(base instanceof BvScd2Table scd2) || dvRefByName == null) {
+      return null;
+    }
+    String hubName =
+        BusinessVaultDerivativeSupport.resolveCanvasParentHubName(scd2, dataVaultModel);
+    if (Utils.isEmpty(hubName) || BusinessVaultDerivativeSupport.hasDerivative(scd2, hubName)) {
+      return null;
+    }
+    BvDvTableReference target = dvRefByName.get(hubName.toLowerCase());
+    if (target == null || target.getLocation() == null) {
+      return null;
+    }
+    if (target.getDvTableType() != null && target.getDvTableType() != DvTableType.HUB) {
+      return null;
+    }
+    return target;
   }
 
   private Bounds getBvTableBounds(BvTableBase table) {
@@ -922,6 +996,7 @@ public class BusinessVaultModelPainter extends BasePainter {
       }
       gc.drawText(typeLabel, textX, y + 28, true);
       drawDerivativeReferences(base, textX, y);
+      drawInferredParentHub(base, textX, y);
       if (base instanceof BvBusinessTable businessTable) {
         drawSqlRefSummary(businessTable, textX, y);
       }
@@ -969,11 +1044,38 @@ public class BusinessVaultModelPainter extends BasePainter {
     gc.setForeground(EColor.BLACK);
   }
 
+  private void drawInferredParentHub(BvTableBase base, int x, int y) {
+    String hubName = inferredParentHubLabel(base);
+    if (Utils.isEmpty(hubName)) {
+      return;
+    }
+    gc.setFont(EFont.SMALL);
+    gc.setForeground(EColor.DARKGRAY);
+    int yRef = y + DERIVATIVES_TOP + countDerivatives(base) * derivativeLineHeight();
+    gc.drawText("HUB: " + hubName, x, yRef, true);
+    gc.setForeground(EColor.BLACK);
+  }
+
+  private String inferredParentHubLabel(BvTableBase base) {
+    if (!(base instanceof BvScd2Table scd2)) {
+      return null;
+    }
+    String hubName =
+        BusinessVaultDerivativeSupport.resolveCanvasParentHubName(scd2, dataVaultModel);
+    if (Utils.isEmpty(hubName) || BusinessVaultDerivativeSupport.hasDerivative(scd2, hubName)) {
+      return null;
+    }
+    return hubName;
+  }
+
   private void drawSqlRefSummary(BvBusinessTable businessTable, int x, int y) {
     if (businessTable == null || businessTable.getSqlRefs().isEmpty()) {
       return;
     }
     int offset = countDerivatives(businessTable);
+    if (!Utils.isEmpty(inferredParentHubLabel(businessTable))) {
+      offset++;
+    }
     gc.setFont(EFont.SMALL);
     gc.setForeground(EColor.DARKGRAY);
     int lineHeight = derivativeLineHeight();
@@ -1014,6 +1116,10 @@ public class BusinessVaultModelPainter extends BasePainter {
       width =
           Math.max(width, gc.textExtent(derLabel + ": " + derivative.getDvTableName()).x + textPad);
     }
+    String inferredHub = inferredParentHubLabel(base);
+    if (!Utils.isEmpty(inferredHub)) {
+      width = Math.max(width, gc.textExtent("HUB: " + inferredHub).x + textPad);
+    }
     if (base instanceof BvBusinessTable businessTable) {
       for (BvSqlRef ref : businessTable.getSqlRefs()) {
         if (ref == null || Utils.isEmpty(ref.getObjectName())) {
@@ -1032,6 +1138,9 @@ public class BusinessVaultModelPainter extends BasePainter {
 
   private int computeBoxHeight(BvTableBase base) {
     int refCount = countDerivatives(base);
+    if (!Utils.isEmpty(inferredParentHubLabel(base))) {
+      refCount++;
+    }
     if (base instanceof BvBusinessTable businessTable) {
       for (BvSqlRef ref : businessTable.getSqlRefs()) {
         if (ref != null && !Utils.isEmpty(ref.getObjectName())) {

@@ -31,6 +31,7 @@ limitations under the License.
       <validToField/>
       <includeHashKey>Y</includeHashKey>
       <includeHubBusinessKeys>Y</includeHubBusinessKeys>
+      <parentHubName>hub_customer</parentHubName>
       <hubBusinessKeysCalculationOnly>N</hubBusinessKeysCalculationOnly>
       <field_mappings>
         <field_mapping>
@@ -139,6 +140,10 @@ limitations under the License.
       <tableType>SCD2</tableType>
       <derivatives>
         <derivative>
+          <dvTableName>hub_customer</dvTableName>
+          <dvTableType>HUB</dvTableType>
+        </derivative>
+        <derivative>
           <dvTableName>sat_customer_demo</dvTableName>
           <dvTableType>SATELLITE</dvTableType>
         </derivative>
@@ -173,6 +178,12 @@ It is possible to load incrementally as well.</text>
     </note>
   </notes>
   <dv_references>
+    <dv_reference>
+      <dvTableName>hub_customer</dvTableName>
+      <dvTableType>HUB</dvTableType>
+      <xloc>528</xloc>
+      <yloc>48</yloc>
+    </dv_reference>
     <dv_reference>
       <dvTableName>sat_customer_demo</dvTableName>
       <dvTableType>SATELLITE</dvTableType>

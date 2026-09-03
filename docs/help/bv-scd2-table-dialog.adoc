@@ -41,7 +41,7 @@ Raw vault satellites remain insert-only (technical load history). SCD2 rewrites 
 |When enabled, the parent hub hash key is written to the BV table.
 
 |**Parent hub**
-|The hub this SCD2 timeline is for. Linked satellites and source queries are all sorted and merged on that hub's hash key plus the functional timestamp. Origin does not matter. Leave empty to infer from linked satellites. Set this when the SCD2 is fed only by source queries. **Validate** / Check model reports an error if the name is not a Linked Hub or a hub in the loaded Data Vault model.
+|The hub this SCD2 timeline is for, and where the business key(s) live. Drag a **Linked Hub** onto the SCD2 table on the canvas (one hub only) or pick it here. The canvas draws that link so you can see grain identity next to the satellite feeds. Linked satellites and source queries are all sorted and merged on that hub's hash key plus the functional timestamp. Leave empty to infer from linked satellites. Set this when the SCD2 is fed only by source queries. **Validate** / Check model reports an error if the name is not a Linked Hub or a hub in the loaded Data Vault model.
 
 |**Include hub business keys**
 |When enabled, that hub's business key columns are left-outer Merge Joined after collapse, immediately before SQL calculations. They are available for calculations but they do not drive new versions. Requires Include hash key. The SCD2 merge/repeat/incremental path is unchanged.

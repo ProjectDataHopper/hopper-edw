@@ -1058,8 +1058,7 @@ public class HopGuiBvScd2TableDialog {
     for (IDvTable table : dv.getTables()) {
       if (table == null
           || Utils.isEmpty(table.getName())
-          || !BusinessVaultDerivativeSupport.isValidDerivativePair(
-              input.getTableType(), table.getTableType())) {
+          || table.getTableType() != DvTableType.SATELLITE) {
         continue;
       }
       names.add(table.getName());
@@ -1251,8 +1250,12 @@ public class HopGuiBvScd2TableDialog {
     wIncludeHubBusinessKeys.setSelection(input.isIncludeHubBusinessKeys());
     wLoadHubBusinessKeys.setSelection(input.isLoadHubBusinessKeys());
     populateParentHubCombo();
-    if (!Utils.isEmpty(input.getParentHubName())) {
-      wParentHubName.setText(input.getParentHubName());
+    String parentHub = input.getParentHubName();
+    if (Utils.isEmpty(parentHub)) {
+      parentHub = BusinessVaultDerivativeSupport.findHubDerivativeName(input);
+    }
+    if (!Utils.isEmpty(parentHub)) {
+      wParentHubName.setText(parentHub);
     }
     updateHubBusinessKeyOptionState();
     EnumDialogSupport.selectCombo(wBuildMode, input.getBuildModeOrDefault());
@@ -1274,7 +1277,9 @@ public class HopGuiBvScd2TableDialog {
 
     wDerivatives.clearAll();
     for (BvDerivativeRef derivative : input.getDerivatives()) {
-      if (derivative == null || Utils.isEmpty(derivative.getDvTableName())) {
+      if (derivative == null
+          || Utils.isEmpty(derivative.getDvTableName())
+          || BusinessVaultDerivativeSupport.isHubDerivative(derivative)) {
         continue;
       }
       TableItem item = new TableItem(wDerivatives.table, SWT.NONE);
@@ -1389,6 +1394,9 @@ public class HopGuiBvScd2TableDialog {
           dvType = DvTableType.lookupCode(item.getText(2));
         }
       }
+      if (dvType == DvTableType.HUB) {
+        continue;
+      }
       if (dvType != null
           && BusinessVaultDerivativeSupport.isValidDerivativePair(target.getTableType(), dvType)
           && !BusinessVaultDerivativeSupport.hasDerivative(target, dvName)) {
@@ -1492,6 +1500,7 @@ public class HopGuiBvScd2TableDialog {
     target.setValidToField(wValidToField.getText());
 
     applyDerivativesToTable(target);
+    BusinessVaultDerivativeSupport.setParentHub(target, wParentHubName.getText());
     applySourceQueriesToTable(target);
     Set<String> activeSatellites = new HashSet<>(List.of(getSatelliteNamesFromDerivativesTable()));
     BvScd2FieldMappingDialogSupport.pruneMappingsAndConfigs(target, activeSatellites);

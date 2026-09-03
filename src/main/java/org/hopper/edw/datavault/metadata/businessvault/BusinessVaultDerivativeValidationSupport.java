@@ -34,9 +34,13 @@ final class BusinessVaultDerivativeValidationSupport {
     if (bvTable == null || dataVaultModel == null) {
       return;
     }
+    int hubCount = 0;
     for (BvDerivativeRef derivative : bvTable.getDerivatives()) {
       if (derivative == null || Utils.isEmpty(derivative.getDvTableName())) {
         continue;
+      }
+      if (BusinessVaultDerivativeSupport.isHubDerivative(derivative)) {
+        hubCount++;
       }
       IDvTable dvTable = dataVaultModel.findTable(derivative.getDvTableName());
       if (dvTable == null) {
@@ -65,6 +69,16 @@ final class BusinessVaultDerivativeValidationSupport {
                     dvTable.getTableType()),
                 bvTable));
       }
+    }
+    if (bvTable.getTableType() == BvTableType.SCD2 && hubCount > 1) {
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_ERROR,
+              BaseMessages.getString(
+                  PKG,
+                  "BusinessVaultDerivativeValidationSupport.Error.MultipleScd2Hubs",
+                  bvTable.getName()),
+              bvTable));
     }
   }
 }

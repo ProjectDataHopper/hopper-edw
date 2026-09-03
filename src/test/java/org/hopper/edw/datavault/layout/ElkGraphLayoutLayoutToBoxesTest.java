@@ -27,6 +27,10 @@ import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvHub;
 import org.hopper.edw.datavault.metadata.DvLink;
 import org.hopper.edw.datavault.metadata.DvSatellite;
+import org.hopper.edw.datavault.metadata.DvTableType;
+import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
+import org.hopper.edw.datavault.metadata.businessvault.BvDerivativeRef;
+import org.hopper.edw.datavault.metadata.businessvault.BvScd2Table;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -68,5 +72,37 @@ class ElkGraphLayoutLayoutToBoxesTest {
     // layoutToBoxes must not write back to model targets
     assertEquals(hubXBefore, hub.getLocation().x);
     assertEquals(hubYBefore, hub.getLocation().y);
+  }
+
+  @Test
+  void businessVaultLayoutIncludesScd2ParentHubEdge() {
+    DataVaultModel dv = new DataVaultModel();
+    DvHub hub = new DvHub("hub_customer");
+    DvSatellite satellite = new DvSatellite("sat_customer");
+    satellite.setHubName("hub_customer");
+    dv.getTables().add(hub);
+    dv.getTables().add(satellite);
+
+    BusinessVaultModel bv = new BusinessVaultModel();
+    bv.setName("bv");
+    BvScd2Table scd2 = new BvScd2Table();
+    scd2.setName("customer_bv");
+    scd2.getDerivatives().add(new BvDerivativeRef("sat_customer", DvTableType.SATELLITE));
+    scd2.setParentHubName("hub_customer");
+    bv.getTables().add(scd2);
+
+    ElkGraphLayout layoutGraph = ElkGraphLayout.fromBusinessVaultModel(bv, dv);
+    assertTrue(
+        layoutGraph.getEdges().stream()
+            .anyMatch(
+                edge ->
+                    "customer_bv".equals(edge.getFromId())
+                        && "hub_customer".equals(edge.getToId())));
+    assertTrue(
+        layoutGraph.getEdges().stream()
+            .anyMatch(
+                edge ->
+                    "customer_bv".equals(edge.getFromId())
+                        && "sat_customer".equals(edge.getToId())));
   }
 }

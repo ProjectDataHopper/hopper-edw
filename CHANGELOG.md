@@ -4,6 +4,11 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### BV SCD2 parent hub on the canvas
+
+- Drag a **Linked Hub** onto an SCD2 table (or set **Parent hub** in the dialog) to show grain identity and where the business key(s) live. One hub per SCD2 table; satellite derivatives stay the history feeds
+- The canvas draws that hub link, the SCD2 card lists `HUB: …`, and ELK layout treats it as an edge. Sample `.hbv` models (vault1, Customer 360, retail-360, SCD2 calculations) include the hub alias
+
 ### SQL Expression transform throughput
 
 - Per-row evaluation no longer clones the input layout or looks up output fields by name (precomputed write indexes + cached value metas). Wide SCD2 rows with a few calculations avoid O(n) name scans

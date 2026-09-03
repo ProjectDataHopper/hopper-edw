@@ -19,6 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.apache.hop.core.util.Utils;
+import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvHub;
 import org.hopper.edw.datavault.metadata.DvSatellite;
 import org.hopper.edw.datavault.metadata.DvTableType;
@@ -27,12 +29,14 @@ import org.junit.jupiter.api.Test;
 class BusinessVaultDerivativeSupportTest {
 
   @Test
-  void scd2AcceptsSatelliteOnly() {
+  void scd2AcceptsSatelliteAndOneHub() {
     assertTrue(
         BusinessVaultDerivativeSupport.isValidDerivativePair(
             BvTableType.SCD2, DvTableType.SATELLITE));
-    assertFalse(
+    assertTrue(
         BusinessVaultDerivativeSupport.isValidDerivativePair(BvTableType.SCD2, DvTableType.HUB));
+    assertFalse(
+        BusinessVaultDerivativeSupport.isValidDerivativePair(BvTableType.SCD2, DvTableType.LINK));
   }
 
   @Test
@@ -54,8 +58,49 @@ class BusinessVaultDerivativeSupportTest {
 
     assertTrue(BusinessVaultDerivativeSupport.addDerivative(bvTable, satellite));
     assertFalse(BusinessVaultDerivativeSupport.addDerivative(bvTable, satellite));
+    assertTrue(BusinessVaultDerivativeSupport.addDerivative(bvTable, hub));
+    assertEquals(2, bvTable.getDerivatives().size());
+    assertEquals("hub_customer", bvTable.getParentHubName());
+    assertEquals("hub_customer", BusinessVaultDerivativeSupport.findHubDerivativeName(bvTable));
     assertFalse(BusinessVaultDerivativeSupport.addDerivative(bvTable, hub));
+  }
+
+  @Test
+  void scd2ParentHubReplacesPreviousHubAndStaysFirst() {
+    BvScd2Table bvTable = new BvScd2Table();
+    DvSatellite satellite = new DvSatellite("sat_customer");
+    DvHub first = new DvHub("hub_customer");
+    DvHub second = new DvHub("hub_party");
+
+    assertTrue(BusinessVaultDerivativeSupport.addDerivative(bvTable, satellite));
+    assertTrue(BusinessVaultDerivativeSupport.addDerivative(bvTable, first));
+    assertTrue(BusinessVaultDerivativeSupport.addDerivative(bvTable, second));
+    assertEquals("hub_party", bvTable.getParentHubName());
+    assertEquals("hub_party", bvTable.getDerivatives().get(0).getDvTableName());
+    assertEquals(2, bvTable.getDerivatives().size());
+    assertTrue(BusinessVaultDerivativeSupport.setParentHub(bvTable, ""));
+    assertTrue(Utils.isEmpty(bvTable.getParentHubName()));
     assertEquals(1, bvTable.getDerivatives().size());
+    assertEquals("sat_customer", bvTable.getDerivatives().get(0).getDvTableName());
+  }
+
+  @Test
+  void canvasParentHubPrefersDeclaredThenInferredSatelliteParent() {
+    BvScd2Table bvTable = new BvScd2Table();
+    bvTable.getDerivatives().add(new BvDerivativeRef("sat_customer", DvTableType.SATELLITE));
+
+    DataVaultModel dv = new DataVaultModel();
+    DvHub hub = new DvHub("hub_customer");
+    DvSatellite satellite = new DvSatellite("sat_customer");
+    satellite.setHubName("hub_customer");
+    dv.getTables().add(hub);
+    dv.getTables().add(satellite);
+
+    assertEquals(
+        "hub_customer", BusinessVaultDerivativeSupport.resolveCanvasParentHubName(bvTable, dv));
+    bvTable.setParentHubName("hub_party");
+    assertEquals(
+        "hub_party", BusinessVaultDerivativeSupport.resolveCanvasParentHubName(bvTable, dv));
   }
 
   @Test

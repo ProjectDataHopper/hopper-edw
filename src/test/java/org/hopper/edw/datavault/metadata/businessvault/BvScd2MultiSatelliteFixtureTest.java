@@ -113,7 +113,13 @@ class BvScd2MultiSatelliteFixtureTest {
         remarks.stream().anyMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_ERROR),
         () -> remarks.stream().map(ICheckResult::getText).toList().toString());
 
-    assertEquals(4, scd2Table.getDerivatives().size());
+    assertEquals(
+        4,
+        scd2Table.getDerivatives().stream()
+            .filter(BusinessVaultDerivativeSupport::isSatelliteDerivative)
+            .count());
+    assertEquals("hub_customer", scd2Table.getParentHubName());
+    assertEquals("hub_customer", BusinessVaultDerivativeSupport.findHubDerivativeName(scd2Table));
     assertEquals(11, scd2Table.getFieldMappings().size());
     assertEquals(4, scd2Table.getSatelliteConfigs().size());
 

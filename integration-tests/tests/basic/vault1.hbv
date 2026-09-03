@@ -28,12 +28,17 @@ limitations under the License.
       <validFromField/>
       <validToField/>
       <includeHashKey>Y</includeHashKey>
+      <parentHubName>hub_customer</parentHubName>
       <field_mappings/>
       <satellite_configs/>
       <tableName>sat_customer_hb</tableName>
       <description/>
       <tableType>SCD2</tableType>
       <derivatives>
+        <derivative>
+          <dvTableName>hub_customer</dvTableName>
+          <dvTableType>HUB</dvTableType>
+        </derivative>
         <derivative>
           <dvTableName>sat_customer</dvTableName>
           <dvTableType>SATELLITE</dvTableType>

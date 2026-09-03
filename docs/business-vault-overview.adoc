@@ -48,7 +48,7 @@ From a Business Vault table you can jump to the linked Data Vault model and sele
 |Type |Purpose
 
 |SCD2 (`BvScd2Table`)
-|Merge one or more DV satellites into a functional SCD2 table. See link:business-vault-scd2.adoc[Business Vault SCD2].
+|Merge one or more DV satellites into a functional SCD2 table. Link **one parent hub** on the canvas so the grain and business keys are visible. See link:business-vault-scd2.adoc[Business Vault SCD2].
 
 |PIT (`BvPitTable`)
 |Point-in-time helper for technical as-of queries: hub grain × snapshot dates with satellite load-timestamp pointers. See link:business-vault-pit.adoc[Business Vault PIT].
