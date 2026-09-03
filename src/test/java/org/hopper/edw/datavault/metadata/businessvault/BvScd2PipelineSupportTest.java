@@ -1591,9 +1591,18 @@ class BvScd2PipelineSupportTest {
   }
 
   @Test
+  void copiesNeedRoundRobinForNumbersAndVariables() {
+    assertFalse(BvScd2PipelineSupport.copiesNeedRoundRobin(null));
+    assertFalse(BvScd2PipelineSupport.copiesNeedRoundRobin(""));
+    assertFalse(BvScd2PipelineSupport.copiesNeedRoundRobin("1"));
+    assertTrue(BvScd2PipelineSupport.copiesNeedRoundRobin("4"));
+    assertTrue(BvScd2PipelineSupport.copiesNeedRoundRobin("${SQL_EXPRESSION_COPIES}"));
+  }
+
+  @Test
   void sqlExpressionCopiesAreSetOnGeneratedTransform() throws Exception {
     Scd2BuildContext ctx = singleSatelliteContext(BvScd2BuildMode.FULL_REBUILD, null);
-    ctx.scd2Table.setSqlExpressionCopyCount(BvScd2SqlExpressionCopyCount.FOUR);
+    ctx.scd2Table.setSqlExpressionCopyCount("4");
     ctx.scd2Table
         .getCalculations()
         .add(
@@ -1607,6 +1616,34 @@ class BvScd2PipelineSupportTest {
             .findFirst()
             .orElseThrow();
     assertEquals(4, calc.getCopies(new Variables()));
+    TransformMeta from =
+        pipelineMeta.getPipelineHops().stream()
+            .filter(hop -> hop.getToTransform() == calc)
+            .map(hop -> hop.getFromTransform())
+            .findFirst()
+            .orElseThrow();
+    assertTrue(from.isDistributes());
+  }
+
+  @Test
+  void sqlExpressionCopiesKeepVariableForRuntimeResolution() throws Exception {
+    Scd2BuildContext ctx = singleSatelliteContext(BvScd2BuildMode.FULL_REBUILD, null);
+    ctx.scd2Table.setSqlExpressionCopyCount("${SQL_EXPRESSION_COPIES}");
+    ctx.scd2Table
+        .getCalculations()
+        .add(
+            new BvScd2Calculation(
+                "name_or_default", "COALESCE(name, 'Default value' :> VARCHAR(720))"));
+
+    PipelineMeta pipelineMeta = BvScd2PipelineSupport.generatePipeline(ctx);
+    TransformMeta calc =
+        pipelineMeta.getTransforms().stream()
+            .filter(t -> "SqlExpression".equals(t.getTransformPluginId()))
+            .findFirst()
+            .orElseThrow();
+    Variables runtime = new Variables();
+    runtime.setVariable("SQL_EXPRESSION_COPIES", "8");
+    assertEquals(8, calc.getCopies(runtime));
     TransformMeta from =
         pipelineMeta.getPipelineHops().stream()
             .filter(hop -> hop.getToTransform() == calc)

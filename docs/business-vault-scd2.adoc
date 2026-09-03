@@ -244,7 +244,7 @@ Open intervals use sentinels from configuration (default `1900-01-01 00:00:00` a
 |`None` (default), or `4` / `8` / `16` parts for a large full rebuild. See <<Hash-key partitions (large full rebuilds)>>.
 
 |SQL Expression copies
-|`1 copy` (default), or `2` / `4` / `8` parallel copies of the generated SQL Expression transform after collapse. Rows are round-robin distributed. Use 4 or 8 for CPU-heavy calculations on wide rows.
+|Number of parallel copies of the generated SQL Expression transform after collapse (default 1). A literal (`4`) or a Hop variable such as `'${SQL_EXPRESSION_COPIES}'` so DTAP environments can differ. Rows are round-robin distributed.
 
 |Incremental watermark field
 |Optional BV column used for `MAX(...)` watermark reads and incremental write filtering. Defaults to the resolved functional timestamp field.

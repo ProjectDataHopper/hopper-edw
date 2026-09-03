@@ -9,7 +9,7 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 - Per-row evaluation no longer clones the input layout or looks up output fields by name (precomputed write indexes + cached value metas). Wide SCD2 rows with a few calculations avoid O(n) name scans
 - New calculated fields are written into Hop's over-allocated row (`RowDataUtil.resizeArray`); the Object[] is copied only when there are not enough spare slots
 - `MD5()` reuses a thread-local digest; `DATE_FORMAT()` compiles the format string once and writes into a shared buffer
-- SCD2 table dialog **SQL Expression copies** (below hash-key partitions) generates 1 / 2 / 4 / 8 parallel copies of the calculation transform, with round-robin row distribution
+- SCD2 table dialog **SQL Expression copies** (below hash-key partitions) is a variable-aware field (for example `'${SQL_EXPRESSION_COPIES}'`) written onto the generated transform so DTAP environments can set their own copy count; rows are round-robin distributed when copies is not 1
 
 ### BV source query SQL highlighting
 

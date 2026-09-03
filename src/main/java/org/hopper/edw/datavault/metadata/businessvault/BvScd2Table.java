@@ -50,8 +50,11 @@ public class BvScd2Table extends BvTableBase {
   @HopMetadataProperty(storeWithCode = true)
   private BvScd2HashPartitionCount hashKeyPartitionCount = BvScd2HashPartitionCount.NONE;
 
-  @HopMetadataProperty(storeWithCode = true)
-  private BvScd2SqlExpressionCopyCount sqlExpressionCopyCount = BvScd2SqlExpressionCopyCount.ONE;
+  /**
+   * Copies of the generated SQL Expression transform. A number ({@code 1}, {@code 4}, …) or a Hop
+   * variable such as {@code ${SQL_EXPRESSION_COPIES}}. Empty means one copy.
+   */
+  @HopMetadataProperty private String sqlExpressionCopyCount;
 
   @HopMetadataProperty private String functionalTimestampField;
 
@@ -158,10 +161,8 @@ public class BvScd2Table extends BvTableBase {
     return getHashKeyPartitionCountOrDefault().isPartitioned();
   }
 
-  public BvScd2SqlExpressionCopyCount getSqlExpressionCopyCountOrDefault() {
-    return sqlExpressionCopyCount != null
-        ? sqlExpressionCopyCount
-        : BvScd2SqlExpressionCopyCount.ONE;
+  public String getSqlExpressionCopyCountOrDefault() {
+    return Utils.isEmpty(sqlExpressionCopyCount) ? "1" : sqlExpressionCopyCount.trim();
   }
 
   /** Inverse of {@link #hubBusinessKeysCalculationOnly}; missing XML means the keys are loaded. */

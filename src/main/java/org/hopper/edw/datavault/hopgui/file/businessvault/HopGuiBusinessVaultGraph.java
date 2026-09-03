@@ -1754,7 +1754,7 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
       tooltip = "i18n::HopGuiBusinessVaultGraph.AiHelp.Tooltip",
       image = "datavault-ai-help.svg",
       category = "Help",
-      categoryOrder = "1")
+      categoryOrder = "10")
   public void openAiAdvisorContext(HopGuiBusinessVaultContext context) {
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
     if (graph != null) {
@@ -1818,7 +1818,7 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
       tooltip = "i18n::HopGuiBusinessVaultGraph.Context.CopyUpdateAction.Tooltip",
       image = "ui/images/copy.svg",
       category = "Workflow",
-      categoryOrder = "1")
+      categoryOrder = "9")
   public void copyUpdateActionToClipboard(HopGuiBusinessVaultContext context) {
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
     if (graph != null) {

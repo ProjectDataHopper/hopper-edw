@@ -82,7 +82,7 @@ The functional timestamp drives interval boundaries — not the technical load d
 - **Full rebuild** — truncate and reload the BV table from satellite history.
 - **Incremental** — read satellite deltas above a watermark, close the prior open version, append new versions. Prefer after an initial full load when history is large.
 - **Hash-key partitions** — optional 4 / 8 / 16 split on Full rebuild. A wrapper workflow truncates the target, then runs the SCD2 pipeline per partition with `'${PARTITION_COUNT}'` and `'${PARTITION_NUMBER}'`. Honors Table Output, Native bulk, and Staging file. Disabled for Incremental.
-- **SQL Expression copies** — optional 2 / 4 / 8 parallel copies of the SQL Expression transform after collapse (default 1). Rows are round-robin distributed. Use this for CPU-heavy calculations on wide rows.
+- **SQL Expression copies** — parallel copies of the SQL Expression transform after collapse (default 1). Enter a number or a variable such as `'${SQL_EXPRESSION_COPIES}'` so each environment can set its own value. Rows are round-robin distributed. Use this for CPU-heavy calculations on wide rows.
 
 Use **Debug** or **Show build pipeline** on the canvas to inspect the generated Hop pipeline (and the partition workflow when enabled) before workflow runs.
 
