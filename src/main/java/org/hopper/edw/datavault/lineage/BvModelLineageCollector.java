@@ -225,7 +225,7 @@ public final class BvModelLineageCollector {
               "hub_business_keys", "includeHubBusinessKeys", "true"));
     }
 
-    addRemainingLoadedFields(lineage, table, config, dvModel, variables);
+    addRemainingLoadedFields(lineage, table, config, dvModel, model, variables);
     return lineage;
   }
 
@@ -290,13 +290,14 @@ public final class BvModelLineageCollector {
       BvScd2Table table,
       BusinessVaultConfiguration config,
       DataVaultModel dvModel,
+      BusinessVaultModel bvModel,
       IVariables variables) {
     if (lineage == null || table == null || dvModel == null) {
       return;
     }
     try {
       IRowMeta layout =
-          BvScd2PipelineSupport.buildTargetTableLayout(table, config, dvModel, variables);
+          BvScd2PipelineSupport.buildTargetTableLayout(table, config, dvModel, bvModel, variables);
       if (layout == null) {
         return;
       }

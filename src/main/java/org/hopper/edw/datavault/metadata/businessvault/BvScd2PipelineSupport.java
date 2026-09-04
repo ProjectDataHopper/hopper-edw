@@ -821,11 +821,34 @@ public final class BvScd2PipelineSupport {
       DataVaultModel dvModel,
       IVariables variables)
       throws HopException {
+    return buildTargetTableLayout(
+        scd2Table, bvConfig, dvModel, (BusinessVaultModel) null, variables);
+  }
+
+  public static IRowMeta buildTargetTableLayout(
+      BvScd2Table scd2Table,
+      BusinessVaultConfiguration bvConfig,
+      DataVaultModel dvModel,
+      BusinessVaultModel bvModel,
+      IVariables variables)
+      throws HopException {
     if (hasFieldMappings(scd2Table)) {
-      return buildMappedTargetTableLayout(scd2Table, bvConfig, dvModel, variables);
+      return buildMappedTargetTableLayout(scd2Table, bvConfig, dvModel, bvModel, variables);
     }
-    return buildLegacyTargetTableLayout(
-        scd2Table, bvConfig, dvModel, resolveSourceSatellite(scd2Table, dvModel), variables);
+    List<DvSatellite> satellites =
+        BvScd2FieldMappingValidationSupport.resolveSatelliteDerivatives(scd2Table, dvModel);
+    if (!satellites.isEmpty()) {
+      return buildLegacyTargetTableLayout(
+          scd2Table, bvConfig, dvModel, satellites.get(0), variables);
+    }
+    List<BvSourceQuery> sourceQueries =
+        BusinessVaultSourceQuerySupport.resolveSourceQueries(scd2Table, bvModel);
+    if (!sourceQueries.isEmpty()) {
+      return buildSourceQueryTargetTableLayout(
+          scd2Table, bvConfig, dvModel, sourceQueries, variables);
+    }
+    return buildGrainAndTechnicalLayout(
+        scd2Table, bvConfig, dvModel, List.of(), sourceQueries, variables);
   }
 
   public static IRowMeta buildTargetTableLayout(
@@ -836,7 +859,8 @@ public final class BvScd2PipelineSupport {
       IVariables variables)
       throws HopException {
     if (hasFieldMappings(scd2Table)) {
-      return buildTargetTableLayout(scd2Table, bvConfig, dvModel, variables);
+      return buildTargetTableLayout(
+          scd2Table, bvConfig, dvModel, (BusinessVaultModel) null, variables);
     }
     return buildLegacyTargetTableLayout(scd2Table, bvConfig, dvModel, satellite, variables);
   }
@@ -849,7 +873,7 @@ public final class BvScd2PipelineSupport {
       IVariables variables)
       throws HopException {
     RowMeta rowMeta = new RowMeta();
-    appendGrainFields(rowMeta, scd2Table, dvModel, List.of(satellite), variables, true);
+    appendGrainFields(rowMeta, scd2Table, dvModel, List.of(satellite), List.of(), variables, true);
 
     for (String attrName : resolveAttributeFieldNames(satellite)) {
       if (satellite.hasDrivingKey()
@@ -872,47 +896,78 @@ public final class BvScd2PipelineSupport {
       BvScd2Table scd2Table,
       BusinessVaultConfiguration bvConfig,
       DataVaultModel dvModel,
+      BusinessVaultModel bvModel,
       IVariables variables)
       throws HopException {
     List<DvSatellite> satellites =
         BvScd2FieldMappingValidationSupport.resolveSatelliteDerivatives(scd2Table, dvModel);
-    if (satellites.isEmpty()) {
-      throw new HopException(
-          "SCD2 table "
-              + scd2Table.getName()
-              + " must reference a Data Vault satellite derivative");
-    }
+    List<BvSourceQuery> sourceQueries =
+        BusinessVaultSourceQuerySupport.resolveSourceQueries(scd2Table, bvModel);
+    return buildGrainAndTechnicalLayout(
+        scd2Table,
+        bvConfig,
+        dvModel,
+        satellites,
+        sourceQueries,
+        variables,
+        mappedAttributeValueMetas(scd2Table, satellites, sourceQueries, variables, true));
+  }
 
+  private static IRowMeta buildSourceQueryTargetTableLayout(
+      BvScd2Table scd2Table,
+      BusinessVaultConfiguration bvConfig,
+      DataVaultModel dvModel,
+      List<BvSourceQuery> sourceQueries,
+      IVariables variables)
+      throws HopException {
     RowMeta rowMeta = new RowMeta();
-    appendGrainFields(rowMeta, scd2Table, dvModel, satellites, variables, true);
-
-    Set<String> addedTargets = new LinkedHashSet<>();
-    for (BvScd2FieldMapping mapping : scd2Table.getFieldMappings()) {
-      if (mapping == null) {
+    appendGrainFields(rowMeta, scd2Table, dvModel, List.of(), sourceQueries, variables, true);
+    BvSourceQuery sourceQuery = sourceQueries.get(0);
+    for (String attrName : BvSourceQuerySqlSupport.attributeFieldNames(sourceQuery, variables)) {
+      if (rowMeta.indexOfValue(attrName) >= 0) {
         continue;
       }
-      String satelliteName = variables.resolve(mapping.getSatelliteName());
-      String sourceFieldName = variables.resolve(mapping.getSourceFieldName());
-      String targetFieldName = variables.resolve(mapping.getTargetFieldName());
-      if (Utils.isEmpty(satelliteName)
-          || Utils.isEmpty(sourceFieldName)
-          || Utils.isEmpty(targetFieldName)
-          || !mapping.isIncludeInTarget()
-          || !addedTargets.add(targetFieldName)) {
-        continue;
+      IValueMeta attrMeta = sourceQueryColumnValueMeta(sourceQuery, attrName, variables);
+      if (attrMeta != null) {
+        rowMeta.addValueMeta(attrMeta);
       }
-
-      DvSatellite satellite = findSatelliteByName(satellites, satelliteName);
-      if (satellite == null) {
-        continue;
-      }
-      IValueMeta sourceMeta = findAttributeValueMeta(satellite, sourceFieldName);
-      if (sourceMeta == null) {
-        continue;
-      }
-      rowMeta.addValueMeta(cloneValueMetaWithName(sourceMeta, targetFieldName));
     }
+    appendSourceAndValidityFields(rowMeta, scd2Table, bvConfig, dvModel, variables);
+    applyCalculations(rowMeta, scd2Table, variables);
+    appendLoadCycleField(rowMeta, bvConfig, variables);
+    return rowMeta;
+  }
 
+  private static IRowMeta buildGrainAndTechnicalLayout(
+      BvScd2Table scd2Table,
+      BusinessVaultConfiguration bvConfig,
+      DataVaultModel dvModel,
+      List<DvSatellite> satellites,
+      List<BvSourceQuery> sourceQueries,
+      IVariables variables)
+      throws HopException {
+    return buildGrainAndTechnicalLayout(
+        scd2Table, bvConfig, dvModel, satellites, sourceQueries, variables, List.of());
+  }
+
+  private static IRowMeta buildGrainAndTechnicalLayout(
+      BvScd2Table scd2Table,
+      BusinessVaultConfiguration bvConfig,
+      DataVaultModel dvModel,
+      List<DvSatellite> satellites,
+      List<BvSourceQuery> sourceQueries,
+      IVariables variables,
+      List<IValueMeta> mappedAttributes)
+      throws HopException {
+    RowMeta rowMeta = new RowMeta();
+    appendGrainFields(rowMeta, scd2Table, dvModel, satellites, sourceQueries, variables, true);
+    if (mappedAttributes != null) {
+      for (IValueMeta mapped : mappedAttributes) {
+        if (mapped != null && rowMeta.indexOfValue(mapped.getName()) < 0) {
+          rowMeta.addValueMeta(mapped);
+        }
+      }
+    }
     appendSourceAndValidityFields(rowMeta, scd2Table, bvConfig, dvModel, variables);
     applyCalculations(rowMeta, scd2Table, variables);
     appendLoadCycleField(rowMeta, bvConfig, variables);
@@ -925,19 +980,28 @@ public final class BvScd2PipelineSupport {
       DataVaultModel dvModel,
       IVariables variables)
       throws HopException {
+    return buildCollapseRowLayout(scd2Table, bvConfig, dvModel, null, variables);
+  }
+
+  public static IRowMeta buildCollapseRowLayout(
+      BvScd2Table scd2Table,
+      BusinessVaultConfiguration bvConfig,
+      DataVaultModel dvModel,
+      BusinessVaultModel bvModel,
+      IVariables variables)
+      throws HopException {
     RowMeta collapse = new RowMeta();
+    List<DvSatellite> satellites =
+        BvScd2FieldMappingValidationSupport.resolveSatelliteDerivatives(scd2Table, dvModel);
+    List<BvSourceQuery> sourceQueries =
+        BusinessVaultSourceQuerySupport.resolveSourceQueries(scd2Table, bvModel);
     if (hasFieldMappings(scd2Table)) {
+      appendGrainFields(collapse, scd2Table, dvModel, satellites, sourceQueries, variables, false);
+      appendMappedAttributes(collapse, scd2Table, satellites, sourceQueries, variables);
+    } else if (!satellites.isEmpty()) {
+      DvSatellite satellite = satellites.get(0);
       appendGrainFields(
-          collapse,
-          scd2Table,
-          dvModel,
-          BvScd2FieldMappingValidationSupport.resolveSatelliteDerivatives(scd2Table, dvModel),
-          variables,
-          false);
-      appendMappedAttributes(collapse, scd2Table, dvModel, variables);
-    } else {
-      DvSatellite satellite = resolveSourceSatellite(scd2Table, dvModel);
-      appendGrainFields(collapse, scd2Table, dvModel, List.of(satellite), variables, false);
+          collapse, scd2Table, dvModel, List.of(satellite), sourceQueries, variables, false);
       for (String attrName : resolveAttributeFieldNames(satellite)) {
         if (satellite.hasDrivingKey()
             && attrName.equals(variables.resolve(satellite.getDrivingKey()))) {
@@ -948,19 +1012,62 @@ public final class BvScd2PipelineSupport {
           collapse.addValueMeta(attrMeta);
         }
       }
+    } else if (!sourceQueries.isEmpty()) {
+      appendGrainFields(collapse, scd2Table, dvModel, List.of(), sourceQueries, variables, false);
+      BvSourceQuery sourceQuery = sourceQueries.get(0);
+      for (String attrName : BvSourceQuerySqlSupport.attributeFieldNames(sourceQuery, variables)) {
+        if (collapse.indexOfValue(attrName) >= 0) {
+          continue;
+        }
+        IValueMeta attrMeta = sourceQueryColumnValueMeta(sourceQuery, attrName, variables);
+        if (attrMeta != null) {
+          collapse.addValueMeta(attrMeta);
+        }
+      }
+    } else {
+      appendGrainFields(collapse, scd2Table, dvModel, satellites, sourceQueries, variables, false);
     }
     appendSourceAndValidityFields(collapse, scd2Table, bvConfig, dvModel, variables);
     return collapse;
   }
 
   private static void appendMappedAttributes(
-      RowMeta rowMeta, BvScd2Table scd2Table, DataVaultModel dvModel, IVariables variables)
+      RowMeta rowMeta,
+      BvScd2Table scd2Table,
+      List<DvSatellite> satellites,
+      List<BvSourceQuery> sourceQueries,
+      IVariables variables)
       throws HopException {
-    List<DvSatellite> satellites =
-        BvScd2FieldMappingValidationSupport.resolveSatelliteDerivatives(scd2Table, dvModel);
+    for (IValueMeta mapped :
+        mappedAttributeValueMetas(scd2Table, satellites, sourceQueries, variables, false)) {
+      if (mapped != null && rowMeta.indexOfValue(mapped.getName()) < 0) {
+        rowMeta.addValueMeta(mapped);
+      }
+    }
+  }
+
+  /**
+   * One value meta per mapping. Loaded mappings (and collapse-only mappings when {@code loadedOnly}
+   * is false) are always included; missing satellite/source-query metadata falls back to String so
+   * bulk loaders still list the column.
+   */
+  private static List<IValueMeta> mappedAttributeValueMetas(
+      BvScd2Table scd2Table,
+      List<DvSatellite> satellites,
+      List<BvSourceQuery> sourceQueries,
+      IVariables variables,
+      boolean loadedOnly)
+      throws HopException {
+    List<IValueMeta> metas = new ArrayList<>();
+    if (scd2Table == null || scd2Table.getFieldMappings() == null) {
+      return metas;
+    }
     Set<String> addedTargets = new LinkedHashSet<>();
     for (BvScd2FieldMapping mapping : scd2Table.getFieldMappings()) {
       if (mapping == null) {
+        continue;
+      }
+      if (loadedOnly && !mapping.isIncludeInTarget()) {
         continue;
       }
       String satelliteName = variables.resolve(mapping.getSatelliteName());
@@ -969,20 +1076,71 @@ public final class BvScd2PipelineSupport {
       if (Utils.isEmpty(satelliteName)
           || Utils.isEmpty(sourceFieldName)
           || Utils.isEmpty(targetFieldName)
-          || !addedTargets.add(targetFieldName)
-          || rowMeta.indexOfValue(targetFieldName) >= 0) {
+          || !addedTargets.add(targetFieldName)) {
         continue;
       }
-      DvSatellite satellite = findSatelliteByName(satellites, satelliteName);
-      if (satellite == null) {
-        continue;
-      }
-      IValueMeta sourceMeta = findAttributeValueMeta(satellite, sourceFieldName);
-      if (sourceMeta == null) {
-        continue;
-      }
-      rowMeta.addValueMeta(cloneValueMetaWithName(sourceMeta, targetFieldName));
+      metas.add(
+          valueMetaForMappedTarget(
+              mapping, targetFieldName, sourceFieldName, satellites, sourceQueries, variables));
     }
+    return metas;
+  }
+
+  private static IValueMeta valueMetaForMappedTarget(
+      BvScd2FieldMapping mapping,
+      String targetFieldName,
+      String sourceFieldName,
+      List<DvSatellite> satellites,
+      List<BvSourceQuery> sourceQueries,
+      IVariables variables)
+      throws HopException {
+    String satelliteName = variables.resolve(mapping.getSatelliteName());
+    DvSatellite satellite = findSatelliteByName(satellites, satelliteName);
+    if (satellite != null) {
+      IValueMeta sourceMeta = findAttributeValueMeta(satellite, sourceFieldName);
+      if (sourceMeta != null) {
+        return cloneValueMetaWithName(sourceMeta, targetFieldName);
+      }
+    }
+    BvSourceQuery sourceQuery = findSourceQuery(sourceQueries, satelliteName);
+    IValueMeta queryMeta = sourceQueryColumnValueMeta(sourceQuery, sourceFieldName, variables);
+    if (queryMeta != null) {
+      return cloneValueMetaWithName(queryMeta, targetFieldName);
+    }
+    try {
+      return ValueMetaFactory.createValueMeta(targetFieldName, IValueMeta.TYPE_STRING);
+    } catch (org.apache.hop.core.exception.HopPluginException e) {
+      throw new HopException("Error creating value meta for mapped field " + targetFieldName, e);
+    }
+  }
+
+  private static BvSourceQuery findSourceQuery(List<BvSourceQuery> sourceQueries, String name) {
+    if (sourceQueries == null || Utils.isEmpty(name)) {
+      return null;
+    }
+    for (BvSourceQuery sourceQuery : sourceQueries) {
+      if (sourceQuery != null && name.equalsIgnoreCase(sourceQuery.getName())) {
+        return sourceQuery;
+      }
+    }
+    return null;
+  }
+
+  private static IValueMeta sourceQueryColumnValueMeta(
+      BvSourceQuery sourceQuery, String columnName, IVariables variables) throws HopException {
+    if (sourceQuery == null || Utils.isEmpty(columnName) || sourceQuery.getColumns() == null) {
+      return null;
+    }
+    for (BvSourceQueryColumn column : sourceQuery.getColumns()) {
+      if (column == null || Utils.isEmpty(column.getName())) {
+        continue;
+      }
+      String resolved = variables != null ? variables.resolve(column.getName()) : column.getName();
+      if (columnName.equalsIgnoreCase(resolved)) {
+        return BvSourceQuery.toValueMeta(column);
+      }
+    }
+    return null;
   }
 
   private static void applyCalculations(
@@ -1016,14 +1174,16 @@ public final class BvScd2PipelineSupport {
       BvScd2Table scd2Table,
       DataVaultModel dvModel,
       List<DvSatellite> satellites,
+      List<BvSourceQuery> sourceQueries,
       IVariables variables,
       boolean forTargetTable)
       throws HopException {
     List<DvSatellite> satList = satellites != null ? satellites : List.of();
+    List<BvSourceQuery> queryList = sourceQueries != null ? sourceQueries : List.of();
 
     if (scd2Table.isIncludeHashKey()) {
       String hashKeyName =
-          resolveSharedHashKeyFieldName(scd2Table, satList, List.of(), dvModel, variables);
+          resolveSharedHashKeyFieldName(scd2Table, satList, queryList, dvModel, variables);
       if (!Utils.isEmpty(hashKeyName)) {
         rowMeta.addValueMeta(resolveHashKeyValueMeta(hashKeyName, dvModel));
       }
@@ -2562,7 +2722,8 @@ public final class BvScd2PipelineSupport {
       Scd2BuildContext ctx, PipelineMeta pipelineMeta, TransformMeta predecessor)
       throws HopException {
     IRowMeta targetLayout =
-        buildTargetTableLayout(ctx.scd2Table, ctx.bvConfig, ctx.dvModel, ctx.variables);
+        buildTargetTableLayout(
+            ctx.scd2Table, ctx.bvConfig, ctx.dvModel, ctx.bvModel, ctx.variables);
     int tableOutputX =
         ctx.isMultiSatellite()
             ? LOCATION_START.x + 9 * SPACING_WIDTH
@@ -2588,7 +2749,8 @@ public final class BvScd2PipelineSupport {
       Scd2BuildContext ctx, PipelineMeta pipelineMeta, TransformMeta predecessor)
       throws HopException {
     IRowMeta targetLayout =
-        buildTargetTableLayout(ctx.scd2Table, ctx.bvConfig, ctx.dvModel, ctx.variables);
+        buildTargetTableLayout(
+            ctx.scd2Table, ctx.bvConfig, ctx.dvModel, ctx.bvModel, ctx.variables);
     Set<String> excludeFields = new LinkedHashSet<>();
     excludeFields.add(INCREMENTAL_WATERMARK_FIELD);
     excludeFields.add(CLOSE_LOOKUP_VALID_FROM_FIELD);

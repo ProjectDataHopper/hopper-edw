@@ -371,6 +371,7 @@ public class BvScd2Table extends BvTableBase {
     }
     BusinessVaultConfiguration bvConfig =
         model != null ? model.getConfigurationOrDefault() : new BusinessVaultConfiguration();
-    return BvScd2PipelineSupport.buildTargetTableLayout(this, bvConfig, dataVaultModel, variables);
+    return BvScd2PipelineSupport.buildTargetTableLayout(
+        this, bvConfig, dataVaultModel, model, variables);
   }
 }

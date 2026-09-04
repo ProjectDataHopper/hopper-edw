@@ -18,11 +18,13 @@ package org.hopper.edw.datavault.metadata.businessvault;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.ICheckResult;
+import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
@@ -31,6 +33,7 @@ import org.hopper.edw.datavault.metadata.BusinessKey;
 import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvHub;
+import org.hopper.edw.datavault.metadata.DvIdentifierLimitSupport;
 import org.hopper.edw.datavault.metadata.DvLoadCycleSupport;
 import org.hopper.edw.datavault.metadata.DvSatellite;
 import org.hopper.edw.datavault.metadata.IDvTable;
@@ -75,6 +78,16 @@ public final class BvScd2FieldMappingValidationSupport {
 
     validateParentHub(
         remarks, scd2Table, satellites, sourceQueries, dataVaultModel, bvModel, variables);
+    validateIdentifierLengths(
+        remarks,
+        scd2Table,
+        satellites,
+        sourceQueries,
+        bvConfig,
+        dvConfig,
+        dataVaultModel,
+        variables,
+        metadataProvider);
     validateValidityFieldNames(
         remarks,
         scd2Table,
@@ -530,6 +543,9 @@ public final class BvScd2FieldMappingValidationSupport {
     String anchorHub = declaredHub;
     String anchorLink = null;
     for (DvSatellite satellite : satellites) {
+      if (satellite == null) {
+        continue;
+      }
       if (!Utils.isEmpty(satellite.getHubName())) {
         if (anchorHub == null) {
           anchorHub = satellite.getHubName();
@@ -558,7 +574,7 @@ public final class BvScd2FieldMappingValidationSupport {
                   scd2Table));
           return;
         }
-      } else {
+      } else if (Utils.isEmpty(declaredHub)) {
         remarks.add(
             new CheckResult(
                 ICheckResult.TYPE_RESULT_ERROR,
@@ -853,6 +869,81 @@ public final class BvScd2FieldMappingValidationSupport {
                   "BvScd2FieldMappingValidationSupport.Error.UnknownParentHub",
                   scd2Table.getName(),
                   declared),
+              scd2Table));
+    }
+  }
+
+  private static void validateIdentifierLengths(
+      List<ICheckResult> remarks,
+      BvScd2Table scd2Table,
+      List<DvSatellite> satellites,
+      List<BvSourceQuery> sourceQueries,
+      BusinessVaultConfiguration bvConfig,
+      DataVaultConfiguration dvConfig,
+      DataVaultModel dataVaultModel,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider) {
+    int maxLength = DvIdentifierLimitSupport.DEFAULT_MAX;
+    if (metadataProvider != null && bvConfig != null) {
+      try {
+        DatabaseMeta targetDatabase =
+            BvTargetDatabaseSupport.loadTargetDatabase(metadataProvider, bvConfig);
+        maxLength = DvIdentifierLimitSupport.maxColumnNameLength(targetDatabase);
+      } catch (Exception ignored) {
+        // Keep the PostgreSQL default when the connection is missing.
+      }
+    }
+    Set<String> names = new LinkedHashSet<>();
+    if (scd2Table.getFieldMappings() != null) {
+      for (BvScd2FieldMapping mapping : scd2Table.getFieldMappings()) {
+        if (mapping == null || !mapping.isIncludeInTarget()) {
+          continue;
+        }
+        String target = resolve(mapping.getTargetFieldName(), variables);
+        if (!Utils.isEmpty(target)) {
+          names.add(target);
+        }
+      }
+    }
+    if (scd2Table.getCalculations() != null) {
+      for (BvScd2Calculation calculation : scd2Table.getCalculations()) {
+        if (calculation == null) {
+          continue;
+        }
+        String target = resolve(calculation.getTargetFieldName(), variables);
+        if (!Utils.isEmpty(target)) {
+          names.add(target);
+        }
+      }
+    }
+    names.addAll(
+        technicalColumnNames(
+            scd2Table, satellites, sourceQueries, bvConfig, dvConfig, dataVaultModel, variables));
+    if (scd2Table.isIncludeHubBusinessKeys() && scd2Table.isLoadHubBusinessKeys()) {
+      DvHub hub = resolveSharedParentHub(scd2Table, satellites, dataVaultModel, variables);
+      if (hub != null) {
+        for (BusinessKey businessKey : hub.getDistinctBusinessKeys()) {
+          if (businessKey == null || Utils.isEmpty(businessKey.getName())) {
+            continue;
+          }
+          names.add(resolve(businessKey.getName(), variables));
+        }
+      }
+    }
+    for (String name : names) {
+      if (Utils.isEmpty(name) || name.length() <= maxLength) {
+        continue;
+      }
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_ERROR,
+              BaseMessages.getString(
+                  PKG,
+                  "BvScd2FieldMappingValidationSupport.Error.IdentifierTooLong",
+                  scd2Table.getName(),
+                  name,
+                  Integer.toString(name.length()),
+                  Integer.toString(maxLength)),
               scd2Table));
     }
   }

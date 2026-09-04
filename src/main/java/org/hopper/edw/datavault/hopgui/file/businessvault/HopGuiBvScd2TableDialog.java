@@ -827,6 +827,7 @@ public class HopGuiBvScd2TableDialog {
               ? businessVaultModel.getConfigurationOrDefault()
               : new BusinessVaultConfiguration(),
           currentDataVaultModel(false),
+          businessVaultModel,
           variables);
     } catch (Exception e) {
       return null;
