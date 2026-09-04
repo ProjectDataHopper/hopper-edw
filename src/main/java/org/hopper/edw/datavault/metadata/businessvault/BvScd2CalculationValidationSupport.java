@@ -189,7 +189,7 @@ final class BvScd2CalculationValidationSupport {
       try {
         layout =
             BvScd2PipelineSupport.buildCollapseRowLayout(
-                scd2Table, bvConfig, dataVaultModel, variables);
+                scd2Table, bvConfig, dataVaultModel, bvModel, variables);
       } catch (Exception ignored) {
         layout = null;
       }

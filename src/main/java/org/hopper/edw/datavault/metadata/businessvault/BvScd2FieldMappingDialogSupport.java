@@ -28,6 +28,7 @@ import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
+import org.hopper.edw.datavault.metadata.DvIdentifierLimitSupport;
 import org.hopper.edw.datavault.metadata.DvSatellite;
 import org.hopper.edw.datavault.metadata.DvTableResolutionSupport;
 import org.hopper.edw.datavault.metadata.DvTableType;
@@ -450,25 +451,24 @@ public final class BvScd2FieldMappingDialogSupport {
 
   static String suggestTargetFieldName(
       String satelliteName, String sourceFieldName, Set<String> usedTargets) {
+    return suggestTargetFieldName(
+        satelliteName, sourceFieldName, usedTargets, DvIdentifierLimitSupport.DEFAULT_MAX);
+  }
+
+  static String suggestTargetFieldName(
+      String satelliteName, String sourceFieldName, Set<String> usedTargets, int maxLength) {
     if (Utils.isEmpty(sourceFieldName)) {
       return sourceFieldName;
     }
     if (usedTargets == null || !usedTargets.contains(sourceFieldName)) {
-      return sourceFieldName;
+      return DvIdentifierLimitSupport.uniqueIdentifier(sourceFieldName, maxLength, usedTargets);
     }
     String prefix = satelliteName;
     if (!Utils.isEmpty(prefix) && prefix.startsWith("sat_")) {
       prefix = prefix.substring(4);
     }
-    String candidate = prefix + "_" + sourceFieldName;
-    if (!usedTargets.contains(candidate)) {
-      return candidate;
-    }
-    int suffix = 2;
-    while (usedTargets.contains(candidate + suffix)) {
-      suffix++;
-    }
-    return candidate + suffix;
+    String candidate = Utils.isEmpty(prefix) ? sourceFieldName : prefix + "_" + sourceFieldName;
+    return DvIdentifierLimitSupport.uniqueIdentifier(candidate, maxLength, usedTargets);
   }
 
   private static Set<String> selectedSourceSet(Collection<String> selectedSourceNames) {

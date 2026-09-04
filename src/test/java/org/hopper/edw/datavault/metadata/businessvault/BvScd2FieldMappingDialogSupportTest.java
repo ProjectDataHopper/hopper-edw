@@ -84,6 +84,22 @@ class BvScd2FieldMappingDialogSupportTest {
   }
 
   @Test
+  void suggestTargetFieldNameFitsPostgresIdentifierLimit() {
+    String longSource = "source_attribute_" + "x".repeat(80);
+    Set<String> used = new HashSet<>();
+    String first =
+        BvScd2FieldMappingDialogSupport.suggestTargetFieldName(
+            "sat_customer_address_history", longSource, used);
+    assertTrue(first.length() <= 63, first);
+    used.add(first);
+    String second =
+        BvScd2FieldMappingDialogSupport.suggestTargetFieldName(
+            "sat_customer_address_history", longSource, used);
+    assertTrue(second.length() <= 63, second);
+    assertTrue(used.add(second));
+  }
+
+  @Test
   void analyzeWithoutDvModelReportsMissingModel() {
     BvScd2Table table = customer360Table();
     BvScd2FieldMappingDialogSupport.MappingSuggestion suggestion =

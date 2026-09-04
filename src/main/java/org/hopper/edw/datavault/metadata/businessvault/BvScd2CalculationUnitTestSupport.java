@@ -276,7 +276,7 @@ public final class BvScd2CalculationUnitTestSupport {
       IVariables variables)
       throws HopException {
     return BvScd2PipelineSupport.buildCollapseRowLayout(
-        scd2Table, bvModel.getConfigurationOrDefault(), dvModel, variables);
+        scd2Table, bvModel.getConfigurationOrDefault(), dvModel, bvModel, variables);
   }
 
   public static IRowMeta calculatedLayout(

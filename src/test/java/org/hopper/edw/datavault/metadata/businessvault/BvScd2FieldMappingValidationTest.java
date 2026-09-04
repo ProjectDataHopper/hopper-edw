@@ -298,6 +298,102 @@ class BvScd2FieldMappingValidationTest {
   }
 
   @Test
+  void identifierLongerThan63IsAnError() throws Exception {
+    BvScd2Table table = new BvScd2Table();
+    table.setName("customer_bv");
+    table.setTableName("customer_bv");
+    table.setFunctionalTimestampField("x_load_ts");
+    table.getDerivatives().add(new BvDerivativeRef("sat_customer", DvTableType.SATELLITE));
+    String tooLong = "customer_name_" + "n".repeat(50);
+    table.getFieldMappings().add(new BvScd2FieldMapping("sat_customer", "name", tooLong));
+
+    List<ICheckResult> remarks = check(table, loadVault1ModelFromFile());
+    assertTrue(hasError(remarks, "exceeds the target database identifier limit"));
+  }
+
+  @Test
+  void identifierOf63CharactersIsAccepted() throws Exception {
+    BvScd2Table table = new BvScd2Table();
+    table.setName("customer_bv");
+    table.setTableName("customer_bv");
+    table.setFunctionalTimestampField("x_load_ts");
+    table.getDerivatives().add(new BvDerivativeRef("sat_customer", DvTableType.SATELLITE));
+    String name = "n".repeat(63);
+    table.getFieldMappings().add(new BvScd2FieldMapping("sat_customer", "name", name));
+
+    List<ICheckResult> remarks = check(table, loadVault1ModelFromFile());
+    assertFalse(hasError(remarks, "exceeds the target database identifier limit"));
+  }
+
+  @Test
+  void unparentedSatelliteIsAllowedWhenParentHubIsSet() throws Exception {
+    DataVaultModel dvModel = loadVault1ModelFromFile();
+    DvSatellite satellite = (DvSatellite) dvModel.findTable("sat_customer");
+    satellite.setHubName(null);
+    satellite.setLinkName(null);
+
+    BvScd2Table table = new BvScd2Table();
+    table.setName("customer_bv");
+    table.setTableName("customer_bv");
+    table.setFunctionalTimestampField("x_load_ts");
+    table.setParentHubName("hub_customer");
+    table.getDerivatives().add(new BvDerivativeRef("sat_customer", DvTableType.SATELLITE));
+
+    List<ICheckResult> remarks = check(table, dvModel);
+    assertFalse(hasError(remarks, "unparented satellite"));
+  }
+
+  @Test
+  void unparentedSatelliteIsAnErrorWithoutParentHub() throws Exception {
+    DataVaultModel dvModel = loadVault1ModelFromFile();
+    DvSatellite satellite = (DvSatellite) dvModel.findTable("sat_customer");
+    satellite.setHubName(null);
+    satellite.setLinkName(null);
+
+    BvScd2Table table = new BvScd2Table();
+    table.setName("customer_bv");
+    table.setTableName("customer_bv");
+    table.setFunctionalTimestampField("x_load_ts");
+    table.getDerivatives().add(new BvDerivativeRef("sat_customer", DvTableType.SATELLITE));
+
+    List<ICheckResult> remarks = check(table, dvModel);
+    assertTrue(hasError(remarks, "unparented satellite"));
+  }
+
+  @Test
+  void sourceQueryOnlyWithParentHubDoesNotRequireSatellite() throws Exception {
+    BvSourceQuery sourceQuery = burgerSourceQuery();
+    sourceQuery.setHubHashKeyField("customer_hk");
+    BusinessVaultModel bvModel = new BusinessVaultModel();
+    bvModel.getTables().add(sourceQuery);
+
+    BvScd2Table table = new BvScd2Table();
+    table.setName("burger_scd2");
+    table.setTableName("burger_scd2");
+    table.setFunctionalTimestampField("effective_ts");
+    table.setParentHubName("hub_customer");
+    table.getSourceQueryRefs().add(new BvSourceQueryRef("sq_burger_view"));
+
+    List<ICheckResult> remarks = check(table, loadVault1ModelFromFile(), bvModel);
+    assertFalse(hasError(remarks, "must hop to at least one Data Vault satellite"));
+    assertFalse(hasError(remarks, "unparented satellite"));
+    assertFalse(hasWarning(remarks, "no Parent hub"));
+  }
+
+  @Test
+  void hubOnlyWithoutHistoryFeedIsAnError() throws Exception {
+    BvScd2Table table = new BvScd2Table();
+    table.setName("customer_bv");
+    table.setTableName("customer_bv");
+    table.setFunctionalTimestampField("x_load_ts");
+    table.setParentHubName("hub_customer");
+    table.getDerivatives().add(new BvDerivativeRef("hub_customer", DvTableType.HUB));
+
+    List<ICheckResult> remarks = check(table, loadVault1ModelFromFile());
+    assertTrue(hasError(remarks, "must hop to at least one Data Vault satellite or source query"));
+  }
+
+  @Test
   void knownParentHubIsAccepted() throws Exception {
     BvScd2Table table = new BvScd2Table();
     table.setName("customer_bv");

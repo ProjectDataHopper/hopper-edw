@@ -50,6 +50,7 @@ import org.apache.hop.pipeline.transforms.update.UpdateMeta;
 import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvBulkLoadPluginSupport;
+import org.hopper.edw.datavault.metadata.DvDdlSupport;
 import org.hopper.edw.datavault.metadata.DvHub;
 import org.hopper.edw.datavault.metadata.DvSatellite;
 import org.hopper.edw.datavault.metadata.DvTableType;
@@ -1756,6 +1757,172 @@ class BvScd2PipelineSupportTest {
             ctx.scd2Table, ctx.bvConfig, ctx.dvModel, ctx.variables);
     assertTrue(
         layout.getValueMetaList().stream().anyMatch(vm -> "customer_id".equals(vm.getName())));
+  }
+
+  @Test
+  void targetLayoutKeepsMappedColumnWhenSatelliteHasNoAttributes() throws Exception {
+    DataVaultModel dvModel = loadVault1Model();
+    DvSatellite wide = new DvSatellite();
+    wide.setName("sat_wide");
+    wide.setTableName("sat_wide");
+    wide.setHubName("hub_customer");
+    dvModel.getTables().add(wide);
+
+    BvScd2Table scd2Table = new BvScd2Table();
+    scd2Table.setName("wide_bv");
+    scd2Table.setTableName("wide_bv");
+    scd2Table.setFunctionalTimestampField("x_load_ts");
+    scd2Table.setParentHubName("hub_customer");
+    scd2Table.getDerivatives().add(new BvDerivativeRef("sat_wide", DvTableType.SATELLITE));
+    scd2Table.getFieldMappings().add(new BvScd2FieldMapping("sat_wide", "attr_a", "attr_a"));
+    scd2Table.getFieldMappings().add(new BvScd2FieldMapping("sat_wide", "attr_b", "attr_b"));
+
+    var layout =
+        BvScd2PipelineSupport.buildTargetTableLayout(
+            scd2Table, new BusinessVaultConfiguration(), dvModel, new Variables());
+    assertTrue(layout.getValueMetaList().stream().anyMatch(vm -> "attr_a".equals(vm.getName())));
+    assertTrue(layout.getValueMetaList().stream().anyMatch(vm -> "attr_b".equals(vm.getName())));
+    assertTrue(
+        layout.getValueMetaList().stream().anyMatch(vm -> "customer_hk".equals(vm.getName())));
+  }
+
+  @Test
+  void targetLayoutIncludesSourceQueryMappedColumns() throws Exception {
+    DataVaultModel dvModel = loadVault1Model();
+    BvSourceQuery sourceQuery = new BvSourceQuery();
+    sourceQuery.setName("sq_burger_view");
+    sourceQuery.setHashKeyField("burger_hkey");
+    sourceQuery.setHubHashKeyField("customer_hk");
+    sourceQuery.setFunctionalTimestampField("effective_ts");
+    BvSourceQueryColumn sauce = new BvSourceQueryColumn("sauce");
+    sauce.setDataType("String");
+    sauce.setLength("40");
+    sourceQuery.getColumns().add(sauce);
+    sourceQuery.getColumns().add(new BvSourceQueryColumn("burger_hkey"));
+    sourceQuery.getColumns().add(new BvSourceQueryColumn("effective_ts"));
+
+    BusinessVaultModel bvModel = new BusinessVaultModel();
+    bvModel.getTables().add(sourceQuery);
+
+    BvScd2Table scd2Table = new BvScd2Table();
+    scd2Table.setName("burger_scd2");
+    scd2Table.setTableName("burger_scd2");
+    scd2Table.setFunctionalTimestampField("effective_ts");
+    scd2Table.setParentHubName("hub_customer");
+    scd2Table.getSourceQueryRefs().add(new BvSourceQueryRef("sq_burger_view"));
+    scd2Table
+        .getFieldMappings()
+        .add(new BvScd2FieldMapping("sq_burger_view", "sauce", "sauce_name"));
+
+    var layout =
+        BvScd2PipelineSupport.buildTargetTableLayout(
+            scd2Table, bvModel.getConfigurationOrDefault(), dvModel, bvModel, new Variables());
+    assertTrue(
+        layout.getValueMetaList().stream().anyMatch(vm -> "sauce_name".equals(vm.getName())));
+    assertEquals(
+        40,
+        layout.getValueMetaList().stream()
+            .filter(vm -> "sauce_name".equals(vm.getName()))
+            .findFirst()
+            .orElseThrow()
+            .getLength());
+    assertTrue(
+        layout.getValueMetaList().stream().anyMatch(vm -> "customer_hk".equals(vm.getName())));
+  }
+
+  @Test
+  void hashKeyLayoutUsesDvBinaryLengthForSingleStoreDdl() throws Exception {
+    DataVaultModel dvModel = loadVault1Model();
+    dvModel.getConfigurationOrDefault().setHashKeyDataType(HashKeyDataType.BINARY.name());
+    BvScd2Table scd2Table = new BvScd2Table();
+    scd2Table.setIncludeHashKey(true);
+    scd2Table.setParentHubName("hub_customer");
+    scd2Table.getDerivatives().add(new BvDerivativeRef("sat_customer", DvTableType.SATELLITE));
+
+    var layout =
+        BvScd2PipelineSupport.buildTargetTableLayout(
+            scd2Table, new BusinessVaultConfiguration(), dvModel, new Variables());
+    var hashMeta =
+        layout.getValueMetaList().stream()
+            .filter(vm -> "customer_hk".equals(vm.getName()))
+            .findFirst()
+            .orElseThrow();
+    assertEquals(IValueMeta.TYPE_BINARY, hashMeta.getType());
+    assertEquals(16, hashMeta.getLength());
+
+    DatabaseMeta singleStore =
+        new DatabaseMeta(
+            "singlestore-test",
+            "SingleStore (MemSQL)",
+            "Native",
+            "",
+            "localhost",
+            "test",
+            "root",
+            "");
+    String definition = DvDdlSupport.getFieldDefinition(singleStore, hashMeta);
+    assertTrue(definition.contains("BINARY(16)"), definition);
+    assertFalse(definition.toUpperCase().contains("VARBINARY"), definition);
+  }
+
+  @Test
+  void tableOutputSpecifiesMappedColumnsMissingFromSatelliteAttributes() throws Exception {
+    DataVaultModel dvModel = loadVault1Model();
+    DvSatellite wide = new DvSatellite();
+    wide.setName("sat_wide");
+    wide.setTableName("sat_wide");
+    wide.setHubName("hub_customer");
+    dvModel.getTables().add(wide);
+
+    BvScd2Table scd2Table = new BvScd2Table();
+    scd2Table.setName("wide_bv");
+    scd2Table.setTableName("wide_bv");
+    scd2Table.setFunctionalTimestampField("x_load_ts");
+    scd2Table.getDerivatives().add(new BvDerivativeRef("sat_wide", DvTableType.SATELLITE));
+    scd2Table.getFieldMappings().add(new BvScd2FieldMapping("sat_wide", "attr_a", "attr_a"));
+
+    BusinessVaultModel bvModel = new BusinessVaultModel();
+    bvModel.getConfigurationOrDefault().setTargetDatabase("Vault");
+    DatabaseMeta databaseMeta = new TestDatabaseMeta("Vault");
+    Scd2BuildContext ctx =
+        new Scd2BuildContext(
+            scd2Table,
+            wide,
+            bvModel,
+            dvModel,
+            bvModel.getConfigurationOrDefault(),
+            dvModel.getConfigurationOrDefault(),
+            null,
+            new Variables(),
+            databaseMeta,
+            "Vault",
+            databaseMeta,
+            "Vault",
+            "sat_wide",
+            "wide_bv",
+            "bv-scd2-wide_bv-sat_wide",
+            "customer_hk",
+            null,
+            List.of("attr_a"),
+            "x_load_ts",
+            "valid_from",
+            "valid_to",
+            "x_record_source",
+            BusinessVaultConfiguration.DEFAULT_OPEN_START_SENTINEL,
+            BusinessVaultConfiguration.DEFAULT_OPEN_END_SENTINEL,
+            true);
+
+    PipelineMeta pipelineMeta = BvScd2PipelineSupport.generatePipeline(ctx);
+    TableOutputMeta tableOutputMeta =
+        (TableOutputMeta)
+            pipelineMeta.getTransforms().stream()
+                .map(TransformMeta::getTransform)
+                .filter(t -> t instanceof TableOutputMeta)
+                .findFirst()
+                .orElseThrow();
+    assertTrue(
+        tableOutputMeta.getFields().stream().anyMatch(f -> "attr_a".equals(f.getFieldDatabase())),
+        tableOutputMeta.getFields().toString());
   }
 
   @Test
