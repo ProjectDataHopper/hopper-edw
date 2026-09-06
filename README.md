@@ -18,7 +18,7 @@ limitations under the License.
 
 ![EDW](docs/images/edw-logo.svg)
 
-Apache Hop plugins to design, generate, and operate an **Enterprise Data Warehouse**: Data Catalog, source models, **Data Vault 2.0**, **Business Vault**, **dimensional** models, quality, lineage, and the **EDW Journey** map. Version **0.10.0-SNAPSHOT** (latest release **0.9.0** as `hop-datavault`) requires **Apache Hop 2.19.0** and **Java 21**.
+Apache Hop plugins to design, generate, and operate an **Enterprise Data Warehouse**: Data Catalog, source models, **Data Vault 2.0**, **Business Vault**, **dimensional** models, quality, lineage, and the **EDW Journey** map. Version **0.10.0** requires **Apache Hop 2.19.0** and **Java 21**.
 
 **Hop 2.19.0 is required.** Hop **2.18.x** (including 2.18.1) is **not** supported for this release.
 
@@ -131,15 +131,15 @@ mvn clean package
 
 Artifacts:
 
-- `target/hopper-edw-0.10.0-SNAPSHOT.jar`
-- `target/hopper-edw-0.10.0-SNAPSHOT.zip` (ready-to-unzip plugin layout)
+- `target/hopper-edw-0.10.0.jar`
+- `target/hopper-edw-0.10.0.zip` (ready-to-unzip plugin layout)
 
 Maven coordinates from **0.10.0** onward: `org.hopper:hopper-edw`. Release **0.9.0** was published as `org.apache.hop:hop-datavault` and unpacked under `plugins/misc/datavault/`.
 
-Published release artifacts for **0.9.0** (previous coordinates):
+Published release artifacts for **0.10.0**:
 
-- **GitHub:** [v0.9.0 release](https://github.com/ProjectDataHopper/hopper-edw/releases/tag/v0.9.0) — [hop-datavault-0.9.0.zip](https://github.com/ProjectDataHopper/hopper-edw/releases/download/v0.9.0/hop-datavault-0.9.0.zip)
-- **Nexus (Marketplace):** [hop-datavault-0.9.0.zip](https://repository.data-hopper.com/repository/hop-community-plugins/org/apache/hop/hop-datavault/0.9.0/hop-datavault-0.9.0.zip) (`org.apache.hop:hop-datavault:0.9.0`)
+- **GitHub:** [v0.10.0 release](https://github.com/ProjectDataHopper/hopper-edw/releases/tag/v0.10.0) — [hopper-edw-0.10.0.zip](https://github.com/ProjectDataHopper/hopper-edw/releases/download/v0.10.0/hopper-edw-0.10.0.zip)
+- **Nexus (Marketplace):** [hopper-edw-0.10.0.zip](https://repository.data-hopper.com/repository/hop-community-plugins/org/hopper/hopper-edw/0.10.0/hopper-edw-0.10.0.zip) (`org.hopper:hopper-edw:0.10.0`)
 
 ## Installation (external plugin)
 
@@ -172,7 +172,7 @@ If you previously installed **0.9.0** as `hop-datavault`, remove `$HOP_HOME/plug
 ```
 
 ```text
-| hopper-edw                | 0.10.0-SNAPSHOT | Community     | data-hopper-community |           |            | Apache Hop plugins to build an Enterprise Data Wareho... |
+| hopper-edw                | 0.10.0          | Community     | data-hopper-community |           | 2026-09-06 | Apache Hop plugins to build an Enterprise Data Wareho... |
 ```
 
 **3. Install** the plugin (latest release or continuous SNAPSHOT when published):
@@ -182,10 +182,10 @@ If you previously installed **0.9.0** as `hop-datavault`, remove `$HOP_HOME/plug
 ```
 
 ```text
-Resolved hopper-edw → org.hopper:hopper-edw:0.10.0-SNAPSHOT (prefer repo 'data-hopper-community')
-… Marketplace - Downloading org.hopper:hopper-edw:0.10.0-SNAPSHOT from https://repository.data-hopper.com/repository/hop-community-plugins/…
-… Marketplace - Installed org.hopper:hopper-edw:0.10.0-SNAPSHOT. Restart Hop to load the plugin.
-Plugin org.hopper:hopper-edw:0.10.0-SNAPSHOT installed under $HOP_HOME from repo 'data-hopper-community'. Restart Hop to load it.
+Resolved hopper-edw → org.hopper:hopper-edw:0.10.0 (prefer repo 'data-hopper-community')
+… Marketplace - Downloading org.hopper:hopper-edw:0.10.0 from https://repository.data-hopper.com/repository/hop-community-plugins/…
+… Marketplace - Installed org.hopper:hopper-edw:0.10.0. Restart Hop to load the plugin.
+Plugin org.hopper:hopper-edw:0.10.0 installed under $HOP_HOME from repo 'data-hopper-community'. Restart Hop to load it.
 ```
 
 You can also use **Tools → Marketplace…** in Hop GUI: import the repository on the **Repositories** tab, then install from the **Plugins** tab.
@@ -228,7 +228,9 @@ SELECT * FROM sat_customer WHERE x_load_end_ts IS NULL
 
 ## Roadmap / releases
 
-**Shipped in 0.9.0:** shared model configuration and **Configure EDW setup** (#126); generate a Data Vault from a source model (#125); optional orphan handling (#77); Hop Lineage View (`.hlv`, #79) including Hop Web; first-time **architecture** / **getting-started EDW** docs and plugin HTML; CSV satellite hash and SQL Server live-schema fixes. See [CHANGELOG.md](CHANGELOG.md).
+**Shipped in 0.10.0:** product rebrand to **Data Hopper EDW** (`org.hopper:hopper-edw`, `plugins/misc/hopper-edw/`); **Generate project documentation** (#25); BV SCD2 calculations / SQL Expression (#150), hub business keys (#153), hash-key partitions (#141), parent hub on canvas; Jinja/dbt import (#72); target type mappings (#127); dialog Help HTML (#133); read-only existing vault. See [CHANGELOG.md](CHANGELOG.md).
+
+**Shipped in 0.9.0:** shared model configuration and **Configure EDW setup** (#126); generate a Data Vault from a source model (#125); optional orphan handling (#77); Hop Lineage View (`.hlv`, #79) including Hop Web; first-time **architecture** / **getting-started EDW** docs and plugin HTML; CSV satellite hash and SQL Server live-schema fixes.
 
 **Shipped in 0.8.0:** **Free SQL** over source models (Calcite, #117) + **Source model SQL** transform + Hop Server **`jdbc:hop-hsm:`** thin client for DBeaver; **pipeline sources** on `.hsm` (#116); **Source JSON** / shipment path (#114); **metadata harvesting** (#112); RDG load-overview reporting.
 

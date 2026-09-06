@@ -4,6 +4,12 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+## [0.10.0] — 2026-09-06
+
+Requires **Apache Hop 2.19.0** and **Java 21**.
+
+**Downloads:** [GitHub release zip](https://github.com/ProjectDataHopper/hopper-edw/releases/download/v0.10.0/hopper-edw-0.10.0.zip) · [Data Hopper Nexus](https://repository.data-hopper.com/repository/hop-community-plugins/org/hopper/hopper-edw/0.10.0/hopper-edw-0.10.0.zip) (`org.hopper:hopper-edw:0.10.0`)
+
 ### Project documentation (issue #25)
 
 - Generate a self-contained HTML+JS documentation set for a Hop project (`hop project-doc`, **Generate project documentation** action, **Tools → Generate project documentation…**)
