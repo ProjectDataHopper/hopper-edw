@@ -18,7 +18,7 @@ limitations under the License.
 
 ![EDW](docs/images/edw-logo.svg)
 
-Apache Hop plugins to design, generate, and operate an **Enterprise Data Warehouse**: Data Catalog, source models, **Data Vault 2.0**, **Business Vault**, **dimensional** models, quality, lineage, and the **EDW Journey** map. Version **0.10.0** requires **Apache Hop 2.19.0** and **Java 21**.
+Apache Hop plugins to design, generate, and operate an **Enterprise Data Warehouse**: Data Catalog, source models, **Data Vault 2.0**, **Business Vault**, **dimensional** models, quality, lineage, and the **EDW Journey** map. Version **0.11.0-SNAPSHOT** (latest release **0.10.0**) requires **Apache Hop 2.19.0** and **Java 21**.
 
 **Hop 2.19.0 is required.** Hop **2.18.x** (including 2.18.1) is **not** supported for this release.
 
@@ -131,8 +131,8 @@ mvn clean package
 
 Artifacts:
 
-- `target/hopper-edw-0.10.0.jar`
-- `target/hopper-edw-0.10.0.zip` (ready-to-unzip plugin layout)
+- `target/hopper-edw-0.11.0-SNAPSHOT.jar`
+- `target/hopper-edw-0.11.0-SNAPSHOT.zip` (ready-to-unzip plugin layout)
 
 Maven coordinates from **0.10.0** onward: `org.hopper:hopper-edw`. Release **0.9.0** was published as `org.apache.hop:hop-datavault` and unpacked under `plugins/misc/datavault/`.
 
