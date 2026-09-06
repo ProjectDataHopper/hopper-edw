@@ -33,3 +33,4 @@ For product documentation, start at [../README.md](../README.md) or [../feature-
 | [orphan-prevention-plan.md](orphan-prevention-plan.md) | Issue #77 — optional DV orphan handling / placeholder hubs |
 | (session plan / issue #112) | Metadata harvesting as distinct EDW phase — product doc: [../metadata-harvesting.adoc](../metadata-harvesting.adoc) |
 | [source-to-vault-generation-plan.md](source-to-vault-generation-plan.md) | Issue #125 — generate hubs/links/sats from a source model |
+| (session plan / issue #25) | Static HTML project documentation — product doc: [../project-documentation.adoc](../project-documentation.adoc) |

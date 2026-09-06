@@ -4,6 +4,18 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Project documentation (issue #25)
+
+- Generate a self-contained HTML+JS documentation set for a Hop project (`hop project-doc`, **Generate project documentation** action, **Tools → Generate project documentation…**)
+- Documents pipelines, workflows, `.hsm`/`.hdv`/`.hbv`/`.hdm`/`.hem`, tables with source-to-target lineage, metadata (secrets redacted), and catalog records
+- Zoomable SVG (light and dark), header search over an embedded index (`file://` safe), system/light/dark theme
+- Sample CSS themes (`default`, `compact`, `high-contrast`) plus a generated `theming.html` contract
+- Missing transform/action icons (for example `sortedmerge.svg` not found on the plugin classloader) draw a placeholder instead of failing the pipeline or workflow page
+- Metadata property tables use `@GuiWidgetElement` labels and tooltips (including `i18n::` keys) when present
+- Tools → Generate project documentation shows a cancelable progress dialog
+- Sidebar navigation is a collapsed tree (type → project folder, parent model, or metadata virtual path), sorted case-insensitive; every page includes the full tree, expand state is remembered, and the header shows a breadcrumb with search and a theme combo on the right
+- Markdown notes rewrite links to pipelines, workflows, models, and tables onto the generated HTML pages (resolved from the source file’s folder)
+
 ### BV SCD2 parent hub on the canvas
 
 - Drag a **Linked Hub** onto an SCD2 table (or set **Parent hub** in the dialog) to show grain identity and where the business key(s) live. One hub per SCD2 table; satellite derivatives stay the history feeds

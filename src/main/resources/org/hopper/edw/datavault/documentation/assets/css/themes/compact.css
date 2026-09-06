@@ -1,0 +1,60 @@
+/*
+ * Copyright 2026 i-Bridge bv
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Compact theme: denser tables and a narrower sidebar.
+ * Copy over assets/css/hop-doc.css or pass --theme compact.
+ */
+
+@import url("default.css");
+
+:root {
+  --hop-doc-sidebar-width: 13rem;
+  --hop-doc-header-height: 2.75rem;
+}
+
+body.hop-doc-page {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.hop-doc-main {
+  padding: 1rem 1.25rem 2rem;
+}
+
+.hop-doc-page-header h1 {
+  font-size: 1.35rem;
+}
+
+.hop-doc-meta-table th,
+.hop-doc-meta-table td {
+  padding: 0.25rem 0.4rem;
+}
+
+.hop-doc-meta-table th {
+  width: 11rem;
+}
+
+.hop-doc-svg-viewport {
+  height: min(60vh, 32rem);
+}
+
+.hop-doc-nav a,
+.hop-doc-nav summary {
+  padding: 0.1rem 0.4rem;
+}
+
+.hop-doc-nav-group > details > summary {
+  margin-top: 0.45rem;
+}

@@ -102,6 +102,10 @@ For a slide-style executive summary, see link:presentations/hop-data-vault-overv
 |Available (SOLUTION + DATA inventory + aggregated DV/BV/DM ELK)
 |link:architecture-export.adoc[Architecture export]
 
+|Project documentation (static HTML)
+|Available
+|link:project-documentation.adoc[Project documentation], issue https://github.com/ProjectDataHopper/hopper-edw/issues/25[#25]
+
 |Model validation (Check model, type checking)
 |Available
 |link:datavault-update-action.adoc[Data Vault Update]
@@ -237,6 +241,10 @@ For a slide-style executive summary, see link:presentations/hop-data-vault-overv
 |`hop svg` export
 |Available
 |link:../README.md#command-line-tools[README — command-line tools]
+
+|`hop project-doc` export
+|Available
+|link:project-documentation.adoc[Project documentation]
 
 |BV naming rules engine
 |Planned

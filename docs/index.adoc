@@ -51,6 +51,9 @@ Sources are the AsciiDoc files in the repository `docs/` folder. Architecture pi
 |link:architecture-export.adoc[architecture-export]
 |Draw.io SOLUTION / DATA / MODEL exports
 
+|link:project-documentation.adoc[project-documentation]
+|Self-contained HTML+JS project documentation (search, SVG, dark/light)
+
 |link:presentations/hop-data-vault-features.html[Interactive feature presentation]
 |Standalone HTML slides
 

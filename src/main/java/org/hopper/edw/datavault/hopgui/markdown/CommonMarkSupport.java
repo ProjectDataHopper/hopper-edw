@@ -48,7 +48,14 @@ public final class CommonMarkSupport {
     if (Utils.isEmpty(markdown)) {
       return "";
     }
-    return htmlRenderer().render(parse(markdown));
+    return renderHtml(parse(markdown));
+  }
+
+  public static String renderHtml(Node node) {
+    if (node == null) {
+      return "";
+    }
+    return htmlRenderer().render(node);
   }
 
   private static Parser parser() {

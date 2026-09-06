@@ -1,0 +1,21 @@
+= Generate project documentation
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../project-documentation.adoc[project-documentation].
+
+**Generate project documentation** writes a folder of static HTML, CSS, JavaScript, and SVG for the current Hop project. Open `index.html` in a browser — no server.
+
+Name the action, then set:
+
+* **Target folder** — where the site is written (variables supported, default `'${PROJECT_HOME}'/work/documentation`)
+* **Source folder** — optional scan root; empty uses `'${PROJECT_HOME}'`
+* **Scope** — project files only, or also environment variables (secrets redacted)
+* **CSS theme** — `default`, `compact`, or `high-contrast`
+* Include parameters, Markdown notes, metadata, catalog records, lineage, and dark-theme SVG copies
+
+The same generator is available as `hop project-doc` and **Tools → Generate project documentation…**. From the Tools menu, Hop shows a cancelable progress dialog while the site is generated.
+
+The site’s left-hand navigation is a tree by object type, then project folder (files), parent model (tables), metadata type and virtual path, or catalog namespace. Type groups start collapsed; siblings stay visible; expanded folders are remembered. The header has a breadcrumb, search on the right, and a theme combo. Items sort alphabetically, case-insensitive.

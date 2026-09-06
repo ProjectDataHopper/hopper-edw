@@ -24,6 +24,9 @@ Guides for the same features live in the parent folder (link:../index.adoc[docum
 |link:action-export-data-lineage-dialog.adoc[action-export-data-lineage-dialog]
 |Export data lineage
 
+|link:action-generate-project-documentation-dialog.adoc[action-generate-project-documentation-dialog]
+|Generate project documentation
+
 |link:action-import-dbt-project-dialog.adoc[action-import-dbt-project-dialog]
 |Import dbt project action
 

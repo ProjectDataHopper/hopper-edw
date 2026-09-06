@@ -46,6 +46,7 @@ Architecture pictures are **committed SVGs** (`docs/images/diagrams/`) generated
 | [enterprise-modeling-and-team-collaboration.adoc](enterprise-modeling-and-team-collaboration.adoc) | **Large programs:** multi-file models, personas, git/catalog, load order, ops and analyst discovery |
 | [architecture.adoc](architecture.adoc) | Plugin architecture: catalog, models, resource definition group, validation vs quality |
 | [architecture-export.adoc](architecture-export.adoc) | Export SOLUTION architecture, DATA inventory, and aggregated DV/BV/DM ELK Draw.io diagrams |
+| [project-documentation.adoc](project-documentation.adoc) | Static HTML+JS documentation set for a Hop project (search, SVG, themes) |
 | [presentations/hop-data-vault-overview.md](presentations/hop-data-vault-overview.md) | High-level slide deck: goals, architecture, hybrid warehouses |
 
 ## Data Catalog and sources
@@ -148,6 +149,17 @@ hop svg -f integration-tests/tests/basic/load1.hpl -o /tmp/load1.svg
 ```
 
 Options: `--no-notes`, `--magnification`, `--show-hash-keys` (`.hdv` only), `--project-home`.
+
+### `hop project-doc`
+
+Generate a self-contained HTML documentation set (search, zoomable SVG, dark/light) for the current project:
+
+```bash
+hop project-doc -e retail-example-docker-pg \
+  -t ${PROJECT_HOME}/work/documentation
+```
+
+See [project-documentation.adoc](project-documentation.adoc).
 
 ## Internal design notes
 

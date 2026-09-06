@@ -1,0 +1,88 @@
+= Project documentation (static HTML)
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Generate a **self-contained HTML + CSS + JavaScript** documentation set for a Hop project (issue https://github.com/ProjectDataHopper/hopper-edw/issues/25[#25]). Open `index.html` in a browser — **no server**. Copy the folder as-is.
+
+This is **not** Apache Hop's `hop doc` / **Generate documentation** action (Markdown). Data Hopper EDW adds models, tables, lineage, search, and theming.
+
+== What is documented
+
+* Pipelines (`.hpl`) and workflows (`.hwf`): description, parameters, transforms/actions, Markdown notes (links to other project files resolve to documentation pages), used metadata
+* Source / Data Vault / Business Vault / dimensional models and execution maps (`.hsm` `.hdv` `.hbv` `.hdm` `.hem`)
+* Tables with descriptions and **source-to-target lineage**
+* Hop metadata objects (passwords redacted)
+* Catalog record definitions (best-effort)
+* Zoomable SVG diagrams (light + dark) with click-through to transforms, actions, and tables
+* Client-side search from the header
+
+Skipped: `.hlv` session graphs, hidden folders, `.git`, `target`, `node_modules`, and the output folder if it sits inside the source tree.
+
+== How to run
+
+=== Workflow action
+
+**Generate project documentation** (`GENERATE_PROJECT_DOCUMENTATION`):
+
+* **Target folder** — output directory (default `'${PROJECT_HOME}'/work/documentation`)
+* **Source folder** — optional; empty uses `'${PROJECT_HOME}'`
+* **Scope** — `PROJECT` or `ENVIRONMENT` (also lists non-secret environment variables)
+* **CSS theme** — `default`, `compact`, or `high-contrast`
+* Include checkboxes: parameters, notes, metadata, catalog, lineage, dark SVG copies
+
+=== Tools menu
+
+**Tools → Generate project documentation…** uses the same options, shows a cancelable progress dialog, and opens `index.html` in the system browser when generation finishes.
+
+=== CLI
+
+[source,bash]
+----
+hop project-doc -e retail-example-docker-pg \
+  -t ${PROJECT_HOME}/work/documentation \
+  --theme default
+----
+
+`-j` / `--project` or `-e` / `--environment` work like `hop-run`. Other flags: `--source-folder`, `--scope`, `--no-parameters`, `--no-notes`, `--no-metadata`, `--no-catalog`, `--no-lineage`, `--no-dark-svg`.
+
+== Opening the set
+
+Open `{target}/index.html`. Search and the search index use `assets/js/search-index.js` (`window.HOP_DOC_INDEX`) so they work from `file://` (browsers block `fetch()` of local JSON).
+
+The left-hand navigation is a tree: **type** (Pipelines, Workflows, Source models, …), then the **relative project folder** for files, the **parent model** (under a layer folder) for tables, **metadata type plus virtual path**, and **catalog name plus namespace**. Type groups start collapsed; opening a page expands its ancestors and keeps **siblings** in the same folder. Expanded groups are remembered in the browser so going back does not collapse the tree. Items sort alphabetically, case-insensitive.
+
+The header shows a breadcrumb (`project / Pipelines / folder / page`), with search and a **System / Light / Dark** combo on the right. **System** follows `prefers-color-scheme`. Diagrams swap `*.light.svg` / `*.dark.svg`.
+
+== Output layout
+
+[source,text]
+----
+{target}/
+  index.html
+  theming.html
+  assets/css/hop-doc.css
+  assets/css/themes/{default,compact,high-contrast}.css
+  assets/css/print.css
+  assets/js/{hop-doc,search,svg-viewer,search-index}.js
+  assets/js/hits/{id}.js
+  assets/images/{id}.light.svg
+  assets/images/{id}.dark.svg
+  pipelines/…
+  workflows/…
+  models/{source,data-vault,business-vault,dimensional,execution-maps}/…
+  tables/{source,dv,bv,dm}/…
+  metadata/{type}/…
+  catalog/{namespace}/…
+----
+
+== Restyling (CSS contract)
+
+See the generated `theming.html` (also copied conceptually here). Replace `assets/css/hop-doc.css` or regenerate with `--theme compact` / `high-contrast`. Custom properties and stable classes (`hop-doc-header`, `hop-doc-search`, `hop-doc-svg-viewport`, …) are listed on that page.
+
+== Related
+
+* link:architecture-export.adoc[Architecture export] (Draw.io, not this HTML set)
+* link:source-to-target-lineage.adoc[Source-to-target lineage]
+* link:feature-overview.adoc[Feature overview]

@@ -69,6 +69,8 @@ public final class HelpTopics {
       "action-validate-resource-definitions-dialog";
   public static final String ACTION_EXPORT_DATA_LINEAGE = "action-export-data-lineage-dialog";
   public static final String ACTION_EXPORT_ARCHITECTURE = "action-export-architecture-dialog";
+  public static final String ACTION_GENERATE_PROJECT_DOCUMENTATION =
+      "action-generate-project-documentation-dialog";
   public static final String ACTION_IMPORT_DBT = "action-import-dbt-project-dialog";
   public static final String ACTION_UPDATE_RESOURCE_GROUP =
       "action-update-resource-definition-group-dialog";
@@ -257,6 +259,10 @@ public final class HelpTopics {
               ACTION_EXPORT_ARCHITECTURE,
               "architecture-export.html",
               "HelpTopics.ActionExportArchitectureDialog.Title"),
+          p(
+              ACTION_GENERATE_PROJECT_DOCUMENTATION,
+              "help/action-generate-project-documentation-dialog.html",
+              "HelpTopics.ActionGenerateProjectDocumentationDialog.Title"),
           p(ACTION_IMPORT_DBT, "dbt-import.html", "HelpTopics.ActionImportDbtProjectDialog.Title"),
           p(
               ACTION_UPDATE_RESOURCE_GROUP,

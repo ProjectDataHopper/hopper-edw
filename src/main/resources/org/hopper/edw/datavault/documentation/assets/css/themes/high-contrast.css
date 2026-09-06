@@ -1,0 +1,96 @@
+/*
+ * Copyright 2026 i-Bridge bv
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * High-contrast theme: stronger borders and focus rings.
+ * Copy over assets/css/hop-doc.css or pass --theme high-contrast.
+ */
+
+@import url("default.css");
+
+:root {
+  --hop-doc-bg: #ffffff;
+  --hop-doc-fg: #000000;
+  --hop-doc-muted: #222222;
+  --hop-doc-header-bg: #000000;
+  --hop-doc-header-fg: #ffffff;
+  --hop-doc-sidebar-bg: #ffffff;
+  --hop-doc-link: #0000ee;
+  --hop-doc-link-hover: #551a8b;
+  --hop-doc-border: #000000;
+  --hop-doc-code-bg: #f0f0f0;
+  --hop-doc-note-bg: #fff3b0;
+  --hop-doc-badge-bg: #000000;
+  --hop-doc-badge-fg: #ffffff;
+  --hop-doc-focus: #000000;
+  --hop-doc-svg-viewport-bg: #ffffff;
+}
+
+html[data-theme="dark"],
+html[data-theme="system"] {
+  --hop-doc-bg: #000000;
+  --hop-doc-fg: #ffffff;
+  --hop-doc-muted: #dddddd;
+  --hop-doc-header-bg: #ffffff;
+  --hop-doc-header-fg: #000000;
+  --hop-doc-sidebar-bg: #000000;
+  --hop-doc-link: #9cf;
+  --hop-doc-link-hover: #fff;
+  --hop-doc-border: #ffffff;
+  --hop-doc-code-bg: #222222;
+  --hop-doc-note-bg: #332b00;
+  --hop-doc-badge-bg: #ffffff;
+  --hop-doc-badge-fg: #000000;
+  --hop-doc-focus: #ffffff;
+  --hop-doc-svg-viewport-bg: #000000;
+}
+
+@media (prefers-color-scheme: light) {
+  html[data-theme="system"] {
+    --hop-doc-bg: #ffffff;
+    --hop-doc-fg: #000000;
+    --hop-doc-muted: #222222;
+    --hop-doc-header-bg: #000000;
+    --hop-doc-header-fg: #ffffff;
+    --hop-doc-sidebar-bg: #ffffff;
+    --hop-doc-link: #0000ee;
+    --hop-doc-link-hover: #551a8b;
+    --hop-doc-border: #000000;
+    --hop-doc-code-bg: #f0f0f0;
+    --hop-doc-note-bg: #fff3b0;
+    --hop-doc-badge-bg: #000000;
+    --hop-doc-badge-fg: #ffffff;
+    --hop-doc-focus: #000000;
+    --hop-doc-svg-viewport-bg: #ffffff;
+  }
+}
+
+a:focus,
+button:focus,
+input:focus,
+select:focus {
+  outline: 3px solid var(--hop-doc-focus);
+  outline-offset: 2px;
+}
+
+.hop-doc-meta-table th,
+.hop-doc-meta-table td {
+  border-bottom-width: 2px;
+}
+
+.hop-doc-svg-viewport,
+.hop-doc-note,
+.hop-doc-count {
+  border-width: 2px;
+}
