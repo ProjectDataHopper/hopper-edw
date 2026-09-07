@@ -23,12 +23,12 @@ import org.apache.hop.pipeline.Pipeline;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.engine.EngineMetrics;
 import org.apache.hop.pipeline.engine.IEngineComponent;
-import org.apache.hop.pipeline.engine.IEngineMetric;
 import org.apache.hop.pipeline.engine.IPipelineEngine;
 import org.apache.hop.pipeline.transform.TransformMeta;
 import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataConstants;
 import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataSupport;
 import org.hopper.edw.datavault.metrics.DvUpdateMetricsConstants;
+import org.hopper.edw.datavault.metrics.EngineMetricsSupport;
 
 /** Samples live engine metrics from the orchestrator and its active child pipelines. */
 public final class UpdateRunLiveMetricsExtractor {
@@ -84,14 +84,21 @@ public final class UpdateRunLiveMetricsExtractor {
     if (engine == null || engine.getPipelineMeta() == null) {
       return List.of();
     }
-    PipelineMeta pipelineMeta = engine.getPipelineMeta();
-    EngineMetrics metrics = engine.getEngineMetrics();
+    return extractTransforms(engine.getPipelineMeta(), engine.getEngineMetrics());
+  }
+
+  static List<TransformLiveMetrics> extractTransforms(
+      PipelineMeta pipelineMeta, EngineMetrics metrics) {
+    if (pipelineMeta == null) {
+      return List.of();
+    }
     List<TransformLiveMetrics> result = new ArrayList<>();
     for (TransformMeta transformMeta : pipelineMeta.getTransforms()) {
       if (transformMeta == null) {
         continue;
       }
-      IEngineComponent component = findComponent(metrics, transformMeta.getName());
+      List<IEngineComponent> components =
+          EngineMetricsSupport.componentsNamed(metrics, transformMeta.getName());
       result.add(
           TransformLiveMetrics.builder()
               .transformName(transformMeta.getName())
@@ -99,12 +106,15 @@ public final class UpdateRunLiveMetricsExtractor {
               .logicalRole(
                   GeneratedPipelineMetadataSupport.getTransformAttribute(
                       transformMeta, GeneratedPipelineMetadataConstants.LOGICAL_ROLE))
-              .rowsRead(metricValue(metrics, component, Pipeline.METRIC_INPUT))
-              .rowsWritten(metricValue(metrics, component, Pipeline.METRIC_OUTPUT))
-              .bufferIn(metricValue(metrics, component, Pipeline.METRIC_BUFFER_IN))
-              .bufferOut(metricValue(metrics, component, Pipeline.METRIC_BUFFER_OUT))
-              .running(isRunning(metrics, component))
-              .status(statusText(metrics, component))
+              .rowsRead(EngineMetricsSupport.sumMetric(metrics, components, Pipeline.METRIC_INPUT))
+              .rowsWritten(
+                  EngineMetricsSupport.sumMetric(metrics, components, Pipeline.METRIC_OUTPUT))
+              .bufferIn(
+                  EngineMetricsSupport.sumMetric(metrics, components, Pipeline.METRIC_BUFFER_IN))
+              .bufferOut(
+                  EngineMetricsSupport.sumMetric(metrics, components, Pipeline.METRIC_BUFFER_OUT))
+              .running(EngineMetricsSupport.anyRunning(metrics, components))
+              .status(EngineMetricsSupport.statusText(metrics, components))
               .secondsSinceLastProgress(0L)
               .build());
     }
@@ -139,42 +149,5 @@ public final class UpdateRunLiveMetricsExtractor {
         GeneratedPipelineMetadataSupport.getPipelineAttribute(
             pipelineMeta, GeneratedPipelineMetadataConstants.SOURCE_NAME);
     return sourceName != null ? sourceName : "";
-  }
-
-  private static IEngineComponent findComponent(EngineMetrics metrics, String transformName) {
-    if (metrics == null || Utils.isEmpty(transformName)) {
-      return null;
-    }
-    for (IEngineComponent component : metrics.getComponents()) {
-      if (component != null && transformName.equals(component.getName())) {
-        return component;
-      }
-    }
-    return null;
-  }
-
-  private static long metricValue(
-      EngineMetrics metrics, IEngineComponent component, IEngineMetric metric) {
-    if (metrics == null || component == null || metric == null) {
-      return 0L;
-    }
-    Long value = metrics.getComponentMetric(component, metric);
-    return value != null ? value : 0L;
-  }
-
-  private static boolean isRunning(EngineMetrics metrics, IEngineComponent component) {
-    if (metrics == null || component == null) {
-      return false;
-    }
-    Boolean running = metrics.getComponentRunningMap().get(component);
-    return running != null && running;
-  }
-
-  private static String statusText(EngineMetrics metrics, IEngineComponent component) {
-    if (metrics == null || component == null) {
-      return "";
-    }
-    String status = metrics.getComponentStatusMap().get(component);
-    return status != null ? status : "";
   }
 }

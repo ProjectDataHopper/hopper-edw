@@ -24,7 +24,6 @@ import org.apache.hop.pipeline.Pipeline;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.engine.EngineMetrics;
 import org.apache.hop.pipeline.engine.IEngineComponent;
-import org.apache.hop.pipeline.engine.IEngineMetric;
 import org.apache.hop.pipeline.engine.IPipelineEngine;
 import org.apache.hop.pipeline.transform.TransformMeta;
 import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataConstants;
@@ -116,14 +115,21 @@ public final class MetadataMetricsResolver {
     if (engine == null || engine.getPipelineMeta() == null) {
       return List.of();
     }
-    PipelineMeta pipelineMeta = engine.getPipelineMeta();
-    EngineMetrics metrics = engine.getEngineMetrics();
+    return extractTransformMetrics(engine.getPipelineMeta(), engine.getEngineMetrics());
+  }
+
+  static List<TransformRunMetrics> extractTransformMetrics(
+      PipelineMeta pipelineMeta, EngineMetrics metrics) {
+    if (pipelineMeta == null) {
+      return List.of();
+    }
     List<TransformRunMetrics> result = new ArrayList<>();
     for (TransformMeta transformMeta : pipelineMeta.getTransforms()) {
       if (transformMeta == null) {
         continue;
       }
-      IEngineComponent component = findComponent(metrics, transformMeta.getName());
+      List<IEngineComponent> components =
+          EngineMetricsSupport.componentsNamed(metrics, transformMeta.getName());
       result.add(
           TransformRunMetrics.builder()
               .transformName(transformMeta.getName())
@@ -143,12 +149,15 @@ public final class MetadataMetricsResolver {
               .lookupCacheMode(
                   GeneratedPipelineMetadataSupport.getTransformAttribute(
                       transformMeta, GeneratedPipelineMetadataConstants.LOOKUP_CACHE_MODE))
-              .rowsRead(metricValue(metrics, component, Pipeline.METRIC_INPUT))
-              .rowsWritten(metricValue(metrics, component, Pipeline.METRIC_OUTPUT))
-              .rowsUpdated(metricValue(metrics, component, Pipeline.METRIC_UPDATED))
-              .rowsRejected(metricValue(metrics, component, Pipeline.METRIC_REJECTED))
-              .errors(metricValue(metrics, component, Pipeline.METRIC_ERROR))
-              .durationMs(resolveDurationMs(component))
+              .rowsRead(EngineMetricsSupport.sumMetric(metrics, components, Pipeline.METRIC_INPUT))
+              .rowsWritten(
+                  EngineMetricsSupport.sumMetric(metrics, components, Pipeline.METRIC_OUTPUT))
+              .rowsUpdated(
+                  EngineMetricsSupport.sumMetric(metrics, components, Pipeline.METRIC_UPDATED))
+              .rowsRejected(
+                  EngineMetricsSupport.sumMetric(metrics, components, Pipeline.METRIC_REJECTED))
+              .errors(EngineMetricsSupport.sumMetric(metrics, components, Pipeline.METRIC_ERROR))
+              .durationMs(EngineMetricsSupport.maxExecutionDurationMs(components))
               .build());
     }
     return result;
@@ -220,33 +229,5 @@ public final class MetadataMetricsResolver {
       total += readMetric ? transform.getRowsRead() : transform.getRowsWritten();
     }
     return total;
-  }
-
-  private static IEngineComponent findComponent(EngineMetrics metrics, String transformName) {
-    if (metrics == null || Utils.isEmpty(transformName)) {
-      return null;
-    }
-    for (IEngineComponent component : metrics.getComponents()) {
-      if (component != null && transformName.equals(component.getName())) {
-        return component;
-      }
-    }
-    return null;
-  }
-
-  private static long metricValue(
-      EngineMetrics metrics, IEngineComponent component, IEngineMetric metric) {
-    if (metrics == null || component == null || metric == null) {
-      return 0L;
-    }
-    Long value = metrics.getComponentMetric(component, metric);
-    return value != null ? value : 0L;
-  }
-
-  private static long resolveDurationMs(IEngineComponent component) {
-    if (component == null) {
-      return 0L;
-    }
-    return Math.max(0L, component.getExecutionDuration());
   }
 }

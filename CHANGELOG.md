@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Fact load metrics with parallel copies (issue #164)
+
+- Load-run and live metrics now sum every parallel copy of a transform, not only copy 0. Staging-file bulk loads with **Target table parallel copies** greater than 1 no longer under-count fact insert rows.
+
 ### Junk Dimension SQL (issue #163)
 
 - The **SQL** button on the Junk Dimension transform no longer throws `NullPointerException` when the dialog builds a temporary meta without a parent pipeline. Connection lookup uses the pipeline passed into `getSqlStatements` / `analyseImpact`.

@@ -18,10 +18,55 @@ package org.hopper.edw.datavault.metrics;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
+import org.apache.hop.core.HopEnvironment;
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.pipeline.Pipeline;
+import org.apache.hop.pipeline.PipelineMeta;
+import org.apache.hop.pipeline.engine.EngineComponent;
+import org.apache.hop.pipeline.engine.EngineMetrics;
+import org.apache.hop.pipeline.transform.TransformMeta;
+import org.apache.hop.pipeline.transforms.textfileoutput.TextFileOutputMeta;
 import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataConstants;
+import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataSupport;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class MetadataMetricsResolverTest {
+
+  @BeforeAll
+  static void initHop() throws HopException {
+    HopEnvironment.init();
+  }
+
+  @Test
+  void extractsWriteMetricsFromEveryParallelStagingCopy() {
+    PipelineMeta pipelineMeta = new PipelineMeta();
+    pipelineMeta.setName("dm-fact-f_orders");
+    TransformMeta write =
+        new TransformMeta("TextFileOutput", "stage_to_f_orders", new TextFileOutputMeta());
+    GeneratedPipelineMetadataSupport.stampWriteTarget(
+        write, "fact", "fact_orders", "f_orders", "vault");
+    pipelineMeta.addTransform(write);
+
+    EngineMetrics metrics = new EngineMetrics();
+    addCopy(metrics, "stage_to_f_orders", 0, 1_000L, 1_000L, 120L);
+    addCopy(metrics, "stage_to_f_orders", 1, 1_200L, 1_200L, 250L);
+    addCopy(metrics, "stage_to_f_orders", 2, 800L, 800L, 180L);
+
+    List<TransformRunMetrics> transforms =
+        MetadataMetricsResolver.extractTransformMetrics(pipelineMeta, metrics);
+
+    assertEquals(1, transforms.size());
+    TransformRunMetrics writeMetrics = transforms.get(0);
+    assertEquals("stage_to_f_orders", writeMetrics.getTransformName());
+    assertEquals(3_000L, writeMetrics.getRowsRead());
+    assertEquals(3_000L, writeMetrics.getRowsWritten());
+    assertEquals(250L, writeMetrics.getDurationMs());
+
+    MetadataMetricsResolver.AggregatedPipelineTotals totals =
+        MetadataMetricsResolver.aggregateRoleTotals(transforms);
+    assertEquals(3_000L, totals.targetRowsInserted());
+  }
 
   @Test
   void aggregatesSourceRowsAcrossMultipleSourceReadTransforms() {
@@ -111,5 +156,19 @@ class MetadataMetricsResolverTest {
         "bulk_load_to_customer", DvUpdateMetricsConstants.BULK_WRITE_TRANSFORM_PREFIX + "customer");
     assertEquals(
         "stage_to_customer", DvUpdateMetricsConstants.STAGING_WRITE_TRANSFORM_PREFIX + "customer");
+  }
+
+  private static void addCopy(
+      EngineMetrics metrics,
+      String transformName,
+      int copyNr,
+      long rowsRead,
+      long rowsWritten,
+      long durationMs) {
+    EngineComponent component = new EngineComponent(transformName, copyNr);
+    component.setExecutionDuration(durationMs);
+    metrics.addComponent(component);
+    metrics.setComponentMetric(component, Pipeline.METRIC_INPUT, rowsRead);
+    metrics.setComponentMetric(component, Pipeline.METRIC_OUTPUT, rowsWritten);
   }
 }
