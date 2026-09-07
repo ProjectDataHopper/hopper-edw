@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Junk Dimension SQL (issue #163)
+
+- The **SQL** button on the Junk Dimension transform no longer throws `NullPointerException` when the dialog builds a temporary meta without a parent pipeline. Connection lookup uses the pipeline passed into `getSqlStatements` / `analyseImpact`.
+
 ### Junk dimension target table (issue #162)
 
 - Inline junk dimension transforms on a fact load pipeline now target the junk dimension table (for example `d_orders_junk`), not the fact table.

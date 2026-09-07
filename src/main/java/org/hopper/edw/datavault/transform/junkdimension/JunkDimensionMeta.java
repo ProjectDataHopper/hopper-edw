@@ -519,8 +519,7 @@ public class JunkDimensionMeta extends BaseTransformMeta<JunkDimension, JunkDime
       IRowMeta prev,
       IHopMetadataProvider metadataProvider) {
 
-    DatabaseMeta databaseMeta =
-        getParentTransformMeta().getParentPipelineMeta().findDatabase(connectionName, variables);
+    DatabaseMeta databaseMeta = pipelineMeta.findDatabase(connectionName, variables);
 
     SqlStatement retval =
         new SqlStatement(transformMeta.getName(), databaseMeta, null); // default: nothing to do!
@@ -766,8 +765,7 @@ public class JunkDimensionMeta extends BaseTransformMeta<JunkDimension, JunkDime
       IRowMeta info,
       IHopMetadataProvider metadataProvider) {
 
-    DatabaseMeta databaseMeta =
-        getParentTransformMeta().getParentPipelineMeta().findDatabase(connectionName, variables);
+    DatabaseMeta databaseMeta = pipelineMeta.findDatabase(connectionName, variables);
 
     // The keys are read-only...
     for (int i = 0; i < fields.getKeyFields().size(); i++) {
