@@ -8,6 +8,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 - The **SQL** button on the Junk Dimension transform no longer throws `NullPointerException` when the dialog builds a temporary meta without a parent pipeline. Connection lookup uses the pipeline passed into `getSqlStatements` / `analyseImpact`.
 
+### Junk dimension hash-key index
+
+- Updating the target database structure for a junk dimension now creates a lookup index on the hash-key column (`idx_<table>_hk`). Shared hash/surrogate keys (for example `d_orders_junk.orders_junk_hk` in `retail-f-orders.hdm`) are indexed when no primary key already covers that column.
+
 ### Junk dimension target table (issue #162)
 
 - Inline junk dimension transforms on a fact load pipeline now target the junk dimension table (for example `d_orders_junk`), not the fact table.

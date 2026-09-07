@@ -141,10 +141,40 @@ public abstract class DmTableBase extends HopMetadataBase implements IHopMetadat
       if (!Utils.isEmpty(ddl)) {
         result.add(ddl);
       }
+      appendAdditionalBuildDdl(
+          result,
+          db,
+          targetDatabaseMeta,
+          targetTableName,
+          targetFields,
+          primaryKeyColumns,
+          config,
+          metadataProvider,
+          variables,
+          model);
     } catch (Exception e) {
       throw new HopException("Error getting DDL for dimensional table: " + targetTableName, e);
     }
     return result;
+  }
+
+  /**
+   * Extra DDL after CREATE/ALTER TABLE (indexes, and similar). Default is none. Called while the
+   * target database connection is open.
+   */
+  protected void appendAdditionalBuildDdl(
+      List<String> result,
+      Database db,
+      DatabaseMeta targetDatabaseMeta,
+      String targetTableName,
+      IRowMeta targetFields,
+      List<String> primaryKeyColumns,
+      DimensionalConfiguration config,
+      IHopMetadataProvider metadataProvider,
+      IVariables variables,
+      DimensionalModel model)
+      throws HopException {
+    // Default: table DDL only.
   }
 
   @Override

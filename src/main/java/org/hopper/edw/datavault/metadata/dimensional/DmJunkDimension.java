@@ -21,12 +21,16 @@ import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.ICheckResult;
+import org.apache.hop.core.database.Database;
+import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
+import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
+import org.hopper.edw.datavault.metadata.DvDdlSupport;
 import org.hopper.edw.datavault.metadata.dimensional.pipeline.DmJunkDimensionBuilder;
 
 /** Kimball junk dimension maintained via Combination Lookup. */
@@ -99,5 +103,48 @@ public class DmJunkDimension extends DmTableBase {
     }
     return List.of(
         DmJunkDimensionBuilder.generatePipeline(metadataProvider, variables, model, this));
+  }
+
+  @Override
+  protected void appendAdditionalBuildDdl(
+      List<String> result,
+      Database db,
+      DatabaseMeta targetDatabaseMeta,
+      String targetTableName,
+      IRowMeta targetFields,
+      List<String> primaryKeyColumns,
+      DimensionalConfiguration config,
+      IHopMetadataProvider metadataProvider,
+      IVariables variables,
+      DimensionalModel model)
+      throws HopException {
+    String hashField = DmJunkDimensionSupport.resolveHashKeyIndexField(this, config, variables);
+    if (Utils.isEmpty(hashField) || db == null || targetDatabaseMeta == null) {
+      return;
+    }
+    boolean creatingTable =
+        result.stream().anyMatch(sql -> DvDdlSupport.extractCreateTableName(sql) != null);
+    if (creatingTable
+        && DmJunkDimensionSupport.primaryKeyCoversHashKey(hashField, primaryKeyColumns)) {
+      return;
+    }
+
+    String schemaTable =
+        targetDatabaseMeta.getQuotedSchemaTableCombination(variables, null, targetTableName);
+    String[] idxFields = new String[] {hashField};
+    try {
+      if (!db.checkIndexExists(schemaTable, idxFields)) {
+        String indexName = DmJunkDimensionSupport.hashKeyIndexName(targetTableName);
+        String indexDdl =
+            db.getCreateIndexStatement(
+                schemaTable, indexName, idxFields, false, false, false, true);
+        if (!Utils.isEmpty(indexDdl)) {
+          result.add(indexDdl);
+        }
+      }
+    } catch (Exception e) {
+      throw new HopException(
+          "Error getting hash key index DDL for junk dimension table: " + targetTableName, e);
+    }
   }
 }

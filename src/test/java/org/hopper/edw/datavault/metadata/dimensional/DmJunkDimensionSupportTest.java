@@ -18,8 +18,10 @@ package org.hopper.edw.datavault.metadata.dimensional;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import org.apache.hop.core.variables.Variables;
 import org.junit.jupiter.api.Test;
 
@@ -117,5 +119,41 @@ class DmJunkDimensionSupportTest {
     assertEquals(
         "hashcode", DmJunkDimensionSupport.resolveJunkHashCodeField(junk, config, new Variables()));
     assertFalse(DmJunkDimensionSupport.sharesHashAndSurrogateColumn(junk, config, new Variables()));
+  }
+
+  @Test
+  void resolveHashKeyIndexFieldUsesSharedSurrogateForRetailStyleJunk() {
+    DmJunkDimension junk = new DmJunkDimension();
+    junk.setTableName("d_orders_junk");
+    junk.setSurrogateKeyField("orders_junk_hk");
+    junk.setHashCodeStrategy(DmJunkHashCodeStrategy.MD5);
+    junk.setUseSurrogateKeyAsHashCodeField(true);
+    DimensionalConfiguration config = new DimensionalConfiguration();
+
+    assertEquals(
+        "orders_junk_hk",
+        DmJunkDimensionSupport.resolveHashKeyIndexField(junk, config, new Variables()));
+    assertEquals("idx_d_orders_junk_hk", DmJunkDimensionSupport.hashKeyIndexName("d_orders_junk"));
+    assertFalse(DmJunkDimensionSupport.primaryKeyCoversHashKey("orders_junk_hk", List.of()));
+  }
+
+  @Test
+  void resolveHashKeyIndexFieldIsNullWhenHashStrategyIsNone() {
+    DmJunkDimension junk = new DmJunkDimension();
+    junk.setHashCodeStrategy(DmJunkHashCodeStrategy.NONE);
+    junk.setUseSurrogateKeyAsHashCodeField(true);
+    junk.setSurrogateKeyField("orders_junk_hk");
+
+    assertNull(
+        DmJunkDimensionSupport.resolveHashKeyIndexField(
+            junk, new DimensionalConfiguration(), new Variables()));
+  }
+
+  @Test
+  void primaryKeyCoversHashKeyWhenSinglePkMatches() {
+    assertTrue(
+        DmJunkDimensionSupport.primaryKeyCoversHashKey(
+            "orders_junk_hk", List.of("orders_junk_hk")));
+    assertFalse(DmJunkDimensionSupport.primaryKeyCoversHashKey("hashcode", List.of("junk_key")));
   }
 }

@@ -15,6 +15,7 @@
  */
 package org.hopper.edw.datavault.metadata.dimensional;
 
+import java.util.List;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 
@@ -147,6 +148,37 @@ public final class DmJunkDimensionSupport {
       return explicit;
     }
     return "hashcode";
+  }
+
+  /**
+   * Column used for junk-dimension hash lookup, or {@code null} when the hash strategy does not use
+   * a hash column.
+   */
+  public static String resolveHashKeyIndexField(
+      DmJunkDimension junkDimension, DimensionalConfiguration config, IVariables variables) {
+    if (junkDimension == null || !junkDimension.getHashCodeStrategyOrDefault().usesHashColumn()) {
+      return null;
+    }
+    return resolveJunkHashCodeField(junkDimension, config, variables);
+  }
+
+  public static String hashKeyIndexName(String tableName) {
+    if (Utils.isEmpty(tableName)) {
+      return null;
+    }
+    return "idx_" + tableName + "_hk";
+  }
+
+  /**
+   * True when generated PRIMARY KEY DDL already indexes the hash-key column, so a separate lookup
+   * index would be redundant on CREATE TABLE.
+   */
+  public static boolean primaryKeyCoversHashKey(String hashField, List<String> primaryKeyColumns) {
+    if (Utils.isEmpty(hashField) || primaryKeyColumns == null || primaryKeyColumns.size() != 1) {
+      return false;
+    }
+    String pk = primaryKeyColumns.get(0);
+    return !Utils.isEmpty(pk) && pk.equals(hashField);
   }
 
   public static boolean sharesHashAndSurrogateColumn(
