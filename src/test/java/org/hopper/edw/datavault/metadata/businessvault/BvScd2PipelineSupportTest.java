@@ -1787,6 +1787,42 @@ class BvScd2PipelineSupportTest {
   }
 
   @Test
+  void targetLayoutMatchesMappedSatelliteIgnoringCase() throws Exception {
+    DataVaultModel dvModel = loadVault1Model();
+    DvSatellite wide = new DvSatellite();
+    wide.setName("sat_wide");
+    wide.setTableName("sat_wide");
+    wide.setHubName("hub_customer");
+    SatelliteAttribute attr = new SatelliteAttribute();
+    attr.setName("Customer_Name");
+    attr.setDataType("String");
+    attr.setLength("50");
+    wide.getAttributes().add(attr);
+    dvModel.getTables().add(wide);
+
+    BvScd2Table scd2Table = new BvScd2Table();
+    scd2Table.setName("wide_bv");
+    scd2Table.setTableName("wide_bv");
+    scd2Table.setFunctionalTimestampField("x_load_ts");
+    scd2Table.setParentHubName("hub_customer");
+    scd2Table.getDerivatives().add(new BvDerivativeRef("sat_wide", DvTableType.SATELLITE));
+    scd2Table
+        .getFieldMappings()
+        .add(new BvScd2FieldMapping("SAT_WIDE", "customer_name", "cust_name"));
+
+    var layout =
+        BvScd2PipelineSupport.buildTargetTableLayout(
+            scd2Table, new BusinessVaultConfiguration(), dvModel, new Variables());
+    var mapped =
+        layout.getValueMetaList().stream()
+            .filter(vm -> "cust_name".equals(vm.getName()))
+            .findFirst()
+            .orElseThrow();
+    assertEquals(IValueMeta.TYPE_STRING, mapped.getType());
+    assertEquals(50, mapped.getLength());
+  }
+
+  @Test
   void targetLayoutIncludesSourceQueryMappedColumns() throws Exception {
     DataVaultModel dvModel = loadVault1Model();
     BvSourceQuery sourceQuery = new BvSourceQuery();

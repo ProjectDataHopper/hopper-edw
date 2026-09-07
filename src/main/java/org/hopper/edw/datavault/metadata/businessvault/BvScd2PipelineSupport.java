@@ -1944,7 +1944,7 @@ public final class BvScd2PipelineSupport {
 
   private static DvSatellite findSatelliteByName(List<DvSatellite> satellites, String name) {
     for (DvSatellite satellite : satellites) {
-      if (satellite != null && name.equals(satellite.getName())) {
+      if (satellite != null && name.equalsIgnoreCase(satellite.getName())) {
         return satellite;
       }
     }
@@ -1966,11 +1966,11 @@ public final class BvScd2PipelineSupport {
 
   private static IValueMeta findAttributeValueMeta(DvSatellite satellite, String name)
       throws HopException {
-    if (satellite.getAttributes() == null) {
+    if (satellite == null || satellite.getAttributes() == null || Utils.isEmpty(name)) {
       return null;
     }
     for (SatelliteAttribute attr : satellite.getAttributes()) {
-      if (attr != null && name.equals(attr.getName())) {
+      if (attr != null && name.equalsIgnoreCase(attr.getName())) {
         String dt = attr.getDataType();
         int typeId = IValueMeta.TYPE_STRING;
         if (!Utils.isEmpty(dt)) {

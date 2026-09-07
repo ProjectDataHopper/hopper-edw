@@ -43,6 +43,10 @@ class ExecutionMapCrawlerTest {
       RETAIL_HOME.resolve("workflows/update-retail-dv-bv-dm.hwf");
   private static final Path RDG_WORKFLOW =
       RETAIL_HOME.resolve("workflows/run-retail-update-models.hwf");
+  private static final Path RETAIL_INITIAL_WORKFLOW =
+      RETAIL_HOME.resolve("workflows/run-retail-initial.hwf");
+  private static final Path RETAIL_UPDATE_WORKFLOW =
+      RETAIL_HOME.resolve("workflows/run-retail-update.hwf");
 
   @BeforeAll
   static void initHop() throws Exception {
@@ -233,6 +237,28 @@ class ExecutionMapCrawlerTest {
   }
 
   @Test
+  void crawlRetailGenerateExecutionMapDoesNotWarnOnMissingHem() throws Exception {
+    Variables variables = retailVariables();
+    CrawlOptions options =
+        CrawlOptions.builder()
+            .includeGeneratedPipelines(false)
+            .includeWorkflowActions(true)
+            .includeDatasetNodes(false)
+            .captureSnapshots(false)
+            .followNestedWorkflows(false)
+            .followNestedPipelines(false)
+            .build();
+
+    ExecutionMapCrawler.CrawlResult initial =
+        ExecutionMapCrawler.crawl(RETAIL_INITIAL_WORKFLOW.toString(), variables, null, options);
+    ExecutionMapCrawler.CrawlResult update =
+        ExecutionMapCrawler.crawl(RETAIL_UPDATE_WORKFLOW.toString(), variables, null, options);
+
+    assertNoExecutionMapLoadWarning(initial.getWarnings());
+    assertNoExecutionMapLoadWarning(update.getWarnings());
+  }
+
+  @Test
   void crawlRetailRdgWorkflowWithoutMetadataDoesNotInventModels() throws Exception {
     Variables variables = retailVariables();
     CrawlOptions options =
@@ -312,6 +338,17 @@ class ExecutionMapCrawlerTest {
         document.getRootArtifactPath().endsWith("update-retail-dv-bv-dm.hwf"),
         "Root path should point at the retail update workflow");
     assertContainsNodeType(document, ExecutionMapNodeType.ROOT_WORKFLOW);
+  }
+
+  private static void assertNoExecutionMapLoadWarning(List<String> warnings) {
+    assertTrue(
+        warnings.stream()
+            .noneMatch(
+                warning ->
+                    warning != null
+                        && warning.contains("Failed to load referenced object")
+                        && warning.contains("GENERATE_EXECUTION_MAP")),
+        () -> "Unexpected HEM load warning(s):\n" + String.join("\n", warnings));
   }
 
   private static void assertContainsNodeType(

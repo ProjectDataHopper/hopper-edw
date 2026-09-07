@@ -41,7 +41,9 @@ image::images/execution-map-in-hop-gui-simulate-six-months.png[Execution map in 
 
 == Creating and refreshing maps
 
-Maps are produced by crawling from a workflow or model in Hop GUI (execution map perspective / crawl actions) or by tooling that serializes the crawl result to `.hem` XML.
+Maps are produced by crawling from a workflow or model in Hop GUI (execution map perspective / crawl actions), the **Generate execution map** workflow action, or tooling that serializes the crawl result to `.hem` XML.
+
+The generate action writes the `.hem` file *after* the crawl. The crawler does not load that output as a nested artifact (the file often does not exist yet, and on Windows a stale VFS cache can report it as "not a file").
 
 Re-crawl after model or workflow changes so generated pipeline nodes stay current.
 

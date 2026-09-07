@@ -20,15 +20,20 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.nio.file.Path;
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.i18n.BaseMessages;
+import org.hopper.edw.datavault.command.executionmap.ExecutionMapService;
 import org.hopper.edw.datavault.executionmap.CrawlOptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class ActionGenerateExecutionMapTest {
+
+  @TempDir Path tempDir;
 
   @BeforeAll
   static void initHop() throws HopException {
@@ -118,6 +123,26 @@ class ActionGenerateExecutionMapTest {
     assertEquals(
         "/workspace/retail-example/execution-maps/run-retail-initial.hem",
         action.resolveReferencedExecutionMapPath(variables));
+  }
+
+  @Test
+  void loadReferencedObjectFailsClearlyWhenHemMissing() {
+    ActionGenerateExecutionMap action = new ActionGenerateExecutionMap();
+    action.setOutputHemFile(tempDir.resolve("not-written-yet.hem").toString());
+
+    HopException thrown =
+        assertThrows(
+            HopException.class, () -> action.loadReferencedObject(0, null, new Variables()));
+    assertTrue(
+        thrown.getMessage().contains("does not exist"),
+        () -> "Unexpected message: " + thrown.getMessage());
+  }
+
+  @Test
+  void resolveOutputPathKeepsWindowsSeparator() {
+    assertEquals(
+        "C:\\proj\\workflows\\run.hem",
+        ExecutionMapService.resolveOutputPath("C:\\proj\\workflows\\run.hwf", null, null));
   }
 
   @Test

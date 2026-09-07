@@ -64,6 +64,44 @@ public final class ExecutionMapPathSupport {
     }
   }
 
+  /**
+   * Last path segment of a filesystem or VFS path. Avoids {@code Path.of}, which rejects {@code
+   * file:///C:/...} URIs on Windows.
+   */
+  public static String fileName(String path) {
+    if (Utils.isEmpty(path)) {
+      return path;
+    }
+    String trimmed = path.trim();
+    while (trimmed.endsWith("/") || trimmed.endsWith("\\")) {
+      trimmed = trimmed.substring(0, trimmed.length() - 1);
+      if (trimmed.isEmpty()) {
+        return path;
+      }
+    }
+    int slash = Math.max(trimmed.lastIndexOf('/'), trimmed.lastIndexOf('\\'));
+    return slash >= 0 ? trimmed.substring(slash + 1) : trimmed;
+  }
+
+  /** Parent directory of {@code path}, or {@code null} when the path has no directory. */
+  public static String parentPath(String path) {
+    if (Utils.isEmpty(path)) {
+      return null;
+    }
+    String trimmed = path.trim();
+    while (trimmed.endsWith("/") || trimmed.endsWith("\\")) {
+      trimmed = trimmed.substring(0, trimmed.length() - 1);
+      if (trimmed.isEmpty()) {
+        return null;
+      }
+    }
+    int slash = Math.max(trimmed.lastIndexOf('/'), trimmed.lastIndexOf('\\'));
+    if (slash <= 0) {
+      return null;
+    }
+    return trimmed.substring(0, slash);
+  }
+
   /** Resolves variables and normalizes for open/file checks. */
   public static String toResolvedPath(String path, IVariables variables) {
     if (Utils.isEmpty(path) || variables == null) {

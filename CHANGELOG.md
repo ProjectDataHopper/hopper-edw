@@ -4,6 +4,18 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### BV SCD2 generated loaders (issue #157)
+
+- Generated Table Output and native bulk-loader field lists include every SCD2 mapping with **Load** enabled. Missing satellite attribute metadata falls back to String so mapped columns are not dropped.
+- Hash-key type and length come from the parent hub / Data Vault configuration (`BINARY` + MD5 → `BINARY(16)` on SingleStore, not unbounded `VARBINARY`).
+- A Linked Hub / **Parent hub** is enough to resolve grain even when a satellite has no parent of its own.
+- Suggest mappings and Check model enforce target identifier length (PostgreSQL 63, MySQL/SingleStore 64).
+
+### Execution maps (issue #159)
+
+- Crawling a workflow no longer tries to load the **Generate execution map** action's own `.hem` output. That file is written after the crawl, so the previous load logged VFS `is not a file` (including on Windows 11).
+- `.hem` load/save uses Hop VFS native filenames (Windows drive letter) and creates the output folder when missing.
+
 ### Project documentation
 
 - On Windows, pipelines, workflows, models, and project folders are documented again (issue #158). Generation used VFS `FileName.getPath()`, which omits the drive letter, so Hop could not reopen those files and only metadata pages were written.

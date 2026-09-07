@@ -87,6 +87,13 @@ public final class ReferencedObjectResolver {
       return;
     }
 
+    // The HEM is this action's output, not an input. Loading it during crawl of the same
+    // workflow fails with VFS "is not a file" when the map has not been written yet (or
+    // when a stale VFS cache still thinks so on Windows). Skip it (issue #159).
+    if ("GENERATE_EXECUTION_MAP".equals(pluginId)) {
+      return;
+    }
+
     if (descriptions.length == 0
         && "UPDATE_RESOURCE_DEFINITION_GROUP".equals(pluginId)
         && context.getMetadataProvider() == null) {
@@ -143,6 +150,9 @@ public final class ReferencedObjectResolver {
     }
     if (loaded instanceof DimensionalModel dmModel) {
       expandDimensionalModel(context, fromNodeId, dmModel, description);
+      return;
+    }
+    if (loaded instanceof ExecutionMapDocument) {
       return;
     }
     if (loaded instanceof WorkflowMeta workflowMeta) {

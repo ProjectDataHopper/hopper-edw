@@ -762,7 +762,7 @@ public final class BvScd2FieldMappingValidationSupport {
 
   private static DvSatellite findSatellite(List<DvSatellite> satellites, String satelliteName) {
     for (DvSatellite satellite : satellites) {
-      if (satellite != null && satelliteName.equals(satellite.getName())) {
+      if (satellite != null && satelliteName.equalsIgnoreCase(satellite.getName())) {
         return satellite;
       }
     }

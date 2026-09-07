@@ -41,6 +41,26 @@ class ExecutionMapPathSupportTest {
   }
 
   @Test
+  void fileNameAndParentPathHandleWindowsAndPosix() {
+    assertEquals(
+        "run-retail-update.hem",
+        ExecutionMapPathSupport.fileName("C:\\maps\\run-retail-update.hem"));
+    assertEquals("C:\\maps", ExecutionMapPathSupport.parentPath("C:\\maps\\run-retail-update.hem"));
+    assertEquals(
+        "run-retail-update.hem",
+        ExecutionMapPathSupport.fileName("/home/proj/work/execution-maps/run-retail-update.hem"));
+    assertEquals(
+        "/home/proj/work/execution-maps",
+        ExecutionMapPathSupport.parentPath("/home/proj/work/execution-maps/run-retail-update.hem"));
+    assertEquals(
+        "run-retail-update.hem",
+        ExecutionMapPathSupport.fileName("file:///C:/maps/run-retail-update.hem"));
+    assertEquals(
+        "file:///C:/maps",
+        ExecutionMapPathSupport.parentPath("file:///C:/maps/run-retail-update.hem"));
+  }
+
+  @Test
   void logicalSchemesAreUnchanged() {
     Variables variables = new Variables();
     variables.setVariable("PROJECT_HOME", tempDir.toString());

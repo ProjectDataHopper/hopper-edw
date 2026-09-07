@@ -97,6 +97,32 @@ class ExecutionMapSerializationTest {
   }
 
   @Test
+  void saveCreatesMissingParentFolder() throws Exception {
+    Variables variables = new Variables();
+    variables.setVariable("PROJECT_HOME", RETAIL_HOME.toString());
+    ExecutionMapDocument document =
+        ExecutionMapCrawler.crawl(
+                ROOT_WORKFLOW.toString(),
+                variables,
+                null,
+                CrawlOptions.builder()
+                    .includeGeneratedPipelines(false)
+                    .captureSnapshots(false)
+                    .followNestedWorkflows(false)
+                    .followNestedPipelines(false)
+                    .build())
+            .getDocument();
+
+    Path nested = tempDir.resolve("work").resolve("execution-maps").resolve("created.hem");
+    assertFalse(Files.exists(nested.getParent()));
+    ExecutionMapPersistence.save(document, nested.toString(), variables);
+    assertTrue(Files.isRegularFile(nested));
+    ExecutionMapDocument loaded = ExecutionMapPersistence.load(nested.toString(), null, variables);
+    assertNotNull(loaded);
+    assertEquals("created.hem", ExecutionMapPathSupport.fileName(loaded.getFilename()));
+  }
+
+  @Test
   void savedHemUsesPortableProjectHomePathsAndNoFilename() throws Exception {
     Variables variables = new Variables();
     String projectHome = RETAIL_HOME.toString().replace('\\', '/');

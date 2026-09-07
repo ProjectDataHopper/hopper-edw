@@ -15,7 +15,6 @@
  */
 package org.hopper.edw.datavault.command.executionmap;
 
-import java.nio.file.Path;
 import java.util.List;
 import lombok.Getter;
 import org.apache.hop.core.exception.HopException;
@@ -26,6 +25,7 @@ import org.hopper.edw.datavault.executionmap.CrawlOptions;
 import org.hopper.edw.datavault.executionmap.ExecutionMapCrawler;
 import org.hopper.edw.datavault.executionmap.ExecutionMapDiffSupport;
 import org.hopper.edw.datavault.executionmap.ExecutionMapDiffSupport.DiffResult;
+import org.hopper.edw.datavault.executionmap.ExecutionMapPathSupport;
 import org.hopper.edw.datavault.executionmap.ExecutionMapPersistence;
 import org.hopper.edw.datavault.executionmap.OpenLineageExportSupport;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapDocument;
@@ -73,7 +73,7 @@ public final class ExecutionMapService {
     ExecutionMapDocument document = crawlResult.getDocument();
     String resolvedOutput = resolveOutputPath(rootArtifactPath, outputPath, variables);
     document.setFilename(resolvedOutput);
-    document.setName(Path.of(resolvedOutput).getFileName().toString());
+    document.setName(ExecutionMapPathSupport.fileName(resolvedOutput));
     ExecutionMapPersistence.save(document, resolvedOutput, variables);
     return new GenerateResult(document, resolvedOutput, crawlResult.getWarnings());
   }
@@ -128,12 +128,15 @@ public final class ExecutionMapService {
     }
     String resolvedRoot =
         variables != null ? variables.resolve(rootArtifactPath) : rootArtifactPath;
-    Path path = Path.of(resolvedRoot);
-    String base = path.getFileName().toString();
+    String base = ExecutionMapPathSupport.fileName(resolvedRoot);
     int dot = base.lastIndexOf('.');
     String stem = dot > 0 ? base.substring(0, dot) : base;
-    Path parent = path.getParent();
     String filename = stem + ".hem";
-    return parent != null ? parent.resolve(filename).toString() : filename;
+    String parent = ExecutionMapPathSupport.parentPath(resolvedRoot);
+    if (Utils.isEmpty(parent)) {
+      return filename;
+    }
+    char sep = resolvedRoot.lastIndexOf('\\') > resolvedRoot.lastIndexOf('/') ? '\\' : '/';
+    return parent + sep + filename;
   }
 }
