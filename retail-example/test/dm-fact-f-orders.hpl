@@ -40,7 +40,7 @@ JOIN hub_customer hc ON lo.customer_hk = hc.customer_hk</sql>
   <transform>
     <type>JunkDimension</type>
     <name>junk_d_orders_junk_key</name>
-    <table>f_orders</table>
+    <table>d_orders_junk</table>
     <connection>Vault</connection>
     <replace>Y</replace>
     <crc>Y</crc>

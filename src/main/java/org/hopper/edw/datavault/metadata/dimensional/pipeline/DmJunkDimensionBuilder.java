@@ -96,7 +96,7 @@ public final class DmJunkDimensionBuilder {
       DmFactJunkDimensionRole factRole) {
     JunkDimensionMeta lookupMeta = new JunkDimensionMeta();
     lookupMeta.setConnectionName(ctx.targetDbName);
-    lookupMeta.setTableName(ctx.targetTableName);
+    lookupMeta.setTableName(resolveTargetTableName(junkDimension));
     lookupMeta.setReplaceFields(factRole != null);
     lookupMeta.setCommitSize(
         Integer.parseInt(ctx.config.resolveTargetTableCommitSize(ctx.variables)));
@@ -152,6 +152,20 @@ public final class DmJunkDimensionBuilder {
       return JunkDimensionMeta.CREATION_METHOD_AUTOINC;
     }
     return JunkDimensionMeta.CREATION_METHOD_TABLEMAX;
+  }
+
+  /**
+   * Physical junk table name. Must not use {@code ctx.targetTableName}: on a fact load that is the
+   * fact table, not the junk dimension.
+   */
+  private static String resolveTargetTableName(DmJunkDimension junkDimension) {
+    if (junkDimension == null) {
+      return null;
+    }
+    if (!Utils.isEmpty(junkDimension.getTableName())) {
+      return junkDimension.getTableName();
+    }
+    return junkDimension.getName();
   }
 
   private static String resolveHashCodeField(

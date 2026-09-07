@@ -110,6 +110,7 @@ class DmCatalogPipelineTest {
                 .findFirst()
                 .orElseThrow()
                 .getTransform();
+    assertEquals("d_order_junk", junkMeta.getTableName());
     assertEquals(3, junkMeta.getFields().getKeyFields().size());
     assertEquals("promo_flag", junkMeta.getFields().getKeyFields().get(0).getName());
   }

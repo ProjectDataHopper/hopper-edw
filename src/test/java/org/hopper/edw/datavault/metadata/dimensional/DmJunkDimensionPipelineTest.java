@@ -61,6 +61,7 @@ class DmJunkDimensionPipelineTest {
             .orElseThrow();
     JunkDimensionMeta junkMeta = (JunkDimensionMeta) junkTransform.getTransform();
     assertEquals("junk_junk_sales_flags_key", junkTransform.getName());
+    assertEquals("d_sales_junk", junkMeta.getTableName());
     assertTrue(junkMeta.isReplaceFields());
     assertEquals("junk_sales_flags_key", junkMeta.resolveTechnicalKeyOutputField());
 
@@ -76,6 +77,27 @@ class DmJunkDimensionPipelineTest {
             .orElseThrow();
     assertTrue(pipelineMeta.findPreviousTransforms(firstLookup).contains(junkTransform));
     assertTrue(pipelineMeta.findPreviousTransforms(junkTransform).contains(tableInput));
+  }
+
+  @Test
+  void factPipelineJunkTransformFallsBackToJunkNameWhenTableNameEmpty() throws Exception {
+    DimensionalModel model = buildModel();
+    DmJunkDimension junk = (DmJunkDimension) model.findTable("junk_sales_flags");
+    junk.setTableName(null);
+
+    DmFact fact = (DmFact) model.findTable("fact_sales");
+    IHopMetadataProvider metadataProvider = testMetadataProvider();
+    List<PipelineMeta> pipelines =
+        fact.generateUpdatePipelines(metadataProvider, new Variables(), model, new Date());
+
+    JunkDimensionMeta junkMeta =
+        (JunkDimensionMeta)
+            pipelines.get(0).getTransforms().stream()
+                .filter(t -> t.getTransform() instanceof JunkDimensionMeta)
+                .findFirst()
+                .orElseThrow()
+                .getTransform();
+    assertEquals("junk_sales_flags", junkMeta.getTableName());
   }
 
   @Test
@@ -132,6 +154,7 @@ class DmJunkDimensionPipelineTest {
 
     DmJunkDimension junk = new DmJunkDimension();
     junk.setName("junk_sales_flags");
+    junk.setTableName("d_sales_junk");
     DmJunkDimensionSupport.applyFactTableSource(junk, "fact_sales");
     junk.getKeyFields().add(new DmNaturalKeyField("is_promo"));
     junk.getKeyFields().add(new DmNaturalKeyField("is_clearance"));
