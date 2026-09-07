@@ -15,67 +15,63 @@
  */
 package org.hopper.edw.datavault.hopgui.widget;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.gui.GuiResource;
+import org.apache.hop.ui.util.EnvironmentUtils;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyleRange;
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.hopper.edw.datavault.hopgui.widget.MarkdownStyleRenderer.RenderedMarkdown;
-import org.hopper.edw.datavault.hopgui.widget.MarkdownStyleRenderer.SpanKind;
-import org.hopper.edw.datavault.hopgui.widget.MarkdownStyleRenderer.StyleSpan;
+import org.eclipse.swt.widgets.Text;
 
-/** Read-only composite that renders markdown advice with SWT StyledText style ranges. */
+/**
+ * Read-only markdown view. Desktop uses SWT {@code StyledText} style ranges; Hop Web uses a plain
+ * {@code Text} widget because RAP does not ship {@code StyledText}.
+ */
 public class MarkdownStyledTextComp extends Composite {
 
-  private final StyledText styledText;
+  private final Control textControl;
+  private final Text webText;
   private final Font fixedFont;
   private final Font boldFixedFont;
   private final boolean disposeFixedFont;
   private final boolean disposeBoldFixedFont;
-  private final GuiResource resources;
-  private Color heading1Color;
-  private Color heading2Color;
-  private Color heading3Color;
-  private Color codeForeground;
-  private Color codeBackground;
-  private Color codeBlockBackground;
-  private Color linkColor;
 
   public MarkdownStyledTextComp(Composite parent, int style) {
     super(parent, style);
     PropsUi.setLook(this);
     setLayout(new FormLayout());
 
-    resources = GuiResource.getInstance();
+    GuiResource resources = GuiResource.getInstance();
     FixedFonts resolved = resolveFixedFonts(resources, getDisplay());
     fixedFont = resolved.fixedFont();
     boldFixedFont = resolved.boldFixedFont();
     disposeFixedFont = resolved.disposeFixedFont();
     disposeBoldFixedFont = resolved.disposeBoldFixedFont();
-    refreshThemeColors();
 
-    styledText =
-        new StyledText(this, SWT.MULTI | SWT.WRAP | SWT.READ_ONLY | SWT.V_SCROLL | SWT.BORDER);
-    PropsUi.setLook(styledText);
-    applyBaseFont();
-    styledText.setMargins(4, 4, 4, 4);
+    if (EnvironmentUtils.getInstance().isWeb()) {
+      webText = new Text(this, SWT.MULTI | SWT.WRAP | SWT.READ_ONLY | SWT.V_SCROLL | SWT.BORDER);
+      PropsUi.setLook(webText);
+      applyWebFont();
+      textControl = webText;
+    } else {
+      webText = null;
+      textControl = MarkdownDesktopStyledText.createReadOnly(this);
+      MarkdownDesktopStyledText.applyBaseFont(textControl, fixedFont);
+    }
+
     FormData fdText = new FormData();
     fdText.left = new FormAttachment(0, 0);
     fdText.right = new FormAttachment(100, 0);
     fdText.top = new FormAttachment(0, 0);
     fdText.bottom = new FormAttachment(100, 0);
-    styledText.setLayoutData(fdText);
+    textControl.setLayoutData(fdText);
 
     addListener(
         SWT.Dispose,
@@ -90,187 +86,56 @@ public class MarkdownStyledTextComp extends Composite {
   }
 
   public void setMarkdown(String markdown) {
-    refreshThemeColors();
-    RenderedMarkdown rendered = MarkdownStyleRenderer.render(markdown);
-    String displayText = rendered.displayText();
-    List<StyleRange> ranges = toStyleRanges(rendered.spans(), displayText.length());
-    styledText.setRedraw(false);
-    try {
-      applyBaseFont();
-      styledText.setText(displayText);
-      applyStyleRangesSafely(ranges, displayText.length());
-    } catch (RuntimeException ex) {
-      clearStyleRanges();
-    } finally {
-      styledText.setRedraw(true);
-    }
-  }
-
-  private void applyStyleRangesSafely(List<StyleRange> ranges, int textLength) {
-    if (textLength <= 0) {
-      clearStyleRanges();
+    if (webText != null) {
+      webText.setText(MarkdownStyleRenderer.render(markdown).displayText());
       return;
     }
-    clearStyleRanges();
-    if (ranges == null || ranges.isEmpty()) {
-      return;
-    }
-    for (StyleRange range : ranges) {
-      StyleRange normalized = normalizeStyleRange(range, textLength);
-      if (normalized == null) {
-        continue;
-      }
-      try {
-        styledText.setStyleRange(normalized);
-      } catch (RuntimeException ignored) {
-        // Skip ranges SWT rejects; keep the rest of the document styled.
-      }
-    }
-  }
-
-  private void clearStyleRanges() {
-    try {
-      styledText.setStyleRanges(new StyleRange[0]);
-    } catch (RuntimeException ignored) {
-      // Widget may reject style reset; plain text is still usable.
-    }
-  }
-
-  private StyleRange normalizeStyleRange(StyleRange range, int textLength) {
-    if (range == null || range.length <= 0 || range.start < 0 || range.start >= textLength) {
-      return null;
-    }
-    StyleRange normalized = new StyleRange();
-    normalized.start = range.start;
-    normalized.length = Math.min(range.length, textLength - range.start);
-    normalized.fontStyle = range.fontStyle;
-    normalized.foreground = range.foreground;
-    normalized.background = range.background;
-    normalized.underline = range.underline;
-    normalized.underlineStyle = range.underlineStyle;
-    normalized.strikeout = range.strikeout;
-    normalized.borderStyle = range.borderStyle;
-    normalized.font = validFont(range.font);
-    if (normalized.font == null) {
-      normalized.font = validFont(fixedFont);
-    }
-    return normalized.length > 0 && normalized.font != null ? normalized : null;
-  }
-
-  private Font validFont(Font font) {
-    return font != null && !font.isDisposed() ? font : null;
-  }
-
-  private void refreshThemeColors() {
-    heading1Color = MarkdownStylePalette.heading1(resources);
-    heading2Color = MarkdownStylePalette.heading2(resources);
-    heading3Color = MarkdownStylePalette.heading3(resources);
-    codeForeground = MarkdownStylePalette.codeForeground(resources);
-    codeBackground = MarkdownStylePalette.codeBackground(resources);
-    codeBlockBackground = MarkdownStylePalette.codeBlockBackground(resources);
-    linkColor = MarkdownStylePalette.link(resources);
+    MarkdownDesktopStyledText.setMarkdown(textControl, markdown, fixedFont, boldFixedFont);
   }
 
   public int getPreferredHeight(int width) {
     if (width <= 0) {
       width = 400;
     }
-    return Math.max(styledText.computeSize(width, SWT.DEFAULT).y + 8, styledText.getLineHeight());
+    if (webText != null) {
+      return Math.max(webText.computeSize(width, SWT.DEFAULT).y + 8, webText.getLineHeight());
+    }
+    return MarkdownDesktopStyledText.preferredHeight(textControl, width);
   }
 
-  private List<StyleRange> toStyleRanges(List<StyleSpan> spans, int textLength) {
-    if (spans == null || spans.isEmpty() || textLength <= 0) {
-      return List.of();
+  public String getDisplayText() {
+    if (webText != null) {
+      return webText.getText();
     }
-    List<StyleSpan> ordered =
-        spans.stream()
-            .sorted(
-                java.util.Comparator.comparingInt(StyleSpan::start)
-                    .thenComparingInt(StyleSpan::length)
-                    .thenComparing(span -> span.kind().name()))
-            .toList();
-    List<StyleRange> proseRanges = new ArrayList<>();
-    List<StyleRange> blockRanges = new ArrayList<>();
-    for (StyleSpan span : ordered) {
-      if (span.length() <= 0 || span.start() >= textLength) {
-        continue;
-      }
-      int length = Math.min(span.length(), textLength - span.start());
-      StyleRange range = new StyleRange();
-      range.start = span.start();
-      range.length = length;
-      applyKind(range, span.kind());
-      if (span.kind() == SpanKind.CODE_BLOCK || span.kind() == SpanKind.TABLE_ROW) {
-        blockRanges.add(range);
-      } else {
-        proseRanges.add(range);
-      }
-    }
-    List<StyleRange> ranges = new ArrayList<>(proseRanges.size() + blockRanges.size());
-    ranges.addAll(blockRanges);
-    ranges.addAll(proseRanges);
-    return ranges;
+    return MarkdownDesktopStyledText.getText(textControl);
   }
 
-  private void applyBaseFont() {
-    if (styledText != null
-        && !styledText.isDisposed()
-        && fixedFont != null
-        && !fixedFont.isDisposed()) {
-      styledText.setFont(fixedFont);
+  public void scrollToTop() {
+    if (webText != null) {
+      if (!webText.isDisposed()) {
+        webText.setTopIndex(0);
+      }
+      return;
     }
+    MarkdownDesktopStyledText.scrollToTop(textControl);
   }
 
-  private void applyKind(StyleRange range, SpanKind kind) {
-    range.font = validFont(fixedFont);
-    range.fontStyle = SWT.NORMAL;
-    Font headingFont = validFont(boldFixedFont);
-    if (headingFont == null) {
-      headingFont = validFont(fixedFont);
+  public void setPlainText(String text) {
+    String value = text != null ? text : "";
+    if (webText != null) {
+      if (Utils.isEmpty(value)) {
+        webText.setText("");
+        return;
+      }
+      setMarkdown(value);
+      return;
     }
-    switch (kind) {
-      case HEADING_1 -> {
-        range.font = headingFont;
-        applyForeground(range, heading1Color);
-      }
-      case HEADING_2 -> {
-        range.font = headingFont;
-        applyForeground(range, heading2Color);
-      }
-      case HEADING_3 -> {
-        range.font = headingFont;
-        applyForeground(range, heading3Color);
-      }
-      case BOLD -> range.font = headingFont;
-      case ITALIC -> range.fontStyle = SWT.ITALIC;
-      case CODE -> {
-        applyForeground(range, codeForeground);
-        applyBackground(range, codeBackground);
-      }
-      case CODE_BLOCK, TABLE_ROW -> {
-        applyForeground(range, codeForeground);
-        applyBackground(range, codeBlockBackground);
-      }
-      case LINK -> {
-        applyForeground(range, linkColor);
-        range.underline = true;
-        range.underlineStyle = SWT.UNDERLINE_SINGLE;
-      }
-      default -> {
-        // no-op
-      }
-    }
+    MarkdownDesktopStyledText.setPlainText(textControl, value, fixedFont, boldFixedFont);
   }
 
-  private static void applyForeground(StyleRange range, Color color) {
-    if (color != null && !color.isDisposed()) {
-      range.foreground = color;
-    }
-  }
-
-  private static void applyBackground(StyleRange range, Color color) {
-    if (color != null && !color.isDisposed()) {
-      range.background = color;
+  private void applyWebFont() {
+    if (webText != null && !webText.isDisposed() && fixedFont != null && !fixedFont.isDisposed()) {
+      webText.setFont(fixedFont);
     }
   }
 
@@ -294,25 +159,5 @@ public class MarkdownStyledTextComp extends Composite {
     FontData boldData = new FontData(fontData[0]);
     boldData.setStyle(boldData.getStyle() | SWT.BOLD);
     return new Font(display, boldData);
-  }
-
-  public String getDisplayText() {
-    return styledText.getText();
-  }
-
-  public void scrollToTop() {
-    if (styledText != null && !styledText.isDisposed()) {
-      styledText.setTopIndex(0);
-    }
-  }
-
-  public void setPlainText(String text) {
-    String value = text != null ? text : "";
-    if (Utils.isEmpty(value)) {
-      styledText.setText("");
-      clearStyleRanges();
-      return;
-    }
-    setMarkdown(value);
   }
 }

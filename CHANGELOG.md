@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Hop Lineage View on Hop Web (issue #161)
+
+- Opening a lineage view no longer crashes Hop Web with `NoClassDefFoundError: StyledText`. RAP does not ship that widget; the details pane now uses a plain text control in the browser (desktop keeps styled markdown). **View as HTML** still opens the formatted details.
+
 ### BV SCD2 generated loaders (issue #157)
 
 - Generated Table Output and native bulk-loader field lists include every SCD2 mapping with **Load** enabled. Missing satellite attribute metadata falls back to String so mapped columns are not dropped.

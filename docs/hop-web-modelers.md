@@ -80,6 +80,7 @@ The shared client scripts (`canvas-svg.js`, `canvas-zoom.js`, explorer tab hooks
 | Left-click vs drag | 3px threshold on move-while-held | Mouse-down arms a client drag ghost; mouse-up with no movement is a click (table context dialog) |
 | Load duration chart | Optional right pane | Not constructed (RAP lacks `ScrolledComposite.addPaintListener`) |
 | Coach palette DnD | DropTarget on canvas | Disabled (use toolbar / dialogs) |
+| Markdown details / notes | SWT `StyledText` style ranges | Plain `Text` (RAP has no `StyledText`); lineage **View as HTML** still opens formatted details |
 
 ## Architecture (plugin)
 

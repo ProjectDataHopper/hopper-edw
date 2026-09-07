@@ -211,7 +211,7 @@ What to expect:
 
 * Open, File → New (wizard first), save, zoom, pan, refresh, and **View settings** work in the browser.
 * The session graph is an SVG overlay. Empty, loading, and error text are painted on that snapshot as well as the status line.
-* Name-click updates the right-hand Markdown details pane. Card-click opens the context dialog after an unmoved mouse-up (same RAP click-vs-drag split as the other modelers).
+* Name-click updates the right-hand details pane. On Hop Web that pane is plain text (RAP has no `StyledText`); use **View as HTML** for formatted markdown. Card-click opens the context dialog after an unmoved mouse-up (same RAP click-vs-drag split as the other modelers).
 * **Show lineage** from a DV/BV/DM table opens an unsaved `.hlv` tab.
 * Lineage cards are not draggable; ELK still owns positions.
 

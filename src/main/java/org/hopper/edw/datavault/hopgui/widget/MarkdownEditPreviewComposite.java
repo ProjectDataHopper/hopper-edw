@@ -16,19 +16,25 @@
 package org.hopper.edw.datavault.hopgui.widget;
 
 import org.apache.hop.core.Const;
+import org.apache.hop.core.Props;
 import org.apache.hop.ui.core.PropsUi;
+import org.apache.hop.ui.util.EnvironmentUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
-import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Text;
 
 /** Markdown source editor with a rendered preview tab. */
 public class MarkdownEditPreviewComposite extends Composite {
 
-  private final StyledText editor;
+  private final Control editor;
+  private final Text webEditor;
   private final MarkdownStyledTextComp preview;
 
   public MarkdownEditPreviewComposite(
@@ -38,17 +44,22 @@ public class MarkdownEditPreviewComposite extends Composite {
     setLayout(new FillLayout());
 
     CTabFolder folder = new CTabFolder(this, SWT.BORDER);
-    PropsUi.setLook(folder, org.apache.hop.core.Props.WIDGET_STYLE_TAB);
+    PropsUi.setLook(folder, Props.WIDGET_STYLE_TAB);
 
     CTabItem editItem = new CTabItem(folder, SWT.NONE);
     editItem.setText(Const.NVL(editTabLabel, "Edit"));
     Composite editComp = new Composite(folder, SWT.NONE);
     PropsUi.setLook(editComp);
     editComp.setLayout(new FillLayout());
-    editor =
-        new StyledText(editComp, SWT.MULTI | SWT.WRAP | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
-    PropsUi.setLook(editor, org.apache.hop.core.Props.WIDGET_STYLE_FIXED);
-    editor.setMargins(4, 4, 4, 4);
+    if (EnvironmentUtils.getInstance().isWeb()) {
+      webEditor =
+          new Text(editComp, SWT.MULTI | SWT.WRAP | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
+      PropsUi.setLook(webEditor, Props.WIDGET_STYLE_FIXED);
+      editor = webEditor;
+    } else {
+      webEditor = null;
+      editor = MarkdownDesktopStyledText.createEditor(editComp);
+    }
     editItem.setControl(editComp);
 
     CTabItem previewItem = new CTabItem(folder, SWT.NONE);
@@ -57,11 +68,11 @@ public class MarkdownEditPreviewComposite extends Composite {
     PropsUi.setLook(previewComp);
     previewComp.setLayout(new FormLayout());
     preview = new MarkdownStyledTextComp(previewComp, SWT.NONE);
-    org.eclipse.swt.layout.FormData fdPreview = new org.eclipse.swt.layout.FormData();
-    fdPreview.left = new org.eclipse.swt.layout.FormAttachment(0, 0);
-    fdPreview.right = new org.eclipse.swt.layout.FormAttachment(100, 0);
-    fdPreview.top = new org.eclipse.swt.layout.FormAttachment(0, 0);
-    fdPreview.bottom = new org.eclipse.swt.layout.FormAttachment(100, 0);
+    FormData fdPreview = new FormData();
+    fdPreview.left = new FormAttachment(0, 0);
+    fdPreview.right = new FormAttachment(100, 0);
+    fdPreview.top = new FormAttachment(0, 0);
+    fdPreview.bottom = new FormAttachment(100, 0);
     preview.setLayoutData(fdPreview);
     previewItem.setControl(previewComp);
 
@@ -70,17 +81,25 @@ public class MarkdownEditPreviewComposite extends Composite {
         SWT.Selection,
         event -> {
           if (folder.getSelection() == previewItem) {
-            preview.setMarkdown(editor.getText());
+            preview.setMarkdown(getText());
           }
         });
   }
 
   public String getText() {
-    return editor.getText();
+    if (webEditor != null) {
+      return webEditor.getText();
+    }
+    return MarkdownDesktopStyledText.getText(editor);
   }
 
   public void setText(String text) {
-    editor.setText(Const.NVL(text, ""));
-    preview.setMarkdown(editor.getText());
+    String value = Const.NVL(text, "");
+    if (webEditor != null) {
+      webEditor.setText(value);
+    } else {
+      MarkdownDesktopStyledText.setText(editor, value);
+    }
+    preview.setMarkdown(value);
   }
 }
