@@ -47,6 +47,10 @@ public interface IDmTable extends IGuiPosition, IBaseMeta, IHasName, IChanged, I
 
   void setDescription(String description);
 
+  String getGrain();
+
+  void setGrain(String grain);
+
   DmTableType getTableType();
 
   void check(

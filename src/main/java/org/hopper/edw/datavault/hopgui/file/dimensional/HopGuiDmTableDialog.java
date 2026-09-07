@@ -81,6 +81,7 @@ import org.hopper.edw.datavault.metadata.dimensional.DmFactJunkDimensionRole;
 import org.hopper.edw.datavault.metadata.dimensional.DmFactMeasure;
 import org.hopper.edw.datavault.metadata.dimensional.DmFactRangeDimensionRole;
 import org.hopper.edw.datavault.metadata.dimensional.DmFactlessFact;
+import org.hopper.edw.datavault.metadata.dimensional.DmFieldDocumentation;
 import org.hopper.edw.datavault.metadata.dimensional.DmJunkDimension;
 import org.hopper.edw.datavault.metadata.dimensional.DmJunkDimensionSupport;
 import org.hopper.edw.datavault.metadata.dimensional.DmJunkHashCodeStrategy;
@@ -121,7 +122,9 @@ public class HopGuiDmTableDialog {
   private Text wName;
   private Text wTableName;
   private Text wDescription;
+  private Text wGrain;
   private Combo wSourceType;
+  private Label wlLogicalSource;
   private MetaSelectionLine<DatabaseMeta> wSourceConnection;
   private Label wlSourceSql;
   private TextComposite wSourceSql;
@@ -363,6 +366,20 @@ public class HopGuiDmTableDialog {
     PropsUi.setLook(wDescription);
     wDescription.setLayoutData(
         new FormDataBuilder().left(middle, 0).top(wTableName, margin).right().result());
+
+    if (factLike) {
+      Label wlGrain = new Label(comp, SWT.RIGHT);
+      wlGrain.setText(BaseMessages.getString(PKG, "HopGuiDmTableDialog.Grain.Label"));
+      wlGrain.setToolTipText(BaseMessages.getString(PKG, "HopGuiDmTableDialog.Grain.ToolTip"));
+      PropsUi.setLook(wlGrain);
+      wlGrain.setLayoutData(
+          new FormDataBuilder().left().top(wDescription, margin).right(middle, -margin).result());
+      wGrain = new Text(comp, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+      PropsUi.setLook(wGrain);
+      wGrain.setToolTipText(BaseMessages.getString(PKG, "HopGuiDmTableDialog.Grain.ToolTip"));
+      wGrain.setLayoutData(
+          new FormDataBuilder().left(middle, 0).top(wDescription, margin).right().result());
+    }
 
     if (dimensionAlias) {
       wTableName.setEditable(false);
@@ -793,6 +810,13 @@ public class HopGuiDmTableDialog {
     wSourceType.setLayoutData(
         new FormDataBuilder().left(middle, 0).top(0, margin).right().result());
 
+    wlLogicalSource = new Label(comp, SWT.WRAP);
+    wlLogicalSource.setText(
+        BaseMessages.getString(PKG, "HopGuiDmTableDialog.LogicalSource.Message"));
+    PropsUi.setLook(wlLogicalSource);
+    wlLogicalSource.setLayoutData(
+        new FormDataBuilder().left().top(wSourceType, margin).right().result());
+
     wlSourceFactTable = new Label(comp, SWT.RIGHT);
     wlSourceFactTable.setText(
         BaseMessages.getString(PKG, "HopGuiDmTableDialog.SourceFactTable.Label"));
@@ -1158,8 +1182,14 @@ public class HopGuiDmTableDialog {
     boolean pipelineSource = isPipelineSourceSelected();
     boolean recordDefinitionSource = isRecordDefinitionSourceSelected();
     boolean dateGeneratorSource = isDateGeneratorSourceSelected();
+    boolean logicalSource = resolveSelectedSourceType() == DmSourceType.NONE;
     boolean sqlSource =
-        !factTableSource && !pipelineSource && !recordDefinitionSource && !dateGeneratorSource;
+        !logicalSource
+            && !factTableSource
+            && !pipelineSource
+            && !recordDefinitionSource
+            && !dateGeneratorSource;
+    setSourceWidgetVisible(wlLogicalSource, logicalSource);
     setSourceWidgetVisible(wlSourceFactTable, factTableSource);
     setSourceWidgetVisible(wSourceFactTable, factTableSource);
     if (factTableSource) {
@@ -1378,7 +1408,15 @@ public class HopGuiDmTableDialog {
             ColumnInfo.COLUMN_TYPE_CCOMBO,
             new String[] {""},
             false);
-    ColumnInfo[] keyFieldColumns = new ColumnInfo[] {naturalKeyFieldColumn};
+    ColumnInfo[] keyFieldColumns =
+        new ColumnInfo[] {naturalKeyFieldColumn, HopGuiDmFieldTableSupport.docsColumn()};
+
+    Button wEditJunkKey = new Button(comp, SWT.PUSH);
+    wEditJunkKey.setText(BaseMessages.getString(PKG, "HopGuiDmTableDialog.EditField.Label"));
+    wEditJunkKey.setToolTipText(
+        BaseMessages.getString(PKG, "HopGuiDmTableDialog.EditField.ToolTip"));
+    PropsUi.setLook(wEditJunkKey);
+    wEditJunkKey.setLayoutData(new FormDataBuilder().left().bottom().result());
 
     Button wGetJunkKeyFields = new Button(comp, SWT.PUSH);
     wGetJunkKeyFields.setText(
@@ -1386,7 +1424,8 @@ public class HopGuiDmTableDialog {
     wGetJunkKeyFields.setToolTipText(
         BaseMessages.getString(PKG, "HopGuiDmTableDialog.JunkKeyFields.GetFields.ToolTip"));
     PropsUi.setLook(wGetJunkKeyFields);
-    wGetJunkKeyFields.setLayoutData(new FormDataBuilder().left().bottom().result());
+    wGetJunkKeyFields.setLayoutData(
+        new FormDataBuilder().left(wEditJunkKey, margin).bottom().result());
     wGetJunkKeyFields.addListener(SWT.Selection, e -> getJunkKeyFieldsFromSource());
 
     wNaturalKeys =
@@ -1399,12 +1438,14 @@ public class HopGuiDmTableDialog {
             null,
             PropsUi.getInstance());
     wNaturalKeys.setLayoutData(
-        new FormDataBuilder()
-            .left()
-            .top(0, margin)
-            .right()
-            .bottom(wGetJunkKeyFields, -margin)
-            .result());
+        new FormDataBuilder().left().top(0, margin).right().bottom(wEditJunkKey, -margin).result());
+    wEditJunkKey.addListener(
+        SWT.Selection,
+        e ->
+            HopGuiDmFieldTableSupport.editSelectedField(
+                shell, wNaturalKeys, HopGuiDmFieldEditorDialog.Kind.NATURAL_KEY));
+    HopGuiDmFieldTableSupport.wireDefaultSelection(
+        shell, wNaturalKeys, HopGuiDmFieldEditorDialog.Kind.NATURAL_KEY);
   }
 
   private void addBridgeDimensionsTab() {
@@ -1453,14 +1494,21 @@ public class HopGuiDmTableDialog {
             ColumnInfo.COLUMN_TYPE_CCOMBO,
             new String[] {""},
             false);
-    ColumnInfo[] naturalKeyColumns = new ColumnInfo[] {naturalKeyFieldColumn};
+    ColumnInfo[] naturalKeyColumns =
+        new ColumnInfo[] {naturalKeyFieldColumn, HopGuiDmFieldTableSupport.docsColumn()};
+
+    Button wEditKey = new Button(comp, SWT.PUSH);
+    wEditKey.setText(BaseMessages.getString(PKG, "HopGuiDmTableDialog.EditField.Label"));
+    wEditKey.setToolTipText(BaseMessages.getString(PKG, "HopGuiDmTableDialog.EditField.ToolTip"));
+    PropsUi.setLook(wEditKey);
+    wEditKey.setLayoutData(new FormDataBuilder().left().bottom().result());
 
     Button wGetKeys = new Button(comp, SWT.PUSH);
     wGetKeys.setText(BaseMessages.getString(PKG, "HopGuiDmTableDialog.NaturalKeys.GetKeys.Label"));
     wGetKeys.setToolTipText(
         BaseMessages.getString(PKG, "HopGuiDmTableDialog.NaturalKeys.GetKeys.ToolTip"));
     PropsUi.setLook(wGetKeys);
-    wGetKeys.setLayoutData(new FormDataBuilder().left().bottom().result());
+    wGetKeys.setLayoutData(new FormDataBuilder().left(wEditKey, margin).bottom().result());
     wGetKeys.addListener(SWT.Selection, e -> getNaturalKeysFromSource());
 
     wNaturalKeys =
@@ -1473,7 +1521,14 @@ public class HopGuiDmTableDialog {
             null,
             PropsUi.getInstance());
     wNaturalKeys.setLayoutData(
-        new FormDataBuilder().left().top(0, margin).right().bottom(wGetKeys, -margin).result());
+        new FormDataBuilder().left().top(0, margin).right().bottom(wEditKey, -margin).result());
+    wEditKey.addListener(
+        SWT.Selection,
+        e ->
+            HopGuiDmFieldTableSupport.editSelectedField(
+                shell, wNaturalKeys, HopGuiDmFieldEditorDialog.Kind.NATURAL_KEY));
+    HopGuiDmFieldTableSupport.wireDefaultSelection(
+        shell, wNaturalKeys, HopGuiDmFieldEditorDialog.Kind.NATURAL_KEY);
   }
 
   private void addAttributesTab() {
@@ -1507,8 +1562,16 @@ public class HopGuiDmTableDialog {
           new ColumnInfo(
               BaseMessages.getString(PKG, "HopGuiDmTableDialog.Attributes.Column.PreviousField"),
               ColumnInfo.COLUMN_TYPE_TEXT,
-              false)
+              false),
+          HopGuiDmFieldTableSupport.docsColumn()
         };
+
+    Button wEditAttribute = new Button(comp, SWT.PUSH);
+    wEditAttribute.setText(BaseMessages.getString(PKG, "HopGuiDmTableDialog.EditField.Label"));
+    wEditAttribute.setToolTipText(
+        BaseMessages.getString(PKG, "HopGuiDmTableDialog.EditField.ToolTip"));
+    PropsUi.setLook(wEditAttribute);
+    wEditAttribute.setLayoutData(new FormDataBuilder().left().bottom().result());
 
     Button wGetAttributes = new Button(comp, SWT.PUSH);
     wGetAttributes.setText(
@@ -1516,7 +1579,8 @@ public class HopGuiDmTableDialog {
     wGetAttributes.setToolTipText(
         BaseMessages.getString(PKG, "HopGuiDmTableDialog.Attributes.GetAttributes.ToolTip"));
     PropsUi.setLook(wGetAttributes);
-    wGetAttributes.setLayoutData(new FormDataBuilder().left().bottom().result());
+    wGetAttributes.setLayoutData(
+        new FormDataBuilder().left(wEditAttribute, margin).bottom().result());
     wGetAttributes.addListener(SWT.Selection, e -> getAttributesFromSource());
 
     wAttributes =
@@ -1533,8 +1597,15 @@ public class HopGuiDmTableDialog {
             .left()
             .top(0, margin)
             .right()
-            .bottom(wGetAttributes, -margin)
+            .bottom(wEditAttribute, -margin)
             .result());
+    wEditAttribute.addListener(
+        SWT.Selection,
+        e ->
+            HopGuiDmFieldTableSupport.editSelectedField(
+                shell, wAttributes, HopGuiDmFieldEditorDialog.Kind.ATTRIBUTE));
+    HopGuiDmFieldTableSupport.wireDefaultSelection(
+        shell, wAttributes, HopGuiDmFieldEditorDialog.Kind.ATTRIBUTE);
   }
 
   private void addOutriggersTab() {
@@ -1693,8 +1764,16 @@ public class HopGuiDmTableDialog {
               BaseMessages.getString(PKG, "HopGuiDmTableDialog.Measures.Column.Additive"),
               ColumnInfo.COLUMN_TYPE_CCOMBO,
               new String[] {"Y", "N"},
-              true)
+              true),
+          HopGuiDmFieldTableSupport.docsColumn()
         };
+
+    Button wEditMeasure = new Button(comp, SWT.PUSH);
+    wEditMeasure.setText(BaseMessages.getString(PKG, "HopGuiDmTableDialog.EditField.Label"));
+    wEditMeasure.setToolTipText(
+        BaseMessages.getString(PKG, "HopGuiDmTableDialog.EditField.ToolTip"));
+    PropsUi.setLook(wEditMeasure);
+    wEditMeasure.setLayoutData(new FormDataBuilder().left().bottom().result());
 
     Button wGetMeasures = new Button(comp, SWT.PUSH);
     wGetMeasures.setText(
@@ -1702,7 +1781,7 @@ public class HopGuiDmTableDialog {
     wGetMeasures.setToolTipText(
         BaseMessages.getString(PKG, "HopGuiDmTableDialog.Measures.GetMeasures.ToolTip"));
     PropsUi.setLook(wGetMeasures);
-    wGetMeasures.setLayoutData(new FormDataBuilder().left().bottom().result());
+    wGetMeasures.setLayoutData(new FormDataBuilder().left(wEditMeasure, margin).bottom().result());
     wGetMeasures.addListener(SWT.Selection, e -> getMeasuresFromSource());
 
     wMeasures =
@@ -1715,7 +1794,14 @@ public class HopGuiDmTableDialog {
             null,
             PropsUi.getInstance());
     wMeasures.setLayoutData(
-        new FormDataBuilder().left().top(0, margin).right().bottom(wGetMeasures, -margin).result());
+        new FormDataBuilder().left().top(0, margin).right().bottom(wEditMeasure, -margin).result());
+    wEditMeasure.addListener(
+        SWT.Selection,
+        e ->
+            HopGuiDmFieldTableSupport.editSelectedField(
+                shell, wMeasures, HopGuiDmFieldEditorDialog.Kind.MEASURE));
+    HopGuiDmFieldTableSupport.wireDefaultSelection(
+        shell, wMeasures, HopGuiDmFieldEditorDialog.Kind.MEASURE);
   }
 
   private void addDegenerateDimensionsTab() {
@@ -1732,6 +1818,13 @@ public class HopGuiDmTableDialog {
             new String[] {""},
             false);
 
+    Button wEditDegenerate = new Button(comp, SWT.PUSH);
+    wEditDegenerate.setText(BaseMessages.getString(PKG, "HopGuiDmTableDialog.EditField.Label"));
+    wEditDegenerate.setToolTipText(
+        BaseMessages.getString(PKG, "HopGuiDmTableDialog.EditField.ToolTip"));
+    PropsUi.setLook(wEditDegenerate);
+    wEditDegenerate.setLayoutData(new FormDataBuilder().left().bottom().result());
+
     Button wGetDegenerateDimensions = new Button(comp, SWT.PUSH);
     wGetDegenerateDimensions.setText(
         BaseMessages.getString(
@@ -1740,7 +1833,8 @@ public class HopGuiDmTableDialog {
         BaseMessages.getString(
             PKG, "HopGuiDmTableDialog.DegenerateDimensions.GetDegenerateDimensions.ToolTip"));
     PropsUi.setLook(wGetDegenerateDimensions);
-    wGetDegenerateDimensions.setLayoutData(new FormDataBuilder().left().bottom().result());
+    wGetDegenerateDimensions.setLayoutData(
+        new FormDataBuilder().left(wEditDegenerate, margin).bottom().result());
     wGetDegenerateDimensions.addListener(SWT.Selection, e -> getDegenerateDimensionsFromSource());
 
     wDegenerateDimensions =
@@ -1748,7 +1842,9 @@ public class HopGuiDmTableDialog {
             variables,
             comp,
             SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI,
-            new ColumnInfo[] {degenerateDimensionFieldColumn},
+            new ColumnInfo[] {
+              degenerateDimensionFieldColumn, HopGuiDmFieldTableSupport.docsColumn()
+            },
             1,
             null,
             PropsUi.getInstance());
@@ -1757,8 +1853,15 @@ public class HopGuiDmTableDialog {
             .left()
             .top(0, margin)
             .right()
-            .bottom(wGetDegenerateDimensions, -margin)
+            .bottom(wEditDegenerate, -margin)
             .result());
+    wEditDegenerate.addListener(
+        SWT.Selection,
+        e ->
+            HopGuiDmFieldTableSupport.editSelectedField(
+                shell, wDegenerateDimensions, HopGuiDmFieldEditorDialog.Kind.DEGENERATE));
+    HopGuiDmFieldTableSupport.wireDefaultSelection(
+        shell, wDegenerateDimensions, HopGuiDmFieldEditorDialog.Kind.DEGENERATE);
   }
 
   private void addRangeBandsTab() {
@@ -1953,6 +2056,9 @@ public class HopGuiDmTableDialog {
     if (!Utils.isEmpty(input.getDescription())) {
       wDescription.setText(input.getDescription());
     }
+    if (wGrain != null && !Utils.isEmpty(input.getGrain())) {
+      wGrain.setText(input.getGrain());
+    }
     if (!dimensionAlias && !range) {
       EnumDialogSupport.selectCombo(wSourceType, input.getSourceOrDefault().resolveSourceType());
       if (!Utils.isEmpty(input.getSourceOrDefault().getSourceConnection())) {
@@ -2057,7 +2163,7 @@ public class HopGuiDmTableDialog {
           continue;
         }
         TableItem item = new TableItem(wNaturalKeys.table, SWT.NONE);
-        item.setText(1, keyField.getFieldName());
+        HopGuiDmFieldTableSupport.populateNaturalKey(item, keyField);
       }
       wNaturalKeys.optimizeTableView();
     }
@@ -2112,7 +2218,7 @@ public class HopGuiDmTableDialog {
           continue;
         }
         TableItem item = new TableItem(wNaturalKeys.table, SWT.NONE);
-        item.setText(1, naturalKey.getFieldName());
+        HopGuiDmFieldTableSupport.populateNaturalKey(item, naturalKey);
       }
       wNaturalKeys.optimizeTableView();
       wAttributes.clearAll();
@@ -2121,18 +2227,7 @@ public class HopGuiDmTableDialog {
           continue;
         }
         TableItem item = new TableItem(wAttributes.table, SWT.NONE);
-        String sourceField =
-            Utils.isEmpty(attribute.getSourceFieldName())
-                ? attribute.getFieldName()
-                : attribute.getSourceFieldName();
-        item.setText(1, sourceField);
-        item.setText(2, attribute.getFieldName());
-        if (attribute.getScdUpdatePolicy() != null) {
-          item.setText(3, EnumDialogSupport.descriptionOf(attribute.getScdUpdatePolicy()));
-        }
-        if (!Utils.isEmpty(attribute.getPreviousFieldName())) {
-          item.setText(4, attribute.getPreviousFieldName());
-        }
+        HopGuiDmFieldTableSupport.populateAttribute(item, attribute);
       }
       wAttributes.optimizeTableView();
       wOutriggers.clearAll();
@@ -2184,8 +2279,7 @@ public class HopGuiDmTableDialog {
             continue;
           }
           TableItem item = new TableItem(wMeasures.table, SWT.NONE);
-          item.setText(1, measure.getFieldName());
-          item.setText(2, measure.isAdditive() ? "Y" : "N");
+          HopGuiDmFieldTableSupport.populateMeasure(item, measure);
         }
         wMeasures.optimizeTableView();
         refreshMeasureComboChoices();
@@ -2199,7 +2293,7 @@ public class HopGuiDmTableDialog {
             continue;
           }
           TableItem item = new TableItem(wDegenerateDimensions.table, SWT.NONE);
-          item.setText(1, degenerateDimension.getFieldName());
+          HopGuiDmFieldTableSupport.populateDegenerate(item, degenerateDimension);
         }
         wDegenerateDimensions.optimizeTableView();
         refreshDegenerateDimensionComboChoices();
@@ -2298,6 +2392,9 @@ public class HopGuiDmTableDialog {
   private void applyWidgetsToTable(IDmTable target, DimensionalModel contextModel) {
     target.setName(wName.getText());
     target.setDescription(wDescription.getText());
+    if (wGrain != null) {
+      target.setGrain(wGrain.getText());
+    }
     if (!dimensionAlias && !range) {
       target.setTableName(wTableName.getText());
       target
@@ -2379,9 +2476,9 @@ public class HopGuiDmTableDialog {
       }
       junkDimension.getKeyFields().clear();
       for (TableItem item : wNaturalKeys.getNonEmptyItems()) {
-        String fieldName = item.getText(1);
-        if (!Utils.isEmpty(fieldName)) {
-          junkDimension.getKeyFields().add(new DmNaturalKeyField(fieldName));
+        DmNaturalKeyField keyField = HopGuiDmFieldTableSupport.readNaturalKey(item);
+        if (keyField != null) {
+          junkDimension.getKeyFields().add(keyField);
         }
       }
     }
@@ -2425,32 +2522,17 @@ public class HopGuiDmTableDialog {
       }
       dmDimension.getNaturalKeys().clear();
       for (TableItem item : wNaturalKeys.getNonEmptyItems()) {
-        String fieldName = item.getText(1);
-        if (!Utils.isEmpty(fieldName)) {
-          dmDimension.getNaturalKeys().add(new DmNaturalKeyField(fieldName));
+        DmNaturalKeyField naturalKey = HopGuiDmFieldTableSupport.readNaturalKey(item);
+        if (naturalKey != null) {
+          dmDimension.getNaturalKeys().add(naturalKey);
         }
       }
       dmDimension.getAttributes().clear();
       for (TableItem item : wAttributes.getNonEmptyItems()) {
-        String sourceFieldName = item.getText(1);
-        String targetFieldName = item.getText(2);
-        if (Utils.isEmpty(targetFieldName)) {
-          continue;
+        DmDimensionAttribute attribute = HopGuiDmFieldTableSupport.readAttribute(item);
+        if (attribute != null) {
+          dmDimension.getAttributes().add(attribute);
         }
-        if (Utils.isEmpty(sourceFieldName)) {
-          sourceFieldName = targetFieldName;
-        }
-        DmScdUpdatePolicy policy =
-            EnumDialogSupport.lookupText(
-                item.getText(3), DmScdUpdatePolicy.class, DmScdUpdatePolicy.TYPE1);
-        DmDimensionAttribute attribute = new DmDimensionAttribute(targetFieldName, policy);
-        if (!sourceFieldName.equals(targetFieldName)) {
-          attribute.setSourceFieldName(sourceFieldName);
-        }
-        if (!Utils.isEmpty(item.getText(4))) {
-          attribute.setPreviousFieldName(item.getText(4));
-        }
-        dmDimension.getAttributes().add(attribute);
       }
       refreshDerivedLoadStrategyLabel(dmDimension);
       dmDimension.getOutriggers().clear();
@@ -2667,12 +2749,10 @@ public class HopGuiDmTableDialog {
       return measures;
     }
     for (TableItem item : wMeasures.getNonEmptyItems()) {
-      String fieldName = item.getText(1);
-      if (Utils.isEmpty(fieldName)) {
-        continue;
+      DmFactMeasure measure = HopGuiDmFieldTableSupport.readMeasure(item);
+      if (measure != null) {
+        measures.add(measure);
       }
-      boolean additive = !"N".equalsIgnoreCase(item.getText(2));
-      measures.add(new DmFactMeasure(fieldName, additive));
     }
     return measures;
   }
@@ -2683,11 +2763,10 @@ public class HopGuiDmTableDialog {
       return degenerateDimensions;
     }
     for (TableItem item : wDegenerateDimensions.getNonEmptyItems()) {
-      String fieldName = item.getText(1);
-      if (Utils.isEmpty(fieldName)) {
-        continue;
+      DmFactDegenerateDimension degenerate = HopGuiDmFieldTableSupport.readDegenerate(item);
+      if (degenerate != null) {
+        degenerateDimensions.add(degenerate);
       }
-      degenerateDimensions.add(new DmFactDegenerateDimension(fieldName));
     }
     return degenerateDimensions;
   }
@@ -3138,6 +3217,7 @@ public class HopGuiDmTableDialog {
       item.setText(1, fieldName);
       item.setText(2, fieldName);
       item.setText(3, defaultPolicy);
+      HopGuiDmFieldTableSupport.attachDocumentation(item, 5, new DmFieldDocumentation());
     }
     wAttributes.optimizeTableView();
     refreshDerivedLoadStrategyFromUi();

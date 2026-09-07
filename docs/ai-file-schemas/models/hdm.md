@@ -30,9 +30,14 @@ Kimball-style dimensional model: dimensions, facts, junk dimensions, bridges, di
 
 ## Fact essentials
 
-- Grain description (in description or naming)  
+- `grain` — Kimball grain sentence (also allowed empty on a logical contract; Check model warns)
 - `dimension_role` entries: `dimensionTableName` / `referencedDimensionName`, `foreignKeyColumn`, source fields, lookup flags  
 - Measure / key fields as defined in the sample  
+
+## Logical contracts and field documentation
+
+- Table `sourceType` may be `NONE` (logical: no load source). Default remains `SQL` for existing files.
+- Attributes, natural keys, measures, and degenerates may include nested `documentation`: `description`, Markdown `notes`, Markdown `requirements`, and `required` (Y/N, default required).  
 
 ## Anti-patterns
 

@@ -126,6 +126,7 @@ import org.hopper.edw.datavault.metadata.dimensional.DmJunkDimensionSupport;
 import org.hopper.edw.datavault.metadata.dimensional.DmLayoutSupport;
 import org.hopper.edw.datavault.metadata.dimensional.DmPeriodicSnapshotFact;
 import org.hopper.edw.datavault.metadata.dimensional.DmRangeDimension;
+import org.hopper.edw.datavault.metadata.dimensional.DmSourceType;
 import org.hopper.edw.datavault.metadata.dimensional.DmSurrogateKeyStrategy;
 import org.hopper.edw.datavault.metadata.dimensional.DmSurrogateKeySupport;
 import org.hopper.edw.datavault.metadata.dimensional.DmTableBase;
@@ -976,6 +977,10 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     String name = getUniqueTableName(table.getTableType().name());
     table.setName(name);
     table.setTableName(name.toLowerCase().replace(' ', '_'));
+    if (table.getSourceOrDefault().resolveSourceType() == DmSourceType.SQL
+        && Utils.isEmpty(table.getSourceOrDefault().getSourceSql())) {
+      table.getSourceOrDefault().setSourceType(DmSourceType.NONE);
+    }
     PropsUi.setLocation(table, click != null ? click.x : 50, click != null ? click.y : 50);
     model.getTables().add(table);
     editDmTable(table);

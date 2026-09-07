@@ -369,8 +369,24 @@ public class ActionDimensionalUpdate extends ActionBase implements Cloneable, IA
         }
       }
 
-      List<IDmTable> tables = filterTables(dmModel.getTables());
+      List<IDmTable> selectedTables = filterTables(dmModel.getTables());
+      List<IDmTable> tables = new ArrayList<>();
+      int skippedLogical = 0;
+      for (IDmTable table : selectedTables) {
+        if (table != null && table.getSourceOrDefault().isLogicalSource()) {
+          logBasic(
+              BaseMessages.getString(
+                  PKG, "ActionDimensionalUpdate.Log.SkippingLogicalTable", table.getName()));
+          skippedLogical++;
+        } else if (table != null) {
+          tables.add(table);
+        }
+      }
       if (tables.isEmpty()) {
+        if (skippedLogical > 0) {
+          logError(BaseMessages.getString(PKG, "ActionDimensionalUpdate.Error.NoLoadReadyTables"));
+          return finishExecution(result, false, 1, dmModel);
+        }
         logBasic(BaseMessages.getString(PKG, "ActionDimensionalUpdate.Log.NoTables"));
         return finishExecution(result, true, 0, dmModel);
       }

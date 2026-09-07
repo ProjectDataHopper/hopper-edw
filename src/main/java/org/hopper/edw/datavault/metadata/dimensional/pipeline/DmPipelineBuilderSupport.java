@@ -122,6 +122,12 @@ public final class DmPipelineBuilderSupport {
 
       DimensionalConfiguration config = model.getConfigurationOrDefault();
       DmSourceConfiguration source = table.getSourceOrDefault();
+      if (source.isLogicalSource()) {
+        throw new HopException(
+            "Dimensional table "
+                + table.getName()
+                + " is a logical contract (no load source) and cannot generate a pipeline");
+      }
       if (source.isSqlSource()) {
         String sourceSql = source.resolveSourceSql(variables);
         if (Utils.isEmpty(sourceSql)) {

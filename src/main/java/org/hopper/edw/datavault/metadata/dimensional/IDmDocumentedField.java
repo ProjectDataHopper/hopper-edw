@@ -15,22 +15,23 @@
  */
 package org.hopper.edw.datavault.metadata.dimensional;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.apache.hop.metadata.api.HopMetadataProperty;
+/** Dimensional field that can carry business documentation. */
+public interface IDmDocumentedField {
 
-/** Natural (business) key column on a dimension. */
-@Getter
-@Setter
-@NoArgsConstructor
-public class DmNaturalKeyField implements IDmDocumentedField {
+  String getFieldName();
 
-  @HopMetadataProperty private String fieldName;
+  void setFieldName(String fieldName);
 
-  @HopMetadataProperty private DmFieldDocumentation documentation;
+  DmFieldDocumentation getDocumentation();
 
-  public DmNaturalKeyField(String fieldName) {
-    this.fieldName = fieldName;
+  void setDocumentation(DmFieldDocumentation documentation);
+
+  default DmFieldDocumentation getDocumentationOrDefault() {
+    DmFieldDocumentation documentation = getDocumentation();
+    if (documentation == null) {
+      documentation = new DmFieldDocumentation();
+      setDocumentation(documentation);
+    }
+    return documentation;
   }
 }

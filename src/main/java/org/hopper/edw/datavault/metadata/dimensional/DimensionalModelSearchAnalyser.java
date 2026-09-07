@@ -95,6 +95,14 @@ public class DimensionalModelSearchAnalyser extends BaseSearchableAnalyser<Dimen
           "dimensional table description",
           table.getDescription(),
           componentName);
+      matchProperty(
+          searchable,
+          results,
+          searchQuery,
+          "dimensional table grain",
+          table.getGrain(),
+          componentName);
+      matchDocumentedFields(searchable, results, searchQuery, table, componentName);
       matchObjectFields(
           searchable, results, searchQuery, table, "dimensional table property", componentName);
     }
@@ -109,5 +117,72 @@ public class DimensionalModelSearchAnalyser extends BaseSearchableAnalyser<Dimen
     }
 
     return results;
+  }
+
+  private void matchDocumentedFields(
+      ISearchable<DimensionalModel> searchable,
+      List<ISearchResult> results,
+      ISearchQuery searchQuery,
+      IDmTable table,
+      String componentName) {
+    if (table instanceof DmDimension dimension) {
+      for (DmNaturalKeyField key : dimension.getNaturalKeysOrEmpty()) {
+        matchFieldDocumentation(searchable, results, searchQuery, key, componentName);
+      }
+      for (DmDimensionAttribute attribute : dimension.getAttributesOrEmpty()) {
+        matchFieldDocumentation(searchable, results, searchQuery, attribute, componentName);
+      }
+    }
+    if (table instanceof IDmFactLikeTable fact) {
+      for (DmFactMeasure measure : fact.getMeasuresOrEmpty()) {
+        matchFieldDocumentation(searchable, results, searchQuery, measure, componentName);
+      }
+      for (DmFactDegenerateDimension degenerate : fact.getDegenerateDimensionsOrEmpty()) {
+        matchFieldDocumentation(searchable, results, searchQuery, degenerate, componentName);
+      }
+    }
+  }
+
+  private void matchFieldDocumentation(
+      ISearchable<DimensionalModel> searchable,
+      List<ISearchResult> results,
+      ISearchQuery searchQuery,
+      IDmDocumentedField field,
+      String componentName) {
+    if (field == null) {
+      return;
+    }
+    matchProperty(
+        searchable,
+        results,
+        searchQuery,
+        "dimensional field name",
+        field.getFieldName(),
+        componentName);
+    DmFieldDocumentation docs = field.getDocumentation();
+    if (docs == null) {
+      return;
+    }
+    matchProperty(
+        searchable,
+        results,
+        searchQuery,
+        "dimensional field description",
+        docs.getDescription(),
+        componentName);
+    matchProperty(
+        searchable,
+        results,
+        searchQuery,
+        "dimensional field notes",
+        docs.getNotes(),
+        componentName);
+    matchProperty(
+        searchable,
+        results,
+        searchQuery,
+        "dimensional field requirements",
+        docs.getRequirements(),
+        componentName);
   }
 }

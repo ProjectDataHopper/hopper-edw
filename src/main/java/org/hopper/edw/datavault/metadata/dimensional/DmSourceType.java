@@ -23,6 +23,11 @@ import org.apache.hop.metadata.api.IEnumHasCodeAndDescription;
 /** Staging source type for a dimensional table load pipeline. */
 @Getter
 public enum DmSourceType implements IEnumHasCodeAndDescription {
+  /**
+   * Logical contract: attributes and grain without a load source. Check model allows this;
+   * Dimensional Update skips the table.
+   */
+  NONE("NONE", BaseMessages.getString(DmSourceType.class, "DmSourceType.None")),
   SQL("SQL", BaseMessages.getString(DmSourceType.class, "DmSourceType.Sql")),
   PIPELINE("PIPELINE", BaseMessages.getString(DmSourceType.class, "DmSourceType.Pipeline")),
   RECORD_DEFINITION(

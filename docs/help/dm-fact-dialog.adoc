@@ -10,13 +10,17 @@ Edit a **fact** (transaction, factless, snapshot, or aggregate) on a `.hdm` canv
 
 == General and source
 
-Name, physical table, and staging source (SQL, pipeline, or catalog record).
+Name, physical table, Kimball **grain** sentence, and staging source (none / logical, SQL, pipeline, or catalog record).
 
 == Grain
+
+Write the grain in words on the General tab (for example `one row per order line`). **Check model** warns when it is empty.
 
 * **Dimension roles** — Conformed dimensions (including date aliases) with join source fields and optional lookup date.
 * **Range / junk roles** — Band and flag dimensions.
 * **Measures** — Additive / semi-additive facts.
 * **Degenerate dimensions** — Degenerate keys stored on the fact.
 
-**Validate** checks grain completeness before Dimensional Update.
+**Edit field...** on measures and degenerates opens the link:dm-field-dialog.adoc[field editor] for Markdown notes and requirements.
+
+**Validate** checks grain completeness before Dimensional Update. A **None (logical)** source is a contract only: Check model warns, and Dimensional Update skips the table.

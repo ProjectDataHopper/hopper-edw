@@ -1,0 +1,24 @@
+= Dimensional field
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../dimensional-modeler-overview.adoc[dimensional-modeler-overview].
+
+Edit a dimension attribute, natural key, measure, or degenerate from the table dialog (**Edit field...** or double-click a row).
+
+== Field
+
+Name, optional source field and SCD policy (attributes), additive flag (measures), and whether the field is **required** for later gap analysis.
+
+**Description** is a short business meaning. Longer text belongs on the Notes and Requirements tabs.
+
+== Notes and Requirements (Markdown)
+
+Both tabs are Markdown (CommonMark with tables, task lists, and footnotes). Use **Edit** for the source and **Preview** to see how it will render in project documentation.
+
+* **Notes** — definition, examples, caveats for analysts.
+* **Requirements** — source-to-target comments for the warehouse team (the old Excel mapping notes). Example: look up `color_description` in the `codes` table on `color_code`.
+
+These fields are stored on the `.hdm` table. They do not generate load SQL yet.

@@ -25,6 +25,7 @@ import org.hopper.edw.datavault.documentation.model.TableDoc.ColumnDoc;
 import org.hopper.edw.datavault.documentation.render.DocPaths;
 import org.hopper.edw.datavault.documentation.render.HtmlEscaper;
 import org.hopper.edw.datavault.documentation.render.HtmlPageWriter;
+import org.hopper.edw.datavault.documentation.render.MarkdownNotesRenderer;
 import org.hopper.edw.datavault.lineage.FieldContribution;
 import org.hopper.edw.datavault.lineage.FieldLineage;
 import org.hopper.edw.datavault.lineage.LineageReason;
@@ -50,6 +51,9 @@ public final class TableDocWriter {
     HtmlPageWriter.row(rows, "Type", table.getTableType());
     HtmlPageWriter.row(rows, "Layer", table.getLayer());
     HtmlPageWriter.row(rows, "Description", table.getDescription());
+    if (!Utils.isEmpty(table.getGrain())) {
+      HtmlPageWriter.row(rows, "Grain", table.getGrain());
+    }
     if (!Utils.isEmpty(table.getModelPageHref())) {
       HtmlPageWriter.rowHtml(
           rows,
@@ -68,6 +72,7 @@ public final class TableDocWriter {
     StringBuilder body = new StringBuilder();
     body.append(HtmlPageWriter.propertyTable(rows));
     body.append(columnsSection(table));
+    body.append(fieldDocumentationSection(table));
     body.append(lineageSection(htmlPath, table.getLineage()));
     PageSupport.writePage(
         site,
@@ -94,6 +99,34 @@ public final class TableDocWriter {
     return "<section id=\"columns\"><h2>Columns</h2>\n"
         + HtmlPageWriter.dataTable(headers, rows, false)
         + "</section>\n";
+  }
+
+  private static String fieldDocumentationSection(TableDoc table) {
+    StringBuilder html = new StringBuilder();
+    boolean any = false;
+    for (ColumnDoc column : table.getColumns()) {
+      if (column == null
+          || (Utils.isEmpty(column.getNotes()) && Utils.isEmpty(column.getRequirements()))) {
+        continue;
+      }
+      if (!any) {
+        html.append("<section id=\"field-docs\"><h2>Field notes and requirements</h2>\n");
+        any = true;
+      }
+      html.append("<h3>").append(HtmlEscaper.escape(nvl(column.getName(), ""))).append("</h3>\n");
+      if (!Utils.isEmpty(column.getNotes())) {
+        html.append("<h4>Notes</h4>\n");
+        html.append(MarkdownNotesRenderer.toHtml(column.getNotes()));
+      }
+      if (!Utils.isEmpty(column.getRequirements())) {
+        html.append("<h4>Requirements</h4>\n");
+        html.append(MarkdownNotesRenderer.toHtml(column.getRequirements()));
+      }
+    }
+    if (any) {
+      html.append("</section>\n");
+    }
+    return html.toString();
   }
 
   private static String lineageSection(String htmlPath, TableLineage lineage) {

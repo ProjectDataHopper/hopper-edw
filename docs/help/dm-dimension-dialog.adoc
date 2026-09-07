@@ -10,7 +10,7 @@ Edit a Kimball **dimension** on a `.hdm` canvas.
 
 == General
 
-Name, physical table, description, and staging **source** (SQL, pipeline, record definition, or date generator).
+Name, physical table, description, and staging **source** (none / logical, SQL, pipeline, record definition, or date generator).
 
 == Keys and attributes
 
@@ -19,6 +19,11 @@ Name, physical table, description, and staging **source** (SQL, pipeline, record
 * **Attributes** — Type 1 / Type 2 / hybrid columns and SCD policy.
 * **Outriggers** — Optional snowflake references.
 
+**Edit field...** (or double-click a row) opens the link:dm-field-dialog.adoc[field editor] for Markdown notes and requirements.
+
 == Source
 
-Configure how staging rows are read for generated **Dimensional Update** pipelines. Validation requires a complete source for the selected type.
+Configure how staging rows are read for generated **Dimensional Update** pipelines.
+
+* **None (logical)** — sketch the dimension without a load source. **Check model** warns; **Dimensional Update** skips the table.
+* Other types still require a complete source before a load.

@@ -24,6 +24,8 @@ A dimensional model contains:
 * **Tables** — dimensions, facts, junk dimensions, bridges, factless facts, snapshot facts, aggregates
 * **Conformed dimension registry** — logical name → physical dimension table
 * **Notes** — canvas documentation only
+* **Logical contracts** — source type **None (logical)** lets you sketch stars and field lists before staging SQL exists. Canvas cards show a **Logical** badge. **Check model** warns; **Dimensional Update** skips those tables until a load source is set.
+* **Field documentation** — **Edit field...** on attributes, natural keys, measures, and degenerates stores a description plus Markdown **notes** and **requirements** (the old Excel mapping comments). Project documentation renders that Markdown.
 
 Optional DDL constraints (both off by default):
 

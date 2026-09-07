@@ -24,9 +24,11 @@ import org.apache.hop.metadata.api.HopMetadataProperty;
 @Getter
 @Setter
 @NoArgsConstructor
-public class DmFactDegenerateDimension {
+public class DmFactDegenerateDimension implements IDmDocumentedField {
 
   @HopMetadataProperty private String fieldName;
+
+  @HopMetadataProperty private DmFieldDocumentation documentation;
 
   public DmFactDegenerateDimension(String fieldName) {
     this.fieldName = fieldName;

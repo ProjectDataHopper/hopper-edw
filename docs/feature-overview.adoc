@@ -194,6 +194,14 @@ For a slide-style executive summary, see link:presentations/hop-data-vault-overv
 |Available
 |link:dimensional-modeler-overview.adoc[Dimensional modeler]
 
+|Logical dimensional contracts (source type None)
+|Available
+|Sketch dims/facts without a load source; Check model warns; Dimensional Update skips. link:dimensional-modeler-overview.adoc[Dimensional modeler]
+
+|Dimensional field notes and requirements (Markdown)
+|Available
+|Field editor on attributes, keys, measures, degenerates; project-doc renders Markdown. link:help/dm-field-dialog.adoc[Field editor]
+
 |Dimensional Update / Publish actions
 |Available
 |link:dimensional-update-action.adoc[Dimensional Update and Publish]

@@ -45,6 +45,14 @@ import org.hopper.edw.datavault.metadata.IDvTable;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.IBvTable;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
+import org.hopper.edw.datavault.metadata.dimensional.DmDimension;
+import org.hopper.edw.datavault.metadata.dimensional.DmDimensionAttribute;
+import org.hopper.edw.datavault.metadata.dimensional.DmFactDegenerateDimension;
+import org.hopper.edw.datavault.metadata.dimensional.DmFactMeasure;
+import org.hopper.edw.datavault.metadata.dimensional.DmFieldDocumentation;
+import org.hopper.edw.datavault.metadata.dimensional.DmNaturalKeyField;
+import org.hopper.edw.datavault.metadata.dimensional.IDmDocumentedField;
+import org.hopper.edw.datavault.metadata.dimensional.IDmFactLikeTable;
 import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapDocument;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapNode;
@@ -306,6 +314,7 @@ public final class ModelDocWriter {
       doc.setPhysicalName(nvl(table.getTableName(), table.getName()));
       doc.setTableType(table.getTableType() != null ? table.getTableType().name() : "TABLE");
       doc.setDescription(table.getDescription());
+      doc.setGrain(table.getGrain());
       doc.setModelName(name);
       doc.setModelPageHref(htmlPath);
       if (lineage != null) {
@@ -314,6 +323,7 @@ public final class ModelDocWriter {
           copyLineageColumns(doc);
         }
       }
+      addDimensionalFieldColumns(doc, table);
       site.addTable(doc);
       addTableSearch(site, doc);
     }
@@ -440,6 +450,58 @@ public final class ModelDocWriter {
       }
     }
     return names;
+  }
+
+  private static void addDimensionalFieldColumns(TableDoc doc, IDmTable table) {
+    if (doc == null || table == null) {
+      return;
+    }
+    if (table instanceof DmDimension dimension) {
+      for (DmNaturalKeyField key : dimension.getNaturalKeysOrEmpty()) {
+        addDocumentedColumn(doc, key);
+      }
+      for (DmDimensionAttribute attribute : dimension.getAttributesOrEmpty()) {
+        addDocumentedColumn(doc, attribute);
+      }
+    }
+    if (table instanceof IDmFactLikeTable fact) {
+      for (DmFactMeasure measure : fact.getMeasuresOrEmpty()) {
+        addDocumentedColumn(doc, measure);
+      }
+      for (DmFactDegenerateDimension degenerate : fact.getDegenerateDimensionsOrEmpty()) {
+        addDocumentedColumn(doc, degenerate);
+      }
+    }
+  }
+
+  private static void addDocumentedColumn(TableDoc doc, IDmDocumentedField field) {
+    if (field == null || Utils.isEmpty(field.getFieldName())) {
+      return;
+    }
+    ColumnDoc column = findColumn(doc, field.getFieldName());
+    if (column == null) {
+      column = new ColumnDoc();
+      column.setName(field.getFieldName());
+      doc.getColumns().add(column);
+    }
+    DmFieldDocumentation documentation = field.getDocumentation();
+    if (documentation == null) {
+      return;
+    }
+    if (Utils.isEmpty(column.getDescription())) {
+      column.setDescription(documentation.getDescription());
+    }
+    column.setNotes(documentation.getNotes());
+    column.setRequirements(documentation.getRequirements());
+  }
+
+  private static ColumnDoc findColumn(TableDoc doc, String name) {
+    for (ColumnDoc column : doc.getColumns()) {
+      if (column != null && name.equalsIgnoreCase(column.getName())) {
+        return column;
+      }
+    }
+    return null;
   }
 
   private static void copyLineageColumns(TableDoc doc) {

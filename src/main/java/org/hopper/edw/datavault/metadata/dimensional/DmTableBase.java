@@ -53,6 +53,11 @@ public abstract class DmTableBase extends HopMetadataBase implements IHopMetadat
 
   @HopMetadataProperty protected String description;
 
+  /**
+   * Kimball grain sentence for facts (and unused on dimensions). Example: one row per order line.
+   */
+  @HopMetadataProperty protected String grain;
+
   @HopMetadataProperty protected DmTableType tableType;
 
   @HopMetadataProperty(inline = true)
@@ -85,12 +90,17 @@ public abstract class DmTableBase extends HopMetadataBase implements IHopMetadat
     return source;
   }
 
+  /** True when this table is a logical contract (no executable staging source). */
+  public boolean isLogicalContract() {
+    return getSourceOrDefault().isLogicalSource();
+  }
+
   @Override
   public List<String> generateBuildDdl(
       IHopMetadataProvider metadataProvider, IVariables variables, DimensionalModel model)
       throws HopException {
     List<String> result = new ArrayList<>();
-    if (metadataProvider == null || model == null) {
+    if (metadataProvider == null || model == null || isLogicalContract()) {
       return result;
     }
 

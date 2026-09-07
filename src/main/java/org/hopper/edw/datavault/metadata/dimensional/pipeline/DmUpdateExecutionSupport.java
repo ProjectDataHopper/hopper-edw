@@ -26,6 +26,20 @@ public final class DmUpdateExecutionSupport {
 
   private DmUpdateExecutionSupport() {}
 
+  /**
+   * True when Dimensional Update can generate a load pipeline for the table. Logical contracts,
+   * aliases, and range dimensions are not load-ready.
+   */
+  public static boolean isLoadReady(IDmTable table) {
+    if (table == null || table.getTableType() == null) {
+      return false;
+    }
+    return switch (table.getTableType()) {
+      case DIMENSION_ALIAS, RANGE_DIMENSION -> false;
+      default -> !table.getSourceOrDefault().isLogicalSource();
+    };
+  }
+
   /** Returns dimensions, junk dimensions, bridges, then fact variants (model order within each). */
   public static List<IDmTable> orderTablesForPipelineExecution(List<IDmTable> tables) {
     List<IDmTable> dimensions = new ArrayList<>();

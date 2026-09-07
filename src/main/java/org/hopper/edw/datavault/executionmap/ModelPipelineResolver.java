@@ -133,7 +133,7 @@ public final class ModelPipelineResolver {
           DmUpdateExecutionSupport.orderTablesForPipelineExecution(dmModel.getTables());
       int generatedCount = 0;
       for (IDmTable table : tables) {
-        if (table == null) {
+        if (table == null || table.getSourceOrDefault().isLogicalSource()) {
           continue;
         }
         resolveDmTableSourcePipeline(context, modelNodeId, table.getSourceOrDefault());

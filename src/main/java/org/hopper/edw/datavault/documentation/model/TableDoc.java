@@ -30,6 +30,7 @@ public class TableDoc {
   private String physicalName;
   private String tableType;
   private String description;
+  private String grain;
   private String modelName;
   private String modelPageHref;
   private String catalogHref;
@@ -43,6 +44,8 @@ public class TableDoc {
     private String name;
     private String dataType;
     private String description;
+    private String notes;
+    private String requirements;
     private boolean technical;
   }
 }

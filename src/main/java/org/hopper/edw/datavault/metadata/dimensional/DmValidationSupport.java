@@ -165,6 +165,7 @@ public final class DmValidationSupport {
     validateDegenerateDimensions(remarks, fact, model, metadataProvider, variables);
     validateRangeDimensionRoles(remarks, fact, model, metadataProvider, variables);
     validateJunkDimensionRoles(remarks, fact, model, metadataProvider, variables);
+    validateGrain(remarks, fact, variables);
     validateSourceConfiguration(remarks, fact, model, metadataProvider, variables);
     validateTargetLayout(remarks, fact, model, metadataProvider, variables);
   }
@@ -194,6 +195,7 @@ public final class DmValidationSupport {
     validateDegenerateDimensions(remarks, fact, model, metadataProvider, variables);
     validateRangeDimensionRoles(remarks, fact, model, metadataProvider, variables);
     validateJunkDimensionRoles(remarks, fact, model, metadataProvider, variables);
+    validateGrain(remarks, fact, variables);
     validateSourceConfiguration(remarks, fact, model, metadataProvider, variables);
     validateTargetLayout(remarks, fact, model, metadataProvider, variables);
   }
@@ -223,6 +225,7 @@ public final class DmValidationSupport {
     validateDegenerateDimensions(remarks, fact, model, metadataProvider, variables);
     validateRangeDimensionRoles(remarks, fact, model, metadataProvider, variables);
     validateJunkDimensionRoles(remarks, fact, model, metadataProvider, variables);
+    validateGrain(remarks, fact, variables);
     validateSourceConfiguration(remarks, fact, model, metadataProvider, variables);
     validateTargetLayout(remarks, fact, model, metadataProvider, variables);
   }
@@ -324,6 +327,7 @@ public final class DmValidationSupport {
     validateDegenerateDimensions(remarks, fact, model, metadataProvider, variables);
     validateRangeDimensionRoles(remarks, fact, model, metadataProvider, variables);
     validateJunkDimensionRoles(remarks, fact, model, metadataProvider, variables);
+    validateGrain(remarks, fact, variables);
     validateSourceConfiguration(remarks, fact, model, metadataProvider, variables);
     validateTargetLayout(remarks, fact, model, metadataProvider, variables);
   }
@@ -655,8 +659,10 @@ public final class DmValidationSupport {
     validateOutriggers(remarks, dimension, model, variables);
     validateSourceConfiguration(remarks, dimension, model, metadataProvider, variables);
     validateSurrogateKey(remarks, dimension, variables);
-    validateScd2HistorizedSource(remarks, dimension, model, variables);
-    validateDimensionSourceFields(remarks, dimension, model, metadataProvider, variables);
+    if (!dimension.isLogicalContract()) {
+      validateScd2HistorizedSource(remarks, dimension, model, variables);
+      validateDimensionSourceFields(remarks, dimension, model, metadataProvider, variables);
+    }
     validateTargetLayout(remarks, dimension, model, metadataProvider, variables);
   }
 
@@ -676,8 +682,11 @@ public final class DmValidationSupport {
     validateDegenerateDimensions(remarks, fact, model, metadataProvider, variables);
     validateRangeDimensionRoles(remarks, fact, model, metadataProvider, variables);
     validateJunkDimensionRoles(remarks, fact, model, metadataProvider, variables);
+    validateGrain(remarks, fact, variables);
     validateSourceConfiguration(remarks, fact, model, metadataProvider, variables);
-    validateFactSourceFields(remarks, fact, model, metadataProvider, variables);
+    if (!fact.isLogicalContract()) {
+      validateFactSourceFields(remarks, fact, model, metadataProvider, variables);
+    }
     validateTargetLayout(remarks, fact, model, metadataProvider, variables);
   }
 
@@ -2162,6 +2171,22 @@ public final class DmValidationSupport {
     }
   }
 
+  private static void validateGrain(
+      List<ICheckResult> remarks, IDmTable table, IVariables variables) {
+    if (remarks == null || table == null) {
+      return;
+    }
+    String grain = resolve(table.getGrain(), variables);
+    if (Utils.isEmpty(grain)) {
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_WARNING,
+              BaseMessages.getString(
+                  PKG, "DmValidationSupport.CheckResult.MissingGrain", table.getName()),
+              table));
+    }
+  }
+
   private static void validateSourceConfiguration(
       List<ICheckResult> remarks,
       IDmTable table,
@@ -2172,6 +2197,15 @@ public final class DmValidationSupport {
       return;
     }
     DmSourceConfiguration source = table.getSourceOrDefault();
+    if (source.isLogicalSource()) {
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_WARNING,
+              BaseMessages.getString(
+                  PKG, "DmValidationSupport.CheckResult.LogicalContract", table.getName()),
+              table));
+      return;
+    }
     if (source.isPipelineSource()) {
       if (Utils.isEmpty(source.resolveSourcePipelineFile(variables))) {
         remarks.add(

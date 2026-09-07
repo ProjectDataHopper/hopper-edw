@@ -546,15 +546,17 @@ public class DimensionalModelPainter extends BasePainter {
       String typeLabel = DmTableDisplaySupport.resolveTypeLabel(base);
       String secondaryField =
           DmTableDisplaySupport.resolveSecondaryFieldName(base, model, variables, metadataProvider);
-      String aliasSourceModel = null;
+      String extraLine = null;
       if (base instanceof DmDimensionAlias alias) {
-        aliasSourceModel =
+        extraLine =
             DmTableDisplaySupport.resolveAliasSourceModelDisplayName(alias, model, variables);
+      }
+      if (Utils.isEmpty(extraLine) && base.isLogicalContract()) {
+        extraLine = BaseMessages.getString(PKG, "DimensionalModelPainter.LogicalBadge");
       }
 
       ModelGraphTableCardLayout.BoxSize boxSize =
-          ModelGraphTableCardLayout.computeBoxSize(
-              gc, label, secondaryField, typeLabel, aliasSourceModel);
+          ModelGraphTableCardLayout.computeBoxSize(gc, label, secondaryField, typeLabel, extraLine);
       int boxWidth = Math.max(140, boxSize.width());
       int boxHeight = Math.max(70, boxSize.height());
       base.setDrawnBoxWidth(boxWidth);
@@ -584,8 +586,7 @@ public class DimensionalModelPainter extends BasePainter {
           ModelGraphTableCardLayout.drawName(gc, label, x, y, label.equals(mouseOverTableName));
       ModelGraphTableCardLayout.drawSecondaryLine(gc, secondaryField, x, y, nameExtent);
       Point typeExtent = ModelGraphTableCardLayout.drawTypeBelowIcon(gc, typeLabel, x, y);
-      ModelGraphTableCardLayout.drawExtraLineBelowType(
-          gc, aliasSourceModel, x, y, typeExtent, color);
+      ModelGraphTableCardLayout.drawExtraLineBelowType(gc, extraLine, x, y, typeExtent, color);
 
       if (areaOwners != null) {
         areaOwners.add(

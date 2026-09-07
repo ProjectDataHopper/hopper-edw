@@ -88,6 +88,11 @@ public class DmSourceConfiguration {
     return resolveSourceType() == DmSourceType.FACT_TABLE;
   }
 
+  /** True when the table is a logical contract with no executable staging source. */
+  public boolean isLogicalSource() {
+    return resolveSourceType() == DmSourceType.NONE;
+  }
+
   public DmDateGeneratorConfiguration getDateGeneratorOrDefault() {
     if (dateGenerator == null) {
       dateGenerator = DmDateGeneratorConfiguration.createDefault();

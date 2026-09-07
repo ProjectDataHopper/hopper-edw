@@ -189,7 +189,7 @@ Reference: link:business-vault-overview.adoc[Business Vault overview], link:busi
 === Dimensional marts
 
 . New `.hdm`, or from the `.hdv` canvas **Publish draft dimensional model** (workflow action **Dimensional Publish**). Review the draft.
-. **Edit model** — configuration `dimensional`. Configure dimension/fact sources (SQL, pipeline, record definition, or date generator).
+. **Edit model** — configuration `dimensional`. You can sketch dimensions and facts with source type **None (logical)** and field Markdown notes before BV/DV sources exist. Configure a load source (SQL, pipeline, record definition, or date generator) before Dimensional Update.
 . **Check model**.
 . Resource definition group → **Dimensional models** tab → **Add models**.
 . Update the group again with dimensional included.

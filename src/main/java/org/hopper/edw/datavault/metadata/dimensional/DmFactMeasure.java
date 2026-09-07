@@ -24,11 +24,13 @@ import org.apache.hop.metadata.api.HopMetadataProperty;
 @Getter
 @Setter
 @NoArgsConstructor
-public class DmFactMeasure {
+public class DmFactMeasure implements IDmDocumentedField {
 
   @HopMetadataProperty private String fieldName;
 
   @HopMetadataProperty private boolean additive = true;
+
+  @HopMetadataProperty private DmFieldDocumentation documentation;
 
   public DmFactMeasure(String fieldName) {
     this.fieldName = fieldName;

@@ -24,7 +24,7 @@ import org.apache.hop.metadata.api.HopMetadataProperty;
 @Getter
 @Setter
 @NoArgsConstructor
-public class DmDimensionAttribute {
+public class DmDimensionAttribute implements IDmDocumentedField {
 
   /** Warehouse / target column name. */
   @HopMetadataProperty private String fieldName;
@@ -39,6 +39,8 @@ public class DmDimensionAttribute {
    * Target column for {@link DmScdUpdatePolicy#TYPE3_PREVIOUS}; defaults to {@code fieldName_prev}.
    */
   @HopMetadataProperty private String previousFieldName;
+
+  @HopMetadataProperty private DmFieldDocumentation documentation;
 
   public DmDimensionAttribute(String fieldName) {
     this.fieldName = fieldName;

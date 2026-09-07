@@ -13,8 +13,9 @@ See link:dimensional-modeler-overview.adoc[Dimensional modeler overview] for tab
 Reads a dimensional model (`.hdm` file) and:
 
 * Loads the model from disk
-* Runs `model.check()` — Kimball validation (grains, roles, source SQL, references)
-* Optionally generates CREATE TABLE DDL on the target database
+* Runs `model.check()` — Kimball validation (grains, roles, source SQL, references). Logical tables (source type **None**) produce warnings, not errors.
+* Skips tables whose source is **None (logical)** — they are contracts, not loads. If every selected table is logical, the action fails.
+* Optionally generates CREATE TABLE DDL on the target database (not for logical tables)
 * Generates per-table update pipelines using native Hop warehouse transforms
 * Stages pipelines and runs them through the **parallel orchestrator**
 * Cleans up the staging folder after a successful run

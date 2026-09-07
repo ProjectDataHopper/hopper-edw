@@ -72,6 +72,9 @@ Guides for the same features live in the parent folder (link:../index.adoc[docum
 |link:dm-fact-dialog.adoc[dm-fact-dialog]
 |Fact table
 
+|link:dm-field-dialog.adoc[dm-field-dialog]
+|Dimensional field notes and requirements
+
 |link:dm-junk-dimension-dialog.adoc[dm-junk-dimension-dialog]
 |Junk dimension
 
