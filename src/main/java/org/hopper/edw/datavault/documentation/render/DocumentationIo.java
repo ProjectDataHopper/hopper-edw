@@ -27,6 +27,21 @@ public final class DocumentationIo {
 
   private DocumentationIo() {}
 
+  /**
+   * Native filename Hop loaders can reopen through {@link HopVfs#getFileObject(String)}.
+   *
+   * <p>{@link org.apache.commons.vfs2.FileName#getPath()} is not usable on Windows: the VFS path
+   * omits the drive letter ({@code /Users/...} instead of {@code C:\Users\...}). Hop then treats
+   * that as current-drive relative, the file is missing, and project documentation only writes
+   * metadata pages (issue #158).
+   */
+  public static String filenameForLoad(FileObject file) {
+    if (file == null) {
+      return "";
+    }
+    return HopVfs.getFilename(file);
+  }
+
   public static void writeUtf8(FileObject file, String content) throws HopException {
     try {
       FileObject parent = file.getParent();

@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import org.apache.commons.vfs2.FileObject;
+import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.vfs.HopVfs;
 
@@ -55,12 +56,17 @@ public final class ProjectFileScanner {
     if (isSkippedFolder(sourceRoot, folder, targetRoot)) {
       return;
     }
-    FileObject[] children = folder.getChildren();
+    FileObject[] children;
+    try {
+      children = folder.getChildren();
+    } catch (Exception e) {
+      return;
+    }
     if (children == null) {
       return;
     }
     for (FileObject child : children) {
-      if (child.isHidden()) {
+      if (hidden(child)) {
         continue;
       }
       if (child.isFolder()) {
@@ -71,9 +77,11 @@ public final class ProjectFileScanner {
       if (extension == null || !EXTENSIONS.contains(extension.toLowerCase(Locale.ROOT))) {
         continue;
       }
-      String relative = sourceRoot.getName().getRelativeName(child.getName());
-      files.add(
-          new ScannedFile(child, relative.replace('\\', '/'), extension.toLowerCase(Locale.ROOT)));
+      String relative = posixRelative(sourceRoot, child);
+      if (relative == null || relative.isEmpty()) {
+        continue;
+      }
+      files.add(new ScannedFile(child, relative, extension.toLowerCase(Locale.ROOT)));
     }
   }
 
@@ -87,16 +95,83 @@ public final class ProjectFileScanner {
       return true;
     }
     if (targetRoot != null) {
-      String relToTarget = sourceRoot.getName().getRelativeName(targetRoot.getName());
-      String relFolder = sourceRoot.getName().getRelativeName(folder.getName());
-      if (relFolder != null
-          && relToTarget != null
-          && !".".equals(relToTarget)
-          && (relFolder.equals(relToTarget) || relFolder.startsWith(relToTarget + "/"))) {
+      String relToTarget = posixRelative(sourceRoot, targetRoot);
+      String relFolder = posixRelative(sourceRoot, folder);
+      if (isUnderRelativeFolder(relFolder, relToTarget)) {
         return true;
       }
     }
     return false;
+  }
+
+  /**
+   * True when {@code relFolder} is {@code relToTarget} or a descendant. Separators are normalized
+   * and comparison is case-insensitive so Windows drive-letter and backslash paths still skip the
+   * output folder inside the source tree.
+   */
+  static boolean isUnderRelativeFolder(String relFolder, String relToTarget) {
+    String folder = stripDot(posix(relFolder));
+    String target = stripDot(posix(relToTarget));
+    if (folder.isEmpty() || target.isEmpty()) {
+      return false;
+    }
+    if (folder.equalsIgnoreCase(target)) {
+      return true;
+    }
+    int n = target.length();
+    return folder.length() > n
+        && (folder.charAt(n) == '/')
+        && folder.regionMatches(true, 0, target, 0, n);
+  }
+
+  static String posix(String path) {
+    if (path == null) {
+      return "";
+    }
+    return path.replace('\\', '/');
+  }
+
+  private static String stripDot(String path) {
+    String posix = posix(path);
+    if (posix.startsWith("./")) {
+      posix = posix.substring(2);
+    }
+    if (".".equals(posix)) {
+      return "";
+    }
+    return posix;
+  }
+
+  private static String posixRelative(FileObject root, FileObject file) {
+    if (root == null || file == null) {
+      return null;
+    }
+    try {
+      return stripDot(posix(root.getName().getRelativeName(file.getName())));
+    } catch (Exception e) {
+      String rootPath = stripDot(posix(HopVfs.getFilename(root)));
+      String filePath = stripDot(posix(HopVfs.getFilename(file)));
+      if (rootPath.isEmpty() || filePath.isEmpty()) {
+        return null;
+      }
+      if (filePath.equalsIgnoreCase(rootPath)) {
+        return "";
+      }
+      String prefix = rootPath.endsWith("/") ? rootPath : rootPath + "/";
+      if (filePath.length() > prefix.length()
+          && filePath.regionMatches(true, 0, prefix, 0, prefix.length())) {
+        return filePath.substring(prefix.length());
+      }
+      return null;
+    }
+  }
+
+  private static boolean hidden(FileObject child) {
+    try {
+      return child.isHidden();
+    } catch (Exception e) {
+      return false;
+    }
   }
 
   private static boolean sameFile(FileObject a, FileObject b) {
@@ -104,8 +179,12 @@ public final class ProjectFileScanner {
       return false;
     }
     try {
-      return a.getName().getURI().equals(b.getName().getURI())
-          || HopVfs.getFilename(a).equals(HopVfs.getFilename(b));
+      if (a.getName().getURI().equals(b.getName().getURI())) {
+        return true;
+      }
+      String left = HopVfs.getFilename(a);
+      String right = HopVfs.getFilename(b);
+      return left.equals(right) || (Const.isWindows() && left.equalsIgnoreCase(right));
     } catch (Exception e) {
       return false;
     }

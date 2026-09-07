@@ -66,24 +66,22 @@ public final class ModelDocWriter {
   private ModelDocWriter() {}
 
   public static void write(DocumentationSite site, ScannedFile file) throws HopException {
-    String path = file.file().getName().getPath();
     switch (file.extension()) {
-      case "hsm" -> writeSource(site, file, path);
-      case "hdv" -> writeDv(site, file, path);
-      case "hbv" -> writeBv(site, file, path);
-      case "hdm" -> writeDm(site, file, path);
-      case "hem" -> writeHem(site, file, path);
+      case "hsm" -> writeSource(site, file);
+      case "hdv" -> writeDv(site, file);
+      case "hbv" -> writeBv(site, file);
+      case "hdm" -> writeDm(site, file);
+      case "hem" -> writeHem(site, file);
       default -> {
         // Ignore
       }
     }
   }
 
-  private static void writeSource(DocumentationSite site, ScannedFile file, String path)
-      throws HopException {
+  private static void writeSource(DocumentationSite site, ScannedFile file) throws HopException {
     SourceModel model =
         DocumentationArtifactLoader.loadSourceModel(
-            path, site.getVariables(), site.getMetadataProvider());
+            file.file(), site.getVariables(), site.getMetadataProvider());
     String htmlPath = DocPaths.htmlForSource(file.relativePath(), "hsm");
     String name = nvl(model.getName(), DocPaths.withoutExtension(file.relativePath()));
     remember(site, file, htmlPath, DocObjectKind.SOURCE_MODEL, name, model.getDescription());
@@ -140,10 +138,9 @@ public final class ModelDocWriter {
     PageSupport.writePage(site, htmlPath, name, "Source model", body.toString(), extraHead);
   }
 
-  private static void writeDv(DocumentationSite site, ScannedFile file, String path)
-      throws HopException {
+  private static void writeDv(DocumentationSite site, ScannedFile file) throws HopException {
     DataVaultModel model =
-        DocumentationArtifactLoader.loadDataVaultModel(path, site.getMetadataProvider());
+        DocumentationArtifactLoader.loadDataVaultModel(file.file(), site.getMetadataProvider());
     String htmlPath = DocPaths.htmlForSource(file.relativePath(), "hdv");
     String name = nvl(model.getName(), DocPaths.withoutExtension(file.relativePath()));
     remember(site, file, htmlPath, DocObjectKind.DATA_VAULT_MODEL, name, model.getDescription());
@@ -204,10 +201,9 @@ public final class ModelDocWriter {
     PageSupport.writePage(site, htmlPath, name, "Data Vault", body.toString(), extraHead);
   }
 
-  private static void writeBv(DocumentationSite site, ScannedFile file, String path)
-      throws HopException {
+  private static void writeBv(DocumentationSite site, ScannedFile file) throws HopException {
     BusinessVaultModel model =
-        DocumentationArtifactLoader.loadBusinessVaultModel(path, site.getMetadataProvider());
+        DocumentationArtifactLoader.loadBusinessVaultModel(file.file(), site.getMetadataProvider());
     String htmlPath = DocPaths.htmlForSource(file.relativePath(), "hbv");
     String name = nvl(model.getName(), DocPaths.withoutExtension(file.relativePath()));
     remember(
@@ -268,10 +264,9 @@ public final class ModelDocWriter {
     PageSupport.writePage(site, htmlPath, name, "Business Vault", body.toString(), extraHead);
   }
 
-  private static void writeDm(DocumentationSite site, ScannedFile file, String path)
-      throws HopException {
+  private static void writeDm(DocumentationSite site, ScannedFile file) throws HopException {
     DimensionalModel model =
-        DocumentationArtifactLoader.loadDimensionalModel(path, site.getMetadataProvider());
+        DocumentationArtifactLoader.loadDimensionalModel(file.file(), site.getMetadataProvider());
     String htmlPath = DocPaths.htmlForSource(file.relativePath(), "hdm");
     String name = nvl(model.getName(), DocPaths.withoutExtension(file.relativePath()));
     remember(site, file, htmlPath, DocObjectKind.DIMENSIONAL_MODEL, name, model.getDescription());
@@ -334,11 +329,10 @@ public final class ModelDocWriter {
     PageSupport.writePage(site, htmlPath, name, "Dimensional", body.toString(), extraHead);
   }
 
-  private static void writeHem(DocumentationSite site, ScannedFile file, String path)
-      throws HopException {
+  private static void writeHem(DocumentationSite site, ScannedFile file) throws HopException {
     ExecutionMapDocument document =
         DocumentationArtifactLoader.loadExecutionMap(
-            path, site.getMetadataProvider(), site.getVariables());
+            file.file(), site.getMetadataProvider(), site.getVariables());
     String htmlPath = DocPaths.htmlForSource(file.relativePath(), "hem");
     String name = nvl(document.getName(), DocPaths.withoutExtension(file.relativePath()));
     remember(site, file, htmlPath, DocObjectKind.EXECUTION_MAP, name, null);

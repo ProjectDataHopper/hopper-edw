@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Project documentation
+
+- On Windows, pipelines, workflows, models, and project folders are documented again (issue #158). Generation used VFS `FileName.getPath()`, which omits the drive letter, so Hop could not reopen those files and only metadata pages were written.
+
 ## [0.10.0] — 2026-09-06
 
 Requires **Apache Hop 2.19.0** and **Java 21**.

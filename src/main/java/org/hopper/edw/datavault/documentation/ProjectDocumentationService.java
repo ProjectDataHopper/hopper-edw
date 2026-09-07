@@ -30,6 +30,7 @@ import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.workflow.WorkflowMeta;
 import org.hopper.edw.datavault.documentation.render.DocPaths;
+import org.hopper.edw.datavault.documentation.render.DocumentationIo;
 import org.hopper.edw.datavault.documentation.render.HtmlPageWriter;
 import org.hopper.edw.datavault.documentation.scan.ProjectFileScanner;
 import org.hopper.edw.datavault.documentation.scan.ScannedFile;
@@ -216,7 +217,8 @@ public final class ProjectDocumentationService {
   }
 
   private static void documentFile(DocumentationSite site, ScannedFile file) throws HopException {
-    String path = file.file().getName().getPath();
+    // HopVfs.getFilename, not FileName.getPath(): the VFS path drops the Windows drive letter.
+    String path = DocumentationIo.filenameForLoad(file.file());
     switch (file.extension()) {
       case "hpl" -> {
         PipelineMeta meta = new PipelineMeta(path, site.getMetadataProvider(), site.getVariables());

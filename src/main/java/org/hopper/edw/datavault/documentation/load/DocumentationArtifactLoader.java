@@ -15,8 +15,10 @@
  */
 package org.hopper.edw.datavault.documentation.load;
 
+import org.apache.commons.vfs2.FileObject;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.core.vfs.HopVfs;
 import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
@@ -45,10 +47,22 @@ public final class DocumentationArtifactLoader {
     return SourceModelLoadSupport.load(filename, variables, metadataProvider);
   }
 
+  public static SourceModel loadSourceModel(
+      FileObject file, IVariables variables, IHopMetadataProvider metadataProvider)
+      throws HopException {
+    return SourceModelLoadSupport.load(HopVfs.getFilename(file), variables, metadataProvider);
+  }
+
   public static DataVaultModel loadDataVaultModel(
       String filename, IHopMetadataProvider metadataProvider) throws HopException {
+    return loadDataVaultModel(fileObject(filename), metadataProvider);
+  }
+
+  public static DataVaultModel loadDataVaultModel(
+      FileObject file, IHopMetadataProvider metadataProvider) throws HopException {
+    String filename = HopVfs.getFilename(file);
     try {
-      Document document = XmlHandler.loadXmlFile(filename);
+      Document document = XmlHandler.loadXmlFile(file);
       Node rootNode = XmlHandler.getSubNode(document, HopVaultFileType.XML_TAG);
       DataVaultModel model = new DataVaultModel();
       XmlMetadataUtil.deSerializeFromXml(rootNode, DataVaultModel.class, model, metadataProvider);
@@ -64,8 +78,14 @@ public final class DocumentationArtifactLoader {
 
   public static BusinessVaultModel loadBusinessVaultModel(
       String filename, IHopMetadataProvider metadataProvider) throws HopException {
+    return loadBusinessVaultModel(fileObject(filename), metadataProvider);
+  }
+
+  public static BusinessVaultModel loadBusinessVaultModel(
+      FileObject file, IHopMetadataProvider metadataProvider) throws HopException {
+    String filename = HopVfs.getFilename(file);
     try {
-      Document document = XmlHandler.loadXmlFile(filename);
+      Document document = XmlHandler.loadXmlFile(file);
       Node rootNode = XmlHandler.getSubNode(document, HopBusinessVaultFileType.XML_TAG);
       BusinessVaultModel model = new BusinessVaultModel();
       XmlMetadataUtil.deSerializeFromXml(
@@ -82,8 +102,14 @@ public final class DocumentationArtifactLoader {
 
   public static DimensionalModel loadDimensionalModel(
       String filename, IHopMetadataProvider metadataProvider) throws HopException {
+    return loadDimensionalModel(fileObject(filename), metadataProvider);
+  }
+
+  public static DimensionalModel loadDimensionalModel(
+      FileObject file, IHopMetadataProvider metadataProvider) throws HopException {
+    String filename = HopVfs.getFilename(file);
     try {
-      Document document = XmlHandler.loadXmlFile(filename);
+      Document document = XmlHandler.loadXmlFile(file);
       Node rootNode = XmlHandler.getSubNode(document, HopDimensionalFileType.XML_TAG);
       DimensionalModel model = new DimensionalModel();
       XmlMetadataUtil.deSerializeFromXml(rootNode, DimensionalModel.class, model, metadataProvider);
@@ -101,5 +127,21 @@ public final class DocumentationArtifactLoader {
       String filename, IHopMetadataProvider metadataProvider, IVariables variables)
       throws HopException {
     return ExecutionMapPersistence.load(filename, metadataProvider, variables);
+  }
+
+  public static ExecutionMapDocument loadExecutionMap(
+      FileObject file, IHopMetadataProvider metadataProvider, IVariables variables)
+      throws HopException {
+    return ExecutionMapPersistence.load(HopVfs.getFilename(file), metadataProvider, variables);
+  }
+
+  private static FileObject fileObject(String filename) throws HopException {
+    try {
+      return HopVfs.getFileObject(filename);
+    } catch (HopException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new HopException("Unable to open " + filename, e);
+    }
   }
 }

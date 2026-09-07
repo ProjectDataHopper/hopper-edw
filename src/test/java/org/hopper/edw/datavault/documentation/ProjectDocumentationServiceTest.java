@@ -152,6 +152,51 @@ class ProjectDocumentationServiceTest {
   }
 
   @Test
+  void documentsNestedPipelineFolder() throws Exception {
+    Path source = temp.resolve("project");
+    Path nested = source.resolve("pipelines").resolve("load");
+    Files.createDirectories(nested);
+    Files.writeString(
+        nested.resolve("tiny-load.hpl"),
+        """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <pipeline>
+          <info>
+            <name>tiny-load</name>
+            <description>nested pipeline</description>
+          </info>
+        </pipeline>
+        """);
+    Path target = temp.resolve("docs");
+
+    ProjectDocumentationOptions options = ProjectDocumentationOptions.defaults();
+    options.setSourceFolder(source.toString());
+    options.setTargetFolder(target.toString());
+    options.setProjectName("Nested Files");
+    options.setIncludingCatalog(false);
+    options.setIncludingMetadata(false);
+    options.setDarkSvg(false);
+
+    Variables variables = new Variables();
+    variables.setVariable(ProjectDocumentationService.VAR_PROJECT_HOME, source.toString());
+
+    ProjectDocumentationResult result =
+        ProjectDocumentationService.generate(
+            options, variables, new MemoryMetadataProvider(), LogChannel.GENERAL);
+    assertTrue(result.getErrors() == 0, () -> result.getWarnings().toString());
+
+    Path page = target.resolve("pipelines/pipelines/load/tiny-load.html");
+    assertTrue(Files.isRegularFile(page), "expected " + page);
+    String html = Files.readString(page, StandardCharsets.UTF_8);
+    assertTrue(html.contains("tiny-load"));
+    assertTrue(html.contains("Pipelines"));
+    assertTrue(html.contains("load"), "folder segment should appear in the nav tree");
+
+    String index = Files.readString(target.resolve("index.html"), StandardCharsets.UTF_8);
+    assertTrue(index.contains("tiny-load"));
+  }
+
+  @Test
   void reportsProgressAndHonorsCancel() throws Exception {
     Path source =
         Path.of("integration-tests/tests/multi-satellite-bv").toAbsolutePath().normalize();
