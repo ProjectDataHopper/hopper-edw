@@ -35,6 +35,7 @@ import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneyOpsOverlay.EdwJourneyProblem;
 import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneyOpsOverlay.LoadOverviewSummary;
 import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneyOpsOverlay.ModelLoadSummary;
+import org.hopper.edw.datavault.metrics.DvUpdateTableMetrics;
 import org.hopper.edw.datavault.metrics.LoadRunMetricsCatalogPublisher;
 import org.hopper.edw.datavault.metrics.MetricsAiContextBuilder;
 import org.hopper.edw.datavault.metrics.WorkflowLoadOverviewDdlSupport;
@@ -127,6 +128,19 @@ public final class EdwJourneyOpsOverlayLoader {
       }
     }
     return null;
+  }
+
+  /**
+   * Prefer load-run wall-clock (finished − started) over stored overview {@code duration_ms}.
+   * Overview rows used to persist the sum of overlapping transform durations, which inflates fact
+   * models with parallel dimension lookups (issue #168).
+   */
+  static Long resolveDisplayedDurationMs(Long storedDurationMs, Date startedAt, Date finishedAt) {
+    long wallClock = DvUpdateTableMetrics.resolveDurationMs(startedAt, finishedAt);
+    if (wallClock > 0L) {
+      return wallClock;
+    }
+    return storedDurationMs;
   }
 
   private static HarvestRunSummary loadHarvest(
@@ -366,12 +380,31 @@ public final class EdwJourneyOpsOverlayLoader {
     String table =
         databaseMeta.getQuotedSchemaTableCombination(
             db, schema, WorkflowLoadOverviewDdlSupport.TABLE_WORKFLOW_LOAD_OVERVIEW_MODEL);
-    String sql =
-        "SELECT model_type, model_name, duration_ms, errors, success FROM "
-            + table
-            + " WHERE overview_id = '"
-            + overviewId.replace("'", "''")
-            + "' ORDER BY sequence_no";
+    boolean joinLoadRun =
+        db.checkTableExists(schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_RUN);
+    String sql;
+    if (joinLoadRun) {
+      String loadRunTable =
+          databaseMeta.getQuotedSchemaTableCombination(
+              db, schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_RUN);
+      sql =
+          "SELECT m.model_type AS model_type, m.model_name AS model_name, m.duration_ms AS"
+              + " duration_ms, m.errors AS errors, m.success AS success, r.started_at AS"
+              + " started_at, r.finished_at AS finished_at FROM "
+              + table
+              + " m LEFT JOIN "
+              + loadRunTable
+              + " r ON r.run_id = m.load_run_id WHERE m.overview_id = '"
+              + overviewId.replace("'", "''")
+              + "' ORDER BY m.sequence_no";
+    } else {
+      sql =
+          "SELECT model_type, model_name, duration_ms, errors, success FROM "
+              + table
+              + " WHERE overview_id = '"
+              + overviewId.replace("'", "''")
+              + "' ORDER BY sequence_no";
+    }
     List<Object[]> rows = db.getRows(sql, 200);
     IRowMeta rowMeta = db.getReturnRowMeta();
     if (rows == null || rows.isEmpty() || rowMeta == null) {
@@ -383,10 +416,13 @@ public final class EdwJourneyOpsOverlayLoader {
           new ModelLoadSummary(
               stringVal(rowMeta, row, "model_type"),
               stringVal(rowMeta, row, "model_name"),
-              longVal(rowMeta, row, "duration_ms"),
+              resolveDisplayedDurationMs(
+                  longVal(rowMeta, row, "duration_ms"),
+                  dateVal(rowMeta, row, "started_at"),
+                  dateVal(rowMeta, row, "finished_at")),
               longVal(rowMeta, row, "errors"),
               boolVal(rowMeta, row, "success"),
-              null));
+              dateVal(rowMeta, row, "finished_at")));
     }
     return models;
   }
@@ -478,6 +514,15 @@ public final class EdwJourneyOpsOverlayLoader {
   private static Date dateVal(IRowMeta rowMeta, Object[] row, String field) {
     try {
       int index = rowMeta.indexOfValue(field);
+      if (index < 0) {
+        for (int i = 0; i < rowMeta.size(); i++) {
+          if (rowMeta.getValueMeta(i).getName() != null
+              && rowMeta.getValueMeta(i).getName().equalsIgnoreCase(field)) {
+            index = i;
+            break;
+          }
+        }
+      }
       if (index < 0) {
         return null;
       }

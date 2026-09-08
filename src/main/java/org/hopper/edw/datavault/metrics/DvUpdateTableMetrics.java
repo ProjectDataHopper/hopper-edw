@@ -66,4 +66,38 @@ public class DvUpdateTableMetrics {
     long duration = executionEndDate.getTime() - executionStartDate.getTime();
     return Math.max(0L, duration);
   }
+
+  /**
+   * Wall-clock duration when both timestamps are present and ordered; otherwise {@code fallbackMs}.
+   * Used so model/run duration is elapsed time rather than the sum of overlapping transform
+   * durations (fact pipelines with parallel dimension lookups).
+   */
+  public static long resolveDurationMs(
+      Date executionStartDate, Date executionEndDate, long fallbackMs) {
+    long wallClock = resolveDurationMs(executionStartDate, executionEndDate);
+    return wallClock > 0L ? wallClock : Math.max(0L, fallbackMs);
+  }
+
+  /**
+   * Sum of per-pipeline wall-clock durations. Does not add overlapping transform times: each
+   * pipeline already reports end − start (or {@link #getDurationMs()}).
+   */
+  public static long sumPipelineWallClockMs(List<DvUpdateTableMetrics> pipelines) {
+    if (pipelines == null || pipelines.isEmpty()) {
+      return 0L;
+    }
+    long total = 0L;
+    for (DvUpdateTableMetrics pipeline : pipelines) {
+      if (pipeline == null) {
+        continue;
+      }
+      long wallClock = pipeline.getDurationMs();
+      if (wallClock <= 0L) {
+        wallClock =
+            resolveDurationMs(pipeline.getExecutionStartDate(), pipeline.getExecutionEndDate());
+      }
+      total += Math.max(0L, wallClock);
+    }
+    return total;
+  }
 }

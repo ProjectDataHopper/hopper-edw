@@ -69,7 +69,9 @@ public final class WorkflowLoadOverviewLoader {
               .thenComparing(LoadRunRow::finishedAt));
 
       Map<String, Long> durationByRunId =
-          queryDurationByRunId(db, databaseMeta, schema, runs, variables);
+          anyMissingWallClock(runs)
+              ? queryDurationByRunId(db, databaseMeta, schema, runs, variables)
+              : Map.of();
       Map<String, Map<String, Long>> pipelineDurationByRunId =
           includePipelineDetail
               ? queryPipelineDurationByRunId(db, databaseMeta, schema, runs, variables)
@@ -177,7 +179,10 @@ public final class WorkflowLoadOverviewLoader {
       }
 
       long durationMs =
-          durationByRunId != null ? durationByRunId.getOrDefault(run.runId(), 0L) : 0L;
+          DvUpdateTableMetrics.resolveDurationMs(
+              run.startedAt(),
+              run.finishedAt(),
+              durationByRunId != null ? durationByRunId.getOrDefault(run.runId(), 0L) : 0L);
       boolean success = run.success() == null || run.success();
       if (!success) {
         allSuccess = false;
@@ -267,6 +272,11 @@ public final class WorkflowLoadOverviewLoader {
     return runs;
   }
 
+  /**
+   * Fallback model duration when {@code load_run} timestamps are missing or identical. Prefers the
+   * sum of pipeline wall-clock {@code duration_ms} (issue #87 / #168). Summing every transform
+   * over-counts fact loads whose lookups run in parallel.
+   */
   private static Map<String, Long> queryDurationByRunId(
       Database db,
       DatabaseMeta databaseMeta,
@@ -274,36 +284,79 @@ public final class WorkflowLoadOverviewLoader {
       List<LoadRunRow> runs,
       IVariables variables)
       throws HopException {
-    if (!db.checkTableExists(schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_TRANSFORM_METRIC)) {
-      return Map.of();
-    }
     String inClause = buildRunIdInClause(variables, runs);
     if (Utils.isEmpty(inClause)) {
       return Map.of();
     }
+    Map<String, Long> durations = new HashMap<>();
+    if (db.checkTableExists(schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_PIPELINE_METRIC)
+        && db.checkColumnExists(
+            schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_PIPELINE_METRIC, "duration_ms")) {
+      String pipelineTable =
+          databaseMeta.getQuotedSchemaTableCombination(
+              variables, schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_PIPELINE_METRIC);
+      putRunDurations(
+          db.getRows(
+              "SELECT run_id, SUM(COALESCE(duration_ms, 0)) AS duration_ms FROM "
+                  + pipelineTable
+                  + " WHERE run_id IN ("
+                  + inClause
+                  + ") GROUP BY run_id",
+              256),
+          db.getReturnRowMeta(),
+          durations,
+          false);
+    }
+    if (!db.checkTableExists(schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_TRANSFORM_METRIC)) {
+      return durations;
+    }
     String transformTable =
         databaseMeta.getQuotedSchemaTableCombination(
             variables, schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_TRANSFORM_METRIC);
-    String sql =
-        "SELECT run_id, SUM(COALESCE(duration_ms, 0)) AS duration_ms FROM "
-            + transformTable
-            + " WHERE run_id IN ("
-            + inClause
-            + ") GROUP BY run_id";
-    List<Object[]> rows = db.getRows(sql, 256);
-    IRowMeta rowMeta = db.getReturnRowMeta();
-    Map<String, Long> durations = new HashMap<>();
+    putRunDurations(
+        db.getRows(
+            "SELECT run_id, SUM(COALESCE(duration_ms, 0)) AS duration_ms FROM "
+                + transformTable
+                + " WHERE run_id IN ("
+                + inClause
+                + ") GROUP BY run_id",
+            256),
+        db.getReturnRowMeta(),
+        durations,
+        true);
+    return durations;
+  }
+
+  private static void putRunDurations(
+      List<Object[]> rows, IRowMeta rowMeta, Map<String, Long> durations, boolean onlyIfAbsent)
+      throws HopException {
     if (rows == null || rowMeta == null) {
-      return durations;
+      return;
     }
     for (Object[] row : rows) {
       String runId = stringValue(rowMeta, row, "run_id");
       Long duration = longValue(rowMeta, row, "duration_ms");
-      if (!Utils.isEmpty(runId) && duration != null) {
-        durations.put(runId, duration);
+      if (Utils.isEmpty(runId) || duration == null) {
+        continue;
+      }
+      if (onlyIfAbsent && durations.containsKey(runId) && durations.get(runId) > 0L) {
+        continue;
+      }
+      durations.put(runId, duration);
+    }
+  }
+
+  static boolean anyMissingWallClock(List<LoadRunRow> runs) {
+    if (runs == null || runs.isEmpty()) {
+      return false;
+    }
+    for (LoadRunRow run : runs) {
+      if (run == null
+          || DvUpdateTableMetrics.resolveDurationMs(run.startedAt(), run.finishedAt()) <= 0L) {
+        return true;
       }
     }
-    return durations;
+    return false;
   }
 
   /**

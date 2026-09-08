@@ -86,6 +86,45 @@ class LoadRunDurationMetricsLoaderTest {
   }
 
   @Test
+  void mergeDurationRowsPrefersPipelineWallClockOverTransformSum() {
+    List<LoadRunDurationMetricsLoader.DurationMetricRow> pipelineRows =
+        List.of(new LoadRunDurationMetricsLoader.DurationMetricRow("run-1", "f_orders", 114_000L));
+    List<LoadRunDurationMetricsLoader.DurationMetricRow> transformRows =
+        List.of(
+            new LoadRunDurationMetricsLoader.DurationMetricRow("run-1", "f_orders", 794_000L),
+            new LoadRunDurationMetricsLoader.DurationMetricRow("run-1", "d_customer", 110_000L));
+
+    List<LoadRunDurationMetricsLoader.DurationMetricRow> merged =
+        LoadRunDurationMetricsLoader.mergeDurationRows(pipelineRows, transformRows);
+
+    assertEquals(2, merged.size());
+    LoadRunDurationSnapshot snapshot =
+        LoadRunDurationMetricsLoader.assembleSnapshot(
+            List.of("f_orders", "d_customer"),
+            List.of(
+                LoadRunDurationRun.builder()
+                    .runId("run-1")
+                    .finishedAt(new Date())
+                    .success(true)
+                    .build()),
+            merged);
+    assertEquals(114_000L, snapshot.durationMs("f_orders", 0));
+    assertEquals(110_000L, snapshot.durationMs("d_customer", 0));
+  }
+
+  @Test
+  void mergeDurationRowsKeepsTransformFallbackWhenPipelineDurationIsZero() {
+    List<LoadRunDurationMetricsLoader.DurationMetricRow> merged =
+        LoadRunDurationMetricsLoader.mergeDurationRows(
+            List.of(new LoadRunDurationMetricsLoader.DurationMetricRow("run-1", "f_orders", 0L)),
+            List.of(
+                new LoadRunDurationMetricsLoader.DurationMetricRow("run-1", "f_orders", 114_000L)));
+
+    assertEquals(1, merged.size());
+    assertEquals(114_000L, merged.get(0).durationMs());
+  }
+
+  @Test
   void buildRunIdInClauseQuotesRunIds() {
     List<LoadRunDurationRun> runs =
         List.of(

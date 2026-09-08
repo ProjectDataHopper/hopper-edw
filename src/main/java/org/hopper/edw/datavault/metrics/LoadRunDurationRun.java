@@ -24,6 +24,7 @@ import lombok.Value;
 @Builder
 public class LoadRunDurationRun {
   String runId;
+  Date startedAt;
   Date finishedAt;
   boolean success;
 }

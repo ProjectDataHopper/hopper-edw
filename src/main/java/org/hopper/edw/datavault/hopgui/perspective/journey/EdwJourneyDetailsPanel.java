@@ -51,6 +51,7 @@ import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneyOpsOverlay.
 import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneyOpsOverlay.LoadOverviewSummary;
 import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneyOpsOverlay.ModelLoadSummary;
 import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneyTreeNode.Kind;
+import org.hopper.edw.datavault.metrics.DvUpdateTableMetrics;
 import org.hopper.edw.datavault.metrics.LoadRunDurationMetricsLoader;
 import org.hopper.edw.datavault.metrics.LoadRunDurationRun;
 import org.hopper.edw.datavault.metrics.LoadRunDurationSnapshot;
@@ -560,13 +561,16 @@ public final class EdwJourneyDetailsPanel {
       } else {
         item = new org.eclipse.swt.widgets.TableItem(view.table, SWT.NONE);
       }
-      long max = 0L;
-      for (String table : duration.getTableNames()) {
-        max = Math.max(max, duration.durationMs(table, i));
+      long runDurationMs =
+          DvUpdateTableMetrics.resolveDurationMs(run.getStartedAt(), run.getFinishedAt());
+      if (runDurationMs <= 0L) {
+        for (String table : duration.getTableNames()) {
+          runDurationMs = Math.max(runDurationMs, duration.durationMs(table, i));
+        }
       }
       item.setText(1, Const.NVL(EdwJourneyOpsDecorations.formatWhen(run.getFinishedAt()), ""));
       item.setText(2, run.isSuccess() ? "ok" : "failed");
-      item.setText(3, Const.NVL(EdwJourneyOpsDecorations.formatDuration(max), ""));
+      item.setText(3, Const.NVL(EdwJourneyOpsDecorations.formatDuration(runDurationMs), ""));
       row++;
     }
     view.setRowNums();

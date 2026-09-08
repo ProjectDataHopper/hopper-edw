@@ -81,6 +81,40 @@ class LoadRunMetricsCatalogPublisherTest {
     assertEquals(0L, DvUpdateTableMetrics.resolveDurationMs(null, end));
     assertEquals(0L, DvUpdateTableMetrics.resolveDurationMs(start, null));
     assertEquals(0L, DvUpdateTableMetrics.resolveDurationMs(end, start));
+    assertEquals(1500L, DvUpdateTableMetrics.resolveDurationMs(start, end, 794_000L));
+    assertEquals(794_000L, DvUpdateTableMetrics.resolveDurationMs(null, end, 794_000L));
+  }
+
+  @Test
+  void sumPipelineWallClockMsDoesNotAddOverlappingTransformDurations() {
+    Date start = new Date(1_700_000_000_000L);
+    Date end = new Date(start.getTime() + 114_000L);
+    List<DvUpdateTableMetrics> pipelines =
+        List.of(
+            DvUpdateTableMetrics.builder()
+                .pipelineName("dm-fact-f_orders")
+                .tableName("f_orders")
+                .executionStartDate(start)
+                .executionEndDate(end)
+                .durationMs(114_000L)
+                .transform(
+                    TransformRunMetrics.builder()
+                        .transformName("lookup_d_customer")
+                        .durationMs(110_000L)
+                        .build())
+                .transform(
+                    TransformRunMetrics.builder()
+                        .transformName("lookup_d_product")
+                        .durationMs(112_000L)
+                        .build())
+                .transform(
+                    TransformRunMetrics.builder()
+                        .transformName("stage_to_f_orders")
+                        .durationMs(114_000L)
+                        .build())
+                .build());
+
+    assertEquals(114_000L, DvUpdateTableMetrics.sumPipelineWallClockMs(pipelines));
   }
 
   @Test

@@ -16,6 +16,7 @@
 package org.hopper.edw.datavault.metrics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Date;
@@ -150,6 +151,80 @@ class WorkflowLoadOverviewLoaderTest {
             "exec-1", "run-retail-update", null, runs, Map.of("dv-run", 1000L), Map.of(), Map.of());
 
     assertEquals(new Date(finishedAt.getTime() - 1000L), report.getModels().get(0).getStartedAt());
+  }
+
+  @Test
+  void assembleReportPrefersLoadRunWallClockOverSummedTransformDurations() {
+    Date started = new Date(1_700_000_000_000L);
+    Date finished = new Date(started.getTime() + 114_000L);
+    List<WorkflowLoadOverviewLoader.LoadRunRow> runs =
+        List.of(
+            new WorkflowLoadOverviewLoader.LoadRunRow(
+                "dm-run",
+                started,
+                finished,
+                "dm",
+                "retail-f-orders",
+                "run-retail-update",
+                true,
+                0L));
+
+    WorkflowLoadOverviewReport report =
+        WorkflowLoadOverviewLoader.assembleReport(
+            "exec-1",
+            "run-retail-update",
+            started,
+            runs,
+            Map.of("dm-run", 794_000L),
+            Map.of(),
+            Map.of());
+
+    assertEquals(114_000L, report.getModels().get(0).getDurationMs());
+    assertEquals(114_000L, report.getDurationMs());
+  }
+
+  @Test
+  void assembleReportFallsBackToQueriedDurationWhenTimestampsMissing() {
+    Date finishedAt = new Date(1_700_000_010_000L);
+    List<WorkflowLoadOverviewLoader.LoadRunRow> runs =
+        List.of(
+            new WorkflowLoadOverviewLoader.LoadRunRow(
+                "dm-run",
+                null,
+                finishedAt,
+                "dm",
+                "retail-f-orders",
+                "run-retail-update",
+                true,
+                0L));
+
+    WorkflowLoadOverviewReport report =
+        WorkflowLoadOverviewLoader.assembleReport(
+            "exec-1",
+            "run-retail-update",
+            null,
+            runs,
+            Map.of("dm-run", 114_000L),
+            Map.of(),
+            Map.of());
+
+    assertEquals(114_000L, report.getModels().get(0).getDurationMs());
+  }
+
+  @Test
+  void anyMissingWallClockDetectsMissingOrIdenticalTimestamps() {
+    Date started = new Date(1_700_000_000_000L);
+    Date finished = new Date(started.getTime() + 1_000L);
+    assertTrue(
+        WorkflowLoadOverviewLoader.anyMissingWallClock(
+            List.of(
+                new WorkflowLoadOverviewLoader.LoadRunRow(
+                    "a", null, finished, "dm", "m", null, true, 0L))));
+    assertFalse(
+        WorkflowLoadOverviewLoader.anyMissingWallClock(
+            List.of(
+                new WorkflowLoadOverviewLoader.LoadRunRow(
+                    "a", started, finished, "dm", "m", null, true, 0L))));
   }
 
   @Test

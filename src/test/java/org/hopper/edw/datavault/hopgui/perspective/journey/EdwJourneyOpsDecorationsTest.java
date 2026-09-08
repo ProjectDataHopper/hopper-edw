@@ -112,4 +112,16 @@ class EdwJourneyOpsDecorationsTest {
             List.of());
     assertEquals(1000L, EdwJourneyOpsOverlayLoader.modelLoad(overlay, "core", "dv").durationMs());
   }
+
+  @Test
+  void displayedModelDurationPrefersLoadRunWallClock() {
+    Date started = new Date(1_700_000_000_000L);
+    Date finished = new Date(started.getTime() + 114_000L);
+    assertEquals(
+        114_000L,
+        EdwJourneyOpsOverlayLoader.resolveDisplayedDurationMs(794_000L, started, finished));
+    assertEquals(
+        794_000L, EdwJourneyOpsOverlayLoader.resolveDisplayedDurationMs(794_000L, null, finished));
+    assertNull(EdwJourneyOpsOverlayLoader.resolveDisplayedDurationMs(null, null, finished));
+  }
 }

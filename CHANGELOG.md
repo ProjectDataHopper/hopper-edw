@@ -4,6 +4,12 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Fact table load duration in EDW Journey (issue #168)
+
+- Last-model-load duration is elapsed wall-clock time (`load_run` finished − started), not the sum of overlapping transform durations. Fact pipelines with parallel dimension lookups no longer show ~13 minutes when the load itself took ~2 minutes.
+- The journey overlay recomputes that duration from `load_run` timestamps so already-published overview rows display correctly without a new load.
+- Per-table duration charts prefer `load_pipeline_metric.duration_ms` (pipeline wall-clock) over summed transform times.
+
 ### Load duration overview on Hop Web (issue #165)
 
 - The modeler metrics panel is available on Hop Web. RAP cannot host the desktop duration-bar canvas, so the pane shows a table: one row per model table, one column per run, durations in the cells.

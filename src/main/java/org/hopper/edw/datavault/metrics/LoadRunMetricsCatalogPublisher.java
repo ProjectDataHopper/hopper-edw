@@ -187,29 +187,11 @@ public final class LoadRunMetricsCatalogPublisher {
     if (finishedAt == null) {
       return startedAt;
     }
-    long durationMs = sumPipelineDurationMs(pipelines);
+    long durationMs = DvUpdateTableMetrics.sumPipelineWallClockMs(pipelines);
     if (durationMs > 0) {
       return new Date(finishedAt.getTime() - durationMs);
     }
     return startedAt != null ? startedAt : finishedAt;
-  }
-
-  private static long sumPipelineDurationMs(List<DvUpdateTableMetrics> pipelines) {
-    if (pipelines == null || pipelines.isEmpty()) {
-      return 0L;
-    }
-    long total = 0L;
-    for (DvUpdateTableMetrics pipeline : pipelines) {
-      if (pipeline == null || pipeline.getTransforms() == null) {
-        continue;
-      }
-      for (TransformRunMetrics transform : pipeline.getTransforms()) {
-        if (transform != null) {
-          total += Math.max(0L, transform.getDurationMs());
-        }
-      }
-    }
-    return total;
   }
 
   /**

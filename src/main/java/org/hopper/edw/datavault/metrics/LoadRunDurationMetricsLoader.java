@@ -201,7 +201,7 @@ public final class LoadRunDurationMetricsLoader {
         databaseMeta.getQuotedSchemaTableCombination(
             variables, schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_RUN);
     String sql =
-        "SELECT run_id, finished_at, success FROM "
+        "SELECT run_id, started_at, finished_at, success FROM "
             + loadRunTable
             + " WHERE model_name = "
             + sqlLiteral(variables, modelName)
@@ -222,6 +222,7 @@ public final class LoadRunDurationMetricsLoader {
       runs.add(
           LoadRunDurationRun.builder()
               .runId(stringValue(rowMeta, row, "run_id"))
+              .startedAt(dateValue(rowMeta, row, "started_at"))
               .finishedAt(dateValue(rowMeta, row, "finished_at"))
               .success(Boolean.TRUE.equals(booleanValue(rowMeta, row, "success")))
               .build());
@@ -238,41 +239,74 @@ public final class LoadRunDurationMetricsLoader {
       List<LoadRunDurationRun> runs,
       IVariables variables)
       throws HopException {
-    if (!db.checkTableExists(schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_TRANSFORM_METRIC)) {
-      return Collections.emptyList();
-    }
-
-    String transformTable =
-        databaseMeta.getQuotedSchemaTableCombination(
-            variables, schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_TRANSFORM_METRIC);
+    String runIdInClause = buildRunIdInClause(variables, runs);
     String loadRunTable =
         databaseMeta.getQuotedSchemaTableCombination(
             variables, schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_RUN);
-
-    String runIdInClause = buildRunIdInClause(variables, runs);
-    String sql =
-        "SELECT r.run_id, t.element_name, SUM(COALESCE(t.duration_ms, 0)) AS duration_ms "
-            + "FROM "
-            + transformTable
-            + " t JOIN "
-            + loadRunTable
-            + " r ON r.run_id = t.run_id "
-            + "WHERE r.model_name = "
-            + sqlLiteral(variables, modelName)
-            + " AND r.model_type = "
-            + sqlLiteral(variables, modelType)
-            + " AND r.run_id IN ("
-            + runIdInClause
-            + ") "
-            + "GROUP BY r.run_id, t.element_name";
-
     int rowLimit = Math.max(1, runs.size()) * 256;
+
+    List<DurationMetricRow> pipelineRows = Collections.emptyList();
+    if (db.checkTableExists(schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_PIPELINE_METRIC)
+        && db.checkColumnExists(
+            schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_PIPELINE_METRIC, "duration_ms")) {
+      String pipelineTable =
+          databaseMeta.getQuotedSchemaTableCombination(
+              variables, schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_PIPELINE_METRIC);
+      pipelineRows =
+          readDurationRows(
+              db,
+              "SELECT r.run_id, p.element_name, SUM(COALESCE(p.duration_ms, 0)) AS duration_ms "
+                  + "FROM "
+                  + pipelineTable
+                  + " p JOIN "
+                  + loadRunTable
+                  + " r ON r.run_id = p.run_id "
+                  + "WHERE r.model_name = "
+                  + sqlLiteral(variables, modelName)
+                  + " AND r.model_type = "
+                  + sqlLiteral(variables, modelType)
+                  + " AND r.run_id IN ("
+                  + runIdInClause
+                  + ") "
+                  + "GROUP BY r.run_id, p.element_name",
+              rowLimit);
+    }
+
+    List<DurationMetricRow> transformRows = Collections.emptyList();
+    if (db.checkTableExists(schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_TRANSFORM_METRIC)) {
+      String transformTable =
+          databaseMeta.getQuotedSchemaTableCombination(
+              variables, schema, LoadRunMetricsCatalogPublisher.TABLE_LOAD_TRANSFORM_METRIC);
+      transformRows =
+          readDurationRows(
+              db,
+              "SELECT r.run_id, t.element_name, SUM(COALESCE(t.duration_ms, 0)) AS duration_ms "
+                  + "FROM "
+                  + transformTable
+                  + " t JOIN "
+                  + loadRunTable
+                  + " r ON r.run_id = t.run_id "
+                  + "WHERE r.model_name = "
+                  + sqlLiteral(variables, modelName)
+                  + " AND r.model_type = "
+                  + sqlLiteral(variables, modelType)
+                  + " AND r.run_id IN ("
+                  + runIdInClause
+                  + ") "
+                  + "GROUP BY r.run_id, t.element_name",
+              rowLimit);
+    }
+
+    return mergeDurationRows(pipelineRows, transformRows);
+  }
+
+  private static List<DurationMetricRow> readDurationRows(Database db, String sql, int rowLimit)
+      throws HopException {
     List<Object[]> rows = db.getRows(sql, rowLimit);
     IRowMeta rowMeta = db.getReturnRowMeta();
     if (rows == null || rows.isEmpty() || rowMeta == null) {
       return Collections.emptyList();
     }
-
     List<DurationMetricRow> metrics = new ArrayList<>(rows.size());
     for (Object[] row : rows) {
       Long durationMs = longValue(rowMeta, row, "duration_ms");
@@ -283,6 +317,36 @@ public final class LoadRunDurationMetricsLoader {
               durationMs != null ? durationMs : 0L));
     }
     return metrics;
+  }
+
+  /**
+   * Pipeline wall-clock rows win over summed transform durations for the same run and table. Fact
+   * pipelines stamp dimension lookups with the dimension's {@code element_name}; summing those
+   * overlapping transform times inflates the table bar (issue #168).
+   */
+  static List<DurationMetricRow> mergeDurationRows(
+      List<DurationMetricRow> pipelineRows, List<DurationMetricRow> transformRows) {
+    Map<String, DurationMetricRow> byKey = new LinkedHashMap<>();
+    putDurationRows(byKey, transformRows, false);
+    putDurationRows(byKey, pipelineRows, true);
+    return new ArrayList<>(byKey.values());
+  }
+
+  private static void putDurationRows(
+      Map<String, DurationMetricRow> byKey, List<DurationMetricRow> rows, boolean preferPositive) {
+    if (rows == null) {
+      return;
+    }
+    for (DurationMetricRow row : rows) {
+      if (row == null || Utils.isEmpty(row.runId()) || Utils.isEmpty(row.elementName())) {
+        continue;
+      }
+      String key = row.runId() + '\0' + row.elementName();
+      if (preferPositive && row.durationMs() <= 0L && byKey.containsKey(key)) {
+        continue;
+      }
+      byKey.put(key, row);
+    }
   }
 
   static String buildRunIdInClause(IVariables variables, List<LoadRunDurationRun> runs) {
