@@ -16,6 +16,7 @@
 package org.hopper.edw.datavault.hopgui;
 
 import org.apache.hop.core.gui.plugin.GuiPlugin;
+import org.apache.hop.core.gui.plugin.callback.GuiCallback;
 import org.apache.hop.core.gui.plugin.menu.GuiMenuElement;
 import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.util.Utils;
@@ -24,12 +25,15 @@ import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.hopgui.HopGui;
+import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
 import org.apache.hop.ui.util.EnvironmentUtils;
 import org.apache.hop.workflow.WorkflowMeta;
 import org.eclipse.swt.SWT;
 import org.hopper.edw.datavault.documentation.ProjectDocumentationOptions;
 import org.hopper.edw.datavault.documentation.ProjectDocumentationResult;
 import org.hopper.edw.datavault.documentation.ProjectDocumentationService;
+import org.hopper.edw.datavault.hopgui.file.projectdoc.HopProjectDocFileType;
+import org.hopper.edw.datavault.hopgui.file.projectdoc.ProjectDocumentationExplorerSupport;
 import org.hopper.edw.datavault.workflow.actions.generatedocumentation.ActionGenerateProjectDocumentation;
 import org.hopper.edw.datavault.workflow.actions.generatedocumentation.ActionGenerateProjectDocumentationDialog;
 
@@ -51,6 +55,11 @@ public class ProjectDocumentationGuiPlugin {
       instance = new ProjectDocumentationGuiPlugin();
     }
     return instance;
+  }
+
+  @GuiCallback(callbackId = ExplorerPerspective.GUI_TOOLBAR_CREATED_CALLBACK_ID)
+  public void registerExplorerListener() {
+    ProjectDocumentationExplorerSupport.register(ExplorerPerspective.getInstance());
   }
 
   @GuiMenuElement(
@@ -91,21 +100,37 @@ public class ProjectDocumentationGuiPlugin {
       options.setProjectName(
           hopGui.getVariables().getVariable(ProjectDocumentationService.VAR_PROJECT_NAME));
 
-      GuiProgressSupport.ProgressResult<ProjectDocumentationResult> progress =
-          GuiProgressSupport.run(
-              hopGui.getShell(),
-              true,
-              monitor ->
-                  ProjectDocumentationService.generate(
-                      options,
-                      hopGui.getVariables(),
-                      hopGui.getMetadataProvider(),
-                      LogChannel.UI,
-                      monitor));
-      if (progress.value() == null) {
-        return;
-      }
-      ProjectDocumentationResult result = progress.value();
+      GuiProgressSupport.runAsync(
+          hopGui.getShell(),
+          BaseMessages.getString(PKG, "ProjectDocumentationGuiPlugin.Progress.Title"),
+          true,
+          monitor ->
+              ProjectDocumentationService.generate(
+                  options,
+                  hopGui.getVariables(),
+                  hopGui.getMetadataProvider(),
+                  LogChannel.UI,
+                  monitor),
+          progress -> handleGenerateResult(hopGui, progress));
+    } catch (Exception e) {
+      new ErrorDialog(
+          hopGui.getShell(),
+          BaseMessages.getString(PKG, "ProjectDocumentationGuiPlugin.Error.Title"),
+          BaseMessages.getString(PKG, "ProjectDocumentationGuiPlugin.Error.Message"),
+          e);
+    }
+  }
+
+  static void handleGenerateResult(
+      HopGui hopGui, GuiProgressSupport.ProgressResult<ProjectDocumentationResult> progress) {
+    if (hopGui == null || hopGui.getShell() == null || hopGui.getShell().isDisposed()) {
+      return;
+    }
+    if (progress == null || progress.value() == null) {
+      return;
+    }
+    ProjectDocumentationResult result = progress.value();
+    try {
       if (progress.cancelled() || result.isCancelled()) {
         MessageBox box = new MessageBox(hopGui.getShell(), SWT.OK | SWT.ICON_INFORMATION);
         box.setText(BaseMessages.getString(PKG, "ProjectDocumentationGuiPlugin.Cancelled.Title"));
@@ -118,9 +143,7 @@ public class ProjectDocumentationGuiPlugin {
         box.open();
         return;
       }
-      String index =
-          HopVfs.getFilename(HopVfs.getFileObject(result.getOutputFolder() + "/index.html"));
-      EnvironmentUtils.getInstance().openUrl(java.nio.file.Path.of(index).toUri().toString());
+      openGeneratedSite(hopGui, result.getOutputFolder());
     } catch (Exception e) {
       new ErrorDialog(
           hopGui.getShell(),
@@ -128,5 +151,21 @@ public class ProjectDocumentationGuiPlugin {
           BaseMessages.getString(PKG, "ProjectDocumentationGuiPlugin.Error.Message"),
           e);
     }
+  }
+
+  static void openGeneratedSite(HopGui hopGui, String outputFolder) throws Exception {
+    String index = HopVfs.getFilename(HopVfs.getFileObject(outputFolder + "/index.html"));
+    if (EnvironmentUtils.getInstance().isWeb()) {
+      ExplorerPerspective explorer = HopGui.getExplorerPerspective();
+      explorer.activate();
+      try {
+        explorer.refresh();
+      } catch (Exception ignored) {
+        // Best-effort: the documentation tab still opens if the tree cannot refresh.
+      }
+      HopProjectDocFileType.getInstance().openFile(hopGui, index, hopGui.getVariables());
+      return;
+    }
+    EnvironmentUtils.getInstance().openUrl(java.nio.file.Path.of(index).toUri().toString());
   }
 }

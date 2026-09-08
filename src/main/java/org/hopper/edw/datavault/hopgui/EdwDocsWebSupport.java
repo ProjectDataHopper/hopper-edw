@@ -19,11 +19,15 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.vfs2.FileObject;
@@ -34,13 +38,20 @@ import org.apache.hop.core.vfs.HopVfs;
 import org.apache.hop.ui.util.EnvironmentUtils;
 
 /**
- * Serves plugin {@code docs/} over a RAP service handler so Hop Web can open HTML that lives on the
+ * Serves HTML documentation over a RAP service handler so Hop Web can open pages that live on the
  * Tomcat host, not on the browser machine.
+ *
+ * <p>Plugin-shipped {@code docs/} use the default root. Generated project documentation registers
+ * its output folder as an extra root ({@code root=} query parameter) so CSS, images, and in-page
+ * links resolve in both a new browser tab and the explorer {@code Browser} widget.
  */
 public final class EdwDocsWebSupport {
 
   static final String SERVICE_ID = "hopperEdwDocs";
   static final String FILE_PARAM = "file";
+  static final String ROOT_PARAM = "root";
+  static final String DEFAULT_ROOT_ID = "edw";
+  static final String HOP_DOC_CSS = "assets/css/hop-doc.css";
 
   private static final Pattern HTML_REF =
       Pattern.compile("(?i)(\\s(?:href|src)\\s*=\\s*)(['\"])([^'\"]+)\\2");
@@ -54,6 +65,8 @@ public final class EdwDocsWebSupport {
   private static final Object LOCK = new Object();
   private static volatile boolean handlerRegistered;
   private static volatile Path docsRoot;
+  private static final Map<String, Path> extraRoots = new ConcurrentHashMap<>();
+  private static final Map<String, Path> siteRootCache = new ConcurrentHashMap<>();
 
   private EdwDocsWebSupport() {}
 
@@ -70,16 +83,133 @@ public final class EdwDocsWebSupport {
       return absolute.toUri().toString();
     }
     Path root = docsDirectory(absolute);
-    String relative = relativeDocFile(root, absolute);
+    return handlerUrlFor(root, absolute, DEFAULT_ROOT_ID);
+  }
+
+  /**
+   * Browser URL for a file under an explicit documentation site root (generated project docs). On
+   * desktop this is the {@code file:} URI.
+   */
+  public static String browserUrl(Path htmlFile, Path siteRoot) {
+    if (htmlFile == null) {
+      return null;
+    }
+    Path absolute = htmlFile.toAbsolutePath().normalize();
+    if (!EnvironmentUtils.getInstance().isWeb()) {
+      return absolute.toUri().toString();
+    }
+    if (siteRoot == null) {
+      return null;
+    }
+    Path root = siteRoot.toAbsolutePath().normalize();
+    return handlerUrlFor(root, absolute, registerSiteRoot(root));
+  }
+
+  /**
+   * Same-origin HTTP URL suitable for RAP {@code Browser.setUrl}. Relative handler URLs are
+   * resolved against the current request so the explorer iframe can load CSS and follow links.
+   */
+  public static String absoluteBrowserUrl(Path htmlFile, Path siteRoot) {
+    String handlerUrl = browserUrl(htmlFile, siteRoot);
+    return toAbsoluteUrl(handlerUrl, currentRequestUrl());
+  }
+
+  /** {@code true} when {@code path} looks like an HTML file. */
+  public static boolean isHtmlPath(String path) {
+    if (Utils.isEmpty(path)) {
+      return false;
+    }
+    String name = path.toLowerCase(Locale.ROOT);
+    int query = name.indexOf('?');
+    if (query >= 0) {
+      name = name.substring(0, query);
+    }
+    return name.endsWith(".html") || name.endsWith(".htm");
+  }
+
+  /**
+   * Directory that contains {@code assets/css/hop-doc.css}, walking up from {@code htmlFile}. Used
+   * to recognise generated project documentation.
+   */
+  public static Path findSiteRoot(Path htmlFile) {
+    if (htmlFile == null) {
+      return null;
+    }
+    Path current = htmlFile.toAbsolutePath().normalize();
+    if (Files.isRegularFile(current)) {
+      current = current.getParent();
+    }
+    Path start = current;
+    if (start != null) {
+      Path cached = siteRootCache.get(start.toString());
+      if (cached != null) {
+        return cached;
+      }
+    }
+    for (; current != null; current = current.getParent()) {
+      Path css = current.resolve(HOP_DOC_CSS);
+      if (Files.isRegularFile(css)) {
+        if (start != null) {
+          siteRootCache.put(start.toString(), current);
+        }
+        siteRootCache.put(current.toString(), current);
+        return current;
+      }
+    }
+    return null;
+  }
+
+  static String registerSiteRoot(Path siteRoot) {
+    if (siteRoot == null) {
+      return null;
+    }
+    Path root = siteRoot.toAbsolutePath().normalize();
+    String id = Integer.toUnsignedString(root.toString().hashCode(), 36);
+    extraRoots.put(id, root);
+    return id;
+  }
+
+  static String handlerUrlFor(Path root, Path htmlFile, String rootId) {
+    String relative = relativeDocFile(root, htmlFile);
     if (root == null || relative == null) {
       return null;
     }
-    docsRoot = root;
+    if (DEFAULT_ROOT_ID.equals(rootId) || Utils.isEmpty(rootId)) {
+      docsRoot = root;
+    } else {
+      extraRoots.put(rootId, root);
+    }
     String handlerUrl = registerAndHandlerUrl();
     if (Utils.isEmpty(handlerUrl)) {
       return null;
     }
+    if (!Utils.isEmpty(rootId) && !DEFAULT_ROOT_ID.equals(rootId)) {
+      handlerUrl = appendQueryParam(handlerUrl, ROOT_PARAM, rootId);
+    }
     return appendFileParam(handlerUrl, relative);
+  }
+
+  static String toAbsoluteUrl(String handlerUrl, String requestUrl) {
+    if (Utils.isEmpty(handlerUrl)) {
+      return handlerUrl;
+    }
+    String trimmed = handlerUrl.trim();
+    String lower = trimmed.toLowerCase(Locale.ROOT);
+    if (lower.startsWith("http://") || lower.startsWith("https://")) {
+      return trimmed;
+    }
+    if (Utils.isEmpty(requestUrl)) {
+      return trimmed;
+    }
+    int queryAt = trimmed.indexOf('?');
+    if (queryAt >= 0) {
+      return requestUrl + trimmed.substring(queryAt);
+    }
+    try {
+      return URI.create(requestUrl).resolve(trimmed).toString();
+    } catch (Exception ignored) {
+      return trimmed;
+    }
   }
 
   static Path docsDirectory(Path htmlFile) {
@@ -147,12 +277,16 @@ public final class EdwDocsWebSupport {
   }
 
   static String appendFileParam(String handlerUrl, String relativeFile) {
-    if (Utils.isEmpty(handlerUrl) || Utils.isEmpty(relativeFile)) {
+    return appendQueryParam(handlerUrl, FILE_PARAM, relativeFile);
+  }
+
+  static String appendQueryParam(String handlerUrl, String name, String value) {
+    if (Utils.isEmpty(handlerUrl) || Utils.isEmpty(name) || Utils.isEmpty(value)) {
       return handlerUrl;
     }
-    String encoded = URLEncoder.encode(relativeFile, StandardCharsets.UTF_8).replace("+", "%20");
+    String encoded = URLEncoder.encode(value, StandardCharsets.UTF_8).replace("+", "%20");
     String separator = handlerUrl.contains("?") ? "&" : "?";
-    return handlerUrl + separator + FILE_PARAM + "=" + encoded;
+    return handlerUrl + separator + name + "=" + encoded;
   }
 
   static String rewriteRelativeUrls(String content, String handlerUrl, String currentFile) {
@@ -318,7 +452,10 @@ public final class EdwDocsWebSupport {
     String relative =
         (String)
             request.getClass().getMethod("getParameter", String.class).invoke(request, FILE_PARAM);
-    Path root = docsRoot;
+    String rootId =
+        (String)
+            request.getClass().getMethod("getParameter", String.class).invoke(request, ROOT_PARAM);
+    Path root = rootForId(rootId);
     Path file = resolveSafe(root, relative);
     if (file == null) {
       sendError(response, 404, "Documentation page not found");
@@ -334,7 +471,7 @@ public final class EdwDocsWebSupport {
     try (InputStream in = HopVfs.getInputStream(fileObject)) {
       body = in.readAllBytes();
     }
-    String handlerUrl = currentHandlerUrl(request);
+    String handlerUrl = currentHandlerUrl(request, rootId);
     if (type.startsWith("text/html") || type.startsWith("text/css")) {
       String text = new String(body, StandardCharsets.UTF_8);
       String relativeFile = relativeDocFile(root, file);
@@ -346,32 +483,60 @@ public final class EdwDocsWebSupport {
     write(response, 200, type, body);
   }
 
-  private static String currentHandlerUrl(Object request) {
+  static Path rootForId(String rootId) {
+    if (Utils.isEmpty(rootId) || DEFAULT_ROOT_ID.equals(rootId)) {
+      return docsRoot;
+    }
+    Path extra = extraRoots.get(rootId);
+    return extra != null ? extra : docsRoot;
+  }
+
+  private static String currentRequestUrl() {
+    try {
+      Class<?> rwtClass = Class.forName("org.eclipse.rap.rwt.RWT");
+      Object request = rwtClass.getMethod("getRequest").invoke(null);
+      Object requestUrl = request.getClass().getMethod("getRequestURL").invoke(request);
+      return requestUrl != null ? requestUrl.toString() : null;
+    } catch (Exception ignored) {
+      return null;
+    }
+  }
+
+  private static String currentHandlerUrl(Object request, String rootId) {
+    String url = null;
     try {
       Class<?> rwtClass = Class.forName("org.eclipse.rap.rwt.RWT");
       Object serviceManager = rwtClass.getMethod("getServiceManager").invoke(null);
-      Object url =
+      Object handlerUrl =
           serviceManager
               .getClass()
               .getMethod("getServiceHandlerUrl", String.class)
               .invoke(serviceManager, SERVICE_ID);
-      if (url != null) {
-        return url.toString();
+      if (handlerUrl != null) {
+        url = handlerUrl.toString();
       }
     } catch (Exception ignored) {
       // Reconstruct from the request URL below.
     }
-    try {
-      Object requestUrl = request.getClass().getMethod("getRequestURL").invoke(request);
-      Object query = request.getClass().getMethod("getQueryString").invoke(request);
-      String url = requestUrl != null ? requestUrl.toString() : "";
-      if (query != null && !query.toString().isBlank()) {
-        url = url + "?" + stripFileParam(query.toString());
+    if (Utils.isEmpty(url)) {
+      try {
+        Object requestUrl = request.getClass().getMethod("getRequestURL").invoke(request);
+        Object query = request.getClass().getMethod("getQueryString").invoke(request);
+        url = requestUrl != null ? requestUrl.toString() : "";
+        if (query != null && !query.toString().isBlank()) {
+          url = url + "?" + stripFileParam(query.toString());
+        }
+      } catch (Exception ignored) {
+        return null;
       }
-      return url;
-    } catch (Exception ignored) {
-      return null;
     }
+    if (!Utils.isEmpty(url)
+        && !Utils.isEmpty(rootId)
+        && !DEFAULT_ROOT_ID.equals(rootId)
+        && !url.contains(ROOT_PARAM + "=")) {
+      url = appendQueryParam(url, ROOT_PARAM, rootId);
+    }
+    return url;
   }
 
   static String stripFileParam(String query) {

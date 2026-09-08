@@ -144,7 +144,8 @@
         var hit = list[h];
         var a = document.createElement("a");
         a.className = "hop-doc-svg-hit";
-        a.href = hit.href || "#";
+        var href = hit.href || "#";
+        a.href = window.hopDocHref ? window.hopDocHref(href) : href;
         a.title = hit.name || "";
         a.style.left = hit.x + "px";
         a.style.top = hit.y + "px";

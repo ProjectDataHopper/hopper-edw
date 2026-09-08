@@ -34,7 +34,10 @@ Skipped: `.hlv` session graphs, hidden folders, `.git`, `target`, `node_modules`
 
 === Tools menu
 
-**Tools → Generate project documentation…** uses the same options, shows a cancelable progress dialog, and opens `index.html` in the system browser when generation finishes.
+**Tools → Generate project documentation…** uses the same options, shows a cancelable progress dialog, and opens `index.html` when generation finishes.
+
+* **Hop GUI (desktop):** opens the site in the system browser (`file:` URL).
+* **Hop Web:** shows a cancelable progress dialog (Hop's built-in monitor is skipped on RAP), then opens `index.html` in the **File explorer** perspective. Pages are served through a RAP handler so CSS, the header/sidebar, search, and in-page links resolve. Opening a generated HTML file from the explorer tree uses the same handler.
 
 === CLI
 

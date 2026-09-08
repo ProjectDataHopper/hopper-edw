@@ -83,9 +83,12 @@
     }
     var html = "";
     var prefix = rootPrefix();
+    var toHref = window.hopDocHref || function (value) {
+      return value;
+    };
     for (var i = 0; i < results.length; i++) {
       var entry = results[i];
-      var href = prefix + (entry.path || "");
+      var href = toHref(prefix + (entry.path || ""));
       var kind = (entry.kind || "").replace(/_/g, " ");
       html +=
         '<a href="' +
@@ -131,7 +134,8 @@
       return;
     }
     var prefix = rootPrefix();
-    window.location.href = prefix + shown[active].path;
+    var href = prefix + shown[active].path;
+    window.location.href = window.hopDocHref ? window.hopDocHref(href) : href;
   }
 
   function bind() {

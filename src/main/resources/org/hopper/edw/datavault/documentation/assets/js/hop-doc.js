@@ -20,6 +20,93 @@
   var NAV_KEY = "hop-doc-nav-open";
   var NAV_NAME_PREFIX = "hop-doc-nav:";
 
+  function isAbsoluteHref(href) {
+    if (!href) {
+      return true;
+    }
+    var lower = href.toLowerCase();
+    return (
+      lower.indexOf("http://") === 0 ||
+      lower.indexOf("https://") === 0 ||
+      lower.indexOf("mailto:") === 0 ||
+      lower.indexOf("javascript:") === 0 ||
+      lower.indexOf("data:") === 0 ||
+      href.charAt(0) === "/" ||
+      href.charAt(0) === "#" ||
+      href.indexOf("servicehandler=") >= 0
+    );
+  }
+
+  function resolveAgainst(currentFile, relative) {
+    var base = String(currentFile || "").replace(/\\/g, "/");
+    var slash = base.lastIndexOf("/");
+    var dir = slash >= 0 ? base.substring(0, slash + 1) : "";
+    var parts = (dir + relative).split("/");
+    var out = [];
+    for (var i = 0; i < parts.length; i++) {
+      var part = parts[i];
+      if (!part || part === ".") {
+        continue;
+      }
+      if (part === "..") {
+        if (out.length) {
+          out.pop();
+        }
+        continue;
+      }
+      out.push(part);
+    }
+    return out.join("/");
+  }
+
+  function hopDocHref(href) {
+    if (!href || isAbsoluteHref(href)) {
+      return href;
+    }
+    try {
+      var params = new URLSearchParams(window.location.search);
+      if (!params.get("servicehandler") || !params.get("file")) {
+        return href;
+      }
+      var hash = "";
+      var path = href;
+      var hashAt = href.indexOf("#");
+      if (hashAt >= 0) {
+        hash = href.substring(hashAt);
+        path = href.substring(0, hashAt);
+      }
+      if (!path) {
+        return href;
+      }
+      params.set("file", resolveAgainst(params.get("file"), path));
+      return window.location.pathname + "?" + params.toString() + hash;
+    } catch (e) {
+      return href;
+    }
+  }
+
+  window.hopDocHref = hopDocHref;
+
+  document.addEventListener(
+    "click",
+    function (event) {
+      var target = event.target;
+      while (target && target.tagName !== "A") {
+        target = target.parentElement;
+      }
+      if (!target) {
+        return;
+      }
+      var href = target.getAttribute("href");
+      var rewritten = hopDocHref(href);
+      if (rewritten && rewritten !== href) {
+        event.preventDefault();
+        window.location.href = rewritten;
+      }
+    },
+    true
+  );
+
   function systemDark() {
     return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
   }

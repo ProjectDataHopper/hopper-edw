@@ -103,7 +103,7 @@ For a slide-style executive summary, see link:presentations/hop-data-vault-overv
 |link:architecture-export.adoc[Architecture export]
 
 |Project documentation (static HTML)
-|Available
+|Available (Hop Web: explorer + RAP handler, issue https://github.com/ProjectDataHopper/hopper-edw/issues/169[#169])
 |link:project-documentation.adoc[Project documentation], issue https://github.com/ProjectDataHopper/hopper-edw/issues/25[#25]
 
 |Model validation (Check model, type checking)
