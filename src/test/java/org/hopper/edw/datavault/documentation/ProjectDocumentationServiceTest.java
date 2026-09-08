@@ -69,8 +69,13 @@ class ProjectDocumentationServiceTest {
     assertTrue(Files.isRegularFile(target.resolve("assets/css/themes/compact.css")));
     assertTrue(Files.isRegularFile(target.resolve("assets/css/themes/high-contrast.css")));
     assertTrue(Files.isRegularFile(target.resolve("assets/js/search-index.js")));
+    assertTrue(Files.isRegularFile(target.resolve("assets/js/hop-doc.js")));
     assertTrue(Files.isRegularFile(target.resolve("assets/js/search.js")));
     assertTrue(Files.isRegularFile(target.resolve("assets/js/svg-viewer.js")));
+    String hopDocJs =
+        Files.readString(target.resolve("assets/js/hop-doc.js"), StandardCharsets.UTF_8);
+    assertTrue(hopDocJs.contains("hopDocHref"));
+    assertTrue(hopDocJs.contains("servicehandler="));
 
     String index = Files.readString(target.resolve("index.html"), StandardCharsets.UTF_8);
     assertTrue(index.contains("Doc Test"));

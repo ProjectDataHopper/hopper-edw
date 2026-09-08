@@ -4,6 +4,11 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Project documentation on Hop Web (issue #169)
+
+- **Tools → Generate project documentation…** shows a cancelable progress dialog on Hop Web (server-push updates) instead of a frozen wait cursor.
+- Generated HTML opens in the File explorer perspective through a RAP handler, so CSS, header/sidebar chrome, search, and in-page links work. Hop's generic HTML tab uses `Browser.setText()` and has no document base.
+
 ### Resource group load metrics
 
 - **Update resource definition group** paints a live badge (clock / stall / fail) and an idle metrics glyph on the workflow canvas. Click the badge or **View load metrics** to open **This run** (every model in the wave, current table, live transform metrics) and **History** (recent OPS workflow load overviews).

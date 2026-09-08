@@ -116,4 +116,57 @@ class EdwDocsWebSupportTest {
     assertTrue(url.startsWith("file:"));
     assertTrue(url.contains("index.html"));
   }
+
+  @Test
+  void findSiteRootWalksToHopDocCss() throws Exception {
+    Path site = tempDir.resolve("work").resolve("documentation");
+    Path css = site.resolve("assets").resolve("css").resolve("hop-doc.css");
+    Path html = site.resolve("pipelines").resolve("load.html");
+    Files.createDirectories(html.getParent());
+    Files.createDirectories(css.getParent());
+    Files.writeString(css, "body{}");
+    Files.writeString(html, "<html></html>");
+    assertEquals(site.toAbsolutePath().normalize(), EdwDocsWebSupport.findSiteRoot(html));
+    assertTrue(EdwDocsWebSupport.isHtmlPath(html.toString()));
+    assertFalse(EdwDocsWebSupport.isHtmlPath(css.toString()));
+  }
+
+  @Test
+  void findSiteRootReturnsNullWhenNotAHopDocSite() throws Exception {
+    Path html = tempDir.resolve("other").resolve("readme.html");
+    Files.createDirectories(html.getParent());
+    Files.writeString(html, "<html></html>");
+    assertNull(EdwDocsWebSupport.findSiteRoot(html));
+  }
+
+  @Test
+  void toAbsoluteUrlKeepsQueryOnRequestPath() {
+    assertEquals(
+        "http://localhost:8080/hop/ui?cid=1&servicehandler=hopperEdwDocs&file=index.html",
+        EdwDocsWebSupport.toAbsoluteUrl(
+            "./ui?cid=1&servicehandler=hopperEdwDocs&file=index.html",
+            "http://localhost:8080/hop/ui"));
+    assertEquals(
+        "https://example/docs/index.html",
+        EdwDocsWebSupport.toAbsoluteUrl("https://example/docs/index.html", "http://localhost/ui"));
+  }
+
+  @Test
+  void rewriteRelativeUrlsKeepsRootParam() {
+    String html = "<link rel=\"stylesheet\" href=\"assets/css/hop-doc.css\">";
+    String rewritten =
+        EdwDocsWebSupport.rewriteRelativeUrls(
+            html, "./ui?cid=1&servicehandler=hopperEdwDocs&root=ab12", "index.html");
+    assertTrue(
+        rewritten.contains("file=assets%2Fcss%2Fhop-doc.css")
+            || rewritten.contains("file=assets/css/hop-doc.css"));
+    assertTrue(rewritten.contains("root=ab12"));
+  }
+
+  @Test
+  void registerSiteRootAndRootForId() {
+    Path site = tempDir.resolve("site");
+    String id = EdwDocsWebSupport.registerSiteRoot(site);
+    assertEquals(site.toAbsolutePath().normalize(), EdwDocsWebSupport.rootForId(id));
+  }
 }
