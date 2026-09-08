@@ -118,6 +118,19 @@ class EdwDocsWebSupportTest {
   }
 
   @Test
+  void relativeFromRootUsesSiteFolder() throws Exception {
+    Path site = tempDir.resolve("documentation");
+    Path html = site.resolve("workflows").resolve("workflows").resolve("run-retail-initial.html");
+    Files.createDirectories(html.getParent());
+    Files.createDirectories(site.resolve("assets").resolve("css"));
+    Files.writeString(site.resolve("assets").resolve("css").resolve("hop-doc.css"), "body{}");
+    Files.writeString(html, "<html></html>");
+    assertEquals(
+        "workflows/workflows/run-retail-initial.html",
+        EdwDocsWebSupport.relativeFromRoot(site, html.toString()));
+  }
+
+  @Test
   void findSiteRootWalksToHopDocCss() throws Exception {
     Path site = tempDir.resolve("work").resolve("documentation");
     Path css = site.resolve("assets").resolve("css").resolve("hop-doc.css");

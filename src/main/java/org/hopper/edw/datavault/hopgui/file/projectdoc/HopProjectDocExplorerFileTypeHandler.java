@@ -16,7 +16,6 @@
 package org.hopper.edw.datavault.hopgui.file.projectdoc;
 
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.util.Utils;
@@ -85,9 +84,7 @@ public class HopProjectDocExplorerFileTypeHandler extends BaseExplorerFileTypeHa
         clearChanged();
         return;
       }
-      Path html = Path.of(filename);
-      Path root = EdwDocsWebSupport.findSiteRoot(html);
-      String url = root != null ? EdwDocsWebSupport.absoluteBrowserUrl(html, root) : null;
+      String url = EdwDocsWebSupport.absoluteBrowserUrl(filename);
       if (!Utils.isEmpty(url)) {
         wBrowser.setUrl(url);
         clearChanged();

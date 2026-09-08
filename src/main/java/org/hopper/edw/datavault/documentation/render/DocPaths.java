@@ -35,8 +35,11 @@ public final class DocPaths {
 
   public static String stripDot(String relative) {
     String path = posix(relative);
-    if (path.startsWith("./")) {
+    while (path.startsWith("./")) {
       path = path.substring(2);
+    }
+    while (path.startsWith("/")) {
+      path = path.substring(1);
     }
     if (".".equals(path)) {
       return "";
@@ -249,17 +252,8 @@ public final class DocPaths {
   }
 
   public static String rootPrefix(String htmlPath) {
-    String from = stripDot(htmlPath);
-    if (from.isEmpty() || !from.contains("/")) {
-      return "";
-    }
-    int depth = 0;
-    for (int i = 0; i < from.length(); i++) {
-      if (from.charAt(i) == '/') {
-        depth++;
-      }
-    }
-    return "../".repeat(depth);
+    int depth = folderSegments(htmlPath).size();
+    return depth == 0 ? "" : "../".repeat(depth);
   }
 
   public static String fragmentId(String prefix, String name) {

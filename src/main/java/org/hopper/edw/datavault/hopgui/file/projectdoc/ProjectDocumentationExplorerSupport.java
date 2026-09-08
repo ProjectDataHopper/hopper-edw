@@ -17,7 +17,6 @@ package org.hopper.edw.datavault.hopgui.file.projectdoc;
 
 import java.lang.reflect.Field;
 import java.nio.file.Path;
-import org.apache.hop.core.util.Utils;
 import org.apache.hop.ui.hopgui.file.IHopFileType;
 import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
 import org.apache.hop.ui.hopgui.perspective.explorer.IExplorerFilePaintListener;
@@ -66,7 +65,7 @@ public final class ProjectDocumentationExplorerSupport implements IExplorerFileP
               if (treeItem.isDisposed()) {
                 return;
               }
-              Path siteRoot = siteRootOf(path);
+              Path siteRoot = EdwDocsWebSupport.findSiteRoot(path);
               if (siteRoot == null) {
                 return;
               }
@@ -92,13 +91,6 @@ public final class ProjectDocumentationExplorerSupport implements IExplorerFileP
   }
 
   static Path siteRootOf(String path) {
-    if (Utils.isEmpty(path)) {
-      return null;
-    }
-    try {
-      return EdwDocsWebSupport.findSiteRoot(Path.of(path));
-    } catch (Exception ignored) {
-      return null;
-    }
+    return EdwDocsWebSupport.findSiteRoot(path);
   }
 }

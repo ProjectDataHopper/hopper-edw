@@ -58,12 +58,12 @@ public final class HtmlPageWriter {
       String bodyHtml,
       List<String> extraHead) {
     String root = DocPaths.rootPrefix(htmlPath);
-    String css = root + "assets/css/hop-doc.css";
-    String printCss = root + "assets/css/print.css";
-    String js = root + "assets/js/hop-doc.js";
-    String searchJs = root + "assets/js/search.js";
-    String svgJs = root + "assets/js/svg-viewer.js";
-    String indexJs = root + "assets/js/search-index.js";
+    String css = DocPaths.relativize(htmlPath, "assets/css/hop-doc.css");
+    String printCss = DocPaths.relativize(htmlPath, "assets/css/print.css");
+    String js = DocPaths.relativize(htmlPath, "assets/js/hop-doc.js");
+    String searchJs = DocPaths.relativize(htmlPath, "assets/js/search.js");
+    String svgJs = DocPaths.relativize(htmlPath, "assets/js/svg-viewer.js");
+    String indexJs = DocPaths.relativize(htmlPath, "assets/js/search-index.js");
     String project = HtmlEscaper.escape(site.getProjectName());
     String pageTitle = HtmlEscaper.escape(title);
     String generated =
