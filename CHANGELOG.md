@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Resource group load metrics
+
+- **Update resource definition group** paints a live badge (clock / stall / fail) and an idle metrics glyph on the workflow canvas. Click the badge or **View load metrics** to open **This run** (every model in the wave, current table, live transform metrics) and **History** (recent OPS workflow load overviews).
+
 ### Fact table load duration in EDW Journey (issue #168)
 
 - Last-model-load duration is elapsed wall-clock time (`load_run` finished − started), not the sum of overlapping transform durations. Fact pipelines with parallel dimension lookups no longer show ~13 minutes when the load itself took ~2 minutes.

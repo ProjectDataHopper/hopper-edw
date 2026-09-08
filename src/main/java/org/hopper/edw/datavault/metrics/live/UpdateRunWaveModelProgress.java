@@ -16,28 +16,25 @@
 package org.hopper.edw.datavault.metrics.live;
 
 import java.util.Date;
-import java.util.List;
 import lombok.Builder;
 import lombok.Value;
 
-/** Immutable view of one in-flight model update run for GUI and logging. */
+/** Progress for one model in a resource-group update wave. */
 @Value
 @Builder(toBuilder = true)
-public class UpdateRunLiveSnapshot {
-  String metricsRunId;
-  String waveId;
+public class UpdateRunWaveModelProgress {
+  String layer;
+  String modelFile;
   String modelName;
-  String modelFilename;
-  String stagingFolder;
-  String workflowFilename;
-  String workflowName;
-  String actionName;
+  UpdateRunLiveState state;
+  boolean skipped;
+  String skipReason;
   Date startedAt;
-  Date updatedAt;
-  UpdateRunLiveState overallState;
+  Date finishedAt;
+  long durationMs;
   String currentElementName;
-  String currentElementType;
-  String tooltipText;
-  List<PipelineLiveMetrics> pipelines;
-  UpdateRunLiveBottleneck primaryBottleneck;
+  long sourceRowsRead;
+  long targetRowsInserted;
+  long errors;
+  String bottleneckMessage;
 }

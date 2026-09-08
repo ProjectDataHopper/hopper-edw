@@ -15,7 +15,6 @@
  */
 package org.hopper.edw.datavault.hopgui.metrics;
 
-import org.apache.hop.core.util.Utils;
 import org.hopper.edw.datavault.metrics.live.UpdateRunLiveMonitor;
 import org.hopper.edw.datavault.metrics.live.UpdateRunLiveSnapshot;
 import org.hopper.edw.datavault.metrics.live.UpdateRunLiveState;
@@ -38,7 +37,6 @@ public final class UpdateRunLiveSnapshotTooltipSupport {
   }
 
   public static boolean isLiveBadgeOwner(Object owner) {
-    return owner instanceof UpdateRunLiveAreaOwnerData data
-        && !Utils.isEmpty(data.getMetricsRunId());
+    return owner instanceof UpdateRunLiveAreaOwnerData;
   }
 }

@@ -62,9 +62,11 @@ The integration-tests project collects Data Vault / Business Vault update metric
 
 === Workflow load overview
 
-**Preferred:** use the **Update resource definition group** workflow action. It loads every DV/BV/DM model listed on a resource definition group (order: all DV, then BV, then DM; list order within each layer), and can **manage vault update metrics** internally (assigns `DV_WORKFLOW_EXECUTION_ID` at start and publishes a load overview at the end). No separate Begin/End actions or hand-wired per-model hops are required.
+**Preferred:** use the **Update resource definition group** workflow action. It loads every DV/BV/DM model listed on a resource definition group (order: all DV, then BV, then DM; list order within each layer), and can **manage vault update metrics** internally (assigns `DV_WORKFLOW_EXECUTION_ID` at start and publishes a load overview at the end). No separate Begin/End actions or hand-wired per-model hops are required. While it runs, the canvas badge and **View load metrics** dialog show which model/table is current, stalls, and this-run plus OPS history (see link:performance-tuning.md[Performance tuning]).
 
 image::images/update-resource-definition-group-action-dialog.png[Update resource definition group action dialog — group selection and layer includes,align="center"]
+
+image::images/action-update-resource-group-load-metrics-dialog.png[Resource group load metrics — This run tab during a retail-sources update,align="center"]
 
 Full option reference: link:update-resource-definition-group-action.adoc[Update resource definition group action].
 

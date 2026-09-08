@@ -23,6 +23,7 @@ import org.apache.hop.core.gui.IGc.EImage;
 import org.apache.hop.workflow.action.ActionMeta;
 import org.hopper.edw.datavault.metrics.live.UpdateRunLiveState;
 import org.hopper.edw.datavault.workflow.actions.datavaultupdate.ActionDataVaultUpdate;
+import org.hopper.edw.datavault.workflow.actions.updateresourcegroup.ActionUpdateResourceDefinitionGroup;
 import org.junit.jupiter.api.Test;
 
 class UpdateRunLiveWorkflowPaintSupportTest {
@@ -49,5 +50,16 @@ class UpdateRunLiveWorkflowPaintSupportTest {
     assertEquals(
         EImage.ERROR,
         UpdateRunLiveWorkflowPaintSupport.resolveStatusImage(UpdateRunLiveState.STALLED));
+  }
+
+  @Test
+  void recognizesGroupUpdateActionAndIdleMetricsIcon() {
+    ActionUpdateResourceDefinitionGroup action = new ActionUpdateResourceDefinitionGroup();
+    ActionMeta actionMeta = new ActionMeta(action);
+
+    assertTrue(UpdateRunLiveWorkflowPaintSupport.isGroupUpdateAction(actionMeta));
+    assertTrue(UpdateRunLiveWorkflowPaintSupport.isGroupUpdateAction(actionMeta.clone()));
+    assertEquals(
+        "execution-metrics-profile.svg", UpdateRunLiveWorkflowPaintSupport.IDLE_METRICS_ICON_PATH);
   }
 }

@@ -395,6 +395,8 @@ Docker-based runners (`scripts/run-hop.sh`, `run-postgres.sh`), parallel pipelin
 
 image::images/update-resource-definition-group-action-dialog.png[Update resource definition group action dialog,align="center"]
 
+image::images/action-update-resource-group-load-metrics-dialog.png[Resource group load metrics — live wave progress and transform metrics,align="center"]
+
 image::images/workflow-load-overview-summary-models.png[Workflow load overview — per-model summary,align="center"]
 
 image::images/data-vault-retail-360-model-with-duration-metrics.png[Retail 360 model with load duration overview,align="center"]

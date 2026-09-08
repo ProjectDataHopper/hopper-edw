@@ -18,14 +18,19 @@ package org.hopper.edw.datavault.metrics.live;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.UnaryOperator;
 import org.apache.hop.core.util.Utils;
 
-/** Thread-safe registry of in-flight model update snapshots. */
+/** Thread-safe registry of in-flight model update snapshots and resource-group waves. */
 public final class UpdateRunLiveRegistry {
 
   private static final ConcurrentMap<String, UpdateRunLiveSnapshot> BY_RUN_ID =
       new ConcurrentHashMap<>();
   private static final ConcurrentMap<String, String> RUN_ID_BY_WORKFLOW_ACTION =
+      new ConcurrentHashMap<>();
+  private static final ConcurrentMap<String, UpdateRunWaveSnapshot> BY_WAVE_ID =
+      new ConcurrentHashMap<>();
+  private static final ConcurrentMap<String, String> WAVE_ID_BY_WORKFLOW_ACTION =
       new ConcurrentHashMap<>();
 
   private UpdateRunLiveRegistry() {}
@@ -39,6 +44,27 @@ public final class UpdateRunLiveRegistry {
         snapshot.getWorkflowFilename(), snapshot.getActionName(), snapshot.getMetricsRunId());
     indexWorkflowAction(
         snapshot.getWorkflowName(), snapshot.getActionName(), snapshot.getMetricsRunId());
+    if (!Utils.isEmpty(snapshot.getWaveId())) {
+      updateWave(
+          snapshot.getWaveId(), wave -> UpdateRunWaveSnapshotSupport.mergeChild(wave, snapshot));
+    }
+  }
+
+  public static void publishWave(UpdateRunWaveSnapshot snapshot) {
+    if (snapshot == null || Utils.isEmpty(snapshot.getWaveId())) {
+      return;
+    }
+    replaceWaveIndex(
+        snapshot.getWorkflowFilename(), snapshot.getActionName(), snapshot.getWaveId());
+    replaceWaveIndex(snapshot.getWorkflowName(), snapshot.getActionName(), snapshot.getWaveId());
+    BY_WAVE_ID.put(snapshot.getWaveId(), snapshot);
+  }
+
+  public static void updateWave(String waveId, UnaryOperator<UpdateRunWaveSnapshot> updater) {
+    if (Utils.isEmpty(waveId) || updater == null) {
+      return;
+    }
+    BY_WAVE_ID.computeIfPresent(waveId, (id, wave) -> updater.apply(wave));
   }
 
   private static void indexWorkflowAction(
@@ -66,6 +92,22 @@ public final class UpdateRunLiveRegistry {
     return findByRunId(runId);
   }
 
+  public static Optional<UpdateRunWaveSnapshot> findWaveById(String waveId) {
+    if (Utils.isEmpty(waveId)) {
+      return Optional.empty();
+    }
+    return Optional.ofNullable(BY_WAVE_ID.get(waveId));
+  }
+
+  public static Optional<UpdateRunWaveSnapshot> findWaveByWorkflowAction(
+      String workflowFilename, String actionName) {
+    String key = workflowActionKey(workflowFilename, actionName);
+    if (Utils.isEmpty(key)) {
+      return Optional.empty();
+    }
+    return findWaveById(WAVE_ID_BY_WORKFLOW_ACTION.get(key));
+  }
+
   public static void remove(String metricsRunId) {
     if (Utils.isEmpty(metricsRunId)) {
       return;
@@ -74,6 +116,22 @@ public final class UpdateRunLiveRegistry {
     if (removed != null) {
       removeWorkflowActionIndex(removed.getWorkflowFilename(), removed.getActionName());
       removeWorkflowActionIndex(removed.getWorkflowName(), removed.getActionName());
+      if (!Utils.isEmpty(removed.getWaveId())) {
+        updateWave(
+            removed.getWaveId(),
+            wave -> UpdateRunWaveSnapshotSupport.clearCurrentLive(wave, metricsRunId));
+      }
+    }
+  }
+
+  public static void removeWave(String waveId) {
+    if (Utils.isEmpty(waveId)) {
+      return;
+    }
+    UpdateRunWaveSnapshot removed = BY_WAVE_ID.remove(waveId);
+    if (removed != null) {
+      removeWaveIndex(removed.getWorkflowFilename(), removed.getActionName());
+      removeWaveIndex(removed.getWorkflowName(), removed.getActionName());
     }
   }
 
@@ -81,6 +139,24 @@ public final class UpdateRunLiveRegistry {
     String workflowActionKey = workflowActionKey(workflowReference, actionName);
     if (!Utils.isEmpty(workflowActionKey)) {
       RUN_ID_BY_WORKFLOW_ACTION.remove(workflowActionKey);
+    }
+  }
+
+  private static void replaceWaveIndex(String workflowReference, String actionName, String waveId) {
+    String workflowActionKey = workflowActionKey(workflowReference, actionName);
+    if (Utils.isEmpty(workflowActionKey) || Utils.isEmpty(waveId)) {
+      return;
+    }
+    String previous = WAVE_ID_BY_WORKFLOW_ACTION.put(workflowActionKey, waveId);
+    if (!Utils.isEmpty(previous) && !previous.equals(waveId)) {
+      BY_WAVE_ID.remove(previous);
+    }
+  }
+
+  private static void removeWaveIndex(String workflowReference, String actionName) {
+    String workflowActionKey = workflowActionKey(workflowReference, actionName);
+    if (!Utils.isEmpty(workflowActionKey)) {
+      WAVE_ID_BY_WORKFLOW_ACTION.remove(workflowActionKey);
     }
   }
 

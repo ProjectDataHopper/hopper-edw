@@ -190,7 +190,13 @@ When a **Data Vault / Business Vault / Dimensional Update** action is executing,
 
 Hover the icon for a short tooltip such as *Updating table d_customer of model retail-360*. Click it to open the **Live model update** dialog with per-pipeline transform metrics (rows in/out, buffer sizes, stall seconds) and a **Copy diagnostics** button for issue reports.
 
+The **Update resource definition group** action uses the same corner. While the wave is running, the tooltip includes the current model and progress (`model 2/5`). Click (or context menu **View load metrics**) opens **Resource group load metrics**: **This run** lists every model in the wave with elapsed time and live transform metrics; **History** lists recent OPS workflow load overviews. When the action is idle, a metrics glyph stays on the icon so you can still open history without a live run.
+
+![Resource group load metrics — This run tab during a retail-sources update](images/action-update-resource-group-load-metrics-dialog.png)
+
 The action log also prints the **resolved staging folder** at orchestrator start (default `${java.io.tmpdir}/dv2/<model-name>/`, not necessarily `/tmp`) and repeats stall warnings about once per minute while a pipeline is quiet.
+
+Live badges are sampled in the Hop GUI JVM. A remote workflow engine will not paint live stalls; History still works when the execution metrics profile published to OPS.
 
 ### Open execution from the workflow action
 

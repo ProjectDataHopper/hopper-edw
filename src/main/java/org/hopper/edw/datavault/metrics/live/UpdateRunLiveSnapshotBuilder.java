@@ -86,6 +86,7 @@ final class UpdateRunLiveSnapshotBuilder {
 
     return UpdateRunLiveSnapshot.builder()
         .metricsRunId(context.getMetricsRunId())
+        .waveId(context.getWaveId())
         .modelName(context.getModelName())
         .modelFilename(context.getModelFilename())
         .stagingFolder(context.getStagingFolder())

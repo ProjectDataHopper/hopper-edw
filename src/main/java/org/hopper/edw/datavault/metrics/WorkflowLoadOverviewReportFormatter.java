@@ -319,7 +319,7 @@ public final class WorkflowLoadOverviewReportFormatter {
     return value + " ".repeat(width - value.length());
   }
 
-  static String formatDuration(long durationMs) {
+  public static String formatDuration(long durationMs) {
     if (durationMs < 0) {
       durationMs = 0;
     }

@@ -75,6 +75,7 @@ public final class HelpTopics {
   public static final String ACTION_IMPORT_DBT = "action-import-dbt-project-dialog";
   public static final String ACTION_UPDATE_RESOURCE_GROUP =
       "action-update-resource-definition-group-dialog";
+  public static final String RESOURCE_GROUP_UPDATE_METRICS = "resource-group-update-metrics-dialog";
   public static final String ACTION_HARVEST_SOURCE_METADATA =
       "action-harvest-source-metadata-dialog";
   public static final String ACTION_MEASURE_DATA_QUALITY = "action-measure-data-quality-dialog";
@@ -270,6 +271,10 @@ public final class HelpTopics {
               ACTION_UPDATE_RESOURCE_GROUP,
               "update-resource-definition-group-action.html",
               "HelpTopics.ActionUpdateResourceDefinitionGroupDialog.Title"),
+          p(
+              RESOURCE_GROUP_UPDATE_METRICS,
+              "help/resource-group-update-metrics-dialog.html",
+              "HelpTopics.ResourceGroupUpdateMetricsDialog.Title"),
           p(
               ACTION_HARVEST_SOURCE_METADATA,
               "metadata-harvesting.html",

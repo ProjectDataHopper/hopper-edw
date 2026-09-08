@@ -13,28 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.hopper.edw.datavault.hopgui.metrics;
+package org.hopper.edw.datavault.metrics.live;
 
-import lombok.AllArgsConstructor;
+import java.util.Date;
+import java.util.List;
+import lombok.Builder;
 import lombok.Value;
 
-/** Marker stored on workflow graph custom area owners for live update badge clicks. */
+/** Immutable view of a resource-group update wave for the workflow canvas and metrics dialog. */
 @Value
-@AllArgsConstructor
-public class UpdateRunLiveAreaOwnerData {
-  String metricsRunId;
+@Builder(toBuilder = true)
+public class UpdateRunWaveSnapshot {
   String waveId;
+  String resourceGroupName;
   String workflowFilename;
+  String workflowName;
   String actionName;
-  boolean historyPreferred;
-
-  public UpdateRunLiveAreaOwnerData(String metricsRunId) {
-    this(metricsRunId, null, null, null, false);
-  }
-
-  public static UpdateRunLiveAreaOwnerData forWave(
-      String waveId, String workflowFilename, String actionName, boolean historyPreferred) {
-    return new UpdateRunLiveAreaOwnerData(
-        waveId, waveId, workflowFilename, actionName, historyPreferred);
-  }
+  String workflowExecutionId;
+  Date startedAt;
+  Date updatedAt;
+  UpdateRunWavePhase phase;
+  UpdateRunLiveState overallState;
+  String tooltipText;
+  int modelsTotal;
+  int modelsCompleted;
+  int modelsFailed;
+  int validatingTotal;
+  List<UpdateRunWaveModelProgress> models;
+  UpdateRunLiveSnapshot currentLiveSnapshot;
 }

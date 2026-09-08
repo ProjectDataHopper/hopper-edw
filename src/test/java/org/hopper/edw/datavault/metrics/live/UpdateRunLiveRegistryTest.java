@@ -16,9 +16,11 @@
 package org.hopper.edw.datavault.metrics.live;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Date;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -27,6 +29,8 @@ class UpdateRunLiveRegistryTest {
   @AfterEach
   void cleanup() {
     UpdateRunLiveRegistry.remove("run-1");
+    UpdateRunLiveRegistry.remove("run-child");
+    UpdateRunLiveRegistry.removeWave("wave-1");
   }
 
   @Test
@@ -53,5 +57,57 @@ class UpdateRunLiveRegistryTest {
     assertEquals(
         "d_customer",
         UpdateRunLiveRegistry.findByRunId("run-1").orElseThrow().getCurrentElementName());
+  }
+
+  @Test
+  void indexesWaveByCanvasActionAndMergesChildWithoutDroppingWave() {
+    UpdateRunWaveSnapshot wave =
+        UpdateRunWaveSnapshotSupport.initial(
+            "wave-1",
+            "retail-sources",
+            "/tmp/update-retail.hwf",
+            "update-retail",
+            "Update resource definition group",
+            null,
+            List.of(
+                UpdateRunWaveModelProgress.builder()
+                    .layer("DATA_VAULT")
+                    .modelFile("models/retail-360.hdv")
+                    .state(UpdateRunLiveState.PENDING)
+                    .build()),
+            new Date());
+    UpdateRunLiveRegistry.publishWave(wave);
+
+    assertTrue(
+        UpdateRunLiveRegistry.findWaveByWorkflowAction(
+                "/tmp/update-retail.hwf", "Update resource definition group")
+            .isPresent());
+
+    UpdateRunLiveSnapshot child =
+        UpdateRunLiveSnapshot.builder()
+            .metricsRunId("run-child")
+            .waveId("wave-1")
+            .modelName("retail-360")
+            .modelFilename("models/retail-360.hdv")
+            .workflowFilename("/tmp/update-retail.hwf")
+            .actionName("DV models/retail-360.hdv")
+            .overallState(UpdateRunLiveState.RUNNING)
+            .currentElementName("hub_customer")
+            .updatedAt(new Date())
+            .pipelines(List.of())
+            .build();
+    UpdateRunLiveRegistry.publish(child);
+
+    UpdateRunWaveSnapshot merged = UpdateRunLiveRegistry.findWaveById("wave-1").orElseThrow();
+    assertEquals("hub_customer", merged.getModels().get(0).getCurrentElementName());
+    assertEquals("run-child", merged.getCurrentLiveSnapshot().getMetricsRunId());
+
+    UpdateRunLiveRegistry.remove("run-child");
+    UpdateRunWaveSnapshot afterRemove =
+        UpdateRunLiveRegistry.findWaveByWorkflowAction(
+                "/tmp/update-retail.hwf", "Update resource definition group")
+            .orElseThrow();
+    assertEquals("wave-1", afterRemove.getWaveId());
+    assertNull(afterRemove.getCurrentLiveSnapshot());
   }
 }

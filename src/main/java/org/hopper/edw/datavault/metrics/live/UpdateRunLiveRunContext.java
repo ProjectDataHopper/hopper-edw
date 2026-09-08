@@ -31,6 +31,7 @@ import org.apache.hop.workflow.engine.IWorkflowEngine;
 @Builder
 public class UpdateRunLiveRunContext {
   String metricsRunId;
+  String waveId;
   String modelName;
   String modelFilename;
   String stagingFolder;
@@ -49,12 +50,15 @@ public class UpdateRunLiveRunContext {
       ILoggingObject parent,
       IWorkflowEngine<WorkflowMeta> parentWorkflow,
       LogLevel logLevel) {
+    UpdateRunLiveAttachment attachment = UpdateRunLiveAttachment.from(parent);
     String actionName = parent != null ? parent.getObjectName() : null;
+    String waveId = attachment != null ? attachment.getWaveId() : null;
     ILogChannel log = parent != null ? new LogChannel(parent) : null;
     String workflowFilename = resolveWorkflowFilename(parentWorkflow);
     String workflowName = resolveWorkflowName(parentWorkflow);
     return UpdateRunLiveRunContext.builder()
         .metricsRunId(metricsRunId)
+        .waveId(waveId)
         .modelName(modelName)
         .modelFilename(modelFilename)
         .stagingFolder(stagingFolder)

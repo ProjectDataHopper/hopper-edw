@@ -54,6 +54,8 @@ import org.hopper.edw.datavault.metrics.WorkflowLoadOverviewPublisher;
 import org.hopper.edw.datavault.metrics.WorkflowLoadOverviewReport;
 import org.hopper.edw.datavault.metrics.WorkflowLoadOverviewReportFormatter;
 import org.hopper.edw.datavault.metrics.WorkflowOverviewMetricsResolver;
+import org.hopper.edw.datavault.metrics.live.UpdateRunLiveAttachment;
+import org.hopper.edw.datavault.metrics.live.UpdateRunWaveMonitor;
 import org.hopper.edw.datavault.metrics.metadata.ExecutionMetricsProfileMeta;
 import org.hopper.edw.datavault.resourcedefinition.ParallelValidationSupport;
 import org.hopper.edw.datavault.resourcedefinition.ResourceDefinitionGroupResolver;
@@ -627,10 +629,34 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
           BaseMessages.getString(PKG, "ActionUpdateResourceDefinitionGroup.Log.DryRunEnabled"));
     }
 
+    UpdateRunWaveMonitor wave = UpdateRunWaveMonitor.start(this, groupName, toPlannedModels(jobs));
+    try {
+      return executeWave(
+          result, nr, groupName, jobs, catalogConnection, metricsProfile, checkParallelism, wave);
+    } finally {
+      if (wave != null) {
+        wave.close();
+      }
+    }
+  }
+
+  private Result executeWave(
+      Result result,
+      int nr,
+      String groupName,
+      List<ModelUpdateJob> jobs,
+      String catalogConnection,
+      String metricsProfile,
+      int checkParallelism,
+      UpdateRunWaveMonitor wave)
+      throws HopException {
     // Parallel model validation for the whole group (before any load / DDL wave).
     boolean preValidated = false;
     if (logModelCheckFailures || abortOnModelCheckFailures || writeValidationReport) {
       preValidated = logModelCheckFailures || abortOnModelCheckFailures;
+      if (wave != null) {
+        wave.markValidating(jobs.size());
+      }
       boolean validationFailed = runParallelModelChecks(jobs, checkParallelism, groupName, result);
       if (validationFailed && abortOnModelCheckFailures) {
         result.setResult(false);
@@ -644,6 +670,10 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
       if (writeValidationReport) {
         preValidated = true;
       }
+    }
+
+    if (wave != null) {
+      wave.markUpdating();
     }
 
     // Pure dry-run validation: no data load, and no structure/DDL work requested → done.
@@ -681,6 +711,9 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
       } else if (!Utils.isEmpty(executionId)) {
         setVariable(VaultUpdateExecutionSupport.defaultExecutionIdVariableName(), executionId);
       }
+      if (wave != null) {
+        wave.withWorkflowExecutionId(executionId);
+      }
       logBasic(
           BaseMessages.getString(
               PKG,
@@ -692,12 +725,18 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
     for (ModelUpdateJob job : jobs) {
       index++;
       if (shouldSkipReadOnlyDataVaultJob(job)) {
+        if (wave != null) {
+          wave.markModelSkipped(job.modelFile(), "read-only existing vault");
+        }
         logBasic(
             BaseMessages.getString(
                 PKG,
                 "ActionUpdateResourceDefinitionGroup.Log.SkippingReadOnlyExistingVault",
                 job.modelFile()));
         continue;
+      }
+      if (wave != null) {
+        wave.markModelStarted(job.modelFile());
       }
       logBasic(
           BaseMessages.getString(
@@ -710,7 +749,10 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
               Integer.toString(index),
               Integer.toString(jobs.size())));
       Result modelResult =
-          runModelUpdate(job, catalogConnection, metricsProfile, result, nr, preValidated);
+          runModelUpdate(job, catalogConnection, metricsProfile, result, nr, preValidated, wave);
+      if (wave != null) {
+        wave.markModelFinished(job.modelFile(), modelResult);
+      }
       mergeResult(result, modelResult);
       if (modelResult.getNrErrors() > 0 || !modelResult.isResult()) {
         result.setResult(false);
@@ -751,6 +793,21 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
             groupName,
             Integer.toString(jobs.size())));
     return result;
+  }
+
+  private static List<UpdateRunWaveMonitor.PlannedModel> toPlannedModels(
+      List<ModelUpdateJob> jobs) {
+    List<UpdateRunWaveMonitor.PlannedModel> planned = new ArrayList<>();
+    if (jobs == null) {
+      return planned;
+    }
+    for (ModelUpdateJob job : jobs) {
+      if (job == null) {
+        continue;
+      }
+      planned.add(new UpdateRunWaveMonitor.PlannedModel(job.layer().name(), job.modelFile()));
+    }
+    return planned;
   }
 
   private int resolveModelCheckParallelism() {
@@ -894,7 +951,8 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
       String metricsProfile,
       Result parentResult,
       int nr,
-      boolean skipChildModelCheck)
+      boolean skipChildModelCheck,
+      UpdateRunWaveMonitor wave)
       throws HopException {
     IAction child =
         switch (job.layer()) {
@@ -909,6 +967,9 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
                   job.modelFile(), catalogConnection, metricsProfile, skipChildModelCheck);
         };
     prepareChildAction(child);
+    if (wave != null) {
+      UpdateRunLiveAttachment.apply(child, wave.attachment());
+    }
     Result modelResult = new Result();
     modelResult.setResult(true);
     modelResult.setNrErrors(0);

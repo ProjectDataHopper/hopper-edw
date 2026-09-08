@@ -17,6 +17,8 @@ package org.hopper.edw.datavault.hopgui.metrics;
 
 import org.apache.hop.core.gui.AreaOwner;
 import org.apache.hop.core.gui.AreaOwner.AreaType;
+import org.apache.hop.core.util.Utils;
+import org.apache.hop.ui.hopgui.file.workflow.HopGuiWorkflowGraph;
 import org.apache.hop.ui.hopgui.file.workflow.extension.HopGuiWorkflowGraphExtension;
 
 /** Shared workflow-graph mouse handling for live update badges. */
@@ -36,10 +38,19 @@ public final class UpdateRunLiveWorkflowMouseSupport {
     if (data == null) {
       return false;
     }
-    UpdateRunLiveAnalysisDialog.open(
-        extension.getWorkflowGraph().getHopGui().getShell(),
-        extension.getWorkflowGraph().getVariables(),
-        data.getMetricsRunId());
+    HopGuiWorkflowGraph graph = extension.getWorkflowGraph();
+    if (!Utils.isEmpty(data.getWaveId())
+        || !Utils.isEmpty(data.getActionName())
+        || data.isHistoryPreferred()) {
+      ResourceGroupUpdateMetricsDialog.open(
+          graph.getHopGui().getShell(),
+          graph.getVariables(),
+          graph.getHopGui().getMetadataProvider(),
+          data);
+    } else {
+      UpdateRunLiveAnalysisDialog.open(
+          graph.getHopGui().getShell(), graph.getVariables(), data.getMetricsRunId());
+    }
     extension.setPreventingDefault(true);
     return true;
   }

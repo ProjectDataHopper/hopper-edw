@@ -135,6 +135,17 @@ Optional Markdown / HTML **workflow load overview** under a report folder (retai
 
 If reports are missing after a successful load, check the workflow log for **no metrics found** for the execution id: child updates must inherit `DV_WORKFLOW_EXECUTION_ID` (handled by this action when metrics management is on).
 
+== Live badge and load metrics
+
+On the workflow canvas the action shows a bottom-right badge while it runs (clock / stall warning / failure) and a metrics glyph when idle. Click the badge or use **View load metrics** on the action context menu to open **Resource group load metrics**:
+
+* **This run** — every model in the wave, current table, elapsed time, and live transform metrics (rows, buffers, stall seconds)
+* **History** — recent OPS `workflow_load_overview` rows (double-click for per-model / per-pipeline detail)
+
+image::images/action-update-resource-group-load-metrics-dialog.png[Resource group load metrics — This run tab during a retail-sources update (model 5 of 8, fact f_orders loading),align="center"]
+
+See link:performance-tuning.md[Performance tuning] and link:help/resource-group-update-metrics-dialog.adoc[Resource group load metrics help].
+
 == Open referenced models
 
 From the workflow canvas context menu, **Open referenced object** lists every non-empty model path on the configured group (DV, then BV, then DM). Labels show a **project-relative** path for readability (for example `Data Vault: models/retail-360.hdv`) without a `${PROJECT_HOME}/` prefix. Opening still uses the stored path so Hop can resolve project variables.

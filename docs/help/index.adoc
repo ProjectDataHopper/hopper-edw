@@ -183,6 +183,9 @@ Guides for the same features live in the parent folder (link:../index.adoc[docum
 |link:resource-definition-issue-dialog.adoc[resource-definition-issue-dialog]
 |Remediation Proposals
 
+|link:resource-group-update-metrics-dialog.adoc[resource-group-update-metrics-dialog]
+|Resource group load metrics
+
 |link:resource-definition-validation-options-dialog.adoc[resource-definition-validation-options-dialog]
 |Validate resource definitions — options
 

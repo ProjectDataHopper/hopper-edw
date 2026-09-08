@@ -192,7 +192,7 @@ public final class UpdateRunLiveAnalysisDialog {
     }
   }
 
-  private static IRowMeta buildTransformRowMeta() throws HopException {
+  static IRowMeta buildTransformRowMeta() throws HopException {
     RowMeta rowMeta = new RowMeta();
     rowMeta.addValueMeta(ValueMetaFactory.createValueMeta("Pipeline", IValueMeta.TYPE_STRING));
     rowMeta.addValueMeta(ValueMetaFactory.createValueMeta("Table", IValueMeta.TYPE_STRING));
@@ -208,8 +208,7 @@ public final class UpdateRunLiveAnalysisDialog {
     return rowMeta;
   }
 
-  private static List<Object[]> buildTransformRows(
-      UpdateRunLiveSnapshot snapshot, IRowMeta rowMeta) {
+  static List<Object[]> buildTransformRows(UpdateRunLiveSnapshot snapshot, IRowMeta rowMeta) {
     List<Object[]> rows = new ArrayList<>();
     if (snapshot.getPipelines() == null) {
       return rows;

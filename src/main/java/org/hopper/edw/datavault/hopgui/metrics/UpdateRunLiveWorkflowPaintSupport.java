@@ -29,6 +29,7 @@ import org.apache.hop.core.plugins.ActionPluginType;
 import org.apache.hop.core.plugins.PluginRegistry;
 import org.apache.hop.core.svg.SvgFile;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.workflow.WorkflowMeta;
 import org.apache.hop.workflow.WorkflowPainter;
 import org.apache.hop.workflow.action.ActionMeta;
@@ -36,9 +37,13 @@ import org.apache.hop.workflow.action.IAction;
 import org.hopper.edw.datavault.metrics.live.UpdateRunLiveRegistry;
 import org.hopper.edw.datavault.metrics.live.UpdateRunLiveSnapshot;
 import org.hopper.edw.datavault.metrics.live.UpdateRunLiveState;
+import org.hopper.edw.datavault.metrics.live.UpdateRunWavePhase;
+import org.hopper.edw.datavault.metrics.live.UpdateRunWaveSnapshot;
+import org.hopper.edw.datavault.metrics.live.UpdateRunWaveSnapshotSupport;
 import org.hopper.edw.datavault.workflow.actions.businessvaultupdate.ActionBusinessVaultUpdate;
 import org.hopper.edw.datavault.workflow.actions.datavaultupdate.ActionDataVaultUpdate;
 import org.hopper.edw.datavault.workflow.actions.dimensionalupdate.ActionDimensionalUpdate;
+import org.hopper.edw.datavault.workflow.actions.updateresourcegroup.ActionUpdateResourceDefinitionGroup;
 
 /** Draws the live update badge on executing vault/dimensional update workflow actions. */
 public final class UpdateRunLiveWorkflowPaintSupport {
@@ -46,17 +51,15 @@ public final class UpdateRunLiveWorkflowPaintSupport {
   private static final String PLUGIN_DATA_VAULT_UPDATE = "DATA_VAULT_UPDATE";
   private static final String PLUGIN_BUSINESS_VAULT_UPDATE = "BUSINESS_VAULT_UPDATE";
   private static final String PLUGIN_DIMENSIONAL_UPDATE = "DIMENSIONAL_UPDATE";
+  private static final String PLUGIN_UPDATE_RESOURCE_GROUP = "UPDATE_RESOURCE_DEFINITION_GROUP";
   static final String RUNNING_ICON_PATH = "ui/images/running-icon.svg";
+  static final String IDLE_METRICS_ICON_PATH = "execution-metrics-profile.svg";
   private static final int BADGE_HIT_PADDING = 6;
 
   private UpdateRunLiveWorkflowPaintSupport() {}
 
   public static void paintWorkflowEnd(WorkflowPainter painter) {
     if (painter == null) {
-      return;
-    }
-    List<ActionMeta> activeActions = painter.getActiveActions();
-    if (activeActions == null || activeActions.isEmpty()) {
       return;
     }
     WorkflowMeta workflowMeta = painter.getWorkflowMeta();
@@ -71,18 +74,107 @@ public final class UpdateRunLiveWorkflowPaintSupport {
     }
     String workflowFilename = resolveWorkflowFilename(workflowMeta);
     String workflowName = workflowMeta.getName();
-    for (ActionMeta actionMeta : activeActions) {
-      Optional<UpdateRunLiveSnapshot> snapshot =
-          findSnapshot(workflowFilename, workflowName, actionMeta);
-      if (snapshot.isEmpty()) {
+    List<ActionMeta> activeActions = painter.getActiveActions();
+    if (activeActions != null) {
+      for (ActionMeta actionMeta : activeActions) {
+        Optional<UpdateRunLiveSnapshot> snapshot =
+            findSnapshot(workflowFilename, workflowName, actionMeta);
+        if (snapshot.isEmpty()) {
+          continue;
+        }
+        paintLiveSnapshotBadge(view, actionMeta, snapshot.get());
+      }
+    }
+    paintGroupBadges(view, workflowMeta, activeActions, workflowFilename, workflowName);
+  }
+
+  private static void paintGroupBadges(
+      PainterView view,
+      WorkflowMeta workflowMeta,
+      List<ActionMeta> activeActions,
+      String workflowFilename,
+      String workflowName) {
+    List<ActionMeta> actions = workflowMeta.getActions();
+    if (actions == null || actions.isEmpty()) {
+      return;
+    }
+    for (ActionMeta actionMeta : actions) {
+      if (!isGroupUpdateAction(actionMeta)) {
         continue;
       }
-      paintBadge(view, actionMeta, snapshot.get());
+      Optional<UpdateRunWaveSnapshot> wave = findWave(workflowFilename, workflowName, actionMeta);
+      boolean live =
+          wave.isPresent()
+              && wave.get().getPhase() != UpdateRunWavePhase.FINISHED
+              && activeActions != null
+              && activeActions.contains(actionMeta);
+      if (live) {
+        paintWaveBadge(view, actionMeta, wave.get(), false);
+      } else {
+        paintWaveBadge(view, actionMeta, wave.orElse(null), true);
+      }
     }
   }
 
-  private static void paintBadge(
+  private static void paintLiveSnapshotBadge(
       PainterView view, ActionMeta actionMeta, UpdateRunLiveSnapshot snapshot) {
+    String tooltip = snapshot.getTooltipText();
+    if (Utils.isEmpty(tooltip)) {
+      tooltip = UpdateRunLiveSnapshotTooltipSupport.defaultTooltip(snapshot);
+    }
+    paintBadge(
+        view,
+        actionMeta,
+        snapshot.getOverallState(),
+        false,
+        tooltip,
+        new UpdateRunLiveAreaOwnerData(snapshot.getMetricsRunId()));
+  }
+
+  private static void paintWaveBadge(
+      PainterView view, ActionMeta actionMeta, UpdateRunWaveSnapshot wave, boolean idle) {
+    UpdateRunLiveState state =
+        idle || wave == null
+            ? null
+            : wave.getOverallState() != null ? wave.getOverallState() : UpdateRunLiveState.RUNNING;
+    String tooltip;
+    if (wave != null && !Utils.isEmpty(wave.getTooltipText())) {
+      tooltip = wave.getTooltipText();
+    } else {
+      tooltip =
+          BaseMessages.getString(UpdateRunWaveSnapshotSupport.class, "UpdateRunWave.Tooltip.Idle");
+    }
+    String workflowFilename =
+        wave != null ? wave.getWorkflowFilename() : resolveWorkflowFilename(actionMeta);
+    String actionName = actionMeta.getName();
+    String waveId = wave != null ? wave.getWaveId() : null;
+    paintBadge(
+        view,
+        actionMeta,
+        state,
+        idle,
+        tooltip,
+        UpdateRunLiveAreaOwnerData.forWave(waveId, workflowFilename, actionName, idle));
+  }
+
+  private static String resolveWorkflowFilename(ActionMeta actionMeta) {
+    if (actionMeta == null || actionMeta.getParentWorkflowMeta() == null) {
+      return null;
+    }
+    WorkflowMeta workflowMeta = actionMeta.getParentWorkflowMeta();
+    if (!Utils.isEmpty(workflowMeta.getFilename())) {
+      return workflowMeta.getFilename();
+    }
+    return workflowMeta.getName();
+  }
+
+  private static void paintBadge(
+      PainterView view,
+      ActionMeta actionMeta,
+      UpdateRunLiveState state,
+      boolean idleMetricsIcon,
+      String tooltip,
+      UpdateRunLiveAreaOwnerData badgeData) {
     Point location = actionMeta.getLocation();
     if (location == null) {
       location = new Point(50, 50);
@@ -93,16 +185,14 @@ public final class UpdateRunLiveWorkflowPaintSupport {
     int iconX = (x + view.iconSize()) - (view.miniIconSize() / 2) + 1;
     int iconY = (y + view.iconSize()) - (view.miniIconSize() / 2) + 1;
     try {
-      drawStatusIcon(view, snapshot.getOverallState(), iconX, iconY);
+      if (idleMetricsIcon) {
+        drawIdleMetricsIcon(view, iconX, iconY);
+      } else {
+        drawStatusIcon(view, state, iconX, iconY);
+      }
     } catch (Exception ignored) {
       return;
     }
-    String tooltip = snapshot.getTooltipText();
-    if (Utils.isEmpty(tooltip)) {
-      tooltip = UpdateRunLiveSnapshotTooltipSupport.defaultTooltip(snapshot);
-    }
-    UpdateRunLiveAreaOwnerData badgeData =
-        new UpdateRunLiveAreaOwnerData(snapshot.getMetricsRunId());
     int hitX = iconX - BADGE_HIT_PADDING;
     int hitY = iconY - BADGE_HIT_PADDING;
     int hitSize = view.miniIconSize() + (2 * BADGE_HIT_PADDING);
@@ -110,6 +200,31 @@ public final class UpdateRunLiveWorkflowPaintSupport {
         .add(
             new AreaOwner(
                 AreaType.CUSTOM, hitX, hitY, hitSize, hitSize, view.offset(), badgeData, tooltip));
+  }
+
+  private static void drawIdleMetricsIcon(PainterView view, int iconX, int iconY) throws Exception {
+    SvgFile icon =
+        new SvgFile(
+            IDLE_METRICS_ICON_PATH, UpdateRunLiveWorkflowPaintSupport.class.getClassLoader());
+    view.gc()
+        .drawImage(
+            icon, iconX, iconY, view.miniIconSize(), view.miniIconSize(), view.magnification(), 0);
+  }
+
+  private static Optional<UpdateRunWaveSnapshot> findWave(
+      String workflowFilename, String workflowName, ActionMeta actionMeta) {
+    if (actionMeta == null || Utils.isEmpty(actionMeta.getName())) {
+      return Optional.empty();
+    }
+    Optional<UpdateRunWaveSnapshot> snapshot =
+        UpdateRunLiveRegistry.findWaveByWorkflowAction(workflowFilename, actionMeta.getName());
+    if (snapshot.isPresent()) {
+      return snapshot;
+    }
+    if (!Utils.isEmpty(workflowName) && !workflowName.equals(workflowFilename)) {
+      return UpdateRunLiveRegistry.findWaveByWorkflowAction(workflowName, actionMeta.getName());
+    }
+    return Optional.empty();
   }
 
   private static Optional<UpdateRunLiveSnapshot> findSnapshot(
@@ -142,6 +257,20 @@ public final class UpdateRunLiveWorkflowPaintSupport {
       return true;
     }
     return matchesUpdatePluginId(resolvePluginId(action));
+  }
+
+  static boolean isGroupUpdateAction(ActionMeta actionMeta) {
+    if (actionMeta == null) {
+      return false;
+    }
+    IAction action = actionMeta.getAction();
+    if (action == null) {
+      return false;
+    }
+    if (action instanceof ActionUpdateResourceDefinitionGroup) {
+      return true;
+    }
+    return PLUGIN_UPDATE_RESOURCE_GROUP.equals(resolvePluginId(action));
   }
 
   private static String resolvePluginId(IAction action) {
