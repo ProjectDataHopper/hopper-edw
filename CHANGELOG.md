@@ -32,6 +32,7 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 ### Hop Lineage View on Hop Web (issue #167)
 
 - Opening a lineage view no longer crashes Hop Web with `NoSuchMethodError: FontData.<init>(FontData)`. RAP has no copy constructor; bold/fixed fonts use `FontData(name, height, style)` like Hop core, and Hop Web skips unused bold-font derivation.
+- The details pane no longer calls `Text.setTopIndex` (absent on RAP). Hop Web scrolls with `setSelection(0)` and the vertical scroll bar; desktop `StyledText` still uses `setTopIndex`.
 
 ### Hop Lineage View on Hop Web (issue #161)
 

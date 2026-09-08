@@ -28,6 +28,7 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Text;
 
 /**
@@ -114,7 +115,12 @@ public class MarkdownStyledTextComp extends Composite {
   public void scrollToTop() {
     if (webText != null) {
       if (!webText.isDisposed()) {
-        webText.setTopIndex(0);
+        // RAP Text has no setTopIndex / getTopIndex. Caret + scrollbar are the portable APIs.
+        webText.setSelection(0);
+        ScrollBar vBar = webText.getVerticalBar();
+        if (vBar != null && !vBar.isDisposed()) {
+          vBar.setSelection(0);
+        }
       }
       return;
     }

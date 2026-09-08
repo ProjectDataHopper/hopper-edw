@@ -38,6 +38,21 @@ class MarkdownWebCompatibilityTest {
   /** Bytecode descriptor of {@code FontData(FontData)}, which RAP does not implement. */
   private static final String FONT_DATA_COPY_CTOR = "(Lorg/eclipse/swt/graphics/FontData;)V";
 
+  /**
+   * SWT {@code Text} methods that RAP does not implement. Invoking any of these from {@link
+   * MarkdownStyledTextComp} is a {@code NoSuchMethodError} on Hop Web.
+   */
+  private static final String[] RAP_MISSING_TEXT_APIS = {
+    "setTopIndex",
+    "getTopIndex",
+    "showSelection",
+    "getCaretLineNumber",
+    "getCaretLocation",
+    "getLineCount",
+    "setTabs",
+    "getTabs"
+  };
+
   @Test
   void lineageViewAndMarkdownFacadesAvoidStyledText() throws IOException {
     assertFalse(classFileContains(MarkdownStyledTextComp.class, SWT_STYLED_TEXT));
@@ -58,6 +73,15 @@ class MarkdownWebCompatibilityTest {
     assertTrue(
         classFileContains(MarkdownStyledTextComp.class, "(Ljava/lang/String;II)V"),
         "Expected FontData(String, int, int), the RAP-safe constructor");
+  }
+
+  @Test
+  void markdownFacadeAvoidsRapMissingTextApis() throws IOException {
+    for (String api : RAP_MISSING_TEXT_APIS) {
+      assertFalse(
+          classFileContains(MarkdownStyledTextComp.class, api),
+          "MarkdownStyledTextComp must not call Text." + api + " (absent on RAP)");
+    }
   }
 
   @Test
