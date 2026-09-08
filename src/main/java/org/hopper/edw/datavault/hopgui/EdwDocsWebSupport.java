@@ -114,6 +114,22 @@ public final class EdwDocsWebSupport {
     return toAbsoluteUrl(handlerUrl, currentRequestUrl());
   }
 
+  /**
+   * RAP browser URL for a documentation file identified by a Hop VFS filename (explorer tree path).
+   */
+  public static String absoluteBrowserUrl(String htmlFilename) {
+    Path root = findSiteRoot(htmlFilename);
+    if (root == null || Utils.isEmpty(htmlFilename)) {
+      return null;
+    }
+    String relative = relativeFromRoot(root, htmlFilename);
+    if (relative == null) {
+      return null;
+    }
+    return toAbsoluteUrl(
+        handlerUrlFor(root, relative, registerSiteRoot(root)), currentRequestUrl());
+  }
+
   /** {@code true} when {@code path} looks like an HTML file. */
   public static boolean isHtmlPath(String path) {
     if (Utils.isEmpty(path)) {
@@ -132,9 +148,57 @@ public final class EdwDocsWebSupport {
    * to recognise generated project documentation.
    */
   public static Path findSiteRoot(Path htmlFile) {
-    if (htmlFile == null) {
+    return htmlFile == null ? null : findSiteRoot(htmlFile.toString());
+  }
+
+  /** Same as {@link #findSiteRoot(Path)} for a Hop VFS filename. */
+  public static Path findSiteRoot(String filename) {
+    if (Utils.isEmpty(filename)) {
       return null;
     }
+    Path fromVfs = findSiteRootViaVfs(filename);
+    if (fromVfs != null) {
+      return fromVfs;
+    }
+    try {
+      return findSiteRootNio(Path.of(filename));
+    } catch (Exception ignored) {
+      return null;
+    }
+  }
+
+  private static Path findSiteRootViaVfs(String filename) {
+    try {
+      FileObject current = HopVfs.getFileObject(filename);
+      if (current.exists() && current.getType() == FileType.FILE) {
+        current = current.getParent();
+      }
+      String startKey = current == null ? null : HopVfs.getFilename(current);
+      if (startKey != null) {
+        Path cached = siteRootCache.get(startKey);
+        if (cached != null) {
+          return cached;
+        }
+      }
+      while (current != null) {
+        FileObject css = current.resolveFile(HOP_DOC_CSS);
+        if (css.exists() && css.getType() == FileType.FILE) {
+          Path root = Path.of(HopVfs.getFilename(current));
+          if (startKey != null) {
+            siteRootCache.put(startKey, root);
+          }
+          siteRootCache.put(root.toString(), root);
+          return root;
+        }
+        current = current.getParent();
+      }
+    } catch (Exception ignored) {
+      // Local Path walk below.
+    }
+    return null;
+  }
+
+  private static Path findSiteRootNio(Path htmlFile) {
     Path current = htmlFile.toAbsolutePath().normalize();
     if (Files.isRegularFile(current)) {
       current = current.getParent();
@@ -170,7 +234,10 @@ public final class EdwDocsWebSupport {
   }
 
   static String handlerUrlFor(Path root, Path htmlFile, String rootId) {
-    String relative = relativeDocFile(root, htmlFile);
+    return handlerUrlFor(root, relativeDocFile(root, htmlFile), rootId);
+  }
+
+  static String handlerUrlFor(Path root, String relative, String rootId) {
     if (root == null || relative == null) {
       return null;
     }
@@ -187,6 +254,34 @@ public final class EdwDocsWebSupport {
       handlerUrl = appendQueryParam(handlerUrl, ROOT_PARAM, rootId);
     }
     return appendFileParam(handlerUrl, relative);
+  }
+
+  static String relativeFromRoot(Path root, String htmlFilename) {
+    if (root == null || Utils.isEmpty(htmlFilename)) {
+      return null;
+    }
+    try {
+      FileObject rootObject = HopVfs.getFileObject(root.toString());
+      FileObject fileObject = HopVfs.getFileObject(htmlFilename);
+      String relative = rootObject.getName().getRelativeName(fileObject.getName());
+      relative = relative.replace('\\', '/');
+      while (relative.startsWith("./")) {
+        relative = relative.substring(2);
+      }
+      while (relative.startsWith("/")) {
+        relative = relative.substring(1);
+      }
+      if (relative.isEmpty() || relative.startsWith("..")) {
+        return relativeDocFile(root, Path.of(htmlFilename));
+      }
+      return relative;
+    } catch (Exception ignored) {
+      try {
+        return relativeDocFile(root, Path.of(htmlFilename));
+      } catch (Exception e) {
+        return null;
+      }
+    }
   }
 
   static String toAbsoluteUrl(String handlerUrl, String requestUrl) {

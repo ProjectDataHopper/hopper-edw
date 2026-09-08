@@ -8,6 +8,7 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 - **Tools → Generate project documentation…** shows a cancelable progress dialog on Hop Web (server-push updates) instead of a frozen wait cursor.
 - Generated HTML opens in the File explorer perspective through a RAP handler, so CSS, header/sidebar chrome, search, and in-page links work. Hop's generic HTML tab uses `Browser.setText()` and has no document base.
+- Nested pages (for example `workflows/workflows/run-retail-initial.html`) emit the correct number of `../` segments for `assets/css/hop-doc.css` and `print.css`. A leading slash in a VFS relative path used to add an extra `../`, so stylesheets 404'd.
 
 ### Resource group load metrics
 

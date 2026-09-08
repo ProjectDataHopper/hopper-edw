@@ -28,6 +28,30 @@ class DocPathsTest {
     assertEquals("pipelines/sub/load1.html", DocPaths.htmlForSource("sub/load1.hpl", "hpl"));
     assertEquals(
         "models/data-vault/models/retail.html", DocPaths.htmlForSource("models/retail.hdv", "hdv"));
+    assertEquals(
+        "workflows/workflows/run-retail-initial.html",
+        DocPaths.htmlForSource("workflows/run-retail-initial.hwf", "hwf"));
+    assertEquals(
+        "workflows/workflows/run-retail-initial.html",
+        DocPaths.htmlForSource("/workflows/run-retail-initial.hwf", "hwf"));
+  }
+
+  @Test
+  void rootPrefixCountsDirectoriesNotRawSlashes() {
+    assertEquals("", DocPaths.rootPrefix("index.html"));
+    assertEquals("", DocPaths.rootPrefix("/index.html"));
+    assertEquals("../", DocPaths.rootPrefix("pipelines/load1.html"));
+    assertEquals("../../", DocPaths.rootPrefix("workflows/workflows/run-retail-initial.html"));
+    assertEquals("../../", DocPaths.rootPrefix("/workflows/workflows/run-retail-initial.html"));
+    assertEquals("../../", DocPaths.rootPrefix("workflows//workflows/run-retail-initial.html"));
+    assertEquals(
+        "../../assets/css/hop-doc.css",
+        DocPaths.rootPrefix("workflows/workflows/run-retail-initial.html")
+            + "assets/css/hop-doc.css");
+    assertEquals(
+        "../../assets/css/hop-doc.css",
+        DocPaths.relativize(
+            "workflows/workflows/run-retail-initial.html", "assets/css/hop-doc.css"));
   }
 
   @Test

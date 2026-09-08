@@ -196,6 +196,10 @@ class ProjectDocumentationServiceTest {
     assertTrue(html.contains("tiny-load"));
     assertTrue(html.contains("Pipelines"));
     assertTrue(html.contains("load"), "folder segment should appear in the nav tree");
+    assertTrue(
+        html.contains("href=\"../../../assets/css/hop-doc.css\""),
+        "CSS href must climb three folders for pipelines/pipelines/load/");
+    assertFalse(html.contains("href=\"../../../../assets/css/hop-doc.css\""));
 
     String index = Files.readString(target.resolve("index.html"), StandardCharsets.UTF_8);
     assertTrue(index.contains("tiny-load"));

@@ -147,7 +147,7 @@ public final class ProjectFileScanner {
       return null;
     }
     try {
-      return stripDot(posix(root.getName().getRelativeName(file.getName())));
+      return stripLeadingSlash(stripDot(posix(root.getName().getRelativeName(file.getName()))));
     } catch (Exception e) {
       String rootPath = stripDot(posix(HopVfs.getFilename(root)));
       String filePath = stripDot(posix(HopVfs.getFilename(file)));
@@ -160,10 +160,18 @@ public final class ProjectFileScanner {
       String prefix = rootPath.endsWith("/") ? rootPath : rootPath + "/";
       if (filePath.length() > prefix.length()
           && filePath.regionMatches(true, 0, prefix, 0, prefix.length())) {
-        return filePath.substring(prefix.length());
+        return stripLeadingSlash(filePath.substring(prefix.length()));
       }
       return null;
     }
+  }
+
+  private static String stripLeadingSlash(String path) {
+    String posix = posix(path);
+    while (posix.startsWith("/")) {
+      posix = posix.substring(1);
+    }
+    return posix;
   }
 
   private static boolean hidden(FileObject child) {
