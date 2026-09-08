@@ -48,7 +48,7 @@ Under **Hop Web** (RAP), the six model file graphs (the original five plus Hop L
 | Tab switch | SVG + zoom rebind so the active tab paints without an extra click |
 | BV/DV reference links | Follow name-click navigation; shared SVG client stays on the **target** tab (no snap-back to the previous model) |
 | Execution map breadcrumb | Drill / breadcrumb **zoom-fit uses the focused subgraph** size (not the full-document maximum) |
-| Lineage view details | Same right-hand Markdown sash as desktop (`StyledText`); **View as HTML** still works |
+| Lineage view details | Right-hand Markdown sash uses a plain `Text` widget on RAP (no `StyledText`); **View as HTML** still opens formatted details |
 | Lineage view empty/error | Painted in the SVG snapshot (not only the status `Label`) |
 | Dark mode | SVG render uses `SvgGc` dark theme + `NotePadStyle` |
 | Edit | Double-click / name-click dialogs, **left-click context dialogs** on tables/cards, toolbars (standard SWT/RAP dialogs) |

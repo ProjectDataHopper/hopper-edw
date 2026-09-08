@@ -25,14 +25,18 @@ import org.hopper.edw.datavault.hopgui.file.lineageview.HopGuiLineageViewGraph;
 import org.junit.jupiter.api.Test;
 
 /**
- * Hop Web / RAP does not ship {@code org.eclipse.swt.custom.StyledText}. Classes constructed on
- * that path must not mention it (or {@code StyleRange}) in the class file, or opening Lineage View
- * fails with {@code NoClassDefFoundError}.
+ * Hop Web / RAP does not ship {@code org.eclipse.swt.custom.StyledText}, and RAP {@code FontData}
+ * has no copy constructor. Classes constructed on that path must not mention those APIs in the
+ * class file, or opening Lineage View fails with {@code NoClassDefFoundError} / {@code
+ * NoSuchMethodError}.
  */
 class MarkdownWebCompatibilityTest {
 
   private static final String SWT_STYLED_TEXT = "org/eclipse/swt/custom/StyledText";
   private static final String SWT_STYLE_RANGE = "org/eclipse/swt/custom/StyleRange";
+
+  /** Bytecode descriptor of {@code FontData(FontData)}, which RAP does not implement. */
+  private static final String FONT_DATA_COPY_CTOR = "(Lorg/eclipse/swt/graphics/FontData;)V";
 
   @Test
   void lineageViewAndMarkdownFacadesAvoidStyledText() throws IOException {
@@ -42,6 +46,18 @@ class MarkdownWebCompatibilityTest {
     assertFalse(classFileContains(MarkdownEditPreviewComposite.class, SWT_STYLE_RANGE));
     assertFalse(classFileContains(HopGuiLineageViewGraph.class, SWT_STYLED_TEXT));
     assertFalse(classFileContains(HopGuiLineageViewGraph.class, SWT_STYLE_RANGE));
+  }
+
+  @Test
+  void markdownFacadeAvoidsFontDataCopyConstructor() throws IOException {
+    assertFalse(
+        classFileContains(MarkdownStyledTextComp.class, FONT_DATA_COPY_CTOR),
+        "MarkdownStyledTextComp must not call FontData(FontData); RAP has no copy constructor");
+    assertFalse(classFileContains(MarkdownEditPreviewComposite.class, FONT_DATA_COPY_CTOR));
+    assertFalse(classFileContains(HopGuiLineageViewGraph.class, FONT_DATA_COPY_CTOR));
+    assertTrue(
+        classFileContains(MarkdownStyledTextComp.class, "(Ljava/lang/String;II)V"),
+        "Expected FontData(String, int, int), the RAP-safe constructor");
   }
 
   @Test

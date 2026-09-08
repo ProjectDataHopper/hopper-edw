@@ -29,6 +29,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 - Inline junk dimension transforms on a fact load pipeline now target the junk dimension table (for example `d_orders_junk`), not the fact table.
 
+### Hop Lineage View on Hop Web (issue #167)
+
+- Opening a lineage view no longer crashes Hop Web with `NoSuchMethodError: FontData.<init>(FontData)`. RAP has no copy constructor; bold/fixed fonts use `FontData(name, height, style)` like Hop core, and Hop Web skips unused bold-font derivation.
+
 ### Hop Lineage View on Hop Web (issue #161)
 
 - Opening a lineage view no longer crashes Hop Web with `NoClassDefFoundError: StyledText`. RAP does not ship that widget; the details pane now uses a plain text control in the browser (desktop keeps styled markdown). **View as HTML** still opens the formatted details.

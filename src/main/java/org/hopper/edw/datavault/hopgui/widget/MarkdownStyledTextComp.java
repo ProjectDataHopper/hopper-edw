@@ -32,7 +32,8 @@ import org.eclipse.swt.widgets.Text;
 
 /**
  * Read-only markdown view. Desktop uses SWT {@code StyledText} style ranges; Hop Web uses a plain
- * {@code Text} widget because RAP does not ship {@code StyledText}.
+ * {@code Text} widget because RAP does not ship {@code StyledText}. Font copies use {@code
+ * FontData(String, int, int)} because RAP has no {@code FontData(FontData)} constructor.
  */
 public class MarkdownStyledTextComp extends Composite {
 
@@ -144,20 +145,31 @@ public class MarkdownStyledTextComp extends Composite {
 
   private static FixedFonts resolveFixedFonts(GuiResource resources, Display display) {
     Font fixed = resources.getFontFixed();
-    if (fixed != null) {
-      return new FixedFonts(fixed, deriveBoldFont(display, fixed), false, true);
+    boolean created = false;
+    if (fixed == null) {
+      fixed = new Font(display, new FontData("Monospace", 10, SWT.NORMAL));
+      created = true;
     }
-    Font created = new Font(display, new FontData("Monospace", 10, SWT.NORMAL));
-    return new FixedFonts(created, deriveBoldFont(display, created), true, true);
+    // Hop Web never applies style ranges, so a second bold font is unused. Skip it so RAP does not
+    // have to construct extra FontData at all.
+    if (EnvironmentUtils.getInstance().isWeb()) {
+      return new FixedFonts(fixed, null, created, false);
+    }
+    Font bold = deriveBoldFont(display, fixed);
+    return new FixedFonts(fixed, bold, created, bold != fixed);
   }
 
+  /**
+   * RAP {@code FontData} has {@code FontData(String, int, int)} only. The SWT copy constructor
+   * {@code FontData(FontData)} is a {@code NoSuchMethodError} on Hop Web.
+   */
   private static Font deriveBoldFont(Display display, Font baseFont) {
     FontData[] fontData = baseFont.getFontData();
     if (fontData == null || fontData.length == 0) {
       return baseFont;
     }
-    FontData boldData = new FontData(fontData[0]);
-    boldData.setStyle(boldData.getStyle() | SWT.BOLD);
-    return new Font(display, boldData);
+    FontData source = fontData[0];
+    return new Font(
+        display, new FontData(source.getName(), source.getHeight(), source.getStyle() | SWT.BOLD));
   }
 }
