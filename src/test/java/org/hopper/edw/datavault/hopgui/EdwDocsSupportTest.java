@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.Const;
 import org.junit.jupiter.api.Test;
@@ -129,5 +130,52 @@ class EdwDocsSupportTest {
         System.setProperty(Const.HOP_PLUGIN_BASE_FOLDERS, previous);
       }
     }
+  }
+
+  @Test
+  void pluginFolderFromLibrariesUsesHopperEdwJarNotLibJars() {
+    Path folder =
+        EdwDocsSupport.pluginFolderFromLibraries(
+            List.of(
+                "/usr/local/tomcat/plugins/misc/hopper-edw/lib/calcite-core-1.40.0.jar",
+                "/usr/local/tomcat/plugins/misc/hopper-edw/lib/hop-hsm-jdbc-0.11.0-SNAPSHOT.jar",
+                "/usr/local/tomcat/plugins/misc/hopper-edw/../../transforms/json/hop-transform-json-2.20.0-SNAPSHOT.jar",
+                "/usr/local/tomcat/plugins/misc/hopper-edw/hopper-edw-0.11.0-SNAPSHOT.jar"));
+    assertEquals(Path.of("/usr/local/tomcat/plugins/misc/hopper-edw"), folder);
+  }
+
+  @Test
+  void pluginFolderFromLibrariesFallsBackFromLibJar() {
+    Path folder =
+        EdwDocsSupport.pluginFolderFromLibraries(
+            List.of("/opt/hop/plugins/misc/hopper-edw/lib/hopper-edw-1.2.3.jar"));
+    assertEquals(Path.of("/opt/hop/plugins/misc/hopper-edw"), folder);
+  }
+
+  @Test
+  void addLibraryCandidatesResolvesDocsIndex() {
+    List<Path> candidates = new ArrayList<>();
+    EdwDocsSupport.addLibraryCandidates(
+        candidates,
+        List.of("/usr/local/tomcat/plugins/misc/hopper-edw/hopper-edw-0.11.0-SNAPSHOT.jar"),
+        "docs/index.html");
+    assertEquals(
+        Path.of("/usr/local/tomcat/plugins/misc/hopper-edw/docs/index.html"), candidates.get(0));
+  }
+
+  @Test
+  void isHopperEdwPluginJarRejectsOtherJars() {
+    assertTrue(EdwDocsSupport.isHopperEdwPluginJar("hopper-edw-0.11.0-SNAPSHOT.jar"));
+    assertFalse(EdwDocsSupport.isHopperEdwPluginJar("hop-hsm-jdbc-0.11.0-SNAPSHOT.jar"));
+    assertFalse(EdwDocsSupport.isHopperEdwPluginJar("calcite-core-1.40.0.jar"));
+  }
+
+  @Test
+  void libraryPathAcceptsFileUri() {
+    Path path =
+        EdwDocsSupport.libraryPath(
+            "file:/usr/local/tomcat/plugins/misc/hopper-edw/hopper-edw-0.11.0-SNAPSHOT.jar");
+    assertEquals(
+        Path.of("/usr/local/tomcat/plugins/misc/hopper-edw/hopper-edw-0.11.0-SNAPSHOT.jar"), path);
   }
 }

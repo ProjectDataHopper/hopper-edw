@@ -15,6 +15,7 @@
  */
 package org.hopper.edw.datavault.hopgui.file.metrics;
 
+import java.util.List;
 import java.util.function.Supplier;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.gui.IGc;
@@ -26,6 +27,7 @@ import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.gui.GuiResource;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.hopgui.shared.SwtGc;
+import org.apache.hop.ui.util.EnvironmentUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.PaintEvent;
@@ -43,6 +45,9 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
 import org.hopper.edw.datavault.metrics.LoadRunDurationMetricsLoader;
 import org.hopper.edw.datavault.metrics.LoadRunDurationSnapshot;
 
@@ -55,14 +60,18 @@ public class ModelLoadDurationPane extends Composite {
   private final IVariables variables;
   private final Supplier<String> modelNameSupplier;
   private final Supplier<String> modelTypeSupplier;
-  private final Supplier<java.util.List<String>> tableNamesSupplier;
+  private final Supplier<List<String>> tableNamesSupplier;
 
+  private final boolean webMode;
   private final ScrolledComposite scrolledComposite;
   private final Canvas chartCanvas;
+  private final Label statusLabel;
+  private final Composite tableHolder;
   private final Label titleLabel;
   private final Button refreshButton;
   private final Button viewDataButton;
 
+  private Table webTable;
   private LoadRunDurationSnapshot snapshot = LoadRunDurationSnapshot.builder().build();
   private LoadRunDurationOverviewPainter lastPainter;
   private boolean loading;
@@ -73,13 +82,14 @@ public class ModelLoadDurationPane extends Composite {
       IVariables variables,
       Supplier<String> modelNameSupplier,
       Supplier<String> modelTypeSupplier,
-      Supplier<java.util.List<String>> tableNamesSupplier) {
+      Supplier<List<String>> tableNamesSupplier) {
     super(parent, SWT.BORDER);
     this.hopGui = hopGui;
     this.variables = variables;
     this.modelNameSupplier = modelNameSupplier;
     this.modelTypeSupplier = modelTypeSupplier;
     this.tableNamesSupplier = tableNamesSupplier;
+    this.webMode = EnvironmentUtils.getInstance().isWeb();
 
     setLayout(new FormLayout());
     PropsUi.setLook(this);
@@ -132,32 +142,58 @@ public class ModelLoadDurationPane extends Composite {
     refreshButton.setLayoutData(fdRefresh);
     fdTitle.right = new FormAttachment(refreshButton, -PropsUi.getMargin());
 
-    scrolledComposite = new ScrolledComposite(this, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
-    PropsUi.setLook(scrolledComposite);
-    applyStandardBackground(scrolledComposite);
-    scrolledComposite.setExpandHorizontal(false);
-    scrolledComposite.setExpandVertical(false);
-    // Use Widget.addListener — RAP ScrolledComposite does not implement addPaintListener
-    // (NoSuchMethodError under Hop Web).
-    scrolledComposite.addListener(SWT.Paint, this::paintScrollBackgroundEvent);
-    FormData fdScroll = new FormData();
-    fdScroll.left = new FormAttachment(0, 0);
-    fdScroll.top = new FormAttachment(header, PropsUi.getMargin());
-    fdScroll.right = new FormAttachment(100, 0);
-    fdScroll.bottom = new FormAttachment(100, 0);
-    scrolledComposite.setLayoutData(fdScroll);
+    if (webMode) {
+      scrolledComposite = null;
+      chartCanvas = null;
+      statusLabel = new Label(this, SWT.WRAP | SWT.LEFT);
+      PropsUi.setLook(statusLabel);
+      applyStandardBackground(statusLabel);
+      FormData fdStatus = new FormData();
+      fdStatus.left = new FormAttachment(0, PropsUi.getMargin());
+      fdStatus.top = new FormAttachment(header, PropsUi.getMargin());
+      fdStatus.right = new FormAttachment(100, -PropsUi.getMargin());
+      statusLabel.setLayoutData(fdStatus);
 
-    Composite canvasHolder = new Composite(scrolledComposite, SWT.NONE);
-    canvasHolder.setLayout(new FillLayout());
-    PropsUi.setLook(canvasHolder);
-    applyStandardBackground(canvasHolder);
+      tableHolder = new Composite(this, SWT.NONE);
+      tableHolder.setLayout(new FillLayout());
+      PropsUi.setLook(tableHolder);
+      applyStandardBackground(tableHolder);
+      FormData fdTable = new FormData();
+      fdTable.left = new FormAttachment(0, 0);
+      fdTable.top = new FormAttachment(header, PropsUi.getMargin());
+      fdTable.right = new FormAttachment(100, 0);
+      fdTable.bottom = new FormAttachment(100, 0);
+      tableHolder.setLayoutData(fdTable);
+    } else {
+      statusLabel = null;
+      tableHolder = null;
+      scrolledComposite = new ScrolledComposite(this, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+      PropsUi.setLook(scrolledComposite);
+      applyStandardBackground(scrolledComposite);
+      scrolledComposite.setExpandHorizontal(false);
+      scrolledComposite.setExpandVertical(false);
+      // Use Widget.addListener — RAP ScrolledComposite does not implement addPaintListener
+      // (NoSuchMethodError under Hop Web).
+      scrolledComposite.addListener(SWT.Paint, this::paintScrollBackgroundEvent);
+      FormData fdScroll = new FormData();
+      fdScroll.left = new FormAttachment(0, 0);
+      fdScroll.top = new FormAttachment(header, PropsUi.getMargin());
+      fdScroll.right = new FormAttachment(100, 0);
+      fdScroll.bottom = new FormAttachment(100, 0);
+      scrolledComposite.setLayoutData(fdScroll);
 
-    chartCanvas = new Canvas(canvasHolder, SWT.DOUBLE_BUFFERED);
-    applyStandardBackground(chartCanvas);
-    chartCanvas.addPaintListener(this::paintChart);
-    chartCanvas.addListener(SWT.MouseMove, this::onMouseMove);
+      Composite canvasHolder = new Composite(scrolledComposite, SWT.NONE);
+      canvasHolder.setLayout(new FillLayout());
+      PropsUi.setLook(canvasHolder);
+      applyStandardBackground(canvasHolder);
 
-    scrolledComposite.setContent(canvasHolder);
+      chartCanvas = new Canvas(canvasHolder, SWT.DOUBLE_BUFFERED);
+      applyStandardBackground(chartCanvas);
+      chartCanvas.addPaintListener(this::paintChart);
+      chartCanvas.addListener(SWT.MouseMove, this::onMouseMove);
+
+      scrolledComposite.setContent(canvasHolder);
+    }
     updateHeaderButtonState();
     refresh();
   }
@@ -190,13 +226,12 @@ public class ModelLoadDurationPane extends Composite {
             .message(BaseMessages.getString(PKG, "ModelLoadDurationPane.Loading"))
             .build();
     updateHeaderButtonState();
-    resizeChart();
-    redrawChart();
+    showSnapshot();
 
     Display display = getDisplay();
     String modelName = modelNameSupplier.get();
     String modelType = modelTypeSupplier.get();
-    java.util.List<String> tableNames = tableNamesSupplier.get();
+    List<String> tableNames = tableNamesSupplier.get();
     IHopMetadataProvider metadataProvider = hopGui.getMetadataProvider();
 
     Thread loaderThread =
@@ -216,13 +251,86 @@ public class ModelLoadDurationPane extends Composite {
                     loading = false;
                     snapshot = loaded;
                     updateHeaderButtonState();
-                    resizeChart();
-                    redrawChart();
+                    showSnapshot();
                   });
             },
             "LoadRunDurationMetricsLoader");
     loaderThread.setDaemon(true);
     loaderThread.start();
+  }
+
+  private void showSnapshot() {
+    if (webMode) {
+      updateWebBody();
+    } else {
+      resizeChart();
+      redrawChart();
+    }
+  }
+
+  private void updateWebBody() {
+    if (statusLabel == null || statusLabel.isDisposed() || tableHolder == null) {
+      return;
+    }
+    if (loading) {
+      showWebStatus(BaseMessages.getString(PKG, "ModelLoadDurationPane.Loading"));
+      return;
+    }
+    LoadRunDurationTableSupport.Model model = LoadRunDurationTableSupport.build(snapshot);
+    if (!model.hasRows()) {
+      showWebStatus(Const.NVL(model.statusMessage(), ""));
+      return;
+    }
+    statusLabel.setVisible(false);
+    tableHolder.setVisible(true);
+    rebuildWebTable(model);
+    layout(true, true);
+  }
+
+  private void showWebStatus(String message) {
+    disposeWebTable();
+    statusLabel.setText(Const.NVL(message, ""));
+    statusLabel.setVisible(true);
+    tableHolder.setVisible(false);
+    layout(true, true);
+  }
+
+  private void rebuildWebTable(LoadRunDurationTableSupport.Model model) {
+    disposeWebTable();
+    webTable =
+        new Table(
+            tableHolder, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+    PropsUi.setLook(webTable);
+    applyStandardBackground(webTable);
+    webTable.setHeaderVisible(true);
+    webTable.setLinesVisible(true);
+
+    TableColumn tableColumn = new TableColumn(webTable, SWT.LEFT);
+    tableColumn.setText(BaseMessages.getString(PKG, "LoadRunDurationTableSupport.Column.Table"));
+    for (String header : model.runHeaders()) {
+      TableColumn runColumn = new TableColumn(webTable, SWT.RIGHT);
+      runColumn.setText(Const.NVL(header, ""));
+    }
+
+    for (LoadRunDurationTableSupport.Row row : model.rows()) {
+      TableItem item = new TableItem(webTable, SWT.NONE);
+      item.setText(0, Const.NVL(row.tableName(), ""));
+      List<LoadRunDurationTableSupport.Cell> cells = row.cells();
+      for (int i = 0; i < cells.size(); i++) {
+        item.setText(i + 1, Const.NVL(cells.get(i).text(), ""));
+      }
+    }
+    for (TableColumn column : webTable.getColumns()) {
+      column.pack();
+    }
+    tableHolder.layout(true, true);
+  }
+
+  private void disposeWebTable() {
+    if (webTable != null && !webTable.isDisposed()) {
+      webTable.dispose();
+    }
+    webTable = null;
   }
 
   private void paintChart(PaintEvent event) {
@@ -297,6 +405,9 @@ public class ModelLoadDurationPane extends Composite {
   }
 
   private void resizeChart() {
+    if (chartCanvas == null || chartCanvas.isDisposed() || scrolledComposite == null) {
+      return;
+    }
     Point preferred = computeChartPreferredSize();
     chartCanvas.setSize(preferred.x, preferred.y);
     if (scrolledComposite.getContent() instanceof Composite content && !content.isDisposed()) {

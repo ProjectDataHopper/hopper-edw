@@ -103,7 +103,7 @@ image::images/workflow-load-overview-model-metrics.png[Workflow load overview â€
 
 === Load duration overview on model graphs
 
-When an execution metrics profile is configured and prior runs are stored in the OPS database, DV/BV/DM model canvases can show a **Load durations** pane alongside the graph. Each model table gets a horizontal bar per recent run (Airflow-style), with hover tooltips for run time and status. Toggle the pane from the modeler toolbar; use **View data** to open catalog-backed load metrics.
+When an execution metrics profile is configured and prior runs are stored in the OPS database, DV/BV/DM model canvases can show a **Load durations** pane alongside the graph. On the desktop each model table gets a horizontal bar per recent run (Airflow-style), with hover tooltips for run time and status. On Hop Web the same pane is a table (one row per table, one column per run). Toggle the pane from the modeler toolbar; use **View data** to open catalog-backed load metrics.
 
 image::images/data-vault-retail-360-model-with-duration-metrics.png[Retail 360 Data Vault model with load duration bars on the right,align="center"]
 

@@ -4,6 +4,15 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Load duration overview on Hop Web (issue #165)
+
+- The modeler metrics panel is available on Hop Web. RAP cannot host the desktop duration-bar canvas, so the pane shows a table: one row per model table, one column per run, durations in the cells.
+
+### EDW documentation on Hop Web (issue #166)
+
+- The EDW documentation button resolves the plugin folder from the `hopper-edw-<version>.jar` entry on the plugin classpath (and from Tomcat `CATALINA_HOME` / `CATALINA_BASE` when present), instead of only a relative `plugins/misc/hopper-edw` path.
+- On Hop Web the docs are served through a RAP handler so the browser can follow the HTML that lives on the Tomcat host.
+
 ### Fact load metrics with parallel copies (issue #164)
 
 - Load-run and live metrics now sum every parallel copy of a transform, not only copy 0. Staging-file bulk loads with **Target table parallel copies** greater than 1 no longer under-count fact insert rows.

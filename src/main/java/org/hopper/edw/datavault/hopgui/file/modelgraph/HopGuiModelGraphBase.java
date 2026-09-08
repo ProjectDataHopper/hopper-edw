@@ -196,21 +196,17 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
       CoachingCanvasDropSupport.register(canvas, hopGui, coachableGraph, this, variables);
     }
 
-    // ModelLoadDurationPane uses ScrolledComposite + paint listeners that RAP does not support
-    // (NoSuchMethodError on ScrolledComposite.addPaintListener). Skip construction under Hop Web.
-    if (!EnvironmentUtils.getInstance().isWeb()) {
-      loadDurationPane =
-          new ModelLoadDurationPane(
-              innerModelSash,
-              hopGui,
-              variables,
-              this::getMetricsModelName,
-              this::getMetricsModelType,
-              this::getMetricsTableNames);
-      innerModelSash.setWeights(new int[] {70, 30});
-    } else {
-      loadDurationPane = null;
-    }
+    // Desktop paints Airflow-style duration bars. Hop Web uses a table in the same pane
+    // (RAP cannot host that second chart canvas on the SVG path).
+    loadDurationPane =
+        new ModelLoadDurationPane(
+            innerModelSash,
+            hopGui,
+            variables,
+            this::getMetricsModelName,
+            this::getMetricsModelType,
+            this::getMetricsTableNames);
+    innerModelSash.setWeights(new int[] {70, 30});
 
     outerModelSash.setWeights(new int[] {25, 75});
     restoreCoachPanelVisibility();
@@ -400,14 +396,9 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
     if (innerModelSash == null || canvas == null || loadDurationPane == null) {
       return;
     }
-    // Second SWT chart canvas is not on the Hop Web SVG path yet — keep hidden under RAP.
-    if (EnvironmentUtils.getInstance().isWeb()) {
-      loadDurationPanelVisible = false;
-    } else {
-      loadDurationPanelVisible =
-          ModelLoadDurationPaneAuditSupport.retrievePanelVisible(
-              getModelFilename(), defaultLoadDurationPanelVisible());
-    }
+    loadDurationPanelVisible =
+        ModelLoadDurationPaneAuditSupport.retrievePanelVisible(
+            getModelFilename(), defaultLoadDurationPanelVisible());
     applyLoadDurationPanelVisibility();
   }
 
@@ -427,7 +418,6 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
     }
     Composite canvasHolder = canvas.getParent();
     if (loadDurationPane == null) {
-      // Web (or other builds without the metrics pane): canvas fills the inner sash.
       innerModelSash.setMaximizedControl(canvasHolder);
       innerModelSash.layout(true, true);
       return;

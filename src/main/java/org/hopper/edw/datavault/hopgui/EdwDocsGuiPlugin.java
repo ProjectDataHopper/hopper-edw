@@ -94,14 +94,19 @@ public class EdwDocsGuiPlugin {
         box.open();
         return;
       }
-      String url = html.toUri().toString();
+      String url = EdwDocsWebSupport.browserUrl(html);
+      if (Utils.isEmpty(url)) {
+        url = html.toUri().toString();
+      }
       if (!Utils.isEmpty(fragment)) {
         String id = fragment.startsWith("#") ? fragment.substring(1) : fragment;
         url = url + "#" + id;
       }
-      // Open the real file:// URL in the system browser. Hop's HTML explorer tab uses
-      // Browser.setText(), which has no document base, so relative links such as
-      // ../business-vault-sql-view.html resolve to /business-vault-sql-view.html.
+      // Desktop: open the real file:// URL in the system browser. Hop Web cannot use file://
+      // (the docs live on the Tomcat host), so browserUrl() serves them over a RAP handler.
+      // Hop's HTML explorer tab uses Browser.setText(), which has no document base, so
+      // relative links such as ../business-vault-sql-view.html resolve to
+      // /business-vault-sql-view.html.
       EnvironmentUtils.getInstance().openUrl(url);
     } catch (Exception e) {
       if (shell == null || shell.isDisposed()) {

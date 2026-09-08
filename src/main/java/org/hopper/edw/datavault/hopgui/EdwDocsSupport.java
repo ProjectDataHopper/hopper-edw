@@ -17,6 +17,8 @@ package org.hopper.edw.datavault.hopgui;
 
 import java.net.URI;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -26,6 +28,7 @@ import java.util.regex.Pattern;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.gui.plugin.GuiPluginType;
 import org.apache.hop.core.plugins.IPlugin;
+import org.apache.hop.core.plugins.IPluginType;
 import org.apache.hop.core.plugins.PluginRegistry;
 import org.apache.hop.core.util.EnvUtil;
 import org.apache.hop.core.util.Utils;
@@ -37,6 +40,8 @@ public final class EdwDocsSupport {
 
   private static final Pattern PAGE_NAME =
       Pattern.compile("[A-Za-z0-9][A-Za-z0-9._-]*\\.(html|md)");
+  private static final Pattern HOPPER_EDW_JAR =
+      Pattern.compile("hopper-edw-\\d[^/\\\\]*\\.jar", Pattern.CASE_INSENSITIVE);
   private static final String HELP_DIR = "help/";
 
   private EdwDocsSupport() {}
@@ -129,15 +134,19 @@ public final class EdwDocsSupport {
       List<Path> candidates, Class<?> pluginClass, String relativePath) {
     try {
       URL location = pluginClass.getProtectionDomain().getCodeSource().getLocation();
-      if (location == null || !"file".equalsIgnoreCase(location.getProtocol())) {
+      Path path = pathFromLocation(location);
+      if (path == null) {
         return;
       }
-      Path path = Paths.get(location.toURI());
       if (Files.isRegularFile(path)) {
+        Path fromJar = pluginFolderFromJar(path);
+        if (fromJar != null) {
+          addCandidate(candidates, fromJar.resolve(relativePath));
+        }
         path = path.getParent();
       }
       if (path != null) {
-        candidates.add(path.resolve(relativePath));
+        addCandidate(candidates, path.resolve(relativePath));
       }
     } catch (Exception ignored) {
       // Try the next strategy.
@@ -150,15 +159,154 @@ public final class EdwDocsSupport {
       return;
     }
     try {
-      IPlugin plugin = registry.getPlugin(GuiPluginType.class, pluginClass);
-      if (plugin == null || plugin.getPluginDirectory() == null) {
-        return;
+      addPluginCandidate(
+          candidates, registry.getPlugin(GuiPluginType.class, pluginClass), relativePath);
+      for (Class<? extends IPluginType> type : registry.getPluginTypes()) {
+        for (IPlugin plugin : registry.getPlugins(type)) {
+          if (isHopperEdwPlugin(plugin)) {
+            addPluginCandidate(candidates, plugin, relativePath);
+          }
+        }
       }
-      URI uri = plugin.getPluginDirectory().toURI();
-      candidates.add(Paths.get(uri).resolve(relativePath));
     } catch (Exception ignored) {
       // Try the next strategy.
     }
+  }
+
+  private static void addPluginCandidate(
+      List<Path> candidates, IPlugin plugin, String relativePath) {
+    if (plugin == null) {
+      return;
+    }
+    addLibraryCandidates(candidates, plugin.getLibraries(), relativePath);
+    if (plugin.getPluginDirectory() == null) {
+      return;
+    }
+    try {
+      URI uri = plugin.getPluginDirectory().toURI();
+      addCandidate(candidates, Paths.get(uri).resolve(relativePath));
+    } catch (Exception ignored) {
+      // Try the next strategy.
+    }
+  }
+
+  static void addLibraryCandidates(
+      List<Path> candidates, List<String> libraries, String relativePath) {
+    Path folder = pluginFolderFromLibraries(libraries);
+    if (folder != null) {
+      addCandidate(candidates, folder.resolve(relativePath));
+    }
+  }
+
+  static Path pluginFolderFromLibraries(List<String> libraries) {
+    if (libraries == null || libraries.isEmpty()) {
+      return null;
+    }
+    Path fallback = null;
+    Path fromMainJar = null;
+    for (String library : libraries) {
+      Path jar = libraryPath(library);
+      if (jar == null
+          || jar.getFileName() == null
+          || !isHopperEdwPluginJar(jar.getFileName().toString())) {
+        continue;
+      }
+      Path folder = pluginFolderFromJar(jar);
+      if (folder == null) {
+        continue;
+      }
+      Path parent = jar.getParent();
+      if (parent != null
+          && parent.getFileName() != null
+          && "lib".equalsIgnoreCase(parent.getFileName().toString())) {
+        fallback = folder;
+      } else {
+        fromMainJar = folder;
+      }
+    }
+    return fromMainJar != null ? fromMainJar : fallback;
+  }
+
+  static Path pluginFolderFromJar(Path jar) {
+    if (jar == null) {
+      return null;
+    }
+    Path parent = jar.getParent();
+    if (parent == null) {
+      return null;
+    }
+    if (parent.getFileName() != null && "lib".equalsIgnoreCase(parent.getFileName().toString())) {
+      return parent.getParent();
+    }
+    return parent;
+  }
+
+  static boolean isHopperEdwPluginJar(String fileName) {
+    return !Utils.isEmpty(fileName) && HOPPER_EDW_JAR.matcher(fileName).matches();
+  }
+
+  static Path libraryPath(String library) {
+    if (Utils.isEmpty(library)) {
+      return null;
+    }
+    String raw = library.trim();
+    try {
+      if (raw.startsWith("file:")) {
+        return Paths.get(URI.create(raw)).normalize();
+      }
+      String decoded = URLDecoder.decode(raw, StandardCharsets.UTF_8);
+      return Paths.get(decoded).normalize();
+    } catch (Exception ignored) {
+      try {
+        return Paths.get(raw).normalize();
+      } catch (Exception ignoredAgain) {
+        return null;
+      }
+    }
+  }
+
+  static Path pathFromLocation(URL location) {
+    if (location == null) {
+      return null;
+    }
+    try {
+      String protocol = location.getProtocol();
+      if ("jar".equalsIgnoreCase(protocol)) {
+        String file = location.getFile();
+        int bang = file.indexOf('!');
+        if (bang >= 0) {
+          file = file.substring(0, bang);
+        }
+        if (file.startsWith("file:")) {
+          return Paths.get(URI.create(file)).normalize();
+        }
+        return Paths.get(URLDecoder.decode(file, StandardCharsets.UTF_8)).normalize();
+      }
+      if ("file".equalsIgnoreCase(protocol)) {
+        return Paths.get(location.toURI()).normalize();
+      }
+    } catch (Exception ignored) {
+      // Fall through.
+    }
+    return null;
+  }
+
+  private static boolean isHopperEdwPlugin(IPlugin plugin) {
+    if (plugin == null) {
+      return false;
+    }
+    if (pluginFolderFromLibraries(plugin.getLibraries()) != null) {
+      return true;
+    }
+    if (plugin.getClassMap() == null) {
+      return false;
+    }
+    for (String className : plugin.getClassMap().values()) {
+      if (className != null && className.startsWith("org.hopper.edw.")) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private static void addPluginFolderCandidates(List<Path> candidates, String relativePath) {
@@ -166,6 +314,13 @@ public final class EdwDocsSupport {
         Const.NVL(
             EnvUtil.getSystemProperty(Const.HOP_PLUGIN_BASE_FOLDERS),
             Const.DEFAULT_PLUGIN_BASE_FOLDERS);
+    addHopPluginBaseFolders(candidates, folders, relativePath);
+    addCatalinaPluginFolders(candidates, System.getenv("CATALINA_HOME"), relativePath);
+    addCatalinaPluginFolders(candidates, System.getenv("CATALINA_BASE"), relativePath);
+  }
+
+  private static void addHopPluginBaseFolders(
+      List<Path> candidates, String folders, String relativePath) {
     if (Utils.isEmpty(folders)) {
       return;
     }
@@ -174,7 +329,29 @@ public final class EdwDocsSupport {
       if (Utils.isEmpty(trimmed)) {
         continue;
       }
-      candidates.add(Paths.get(trimmed, "misc", "hopper-edw").resolve(relativePath));
+      Path root = Paths.get(trimmed);
+      if (root.getFileName() != null && "hopper-edw".equals(root.getFileName().toString())) {
+        addCandidate(candidates, root.resolve(relativePath));
+      }
+      addCandidate(candidates, root.resolve("misc").resolve("hopper-edw").resolve(relativePath));
+      addCandidate(
+          candidates,
+          root.resolve("plugins").resolve("misc").resolve("hopper-edw").resolve(relativePath));
+    }
+  }
+
+  private static void addCatalinaPluginFolders(
+      List<Path> candidates, String catalinaHome, String relativePath) {
+    if (Utils.isEmpty(catalinaHome)) {
+      return;
+    }
+    addCandidate(
+        candidates, Paths.get(catalinaHome, "plugins", "misc", "hopper-edw").resolve(relativePath));
+  }
+
+  private static void addCandidate(List<Path> candidates, Path candidate) {
+    if (candidate != null && !candidates.contains(candidate)) {
+      candidates.add(candidate);
     }
   }
 }

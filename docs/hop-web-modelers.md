@@ -78,7 +78,7 @@ The shared client scripts (`canvas-svg.js`, `canvas-zoom.js`, explorer tab hooks
 | Paint | `SwtGc` on SWT `Canvas` | Server `SvgGc` → SVG snapshot → client overlay |
 | Drag while button held | Server mouse-move | Client outline; server applies final position on mouse-up |
 | Left-click vs drag | 3px threshold on move-while-held | Mouse-down arms a client drag ghost; mouse-up with no movement is a click (table context dialog) |
-| Load duration chart | Optional right pane | Not constructed (RAP lacks `ScrolledComposite.addPaintListener`) |
+| Load duration overview | Optional right pane (duration bars) | Same pane; table with one row per table and one column per run |
 | Coach palette DnD | DropTarget on canvas | Disabled (use toolbar / dialogs) |
 | Markdown details / notes | SWT `StyledText` style ranges | Plain `Text` (RAP has no `StyledText`); lineage **View as HTML** still opens formatted details |
 
@@ -110,7 +110,7 @@ Painters already target `IGc`. Interactive web path uses the `*ModelCanvasSvgRen
 ## Known limitations
 
 - Continuous “live” card motion while the button is held is client-outline only; the authoritative model updates on mouse-up (RAP).
-- Load-duration overview and coach drag-from-palette remain desktop-first.
+- Coach drag-from-palette remains desktop-first. Load-duration overview is a table on Hop Web.
 - Lineage view cards are **not** user-draggable (ELK owns layout). Click is select / context only.
 - Marquez, export-folder, and OPS queries run in the **Hop Web server JVM**. `${MARQUEZ_BASE_URL}=http://localhost:5001` is localhost inside that process (or container), not the browser. Use a URL or folder the server can reach, or the **Local models** backend / **Show lineage**.
 - Requires the Hop SPI and client fixes above; older Hop Web builds will not compile or run this plugin version correctly.
