@@ -190,6 +190,7 @@ These are easy for agents to violate:
 6. **Formatting** — Google Java Format via Spotless (`mvn spotless:apply` before commit).
 7. **Package placement** — Put new code under `org.hopper.edw.datavault`, `.catalog`, or `.quality`, following existing layering (`metadata`, `hopgui`, `workflow/actions`, `transform`, services). Mirror Hop patterns: `*Meta` + dialog/editor; transforms often `*Meta` / `*Data` / `*`; actions under `.../workflow/actions/...`.
 8. **Plugin isolation** — Treat classloaders carefully. The assembly deliberately bundles selected third-party libs (ELK, CommonMark, Iceberg, some Hop actions). Prefer `provided` for Hop itself.
+9. **Metadata category** — `@HopMetadata` types must set `category = EdwMetadataCategory.EDW` so they appear under **EDW** in the metadata perspective, not **Other**. The exception is `SourceModelService` (`HopMetadataCategory.SERVERS`).
 
 ## Anti-patterns (do not)
 

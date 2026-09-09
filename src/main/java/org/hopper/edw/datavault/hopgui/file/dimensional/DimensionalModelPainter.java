@@ -104,7 +104,7 @@ public class DimensionalModelPainter extends BasePainter {
 
     gc.setTransform((float) offset.x, (float) offset.y, magnification);
     gc.setAntialias(true);
-    if (gridSize > 1) {
+    if (shouldDrawCanvasGrid()) {
       drawGrid();
     }
 
@@ -557,7 +557,7 @@ public class DimensionalModelPainter extends BasePainter {
 
       ModelGraphTableCardLayout.BoxSize boxSize =
           ModelGraphTableCardLayout.computeBoxSize(gc, label, secondaryField, typeLabel, extraLine);
-      int boxWidth = Math.max(140, boxSize.width());
+      int boxWidth = ModelGraphTableCardLayout.ceilToGrid(Math.max(140, boxSize.width()), gridSize);
       int boxHeight = Math.max(70, boxSize.height());
       base.setDrawnBoxWidth(boxWidth);
       base.setDrawnBoxHeight(boxHeight);

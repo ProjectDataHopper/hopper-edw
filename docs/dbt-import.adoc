@@ -31,7 +31,7 @@ image::images/business-vault-dbt-import-models-dialog.png[Import dbt models dial
 
 == Jinja macro library
 
-Imported `{% macro %}` blocks are stored as a **Jinja macro library** in project metadata (Metadata perspective). Enable the library, set optional default `var()` values, and use **Test render** to expand a snippet with dummy `ref` / `source` names.
+Imported `{% macro %}` blocks are stored as a **Jinja macro library** in project metadata (Metadata perspective → **EDW**). Enable the library, set optional default `var()` values, and use **Test render** to expand a snippet with dummy `ref` / `source` names.
 
 image::images/jinja-macro-library-editor.png[Jinja macro library editor — macros, variables, and test render,align="center"]
 

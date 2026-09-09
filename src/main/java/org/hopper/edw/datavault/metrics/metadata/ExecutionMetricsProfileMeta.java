@@ -22,6 +22,7 @@ import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.HopMetadataPropertyType;
 import org.apache.hop.metadata.api.IHopMetadata;
+import org.hopper.edw.datavault.metadata.EdwMetadataCategory;
 import org.hopper.edw.datavault.metrics.LoadRunInsightEngine;
 
 /**
@@ -33,6 +34,7 @@ import org.hopper.edw.datavault.metrics.LoadRunInsightEngine;
     name = "i18n::ExecutionMetricsProfileMeta.name",
     description = "i18n::ExecutionMetricsProfileMeta.description",
     image = "execution-metrics-profile.svg",
+    category = EdwMetadataCategory.EDW,
     documentationUrl = "/metadata-types/execution-metrics-profile.html",
     hopMetadataPropertyType = HopMetadataPropertyType.NONE)
 @Getter

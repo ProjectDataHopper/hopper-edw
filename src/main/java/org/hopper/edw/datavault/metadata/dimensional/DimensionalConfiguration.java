@@ -37,6 +37,7 @@ import org.hopper.edw.datavault.config.DataVaultConfigSingleton;
 import org.hopper.edw.datavault.metadata.DvLoadCycleSupport;
 import org.hopper.edw.datavault.metadata.DvTargetLoadConfigurationSupport;
 import org.hopper.edw.datavault.metadata.DvTargetLoadMode;
+import org.hopper.edw.datavault.metadata.EdwMetadataCategory;
 import org.hopper.edw.datavault.metadata.IDvTargetLoadConfiguration;
 
 /**
@@ -50,6 +51,7 @@ import org.hopper.edw.datavault.metadata.IDvTargetLoadConfiguration;
     name = "i18n::DimensionalConfiguration.name",
     description = "i18n::DimensionalConfiguration.description",
     image = "dimensional-model.svg",
+    category = EdwMetadataCategory.EDW,
     documentationUrl = "/metadata-types/dimensional-configuration.html",
     hopMetadataPropertyType = HopMetadataPropertyType.NONE)
 @GuiPlugin

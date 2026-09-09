@@ -21,7 +21,7 @@ Retail sample: metadata **`retail-sources`** (`retail-example/metadata/resource-
 == Create and edit (Hop GUI)
 
 . Open the Hop project so `${PROJECT_HOME}` resolves.
-. Metadata perspective → type **Resource definition group** → New.
+. Metadata perspective → **EDW** → **Resource definition group** → New.
 . Set **Name** (for example `sales-edw`) and **Default catalog connection** (Configure EDW typically created `local-catalog`).
 . On the **Data Vault models** tab, **Add models** and select the `.hdv` file(s). Prefer `${PROJECT_HOME}/models/….hdv`.
 . Leave **Business Vault models** and **Dimensional models** empty until those files exist.

@@ -25,6 +25,7 @@ import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.HopMetadataPropertyType;
 import org.apache.hop.metadata.api.IHopMetadata;
+import org.hopper.edw.datavault.metadata.EdwMetadataCategory;
 
 /**
  * Project-level reusable Hop-type to native SQL type preferences for generated DDL (issue #127).
@@ -37,6 +38,7 @@ import org.apache.hop.metadata.api.IHopMetadata;
     name = "i18n::TargetTypeMappingMeta.name",
     description = "i18n::TargetTypeMappingMeta.description",
     image = "target-type-mapping.svg",
+    category = EdwMetadataCategory.EDW,
     documentationUrl = "/metadata-types/target-type-mapping.html",
     hopMetadataPropertyType = HopMetadataPropertyType.NONE)
 @Getter

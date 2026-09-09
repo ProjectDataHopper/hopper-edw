@@ -25,6 +25,7 @@ import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.HopMetadataPropertyType;
 import org.apache.hop.metadata.api.IHopMetadata;
+import org.hopper.edw.datavault.metadata.EdwMetadataCategory;
 
 /**
  * Project-level reusable data type mapping profile for pre-modeling sources (issue #113).
@@ -37,6 +38,7 @@ import org.apache.hop.metadata.api.IHopMetadata;
     name = "i18n::DataTypeMappingMeta.name",
     description = "i18n::DataTypeMappingMeta.description",
     image = "data-type-mapping.svg",
+    category = EdwMetadataCategory.EDW,
     documentationUrl = "/metadata-types/data-type-mapping.html",
     hopMetadataPropertyType = HopMetadataPropertyType.NONE)
 @Getter

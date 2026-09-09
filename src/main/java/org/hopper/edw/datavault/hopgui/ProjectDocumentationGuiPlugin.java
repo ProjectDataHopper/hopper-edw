@@ -25,6 +25,7 @@ import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.hopgui.HopGui;
+import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerFile;
 import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
 import org.apache.hop.ui.util.EnvironmentUtils;
 import org.apache.hop.workflow.WorkflowMeta;
@@ -59,6 +60,44 @@ public class ProjectDocumentationGuiPlugin {
   @GuiCallback(callbackId = ExplorerPerspective.GUI_TOOLBAR_CREATED_CALLBACK_ID)
   public void registerExplorerListener() {
     ProjectDocumentationExplorerSupport.register(ExplorerPerspective.getInstance());
+  }
+
+  @GuiMenuElement(
+      root = ExplorerPerspective.GUI_PLUGIN_CONTEXT_MENU_PARENT_ID,
+      parentId = ExplorerPerspective.GUI_PLUGIN_CONTEXT_MENU_PARENT_ID,
+      id = ProjectDocumentationExplorerSupport.ID_CONTEXT_MENU_OPEN_IN_BROWSER,
+      label = "i18n::ProjectDocumentationGuiPlugin.Menu.OpenInBrowser",
+      toolTip = "i18n::ProjectDocumentationGuiPlugin.Menu.OpenInBrowser.Tooltip",
+      image = "edw-logo.svg")
+  public void menuOpenInBrowser() {
+    HopGui hopGui = HopGui.getInstance();
+    try {
+      ExplorerPerspective explorer = ExplorerPerspective.getInstance();
+      if (explorer == null) {
+        return;
+      }
+      ExplorerFile selected = explorer.getSelectedFile();
+      if (selected == null || Utils.isEmpty(selected.getFilename())) {
+        return;
+      }
+      if (!EdwDocsWebSupport.canOpenInBrowser(selected.getFilename())) {
+        MessageBox box = new MessageBox(hopGui.getShell(), SWT.OK | SWT.ICON_INFORMATION);
+        box.setText(
+            BaseMessages.getString(PKG, "ProjectDocumentationGuiPlugin.OpenInBrowser.Title"));
+        box.setMessage(
+            BaseMessages.getString(
+                PKG, "ProjectDocumentationGuiPlugin.OpenInBrowser.NotSupported"));
+        box.open();
+        return;
+      }
+      EdwDocsWebSupport.openInBrowser(selected.getFilename());
+    } catch (Exception e) {
+      new ErrorDialog(
+          hopGui.getShell(),
+          BaseMessages.getString(PKG, "ProjectDocumentationGuiPlugin.OpenInBrowser.Title"),
+          BaseMessages.getString(PKG, "ProjectDocumentationGuiPlugin.OpenInBrowser.Error"),
+          e);
+    }
   }
 
   @GuiMenuElement(

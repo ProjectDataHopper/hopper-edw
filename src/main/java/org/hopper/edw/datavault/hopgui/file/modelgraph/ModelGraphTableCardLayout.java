@@ -32,6 +32,19 @@ public final class ModelGraphTableCardLayout {
 
   public record BoxSize(int width, int height) {}
 
+  /**
+   * Rounds {@code size} up to the next multiple of {@code gridSize} so a box whose origin sits on
+   * the canvas grid has its far edge on the grid as well. {@code gridSize <= 1} leaves {@code size}
+   * unchanged (snap-to-grid disabled).
+   */
+  public static int ceilToGrid(int size, int gridSize) {
+    if (gridSize <= 1 || size <= 0) {
+      return size;
+    }
+    int remainder = size % gridSize;
+    return remainder == 0 ? size : size + (gridSize - remainder);
+  }
+
   public static BoxSize computeBoxSize(
       IGc gc, String name, String secondaryLine, String typeLabel, String extraLineBelowType) {
     String resolvedName = Utils.isEmpty(name) ? "?" : name;

@@ -22,6 +22,7 @@ import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.HopMetadataPropertyType;
 import org.apache.hop.metadata.api.IHopMetadata;
+import org.hopper.edw.datavault.metadata.EdwMetadataCategory;
 
 /** Named lineage server / folder / local-models connection. */
 @HopMetadata(
@@ -29,6 +30,7 @@ import org.apache.hop.metadata.api.IHopMetadata;
     name = "i18n::LineageBackendMeta.name",
     description = "i18n::LineageBackendMeta.description",
     image = "lineage-view.svg",
+    category = EdwMetadataCategory.EDW,
     documentationUrl = "/metadata-types/lineage-backend.html",
     hopMetadataPropertyType = HopMetadataPropertyType.NONE)
 @Getter

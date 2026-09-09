@@ -25,6 +25,7 @@ import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.HopMetadataPropertyType;
 import org.apache.hop.metadata.api.IHopMetadata;
+import org.hopper.edw.datavault.metadata.EdwMetadataCategory;
 import org.hopper.edw.quality.model.DataQualityRule;
 
 /** Central library of reusable data quality rules. */
@@ -33,6 +34,7 @@ import org.hopper.edw.quality.model.DataQualityRule;
     name = "i18n::DataQualityRuleSetMeta.name",
     description = "i18n::DataQualityRuleSetMeta.description",
     image = "data-catalog.svg",
+    category = EdwMetadataCategory.EDW,
     documentationUrl = "/metadata-types/data-quality-rule-set.html",
     hopMetadataPropertyType = HopMetadataPropertyType.NONE)
 @Getter

@@ -146,7 +146,7 @@ Published release artifacts for **0.10.0**:
 1. Install **Apache Hop 2.19.0**.
 2. Unzip the assembly zip into your Hop installation root (`$HOP_HOME`) so both `plugins/misc/hopper-edw/` and `lib/core/` (Jinjava) are updated. Copying only the plugin jar is not enough for Jinja SQL.
 3. Restart Hop GUI.
-4. New metadata types appear under **Metadata → Data Vault**. **Data Vault Update**, **Business Vault Update**, **Validate resource definitions**, **Export data lineage**, and **Update resource definition group** actions are available in workflows. `.hsm`, `.hdv`, `.hbv`, `.hdm`, and `.hlv` files open in Explorer tabs.
+4. New metadata types appear under **Metadata → EDW**. **Data Vault Update**, **Business Vault Update**, **Validate resource definitions**, **Export data lineage**, and **Update resource definition group** actions are available in workflows. `.hsm`, `.hdv`, `.hbv`, `.hdm`, and `.hlv` files open in Explorer tabs.
 
 ### Hop Marketplace
 

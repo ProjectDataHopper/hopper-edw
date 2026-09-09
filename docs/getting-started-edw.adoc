@@ -112,7 +112,7 @@ Reference: link:generating-data-vault-from-source-model.adoc[Generate a Data Vau
 
 The group is the list of warehouse models the rest of the product will harvest, validate, tag, and load.
 
-. Metadata → **Resource definition group** → New.
+. Metadata → **EDW** → **Resource definition group** → New.
 . **Name** (for example `sales-edw`). **Default catalog connection** = `local-catalog`.
 . **Data Vault models** tab → **Add models** → your `.hdv`.
 . Leave Business Vault and dimensional tabs empty.

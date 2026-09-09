@@ -140,17 +140,75 @@ public final class EdwDocsWebSupport {
     if (Utils.isEmpty(htmlFilename)) {
       throw new HopException("Documentation file name is required");
     }
-    Path root = serveRoot(htmlFilename);
-    String relative = relativeFromRoot(root, htmlFilename);
+    String target = resolveBrowserTarget(htmlFilename);
+    if (Utils.isEmpty(target)) {
+      throw new HopException("This file cannot be opened in the browser: " + htmlFilename);
+    }
+    if (!EnvironmentUtils.getInstance().isWeb()) {
+      try {
+        FileObject file = HopVfs.getFileObject(target);
+        EnvironmentUtils.getInstance().openUrl(file.getURL().toString());
+        return;
+      } catch (HopException e) {
+        throw e;
+      } catch (Exception e) {
+        throw new HopException("Unable to open " + target + " in the browser", e);
+      }
+    }
+    Path root = serveRoot(target);
+    String relative = relativeFromRoot(root, target);
     String handlerUrl = handlerUrlFor(root, relative, registerSiteRoot(root));
     if (Utils.isEmpty(handlerUrl)) {
-      throw new HopException("Unable to register a documentation handler for " + htmlFilename);
+      throw new HopException("Unable to register a documentation handler for " + target);
     }
     String url = toAbsoluteUrl(handlerUrl, currentRequestUrl());
     if (Utils.isEmpty(url)) {
       url = handlerUrl;
     }
     EnvironmentUtils.getInstance().openUrl(url);
+  }
+
+  /** {@code true} when the explorer selection can be opened with {@link #openInBrowser}. */
+  public static boolean canOpenInBrowser(String path) {
+    return !Utils.isEmpty(resolveBrowserTarget(path));
+  }
+
+  /**
+   * HTML file, hop-doc {@code index.html} in a folder, or another allowed file under a hop-doc
+   * site.
+   */
+  public static String resolveBrowserTarget(String path) {
+    if (Utils.isEmpty(path)) {
+      return null;
+    }
+    try {
+      FileObject file = HopVfs.getFileObject(path);
+      if (!file.exists()) {
+        return null;
+      }
+      if (file.getType() == FileType.FOLDER) {
+        FileObject index = file.resolveFile("index.html");
+        if (index.exists() && index.getType() == FileType.FILE) {
+          return HopVfs.getFilename(index);
+        }
+        return null;
+      }
+      String filename = HopVfs.getFilename(file);
+      if (isHtmlPath(filename)) {
+        return filename;
+      }
+      Path site = findSiteRoot(filename);
+      if (site == null) {
+        return null;
+      }
+      String relative = relativeFromRoot(site, filename);
+      if (relative == null || resolveSafe(site, relative) == null) {
+        return null;
+      }
+      return filename;
+    } catch (Exception ignored) {
+      return null;
+    }
   }
 
   /**

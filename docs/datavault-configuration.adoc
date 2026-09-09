@@ -4,7 +4,7 @@
 
 toc::[]
 
-**Data Vault configuration** is project metadata that many `.hdv` files can share. Put hashing, naming, target database, catalog, and load settings in one object (Metadata perspective → **Data Vault configuration**) and point each model at it with **Configuration** on the Edit model dialog.
+**Data Vault configuration** is project metadata that many `.hdv` files can share. Put hashing, naming, target database, catalog, and load settings in one object (Metadata perspective → **EDW** → **Data Vault configuration**) and point each model at it with **Configuration** on the Edit model dialog.
 
 Older models may still embed a `<configuration>` block. Those files keep working. Use **Extract to project configuration…** when you want to stop copying the same settings across hub and link models.
 

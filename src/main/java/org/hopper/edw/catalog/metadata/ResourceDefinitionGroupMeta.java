@@ -24,6 +24,7 @@ import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.HopMetadataPropertyType;
 import org.apache.hop.metadata.api.IHopMetadata;
+import org.hopper.edw.datavault.metadata.EdwMetadataCategory;
 
 /**
  * Groups DV, BV, and DM models whose source record definitions should be validated together before
@@ -34,6 +35,7 @@ import org.apache.hop.metadata.api.IHopMetadata;
     name = "i18n::ResourceDefinitionGroupMeta.name",
     description = "i18n::ResourceDefinitionGroupMeta.description",
     image = "resource-definition-group.svg",
+    category = EdwMetadataCategory.EDW,
     documentationUrl = "/metadata-types/resource-definition-group.html",
     hopMetadataPropertyType = HopMetadataPropertyType.NONE)
 @Getter

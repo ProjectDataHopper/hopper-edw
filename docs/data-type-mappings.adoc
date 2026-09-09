@@ -54,7 +54,7 @@ For **Hop type → native SQL type** on CREATE/ALTER, use link:target-type-mappi
 
 == Project metadata editor
 
-In Hop **Metadata** perspective, create a **Data type mapping** (key `data-type-mapping`).
+In Hop **Metadata** perspective, under **EDW**, create a **Data type mapping** (key `data-type-mapping`).
 
 The editor has **Name** / **Description**, then two tabs:
 

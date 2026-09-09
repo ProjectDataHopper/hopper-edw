@@ -53,4 +53,25 @@ class ModelGraphTableCardLayoutTest {
             + ModelGraphTableCardLayout.SECONDARY_LABEL_GAP,
         ModelGraphTableCardLayout.secondaryLineY(boxY, nameExtent));
   }
+
+  @Test
+  void ceilToGridLeavesSizeUnchangedWhenGridIsDisabled() {
+    assertEquals(17, ModelGraphTableCardLayout.ceilToGrid(17, 1));
+    assertEquals(17, ModelGraphTableCardLayout.ceilToGrid(17, 0));
+    assertEquals(17, ModelGraphTableCardLayout.ceilToGrid(17, -16));
+  }
+
+  @Test
+  void ceilToGridRoundsWidthUpSoTheRightEdgeLandsOnTheGrid() {
+    assertEquals(16, ModelGraphTableCardLayout.ceilToGrid(16, 16));
+    assertEquals(16, ModelGraphTableCardLayout.ceilToGrid(1, 16));
+    assertEquals(32, ModelGraphTableCardLayout.ceilToGrid(17, 16));
+    assertEquals(144, ModelGraphTableCardLayout.ceilToGrid(140, 16));
+  }
+
+  @Test
+  void ceilToGridLeavesNonPositiveSizesUnchanged() {
+    assertEquals(0, ModelGraphTableCardLayout.ceilToGrid(0, 16));
+    assertEquals(-3, ModelGraphTableCardLayout.ceilToGrid(-3, 16));
+  }
 }

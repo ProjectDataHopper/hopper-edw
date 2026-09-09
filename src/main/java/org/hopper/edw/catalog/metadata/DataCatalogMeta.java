@@ -24,6 +24,7 @@ import org.apache.hop.metadata.api.HopMetadataPropertyType;
 import org.apache.hop.metadata.api.IHopMetadata;
 import org.hopper.edw.catalog.impl.file.FileDataCatalog;
 import org.hopper.edw.catalog.spi.IDataCatalog;
+import org.hopper.edw.datavault.metadata.EdwMetadataCategory;
 
 /**
  * Hop metadata connection to an external data catalog. Plugin-specific options are stored in the
@@ -34,6 +35,7 @@ import org.hopper.edw.catalog.spi.IDataCatalog;
     name = "i18n::DataCatalogMeta.name",
     description = "i18n::DataCatalogMeta.description",
     image = "data-catalog.svg",
+    category = EdwMetadataCategory.EDW,
     documentationUrl = "/metadata-types/data-catalog.html",
     hopMetadataPropertyType = HopMetadataPropertyType.NONE)
 @Getter

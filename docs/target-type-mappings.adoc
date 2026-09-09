@@ -42,7 +42,7 @@ This is **not** a Data type mapping. Data type mappings improve source → Hop. 
 
 == Project metadata editor
 
-In Hop **Metadata** perspective, create a **Target type mapping** (key `target-type-mapping`).
+In Hop **Metadata** perspective, under **EDW**, create a **Target type mapping** (key `target-type-mapping`).
 
 * **Name** / **Description**
 * **Target database** — Hop connection this profile is intended for (auto-match + preview)

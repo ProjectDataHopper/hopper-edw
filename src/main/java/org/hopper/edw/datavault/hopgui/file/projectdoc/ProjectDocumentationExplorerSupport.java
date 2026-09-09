@@ -20,8 +20,10 @@ import java.nio.file.Path;
 import java.util.Map;
 import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.ui.hopgui.file.IHopFileType;
+import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerFile;
 import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
 import org.apache.hop.ui.hopgui.perspective.explorer.IExplorerFilePaintListener;
+import org.apache.hop.ui.hopgui.perspective.explorer.IExplorerSelectionListener;
 import org.apache.hop.ui.util.EnvironmentUtils;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
@@ -32,7 +34,11 @@ import org.hopper.edw.datavault.hopgui.EdwDocsWebSupport;
  * serves CSS and links through a RAP handler. Hop's generic HTML handler uses {@code
  * Browser.setText()} and has no document base (Markdown preview looks fine because it inlines CSS).
  */
-public final class ProjectDocumentationExplorerSupport implements IExplorerFilePaintListener {
+public final class ProjectDocumentationExplorerSupport
+    implements IExplorerFilePaintListener, IExplorerSelectionListener {
+
+  public static final String ID_CONTEXT_MENU_OPEN_IN_BROWSER =
+      "ExplorerPerspective-ContextMenu-10103-OpenInBrowser";
 
   private static final ProjectDocumentationExplorerSupport INSTANCE =
       new ProjectDocumentationExplorerSupport();
@@ -44,14 +50,20 @@ public final class ProjectDocumentationExplorerSupport implements IExplorerFileP
   }
 
   public static void register(ExplorerPerspective explorer) {
-    if (explorer == null || !EnvironmentUtils.getInstance().isWeb()) {
+    if (explorer == null) {
       return;
     }
-    installAsHtmlFileType(explorer);
-    IExplorerFilePaintListener listener = getInstance();
-    if (!explorer.getFilePaintListeners().contains(listener)) {
-      explorer.getFilePaintListeners().add(listener);
+    ProjectDocumentationExplorerSupport listener = getInstance();
+    if (EnvironmentUtils.getInstance().isWeb()) {
+      installAsHtmlFileType(explorer);
+      if (!explorer.getFilePaintListeners().contains(listener)) {
+        explorer.getFilePaintListeners().add(listener);
+      }
     }
+    if (!explorer.getSelectionListeners().contains(listener)) {
+      explorer.getSelectionListeners().add(listener);
+    }
+    enableOpenInBrowserMenu();
   }
 
   /**
@@ -116,6 +128,22 @@ public final class ProjectDocumentationExplorerSupport implements IExplorerFileP
                 // Explorer tree-item layout is internal to Hop.
               }
             });
+  }
+
+  @Override
+  public void fileSelected() {
+    enableOpenInBrowserMenu();
+  }
+
+  static void enableOpenInBrowserMenu() {
+    ExplorerPerspective explorer = ExplorerPerspective.getInstance();
+    if (explorer == null || explorer.getMenuWidgets() == null) {
+      return;
+    }
+    ExplorerFile selected = explorer.getSelectedFile();
+    boolean enabled =
+        selected != null && EdwDocsWebSupport.canOpenInBrowser(selected.getFilename());
+    explorer.getMenuWidgets().enableMenuItem(ID_CONTEXT_MENU_OPEN_IN_BROWSER, enabled);
   }
 
   static Path siteRootOf(String path) {

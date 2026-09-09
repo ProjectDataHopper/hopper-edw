@@ -119,7 +119,7 @@ public class BusinessVaultModelPainter extends BasePainter {
 
     gc.setTransform((float) offset.x, (float) offset.y, magnification);
     gc.setAntialias(true);
-    if (gridSize > 1) {
+    if (shouldDrawCanvasGrid()) {
       drawGrid();
     }
 
@@ -734,9 +734,10 @@ public class BusinessVaultModelPainter extends BasePainter {
     ModelGraphTableCardLayout.BoxSize boxSize =
         ModelGraphTableCardLayout.computeBoxSize(
             gc, name, resolveDvReferenceSecondaryLine(reference), typeLabel, null);
-    reference.setDrawnBoxWidth(boxSize.width());
+    int boxWidth = ModelGraphTableCardLayout.ceilToGrid(boxSize.width(), gridSize);
+    reference.setDrawnBoxWidth(boxWidth);
     reference.setDrawnBoxHeight(boxSize.height());
-    return new Point(boxSize.width(), boxSize.height());
+    return new Point(boxWidth, boxSize.height());
   }
 
   private String resolveDvReferenceSecondaryLine(BvDvTableReference reference) {
@@ -863,9 +864,10 @@ public class BusinessVaultModelPainter extends BasePainter {
     ModelGraphTableCardLayout.BoxSize boxSize =
         ModelGraphTableCardLayout.computeBoxSize(
             gc, name, resolveBvReferenceSecondaryLine(reference), typeLabel, null);
-    reference.setDrawnBoxWidth(boxSize.width());
+    int boxWidth = ModelGraphTableCardLayout.ceilToGrid(boxSize.width(), gridSize);
+    reference.setDrawnBoxWidth(boxWidth);
     reference.setDrawnBoxHeight(boxSize.height());
-    return new Point(boxSize.width(), boxSize.height());
+    return new Point(boxWidth, boxSize.height());
   }
 
   private String resolveBvReferenceSecondaryLine(BvBvTableReference reference) {
@@ -1133,7 +1135,7 @@ public class BusinessVaultModelPainter extends BasePainter {
         width = Math.max(width, gc.textExtent(refLabel).x + textPad);
       }
     }
-    return width;
+    return ModelGraphTableCardLayout.ceilToGrid(width, gridSize);
   }
 
   private int computeBoxHeight(BvTableBase base) {

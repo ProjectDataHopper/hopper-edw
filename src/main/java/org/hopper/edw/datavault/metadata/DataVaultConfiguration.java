@@ -47,6 +47,7 @@ import org.hopper.edw.catalog.metadata.DataCatalogMeta;
     name = "i18n::DataVaultConfiguration.name",
     description = "i18n::DataVaultConfiguration.description",
     image = "datavault-configuration.svg",
+    category = EdwMetadataCategory.EDW,
     documentationUrl = "/metadata-types/data-vault-configuration.html",
     hopMetadataPropertyType = HopMetadataPropertyType.NONE)
 @Getter

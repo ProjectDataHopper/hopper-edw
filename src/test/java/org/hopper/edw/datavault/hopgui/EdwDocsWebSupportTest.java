@@ -118,6 +118,29 @@ class EdwDocsWebSupportTest {
   }
 
   @Test
+  void resolveBrowserTargetHtmlAndFolderIndex() throws Exception {
+    Path site = tempDir.resolve("docs");
+    Path html = site.resolve("index.html");
+    Files.createDirectories(site.resolve("assets").resolve("css"));
+    Files.writeString(site.resolve("assets").resolve("css").resolve("hop-doc.css"), "body{}");
+    Files.writeString(html, "<html></html>");
+    assertEquals(
+        html.toAbsolutePath().normalize().toString(),
+        Path.of(EdwDocsWebSupport.resolveBrowserTarget(html.toString()))
+            .toAbsolutePath()
+            .normalize()
+            .toString());
+    assertEquals(
+        html.toAbsolutePath().normalize().toString(),
+        Path.of(EdwDocsWebSupport.resolveBrowserTarget(site.toString()))
+            .toAbsolutePath()
+            .normalize()
+            .toString());
+    assertTrue(EdwDocsWebSupport.canOpenInBrowser(html.toString()));
+    assertNull(EdwDocsWebSupport.resolveBrowserTarget(tempDir.resolve("missing.html").toString()));
+  }
+
+  @Test
   void serveRootPrefersHopDocSiteThenParent() throws Exception {
     Path site = tempDir.resolve("documentation");
     Path html = site.resolve("workflows").resolve("run.html");

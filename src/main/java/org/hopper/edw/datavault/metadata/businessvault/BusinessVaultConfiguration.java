@@ -37,6 +37,7 @@ import org.hopper.edw.catalog.metadata.DataCatalogMeta;
 import org.hopper.edw.datavault.metadata.DvLoadCycleSupport;
 import org.hopper.edw.datavault.metadata.DvTargetLoadConfigurationSupport;
 import org.hopper.edw.datavault.metadata.DvTargetLoadMode;
+import org.hopper.edw.datavault.metadata.EdwMetadataCategory;
 import org.hopper.edw.datavault.metadata.IDvTargetLoadConfiguration;
 
 /**
@@ -50,6 +51,7 @@ import org.hopper.edw.datavault.metadata.IDvTargetLoadConfiguration;
     name = "i18n::BusinessVaultConfiguration.name",
     description = "i18n::BusinessVaultConfiguration.description",
     image = "business-vault-model.svg",
+    category = EdwMetadataCategory.EDW,
     documentationUrl = "/metadata-types/business-vault-configuration.html",
     hopMetadataPropertyType = HopMetadataPropertyType.NONE)
 @Getter

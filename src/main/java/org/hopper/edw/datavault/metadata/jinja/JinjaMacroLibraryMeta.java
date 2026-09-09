@@ -25,6 +25,7 @@ import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.HopMetadataPropertyType;
 import org.apache.hop.metadata.api.IHopMetadata;
+import org.hopper.edw.datavault.metadata.EdwMetadataCategory;
 
 /**
  * Project-level library of Jinja macros and default {@code var()} values for Business Vault SQL
@@ -35,6 +36,7 @@ import org.apache.hop.metadata.api.IHopMetadata;
     name = "i18n::JinjaMacroLibraryMeta.name",
     description = "i18n::JinjaMacroLibraryMeta.description",
     image = "jinja-macro-library.svg",
+    category = EdwMetadataCategory.EDW,
     documentationUrl = "/metadata-types/jinja-macro-library.html",
     hopMetadataPropertyType = HopMetadataPropertyType.NONE)
 @Getter

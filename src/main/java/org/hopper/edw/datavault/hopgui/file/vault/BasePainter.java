@@ -64,6 +64,13 @@ public abstract class BasePainter {
   protected int iconSize;
   protected int miniIconSize;
   protected int gridSize;
+
+  /**
+   * When false, grid dots are omitted even if {@link #gridSize} is still used to snap table box
+   * widths so the right edge lands on a grid line.
+   */
+  protected boolean showCanvasGrid = true;
+
   protected Rectangle selectionRegion;
   protected float magnification;
 
@@ -172,6 +179,10 @@ public abstract class BasePainter {
    * Windows).
    */
   private static final int MAX_GRID_POINTS = 50_000;
+
+  protected boolean shouldDrawCanvasGrid() {
+    return showCanvasGrid && gridSize > 1;
+  }
 
   protected void drawGrid() {
     if (area == null || area.x <= 0 || area.y <= 0) {

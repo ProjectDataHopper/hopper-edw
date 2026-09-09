@@ -156,7 +156,7 @@ public class DataVaultModelPainter extends BasePainter {
   }
 
   public void drawDataVaultModelImage() {
-    if (gridSize > 1) {
+    if (shouldDrawCanvasGrid()) {
       drawGrid();
     }
 
@@ -549,11 +549,12 @@ public class DataVaultModelPainter extends BasePainter {
     }
     ModelGraphTableCardLayout.BoxSize boxSize =
         ModelGraphTableCardLayout.computeBoxSize(gc, name, fieldLine, typeLabel, extraLine);
+    int boxWidth = ModelGraphTableCardLayout.ceilToGrid(boxSize.width(), gridSize);
     if (table instanceof DvTableBase base) {
-      base.setDrawnBoxWidth(boxSize.width());
+      base.setDrawnBoxWidth(boxWidth);
       base.setDrawnBoxHeight(boxSize.height());
     }
-    return new Point(boxSize.width(), boxSize.height());
+    return new Point(boxWidth, boxSize.height());
   }
 
   private boolean isValidRelationshipPair(IDvTable a, IDvTable b) {

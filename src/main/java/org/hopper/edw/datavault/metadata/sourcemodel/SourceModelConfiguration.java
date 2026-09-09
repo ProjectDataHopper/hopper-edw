@@ -31,6 +31,7 @@ import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.HopMetadataPropertyType;
 import org.apache.hop.metadata.api.IHopMetadata;
+import org.hopper.edw.datavault.metadata.EdwMetadataCategory;
 import org.hopper.edw.datavault.metadata.datatypemapping.IDataTypeMappingTarget;
 
 /**
@@ -44,6 +45,7 @@ import org.hopper.edw.datavault.metadata.datatypemapping.IDataTypeMappingTarget;
     name = "i18n::SourceModelConfiguration.name",
     description = "i18n::SourceModelConfiguration.description",
     image = "source-model.svg",
+    category = EdwMetadataCategory.EDW,
     documentationUrl = "/metadata-types/source-model-configuration.html",
     hopMetadataPropertyType = HopMetadataPropertyType.NONE)
 @GuiPlugin

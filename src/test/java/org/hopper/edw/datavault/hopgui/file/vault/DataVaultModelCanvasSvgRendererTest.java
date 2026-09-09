@@ -67,5 +67,8 @@ class DataVaultModelCanvasSvgRendererTest {
     assertFalse(
         result.getCanvasResult().getAreaOwners().isEmpty(),
         "interactive render should populate click regions");
+    assertTrue(
+        hub.getDrawnBoxWidth() > 0 && hub.getDrawnBoxWidth() % ctx.gridSize == 0,
+        "table width should round up to the canvas grid so the right edge aligns");
   }
 }

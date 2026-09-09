@@ -307,7 +307,8 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     ctx.offset = offset;
     ctx.selectionRegion = selectionRegion;
     ctx.iconSize = propsUi.getIconSize();
-    ctx.gridSize = propsUi.isShowCanvasGridEnabled() ? propsUi.getCanvasGridSize() : 1;
+    ctx.gridSize = Math.max(1, propsUi.getCanvasGridSize());
+    ctx.showCanvasGrid = propsUi.isShowCanvasGridEnabled();
     ctx.magnification = (float) (magnification * PropsUi.getNativeZoomFactor());
     ctx.screenMagnification = magnification;
     ctx.zoomFactor = propsUi.getZoomFactor();
@@ -332,7 +333,8 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
       areaOwners.clear();
       DimensionalModelPainter painter =
           new DimensionalModelPainter(model, gc, variables, width, height);
-      painter.setGridSize(propsUi.isShowCanvasGridEnabled() ? propsUi.getCanvasGridSize() : 1);
+      painter.setGridSize(Math.max(1, propsUi.getCanvasGridSize()));
+      painter.setShowCanvasGrid(propsUi.isShowCanvasGridEnabled());
       painter.setZoomFactor((float) propsUi.getZoomFactor());
       painter.setMagnification((float) (magnification * PropsUi.getNativeZoomFactor()));
       painter.setOffset(offset);

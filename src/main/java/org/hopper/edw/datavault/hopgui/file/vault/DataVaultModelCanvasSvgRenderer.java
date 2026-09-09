@@ -49,6 +49,7 @@ public final class DataVaultModelCanvasSvgRenderer {
     public Rectangle selectionRegion;
     public int iconSize;
     public int gridSize;
+    public boolean showCanvasGrid = true;
     public float magnification;
     public float screenMagnification;
     public double zoomFactor;
@@ -79,6 +80,7 @@ public final class DataVaultModelCanvasSvgRenderer {
           new DataVaultModelPainter(
               ctx.model, gc, ctx.variables, ctx.canvasSize.x, ctx.canvasSize.y);
       painter.setGridSize(ctx.gridSize);
+      painter.setShowCanvasGrid(ctx.showCanvasGrid);
       painter.setZoomFactor((float) ctx.zoomFactor);
       painter.setMagnification(ctx.magnification);
       painter.setScreenMagnification(ctx.screenMagnification);

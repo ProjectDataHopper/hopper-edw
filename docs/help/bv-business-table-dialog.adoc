@@ -24,7 +24,7 @@ Optional target schema for `CREATE VIEW|TABLE` and for `{{ this }}`. Leave empty
 - `{{ ref('object') }}` — BV table in this model or DV table in the linked vault model
 - `{{ ref('model', 'object') }}` — object in another model file. `model` may be a relative path (e.g. `../models/retail-360` or another `.hbv` for multi-step BV layers), with optional extension, a catalog registry basename, or a path under `${PROJECT_HOME}`
 - `{{ source('source', 'table') }}` — must be declared on the **Sources** tab
-- `{% set %}` / `{% if %}` / `{% for %}` and project macros from a **Jinja macro library** (Metadata perspective)
+- `{% set %}` / `{% if %}` / `{% for %}` and project macros from a **Jinja macro library** (Metadata perspective → **EDW**)
 - `{{ var('name') }}` — Hop variable of that name, else a library default
 - `{{ config(...) }}` — ignored at render (set materialization and schema on this dialog)
 - `{{ this }}` — quoted name of this table
