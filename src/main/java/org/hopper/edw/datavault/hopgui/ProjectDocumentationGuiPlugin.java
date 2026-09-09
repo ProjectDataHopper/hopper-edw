@@ -32,7 +32,6 @@ import org.eclipse.swt.SWT;
 import org.hopper.edw.datavault.documentation.ProjectDocumentationOptions;
 import org.hopper.edw.datavault.documentation.ProjectDocumentationResult;
 import org.hopper.edw.datavault.documentation.ProjectDocumentationService;
-import org.hopper.edw.datavault.hopgui.file.projectdoc.HopProjectDocFileType;
 import org.hopper.edw.datavault.hopgui.file.projectdoc.ProjectDocumentationExplorerSupport;
 import org.hopper.edw.datavault.workflow.actions.generatedocumentation.ActionGenerateProjectDocumentation;
 import org.hopper.edw.datavault.workflow.actions.generatedocumentation.ActionGenerateProjectDocumentationDialog;
@@ -156,14 +155,12 @@ public class ProjectDocumentationGuiPlugin {
   static void openGeneratedSite(HopGui hopGui, String outputFolder) throws Exception {
     String index = HopVfs.getFilename(HopVfs.getFileObject(outputFolder + "/index.html"));
     if (EnvironmentUtils.getInstance().isWeb()) {
-      ExplorerPerspective explorer = HopGui.getExplorerPerspective();
-      explorer.activate();
       try {
-        explorer.refresh();
+        HopGui.getExplorerPerspective().refresh();
       } catch (Exception ignored) {
-        // Best-effort: the documentation tab still opens if the tree cannot refresh.
+        // Best-effort: the project tree can still be stale if refresh fails.
       }
-      HopProjectDocFileType.getInstance().openFile(hopGui, index, hopGui.getVariables());
+      EdwDocsWebSupport.openInBrowser(index);
       return;
     }
     EnvironmentUtils.getInstance().openUrl(java.nio.file.Path.of(index).toUri().toString());

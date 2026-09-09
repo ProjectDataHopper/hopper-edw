@@ -32,6 +32,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileType;
+import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.vfs.HopVfs;
@@ -118,7 +119,7 @@ public final class EdwDocsWebSupport {
    * RAP browser URL for a documentation file identified by a Hop VFS filename (explorer tree path).
    */
   public static String absoluteBrowserUrl(String htmlFilename) {
-    Path root = findSiteRoot(htmlFilename);
+    Path root = serveRoot(htmlFilename);
     if (root == null || Utils.isEmpty(htmlFilename)) {
       return null;
     }
@@ -128,6 +129,90 @@ public final class EdwDocsWebSupport {
     }
     return toAbsoluteUrl(
         handlerUrlFor(root, relative, registerSiteRoot(root)), currentRequestUrl());
+  }
+
+  /**
+   * Open generated documentation in the real browser, same pattern as plugin EDW docs ({@code
+   * servicehandler=hopperEdwDocs&file=...}). Relative handler URLs resolve against the current Hop
+   * Web entry ({@code /ui-dark}, {@code /ui}, …).
+   */
+  public static void openInBrowser(String htmlFilename) throws HopException {
+    if (Utils.isEmpty(htmlFilename)) {
+      throw new HopException("Documentation file name is required");
+    }
+    Path root = serveRoot(htmlFilename);
+    String relative = relativeFromRoot(root, htmlFilename);
+    String handlerUrl = handlerUrlFor(root, relative, registerSiteRoot(root));
+    if (Utils.isEmpty(handlerUrl)) {
+      throw new HopException("Unable to register a documentation handler for " + htmlFilename);
+    }
+    String url = toAbsoluteUrl(handlerUrl, currentRequestUrl());
+    if (Utils.isEmpty(url)) {
+      url = handlerUrl;
+    }
+    EnvironmentUtils.getInstance().openUrl(url);
+  }
+
+  /**
+   * HTML with {@code href}/{@code src} rewritten to RAP handler URLs so {@code Browser.setText()}
+   * can still load CSS when the explorer iframe has no document base.
+   */
+  public static String rewrittenPageHtml(String htmlFilename) {
+    if (Utils.isEmpty(htmlFilename) || !isHtmlPath(htmlFilename)) {
+      return null;
+    }
+    Path root = serveRoot(htmlFilename);
+    if (root == null) {
+      return null;
+    }
+    String relative = relativeFromRoot(root, htmlFilename);
+    String handlerUrl = handlerUrlFor(root, relative, registerSiteRoot(root));
+    String absolute = toAbsoluteUrl(handlerUrl, currentRequestUrl());
+    if (relative == null || Utils.isEmpty(absolute)) {
+      return null;
+    }
+    try {
+      FileObject fileObject = HopVfs.getFileObject(htmlFilename);
+      if (!fileObject.exists() || fileObject.getType() != FileType.FILE) {
+        return null;
+      }
+      byte[] body;
+      try (InputStream in = HopVfs.getInputStream(fileObject)) {
+        body = in.readAllBytes();
+      }
+      return rewriteRelativeUrls(new String(body, StandardCharsets.UTF_8), absolute, relative);
+    } catch (Exception ignored) {
+      return null;
+    }
+  }
+
+  /** Hop-doc site root when present, otherwise the HTML file's parent folder. */
+  public static Path serveRoot(String htmlFilename) {
+    Path site = findSiteRoot(htmlFilename);
+    return site != null ? site : parentDirectory(htmlFilename);
+  }
+
+  static Path parentDirectory(String filename) {
+    if (Utils.isEmpty(filename)) {
+      return null;
+    }
+    try {
+      FileObject file = HopVfs.getFileObject(filename);
+      FileObject parent =
+          file.exists() && file.getType() == FileType.FILE ? file.getParent() : file;
+      if (parent == null) {
+        return null;
+      }
+      return Path.of(HopVfs.getFilename(parent));
+    } catch (Exception ignored) {
+      try {
+        Path path = Path.of(filename);
+        Path parent = Files.isRegularFile(path) ? path.getParent() : path;
+        return parent == null ? null : parent.toAbsolutePath().normalize();
+      } catch (Exception e) {
+        return null;
+      }
+    }
   }
 
   /** {@code true} when {@code path} looks like an HTML file. */

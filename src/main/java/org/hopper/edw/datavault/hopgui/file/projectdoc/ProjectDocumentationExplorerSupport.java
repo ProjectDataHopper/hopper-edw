@@ -17,6 +17,8 @@ package org.hopper.edw.datavault.hopgui.file.projectdoc;
 
 import java.lang.reflect.Field;
 import java.nio.file.Path;
+import java.util.Map;
+import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.ui.hopgui.file.IHopFileType;
 import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
 import org.apache.hop.ui.hopgui.perspective.explorer.IExplorerFilePaintListener;
@@ -26,8 +28,9 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.hopper.edw.datavault.hopgui.EdwDocsWebSupport;
 
 /**
- * On Hop Web, routes generated project-documentation HTML to {@link HopProjectDocFileType} so the
- * explorer tab uses a RAP handler URL instead of {@code Browser.setText()}.
+ * On Hop Web, routes {@code .html} files to {@link HopProjectDocFileType} so the explorer tab
+ * serves CSS and links through a RAP handler. Hop's generic HTML handler uses {@code
+ * Browser.setText()} and has no document base (Markdown preview looks fine because it inlines CSS).
  */
 public final class ProjectDocumentationExplorerSupport implements IExplorerFilePaintListener {
 
@@ -44,9 +47,38 @@ public final class ProjectDocumentationExplorerSupport implements IExplorerFileP
     if (explorer == null || !EnvironmentUtils.getInstance().isWeb()) {
       return;
     }
+    installAsHtmlFileType(explorer);
     IExplorerFilePaintListener listener = getInstance();
     if (!explorer.getFilePaintListeners().contains(listener)) {
       explorer.getFilePaintListeners().add(listener);
+    }
+  }
+
+  /**
+   * Makes this plugin the explorer handler for {@code html}/{@code htm}. Hop indexes the first
+   * matching file type; without this, {@code HtmlExplorerFileType} always wins.
+   */
+  static boolean installAsHtmlFileType(ExplorerPerspective explorer) {
+    if (explorer == null) {
+      return false;
+    }
+    try {
+      Field field = ExplorerPerspective.class.getDeclaredField("fileTypeByExtension");
+      field.setAccessible(true);
+      Object raw = field.get(explorer);
+      if (!(raw instanceof Map<?, ?>)) {
+        return false;
+      }
+      @SuppressWarnings("unchecked")
+      Map<String, IHopFileType> map = (Map<String, IHopFileType>) raw;
+      HopProjectDocFileType type = HopProjectDocFileType.getInstance();
+      map.put("html", type);
+      map.put("htm", type);
+      return true;
+    } catch (Exception e) {
+      LogChannel.UI.logError(
+          "Unable to install Hop Web HTML documentation handler on the explorer perspective", e);
+      return false;
     }
   }
 
@@ -63,10 +95,6 @@ public final class ProjectDocumentationExplorerSupport implements IExplorerFileP
         .asyncExec(
             () -> {
               if (treeItem.isDisposed()) {
-                return;
-              }
-              Path siteRoot = EdwDocsWebSupport.findSiteRoot(path);
-              if (siteRoot == null) {
                 return;
               }
               Object data = treeItem.getData();

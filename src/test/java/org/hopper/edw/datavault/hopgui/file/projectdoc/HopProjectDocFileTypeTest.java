@@ -38,6 +38,11 @@ class HopProjectDocFileTypeTest {
   }
 
   @Test
+  void installAsHtmlFileTypeRejectsNullExplorer() {
+    assertFalse(ProjectDocumentationExplorerSupport.installAsHtmlFileType(null));
+  }
+
+  @Test
   void siteRootOfDetectsGeneratedDocumentation() throws Exception {
     Path site = tempDir.resolve("documentation");
     Path css = site.resolve("assets").resolve("css").resolve("hop-doc.css");

@@ -84,6 +84,15 @@ public class HopProjectDocExplorerFileTypeHandler extends BaseExplorerFileTypeHa
         clearChanged();
         return;
       }
+      String rewritten = EdwDocsWebSupport.rewrittenPageHtml(filename);
+      if (!Utils.isEmpty(rewritten)) {
+        // Prefer rewritten HTML: RAP Browser.setText has no document base, so relative CSS 404s
+        // (Markdown preview looks fine because it inlines styles). Absolute RAP handler URLs
+        // load stylesheets and keep in-page links inside the explorer iframe.
+        wBrowser.setText(rewritten);
+        clearChanged();
+        return;
+      }
       String url = EdwDocsWebSupport.absoluteBrowserUrl(filename);
       if (!Utils.isEmpty(url)) {
         wBrowser.setUrl(url);

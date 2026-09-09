@@ -37,7 +37,7 @@ Skipped: `.hlv` session graphs, hidden folders, `.git`, `target`, `node_modules`
 **Tools → Generate project documentation…** uses the same options, shows a cancelable progress dialog, and opens `index.html` when generation finishes.
 
 * **Hop GUI (desktop):** opens the site in the system browser (`file:` URL).
-* **Hop Web:** shows a cancelable progress dialog (Hop's built-in monitor is skipped on RAP), then opens `index.html` in the **File explorer** perspective. Pages are served through a RAP handler so CSS, the header/sidebar, search, and in-page links resolve. Opening a generated HTML file from the explorer tree uses the same handler.
+* **Hop Web:** shows a cancelable progress dialog, then opens `index.html` in the **regular browser** through the same RAP handler as plugin EDW docs (`servicehandler=hopperEdwDocs&file=index.html`). Opening a generated HTML file from the explorer tree uses that handler too — not Hop's explorer HTML tab (`Browser.setText()` has no document base).
 
 === CLI
 

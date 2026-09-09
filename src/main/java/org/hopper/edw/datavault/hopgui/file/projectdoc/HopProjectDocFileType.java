@@ -29,6 +29,7 @@ import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
 import org.apache.hop.ui.hopgui.perspective.explorer.file.capabilities.FileTypeCapabilities;
 import org.apache.hop.ui.hopgui.perspective.explorer.file.types.base.BaseExplorerFileType;
 import org.apache.hop.ui.util.EnvironmentUtils;
+import org.hopper.edw.datavault.hopgui.EdwDocsWebSupport;
 
 /**
  * Explorer handler for generated project-documentation HTML on Hop Web. Desktop keeps the system
@@ -79,11 +80,15 @@ public class HopProjectDocFileType
     if (Utils.isEmpty(resolved)) {
       throw new HopException("Documentation file name is required");
     }
-    if (isHttp(resolved) || !EnvironmentUtils.getInstance().isWeb()) {
+    if (isHttp(resolved)) {
       return openExplorerFile(hopGui, resolved, tabName(resolved));
     }
-    String vfsName = HopVfs.getFilename(HopVfs.getFileObject(resolved, variables));
-    return openExplorerFile(hopGui, vfsName, tabName(vfsName));
+    if (EnvironmentUtils.getInstance().isWeb()) {
+      String vfsName = HopVfs.getFilename(HopVfs.getFileObject(resolved, variables));
+      EdwDocsWebSupport.openInBrowser(vfsName);
+      return null;
+    }
+    return openExplorerFile(hopGui, resolved, tabName(resolved));
   }
 
   private HopProjectDocExplorerFileTypeHandler openExplorerFile(

@@ -118,6 +118,23 @@ class EdwDocsWebSupportTest {
   }
 
   @Test
+  void serveRootPrefersHopDocSiteThenParent() throws Exception {
+    Path site = tempDir.resolve("documentation");
+    Path html = site.resolve("workflows").resolve("run.html");
+    Files.createDirectories(html.getParent());
+    Files.createDirectories(site.resolve("assets").resolve("css"));
+    Files.writeString(site.resolve("assets").resolve("css").resolve("hop-doc.css"), "body{}");
+    Files.writeString(html, "<html></html>");
+    assertEquals(site.toAbsolutePath().normalize(), EdwDocsWebSupport.serveRoot(html.toString()));
+    Path loose = tempDir.resolve("loose").resolve("page.html");
+    Files.createDirectories(loose.getParent());
+    Files.writeString(loose, "<html></html>");
+    assertEquals(
+        loose.getParent().toAbsolutePath().normalize(),
+        EdwDocsWebSupport.serveRoot(loose.toString()));
+  }
+
+  @Test
   void relativeFromRootUsesSiteFolder() throws Exception {
     Path site = tempDir.resolve("documentation");
     Path html = site.resolve("workflows").resolve("workflows").resolve("run-retail-initial.html");
