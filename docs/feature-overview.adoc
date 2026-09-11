@@ -210,6 +210,10 @@ For a slide-style executive summary, see link:presentations/hop-data-vault-overv
 |Available
 |link:execution-maps.adoc[Execution maps]
 
+|Hopper presentations in Hop GUI
+|Preview (issue https://github.com/ProjectDataHopper/hopper-edw/issues/170[#170])
+|Generated dashboards (no web server, no Hop metadata editors) via **Tools → Project presentation…** and explorer **View execution presentation** on `.hpl`/`.hwf`. Pipeline results **Performance** tab (throughput over time) and workflow results **Gantt** tab (action durations). Built on the fly with `HSimplePresentation`; drawn by `HPresentationViewer` / `HPresentationSession` (Hop Web: inline SVG + JS).
+
 |EDW Journey perspective
 |Available (map, Open, last-run, grow, contextual docs)
 |link:edw-journey.adoc[EDW Journey]

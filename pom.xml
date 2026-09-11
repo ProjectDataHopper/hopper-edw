@@ -65,6 +65,8 @@
     <hadoop.version>3.3.6</hadoop.version>
     <!-- Required runtime: Apache Hop 2.19.0. -->
     <hop.version>2.19.0</hop.version>
+    <!-- Hopper Presentation Engine (issue #170). Resolved from repository.data-hopper.com/hopper. -->
+    <hopper.presentation.version>1.0.0-SNAPSHOT</hopper.presentation.version>
     <iceberg.version>1.6.1</iceberg.version>
     <jandex.version>3.5.3</jandex.version>
     <!-- HubSpot Jinjava: dbt-style Jinja for BV SQL (issue #72). Do not drop below 2.8.3. -->
@@ -398,6 +400,42 @@
       <version>${elk.version}</version>
     </dependency>
 
+    <!-- Hopper Presentation Engine viewer (issue #170). Hop APIs are provided by the runtime. -->
+    <dependency>
+      <groupId>org.hopper</groupId>
+      <artifactId>hopper-presentation-core</artifactId>
+      <version>${hopper.presentation.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.hop</groupId>
+          <artifactId>hop-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.hop</groupId>
+          <artifactId>hop-engine</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.hopper</groupId>
+      <artifactId>hopper-presentation-swt</artifactId>
+      <version>${hopper.presentation.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.hop</groupId>
+          <artifactId>hop-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.hop</groupId>
+          <artifactId>hop-engine</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.hop</groupId>
+          <artifactId>hop-ui</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
     <!-- Jandex index support for fast annotation discovery by Hop's plugin system -->
     <dependency>
       <groupId>io.smallrye</groupId>
@@ -492,6 +530,18 @@
       <id>apache.snapshots</id>
       <name>Apache Snapshot Repository</name>
       <url>https://repository.apache.org/snapshots/</url>
+    </repository>
+    <repository>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
+      </snapshots>
+      <id>hopper</id>
+      <name>Data Hopper (presentation engine)</name>
+      <url>https://repository.data-hopper.com/repository/hopper/</url>
     </repository>
   </repositories>
 

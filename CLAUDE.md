@@ -59,6 +59,11 @@ This plugin is built **against** Hop; it does not vendor Hop sources.
 | `org.apache.hop:hop-core` (`${hop.version}`) | Core utilities, metadata interfaces, types, **HopVfs** |
 | `org.apache.hop:hop-engine` (`${hop.version}`) | Pipelines, workflows, execution |
 | `org.apache.hop:hop-ui` (`${hop.version}`) | Hop GUI, dialogs, file types, canvas |
+| `org.hopper:hopper-presentation-core` / `hopper-presentation-swt` (`${hopper.presentation.version}`) | Generated dashboards, Performance/Gantt charts (`HPresentationViewer`) |
+
+Hopper presentation artifacts (`hopper-presentation-core`, `hopper-presentation-swt`, parent `hopper-presentation-engine`) resolve from **https://repository.data-hopper.com/repository/hopper/** (Maven repo id `hopper` in `pom.xml`). Do not require a local `mvn install` of the presentation engine unless you are changing that engine in the same session.
+
+**Jenkins:** pushes (and PRs) to GitHub `main` trigger https://jenkins.data-hopper.com/ via [`.github/workflows/trigger-jenkins.yml`](.github/workflows/trigger-jenkins.yml). A successful hopper-edw job publishes the SNAPSHOT plugin zip to **hop-community-plugins**. The presentation engine uses the same pattern and deploys SNAPSHOTs to the **hopper** Maven repo. After a GitHub change, `mvn -U` picks up those SNAPSHOTs; wait for Jenkins to finish before expecting new artifacts.
 
 Many `hop-transform-*` / `hop-action-*` modules are also on the compile classpath so generated pipelines can reference Meta classes. They are **not** all packaged into this plugin jar (Hop loads plugins dynamically). See `src/main/resources/dependencies.xml` and `src/assembly/assembly.xml`.
 
@@ -191,6 +196,7 @@ These are easy for agents to violate:
 7. **Package placement** — Put new code under `org.hopper.edw.datavault`, `.catalog`, or `.quality`, following existing layering (`metadata`, `hopgui`, `workflow/actions`, `transform`, services). Mirror Hop patterns: `*Meta` + dialog/editor; transforms often `*Meta` / `*Data` / `*`; actions under `.../workflow/actions/...`.
 8. **Plugin isolation** — Treat classloaders carefully. The assembly deliberately bundles selected third-party libs (ELK, CommonMark, Iceberg, some Hop actions). Prefer `provided` for Hop itself.
 9. **Metadata category** — `@HopMetadata` types must set `category = EdwMetadataCategory.EDW` so they appear under **EDW** in the metadata perspective, not **Other**. The exception is `SourceModelService` (`HopMetadataCategory.SERVERS`).
+10. **Presentations** — Charts and dashboards in Hop GUI go through `HPresentationViewer` / `HPresentationSession` (hopper-presentation-engine). Do not add ad-hoc `IGc` chart painters for new analytics surfaces.
 
 ## Anti-patterns (do not)
 

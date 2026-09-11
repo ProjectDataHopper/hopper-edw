@@ -4,6 +4,17 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Hopper presentations in Hop GUI (issue #170)
+
+- Pipeline execution results have a **Performance** tab: live multi-series transform throughput (and related metrics) over time, from Hop `PerformanceSnapShot` data. Local runs enable snapshot capture for that execution without dirtying the `.hpl` file. Rows/second matches the Metrics panel (max of inbound vs outbound rows per interval, so generators and pass-throughs are not stuck at 0). The chart keeps the series inside the axes, formats Y labels as integers (`###,###,##0`), omits crowded X labels, sorts elapsed seconds numerically, and puts transform names in a right-hand legend.
+- The Performance and Gantt result tabs show a zoom toolbar (in/out/100%/width/height/page), SVG/PDF export, and a live refresh rate (Paused, 1s–30s).
+- Workflow execution results have a **Gantt** tab of action start/end times (including running actions and nested workflows), matching the Grid tab pairing.
+- Both tabs use `HSimplePresentation` + `HPresentationViewer`. On Hop Web the SVG is hosted in a RAP `Browser` with a small JavaScript shell that replaces SVG in place on the 1s refresh (no iframe reload).
+- Hop GUI can open Hopper presentations without a local web server. **Tools → Project presentation…** (and the matching main-toolbar button) **generates** a project dashboard from Hop execution information (duration trend, status comparison, recent runs) and shows it in `HPresentationViewer`. Explorer toolbar / context menu **View execution presentation** does the same for a selected `.hpl` / `.hwf`.
+- Dashboards are built on the fly with `HSimplePresentation` into an isolated in-memory catalog (themes + in-memory row connectors). They are **not** stored under project `metadata/presentation/` and presentation-core types are **not** registered in the Metadata perspective.
+- The SWT viewer lives in `hopper-presentation-swt` and shares `HPresentationSession` with REST (layout, hit-test, `OPEN_PRESENTATION`). It **fits the page to the canvas** on open and resize, with zoom in/out/100%, fit width/height/page, Ctrl+wheel zoom, scrollbars when zoomed in, and a **Page N of M** indicator. Chrome modes `FULL` / `MINIMAL` / `NONE` cover dashboards down to small charts.
+- Component/connector plugins are still registered at Hop startup (Hop skips plugin `lib/` jars). Without that, generated presentations fail with missing `HLabelComponent`.
+
 ### Modeler table alignment
 
 - Data Vault, Business Vault, and Dimensional table cards round their width up to the canvas grid. With snap-to-grid, both the left and right edges land on grid lines so tables can be aligned on either side. Width still snaps when the grid dots are hidden.
