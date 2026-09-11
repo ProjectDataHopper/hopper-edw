@@ -4,6 +4,13 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Source model JDBC authentication (Hop Web)
+
+- Thin `jdbc:hop-hsm:` client supports **Basic**, **Bearer**, and **OAuth 2** (`client_credentials` / `refresh_token`). Tokens stay in JDBC properties, not the URL.
+- Apache Hop Source Model connections expose Authentication and OAuth 2 fields in the RDBMS dialog.
+- `/hop/sourceModelData` registers itself with Hop Web RBAC when the running Hop has a plugin permission overlay (`run.execute`).
+- Retail example connection **hsm-crm-web**: `localhost:8080`, schema `crm`, Authentication Bearer (paste a Hop Web JDBC token; do not commit one).
+
 ### Hopper presentations in Hop GUI (issue #170)
 
 - Pipeline execution results have a **Performance** tab: live multi-series transform throughput (and related metrics) over time, from Hop `PerformanceSnapShot` data. Local runs enable snapshot capture for that execution without dirtying the `.hpl` file. Rows/second matches the Metrics panel (max of inbound vs outbound rows per interval, so generators and pass-throughs are not stuck at 0). The chart keeps the series inside the axes, formats Y labels as integers (`###,###,##0`), omits crowded X labels, sorts elapsed seconds numerically, and puts transform names in a right-hand legend.

@@ -22,7 +22,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.hop.core.database.DatabaseMeta;
+import org.apache.hop.core.encryption.Encr;
 import org.apache.hop.core.row.value.ValueMetaString;
+import org.apache.hop.core.variables.Variables;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +33,8 @@ class HopSourceModelDatabaseMetaTest {
   private HopSourceModelDatabaseMeta meta;
 
   @BeforeEach
-  void setUp() {
+  void setUp() throws Exception {
+    Encr.init("Hop");
     meta = new HopSourceModelDatabaseMeta();
     meta.setAccessType(DatabaseMeta.TYPE_ACCESS_NATIVE);
     meta.addDefaultOptions();
@@ -72,6 +75,30 @@ class HopSourceModelDatabaseMetaTest {
   @Test
   void urlDefaultsHostWhenBlank() {
     assertEquals("jdbc:hop-hsm://localhost:8080/retail", meta.getURL("", "8080", "retail"));
+  }
+
+  @Test
+  void connectionPropertiesIncludeAuthTypeAndKeepUrlClean() {
+    meta.setAuthenticationType(HopHsmAuthType.BEARER);
+    assertEquals("jdbc:hop-hsm://localhost:8080/crm", meta.getURL("localhost", "8080", "crm"));
+    assertEquals("bearer", meta.getConnectionProperties(new Variables()).get("authType"));
+  }
+
+  @Test
+  void oauth2PropertiesAreNotPutOnTheUrl() {
+    meta.setAuthenticationType(HopHsmAuthType.OAUTH2);
+    meta.setOauthTokenUrl("https://idp.example/token");
+    meta.setOauthClientId("hop-jdbc");
+    meta.setOauthClientSecret("s3cret");
+    meta.setOauthScope("api");
+    assertEquals("jdbc:hop-hsm://localhost:8080/crm", meta.getURL("localhost", "8080", "crm"));
+    var props = meta.getConnectionProperties(new Variables());
+    assertEquals("oauth2", props.get("authType"));
+    assertEquals("https://idp.example/token", props.get("oauthTokenUrl"));
+    assertEquals("hop-jdbc", props.get("oauthClientId"));
+    assertEquals("s3cret", props.get("oauthClientSecret"));
+    assertEquals("api", props.get("oauthScope"));
+    assertEquals("client_credentials", props.get("oauthGrant"));
   }
 
   @Test

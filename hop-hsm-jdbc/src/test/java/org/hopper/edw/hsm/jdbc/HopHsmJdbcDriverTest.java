@@ -84,6 +84,34 @@ class HopHsmJdbcDriverTest {
     assertEquals("https://host:9443/hop/sourceModelData", p.endpointUrl());
     assertEquals("fromProp", p.defaultSchema());
     assertEquals("u", p.user());
+    assertEquals(HsmAuthType.BASIC, p.authType());
+  }
+
+  @Test
+  void parseAuthTypeBearerFromQueryAndTokenFromPassword() throws Exception {
+    Properties info = new Properties();
+    info.setProperty("password", "jwt-here");
+    HopHsmJdbcDriver.ParsedUrl p =
+        HopHsmJdbcDriver.parse("jdbc:hop-hsm://host:8080/crm?authType=bearer", info);
+    assertEquals(HsmAuthType.BEARER, p.authType());
+    assertEquals("jwt-here", p.password());
+    assertEquals("crm", p.defaultSchema());
+  }
+
+  @Test
+  void parseOauth2PropertiesWinOverQuery() throws Exception {
+    Properties info = new Properties();
+    info.setProperty("authType", "oauth2");
+    info.setProperty("oauthTokenUrl", "https://idp.example/token");
+    info.setProperty("oauthClientId", "hop-jdbc");
+    info.setProperty("oauthScope", "hop");
+    HopHsmJdbcDriver.ParsedUrl p =
+        HopHsmJdbcDriver.parse(
+            "jdbc:hop-hsm://host:8080/crm?authType=basic&oauthTokenUrl=http://ignored", info);
+    assertEquals(HsmAuthType.OAUTH2, p.authType());
+    assertEquals("https://idp.example/token", p.oauthTokenUrl());
+    assertEquals("hop-jdbc", p.oauthClientId());
+    assertEquals("client_credentials", p.oauthGrant());
   }
 
   @Test

@@ -1,0 +1,37 @@
+{
+  "virtualPath": "",
+  "rdbms": {
+    "HOPSOURCEMODEL": {
+      "sshTunnelPort": "22",
+      "sshTunnelUsePrivateKey": false,
+      "databaseName": "crm",
+      "pluginId": "HOPSOURCEMODEL",
+      "sshTunnelEnabled": false,
+      "accessType": 0,
+      "sshTunnelUsername": "",
+      "hostname": "localhost",
+      "password": "Encrypted ",
+      "pluginName": "Apache Hop Source Model",
+      "port": "8080",
+      "sshTunnelHost": "",
+      "authenticationType": "BEARER",
+      "oauthGrant": "client_credentials",
+      "attributes": {
+        "SUPPORTS_TIMESTAMP_DATA_TYPE": "Y",
+        "QUOTE_ALL_FIELDS": "N",
+        "SUPPORTS_BOOLEAN_DATA_TYPE": "Y",
+        "FORCE_IDENTIFIERS_TO_LOWERCASE": "N",
+        "PRESERVE_RESERVED_WORD_CASE": "Y",
+        "SQL_CONNECT": "",
+        "FORCE_IDENTIFIERS_TO_UPPERCASE": "N",
+        "PREFERRED_SCHEMA_NAME": ""
+      },
+      "manualUrl": "",
+      "sshTunnelPassphrase": "Encrypted ",
+      "sshTunnelPassword": "Encrypted ",
+      "sshTunnelPrivateKeyFile": "",
+      "username": ""
+    }
+  },
+  "name": "hsm-crm-web"
+}

@@ -205,10 +205,11 @@ With Data Hopper EDW installed, create a connection of type **Apache Hop Source 
 |===
 | Hop field | Maps to |
 
-| Host name | Hop Server host |
-| Port number | Hop Server HTTP port (default *8080*) |
+| Host name | Hop Server / Hop Web host (`localhost` when the Database perspective runs inside Hop Web) |
+| Port number | HTTP port (Hop Server often *8888*; Hop Web Tomcat *8080*) |
 | Database name | Optional default Source model service (JDBC schema) |
-| Username / password | Hop Server credentials |
+| Username / password | Basic: Hop Server user/password. Bearer: leave user empty and paste a JDBC token as the password |
+| Authentication | *Basic*, *Bearer*, or *OAuth 2* (driver fetches a token; not used with Google OIDC) |
 |===
 
 The driver class is `org.hopper.edw.hsm.jdbc.HopHsmJdbcDriver`. The thin client jar is shipped under `plugins/misc/hopper-edw/lib/` so **Table input**, Explore database, and other Hop database consumers can use the connection without a separate driver install.
@@ -261,12 +262,17 @@ In the URL template, `{database}` is the default **schema** (Source model servic
 | Host | `localhost` | Hop Server host |
 | Port | `8888` | Hop Server port |
 | Database/Schema | `crm` | Source model service name (JDBC schema) |
-| Username / Password | Hop Server credentials | Basic auth |
+| Username / Password | Hop Server credentials | Basic auth. For Bearer, put the token in *Password* (do not put it in the URL) |
+| Driver properties | `authType=basic\|bearer\|oauth2` | Optional. OAuth 2 also needs `oauthTokenUrl`, `oauthClientId`, `oauthClientSecret` / `oauthScope` |
 |===
 
 The resolved URL looks like:
 
 `jdbc:hop-hsm://{username}:{password}@localhost:8888/crm`
+
+Do **not** put a Bearer token in the URL userinfo. Use the password field or the `accessToken` property.
+
+On Hop Web with OAuth2 (for example https://hop-web.data-hopper.com/ui): **File → Copy JDBC token**, then use connection `hsm-crm-web` (host `localhost`, port `8080`, database `crm`, Authentication *Bearer*, paste the token as the password). Open the Database perspective and connect. The token lasts about an hour; do not save it in project metadata.
 
 image::images/hop-source-model-jdbc-dbeaver-database-connection.png[DBeaver connection settings for Hop Source Model (host, port, schema crm),align="center"]
 

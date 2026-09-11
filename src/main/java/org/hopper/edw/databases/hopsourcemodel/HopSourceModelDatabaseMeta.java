@@ -15,14 +15,30 @@
  */
 package org.hopper.edw.databases.hopsourcemodel;
 
+import java.util.HashSet;
+import java.util.Properties;
+import java.util.Set;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.database.BaseDatabaseMeta;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.database.DatabaseMetaPlugin;
 import org.apache.hop.core.database.IDatabase;
+import org.apache.hop.core.encryption.Encr;
+import org.apache.hop.core.gui.plugin.GuiElementType;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
+import org.apache.hop.core.gui.plugin.GuiWidgetElement;
+import org.apache.hop.core.logging.ILogChannel;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.HopMetadataProperty;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.ui.core.gui.GuiCompositeWidgets;
+import org.apache.hop.ui.core.gui.IGuiPluginCompositeWidgetsListener;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Control;
 
 /**
  * Hop connection type for the thin hop-hsm JDBC driver (free SQL against Hop Server source model
@@ -46,7 +62,8 @@ import org.apache.hop.core.util.Utils;
     documentationUrl =
         "https://github.com/ProjectDataHopper/hopper-edw/blob/main/hop-hsm-jdbc/README.md")
 @GuiPlugin(id = "GUI-HopSourceModelDatabaseMeta")
-public class HopSourceModelDatabaseMeta extends BaseDatabaseMeta implements IDatabase {
+public class HopSourceModelDatabaseMeta extends BaseDatabaseMeta
+    implements IDatabase, IGuiPluginCompositeWidgetsListener {
 
   /** Common Hop Server listen port used in tutorials and hop-server defaults. */
   public static final int DEFAULT_PORT = 8080;
@@ -54,6 +71,112 @@ public class HopSourceModelDatabaseMeta extends BaseDatabaseMeta implements IDat
   public static final String DRIVER_CLASS = "org.hopper.edw.hsm.jdbc.HopHsmJdbcDriver";
 
   public static final String JDBC_PREFIX = "jdbc:hop-hsm://";
+
+  public static final String ID_AUTHENTICATION_TYPE = "authenticationType";
+  public static final String ID_OAUTH_TOKEN_URL = "oauthTokenUrl";
+  public static final String ID_OAUTH_GRANT = "oauthGrant";
+  public static final String ID_OAUTH_CLIENT_ID = "oauthClientId";
+  public static final String ID_OAUTH_CLIENT_SECRET = "oauthClientSecret";
+  public static final String ID_OAUTH_SCOPE = "oauthScope";
+  public static final String ID_OAUTH_REFRESH_TOKEN = "oauthRefreshToken";
+
+  public static final String PROP_AUTH_TYPE = "authType";
+  public static final String PROP_OAUTH_TOKEN_URL = "oauthTokenUrl";
+  public static final String PROP_OAUTH_GRANT = "oauthGrant";
+  public static final String PROP_OAUTH_CLIENT_ID = "oauthClientId";
+  public static final String PROP_OAUTH_CLIENT_SECRET = "oauthClientSecret";
+  public static final String PROP_OAUTH_SCOPE = "oauthScope";
+  public static final String PROP_OAUTH_REFRESH_TOKEN = "oauthRefreshToken";
+
+  @Getter
+  @Setter
+  @GuiWidgetElement(
+      id = ID_AUTHENTICATION_TYPE,
+      order = "10",
+      parentId = DatabaseMeta.GUI_PLUGIN_ELEMENT_PARENT_ID,
+      type = GuiElementType.COMBO,
+      variables = false,
+      comboValuesMethod = "getAuthenticationTypeNames",
+      label = "i18n::HopSourceModelDatabaseMeta.label.AuthenticationType",
+      toolTip = "i18n::HopSourceModelDatabaseMeta.tooltip.AuthenticationType")
+  @HopMetadataProperty(enumNameWhenNotFound = "BASIC")
+  private HopHsmAuthType authenticationType = HopHsmAuthType.BASIC;
+
+  @Getter
+  @Setter
+  @GuiWidgetElement(
+      id = ID_OAUTH_TOKEN_URL,
+      order = "20",
+      parentId = DatabaseMeta.GUI_PLUGIN_ELEMENT_PARENT_ID,
+      type = GuiElementType.TEXT,
+      label = "i18n::HopSourceModelDatabaseMeta.label.OauthTokenUrl",
+      toolTip = "i18n::HopSourceModelDatabaseMeta.tooltip.OauthTokenUrl")
+  @HopMetadataProperty
+  private String oauthTokenUrl;
+
+  @Getter
+  @Setter
+  @GuiWidgetElement(
+      id = ID_OAUTH_GRANT,
+      order = "30",
+      parentId = DatabaseMeta.GUI_PLUGIN_ELEMENT_PARENT_ID,
+      type = GuiElementType.COMBO,
+      variables = false,
+      comboValuesMethod = "getOauthGrantNames",
+      label = "i18n::HopSourceModelDatabaseMeta.label.OauthGrant",
+      toolTip = "i18n::HopSourceModelDatabaseMeta.tooltip.OauthGrant")
+  @HopMetadataProperty
+  private String oauthGrant = "client_credentials";
+
+  @Getter
+  @Setter
+  @GuiWidgetElement(
+      id = ID_OAUTH_CLIENT_ID,
+      order = "40",
+      parentId = DatabaseMeta.GUI_PLUGIN_ELEMENT_PARENT_ID,
+      type = GuiElementType.TEXT,
+      label = "i18n::HopSourceModelDatabaseMeta.label.OauthClientId",
+      toolTip = "i18n::HopSourceModelDatabaseMeta.tooltip.OauthClientId")
+  @HopMetadataProperty
+  private String oauthClientId;
+
+  @Getter
+  @Setter
+  @GuiWidgetElement(
+      id = ID_OAUTH_CLIENT_SECRET,
+      order = "50",
+      parentId = DatabaseMeta.GUI_PLUGIN_ELEMENT_PARENT_ID,
+      type = GuiElementType.TEXT,
+      password = true,
+      label = "i18n::HopSourceModelDatabaseMeta.label.OauthClientSecret",
+      toolTip = "i18n::HopSourceModelDatabaseMeta.tooltip.OauthClientSecret")
+  @HopMetadataProperty(password = true)
+  private String oauthClientSecret;
+
+  @Getter
+  @Setter
+  @GuiWidgetElement(
+      id = ID_OAUTH_SCOPE,
+      order = "60",
+      parentId = DatabaseMeta.GUI_PLUGIN_ELEMENT_PARENT_ID,
+      type = GuiElementType.TEXT,
+      label = "i18n::HopSourceModelDatabaseMeta.label.OauthScope",
+      toolTip = "i18n::HopSourceModelDatabaseMeta.tooltip.OauthScope")
+  @HopMetadataProperty
+  private String oauthScope;
+
+  @Getter
+  @Setter
+  @GuiWidgetElement(
+      id = ID_OAUTH_REFRESH_TOKEN,
+      order = "70",
+      parentId = DatabaseMeta.GUI_PLUGIN_ELEMENT_PARENT_ID,
+      type = GuiElementType.TEXT,
+      password = true,
+      label = "i18n::HopSourceModelDatabaseMeta.label.OauthRefreshToken",
+      toolTip = "i18n::HopSourceModelDatabaseMeta.tooltip.OauthRefreshToken")
+  @HopMetadataProperty(password = true)
+  private String oauthRefreshToken;
 
   @Override
   public int[] getAccessTypeList() {
@@ -85,6 +208,108 @@ public class HopSourceModelDatabaseMeta extends BaseDatabaseMeta implements IDat
       url.append('/').append(databaseName);
     }
     return url.toString();
+  }
+
+  /**
+   * Auth settings go in JDBC properties, not the URL: tokens are large and would leak in logs and
+   * the connection string shown on the dialog.
+   */
+  @Override
+  public Properties getConnectionProperties(IVariables variables) {
+    Properties properties = new Properties();
+    HopHsmAuthType type = authenticationType != null ? authenticationType : HopHsmAuthType.BASIC;
+    properties.put(PROP_AUTH_TYPE, type.jdbcValue());
+    if (type.isOauth2()) {
+      putIfFilled(properties, PROP_OAUTH_TOKEN_URL, resolve(variables, oauthTokenUrl));
+      putIfFilled(
+          properties,
+          PROP_OAUTH_GRANT,
+          resolve(variables, Utils.isEmpty(oauthGrant) ? "client_credentials" : oauthGrant));
+      putIfFilled(properties, PROP_OAUTH_CLIENT_ID, resolve(variables, oauthClientId));
+      putIfFilled(properties, PROP_OAUTH_CLIENT_SECRET, decrypt(variables, oauthClientSecret));
+      putIfFilled(properties, PROP_OAUTH_SCOPE, resolve(variables, oauthScope));
+      putIfFilled(properties, PROP_OAUTH_REFRESH_TOKEN, decrypt(variables, oauthRefreshToken));
+    }
+    return properties;
+  }
+
+  public String[] getAuthenticationTypeNames(
+      ILogChannel log, IHopMetadataProvider metadataProvider) {
+    return new String[] {
+      HopHsmAuthType.BASIC.name(), HopHsmAuthType.BEARER.name(), HopHsmAuthType.OAUTH2.name()
+    };
+  }
+
+  public String[] getOauthGrantNames(ILogChannel log, IHopMetadataProvider metadataProvider) {
+    return new String[] {"client_credentials", "refresh_token"};
+  }
+
+  @Override
+  public void widgetsCreated(GuiCompositeWidgets compositeWidgets) {
+    // Values are not set yet.
+  }
+
+  @Override
+  public void widgetsPopulated(GuiCompositeWidgets compositeWidgets) {
+    hideFieldsThatDoNotApply(compositeWidgets);
+  }
+
+  @Override
+  public void widgetModified(
+      GuiCompositeWidgets compositeWidgets, Control changedWidget, String widgetId) {
+    hideFieldsThatDoNotApply(compositeWidgets);
+  }
+
+  @Override
+  public void persistContents(GuiCompositeWidgets compositeWidgets) {
+    // Dialog reads widgets back itself.
+  }
+
+  private void hideFieldsThatDoNotApply(GuiCompositeWidgets compositeWidgets) {
+    HopHsmAuthType type = readAuthenticationType(compositeWidgets);
+    Set<String> hidden = new HashSet<>();
+    if (!type.isOauth2()) {
+      hidden.add(ID_OAUTH_TOKEN_URL);
+      hidden.add(ID_OAUTH_GRANT);
+      hidden.add(ID_OAUTH_CLIENT_ID);
+      hidden.add(ID_OAUTH_CLIENT_SECRET);
+      hidden.add(ID_OAUTH_SCOPE);
+      hidden.add(ID_OAUTH_REFRESH_TOKEN);
+    }
+    compositeWidgets.setWidgetsHidden(this, hidden);
+  }
+
+  private HopHsmAuthType readAuthenticationType(GuiCompositeWidgets compositeWidgets) {
+    Control control = compositeWidgets.getWidgetsMap().get(ID_AUTHENTICATION_TYPE);
+    if (control instanceof Combo combo) {
+      try {
+        return HopHsmAuthType.valueOf(combo.getText());
+      } catch (IllegalArgumentException e) {
+        // nothing selected yet
+      }
+    }
+    return authenticationType != null ? authenticationType : HopHsmAuthType.BASIC;
+  }
+
+  private void putIfFilled(Properties properties, String name, String value) {
+    if (!Utils.isEmpty(value)) {
+      properties.put(name, value.trim());
+    }
+  }
+
+  private String resolve(IVariables variables, String value) {
+    if (Utils.isEmpty(value)) {
+      return value;
+    }
+    return variables != null ? variables.resolve(value) : value;
+  }
+
+  private String decrypt(IVariables variables, String password) {
+    if (Utils.isEmpty(password)) {
+      return password;
+    }
+    String resolved = resolve(variables, password);
+    return Encr.decryptPasswordOptionallyEncrypted(resolved);
   }
 
   @Override

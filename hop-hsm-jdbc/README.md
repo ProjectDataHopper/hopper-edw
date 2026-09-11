@@ -31,9 +31,20 @@ With the **Data Hopper EDW** plugin installed, create a relational connection of
 | Host name | Hop Server host |
 | Port | Hop Server HTTP port (default **8080**) |
 | Database name | Optional default **Source model service** (JDBC schema) |
-| Username / password | Hop Server credentials |
+| Username / password | Basic credentials, or Bearer token in the password field |
+| Authentication | Basic, Bearer, or OAuth 2 (see below) |
 
-JDBC URL shape: `jdbc:hop-hsm://{host}:{port}/{service}`. Extra options use `?` / `&` (e.g. `rowLimit`, `connectTimeout`, `readTimeout`). The driver jar is bundled under `plugins/misc/hopper-edw/lib/`.
+JDBC URL shape: `jdbc:hop-hsm://{host}:{port}/{service}`. Extra options use `?` / `&` (e.g. `authType`, `rowLimit`, `connectTimeout`, `readTimeout`). Tokens and client secrets belong in JDBC **properties**, not the URL. The driver jar is bundled under `plugins/misc/hopper-edw/lib/`.
+
+### Authentication
+
+| `authType` | `Authorization` header | When to use |
+|------------|------------------------|-------------|
+| `basic` (default) | `Basic` | Standalone Hop Server; Hop Web mode BASIC |
+| `bearer` | `Bearer <token>` | Hop Web mode OAUTH2. Password or `accessToken` is the token (Hop **Copy JDBC token**, or an IdP JWT) |
+| `oauth2` | Driver fetches a token, then `Bearer` | IdPs that support `client_credentials` or `refresh_token` (Keycloak, Entra). **Not Google OIDC.** |
+
+OAuth2 extra properties: `oauthTokenUrl`, `oauthGrant` (`client_credentials` default, or `refresh_token`), `oauthClientId`, `oauthClientSecret`, `oauthScope`, `oauthRefreshToken`.
 
 ## DBeaver setup
 
@@ -99,6 +110,7 @@ jdbc:hop-hsm://user:pass@hop-server:8182
 jdbc:hop-hsm://user:pass@hop-server:8182/crm
 jdbc:hop-hsm://user:pass@hop-server:8182?schema=crm
 jdbc:hop-hsm:https://user:pass@host:8443?schema=crm&rowLimit=5000
+jdbc:hop-hsm://host:8080/crm?authType=bearer
 ```
 
 DBeaver Driver Manager template:
@@ -109,7 +121,8 @@ jdbc:hop-hsm://{username}:{password}@{host}:{port}/{database}
 
 | Part | Meaning |
 |------|---------|
-| `user:pass@` | Hop Server basic auth |
+| `user:pass@` | Basic auth (avoid putting Bearer tokens here) |
+| `authType` | `basic` (default), `bearer`, or `oauth2` |
 | `host:port` | Hop Server |
 | `/{database}` or `?schema=` | Default **schema** = Source model service name |
 | Servlet path | Defaults to `/hop/sourceModelData` |

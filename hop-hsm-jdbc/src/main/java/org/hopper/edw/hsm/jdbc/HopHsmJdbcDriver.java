@@ -41,7 +41,10 @@ import java.util.logging.Logger;
  * </ul>
  *
  * <p>Properties: {@code user}, {@code password}, {@code schema} (or legacy {@code modelName}),
- * {@code rowLimit}, {@code connectTimeout}, {@code readTimeout} (ms).
+ * {@code rowLimit}, {@code connectTimeout}, {@code readTimeout} (ms), {@code authType} ({@code
+ * basic}|{@code bearer}|{@code oauth2}), {@code accessToken}, {@code oauthTokenUrl}, {@code
+ * oauthGrant}, {@code oauthClientId}, {@code oauthClientSecret}, {@code oauthScope}, {@code
+ * oauthRefreshToken}.
  */
 public class HopHsmJdbcDriver implements Driver {
 
@@ -59,13 +62,7 @@ public class HopHsmJdbcDriver implements Driver {
       return null;
     }
     ParsedUrl parsed = parse(url, info != null ? info : new Properties());
-    HsmHttpClient http =
-        new HsmHttpClient(
-            parsed.endpointUrl(),
-            parsed.user(),
-            parsed.password(),
-            parsed.connectTimeoutMs(),
-            parsed.readTimeoutMs());
+    HsmHttpClient http = new HsmHttpClient(parsed);
     http.ping();
     return new HopHsmJdbcConnection(http, parsed);
   }
@@ -88,8 +85,16 @@ public class HopHsmJdbcDriver implements Driver {
     return new DriverPropertyInfo[] {
       prop("schema", "Default Source model service name (JDBC schema)", false),
       prop("modelName", "Alias for schema (legacy)", false),
-      prop("user", "Hop Server username", false),
-      prop("password", "Hop Server password", false),
+      prop("user", "Hop Server username (Basic) or OAuth2 client id", false),
+      prop("password", "Hop Server password, Bearer token, or OAuth2 client secret", false),
+      prop("authType", "basic (default), bearer, or oauth2", false),
+      prop("accessToken", "Bearer token (preferred over password for bearer)", false),
+      prop("oauthTokenUrl", "OAuth2 token endpoint URL", false),
+      prop("oauthGrant", "client_credentials (default) or refresh_token", false),
+      prop("oauthClientId", "OAuth2 client id", false),
+      prop("oauthClientSecret", "OAuth2 client secret", false),
+      prop("oauthScope", "OAuth2 scope", false),
+      prop("oauthRefreshToken", "OAuth2 refresh token (refresh_token grant)", false),
       prop("rowLimit", "Default max rows per query", false),
       prop("connectTimeout", "HTTP connect timeout ms", false),
       prop("readTimeout", "HTTP read timeout ms", false),
@@ -128,6 +133,15 @@ public class HopHsmJdbcDriver implements Driver {
       String defaultSchema,
       String user,
       String password,
+      HsmAuthType authType,
+      String accessToken,
+      String oauthTokenUrl,
+      String oauthGrant,
+      String oauthClientId,
+      String oauthClientSecret,
+      String oauthScope,
+      String oauthRefreshToken,
+      boolean oauthCredentialsInBody,
       int rowLimit,
       int connectTimeoutMs,
       int readTimeoutMs) {}
@@ -230,9 +244,41 @@ public class HopHsmJdbcDriver implements Driver {
     int readTimeout =
         parseInt(first(info.getProperty("readTimeout"), qp.get("readTimeout")), 300_000);
 
+    HsmAuthType authType =
+        HsmAuthType.parse(first(info.getProperty("authType"), qp.get("authType")));
+    String accessToken = first(info.getProperty("accessToken"), qp.get("accessToken"));
+    String oauthTokenUrl = first(info.getProperty("oauthTokenUrl"), qp.get("oauthTokenUrl"));
+    String oauthGrant =
+        first(first(info.getProperty("oauthGrant"), qp.get("oauthGrant")), "client_credentials");
+    String oauthClientId = first(info.getProperty("oauthClientId"), qp.get("oauthClientId"));
+    String oauthClientSecret =
+        first(info.getProperty("oauthClientSecret"), qp.get("oauthClientSecret"));
+    String oauthScope = first(info.getProperty("oauthScope"), qp.get("oauthScope"));
+    String oauthRefreshToken =
+        first(info.getProperty("oauthRefreshToken"), qp.get("oauthRefreshToken"));
+    boolean oauthCredentialsInBody =
+        parseBool(
+            first(info.getProperty("oauthCredentialsInBody"), qp.get("oauthCredentialsInBody")),
+            false);
+
     String endpoint = scheme + "://" + hostPort + servletPath;
     return new ParsedUrl(
-        endpoint, defaultSchema, user, password, rowLimit, connectTimeout, readTimeout);
+        endpoint,
+        defaultSchema,
+        user,
+        password,
+        authType,
+        accessToken,
+        oauthTokenUrl,
+        oauthGrant,
+        oauthClientId,
+        oauthClientSecret,
+        oauthScope,
+        oauthRefreshToken,
+        oauthCredentialsInBody,
+        rowLimit,
+        connectTimeout,
+        readTimeout);
   }
 
   private static Map<String, String> parseQuery(String query) {
@@ -275,5 +321,12 @@ public class HopHsmJdbcDriver implements Driver {
     } catch (NumberFormatException e) {
       return def;
     }
+  }
+
+  private static boolean parseBool(String text, boolean def) {
+    if (isEmpty(text)) {
+      return def;
+    }
+    return "true".equalsIgnoreCase(text.trim()) || "Y".equalsIgnoreCase(text.trim());
   }
 }
