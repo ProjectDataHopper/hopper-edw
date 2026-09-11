@@ -34,6 +34,8 @@ import org.hopper.core.HFact;
 import org.hopper.core.HHorizontalAlignment;
 import org.hopper.core.HVerticalAlignment;
 import org.hopper.presentation.component.types.chart.HLineChartComponent;
+import org.hopper.presentation.simple.HSimplePresentation;
+import org.hopper.presentation.swt.HPresentationZoom;
 import org.junit.jupiter.api.Test;
 
 class ResultsPaneGuiTabTest {
@@ -73,6 +75,15 @@ class ResultsPaneGuiTabTest {
     assertTrue(chart.isShowingLegend());
     assertEquals("RIGHT", chart.getLegendPosition());
     assertEquals("###,###,##0", chart.getFacts().get(0).getFormatMask());
+  }
+
+  @Test
+  void ganttPageHeightFillsViewportUnderFitWidth() {
+    int minPageH = HSimplePresentation.ganttPixelHeight(4) + 32;
+    int pageH = WorkflowGanttResultsTab.pageHeightForViewport(960, minPageH, 1208, 408);
+    assertTrue(pageH >= minPageH);
+    float zoom = HPresentationZoom.compute(HPresentationZoom.WIDTH, 1208, 408, 960, pageH, 1f);
+    assertEquals(408 - HPresentationZoom.MARGIN, Math.round(zoom * pageH));
   }
 
   @Test

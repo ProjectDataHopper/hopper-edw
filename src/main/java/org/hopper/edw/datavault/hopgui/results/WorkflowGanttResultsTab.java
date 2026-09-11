@@ -30,6 +30,9 @@ import org.apache.hop.workflow.engine.IWorkflowEngine;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
@@ -102,6 +105,13 @@ public class WorkflowGanttResultsTab {
       fdViewer.right = new FormAttachment(100, 0);
       fdViewer.bottom = new FormAttachment(100, 0);
       viewer.setLayoutData(fdViewer);
+      viewer.addControlListener(
+          new ControlAdapter() {
+            @Override
+            public void controlResized(ControlEvent e) {
+              refreshChart();
+            }
+          });
     } catch (Exception e) {
       Label error = new Label(composite, SWT.WRAP);
       PropsUi.setLook(error);
@@ -126,7 +136,15 @@ public class WorkflowGanttResultsTab {
     WorkflowTracker<?> tracker = workflow != null ? workflow.getWorkflowTracker() : null;
     List<GanttTask> tasks = WorkflowGanttTasks.from(tracker, System.currentTimeMillis());
     int rows = tasks.isEmpty() ? Math.max(1, actionCount()) : tasks.size();
-    String fingerprint = rows + ":" + WorkflowGanttTasks.fingerprint(tasks);
+    Rectangle vp = viewer.getViewportBounds();
+    String fingerprint =
+        rows
+            + ":"
+            + vp.width
+            + "x"
+            + vp.height
+            + ":"
+            + WorkflowGanttTasks.fingerprint(tasks);
     if (fingerprint.equals(lastFingerprint)) {
       return;
     }
@@ -145,7 +163,10 @@ public class WorkflowGanttResultsTab {
     return meta != null ? Math.max(0, meta.nrActions()) : 0;
   }
 
-  /** Page height follows the known action count (fixed row pitch), not the window size. */
+  /**
+   * Page height fills the results pane under fit-width zoom, never shorter than the action-row
+   * pitch.
+   */
   private void applyRowCount(int rows) {
     if (catalog == null || catalog.getPresentation() == null) {
       return;
@@ -154,15 +175,23 @@ public class WorkflowGanttResultsTab {
         || catalog.getPresentation().getPages().isEmpty()) {
       return;
     }
-    int tileH = HSimplePresentation.ganttPixelHeight(rows);
-    int pageH = tileH + 32;
     HPage page = catalog.getPresentation().getPages().get(0);
+    int minTile = HSimplePresentation.ganttPixelHeight(rows);
+    int minPageH = minTile + 32;
+    Rectangle vp =
+        viewer != null && !viewer.isDisposed() ? viewer.getViewportBounds() : new Rectangle(0, 0, 0, 0);
+    int pageH = pageHeightForViewport(page.getWidth(), minPageH, vp.width, vp.height);
+    int tileH = Math.max(minTile, pageH - 32);
     page.setHeight(pageH);
     if (page.getComponents() != null && !page.getComponents().isEmpty()) {
       HComponent component = page.getComponents().get(0);
       component.setLayout(
           new HLayoutBuilder().left(16).right(-16).top(16).bottomFromTop(0, 16 + tileH).build());
     }
+  }
+
+  static int pageHeightForViewport(int pageW, int minPageH, int viewportW, int viewportH) {
+    return HPresentationZoom.pageHeightToFillWidth(pageW, minPageH, viewportW, viewportH);
   }
 
   private static HGeneratedCatalog buildCatalog(List<GanttTask> tasks, int reservedRows)
