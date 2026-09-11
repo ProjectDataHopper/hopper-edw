@@ -378,7 +378,10 @@ public class HopHsmJdbcDatabaseMetaData implements DatabaseMetaData {
 
   @Override
   public boolean supportsSchemasInTableDefinitions() {
-    return false;
+    // Hop's Database perspective only calls getSchemas()/getTables(schema) when this is true.
+    // If false, it flattens names to "crm.customer_address" and then quoteField wraps the dot:
+    // SELECT * FROM "crm.customer_address" — invalid. true → crm.customer_address.
+    return true;
   }
 
   @Override

@@ -23,9 +23,12 @@ import org.apache.hop.core.extension.ExtensionPoint;
 import org.apache.hop.core.extension.ExtensionPointPluginType;
 import org.apache.hop.core.extension.IExtensionPoint;
 import org.apache.hop.core.logging.ILogChannel;
+import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.plugins.IPlugin;
 import org.apache.hop.core.plugins.PluginRegistry;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.metadata.api.IHopMetadata;
+import org.apache.hop.metadata.plugin.MetadataPluginType;
 import org.hopper.core.HEnvironment;
 
 /**
@@ -55,13 +58,56 @@ public class RegisterHopperPresentationExtensionPoint implements IExtensionPoint
     URL pluginUrl = thisPlugin != null ? thisPlugin.getPluginDirectory() : null;
 
     try {
-      HEnvironment.initEmbed(classLoader, libraries, pluginUrl);
+      initEmbedPreservingEdwMetadata(classLoader, libraries, pluginUrl);
     } catch (Exception e) {
       throw new HopException("Unable to register Hopper presentation plugins", e);
     }
 
     if (log != null) {
       log.logBasic("Hopper presentation engine plugins registered");
+    }
+  }
+
+  /**
+   * {@code HEnvironment.initEmbed} unregisters every {@code org.hopper.*} metadata type so
+   * presentation-core types stay out of the Metadata perspective. That prefix also matches {@code
+   * org.hopper.edw.*} (source-model-service and the other EDW types). Snapshot and put them back.
+   */
+  public static void initEmbedPreservingEdwMetadata(
+      ClassLoader classLoader, List<String> libraries, URL pluginUrl) throws Exception {
+    PluginRegistry registry = PluginRegistry.getInstance();
+    List<IPlugin> edwMetadata = snapshotEdwMetadata(registry);
+    HEnvironment.initEmbed(classLoader, libraries, pluginUrl);
+    restoreEdwMetadata(registry, edwMetadata);
+  }
+
+  static List<IPlugin> snapshotEdwMetadata(PluginRegistry registry) {
+    List<IPlugin> edw = new ArrayList<>();
+    for (IPlugin plugin : registry.getPlugins(MetadataPluginType.class)) {
+      String className = plugin.getClassMap().get(IHopMetadata.class);
+      if (className != null && className.startsWith("org.hopper.edw.")) {
+        edw.add(plugin);
+      }
+    }
+    return edw;
+  }
+
+  static void restoreEdwMetadata(PluginRegistry registry, List<IPlugin> edwMetadata)
+      throws HopException {
+    int restored = 0;
+    for (IPlugin plugin : edwMetadata) {
+      String id = plugin.getIds() != null && plugin.getIds().length > 0 ? plugin.getIds()[0] : null;
+      if (id == null) {
+        continue;
+      }
+      if (registry.getPlugin(MetadataPluginType.class, id) == null) {
+        registry.registerPlugin(MetadataPluginType.class, plugin);
+        restored++;
+      }
+    }
+    if (restored > 0) {
+      LogChannel.GENERAL.logBasic(
+          "Restored " + restored + " hopper-edw metadata type(s) after presentation embed");
     }
   }
 }

@@ -122,6 +122,12 @@ public final class SourceModelSqlExecutor {
           }
         });
 
+    IRowMeta layout = null;
+    try {
+      layout = pipelineMeta.getTransformFields(variables, transformName);
+    } catch (Exception ignored) {
+      // Layout is optional when the pipeline produced rows.
+    }
     pipeline.startThreads();
     pipeline.waitUntilFinished();
     if (pipeline.getErrors() > 0) {
@@ -130,6 +136,9 @@ public final class SourceModelSqlExecutor {
               + pipeline.getErrors()
               + " error(s)."
               + logSnippet(pipeline));
+    }
+    if (rows.isEmpty() && layout != null && layout.size() > 0) {
+      rows.add(new RowMetaAndData(layout.clone(), null));
     }
     return rows;
   }

@@ -4,6 +4,19 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Hop Web source-model JDBC explorer
+
+- JDBC `DatabaseMetaData.supportsSchemasInTableDefinitions()` is true so Hop's Database perspective lists `crm` as a schema and `customer_address` as a table. Previously it flattened to `crm.customer_address` and quoted the whole identifier (`SELECT * FROM "crm.customer_address"`).
+- Table column lists in the Database perspective used `SELECT * FROM t LIMIT 0`, which produces no pipeline rows and therefore no field metadata (views still returned rows). Layout SQL now uses `LIMIT 1`, prepared-statement metadata is disabled (hop-hsm `getMetaData()` is null), and empty previews still serialize column metadata.
+- Apache Hop Source Model combo methods return `List<String>` so the connection dialog no longer ClassCasts on Authentication / OAuth grant.
+- `/hop/sourceModelData` loads the Hop Web project metadata folder (`PROJECT_HOME` / `HOP_PROJECT_FOLDER`) so table/view listing works; ping never needed that and Test Connection could succeed with an empty explorer.
+- Ignore Hop Server's default **empty** metadata provider (Hop Web). That was skipping the project folder, so explorer/query found no `source-model-service`.
+- Load `HOP_ENVIRONMENT_CONFIG_FILE_NAME_PATHS` (DB_HOST / DB_PORT / …) so SQL preview can open PostgreSQL instead of `jdbc:postgresql://${DB_HOST}:${DB_PORT}/…`.
+
+### Hopper presentation embed no longer drops EDW metadata
+
+- `HEnvironment.initEmbed` unregisters every `org.hopper.*` metadata type (so presentation types stay out of the Metadata perspective). That also removed hopper-edw types such as **source-model-service**. Embed now snapshots `org.hopper.edw.*` metadata and puts it back. Source model service is also registered on `HopEnvironmentAfterInit` like the other EDW types.
+
 ### Source model JDBC authentication (Hop Web)
 
 - Thin `jdbc:hop-hsm:` client supports **Basic**, **Bearer**, and **OAuth 2** (`client_credentials` / `refresh_token`). Tokens stay in JDBC properties, not the URL.

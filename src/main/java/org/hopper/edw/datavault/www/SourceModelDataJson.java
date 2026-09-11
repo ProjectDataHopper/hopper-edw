@@ -154,12 +154,16 @@ public final class SourceModelDataJson {
     }
     sb.append("],\"rows\":[");
     if (rows != null && meta != null) {
+      int written = 0;
       for (int r = 0; r < rows.size(); r++) {
-        if (r > 0) {
-          sb.append(',');
-        }
         RowMetaAndData row = rows.get(r);
         Object[] data = row != null ? row.getData() : null;
+        if (data == null) {
+          continue;
+        }
+        if (written++ > 0) {
+          sb.append(',');
+        }
         sb.append('[');
         for (int c = 0; c < meta.size(); c++) {
           if (c > 0) {

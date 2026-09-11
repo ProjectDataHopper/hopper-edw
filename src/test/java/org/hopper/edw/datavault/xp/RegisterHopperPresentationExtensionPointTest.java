@@ -47,5 +47,8 @@ class RegisterHopperPresentationExtensionPointTest {
     assertNull(
         registry.getPlugin(MetadataPluginType.class, "presentation"),
         "Presentation types must not appear in the Metadata perspective");
+    assertNotNull(
+        registry.getPlugin(MetadataPluginType.class, "source-model-service"),
+        "hopper-edw metadata (source-model-service) must survive presentation embed");
   }
 }

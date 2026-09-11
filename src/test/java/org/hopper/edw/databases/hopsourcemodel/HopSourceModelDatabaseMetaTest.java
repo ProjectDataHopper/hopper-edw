@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.encryption.Encr;
 import org.apache.hop.core.row.value.ValueMetaString;
@@ -59,6 +60,8 @@ class HopSourceModelDatabaseMetaTest {
     assertEquals(" LIMIT 5", meta.getLimitClause(5));
     assertEquals("\"", meta.getStartQuote());
     assertEquals("\"", meta.getEndQuote());
+    assertEquals(
+        "crm.customer_address", meta.getSchemaTableCombination("crm", "customer_address"));
   }
 
   @Test
@@ -102,6 +105,13 @@ class HopSourceModelDatabaseMetaTest {
   }
 
   @Test
+  void comboValueMethodsReturnListsForGuiCompositeWidgets() {
+    assertEquals(
+        List.of("BASIC", "BEARER", "OAUTH2"), meta.getAuthenticationTypeNames(null, null));
+    assertEquals(List.of("client_credentials", "refresh_token"), meta.getOauthGrantNames(null, null));
+  }
+
+  @Test
   void ddlNotSupported() {
     ValueMetaString col = new ValueMetaString("x");
     assertNull(meta.getAddColumnStatement("t", col, null, false, null, false));
@@ -111,8 +121,9 @@ class HopSourceModelDatabaseMetaTest {
 
   @Test
   void fieldExploreSql() {
-    assertEquals("SELECT * FROM sat_order LIMIT 0", meta.getSqlQueryFields("sat_order"));
+    assertEquals("SELECT * FROM sat_order LIMIT 1", meta.getSqlQueryFields("sat_order"));
     assertEquals(
-        "SELECT order_id FROM sat_order LIMIT 0", meta.getSqlColumnExists("order_id", "sat_order"));
+        "SELECT order_id FROM sat_order LIMIT 1", meta.getSqlColumnExists("order_id", "sat_order"));
+    assertFalse(meta.isSupportsPreparedStatementMetadataRetrieval());
   }
 }

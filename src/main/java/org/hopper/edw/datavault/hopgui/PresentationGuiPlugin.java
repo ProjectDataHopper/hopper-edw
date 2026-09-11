@@ -38,6 +38,7 @@ import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Shell;
 import org.hopper.core.HEnvironment;
+import org.hopper.edw.datavault.xp.RegisterHopperPresentationExtensionPoint;
 import org.hopper.edw.datavault.presentation.EdwPresentationDashboards;
 import org.hopper.presentation.simple.HGeneratedCatalog;
 import org.hopper.presentation.swt.HPresentationChrome;
@@ -153,7 +154,8 @@ public class PresentationGuiPlugin {
         List<String> libraries =
             thisPlugin != null ? new ArrayList<>(thisPlugin.getLibraries()) : new ArrayList<>();
         URL pluginUrl = thisPlugin != null ? thisPlugin.getPluginDirectory() : null;
-        HEnvironment.initEmbed(PresentationGuiPlugin.class.getClassLoader(), libraries, pluginUrl);
+        RegisterHopperPresentationExtensionPoint.initEmbedPreservingEdwMetadata(
+            PresentationGuiPlugin.class.getClassLoader(), libraries, pluginUrl);
         environmentInitialized = true;
       }
     }

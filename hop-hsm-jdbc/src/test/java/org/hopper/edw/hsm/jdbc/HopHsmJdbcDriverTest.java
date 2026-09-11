@@ -145,4 +145,11 @@ class HopHsmJdbcDriverTest {
     assertEquals("VIEW", HopHsmJdbcDatabaseMetaData.normalizeTableType("PIPELINE"));
     assertEquals("TABLE", HopHsmJdbcDatabaseMetaData.normalizeTableType("TABLE"));
   }
+
+  @Test
+  void advertisesSchemasSoHopExplorerDoesNotQuoteSchemaDotTableAsOneIdentifier() {
+    HopHsmJdbcDatabaseMetaData md = new HopHsmJdbcDatabaseMetaData(null);
+    assertTrue(md.supportsSchemasInDataManipulation());
+    assertTrue(md.supportsSchemasInTableDefinitions());
+  }
 }

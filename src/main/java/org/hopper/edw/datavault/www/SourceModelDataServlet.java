@@ -26,18 +26,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hop.core.Const;
 import org.apache.hop.core.RowMetaAndData;
 import org.apache.hop.core.annotations.HopServerServlet;
+import org.apache.hop.core.config.DescribedVariablesConfigFile;
 import org.apache.hop.core.encryption.Encr;
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.core.variables.DescribedVariable;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.core.variables.Variables;
 import org.apache.hop.metadata.api.IHopMetadataSerializer;
 import org.apache.hop.metadata.serializer.json.JsonMetadataProvider;
 import org.apache.hop.metadata.serializer.multi.MultiMetadataProvider;
 import org.apache.hop.metadata.util.HopMetadataUtil;
 import org.apache.hop.www.BaseHttpServlet;
+import org.apache.hop.www.HopServerConfig;
 import org.apache.hop.www.IHopServerPlugin;
 import org.apache.hop.www.PipelineMap;
 import org.apache.hop.www.WorkflowMap;
@@ -139,7 +145,7 @@ public class SourceModelDataServlet extends BaseHttpServlet implements IHopServe
     response.setContentType(SourceModelDataProtocol.CONTENT_TYPE_JSON);
 
     try {
-      IVariables variables = pipelineMap.getHopServerConfig().getVariables();
+      IVariables variables = resolveServerVariables();
       MultiMetadataProvider metadataProvider = buildMetadataProvider(variables);
       IHopMetadataSerializer<SourceModelService> serializer =
           metadataProvider.getSerializer(SourceModelService.class);
@@ -185,13 +191,12 @@ public class SourceModelDataServlet extends BaseHttpServlet implements IHopServe
 
       SourceModelService service = loadService(serializer, schemaName);
       if (service == null) {
-        writeJson(
-            response,
-            HttpServletResponse.SC_NOT_FOUND,
-            SourceModelDataJson.error(
-                "Source model service (schema) '"
-                    + schemaName
-                    + "' not found. Create metadata type 'Source model service' on the Hop Server project."));
+        String message =
+            "Source model service (schema) '"
+                + schemaName
+                + "' not found. Create metadata type 'Source model service' on the Hop Server project.";
+        logError(message);
+        writeJson(response, HttpServletResponse.SC_NOT_FOUND, SourceModelDataJson.error(message));
         return;
       }
       String err = validateService(service, schemaName);
@@ -393,17 +398,110 @@ public class SourceModelDataServlet extends BaseHttpServlet implements IHopServe
     return firstNonEmpty(request.getParameter(SourceModelDataProtocol.PARAM_MODEL_NAME));
   }
 
-  private MultiMetadataProvider buildMetadataProvider(IVariables variables) {
+  /**
+   * Hop Web's embedded Hop Server config does not enable the GUI project. JDBC {@code ping} does
+   * not need metadata; {@code tables}/{@code query} need the project {@code metadata/} folder and
+   * {@code PROJECT_HOME} (model paths like {@code ${PROJECT_HOME}/models/...}).
+   */
+  IVariables resolveServerVariables() {
+    Variables variables = new Variables();
+    HopServerConfig config = pipelineMap != null ? pipelineMap.getHopServerConfig() : null;
+    if (config != null && config.getVariables() != null) {
+      variables.initializeFrom(config.getVariables());
+    }
+    copyEnvIfUnset(variables, "HOP_PROJECT_FOLDER");
+    copyEnvIfUnset(variables, "HOP_ENVIRONMENT_CONFIG_FILE_NAME_PATHS");
+    if (Utils.isEmpty(variables.getVariable("PROJECT_HOME"))) {
+      String projectHome = firstNonEmpty(variables.getVariable("HOP_PROJECT_FOLDER"));
+      if (!Utils.isEmpty(projectHome)) {
+        variables.setVariable("PROJECT_HOME", projectHome);
+      }
+    }
+    applyEnvironmentConfigFiles(variables);
+    return variables;
+  }
+
+  static void copyEnvIfUnset(IVariables variables, String name) {
+    if (variables == null || Utils.isEmpty(name) || !Utils.isEmpty(variables.getVariable(name))) {
+      return;
+    }
+    String value = firstNonEmpty(System.getenv(name));
+    if (!Utils.isEmpty(value)) {
+      variables.setVariable(name, value);
+    }
+  }
+
+  /** Load Hop environment JSON (DB_HOST, DB_PORT, …) so Table Input JDBC URLs resolve. */
+  static void applyEnvironmentConfigFiles(IVariables variables) {
+    if (variables == null) {
+      return;
+    }
+    String paths = firstNonEmpty(variables.getVariable("HOP_ENVIRONMENT_CONFIG_FILE_NAME_PATHS"));
+    if (Utils.isEmpty(paths)) {
+      return;
+    }
+    for (String path : paths.split(",")) {
+      path = path.trim();
+      if (path.isEmpty()) {
+        continue;
+      }
+      try {
+        DescribedVariablesConfigFile file = new DescribedVariablesConfigFile(path);
+        file.readFromFile();
+        for (DescribedVariable described : file.getDescribedVariables()) {
+          if (described == null || Utils.isEmpty(described.getName())) {
+            continue;
+          }
+          if (Utils.isEmpty(variables.getVariable(described.getName()))) {
+            variables.setVariable(described.getName(), Const.NVL(described.getValue(), ""));
+          }
+        }
+      } catch (Exception e) {
+        LogChannel.GENERAL.logError("Unable to load environment config '" + path + "'", e);
+      }
+    }
+  }
+
+  MultiMetadataProvider buildMetadataProvider(IVariables variables) {
+    HopServerConfig config = pipelineMap != null ? pipelineMap.getHopServerConfig() : null;
+    // HopServerConfig() seeds an empty MultiMetadataProvider. That is not "configured" — using it
+    // skips the project metadata folder and JDBC tables/query find no source-model-service.
+    if (hasBackends(config != null ? config.getMetadataProvider() : null)) {
+      return config.getMetadataProvider();
+    }
     MultiMetadataProvider metadataProvider =
         new MultiMetadataProvider(Encr.getEncoder(), new ArrayList<>(), variables);
     metadataProvider.getProviders().add(HopMetadataUtil.getStandardHopMetadataProvider(variables));
-    String metadataFolder = pipelineMap.getHopServerConfig().getMetadataFolder();
+    String metadataFolder = config != null ? config.getMetadataFolder() : null;
+    if (StringUtils.isEmpty(metadataFolder)) {
+      metadataFolder = projectMetadataFolder(variables);
+    }
     if (StringUtils.isNotEmpty(metadataFolder)) {
       metadataProvider
           .getProviders()
           .add(new JsonMetadataProvider(Encr.getEncoder(), metadataFolder, variables));
     }
     return metadataProvider;
+  }
+
+  static boolean hasBackends(MultiMetadataProvider provider) {
+    return provider != null
+        && provider.getProviders() != null
+        && !provider.getProviders().isEmpty();
+  }
+
+  static String projectMetadataFolder(IVariables variables) {
+    String home = firstNonEmpty(variables != null ? variables.getVariable("PROJECT_HOME") : null);
+    if (Utils.isEmpty(home) && variables != null) {
+      home = firstNonEmpty(variables.getVariable("HOP_PROJECT_FOLDER"));
+    }
+    if (Utils.isEmpty(home)) {
+      home = firstNonEmpty(System.getenv("HOP_PROJECT_FOLDER"));
+    }
+    if (Utils.isEmpty(home)) {
+      return null;
+    }
+    return home.endsWith("/") ? home + "metadata" : home + "/metadata";
   }
 
   private static String resolveSql(HttpServletRequest request) throws IOException {

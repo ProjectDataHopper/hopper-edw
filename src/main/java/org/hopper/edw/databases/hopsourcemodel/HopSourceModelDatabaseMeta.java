@@ -16,6 +16,7 @@
 package org.hopper.edw.databases.hopsourcemodel;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import lombok.Getter;
@@ -233,15 +234,22 @@ public class HopSourceModelDatabaseMeta extends BaseDatabaseMeta
     return properties;
   }
 
-  public String[] getAuthenticationTypeNames(
+  /**
+   * Combo values for {@link #authenticationType}. Must return {@code List} — {@code
+   * GuiCompositeWidgets} casts the reflected result.
+   */
+  public List<String> getAuthenticationTypeNames(
       ILogChannel log, IHopMetadataProvider metadataProvider) {
-    return new String[] {
-      HopHsmAuthType.BASIC.name(), HopHsmAuthType.BEARER.name(), HopHsmAuthType.OAUTH2.name()
-    };
+    return List.of(
+        HopHsmAuthType.BASIC.name(), HopHsmAuthType.BEARER.name(), HopHsmAuthType.OAUTH2.name());
   }
 
-  public String[] getOauthGrantNames(ILogChannel log, IHopMetadataProvider metadataProvider) {
-    return new String[] {"client_credentials", "refresh_token"};
+  /**
+   * Combo values for {@link #oauthGrant}. Must return {@code List} — {@code GuiCompositeWidgets}
+   * casts the reflected result.
+   */
+  public List<String> getOauthGrantNames(ILogChannel log, IHopMetadataProvider metadataProvider) {
+    return List.of("client_credentials", "refresh_token");
   }
 
   @Override
@@ -441,8 +449,15 @@ public class HopSourceModelDatabaseMeta extends BaseDatabaseMeta
   }
 
   @Override
+  public boolean isSupportsPreparedStatementMetadataRetrieval() {
+    // hop-hsm PreparedStatement.getMetaData() is null; Hop would cache an empty layout.
+    return false;
+  }
+
+  @Override
   public String getSqlQueryFields(String tableName) {
-    return "SELECT * FROM " + tableName + " LIMIT 0";
+    // LIMIT 0 yields no pipeline rows, so query JSON has no column metadata for tables.
+    return "SELECT * FROM " + tableName + " LIMIT 1";
   }
 
   @Override
@@ -452,7 +467,7 @@ public class HopSourceModelDatabaseMeta extends BaseDatabaseMeta
 
   @Override
   public String getSqlColumnExists(String columnname, String tableName) {
-    return "SELECT " + columnname + " FROM " + tableName + " LIMIT 0";
+    return "SELECT " + columnname + " FROM " + tableName + " LIMIT 1";
   }
 
   @Override
