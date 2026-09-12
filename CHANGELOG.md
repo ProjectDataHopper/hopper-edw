@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Gantt / presentation SVG and PDF export (issue #174)
+
+- Saving a Gantt (or Performance) chart as PDF or SVG no longer writes `${PROJECT_HOME}` as a literal folder under Tomcat. Hop Web downloads the file in the browser. Desktop still uses the VFS save dialog, and the selected path is resolved before writing.
+
 ### Hop Web source-model JDBC explorer
 
 - JDBC `DatabaseMetaData.supportsSchemasInTableDefinitions()` is true so Hop's Database perspective lists `crm` as a schema and `customer_address` as a table. Previously it flattened to `crm.customer_address` and quoted the whole identifier (`SELECT * FROM "crm.customer_address"`).
