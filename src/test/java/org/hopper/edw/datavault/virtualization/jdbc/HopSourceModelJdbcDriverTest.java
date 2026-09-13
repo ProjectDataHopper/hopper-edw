@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Properties;
+import org.apache.commons.vfs2.FileObject;
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.RowMetaAndData;
 import org.apache.hop.core.database.DatabaseMeta;
@@ -38,7 +39,9 @@ import org.apache.hop.core.row.RowMeta;
 import org.apache.hop.core.row.value.ValueMetaInteger;
 import org.apache.hop.core.row.value.ValueMetaString;
 import org.apache.hop.core.variables.Variables;
+import org.apache.hop.core.vfs.HopVfs;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
+import org.hopper.edw.datavault.metadata.ModelXmlWriteSupport;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceColumn;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceJson;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceJsonField;
@@ -46,6 +49,7 @@ import org.hopper.edw.datavault.metadata.sourcemodel.SourceJsonParentKind;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceQuery;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
+import org.hopper.edw.datavault.metadata.sourcemodel.service.SourceModelService;
 import org.hopper.edw.datavault.transform.sqlexpression.SqlExpressionMeta;
 import org.hopper.edw.datavault.virtualization.sql.SourceModelFreeSqlTableSupport;
 import org.hopper.edw.datavault.virtualization.sql.SourceModelSqlEngine;
@@ -242,5 +246,211 @@ class HopSourceModelJdbcDriverTest {
   void connectRejectsNonMatchingUrl() throws Exception {
     HopSourceModelJdbcDriver driver = new HopSourceModelJdbcDriver();
     assertNull(driver.connect("jdbc:h2:mem:test", new Properties()));
+  }
+
+  @Test
+  void parseUrlSupportsServiceAndEmbedded() throws Exception {
+    Properties info = new Properties();
+    HopSourceModelJdbcDriver.ParsedUrl p1 =
+        HopSourceModelJdbcDriver.parseUrl("jdbc:hop-hsm:service=crm;rowLimit=50", info);
+    assertEquals("crm", p1.serviceName());
+    assertEquals(50, p1.rowLimit());
+
+    HopSourceModelJdbcDriver.ParsedUrl p2 =
+        HopSourceModelJdbcDriver.parseUrl("jdbc:hop-hsm:embedded/crm", info);
+    assertEquals("crm", p2.serviceName());
+    assertTrue(p2.isEmbedded());
+
+    HopSourceModelJdbcDriver.ParsedUrl p3 =
+        HopSourceModelJdbcDriver.parseUrl("jdbc:hop-hsm:embedded", info);
+    assertTrue(p3.isEmbedded());
+
+    HopSourceModelJdbcDriver.ParsedUrl p4 =
+        HopSourceModelJdbcDriver.parseUrl("jdbc:hop-hsm:memory:sales", info);
+    assertEquals("sales", p4.memoryName());
+
+    HopSourceModelJdbcDriver.ParsedUrl p5 =
+        HopSourceModelJdbcDriver.parseUrl("jdbc:hop-hsm:service=crm?rowLimit=25", info);
+    assertEquals("crm", p5.serviceName());
+    assertEquals(25, p5.rowLimit());
+  }
+
+  @Test
+  void connectWithRegisteredInMemoryModel() throws Exception {
+    SourceModel model = new SourceModel();
+    model.setName("sales");
+    SourceTable table = new SourceTable("orders");
+    SourceColumn col = new SourceColumn("order_id");
+    col.setHopType(IValueMeta.TYPE_INTEGER);
+    col.setPrimaryKeyPosition(1);
+    table.getColumns().add(col);
+    model.getTables().add(table);
+
+    HopSourceModelJdbcDriver.registerModel("sales", model);
+    try {
+      HopSourceModelJdbcDriver driver = new HopSourceModelJdbcDriver();
+      try (HopSourceModelJdbcConnection conn =
+          (HopSourceModelJdbcConnection)
+              driver.connect("jdbc:hop-hsm:memory:sales", new Properties())) {
+        assertNotNull(conn);
+        assertEquals("sales", conn.getSchema());
+        DatabaseMetaData md = conn.getMetaData();
+        try (ResultSet rs = md.getTables(null, "sales", "orders", null)) {
+          assertTrue(rs.next());
+          assertEquals("orders", rs.getString("TABLE_NAME"));
+          assertEquals("sales", rs.getString("TABLE_SCHEM"));
+        }
+      }
+    } finally {
+      HopSourceModelJdbcDriver.deregisterModel("sales");
+    }
+  }
+
+  @Test
+  void connectWithDirectInMemoryModelInProperties() throws Exception {
+    SourceModel model = new SourceModel();
+    model.setName("direct_model");
+    SourceTable table = new SourceTable("items");
+    SourceColumn col = new SourceColumn("item_name");
+    col.setHopType(IValueMeta.TYPE_STRING);
+    table.getColumns().add(col);
+    model.getTables().add(table);
+
+    Properties info = new Properties();
+    info.put("model", model);
+
+    HopSourceModelJdbcDriver driver = new HopSourceModelJdbcDriver();
+    try (HopSourceModelJdbcConnection conn =
+        (HopSourceModelJdbcConnection) driver.connect("jdbc:hop-hsm:embedded", info)) {
+      assertNotNull(conn);
+      assertEquals("direct_model", conn.getSchema());
+      DatabaseMetaData md = conn.getMetaData();
+      try (ResultSet rs = md.getTables(null, null, "items", null)) {
+        assertTrue(rs.next());
+        assertEquals("items", rs.getString("TABLE_NAME"));
+      }
+    }
+  }
+
+  @Test
+  void databaseMetaDataListsSchemasAndTablesForService() throws Exception {
+    Variables variables = new Variables();
+    FileObject tempFile =
+        HopVfs.createTempFile("test-crm-", ".hsm", System.getProperty("java.io.tmpdir"));
+    try {
+      SourceModel model = new SourceModel();
+      model.setName("crm_model");
+      SourceTable table = new SourceTable("contacts");
+      SourceColumn col = new SourceColumn("email");
+      col.setHopType(IValueMeta.TYPE_STRING);
+      table.getColumns().add(col);
+      model.getTables().add(table);
+
+      ModelXmlWriteSupport.writeModelXml(
+          SourceModel.XML_TAG, model, HopVfs.getFilename(tempFile), variables);
+
+      MemoryMetadataProvider metadataProvider = new MemoryMetadataProvider();
+      SourceModelService service = new SourceModelService("CrmService");
+      service.setEnabled(true);
+      service.setModelFilename(HopVfs.getFilename(tempFile));
+      metadataProvider.getSerializer(SourceModelService.class).save(service);
+
+      Properties info = new Properties();
+      info.put("metadataProvider", metadataProvider);
+
+      HopSourceModelJdbcDriver driver = new HopSourceModelJdbcDriver();
+      try (HopSourceModelJdbcConnection conn =
+          (HopSourceModelJdbcConnection) driver.connect("jdbc:hop-hsm:service=CrmService", info)) {
+        assertNotNull(conn);
+        assertEquals("CrmService", conn.getSchema());
+
+        DatabaseMetaData md = conn.getMetaData();
+        try (ResultSet schemas = md.getSchemas()) {
+          assertTrue(schemas.next());
+          assertEquals("CrmService", schemas.getString("TABLE_SCHEM"));
+        }
+
+        try (ResultSet tables = md.getTables(null, "CrmService", "contacts", null)) {
+          assertTrue(tables.next());
+          assertEquals("contacts", tables.getString("TABLE_NAME"));
+          assertEquals("CrmService", tables.getString("TABLE_SCHEM"));
+        }
+
+        try (ResultSet cols = md.getColumns(null, "CrmService", "contacts", "email")) {
+          assertTrue(cols.next());
+          assertEquals("email", cols.getString("COLUMN_NAME"));
+          assertEquals("CrmService", cols.getString("TABLE_SCHEM"));
+        }
+      }
+    } finally {
+      tempFile.delete();
+    }
+  }
+
+  @Test
+  void connectResolvesProjectHomeVariableInModelFilename() throws Exception {
+    Variables variables = new Variables();
+    FileObject tempFile =
+        HopVfs.createTempFile("test-project-hsm-", ".hsm", System.getProperty("java.io.tmpdir"));
+    try {
+      SourceModel model = new SourceModel();
+      model.setName("proj_model");
+      SourceTable table = new SourceTable("accounts");
+      SourceColumn col = new SourceColumn("account_no");
+      col.setHopType(IValueMeta.TYPE_STRING);
+      table.getColumns().add(col);
+      model.getTables().add(table);
+
+      ModelXmlWriteSupport.writeModelXml(
+          SourceModel.XML_TAG, model, HopVfs.getFilename(tempFile), variables);
+
+      String parentDir = tempFile.getParent().getName().getURI();
+      String baseName = tempFile.getName().getBaseName();
+
+      MemoryMetadataProvider metadataProvider = new MemoryMetadataProvider();
+      SourceModelService service = new SourceModelService("ProjectService");
+      service.setEnabled(true);
+      service.setModelFilename("${PROJECT_HOME}/" + baseName);
+      metadataProvider.getSerializer(SourceModelService.class).save(service);
+
+      Properties info = new Properties();
+      info.put("metadataProvider", metadataProvider);
+      Variables projectVars = new Variables();
+      projectVars.setVariable("PROJECT_HOME", parentDir);
+      info.put("variables", projectVars);
+
+      HopSourceModelJdbcDriver driver = new HopSourceModelJdbcDriver();
+      try (HopSourceModelJdbcConnection conn =
+          (HopSourceModelJdbcConnection)
+              driver.connect("jdbc:hop-hsm:service=ProjectService", info)) {
+        assertNotNull(conn);
+        DatabaseMetaData md = conn.getMetaData();
+        try (ResultSet tables = md.getTables(null, "ProjectService", "accounts", null)) {
+          assertTrue(tables.next());
+          assertEquals("accounts", tables.getString("TABLE_NAME"));
+        }
+      }
+    } finally {
+      tempFile.delete();
+    }
+  }
+
+  @Test
+  void connectFailsWithClearMessageWhenProjectHomeUnresolved() throws Exception {
+    MemoryMetadataProvider metadataProvider = new MemoryMetadataProvider();
+    SourceModelService service = new SourceModelService("UnresolvedService");
+    service.setEnabled(true);
+    service.setModelFilename("${PROJECT_HOME}/models/non-existent.hsm");
+    metadataProvider.getSerializer(SourceModelService.class).save(service);
+
+    Properties info = new Properties();
+    info.put("metadataProvider", metadataProvider);
+
+    HopSourceModelJdbcDriver driver = new HopSourceModelJdbcDriver();
+    SQLException ex =
+        assertThrows(
+            SQLException.class,
+            () -> driver.connect("jdbc:hop-hsm:service=UnresolvedService", info));
+    assertTrue(ex.getMessage().contains("PROJECT_HOME"), ex.getMessage());
   }
 }

@@ -31,20 +31,32 @@ import java.sql.SQLXML;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Struct;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
+import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.metadata.api.IHopMetadataSerializer;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceModelLoadSupport;
+import org.hopper.edw.datavault.metadata.sourcemodel.service.SourceModelService;
 
-/** Read-only JDBC connection bound to a loaded {@link SourceModel}. */
+/** Read-only JDBC connection bound to a loaded {@link SourceModel} or local metadata services. */
 public class HopSourceModelJdbcConnection implements Connection {
 
-  private final SourceModel model;
+  private final SourceModel defaultModel;
+  private String defaultSchema;
   private final IVariables variables;
   private final IHopMetadataProvider metadataProvider;
   private final int defaultRowLimit;
+  private final Map<String, SourceModel> loadedModelsBySchema = new ConcurrentHashMap<>();
   private boolean closed;
   private boolean autoCommit = true;
 
@@ -53,14 +65,104 @@ public class HopSourceModelJdbcConnection implements Connection {
       IVariables variables,
       IHopMetadataProvider metadataProvider,
       int defaultRowLimit) {
-    this.model = model;
+    this(
+        model,
+        model != null ? model.getName() : null,
+        variables,
+        metadataProvider,
+        defaultRowLimit);
+  }
+
+  public HopSourceModelJdbcConnection(
+      SourceModel defaultModel,
+      String defaultSchema,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider,
+      int defaultRowLimit) {
+    this.defaultModel = defaultModel;
+    this.defaultSchema = defaultSchema;
     this.variables = variables;
     this.metadataProvider = metadataProvider;
     this.defaultRowLimit = Math.max(0, defaultRowLimit);
+    if (defaultModel != null && defaultSchema != null) {
+      this.loadedModelsBySchema.put(defaultSchema.trim().toLowerCase(Locale.ROOT), defaultModel);
+    }
+    if (defaultModel != null && !Utils.isEmpty(defaultModel.getName())) {
+      this.loadedModelsBySchema.put(
+          defaultModel.getName().trim().toLowerCase(Locale.ROOT), defaultModel);
+    }
   }
 
   SourceModel model() {
-    return model;
+    if (defaultModel != null) {
+      return defaultModel;
+    }
+    if (!Utils.isEmpty(defaultSchema)) {
+      return getModelForSchema(defaultSchema);
+    }
+    return null;
+  }
+
+  public SourceModel getModelForSchema(String schemaName) {
+    if (Utils.isEmpty(schemaName)) {
+      return model();
+    }
+    String key = schemaName.trim().toLowerCase(Locale.ROOT);
+    SourceModel cached = loadedModelsBySchema.get(key);
+    if (cached != null) {
+      return cached;
+    }
+    if (defaultModel != null
+        && ((defaultSchema != null && defaultSchema.equalsIgnoreCase(schemaName.trim()))
+            || (!Utils.isEmpty(defaultModel.getName())
+                && defaultModel.getName().equalsIgnoreCase(schemaName.trim())))) {
+      loadedModelsBySchema.put(key, defaultModel);
+      return defaultModel;
+    }
+    if (metadataProvider != null) {
+      try {
+        IHopMetadataSerializer<SourceModelService> serializer =
+            metadataProvider.getSerializer(SourceModelService.class);
+        SourceModelService service = serializer.load(schemaName.trim());
+        if (service != null && !Utils.isEmpty(service.getModelFilename())) {
+          String filename =
+              HopSourceModelJdbcDriver.resolveModelFilename(
+                  service.getModelFilename(), variables, metadataProvider);
+          SourceModel loaded = SourceModelLoadSupport.load(filename, variables, metadataProvider);
+          if (Utils.isEmpty(loaded.getName())) {
+            loaded.setName(service.getName());
+          }
+          loadedModelsBySchema.put(key, loaded);
+          return loaded;
+        }
+      } catch (Exception ignored) {
+        // schema not found as service
+      }
+    }
+    return null;
+  }
+
+  public List<String> listAvailableSchemas() {
+    Set<String> schemas = new LinkedHashSet<>();
+    if (!Utils.isEmpty(defaultSchema)) {
+      schemas.add(defaultSchema);
+    }
+    if (defaultModel != null && !Utils.isEmpty(defaultModel.getName())) {
+      schemas.add(defaultModel.getName());
+    }
+    if (metadataProvider != null) {
+      try {
+        IHopMetadataSerializer<SourceModelService> serializer =
+            metadataProvider.getSerializer(SourceModelService.class);
+        for (SourceModelService s : serializer.loadAll()) {
+          if (s.isEnabled()) {
+            schemas.add(s.getName());
+          }
+        }
+      } catch (Exception ignored) {
+      }
+    }
+    return new ArrayList<>(schemas);
   }
 
   IVariables variables() {
@@ -322,11 +424,13 @@ public class HopSourceModelJdbcConnection implements Connection {
   }
 
   @Override
-  public void setSchema(String schema) {}
+  public void setSchema(String schema) {
+    this.defaultSchema = schema;
+  }
 
   @Override
   public String getSchema() {
-    return null;
+    return defaultSchema;
   }
 
   @Override

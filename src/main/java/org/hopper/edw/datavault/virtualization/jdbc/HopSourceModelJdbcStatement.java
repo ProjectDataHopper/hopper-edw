@@ -23,6 +23,8 @@ import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.List;
 import org.apache.hop.core.RowMetaAndData;
+import org.apache.hop.core.util.Utils;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 import org.hopper.edw.datavault.virtualization.execute.SourceModelSqlExecutor;
 import org.hopper.edw.datavault.virtualization.sql.SourceModelSqlEngine;
 import org.hopper.edw.datavault.virtualization.sql.SourceModelSqlOptions;
@@ -47,24 +49,37 @@ public class HopSourceModelJdbcStatement implements Statement {
     connection.checkOpen();
     checkOpen();
     try {
+      SourceModel model = connection.model();
+      if (model == null) {
+        for (String s : connection.listAvailableSchemas()) {
+          model = connection.getModelForSchema(s);
+          if (model != null) {
+            break;
+          }
+        }
+      }
+      if (model == null) {
+        throw new SQLException("No source model available for query execution");
+      }
+      String schemaAlias =
+          !Utils.isEmpty(connection.getSchema()) ? connection.getSchema() : model.getName();
       int limit = maxRows > 0 ? maxRows : connection.defaultRowLimit();
       List<RowMetaAndData> rows;
       if (limit > 0) {
         rows =
             SourceModelSqlExecutor.preview(
-                connection.model(),
+                model,
                 sql,
                 connection.variables(),
                 connection.metadataProvider(),
-                limit);
+                limit,
+                schemaAlias);
       } else {
+        SourceModelSqlOptions options =
+            SourceModelSqlOptions.builder().jdbcSchemaAlias(schemaAlias).build();
         SourceModelSqlPlan plan =
             SourceModelSqlEngine.plan(
-                connection.model(),
-                sql,
-                connection.variables(),
-                connection.metadataProvider(),
-                SourceModelSqlOptions.defaults());
+                model, sql, connection.variables(), connection.metadataProvider(), options);
         rows = SourceModelSqlExecutor.execute(plan, connection.variables(), Integer.MAX_VALUE);
       }
       currentResultSet = new HopSourceModelJdbcResultSet(this, rows);

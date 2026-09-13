@@ -19,6 +19,7 @@ import java.util.Locale;
 
 /** Authentication mode for {@code jdbc:hop-hsm:} connections. */
 public enum HopHsmAuthType {
+  EMBEDDED,
   BASIC,
   BEARER,
   OAUTH2;
@@ -26,6 +27,10 @@ public enum HopHsmAuthType {
   /** JDBC {@code authType} property value. */
   public String jdbcValue() {
     return name().toLowerCase(Locale.ROOT);
+  }
+
+  public boolean isEmbedded() {
+    return this == EMBEDDED;
   }
 
   public boolean isOauth2() {

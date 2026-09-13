@@ -69,9 +69,13 @@ public class HopSourceModelDatabaseMeta extends BaseDatabaseMeta
   /** Common Hop Server listen port used in tutorials and hop-server defaults. */
   public static final int DEFAULT_PORT = 8080;
 
-  public static final String DRIVER_CLASS = "org.hopper.edw.hsm.jdbc.HopHsmJdbcDriver";
+  public static final String DRIVER_CLASS_REMOTE = "org.hopper.edw.hsm.jdbc.HopHsmJdbcDriver";
+  public static final String DRIVER_CLASS_LOCAL =
+      "org.hopper.edw.datavault.virtualization.jdbc.HopSourceModelJdbcDriver";
+  public static final String DRIVER_CLASS = DRIVER_CLASS_REMOTE;
 
   public static final String JDBC_PREFIX = "jdbc:hop-hsm://";
+  public static final String JDBC_PREFIX_LOCAL = "jdbc:hop-hsm:";
 
   public static final String ID_AUTHENTICATION_TYPE = "authenticationType";
   public static final String ID_OAUTH_TOKEN_URL = "oauthTokenUrl";
@@ -194,11 +198,20 @@ public class HopSourceModelDatabaseMeta extends BaseDatabaseMeta
 
   @Override
   public String getDriverClass() {
-    return DRIVER_CLASS;
+    if (authenticationType != null && authenticationType.isEmbedded()) {
+      return DRIVER_CLASS_LOCAL;
+    }
+    return DRIVER_CLASS_REMOTE;
   }
 
   @Override
   public String getURL(String hostname, String port, String databaseName) {
+    if (authenticationType != null && authenticationType.isEmbedded()) {
+      if (Utils.isEmpty(databaseName)) {
+        return JDBC_PREFIX_LOCAL + "embedded";
+      }
+      return JDBC_PREFIX_LOCAL + "service=" + databaseName;
+    }
     StringBuilder url = new StringBuilder(JDBC_PREFIX);
     url.append(Utils.isEmpty(hostname) ? "localhost" : hostname);
     if (!Utils.isEmpty(port)) {
@@ -220,6 +233,31 @@ public class HopSourceModelDatabaseMeta extends BaseDatabaseMeta
     Properties properties = new Properties();
     HopHsmAuthType type = authenticationType != null ? authenticationType : HopHsmAuthType.BASIC;
     properties.put(PROP_AUTH_TYPE, type.jdbcValue());
+    if (type.isEmbedded()) {
+      IVariables effectiveVariables = variables;
+      if (effectiveVariables == null) {
+        try {
+          org.apache.hop.ui.hopgui.HopGui gui = org.apache.hop.ui.hopgui.HopGui.getInstance();
+          if (gui != null) {
+            effectiveVariables = gui.getVariables();
+          }
+        } catch (Throwable ignored) {
+        }
+      }
+      if (!Utils.isEmpty(getDatabaseName())) {
+        properties.put("service", resolve(effectiveVariables, getDatabaseName()));
+      }
+      if (effectiveVariables != null) {
+        properties.put("variables", effectiveVariables);
+        for (String varName : effectiveVariables.getVariableNames()) {
+          String val = effectiveVariables.getVariable(varName);
+          if (val != null) {
+            properties.put(varName, val);
+          }
+        }
+      }
+      return properties;
+    }
     if (type.isOauth2()) {
       putIfFilled(properties, PROP_OAUTH_TOKEN_URL, resolve(variables, oauthTokenUrl));
       putIfFilled(
@@ -241,7 +279,10 @@ public class HopSourceModelDatabaseMeta extends BaseDatabaseMeta
   public List<String> getAuthenticationTypeNames(
       ILogChannel log, IHopMetadataProvider metadataProvider) {
     return List.of(
-        HopHsmAuthType.BASIC.name(), HopHsmAuthType.BEARER.name(), HopHsmAuthType.OAUTH2.name());
+        HopHsmAuthType.EMBEDDED.name(),
+        HopHsmAuthType.BASIC.name(),
+        HopHsmAuthType.BEARER.name(),
+        HopHsmAuthType.OAUTH2.name());
   }
 
   /**
@@ -284,7 +325,29 @@ public class HopSourceModelDatabaseMeta extends BaseDatabaseMeta
       hidden.add(ID_OAUTH_SCOPE);
       hidden.add(ID_OAUTH_REFRESH_TOKEN);
     }
+    if (type.isEmbedded()) {
+      hidden.add(BaseDatabaseMeta.ELEMENT_ID_HOSTNAME);
+      hidden.add(BaseDatabaseMeta.ELEMENT_ID_PORT);
+    }
     compositeWidgets.setWidgetsHidden(this, hidden);
+
+    boolean enableUserPass = !type.isEmbedded();
+    Control userLabel = compositeWidgets.getWidgetsMap().get(BaseDatabaseMeta.ID_USERNAME_LABEL);
+    if (userLabel != null && !userLabel.isDisposed()) {
+      userLabel.setEnabled(enableUserPass);
+    }
+    Control userWidget = compositeWidgets.getWidgetsMap().get(BaseDatabaseMeta.ID_USERNAME_WIDGET);
+    if (userWidget != null && !userWidget.isDisposed()) {
+      userWidget.setEnabled(enableUserPass);
+    }
+    Control passLabel = compositeWidgets.getWidgetsMap().get(BaseDatabaseMeta.ID_PASSWORD_LABEL);
+    if (passLabel != null && !passLabel.isDisposed()) {
+      passLabel.setEnabled(enableUserPass);
+    }
+    Control passWidget = compositeWidgets.getWidgetsMap().get(BaseDatabaseMeta.ID_PASSWORD_WIDGET);
+    if (passWidget != null && !passWidget.isDisposed()) {
+      passWidget.setEnabled(enableUserPass);
+    }
   }
 
   private HopHsmAuthType readAuthenticationType(GuiCompositeWidgets compositeWidgets) {

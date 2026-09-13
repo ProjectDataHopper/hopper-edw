@@ -60,8 +60,7 @@ class HopSourceModelDatabaseMetaTest {
     assertEquals(" LIMIT 5", meta.getLimitClause(5));
     assertEquals("\"", meta.getStartQuote());
     assertEquals("\"", meta.getEndQuote());
-    assertEquals(
-        "crm.customer_address", meta.getSchemaTableCombination("crm", "customer_address"));
+    assertEquals("crm.customer_address", meta.getSchemaTableCombination("crm", "customer_address"));
   }
 
   @Test
@@ -105,10 +104,31 @@ class HopSourceModelDatabaseMetaTest {
   }
 
   @Test
+  void embeddedAuthenticationSettings() {
+    meta.setAuthenticationType(HopHsmAuthType.EMBEDDED);
+    assertTrue(meta.getAuthenticationType().isEmbedded());
+    assertEquals(HopSourceModelDatabaseMeta.DRIVER_CLASS_LOCAL, meta.getDriverClass());
+    assertEquals("jdbc:hop-hsm:service=crm", meta.getURL("localhost", "8080", "crm"));
+    assertEquals("jdbc:hop-hsm:embedded", meta.getURL("localhost", "8080", ""));
+    assertEquals("jdbc:hop-hsm:embedded", meta.getURL("localhost", "8080", null));
+
+    meta.setDatabaseName("crm");
+    Variables vars = new Variables();
+    vars.setVariable("PROJECT_HOME", "/test/project");
+    var props = meta.getConnectionProperties(vars);
+    assertEquals("embedded", props.get("authType"));
+    assertEquals("crm", props.get("service"));
+    assertEquals(vars, props.get("variables"));
+    assertEquals("/test/project", props.get("PROJECT_HOME"));
+  }
+
+  @Test
   void comboValueMethodsReturnListsForGuiCompositeWidgets() {
     assertEquals(
-        List.of("BASIC", "BEARER", "OAUTH2"), meta.getAuthenticationTypeNames(null, null));
-    assertEquals(List.of("client_credentials", "refresh_token"), meta.getOauthGrantNames(null, null));
+        List.of("EMBEDDED", "BASIC", "BEARER", "OAUTH2"),
+        meta.getAuthenticationTypeNames(null, null));
+    assertEquals(
+        List.of("client_credentials", "refresh_token"), meta.getOauthGrantNames(null, null));
   }
 
   @Test

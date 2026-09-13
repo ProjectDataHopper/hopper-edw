@@ -381,8 +381,7 @@ public class HopSourceModelJdbcDatabaseMetaData implements DatabaseMetaData {
 
   @Override
   public boolean supportsSchemasInDataManipulation() {
-    // Flat model: bare table names (helps DBeaver SQL editor resolution).
-    return false;
+    return true;
   }
 
   @Override
@@ -392,7 +391,7 @@ public class HopSourceModelJdbcDatabaseMetaData implements DatabaseMetaData {
 
   @Override
   public boolean supportsSchemasInTableDefinitions() {
-    return false;
+    return true;
   }
 
   @Override
@@ -664,50 +663,68 @@ public class HopSourceModelJdbcDatabaseMetaData implements DatabaseMetaData {
       throws SQLException {
     IRowMeta meta = tableMeta();
     List<RowMetaAndData> rows = new ArrayList<>();
-    SourceModel model = connection.model();
-    if (model != null) {
-      for (TableEntry entry : listTables(model)) {
-        if (!matchesPattern(tableNamePattern, entry.name())) {
+    List<String> schemas = connection.listAvailableSchemas();
+    if (schemas.isEmpty()) {
+      SourceModel model = connection.model();
+      if (model != null) {
+        addTablesForModel(rows, meta, model, null, tableNamePattern, types);
+      }
+    } else {
+      for (String schemaName : schemas) {
+        if (!matchesPattern(schemaPattern, schemaName)) {
           continue;
         }
-        if (types != null && types.length > 0) {
-          boolean ok = false;
-          for (String t : types) {
-            if (t != null && t.equalsIgnoreCase(entry.type())) {
-              ok = true;
-              break;
-            }
-          }
-          if (!ok) {
-            continue;
-          }
+        SourceModel model = connection.getModelForSchema(schemaName);
+        if (model != null) {
+          addTablesForModel(rows, meta, model, schemaName, tableNamePattern, types);
         }
-        if (!matchesSchemaPattern(schemaPattern)) {
-          continue;
-        }
-        // Flat namespace (null catalog/schema) for SQL editor bare-name resolution.
-        rows.add(
-            row(
-                meta,
-                null,
-                null,
-                entry.name(),
-                entry.type(),
-                entry.remarks(),
-                null,
-                null,
-                null,
-                null,
-                null));
       }
     }
     return new HopSourceModelJdbcResultSet(null, rows);
   }
 
+  private void addTablesForModel(
+      List<RowMetaAndData> rows,
+      IRowMeta meta,
+      SourceModel model,
+      String schemaName,
+      String tableNamePattern,
+      String[] types) {
+    for (TableEntry entry : listTables(model)) {
+      if (!matchesPattern(tableNamePattern, entry.name())) {
+        continue;
+      }
+      if (types != null && types.length > 0) {
+        boolean ok = false;
+        for (String t : types) {
+          if (t != null && t.equalsIgnoreCase(entry.type())) {
+            ok = true;
+            break;
+          }
+        }
+        if (!ok) {
+          continue;
+        }
+      }
+      rows.add(
+          row(
+              meta,
+              null,
+              schemaName,
+              entry.name(),
+              entry.type(),
+              entry.remarks(),
+              null,
+              null,
+              null,
+              null,
+              null));
+    }
+  }
+
   @Override
   public ResultSet getSchemas() throws SQLException {
-    // Empty: tables have null TABLE_SCHEM (flat model for DBeaver / generic tools).
-    return new HopSourceModelJdbcResultSet(null, List.of());
+    return getSchemas(null, null);
   }
 
   @Override
@@ -729,15 +746,35 @@ public class HopSourceModelJdbcDatabaseMetaData implements DatabaseMetaData {
       throws SQLException {
     IRowMeta meta = columnMeta();
     List<RowMetaAndData> rows = new ArrayList<>();
-    SourceModel model = connection.model();
-    if (model == null) {
-      return new HopSourceModelJdbcResultSet(null, rows);
+    List<String> schemas = connection.listAvailableSchemas();
+    if (schemas.isEmpty()) {
+      SourceModel model = connection.model();
+      if (model != null) {
+        addColumnsForModel(rows, meta, model, null, tableNamePattern, columnNamePattern);
+      }
+    } else {
+      for (String schemaName : schemas) {
+        if (!matchesPattern(schemaPattern, schemaName)) {
+          continue;
+        }
+        SourceModel model = connection.getModelForSchema(schemaName);
+        if (model != null) {
+          addColumnsForModel(rows, meta, model, schemaName, tableNamePattern, columnNamePattern);
+        }
+      }
     }
+    return new HopSourceModelJdbcResultSet(null, rows);
+  }
+
+  private void addColumnsForModel(
+      List<RowMetaAndData> rows,
+      IRowMeta meta,
+      SourceModel model,
+      String schemaName,
+      String tableNamePattern,
+      String columnNamePattern) {
     for (TableEntry entry : listTables(model)) {
       if (!matchesPattern(tableNamePattern, entry.name())) {
-        continue;
-      }
-      if (!matchesSchemaPattern(schemaPattern)) {
         continue;
       }
       int pos = 1;
@@ -751,7 +788,7 @@ public class HopSourceModelJdbcDatabaseMetaData implements DatabaseMetaData {
             row(
                 meta,
                 null, // TABLE_CAT
-                null, // TABLE_SCHEM (flat)
+                schemaName, // TABLE_SCHEM
                 entry.name(), // TABLE_NAME
                 col.name(), // COLUMN_NAME
                 (long) sqlType, // DATA_TYPE
@@ -777,7 +814,6 @@ public class HopSourceModelJdbcDatabaseMetaData implements DatabaseMetaData {
         pos++;
       }
     }
-    return new HopSourceModelJdbcResultSet(null, rows);
   }
 
   @Override
@@ -1072,7 +1108,22 @@ public class HopSourceModelJdbcDatabaseMetaData implements DatabaseMetaData {
 
   @Override
   public ResultSet getSchemas(String catalog, String schemaPattern) throws SQLException {
-    return getSchemas();
+    IRowMeta meta = new RowMeta();
+    meta.addValueMeta(new ValueMetaString("TABLE_SCHEM"));
+    meta.addValueMeta(new ValueMetaString("TABLE_CATALOG"));
+    List<RowMetaAndData> rows = new ArrayList<>();
+    List<String> schemas = connection.listAvailableSchemas();
+    if (schemas.isEmpty()) {
+      SourceModel model = connection.model();
+      String name = model != null && !Utils.isEmpty(model.getName()) ? model.getName() : "source";
+      schemas = List.of(name);
+    }
+    for (String s : schemas) {
+      if (matchesPattern(schemaPattern, s)) {
+        rows.add(row(meta, s, null));
+      }
+    }
+    return new HopSourceModelJdbcResultSet(null, rows);
   }
 
   @Override
