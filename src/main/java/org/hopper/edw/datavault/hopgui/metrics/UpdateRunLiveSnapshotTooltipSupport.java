@@ -37,6 +37,7 @@ public final class UpdateRunLiveSnapshotTooltipSupport {
   }
 
   public static boolean isLiveBadgeOwner(Object owner) {
-    return owner instanceof UpdateRunLiveAreaOwnerData;
+    return owner instanceof UpdateRunLiveAreaOwnerData
+        || UpdateRunLiveAreaOwnerData.AREA_DRAWN_LIVE_UPDATE_BADGE.equals(owner);
   }
 }

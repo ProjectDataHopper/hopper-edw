@@ -22,6 +22,10 @@ import lombok.Value;
 @Value
 @AllArgsConstructor
 public class UpdateRunLiveAreaOwnerData {
+
+  /** Parent id used when identifying the live-update badge drawn area. */
+  public static final String AREA_DRAWN_LIVE_UPDATE_BADGE = "Drawn_LiveUpdateBadge";
+
   String metricsRunId;
   String waveId;
   String workflowFilename;

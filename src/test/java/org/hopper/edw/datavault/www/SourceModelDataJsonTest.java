@@ -60,7 +60,8 @@ class SourceModelDataJsonTest {
   void queryResultKeepsColumnsWhenRowsAreMetadataOnly() throws Exception {
     RowMeta meta = new RowMeta();
     meta.addValueMeta(new ValueMetaInteger("id"));
-    String json = SourceModelDataJson.queryResult(List.of(new RowMetaAndData(meta, (Object[]) null)), false);
+    String json =
+        SourceModelDataJson.queryResult(List.of(new RowMetaAndData(meta, (Object[]) null)), false);
     assertTrue(json.contains("\"n\":\"id\""));
     assertTrue(json.contains("\"rows\":[]"));
   }

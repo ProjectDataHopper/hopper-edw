@@ -138,13 +138,7 @@ public class WorkflowGanttResultsTab {
     int rows = tasks.isEmpty() ? Math.max(1, actionCount()) : tasks.size();
     Rectangle vp = viewer.getViewportBounds();
     String fingerprint =
-        rows
-            + ":"
-            + vp.width
-            + "x"
-            + vp.height
-            + ":"
-            + WorkflowGanttTasks.fingerprint(tasks);
+        rows + ":" + vp.width + "x" + vp.height + ":" + WorkflowGanttTasks.fingerprint(tasks);
     if (fingerprint.equals(lastFingerprint)) {
       return;
     }
@@ -179,7 +173,9 @@ public class WorkflowGanttResultsTab {
     int minTile = HSimplePresentation.ganttPixelHeight(rows);
     int minPageH = minTile + 32;
     Rectangle vp =
-        viewer != null && !viewer.isDisposed() ? viewer.getViewportBounds() : new Rectangle(0, 0, 0, 0);
+        viewer != null && !viewer.isDisposed()
+            ? viewer.getViewportBounds()
+            : new Rectangle(0, 0, 0, 0);
     int pageH = pageHeightForViewport(page.getWidth(), minPageH, vp.width, vp.height);
     int tileH = Math.max(minTile, pageH - 32);
     page.setHeight(pageH);

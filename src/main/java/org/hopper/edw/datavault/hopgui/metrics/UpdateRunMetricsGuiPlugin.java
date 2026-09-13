@@ -55,8 +55,11 @@ public class UpdateRunMetricsGuiPlugin {
                 ? context.getWorkflowMeta().getName()
                 : context.getWorkflowMeta().getFilename())
             : null;
+    String workflowName =
+        context.getWorkflowMeta() != null ? context.getWorkflowMeta().getName() : null;
     UpdateRunWaveSnapshot wave =
-        UpdateRunLiveRegistry.findWaveByWorkflowAction(workflowFilename, actionMeta.getName())
+        UpdateRunLiveRegistry.findWave(
+                workflowFilename, workflowName, actionMeta.getName(), graph.getVariables())
             .orElse(null);
     boolean historyPreferred = wave == null || wave.getPhase() == UpdateRunWavePhase.FINISHED;
     ResourceGroupUpdateMetricsDialog.open(

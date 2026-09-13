@@ -20,19 +20,23 @@ import org.apache.hop.core.extension.ExtensionPoint;
 import org.apache.hop.core.extension.IExtensionPoint;
 import org.apache.hop.core.logging.ILogChannel;
 import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.workflow.WorkflowPainter;
+import org.apache.hop.ui.hopgui.file.workflow.extension.HopGuiWorkflowGraphExtension;
 
-/** Paints the live model-update badge on executing workflow actions. */
+/** Prevents canvas lasso selection when pressing mouse down on a live update badge. */
 @ExtensionPoint(
-    id = "UpdateRunLiveWorkflowPainterExtensionPoint",
-    extensionPointId = "WorkflowPainterEnd",
-    description = "Draws live update status on executing DV/BV/DM update workflow actions")
-public class UpdateRunLiveWorkflowPainterExtensionPoint
-    implements IExtensionPoint<WorkflowPainter> {
+    id = "UpdateRunLiveWorkflowMouseDownExtensionPoint",
+    extensionPointId = "WorkflowGraphMouseDown",
+    description = "Prevents canvas box selection when clicking a model update badge")
+public class UpdateRunLiveWorkflowMouseDownExtensionPoint
+    implements IExtensionPoint<HopGuiWorkflowGraphExtension> {
 
   @Override
-  public void callExtensionPoint(ILogChannel log, IVariables variables, WorkflowPainter painter)
+  public void callExtensionPoint(
+      ILogChannel log, IVariables variables, HopGuiWorkflowGraphExtension extension)
       throws HopException {
-    UpdateRunLiveWorkflowPaintSupport.paintWorkflowEnd(painter, variables);
+    if (extension == null || extension.getWorkflowGraph() == null) {
+      return;
+    }
+    UpdateRunLiveWorkflowMouseSupport.handleMouseDownIfBadgeClicked(extension);
   }
 }

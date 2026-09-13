@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Date;
 import java.util.List;
+import org.apache.hop.core.variables.Variables;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -28,9 +29,7 @@ class UpdateRunLiveRegistryTest {
 
   @AfterEach
   void cleanup() {
-    UpdateRunLiveRegistry.remove("run-1");
-    UpdateRunLiveRegistry.remove("run-child");
-    UpdateRunLiveRegistry.removeWave("wave-1");
+    UpdateRunLiveRegistry.clear();
   }
 
   @Test
@@ -109,5 +108,72 @@ class UpdateRunLiveRegistryTest {
             .orElseThrow();
     assertEquals("wave-1", afterRemove.getWaveId());
     assertNull(afterRemove.getCurrentLiveSnapshot());
+  }
+
+  @Test
+  void findsWaveWithVariableExpansionAndUriSchemes() {
+    Variables variables = new Variables();
+    variables.setVariable("PROJECT_HOME", "/home/matt/project");
+
+    UpdateRunWaveSnapshot wave =
+        UpdateRunWaveSnapshotSupport.initial(
+            "wave-var-1",
+            "retail-group",
+            "/home/matt/project/workflows/update-retail.hwf",
+            "update-retail",
+            "Update resource definition group",
+            null,
+            List.of(),
+            new Date());
+    UpdateRunLiveRegistry.publishWave(wave);
+
+    // 1. Lookup with variable in path
+    assertTrue(
+        UpdateRunLiveRegistry.findWave(
+                "${PROJECT_HOME}/workflows/update-retail.hwf",
+                "update-retail",
+                "Update resource definition group",
+                variables)
+            .isPresent());
+
+    // 2. Lookup with file:/// scheme and variable
+    assertTrue(
+        UpdateRunLiveRegistry.findWave(
+                "file://${PROJECT_HOME}/workflows/update-retail.hwf",
+                "update-retail",
+                "Update resource definition group",
+                variables)
+            .isPresent());
+
+    // 3. Lookup with just basename
+    assertTrue(
+        UpdateRunLiveRegistry.findWave(
+                "update-retail.hwf", "update-retail", "Update resource definition group", variables)
+            .isPresent());
+  }
+
+  @Test
+  void fallbackToActiveWaveByActionNameWhenFilenameDiffers() {
+    UpdateRunWaveSnapshot wave =
+        UpdateRunWaveSnapshotSupport.initial(
+            "wave-active-1",
+            "retail-group",
+            "/internal/engine/path/workflow.hwf",
+            "workflow",
+            "Update resource definition group",
+            null,
+            List.of(),
+            new Date());
+    UpdateRunLiveRegistry.publishWave(wave);
+
+    // GUI tab has completely different filename or null filename
+    java.util.Optional<UpdateRunWaveSnapshot> resolved =
+        UpdateRunLiveRegistry.findWave(
+            "/gui/user/path/different-name.hwf",
+            "different-workflow",
+            "Update resource definition group",
+            null);
+    assertTrue(resolved.isPresent());
+    assertEquals("wave-active-1", resolved.get().getWaveId());
   }
 }

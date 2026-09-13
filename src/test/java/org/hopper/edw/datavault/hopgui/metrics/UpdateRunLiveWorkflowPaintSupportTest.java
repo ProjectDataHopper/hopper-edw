@@ -16,10 +16,14 @@
 package org.hopper.edw.datavault.hopgui.metrics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.hop.core.gui.IGc.EImage;
+import org.apache.hop.core.gui.Point;
+import org.apache.hop.core.gui.Rectangle;
+import org.apache.hop.ui.core.ConstUi;
 import org.apache.hop.workflow.action.ActionMeta;
 import org.hopper.edw.datavault.metrics.live.UpdateRunLiveState;
 import org.hopper.edw.datavault.workflow.actions.datavaultupdate.ActionDataVaultUpdate;
@@ -61,5 +65,39 @@ class UpdateRunLiveWorkflowPaintSupportTest {
     assertTrue(UpdateRunLiveWorkflowPaintSupport.isGroupUpdateAction(actionMeta.clone()));
     assertEquals(
         "execution-metrics-profile.svg", UpdateRunLiveWorkflowPaintSupport.IDLE_METRICS_ICON_PATH);
+  }
+
+  @Test
+  void areaOwnerDataForWaveHoldsIdentifiersAndHistoryPreference() {
+    UpdateRunLiveAreaOwnerData running =
+        UpdateRunLiveAreaOwnerData.forWave("wave-1", "/path/workflow.hwf", "RDG Action", false);
+    assertEquals("wave-1", running.getWaveId());
+    assertEquals("/path/workflow.hwf", running.getWorkflowFilename());
+    assertEquals("RDG Action", running.getActionName());
+    org.junit.jupiter.api.Assertions.assertFalse(running.isHistoryPreferred());
+
+    UpdateRunLiveAreaOwnerData idle =
+        UpdateRunLiveAreaOwnerData.forWave(null, "/path/workflow.hwf", "RDG Action", true);
+    assertNull(idle.getWaveId());
+    assertTrue(idle.isHistoryPreferred());
+    assertTrue(UpdateRunLiveSnapshotTooltipSupport.isLiveBadgeOwner(idle));
+  }
+
+  @Test
+  void runningIconHitRectCoversBottomRightOfAction() {
+    Point location = new Point(100, 100);
+    int iconSize = ConstUi.ICON_SIZE;
+    int miniIconSize = iconSize / 2;
+    Rectangle hit =
+        UpdateRunLiveWorkflowPaintSupport.badgeHitRect(
+            location.x, location.y, iconSize, miniIconSize);
+
+    assertTrue(
+        UpdateRunLiveWorkflowPaintSupport.badgeHitContains(
+            location, iconSize, miniIconSize, 126, 126));
+    assertTrue(hit.contains(126, 126));
+    assertFalse(
+        UpdateRunLiveWorkflowPaintSupport.badgeHitContains(
+            location, iconSize, miniIconSize, 116, 116));
   }
 }

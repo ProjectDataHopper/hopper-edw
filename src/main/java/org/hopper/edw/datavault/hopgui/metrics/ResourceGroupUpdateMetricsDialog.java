@@ -196,9 +196,8 @@ public final class ResourceGroupUpdateMetricsDialog {
     createHistoryTab();
 
     boolean showHistory =
-        historyPreferred
-            || currentWave == null
-            || currentWave.getPhase() == UpdateRunWavePhase.FINISHED;
+        (historyPreferred || currentWave == null)
+            && (currentWave == null || currentWave.getPhase() == UpdateRunWavePhase.FINISHED);
     tabFolder.setSelection(showHistory ? 1 : 0);
 
     populateThisRun();
@@ -584,12 +583,8 @@ public final class ResourceGroupUpdateMetricsDialog {
         return byId;
       }
     }
-    Optional<UpdateRunWaveSnapshot> byFile =
-        UpdateRunLiveRegistry.findWaveByWorkflowAction(workflowFilename, actionName);
-    if (byFile.isPresent()) {
-      return byFile;
-    }
-    return UpdateRunLiveRegistry.findWaveByWorkflowAction(resolveWorkflowName(), actionName);
+    return UpdateRunLiveRegistry.findWave(
+        workflowFilename, resolveWorkflowName(), actionName, variables);
   }
 
   private String resolveWorkflowName() {

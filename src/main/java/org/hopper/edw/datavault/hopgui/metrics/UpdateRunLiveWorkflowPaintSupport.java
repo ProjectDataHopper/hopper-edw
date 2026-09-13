@@ -15,16 +15,15 @@
  */
 package org.hopper.edw.datavault.hopgui.metrics;
 
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
 import org.apache.hop.core.gui.AreaOwner;
 import org.apache.hop.core.gui.AreaOwner.AreaType;
-import org.apache.hop.core.gui.BasePainter;
 import org.apache.hop.core.gui.DPoint;
 import org.apache.hop.core.gui.IGc;
 import org.apache.hop.core.gui.IGc.EImage;
 import org.apache.hop.core.gui.Point;
+import org.apache.hop.core.gui.Rectangle;
 import org.apache.hop.core.plugins.ActionPluginType;
 import org.apache.hop.core.plugins.PluginRegistry;
 import org.apache.hop.core.svg.SvgFile;
@@ -59,6 +58,11 @@ public final class UpdateRunLiveWorkflowPaintSupport {
   private UpdateRunLiveWorkflowPaintSupport() {}
 
   public static void paintWorkflowEnd(WorkflowPainter painter) {
+    paintWorkflowEnd(painter, null);
+  }
+
+  public static void paintWorkflowEnd(
+      WorkflowPainter painter, org.apache.hop.core.variables.IVariables variables) {
     if (painter == null) {
       return;
     }
@@ -66,26 +70,27 @@ public final class UpdateRunLiveWorkflowPaintSupport {
     if (workflowMeta == null) {
       return;
     }
-    PainterView view;
-    try {
-      view = PainterView.from(painter);
-    } catch (ReflectiveOperationException ignored) {
+    PainterView view = PainterView.from(painter);
+    if (view.gc() == null || view.areaOwners() == null || view.offset() == null) {
       return;
     }
+    org.apache.hop.core.variables.IVariables effectiveVariables =
+        variables != null ? variables : view.variables();
     String workflowFilename = resolveWorkflowFilename(workflowMeta);
     String workflowName = workflowMeta.getName();
     List<ActionMeta> activeActions = painter.getActiveActions();
     if (activeActions != null) {
       for (ActionMeta actionMeta : activeActions) {
         Optional<UpdateRunLiveSnapshot> snapshot =
-            findSnapshot(workflowFilename, workflowName, actionMeta);
+            findSnapshot(workflowFilename, workflowName, actionMeta, effectiveVariables);
         if (snapshot.isEmpty()) {
           continue;
         }
         paintLiveSnapshotBadge(view, actionMeta, snapshot.get());
       }
     }
-    paintGroupBadges(view, workflowMeta, activeActions, workflowFilename, workflowName);
+    paintGroupBadges(
+        view, workflowMeta, activeActions, workflowFilename, workflowName, effectiveVariables);
   }
 
   private static void paintGroupBadges(
@@ -93,7 +98,8 @@ public final class UpdateRunLiveWorkflowPaintSupport {
       WorkflowMeta workflowMeta,
       List<ActionMeta> activeActions,
       String workflowFilename,
-      String workflowName) {
+      String workflowName,
+      org.apache.hop.core.variables.IVariables variables) {
     List<ActionMeta> actions = workflowMeta.getActions();
     if (actions == null || actions.isEmpty()) {
       return;
@@ -102,14 +108,13 @@ public final class UpdateRunLiveWorkflowPaintSupport {
       if (!isGroupUpdateAction(actionMeta)) {
         continue;
       }
-      Optional<UpdateRunWaveSnapshot> wave = findWave(workflowFilename, workflowName, actionMeta);
+      Optional<UpdateRunWaveSnapshot> wave =
+          findWave(workflowFilename, workflowName, actionMeta, variables);
+      boolean isRunning = activeActions != null && activeActions.contains(actionMeta);
       boolean live =
-          wave.isPresent()
-              && wave.get().getPhase() != UpdateRunWavePhase.FINISHED
-              && activeActions != null
-              && activeActions.contains(actionMeta);
+          isRunning || (wave.isPresent() && wave.get().getPhase() != UpdateRunWavePhase.FINISHED);
       if (live) {
-        paintWaveBadge(view, actionMeta, wave.get(), false);
+        paintWaveBadge(view, actionMeta, wave.orElse(null), false);
       } else {
         paintWaveBadge(view, actionMeta, wave.orElse(null), true);
       }
@@ -133,21 +138,37 @@ public final class UpdateRunLiveWorkflowPaintSupport {
 
   private static void paintWaveBadge(
       PainterView view, ActionMeta actionMeta, UpdateRunWaveSnapshot wave, boolean idle) {
-    UpdateRunLiveState state =
-        idle || wave == null
-            ? null
-            : wave.getOverallState() != null ? wave.getOverallState() : UpdateRunLiveState.RUNNING;
+    UpdateRunLiveState state;
+    if (idle) {
+      state = null;
+    } else if (wave != null && wave.getOverallState() != null) {
+      state = wave.getOverallState();
+    } else {
+      state = UpdateRunLiveState.RUNNING;
+    }
+
     String tooltip;
     if (wave != null && !Utils.isEmpty(wave.getTooltipText())) {
       tooltip = wave.getTooltipText();
-    } else {
+    } else if (idle) {
       tooltip =
           BaseMessages.getString(UpdateRunWaveSnapshotSupport.class, "UpdateRunWave.Tooltip.Idle");
+    } else {
+      tooltip =
+          BaseMessages.getString(
+              UpdateRunWaveSnapshotSupport.class, "UpdateRunWave.Tooltip.Updating", "in progress");
     }
+
     String workflowFilename =
         wave != null ? wave.getWorkflowFilename() : resolveWorkflowFilename(actionMeta);
     String actionName = actionMeta.getName();
     String waveId = wave != null ? wave.getWaveId() : null;
+    if (waveId == null && !idle) {
+      waveId =
+          UpdateRunLiveRegistry.findActiveWaveByAction(actionName)
+              .map(UpdateRunWaveSnapshot::getWaveId)
+              .orElse(null);
+    }
     paintBadge(
         view,
         actionMeta,
@@ -180,10 +201,9 @@ public final class UpdateRunLiveWorkflowPaintSupport {
       location = new Point(50, 50);
     }
     Point screen = view.real2screen(location.x, location.y);
-    int x = screen.x;
-    int y = screen.y;
-    int iconX = (x + view.iconSize()) - (view.miniIconSize() / 2) + 1;
-    int iconY = (y + view.iconSize()) - (view.miniIconSize() / 2) + 1;
+    Rectangle hit = badgeHitRect(screen.x, screen.y, view.iconSize(), view.miniIconSize());
+    int iconX = hit.x + BADGE_HIT_PADDING;
+    int iconY = hit.y + BADGE_HIT_PADDING;
     try {
       if (idleMetricsIcon) {
         drawIdleMetricsIcon(view, iconX, iconY);
@@ -193,13 +213,41 @@ public final class UpdateRunLiveWorkflowPaintSupport {
     } catch (Exception ignored) {
       return;
     }
-    int hitX = iconX - BADGE_HIT_PADDING;
-    int hitY = iconY - BADGE_HIT_PADDING;
-    int hitSize = view.miniIconSize() + (2 * BADGE_HIT_PADDING);
     view.areaOwners()
         .add(
             new AreaOwner(
-                AreaType.CUSTOM, hitX, hitY, hitSize, hitSize, view.offset(), badgeData, tooltip));
+                AreaType.CUSTOM,
+                hit.x,
+                hit.y,
+                hit.width,
+                hit.height,
+                view.offset(),
+                badgeData,
+                tooltip));
+  }
+
+  /**
+   * Hit rectangle of the live-update badge in the same coordinate space as {@code baseX}/{@code
+   * baseY}. Pass action location (graph space) for mouse hit-testing, or {@code real2screen}
+   * coordinates when registering an {@link AreaOwner}.
+   */
+  static Rectangle badgeHitRect(int baseX, int baseY, int iconSize, int miniIconSize) {
+    int iconX = (baseX + iconSize) - (miniIconSize / 2) + 1;
+    int iconY = (baseY + iconSize) - (miniIconSize / 2) + 1;
+    int hitSize = miniIconSize + (2 * BADGE_HIT_PADDING);
+    return new Rectangle(iconX - BADGE_HIT_PADDING, iconY - BADGE_HIT_PADDING, hitSize, hitSize);
+  }
+
+  static boolean badgeHitContains(
+      Point location, int iconSize, int miniIconSize, int graphX, int graphY) {
+    if (location == null) {
+      location = new Point(50, 50);
+    }
+    if (iconSize <= 0) {
+      return false;
+    }
+    int mini = miniIconSize > 0 ? miniIconSize : Math.max(iconSize / 2, 1);
+    return badgeHitRect(location.x, location.y, iconSize, mini).contains(graphX, graphY);
   }
 
   private static void drawIdleMetricsIcon(PainterView view, int iconX, int iconY) throws Exception {
@@ -212,35 +260,27 @@ public final class UpdateRunLiveWorkflowPaintSupport {
   }
 
   private static Optional<UpdateRunWaveSnapshot> findWave(
-      String workflowFilename, String workflowName, ActionMeta actionMeta) {
+      String workflowFilename,
+      String workflowName,
+      ActionMeta actionMeta,
+      org.apache.hop.core.variables.IVariables variables) {
     if (actionMeta == null || Utils.isEmpty(actionMeta.getName())) {
       return Optional.empty();
     }
-    Optional<UpdateRunWaveSnapshot> snapshot =
-        UpdateRunLiveRegistry.findWaveByWorkflowAction(workflowFilename, actionMeta.getName());
-    if (snapshot.isPresent()) {
-      return snapshot;
-    }
-    if (!Utils.isEmpty(workflowName) && !workflowName.equals(workflowFilename)) {
-      return UpdateRunLiveRegistry.findWaveByWorkflowAction(workflowName, actionMeta.getName());
-    }
-    return Optional.empty();
+    return UpdateRunLiveRegistry.findWave(
+        workflowFilename, workflowName, actionMeta.getName(), variables);
   }
 
   private static Optional<UpdateRunLiveSnapshot> findSnapshot(
-      String workflowFilename, String workflowName, ActionMeta actionMeta) {
+      String workflowFilename,
+      String workflowName,
+      ActionMeta actionMeta,
+      org.apache.hop.core.variables.IVariables variables) {
     if (actionMeta == null || Utils.isEmpty(actionMeta.getName())) {
       return Optional.empty();
     }
-    Optional<UpdateRunLiveSnapshot> snapshot =
-        UpdateRunLiveRegistry.findByWorkflowAction(workflowFilename, actionMeta.getName());
-    if (snapshot.isPresent()) {
-      return snapshot;
-    }
-    if (!Utils.isEmpty(workflowName) && !workflowName.equals(workflowFilename)) {
-      return UpdateRunLiveRegistry.findByWorkflowAction(workflowName, actionMeta.getName());
-    }
-    return Optional.empty();
+    return UpdateRunLiveRegistry.findSnapshot(
+        workflowFilename, workflowName, actionMeta.getName(), variables);
   }
 
   static boolean isUpdateAction(ActionMeta actionMeta) {
@@ -342,29 +382,22 @@ public final class UpdateRunLiveWorkflowPaintSupport {
       DPoint offset,
       int iconSize,
       int miniIconSize,
-      float magnification) {
+      float magnification,
+      org.apache.hop.core.variables.IVariables variables) {
 
-    static PainterView from(WorkflowPainter painter) throws ReflectiveOperationException {
+    static PainterView from(WorkflowPainter painter) {
       return new PainterView(
-          readField(painter, "gc", IGc.class),
-          readField(painter, "areaOwners", List.class),
-          readField(painter, "offset", DPoint.class),
-          readField(painter, "iconSize", int.class),
-          readField(painter, "miniIconSize", int.class),
-          readField(painter, "magnification", float.class));
+          painter.getGc(),
+          painter.getAreaOwners(),
+          painter.getOffset(),
+          painter.getIconSize(),
+          painter.getMiniIconSize(),
+          painter.getMagnification(),
+          painter.getVariables());
     }
 
     Point real2screen(int x, int y) {
       return new Point((int) (x + offset.x), (int) (y + offset.y));
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> T readField(Object target, String name, Class<T> type)
-        throws ReflectiveOperationException {
-      Field field = BasePainter.class.getDeclaredField(name);
-      field.setAccessible(true);
-      Object value = field.get(target);
-      return (T) value;
     }
   }
 }
