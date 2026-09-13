@@ -23,6 +23,7 @@ For product documentation, start at [../README.md](../README.md) or [../feature-
 | Plan | Topic |
 |------|--------|
 | [hop-2.20-ai-advisor-migration-plan.md](hop-2.20-ai-advisor-migration-plan.md) | Migrate DV/BV/DM AI Help to Hop 2.20 `IAiAdvisor` (requires 2.20.0-SNAPSHOT / #8330) |
+| [diagram-export-plugin-plan.md](diagram-export-plugin-plan.md) | Issue #175 — Dimensional model diagram exporters (SVG, PDF, PlantUML, Draw.io, Mermaid) on Hop 2.20 Diagram Exporter plugin type (apache/hop#8346) |
 | [hop-lineage-view-plan.md](hop-lineage-view-plan.md) | Issue #79 — Hop Lineage View (`.hlv`) over OpenLineage backends |
 | [edw-journey-perspective-plan.md](edw-journey-perspective-plan.md) | EDW Journey perspective (canonical tree over a resource definition group) |
 | [data-type-mappings-plan.md](data-type-mappings-plan.md) | Issue #113 — project data type mappings / pre-modeling sources |
