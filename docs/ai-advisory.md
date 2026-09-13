@@ -1,6 +1,6 @@
 # Data Vault AI Help & Advisory
 
-The Data Hopper EDW includes an AI-powered assistant (the **AI Help** or **AI Advisor**) designed to accelerate enterprise data warehousing modeling and integration. By integrating a Large Language Model (LLM), the AI Helper can analyze catalog sources, validate models, suggest layout updates, perform type mappings, build hubs, links, and satellites, and troubleshoot integration errors.
+The Data Hopper EDW includes an AI-powered assistant (the **AI Help** or **AI Advisor**) designed to accelerate enterprise data warehousing modeling and integration. Data Vault, Business Vault, and dimensional modelers open the Hop **AI Assistant** workbench bound to the open model. The assistant can analyze catalog sources, validate models, suggest layout updates, perform type mappings, build hubs, links, and satellites, and troubleshoot integration errors.
 
 ![Data Vault AI Help Dialog](images/data-vault-ai-help-dialog.png)
 
@@ -17,11 +17,11 @@ Start sessions with `conventions.md` + the file-type docs that match the edit. P
 ## Prerequisites & Installation
 
 To use the AI Helper:
-1. Ensure the Hop **Language Model Chat** transform (`hop-transform-languagemodelchat`) is installed in your Apache Hop distribution (bundled by default under the plugin’s dependencies).
-2. Configure your preferred AI provider in **Hop GUI → Configuration → AI Assistant**.
-3. Enable the **Enable AI advisory** flag and select or configure your model details.
+1. Install Apache Hop **2.20** (development **2.20.0-SNAPSHOT**) with the **AI Assistant** plugin (`plugins/tech/ai`). Removing that plugin makes AI Help a no-op; hopper-edw still loads.
+2. Create a named **AI Provider** under **Metadata** and enable AI under **Configuration → Plugins → AI Assistant**.
+3. Open a `.hdv` / `.hbv` / `.hdm` graph and click **AI Help** (floating workbench). Pipeline and workflow AI Help is Hop's, not this plugin.
 
-> **Note:** AI settings previously stored under **Data Vault 2.0** configuration are migrated automatically to **AI Assistant** on first load.
+> **Note:** Older hopper-edw `hopAiConfig` keys (API key, preset, model name) are migrated by Hop to an **AI Provider** metadata object on first GUI start.
 
 ---
 
@@ -158,20 +158,14 @@ The Data Hopper EDW AI Helper values the security of your enterprise metadata:
 
 ## Programmatic API
 
-For headless, automated, or test environments, the underlying AI services can be invoked programmatically.
+hopper-edw advisors implement Hop's `IAiAdvisor`. The workbench calls `buildPrompt` / `parseResponse` / `validateProposals` / `applyProposals`. Do not compile against `hop-tech-ai` or langchain4j from this plugin.
 
-**Data Vault modeler**
+**Data Vault / Business Vault / dimensional**
 
-* [DvAiContextBuilder](../src/main/java/org/hopper/edw/datavault/ai/DvAiContextBuilder.java): Assembles and redacts context bundles, combining scenario details, model XML, structures, and catalog schemas.
-* [DvAiAdvisorService](../src/main/java/org/hopper/edw/datavault/ai/DvAiAdvisorService.java): Communicates directly with the configured language model.
-* [DvAiConversationSession](../src/main/java/org/hopper/edw/datavault/ai/DvAiConversationSession.java): Manages state and conversation turns for interactive applications.
-* [DvAiProposalApplier](../src/main/java/org/hopper/edw/datavault/ai/DvAiProposalApplier.java): Validates and writes approved proposals directly back to the model memory.
+* [DataVaultAiAdvisor](../src/main/java/org/hopper/edw/datavault/ai/DataVaultAiAdvisor.java), [BusinessVaultAiAdvisor](../src/main/java/org/hopper/edw/datavault/ai/businessvault/BusinessVaultAiAdvisor.java), [DimensionalAiAdvisor](../src/main/java/org/hopper/edw/datavault/ai/dimensional/DimensionalAiAdvisor.java): `@AiAdvisorPlugin` entry points.
+* [DvAiContextBuilder](../src/main/java/org/hopper/edw/datavault/ai/DvAiContextBuilder.java) (and BV/DM equivalents): redacted context bundles.
+* [DvAiProposalApplier](../src/main/java/org/hopper/edw/datavault/ai/DvAiProposalApplier.java): writes approved proposals to the in-memory model.
 
-**Pipeline and workflow (M2)**
+**Pipeline and workflow**
 
-* [PipelineAiAdvisorService](../src/main/java/org/hopper/edw/datavault/ai/pipeline/PipelineAiAdvisorService.java) / [WorkflowAiAdvisorService](../src/main/java/org/hopper/edw/datavault/ai/workflow/WorkflowAiAdvisorService.java): LLM calls with M2 prompt supplement and `hop_proposals` parsing.
-* [HopAiProposalParser](../src/main/java/org/hopper/edw/datavault/ai/HopAiProposalParser.java): Extracts proposals from raw assistant text.
-* [PipelineAiProposalValidator](../src/main/java/org/hopper/edw/datavault/ai/pipeline/PipelineAiProposalValidator.java) / [WorkflowAiProposalValidator](../src/main/java/org/hopper/edw/datavault/ai/workflow/WorkflowAiProposalValidator.java): Topology validation before apply.
-* [PipelineAiProposalApplier](../src/main/java/org/hopper/edw/datavault/ai/pipeline/PipelineAiProposalApplier.java) / [WorkflowAiProposalApplier](../src/main/java/org/hopper/edw/datavault/ai/workflow/WorkflowAiProposalApplier.java): Applies selected proposals.
-
-Full M2 design and proposal tables: [plans/hop-ai-assistant-m2.md](plans/hop-ai-assistant-m2.md).
+Pipeline and workflow AI Help live in Apache Hop 2.20 (`pipeline-graph` / `workflow-graph`). See Hop's AI Assistant docs. The M2 design notes remain at [plans/hop-ai-assistant-m2.md](plans/hop-ai-assistant-m2.md).

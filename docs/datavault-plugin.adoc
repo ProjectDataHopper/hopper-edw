@@ -103,7 +103,7 @@ image::images/hopgui-data-vault-model-toolbar.png[The data vault model toolbar i
 |Runs validation and shows results in a Hop check dialog (missing keys, broken references, duplicate names, source-to-target type compatibility, and more). Always uses detailed data type checking (live source schema where supported).
 
 |AI Help
-|Opens the Data Vault AI Helper/Advisor dialog to interact with a Large Language Model (LLM) assistant for source analysis, type mapping, modeling advice, and troubleshooting. The assistant can also propose direct model changes that you can preview, validate, and selectively apply. See link:ai-advisory.md[AI advisory for Data Vault modeling] for details.
+|Opens the Hop AI Assistant workbench bound to the open `.hdv` model for source analysis, type mapping, modeling advice, and troubleshooting. The assistant can propose model changes that you preview, validate, and selectively apply. See link:ai-advisory.md[AI advisory for Data Vault modeling] for details.
 
 |Generate DDL
 |Collects CREATE/ALTER statements for every table in the model against the configured target database and opens them in the SQL editor.
@@ -246,7 +246,7 @@ image::images/data-vault-model-customer-360-external.png[External read-only sate
 
 == AI advisory
 
-The **AI Help** toolbar button opens an LLM-assisted advisor for source analysis, modeling suggestions, layout proposals, and troubleshooting. Proposals can be reviewed and applied selectively.
+The **AI Help** toolbar button opens the Hop AI Assistant workbench bound to the vault model for source analysis, modeling suggestions, layout proposals, and troubleshooting. Proposals can be reviewed and applied selectively.
 
 See link:ai-advisory.md[Data Vault AI Help and advisory].
 

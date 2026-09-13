@@ -113,7 +113,7 @@ import org.hopper.edw.datavault.hopgui.ModelGeneratedArtifactOpenSupport;
 import org.hopper.edw.datavault.hopgui.ModelTableLayoutPreviewSupport;
 import org.hopper.edw.datavault.hopgui.ModelUpdateActionAuditSupport;
 import org.hopper.edw.datavault.hopgui.ModelUpdateWorkflowClipboardSupport;
-import org.hopper.edw.datavault.hopgui.ai.DvAiAdvisorDialog;
+import org.hopper.edw.datavault.hopgui.ai.EdwAiAdvisorOpenSupport;
 import org.hopper.edw.datavault.hopgui.coaching.ICoachableModelGraph;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.HopGuiModelGraphBase;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
@@ -199,6 +199,8 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
   public static final String TOOLBAR_ITEM_GENERATE_FROM_SOURCE =
       "HopGuiVaultGraph-ToolBar-10062-Generate-From-Source";
   public static final String TOOLBAR_ITEM_AI_HELP = "HopGuiVaultGraph-ToolBar-10065-AI-Help";
+  public static final String TOOLBAR_ITEM_EXPORT_DIAGRAM =
+      "HopGuiVaultGraph-ToolBar-10067-Export-Diagram";
 
   public static final String TOOLBAR_ITEM_RUN_DATA_VAULT_UPDATE =
       "HopGuiVaultGraph-ToolBar-10065-Run-Data-Vault-Update";
@@ -349,6 +351,19 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       }
     }
     centerOnCanvasLocation(loc, boxW, boxH);
+  }
+
+  @Override
+  protected boolean nudgeSelectedElements(int dx, int dy) {
+    if (getSelectedTables().isEmpty() && getSelectedNotes().isEmpty()) {
+      return false;
+    }
+    markUndoPoint();
+    moveSelectedObjects(dx, dy);
+    setChanged();
+    redraw();
+    enableUndoToolbarItems();
+    return true;
   }
 
   private void moveSelectedObjects(int dx, int dy) {
@@ -865,22 +880,20 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       toolTip = "i18n::HopGuiVaultGraph.Toolbar.AiHelp.Tooltip",
       image = "datavault-ai-help.svg")
   public void openAiAdvisor() {
-    if (model == null) {
-      return;
-    }
-    new DvAiAdvisorDialog(
-            hopShell(),
-            hopGui,
-            model,
-            getVariables(),
-            hopGui.getMetadataProvider(),
-            this::markUndoPoint,
-            () -> {
-              setChanged();
-              redraw();
-              enableUndoToolbarItems();
-            })
-        .open();
+    openAiAdvisor(null);
+  }
+
+  public void openAiAdvisor(String focusNodeName) {
+    EdwAiAdvisorOpenSupport.openDataVault(hopGui, model, focusNodeName);
+  }
+
+  @GuiToolbarElement(
+      root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
+      id = TOOLBAR_ITEM_EXPORT_DIAGRAM,
+      toolTip = "i18n::HopGuiVaultGraph.Toolbar.ExportDiagram.Tooltip",
+      image = "ui/images/image.svg")
+  public void exportDiagram() {
+    hopGui.fileDelegate.exportToSvg();
   }
 
   @GuiToolbarElement(
@@ -2002,6 +2015,23 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     HopGuiVaultGraph realGraph = context.getVaultGraph();
     if (realGraph != null) {
       realGraph.openAiAdvisor();
+    }
+  }
+
+  @GuiContextAction(
+      id = "vault-graph-table-ai-help",
+      parentId = HopGuiVaultTableContext.CONTEXT_ID,
+      type = GuiActionType.Modify,
+      name = "i18n::HopGuiVaultGraph.AiHelp.Name",
+      tooltip = "i18n::HopGuiVaultGraph.AiHelp.Tooltip",
+      image = "datavault-ai-help.svg",
+      category = "Help",
+      categoryOrder = "1")
+  public void openAiAdvisorTableContext(HopGuiVaultTableContext context) {
+    HopGuiVaultGraph realGraph = context.getVaultGraph();
+    if (realGraph != null) {
+      String focus = context.getTable() != null ? context.getTable().getName() : null;
+      realGraph.openAiAdvisor(focus);
     }
   }
 

@@ -46,7 +46,6 @@ import org.apache.hop.www.BaseHttpServlet;
 import org.apache.hop.www.HopServerConfig;
 import org.apache.hop.www.IHopServerPlugin;
 import org.apache.hop.www.PipelineMap;
-import org.apache.hop.www.WorkflowMap;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceColumn;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceJson;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
@@ -76,7 +75,10 @@ import org.hopper.edw.datavault.virtualization.jdbc.HopSourceModelJdbcResultSet;
  * <p>Parameters: {@code schema} / {@code modelName} (service name), {@code action}
  * (schemas|tables|columns|query|ping), {@code sql}, {@code rowLimit}, {@code table}.
  */
-@HopServerServlet(id = "sourceModelData", name = "Source model free SQL data (hop-hsm JDBC)")
+@HopServerServlet(
+    id = "sourceModelData",
+    name = "Source model free SQL data (hop-hsm JDBC)",
+    requiredPermission = "run.execute")
 public class SourceModelDataServlet extends BaseHttpServlet implements IHopServerPlugin {
 
   @Serial private static final long serialVersionUID = 1L;
@@ -87,30 +89,6 @@ public class SourceModelDataServlet extends BaseHttpServlet implements IHopServe
 
   public SourceModelDataServlet(PipelineMap pipelineMap) {
     super(pipelineMap);
-  }
-
-  @Override
-  public void setup(PipelineMap pipelineMap, WorkflowMap workflowMap) {
-    super.setup(pipelineMap, workflowMap);
-    registerHopWebPermission();
-  }
-
-  /**
-   * Opt the plugin servlet into Hop Web RBAC when the running Hop has {@code
-   * HopServerEndpointPermissionMapper.register}. No-op on Hop 2.19.0 (standalone Jetty Basic).
-   */
-  void registerHopWebPermission() {
-    try {
-      Class<?> mapper =
-          Class.forName("org.apache.hop.core.security.HopServerEndpointPermissionMapper");
-      mapper
-          .getMethod("register", String.class, String.class)
-          .invoke(null, CONTEXT_PATH, "run.execute");
-    } catch (ClassNotFoundException | NoSuchMethodException ignored) {
-      // Hop without plugin overlay (2.19.0)
-    } catch (Exception e) {
-      logError("Could not register " + CONTEXT_PATH + " with Hop Web RBAC", e);
-    }
   }
 
   @Override

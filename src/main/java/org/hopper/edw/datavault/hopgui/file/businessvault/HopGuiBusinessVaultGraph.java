@@ -15,8 +15,6 @@
  */
 package org.hopper.edw.datavault.hopgui.file.businessvault;
 
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -46,7 +44,6 @@ import org.apache.hop.core.gui.plugin.toolbar.GuiToolbarElementType;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.variables.Variables;
-import org.apache.hop.core.vfs.HopVfs;
 import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.pipeline.PipelineMeta;
@@ -86,14 +83,12 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
-import org.hopper.edw.datavault.command.svg.SvgExportService;
-import org.hopper.edw.datavault.command.svg.SvgRenderOptions;
 import org.hopper.edw.datavault.config.DataVaultConfigSingleton;
 import org.hopper.edw.datavault.hopgui.ModelGeneratedArtifactOpenSupport;
 import org.hopper.edw.datavault.hopgui.ModelTableLayoutPreviewSupport;
 import org.hopper.edw.datavault.hopgui.ModelUpdateActionAuditSupport;
 import org.hopper.edw.datavault.hopgui.ModelUpdateWorkflowClipboardSupport;
-import org.hopper.edw.datavault.hopgui.ai.BvAiAdvisorDialog;
+import org.hopper.edw.datavault.hopgui.ai.EdwAiAdvisorOpenSupport;
 import org.hopper.edw.datavault.hopgui.coaching.ICoachableModelGraph;
 import org.hopper.edw.datavault.hopgui.file.businessvault.delegates.HopGuiBusinessVaultClipboardDelegate;
 import org.hopper.edw.datavault.hopgui.file.businessvault.delegates.HopGuiBusinessVaultSnapshotUndo;
@@ -1000,6 +995,46 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     }
   }
 
+  @Override
+  protected boolean nudgeSelectedElements(int dx, int dy) {
+    List<IBvTable> tables = getSelectedBvTables();
+    List<BvDvTableReference> dvRefs = getSelectedDvReferences();
+    List<BvBvTableReference> bvRefs = getSelectedBvReferences();
+    List<DvNote> notes = getSelectedNotes();
+    if (tables.isEmpty() && dvRefs.isEmpty() && bvRefs.isEmpty() && notes.isEmpty()) {
+      return false;
+    }
+    markUndoPoint();
+    for (IBvTable table : tables) {
+      Point loc = table.getLocation();
+      if (loc != null) {
+        setCanvasObjectLocation(table, loc.x + dx, loc.y + dy);
+      }
+    }
+    for (BvDvTableReference reference : dvRefs) {
+      Point loc = reference.getLocation();
+      if (loc != null) {
+        setCanvasObjectLocation(reference, loc.x + dx, loc.y + dy);
+      }
+    }
+    for (BvBvTableReference reference : bvRefs) {
+      Point loc = reference.getLocation();
+      if (loc != null) {
+        setCanvasObjectLocation(reference, loc.x + dx, loc.y + dy);
+      }
+    }
+    for (DvNote note : notes) {
+      Point loc = note.getLocation();
+      if (loc != null) {
+        setCanvasObjectLocation(note, loc.x + dx, loc.y + dy);
+      }
+    }
+    setChanged();
+    redraw();
+    enableUndoToolbarItems();
+    return true;
+  }
+
   private void setCanvasObjectLocation(IBvTable table, int x, int y) {
     int clampedX = Math.max(0, x);
     int clampedY = Math.max(0, y);
@@ -1765,6 +1800,23 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
   }
 
   @GuiContextAction(
+      id = "bv-graph-table-ai-help",
+      parentId = HopGuiBusinessVaultTableContext.CONTEXT_ID,
+      type = GuiActionType.Modify,
+      name = "i18n::HopGuiBusinessVaultGraph.AiHelp.Name",
+      tooltip = "i18n::HopGuiBusinessVaultGraph.AiHelp.Tooltip",
+      image = "datavault-ai-help.svg",
+      category = "Help",
+      categoryOrder = "10")
+  public void openAiAdvisorTableContext(HopGuiBusinessVaultTableContext context) {
+    HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
+    if (graph != null) {
+      String focus = context.getTable() != null ? context.getTable().getName() : null;
+      graph.openAiAdvisor(focus);
+    }
+  }
+
+  @GuiContextAction(
       id = "bv-graph-paste-clipboard",
       parentId = HopGuiBusinessVaultContext.CONTEXT_ID,
       type = GuiActionType.Modify,
@@ -2006,79 +2058,20 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
       toolTip = "i18n::HopGuiBusinessVaultGraph.Toolbar.AiHelp.Tooltip",
       image = "datavault-ai-help.svg")
   public void openAiAdvisor() {
-    if (model == null) {
-      return;
-    }
-    new BvAiAdvisorDialog(
-            hopShell(),
-            hopGui,
-            model,
-            getVariables(),
-            hopGui.getMetadataProvider(),
-            this::markUndoPoint,
-            () -> {
-              setChanged();
-              redraw();
-              enableUndoToolbarItems();
-            })
-        .open();
+    openAiAdvisor(null);
+  }
+
+  public void openAiAdvisor(String focusNodeName) {
+    EdwAiAdvisorOpenSupport.openBusinessVault(hopGui, model, focusNodeName);
   }
 
   @GuiToolbarElement(
       root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
       id = TOOLBAR_ITEM_EXPORT_SVG,
-      toolTip = "i18n::HopGuiBusinessVaultGraph.Toolbar.ExportSvg.Tooltip",
+      toolTip = "i18n::HopGuiBusinessVaultGraph.Toolbar.ExportDiagram.Tooltip",
       image = "ui/images/image.svg")
   public void exportModelToSvg() {
-    if (model == null) {
-      return;
-    }
-    try {
-      SvgRenderOptions options = SvgRenderOptions.defaults();
-      String svgXml =
-          SvgExportService.generateBusinessVaultModelSvg(
-              model, options, variables, hopGui.getMetadataProvider());
-
-      String proposedName = Const.NVL(model.getName(), "business-vault-model") + ".svg";
-      String proposedFilename =
-          variables.getVariable("user.home") + java.io.File.separator + proposedName;
-
-      String filenameFromUser =
-          BaseDialog.presentFileDialog(
-              true,
-              hopGui.getShell(),
-              null,
-              variables,
-              HopVfs.getFileObject(proposedFilename),
-              new String[] {"*.svg"},
-              new String[] {"SVG Files"},
-              true);
-      if (filenameFromUser == null) {
-        return;
-      }
-
-      String realFilename = variables.resolve(filenameFromUser);
-      var file = HopVfs.getFileObject(realFilename);
-      if (file.exists()) {
-        MessageBox box = new MessageBox(hopGui.getShell(), SWT.YES | SWT.NO | SWT.ICON_QUESTION);
-        box.setText(BaseMessages.getString(PKG, "HopGuiBusinessVaultGraph.ExportSvg.Exists.Title"));
-        box.setMessage(
-            BaseMessages.getString(PKG, "HopGuiBusinessVaultGraph.ExportSvg.Exists.Message"));
-        if ((box.open() & SWT.YES) == 0) {
-          return;
-        }
-      }
-
-      try (OutputStream outputStream = HopVfs.getOutputStream(file, false)) {
-        outputStream.write(svgXml.getBytes(StandardCharsets.UTF_8));
-      }
-    } catch (Exception e) {
-      new ErrorDialog(
-          hopGui.getShell(),
-          BaseMessages.getString(PKG, "HopGuiBusinessVaultGraph.ExportSvg.Error.Title"),
-          BaseMessages.getString(PKG, "HopGuiBusinessVaultGraph.ExportSvg.Error.Message"),
-          e);
-    }
+    hopGui.fileDelegate.exportToSvg();
   }
 
   @GuiToolbarElement(

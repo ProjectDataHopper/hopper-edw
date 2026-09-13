@@ -166,7 +166,6 @@
                 <include>org.apache.hop:hop-transform-groupby:jar</include>
                 <include>org.apache.hop:hop-transform-ifnull:jar</include>
                 <include>org.apache.hop:hop-transform-insertupdate:jar</include>
-                <include>org.apache.hop:hop-transform-languagemodelchat:jar</include>
                 <include>org.apache.hop:hop-transform-mergejoin:jar</include>
                 <include>org.apache.hop:hop-transform-mergerows:jar</include>
                 <include>org.apache.hop:hop-transform-metainject:jar</include>

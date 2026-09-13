@@ -63,8 +63,8 @@
     <commonmark.version>0.29.0</commonmark.version>
     <elk.version>0.10.0</elk.version>
     <hadoop.version>3.3.6</hadoop.version>
-    <!-- Required runtime: Apache Hop 2.19.0. -->
-    <hop.version>2.19.0</hop.version>
+    <!-- Required runtime: Apache Hop 2.20.0-SNAPSHOT (until 2.20.0 GA). -->
+    <hop.version>2.20.0-SNAPSHOT</hop.version>
     <!-- Hopper Presentation Engine (issue #170). Resolved from repository.data-hopper.com/hopper. -->
     <hopper.presentation.version>1.0.0-SNAPSHOT</hopper.presentation.version>
     <iceberg.version>1.6.1</iceberg.version>
@@ -241,12 +241,6 @@
     <dependency>
       <groupId>org.apache.hop</groupId>
       <artifactId>hop-transform-json</artifactId>
-      <version>${hop.version}</version>
-    </dependency>
-    <!-- LangChain4j language model chat (provided when the Hop module is on the classpath) -->
-    <dependency>
-      <groupId>org.apache.hop</groupId>
-      <artifactId>hop-transform-languagemodelchat</artifactId>
       <version>${hop.version}</version>
     </dependency>
     <dependency>
@@ -514,9 +508,9 @@
   </dependencies>
 
   <!--
-    Optional ASF snapshots repository. Hop 2.19.0 is released and resolved from Maven
-    Central via hop.version. Keep this block only if a compile dependency still needs a
-    SNAPSHOT; it is harmless for released artifacts (releases are disabled).
+    Optional ASF snapshots repository. Hop 2.20.0-SNAPSHOT is resolved from here (or a
+    local mvn install of the Hop tree). Releases stay disabled so GA artifacts come from
+    Maven Central.
   -->
   <repositories>
     <repository>

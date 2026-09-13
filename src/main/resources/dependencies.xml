@@ -15,8 +15,6 @@
   -->
 
 <dependencies>
-    <folder>../../transforms/languagemodelchat</folder>
-    <folder>../../transforms/languagemodelchat/lib</folder>
     <folder>../../transforms/mergejoin</folder>
     <folder>../../transforms/json</folder>
 </dependencies>

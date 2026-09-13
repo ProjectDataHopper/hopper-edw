@@ -16,7 +16,7 @@ limitations under the License.
 
 # Data Hopper EDW documentation index
 
-Documentation for the **Data Hopper EDW** plugin (development **0.11.0-SNAPSHOT**, latest release **0.10.0**). Requires **Apache Hop 2.19.0**. Highlights include **Free SQL / hop-hsm JDBC**, **source modeler** (`.hsm` with JSON and pipeline sources), **metadata harvesting**, optional **load cycle IDs**, **composite hub business keys**, **OpenLineage / Marquez export**, **Hop Lineage View** (`.hlv`), **source-to-target lineage**, catalog version tags, schema validation, multi-DB hardening, and Business Vault incremental loading. See [CHANGELOG.md](../CHANGELOG.md).
+Documentation for the **Data Hopper EDW** plugin (development **0.11.0-SNAPSHOT**, latest release **0.10.0**). Requires **Apache Hop 2.20.0-SNAPSHOT**. Highlights include **Free SQL / hop-hsm JDBC**, **source modeler** (`.hsm` with JSON and pipeline sources), **metadata harvesting**, optional **load cycle IDs**, **composite hub business keys**, **OpenLineage / Marquez export**, **Hop Lineage View** (`.hlv`), **source-to-target lineage**, catalog version tags, schema validation, multi-DB hardening, and Business Vault incremental loading. See [CHANGELOG.md](../CHANGELOG.md).
 
 **New here?** Read [architecture.adoc](architecture.adoc) (catalog, models, resource definition group), then [getting-started-edw.adoc](getting-started-edw.adoc) to **build** an EDW. To **tour** a finished sample, use [getting-started-retail.adoc](getting-started-retail.adoc). Capability list: [feature-overview.adoc](feature-overview.adoc).
 
@@ -127,9 +127,24 @@ Architecture pictures are **committed SVGs** (`docs/images/diagrams/`) generated
 
 ## Command-line tools
 
+### `hop export`
+
+Hop 2.20's unified diagram export. With this plugin installed it also loads EDW files:
+
+```bash
+hop export -f integration-tests/tests/multi-satellite-bv/customer-360.hdv --format svg -o /tmp/customer-360.svg
+hop export -f models/retail-f-orders.hdm --format puml -o /tmp/retail-f-orders.puml
+hop export -f models/retail-f-orders.hdm --format mermaid -o /tmp/retail-f-orders.mmd
+hop export -f models/retail-f-orders.hdm --format drawio -o /tmp/retail-f-orders.drawio
+hop export -f models/retail-f-orders.hdm --format pdf -o /tmp/retail-f-orders.pdf
+hop export --list-exporters
+```
+
+Supported EDW extensions: `.hsm`, `.hdv`, `.hbv`, `.hdm`, `.hem`. Formats: **SVG**, **PDF**, **PlantUML** (`.puml`), **Draw.io** (`.drawio`), **Mermaid** (`.mmd`; execution maps emit a flowchart). Lineage views (`.hlv`) export SVG from an **open** Lineage View tab (the graph is a live session). Multi-model Draw.io rollups stay on `hop architecture-export`. Extra option keys (GUI `DiagramExportOptions.extraOptions`, when the Hop dialog/CLI supplies them): `syntaxStyle` (`CLASS`/`ENTITY`), `diagramType` (`ER`/`CLASS`), `layout` (`ELK`/`SWIMLANE`), `includeDataTypes`, `includeGrain`, `markdownFence`, `includeColumnDetails`.
+
 ### `hop svg`
 
-Export pipelines (`.hpl`), workflows (`.hwf`), Data Vault models (`.hdv`), Business Vault models (`.hbv`), dimensional models (`.hdm`), and execution maps (`.hem`) to SVG.
+Compatibility CLI for the same SVG painters (pipelines, workflows, `.hsm` / `.hdv` / `.hbv` / `.hdm` / `.hem`). Prefer `hop export` when you are on Hop 2.20.
 
 **Docker (no local Hop install):** from `integration-tests/`:
 

@@ -18,6 +18,8 @@ limitations under the License.
 
 Implementation plan for `hopper-edw`. Product documentation will be added to `docs/` once implemented.
 
+**Status (2026-09):** Implemented on Hop 2.20.0-SNAPSHOT. SVG, PDF, PlantUML, Draw.io, and Mermaid exporters ship for `.hsm` / `.hdv` / `.hbv` / `.hdm` / `.hem`. GUI uses Hop's `DiagramExportDialog` (File → Export diagram). `hop architecture-export` and `hop svg` are unchanged.
+
 * **Hopper EDW Issue:** [#175](https://github.com/ProjectDataHopper/hopper-edw/issues/175) (*Export models to various formats in the GUI*)
 * **Apache Hop Core Issue:** [apache/hop#8346](https://github.com/apache/hop/issues/8346) (*Extensible Diagram Exporter plugin architecture*)
 * **Prerequisite:** Apache Hop **2.20.0-SNAPSHOT** (or 2.20.0) containing the Diagram Exporter plugin type and SPI:

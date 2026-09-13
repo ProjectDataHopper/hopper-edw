@@ -61,7 +61,7 @@ Plugin code calls:
 - `CanvasSvgFacade.registerCanvas` / `publishSnapshot` / `ensureInteractionHandler`
 - `IWebCanvasGraph` (hover + area owners)
 
-These APIs land in Apache Hop via [issue #7873](https://github.com/apache/hop/issues/7873) / [PR #7874](https://github.com/apache/hop/pull/7874). Use **Apache Hop 2.19.0**, which includes that SPI **and** the related Hop Web client fixes (SVG effects-layer previews, zoom wheel hit-testing, active-canvas-only rebind).
+These APIs land in Apache Hop via [issue #7873](https://github.com/apache/hop/issues/7873) / [PR #7874](https://github.com/apache/hop/pull/7874). Use **Apache Hop 2.20.0-SNAPSHOT**, which includes that SPI, the related Hop Web client fixes (SVG effects-layer previews, zoom wheel hit-testing, active-canvas-only rebind), explorer HTML/PDF with a document base ([issue #8297](https://github.com/apache/hop/issues/8297)), and the AI Assistant workbench.
 
 ### Hop Web client behaviour (core)
 

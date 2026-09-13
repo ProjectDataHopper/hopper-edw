@@ -15,60 +15,16 @@
  */
 package org.hopper.edw.datavault.ai.dimensional;
 
-import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.data.message.ChatMessage;
-import dev.langchain4j.data.message.SystemMessage;
-import dev.langchain4j.data.message.UserMessage;
-import dev.langchain4j.model.output.Response;
-import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
-import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.pipeline.transforms.languagemodelchat.LanguageModelChatMeta;
-import org.apache.hop.pipeline.transforms.languagemodelchat.internals.LanguageModelFacade;
-import org.hopper.edw.datavault.ai.DvAiLanguageModelFactory;
-import org.hopper.edw.datavault.ai.DvAiProposalParser;
-import org.hopper.edw.datavault.ai.DvAiResponse;
-import org.hopper.edw.datavault.ai.HopAiAdvisorEngine;
-import org.hopper.edw.datavault.ai.HopAiConfig;
 
-/** Calls the configured LLM and parses dimensional model advisory responses. */
+/** Assembles dimensional-model system and user prompts for the Hop AI Assistant workbench. */
 public final class DmAiAdvisorService {
 
   private DmAiAdvisorService() {}
 
-  public static DvAiResponse advise(
-      HopAiConfig config,
-      IVariables variables,
-      DmAiContextBundle context,
-      List<ChatMessage> history)
-      throws HopException {
-    HopAiAdvisorEngine.validateConfig(config);
-
-    LanguageModelChatMeta meta = DvAiLanguageModelFactory.fromConfig(config, variables);
-    LanguageModelFacade facade = new LanguageModelFacade(variables, meta);
-
-    String userPrompt =
-        context.isFollowUp() ? buildFollowUpUserPrompt(context) : buildInitialUserPrompt(context);
-
-    List<ChatMessage> messages = new ArrayList<>();
-    messages.add(new SystemMessage(buildSystemPrompt(context)));
-    if (history != null) {
-      messages.addAll(history);
-    }
-    messages.add(new UserMessage(userPrompt));
-
-    try {
-      Response<AiMessage> response = facade.generate(messages);
-      String text = response != null && response.content() != null ? response.content().text() : "";
-      return DvAiProposalParser.parse(text);
-    } catch (Exception e) {
-      throw new HopException("AI advisory request failed: " + e.getMessage(), e);
-    }
-  }
-
-  static String buildSystemPrompt(DmAiContextBundle context) throws HopException {
+  public static String buildSystemPrompt(DmAiContextBundle context) throws HopException {
     StringBuilder prompt = new StringBuilder();
     prompt.append(DmAiPromptLoader.loadPreamble()).append("\n\n");
     prompt.append(DmAiPromptLoader.loadScenarioPrompt(context.getScenario()));

@@ -84,7 +84,7 @@ import org.hopper.edw.datavault.hopgui.ModelGeneratedArtifactOpenSupport;
 import org.hopper.edw.datavault.hopgui.ModelTableLayoutPreviewSupport;
 import org.hopper.edw.datavault.hopgui.ModelUpdateActionAuditSupport;
 import org.hopper.edw.datavault.hopgui.ModelUpdateWorkflowClipboardSupport;
-import org.hopper.edw.datavault.hopgui.ai.DmAiAdvisorDialog;
+import org.hopper.edw.datavault.hopgui.ai.EdwAiAdvisorOpenSupport;
 import org.hopper.edw.datavault.hopgui.coaching.ICoachableModelGraph;
 import org.hopper.edw.datavault.hopgui.file.dimensional.delegates.HopGuiDimensionalClipboardDelegate;
 import org.hopper.edw.datavault.hopgui.file.dimensional.delegates.HopGuiDimensionalSnapshotUndo;
@@ -166,6 +166,8 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
       "HopGuiDimensionalModelGraph-ToolBar-10060-Check-Model";
   public static final String TOOLBAR_ITEM_AI_HELP =
       "HopGuiDimensionalModelGraph-ToolBar-10065-AI-Help";
+  public static final String TOOLBAR_ITEM_EXPORT_DIAGRAM =
+      "HopGuiDimensionalModelGraph-ToolBar-10067-Export-Diagram";
   public static final String TOOLBAR_ITEM_DEBUG = "HopGuiDimensionalModelGraph-ToolBar-10070-Debug";
   public static final String TOOLBAR_ITEM_GENERATE_DDL =
       "HopGuiDimensionalModelGraph-ToolBar-10080-Generate-Ddl";
@@ -504,6 +506,19 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
       }
     }
     centerOnCanvasLocation(loc, boxW, boxH);
+  }
+
+  @Override
+  protected boolean nudgeSelectedElements(int dx, int dy) {
+    if (getSelectedTables().isEmpty() && getSelectedNotes().isEmpty()) {
+      return false;
+    }
+    markUndoPoint();
+    moveSelectedObjects(dx, dy);
+    setChanged();
+    redraw();
+    enableUndoToolbarItems();
+    return true;
   }
 
   private void moveSelectedObjects(int dx, int dy) {
@@ -1051,6 +1066,23 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
   }
 
   @GuiContextAction(
+      id = "dm-graph-table-ai-help",
+      parentId = HopGuiDimensionalTableContext.CONTEXT_ID,
+      type = GuiActionType.Modify,
+      name = "i18n::HopGuiDimensionalModelGraph.AiHelp.Name",
+      tooltip = "i18n::HopGuiDimensionalModelGraph.AiHelp.Tooltip",
+      image = "datavault-ai-help.svg",
+      category = "Help",
+      categoryOrder = "2")
+  public void openAiAdvisorTableContext(HopGuiDimensionalTableContext context) {
+    HopGuiDimensionalModelGraph graph = context.getDimensionalGraph();
+    if (graph != null) {
+      String focus = context.getTable() != null ? context.getTable().getName() : null;
+      graph.openAiAdvisor(focus);
+    }
+  }
+
+  @GuiContextAction(
       id = "dm-graph-import-database-tables",
       parentId = HopGuiDimensionalContext.CONTEXT_ID,
       type = GuiActionType.Create,
@@ -1591,22 +1623,20 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
       toolTip = "i18n::HopGuiDimensionalModelGraph.Toolbar.AiHelp.Tooltip",
       image = "datavault-ai-help.svg")
   public void openAiAdvisor() {
-    if (model == null) {
-      return;
-    }
-    new DmAiAdvisorDialog(
-            hopShell(),
-            hopGui,
-            model,
-            getVariables(),
-            hopGui.getMetadataProvider(),
-            this::markUndoPoint,
-            () -> {
-              setChanged();
-              redraw();
-              enableUndoToolbarItems();
-            })
-        .open();
+    openAiAdvisor(null);
+  }
+
+  public void openAiAdvisor(String focusNodeName) {
+    EdwAiAdvisorOpenSupport.openDimensional(hopGui, model, focusNodeName);
+  }
+
+  @GuiToolbarElement(
+      root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
+      id = TOOLBAR_ITEM_EXPORT_DIAGRAM,
+      toolTip = "i18n::HopGuiDimensionalModelGraph.Toolbar.ExportDiagram.Tooltip",
+      image = "ui/images/image.svg")
+  public void exportDiagram() {
+    hopGui.fileDelegate.exportToSvg();
   }
 
   @GuiToolbarElement(

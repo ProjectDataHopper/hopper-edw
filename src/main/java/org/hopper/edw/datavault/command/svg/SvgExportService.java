@@ -319,7 +319,7 @@ public final class SvgExportService {
       IHopMetadataProvider metadataProvider)
       throws HopException {
     try {
-      DataVaultModel model = loadDataVaultModel(filename, metadataProvider);
+      DataVaultModel model = deserializeDataVaultModel(filename, metadataProvider);
       return DataVaultModelSvgPainter.generateDataVaultModelSvg(model, options, variables);
     } catch (HopException e) {
       throw e;
@@ -335,7 +335,7 @@ public final class SvgExportService {
       IHopMetadataProvider metadataProvider)
       throws HopException {
     try {
-      BusinessVaultModel model = loadBusinessVaultModel(filename, metadataProvider);
+      BusinessVaultModel model = deserializeBusinessVaultModel(filename, metadataProvider);
       return BusinessVaultModelSvgPainter.generateBusinessVaultModelSvg(
           model, options, variables, metadataProvider);
     } catch (HopException e) {
@@ -352,7 +352,7 @@ public final class SvgExportService {
       IHopMetadataProvider metadataProvider)
       throws HopException {
     try {
-      DimensionalModel model = loadDimensionalModel(filename, metadataProvider);
+      DimensionalModel model = deserializeDimensionalModel(filename, metadataProvider);
       return DimensionalModelSvgPainter.generateDimensionalModelSvg(
           model, options, variables, metadataProvider);
     } catch (HopException e) {
@@ -362,7 +362,40 @@ public final class SvgExportService {
     }
   }
 
-  private static DataVaultModel loadDataVaultModel(
+  public static DataVaultModel loadDataVaultModel(
+      String filename, IHopMetadataProvider metadataProvider) throws HopException {
+    try {
+      return deserializeDataVaultModel(filename, metadataProvider);
+    } catch (HopException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new HopException("Unable to load Data Vault model " + filename, e);
+    }
+  }
+
+  public static BusinessVaultModel loadBusinessVaultModel(
+      String filename, IHopMetadataProvider metadataProvider) throws HopException {
+    try {
+      return deserializeBusinessVaultModel(filename, metadataProvider);
+    } catch (HopException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new HopException("Unable to load Business Vault model " + filename, e);
+    }
+  }
+
+  public static DimensionalModel loadDimensionalModel(
+      String filename, IHopMetadataProvider metadataProvider) throws HopException {
+    try {
+      return deserializeDimensionalModel(filename, metadataProvider);
+    } catch (HopException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new HopException("Unable to load dimensional model " + filename, e);
+    }
+  }
+
+  private static DataVaultModel deserializeDataVaultModel(
       String filename, IHopMetadataProvider metadataProvider) throws Exception {
     Document document = XmlHandler.loadXmlFile(filename);
     Node rootNode = XmlHandler.getSubNode(document, HopVaultFileType.XML_TAG);
@@ -372,7 +405,7 @@ public final class SvgExportService {
     return model;
   }
 
-  private static BusinessVaultModel loadBusinessVaultModel(
+  private static BusinessVaultModel deserializeBusinessVaultModel(
       String filename, IHopMetadataProvider metadataProvider) throws Exception {
     Document document = XmlHandler.loadXmlFile(filename);
     Node rootNode = XmlHandler.getSubNode(document, HopBusinessVaultFileType.XML_TAG);
@@ -382,7 +415,7 @@ public final class SvgExportService {
     return model;
   }
 
-  private static DimensionalModel loadDimensionalModel(
+  private static DimensionalModel deserializeDimensionalModel(
       String filename, IHopMetadataProvider metadataProvider) throws Exception {
     Document document = XmlHandler.loadXmlFile(filename);
     Node rootNode = XmlHandler.getSubNode(document, HopDimensionalFileType.XML_TAG);

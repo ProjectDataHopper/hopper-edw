@@ -24,6 +24,7 @@ import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerFile;
 import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
 import org.apache.hop.ui.hopgui.perspective.explorer.file.types.base.BaseExplorerFileTypeHandler;
+import org.apache.hop.ui.hopgui.perspective.explorer.web.HopWebExplorerFileHelper;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.ProgressEvent;
@@ -34,9 +35,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.hopper.edw.datavault.hopgui.EdwDocsWebSupport;
 
 /**
- * Loads generated project documentation in the explorer {@link Browser} via a RAP handler URL so
- * CSS, header/sidebar chrome, and in-page links resolve. Hop's default HTML handler uses {@code
- * Browser.setText()} and has no document base.
+ * Loads generated project documentation in the explorer {@link Browser}. On Hop Web, prefers the
+ * explorer-file URL (document base) when {@link HopWebExplorerFileHelper} is registered, then the
+ * plugin RAP handler, then rewritten HTML.
  */
 public class HopProjectDocExplorerFileTypeHandler extends BaseExplorerFileTypeHandler {
 
@@ -84,11 +85,14 @@ public class HopProjectDocExplorerFileTypeHandler extends BaseExplorerFileTypeHa
         clearChanged();
         return;
       }
+      String explorerUrl = HopWebExplorerFileHelper.urlFor(filename, hopGui.getVariables());
+      if (!Utils.isEmpty(explorerUrl)) {
+        wBrowser.setUrl(explorerUrl);
+        clearChanged();
+        return;
+      }
       String rewritten = EdwDocsWebSupport.rewrittenPageHtml(filename);
       if (!Utils.isEmpty(rewritten)) {
-        // Prefer rewritten HTML: RAP Browser.setText has no document base, so relative CSS 404s
-        // (Markdown preview looks fine because it inlines styles). Absolute RAP handler URLs
-        // load stylesheets and keep in-page links inside the explorer iframe.
         wBrowser.setText(rewritten);
         clearChanged();
         return;

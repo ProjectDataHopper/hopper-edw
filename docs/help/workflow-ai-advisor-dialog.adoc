@@ -6,4 +6,4 @@ toc::[]
 
 Related guide: link:../ai-advisory.md[ai-advisory.md].
 
-Ask the AI advisor about the open Hop workflow: action choice, error hops, and orchestration. See link:../ai-advisory.md[AI advisory].
+Workflow AI Help is provided by Apache Hop 2.20 (toolbar on the workflow canvas). See Hop's AI Assistant documentation. EDW-specific advisors are documented in link:../ai-advisory.md[AI advisory].

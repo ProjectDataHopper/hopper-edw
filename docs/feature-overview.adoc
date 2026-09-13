@@ -6,7 +6,7 @@
 
 toc::[]
 
-**Data Hopper EDW** is a set of Apache Hop plugins for an **Enterprise Data Warehouse**: catalog, source models, **model-driven Data Vault 2.0**, **Business Vault**, and **dimensional** loading. Version **0.11.0-SNAPSHOT** (latest release **0.10.0**) requires **Apache Hop 2.19.0** and **Java 21**.
+**Data Hopper EDW** is a set of Apache Hop plugins for an **Enterprise Data Warehouse**: catalog, source models, **model-driven Data Vault 2.0**, **Business Vault**, and **dimensional** loading. Version **0.11.0-SNAPSHOT** (latest release **0.10.0**) requires **Apache Hop 2.20.0-SNAPSHOT** and **Java 21**.
 
 **Model once. Generate loads and consumption layers.** The visual models (`.hsm`, `.hdv`, `.hbv`, `.hdm`) are the contract between architects, modelers, and operations.
 
@@ -101,6 +101,10 @@ For a slide-style executive summary, see link:presentations/hop-data-vault-overv
 |Architecture export (Draw.io)
 |Available (SOLUTION + DATA inventory + aggregated DV/BV/DM ELK)
 |link:architecture-export.adoc[Architecture export]
+
+|Diagram export (Hop 2.20)
+|Available (SVG, PDF, PlantUML, Draw.io, Mermaid for `.hsm` / `.hdv` / `.hbv` / `.hdm` / `.hem`)
+|link:README.md[docs README] (`hop export`), issue https://github.com/ProjectDataHopper/hopper-edw/issues/175[#175]
 
 |Project documentation (static HTML)
 |Available (Hop Web: explorer + RAP handler, issue https://github.com/ProjectDataHopper/hopper-edw/issues/169[#169])

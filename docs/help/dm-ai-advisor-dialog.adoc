@@ -6,6 +6,6 @@ toc::[]
 
 Related guide: link:../ai-advisory.md[ai-advisory.md].
 
-Ask the AI advisor about the open `.hdm` model: grains, SCD policies, junk/range dimensions, and generated loads.
+Opens the Hop **AI Assistant** workbench bound to the open `.hdm` model: grains, SCD policies, junk/range dimensions, and generated loads.
 
-Requires an AI provider in Hop configuration. Review proposed edits before applying. See link:../ai-advisory.md[AI advisory].
+Requires an **AI Provider** in Hop metadata and AI enabled under **Configuration → Plugins → AI Assistant**. Review proposed edits before applying. See link:../ai-advisory.md[AI advisory].

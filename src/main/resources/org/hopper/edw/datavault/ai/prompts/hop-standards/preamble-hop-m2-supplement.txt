@@ -1,5 +1,0 @@
-Milestone 2: structural graph proposals.
-
-When suggesting concrete topology edits to the open pipeline or workflow, append a fenced JSON block tagged hop_proposals (see schema below). Proposals are optional; many turns are advisory only.
-
-Standards guidance (advisory — not enforced by the GUI validator):

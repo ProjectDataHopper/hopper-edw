@@ -143,6 +143,8 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       "HopGuiSourceModelGraph-ToolBar-10059-Generate-Vault";
   public static final String TOOLBAR_ITEM_CHECK_MODEL =
       "HopGuiSourceModelGraph-ToolBar-10060-Check-Model";
+  public static final String TOOLBAR_ITEM_EXPORT_DIAGRAM =
+      "HopGuiSourceModelGraph-ToolBar-10063-Export-Diagram";
   public static final String TOOLBAR_ITEM_TOGGLE_COACH =
       "HopGuiSourceModelGraph-ToolBar-10084-Toggle-Coach";
   public static final String TOOLBAR_ITEM_TOGGLE_DURATIONS =
@@ -544,6 +546,16 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
     CheckResultDialog dialog = new CheckResultDialog(getShell(), new ArrayList<>(result.remarks()));
     dialog.open();
+  }
+
+  @GuiToolbarElement(
+      root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
+      id = TOOLBAR_ITEM_EXPORT_DIAGRAM,
+      toolTip = "i18n::HopGuiSourceModelGraph.Toolbar.ExportDiagram.Tooltip",
+      type = GuiToolbarElementType.BUTTON,
+      image = "ui/images/image.svg")
+  public void exportDiagram() {
+    hopGui.fileDelegate.exportToSvg();
   }
 
   @GuiToolbarElement(
@@ -1470,6 +1482,23 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     boolean xOverlap = Math.max(lassoMinX, tMinX) < Math.min(lassoMaxX, tMaxX);
     boolean yOverlap = Math.max(lassoMinY, tMinY) < Math.min(lassoMaxY, tMaxY);
     return xOverlap && yOverlap;
+  }
+
+  @Override
+  protected boolean nudgeSelectedElements(int dx, int dy) {
+    if (getSelectedTables().isEmpty()
+        && getSelectedQueries().isEmpty()
+        && getSelectedJsonSources().isEmpty()
+        && getSelectedPipelineSources().isEmpty()
+        && getSelectedNotes().isEmpty()) {
+      return false;
+    }
+    markUndoPoint();
+    moveSelectedObjects(dx, dy);
+    setChanged();
+    redraw();
+    enableUndoToolbarItems();
+    return true;
   }
 
   private void moveSelectedObjects(int dx, int dy) {

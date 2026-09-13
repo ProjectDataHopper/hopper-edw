@@ -18,9 +18,9 @@ limitations under the License.
 
 ![EDW](docs/images/edw-logo.svg)
 
-Apache Hop plugins to design, generate, and operate an **Enterprise Data Warehouse**: Data Catalog, source models, **Data Vault 2.0**, **Business Vault**, **dimensional** models, quality, lineage, and the **EDW Journey** map. Version **0.11.0-SNAPSHOT** (latest release **0.10.0**) requires **Apache Hop 2.19.0** and **Java 21**.
+Apache Hop plugins to design, generate, and operate an **Enterprise Data Warehouse**: Data Catalog, source models, **Data Vault 2.0**, **Business Vault**, **dimensional** models, quality, lineage, and the **EDW Journey** map. Version **0.11.0-SNAPSHOT** (latest release **0.10.0**) requires **Apache Hop 2.20** (development **2.20.0-SNAPSHOT**) and **Java 21**.
 
-**Hop 2.19.0 is required.** Hop **2.18.x** (including 2.18.1) is **not** supported for this release.
+**Hop 2.20.0-SNAPSHOT is required.** Hop **2.19.x** and earlier are **not** supported for this development line.
 
 **Model once. Generate loads and consumption layers.** Sources live in the Hop **Data Catalog**; visual **`.hsm`**, **`.hdv`**, **`.hbv`**, and **`.hdm`** models drive workflow actions, optional **execution maps** (`.hem`), and **Hop Lineage Views** (`.hlv`).
 

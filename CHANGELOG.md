@@ -4,6 +4,14 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Apache Hop 2.20.0-SNAPSHOT
+
+- Compile and runtime pin is **Apache Hop 2.20.0-SNAPSHOT** (Java 21 unchanged). Language Model Chat is no longer bundled in the plugin zip.
+- Data Vault, Business Vault, and dimensional **AI Help** open the Hop AI Assistant workbench (`IAiAdvisor` / `#8330`). Pipeline and workflow AI Help, and the hopper-edw AI Configuration tab, are removed (Hop owns those surfaces).
+- Hop Web explorer HTML for generated project documentation prefers the Hop explorer-file URL with a document base (`#8297`). Plugin Help still uses the hopper-edw RAP handler.
+- `/hop/sourceModelData` declares `@HopServerServlet(requiredPermission = "run.execute")` instead of reflecting on a 2.19-only mapper.
+- **Diagram export:** `.hsm` / `.hdv` / `.hbv` / `.hdm` / `.hem` register as Hop Diagram Exporter subjects (SVG, PDF, PlantUML, Draw.io, Mermaid). File → Export diagram and `hop export -f model.hdm --format puml` work. `.hlv` SVG still needs an open Lineage View tab (live session graph). `hop svg` and `hop architecture-export` remain as compatibility / multi-model commands.
+
 ### Gantt / presentation SVG and PDF export (issue #174)
 
 - Saving a Gantt (or Performance) chart as PDF or SVG no longer writes `${PROJECT_HOME}` as a literal folder under Tomcat. Hop Web downloads the file in the browser. Desktop still uses the VFS save dialog, and the selected path is resolved before writing.

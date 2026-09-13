@@ -1370,6 +1370,27 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
     }
   }
 
+  /** Snapshot undo before an AI proposal apply. Must run before mutations. */
+  public void markAiAdvisorUndoPoint() {
+    markUndoPoint();
+  }
+
+  /** Mark changed, redraw, and refresh undo toolbar after AI proposals are applied. */
+  public void afterAiAdvisorApply() {
+    setChanged();
+    redraw();
+    enableUndoToolbarItems();
+  }
+
+  /**
+   * Arrow-key nudge of selected canvas elements. Subclasses that support table/note selection
+   * override this; graphs that do not (lineage, execution map) leave the view to pan.
+   */
+  @Override
+  protected boolean nudgeSelectedElements(int dx, int dy) {
+    return false;
+  }
+
   protected void applySnapshotChange(Object restored) {
     if (restored == null) {
       return;

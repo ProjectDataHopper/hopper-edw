@@ -6,6 +6,8 @@ toc::[]
 
 Export **derived** diagrams for architects and analysts. Models and workflows remain the source of truth; exports are projections for Draw.io / ArchiMate-style communication (issue #104).
 
+For a **single** open model (`.hsm` / `.hdv` / `.hbv` / `.hdm` / `.hem`), prefer Hop 2.20 **File → Export diagram** or `hop export -f model.hdm --format drawio` (also SVG, PDF, PlantUML, Mermaid). This page is the **multi-model** Draw.io workflow (`hop architecture-export`): SOLUTION architecture, DATA inventory, and aggregated DV/BV/DM diagrams.
+
 == Four products
 
 [cols="1,2,2", options="header"]

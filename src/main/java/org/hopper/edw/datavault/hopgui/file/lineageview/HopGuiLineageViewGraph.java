@@ -1217,6 +1217,14 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
     return document;
   }
 
+  /** SVG of the live session graph (layout is not stored in the {@code .hlv} file). */
+  public String generateSessionSvg() throws HopException {
+    if (sessionGraph == null) {
+      throw new HopException("No lineage graph is loaded in this Lineage View.");
+    }
+    return LineageViewSvgPainter.generateSvg(sessionGraph, layoutBoxes, variables, opsOverlay);
+  }
+
   @Override
   public String getName() {
     return document != null ? document.getName() : "Lineage view";

@@ -7,7 +7,7 @@
 > - **Docker** with Compose v2 — used by `run-tests.sh` and `run-tests-all-databases.sh` to run workflows in a short-lived Hop container (`docker-hop:latest`). No local Hop installation is required for command-line testing.
 > - **Python 3** — used by the test scripts to print the metrics overview table at the end of a run (stdlib only; no extra packages).
 > - Testing has been done with **PostgreSQL**, **MySQL**, **SingleStore**, and **Microsoft SQL Server** (see [Docker multi-database tests](#docker-multi-database-tests) below). **Snowflake** is an opt-in fifth engine via LocalStack (`LOCALSTACK_AUTH_TOKEN` required); it is not part of the default matrix.
-> - For Hop GUI use, install the **Data Hopper EDW** plugin in your Hop **2.19.0** environment.
+> - For Hop GUI use, install the **Data Hopper EDW** plugin in your Hop **2.20.0-SNAPSHOT** environment.
 
 **CI and regression reference** — not the first-time tutorial. Build an EDW: [docs/getting-started-edw.adoc](../docs/getting-started-edw.adoc). Tour the sample: [retail-example](../retail-example/) and [docs/getting-started-retail.adoc](../docs/getting-started-retail.adoc). Documentation index: [docs/README.md](../docs/README.md).
 

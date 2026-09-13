@@ -33,13 +33,16 @@ import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.IBvTable;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
 import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
 
 /**
  * Builds freeform MODEL {@link ArchitectureGraph}s with ELK table layout.
  *
  * <p><b>Primary use:</b> aggregate diagrams across <em>several</em> model files of the same layer
  * (all DV, all BV, or all dimensional) so enterprise multi-file models appear as one Draw.io
- * diagram — not one file per model.
+ * diagram — not one file per model. Single-file {@code hop export --format drawio} also uses these
+ * graphs (including {@link #fromSourceModel}).
  */
 public final class ArchitectureGraphFromModel {
 
@@ -225,6 +228,43 @@ public final class ArchitectureGraphFromModel {
         if (!node.hasLayoutCoordinates()) {
           applyBox(node, boxes.get(table.getName()));
         }
+      }
+    }
+    addStructuralEdges(graph, layoutGraph);
+    ArchitecturePathSupport.portableizeGraph(graph, variables);
+    return graph;
+  }
+
+  public static ArchitectureGraph fromSourceModel(SourceModel model, IVariables variables)
+      throws HopException {
+    ArchitectureGraph graph =
+        baseGraph(
+            model != null && !Utils.isEmpty(model.getName()) ? model.getName() : "source-model",
+            "SOURCE",
+            model != null ? 1 : 0);
+    if (model == null) {
+      return graph;
+    }
+    ElkGraphLayout layoutGraph = ElkGraphLayout.fromSourceModel(model);
+    Map<String, ElkLayoutBox> boxes = layoutGraph.layoutToBoxes(ElkLayout.createDefault());
+    for (SourceTable table : model.getTables()) {
+      if (table == null || Utils.isEmpty(table.getName())) {
+        continue;
+      }
+      ArchitectureNode node =
+          graph.getOrCreateNode(
+              tableNodeId(table.getName()),
+              table.getName(),
+              ArchitectureNodeKind.TABLE,
+              ArchitectureLayer.SOURCE);
+      if (Utils.isEmpty(node.getDetailType())) {
+        node.setDetailType("TABLE");
+      }
+      if (!Utils.isEmpty(model.getName())) {
+        node.property("model", model.getName());
+      }
+      if (!node.hasLayoutCoordinates()) {
+        applyBox(node, boxes.get(table.getName()));
       }
     }
     addStructuralEdges(graph, layoutGraph);

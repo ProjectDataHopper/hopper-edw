@@ -38,15 +38,15 @@ Do **not** bump these without an explicit human decision.
 | Constraint | Value |
 |------------|--------|
 | **JDK / Java** | **21** (`maven.compiler.source` / `target` / `release`) |
-| **Apache Hop** | **2.19.0** required (`hop.version` is **2.19.0**) |
+| **Apache Hop** | **2.20.0-SNAPSHOT** required (`hop.version` is **2.20.0-SNAPSHOT**; 2.20.0 at Hop GA) |
 | **Lombok** | **1.18.42** (aligned with Hop) |
-| **Base Docker image** | `apache/hop:2.19.0` → local `docker-hop:latest` |
+| **Base Docker image** | `apache/hop:2.20.0-SNAPSHOT` (build from the Hop tree; Docker Hub has no 2.20 image yet) → local `docker-hop:latest` |
 
 Hop compile dependencies (`hop-core`, `hop-engine`, `hop-ui`) are **`provided`**. The plugin must match the Hop runtime (local install or Docker image).
 
-Hop **2.19.0** is required for OPS database execution info, BINARY hash key sorting ([apache/hop#7346](https://github.com/apache/hop/issues/7346)), and Marketplace install. Do not assume APIs beyond the **2.19.0** line without a deliberate pin bump.
+Hop **2.20.0-SNAPSHOT** is required for the AI advisor plugin type ([apache/hop#8330](https://github.com/apache/hop/issues/8330)), diagram exporters ([apache/hop#8346](https://github.com/apache/hop/issues/8346)), Hop Web explorer HTML document base ([apache/hop#8297](https://github.com/apache/hop/issues/8297)), plugin servlet RBAC ([apache/hop#8334](https://github.com/apache/hop/issues/8334)), OPS database execution info, and BINARY hash key sorting ([apache/hop#7346](https://github.com/apache/hop/issues/7346)). Do not assume APIs beyond the **2.20** line without a deliberate pin bump.
 
-Hop **2.19.0** is resolved from Maven Central (`hop.version` in `pom.xml`). Do not revert to a SNAPSHOT pin without an explicit human decision.
+Hop **2.20.0-SNAPSHOT** is resolved from the ASF snapshots repository (`pom.xml`) or a local `mvn install` of the Hop tree. The SNAPSHOT pin is intentional until Hop 2.20.0 is released.
 
 ## Apache Hop source and API
 
@@ -71,7 +71,7 @@ Many `hop-transform-*` / `hop-action-*` modules are also on the compile classpat
 
 Prefer real Hop sources over inventing package or method names:
 
-1. **Upstream:** https://github.com/apache/hop — use a tag/branch aligned with **2.19.0** when inspecting APIs for this pin.
+1. **Upstream:** https://github.com/apache/hop — use a tag/branch aligned with **2.20.0-SNAPSHOT** (local maintainer tree or `main`) when inspecting APIs for this pin.
 2. **Local Maven cache:** `~/.m2/repository/org/apache/hop/.../${hop.version}/` (binary and optional `-sources` jars).
 3. **Local clone (maintainers):** a sibling Hop tree (e.g. `../hop`) is useful for navigation when available. Agents with filesystem access should read that tree instead of guessing APIs.
 
@@ -200,7 +200,7 @@ These are easy for agents to violate:
 
 ## Anti-patterns (do not)
 
-- Target Java 11/17 or a Hop version other than **2.19.0** without human approval.
+- Target Java 11/17 or a Hop version other than **2.20.0-SNAPSHOT** / **2.20.0** without human approval.
 - Ship SQL/DDL/dialect/collation/load changes with only unit tests (or only Postgres) green.
 - Edit golden CSVs under `integration-tests/datasets/` (or other expected outputs) without understanding the intentional behavior change and re-running the relevant suites.
 - Leave Docker-swapped `CRM.json` / `Vault.json` dirty after manual experiments.
