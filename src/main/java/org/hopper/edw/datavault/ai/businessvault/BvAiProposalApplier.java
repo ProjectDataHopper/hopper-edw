@@ -50,6 +50,7 @@ public final class BvAiProposalApplier {
           "scd2PipelineNamePrefix",
           "pitPipelineNamePrefix",
           "businessTablePipelineNamePrefix",
+          "bridgePipelineNamePrefix",
           "functionalTimestampField",
           "loadDateFieldFallback",
           "validFromField",
@@ -90,14 +91,18 @@ public final class BvAiProposalApplier {
       return;
     }
     for (DvAiProposal proposal : proposals) {
-      applyOne(model, proposal);
+      applyOne(model, proposal, metadataProvider, variables);
     }
     if (metadataProvider != null) {
       model.check(metadataProvider, variables);
     }
   }
 
-  private static void applyOne(BusinessVaultModel model, DvAiProposal proposal)
+  private static void applyOne(
+      BusinessVaultModel model,
+      DvAiProposal proposal,
+      IHopMetadataProvider metadataProvider,
+      IVariables variables)
       throws HopException {
     if (proposal == null || proposal.getType() == null) {
       return;
@@ -106,6 +111,15 @@ public final class BvAiProposalApplier {
       case ADD_MODEL_NOTE -> addModelNote(model, proposal);
       case SET_CONFIGURATION_PROPERTY -> setConfigurationProperty(model, proposal);
       case RENAME_TABLE -> renameTable(model, proposal);
+      case ADD_SCD2,
+              ADD_PIT,
+              ADD_BUSINESS_TABLE,
+              ADD_SOURCE_QUERY,
+              ADD_BRIDGE,
+              BIND_DV_TABLE,
+              SET_SQL_QUERY,
+              SET_TABLE_LOCATION ->
+          BvAiStructuralProposalSupport.apply(model, proposal, metadataProvider, variables);
       default -> throw new HopException("Unsupported proposal type: " + proposal.getType());
     }
   }

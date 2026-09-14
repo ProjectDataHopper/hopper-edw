@@ -25,6 +25,8 @@ public enum ImpactEdgeType {
   DV_TO_BV_SCD2,
   /** DV hub/sat participates in a BV PIT table (table-level). */
   DV_TO_BV_PIT,
+  /** DV hub/link participates in a BV bridge table (table-level). */
+  DV_TO_BV_BRIDGE,
   /** DV/BV table is referenced from a BV SQL business table (table-level). */
   DV_TO_BV_SQL,
   /** DV/BV physical name appears in dimensional SQL (table-level, medium confidence). */

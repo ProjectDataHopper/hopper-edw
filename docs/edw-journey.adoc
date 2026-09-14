@@ -63,6 +63,8 @@ Select a node for identity (path, catalog key, table count) and buttons that jum
 
 Each selected level also has **Documentation** buttons (help icon) that open the matching plugin HTML guide in the browser — for example source modeler, harvest, schema gate, Data Vault, Business Vault, dimensional modeler, execution maps, or Hop Lineage View. The same HTML set is on the main toolbar **EDW** button and **Help → EDW documentation**.
 
+The Journey toolbar **AI Help** opens the Hop AI Assistant on the current group snapshot (chat only: what is in the group, what to do next). See link:ai-advisory.md[AI advisory].
+
 Double-click is the primary Open action for models, feeds, workflows, and files.
 
 == Last run and problems

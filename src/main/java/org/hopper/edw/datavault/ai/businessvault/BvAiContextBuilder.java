@@ -31,6 +31,7 @@ import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataConstants;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultConfiguration;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultDvModelResolver;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
+import org.hopper.edw.datavault.metadata.businessvault.BvBridge;
 import org.hopper.edw.datavault.metadata.businessvault.BvDerivativeRef;
 import org.hopper.edw.datavault.metadata.businessvault.BvPitTable;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2SatelliteConfig;
@@ -149,6 +150,10 @@ public final class BvAiContextBuilder {
       } else if (table instanceof BvPitTable pit) {
         json.append(",\"snapshotDateField\":")
             .append(DvAiContextBuilder.jsonString(pit.getSnapshotDateField()));
+      } else if (table instanceof BvBridge bridge) {
+        json.append(",\"weightField\":")
+            .append(DvAiContextBuilder.jsonString(bridge.getWeightField()));
+        json.append(",\"hasSqlQuery\":").append(!Utils.isEmpty(bridge.getSqlQuery()));
       }
       json.append('}');
     }

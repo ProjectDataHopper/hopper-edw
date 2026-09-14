@@ -53,12 +53,16 @@ public final class BvAiProposalValidator {
       return results;
     }
     for (DvAiProposal proposal : proposals) {
-      results.add(validateOne(model, proposal));
+      results.add(validateOne(model, proposal, metadataProvider, variables));
     }
     return results;
   }
 
-  private static ValidationResult validateOne(BusinessVaultModel model, DvAiProposal proposal) {
+  private static ValidationResult validateOne(
+      BusinessVaultModel model,
+      DvAiProposal proposal,
+      IHopMetadataProvider metadataProvider,
+      IVariables variables) {
     if (proposal == null || proposal.getType() == null) {
       return new ValidationResult(proposal, Status.BLOCKED, "Missing proposal type");
     }
@@ -66,6 +70,15 @@ public final class BvAiProposalValidator {
       case ADD_MODEL_NOTE -> validateAddModelNote(proposal);
       case SET_CONFIGURATION_PROPERTY -> validateSetConfigurationProperty(proposal);
       case RENAME_TABLE -> validateRenameTable(model, proposal);
+      case ADD_SCD2,
+              ADD_PIT,
+              ADD_BUSINESS_TABLE,
+              ADD_SOURCE_QUERY,
+              ADD_BRIDGE,
+              BIND_DV_TABLE,
+              SET_SQL_QUERY,
+              SET_TABLE_LOCATION ->
+          BvAiStructuralProposalSupport.validate(model, proposal, metadataProvider, variables);
       default ->
           new ValidationResult(
               proposal, Status.BLOCKED, "Unsupported proposal type for Business Vault");

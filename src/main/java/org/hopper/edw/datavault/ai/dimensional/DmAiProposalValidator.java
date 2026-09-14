@@ -66,6 +66,13 @@ public final class DmAiProposalValidator {
       case ADD_MODEL_NOTE -> validateAddModelNote(proposal);
       case SET_CONFIGURATION_PROPERTY -> validateSetConfigurationProperty(proposal);
       case RENAME_TABLE -> validateRenameTable(model, proposal);
+      case ADD_DIMENSION,
+              ADD_FACT,
+              ADD_BRIDGE,
+              ADD_JUNK_DIMENSION,
+              BIND_SOURCE,
+              SET_TABLE_LOCATION ->
+          DmAiStructuralProposalSupport.validate(model, proposal);
       default ->
           new ValidationResult(
               proposal, Status.BLOCKED, "Unsupported proposal type for dimensional model");

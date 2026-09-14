@@ -113,10 +113,10 @@ Do not add these to Hop. Same string on `@AiAdvisorPlugin(locations)` and `AiAdv
 | `DATA_VAULT_GRAPH` | `data-vault-graph` | `DataVaultModel` |
 | `BUSINESS_VAULT_GRAPH` | `business-vault-graph` | `BusinessVaultModel` |
 | `DIMENSIONAL_GRAPH` | `dimensional-graph` | `DimensionalModel` |
-| (later) `SOURCE_MODEL_GRAPH` | `source-model-graph` | source model |
-| (later) `LINEAGE_VIEW` | `lineage-view` | `.hlv` document |
-| (later) `EXECUTION_MAP` | `execution-map` | `.hem` |
-| (later) `EDW_JOURNEY` | `edw-journey` | journey snapshot |
+| `SOURCE_MODEL_GRAPH` | `source-model-graph` | source model (chat-only) |
+| `LINEAGE_VIEW` | `lineage-view` | `.hlv` document (chat-only) |
+| `EXECUTION_MAP` | `execution-map` | `.hem` (chat-only) |
+| `EDW_JOURNEY` | `edw-journey` | journey snapshot (chat-only) |
 
 Put them on `org.hopper.edw.datavault.ai.EdwAiAdvisorLocations`.
 
@@ -332,9 +332,9 @@ Manual GUI (once): open `.hdv` AI Help → floating workbench, catalog Select…
 | **3** | BV + DM advisors + toolbars | All three modelers on workbench; their dialogs gone |
 | **4** | Delete pipeline/workflow AI, `HopAiConfig*`, engines, transcript/review dialogs, dead tests | No duplicate AI Help on `.hpl`/`.hwf`; one AI config tab (Hop’s) |
 | **5** | Docs, help topics, CHANGELOG, screenshots | `ai-advisory.md` describes the workbench |
-| **6** (follow-up) | Source-model chat-only advisor | `.hsm` toolbar AI Help |
-| **7** (follow-up) | Lineage view, execution map, Journey chat-only | explain-this-graph / what-next |
-| **8** (follow-up) | Richer BV/DM proposals | add table / PIT / fact / bind source, etc. |
+| **6** (follow-up) | Source-model chat-only advisor | `.hsm` toolbar AI Help — **done** |
+| **7** (follow-up) | Lineage view, execution map, Journey chat-only | explain-this-graph / what-next — **done** |
+| **8** (follow-up) | Richer BV/DM proposals | add table / PIT / fact / bind source, etc. — **done** |
 
 Phases 0–5 are the migration. 6–8 are “build more” and can land after.
 
@@ -346,12 +346,12 @@ Prefer **one PR for 0–5** if the pin bump is already agreed; otherwise pin PR 
 
 ### Richer BV / DM proposals
 
-Today BV/DM can only apply note / config / rename. After the port, add types in hopper-edw validators/appliers (no Hop API change):
+**Done.** BV/DM apply note / config / rename plus structural types in hopper-edw validators/appliers (no Hop API change):
 
-- BV: add SCD2/PIT/bridge/business table, bind linked DV table, set SQL/Jinja, layout.
+- BV: add SCD2/PIT/business table/source query/bridge, bind linked DV table, set SQL/Jinja, layout.
 - DM: add dimension/fact/bridge/junk, bind source, layout.
 
-Same `hop_proposals` review path.
+Same `hop_proposals` / `dv_proposals` review path.
 
 ### New chat-only advisors
 

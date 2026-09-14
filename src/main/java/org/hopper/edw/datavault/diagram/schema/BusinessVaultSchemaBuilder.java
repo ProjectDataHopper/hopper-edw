@@ -24,7 +24,10 @@ import org.hopper.edw.datavault.metadata.businessvault.BvTableBase;
 import org.hopper.edw.datavault.metadata.businessvault.BvTableType;
 import org.hopper.edw.datavault.metadata.businessvault.IBvTable;
 
-/** Builds a Business Vault {@link SchemaDiagram} (SCD2, PIT, business tables, source queries). */
+/**
+ * Builds a Business Vault {@link SchemaDiagram} (SCD2, PIT, business tables, source queries,
+ * bridges).
+ */
 public final class BusinessVaultSchemaBuilder {
 
   private BusinessVaultSchemaBuilder() {}
@@ -85,6 +88,7 @@ public final class BusinessVaultSchemaBuilder {
       case PIT -> SchemaStereotypes.PIT;
       case BUSINESS_TABLE -> SchemaStereotypes.BUSINESS_TABLE;
       case SOURCE_QUERY -> SchemaStereotypes.SOURCE_QUERY;
+      case BRIDGE -> SchemaStereotypes.BRIDGE;
     };
   }
 }

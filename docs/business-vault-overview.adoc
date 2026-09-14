@@ -23,7 +23,7 @@ A Business Vault model contains:
 
 * **Data Vault model path** — path to the linked `.hdv` file (variables such as `${PROJECT_HOME}` supported)
 * **Configuration** — target database, SCD2 defaults, pipeline naming; see link:business-vault-configuration.adoc[Business Vault Configuration]
-* **Tables** — SCD2 tables, PIT tables, and future business table types
+* **Tables** — SCD2 tables, PIT tables, SQL business tables, source queries, and bridges
 
 Open a `.hbv` file in Hop GUI to get a visual editor comparable to the Data Vault canvas.
 
@@ -58,6 +58,9 @@ From a Business Vault table you can jump to the linked Data Vault model and sele
 
 |Source query (`BvSourceQuery`)
 |Satellite-shaped **input** (table/view or SQL) that SCD2 and PIT can hop to. Optional Hop connection (empty = Data Vault target). Not loaded by Business Vault Update. See link:help/bv-source-query-dialog.adoc[source query dialog] and link:business-vault-scd2.adoc[SCD2].
+
+|Bridge (`BvBridge`)
+|Query-friendly table of two or more hub hash keys, usually from a Data Vault link, with optional weight and load SQL. Loaded by Business Vault Update. See link:business-vault-bridge.adoc[Business Vault bridge].
 
 Data Vault hubs, links, and satellites are referenced with **canvas aliases** (Add Hub / Link / Satellite reference), optionally from multiple `.hdv` models via the catalog or file browse. There is no required single “linked Data Vault model file” on the BV.
 |===

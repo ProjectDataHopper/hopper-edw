@@ -33,6 +33,9 @@ Guides for the same features live in the parent folder (link:../index.adoc[docum
 |link:bv-ai-advisor-dialog.adoc[bv-ai-advisor-dialog]
 |Business Vault AI advisor
 
+|link:bv-bridge-dialog.adoc[bv-bridge-dialog]
+|Business Vault bridge table
+
 |link:bv-business-table-dialog.adoc[bv-business-table-dialog]
 |SQL business table
 

@@ -1,0 +1,47 @@
+= Business Vault bridge tables
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+A **Business Vault bridge** (`BvBridge`) is a consumption-layer table of two or more hub hash keys. Typical uses:
+
+* Many-to-many relationships already stored as a Data Vault link, flattened for reporting joins
+* Same-as / hierarchy links (parent and child hash keys of the same hub)
+* Optional allocation **weight**
+
+This is **not** a Kimball dimensional bridge (`.hdm` `DmBridge`). Dimensional bridges resolve dimension surrogate keys; BV bridges resolve raw-vault hub hash keys.
+
+== Canvas
+
+On a `.hbv` model, **Add bridge table**. Edit:
+
+* Name and physical table name
+* Optional **weight field**
+* Optional **load SQL**
+* **Linked Data Vault hubs and links** (derivatives)
+
+Bind a **link** whenever the grain already exists in the raw vault. Binding the participating hubs as well is optional; hash-key columns are taken from the link's hubs.
+
+== Layout and DDL
+
+The target layout is:
+
+* One column per distinct hub hash key (from bound links, then bound hubs)
+* Optional weight (`Number`)
+* Optional load-cycle ID when the BV model stores it
+
+Primary key is the composite of the hash-key columns. Foreign keys to parent hubs are emitted when BV and DV share a physical database and **Generate foreign keys** is on.
+
+== Load pipeline
+
+Business Vault Update includes bridges after SCD2 and PIT, before SQL business tables.
+
+* **No SQL** — `SELECT` of hub hash keys from the first bound Data Vault link
+* **SQL present** — Table Input runs the authoring SQL, then the standard BV target load (table output or staging file)
+
+Pipeline names use `bridgePipelineNamePrefix` (default `bv-bridge-`).
+
+== AI Help
+
+On the BV canvas, AI Help can emit `ADD_BRIDGE` (name, optional `linkName` / `hubNames` / `weightField` / `sqlQuery`) and `BIND_DV_TABLE` / `SET_SQL_QUERY`.

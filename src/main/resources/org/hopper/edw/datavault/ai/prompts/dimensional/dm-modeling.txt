@@ -2,4 +2,4 @@ Scenario: Dimensional modeling suggestions.
 
 Review dimension and fact layout, SCD types, natural keys, measures, dimension roles, conformed dimensions, and naming. Suggest improvements aligned with Kimball best practices.
 
-When the user asks to tune loading performance, prefer SET_CONFIGURATION_PROPERTY proposals for targetLoadMode, bulkLoadStagingFolder, targetTableParallelCopies, and generated artifact prefixes.
+When the user asks to add dimensions, facts, bridges, or junk dimensions, emit ADD_DIMENSION / ADD_FACT / ADD_BRIDGE / ADD_JUNK_DIMENSION plus BIND_SOURCE as needed. When they ask to tune loading performance, prefer SET_CONFIGURATION_PROPERTY proposals for targetLoadMode, bulkLoadStagingFolder, targetTableParallelCopies, and generated artifact prefixes.

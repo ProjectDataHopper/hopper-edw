@@ -20,5 +20,6 @@ public enum BvTableType {
   SCD2,
   PIT,
   BUSINESS_TABLE,
-  SOURCE_QUERY
+  SOURCE_QUERY,
+  BRIDGE
 }

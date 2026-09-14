@@ -23,6 +23,7 @@ import org.apache.hop.core.gui.plugin.action.GuiActionLambdaBuilder;
 import org.apache.hop.ui.hopgui.context.BaseGuiContextHandler;
 import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
+import org.hopper.edw.datavault.metadata.businessvault.BvBridge;
 import org.hopper.edw.datavault.metadata.businessvault.BvPitTable;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2Table;
 import org.hopper.edw.datavault.metadata.businessvault.IBvTable;
@@ -63,7 +64,9 @@ public class HopGuiBusinessVaultTableContext extends BaseGuiContextHandler
     if (pluginActions != null) {
       for (GuiAction pluginAction : pluginActions) {
         if ("bv-graph-show-build-pipeline".equals(pluginAction.getId())
-            && !(table instanceof BvScd2Table || table instanceof BvPitTable)) {
+            && !(table instanceof BvScd2Table
+                || table instanceof BvPitTable
+                || table instanceof BvBridge)) {
           continue;
         }
         if ("bv-graph-generate-scd2-calc-unit-test".equals(pluginAction.getId())

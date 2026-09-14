@@ -15,6 +15,7 @@ This is a **raw-vault starter**. Review the proposals, then refine names, busine
 * **Data Vault modeler** toolbar / canvas: *Generate from source model…*  
   Pick an `.hsm` and apply into the **open** vault (one undo). The coach panel **Generate DV** button opens the same path.
 * **AI Help** on a Data Vault model includes a compact classification of sibling `.hsm` files in the same folder so the advisor can refine the same heuristic instead of starting from scratch.
+* **AI Help** on the source modeler (`.hsm`) is chat-only and uses the same classification JSON so you can review Generate Data Vault before applying it on the canvas.
 
 All of those paths open the same review dialog.
 

@@ -220,7 +220,7 @@ Planned follow-on phases:
 * **PIT-3** — load-end-date satellites, link PIT
 * **PIT-4** — range start `EARLIEST_SCD2_TABLE_LOAD`, dedicated PIT schedule dialog
 
-Out of scope: raw-vault `DvPit` in `.hdv`, bridge tables, auto-PIT for every hub.
+Out of scope: raw-vault `DvPit` in `.hdv`, auto-PIT for every hub. Business Vault **bridge** tables are a separate canvas type; see link:business-vault-bridge.adoc[Business Vault bridge].
 
 == GitHub issue #26
 

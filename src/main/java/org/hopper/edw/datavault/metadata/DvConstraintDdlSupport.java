@@ -26,6 +26,8 @@ import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultConfiguration;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
+import org.hopper.edw.datavault.metadata.businessvault.BvBridge;
+import org.hopper.edw.datavault.metadata.businessvault.BvBridgeLayoutSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BvBusinessTable;
 import org.hopper.edw.datavault.metadata.businessvault.BvPitLayoutSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BvPitTable;
@@ -366,6 +368,9 @@ public final class DvConstraintDdlSupport {
     if (table instanceof BvBusinessTable) {
       return List.of();
     }
+    if (table instanceof BvBridge bridge) {
+      return resolveBvBridgePrimaryKeyColumns(bridge, dataVaultModel, variables);
+    }
     return List.of();
   }
 
@@ -395,6 +400,9 @@ public final class DvConstraintDdlSupport {
     }
     if (table instanceof BvPitTable pit) {
       return resolvePitForeignKeys(pit, dataVaultModel, variables);
+    }
+    if (table instanceof BvBridge bridge) {
+      return resolveBvBridgeForeignKeys(bridge, dataVaultModel, variables);
     }
     return List.of();
   }
@@ -498,6 +506,42 @@ public final class DvConstraintDdlSupport {
             List.of(hashKey),
             parentTable,
             List.of(hashKey)));
+    return fks;
+  }
+
+  private static List<String> resolveBvBridgePrimaryKeyColumns(
+      BvBridge bridge, DataVaultModel dataVaultModel, IVariables variables) {
+    List<String> columns = new ArrayList<>();
+    for (BvBridgeLayoutSupport.HashKeyColumn hashKey :
+        BvBridgeLayoutSupport.listHashKeyColumns(bridge, dataVaultModel, variables, null)) {
+      addIfPresent(columns, hashKey.columnName());
+    }
+    return columns;
+  }
+
+  private static List<ForeignKeySpec> resolveBvBridgeForeignKeys(
+      BvBridge bridge, DataVaultModel dataVaultModel, IVariables variables) {
+    List<ForeignKeySpec> fks = new ArrayList<>();
+    String childTable = physicalTableName(bridge);
+    if (Utils.isEmpty(childTable)) {
+      return fks;
+    }
+    for (BvBridgeLayoutSupport.HashKeyColumn hashKey :
+        BvBridgeLayoutSupport.listHashKeyColumns(bridge, dataVaultModel, variables, null)) {
+      if (Utils.isEmpty(hashKey.columnName()) || Utils.isEmpty(hashKey.parentTableName())) {
+        continue;
+      }
+      String parentColumn =
+          !Utils.isEmpty(hashKey.parentColumnName())
+              ? hashKey.parentColumnName()
+              : hashKey.columnName();
+      fks.add(
+          new ForeignKeySpec(
+              constraintName("fk", childTable, hashKey.columnName()),
+              List.of(hashKey.columnName()),
+              hashKey.parentTableName(),
+              List.of(parentColumn)));
+    }
     return fks;
   }
 

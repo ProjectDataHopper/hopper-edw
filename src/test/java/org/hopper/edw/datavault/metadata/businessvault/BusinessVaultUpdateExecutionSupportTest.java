@@ -25,16 +25,18 @@ import org.junit.jupiter.api.Test;
 class BusinessVaultUpdateExecutionSupportTest {
 
   @Test
-  void recognizesScd2PitAndBusinessTableAsExecutable() {
+  void recognizesScd2PitBridgeAndBusinessTableAsExecutable() {
     assertTrue(BusinessVaultUpdateExecutionSupport.isPipelineExecutableTableType(BvTableType.SCD2));
     assertTrue(BusinessVaultUpdateExecutionSupport.isPipelineExecutableTableType(BvTableType.PIT));
+    assertTrue(
+        BusinessVaultUpdateExecutionSupport.isPipelineExecutableTableType(BvTableType.BRIDGE));
     assertTrue(
         BusinessVaultUpdateExecutionSupport.isPipelineExecutableTableType(
             BvTableType.BUSINESS_TABLE));
   }
 
   @Test
-  void ordersScd2BeforePitBeforeBusinessTable() {
+  void ordersScd2BeforePitBeforeBridgeBeforeBusinessTable() {
     BvPitTable pit = new BvPitTable();
     pit.setName("pit_customer");
     pit.getDerivatives().add(new BvDerivativeRef("hub_customer", DvTableType.HUB));
@@ -43,17 +45,21 @@ class BusinessVaultUpdateExecutionSupportTest {
     scd2.setName("sat_customer_hb");
     scd2.getDerivatives().add(new BvDerivativeRef("sat_customer", DvTableType.SATELLITE));
 
+    BvBridge bridge = new BvBridge();
+    bridge.setName("customer_account_bridge");
+
     BvBusinessTable business = new BvBusinessTable();
     business.setName("dim_customer");
     business.setSqlQuery("SELECT 1");
 
     List<IBvTable> ordered =
         BusinessVaultUpdateExecutionSupport.orderTablesForPipelineExecution(
-            List.of(pit, scd2, business));
+            List.of(pit, scd2, business, bridge));
 
-    assertEquals(3, ordered.size());
+    assertEquals(4, ordered.size());
     assertEquals("sat_customer_hb", ordered.get(0).getName());
     assertEquals("pit_customer", ordered.get(1).getName());
-    assertEquals("dim_customer", ordered.get(2).getName());
+    assertEquals("customer_account_bridge", ordered.get(2).getName());
+    assertEquals("dim_customer", ordered.get(3).getName());
   }
 }

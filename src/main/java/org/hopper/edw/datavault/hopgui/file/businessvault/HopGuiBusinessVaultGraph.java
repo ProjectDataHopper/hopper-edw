@@ -116,6 +116,7 @@ import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultDvReferenceS
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultSourceQuerySupport;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultUpdateExecutionSupport;
+import org.hopper.edw.datavault.metadata.businessvault.BvBridge;
 import org.hopper.edw.datavault.metadata.businessvault.BvBusinessTable;
 import org.hopper.edw.datavault.metadata.businessvault.BvBvTableReference;
 import org.hopper.edw.datavault.metadata.businessvault.BvDvTableReference;
@@ -741,6 +742,9 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
       accepted =
           new HopGuiBvSourceQueryDialog(getShell(), sourceQuery, model, dataVaultModel, variables)
               .open();
+    } else if (table instanceof BvBridge bridge) {
+      accepted =
+          new HopGuiBvBridgeDialog(getShell(), bridge, model, dataVaultModel, variables).open();
     } else {
       accepted =
           new HopGuiBvTableDialog(getShell(), table, model, dataVaultModel, variables).open();
@@ -1701,6 +1705,26 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
   }
 
   @GuiContextAction(
+      id = "bv-graph-add-bridge",
+      parentId = HopGuiBusinessVaultContext.CONTEXT_ID,
+      type = GuiActionType.Create,
+      name = "i18n::HopGuiBusinessVaultGraph.Context.AddBridge.Name",
+      tooltip = "i18n::HopGuiBusinessVaultGraph.Context.AddBridge.Tooltip",
+      image = "business-vault-model.svg",
+      category = "Business Vault",
+      categoryOrder = "3")
+  public void addBridgeTable(HopGuiBusinessVaultContext context) {
+    HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
+    if (graph == null || context.getModel() == null) {
+      return;
+    }
+    graph.markUndoPoint();
+    graph.addBvTableAtClick(new BvBridge(), context.getClick());
+    graph.setChanged();
+    graph.redraw();
+  }
+
+  @GuiContextAction(
       id = "bv-graph-import-dbt",
       parentId = HopGuiBusinessVaultContext.CONTEXT_ID,
       type = GuiActionType.Create,
@@ -1930,7 +1954,8 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
   public void showBuildPipelineAction(HopGuiBusinessVaultTableContext context) {
     IBvTable table = context.getTable();
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
-    if ((table instanceof BvScd2Table || table instanceof BvPitTable) && graph != null) {
+    if ((table instanceof BvScd2Table || table instanceof BvPitTable || table instanceof BvBridge)
+        && graph != null) {
       graph.openBuildPipeline(table);
     }
   }
@@ -2210,7 +2235,10 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
       return;
     }
     for (IBvTable table : model.getTables()) {
-      if (table == null || !(table instanceof BvScd2Table || table instanceof BvPitTable)) {
+      if (table == null
+          || !(table instanceof BvScd2Table
+              || table instanceof BvPitTable
+              || table instanceof BvBridge)) {
         continue;
       }
       if (!table.isSelected() && nrSelectedBvTables() > 0) {
@@ -2239,7 +2267,12 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     boolean needsDv =
         model != null
             && model.getTables().stream()
-                .anyMatch(t -> t instanceof BvScd2Table || t instanceof BvPitTable);
+                .anyMatch(
+                    t ->
+                        t instanceof BvScd2Table
+                            || t instanceof BvPitTable
+                            || (t instanceof BvBridge bridge
+                                && Utils.isEmpty(bridge.getSqlQuery())));
     if (!needsDv) {
       dataVaultModel = new org.hopper.edw.datavault.metadata.DataVaultModel();
       return true;
@@ -2262,6 +2295,7 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
               model.getTables(), model, dataVaultModel)) {
         if (!(table instanceof BvScd2Table
             || table instanceof BvPitTable
+            || table instanceof BvBridge
             || table instanceof BvBusinessTable)) {
           continue;
         }
@@ -2325,7 +2359,9 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
   }
 
   private void openBuildPipeline(IBvTable table, IVariables debugVariables) {
-    if (!(table instanceof BvScd2Table || table instanceof BvPitTable)) {
+    if (!(table instanceof BvScd2Table
+        || table instanceof BvPitTable
+        || table instanceof BvBridge)) {
       return;
     }
     String tableName =

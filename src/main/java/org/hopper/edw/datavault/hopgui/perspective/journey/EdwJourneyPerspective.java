@@ -55,6 +55,7 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupModelDiscoverySupport;
 import org.hopper.edw.datavault.hopgui.GuiBusySupport;
+import org.hopper.edw.datavault.hopgui.ai.EdwAiAdvisorOpenSupport;
 import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneyTreeNode.Kind;
 
 /** Hop GUI perspective for the EDW data journey of a resource definition group. */
@@ -75,6 +76,7 @@ public class EdwJourneyPerspective implements IHopPerspective {
       "EdwJourneyPerspective-Toolbar-10001-ExpandAll";
   public static final String TOOLBAR_ITEM_COLLAPSE_ALL =
       "EdwJourneyPerspective-Toolbar-10003-CollapseAll";
+  public static final String TOOLBAR_ITEM_AI_HELP = "EdwJourneyPerspective-Toolbar-10010-AI-Help";
 
   @Getter private static EdwJourneyPerspective instance;
 
@@ -95,6 +97,14 @@ public class EdwJourneyPerspective implements IHopPerspective {
 
   public EdwJourneyPerspective() {
     instance = this;
+  }
+
+  public EdwJourneySnapshot getSnapshot() {
+    return snapshot != null ? snapshot : EdwJourneySnapshot.empty();
+  }
+
+  public EdwJourneyOpsOverlay getOpsOverlay() {
+    return opsOverlay != null ? opsOverlay : EdwJourneyOpsOverlay.empty();
   }
 
   @Override
@@ -342,6 +352,22 @@ public class EdwJourneyPerspective implements IHopPerspective {
       image = "ui/images/collapse-all.svg")
   public void collapseAll() {
     setExpanded(tree.getItems(), false);
+  }
+
+  @GuiToolbarElement(
+      root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
+      id = TOOLBAR_ITEM_AI_HELP,
+      toolTip = "i18n::EdwJourneyPerspective.Toolbar.AiHelp.Tooltip",
+      image = "datavault-ai-help.svg")
+  public void openAiAdvisor() {
+    String focus = null;
+    if (tree != null && !tree.isDisposed() && tree.getSelectionCount() > 0) {
+      Object data = tree.getSelection()[0].getData();
+      if (data instanceof EdwJourneyTreeNode node) {
+        focus = !Utils.isEmpty(node.id()) ? node.id() : node.label();
+      }
+    }
+    EdwAiAdvisorOpenSupport.openEdwJourney(hopGui, getSnapshot(), getOpsOverlay(), focus);
   }
 
   /**

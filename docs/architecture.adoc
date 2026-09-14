@@ -50,7 +50,7 @@ PlantUML source: link:diagrams/d1-logical-layers.puml[d1-logical-layers.puml].
 
 |Business Vault
 |`.hbv`
-|SCD2, PIT, SQL business tables on top of raw vault history.
+|SCD2, PIT, bridges, SQL business tables on top of raw vault history.
 
 |Dimensional
 |`.hdm`

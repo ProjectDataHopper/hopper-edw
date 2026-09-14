@@ -26,12 +26,13 @@ public final class BusinessVaultUpdateExecutionSupport {
   public static boolean isPipelineExecutableTableType(BvTableType tableType) {
     return tableType == BvTableType.SCD2
         || tableType == BvTableType.PIT
+        || tableType == BvTableType.BRIDGE
         || tableType == BvTableType.BUSINESS_TABLE;
   }
 
   /**
-   * Orders pipeline-executable tables for update: SCD2, PIT, and SQL business tables, honouring
-   * {@code ref()} dependencies among business tables.
+   * Orders pipeline-executable tables for update: SCD2, PIT, bridges, and SQL business tables,
+   * honouring {@code ref()} dependencies among business tables.
    */
   public static List<IBvTable> orderTablesForPipelineExecution(List<IBvTable> tables) {
     return orderTablesForPipelineExecution(tables, null, null);

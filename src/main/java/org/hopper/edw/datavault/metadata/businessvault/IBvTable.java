@@ -107,6 +107,9 @@ public interface IBvTable extends IGuiPosition, IBaseMeta, IHasName, IChanged, I
       if (BvTableType.SOURCE_QUERY.name().equals(id)) {
         return new BvSourceQuery();
       }
+      if (BvTableType.BRIDGE.name().equals(id)) {
+        return new BvBridge();
+      }
       throw new HopException("Unable to recognize Business Vault table type with ID '" + id + "'");
     }
 

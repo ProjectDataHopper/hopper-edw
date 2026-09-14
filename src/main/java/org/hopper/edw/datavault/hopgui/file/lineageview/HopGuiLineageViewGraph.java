@@ -77,6 +77,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.hopper.edw.datavault.command.svg.SvgExportService;
+import org.hopper.edw.datavault.hopgui.ai.EdwAiAdvisorOpenSupport;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.HopGuiModelGraphBase;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphCanvasSvgResult;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphMouseInteractions;
@@ -129,6 +130,7 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
   public static final String TOOLBAR_ITEM_REFRESH = "HopGuiLineageViewGraph-ToolBar-10050-Refresh";
   public static final String TOOLBAR_ITEM_SETTINGS =
       "HopGuiLineageViewGraph-ToolBar-10060-Settings";
+  public static final String TOOLBAR_ITEM_AI_HELP = "HopGuiLineageViewGraph-ToolBar-10065-AI-Help";
   public static final String TOOLBAR_ITEM_EXPORT_SVG =
       "HopGuiLineageViewGraph-ToolBar-10070-Export-Svg";
   public static final String TOOLBAR_ITEM_UNDO = "HopGuiLineageViewGraph-ToolBar-Undo";
@@ -831,6 +833,19 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
 
   @GuiToolbarElement(
       root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
+      id = TOOLBAR_ITEM_AI_HELP,
+      toolTip = "i18n::HopGuiLineageViewGraph.Toolbar.AiHelp.Tooltip",
+      image = "datavault-ai-help.svg")
+  public void openAiAdvisor() {
+    openAiAdvisor(null);
+  }
+
+  public void openAiAdvisor(String focusNodeName) {
+    EdwAiAdvisorOpenSupport.openLineageView(hopGui, document, focusNodeName);
+  }
+
+  @GuiToolbarElement(
+      root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
       id = TOOLBAR_ITEM_EXPORT_SVG,
       toolTip = "i18n::HopGuiLineageViewGraph.Toolbar.ExportSvg",
       image = "ui/images/image.svg")
@@ -954,6 +969,23 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
   public void showBuildPipelineFromContext(HopGuiLineageViewNodeContext context) {
     runNavigation(
         () -> LineageViewNavigationSupport.openBuildPipeline(hopGui, variables, context.getNode()));
+  }
+
+  @GuiContextAction(
+      id = "lineage-view-ai-help",
+      parentId = HopGuiLineageViewNodeContext.CONTEXT_ID,
+      type = GuiActionType.Modify,
+      name = "i18n::HopGuiLineageViewGraph.AiHelp.Name",
+      tooltip = "i18n::HopGuiLineageViewGraph.AiHelp.Tooltip",
+      image = "datavault-ai-help.svg",
+      category = "Help",
+      categoryOrder = "1")
+  public void openAiAdvisorNodeContext(HopGuiLineageViewNodeContext context) {
+    HopGuiLineageViewGraph graph = context != null ? context.getLineageViewGraph() : this;
+    if (graph != null) {
+      String focus = context.getNode() != null ? context.getNode().getName() : null;
+      graph.openAiAdvisor(focus);
+    }
   }
 
   private void runNavigation(NavigationAction action) {

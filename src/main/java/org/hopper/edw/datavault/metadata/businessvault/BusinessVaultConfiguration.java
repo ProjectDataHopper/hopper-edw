@@ -70,6 +70,7 @@ public class BusinessVaultConfiguration extends HopMetadataBase
   public static final String DEFAULT_SCD2_PIPELINE_NAME_PREFIX = "bv-scd2-";
   public static final String DEFAULT_PIT_PIPELINE_NAME_PREFIX = "bv-pit-";
   public static final String DEFAULT_BUSINESS_TABLE_PIPELINE_NAME_PREFIX = "bv-biz-";
+  public static final String DEFAULT_BRIDGE_PIPELINE_NAME_PREFIX = "bv-bridge-";
   public static final String DEFAULT_GENERATED_WORKFLOW_NAME_PREFIX = "BV Bulk Update - ";
   public static final String DEFAULT_OPEN_START_SENTINEL = "1900-01-01 00:00:00";
   public static final String DEFAULT_OPEN_END_SENTINEL = "9999-12-31 23:59:59";
@@ -333,6 +334,16 @@ public class BusinessVaultConfiguration extends HopMetadataBase
   private String businessTablePipelineNamePrefix = DEFAULT_BUSINESS_TABLE_PIPELINE_NAME_PREFIX;
 
   @GuiWidgetElement(
+      order = "0635",
+      type = GuiElementType.TEXT,
+      variables = true,
+      label = "i18n::BusinessVaultConfiguration.BridgePipelineNamePrefix.Label",
+      toolTip = "i18n::BusinessVaultConfiguration.BridgePipelineNamePrefix.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_GENERATED_ARTIFACTS_TAB_ID)
+  @HopMetadataProperty
+  private String bridgePipelineNamePrefix = DEFAULT_BRIDGE_PIPELINE_NAME_PREFIX;
+
+  @GuiWidgetElement(
       order = "0640",
       type = GuiElementType.TEXT,
       variables = true,
@@ -452,6 +463,15 @@ public class BusinessVaultConfiguration extends HopMetadataBase
         variables,
         businessTablePipelineNamePrefix,
         DEFAULT_BUSINESS_TABLE_PIPELINE_NAME_PREFIX,
+        targetTableName,
+        null);
+  }
+
+  public String buildBridgePipelineName(IVariables variables, String targetTableName) {
+    return buildPipelineName(
+        variables,
+        bridgePipelineNamePrefix,
+        DEFAULT_BRIDGE_PIPELINE_NAME_PREFIX,
         targetTableName,
         null);
   }

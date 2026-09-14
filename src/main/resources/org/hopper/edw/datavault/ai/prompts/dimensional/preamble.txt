@@ -18,7 +18,7 @@ Proposal JSON schema (when suggesting model edits):
       "id": "1",
       "description": "Human-readable summary",
       "riskLevel": "LOW|MEDIUM|HIGH",
-      "type": "ADD_MODEL_NOTE|SET_CONFIGURATION_PROPERTY|RENAME_TABLE",
+      "type": "ADD_MODEL_NOTE|SET_CONFIGURATION_PROPERTY|RENAME_TABLE|ADD_DIMENSION|ADD_FACT|ADD_BRIDGE|ADD_JUNK_DIMENSION|BIND_SOURCE|SET_TABLE_LOCATION",
       "parameters": { }
     }
   ]
@@ -30,5 +30,11 @@ Parameter reference (use only the keys needed for each type):
 - ADD_MODEL_NOTE: text
 - SET_CONFIGURATION_PROPERTY: propertyName, value (allowed: targetTableParallelCopies, targetTableBatchSize, targetLoadMode, bulkLoadStagingFolder, bulkLoadDelimiter, bulkLoadEnclosure, bulkLoadEncoding, bulkLoadLocalFileRequired, targetDatabase, sourceDatabase, generatedPipelineFolder, generatedWorkflowNamePrefix, dimensionPipelineNamePrefix, junkDimensionPipelineNamePrefix, bridgePipelineNamePrefix, factPipelineNamePrefix, dimKeyField, versionField, dateFromField, dateToField, loadDateField, currentFlagField)
 - RENAME_TABLE: tableName, newName
+- ADD_DIMENSION: name, tableName (opt), surrogateKeyField (opt), naturalKeys (opt comma list), attributes (opt comma list), locationX / locationY (opt)
+- ADD_FACT: name, tableName (opt), grain (opt), measures (opt comma list), dimensionTableNames (opt comma list), locationX / locationY (opt)
+- ADD_BRIDGE: name, tableName (opt), dimensionTableNames (opt comma list), locationX / locationY (opt)
+- ADD_JUNK_DIMENSION: name, tableName (opt), surrogateKeyField (opt), keyFields (opt comma list), locationX / locationY (opt)
+- BIND_SOURCE: tableName, sourceType (SQL|PIPELINE|RECORD_DEFINITION|DATE_GENERATOR|FACT_TABLE|NONE), sourceSql / sourcePipelineFile / sourcePipelineTransform / sourceCatalogConnection / sourceRecordNamespace / sourceRecordName / sourceFactTableName as needed
+- SET_TABLE_LOCATION: tableName, locationX, locationY
 
-For targetLoadMode use TABLE_OUTPUT or STAGING_FILE. Structural table creation is not supported via proposals in this release.
+For targetLoadMode use TABLE_OUTPUT or STAGING_FILE. Add dimensions before facts, then BIND_SOURCE with real SQL or catalog ids from the structure JSON.

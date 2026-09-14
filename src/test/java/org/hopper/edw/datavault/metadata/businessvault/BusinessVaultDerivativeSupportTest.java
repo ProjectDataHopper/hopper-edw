@@ -114,4 +114,15 @@ class BusinessVaultDerivativeSupportTest {
     assertFalse(BusinessVaultDerivativeSupport.addDerivative(pitTable, hubRef));
     assertEquals(2, pitTable.getDerivatives().size());
   }
+
+  @Test
+  void bridgeAcceptsHubAndLink() {
+    assertTrue(
+        BusinessVaultDerivativeSupport.isValidDerivativePair(BvTableType.BRIDGE, DvTableType.HUB));
+    assertTrue(
+        BusinessVaultDerivativeSupport.isValidDerivativePair(BvTableType.BRIDGE, DvTableType.LINK));
+    assertFalse(
+        BusinessVaultDerivativeSupport.isValidDerivativePair(
+            BvTableType.BRIDGE, DvTableType.SATELLITE));
+  }
 }

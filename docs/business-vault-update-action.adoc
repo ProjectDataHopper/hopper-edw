@@ -13,7 +13,7 @@ At runtime the action:
 * Loads the `.hbv` model and resolves the linked `.hdv` Data Vault model
 * Optionally validates both models before any work is done
 * Optionally generates CREATE TABLE DDL for Business Vault tables on the BV target database
-* Generates **build pipelines** for each selected SCD2 and PIT table (and other supported types when implemented)
+* Generates **build pipelines** for each selected SCD2, PIT, bridge, and SQL business table
 * For SCD2 tables with **hash-key partitions**, generates a wrapper workflow (truncate once, then sequential partition loads; Staging file mode then bulk-loads each partition CSV) and runs it before the free-pipeline orchestrator
 * Stages remaining pipelines and runs them through a parallel orchestrator
 * Optionally publishes BV target table layouts to the data catalog

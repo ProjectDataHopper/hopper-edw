@@ -1,6 +1,6 @@
 # Data Vault AI Help & Advisory
 
-The Data Hopper EDW includes an AI-powered assistant (the **AI Help** or **AI Advisor**) designed to accelerate enterprise data warehousing modeling and integration. Data Vault, Business Vault, and dimensional modelers open the Hop **AI Assistant** workbench bound to the open model. The assistant can analyze catalog sources, validate models, suggest layout updates, perform type mappings, build hubs, links, and satellites, and troubleshoot integration errors.
+The Data Hopper EDW includes an AI-powered assistant (the **AI Help** or **AI Advisor**) designed to accelerate enterprise data warehousing modeling and integration. Data Vault, Business Vault, and dimensional modelers open the Hop **AI Assistant** workbench bound to the open model. The assistant can analyze catalog sources, validate models, suggest layout updates, perform type mappings, build hubs, links, and satellites, and troubleshoot integration errors. Source models, lineage views, execution maps, and the **EDW Journey** perspective also have **AI Help**; those four are **chat-only** (no apply).
 
 ![Data Vault AI Help Dialog](images/data-vault-ai-help-dialog.png)
 
@@ -19,7 +19,7 @@ Start sessions with `conventions.md` + the file-type docs that match the edit. P
 To use the AI Helper:
 1. Install Apache Hop **2.20** (development **2.20.0-SNAPSHOT**) with the **AI Assistant** plugin (`plugins/tech/ai`). Removing that plugin makes AI Help a no-op; hopper-edw still loads.
 2. Create a named **AI Provider** under **Metadata** and enable AI under **Configuration → Plugins → AI Assistant**.
-3. Open a `.hdv` / `.hbv` / `.hdm` graph and click **AI Help** (floating workbench). Pipeline and workflow AI Help is Hop's, not this plugin.
+3. Open a `.hdv` / `.hbv` / `.hdm` / `.hsm` / `.hlv` / `.hem` graph (or the **EDW Journey** perspective) and click **AI Help** (floating workbench). Pipeline and workflow AI Help is Hop's, not this plugin.
 
 > **Note:** Older hopper-edw `hopAiConfig` keys (API key, preset, model name) are migrated by Hop to an **AI Provider** metadata object on first GUI start.
 
@@ -70,6 +70,19 @@ Open a pipeline (`.hpl`) or workflow (`.hwf`) and use:
 
 When a response includes `hop_proposals`, click **Review N proposed change(s)** in the transcript (same flow as the Data Vault modeler). Applied changes register undo on the pipeline/workflow graph; follow-up turns include summaries of what you applied.
 
+### Source model, lineage view, execution map, EDW Journey (chat only)
+
+These advisors explain the open artifact. They do **not** apply graph edits.
+
+| Surface | Open | Scenarios |
+|---|---|---|
+| Source model (`.hsm`) | Toolbar **AI Help**, or right-click canvas / table / query | Source analysis, Type mapping, Generate Data Vault, General |
+| Lineage view (`.hlv`) | Toolbar **AI Help**, or right-click a node | Explain graph, What next, General |
+| Execution map (`.hem`) | Toolbar **AI Help**, or right-click a node | Explain map, Runtime, Diffs, General |
+| EDW Journey | Perspective toolbar **AI Help** (uses the selected tree node as focus) | What should I do next?, Explain journey, General |
+
+Source-model prompts always include a compact structure JSON and the same Generate Data Vault classification heuristic as the canvas action. Lineage Help uses the live session graph when the tab has been refreshed; otherwise it says the graph is not loaded. Journey Help uses the current group snapshot plus last-run OPS when available.
+
 ### Advisory Scenarios
 
 The Advisor uses tailored system prompt templates to optimize responses for different modeling phases:
@@ -117,6 +130,7 @@ See [performance-tuning.md](performance-tuning.md) for the underlying knobs (`pa
 In addition to providing conversational guidance, the AI can propose specific modifications to your open artifact. When a response contains actionable edits, a **Review … proposed change(s)** button appears in the conversation history.
 
 - **Data Vault model** (`.hdv`): table/hub/link/satellite proposals (`dv_proposals`) — details below.
+- **Business Vault** (`.hbv`) and **dimensional** (`.hdm`): add tables, bind DV/source, SQL, layout — details below.
 - **Pipeline** (`.hpl`) and **workflow** (`.hwf`): graph topology proposals (`hop_proposals`) — see [M2 documentation](plans/hop-ai-assistant-m2.md).
 
 ![Proposal Review Dialog](images/data-vault-ai-help-review-proposals-dialog.png)
@@ -145,6 +159,30 @@ The AI can suggest the following structured modifications:
 | `SET_CONFIGURATION_PROPERTY` | `propertyName`, `value` | Updates configuration settings (e.g., `sortRowsSize`, `targetTableParallelCopies`, `targetTableBatchSize`, `targetDatabase`, `dataCatalogConnection`). |
 | `RENAME_TABLE` | `tableName`, `newName` | Safely renames an existing Hub, Link, or Satellite. |
 
+**Business Vault** (`.hbv`):
+
+| Proposal Type | Expected Parameters | Description / Effect |
+| :--- | :--- | :--- |
+| `ADD_SCD2` | `name`, `tableName` (opt), `parentHubName` (opt), `satelliteNames` (opt), `locationX` / `locationY` (opt) | Adds an SCD2 table and optional hub/satellite derivatives. |
+| `ADD_PIT` | `name`, `tableName` (opt), `hubName` (opt), `satelliteNames` (opt), `locationX` / `locationY` (opt) | Adds a PIT table and optional hub/satellite derivatives. |
+| `ADD_BUSINESS_TABLE` | `name`, `tableName` (opt), `sqlQuery` (opt), `locationX` / `locationY` (opt) | Adds a SQL/Jinja business table. |
+| `ADD_SOURCE_QUERY` | `name`, `tableName` (opt), `sqlQuery` (opt), `hashKeyField` (opt), `locationX` / `locationY` (opt) | Adds a source-query input for SCD2/PIT. |
+| `ADD_BRIDGE` | `name`, `tableName` (opt), `linkName` (opt), `hubNames` (opt), `weightField` (opt), `sqlQuery` (opt), `locationX` / `locationY` (opt) | Adds a BV bridge of hub hash keys (usually from a DV link). Dimensional `ADD_BRIDGE` still adds a Kimball bridge on `.hdm`. |
+| `BIND_DV_TABLE` | `tableName`, `dvTableName`, `dvTableType` (when the linked DV is not loaded) | Binds a DV hub/satellite/link to an SCD2, PIT, business table, or bridge. |
+| `SET_SQL_QUERY` | `tableName`, `sqlQuery` | Sets authoring SQL (including `{{ ref() }}` / `{{ source() }}`) on a business table, source query, or bridge. |
+| `SET_TABLE_LOCATION` | `tableName`, `locationX`, `locationY` | Moves the table on the canvas. |
+
+**Dimensional** (`.hdm`):
+
+| Proposal Type | Expected Parameters | Description / Effect |
+| :--- | :--- | :--- |
+| `ADD_DIMENSION` | `name`, `tableName` (opt), `surrogateKeyField` (opt), `naturalKeys` (opt), `attributes` (opt), `locationX` / `locationY` (opt) | Adds a dimension with optional keys and attributes. |
+| `ADD_FACT` | `name`, `tableName` (opt), `grain` (opt), `measures` (opt), `dimensionTableNames` (opt), `locationX` / `locationY` (opt) | Adds a fact with optional measures and dimension roles. |
+| `ADD_BRIDGE` | `name`, `tableName` (opt), `dimensionTableNames` (opt), `locationX` / `locationY` (opt) | Adds a many-to-many bridge. |
+| `ADD_JUNK_DIMENSION` | `name`, `tableName` (opt), `surrogateKeyField` (opt), `keyFields` (opt), `locationX` / `locationY` (opt) | Adds a junk dimension. |
+| `BIND_SOURCE` | `tableName`, `sourceType`, `sourceSql` / pipeline / catalog / fact-table fields | Sets the staging source on a dimensional table. |
+| `SET_TABLE_LOCATION` | `tableName`, `locationX`, `locationY` | Moves the table on the canvas. |
+
 ---
 
 ## Privacy & Security
@@ -160,9 +198,13 @@ The Data Hopper EDW AI Helper values the security of your enterprise metadata:
 
 hopper-edw advisors implement Hop's `IAiAdvisor`. The workbench calls `buildPrompt` / `parseResponse` / `validateProposals` / `applyProposals`. Do not compile against `hop-tech-ai` or langchain4j from this plugin.
 
-**Data Vault / Business Vault / dimensional**
+**Data Vault / Business Vault / dimensional** (proposals)
 
 * [DataVaultAiAdvisor](../src/main/java/org/hopper/edw/datavault/ai/DataVaultAiAdvisor.java), [BusinessVaultAiAdvisor](../src/main/java/org/hopper/edw/datavault/ai/businessvault/BusinessVaultAiAdvisor.java), [DimensionalAiAdvisor](../src/main/java/org/hopper/edw/datavault/ai/dimensional/DimensionalAiAdvisor.java): `@AiAdvisorPlugin` entry points.
+
+**Chat-only**
+
+* [SourceModelAiAdvisor](../src/main/java/org/hopper/edw/datavault/ai/sourcemodel/SourceModelAiAdvisor.java), [LineageViewAiAdvisor](../src/main/java/org/hopper/edw/datavault/ai/lineageview/LineageViewAiAdvisor.java), [ExecutionMapAiAdvisor](../src/main/java/org/hopper/edw/datavault/ai/executionmap/ExecutionMapAiAdvisor.java), [EdwJourneyAiAdvisor](../src/main/java/org/hopper/edw/datavault/ai/journey/EdwJourneyAiAdvisor.java).
 * [DvAiContextBuilder](../src/main/java/org/hopper/edw/datavault/ai/DvAiContextBuilder.java) (and BV/DM equivalents): redacted context bundles.
 * [DvAiProposalApplier](../src/main/java/org/hopper/edw/datavault/ai/DvAiProposalApplier.java): writes approved proposals to the in-memory model.
 

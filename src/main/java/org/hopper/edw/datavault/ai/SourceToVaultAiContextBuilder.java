@@ -98,7 +98,7 @@ public final class SourceToVaultAiContextBuilder {
     return files;
   }
 
-  static String serializeClassification(
+  public static String serializeClassification(
       String filename, String modelName, SourceToVaultClassification classification) {
     StringBuilder json = new StringBuilder();
     json.append("{\"filename\":").append(DvAiContextBuilder.jsonString(filename));

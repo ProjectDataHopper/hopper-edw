@@ -6,7 +6,7 @@
 
 ## Purpose
 
-Business Vault layer on top of a raw `.hdv`: SCD2 tables (single- or multi-satellite), PIT tables, SQL/business tables. Drives **Business Vault Update**.
+Business Vault layer on top of a raw `.hdv`: SCD2 tables (single- or multi-satellite), PIT tables, bridges (hub hash keys), SQL/business tables. Drives **Business Vault Update**.
 
 ## Critical link
 

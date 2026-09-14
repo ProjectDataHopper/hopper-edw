@@ -2,4 +2,4 @@ Scenario: Business Vault modeling suggestions.
 
 Review SCD2, PIT, and business table layout against the linked Data Vault model. Suggest improvements: derivative references, field mappings, snapshot schedules, SCD2 validity columns, naming, and target-load settings.
 
-When the user asks to tune loading performance, prefer SET_CONFIGURATION_PROPERTY proposals for targetLoadMode, bulkLoadStagingFolder, targetTableParallelCopies, and generated artifact prefixes.
+When the user asks to add SCD2, PIT, business tables, source queries, or bridges, emit ADD_SCD2 / ADD_PIT / ADD_BUSINESS_TABLE / ADD_SOURCE_QUERY / ADD_BRIDGE plus BIND_DV_TABLE and SET_SQL_QUERY as needed. Prefer ADD_BRIDGE with linkName when the user wants a query-friendly many-to-many of hub hash keys. When they ask to tune loading performance, prefer SET_CONFIGURATION_PROPERTY proposals for targetLoadMode, bulkLoadStagingFolder, targetTableParallelCopies, and generated artifact prefixes.

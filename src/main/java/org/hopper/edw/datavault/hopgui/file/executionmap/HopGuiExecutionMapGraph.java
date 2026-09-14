@@ -77,6 +77,7 @@ import org.hopper.edw.datavault.command.svg.SvgRenderOptions;
 import org.hopper.edw.datavault.executionmap.ExecutionMapFocusContext;
 import org.hopper.edw.datavault.executionmap.ExecutionMapViewFilter;
 import org.hopper.edw.datavault.executionmap.ExecutionMapViewSupport;
+import org.hopper.edw.datavault.hopgui.ai.EdwAiAdvisorOpenSupport;
 import org.hopper.edw.datavault.hopgui.executionmap.ExecutionMapGenerationDialog;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.HopGuiModelGraphBase;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphCanvasSvgResult;
@@ -106,6 +107,7 @@ public class HopGuiExecutionMapGraph extends HopGuiModelGraphBase
   public static final String TOOLBAR_ITEM_ZOOM_FIT =
       "HopGuiExecutionMapGraph-ToolBar-10040-Zoom-Fit";
   public static final String TOOLBAR_ITEM_REFRESH = "HopGuiExecutionMapGraph-ToolBar-10050-Refresh";
+  public static final String TOOLBAR_ITEM_AI_HELP = "HopGuiExecutionMapGraph-ToolBar-10055-AI-Help";
   public static final String TOOLBAR_ITEM_EXPORT_SVG =
       "HopGuiExecutionMapGraph-ToolBar-10060-Export-Svg";
   public static final String TOOLBAR_ITEM_EXPORT_LINEAGE =
@@ -666,6 +668,36 @@ public class HopGuiExecutionMapGraph extends HopGuiModelGraphBase
       categoryOrder = "5")
   public void viewDatasetFromContext(HopGuiExecutionMapNodeContext context) {
     ExecutionMapDatasetDetailsViewer.showDetails(hopGui.getShell(), context.getNode());
+  }
+
+  @GuiContextAction(
+      id = "execution-map-ai-help",
+      parentId = HopGuiExecutionMapNodeContext.CONTEXT_ID,
+      type = GuiActionType.Modify,
+      name = "i18n::HopGuiExecutionMapGraph.AiHelp.Name",
+      tooltip = "i18n::HopGuiExecutionMapGraph.AiHelp.Tooltip",
+      image = "datavault-ai-help.svg",
+      category = "Help",
+      categoryOrder = "1")
+  public void openAiAdvisorNodeContext(HopGuiExecutionMapNodeContext context) {
+    HopGuiExecutionMapGraph graph = context != null ? context.getExecutionMapGraph() : this;
+    if (graph != null) {
+      String focus = context.getNode() != null ? context.getNode().getName() : null;
+      graph.openAiAdvisor(focus);
+    }
+  }
+
+  @GuiToolbarElement(
+      root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
+      id = TOOLBAR_ITEM_AI_HELP,
+      toolTip = "i18n::HopGuiExecutionMapGraph.Toolbar.AiHelp.Tooltip",
+      image = "datavault-ai-help.svg")
+  public void openAiAdvisor() {
+    openAiAdvisor(null);
+  }
+
+  public void openAiAdvisor(String focusNodeName) {
+    EdwAiAdvisorOpenSupport.openExecutionMap(hopGui, document, focusNodeName);
   }
 
   @GuiToolbarElement(

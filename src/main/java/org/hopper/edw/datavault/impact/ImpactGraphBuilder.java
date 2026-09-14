@@ -35,6 +35,7 @@ import org.hopper.edw.datavault.metadata.DvLink;
 import org.hopper.edw.datavault.metadata.DvSatellite;
 import org.hopper.edw.datavault.metadata.IDvTable;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
+import org.hopper.edw.datavault.metadata.businessvault.BvBridge;
 import org.hopper.edw.datavault.metadata.businessvault.BvBusinessTable;
 import org.hopper.edw.datavault.metadata.businessvault.BvDerivativeRef;
 import org.hopper.edw.datavault.metadata.businessvault.BvPitTable;
@@ -293,6 +294,8 @@ public final class ImpactGraphBuilder {
           addPit(bvModel, pit);
         } else if (table instanceof BvBusinessTable businessTable) {
           addBvSql(bvModel, businessTable);
+        } else if (table instanceof BvBridge bridge) {
+          addBvBridge(bvModel, bridge);
         }
       }
     }
@@ -470,6 +473,42 @@ public final class ImpactGraphBuilder {
                     null));
         indexTableName(dvNode);
         addEdge(ImpactEdgeType.DV_TO_BV_PIT, dvNode, pitNode);
+      }
+    }
+
+    private void addBvBridge(BusinessVaultModel bvModel, BvBridge bridge) {
+      ImpactNode bridgeNode =
+          addNode(
+              new ImpactNode(
+                  ImpactNodeKind.BV_TABLE,
+                  SourceUsageIndexBuilder.MODEL_TYPE_BUSINESS_VAULT,
+                  bvModel.getName(),
+                  bvModel.getFilename(),
+                  bridge.getName(),
+                  null,
+                  null,
+                  null));
+      indexTableName(bridgeNode);
+      if (bridge.getDerivatives() == null) {
+        return;
+      }
+      for (BvDerivativeRef derivative : bridge.getDerivatives()) {
+        if (derivative == null || Utils.isEmpty(derivative.getDvTableName())) {
+          continue;
+        }
+        ImpactNode dvNode =
+            addNode(
+                new ImpactNode(
+                    ImpactNodeKind.DV_TABLE,
+                    SourceUsageIndexBuilder.MODEL_TYPE_DATA_VAULT,
+                    null,
+                    null,
+                    resolve(derivative.getDvTableName()),
+                    null,
+                    null,
+                    null));
+        indexTableName(dvNode);
+        addEdge(ImpactEdgeType.DV_TO_BV_BRIDGE, dvNode, bridgeNode);
       }
     }
 

@@ -109,6 +109,13 @@ public final class DmAiProposalApplier {
       case ADD_MODEL_NOTE -> addModelNote(model, proposal);
       case SET_CONFIGURATION_PROPERTY -> setConfigurationProperty(model, proposal);
       case RENAME_TABLE -> renameTable(model, proposal);
+      case ADD_DIMENSION,
+              ADD_FACT,
+              ADD_BRIDGE,
+              ADD_JUNK_DIMENSION,
+              BIND_SOURCE,
+              SET_TABLE_LOCATION ->
+          DmAiStructuralProposalSupport.apply(model, proposal);
       default -> throw new HopException("Unsupported proposal type: " + proposal.getType());
     }
   }

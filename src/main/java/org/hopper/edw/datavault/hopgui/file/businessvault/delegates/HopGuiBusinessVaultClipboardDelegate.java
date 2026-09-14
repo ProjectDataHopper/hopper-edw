@@ -36,6 +36,7 @@ import org.hopper.edw.datavault.hopgui.file.businessvault.HopGuiBusinessVaultGra
 import org.hopper.edw.datavault.metadata.DvNote;
 import org.hopper.edw.datavault.metadata.DvNoteType;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
+import org.hopper.edw.datavault.metadata.businessvault.BvBridge;
 import org.hopper.edw.datavault.metadata.businessvault.BvBusinessTable;
 import org.hopper.edw.datavault.metadata.businessvault.BvPitTable;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2Table;
@@ -214,6 +215,8 @@ public class HopGuiBusinessVaultClipboardDelegate {
           XmlMetadataUtil.deSerializeFromXml(tableNode, BvBusinessTable.class, metadataProvider);
       case SOURCE_QUERY ->
           XmlMetadataUtil.deSerializeFromXml(tableNode, BvSourceQuery.class, metadataProvider);
+      case BRIDGE ->
+          XmlMetadataUtil.deSerializeFromXml(tableNode, BvBridge.class, metadataProvider);
     };
   }
 

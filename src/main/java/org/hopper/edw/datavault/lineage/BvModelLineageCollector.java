@@ -32,6 +32,7 @@ import org.hopper.edw.datavault.metadata.DvSatellite;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultConfiguration;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultDvModelResolver;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
+import org.hopper.edw.datavault.metadata.businessvault.BvBridge;
 import org.hopper.edw.datavault.metadata.businessvault.BvBusinessTable;
 import org.hopper.edw.datavault.metadata.businessvault.BvDerivativeRef;
 import org.hopper.edw.datavault.metadata.businessvault.BvPitTable;
@@ -88,6 +89,8 @@ public final class BvModelLineageCollector {
         tableLineage = collectPit(pit, model, config, variables, targetDb);
       } else if (table instanceof BvBusinessTable business) {
         tableLineage = collectBusinessTable(business, model, variables, targetDb);
+      } else if (table instanceof BvBridge) {
+        tableLineage = collectGeneric(table, model, variables, targetDb);
       } else {
         tableLineage = collectGeneric(table, model, variables, targetDb);
       }

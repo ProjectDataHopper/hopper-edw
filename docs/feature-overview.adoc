@@ -154,6 +154,10 @@ For a slide-style executive summary, see link:presentations/hop-data-vault-overv
 |Available
 |link:business-vault-pit.adoc[Business Vault PIT]
 
+|BV bridge tables (hub hash keys, optional weight / SQL)
+|Preview
+|link:business-vault-bridge.adoc[Business Vault bridge]
+
 |BV SQL views / tables (`ref` / `source`)
 |Available
 |link:business-vault-sql-view.adoc[Business Vault SQL] (`vault1.hbv` + `retail-sql.hbv` samples)
@@ -227,7 +231,7 @@ For a slide-style executive summary, see link:presentations/hop-data-vault-overv
 |link:hop-web-modelers.md[Hop Web modelers], issue https://github.com/ProjectDataHopper/hopper-edw/issues/119[#119]
 
 |AI Help (model, pipeline, workflow)
-|Available
+|Available (DV/BV/DM proposals; `.hsm` / `.hlv` / `.hem` / Journey chat-only)
 |link:ai-advisory.md[AI advisory]
 
 |Get Record Definition Names transform
@@ -360,7 +364,7 @@ image::images/validate-resource-definitions-action-dialog.png[Validate resource 
 
 === Business Vault (`.hbv`)
 
-Linked to a `.hdv` model. Defines **SCD2** consumption tables (single- or multi-satellite merge), **PIT** helpers, and **SQL views/tables** (dbt-style `ref` / `source`, optional Jinja macros). **Import dbt models** on the canvas (and the **Import dbt project** workflow action) loads a dbt-core project as SQL business tables. **Business Vault Update** validates, optionally publishes target layouts to the catalog, generates SCD2 build pipelines (hash-key partitioned full rebuilds run as truncate-then-load wrapper workflows), and orchestrates parallel execution.
+Linked to a `.hdv` model. Defines **SCD2** consumption tables (single- or multi-satellite merge), **PIT** helpers, **bridges** (query-friendly hub hash-key tables, usually from a DV link), and **SQL views/tables** (dbt-style `ref` / `source`, optional Jinja macros). **Import dbt models** on the canvas (and the **Import dbt project** workflow action) loads a dbt-core project as SQL business tables. **Business Vault Update** validates, optionally publishes target layouts to the catalog, generates SCD2 build pipelines (hash-key partitioned full rebuilds run as truncate-then-load wrapper workflows), and orchestrates parallel execution.
 
 image::images/business-vault-dbt-import-models-dialog.png[Import dbt models dialog — project folder, model list, destination, and macro library,align="center"]
 

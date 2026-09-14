@@ -75,6 +75,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.datavault.hopgui.ai.EdwAiAdvisorOpenSupport;
 import org.hopper.edw.datavault.hopgui.dialog.ShowRowsDialog;
 import org.hopper.edw.datavault.hopgui.file.dimensional.DmSourcePipelineOpenSupport;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.HopGuiModelGraphBase;
@@ -143,6 +144,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       "HopGuiSourceModelGraph-ToolBar-10059-Generate-Vault";
   public static final String TOOLBAR_ITEM_CHECK_MODEL =
       "HopGuiSourceModelGraph-ToolBar-10060-Check-Model";
+  public static final String TOOLBAR_ITEM_AI_HELP = "HopGuiSourceModelGraph-ToolBar-10062-AI-Help";
   public static final String TOOLBAR_ITEM_EXPORT_DIAGRAM =
       "HopGuiSourceModelGraph-ToolBar-10063-Export-Diagram";
   public static final String TOOLBAR_ITEM_TOGGLE_COACH =
@@ -546,6 +548,20 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
     CheckResultDialog dialog = new CheckResultDialog(getShell(), new ArrayList<>(result.remarks()));
     dialog.open();
+  }
+
+  @GuiToolbarElement(
+      root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
+      id = TOOLBAR_ITEM_AI_HELP,
+      toolTip = "i18n::HopGuiSourceModelGraph.Toolbar.AiHelp.Tooltip",
+      type = GuiToolbarElementType.BUTTON,
+      image = "datavault-ai-help.svg")
+  public void openAiAdvisor() {
+    openAiAdvisor(null);
+  }
+
+  public void openAiAdvisor(String focusNodeName) {
+    EdwAiAdvisorOpenSupport.openSourceModel(hopGui, model, focusNodeName);
   }
 
   @GuiToolbarElement(
@@ -2206,6 +2222,108 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       categoryOrder = "2")
   public void importSchemaFromContext(HopGuiSourceModelContext context) {
     importSchema();
+  }
+
+  @GuiContextAction(
+      id = "source-model-graph-ai-help",
+      parentId = HopGuiSourceModelContext.CONTEXT_ID,
+      type = GuiActionType.Modify,
+      name = "i18n::HopGuiSourceModelGraph.AiHelp.Name",
+      tooltip = "i18n::HopGuiSourceModelGraph.AiHelp.Tooltip",
+      image = "datavault-ai-help.svg",
+      category = "Help",
+      categoryOrder = "1")
+  public void openAiAdvisorContext(HopGuiSourceModelContext context) {
+    HopGuiSourceModelGraph graph = context != null ? context.getSourceModelGraph() : this;
+    if (graph != null) {
+      graph.openAiAdvisor();
+    }
+  }
+
+  @GuiContextAction(
+      id = "source-model-table-ai-help",
+      parentId = HopGuiSourceTableContext.CONTEXT_ID,
+      type = GuiActionType.Modify,
+      name = "i18n::HopGuiSourceModelGraph.AiHelp.Name",
+      tooltip = "i18n::HopGuiSourceModelGraph.AiHelp.Tooltip",
+      image = "datavault-ai-help.svg",
+      category = "Help",
+      categoryOrder = "1")
+  public void openAiAdvisorTableContext(HopGuiSourceTableContext context) {
+    HopGuiSourceModelGraph graph = context != null ? context.getSourceModelGraph() : this;
+    if (graph != null) {
+      String focus = context.getTable() != null ? context.getTable().getName() : null;
+      graph.openAiAdvisor(focus);
+    }
+  }
+
+  @GuiContextAction(
+      id = "source-model-query-ai-help",
+      parentId = HopGuiSourceQueryContext.CONTEXT_ID,
+      type = GuiActionType.Modify,
+      name = "i18n::HopGuiSourceModelGraph.AiHelp.Name",
+      tooltip = "i18n::HopGuiSourceModelGraph.AiHelp.Tooltip",
+      image = "datavault-ai-help.svg",
+      category = "Help",
+      categoryOrder = "1")
+  public void openAiAdvisorQueryContext(HopGuiSourceQueryContext context) {
+    HopGuiSourceModelGraph graph = context != null ? context.getSourceModelGraph() : this;
+    if (graph != null) {
+      String focus = context.getQuery() != null ? context.getQuery().getName() : null;
+      graph.openAiAdvisor(focus);
+    }
+  }
+
+  @GuiContextAction(
+      id = "source-model-json-ai-help",
+      parentId = HopGuiSourceJsonContext.CONTEXT_ID,
+      type = GuiActionType.Modify,
+      name = "i18n::HopGuiSourceModelGraph.AiHelp.Name",
+      tooltip = "i18n::HopGuiSourceModelGraph.AiHelp.Tooltip",
+      image = "datavault-ai-help.svg",
+      category = "Help",
+      categoryOrder = "1")
+  public void openAiAdvisorJsonContext(HopGuiSourceJsonContext context) {
+    HopGuiSourceModelGraph graph = context != null ? context.getSourceModelGraph() : this;
+    if (graph != null) {
+      String focus = context.getJsonSource() != null ? context.getJsonSource().getName() : null;
+      graph.openAiAdvisor(focus);
+    }
+  }
+
+  @GuiContextAction(
+      id = "source-model-pipeline-ai-help",
+      parentId = HopGuiSourcePipelineContext.CONTEXT_ID,
+      type = GuiActionType.Modify,
+      name = "i18n::HopGuiSourceModelGraph.AiHelp.Name",
+      tooltip = "i18n::HopGuiSourceModelGraph.AiHelp.Tooltip",
+      image = "datavault-ai-help.svg",
+      category = "Help",
+      categoryOrder = "1")
+  public void openAiAdvisorPipelineContext(HopGuiSourcePipelineContext context) {
+    HopGuiSourceModelGraph graph = context != null ? context.getSourceModelGraph() : this;
+    if (graph != null) {
+      String focus =
+          context.getPipelineSource() != null ? context.getPipelineSource().getName() : null;
+      graph.openAiAdvisor(focus);
+    }
+  }
+
+  @GuiContextAction(
+      id = "source-model-relationship-ai-help",
+      parentId = HopGuiSourceRelationshipContext.CONTEXT_ID,
+      type = GuiActionType.Modify,
+      name = "i18n::HopGuiSourceModelGraph.AiHelp.Name",
+      tooltip = "i18n::HopGuiSourceModelGraph.AiHelp.Tooltip",
+      image = "datavault-ai-help.svg",
+      category = "Help",
+      categoryOrder = "1")
+  public void openAiAdvisorRelationshipContext(HopGuiSourceRelationshipContext context) {
+    HopGuiSourceModelGraph graph = context != null ? context.getSourceModelGraph() : this;
+    if (graph != null) {
+      String focus = context.getRelationship() != null ? context.getRelationship().getName() : null;
+      graph.openAiAdvisor(focus);
+    }
   }
 
   @GuiContextAction(

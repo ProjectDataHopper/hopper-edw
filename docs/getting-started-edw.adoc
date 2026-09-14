@@ -178,7 +178,7 @@ Grow the warehouse; do not start a second group.
 
 . New `.hbv`. Point it at the `.hdv` (and/or place DV table aliases on the canvas).
 . **Edit model** — configuration `business-vault`, target database (often the same Vault).
-. Add SCD2 / PIT / SQL business tables. **Check model**.
+. Add SCD2 / PIT / bridge / SQL business tables. **Check model**.
 . Resource definition group → **Business Vault models** tab → **Add models**.
 . Run **Update resource definition group** again with Business Vault included.
 

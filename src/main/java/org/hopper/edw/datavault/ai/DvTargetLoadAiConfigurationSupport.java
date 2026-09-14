@@ -95,6 +95,8 @@ public final class DvTargetLoadAiConfigurationSupport {
         .append(DvAiContextBuilder.jsonString(config.getPitPipelineNamePrefix()));
     json.append(",\"businessTablePipelineNamePrefix\":")
         .append(DvAiContextBuilder.jsonString(config.getBusinessTablePipelineNamePrefix()));
+    json.append(",\"bridgePipelineNamePrefix\":")
+        .append(DvAiContextBuilder.jsonString(config.getBridgePipelineNamePrefix()));
   }
 
   public static void appendTargetLoadSummaryJson(
@@ -163,6 +165,7 @@ public final class DvTargetLoadAiConfigurationSupport {
       case "scd2PipelineNamePrefix" -> config.setScd2PipelineNamePrefix(value);
       case "pitPipelineNamePrefix" -> config.setPitPipelineNamePrefix(value);
       case "businessTablePipelineNamePrefix" -> config.setBusinessTablePipelineNamePrefix(value);
+      case "bridgePipelineNamePrefix" -> config.setBridgePipelineNamePrefix(value);
       default -> throw new HopException("Configuration property not allowed: " + propertyName);
     }
   }

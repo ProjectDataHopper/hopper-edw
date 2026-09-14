@@ -92,6 +92,7 @@ Architecture pictures are **committed SVGs** (`docs/images/diagrams/`) generated
 | [business-vault-overview.adoc](business-vault-overview.adoc) | `.hbv` modeler and table types |
 | [business-vault-scd2.adoc](business-vault-scd2.adoc) | SCD2 generation, multi-satellite mappings |
 | [business-vault-pit.adoc](business-vault-pit.adoc) | PIT snapshot schedule, layout, pipelines |
+| [business-vault-bridge.adoc](business-vault-bridge.adoc) | BV bridge tables (hub hash keys, optional weight / SQL) |
 | [business-vault-sql-view.adoc](business-vault-sql-view.adoc) | SQL business tables: view/table materialization, `ref` / `source` |
 | [business-vault-configuration.adoc](business-vault-configuration.adoc) | Embedded `.hbv` configuration |
 | [business-vault-update-action.adoc](business-vault-update-action.adoc) | Business Vault Update workflow action |

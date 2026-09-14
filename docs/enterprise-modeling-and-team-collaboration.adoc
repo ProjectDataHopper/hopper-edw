@@ -81,7 +81,7 @@ Roles often overlap in small teams; at scale, keep **accountable owners** even i
 |Begin/End Vault Update, metrics profiles, partial loads by record source group
 
 |**Business Vault modeler**
-|`.hbv` models (SCD2, PIT, SQL business tables)
+|`.hbv` models (SCD2, PIT, bridges, SQL business tables)
 |Publishes BV target definitions on BV Update
 |BV canvas (DV aliases / multi-model refs), Business Vault Update
 
@@ -154,7 +154,7 @@ Retail-example collapses many of these into fewer files for teaching. Integratio
 |Links and satellites for that domain; **linked tables** to core hubs (and links if needed). Local hubs only when the concept is truly local.
 
 |**Business Vault** `.hbv`
-|SCD2 / PIT / SQL business objects. References DV tables via canvas aliases (possibly multi-model). May itself be split by domain.
+|SCD2 / PIT / bridge / SQL business objects. References DV tables via canvas aliases (possibly multi-model). May itself be split by domain.
 
 |**Dimensional** `.hdm`
 |Marts; conformed dimensions and role-playing dimension aliases. Often owned by a different team than raw DV.
