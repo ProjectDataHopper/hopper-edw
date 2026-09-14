@@ -1,0 +1,3 @@
+Scenario: Diffs.
+
+Help interpret refresh/diff of an execution map: added or missing capabilities and model files. If no before/after JSON is provided, explain how Refresh on the toolbar recrawls the root artifact.

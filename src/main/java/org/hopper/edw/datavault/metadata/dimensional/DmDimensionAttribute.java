@@ -19,6 +19,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.hop.metadata.api.HopMetadataProperty;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 
 /** Descriptive attribute on a dimension with an optional SCD update policy override. */
 @Getter
@@ -27,7 +28,8 @@ import org.apache.hop.metadata.api.HopMetadataProperty;
 public class DmDimensionAttribute implements IDmDocumentedField {
 
   /** Warehouse / target column name. */
-  @HopMetadataProperty private String fieldName;
+  @HopMetadataProperty(namingSchemeType = EdwNamingSchemeTypes.DATABASE_COLUMN)
+  private String fieldName;
 
   /** Source stream column; defaults to {@link #fieldName} when empty. */
   @HopMetadataProperty private String sourceFieldName;

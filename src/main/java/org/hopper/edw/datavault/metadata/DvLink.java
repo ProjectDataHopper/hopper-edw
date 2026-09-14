@@ -40,6 +40,7 @@ import org.apache.hop.core.gui.plugin.GuiElementType;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.GuiWidgetElement;
 import org.apache.hop.core.logging.ILoggingObject;
+import org.apache.hop.core.naming.NamingSchemeKind;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.RowMeta;
@@ -71,6 +72,7 @@ import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
 import org.apache.hop.pipeline.transforms.uniquerowsbyhashset.UniqueRowsByHashSetMeta;
 import org.apache.hop.workflow.WorkflowMeta;
 import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 import org.hopper.edw.datavault.transform.dvhashkey.DvHashKeyMeta;
 import org.hopper.edw.datavault.transform.dvhashkey.DvHashKeyMetaFactory;
 import org.hopper.edw.datavault.transform.mergerowsplus.MergeRowsPlusMeta;
@@ -86,6 +88,7 @@ import org.jspecify.annotations.NonNull;
 @GuiPlugin
 @Getter
 @Setter
+@NamingSchemeKind(EdwNamingSchemeTypes.DV_LINK)
 public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBaseMeta, IHasName {
   private static final Class<?> PKG = DvLink.class;
 

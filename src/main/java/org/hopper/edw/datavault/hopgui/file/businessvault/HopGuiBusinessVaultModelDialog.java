@@ -48,6 +48,8 @@ import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 import org.hopper.edw.datavault.metadata.ModelConfigurationExtractSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultConfiguration;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
+import org.hopper.edw.datavault.naming.EdwNamingWidgetSupport;
 import org.jspecify.annotations.NonNull;
 
 /**
@@ -116,7 +118,8 @@ public class HopGuiBusinessVaultModelDialog {
     fdName.left = new FormAttachment(middle, 0);
     fdName.top = new FormAttachment(0, margin);
     fdName.right = new FormAttachment(100, 0);
-    wName.setLayoutData(fdName);
+    EdwNamingWidgetSupport.enableAndLayout(
+        wName, variables, EdwNamingSchemeTypes.EDW_BV_MODEL, fdName);
     wName.addModifyListener(e -> input.setChanged());
 
     Label wlDescription = new Label(shell, SWT.RIGHT);

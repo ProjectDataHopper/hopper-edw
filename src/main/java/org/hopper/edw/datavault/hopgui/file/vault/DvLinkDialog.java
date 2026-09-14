@@ -72,6 +72,8 @@ import org.hopper.edw.datavault.metadata.DvSatellite;
 import org.hopper.edw.datavault.metadata.DvTableType;
 import org.hopper.edw.datavault.metadata.IDvTable;
 import org.hopper.edw.datavault.metadata.SourceField;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
+import org.hopper.edw.datavault.naming.EdwNamingWidgetSupport;
 
 /**
  * Dialog to edit the properties of a DvLink using a TabFolder. Name and description are placed at
@@ -193,7 +195,7 @@ public class DvLinkDialog {
     fdName.left = new FormAttachment(middle, 0);
     fdName.top = new FormAttachment(0, margin);
     fdName.right = new FormAttachment(100, 0);
-    wName.setLayoutData(fdName);
+    EdwNamingWidgetSupport.enableAndLayout(wName, variables, EdwNamingSchemeTypes.DV_LINK, fdName);
 
     // Description right under name
     Label wlDescription = new Label(shell, SWT.RIGHT);
@@ -310,7 +312,8 @@ public class DvLinkDialog {
     fdTableName.left = new FormAttachment(middle, 0);
     fdTableName.top = new FormAttachment(wlTableName, 0, SWT.CENTER);
     fdTableName.right = new FormAttachment(100, 0);
-    wTableName.setLayoutData(fdTableName);
+    EdwNamingWidgetSupport.enableAndLayout(
+        wTableName, variables, EdwNamingSchemeTypes.DATABASE_TABLE, fdTableName);
 
     // Link hash key field name
     Label wlLinkHashKey = new Label(wOptionsComp, SWT.RIGHT);

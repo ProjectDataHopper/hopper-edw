@@ -19,6 +19,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.hop.metadata.api.HopMetadataProperty;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 
 /** Maps one satellite source column to a uniquely named Business Vault SCD2 target column. */
 @Getter
@@ -30,7 +31,8 @@ public class BvScd2FieldMapping {
 
   @HopMetadataProperty private String sourceFieldName;
 
-  @HopMetadataProperty private String targetFieldName;
+  @HopMetadataProperty(namingSchemeType = EdwNamingSchemeTypes.DATABASE_COLUMN)
+  private String targetFieldName;
 
   /**
    * When true the mapped column is kept on the SCD2 stream for calculations and versioning but is

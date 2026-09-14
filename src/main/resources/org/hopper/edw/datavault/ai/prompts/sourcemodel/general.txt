@@ -1,0 +1,3 @@
+Scenario: General help.
+
+Answer questions about this source model: tables, relationships, queries, JSON extractions, and pipeline sources. Prefer concrete names from the structure JSON.

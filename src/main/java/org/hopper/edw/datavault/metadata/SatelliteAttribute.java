@@ -21,6 +21,7 @@ import org.apache.hop.core.gui.plugin.GuiElementType;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.GuiWidgetElement;
 import org.apache.hop.metadata.api.HopMetadataProperty;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 
 /** A descriptive attribute stored in a Satellite (attached to a Hub or Link). */
 @GuiPlugin
@@ -34,8 +35,9 @@ public class SatelliteAttribute {
       type = GuiElementType.TEXT,
       label = "i18n::SatelliteAttribute.Name.Label",
       toolTip = "i18n::SatelliteAttribute.Name.ToolTip",
-      parentId = GUI_PLUGIN_ELEMENT_PARENT_ID)
-  @HopMetadataProperty
+      parentId = GUI_PLUGIN_ELEMENT_PARENT_ID,
+      namingSchemeType = EdwNamingSchemeTypes.DATABASE_COLUMN)
+  @HopMetadataProperty(namingSchemeType = EdwNamingSchemeTypes.DATABASE_COLUMN)
   private String name;
 
   @GuiWidgetElement(

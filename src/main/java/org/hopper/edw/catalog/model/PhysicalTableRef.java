@@ -21,6 +21,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.hop.metadata.api.HopMetadataProperty;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 
 /**
  * Optional link from a record definition to a physical database table.
@@ -38,7 +39,8 @@ public class PhysicalTableRef {
 
   @HopMetadataProperty private String schemaName;
 
-  @HopMetadataProperty private String tableName;
+  @HopMetadataProperty(namingSchemeType = EdwNamingSchemeTypes.DATABASE_TABLE)
+  private String tableName;
 
   /**
    * Column layout for this physical table when the parent record definition owns the layout (vault

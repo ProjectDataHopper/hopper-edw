@@ -22,16 +22,19 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.naming.NamingSchemeKind;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.hopper.edw.datavault.metadata.dimensional.pipeline.DmBridgeLoadBuilder;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 
 /** Kimball bridge table for many-to-many relationships. */
 @Getter
 @Setter
+@NamingSchemeKind(EdwNamingSchemeTypes.DM_BRIDGE)
 public class DmBridge extends DmTableBase {
 
   @HopMetadataProperty(key = "dimension_ref", groupKey = "dimension_refs")

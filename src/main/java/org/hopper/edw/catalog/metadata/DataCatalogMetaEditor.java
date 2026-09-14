@@ -49,6 +49,8 @@ import org.hopper.edw.catalog.impl.file.FileDataCatalog;
 import org.hopper.edw.catalog.spi.IDataCatalog;
 import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
 import org.hopper.edw.datavault.hopgui.help.HelpTopics;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
+import org.hopper.edw.datavault.naming.EdwNamingWidgetSupport;
 
 /** Editor for {@link DataCatalogMeta} with type-specific catalog configuration. */
 @GuiPlugin(description = "Editor for Data Catalog metadata")
@@ -100,7 +102,8 @@ public class DataCatalogMetaEditor extends MetadataEditor<DataCatalogMeta> {
     fdName.top = new FormAttachment(wlName, 0, SWT.CENTER);
     fdName.left = new FormAttachment(middle, 0);
     fdName.right = new FormAttachment(100, 0);
-    wName.setLayoutData(fdName);
+    EdwNamingWidgetSupport.enableAndLayout(
+        wName, hopGui.getVariables(), EdwNamingSchemeTypes.HOP_METADATA, fdName);
     Control lastControl = wName;
 
     Label wlDescription = new Label(parent, SWT.RIGHT);

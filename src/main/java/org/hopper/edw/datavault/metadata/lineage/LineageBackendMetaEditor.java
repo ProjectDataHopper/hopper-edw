@@ -45,6 +45,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
 import org.hopper.edw.datavault.hopgui.help.HelpTopics;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
+import org.hopper.edw.datavault.naming.EdwNamingWidgetSupport;
 
 /** Editor for {@link LineageBackendMeta} with type-specific settings. */
 @GuiPlugin(description = "Editor for Lineage Backend metadata")
@@ -96,7 +98,8 @@ public class LineageBackendMetaEditor extends MetadataEditor<LineageBackendMeta>
     fdName.top = new FormAttachment(wlName, 0, SWT.CENTER);
     fdName.left = new FormAttachment(middle, 0);
     fdName.right = new FormAttachment(100, 0);
-    wName.setLayoutData(fdName);
+    EdwNamingWidgetSupport.enableAndLayout(
+        wName, hopGui.getVariables(), EdwNamingSchemeTypes.HOP_METADATA, fdName);
     Control lastControl = wName;
 
     Label wlDescription = new Label(parent, SWT.RIGHT);

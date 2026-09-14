@@ -69,6 +69,8 @@ import org.hopper.edw.datavault.metadata.businessvault.BvSourceQueryColumn;
 import org.hopper.edw.datavault.metadata.businessvault.BvSourceQueryKind;
 import org.hopper.edw.datavault.metadata.businessvault.BvSourceQuerySqlSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BvTargetDatabaseSupport;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
+import org.hopper.edw.datavault.naming.EdwNamingWidgetSupport;
 
 /** Dialog to edit a satellite-shaped Business Vault source query (table/view or SQL). */
 public class HopGuiBvSourceQueryDialog {
@@ -126,6 +128,9 @@ public class HopGuiBvSourceQueryDialog {
 
     Label lastLabel = addRightLabel("HopGuiBvSourceQueryDialog.Name.Label", null, middle, margin);
     wName = addText(lastLabel, middle);
+    FormData fdName = (FormData) wName.getLayoutData();
+    EdwNamingWidgetSupport.enableAndLayout(
+        wName, variables, EdwNamingSchemeTypes.BV_SOURCE_QUERY, fdName);
     lastLabel = addRightLabel("HopGuiBvSourceQueryDialog.Description.Label", wName, middle, margin);
     wDescription = addText(lastLabel, middle);
 

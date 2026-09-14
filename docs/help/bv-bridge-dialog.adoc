@@ -1,0 +1,20 @@
+= Business Vault bridge table
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../business-vault-bridge.adoc[business-vault-bridge].
+
+A **Business Vault bridge** is a query-friendly table of two or more hub hash keys, usually sourced from a Data Vault link (many-to-many or hierarchy). Optional **weight** supports allocation. Optional **load SQL** overrides the generated `SELECT` from the first bound link.
+
+== Grain
+
+Bind a Data Vault **link** (preferred) and/or two or more **hubs**. The target layout is the participating hub hash keys, plus the optional weight column.
+
+== Load
+
+* Empty SQL — Business Vault Update selects hub hash keys from the first bound link table.
+* Authoring SQL — Table Input runs that SQL against the Data Vault (or Business Vault) target, then writes the bridge.
+
+SCD2, PIT, and SQL business tables have their own dialogs.

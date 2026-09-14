@@ -67,6 +67,8 @@ import org.hopper.edw.datavault.metadata.DvModelCheckOptions;
 import org.hopper.edw.datavault.metadata.IDvTable;
 import org.hopper.edw.datavault.metadata.SourceField;
 import org.hopper.edw.datavault.metadata.SourceFieldPrimaryKeySupport;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
+import org.hopper.edw.datavault.naming.EdwNamingWidgetSupport;
 
 /** Dialog to edit the properties of a DvHub, including business keys list using TableView. */
 public class DvHubDialog {
@@ -156,7 +158,7 @@ public class DvHubDialog {
     fdName.left = new FormAttachment(middle, 0);
     fdName.top = new FormAttachment(0, margin);
     fdName.right = new FormAttachment(100, 0);
-    wName.setLayoutData(fdName);
+    EdwNamingWidgetSupport.enableAndLayout(wName, variables, EdwNamingSchemeTypes.DV_HUB, fdName);
 
     // Description
     Label wlDescription = new Label(shell, SWT.RIGHT);
@@ -249,7 +251,8 @@ public class DvHubDialog {
     fdTableName.left = new FormAttachment(middle, 0);
     fdTableName.top = new FormAttachment(wlTableName, 0, SWT.CENTER);
     fdTableName.right = new FormAttachment(100, 0);
-    wTableName.setLayoutData(fdTableName);
+    EdwNamingWidgetSupport.enableAndLayout(
+        wTableName, variables, EdwNamingSchemeTypes.DATABASE_TABLE, fdTableName);
 
     // Hash key field name (per-hub, replaces global suffix from DataVaultConfiguration)
     Label wlHashKeyFieldName = new Label(wOptionsComp, SWT.RIGHT);
@@ -267,7 +270,8 @@ public class DvHubDialog {
     fdHashKeyFieldName.left = new FormAttachment(middle, 0);
     fdHashKeyFieldName.top = new FormAttachment(wlHashKeyFieldName, 0, SWT.CENTER);
     fdHashKeyFieldName.right = new FormAttachment(100, 0);
-    wHashKeyFieldName.setLayoutData(fdHashKeyFieldName);
+    EdwNamingWidgetSupport.enableAndLayout(
+        wHashKeyFieldName, variables, EdwNamingSchemeTypes.DATABASE_COLUMN, fdHashKeyFieldName);
 
     // Record source field name (per-hub override of the one in DataVaultConfiguration)
     Label wlRecordSourceFieldName = new Label(wOptionsComp, SWT.RIGHT);
@@ -286,7 +290,11 @@ public class DvHubDialog {
     fdRecordSourceFieldName.left = new FormAttachment(middle, 0);
     fdRecordSourceFieldName.top = new FormAttachment(wlRecordSourceFieldName, 0, SWT.CENTER);
     fdRecordSourceFieldName.right = new FormAttachment(100, 0);
-    wRecordSourceFieldName.setLayoutData(fdRecordSourceFieldName);
+    EdwNamingWidgetSupport.enableAndLayout(
+        wRecordSourceFieldName,
+        variables,
+        EdwNamingSchemeTypes.DATABASE_COLUMN,
+        fdRecordSourceFieldName);
 
     wAllowInferredInsert = new Button(wOptionsComp, SWT.CHECK);
     wAllowInferredInsert.setText(
@@ -361,6 +369,7 @@ public class DvHubDialog {
               ColumnInfo.COLUMN_TYPE_TEXT,
               false),
         };
+    columns[0].setNamingSchemeType(EdwNamingSchemeTypes.DATABASE_COLUMN);
 
     Button wLoadFromSource = new Button(wKeysComp, SWT.PUSH);
     wLoadFromSource.setText(BaseMessages.getString(PKG, "DvHubDialog.GetKeys.Button"));

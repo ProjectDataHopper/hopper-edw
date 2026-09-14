@@ -1,0 +1,3 @@
+Scenario: What should I do next?
+
+Look at missing layers, warnings, and last-run OPS problems. Recommend the smallest next step (for example: add a source model, generate Data Vault, run the update workflow, inspect harvest).

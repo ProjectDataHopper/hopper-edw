@@ -42,6 +42,7 @@ import org.apache.hop.core.gui.plugin.GuiWidgetElement;
 import org.apache.hop.core.logging.ILoggingObject;
 import org.apache.hop.core.logging.LoggingObjectType;
 import org.apache.hop.core.logging.SimpleLoggingObject;
+import org.apache.hop.core.naming.NamingSchemeKind;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.RowMeta;
@@ -84,6 +85,7 @@ import org.apache.hop.pipeline.transforms.update.UpdateLookupField;
 import org.apache.hop.pipeline.transforms.update.UpdateMeta;
 import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
 import org.hopper.edw.datavault.metadata.database.DvDatabaseSource;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 import org.hopper.edw.datavault.transform.dvhashkey.DvHashKeyMeta;
 import org.hopper.edw.datavault.transform.dvhashkey.DvHashKeyMetaFactory;
 import org.hopper.edw.datavault.transform.mergerowsplus.MergeRowsPlusMeta;
@@ -97,6 +99,7 @@ import org.hopper.edw.datavault.transform.mergerowsplus.MergeRowsPlusMeta;
 @GuiPlugin
 @Getter
 @Setter
+@NamingSchemeKind(EdwNamingSchemeTypes.DV_SATELLITE)
 public class DvSatellite extends DvTableBase
     implements IDvTable, IGuiPosition, IBaseMeta, IHasName {
 

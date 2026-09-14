@@ -34,6 +34,7 @@ import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.plugin.GuiElementType;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.GuiWidgetElement;
+import org.apache.hop.core.naming.NamingSchemeKind;
 import org.apache.hop.core.undo.ChangeAction;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
@@ -45,6 +46,8 @@ import org.apache.hop.metadata.api.IHopMetadata;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.DvNote;
 import org.hopper.edw.datavault.metadata.ModelConfigurationResolver;
+import org.hopper.edw.datavault.naming.EdwNamingCheckSupport;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 import org.jspecify.annotations.NonNull;
 
 /**
@@ -54,6 +57,7 @@ import org.jspecify.annotations.NonNull;
 @GuiPlugin
 @Getter
 @Setter
+@NamingSchemeKind(EdwNamingSchemeTypes.EDW_SOURCE_MODEL)
 public class SourceModel extends HopMetadataBase
     implements IHopMetadata, org.apache.hop.core.changed.IChanged, IHasName, IHasFilename, IUndo {
 
@@ -561,6 +565,9 @@ public class SourceModel extends HopMetadataBase
       monitor.worked(1);
     }
 
+    if (!monitor.isCanceled()) {
+      EdwNamingCheckSupport.addRemarks(this, getFilename(), remarks, metadataProvider);
+    }
     if (!monitor.isCanceled()
         && remarks.stream().noneMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_ERROR)) {
       remarks.add(

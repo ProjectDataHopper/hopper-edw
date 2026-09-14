@@ -35,6 +35,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
 import org.hopper.edw.datavault.hopgui.help.HelpTopics;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
+import org.hopper.edw.datavault.naming.EdwNamingWidgetSupport;
 
 /** GUI editor for {@link SourceModelService} metadata. */
 public class SourceModelServiceEditor extends MetadataEditor<SourceModelService> {
@@ -87,7 +89,8 @@ public class SourceModelServiceEditor extends MetadataEditor<SourceModelService>
     fdName.top = new FormAttachment(wlName, 0, SWT.CENTER);
     fdName.left = new FormAttachment(middle, 0);
     fdName.right = new FormAttachment(100, 0);
-    wName.setLayoutData(fdName);
+    EdwNamingWidgetSupport.enableAndLayout(
+        wName, hopGui.getVariables(), EdwNamingSchemeTypes.HOP_METADATA, fdName);
     Control last = wName;
 
     Label spacer = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);

@@ -1,0 +1,3 @@
+Scenario: General help.
+
+Answer questions about this lineage view definition and, when present, the live session graph.

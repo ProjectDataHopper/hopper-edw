@@ -33,6 +33,7 @@ Architecture pictures are **committed SVGs** (`docs/images/diagrams/`) generated
 | [getting-started-edw.adoc](getting-started-edw.adoc) | **Build an EDW:** source model → catalog → Data Vault → resource definition group → load → BV/DM |
 | [getting-started-retail.adoc](getting-started-retail.adoc) | **Tour** the finished retail-example (run the sample workflows) |
 | [feature-overview.adoc](feature-overview.adoc) | Major plugin capabilities, maturity, and links to deep dives |
+| [naming-schemes.adoc](naming-schemes.adoc) | Hop 2.20 naming schemes for EDW models, tables, physical names, record definitions |
 | [getting-started-integration-tests.adoc](getting-started-integration-tests.adoc) | Reference walkthrough: Customer 360 and integration test fixtures |
 | [hop-web-modelers.md](hop-web-modelers.md) | **Hop Web** modelers (`.hsm`/`.hdv`/`.hbv`/`.hdm`/`.hem`/`.hlv`): SVG canvas, interactions, Hop SPI |
 | [search.adoc](search.adoc) | **Search Everywhere**: models (`.hsm`/`.hdv`/`.hbv`/`.hdm`/`.hlv`) and plugin metadata |
@@ -165,6 +166,15 @@ hop svg -f integration-tests/tests/basic/load1.hpl -o /tmp/load1.svg
 ```
 
 Options: `--no-notes`, `--magnification`, `--show-hash-keys` (`.hdv` only), `--project-home`.
+
+### `hop edw-naming-check`
+
+Validate `.hsm` / `.hdv` / `.hbv` / `.hdm` names against project Naming Schemes (Hop's `hop naming-check` covers pipelines, workflows, and metadata). See link:naming-schemes.adoc[EDW naming schemes].
+
+```bash
+hop edw-naming-check --project my-project
+hop edw-naming-check --path /path/to/project --format json --require-scheme
+```
 
 ### `hop project-doc`
 

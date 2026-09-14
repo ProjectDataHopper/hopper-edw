@@ -46,6 +46,8 @@ import org.eclipse.swt.widgets.Text;
 import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
 import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 import org.hopper.edw.datavault.jinja.BvSqlJinjaSupport;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
+import org.hopper.edw.datavault.naming.EdwNamingWidgetSupport;
 
 /** Editor for project-level {@link JinjaMacroLibraryMeta} libraries. */
 @GuiPlugin(description = "Editor for Jinja Macro Library metadata")
@@ -92,7 +94,8 @@ public class JinjaMacroLibraryMetaEditor extends MetadataEditor<JinjaMacroLibrar
     fdName.top = new FormAttachment(wlName, 0, SWT.CENTER);
     fdName.left = new FormAttachment(middle, 0);
     fdName.right = new FormAttachment(100, 0);
-    wName.setLayoutData(fdName);
+    EdwNamingWidgetSupport.enableAndLayout(
+        wName, hopGui.getVariables(), EdwNamingSchemeTypes.HOP_METADATA, fdName);
 
     Label wlDescription = new Label(parent, SWT.RIGHT);
     PropsUi.setLook(wlDescription);

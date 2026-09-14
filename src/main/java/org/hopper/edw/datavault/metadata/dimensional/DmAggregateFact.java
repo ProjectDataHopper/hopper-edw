@@ -22,16 +22,19 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.naming.NamingSchemeKind;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.hopper.edw.datavault.metadata.dimensional.pipeline.DmFactLikeLoadBuilder;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 
 /** Kimball aggregate fact at a reduced grain. */
 @Getter
 @Setter
+@NamingSchemeKind(EdwNamingSchemeTypes.DM_AGGREGATE_FACT)
 public class DmAggregateFact extends DmTableBase implements IDmFactLikeTable {
 
   @HopMetadataProperty private String baseFactTableName;

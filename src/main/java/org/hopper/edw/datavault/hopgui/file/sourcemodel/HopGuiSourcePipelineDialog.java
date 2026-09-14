@@ -45,6 +45,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -67,6 +68,8 @@ import org.hopper.edw.datavault.metadata.sourcemodel.SourcePipelineCatalogSource
 import org.hopper.edw.datavault.metadata.sourcemodel.SourcePipelineValidationSupport;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceRelationshipLifecycleSupport;
 import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourcePipelineCatalogImportSupport;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
+import org.hopper.edw.datavault.naming.EdwNamingWidgetSupport;
 
 /**
  * Dialog to edit a {@link SourcePipeline}: pipeline file, output transform, declared fields, and
@@ -189,7 +192,9 @@ public class HopGuiSourcePipelineDialog {
         new FormDataBuilder().left().top(0, margin).right(middle, -margin).result());
     wName = new Text(comp, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wName);
-    wName.setLayoutData(new FormDataBuilder().left(middle, 0).top(0, margin).right().result());
+    FormData fdName = new FormDataBuilder().left(middle, 0).top(0, margin).right().result();
+    EdwNamingWidgetSupport.enableAndLayout(
+        wName, variables, EdwNamingSchemeTypes.SOURCE_PIPELINE, fdName);
 
     Label wlDescription = new Label(comp, SWT.RIGHT);
     wlDescription.setText(

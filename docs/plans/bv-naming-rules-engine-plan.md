@@ -1,5 +1,7 @@
 # BV Naming Rules Engine (Complete Plan)
 
+> **Foundation (issue #41, mechanical identifiers):** Hopper EDW now uses Hop 2.20 Naming Schemes for case, separators, and prefixes. See `docs/naming-schemes.adoc`. This document is the **later semantic layer** (vague tokens, redundant table prefix, language, acknowledgements, review reports).
+>
 > Layered rules engine, acknowledgements with comments, architect health check, and exportable naming quality reports for code review (CLI + GUI) — giving reviewers semantic context a GitHub diff cannot provide.
 >
 > Supersedes a deferred BV field dictionary plan (not published).

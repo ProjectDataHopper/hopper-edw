@@ -21,11 +21,13 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.gui.Point;
+import org.apache.hop.core.naming.NamingSchemeKind;
 import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadata;
 import org.hopper.edw.datavault.metadata.datatypemapping.IDataTypeMappingTarget;
 import org.hopper.edw.datavault.metadata.datatypemapping.SourceFieldTypeMapping;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 import org.jspecify.annotations.NonNull;
 
 /**
@@ -36,6 +38,7 @@ import org.jspecify.annotations.NonNull;
  */
 @Getter
 @Setter
+@NamingSchemeKind(EdwNamingSchemeTypes.SOURCE_QUERY)
 public class SourceQuery extends HopMetadataBase implements IHopMetadata, IDataTypeMappingTarget {
 
   @HopMetadataProperty private String description;

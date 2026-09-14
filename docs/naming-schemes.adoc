@@ -1,0 +1,60 @@
+= EDW naming schemes
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Hopper EDW uses Apache Hop **2.20 Naming Schemes** for identifier standards: case, word separators, prefix, and suffix. Create schemes in the Metadata perspective (**Data definition → Naming scheme**). Apply them with **CTRL-SHIFT-N** or the **N** indicator on a name field.
+
+This is mechanical formatting (`Customer` → `hub_customer`). Semantic Business Vault rules (vague tokens, language mix, acknowledgements) remain a later layer; see link:plans/bv-naming-rules-engine-plan.md[BV naming rules plan].
+
+== Logical vs physical names
+
+Canvas / model object **Name** uses an EDW type (`dv-hub`, `source-table`, …). Optional **Physical table name** uses Hop's built-in `database-table` type. When physical table name is empty, the logical name is the table name — it is not validated twice.
+
+Harvested **source-system** physical names (`SourceTable.tableName`, source columns, catalog `DV_SOURCE` stream names) are **not** rewritten. They must match the source. Logical source-model card names are in scope.
+
+== Types
+
+Create **one scheme per type** in a project so Check and CI have a single expected spelling. A **General** scheme covers types that have no specific scheme.
+
+|Type code | Used for
+|`edw-source-model` / `edw-dv-model` / `edw-bv-model` / `edw-dm-model` | `.hsm` / `.hdv` / `.hbv` / `.hdm` document names
+|`source-table`, `source-query`, `source-pipeline`, `source-json` | Source modeler cards
+|`dv-hub`, `dv-link`, `dv-satellite`, `dv-reference` | Data Vault logical table names
+|`bv-scd2`, `bv-pit`, `bv-bridge`, `bv-business-table`, `bv-source-query` | Business Vault logical table names
+|`dm-dimension`, `dm-fact`, … | Dimensional logical table names
+|`edw-record-definition` | Catalog record definition names
+|`database-table` / `database-column` | Physical tables and columns (Hop built-in)
+
+== Apply in the GUI
+
+. Create a Naming Scheme of the matching type (or one General scheme).
+. Open a model or table dialog. Name fields show **N**.
+. Press **CTRL-SHIFT-N** (or **CTRL-SPACE** when the field does not accept variables).
+. TableView columns (business keys, satellite attributes) support the same shortcut per cell and the table toolbar bulk action.
+
+**Tools → Configure EDW setup…** can create default schemes (`hub_`, `sat_`, `lnk_`, `dim_`, `fact_`, lower-case columns). Existing schemes of those names are left unchanged.
+
+Generate-to-vault uses a **type-specific** scheme when present (so a lone General scheme does not drop `hub_` prefixes). Otherwise it keeps the built-in `hub_` / `sat_` / `lnk_` / `ref_` fallback.
+
+Check treats a name as conforming when applying the scheme to the prefix-stripped core reproduces it (`hub_customer` matches a `hub_` scheme). Applying **N** on an already-prefixed name still prepends the prefix again — apply N to the raw business token (`Customer`), or type the standard name.
+
+== Check
+
+Model **Check** reports errors when a loaded scheme would rewrite a name. Projects with **no** naming schemes are unchanged (no remarks).
+
+From the command line (in addition to Hop's `hop naming-check` for pipelines/workflows/metadata):
+
+----
+hop edw-naming-check --project my-project
+hop edw-naming-check --path /path/to/project --format json --require-scheme
+----
+
+Exit `0` when there are no errors, `1` when at least one name would be rewritten, `2` on unexpected failure. There is no `--fix` flag.
+
+== Related
+
+* Hop user manual: Naming Scheme metadata
+* link:datavault-configuration.adoc[Data Vault configuration]
+* link:feature-overview.adoc[Feature overview]

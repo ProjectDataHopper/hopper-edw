@@ -46,6 +46,7 @@ import org.hopper.edw.datavault.metadata.DvDdlSupport;
 import org.hopper.edw.datavault.metadata.ForeignKeySpec;
 import org.hopper.edw.datavault.metadata.ModelConfigurationResolver;
 import org.hopper.edw.datavault.metadata.targettypemapping.TargetTypeMappingSupport;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 
 @Getter
 @Setter
@@ -53,7 +54,7 @@ public abstract class BvTableBase extends HopMetadataBase implements IHopMetadat
 
   private static final Class<?> PKG = BvTableBase.class;
 
-  @HopMetadataProperty(key = "tableName")
+  @HopMetadataProperty(key = "tableName", namingSchemeType = EdwNamingSchemeTypes.DATABASE_TABLE)
   protected String tableName;
 
   @HopMetadataProperty protected String description;

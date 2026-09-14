@@ -38,6 +38,7 @@ import org.apache.hop.core.gui.plugin.GuiElementType;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.GuiWidgetElement;
 import org.apache.hop.core.logging.ILoggingObject;
+import org.apache.hop.core.naming.NamingSchemeKind;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.RowMeta;
@@ -66,6 +67,7 @@ import org.apache.hop.pipeline.transforms.filterrows.FilterRowsMeta;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
 import org.apache.hop.workflow.WorkflowMeta;
 import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 import org.hopper.edw.datavault.transform.dvhashkey.DvHashKeyMeta;
 import org.hopper.edw.datavault.transform.dvhashkey.DvHashKeyMetaFactory;
 import org.hopper.edw.datavault.transform.mergerowsplus.MergeRowsPlusMeta;
@@ -80,6 +82,7 @@ import org.jspecify.annotations.NonNull;
 @GuiPlugin
 @Getter
 @Setter
+@NamingSchemeKind(EdwNamingSchemeTypes.DV_HUB)
 public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseMeta, IHasName {
   private static final Class<?> PKG = DvHub.class;
 
@@ -109,8 +112,9 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
       type = GuiElementType.TEXT,
       label = "i18n::DvHub.HashKeyFieldName.Label",
       toolTip = "i18n::DvHub.HashKeyFieldName.ToolTip",
-      parentId = GUI_PLUGIN_ELEMENT_PARENT_ID)
-  @HopMetadataProperty
+      parentId = GUI_PLUGIN_ELEMENT_PARENT_ID,
+      namingSchemeType = EdwNamingSchemeTypes.DATABASE_COLUMN)
+  @HopMetadataProperty(namingSchemeType = EdwNamingSchemeTypes.DATABASE_COLUMN)
   private String hashKeyFieldName;
 
   /**
@@ -123,8 +127,9 @@ public class DvHub extends DvTableBase implements IDvTable, IGuiPosition, IBaseM
       variables = true,
       label = "i18n::DvHub.RecordSourceFieldName.Label",
       toolTip = "i18n::DvHub.RecordSourceFieldName.ToolTip",
-      parentId = GUI_PLUGIN_ELEMENT_PARENT_ID)
-  @HopMetadataProperty
+      parentId = GUI_PLUGIN_ELEMENT_PARENT_ID,
+      namingSchemeType = EdwNamingSchemeTypes.DATABASE_COLUMN)
+  @HopMetadataProperty(namingSchemeType = EdwNamingSchemeTypes.DATABASE_COLUMN)
   private String recordSourceFieldName;
 
   /**

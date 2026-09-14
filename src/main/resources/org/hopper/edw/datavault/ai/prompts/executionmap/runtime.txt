@@ -1,0 +1,3 @@
+Scenario: Runtime.
+
+If the user asks about last run or duration, say what the map itself does and does not contain (structure from crawl time, not live metrics unless present in the JSON). Point them to EDW Journey or OPS when runtime facts are missing.

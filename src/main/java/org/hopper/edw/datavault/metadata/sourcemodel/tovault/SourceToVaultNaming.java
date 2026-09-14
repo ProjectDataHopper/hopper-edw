@@ -17,11 +17,37 @@ package org.hopper.edw.datavault.metadata.sourcemodel.tovault;
 
 import java.util.Locale;
 import org.apache.hop.core.util.Utils;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
+import org.hopper.edw.datavault.naming.EdwNamingSupport;
 
 /** Default raw-vault object names derived from source table names. */
 public final class SourceToVaultNaming {
 
+  private static final ThreadLocal<IHopMetadataProvider> NAMING_PROVIDER = new ThreadLocal<>();
+
   private SourceToVaultNaming() {}
+
+  /** Apply type-specific naming schemes during classify/apply when a provider is in scope. */
+  public static void runWithProvider(IHopMetadataProvider provider, Runnable action) {
+    if (action == null) {
+      return;
+    }
+    NAMING_PROVIDER.set(provider);
+    try {
+      action.run();
+    } finally {
+      NAMING_PROVIDER.remove();
+    }
+  }
+
+  private static IHopMetadataProvider provider() {
+    return NAMING_PROVIDER.get();
+  }
+
+  private static String named(String typeCode, String entity, String fallback) {
+    return EdwNamingSupport.applyTypeSpecificOrFallback(provider(), typeCode, entity, fallback);
+  }
 
   public static String entityName(String tableName) {
     String normalized = normalizeToken(tableName);
@@ -41,31 +67,38 @@ public final class SourceToVaultNaming {
   }
 
   public static String hubName(String tableName) {
-    return "hub_" + entityName(tableName);
+    String entity = entityName(tableName);
+    return named(EdwNamingSchemeTypes.DV_HUB, entity, "hub_" + entity);
   }
 
   public static String hubSatelliteName(String tableName) {
-    return "sat_" + entityName(tableName);
+    String entity = entityName(tableName);
+    return named(EdwNamingSchemeTypes.DV_SATELLITE, entity, "sat_" + entity);
   }
 
   public static String extensionSatelliteName(String tableName) {
-    return "sat_" + normalizeToken(tableName);
+    String entity = normalizeToken(tableName);
+    return named(EdwNamingSchemeTypes.DV_SATELLITE, entity, "sat_" + entity);
   }
 
   public static String linkNameFromTable(String tableName) {
-    return "lnk_" + normalizeToken(tableName);
+    String entity = normalizeToken(tableName);
+    return named(EdwNamingSchemeTypes.DV_LINK, entity, "lnk_" + entity);
   }
 
   public static String fkLinkName(String childTableName) {
-    return "lnk_" + entityName(childTableName);
+    String entity = entityName(childTableName);
+    return named(EdwNamingSchemeTypes.DV_LINK, entity, "lnk_" + entity);
   }
 
   public static String linkSatelliteName(String tableName) {
-    return "sat_lnk_" + normalizeToken(tableName);
+    String entity = "lnk_" + normalizeToken(tableName);
+    return named(EdwNamingSchemeTypes.DV_SATELLITE, entity, "sat_" + entity);
   }
 
   public static String referenceName(String tableName) {
-    return "ref_" + entityName(tableName);
+    String entity = entityName(tableName);
+    return named(EdwNamingSchemeTypes.DV_REFERENCE, entity, "ref_" + entity);
   }
 
   public static String hierarchyAliasName(String tableName) {
@@ -73,7 +106,8 @@ public final class SourceToVaultNaming {
   }
 
   public static String hierarchyLinkName(String tableName) {
-    return "lnk_" + entityName(tableName) + "_hierarchy";
+    String entity = entityName(tableName) + "_hierarchy";
+    return named(EdwNamingSchemeTypes.DV_LINK, entity, "lnk_" + entity);
   }
 
   public static String naryLinkName(String tableName) {

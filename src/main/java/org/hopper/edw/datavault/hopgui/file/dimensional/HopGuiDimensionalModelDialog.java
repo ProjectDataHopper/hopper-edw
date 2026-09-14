@@ -48,6 +48,8 @@ import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 import org.hopper.edw.datavault.metadata.ModelConfigurationExtractSupport;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalConfiguration;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
+import org.hopper.edw.datavault.naming.EdwNamingWidgetSupport;
 import org.jspecify.annotations.NonNull;
 
 /** Dialog to edit the properties of a {@link DimensionalModel}. */
@@ -109,7 +111,8 @@ public class HopGuiDimensionalModelDialog {
     fdName.left = new FormAttachment(middle, 0);
     fdName.top = new FormAttachment(0, margin);
     fdName.right = new FormAttachment(100, 0);
-    wName.setLayoutData(fdName);
+    EdwNamingWidgetSupport.enableAndLayout(
+        wName, variables, EdwNamingSchemeTypes.EDW_DM_MODEL, fdName);
     wName.addModifyListener(e -> input.setChanged());
 
     Label wlDescription = new Label(shell, SWT.RIGHT);

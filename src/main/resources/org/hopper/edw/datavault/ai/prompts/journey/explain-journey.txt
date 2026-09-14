@@ -1,0 +1,3 @@
+Scenario: Explain journey.
+
+Summarize the group's source, Data Vault, Business Vault, dimensional, workflow, and output artifacts. Call out empty layers.

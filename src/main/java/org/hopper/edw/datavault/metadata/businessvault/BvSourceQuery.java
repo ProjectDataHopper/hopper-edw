@@ -25,6 +25,7 @@ import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.exception.HopPluginException;
+import org.apache.hop.core.naming.NamingSchemeKind;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.RowMeta;
@@ -35,6 +36,7 @@ import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 
 /**
  * Satellite-shaped Business Vault input: a table/view or SQL query that SCD2 and PIT can hop to.
@@ -43,6 +45,7 @@ import org.hopper.edw.datavault.metadata.DataVaultModel;
  */
 @Getter
 @Setter
+@NamingSchemeKind(EdwNamingSchemeTypes.BV_SOURCE_QUERY)
 public class BvSourceQuery extends BvTableBase {
 
   private static final Class<?> PKG = BvSourceQuery.class;

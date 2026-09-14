@@ -41,7 +41,8 @@ public final class StandardProjectElementsOfferDialog {
       boolean createSourceModel,
       boolean createDataVault,
       boolean createBusinessVault,
-      boolean createDimensional) {}
+      boolean createDimensional,
+      boolean createNamingSchemes) {}
 
   public static Selection open(
       Shell parent,
@@ -58,7 +59,8 @@ public final class StandardProjectElementsOfferDialog {
         offerSourceModel,
         offerDataVault,
         offerBusinessVault,
-        offerDimensional);
+        offerDimensional,
+        true);
   }
 
   public static Selection open(
@@ -69,7 +71,8 @@ public final class StandardProjectElementsOfferDialog {
       boolean missingSourceModel,
       boolean missingDataVault,
       boolean missingBusinessVault,
-      boolean missingDimensional) {
+      boolean missingDimensional,
+      boolean missingNamingSchemes) {
     Shell shell = new Shell(parent, BaseDialog.getDefaultDialogStyle());
     PropsUi.setLook(shell);
     shell.setText(
@@ -116,6 +119,9 @@ public final class StandardProjectElementsOfferDialog {
     Button wDm =
         checkbox(
             shell, missingDimensional, "StandardProjectElementsOffer.Dimensional", wBv, margin);
+    Button wNaming =
+        checkbox(
+            shell, missingNamingSchemes, "StandardProjectElementsOffer.NamingSchemes", wDm, margin);
 
     Button wDontShow = new Button(shell, SWT.CHECK);
     PropsUi.setLook(wDontShow);
@@ -123,7 +129,7 @@ public final class StandardProjectElementsOfferDialog {
     wDontShow.setSelection(dontShowAgainInitial);
     FormData fdDontShow = new FormData();
     fdDontShow.left = new FormAttachment(0, 0);
-    fdDontShow.top = new FormAttachment(wDm, margin * 2);
+    fdDontShow.top = new FormAttachment(wNaming, margin * 2);
     wDontShow.setLayoutData(fdDontShow);
 
     final Selection[] result = new Selection[1];
@@ -140,7 +146,8 @@ public final class StandardProjectElementsOfferDialog {
                   wSource.getSelection(),
                   wDv.getSelection(),
                   wBv.getSelection(),
-                  wDm.getSelection());
+                  wDm.getSelection(),
+                  wNaming.getSelection());
           shell.dispose();
         });
     Button wSkip = new Button(shell, SWT.PUSH);
@@ -152,7 +159,8 @@ public final class StandardProjectElementsOfferDialog {
         SWT.Selection,
         e -> {
           result[0] =
-              new Selection(false, wDontShow.getSelection(), false, false, false, false, false);
+              new Selection(
+                  false, wDontShow.getSelection(), false, false, false, false, false, false);
           shell.dispose();
         });
     BaseTransformDialog.positionBottomButtons(shell, new Button[] {wOk, wSkip}, margin, wDontShow);

@@ -32,6 +32,7 @@ import org.apache.hop.ui.core.widget.ColumnInfo;
 import org.apache.hop.ui.core.widget.TableView;
 import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Label;
@@ -49,6 +50,8 @@ import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
 import org.hopper.edw.datavault.metadata.dimensional.DmRangeBand;
 import org.hopper.edw.datavault.metadata.dimensional.DmRangeDimension;
 import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
+import org.hopper.edw.datavault.naming.EdwNamingWidgetSupport;
 
 /** Dialog to edit a metadata-only {@link DmRangeDimension} (NumberRange band definitions). */
 public class HopGuiDmRangeDimensionDialog {
@@ -131,7 +134,9 @@ public class HopGuiDmRangeDimensionDialog {
 
     wName = new Text(shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wName);
-    wName.setLayoutData(new FormDataBuilder().left(middle, 0).top(0, margin).right().result());
+    FormData fdName = new FormDataBuilder().left(middle, 0).top(0, margin).right().result();
+    EdwNamingWidgetSupport.enableAndLayout(
+        wName, variables, EdwNamingSchemeTypes.DM_RANGE_DIMENSION, fdName);
 
     Label wlDescription = new Label(shell, SWT.RIGHT);
     wlDescription.setText(

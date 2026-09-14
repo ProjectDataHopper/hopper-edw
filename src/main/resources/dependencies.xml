@@ -17,4 +17,5 @@
 <dependencies>
     <folder>../../transforms/mergejoin</folder>
     <folder>../../transforms/json</folder>
+    <folder>../../misc/naming</folder>
 </dependencies>

@@ -37,6 +37,7 @@ import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.plugin.GuiElementType;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.GuiWidgetElement;
+import org.apache.hop.core.naming.NamingSchemeKind;
 import org.apache.hop.core.undo.ChangeAction;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
@@ -53,12 +54,15 @@ import org.hopper.edw.datavault.metadata.DvTargetUnicodeCapabilitySupport;
 import org.hopper.edw.datavault.metadata.IDvTable;
 import org.hopper.edw.datavault.metadata.ModelConfigurationResolver;
 import org.hopper.edw.datavault.metadata.coaching.ModelCoachingConfiguration;
+import org.hopper.edw.datavault.naming.EdwNamingCheckSupport;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 import org.jspecify.annotations.NonNull;
 
 /** A Business Vault model referencing one Data Vault model and owning BV derivative tables. */
 @GuiPlugin
 @Getter
 @Setter
+@NamingSchemeKind(EdwNamingSchemeTypes.EDW_BV_MODEL)
 public class BusinessVaultModel extends HopMetadataBase
     implements IHopMetadata, org.apache.hop.core.changed.IChanged, IHasName, IHasFilename, IUndo {
 
@@ -579,6 +583,8 @@ public class BusinessVaultModel extends HopMetadataBase
                 null));
       }
     }
+
+    EdwNamingCheckSupport.addRemarks(this, getFilename(), remarks, metadataProvider);
 
     boolean hasErrors =
         remarks.stream().anyMatch(r -> r.getType() == ICheckResult.TYPE_RESULT_ERROR);

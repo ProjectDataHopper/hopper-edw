@@ -69,6 +69,8 @@ import org.hopper.edw.datavault.metadata.IDvTable;
 import org.hopper.edw.datavault.metadata.SatelliteAttribute;
 import org.hopper.edw.datavault.metadata.SourceField;
 import org.hopper.edw.datavault.metadata.SourceFieldPrimaryKeySupport;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
+import org.hopper.edw.datavault.naming.EdwNamingWidgetSupport;
 
 /**
  * Dialog to edit a {@link DvReferenceTable}: natural keys, attributes, record sources, and load
@@ -157,7 +159,8 @@ public class DvReferenceTableDialog {
     fdName.left = new FormAttachment(middle, 0);
     fdName.top = new FormAttachment(0, margin);
     fdName.right = new FormAttachment(100, 0);
-    wName.setLayoutData(fdName);
+    EdwNamingWidgetSupport.enableAndLayout(
+        wName, variables, EdwNamingSchemeTypes.DV_REFERENCE, fdName);
 
     Label wlDescription = new Label(shell, SWT.RIGHT);
     wlDescription.setText(BaseMessages.getString(PKG, "DvReferenceTableDialog.Description.Label"));
@@ -251,7 +254,8 @@ public class DvReferenceTableDialog {
     fdTableName.left = new FormAttachment(middle, 0);
     fdTableName.top = new FormAttachment(wlTableName, 0, SWT.CENTER);
     fdTableName.right = new FormAttachment(100, 0);
-    wTableName.setLayoutData(fdTableName);
+    EdwNamingWidgetSupport.enableAndLayout(
+        wTableName, variables, EdwNamingSchemeTypes.DATABASE_TABLE, fdTableName);
 
     Label wlLoadMode = new Label(wOptionsComp, SWT.RIGHT);
     wlLoadMode.setText(BaseMessages.getString(PKG, "DvReferenceTableDialog.LoadMode.Label"));

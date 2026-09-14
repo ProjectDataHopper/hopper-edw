@@ -35,6 +35,7 @@ import org.apache.hop.metadata.api.HopMetadataPropertyType;
 import org.apache.hop.metadata.api.IHopMetadata;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.catalog.metadata.DataCatalogMeta;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 
 /**
  * Configuration for Data Vault 2.0 physical implementation and update strategy.
@@ -398,8 +399,9 @@ public class DataVaultConfiguration extends HopMetadataBase
       type = GuiElementType.TEXT,
       label = "i18n::DataVaultConfiguration.LoadDateField.Label",
       toolTip = "i18n::DataVaultConfiguration.LoadDateField.ToolTip",
-      parentId = GUI_PLUGIN_ELEMENT_COLUMNS_TAB_ID)
-  @HopMetadataProperty
+      parentId = GUI_PLUGIN_ELEMENT_COLUMNS_TAB_ID,
+      namingSchemeType = EdwNamingSchemeTypes.DATABASE_COLUMN)
+  @HopMetadataProperty(namingSchemeType = EdwNamingSchemeTypes.DATABASE_COLUMN)
   private String loadDateField = "LOAD_DATE";
 
   @GuiWidgetElement(
@@ -407,8 +409,9 @@ public class DataVaultConfiguration extends HopMetadataBase
       type = GuiElementType.TEXT,
       label = "i18n::DataVaultConfiguration.LoadEndDateField.Label",
       toolTip = "i18n::DataVaultConfiguration.LoadEndDateField.ToolTip",
-      parentId = GUI_PLUGIN_ELEMENT_COLUMNS_TAB_ID)
-  @HopMetadataProperty
+      parentId = GUI_PLUGIN_ELEMENT_COLUMNS_TAB_ID,
+      namingSchemeType = EdwNamingSchemeTypes.DATABASE_COLUMN)
+  @HopMetadataProperty(namingSchemeType = EdwNamingSchemeTypes.DATABASE_COLUMN)
   private String loadEndDateField = "LOAD_END_DATE";
 
   @GuiWidgetElement(
@@ -416,8 +419,9 @@ public class DataVaultConfiguration extends HopMetadataBase
       type = GuiElementType.TEXT,
       label = "i18n::DataVaultConfiguration.RecordSourceField.Label",
       toolTip = "i18n::DataVaultConfiguration.RecordSourceField.ToolTip",
-      parentId = GUI_PLUGIN_ELEMENT_COLUMNS_TAB_ID)
-  @HopMetadataProperty
+      parentId = GUI_PLUGIN_ELEMENT_COLUMNS_TAB_ID,
+      namingSchemeType = EdwNamingSchemeTypes.DATABASE_COLUMN)
+  @HopMetadataProperty(namingSchemeType = EdwNamingSchemeTypes.DATABASE_COLUMN)
   private String recordSourceField = "RECORD_SOURCE";
 
   @GuiWidgetElement(

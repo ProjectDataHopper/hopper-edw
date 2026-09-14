@@ -19,6 +19,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.hop.metadata.api.HopMetadataProperty;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 
 /** Numeric or additive measure column on a fact table. */
 @Getter
@@ -26,7 +27,8 @@ import org.apache.hop.metadata.api.HopMetadataProperty;
 @NoArgsConstructor
 public class DmFactMeasure implements IDmDocumentedField {
 
-  @HopMetadataProperty private String fieldName;
+  @HopMetadataProperty(namingSchemeType = EdwNamingSchemeTypes.DATABASE_COLUMN)
+  private String fieldName;
 
   @HopMetadataProperty private boolean additive = true;
 

@@ -31,6 +31,7 @@ import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.IGuiPosition;
 import org.apache.hop.core.gui.Point;
+import org.apache.hop.core.naming.NamingSchemeKind;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.RowMeta;
@@ -52,6 +53,7 @@ import org.apache.hop.pipeline.transforms.constant.ConstantField;
 import org.apache.hop.pipeline.transforms.constant.ConstantMeta;
 import org.apache.hop.workflow.WorkflowMeta;
 import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 
 /**
  * Data Vault reference (code / catalog) table: natural keys and attributes with DV load metadata,
@@ -61,6 +63,7 @@ import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
  */
 @Getter
 @Setter
+@NamingSchemeKind(EdwNamingSchemeTypes.DV_REFERENCE)
 public class DvReferenceTable extends DvTableBase
     implements IDvTable, IGuiPosition, IBaseMeta, IHasName {
 

@@ -21,6 +21,7 @@ import org.apache.hop.core.util.Utils;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadata;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.naming.metadata.NamingScheme;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
@@ -41,6 +42,7 @@ import org.hopper.edw.datavault.metadata.dimensional.DimensionalConfiguration;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModelConfiguration;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeSeedSupport;
 
 /**
  * Offers to create the standard project catalog plus the four shared model-configuration metadata
@@ -78,7 +80,14 @@ public final class StandardProjectElementsOfferSupport {
     boolean missingDv = isMissingConfiguration(provider, DataVaultConfiguration.class);
     boolean missingBv = isMissingConfiguration(provider, BusinessVaultConfiguration.class);
     boolean missingDm = isMissingConfiguration(provider, DimensionalConfiguration.class);
-    if (!fromMenu && !missingCatalog && !missingSource && !missingDv && !missingBv && !missingDm) {
+    boolean missingNaming = isMissingNamingSchemes(provider);
+    if (!fromMenu
+        && !missingCatalog
+        && !missingSource
+        && !missingDv
+        && !missingBv
+        && !missingDm
+        && !missingNaming) {
       return;
     }
 
@@ -91,7 +100,8 @@ public final class StandardProjectElementsOfferSupport {
             missingSource,
             missingDv,
             missingBv,
-            missingDm);
+            missingDm,
+            missingNaming);
     if (selection == null) {
       return;
     }
@@ -132,6 +142,9 @@ public final class StandardProjectElementsOfferSupport {
             BaseMessages.getString(PKG, "StandardProjectElementsOffer.Dimensional.Description"));
         createDefault(provider, config);
       }
+      if (selection.createNamingSchemes() && missingNaming) {
+        EdwNamingSchemeSeedSupport.seedDefaults(provider);
+      }
       bindCurrentModel(model, provider);
     } catch (Exception e) {
       new ErrorDialog(
@@ -139,6 +152,14 @@ public final class StandardProjectElementsOfferSupport {
           BaseMessages.getString(PKG, "StandardProjectElementsOffer.Error.Title"),
           BaseMessages.getString(PKG, "StandardProjectElementsOffer.Error.Message"),
           e);
+    }
+  }
+
+  static boolean isMissingNamingSchemes(IHopMetadataProvider provider) {
+    try {
+      return provider.getSerializer(NamingScheme.class).listObjectNames().isEmpty();
+    } catch (Exception e) {
+      return false;
     }
   }
 

@@ -49,6 +49,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
@@ -82,6 +83,8 @@ import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceQueryGenerat
 import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceQueryPreviewSupport;
 import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceQueryRelationSupport;
 import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceQuerySqlGenerator;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
+import org.hopper.edw.datavault.naming.EdwNamingWidgetSupport;
 import org.hopper.edw.datavault.transform.sourcemodelsql.SourceModelSqlSupport;
 import org.hopper.edw.datavault.virtualization.sql.SourceModelFreeSqlTableSupport;
 import org.hopper.edw.datavault.virtualization.sql.SourceModelSqlEngine;
@@ -256,7 +259,9 @@ public class HopGuiSourceQueryDialog {
         new FormDataBuilder().left().top(0, margin).right(middle, -margin).result());
     wName = new Text(comp, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wName);
-    wName.setLayoutData(new FormDataBuilder().left(middle, 0).top(0, margin).right().result());
+    FormData fdName = new FormDataBuilder().left(middle, 0).top(0, margin).right().result();
+    EdwNamingWidgetSupport.enableAndLayout(
+        wName, variables, EdwNamingSchemeTypes.SOURCE_QUERY, fdName);
 
     Label wlDescription = new Label(comp, SWT.RIGHT);
     wlDescription.setText(BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.Description.Label"));

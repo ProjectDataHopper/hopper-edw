@@ -23,6 +23,7 @@ import org.apache.hop.base.AbstractMeta;
 import org.apache.hop.core.file.IHasFilename;
 import org.apache.hop.core.gui.IUndo;
 import org.apache.hop.core.gui.Point;
+import org.apache.hop.core.naming.NamingSchemeKind;
 import org.apache.hop.core.undo.ChangeAction;
 import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
@@ -32,10 +33,12 @@ import org.hopper.edw.datavault.lineageview.backend.LineageDirection;
 import org.hopper.edw.datavault.lineageview.backend.LineageGranularity;
 import org.hopper.edw.datavault.lineageview.backend.LineageGraphLayer;
 import org.hopper.edw.datavault.lineageview.backend.LineageSeedKind;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 
 /** Authorable Hop Lineage View definition. The graph itself is not persisted. */
 @Getter
 @Setter
+@NamingSchemeKind(EdwNamingSchemeTypes.EDW_LINEAGE_VIEW)
 public class HopLineageViewDocument extends HopMetadataBase
     implements IHopMetadata, IHasFilename, IUndo {
 

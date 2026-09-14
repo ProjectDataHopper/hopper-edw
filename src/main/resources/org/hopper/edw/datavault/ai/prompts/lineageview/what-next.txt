@@ -1,0 +1,3 @@
+Scenario: What next.
+
+Suggest the next investigation step: open a model, check a missing seed, refresh the graph, or inspect OPS badges. Do not claim you can edit the graph.

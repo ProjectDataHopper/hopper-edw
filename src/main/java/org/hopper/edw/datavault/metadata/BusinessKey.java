@@ -24,6 +24,7 @@ import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.GuiWidgetElement;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.metadata.api.HopMetadataProperty;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 
 /**
  * Definition of a hub business key (vault column) and how a record source supplies it.
@@ -54,8 +55,9 @@ public class BusinessKey {
       type = GuiElementType.TEXT,
       label = "i18n::BusinessKey.Name.Label",
       toolTip = "i18n::BusinessKey.Name.ToolTip",
-      parentId = GUI_PLUGIN_ELEMENT_PARENT_ID)
-  @HopMetadataProperty
+      parentId = GUI_PLUGIN_ELEMENT_PARENT_ID,
+      namingSchemeType = EdwNamingSchemeTypes.DATABASE_COLUMN)
+  @HopMetadataProperty(namingSchemeType = EdwNamingSchemeTypes.DATABASE_COLUMN)
   private String name;
 
   @GuiWidgetElement(

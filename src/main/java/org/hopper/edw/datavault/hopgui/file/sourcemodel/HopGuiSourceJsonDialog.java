@@ -45,6 +45,7 @@ import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
+import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
@@ -74,6 +75,8 @@ import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
 import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceJsonParentSampleSupport;
 import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceJsonPreviewSupport;
 import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceJsonSampleSupport;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
+import org.hopper.edw.datavault.naming.EdwNamingWidgetSupport;
 
 /**
  * Dialog to define a {@link SourceJson} extraction (parent source, JSON field, projected fields).
@@ -195,7 +198,9 @@ public class HopGuiSourceJsonDialog {
         new FormDataBuilder().left().top(0, margin).right(middle, -margin).result());
     wName = new Text(comp, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wName);
-    wName.setLayoutData(new FormDataBuilder().left(middle, 0).top(0, margin).right().result());
+    FormData fdName = new FormDataBuilder().left(middle, 0).top(0, margin).right().result();
+    EdwNamingWidgetSupport.enableAndLayout(
+        wName, variables, EdwNamingSchemeTypes.SOURCE_JSON, fdName);
 
     Label wlDescription = new Label(comp, SWT.RIGHT);
     wlDescription.setText(BaseMessages.getString(PKG, "HopGuiSourceJsonDialog.Description.Label"));

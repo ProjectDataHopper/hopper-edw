@@ -21,16 +21,19 @@ import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.ICheckResult;
+import org.apache.hop.core.naming.NamingSchemeKind;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.RowMeta;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 
 /** Metadata-only numeric band definition reused by fact range dimension roles. */
 @Getter
 @Setter
+@NamingSchemeKind(EdwNamingSchemeTypes.DM_RANGE_DIMENSION)
 public class DmRangeDimension extends DmTableBase {
 
   @HopMetadataProperty private String fallBackLabel = "unknown";

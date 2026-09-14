@@ -1,0 +1,3 @@
+Scenario: Source analysis.
+
+Identify business keys, degenerate fields, potential hubs, links, satellites, and reference tables. Note data quality or naming issues. Recommend how this source model should map into a Data Vault.

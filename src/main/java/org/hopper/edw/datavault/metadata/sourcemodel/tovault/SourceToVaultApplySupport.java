@@ -44,6 +44,8 @@ import org.hopper.edw.datavault.metadata.sourcemodel.publish.SourceJsonCatalogPu
 import org.hopper.edw.datavault.metadata.sourcemodel.publish.SourcePipelineCatalogPublisher;
 import org.hopper.edw.datavault.metadata.sourcemodel.publish.SourceQueryCatalogPublisher;
 import org.hopper.edw.datavault.metadata.sourcemodel.publish.SourceTableCatalogPublisher;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
+import org.hopper.edw.datavault.naming.EdwNamingSupport;
 
 /**
  * Writes accepted {@link SourceToVaultProposal}s into a {@link DataVaultModel} (new or existing).
@@ -232,7 +234,10 @@ public final class SourceToVaultApplySupport {
 
     DvHub hub = new DvHub(name);
     hub.setTableName(name);
-    hub.setHashKeyFieldName(SourceToVaultNaming.entityName(name) + "_hk");
+    String hashKey = SourceToVaultNaming.entityName(name) + "_hk";
+    hub.setHashKeyFieldName(
+        EdwNamingSupport.applyTypeSpecificOrFallback(
+            metadataProvider, EdwNamingSchemeTypes.DATABASE_COLUMN, hashKey, hashKey));
     if (!Utils.isEmpty(feed)) {
       hub.getRecordSources().add(feed);
     }

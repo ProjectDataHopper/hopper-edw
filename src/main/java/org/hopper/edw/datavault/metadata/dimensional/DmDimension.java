@@ -22,6 +22,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.naming.NamingSchemeKind;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
@@ -32,10 +33,12 @@ import org.hopper.edw.datavault.metadata.dimensional.DmDimensionLoadStrategySupp
 import org.hopper.edw.datavault.metadata.dimensional.pipeline.DmDimensionLookupBuilder;
 import org.hopper.edw.datavault.metadata.dimensional.pipeline.DmInsertUpdateBuilder;
 import org.hopper.edw.datavault.metadata.dimensional.pipeline.DmScd2DimensionBuilder;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 
 /** Kimball dimension table. */
 @Getter
 @Setter
+@NamingSchemeKind(EdwNamingSchemeTypes.DM_DIMENSION)
 public class DmDimension extends DmTableBase {
 
   /**

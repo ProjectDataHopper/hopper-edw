@@ -67,6 +67,8 @@ import org.hopper.edw.datavault.metadata.businessvault.BvSourceQueryRef;
 import org.hopper.edw.datavault.metadata.businessvault.BvTableBase;
 import org.hopper.edw.datavault.metadata.businessvault.BvTableType;
 import org.hopper.edw.datavault.metadata.businessvault.IBvTable;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
+import org.hopper.edw.datavault.naming.EdwNamingWidgetSupport;
 
 /** Dialog to edit a Business Vault table on the canvas. */
 public class HopGuiBvTableDialog {
@@ -159,7 +161,8 @@ public class HopGuiBvTableDialog {
     fdName.left = new FormAttachment(middle, 0);
     fdName.top = new FormAttachment(0, margin);
     fdName.right = new FormAttachment(100, 0);
-    wName.setLayoutData(fdName);
+    EdwNamingWidgetSupport.enableAndLayout(
+        wName, variables, EdwNamingSchemeTypes.forBvTable(input.getTableType()), fdName);
 
     Label wlTableName = new Label(shell, SWT.RIGHT);
     wlTableName.setText(BaseMessages.getString(PKG, "HopGuiBvTableDialog.TableName.Label"));
@@ -176,7 +179,8 @@ public class HopGuiBvTableDialog {
     fdTableName.left = new FormAttachment(middle, 0);
     fdTableName.top = new FormAttachment(wName, margin);
     fdTableName.right = new FormAttachment(100, 0);
-    wTableName.setLayoutData(fdTableName);
+    EdwNamingWidgetSupport.enableAndLayout(
+        wTableName, variables, EdwNamingSchemeTypes.DATABASE_TABLE, fdTableName);
 
     Label wlDescription = new Label(shell, SWT.RIGHT);
     wlDescription.setText(BaseMessages.getString(PKG, "HopGuiBvTableDialog.Description.Label"));

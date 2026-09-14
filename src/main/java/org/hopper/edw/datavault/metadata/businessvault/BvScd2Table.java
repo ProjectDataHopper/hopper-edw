@@ -23,6 +23,7 @@ import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.naming.NamingSchemeKind;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
@@ -36,10 +37,12 @@ import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvBulkLoadPluginSupport;
 import org.hopper.edw.datavault.metadata.DvTableType;
 import org.hopper.edw.datavault.metadata.DvTargetLoadMode;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 
 /** Business Vault SCD2 table derived from one or more DV satellites. */
 @Getter
 @Setter
+@NamingSchemeKind(EdwNamingSchemeTypes.BV_SCD2)
 public class BvScd2Table extends BvTableBase {
 
   private static final Class<?> PKG = BvScd2Table.class;

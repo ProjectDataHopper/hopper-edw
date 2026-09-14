@@ -46,6 +46,7 @@ import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transforms.dummy.DummyMeta;
 import org.apache.hop.workflow.WorkflowMeta;
 import org.hopper.edw.datavault.metadata.targettypemapping.TargetTypeMappingSupport;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 import org.jspecify.annotations.NonNull;
 
 /**
@@ -81,7 +82,7 @@ public abstract class DvTableBase extends HopMetadataBase implements IHopMetadat
   // defined on DvHub / DvLink / DvSatellite (which use their own GUI_PLUGIN_ELEMENT_PARENT_ID).
   // The properties will receive reasonable default widgets. For pixel-perfect per-type
   // layout a custom MetadataEditor can be added later.
-  @HopMetadataProperty(key = "tableName")
+  @HopMetadataProperty(key = "tableName", namingSchemeType = EdwNamingSchemeTypes.DATABASE_TABLE)
   protected String tableName;
 
   @HopMetadataProperty protected String description;

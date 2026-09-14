@@ -23,14 +23,17 @@ import lombok.Setter;
 import org.apache.hop.core.file.IHasFilename;
 import org.apache.hop.core.gui.IUndo;
 import org.apache.hop.core.gui.Point;
+import org.apache.hop.core.naming.NamingSchemeKind;
 import org.apache.hop.core.undo.ChangeAction;
 import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadata;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 
 /** Read-only graph of connected Hop workflows, pipelines, models, and generated loaders. */
 @Getter
 @Setter
+@NamingSchemeKind(EdwNamingSchemeTypes.EDW_EXECUTION_MAP)
 public class ExecutionMapDocument extends HopMetadataBase
     implements IHopMetadata, IHasFilename, IUndo {
 

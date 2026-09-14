@@ -69,6 +69,8 @@ import org.hopper.edw.datavault.metadata.businessvault.BvSqlSource;
 import org.hopper.edw.datavault.metadata.businessvault.BvSqlTemplateParser;
 import org.hopper.edw.datavault.metadata.businessvault.BvSqlViewPipelineSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BvTargetDatabaseSupport;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
+import org.hopper.edw.datavault.naming.EdwNamingWidgetSupport;
 
 /** Dialog to edit a SQL-sourced Business Vault business table (view or table materialization). */
 public class HopGuiBvBusinessTableDialog {
@@ -140,7 +142,8 @@ public class HopGuiBvBusinessTableDialog {
     fdName.left = new FormAttachment(middle, 0);
     fdName.top = new FormAttachment(0, margin);
     fdName.right = new FormAttachment(100, 0);
-    wName.setLayoutData(fdName);
+    EdwNamingWidgetSupport.enableAndLayout(
+        wName, variables, EdwNamingSchemeTypes.BV_BUSINESS_TABLE, fdName);
 
     Label wlTableName = new Label(shell, SWT.RIGHT);
     wlTableName.setText(BaseMessages.getString(PKG, "HopGuiBvBusinessTableDialog.TableName.Label"));

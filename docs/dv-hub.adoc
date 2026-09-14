@@ -31,7 +31,7 @@ The Hub dialog is organized into three tabs: **Options**, **Keys**, and **Record
 |Option |Description
 
 |Name
-|The name of this hub definition inside your Data Vault Model. It is also used as the default physical table name if you do not specify an explicit table name. The name must be unique within the model.
+|The name of this hub definition inside your Data Vault Model. It is also used as the default physical table name if you do not specify an explicit table name. The name must be unique within the model. Press CTRL-SHIFT-N or click **N** to apply a `dv-hub` naming scheme; see link:naming-schemes.adoc[EDW naming schemes].
 
 |Physical table name
 |The actual name of the table that will be created or loaded in your target Data Vault database. Leave this empty to use the Name above. This is useful when your metadata name is more business-friendly while the physical table follows a different naming convention.

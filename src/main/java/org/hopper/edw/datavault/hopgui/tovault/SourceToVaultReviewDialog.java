@@ -22,10 +22,12 @@ import lombok.Getter;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
 import org.apache.hop.ui.core.widget.ColumnInfo;
 import org.apache.hop.ui.core.widget.TableView;
+import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormAttachment;
@@ -45,6 +47,7 @@ import org.hopper.edw.datavault.metadata.sourcemodel.tovault.ProposedVaultObject
 import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceTableRole;
 import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceToVaultClassification;
 import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceToVaultClassifier;
+import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceToVaultNaming;
 import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceToVaultOptions;
 import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceToVaultProposal;
 
@@ -101,8 +104,20 @@ public class SourceToVaultReviewDialog {
     this.selectedTableNames = selectedTableNames;
     this.chooseDestination = chooseDestination;
     this.destination = chooseDestination ? Destination.NEW_MODEL : Destination.CURRENT_MODEL;
-    this.classification =
-        SourceToVaultClassifier.classify(sourceModel, selectedTableNames, existingVault, options);
+    this.classification = classifyWithNaming();
+  }
+
+  private SourceToVaultClassification classifyWithNaming() {
+    SourceToVaultClassification[] box = new SourceToVaultClassification[1];
+    IHopMetadataProvider provider =
+        HopGui.getInstance() != null ? HopGui.getInstance().getMetadataProvider() : null;
+    SourceToVaultNaming.runWithProvider(
+        provider,
+        () ->
+            box[0] =
+                SourceToVaultClassifier.classify(
+                    sourceModel, selectedTableNames, existingVault, options));
+    return box[0];
   }
 
   public boolean open() {
@@ -261,8 +276,7 @@ public class SourceToVaultReviewDialog {
   private void reclassify() {
     captureEdits();
     readOptionsFromWidgets();
-    classification =
-        SourceToVaultClassifier.classify(sourceModel, selectedTableNames, existingVault, options);
+    classification = classifyWithNaming();
     populateTable();
   }
 

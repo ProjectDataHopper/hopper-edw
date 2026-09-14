@@ -40,6 +40,7 @@ import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.plugin.GuiElementType;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.GuiWidgetElement;
+import org.apache.hop.core.naming.NamingSchemeKind;
 import org.apache.hop.core.reflection.StringSearchResult;
 import org.apache.hop.core.undo.ChangeAction;
 import org.apache.hop.core.util.StringUtil;
@@ -54,6 +55,8 @@ import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
 import org.hopper.edw.datavault.metadata.coaching.ModelCoachingConfiguration;
+import org.hopper.edw.datavault.naming.EdwNamingCheckSupport;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 import org.jspecify.annotations.NonNull;
 
 /**
@@ -75,6 +78,7 @@ import org.jspecify.annotations.NonNull;
 @GuiPlugin
 @Getter
 @Setter
+@NamingSchemeKind(EdwNamingSchemeTypes.EDW_DV_MODEL)
 public class DataVaultModel extends HopMetadataBase
     implements IHopMetadata, IChanged, IHasName, IHasFilename, IUndo {
 
@@ -336,6 +340,7 @@ public class DataVaultModel extends HopMetadataBase
         if (!readOnly) {
           checkDuplicateSourceNames(remarks, sourceNames);
         }
+        EdwNamingCheckSupport.addRemarks(this, getFilename(), remarks, metadataProvider);
       }
       return remarks;
     } finally {

@@ -24,6 +24,7 @@ import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.database.Database;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.naming.NamingSchemeKind;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
@@ -32,10 +33,12 @@ import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.hopper.edw.datavault.metadata.DvDdlSupport;
 import org.hopper.edw.datavault.metadata.dimensional.pipeline.DmJunkDimensionBuilder;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 
 /** Kimball junk dimension maintained via Combination Lookup. */
 @Getter
 @Setter
+@NamingSchemeKind(EdwNamingSchemeTypes.DM_JUNK_DIMENSION)
 public class DmJunkDimension extends DmTableBase {
 
   @HopMetadataProperty(key = "key_field", groupKey = "key_fields")

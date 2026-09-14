@@ -23,6 +23,7 @@ import lombok.Setter;
 import org.apache.hop.core.changed.ChangedFlag;
 import org.apache.hop.core.gui.IGuiPosition;
 import org.apache.hop.core.gui.Point;
+import org.apache.hop.core.naming.NamingSchemeKind;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
@@ -30,6 +31,7 @@ import org.apache.hop.metadata.api.IHopMetadata;
 import org.hopper.edw.datavault.metadata.DvSourceType;
 import org.hopper.edw.datavault.metadata.datatypemapping.IDataTypeMappingTarget;
 import org.hopper.edw.datavault.metadata.datatypemapping.SourceFieldTypeMapping;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 import org.jspecify.annotations.NonNull;
 
 /**
@@ -37,6 +39,7 @@ import org.jspecify.annotations.NonNull;
  */
 @Getter
 @Setter
+@NamingSchemeKind(EdwNamingSchemeTypes.SOURCE_TABLE)
 public class SourceTable extends HopMetadataBase
     implements IHopMetadata, IGuiPosition, IDataTypeMappingTarget {
 

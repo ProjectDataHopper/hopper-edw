@@ -21,6 +21,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.metadata.api.HopMetadataProperty;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 
 /** Qualified identifier for a record definition within a single catalog connection. */
 @Getter
@@ -30,7 +31,8 @@ public class RecordDefinitionKey {
 
   @HopMetadataProperty private String namespace;
 
-  @HopMetadataProperty private String name;
+  @HopMetadataProperty(namingSchemeType = EdwNamingSchemeTypes.EDW_RECORD_DEFINITION)
+  private String name;
 
   public RecordDefinitionKey(String namespace, String name) {
     this.namespace = namespace;

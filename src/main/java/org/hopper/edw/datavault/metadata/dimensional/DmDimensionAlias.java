@@ -22,6 +22,7 @@ import lombok.Setter;
 import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.naming.NamingSchemeKind;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
@@ -29,6 +30,7 @@ import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 
 /**
  * Logical dimension alias referencing another {@link DmDimension} without redefining keys or
@@ -36,6 +38,7 @@ import org.apache.hop.pipeline.PipelineMeta;
  */
 @Getter
 @Setter
+@NamingSchemeKind(EdwNamingSchemeTypes.DM_DIMENSION_ALIAS)
 public class DmDimensionAlias extends DmTableBase {
 
   private static final Class<?> PKG = DmDimensionAlias.class;

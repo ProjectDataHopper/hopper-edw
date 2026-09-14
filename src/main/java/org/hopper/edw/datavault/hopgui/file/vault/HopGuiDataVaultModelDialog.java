@@ -50,6 +50,8 @@ import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvDdlSupport;
 import org.hopper.edw.datavault.metadata.ModelConfigurationExtractSupport;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
+import org.hopper.edw.datavault.naming.EdwNamingWidgetSupport;
 import org.jspecify.annotations.NonNull;
 
 /** Dialog to edit the properties of a DataVaultModel (description, configuration, etc). */
@@ -114,7 +116,8 @@ public class HopGuiDataVaultModelDialog {
     fdName.left = new FormAttachment(middle, 0);
     fdName.top = new FormAttachment(0, margin);
     fdName.right = new FormAttachment(100, 0);
-    wName.setLayoutData(fdName);
+    EdwNamingWidgetSupport.enableAndLayout(
+        wName, variables, EdwNamingSchemeTypes.EDW_DV_MODEL, fdName);
     wName.addModifyListener(e -> input.setChanged());
 
     Label wlDescription = new Label(shell, SWT.RIGHT);

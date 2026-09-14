@@ -59,6 +59,8 @@ import org.hopper.edw.datavault.hopgui.file.vault.HopVaultFileType;
 import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
 import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 import org.hopper.edw.datavault.hopgui.resourcedefinition.ResourceDefinitionValidationGuiSupport;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
+import org.hopper.edw.datavault.naming.EdwNamingWidgetSupport;
 
 /**
  * Editor for {@link ResourceDefinitionGroupMeta}.
@@ -118,7 +120,8 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
     fdName.top = new FormAttachment(wlName, 0, SWT.CENTER);
     fdName.left = new FormAttachment(middle, 0);
     fdName.right = new FormAttachment(100, 0);
-    wName.setLayoutData(fdName);
+    EdwNamingWidgetSupport.enableAndLayout(
+        wName, hopGui.getVariables(), EdwNamingSchemeTypes.HOP_METADATA, fdName);
     Control lastControl = wName;
 
     wDescription = new Text(parent, SWT.SINGLE | SWT.LEFT | SWT.BORDER);

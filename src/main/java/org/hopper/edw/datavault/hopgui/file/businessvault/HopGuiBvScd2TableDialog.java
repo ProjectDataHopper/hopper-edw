@@ -45,6 +45,7 @@ import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
+import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
@@ -81,6 +82,8 @@ import org.hopper.edw.datavault.metadata.businessvault.BvScd2PipelineSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2SatelliteConfig;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2Table;
 import org.hopper.edw.datavault.metadata.businessvault.BvSourceQueryRef;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
+import org.hopper.edw.datavault.naming.EdwNamingWidgetSupport;
 import org.hopper.edw.datavault.transform.sqlexpression.SqlExpressionEditorDialog;
 
 /** Tabbed dialog to edit a Business Vault SCD2 table, including multi-satellite field mappings. */
@@ -185,7 +188,8 @@ public class HopGuiBvScd2TableDialog {
 
     wName = new Text(shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wName);
-    wName.setLayoutData(new FormDataBuilder().left(middle, 0).top(0, margin).right().result());
+    FormData fdName = new FormDataBuilder().left(middle, 0).top(0, margin).right().result();
+    EdwNamingWidgetSupport.enableAndLayout(wName, variables, EdwNamingSchemeTypes.BV_SCD2, fdName);
     wName.addModifyListener(e -> refreshUnitTestArtifactLabel());
 
     Label wlDescription = new Label(shell, SWT.RIGHT);
@@ -260,7 +264,9 @@ public class HopGuiBvScd2TableDialog {
 
     wTableName = new Text(comp, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wTableName);
-    wTableName.setLayoutData(new FormDataBuilder().left(middle, 0).top(0, margin).right().result());
+    FormData fdTableName = new FormDataBuilder().left(middle, 0).top(0, margin).right().result();
+    EdwNamingWidgetSupport.enableAndLayout(
+        wTableName, variables, EdwNamingSchemeTypes.DATABASE_TABLE, fdTableName);
 
     Label wlIncludeHashKey = new Label(comp, SWT.RIGHT);
     wlIncludeHashKey.setText(

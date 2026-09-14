@@ -44,6 +44,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -65,6 +66,8 @@ import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceTableLiveSchemaSupport;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceTableValidationSupport;
 import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceTablePreviewSupport;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
+import org.hopper.edw.datavault.naming.EdwNamingWidgetSupport;
 
 /** Dialog to edit a {@link SourceTable} (identity, physical location, columns). */
 public class HopGuiSourceTableDialog {
@@ -185,7 +188,9 @@ public class HopGuiSourceTableDialog {
         new FormDataBuilder().left().top(0, margin).right(middle, -margin).result());
     wName = new Text(comp, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wName);
-    wName.setLayoutData(new FormDataBuilder().left(middle, 0).top(0, margin).right().result());
+    FormData fdName = new FormDataBuilder().left(middle, 0).top(0, margin).right().result();
+    EdwNamingWidgetSupport.enableAndLayout(
+        wName, variables, EdwNamingSchemeTypes.SOURCE_TABLE, fdName);
 
     Label wlDescription = new Label(comp, SWT.RIGHT);
     wlDescription.setText(BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Description.Label"));

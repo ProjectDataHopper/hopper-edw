@@ -39,6 +39,8 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
 import org.hopper.edw.datavault.hopgui.help.HelpTopics;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
+import org.hopper.edw.datavault.naming.EdwNamingWidgetSupport;
 import org.hopper.edw.quality.model.DataQualityRule;
 import org.hopper.edw.quality.model.DataQualityRuleType;
 import org.hopper.edw.quality.model.QualitySeverity;
@@ -86,7 +88,8 @@ public class DataQualityRuleSetMetaEditor extends MetadataEditor<DataQualityRule
     fdName.top = new FormAttachment(wlName, 0, SWT.CENTER);
     fdName.left = new FormAttachment(middle, 0);
     fdName.right = new FormAttachment(100, 0);
-    wName.setLayoutData(fdName);
+    EdwNamingWidgetSupport.enableAndLayout(
+        wName, hopGui.getVariables(), EdwNamingSchemeTypes.HOP_METADATA, fdName);
 
     Label wlDescription = new Label(parent, SWT.RIGHT);
     PropsUi.setLook(wlDescription);

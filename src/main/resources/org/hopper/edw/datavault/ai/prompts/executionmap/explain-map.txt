@@ -1,0 +1,3 @@
+Scenario: Explain map.
+
+Describe the process structure: root workflow, update actions, and model files. Follow edges from the root.

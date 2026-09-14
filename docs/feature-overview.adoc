@@ -266,9 +266,13 @@ For a slide-style executive summary, see link:presentations/hop-data-vault-overv
 |Available
 |link:project-documentation.adoc[Project documentation]
 
-|BV naming rules engine
+|EDW naming schemes
+|Available
+|Hop 2.20 Naming Schemes for models, tables, physical names, and record definitions; link:naming-schemes.adoc[EDW naming schemes]
+
+|BV semantic naming rules
 |Planned
-|link:plans/bv-naming-rules-engine-plan.md[BV naming rules plan]
+|Vague tokens, language, acknowledgements; link:plans/bv-naming-rules-engine-plan.md[BV naming rules plan] (mechanical schemes first)
 
 |Marquez / OpenLineage export
 |Available

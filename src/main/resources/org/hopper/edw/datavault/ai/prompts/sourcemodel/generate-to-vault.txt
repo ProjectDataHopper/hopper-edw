@@ -1,0 +1,3 @@
+Scenario: Generate Data Vault.
+
+Explain and critique the Generate Data Vault classification for this source model. Suggest which tables to include, which should be hubs vs satellites vs links, and what to check before applying Generate Data Vault on the canvas.

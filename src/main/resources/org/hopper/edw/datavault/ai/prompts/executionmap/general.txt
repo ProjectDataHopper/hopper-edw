@@ -1,0 +1,3 @@
+Scenario: General help.
+
+Answer questions about this execution map: root artifact, capabilities, and model file references.

@@ -1,0 +1,3 @@
+Scenario: Type mapping.
+
+Advise on mapping source column types to Hop types and warehouse target types. Call out missing lengths, Unicode, and fields that need an explicit type-mapping profile.

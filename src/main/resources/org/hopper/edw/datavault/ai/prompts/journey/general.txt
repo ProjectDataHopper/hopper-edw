@@ -1,0 +1,3 @@
+Scenario: General help.
+
+Answer questions about this resource definition group's EDW journey: models, workflows, execution maps, and lineage views.

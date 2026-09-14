@@ -40,6 +40,7 @@ import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
+import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
@@ -68,6 +69,8 @@ import org.hopper.edw.datavault.metadata.DvTableType;
 import org.hopper.edw.datavault.metadata.IDvTable;
 import org.hopper.edw.datavault.metadata.SatelliteAttribute;
 import org.hopper.edw.datavault.metadata.SourceField;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
+import org.hopper.edw.datavault.naming.EdwNamingWidgetSupport;
 
 /** Dialog to edit the properties of a DvSatellite, including attributes list using TableView. */
 public class DvSatelliteDialog {
@@ -161,7 +164,9 @@ public class DvSatelliteDialog {
 
     wName = new Text(shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wName);
-    wName.setLayoutData(new FormDataBuilder().left(middle, 0).top(0, margin).right().result());
+    FormData fdName = new FormDataBuilder().left(middle, 0).top(0, margin).right().result();
+    EdwNamingWidgetSupport.enableAndLayout(
+        wName, variables, EdwNamingSchemeTypes.DV_SATELLITE, fdName);
 
     Label wlDescription = new Label(shell, SWT.RIGHT);
     wlDescription.setText(BaseMessages.getString(PKG, "DvSatelliteDialog.Description.Label"));
@@ -252,8 +257,10 @@ public class DvSatelliteDialog {
 
     wTableName = new Text(comp, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wTableName);
-    wTableName.setLayoutData(
-        new FormDataBuilder().left(middle, 0).top(wIntegrationMode, margin).right().result());
+    FormData fdTableName =
+        new FormDataBuilder().left(middle, 0).top(wIntegrationMode, margin).right().result();
+    EdwNamingWidgetSupport.enableAndLayout(
+        wTableName, variables, EdwNamingSchemeTypes.DATABASE_TABLE, fdTableName);
 
     wRecordSource =
         new DvCatalogSourceSelectionLine(
@@ -577,6 +584,7 @@ public class DvSatelliteDialog {
               BaseMessages.getString(PKG, "System.Combo.Yes"),
               BaseMessages.getString(PKG, "System.Combo.No")),
         };
+    columns[0].setNamingSchemeType(EdwNamingSchemeTypes.DATABASE_COLUMN);
 
     Button wLoadFromSource = new Button(comp, SWT.PUSH);
     wLoadFromSource.setText(BaseMessages.getString(PKG, "DvSatelliteDialog.GetAttributes.Button"));

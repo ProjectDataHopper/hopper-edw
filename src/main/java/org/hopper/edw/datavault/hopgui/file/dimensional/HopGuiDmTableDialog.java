@@ -47,6 +47,7 @@ import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.apache.hop.ui.util.EnvironmentUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
@@ -102,6 +103,8 @@ import org.hopper.edw.datavault.metadata.dimensional.DmTableBase;
 import org.hopper.edw.datavault.metadata.dimensional.DmTableType;
 import org.hopper.edw.datavault.metadata.dimensional.IDmFactLikeTable;
 import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
+import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
+import org.hopper.edw.datavault.naming.EdwNamingWidgetSupport;
 
 /** Dialog to edit a dimension or fact table on the dimensional model canvas. */
 public class HopGuiDmTableDialog {
@@ -343,7 +346,9 @@ public class HopGuiDmTableDialog {
 
     wName = new Text(comp, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wName);
-    wName.setLayoutData(new FormDataBuilder().left(middle, 0).top(0, margin).right().result());
+    FormData fdName = new FormDataBuilder().left(middle, 0).top(0, margin).right().result();
+    EdwNamingWidgetSupport.enableAndLayout(
+        wName, variables, EdwNamingSchemeTypes.forDmTable(input.getTableType()), fdName);
 
     Label wlTableName = new Label(comp, SWT.RIGHT);
     wlTableName.setText(BaseMessages.getString(PKG, "HopGuiDmTableDialog.TableName.Label"));
@@ -353,8 +358,10 @@ public class HopGuiDmTableDialog {
 
     wTableName = new Text(comp, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wTableName);
-    wTableName.setLayoutData(
-        new FormDataBuilder().left(middle, 0).top(wName, margin).right().result());
+    FormData fdTableName =
+        new FormDataBuilder().left(middle, 0).top(wName, margin).right().result();
+    EdwNamingWidgetSupport.enableAndLayout(
+        wTableName, variables, EdwNamingSchemeTypes.DATABASE_TABLE, fdTableName);
 
     Label wlDescription = new Label(comp, SWT.RIGHT);
     wlDescription.setText(BaseMessages.getString(PKG, "HopGuiDmTableDialog.Description.Label"));

@@ -1,0 +1,3 @@
+Scenario: Explain graph.
+
+Walk through the seed, direction, and neighborhood. Name upstream and downstream datasets/jobs from the session graph. Mention OPS last-success times when present on nodes.
