@@ -15,7 +15,7 @@
  */
 package org.hopper.edw.datavault.hopgui.file.sourcemodel;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
@@ -23,8 +23,10 @@ class SourceModelPainterEmptyHintTest {
 
   @Test
   void emptyModelHintScaleIsModestHalfwayBoost() {
-    float scale = SourceModelPainter.emptyModelHintScale();
-    // Half-way between 1.0 (too small) and 2.5×native (too large): 1.5×native (≥ 1.5).
-    assertTrue(scale >= 1.5f - 0.001f);
+    // Half-way between 1.0 (too small) and 2.5×native (too large): 1.5×native.
+    // Zoom is passed in so this test never initializes SWT/PropsUi (headless CI).
+    assertEquals(1.5f, SourceModelPainter.emptyModelHintScale(1.0d), 0.001f);
+    assertEquals(1.5f, SourceModelPainter.emptyModelHintScale(0.5d), 0.001f);
+    assertEquals(3.0f, SourceModelPainter.emptyModelHintScale(2.0d), 0.001f);
   }
 }

@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.hop.core.gui.Point;
-import org.apache.hop.ui.core.PropsUi;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry.Bounds;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry.ConnectionAnchors;
 import org.junit.jupiter.api.Test;
@@ -167,22 +166,26 @@ class ModelGraphConnectionGeometryTest {
 
   @Test
   void effectiveSegmentCountScalesWithScreenLength() {
-    double zoom = PropsUi.getNativeZoomFactor();
+    // Zoom is passed in so this test never initializes SWT/PropsUi (headless CI).
+    double zoom = 1.0d;
     assertEquals(
         expectedSegmentCount(120, 20, zoom),
-        ModelGraphConnectionGeometry.effectiveSegmentCount(120, 20));
+        ModelGraphConnectionGeometry.effectiveSegmentCount(120, 20, zoom));
     assertEquals(
         expectedSegmentCount(300, 20, zoom),
-        ModelGraphConnectionGeometry.effectiveSegmentCount(300, 20));
+        ModelGraphConnectionGeometry.effectiveSegmentCount(300, 20, zoom));
     assertEquals(
         expectedSegmentCount(300, 30, zoom),
-        ModelGraphConnectionGeometry.effectiveSegmentCount(300, 30));
+        ModelGraphConnectionGeometry.effectiveSegmentCount(300, 30, zoom));
     assertEquals(
         expectedSegmentCount(5000, 20, zoom),
-        ModelGraphConnectionGeometry.effectiveSegmentCount(5000, 20));
+        ModelGraphConnectionGeometry.effectiveSegmentCount(5000, 20, zoom));
     assertTrue(
-        ModelGraphConnectionGeometry.effectiveSegmentCount(300, 20)
-            <= ModelGraphConnectionGeometry.effectiveSegmentCount(5000, 20));
+        ModelGraphConnectionGeometry.effectiveSegmentCount(300, 20, zoom)
+            <= ModelGraphConnectionGeometry.effectiveSegmentCount(5000, 20, zoom));
+    assertTrue(
+        ModelGraphConnectionGeometry.effectiveSegmentCount(300, 20, 1.0d)
+            <= ModelGraphConnectionGeometry.effectiveSegmentCount(300, 20, 0.5d));
   }
 
   /** Target box whose center is offset from {@code from}'s center by {@code dx},{@code dy}. */

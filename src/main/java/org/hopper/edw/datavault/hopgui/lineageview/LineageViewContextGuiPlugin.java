@@ -48,10 +48,8 @@ public class LineageViewContextGuiPlugin {
       id = HopGuiLineageViewGraph.ACTION_ID_OPEN_MODEL,
       parentId = HopGuiLineageViewNodeContext.CONTEXT_ID,
       type = GuiActionType.Modify,
-      name =
-          "i18n:org.hopper.edw.datavault.hopgui.file.lineageview:HopGuiLineageViewGraph.Context.OpenModel.Name",
-      tooltip =
-          "i18n:org.hopper.edw.datavault.hopgui.file.lineageview:HopGuiLineageViewGraph.Context.OpenModel.Tooltip",
+      name = "i18n::LineageViewContextGuiPlugin.OpenModel.Name",
+      tooltip = "i18n::LineageViewContextGuiPlugin.OpenModel.Tooltip",
       image = "ui/images/open.svg",
       category = "Lineage",
       categoryOrder = "1")
@@ -66,10 +64,8 @@ public class LineageViewContextGuiPlugin {
       id = HopGuiLineageViewGraph.ACTION_ID_OPEN_CATALOG,
       parentId = HopGuiLineageViewNodeContext.CONTEXT_ID,
       type = GuiActionType.Modify,
-      name =
-          "i18n:org.hopper.edw.datavault.hopgui.file.lineageview:HopGuiLineageViewGraph.Context.OpenCatalog.Name",
-      tooltip =
-          "i18n:org.hopper.edw.datavault.hopgui.file.lineageview:HopGuiLineageViewGraph.Context.OpenCatalog.Tooltip",
+      name = "i18n::LineageViewContextGuiPlugin.OpenCatalog.Name",
+      tooltip = "i18n::LineageViewContextGuiPlugin.OpenCatalog.Tooltip",
       image = "data-catalog.svg",
       category = "Lineage",
       categoryOrder = "2")
@@ -84,10 +80,8 @@ public class LineageViewContextGuiPlugin {
       id = HopGuiLineageViewGraph.ACTION_ID_SHOW_UPDATE_PIPELINE,
       parentId = HopGuiLineageViewNodeContext.CONTEXT_ID,
       type = GuiActionType.Modify,
-      name =
-          "i18n:org.hopper.edw.datavault.hopgui.file.lineageview:HopGuiLineageViewGraph.Context.ShowUpdatePipeline.Name",
-      tooltip =
-          "i18n:org.hopper.edw.datavault.hopgui.file.lineageview:HopGuiLineageViewGraph.Context.ShowUpdatePipeline.Tooltip",
+      name = "i18n::LineageViewContextGuiPlugin.ShowUpdatePipeline.Name",
+      tooltip = "i18n::LineageViewContextGuiPlugin.ShowUpdatePipeline.Tooltip",
       image = "ui/images/pipeline.svg",
       category = "Lineage",
       categoryOrder = "3")
@@ -102,10 +96,8 @@ public class LineageViewContextGuiPlugin {
       id = HopGuiLineageViewGraph.ACTION_ID_SHOW_BUILD_PIPELINE,
       parentId = HopGuiLineageViewNodeContext.CONTEXT_ID,
       type = GuiActionType.Modify,
-      name =
-          "i18n:org.hopper.edw.datavault.hopgui.file.lineageview:HopGuiLineageViewGraph.Context.ShowBuildPipeline.Name",
-      tooltip =
-          "i18n:org.hopper.edw.datavault.hopgui.file.lineageview:HopGuiLineageViewGraph.Context.ShowBuildPipeline.Tooltip",
+      name = "i18n::LineageViewContextGuiPlugin.ShowBuildPipeline.Name",
+      tooltip = "i18n::LineageViewContextGuiPlugin.ShowBuildPipeline.Tooltip",
       image = "ui/images/pipeline.svg",
       category = "Lineage",
       categoryOrder = "4")
@@ -120,10 +112,8 @@ public class LineageViewContextGuiPlugin {
       id = ACTION_ID_AI_HELP,
       parentId = HopGuiLineageViewNodeContext.CONTEXT_ID,
       type = GuiActionType.Modify,
-      name =
-          "i18n:org.hopper.edw.datavault.hopgui.file.lineageview:HopGuiLineageViewGraph.AiHelp.Name",
-      tooltip =
-          "i18n:org.hopper.edw.datavault.hopgui.file.lineageview:HopGuiLineageViewGraph.AiHelp.Tooltip",
+      name = "i18n::LineageViewContextGuiPlugin.AiHelp.Name",
+      tooltip = "i18n::LineageViewContextGuiPlugin.AiHelp.Tooltip",
       image = "ai-provider.svg",
       category = "Help",
       categoryOrder = "1")

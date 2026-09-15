@@ -22,15 +22,24 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.action.GuiContextAction;
+import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.plugin.action.GuiAction;
 import org.apache.hop.core.gui.plugin.action.GuiActionLambdaBuilder;
 import org.apache.hop.core.gui.plugin.action.GuiActionType;
+import org.apache.hop.core.util.TranslateUtil;
 import org.hopper.edw.datavault.hopgui.file.lineageview.HopGuiLineageViewGraph;
 import org.hopper.edw.datavault.hopgui.file.lineageview.HopGuiLineageViewNodeContext;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class LineageViewContextGuiPluginTest {
+
+  @BeforeAll
+  static void initHop() throws HopException {
+    HopEnvironment.init();
+  }
 
   @Test
   void pluginHasPublicNoArgConstructor() throws Exception {
@@ -83,5 +92,27 @@ class LineageViewContextGuiPluginTest {
     assertNotNull(action);
     assertEquals(LineageViewContextGuiPlugin.ACTION_ID_AI_HELP, action.id());
     assertEquals(HopGuiLineageViewNodeContext.CONTEXT_ID, action.parentId());
+    assertEquals("i18n::LineageViewContextGuiPlugin.AiHelp.Name", action.name());
+    assertEquals(
+        "AI Help", TranslateUtil.translate(action.name(), LineageViewContextGuiPlugin.class));
+    assertEquals(
+        "Ask the AI assistant about this lineage graph (chat only, read-only)",
+        TranslateUtil.translate(action.tooltip(), LineageViewContextGuiPlugin.class));
+  }
+
+  @Test
+  void contextActionLabelsResolveOnThePluginClass() throws Exception {
+    for (Method method : LineageViewContextGuiPlugin.class.getDeclaredMethods()) {
+      GuiContextAction action = method.getAnnotation(GuiContextAction.class);
+      if (action == null) {
+        continue;
+      }
+      String name = TranslateUtil.translate(action.name(), LineageViewContextGuiPlugin.class);
+      String tooltip = TranslateUtil.translate(action.tooltip(), LineageViewContextGuiPlugin.class);
+      assertFalse(name.startsWith("i18n:"), method.getName() + " name: " + name);
+      assertFalse(name.startsWith("!"), method.getName() + " name: " + name);
+      assertFalse(tooltip.startsWith("i18n:"), method.getName() + " tooltip: " + tooltip);
+      assertFalse(tooltip.startsWith("!"), method.getName() + " tooltip: " + tooltip);
+    }
   }
 }

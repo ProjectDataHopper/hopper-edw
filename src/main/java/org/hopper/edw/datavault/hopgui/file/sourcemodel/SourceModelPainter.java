@@ -1049,7 +1049,11 @@ public class SourceModelPainter extends BasePainter {
    * native-zoom boost → {@code 1.5 × max(1, nativeZoom)}.
    */
   static float emptyModelHintScale() {
-    double nativeZoom = PropsUi.getNativeZoomFactor();
+    return emptyModelHintScale(PropsUi.getNativeZoomFactor());
+  }
+
+  /** {@code nativeZoom} is injected so unit tests can run without initializing SWT. */
+  static float emptyModelHintScale(double nativeZoom) {
     if (nativeZoom < 1.0d) {
       nativeZoom = 1.0d;
     }

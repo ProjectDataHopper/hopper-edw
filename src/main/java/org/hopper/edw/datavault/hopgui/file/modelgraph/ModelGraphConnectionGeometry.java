@@ -228,8 +228,14 @@ public final class ModelGraphConnectionGeometry {
    * honoring the configured minimum.
    */
   static int effectiveSegmentCount(double screenLength, int configuredSegments) {
+    return effectiveSegmentCount(screenLength, configuredSegments, PropsUi.getNativeZoomFactor());
+  }
+
+  /** {@code zoomFactor} is injected so unit tests can run without initializing SWT. */
+  static int effectiveSegmentCount(double screenLength, int configuredSegments, double zoomFactor) {
     int configured = Math.max(1, configuredSegments);
-    int byLength = (int) Math.ceil(screenLength / (15.0 * PropsUi.getNativeZoomFactor()));
+    double zoom = zoomFactor > 0 ? zoomFactor : 1.0d;
+    int byLength = (int) Math.ceil(screenLength / (15.0 * zoom));
     return Math.max(configured, Math.min(200, byLength));
   }
 

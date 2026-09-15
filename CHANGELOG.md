@@ -10,7 +10,7 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ### Hop Web lineage view AI Help (issue #178)
 
-- Clicking a lineage node no longer throws `NoSuchMethodException` for `openAiAdvisorNodeContext` when building the context dialog. Node actions (including AI Help) are registered on a plain `@GuiPlugin` with a no-arg constructor, the same pattern as **Show lineage**, instead of on the RAP graph widget.
+- Clicking a lineage node no longer throws `NoSuchMethodException` for `openAiAdvisorNodeContext` when building the context dialog. Node actions (including AI Help) are registered on a plain `@GuiPlugin` with a no-arg constructor, the same pattern as **Show lineage**, instead of on the RAP graph widget. Action names/tooltips use `i18n::` keys on that plugin class so Hop Web resolves them (package-qualified `i18n:pkg:key` does not pass the plugin classloader).
 
 ### Apache Hop 2.20.0-SNAPSHOT
 

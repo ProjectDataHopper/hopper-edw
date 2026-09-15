@@ -67,7 +67,12 @@ class LineageViewI18nTest {
             LineageViewGuiPlugin.class, "LineageViewContextGuiPlugin.Description"));
     assertEquals(
         "AI Help",
-        BaseMessages.getString(HopGuiLineageViewGraph.class, "HopGuiLineageViewGraph.AiHelp.Name"));
+        BaseMessages.getString(
+            LineageViewGuiPlugin.class, "LineageViewContextGuiPlugin.AiHelp.Name"));
+    assertEquals(
+        "Open model",
+        BaseMessages.getString(
+            LineageViewGuiPlugin.class, "LineageViewContextGuiPlugin.OpenModel.Name"));
     assertEquals(
         "View as HTML",
         BaseMessages.getString(
