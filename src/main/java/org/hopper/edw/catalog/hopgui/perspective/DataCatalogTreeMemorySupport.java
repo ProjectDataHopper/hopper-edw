@@ -69,12 +69,41 @@ public final class DataCatalogTreeMemorySupport {
 
   static boolean resolveExpanded(
       String treeKey, String[] path, Set<String> seededPaths, boolean defaultExpanded) {
-    if (!TreeMemory.getInstance().isExpanded(treeKey, path)
-        && defaultExpanded
-        && seededPaths.add(pathKey(path))) {
-      TreeMemory.getInstance().storeExpanded(treeKey, path, true);
+    return resolveExpanded(treeKey, path, seededPaths, defaultExpanded, hopExpandMemory());
+  }
+
+  static boolean resolveExpanded(
+      String treeKey,
+      String[] path,
+      Set<String> seededPaths,
+      boolean defaultExpanded,
+      ExpandMemory memory) {
+    if (!memory.isExpanded(treeKey, path) && defaultExpanded && seededPaths.add(pathKey(path))) {
+      memory.storeExpanded(treeKey, path, true);
     }
-    return TreeMemory.getInstance().isExpanded(treeKey, path);
+    return memory.isExpanded(treeKey, path);
+  }
+
+  private static ExpandMemory hopExpandMemory() {
+    TreeMemory treeMemory = TreeMemory.getInstance();
+    return new ExpandMemory() {
+      @Override
+      public boolean isExpanded(String treeKey, String[] path) {
+        return treeMemory.isExpanded(treeKey, path);
+      }
+
+      @Override
+      public void storeExpanded(String treeKey, String[] path, boolean expanded) {
+        treeMemory.storeExpanded(treeKey, path, expanded);
+      }
+    };
+  }
+
+  /** Expand/collapse store used by {@link #resolveExpanded}. Tests inject a map-backed fake. */
+  interface ExpandMemory {
+    boolean isExpanded(String treeKey, String[] path);
+
+    void storeExpanded(String treeKey, String[] path, boolean expanded);
   }
 
   private static String pathKey(String[] path) {

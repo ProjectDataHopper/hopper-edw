@@ -18,9 +18,10 @@ package org.hopper.edw.catalog.hopgui.perspective;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
-import org.apache.hop.ui.core.widget.TreeMemory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -28,10 +29,11 @@ class DataCatalogTreeMemorySupportTest {
 
   private static final String TREE_KEY = "test-data-catalog-tree";
   private Set<String> seededPaths;
+  private MapExpandMemory memory;
 
   @BeforeEach
   void setUp() {
-    TreeMemory.getInstance().clear();
+    memory = new MapExpandMemory();
     seededPaths = new HashSet<>();
   }
 
@@ -41,15 +43,19 @@ class DataCatalogTreeMemorySupportTest {
     String[] namespacePath = new String[] {"local-catalog", "hop/project/sources"};
 
     assertTrue(
-        DataCatalogTreeMemorySupport.resolveExpanded(TREE_KEY, catalogPath, seededPaths, true));
+        DataCatalogTreeMemorySupport.resolveExpanded(
+            TREE_KEY, catalogPath, seededPaths, true, memory));
     assertTrue(
-        DataCatalogTreeMemorySupport.resolveExpanded(TREE_KEY, namespacePath, seededPaths, true));
+        DataCatalogTreeMemorySupport.resolveExpanded(
+            TREE_KEY, namespacePath, seededPaths, true, memory));
 
-    TreeMemory.getInstance().storeExpanded(TREE_KEY, namespacePath, false);
+    memory.storeExpanded(TREE_KEY, namespacePath, false);
     assertFalse(
-        DataCatalogTreeMemorySupport.resolveExpanded(TREE_KEY, namespacePath, seededPaths, true));
+        DataCatalogTreeMemorySupport.resolveExpanded(
+            TREE_KEY, namespacePath, seededPaths, true, memory));
     assertTrue(
-        DataCatalogTreeMemorySupport.resolveExpanded(TREE_KEY, catalogPath, seededPaths, true));
+        DataCatalogTreeMemorySupport.resolveExpanded(
+            TREE_KEY, catalogPath, seededPaths, true, memory));
   }
 
   @Test
@@ -57,10 +63,36 @@ class DataCatalogTreeMemorySupportTest {
     String[] catalogPath = new String[] {"vault-catalog"};
 
     assertTrue(
-        DataCatalogTreeMemorySupport.resolveExpanded(TREE_KEY, catalogPath, seededPaths, true));
-    TreeMemory.getInstance().storeExpanded(TREE_KEY, catalogPath, false);
+        DataCatalogTreeMemorySupport.resolveExpanded(
+            TREE_KEY, catalogPath, seededPaths, true, memory));
+    memory.storeExpanded(TREE_KEY, catalogPath, false);
 
     assertFalse(
-        DataCatalogTreeMemorySupport.resolveExpanded(TREE_KEY, catalogPath, seededPaths, true));
+        DataCatalogTreeMemorySupport.resolveExpanded(
+            TREE_KEY, catalogPath, seededPaths, true, memory));
+  }
+
+  /** Same put/remove semantics as {@code TreeMemory}, without initializing SWT. */
+  private static final class MapExpandMemory implements DataCatalogTreeMemorySupport.ExpandMemory {
+    private final Map<String, Boolean> expanded = new HashMap<>();
+
+    @Override
+    public boolean isExpanded(String treeKey, String[] path) {
+      return Boolean.TRUE.equals(expanded.get(key(treeKey, path)));
+    }
+
+    @Override
+    public void storeExpanded(String treeKey, String[] path, boolean expandedState) {
+      String key = key(treeKey, path);
+      if (expandedState) {
+        expanded.put(key, true);
+      } else {
+        expanded.remove(key);
+      }
+    }
+
+    private static String key(String treeKey, String[] path) {
+      return treeKey + "\0" + String.join("\0", path);
+    }
   }
 }
