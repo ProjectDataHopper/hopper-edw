@@ -23,7 +23,6 @@ import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.Const;
-import org.apache.hop.core.DbCache;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.Props;
 import org.apache.hop.core.action.GuiContextAction;
@@ -49,7 +48,6 @@ import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.ui.core.ConstUi;
 import org.apache.hop.ui.core.PropsUi;
-import org.apache.hop.ui.core.database.dialog.SqlEditor;
 import org.apache.hop.ui.core.dialog.BaseDialog;
 import org.apache.hop.ui.core.dialog.CheckResultDialog;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
@@ -65,6 +63,7 @@ import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
 import org.apache.hop.ui.hopgui.file.IHopFileType;
 import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
 import org.apache.hop.ui.hopgui.perspective.IHopPerspective;
+import org.apache.hop.ui.hopgui.perspective.database.DatabaseWorkbenchDialog;
 import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerPerspective;
 import org.apache.hop.ui.hopgui.shared.SwtGc;
 import org.apache.hop.ui.util.EnvironmentUtils;
@@ -1679,22 +1678,13 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
           org.hopper.edw.datavault.hopgui.lineage.LineageTabSupport.showDdlExplanation(
               hopGui.getShell(), explanation);
         } catch (Exception lineageEx) {
-          // Non-fatal: still open SQL editor.
+          // Non-fatal: still open the Database SQL editor.
         }
         DatabaseMeta dbMeta =
             DmTargetDatabaseSupport.loadTargetDatabase(
                 hopGui.getMetadataProvider(), model.getConfigurationOrDefault());
         if (dbMeta != null) {
-          String sql = String.join("\n", ddlStatements);
-          SqlEditor sqlEditor =
-              new SqlEditor(
-                  hopGui.getShell(),
-                  SWT.NONE,
-                  hopGui.getVariables(),
-                  dbMeta,
-                  DbCache.getInstance(),
-                  sql);
-          sqlEditor.open();
+          DatabaseWorkbenchDialog.openSql(dbMeta, String.join("\n", ddlStatements));
         }
       } catch (Exception e) {
         new ErrorDialog(hopGui.getShell(), "Error", "Error opening DDL SQL editor", e);

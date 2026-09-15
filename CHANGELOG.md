@@ -14,6 +14,7 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ### Apache Hop 2.20.0-SNAPSHOT
 
+- **Generate DDL** / **Generate SQL** open Hop's floating Database SQL editor (`DatabaseWorkbenchDialog.openSql`) instead of the removed Simple SQL Editor (`org.apache.hop.ui.core.database.dialog.SqlEditor`).
 - Compile and runtime pin is **Apache Hop 2.20.0-SNAPSHOT** (Java 21 unchanged). Language Model Chat is no longer bundled in the plugin zip.
 - Data Vault, Business Vault, and dimensional **AI Help** open the Hop AI Assistant workbench (`IAiAdvisor` / `#8330`). Chat-only advisors also cover source models (`.hsm`), lineage views (`.hlv`), execution maps (`.hem`), and the **EDW Journey** perspective. Business Vault and dimensional Help can now apply structural proposals (add SCD2/PIT/business table/source query/BV bridge/dimension/fact/bridge/junk, bind DV or staging source, SQL, layout). Pipeline and workflow AI Help, and the hopper-edw AI Configuration tab, are removed (Hop owns those surfaces).
 - Business Vault **bridge** tables (`BvBridge`): canvas add/edit, hub/link derivatives, layout and DDL of hub hash keys plus optional weight, load from a bound DV link or authoring SQL, Business Vault Update execution, and AI `ADD_BRIDGE` on `.hbv`.

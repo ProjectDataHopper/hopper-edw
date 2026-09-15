@@ -16,7 +16,6 @@
 package org.hopper.edw.datavault.metrics.metadata;
 
 import org.apache.hop.core.Const;
-import org.apache.hop.core.DbCache;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
@@ -24,12 +23,12 @@ import org.apache.hop.core.util.Utils;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.PropsUi;
-import org.apache.hop.ui.core.database.dialog.SqlEditor;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.core.metadata.MetadataEditor;
 import org.apache.hop.ui.core.metadata.MetadataManager;
 import org.apache.hop.ui.hopgui.HopGui;
+import org.apache.hop.ui.hopgui.perspective.database.DatabaseWorkbenchDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
@@ -491,8 +490,9 @@ public class ExecutionMetricsProfileMetaEditor extends MetadataEditor<ExecutionM
   }
 
   /**
-   * Opens Hop's SQL editor with dialect-specific CREATE statements for {@code load_run}, {@code
-   * load_pipeline_metric}, and the other operations tables on the selected OPS connection.
+   * Opens Hop's floating Database SQL editor with dialect-specific CREATE statements for {@code
+   * load_run}, {@code load_pipeline_metric}, and the other operations tables on the selected OPS
+   * connection.
    */
   private void generateSql() {
     ExecutionMetricsProfileMeta preview = new ExecutionMetricsProfileMeta();
@@ -530,15 +530,7 @@ public class ExecutionMetricsProfileMetaEditor extends MetadataEditor<ExecutionM
       String schema =
           hopGui.getVariables().resolve(Const.NVL(preview.getOperationsSchemaOrDefault(), ""));
       String sql = LoadRunMetricsDdlSupport.buildPreviewSql(databaseMeta, schema);
-      SqlEditor sqlEditor =
-          new SqlEditor(
-              getShell(),
-              SWT.NONE,
-              hopGui.getVariables(),
-              databaseMeta,
-              DbCache.getInstance(),
-              sql);
-      sqlEditor.open();
+      DatabaseWorkbenchDialog.openSql(databaseMeta, sql);
     } catch (Exception e) {
       new ErrorDialog(
           getShell(),
