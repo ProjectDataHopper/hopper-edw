@@ -21,6 +21,7 @@ import lombok.Getter;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.plugin.action.GuiAction;
 import org.apache.hop.core.gui.plugin.action.GuiActionLambdaBuilder;
+import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.ui.hopgui.context.BaseGuiContextHandler;
 import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
 import org.hopper.edw.datavault.lineageview.HopLineageViewDocument;
@@ -62,7 +63,12 @@ public class HopGuiLineageViewNodeContext extends BaseGuiContextHandler
     List<GuiAction> pluginActions = getPluginActions(true);
     if (pluginActions != null) {
       for (GuiAction pluginAction : pluginActions) {
-        actions.add(lambdaBuilder.createLambda(pluginAction, this, lineageViewGraph));
+        try {
+          actions.add(lambdaBuilder.createLambda(pluginAction, this, lineageViewGraph));
+        } catch (Exception e) {
+          LogChannel.UI.logError(
+              "Unable to create lineage view context action " + pluginAction.getId(), e);
+        }
       }
     }
     return actions;

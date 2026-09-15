@@ -34,7 +34,7 @@ import org.hopper.edw.datavault.lineageview.HopLineageViewDocument;
     id = LineageViewAiAdvisor.ID,
     name = "i18n::LineageViewAiAdvisor.Name",
     description = "i18n::LineageViewAiAdvisor.Description",
-    image = "datavault-ai-help.svg",
+    image = "ai-provider.svg",
     locations = {EdwAiAdvisorLocations.LINEAGE_VIEW})
 public class LineageViewAiAdvisor implements IAiAdvisor {
 

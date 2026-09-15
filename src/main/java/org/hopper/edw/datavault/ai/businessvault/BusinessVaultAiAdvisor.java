@@ -38,7 +38,7 @@ import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
     id = BusinessVaultAiAdvisor.ID,
     name = "i18n::BusinessVaultAiAdvisor.Name",
     description = "i18n::BusinessVaultAiAdvisor.Description",
-    image = "datavault-ai-help.svg",
+    image = "ai-provider.svg",
     locations = {EdwAiAdvisorLocations.BUSINESS_VAULT_GRAPH})
 public class BusinessVaultAiAdvisor implements IAiAdvisor {
 

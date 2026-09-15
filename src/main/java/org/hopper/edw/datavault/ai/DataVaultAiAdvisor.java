@@ -37,7 +37,7 @@ import org.hopper.edw.datavault.metadata.DataVaultModel;
     id = DataVaultAiAdvisor.ID,
     name = "i18n::DataVaultAiAdvisor.Name",
     description = "i18n::DataVaultAiAdvisor.Description",
-    image = "datavault-ai-help.svg",
+    image = "ai-provider.svg",
     locations = {EdwAiAdvisorLocations.DATA_VAULT_GRAPH})
 public class DataVaultAiAdvisor implements IAiAdvisor {
 

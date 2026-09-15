@@ -34,7 +34,7 @@ import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneySnapshot;
     id = EdwJourneyAiAdvisor.ID,
     name = "i18n::EdwJourneyAiAdvisor.Name",
     description = "i18n::EdwJourneyAiAdvisor.Description",
-    image = "datavault-ai-help.svg",
+    image = "ai-provider.svg",
     locations = {EdwAiAdvisorLocations.EDW_JOURNEY})
 public class EdwJourneyAiAdvisor implements IAiAdvisor {
 

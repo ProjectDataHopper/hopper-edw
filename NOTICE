@@ -7,6 +7,10 @@ This is a third-party plugin for Apache Hop. It is NOT an Apache Software
 Foundation release and is not distributed by the ASF.
 
 "Apache Hop" and "Apache" are trademarks of the Apache Software Foundation.
+
+The AI Help toolbar/context icon `ai-provider.svg` is copied from Apache Hop
+(`plugins/tech/ai`). Copyright the Apache Software Foundation. Licensed under
+the Apache License, Version 2.0.
 Data Vault 2.0 is a methodology; this product implements modeling and load
 generation for that methodology among other EDW capabilities.
 

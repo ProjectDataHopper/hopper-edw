@@ -358,7 +358,7 @@ public class EdwJourneyPerspective implements IHopPerspective {
       root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
       id = TOOLBAR_ITEM_AI_HELP,
       toolTip = "i18n::EdwJourneyPerspective.Toolbar.AiHelp.Tooltip",
-      image = "datavault-ai-help.svg")
+      image = "ai-provider.svg")
   public void openAiAdvisor() {
     String focus = null;
     if (tree != null && !tree.isDisposed() && tree.getSelectionCount() > 0) {

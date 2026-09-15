@@ -555,7 +555,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       id = TOOLBAR_ITEM_AI_HELP,
       toolTip = "i18n::HopGuiSourceModelGraph.Toolbar.AiHelp.Tooltip",
       type = GuiToolbarElementType.BUTTON,
-      image = "datavault-ai-help.svg")
+      image = "ai-provider.svg")
   public void openAiAdvisor() {
     openAiAdvisor(null);
   }
@@ -2230,7 +2230,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       type = GuiActionType.Modify,
       name = "i18n::HopGuiSourceModelGraph.AiHelp.Name",
       tooltip = "i18n::HopGuiSourceModelGraph.AiHelp.Tooltip",
-      image = "datavault-ai-help.svg",
+      image = "ai-provider.svg",
       category = "Help",
       categoryOrder = "1")
   public void openAiAdvisorContext(HopGuiSourceModelContext context) {
@@ -2246,7 +2246,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       type = GuiActionType.Modify,
       name = "i18n::HopGuiSourceModelGraph.AiHelp.Name",
       tooltip = "i18n::HopGuiSourceModelGraph.AiHelp.Tooltip",
-      image = "datavault-ai-help.svg",
+      image = "ai-provider.svg",
       category = "Help",
       categoryOrder = "1")
   public void openAiAdvisorTableContext(HopGuiSourceTableContext context) {
@@ -2263,7 +2263,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       type = GuiActionType.Modify,
       name = "i18n::HopGuiSourceModelGraph.AiHelp.Name",
       tooltip = "i18n::HopGuiSourceModelGraph.AiHelp.Tooltip",
-      image = "datavault-ai-help.svg",
+      image = "ai-provider.svg",
       category = "Help",
       categoryOrder = "1")
   public void openAiAdvisorQueryContext(HopGuiSourceQueryContext context) {
@@ -2280,7 +2280,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       type = GuiActionType.Modify,
       name = "i18n::HopGuiSourceModelGraph.AiHelp.Name",
       tooltip = "i18n::HopGuiSourceModelGraph.AiHelp.Tooltip",
-      image = "datavault-ai-help.svg",
+      image = "ai-provider.svg",
       category = "Help",
       categoryOrder = "1")
   public void openAiAdvisorJsonContext(HopGuiSourceJsonContext context) {
@@ -2297,7 +2297,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       type = GuiActionType.Modify,
       name = "i18n::HopGuiSourceModelGraph.AiHelp.Name",
       tooltip = "i18n::HopGuiSourceModelGraph.AiHelp.Tooltip",
-      image = "datavault-ai-help.svg",
+      image = "ai-provider.svg",
       category = "Help",
       categoryOrder = "1")
   public void openAiAdvisorPipelineContext(HopGuiSourcePipelineContext context) {
@@ -2315,7 +2315,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       type = GuiActionType.Modify,
       name = "i18n::HopGuiSourceModelGraph.AiHelp.Name",
       tooltip = "i18n::HopGuiSourceModelGraph.AiHelp.Tooltip",
-      image = "datavault-ai-help.svg",
+      image = "ai-provider.svg",
       category = "Help",
       categoryOrder = "1")
   public void openAiAdvisorRelationshipContext(HopGuiSourceRelationshipContext context) {

@@ -34,7 +34,7 @@ import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapDocument;
     id = ExecutionMapAiAdvisor.ID,
     name = "i18n::ExecutionMapAiAdvisor.Name",
     description = "i18n::ExecutionMapAiAdvisor.Description",
-    image = "datavault-ai-help.svg",
+    image = "ai-provider.svg",
     locations = {EdwAiAdvisorLocations.EXECUTION_MAP})
 public class ExecutionMapAiAdvisor implements IAiAdvisor {
 

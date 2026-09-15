@@ -62,6 +62,13 @@ class LineageViewI18nTest {
         "Show lineage",
         BaseMessages.getString(LineageViewGuiPlugin.class, "LineageViewGuiPlugin.Action.Name"));
     assertEquals(
+        "Lineage view node context actions",
+        BaseMessages.getString(
+            LineageViewGuiPlugin.class, "LineageViewContextGuiPlugin.Description"));
+    assertEquals(
+        "AI Help",
+        BaseMessages.getString(HopGuiLineageViewGraph.class, "HopGuiLineageViewGraph.AiHelp.Name"));
+    assertEquals(
         "View as HTML",
         BaseMessages.getString(
             HopGuiLineageViewGraph.class, "HopGuiLineageViewGraph.Details.ViewHtml"));

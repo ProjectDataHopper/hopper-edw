@@ -36,7 +36,7 @@ import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
     id = SourceModelAiAdvisor.ID,
     name = "i18n::SourceModelAiAdvisor.Name",
     description = "i18n::SourceModelAiAdvisor.Description",
-    image = "datavault-ai-help.svg",
+    image = "ai-provider.svg",
     locations = {EdwAiAdvisorLocations.SOURCE_MODEL_GRAPH})
 public class SourceModelAiAdvisor implements IAiAdvisor {
 

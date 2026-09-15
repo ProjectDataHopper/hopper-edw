@@ -878,7 +878,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
       id = TOOLBAR_ITEM_AI_HELP,
       toolTip = "i18n::HopGuiVaultGraph.Toolbar.AiHelp.Tooltip",
-      image = "datavault-ai-help.svg")
+      image = "ai-provider.svg")
   public void openAiAdvisor() {
     openAiAdvisor(null);
   }
@@ -2008,7 +2008,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       type = GuiActionType.Modify,
       name = "i18n::HopGuiVaultGraph.AiHelp.Name",
       tooltip = "i18n::HopGuiVaultGraph.AiHelp.Tooltip",
-      image = "datavault-ai-help.svg",
+      image = "ai-provider.svg",
       category = "Help",
       categoryOrder = "1")
   public void openAiAdvisorContext(HopGuiVaultContext context) {
@@ -2024,7 +2024,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       type = GuiActionType.Modify,
       name = "i18n::HopGuiVaultGraph.AiHelp.Name",
       tooltip = "i18n::HopGuiVaultGraph.AiHelp.Tooltip",
-      image = "datavault-ai-help.svg",
+      image = "ai-provider.svg",
       category = "Help",
       categoryOrder = "1")
   public void openAiAdvisorTableContext(HopGuiVaultTableContext context) {

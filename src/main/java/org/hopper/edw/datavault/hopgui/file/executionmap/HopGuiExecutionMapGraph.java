@@ -676,7 +676,7 @@ public class HopGuiExecutionMapGraph extends HopGuiModelGraphBase
       type = GuiActionType.Modify,
       name = "i18n::HopGuiExecutionMapGraph.AiHelp.Name",
       tooltip = "i18n::HopGuiExecutionMapGraph.AiHelp.Tooltip",
-      image = "datavault-ai-help.svg",
+      image = "ai-provider.svg",
       category = "Help",
       categoryOrder = "1")
   public void openAiAdvisorNodeContext(HopGuiExecutionMapNodeContext context) {
@@ -691,7 +691,7 @@ public class HopGuiExecutionMapGraph extends HopGuiModelGraphBase
       root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
       id = TOOLBAR_ITEM_AI_HELP,
       toolTip = "i18n::HopGuiExecutionMapGraph.Toolbar.AiHelp.Tooltip",
-      image = "datavault-ai-help.svg")
+      image = "ai-provider.svg")
   public void openAiAdvisor() {
     openAiAdvisor(null);
   }

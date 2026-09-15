@@ -25,8 +25,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.Props;
-import org.apache.hop.core.action.GuiContextAction;
-import org.apache.hop.core.action.GuiContextActionFilter;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.AreaOwner;
 import org.apache.hop.core.gui.IGc;
@@ -34,7 +32,6 @@ import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.SnapAllignDistribute;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.IGuiRefresher;
-import org.apache.hop.core.gui.plugin.action.GuiActionType;
 import org.apache.hop.core.gui.plugin.key.GuiKeyboardShortcut;
 import org.apache.hop.core.gui.plugin.key.GuiOsxKeyboardShortcut;
 import org.apache.hop.core.gui.plugin.toolbar.GuiToolbarElement;
@@ -835,7 +832,7 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
       root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
       id = TOOLBAR_ITEM_AI_HELP,
       toolTip = "i18n::HopGuiLineageViewGraph.Toolbar.AiHelp.Tooltip",
-      image = "datavault-ai-help.svg")
+      image = "ai-provider.svg")
   public void openAiAdvisor() {
     openAiAdvisor(null);
   }
@@ -896,7 +893,6 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextActionFilter(parentId = HopGuiLineageViewNodeContext.CONTEXT_ID)
   public boolean filterNodeContextActions(
       String contextActionId, HopGuiLineageViewNodeContext context) {
     LineageNode node = context != null ? context.getNode() : null;
@@ -915,77 +911,24 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
     return true;
   }
 
-  @GuiContextAction(
-      id = ACTION_ID_OPEN_MODEL,
-      parentId = HopGuiLineageViewNodeContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiLineageViewGraph.Context.OpenModel.Name",
-      tooltip = "i18n::HopGuiLineageViewGraph.Context.OpenModel.Tooltip",
-      image = "ui/images/open.svg",
-      category = "Lineage",
-      categoryOrder = "1")
   public void openModelFromContext(HopGuiLineageViewNodeContext context) {
     runNavigation(
         () -> LineageViewNavigationSupport.openModel(hopGui, variables, context.getNode()));
   }
 
-  @GuiContextAction(
-      id = ACTION_ID_OPEN_CATALOG,
-      parentId = HopGuiLineageViewNodeContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiLineageViewGraph.Context.OpenCatalog.Name",
-      tooltip = "i18n::HopGuiLineageViewGraph.Context.OpenCatalog.Tooltip",
-      image = "data-catalog.svg",
-      category = "Lineage",
-      categoryOrder = "2")
   public void openCatalogFromContext(HopGuiLineageViewNodeContext context) {
     runNavigation(() -> LineageViewNavigationSupport.openCatalog(hopGui, context.getNode()));
   }
 
-  @GuiContextAction(
-      id = ACTION_ID_SHOW_UPDATE_PIPELINE,
-      parentId = HopGuiLineageViewNodeContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiLineageViewGraph.Context.ShowUpdatePipeline.Name",
-      tooltip = "i18n::HopGuiLineageViewGraph.Context.ShowUpdatePipeline.Tooltip",
-      image = "ui/images/pipeline.svg",
-      category = "Lineage",
-      categoryOrder = "3")
   public void showUpdatePipelineFromContext(HopGuiLineageViewNodeContext context) {
     runNavigation(
         () ->
             LineageViewNavigationSupport.openUpdatePipeline(hopGui, variables, context.getNode()));
   }
 
-  @GuiContextAction(
-      id = ACTION_ID_SHOW_BUILD_PIPELINE,
-      parentId = HopGuiLineageViewNodeContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiLineageViewGraph.Context.ShowBuildPipeline.Name",
-      tooltip = "i18n::HopGuiLineageViewGraph.Context.ShowBuildPipeline.Tooltip",
-      image = "ui/images/pipeline.svg",
-      category = "Lineage",
-      categoryOrder = "4")
   public void showBuildPipelineFromContext(HopGuiLineageViewNodeContext context) {
     runNavigation(
         () -> LineageViewNavigationSupport.openBuildPipeline(hopGui, variables, context.getNode()));
-  }
-
-  @GuiContextAction(
-      id = "lineage-view-ai-help",
-      parentId = HopGuiLineageViewNodeContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiLineageViewGraph.AiHelp.Name",
-      tooltip = "i18n::HopGuiLineageViewGraph.AiHelp.Tooltip",
-      image = "datavault-ai-help.svg",
-      category = "Help",
-      categoryOrder = "1")
-  public void openAiAdvisorNodeContext(HopGuiLineageViewNodeContext context) {
-    HopGuiLineageViewGraph graph = context != null ? context.getLineageViewGraph() : this;
-    if (graph != null) {
-      String focus = context.getNode() != null ? context.getNode().getName() : null;
-      graph.openAiAdvisor(focus);
-    }
   }
 
   private void runNavigation(NavigationAction action) {

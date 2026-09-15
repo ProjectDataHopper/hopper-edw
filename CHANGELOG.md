@@ -4,6 +4,14 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### AI Help uses the Hop AI Assistant icon
+
+- Toolbar, context-menu, and advisor combo icons use Hop's `ai-provider.svg` (speech-bubble neural net) instead of hopper-edw's `datavault-ai-help.svg`.
+
+### Hop Web lineage view AI Help (issue #178)
+
+- Clicking a lineage node no longer throws `NoSuchMethodException` for `openAiAdvisorNodeContext` when building the context dialog. Node actions (including AI Help) are registered on a plain `@GuiPlugin` with a no-arg constructor, the same pattern as **Show lineage**, instead of on the RAP graph widget.
+
 ### Apache Hop 2.20.0-SNAPSHOT
 
 - Compile and runtime pin is **Apache Hop 2.20.0-SNAPSHOT** (Java 21 unchanged). Language Model Chat is no longer bundled in the plugin zip.

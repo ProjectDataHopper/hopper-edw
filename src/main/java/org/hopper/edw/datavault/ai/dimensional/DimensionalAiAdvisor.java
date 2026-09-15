@@ -38,7 +38,7 @@ import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
     id = DimensionalAiAdvisor.ID,
     name = "i18n::DimensionalAiAdvisor.Name",
     description = "i18n::DimensionalAiAdvisor.Description",
-    image = "datavault-ai-help.svg",
+    image = "ai-provider.svg",
     locations = {EdwAiAdvisorLocations.DIMENSIONAL_GRAPH})
 public class DimensionalAiAdvisor implements IAiAdvisor {
 
