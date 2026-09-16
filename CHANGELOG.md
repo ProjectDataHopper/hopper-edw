@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Record definition property tab gaps (issue #179)
+
+- Hidden property groups (physical file, Iceberg, CSV format, and others) no longer leave blank space between visible sections such as **Physical table** and **Data Vault source**. The properties scroller sizes to the visible groups only.
+
 ### AI Help uses the Hop AI Assistant icon
 
 - Toolbar, context-menu, and advisor combo icons use Hop's `ai-provider.svg` (speech-bubble neural net) instead of hopper-edw's `datavault-ai-help.svg`.

@@ -38,9 +38,12 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -161,11 +164,11 @@ public class RecordDefinitionDetailsPanel {
   private Button wQualityHistory;
   private Button wSchemaHarvestHistory;
 
-  private final List<Control> physicalTableSectionControls = new ArrayList<>();
-  private final List<Control> physicalFileSectionControls = new ArrayList<>();
-  private final List<Control> physicalIcebergSectionControls = new ArrayList<>();
-  private final List<Control> csvFormatSectionControls = new ArrayList<>();
-  private final List<Control> dvSourceSectionControls = new ArrayList<>();
+  private Composite wPhysicalTableSection;
+  private Composite wPhysicalFileSection;
+  private Composite wPhysicalIcebergSection;
+  private Composite wCsvFormatSection;
+  private Composite wDvSourceSection;
 
   public RecordDefinitionDetailsPanel(Composite parent, IVariables variables, Runnable onUpdate) {
     this.parent = parent;
@@ -247,481 +250,23 @@ public class RecordDefinitionDetailsPanel {
 
     wPropertiesComp = new Composite(wScroll, SWT.NONE);
     PropsUi.setLook(wPropertiesComp);
-    wPropertiesComp.setLayout(new FormLayout());
+    GridLayout propertiesLayout = new GridLayout(1, false);
+    propertiesLayout.marginWidth = 0;
+    propertiesLayout.marginHeight = 0;
+    propertiesLayout.verticalSpacing = margin;
+    wPropertiesComp.setLayout(propertiesLayout);
 
-    Control lastControl =
-        addReadOnlyField(
-            wPropertiesComp, messageKey("General.Namespace.Label"), middle, margin, null);
-    wNamespace = (Text) lastControl;
+    createGeneralPropertiesSection(middle, margin);
+    wPhysicalTableSection = createPhysicalTableSection(middle, margin);
+    wPhysicalFileSection = createPhysicalFileSection(middle, margin);
+    wPhysicalIcebergSection = createPhysicalIcebergSection(middle, margin);
+    wCsvFormatSection = createCsvFormatSection(middle, margin);
+    wDvSourceSection = createDvSourceSection(middle, margin);
 
-    lastControl =
-        addReadOnlyField(
-            wPropertiesComp, messageKey("General.Name.Label"), middle, margin, wNamespace);
-    wName = (Text) lastControl;
-
-    lastControl =
-        addReadOnlyField(wPropertiesComp, messageKey("General.Type.Label"), middle, margin, wName);
-    wType = (Text) lastControl;
-
-    lastControl =
-        addReadOnlyField(
-            wPropertiesComp, messageKey("General.Description.Label"), middle, margin, wType);
-    wDescription = (Text) lastControl;
-
-    lastControl =
-        addSectionLabel(wPropertiesComp, messageKey("Origin.Label"), wDescription, margin, null);
-    lastControl =
-        addReadOnlyField(
-            wPropertiesComp, messageKey("Origin.ModelType.Label"), middle, margin, lastControl);
-    wModelType = (Text) lastControl;
-
-    lastControl =
-        addReadOnlyField(
-            wPropertiesComp, messageKey("Origin.ModelName.Label"), middle, margin, wModelType);
-    wModelName = (Text) lastControl;
-
-    lastControl =
-        addReadOnlyField(
-            wPropertiesComp, messageKey("Origin.ModelFilename.Label"), middle, margin, wModelName);
-    wModelFilename = (Text) lastControl;
-
-    lastControl =
-        addReadOnlyField(
-            wPropertiesComp,
-            messageKey("Origin.ModelElementName.Label"),
-            middle,
-            margin,
-            wModelFilename);
-    wModelElementName = (Text) lastControl;
-
-    lastControl =
-        addReadOnlyField(
-            wPropertiesComp,
-            messageKey("Origin.HopProject.Label"),
-            middle,
-            margin,
-            wModelElementName);
-    wHopProject = (Text) lastControl;
-
-    lastControl =
-        addReadOnlyField(
-            wPropertiesComp, messageKey("Origin.CreatedAt.Label"), middle, margin, wHopProject);
-    wCreatedAt = (Text) lastControl;
-
-    lastControl =
-        addReadOnlyField(
-            wPropertiesComp, messageKey("Origin.UpdatedAt.Label"), middle, margin, wCreatedAt);
-    wUpdatedAt = (Text) lastControl;
-
-    lastControl =
-        addReadOnlyField(
-            wPropertiesComp,
-            messageKey("Origin.LastDiscoveredAt.Label"),
-            middle,
-            margin,
-            wUpdatedAt);
-    wLastDiscoveredAt = (Text) lastControl;
-
-    lastControl =
-        addReadOnlyField(
-            wPropertiesComp,
-            messageKey("Origin.UpdatedBy.Label"),
-            middle,
-            margin,
-            wLastDiscoveredAt);
-    wUpdatedBy = (Text) lastControl;
-
-    lastControl =
-        addReadOnlyField(
-            wPropertiesComp, messageKey("Origin.LastWorkflow.Label"), middle, margin, wUpdatedBy);
-    wLastWorkflow = (Text) lastControl;
-
-    lastControl =
-        addReadOnlyField(
-            wPropertiesComp,
-            messageKey("Origin.LastPipeline.Label"),
-            middle,
-            margin,
-            wLastWorkflow);
-    wLastPipeline = (Text) lastControl;
-
-    wGoToOrigin = new Button(wPropertiesComp, SWT.PUSH);
-    wGoToOrigin.setText(BaseMessages.getString(PKG, messageKey("Origin.GoToOrigin.Label")));
-    wGoToOrigin.setToolTipText(
-        BaseMessages.getString(PKG, messageKey("Origin.GoToOrigin.ToolTip")));
-    PropsUi.setLook(wGoToOrigin);
-    FormData fdGoToOrigin = new FormData();
-    fdGoToOrigin.right = new FormAttachment(100, 0);
-    fdGoToOrigin.top = new FormAttachment(wLastPipeline, margin);
-    wGoToOrigin.setLayoutData(fdGoToOrigin);
-    wGoToOrigin.addListener(SWT.Selection, e -> goToOrigin());
-    lastControl = wGoToOrigin;
-
-    lastControl =
-        addSectionLabel(
-            wPropertiesComp,
-            messageKey("PhysicalTable.Label"),
-            lastControl,
-            margin,
-            physicalTableSectionControls);
-    lastControl =
-        addEditableField(
-            wPropertiesComp,
-            messageKey("PhysicalTable.Database.Label"),
-            middle,
-            margin,
-            lastControl,
-            physicalTableSectionControls);
-    wDatabaseMetaName = (Text) lastControl;
-
-    lastControl =
-        addEditableField(
-            wPropertiesComp,
-            messageKey("PhysicalTable.Schema.Label"),
-            middle,
-            margin,
-            wDatabaseMetaName,
-            physicalTableSectionControls);
-    wSchemaName = (Text) lastControl;
-
-    lastControl =
-        addEditableField(
-            wPropertiesComp,
-            messageKey("PhysicalTable.Table.Label"),
-            middle,
-            margin,
-            wSchemaName,
-            physicalTableSectionControls);
-    wTableName = (Text) lastControl;
-
-    lastControl =
-        addSectionUpdateButton(
-            wPropertiesComp,
-            messageKey("PhysicalTable.UpdateButton.Label"),
-            wTableName,
-            margin,
-            this::updatePhysicalTable,
-            physicalTableSectionControls);
-
-    lastControl =
-        addSectionLabel(
-            wPropertiesComp,
-            messageKey("PhysicalFile.Label"),
-            lastControl,
-            margin,
-            physicalFileSectionControls);
-    lastControl =
-        addEditableField(
-            wPropertiesComp,
-            messageKey("PhysicalFile.Folder.Label"),
-            middle,
-            margin,
-            lastControl,
-            physicalFileSectionControls);
-    wFileFolder = (Text) lastControl;
-
-    lastControl =
-        addEditableField(
-            wPropertiesComp,
-            messageKey("PhysicalFile.IncludeMask.Label"),
-            middle,
-            margin,
-            wFileFolder,
-            physicalFileSectionControls);
-    wIncludeFileMask = (Text) lastControl;
-
-    lastControl =
-        addEditableField(
-            wPropertiesComp,
-            messageKey("PhysicalFile.ExcludeMask.Label"),
-            middle,
-            margin,
-            wIncludeFileMask,
-            physicalFileSectionControls);
-    wExcludeFileMask = (Text) lastControl;
-
-    lastControl =
-        addCheckboxField(
-            wPropertiesComp,
-            messageKey("PhysicalFile.IncludeSubfolders.Label"),
-            middle,
-            margin,
-            wExcludeFileMask,
-            physicalFileSectionControls);
-    wIncludeSubfolders = (Button) lastControl;
-
-    lastControl =
-        addSectionUpdateButton(
-            wPropertiesComp,
-            messageKey("PhysicalFile.UpdateButton.Label"),
-            wIncludeSubfolders,
-            margin,
-            this::updatePhysicalFile,
-            physicalFileSectionControls);
-
-    lastControl =
-        addSectionLabel(
-            wPropertiesComp,
-            messageKey("PhysicalIceberg.Label"),
-            lastControl,
-            margin,
-            physicalIcebergSectionControls);
-    lastControl =
-        addEditableField(
-            wPropertiesComp,
-            messageKey("PhysicalIceberg.CatalogUri.Label"),
-            middle,
-            margin,
-            lastControl,
-            physicalIcebergSectionControls);
-    wIcebergCatalogUri = (Text) lastControl;
-
-    lastControl =
-        addEditableField(
-            wPropertiesComp,
-            messageKey("PhysicalIceberg.Warehouse.Label"),
-            middle,
-            margin,
-            wIcebergCatalogUri,
-            physicalIcebergSectionControls);
-    wIcebergWarehouse = (Text) lastControl;
-
-    lastControl =
-        addEditableField(
-            wPropertiesComp,
-            messageKey("PhysicalIceberg.Namespace.Label"),
-            middle,
-            margin,
-            wIcebergWarehouse,
-            physicalIcebergSectionControls);
-    wIcebergNamespace = (Text) lastControl;
-
-    lastControl =
-        addEditableField(
-            wPropertiesComp,
-            messageKey("PhysicalIceberg.TableName.Label"),
-            middle,
-            margin,
-            wIcebergNamespace,
-            physicalIcebergSectionControls);
-    wIcebergTableName = (Text) lastControl;
-
-    lastControl =
-        addEditableField(
-            wPropertiesComp,
-            messageKey("PhysicalIceberg.SnapshotId.Label"),
-            middle,
-            margin,
-            wIcebergTableName,
-            physicalIcebergSectionControls);
-    wIcebergSnapshotId = (Text) lastControl;
-
-    lastControl =
-        addEditableField(
-            wPropertiesComp,
-            messageKey("PhysicalIceberg.Branch.Label"),
-            middle,
-            margin,
-            wIcebergSnapshotId,
-            physicalIcebergSectionControls);
-    wIcebergBranch = (Text) lastControl;
-
-    lastControl =
-        addEditableField(
-            wPropertiesComp,
-            messageKey("PhysicalIceberg.S3Endpoint.Label"),
-            middle,
-            margin,
-            wIcebergBranch,
-            physicalIcebergSectionControls);
-    wIcebergS3Endpoint = (Text) lastControl;
-
-    lastControl =
-        addEditableField(
-            wPropertiesComp,
-            messageKey("PhysicalIceberg.S3AccessKey.Label"),
-            middle,
-            margin,
-            wIcebergS3Endpoint,
-            physicalIcebergSectionControls);
-    wIcebergS3AccessKey = (Text) lastControl;
-
-    lastControl =
-        addEditableField(
-            wPropertiesComp,
-            messageKey("PhysicalIceberg.S3SecretKey.Label"),
-            middle,
-            margin,
-            wIcebergS3AccessKey,
-            physicalIcebergSectionControls);
-    wIcebergS3SecretKey = (Text) lastControl;
-
-    lastControl =
-        addSectionUpdateButton(
-            wPropertiesComp,
-            messageKey("PhysicalIceberg.UpdateButton.Label"),
-            wIcebergS3SecretKey,
-            margin,
-            this::updatePhysicalIceberg,
-            physicalIcebergSectionControls);
-
-    lastControl =
-        addSectionLabel(
-            wPropertiesComp,
-            messageKey("CsvFormat.Label"),
-            lastControl,
-            margin,
-            csvFormatSectionControls);
-    lastControl =
-        addEditableField(
-            wPropertiesComp,
-            messageKey("CsvFormat.Delimiter.Label"),
-            middle,
-            margin,
-            lastControl,
-            csvFormatSectionControls);
-    wCsvDelimiter = (Text) lastControl;
-
-    lastControl =
-        addEditableField(
-            wPropertiesComp,
-            messageKey("CsvFormat.Enclosure.Label"),
-            middle,
-            margin,
-            wCsvDelimiter,
-            csvFormatSectionControls);
-    wCsvEnclosure = (Text) lastControl;
-
-    lastControl =
-        addEditableField(
-            wPropertiesComp,
-            messageKey("CsvFormat.Encoding.Label"),
-            middle,
-            margin,
-            wCsvEnclosure,
-            csvFormatSectionControls);
-    wCsvEncoding = (Text) lastControl;
-
-    lastControl =
-        addCheckboxField(
-            wPropertiesComp,
-            messageKey("CsvFormat.HeaderPresent.Label"),
-            middle,
-            margin,
-            wCsvEncoding,
-            csvFormatSectionControls);
-    wCsvHeaderPresent = (Button) lastControl;
-
-    lastControl =
-        addEditableField(
-            wPropertiesComp,
-            messageKey("CsvFormat.HeaderLines.Label"),
-            middle,
-            margin,
-            wCsvHeaderPresent,
-            csvFormatSectionControls);
-    wCsvHeaderLines = (Text) lastControl;
-
-    lastControl =
-        addEditableField(
-            wPropertiesComp,
-            messageKey("CsvFormat.InputTransform.Label"),
-            middle,
-            margin,
-            wCsvHeaderLines,
-            csvFormatSectionControls);
-    wCsvInputTransform = (Text) lastControl;
-
-    lastControl =
-        addSectionUpdateButton(
-            wPropertiesComp,
-            messageKey("CsvFormat.UpdateButton.Label"),
-            wCsvInputTransform,
-            margin,
-            this::updateCsvFormat,
-            csvFormatSectionControls);
-
-    lastControl =
-        addSectionLabel(
-            wPropertiesComp,
-            messageKey("DvSource.Label"),
-            lastControl,
-            margin,
-            dvSourceSectionControls);
-    lastControl =
-        addReadOnlyField(
-            wPropertiesComp,
-            messageKey("DvSource.SourceType.Label"),
-            middle,
-            margin,
-            lastControl,
-            dvSourceSectionControls);
-    wDvSourceType = (Text) lastControl;
-
-    lastControl =
-        addEditableField(
-            wPropertiesComp,
-            messageKey("DvSource.SourceIndicator.Label"),
-            middle,
-            margin,
-            wDvSourceType,
-            dvSourceSectionControls);
-    wDvSourceIndicator = (Text) lastControl;
-
-    lastControl =
-        addEditableField(
-            wPropertiesComp,
-            messageKey("DvSource.SourceIndicatorField.Label"),
-            middle,
-            margin,
-            wDvSourceIndicator,
-            dvSourceSectionControls);
-    wDvSourceIndicatorField = (Text) lastControl;
-
-    lastControl =
-        addEditableField(
-            wPropertiesComp,
-            messageKey("DvSource.Group.Label"),
-            middle,
-            margin,
-            wDvSourceIndicatorField,
-            dvSourceSectionControls);
-    wDvSourceGroup = (Text) lastControl;
-
-    lastControl =
-        addComboField(
-            wPropertiesComp,
-            messageKey("DvSource.DeliveryType.Label"),
-            middle,
-            margin,
-            wDvSourceGroup,
-            dvSourceSectionControls);
-    wDvDeliveryType = (Combo) lastControl;
-    for (String description : DvSourceDeliveryType.getDescriptions()) {
-      wDvDeliveryType.add(description);
-    }
-
-    lastControl =
-        addSectionUpdateButton(
-            wPropertiesComp,
-            messageKey("DvSource.UpdateButton.Label"),
-            wDvDeliveryType,
-            margin,
-            this::updateDvSource,
-            dvSourceSectionControls);
-
-    FormData fdProps = new FormData();
-    fdProps.left = new FormAttachment(0, 0);
-    fdProps.right = new FormAttachment(100, 0);
-    fdProps.top = new FormAttachment(0, 0);
-    fdProps.bottom = new FormAttachment(lastControl, margin * 2);
-    wPropertiesComp.setLayoutData(fdProps);
-
-    wPropertiesComp.pack();
     wScroll.setContent(wPropertiesComp);
     wScroll.setExpandHorizontal(true);
     wScroll.setExpandVertical(true);
-    wScroll.setMinSize(wPropertiesComp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+    updatePropertySectionVisibility(null, "");
 
     wFields = createFieldsTable(wFieldsTabComp);
 
@@ -831,6 +376,315 @@ public class RecordDefinitionDetailsPanel {
     wTabFolder.setVisible(false);
   }
 
+  private void createGeneralPropertiesSection(int middle, int margin) {
+    Composite general = addPropertySectionComposite();
+
+    Control lastControl =
+        addReadOnlyField(general, messageKey("General.Namespace.Label"), middle, margin, null);
+    wNamespace = (Text) lastControl;
+
+    lastControl =
+        addReadOnlyField(general, messageKey("General.Name.Label"), middle, margin, wNamespace);
+    wName = (Text) lastControl;
+
+    lastControl =
+        addReadOnlyField(general, messageKey("General.Type.Label"), middle, margin, wName);
+    wType = (Text) lastControl;
+
+    lastControl =
+        addReadOnlyField(general, messageKey("General.Description.Label"), middle, margin, wType);
+    wDescription = (Text) lastControl;
+
+    lastControl = addSectionLabel(general, messageKey("Origin.Label"), wDescription, margin);
+    lastControl =
+        addReadOnlyField(
+            general, messageKey("Origin.ModelType.Label"), middle, margin, lastControl);
+    wModelType = (Text) lastControl;
+
+    lastControl =
+        addReadOnlyField(general, messageKey("Origin.ModelName.Label"), middle, margin, wModelType);
+    wModelName = (Text) lastControl;
+
+    lastControl =
+        addReadOnlyField(
+            general, messageKey("Origin.ModelFilename.Label"), middle, margin, wModelName);
+    wModelFilename = (Text) lastControl;
+
+    lastControl =
+        addReadOnlyField(
+            general, messageKey("Origin.ModelElementName.Label"), middle, margin, wModelFilename);
+    wModelElementName = (Text) lastControl;
+
+    lastControl =
+        addReadOnlyField(
+            general, messageKey("Origin.HopProject.Label"), middle, margin, wModelElementName);
+    wHopProject = (Text) lastControl;
+
+    lastControl =
+        addReadOnlyField(
+            general, messageKey("Origin.CreatedAt.Label"), middle, margin, wHopProject);
+    wCreatedAt = (Text) lastControl;
+
+    lastControl =
+        addReadOnlyField(general, messageKey("Origin.UpdatedAt.Label"), middle, margin, wCreatedAt);
+    wUpdatedAt = (Text) lastControl;
+
+    lastControl =
+        addReadOnlyField(
+            general, messageKey("Origin.LastDiscoveredAt.Label"), middle, margin, wUpdatedAt);
+    wLastDiscoveredAt = (Text) lastControl;
+
+    lastControl =
+        addReadOnlyField(
+            general, messageKey("Origin.UpdatedBy.Label"), middle, margin, wLastDiscoveredAt);
+    wUpdatedBy = (Text) lastControl;
+
+    lastControl =
+        addReadOnlyField(
+            general, messageKey("Origin.LastWorkflow.Label"), middle, margin, wUpdatedBy);
+    wLastWorkflow = (Text) lastControl;
+
+    lastControl =
+        addReadOnlyField(
+            general, messageKey("Origin.LastPipeline.Label"), middle, margin, wLastWorkflow);
+    wLastPipeline = (Text) lastControl;
+
+    wGoToOrigin = new Button(general, SWT.PUSH);
+    wGoToOrigin.setText(BaseMessages.getString(PKG, messageKey("Origin.GoToOrigin.Label")));
+    wGoToOrigin.setToolTipText(
+        BaseMessages.getString(PKG, messageKey("Origin.GoToOrigin.ToolTip")));
+    PropsUi.setLook(wGoToOrigin);
+    FormData fdGoToOrigin = new FormData();
+    fdGoToOrigin.right = new FormAttachment(100, 0);
+    fdGoToOrigin.top = new FormAttachment(wLastPipeline, margin);
+    wGoToOrigin.setLayoutData(fdGoToOrigin);
+    wGoToOrigin.addListener(SWT.Selection, e -> goToOrigin());
+  }
+
+  private Composite createPhysicalTableSection(int middle, int margin) {
+    Composite section = addPropertySectionComposite();
+    Control lastControl = addSectionLabel(section, messageKey("PhysicalTable.Label"), null, margin);
+    lastControl =
+        addEditableField(
+            section, messageKey("PhysicalTable.Database.Label"), middle, margin, lastControl);
+    wDatabaseMetaName = (Text) lastControl;
+    lastControl =
+        addEditableField(
+            section, messageKey("PhysicalTable.Schema.Label"), middle, margin, wDatabaseMetaName);
+    wSchemaName = (Text) lastControl;
+    lastControl =
+        addEditableField(
+            section, messageKey("PhysicalTable.Table.Label"), middle, margin, wSchemaName);
+    wTableName = (Text) lastControl;
+    addSectionUpdateButton(
+        section,
+        messageKey("PhysicalTable.UpdateButton.Label"),
+        wTableName,
+        margin,
+        this::updatePhysicalTable);
+    return section;
+  }
+
+  private Composite createPhysicalFileSection(int middle, int margin) {
+    Composite section = addPropertySectionComposite();
+    Control lastControl = addSectionLabel(section, messageKey("PhysicalFile.Label"), null, margin);
+    lastControl =
+        addEditableField(
+            section, messageKey("PhysicalFile.Folder.Label"), middle, margin, lastControl);
+    wFileFolder = (Text) lastControl;
+    lastControl =
+        addEditableField(
+            section, messageKey("PhysicalFile.IncludeMask.Label"), middle, margin, wFileFolder);
+    wIncludeFileMask = (Text) lastControl;
+    lastControl =
+        addEditableField(
+            section,
+            messageKey("PhysicalFile.ExcludeMask.Label"),
+            middle,
+            margin,
+            wIncludeFileMask);
+    wExcludeFileMask = (Text) lastControl;
+    lastControl =
+        addCheckboxField(
+            section,
+            messageKey("PhysicalFile.IncludeSubfolders.Label"),
+            middle,
+            margin,
+            wExcludeFileMask);
+    wIncludeSubfolders = (Button) lastControl;
+    addSectionUpdateButton(
+        section,
+        messageKey("PhysicalFile.UpdateButton.Label"),
+        wIncludeSubfolders,
+        margin,
+        this::updatePhysicalFile);
+    return section;
+  }
+
+  private Composite createPhysicalIcebergSection(int middle, int margin) {
+    Composite section = addPropertySectionComposite();
+    Control lastControl =
+        addSectionLabel(section, messageKey("PhysicalIceberg.Label"), null, margin);
+    lastControl =
+        addEditableField(
+            section, messageKey("PhysicalIceberg.CatalogUri.Label"), middle, margin, lastControl);
+    wIcebergCatalogUri = (Text) lastControl;
+    lastControl =
+        addEditableField(
+            section,
+            messageKey("PhysicalIceberg.Warehouse.Label"),
+            middle,
+            margin,
+            wIcebergCatalogUri);
+    wIcebergWarehouse = (Text) lastControl;
+    lastControl =
+        addEditableField(
+            section,
+            messageKey("PhysicalIceberg.Namespace.Label"),
+            middle,
+            margin,
+            wIcebergWarehouse);
+    wIcebergNamespace = (Text) lastControl;
+    lastControl =
+        addEditableField(
+            section,
+            messageKey("PhysicalIceberg.TableName.Label"),
+            middle,
+            margin,
+            wIcebergNamespace);
+    wIcebergTableName = (Text) lastControl;
+    lastControl =
+        addEditableField(
+            section,
+            messageKey("PhysicalIceberg.SnapshotId.Label"),
+            middle,
+            margin,
+            wIcebergTableName);
+    wIcebergSnapshotId = (Text) lastControl;
+    lastControl =
+        addEditableField(
+            section,
+            messageKey("PhysicalIceberg.Branch.Label"),
+            middle,
+            margin,
+            wIcebergSnapshotId);
+    wIcebergBranch = (Text) lastControl;
+    lastControl =
+        addEditableField(
+            section,
+            messageKey("PhysicalIceberg.S3Endpoint.Label"),
+            middle,
+            margin,
+            wIcebergBranch);
+    wIcebergS3Endpoint = (Text) lastControl;
+    lastControl =
+        addEditableField(
+            section,
+            messageKey("PhysicalIceberg.S3AccessKey.Label"),
+            middle,
+            margin,
+            wIcebergS3Endpoint);
+    wIcebergS3AccessKey = (Text) lastControl;
+    lastControl =
+        addEditableField(
+            section,
+            messageKey("PhysicalIceberg.S3SecretKey.Label"),
+            middle,
+            margin,
+            wIcebergS3AccessKey);
+    wIcebergS3SecretKey = (Text) lastControl;
+    addSectionUpdateButton(
+        section,
+        messageKey("PhysicalIceberg.UpdateButton.Label"),
+        wIcebergS3SecretKey,
+        margin,
+        this::updatePhysicalIceberg);
+    return section;
+  }
+
+  private Composite createCsvFormatSection(int middle, int margin) {
+    Composite section = addPropertySectionComposite();
+    Control lastControl = addSectionLabel(section, messageKey("CsvFormat.Label"), null, margin);
+    lastControl =
+        addEditableField(
+            section, messageKey("CsvFormat.Delimiter.Label"), middle, margin, lastControl);
+    wCsvDelimiter = (Text) lastControl;
+    lastControl =
+        addEditableField(
+            section, messageKey("CsvFormat.Enclosure.Label"), middle, margin, wCsvDelimiter);
+    wCsvEnclosure = (Text) lastControl;
+    lastControl =
+        addEditableField(
+            section, messageKey("CsvFormat.Encoding.Label"), middle, margin, wCsvEnclosure);
+    wCsvEncoding = (Text) lastControl;
+    lastControl =
+        addCheckboxField(
+            section, messageKey("CsvFormat.HeaderPresent.Label"), middle, margin, wCsvEncoding);
+    wCsvHeaderPresent = (Button) lastControl;
+    lastControl =
+        addEditableField(
+            section, messageKey("CsvFormat.HeaderLines.Label"), middle, margin, wCsvHeaderPresent);
+    wCsvHeaderLines = (Text) lastControl;
+    lastControl =
+        addEditableField(
+            section, messageKey("CsvFormat.InputTransform.Label"), middle, margin, wCsvHeaderLines);
+    wCsvInputTransform = (Text) lastControl;
+    addSectionUpdateButton(
+        section,
+        messageKey("CsvFormat.UpdateButton.Label"),
+        wCsvInputTransform,
+        margin,
+        this::updateCsvFormat);
+    return section;
+  }
+
+  private Composite createDvSourceSection(int middle, int margin) {
+    Composite section = addPropertySectionComposite();
+    Control lastControl = addSectionLabel(section, messageKey("DvSource.Label"), null, margin);
+    lastControl =
+        addReadOnlyField(
+            section, messageKey("DvSource.SourceType.Label"), middle, margin, lastControl);
+    wDvSourceType = (Text) lastControl;
+    lastControl =
+        addEditableField(
+            section, messageKey("DvSource.SourceIndicator.Label"), middle, margin, wDvSourceType);
+    wDvSourceIndicator = (Text) lastControl;
+    lastControl =
+        addEditableField(
+            section,
+            messageKey("DvSource.SourceIndicatorField.Label"),
+            middle,
+            margin,
+            wDvSourceIndicator);
+    wDvSourceIndicatorField = (Text) lastControl;
+    lastControl =
+        addEditableField(
+            section, messageKey("DvSource.Group.Label"), middle, margin, wDvSourceIndicatorField);
+    wDvSourceGroup = (Text) lastControl;
+    lastControl =
+        addComboField(
+            section, messageKey("DvSource.DeliveryType.Label"), middle, margin, wDvSourceGroup);
+    wDvDeliveryType = (Combo) lastControl;
+    for (String description : DvSourceDeliveryType.getDescriptions()) {
+      wDvDeliveryType.add(description);
+    }
+    addSectionUpdateButton(
+        section,
+        messageKey("DvSource.UpdateButton.Label"),
+        wDvDeliveryType,
+        margin,
+        this::updateDvSource);
+    return section;
+  }
+
+  private Composite addPropertySectionComposite() {
+    Composite section = new Composite(wPropertiesComp, SWT.NONE);
+    PropsUi.setLook(section);
+    section.setLayout(new FormLayout());
+    section.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+    return section;
+  }
+
   private Composite addTab(CTabFolder tabFolder, String titleKey, String toolTipKey) {
     CTabItem tabItem = new CTabItem(tabFolder, SWT.NONE);
     tabItem.setFont(GuiResource.getInstance().getFontDefault());
@@ -848,50 +702,33 @@ public class RecordDefinitionDetailsPanel {
   }
 
   private Control addSectionLabel(
-      Composite composite, String messageKey, Control previous, int margin, List<Control> section) {
+      Composite composite, String messageKey, Control previous, int margin) {
     Label label = new Label(composite, SWT.LEFT);
     PropsUi.setLook(label);
     label.setText(BaseMessages.getString(PKG, messageKey));
     FormData fd = new FormData();
     fd.left = new FormAttachment(0, 0);
-    fd.top = new FormAttachment(previous, margin * 2);
+    if (previous == null) {
+      fd.top = new FormAttachment(0, 0);
+    } else {
+      fd.top = new FormAttachment(previous, margin * 2);
+    }
     label.setLayoutData(fd);
-    registerSectionControl(section, label);
     return label;
   }
 
   private Control addEditableField(
-      Composite composite,
-      String messageKey,
-      int middle,
-      int margin,
-      Control previous,
-      List<Control> section) {
-    return addTextField(composite, messageKey, middle, margin, previous, false, section);
+      Composite composite, String messageKey, int middle, int margin, Control previous) {
+    return addTextField(composite, messageKey, middle, margin, previous, false);
   }
 
   private Control addReadOnlyField(
       Composite composite, String messageKey, int middle, int margin, Control previous) {
-    return addTextField(composite, messageKey, middle, margin, previous, true, null);
-  }
-
-  private Control addReadOnlyField(
-      Composite composite,
-      String messageKey,
-      int middle,
-      int margin,
-      Control previous,
-      List<Control> section) {
-    return addTextField(composite, messageKey, middle, margin, previous, true, section);
+    return addTextField(composite, messageKey, middle, margin, previous, true);
   }
 
   private Control addComboField(
-      Composite composite,
-      String messageKey,
-      int middle,
-      int margin,
-      Control previous,
-      List<Control> section) {
+      Composite composite, String messageKey, int middle, int margin, Control previous) {
     Label label = new Label(composite, SWT.RIGHT);
     PropsUi.setLook(label);
     label.setText(BaseMessages.getString(PKG, messageKey));
@@ -912,8 +749,6 @@ public class RecordDefinitionDetailsPanel {
     fd.right = new FormAttachment(100, 0);
     fd.top = new FormAttachment(label, 0, SWT.CENTER);
     combo.setLayoutData(fd);
-    registerSectionControl(section, label);
-    registerSectionControl(section, combo);
     return combo;
   }
 
@@ -923,8 +758,7 @@ public class RecordDefinitionDetailsPanel {
       int middle,
       int margin,
       Control previous,
-      boolean readOnly,
-      List<Control> section) {
+      boolean readOnly) {
     Label label = new Label(composite, SWT.RIGHT);
     PropsUi.setLook(label);
     label.setText(BaseMessages.getString(PKG, messageKey));
@@ -949,25 +783,22 @@ public class RecordDefinitionDetailsPanel {
     fd.right = new FormAttachment(100, 0);
     fd.top = new FormAttachment(label, 0, SWT.CENTER);
     text.setLayoutData(fd);
-    registerSectionControl(section, label);
-    registerSectionControl(section, text);
     return text;
   }
 
   private Control addCheckboxField(
-      Composite composite,
-      String messageKey,
-      int middle,
-      int margin,
-      Control previous,
-      List<Control> section) {
+      Composite composite, String messageKey, int middle, int margin, Control previous) {
     Label label = new Label(composite, SWT.RIGHT);
     PropsUi.setLook(label);
     label.setText(BaseMessages.getString(PKG, messageKey));
     FormData fdl = new FormData();
     fdl.left = new FormAttachment(0, 0);
     fdl.right = new FormAttachment(middle, -margin);
-    fdl.top = new FormAttachment(previous, margin);
+    if (previous == null) {
+      fdl.top = new FormAttachment(0, margin);
+    } else {
+      fdl.top = new FormAttachment(previous, margin);
+    }
     label.setLayoutData(fdl);
 
     Button checkbox = new Button(composite, SWT.CHECK);
@@ -976,18 +807,11 @@ public class RecordDefinitionDetailsPanel {
     fd.left = new FormAttachment(middle, 0);
     fd.top = new FormAttachment(label, 0, SWT.CENTER);
     checkbox.setLayoutData(fd);
-    registerSectionControl(section, label);
-    registerSectionControl(section, checkbox);
     return checkbox;
   }
 
   private Control addSectionUpdateButton(
-      Composite composite,
-      String messageKey,
-      Control previous,
-      int margin,
-      Runnable action,
-      List<Control> section) {
+      Composite composite, String messageKey, Control previous, int margin, Runnable action) {
     Button button = new Button(composite, SWT.PUSH);
     button.setText(BaseMessages.getString(PKG, messageKey));
     PropsUi.setLook(button);
@@ -996,22 +820,22 @@ public class RecordDefinitionDetailsPanel {
     fd.top = new FormAttachment(previous, margin);
     button.setLayoutData(fd);
     button.addListener(SWT.Selection, e -> action.run());
-    registerSectionControl(section, button);
     return button;
   }
 
-  private static void registerSectionControl(List<Control> section, Control control) {
-    if (section != null && control != null) {
-      section.add(control);
-    }
-  }
-
-  private void setSectionVisible(List<Control> section, boolean visible) {
-    if (section == null) {
+  /**
+   * Show or hide a property group. {@link GridData#exclude} is required: {@code setVisible(false)}
+   * alone still reserves Form/Grid space, which produced blank gaps between groups such as Physical
+   * table and Data Vault source.
+   */
+  private void setSectionVisible(Composite section, boolean visible) {
+    if (section == null || section.isDisposed()) {
       return;
     }
-    for (Control control : section) {
-      control.setVisible(visible);
+    section.setVisible(visible);
+    Object layoutData = section.getLayoutData();
+    if (layoutData instanceof GridData gridData) {
+      gridData.exclude = !visible;
     }
   }
 
@@ -1024,11 +848,21 @@ public class RecordDefinitionDetailsPanel {
     boolean isIceberg = "ICEBERG".equalsIgnoreCase(sourceType);
     boolean isFileSource = isCsv || isParquet;
 
-    setSectionVisible(dvSourceSectionControls, isDvSource);
-    setSectionVisible(physicalTableSectionControls, isDatabase);
-    setSectionVisible(physicalFileSectionControls, isFileSource);
-    setSectionVisible(physicalIcebergSectionControls, isIceberg);
-    setSectionVisible(csvFormatSectionControls, isCsv);
+    setSectionVisible(wDvSourceSection, isDvSource);
+    setSectionVisible(wPhysicalTableSection, isDatabase);
+    setSectionVisible(wPhysicalFileSection, isFileSource);
+    setSectionVisible(wPhysicalIcebergSection, isIceberg);
+    setSectionVisible(wCsvFormatSection, isCsv);
+    refreshPropertiesScroll();
+  }
+
+  private void refreshPropertiesScroll() {
+    if (wPropertiesComp == null || wPropertiesComp.isDisposed()) {
+      return;
+    }
+    wPropertiesComp.layout(true, true);
+    Point size = wPropertiesComp.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+    wScroll.setMinSize(size);
   }
 
   private TableView createListTable(Composite tabComp, String columnKey) {
@@ -1303,8 +1137,7 @@ public class RecordDefinitionDetailsPanel {
               && RecordDefinitionPhysicalRefSupport.supportsRefreshFromSource(definition));
     }
 
-    wPropertiesComp.pack();
-    wScroll.setMinSize(wPropertiesComp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+    refreshPropertiesScroll();
     parent.layout(true, true);
   }
 
