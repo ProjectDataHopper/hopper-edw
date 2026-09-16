@@ -55,12 +55,8 @@ public final class BusMatrixSvgPainter {
         .append(width)
         .append(' ')
         .append(height)
-        .append("\" preserveAspectRatio=\"xMinYMin meet\">\n");
-    // RAP dark-mode.css uses `* { color; background-color }` which bleeds into inline SVG.
-    svg.append("<style type=\"text/css\"><![CDATA[");
-    svg.append(
-        "svg,svg *{background:none!important;background-color:transparent!important;color:unset!important;}");
-    svg.append("]]></style>\n");
+        .append("\" preserveAspectRatio=\"xMinYMin meet\"")
+        .append(" style=\"background:none;background-color:transparent\">\n");
     rect(svg, 0, 0, width, height, palette.background, null);
     List<SvgHit> hits = new ArrayList<>();
 
@@ -183,7 +179,7 @@ public final class BusMatrixSvgPainter {
       }
       svg.append(pts[i]).append(',').append(pts[i + 1]);
     }
-    svg.append("\" fill=\"").append(fill).append('"');
+    svg.append("\" fill=\"").append(fill).append("\" style=\"fill:").append(fill).append('"');
     if (stroke != null) {
       svg.append(" stroke=\"").append(stroke).append("\" stroke-width=\"1\"");
     }
@@ -201,6 +197,8 @@ public final class BusMatrixSvgPainter {
         .append("\" height=\"")
         .append(h)
         .append("\" fill=\"")
+        .append(fill)
+        .append("\" style=\"fill:")
         .append(fill)
         .append('"');
     if (stroke != null) {

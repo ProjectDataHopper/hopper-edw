@@ -97,7 +97,7 @@ class RetailBusMatrixTest {
     assertTrue(svg.contains("Order management"), svg);
     assertTrue(svg.contains("Inventory snapshot"), svg);
     assertTrue(svg.contains("preserveAspectRatio=\"xMinYMin meet\""), svg);
-    assertTrue(svg.contains("background-color:transparent"), svg);
+    assertFalse(svg.contains("<style"), svg);
   }
 
   private static BusMatrixRow row(BusMatrix matrix, String factName) {
