@@ -17,6 +17,7 @@ package org.hopper.edw.datavault.hopgui.busmatrix;
 
 import org.apache.hop.core.Const;
 import org.apache.hop.ui.core.PropsUi;
+import org.apache.hop.ui.util.EnvironmentUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
@@ -109,7 +110,11 @@ final class BusMatrixCanvas extends Canvas {
     if (bar == null || !bar.getVisible()) {
       return;
     }
-    int step = event.count > 0 ? -bar.getIncrement() * 3 : bar.getIncrement() * 3;
+    int unit =
+        event.stateMask == SWT.SHIFT
+            ? Math.max(1, layout.cellWidth())
+            : Math.max(1, layout.rowHeight());
+    int step = event.count > 0 ? -unit * 3 : unit * 3;
     bar.setSelection(bar.getSelection() + step);
     redraw();
   }
@@ -245,8 +250,10 @@ final class BusMatrixCanvas extends Canvas {
           null);
     }
 
-    gc.setAntialias(SWT.ON);
-    gc.setTextAntialias(SWT.ON);
+    if (!EnvironmentUtils.getInstance().isWeb()) {
+      gc.setAntialias(SWT.ON);
+      gc.setTextAntialias(SWT.ON);
+    }
     int headerFirstCol = Math.max(0, (scrollX - headerH) / Math.max(1, cellW));
     int headerLastCol =
         Math.min(
@@ -330,14 +337,19 @@ final class BusMatrixCanvas extends Canvas {
       return;
     }
     Point extent = gc.textExtent(text);
+    int cx = Math.round(BusMatrixLayout.headerLabelCenterX(x, w, h));
+    int cy = Math.round(BusMatrixLayout.headerLabelCenterY(y, h));
+    if (EnvironmentUtils.getInstance().isWeb()) {
+      gc.drawText(text, cx - extent.x / 2, cy - extent.y / 2, true);
+      return;
+    }
     gc.setAdvanced(true);
     Transform previous = new Transform(gc.getDevice());
     Transform rotated = new Transform(gc.getDevice());
     try {
       gc.getTransform(previous);
       gc.getTransform(rotated);
-      rotated.translate(
-          BusMatrixLayout.headerLabelCenterX(x, w, h), BusMatrixLayout.headerLabelCenterY(y, h));
+      rotated.translate(cx, cy);
       rotated.rotate(BusMatrixLayout.HEADER_TILT_DEGREES);
       gc.setTransform(rotated);
       gc.drawText(text, -extent.x / 2, -extent.y / 2, true);
@@ -370,24 +382,20 @@ final class BusMatrixCanvas extends Canvas {
     configure(
         getHorizontalBar(),
         Math.max(0, contentW - layout.frozenWidth()),
-        Math.max(1, client.width - layout.frozenWidth()),
-        layout.cellWidth());
+        Math.max(1, client.width - layout.frozenWidth()));
     configure(
         getVerticalBar(),
         Math.max(0, contentH - layout.headerHeight()),
-        Math.max(1, client.height - layout.headerHeight()),
-        layout.rowHeight());
+        Math.max(1, client.height - layout.headerHeight()));
   }
 
-  private static void configure(ScrollBar bar, int content, int visible, int increment) {
+  private static void configure(ScrollBar bar, int content, int visible) {
     if (bar == null) {
       return;
     }
     int thumb = Math.max(1, visible);
     int max = Math.max(thumb + 1, content);
     bar.setMinimum(0);
-    bar.setIncrement(Math.max(1, increment));
-    bar.setPageIncrement(Math.max(increment, visible));
     bar.setThumb(Math.min(thumb, max));
     bar.setMaximum(max);
     bar.setVisible(content > visible);
