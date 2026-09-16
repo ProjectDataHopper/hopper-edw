@@ -15,8 +15,16 @@
  */
 package org.hopper.edw.datavault.hopgui.busmatrix;
 
+import java.util.List;
 import org.apache.hop.core.Const;
+import org.apache.hop.core.gui.CanvasSvgRenderResult;
+import org.apache.hop.core.gui.DPoint;
+import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.ui.core.PropsUi;
+import org.apache.hop.ui.core.gui.GuiResource;
+import org.apache.hop.ui.hopgui.CanvasFacade;
+import org.apache.hop.ui.hopgui.CanvasListener;
+import org.apache.hop.ui.hopgui.CanvasSvgFacade;
 import org.apache.hop.ui.util.EnvironmentUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -27,12 +35,15 @@ import org.eclipse.swt.graphics.Transform;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.hopper.edw.datavault.busmatrix.BusMatrix;
 import org.hopper.edw.datavault.busmatrix.BusMatrixCell;
 import org.hopper.edw.datavault.busmatrix.BusMatrixColumn;
 import org.hopper.edw.datavault.busmatrix.BusMatrixLayout;
 import org.hopper.edw.datavault.busmatrix.BusMatrixRow;
+import org.hopper.edw.datavault.busmatrix.BusMatrixSvgPainter;
+import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphWebCanvasData;
 
 /** Scrollable bus-matrix grid with frozen process labels and dimension headers. */
 final class BusMatrixCanvas extends Canvas {
@@ -41,31 +52,60 @@ final class BusMatrixCanvas extends Canvas {
   private BusMatrixLayout layout = BusMatrixLayout.DEFAULT;
   private Color oddRowBackground;
   private Color markBackground;
+  private String lastWebSvg;
+  private BusMatrix lastWebMatrix;
+  private boolean lastWebDark;
 
   BusMatrixCanvas(Composite parent) {
-    super(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.NO_BACKGROUND | SWT.DOUBLE_BUFFERED);
+    super(
+        parent,
+        EnvironmentUtils.getInstance().isWeb()
+            ? SWT.NO_BACKGROUND
+            : SWT.H_SCROLL | SWT.V_SCROLL | SWT.NO_BACKGROUND | SWT.DOUBLE_BUFFERED);
     PropsUi.setLook(this);
     addDisposeListener(
         e -> {
+          if (EnvironmentUtils.getInstance().isWeb()) {
+            CanvasSvgFacade.unregisterCanvas(this);
+          }
           disposeColor(oddRowBackground);
           disposeColor(markBackground);
         });
     addListener(SWT.Paint, this::paint);
     addListener(SWT.Resize, e -> updateScrollBars());
     addListener(SWT.MouseMove, this::onMove);
-    addListener(SWT.MouseWheel, this::onWheel);
-    ScrollBar hBar = getHorizontalBar();
-    ScrollBar vBar = getVerticalBar();
-    if (hBar != null) {
-      hBar.addListener(SWT.Selection, e -> redraw());
+    if (EnvironmentUtils.getInstance().isWeb()) {
+      setupWebCanvas(parent);
+    } else {
+      addListener(SWT.MouseWheel, this::onWheel);
+      ScrollBar hBar = getHorizontalBar();
+      ScrollBar vBar = getVerticalBar();
+      if (hBar != null) {
+        hBar.addListener(SWT.Selection, e -> redraw());
+      }
+      if (vBar != null) {
+        vBar.addListener(SWT.Selection, e -> redraw());
+      }
     }
-    if (vBar != null) {
-      vBar.addListener(SWT.Selection, e -> redraw());
-    }
+  }
+
+  private void setupWebCanvas(Composite parent) {
+    Listener canvasListener = CanvasListener.getInstance();
+    addListener(SWT.MouseDown, canvasListener);
+    addListener(SWT.MouseMove, canvasListener);
+    addListener(SWT.MouseUp, canvasListener);
+    addListener(SWT.Paint, canvasListener);
+    addListener(SWT.MouseWheel, canvasListener);
+    addListener(SWT.MouseVerticalWheel, canvasListener);
+    CanvasSvgFacade.registerCanvas(this, this);
+    CanvasSvgFacade.ensureInteractionHandler(parent, this);
+    ModelGraphWebCanvasData.ensureEmptyCollections(this);
   }
 
   void setMatrix(BusMatrix matrix) {
     this.matrix = matrix != null ? matrix : new BusMatrix("", null, null, null);
+    lastWebSvg = null;
+    lastWebMatrix = null;
     redraw();
   }
 
@@ -143,6 +183,13 @@ final class BusMatrixCanvas extends Canvas {
   private void paint(Event event) {
     GC gc = event.gc;
     Rectangle client = getClientArea();
+    if (client.width <= 0 || client.height <= 0) {
+      return;
+    }
+    if (EnvironmentUtils.getInstance().isWeb()) {
+      paintWeb(gc, client);
+      return;
+    }
     BusMatrixLayout measured =
         BusMatrixLayout.measure(
             matrix, text -> gc.textExtent(Const.NVL(text, "")).x, gc.textExtent("Mg").y);
@@ -372,7 +419,40 @@ final class BusMatrixCanvas extends Canvas {
     return result;
   }
 
+  private void paintWeb(GC gc, Rectangle client) {
+    layout = BusMatrixLayout.measure(matrix, s -> Math.max(1, Const.NVL(s, "").length()) * 7, 12);
+    try {
+      boolean dark = PropsUi.getInstance().isDarkMode();
+      if (lastWebSvg == null || lastWebMatrix != matrix || lastWebDark != dark) {
+        lastWebSvg = BusMatrixSvgPainter.paint(matrix, dark);
+        lastWebMatrix = matrix;
+        lastWebDark = dark;
+      }
+      org.apache.hop.core.gui.Rectangle viewPort =
+          new org.apache.hop.core.gui.Rectangle(0, 0, client.width, client.height);
+      org.apache.hop.core.gui.Rectangle graphPort =
+          new org.apache.hop.core.gui.Rectangle(0, 0, layout.width(matrix), layout.height(matrix));
+      CanvasSvgRenderResult result =
+          new CanvasSvgRenderResult(lastWebSvg, List.of(), viewPort, graphPort);
+      CanvasSvgFacade.publishSnapshot(
+          this,
+          result,
+          1.0f,
+          new DPoint(0, 0),
+          new org.apache.hop.core.gui.Point(client.width, client.height));
+      CanvasFacade.setData(this, 1.0f, new DPoint(0, 0), matrix);
+      ModelGraphWebCanvasData.ensureEmptyCollections(this);
+    } catch (Exception e) {
+      LogChannel.UI.logError("Failed to render bus matrix SVG for Hop Web", e);
+    }
+    gc.setBackground(GuiResource.getInstance().getColorBackground());
+    gc.fillRectangle(client);
+  }
+
   private void updateScrollBars() {
+    if (EnvironmentUtils.getInstance().isWeb()) {
+      return;
+    }
     Rectangle client = getClientArea();
     if (client.width <= 0 || client.height <= 0) {
       return;
