@@ -31,7 +31,9 @@ import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.gui.GuiResource;
+import org.apache.hop.ui.core.gui.IToolbarContainer;
 import org.apache.hop.ui.hopgui.HopGui;
+import org.apache.hop.ui.hopgui.ToolbarFacade;
 import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormAttachment;
@@ -39,6 +41,8 @@ import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -171,12 +175,12 @@ public final class BusMatrixViewerDialog {
     wHideUnused.setLayoutData(fdHide);
     wHideUnused.addListener(SWT.Selection, e -> applyFilter());
 
-    ToolBar zoomBar = createZoomBar(shell);
+    Control zoomBar = createZoomBar(shell);
     FormData fdZoom = new FormData();
     fdZoom.left = new FormAttachment(0, 0);
     fdZoom.top = new FormAttachment(wSearch, margin);
-    fdZoom.right = new FormAttachment(100, 0);
     zoomBar.setLayoutData(fdZoom);
+    zoomBar.pack();
 
     wlStatus = new Label(shell, SWT.LEFT);
     PropsUi.setLook(wlStatus);
@@ -202,42 +206,80 @@ public final class BusMatrixViewerDialog {
     BaseDialog.defaultShellHandling(shell, c -> shell.dispose(), c -> shell.dispose());
   }
 
-  private ToolBar createZoomBar(Shell parentShell) {
-    ToolBar bar = new ToolBar(parentShell, SWT.FLAT | SWT.HORIZONTAL | SWT.WRAP);
+  private Control createZoomBar(Composite parentComposite) {
+    IToolbarContainer container =
+        ToolbarFacade.createToolbarContainer(parentComposite, SWT.FLAT | SWT.HORIZONTAL);
+    Control bar = container.getControl();
     PropsUi.setLook(bar, Props.WIDGET_STYLE_TOOLBAR);
-    addZoomItem(
-        bar,
-        "ui/images/zoom-in.svg",
-        "BusMatrixViewerDialog.ZoomIn.Tooltip",
-        () -> canvas.zoomIn());
-    addZoomItem(
-        bar,
-        "ui/images/zoom-out.svg",
-        "BusMatrixViewerDialog.ZoomOut.Tooltip",
-        () -> canvas.zoomOut());
-    addZoomItem(
-        bar,
-        "ui/images/zoom-100.svg",
-        "BusMatrixViewerDialog.Zoom100.Tooltip",
-        () -> canvas.zoom100Percent());
-    addZoomItem(
-        bar,
-        "ui/images/zoom-fit.svg",
-        "BusMatrixViewerDialog.ZoomFitSize.Tooltip",
-        () -> canvas.zoomFitSize());
-    addZoomItem(
-        bar,
-        "ui/images/maximize-panel.svg",
-        "BusMatrixViewerDialog.ZoomFitWidth.Tooltip",
-        () -> canvas.zoomFitWidth());
+    if (bar instanceof ToolBar toolBar) {
+      addZoomToolItem(
+          toolBar,
+          "ui/images/zoom-in.svg",
+          "BusMatrixViewerDialog.ZoomIn.Tooltip",
+          () -> canvas.zoomIn());
+      addZoomToolItem(
+          toolBar,
+          "ui/images/zoom-out.svg",
+          "BusMatrixViewerDialog.ZoomOut.Tooltip",
+          () -> canvas.zoomOut());
+      addZoomToolItem(
+          toolBar,
+          "ui/images/zoom-100.svg",
+          "BusMatrixViewerDialog.Zoom100.Tooltip",
+          () -> canvas.zoom100Percent());
+      addZoomToolItem(
+          toolBar,
+          "ui/images/zoom-fit.svg",
+          "BusMatrixViewerDialog.ZoomFitSize.Tooltip",
+          () -> canvas.zoomFitSize());
+      addZoomToolItem(
+          toolBar,
+          "ui/images/show-all.svg",
+          "BusMatrixViewerDialog.ZoomFitWidth.Tooltip",
+          () -> canvas.zoomFitWidth());
+    } else if (bar instanceof Composite composite) {
+      addZoomButton(
+          composite,
+          "ui/images/zoom-in.svg",
+          "BusMatrixViewerDialog.ZoomIn.Tooltip",
+          () -> canvas.zoomIn());
+      addZoomButton(
+          composite,
+          "ui/images/zoom-out.svg",
+          "BusMatrixViewerDialog.ZoomOut.Tooltip",
+          () -> canvas.zoomOut());
+      addZoomButton(
+          composite,
+          "ui/images/zoom-100.svg",
+          "BusMatrixViewerDialog.Zoom100.Tooltip",
+          () -> canvas.zoom100Percent());
+      addZoomButton(
+          composite,
+          "ui/images/zoom-fit.svg",
+          "BusMatrixViewerDialog.ZoomFitSize.Tooltip",
+          () -> canvas.zoomFitSize());
+      addZoomButton(
+          composite,
+          "ui/images/show-all.svg",
+          "BusMatrixViewerDialog.ZoomFitWidth.Tooltip",
+          () -> canvas.zoomFitWidth());
+    }
     return bar;
   }
 
-  private void addZoomItem(ToolBar bar, String image, String tooltipKey, Runnable action) {
+  private void addZoomToolItem(ToolBar bar, String image, String tooltipKey, Runnable action) {
     ToolItem item = new ToolItem(bar, SWT.PUSH);
     item.setImage(GuiResource.getInstance().getImage(image));
     item.setToolTipText(BaseMessages.getString(PKG, tooltipKey));
     item.addListener(SWT.Selection, e -> action.run());
+  }
+
+  private void addZoomButton(Composite parent, String image, String tooltipKey, Runnable action) {
+    Button button = new Button(parent, SWT.PUSH | SWT.FLAT);
+    button.setImage(GuiResource.getInstance().getImage(image));
+    button.setToolTipText(BaseMessages.getString(PKG, tooltipKey));
+    PropsUi.setLook(button, Props.WIDGET_STYLE_TOOLBAR);
+    button.addListener(SWT.Selection, e -> action.run());
   }
 
   private Combo addFilterCombo(org.eclipse.swt.widgets.Control left, String labelKey) {

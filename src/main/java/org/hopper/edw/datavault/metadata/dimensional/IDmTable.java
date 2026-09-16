@@ -51,6 +51,8 @@ public interface IDmTable extends IGuiPosition, IBaseMeta, IHasName, IChanged, I
 
   void setGrain(String grain);
 
+  DmBusinessProcessRef getBusinessProcessOrEmpty();
+
   DmTableType getTableType();
 
   void check(

@@ -20,10 +20,6 @@ import java.util.List;
 /** Fact tables and Kimball fact variants that resolve dimension roles on a load stream. */
 public interface IDmFactLikeTable extends IDmTable {
 
-  default DmBusinessProcessRef getBusinessProcessOrEmpty() {
-    return new DmBusinessProcessRef();
-  }
-
   List<DmFactDimensionRole> getDimensionRolesOrEmpty();
 
   List<DmFactMeasure> getMeasuresOrEmpty();

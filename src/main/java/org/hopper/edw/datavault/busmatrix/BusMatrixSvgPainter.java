@@ -275,8 +275,17 @@ public final class BusMatrixSvgPainter {
       String markFg) {
     static final Palette LIGHT =
         new Palette(
-            "#ffffff", "#17324d", "#f4f6f8", "#d5dde5", "#1b2430", "#ffffff", "#f4f6f8", "#ecf5fa",
-            "#17324d");
+            // Hex values that exist in PropsUi contrastingColors so Hop Web/desktop dark mode
+            // can remap them the same way as model-graph SVGs.
+            "#f0f0f0",
+            "#033d5d",
+            "#f0f0f0",
+            "#e1e1e1",
+            "#000000",
+            "#f0f0f0",
+            "#e1e1e1",
+            "#c9e8fb",
+            "#0e3a5a");
     static final Palette DARK =
         new Palette(
             "#12151a", "#0d1b27", "#e8edf2", "#2c3640", "#e8edf2", "#1a1f26", "#12151a", "#1b2c39",

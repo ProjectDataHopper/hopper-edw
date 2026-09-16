@@ -141,7 +141,7 @@ class BusMatrixBuilderTest {
     assertTrue(svg.contains("<svg"));
     assertTrue(svg.contains(">X</text>") || svg.contains(">X<"));
     assertTrue(svg.contains("rotate(-45"), svg);
-    assertTrue(svg.contains("#ecf5fa"), svg);
+    assertTrue(svg.contains("#c9e8fb") || svg.contains("#ecf5fa"), svg);
     assertTrue(svg.contains("<polygon"), svg);
   }
 
