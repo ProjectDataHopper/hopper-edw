@@ -19,6 +19,7 @@ Lists model files for:
 |-------|------|
 | `name` | Metadata name |
 | `dataCatalogConnection` | Catalog connection name |
+| `businessProcessCatalog` | Optional business process catalog name for the bus matrix |
 | `data_vault_model` | Array of `.hdv` paths |
 | `business_vault_model` | Array of `.hbv` paths |
 | `dimensional_model` | Array of `.hdm` paths |

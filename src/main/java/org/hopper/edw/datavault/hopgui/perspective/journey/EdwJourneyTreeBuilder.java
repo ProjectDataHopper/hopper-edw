@@ -193,6 +193,17 @@ public final class EdwJourneyTreeBuilder {
   private static EdwJourneyTreeNode modelStage(
       EdwJourneyStage stage, String labelKey, List<ModelRef> models, EdwJourneyOpsOverlay overlay) {
     List<EdwJourneyTreeNode> children = new ArrayList<>();
+    if (stage == EdwJourneyStage.DIMENSIONAL && models != null && !models.isEmpty()) {
+      children.add(
+          EdwJourneyTreeNode.builder(
+                  Kind.BUS_MATRIX,
+                  EdwJourneyIds.busMatrix(),
+                  BaseMessages.getString(PKG, "EdwJourneyTreeBuilder.BusMatrix"))
+              .stage(stage)
+              .description(
+                  BaseMessages.getString(PKG, "EdwJourneyTreeBuilder.BusMatrix.Description"))
+              .build());
+    }
     for (ModelRef model : models) {
       children.add(modelNode(model, overlay));
     }

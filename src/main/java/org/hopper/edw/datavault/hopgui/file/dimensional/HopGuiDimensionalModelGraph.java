@@ -167,6 +167,8 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
       "HopGuiDimensionalModelGraph-ToolBar-10065-AI-Help";
   public static final String TOOLBAR_ITEM_EXPORT_DIAGRAM =
       "HopGuiDimensionalModelGraph-ToolBar-10067-Export-Diagram";
+  public static final String TOOLBAR_ITEM_BUS_MATRIX =
+      "HopGuiDimensionalModelGraph-ToolBar-10068-Bus-Matrix";
   public static final String TOOLBAR_ITEM_DEBUG = "HopGuiDimensionalModelGraph-ToolBar-10070-Debug";
   public static final String TOOLBAR_ITEM_GENERATE_DDL =
       "HopGuiDimensionalModelGraph-ToolBar-10080-Generate-Ddl";
@@ -1636,6 +1638,16 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
       image = "ui/images/image.svg")
   public void exportDiagram() {
     hopGui.fileDelegate.exportToSvg();
+  }
+
+  @GuiToolbarElement(
+      root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
+      id = TOOLBAR_ITEM_BUS_MATRIX,
+      toolTip = "i18n::HopGuiDimensionalModelGraph.Toolbar.BusMatrix.Tooltip",
+      image = "business-process-catalog.svg")
+  public void openBusMatrix() {
+    String filename = model != null ? model.getFilename() : null;
+    org.hopper.edw.datavault.hopgui.busmatrix.BusMatrixLaunchSupport.openForModel(hopGui, filename);
   }
 
   @GuiToolbarElement(

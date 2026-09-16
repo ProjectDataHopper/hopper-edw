@@ -129,6 +129,12 @@ limitations under the License.
       <tableName>f_order_lines</tableName>
       <description/>
       <tableType>FACT</tableType>
+      <business_process>
+        <business>Retail</business>
+        <level1>Sales</level1>
+        <level2>Order management</level2>
+        <level3>Order lines</level3>
+      </business_process>
       <sourceType>SQL</sourceType>
       <sourceConnection>Vault</sourceConnection>
       <sourceSql>SELECT lol.order_hk,

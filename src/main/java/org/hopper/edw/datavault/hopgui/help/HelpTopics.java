@@ -150,6 +150,8 @@ public final class HelpTopics {
   public static final String SOURCE_MODEL_SERVICE = "source-model-service-dialog";
   public static final String EXECUTION_METRICS_PROFILE = "execution-metrics-profile-dialog";
   public static final String DATA_QUALITY_RULE_SET = "data-quality-rule-set-dialog";
+  public static final String BUSINESS_PROCESS_CATALOG = "business-process-catalog-dialog";
+  public static final String BUS_MATRIX = "bus-matrix-dialog";
 
   /**
    * Plugin-shipped HTML page for a Help topic. {@code htmlPage} is relative to {@code docs/} (for
@@ -488,7 +490,12 @@ public final class HelpTopics {
           p(
               DATA_QUALITY_RULE_SET,
               "data-quality.html",
-              "HelpTopics.DataQualityRuleSetDialog.Title"));
+              "HelpTopics.DataQualityRuleSetDialog.Title"),
+          p(
+              BUSINESS_PROCESS_CATALOG,
+              "help/business-process-catalog-dialog.html",
+              "HelpTopics.BusinessProcessCatalogDialog.Title"),
+          p(BUS_MATRIX, "help/bus-matrix-dialog.html", "HelpTopics.BusMatrixDialog.Title"));
 
   private static final Map<String, HelpPage> BY_ID = index(PAGES);
 

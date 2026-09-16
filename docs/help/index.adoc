@@ -30,6 +30,12 @@ Guides for the same features live in the parent folder (link:../index.adoc[docum
 |link:action-import-dbt-project-dialog.adoc[action-import-dbt-project-dialog]
 |Import dbt project action
 
+|link:bus-matrix-dialog.adoc[bus-matrix-dialog]
+|Bus matrix viewer
+
+|link:business-process-catalog-dialog.adoc[business-process-catalog-dialog]
+|Business process catalog
+
 |link:bv-ai-advisor-dialog.adoc[bv-ai-advisor-dialog]
 |Business Vault AI advisor
 

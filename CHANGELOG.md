@@ -4,6 +4,12 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Kimball bus matrix (issue #177)
+
+- **Business process catalog** metadata holds domains and process levels 1–3. Facts tag **Business / L1 / L2 / L3** on the General tab.
+- Open a derived bus matrix from a resource definition group, EDW Journey (Dimensional **Bus matrix** node), the dimensional canvas toolbar, or **Tools → View bus matrix…** (group combo, filter, frozen headers sized to content, 45° trapezium dimension names, click-through, CSV/SVG export).
+- `hop bus-matrix -g <group>` writes CSV or SVG. Project documentation includes a Bus matrices page per group, with links from dimensional model and fact pages.
+
 ### Record definition property tab gaps (issue #179)
 
 - Hidden property groups (physical file, Iceberg, CSV format, and others) no longer leave blank space between visible sections such as **Physical table** and **Data Vault source**. The properties scroller sizes to the visible groups only.

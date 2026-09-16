@@ -15,6 +15,7 @@
  */
 package org.hopper.edw.datavault.documentation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -27,7 +28,9 @@ import org.apache.hop.core.IProgressMonitor;
 import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
+import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.hopper.edw.datavault.documentation.render.DocPaths;
+import org.hopper.edw.datavault.resourcedefinition.ResourceDefinitionGroupResolver;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -232,6 +235,82 @@ class ProjectDocumentationServiceTest {
     assertTrue(monitor.beginTaskWork > 0);
     assertTrue(monitor.workedTotal >= 1);
     assertTrue(Files.isRegularFile(target.resolve("index.html")));
+  }
+
+  @Test
+  void documentsBusMatrixFromResourceDefinitionGroup() throws Exception {
+    Path source = temp.resolve("project");
+    Path models = source.resolve("models");
+    Files.createDirectories(models);
+    Files.writeString(
+        models.resolve("star.hdm"),
+        """
+        <dimensional-model>
+          <name>star</name>
+          <tables>
+            <table>
+              <tableType>DIMENSION</tableType>
+              <name>d_customer</name>
+              <tableName>d_customer</tableName>
+            </table>
+            <table>
+              <tableType>FACT</tableType>
+              <name>f_orders</name>
+              <tableName>f_orders</tableName>
+              <business_process>
+                <business>Retail</business>
+                <level1>Sales</level1>
+              </business_process>
+              <dimension_roles>
+                <dimension_role>
+                  <dimensionTableName>d_customer</dimensionTableName>
+                  <foreignKeyColumn>customer_hk</foreignKeyColumn>
+                </dimension_role>
+              </dimension_roles>
+            </table>
+          </tables>
+        </dimensional-model>
+        """);
+
+    MemoryMetadataProvider metadata = new MemoryMetadataProvider();
+    ResourceDefinitionGroupMeta group = new ResourceDefinitionGroupMeta("retail-sources");
+    group.getDimensionalModelFiles().add("${PROJECT_HOME}/models/star.hdm");
+    metadata.getSerializer(ResourceDefinitionGroupMeta.class).save(group);
+
+    Variables variables = new Variables();
+    variables.setVariable(ProjectDocumentationService.VAR_PROJECT_HOME, source.toString());
+    assertEquals(
+        1,
+        ResourceDefinitionGroupResolver.findGroupsForDimensionalModel(
+                metadata, variables, "models/star.hdm")
+            .size());
+
+    Path target = temp.resolve("docs");
+    ProjectDocumentationOptions options = ProjectDocumentationOptions.defaults();
+    options.setSourceFolder(source.toString());
+    options.setTargetFolder(target.toString());
+    options.setProjectName("Bus Matrix Doc");
+    options.setIncludingCatalog(false);
+    options.setIncludingMetadata(false);
+    options.setDarkSvg(false);
+
+    ProjectDocumentationResult result =
+        ProjectDocumentationService.generate(options, variables, metadata, LogChannel.GENERAL);
+    assertTrue(result.getErrors() == 0, () -> result.getWarnings().toString());
+
+    Path matrixPage = target.resolve("bus-matrices/retail-sources.html");
+    assertTrue(Files.isRegularFile(matrixPage), "expected " + matrixPage);
+    String html = Files.readString(matrixPage, StandardCharsets.UTF_8);
+    assertTrue(html.contains("f_orders"), html);
+    assertTrue(html.contains("d_customer"), html);
+    assertTrue(html.contains("hop-doc-bus-matrix"), html);
+    assertTrue(html.contains("href="), html);
+
+    Path modelPage = target.resolve("models/dimensional/models/star.html");
+    assertTrue(Files.isRegularFile(modelPage), "expected " + modelPage);
+    String modelHtml = Files.readString(modelPage, StandardCharsets.UTF_8);
+    assertTrue(modelHtml.contains("Bus matrices"), modelHtml);
+    assertTrue(modelHtml.contains("retail-sources"), modelHtml);
   }
 
   @Test

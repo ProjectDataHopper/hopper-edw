@@ -47,6 +47,9 @@ public class ResourceDefinitionGroupMeta extends HopMetadataBase implements IHop
   /** Optional default data catalog connection; individual models may override. */
   @HopMetadataProperty private String dataCatalogConnection;
 
+  /** Optional business process catalog used when building the Kimball bus matrix. */
+  @HopMetadataProperty private String businessProcessCatalog;
+
   @HopMetadataProperty(key = "data_vault_model", groupKey = "data_vault_models")
   private List<String> dataVaultModelFiles = new ArrayList<>();
 

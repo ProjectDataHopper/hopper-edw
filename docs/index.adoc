@@ -54,6 +54,9 @@ Sources are the AsciiDoc files in the repository `docs/` folder. Architecture pi
 |link:project-documentation.adoc[project-documentation]
 |Self-contained HTML+JS project documentation (search, SVG, dark/light)
 
+|link:bus-matrix.adoc[bus-matrix]
+|Kimball bus matrix over a resource definition group's dimensional models
+
 |link:presentations/hop-data-vault-features.html[Interactive feature presentation]
 |Standalone HTML slides
 

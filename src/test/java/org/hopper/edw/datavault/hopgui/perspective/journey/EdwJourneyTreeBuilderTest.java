@@ -126,7 +126,8 @@ class EdwJourneyTreeBuilderTest {
         dv.children().get(0).id());
 
     assertTrue(root.children().get(3).children().isEmpty());
-    assertEquals("orders", root.children().get(4).children().get(0).label());
+    assertEquals(Kind.BUS_MATRIX, root.children().get(4).children().get(0).kind());
+    assertEquals("orders", root.children().get(4).children().get(1).label());
 
     EdwJourneyTreeNode versions =
         find(root.children().get(1), EdwJourneyIds.control(EdwJourneyControl.CATALOG_VERSION));

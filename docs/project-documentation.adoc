@@ -16,6 +16,7 @@ This is **not** Apache Hop's `hop doc` / **Generate documentation** action (Mark
 * Hop metadata objects (passwords redacted)
 * Catalog record definitions (best-effort)
 * Zoomable SVG diagrams (light + dark) with click-through to transforms, actions, and tables
+* Kimball **bus matrices** (one page per resource definition group that lists `.hdm` files)
 * Client-side search from the header
 
 Skipped: `.hlv` session graphs, hidden folders, `.git`, `target`, `node_modules`, and the output folder if it sits inside the source tree.

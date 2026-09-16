@@ -73,6 +73,12 @@ limitations under the License.
       <tableName>f_pit_inventory</tableName>
       <description/>
       <tableType>FACT</tableType>
+      <business_process>
+        <business>Retail</business>
+        <level1>Inventory</level1>
+        <level2>Stock</level2>
+        <level3>Inventory snapshot</level3>
+      </business_process>
       <sourceType>SQL</sourceType>
       <sourceConnection>Vault</sourceConnection>
       <sourceSql>SELECT lwp.x_load_ts AS status_ts, lwp.product_hk, hp.product_id, lwp.warehouse_hk, hw.warehouse_id, 

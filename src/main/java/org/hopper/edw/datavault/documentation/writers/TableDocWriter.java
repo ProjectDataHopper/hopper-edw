@@ -20,6 +20,7 @@ import java.util.List;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.hopper.edw.datavault.documentation.DocumentationSite;
+import org.hopper.edw.datavault.documentation.model.NavItem;
 import org.hopper.edw.datavault.documentation.model.TableDoc;
 import org.hopper.edw.datavault.documentation.model.TableDoc.ColumnDoc;
 import org.hopper.edw.datavault.documentation.render.DocPaths;
@@ -54,6 +55,18 @@ public final class TableDocWriter {
     if (!Utils.isEmpty(table.getGrain())) {
       HtmlPageWriter.row(rows, "Grain", table.getGrain());
     }
+    if (!Utils.isEmpty(table.getBusiness())) {
+      HtmlPageWriter.row(rows, "Business", table.getBusiness());
+    }
+    if (!Utils.isEmpty(table.getProcessLevel1())) {
+      HtmlPageWriter.row(rows, "Process level 1", table.getProcessLevel1());
+    }
+    if (!Utils.isEmpty(table.getProcessLevel2())) {
+      HtmlPageWriter.row(rows, "Process level 2", table.getProcessLevel2());
+    }
+    if (!Utils.isEmpty(table.getProcessLevel3())) {
+      HtmlPageWriter.row(rows, "Process level 3", table.getProcessLevel3());
+    }
     if (!Utils.isEmpty(table.getModelPageHref())) {
       HtmlPageWriter.rowHtml(
           rows,
@@ -68,6 +81,21 @@ public final class TableDocWriter {
           "Catalog",
           HtmlPageWriter.link(
               DocPaths.relativize(htmlPath, table.getCatalogHref()), "Record definition"));
+    }
+    if (!table.getUsedBy().isEmpty()) {
+      StringBuilder links = new StringBuilder();
+      for (NavItem item : table.getUsedBy()) {
+        if (item == null || Utils.isEmpty(item.href()) || Utils.isEmpty(item.title())) {
+          continue;
+        }
+        if (links.length() > 0) {
+          links.append(", ");
+        }
+        links.append(HtmlPageWriter.link(DocPaths.relativize(htmlPath, item.href()), item.title()));
+      }
+      if (links.length() > 0) {
+        HtmlPageWriter.rowHtml(rows, "Bus matrices", links.toString());
+      }
     }
     StringBuilder body = new StringBuilder();
     body.append(HtmlPageWriter.propertyTable(rows));

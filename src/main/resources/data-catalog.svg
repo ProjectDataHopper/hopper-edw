@@ -15,16 +15,51 @@
   - limitations under the License.
   -
   -->
-<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-    <g transform="translate(0.2,0.4) scale(0.82)">
-        <path fill="#0E3A5A" d="M1.448,9.916v2.823c0,1.56,2.95,2.823,6.588,2.823c3.638,0,6.588-1.265,6.588-2.823V9.916
-            c0,1.561-2.95,2.823-6.588,2.823C4.398,12.739,1.448,11.477,1.448,9.916z"/>
-        <path fill="#0E3A5A" d="M1.448,5.21v2.824c0,1.559,2.95,2.823,6.588,2.823c3.638,0,6.588-1.265,6.588-2.823V5.21
-            c0,1.56-2.95,2.824-6.588,2.824C4.398,8.034,1.448,6.77,1.448,5.21z"/>
-        <path fill="#0E3A5A" d="M14.625,3.328c0,1.56-2.95,2.823-6.588,2.823c-3.639,0-6.588-1.264-6.588-2.823s2.95-2.823,6.588-2.823
-            C11.675,0.504,14.625,1.769,14.625,3.328z"/>
+<!--
+  Data Catalog perspective icon.
+  Asymmetrical hub-and-spoke: the catalog at the centre, connected to
+  sources, record definitions, tables, files and fields.
+  Drop-in for src/main/resources/data-catalog.svg
+  Palette: #033d5d #0E3A5A #51c3c4 #5CC0C4 #b9e5fa #C9E8FB #9ec5fe #74c0fc #ffe066
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+    <g fill="none" stroke="#51c3c4" stroke-width="1.4" stroke-linecap="round">
+        <path d="M15.4 14.2 L16.4 6.4"/>
+        <path d="M17.6 15.0 L25.6 10.0"/>
+        <path d="M17.8 17.6 L25.8 22.0"/>
+        <path d="M14.8 18.8 L11.6 25.4"/>
+        <path d="M13.4 16.8 L6.0 19.2"/>
+        <path d="M13.6 14.4 L7.0 8.4"/>
     </g>
-    <path fill="#C9E8FB" fill-rule="evenodd" d="M13.7,13.7l1.8,1.8l-1.1,1.1l-1.8-1.8c-1,0.8-2.4,0.7-3.4-0.3
-        c-1.2-1.2-1.2-3.1,0-4.3c1.2-1.2,3.1-1.2,4.3,0C14.4,11.2,14.5,12.6,13.7,13.7z
-        M10.7,8.1c-1.4,0-2.5,1.1-2.5,2.5s1.1,2.5,2.5,2.5s2.5-1.1,2.5-2.5S12.1,8.1,10.7,8.1z"/>
+
+    <!-- Source -->
+    <circle cx="16.4" cy="5.2" r="2.25" fill="#b9e5fa" stroke="#033d5d" stroke-width="0.95"/>
+
+    <!-- Record definition -->
+    <rect x="22.8" y="7.0" width="6.6" height="5.3" rx="1.05" fill="#C9E8FB" stroke="#033d5d" stroke-width="0.95"/>
+    <path d="M24.3 8.7 h3.6 M24.3 10.05 h2.5 M24.3 11.4 h3.1"
+          fill="none" stroke="#0E3A5A" stroke-width="0.75" stroke-linecap="round"/>
+
+    <!-- Pipeline / composite -->
+    <polygon points="25.8,20.2 29.2,22.4 25.8,24.6 22.4,22.4"
+             fill="#74c0fc" stroke="#033d5d" stroke-width="0.95"/>
+
+    <!-- Physical table -->
+    <rect x="8.4" y="23.8" width="6.4" height="5.2" rx="0.75" fill="#9ec5fe" stroke="#033d5d" stroke-width="0.95"/>
+    <path d="M8.55 25.55 h6.1 M10.55 23.95 v5.0 M12.65 23.95 v5.0"
+          fill="none" stroke="#0E3A5A" stroke-width="0.6"/>
+
+    <!-- Landing file -->
+    <path d="M3.4 16.2 h4.2 l2.0 2.0 v5.6 H3.4 z" fill="#ffe066" stroke="#033d5d" stroke-width="0.95" stroke-linejoin="round"/>
+    <path d="M7.6 16.2 v2.0 h2.0" fill="none" stroke="#033d5d" stroke-width="0.95" stroke-linejoin="round"/>
+    <path d="M4.5 20.6 h3.0 M4.5 22.1 h2.1" fill="none" stroke="#0E3A5A" stroke-width="0.7" stroke-linecap="round"/>
+
+    <!-- Field -->
+    <circle cx="6.2" cy="7.8" r="2.0" fill="#5CC0C4" stroke="#033d5d" stroke-width="0.95"/>
+
+    <!-- Catalog hub -->
+    <polygon points="15.4,11.05 19.75,13.55 19.75,18.55 15.4,21.05 11.05,18.55 11.05,13.55"
+             fill="#033d5d" stroke="#51c3c4" stroke-width="1.2"/>
+    <path d="M13.25 14.95 h4.3 M13.25 16.6 h4.3 M13.25 18.2 h2.7"
+          fill="none" stroke="#b9e5fa" stroke-width="0.9" stroke-linecap="round"/>
 </svg>

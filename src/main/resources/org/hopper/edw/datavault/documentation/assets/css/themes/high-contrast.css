@@ -33,6 +33,7 @@
   --hop-doc-note-bg: #fff3b0;
   --hop-doc-badge-bg: #000000;
   --hop-doc-badge-fg: #ffffff;
+  --hop-doc-bus-matrix-x: #d0d0d0;
   --hop-doc-focus: #000000;
   --hop-doc-svg-viewport-bg: #ffffff;
 }
@@ -52,6 +53,7 @@ html[data-theme="system"] {
   --hop-doc-note-bg: #332b00;
   --hop-doc-badge-bg: #ffffff;
   --hop-doc-badge-fg: #000000;
+  --hop-doc-bus-matrix-x: #2a2a2a;
   --hop-doc-focus: #ffffff;
   --hop-doc-svg-viewport-bg: #000000;
 }
@@ -71,6 +73,7 @@ html[data-theme="system"] {
     --hop-doc-note-bg: #fff3b0;
     --hop-doc-badge-bg: #000000;
     --hop-doc-badge-fg: #ffffff;
+    --hop-doc-bus-matrix-x: #d0d0d0;
     --hop-doc-focus: #000000;
     --hop-doc-svg-viewport-bg: #ffffff;
   }

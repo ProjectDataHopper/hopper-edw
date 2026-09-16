@@ -31,6 +31,10 @@ public class TableDoc {
   private String tableType;
   private String description;
   private String grain;
+  private String business;
+  private String processLevel1;
+  private String processLevel2;
+  private String processLevel3;
   private String modelName;
   private String modelPageHref;
   private String catalogHref;

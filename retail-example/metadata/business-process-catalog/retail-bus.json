@@ -1,0 +1,53 @@
+{
+  "virtualPath": "",
+  "domain": [
+    {
+      "parentName": "",
+      "name": "Retail",
+      "description": "Retail sales and inventory"
+    }
+  ],
+  "name": "retail-bus",
+  "description": "Retail Kimball bus-matrix taxonomy",
+  "level1": [
+    {
+      "parentName": "Retail",
+      "name": "Sales",
+      "description": "Order-to-cash processes"
+    },
+    {
+      "parentName": "Retail",
+      "name": "Inventory",
+      "description": "Stock and warehouse processes"
+    }
+  ],
+  "level3": [
+    {
+      "parentName": "Order management",
+      "name": "Orders",
+      "description": ""
+    },
+    {
+      "parentName": "Order management",
+      "name": "Order lines",
+      "description": ""
+    },
+    {
+      "parentName": "Stock",
+      "name": "Inventory snapshot",
+      "description": ""
+    }
+  ],
+  "level2": [
+    {
+      "parentName": "Sales",
+      "name": "Order management",
+      "description": ""
+    },
+    {
+      "parentName": "Inventory",
+      "name": "Stock",
+      "description": ""
+    }
+  ]
+}

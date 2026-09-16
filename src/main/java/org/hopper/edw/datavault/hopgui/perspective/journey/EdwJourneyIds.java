@@ -55,6 +55,10 @@ public final class EdwJourneyIds {
     return "catalog-version:" + Const.NVL(tag, "");
   }
 
+  public static String busMatrix() {
+    return "bus-matrix";
+  }
+
   public static String model(String modelType, String storedPath) {
     return "model:" + Const.NVL(modelType, "") + ":" + normalize(storedPath);
   }

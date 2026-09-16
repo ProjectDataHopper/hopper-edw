@@ -7,6 +7,7 @@
   "name": "retail-sources",
   "previewRowLimit": 1000,
   "dataCatalogConnection": "local-catalog",
+  "businessProcessCatalog": "retail-bus",
   "description": "Retail DV/BV/DM models. List order within each layer is update order for the Update resource definition group action.",
   "business_vault_model": [
     "${PROJECT_HOME}/models/retail-360.hbv",

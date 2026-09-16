@@ -34,6 +34,7 @@ import org.apache.hop.metadata.api.HopMetadataCategory;
 import org.hopper.edw.catalog.metadata.DataCatalogMeta;
 import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultConfiguration;
+import org.hopper.edw.datavault.metadata.busmatrix.BusinessProcessCatalogMeta;
 import org.hopper.edw.datavault.metadata.datatypemapping.DataTypeMappingMeta;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalConfiguration;
 import org.hopper.edw.datavault.metadata.jinja.JinjaMacroLibraryMeta;
@@ -49,6 +50,7 @@ class EdwMetadataCategoryTest {
 
   private static final List<Class<?>> EDW_METADATA_TYPES =
       List.of(
+          BusinessProcessCatalogMeta.class,
           BusinessVaultConfiguration.class,
           DataCatalogMeta.class,
           DataQualityRuleSetMeta.class,

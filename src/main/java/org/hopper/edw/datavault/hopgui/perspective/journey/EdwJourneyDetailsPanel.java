@@ -46,6 +46,7 @@ import org.hopper.edw.catalog.harvest.history.SchemaHarvestHistoryReader.Harvest
 import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.hopper.edw.datavault.hopgui.EdwDocsGuiPlugin;
 import org.hopper.edw.datavault.hopgui.StandardProjectElementsOfferSupport;
+import org.hopper.edw.datavault.hopgui.busmatrix.BusMatrixLaunchSupport;
 import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneyDocsSupport.DocLink;
 import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneyOpsOverlay.EdwJourneyProblem;
 import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneyOpsOverlay.LoadOverviewSummary;
@@ -255,6 +256,12 @@ public final class EdwJourneyDetailsPanel {
           buttons,
           BaseMessages.getString(PKG, "EdwJourneyDetailsPanel.Grow.ConfigureEdw"),
           () -> EdwJourneyCreateSupport.configureEdw(hopGui));
+      if (group != null) {
+        addButton(
+            buttons,
+            BaseMessages.getString(PKG, "EdwJourneyDetailsPanel.BusMatrix"),
+            () -> BusMatrixLaunchSupport.open(hopGui, group));
+      }
     }
     if (node.kind() == Kind.STAGE && node.stage() == EdwJourneyStage.SOURCES) {
       addButton(
@@ -311,6 +318,10 @@ public final class EdwJourneyDetailsPanel {
     if (node.kind() == Kind.STAGE && node.stage() == EdwJourneyStage.DIMENSIONAL && group != null) {
       addButton(
           buttons,
+          BaseMessages.getString(PKG, "EdwJourneyDetailsPanel.BusMatrix"),
+          () -> BusMatrixLaunchSupport.open(hopGui, group));
+      addButton(
+          buttons,
           BaseMessages.getString(PKG, "EdwJourneyDetailsPanel.Grow.NewDimensional"),
           () ->
               EdwJourneyCreateSupport.newWarehouseModel(
@@ -340,7 +351,8 @@ public final class EdwJourneyDetailsPanel {
               WORKFLOW,
               WORKFLOW_ACTION,
               OUTPUT_FILE,
-              CATALOG_VERSION ->
+              CATALOG_VERSION,
+              BUS_MATRIX ->
           true;
       case CONTROL -> node.control() != null && node.control() != EdwJourneyControl.SOURCE_QUALITY;
       default -> false;
@@ -353,6 +365,7 @@ public final class EdwJourneyDetailsPanel {
           BaseMessages.getString(PKG, "EdwJourneyDetailsPanel.Open.Model");
       case CATALOG_FEED -> BaseMessages.getString(PKG, "EdwJourneyDetailsPanel.Open.Catalog");
       case GROUP -> BaseMessages.getString(PKG, "EdwJourneyDetailsPanel.Open.Group");
+      case BUS_MATRIX -> BaseMessages.getString(PKG, "EdwJourneyDetailsPanel.BusMatrix");
       case WORKFLOW, WORKFLOW_ACTION, OUTPUT_FILE ->
           BaseMessages.getString(PKG, "EdwJourneyDetailsPanel.Open.File");
       case CONTROL ->

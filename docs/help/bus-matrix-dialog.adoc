@@ -1,0 +1,28 @@
+= Bus matrix
+:toc: macro
+:toclevels: 2
+
+toc::[]
+
+Related guide: link:../bus-matrix.adoc[Kimball bus matrix].
+
+The **bus matrix** is a derived Kimball crosstab over every dimensional model (`.hdm`) on a **resource definition group**.
+
+* **Rows** — fact-like tables, grouped by Business / L1 / L2 / L3
+* **Columns** — conformed dimensions (role-playing aliases collapse to the physical table)
+* **Cells** — `X` (or a role count) where the fact uses that dimension
+
+== Open
+
+* Resource definition group editor → **Bus matrix**
+* EDW Journey → Dimensional stage → **Bus matrix**
+* Dimensional model canvas toolbar
+* **Tools → View bus matrix…**
+
+== Navigation
+
+The **Group** combo switches resource definition group. Filter by business or process level, search fact/dimension names, and toggle unused dimensions. Double-click a row, column, or cell to open the `.hdm` table. Export **SVG** or **CSV** from the toolbar. Dimension names tilt 45° counter-clockwise inside trapeziums that follow the text. The header row is tall so long names fit.
+
+image::../images/bus-matrix-of-the-retail-example.png[Bus matrix for retail-sources — inventory, order lines, and orders against conformed dimensions,align="center"]
+
+The same matrix is written into **Generate project documentation**.

@@ -47,6 +47,7 @@ public final class EdwJourneyNavigationSupport {
       case SOURCE_MODEL, MODEL, MODEL_TABLE -> canOpenModel(node, variables);
       case CATALOG_FEED -> node.catalogKey() != null && !Utils.isEmpty(node.catalogConnection());
       case WORKFLOW, WORKFLOW_ACTION, OUTPUT_FILE -> !Utils.isEmpty(node.storedPath());
+      case BUS_MATRIX -> true;
       default -> false;
     };
   }
@@ -69,6 +70,8 @@ public final class EdwJourneyNavigationSupport {
           CatalogVersionGuiSupport.listVersionsForGroup(hopGui, group);
         }
       }
+      case BUS_MATRIX ->
+          org.hopper.edw.datavault.hopgui.busmatrix.BusMatrixLaunchSupport.open(hopGui, group);
       default -> {
         // Stages and folders have no single artifact to open.
       }

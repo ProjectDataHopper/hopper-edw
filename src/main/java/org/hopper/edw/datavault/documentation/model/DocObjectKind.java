@@ -26,6 +26,7 @@ public enum DocObjectKind {
   DATA_VAULT_MODEL("Data Vault models"),
   BUSINESS_VAULT_MODEL("Business Vault models"),
   DIMENSIONAL_MODEL("Dimensional models"),
+  BUS_MATRIX("Bus matrices"),
   EXECUTION_MAP("Execution maps"),
   TABLE("Tables"),
   METADATA("Metadata"),

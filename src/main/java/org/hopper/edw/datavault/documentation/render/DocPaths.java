@@ -222,6 +222,10 @@ public final class DocPaths {
     return "catalog/" + slug(namespace) + "/" + slug(name) + ".html";
   }
 
+  public static String busMatrixHref(String groupName) {
+    return "bus-matrices/" + slug(groupName) + ".html";
+  }
+
   public static String asset(String htmlPath, String siteRelativeAsset) {
     return relativize(htmlPath, siteRelativeAsset);
   }

@@ -14,6 +14,10 @@
       "type": "string",
       "description": "Name of metadata/data-catalog entry."
     },
+    "businessProcessCatalog": {
+      "type": "string",
+      "description": "Optional metadata/business-process-catalog name for the Kimball bus matrix."
+    },
     "detailedDataTypeChecking": { "type": "boolean" },
     "previewRowLimit": { "type": "integer" },
     "data_vault_model": {

@@ -10,7 +10,7 @@ Edit a **fact** (transaction, factless, snapshot, or aggregate) on a `.hdm` canv
 
 == General and source
 
-Name, physical table, Kimball **grain** sentence, and staging source (none / logical, SQL, pipeline, or catalog record).
+Name, physical table, Kimball **grain** sentence, **business process** (Business / L1 / L2 / L3 from the link:../bus-matrix.adoc[bus matrix] catalog), and staging source (none / logical, SQL, pipeline, or catalog record). **Business process catalog** on the General tab opens that metadata type in the Metadata perspective.
 
 == Grain
 

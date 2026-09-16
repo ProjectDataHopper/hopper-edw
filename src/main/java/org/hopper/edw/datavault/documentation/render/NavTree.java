@@ -37,6 +37,7 @@ public final class NavTree {
     DocObjectKind.DATA_VAULT_MODEL,
     DocObjectKind.BUSINESS_VAULT_MODEL,
     DocObjectKind.DIMENSIONAL_MODEL,
+    DocObjectKind.BUS_MATRIX,
     DocObjectKind.EXECUTION_MAP,
     DocObjectKind.TABLE,
     DocObjectKind.METADATA,

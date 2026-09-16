@@ -26,6 +26,7 @@ For product documentation, start at [../README.md](../README.md) or [../feature-
 | [diagram-export-plugin-plan.md](diagram-export-plugin-plan.md) | Issue #175 — Implemented: SVG, PDF, PlantUML, Draw.io, Mermaid exporters for `.hsm` / `.hdv` / `.hbv` / `.hdm` / `.hem` on Hop 2.20 Diagram Exporter (apache/hop#8346) |
 | [hop-lineage-view-plan.md](hop-lineage-view-plan.md) | Issue #79 — Hop Lineage View (`.hlv`) over OpenLineage backends |
 | [edw-journey-perspective-plan.md](edw-journey-perspective-plan.md) | EDW Journey perspective (canonical tree over a resource definition group) |
+| (session plan / issue #177) | Kimball bus matrix — product doc: [../bus-matrix.adoc](../bus-matrix.adoc) |
 | [data-type-mappings-plan.md](data-type-mappings-plan.md) | Issue #113 — project data type mappings / pre-modeling sources |
 | [target-type-mappings-plan.md](target-type-mappings-plan.md) | Issue #127 — Hop type → native SQL type preferences for DDL |
 | [snowflake-support-plan.md](snowflake-support-plan.md) | Snowflake as a fifth EDW engine (dialect done; live LocalStack/real-account completion) |

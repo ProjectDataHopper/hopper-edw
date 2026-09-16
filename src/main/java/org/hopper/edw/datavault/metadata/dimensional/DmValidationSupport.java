@@ -30,6 +30,7 @@ import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.datavault.metadata.busmatrix.BusinessProcessCatalogSupport;
 import org.hopper.edw.datavault.transform.datedimensiongenerator.DateDimensionGeneratorLogic;
 
 /** Kimball validation rules for dimensional model tables. */
@@ -166,6 +167,7 @@ public final class DmValidationSupport {
     validateRangeDimensionRoles(remarks, fact, model, metadataProvider, variables);
     validateJunkDimensionRoles(remarks, fact, model, metadataProvider, variables);
     validateGrain(remarks, fact, variables);
+    validateBusinessProcess(remarks, fact, metadataProvider, variables);
     validateSourceConfiguration(remarks, fact, model, metadataProvider, variables);
     validateTargetLayout(remarks, fact, model, metadataProvider, variables);
   }
@@ -196,6 +198,7 @@ public final class DmValidationSupport {
     validateRangeDimensionRoles(remarks, fact, model, metadataProvider, variables);
     validateJunkDimensionRoles(remarks, fact, model, metadataProvider, variables);
     validateGrain(remarks, fact, variables);
+    validateBusinessProcess(remarks, fact, metadataProvider, variables);
     validateSourceConfiguration(remarks, fact, model, metadataProvider, variables);
     validateTargetLayout(remarks, fact, model, metadataProvider, variables);
   }
@@ -226,6 +229,7 @@ public final class DmValidationSupport {
     validateRangeDimensionRoles(remarks, fact, model, metadataProvider, variables);
     validateJunkDimensionRoles(remarks, fact, model, metadataProvider, variables);
     validateGrain(remarks, fact, variables);
+    validateBusinessProcess(remarks, fact, metadataProvider, variables);
     validateSourceConfiguration(remarks, fact, model, metadataProvider, variables);
     validateTargetLayout(remarks, fact, model, metadataProvider, variables);
   }
@@ -328,6 +332,7 @@ public final class DmValidationSupport {
     validateRangeDimensionRoles(remarks, fact, model, metadataProvider, variables);
     validateJunkDimensionRoles(remarks, fact, model, metadataProvider, variables);
     validateGrain(remarks, fact, variables);
+    validateBusinessProcess(remarks, fact, metadataProvider, variables);
     validateSourceConfiguration(remarks, fact, model, metadataProvider, variables);
     validateTargetLayout(remarks, fact, model, metadataProvider, variables);
   }
@@ -683,6 +688,7 @@ public final class DmValidationSupport {
     validateRangeDimensionRoles(remarks, fact, model, metadataProvider, variables);
     validateJunkDimensionRoles(remarks, fact, model, metadataProvider, variables);
     validateGrain(remarks, fact, variables);
+    validateBusinessProcess(remarks, fact, metadataProvider, variables);
     validateSourceConfiguration(remarks, fact, model, metadataProvider, variables);
     if (!fact.isLogicalContract()) {
       validateFactSourceFields(remarks, fact, model, metadataProvider, variables);
@@ -2183,6 +2189,48 @@ public final class DmValidationSupport {
               ICheckResult.TYPE_RESULT_WARNING,
               BaseMessages.getString(
                   PKG, "DmValidationSupport.CheckResult.MissingGrain", table.getName()),
+              table));
+    }
+  }
+
+  public static void validateBusinessProcess(
+      List<ICheckResult> remarks,
+      DmTableBase table,
+      IHopMetadataProvider metadataProvider,
+      IVariables variables) {
+    if (remarks == null || table == null) {
+      return;
+    }
+    DmBusinessProcessRef ref = table.getBusinessProcessOrEmpty();
+    if (ref.isEmpty()) {
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_WARNING,
+              BaseMessages.getString(
+                  PKG, "DmValidationSupport.CheckResult.MissingBusinessProcess", table.getName()),
+              table));
+      return;
+    }
+    DmBusinessProcessRef resolved = new DmBusinessProcessRef();
+    resolved.setBusiness(resolve(ref.getBusiness(), variables));
+    resolved.setLevel1(resolve(ref.getLevel1(), variables));
+    resolved.setLevel2(resolve(ref.getLevel2(), variables));
+    resolved.setLevel3(resolve(ref.getLevel3(), variables));
+    BusinessProcessCatalogSupport.ResolvedCatalog catalog =
+        BusinessProcessCatalogSupport.load(metadataProvider, (String) null);
+    if (catalog.isEmpty()) {
+      return;
+    }
+    List<String> issues = catalog.validate(resolved);
+    if (!issues.isEmpty()) {
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_WARNING,
+              BaseMessages.getString(
+                  PKG,
+                  "DmValidationSupport.CheckResult.UnknownBusinessProcess",
+                  table.getName(),
+                  String.join(", ", issues)),
               table));
     }
   }

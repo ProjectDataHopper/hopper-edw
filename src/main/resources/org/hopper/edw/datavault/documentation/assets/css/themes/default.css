@@ -32,6 +32,7 @@
   --hop-doc-note-bg: #fff8e8;
   --hop-doc-badge-bg: #d9ecf5;
   --hop-doc-badge-fg: #17324d;
+  --hop-doc-bus-matrix-x: #ecf5fa;
   --hop-doc-focus: #0b6e99;
   --hop-doc-svg-viewport-bg: #ffffff;
   --hop-doc-font-sans: "Segoe UI", system-ui, sans-serif;
@@ -55,6 +56,7 @@ html[data-theme="dark"] {
   --hop-doc-note-bg: #2a2416;
   --hop-doc-badge-bg: #1d3a4c;
   --hop-doc-badge-fg: #d5eaf3;
+  --hop-doc-bus-matrix-x: #1b2c39;
   --hop-doc-focus: #7ec8e3;
   --hop-doc-svg-viewport-bg: #0f1318;
 }
@@ -74,6 +76,7 @@ html[data-theme="dark"] {
     --hop-doc-note-bg: #2a2416;
     --hop-doc-badge-bg: #1d3a4c;
     --hop-doc-badge-fg: #d5eaf3;
+    --hop-doc-bus-matrix-x: #1b2c39;
     --hop-doc-focus: #7ec8e3;
     --hop-doc-svg-viewport-bg: #0f1318;
   }
@@ -516,4 +519,108 @@ html[data-theme="dark"] .hop-doc-svg-dark {
     border-right: 0;
     border-bottom: 1px solid var(--hop-doc-border);
   }
+}
+
+.hop-doc-bus-matrix-wrap {
+  max-height: 70vh;
+  overflow: auto;
+}
+
+.hop-doc-bus-matrix {
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.85rem;
+}
+
+.hop-doc-bus-matrix th,
+.hop-doc-bus-matrix td {
+  border: 1px solid var(--hop-doc-border);
+  padding: 0.25rem 0.4rem;
+  white-space: nowrap;
+  background: var(--hop-doc-bg);
+}
+
+.hop-doc-bus-matrix thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: var(--hop-doc-header-bg);
+  color: var(--hop-doc-header-fg);
+}
+
+.hop-doc-bus-matrix-sticky {
+  position: sticky;
+  z-index: 2;
+  background: var(--hop-doc-sidebar-bg);
+}
+
+.hop-doc-bus-matrix-c1 { left: 0; min-width: 7rem; }
+.hop-doc-bus-matrix-c2 { left: 7rem; min-width: 7rem; }
+.hop-doc-bus-matrix-c3 { left: 14rem; min-width: 7rem; }
+.hop-doc-bus-matrix-c4 { left: 21rem; min-width: 7rem; }
+.hop-doc-bus-matrix-c5 { left: 28rem; min-width: 8rem; }
+
+.hop-doc-bus-matrix thead .hop-doc-bus-matrix-sticky {
+  z-index: 4;
+  background: var(--hop-doc-header-bg);
+  color: var(--hop-doc-header-fg);
+  vertical-align: bottom;
+  padding-bottom: 1.35rem;
+}
+
+.hop-doc-bus-matrix-x {
+  text-align: center;
+  font-weight: 700;
+  background: var(--hop-doc-bus-matrix-x);
+  color: var(--hop-doc-badge-fg);
+}
+
+.hop-doc-bus-matrix thead .hop-doc-bus-matrix-dim {
+  position: relative;
+  width: 3.25rem;
+  min-width: 3.25rem;
+  max-width: 3.5rem;
+  height: 16rem;
+  padding: 0;
+  overflow: visible;
+  vertical-align: bottom;
+  white-space: nowrap;
+  text-align: left;
+  background: transparent;
+  border-color: transparent;
+}
+
+.hop-doc-bus-matrix-dim::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--hop-doc-header-bg);
+  border: 1px solid var(--hop-doc-border);
+  transform: skewX(-45deg);
+  transform-origin: left bottom;
+  pointer-events: none;
+}
+
+.hop-doc-bus-matrix-dim a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.hop-doc-bus-matrix-dim-label {
+  position: relative;
+  display: inline-block;
+  transform: rotate(-45deg);
+  transform-origin: bottom left;
+  white-space: nowrap;
+  font-weight: 600;
+  margin: 0 0 0.35rem 0.2rem;
+}
+
+.hop-doc-bus-matrix-group th,
+.hop-doc-bus-matrix-group td {
+  border-top-width: 2px;
+  border-top-color: var(--hop-doc-fg);
 }

@@ -61,6 +61,13 @@ public class ResourceDefinitionGroupMetaSearchableAnalyser
         "data catalog connection",
         group.getDataCatalogConnection(),
         getMetadataComponent());
+    matchProperty(
+        searchable,
+        results,
+        searchQuery,
+        "business process catalog",
+        group.getBusinessProcessCatalog(),
+        getMetadataComponent());
 
     for (String path : group.getDataVaultModelFiles()) {
       matchProperty(

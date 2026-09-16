@@ -31,6 +31,7 @@ Kimball-style dimensional model: dimensions, facts, junk dimensions, bridges, di
 ## Fact essentials
 
 - `grain` — Kimball grain sentence (also allowed empty on a logical contract; Check model warns)
+- `business_process` — optional `business`, `level1`, `level2`, `level3` for the Kimball bus matrix
 - `dimension_role` entries: `dimensionTableName` / `referencedDimensionName`, `foreignKeyColumn`, source fields, lookup flags  
 - Measure / key fields as defined in the sample  
 

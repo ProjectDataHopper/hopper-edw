@@ -48,7 +48,7 @@ These extensions participate when the plugin is installed (including Hop Lineage
 
 |`.hdm`
 |Dimensional Model
-|Model name/description; dimension/fact/bridge names; configuration; nested mappings; notes
+|Model name/description; dimension/fact/bridge names; business process fields; configuration; nested mappings; notes
 
 |`.hlv`
 |Hop Lineage View
@@ -91,6 +91,10 @@ Project `@HopMetadata` objects are always listed by Hop; the plugin adds **conte
 |Data quality rule set
 |`data-quality-rule-set`
 |Name, description; each rule id, name, field name, parameter values
+
+|Business process catalog
+|`business-process-catalog`
+|Name, description; domain and process level names, parents, descriptions
 
 |Lineage backend
 |`lineage-backend`

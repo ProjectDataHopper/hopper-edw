@@ -44,6 +44,7 @@ public record EdwJourneyTreeNode(
     CATALOG_VERSION,
     MODEL,
     MODEL_TABLE,
+    BUS_MATRIX,
     WORKFLOW,
     WORKFLOW_ACTION,
     OUTPUT_GROUP,

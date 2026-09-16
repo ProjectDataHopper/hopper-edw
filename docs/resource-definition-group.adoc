@@ -44,6 +44,9 @@ image::images/resource-definition-group-editor.png[Resource definition group edi
 |Default catalog connection
 |FILE catalog used when harvest, validate, tag, and Update RDG do not override it. Individual models may still name a catalog.
 
+|Business process catalog
+|Optional link:bus-matrix.adoc[bus matrix] taxonomy. Empty unions every **Business process catalog** in the project.
+
 |Preview row limit
 |Rows attempted for file-source readability checks during validation.
 
@@ -72,6 +75,9 @@ Use **Add models** to pick project files. Filter the path list when the project 
 
 |**Open in EDW Journey**
 |Switch to the link:edw-journey.adoc[EDW Journey] perspective for this group (sources through outputs).
+
+|**Bus matrix**
+|Open the link:bus-matrix.adoc[Kimball bus matrix] for the group's dimensional models.
 
 |**Generate .hsm from harvest…**
 |Day-2: build or merge a source model from the latest harvest FK inventory. Not a greenfield first step.

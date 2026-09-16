@@ -59,6 +59,10 @@ public abstract class DmTableBase extends HopMetadataBase implements IHopMetadat
    */
   @HopMetadataProperty protected String grain;
 
+  /** Bus-matrix taxonomy. Used on fact-like tables; ignored on dimensions. */
+  @HopMetadataProperty(key = "business_process")
+  private DmBusinessProcessRef businessProcess;
+
   @HopMetadataProperty protected DmTableType tableType;
 
   @HopMetadataProperty(inline = true)
@@ -89,6 +93,13 @@ public abstract class DmTableBase extends HopMetadataBase implements IHopMetadat
       source = new DmSourceConfiguration();
     }
     return source;
+  }
+
+  public DmBusinessProcessRef getBusinessProcessOrEmpty() {
+    if (businessProcess == null) {
+      businessProcess = new DmBusinessProcessRef();
+    }
+    return businessProcess;
   }
 
   /** True when this table is a logical contract (no executable staging source). */

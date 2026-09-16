@@ -102,6 +102,36 @@ public class DimensionalModelSearchAnalyser extends BaseSearchableAnalyser<Dimen
           "dimensional table grain",
           table.getGrain(),
           componentName);
+      if (table instanceof DmTableBase tableBase) {
+        matchProperty(
+            searchable,
+            results,
+            searchQuery,
+            "business",
+            tableBase.getBusinessProcessOrEmpty().getBusiness(),
+            componentName);
+        matchProperty(
+            searchable,
+            results,
+            searchQuery,
+            "process level 1",
+            tableBase.getBusinessProcessOrEmpty().getLevel1(),
+            componentName);
+        matchProperty(
+            searchable,
+            results,
+            searchQuery,
+            "process level 2",
+            tableBase.getBusinessProcessOrEmpty().getLevel2(),
+            componentName);
+        matchProperty(
+            searchable,
+            results,
+            searchQuery,
+            "process level 3",
+            tableBase.getBusinessProcessOrEmpty().getLevel3(),
+            componentName);
+      }
       matchDocumentedFields(searchable, results, searchQuery, table, componentName);
       matchObjectFields(
           searchable, results, searchQuery, table, "dimensional table property", componentName);

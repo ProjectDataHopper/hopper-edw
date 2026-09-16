@@ -53,12 +53,14 @@ import org.eclipse.swt.widgets.Text;
 import org.hopper.edw.catalog.versioning.CatalogVersionGuiSupport;
 import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
 import org.hopper.edw.datavault.hopgui.GuiBusySupport;
+import org.hopper.edw.datavault.hopgui.busmatrix.BusMatrixLaunchSupport;
 import org.hopper.edw.datavault.hopgui.file.businessvault.HopBusinessVaultFileType;
 import org.hopper.edw.datavault.hopgui.file.dimensional.HopDimensionalFileType;
 import org.hopper.edw.datavault.hopgui.file.vault.HopVaultFileType;
 import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
 import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 import org.hopper.edw.datavault.hopgui.resourcedefinition.ResourceDefinitionValidationGuiSupport;
+import org.hopper.edw.datavault.metadata.busmatrix.BusinessProcessCatalogMeta;
 import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 import org.hopper.edw.datavault.naming.EdwNamingWidgetSupport;
 
@@ -79,6 +81,7 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
   private Text wName;
   private Text wDescription;
   private Combo wCatalogConnection;
+  private Combo wBusinessProcessCatalog;
   private Text wPreviewRowLimit;
   private Button wDetailedChecking;
   private CTabFolder tabFolder;
@@ -146,6 +149,30 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
     fdCatalog.right = new FormAttachment(100, 0);
     wCatalogConnection.setLayoutData(fdCatalog);
     lastControl = wCatalogConnection;
+
+    Label wlBusCatalog = new Label(parent, SWT.RIGHT);
+    PropsUi.setLook(wlBusCatalog);
+    wlBusCatalog.setText(
+        BaseMessages.getString(
+            PKG, "ResourceDefinitionGroupMetaEditor.BusinessProcessCatalog.Label"));
+    FormData fdlBusCatalog = new FormData();
+    fdlBusCatalog.top = new FormAttachment(lastControl, margin);
+    fdlBusCatalog.left = new FormAttachment(0, 0);
+    fdlBusCatalog.right = new FormAttachment(middle, -margin);
+    wlBusCatalog.setLayoutData(fdlBusCatalog);
+
+    wBusinessProcessCatalog = new Combo(parent, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+    PropsUi.setLook(wBusinessProcessCatalog);
+    wBusinessProcessCatalog.setToolTipText(
+        BaseMessages.getString(
+            PKG, "ResourceDefinitionGroupMetaEditor.BusinessProcessCatalog.ToolTip"));
+    populateBusinessProcessCatalogs();
+    FormData fdBusCatalog = new FormData();
+    fdBusCatalog.top = new FormAttachment(wlBusCatalog, 0, SWT.CENTER);
+    fdBusCatalog.left = new FormAttachment(middle, 0);
+    fdBusCatalog.right = new FormAttachment(100, 0);
+    wBusinessProcessCatalog.setLayoutData(fdBusCatalog);
+    lastControl = wBusinessProcessCatalog;
 
     lastControl =
         addTextField(
@@ -274,6 +301,17 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
     fdOpenJourney.bottom = new FormAttachment(100, 0);
     wOpenJourney.setLayoutData(fdOpenJourney);
 
+    Button wBusMatrix = new Button(parent, SWT.PUSH);
+    wBusMatrix.setText(
+        BaseMessages.getString(PKG, "ResourceDefinitionGroupMetaEditor.BusMatrix.Label"));
+    wBusMatrix.setToolTipText(
+        BaseMessages.getString(PKG, "ResourceDefinitionGroupMetaEditor.BusMatrix.ToolTip"));
+    wBusMatrix.addListener(SWT.Selection, e -> openBusMatrix());
+    FormData fdBusMatrix = new FormData();
+    fdBusMatrix.right = new FormAttachment(wOpenJourney, -margin);
+    fdBusMatrix.bottom = new FormAttachment(100, 0);
+    wBusMatrix.setLayoutData(fdBusMatrix);
+
     Button wGenerateHsmFromHarvest = new Button(parent, SWT.PUSH);
     wGenerateHsmFromHarvest.setText(
         BaseMessages.getString(
@@ -283,7 +321,7 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
             PKG, "ResourceDefinitionGroupMetaEditor.GenerateHsmFromHarvest.ToolTip"));
     wGenerateHsmFromHarvest.addListener(SWT.Selection, e -> generateHsmFromHarvest());
     FormData fdGenerateHsmFromHarvest = new FormData();
-    fdGenerateHsmFromHarvest.right = new FormAttachment(wOpenJourney, -margin);
+    fdGenerateHsmFromHarvest.right = new FormAttachment(wBusMatrix, -margin);
     fdGenerateHsmFromHarvest.bottom = new FormAttachment(100, 0);
     wGenerateHsmFromHarvest.setLayoutData(fdGenerateHsmFromHarvest);
 
@@ -294,6 +332,7 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
     wName.addListener(SWT.Modify, modifyListener);
     wDescription.addListener(SWT.Modify, modifyListener);
     wCatalogConnection.addListener(SWT.Modify, modifyListener);
+    wBusinessProcessCatalog.addListener(SWT.Modify, modifyListener);
     wPreviewRowLimit.addListener(SWT.Modify, modifyListener);
     wDetailedChecking.addListener(SWT.Selection, modifyListener);
   }
@@ -483,6 +522,28 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
     setChanged();
   }
 
+  private void populateBusinessProcessCatalogs() {
+    wBusinessProcessCatalog.removeAll();
+    wBusinessProcessCatalog.add("");
+    try {
+      IHopMetadataProvider metadataProvider = hopGui.getMetadataProvider();
+      if (metadataProvider == null) {
+        return;
+      }
+      List<String> names =
+          metadataProvider.getSerializer(BusinessProcessCatalogMeta.class).listObjectNames();
+      if (names == null) {
+        return;
+      }
+      names.stream()
+          .filter(name -> !Utils.isEmpty(name))
+          .sorted()
+          .forEach(wBusinessProcessCatalog::add);
+    } catch (Exception ignored) {
+      // Catalog type may not be registered yet in tests.
+    }
+  }
+
   private void populateCatalogConnections() {
     wCatalogConnection.removeAll();
     wCatalogConnection.add("");
@@ -517,6 +578,12 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
     ResourceDefinitionGroupMeta draft = new ResourceDefinitionGroupMeta();
     getWidgetsContent(draft);
     CatalogVersionGuiSupport.listVersionsForGroup(HopGui.getInstance(), draft);
+  }
+
+  private void openBusMatrix() {
+    ResourceDefinitionGroupMeta draft = new ResourceDefinitionGroupMeta();
+    getWidgetsContent(draft);
+    BusMatrixLaunchSupport.open(HopGui.getInstance(), draft);
   }
 
   private void browseLineage() {
@@ -566,6 +633,7 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
     wName.setText(Const.NVL(meta.getName(), ""));
     wDescription.setText(Const.NVL(meta.getDescription(), ""));
     wCatalogConnection.setText(Const.NVL(meta.getDataCatalogConnection(), ""));
+    wBusinessProcessCatalog.setText(Const.NVL(meta.getBusinessProcessCatalog(), ""));
     wPreviewRowLimit.setText(String.valueOf(Math.max(1, meta.getPreviewRowLimit())));
     wDetailedChecking.setSelection(meta.isDetailedDataTypeChecking());
 
@@ -591,6 +659,7 @@ public class ResourceDefinitionGroupMetaEditor extends MetadataEditor<ResourceDe
     meta.setName(wName.getText());
     meta.setDescription(wDescription.getText());
     meta.setDataCatalogConnection(wCatalogConnection.getText());
+    meta.setBusinessProcessCatalog(wBusinessProcessCatalog.getText());
     try {
       meta.setPreviewRowLimit(Integer.parseInt(wPreviewRowLimit.getText().trim()));
     } catch (NumberFormatException e) {

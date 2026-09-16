@@ -17,6 +17,7 @@ package org.hopper.edw.datavault.resourcedefinition;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
@@ -114,6 +115,65 @@ public final class ResourceDefinitionGroupResolver {
               PKG, "ResourceDefinitionGroupResolver.Error.GroupNotFound", groupName));
     }
     return group;
+  }
+
+  /**
+   * Resource definition groups whose dimensional-model list includes {@code modelFilename} (after
+   * variable resolution and leaf-name matching).
+   */
+  public static List<ResourceDefinitionGroupMeta> findGroupsForDimensionalModel(
+      IHopMetadataProvider provider, IVariables variables, String modelFilename)
+      throws HopException {
+    List<ResourceDefinitionGroupMeta> matches = new ArrayList<>();
+    if (provider == null || Utils.isEmpty(modelFilename)) {
+      return matches;
+    }
+    String wanted = normalizeModelPath(modelFilename, variables);
+    List<String> names =
+        provider.getSerializer(ResourceDefinitionGroupMeta.class).listObjectNames();
+    if (names == null) {
+      return matches;
+    }
+    for (String name : names) {
+      ResourceDefinitionGroupMeta group =
+          provider.getSerializer(ResourceDefinitionGroupMeta.class).load(name);
+      if (group == null) {
+        continue;
+      }
+      for (String path : group.getDimensionalModelFiles()) {
+        String resolved = variables != null ? variables.resolve(Const.NVL(path, "")) : path;
+        if (wanted.equals(normalizeModelPath(path, variables))
+            || sameModelLeaf(wanted, path)
+            || sameModelLeaf(wanted, resolved)) {
+          matches.add(group);
+          break;
+        }
+      }
+    }
+    return matches;
+  }
+
+  static String normalizeModelPath(String path, IVariables variables) {
+    String resolved =
+        variables != null ? variables.resolve(Const.NVL(path, "")) : Const.NVL(path, "");
+    try {
+      return HopVfs.normalize(resolved);
+    } catch (Exception e) {
+      return resolved.replace('\\', '/');
+    }
+  }
+
+  static boolean sameModelLeaf(String normalized, String listed) {
+    if (Utils.isEmpty(normalized) || Utils.isEmpty(listed)) {
+      return false;
+    }
+    String leaf = listed.replace('\\', '/');
+    int slash = leaf.lastIndexOf('/');
+    if (slash >= 0) {
+      leaf = leaf.substring(slash + 1);
+    }
+    String wanted = normalized.replace('\\', '/');
+    return wanted.endsWith("/" + leaf) || wanted.endsWith(leaf);
   }
 
   private static String resolveGroupCatalogConnection(

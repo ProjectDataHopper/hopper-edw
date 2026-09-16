@@ -43,6 +43,7 @@ import org.apache.hop.ui.core.widget.StyledTextComp;
 import org.apache.hop.ui.core.widget.TableView;
 import org.apache.hop.ui.core.widget.TextComposite;
 import org.apache.hop.ui.hopgui.HopGui;
+import org.apache.hop.ui.hopgui.perspective.metadata.MetadataPerspective;
 import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.apache.hop.ui.util.EnvironmentUtils;
 import org.eclipse.swt.SWT;
@@ -63,12 +64,16 @@ import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
 import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 import org.hopper.edw.datavault.hopgui.lineage.LineageTabSupport;
 import org.hopper.edw.datavault.lineage.DmModelLineageCollector;
+import org.hopper.edw.datavault.metadata.busmatrix.BusinessProcessCatalogMeta;
+import org.hopper.edw.datavault.metadata.busmatrix.BusinessProcessCatalogSupport;
+import org.hopper.edw.datavault.metadata.busmatrix.BusinessProcessCatalogSupport.TermLevel;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalConfiguration;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
 import org.hopper.edw.datavault.metadata.dimensional.DmAccumulatingSnapshotFact;
 import org.hopper.edw.datavault.metadata.dimensional.DmAggregateFact;
 import org.hopper.edw.datavault.metadata.dimensional.DmBridge;
 import org.hopper.edw.datavault.metadata.dimensional.DmBridgeDimensionRef;
+import org.hopper.edw.datavault.metadata.dimensional.DmBusinessProcessRef;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimension;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimensionAlias;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimensionAttribute;
@@ -126,6 +131,11 @@ public class HopGuiDmTableDialog {
   private Text wTableName;
   private Text wDescription;
   private Text wGrain;
+  private Combo wBusiness;
+  private Combo wProcessLevel1;
+  private Combo wProcessLevel2;
+  private Combo wProcessLevel3;
+  private BusinessProcessCatalogSupport.ResolvedCatalog processCatalog;
   private Combo wSourceType;
   private Label wlLogicalSource;
   private MetaSelectionLine<DatabaseMeta> wSourceConnection;
@@ -386,6 +396,7 @@ public class HopGuiDmTableDialog {
       wGrain.setToolTipText(BaseMessages.getString(PKG, "HopGuiDmTableDialog.Grain.ToolTip"));
       wGrain.setLayoutData(
           new FormDataBuilder().left(middle, 0).top(wDescription, margin).right().result());
+      addBusinessProcessFields(comp, wGrain, middle, margin);
     }
 
     if (dimensionAlias) {
@@ -418,6 +429,146 @@ public class HopGuiDmTableDialog {
     } else if (junk) {
       addJunkSurrogateKeyControls(comp, wDescription);
     }
+  }
+
+  private void addBusinessProcessFields(
+      Composite comp, org.eclipse.swt.widgets.Control top, int middle, int margin) {
+    processCatalog = BusinessProcessCatalogSupport.load(metadataProvider, (String) null);
+
+    Label wlCatalog = new Label(comp, SWT.RIGHT);
+    wlCatalog.setText(BaseMessages.getString(PKG, "HopGuiDmTableDialog.OpenProcessCatalog.Label"));
+    wlCatalog.setToolTipText(
+        BaseMessages.getString(PKG, "HopGuiDmTableDialog.OpenProcessCatalog.ToolTip"));
+    PropsUi.setLook(wlCatalog);
+
+    Button wOpenCatalog = new Button(comp, SWT.PUSH);
+    wOpenCatalog.setText(
+        BaseMessages.getString(PKG, "HopGuiDmTableDialog.OpenProcessCatalog.Button"));
+    wOpenCatalog.setToolTipText(
+        BaseMessages.getString(PKG, "HopGuiDmTableDialog.OpenProcessCatalog.ToolTip"));
+    PropsUi.setLook(wOpenCatalog);
+    wOpenCatalog.setLayoutData(new FormDataBuilder().left(middle, 0).top(top, margin).result());
+    wOpenCatalog.addListener(SWT.Selection, e -> openBusinessProcessCatalog());
+    wlCatalog.setLayoutData(
+        new FormDataBuilder()
+            .left()
+            .top(wOpenCatalog, 0, SWT.CENTER)
+            .right(middle, -margin)
+            .result());
+
+    wBusiness =
+        addProcessCombo(
+            comp,
+            wOpenCatalog,
+            middle,
+            margin,
+            "HopGuiDmTableDialog.Business.Label",
+            "HopGuiDmTableDialog.Business.ToolTip",
+            TermLevel.DOMAIN,
+            null);
+    wProcessLevel1 =
+        addProcessCombo(
+            comp,
+            wBusiness,
+            middle,
+            margin,
+            "HopGuiDmTableDialog.ProcessLevel1.Label",
+            "HopGuiDmTableDialog.ProcessLevel1.ToolTip",
+            TermLevel.LEVEL1,
+            wBusiness);
+    wProcessLevel2 =
+        addProcessCombo(
+            comp,
+            wProcessLevel1,
+            middle,
+            margin,
+            "HopGuiDmTableDialog.ProcessLevel2.Label",
+            "HopGuiDmTableDialog.ProcessLevel2.ToolTip",
+            TermLevel.LEVEL2,
+            wProcessLevel1);
+    wProcessLevel3 =
+        addProcessCombo(
+            comp,
+            wProcessLevel2,
+            middle,
+            margin,
+            "HopGuiDmTableDialog.ProcessLevel3.Label",
+            "HopGuiDmTableDialog.ProcessLevel3.ToolTip",
+            TermLevel.LEVEL3,
+            wProcessLevel2);
+    wBusiness.addListener(
+        SWT.Modify, e -> refreshProcessChildren(wProcessLevel1, TermLevel.LEVEL1, wBusiness));
+    wProcessLevel1.addListener(
+        SWT.Modify, e -> refreshProcessChildren(wProcessLevel2, TermLevel.LEVEL2, wProcessLevel1));
+    wProcessLevel2.addListener(
+        SWT.Modify, e -> refreshProcessChildren(wProcessLevel3, TermLevel.LEVEL3, wProcessLevel2));
+    if (shell != null) {
+      shell.addListener(SWT.Activate, e -> reloadProcessCatalog());
+    }
+  }
+
+  private void openBusinessProcessCatalog() {
+    try {
+      MetadataPerspective perspective = HopGui.getMetadataPerspective();
+      if (perspective == null) {
+        throw new HopException(
+            BaseMessages.getString(PKG, "HopGuiDmTableDialog.OpenProcessCatalog.Error.Message"));
+      }
+      perspective.activate();
+      perspective.goToType(BusinessProcessCatalogMeta.class);
+    } catch (Exception e) {
+      new ErrorDialog(
+          shell,
+          BaseMessages.getString(PKG, "HopGuiDmTableDialog.OpenProcessCatalog.Error.Title"),
+          BaseMessages.getString(PKG, "HopGuiDmTableDialog.OpenProcessCatalog.Error.Message"),
+          e);
+    }
+  }
+
+  private void reloadProcessCatalog() {
+    if (wBusiness == null || wBusiness.isDisposed()) {
+      return;
+    }
+    processCatalog = BusinessProcessCatalogSupport.load(metadataProvider, (String) null);
+    String business = wBusiness.getText();
+    wBusiness.setItems(processCatalog.names(TermLevel.DOMAIN, null, business));
+    wBusiness.setText(Const.NVL(business, ""));
+    refreshProcessChildren(wProcessLevel1, TermLevel.LEVEL1, wBusiness);
+    refreshProcessChildren(wProcessLevel2, TermLevel.LEVEL2, wProcessLevel1);
+    refreshProcessChildren(wProcessLevel3, TermLevel.LEVEL3, wProcessLevel2);
+  }
+
+  private Combo addProcessCombo(
+      Composite comp,
+      org.eclipse.swt.widgets.Control top,
+      int middle,
+      int margin,
+      String labelKey,
+      String tooltipKey,
+      TermLevel level,
+      Combo parentCombo) {
+    Label label = new Label(comp, SWT.RIGHT);
+    label.setText(BaseMessages.getString(PKG, labelKey));
+    label.setToolTipText(BaseMessages.getString(PKG, tooltipKey));
+    PropsUi.setLook(label);
+    label.setLayoutData(
+        new FormDataBuilder().left().top(top, margin).right(middle, -margin).result());
+    Combo combo = new Combo(comp, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+    PropsUi.setLook(combo);
+    combo.setToolTipText(BaseMessages.getString(PKG, tooltipKey));
+    combo.setLayoutData(new FormDataBuilder().left(middle, 0).top(top, margin).right().result());
+    String parentName = parentCombo != null ? parentCombo.getText() : null;
+    combo.setItems(processCatalog.names(level, parentName, null));
+    return combo;
+  }
+
+  private void refreshProcessChildren(Combo child, TermLevel level, Combo parent) {
+    if (child == null || processCatalog == null) {
+      return;
+    }
+    String current = child.getText();
+    child.setItems(processCatalog.names(level, parent.getText(), current));
+    child.setText(Const.NVL(current, ""));
   }
 
   private void addSurrogateKeyControls(Composite comp, org.eclipse.swt.widgets.Control topControl) {
@@ -2066,6 +2217,16 @@ public class HopGuiDmTableDialog {
     if (wGrain != null && !Utils.isEmpty(input.getGrain())) {
       wGrain.setText(input.getGrain());
     }
+    if (wBusiness != null && input instanceof DmTableBase tableBase) {
+      DmBusinessProcessRef process = tableBase.getBusinessProcessOrEmpty();
+      wBusiness.setText(Const.NVL(process.getBusiness(), ""));
+      refreshProcessChildren(wProcessLevel1, TermLevel.LEVEL1, wBusiness);
+      wProcessLevel1.setText(Const.NVL(process.getLevel1(), ""));
+      refreshProcessChildren(wProcessLevel2, TermLevel.LEVEL2, wProcessLevel1);
+      wProcessLevel2.setText(Const.NVL(process.getLevel2(), ""));
+      refreshProcessChildren(wProcessLevel3, TermLevel.LEVEL3, wProcessLevel2);
+      wProcessLevel3.setText(Const.NVL(process.getLevel3(), ""));
+    }
     if (!dimensionAlias && !range) {
       EnumDialogSupport.selectCombo(wSourceType, input.getSourceOrDefault().resolveSourceType());
       if (!Utils.isEmpty(input.getSourceOrDefault().getSourceConnection())) {
@@ -2401,6 +2562,13 @@ public class HopGuiDmTableDialog {
     target.setDescription(wDescription.getText());
     if (wGrain != null) {
       target.setGrain(wGrain.getText());
+    }
+    if (wBusiness != null && target instanceof DmTableBase tableBase) {
+      DmBusinessProcessRef process = tableBase.getBusinessProcessOrEmpty();
+      process.setBusiness(wBusiness.getText());
+      process.setLevel1(wProcessLevel1.getText());
+      process.setLevel2(wProcessLevel2.getText());
+      process.setLevel3(wProcessLevel3.getText());
     }
     if (!dimensionAlias && !range) {
       target.setTableName(wTableName.getText());

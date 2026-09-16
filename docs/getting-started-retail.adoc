@@ -197,7 +197,11 @@ Reference: link:dv-link.adoc#transactional-links-dependent-child-keys[Transactio
 
 image::images/dimensional-model-f-orders.png[Dimensional model — f_orders,align="center"]
 
-The `f_order_lines` fact in `retail-f-order-lines.hdm` reuses conformed dimensions from `retail-conformed-dims` and adds role-playing date dimensions for order, shipping, and delivery dates. Its source SQL reads `line_number` from **`lnk_order_line`** (dependent child key on the transactional link) and measures from the current row of `sat_lnk_order_line`:
+The `f_order_lines` fact in `retail-f-order-lines.hdm` reuses conformed dimensions from `retail-conformed-dims` and adds role-playing date dimensions for order, shipping, and delivery dates. Facts are tagged with Business / process levels from metadata **retail-bus**; open the link:bus-matrix.adoc[bus matrix] from resource definition group **retail-sources**.
+
+image::images/bus-matrix-of-the-retail-example.png[Bus matrix for retail-sources — inventory, order lines, and orders against conformed dimensions,align="center"]
+
+Its source SQL reads `line_number` from **`lnk_order_line`** (dependent child key on the transactional link) and measures from the current row of `sat_lnk_order_line`:
 
 image::images/dimensional-model-f-order-lines.png[Dimensional model — f_order_lines with conformed dimension roles,align="center"]
 

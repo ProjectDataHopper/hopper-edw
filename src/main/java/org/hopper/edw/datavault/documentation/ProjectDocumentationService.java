@@ -35,6 +35,7 @@ import org.hopper.edw.datavault.documentation.render.HtmlPageWriter;
 import org.hopper.edw.datavault.documentation.scan.ProjectFileScanner;
 import org.hopper.edw.datavault.documentation.scan.ScannedFile;
 import org.hopper.edw.datavault.documentation.writers.AssetCopyWriter;
+import org.hopper.edw.datavault.documentation.writers.BusMatrixDocWriter;
 import org.hopper.edw.datavault.documentation.writers.CatalogDocWriter;
 import org.hopper.edw.datavault.documentation.writers.IndexWriter;
 import org.hopper.edw.datavault.documentation.writers.MetadataDocWriter;
@@ -134,7 +135,7 @@ public final class ProjectDocumentationService {
     progress.subTask("Scanning project files");
     List<ScannedFile> files = ProjectFileScanner.scan(sourceRoot, targetRoot);
     int extra =
-        3 + (options.isIncludingMetadata() ? 1 : 0) + (options.isIncludingCatalog() ? 1 : 0);
+        4 + (options.isIncludingMetadata() ? 1 : 0) + (options.isIncludingCatalog() ? 1 : 0);
     progress.beginTask(
         "Generating project documentation for " + site.getProjectName(), files.size() + extra);
 
@@ -174,6 +175,11 @@ public final class ProjectDocumentationService {
     if (!result.isCancelled() && options.isIncludingMetadata()) {
       progress.subTask("Documenting metadata");
       MetadataDocWriter.writeAll(site);
+      progress.worked(1);
+    }
+    if (!result.isCancelled()) {
+      progress.subTask("Documenting bus matrices");
+      BusMatrixDocWriter.writeAll(site);
       progress.worked(1);
     }
     if (!result.isCancelled() && options.isIncludingCatalog()) {

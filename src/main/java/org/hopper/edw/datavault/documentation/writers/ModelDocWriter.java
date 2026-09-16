@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.function.Function;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
+import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.hopper.edw.datavault.documentation.DocumentationSite;
 import org.hopper.edw.datavault.documentation.export.DocumentSvgExporter;
 import org.hopper.edw.datavault.documentation.load.DocumentationArtifactLoader;
@@ -51,6 +52,7 @@ import org.hopper.edw.datavault.metadata.dimensional.DmFactDegenerateDimension;
 import org.hopper.edw.datavault.metadata.dimensional.DmFactMeasure;
 import org.hopper.edw.datavault.metadata.dimensional.DmFieldDocumentation;
 import org.hopper.edw.datavault.metadata.dimensional.DmNaturalKeyField;
+import org.hopper.edw.datavault.metadata.dimensional.DmTableBase;
 import org.hopper.edw.datavault.metadata.dimensional.IDmDocumentedField;
 import org.hopper.edw.datavault.metadata.dimensional.IDmFactLikeTable;
 import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
@@ -59,6 +61,7 @@ import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapNode;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceColumn;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
+import org.hopper.edw.datavault.resourcedefinition.ResourceDefinitionGroupResolver;
 
 /** Documents .hsm / .hdv / .hbv / .hdm / .hem files and collects table pages. */
 public final class ModelDocWriter {
@@ -291,9 +294,11 @@ public final class ModelDocWriter {
     }
     List<String> extraHead = new ArrayList<>();
     StringBuilder body = new StringBuilder();
+    List<ResourceDefinitionGroupMeta> groups = groupsForDimensionalFile(site, file.relativePath());
     body.append(
         HtmlPageWriter.propertyTable(
             modelDetails(name, file.relativePath(), model.getDescription())));
+    body.append(busMatricesSection(htmlPath, groups));
     body.append(
         PageSupport.svgSection(
             site, htmlPath, DocPaths.stableId(file.relativePath()), svg, extraHead));
@@ -310,8 +315,28 @@ public final class ModelDocWriter {
       doc.setTableType(table.getTableType() != null ? table.getTableType().name() : "TABLE");
       doc.setDescription(table.getDescription());
       doc.setGrain(table.getGrain());
+      if (table instanceof DmTableBase tableBase) {
+        doc.setBusiness(tableBase.getBusinessProcessOrEmpty().getBusiness());
+        doc.setProcessLevel1(tableBase.getBusinessProcessOrEmpty().getLevel1());
+        doc.setProcessLevel2(tableBase.getBusinessProcessOrEmpty().getLevel2());
+        doc.setProcessLevel3(tableBase.getBusinessProcessOrEmpty().getLevel3());
+      }
       doc.setModelName(name);
       doc.setModelPageHref(htmlPath);
+      if (table instanceof IDmFactLikeTable) {
+        for (ResourceDefinitionGroupMeta group : groups) {
+          if (group == null || Utils.isEmpty(group.getName())) {
+            continue;
+          }
+          doc.getUsedBy()
+              .add(
+                  new NavItem(
+                      DocObjectKind.BUS_MATRIX,
+                      group.getName(),
+                      DocPaths.busMatrixHref(group.getName()),
+                      group.getDescription()));
+        }
+      }
       if (lineage != null) {
         lineage.findTableByLogicalName(table.getName()).ifPresent(doc::setLineage);
         if (doc.getLineage() != null) {
@@ -413,6 +438,35 @@ public final class ModelDocWriter {
     HtmlPageWriter.row(rows, "Filename", relative);
     HtmlPageWriter.row(rows, "Description", description);
     return rows;
+  }
+
+  private static List<ResourceDefinitionGroupMeta> groupsForDimensionalFile(
+      DocumentationSite site, String relativePath) {
+    try {
+      return ResourceDefinitionGroupResolver.findGroupsForDimensionalModel(
+          site.getMetadataProvider(), site.getVariables(), relativePath);
+    } catch (Exception e) {
+      site.warn("Unable to match bus matrices for " + relativePath + ": " + e.getMessage());
+      return List.of();
+    }
+  }
+
+  private static String busMatricesSection(
+      String htmlPath, List<ResourceDefinitionGroupMeta> groups) {
+    if (groups == null || groups.isEmpty()) {
+      return "";
+    }
+    StringBuilder html = new StringBuilder();
+    html.append("<section id=\"bus-matrices\"><h2>Bus matrices</h2><ul>\n");
+    for (ResourceDefinitionGroupMeta group : groups) {
+      if (group == null || Utils.isEmpty(group.getName())) {
+        continue;
+      }
+      String href = DocPaths.relativize(htmlPath, DocPaths.busMatrixHref(group.getName()));
+      html.append("<li>").append(HtmlPageWriter.link(href, group.getName())).append("</li>\n");
+    }
+    html.append("</ul></section>\n");
+    return html.toString();
   }
 
   private static String tableIndex(
