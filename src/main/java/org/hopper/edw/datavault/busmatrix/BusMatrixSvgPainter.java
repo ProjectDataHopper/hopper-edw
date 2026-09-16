@@ -33,10 +33,16 @@ public final class BusMatrixSvgPainter {
     return dark ? document.getDarkSvg() : document.getLightSvg();
   }
 
+  /** Geometry used by {@link #paintDocument}; shared with the viewer host. */
+  public static BusMatrixLayout layoutOf(BusMatrix matrix) {
+    BusMatrix safe = matrix != null ? matrix : new BusMatrix("", null, null, null);
+    return BusMatrixLayout.measure(safe, s -> Math.max(1, Const.NVL(s, "").length()) * 7, 12);
+  }
+
   public static SvgDocument paintDocument(
       BusMatrix matrix, boolean dark, Function<String, String> tableHref) {
     BusMatrix safe = matrix != null ? matrix : new BusMatrix("", null, null, null);
-    BusMatrixLayout layout = BusMatrixLayout.measure(safe, s -> Math.max(1, s.length()) * 7, 12);
+    BusMatrixLayout layout = layoutOf(safe);
     int width = Math.max(320, layout.width(safe));
     int height = Math.max(240, layout.height(safe));
     Palette palette = dark ? Palette.DARK : Palette.LIGHT;
@@ -49,7 +55,7 @@ public final class BusMatrixSvgPainter {
         .append(width)
         .append(' ')
         .append(height)
-        .append("\">\n");
+        .append("\" preserveAspectRatio=\"xMinYMin meet\">\n");
     rect(svg, 0, 0, width, height, palette.background, null);
     List<SvgHit> hits = new ArrayList<>();
 

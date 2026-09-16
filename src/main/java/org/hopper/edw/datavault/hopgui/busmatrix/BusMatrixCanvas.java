@@ -15,11 +15,16 @@
  */
 package org.hopper.edw.datavault.hopgui.busmatrix;
 
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
-import org.apache.hop.core.Const;
+import java.util.function.Consumer;
+import org.apache.hop.core.SwtUniversalImageSvg;
 import org.apache.hop.core.gui.CanvasSvgRenderResult;
 import org.apache.hop.core.gui.DPoint;
 import org.apache.hop.core.logging.LogChannel;
+import org.apache.hop.core.svg.SvgImage;
+import org.apache.hop.core.svg.SvgSupport;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.gui.GuiResource;
 import org.apache.hop.ui.hopgui.CanvasFacade;
@@ -27,490 +32,218 @@ import org.apache.hop.ui.hopgui.CanvasListener;
 import org.apache.hop.ui.hopgui.CanvasSvgFacade;
 import org.apache.hop.ui.util.EnvironmentUtils;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.graphics.Transform;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.ScrollBar;
 import org.hopper.edw.datavault.busmatrix.BusMatrix;
-import org.hopper.edw.datavault.busmatrix.BusMatrixCell;
-import org.hopper.edw.datavault.busmatrix.BusMatrixColumn;
 import org.hopper.edw.datavault.busmatrix.BusMatrixLayout;
-import org.hopper.edw.datavault.busmatrix.BusMatrixRow;
 import org.hopper.edw.datavault.busmatrix.BusMatrixSvgPainter;
+import org.hopper.edw.datavault.documentation.model.SvgDocument;
+import org.hopper.edw.datavault.documentation.model.SvgHit;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphWebCanvasData;
 
-/** Scrollable bus-matrix grid with frozen process labels and dimension headers. */
-final class BusMatrixCanvas extends Canvas {
+/**
+ * Shows a bus matrix as a single SVG (same drawing as export and project documentation). Desktop
+ * scrolls the whole picture; Hop Web uses the model-graph SVG overlay.
+ */
+final class BusMatrixCanvas extends Composite {
 
+  private final boolean web;
+  private final Canvas canvas;
+  private final ScrolledComposite scroll;
   private BusMatrix matrix = new BusMatrix("", null, null, null);
-  private BusMatrixLayout layout = BusMatrixLayout.DEFAULT;
-  private Color oddRowBackground;
-  private Color markBackground;
-  private String lastWebSvg;
-  private BusMatrix lastWebMatrix;
-  private boolean lastWebDark;
+  private List<SvgHit> hits = List.of();
+  private int svgWidth = 320;
+  private int svgHeight = 240;
+  private float magnification = 1.0f;
+  private DPoint offset = new DPoint(0, 0);
+  private SwtUniversalImageSvg desktopSvg;
+  private Consumer<SvgHit> hitListener;
 
   BusMatrixCanvas(Composite parent) {
-    super(
-        parent,
-        EnvironmentUtils.getInstance().isWeb()
-            ? SWT.NO_BACKGROUND
-            : SWT.H_SCROLL | SWT.V_SCROLL | SWT.NO_BACKGROUND | SWT.DOUBLE_BUFFERED);
+    super(parent, SWT.NONE);
+    setLayout(new FillLayout());
+    web = EnvironmentUtils.getInstance().isWeb();
+    if (web) {
+      scroll = null;
+      canvas = new Canvas(this, SWT.NO_BACKGROUND);
+      setupWebCanvas();
+    } else {
+      scroll = new ScrolledComposite(this, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+      scroll.setExpandHorizontal(true);
+      scroll.setExpandVertical(true);
+      canvas = new Canvas(scroll, SWT.NONE);
+      scroll.setContent(canvas);
+      canvas.addListener(SWT.Paint, this::paintDesktop);
+    }
     PropsUi.setLook(this);
+    PropsUi.setLook(canvas);
+    canvas.addListener(SWT.MouseMove, this::onMove);
+    canvas.addListener(SWT.MouseDoubleClick, this::onDoubleClick);
+    canvas.addListener(SWT.Resize, e -> redrawSurface());
     addDisposeListener(
         e -> {
-          if (EnvironmentUtils.getInstance().isWeb()) {
-            CanvasSvgFacade.unregisterCanvas(this);
+          if (web) {
+            CanvasSvgFacade.unregisterCanvas(canvas);
           }
-          disposeColor(oddRowBackground);
-          disposeColor(markBackground);
+          disposeDesktopSvg();
         });
-    addListener(SWT.Paint, this::paint);
-    addListener(SWT.Resize, e -> updateScrollBars());
-    addListener(SWT.MouseMove, this::onMove);
-    if (EnvironmentUtils.getInstance().isWeb()) {
-      setupWebCanvas(parent);
-    } else {
-      addListener(SWT.MouseWheel, this::onWheel);
-      ScrollBar hBar = getHorizontalBar();
-      ScrollBar vBar = getVerticalBar();
-      if (hBar != null) {
-        hBar.addListener(SWT.Selection, e -> redraw());
-      }
-      if (vBar != null) {
-        vBar.addListener(SWT.Selection, e -> redraw());
-      }
-    }
-  }
-
-  private void setupWebCanvas(Composite parent) {
-    Listener canvasListener = CanvasListener.getInstance();
-    addListener(SWT.MouseDown, canvasListener);
-    addListener(SWT.MouseMove, canvasListener);
-    addListener(SWT.MouseUp, canvasListener);
-    addListener(SWT.Paint, canvasListener);
-    addListener(SWT.MouseWheel, canvasListener);
-    addListener(SWT.MouseVerticalWheel, canvasListener);
-    CanvasSvgFacade.registerCanvas(this, this);
-    CanvasSvgFacade.ensureInteractionHandler(parent, this);
-    ModelGraphWebCanvasData.ensureEmptyCollections(this);
   }
 
   void setMatrix(BusMatrix matrix) {
     this.matrix = matrix != null ? matrix : new BusMatrix("", null, null, null);
-    lastWebSvg = null;
-    lastWebMatrix = null;
-    redraw();
+    rebuildSvg();
   }
 
   BusMatrix getMatrix() {
     return matrix;
   }
 
-  Hit hitAt(int x, int y) {
-    int scrollX = bar(getHorizontalBar());
-    int scrollY = bar(getVerticalBar());
-    if (y < layout.headerHeight() && x >= layout.frozenWidth()) {
-      int col = layout.headerColumnAt(x, y, scrollX, matrix.getColumns().size());
-      if (col >= 0) {
-        return new Hit(HitKind.COLUMN, -1, col);
-      }
-    }
-    if (x < layout.frozenWidth() && y >= layout.headerHeight()) {
-      int row = (y + scrollY - layout.headerHeight()) / Math.max(1, layout.rowHeight());
-      if (row >= 0 && row < matrix.getRows().size()) {
-        return new Hit(HitKind.ROW, row, -1);
-      }
-    }
-    if (x >= layout.frozenWidth() && y >= layout.headerHeight()) {
-      int col = (x + scrollX - layout.frozenWidth()) / Math.max(1, layout.cellWidth());
-      int row = (y + scrollY - layout.headerHeight()) / Math.max(1, layout.rowHeight());
-      if (row >= 0
-          && row < matrix.getRows().size()
-          && col >= 0
-          && col < matrix.getColumns().size()) {
-        return new Hit(HitKind.CELL, row, col);
+  void setHitListener(Consumer<SvgHit> hitListener) {
+    this.hitListener = hitListener;
+  }
+
+  SvgHit hitAt(int x, int y) {
+    int gx = Math.round(x / magnification - (float) offset.x);
+    int gy = Math.round(y / magnification - (float) offset.y);
+    for (int i = hits.size() - 1; i >= 0; i--) {
+      SvgHit hit = hits.get(i);
+      if (hit != null
+          && gx >= hit.x()
+          && gx < hit.x() + hit.w()
+          && gy >= hit.y()
+          && gy < hit.y() + hit.h()) {
+        return hit;
       }
     }
     return null;
   }
 
-  private void onMove(Event event) {
-    setToolTipText(tooltip(hitAt(event.x, event.y)));
+  private void setupWebCanvas() {
+    Listener canvasListener = CanvasListener.getInstance();
+    canvas.addListener(SWT.MouseDown, canvasListener);
+    canvas.addListener(SWT.MouseMove, canvasListener);
+    canvas.addListener(SWT.MouseUp, canvasListener);
+    canvas.addListener(SWT.Paint, canvasListener);
+    canvas.addListener(SWT.MouseWheel, canvasListener);
+    canvas.addListener(SWT.MouseVerticalWheel, canvasListener);
+    canvas.addListener(SWT.Paint, this::paintWebBackground);
+    CanvasSvgFacade.registerCanvas(canvas, this);
+    CanvasSvgFacade.ensureInteractionHandler(this, canvas);
+    ModelGraphWebCanvasData.ensureEmptyCollections(canvas);
   }
 
-  private void onWheel(Event event) {
-    ScrollBar bar = event.stateMask == SWT.SHIFT ? getHorizontalBar() : getVerticalBar();
-    if (bar == null || !bar.getVisible()) {
-      return;
-    }
-    int unit =
-        event.stateMask == SWT.SHIFT
-            ? Math.max(1, layout.cellWidth())
-            : Math.max(1, layout.rowHeight());
-    int step = event.count > 0 ? -unit * 3 : unit * 3;
-    bar.setSelection(bar.getSelection() + step);
-    redraw();
-  }
-
-  private String tooltip(Hit hit) {
-    if (hit == null) {
-      return null;
-    }
-    if (hit.kind == HitKind.COLUMN) {
-      BusMatrixColumn column = matrix.getColumns().get(hit.column);
-      return column.label() + " (" + column.physicalTableName() + ")";
-    }
-    if (hit.kind == HitKind.ROW) {
-      BusMatrixRow row = matrix.getRows().get(hit.row);
-      return row.factName() + (row.grain().isEmpty() ? "" : " — " + row.grain());
-    }
-    BusMatrixRow row = matrix.getRows().get(hit.row);
-    BusMatrixColumn column = matrix.getColumns().get(hit.column);
-    BusMatrixCell cell = row.cell(column.key());
-    if (!cell.used()) {
-      return row.factName() + " × " + column.label();
-    }
-    return row.factName() + " × " + column.label() + ": " + cell.tooltip();
-  }
-
-  private void paint(Event event) {
-    GC gc = event.gc;
-    Rectangle client = getClientArea();
-    if (client.width <= 0 || client.height <= 0) {
-      return;
-    }
-    if (EnvironmentUtils.getInstance().isWeb()) {
-      paintWeb(gc, client);
-      return;
-    }
-    BusMatrixLayout measured =
-        BusMatrixLayout.measure(
-            matrix, text -> gc.textExtent(Const.NVL(text, "")).x, gc.textExtent("Mg").y);
-    if (!measured.equals(layout)) {
-      layout = measured;
-      updateScrollBars();
-    }
-
-    int scrollX = bar(getHorizontalBar());
-    int scrollY = bar(getVerticalBar());
-    Color border = getDisplay().getSystemColor(SWT.COLOR_GRAY);
-    Color headerBg = getDisplay().getSystemColor(SWT.COLOR_DARK_BLUE);
-    Color headerFg = getDisplay().getSystemColor(SWT.COLOR_WHITE);
-    Color markBg = markBackground();
-    Color even = getDisplay().getSystemColor(SWT.COLOR_WHITE);
-    Color odd = oddRowBackground();
-    Color fg = getDisplay().getSystemColor(SWT.COLOR_BLACK);
-
-    gc.setBackground(even);
-    gc.fillRectangle(client);
-
-    int frozen = layout.frozenWidth();
-    int headerH = layout.headerHeight();
-    int cellW = layout.cellWidth();
-    int rowH = layout.rowHeight();
-
-    int firstCol = Math.max(0, scrollX / Math.max(1, cellW));
-    int firstRow = Math.max(0, scrollY / Math.max(1, rowH));
-    int lastCol =
-        Math.min(matrix.getColumns().size() - 1, firstCol + client.width / Math.max(1, cellW) + 2);
-    int lastRow =
-        Math.min(matrix.getRows().size() - 1, firstRow + client.height / Math.max(1, rowH) + 2);
-
-    Rectangle dataClip =
-        new Rectangle(
-            frozen,
-            headerH,
-            Math.max(0, client.width - frozen),
-            Math.max(0, client.height - headerH));
-    Rectangle rowClip = new Rectangle(0, headerH, frozen, Math.max(0, client.height - headerH));
-
-    for (int r = firstRow; r <= lastRow && r >= 0; r++) {
-      BusMatrixRow row = matrix.getRows().get(r);
-      int y = layout.cellY(r) - scrollY;
-      Color rowBg = r % 2 == 0 ? even : odd;
-      boolean groupStart =
-          BusMatrixLayout.startsGroup(r == 0 ? null : matrix.getRows().get(r - 1), row);
-      for (int c = firstCol; c <= lastCol && c >= 0; c++) {
-        BusMatrixColumn column = matrix.getColumns().get(c);
-        BusMatrixCell cell = row.cell(column.key());
-        int x = layout.cellX(c) - scrollX;
-        fillCell(gc, x, y, cellW, rowH, cell.used() ? markBg : rowBg, border, dataClip, groupStart);
-        if (cell.used()) {
-          gc.setForeground(fg);
-          drawCentered(gc, cell.mark(), x, y, cellW, rowH, dataClip);
-        }
-      }
-    }
-
-    for (int r = firstRow; r <= lastRow && r >= 0; r++) {
-      BusMatrixRow row = matrix.getRows().get(r);
-      int y = layout.cellY(r) - scrollY;
-      Color rowBg = r % 2 == 0 ? even : odd;
-      boolean groupStart =
-          BusMatrixLayout.startsGroup(r == 0 ? null : matrix.getRows().get(r - 1), row);
-      for (int i = 0; i < BusMatrixLayout.FROZEN_COLUMNS; i++) {
-        int x = layout.labelX(i);
-        int w = layout.labelWidth(i);
-        fillCell(gc, x, y, w, rowH, rowBg, border, rowClip, groupStart);
-        gc.setForeground(fg);
-        drawClipped(
-            gc,
-            BusMatrixLayout.ellipsize(
-                BusMatrixLayout.frozenValue(row, i),
-                w - BusMatrixLayout.FROZEN_COLUMN_MARGIN,
-                text -> gc.textExtent(text).x),
-            x + 6,
-            y,
-            w - 8,
-            rowH,
-            rowClip);
-      }
-    }
-
-    Rectangle headerBand = new Rectangle(0, 0, client.width, headerH);
-    gc.setClipping(headerBand);
-    gc.setBackground(even);
-    gc.fillRectangle(frozen, 0, Math.max(0, client.width - frozen), headerH);
-
-    gc.setBackground(headerBg);
-    gc.fillRectangle(0, 0, frozen, headerH);
-    for (int i = 0; i < BusMatrixLayout.FROZEN_COLUMNS; i++) {
-      int x = layout.labelX(i);
-      int w = layout.labelWidth(i);
-      gc.setForeground(border);
-      gc.drawRectangle(x, 0, w, headerH);
-      gc.setForeground(headerFg);
-      drawClipped(
-          gc,
-          BusMatrixLayout.FROZEN_HEADERS[i],
-          x + 6,
-          headerH - BusMatrixLayout.FROZEN_HEADER_BAND - BusMatrixLayout.FROZEN_HEADER_LIFT,
-          w - 8,
-          BusMatrixLayout.FROZEN_HEADER_BAND,
-          null);
-    }
-
-    if (!EnvironmentUtils.getInstance().isWeb()) {
-      gc.setAntialias(SWT.ON);
-      gc.setTextAntialias(SWT.ON);
-    }
-    int headerFirstCol = Math.max(0, (scrollX - headerH) / Math.max(1, cellW));
-    int headerLastCol =
-        Math.min(
-            matrix.getColumns().size() - 1,
-            (scrollX + Math.max(0, client.width - frozen) + headerH) / Math.max(1, cellW) + 1);
-    for (int c = headerFirstCol; c <= headerLastCol && c >= 0; c++) {
-      int[] pts = layout.headerTrapezium(c, -scrollX, 0);
-      gc.setBackground(headerBg);
-      gc.fillPolygon(pts);
-      gc.setForeground(border);
-      gc.drawPolygon(pts);
-    }
-    gc.setForeground(headerFg);
-    int maxLabelPx = BusMatrixLayout.maxLabelPxForHeader(headerH, gc.textExtent("Mg").y);
-    for (int c = headerFirstCol; c <= headerLastCol && c >= 0; c++) {
-      BusMatrixColumn column = matrix.getColumns().get(c);
-      int x = layout.cellX(c) - scrollX;
-      drawRotatedHeader(
-          gc,
-          BusMatrixLayout.ellipsize(
-              column.label(), maxLabelPx, text -> gc.textExtent(Const.NVL(text, "")).x),
-          x,
-          0,
-          cellW,
-          headerH);
-    }
-    gc.setClipping(client);
-  }
-
-  private void fillCell(GC gc, int x, int y, int w, int h, Color bg, Color border, Rectangle clip) {
-    fillCell(gc, x, y, w, h, bg, border, clip, false);
-  }
-
-  private void fillCell(
-      GC gc,
-      int x,
-      int y,
-      int w,
-      int h,
-      Color bg,
-      Color border,
-      Rectangle clip,
-      boolean groupStart) {
-    Rectangle old = gc.getClipping();
-    gc.setClipping(intersect(old, clip, new Rectangle(x, y, w, h)));
-    gc.setBackground(bg);
-    gc.fillRectangle(x, y, w, h);
-    gc.setForeground(border);
-    gc.drawRectangle(x, y, w, h);
-    if (groupStart) {
-      gc.setLineWidth(2);
-      gc.drawLine(x, y, x + w, y);
-      gc.setLineWidth(1);
-    }
-    gc.setClipping(old);
-  }
-
-  private void drawClipped(GC gc, String text, int x, int y, int w, int h, Rectangle extraClip) {
-    if (text == null || text.isEmpty() || w <= 0 || h <= 0) {
-      return;
-    }
-    Rectangle old = gc.getClipping();
-    gc.setClipping(intersect(old, extraClip, new Rectangle(x, y, w, h)));
-    Point extent = gc.textExtent(text);
-    int ty = y + Math.max(0, (h - extent.y) / 2);
-    gc.drawText(text, x, ty, true);
-    gc.setClipping(old);
-  }
-
-  private void drawCentered(GC gc, String text, int x, int y, int w, int h, Rectangle clip) {
-    Rectangle old = gc.getClipping();
-    gc.setClipping(intersect(old, clip, new Rectangle(x, y, w, h)));
-    Point extent = gc.textExtent(text);
-    gc.drawText(
-        text, x + Math.max(0, (w - extent.x) / 2), y + Math.max(0, (h - extent.y) / 2), true);
-    gc.setClipping(old);
-  }
-
-  private void drawRotatedHeader(GC gc, String text, int x, int y, int w, int h) {
-    if (text == null || text.isEmpty() || w <= 0 || h <= 0) {
-      return;
-    }
-    Point extent = gc.textExtent(text);
-    int cx = Math.round(BusMatrixLayout.headerLabelCenterX(x, w, h));
-    int cy = Math.round(BusMatrixLayout.headerLabelCenterY(y, h));
-    if (EnvironmentUtils.getInstance().isWeb()) {
-      gc.drawText(text, cx - extent.x / 2, cy - extent.y / 2, true);
-      return;
-    }
-    gc.setAdvanced(true);
-    Transform previous = new Transform(gc.getDevice());
-    Transform rotated = new Transform(gc.getDevice());
+  private void rebuildSvg() {
+    boolean dark = false;
     try {
-      gc.getTransform(previous);
-      gc.getTransform(rotated);
-      rotated.translate(cx, cy);
-      rotated.rotate(BusMatrixLayout.HEADER_TILT_DEGREES);
-      gc.setTransform(rotated);
-      gc.drawText(text, -extent.x / 2, -extent.y / 2, true);
-    } finally {
-      gc.setTransform(previous);
-      previous.dispose();
-      rotated.dispose();
+      dark = PropsUi.getInstance().isDarkMode();
+    } catch (Throwable ignored) {
+      // Headless / tests
     }
+    SvgDocument document = BusMatrixSvgPainter.paintDocument(matrix, dark, null);
+    String svg = dark ? document.getDarkSvg() : document.getLightSvg();
+    hits = List.copyOf(document.getHits());
+    BusMatrixLayout layout = BusMatrixSvgPainter.layoutOf(matrix);
+    svgWidth = layout.width(matrix);
+    svgHeight = layout.height(matrix);
+    if (web) {
+      publishWebSvg(svg);
+    } else {
+      rebuildDesktopImage(svg);
+    }
+    redrawSurface();
   }
 
-  private static Rectangle intersect(Rectangle a, Rectangle b, Rectangle c) {
-    Rectangle result =
-        a != null ? new Rectangle(a.x, a.y, a.width, a.height) : new Rectangle(0, 0, 0, 0);
-    if (b != null) {
-      result.intersect(b);
-    }
-    if (c != null) {
-      result.intersect(c);
-    }
-    return result;
+  private void publishWebSvg(String svg) {
+    Rectangle client = canvas.getClientArea();
+    int viewW = Math.max(1, client.width);
+    int viewH = Math.max(1, client.height);
+    CanvasSvgRenderResult result =
+        new CanvasSvgRenderResult(
+            svg,
+            List.of(),
+            new org.apache.hop.core.gui.Rectangle(0, 0, viewW, viewH),
+            new org.apache.hop.core.gui.Rectangle(0, 0, svgWidth, svgHeight));
+    CanvasSvgFacade.publishSnapshot(
+        canvas, result, magnification, offset, new org.apache.hop.core.gui.Point(viewW, viewH));
+    CanvasFacade.setData(canvas, magnification, offset, matrix);
+    ModelGraphWebCanvasData.ensureEmptyCollections(canvas);
   }
 
-  private void paintWeb(GC gc, Rectangle client) {
-    layout = BusMatrixLayout.measure(matrix, s -> Math.max(1, Const.NVL(s, "").length()) * 7, 12);
+  private void rebuildDesktopImage(String svg) {
+    disposeDesktopSvg();
+    if (svg == null || svg.isBlank()) {
+      return;
+    }
     try {
-      boolean dark = PropsUi.getInstance().isDarkMode();
-      if (lastWebSvg == null || lastWebMatrix != matrix || lastWebDark != dark) {
-        lastWebSvg = BusMatrixSvgPainter.paint(matrix, dark);
-        lastWebMatrix = matrix;
-        lastWebDark = dark;
+      SvgImage loaded =
+          SvgSupport.loadSvgImage(new ByteArrayInputStream(svg.getBytes(StandardCharsets.UTF_8)));
+      desktopSvg = new SwtUniversalImageSvg(loaded, true);
+      canvas.setSize(svgWidth, svgHeight);
+      if (scroll != null) {
+        scroll.setMinSize(svgWidth, svgHeight);
       }
-      org.apache.hop.core.gui.Rectangle viewPort =
-          new org.apache.hop.core.gui.Rectangle(0, 0, client.width, client.height);
-      org.apache.hop.core.gui.Rectangle graphPort =
-          new org.apache.hop.core.gui.Rectangle(0, 0, layout.width(matrix), layout.height(matrix));
-      CanvasSvgRenderResult result =
-          new CanvasSvgRenderResult(lastWebSvg, List.of(), viewPort, graphPort);
-      CanvasSvgFacade.publishSnapshot(
-          this,
-          result,
-          1.0f,
-          new DPoint(0, 0),
-          new org.apache.hop.core.gui.Point(client.width, client.height));
-      CanvasFacade.setData(this, 1.0f, new DPoint(0, 0), matrix);
-      ModelGraphWebCanvasData.ensureEmptyCollections(this);
     } catch (Exception e) {
-      LogChannel.UI.logError("Failed to render bus matrix SVG for Hop Web", e);
+      LogChannel.UI.logError("Failed to rasterize bus matrix SVG", e);
     }
+  }
+
+  private void paintDesktop(Event event) {
+    GC gc = event.gc;
+    Rectangle client = canvas.getClientArea();
     gc.setBackground(GuiResource.getInstance().getColorBackground());
     gc.fillRectangle(client);
-  }
-
-  private void updateScrollBars() {
-    if (EnvironmentUtils.getInstance().isWeb()) {
+    if (desktopSvg == null) {
       return;
     }
-    Rectangle client = getClientArea();
+    Image bitmap = desktopSvg.getAsBitmapForSize(getDisplay(), svgWidth, svgHeight);
+    gc.drawImage(bitmap, 0, 0);
+  }
+
+  private void paintWebBackground(Event event) {
+    Rectangle client = canvas.getClientArea();
     if (client.width <= 0 || client.height <= 0) {
       return;
     }
-    int contentW = layout.width(matrix);
-    int contentH = layout.height(matrix);
-    configure(
-        getHorizontalBar(),
-        Math.max(0, contentW - layout.frozenWidth()),
-        Math.max(1, client.width - layout.frozenWidth()));
-    configure(
-        getVerticalBar(),
-        Math.max(0, contentH - layout.headerHeight()),
-        Math.max(1, client.height - layout.headerHeight()));
+    publishWebSvg(
+        PropsUi.getInstance().isDarkMode()
+            ? BusMatrixSvgPainter.paint(matrix, true)
+            : BusMatrixSvgPainter.paint(matrix, false));
+    event.gc.setBackground(GuiResource.getInstance().getColorBackground());
+    event.gc.fillRectangle(client);
   }
 
-  private static void configure(ScrollBar bar, int content, int visible) {
-    if (bar == null) {
+  private void onMove(Event event) {
+    SvgHit hit = hitAt(event.x, event.y);
+    canvas.setToolTipText(hit == null ? null : hit.name());
+  }
+
+  private void onDoubleClick(Event event) {
+    if (hitListener == null) {
       return;
     }
-    int thumb = Math.max(1, visible);
-    int max = Math.max(thumb + 1, content);
-    bar.setMinimum(0);
-    bar.setThumb(Math.min(thumb, max));
-    bar.setMaximum(max);
-    bar.setVisible(content > visible);
-  }
-
-  private Color oddRowBackground() {
-    if (oddRowBackground == null || oddRowBackground.isDisposed()) {
-      oddRowBackground = new Color(getDisplay(), 242, 244, 247);
-    }
-    return oddRowBackground;
-  }
-
-  private Color markBackground() {
-    if (markBackground == null || markBackground.isDisposed()) {
-      // Half the previous #d9ecf5 contrast against white.
-      markBackground = new Color(getDisplay(), 236, 245, 250);
-    }
-    return markBackground;
-  }
-
-  private static void disposeColor(Color color) {
-    if (color != null && !color.isDisposed()) {
-      color.dispose();
+    SvgHit hit = hitAt(event.x, event.y);
+    if (hit != null) {
+      hitListener.accept(hit);
     }
   }
 
-  private static int bar(ScrollBar bar) {
-    return bar != null && bar.getVisible() ? bar.getSelection() : 0;
+  private void redrawSurface() {
+    if (canvas != null && !canvas.isDisposed()) {
+      canvas.redraw();
+    }
   }
 
-  enum HitKind {
-    ROW,
-    COLUMN,
-    CELL
+  private void disposeDesktopSvg() {
+    if (desktopSvg != null) {
+      desktopSvg.dispose();
+      desktopSvg = null;
+    }
   }
-
-  record Hit(HitKind kind, int row, int column) {}
 }

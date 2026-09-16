@@ -91,6 +91,12 @@ class RetailBusMatrixTest {
     assertTrue(inventory.cell(columnKey(matrix, "qty_class")).used());
     assertFalse(inventory.cell(columnKey(matrix, "d_customer")).used());
     assertFalse(inventory.cell(columnKey(matrix, "d_order")).used());
+
+    String svg = BusMatrixSvgPainter.paint(matrix, false);
+    assertTrue(svg.contains("Retail"), svg);
+    assertTrue(svg.contains("Order management"), svg);
+    assertTrue(svg.contains("Inventory snapshot"), svg);
+    assertTrue(svg.contains("preserveAspectRatio=\"xMinYMin meet\""), svg);
   }
 
   private static BusMatrixRow row(BusMatrix matrix, String factName) {

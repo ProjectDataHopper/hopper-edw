@@ -49,6 +49,7 @@ import org.hopper.edw.datavault.busmatrix.BusMatrixColumn;
 import org.hopper.edw.datavault.busmatrix.BusMatrixCsvWriter;
 import org.hopper.edw.datavault.busmatrix.BusMatrixRow;
 import org.hopper.edw.datavault.busmatrix.BusMatrixSvgPainter;
+import org.hopper.edw.datavault.documentation.model.SvgHit;
 import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
 import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 import org.hopper.edw.datavault.resourcedefinition.ResourceDefinitionGroupResolver;
@@ -181,7 +182,7 @@ public final class BusMatrixViewerDialog {
     fdCanvas.right = new FormAttachment(100, 0);
     fdCanvas.bottom = new FormAttachment(wlStatus, -margin);
     canvas.setLayoutData(fdCanvas);
-    canvas.addListener(SWT.MouseDoubleClick, e -> openHit(canvas.hitAt(e.x, e.y)));
+    canvas.setHitListener(this::openHit);
 
     rebuild();
     updateTitle();
@@ -306,18 +307,26 @@ public final class BusMatrixViewerDialog {
     wlStatus.setText(status);
   }
 
-  private void openHit(BusMatrixCanvas.Hit hit) {
+  private void openHit(SvgHit hit) {
     if (hit == null || hopGui == null) {
       return;
     }
     BusMatrix shown = canvas.getMatrix();
     try {
-      if (hit.kind() == BusMatrixCanvas.HitKind.COLUMN) {
-        BusMatrixColumn column = shown.getColumns().get(hit.column());
-        navigate(column.modelFilename(), column.dimensionName());
+      if ("dimension".equals(hit.type())) {
+        for (BusMatrixColumn column : shown.getColumns()) {
+          if (hit.name().equals(column.dimensionName()) || hit.name().equals(column.label())) {
+            navigate(column.modelFilename(), column.dimensionName());
+            return;
+          }
+        }
       } else {
-        BusMatrixRow row = shown.getRows().get(hit.row());
-        navigate(row.modelFilename(), row.factName());
+        for (BusMatrixRow row : shown.getRows()) {
+          if (hit.name().equals(row.factName())) {
+            navigate(row.modelFilename(), row.factName());
+            return;
+          }
+        }
       }
     } catch (Exception e) {
       new ErrorDialog(

@@ -38,7 +38,6 @@ import org.hopper.edw.datavault.metadata.dimensional.DmFactJunkDimensionRole;
 import org.hopper.edw.datavault.metadata.dimensional.DmFactRangeDimensionRole;
 import org.hopper.edw.datavault.metadata.dimensional.DmJunkDimension;
 import org.hopper.edw.datavault.metadata.dimensional.DmRangeDimension;
-import org.hopper.edw.datavault.metadata.dimensional.DmTableBase;
 import org.hopper.edw.datavault.metadata.dimensional.IDmFactLikeTable;
 import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
 import org.hopper.edw.datavault.resourcedefinition.ResourceDefinitionGroupResolver;
@@ -286,10 +285,7 @@ public final class BusMatrixBuilder {
 
   private static RowAcc newRow(
       DimensionalModel model, IDmFactLikeTable fact, IVariables variables) {
-    DmBusinessProcessRef process =
-        fact instanceof DmTableBase tableBase
-            ? tableBase.getBusinessProcessOrEmpty()
-            : new DmBusinessProcessRef();
+    DmBusinessProcessRef process = fact.getBusinessProcessOrEmpty();
     RowAcc row = new RowAcc();
     row.factName = Const.NVL(fact.getName(), "");
     row.physicalTableName = Const.NVL(fact.getTableName(), row.factName);
