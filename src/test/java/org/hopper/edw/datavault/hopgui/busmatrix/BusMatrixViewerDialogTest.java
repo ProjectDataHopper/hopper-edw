@@ -33,6 +33,12 @@ class BusMatrixViewerDialogTest {
   }
 
   @Test
+  void contrastIfDarkLeavesSvgWhenNotDark() {
+    String svg = "<svg fill=\"#ffffff\"/>";
+    assertEquals(svg, BusMatrixCanvas.contrastIfDark(svg));
+  }
+
+  @Test
   void resolveExportFilenameStripsHopInstallPrefixAndExpandsProjectHome() {
     Variables vars = new Variables();
     vars.setVariable("PROJECT_HOME", "/home/matt/git/ProjectDataHopper/hopper-edw");

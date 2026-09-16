@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Locale;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.hop.core.Const;
+import org.apache.hop.core.Props;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
@@ -29,6 +30,7 @@ import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
+import org.apache.hop.ui.core.gui.GuiResource;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.eclipse.swt.SWT;
@@ -40,6 +42,8 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.hopper.edw.catalog.hopgui.navigation.RecordOriginNavigationSupport;
 import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.hopper.edw.catalog.model.RecordOrigin;
@@ -167,6 +171,13 @@ public final class BusMatrixViewerDialog {
     wHideUnused.setLayoutData(fdHide);
     wHideUnused.addListener(SWT.Selection, e -> applyFilter());
 
+    ToolBar zoomBar = createZoomBar(shell);
+    FormData fdZoom = new FormData();
+    fdZoom.left = new FormAttachment(0, 0);
+    fdZoom.top = new FormAttachment(wSearch, margin);
+    fdZoom.right = new FormAttachment(100, 0);
+    zoomBar.setLayoutData(fdZoom);
+
     wlStatus = new Label(shell, SWT.LEFT);
     PropsUi.setLook(wlStatus);
     FormData fdStatus = new FormData();
@@ -178,16 +189,55 @@ public final class BusMatrixViewerDialog {
     canvas = new BusMatrixCanvas(shell);
     FormData fdCanvas = new FormData();
     fdCanvas.left = new FormAttachment(0, 0);
-    fdCanvas.top = new FormAttachment(wSearch, margin);
+    fdCanvas.top = new FormAttachment(zoomBar, margin);
     fdCanvas.right = new FormAttachment(100, 0);
     fdCanvas.bottom = new FormAttachment(wlStatus, -margin);
     canvas.setLayoutData(fdCanvas);
     canvas.setHitListener(this::openHit);
+    shell.getDisplay().asyncExec(() -> canvas.zoomFitWidth());
 
     rebuild();
     updateTitle();
     shell.setSize(1100, 720);
     BaseDialog.defaultShellHandling(shell, c -> shell.dispose(), c -> shell.dispose());
+  }
+
+  private ToolBar createZoomBar(Shell parentShell) {
+    ToolBar bar = new ToolBar(parentShell, SWT.FLAT | SWT.HORIZONTAL | SWT.WRAP);
+    PropsUi.setLook(bar, Props.WIDGET_STYLE_TOOLBAR);
+    addZoomItem(
+        bar,
+        "ui/images/zoom-in.svg",
+        "BusMatrixViewerDialog.ZoomIn.Tooltip",
+        () -> canvas.zoomIn());
+    addZoomItem(
+        bar,
+        "ui/images/zoom-out.svg",
+        "BusMatrixViewerDialog.ZoomOut.Tooltip",
+        () -> canvas.zoomOut());
+    addZoomItem(
+        bar,
+        "ui/images/zoom-100.svg",
+        "BusMatrixViewerDialog.Zoom100.Tooltip",
+        () -> canvas.zoom100Percent());
+    addZoomItem(
+        bar,
+        "ui/images/zoom-fit.svg",
+        "BusMatrixViewerDialog.ZoomFitSize.Tooltip",
+        () -> canvas.zoomFitSize());
+    addZoomItem(
+        bar,
+        "ui/images/maximize-panel.svg",
+        "BusMatrixViewerDialog.ZoomFitWidth.Tooltip",
+        () -> canvas.zoomFitWidth());
+    return bar;
+  }
+
+  private void addZoomItem(ToolBar bar, String image, String tooltipKey, Runnable action) {
+    ToolItem item = new ToolItem(bar, SWT.PUSH);
+    item.setImage(GuiResource.getInstance().getImage(image));
+    item.setToolTipText(BaseMessages.getString(PKG, tooltipKey));
+    item.addListener(SWT.Selection, e -> action.run());
   }
 
   private Combo addFilterCombo(org.eclipse.swt.widgets.Control left, String labelKey) {

@@ -56,6 +56,11 @@ public final class BusMatrixSvgPainter {
         .append(' ')
         .append(height)
         .append("\" preserveAspectRatio=\"xMinYMin meet\">\n");
+    // RAP dark-mode.css uses `* { color; background-color }` which bleeds into inline SVG.
+    svg.append("<style type=\"text/css\"><![CDATA[");
+    svg.append(
+        "svg,svg *{background:none!important;background-color:transparent!important;color:unset!important;}");
+    svg.append("]]></style>\n");
     rect(svg, 0, 0, width, height, palette.background, null);
     List<SvgHit> hits = new ArrayList<>();
 
@@ -223,6 +228,8 @@ public final class BusMatrixSvgPainter {
         .append(y)
         .append("\" fill=\"")
         .append(fill)
+        .append("\" style=\"fill:")
+        .append(fill)
         .append("\" font-size=\"")
         .append(size)
         .append("\" font-family=\"Segoe UI, sans-serif\"");
@@ -242,6 +249,8 @@ public final class BusMatrixSvgPainter {
     int cx = Math.round(BusMatrixLayout.headerLabelCenterX(x, w, h));
     int cy = Math.round(BusMatrixLayout.headerLabelCenterY(y, h));
     svg.append("<text fill=\"")
+        .append(fill)
+        .append("\" style=\"fill:")
         .append(fill)
         .append("\" font-size=\"11\" font-family=\"Segoe UI, sans-serif\"")
         .append(" text-anchor=\"middle\" dominant-baseline=\"middle\"")

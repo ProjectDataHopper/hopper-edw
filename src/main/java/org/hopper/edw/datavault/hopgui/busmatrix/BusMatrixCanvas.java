@@ -18,6 +18,7 @@ package org.hopper.edw.datavault.hopgui.busmatrix;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import org.apache.hop.core.SwtUniversalImageSvg;
 import org.apache.hop.core.gui.CanvasSvgRenderResult;
@@ -65,6 +66,7 @@ final class BusMatrixCanvas extends Composite {
   private DPoint offset = new DPoint(0, 0);
   private SwtUniversalImageSvg desktopSvg;
   private Consumer<SvgHit> hitListener;
+  private String lastSvgXml = "";
 
   BusMatrixCanvas(Composite parent) {
     super(parent, SWT.NONE);
@@ -109,6 +111,64 @@ final class BusMatrixCanvas extends Composite {
     this.hitListener = hitListener;
   }
 
+  void zoomIn() {
+    setMagnification(magnification + 0.1f);
+  }
+
+  void zoomOut() {
+    setMagnification(magnification - 0.1f);
+  }
+
+  void zoom100Percent() {
+    setMagnification(1.0f);
+  }
+
+  void zoomFitSize() {
+    Rectangle client = visibleClient();
+    if (svgWidth <= 0 || svgHeight <= 0 || client.width <= 0 || client.height <= 0) {
+      return;
+    }
+    float mx = client.width / (float) svgWidth;
+    float my = client.height / (float) svgHeight;
+    setMagnification(Math.min(mx, my) * 0.95f);
+  }
+
+  void zoomFitWidth() {
+    Rectangle client = visibleClient();
+    if (svgWidth <= 0 || client.width <= 0) {
+      return;
+    }
+    setMagnification(client.width / (float) svgWidth);
+  }
+
+  private void setMagnification(float value) {
+    magnification = Math.max(0.1f, Math.min(10f, value));
+    offset = new DPoint(0, 0);
+    applyZoom();
+  }
+
+  private Rectangle visibleClient() {
+    if (web) {
+      return canvas.getClientArea();
+    }
+    return scroll != null ? scroll.getClientArea() : canvas.getClientArea();
+  }
+
+  private void applyZoom() {
+    if (web) {
+      publishWebSvg(lastSvgXml);
+      canvas.redraw();
+      return;
+    }
+    int w = Math.max(1, Math.round(svgWidth * magnification));
+    int h = Math.max(1, Math.round(svgHeight * magnification));
+    canvas.setSize(w, h);
+    if (scroll != null) {
+      scroll.setMinSize(w, h);
+    }
+    canvas.redraw();
+  }
+
   SvgHit hitAt(int x, int y) {
     int gx = Math.round(x / magnification - (float) offset.x);
     int gy = Math.round(y / magnification - (float) offset.y);
@@ -140,24 +200,46 @@ final class BusMatrixCanvas extends Composite {
   }
 
   private void rebuildSvg() {
-    boolean dark = false;
-    try {
-      dark = PropsUi.getInstance().isDarkMode();
-    } catch (Throwable ignored) {
-      // Headless / tests
-    }
-    SvgDocument document = BusMatrixSvgPainter.paintDocument(matrix, dark, null);
-    String svg = dark ? document.getDarkSvg() : document.getLightSvg();
+    // Always paint the light SVG. Desktop Batik and Hop Web both apply Hop's contrast map for
+    // dark mode (same as model graphs). Painting a pre-darkened SVG on Web is restyled again by
+    // RAP dark-mode.css (`* { color; background-color }`).
+    SvgDocument document = BusMatrixSvgPainter.paintDocument(matrix, false, null);
+    String svg = contrastIfDark(document.getLightSvg());
+    lastSvgXml = svg != null ? svg : "";
     hits = List.copyOf(document.getHits());
     BusMatrixLayout layout = BusMatrixSvgPainter.layoutOf(matrix);
     svgWidth = layout.width(matrix);
     svgHeight = layout.height(matrix);
     if (web) {
-      publishWebSvg(svg);
+      publishWebSvg(lastSvgXml);
     } else {
-      rebuildDesktopImage(svg);
+      rebuildDesktopImage(lastSvgXml);
     }
-    redrawSurface();
+    applyZoom();
+  }
+
+  static String contrastIfDark(String svg) {
+    if (svg == null || svg.isBlank()) {
+      return svg;
+    }
+    try {
+      if (!PropsUi.getInstance().isDarkMode()) {
+        return svg;
+      }
+      Map<String, String> map = PropsUi.getInstance().getContrastingColorStrings();
+      if (map == null || map.isEmpty()) {
+        return svg;
+      }
+      String out = svg;
+      for (Map.Entry<String, String> entry : map.entrySet()) {
+        if (entry.getKey() != null && entry.getValue() != null) {
+          out = out.replace(entry.getKey(), entry.getValue());
+        }
+      }
+      return out;
+    } catch (Throwable ignored) {
+      return svg;
+    }
   }
 
   private void publishWebSvg(String svg) {
@@ -185,10 +267,7 @@ final class BusMatrixCanvas extends Composite {
       SvgImage loaded =
           SvgSupport.loadSvgImage(new ByteArrayInputStream(svg.getBytes(StandardCharsets.UTF_8)));
       desktopSvg = new SwtUniversalImageSvg(loaded, true);
-      canvas.setSize(svgWidth, svgHeight);
-      if (scroll != null) {
-        scroll.setMinSize(svgWidth, svgHeight);
-      }
+      // Size is applied in applyZoom().
     } catch (Exception e) {
       LogChannel.UI.logError("Failed to rasterize bus matrix SVG", e);
     }
@@ -202,7 +281,9 @@ final class BusMatrixCanvas extends Composite {
     if (desktopSvg == null) {
       return;
     }
-    Image bitmap = desktopSvg.getAsBitmapForSize(getDisplay(), svgWidth, svgHeight);
+    int w = Math.max(1, Math.round(svgWidth * magnification));
+    int h = Math.max(1, Math.round(svgHeight * magnification));
+    Image bitmap = desktopSvg.getAsBitmapForSize(getDisplay(), w, h);
     gc.drawImage(bitmap, 0, 0);
   }
 
@@ -211,10 +292,7 @@ final class BusMatrixCanvas extends Composite {
     if (client.width <= 0 || client.height <= 0) {
       return;
     }
-    publishWebSvg(
-        PropsUi.getInstance().isDarkMode()
-            ? BusMatrixSvgPainter.paint(matrix, true)
-            : BusMatrixSvgPainter.paint(matrix, false));
+    publishWebSvg(lastSvgXml);
     event.gc.setBackground(GuiResource.getInstance().getColorBackground());
     event.gc.fillRectangle(client);
   }
