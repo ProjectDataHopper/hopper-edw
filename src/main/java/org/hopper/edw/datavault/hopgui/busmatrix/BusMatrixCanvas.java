@@ -15,22 +15,17 @@
  */
 package org.hopper.edw.datavault.hopgui.busmatrix;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 import org.apache.hop.core.SwtUniversalImageSvg;
-import org.apache.hop.core.gui.CanvasSvgRenderResult;
-import org.apache.hop.core.gui.DPoint;
 import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.svg.SvgImage;
 import org.apache.hop.core.svg.SvgSupport;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.gui.GuiResource;
-import org.apache.hop.ui.hopgui.CanvasFacade;
-import org.apache.hop.ui.hopgui.CanvasListener;
-import org.apache.hop.ui.hopgui.CanvasSvgFacade;
 import org.apache.hop.ui.util.EnvironmentUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -41,19 +36,19 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
 import org.hopper.edw.datavault.busmatrix.BusMatrix;
 import org.hopper.edw.datavault.busmatrix.BusMatrixLayout;
 import org.hopper.edw.datavault.busmatrix.BusMatrixSvgPainter;
 import org.hopper.edw.datavault.documentation.model.SvgDocument;
 import org.hopper.edw.datavault.documentation.model.SvgHit;
-import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphWebCanvasData;
 
 /**
  * Shows a bus matrix as a single SVG (same drawing as export and project documentation). Desktop
- * scrolls the whole picture; Hop Web uses the model-graph SVG overlay.
+ * scrolls the whole picture; Hop Web renders an isolated SVG overlay inside the canvas container.
  */
 final class BusMatrixCanvas extends Composite {
+
+  private static final ObjectMapper JSON = new ObjectMapper();
 
   private final boolean web;
   private final Canvas canvas;
@@ -63,7 +58,6 @@ final class BusMatrixCanvas extends Composite {
   private int svgWidth = 320;
   private int svgHeight = 240;
   private float magnification = 1.0f;
-  private DPoint offset = new DPoint(0, 0);
   private SwtUniversalImageSvg desktopSvg;
   private Consumer<SvgHit> hitListener;
   private String lastSvgXml = "";
@@ -73,16 +67,14 @@ final class BusMatrixCanvas extends Composite {
     super(parent, SWT.NONE);
     setLayout(new FillLayout());
     web = EnvironmentUtils.getInstance().isWeb();
+    scroll = new ScrolledComposite(this, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+    scroll.setExpandHorizontal(true);
+    scroll.setExpandVertical(true);
+    canvas = new Canvas(scroll, web ? SWT.NO_BACKGROUND : SWT.NONE);
+    scroll.setContent(canvas);
     if (web) {
-      scroll = null;
-      canvas = new Canvas(this, SWT.NO_BACKGROUND);
-      setupWebCanvas();
+      canvas.addListener(SWT.Paint, this::paintWebBackground);
     } else {
-      scroll = new ScrolledComposite(this, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
-      scroll.setExpandHorizontal(true);
-      scroll.setExpandVertical(true);
-      canvas = new Canvas(scroll, SWT.NONE);
-      scroll.setContent(canvas);
       canvas.addListener(SWT.Paint, this::paintDesktop);
     }
     PropsUi.setLook(this);
@@ -90,13 +82,7 @@ final class BusMatrixCanvas extends Composite {
     canvas.addListener(SWT.MouseMove, this::onMove);
     canvas.addListener(SWT.MouseDoubleClick, this::onDoubleClick);
     canvas.addListener(SWT.Resize, e -> redrawSurface());
-    addDisposeListener(
-        e -> {
-          if (web) {
-            CanvasSvgFacade.unregisterCanvas(canvas);
-          }
-          disposeDesktopSvg();
-        });
+    addDisposeListener(e -> disposeDesktopSvg());
   }
 
   void setMatrix(BusMatrix matrix) {
@@ -144,35 +130,29 @@ final class BusMatrixCanvas extends Composite {
 
   private void setMagnification(float value) {
     magnification = Math.max(0.1f, Math.min(10f, value));
-    offset = new DPoint(0, 0);
     applyZoom();
   }
 
   private Rectangle visibleClient() {
-    if (web) {
-      return canvas.getClientArea();
-    }
     return scroll != null ? scroll.getClientArea() : canvas.getClientArea();
   }
 
   private void applyZoom() {
-    if (web) {
-      publishWebSvg(lastSvgXml);
-      canvas.redraw();
-      return;
-    }
     int w = Math.max(1, Math.round(svgWidth * magnification));
     int h = Math.max(1, Math.round(svgHeight * magnification));
     canvas.setSize(w, h);
     if (scroll != null) {
       scroll.setMinSize(w, h);
     }
+    if (web) {
+      renderWebSvg(lastSvgXml);
+    }
     canvas.redraw();
   }
 
   SvgHit hitAt(int x, int y) {
-    int gx = Math.round(x / magnification - (float) offset.x);
-    int gy = Math.round(y / magnification - (float) offset.y);
+    int gx = Math.round(x / magnification);
+    int gy = Math.round(y / magnification);
     for (int i = hits.size() - 1; i >= 0; i--) {
       SvgHit hit = hits.get(i);
       if (hit != null
@@ -186,20 +166,6 @@ final class BusMatrixCanvas extends Composite {
     return null;
   }
 
-  private void setupWebCanvas() {
-    Listener canvasListener = CanvasListener.getInstance();
-    canvas.addListener(SWT.MouseDown, canvasListener);
-    canvas.addListener(SWT.MouseMove, canvasListener);
-    canvas.addListener(SWT.MouseUp, canvasListener);
-    canvas.addListener(SWT.Paint, canvasListener);
-    canvas.addListener(SWT.MouseWheel, canvasListener);
-    canvas.addListener(SWT.MouseVerticalWheel, canvasListener);
-    canvas.addListener(SWT.Paint, this::paintWebBackground);
-    CanvasSvgFacade.registerCanvas(canvas, this);
-    CanvasSvgFacade.ensureInteractionHandler(this, canvas);
-    ModelGraphWebCanvasData.ensureEmptyCollections(canvas);
-  }
-
   private void rebuildSvg() {
     boolean dark = isDarkMode();
     lastDark = dark;
@@ -211,7 +177,7 @@ final class BusMatrixCanvas extends Composite {
     svgWidth = layout.width(matrix);
     svgHeight = layout.height(matrix);
     if (web) {
-      publishWebSvg(lastSvgXml);
+      renderWebSvg(lastSvgXml);
     } else {
       rebuildDesktopImage(lastSvgXml);
     }
@@ -226,20 +192,95 @@ final class BusMatrixCanvas extends Composite {
     }
   }
 
-  private void publishWebSvg(String svg) {
-    Rectangle client = canvas.getClientArea();
-    int viewW = Math.max(1, client.width);
-    int viewH = Math.max(1, client.height);
-    CanvasSvgRenderResult result =
-        new CanvasSvgRenderResult(
-            svg,
-            List.of(),
-            new org.apache.hop.core.gui.Rectangle(0, 0, viewW, viewH),
-            new org.apache.hop.core.gui.Rectangle(0, 0, svgWidth, svgHeight));
-    CanvasSvgFacade.publishSnapshot(
-        canvas, result, magnification, offset, new org.apache.hop.core.gui.Point(viewW, viewH));
-    CanvasFacade.setData(canvas, magnification, offset, matrix);
-    ModelGraphWebCanvasData.ensureEmptyCollections(canvas);
+  private void renderWebSvg(String svg) {
+    if (canvas == null || canvas.isDisposed() || svg == null || svg.isBlank()) {
+      return;
+    }
+    try {
+      Class<?> widgetUtilClass = Class.forName("org.eclipse.rap.rwt.widgets.WidgetUtil");
+      String canvasId =
+          (String)
+              widgetUtilClass
+                  .getMethod("getId", org.eclipse.swt.widgets.Widget.class)
+                  .invoke(null, canvas);
+      if (canvasId == null || canvasId.isBlank()) {
+        return;
+      }
+      Class<?> rwtClass = Class.forName("org.eclipse.rap.rwt.RWT");
+      Object client = rwtClass.getMethod("getClient").invoke(null);
+      Class<?> jsExecClass =
+          Class.forName("org.eclipse.rap.rwt.client.service.JavaScriptExecutor");
+      Object executor =
+          client.getClass().getMethod("getService", Class.class).invoke(client, jsExecClass);
+
+      String escapedSvg = JSON.writeValueAsString(svg);
+      String escapedId = JSON.writeValueAsString(canvasId);
+
+      String script =
+          "(function() {"
+              + "var id = "
+              + escapedId
+              + ";"
+              + "var svgXml = "
+              + escapedSvg
+              + ";"
+              + "function getEl(widgetId) {"
+              + "  try {"
+              + "    if (typeof rap !== 'undefined' && rap.getObject) {"
+              + "      var p = rap.getObject(widgetId);"
+              + "      if (p && p.$el) {"
+              + "        var q = p.$el.get ? p.$el.get(0) : (p.$el[0] || p.$el);"
+              + "        if (q && q.tagName) return q;"
+              + "      }"
+              + "    }"
+              + "    if (typeof rwt !== 'undefined' && rwt.remote && rwt.remote.ObjectRegistry) {"
+              + "      var nw = rwt.remote.ObjectRegistry.getObject(widgetId);"
+              + "      if (nw) {"
+              + "        if (typeof nw.getElement === 'function') {"
+              + "          var el = nw.getElement();"
+              + "          if (el) return el;"
+              + "        }"
+              + "        if (nw._element) return nw._element;"
+              + "      }"
+              + "    }"
+              + "  } catch (e) {}"
+              + "  return document.getElementById(widgetId);"
+              + "}"
+              + "var canvasEl = getEl(id);"
+              + "if (!canvasEl) return;"
+              + "var container = canvasEl.tagName === 'CANVAS' ? canvasEl.parentElement : canvasEl;"
+              + "if (!container) return;"
+              + "if (window.getComputedStyle(container).position === 'static') {"
+              + "  container.style.position = 'relative';"
+              + "}"
+              + "var overlay = container.querySelector('[data-hop-bus-matrix-overlay]');"
+              + "if (!overlay) {"
+              + "  overlay = document.createElement('div');"
+              + "  overlay.setAttribute('data-hop-bus-matrix-overlay', 'true');"
+              + "  overlay.style.position = 'absolute';"
+              + "  overlay.style.left = '0';"
+              + "  overlay.style.top = '0';"
+              + "  overlay.style.width = '100%';"
+              + "  overlay.style.height = '100%';"
+              + "  overlay.style.pointerEvents = 'none';"
+              + "  overlay.style.overflow = 'hidden';"
+              + "  overlay.style.zIndex = '10';"
+              + "  container.appendChild(overlay);"
+              + "}"
+              + "overlay.innerHTML = svgXml;"
+              + "var svg = overlay.querySelector('svg');"
+              + "if (svg) {"
+              + "  svg.style.width = '100%';"
+              + "  svg.style.height = '100%';"
+              + "  svg.style.display = 'block';"
+              + "  svg.style.pointerEvents = 'none';"
+              + "}"
+              + "})();";
+
+      jsExecClass.getMethod("execute", String.class).invoke(executor, script);
+    } catch (Exception e) {
+      LogChannel.UI.logError("Failed to render bus matrix web SVG", e);
+    }
   }
 
   private void rebuildDesktopImage(String svg) {
@@ -279,7 +320,7 @@ final class BusMatrixCanvas extends Composite {
     if (isDarkMode() != lastDark) {
       rebuildSvg();
     } else {
-      publishWebSvg(lastSvgXml);
+      renderWebSvg(lastSvgXml);
     }
     event.gc.setBackground(GuiResource.getInstance().getColorBackground());
     event.gc.fillRectangle(client);
