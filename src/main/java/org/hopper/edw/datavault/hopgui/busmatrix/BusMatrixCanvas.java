@@ -67,6 +67,7 @@ final class BusMatrixCanvas extends Composite {
   private SwtUniversalImageSvg desktopSvg;
   private Consumer<SvgHit> hitListener;
   private String lastSvgXml = "";
+  private boolean lastDark;
 
   BusMatrixCanvas(Composite parent) {
     super(parent, SWT.NONE);
@@ -200,11 +201,10 @@ final class BusMatrixCanvas extends Composite {
   }
 
   private void rebuildSvg() {
-    // Always paint the light SVG. Desktop Batik and Hop Web both apply Hop's contrast map for
-    // dark mode (same as model graphs). Painting a pre-darkened SVG on Web is restyled again by
-    // RAP dark-mode.css (`* { color; background-color }`).
-    SvgDocument document = BusMatrixSvgPainter.paintDocument(matrix, false, null);
-    String svg = contrastIfDark(document.getLightSvg());
+    boolean dark = isDarkMode();
+    lastDark = dark;
+    SvgDocument document = BusMatrixSvgPainter.paintDocument(matrix, dark, null);
+    String svg = dark ? document.getDarkSvg() : document.getLightSvg();
     lastSvgXml = svg != null ? svg : "";
     hits = List.copyOf(document.getHits());
     BusMatrixLayout layout = BusMatrixSvgPainter.layoutOf(matrix);
@@ -218,27 +218,11 @@ final class BusMatrixCanvas extends Composite {
     applyZoom();
   }
 
-  static String contrastIfDark(String svg) {
-    if (svg == null || svg.isBlank()) {
-      return svg;
-    }
+  static boolean isDarkMode() {
     try {
-      if (!PropsUi.getInstance().isDarkMode()) {
-        return svg;
-      }
-      Map<String, String> map = PropsUi.getInstance().getContrastingColorStrings();
-      if (map == null || map.isEmpty()) {
-        return svg;
-      }
-      String out = svg;
-      for (Map.Entry<String, String> entry : map.entrySet()) {
-        if (entry.getKey() != null && entry.getValue() != null) {
-          out = out.replace(entry.getKey(), entry.getValue());
-        }
-      }
-      return out;
+      return PropsUi.getInstance().isDarkMode();
     } catch (Throwable ignored) {
-      return svg;
+      return false;
     }
   }
 
@@ -292,7 +276,11 @@ final class BusMatrixCanvas extends Composite {
     if (client.width <= 0 || client.height <= 0) {
       return;
     }
-    publishWebSvg(lastSvgXml);
+    if (isDarkMode() != lastDark) {
+      rebuildSvg();
+    } else {
+      publishWebSvg(lastSvgXml);
+    }
     event.gc.setBackground(GuiResource.getInstance().getColorBackground());
     event.gc.fillRectangle(client);
   }

@@ -16,8 +16,16 @@
 package org.hopper.edw.datavault.hopgui.busmatrix;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
+import java.util.Map;
 import org.apache.hop.core.variables.Variables;
+import org.hopper.edw.datavault.busmatrix.BusMatrix;
+import org.hopper.edw.datavault.busmatrix.BusMatrixCell;
+import org.hopper.edw.datavault.busmatrix.BusMatrixColumn;
+import org.hopper.edw.datavault.busmatrix.BusMatrixRow;
+import org.hopper.edw.datavault.busmatrix.BusMatrixSvgPainter;
 import org.junit.jupiter.api.Test;
 
 class BusMatrixViewerDialogTest {
@@ -33,9 +41,56 @@ class BusMatrixViewerDialogTest {
   }
 
   @Test
-  void contrastIfDarkLeavesSvgWhenNotDark() {
-    String svg = "<svg fill=\"#ffffff\"/>";
-    assertEquals(svg, BusMatrixCanvas.contrastIfDark(svg));
+  void painterUsesLightPaletteWhenNotDark() {
+    BusMatrixColumn col =
+        new BusMatrixColumn("d_date", "d_date", "d_date", "DIMENSION", "star.hdm", "d_date");
+    BusMatrixRow row =
+        new BusMatrixRow(
+            "f_orders",
+            "f_orders",
+            "grain",
+            "FACT",
+            "star.hdm",
+            "orders",
+            "Retail",
+            "Sales",
+            "",
+            "",
+            Map.of("d_date", new BusMatrixCell(List.of("date"))));
+    BusMatrix matrix = new BusMatrix("g", List.of(row), List.of(col), List.of());
+
+    String svg = BusMatrixSvgPainter.paint(matrix, false);
+    assertTrue(svg.contains("#ffffff"));
+    assertTrue(svg.contains("#17324d"));
+    assertTrue(svg.contains("#c9e8fb"));
+    assertTrue(svg.contains("font-family:Segoe UI, sans-serif"));
+  }
+
+  @Test
+  void painterUsesDarkPaletteWhenDark() {
+    BusMatrixColumn col =
+        new BusMatrixColumn("d_date", "d_date", "d_date", "DIMENSION", "star.hdm", "d_date");
+    BusMatrixRow row =
+        new BusMatrixRow(
+            "f_orders",
+            "f_orders",
+            "grain",
+            "FACT",
+            "star.hdm",
+            "orders",
+            "Retail",
+            "Sales",
+            "",
+            "",
+            Map.of("d_date", new BusMatrixCell(List.of("date"))));
+    BusMatrix matrix = new BusMatrix("g", List.of(row), List.of(col), List.of());
+
+    String svg = BusMatrixSvgPainter.paint(matrix, true);
+    assertTrue(svg.contains("#242424"));
+    assertTrue(svg.contains("#0d1b27"));
+    assertTrue(svg.contains("#1b3a4b"));
+    assertTrue(svg.contains("#62bdf7"));
+    assertTrue(svg.contains("font-family:Segoe UI, sans-serif"));
   }
 
   @Test

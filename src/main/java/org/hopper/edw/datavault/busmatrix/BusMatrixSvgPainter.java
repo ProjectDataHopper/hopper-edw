@@ -149,7 +149,9 @@ public final class BusMatrixSvgPainter {
             .append(y)
             .append("\" stroke=\"")
             .append(palette.border)
-            .append("\" stroke-width=\"2\"/>\n");
+            .append("\" stroke-width=\"2\" style=\"stroke:")
+            .append(palette.border)
+            .append(";stroke-width:2px\"/>\n");
       }
     }
     svg.append("</svg>\n");
@@ -179,9 +181,12 @@ public final class BusMatrixSvgPainter {
       }
       svg.append(pts[i]).append(',').append(pts[i + 1]);
     }
-    svg.append("\" fill=\"").append(fill).append("\" style=\"fill:").append(fill).append('"');
+    svg.append("\" fill=\"").append(fill).append("\" style=\"fill:").append(fill);
     if (stroke != null) {
+      svg.append(";stroke:").append(stroke).append(";stroke-width:1px\"");
       svg.append(" stroke=\"").append(stroke).append("\" stroke-width=\"1\"");
+    } else {
+      svg.append('"');
     }
     svg.append("/>\n");
   }
@@ -199,10 +204,12 @@ public final class BusMatrixSvgPainter {
         .append("\" fill=\"")
         .append(fill)
         .append("\" style=\"fill:")
-        .append(fill)
-        .append('"');
+        .append(fill);
     if (stroke != null) {
+      svg.append(";stroke:").append(stroke).append(";stroke-width:1px\"");
       svg.append(" stroke=\"").append(stroke).append("\" stroke-width=\"1\"");
+    } else {
+      svg.append('"');
     }
     svg.append("/>\n");
   }
@@ -226,11 +233,14 @@ public final class BusMatrixSvgPainter {
         .append(y)
         .append("\" fill=\"")
         .append(fill)
-        .append("\" style=\"fill:")
-        .append(fill)
         .append("\" font-size=\"")
         .append(size)
-        .append("\" font-family=\"Segoe UI, sans-serif\"");
+        .append("\" font-family=\"Segoe UI, sans-serif\"")
+        .append(" style=\"fill:")
+        .append(fill)
+        .append(";font-family:Segoe UI, sans-serif;font-size:")
+        .append(size)
+        .append("px;line-height:1;letter-spacing:normal\"");
     if (center) {
       svg.append(" text-anchor=\"middle\"");
     }
@@ -248,9 +258,10 @@ public final class BusMatrixSvgPainter {
     int cy = Math.round(BusMatrixLayout.headerLabelCenterY(y, h));
     svg.append("<text fill=\"")
         .append(fill)
-        .append("\" style=\"fill:")
-        .append(fill)
         .append("\" font-size=\"11\" font-family=\"Segoe UI, sans-serif\"")
+        .append(" style=\"fill:")
+        .append(fill)
+        .append(";font-family:Segoe UI, sans-serif;font-size:11px;line-height:1;letter-spacing:normal\"")
         .append(" text-anchor=\"middle\" dominant-baseline=\"middle\"")
         .append(" transform=\"translate(")
         .append(cx)
@@ -275,20 +286,25 @@ public final class BusMatrixSvgPainter {
       String markFg) {
     static final Palette LIGHT =
         new Palette(
-            // Hex values that exist in PropsUi contrastingColors so Hop Web/desktop dark mode
-            // can remap them the same way as model-graph SVGs.
-            "#f0f0f0",
-            "#033d5d",
-            "#f0f0f0",
-            "#e1e1e1",
-            "#000000",
-            "#f0f0f0",
-            "#e1e1e1",
+            "#ffffff",
+            "#17324d",
+            "#ffffff",
+            "#d5dde5",
+            "#1b2430",
+            "#ffffff",
+            "#f4f6f8",
             "#c9e8fb",
             "#0e3a5a");
     static final Palette DARK =
         new Palette(
-            "#12151a", "#0d1b27", "#e8edf2", "#2c3640", "#e8edf2", "#1a1f26", "#12151a", "#1b2c39",
-            "#d5eaf3");
+            "#242424",
+            "#0d1b27",
+            "#e8edf2",
+            "#3e4752",
+            "#e8edf2",
+            "#2d333b",
+            "#242424",
+            "#1b3a4b",
+            "#62bdf7");
   }
 }
