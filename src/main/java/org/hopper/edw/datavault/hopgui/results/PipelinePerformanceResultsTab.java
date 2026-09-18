@@ -149,19 +149,24 @@ public class PipelinePerformanceResultsTab {
     if (viewer == null || viewer.isDisposed() || catalog == null) {
       return;
     }
-    Metric metric = selectedMetric();
-    IPipelineEngine<?> pipeline = pipelineGraph.getPipeline();
-    List<RowMetaAndData> rows = PerformanceSnapshotRows.from(pipeline, metric);
-    String fingerprint = metric.name() + ":" + PerformanceSnapshotRows.fingerprint(rows);
-    if (fingerprint.equals(lastFingerprint)) {
-      return;
+    try {
+      Metric metric = selectedMetric();
+      IPipelineEngine<?> pipeline = pipelineGraph.getPipeline();
+      List<RowMetaAndData> rows = PerformanceSnapshotRows.from(pipeline, metric);
+      String fingerprint = metric.name() + ":" + PerformanceSnapshotRows.fingerprint(rows);
+      if (fingerprint.equals(lastFingerprint)) {
+        return;
+      }
+      lastFingerprint = fingerprint;
+      HInMemoryRowsConnector connector = catalog.findInMemoryConnector();
+      if (connector != null) {
+        connector.setRows(rows);
+      }
+      viewer.reloadSurface();
+    } catch (Exception ignored) {
+      // Skip this tick. An uncaught exception aborts live refresh and shows
+      // "Error in the Hop GUI : null" (issue #181).
     }
-    lastFingerprint = fingerprint;
-    HInMemoryRowsConnector connector = catalog.findInMemoryConnector();
-    if (connector != null) {
-      connector.setRows(rows);
-    }
-    viewer.reloadSurface();
   }
 
   private Metric selectedMetric() {

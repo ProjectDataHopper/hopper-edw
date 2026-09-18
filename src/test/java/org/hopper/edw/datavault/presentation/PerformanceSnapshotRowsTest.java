@@ -16,16 +16,23 @@
 package org.hopper.edw.datavault.presentation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.hop.core.RowMetaAndData;
 import org.apache.hop.pipeline.performance.PerformanceSnapShot;
 import org.hopper.edw.datavault.presentation.PerformanceSnapshotRows.Metric;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 class PerformanceSnapshotRowsTest {
 
@@ -142,6 +149,62 @@ class PerformanceSnapshotRowsTest {
                     return false;
                   }
                 }));
+  }
+
+  @Test
+  void freezeSnapshotsDoesNotShareLiveList() {
+    List<PerformanceSnapShot> live = new ArrayList<>();
+    live.add(snap("Generator", new Date(1_000L), 0));
+    Map<String, List<PerformanceSnapShot>> engineMap = new ConcurrentHashMap<>();
+    engineMap.put("Generator.0", live);
+
+    Map<String, List<PerformanceSnapShot>> frozen =
+        PerformanceSnapshotRows.freezeSnapshots(engineMap);
+    live.add(snap("Generator", new Date(2_000L), 1));
+
+    assertEquals(1, frozen.get("Generator.0").size());
+    assertEquals(2, live.size());
+  }
+
+  @Test
+  @Timeout(value = 10, unit = TimeUnit.SECONDS)
+  void liveListMutationDoesNotThrowConcurrentModification() throws Exception {
+    List<PerformanceSnapShot> live = new ArrayList<>();
+    live.add(snap("Generator", new Date(1_000L), 0));
+    Map<String, List<PerformanceSnapShot>> engineMap = new ConcurrentHashMap<>();
+    engineMap.put("Generator.0", live);
+
+    AtomicBoolean stop = new AtomicBoolean(false);
+    AtomicInteger seq = new AtomicInteger(1);
+    Thread writer =
+        new Thread(
+            () -> {
+              while (!stop.get()) {
+                synchronized (engineMap) {
+                  int n = seq.getAndIncrement();
+                  live.add(snap("Generator", new Date(1_000L + n), n));
+                  if (live.size() > 32) {
+                    live.remove(0);
+                  }
+                }
+              }
+            },
+            "snapshot-writer");
+    writer.setDaemon(true);
+    writer.start();
+    try {
+      for (int i = 0; i < 2_000; i++) {
+        List<RowMetaAndData> keyed =
+            PerformanceSnapshotRows.from(
+                PerformanceSnapshotRows.keyedByTransformLabel(engineMap), Metric.LINES_READ);
+        List<RowMetaAndData> direct = PerformanceSnapshotRows.from(engineMap, Metric.LINES_READ);
+        assertFalse(keyed.isEmpty());
+        assertFalse(direct.isEmpty());
+      }
+    } finally {
+      stop.set(true);
+      writer.join(2_000);
+    }
   }
 
   @Test

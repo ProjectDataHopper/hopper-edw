@@ -16,7 +16,9 @@
 package org.hopper.edw.datavault.presentation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -44,6 +46,8 @@ public final class PerformanceSnapshotRows {
   public static final String COL_VALUE = "value";
   public static final int MAX_SERIES = 12;
   public static final String OTHER_SERIES = "Other";
+  private static final PerformanceSnapShot[] NO_SNAPSHOTS = new PerformanceSnapShot[0];
+  private static final int LIVE_COPY_ATTEMPTS = 3;
 
   public enum Metric {
     ROWS_PER_SECOND,
@@ -68,7 +72,7 @@ public final class PerformanceSnapshotRows {
     if (engine instanceof Pipeline pipeline) {
       Map<String, List<PerformanceSnapShot>> snaps = pipeline.getTransformPerformanceSnapShots();
       if (snaps != null && !snaps.isEmpty()) {
-        return from(keyedByTransformLabel(snaps), metric);
+        return fromLiveSnapshots(snaps, metric);
       }
     }
     return from(engine != null ? engine.getEngineMetrics() : null, metric);
@@ -80,7 +84,7 @@ public final class PerformanceSnapshotRows {
     }
     Map<String, List<PerformanceSnapShot>> byTransform = new LinkedHashMap<>();
     for (Map.Entry<IEngineComponent, List<PerformanceSnapShot>> entry :
-        metrics.getComponentPerformanceSnapshots().entrySet()) {
+        freezeSnapshots(metrics.getComponentPerformanceSnapshots()).entrySet()) {
       IEngineComponent component = entry.getKey();
       String name = componentLabel(component);
       if (StringUtils.isBlank(name)) {
@@ -94,10 +98,8 @@ public final class PerformanceSnapshotRows {
   static Map<String, List<PerformanceSnapShot>> keyedByTransformLabel(
       Map<String, List<PerformanceSnapShot>> snapshots) {
     Map<String, List<PerformanceSnapShot>> byName = new LinkedHashMap<>();
-    if (snapshots == null) {
-      return byName;
-    }
-    for (Map.Entry<String, List<PerformanceSnapShot>> entry : snapshots.entrySet()) {
+    for (Map.Entry<String, List<PerformanceSnapShot>> entry :
+        freezeSnapshots(snapshots).entrySet()) {
       List<PerformanceSnapShot> list = entry.getValue();
       String label = null;
       if (list != null) {
@@ -117,6 +119,51 @@ public final class PerformanceSnapshotRows {
       byName.put(label, list);
     }
     return byName;
+  }
+
+  /**
+   * Hop appends (and may drop the oldest) snapshots on a timer under {@code synchronized
+   * (transformPerformanceSnapShots)}. Iterating those live {@link ArrayList}s with a fail-fast
+   * iterator throws {@link ConcurrentModificationException} (issue #181).
+   */
+  private static List<RowMetaAndData> fromLiveSnapshots(
+      Map<String, List<PerformanceSnapShot>> snaps, Metric metric) {
+    for (int attempt = 0; attempt < LIVE_COPY_ATTEMPTS; attempt++) {
+      try {
+        return from(keyedByTransformLabel(snaps), metric);
+      } catch (ConcurrentModificationException ignored) {
+        // Snapshot timer mutated a list mid-copy; retry a frozen snapshot.
+      }
+    }
+    return List.of();
+  }
+
+  static <K> Map<K, List<PerformanceSnapShot>> freezeSnapshots(
+      Map<K, List<PerformanceSnapShot>> snapshots) {
+    Map<K, List<PerformanceSnapShot>> frozen = new LinkedHashMap<>();
+    if (snapshots == null) {
+      return frozen;
+    }
+    synchronized (snapshots) {
+      for (Map.Entry<K, List<PerformanceSnapShot>> entry : snapshots.entrySet()) {
+        if (entry.getKey() == null) {
+          continue;
+        }
+        frozen.put(entry.getKey(), copySnapshotList(entry.getValue()));
+      }
+    }
+    return frozen;
+  }
+
+  /**
+   * Copy without a fail-fast iterator. {@code new ArrayList<>(list)} and {@link List#copyOf} both
+   * iterate and can throw {@link ConcurrentModificationException} on Hop's live snapshot lists.
+   */
+  static List<PerformanceSnapShot> copySnapshotList(List<PerformanceSnapShot> list) {
+    if (list == null || list.isEmpty()) {
+      return List.of();
+    }
+    return new ArrayList<>(Arrays.asList(list.toArray(NO_SNAPSHOTS)));
   }
 
   static String displayNameFromKey(String key) {
@@ -141,7 +188,8 @@ public final class PerformanceSnapshotRows {
   public static List<RowMetaAndData> from(
       Map<String, List<PerformanceSnapShot>> snapshotsByTransform, Metric metric) {
     Metric chosen = metric != null ? metric : Metric.ROWS_PER_SECOND;
-    if (snapshotsByTransform == null || snapshotsByTransform.isEmpty()) {
+    snapshotsByTransform = freezeSnapshots(snapshotsByTransform);
+    if (snapshotsByTransform.isEmpty()) {
       return List.of();
     }
     long t0 = Long.MAX_VALUE;

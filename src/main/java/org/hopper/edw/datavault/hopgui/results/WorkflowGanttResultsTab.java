@@ -132,6 +132,14 @@ public class WorkflowGanttResultsTab {
     if (viewer == null || viewer.isDisposed() || catalog == null) {
       return;
     }
+    try {
+      refreshChartUnsafe();
+    } catch (Exception ignored) {
+      // Skip this tick rather than abort live refresh (see issue #181).
+    }
+  }
+
+  private void refreshChartUnsafe() {
     IWorkflowEngine<?> workflow = workflowGraph.getWorkflow();
     WorkflowTracker<?> tracker = workflow != null ? workflow.getWorkflowTracker() : null;
     List<GanttTask> tasks = WorkflowGanttTasks.from(tracker, System.currentTimeMillis());

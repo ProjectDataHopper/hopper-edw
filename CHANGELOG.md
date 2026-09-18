@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Performance chart CME during pipeline run (issue #181)
+
+- The results-pane Performance tab no longer throws `ConcurrentModificationException` (`Error in the Hop GUI : null`) when Hop's snapshot timer appends to live transform snapshot lists during a chart refresh. Snapshot lists are copied (without fail-fast iterators) under the same lock Hop uses before they are charted. A leftover race skips that tick instead of aborting live refresh.
+
 ### Kimball bus matrix (issue #177)
 
 - **Business process catalog** metadata holds domains and process levels 1–3. Facts tag **Business / L1 / L2 / L3** on the General tab.
