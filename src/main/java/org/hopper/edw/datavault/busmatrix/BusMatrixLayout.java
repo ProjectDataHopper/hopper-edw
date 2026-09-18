@@ -26,6 +26,9 @@ public final class BusMatrixLayout {
   public static final String[] FROZEN_HEADERS = {
     "Business", "Level 1", "Level 2", "Level 3", "Fact"
   };
+  public static final String[] FROZEN_HEADERS_WITH_GRAIN = {
+    "Business", "Level 1", "Level 2", "Level 3", "Fact", "Granularity"
+  };
   public static final int FROZEN_COLUMNS = FROZEN_HEADERS.length;
   public static final int MIN_FROZEN_WIDTH = 48;
   public static final int FROZEN_COLUMN_MARGIN = 20;
@@ -56,12 +59,23 @@ public final class BusMatrixLayout {
   private final int headerHeight;
   private final int rowHeight;
   private final int frozenWidth;
+  private final boolean showGranularity;
 
   public BusMatrixLayout(int[] frozenWidths, int cellWidth, int headerHeight, int rowHeight) {
+    this(frozenWidths, cellWidth, headerHeight, rowHeight, frozenWidths.length > FROZEN_COLUMNS);
+  }
+
+  public BusMatrixLayout(
+      int[] frozenWidths,
+      int cellWidth,
+      int headerHeight,
+      int rowHeight,
+      boolean showGranularity) {
     this.frozenWidths = frozenWidths.clone();
     this.cellWidth = cellWidth;
     this.headerHeight = headerHeight;
     this.rowHeight = rowHeight;
+    this.showGranularity = showGranularity;
     int sum = 0;
     for (int width : this.frozenWidths) {
       sum += width;
@@ -71,10 +85,17 @@ public final class BusMatrixLayout {
 
   public static BusMatrixLayout measure(
       BusMatrix matrix, ToIntFunction<String> textWidth, int lineHeight) {
+    return measure(matrix, textWidth, lineHeight, false);
+  }
+
+  public static BusMatrixLayout measure(
+      BusMatrix matrix, ToIntFunction<String> textWidth, int lineHeight, boolean showGranularity) {
     BusMatrix safe = matrix != null ? matrix : new BusMatrix("", null, null, null);
-    int[] widths = new int[FROZEN_COLUMNS];
-    for (int i = 0; i < FROZEN_COLUMNS; i++) {
-      int width = textWidth.applyAsInt(FROZEN_HEADERS[i]);
+    String[] headers = showGranularity ? FROZEN_HEADERS_WITH_GRAIN : FROZEN_HEADERS;
+    int frozenCount = headers.length;
+    int[] widths = new int[frozenCount];
+    for (int i = 0; i < frozenCount; i++) {
+      int width = textWidth.applyAsInt(headers[i]);
       for (BusMatrixRow row : safe.getRows()) {
         width = Math.max(width, textWidth.applyAsInt(frozenValue(row, i)));
       }
@@ -87,7 +108,7 @@ public final class BusMatrixLayout {
     int cell = MIN_CELL_WIDTH;
     int row = Math.max(MIN_ROW_HEIGHT, lineHeight + 10);
     int header = rotatedHeaderHeight(maxLabel, lineHeight);
-    return new BusMatrixLayout(widths, cell, header, row);
+    return new BusMatrixLayout(widths, cell, header, row, showGranularity);
   }
 
   /** Header-band height for labels tilted {@link #HEADER_TILT_DEGREES}. */
@@ -229,6 +250,18 @@ public final class BusMatrixLayout {
     return headerHeight + rows * rowHeight + 1;
   }
 
+  public int frozenColumns() {
+    return frozenWidths.length;
+  }
+
+  public String frozenHeader(int i) {
+    String[] headers = showGranularity ? FROZEN_HEADERS_WITH_GRAIN : FROZEN_HEADERS;
+    if (i >= 0 && i < headers.length) {
+      return headers[i];
+    }
+    return "";
+  }
+
   public static String frozenValue(BusMatrixRow row, int index) {
     if (row == null) {
       return "";
@@ -238,7 +271,9 @@ public final class BusMatrixLayout {
       case 1 -> row.level1();
       case 2 -> row.level2();
       case 3 -> row.level3();
-      default -> row.factName();
+      case 4 -> row.factName();
+      case 5 -> row.grain();
+      default -> "";
     };
   }
 
@@ -316,6 +351,7 @@ public final class BusMatrixLayout {
     if (cellWidth != layout.cellWidth
         || headerHeight != layout.headerHeight
         || rowHeight != layout.rowHeight
+        || showGranularity != layout.showGranularity
         || frozenWidths.length != layout.frozenWidths.length) {
       return false;
     }
@@ -332,6 +368,7 @@ public final class BusMatrixLayout {
     int hash = cellWidth;
     hash = 31 * hash + headerHeight;
     hash = 31 * hash + rowHeight;
+    hash = 31 * hash + (showGranularity ? 1 : 0);
     for (int width : frozenWidths) {
       hash = 31 * hash + width;
     }

@@ -109,7 +109,9 @@ public record BusMatrixRow(
       sb.append(" (").append(physicalTableName).append(")");
     }
     if (!Utils.isEmpty(grain)) {
-      sb.append("\nGrain: ").append(grain);
+      sb.append("\nGranularity: ").append(grain);
+    } else {
+      sb.append("\nGranularity: (not defined)");
     }
     List<String> taxonomy = new ArrayList<>();
     if (!Utils.isEmpty(business)) taxonomy.add(business);

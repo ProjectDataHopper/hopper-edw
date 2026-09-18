@@ -162,21 +162,34 @@ final class BusMatrixCanvas extends Composite {
     canvas.redraw();
   }
 
+  private boolean showGranularity = false;
+
+  boolean isShowGranularity() {
+    return showGranularity;
+  }
+
+  void setShowGranularity(boolean showGranularity) {
+    if (this.showGranularity != showGranularity) {
+      this.showGranularity = showGranularity;
+      rebuildSvg();
+    }
+  }
+
   BusMatrixHit hitAt(int x, int y) {
     int gx = Math.round(x / magnification);
     int gy = Math.round(y / magnification);
-    BusMatrixLayout layout = BusMatrixSvgPainter.layoutOf(matrix);
+    BusMatrixLayout layout = BusMatrixSvgPainter.layoutOf(matrix, showGranularity);
     return BusMatrixHit.hitAt(gx, gy, matrix, layout);
   }
 
   private void rebuildSvg() {
     boolean dark = isDarkMode();
     lastDark = dark;
-    SvgDocument document = BusMatrixSvgPainter.paintDocument(matrix, dark, null);
+    SvgDocument document = BusMatrixSvgPainter.paintDocument(matrix, dark, null, showGranularity);
     String svg = dark ? document.getDarkSvg() : document.getLightSvg();
     lastSvgXml = svg != null ? svg : "";
     hits = List.copyOf(document.getHits());
-    BusMatrixLayout layout = BusMatrixSvgPainter.layoutOf(matrix);
+    BusMatrixLayout layout = BusMatrixSvgPainter.layoutOf(matrix, showGranularity);
     svgWidth = layout.width(matrix);
     svgHeight = layout.height(matrix);
     if (web) {

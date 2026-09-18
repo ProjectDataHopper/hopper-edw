@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-     http://www.apache.org/licenses/LICENSE-2.0
+      http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -55,10 +55,16 @@ limitations under the License.
         <measure>
           <fieldName>stock_qty</fieldName>
           <additive>Y</additive>
+          <documentation>
+            <required>Y</required>
+          </documentation>
         </measure>
         <measure>
           <fieldName>reorder_point</fieldName>
           <additive>N</additive>
+          <documentation>
+            <required>Y</required>
+          </documentation>
         </measure>
       </measures>
       <degenerate_dimensions/>
@@ -72,13 +78,14 @@ limitations under the License.
       <junk_dimension_roles/>
       <tableName>f_pit_inventory</tableName>
       <description/>
-      <tableType>FACT</tableType>
+      <grain>warehouse-product-day</grain>
       <business_process>
         <business>Retail</business>
         <level1>Inventory</level1>
         <level2>Stock</level2>
         <level3>Inventory snapshot</level3>
       </business_process>
+      <tableType>FACT</tableType>
       <sourceType>SQL</sourceType>
       <sourceConnection>Vault</sourceConnection>
       <sourceSql>SELECT lwp.x_load_ts AS status_ts, lwp.product_hk, hp.product_id, lwp.warehouse_hk, hw.warehouse_id, 

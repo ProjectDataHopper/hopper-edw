@@ -52,7 +52,7 @@ public record BusMatrixCell(List<String> roleNames) {
     StringBuilder sb = new StringBuilder();
     sb.append("Fact: ").append(factName != null ? factName : "");
     if (grain != null && !grain.isBlank()) {
-      sb.append("\nGrain: ").append(grain);
+      sb.append("\nGranularity: ").append(grain);
     }
     sb.append("\nDimension: ").append(dimensionLabel != null ? dimensionLabel : "");
     if (used()) {

@@ -25,6 +25,11 @@ public final class BusMatrixHtmlRenderer {
   private BusMatrixHtmlRenderer() {}
 
   public static String table(BusMatrix matrix, Function<String, String> href) {
+    return table(matrix, href, false);
+  }
+
+  public static String table(
+      BusMatrix matrix, Function<String, String> href, boolean showGranularity) {
     BusMatrix safe = matrix != null ? matrix : new BusMatrix("", null, null, null);
     StringBuilder html = new StringBuilder();
     html.append(
@@ -34,9 +39,12 @@ public final class BusMatrixHtmlRenderer {
     header(html, "Level 2", 3);
     header(html, "Level 3", 4);
     header(html, "Fact", 5);
+    if (showGranularity) {
+      header(html, "Granularity", 6);
+    }
     for (BusMatrixColumn column : safe.getColumns()) {
       html.append("<th class=\"hop-doc-bus-matrix-dim\" title=\"")
-          .append(HtmlEscaper.escape(column.physicalTableName()))
+          .append(HtmlEscaper.escape(column.tooltip()))
           .append("\">");
       String dimHref = href != null ? href.apply(column.dimensionName()) : null;
       if (!Utils.isEmpty(dimHref)) {
@@ -63,7 +71,11 @@ public final class BusMatrixHtmlRenderer {
       cell(html, row.level1(), true, 2);
       cell(html, row.level2(), true, 3);
       cell(html, row.level3(), true, 4);
-      html.append("<th class=\"hop-doc-bus-matrix-sticky hop-doc-bus-matrix-c5\">");
+      html.append("<th class=\"hop-doc-bus-matrix-sticky hop-doc-bus-matrix-c5\"");
+      if (!Utils.isEmpty(row.tooltip())) {
+        html.append(" title=\"").append(HtmlEscaper.escape(row.tooltip())).append('"');
+      }
+      html.append('>');
       String factHref = href != null ? href.apply(row.factName()) : null;
       if (!Utils.isEmpty(factHref)) {
         html.append("<a href=\"").append(HtmlEscaper.escape(factHref)).append("\">");
@@ -73,6 +85,9 @@ public final class BusMatrixHtmlRenderer {
         html.append("</a>");
       }
       html.append("</th>");
+      if (showGranularity) {
+        cell(html, row.grain(), true, 6);
+      }
       for (BusMatrixColumn column : safe.getColumns()) {
         BusMatrixCell cell = row.cell(column.key());
         html.append("<td");

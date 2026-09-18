@@ -188,7 +188,7 @@ class BusMatrixHitTest {
     String factTooltip = hitFact.tooltip();
     assertNotNull(factTooltip);
     assertTrue(factTooltip.contains("Fact: f_orders"));
-    assertTrue(factTooltip.contains("Grain: one row per order header"));
+    assertTrue(factTooltip.contains("Granularity: one row per order header"));
     assertTrue(factTooltip.contains("Measures (2): order_total, tax_amount"));
     assertTrue(factTooltip.contains("Source: RECORD_DEFINITION"));
 
@@ -196,9 +196,15 @@ class BusMatrixHitTest {
     String cellTooltip = hitCell.tooltip();
     assertNotNull(cellTooltip);
     assertTrue(cellTooltip.contains("Fact: f_orders"));
-    assertTrue(cellTooltip.contains("Grain: one row per order header"));
+    assertTrue(cellTooltip.contains("Granularity: one row per order header"));
     assertTrue(cellTooltip.contains("Dimension: d_date"));
     assertTrue(cellTooltip.contains("Roles (2): order_date, ship_date"));
+
+    // Verify undefined grain fallback
+    BusMatrixRow emptyGrainRow =
+        new BusMatrixRow(
+            "f_empty", "f_empty", "", "FACT", "star.hdm", "star", "", "", "", "", Map.of());
+    assertTrue(emptyGrainRow.tooltip().contains("Granularity: (not defined)"));
   }
 
   @Test

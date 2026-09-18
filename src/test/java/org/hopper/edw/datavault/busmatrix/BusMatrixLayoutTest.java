@@ -214,4 +214,38 @@ class BusMatrixLayoutTest {
     assertFalse(BusMatrixLayout.startsGroup(retailSales, retailSalesLine));
     assertTrue(BusMatrixLayout.startsGroup(retailSales, retailInventory));
   }
+
+  @Test
+  void measureWithGranularityAddsSixthFrozenColumn() {
+    BusMatrixRow row =
+        new BusMatrixRow(
+            "f_orders",
+            "f_orders",
+            "one row per order",
+            "FACT",
+            "orders.hdm",
+            "orders",
+            "Retail",
+            "Sales",
+            "Order management",
+            "Orders",
+            Map.of());
+    BusMatrix matrix = new BusMatrix("g", List.of(row), List.of(), List.of());
+
+    BusMatrixLayout standard = BusMatrixLayout.measure(matrix, s -> s.length() * 8, 16, false);
+    assertEquals(5, standard.frozenColumns());
+    assertEquals("Fact", standard.frozenHeader(4));
+    assertEquals("", standard.frozenHeader(5));
+
+    BusMatrixLayout withGrain = BusMatrixLayout.measure(matrix, s -> s.length() * 8, 16, true);
+    assertEquals(6, withGrain.frozenColumns());
+    assertEquals("Granularity", withGrain.frozenHeader(5));
+    assertEquals("one row per order", BusMatrixLayout.frozenValue(row, 5));
+    assertTrue(withGrain.labelWidth(5) >= "one row per order".length() * 8);
+    assertEquals(
+        standard.frozenWidth() + withGrain.labelWidth(5),
+        withGrain.frozenWidth());
+    assertEquals(withGrain.labelX(4) + withGrain.labelWidth(4), withGrain.labelX(5));
+    assertFalse(standard.equals(withGrain));
+  }
 }

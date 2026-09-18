@@ -81,6 +81,11 @@ public class BusMatrixCommand implements Runnable, IHopCommand, IHasHopMetadataP
       description = "Dark SVG colours (svg format only)")
   private boolean dark;
 
+  @CommandLine.Option(
+      names = {"--show-granularity"},
+      description = "Include fact table granularity column (svg format)")
+  private boolean showGranularity;
+
   public BusMatrixCommand() {}
 
   @Override
@@ -109,7 +114,7 @@ public class BusMatrixCommand implements Runnable, IHopCommand, IHasHopMetadataP
       String kind = Const.NVL(format, "csv").trim().toLowerCase();
       String content =
           "svg".equals(kind)
-              ? BusMatrixSvgPainter.paint(matrix, dark)
+              ? BusMatrixSvgPainter.paint(matrix, dark, showGranularity)
               : BusMatrixCsvWriter.write(matrix);
       String resolvedOutput = variables.resolve(output);
       try (FileObject file = HopVfs.getFileObject(resolvedOutput)) {

@@ -16,6 +16,7 @@
 package org.hopper.edw.datavault.hopgui.busmatrix;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -105,5 +106,34 @@ class BusMatrixViewerDialogTest {
     assertEquals(
         "/home/matt/git/ProjectDataHopper/hopper-edw/work/bus-matrix.csv",
         BusMatrixViewerDialog.resolveExportFilename("${PROJECT_HOME}/work/bus-matrix.csv", vars));
+  }
+
+  @Test
+  void painterWithGranularityIncludesGranularityHeaderAndValue() {
+    BusMatrixColumn col =
+        new BusMatrixColumn("d_date", "d_date", "d_date", "DIMENSION", "star.hdm", "d_date");
+    BusMatrixRow row =
+        new BusMatrixRow(
+            "f_orders",
+            "f_orders",
+            "order-grain",
+            "FACT",
+            "star.hdm",
+            "orders",
+            "Retail",
+            "Sales",
+            "",
+            "",
+            Map.of("d_date", new BusMatrixCell(List.of("date"))));
+    BusMatrix matrix = new BusMatrix("g", List.of(row), List.of(col), List.of());
+
+    String withoutGrain = BusMatrixSvgPainter.paint(matrix, false, false);
+    assertTrue(withoutGrain.contains("Granularity: order-grain")); // in tooltip title
+    assertFalse(withoutGrain.contains(">Granularity<"));
+    assertFalse(withoutGrain.contains(">order-grain<"));
+
+    String withGrain = BusMatrixSvgPainter.paint(matrix, false, true);
+    assertTrue(withGrain.contains(">Granularity<"));
+    assertTrue(withGrain.contains(">order-grain<"));
   }
 }

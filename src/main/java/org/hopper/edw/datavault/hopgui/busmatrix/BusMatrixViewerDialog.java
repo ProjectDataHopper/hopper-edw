@@ -79,6 +79,10 @@ public final class BusMatrixViewerDialog {
   public static final String TOOLBAR_ITEM_ZOOM_FIT_WIDTH =
       "BusMatrixViewerDialog-ToolBar-10050-ZoomFitWidth";
   public static final String TOOLBAR_ITEM_REFRESH = "BusMatrixViewerDialog-ToolBar-10060-Refresh";
+  public static final String TOOLBAR_ITEM_TOGGLE_GRANULARITY =
+      "BusMatrixViewerDialog-ToolBar-10070-ToggleGranularity";
+  public static final String TOOLBAR_ITEM_HIDE_UNUSED =
+      "BusMatrixViewerDialog-ToolBar-10080-HideUnused";
 
   private static final Class<?> PKG = BusMatrixLaunchSupport.class;
 
@@ -95,7 +99,8 @@ public final class BusMatrixViewerDialog {
   private Combo wBusiness;
   private Combo wLevel1;
   private Combo wLevel2;
-  private Button wHideUnused;
+  private boolean hideUnused = false;
+  private boolean showGranularity = false;
   private Label wlStatus;
   private BusMatrixCanvas canvas;
   private BusMatrix fullMatrix;
@@ -181,15 +186,6 @@ public final class BusMatrixViewerDialog {
     wBusiness = addFilterCombo(wSearch, "BusMatrixViewerDialog.Business.Label");
     wLevel1 = addFilterCombo(wBusiness, "BusMatrixViewerDialog.Level1.Label");
     wLevel2 = addFilterCombo(wLevel1, "BusMatrixViewerDialog.Level2.Label");
-
-    wHideUnused = new Button(shell, SWT.CHECK);
-    PropsUi.setLook(wHideUnused);
-    wHideUnused.setText(BaseMessages.getString(PKG, "BusMatrixViewerDialog.HideUnused.Label"));
-    FormData fdHide = new FormData();
-    fdHide.left = new FormAttachment(wLevel2, margin * 2);
-    fdHide.top = new FormAttachment(wLevel2, 0, SWT.CENTER);
-    wHideUnused.setLayoutData(fdHide);
-    wHideUnused.addListener(SWT.Selection, e -> applyFilter());
 
     IToolbarContainer toolbarContainer =
         ToolbarFacade.createToolbarContainer(shell, SWT.WRAP | SWT.LEFT | SWT.HORIZONTAL);
@@ -293,6 +289,47 @@ public final class BusMatrixViewerDialog {
       separator = true)
   public void refreshToolbar() {
     rebuild();
+  }
+
+  @GuiToolbarElement(
+      root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
+      id = TOOLBAR_ITEM_TOGGLE_GRANULARITY,
+      toolTip = "i18n::BusMatrixViewerDialog.ShowGranularity.Tooltip",
+      image = "ui/images/table.svg",
+      separator = true)
+  public void toggleGranularity() {
+    showGranularity = !showGranularity;
+    if (canvas != null) {
+      canvas.setShowGranularity(showGranularity);
+    }
+    if (toolBarWidgets != null) {
+      toolBarWidgets.setToolbarItemToolTip(
+          TOOLBAR_ITEM_TOGGLE_GRANULARITY,
+          BaseMessages.getString(
+              PKG,
+              showGranularity
+                  ? "BusMatrixViewerDialog.HideGranularity.Tooltip"
+                  : "BusMatrixViewerDialog.ShowGranularity.Tooltip"));
+    }
+  }
+
+  @GuiToolbarElement(
+      root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
+      id = TOOLBAR_ITEM_HIDE_UNUSED,
+      toolTip = "i18n::BusMatrixViewerDialog.HideUnused.Tooltip",
+      image = "ui/images/filter.svg")
+  public void toggleHideUnused() {
+    hideUnused = !hideUnused;
+    if (toolBarWidgets != null) {
+      toolBarWidgets.setToolbarItemToolTip(
+          TOOLBAR_ITEM_HIDE_UNUSED,
+          BaseMessages.getString(
+              PKG,
+              hideUnused
+                  ? "BusMatrixViewerDialog.ShowAllDimensions.Tooltip"
+                  : "BusMatrixViewerDialog.HideUnused.Tooltip"));
+    }
+    applyFilter();
   }
 
   private Combo addFilterCombo(org.eclipse.swt.widgets.Control left, String labelKey) {
@@ -400,7 +437,7 @@ public final class BusMatrixViewerDialog {
             wBusiness.getText(),
             wLevel1.getText(),
             wLevel2.getText(),
-            wHideUnused.getSelection());
+            hideUnused);
     canvas.setMatrix(filtered);
     String status =
         BaseMessages.getString(
@@ -473,7 +510,7 @@ public final class BusMatrixViewerDialog {
       BusMatrix shown = canvas.getMatrix();
       String content =
           "svg".equals(ext)
-              ? BusMatrixSvgPainter.paint(shown, false)
+              ? BusMatrixSvgPainter.paint(shown, false, showGranularity)
               : BusMatrixCsvWriter.write(shown);
       try (FileObject file = HopVfs.getFileObject(resolved)) {
         if (file.getParent() != null && !file.getParent().exists()) {

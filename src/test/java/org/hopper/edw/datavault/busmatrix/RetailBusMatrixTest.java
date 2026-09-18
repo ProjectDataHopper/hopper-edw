@@ -66,9 +66,15 @@ class RetailBusMatrixTest {
     assertEquals("Sales", orders.level1());
     assertEquals("Order management", orders.level2());
     assertEquals("Orders", orders.level3());
+    assertEquals("order", orders.grain());
+    assertTrue(orders.tooltip().contains("Granularity: order"));
     assertEquals("Order lines", lines.level3());
+    assertEquals("order-line", lines.grain());
+    assertTrue(lines.tooltip().contains("Granularity: order-line"));
     assertEquals("Inventory", inventory.level1());
     assertEquals("Inventory snapshot", inventory.level3());
+    assertEquals("warehouse-product-day", inventory.grain());
+    assertTrue(inventory.tooltip().contains("Granularity: warehouse-product-day"));
 
     assertEquals(3, orders.cell(columnKey(matrix, "d_date")).roleCount());
     assertTrue(orders.cell(columnKey(matrix, "d_customer")).used());

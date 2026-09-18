@@ -336,7 +336,7 @@ public final class BusMatrixBuilder {
     RowAcc row = new RowAcc();
     row.factName = Const.NVL(fact.getName(), "");
     row.physicalTableName = Const.NVL(fact.getTableName(), row.factName);
-    row.grain = Const.NVL(fact.getGrain(), "");
+    row.grain = resolve(fact.getGrain(), variables);
     row.tableType = fact.getTableType() != null ? fact.getTableType().name() : "";
     row.modelFilename = Const.NVL(model.getFilename(), "");
     row.modelName = Const.NVL(model.getName(), "");

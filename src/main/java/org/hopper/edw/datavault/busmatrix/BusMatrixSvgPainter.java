@@ -30,20 +30,34 @@ public final class BusMatrixSvgPainter {
   private BusMatrixSvgPainter() {}
 
   public static String paint(BusMatrix matrix, boolean dark) {
-    SvgDocument document = paintDocument(matrix, dark, null);
+    return paint(matrix, dark, false);
+  }
+
+  public static String paint(BusMatrix matrix, boolean dark, boolean showGranularity) {
+    SvgDocument document = paintDocument(matrix, dark, null, showGranularity);
     return dark ? document.getDarkSvg() : document.getLightSvg();
   }
 
   /** Geometry used by {@link #paintDocument}; shared with the viewer host. */
   public static BusMatrixLayout layoutOf(BusMatrix matrix) {
+    return layoutOf(matrix, false);
+  }
+
+  public static BusMatrixLayout layoutOf(BusMatrix matrix, boolean showGranularity) {
     BusMatrix safe = matrix != null ? matrix : new BusMatrix("", null, null, null);
-    return BusMatrixLayout.measure(safe, s -> Math.max(1, Const.NVL(s, "").length()) * 7, 12);
+    return BusMatrixLayout.measure(
+        safe, s -> Math.max(1, Const.NVL(s, "").length()) * 7, 12, showGranularity);
   }
 
   public static SvgDocument paintDocument(
       BusMatrix matrix, boolean dark, Function<String, String> tableHref) {
+    return paintDocument(matrix, dark, tableHref, false);
+  }
+
+  public static SvgDocument paintDocument(
+      BusMatrix matrix, boolean dark, Function<String, String> tableHref, boolean showGranularity) {
     BusMatrix safe = matrix != null ? matrix : new BusMatrix("", null, null, null);
-    BusMatrixLayout layout = layoutOf(safe);
+    BusMatrixLayout layout = layoutOf(safe, showGranularity);
     int width = Math.max(320, layout.width(safe));
     int height = Math.max(240, layout.height(safe));
     Palette palette = dark ? Palette.DARK : Palette.LIGHT;
@@ -61,7 +75,7 @@ public final class BusMatrixSvgPainter {
     rect(svg, 0, 0, width, height, palette.background, null);
     List<SvgHit> hits = new ArrayList<>();
 
-    for (int i = 0; i < BusMatrixLayout.FROZEN_HEADERS.length; i++) {
+    for (int i = 0; i < layout.frozenColumns(); i++) {
       int x = layout.labelX(i);
       int w = layout.labelWidth(i);
       rect(svg, x, 0, w, layout.headerHeight(), palette.header, palette.border);
@@ -69,7 +83,7 @@ public final class BusMatrixSvgPainter {
           svg,
           x + 6,
           layout.headerHeight() - BusMatrixLayout.FROZEN_HEADER_LIFT - 8,
-          BusMatrixLayout.FROZEN_HEADERS[i],
+          layout.frozenHeader(i),
           palette.headerFg,
           11,
           false,
@@ -108,7 +122,7 @@ public final class BusMatrixSvgPainter {
       boolean groupStart =
           BusMatrixLayout.startsGroup(r == 0 ? null : safe.getRows().get(r - 1), row);
       String rowTooltip = row.tooltip();
-      for (int i = 0; i < BusMatrixLayout.FROZEN_COLUMNS; i++) {
+      for (int i = 0; i < layout.frozenColumns(); i++) {
         int x = layout.labelX(i);
         int w = layout.labelWidth(i);
         rect(svg, x, y, w, layout.rowHeight(), rowBg, palette.border, rowTooltip);
@@ -265,7 +279,7 @@ public final class BusMatrixSvgPainter {
         .append(fill)
         .append(";font-family:Segoe UI, sans-serif;font-size:")
         .append(size)
-        .append("px;line-height:1;letter-spacing:normal\"");
+        .append("px;line-height:1;letter-spacing:normal;pointer-events:none\"");
     if (center) {
       svg.append(" text-anchor=\"middle\"");
     }
