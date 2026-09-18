@@ -47,4 +47,19 @@ public record BusMatrixCell(List<String> roleNames) {
     }
     return String.join(", ", roleNames);
   }
+
+  public String richTooltip(String factName, String grain, String dimensionLabel) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("Fact: ").append(factName != null ? factName : "");
+    if (grain != null && !grain.isBlank()) {
+      sb.append("\nGrain: ").append(grain);
+    }
+    sb.append("\nDimension: ").append(dimensionLabel != null ? dimensionLabel : "");
+    if (used()) {
+      sb.append("\nRoles (").append(roleCount()).append("): ").append(String.join(", ", roleNames));
+    } else {
+      sb.append("\nStatus: Not connected");
+    }
+    return sb.toString();
+  }
 }

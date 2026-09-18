@@ -15,7 +15,9 @@
  */
 package org.hopper.edw.datavault.busmatrix;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.hop.core.Const;
@@ -33,10 +35,45 @@ public record BusMatrixRow(
     String level1,
     String level2,
     String level3,
+    List<String> measures,
+    String sourceType,
+    String sourceDetail,
     Map<String, BusMatrixCell> cells) {
+
+  public BusMatrixRow(
+      String factName,
+      String physicalTableName,
+      String grain,
+      String tableType,
+      String modelFilename,
+      String modelName,
+      String business,
+      String level1,
+      String level2,
+      String level3,
+      Map<String, BusMatrixCell> cells) {
+    this(
+        factName,
+        physicalTableName,
+        grain,
+        tableType,
+        modelFilename,
+        modelName,
+        business,
+        level1,
+        level2,
+        level3,
+        List.of(),
+        "",
+        "",
+        cells);
+  }
 
   public BusMatrixRow {
     cells = cells != null ? Map.copyOf(cells) : Map.of();
+    measures = measures != null ? List.copyOf(measures) : List.of();
+    sourceType = Const.NVL(sourceType, "");
+    sourceDetail = Const.NVL(sourceDetail, "");
     business = Const.NVL(business, "");
     level1 = Const.NVL(level1, "");
     level2 = Const.NVL(level2, "");
@@ -63,6 +100,58 @@ public record BusMatrixRow(
         || contains(level3, needle)
         || contains(grain, needle)
         || contains(modelName, needle);
+  }
+
+  public String tooltip() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("Fact: ").append(factName);
+    if (!Utils.isEmpty(physicalTableName) && !physicalTableName.equals(factName)) {
+      sb.append(" (").append(physicalTableName).append(")");
+    }
+    if (!Utils.isEmpty(grain)) {
+      sb.append("\nGrain: ").append(grain);
+    }
+    List<String> taxonomy = new ArrayList<>();
+    if (!Utils.isEmpty(business)) taxonomy.add(business);
+    if (!Utils.isEmpty(level1)) taxonomy.add(level1);
+    if (!Utils.isEmpty(level2)) taxonomy.add(level2);
+    if (!Utils.isEmpty(level3)) taxonomy.add(level3);
+    if (!taxonomy.isEmpty()) {
+      sb.append("\nProcess: ").append(String.join(" > ", taxonomy));
+    }
+    if (!Utils.isEmpty(sourceType)) {
+      sb.append("\nSource: ").append(sourceType);
+      if (!Utils.isEmpty(sourceDetail)) {
+        sb.append(" (").append(sourceDetail).append(")");
+      }
+    }
+    if (!measures.isEmpty()) {
+      sb.append("\nMeasures (").append(measures.size()).append("): ");
+      if (measures.size() <= 5) {
+        sb.append(String.join(", ", measures));
+      } else {
+        sb.append(String.join(", ", measures.subList(0, 5)))
+            .append("... (+")
+            .append(measures.size() - 5)
+            .append(" more)");
+      }
+    }
+    return sb.toString();
+  }
+
+  public boolean hasRecordDefinitionSource() {
+    return !Utils.isEmpty(sourceType)
+        && sourceType.toUpperCase(Locale.ROOT).contains("RECORD_DEFINITION")
+        && !Utils.isEmpty(sourceDetail)
+        && sourceDetail.contains("/");
+  }
+
+  public String recordDefinitionNamespace() {
+    return hasRecordDefinitionSource() ? sourceDetail.substring(0, sourceDetail.indexOf('/')) : "";
+  }
+
+  public String recordDefinitionName() {
+    return hasRecordDefinitionSource() ? sourceDetail.substring(sourceDetail.indexOf('/') + 1) : "";
   }
 
   private static boolean contains(String value, String needle) {

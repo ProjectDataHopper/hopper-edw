@@ -51,10 +51,14 @@ import org.eclipse.swt.widgets.Text;
 import org.hopper.edw.catalog.hopgui.navigation.RecordOriginNavigationSupport;
 import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.hopper.edw.catalog.model.RecordOrigin;
+import org.apache.hop.core.gui.Point;
+import org.apache.hop.ui.hopgui.context.GuiContextUtil;
+import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
 import org.hopper.edw.datavault.busmatrix.BusMatrix;
 import org.hopper.edw.datavault.busmatrix.BusMatrixBuilder;
 import org.hopper.edw.datavault.busmatrix.BusMatrixColumn;
 import org.hopper.edw.datavault.busmatrix.BusMatrixCsvWriter;
+import org.hopper.edw.datavault.busmatrix.BusMatrixHit;
 import org.hopper.edw.datavault.busmatrix.BusMatrixRow;
 import org.hopper.edw.datavault.busmatrix.BusMatrixSvgPainter;
 import org.hopper.edw.datavault.documentation.model.SvgHit;
@@ -217,7 +221,7 @@ public final class BusMatrixViewerDialog {
     fdCanvas.right = new FormAttachment(100, 0);
     fdCanvas.bottom = new FormAttachment(wlStatus, -margin);
     canvas.setLayoutData(fdCanvas);
-    canvas.setHitListener(this::openHit);
+    canvas.setHitClickListener(this::openContextMenu);
     shell.getDisplay().asyncExec(() -> canvas.zoomFitWidth());
 
     rebuild();
@@ -408,27 +412,28 @@ public final class BusMatrixViewerDialog {
     wlStatus.setText(status);
   }
 
-  private void openHit(SvgHit hit) {
-    if (hit == null || hopGui == null) {
+  private void openContextMenu(BusMatrixHit hit, org.eclipse.swt.widgets.Event event) {
+    if (hit == null || !hit.hasAction() || hopGui == null) {
       return;
     }
-    BusMatrix shown = canvas.getMatrix();
     try {
-      if ("dimension".equals(hit.type())) {
-        for (BusMatrixColumn column : shown.getColumns()) {
-          if (hit.name().equals(column.dimensionName()) || hit.name().equals(column.label())) {
-            navigate(column.modelFilename(), column.dimensionName());
-            return;
-          }
-        }
+      org.eclipse.swt.graphics.Point screenPoint;
+      if (event != null && canvas != null && !canvas.isDisposed()) {
+        screenPoint = shell.getDisplay().map(canvas, null, event.x, event.y);
       } else {
-        for (BusMatrixRow row : shown.getRows()) {
-          if (hit.name().equals(row.factName())) {
-            navigate(row.modelFilename(), row.factName());
-            return;
-          }
-        }
+        screenPoint = shell.getDisplay().getCursorLocation();
       }
+      String targetDesc = hit.targetName();
+      String message =
+          BaseMessages.getString(PKG, "BusMatrixViewerDialog.Context.Message", targetDesc);
+      IGuiContextHandler contextHandler =
+          new BusMatrixContextHandler(hopGui, shell, variables, metadataProvider, hit);
+      GuiContextUtil.getInstance()
+          .handleActionSelection(
+              shell,
+              message,
+              new Point(screenPoint.x, screenPoint.y),
+              contextHandler);
     } catch (Exception e) {
       new ErrorDialog(
           shell,

@@ -97,6 +97,17 @@ class BusMatrixLayoutTest {
   }
 
   @Test
+  void headerLabelStartSitsNearBaseOfParallelogram() {
+    float sx = BusMatrixLayout.headerLabelStartX(420, 52, 200);
+    float sy = BusMatrixLayout.headerLabelStartY(0, 200);
+    assertEquals(420 + 26 + 8, sx, 0.1f);
+    assertEquals(192, sy, 0.1f);
+    int[] trap = BusMatrixLayout.headerTrapezium(420, 0, 52, 200);
+    assertTrue(sx >= trap[0] && sx <= trap[4]);
+    assertTrue(sy >= trap[5] && sy <= trap[1]);
+  }
+
+  @Test
   void headerTrapeziumsTessellateAtFortyFiveDegrees() {
     int[] first = BusMatrixLayout.headerTrapezium(100, 0, 36, 200);
     int[] second = BusMatrixLayout.headerTrapezium(136, 0, 36, 200);

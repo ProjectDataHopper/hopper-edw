@@ -32,12 +32,17 @@ import org.hopper.edw.datavault.metadata.dimensional.DmBusinessProcessRef;
 import org.hopper.edw.datavault.metadata.dimensional.DmConformedDimensionRef;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimension;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimensionAlias;
+import org.hopper.edw.datavault.metadata.dimensional.DmDimensionLoadStrategySupport;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimensionResolutionSupport;
 import org.hopper.edw.datavault.metadata.dimensional.DmFactDimensionRole;
 import org.hopper.edw.datavault.metadata.dimensional.DmFactJunkDimensionRole;
+import org.hopper.edw.datavault.metadata.dimensional.DmFactMeasure;
 import org.hopper.edw.datavault.metadata.dimensional.DmFactRangeDimensionRole;
 import org.hopper.edw.datavault.metadata.dimensional.DmJunkDimension;
+import org.hopper.edw.datavault.metadata.dimensional.DmNaturalKeyField;
 import org.hopper.edw.datavault.metadata.dimensional.DmRangeDimension;
+import org.hopper.edw.datavault.metadata.dimensional.DmSourceConfiguration;
+import org.hopper.edw.datavault.metadata.dimensional.DmTableBase;
 import org.hopper.edw.datavault.metadata.dimensional.IDmFactLikeTable;
 import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
 import org.hopper.edw.datavault.resourcedefinition.ResourceDefinitionGroupResolver;
@@ -259,12 +264,54 @@ public final class BusMatrixBuilder {
     String name = Const.NVL(table.getName(), physical);
     String type = table.getTableType() != null ? table.getTableType().name() : "";
     String key = physical.toLowerCase(Locale.ROOT);
-    return new ColumnAcc(key, name, physical, type, Const.NVL(model.getFilename(), ""), name);
+    List<String> naturalKeys = List.of();
+    String scdNature = "";
+    if (table instanceof DmDimension dim) {
+      naturalKeys =
+          dim.getNaturalKeysOrEmpty().stream()
+              .map(DmNaturalKeyField::getFieldName)
+              .filter(f -> !Utils.isEmpty(f))
+              .toList();
+      var scd = DmDimensionLoadStrategySupport.resolveDerivedScdType(dim);
+      scdNature = scd != null && "TYPE2".equalsIgnoreCase(scd.name()) ? "SCD Type 2" : "SCD Type 1";
+    } else if (table instanceof DmJunkDimension) {
+      scdNature = "Junk Dimension";
+    } else if (table instanceof DmRangeDimension) {
+      scdNature = "Range Dimension";
+    }
+    String sourceType = "";
+    String sourceDetail = "";
+    if (table instanceof DmTableBase tableBase) {
+      DmSourceConfiguration src = tableBase.getSourceOrDefault();
+      sourceType = src.resolveSourceType().name();
+      sourceDetail = resolveSourceDetail(src, variables);
+    }
+    return new ColumnAcc(
+        key,
+        name,
+        physical,
+        type,
+        Const.NVL(model.getFilename(), ""),
+        name,
+        naturalKeys,
+        scdNature,
+        sourceType,
+        sourceDetail);
   }
 
   private static ColumnAcc fallbackColumn(String name, DimensionalModel model) {
     String key = Const.NVL(name, "").toLowerCase(Locale.ROOT);
-    return new ColumnAcc(key, name, name, "UNRESOLVED", Const.NVL(model.getFilename(), ""), name);
+    return new ColumnAcc(
+        key,
+        name,
+        name,
+        "UNRESOLVED",
+        Const.NVL(model.getFilename(), ""),
+        name,
+        List.of(),
+        "",
+        "",
+        "");
   }
 
   private static void applyConformedLabel(DimensionalModel model, IDmTable table, ColumnAcc acc) {
@@ -297,7 +344,42 @@ public final class BusMatrixBuilder {
     row.level1 = resolve(process.getLevel1(), variables);
     row.level2 = resolve(process.getLevel2(), variables);
     row.level3 = resolve(process.getLevel3(), variables);
+
+    List<String> measures = new ArrayList<>();
+    for (DmFactMeasure m : fact.getMeasuresOrEmpty()) {
+      if (m != null && !Utils.isEmpty(m.getFieldName())) {
+        String desc = m.getFieldName();
+        if (!m.isAdditive()) {
+          desc += " (non-additive)";
+        }
+        measures.add(desc);
+      }
+    }
+    row.measures = measures;
+    if (fact instanceof DmTableBase tableBase) {
+      DmSourceConfiguration src = tableBase.getSourceOrDefault();
+      row.sourceType = src.resolveSourceType().name();
+      row.sourceDetail = resolveSourceDetail(src, variables);
+    }
     return row;
+  }
+
+  private static String resolveSourceDetail(DmSourceConfiguration src, IVariables variables) {
+    if (src == null) {
+      return "";
+    }
+    if (src.isRecordDefinitionSource()) {
+      return Const.NVL(src.getSourceRecordNamespace(), "")
+          + "/"
+          + Const.NVL(src.getSourceRecordName(), "");
+    }
+    if (src.isPipelineSource()) {
+      return resolve(src.getSourcePipelineFile(), variables);
+    }
+    if (src.isSqlSource()) {
+      return resolve(src.getSourceConnection(), variables);
+    }
+    return "";
   }
 
   private static String resolve(String value, IVariables variables) {
@@ -314,6 +396,10 @@ public final class BusMatrixBuilder {
     final String tableType;
     final String modelFilename;
     final String dimensionName;
+    final List<String> naturalKeys;
+    final String scdNature;
+    final String sourceType;
+    final String sourceDetail;
 
     ColumnAcc(
         String key,
@@ -321,18 +407,35 @@ public final class BusMatrixBuilder {
         String physicalTableName,
         String tableType,
         String modelFilename,
-        String dimensionName) {
+        String dimensionName,
+        List<String> naturalKeys,
+        String scdNature,
+        String sourceType,
+        String sourceDetail) {
       this.key = key;
       this.label = label;
       this.physicalTableName = physicalTableName;
       this.tableType = tableType;
       this.modelFilename = modelFilename;
       this.dimensionName = dimensionName;
+      this.naturalKeys = naturalKeys != null ? List.copyOf(naturalKeys) : List.of();
+      this.scdNature = Const.NVL(scdNature, "");
+      this.sourceType = Const.NVL(sourceType, "");
+      this.sourceDetail = Const.NVL(sourceDetail, "");
     }
 
     BusMatrixColumn toColumn() {
       return new BusMatrixColumn(
-          key, label, physicalTableName, tableType, modelFilename, dimensionName);
+          key,
+          label,
+          physicalTableName,
+          tableType,
+          modelFilename,
+          dimensionName,
+          naturalKeys,
+          scdNature,
+          sourceType,
+          sourceDetail);
     }
   }
 
@@ -347,6 +450,9 @@ public final class BusMatrixBuilder {
     String level1 = "";
     String level2 = "";
     String level3 = "";
+    List<String> measures = List.of();
+    String sourceType = "";
+    String sourceDetail = "";
     final Map<String, List<String>> cells = new LinkedHashMap<>();
 
     BusMatrixRow toRow() {
@@ -365,6 +471,9 @@ public final class BusMatrixBuilder {
           level1,
           level2,
           level3,
+          measures,
+          sourceType,
+          sourceDetail,
           mapped);
     }
   }

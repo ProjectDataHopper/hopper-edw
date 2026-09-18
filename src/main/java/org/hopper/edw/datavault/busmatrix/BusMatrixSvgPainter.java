@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import org.apache.hop.core.Const;
+import org.apache.hop.core.util.Utils;
 import org.hopper.edw.datavault.documentation.model.SvgDocument;
 import org.hopper.edw.datavault.documentation.model.SvgHit;
 import org.hopper.edw.datavault.documentation.render.HtmlEscaper;
@@ -77,9 +78,17 @@ public final class BusMatrixSvgPainter {
     for (int c = 0; c < safe.getColumns().size(); c++) {
       BusMatrixColumn column = safe.getColumns().get(c);
       int x = layout.cellX(c);
-      trapezium(svg, layout.headerTrapezium(c, 0, 0), palette.header, palette.border);
+      String colTooltip = column.tooltip();
+      trapezium(svg, layout.headerTrapezium(c, 0, 0), palette.header, palette.border, colTooltip);
       rotatedHeader(
-          svg, x, 0, layout.cellWidth(), layout.headerHeight(), column.label(), palette.headerFg);
+          svg,
+          x,
+          0,
+          layout.cellWidth(),
+          layout.headerHeight(),
+          column.label(),
+          palette.headerFg,
+          colTooltip);
       String href = tableHref != null ? tableHref.apply(column.dimensionName()) : null;
       hits.add(
           new SvgHit(
@@ -98,10 +107,11 @@ public final class BusMatrixSvgPainter {
       String rowBg = r % 2 == 0 ? palette.rowEven : palette.rowOdd;
       boolean groupStart =
           BusMatrixLayout.startsGroup(r == 0 ? null : safe.getRows().get(r - 1), row);
+      String rowTooltip = row.tooltip();
       for (int i = 0; i < BusMatrixLayout.FROZEN_COLUMNS; i++) {
         int x = layout.labelX(i);
         int w = layout.labelWidth(i);
-        rect(svg, x, y, w, layout.rowHeight(), rowBg, palette.border);
+        rect(svg, x, y, w, layout.rowHeight(), rowBg, palette.border, rowTooltip);
         text(
             svg,
             x + 6,
@@ -127,7 +137,8 @@ public final class BusMatrixSvgPainter {
         BusMatrixCell cell = row.cell(column.key());
         int x = layout.cellX(c);
         String fill = cell.used() ? palette.mark : rowBg;
-        rect(svg, x, y, layout.cellWidth(), layout.rowHeight(), fill, palette.border);
+        String cellTooltip = cell.richTooltip(row.factName(), row.grain(), column.label());
+        rect(svg, x, y, layout.cellWidth(), layout.rowHeight(), fill, palette.border, cellTooltip);
         if (cell.used()) {
           text(
               svg,
@@ -173,7 +184,8 @@ public final class BusMatrixSvgPainter {
     return light;
   }
 
-  private static void trapezium(StringBuilder svg, int[] pts, String fill, String stroke) {
+  private static void trapezium(
+      StringBuilder svg, int[] pts, String fill, String stroke, String tooltip) {
     svg.append("<polygon points=\"");
     for (int i = 0; i < pts.length; i += 2) {
       if (i > 0) {
@@ -188,11 +200,20 @@ public final class BusMatrixSvgPainter {
     } else {
       svg.append('"');
     }
-    svg.append("/>\n");
+    if (!Utils.isEmpty(tooltip)) {
+      svg.append("><title>").append(HtmlEscaper.escape(tooltip)).append("</title></polygon>\n");
+    } else {
+      svg.append("/>\n");
+    }
   }
 
   private static void rect(
       StringBuilder svg, int x, int y, int w, int h, String fill, String stroke) {
+    rect(svg, x, y, w, h, fill, stroke, null);
+  }
+
+  private static void rect(
+      StringBuilder svg, int x, int y, int w, int h, String fill, String stroke, String tooltip) {
     svg.append("<rect x=\"")
         .append(x)
         .append("\" y=\"")
@@ -211,7 +232,11 @@ public final class BusMatrixSvgPainter {
     } else {
       svg.append('"');
     }
-    svg.append("/>\n");
+    if (!Utils.isEmpty(tooltip)) {
+      svg.append("><title>").append(HtmlEscaper.escape(tooltip)).append("</title></rect>\n");
+    } else {
+      svg.append("/>\n");
+    }
   }
 
   private static void text(
@@ -248,29 +273,32 @@ public final class BusMatrixSvgPainter {
   }
 
   private static void rotatedHeader(
-      StringBuilder svg, int x, int y, int w, int h, String value, String fill) {
+      StringBuilder svg, int x, int y, int w, int h, String value, String fill, String tooltip) {
     int maxPx = BusMatrixLayout.maxLabelPxForHeader(h, 12);
     String shown = BusMatrixLayout.ellipsize(value, maxPx, s -> s.length() * 7);
     if (shown.isEmpty()) {
       return;
     }
-    int cx = Math.round(BusMatrixLayout.headerLabelCenterX(x, w, h));
-    int cy = Math.round(BusMatrixLayout.headerLabelCenterY(y, h));
+    float sx = BusMatrixLayout.headerLabelStartX(x, w, h);
+    float sy = BusMatrixLayout.headerLabelStartY(y, h);
     svg.append("<text fill=\"")
         .append(fill)
         .append("\" font-size=\"11\" font-family=\"Segoe UI, sans-serif\"")
         .append(" style=\"fill:")
         .append(fill)
         .append(";font-family:Segoe UI, sans-serif;font-size:11px;line-height:1;letter-spacing:normal\"")
-        .append(" text-anchor=\"middle\" dominant-baseline=\"middle\"")
+        .append(" text-anchor=\"start\" dominant-baseline=\"middle\"")
         .append(" transform=\"translate(")
-        .append(cx)
+        .append(Math.round(sx))
         .append(',')
-        .append(cy)
+        .append(Math.round(sy))
         .append(") rotate(")
         .append((int) BusMatrixLayout.HEADER_TILT_DEGREES)
-        .append(")\">")
-        .append(HtmlEscaper.escape(shown))
+        .append(")\">");
+    if (!Utils.isEmpty(tooltip)) {
+      svg.append("<title>").append(HtmlEscaper.escape(tooltip)).append("</title>");
+    }
+    svg.append(HtmlEscaper.escape(shown))
         .append("</text>\n");
   }
 

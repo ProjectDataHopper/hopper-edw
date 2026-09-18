@@ -140,6 +140,15 @@ public final class BusMatrixLayout {
     return y + headerHeight / 2f;
   }
 
+  /** Left/bottom anchor point for start-aligned tilted labels (running 45° up and right). */
+  public static float headerLabelStartX(int x, int cellWidth, int headerHeight) {
+    return x + cellWidth / 2f + 8f;
+  }
+
+  public static float headerLabelStartY(int y, int headerHeight) {
+    return y + headerHeight - 8f;
+  }
+
   /**
    * Trapezium (parallelogram) around a tilted dimension name: bottom sits on the data column, left
    * and right edges run 45° counter-clockwise (up and right).

@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.hopper.edw.datavault.busmatrix.BusMatrix;
+import org.hopper.edw.datavault.busmatrix.BusMatrixHit;
 import org.hopper.edw.datavault.busmatrix.BusMatrixLayout;
 import org.hopper.edw.datavault.busmatrix.BusMatrixSvgPainter;
 import org.hopper.edw.datavault.documentation.model.SvgDocument;
@@ -50,6 +51,11 @@ final class BusMatrixCanvas extends Composite {
 
   private static final ObjectMapper JSON = new ObjectMapper();
 
+  @FunctionalInterface
+  interface HitClickListener {
+    void onClick(BusMatrixHit hit, Event event);
+  }
+
   private final boolean web;
   private final Canvas canvas;
   private final ScrolledComposite scroll;
@@ -60,6 +66,7 @@ final class BusMatrixCanvas extends Composite {
   private float magnification = 1.0f;
   private SwtUniversalImageSvg desktopSvg;
   private Consumer<SvgHit> hitListener;
+  private HitClickListener hitClickListener;
   private String lastSvgXml = "";
   private boolean lastDark;
 
@@ -80,6 +87,7 @@ final class BusMatrixCanvas extends Composite {
     PropsUi.setLook(this);
     PropsUi.setLook(canvas);
     canvas.addListener(SWT.MouseMove, this::onMove);
+    canvas.addListener(SWT.MouseDown, this::onMouseDown);
     canvas.addListener(SWT.MouseDoubleClick, this::onDoubleClick);
     canvas.addListener(SWT.Resize, e -> redrawSurface());
     addDisposeListener(e -> disposeDesktopSvg());
@@ -96,6 +104,10 @@ final class BusMatrixCanvas extends Composite {
 
   void setHitListener(Consumer<SvgHit> hitListener) {
     this.hitListener = hitListener;
+  }
+
+  void setHitClickListener(HitClickListener listener) {
+    this.hitClickListener = listener;
   }
 
   void zoomIn() {
@@ -150,20 +162,11 @@ final class BusMatrixCanvas extends Composite {
     canvas.redraw();
   }
 
-  SvgHit hitAt(int x, int y) {
+  BusMatrixHit hitAt(int x, int y) {
     int gx = Math.round(x / magnification);
     int gy = Math.round(y / magnification);
-    for (int i = hits.size() - 1; i >= 0; i--) {
-      SvgHit hit = hits.get(i);
-      if (hit != null
-          && gx >= hit.x()
-          && gx < hit.x() + hit.w()
-          && gy >= hit.y()
-          && gy < hit.y() + hit.h()) {
-        return hit;
-      }
-    }
-    return null;
+    BusMatrixLayout layout = BusMatrixSvgPainter.layoutOf(matrix);
+    return BusMatrixHit.hitAt(gx, gy, matrix, layout);
   }
 
   private void rebuildSvg() {
@@ -262,9 +265,30 @@ final class BusMatrixCanvas extends Composite {
               + "  overlay.style.top = '0';"
               + "  overlay.style.width = '100%';"
               + "  overlay.style.height = '100%';"
-              + "  overlay.style.pointerEvents = 'none';"
+              + "  overlay.style.pointerEvents = 'auto';"
               + "  overlay.style.overflow = 'hidden';"
               + "  overlay.style.zIndex = '10';"
+              + "  ['mousedown', 'mouseup', 'click', 'dblclick'].forEach(function(eventType) {"
+              + "    overlay.addEventListener(eventType, function(e) {"
+              + "      overlay.style.pointerEvents = 'none';"
+              + "      var target = document.elementFromPoint(e.clientX, e.clientY);"
+              + "      if (target && target !== overlay) {"
+              + "        var evt = new MouseEvent(eventType, {"
+              + "          bubbles: true,"
+              + "          cancelable: true,"
+              + "          view: window,"
+              + "          clientX: e.clientX,"
+              + "          clientY: e.clientY,"
+              + "          screenX: e.screenX,"
+              + "          screenY: e.screenY,"
+              + "          button: e.button,"
+              + "          buttons: e.buttons"
+              + "        });"
+              + "        target.dispatchEvent(evt);"
+              + "      }"
+              + "      overlay.style.pointerEvents = 'auto';"
+              + "    });"
+              + "  });"
               + "  container.appendChild(overlay);"
               + "}"
               + "overlay.innerHTML = svgXml;"
@@ -273,7 +297,7 @@ final class BusMatrixCanvas extends Composite {
               + "  svg.style.width = '100%';"
               + "  svg.style.height = '100%';"
               + "  svg.style.display = 'block';"
-              + "  svg.style.pointerEvents = 'none';"
+              + "  svg.style.pointerEvents = 'auto';"
               + "}"
               + "})();";
 
@@ -327,17 +351,30 @@ final class BusMatrixCanvas extends Composite {
   }
 
   private void onMove(Event event) {
-    SvgHit hit = hitAt(event.x, event.y);
-    canvas.setToolTipText(hit == null ? null : hit.name());
+    BusMatrixHit hit = hitAt(event.x, event.y);
+    canvas.setToolTipText(hit != null && hit.hasTooltip() ? hit.tooltip() : null);
+  }
+
+  private void onMouseDown(Event event) {
+    if (hitClickListener == null) {
+      return;
+    }
+    BusMatrixHit hit = hitAt(event.x, event.y);
+    if (hit != null && hit.hasAction()) {
+      hitClickListener.onClick(hit, event);
+    }
   }
 
   private void onDoubleClick(Event event) {
-    if (hitListener == null) {
-      return;
-    }
-    SvgHit hit = hitAt(event.x, event.y);
-    if (hit != null) {
-      hitListener.accept(hit);
+    BusMatrixHit hit = hitAt(event.x, event.y);
+    if (hit != null && hit.hasAction()) {
+      if (hitClickListener != null) {
+        hitClickListener.onClick(hit, event);
+      } else if (hitListener != null) {
+        String name = hit.targetName();
+        String type = hit.isDimension() ? "dimension" : "fact";
+        hitListener.accept(new SvgHit(type, name, event.x, event.y, 10, 10, "#"));
+      }
     }
   }
 
