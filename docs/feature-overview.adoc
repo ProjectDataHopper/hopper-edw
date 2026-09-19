@@ -10,7 +10,7 @@ toc::[]
 
 **Model once. Generate loads and consumption layers.** The visual models (`.hsm`, `.hdv`, `.hbv`, `.hdm`) are the contract between architects, modelers, and operations.
 
-**Build an EDW:** link:getting-started-edw.adoc[Getting started — building an EDW]. **Architecture** (catalog, resource definition group, four controls): link:architecture.adoc[Architecture]. **Tour the sample:** link:getting-started-retail.adoc[Getting started — retail].
+**Build an EDW:** link:getting-started-edw.adoc[Getting started — building an EDW]. **Architecture** (catalog, resource definition group, four controls): link:architecture.adoc[Architecture]. **Tour the sample:** link:getting-started-retail.adoc[Getting started — retail]. **AdventureWorks demo** (SQL Server source → Postgres DV/BV/DM): link:getting-started-adventureworks.adoc[Getting started — AdventureWorks] (issue https://github.com/ProjectDataHopper/hopper-edw/issues/180[#180]).
 
 For a slide-style executive summary, see link:presentations/hop-data-vault-overview.md[presentations/hop-data-vault-overview.md]. Interactive HTML presentation: link:presentations/hop-data-vault-features.html[hop-data-vault-features.html]. For DV concepts and canvas usage, see link:datavault-plugin.adoc[Data Vault plugin].
 

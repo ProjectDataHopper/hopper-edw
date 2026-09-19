@@ -1,0 +1,146 @@
+{
+  "virtualPath": "",
+  "scope": {
+    "databaseNamePattern": "AdventureWorks*",
+    "sourceKind": ["DATABASE"],
+    "schemaNamePattern": "",
+    "catalogNamespacePattern": "",
+    "pathPattern": ""
+  },
+  "name": "sqlserver-types",
+  "description": "Map SQL Server-specific types so generated Postgres DDL and loads stay portable",
+  "rule": [
+    {
+      "targetHopType": 6,
+      "matchLengthAbsent": false,
+      "enabled": true,
+      "matchSourceDataTypePattern": "money",
+      "targetFieldName": "",
+      "targetLength": "",
+      "name": "money → BigNumber",
+      "targetPrecision": "4",
+      "id": "money-bignumber",
+      "matchFieldNamePattern": "",
+      "matchHopType": "",
+      "conversion": {
+        "decimalSymbol": "",
+        "dateFormatTimeZone": "",
+        "lenientStringToNumber": false,
+        "conversionMask": "",
+        "dateFormatLocale": "",
+        "dateFormatLenient": false,
+        "groupingSymbol": ""
+      }
+    },
+    {
+      "targetHopType": 6,
+      "matchLengthAbsent": false,
+      "enabled": true,
+      "matchSourceDataTypePattern": "smallmoney",
+      "targetFieldName": "",
+      "targetLength": "",
+      "name": "smallmoney → BigNumber",
+      "targetPrecision": "4",
+      "id": "smallmoney-bignumber",
+      "matchFieldNamePattern": "",
+      "matchHopType": "",
+      "conversion": {
+        "decimalSymbol": "",
+        "dateFormatTimeZone": "",
+        "lenientStringToNumber": false,
+        "conversionMask": "",
+        "dateFormatLocale": "",
+        "dateFormatLenient": false,
+        "groupingSymbol": ""
+      }
+    },
+    {
+      "targetHopType": 2,
+      "matchLengthAbsent": false,
+      "enabled": true,
+      "matchSourceDataTypePattern": "xml",
+      "targetFieldName": "",
+      "targetLength": "1000000",
+      "name": "xml → String",
+      "targetPrecision": "",
+      "id": "xml-string",
+      "matchFieldNamePattern": "",
+      "matchHopType": "",
+      "conversion": {
+        "decimalSymbol": "",
+        "dateFormatTimeZone": "",
+        "lenientStringToNumber": false,
+        "conversionMask": "",
+        "dateFormatLocale": "",
+        "dateFormatLenient": false,
+        "groupingSymbol": ""
+      }
+    },
+    {
+      "targetHopType": 2,
+      "matchLengthAbsent": false,
+      "enabled": true,
+      "matchSourceDataTypePattern": "hierarchyid",
+      "targetFieldName": "",
+      "targetLength": "892",
+      "name": "hierarchyid → String",
+      "targetPrecision": "",
+      "id": "hierarchyid-string",
+      "matchFieldNamePattern": "",
+      "matchHopType": "",
+      "conversion": {
+        "decimalSymbol": "",
+        "dateFormatTimeZone": "",
+        "lenientStringToNumber": false,
+        "conversionMask": "",
+        "dateFormatLocale": "",
+        "dateFormatLenient": false,
+        "groupingSymbol": ""
+      }
+    },
+    {
+      "targetHopType": 2,
+      "matchLengthAbsent": false,
+      "enabled": true,
+      "matchSourceDataTypePattern": "geography",
+      "targetFieldName": "",
+      "targetLength": "4000",
+      "name": "geography → String",
+      "targetPrecision": "",
+      "id": "geography-string",
+      "matchFieldNamePattern": "",
+      "matchHopType": "",
+      "conversion": {
+        "decimalSymbol": "",
+        "dateFormatTimeZone": "",
+        "lenientStringToNumber": false,
+        "conversionMask": "",
+        "dateFormatLocale": "",
+        "dateFormatLenient": false,
+        "groupingSymbol": ""
+      }
+    },
+    {
+      "targetHopType": 8,
+      "matchLengthAbsent": false,
+      "enabled": true,
+      "matchSourceDataTypePattern": "varbinary",
+      "targetFieldName": "",
+      "targetLength": "",
+      "name": "varbinary → Binary",
+      "targetPrecision": "",
+      "id": "varbinary-binary",
+      "matchFieldNamePattern": "",
+      "matchHopType": "",
+      "conversion": {
+        "decimalSymbol": "",
+        "dateFormatTimeZone": "",
+        "lenientStringToNumber": false,
+        "conversionMask": "",
+        "dateFormatLocale": "",
+        "dateFormatLenient": false,
+        "groupingSymbol": ""
+      }
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "local-catalog",
+  "description": "Local file-based data catalog for the AdventureWorks sample (runtime root: work/edw-catalog)",
+  "enabled": true,
+  "catalog": {
+    "FILE": {
+      "pluginId": "FILE",
+      "storageDirectory": "${PROJECT_HOME}/work/edw-catalog"
+    }
+  }
+}

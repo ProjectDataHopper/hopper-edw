@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright 2026 i-Bridge bv
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<workflow>
+  <name>run-adventureworks-update</name>
+  <name_sync_with_filename>Y</name_sync_with_filename>
+  <description>No-change incremental AdventureWorks load: DV/BV/DM update without dropping the vault (timings only)</description>
+  <extended_description/>
+  <created_user>-</created_user>
+  <modified_user>-</modified_user>
+  <created_date>2026/09/19 00:00:00.000</created_date>
+  <modified_date>2026/09/19 00:00:00.000</modified_date>
+  <created_hop_version/>
+  <modified_hop_version>2.20.0-SNAPSHOT</modified_hop_version>
+  <workflow_version/>
+  <parameters>
+    <parameter>
+      <name>PIPELINE_COPIES</name>
+      <description>Parallel pipeline copies for the resource definition group update</description>
+      <default_value>3</default_value>
+    </parameter>
+    <parameter>
+      <name>REPORT_BASE_NAME</name>
+      <description>Load-overview report base name</description>
+      <default_value>adventureworks-update-report</default_value>
+    </parameter>
+  </parameters>
+  <actions>
+    <action>
+      <repeat>N</repeat>
+      <schedulerType>0</schedulerType>
+      <intervalSeconds>0</intervalSeconds>
+      <intervalMinutes>60</intervalMinutes>
+      <DayOfMonth>1</DayOfMonth>
+      <weekDay>1</weekDay>
+      <minutes>0</minutes>
+      <hour>12</hour>
+      <doNotWaitOnFirstExecution>N</doNotWaitOnFirstExecution>
+      <name>Start</name>
+      <description/>
+      <type>SPECIAL</type>
+      <attributes/>
+      <xloc>96</xloc>
+      <yloc>48</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <connections>
+        <connection>
+          <name>OPS</name>
+          <waitfor>0</waitfor>
+          <waittime>millisecond</waittime>
+        </connection>
+        <connection>
+          <name>Vault</name>
+          <waitfor>0</waitfor>
+          <waittime>millisecond</waittime>
+        </connection>
+        <connection>
+          <name>AdventureWorks</name>
+          <waitfor>0</waitfor>
+          <waittime>millisecond</waittime>
+        </connection>
+      </connections>
+      <name>Check DB connections</name>
+      <description/>
+      <type>CHECK_DB_CONNECTIONS</type>
+      <attributes/>
+      <xloc>288</xloc>
+      <yloc>48</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <filename/>
+      <work_directory>${PROJECT_HOME}</work_directory>
+      <arguments/>
+      <arg_from_previous>N</arg_from_previous>
+      <set_logfile>N</set_logfile>
+      <logfile/>
+      <logext/>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <loglevel>Basic</loglevel>
+      <exec_per_row>N</exec_per_row>
+      <set_append_logfile>N</set_append_logfile>
+      <insertScript>Y</insertScript>
+      <script>#!/bin/sh
+exec python3 "${PROJECT_HOME}/scripts/bootstrap-adventureworks-work.py" --project-home "${PROJECT_HOME}"</script>
+      <name>bootstrap-adventureworks-work.py</name>
+      <description>Create work/ catalog, reports, execution-maps, documentation folders</description>
+      <type>SHELL</type>
+      <attributes/>
+      <xloc>480</xloc>
+      <yloc>48</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <sql/>
+      <connection>OPS</connection>
+      <useVariableSubstitution>N</useVariableSubstitution>
+      <sqlfromfile>Y</sqlfromfile>
+      <sqlfilename>${PROJECT_HOME}/sql/create-load-metrics-tables.sql</sqlfilename>
+      <sqlfilename_encoding/>
+      <sendOneStatement>N</sendOneStatement>
+      <name>create-load-metrics-tables.sql</name>
+      <description/>
+      <type>SQL</type>
+      <attributes/>
+      <xloc>672</xloc>
+      <yloc>48</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <sql/>
+      <connection>Vault</connection>
+      <useVariableSubstitution>N</useVariableSubstitution>
+      <sqlfromfile>Y</sqlfromfile>
+      <sqlfilename>${PROJECT_HOME}/sql/truncate-fact-tables.sql</sqlfilename>
+      <sqlfilename_encoding/>
+      <sendOneStatement>N</sendOneStatement>
+      <name>truncate-fact-tables.sql</name>
+      <description>Fact pipelines insert without truncate; empty them before a full fact rebuild</description>
+      <type>SQL</type>
+      <attributes/>
+      <xloc>864</xloc>
+      <yloc>48</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <resourceDefinitionGroup>adventureworks</resourceDefinitionGroup>
+      <includeDataVault>Y</includeDataVault>
+      <includeBusinessVault>Y</includeBusinessVault>
+      <includeDimensional>Y</includeDimensional>
+      <loadDate/>
+      <pipelineRunConfiguration>local</pipelineRunConfiguration>
+      <workflowRunConfiguration>local</workflowRunConfiguration>
+      <parallelPipelineCopies>${PIPELINE_COPIES}</parallelPipelineCopies>
+      <logModelCheckFailures>Y</logModelCheckFailures>
+      <abortOnModelCheckFailures>Y</abortOnModelCheckFailures>
+      <detailedDataTypeChecking>N</detailedDataTypeChecking>
+      <preferHarvestForTypeChecks>N</preferHarvestForTypeChecks>
+      <harvestRunId/>
+      <harvestHistoryDatabase/>
+      <modelCheckParallelism>8</modelCheckParallelism>
+      <ignoreModelCheckWarnings>Y</ignoreModelCheckWarnings>
+      <writeValidationReport>Y</writeValidationReport>
+      <validationReportFolder>${PROJECT_HOME}/work/reports</validationReportFolder>
+      <validationReportBaseName>adventureworks-model-check</validationReportBaseName>
+      <validationReportFormat>MARKDOWN</validationReportFormat>
+      <updateTargetDatabaseStructure>Y</updateTargetDatabaseStructure>
+      <targetTypeMapping>vault-target-mapping</targetTypeMapping>
+      <failIfDdlNeeded>N</failIfDdlNeeded>
+      <doNotUpdateTargetDatabase>N</doNotUpdateTargetDatabase>
+      <publishToCatalog>Y</publishToCatalog>
+      <dataCatalogConnection>local-catalog</dataCatalogConnection>
+      <ensureSpecialRecords>Y</ensureSpecialRecords>
+      <recordSourceGroup/>
+      <manageVaultUpdateMetrics>Y</manageVaultUpdateMetrics>
+      <useWorkflowLogChannelId>Y</useWorkflowLogChannelId>
+      <executionMetricsProfile>adventureworks-execution-metrics</executionMetricsProfile>
+      <publishMetricsToDatabase>Y</publishMetricsToDatabase>
+      <publishMetricsToCatalog>Y</publishMetricsToCatalog>
+      <logMetricsToWorkflow>Y</logMetricsToWorkflow>
+      <writeMarkdownReport>Y</writeMarkdownReport>
+      <writeHtmlReport>Y</writeHtmlReport>
+      <reportOutputFolder>${PROJECT_HOME}/work/reports</reportOutputFolder>
+      <reportFileBaseName>${REPORT_BASE_NAME}</reportFileBaseName>
+      <failIfNoMetricsFound>N</failIfNoMetricsFound>
+      <includePipelineDetail>Y</includePipelineDetail>
+      <includeInsights>Y</includeInsights>
+      <name>Update resource definition group</name>
+      <description>Incremental DV, BV, and DM update on group adventureworks</description>
+      <type>UPDATE_RESOURCE_DEFINITION_GROUP</type>
+      <attributes/>
+      <xloc>288</xloc>
+      <yloc>176</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <rootArtifactFilename>${Internal.Workflow.Filename.Folder}/${Internal.Workflow.Filename.Name}</rootArtifactFilename>
+      <outputHemFile>${PROJECT_HOME}/work/execution-maps/run-adventureworks-update.hem</outputHemFile>
+      <includeGeneratedPipelines>Y</includeGeneratedPipelines>
+      <includeDatasetNodes>Y</includeDatasetNodes>
+      <captureSnapshots>Y</captureSnapshots>
+      <followNestedWorkflows>Y</followNestedWorkflows>
+      <followNestedPipelines>Y</followNestedPipelines>
+      <includeWorkflowActions>N</includeWorkflowActions>
+      <includePipelineTransforms>N</includePipelineTransforms>
+      <exportLineage>N</exportLineage>
+      <name>Generate update execution map</name>
+      <type>GENERATE_EXECUTION_MAP</type>
+      <attributes/>
+      <xloc>544</xloc>
+      <yloc>176</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+  </actions>
+  <hops>
+    <hop>
+      <from>Start</from>
+      <to>Check DB connections</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>Y</unconditional>
+    </hop>
+    <hop>
+      <from>Check DB connections</from>
+      <to>bootstrap-adventureworks-work.py</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>bootstrap-adventureworks-work.py</from>
+      <to>create-load-metrics-tables.sql</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>create-load-metrics-tables.sql</from>
+      <to>truncate-fact-tables.sql</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>truncate-fact-tables.sql</from>
+      <to>Update resource definition group</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>Update resource definition group</from>
+      <to>Generate update execution map</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+  </hops>
+  <notepads/>
+  <attributes/>
+</workflow>

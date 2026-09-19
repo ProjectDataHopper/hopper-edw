@@ -66,6 +66,7 @@ Full index: **[docs/README.md](docs/README.md)**
 | Everyone (start here) | [`docs/architecture.adoc`](docs/architecture.adoc) then [`docs/getting-started-edw.adoc`](docs/getting-started-edw.adoc) |
 | Feature list | [`docs/feature-overview.adoc`](docs/feature-overview.adoc) |
 | Tour the sample | [`docs/getting-started-retail.adoc`](docs/getting-started-retail.adoc) |
+| AdventureWorks demo (SQL Server → Postgres) | [`docs/getting-started-adventureworks.adoc`](docs/getting-started-adventureworks.adoc) |
 | Advanced fixtures | [`docs/getting-started-integration-tests.adoc`](docs/getting-started-integration-tests.adoc) |
 | Managers / architects | [`docs/presentations/hop-data-vault-overview.md`](docs/presentations/hop-data-vault-overview.md) |
 

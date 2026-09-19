@@ -1,0 +1,20 @@
+{
+  "data_vault_model": [
+    "${PROJECT_HOME}/models/adventureworks.hdv"
+  ],
+  "virtualPath": "",
+  "detailedDataTypeChecking": true,
+  "name": "adventureworks",
+  "previewRowLimit": 1000,
+  "dataCatalogConnection": "local-catalog",
+  "businessProcessCatalog": "adventureworks-bus",
+  "description": "AdventureWorks DV/BV/DM models. List order within each layer is update order for the Update resource definition group action.",
+  "business_vault_model": [
+    "${PROJECT_HOME}/models/adventureworks.hbv"
+  ],
+  "dimensional_model": [
+    "${PROJECT_HOME}/models/adventureworks-conformed-dims.hdm",
+    "${PROJECT_HOME}/models/adventureworks-f-sales.hdm",
+    "${PROJECT_HOME}/models/adventureworks-f-purchasing.hdm"
+  ]
+}

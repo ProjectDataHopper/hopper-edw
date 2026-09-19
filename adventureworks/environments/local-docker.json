@@ -1,0 +1,64 @@
+{
+  "variables" : [
+    {
+      "name" : "DB_SOURCE_HOST",
+      "value" : "localhost",
+      "description" : "SQL Server AdventureWorks host (Hop docker uses host network)"
+    },
+    {
+      "name" : "DB_SOURCE_PORT",
+      "value" : "14333",
+      "description" : "Published SQL Server port (non-default to avoid a host instance on 1433)"
+    },
+    {
+      "name" : "DB_SOURCE_USER",
+      "value" : "sa",
+      "description" : "SQL Server username"
+    },
+    {
+      "name" : "DB_SOURCE_PASSWORD",
+      "value" : "Test_Password123",
+      "description" : "SQL Server password (must meet complexity rules)"
+    },
+    {
+      "name" : "DB_SOURCE_NAME",
+      "value" : "AdventureWorks2025",
+      "description" : "Restored AdventureWorks OLTP database name"
+    },
+    {
+      "name" : "DB_HOST",
+      "value" : "localhost",
+      "description" : "Local Docker PostgreSQL (host network from run-hop.sh)"
+    },
+    {
+      "name" : "DB_PORT",
+      "value" : "54320",
+      "description" : "PostgreSQL port (non-default to avoid collision with host PostgreSQL on 5432)"
+    },
+    {
+      "name" : "DB_USER",
+      "value" : "test",
+      "description" : "PostgreSQL username"
+    },
+    {
+      "name" : "DB_PASSWORD",
+      "value" : "test",
+      "description" : "PostgreSQL password"
+    },
+    {
+      "name" : "DB_TARGET_NAME",
+      "value" : "test_aw_edw",
+      "description" : "PostgreSQL database for Data Vault / Business Vault / dimensional targets"
+    },
+    {
+      "name" : "DB_OPS_NAME",
+      "value" : "test_aw_ops",
+      "description" : "PostgreSQL database for execution metrics / load-run operations tables"
+    },
+    {
+      "name" : "OUTPUT_COPIES",
+      "value" : "2",
+      "description" : "Number of data load threads"
+    }
+  ]
+}

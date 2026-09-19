@@ -8,7 +8,7 @@ This is the **build-from-scratch** guide. You create a source model, publish con
 
 Architecture pictures (catalog in/out, RDG spine, four controls): link:architecture.adoc[Architecture].
 
-To **run a finished warehouse** instead of building one, use link:getting-started-retail.adoc[Getting started — retail example]. Advanced fixtures: link:getting-started-integration-tests.adoc[integration test fixtures].
+To **run a finished warehouse** instead of building one, use link:getting-started-retail.adoc[Getting started — retail example] or link:getting-started-adventureworks.adoc[Getting started — AdventureWorks]. Advanced fixtures: link:getting-started-integration-tests.adoc[integration test fixtures].
 
 Estimated time for a small source system (a handful of tables): a few hours in Hop GUI once connections exist.
 

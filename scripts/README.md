@@ -24,6 +24,7 @@ Docker runners and retail data generators used by `integration-tests/` and `reta
 ./scripts/run-postgres.sh up
 ./scripts/run-marquez.sh up   # OpenLineage / Marquez (API :5001, UI :3001)
 ./scripts/run-hop.sh <hop-project-dir> <workflow>
+./scripts/run-adventureworks.sh up   # SQL Server 2025 + AdventureWorks2025.bak restore
 ./scripts/smoke-lineage-view.sh   # optional Marquez GET /lineage + hop_export check
 ```
 
@@ -33,6 +34,7 @@ Docker runners and retail data generators used by `integration-tests/` and `reta
 |----------------|---------|
 | `integration-tests` | `./scripts/run-hop.sh integration-tests tests/run-tests.hwf` |
 | `retail-example` | `./scripts/run-hop.sh retail-example workflows/run-retail-initial.hwf` |
+| `adventureworks` | `./scripts/run-adventureworks.sh up` then `load` / `update` / `spot-check` |
 
 Thin wrappers also exist in `integration-tests/run-tests.sh` and `integration-tests/run-postgres.sh`.
 

@@ -18,7 +18,7 @@ limitations under the License.
 
 Documentation for the **Data Hopper EDW** plugin (development **0.11.0-SNAPSHOT**, latest release **0.10.0**). Requires **Apache Hop 2.20.0-SNAPSHOT**. Highlights include **Free SQL / hop-hsm JDBC**, **source modeler** (`.hsm` with JSON and pipeline sources), **metadata harvesting**, optional **load cycle IDs**, **composite hub business keys**, **OpenLineage / Marquez export**, **Hop Lineage View** (`.hlv`), **source-to-target lineage**, catalog version tags, schema validation, multi-DB hardening, and Business Vault incremental loading. See [CHANGELOG.md](../CHANGELOG.md).
 
-**New here?** Read [architecture.adoc](architecture.adoc) (catalog, models, resource definition group), then [getting-started-edw.adoc](getting-started-edw.adoc) to **build** an EDW. To **tour** a finished sample, use [getting-started-retail.adoc](getting-started-retail.adoc). Capability list: [feature-overview.adoc](feature-overview.adoc).
+**New here?** Read [architecture.adoc](architecture.adoc) (catalog, models, resource definition group), then [getting-started-edw.adoc](getting-started-edw.adoc) to **build** an EDW. To **tour** a finished sample, use [getting-started-retail.adoc](getting-started-retail.adoc) or [getting-started-adventureworks.adoc](getting-started-adventureworks.adoc). Capability list: [feature-overview.adoc](feature-overview.adoc).
 
 Architecture pictures are **committed SVGs** (`docs/images/diagrams/`) generated from PlantUML (`docs/diagrams/`). Do not put Mermaid or Markdown ` ``` ` fences in `.adoc` files.
 
@@ -32,6 +32,7 @@ Architecture pictures are **committed SVGs** (`docs/images/diagrams/`) generated
 | [edw-journey.adoc](edw-journey.adoc) | **EDW Journey** perspective: sources → controls → DV/BV/DM → workflows → reports |
 | [getting-started-edw.adoc](getting-started-edw.adoc) | **Build an EDW:** source model → catalog → Data Vault → resource definition group → load → BV/DM |
 | [getting-started-retail.adoc](getting-started-retail.adoc) | **Tour** the finished retail-example (run the sample workflows) |
+| [getting-started-adventureworks.adoc](getting-started-adventureworks.adoc) | **Tour** AdventureWorks (SQL Server → Postgres DV/BV/DM, bus matrix) |
 | [feature-overview.adoc](feature-overview.adoc) | Major plugin capabilities, maturity, and links to deep dives |
 | [naming-schemes.adoc](naming-schemes.adoc) | Hop 2.20 naming schemes for EDW models, tables, physical names, record definitions |
 | [getting-started-integration-tests.adoc](getting-started-integration-tests.adoc) | Reference walkthrough: Customer 360 and integration test fixtures |
@@ -124,6 +125,7 @@ Architecture pictures are **committed SVGs** (`docs/images/diagrams/`) generated
 | Folder | Document | Role |
 |--------|----------|------|
 | [../retail-example/](../retail-example/) | [../retail-example/README.md](../retail-example/README.md) | **Learn** — full-stack retail demo |
+| [../adventureworks/](../adventureworks/) | [getting-started-adventureworks.adoc](getting-started-adventureworks.adoc) | **Demo / benchmark** — AdventureWorks SQL Server → Postgres (issue #180) |
 | [../integration-tests/](../integration-tests/) | [../integration-tests/PROJECT.md](../integration-tests/PROJECT.md) | **Reference / CI** — regression suites |
 | [../scripts/](../scripts/) | [../scripts/README.md](../scripts/README.md) | Shared Docker runners |
 

@@ -24,10 +24,12 @@ import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.hopper.edw.datavault.metadata.AttributeSource;
 import org.hopper.edw.datavault.metadata.BusinessKey;
 import org.hopper.edw.datavault.metadata.BusinessKeySource;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DependentChildKey;
+import org.hopper.edw.datavault.metadata.DrivingKeySource;
 import org.hopper.edw.datavault.metadata.DvHub;
 import org.hopper.edw.datavault.metadata.DvLink;
 import org.hopper.edw.datavault.metadata.DvLinkedTable;
@@ -409,6 +411,7 @@ public final class SourceToVaultApplySupport {
         names.add(name);
         link.setLinkSatelliteNames(names);
         link.setHasDescriptiveAttributes(true);
+        addLinkSatelliteSource(link, name, feed, object);
       }
     }
 
@@ -419,6 +422,46 @@ public final class SourceToVaultApplySupport {
 
     vaultModel.getTables().add(satellite);
     result.getCreatedTableNames().add(name);
+  }
+
+  private static void addLinkSatelliteSource(
+      DvLink link, String satelliteName, String feed, ProposedVaultObject object) {
+    if (link == null || Utils.isEmpty(feed) || Utils.isEmpty(satelliteName)) {
+      return;
+    }
+    DvLink.DvLinkSatelliteSource existing = null;
+    if (link.getLinkSatelliteSources() != null) {
+      for (DvLink.DvLinkSatelliteSource candidate : link.getLinkSatelliteSources()) {
+        if (candidate != null && feed.equals(candidate.getSource())) {
+          existing = candidate;
+          break;
+        }
+      }
+    }
+    if (existing == null) {
+      existing = new DvLink.DvLinkSatelliteSource();
+      existing.setSource(feed);
+      if (link.getLinkSatelliteSources() == null) {
+        link.setLinkSatelliteSources(new ArrayList<>());
+      }
+      link.getLinkSatelliteSources().add(existing);
+    }
+    DvLink.SatelliteSourceKeyField keyField = new DvLink.SatelliteSourceKeyField();
+    keyField.setSatelliteName(satelliteName);
+    if (object != null) {
+      for (String columnName : object.getSatelliteAttributeColumns()) {
+        if (Utils.isEmpty(columnName)) {
+          continue;
+        }
+        keyField.getAttributeSources().add(new AttributeSource(columnName, columnName));
+      }
+      if (!Utils.isEmpty(object.getDrivingKeyColumn())) {
+        keyField
+            .getDrivingKeySources()
+            .add(new DrivingKeySource(object.getDrivingKeyColumn(), object.getDrivingKeyColumn()));
+      }
+    }
+    existing.getSatelliteSourceKeyFields().add(keyField);
   }
 
   private static void applyLinkedTable(

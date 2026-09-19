@@ -269,6 +269,60 @@ public final class DatabaseSchemaImportSupport {
         importedTables, importedRelationships, published, warnings, errors);
   }
 
+  /**
+   * Discovers JDBC foreign keys for every table already on the model and adds missing
+   * relationships. Call after importing several schemas so cross-schema FKs can resolve.
+   */
+  public static SourceSchemaImportResult importMissingForeignKeys(
+      SourceModel model, DatabaseMeta databaseMeta, IVariables variables) throws HopException {
+    if (model == null || databaseMeta == null || model.getTables().isEmpty()) {
+      return SourceSchemaImportResult.empty();
+    }
+    List<SourceRelationship> importedRelationships = new ArrayList<>();
+    List<String> warnings = new ArrayList<>();
+    Map<String, String> physicalToLogical = new HashMap<>();
+    Map<String, List<String>> tablesBySchema = new HashMap<>();
+    for (SourceTable existing : model.getTables()) {
+      if (existing == null || Utils.isEmpty(existing.getTableName())) {
+        continue;
+      }
+      physicalToLogical.put(
+          normalizePhysicalKey(existing.getSchemaName(), existing.getTableName()),
+          existing.getName());
+      physicalToLogical.putIfAbsent(
+          normalizePhysicalKey(null, existing.getTableName()), existing.getName());
+      String schema = Const.NVL(existing.getSchemaName(), "");
+      tablesBySchema.computeIfAbsent(schema, ignored -> new ArrayList<>()).add(existing.getTableName());
+    }
+
+    ILoggingObject loggingObject =
+        new SimpleLoggingObject("SourceSchemaFkImport", LoggingObjectType.GENERAL, null);
+    try (Database database = new Database(loggingObject, variables, databaseMeta)) {
+      database.connect();
+      for (Map.Entry<String, List<String>> entry : tablesBySchema.entrySet()) {
+        String schemaName = entry.getKey();
+        try {
+          List<DiscoveredForeignKey> foreignKeys =
+              DatabaseForeignKeyDiscoverySupport.discoverImportedForeignKeysForTables(
+                  database, databaseMeta, schemaName, entry.getValue());
+          List<SourceRelationship> relationships =
+              buildRelationshipsFromForeignKeys(
+                  foreignKeys, physicalToLogical, model, importedRelationships, warnings);
+          importedRelationships.addAll(relationships);
+        } catch (Exception e) {
+          warnings.add(
+              BaseMessages.getString(
+                  PKG, "DatabaseSchemaImportSupport.Warning.FkDiscoveryFailed", e.getMessage()));
+        }
+      }
+    } catch (Exception e) {
+      throw new HopException(
+          BaseMessages.getString(PKG, "DatabaseSchemaImportSupport.Error.DatabaseConnection"), e);
+    }
+    return new SourceSchemaImportResult(
+        List.of(), importedRelationships, List.of(), warnings, List.of());
+  }
+
   /** Applies imported tables/relationships onto the model (mutates {@code model}). */
   public static void applyImportResult(SourceModel model, SourceSchemaImportResult result) {
     if (model == null || result == null) {

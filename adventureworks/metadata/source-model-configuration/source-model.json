@@ -1,0 +1,10 @@
+{
+  "defaultDatabase": "AdventureWorks",
+  "defaultSchema": "Sales",
+  "catalogConnection": "local-catalog",
+  "catalogNamespace": "hop/adventureworks/sources",
+  "defaultDataTypeMappingNames": "sqlserver-types",
+  "name": "source-model",
+  "description": "",
+  "virtualPath": ""
+}

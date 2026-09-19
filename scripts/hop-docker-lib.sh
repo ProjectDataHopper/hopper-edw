@@ -23,6 +23,7 @@ DOCKER_DIR="${SCRIPT_DIR}/docker"
 HOP_IMAGE_NAME="docker-hop:latest"
 HOP_COMPOSE_FILE="${DOCKER_DIR}/compose.hop.yml"
 HOP_POSTGRES_LOCAL_COMPOSE_FILE="${DOCKER_DIR}/compose.postgres-local.yml"
+HOP_ADVENTUREWORKS_COMPOSE_FILE="${DOCKER_DIR}/compose.adventureworks.yml"
 HOP_SVG_COMPOSE_FILE="${DOCKER_DIR}/compose.svg.yml"
 METRICS_COMPOSE_FILE="${HOP_COMPOSE_FILE}"
 HOP_ENTRYPOINT_INIT="${HOP_ENTRYPOINT_INIT:-/opt/hop-datavault/entrypoint-init.sh}"
@@ -172,6 +173,52 @@ ensure_local_postgres_retail_databases() {
         -c "CREATE DATABASE ${db} OWNER ${LOCAL_POSTGRES_USER};" >/dev/null
     fi
   done
+}
+
+# AdventureWorks sample databases (SQL Server source lives in compose.adventureworks.yml).
+ensure_local_postgres_adventureworks_databases() {
+  if ! docker ps --format '{{.Names}}' 2>/dev/null | grep -qx "${LOCAL_POSTGRES_CONTAINER}"; then
+    return 0
+  fi
+
+  for db in test_aw_edw test_aw_ops; do
+    exists="$(
+      docker exec "${LOCAL_POSTGRES_CONTAINER}" \
+        psql -U "${LOCAL_POSTGRES_USER}" -p "${LOCAL_POSTGRES_PORT}" -d "${LOCAL_POSTGRES_DB}" -tAc \
+        "SELECT 1 FROM pg_database WHERE datname = '${db}'" 2>/dev/null \
+        | tr -d '[:space:]'
+    )"
+    if [ "${exists}" != "1" ]; then
+      echo "Creating missing PostgreSQL database: ${db}"
+      docker exec "${LOCAL_POSTGRES_CONTAINER}" \
+        psql -U "${LOCAL_POSTGRES_USER}" -p "${LOCAL_POSTGRES_PORT}" -d "${LOCAL_POSTGRES_DB}" \
+        -c "CREATE DATABASE ${db} OWNER ${LOCAL_POSTGRES_USER};" >/dev/null
+    fi
+  done
+
+  docker exec -i "${LOCAL_POSTGRES_CONTAINER}" \
+    psql -q -U "${LOCAL_POSTGRES_USER}" -p "${LOCAL_POSTGRES_PORT}" -d test_aw_ops >/dev/null <<'SQL'
+CREATE TABLE IF NOT EXISTS hop_executions
+(
+  id VARCHAR(100)
+, name VARCHAR(1024)
+, execution_type VARCHAR(32)
+, parent_id VARCHAR(100)
+, registration_date TIMESTAMP
+, execution_start_date TIMESTAMP
+, execution_end_date TIMESTAMP
+, failed BOOLEAN
+, status_description VARCHAR(128)
+, duration_ms BIGINT
+, json TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_hop_exec_start ON hop_executions(execution_start_date);
+CREATE INDEX IF NOT EXISTS idx_hop_exec_name ON hop_executions("name");
+CREATE INDEX IF NOT EXISTS idx_hop_exec_type ON hop_executions(execution_type);
+CREATE INDEX IF NOT EXISTS idx_hop_exec_failed ON hop_executions(failed);
+CREATE INDEX IF NOT EXISTS idx_hop_exec_parent ON hop_executions(parent_id);
+CREATE INDEX IF NOT EXISTS idx_hop_exec_status ON hop_executions(status_description);
+SQL
 }
 
 require_local_postgres() {
@@ -630,6 +677,7 @@ run_hop_docker_short_lived() {
       -e HOP_PROJECT_DIR="${HOP_PROJECT_DIR}" \
       -e HOP_PROJECT_FOLDER="${HOP_PROJECT_FOLDER}" \
       -e HOP_PROJECT_NAME="${HOP_PROJECT_NAME}" \
+      -e HOP_ENVIRONMENT_NAME="${HOP_ENVIRONMENT_NAME:-local-docker-postgres}" \
       -e HOP_ENVIRONMENT_CONFIG_FILE_NAME_PATHS="${LOCAL_POSTGRES_ENV_FILE}" \
       hop
   else
@@ -640,6 +688,7 @@ run_hop_docker_short_lived() {
       -e HOP_PROJECT_DIR="${HOP_PROJECT_DIR}" \
       -e HOP_PROJECT_FOLDER="${HOP_PROJECT_FOLDER}" \
       -e HOP_PROJECT_NAME="${HOP_PROJECT_NAME}" \
+      -e HOP_ENVIRONMENT_NAME="${HOP_ENVIRONMENT_NAME:-local-docker-postgres}" \
       -e HOP_ENVIRONMENT_CONFIG_FILE_NAME_PATHS="${LOCAL_POSTGRES_ENV_FILE}" \
       hop
   fi

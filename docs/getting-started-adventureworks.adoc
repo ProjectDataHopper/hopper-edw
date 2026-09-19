@@ -1,0 +1,96 @@
+= Getting started — AdventureWorks sample
+:toc: macro
+:toclevels: 2
+
+toc::[]
+
+This is a **tour of the finished AdventureWorks sample**: Microsoft's OLTP schema in SQL Server, imported to a source model, generated as raw Data Vault 2.0, then a **hand-authored** Business Vault and Kimball slice loaded into PostgreSQL. It is a schema-complexity / cross-engine demo, not a volume stress test.
+
+Retail stays the small tutorial (link:getting-started-retail.adoc[Getting started — retail]). Design notes: link:plans/adventureworks-sample-plan.md[adventureworks-sample-plan.md] (issue https://github.com/ProjectDataHopper/hopper-edw/issues/180[#180]). Project details: link:../adventureworks/README.md[adventureworks/README.md].
+
+== Prerequisites
+
+. Docker with Compose v2, Python 3 (stdlib only), JDK 21, Maven 3.
+. Plugin zip built (`mvn package`) so `docker-hop:latest` can include hopper-edw.
+. About **8 GB RAM** (SQL Server 4G + Postgres + Hop).
+
+== Run
+
+From the repository root:
+
+[source,bash]
+----
+./scripts/run-adventureworks.sh up
+./scripts/run-adventureworks.sh load
+----
+
+`up` starts local Postgres (`test_aw_edw` / `test_aw_ops` on port **54320**), SQL Server 2025 on **14333**, and restores `AdventureWorks2025.bak` (cached under gitignored `adventureworks/.cache/`).
+
+`load` runs `workflows/run-adventureworks-initial.hwf`: drop the vault schema, **Update resource definition group** `adventureworks` (DV then BV then DM), write the load-overview report, generate an execution map, and generate project documentation (including the bus matrix).
+
+A second run without dropping the vault (static snapshot, no new source rows):
+
+[source,bash]
+----
+./scripts/run-adventureworks.sh update
+----
+
+That is `workflows/run-adventureworks-update.hwf`. Hubs insert **0** (keys already present). Insert-only satellites may add versions for the new load date. TYPE1 dimensions insert **0**. Facts are truncated then reloaded (fact pipelines insert without truncate). Report: `work/reports/adventureworks-update-report.html`.
+
+Compare SQL Server source counts to Postgres hubs/sats/facts:
+
+[source,bash]
+----
+./scripts/run-adventureworks.sh spot-check
+----
+
+Hubs include two special records (unknown + invalid), so `hub_customer` is source Customer count **+ 2**.
+
+Refresh committed source/vault models from the live restore:
+
+[source,bash]
+----
+./scripts/run-adventureworks.sh generate-models
+----
+
+That imports `Person`, `HumanResources`, `Production`, `Purchasing`, and `Sales`, then **Generate Data Vault**. It also draws `SalesOrderDetail.ProductID` → `Product.ProductID` so the sales fact can join `hub_product` (the physical FK is the composite to `SpecialOfferProduct`, which classifies as a link).
+
+== What to open in Hop GUI
+
+. Register `adventureworks/` as a Hop project named **adventureworks**, environment **local-docker**.
+. Models under `models/`:
+  * `adventureworks.hsm` — imported OLTP (63 tables).
+  * `adventureworks.hdv` — generated raw vault.
+  * `adventureworks.hbv` — customer 360, product 360, employee PIT + current employee.
+  * `adventureworks-conformed-dims.hdm`, `adventureworks-f-sales.hdm`, `adventureworks-f-purchasing.hdm` — designed mart (not Dimensional Publish's hub-to-dim dump).
+. Metadata **resource definition group** `adventureworks` (load order) and **business process catalog** `adventureworks-bus`.
+. After a load: `work/reports/adventureworks-initial-report.html`, `work/execution-maps/run-adventureworks-initial.hem`, `work/documentation/index.html` (Bus matrices page).
+
+== Designed BV / DM slice
+
+| Layer | Objects |
+|---|---|
+| BV | `bv_customer_scd2` + view `bv_customer_360` (Person or Store, email, territory); `bv_product_scd2` + view `bv_product_360` (subcategory/category); `pit_employee` + view `bv_employee` |
+| Dims | `d_date` (generator 2022–2026), `d_customer`, `d_product`, `d_employee`, `d_sales_territory`, `d_vendor` |
+| Facts | `f_sales_order_line` (Sales / Order management / Sales order lines); `f_purchase_order_line` (Purchasing / Procurement / Purchase order lines) |
+
+SCD2 cannot merge Person, Store, and email onto `hub_customer` (those satellites hang off `hub_businessentity` / `hub_emailaddress`). The 360 views do that join. `Employee.OrganizationNode` is `hierarchyid` stored as binary; `bv_employee` exposes `organization_level` instead of a manager FK.
+
+== Next steps
+
+[cols="1,2", options="header"]
+|===
+|Topic |Document
+
+|Build an EDW from scratch
+|link:getting-started-edw.adoc[getting-started-edw]
+
+|Retail tutorial
+|link:getting-started-retail.adoc[getting-started-retail]
+
+|Kimball bus matrix
+|link:bus-matrix.adoc[bus-matrix]
+
+|Project documentation
+|link:project-documentation.adoc[project-documentation]
+|===

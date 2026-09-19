@@ -37,13 +37,24 @@ case "${HOP_PROJECT_DIR}" in
   retail-example)
     export HOP_PROJECT_NAME="${HOP_PROJECT_NAME:-retail-example}"
     ;;
+  adventureworks)
+    export HOP_PROJECT_NAME="${HOP_PROJECT_NAME:-adventureworks}"
+    ;;
   *)
     export HOP_PROJECT_NAME="${HOP_PROJECT_NAME:-${HOP_PROJECT_DIR}}"
     ;;
 esac
 
 export HOP_PROJECT_FOLDER="${WORKSPACE_PREFIX}/${HOP_PROJECT_DIR}"
-export LOCAL_POSTGRES_ENV_FILE="${HOP_PROJECT_FOLDER}/environments/local-docker-postgres.json"
+case "${HOP_PROJECT_DIR}" in
+  adventureworks)
+    export LOCAL_POSTGRES_ENV_FILE="${HOP_PROJECT_FOLDER}/environments/local-docker.json"
+    export HOP_ENVIRONMENT_NAME="${HOP_ENVIRONMENT_NAME:-local-docker}"
+    ;;
+  *)
+    export LOCAL_POSTGRES_ENV_FILE="${HOP_PROJECT_FOLDER}/environments/local-docker-postgres.json"
+    ;;
+esac
 
 export HOST_UID="$(id -u)"
 export HOST_GID="$(id -g)"
@@ -65,12 +76,17 @@ echo "Project folder: ${HOP_PROJECT_FOLDER}"
 echo "Environment: ${HOP_ENVIRONMENT_NAME:-local-docker-postgres} (${LOCAL_POSTGRES_ENV_FILE})"
 if [ "${HOP_PROJECT_DIR}" = "retail-example" ]; then
   echo "Databases: CRM=test_source, Vault=test_edw, OPS=test_ops (${LOCAL_POSTGRES_USER}@${LOCAL_POSTGRES_HOST}:${LOCAL_POSTGRES_PORT})"
+elif [ "${HOP_PROJECT_DIR}" = "adventureworks" ]; then
+  echo "Databases: AdventureWorks SQL Server + Vault=test_aw_edw, OPS=test_aw_ops (${LOCAL_POSTGRES_USER}@${LOCAL_POSTGRES_HOST}:${LOCAL_POSTGRES_PORT})"
 else
   echo "Database: ${LOCAL_POSTGRES_USER}@${LOCAL_POSTGRES_HOST}:${LOCAL_POSTGRES_PORT}/${LOCAL_POSTGRES_DB}"
 fi
 require_local_postgres
 if [ "${HOP_PROJECT_DIR}" = "retail-example" ]; then
   ensure_local_postgres_retail_databases
+fi
+if [ "${HOP_PROJECT_DIR}" = "adventureworks" ]; then
+  ensure_local_postgres_adventureworks_databases
 fi
 
 EXIT_CODE=0

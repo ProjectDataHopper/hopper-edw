@@ -86,6 +86,11 @@ class SourceToVaultApplySupportTest {
     DvSatellite lineSat = (DvSatellite) vault.findTable("sat_lnk_order_line");
     assertEquals("lnk_order_line", lineSat.getLinkName());
     assertTrue(lineSat.getAttributes().stream().anyMatch(a -> "quantity".equals(a.getName())));
+    assertFalse(orderLine.getLinkSatelliteSources().isEmpty());
+    assertEquals("order_line", orderLine.getLinkSatelliteSources().get(0).getSource());
+    assertEquals(
+        "sat_lnk_order_line",
+        orderLine.getLinkSatelliteSources().get(0).getSatelliteSourceKeyFields().get(0).getSatelliteName());
   }
 
   @Test

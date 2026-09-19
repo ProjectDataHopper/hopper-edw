@@ -1,0 +1,48 @@
+{
+  "virtualPath": "",
+  "domain": [
+    {
+      "parentName": "",
+      "name": "Adventure Works Cycles",
+      "description": "Bicycle manufacturer sample (Microsoft AdventureWorks OLTP)"
+    }
+  ],
+  "name": "adventureworks-bus",
+  "description": "Kimball bus taxonomy for the AdventureWorks sample (Sales and Purchasing)",
+  "level1": [
+    {
+      "parentName": "Adventure Works Cycles",
+      "name": "Sales",
+      "description": "Customer orders and order lines"
+    },
+    {
+      "parentName": "Adventure Works Cycles",
+      "name": "Purchasing",
+      "description": "Vendor purchase orders"
+    }
+  ],
+  "level2": [
+    {
+      "parentName": "Sales",
+      "name": "Order management",
+      "description": ""
+    },
+    {
+      "parentName": "Purchasing",
+      "name": "Procurement",
+      "description": ""
+    }
+  ],
+  "level3": [
+    {
+      "parentName": "Order management",
+      "name": "Sales order lines",
+      "description": "Grain: sales order + line number"
+    },
+    {
+      "parentName": "Procurement",
+      "name": "Purchase order lines",
+      "description": "Grain: purchase order + line number"
+    }
+  ]
+}

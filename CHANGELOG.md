@@ -4,6 +4,11 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### AdventureWorks sample (issue #180)
+
+- New repo-root `adventureworks/` Hop project: restore Microsoft **AdventureWorks2025** into SQL Server 2025 Docker (`localhost:14333`), import a source model, generate a raw Data Vault, then a hand-authored Business Vault and Kimball slice loaded into Postgres `test_aw_edw` / `test_aw_ops` (not retail’s `test_edw`).
+- Runner: `./scripts/run-adventureworks.sh up|load|update|spot-check`. Initial load writes a timings report, execution map, and project documentation including a bus matrix. `update` is a no-change incremental for timings. Tour: [docs/getting-started-adventureworks.adoc](docs/getting-started-adventureworks.adoc).
+
 ### Performance chart CME during pipeline run (issue #181)
 
 - The results-pane Performance tab no longer throws `ConcurrentModificationException` (`Error in the Hop GUI : null`) when Hop's snapshot timer appends to live transform snapshot lists during a chart refresh. Snapshot lists are copied (without fail-fast iterators) under the same lock Hop uses before they are charted. A leftover race skips that tick instead of aborting live refresh.

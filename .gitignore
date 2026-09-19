@@ -26,6 +26,10 @@ AGENTS.md
 # Retail example runtime tree (FILE catalog, reports, HEMs, metrics, …)
 retail-example/work/
 
+# AdventureWorks sample: FILE catalog / reports / downloaded .bak
+adventureworks/work/
+adventureworks/.cache/
+
 # Generated CSV control markers and period waves under files/
 retail-example/files/.dv-load-date
 retail-example/files/.load-control

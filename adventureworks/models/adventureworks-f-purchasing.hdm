@@ -1,0 +1,262 @@
+<!--
+Copyright 2026 i-Bridge bv
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<dimensional-model>
+  <name_sync_with_filename>Y</name_sync_with_filename>
+  <description>AdventureWorks purchase order line fact</description>
+  <configurationName>dimensional</configurationName>
+  <coaching>
+    <coaching_sources/>
+  </coaching>
+  <tables>
+    <table>
+      <referencedDimensionName>d_vendor</referencedDimensionName>
+      <referencedModelFilename>${PROJECT_HOME}/models/adventureworks-conformed-dims.hdm</referencedModelFilename>
+      <tableName>d_vendor</tableName>
+      <description/>
+      <tableType>DIMENSION_ALIAS</tableType>
+      <sourceType>SQL</sourceType>
+      <xloc>160</xloc>
+      <yloc>208</yloc>
+      <name>d_vendor</name>
+    </table>
+    <table>
+      <referencedDimensionName>d_product</referencedDimensionName>
+      <referencedModelFilename>${PROJECT_HOME}/models/adventureworks-conformed-dims.hdm</referencedModelFilename>
+      <tableName>d_product</tableName>
+      <description/>
+      <tableType>DIMENSION_ALIAS</tableType>
+      <sourceType>SQL</sourceType>
+      <xloc>160</xloc>
+      <yloc>336</yloc>
+      <name>d_product</name>
+    </table>
+    <table>
+      <referencedDimensionName>d_employee</referencedDimensionName>
+      <referencedModelFilename>${PROJECT_HOME}/models/adventureworks-conformed-dims.hdm</referencedModelFilename>
+      <tableName>d_employee</tableName>
+      <description/>
+      <tableType>DIMENSION_ALIAS</tableType>
+      <sourceType>SQL</sourceType>
+      <xloc>160</xloc>
+      <yloc>464</yloc>
+      <name>d_employee</name>
+    </table>
+    <table>
+      <referencedDimensionName>d_date</referencedDimensionName>
+      <referencedModelFilename>${PROJECT_HOME}/models/adventureworks-conformed-dims.hdm</referencedModelFilename>
+      <tableName>d_date</tableName>
+      <description/>
+      <tableType>DIMENSION_ALIAS</tableType>
+      <sourceType>SQL</sourceType>
+      <xloc>672</xloc>
+      <yloc>176</yloc>
+      <name>d_order_date</name>
+    </table>
+    <table>
+      <referencedDimensionName>d_date</referencedDimensionName>
+      <referencedModelFilename>${PROJECT_HOME}/models/adventureworks-conformed-dims.hdm</referencedModelFilename>
+      <tableName>d_date</tableName>
+      <description/>
+      <tableType>DIMENSION_ALIAS</tableType>
+      <sourceType>SQL</sourceType>
+      <xloc>672</xloc>
+      <yloc>256</yloc>
+      <name>d_due_date</name>
+    </table>
+    <table>
+      <referencedDimensionName>d_date</referencedDimensionName>
+      <referencedModelFilename>${PROJECT_HOME}/models/adventureworks-conformed-dims.hdm</referencedModelFilename>
+      <tableName>d_date</tableName>
+      <description/>
+      <tableType>DIMENSION_ALIAS</tableType>
+      <sourceType>SQL</sourceType>
+      <xloc>672</xloc>
+      <yloc>336</yloc>
+      <name>d_ship_date</name>
+    </table>
+    <table>
+      <dimension_roles>
+        <dimension_role>
+          <dimensionTableName>d_vendor</dimensionTableName>
+          <foreignKeyColumn>vendor_hk</foreignKeyColumn>
+          <sourceFieldName>vendor_hk</sourceFieldName>
+          <truncateToDateKey>N</truncateToDateKey>
+          <preloadLookupCache>N</preloadLookupCache>
+          <skipDimensionLookup>Y</skipDimensionLookup>
+          <forceDimensionLookup>N</forceDimensionLookup>
+        </dimension_role>
+        <dimension_role>
+          <dimensionTableName>d_product</dimensionTableName>
+          <foreignKeyColumn>product_hk</foreignKeyColumn>
+          <sourceFieldName>product_hk</sourceFieldName>
+          <truncateToDateKey>N</truncateToDateKey>
+          <preloadLookupCache>N</preloadLookupCache>
+          <skipDimensionLookup>Y</skipDimensionLookup>
+          <forceDimensionLookup>N</forceDimensionLookup>
+        </dimension_role>
+        <dimension_role>
+          <dimensionTableName>d_employee</dimensionTableName>
+          <foreignKeyColumn>employee_hk</foreignKeyColumn>
+          <sourceFieldName>employee_hk</sourceFieldName>
+          <truncateToDateKey>N</truncateToDateKey>
+          <preloadLookupCache>N</preloadLookupCache>
+          <skipDimensionLookup>Y</skipDimensionLookup>
+          <forceDimensionLookup>N</forceDimensionLookup>
+        </dimension_role>
+        <dimension_role>
+          <dimensionTableName>d_order_date</dimensionTableName>
+          <foreignKeyColumn>order_date_key</foreignKeyColumn>
+          <sourceFieldName>order_date</sourceFieldName>
+          <truncateToDateKey>Y</truncateToDateKey>
+          <preloadLookupCache>N</preloadLookupCache>
+          <skipDimensionLookup>N</skipDimensionLookup>
+          <forceDimensionLookup>N</forceDimensionLookup>
+        </dimension_role>
+        <dimension_role>
+          <dimensionTableName>d_due_date</dimensionTableName>
+          <foreignKeyColumn>due_date_key</foreignKeyColumn>
+          <sourceFieldName>due_date</sourceFieldName>
+          <truncateToDateKey>Y</truncateToDateKey>
+          <preloadLookupCache>N</preloadLookupCache>
+          <skipDimensionLookup>N</skipDimensionLookup>
+          <forceDimensionLookup>N</forceDimensionLookup>
+        </dimension_role>
+        <dimension_role>
+          <dimensionTableName>d_ship_date</dimensionTableName>
+          <foreignKeyColumn>ship_date_key</foreignKeyColumn>
+          <sourceFieldName>ship_date</sourceFieldName>
+          <truncateToDateKey>Y</truncateToDateKey>
+          <preloadLookupCache>N</preloadLookupCache>
+          <skipDimensionLookup>N</skipDimensionLookup>
+          <forceDimensionLookup>N</forceDimensionLookup>
+        </dimension_role>
+      </dimension_roles>
+      <measures>
+        <measure>
+          <fieldName>order_qty</fieldName>
+          <additive>Y</additive>
+          <documentation>
+            <required>Y</required>
+          </documentation>
+        </measure>
+        <measure>
+          <fieldName>unit_price</fieldName>
+          <additive>N</additive>
+          <documentation>
+            <required>Y</required>
+          </documentation>
+        </measure>
+        <measure>
+          <fieldName>line_total</fieldName>
+          <additive>Y</additive>
+          <documentation>
+            <required>Y</required>
+          </documentation>
+        </measure>
+        <measure>
+          <fieldName>received_qty</fieldName>
+          <additive>Y</additive>
+          <documentation>
+            <required>Y</required>
+          </documentation>
+        </measure>
+        <measure>
+          <fieldName>rejected_qty</fieldName>
+          <additive>Y</additive>
+          <documentation>
+            <required>Y</required>
+          </documentation>
+        </measure>
+        <measure>
+          <fieldName>stocked_qty</fieldName>
+          <additive>Y</additive>
+          <documentation>
+            <required>Y</required>
+          </documentation>
+        </measure>
+      </measures>
+      <degenerate_dimensions>
+        <degenerate_dimension>
+          <fieldName>purchase_order_id</fieldName>
+        </degenerate_dimension>
+        <degenerate_dimension>
+          <fieldName>purchase_order_detail_id</fieldName>
+        </degenerate_dimension>
+      </degenerate_dimensions>
+      <range_dimension_roles/>
+      <junk_dimension_roles/>
+      <tableName>f_purchase_order_line</tableName>
+      <description>Purchase order line grain (PurchaseOrderID + PurchaseOrderDetailID)</description>
+      <grain>purchase order + line</grain>
+      <business_process>
+        <business>Adventure Works Cycles</business>
+        <level1>Purchasing</level1>
+        <level2>Procurement</level2>
+        <level3>Purchase order lines</level3>
+      </business_process>
+      <tableType>FACT</tableType>
+      <sourceType>SQL</sourceType>
+      <sourceConnection>Vault</sourceConnection>
+      <sourceSql>SELECT
+  hpod.purchaseorderid AS purchase_order_id,
+  hpod.purchaseorderdetailid AS purchase_order_detail_id,
+  hv.businessentity_hk AS vendor_hk,
+  hp.product_hk,
+  he.businessentity_hk AS employee_hk,
+  soh.orderdate AS order_date,
+  soh.shipdate AS ship_date,
+  sat.duedate AS due_date,
+  sat.orderqty AS order_qty,
+  sat.unitprice AS unit_price,
+  sat.linetotal AS line_total,
+  sat.receivedqty AS received_qty,
+  sat.rejectedqty AS rejected_qty,
+  sat.stockedqty AS stocked_qty
+FROM lnk_purchaseorderdetail_product lp
+JOIN hub_purchaseorderdetail hpod
+  ON hpod.purchaseorderdetail_hk = lp.purchaseorderdetail_hk
+JOIN (
+  SELECT DISTINCT ON (purchaseorderdetail_hk) *
+  FROM sat_purchaseorderdetail
+  ORDER BY purchaseorderdetail_hk, x_load_ts DESC
+) sat ON sat.purchaseorderdetail_hk = hpod.purchaseorderdetail_hk
+JOIN hub_product hp
+  ON hp.product_hk = lp.product_hk
+JOIN lnk_purchaseorderdetail_purchaseorderheader lh
+  ON lh.purchaseorderdetail_hk = hpod.purchaseorderdetail_hk
+JOIN (
+  SELECT DISTINCT ON (purchaseorderheader_hk) *
+  FROM sat_purchaseorderheader
+  ORDER BY purchaseorderheader_hk, x_load_ts DESC
+) soh ON soh.purchaseorderheader_hk = lh.purchaseorderheader_hk
+JOIN lnk_purchaseorderheader_vendor lv
+  ON lv.purchaseorderheader_hk = lh.purchaseorderheader_hk
+JOIN hub_businessentity hv
+  ON hv.businessentity_hk = lv.businessentity_hk
+LEFT JOIN lnk_purchaseorderheader_employee le
+  ON le.purchaseorderheader_hk = lh.purchaseorderheader_hk
+LEFT JOIN hub_businessentity he
+  ON he.businessentity_hk = le.businessentity_hk</sourceSql>
+      <dimensionLookupDateField>order_date</dimensionLookupDateField>
+      <xloc>400</xloc>
+      <yloc>336</yloc>
+      <name>f_purchase_order_line</name>
+    </table>
+  </tables>
+  <conformed_dimensions/>
+  <notes/>
+  <name>adventureworks-f-purchasing</name>
+</dimensional-model>

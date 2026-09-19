@@ -28,7 +28,8 @@ case "${ACTION}" in
     echo "Waiting for PostgreSQL on ${LOCAL_POSTGRES_HOST}:${LOCAL_POSTGRES_PORT}..."
     if wait_for_local_postgres 60; then
       ensure_local_postgres_retail_databases
-      echo "PostgreSQL is ready (${LOCAL_POSTGRES_USER}@${LOCAL_POSTGRES_HOST}:${LOCAL_POSTGRES_PORT}/${LOCAL_POSTGRES_DB}; also test_source, test_edw, test_ops for retail-example)."
+      ensure_local_postgres_adventureworks_databases
+      echo "PostgreSQL is ready (${LOCAL_POSTGRES_USER}@${LOCAL_POSTGRES_HOST}:${LOCAL_POSTGRES_PORT}/${LOCAL_POSTGRES_DB}; also test_source, test_edw, test_ops for retail-example; test_aw_edw, test_aw_ops for adventureworks)."
     else
       echo "PostgreSQL did not become ready in time." >&2
       docker compose -f "${COMPOSE_FILE}" logs db >&2 || true

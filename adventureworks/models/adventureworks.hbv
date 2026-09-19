@@ -1,0 +1,590 @@
+<!--
+Copyright 2026 i-Bridge bv
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<business-vault-model>
+  <name_sync_with_filename>Y</name_sync_with_filename>
+  <description>AdventureWorks Business Vault slice: customer 360, product 360, employee PIT</description>
+  <dataVaultModelPath>${PROJECT_HOME}/models/adventureworks.hdv</dataVaultModelPath>
+  <configurationName>business-vault</configurationName>
+  <coaching>
+    <coaching_sources/>
+  </coaching>
+  <tables>
+    <table>
+      <buildMode>FULL_REBUILD</buildMode>
+      <hashKeyPartitionCount>NONE</hashKeyPartitionCount>
+      <functionalTimestampField>x_load_ts</functionalTimestampField>
+      <incrementalWatermarkField/>
+      <validFromField/>
+      <validToField/>
+      <includeHashKey>Y</includeHashKey>
+      <includeHubBusinessKeys>N</includeHubBusinessKeys>
+      <parentHubName>hub_customer</parentHubName>
+      <hubBusinessKeysCalculationOnly>N</hubBusinessKeysCalculationOnly>
+      <field_mappings>
+        <field_mapping>
+          <satelliteName>sat_customer</satelliteName>
+          <sourceFieldName>accountnumber</sourceFieldName>
+          <targetFieldName>accountnumber</targetFieldName>
+          <calculationOnly>N</calculationOnly>
+        </field_mapping>
+      </field_mappings>
+      <satellite_configs>
+        <satellite_config>
+          <satelliteName>sat_customer</satelliteName>
+          <functionalTimestampField/>
+          <sourceIndicatorValue>CUSTOMER</sourceIndicatorValue>
+        </satellite_config>
+      </satellite_configs>
+      <calculations/>
+      <calculation_tests/>
+      <collapse_tests/>
+      <tableName>bv_customer_scd2</tableName>
+      <description>SCD2 of sat_customer at hub_customer grain (Person/Store/email live on other hubs)</description>
+      <tableType>SCD2</tableType>
+      <derivatives>
+        <derivative>
+          <dvTableName>hub_customer</dvTableName>
+          <dvTableType>HUB</dvTableType>
+        </derivative>
+        <derivative>
+          <dvTableName>sat_customer</dvTableName>
+          <dvTableType>SATELLITE</dvTableType>
+        </derivative>
+      </derivatives>
+      <source_query_refs/>
+      <xloc>400</xloc>
+      <yloc>160</yloc>
+      <name>bv_customer_scd2</name>
+    </table>
+    <table>
+      <sqlQuery>SELECT
+  c.customer_hk,
+  hc.customerid AS customer_id,
+  c.accountnumber AS account_number,
+  CASE
+    WHEN lcp.businessentity_hk IS NOT NULL THEN 'Person'
+    WHEN lcs.businessentity_hk IS NOT NULL THEN 'Store'
+    ELSE 'Unknown'
+  END AS customer_type,
+  sp.firstname AS first_name,
+  sp.lastname AS last_name,
+  sp.title,
+  em.emailaddress AS email_address,
+  st.name AS store_name,
+  COALESCE(
+    NULLIF(TRIM(BOTH FROM CONCAT_WS(' ', sp.firstname, sp.lastname)), ''),
+    st.name
+  ) AS display_name,
+  ter.name AS territory_name,
+  ter.territory_group,
+  c.x_from_ts,
+  c.x_to_ts,
+  c.x_load_ts
+FROM {{ ref('bv_customer_scd2') }} c
+JOIN {{ ref('adventureworks', 'hub_customer') }} hc
+  ON hc.customer_hk = c.customer_hk
+LEFT JOIN {{ ref('adventureworks', 'lnk_customer_person') }} lcp
+  ON lcp.customer_hk = c.customer_hk
+LEFT JOIN (
+  SELECT DISTINCT ON (businessentity_hk) *
+  FROM {{ ref('adventureworks', 'sat_person') }}
+  ORDER BY businessentity_hk, x_load_ts DESC
+) sp ON sp.businessentity_hk = lcp.businessentity_hk
+LEFT JOIN {{ ref('adventureworks', 'lnk_customer_store') }} lcs
+  ON lcs.customer_hk = c.customer_hk
+LEFT JOIN (
+  SELECT DISTINCT ON (businessentity_hk) *
+  FROM {{ ref('adventureworks', 'sat_store') }}
+  ORDER BY businessentity_hk, x_load_ts DESC
+) st ON st.businessentity_hk = lcs.businessentity_hk
+LEFT JOIN {{ ref('adventureworks', 'lnk_customer_salesterritory') }} lct
+  ON lct.customer_hk = c.customer_hk
+LEFT JOIN (
+  SELECT
+    salesterritory_hk,
+    name,
+    "group" AS territory_group
+  FROM (
+    SELECT DISTINCT ON (salesterritory_hk) *
+    FROM {{ ref('adventureworks', 'sat_salesterritory') }}
+    ORDER BY salesterritory_hk, x_load_ts DESC
+  ) latest_territory
+) ter ON ter.salesterritory_hk = lct.salesterritory_hk
+LEFT JOIN LATERAL (
+  SELECT sea.emailaddress
+  FROM {{ ref('adventureworks', 'lnk_emailaddress') }} le
+  JOIN {{ ref('adventureworks', 'sat_emailaddress') }} sea
+    ON sea.emailaddress_hk = le.emailaddress_hk
+  WHERE le.businessentity_hk = lcp.businessentity_hk
+  ORDER BY sea.x_load_ts DESC
+  LIMIT 1
+) em ON TRUE</sqlQuery>
+      <referenceStyle>DBT</referenceStyle>
+      <materialization>VIEW</materialization>
+      <sql_sources/>
+      <sql_refs>
+        <sql_ref>
+          <objectName>bv_customer_scd2</objectName>
+          <resolvedKind>BV_TABLE</resolvedKind>
+          <resolvedTableName>bv_customer_scd2</resolvedTableName>
+        </sql_ref>
+        <sql_ref>
+          <modelName>adventureworks</modelName>
+          <objectName>hub_customer</objectName>
+          <resolvedKind>DV_TABLE</resolvedKind>
+          <resolvedModelFilename>${PROJECT_HOME}/models/adventureworks.hdv</resolvedModelFilename>
+          <resolvedTableName>hub_customer</resolvedTableName>
+          <resolvedDvTableType>HUB</resolvedDvTableType>
+        </sql_ref>
+        <sql_ref>
+          <modelName>adventureworks</modelName>
+          <objectName>lnk_customer_person</objectName>
+          <resolvedKind>DV_TABLE</resolvedKind>
+          <resolvedModelFilename>${PROJECT_HOME}/models/adventureworks.hdv</resolvedModelFilename>
+          <resolvedTableName>lnk_customer_person</resolvedTableName>
+          <resolvedDvTableType>LINK</resolvedDvTableType>
+        </sql_ref>
+        <sql_ref>
+          <modelName>adventureworks</modelName>
+          <objectName>sat_person</objectName>
+          <resolvedKind>DV_TABLE</resolvedKind>
+          <resolvedModelFilename>${PROJECT_HOME}/models/adventureworks.hdv</resolvedModelFilename>
+          <resolvedTableName>sat_person</resolvedTableName>
+          <resolvedDvTableType>SATELLITE</resolvedDvTableType>
+        </sql_ref>
+        <sql_ref>
+          <modelName>adventureworks</modelName>
+          <objectName>lnk_customer_store</objectName>
+          <resolvedKind>DV_TABLE</resolvedKind>
+          <resolvedModelFilename>${PROJECT_HOME}/models/adventureworks.hdv</resolvedModelFilename>
+          <resolvedTableName>lnk_customer_store</resolvedTableName>
+          <resolvedDvTableType>LINK</resolvedDvTableType>
+        </sql_ref>
+        <sql_ref>
+          <modelName>adventureworks</modelName>
+          <objectName>sat_store</objectName>
+          <resolvedKind>DV_TABLE</resolvedKind>
+          <resolvedModelFilename>${PROJECT_HOME}/models/adventureworks.hdv</resolvedModelFilename>
+          <resolvedTableName>sat_store</resolvedTableName>
+          <resolvedDvTableType>SATELLITE</resolvedDvTableType>
+        </sql_ref>
+        <sql_ref>
+          <modelName>adventureworks</modelName>
+          <objectName>lnk_customer_salesterritory</objectName>
+          <resolvedKind>DV_TABLE</resolvedKind>
+          <resolvedModelFilename>${PROJECT_HOME}/models/adventureworks.hdv</resolvedModelFilename>
+          <resolvedTableName>lnk_customer_salesterritory</resolvedTableName>
+          <resolvedDvTableType>LINK</resolvedDvTableType>
+        </sql_ref>
+        <sql_ref>
+          <modelName>adventureworks</modelName>
+          <objectName>sat_salesterritory</objectName>
+          <resolvedKind>DV_TABLE</resolvedKind>
+          <resolvedModelFilename>${PROJECT_HOME}/models/adventureworks.hdv</resolvedModelFilename>
+          <resolvedTableName>sat_salesterritory</resolvedTableName>
+          <resolvedDvTableType>SATELLITE</resolvedDvTableType>
+        </sql_ref>
+        <sql_ref>
+          <modelName>adventureworks</modelName>
+          <objectName>lnk_emailaddress</objectName>
+          <resolvedKind>DV_TABLE</resolvedKind>
+          <resolvedModelFilename>${PROJECT_HOME}/models/adventureworks.hdv</resolvedModelFilename>
+          <resolvedTableName>lnk_emailaddress</resolvedTableName>
+          <resolvedDvTableType>LINK</resolvedDvTableType>
+        </sql_ref>
+        <sql_ref>
+          <modelName>adventureworks</modelName>
+          <objectName>sat_emailaddress</objectName>
+          <resolvedKind>DV_TABLE</resolvedKind>
+          <resolvedModelFilename>${PROJECT_HOME}/models/adventureworks.hdv</resolvedModelFilename>
+          <resolvedTableName>sat_emailaddress</resolvedTableName>
+          <resolvedDvTableType>SATELLITE</resolvedDvTableType>
+        </sql_ref>
+      </sql_refs>
+      <tableName>bv_customer_360</tableName>
+      <description>Customer 360 at customer_hk: SCD2 account plus Person or Store, email, and territory</description>
+      <tableType>BUSINESS_TABLE</tableType>
+      <derivatives>
+        <derivative>
+          <dvTableName>hub_customer</dvTableName>
+          <dvTableType>HUB</dvTableType>
+        </derivative>
+      </derivatives>
+      <xloc>720</xloc>
+      <yloc>160</yloc>
+      <name>bv_customer_360</name>
+    </table>
+    <table>
+      <buildMode>FULL_REBUILD</buildMode>
+      <hashKeyPartitionCount>NONE</hashKeyPartitionCount>
+      <functionalTimestampField>x_load_ts</functionalTimestampField>
+      <incrementalWatermarkField/>
+      <validFromField/>
+      <validToField/>
+      <includeHashKey>Y</includeHashKey>
+      <includeHubBusinessKeys>N</includeHubBusinessKeys>
+      <parentHubName>hub_product</parentHubName>
+      <hubBusinessKeysCalculationOnly>N</hubBusinessKeysCalculationOnly>
+      <field_mappings>
+        <field_mapping>
+          <satelliteName>sat_product</satelliteName>
+          <sourceFieldName>name</sourceFieldName>
+          <targetFieldName>name</targetFieldName>
+          <calculationOnly>N</calculationOnly>
+        </field_mapping>
+        <field_mapping>
+          <satelliteName>sat_product</satelliteName>
+          <sourceFieldName>productnumber</sourceFieldName>
+          <targetFieldName>productnumber</targetFieldName>
+          <calculationOnly>N</calculationOnly>
+        </field_mapping>
+        <field_mapping>
+          <satelliteName>sat_product</satelliteName>
+          <sourceFieldName>color</sourceFieldName>
+          <targetFieldName>color</targetFieldName>
+          <calculationOnly>N</calculationOnly>
+        </field_mapping>
+        <field_mapping>
+          <satelliteName>sat_product</satelliteName>
+          <sourceFieldName>listprice</sourceFieldName>
+          <targetFieldName>listprice</targetFieldName>
+          <calculationOnly>N</calculationOnly>
+        </field_mapping>
+        <field_mapping>
+          <satelliteName>sat_product</satelliteName>
+          <sourceFieldName>standardcost</sourceFieldName>
+          <targetFieldName>standardcost</targetFieldName>
+          <calculationOnly>N</calculationOnly>
+        </field_mapping>
+        <field_mapping>
+          <satelliteName>sat_product</satelliteName>
+          <sourceFieldName>size</sourceFieldName>
+          <targetFieldName>size</targetFieldName>
+          <calculationOnly>N</calculationOnly>
+        </field_mapping>
+        <field_mapping>
+          <satelliteName>sat_product</satelliteName>
+          <sourceFieldName>productline</sourceFieldName>
+          <targetFieldName>productline</targetFieldName>
+          <calculationOnly>N</calculationOnly>
+        </field_mapping>
+        <field_mapping>
+          <satelliteName>sat_product</satelliteName>
+          <sourceFieldName>class</sourceFieldName>
+          <targetFieldName>class</targetFieldName>
+          <calculationOnly>N</calculationOnly>
+        </field_mapping>
+        <field_mapping>
+          <satelliteName>sat_product</satelliteName>
+          <sourceFieldName>style</sourceFieldName>
+          <targetFieldName>style</targetFieldName>
+          <calculationOnly>N</calculationOnly>
+        </field_mapping>
+        <field_mapping>
+          <satelliteName>sat_product</satelliteName>
+          <sourceFieldName>makeflag</sourceFieldName>
+          <targetFieldName>makeflag</targetFieldName>
+          <calculationOnly>N</calculationOnly>
+        </field_mapping>
+        <field_mapping>
+          <satelliteName>sat_product</satelliteName>
+          <sourceFieldName>finishedgoodsflag</sourceFieldName>
+          <targetFieldName>finishedgoodsflag</targetFieldName>
+          <calculationOnly>N</calculationOnly>
+        </field_mapping>
+      </field_mappings>
+      <satellite_configs>
+        <satellite_config>
+          <satelliteName>sat_product</satelliteName>
+          <functionalTimestampField/>
+          <sourceIndicatorValue>PRODUCT</sourceIndicatorValue>
+        </satellite_config>
+      </satellite_configs>
+      <calculations/>
+      <calculation_tests/>
+      <collapse_tests/>
+      <tableName>bv_product_scd2</tableName>
+      <description>SCD2 of sat_product at hub_product grain</description>
+      <tableType>SCD2</tableType>
+      <derivatives>
+        <derivative>
+          <dvTableName>hub_product</dvTableName>
+          <dvTableType>HUB</dvTableType>
+        </derivative>
+        <derivative>
+          <dvTableName>sat_product</dvTableName>
+          <dvTableType>SATELLITE</dvTableType>
+        </derivative>
+      </derivatives>
+      <source_query_refs/>
+      <xloc>400</xloc>
+      <yloc>368</yloc>
+      <name>bv_product_scd2</name>
+    </table>
+    <table>
+      <sqlQuery>SELECT
+  p.product_hk,
+  hp.productid AS product_id,
+  p.name AS product_name,
+  p.productnumber AS product_number,
+  p.color,
+  p.listprice AS list_price,
+  p.standardcost AS standard_cost,
+  p.size,
+  p.productline AS product_line,
+  p."class" AS product_class,
+  p.style,
+  p.makeflag AS make_flag,
+  p.finishedgoodsflag AS finished_goods_flag,
+  ss.name AS subcategory_name,
+  sc.name AS category_name,
+  p.x_from_ts,
+  p.x_to_ts,
+  p.x_load_ts
+FROM {{ ref('bv_product_scd2') }} p
+JOIN {{ ref('adventureworks', 'hub_product') }} hp
+  ON hp.product_hk = p.product_hk
+LEFT JOIN {{ ref('adventureworks', 'lnk_product_productsubcategory') }} lps
+  ON lps.product_hk = p.product_hk
+LEFT JOIN (
+  SELECT DISTINCT ON (productsubcategory_hk) *
+  FROM {{ ref('adventureworks', 'sat_productsubcategory') }}
+  ORDER BY productsubcategory_hk, x_load_ts DESC
+) ss ON ss.productsubcategory_hk = lps.productsubcategory_hk
+LEFT JOIN {{ ref('adventureworks', 'lnk_productsubcategory') }} lpc
+  ON lpc.productsubcategory_hk = lps.productsubcategory_hk
+LEFT JOIN (
+  SELECT DISTINCT ON (productcategory_hk) *
+  FROM {{ ref('adventureworks', 'sat_productcategory') }}
+  ORDER BY productcategory_hk, x_load_ts DESC
+) sc ON sc.productcategory_hk = lpc.productcategory_hk</sqlQuery>
+      <referenceStyle>DBT</referenceStyle>
+      <materialization>VIEW</materialization>
+      <sql_sources/>
+      <sql_refs>
+        <sql_ref>
+          <objectName>bv_product_scd2</objectName>
+          <resolvedKind>BV_TABLE</resolvedKind>
+          <resolvedTableName>bv_product_scd2</resolvedTableName>
+        </sql_ref>
+        <sql_ref>
+          <modelName>adventureworks</modelName>
+          <objectName>hub_product</objectName>
+          <resolvedKind>DV_TABLE</resolvedKind>
+          <resolvedModelFilename>${PROJECT_HOME}/models/adventureworks.hdv</resolvedModelFilename>
+          <resolvedTableName>hub_product</resolvedTableName>
+          <resolvedDvTableType>HUB</resolvedDvTableType>
+        </sql_ref>
+        <sql_ref>
+          <modelName>adventureworks</modelName>
+          <objectName>lnk_product_productsubcategory</objectName>
+          <resolvedKind>DV_TABLE</resolvedKind>
+          <resolvedModelFilename>${PROJECT_HOME}/models/adventureworks.hdv</resolvedModelFilename>
+          <resolvedTableName>lnk_product_productsubcategory</resolvedTableName>
+          <resolvedDvTableType>LINK</resolvedDvTableType>
+        </sql_ref>
+        <sql_ref>
+          <modelName>adventureworks</modelName>
+          <objectName>sat_productsubcategory</objectName>
+          <resolvedKind>DV_TABLE</resolvedKind>
+          <resolvedModelFilename>${PROJECT_HOME}/models/adventureworks.hdv</resolvedModelFilename>
+          <resolvedTableName>sat_productsubcategory</resolvedTableName>
+          <resolvedDvTableType>SATELLITE</resolvedDvTableType>
+        </sql_ref>
+        <sql_ref>
+          <modelName>adventureworks</modelName>
+          <objectName>lnk_productsubcategory</objectName>
+          <resolvedKind>DV_TABLE</resolvedKind>
+          <resolvedModelFilename>${PROJECT_HOME}/models/adventureworks.hdv</resolvedModelFilename>
+          <resolvedTableName>lnk_productsubcategory</resolvedTableName>
+          <resolvedDvTableType>LINK</resolvedDvTableType>
+        </sql_ref>
+        <sql_ref>
+          <modelName>adventureworks</modelName>
+          <objectName>sat_productcategory</objectName>
+          <resolvedKind>DV_TABLE</resolvedKind>
+          <resolvedModelFilename>${PROJECT_HOME}/models/adventureworks.hdv</resolvedModelFilename>
+          <resolvedTableName>sat_productcategory</resolvedTableName>
+          <resolvedDvTableType>SATELLITE</resolvedDvTableType>
+        </sql_ref>
+      </sql_refs>
+      <tableName>bv_product_360</tableName>
+      <description>Product 360: SCD2 product attributes plus subcategory and category names</description>
+      <tableType>BUSINESS_TABLE</tableType>
+      <derivatives>
+        <derivative>
+          <dvTableName>hub_product</dvTableName>
+          <dvTableType>HUB</dvTableType>
+        </derivative>
+      </derivatives>
+      <xloc>720</xloc>
+      <yloc>368</yloc>
+      <name>bv_product_360</name>
+    </table>
+    <table>
+      <snapshotDateField>snapshot_date</snapshotDateField>
+      <cadence>DAILY</cadence>
+      <snapshotAnchor>END_OF_PERIOD</snapshotAnchor>
+      <horizonDays>1</horizonDays>
+      <rangeStart>EARLIEST_PARTICIPATING_SATELLITE_LOAD</rangeStart>
+      <rangeEnd>NOW</rangeEnd>
+      <satellitePointerSuffix>_ldts</satellitePointerSuffix>
+      <tableName>pit_employee</tableName>
+      <description>Daily PIT of sat_employee on hub_businessentity (Person/Store/Vendor sats on the same hub are unlisted)</description>
+      <tableType>PIT</tableType>
+      <derivatives>
+        <derivative>
+          <dvTableName>hub_businessentity</dvTableName>
+          <dvTableType>HUB</dvTableType>
+        </derivative>
+        <derivative>
+          <dvTableName>sat_employee</dvTableName>
+          <dvTableType>SATELLITE</dvTableType>
+        </derivative>
+      </derivatives>
+      <xloc>400</xloc>
+      <yloc>576</yloc>
+      <name>pit_employee</name>
+    </table>
+    <table>
+      <sqlQuery>SELECT
+  he.businessentityid AS employee_id,
+  se.businessentity_hk,
+  sp.firstname AS first_name,
+  sp.lastname AS last_name,
+  se.jobtitle AS job_title,
+  se.hiredate AS hire_date,
+  se.organizationlevel AS organization_level,
+  se.currentflag AS current_flag,
+  se.gender,
+  se.maritalstatus AS marital_status,
+  se.x_load_ts
+FROM (
+  SELECT DISTINCT ON (businessentity_hk) *
+  FROM {{ ref('adventureworks', 'sat_employee') }}
+  ORDER BY businessentity_hk, x_load_ts DESC
+) se
+JOIN {{ ref('adventureworks', 'hub_businessentity') }} he
+  ON he.businessentity_hk = se.businessentity_hk
+LEFT JOIN (
+  SELECT DISTINCT ON (businessentity_hk) *
+  FROM {{ ref('adventureworks', 'sat_person') }}
+  ORDER BY businessentity_hk, x_load_ts DESC
+) sp ON sp.businessentity_hk = se.businessentity_hk</sqlQuery>
+      <referenceStyle>DBT</referenceStyle>
+      <materialization>VIEW</materialization>
+      <sql_sources/>
+      <sql_refs>
+        <sql_ref>
+          <modelName>adventureworks</modelName>
+          <objectName>sat_employee</objectName>
+          <resolvedKind>DV_TABLE</resolvedKind>
+          <resolvedModelFilename>${PROJECT_HOME}/models/adventureworks.hdv</resolvedModelFilename>
+          <resolvedTableName>sat_employee</resolvedTableName>
+          <resolvedDvTableType>SATELLITE</resolvedDvTableType>
+        </sql_ref>
+        <sql_ref>
+          <modelName>adventureworks</modelName>
+          <objectName>hub_businessentity</objectName>
+          <resolvedKind>DV_TABLE</resolvedKind>
+          <resolvedModelFilename>${PROJECT_HOME}/models/adventureworks.hdv</resolvedModelFilename>
+          <resolvedTableName>hub_businessentity</resolvedTableName>
+          <resolvedDvTableType>HUB</resolvedDvTableType>
+        </sql_ref>
+        <sql_ref>
+          <modelName>adventureworks</modelName>
+          <objectName>sat_person</objectName>
+          <resolvedKind>DV_TABLE</resolvedKind>
+          <resolvedModelFilename>${PROJECT_HOME}/models/adventureworks.hdv</resolvedModelFilename>
+          <resolvedTableName>sat_person</resolvedTableName>
+          <resolvedDvTableType>SATELLITE</resolvedDvTableType>
+        </sql_ref>
+      </sql_refs>
+      <tableName>bv_employee</tableName>
+      <description>Current employee (sat_employee) with Person name; OrganizationLevel stands in for the hierarchyid manager tree</description>
+      <tableType>BUSINESS_TABLE</tableType>
+      <derivatives>
+        <derivative>
+          <dvTableName>hub_businessentity</dvTableName>
+          <dvTableType>HUB</dvTableType>
+        </derivative>
+        <derivative>
+          <dvTableName>sat_employee</dvTableName>
+          <dvTableType>SATELLITE</dvTableType>
+        </derivative>
+      </derivatives>
+      <xloc>720</xloc>
+      <yloc>576</yloc>
+      <name>bv_employee</name>
+    </table>
+  </tables>
+  <notes>
+    <note>
+      <text>SCD2 cannot merge Person/Store/email onto hub_customer (different hubs). bv_customer_scd2 historises sat_customer; bv_customer_360 is the cross-hub 360 view. Same pattern for product subcategory/category. pit_employee is single-satellite (engine limit); bv_employee is the current employee+name view. OrganizationNode is binary hierarchyid — use organization_level.</text>
+      <noteType>INFORMATION</noteType>
+      <xloc>48</xloc>
+      <yloc>32</yloc>
+      <width>960</width>
+      <height>64</height>
+    </note>
+  </notes>
+  <dv_references>
+    <dv_reference>
+      <dvTableName>hub_customer</dvTableName>
+      <dvTableType>HUB</dvTableType>
+      <referencedModelFilename>${PROJECT_HOME}/models/adventureworks.hdv</referencedModelFilename>
+      <xloc>80</xloc>
+      <yloc>160</yloc>
+    </dv_reference>
+    <dv_reference>
+      <dvTableName>sat_customer</dvTableName>
+      <dvTableType>SATELLITE</dvTableType>
+      <referencedModelFilename>${PROJECT_HOME}/models/adventureworks.hdv</referencedModelFilename>
+      <xloc>80</xloc>
+      <yloc>224</yloc>
+    </dv_reference>
+    <dv_reference>
+      <dvTableName>hub_product</dvTableName>
+      <dvTableType>HUB</dvTableType>
+      <referencedModelFilename>${PROJECT_HOME}/models/adventureworks.hdv</referencedModelFilename>
+      <xloc>80</xloc>
+      <yloc>368</yloc>
+    </dv_reference>
+    <dv_reference>
+      <dvTableName>sat_product</dvTableName>
+      <dvTableType>SATELLITE</dvTableType>
+      <referencedModelFilename>${PROJECT_HOME}/models/adventureworks.hdv</referencedModelFilename>
+      <xloc>80</xloc>
+      <yloc>432</yloc>
+    </dv_reference>
+    <dv_reference>
+      <dvTableName>hub_businessentity</dvTableName>
+      <dvTableType>HUB</dvTableType>
+      <referencedModelFilename>${PROJECT_HOME}/models/adventureworks.hdv</referencedModelFilename>
+      <xloc>80</xloc>
+      <yloc>576</yloc>
+    </dv_reference>
+    <dv_reference>
+      <dvTableName>sat_employee</dvTableName>
+      <dvTableType>SATELLITE</dvTableType>
+      <referencedModelFilename>${PROJECT_HOME}/models/adventureworks.hdv</referencedModelFilename>
+      <xloc>80</xloc>
+      <yloc>640</yloc>
+    </dv_reference>
+  </dv_references>
+  <bv_references/>
+  <name>adventureworks</name>
+</business-vault-model>

@@ -1,0 +1,16 @@
+{
+  "targetReadRatioThreshold": 10,
+  "highTransformDurationMs": 300000,
+  "autoCreateTables": true,
+  "targetDatabaseConnection": "OPS",
+  "metricsOutputFolder": "${PROJECT_HOME}/work/metrics",
+  "dataCatalogConnection": "local-catalog",
+  "description": "Load-run metrics for AdventureWorks DV/BV/DM update workflows",
+  "operationsSchema": "dv_ops",
+  "enabled": true,
+  "publishDatabaseRows": true,
+  "dimLookupPreloadRatioThreshold": 100,
+  "name": "adventureworks-execution-metrics",
+  "publishCatalogDefinitions": true,
+  "sortRowsRiskThreshold": 500000
+}
