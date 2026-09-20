@@ -103,6 +103,9 @@ public class DimensionalModel extends HopMetadataBase
 
   @HopMetadataProperty private ModelCoachingConfiguration coaching;
 
+  /** Optional path to a Hopper semantic layer (`.hsl`) for consumption queries. */
+  @HopMetadataProperty private String semanticModelFilename;
+
   @HopMetadataProperty(key = "table", groupKey = "tables")
   @Getter(AccessLevel.NONE)
   @Setter(AccessLevel.NONE)

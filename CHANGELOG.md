@@ -4,6 +4,14 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Semantic layer (`.hsl`)
+
+- New consumption model file `.hsl`: entities, attributes, measures (default numeric format masks), relationships, and named selections. **Select dimensional model...** in the tree editor binds a `.hdm` (several `.hsl` files may share one model) and **Create presentation...** opens the fact crosstab from that layer. Calcite compiles a structured selection to warehouse SQL. The fact crosstab **Save selection** / **Open selection** persist layout on the current `.hsl`; presentations use measure format masks (avoids `123.449999999999`). Docs: [docs/semantic-layer.adoc](docs/semantic-layer.adoc).
+
+### Fact-table crosstab presentation (issue #185)
+
+- Right-click a fact (or factless / snapshot / aggregate) on a `.hdm` canvas → **Create presentation…**. The crosstab editor assigns source columns to groups, horizontal dimensions, vertical dimensions, and facts/KPIs (with aggregations and optional totals). **SQL** opens the generated join (LIMIT/TOP 1000) in the database explorer. **Show** generates an isolated Hopper presentation (database connection + star-join SQL connector + crosstab, or group/composite when grouped) and opens the viewer with zoom, paging, export, refresh, and **Edit crosstab…**. Nothing is stored in the Hop project. Help: [docs/help/fact-crosstab-editor.adoc](docs/help/fact-crosstab-editor.adoc).
+
 ### AdventureWorks sample (issue #180)
 
 - New repo-root `adventureworks/` Hop project: restore Microsoft **AdventureWorks2025** into SQL Server 2025 Docker (`localhost:14333`), import a source model, generate a raw Data Vault, then a hand-authored Business Vault and Kimball slice loaded into Postgres `test_aw_edw` / `test_aw_ops` (not retail’s `test_edw`).

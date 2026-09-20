@@ -1420,6 +1420,8 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
   private static final String ACTION_ID_GO_TO_ALIASED_DIMENSION =
       "dm-graph-go-to-aliased-dimension";
   private static final String ACTION_ID_OPEN_SOURCE_PIPELINE = "dm-graph-open-source-pipeline";
+  private static final String ACTION_ID_CREATE_PRESENTATION =
+      FactCrosstabGuiSupport.ACTION_ID_CREATE_PRESENTATION;
 
   @GuiContextAction(
       id = "dm-graph-edit-table",
@@ -1435,6 +1437,19 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     if (graph != null) {
       graph.editDmTable(context.getTable());
     }
+  }
+
+  @GuiContextAction(
+      id = ACTION_ID_CREATE_PRESENTATION,
+      parentId = HopGuiDimensionalTableContext.CONTEXT_ID,
+      type = GuiActionType.Info,
+      name = "i18n::HopGuiDimensionalModelGraph.Context.CreatePresentation.Name",
+      tooltip = "i18n::HopGuiDimensionalModelGraph.Context.CreatePresentation.Tooltip",
+      image = "fact.svg",
+      category = "Dimensional",
+      categoryOrder = "2")
+  public void createFactPresentationAction(HopGuiDimensionalTableContext context) {
+    FactCrosstabGuiSupport.open(hopGui, context.getModel(), context.getTable());
   }
 
   @GuiContextAction(
@@ -1495,6 +1510,9 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     }
     if (ACTION_ID_OPEN_SOURCE_PIPELINE.equals(contextActionId)) {
       return DmSourcePipelineOpenSupport.canOpenSourcePipeline(context.getTable(), getVariables());
+    }
+    if (ACTION_ID_CREATE_PRESENTATION.equals(contextActionId)) {
+      return FactCrosstabGuiSupport.isFactLikeTable(context.getTable());
     }
     return true;
   }

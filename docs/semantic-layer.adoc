@@ -1,0 +1,27 @@
+= Hopper semantic layer
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+The **semantic layer** (`.hsl`) is the consumption model above a loaded warehouse. It is not a second Kimball canvas and not an extension of catalog record definitions.
+
+* **Physical bindings** point at `.hdm` tables (later: catalog, RDBMS).
+* **Logical entities** hold attributes and measures with headers, default aggregations, and format masks.
+* **Relationships** describe joins (including role-playing dates).
+* **Named selections** store a crosstab / presentation query so fields do not have to be re-picked.
+
+Calcite compiles a structured selection to warehouse SQL (logical entity names → physical tables). That is a different path from source-model SQL virtualization, which builds Hop pipelines over `.hsm` sources.
+
+== Create or bind
+
+* **File → New → Semantic layer**, then **Select dimensional model...**
+* The editor shows the bound `.hdm` under the buttons. Several `.hsl` files can bind to the same dimensional model (for example finance vs operations presentations).
+
+Edit headers, format masks (default `#,##0.00` for numbers), and aggregations in the tree editor.
+
+== Crosstab
+
+**Create presentation...** on the semantic layer opens the fact crosstab editor. The source tree is the `.hsl` (not the raw `.hdm` field list), so dropping a measure from the layer hides it in the editor. The last saved selection for that fact is reloaded. **Save selection** / **Open selection** persist layout on this `.hsl`. Presentations apply measure format masks.
+
+A `.hdm` fact still has **Create presentation...** as a shortcut; that path seeds an in-memory layer from the star and does not pick or overwrite a particular `.hsl` file.

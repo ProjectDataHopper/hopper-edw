@@ -1,0 +1,559 @@
+<!--
+Copyright 2026 i-Bridge bv
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<semantic-model>
+  <description>Retail warehouse star schema with date role-playing and extended catalog tables</description>
+  <dimensionalModelFilename>/home/matt/git/ProjectDataHopper/hopper-edw/retail-example/models/retail-f-orders.hdm</dimensionalModelFilename>
+  <targetDatabase>Vault</targetDatabase>
+  <entities>
+    <entity>
+      <name>f_orders</name>
+      <description/>
+      <role>FACT</role>
+      <binding>
+        <kind>HDM</kind>
+        <modelFilename>/home/matt/git/ProjectDataHopper/hopper-edw/retail-example/models/retail-f-orders.hdm</modelFilename>
+        <tableName>f_orders</tableName>
+        <physicalTableName>f_orders</physicalTableName>
+      </binding>
+      <attributes>
+        <attribute>
+          <name>degenerate_info</name>
+          <physicalColumn>degenerate_info</physicalColumn>
+          <header>Degenerate info</header>
+          <formatMask/>
+        </attribute>
+      </attributes>
+      <measures>
+        <measure>
+          <name>total_amount</name>
+          <physicalColumn>total_amount</physicalColumn>
+          <header>Total amount</header>
+          <description>Amount</description>
+          <formatMask>#,##0</formatMask>
+          <aggregation>SUM</aggregation>
+          <additive>Y</additive>
+        </measure>
+      </measures>
+    </entity>
+    <entity>
+      <name>d_order</name>
+      <description/>
+      <role>DIMENSION</role>
+      <binding>
+        <kind>HDM</kind>
+        <modelFilename>/home/matt/git/ProjectDataHopper/hopper-edw/retail-example/models/retail-f-orders.hdm</modelFilename>
+        <tableName>d_order</tableName>
+        <physicalTableName>d_order</physicalTableName>
+      </binding>
+      <attributes>
+        <attribute>
+          <name>order_id</name>
+          <physicalColumn>order_id</physicalColumn>
+          <header>Order id</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>order_date</name>
+          <physicalColumn>order_date</physicalColumn>
+          <header>Order date</header>
+          <formatMask>yyyy-MM-dd</formatMask>
+        </attribute>
+        <attribute>
+          <name>shipping_date</name>
+          <physicalColumn>shipping_date</physicalColumn>
+          <header>Shipping date</header>
+          <formatMask>yyyy-MM-dd</formatMask>
+        </attribute>
+        <attribute>
+          <name>delivery_date</name>
+          <physicalColumn>delivery_date</physicalColumn>
+          <header>Delivery date</header>
+          <formatMask>yyyy-MM-dd</formatMask>
+        </attribute>
+        <attribute>
+          <name>order_status</name>
+          <physicalColumn>order_status</physicalColumn>
+          <header>Order status</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>total_amount</name>
+          <physicalColumn>total_amount</physicalColumn>
+          <header>Total amount</header>
+          <formatMask>#,##0.00</formatMask>
+        </attribute>
+      </attributes>
+      <measures/>
+    </entity>
+    <entity>
+      <name>d_customer</name>
+      <description/>
+      <role>DIMENSION</role>
+      <binding>
+        <kind>HDM</kind>
+        <modelFilename>/home/matt/git/ProjectDataHopper/hopper-edw/retail-example/models/retail-f-orders.hdm</modelFilename>
+        <tableName>d_customer</tableName>
+        <physicalTableName>d_customer</physicalTableName>
+      </binding>
+      <attributes>
+        <attribute>
+          <name>customer_id</name>
+          <physicalColumn>customer_id</physicalColumn>
+          <header>Customer id</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>cust_segment</name>
+          <physicalColumn>cust_segment</physicalColumn>
+          <header>Cust segment</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>cust_loyalty_tier</name>
+          <physicalColumn>cust_loyalty_tier</physicalColumn>
+          <header>Cust loyalty tier</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>cust_demo_score</name>
+          <physicalColumn>cust_demo_score</physicalColumn>
+          <header>Cust demo score</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>cust_email</name>
+          <physicalColumn>cust_email</physicalColumn>
+          <header>Cust email</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>cust_phone</name>
+          <physicalColumn>cust_phone</physicalColumn>
+          <header>Cust phone</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>cust_address</name>
+          <physicalColumn>cust_address</physicalColumn>
+          <header>Cust address</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>cust_city</name>
+          <physicalColumn>cust_city</physicalColumn>
+          <header>Cust city</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>cust_postal_code</name>
+          <physicalColumn>cust_postal_code</physicalColumn>
+          <header>Cust postal code</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>cust_newsletter</name>
+          <physicalColumn>cust_newsletter</physicalColumn>
+          <header>Cust newsletter</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>cust_channel</name>
+          <physicalColumn>cust_channel</physicalColumn>
+          <header>Cust channel</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>cust_language</name>
+          <physicalColumn>cust_language</physicalColumn>
+          <header>Cust language</header>
+          <formatMask/>
+        </attribute>
+      </attributes>
+      <measures/>
+    </entity>
+    <entity>
+      <name>d_order_date</name>
+      <description/>
+      <role>DIMENSION</role>
+      <binding>
+        <kind>HDM</kind>
+        <modelFilename>/home/matt/git/ProjectDataHopper/hopper-edw/retail-example/models/retail-f-orders.hdm</modelFilename>
+        <tableName>d_order_date</tableName>
+        <physicalTableName>d_date</physicalTableName>
+      </binding>
+      <attributes>
+        <attribute>
+          <name>date_key</name>
+          <physicalColumn>date_key</physicalColumn>
+          <header>Date key</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>day_of_month</name>
+          <physicalColumn>day_of_month</physicalColumn>
+          <header>Day of month</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>day_of_week</name>
+          <physicalColumn>day_of_week</physicalColumn>
+          <header>Day of week</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>day_of_year</name>
+          <physicalColumn>day_of_year</physicalColumn>
+          <header>Day of year</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>full_date</name>
+          <physicalColumn>full_date</physicalColumn>
+          <header>Full date</header>
+          <formatMask>yyyy-MM-dd</formatMask>
+        </attribute>
+        <attribute>
+          <name>is_weekend</name>
+          <physicalColumn>is_weekend</physicalColumn>
+          <header>Is weekend</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>month</name>
+          <physicalColumn>month</physicalColumn>
+          <header>Month</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>month_name</name>
+          <physicalColumn>month_name</physicalColumn>
+          <header>Month name</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>quarter</name>
+          <physicalColumn>quarter</physicalColumn>
+          <header>Quarter</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>week_of_year</name>
+          <physicalColumn>week_of_year</physicalColumn>
+          <header>Week of year</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>year</name>
+          <physicalColumn>year</physicalColumn>
+          <header>Year</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+      </attributes>
+      <measures/>
+    </entity>
+    <entity>
+      <name>d_shipping_date</name>
+      <description/>
+      <role>DIMENSION</role>
+      <binding>
+        <kind>HDM</kind>
+        <modelFilename>/home/matt/git/ProjectDataHopper/hopper-edw/retail-example/models/retail-f-orders.hdm</modelFilename>
+        <tableName>d_shipping_date</tableName>
+        <physicalTableName>d_date</physicalTableName>
+      </binding>
+      <attributes>
+        <attribute>
+          <name>date_key</name>
+          <physicalColumn>date_key</physicalColumn>
+          <header>Date key</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>day_of_month</name>
+          <physicalColumn>day_of_month</physicalColumn>
+          <header>Day of month</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>day_of_week</name>
+          <physicalColumn>day_of_week</physicalColumn>
+          <header>Day of week</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>day_of_year</name>
+          <physicalColumn>day_of_year</physicalColumn>
+          <header>Day of year</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>full_date</name>
+          <physicalColumn>full_date</physicalColumn>
+          <header>Full date</header>
+          <formatMask>yyyy-MM-dd</formatMask>
+        </attribute>
+        <attribute>
+          <name>is_weekend</name>
+          <physicalColumn>is_weekend</physicalColumn>
+          <header>Is weekend</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>month</name>
+          <physicalColumn>month</physicalColumn>
+          <header>Month</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>month_name</name>
+          <physicalColumn>month_name</physicalColumn>
+          <header>Month name</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>quarter</name>
+          <physicalColumn>quarter</physicalColumn>
+          <header>Quarter</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>week_of_year</name>
+          <physicalColumn>week_of_year</physicalColumn>
+          <header>Week of year</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>year</name>
+          <physicalColumn>year</physicalColumn>
+          <header>Year</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+      </attributes>
+      <measures/>
+    </entity>
+    <entity>
+      <name>d_delivery_date</name>
+      <description/>
+      <role>DIMENSION</role>
+      <binding>
+        <kind>HDM</kind>
+        <modelFilename>/home/matt/git/ProjectDataHopper/hopper-edw/retail-example/models/retail-f-orders.hdm</modelFilename>
+        <tableName>d_delivery_date</tableName>
+        <physicalTableName>d_date</physicalTableName>
+      </binding>
+      <attributes>
+        <attribute>
+          <name>date_key</name>
+          <physicalColumn>date_key</physicalColumn>
+          <header>Date key</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>day_of_month</name>
+          <physicalColumn>day_of_month</physicalColumn>
+          <header>Day of month</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>day_of_week</name>
+          <physicalColumn>day_of_week</physicalColumn>
+          <header>Day of week</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>day_of_year</name>
+          <physicalColumn>day_of_year</physicalColumn>
+          <header>Day of year</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>full_date</name>
+          <physicalColumn>full_date</physicalColumn>
+          <header>Full date</header>
+          <formatMask>yyyy-MM-dd</formatMask>
+        </attribute>
+        <attribute>
+          <name>is_weekend</name>
+          <physicalColumn>is_weekend</physicalColumn>
+          <header>Is weekend</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>month</name>
+          <physicalColumn>month</physicalColumn>
+          <header>Month</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>month_name</name>
+          <physicalColumn>month_name</physicalColumn>
+          <header>Month name</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>quarter</name>
+          <physicalColumn>quarter</physicalColumn>
+          <header>Quarter</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>week_of_year</name>
+          <physicalColumn>week_of_year</physicalColumn>
+          <header>Week of year</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>year</name>
+          <physicalColumn>year</physicalColumn>
+          <header>Year</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+      </attributes>
+      <measures/>
+    </entity>
+    <entity>
+      <name>d_orders_junk</name>
+      <description/>
+      <role>DIMENSION</role>
+      <binding>
+        <kind>HDM</kind>
+        <modelFilename>/home/matt/git/ProjectDataHopper/hopper-edw/retail-example/models/retail-f-orders.hdm</modelFilename>
+        <tableName>d_orders_junk</tableName>
+        <physicalTableName>d_orders_junk</physicalTableName>
+      </binding>
+      <attributes>
+        <attribute>
+          <name>j1</name>
+          <physicalColumn>j1</physicalColumn>
+          <header>J1</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>j2</name>
+          <physicalColumn>j2</physicalColumn>
+          <header>J2</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>j3</name>
+          <physicalColumn>j3</physicalColumn>
+          <header>J3</header>
+          <formatMask/>
+        </attribute>
+      </attributes>
+      <measures/>
+    </entity>
+  </entities>
+  <relationships>
+    <relationship>
+      <name>f_orders_d_order</name>
+      <fromEntity>f_orders</fromEntity>
+      <toEntity>d_order</toEntity>
+      <joinType>INNER</joinType>
+      <fromField>order_hk</fromField>
+      <toField>order_hk</toField>
+      <roleName>d_order</roleName>
+    </relationship>
+    <relationship>
+      <name>f_orders_d_customer</name>
+      <fromEntity>f_orders</fromEntity>
+      <toEntity>d_customer</toEntity>
+      <joinType>INNER</joinType>
+      <fromField>customer_hk</fromField>
+      <toField>customer_hk</toField>
+      <roleName>d_customer</roleName>
+    </relationship>
+    <relationship>
+      <name>f_orders_d_order_date</name>
+      <fromEntity>f_orders</fromEntity>
+      <toEntity>d_order_date</toEntity>
+      <joinType>INNER</joinType>
+      <fromField>order_date_key</fromField>
+      <toField>date_key</toField>
+      <roleName>d_order_date</roleName>
+    </relationship>
+    <relationship>
+      <name>f_orders_d_shipping_date</name>
+      <fromEntity>f_orders</fromEntity>
+      <toEntity>d_shipping_date</toEntity>
+      <joinType>INNER</joinType>
+      <fromField>shipping_date_key</fromField>
+      <toField>date_key</toField>
+      <roleName>d_shipping_date</roleName>
+    </relationship>
+    <relationship>
+      <name>f_orders_d_delivery_date</name>
+      <fromEntity>f_orders</fromEntity>
+      <toEntity>d_delivery_date</toEntity>
+      <joinType>INNER</joinType>
+      <fromField>delivery_date_key</fromField>
+      <toField>date_key</toField>
+      <roleName>d_delivery_date</roleName>
+    </relationship>
+    <relationship>
+      <name>f_orders_d_orders_junk</name>
+      <fromEntity>f_orders</fromEntity>
+      <toEntity>d_orders_junk</toEntity>
+      <joinType>INNER</joinType>
+      <fromField>d_orders_junk_key</fromField>
+      <toField>orders_junk_hk</toField>
+      <roleName>d_orders_junk</roleName>
+    </relationship>
+  </relationships>
+  <selections>
+    <selection>
+      <name>orders-per-channel-month-status</name>
+      <entityName>f_orders</entityName>
+      <groups>
+        <group>
+          <entityName>d_customer</entityName>
+          <fieldName>cust_channel</fieldName>
+          <header>Cust channel</header>
+        </group>
+      </groups>
+      <rows>
+        <row>
+          <entityName>d_order_date</entityName>
+          <fieldName>year</fieldName>
+          <header>Year</header>
+        </row>
+        <row>
+          <entityName>d_order_date</entityName>
+          <fieldName>month</fieldName>
+          <header>Month</header>
+        </row>
+      </rows>
+      <columns>
+        <column>
+          <entityName>d_order</entityName>
+          <fieldName>order_status</fieldName>
+          <header>Order status</header>
+        </column>
+      </columns>
+      <measures>
+        <measure>
+          <entityName>f_orders</entityName>
+          <fieldName>total_amount</fieldName>
+          <header>Total amount</header>
+          <aggregation>SUM</aggregation>
+        </measure>
+      </measures>
+      <showingHorizontalTotals>Y</showingHorizontalTotals>
+      <showingVerticalTotals>Y</showingVerticalTotals>
+    </selection>
+  </selections>
+  <name>retail-f-orders</name>
+</semantic-model>

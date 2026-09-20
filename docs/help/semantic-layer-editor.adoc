@@ -1,0 +1,15 @@
+= Semantic layer editor
+:toc: macro
+:toclevels: 2
+
+toc::[]
+
+Related: link:../semantic-layer.adoc[semantic layer].
+
+Open a `.hsl` file or create one from the File menu. **Select dimensional model...** binds this layer to a `.hdm` and fills entities, measures, attributes, relationships, and default number/date format masks. The bound model path is shown in the label under the buttons. Several `.hsl` files may point at the same dimensional model.
+
+**Create presentation...** opens the link:fact-crosstab-editor.adoc[crosstab editor] from this layer. If the tree has a fact selected, that fact is used; otherwise you pick one when the layer has more than one fact.
+
+Select an attribute or measure in the tree to edit **Header**, **Format mask**, **Aggregation** (measures), and **Description**. Edits are applied as you type. Save the `.hsl` with the usual Hop file save.
+
+Named selections created from the fact crosstab editor appear under **Selections**.

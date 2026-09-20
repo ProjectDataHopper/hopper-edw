@@ -25,7 +25,7 @@ import org.apache.hop.core.xml.XmlFormatter;
 import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 
-/** Formats and writes `.hdv`, `.hbv`, `.hdm`, `.hem`, `.hsm`, and `.hlv` XML documents. */
+/** Formats and writes `.hdv`, `.hbv`, `.hdm`, `.hsl`, `.hem`, `.hsm`, and `.hlv` XML documents. */
 public final class ModelXmlWriteSupport {
 
   private ModelXmlWriteSupport() {}

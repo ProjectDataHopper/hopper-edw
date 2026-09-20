@@ -108,6 +108,7 @@ Do **not** “fix” Hop core inside this repo. Core Hop changes belong in **apa
 | `.hdv` | Raw Data Vault model |
 | `.hbv` | Business Vault model |
 | `.hdm` | Dimensional model |
+| `.hsl` | Semantic layer (consumption metadata over a `.hdm`; several `.hsl` per model; saved selections; presentation query API) |
 | `.hem` | Execution map |
 | `.hlv` | Hop Lineage View (definition over a lineage backend; graph is not stored) |
 

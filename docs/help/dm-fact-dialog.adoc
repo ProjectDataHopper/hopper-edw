@@ -24,3 +24,5 @@ Write the grain in words on the General tab (for example `one row per order line
 **Edit field...** on measures and degenerates opens the link:dm-field-dialog.adoc[field editor] for Markdown notes and requirements.
 
 **Validate** checks grain completeness before Dimensional Update. A **None (logical)** source is a contract only: Check model warns, and Dimensional Update skips the table.
+
+Open a bound `.hsl` → **Create presentation...**, or right-click the fact on the canvas → **Create presentation…**, to open the link:fact-crosstab-editor.adoc[crosstab editor] and try the star against the target warehouse.

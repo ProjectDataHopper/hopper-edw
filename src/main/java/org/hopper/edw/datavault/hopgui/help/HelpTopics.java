@@ -59,6 +59,7 @@ public final class HelpTopics {
   public static final String DM_RANGE_DIMENSION = "dm-range-dimension-dialog";
   public static final String DM_BRIDGE = "dm-bridge-dialog";
   public static final String DM_FIELD = "dm-field-dialog";
+  public static final String FACT_CROSSTAB_EDITOR = "fact-crosstab-editor";
 
   public static final String ACTION_DATAVAULT_UPDATE = "action-datavault-update-dialog";
   public static final String ACTION_DIMENSIONAL_UPDATE = "action-dimensional-update-dialog";
@@ -225,6 +226,10 @@ public final class HelpTopics {
               "HelpTopics.DmRangeDimensionDialog.Title"),
           p(DM_BRIDGE, "help/dm-bridge-dialog.html", "HelpTopics.DmBridgeDialog.Title"),
           p(DM_FIELD, "help/dm-field-dialog.html", "HelpTopics.DmFieldDialog.Title"),
+          p(
+              FACT_CROSSTAB_EDITOR,
+              "help/fact-crosstab-editor.html",
+              "HelpTopics.FactCrosstabEditorDialog.Title"),
           p(
               ACTION_DATAVAULT_UPDATE,
               "datavault-update-action.html",

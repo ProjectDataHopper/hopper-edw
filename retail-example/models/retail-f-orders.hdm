@@ -28,8 +28,8 @@ limitations under the License.
           <foreignKeyColumn>order_hk</foreignKeyColumn>
           <sourceFieldName>order_id</sourceFieldName>
           <truncateToDateKey>N</truncateToDateKey>
-          <preloadLookupCache>N</preloadLookupCache>
-          <skipDimensionLookup>Y</skipDimensionLookup>
+          <preloadLookupCache>Y</preloadLookupCache>
+          <skipDimensionLookup>N</skipDimensionLookup>
           <forceDimensionLookup>N</forceDimensionLookup>
         </dimension_role>
         <dimension_role>

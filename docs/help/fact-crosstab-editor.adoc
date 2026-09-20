@@ -1,0 +1,40 @@
+= Fact crosstab editor
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../dimensional-modeler-overview.adoc[dimensional-modeler-overview]. Issue https://github.com/ProjectDataHopper/hopper-edw/issues/185[#185].
+
+Generate a Hopper presentation from a **semantic layer** (`.hsl`) bound to a dimensional star so you can try the warehouse query.
+
+== Open the editor
+
+On a `.hsl` file, **Create presentation...**. If more than one fact entity exists, pick one (or select the fact in the tree first). Right-click a fact table on a `.hdm` canvas → **Create presentation…** remains a shortcut that seeds an in-memory layer from that star. The action is hidden on dimensions, aliases, junk, range, and bridge tables.
+
+== Layout
+
+The **Sources** tree lists the selected fact entity and related entities from the `.hsl` (including role-playing aliases and junk dimensions). Range-dimension bands appear as columns on the fact; they are not joined. Fields you remove from the semantic layer do not appear here.
+
+Four toolbar buttons above the tree add the selected column (or every column of a selected table) to:
+
+* **Groups**
+* **Horizontal dimensions**
+* **Vertical dimensions**
+* **Facts / KPIs** (with `SUM`, `COUNT`, or `AVERAGE`)
+
+On desktop Hop GUI you can also drag a tree item onto a zone. Hop Web uses the toolbar only.
+
+Check **Show horizontal totals** and **Show vertical totals** to add crosstab grand totals.
+
+**Save selection** / **Open selection** store the zone layout on the current `.hsl`. Reopening **Create presentation...** from that layer reloads the last selection for that fact. Several `.hsl` files may bind to one `.hdm`.
+
+**SQL** opens the same grain-level join in Hop's database explorer, with a dialect limit of 1000 rows (`LIMIT` / `TOP`), so you can check that the query returns rows before generating the presentation. The editor stays open.
+
+**Show** builds that join (fact plus only the tables that contribute selected columns), generates a presentation in an isolated catalog (not saved in the Hop project), and opens the Hopper viewer (zoom, paging, SVG/PDF export, refresh). **Edit crosstab…** on that window returns here with the same selections.
+
+The generated SQL is not aggregated; the crosstab (and optional group repeat) aggregates in memory. Large facts can be heavy.
+
+== Requirements
+
+The dimensional configuration must have a **target database**. Connection fields (host, port, database, user, password) are resolved from the Hop environment when **Show** runs, so values like `'${DB_PASSWORD}'` become concrete in the isolated catalog. Extra JDBC options on the Hop connection (for example SQL Server `encrypt=false`) are not copied in this release.

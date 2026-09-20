@@ -81,6 +81,12 @@ Guides for the same features live in the parent folder (link:../index.adoc[docum
 |link:dm-fact-dialog.adoc[dm-fact-dialog]
 |Fact table
 
+|link:fact-crosstab-editor.adoc[fact-crosstab-editor]
+|Fact crosstab presentation editor
+
+|link:semantic-layer-editor.adoc[semantic-layer-editor]
+|Semantic layer tree editor
+
 |link:dm-field-dialog.adoc[dm-field-dialog]
 |Dimensional field notes and requirements
 

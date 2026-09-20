@@ -56,6 +56,10 @@ PlantUML source: link:diagrams/d1-logical-layers.puml[d1-logical-layers.puml].
 |`.hdm`
 |Kimball dims, facts, bridges. Often reads BV and/or raw vault.
 
+|Semantic layer
+|`.hsl`
+|Consumption model over the warehouse: entities, attributes, measures, relationships, format masks, named selections. Bound to a `.hdm` (several `.hsl` per model). Used by fact crosstabs and later presentations.
+
 |Execution / lineage views
 |`.hem` / `.hlv`
 |Optional ops graphs and Hop Lineage Views — not required to build the warehouse.

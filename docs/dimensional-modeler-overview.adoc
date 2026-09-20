@@ -27,6 +27,7 @@ A dimensional model contains:
 * **Logical contracts** — source type **None (logical)** lets you sketch stars and field lists before staging SQL exists. Canvas cards show a **Logical** badge. **Check model** warns; **Dimensional Update** skips those tables until a load source is set.
 * **Field documentation** — **Edit field...** on attributes, natural keys, measures, and degenerates stores a description plus Markdown **notes** and **requirements** (the old Excel mapping comments). Project documentation renders that Markdown.
 * **Bus matrix** — facts carry Business / process level 1–3 from a **Business process catalog**. Open the crosstab from the resource definition group, EDW Journey, or **Tools → View bus matrix…**. See link:bus-matrix.adoc[Kimball bus matrix].
+* **Fact presentation** — bind a link:semantic-layer.adoc[semantic layer] (`.hsl`) to this model and **Create presentation...**, or right-click a fact → **Create presentation…**. Pick groups, axes, and measures, then generate a Hopper crosstab against the target warehouse. See link:help/fact-crosstab-editor.adoc[crosstab editor].
 
 Optional DDL constraints (both off by default):
 
