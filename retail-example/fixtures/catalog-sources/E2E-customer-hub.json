@@ -1,0 +1,95 @@
+{
+  "namespace": "hop/retail-example/sources",
+  "name": "E2E-customer-hub",
+  "type": "DV_SOURCE",
+  "description": "Retail customer hub database source",
+  "origin": {
+    "modelType": "DATA_VAULT_SOURCE",
+    "modelName": "retail-360",
+    "modelFilename": "${PROJECT_HOME}/models/retail-360.hdv",
+    "modelElementName": "E2E-customer-hub",
+    "hopProject": "retail-example",
+    "createdAt": 1782400000000,
+    "updatedAt": 1782400000000,
+    "updatedBy": null,
+    "lastWorkflow": null,
+    "lastPipeline": null
+  },
+  "physicalTable": {
+    "databaseMetaName": "CRM",
+    "schemaName": "",
+    "tableName": "customer_hub"
+  },
+  "physicalFile": null,
+  "tags": [
+    "DV Source",
+    "FULL_SNAPSHOT",
+    "DATABASE",
+    "RETAIL_E2E"
+  ],
+  "glossaryTerms": [],
+  "customProperties": {},
+  "validationAcknowledgements": [],
+  "qualityRules": [
+    {
+      "ruleSetName": "retail-source-quality",
+      "ruleId": "table-not-empty",
+      "inlineRule": null,
+      "severityOverride": null,
+      "fieldNameOverride": null,
+      "enabled": true
+    },
+    {
+      "ruleSetName": "retail-source-quality",
+      "ruleId": "customer-id-not-null",
+      "inlineRule": null,
+      "severityOverride": null,
+      "fieldNameOverride": null,
+      "enabled": true
+    }
+  ],
+  "dvSource": {
+    "sourceType": "DATABASE",
+    "sourceIndicator": "",
+    "sourceIndicatorField": "record_source",
+    "group": null,
+    "deliveryType": "FULL_SNAPSHOT",
+    "fields": [
+      {
+        "name": "customer_id",
+        "description": null,
+        "sourceDataType": "Integer",
+        "length": "9",
+        "precision": "0",
+        "hopType": 5,
+        "inputOptions": null,
+        "primaryKeyPosition": 1
+      },
+      {
+        "name": "load_date",
+        "description": null,
+        "sourceDataType": "Timestamp",
+        "length": "",
+        "precision": "",
+        "hopType": 9,
+        "inputOptions": {
+          "csv": {
+            "format": "yyyy-MM-dd",
+            "decimalSymbol": "",
+            "groupingSymbol": "",
+            "currencySymbol": null
+          }
+        }
+      },
+      {
+        "name": "record_source",
+        "description": null,
+        "sourceDataType": "String",
+        "length": "30",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      }
+    ]
+  }
+}

@@ -88,7 +88,7 @@ On a **link** dialog **Hub sources** tab, **Suggest mappings…** matches feed f
 
 Runtime variables such as `RETAIL_CSV_WAVE` come from the **workflow / project variable space** (not from a separate parameter map on the source card). Pipeline parameter defaults help GUI preview when those variables are unset.
 
-Sample retail pipeline: `retail-example/pipelines/parse-asn-xml.hpl` + `files/asn_demo.xml` (and wave files from `generate-retail-data.py`).
+Sample retail pipeline: `retail-example/pipelines/parse-asn-xml.hpl` + `files/asn_demo.xml` (and wave files from `pipelines/generate-retail-data.hpl`).
 
 == Source JSON
 

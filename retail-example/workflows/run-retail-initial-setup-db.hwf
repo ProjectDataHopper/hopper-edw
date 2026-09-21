@@ -94,24 +94,25 @@ limitations under the License.
       <attributes_hac/>
     </action>
     <action>
-      <filename/>
-      <work_directory>${PROJECT_HOME}</work_directory>
-      <arguments/>
-      <arg_from_previous>N</arg_from_previous>
+      <filename>${PROJECT_HOME}/workflows/bootstrap-retail-work.hwf</filename>
+      <params_from_previous>N</params_from_previous>
+      <exec_per_row>N</exec_per_row>
       <set_logfile>N</set_logfile>
       <logfile/>
       <logext/>
       <add_date>N</add_date>
       <add_time>N</add_time>
       <loglevel>Basic</loglevel>
-      <exec_per_row>N</exec_per_row>
       <set_append_logfile>N</set_append_logfile>
-      <insertScript>Y</insertScript>
-      <script>#!/bin/sh
-exec python3 "${PROJECT_HOME}/scripts/bootstrap-retail-work.py" --project-home "${PROJECT_HOME}"</script>
-      <name>bootstrap-retail-work.py</name>
-      <description>Create work/ tree, E2E catalog sources, and schema-gate v1.0.0 baseline</description>
-      <type>SHELL</type>
+      <create_parent_folder>N</create_parent_folder>
+      <wait_until_finished>Y</wait_until_finished>
+      <parameters>
+        <pass_all_parameters>Y</pass_all_parameters>
+      </parameters>
+      <run_configuration>local</run_configuration>
+      <name>Bootstrap retail work</name>
+      <description>Create work/ folders, copy catalog sources, and seed schema-gate v1.0.0 when missing</description>
+      <type>WORKFLOW</type>
       <attributes/>
       <xloc>112</xloc>
       <yloc>144</yloc>
@@ -119,24 +120,31 @@ exec python3 "${PROJECT_HOME}/scripts/bootstrap-retail-work.py" --project-home "
       <attributes_hac/>
     </action>
     <action>
-      <filename/>
-      <work_directory>${PROJECT_HOME}</work_directory>
-      <arguments/>
-      <arg_from_previous>N</arg_from_previous>
+      <filename>${PROJECT_HOME}/pipelines/generate-retail-data.hpl</filename>
+      <params_from_previous>N</params_from_previous>
+      <exec_per_row>N</exec_per_row>
+      <clear_rows>N</clear_rows>
+      <clear_files>N</clear_files>
+      <create_parent_folder>N</create_parent_folder>
       <set_logfile>N</set_logfile>
+      <set_append_logfile>N</set_append_logfile>
       <logfile/>
       <logext/>
       <add_date>N</add_date>
       <add_time>N</add_time>
       <loglevel>Basic</loglevel>
-      <exec_per_row>N</exec_per_row>
-      <set_append_logfile>N</set_append_logfile>
-      <insertScript>Y</insertScript>
-      <script>#!/bin/sh
-exec python3 "${PROJECT_HOME}/scripts/generate-retail-data.py" --mode initial --project-home "${PROJECT_HOME}"</script>
-      <name>generate-retail-data.py</name>
-      <description/>
-      <type>SHELL</type>
+      <wait_until_finished>Y</wait_until_finished>
+      <parameters>
+        <pass_all_parameters>Y</pass_all_parameters>
+        <parameter>
+          <name>MODE</name>
+          <value>initial</value>
+        </parameter>
+      </parameters>
+      <run_configuration>local</run_configuration>
+      <name>Generate retail data</name>
+      <description>Synthetic data transform pipeline (initial wave)</description>
+      <type>PIPELINE</type>
       <attributes/>
       <xloc>288</xloc>
       <yloc>144</yloc>
@@ -149,7 +157,7 @@ exec python3 "${PROJECT_HOME}/scripts/generate-retail-data.py" --mode initial --
       <filename>${PROJECT_HOME}/work/retail-csv-wave.properties</filename>
       <file_variable_type>CURRENT_WORKFLOW</file_variable_type>
       <name>Set RETAIL_CSV_WAVE</name>
-      <description>Load RETAIL_CSV_WAVE written by generate-retail-data.py</description>
+      <description>Load RETAIL_CSV_WAVE written by generate-retail-data.hpl</description>
       <type>SET_VARIABLES</type>
       <attributes/>
       <xloc>800</xloc>
@@ -288,7 +296,7 @@ exec python3 "${PROJECT_HOME}/scripts/generate-retail-data.py" --mode initial --
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>generate-retail-data.py</from>
+      <from>Generate retail data</from>
       <to>Create source tables</to>
       <evaluation>Y</evaluation>
       <unconditional>N</unconditional>
@@ -323,8 +331,8 @@ exec python3 "${PROJECT_HOME}/scripts/generate-retail-data.py" --mode initial --
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>bootstrap-retail-work.py</from>
-      <to>generate-retail-data.py</to>
+      <from>Bootstrap retail work</from>
+      <to>Generate retail data</to>
       <evaluation>Y</evaluation>
       <unconditional>N</unconditional>
       <enabled>Y</enabled>
@@ -338,7 +346,7 @@ exec python3 "${PROJECT_HOME}/scripts/generate-retail-data.py" --mode initial --
     </hop>
     <hop>
       <from>ops-create-hop-executions-table-indexes.sql</from>
-      <to>bootstrap-retail-work.py</to>
+      <to>Bootstrap retail work</to>
       <evaluation>Y</evaluation>
       <unconditional>N</unconditional>
       <enabled>Y</enabled>

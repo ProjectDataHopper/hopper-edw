@@ -106,6 +106,7 @@ Architecture pictures are **committed SVGs** (`docs/images/diagrams/`) generated
 | [dimensional-modeler-overview.adoc](dimensional-modeler-overview.adoc) | `.hdm` modeler, Kimball table types |
 | [dimensional-update-action.adoc](dimensional-update-action.adoc) | Dimensional Update and Publish actions |
 | [date-dimension-generator.adoc](date-dimension-generator.adoc) | Generate `dim_date` rows |
+| [synthetic-data.adoc](synthetic-data.adoc) | Seeded synthetic rows, including the retail source wave |
 
 ## Operations and tooling
 

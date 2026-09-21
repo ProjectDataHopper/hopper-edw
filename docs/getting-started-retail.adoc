@@ -75,7 +75,7 @@ Key files:
 . Expand `hop/retail-example/sources` — entries such as `E2E-customer-hub`, `E2E-order-header`.
 . Open one source — note **physical table** on CRM, **record source** field, and column layout.
 
-Sources are JSON under the FILE catalog root (`work/edw-catalog/` for retail); the namespace in each file must match its folder path (`hop/retail-example/sources`). Initial setup runs `scripts/bootstrap-retail-work.py` to create the `work/` tree, generate E2E DATABASE sources, and seed COMPOSITE / JSON / PIPELINE feeds (`all-customer-info`, `feed_order_shipment_tracking`, `asn-package-lines`) that `retail-360.hdv` requires.
+Sources are JSON under the FILE catalog root (`work/edw-catalog/` for retail); the namespace in each file must match its folder path (`hop/retail-example/sources`). Initial setup runs `workflows/bootstrap-retail-work.hwf` to create the `work/` folders, copy E2E DATABASE sources from `fixtures/catalog-sources/`, and seed COMPOSITE / JSON / PIPELINE feeds (`all-customer-info`, `feed_order_shipment_tracking`, `asn-package-lines`) that `retail-360.hdv` requires.
 
 If entries appear in the tree but fail to open, press **F5** to refresh the catalog.
 
@@ -99,7 +99,7 @@ image::images/source-modeler-retail-example-with-query-dialog-generated-sql.png[
 
 === Kafka-style shipment events (Source JSON → vault)
 
-Retail lands a simulated **Kafka consumer** table `order_shipment_event` (UUID `message_id`, JSON `payload`, topic/partition/offset). `generate-retail-data.py` writes shipment-tracking events for a subset of orders during initial and update waves (statuses such as `LABEL_CREATED`, `PICKED_UP`, `IN_TRANSIT`, `DELIVERED`).
+Retail lands a simulated **Kafka consumer** table `order_shipment_event` (UUID `message_id`, JSON `payload`, topic/partition/offset). `pipelines/generate-retail-data.hpl` writes shipment-tracking events for a subset of orders during initial and update waves (statuses such as `LABEL_CREATED`, `PICKED_UP`, `IN_TRANSIT`, `DELIVERED`).
 
 . On the same `.hsm`, open Source JSON **order_shipment_tracking** (parent = `order_shipment_event`, JSON field = `payload`).
 . After CRM is loaded, use **Sample and propose fields** / **Preview data** / **Validate** on the JSON card.
@@ -112,7 +112,7 @@ The main retail vault still uses one catalog source per physical table for class
 Alongside tracking **events** (JSON), retail includes nested **ASN** documents (what left the warehouse: packages and lines).
 
 * Committed sample: `files/asn_demo.xml` (two ASNs, five package lines).
-* Generated waves: `files/asn_${RETAIL_CSV_WAVE}.xml` from `generate-retail-data.py` (subset of SHIPPED/DELIVERED orders).
+* Generated waves: `files/asn_${RETAIL_CSV_WAVE}.xml` from `pipelines/generate-retail-data.hpl` (subset of SHIPPED/DELIVERED orders).
 * Parse pipeline: `pipelines/parse-asn-xml.hpl` — **Get data from XML** loops `/AdvancedShipmentNotices/ASN/Packages/Package/Lines/Line`, flattens parent attributes via relative XPath, adds `record_source=E2E-asn-line`, and ends on dummy **ASN lines** (preview / pipeline-source output).
 
 Default parameter `RETAIL_CSV_WAVE=demo` reads the committed fixture. After a data generate, set the wave to `initial` or `2024-01` to parse the matching file. This path is meant for **pipeline sources** in the source modeler; it is not loaded into CRM by the default workflows.

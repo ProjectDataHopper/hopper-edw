@@ -40,11 +40,11 @@ Thin wrappers also exist in `integration-tests/run-tests.sh` and `integration-te
 
 ## Retail data generators
 
-`scripts/end-to-end/` — Python helpers invoked from `retail-example` workflows:
+Source CSV and ASN waves are produced by the **Synthetic data** transform in `retail-example/pipelines/generate-retail-data.hpl` (see `docs/synthetic-data.adoc`). Python helpers that remain:
 
-- `generate-retail-data.py` — initial snapshot or period update CSVs
-- `activate-source-wave.py` — switch catalog file masks
-- `generate-catalog-sources.py` — (re)create E2E catalog JSON entries
+- `retail-example/scripts/activate-source-wave.py` — switch catalog file masks
+- `retail-example/scripts/generate-catalog-sources.py` — refresh committed `fixtures/catalog-sources/` after source-contract edits (`--write-fixtures`). Initial setup copies those files from `workflows/bootstrap-retail-work.hwf` and does not run this script.
+- `scripts/end-to-end/` — shared copies of the catalog and wave-activation helpers used outside the retail project
 
 ## Video tutorials
 

@@ -4,6 +4,14 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Retail work tree without Python bootstrap
+
+- Initial setup runs `retail-example/workflows/bootstrap-retail-work.hwf` instead of `bootstrap-retail-work.py`. The workflow creates `work/reports`, `work/execution-maps`, `work/metrics`, and the catalog sources folder, copies E2E catalog JSON from `fixtures/catalog-sources/` (model feeds are copied only when missing), and copies `fixtures/schema-gate-baseline/` into `work/edw-catalog/catalog-versions/` when `versions.json` is not already there.
+
+### Synthetic data transform (issue #187)
+
+- New **Synthetic data** input transform generates seeded rows (sequences, choices, ranges, templates, parent/child paths, unique pairs, optional nested XML). Retail initial and update workflows run `retail-example/pipelines/generate-retail-data.hpl` instead of `generate-retail-data.py`. Output keeps the same file names and columns; it is not byte-identical to the old Python random stream. Docs: [docs/synthetic-data.adoc](docs/synthetic-data.adoc).
+
 ### Semantic layer (`.hsl`)
 
 - New consumption model file `.hsl`: entities, attributes, measures (default numeric format masks), relationships, and named selections. **Select dimensional model...** in the tree editor binds a `.hdm` (several `.hsl` files may share one model) and **Create presentation...** opens the fact crosstab from that layer. Calcite compiles a structured selection to warehouse SQL. The fact crosstab **Save selection** / **Open selection** persist layout on the current `.hsl`; presentations use measure format masks (avoids `123.449999999999`). Docs: [docs/semantic-layer.adoc](docs/semantic-layer.adoc).

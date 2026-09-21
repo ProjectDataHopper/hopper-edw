@@ -1,0 +1,57 @@
+= Synthetic data
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+The **Synthetic data** transform (plugin id `SyntheticData`, category **Input**) generates seeded rows for demos, samples, and tests. It replaces one-off Python generators when the shape of the data is sequences, choices, ranges, templates, and parent-child relationships.
+
+Apache Hop's **Fake** transform decorates an existing row with realistic names and addresses. **Generate rows** emits constants. Synthetic data covers the cases those do not: stable ids, foreign keys, a sample of existing keys plus a block of new keys, status paths, unique pairs, and an optional nested XML document.
+
+== How a pipeline uses it
+
+. Drop **Synthetic data** on the canvas. It has no main input.
+. Set **Seed** and **Cardinality**, then add output fields.
+. For parent-child data, draw an info hop from the parent transform and set **Parents transform** (drawing the hop fills the name). Copy rows to every target (`distribute` off) when one generator also writes a file.
+. Write flat files with **Text file output**. The transform itself does not write CSV.
+
+Each copy keeps its own random sequence. Use one copy, and give every copy its own seed expression such as `'${SEED}+3'`. The same seed and parameters always produce the same rows. A pipeline must not assume that two transforms share one Python-style random stream.
+
+Dialog reference: link:help/synthetic-data-dialog.adoc[Synthetic data dialog].
+
+== Cardinality
+
+[cols="1,3", options="header"]
+|===
+|Mode |What it emits
+
+|`COUNT`
+|A fixed number of rows. A count of `0` still lets **Text file output** write a header when the file is created at start.
+
+|`COMBINE`
+|The union of id populations. `RANGE` is `start .. start+count-1`. `SAMPLE` draws unique ids from `from..to` and emits them in sorted order. A population whose count expression is `0` is skipped. `SEQUENCE` with `source=population` formats that id.
+
+|`PER_PARENT`
+|One or more child rows for a sample of parent rows.
+
+|`PATHS`
+|Zero or more step rows for each selected parent. The selector field picks the first matching path. `*` is the fallback. An empty step list emits nothing.
+
+|`UNIQUE_PAIRS`
+|Distinct pairs from two info streams, or from two integer ranges, capped at the cartesian product.
+
+|`HIERARCHY`
+|Flat rows at the leaf of a parent/child join, with optional splitting into groups. The same rows can be written as nested XML.
+|===
+
+Expressions are numeric: integers, variables, `+ - * /`, parentheses, `max`, `min`, `div` (integer division), `mod`, `round`, and `ifEq(left, right, whenEqual, whenNot)`. `dateDiff(later, earlier)` is a day count. Hop variables are resolved first. `${field}` that is not a variable reads a row field.
+
+== Retail example
+
+`retail-example/pipelines/generate-retail-data.hpl` builds the CRM CSV wave and `files/asn_${WAVE}.xml`. Workflows `run-retail-initial-setup-db` and `run-retail-update-db-update` run that pipeline instead of `generate-retail-data.py`.
+
+Initial defaults match the old script: seed `42`, 10,000 customers, 1,000 products, 100,000 orders, 50 warehouses, 25 sales reps, wave `initial`, load date `2024-01-01`. Update mode reads `PROGRESS_DATE`, `PERIOD_MONTHS`, and `WAVE` (`yyyy-MM`) from `pipelines/write-load-control-context.hpl`, then passes them into the generator. New ids do not overlap across months (`start = base + (period-1)*sample + 1`, sample `max(50, n/100)`). Hubs emit new ids only. Customer satellites emit a sample of existing ids plus the new ids.
+
+The generated files follow the same names and columns as before. They are **not** byte-identical to the historical Python output, because each transform has its own seed instead of one shared `random.Random`. Do not treat the committed `retail-example/files/*_initial.csv` snapshot as an oracle for this transform. A full initial run overwrites those files locally.
+
+`asn_demo.xml` stays a hand-written fixture. Generation writes `asn_${WAVE}.xml` only.

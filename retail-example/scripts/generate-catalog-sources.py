@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
-"""Create retail catalog source JSON under work/edw-catalog.
+"""Write retail catalog source JSON.
 
-Writes E2E-* DATABASE source contracts, then seeds COMPOSITE / JSON / PIPELINE
-feeds that retail-360.hdv uses (all-customer-info, feed_order_shipment_tracking,
-asn-package-lines) from the committed schema-gate baseline snapshot when they
-are missing from the working tree.
+workflows/bootstrap-retail-work.hwf does not run this script. It copies
+fixtures/catalog-sources/ into the gitignored work catalog. After editing
+SOURCE_DEFINITIONS or QUALITY_BINDINGS, refresh those fixtures:
+
+    python3 scripts/generate-catalog-sources.py --write-fixtures
+
+Without --write-fixtures the script still writes work/edw-catalog/ (E2E
+sources overwritten, model feeds kept when already present).
 """
 #
 # Copyright 2026 i-Bridge bv
@@ -400,13 +404,15 @@ def baseline_snapshot_sources_dir(project_home: Path) -> Path | None:
     return sources if sources.is_dir() else None
 
 
-def seed_model_feeds_from_baseline(project_home: Path, catalog_dir: Path, namespace: str) -> None:
-    """Copy non-E2E source contracts referenced by retail-360.hdv into the working tree.
+def seed_model_feeds_from_baseline(
+    project_home: Path, catalog_dir: Path, namespace: str, *, overwrite: bool = False
+) -> None:
+    """Copy non-E2E source contracts referenced by retail-360.hdv.
 
-    generate-catalog-sources always regenerates E2E-* DATABASE feeds. Schema validation
-    also requires COMPOSITE (all-customer-info), JSON (feed_order_shipment_tracking), and
-    PIPELINE (asn-package-lines) contracts. Those live in the schema-gate baseline
-    snapshot; skip files that already exist so a later catalog publish is not overwritten.
+    Schema validation also requires COMPOSITE (all-customer-info), JSON
+    (feed_order_shipment_tracking), and PIPELINE (asn-package-lines) contracts.
+    Those live in the schema-gate baseline snapshot. Unless overwrite is set,
+    files that already exist are kept so a later catalog publish is not replaced.
     """
     sources = baseline_snapshot_sources_dir(project_home)
     if sources is None:
@@ -422,7 +428,7 @@ def seed_model_feeds_from_baseline(project_home: Path, catalog_dir: Path, namesp
         if src.stem in SOURCE_DEFINITIONS:
             continue
         dest = catalog_dir / src.name
-        if dest.exists():
+        if dest.exists() and not overwrite:
             print(f"Keeping existing {dest}")
             continue
         payload = json.loads(src.read_text(encoding="utf-8"))
@@ -431,25 +437,49 @@ def seed_model_feeds_from_baseline(project_home: Path, catalog_dir: Path, namesp
         print(f"Seeded {dest}")
 
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--project-home", type=Path, default=DEFAULT_PROJECT_HOME)
-    return parser.parse_args()
-
-
-def main() -> None:
-    args = parse_args()
-    namespace = project_sources_namespace(args.project_home)
-    catalog_dir = edw_catalog_root(args.project_home) / Path(*namespace.split("/"))
-    catalog_dir.mkdir(parents=True, exist_ok=True)
-
+def write_e2e_sources(dest_dir: Path, namespace: str) -> None:
+    dest_dir.mkdir(parents=True, exist_ok=True)
     for name, definition in SOURCE_DEFINITIONS.items():
-        path = catalog_dir / f"{name}.json"
+        path = dest_dir / f"{name}.json"
         payload = build_source(name, definition, namespace)
         path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
         print(f"Wrote {path}")
 
-    seed_model_feeds_from_baseline(args.project_home, catalog_dir, namespace)
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--project-home", type=Path, default=DEFAULT_PROJECT_HOME)
+    parser.add_argument(
+        "--write-fixtures",
+        action="store_true",
+        help=(
+            "Write fixtures/catalog-sources (E2E JSON, overwrite) and "
+            "fixtures/catalog-sources/feeds (model feeds, overwrite)"
+        ),
+    )
+    return parser.parse_args()
+
+
+# Committed fixtures are copied into hop/retail-example/sources. The namespace
+# has to match that folder, not whatever directory --project-home points at.
+FIXTURE_SOURCES_NAMESPACE = "hop/retail-example/sources"
+
+
+def main() -> None:
+    args = parse_args()
+    project_home = args.project_home.expanduser().resolve()
+    if args.write_fixtures:
+        root = project_home / "fixtures" / "catalog-sources"
+        write_e2e_sources(root, FIXTURE_SOURCES_NAMESPACE)
+        seed_model_feeds_from_baseline(
+            project_home, root / "feeds", FIXTURE_SOURCES_NAMESPACE, overwrite=True
+        )
+        return
+
+    namespace = project_sources_namespace(project_home)
+    catalog_dir = edw_catalog_root(project_home) / Path(*namespace.split("/"))
+    write_e2e_sources(catalog_dir, namespace)
+    seed_model_feeds_from_baseline(project_home, catalog_dir, namespace)
 
 
 if __name__ == "__main__":

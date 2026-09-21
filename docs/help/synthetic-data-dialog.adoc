@@ -1,0 +1,72 @@
+= Synthetic data
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../synthetic-data.adoc[Synthetic data].
+
+Input transform that emits seeded rows. It does not read a main input. Optional info hops supply parent rows, child rows, or pair values. Downstream transforms such as **Text file output** write the rows.
+
+The same seed and parameters always produce the same rows. Each transform copy has its own seed, so the pipeline does not depend on transform execution order.
+
+== Generation
+
+[cols="1,3", options="header"]
+|===
+|Option |Description
+
+|Seed
+|Numeric expression. Use a different expression on each copy, for example `'${SEED}+3'`.
+
+|Cardinality
+|`COUNT` emits a fixed number of rows. `COMBINE` unions id populations. `PER_PARENT`, `PATHS`, and `HIERARCHY` expand an info stream. `UNIQUE_PAIRS` samples distinct pairs.
+
+|Row count
+|Expression for `COUNT`. Integer division is `div(a,b)`. `ifEq('left','right',whenEqual,whenNot)` picks a branch. Example: `max(50, div('${CUSTOMERS}', 100))`.
+
+|Parent fraction / minimum parent rows / always include the first candidate
+|How many candidate parents to keep. A fraction of `1` keeps every parent.
+
+|Minimum / maximum children
+|Child rows per selected parent for `PER_PARENT`.
+
+|Selector field
+|Parent field that selects a path or a hierarchy filter.
+
+|Parent key / child key
+|Join keys for `HIERARCHY`.
+
+|Include values / fallback values
+|Pipe-separated selector values. Fallback is used only when nothing matches the include list.
+
+|Split when child count is at least / split probability
+|`HIERARCHY` can split one parent's children into two groups.
+
+|Pair count and pair fields
+|`UNIQUE_PAIRS`. Connected info streams supply the values. Otherwise use the integer ranges.
+
+|Parents / children / pairs transforms
+|Names of the info hops. Drawing the hop fills the name.
+|===
+
+== Populations, paths, fields, overrides
+
+* **Populations** (`COMBINE`): `RANGE` emits `start .. start+count-1`. `SAMPLE` draws unique ids from `from..to` and emits them sorted. A count of `0` is skipped.
+* **Paths**: the first matching **When** value wins. `*` is the fallback. Steps are separated by `|`. An empty step list emits no rows. **Probability** chooses steps versus else-steps. **Extra step** is appended when its probability hits.
+* **Fields** are evaluated left to right. Later fields can read earlier ones, `parent.field`, `child.field`, `step_name`, `step_index`, `child_index`, `package_index`, `group_index`, `population_id`, `pair_left`, and `pair_right`. Set **Publish** to `N` to keep a value for later fields without writing it.
+* **Overrides** replace one field, or force the child count, when the 0-based parent and child indexes match. An empty index matches every row. Operators are `=` and `<=`.
+
+Argument strings are `key=value` pairs separated by `;`. Lists use `|`.
+
+Common generators: `CONSTANT`, `SEQUENCE` (`source=population`, `format=P%06d`), `SEQUENCE_IN_PARENT`, `SEQUENCE_IN_GROUP`, `CHOICE` (`strategy=random` or `round_robin`), `INT_RANGE`, `NUMBER_RANGE`, `NUMBER_EXPR`, `TEMPLATE` (`${field}`, `${pad(expr,width)}`, `${label(field)}`), `DATE_OFFSET`, `COPY`, `COPY_SIBLING`, `LOOKUP`, `REFERENCE` (`excludeField`), `UUID`, `MOD_HASH`, `JSON` (dot paths nest objects), `CHILD_AGGREGATE`.
+
+`scope=parent` or `scope=package` computes a field once and reuses it on the later rows of that parent or package.
+
+== Document
+
+`NONE` emits rows only. `XML` also writes a nested document to the filename (VFS, variables supported). The flat rows stay on the transform output so you can preview them.
+
+The XML tab describes the tree. `GROUP` repeats an element for each value of the group field. `ELEMENT` writes one tag from the first row of the current group. `WRAPPER` is a tag with children and no attributes. `ROW` writes one tag per flat row. Attributes are `attr:field` pairs separated by commas. Rows must already be ordered by the group fields, which `HIERARCHY` does.
+
+Run a single copy. Several copies would split one random sequence.

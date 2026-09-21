@@ -107,10 +107,79 @@ WHERE topic = 'retail'</sql>
     </partitioning>
     <attributes/>
   </transform>
+  <transform>
+    <type>StringCut</type>
+    <name>Wave label</name>
+    <distribute>N</distribute>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <fields>
+      <field>
+        <in_stream_name>progress_date</in_stream_name>
+        <out_stream_name>wave</out_stream_name>
+        <cut_from>0</cut_from>
+        <cut_to>7</cut_to>
+      </field>
+    </fields>
+    <GUI>
+      <xloc>400</xloc>
+      <yloc>160</yloc>
+    </GUI>
+    <attributes/>
+  </transform>
+  <transform>
+    <type>SetVariable</type>
+    <name>Set load control variables</name>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <use_formatting>N</use_formatting>
+    <fields>
+      <field>
+        <field_name>progress_date</field_name>
+        <variable_name>PROGRESS_DATE</variable_name>
+        <variable_type>PARENT_WORKFLOW</variable_type>
+        <default_value/>
+      </field>
+      <field>
+        <field_name>period_months</field_name>
+        <variable_name>PERIOD_MONTHS</variable_name>
+        <variable_type>PARENT_WORKFLOW</variable_type>
+        <default_value>1</default_value>
+      </field>
+      <field>
+        <field_name>wave</field_name>
+        <variable_name>WAVE</variable_name>
+        <variable_type>PARENT_WORKFLOW</variable_type>
+        <default_value/>
+      </field>
+    </fields>
+    <GUI>
+      <xloc>640</xloc>
+      <yloc>160</yloc>
+    </GUI>
+    <attributes/>
+  </transform>
   <order>
     <hop>
       <from>read_load_control</from>
+      <to>Wave label</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Wave label</from>
       <to>write_load_control_context</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Wave label</from>
+      <to>Set load control variables</to>
       <enabled>Y</enabled>
     </hop>
   </order>

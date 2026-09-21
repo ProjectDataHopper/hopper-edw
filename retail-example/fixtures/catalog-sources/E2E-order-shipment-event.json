@@ -1,0 +1,139 @@
+{
+  "namespace": "hop/retail-example/sources",
+  "name": "E2E-order-shipment-event",
+  "type": "DV_SOURCE",
+  "description": "Kafka-style consumer landing for order shipment tracking events (message key + JSON payload + topic/partition/offset). Flatten payload with a Source JSON object on source-tables-crm.hsm.",
+  "origin": {
+    "modelType": "DATA_VAULT_SOURCE",
+    "modelName": "retail-360",
+    "modelFilename": "${PROJECT_HOME}/models/retail-360.hdv",
+    "modelElementName": "E2E-order-shipment-event",
+    "hopProject": "retail-example",
+    "createdAt": 1782400000000,
+    "updatedAt": 1782400000000,
+    "updatedBy": null,
+    "lastWorkflow": null,
+    "lastPipeline": null
+  },
+  "physicalTable": {
+    "databaseMetaName": "CRM",
+    "schemaName": "",
+    "tableName": "order_shipment_event"
+  },
+  "physicalFile": null,
+  "tags": [
+    "DV Source",
+    "FULL_SNAPSHOT",
+    "DATABASE",
+    "RETAIL_E2E"
+  ],
+  "glossaryTerms": [],
+  "customProperties": {},
+  "validationAcknowledgements": [],
+  "qualityRules": [
+    {
+      "ruleSetName": "retail-source-quality",
+      "ruleId": "table-not-empty",
+      "inlineRule": null,
+      "severityOverride": null,
+      "fieldNameOverride": null,
+      "enabled": true
+    }
+  ],
+  "dvSource": {
+    "sourceType": "DATABASE",
+    "sourceIndicator": "",
+    "sourceIndicatorField": "record_source",
+    "group": null,
+    "deliveryType": "FULL_SNAPSHOT",
+    "fields": [
+      {
+        "name": "message_id",
+        "description": null,
+        "sourceDataType": "String",
+        "length": "36",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null,
+        "primaryKeyPosition": 1
+      },
+      {
+        "name": "payload",
+        "description": null,
+        "sourceDataType": "String",
+        "length": "4000",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "kafka_timestamp",
+        "description": null,
+        "sourceDataType": "Timestamp",
+        "length": "",
+        "precision": "",
+        "hopType": 9,
+        "inputOptions": {
+          "csv": {
+            "format": "yyyy-MM-dd",
+            "decimalSymbol": "",
+            "groupingSymbol": "",
+            "currencySymbol": null
+          }
+        }
+      },
+      {
+        "name": "topic",
+        "description": null,
+        "sourceDataType": "String",
+        "length": "80",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "partition",
+        "description": null,
+        "sourceDataType": "Integer",
+        "length": "9",
+        "precision": "0",
+        "hopType": 5,
+        "inputOptions": null
+      },
+      {
+        "name": "offset",
+        "description": null,
+        "sourceDataType": "Integer",
+        "length": "12",
+        "precision": "0",
+        "hopType": 5,
+        "inputOptions": null
+      },
+      {
+        "name": "load_date",
+        "description": null,
+        "sourceDataType": "Timestamp",
+        "length": "",
+        "precision": "",
+        "hopType": 9,
+        "inputOptions": {
+          "csv": {
+            "format": "yyyy-MM-dd",
+            "decimalSymbol": "",
+            "groupingSymbol": "",
+            "currencySymbol": null
+          }
+        }
+      },
+      {
+        "name": "record_source",
+        "description": null,
+        "sourceDataType": "String",
+        "length": "40",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      }
+    ]
+  }
+}

@@ -16,7 +16,7 @@ limitations under the License.
 
   Sample Advanced Shipping Notice (ASN) for pipelines/parse-asn-xml.hpl.
   Wave-scoped files (asn_initial.xml, asn_2024-01.xml, …) are produced by
-  scripts/generate-retail-data.py. This demo file is small and always present.
+  pipelines/generate-retail-data.hpl. This demo file is small and always present.
 -->
 <AdvancedShipmentNotices wave="demo" generated_at="2024-01-01T12:00:00Z">
   <ASN asn_id="ASN000001" warehouse_id="1" ship_date="2024-01-25">

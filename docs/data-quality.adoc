@@ -234,7 +234,7 @@ The `retail-example` project ships libraries and wiring for **both** pre-update 
 
 | Source rule set | `retail-example/metadata/data-quality-rule-set/retail-source-quality.json` |
 | Target rule set | `retail-example/metadata/data-quality-rule-set/retail-target-quality.json` |
-| Source bindings | `qualityRules` on each `E2E-*` catalog source (`scripts/generate-catalog-sources.py`) |
+| Source bindings | `qualityRules` on each `E2E-*` catalog source (`fixtures/catalog-sources/`, refreshed by `scripts/generate-catalog-sources.py --write-fixtures`) |
 | Target bindings | `hub_customer`, `sat_customer_demo`, `hub_order` under `work/edw-catalog/hop/retail-example/models/retail-360/` |
 | Pre-load gate | `Measure source data quality` (`persistHistory` → OPS) → `Evaluate source quality gate` (`FAIL_ON_BLOCKING`) |
 | Post-load alert | `Measure target data quality (post)` (`POST_UPDATE`, persist OPS) → `Alert on target quality (post)` (`ALERT_ONLY`, `alertSinks=log,ops_table`, remeasure off) |

@@ -452,7 +452,8 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
    * subclasses still add their paint listener separately.
    *
    * <p>On Hop Web, continuous mouse-move / wheel events are not registered (client SVG overlay +
-   * zoom handler own those); hover arrives via {@link #handleWebCanvasHover}.
+   * zoom handler own those); hover arrives via {@link #handleWebCanvasHover} and ends via {@link
+   * #handleWebCanvasHoverEnd}.
    */
   protected void registerCanvasMouseListeners() {
     canvas.addListener(SWT.MouseDown, this::onMouseDown);
@@ -483,6 +484,21 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
     if (mouseInteractions().updateHoverState(areaOwner, real)) {
       redraw();
     }
+  }
+
+  /**
+   * The pointer left the hovered area on Hop Web. The web canvas does not deliver {@link
+   * SWT#MouseExit}, so this does the same cleanup as {@link #handleMouseExit()}.
+   */
+  @Override
+  public void handleWebCanvasHoverEnd() {
+    if (!EnvironmentUtils.getInstance().isWeb()) {
+      return;
+    }
+    if (canvas == null || canvas.isDisposed()) {
+      return;
+    }
+    handleMouseExit();
   }
 
   protected void onMouseDown(Event e) {

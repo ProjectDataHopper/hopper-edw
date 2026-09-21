@@ -39,7 +39,7 @@ DV source catalog entries use namespace **`hop/retail-example/sources`**.
 `models/source-tables-crm.hsm` maps CRM landing tables (PK/FK relationships) and includes:
 
 - Query **All customer info** (hub + address + contact + demo + prefs). Publish as composite catalog feed `feed_customer_enriched` when experimenting with multi-table satellite loads.
-- Table **order_shipment_event** — Kafka-style consumer landing (UUID `message_id`, JSON `payload`, `kafka_timestamp`, `topic`, `partition`, `offset`). Populated by `scripts/generate-retail-data.py` during initial and update waves with **order shipping tracking** events (label created → picked up → in transit → delivered, …).
+- Table **order_shipment_event** — Kafka-style consumer landing (UUID `message_id`, JSON `payload`, `kafka_timestamp`, `topic`, `partition`, `offset`). Populated by `pipelines/generate-retail-data.hpl` during initial and update waves with **order shipping tracking** events (label created → picked up → in transit → delivered, …).
 - Source JSON **order_shipment_tracking** — flattens `payload` into columns (`order_id`, `status`, `carrier`, location, …) plus pass-through Kafka metadata. Published as catalog feed **`feed_order_shipment_tracking`** (type `JSON`).
 - Data Vault **`retail-360.hdv`** loads that feed into **`hub_order_shipment`**, **`lnk_order_shipment`**, and **`sat_order_shipment`** (JSON source pipeline: record-source constant, hub sort/distinct for CDC).
 - **ASN XML** (Advanced Shipping Notice) — nested warehouse-outbound documents under `files/asn_*.xml`. Complements shipment **tracking** JSON (status events) with planned package **contents**. Parse with **`pipelines/parse-asn-xml.hpl`** (Get data from XML → flat package-line rows). Small committed fixture: `files/asn_demo.xml` (`RETAIL_CSV_WAVE=demo`).
@@ -85,18 +85,20 @@ retail-example/
 │   ├── target-type-mapping/   # vault-target-mapping (String length 1 → CHAR)
 │   └── lineage-backend/       # Marquez-Localhost (Hop Lineage View)
 ├── fixtures/
+│   ├── catalog-sources/       # Working-tree DV source JSON (copied into work/)
 │   └── schema-gate-baseline/  # Seed for catalog-versions tag v1.0.0 (copied into work/)
 ├── pipelines/                 # create-source-tables, load-e2e-sources-to-crm, parse-asn-xml
 ├── files/                     # Generated CSV/XML source files (mostly gitignored; asn_demo.xml tracked)
 ├── models/                    # TRACKED .hsm / .hdv / .hbv / .hdm / .hlv
 ├── sql/                       # drop-source / drop-target, load control, staging views
-├── scripts/                   # generate data, bootstrap work/, catalog sources
+├── scripts/                   # catalog source fixture refresh, wave activation
 ├── work/                      # GITIGNORED runtime tree (created on first run)
 │   ├── edw-catalog/           # FILE data catalog (sources, published models, versions)
 │   ├── reports/               # Schema gate + load overview MD/HTML
 │   ├── execution-maps/        # Generated .hem files
 │   └── metrics/               # Per-run metrics JSON
 └── workflows/
+    ├── bootstrap-retail-work.hwf
     ├── run-retail-initial.hwf
     ├── run-retail-update.hwf
     ├── send-lineage-to-marquez.hwf
@@ -104,7 +106,8 @@ retail-example/
 ```
 
 `local-catalog` points at `${PROJECT_HOME}/work/edw-catalog`. Initial setup runs
-`scripts/bootstrap-retail-work.py` (E2E sources + schema-gate baseline copy).
+`workflows/bootstrap-retail-work.hwf` (work folders, E2E catalog sources, model
+feeds, and the schema-gate baseline copy).
 
 Shared Python helpers live in `../scripts/end-to-end/` (repo root, not inside this project).
 
@@ -153,12 +156,13 @@ After the vault wave, **Update resource definition group** also writes load-over
 - Update: `work/reports/retail-dv-update-report.md` / `.html`
 
 Baseline **`v1.0.0`** is seeded from `fixtures/schema-gate-baseline/` into
-`work/edw-catalog/catalog-versions/` by `bootstrap-retail-work.py`. Refresh the
-live baseline with **Tag catalog version** on the resource definition group when
-source contracts change intentionally (or re-bootstrap with `--force-baseline`
-after fixture updates). Use **`LIVE_SOURCE`** only when you want
-to compare the expected contract to physical CRM columns (not catalog-only
-metadata edits).
+`work/edw-catalog/catalog-versions/` by `workflows/bootstrap-retail-work.hwf`
+when `versions.json` is not already there. Refresh the live baseline with
+**Tag catalog version** on the resource definition group when source contracts
+change intentionally. To re-copy the committed fixture, delete
+`work/edw-catalog/catalog-versions` and run the bootstrap workflow again. Use
+**`LIVE_SOURCE`** only when you want to compare the expected contract to
+physical CRM columns (not catalog-only metadata edits).
 
 When reading validation results, use the **Axis / Compared / Found / Why it matters**
 lines on each issue: a baseline version gap is not the same as “target tables
@@ -171,7 +175,7 @@ Screenshots and full parameter reference:
 
 ## Data quality (measure + gate)
 
-Retail binds source content rules from Hop metadata **`retail-source-quality`** onto the `E2E-*` catalog sources (via `generate-catalog-sources.py`), and target rules from **`retail-target-quality`** onto published vault tables (`hub_customer`, `sat_customer_demo`, `hub_order`).
+Retail binds source content rules from Hop metadata **`retail-source-quality`** onto the `E2E-*` catalog sources (committed in `fixtures/catalog-sources/`; refresh with `scripts/generate-catalog-sources.py --write-fixtures`), and target rules from **`retail-target-quality`** onto published vault tables (`hub_customer`, `sat_customer_demo`, `hub_order`).
 
 Both **initial** and **update** workflows:
 
@@ -186,7 +190,7 @@ See [docs/data-quality.adoc](../docs/data-quality.adoc) for rule types and actio
 
 ## Data generation
 
-CSV (and ASN XML) files are written to `files/` by `scripts/generate-retail-data.py` (workflows) — kept in sync with `../scripts/end-to-end/generate-retail-data.py` where that shared copy is used:
+CSV (and ASN XML) files are written to `files/` by `pipelines/generate-retail-data.hpl` (the **Synthetic data** transform; workflows run that pipeline):
 
 | Mode | Description |
 |------|-------------|
@@ -205,7 +209,7 @@ Default scale: 10,000 customers, 1,000 products, 100,000 orders.
 ```
 
 CSV wave selection uses Hop variable **`RETAIL_CSV_WAVE`** (for example `initial` or
-`2024-01`). `generate-retail-data.py` writes `work/retail-csv-wave.properties`; the
+`2024-01`). `generate-retail-data.hpl` writes `work/retail-csv-wave.properties`; the
 workflows load it with **Set variables** before `load-e2e-sources-to-crm.hpl`, which
 reads files as `${PROJECT_HOME}/files/<table>_${RETAIL_CSV_WAVE}.csv`. The same
 variable selects `asn_${RETAIL_CSV_WAVE}.xml` in `parse-asn-xml.hpl`. The pipeline

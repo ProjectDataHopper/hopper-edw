@@ -288,7 +288,7 @@ Include downstream impact: Y
 The retail project workflow `retail-example/workflows/run-retail-update-models.hwf` runs **Validate resource definitions** on group `retail-sources` with:
 
 * Compare mode: **`WORKING_VS_VERSION`** — picks up catalog field edits (length/type) against a frozen tag
-* Baseline catalog version: **`v1.0.0`** (seeded from `fixtures/schema-gate-baseline/` into `work/edw-catalog/catalog-versions/` by `bootstrap-retail-work.py`)
+* Baseline catalog version: **`v1.0.0`** (seeded from `fixtures/schema-gate-baseline/` into `work/edw-catalog/catalog-versions/` by `workflows/bootstrap-retail-work.hwf` when that folder is missing)
 * Report output path: `${PROJECT_HOME}/work/reports`
 * Report base name: `retail-schema-validation`
 * Format: Markdown and HTML

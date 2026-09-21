@@ -71,24 +71,51 @@ limitations under the License.
       <attributes_hac/>
     </action>
     <action>
-      <filename/>
-      <work_directory>${PROJECT_HOME}</work_directory>
-      <arguments/>
-      <arg_from_previous>N</arg_from_previous>
+      <filename>${PROJECT_HOME}/pipelines/generate-retail-data.hpl</filename>
+      <params_from_previous>N</params_from_previous>
+      <exec_per_row>N</exec_per_row>
+      <clear_rows>N</clear_rows>
+      <clear_files>N</clear_files>
+      <create_parent_folder>N</create_parent_folder>
       <set_logfile>N</set_logfile>
+      <set_append_logfile>N</set_append_logfile>
       <logfile/>
       <logext/>
       <add_date>N</add_date>
       <add_time>N</add_time>
       <loglevel>Basic</loglevel>
-      <exec_per_row>N</exec_per_row>
-      <set_append_logfile>N</set_append_logfile>
-      <insertScript>Y</insertScript>
-      <script>#!/bin/sh
-exec python3 "${PROJECT_HOME}/scripts/generate-retail-data.py" --mode update --project-home "${PROJECT_HOME}"</script>
+      <wait_until_finished>Y</wait_until_finished>
+      <parameters>
+        <pass_all_parameters>N</pass_all_parameters>
+        <parameter>
+          <name>MODE</name>
+          <value>update</value>
+        </parameter>
+        <parameter>
+          <name>WAVE</name>
+          <value>${WAVE}</value>
+        </parameter>
+        <parameter>
+          <name>LOAD_DATE</name>
+          <value>${PROGRESS_DATE}</value>
+        </parameter>
+        <parameter>
+          <name>ANCHOR</name>
+          <value>${PROGRESS_DATE}</value>
+        </parameter>
+        <parameter>
+          <name>PROGRESS_DATE</name>
+          <value>${PROGRESS_DATE}</value>
+        </parameter>
+        <parameter>
+          <name>PERIOD_MONTHS</name>
+          <value>${PERIOD_MONTHS}</value>
+        </parameter>
+      </parameters>
+      <run_configuration>local</run_configuration>
       <name>Generate update data</name>
-      <description/>
-      <type>SHELL</type>
+      <description>Synthetic data transform pipeline (update wave)</description>
+      <type>PIPELINE</type>
       <attributes/>
       <xloc>416</xloc>
       <yloc>64</yloc>
@@ -101,7 +128,7 @@ exec python3 "${PROJECT_HOME}/scripts/generate-retail-data.py" --mode update --p
       <filename>${PROJECT_HOME}/work/retail-csv-wave.properties</filename>
       <file_variable_type>CURRENT_WORKFLOW</file_variable_type>
       <name>Set RETAIL_CSV_WAVE</name>
-      <description>Load RETAIL_CSV_WAVE written by generate-retail-data.py</description>
+      <description>Load RETAIL_CSV_WAVE written by generate-retail-data.hpl</description>
       <type>SET_VARIABLES</type>
       <attributes/>
       <xloc>592</xloc>

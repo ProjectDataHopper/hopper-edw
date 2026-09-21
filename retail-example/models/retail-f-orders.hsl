@@ -15,7 +15,7 @@ limitations under the License.
 -->
 <semantic-model>
   <description>Retail warehouse star schema with date role-playing and extended catalog tables</description>
-  <dimensionalModelFilename>/home/matt/git/ProjectDataHopper/hopper-edw/retail-example/models/retail-f-orders.hdm</dimensionalModelFilename>
+  <dimensionalModelFilename>${PROJECT_HOME}/models/retail-f-orders.hdm</dimensionalModelFilename>
   <targetDatabase>Vault</targetDatabase>
   <entities>
     <entity>
@@ -41,7 +41,7 @@ limitations under the License.
           <name>total_amount</name>
           <physicalColumn>total_amount</physicalColumn>
           <header>Total amount</header>
-          <description>Amount</description>
+          <description/>
           <formatMask>#,##0</formatMask>
           <aggregation>SUM</aggregation>
           <additive>Y</additive>

@@ -1,0 +1,146 @@
+{
+  "namespace": "hop/retail-example/sources",
+  "name": "E2E-customer-prefs",
+  "type": "DV_SOURCE",
+  "description": "Retail customer preference satellite database source",
+  "origin": {
+    "modelType": "DATA_VAULT_SOURCE",
+    "modelName": "retail-360",
+    "modelFilename": "${PROJECT_HOME}/models/retail-360.hdv",
+    "modelElementName": "E2E-customer-prefs",
+    "hopProject": "retail-example",
+    "createdAt": 1782400000000,
+    "updatedAt": 1782400000000,
+    "updatedBy": null,
+    "lastWorkflow": null,
+    "lastPipeline": null
+  },
+  "physicalTable": {
+    "databaseMetaName": "CRM",
+    "schemaName": "",
+    "tableName": "customer_prefs"
+  },
+  "physicalFile": null,
+  "tags": [
+    "DV Source",
+    "FULL_SNAPSHOT",
+    "DATABASE",
+    "RETAIL_E2E"
+  ],
+  "glossaryTerms": [],
+  "customProperties": {},
+  "validationAcknowledgements": [],
+  "qualityRules": [
+    {
+      "ruleSetName": "retail-source-quality",
+      "ruleId": "table-not-empty",
+      "inlineRule": null,
+      "severityOverride": null,
+      "fieldNameOverride": null,
+      "enabled": true
+    },
+    {
+      "ruleSetName": "retail-source-quality",
+      "ruleId": "customer-id-not-null",
+      "inlineRule": null,
+      "severityOverride": null,
+      "fieldNameOverride": null,
+      "enabled": true
+    },
+    {
+      "ruleSetName": "retail-source-quality",
+      "ruleId": "newsletter-opt-in-allowed",
+      "inlineRule": null,
+      "severityOverride": null,
+      "fieldNameOverride": null,
+      "enabled": true
+    },
+    {
+      "ruleSetName": "retail-source-quality",
+      "ruleId": "preferred-channel-allowed",
+      "inlineRule": null,
+      "severityOverride": null,
+      "fieldNameOverride": null,
+      "enabled": true
+    },
+    {
+      "ruleSetName": "retail-source-quality",
+      "ruleId": "language-code-allowed",
+      "inlineRule": null,
+      "severityOverride": null,
+      "fieldNameOverride": null,
+      "enabled": true
+    }
+  ],
+  "dvSource": {
+    "sourceType": "DATABASE",
+    "sourceIndicator": "",
+    "sourceIndicatorField": "record_source",
+    "group": null,
+    "deliveryType": "FULL_SNAPSHOT",
+    "fields": [
+      {
+        "name": "customer_id",
+        "description": null,
+        "sourceDataType": "Integer",
+        "length": "9",
+        "precision": "0",
+        "hopType": 5,
+        "inputOptions": null,
+        "primaryKeyPosition": 1
+      },
+      {
+        "name": "newsletter_opt_in",
+        "description": null,
+        "sourceDataType": "String",
+        "length": "1",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "preferred_channel",
+        "description": null,
+        "sourceDataType": "String",
+        "length": "10",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "language_code",
+        "description": null,
+        "sourceDataType": "String",
+        "length": "5",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      },
+      {
+        "name": "load_date",
+        "description": null,
+        "sourceDataType": "Timestamp",
+        "length": "",
+        "precision": "",
+        "hopType": 9,
+        "inputOptions": {
+          "csv": {
+            "format": "yyyy-MM-dd",
+            "decimalSymbol": "",
+            "groupingSymbol": "",
+            "currencySymbol": null
+          }
+        }
+      },
+      {
+        "name": "record_source",
+        "description": null,
+        "sourceDataType": "String",
+        "length": "30",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      }
+    ]
+  }
+}

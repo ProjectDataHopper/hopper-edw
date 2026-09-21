@@ -60,7 +60,7 @@ Output grain: one row per ASN package line for use as a pipeline source feed.
       <yloc>48</yloc>
       <note>ASN XML → flat package-line feed. Preview on "ASN lines".
 Set RETAIL_CSV_WAVE=demo (default) for files/asn_demo.xml,
-or initial / 2024-01 after generate-retail-data.py.</note>
+or initial / 2024-01 after generate-retail-data.hpl.</note>
       <width>420</width>
     </notepad>
   </notepads>

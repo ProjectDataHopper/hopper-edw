@@ -135,6 +135,7 @@ public final class HelpTopics {
   public static final String RECORD_DEFINITION_DATA_INPUT = "record-definition-data-input-dialog";
   public static final String DATABASE_TABLE_METADATA = "database-table-metadata-dialog";
   public static final String DATE_DIMENSION_GENERATOR = "date-dimension-generator-dialog";
+  public static final String SYNTHETIC_DATA = "synthetic-data-dialog";
   public static final String SOURCE_MODEL_SQL = "source-model-sql-dialog";
   public static final String DV_HASH_KEY = "dv-hash-key-dialog";
   public static final String MERGE_ROWS_PLUS = "merge-rows-plus-dialog";
@@ -441,6 +442,10 @@ public final class HelpTopics {
               DATE_DIMENSION_GENERATOR,
               "date-dimension-generator.html",
               "HelpTopics.DateDimensionGeneratorDialog.Title"),
+          p(
+              SYNTHETIC_DATA,
+              "help/synthetic-data-dialog.html",
+              "HelpTopics.SyntheticDataDialog.Title"),
           p(
               SOURCE_MODEL_SQL,
               "help/source-model-sql-dialog.html",

@@ -1,0 +1,105 @@
+{
+  "namespace": "hop/retail-example/sources",
+  "name": "E2E-order-rep",
+  "type": "DV_SOURCE",
+  "description": "Order to primary/secondary sales rep assignment (same hub twice on link)",
+  "origin": {
+    "modelType": "DATA_VAULT_SOURCE",
+    "modelName": "retail-360",
+    "modelFilename": "${PROJECT_HOME}/models/retail-360.hdv",
+    "modelElementName": "E2E-order-rep",
+    "hopProject": "retail-example",
+    "createdAt": 1782400000000,
+    "updatedAt": 1782400000000,
+    "updatedBy": null,
+    "lastWorkflow": null,
+    "lastPipeline": null
+  },
+  "physicalTable": {
+    "databaseMetaName": "CRM",
+    "schemaName": "",
+    "tableName": "order_rep"
+  },
+  "physicalFile": null,
+  "tags": [
+    "DV Source",
+    "FULL_SNAPSHOT",
+    "DATABASE",
+    "RETAIL_E2E"
+  ],
+  "glossaryTerms": [],
+  "customProperties": {},
+  "validationAcknowledgements": [],
+  "qualityRules": [
+    {
+      "ruleSetName": "retail-source-quality",
+      "ruleId": "table-not-empty",
+      "inlineRule": null,
+      "severityOverride": null,
+      "fieldNameOverride": null,
+      "enabled": true
+    }
+  ],
+  "dvSource": {
+    "sourceType": "DATABASE",
+    "sourceIndicator": "",
+    "sourceIndicatorField": "record_source",
+    "group": null,
+    "deliveryType": "FULL_SNAPSHOT",
+    "fields": [
+      {
+        "name": "order_id",
+        "description": null,
+        "sourceDataType": "String",
+        "length": "7",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null,
+        "primaryKeyPosition": 1
+      },
+      {
+        "name": "primary_rep_id",
+        "description": null,
+        "sourceDataType": "Integer",
+        "length": "9",
+        "precision": "0",
+        "hopType": 5,
+        "inputOptions": null
+      },
+      {
+        "name": "secondary_rep_id",
+        "description": null,
+        "sourceDataType": "Integer",
+        "length": "9",
+        "precision": "0",
+        "hopType": 5,
+        "inputOptions": null
+      },
+      {
+        "name": "load_date",
+        "description": null,
+        "sourceDataType": "Timestamp",
+        "length": "",
+        "precision": "",
+        "hopType": 9,
+        "inputOptions": {
+          "csv": {
+            "format": "yyyy-MM-dd",
+            "decimalSymbol": "",
+            "groupingSymbol": "",
+            "currencySymbol": null
+          }
+        }
+      },
+      {
+        "name": "record_source",
+        "description": null,
+        "sourceDataType": "String",
+        "length": "30",
+        "precision": "",
+        "hopType": 2,
+        "inputOptions": null
+      }
+    ]
+  }
+}

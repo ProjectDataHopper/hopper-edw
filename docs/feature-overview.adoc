@@ -262,6 +262,10 @@ For a slide-style executive summary, see link:presentations/hop-data-vault-overv
 |Available
 |link:date-dimension-generator.adoc[Date Dimension Generator]
 
+|Synthetic data transform
+|Available
+|link:synthetic-data.adoc[Synthetic data]
+
 |Dimensional modeler date generator source (`DATE_GENERATOR`)
 |Available
 |Canvas **Add date dimension**; fiscal offsets + relative attrs; `@now` load timestamp for Type 1; link:date-dimension-generator.adoc[Date Dimension Generator], link:dimensional-modeler-overview.adoc[Dimensional modeler]
@@ -410,6 +414,7 @@ image::images/ai-advisor-offering-performance-tuning-advice.png[AI advisor — p
 * **Catalog Record Definition Metadata Output** — discover or migrate field layouts into the data catalog (including stream field grouping).
 * **Record Definition Input** — read actual data rows from a catalog record definition (same path as catalog Preview data).
 * **Date Dimension Generator** — populate standard calendar dimension attributes.
+* **Synthetic data** — seeded rows (sequences, choices, parent/child, unique pairs, optional nested XML). Retail source waves use `retail-example/pipelines/generate-retail-data.hpl`.
 
 === Operations
 
