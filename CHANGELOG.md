@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Split generated Data Vault models (issue #184)
+
+- **Generate Data Vault…** can write one `.hdv` per hub (plus its satellites), one per link (plus link satellites and cross-model hub aliases), and one per reference table. Choose the output folder, an optional file-name prefix, and whether an existing file is skipped or replaced. A project Data Vault model naming scheme (`edw-dv-model`) formats the file names when one exists. Load hub and reference files before link files, and add the files to the resource definition group before a group update. Docs: [docs/generating-data-vault-from-source-model.adoc](docs/generating-data-vault-from-source-model.adoc).
+
 ### Retail work tree without Python bootstrap
 
 - Initial setup runs `retail-example/workflows/bootstrap-retail-work.hwf` instead of `bootstrap-retail-work.py`. The workflow creates `work/reports`, `work/execution-maps`, `work/metrics`, and the catalog sources folder, copies E2E catalog JSON from `fixtures/catalog-sources/` (model feeds are copied only when missing), and copies `fixtures/schema-gate-baseline/` into `work/edw-catalog/catalog-versions/` when `versions.json` is not already there.

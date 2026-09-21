@@ -20,13 +20,17 @@ import java.util.Collection;
 import java.util.List;
 import lombok.Getter;
 import org.apache.hop.core.Const;
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.core.vfs.HopVfs;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
 import org.apache.hop.ui.core.widget.ColumnInfo;
 import org.apache.hop.ui.core.widget.TableView;
+import org.apache.hop.ui.core.widget.TextVar;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.eclipse.swt.SWT;
@@ -34,9 +38,13 @@ import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
 import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
 import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
@@ -50,6 +58,8 @@ import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceToVaultClassi
 import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceToVaultNaming;
 import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceToVaultOptions;
 import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceToVaultProposal;
+import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceToVaultSplitOptions;
+import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceToVaultSplitSupport;
 
 /** Review-and-apply screen for source-model → raw Data Vault proposals. */
 public class SourceToVaultReviewDialog {
@@ -59,7 +69,8 @@ public class SourceToVaultReviewDialog {
   public enum Destination {
     NEW_MODEL,
     EXISTING_MODEL,
-    CURRENT_MODEL
+    CURRENT_MODEL,
+    SPLIT_MODELS
   }
 
   private final Shell parent;
@@ -82,6 +93,13 @@ public class SourceToVaultReviewDialog {
   private Button wPublishCatalog;
   private Button wNewModel;
   private Button wExistingModel;
+  private Button wCurrentModel;
+  private Button wSplitModel;
+  private TextVar wSplitFolder;
+  private Button wSplitBrowse;
+  private Text wSplitPrefix;
+  private Combo wSplitExisting;
+  private Label wSplitExample;
   private TableView wObjects;
 
   @Getter private boolean confirmed;
@@ -89,6 +107,7 @@ public class SourceToVaultReviewDialog {
   @Getter private SourceToVaultClassification classification;
   @Getter private SourceToVaultOptions options = SourceToVaultOptions.defaults();
   @Getter private Destination destination = Destination.NEW_MODEL;
+  @Getter private final SourceToVaultSplitOptions splitOptions = new SourceToVaultSplitOptions();
 
   public SourceToVaultReviewDialog(
       Shell parent,
@@ -158,27 +177,8 @@ public class SourceToVaultReviewDialog {
     wSeedParentHubs.setSelection(options.isSeedParentHubsFromChildFeeds());
     wPublishCatalog.setSelection(true);
 
-    org.eclipse.swt.widgets.Control last = wPublishCatalog;
-    if (chooseDestination) {
-      wNewModel = new Button(shell, SWT.RADIO);
-      PropsUi.setLook(wNewModel);
-      wNewModel.setText(BaseMessages.getString(PKG, "SourceToVaultReviewDialog.NewModel.Label"));
-      wNewModel.setSelection(true);
-      FormData fdNew = new FormData();
-      fdNew.left = new FormAttachment(0, 0);
-      fdNew.top = new FormAttachment(wPublishCatalog, margin);
-      wNewModel.setLayoutData(fdNew);
-
-      wExistingModel = new Button(shell, SWT.RADIO);
-      PropsUi.setLook(wExistingModel);
-      wExistingModel.setText(
-          BaseMessages.getString(PKG, "SourceToVaultReviewDialog.ExistingModel.Label"));
-      FormData fdExisting = new FormData();
-      fdExisting.left = new FormAttachment(wNewModel, margin * 2);
-      fdExisting.top = new FormAttachment(wPublishCatalog, margin);
-      wExistingModel.setLayoutData(fdExisting);
-      last = wNewModel;
-    }
+    Control last = addDestinationRadios(wPublishCatalog, margin);
+    last = addSplitFields(last, margin);
 
     Label wlObjects = new Label(shell, SWT.LEFT);
     PropsUi.setLook(wlObjects);
@@ -253,8 +253,244 @@ public class SourceToVaultReviewDialog {
     wIncludeNonTableSources.addListener(SWT.Selection, e -> reclassify());
 
     populateTable();
+    updateSplitEnabled();
+    BaseTransformDialog.setSize(shell, 980, 760);
     BaseDialog.defaultShellHandling(shell, c -> ok(), c -> cancel());
     return confirmed;
+  }
+
+  private Control addDestinationRadios(Control above, int margin) {
+    org.eclipse.swt.widgets.Listener toggle =
+        e -> {
+          updateSplitEnabled();
+          refreshSplitExample();
+        };
+    if (chooseDestination) {
+      wNewModel = radio(above, margin, "SourceToVaultReviewDialog.NewModel.Label", true, 0);
+      wExistingModel =
+          radio(above, margin, "SourceToVaultReviewDialog.ExistingModel.Label", false, wNewModel);
+      wNewModel.addListener(SWT.Selection, toggle);
+      wExistingModel.addListener(SWT.Selection, toggle);
+      above = wNewModel;
+    } else {
+      wCurrentModel =
+          radio(above, margin, "SourceToVaultReviewDialog.CurrentModel.Label", true, 0);
+      wCurrentModel.addListener(SWT.Selection, toggle);
+      above = wCurrentModel;
+    }
+    wSplitModel = radio(above, margin, "SourceToVaultReviewDialog.SplitModels.Label", false, 0);
+    wSplitModel.addListener(SWT.Selection, toggle);
+    return wSplitModel;
+  }
+
+  private Button radio(Control above, int margin, String key, boolean selected, Object left) {
+    Button button = new Button(shell, SWT.RADIO);
+    PropsUi.setLook(button);
+    button.setText(BaseMessages.getString(PKG, key));
+    button.setSelection(selected);
+    FormData fd = new FormData();
+    if (left instanceof Button leftButton) {
+      fd.left = new FormAttachment(leftButton, margin * 2);
+      fd.top = new FormAttachment(above, margin);
+    } else {
+      fd.left = new FormAttachment(0, 0);
+      fd.top = new FormAttachment(above, margin);
+    }
+    button.setLayoutData(fd);
+    return button;
+  }
+
+  private Control addSplitFields(Control above, int margin) {
+    int middle = PropsUi.getInstance().getMiddlePct();
+
+    Label wlFolder = new Label(shell, SWT.RIGHT);
+    PropsUi.setLook(wlFolder);
+    wlFolder.setText(BaseMessages.getString(PKG, "SourceToVaultReviewDialog.SplitFolder.Label"));
+    FormData fdlFolder = new FormData();
+    fdlFolder.left = new FormAttachment(0, 0);
+    fdlFolder.right = new FormAttachment(middle, -margin);
+    fdlFolder.top = new FormAttachment(above, margin);
+    wlFolder.setLayoutData(fdlFolder);
+
+    wSplitBrowse = new Button(shell, SWT.PUSH);
+    wSplitBrowse.setText(BaseMessages.getString(PKG, "SourceToVaultReviewDialog.SplitBrowse.Label"));
+    FormData fdBrowse = new FormData();
+    fdBrowse.right = new FormAttachment(100, 0);
+    fdBrowse.top = new FormAttachment(above, margin);
+    wSplitBrowse.setLayoutData(fdBrowse);
+    wSplitBrowse.addListener(
+        SWT.Selection,
+        e -> {
+          String folder =
+              BaseDialog.presentDirectoryDialog(shell, wSplitFolder.getText(), null, variables);
+          if (!Utils.isEmpty(folder)) {
+            wSplitFolder.setText(folder);
+            refreshSplitExample();
+          }
+        });
+
+    wSplitFolder = new TextVar(variables, shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+    PropsUi.setLook(wSplitFolder);
+    wSplitFolder.setText(defaultSplitFolder());
+    wSplitFolder.setToolTipText(
+        BaseMessages.getString(PKG, "SourceToVaultReviewDialog.SplitFolder.ToolTip"));
+    FormData fdFolder = new FormData();
+    fdFolder.left = new FormAttachment(middle, 0);
+    fdFolder.right = new FormAttachment(wSplitBrowse, -margin);
+    fdFolder.top = new FormAttachment(above, margin);
+    wSplitFolder.setLayoutData(fdFolder);
+
+    Label wlPrefix = new Label(shell, SWT.RIGHT);
+    PropsUi.setLook(wlPrefix);
+    wlPrefix.setText(BaseMessages.getString(PKG, "SourceToVaultReviewDialog.SplitPrefix.Label"));
+    FormData fdlPrefix = new FormData();
+    fdlPrefix.left = new FormAttachment(0, 0);
+    fdlPrefix.right = new FormAttachment(middle, -margin);
+    fdlPrefix.top = new FormAttachment(wSplitFolder, margin);
+    wlPrefix.setLayoutData(fdlPrefix);
+
+    wSplitPrefix = new Text(shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+    PropsUi.setLook(wSplitPrefix);
+    wSplitPrefix.setToolTipText(
+        BaseMessages.getString(PKG, "SourceToVaultReviewDialog.SplitPrefix.ToolTip"));
+    FormData fdPrefix = new FormData();
+    fdPrefix.left = new FormAttachment(middle, 0);
+    fdPrefix.right = new FormAttachment(100, 0);
+    fdPrefix.top = new FormAttachment(wSplitFolder, margin);
+    wSplitPrefix.setLayoutData(fdPrefix);
+    wSplitPrefix.addListener(SWT.Modify, e -> refreshSplitExample());
+
+    Label wlExisting = new Label(shell, SWT.RIGHT);
+    PropsUi.setLook(wlExisting);
+    wlExisting.setText(
+        BaseMessages.getString(PKG, "SourceToVaultReviewDialog.SplitExisting.Label"));
+    FormData fdlExisting = new FormData();
+    fdlExisting.left = new FormAttachment(0, 0);
+    fdlExisting.right = new FormAttachment(middle, -margin);
+    fdlExisting.top = new FormAttachment(wSplitPrefix, margin);
+    wlExisting.setLayoutData(fdlExisting);
+
+    wSplitExisting = new Combo(shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER | SWT.READ_ONLY);
+    PropsUi.setLook(wSplitExisting);
+    wSplitExisting.setItems(
+        new String[] {
+          BaseMessages.getString(PKG, "SourceToVaultReviewDialog.SplitExisting.Skip"),
+          BaseMessages.getString(PKG, "SourceToVaultReviewDialog.SplitExisting.Replace")
+        });
+    wSplitExisting.select(0);
+    wSplitExisting.setToolTipText(
+        BaseMessages.getString(PKG, "SourceToVaultReviewDialog.SplitExisting.ToolTip"));
+    FormData fdExisting = new FormData();
+    fdExisting.left = new FormAttachment(middle, 0);
+    fdExisting.right = new FormAttachment(100, 0);
+    fdExisting.top = new FormAttachment(wSplitPrefix, margin);
+    wSplitExisting.setLayoutData(fdExisting);
+
+    wSplitExample = new Label(shell, SWT.LEFT);
+    PropsUi.setLook(wSplitExample);
+    wSplitExample.setText("");
+    FormData fdExample = new FormData();
+    fdExample.left = new FormAttachment(middle, 0);
+    fdExample.right = new FormAttachment(100, 0);
+    fdExample.top = new FormAttachment(wSplitExisting, margin);
+    wSplitExample.setLayoutData(fdExample);
+    return wSplitExample;
+  }
+
+  private String defaultSplitFolder() {
+    try {
+      String filename = sourceModel != null ? sourceModel.getFilename() : null;
+      if (!Utils.isEmpty(filename)) {
+        String resolved = variables != null ? variables.resolve(filename) : filename;
+        var parent = HopVfs.getFileObject(resolved).getParent();
+        if (parent != null) {
+          return HopVfs.getFilename(parent);
+        }
+      }
+    } catch (Exception ignored) {
+      // Fall through to the project models folder.
+    }
+    if (variables != null) {
+      String home = variables.getVariable("PROJECT_HOME");
+      if (!Utils.isEmpty(home) && !home.contains("${")) {
+        return "${PROJECT_HOME}/models";
+      }
+    }
+    return "";
+  }
+
+  private void updateSplitEnabled() {
+    boolean enabled = wSplitModel != null && wSplitModel.getSelection();
+    if (wSplitFolder != null) {
+      wSplitFolder.setEnabled(enabled);
+    }
+    if (wSplitBrowse != null) {
+      wSplitBrowse.setEnabled(enabled);
+    }
+    if (wSplitPrefix != null) {
+      wSplitPrefix.setEnabled(enabled);
+    }
+    if (wSplitExisting != null) {
+      wSplitExisting.setEnabled(enabled);
+    }
+    if (wSplitExample != null) {
+      wSplitExample.setEnabled(enabled);
+      if (!enabled) {
+        wSplitExample.setText("");
+      }
+    }
+  }
+
+  private void refreshSplitExample() {
+    if (wSplitExample == null || wSplitModel == null || !wSplitModel.getSelection()) {
+      return;
+    }
+    try {
+      List<String> names = new ArrayList<>();
+      String hub = firstIncludedName("HUB");
+      String link = firstIncludedName("LINK");
+      IHopMetadataProvider provider = metadataProvider();
+      if (!Utils.isEmpty(hub)) {
+        names.add(
+            SourceToVaultSplitSupport.fileBaseName(hub, wSplitPrefix.getText(), provider)
+                + ".hdv");
+      }
+      if (!Utils.isEmpty(link)) {
+        names.add(
+            SourceToVaultSplitSupport.fileBaseName(link, wSplitPrefix.getText(), provider)
+                + ".hdv");
+      }
+      if (names.isEmpty()) {
+        wSplitExample.setText(
+            BaseMessages.getString(PKG, "SourceToVaultReviewDialog.SplitExample.Empty"));
+      } else {
+        wSplitExample.setText(
+            BaseMessages.getString(
+                PKG, "SourceToVaultReviewDialog.SplitExample.Label", String.join(", ", names)));
+      }
+    } catch (HopException e) {
+      wSplitExample.setText(e.getMessage());
+    }
+  }
+
+  private String firstIncludedName(String kind) {
+    if (wObjects == null || wObjects.table == null) {
+      return null;
+    }
+    for (int i = 0; i < wObjects.table.getItemCount(); i++) {
+      TableItem item = wObjects.table.getItem(i);
+      if (kind.equals(item.getText(3)) && "Y".equalsIgnoreCase(item.getText(1))) {
+        String name = item.getText(4);
+        if (!Utils.isEmpty(name)) {
+          return name.trim();
+        }
+      }
+    }
+    return null;
+  }
+
+  private IHopMetadataProvider metadataProvider() {
+    return HopGui.getInstance() != null ? HopGui.getInstance().getMetadataProvider() : null;
   }
 
   private Button optionCheckbox(String key, org.eclipse.swt.widgets.Control above) {
@@ -317,6 +553,7 @@ public class SourceToVaultReviewDialog {
     }
     wObjects.setRowNums();
     wObjects.optWidth(true);
+    refreshSplitExample();
   }
 
   private static String details(ProposedVaultObject object) {
@@ -383,7 +620,26 @@ public class SourceToVaultReviewDialog {
   private void ok() {
     captureEdits();
     readOptionsFromWidgets();
-    if (chooseDestination) {
+    if (wSplitModel != null && wSplitModel.getSelection()) {
+      if (Utils.isEmpty(wSplitFolder.getText())) {
+        error(
+            BaseMessages.getString(PKG, "SourceToVaultReviewDialog.Error.FolderRequired"));
+        return;
+      }
+      try {
+        SourceToVaultSplitSupport.normalizePrefix(wSplitPrefix.getText());
+      } catch (HopException e) {
+        error(BaseMessages.getString(PKG, "SourceToVaultReviewDialog.Error.Prefix"));
+        return;
+      }
+      destination = Destination.SPLIT_MODELS;
+      splitOptions.setOutputFolder(wSplitFolder.getText().trim());
+      splitOptions.setNamePrefix(wSplitPrefix.getText());
+      splitOptions.setExistingFilePolicy(
+          wSplitExisting.getSelectionIndex() == 1
+              ? SourceToVaultSplitOptions.ExistingFilePolicy.REPLACE
+              : SourceToVaultSplitOptions.ExistingFilePolicy.SKIP);
+    } else if (chooseDestination) {
       destination =
           wExistingModel != null && wExistingModel.getSelection()
               ? Destination.EXISTING_MODEL
@@ -394,6 +650,13 @@ public class SourceToVaultReviewDialog {
     publishToCatalog = wPublishCatalog.getSelection();
     confirmed = true;
     dispose();
+  }
+
+  private void error(String message) {
+    MessageBox box = new MessageBox(shell, SWT.OK | SWT.ICON_ERROR);
+    box.setText(BaseMessages.getString(PKG, "SourceToVaultReviewDialog.Error.Title"));
+    box.setMessage(message);
+    box.open();
   }
 
   private void cancel() {

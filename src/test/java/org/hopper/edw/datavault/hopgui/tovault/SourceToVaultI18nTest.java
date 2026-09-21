@@ -50,6 +50,37 @@ class SourceToVaultI18nTest {
         "SourceToVaultReviewDialog.CreateReferenceTables.Label",
         "Classify lookup tables as reference tables");
     assertResolved(
+        SourceToVaultReviewDialog.class,
+        "SourceToVaultReviewDialog.SplitModels.Label",
+        "Split into hub and link models");
+    assertResolved(
+        SourceToVaultReviewDialog.class,
+        "SourceToVaultReviewDialog.CurrentModel.Label",
+        "This Data Vault model");
+    assertResolved(
+        SourceToVaultReviewDialog.class,
+        "SourceToVaultReviewDialog.SplitExisting.ToolTip",
+        "Skip leaves an existing file unchanged and does not merge new satellites into it. Replace overwrites the whole file.");
+    assertResolved(
+        SourceToVaultReviewDialog.class,
+        "SourceToVaultReviewDialog.Error.FolderRequired",
+        "Choose a folder for the split Data Vault models.");
+    assertEquals(
+        "Example: aw_hub_customer.hdv",
+        BaseMessages.getString(
+            SourceToVaultReviewDialog.class,
+            "SourceToVaultReviewDialog.SplitExample.Label",
+            "aw_hub_customer.hdv"));
+    assertEquals(
+        "Wrote 2 hub model(s), 1 link model(s), and 0 reference model(s) in /models.",
+        BaseMessages.getString(
+            SourceToVaultGenerationSupport.class,
+            "SourceToVaultGenerationSupport.Success.Split",
+            2,
+            1,
+            0,
+            "/models"));
+    assertResolved(
         SourceToVaultGenerationSupport.class,
         "SourceToVaultGenerationSupport.Success.Title",
         "Generate Data Vault");

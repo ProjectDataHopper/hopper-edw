@@ -8,7 +8,7 @@ Related guide: link:../generating-data-vault-from-source-model.adoc[generating-d
 
 
 
-Review the hubs, links, satellites, reference tables, and hub aliases suggested from selected source-model tables, queries, JSON extractions, and pipelines, then apply them to a new or existing `.hdv` file.
+Review the hubs, links, satellites, reference tables, and hub aliases suggested from selected source-model tables, queries, JSON extractions, and pipelines, then apply them to a new or existing `.hdv` file, or split them into one file per hub, link, and reference table.
 
 == How sources are classified
 
@@ -21,6 +21,17 @@ Review the hubs, links, satellites, reference tables, and hub aliases suggested 
 - Isolated tables with no table-to-table relationships are skipped. JSON or pipeline children of those tables can still generate.
 
 Relationship direction is inferred from primary-key and foreign-key columns, so inverted child/parent labels still classify correctly.
+
+== Split into separate files
+
+Choose **Split into hub and link models** when one canvas would be too large.
+
+- **Folder** is where the `.hdv` files are written. A path such as `${PROJECT_HOME}/models` is stored on linked hubs.
+- **Prefix** is optional text in front of each file name. `aw` becomes `aw_hub_customer.hdv`. The example line shows the first hub and link file.
+- A project **Data Vault model** naming scheme (`edw-dv-model`) formats those file names when one exists.
+- **When a file already exists:** **Skip** leaves it unchanged (new satellites are not merged in). **Replace** overwrites the file.
+- Each hub file contains that hub and its satellites. Each link file contains the link, its link satellites, and linked-table aliases to the hub files. Each reference table gets its own file.
+- Load hub and reference files before link files. Add the files to the resource definition group yourself.
 
 == Tips
 

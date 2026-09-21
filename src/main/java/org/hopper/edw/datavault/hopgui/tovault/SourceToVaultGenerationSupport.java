@@ -52,6 +52,9 @@ import org.hopper.edw.datavault.metadata.sourcemodel.SourceQuery;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
 import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceToVaultApplyResult;
 import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceToVaultApplySupport;
+import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceToVaultSplitResult;
+import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceToVaultSplitSupport;
+import org.hopper.edw.datavault.metadata.sourcemodel.tovault.SourceToVaultSplitWriteResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -80,7 +83,9 @@ public final class SourceToVaultGenerationSupport {
       if (!dialog.open()) {
         return;
       }
-      if (dialog.getDestination() == SourceToVaultReviewDialog.Destination.EXISTING_MODEL) {
+      if (dialog.getDestination() == SourceToVaultReviewDialog.Destination.SPLIT_MODELS) {
+        applySplit(hopGui, sourceGraph.getShell(), sourceModel, dialog);
+      } else if (dialog.getDestination() == SourceToVaultReviewDialog.Destination.EXISTING_MODEL) {
         applyToExistingFile(hopGui, sourceGraph.getShell(), sourceModel, dialog);
       } else {
         applyToNewFile(hopGui, sourceGraph.getShell(), sourceModel, dialog);
@@ -127,6 +132,10 @@ public final class SourceToVaultGenerationSupport {
       if (!dialog.open()) {
         return;
       }
+      if (dialog.getDestination() == SourceToVaultReviewDialog.Destination.SPLIT_MODELS) {
+        applySplit(hopGui, vaultGraph.getShell(), sourceModel, dialog);
+        return;
+      }
       SourceToVaultApplyResult[] holder = new SourceToVaultApplyResult[1];
       vaultGraph.runUndoableModelChange(
           () -> {
@@ -149,6 +158,41 @@ public final class SourceToVaultGenerationSupport {
           BaseMessages.getString(PKG, "SourceToVaultGenerationSupport.Error.Title"),
           BaseMessages.getString(PKG, "SourceToVaultGenerationSupport.Error.Message"),
           e);
+    }
+  }
+
+  private static void applySplit(
+      HopGui hopGui, Shell shell, SourceModel sourceModel, SourceToVaultReviewDialog dialog)
+      throws Exception {
+    IVariables variables = hopGui.getVariables();
+    DataVaultModel vault = new DataVaultModel();
+    SourceToVaultApplyResult applied =
+        SourceToVaultApplySupport.apply(
+            sourceModel,
+            vault,
+            dialog.getClassification(),
+            dialog.isPublishToCatalog(),
+            variables,
+            hopGui.getMetadataProvider(),
+            dialog.getOptions());
+    SourceToVaultSplitResult split =
+        SourceToVaultSplitSupport.partition(
+            vault, dialog.getSplitOptions(), variables, hopGui.getMetadataProvider());
+    SourceToVaultSplitWriteResult written =
+        SourceToVaultSplitSupport.write(
+            split, dialog.getSplitOptions().getExistingFilePolicy(), variables);
+    refreshExplorer();
+    showSplitResult(shell, applied, written, dialog.getSplitOptions().getOutputFolder());
+  }
+
+  private static void refreshExplorer() {
+    try {
+      ExplorerPerspective explorer = HopGui.getExplorerPerspective();
+      if (explorer != null) {
+        explorer.refresh();
+      }
+    } catch (Exception ignored) {
+      // The project tree can stay stale if refresh fails. The files are still on disk.
     }
   }
 
@@ -288,6 +332,63 @@ public final class SourceToVaultGenerationSupport {
     } catch (Exception e) {
       result.getWarnings().add("Layout skipped: " + e.getMessage());
     }
+  }
+
+  private static void showSplitResult(
+      Shell shell,
+      SourceToVaultApplyResult applied,
+      SourceToVaultSplitWriteResult written,
+      String folder) {
+    StringBuilder message = new StringBuilder();
+    message.append(
+        BaseMessages.getString(
+            PKG,
+            "SourceToVaultGenerationSupport.Success.Split",
+            written.getHubFiles(),
+            written.getLinkFiles(),
+            written.getReferenceFiles(),
+            Const.NVL(folder, "")));
+    message.append(Const.CR).append(Const.CR);
+    message.append(
+        BaseMessages.getString(
+            PKG,
+            "SourceToVaultGenerationSupport.Success.Message",
+            applied.getCreatedTableNames().size(),
+            applied.getReusedTableNames().size()));
+    if (!applied.getPublishedFeeds().isEmpty()) {
+      message
+          .append(Const.CR)
+          .append(
+              BaseMessages.getString(
+                  PKG,
+                  "SourceToVaultGenerationSupport.Success.Published",
+                  String.join(", ", applied.getPublishedFeeds())));
+    }
+    if (!written.getSkippedFilenames().isEmpty()) {
+      message
+          .append(Const.CR)
+          .append(
+              BaseMessages.getString(
+                  PKG,
+                  "SourceToVaultGenerationSupport.Success.SplitSkipped",
+                  String.join(", ", written.getSkippedFilenames())));
+    }
+    List<String> warnings = new ArrayList<>();
+    warnings.addAll(applied.getWarnings());
+    warnings.addAll(written.getWarnings());
+    if (!warnings.isEmpty()) {
+      message.append(Const.CR).append(Const.CR);
+      message.append(
+          BaseMessages.getString(PKG, "SourceToVaultGenerationSupport.Success.Warnings"));
+      for (String warning : warnings) {
+        message.append(Const.CR).append("- ").append(warning);
+      }
+    }
+    MessageBox box =
+        new MessageBox(shell, warnings.isEmpty() ? SWT.OK | SWT.ICON_INFORMATION : SWT.OK | SWT.ICON_WARNING);
+    box.setText(BaseMessages.getString(PKG, "SourceToVaultGenerationSupport.Success.Title"));
+    box.setMessage(message.toString());
+    box.open();
   }
 
   private static void showResult(Shell shell, SourceToVaultApplyResult result) {

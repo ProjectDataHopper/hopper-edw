@@ -35,7 +35,38 @@ Uncheck a row to skip that object. Edit **Vault name** before Apply. Options on 
 * Include source queries, JSON extractions, and pipeline cards
 * Publish unpublished tables to the catalog when the source model has a catalog connection
 
+From the source modeler, choose **New Data Vault model**, **Existing Data Vault model**, or **Split into hub and link models**. From an open Data Vault model the same review can apply into **This Data Vault model** or split instead. Split does not write into the model that is already open.
+
 image::images/source-modeler-generate-data-vault-model-dialog.png[Generate Data Vault from source model review dialog with proposed hubs, satellites, and links,align="center"]
+
+== Split into hub and link models
+
+Use this when one generated canvas would be too large to review or to merge. Apply still classifies once. The result is written as separate `.hdv` files:
+
+[cols="1,2", options="header"]
+|===
+|File |Contents
+
+|One file per hub
+|That hub and the satellites whose parent is the hub
+
+|One file per link
+|That link, its link satellites, and a linked-table card for every participating hub
+
+|One file per reference table
+|That reference table only
+|===
+
+Link files do not copy hub metadata. Each hub card is a cross-model linked table (`referencedModelFilename`, usually `${PROJECT_HOME}/...`). A hierarchy link keeps the natural hub and the parent role alias (`hub_*_parent`) as two linked tables that point at the hub file. Linked tables are not loaded and do not get their own DDL.
+
+On the review dialog:
+
+* **Folder** — where the files are written. Defaults to the source model's folder, or `${PROJECT_HOME}/models` when that variable is set and the source file has not been saved.
+* **Prefix** — optional text in front of each file name. `aw` is stored as `aw_`, so a hub becomes `aw_hub_customer.hdv`. Leave it empty to keep the vault object name.
+* **Naming scheme** — when the project has a Data Vault model naming scheme (`edw-dv-model`), that scheme formats the file name. Hub, link, and satellite schemes are not applied again; the object names already use them. The dialog shows an example of the first hub and link file.
+* **When a file already exists** — **Skip** (default) leaves the file untouched and does not merge new satellites into it. **Replace** overwrites the whole file.
+
+Load **hub and reference files before link files**. Add the new files to the resource definition group before a group update; generation does not edit the group. Check each model you open. The confirmation lists how many files were written and does not open a tab per file.
 
 == How sources are classified
 
@@ -106,6 +137,6 @@ Existing vault tables are **reused** when a hub already has the same business-ke
 * link:dv-hub.adoc[Hubs]
 * link:dv-link.adoc[Links]
 * link:dv-satellite.adoc[Satellites]
-* link:dv-cross-model-references.adoc[Linked tables / hub aliases] (hierarchy generation uses a same-model hub alias)
+* link:dv-cross-model-references.adoc[Linked tables / hub aliases] (a single-file hierarchy uses a same-model hub alias; a split hierarchy stores that alias as a cross-model linked table)
 * link:ai-advisory.md[AI Help]
 * link:datavault-plugin.adoc[Data Vault plugin]
