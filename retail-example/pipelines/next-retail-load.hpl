@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright 2026 i-Bridge bv
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<pipeline>
+  <info>
+    <capture_transform_performance>N</capture_transform_performance>
+    <transform_performance_capturing_delay>1000</transform_performance_capturing_delay>
+    <transform_performance_capturing_size_limit>100</transform_performance_capturing_size_limit>
+    <pipeline_status>0</pipeline_status>
+    <parameters>
+      <parameter>
+        <name>MONTHS</name>
+        <description>Months to add to the latest retail_load_log date. 0 keeps the initial row.</description>
+        <default_value>1</default_value>
+      </parameter>
+    </parameters>
+    <name>next-retail-load</name>
+    <name_sync_with_filename>Y</name_sync_with_filename>
+    <description>Last finished retail load, plus MONTHS (0 on initial, 1 on update).</description>
+    <created_user>-</created_user>
+    <modified_user>-</modified_user>
+    <created_date>2026/09/23 20:00:00.000</created_date>
+    <modified_date>2026/09/23 20:00:00.000</modified_date>
+    <created_hop_version/>
+    <modified_hop_version>2.20.0-SNAPSHOT</modified_hop_version>
+  </info>
+  <transform>
+    <type>TableInput</type>
+    <name>Latest load</name>
+    <sql>SELECT MAX(load_date) AS last_load_date,
+       COUNT(*)::int AS wave_index,
+       (SELECT wave FROM retail_load_log ORDER BY load_date DESC LIMIT 1) AS last_wave,
+       ${MONTHS}::int AS months
+FROM retail_load_log</sql>
+    <execute_each_row>N</execute_each_row>
+    <variables_active>Y</variables_active>
+    <connection>Vault</connection>
+    <use_named_parameters>N</use_named_parameters>
+    <specify_fields>N</specify_fields>
+    <validate_specified_fields>N</validate_specified_fields>
+    <fields/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+    <GUI>
+      <xloc>128</xloc>
+      <yloc>96</yloc>
+    </GUI>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <attributes/>
+  </transform>
+  <transform>
+    <type>Calculator</type>
+    <name>load_date</name>
+    <calculation>
+      <field_name>load_date</field_name>
+      <calc_type>ADD_MONTHS</calc_type>
+      <field_a>last_load_date</field_a>
+      <field_b>months</field_b>
+      <field_c/>
+      <value_type>Date</value_type>
+      <value_length>-1</value_length>
+      <value_precision>-1</value_precision>
+      <conversion_mask/>
+      <decimal_symbol/>
+      <grouping_symbol/>
+      <currency_symbol/>
+      <remove>N</remove>
+    </calculation>
+    <failIfNoFile>N</failIfNoFile>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+    <GUI>
+      <xloc>320</xloc>
+      <yloc>96</yloc>
+    </GUI>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <attributes/>
+  </transform>
+  <transform>
+    <type>ScriptValueMod</type>
+    <name>Format load date</name>
+    <jsScripts>
+      <jsScript>
+        <jsScript_type>0</jsScript_type>
+        <jsScript_name>Script 1</jsScript_name>
+        <jsScript_script>var load_date_text = date2str(load_date, "yyyy/MM/dd HH:mm:ss.SSS");
+var retail_csv_wave = parseInt(months, 10) === 0 ? String(last_wave) : date2str(load_date, "yyyy-MM");
+</jsScript_script>
+      </jsScript>
+    </jsScripts>
+    <fields>
+      <field>
+        <name>load_date_text</name>
+        <rename>load_date_text</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>
+      <field>
+        <name>retail_csv_wave</name>
+        <rename>retail_csv_wave</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>
+    </fields>
+    <optimizationLevel>9</optimizationLevel>
+    <languageVersion>ES6</languageVersion>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+    <GUI>
+      <xloc>512</xloc>
+      <yloc>96</yloc>
+    </GUI>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <attributes/>
+  </transform>
+  <transform>
+    <type>SetVariable</type>
+    <name>Set load variables</name>
+    <fields>
+      <field>
+        <field_name>load_date_text</field_name>
+        <variable_name>LOAD_DATE</variable_name>
+        <variable_type>GP_WORKFLOW</variable_type>
+        <default_value/>
+      </field>
+      <field>
+        <field_name>retail_csv_wave</field_name>
+        <variable_name>RETAIL_CSV_WAVE</variable_name>
+        <variable_type>GP_WORKFLOW</variable_type>
+        <default_value/>
+      </field>
+      <field>
+        <field_name>wave_index</field_name>
+        <variable_name>WAVE_INDEX</variable_name>
+        <variable_type>GP_WORKFLOW</variable_type>
+        <default_value>1</default_value>
+      </field>
+    </fields>
+    <use_formatting>N</use_formatting>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+    <GUI>
+      <xloc>720</xloc>
+      <yloc>96</yloc>
+    </GUI>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <attributes/>
+  </transform>
+  <order>
+    <hop>
+      <from>Latest load</from>
+      <to>load_date</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>load_date</from>
+      <to>Format load date</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Format load date</from>
+      <to>Set load variables</to>
+      <enabled>Y</enabled>
+    </hop>
+  </order>
+  <notepads>
+    <notepad>
+      <note>One date. MONTHS is 0 for the initial row and 1 for each update.
+LOAD_DATE is that date. RETAIL_CSV_WAVE is initial, or yyyy-MM.
+WAVE_INDEX is how many loads are already in retail_load_log.</note>
+      <markdown>N</markdown>
+      <notetype>GENERAL</notetype>
+      <fontsize>-1</fontsize>
+      <fontbold>N</fontbold>
+      <fontitalic>N</fontitalic>
+      <fontcolorred>14</fontcolorred>
+      <fontcolorgreen>58</fontcolorgreen>
+      <fontcolorblue>90</fontcolorblue>
+      <backgroundcolorred>201</backgroundcolorred>
+      <backgroundcolorgreen>232</backgroundcolorgreen>
+      <backgroundcolorblue>251</backgroundcolorblue>
+      <bordercolorred>14</bordercolorred>
+      <bordercolorgreen>58</bordercolorgreen>
+      <bordercolorblue>90</bordercolorblue>
+      <xloc>128</xloc>
+      <yloc>224</yloc>
+      <width>460</width>
+      <height>72</height>
+    </notepad>
+  </notepads>
+  <attributes/>
+  <transform_error_handling/>
+</pipeline>

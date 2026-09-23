@@ -1342,6 +1342,16 @@ limitations under the License.
         <sourceFieldName>product_id</sourceFieldName>
         <recordSourceName>asn-package-lines</recordSourceName>
       </businessKeys>
+      <businessKeys>
+        <name>line_number</name>
+        <description/>
+        <dataType>Integer</dataType>
+        <length/>
+        <composite>N</composite>
+        <sourceFieldNames/>
+        <sourceFieldName>line_number</sourceFieldName>
+        <recordSourceName>asn-package-lines</recordSourceName>
+      </businessKeys>
       <hashKeyFieldName>package_line_hk</hashKeyFieldName>
       <recordSourceFieldName/>
       <recordSources>
@@ -1436,6 +1446,7 @@ limitations under the License.
       <parentKeySourceFields>
         <parentKeySourceField>asn_id</parentKeySourceField>
         <parentKeySourceField>product_id</parentKeySourceField>
+        <parentKeySourceField>line_number</parentKeySourceField>
       </parentKeySourceFields>
       <drivingKey/>
       <drivingKeySourceField/>
@@ -1522,6 +1533,11 @@ limitations under the License.
                   <businessKeyField>product_id</businessKeyField>
                   <sourceFieldNames/>
                   <sourceFieldName>product_id</sourceFieldName>
+                </businessKeySource>
+                <businessKeySource>
+                  <businessKeyField>line_number</businessKeyField>
+                  <sourceFieldNames/>
+                  <sourceFieldName>line_number</sourceFieldName>
                 </businessKeySource>
               </businessKeySources>
               <drivingKeySources/>

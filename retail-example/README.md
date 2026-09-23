@@ -64,7 +64,7 @@ Retail uses **two PostgreSQL databases** on the same local instance (port 54320)
 | Database | Hop connection | Role |
 |----------|----------------|------|
 | `test_source` | **CRM** | E2E landing tables (source system) |
-| `test_edw` | **Vault** | Data Vault, Business Vault, dimensional marts, load control, DM staging views |
+| `test_edw` | **Vault** | Data Vault, Business Vault, dimensional marts, retail load log, DM staging views |
 
 Environment variables in `environments/local-docker-postgres.json`:
 
@@ -90,7 +90,7 @@ retail-example/
 ├── pipelines/                 # create-source-tables, load-e2e-sources-to-crm, parse-asn-xml
 ├── files/                     # Generated CSV/XML source files (mostly gitignored; asn_demo.xml tracked)
 ├── models/                    # TRACKED .hsm / .hdv / .hbv / .hdm / .hlv
-├── sql/                       # drop-source / drop-target, load control, staging views
+├── sql/                       # drop-source / drop-target, retail load log, staging views
 ├── scripts/                   # catalog source fixture refresh, wave activation
 ├── work/                      # GITIGNORED runtime tree (created on first run)
 │   ├── edw-catalog/           # FILE data catalog (sources, published models, versions)
@@ -195,7 +195,7 @@ CSV (and ASN XML) files are written to `files/` by `pipelines/generate-retail-da
 | Mode | Description |
 |------|-------------|
 | `initial` | Full snapshot wave (`*_initial.csv`, `asn_initial.xml`) |
-| `update` | Incremental wave for the current `retail_load_control.progress_date` |
+| `update` | Incremental wave for the last `retail_load_log` date plus one month |
 
 Default scale: 10,000 customers, 1,000 products, 100,000 orders.
 
@@ -208,9 +208,9 @@ Default scale: 10,000 customers, 1,000 products, 100,000 orders.
 # Open pipelines/parse-asn-xml.hpl in Hop GUI and preview transform "ASN lines"
 ```
 
-CSV wave selection uses Hop variable **`RETAIL_CSV_WAVE`** (for example `initial` or
-`2024-01`). `generate-retail-data.hpl` writes `work/retail-csv-wave.properties`; the
-workflows load it with **Set variables** before `load-e2e-sources-to-crm.hpl`, which
-reads files as `${PROJECT_HOME}/files/<table>_${RETAIL_CSV_WAVE}.csv`. The same
-variable selects `asn_${RETAIL_CSV_WAVE}.xml` in `parse-asn-xml.hpl`. The pipeline
-XML is stable and is not rewritten on each run.
+CSV wave selection uses Hop variable **`RETAIL_CSV_WAVE`** (`initial`, or `yyyy-MM`).
+`pipelines/next-retail-load.hpl` sets it, together with **`LOAD_DATE`**, from
+`retail_load_log` before `load-e2e-sources-to-crm.hpl` reads
+`${PROJECT_HOME}/files/<table>_${RETAIL_CSV_WAVE}.csv`. The same variable selects
+`asn_${RETAIL_CSV_WAVE}.xml` in `parse-asn-xml.hpl`. The pipeline XML is stable and
+is not rewritten on each run.

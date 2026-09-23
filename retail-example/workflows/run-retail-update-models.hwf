@@ -6,7 +6,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-     http://www.apache.org/licenses/LICENSE-2.0
+      http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,13 +23,10 @@ limitations under the License.
   <modified_user>-</modified_user>
   <created_date>2026/07/10 12:35:36.188</created_date>
   <modified_date>2026/07/10 12:35:36.188</modified_date>
+  <created_hop_version/>
+  <modified_hop_version>2.20.0-SNAPSHOT</modified_hop_version>
   <workflow_version/>
   <parameters>
-    <parameter>
-      <name>DV_ACTUAL_LOAD_DATE</name>
-      <description>Load date for incremental Data Vault Update actions</description>
-      <default_value>2024/02/01 00:00:00.000</default_value>
-    </parameter>
     <parameter>
       <name>OUTPUT_COPIES</name>
       <description>Valid in the current workflow</description>
@@ -77,23 +74,6 @@ limitations under the License.
       <attributes_hac/>
     </action>
     <action>
-      <sql/>
-      <connection>Vault</connection>
-      <useVariableSubstitution>N</useVariableSubstitution>
-      <sqlfromfile>Y</sqlfromfile>
-      <sqlfilename>${PROJECT_HOME}/sql/advance-load-control.sql</sqlfilename>
-      <sqlfilename_encoding/>
-      <sendOneStatement>N</sendOneStatement>
-      <name>advance-load-control.sql</name>
-      <description/>
-      <type>SQL</type>
-      <attributes/>
-      <xloc>288</xloc>
-      <yloc>320</yloc>
-      <parallel>N</parallel>
-      <attributes_hac/>
-    </action>
-    <action>
       <resourceDefinitionGroup>retail-sources</resourceDefinitionGroup>
       <catalogConnection>local-catalog</catalogConnection>
       <baselineMode>WORKING_CATALOG</baselineMode>
@@ -112,7 +92,7 @@ limitations under the License.
       <description>Discover live source schemas, persist schema_harvest_* history (no catalog rewrite, no load)</description>
       <type>HARVEST_SOURCE_METADATA</type>
       <attributes/>
-      <xloc>208</xloc>
+      <xloc>224</xloc>
       <yloc>48</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -138,7 +118,7 @@ limitations under the License.
       <description>Schema gate from the prior harvest (no second live discovery); optional target DDL checks</description>
       <type>VALIDATE_RESOURCE_DEFINITIONS</type>
       <attributes/>
-      <xloc>400</xloc>
+      <xloc>416</xloc>
       <yloc>48</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -163,7 +143,7 @@ limitations under the License.
       <description>Profile CRM source extracts against retail-source-quality rules</description>
       <type>MEASURE_DATA_QUALITY</type>
       <attributes/>
-      <xloc>640</xloc>
+      <xloc>656</xloc>
       <yloc>48</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -185,7 +165,7 @@ limitations under the License.
       <description>Fail the workflow when source quality has blocking findings</description>
       <type>EVALUATE_QUALITY_GATE</type>
       <attributes/>
-      <xloc>848</xloc>
+      <xloc>864</xloc>
       <yloc>48</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -210,7 +190,7 @@ limitations under the License.
       <description>Measure published vault targets after update (POST_UPDATE, persist to OPS)</description>
       <type>MEASURE_DATA_QUALITY</type>
       <attributes/>
-      <xloc>464</xloc>
+      <xloc>480</xloc>
       <yloc>160</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -232,7 +212,7 @@ limitations under the License.
       <description>Alert on target quality findings after update without failing the workflow</description>
       <type>EVALUATE_QUALITY_GATE</type>
       <attributes/>
-      <xloc>688</xloc>
+      <xloc>704</xloc>
       <yloc>160</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -258,7 +238,7 @@ limitations under the License.
       <name>Export data lineage to Marquez</name>
       <type>EXPORT_DATA_LINEAGE</type>
       <attributes/>
-      <xloc>464</xloc>
+      <xloc>480</xloc>
       <yloc>272</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -268,7 +248,7 @@ limitations under the License.
       <includeDataVault>Y</includeDataVault>
       <includeBusinessVault>Y</includeBusinessVault>
       <includeDimensional>Y</includeDimensional>
-      <loadDate>${DV_ACTUAL_LOAD_DATE}</loadDate>
+      <loadDate>${LOAD_DATE}</loadDate>
       <pipelineRunConfiguration>local</pipelineRunConfiguration>
       <workflowRunConfiguration>local</workflowRunConfiguration>
       <parallelPipelineCopies>${PIPELINE_COPIES}</parallelPipelineCopies>
@@ -309,20 +289,13 @@ limitations under the License.
       <description>Update all DV/BV/DM models listed on retail-sources (order from group)</description>
       <type>UPDATE_RESOURCE_DEFINITION_GROUP</type>
       <attributes/>
-      <xloc>224</xloc>
+      <xloc>240</xloc>
       <yloc>160</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
   </actions>
   <hops>
-    <hop>
-      <from>Start</from>
-      <to>Harvest source metadata</to>
-      <evaluation>Y</evaluation>
-      <unconditional>Y</unconditional>
-      <enabled>Y</enabled>
-    </hop>
     <hop>
       <from>Harvest source metadata</from>
       <to>Validate resource definitions</to>
@@ -353,13 +326,6 @@ limitations under the License.
     </hop>
     <hop>
       <from>Update resource definition group</from>
-      <to>advance-load-control.sql</to>
-      <evaluation>Y</evaluation>
-      <unconditional>N</unconditional>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
-      <from>Update resource definition group</from>
       <to>Measure target data quality (post)</to>
       <evaluation>Y</evaluation>
       <unconditional>N</unconditional>
@@ -376,6 +342,13 @@ limitations under the License.
       <from>Measure target data quality (post)</from>
       <to>Alert on target quality (post)</to>
       <evaluation>N</evaluation>
+      <unconditional>Y</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Start</from>
+      <to>Harvest source metadata</to>
+      <evaluation>Y</evaluation>
       <unconditional>Y</unconditional>
       <enabled>Y</enabled>
     </hop>

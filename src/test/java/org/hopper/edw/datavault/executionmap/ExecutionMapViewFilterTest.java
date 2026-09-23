@@ -56,7 +56,7 @@ class ExecutionMapViewFilterTest {
     assertEquals(
         Set.of(
             "run-retail-update",
-            "write-load-control-context",
+            "next-retail-load",
             "load-e2e-sources-to-crm",
             "update-retail-dv-bv-dm"),
         visibleNames);
@@ -103,7 +103,7 @@ class ExecutionMapViewFilterTest {
     document
         .getNodesOrEmpty()
         .add(
-            node("write-load-control-context", ExecutionMapNodeType.PIPELINE, "run-retail-update"));
+            node("next-retail-load", ExecutionMapNodeType.PIPELINE, "run-retail-update"));
     document
         .getNodesOrEmpty()
         .add(node("load-e2e-sources-to-crm", ExecutionMapNodeType.PIPELINE, "run-retail-initial"));

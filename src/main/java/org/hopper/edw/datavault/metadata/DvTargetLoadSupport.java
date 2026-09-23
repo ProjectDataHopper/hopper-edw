@@ -205,6 +205,20 @@ public final class DvTargetLoadSupport {
     return pipelineName;
   }
 
+  /**
+   * Resolves folder variables in a staging filename while leaving {@code
+   * ${Internal.Transform.CopyNr}} in place. A running pipeline sets that variable to {@code 0}, and
+   * resolving it here makes the bulk loader append the copy index a second time ({@code -0-0}).
+   */
+  public static String resolveStagingFileBase(String stagingFileBase, IVariables variables) {
+    if (Utils.isEmpty(stagingFileBase) || variables == null) {
+      return stagingFileBase;
+    }
+    String token = "\u0000staging-copy-nr\u0000";
+    String protectedBase = stagingFileBase.replace(STAGING_FILE_COPY_VARIABLE_PATTERN, token);
+    return variables.resolve(protectedBase).replace(token, STAGING_FILE_COPY_VARIABLE_PATTERN);
+  }
+
   /** Resolves the staged CSV path for a parallel copy from the Text File Output file base. */
   public static String resolveStagedCsvFilePath(String stagingFileBase, int copyIndex) {
     if (Utils.isEmpty(stagingFileBase)) {

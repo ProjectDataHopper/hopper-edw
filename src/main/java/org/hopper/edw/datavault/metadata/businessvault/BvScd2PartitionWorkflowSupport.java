@@ -258,10 +258,9 @@ public final class BvScd2PartitionWorkflowSupport {
             DataVaultConfiguration.DEFAULT_TARGET_TABLE_PARALLEL_COPIES,
             "parallel copies");
     List<String> columnNames = stagingColumnNames(textFileOutputMeta);
-    String fileBase = textFileOutputMeta.getFileSettings().getFileName();
-    if (ctx.variables != null) {
-      fileBase = ctx.variables.resolve(fileBase);
-    }
+    String fileBase =
+        DvTargetLoadSupport.resolveStagingFileBase(
+            textFileOutputMeta.getFileSettings().getFileName(), ctx.variables);
 
     String bulkStagingFolder =
         ctx.bvConfig.resolveBulkLoadStagingFolder(

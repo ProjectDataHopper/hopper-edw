@@ -89,6 +89,7 @@ DROP VIEW IF EXISTS stg_e2e_product CASCADE;
 DROP VIEW IF EXISTS stg_e2e_customer CASCADE;
 DROP VIEW IF EXISTS stg_e2e_date CASCADE;
 
--- Load control (names used by different retail seeds)
+-- Finished-load log (and the older single-row control tables)
+DROP TABLE IF EXISTS retail_load_log CASCADE;
 DROP TABLE IF EXISTS retail_load_control CASCADE;
 DROP TABLE IF EXISTS load_control CASCADE;

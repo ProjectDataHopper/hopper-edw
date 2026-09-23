@@ -158,7 +158,7 @@ Harvest source metadata
   → Schema gate (Validate resource definitions)
   → Measure / Evaluate source quality
   → Update resource definition group (retail-sources)
-  → Advance load control
+  → Record the load in retail_load_log
 ----
 
 See link:metadata-harvesting.adoc[Metadata harvesting] for the observation step, link:operations.adoc[Operations] for Docker runners and load overview screenshots, and link:resource-definition-validation.adoc[Resource definition validation] for the schema gate.

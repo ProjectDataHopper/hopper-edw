@@ -57,29 +57,19 @@ limitations under the License.
         <description>Sales rep population</description>
       </parameter>
       <parameter>
-        <name>PERIOD_MONTHS</name>
+        <name>WAVE_INDEX</name>
         <default_value>1</default_value>
-        <description>Update wave number, starting at 1</description>
+        <description>Finished loads already in retail_load_log. The first update is 1.</description>
       </parameter>
       <parameter>
-        <name>WAVE</name>
+        <name>RETAIL_CSV_WAVE</name>
         <default_value>initial</default_value>
-        <description>File suffix, for example initial or 2024-02</description>
+        <description>File suffix: initial, or yyyy-MM</description>
       </parameter>
       <parameter>
         <name>LOAD_DATE</name>
-        <default_value>2024-01-01</default_value>
-        <description>load_date column value</description>
-      </parameter>
-      <parameter>
-        <name>ANCHOR</name>
-        <default_value>2024-01-01</default_value>
-        <description>First day of the order-date window</description>
-      </parameter>
-      <parameter>
-        <name>PROGRESS_DATE</name>
-        <default_value>2024-01-01</default_value>
-        <description>Load-control progress date</description>
+        <default_value>2024/01/01 00:00:00.000</default_value>
+        <description>Load date for this run, yyyy/MM/dd HH:mm:ss.SSS</description>
       </parameter>
     </parameters>
     <capture_transform_performance>N</capture_transform_performance>
@@ -103,7 +93,7 @@ limitations under the License.
     <populations>
       <population>
         <kind>RANGE</kind>
-        <start>ifEq('${MODE}','initial',1,${CUSTOMERS}+(max(1,${PERIOD_MONTHS})-1)*max(50,div(${CUSTOMERS},100))+1)</start>
+        <start>ifEq('${MODE}','initial',1,${CUSTOMERS}+(max(1,${WAVE_INDEX})-1)*max(50,div(${CUSTOMERS},100))+1)</start>
         <count>ifEq('${MODE}','initial',${CUSTOMERS},max(50,div(${CUSTOMERS},100)))</count>
       </population>
     </populations>
@@ -157,7 +147,7 @@ limitations under the License.
       </population>
       <population>
         <kind>RANGE</kind>
-        <start>ifEq('${MODE}','initial',1,${CUSTOMERS}+(max(1,${PERIOD_MONTHS})-1)*max(50,div(${CUSTOMERS},100))+1)</start>
+        <start>ifEq('${MODE}','initial',1,${CUSTOMERS}+(max(1,${WAVE_INDEX})-1)*max(50,div(${CUSTOMERS},100))+1)</start>
         <count>ifEq('${MODE}','initial',${CUSTOMERS},max(50,div(${CUSTOMERS},100)))</count>
       </population>
     </populations>
@@ -232,7 +222,7 @@ limitations under the License.
       </population>
       <population>
         <kind>RANGE</kind>
-        <start>ifEq('${MODE}','initial',1,${CUSTOMERS}+(max(1,${PERIOD_MONTHS})-1)*max(50,div(${CUSTOMERS},100))+1)</start>
+        <start>ifEq('${MODE}','initial',1,${CUSTOMERS}+(max(1,${WAVE_INDEX})-1)*max(50,div(${CUSTOMERS},100))+1)</start>
         <count>ifEq('${MODE}','initial',${CUSTOMERS},max(50,div(${CUSTOMERS},100)))</count>
       </population>
     </populations>
@@ -300,7 +290,7 @@ limitations under the License.
       </population>
       <population>
         <kind>RANGE</kind>
-        <start>ifEq('${MODE}','initial',1,${CUSTOMERS}+(max(1,${PERIOD_MONTHS})-1)*max(50,div(${CUSTOMERS},100))+1)</start>
+        <start>ifEq('${MODE}','initial',1,${CUSTOMERS}+(max(1,${WAVE_INDEX})-1)*max(50,div(${CUSTOMERS},100))+1)</start>
         <count>ifEq('${MODE}','initial',${CUSTOMERS},max(50,div(${CUSTOMERS},100)))</count>
       </population>
     </populations>
@@ -375,7 +365,7 @@ limitations under the License.
       </population>
       <population>
         <kind>RANGE</kind>
-        <start>ifEq('${MODE}','initial',1,${CUSTOMERS}+(max(1,${PERIOD_MONTHS})-1)*max(50,div(${CUSTOMERS},100))+1)</start>
+        <start>ifEq('${MODE}','initial',1,${CUSTOMERS}+(max(1,${WAVE_INDEX})-1)*max(50,div(${CUSTOMERS},100))+1)</start>
         <count>ifEq('${MODE}','initial',${CUSTOMERS},max(50,div(${CUSTOMERS},100)))</count>
       </population>
     </populations>
@@ -444,7 +434,7 @@ limitations under the License.
     <populations>
       <population>
         <kind>RANGE</kind>
-        <start>ifEq('${MODE}','initial',1,${PRODUCTS}+(max(1,${PERIOD_MONTHS})-1)*max(50,div(${PRODUCTS},100))+1)</start>
+        <start>ifEq('${MODE}','initial',1,${PRODUCTS}+(max(1,${WAVE_INDEX})-1)*max(50,div(${PRODUCTS},100))+1)</start>
         <count>ifEq('${MODE}','initial',${PRODUCTS},max(50,div(${PRODUCTS},100)))</count>
       </population>
     </populations>
@@ -513,7 +503,7 @@ limitations under the License.
     <populations>
       <population>
         <kind>RANGE</kind>
-        <start>ifEq('${MODE}','initial',1,${WAREHOUSES}+(max(1,${PERIOD_MONTHS})-1)*max(50,div(${WAREHOUSES},100))+1)</start>
+        <start>ifEq('${MODE}','initial',1,${WAREHOUSES}+(max(1,${WAVE_INDEX})-1)*max(50,div(${WAREHOUSES},100))+1)</start>
         <count>ifEq('${MODE}','initial',${WAREHOUSES},max(50,div(${WAREHOUSES},100)))</count>
       </population>
     </populations>
@@ -645,7 +635,7 @@ limitations under the License.
     <populations>
       <population>
         <kind>RANGE</kind>
-        <start>ifEq('${MODE}','initial',1,${ORDERS}+(max(1,${PERIOD_MONTHS})-1)*max(50,div(${ORDERS},100))+1)</start>
+        <start>ifEq('${MODE}','initial',1,${ORDERS}+(max(1,${WAVE_INDEX})-1)*max(50,div(${ORDERS},100))+1)</start>
         <count>ifEq('${MODE}','initial',${ORDERS},max(50,div(${ORDERS},100)))</count>
       </population>
     </populations>
@@ -661,14 +651,14 @@ limitations under the License.
         <name>customer_id</name>
         <hopType>Integer</hopType>
         <generator>INT_RANGE</generator>
-        <arguments>min=1;max=ifEq('${MODE}','initial',${CUSTOMERS},${CUSTOMERS}+max(1,${PERIOD_MONTHS})*max(50,div(${CUSTOMERS},100)))</arguments>
+        <arguments>min=1;max=ifEq('${MODE}','initial',${CUSTOMERS},${CUSTOMERS}+max(1,${WAVE_INDEX})*max(50,div(${CUSTOMERS},100)))</arguments>
         <publish>Y</publish>
       </field>
       <field>
         <name>order_date</name>
         <hopType>String</hopType>
         <generator>DATE_OFFSET</generator>
-        <arguments>base=${ANCHOR};minDays=0;maxDays=27;format=yyyy-MM-dd</arguments>
+        <arguments>base=${LOAD_DATE};minDays=0;maxDays=27;format=yyyy-MM-dd</arguments>
         <publish>Y</publish>
       </field>
       <field>
@@ -750,7 +740,7 @@ limitations under the License.
         <name>product_num</name>
         <hopType>Integer</hopType>
         <generator>INT_RANGE</generator>
-        <arguments>min=1;max=ifEq('${MODE}','initial',${PRODUCTS},${PRODUCTS}+max(1,${PERIOD_MONTHS})*max(50,div(${PRODUCTS},100)));repeatPreviousProbability=0.25</arguments>
+        <arguments>min=1;max=ifEq('${MODE}','initial',${PRODUCTS},${PRODUCTS}+max(1,${WAVE_INDEX})*max(50,div(${PRODUCTS},100)));repeatPreviousProbability=0.25</arguments>
         <publish>N</publish>
       </field>
       <field>
@@ -825,7 +815,7 @@ limitations under the License.
         <childOp>=</childOp>
         <field>product_num</field>
         <generator>INT_RANGE</generator>
-        <arguments>min=1;max=ifEq('${MODE}','initial',${PRODUCTS},${PRODUCTS}+max(1,${PERIOD_MONTHS})*max(50,div(${PRODUCTS},100)));excludeSibling=0</arguments>
+        <arguments>min=1;max=ifEq('${MODE}','initial',${PRODUCTS},${PRODUCTS}+max(1,${WAVE_INDEX})*max(50,div(${PRODUCTS},100)));excludeSibling=0</arguments>
       </override>
       <override>
         <parentIndex>0</parentIndex>
@@ -862,7 +852,7 @@ limitations under the License.
       <method>none</method>
       <schema_name/>
     </partitioning>
-    <seed>${SEED}+11</seed>
+    <seed>${SEED}+11+ifEq('${MODE}','initial',0,${WAVE_INDEX})</seed>
     <cardinalityMode>PATHS</cardinalityMode>
     <fraction>0.4</fraction>
     <includeFirst>Y</includeFirst>
@@ -973,7 +963,7 @@ limitations under the License.
         <name>warehouse_id</name>
         <hopType>Integer</hopType>
         <generator>INT_RANGE</generator>
-        <arguments>min=1;max=ifEq('${MODE}','initial',${WAREHOUSES},${WAREHOUSES}+max(1,${PERIOD_MONTHS})*max(50,div(${WAREHOUSES},100)));scope=parent</arguments>
+        <arguments>min=1;max=ifEq('${MODE}','initial',${WAREHOUSES},${WAREHOUSES}+max(1,${WAVE_INDEX})*max(50,div(${WAREHOUSES},100)));scope=parent</arguments>
         <publish>N</publish>
       </field>
       <field>
@@ -1198,9 +1188,9 @@ limitations under the License.
     <parentsTransform>Order headers</parentsTransform>
     <childrenTransform>Order lines</childrenTransform>
     <documentFormat>XML</documentFormat>
-    <documentFilename>${PROJECT_HOME}/files/asn_${WAVE}.xml</documentFilename>
+    <documentFilename>${PROJECT_HOME}/files/asn_${RETAIL_CSV_WAVE}.xml</documentFilename>
     <documentRootElement>AdvancedShipmentNotices</documentRootElement>
-    <documentRootAttributes>wave=${WAVE};generated_at=${LOAD_DATE}T00:00:00Z</documentRootAttributes>
+    <documentRootAttributes>wave=${RETAIL_CSV_WAVE};generated_at=${LOAD_DATE}</documentRootAttributes>
     <documentEncoding>UTF-8</documentEncoding>
     <fields>
       <field>
@@ -1214,7 +1204,7 @@ limitations under the License.
         <name>warehouse_id</name>
         <hopType>Integer</hopType>
         <generator>INT_RANGE</generator>
-        <arguments>min=1;max=ifEq('${MODE}','initial',${WAREHOUSES},${WAREHOUSES}+max(1,${PERIOD_MONTHS})*max(50,div(${WAREHOUSES},100)));scope=parent</arguments>
+        <arguments>min=1;max=ifEq('${MODE}','initial',${WAREHOUSES},${WAREHOUSES}+max(1,${WAVE_INDEX})*max(50,div(${WAREHOUSES},100)));scope=parent</arguments>
         <publish>Y</publish>
       </field>
       <field>
@@ -1381,90 +1371,6 @@ limitations under the License.
     <attributes/>
   </transform>
   <transform>
-    <type>SyntheticData</type>
-    <name>Wave properties</name>
-    <description/>
-    <distribute>Y</distribute>
-    <copies>1</copies>
-    <partitioning>
-      <method>none</method>
-      <schema_name/>
-    </partitioning>
-    <seed>1</seed>
-    <cardinalityMode>COUNT</cardinalityMode>
-    <rowCount>1</rowCount>
-    <fields>
-      <field>
-        <name>line</name>
-        <hopType>String</hopType>
-        <generator>CONSTANT</generator>
-        <arguments>value=RETAIL_CSV_WAVE=${WAVE}</arguments>
-        <publish>Y</publish>
-      </field>
-    </fields>
-    <GUI>
-      <xloc>80</xloc>
-      <yloc>1408</yloc>
-    </GUI>
-    <attributes/>
-  </transform>
-  <transform>
-    <type>SyntheticData</type>
-    <name>Period label</name>
-    <description/>
-    <distribute>Y</distribute>
-    <copies>1</copies>
-    <partitioning>
-      <method>none</method>
-      <schema_name/>
-    </partitioning>
-    <seed>1</seed>
-    <cardinalityMode>COUNT</cardinalityMode>
-    <rowCount>1</rowCount>
-    <fields>
-      <field>
-        <name>line</name>
-        <hopType>String</hopType>
-        <generator>CONSTANT</generator>
-        <arguments>value=${WAVE}</arguments>
-        <publish>Y</publish>
-      </field>
-    </fields>
-    <GUI>
-      <xloc>80</xloc>
-      <yloc>1504</yloc>
-    </GUI>
-    <attributes/>
-  </transform>
-  <transform>
-    <type>SyntheticData</type>
-    <name>DV load date</name>
-    <description/>
-    <distribute>Y</distribute>
-    <copies>1</copies>
-    <partitioning>
-      <method>none</method>
-      <schema_name/>
-    </partitioning>
-    <seed>1</seed>
-    <cardinalityMode>COUNT</cardinalityMode>
-    <rowCount>1</rowCount>
-    <fields>
-      <field>
-        <name>line</name>
-        <hopType>String</hopType>
-        <generator>DATE_OFFSET</generator>
-        <arguments>base=${PROGRESS_DATE};minDays=0;maxDays=0;format=yyyy/MM/dd HH:mm:ss.SSS</arguments>
-        <publish>Y</publish>
-      </field>
-    </fields>
-    <GUI>
-      <xloc>80</xloc>
-      <yloc>1600</yloc>
-    </GUI>
-    <attributes/>
-  </transform>
-  <transform>
     <type>TextFileOutput</type>
     <name>Write customer hub</name>
     <description/>
@@ -1488,7 +1394,7 @@ limitations under the License.
     <fileNameField/>
     <create_parent_folder>Y</create_parent_folder>
     <file>
-      <name>${PROJECT_HOME}/files/customer_hub_${WAVE}.csv</name>
+      <name>${PROJECT_HOME}/files/customer_hub_${RETAIL_CSV_WAVE}.csv</name>
       <servlet_output>N</servlet_output>
       <do_not_open_new_file_init>N</do_not_open_new_file_init>
       <extension/>
@@ -1535,7 +1441,7 @@ limitations under the License.
     <fileNameField/>
     <create_parent_folder>Y</create_parent_folder>
     <file>
-      <name>${PROJECT_HOME}/files/customer_demo_${WAVE}.csv</name>
+      <name>${PROJECT_HOME}/files/customer_demo_${RETAIL_CSV_WAVE}.csv</name>
       <servlet_output>N</servlet_output>
       <do_not_open_new_file_init>N</do_not_open_new_file_init>
       <extension/>
@@ -1582,7 +1488,7 @@ limitations under the License.
     <fileNameField/>
     <create_parent_folder>Y</create_parent_folder>
     <file>
-      <name>${PROJECT_HOME}/files/customer_contact_${WAVE}.csv</name>
+      <name>${PROJECT_HOME}/files/customer_contact_${RETAIL_CSV_WAVE}.csv</name>
       <servlet_output>N</servlet_output>
       <do_not_open_new_file_init>N</do_not_open_new_file_init>
       <extension/>
@@ -1629,7 +1535,7 @@ limitations under the License.
     <fileNameField/>
     <create_parent_folder>Y</create_parent_folder>
     <file>
-      <name>${PROJECT_HOME}/files/customer_address_${WAVE}.csv</name>
+      <name>${PROJECT_HOME}/files/customer_address_${RETAIL_CSV_WAVE}.csv</name>
       <servlet_output>N</servlet_output>
       <do_not_open_new_file_init>N</do_not_open_new_file_init>
       <extension/>
@@ -1676,7 +1582,7 @@ limitations under the License.
     <fileNameField/>
     <create_parent_folder>Y</create_parent_folder>
     <file>
-      <name>${PROJECT_HOME}/files/customer_prefs_${WAVE}.csv</name>
+      <name>${PROJECT_HOME}/files/customer_prefs_${RETAIL_CSV_WAVE}.csv</name>
       <servlet_output>N</servlet_output>
       <do_not_open_new_file_init>N</do_not_open_new_file_init>
       <extension/>
@@ -1723,7 +1629,7 @@ limitations under the License.
     <fileNameField/>
     <create_parent_folder>Y</create_parent_folder>
     <file>
-      <name>${PROJECT_HOME}/files/product_${WAVE}.csv</name>
+      <name>${PROJECT_HOME}/files/product_${RETAIL_CSV_WAVE}.csv</name>
       <servlet_output>N</servlet_output>
       <do_not_open_new_file_init>N</do_not_open_new_file_init>
       <extension/>
@@ -1770,7 +1676,7 @@ limitations under the License.
     <fileNameField/>
     <create_parent_folder>Y</create_parent_folder>
     <file>
-      <name>${PROJECT_HOME}/files/warehouse_${WAVE}.csv</name>
+      <name>${PROJECT_HOME}/files/warehouse_${RETAIL_CSV_WAVE}.csv</name>
       <servlet_output>N</servlet_output>
       <do_not_open_new_file_init>N</do_not_open_new_file_init>
       <extension/>
@@ -1817,7 +1723,7 @@ limitations under the License.
     <fileNameField/>
     <create_parent_folder>Y</create_parent_folder>
     <file>
-      <name>${PROJECT_HOME}/files/sales_rep_${WAVE}.csv</name>
+      <name>${PROJECT_HOME}/files/sales_rep_${RETAIL_CSV_WAVE}.csv</name>
       <servlet_output>N</servlet_output>
       <do_not_open_new_file_init>N</do_not_open_new_file_init>
       <extension/>
@@ -1864,7 +1770,7 @@ limitations under the License.
     <fileNameField/>
     <create_parent_folder>Y</create_parent_folder>
     <file>
-      <name>${PROJECT_HOME}/files/order_header_${WAVE}.csv</name>
+      <name>${PROJECT_HOME}/files/order_header_${RETAIL_CSV_WAVE}.csv</name>
       <servlet_output>N</servlet_output>
       <do_not_open_new_file_init>N</do_not_open_new_file_init>
       <extension/>
@@ -1911,7 +1817,7 @@ limitations under the License.
     <fileNameField/>
     <create_parent_folder>Y</create_parent_folder>
     <file>
-      <name>${PROJECT_HOME}/files/order_line_${WAVE}.csv</name>
+      <name>${PROJECT_HOME}/files/order_line_${RETAIL_CSV_WAVE}.csv</name>
       <servlet_output>N</servlet_output>
       <do_not_open_new_file_init>N</do_not_open_new_file_init>
       <extension/>
@@ -1958,7 +1864,7 @@ limitations under the License.
     <fileNameField/>
     <create_parent_folder>Y</create_parent_folder>
     <file>
-      <name>${PROJECT_HOME}/files/order_shipment_event_${WAVE}.csv</name>
+      <name>${PROJECT_HOME}/files/order_shipment_event_${RETAIL_CSV_WAVE}.csv</name>
       <servlet_output>N</servlet_output>
       <do_not_open_new_file_init>N</do_not_open_new_file_init>
       <extension/>
@@ -2005,7 +1911,7 @@ limitations under the License.
     <fileNameField/>
     <create_parent_folder>Y</create_parent_folder>
     <file>
-      <name>${PROJECT_HOME}/files/order_rep_${WAVE}.csv</name>
+      <name>${PROJECT_HOME}/files/order_rep_${RETAIL_CSV_WAVE}.csv</name>
       <servlet_output>N</servlet_output>
       <do_not_open_new_file_init>N</do_not_open_new_file_init>
       <extension/>
@@ -2052,7 +1958,7 @@ limitations under the License.
     <fileNameField/>
     <create_parent_folder>Y</create_parent_folder>
     <file>
-      <name>${PROJECT_HOME}/files/warehouse_product_${WAVE}.csv</name>
+      <name>${PROJECT_HOME}/files/warehouse_product_${RETAIL_CSV_WAVE}.csv</name>
       <servlet_output>N</servlet_output>
       <do_not_open_new_file_init>N</do_not_open_new_file_init>
       <extension/>
@@ -2088,147 +1994,6 @@ limitations under the License.
     <GUI>
       <xloc>480</xloc>
       <yloc>1312</yloc>
-    </GUI>
-    <attributes/>
-  </transform>
-  <transform>
-    <type>TextFileOutput</type>
-    <name>Write wave properties</name>
-    <description/>
-    <distribute>Y</distribute>
-    <copies>1</copies>
-    <partitioning>
-      <method>none</method>
-      <schema_name/>
-    </partitioning>
-    <separator>,</separator>
-    <enclosure>"</enclosure>
-    <enclosure_forced>N</enclosure_forced>
-    <enclosure_fix_disabled>N</enclosure_fix_disabled>
-    <header>N</header>
-    <footer>N</footer>
-    <format>UNIX</format>
-    <compression>None</compression>
-    <encoding>UTF-8</encoding>
-    <endedLine/>
-    <fileNameInField>N</fileNameInField>
-    <fileNameField/>
-    <create_parent_folder>Y</create_parent_folder>
-    <file>
-      <name>${PROJECT_HOME}/work/retail-csv-wave.properties</name>
-      <servlet_output>N</servlet_output>
-      <do_not_open_new_file_init>N</do_not_open_new_file_init>
-      <extension/>
-      <append>N</append>
-      <split>N</split>
-      <haspartno>N</haspartno>
-      <add_date>N</add_date>
-      <add_time>N</add_time>
-      <SpecifyFormat>N</SpecifyFormat>
-      <date_time_format/>
-      <add_to_result_filenames>N</add_to_result_filenames>
-      <pad>N</pad>
-      <fast_dump>N</fast_dump>
-      <splitevery/>
-    </file>
-    <fields/>
-    <GUI>
-      <xloc>480</xloc>
-      <yloc>1408</yloc>
-    </GUI>
-    <attributes/>
-  </transform>
-  <transform>
-    <type>TextFileOutput</type>
-    <name>Write period label</name>
-    <description/>
-    <distribute>Y</distribute>
-    <copies>1</copies>
-    <partitioning>
-      <method>none</method>
-      <schema_name/>
-    </partitioning>
-    <separator>,</separator>
-    <enclosure>"</enclosure>
-    <enclosure_forced>N</enclosure_forced>
-    <enclosure_fix_disabled>N</enclosure_fix_disabled>
-    <header>N</header>
-    <footer>N</footer>
-    <format>UNIX</format>
-    <compression>None</compression>
-    <encoding>UTF-8</encoding>
-    <endedLine/>
-    <fileNameInField>N</fileNameInField>
-    <fileNameField/>
-    <create_parent_folder>Y</create_parent_folder>
-    <file>
-      <name>${PROJECT_HOME}/files/.period-label</name>
-      <servlet_output>N</servlet_output>
-      <do_not_open_new_file_init>N</do_not_open_new_file_init>
-      <extension/>
-      <append>N</append>
-      <split>N</split>
-      <haspartno>N</haspartno>
-      <add_date>N</add_date>
-      <add_time>N</add_time>
-      <SpecifyFormat>N</SpecifyFormat>
-      <date_time_format/>
-      <add_to_result_filenames>N</add_to_result_filenames>
-      <pad>N</pad>
-      <fast_dump>N</fast_dump>
-      <splitevery/>
-    </file>
-    <fields/>
-    <GUI>
-      <xloc>480</xloc>
-      <yloc>1504</yloc>
-    </GUI>
-    <attributes/>
-  </transform>
-  <transform>
-    <type>TextFileOutput</type>
-    <name>Write DV load date</name>
-    <description/>
-    <distribute>Y</distribute>
-    <copies>1</copies>
-    <partitioning>
-      <method>none</method>
-      <schema_name/>
-    </partitioning>
-    <separator>,</separator>
-    <enclosure>"</enclosure>
-    <enclosure_forced>N</enclosure_forced>
-    <enclosure_fix_disabled>N</enclosure_fix_disabled>
-    <header>N</header>
-    <footer>N</footer>
-    <format>UNIX</format>
-    <compression>None</compression>
-    <encoding>UTF-8</encoding>
-    <endedLine/>
-    <fileNameInField>N</fileNameInField>
-    <fileNameField/>
-    <create_parent_folder>Y</create_parent_folder>
-    <file>
-      <name>${PROJECT_HOME}/files/.dv-load-date</name>
-      <servlet_output>N</servlet_output>
-      <do_not_open_new_file_init>N</do_not_open_new_file_init>
-      <extension/>
-      <append>N</append>
-      <split>N</split>
-      <haspartno>N</haspartno>
-      <add_date>N</add_date>
-      <add_time>N</add_time>
-      <SpecifyFormat>N</SpecifyFormat>
-      <date_time_format/>
-      <add_to_result_filenames>N</add_to_result_filenames>
-      <pad>N</pad>
-      <fast_dump>N</fast_dump>
-      <splitevery/>
-    </file>
-    <fields/>
-    <GUI>
-      <xloc>480</xloc>
-      <yloc>1600</yloc>
     </GUI>
     <attributes/>
   </transform>
@@ -2304,21 +2069,6 @@ limitations under the License.
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>Wave properties</from>
-      <to>Write wave properties</to>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
-      <from>Period label</from>
-      <to>Write period label</to>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
-      <from>DV load date</from>
-      <to>Write DV load date</to>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
       <from>Order headers</from>
       <to>Order lines</to>
       <enabled>Y</enabled>
@@ -2357,9 +2107,9 @@ limitations under the License.
   <notepads>
     <notepad>
       <note>Synthetic data replaces generate-retail-data.py.
-Initial defaults: WAVE=initial, 10000 customers, 1000 products, 100000 orders.
-Update passes MODE=update plus WAVE, LOAD_DATE, ANCHOR and PERIOD_MONTHS from load control.
-Each generator copy has its own seed. Output is deterministic but not byte-identical to the old Python files.</note>
+Initial defaults: RETAIL_CSV_WAVE=initial, 10000 customers, 1000 products, 100000 orders.
+Update passes MODE=update plus LOAD_DATE, RETAIL_CSV_WAVE and WAVE_INDEX from retail_load_log.
+Each generator copy has its own seed.</note>
       <xloc>720</xloc>
       <yloc>48</yloc>
       <width>420</width>

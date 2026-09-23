@@ -28,11 +28,6 @@ limitations under the License.
   <workflow_version/>
   <parameters>
     <parameter>
-      <name>DV_INITIAL_LOAD_DATE</name>
-      <description>Fixed load date for initial Data Vault Update actions</description>
-      <default_value>2024/01/01 00:00:00.000</default_value>
-    </parameter>
-    <parameter>
       <name>OUTPUT_COPIES</name>
       <description>Valid in the current workflow</description>
       <default_value>1</default_value>
@@ -166,11 +161,6 @@ limitations under the License.
       <wait_until_finished>Y</wait_until_finished>
       <parameters>
         <pass_all_parameters>Y</pass_all_parameters>
-        <parameter>
-          <name>DV_ACTUAL_LOAD_DATE</name>
-          <value>${DV_INITIAL_LOAD_DATE}</value>
-          <stream_name/>
-        </parameter>
         <parameter>
           <name>REPORT_BASE_NAME</name>
           <value>retail-dv-initial-report</value>

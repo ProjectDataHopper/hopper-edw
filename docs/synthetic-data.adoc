@@ -48,9 +48,9 @@ Expressions are numeric: integers, variables, `+ - * /`, parentheses, `max`, `mi
 
 == Retail example
 
-`retail-example/pipelines/generate-retail-data.hpl` builds the CRM CSV wave and `files/asn_${WAVE}.xml`. Workflows `run-retail-initial-setup-db` and `run-retail-update-db-update` run that pipeline instead of `generate-retail-data.py`.
+`retail-example/pipelines/generate-retail-data.hpl` builds the CRM CSV wave and `files/asn_${RETAIL_CSV_WAVE}.xml`. Workflows `run-retail-initial-setup-db` and `run-retail-update-db-update` run that pipeline instead of `generate-retail-data.py`.
 
-Initial defaults match the old script: seed `42`, 10,000 customers, 1,000 products, 100,000 orders, 50 warehouses, 25 sales reps, wave `initial`, load date `2024-01-01`. Update mode reads `PROGRESS_DATE`, `PERIOD_MONTHS`, and `WAVE` (`yyyy-MM`) from `pipelines/write-load-control-context.hpl`, then passes them into the generator. New ids do not overlap across months (`start = base + (period-1)*sample + 1`, sample `max(50, n/100)`). Hubs emit new ids only. Customer satellites emit a sample of existing ids plus the new ids.
+Initial defaults match the old script: seed `42`, 10,000 customers, 1,000 products, 100,000 orders, 50 warehouses, 25 sales reps, wave `initial`, load date `2024/01/01 00:00:00.000`. `pipelines/next-retail-load.hpl` reads the latest row in `retail_load_log` and adds `MONTHS` with Calculator **Date A + B Months** (`0` on initial, `1` on update). That date is `LOAD_DATE`. `RETAIL_CSV_WAVE` is `initial` or `yyyy-MM`. `WAVE_INDEX` is how many loads are already in the log, so the first update is 1 and the March update is 2. New ids do not overlap across waves (`start = base + (wave-1)*sample + 1`, sample `max(50, n/100)`). Shipment `message_id` values mix in the wave index so later months do not repeat earlier UUIDs. Hubs emit new ids only. Customer satellites emit a sample of existing ids plus the new ids.
 
 The generated files follow the same names and columns as before. They are **not** byte-identical to the historical Python output, because each transform has its own seed instead of one shared `random.Random`. Do not treat the committed `retail-example/files/*_initial.csv` snapshot as an oracle for this transform. A full initial run overwrites those files locally.
 

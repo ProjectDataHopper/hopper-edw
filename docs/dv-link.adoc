@@ -91,7 +91,7 @@ On the link dialog **Hub sources** tab:
 
 Matching uses the catalog field list for the selected source and the hub business-key names already on the model. This is especially helpful for multi-hub links fed by a flat pipeline or composite feed where most maps are identity renames.
 
-Retail example: `lnk_package_line` on `retail-360.hdv` maps `asn-package-lines` into `hub_order`, `hub_product`, `hub_warehouse`, `hub_customer`, and `hub_package_line` via the same field names on the ASN package-line feed.
+Retail example: `lnk_package_line` on `retail-360.hdv` maps `asn-package-lines` into `hub_order`, `hub_product`, `hub_warehouse`, `hub_customer`, and `hub_package_line` via the same field names on the ASN package-line feed. `hub_package_line` is `asn_id` + `product_id` + `line_number`, because one ASN can repeat a product on another line.
 
 == Options in the Link dialog
 

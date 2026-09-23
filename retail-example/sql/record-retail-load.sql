@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
-SELECT progress_date, period_months
-FROM load_control
-WHERE topic = 'retail';
+-- Run only after the vault update succeeds. LOAD_DATE is yyyy/MM/dd HH:mm:ss.SSS.
+INSERT INTO retail_load_log (load_date, wave)
+VALUES (
+  to_date(left('${LOAD_DATE}', 10), 'YYYY/MM/DD'),
+  '${RETAIL_CSV_WAVE}'
+);

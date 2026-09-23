@@ -35,7 +35,7 @@ Project details: link:../retail-example/README.md[retail-example/README.md].
 Retail uses two databases on port **54320**:
 
 * **CRM** (`test_source`) — landing tables mimicking a source system
-* **Vault** (`test_edw`) — Data Vault, Business Vault, dimensional tables, load control
+* **Vault** (`test_edw`) — Data Vault, Business Vault, dimensional tables, retail load log
 
 Key files:
 
@@ -167,7 +167,7 @@ Full parameter reference, GUI issue dialogs, and sample HTML reports: link:resou
 ./scripts/run-hop.sh retail-example workflows/run-retail-update.hwf
 ----
 
-Repeat to simulate monthly batches. Load control in Vault tracks `progress_date`; data generation scripts produce update-wave CSVs.
+Repeat to simulate monthly batches. Vault table `retail_load_log` stores each finished load. The next run sets `LOAD_DATE` to that date plus one month and writes the row only after the vault update succeeds.
 
 == Chapter 5b — Transactional links: order lines
 

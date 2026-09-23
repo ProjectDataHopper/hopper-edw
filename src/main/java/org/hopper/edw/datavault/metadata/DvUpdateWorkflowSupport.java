@@ -324,10 +324,9 @@ public final class DvUpdateWorkflowSupport {
           "Staged pipeline '" + pipelineMeta.getName() + "' does not have a filename");
     }
 
-    String stagingFileBase = textFileOutputMeta.getFileSettings().getFileName();
-    if (variables != null) {
-      stagingFileBase = variables.resolve(stagingFileBase);
-    }
+    String stagingFileBase =
+        DvTargetLoadSupport.resolveStagingFileBase(
+            textFileOutputMeta.getFileSettings().getFileName(), variables);
 
     return new DvStagingLoadDescriptor(
         pipelineMeta.getName(),

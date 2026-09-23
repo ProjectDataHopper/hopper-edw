@@ -205,6 +205,26 @@ class DvTargetLoadSupportTest {
   }
 
   @Test
+  void resolveStagingFileBaseKeepsCopyVariableWhenItIsAlreadySet() {
+    Variables variables = new Variables();
+    variables.setVariable("java.io.tmpdir", "/tmp");
+    variables.setVariable(DvTargetLoadSupport.STAGING_FILE_COPY_VARIABLE, "0");
+
+    String resolved =
+        DvTargetLoadSupport.resolveStagingFileBase(
+            "${java.io.tmpdir}/dv2/bulk/dm-fact-f_orders-"
+                + DvTargetLoadSupport.STAGING_FILE_COPY_VARIABLE_PATTERN,
+            variables);
+
+    assertEquals(
+        "/tmp/dv2/bulk/dm-fact-f_orders-" + DvTargetLoadSupport.STAGING_FILE_COPY_VARIABLE_PATTERN,
+        resolved);
+    assertEquals(
+        "/tmp/dv2/bulk/dm-fact-f_orders-0.csv",
+        DvTargetLoadSupport.resolveStagedCsvFilePath(resolved, 0));
+  }
+
+  @Test
   void resolveStagedCsvFilePathSubstitutesCopyIndex() {
     assertEquals(
         "/tmp/dv2/bulk/dm-fact-f_orders-0.csv",

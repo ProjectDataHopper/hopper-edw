@@ -21,6 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -112,7 +114,7 @@ class SyntheticDataEngineTest {
   void expressionComputesSampleSizeAndNewIdStart() throws HopException {
     Variables variables = new Variables();
     variables.setVariable("CUSTOMERS", "10000");
-    variables.setVariable("PERIOD_MONTHS", "1");
+    variables.setVariable("WAVE_INDEX", "1");
 
     assertEquals(
         100L,
@@ -120,7 +122,14 @@ class SyntheticDataEngineTest {
     assertEquals(
         10001L,
         NumericExpression.evaluateLong(
-            "${CUSTOMERS}+(max(1,${PERIOD_MONTHS})-1)*max(50,div(${CUSTOMERS},100))+1",
+            "${CUSTOMERS}+(max(1,${WAVE_INDEX})-1)*max(50,div(${CUSTOMERS},100))+1",
+            variables,
+            Map.of()));
+    variables.setVariable("WAVE_INDEX", "2");
+    assertEquals(
+        10101L,
+        NumericExpression.evaluateLong(
+            "${CUSTOMERS}+(max(1,${WAVE_INDEX})-1)*max(50,div(${CUSTOMERS},100))+1",
             variables,
             Map.of()));
     assertEquals(
@@ -129,6 +138,88 @@ class SyntheticDataEngineTest {
             "ifEq('${MODE}','initial',${CUSTOMERS},max(50,div(${CUSTOMERS},100)))",
             variablesWith(variables, "MODE", "initial"),
             Map.of()));
+  }
+
+  @Test
+  void twentyFourUpdateWavesKeepDisjointKeysAndMessageIds() throws Exception {
+    PipelineMeta pipeline = loadRetailPipeline();
+    SyntheticDataMeta customers = synthetic(pipeline, "Customers hub");
+    SyntheticDataMeta products = synthetic(pipeline, "Products");
+    SyntheticDataMeta warehouses = synthetic(pipeline, "Warehouses");
+    SyntheticDataMeta orders = synthetic(pipeline, "Order headers");
+    SyntheticDataMeta shipments = synthetic(pipeline, "Shipment events");
+    String customerStart = customers.getPopulations().get(0).getStart();
+    assertTrue(customerStart.contains("${WAVE_INDEX}"));
+    assertFalse(customerStart.contains("PERIOD_MONTHS"));
+
+    Variables scale = new Variables();
+    scale.setVariable("MODE", "update");
+    scale.setVariable("CUSTOMERS", "10000");
+    scale.setVariable("PRODUCTS", "1000");
+    scale.setVariable("ORDERS", "100000");
+    scale.setVariable("WAREHOUSES", "50");
+    assertEquals(
+        12400L,
+        assertContiguousWaves(
+            "customers",
+            customerStart,
+            customers.getPopulations().get(0).getCount(),
+            10000L,
+            scale));
+    assertEquals(
+        2200L,
+        assertContiguousWaves(
+            "products",
+            products.getPopulations().get(0).getStart(),
+            products.getPopulations().get(0).getCount(),
+            1000L,
+            scale));
+    assertEquals(
+        1250L,
+        assertContiguousWaves(
+            "warehouses",
+            warehouses.getPopulations().get(0).getStart(),
+            warehouses.getPopulations().get(0).getCount(),
+            50L,
+            scale));
+    assertEquals(
+        124000L,
+        assertContiguousWaves(
+            "orders",
+            orders.getPopulations().get(0).getStart(),
+            orders.getPopulations().get(0).getCount(),
+            100000L,
+            scale));
+
+    Variables initial = retailVariables("initial", "2024-01-01", "1");
+    Variables wave1 = retailVariables("update", "2024-02-01", "1");
+    Variables wave2 = retailVariables("update", "2024-03-01", "2");
+    for (Variables variables : List.of(wave1, wave2)) {
+      variables.setVariable("CUSTOMERS", "80");
+      variables.setVariable("PRODUCTS", "10");
+      variables.setVariable("ORDERS", "30");
+      variables.setVariable("WAREHOUSES", "4");
+    }
+    assertEquals(53L, NumericExpression.evaluateLong(shipments.getSeed(), initial, Map.of()));
+    assertEquals(54L, NumericExpression.evaluateLong(shipments.getSeed(), wave1, Map.of()));
+    assertEquals(55L, NumericExpression.evaluateLong(shipments.getSeed(), wave2, Map.of()));
+
+    List<String> firstMessages = messageIds(pipeline, wave1);
+    List<String> secondMessages = messageIds(pipeline, wave2);
+    assertFalse(firstMessages.isEmpty());
+    assertEquals(firstMessages.size(), new HashSet<>(firstMessages).size());
+    Set<String> overlap = new HashSet<>(firstMessages);
+    overlap.retainAll(secondMessages);
+    assertTrue(overlap.isEmpty());
+  }
+
+  @Test
+  void nextRetailLoadAddsMonthsFromTheLog() throws Exception {
+    String pipeline = Files.readString(Path.of("retail-example/pipelines/next-retail-load.hpl"));
+    assertTrue(pipeline.contains("<calc_type>ADD_MONTHS</calc_type>"));
+    assertTrue(pipeline.contains("FROM retail_load_log"));
+    assertFalse(pipeline.contains("period_months"));
+    assertFalse(pipeline.contains("2024"));
   }
 
   @Test
@@ -195,7 +286,7 @@ class SyntheticDataEngineTest {
     Variables variables = new Variables();
     variables.setVariable("MODE", "update");
     variables.setVariable("CUSTOMERS", "100");
-    variables.setVariable("PERIOD_MONTHS", "1");
+    variables.setVariable("WAVE_INDEX", "1");
 
     List<Long> hub = ids(hubMeta(), variables);
     List<Long> satellites = ids(satelliteMeta(), variables);
@@ -410,15 +501,15 @@ class SyntheticDataEngineTest {
     return (SyntheticDataMeta) pipeline.findTransform(name).getTransform();
   }
 
-  private static Variables retailVariables(String mode, String progressDate, String periodMonths) {
+  private static Variables retailVariables(String mode, String progressDate, String waveIndex) {
     Variables variables = new Variables();
     variables.setVariable("MODE", mode);
     variables.setVariable("SEED", "42");
-    variables.setVariable("PERIOD_MONTHS", periodMonths);
-    variables.setVariable("WAVE", "initial".equals(mode) ? "initial" : progressDate.substring(0, 7));
-    variables.setVariable("LOAD_DATE", "initial".equals(mode) ? "2024-01-01" : progressDate);
-    variables.setVariable("ANCHOR", variables.getVariable("LOAD_DATE", ""));
-    variables.setVariable("PROGRESS_DATE", progressDate);
+    variables.setVariable("WAVE_INDEX", waveIndex);
+    String day = "initial".equals(mode) ? "2024-01-01" : progressDate;
+    variables.setVariable(
+        "RETAIL_CSV_WAVE", "initial".equals(mode) ? "initial" : day.substring(0, 7));
+    variables.setVariable("LOAD_DATE", day.substring(0, 10).replace('-', '/') + " 00:00:00.000");
     variables.setVariable("SALES_REPS", "6");
     return variables;
   }
@@ -443,7 +534,7 @@ class SyntheticDataEngineTest {
     SyntheticPopulation range = new SyntheticPopulation();
     range.setKind("RANGE");
     range.setStart(
-        "ifEq('${MODE}','initial',1,${CUSTOMERS}+(max(1,${PERIOD_MONTHS})-1)*max(50,div(${CUSTOMERS},100))+1)");
+        "ifEq('${MODE}','initial',1,${CUSTOMERS}+(max(1,${WAVE_INDEX})-1)*max(50,div(${CUSTOMERS},100))+1)");
     range.setCount("ifEq('${MODE}','initial',${CUSTOMERS},max(50,div(${CUSTOMERS},100)))");
     meta.getPopulations().add(range);
     meta.getFields().add(field("id", "Integer", "SEQUENCE", "source=population"));
@@ -502,5 +593,43 @@ class SyntheticDataEngineTest {
   private static IVariables variablesWith(Variables variables, String name, String value) {
     variables.setVariable(name, value);
     return variables;
+  }
+
+  private static long assertContiguousWaves(
+      String label, String startExpr, String countExpr, long initialEnd, Variables scale)
+      throws HopException {
+    long previous = initialEnd;
+    for (int wave = 1; wave <= 24; wave++) {
+      scale.setVariable("WAVE_INDEX", Integer.toString(wave));
+      long start = NumericExpression.evaluateLong(startExpr, scale, Map.of());
+      long count = NumericExpression.evaluateLong(countExpr, scale, Map.of());
+      assertTrue(count > 0, label);
+      assertEquals(previous + 1, start, label + " wave " + wave);
+      previous = start + count - 1;
+    }
+    assertTrue(previous <= 999999L, label + " id no longer fits the 6-digit format");
+    return previous;
+  }
+
+  private List<String> messageIds(PipelineMeta pipeline, IVariables variables) throws HopException {
+    List<Map<String, Object>> orders =
+        engine.generate(
+            synthetic(pipeline, "Order headers"),
+            variables,
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of());
+    return engine
+        .generate(
+            synthetic(pipeline, "Shipment events"),
+            variables,
+            orders,
+            List.of(),
+            List.of(),
+            List.of())
+        .stream()
+        .map(row -> String.valueOf(row.get("message_id")))
+        .toList();
   }
 }

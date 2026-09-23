@@ -78,7 +78,7 @@ Harvest source metadata (optional Phase 1 wiring)
   → Schema gate (Validate resource definitions)
   → Measure / Evaluate source quality
   → Update resource definition group (retail-sources)
-  → Advance load control
+  → Record the load in retail_load_log
 ----
 
 Metadata harvest details: link:metadata-harvesting.adoc[Metadata harvesting].

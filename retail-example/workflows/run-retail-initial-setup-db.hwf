@@ -6,7 +6,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-     http://www.apache.org/licenses/LICENSE-2.0
+      http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,8 @@ limitations under the License.
   <modified_user>-</modified_user>
   <created_date>2026/07/10 08:12:48.764</created_date>
   <modified_date>2026/07/10 08:12:48.764</modified_date>
+  <created_hop_version/>
+  <modified_hop_version>2.20.0-SNAPSHOT</modified_hop_version>
   <parameters/>
   <actions>
     <action>
@@ -140,27 +142,57 @@ limitations under the License.
           <name>MODE</name>
           <value>initial</value>
         </parameter>
+        <parameter>
+          <name>LOAD_DATE</name>
+          <value>${LOAD_DATE}</value>
+        </parameter>
+        <parameter>
+          <name>RETAIL_CSV_WAVE</name>
+          <value>${RETAIL_CSV_WAVE}</value>
+        </parameter>
+        <parameter>
+          <name>WAVE_INDEX</name>
+          <value>${WAVE_INDEX}</value>
+        </parameter>
       </parameters>
       <run_configuration>local</run_configuration>
       <name>Generate retail data</name>
       <description>Synthetic data transform pipeline (initial wave)</description>
       <type>PIPELINE</type>
       <attributes/>
-      <xloc>288</xloc>
+      <xloc>640</xloc>
       <yloc>144</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
     <action>
-      <replacevars>Y</replacevars>
-      <fields/>
-      <filename>${PROJECT_HOME}/work/retail-csv-wave.properties</filename>
-      <file_variable_type>CURRENT_WORKFLOW</file_variable_type>
-      <name>Set RETAIL_CSV_WAVE</name>
-      <description>Load RETAIL_CSV_WAVE written by generate-retail-data.hpl</description>
-      <type>SET_VARIABLES</type>
+      <filename>${PROJECT_HOME}/pipelines/next-retail-load.hpl</filename>
+      <params_from_previous>N</params_from_previous>
+      <exec_per_row>N</exec_per_row>
+      <clear_rows>N</clear_rows>
+      <clear_files>N</clear_files>
+      <create_parent_folder>N</create_parent_folder>
+      <set_logfile>N</set_logfile>
+      <set_append_logfile>N</set_append_logfile>
+      <logfile/>
+      <logext/>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <loglevel>Basic</loglevel>
+      <wait_until_finished>Y</wait_until_finished>
+      <parameters>
+        <pass_all_parameters>N</pass_all_parameters>
+        <parameter>
+          <name>MONTHS</name>
+          <value>0</value>
+        </parameter>
+      </parameters>
+      <run_configuration>local</run_configuration>
+      <name>Read initial load date</name>
+      <description>Sets LOAD_DATE from the anchor row</description>
+      <type>PIPELINE</type>
       <attributes/>
-      <xloc>800</xloc>
+      <xloc>480</xloc>
       <yloc>144</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -216,7 +248,7 @@ limitations under the License.
       <description/>
       <type>PIPELINE</type>
       <attributes/>
-      <xloc>464</xloc>
+      <xloc>816</xloc>
       <yloc>144</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -226,14 +258,14 @@ limitations under the License.
       <connection>Vault</connection>
       <useVariableSubstitution>N</useVariableSubstitution>
       <sqlfromfile>Y</sqlfromfile>
-      <sqlfilename>${PROJECT_HOME}/sql/seed-load-control.sql</sqlfilename>
+      <sqlfilename>${PROJECT_HOME}/sql/seed-retail-load-log.sql</sqlfilename>
       <sqlfilename_encoding/>
       <sendOneStatement>N</sendOneStatement>
-      <name>seed-load-control.sql</name>
+      <name>Seed retail load log</name>
       <description/>
       <type>SQL</type>
       <attributes/>
-      <xloc>624</xloc>
+      <xloc>304</xloc>
       <yloc>144</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -304,20 +336,6 @@ limitations under the License.
     </hop>
     <hop>
       <from>Create source tables</from>
-      <to>seed-load-control.sql</to>
-      <evaluation>Y</evaluation>
-      <unconditional>N</unconditional>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
-      <from>seed-load-control.sql</from>
-      <to>Set RETAIL_CSV_WAVE</to>
-      <evaluation>Y</evaluation>
-      <unconditional>N</unconditional>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
-      <from>Set RETAIL_CSV_WAVE</from>
       <to>Load CSV to CRM</to>
       <evaluation>Y</evaluation>
       <unconditional>N</unconditional>
@@ -332,6 +350,20 @@ limitations under the License.
     </hop>
     <hop>
       <from>Bootstrap retail work</from>
+      <to>Seed retail load log</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Seed retail load log</from>
+      <to>Read initial load date</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Read initial load date</from>
       <to>Generate retail data</to>
       <evaluation>Y</evaluation>
       <unconditional>N</unconditional>

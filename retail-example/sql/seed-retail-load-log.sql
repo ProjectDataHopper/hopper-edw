@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-CREATE TABLE IF NOT EXISTS load_control (
-  topic varchar(100) PRIMARY KEY,
-  progress_date DATE NOT NULL,
-  period_months INTEGER NOT NULL DEFAULT 1,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- Finished retail loads. The next update is the latest load_date plus one month.
+CREATE TABLE IF NOT EXISTS retail_load_log (
+  load_date DATE PRIMARY KEY,
+  wave VARCHAR(20) NOT NULL,
+  loaded_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-DELETE FROM load_control;
+TRUNCATE retail_load_log;
 
-INSERT INTO load_control (topic, progress_date, period_months)
-VALUES ('retail', DATE '2024-01-01', 1)
-;
+INSERT INTO retail_load_log (load_date, wave)
+VALUES (DATE '2024-01-01', 'initial');

@@ -43,7 +43,7 @@ limitations under the License.
       <attributes_hac/>
     </action>
     <action>
-      <filename>${PROJECT_HOME}/pipelines/write-load-control-context.hpl</filename>
+      <filename>${PROJECT_HOME}/pipelines/next-retail-load.hpl</filename>
       <params_from_previous>N</params_from_previous>
       <exec_per_row>N</exec_per_row>
       <clear_rows>N</clear_rows>
@@ -58,11 +58,15 @@ limitations under the License.
       <loglevel>Basic</loglevel>
       <wait_until_finished>Y</wait_until_finished>
       <parameters>
-        <pass_all_parameters>Y</pass_all_parameters>
+        <pass_all_parameters>N</pass_all_parameters>
+        <parameter>
+          <name>MONTHS</name>
+          <value>1</value>
+        </parameter>
       </parameters>
       <run_configuration>local</run_configuration>
-      <name>Read load control</name>
-      <description/>
+      <name>Next load date</name>
+      <description>Latest retail_load_log date plus one month</description>
       <type>PIPELINE</type>
       <attributes/>
       <xloc>256</xloc>
@@ -92,46 +96,24 @@ limitations under the License.
           <value>update</value>
         </parameter>
         <parameter>
-          <name>WAVE</name>
-          <value>${WAVE}</value>
-        </parameter>
-        <parameter>
           <name>LOAD_DATE</name>
-          <value>${PROGRESS_DATE}</value>
+          <value>${LOAD_DATE}</value>
         </parameter>
         <parameter>
-          <name>ANCHOR</name>
-          <value>${PROGRESS_DATE}</value>
+          <name>RETAIL_CSV_WAVE</name>
+          <value>${RETAIL_CSV_WAVE}</value>
         </parameter>
         <parameter>
-          <name>PROGRESS_DATE</name>
-          <value>${PROGRESS_DATE}</value>
-        </parameter>
-        <parameter>
-          <name>PERIOD_MONTHS</name>
-          <value>${PERIOD_MONTHS}</value>
+          <name>WAVE_INDEX</name>
+          <value>${WAVE_INDEX}</value>
         </parameter>
       </parameters>
       <run_configuration>local</run_configuration>
       <name>Generate update data</name>
-      <description>Synthetic data transform pipeline (update wave)</description>
+      <description>Synthetic data for LOAD_DATE</description>
       <type>PIPELINE</type>
       <attributes/>
       <xloc>416</xloc>
-      <yloc>64</yloc>
-      <parallel>N</parallel>
-      <attributes_hac/>
-    </action>
-    <action>
-      <replacevars>Y</replacevars>
-      <fields/>
-      <filename>${PROJECT_HOME}/work/retail-csv-wave.properties</filename>
-      <file_variable_type>CURRENT_WORKFLOW</file_variable_type>
-      <name>Set RETAIL_CSV_WAVE</name>
-      <description>Load RETAIL_CSV_WAVE written by generate-retail-data.hpl</description>
-      <type>SET_VARIABLES</type>
-      <attributes/>
-      <xloc>592</xloc>
       <yloc>64</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -167,7 +149,7 @@ limitations under the License.
   </actions>
   <hops>
     <hop>
-      <from>Read load control</from>
+      <from>Next load date</from>
       <to>Generate update data</to>
       <evaluation>Y</evaluation>
       <unconditional>N</unconditional>
@@ -175,13 +157,6 @@ limitations under the License.
     </hop>
     <hop>
       <from>Generate update data</from>
-      <to>Set RETAIL_CSV_WAVE</to>
-      <evaluation>Y</evaluation>
-      <unconditional>N</unconditional>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
-      <from>Set RETAIL_CSV_WAVE</from>
       <to>Load CSV to CRM</to>
       <evaluation>Y</evaluation>
       <unconditional>N</unconditional>
@@ -189,7 +164,7 @@ limitations under the License.
     </hop>
     <hop>
       <from>Start</from>
-      <to>Read load control</to>
+      <to>Next load date</to>
       <evaluation>Y</evaluation>
       <unconditional>Y</unconditional>
       <enabled>Y</enabled>
