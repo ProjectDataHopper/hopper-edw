@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.hopper.core.HEnvironment;
 import org.hopper.edw.datavault.presentation.EdwPresentationDashboards;
 import org.hopper.edw.datavault.xp.RegisterHopperPresentationExtensionPoint;
+import org.hopper.core.exception.HQueryCancelledException;
 import org.hopper.presentation.simple.HGeneratedCatalog;
 import org.hopper.presentation.swt.HPresentationChrome;
 import org.hopper.presentation.swt.HPresentationViewer;
@@ -178,21 +179,33 @@ public class PresentationGuiPlugin {
             : BaseMessages.getString(PKG, "PresentationGuiPlugin.Untitled");
     shell.setText(title);
     shell.setLayout(new FormLayout());
-    HPresentationViewer viewer =
-        new HPresentationViewer(
-            shell,
-            new LoggingObject("presentation-viewer"),
-            catalog.getProvider(),
-            catalog.getPresentation(),
-            HPresentationChrome.FULL,
-            null);
+    shell.setSize(1000, 800);
+    shell.open();
+    HPresentationViewer viewer;
+    try {
+      viewer =
+          new HPresentationViewer(
+              shell,
+              new LoggingObject("presentation-viewer"),
+              catalog.getProvider(),
+              catalog.getPresentation(),
+              HPresentationChrome.FULL,
+              null);
+    } catch (HQueryCancelledException e) {
+      if (!shell.isDisposed()) {
+        shell.dispose();
+      }
+      return;
+    }
+    if (shell.isDisposed()) {
+      return;
+    }
     FormData fd = new FormData();
     fd.left = new FormAttachment(0, 0);
     fd.top = new FormAttachment(0, 0);
     fd.right = new FormAttachment(100, 0);
     fd.bottom = new FormAttachment(100, 0);
     viewer.setLayoutData(fd);
-    shell.setSize(1000, 800);
-    shell.open();
+    shell.layout(true, true);
   }
 }

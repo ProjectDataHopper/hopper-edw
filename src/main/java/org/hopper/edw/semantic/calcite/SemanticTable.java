@@ -69,7 +69,8 @@ public class SemanticTable extends AbstractTable implements TranslatableTable {
             types,
             added,
             measure == null ? null : measure.resolvePhysicalColumn(),
-            typeFactory);
+            typeFactory,
+            true);
       }
     }
     if (model != null && model.getRelationships() != null) {
@@ -98,11 +99,25 @@ public class SemanticTable extends AbstractTable implements TranslatableTable {
       Set<String> added,
       String column,
       RelDataTypeFactory typeFactory) {
+    addColumn(names, types, added, column, typeFactory, false);
+  }
+
+  private static void addColumn(
+      List<String> names,
+      List<RelDataType> types,
+      Set<String> added,
+      String column,
+      RelDataTypeFactory typeFactory,
+      boolean numeric) {
     if (Utils.isEmpty(column) || !added.add(column)) {
       return;
     }
     names.add(column);
-    types.add(typeFactory.createSqlType(SqlTypeName.VARCHAR, 1024));
+    if (numeric) {
+      types.add(typeFactory.createSqlType(SqlTypeName.DECIMAL, 38, 10));
+    } else {
+      types.add(typeFactory.createSqlType(SqlTypeName.VARCHAR, 1024));
+    }
   }
 
   @Override

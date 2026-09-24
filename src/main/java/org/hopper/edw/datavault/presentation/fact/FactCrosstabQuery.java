@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 
-/** Grain-level star-join SQL plus result aliases for each selected editor field. */
+/** Star-join SQL plus result aliases for each selected editor field. */
 @Getter
 public final class FactCrosstabQuery {
 
@@ -64,9 +64,17 @@ public final class FactCrosstabQuery {
     private final FactCrosstabField field;
     private final String resultAlias;
 
+    /** Companion count column for an AVERAGE fact. Null for SUM and COUNT. */
+    private final String weightAlias;
+
     public SelectedColumn(FactCrosstabField field, String resultAlias) {
+      this(field, resultAlias, null);
+    }
+
+    public SelectedColumn(FactCrosstabField field, String resultAlias, String weightAlias) {
       this.field = field;
       this.resultAlias = resultAlias;
+      this.weightAlias = weightAlias;
     }
   }
 }

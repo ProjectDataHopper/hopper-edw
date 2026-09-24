@@ -29,11 +29,11 @@ Check **Show horizontal totals** and **Show vertical totals** to add crosstab gr
 
 **Save selection** / **Open selection** store the zone layout on the current `.hsl`. Reopening **Create presentation...** from that layer reloads the last selection for that fact. Several `.hsl` files may bind to one `.hdm`.
 
-**SQL** opens the same grain-level join in Hop's database explorer, with a dialect limit of 1000 rows (`LIMIT` / `TOP`), so you can check that the query returns rows before generating the presentation. The editor stays open.
+**SQL** opens that query in Hop's database explorer, with a dialect limit of 1000 rows (`LIMIT` / `TOP`) applied after `GROUP BY`, so the cap limits groups rather than fact rows. The editor stays open.
 
-**Show** builds that join (fact plus only the tables that contribute selected columns), generates a presentation in an isolated catalog (not saved in the Hop project), and opens the Hopper viewer (zoom, paging, SVG/PDF export, refresh). **Edit crosstab…** on that window returns here with the same selections.
+**Show** builds that query (fact plus only the tables that contribute selected columns), generates a presentation in an isolated catalog (not saved in the Hop project), and opens the Hopper viewer (zoom, paging, SVG/PDF export, refresh). While the warehouse query runs, a progress dialog shows how many rows have been read. **Cancel** stops the query and closes the window. **Refresh** in the viewer runs the query again with the same dialog; cancelling that leaves the page that is already on screen. **Edit crosstab…** on that window returns here with the same selections.
 
-The generated SQL is not aggregated; the crosstab (and optional group repeat) aggregates in memory. Large facts can be heavy.
+The query groups by the columns in **Groups**, **Horizontal dimensions**, and **Vertical dimensions**, and aggregates each fact with the selected `SUM`, `COUNT`, or `AVERAGE`. The crosstab still rolls those rows into totals, and a group repeats the crosstab once per group value.
 
 == Requirements
 

@@ -11,7 +11,7 @@ The **semantic layer** (`.hsl`) is the consumption model above a loaded warehous
 * **Relationships** describe joins (including role-playing dates).
 * **Named selections** store a crosstab / presentation query so fields do not have to be re-picked.
 
-Calcite compiles a structured selection to warehouse SQL (logical entity names → physical tables). That is a different path from source-model SQL virtualization, which builds Hop pipelines over `.hsm` sources.
+Calcite compiles a structured selection to warehouse SQL (logical entity names → physical tables). Measures are aggregated with the selection's `SUM`, `COUNT`, or `AVERAGE`, and the other fields are grouped. That is a different path from source-model SQL virtualization, which builds Hop pipelines over `.hsm` sources.
 
 == Create or bind
 

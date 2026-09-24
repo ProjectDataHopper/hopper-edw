@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.variables.Variables;
+import org.hopper.core.AggregationMethod;
 import org.hopper.edw.datavault.metadata.ModelConfigurationTestSupport;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
 import org.hopper.edw.datavault.presentation.fact.FactCrosstabTestModels;
@@ -48,6 +49,8 @@ class SemanticSqlEngineTest {
             });
     assertTrue(sql.toLowerCase().contains("f_order_lines"), sql);
     assertFalse(sql.toLowerCase().contains(" join "), sql);
+    assertTrue(sql.toUpperCase().contains("SUM("), sql);
+    assertFalse(sql.toUpperCase().contains("GROUP BY"), sql);
   }
 
   @Test
@@ -80,6 +83,32 @@ class SemanticSqlEngineTest {
     String lower = sql.toLowerCase();
     assertTrue(lower.contains("order_date") || lower.contains("dim_order_date"), sql);
     assertTrue(lower.contains("ship_date") || lower.contains("dim_ship_date"), sql);
+    assertTrue(sql.toUpperCase().contains("SUM("), sql);
+    assertTrue(sql.toUpperCase().contains("GROUP BY"), sql);
+  }
+
+  @Test
+  void selectionAggregationIsPushedIntoSql() throws Exception {
+    String sql =
+        sql(
+            selection -> {
+              selection.getRows().add(new SemanticSelectionField("dim_customer", "customer_name"));
+              SemanticSelectionField counted =
+                  new SemanticSelectionField("f_order_lines", "quantity");
+              counted.setAggregationMethod(AggregationMethod.COUNT);
+              selection.getMeasures().add(counted);
+              SemanticSelectionField averaged = new SemanticSelectionField("f_order_lines", "amount");
+              averaged.setAggregationMethod(AggregationMethod.AVERAGE);
+              selection.getMeasures().add(averaged);
+            });
+    String upper = sql.toUpperCase();
+    assertTrue(upper.contains("COUNT("), sql);
+    assertTrue(upper.contains("AVG("), sql);
+    int groupBy = upper.indexOf("GROUP BY");
+    assertTrue(groupBy > 0, sql);
+    assertTrue(upper.substring(groupBy).contains("CUSTOMER_NAME"), sql);
+    assertFalse(upper.substring(groupBy).contains("QUANTITY"), sql);
+    assertFalse(upper.substring(groupBy).contains("AMOUNT"), sql);
   }
 
   private static String sql(SelectionWriter writer) throws Exception {

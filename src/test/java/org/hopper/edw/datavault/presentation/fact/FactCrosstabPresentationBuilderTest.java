@@ -18,6 +18,7 @@ package org.hopper.edw.datavault.presentation.fact;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.hop.core.HopEnvironment;
@@ -86,6 +87,56 @@ class FactCrosstabPresentationBuilderTest {
   }
 
   @Test
+  void countFactPivotsAsSumOfTheSqlCount() throws Exception {
+    HGeneratedCatalog catalog =
+        catalog(
+            spec -> {
+              spec.addField(
+                  FactCrosstabSpec.Zone.VERTICAL,
+                  new FactCrosstabField("dim_customer", "customer_name", "Customer"));
+              spec.addField(
+                  FactCrosstabSpec.Zone.FACTS,
+                  new FactCrosstabField(
+                      "f_order_lines", "quantity", "Qty", AggregationMethod.COUNT));
+            });
+    String sql = connectorSql(catalog);
+    assertTrue(sql.toUpperCase().contains("NULLIF(COUNT("), sql);
+    assertTrue(sql.toUpperCase().contains("GROUP BY"), sql);
+    HCrosstabComponent crosstab =
+        findCrosstab(catalog.getPresentation().getPages().get(0).getComponents().get(1));
+    assertEquals(AggregationMethod.SUM, crosstab.getFacts().get(0).getAggregationMethod());
+    assertEquals("0", crosstab.getFacts().get(0).getFormatMask());
+    assertNull(crosstab.getFacts().get(0).getWeightColumnName());
+  }
+
+  @Test
+  void averageFactKeepsAverageAndWeightColumn() throws Exception {
+    HGeneratedCatalog catalog =
+        catalog(
+            spec -> {
+              spec.addField(
+                  FactCrosstabSpec.Zone.GROUPS,
+                  new FactCrosstabField("dim_customer", "country", "Country"));
+              spec.addField(
+                  FactCrosstabSpec.Zone.FACTS,
+                  new FactCrosstabField(
+                      "f_order_lines", "amount", "Amount", AggregationMethod.AVERAGE));
+            });
+    String sql = connectorSql(catalog);
+    String upper = sql.toUpperCase();
+    assertTrue(upper.contains("SUM("), sql);
+    assertTrue(upper.contains("COUNT("), sql);
+    assertTrue(upper.contains("GROUP BY"), sql);
+    HComponent root = catalog.getPresentation().getPages().get(0).getComponents().get(0);
+    HGroupComponent group = assertInstanceOf(HGroupComponent.class, root.getComponent());
+    HCompositeComponent composite =
+        assertInstanceOf(HCompositeComponent.class, group.getGroupComponent().getComponent());
+    HCrosstabComponent crosstab = findCrosstab(composite.getChildren().get(1));
+    assertEquals(AggregationMethod.AVERAGE, crosstab.getFacts().get(0).getAggregationMethod());
+    assertEquals("amount_n", crosstab.getFacts().get(0).getWeightColumnName());
+  }
+
+  @Test
   void groupsWrapCompositeWithLabelAndCrosstab() throws Exception {
     HGeneratedCatalog catalog =
         catalog(
@@ -130,6 +181,15 @@ class FactCrosstabPresentationBuilderTest {
         sources,
         FactCrosstabTestModels.variables(),
         FactCrosstabTestModels.providerWithVault());
+  }
+
+  private static String connectorSql(HGeneratedCatalog catalog) throws Exception {
+    HConnector connector =
+        catalog
+            .getProvider()
+            .getSerializer(HConnector.class)
+            .load(FactCrosstabPresentationBuilder.CONNECTOR_NAME);
+    return assertInstanceOf(HSqlConnector.class, connector.getConnector()).getSql();
   }
 
   private static HCrosstabComponent findCrosstab(HComponent component) {

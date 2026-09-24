@@ -33,9 +33,11 @@ import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.hopper.core.AggregationMethod;
 import org.hopper.edw.datavault.virtualization.generate.DialectSqlSupport;
 import org.hopper.edw.semantic.model.SemanticEntity;
 import org.hopper.edw.semantic.model.SemanticJoinType;
+import org.hopper.edw.semantic.model.SemanticMeasure;
 import org.hopper.edw.semantic.model.SemanticModel;
 import org.hopper.edw.semantic.model.SemanticRelationship;
 import org.hopper.edw.semantic.model.SemanticSelection;
@@ -101,6 +103,8 @@ public final class SemanticSqlEngine {
     Set<String> needed = neededEntities(selection, fact.getName());
     Set<String> usedAliases = new LinkedHashSet<>();
     List<String> selectList = new ArrayList<>();
+    List<String> groupBy = new ArrayList<>();
+    Set<String> grouped = new LinkedHashSet<>();
     for (SemanticSelectionField field : selection.allFields()) {
       if (field == null || Utils.isEmpty(field.getFieldName())) {
         continue;
@@ -113,8 +117,15 @@ public final class SemanticSqlEngine {
       String physical = physicalColumn(entity, field.getFieldName());
       String alias = uniqueAlias(field, usedAliases);
       usedAliases.add(alias);
-      selectList.add(
-          quoteIdent(entityName) + "." + quoteIdent(physical) + " AS " + quoteIdent(alias));
+      String expr = quoteIdent(entityName) + "." + quoteIdent(physical);
+      if (selection.getMeasures().contains(field)) {
+        selectList.add(aggregateCall(aggregationOf(entity, field)) + "(" + expr + ") AS " + quoteIdent(alias));
+      } else {
+        selectList.add(expr + " AS " + quoteIdent(alias));
+        if (grouped.add(expr)) {
+          groupBy.add(expr);
+        }
+      }
     }
     if (selectList.isEmpty()) {
       throw new HopException("Select at least one field");
@@ -145,7 +156,31 @@ public final class SemanticSqlEngine {
           .append(".")
           .append(quoteIdent(relationship.getToField()));
     }
+    if (!groupBy.isEmpty()) {
+      sql.append(" GROUP BY ");
+      sql.append(String.join(", ", groupBy));
+    }
     return sql.toString();
+  }
+
+  private static AggregationMethod aggregationOf(SemanticEntity entity, SemanticSelectionField field) {
+    AggregationMethod method = field.resolveAggregation();
+    if (method != null) {
+      return method;
+    }
+    SemanticMeasure measure = entity.findMeasure(field.getFieldName());
+    if (measure != null) {
+      return measure.resolveAggregation();
+    }
+    return AggregationMethod.SUM;
+  }
+
+  private static String aggregateCall(AggregationMethod method) {
+    return switch (method) {
+      case COUNT -> "COUNT";
+      case AVERAGE -> "AVG";
+      case SUM -> "SUM";
+    };
   }
 
   private static Set<String> neededEntities(SemanticSelection selection, String factName) {

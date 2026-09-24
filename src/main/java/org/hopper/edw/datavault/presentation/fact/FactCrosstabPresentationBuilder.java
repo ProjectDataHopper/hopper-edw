@@ -184,13 +184,17 @@ public final class FactCrosstabPresentationBuilder {
     crosstab.setVerticalDimensions(toDimensions(query.matching(spec.getVerticalDimensions())));
     List<HFact> facts = new ArrayList<>();
     for (SelectedColumn column : query.matching(spec.getFacts())) {
-      AggregationMethod method =
+      AggregationMethod selectionMethod =
           column.getField().getAggregation() != null
               ? column.getField().getAggregation()
               : AggregationMethod.SUM;
+      // COUNT is already counted in SQL. Summing those counts keeps totals correct.
+      // AVERAGE is a SQL SUM plus a weight column; the pivot divides by that weight.
+      AggregationMethod pivotMethod =
+          selectionMethod == AggregationMethod.COUNT ? AggregationMethod.SUM : selectionMethod;
       String mask = SemanticSelectionAdapter.formatMask(semanticModel, column.getField());
       if (Utils.isEmpty(mask)) {
-        mask = method == AggregationMethod.COUNT ? "0" : null;
+        mask = selectionMethod == AggregationMethod.COUNT ? "0" : null;
       }
       HFact fact =
           new HFact(
@@ -198,8 +202,12 @@ public final class FactCrosstabPresentationBuilder {
               headerOf(column),
               HHorizontalAlignment.RIGHT,
               HVerticalAlignment.MIDDLE,
-              method,
+              pivotMethod,
               mask);
+      if (selectionMethod == AggregationMethod.AVERAGE
+          && !Utils.isEmpty(column.getWeightAlias())) {
+        fact.setWeightColumnName(column.getWeightAlias());
+      }
       if (spec.isShowingHorizontalTotals()) {
         fact.setHorizontalAggregation(true);
         fact.setHorizontalAggregationHeader("Total");

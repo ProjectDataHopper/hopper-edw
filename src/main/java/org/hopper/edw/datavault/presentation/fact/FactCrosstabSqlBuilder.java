@@ -25,9 +25,10 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.variables.Variables;
+import org.hopper.core.AggregationMethod;
 import org.hopper.edw.datavault.presentation.fact.FactCrosstabQuery.SelectedColumn;
 
-/** Builds a grain-level star join for the columns placed in a {@link FactCrosstabSpec}. */
+/** Builds the star join for a {@link FactCrosstabSpec}, aggregated at the selected grain. */
 public final class FactCrosstabSqlBuilder {
 
   /** Preview cap for the editor SQL button (database explorer). */
@@ -75,6 +76,8 @@ public final class FactCrosstabSqlBuilder {
     List<SelectedColumn> selected = new ArrayList<>();
     Set<String> usedAliases = new LinkedHashSet<>();
     List<String> selectList = new ArrayList<>();
+    List<String> groupBy = new ArrayList<>();
+    Set<String> grouped = new LinkedHashSet<>();
     for (FactCrosstabField field : selectedFields) {
       FactCrosstabSourceTable table = sourceModel.findTable(field.getTableName());
       if (table == null) {
@@ -91,8 +94,29 @@ public final class FactCrosstabSqlBuilder {
       String resultAlias = uniqueAlias(field, usedAliases);
       usedAliases.add(resultAlias);
       String qualified = qualifiedColumn(databaseMeta, table.getJoinAlias(), field.getColumnName());
-      selectList.add(qualified + " AS " + resultAlias);
-      selected.add(new SelectedColumn(field.copy(), resultAlias));
+      if (spec.getFacts().contains(field)) {
+        AggregationMethod method =
+            field.getAggregation() != null ? field.getAggregation() : AggregationMethod.SUM;
+        String weightAlias = null;
+        switch (method) {
+          case COUNT -> selectList.add("NULLIF(COUNT(" + qualified + "), 0) AS " + resultAlias);
+          case AVERAGE -> {
+            selectList.add("SUM(" + qualified + ") AS " + resultAlias);
+            weightAlias = uniqueWeightAlias(resultAlias, usedAliases);
+            usedAliases.add(weightAlias);
+            selectList.add("COUNT(" + qualified + ") AS " + weightAlias);
+          }
+          case SUM -> selectList.add("SUM(" + qualified + ") AS " + resultAlias);
+          default -> selectList.add("SUM(" + qualified + ") AS " + resultAlias);
+        }
+        selected.add(new SelectedColumn(field.copy(), resultAlias, weightAlias));
+      } else {
+        selectList.add(qualified + " AS " + resultAlias);
+        selected.add(new SelectedColumn(field.copy(), resultAlias));
+        if (grouped.add(qualified)) {
+          groupBy.add(qualified);
+        }
+      }
     }
 
     StringBuilder sql = new StringBuilder();
@@ -126,6 +150,16 @@ public final class FactCrosstabSqlBuilder {
               qualifiedColumn(
                   databaseMeta, joinTable.getJoinAlias(), joinTable.getDimensionKeyColumn()))
           .append(System.lineSeparator());
+    }
+    if (!groupBy.isEmpty()) {
+      sql.append("GROUP BY").append(System.lineSeparator());
+      for (int i = 0; i < groupBy.size(); i++) {
+        sql.append("  ").append(groupBy.get(i));
+        if (i < groupBy.size() - 1) {
+          sql.append(',');
+        }
+        sql.append(System.lineSeparator());
+      }
     }
     return new FactCrosstabQuery(sql.toString().trim(), selected);
   }
@@ -178,6 +212,16 @@ public final class FactCrosstabSqlBuilder {
       alias = "t_" + alias;
     }
     return alias;
+  }
+
+  private static String uniqueWeightAlias(String resultAlias, Set<String> used) {
+    String candidate = resultAlias + "_n";
+    int n = 2;
+    while (used.contains(candidate)) {
+      candidate = resultAlias + "_n" + n;
+      n++;
+    }
+    return candidate;
   }
 
   private static String uniqueAlias(FactCrosstabField field, Set<String> used) {

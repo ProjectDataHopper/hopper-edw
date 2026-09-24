@@ -17,6 +17,7 @@ package org.hopper.edw.datavault.presentation.fact;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -99,6 +100,10 @@ class FactCrosstabSqlBuilderTest {
     assertTrue(fromDate >= 2, sql);
     assertTrue(sql.contains("order_date_key"));
     assertTrue(sql.contains("ship_date_key"));
+    String grouped = sql.substring(sql.toUpperCase().indexOf("GROUP BY")).toLowerCase();
+    assertTrue(grouped.contains("order"), sql);
+    assertTrue(grouped.contains("ship"), sql);
+    assertFalse(grouped.contains("quantity"), sql);
     assertEquals(3, query.getColumns().size());
     long yearAliases = query.getColumns().stream().map(c -> c.getResultAlias()).distinct().count();
     assertEquals(3, yearAliases);
@@ -124,6 +129,10 @@ class FactCrosstabSqlBuilderTest {
     assertTrue(sql.contains("flags_key"));
     assertTrue(sql.contains("qty_band"));
     assertFalse(sql.contains("dim_qty_band"));
+    String grouped = sql.substring(sql.toUpperCase().indexOf("GROUP BY"));
+    assertTrue(grouped.contains("qty_band"), sql);
+    assertTrue(grouped.contains("channel"), sql);
+    assertFalse(grouped.toLowerCase().contains("quantity"), sql);
   }
 
   @Test
@@ -159,6 +168,117 @@ class FactCrosstabSqlBuilderTest {
             FactCrosstabSqlBuilder.DEBUG_ROW_LIMIT);
     assertTrue(limited.toLowerCase().contains("limit 1000"), limited);
     assertTrue(limited.regionMatches(true, 0, "SELECT", 0, 6), limited);
+  }
+
+  @Test
+  void sumsFactsAndGroupsDimensions() throws Exception {
+    FactCrosstabQuery query =
+        buildQuery(
+            spec -> {
+              spec.addField(
+                  FactCrosstabSpec.Zone.GROUPS,
+                  new FactCrosstabField("dim_customer", "country", "Country"));
+              spec.addField(
+                  FactCrosstabSpec.Zone.HORIZONTAL,
+                  new FactCrosstabField("dim_order_date", "year", "Year"));
+              spec.addField(
+                  FactCrosstabSpec.Zone.VERTICAL,
+                  new FactCrosstabField("dim_customer", "customer_name", "Customer"));
+              spec.addField(
+                  FactCrosstabSpec.Zone.FACTS,
+                  new FactCrosstabField(
+                      "f_order_lines", "quantity", "Qty", AggregationMethod.SUM));
+            });
+    String sql = query.getSql();
+    String upper = sql.toUpperCase();
+    int groupBy = upper.indexOf("GROUP BY");
+    assertTrue(upper.contains("SUM("), sql);
+    assertTrue(groupBy > upper.indexOf("SUM("), sql);
+    String grouped = upper.substring(groupBy);
+    assertTrue(grouped.contains("COUNTRY"), sql);
+    assertTrue(grouped.contains("YEAR"), sql);
+    assertTrue(grouped.contains("CUSTOMER_NAME"), sql);
+    assertFalse(grouped.contains("QUANTITY"), sql);
+  }
+
+  @Test
+  void countUsesNullIfSoAllNullGroupsStayBlank() throws Exception {
+    FactCrosstabQuery query =
+        buildQuery(
+            spec -> {
+              spec.addField(
+                  FactCrosstabSpec.Zone.VERTICAL,
+                  new FactCrosstabField("dim_customer", "customer_name", "Customer"));
+              spec.addField(
+                  FactCrosstabSpec.Zone.FACTS,
+                  new FactCrosstabField(
+                      "f_order_lines", "quantity", "Qty", AggregationMethod.COUNT));
+            });
+    String upper = query.getSql().toUpperCase();
+    assertTrue(upper.contains("NULLIF(COUNT("), query.getSql());
+    assertFalse(upper.contains("COUNT(*)"), query.getSql());
+    assertFalse(upper.substring(upper.indexOf("GROUP BY")).contains("QUANTITY"), query.getSql());
+  }
+
+  @Test
+  void averageSelectsSumAndAWeightCount() throws Exception {
+    FactCrosstabQuery query =
+        buildQuery(
+            spec -> {
+              spec.addField(
+                  FactCrosstabSpec.Zone.VERTICAL,
+                  new FactCrosstabField("dim_customer", "customer_name", "Customer"));
+              spec.addField(
+                  FactCrosstabSpec.Zone.FACTS,
+                  new FactCrosstabField(
+                      "f_order_lines", "amount", "Amount", AggregationMethod.AVERAGE));
+            });
+    String sql = query.getSql();
+    String upper = sql.toUpperCase();
+    assertTrue(upper.contains("SUM("), sql);
+    assertTrue(upper.contains("COUNT("), sql);
+    assertFalse(upper.contains("NULLIF"), sql);
+    assertEquals("amount", query.getColumns().get(1).getResultAlias());
+    assertEquals("amount_n", query.getColumns().get(1).getWeightAlias());
+    assertFalse(upper.substring(upper.indexOf("GROUP BY")).contains("AMOUNT"), sql);
+  }
+
+  @Test
+  void factsOnlyQueryIsAScalarAggregate() throws Exception {
+    FactCrosstabQuery query =
+        buildQuery(
+            spec ->
+                spec.addField(
+                    FactCrosstabSpec.Zone.FACTS,
+                    new FactCrosstabField(
+                        "f_order_lines", "quantity", "Quantity", AggregationMethod.SUM)));
+    assertTrue(query.getSql().toUpperCase().contains("SUM("), query.getSql());
+    assertFalse(query.getSql().toUpperCase().contains("GROUP BY"), query.getSql());
+    assertNull(query.getColumns().get(0).getWeightAlias());
+  }
+
+  @Test
+  void rowLimitAppliesAfterGroupBy() throws Exception {
+    FactCrosstabQuery query =
+        buildQuery(
+            spec -> {
+              spec.addField(
+                  FactCrosstabSpec.Zone.VERTICAL,
+                  new FactCrosstabField("dim_customer", "customer_name", "Customer"));
+              spec.addField(
+                  FactCrosstabSpec.Zone.FACTS,
+                  new FactCrosstabField(
+                      "f_order_lines", "amount", "Amount", AggregationMethod.SUM));
+            });
+    String limited =
+        FactCrosstabSqlBuilder.applyRowLimit(
+            query.getSql(),
+            FactCrosstabTestModels.postgres(),
+            FactCrosstabSqlBuilder.DEBUG_ROW_LIMIT);
+    String upper = limited.toUpperCase();
+    int groupBy = upper.indexOf("GROUP BY");
+    int limit = limited.toLowerCase().indexOf("limit 1000");
+    assertTrue(groupBy > 0 && limit > groupBy, limited);
   }
 
   @Test

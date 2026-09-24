@@ -28,6 +28,7 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.core.exception.HQueryCancelledException;
 import org.hopper.edw.datavault.hopgui.PresentationGuiPlugin;
 import org.hopper.presentation.simple.HGeneratedCatalog;
 import org.hopper.presentation.swt.HPresentationChrome;
@@ -86,6 +87,11 @@ final class FactCrosstabViewerShell {
           }
         });
 
+    // Open before the query so the progress dialog has a visible parent. The viewer fills in
+    // after the query returns.
+    shell.setSize(1100, 800);
+    shell.open();
+
     try {
       PresentationGuiPlugin.ensureEnvironment();
       HPresentationViewer viewer =
@@ -96,22 +102,31 @@ final class FactCrosstabViewerShell {
               catalog.getPresentation(),
               HPresentationChrome.FULL,
               null);
+      if (shell.isDisposed()) {
+        return;
+      }
       FormData fdViewer = new FormData();
       fdViewer.left = new FormAttachment(0, 0);
       fdViewer.top = new FormAttachment(bar, 0);
       fdViewer.right = new FormAttachment(100, 0);
       fdViewer.bottom = new FormAttachment(100, 0);
       viewer.setLayoutData(fdViewer);
+      shell.layout(true, true);
+    } catch (HQueryCancelledException e) {
+      if (!shell.isDisposed()) {
+        shell.dispose();
+      }
+      return;
     } catch (Exception e) {
       new ErrorDialog(
           hopGui.getShell(),
           BaseMessages.getString(PKG, "FactCrosstabEditorDialog.Error.Title"),
           BaseMessages.getString(PKG, "FactCrosstabEditorDialog.Error.Generate"),
           e);
-      shell.dispose();
+      if (!shell.isDisposed()) {
+        shell.dispose();
+      }
       return;
     }
-    shell.setSize(1100, 800);
-    shell.open();
   }
 }
