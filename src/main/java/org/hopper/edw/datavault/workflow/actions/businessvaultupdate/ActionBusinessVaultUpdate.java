@@ -77,6 +77,7 @@ import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultDvModelResol
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultUpdateExecutionSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BvGeneratedPipelineSupport;
+import org.hopper.edw.datavault.metadata.businessvault.BvIdentityMap;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2PartitionWorkflowSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BvTargetDatabaseSupport;
 import org.hopper.edw.datavault.metadata.businessvault.IBvTable;
@@ -571,6 +572,14 @@ public class ActionBusinessVaultUpdate extends ActionBase implements Cloneable, 
             table.generateBuildPipelines(getMetadataProvider(), getVariables(), bvModel, dvModel);
 
         if (pipelineMetas == null || pipelineMetas.isEmpty()) {
+          if (table instanceof BvIdentityMap identityMap && identityMap.isExternal()) {
+            logBasic(
+                BaseMessages.getString(
+                    PKG,
+                    "ActionBusinessVaultUpdate.Log.ExternalIdentityMap",
+                    table.getName()));
+            continue;
+          }
           logError(
               BaseMessages.getString(
                   PKG, "ActionBusinessVaultUpdate.Error.GenerateFailed", table.getName()));

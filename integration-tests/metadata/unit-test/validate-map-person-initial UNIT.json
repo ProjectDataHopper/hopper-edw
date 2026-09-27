@@ -1,0 +1,38 @@
+{
+  "database_replacements": [],
+  "autoOpening": true,
+  "description": "O100 and K100 share one durable key and O100 is the master",
+  "persist_filename": "",
+  "test_type": "UNIT_TEST",
+  "variableValues": [],
+  "basePath": "${HOP_UNIT_TESTS_FOLDER}",
+  "golden_data_sets": [
+    {
+      "field_mappings": [
+        {
+          "transform_field": "person_id",
+          "data_set_field": "person_id"
+        },
+        {
+          "transform_field": "rule_version",
+          "data_set_field": "rule_version"
+        },
+        {
+          "transform_field": "master_is_o100",
+          "data_set_field": "master_is_o100"
+        },
+        {
+          "transform_field": "shared_durable",
+          "data_set_field": "shared_durable"
+        }
+      ],
+      "field_order": ["person_id"],
+      "data_set_name": "map-person-initial",
+      "transform_name": "Validate"
+    }
+  ],
+  "input_data_sets": [],
+  "name": "validate-map-person-initial UNIT",
+  "trans_test_tweaks": [],
+  "pipeline_filename": "./tests/bv-resolution/validate-map-person-initial.hpl"
+}

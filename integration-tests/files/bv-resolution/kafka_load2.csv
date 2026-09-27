@@ -1,0 +1,3 @@
+person_id,email,city,record_source
+K100,kafka@new.example,Ostend,KAFKA
+K300,kafka-only@example,,KAFKA

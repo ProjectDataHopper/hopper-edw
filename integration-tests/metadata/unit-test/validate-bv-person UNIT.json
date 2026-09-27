@@ -1,0 +1,34 @@
+{
+  "database_replacements": [],
+  "autoOpening": true,
+  "description": "Current bv_person_bvr rows before the Kafka cutover",
+  "persist_filename": "",
+  "test_type": "UNIT_TEST",
+  "variableValues": [],
+  "basePath": "${HOP_UNIT_TESTS_FOLDER}",
+  "golden_data_sets": [
+    {
+      "field_mappings": [
+        {
+          "transform_field": "person_ids",
+          "data_set_field": "person_ids"
+        },
+        {
+          "transform_field": "email",
+          "data_set_field": "email"
+        },
+        {
+          "transform_field": "city",
+          "data_set_field": "city"
+        }
+      ],
+      "field_order": ["person_ids"],
+      "data_set_name": "bv-person-current-1",
+      "transform_name": "Validate"
+    }
+  ],
+  "input_data_sets": [],
+  "name": "validate-bv-person UNIT",
+  "trans_test_tweaks": [],
+  "pipeline_filename": "./tests/bv-resolution/validate-bv-person.hpl"
+}

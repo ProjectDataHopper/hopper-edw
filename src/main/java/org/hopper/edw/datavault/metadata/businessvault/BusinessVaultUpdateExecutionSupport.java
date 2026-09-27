@@ -27,7 +27,8 @@ public final class BusinessVaultUpdateExecutionSupport {
     return tableType == BvTableType.SCD2
         || tableType == BvTableType.PIT
         || tableType == BvTableType.BRIDGE
-        || tableType == BvTableType.BUSINESS_TABLE;
+        || tableType == BvTableType.BUSINESS_TABLE
+        || tableType == BvTableType.IDENTITY_MAP;
   }
 
   /**

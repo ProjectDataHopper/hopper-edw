@@ -72,6 +72,8 @@ import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultDvModelResol
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultSourceQuerySupport;
 import org.hopper.edw.datavault.metadata.businessvault.BvDerivativeRef;
+import org.hopper.edw.datavault.metadata.businessvault.BvLegOperation;
+import org.hopper.edw.datavault.metadata.businessvault.BvNullPolicy;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2BuildMode;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2Calculation;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2CalculationUnitTestSupport;
@@ -81,7 +83,12 @@ import org.hopper.edw.datavault.metadata.businessvault.BvScd2HashPartitionCount;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2PipelineSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2SatelliteConfig;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2Table;
+import org.hopper.edw.datavault.metadata.businessvault.BvIdentityMap;
+import org.hopper.edw.datavault.metadata.businessvault.BvIdentityUnmappedPolicy;
+import org.hopper.edw.datavault.metadata.businessvault.BvSourceCalendar;
+import org.hopper.edw.datavault.metadata.businessvault.BvSourceCalendarEntry;
 import org.hopper.edw.datavault.metadata.businessvault.BvSourceQueryRef;
+import org.hopper.edw.datavault.metadata.businessvault.IBvTable;
 import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 import org.hopper.edw.datavault.naming.EdwNamingWidgetSupport;
 import org.hopper.edw.datavault.transform.sqlexpression.SqlExpressionEditorDialog;
@@ -113,6 +120,11 @@ public class HopGuiBvScd2TableDialog {
   private Text wIncrementalWatermark;
   private Text wValidFromField;
   private Text wValidToField;
+  private Combo wSourceCalendar;
+  private ColumnInfo satelliteCalendarSystemColumn;
+  private ColumnInfo sourceQueryCalendarSystemColumn;
+  private Combo wIdentityMap;
+  private Combo wIdentityUnmapped;
   private TableView wDerivatives;
   private Button wAddDerivative;
   private Button wDeleteDerivative;
@@ -455,6 +467,103 @@ public class HopGuiBvScd2TableDialog {
     PropsUi.setLook(wValidToField);
     wValidToField.setLayoutData(
         new FormDataBuilder().left(middle, 0).top(wValidFromField, margin).right().result());
+
+    Label wlSourceCalendar = new Label(comp, SWT.RIGHT);
+    wlSourceCalendar.setText(
+        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.SourceCalendar.Label"));
+    PropsUi.setLook(wlSourceCalendar);
+    wlSourceCalendar.setLayoutData(
+        new FormDataBuilder().left().top(wValidToField, margin).right(middle, -margin).result());
+
+    wSourceCalendar = new Combo(comp, SWT.BORDER);
+    PropsUi.setLook(wSourceCalendar);
+    wSourceCalendar.setItems(sourceCalendarNames());
+    wSourceCalendar.addListener(SWT.Modify, e -> refreshCalendarSystemChoices());
+    wSourceCalendar.setLayoutData(
+        new FormDataBuilder().left(middle, 0).top(wValidToField, margin).right().result());
+
+    Label wlIdentityMap = new Label(comp, SWT.RIGHT);
+    wlIdentityMap.setText(BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.IdentityMap.Label"));
+    PropsUi.setLook(wlIdentityMap);
+    wlIdentityMap.setLayoutData(
+        new FormDataBuilder().left().top(wSourceCalendar, margin).right(middle, -margin).result());
+    wIdentityMap = new Combo(comp, SWT.BORDER);
+    PropsUi.setLook(wIdentityMap);
+    wIdentityMap.setItems(identityMapNames());
+    wIdentityMap.setLayoutData(
+        new FormDataBuilder().left(middle, 0).top(wSourceCalendar, margin).right().result());
+
+    Label wlIdentityUnmapped = new Label(comp, SWT.RIGHT);
+    wlIdentityUnmapped.setText(
+        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.IdentityUnmapped.Label"));
+    PropsUi.setLook(wlIdentityUnmapped);
+    wlIdentityUnmapped.setLayoutData(
+        new FormDataBuilder().left().top(wIdentityMap, margin).right(middle, -margin).result());
+    wIdentityUnmapped = new Combo(comp, SWT.BORDER | SWT.READ_ONLY);
+    PropsUi.setLook(wIdentityUnmapped);
+    wIdentityUnmapped.setItems(new String[] {"", "self", "quarantine", "drop"});
+    wIdentityUnmapped.setLayoutData(
+        new FormDataBuilder().left(middle, 0).top(wIdentityMap, margin).right().result());
+  }
+
+  private String[] sourceCalendarNames() {
+    List<String> names = new ArrayList<>();
+    names.add("");
+    if (businessVaultModel != null) {
+      for (IBvTable table : businessVaultModel.getTables()) {
+        if (table instanceof BvSourceCalendar calendar && !Utils.isEmpty(calendar.getName())) {
+          names.add(calendar.getName());
+        }
+      }
+    }
+    return names.toArray(new String[0]);
+  }
+
+  private String[] calendarSystemNames() {
+    List<String> names = new ArrayList<>();
+    names.add("");
+    if (businessVaultModel == null || wSourceCalendar == null) {
+      return names.toArray(new String[0]);
+    }
+    String calendarName = Const.trim(wSourceCalendar.getText());
+    if (Utils.isEmpty(calendarName)) {
+      return names.toArray(new String[0]);
+    }
+    IBvTable table = businessVaultModel.findTable(calendarName);
+    if (!(table instanceof BvSourceCalendar calendar) || calendar.getEntries() == null) {
+      return names.toArray(new String[0]);
+    }
+    Set<String> seen = new LinkedHashSet<>();
+    for (BvSourceCalendarEntry entry : calendar.getEntries()) {
+      if (entry != null && !Utils.isEmpty(entry.getSourceId())) {
+        seen.add(entry.getSourceId().trim());
+      }
+    }
+    names.addAll(seen);
+    return names.toArray(new String[0]);
+  }
+
+  private void refreshCalendarSystemChoices() {
+    String[] values = calendarSystemNames();
+    if (satelliteCalendarSystemColumn != null) {
+      satelliteCalendarSystemColumn.setComboValues(values);
+    }
+    if (sourceQueryCalendarSystemColumn != null) {
+      sourceQueryCalendarSystemColumn.setComboValues(values);
+    }
+  }
+
+  private String[] identityMapNames() {
+    List<String> names = new ArrayList<>();
+    names.add("");
+    if (businessVaultModel != null) {
+      for (IBvTable table : businessVaultModel.getTables()) {
+        if (table instanceof BvIdentityMap identityMap && !Utils.isEmpty(identityMap.getName())) {
+          names.add(identityMap.getName());
+        }
+      }
+    }
+    return names.toArray(new String[0]);
   }
 
   private void addDerivativesTab() {
@@ -558,6 +667,11 @@ public class HopGuiBvScd2TableDialog {
               ColumnInfo.COLUMN_TYPE_CCOMBO,
               getEligibleSourceQueryNames(),
               false),
+          sourceQueryCalendarSystemColumn = calendarSystemColumn(),
+          legOperationColumn(),
+          legNullPolicyColumn(),
+          legPriorityColumn(),
+          legOpFieldColumn(),
         };
     wSourceQueries =
         new TableView(
@@ -632,6 +746,9 @@ public class HopGuiBvScd2TableDialog {
               BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Mappings.Column.TargetField"),
               ColumnInfo.COLUMN_TYPE_TEXT,
               false),
+          rankColumn(),
+          nullPolicyColumn(),
+          presentFlagColumn(),
         };
 
     wMappings =
@@ -678,6 +795,11 @@ public class HopGuiBvScd2TableDialog {
                   PKG, "HopGuiBvScd2TableDialog.SatelliteSettings.Column.SourceIndicator"),
               ColumnInfo.COLUMN_TYPE_TEXT,
               false),
+          satelliteCalendarSystemColumn = calendarSystemColumn(),
+          legOperationColumn(),
+          legNullPolicyColumn(),
+          legPriorityColumn(),
+          legOpFieldColumn(),
         };
     configCols[0].setReadOnly(true);
 
@@ -1281,6 +1403,13 @@ public class HopGuiBvScd2TableDialog {
     if (!Utils.isEmpty(input.getValidToField())) {
       wValidToField.setText(input.getValidToField());
     }
+    wSourceCalendar.setText(Const.NVL(input.getSourceCalendarName(), ""));
+    refreshCalendarSystemChoices();
+    wIdentityMap.setText(Const.NVL(input.getIdentityMapName(), ""));
+    wIdentityUnmapped.setText(
+        input.getIdentityUnmappedPolicy() == null
+            ? ""
+            : input.getIdentityUnmappedPolicy().getCode());
 
     wDerivatives.clearAll();
     for (BvDerivativeRef derivative : input.getDerivatives()) {
@@ -1303,6 +1432,14 @@ public class HopGuiBvScd2TableDialog {
       }
       TableItem item = new TableItem(wSourceQueries.table, SWT.NONE);
       item.setText(1, ref.getSourceQueryName());
+      writeLegCutover(
+          item,
+          2,
+          ref.getSourceId(),
+          ref.getOp(),
+          ref.getNullPolicyDefault(),
+          ref.getPriorityOverride(),
+          ref.getOpField());
     }
     wSourceQueries.optimizeTableView();
     loadMappingsTable();
@@ -1323,6 +1460,10 @@ public class HopGuiBvScd2TableDialog {
       item.setText(1, mapping.getSatelliteName());
       item.setText(2, Const.NVL(mapping.getSourceFieldName(), ""));
       item.setText(3, Const.NVL(mapping.getTargetFieldName(), ""));
+      item.setText(4, Const.NVL(mapping.getRank(), ""));
+      item.setText(
+          5, mapping.getNullPolicy() == null ? "" : mapping.getNullPolicy().getCode());
+      item.setText(6, Const.NVL(mapping.getPresentFlagField(), ""));
     }
     wMappings.optimizeTableView();
     refreshMappingSourceCombos();
@@ -1355,6 +1496,14 @@ public class HopGuiBvScd2TableDialog {
       item.setText(1, config.getSatelliteName());
       item.setText(2, Const.NVL(config.getFunctionalTimestampField(), ""));
       item.setText(3, Const.NVL(config.getSourceIndicatorValue(), ""));
+      writeLegCutover(
+          item,
+          4,
+          config.getSourceId(),
+          config.getOp(),
+          config.getNullPolicyDefault(),
+          config.getPriorityOverride(),
+          config.getOpField());
     }
     wSatelliteConfigs.optimizeTableView();
   }
@@ -1369,8 +1518,121 @@ public class HopGuiBvScd2TableDialog {
       if (Utils.isEmpty(name) || BusinessVaultSourceQuerySupport.hasSourceQuery(target, name)) {
         continue;
       }
-      target.getSourceQueryRefs().add(new BvSourceQueryRef(name));
+      BvSourceQueryRef ref = new BvSourceQueryRef(name);
+      applyLegCutover(ref, item, 2);
+      target.getSourceQueryRefs().add(ref);
     }
+  }
+
+  private ColumnInfo calendarSystemColumn() {
+    ColumnInfo column =
+        new ColumnInfo(
+            BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Leg.Column.CalendarSystem"),
+            ColumnInfo.COLUMN_TYPE_CCOMBO,
+            calendarSystemNames(),
+            false);
+    column.setToolTip(
+        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Leg.Column.CalendarSystem.Tooltip"));
+    return column;
+  }
+
+  private static ColumnInfo legOperationColumn() {
+    return new ColumnInfo(
+        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Leg.Column.Operation"),
+        ColumnInfo.COLUMN_TYPE_CCOMBO,
+        new String[] {"", "upsert", "delete", "seed"},
+        false);
+  }
+
+  private static ColumnInfo legNullPolicyColumn() {
+    return new ColumnInfo(
+        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Leg.Column.NullPolicy"),
+        ColumnInfo.COLUMN_TYPE_CCOMBO,
+        new String[] {"", "inherit", "apply"},
+        false);
+  }
+
+  private static ColumnInfo legPriorityColumn() {
+    return new ColumnInfo(
+        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Leg.Column.PriorityOverride"),
+        ColumnInfo.COLUMN_TYPE_TEXT,
+        false);
+  }
+
+  private static ColumnInfo rankColumn() {
+    ColumnInfo column =
+        new ColumnInfo(
+            BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Mappings.Column.Rank"),
+            ColumnInfo.COLUMN_TYPE_TEXT,
+            false);
+    column.setToolTip(
+        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Mappings.Column.Rank.Tooltip"));
+    return column;
+  }
+
+  private static ColumnInfo nullPolicyColumn() {
+    ColumnInfo column =
+        new ColumnInfo(
+            BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Mappings.Column.NullPolicy"),
+            ColumnInfo.COLUMN_TYPE_CCOMBO,
+            new String[] {"", "inherit", "apply"},
+            false);
+    column.setToolTip(
+        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Mappings.Column.NullPolicy.Tooltip"));
+    return column;
+  }
+
+  private static ColumnInfo presentFlagColumn() {
+    ColumnInfo column =
+        new ColumnInfo(
+            BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Mappings.Column.PresentFlag"),
+            ColumnInfo.COLUMN_TYPE_TEXT,
+            false);
+    column.setToolTip(
+        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Mappings.Column.PresentFlag.Tooltip"));
+    return column;
+  }
+
+  private static ColumnInfo legOpFieldColumn() {
+    ColumnInfo column =
+        new ColumnInfo(
+            BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Leg.Column.OperationField"),
+            ColumnInfo.COLUMN_TYPE_TEXT,
+            false);
+    column.setToolTip(
+        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.Leg.Column.OperationField.Tooltip"));
+    return column;
+  }
+
+  private static void writeLegCutover(
+      TableItem item,
+      int firstColumn,
+      String sourceId,
+      BvLegOperation op,
+      BvNullPolicy nullPolicy,
+      String priorityOverride,
+      String opField) {
+    item.setText(firstColumn, Const.NVL(sourceId, ""));
+    item.setText(firstColumn + 1, op == null ? "" : op.getCode());
+    item.setText(firstColumn + 2, nullPolicy == null ? "" : nullPolicy.getCode());
+    item.setText(firstColumn + 3, Const.NVL(priorityOverride, ""));
+    item.setText(firstColumn + 4, Const.NVL(opField, ""));
+  }
+
+  private static void applyLegCutover(BvScd2SatelliteConfig config, TableItem item, int firstColumn) {
+    config.setSourceId(Const.trim(item.getText(firstColumn)));
+    config.setOp(BvLegOperation.lookupCode(item.getText(firstColumn + 1)));
+    config.setNullPolicyDefault(BvNullPolicy.lookupCode(item.getText(firstColumn + 2)));
+    config.setPriorityOverride(Const.trim(item.getText(firstColumn + 3)));
+    config.setOpField(Const.trim(item.getText(firstColumn + 4)));
+  }
+
+  private static void applyLegCutover(BvSourceQueryRef ref, TableItem item, int firstColumn) {
+    ref.setSourceId(Const.trim(item.getText(firstColumn)));
+    ref.setOp(BvLegOperation.lookupCode(item.getText(firstColumn + 1)));
+    ref.setNullPolicyDefault(BvNullPolicy.lookupCode(item.getText(firstColumn + 2)));
+    ref.setPriorityOverride(Const.trim(item.getText(firstColumn + 3)));
+    ref.setOpField(Const.trim(item.getText(firstColumn + 4)));
   }
 
   private void applyDerivativesToTable(BvScd2Table target) {
@@ -1505,6 +1767,9 @@ public class HopGuiBvScd2TableDialog {
     target.setIncrementalWatermarkField(wIncrementalWatermark.getText());
     target.setValidFromField(wValidFromField.getText());
     target.setValidToField(wValidToField.getText());
+    target.setSourceCalendarName(Const.trim(wSourceCalendar.getText()));
+    target.setIdentityMapName(Const.trim(wIdentityMap.getText()));
+    target.setIdentityUnmappedPolicy(BvIdentityUnmappedPolicy.lookupCode(wIdentityUnmapped.getText()));
 
     applyDerivativesToTable(target);
     BusinessVaultDerivativeSupport.setParentHub(target, wParentHubName.getText());
@@ -1524,6 +1789,9 @@ public class HopGuiBvScd2TableDialog {
       }
       BvScd2FieldMapping mapping =
           new BvScd2FieldMapping(satelliteName, sourceFieldName, targetFieldName);
+      mapping.setRank(Const.trim(item.getText(4)));
+      mapping.setNullPolicy(BvNullPolicy.lookupCode(item.getText(5)));
+      mapping.setPresentFlagField(Const.trim(item.getText(6)));
       target.getFieldMappings().add(mapping);
     }
 
@@ -1536,6 +1804,7 @@ public class HopGuiBvScd2TableDialog {
       BvScd2SatelliteConfig config = new BvScd2SatelliteConfig(satelliteName);
       config.setFunctionalTimestampField(item.getText(2));
       config.setSourceIndicatorValue(item.getText(3));
+      applyLegCutover(config, item, 4);
       target.getSatelliteConfigs().add(config);
     }
 
@@ -1803,6 +2072,12 @@ public class HopGuiBvScd2TableDialog {
             "HopGuiBvScd2TableDialog.ValidFromField.Tooltip",
             Const.NVL(
                 config.getValidFromField(), BusinessVaultConfiguration.DEFAULT_VALID_FROM_FIELD)));
+    wSourceCalendar.setToolTipText(
+        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.SourceCalendar.Tooltip"));
+    wIdentityMap.setToolTipText(
+        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.IdentityMap.Tooltip"));
+    wIdentityUnmapped.setToolTipText(
+        BaseMessages.getString(PKG, "HopGuiBvScd2TableDialog.IdentityUnmapped.Tooltip"));
     wValidToField.setToolTipText(
         BaseMessages.getString(
             PKG,

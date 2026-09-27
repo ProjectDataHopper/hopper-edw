@@ -84,6 +84,24 @@ public class BvScd2Table extends BvTableBase {
   @HopMetadataProperty private String parentHubName;
 
   /**
+   * Optional {@link BvSourceCalendar} on this canvas. Empty means every leg is always eligible.
+   * Each satellite and source-query leg then stores the calendar {@code sourceId} it belongs to.
+   */
+  @HopMetadataProperty private String sourceCalendarName;
+
+  /**
+   * Optional {@link BvIdentityMap} on this canvas. Empty keeps the raw hub hash as the SCD2 grain.
+   */
+  @HopMetadataProperty private String identityMapName;
+
+  /**
+   * Blank uses the identity map's unmapped policy. {@code self} keeps the raw hash, {@code drop}
+   * and {@code quarantine} leave the row out of the timeline.
+   */
+  @HopMetadataProperty(storeWithCode = true)
+  private BvIdentityUnmappedPolicy identityUnmappedPolicy;
+
+  /**
    * When true, hub business keys are joined for calculations but not written to the BV table.
    * Stored as the uncommon case so older {@code .hbv} files without this tag deserialize as false
    * (keys are loaded when Include hub business keys is enabled).
@@ -291,6 +309,8 @@ public class BvScd2Table extends BvTableBase {
         remarks, this, bvConfig, dvConfig, dataVaultModel, model, variables, metadataProvider);
     BvScd2CalculationValidationSupport.validate(
         remarks, this, bvConfig, dataVaultModel, model, variables);
+    BvSourceCalendarSupport.validateScd2(remarks, this, model, variables);
+    BvIdentityResolutionSupport.validateScd2(remarks, this, model, variables);
     if (dataVaultModel != null) {
       BvScd2PipelineSupport.validateTargetDatabases(
           remarks, metadataProvider, model, dataVaultModel, this);

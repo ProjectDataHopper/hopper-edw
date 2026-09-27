@@ -1179,6 +1179,8 @@ public class BusinessVaultModelPainter extends BasePainter {
       case BUSINESS_TABLE -> new int[] {40, 120, 60};
       case SOURCE_QUERY -> new int[] {90, 90, 110};
       case BRIDGE -> new int[] {180, 130, 20};
+      case SOURCE_CALENDAR -> new int[] {13, 148, 136};
+      case IDENTITY_MAP -> new int[] {91, 33, 182};
     };
   }
 
@@ -1192,6 +1194,8 @@ public class BusinessVaultModelPainter extends BasePainter {
       case SCD2 -> dark ? new int[] {16, 36, 54} : new int[] {228, 240, 248};
       case SOURCE_QUERY -> dark ? new int[] {30, 24, 44} : new int[] {236, 234, 246};
       case BRIDGE -> dark ? new int[] {48, 36, 12} : new int[] {254, 252, 191};
+      case SOURCE_CALENDAR -> dark ? new int[] {12, 40, 40} : new int[] {224, 244, 242};
+      case IDENTITY_MAP -> dark ? new int[] {36, 24, 58} : new int[] {237, 233, 254};
       default -> null;
     };
   }
@@ -1213,6 +1217,8 @@ public class BusinessVaultModelPainter extends BasePainter {
       case SCD2 -> new int[] {88, 148, 186};
       case SOURCE_QUERY -> new int[] {130, 118, 168};
       case BRIDGE -> new int[] {183, 121, 31};
+      case SOURCE_CALENDAR -> new int[] {13, 148, 136};
+      case IDENTITY_MAP -> new int[] {91, 33, 182};
       default -> null;
     };
   }
@@ -1225,6 +1231,8 @@ public class BusinessVaultModelPainter extends BasePainter {
       case SCD2 -> "2";
       case SOURCE_QUERY -> "Q";
       case BRIDGE -> "B";
+      case SOURCE_CALENDAR -> "C";
+      case IDENTITY_MAP -> "I";
       default -> null;
     };
   }

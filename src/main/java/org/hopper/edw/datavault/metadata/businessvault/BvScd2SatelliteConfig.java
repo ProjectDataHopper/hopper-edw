@@ -32,6 +32,24 @@ public class BvScd2SatelliteConfig {
 
   @HopMetadataProperty private String sourceIndicatorValue;
 
+  /** Source id on the SCD2 table's {@link BvSourceCalendar}. Empty means this leg is not filtered. */
+  @HopMetadataProperty private String sourceId;
+
+  @HopMetadataProperty(storeWithCode = true)
+  private BvLegOperation op;
+
+  @HopMetadataProperty(storeWithCode = true)
+  private BvNullPolicy nullPolicyDefault;
+
+  /** Blank uses the calendar row priority. Survivorship reads this later. */
+  @HopMetadataProperty private String priorityOverride;
+
+  /**
+   * Optional source column whose row value is upsert, delete, or seed. Blank uses {@link #op}. A
+   * key that does not appear on the leg is not a delete.
+   */
+  @HopMetadataProperty private String opField;
+
   public BvScd2SatelliteConfig(String satelliteName) {
     this.satelliteName = satelliteName;
   }
@@ -41,6 +59,11 @@ public class BvScd2SatelliteConfig {
       satelliteName = other.satelliteName;
       functionalTimestampField = other.functionalTimestampField;
       sourceIndicatorValue = other.sourceIndicatorValue;
+      sourceId = other.sourceId;
+      op = other.op;
+      nullPolicyDefault = other.nullPolicyDefault;
+      priorityOverride = other.priorityOverride;
+      opField = other.opField;
     }
   }
 }

@@ -90,6 +90,16 @@ public final class EdwNamingSchemeTypePlugins {
       name = "Business Vault source query names")
   public static final class BvSourceQuery extends EdwBuiltinNamingSchemeType {}
 
+  @NamingSchemeTypePlugin(
+      id = EdwNamingSchemeTypes.BV_SOURCE_CALENDAR,
+      name = "Business Vault source calendar names")
+  public static final class BvSourceCalendar extends EdwBuiltinNamingSchemeType {}
+
+  @NamingSchemeTypePlugin(
+      id = EdwNamingSchemeTypes.BV_IDENTITY_MAP,
+      name = "Business Vault identity map names")
+  public static final class BvIdentityMap extends EdwBuiltinNamingSchemeType {}
+
   @NamingSchemeTypePlugin(id = EdwNamingSchemeTypes.DM_DIMENSION, name = "Dimension names")
   public static final class DmDimension extends EdwBuiltinNamingSchemeType {}
 

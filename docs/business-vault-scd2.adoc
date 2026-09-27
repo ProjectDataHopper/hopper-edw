@@ -166,6 +166,49 @@ SCD2 merges those streams with satellite history on the **same hub grain**. Set 
 
 Mixed SCD2 (DV satellites plus source queries) is supported; two or more inputs still require field mappings. The mapping **Source** column is the satellite name or the source-query name. **Suggest mappings** lets you pick one or more of those linked satellites and source queries, then fills unmapped fields from the selection.
 
+== Identity maps
+
+An **identity map** on the canvas resolves many raw hub hashes to one durable hash. Add it with **Add identity map**. An SCD2 table opts in with **Identity map**. Leave that blank and the timeline stays on the raw hub hash.
+
+The generated map pipeline reads the same-as link and the map rows already stored, then upserts. It does not truncate. A raw key that already has a durable key keeps it. A new duplicate in that cluster inherits it. A new cluster hashes the MDM id when one is present, otherwise the current master raw hash, and that value sticks. The preferred business key is updated in place and does not open an SCD2 version.
+
+On each SCD2 leg the generator looks up the map as of the row timestamp, writes the durable hash into the grain column, and keeps the raw hash as `hk_raw`. The preferred business key is carried as `preferred_bk` and is not a version driver. The map `rule_version` is stored as `map_rule_version`, also not a version driver. Rows before the mapping starts follow the unmapped policy: `self` uses the raw hash, `quarantine` and `drop` leave the row out of the timeline. Partitions, when set, use the durable hash and stay a full rebuild. Hub business keys, when loaded, join on `hk_raw` so the durable grain still finds the raw hub.
+
+Incremental build is allowed with a map. Rows after the watermark load as usual. A raw key whose `rule_version` no longer matches the open SCD2 row is read again from the earlier of that map row's `valid_from` and the watermark, and the open row for its durable key is closed. That extra read is generated only when the satellite uses the Business Vault database connection. Otherwise run a full rebuild after the map changes. Survivorship still forces a full rebuild.
+
+Naming an effectivity satellite requires both the from and to columns. Empty effectivity means the same-as match applies for the whole timeline.
+
+== Survivorship
+
+Field mappings can name more than one source for the same target column. Give every one of those rows a **Rank**. `1` wins over `2`. Leave rank blank when the target has a single source. If any rank is set, that SCD2 table uses `SurvivorshipMerge` instead of `SortedSchemaMerge` and Repeat. A table with no ranks is unchanged.
+
+The merge reads the legs already sorted by hash key and functional timestamp. At each timestamp it keeps the best-ranked value. **Null policy** `inherit` skips a null and tries the next rank. `apply` writes the null. A blank null policy uses the leg default, then the calendar: a delta-only source inherits, a full or seed source applies. `seed` fills a gap and does not replace a value already held by an upsert source. `delete` withdraws that source. A row is emitted only when the surviving values change. The build is a full rebuild even if the dialog says Incremental.
+
+**Present flag** is an optional source column on a mapping. When the flag is false, a null was left out of the message and does not change the stored value. When the flag is true, a null clears the value even if the null policy is `inherit`. Blank means the column arrived, so the null policy decides.
+
+**Operation field** is an optional column on a satellite or source query. A row value of `upsert`, `delete`, or `seed` overrides the leg operation. A key that does not appear on a delta feed is not deleted. A source query lists either a functional timestamp or a load date, not both.
+
+Calendar priority and the leg priority override are still stored. They are not the field rank.
+
+== Source calendars
+
+A **source calendar** says when each source system may contribute rows. Add it with **Add source calendar**. It is shared metadata, not a warehouse table. An SCD2 table opts in with **Source calendar**. Leave that blank and every satellite row is kept.
+
+**Calendar system** is a name you choose, such as `ORACLE` or `KAFKA`. It is not a table name. On the SCD2 table, open **Satellite settings** and pick that name from the dropdown. Source queries are picked on the **Derivatives** tab. A row is kept when the leg's functional timestamp falls in a window for that name.
+
+Oracle through February 2024, Kafka from 1 March 2024 onward:
+
+[cols="1,2,2", options="header"]
+|===
+|Calendar system |Effective from |Effective to
+|ORACLE |1900-01-01 |2024-03-01
+|KAFKA |2024-03-01 |
+|===
+
+`2024-02-29 23:59:59` is Oracle. `2024-03-01 00:00:00` is Kafka. A date with no time means midnight at the start of that day. An empty effective to means the source is still in use. Dates are `yyyy-MM-dd` or `yyyy-MM-dd HH:mm:ss`.
+
+The worked example and the column tooltips are in link:help/bv-source-calendar-dialog.adoc[the source calendar help]. How an SCD2 satellite picks `ORACLE` or `KAFKA` is in link:help/bv-scd2-table-dialog.adoc#satellite-settings[Satellite settings]. Priority and mode do not change this filter. Two SCD2 tables can share the calendar and still pick different calendar systems.
+
 == Single-satellite SCD2
 
 The simplest case: one DV satellite derivative → one BV table.
@@ -265,7 +308,10 @@ Open intervals use sentinels from configuration (default `1900-01-01 00:00:00` a
 |Required for multi-satellite tables. Maps satellite attribute → BV column.
 
 |Satellite configs
-|Per-satellite functional timestamp and source indicator for multi-satellite merges. The source indicator is the merge tag (`_bv_source`) and the BV record-source value when the satellite does not store a physical source-indicator column. Honor **Store record source indicator** on each DV satellite — SCD2 Table Input SQL never requests a column the satellite table does not have.
+|Per-satellite functional timestamp and source indicator for multi-satellite merges. The source indicator is the merge tag (`_bv_source`) and the BV record-source value when the satellite does not store a physical source-indicator column. Honor **Store record source indicator** on each DV satellite — SCD2 Table Input SQL never requests a column the satellite table does not have. When a source calendar is selected, **Calendar system** on this tab picks which name on that calendar the satellite uses. It is not a field on the Data Vault satellite.
+
+|Source calendar
+|Optional name of a `BvSourceCalendar` on this canvas. Empty means every leg is eligible. See <<Source calendars>>.
 |===
 
 The Customer 360 sample uses all three SCD2 dialog areas:

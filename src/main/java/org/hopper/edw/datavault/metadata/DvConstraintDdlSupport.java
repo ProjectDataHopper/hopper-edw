@@ -29,6 +29,8 @@ import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BvBridge;
 import org.hopper.edw.datavault.metadata.businessvault.BvBridgeLayoutSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BvBusinessTable;
+import org.hopper.edw.datavault.metadata.businessvault.BvIdentityKeys;
+import org.hopper.edw.datavault.metadata.businessvault.BvIdentityMap;
 import org.hopper.edw.datavault.metadata.businessvault.BvPitLayoutSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BvPitTable;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2PipelineSupport;
@@ -371,6 +373,9 @@ public final class DvConstraintDdlSupport {
     if (table instanceof BvBridge bridge) {
       return resolveBvBridgePrimaryKeyColumns(bridge, dataVaultModel, variables);
     }
+    if (table instanceof BvIdentityMap) {
+      return List.of(BvIdentityKeys.HK_RAW);
+    }
     return List.of();
   }
 
@@ -403,6 +408,9 @@ public final class DvConstraintDdlSupport {
     }
     if (table instanceof BvBridge bridge) {
       return resolveBvBridgeForeignKeys(bridge, dataVaultModel, variables);
+    }
+    if (table instanceof BvIdentityMap identityMap) {
+      return resolveIdentityMapForeignKeys(identityMap, dataVaultModel, variables);
     }
     return List.of();
   }
@@ -506,6 +514,37 @@ public final class DvConstraintDdlSupport {
             List.of(hashKey),
             parentTable,
             List.of(hashKey)));
+    return fks;
+  }
+
+  private static List<ForeignKeySpec> resolveIdentityMapForeignKeys(
+      BvIdentityMap identityMap, DataVaultModel dataVaultModel, IVariables variables) {
+    List<ForeignKeySpec> fks = new ArrayList<>();
+    if (identityMap == null
+        || dataVaultModel == null
+        || Utils.isEmpty(identityMap.getParentHubName())) {
+      return fks;
+    }
+    String hubName =
+        variables == null
+            ? identityMap.getParentHubName()
+            : variables.resolve(identityMap.getParentHubName());
+    DvHub hub = dataVaultModel.findHub(hubName, variables, null);
+    if (hub == null) {
+      return fks;
+    }
+    String childTable = physicalTableName(identityMap);
+    String parentTable = physicalTableName(hub);
+    String parentHash = resolveHubHashKeyColumn(hub, variables);
+    if (Utils.isEmpty(childTable) || Utils.isEmpty(parentTable) || Utils.isEmpty(parentHash)) {
+      return fks;
+    }
+    fks.add(
+        new ForeignKeySpec(
+            constraintName("fk", childTable, parentTable),
+            List.of(BvIdentityKeys.HK_RAW),
+            parentTable,
+            List.of(parentHash)));
     return fks;
   }
 

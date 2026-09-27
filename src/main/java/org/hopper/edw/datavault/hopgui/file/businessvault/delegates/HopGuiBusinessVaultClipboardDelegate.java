@@ -40,6 +40,8 @@ import org.hopper.edw.datavault.metadata.businessvault.BvBridge;
 import org.hopper.edw.datavault.metadata.businessvault.BvBusinessTable;
 import org.hopper.edw.datavault.metadata.businessvault.BvPitTable;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2Table;
+import org.hopper.edw.datavault.metadata.businessvault.BvIdentityMap;
+import org.hopper.edw.datavault.metadata.businessvault.BvSourceCalendar;
 import org.hopper.edw.datavault.metadata.businessvault.BvSourceQuery;
 import org.hopper.edw.datavault.metadata.businessvault.BvTableType;
 import org.hopper.edw.datavault.metadata.businessvault.IBvTable;
@@ -217,6 +219,10 @@ public class HopGuiBusinessVaultClipboardDelegate {
           XmlMetadataUtil.deSerializeFromXml(tableNode, BvSourceQuery.class, metadataProvider);
       case BRIDGE ->
           XmlMetadataUtil.deSerializeFromXml(tableNode, BvBridge.class, metadataProvider);
+      case SOURCE_CALENDAR ->
+          XmlMetadataUtil.deSerializeFromXml(tableNode, BvSourceCalendar.class, metadataProvider);
+      case IDENTITY_MAP ->
+          XmlMetadataUtil.deSerializeFromXml(tableNode, BvIdentityMap.class, metadataProvider);
     };
   }
 

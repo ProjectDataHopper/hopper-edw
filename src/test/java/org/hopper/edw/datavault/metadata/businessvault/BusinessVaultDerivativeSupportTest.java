@@ -116,6 +116,29 @@ class BusinessVaultDerivativeSupportTest {
   }
 
   @Test
+  void sourceCalendarDoesNotBindDataVaultTables() {
+    assertFalse(
+        BusinessVaultDerivativeSupport.isValidDerivativePair(
+            BvTableType.SOURCE_CALENDAR, DvTableType.HUB));
+    assertFalse(
+        BusinessVaultDerivativeSupport.isValidDerivativePair(
+            BvTableType.SOURCE_CALENDAR, DvTableType.SATELLITE));
+  }
+
+  @Test
+  void identityMapBindsHubAndLinkOnly() {
+    assertTrue(
+        BusinessVaultDerivativeSupport.isValidDerivativePair(
+            BvTableType.IDENTITY_MAP, DvTableType.HUB));
+    assertTrue(
+        BusinessVaultDerivativeSupport.isValidDerivativePair(
+            BvTableType.IDENTITY_MAP, DvTableType.LINK));
+    assertFalse(
+        BusinessVaultDerivativeSupport.isValidDerivativePair(
+            BvTableType.IDENTITY_MAP, DvTableType.SATELLITE));
+  }
+
+  @Test
   void bridgeAcceptsHubAndLink() {
     assertTrue(
         BusinessVaultDerivativeSupport.isValidDerivativePair(BvTableType.BRIDGE, DvTableType.HUB));

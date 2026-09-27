@@ -21,5 +21,9 @@ public enum BvTableType {
   PIT,
   BUSINESS_TABLE,
   SOURCE_QUERY,
-  BRIDGE
+  BRIDGE,
+  /** Shared cutover calendar. Metadata only; not a loaded warehouse table. */
+  SOURCE_CALENDAR,
+  /** Raw hub hash to durable hash. Loaded before SCD2 tables that name it. */
+  IDENTITY_MAP
 }

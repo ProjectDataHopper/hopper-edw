@@ -32,6 +32,24 @@ public class BvSourceQueryRef {
 
   @HopMetadataProperty private String sourceQueryName;
 
+  /** Source id on the SCD2 table's {@link BvSourceCalendar}. Empty means this leg is not filtered. */
+  @HopMetadataProperty private String sourceId;
+
+  @HopMetadataProperty(storeWithCode = true)
+  private BvLegOperation op;
+
+  @HopMetadataProperty(storeWithCode = true)
+  private BvNullPolicy nullPolicyDefault;
+
+  /** Blank uses the calendar row priority. Survivorship reads this later. */
+  @HopMetadataProperty private String priorityOverride;
+
+  /**
+   * Optional source column whose row value is upsert, delete, or seed. Blank uses {@link #op}. A
+   * key that does not appear on the leg is not a delete.
+   */
+  @HopMetadataProperty private String opField;
+
   public BvSourceQueryRef(String sourceQueryName) {
     this.sourceQueryName = sourceQueryName;
   }

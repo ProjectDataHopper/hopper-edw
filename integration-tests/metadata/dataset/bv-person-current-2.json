@@ -1,0 +1,33 @@
+{
+  "base_filename": "bv-resolution/bv-person-current-2.csv",
+  "virtualPath": "/bv-resolution",
+  "name": "bv-person-current-2",
+  "description": "Current person SCD2 rows after the Kafka cutover",
+  "dataset_fields": [
+    {
+      "field_comment": "person_ids",
+      "field_length": 40,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "person_ids",
+      "field_format": ""
+    },
+    {
+      "field_comment": "email",
+      "field_length": 80,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "email",
+      "field_format": ""
+    },
+    {
+      "field_comment": "city",
+      "field_length": 40,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "city",
+      "field_format": ""
+    }
+  ],
+  "folder_name": ""
+}

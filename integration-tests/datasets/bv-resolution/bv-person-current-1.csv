@@ -1,0 +1,3 @@
+person_ids,email,city
+K100|O100,oracle@old.example,Brussels
+O200,only-oracle@example,Ghent

@@ -1,0 +1,3 @@
+person_id,rule_version,durable_frozen,master_is_k100,shared_durable
+K100,2,Y,Y,Y
+O100,2,Y,Y,Y

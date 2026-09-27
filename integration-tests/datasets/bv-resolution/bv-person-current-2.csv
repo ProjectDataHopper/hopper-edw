@@ -1,0 +1,4 @@
+person_ids,email,city
+K100|O100,kafka@new.example,Ostend
+K300,kafka-only@example,
+O200,only-oracle@example,Ghent

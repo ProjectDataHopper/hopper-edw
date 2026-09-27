@@ -133,7 +133,6 @@ public final class BvScd2FieldMappingValidationSupport {
             scd2Table, satellites, sourceQueries, bvConfig, dvConfig, dataVaultModel, variables);
 
     if (hasMappings) {
-      Set<String> targetFieldNames = new HashSet<>();
       Set<String> sourceKeys = new HashSet<>();
       Map<String, Integer> mappingsPerSatellite = new HashMap<>();
       for (String derivativeName : derivativeNames) {
@@ -186,18 +185,6 @@ public final class BvScd2FieldMappingValidationSupport {
                       scd2Table.getName(),
                       satelliteName,
                       sourceFieldName),
-                  scd2Table));
-        }
-
-        if (!targetFieldNames.add(targetFieldName.toLowerCase())) {
-          remarks.add(
-              new CheckResult(
-                  ICheckResult.TYPE_RESULT_ERROR,
-                  BaseMessages.getString(
-                      PKG,
-                      "BvScd2FieldMappingValidationSupport.Error.DuplicateTargetField",
-                      scd2Table.getName(),
-                      targetFieldName),
                   scd2Table));
         }
 
@@ -259,9 +246,12 @@ public final class BvScd2FieldMappingValidationSupport {
                       sourceFieldName),
                   scd2Table));
         }
+        validatePresentFlag(
+            remarks, scd2Table, mapping, satellite, sourceQuery, satelliteName, variables);
 
         mappingsPerSatellite.merge(satelliteName, 1, Integer::sum);
       }
+      BvSurvivorshipSupport.validateRanks(remarks, scd2Table, variables);
 
       if (satellites.size() + sourceQueries.size() > 1) {
         for (Map.Entry<String, Integer> entry : mappingsPerSatellite.entrySet()) {
@@ -688,6 +678,24 @@ public final class BvScd2FieldMappingValidationSupport {
                     functionalTimestampField),
                 scd2Table));
       }
+      if (satelliteConfig != null
+          && !Utils.isEmpty(satelliteConfig.getOpField())
+          && satellite.getAttributes() != null
+          && !satellite.getAttributes().isEmpty()) {
+        String opField = variables.resolve(satelliteConfig.getOpField());
+        if (!satelliteDefinesAttribute(satellite, opField)) {
+          remarks.add(
+              new CheckResult(
+                  ICheckResult.TYPE_RESULT_ERROR,
+                  BaseMessages.getString(
+                      PKG,
+                      "BvScd2FieldMappingValidationSupport.Error.MissingOpField",
+                      scd2Table.getName(),
+                      satellite.getName(),
+                      opField),
+                  scd2Table));
+        }
+      }
     }
   }
 
@@ -824,7 +832,133 @@ public final class BvScd2FieldMappingValidationSupport {
                     timestamp),
                 scd2Table));
       }
+      validateOneClock(remarks, scd2Table, sourceQuery, variables);
+      BvSourceQueryRef queryRef = findSourceQueryRef(scd2Table, sourceQuery.getName(), variables);
+      if (queryRef != null
+          && !Utils.isEmpty(queryRef.getOpField())
+          && !sourceQuery.getColumns().isEmpty()) {
+        String opField = variables.resolve(queryRef.getOpField());
+        if (!sourceQuery.definesColumn(opField)) {
+          remarks.add(
+              new CheckResult(
+                  ICheckResult.TYPE_RESULT_ERROR,
+                  BaseMessages.getString(
+                      PKG,
+                      "BvScd2FieldMappingValidationSupport.Error.MissingOpField",
+                      scd2Table.getName(),
+                      sourceQuery.getName(),
+                      opField),
+                  scd2Table));
+        }
+      }
     }
+  }
+
+  private static BvSourceQueryRef findSourceQueryRef(
+      BvScd2Table scd2Table, String sourceQueryName, IVariables variables) {
+    if (scd2Table == null || scd2Table.getSourceQueryRefs() == null || Utils.isEmpty(sourceQueryName)) {
+      return null;
+    }
+    String resolved = variables == null ? sourceQueryName : variables.resolve(sourceQueryName);
+    for (BvSourceQueryRef ref : scd2Table.getSourceQueryRefs()) {
+      if (ref == null || Utils.isEmpty(ref.getSourceQueryName())) {
+        continue;
+      }
+      String refName =
+          variables == null ? ref.getSourceQueryName() : variables.resolve(ref.getSourceQueryName());
+      if (resolved.equalsIgnoreCase(refName)) {
+        return ref;
+      }
+    }
+    return null;
+  }
+
+  private static void validatePresentFlag(
+      List<ICheckResult> remarks,
+      BvScd2Table scd2Table,
+      BvScd2FieldMapping mapping,
+      DvSatellite satellite,
+      BvSourceQuery sourceQuery,
+      String satelliteName,
+      IVariables variables) {
+    if (mapping == null || Utils.isEmpty(mapping.getPresentFlagField())) {
+      return;
+    }
+    String flag =
+        variables == null
+            ? mapping.getPresentFlagField().trim()
+            : variables.resolve(mapping.getPresentFlagField()).trim();
+    if (Utils.isEmpty(flag)) {
+      return;
+    }
+    String sourceField =
+        variables == null
+            ? mapping.getSourceFieldName()
+            : variables.resolve(mapping.getSourceFieldName());
+    if (flag.equalsIgnoreCase(sourceField)) {
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_ERROR,
+              BaseMessages.getString(
+                  PKG,
+                  "BvScd2FieldMappingValidationSupport.Error.PresentFlagSameAsValue",
+                  scd2Table.getName(),
+                  satelliteName,
+                  flag),
+              scd2Table));
+      return;
+    }
+    boolean known =
+        satellite != null
+            ? satelliteDefinesAttribute(satellite, flag)
+            : sourceQuery == null
+                || sourceQuery.getColumns().isEmpty()
+                || sourceQuery.definesColumn(flag);
+    if (!known) {
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_ERROR,
+              BaseMessages.getString(
+                  PKG,
+                  "BvScd2FieldMappingValidationSupport.Error.MissingPresentFlag",
+                  scd2Table.getName(),
+                  satelliteName,
+                  flag),
+              scd2Table));
+    }
+  }
+
+  static void validateOneClock(
+      List<ICheckResult> remarks,
+      BvScd2Table scd2Table,
+      BvSourceQuery sourceQuery,
+      IVariables variables) {
+    if (sourceQuery == null) {
+      return;
+    }
+    String eventTime =
+        variables == null
+            ? sourceQuery.getFunctionalTimestampField()
+            : variables.resolve(sourceQuery.getFunctionalTimestampField());
+    String processingTime =
+        variables == null
+            ? sourceQuery.getLoadDateField()
+            : variables.resolve(sourceQuery.getLoadDateField());
+    if (Utils.isEmpty(eventTime)
+        || Utils.isEmpty(processingTime)
+        || eventTime.equalsIgnoreCase(processingTime)) {
+      return;
+    }
+    remarks.add(
+        new CheckResult(
+            ICheckResult.TYPE_RESULT_ERROR,
+            BaseMessages.getString(
+                PKG,
+                "BvScd2FieldMappingValidationSupport.Error.TwoClocks",
+                sourceQuery.getName(),
+                eventTime,
+                processingTime),
+            scd2Table == null ? sourceQuery : scd2Table));
   }
 
   private static void validateParentHub(

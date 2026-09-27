@@ -64,6 +64,15 @@ Raw vault satellites remain insert-only (technical load history). SCD2 rewrites 
 |**Valid from / Valid to**
 |Output column names for SCD2 interval bounds (model defaults apply when empty).
 
+|**Source calendar**
+|Optional cutover calendar on this canvas. Empty keeps every satellite row. When set, open **Satellite settings** and pick a **Calendar system** for each satellite. Source queries are set on the **Derivatives** tab. This is not a field on the Data Vault satellite.
+
+|**Identity map**
+|Optional shared raw-to-durable map. Empty keeps the raw hub hash. When set, the grain column holds the durable hash. Incremental loads new satellite rows after the watermark. A raw key whose map version changed is replayed when the satellite uses the Business Vault connection; otherwise run a full rebuild after the map changes. Hash-key partitions stay a full rebuild.
+
+|**Unmapped keys**
+|Blank uses the map default. `self` keeps the raw hash. `quarantine` and `drop` leave the row out of the timeline.
+
 |===
 
 === Functional timestamp resolution
@@ -90,6 +99,8 @@ Use **Debug** or **Show build pipeline** on the canvas to inspect the generated 
 
 Required when **two or more** satellites or source queries feed the table. Map each `(source, source field)` to a BV target column name. **Validate** / Check model checks parent hub existence, source field existence on the satellite or source query, unique source and target names, that targets do not collide with hash key / validity / record-source columns, and that every persisted column **name** fits the target database identifier limit (PostgreSQL 63 characters, MySQL/SingleStore 64). Hash key, functional timestamp, and load date cannot be mapped as attributes.
 
+**Rank** is blank when a target has one source. Two sources may share a target only when every row for that target has a rank. `1` wins over `2`. Any rank switches the whole table to survivorship merge and a full rebuild. **Null policy** is blank to use the leg default: `inherit` keeps the previous value when this source is null, `apply` writes the null. **Present flag** is an optional source column: false means the null was absent, true means the null clears the value. **Suggest mappings** leaves rank and the present flag blank.
+
 A Linked Hub / **Parent hub** is enough to resolve the grain hash key even when a satellite has no parent of its own. Generated Table Output and bulk-loader field lists include every mapping with Load enabled (you should not need **Get fields** on the loader to pick up mapped columns).
 
 **Suggest mappings** first asks which linked satellites and source queries to fill (all are selected by default). It then reloads the linked `.hdv` from disk and adds one row per unmapped satellite attribute **and** per unmapped source-query column among the selection (hash key, functional timestamp, and load date on the source query are skipped). Target names stay unique on collisions and are truncated to the identifier limit. If nothing is added, a message explains why: Data Vault model not loaded (satellites only), satellite not in that model, source query not on the canvas, the satellite has no attributes (use **Get attributes**), or the source query has no columns (use **Get fields**). You do not need to close the BV tab after editing the `.hdv` or a source query.
@@ -100,12 +111,32 @@ Single-satellite tables can pass attributes through under DV names unless you ad
 
 **Validate** always shows a result, including a short Data Vault resolution summary. It is not a silent no-op when there are no errors.
 
-== Satellite configs
+== Satellite settings
 
-Optional per-satellite settings for multi-satellite merges:
+This tab is on the **SCD2 table**, not on the Data Vault satellite and not on the satellite alias. Open the SCD2 table, then this tab.
 
-- Functional timestamp override for that satellite
-- Source indicator value when you need to tag which satellite contributed a version (and to fill the BV record-source column when that satellite does not store a physical source-indicator column)
+The grid has one row per linked satellite. **Calendar system** is how that satellite uses the source calendar selected on the main tab. The dropdown lists the names written on that calendar. Pick one. Several satellites can share a name when they come from the same system.
+
+Using the calendar in link:bv-source-calendar-dialog.adoc[the source calendar help]:
+
+[cols="2,2,2", options="header"]
+|===
+|Satellite |Calendar system |What is kept
+|sat_customer_demo |ORACLE |Rows from 1900-01-01 up to, but not including, 2024-03-01 00:00:00
+|sat_customer_contact |KAFKA |Rows from 2024-03-01 00:00:00 onward
+|===
+
+`2024-02-29 23:59:59` on `sat_customer_demo` is kept. `2024-03-01 00:00:00` on that satellite is not. The same instant on `sat_customer_contact` is kept. The comparison uses that row's functional timestamp.
+
+Leave **Calendar system** empty only when **Source calendar** on the main tab is empty. Check model names this tab when a calendar is selected and a satellite has no choice.
+
+The other columns:
+
+- **Functional timestamp override** — this satellite's timestamp, when it is not the table default
+- **Source indicator value** — tag written on the merged row, and the record-source value when the satellite does not store one
+- **Operation**, **Null policy**, **Priority override**, and **Operation field** — used when this table ranks fields. They do not change which calendar rows are kept. `seed` is valid only on a source query. Priority override is stored and is not the field rank.
+
+Source queries are not on this tab. On the **Derivatives** tab, each source-query row has the same **Calendar system** dropdown.
 
 If a derivative satellite has **Store record source indicator** unchecked, generated satellite `TableInput` SQL does not select the vault record-source column. The BV table still receives a record-source value from this config (or the satellite name).
 

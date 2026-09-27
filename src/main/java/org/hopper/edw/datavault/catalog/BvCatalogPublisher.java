@@ -102,7 +102,8 @@ public final class BvCatalogPublisher {
     for (IBvTable table : bvModel.getTables()) {
       if (table == null
           || Utils.isEmpty(table.getName())
-          || table.getTableType() == BvTableType.SOURCE_QUERY) {
+          || table.getTableType() == BvTableType.SOURCE_QUERY
+          || table.getTableType() == BvTableType.SOURCE_CALENDAR) {
         continue;
       }
       try {

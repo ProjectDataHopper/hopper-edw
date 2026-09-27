@@ -28,6 +28,8 @@ public final class SchemaStereotypes {
   public static final String PIT = "PIT";
   public static final String BUSINESS_TABLE = "BusinessTable";
   public static final String SOURCE_QUERY = "SourceQuery";
+  public static final String SOURCE_CALENDAR = "SourceCalendar";
+  public static final String IDENTITY_MAP = "IdentityMap";
   public static final String TABLE = "Table";
   public static final String DATA_VAULT = "DataVault";
 
@@ -48,6 +50,8 @@ public final class SchemaStereotypes {
       case PIT -> "#dae8fc";
       case BUSINESS_TABLE -> "#d5e8d4";
       case SOURCE_QUERY -> "#ffe6cc";
+      case SOURCE_CALENDAR -> "#E6FFFA";
+      case IDENTITY_MAP -> "#EDE9FE";
       case DATA_VAULT -> "#f5f5f5";
       default -> "#ffffff";
     };
@@ -68,6 +72,8 @@ public final class SchemaStereotypes {
       case PIT -> "#6c8ebf";
       case BUSINESS_TABLE -> "#82b366";
       case SOURCE_QUERY -> "#d79b00";
+      case SOURCE_CALENDAR -> "#0D9488";
+      case IDENTITY_MAP -> "#5B21B6";
       default -> "#666666";
     };
   }

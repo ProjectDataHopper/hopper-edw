@@ -199,6 +199,20 @@ public class BvSourceQuery extends BvTableBase {
     }
 
     String resolvedLoadDate = resolve(loadDateField, variables);
+    if (!Utils.isEmpty(resolvedTs)
+        && !Utils.isEmpty(resolvedLoadDate)
+        && !resolvedTs.equalsIgnoreCase(resolvedLoadDate)) {
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_ERROR,
+              BaseMessages.getString(
+                  PKG,
+                  "BvSourceQuery.CheckResult.TwoClocks",
+                  getName(),
+                  resolvedTs,
+                  resolvedLoadDate),
+              this));
+    }
     if (!Utils.isEmpty(resolvedLoadDate)
         && !getColumns().isEmpty()
         && !definesColumn(resolvedLoadDate)) {

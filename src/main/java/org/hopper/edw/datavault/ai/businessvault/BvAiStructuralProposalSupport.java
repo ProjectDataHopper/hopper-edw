@@ -249,8 +249,9 @@ final class BvAiStructuralProposalSupport {
       throws HopException {
     IBvTable table = requireTable(model, required(proposal, "tableName"));
     String dvTableName = required(proposal, "dvTableName");
-    if (table.getTableType() == BvTableType.SOURCE_QUERY) {
-      return blocked(proposal, "Source queries cannot bind Data Vault tables");
+    if (table.getTableType() == BvTableType.SOURCE_QUERY
+        || table.getTableType() == BvTableType.SOURCE_CALENDAR) {
+      return blocked(proposal, "Source queries and source calendars cannot bind Data Vault tables");
     }
     if (BusinessVaultDerivativeSupport.hasDerivative(table, dvTableName)) {
       return blocked(proposal, "Already bound to " + dvTableName);

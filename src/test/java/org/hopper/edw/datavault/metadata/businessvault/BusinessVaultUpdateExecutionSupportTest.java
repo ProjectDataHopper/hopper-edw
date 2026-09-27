@@ -16,6 +16,7 @@
 package org.hopper.edw.datavault.metadata.businessvault;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -33,6 +34,15 @@ class BusinessVaultUpdateExecutionSupportTest {
     assertTrue(
         BusinessVaultUpdateExecutionSupport.isPipelineExecutableTableType(
             BvTableType.BUSINESS_TABLE));
+    assertFalse(
+        BusinessVaultUpdateExecutionSupport.isPipelineExecutableTableType(
+            BvTableType.SOURCE_CALENDAR));
+    assertFalse(
+        BusinessVaultUpdateExecutionSupport.isPipelineExecutableTableType(
+            BvTableType.SOURCE_QUERY));
+    assertTrue(
+        BusinessVaultUpdateExecutionSupport.isPipelineExecutableTableType(
+            BvTableType.IDENTITY_MAP));
   }
 
   @Test
@@ -52,14 +62,18 @@ class BusinessVaultUpdateExecutionSupportTest {
     business.setName("dim_customer");
     business.setSqlQuery("SELECT 1");
 
+    BvIdentityMap identityMap = new BvIdentityMap();
+    identityMap.setName("map_person");
+
     List<IBvTable> ordered =
         BusinessVaultUpdateExecutionSupport.orderTablesForPipelineExecution(
-            List.of(pit, scd2, business, bridge));
+            List.of(pit, scd2, business, bridge, identityMap));
 
-    assertEquals(4, ordered.size());
-    assertEquals("sat_customer_hb", ordered.get(0).getName());
-    assertEquals("pit_customer", ordered.get(1).getName());
-    assertEquals("customer_account_bridge", ordered.get(2).getName());
-    assertEquals("dim_customer", ordered.get(3).getName());
+    assertEquals(5, ordered.size());
+    assertEquals("map_person", ordered.get(0).getName());
+    assertEquals("sat_customer_hb", ordered.get(1).getName());
+    assertEquals("pit_customer", ordered.get(2).getName());
+    assertEquals("customer_account_bridge", ordered.get(3).getName());
+    assertEquals("dim_customer", ordered.get(4).getName());
   }
 }

@@ -50,6 +50,8 @@ public final class EdwNamingSchemeTypes {
   public static final String BV_BRIDGE = "bv-bridge";
   public static final String BV_BUSINESS_TABLE = "bv-business-table";
   public static final String BV_SOURCE_QUERY = "bv-source-query";
+  public static final String BV_SOURCE_CALENDAR = "bv-source-calendar";
+  public static final String BV_IDENTITY_MAP = "bv-identity-map";
 
   public static final String DM_DIMENSION = "dm-dimension";
   public static final String DM_DIMENSION_ALIAS = "dm-dimension-alias";
@@ -94,6 +96,8 @@ public final class EdwNamingSchemeTypes {
       case BRIDGE -> BV_BRIDGE;
       case BUSINESS_TABLE -> BV_BUSINESS_TABLE;
       case SOURCE_QUERY -> BV_SOURCE_QUERY;
+      case SOURCE_CALENDAR -> BV_SOURCE_CALENDAR;
+      case IDENTITY_MAP -> BV_IDENTITY_MAP;
       default -> BV_SCD2;
     };
   }

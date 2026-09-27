@@ -154,6 +154,22 @@ For a slide-style executive summary, see link:presentations/hop-data-vault-overv
 |Preview
 |link:help/bv-source-query-dialog.adoc[Source query dialog], link:business-vault-scd2.adoc[Business Vault SCD2]
 
+|BV identity map (raw hub hash to durable hash, as-of lookup on SCD2)
+|Preview
+|link:business-vault-scd2.adoc#identity-maps[Business Vault SCD2], issue https://github.com/ProjectDataHopper/hopper-edw/issues/183[#183]
+
+|BV present flags (delta null means absent unless the flag says the field was cleared)
+|Preview
+|link:business-vault-scd2.adoc#survivorship[Business Vault SCD2], issue https://github.com/ProjectDataHopper/hopper-edw/issues/183[#183]
+
+|BV survivorship (ranked field mappings replace the SCD2 merge for that table)
+|Preview
+|link:business-vault-scd2.adoc#survivorship[Business Vault SCD2], issue https://github.com/ProjectDataHopper/hopper-edw/issues/183[#183]
+
+|BV source calendar (shared cutover windows on SCD2 legs)
+|Preview
+|link:business-vault-scd2.adoc#source-calendars[Business Vault SCD2], issue https://github.com/ProjectDataHopper/hopper-edw/issues/183[#183]
+
 |BV PIT tables
 |Available
 |link:business-vault-pit.adoc[Business Vault PIT]

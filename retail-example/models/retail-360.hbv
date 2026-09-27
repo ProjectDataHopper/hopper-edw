@@ -25,6 +25,7 @@ limitations under the License.
     <table>
       <buildMode>FULL_REBUILD</buildMode>
       <hashKeyPartitionCount>NONE</hashKeyPartitionCount>
+      <sqlExpressionCopyCount/>
       <functionalTimestampField>x_load_ts</functionalTimestampField>
       <incrementalWatermarkField/>
       <validFromField/>
@@ -32,6 +33,8 @@ limitations under the License.
       <includeHashKey>Y</includeHashKey>
       <includeHubBusinessKeys>Y</includeHubBusinessKeys>
       <parentHubName>hub_customer</parentHubName>
+      <sourceCalendarName>Oracle-Kafka-Calendar</sourceCalendarName>
+      <identityMapName/>
       <hubBusinessKeysCalculationOnly>N</hubBusinessKeysCalculationOnly>
       <field_mappings>
         <field_mapping>
@@ -39,66 +42,88 @@ limitations under the License.
           <sourceFieldName>segment</sourceFieldName>
           <targetFieldName>cust_segment</targetFieldName>
           <calculationOnly>N</calculationOnly>
+          <rank/>
+          <presentFlagField/>
         </field_mapping>
         <field_mapping>
           <satelliteName>sat_customer_demo</satelliteName>
           <sourceFieldName>loyalty_tier</sourceFieldName>
           <targetFieldName>cust_loyalty_tier</targetFieldName>
           <calculationOnly>N</calculationOnly>
+          <rank/>
+          <presentFlagField/>
         </field_mapping>
         <field_mapping>
           <satelliteName>sat_customer_demo</satelliteName>
           <sourceFieldName>demo_score</sourceFieldName>
           <targetFieldName>cust_demo_score</targetFieldName>
           <calculationOnly>N</calculationOnly>
+          <rank/>
+          <presentFlagField/>
         </field_mapping>
         <field_mapping>
           <satelliteName>sat_customer_contact</satelliteName>
           <sourceFieldName>email</sourceFieldName>
           <targetFieldName>cust_email</targetFieldName>
           <calculationOnly>N</calculationOnly>
+          <rank/>
+          <presentFlagField/>
         </field_mapping>
         <field_mapping>
           <satelliteName>sat_customer_contact</satelliteName>
           <sourceFieldName>phone</sourceFieldName>
           <targetFieldName>cust_phone</targetFieldName>
           <calculationOnly>N</calculationOnly>
+          <rank/>
+          <presentFlagField/>
         </field_mapping>
         <field_mapping>
           <satelliteName>sat_customer_address</satelliteName>
           <sourceFieldName>address_line1</sourceFieldName>
           <targetFieldName>cust_address</targetFieldName>
           <calculationOnly>N</calculationOnly>
+          <rank/>
+          <presentFlagField/>
         </field_mapping>
         <field_mapping>
           <satelliteName>sat_customer_address</satelliteName>
           <sourceFieldName>city</sourceFieldName>
           <targetFieldName>cust_city</targetFieldName>
           <calculationOnly>N</calculationOnly>
+          <rank/>
+          <presentFlagField/>
         </field_mapping>
         <field_mapping>
           <satelliteName>sat_customer_address</satelliteName>
           <sourceFieldName>postal_code</sourceFieldName>
           <targetFieldName>cust_postal_code</targetFieldName>
           <calculationOnly>N</calculationOnly>
+          <rank/>
+          <presentFlagField/>
         </field_mapping>
         <field_mapping>
           <satelliteName>sat_customer_prefs</satelliteName>
           <sourceFieldName>newsletter_opt_in</sourceFieldName>
           <targetFieldName>cust_newsletter</targetFieldName>
           <calculationOnly>N</calculationOnly>
+          <rank/>
+          <presentFlagField/>
         </field_mapping>
         <field_mapping>
           <satelliteName>sat_customer_prefs</satelliteName>
           <sourceFieldName>preferred_channel</sourceFieldName>
           <targetFieldName>cust_channel</targetFieldName>
           <calculationOnly>N</calculationOnly>
+          <rank/>
+          <presentFlagField/>
         </field_mapping>
         <field_mapping>
           <satelliteName>sat_customer_prefs</satelliteName>
           <sourceFieldName>language_code</sourceFieldName>
           <targetFieldName>cust_language</targetFieldName>
           <calculationOnly>N</calculationOnly>
+          <rank/>
+          <presentFlagField/>
         </field_mapping>
       </field_mappings>
       <satellite_configs>
@@ -106,21 +131,33 @@ limitations under the License.
           <satelliteName>sat_customer_demo</satelliteName>
           <functionalTimestampField/>
           <sourceIndicatorValue>DEMO</sourceIndicatorValue>
+          <sourceId/>
+          <priorityOverride/>
+          <opField/>
         </satellite_config>
         <satellite_config>
           <satelliteName>sat_customer_contact</satelliteName>
           <functionalTimestampField/>
           <sourceIndicatorValue>CONTACT</sourceIndicatorValue>
+          <sourceId/>
+          <priorityOverride/>
+          <opField/>
         </satellite_config>
         <satellite_config>
           <satelliteName>sat_customer_address</satelliteName>
           <functionalTimestampField/>
           <sourceIndicatorValue>ADDRESS</sourceIndicatorValue>
+          <sourceId/>
+          <priorityOverride/>
+          <opField/>
         </satellite_config>
         <satellite_config>
           <satelliteName>sat_customer_prefs</satelliteName>
           <functionalTimestampField/>
           <sourceIndicatorValue>PREFS</sourceIndicatorValue>
+          <sourceId/>
+          <priorityOverride/>
+          <opField/>
         </satellite_config>
       </satellite_configs>
       <calculations>
@@ -164,6 +201,32 @@ limitations under the License.
       <xloc>528</xloc>
       <yloc>176</yloc>
       <name>customer_360_bv</name>
+    </table>
+    <table>
+      <entries>
+        <entry>
+          <sourceId>ORACLE</sourceId>
+          <effectiveFrom>1900-01-01</effectiveFrom>
+          <effectiveTo>2024-03-01</effectiveTo>
+          <priority/>
+          <mode>full</mode>
+        </entry>
+        <entry>
+          <sourceId>KAFKA</sourceId>
+          <effectiveFrom>2024-03-01</effectiveFrom>
+          <effectiveTo/>
+          <priority/>
+          <mode>delta</mode>
+        </entry>
+      </entries>
+      <tableName>source_calendar_1</tableName>
+      <description/>
+      <tableType>SOURCE_CALENDAR</tableType>
+      <derivatives/>
+      <source_query_refs/>
+      <xloc>528</xloc>
+      <yloc>400</yloc>
+      <name>Oracle-Kafka-Calendar</name>
     </table>
   </tables>
   <notes>

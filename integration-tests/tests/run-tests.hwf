@@ -545,6 +545,32 @@ dbType == "" || dbType == "postgres";
       <attributes_hac/>
     </action>
     <action>
+      <filename>${PROJECT_HOME}/tests/bv-resolution/update-bv-resolution.hwf</filename>
+      <params_from_previous>N</params_from_previous>
+      <exec_per_row>N</exec_per_row>
+      <set_logfile>N</set_logfile>
+      <logfile/>
+      <logext/>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <loglevel>Nothing</loglevel>
+      <set_append_logfile>N</set_append_logfile>
+      <create_parent_folder>N</create_parent_folder>
+      <wait_until_finished>Y</wait_until_finished>
+      <parameters>
+        <pass_all_parameters>Y</pass_all_parameters>
+      </parameters>
+      <run_configuration>local</run_configuration>
+      <name>bv-resolution</name>
+      <description>Postgres: calendar cutover, identity freeze, and ranked survivorship</description>
+      <type>WORKFLOW</type>
+      <attributes/>
+      <xloc>480</xloc>
+      <yloc>512</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
       <name>Success</name>
       <description/>
       <type>SUCCESS</type>
@@ -741,6 +767,13 @@ dbType == "" || dbType == "postgres";
     </hop>
     <hop>
       <from>multi-satellite-bv-incremental</from>
+      <to>bv-resolution</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>bv-resolution</from>
       <to>Success</to>
       <evaluation>Y</evaluation>
       <unconditional>N</unconditional>

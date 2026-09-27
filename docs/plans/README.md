@@ -32,6 +32,7 @@ For product documentation, start at [../README.md](../README.md) or [../feature-
 | [snowflake-support-plan.md](snowflake-support-plan.md) | Snowflake as a fifth EDW engine (dialect done; live LocalStack/real-account completion) |
 | [jinja-dbt-import-plan.md](jinja-dbt-import-plan.md) | Issue #72 — Jinja macros + dbt-core importer for BV SQL |
 | [bv-scd2-calculations-plan.md](bv-scd2-calculations-plan.md) | Issue #150 — BV SCD2 SQL calculations + tests |
+| [bv-identity-cutover-survivorship-plan.md](bv-identity-cutover-survivorship-plan.md) | Issue #183 — BV identity map, source calendar, survivorship (through present-flags; incremental SCD2 under a stable map remains) |
 | [late-arriving-dimensions-plan.md](late-arriving-dimensions-plan.md) | Issue #109 — late-arriving dimensions / inferred members (deferred) |
 | [orphan-prevention-plan.md](orphan-prevention-plan.md) | Issue #77 — optional DV orphan handling / placeholder hubs |
 | (session plan / issue #112) | Metadata harvesting as distinct EDW phase — product doc: [../metadata-harvesting.adoc](../metadata-harvesting.adoc) |

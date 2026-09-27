@@ -1,0 +1,17 @@
+{
+  "base_filename": "bv-resolution/bv-person-excluded.csv",
+  "virtualPath": "/bv-resolution",
+  "name": "bv-person-excluded",
+  "description": "Rows that the calendar must keep out of the person SCD2 table",
+  "dataset_fields": [
+    {
+      "field_comment": "bad_rows",
+      "field_length": 10,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "bad_rows",
+      "field_format": ""
+    }
+  ],
+  "folder_name": ""
+}

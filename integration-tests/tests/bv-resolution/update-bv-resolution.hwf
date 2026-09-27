@@ -1,0 +1,480 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright 2026 i-Bridge bv
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<workflow>
+  <name>update-bv-resolution</name>
+  <name_sync_with_filename>Y</name_sync_with_filename>
+  <description>Postgres proof of calendar cutover, identity freeze, and ranked survivorship</description>
+  <created_user>-</created_user>
+  <modified_user>-</modified_user>
+  <created_date>2026/09/25 00:00:00.000</created_date>
+  <modified_date>2026/09/25 00:00:00.000</modified_date>
+  <parameters>
+    <parameter>
+      <name>DV_INITIAL_LOAD_DATE</name>
+      <description>Load date inside the Oracle window and before the Kafka window</description>
+      <default_value>2024/02/15 00:00:00.000</default_value>
+    </parameter>
+    <parameter>
+      <name>DV_UPDATE_LOAD_DATE</name>
+      <description>Load date inside the Kafka window and after the Oracle window</description>
+      <default_value>2024/03/15 00:00:00.000</default_value>
+    </parameter>
+    <parameter>
+      <name>OUTPUT_COPIES</name>
+      <default_value>1</default_value>
+    </parameter>
+    <parameter>
+      <name>PIPELINE_COPIES</name>
+      <default_value>1</default_value>
+    </parameter>
+    <parameter>
+      <name>METRICS_FOLDER</name>
+      <default_value>${PROJECT_HOME}/metrics</default_value>
+    </parameter>
+  </parameters>
+  <actions>
+    <action>
+      <name>Start</name>
+      <description/>
+      <type>SPECIAL</type>
+      <attributes/>
+      <xloc>48</xloc>
+      <yloc>48</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <sql>DROP TABLE IF EXISTS bv_resolution_map_snapshot
+;
+DROP TABLE IF EXISTS bv_person_bvr
+;
+DROP TABLE IF EXISTS map_person_bvr
+;
+DROP TABLE IF EXISTS sat_person_oracle_bvr
+;
+DROP TABLE IF EXISTS sat_person_kafka_bvr
+;
+DROP TABLE IF EXISTS lnk_person_same_as_bvr
+;
+DROP TABLE IF EXISTS hub_person_bvr
+;
+</sql>
+      <connection>Vault</connection>
+      <useVariableSubstitution>N</useVariableSubstitution>
+      <sqlfromfile>N</sqlfromfile>
+      <sendOneStatement>N</sendOneStatement>
+      <name>drop bv-resolution vault tables</name>
+      <description/>
+      <type>SQL</type>
+      <attributes/>
+      <xloc>208</xloc>
+      <yloc>48</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <filename>${PROJECT_HOME}/tests/shared/create-source-tables-from-data-catalog.hpl</filename>
+      <params_from_previous>N</params_from_previous>
+      <exec_per_row>N</exec_per_row>
+      <clear_rows>N</clear_rows>
+      <clear_files>N</clear_files>
+      <create_parent_folder>N</create_parent_folder>
+      <set_logfile>N</set_logfile>
+      <loglevel>Basic</loglevel>
+      <wait_until_finished>Y</wait_until_finished>
+      <parameters>
+        <pass_all_parameters>Y</pass_all_parameters>
+      </parameters>
+      <run_configuration>local</run_configuration>
+      <name>create CRM source tables</name>
+      <description/>
+      <type>PIPELINE</type>
+      <attributes/>
+      <xloc>400</xloc>
+      <yloc>48</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <filename>${PROJECT_HOME}/tests/bv-resolution/load-bv-resolution-1.hpl</filename>
+      <params_from_previous>N</params_from_previous>
+      <exec_per_row>N</exec_per_row>
+      <clear_rows>N</clear_rows>
+      <clear_files>N</clear_files>
+      <create_parent_folder>N</create_parent_folder>
+      <set_logfile>N</set_logfile>
+      <loglevel>Basic</loglevel>
+      <wait_until_finished>Y</wait_until_finished>
+      <parameters>
+        <pass_all_parameters>Y</pass_all_parameters>
+      </parameters>
+      <run_configuration>local</run_configuration>
+      <name>load-bv-resolution-1</name>
+      <description/>
+      <type>PIPELINE</type>
+      <attributes/>
+      <xloc>592</xloc>
+      <yloc>48</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <sql>UPDATE person_oracle_bvr SET city = NULL WHERE city = ''
+;
+UPDATE person_kafka_bvr SET city = NULL WHERE city = ''
+;
+</sql>
+      <connection>CRM</connection>
+      <useVariableSubstitution>N</useVariableSubstitution>
+      <sqlfromfile>N</sqlfromfile>
+      <sendOneStatement>N</sendOneStatement>
+      <name>null empty cities 1</name>
+      <description/>
+      <type>SQL</type>
+      <attributes/>
+      <xloc>784</xloc>
+      <yloc>48</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <dataVaultModelFile>${PROJECT_HOME}/tests/bv-resolution/bv-resolution.hdv</dataVaultModelFile>
+      <pipelineRunConfiguration>local</pipelineRunConfiguration>
+      <logModelCheckFailures>Y</logModelCheckFailures>
+      <abortOnModelCheckFailures>Y</abortOnModelCheckFailures>
+      <detailedDataTypeChecking>N</detailedDataTypeChecking>
+      <parallelPipelineCopies>${PIPELINE_COPIES}</parallelPipelineCopies>
+      <pipelineStagingFolder/>
+      <metricsOutputFolder>${METRICS_FOLDER}</metricsOutputFolder>
+      <publishToCatalog>Y</publishToCatalog>
+      <dataCatalogConnection>vault-catalog</dataCatalogConnection>
+      <updateTargetDatabaseStructure>Y</updateTargetDatabaseStructure>
+      <ddlSqlFilename>${java.io.tmpdir}/bv-resolution-ddl.sql</ddlSqlFilename>
+      <failIfDdlNeeded>N</failIfDdlNeeded>
+      <loadDate>${DV_INITIAL_LOAD_DATE}</loadDate>
+      <recordSourceGroup/>
+      <ensureSpecialRecords>Y</ensureSpecialRecords>
+      <doNotUpdateTargetDatabase>N</doNotUpdateTargetDatabase>
+      <name>update bv-resolution.hdv</name>
+      <description/>
+      <type>DATA_VAULT_UPDATE</type>
+      <attributes/>
+      <xloc>976</xloc>
+      <yloc>48</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <businessVaultModelFile>${PROJECT_HOME}/tests/bv-resolution/bv-resolution.hbv</businessVaultModelFile>
+      <pipelineRunConfiguration>local</pipelineRunConfiguration>
+      <logModelCheckFailures>Y</logModelCheckFailures>
+      <abortOnModelCheckFailures>Y</abortOnModelCheckFailures>
+      <parallelPipelineCopies>1</parallelPipelineCopies>
+      <pipelineStagingFolder/>
+      <metricsOutputFolder/>
+      <publishToCatalog>Y</publishToCatalog>
+      <dataCatalogConnection>vault-catalog</dataCatalogConnection>
+      <selectedTableNames/>
+      <doNotUpdateTargetDatabase>N</doNotUpdateTargetDatabase>
+      <updateTargetDatabaseStructure>Y</updateTargetDatabaseStructure>
+      <ddlSqlFilename/>
+      <failIfDdlNeeded>N</failIfDdlNeeded>
+      <name>Business Vault Update</name>
+      <description/>
+      <type>BUSINESS_VAULT_UPDATE</type>
+      <attributes/>
+      <xloc>1168</xloc>
+      <yloc>48</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <test_names>
+        <test_name>
+          <name>validate-bv-person UNIT</name>
+        </test_name>
+        <test_name>
+          <name>validate-bv-person-excluded UNIT</name>
+        </test_name>
+        <test_name>
+          <name>validate-map-person-initial UNIT</name>
+        </test_name>
+      </test_names>
+      <name>test after initial</name>
+      <description/>
+      <type>RunPipelineTests</type>
+      <attributes/>
+      <xloc>1360</xloc>
+      <yloc>48</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <sql>DROP TABLE IF EXISTS bv_resolution_map_snapshot
+;
+CREATE TABLE bv_resolution_map_snapshot AS
+SELECT hk_raw, hk_durable, hk_master, rule_version
+FROM map_person_bvr
+;
+</sql>
+      <connection>Vault</connection>
+      <useVariableSubstitution>N</useVariableSubstitution>
+      <sqlfromfile>N</sqlfromfile>
+      <sendOneStatement>N</sendOneStatement>
+      <name>snapshot identity map</name>
+      <description>Keep the first durable assignment so the flipped master can be compared</description>
+      <type>SQL</type>
+      <attributes/>
+      <xloc>400</xloc>
+      <yloc>192</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <filename>${PROJECT_HOME}/tests/bv-resolution/load-bv-resolution-2.hpl</filename>
+      <params_from_previous>N</params_from_previous>
+      <exec_per_row>N</exec_per_row>
+      <clear_rows>N</clear_rows>
+      <clear_files>N</clear_files>
+      <create_parent_folder>N</create_parent_folder>
+      <set_logfile>N</set_logfile>
+      <loglevel>Basic</loglevel>
+      <wait_until_finished>Y</wait_until_finished>
+      <parameters>
+        <pass_all_parameters>Y</pass_all_parameters>
+      </parameters>
+      <run_configuration>local</run_configuration>
+      <name>load-bv-resolution-2</name>
+      <description/>
+      <type>PIPELINE</type>
+      <attributes/>
+      <xloc>592</xloc>
+      <yloc>192</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <sql>UPDATE person_oracle_bvr SET city = NULL WHERE city = ''
+;
+UPDATE person_kafka_bvr SET city = NULL WHERE city = ''
+;
+</sql>
+      <connection>CRM</connection>
+      <useVariableSubstitution>N</useVariableSubstitution>
+      <sqlfromfile>N</sqlfromfile>
+      <sendOneStatement>N</sendOneStatement>
+      <name>null empty cities 2</name>
+      <description/>
+      <type>SQL</type>
+      <attributes/>
+      <xloc>784</xloc>
+      <yloc>192</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <sql>DELETE FROM lnk_person_same_as_bvr
+;
+</sql>
+      <connection>Vault</connection>
+      <useVariableSubstitution>N</useVariableSubstitution>
+      <sqlfromfile>N</sqlfromfile>
+      <sendOneStatement>Y</sendOneStatement>
+      <name>delete same-as link</name>
+      <description>Links are insert-only, so the flipped edge replaces the wave-1 edge</description>
+      <type>SQL</type>
+      <attributes/>
+      <xloc>976</xloc>
+      <yloc>192</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <dataVaultModelFile>${PROJECT_HOME}/tests/bv-resolution/bv-resolution.hdv</dataVaultModelFile>
+      <pipelineRunConfiguration>local</pipelineRunConfiguration>
+      <logModelCheckFailures>Y</logModelCheckFailures>
+      <abortOnModelCheckFailures>Y</abortOnModelCheckFailures>
+      <detailedDataTypeChecking>N</detailedDataTypeChecking>
+      <parallelPipelineCopies>${PIPELINE_COPIES}</parallelPipelineCopies>
+      <pipelineStagingFolder/>
+      <metricsOutputFolder>${METRICS_FOLDER}</metricsOutputFolder>
+      <publishToCatalog>N</publishToCatalog>
+      <updateTargetDatabaseStructure>N</updateTargetDatabaseStructure>
+      <ddlSqlFilename/>
+      <failIfDdlNeeded>N</failIfDdlNeeded>
+      <loadDate>${DV_UPDATE_LOAD_DATE}</loadDate>
+      <recordSourceGroup/>
+      <ensureSpecialRecords>N</ensureSpecialRecords>
+      <doNotUpdateTargetDatabase>N</doNotUpdateTargetDatabase>
+      <name>update bv-resolution.hdv 2</name>
+      <description/>
+      <type>DATA_VAULT_UPDATE</type>
+      <attributes/>
+      <xloc>1168</xloc>
+      <yloc>192</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <businessVaultModelFile>${PROJECT_HOME}/tests/bv-resolution/bv-resolution.hbv</businessVaultModelFile>
+      <pipelineRunConfiguration>local</pipelineRunConfiguration>
+      <logModelCheckFailures>Y</logModelCheckFailures>
+      <abortOnModelCheckFailures>Y</abortOnModelCheckFailures>
+      <parallelPipelineCopies>1</parallelPipelineCopies>
+      <pipelineStagingFolder/>
+      <metricsOutputFolder/>
+      <publishToCatalog>N</publishToCatalog>
+      <dataCatalogConnection>vault-catalog</dataCatalogConnection>
+      <selectedTableNames/>
+      <doNotUpdateTargetDatabase>N</doNotUpdateTargetDatabase>
+      <updateTargetDatabaseStructure>N</updateTargetDatabaseStructure>
+      <ddlSqlFilename/>
+      <failIfDdlNeeded>N</failIfDdlNeeded>
+      <name>Business Vault Update 2</name>
+      <description/>
+      <type>BUSINESS_VAULT_UPDATE</type>
+      <attributes/>
+      <xloc>1360</xloc>
+      <yloc>192</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <test_names>
+        <test_name>
+          <name>validate-bv-person-2 UNIT</name>
+        </test_name>
+        <test_name>
+          <name>validate-bv-person-excluded UNIT</name>
+        </test_name>
+        <test_name>
+          <name>validate-map-person-frozen UNIT</name>
+        </test_name>
+      </test_names>
+      <name>test after cutover</name>
+      <description/>
+      <type>RunPipelineTests</type>
+      <attributes/>
+      <xloc>1552</xloc>
+      <yloc>192</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+  </actions>
+  <hops>
+    <hop>
+      <from>Start</from>
+      <to>drop bv-resolution vault tables</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>Y</unconditional>
+    </hop>
+    <hop>
+      <from>drop bv-resolution vault tables</from>
+      <to>create CRM source tables</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>create CRM source tables</from>
+      <to>load-bv-resolution-1</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>load-bv-resolution-1</from>
+      <to>null empty cities 1</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>null empty cities 1</from>
+      <to>update bv-resolution.hdv</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>update bv-resolution.hdv</from>
+      <to>Business Vault Update</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>Business Vault Update</from>
+      <to>test after initial</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>test after initial</from>
+      <to>snapshot identity map</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>snapshot identity map</from>
+      <to>load-bv-resolution-2</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>load-bv-resolution-2</from>
+      <to>null empty cities 2</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>null empty cities 2</from>
+      <to>delete same-as link</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>delete same-as link</from>
+      <to>update bv-resolution.hdv 2</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>update bv-resolution.hdv 2</from>
+      <to>Business Vault Update 2</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>Business Vault Update 2</from>
+      <to>test after cutover</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+  </hops>
+  <notepads/>
+  <attributes/>
+</workflow>

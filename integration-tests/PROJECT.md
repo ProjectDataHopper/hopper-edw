@@ -47,6 +47,7 @@ integration-tests/
     ├── link-satellite-driving-key/
     ├── load-end-date/
     ├── scd2-calculations/
+    ├── bv-resolution/
     ├── reference-table/
     ├── composite-hub-bk/
     ├── status-tracking/
@@ -71,6 +72,7 @@ integration-tests/
 | `tests/link-satellite-driving-key/link-satellite-driving-key.hdv` | Hubs + link + multi-active link satellite (`line_number` driving key) |
 | `tests/load-end-date/load-end-date.hdv` | Hub + standard satellite with load end date (`x_load_end_ts`) |
 | `tests/scd2-calculations/` | BV SCD2 SQL calculations: deleted-flag `CASE` + `CAST` default `VARCHAR(720)` |
+| `tests/bv-resolution/` | Postgres proof: Oracle/Kafka calendar cutover, frozen identity map, ranked survivorship. Runs with the multi-satellite suites (Postgres or unset `DB_TYPE` only) |
 | `tests/reference-table/reference-table.hdv` | Physical **Reference table** (`ref_country`) FULL_REPLACE two-wave load (issue #110) |
 | `tests/composite-hub-bk/composite-hub-bk.hdv` | Composite hub business key (`burger_bk` from two EXT parts) + satellite parent parts |
 

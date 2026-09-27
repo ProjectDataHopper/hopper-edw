@@ -35,13 +35,15 @@ Must point at the parent raw vault model. Without it, DV references cannot resol
 | `PIT` | Point-in-time snapshot helper |
 | `BUSINESS_TABLE` | SQL or other BV table shape |
 | `SOURCE_QUERY` | Satellite-shaped table/view or SQL that SCD2/PIT hop to (optional other connection) |
+| `SOURCE_CALENDAR` | Shared cutover windows. Not a loaded table. An SCD2 table points at it with `sourceCalendarName`; each satellite config and source-query ref stores `sourceId` |
+| `IDENTITY_MAP` | Raw-to-durable hash map. An SCD2 table points at it with `identityMapName` |
 
 Inspect real retail samples for exact nested tags (`satellite_config`, `field_mapping`, `dv_reference`, …).
 
 ## SCD2 essentials
 
 - Parent DV hub: `parentHubName` and a single `HUB` derivative (canvas **Linked Hub**). That answers which grain the SCD2 belongs to and where the business key(s) live. Leave empty to infer from linked satellites.  
-- One or more **satellite** derivatives / **satellite configs** (`satelliteName`, source indicator, field mappings `sourceFieldName` → `targetFieldName`)  
+- One or more **satellite** derivatives / **satellite configs** (`satelliteName`, source indicator, optional `opField`, field mappings `sourceFieldName` → `targetFieldName`, optional `rank`, `nullPolicy`, and `presentFlagField`)  
 - Timeline fields from configuration (`validFromField`, `validToField`, open sentinels)
 - Optional `hashKeyPartitionCount` (`NONE`, `4`, `8`, `16`) for large full rebuilds — SQL truncate once, then Table Output, Native bulk, or Staging file (one CSV set per partition)
 - Optional `calculations` (`targetFieldName`, SQL `expression`) applied after collapse. Generate a Hop pipeline unit test from the table context action (SQL Expression linked to this `.hbv` table). Legacy `calculation_tests` / `collapse_tests` still run at Check model if present.  

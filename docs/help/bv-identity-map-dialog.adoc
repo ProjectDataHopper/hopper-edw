@@ -1,0 +1,24 @@
+= Business Vault identity map
+:toc: macro
+:toclevels: 3
+
+toc::[]
+
+Related guide: link:../business-vault-scd2.adoc#identity-maps[business-vault-scd2].
+
+An **identity map** turns many raw hub hashes for one business concept into one durable hash. The durable hash does not change when the preferred business key changes. Several SCD2 tables can name the same map.
+
+== What you fill in
+
+* **Parent hub** — the raw hub being clustered
+* **Same-as link** — a link whose two roles are that hub
+* **Master hash column** and **Duplicate hash column** — the two role hash columns on the link. v1 is a star: every duplicate points at one master
+* **Preferred business key column** — payload. It can change without changing the durable hash
+* **MDM id column** — optional. A new cluster hashes this id with the hub hash configuration. Otherwise the current master raw hash is hashed once and then frozen
+* **Effectivity** — optional satellite, or from/to columns on the link. A named satellite needs both columns. Empty means the match applies for the whole timeline
+* **Unmapped keys** — `self` keeps the raw hash, `quarantine` and `drop` leave the row out of an SCD2 timeline that uses this map
+* **Map mode** — `generated` upserts the map and does not truncate it. `external` means the table already exists and Business Vault Update does not rebuild it
+
+== What the generator owns
+
+Sort order, the hash algorithm, and which SCD2 rows are rebuilt. Incremental mode loads satellite rows after the watermark. When a raw key's `rule_version` changes, that key is read again from the earlier of the map `valid_from` and the watermark, if the satellite uses the Business Vault database. Otherwise run a full rebuild after the map changes. Hash-key partitions stay a full rebuild and use the durable hash after the lookup.

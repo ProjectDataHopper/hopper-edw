@@ -88,6 +88,8 @@ public final class BusinessVaultSchemaBuilder {
       case PIT -> SchemaStereotypes.PIT;
       case BUSINESS_TABLE -> SchemaStereotypes.BUSINESS_TABLE;
       case SOURCE_QUERY -> SchemaStereotypes.SOURCE_QUERY;
+      case SOURCE_CALENDAR -> SchemaStereotypes.SOURCE_CALENDAR;
+      case IDENTITY_MAP -> SchemaStereotypes.IDENTITY_MAP;
       case BRIDGE -> SchemaStereotypes.BRIDGE;
     };
   }

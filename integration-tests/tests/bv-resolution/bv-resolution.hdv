@@ -1,0 +1,188 @@
+<!--
+Copyright 2026 i-Bridge bv
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<data-vault-model>
+  <name_sync_with_filename>Y</name_sync_with_filename>
+  <description>Person hub fed by Oracle and Kafka, plus a same-as link used by the Business Vault identity map</description>
+  <configurationName>data-vault-vault1</configurationName>
+  <tables>
+    <table>
+      <businessKeys>
+        <name>person_id</name>
+        <description>Person business key from Oracle</description>
+        <dataType>String</dataType>
+        <length>20</length>
+        <sourceFieldName>person_id</sourceFieldName>
+        <recordSourceName>CRM-bv-resolution-oracle</recordSourceName>
+      </businessKeys>
+      <businessKeys>
+        <name>person_id</name>
+        <description>Person business key from Kafka</description>
+        <dataType>String</dataType>
+        <length>20</length>
+        <sourceFieldName>person_id</sourceFieldName>
+        <recordSourceName>CRM-bv-resolution-kafka</recordSourceName>
+      </businessKeys>
+      <hashKeyFieldName>person_hk</hashKeyFieldName>
+      <recordSourceFieldName/>
+      <recordSources>
+        <recordSource>CRM-bv-resolution-oracle</recordSource>
+        <recordSource>CRM-bv-resolution-kafka</recordSource>
+      </recordSources>
+      <tableName>hub_person_bvr</tableName>
+      <description>One raw hub row per source person id. Same-as does not dedupe this hub.</description>
+      <tableType>HUB</tableType>
+      <integrationMode>HOP_MANAGED</integrationMode>
+      <customUpdatePipelinePaths/>
+      <xloc>64</xloc>
+      <yloc>160</yloc>
+      <name>hub_person_bvr</name>
+      <virtualPath/>
+    </table>
+    <table>
+      <referencedTableName>hub_person_bvr</referencedTableName>
+      <referencedTableType>HUB</referencedTableType>
+      <hashKeyFieldName>person_hk_dup</hashKeyFieldName>
+      <tableName>hub_person_bvr</tableName>
+      <description>Duplicate role of hub_person_bvr on the same-as link</description>
+      <tableType>LINKED_TABLE</tableType>
+      <integrationMode>HOP_MANAGED</integrationMode>
+      <customUpdatePipelinePaths/>
+      <xloc>320</xloc>
+      <yloc>288</yloc>
+      <name>hub_person_dup_bvr</name>
+      <virtualPath/>
+    </table>
+    <table>
+      <hub>hub_person_bvr</hub>
+      <link/>
+      <attributes>
+        <name>email</name>
+        <description>Email from the Oracle feed</description>
+        <dataType>String</dataType>
+        <length>80</length>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>city</name>
+        <description>City from the Oracle feed</description>
+        <dataType>String</dataType>
+        <length>40</length>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <parentKeySourceFields/>
+      <drivingKey/>
+      <recordSource>CRM-bv-resolution-oracle</recordSource>
+      <statusTrackingEnabled>N</statusTrackingEnabled>
+      <statusFieldName>record_status</statusFieldName>
+      <activeStatusValue>ACTIVE</activeStatusValue>
+      <deletedStatusValue>DELETED</deletedStatusValue>
+      <tableName>sat_person_oracle_bvr</tableName>
+      <description>Oracle person attributes. Eligible before the 2024-03-01 cutover.</description>
+      <tableType>SATELLITE</tableType>
+      <integrationMode>HOP_MANAGED</integrationMode>
+      <customUpdatePipelinePaths/>
+      <xloc>320</xloc>
+      <yloc>64</yloc>
+      <name>sat_person_oracle_bvr</name>
+      <virtualPath/>
+    </table>
+    <table>
+      <hub>hub_person_bvr</hub>
+      <link/>
+      <attributes>
+        <name>email</name>
+        <description>Email from the Kafka feed</description>
+        <dataType>String</dataType>
+        <length>80</length>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>city</name>
+        <description>City from the Kafka feed</description>
+        <dataType>String</dataType>
+        <length>40</length>
+        <precision/>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <parentKeySourceFields/>
+      <drivingKey/>
+      <recordSource>CRM-bv-resolution-kafka</recordSource>
+      <statusTrackingEnabled>N</statusTrackingEnabled>
+      <statusFieldName>record_status</statusFieldName>
+      <activeStatusValue>ACTIVE</activeStatusValue>
+      <deletedStatusValue>DELETED</deletedStatusValue>
+      <tableName>sat_person_kafka_bvr</tableName>
+      <description>Kafka person attributes. Eligible from the 2024-03-01 cutover.</description>
+      <tableType>SATELLITE</tableType>
+      <integrationMode>HOP_MANAGED</integrationMode>
+      <customUpdatePipelinePaths/>
+      <xloc>320</xloc>
+      <yloc>176</yloc>
+      <name>sat_person_kafka_bvr</name>
+      <virtualPath/>
+    </table>
+    <table>
+      <hubNames>hub_person_bvr</hubNames>
+      <hubNames>hub_person_dup_bvr</hubNames>
+      <linkHubSources>
+        <linkHubSource>
+          <source>CRM-bv-resolution-same-as</source>
+          <hubSourceKeyFields>
+            <hubSourceKeyField>
+              <hubName>hub_person_bvr</hubName>
+              <businessKeySources>
+                <businessKeySource>
+                  <businessKeyField>person_id</businessKeyField>
+                  <sourceFieldName>master_person_id</sourceFieldName>
+                </businessKeySource>
+              </businessKeySources>
+              <drivingKeySources/>
+            </hubSourceKeyField>
+            <hubSourceKeyField>
+              <hubName>hub_person_dup_bvr</hubName>
+              <businessKeySources>
+                <businessKeySource>
+                  <businessKeyField>person_id</businessKeyField>
+                  <sourceFieldName>duplicate_person_id</sourceFieldName>
+                </businessKeySource>
+              </businessKeySources>
+              <drivingKeySources/>
+            </hubSourceKeyField>
+          </hubSourceKeyFields>
+        </linkHubSource>
+      </linkHubSources>
+      <linkSatelliteSources/>
+      <dependentChildKeys/>
+      <linkHashKeyFieldName>lnk_person_same_as_bvr_hk</linkHashKeyFieldName>
+      <hubSourceKeyFields/>
+      <hasDescriptiveAttributes>N</hasDescriptiveAttributes>
+      <tableName>lnk_person_same_as_bvr</tableName>
+      <description>Star-shaped same-as: person_hk is the master role, person_hk_dup is the duplicate</description>
+      <tableType>LINK</tableType>
+      <integrationMode>HOP_MANAGED</integrationMode>
+      <customUpdatePipelinePaths/>
+      <xloc>560</xloc>
+      <yloc>224</yloc>
+      <name>lnk_person_same_as_bvr</name>
+      <virtualPath/>
+    </table>
+  </tables>
+  <notes/>
+  <name>bv-resolution</name>
+</data-vault-model>

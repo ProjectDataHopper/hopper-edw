@@ -1,0 +1,2 @@
+person_id,email,city,record_source
+K100,kafka-before@example,Liege,KAFKA

@@ -37,8 +37,8 @@ public final class BvSqlDependencySupport {
    * Orders pipeline-executable tables: respects BV→BV sqlRefs among business tables, keeps SCD2
    * before PIT when there is no stronger edge, and places dependents after their prerequisites.
    *
-   * <p>Base priority when no ref edge applies: SCD2 (0), PIT (1), BRIDGE (2), BUSINESS_TABLE (3),
-   * then model order as a stable tie-break.
+   * <p>Base priority when no ref edge applies: IDENTITY_MAP (-1), SCD2 (0), PIT (1), BRIDGE (2),
+   * BUSINESS_TABLE (3), then model order as a stable tie-break.
    */
   public static List<IBvTable> orderTablesForPipelineExecution(
       List<IBvTable> tables, BusinessVaultModel bvModel, DataVaultModel dvModel) {
@@ -278,11 +278,12 @@ public final class BvSqlDependencySupport {
       return 99;
     }
     return switch (table.getTableType()) {
+      case IDENTITY_MAP -> -1;
       case SCD2 -> 0;
       case PIT -> 1;
       case BRIDGE -> 2;
       case BUSINESS_TABLE -> 3;
-      case SOURCE_QUERY -> 99;
+      case SOURCE_QUERY, SOURCE_CALENDAR -> 99;
     };
   }
 }

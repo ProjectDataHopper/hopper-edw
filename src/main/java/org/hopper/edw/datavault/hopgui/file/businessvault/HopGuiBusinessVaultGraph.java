@@ -121,6 +121,8 @@ import org.hopper.edw.datavault.metadata.businessvault.BvBvTableReference;
 import org.hopper.edw.datavault.metadata.businessvault.BvDvTableReference;
 import org.hopper.edw.datavault.metadata.businessvault.BvPitTable;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2Table;
+import org.hopper.edw.datavault.metadata.businessvault.BvIdentityMap;
+import org.hopper.edw.datavault.metadata.businessvault.BvSourceCalendar;
 import org.hopper.edw.datavault.metadata.businessvault.BvSourceQuery;
 import org.hopper.edw.datavault.metadata.businessvault.BvTableBase;
 import org.hopper.edw.datavault.metadata.businessvault.BvTargetDatabaseSupport;
@@ -744,6 +746,15 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     } else if (table instanceof BvBridge bridge) {
       accepted =
           new HopGuiBvBridgeDialog(getShell(), bridge, model, dataVaultModel, variables).open();
+    } else if (table instanceof BvIdentityMap identityMap) {
+      accepted =
+          new HopGuiBvIdentityMapDialog(getShell(), identityMap, model, dataVaultModel, variables)
+              .open();
+    } else if (table instanceof BvSourceCalendar sourceCalendar) {
+      accepted =
+          new HopGuiBvSourceCalendarDialog(
+                  getShell(), sourceCalendar, model, dataVaultModel, variables)
+              .open();
     } else {
       accepted =
           new HopGuiBvTableDialog(getShell(), table, model, dataVaultModel, variables).open();
@@ -1699,6 +1710,46 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     }
     graph.markUndoPoint();
     graph.addBvTableAtClick(new BvSourceQuery(), context.getClick());
+    graph.setChanged();
+    graph.redraw();
+  }
+
+  @GuiContextAction(
+      id = "bv-graph-add-identity-map",
+      parentId = HopGuiBusinessVaultContext.CONTEXT_ID,
+      type = GuiActionType.Create,
+      name = "i18n::HopGuiBusinessVaultGraph.Context.AddIdentityMap.Name",
+      tooltip = "i18n::HopGuiBusinessVaultGraph.Context.AddIdentityMap.Tooltip",
+      image = "business-vault-model.svg",
+      category = "Business Vault",
+      categoryOrder = "3")
+  public void addIdentityMap(HopGuiBusinessVaultContext context) {
+    HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
+    if (graph == null || context.getModel() == null) {
+      return;
+    }
+    graph.markUndoPoint();
+    graph.addBvTableAtClick(new BvIdentityMap(), context.getClick());
+    graph.setChanged();
+    graph.redraw();
+  }
+
+  @GuiContextAction(
+      id = "bv-graph-add-source-calendar",
+      parentId = HopGuiBusinessVaultContext.CONTEXT_ID,
+      type = GuiActionType.Create,
+      name = "i18n::HopGuiBusinessVaultGraph.Context.AddSourceCalendar.Name",
+      tooltip = "i18n::HopGuiBusinessVaultGraph.Context.AddSourceCalendar.Tooltip",
+      image = "business-vault-model.svg",
+      category = "Business Vault",
+      categoryOrder = "3")
+  public void addSourceCalendar(HopGuiBusinessVaultContext context) {
+    HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
+    if (graph == null || context.getModel() == null) {
+      return;
+    }
+    graph.markUndoPoint();
+    graph.addBvTableAtClick(new BvSourceCalendar(), context.getClick());
     graph.setChanged();
     graph.redraw();
   }

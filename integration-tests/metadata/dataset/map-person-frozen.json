@@ -1,0 +1,49 @@
+{
+  "base_filename": "bv-resolution/map-person-frozen.csv",
+  "virtualPath": "/bv-resolution",
+  "name": "map-person-frozen",
+  "description": "After the same-as master flips, hk_durable is unchanged and rule_version is 2",
+  "dataset_fields": [
+    {
+      "field_comment": "person_id",
+      "field_length": 20,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "person_id",
+      "field_format": ""
+    },
+    {
+      "field_comment": "rule_version",
+      "field_length": 10,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "rule_version",
+      "field_format": ""
+    },
+    {
+      "field_comment": "durable_frozen",
+      "field_length": 1,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "durable_frozen",
+      "field_format": ""
+    },
+    {
+      "field_comment": "master_is_k100",
+      "field_length": 1,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "master_is_k100",
+      "field_format": ""
+    },
+    {
+      "field_comment": "shared_durable",
+      "field_length": 1,
+      "field_type": 2,
+      "field_precision": -1,
+      "field_name": "shared_durable",
+      "field_format": ""
+    }
+  ],
+  "folder_name": ""
+}

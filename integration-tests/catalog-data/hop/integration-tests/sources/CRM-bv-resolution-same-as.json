@@ -1,0 +1,59 @@
+{
+  "namespace": "hop/integration-tests/sources",
+  "name": "CRM-bv-resolution-same-as",
+  "type": "DV_SOURCE",
+  "description": "Same-as edges for the Business Vault identity map proof",
+  "origin": {
+    "modelType": "DATA_VAULT_SOURCE",
+    "modelName": "bv-resolution",
+    "modelFilename": "${PROJECT_HOME}/tests/bv-resolution/bv-resolution.hdv",
+    "modelElementName": "CRM-bv-resolution-same-as",
+    "hopProject": "hop-data-vault",
+    "createdAt": 1783000000000,
+    "updatedAt": 1783000000000,
+    "updatedBy": null,
+    "lastWorkflow": null,
+    "lastPipeline": null
+  },
+  "physicalTable": {
+    "databaseMetaName": "CRM",
+    "schemaName": "",
+    "tableName": "person_same_as_bvr"
+  },
+  "tags": ["DV Source", "FULL_SNAPSHOT"],
+  "glossaryTerms": [],
+  "customProperties": {},
+  "dvSource": {
+    "sourceType": "DATABASE",
+    "sourceIndicator": "SAMEAS",
+    "sourceIndicatorField": "record_source",
+    "group": "",
+    "deliveryType": "FULL_SNAPSHOT",
+    "fields": [
+      {
+        "name": "master_person_id",
+        "description": "Master person id",
+        "sourceDataType": "String",
+        "length": "20",
+        "precision": "",
+        "hopType": 2
+      },
+      {
+        "name": "duplicate_person_id",
+        "description": "Duplicate person id",
+        "sourceDataType": "String",
+        "length": "20",
+        "precision": "",
+        "hopType": 2
+      },
+      {
+        "name": "record_source",
+        "description": "Record source indicator",
+        "sourceDataType": "String",
+        "length": "20",
+        "precision": "",
+        "hopType": 2
+      }
+    ]
+  }
+}

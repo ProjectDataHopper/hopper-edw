@@ -1,0 +1,26 @@
+{
+  "database_replacements": [],
+  "autoOpening": true,
+  "description": "Calendar-excluded Oracle and Kafka values are absent from bv_person_bvr",
+  "persist_filename": "",
+  "test_type": "UNIT_TEST",
+  "variableValues": [],
+  "basePath": "${HOP_UNIT_TESTS_FOLDER}",
+  "golden_data_sets": [
+    {
+      "field_mappings": [
+        {
+          "transform_field": "bad_rows",
+          "data_set_field": "bad_rows"
+        }
+      ],
+      "field_order": ["bad_rows"],
+      "data_set_name": "bv-person-excluded",
+      "transform_name": "Validate"
+    }
+  ],
+  "input_data_sets": [],
+  "name": "validate-bv-person-excluded UNIT",
+  "trans_test_tweaks": [],
+  "pipeline_filename": "./tests/bv-resolution/validate-bv-person-excluded.hpl"
+}

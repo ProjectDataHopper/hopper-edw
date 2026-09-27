@@ -41,6 +41,22 @@ public class BvScd2FieldMapping {
    */
   @HopMetadataProperty private boolean calculationOnly;
 
+  /**
+   * Blank means this target has one source. A positive integer is the survivorship order: 1 wins
+   * over 2. Any rank on the table switches that table to {@code SurvivorshipMerge}.
+   */
+  @HopMetadataProperty private String rank;
+
+  /** Blank uses the leg default, then the calendar mode. */
+  @HopMetadataProperty(storeWithCode = true)
+  private BvNullPolicy nullPolicy;
+
+  /**
+   * Optional source column. When it is false, a null was not in the message and does not change the
+   * value. When it is true, a null clears the value. Blank means the column arrived.
+   */
+  @HopMetadataProperty private String presentFlagField;
+
   public BvScd2FieldMapping(String satelliteName, String sourceFieldName, String targetFieldName) {
     this(satelliteName, sourceFieldName, targetFieldName, true);
   }
@@ -62,6 +78,9 @@ public class BvScd2FieldMapping {
       sourceFieldName = other.sourceFieldName;
       targetFieldName = other.targetFieldName;
       calculationOnly = other.calculationOnly;
+      rank = other.rank;
+      nullPolicy = other.nullPolicy;
+      presentFlagField = other.presentFlagField;
     }
   }
 
