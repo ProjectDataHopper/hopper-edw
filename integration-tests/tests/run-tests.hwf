@@ -6,7 +6,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-     http://www.apache.org/licenses/LICENSE-2.0
+      http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,8 @@ limitations under the License.
   <modified_user>-</modified_user>
   <created_date>2026/06/15 22:33:35.991</created_date>
   <modified_date>2026/06/15 22:33:35.991</modified_date>
+  <created_hop_version/>
+  <modified_hop_version>2.20.0-SNAPSHOT</modified_hop_version>
   <workflow_version/>
   <parameters>
     <parameter>
@@ -238,7 +240,7 @@ limitations under the License.
       <description/>
       <type>WORKFLOW</type>
       <attributes/>
-      <xloc>448</xloc>
+      <xloc>576</xloc>
       <yloc>288</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -264,7 +266,7 @@ limitations under the License.
       <description>Composite hub business key (single vault BK column from parts)</description>
       <type>WORKFLOW</type>
       <attributes/>
-      <xloc>624</xloc>
+      <xloc>752</xloc>
       <yloc>288</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -290,7 +292,7 @@ limitations under the License.
       <description/>
       <type>WORKFLOW</type>
       <attributes/>
-      <xloc>624</xloc>
+      <xloc>576</xloc>
       <yloc>400</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -316,7 +318,7 @@ limitations under the License.
       <description/>
       <type>WORKFLOW</type>
       <attributes/>
-      <xloc>800</xloc>
+      <xloc>928</xloc>
       <yloc>400</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -342,8 +344,8 @@ limitations under the License.
       <description>Customer 360 SCD2 full rebuild split into 4 hash-key partitions</description>
       <type>WORKFLOW</type>
       <attributes/>
-      <xloc>624</xloc>
-      <yloc>496</yloc>
+      <xloc>736</xloc>
+      <yloc>400</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
@@ -409,7 +411,7 @@ dbType == "" || dbType == "postgres";
       <description>Skip multi-satellite BV on MySQL/SingleStore/SQL Server/Snowflake: current-row golden is Postgres-oriented (multiple open-end sparse rows)</description>
       <type>EVAL</type>
       <attributes/>
-      <xloc>448</xloc>
+      <xloc>416</xloc>
       <yloc>400</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -461,7 +463,7 @@ dbType == "" || dbType == "postgres";
       <description/>
       <type>WORKFLOW</type>
       <attributes/>
-      <xloc>800</xloc>
+      <xloc>928</xloc>
       <yloc>288</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -487,7 +489,7 @@ dbType == "" || dbType == "postgres";
       <description/>
       <type>WORKFLOW</type>
       <attributes/>
-      <xloc>992</xloc>
+      <xloc>1120</xloc>
       <yloc>288</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -539,8 +541,8 @@ dbType == "" || dbType == "postgres";
       <description>BV SCD2 SQL calculations (deleted-flag CASE + CAST VARCHAR default)</description>
       <type>WORKFLOW</type>
       <attributes/>
-      <xloc>352</xloc>
-      <yloc>336</yloc>
+      <xloc>416</xloc>
+      <yloc>288</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
@@ -565,8 +567,8 @@ dbType == "" || dbType == "postgres";
       <description>Postgres: calendar cutover, identity freeze, and ranked survivorship</description>
       <type>WORKFLOW</type>
       <attributes/>
-      <xloc>480</xloc>
-      <yloc>512</yloc>
+      <xloc>736</xloc>
+      <yloc>528</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
@@ -575,8 +577,8 @@ dbType == "" || dbType == "postgres";
       <description/>
       <type>SUCCESS</type>
       <attributes/>
-      <xloc>624</xloc>
-      <yloc>512</yloc>
+      <xloc>416</xloc>
+      <yloc>528</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
@@ -625,8 +627,18 @@ dbType == "" || dbType == "postgres";
       <name>create-source-tables-from-data-catalog.hpl</name>
       <type>PIPELINE</type>
       <attributes/>
-      <xloc>624</xloc>
+      <xloc>528</xloc>
       <yloc>64</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <name>Success </name>
+      <description/>
+      <type>SUCCESS</type>
+      <attributes/>
+      <xloc>928</xloc>
+      <yloc>528</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
@@ -773,13 +785,6 @@ dbType == "" || dbType == "postgres";
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>bv-resolution</from>
-      <to>Success</to>
-      <evaluation>Y</evaluation>
-      <unconditional>N</unconditional>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
       <from>create-source-tables-from-data-catalog.hpl</from>
       <to>csv-basic</to>
       <evaluation>Y</evaluation>
@@ -796,6 +801,13 @@ dbType == "" || dbType == "postgres";
     <hop>
       <from>discover-catalog-tests</from>
       <to>create-source-tables-from-data-catalog.hpl</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>bv-resolution</from>
+      <to>Success </to>
       <evaluation>Y</evaluation>
       <unconditional>N</unconditional>
       <enabled>Y</enabled>

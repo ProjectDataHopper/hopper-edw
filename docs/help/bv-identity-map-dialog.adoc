@@ -8,6 +8,10 @@ Related guide: link:../business-vault-scd2.adoc#identity-maps[business-vault-scd
 
 An **identity map** turns many raw hub hashes for one business concept into one durable hash. The durable hash does not change when the preferred business key changes. Several SCD2 tables can name the same map.
 
+image::../images/diagrams/bv-identity-map-freeze.svg[Identity map — Freezing hk_durable on first assignment,align="center"]
+
+PlantUML source: link:../diagrams/bv-identity-map-freeze.puml[bv-identity-map-freeze.puml].
+
 == What you fill in
 
 * **Parent hub** — the raw hub being clustered

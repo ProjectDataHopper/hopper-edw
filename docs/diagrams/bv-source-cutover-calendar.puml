@@ -1,0 +1,41 @@
+@startuml bv-source-cutover-calendar
+!pragma layout smetana
+title Source Calendar — Half-open cutover windows [effectiveFrom, effectiveTo)
+skinparam backgroundColor #fafbfc
+skinparam defaultFontName SansSerif
+skinparam shadowing false
+skinparam ArrowColor #5a6a7e
+skinparam rectangle {
+  FontSize 12
+  BorderThickness 1
+}
+skinparam package {
+  FontSize 13
+  BorderColor #4a5568
+  BackgroundColor #ffffff
+}
+
+left to right direction
+
+package "BvSourceCalendar: person_sources" as Cal #fff6e8 {
+  rectangle "ORACLE Window\nFrom: 1900-01-01 00:00:00 [Inclusive]\nTo:   2024-03-01 00:00:00 [Exclusive]\nMode: full" as OraWin #e8f0fb
+  rectangle "KAFKA Window\nFrom: 2024-03-01 00:00:00 [Inclusive]\nTo:   [Open-ended / active]\nMode: delta" as KafWin #e7f6ed
+}
+
+package "SQL Pushdown via TableInput" as SQL #ffffff {
+  rectangle "sat_person_oracle SQL\nWHERE x_load_ts >= '1900-01-01'\n  AND x_load_ts < '2024-03-01'" as SqlOra #e8f0fb
+  rectangle "sat_person_kafka SQL\nWHERE x_load_ts >= '2024-03-01'" as SqlKaf #e7f6ed
+}
+
+package "Boundary Instant Evaluation" as Eval #edf0f4 {
+  rectangle "2024-02-29 23:59:59\nBelongs to: ORACLE\nResult: KEPT" as B1 #e8f0fb
+  rectangle "2024-03-01 00:00:00\nBelongs to: KAFKA\nOracle ends at midnight\nResult: KEPT" as B2 #e7f6ed
+  rectangle "2024-03-15 00:00:00\nIf arriving from ORACLE:\nOutside [1900, 2024-03-01)\nResult: EXCLUDED (0 rows)" as B3 #fff6e8
+}
+
+OraWin --> SqlOra : Compiles bounds
+KafWin --> SqlKaf : Compiles bounds
+SqlOra --> B1
+SqlKaf --> B2
+SqlOra --> B3
+@enduml

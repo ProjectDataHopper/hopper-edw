@@ -1,0 +1,44 @@
+@startuml bv-identity-map-freeze
+!pragma layout smetana
+title Identity Map — Freezing hk_durable on first assignment
+skinparam backgroundColor #fafbfc
+skinparam defaultFontName SansSerif
+skinparam shadowing false
+skinparam ArrowColor #5a6a7e
+skinparam rectangle {
+  FontSize 12
+  BorderThickness 1
+}
+skinparam package {
+  FontSize 13
+  BorderColor #4a5568
+  BackgroundColor #ffffff
+}
+
+left to right direction
+
+package "Load 1: Initial Cluster Formation (2024-02-15)" as L1 #edf0f4 {
+  rectangle "Same-As Link\nMaster: O100\nDuplicate: K100" as L1_SameAs #e8f0fb
+  rectangle "IdentityMapAssignLogic\nMint hk_durable = HASH(O100)\nrule_version = 1" as L1_Logic #fff6e8
+  rectangle "map_person Table\nO100 ➔ hk_durable: HASH(O100) (v1)\nK100 ➔ hk_durable: HASH(O100) (v1)" as L1_Map #e8f0fb
+  
+  L1_SameAs --> L1_Logic
+  L1_Logic --> L1_Map : Insert initial map
+}
+
+package "Load 2: Master Flips to K100 (2024-03-15)" as L2 #edf0f4 {
+  rectangle "Same-As Link\nMaster: K100 (FLIPPED!)\nDuplicate: O100" as L2_SameAs #fff6e8
+  rectangle "IdentityMapAssignLogic\nCheck existing cluster:\nhk_durable already exists!\nKEEP FROZEN HASH(O100)\nrule_version = 2" as L2_Logic #f3ebfb
+  rectangle "map_person Table\nO100 ➔ FROZEN HASH(O100) (v2)\nK100 ➔ FROZEN HASH(O100) (v2)\npreferred_bk updated" as L2_Map #e7f6ed
+
+  L2_SameAs --> L2_Logic
+  L2_Logic --> L2_Map : Update master & version\n(hk_durable NOT rewritten!)
+}
+
+package "Business Vault SCD2 Timeline" as SCD2 #f3ebfb {
+  rectangle "bv_person_bvr\nConsolidated grain: HASH(O100)\nNo historical key churn\nDownstream marts stay stable!" as SCD2_Target #e7f6ed
+}
+
+L1_Map --> SCD2_Target : As-of lookup
+L2_Map --> SCD2_Target : As-of lookup
+@enduml

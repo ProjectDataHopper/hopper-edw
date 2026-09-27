@@ -1,0 +1,54 @@
+@startuml bv-identity-cutover-survivorship
+!pragma layout smetana
+title Business Vault SCD2 — Cutover, identity, and survivorship pipeline
+skinparam backgroundColor #fafbfc
+skinparam defaultFontName SansSerif
+skinparam shadowing false
+skinparam ArrowColor #5a6a7e
+skinparam rectangle {
+  FontSize 12
+  BorderThickness 1
+}
+skinparam package {
+  FontSize 13
+  BorderColor #4a5568
+  BackgroundColor #ffffff
+}
+
+left to right direction
+
+package "Raw Data Vault (Source DB)" as raw #e8f0fb {
+  rectangle "sat_person_oracle\n(Legacy history)" as SatOra #e8f0fb
+  rectangle "sat_person_kafka\n(Modern event stream)" as SatKaf #e7f6ed
+  rectangle "lnk_person_same_as\n(Duplicate ➔ Master links)" as LnkSameAs #edf0f4
+}
+
+package "Business Vault Metadata (.hbv)" as bvMeta #f3ebfb {
+  rectangle "BvSourceCalendar\nperson_sources\n(Temporal system windows)" as Cal #fff6e8
+  rectangle "BvIdentityMap\nmap_person\n(Durable hash clustering)" as IdMap #e8f0fb
+}
+
+package "Generated SCD2 Build Pipeline" as pipe #ffffff {
+  rectangle "1. TableInput SQL Filter\n[effectiveFrom, effectiveTo)\n(WHERE bounds pushdown)" as Gate1 #fff6e8
+  rectangle "2. IdentityLookup\nhk_raw ➔ hk_durable\n(As-of temporal lookup)" as Gate2 #e8f0fb
+  rectangle "3. SurvivorshipMerge\nRank 1 > Rank 2\ninherit / apply nulls + present flags" as Gate3 #f3ebfb
+  rectangle "4. Analytic LAG/LEAD\nvalid_from / valid_to bounds" as Gate4 #edf0f4
+}
+
+package "Business Vault Target Database" as target #e7f6ed {
+  rectangle "map_person_bvr\n(Physical map table\nFrozen hk_durable)" as PhysMap #e8f0fb
+  rectangle "bv_person_bvr\n(Functional SCD2 timeline\nDurable entity grain)" as TargetScd2 #e7f6ed
+}
+
+LnkSameAs --> PhysMap : Generated upsert
+PhysMap --> Gate2 : Lookup interval
+
+SatOra --> Gate1
+SatKaf --> Gate1
+Cal ..> Gate1 : Compiles WHERE bounds
+
+Gate1 --> Gate2
+Gate2 --> Gate3
+Gate3 --> Gate4
+Gate4 --> TargetScd2 : TableOutput
+@enduml

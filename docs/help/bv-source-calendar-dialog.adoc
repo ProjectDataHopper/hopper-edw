@@ -8,6 +8,10 @@ Related guide: link:../business-vault-scd2.adoc#source-calendars[business-vault-
 
 A source calendar says **when each source system may contribute rows**. It is not a warehouse table. Business Vault Update does not create or load it.
 
+image::../images/diagrams/bv-source-cutover-calendar.svg[Source calendar — Half-open cutover windows,align="center"]
+
+PlantUML source: link:../diagrams/bv-source-cutover-calendar.puml[bv-source-cutover-calendar.puml].
+
 == Example
 
 Oracle loads history through February 2024. Kafka takes over on the morning of 1 March 2024 and is still the current source.

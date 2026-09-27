@@ -34,6 +34,18 @@ Use `!pragma layout smetana` in every file so Graphviz is not required.
 |link:bv-pit-scd2.puml[bv-pit-scd2.puml]
 |link:../business-vault-pit.adoc[business-vault-pit]
 
+|link:bv-identity-cutover-survivorship.puml[bv-identity-cutover-survivorship.puml]
+|link:../business-vault-scd2.adoc#identity-cutover-and-survivorship-pipeline[business-vault-scd2]
+
+|link:bv-identity-map-freeze.puml[bv-identity-map-freeze.puml]
+|link:../business-vault-scd2.adoc#identity-maps[business-vault-scd2], link:../help/bv-identity-map-dialog.adoc[bv-identity-map-dialog]
+
+|link:bv-source-cutover-calendar.puml[bv-source-cutover-calendar.puml]
+|link:../business-vault-scd2.adoc#source-calendars[business-vault-scd2], link:../help/bv-source-calendar-dialog.adoc[bv-source-calendar-dialog]
+
+|link:bv-survivorship-rules.puml[bv-survivorship-rules.puml]
+|link:../business-vault-scd2.adoc#survivorship[business-vault-scd2]
+
 |link:enterprise-people-files-systems.puml[enterprise-people-files-systems.puml]
 |link:../enterprise-modeling-and-team-collaboration.adoc[enterprise-modeling-and-team-collaboration]
 |===

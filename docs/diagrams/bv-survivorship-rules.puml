@@ -1,0 +1,44 @@
+@startuml bv-survivorship-rules
+!pragma layout smetana
+title Survivorship — Field ranks, null policies, and delta semantics
+skinparam backgroundColor #fafbfc
+skinparam defaultFontName SansSerif
+skinparam shadowing false
+skinparam ArrowColor #5a6a7e
+skinparam rectangle {
+  FontSize 12
+  BorderThickness 1
+}
+skinparam package {
+  FontSize 13
+  BorderColor #4a5568
+  BackgroundColor #ffffff
+}
+
+left to right direction
+
+package "Incoming Satellite History" as Inputs #edf0f4 {
+  rectangle "sat_person_kafka\nRank = 1\nNull policy: inherit\nMode: delta" as InKaf #e7f6ed
+  rectangle "sat_person_oracle\nRank = 2\nNull policy: apply\nMode: full" as InOra #e8f0fb
+  rectangle "sat_person_seed\nRank = 3\nOperation: seed\nMode: seed" as InSeed #fff6e8
+}
+
+package "SurvivorshipMerge Transform" as Logic #ffffff {
+  rectangle "Rank Arbitration\nRank 1 wins over Rank 2\n(Ranks can disagree per column!)" as Ranks #f3ebfb
+  rectangle "Null Policy: inherit vs apply\ninherit: skip null & keep prior value\napply: write null & clear attribute" as Nulls #fff6e8
+  rectangle "Present Flags (Sparse Feeds)\nflag = 'N': field omitted (keep value)\nflag = 'Y': explicitly cleared (apply null)" as Flags #edf0f4
+  rectangle "Leg Operations\nupsert: standard update\nseed: fills gaps, never overwrites upsert\ndelete: withdraws source contribution" as Ops #e8f0fb
+}
+
+package "Consolidated SCD2 Attribute State" as Out #f3ebfb {
+  rectangle "Surviving Target Row\nKafka email wins (Rank 1)\nOracle city preserved when Kafka sends null\nEmitted ONLY when surviving state changes" as Emit #e7f6ed
+}
+
+InKaf --> Ranks
+InOra --> Ranks
+InSeed --> Ops
+Ranks --> Nulls
+Nulls --> Flags
+Flags --> Ops
+Ops --> Emit
+@enduml
