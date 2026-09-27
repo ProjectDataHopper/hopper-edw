@@ -4,8 +4,22 @@
   <meta charset="utf-8">
   <title>Business Vault: Identity, Cutover & Survivorship (Issue #183)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body class="bv-infographic bg-transparent text-[var(--foreground)] antialiased p-4 md:p-6 font-sans">
+  <!-- tag::embed[] -->
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
   <style>
+    /* Theme tokens. The standalone page and the AsciiDoc embed both use .bv-infographic. */
+    .bv-infographic {
+      --background: #f8fafc;
+      --foreground: #0f172a;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --muted-foreground: #64748b;
+      --primary: #4f46e5;
+      --primary-foreground: #ffffff;
+      --secondary: #f1f5f9;
+    }
     /* Clean micro-interactions and scroll styling */
     .tab-btn.active {
       background-color: var(--primary);
@@ -33,9 +47,7 @@
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
   </style>
-</head>
-<body class="bg-transparent text-[var(--foreground)] antialiased p-4 md:p-6 font-sans">
-  <div class="max-w-6xl mx-auto space-y-6">
+  <div class="bv-infographic max-w-6xl mx-auto space-y-6">
 
     <!-- Header Banner -->
     <header class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm">
@@ -716,5 +728,6 @@
       }
     }
   </script>
+  <!-- end::embed[] -->
 </body>
 </html>

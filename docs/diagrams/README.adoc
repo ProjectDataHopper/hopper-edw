@@ -37,6 +37,9 @@ Use `!pragma layout smetana` in every file so Graphviz is not required.
 |link:bv-identity-cutover-survivorship.puml[bv-identity-cutover-survivorship.puml]
 |link:../business-vault-scd2.adoc#identity-cutover-and-survivorship-pipeline[business-vault-scd2]
 
+|link:identity-cutover-survivorship-infographic.html[identity-cutover-survivorship-infographic.html]
+|link:../business-vault-scd2.adoc#identity-cutover-and-survivorship-pipeline[business-vault-scd2], embedded infographic
+
 |link:bv-identity-map-freeze.puml[bv-identity-map-freeze.puml]
 |link:../business-vault-scd2.adoc#identity-maps[business-vault-scd2], link:../help/bv-identity-map-dialog.adoc[bv-identity-map-dialog]
 

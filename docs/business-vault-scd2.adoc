@@ -168,11 +168,11 @@ Mixed SCD2 (DV satellites plus source queries) is supported; two or more inputs 
 
 == Identity, cutover, and survivorship pipeline
 
-.Show the infographics
+.Show the infographic
 [%collapsible]
 ====
 ++++
-include::diagrams/identity-cutover-survivorship-infographic.html
+include::diagrams/identity-cutover-survivorship-infographic.html[tag=embed]
 ++++
 ====
 
