@@ -92,7 +92,7 @@ public class SortedSchemaMergeMeta
       IHopMetadataProvider metadataProvider)
       throws HopTransformException {
     IRowMeta[] inputLayouts = resolveInputLayouts(pipelineMeta, name, info, variables);
-    if (inputLayouts == null || inputLayouts.length == 0) {
+    if (isEmptyLayout(inputLayouts)) {
       return;
     }
     mergeOutputFields(inputRowMeta, name, inputLayouts);
@@ -108,7 +108,7 @@ public class SortedSchemaMergeMeta
       IHopMetadataProvider metadataProvider)
       throws HopTransformException {
     IRowMeta[] inputLayouts = resolveInputLayouts(null, name, info, variables);
-    if (inputLayouts == null || inputLayouts.length == 0) {
+    if (isEmptyLayout(inputLayouts)) {
       return;
     }
     mergeOutputFields(inputRowMeta, name, inputLayouts);
@@ -145,6 +145,9 @@ public class SortedSchemaMergeMeta
   }
 
   private static boolean isEmptyLayout(IRowMeta[] layouts) {
+    if (layouts == null || layouts.length == 0) {
+      return true;
+    }
     for (IRowMeta layout : layouts) {
       if (layout != null && !layout.isEmpty()) {
         return false;

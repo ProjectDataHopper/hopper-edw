@@ -27,6 +27,7 @@ import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.GuiWidgetElement;
 import org.apache.hop.core.gui.plugin.GuiWidgetGroupType;
 import org.apache.hop.core.row.IRowMeta;
+import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
@@ -110,6 +111,7 @@ public class SurvivorshipMergeMeta
 
   @Override
   public void getFields(
+      PipelineMeta pipelineMeta,
       IRowMeta inputRowMeta,
       String name,
       IRowMeta[] info,
@@ -117,18 +119,82 @@ public class SurvivorshipMergeMeta
       IVariables variables,
       IHopMetadataProvider metadataProvider)
       throws HopTransformException {
-    if (info == null || info.length == 0) {
+    // Main inputs are not info streams. Hop passes a one-element null info array for those, while
+    // the incoming row already holds the previous transforms' fields.
+    IRowMeta[] layouts = resolveInputLayouts(pipelineMeta, name, info, variables);
+    if (layouts == null) {
       return;
     }
     try {
-      IRowMeta output = SortedSchemaMergeLogic.buildSchemaMapping(info).getOutputRowMeta();
+      IRowMeta output = SortedSchemaMergeLogic.buildSchemaMapping(layouts).getOutputRowMeta();
       for (int i = 0; i < output.size(); i++) {
         output.getValueMeta(i).setOrigin(name);
       }
-      inputRowMeta.clear();
-      inputRowMeta.addRowMeta(output);
+      if (inputRowMeta != null) {
+        inputRowMeta.clear();
+        inputRowMeta.addRowMeta(output);
+      }
     } catch (HopPluginException e) {
       throw new HopTransformException("Unable to resolve survivorship output fields", e);
     }
+  }
+
+  @Override
+  public void getFields(
+      IRowMeta inputRowMeta,
+      String name,
+      IRowMeta[] info,
+      TransformMeta nextTransform,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider)
+      throws HopTransformException {
+    getFields(null, inputRowMeta, name, info, nextTransform, variables, metadataProvider);
+  }
+
+  private static IRowMeta[] resolveInputLayouts(
+      PipelineMeta pipelineMeta, String transformName, IRowMeta[] info, IVariables variables) {
+    IRowMeta[] fromInfo = usableLayouts(info);
+    if (fromInfo != null) {
+      return fromInfo;
+    }
+    if (pipelineMeta == null || Utils.isEmpty(transformName)) {
+      return null;
+    }
+    TransformMeta transformMeta = pipelineMeta.findTransform(transformName);
+    if (transformMeta == null) {
+      return null;
+    }
+    String[] inputNames = pipelineMeta.getPrevTransformNames(transformMeta);
+    if (inputNames == null || inputNames.length == 0) {
+      return null;
+    }
+    List<IRowMeta> layouts = new ArrayList<>();
+    for (String inputName : inputNames) {
+      if (Utils.isEmpty(inputName)) {
+        continue;
+      }
+      try {
+        IRowMeta layout = pipelineMeta.getTransformFields(variables, inputName);
+        if (layout != null && !layout.isEmpty()) {
+          layouts.add(layout);
+        }
+      } catch (HopTransformException e) {
+        // Leave this leg out. The caller keeps the row Hop already assembled.
+      }
+    }
+    return layouts.isEmpty() ? null : layouts.toArray(IRowMeta[]::new);
+  }
+
+  private static IRowMeta[] usableLayouts(IRowMeta[] layouts) {
+    if (layouts == null || layouts.length == 0) {
+      return null;
+    }
+    List<IRowMeta> usable = new ArrayList<>();
+    for (IRowMeta layout : layouts) {
+      if (layout != null && !layout.isEmpty()) {
+        usable.add(layout);
+      }
+    }
+    return usable.isEmpty() ? null : usable.toArray(IRowMeta[]::new);
   }
 }

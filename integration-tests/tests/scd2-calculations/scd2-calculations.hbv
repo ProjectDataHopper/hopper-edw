@@ -29,7 +29,7 @@ limitations under the License.
       <validFromField/>
       <validToField/>
       <includeHashKey>Y</includeHashKey>
-      <parentHubName>hub_customer</parentHubName>
+      <parentHubName>hub_customer_calc</parentHubName>
       <field_mappings/>
       <satellite_configs/>
       <calculations>
@@ -107,7 +107,7 @@ limitations under the License.
       <tableType>SCD2</tableType>
       <derivatives>
         <derivative>
-          <dvTableName>hub_customer</dvTableName>
+          <dvTableName>hub_customer_calc</dvTableName>
           <dvTableType>HUB</dvTableType>
         </derivative>
         <derivative>
@@ -127,7 +127,7 @@ limitations under the License.
       <validToField/>
       <includeHashKey>Y</includeHashKey>
       <includeHubBusinessKeys>Y</includeHubBusinessKeys>
-      <parentHubName>hub_customer</parentHubName>
+      <parentHubName>hub_customer_calc</parentHubName>
       <field_mappings>
         <field_mapping>
           <satelliteName>sat_customer_calc</satelliteName>
@@ -185,7 +185,7 @@ limitations under the License.
       <tableType>SCD2</tableType>
       <derivatives>
         <derivative>
-          <dvTableName>hub_customer</dvTableName>
+          <dvTableName>hub_customer_calc</dvTableName>
           <dvTableType>HUB</dvTableType>
         </derivative>
         <derivative>
@@ -201,7 +201,7 @@ limitations under the License.
   <notes/>
   <dv_references>
     <dv_reference>
-      <dvTableName>hub_customer</dvTableName>
+      <dvTableName>hub_customer_calc</dvTableName>
       <dvTableType>HUB</dvTableType>
       <xloc>160</xloc>
       <yloc>144</yloc>

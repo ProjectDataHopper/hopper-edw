@@ -168,6 +168,16 @@ Mixed SCD2 (DV satellites plus source queries) is supported; two or more inputs 
 
 == Identity, cutover, and survivorship pipeline
 
+.Show the infographics
+[%collapsible]
+====
+++++
+include::diagrams/identity-cutover-survivorship-infographic.html
+++++
+====
+
+
+
 Three contracts, three homes, wired only by name. A blank pointer keeps today's `SortedSchemaMerge` pipeline:
 
 image::images/diagrams/bv-identity-cutover-survivorship.svg[Business Vault SCD2 — Cutover, identity resolution, and survivorship pipeline,align="center"]
@@ -202,10 +212,11 @@ The merge reads the legs already sorted by hash key and functional timestamp. At
 
 **Present flag** is an optional source column on a mapping. When the flag is false, a null was left out of the message and does not change the stored value. When the flag is true, a null clears the value even if the null policy is `inherit`. Blank means the column arrived, so the null policy decides.
 
-**Operation field** is an optional column on a satellite or source query. A row value of `upsert`, `delete`, or `seed` overrides the leg operation. A key that does not appear on a delta feed is not deleted. A source query lists either a functional timestamp or a load date, not both.
+**Operation field** is an optional column on a satellite or source query.A row value of `upsert`, `delete`, or `seed` overrides the leg operation.A key that does not appear on a delta feed is not deleted.A source query lists either a functional timestamp or a load date, not both.
 
-Calendar priority and the leg priority override are still stored. They are not the field rank.
+Calendar priority and the leg priority override are still stored.They are not the field rank.
 
+[#_source_calendars]
 == Source calendars
 
 A **source calendar** says when each source system may contribute rows. Add it with **Add source calendar**. It is shared metadata, not a warehouse table. An SCD2 table opts in with **Source calendar**. Leave that blank and every satellite row is kept.
@@ -227,7 +238,7 @@ Oracle through February 2024, Kafka from 1 March 2024 onward:
 
 `2024-02-29 23:59:59` is Oracle. `2024-03-01 00:00:00` is Kafka. A date with no time means midnight at the start of that day. An empty effective to means the source is still in use. Dates are `yyyy-MM-dd` or `yyyy-MM-dd HH:mm:ss`.
 
-The worked example and the column tooltips are in link:help/bv-source-calendar-dialog.adoc[the source calendar help]. How an SCD2 satellite picks `ORACLE` or `KAFKA` is in link:help/bv-scd2-table-dialog.adoc#satellite-settings[Satellite settings]. Priority and mode do not change this filter. Two SCD2 tables can share the calendar and still pick different calendar systems.
+The worked example and the column tooltips are in link:help/bv-source-calendar-dialog.adoc[the source calendar help]. How an SCD2 satellite picks `ORACLE` or `KAFKA` is in link:help/bv-scd2-table-dialog.adoc#_satellite_settings[Satellite settings]. Priority and mode do not change this filter. Two SCD2 tables can share the calendar and still pick different calendar systems.
 
 == Single-satellite SCD2
 

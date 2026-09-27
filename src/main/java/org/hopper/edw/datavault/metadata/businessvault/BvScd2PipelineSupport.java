@@ -913,7 +913,7 @@ public final class BvScd2PipelineSupport {
     }
 
     appendSourceAndValidityFields(rowMeta, scd2Table, bvConfig, dvModel, variables);
-    applyCalculations(rowMeta, scd2Table, variables);
+    applyTargetCalculations(rowMeta, scd2Table, dvModel, List.of(satellite), List.of(), variables);
     appendLoadCycleField(rowMeta, bvConfig, variables);
     return rowMeta;
   }
@@ -959,7 +959,7 @@ public final class BvScd2PipelineSupport {
       }
     }
     appendSourceAndValidityFields(rowMeta, scd2Table, bvConfig, dvModel, variables);
-    applyCalculations(rowMeta, scd2Table, variables);
+    applyTargetCalculations(rowMeta, scd2Table, dvModel, List.of(), sourceQueries, variables);
     appendLoadCycleField(rowMeta, bvConfig, variables);
     return rowMeta;
   }
@@ -995,7 +995,7 @@ public final class BvScd2PipelineSupport {
       }
     }
     appendSourceAndValidityFields(rowMeta, scd2Table, bvConfig, dvModel, variables);
-    applyCalculations(rowMeta, scd2Table, variables);
+    applyTargetCalculations(rowMeta, scd2Table, dvModel, satellites, sourceQueries, variables);
     appendLoadCycleField(rowMeta, bvConfig, variables);
     return rowMeta;
   }
@@ -1167,6 +1167,102 @@ public final class BvScd2PipelineSupport {
       }
     }
     return null;
+  }
+
+  /**
+   * Compiles calculations against the collapse stream, including calculation-only mappings and hub
+   * business keys that are not loaded, then drops those stream-only inputs so they are not DDL
+   * columns.
+   */
+  private static void applyTargetCalculations(
+      RowMeta rowMeta,
+      BvScd2Table scd2Table,
+      DataVaultModel dvModel,
+      List<DvSatellite> satellites,
+      List<BvSourceQuery> sourceQueries,
+      IVariables variables)
+      throws HopException {
+    List<String> dropAfterCompile = List.of();
+    if (scd2Table != null && scd2Table.hasCalculations()) {
+      dropAfterCompile =
+          appendStreamOnlyCalculationInputs(
+              rowMeta, scd2Table, dvModel, satellites, sourceQueries, variables);
+    }
+    applyCalculations(rowMeta, scd2Table, variables);
+    for (String fieldName : dropAfterCompile) {
+      if (rowMeta.indexOfValue(fieldName) >= 0) {
+        rowMeta.removeValueMeta(fieldName);
+      }
+    }
+  }
+
+  private static List<String> appendStreamOnlyCalculationInputs(
+      RowMeta rowMeta,
+      BvScd2Table scd2Table,
+      DataVaultModel dvModel,
+      List<DvSatellite> satellites,
+      List<BvSourceQuery> sourceQueries,
+      IVariables variables)
+      throws HopException {
+    List<String> dropAfterCompile = new ArrayList<>();
+    if (hasFieldMappings(scd2Table)) {
+      for (BvScd2FieldMapping mapping : scd2Table.getFieldMappings()) {
+        if (mapping == null || mapping.isIncludeInTarget()) {
+          continue;
+        }
+        String targetFieldName = variables.resolve(mapping.getTargetFieldName());
+        String sourceFieldName = variables.resolve(mapping.getSourceFieldName());
+        if (Utils.isEmpty(targetFieldName) || Utils.isEmpty(sourceFieldName)) {
+          continue;
+        }
+        if (rowMeta.indexOfValue(targetFieldName) < 0) {
+          rowMeta.addValueMeta(
+              valueMetaForMappedTarget(
+                  mapping,
+                  targetFieldName,
+                  sourceFieldName,
+                  satellites,
+                  sourceQueries,
+                  variables));
+        }
+        if (!isCalculationTarget(scd2Table, targetFieldName, variables)) {
+          dropAfterCompile.add(targetFieldName);
+        }
+      }
+    }
+    if (scd2Table.isIncludeHubBusinessKeys() && !scd2Table.isLoadHubBusinessKeys()) {
+      int before = rowMeta.size();
+      appendHubBusinessKeyFields(
+          rowMeta,
+          scd2Table,
+          dvModel,
+          satellites != null ? satellites : List.of(),
+          variables);
+      for (int i = before; i < rowMeta.size(); i++) {
+        String fieldName = rowMeta.getValueMeta(i).getName();
+        if (!isCalculationTarget(scd2Table, fieldName, variables)) {
+          dropAfterCompile.add(fieldName);
+        }
+      }
+    }
+    return dropAfterCompile;
+  }
+
+  private static boolean isCalculationTarget(
+      BvScd2Table scd2Table, String fieldName, IVariables variables) {
+    if (scd2Table == null || Utils.isEmpty(fieldName) || scd2Table.getCalculations() == null) {
+      return false;
+    }
+    for (BvScd2Calculation calculation : scd2Table.getCalculations()) {
+      if (calculation == null) {
+        continue;
+      }
+      String targetFieldName = variables.resolve(calculation.getTargetFieldName());
+      if (fieldName.equalsIgnoreCase(targetFieldName)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private static void applyCalculations(

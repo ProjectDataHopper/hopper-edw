@@ -20,6 +20,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.annotations.Transform;
 import org.apache.hop.core.exception.HopTransformException;
+import org.apache.hop.core.logging.ILogChannel;
 import org.apache.hop.core.gui.plugin.GuiElementType;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.GuiWidgetElement;
@@ -112,8 +113,15 @@ public class IdentityLookupMeta extends BaseTransformMeta<IdentityLookup, Identi
   @HopMetadataProperty
   private String unmappedPolicy = BvIdentityUnmappedPolicy.SELF.getCode();
 
-  public List<String> unmappedPolicyValues() {
-    return List.of("self", "quarantine", "drop");
+  /**
+   * Policies the Unmapped combo offers. {@code GuiCompositeWidgets} looks this up as {@code
+   * unmappedPolicyValues(ILogChannel, IHopMetadataProvider)}.
+   */
+  public List<String> unmappedPolicyValues(ILogChannel log, IHopMetadataProvider metadataProvider) {
+    return List.of(
+        BvIdentityUnmappedPolicy.SELF.getCode(),
+        BvIdentityUnmappedPolicy.QUARANTINE.getCode(),
+        BvIdentityUnmappedPolicy.DROP.getCode());
   }
 
   public BvIdentityUnmappedPolicy unmappedPolicyOrDefault() {

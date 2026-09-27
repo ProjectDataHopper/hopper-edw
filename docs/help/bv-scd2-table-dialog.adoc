@@ -111,6 +111,7 @@ Single-satellite tables can pass attributes through under DV names unless you ad
 
 **Validate** always shows a result, including a short Data Vault resolution summary. It is not a silent no-op when there are no errors.
 
+[#_satellite_settings]
 == Satellite settings
 
 This tab is on the **SCD2 table**, not on the Data Vault satellite and not on the satellite alias. Open the SCD2 table, then this tab.

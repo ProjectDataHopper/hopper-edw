@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-     http://www.apache.org/licenses/LICENSE-2.0
+      http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,6 +33,7 @@ limitations under the License.
       <parentHubName>hub_person_bvr</parentHubName>
       <sourceCalendarName>person_sources</sourceCalendarName>
       <identityMapName>map_person_bvr</identityMapName>
+      <hubBusinessKeysCalculationOnly>N</hubBusinessKeysCalculationOnly>
       <field_mappings>
         <field_mapping>
           <satelliteName>sat_person_oracle_bvr</satelliteName>
@@ -110,8 +111,8 @@ limitations under the License.
         </derivative>
       </derivatives>
       <source_query_refs/>
-      <xloc>800</xloc>
-      <yloc>160</yloc>
+      <xloc>608</xloc>
+      <yloc>176</yloc>
       <name>bv_person_bvr</name>
     </table>
     <table>
@@ -131,8 +132,8 @@ limitations under the License.
       <tableType>IDENTITY_MAP</tableType>
       <derivatives/>
       <source_query_refs/>
-      <xloc>560</xloc>
-      <yloc>352</yloc>
+      <xloc>176</xloc>
+      <yloc>368</yloc>
       <name>map_person_bvr</name>
     </table>
     <table>
@@ -157,8 +158,8 @@ limitations under the License.
       <tableType>SOURCE_CALENDAR</tableType>
       <derivatives/>
       <source_query_refs/>
-      <xloc>800</xloc>
-      <yloc>352</yloc>
+      <xloc>416</xloc>
+      <yloc>368</yloc>
       <name>person_sources</name>
     </table>
   </tables>
@@ -167,26 +168,26 @@ limitations under the License.
     <dv_reference>
       <dvTableName>hub_person_bvr</dvTableName>
       <dvTableType>HUB</dvTableType>
-      <xloc>64</xloc>
-      <yloc>160</yloc>
+      <xloc>160</xloc>
+      <yloc>224</yloc>
     </dv_reference>
     <dv_reference>
       <dvTableName>sat_person_oracle_bvr</dvTableName>
       <dvTableType>SATELLITE</dvTableType>
-      <xloc>320</xloc>
+      <xloc>128</xloc>
       <yloc>64</yloc>
     </dv_reference>
     <dv_reference>
       <dvTableName>sat_person_kafka_bvr</dvTableName>
       <dvTableType>SATELLITE</dvTableType>
-      <xloc>320</xloc>
-      <yloc>176</yloc>
+      <xloc>128</xloc>
+      <yloc>144</yloc>
     </dv_reference>
     <dv_reference>
       <dvTableName>lnk_person_same_as_bvr</dvTableName>
       <dvTableType>LINK</dvTableType>
-      <xloc>560</xloc>
-      <yloc>224</yloc>
+      <xloc>608</xloc>
+      <yloc>368</yloc>
     </dv_reference>
   </dv_references>
   <bv_references/>

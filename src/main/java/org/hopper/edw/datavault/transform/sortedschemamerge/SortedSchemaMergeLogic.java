@@ -70,14 +70,28 @@ public final class SortedSchemaMergeLogic {
     if (inputRowMetas == null || inputRowMetas.length == 0) {
       throw new HopPluginException("At least one input row layout is required");
     }
+    int seed = -1;
+    for (int i = 0; i < inputRowMetas.length; i++) {
+      if (inputRowMetas[i] != null) {
+        seed = i;
+        break;
+      }
+    }
+    if (seed < 0) {
+      throw new HopPluginException("At least one input row layout is required");
+    }
 
     int[][] mappings = new int[inputRowMetas.length][];
-    IRowMeta outputRowMeta = inputRowMetas[0].clone();
+    IRowMeta outputRowMeta = inputRowMetas[seed].clone();
     HashSet<String> fieldNames = new HashSet<>();
     Collections.addAll(fieldNames, outputRowMeta.getFieldNames());
 
     for (int streamIndex = 0; streamIndex < inputRowMetas.length; streamIndex++) {
       IRowMeta inputRowMeta = inputRowMetas[streamIndex];
+      if (inputRowMeta == null) {
+        mappings[streamIndex] = new int[0];
+        continue;
+      }
       int[] streamMapping = new int[inputRowMeta.size()];
       for (int fieldIndex = 0; fieldIndex < inputRowMeta.size(); fieldIndex++) {
         IValueMeta field = inputRowMeta.getValueMeta(fieldIndex);

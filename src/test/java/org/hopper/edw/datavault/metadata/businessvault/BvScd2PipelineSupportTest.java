@@ -1985,6 +1985,29 @@ class BvScd2PipelineSupportTest {
   }
 
   @Test
+  void calculationOnlyMappingIsVisibleToCalculationsButOmittedFromTarget() throws Exception {
+    Scd2BuildContext ctx = singleSatelliteContext(BvScd2BuildMode.FULL_REBUILD, null);
+    ctx.scd2Table
+        .getFieldMappings()
+        .add(new BvScd2FieldMapping("sat_customer", "name", "customer_name"));
+    ctx.scd2Table
+        .getFieldMappings()
+        .add(new BvScd2FieldMapping("sat_customer", "email", "email", false));
+    ctx.scd2Table
+        .getCalculations()
+        .add(new BvScd2Calculation("email_label", "COALESCE(email, 'none')"));
+
+    var layout =
+        BvScd2PipelineSupport.buildTargetTableLayout(
+            ctx.scd2Table, ctx.bvConfig, ctx.dvModel, ctx.variables);
+    assertTrue(
+        layout.getValueMetaList().stream().anyMatch(vm -> "customer_name".equals(vm.getName())));
+    assertTrue(
+        layout.getValueMetaList().stream().anyMatch(vm -> "email_label".equals(vm.getName())));
+    assertTrue(layout.getValueMetaList().stream().noneMatch(vm -> "email".equals(vm.getName())));
+  }
+
+  @Test
   void targetLayoutOmitsHubBusinessKeysWhenNotLoaded() throws Exception {
     Scd2BuildContext ctx = singleSatelliteContextWithHubBusinessKeys();
     ctx.scd2Table.setLoadHubBusinessKeys(false);
@@ -2003,6 +2026,22 @@ class BvScd2PipelineSupportTest {
     var layout =
         BvScd2PipelineSupport.buildTargetTableLayout(
             ctx.scd2Table, ctx.bvConfig, ctx.dvModel, ctx.variables);
+    assertTrue(
+        layout.getValueMetaList().stream().noneMatch(vm -> "customer_id".equals(vm.getName())));
+  }
+
+  @Test
+  void unloadedHubBusinessKeyIsVisibleToCalculationsButOmittedFromTarget() throws Exception {
+    Scd2BuildContext ctx = singleSatelliteContextWithHubBusinessKeys();
+    ctx.scd2Table.setLoadHubBusinessKeys(false);
+    ctx.scd2Table
+        .getCalculations()
+        .add(new BvScd2Calculation("id_label", "CAST(customer_id AS VARCHAR(20))"));
+
+    var layout =
+        BvScd2PipelineSupport.buildTargetTableLayout(
+            ctx.scd2Table, ctx.bvConfig, ctx.dvModel, ctx.variables);
+    assertTrue(layout.getValueMetaList().stream().anyMatch(vm -> "id_label".equals(vm.getName())));
     assertTrue(
         layout.getValueMetaList().stream().noneMatch(vm -> "customer_id".equals(vm.getName())));
   }

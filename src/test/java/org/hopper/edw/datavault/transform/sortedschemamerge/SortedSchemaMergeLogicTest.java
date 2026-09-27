@@ -69,6 +69,23 @@ class SortedSchemaMergeLogicTest {
   }
 
   @Test
+  void buildSchemaMappingSkipsANullStream() throws HopPluginException {
+    IRowMeta stream = new RowMeta();
+    stream.addValueMeta(new ValueMetaString("hub_hk"));
+
+    SortedSchemaMergeLogic.SchemaMapping mapping =
+        SortedSchemaMergeLogic.buildSchemaMapping(new IRowMeta[] {null, stream});
+
+    assertEquals(1, mapping.getOutputRowMeta().size());
+    assertEquals(0, mapping.getStreamMappings()[0].length);
+    Object[] mapped = mapping.mapRow(1, new Object[] {"hk-1"});
+    assertEquals("hk-1", mapped[0]);
+    assertThrows(
+        HopPluginException.class,
+        () -> SortedSchemaMergeLogic.buildSchemaMapping(new IRowMeta[] {null, null}));
+  }
+
+  @Test
   void buildSchemaMappingCoercesConflictingTypesToString() throws HopPluginException {
     IRowMeta streamA = new RowMeta();
     streamA.addValueMeta(new ValueMetaString("shared"));
