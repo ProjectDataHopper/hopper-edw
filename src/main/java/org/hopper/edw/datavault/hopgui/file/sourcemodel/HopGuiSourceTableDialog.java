@@ -21,7 +21,6 @@ import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.Props;
-import org.apache.hop.core.RowMetaAndData;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.value.ValueMetaFactory;
@@ -52,7 +51,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
-import org.hopper.edw.datavault.hopgui.dialog.ShowRowsDialog;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
 import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
 import org.hopper.edw.datavault.hopgui.help.HelpTopics;
@@ -431,31 +429,8 @@ public class HopGuiSourceTableDialog {
   private void previewData() {
     try {
       SourceTable working = workingTableFromDialog();
-      List<RowMetaAndData> rows =
-          SourceTablePreviewSupport.preview(
-              model,
-              working,
-              variables,
-              metadataProvider,
-              SourceTablePreviewSupport.DEFAULT_ROW_LIMIT);
-      if (rows.isEmpty()) {
-        MessageBox emptyBox = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-        emptyBox.setText(
-            BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Preview.Empty.Title"));
-        emptyBox.setMessage(
-            BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Preview.Empty.Message"));
-        emptyBox.open();
-        return;
-      }
-      ShowRowsDialog dialog =
-          new ShowRowsDialog(
-              shell,
-              variables,
-              BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Preview.Title"),
-              BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Preview.Message"),
-              rows.get(0).getRowMeta(),
-              toObjectList(rows));
-      dialog.open();
+      SourceTablePreviewSupport.openInDatabaseWorkbench(
+          model, working, variables, metadataProvider);
     } catch (Exception e) {
       new ErrorDialog(
           shell,
@@ -666,14 +641,6 @@ public class HopGuiSourceTableDialog {
       working.setPhysicalType(input.getPhysicalType());
     }
     return working;
-  }
-
-  private static List<Object[]> toObjectList(List<RowMetaAndData> rows) {
-    List<Object[]> list = new ArrayList<>();
-    for (RowMetaAndData row : rows) {
-      list.add(row.getData());
-    }
-    return list;
   }
 
   private void dispose() {

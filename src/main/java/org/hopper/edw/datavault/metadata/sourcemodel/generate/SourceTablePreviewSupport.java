@@ -108,6 +108,53 @@ public final class SourceTablePreviewSupport {
   }
 
   /**
+   * Opens the SELECT query for this source table in the Database perspective popup dialog (Issue #189).
+   */
+  public static void openInDatabaseWorkbench(
+      SourceModel model,
+      SourceTable table,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider)
+      throws HopException {
+    if (table == null) {
+      throw new HopException("Source table is required for preview");
+    }
+    DvSourceType physical =
+        table.getPhysicalType() != null ? table.getPhysicalType() : DvSourceType.DATABASE;
+    if (physical != DvSourceType.DATABASE) {
+      throw new HopException(
+          "Preview is currently available for database source tables only (got " + physical + ")");
+    }
+
+    String connectionName = resolveConnectionName(model, table, variables);
+    if (Utils.isEmpty(connectionName)) {
+      throw new HopException(
+          "No database connection is set for table '"
+              + ConstNvl(table.getName())
+              + "'. Choose a connection on the General tab.");
+    }
+    DatabaseMeta databaseMeta =
+        metadataProvider
+            .getSerializer(DatabaseMeta.class)
+            .load(variables != null ? variables.resolve(connectionName) : connectionName);
+    if (databaseMeta == null) {
+      throw new HopException("Database connection '" + connectionName + "' not found");
+    }
+
+    String schema = table.getSchemaName() != null ? table.getSchemaName().trim() : "";
+    String physicalName =
+        !Utils.isEmpty(table.getTableName()) ? table.getTableName().trim() : table.getName();
+    if (Utils.isEmpty(physicalName)) {
+      throw new HopException("Physical table name is required for preview");
+    }
+    String sql =
+        org.hopper.edw.datavault.hopgui.ModelTargetTablePreviewSupport.previewSelectSql(
+            databaseMeta, variables, schema, physicalName, 1000);
+    org.apache.hop.ui.hopgui.perspective.database.DatabaseWorkbenchDialog.openSql(
+        databaseMeta, sql);
+  }
+
+  /**
    * Connection from the table, else model default. Dialog fields can override by mutating a working
    * copy of the table before calling {@link #preview}.
    */

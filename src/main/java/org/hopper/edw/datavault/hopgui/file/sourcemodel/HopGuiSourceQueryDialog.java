@@ -23,7 +23,6 @@ import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.Props;
-import org.apache.hop.core.RowMetaAndData;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
@@ -60,7 +59,6 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.hopper.edw.datavault.hopgui.EnumDialogSupport;
 import org.hopper.edw.datavault.hopgui.ModelGeneratedArtifactOpenSupport;
-import org.hopper.edw.datavault.hopgui.dialog.ShowRowsDialog;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
 import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
 import org.hopper.edw.datavault.hopgui.help.HelpTopics;
@@ -1144,31 +1142,8 @@ public class HopGuiSourceQueryDialog {
   private void previewData() {
     try {
       SourceQuery working = workingQueryFromDialog();
-      List<RowMetaAndData> rows =
-          SourceQueryPreviewSupport.preview(
-              model,
-              working,
-              variables,
-              metadataProvider,
-              SourceQueryPreviewSupport.DEFAULT_ROW_LIMIT);
-      if (rows.isEmpty()) {
-        MessageBox emptyBox = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-        emptyBox.setText(
-            BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.Preview.Empty.Title"));
-        emptyBox.setMessage(
-            BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.Preview.Empty.Message"));
-        emptyBox.open();
-        return;
-      }
-      ShowRowsDialog dialog =
-          new ShowRowsDialog(
-              shell,
-              variables,
-              BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.Preview.Title"),
-              BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.Preview.Message"),
-              rows.get(0).getRowMeta(),
-              toObjectList(rows));
-      dialog.open();
+      SourceQueryPreviewSupport.openInDatabaseWorkbench(
+          model, working, variables, metadataProvider);
     } catch (Exception e) {
       new ErrorDialog(
           shell,
@@ -1216,14 +1191,6 @@ public class HopGuiSourceQueryDialog {
               PKG, "HopGuiSourceQueryDialog.Validate.Error.Message", ex.getMessage()),
           ex);
     }
-  }
-
-  private static List<Object[]> toObjectList(List<RowMetaAndData> rows) {
-    List<Object[]> list = new ArrayList<>();
-    for (RowMetaAndData row : rows) {
-      list.add(row.getData());
-    }
-    return list;
   }
 
   private void ok() {

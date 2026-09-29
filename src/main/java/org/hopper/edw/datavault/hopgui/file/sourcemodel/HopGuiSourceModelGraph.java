@@ -1823,30 +1823,8 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       return;
     }
     try {
-      List<RowMetaAndData> rows =
-          SourceQueryPreviewSupport.preview(
-              model, query, variables, hopGui.getMetadataProvider(), 50);
-      if (rows.isEmpty()) {
-        MessageBox emptyBox = new MessageBox(getShell(), SWT.ICON_INFORMATION | SWT.OK);
-        emptyBox.setText(
-            BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.Preview.Empty.Title"));
-        emptyBox.setMessage(
-            BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.Preview.Empty.Message"));
-        emptyBox.open();
-        return;
-      }
-      List<Object[]> data = new ArrayList<>();
-      for (RowMetaAndData row : rows) {
-        data.add(row.getData());
-      }
-      new ShowRowsDialog(
-              getShell(),
-              variables,
-              BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.Preview.Title"),
-              BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.Preview.Message"),
-              rows.get(0).getRowMeta(),
-              data)
-          .open();
+      SourceQueryPreviewSupport.openInDatabaseWorkbench(
+          model, query, variables, hopGui.getMetadataProvider());
     } catch (Exception e) {
       new ErrorDialog(
           getShell(),
@@ -1861,34 +1839,8 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       return;
     }
     try {
-      List<RowMetaAndData> rows =
-          SourceTablePreviewSupport.preview(
-              model,
-              table,
-              variables,
-              hopGui.getMetadataProvider(),
-              SourceTablePreviewSupport.DEFAULT_ROW_LIMIT);
-      if (rows.isEmpty()) {
-        MessageBox emptyBox = new MessageBox(getShell(), SWT.ICON_INFORMATION | SWT.OK);
-        emptyBox.setText(
-            BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Preview.Empty.Title"));
-        emptyBox.setMessage(
-            BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Preview.Empty.Message"));
-        emptyBox.open();
-        return;
-      }
-      List<Object[]> data = new ArrayList<>();
-      for (RowMetaAndData row : rows) {
-        data.add(row.getData());
-      }
-      new ShowRowsDialog(
-              getShell(),
-              variables,
-              BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Preview.Title"),
-              BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Preview.Message"),
-              rows.get(0).getRowMeta(),
-              data)
-          .open();
+      SourceTablePreviewSupport.openInDatabaseWorkbench(
+          model, table, variables, hopGui.getMetadataProvider());
     } catch (Exception e) {
       new ErrorDialog(
           getShell(),

@@ -4,6 +4,12 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Preview target table actions in Database Workbench (issue #189)
+
+- Added **Preview target table** context actions on tables in Data Vault (`.hdv`), Business Vault (`.hbv`), and Dimensional (`.hdm`) model canvases.
+- Instead of opening in a flat rows dialog, table and query previews generate dialect-limited queries (`SELECT * FROM <table> LIMIT 1000` or dialect equivalent) and open in Hop's floating Database Perspective SQL workbench editor (`DatabaseWorkbenchDialog.openSql`), enabling data engineers to inspect, modify, and test queries.
+- Replaced table and SQL preview dialogs with Database Workbench across Source Model table and query previews (`HopGuiSourceTableDialog`, `HopGuiSourceQueryDialog`, `HopGuiSourceModelGraph`), dimensional and business vault source SQL previews (`DmSourceSqlGuiSupport`), and Data Catalog record definitions backed by physical database tables (`RecordDefinitionPreviewRunner`).
+
 ### Split generated Data Vault models (issue #184)
 
 - **Generate Data Vault…** can write one `.hdv` per hub (plus its satellites), one per link (plus link satellites and cross-model hub aliases), and one per reference table. Choose the output folder, an optional file-name prefix, and whether an existing file is skipped or replaced. A project Data Vault model naming scheme (`edw-dv-model`) formats the file names when one exists. Load hub and reference files before link files, and add the files to the resource definition group before a group update. Docs: [docs/generating-data-vault-from-source-model.adoc](docs/generating-data-vault-from-source-model.adoc).

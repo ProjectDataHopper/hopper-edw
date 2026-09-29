@@ -85,6 +85,7 @@ import org.eclipse.swt.widgets.Event;
 import org.hopper.edw.datavault.config.DataVaultConfigSingleton;
 import org.hopper.edw.datavault.hopgui.ModelGeneratedArtifactOpenSupport;
 import org.hopper.edw.datavault.hopgui.ModelTableLayoutPreviewSupport;
+import org.hopper.edw.datavault.hopgui.ModelTargetTablePreviewSupport;
 import org.hopper.edw.datavault.hopgui.ModelUpdateActionAuditSupport;
 import org.hopper.edw.datavault.hopgui.ModelUpdateWorkflowClipboardSupport;
 import org.hopper.edw.datavault.hopgui.ai.EdwAiAdvisorOpenSupport;
@@ -2040,6 +2041,25 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
   }
 
   @GuiContextAction(
+      id = "bv-graph-preview-target-table",
+      parentId = HopGuiBusinessVaultTableContext.CONTEXT_ID,
+      type = GuiActionType.Info,
+      name = "i18n::HopGuiBusinessVaultGraph.Context.PreviewTargetTable.Name",
+      tooltip = "i18n::HopGuiBusinessVaultGraph.Context.PreviewTargetTable.Tooltip",
+      image = "ui/images/preview.svg",
+      category = "Business Vault",
+      categoryOrder = "5")
+  public void previewTargetTableAction(HopGuiBusinessVaultTableContext context) {
+    IBvTable table = context.getTable();
+    BusinessVaultModel bvModel = context.getModel();
+    if (table == null) {
+      return;
+    }
+    ModelTargetTablePreviewSupport.previewBvTargetTable(
+        hopGui.getShell(), getVariables(), hopGui.getMetadataProvider(), bvModel, table);
+  }
+
+  @GuiContextAction(
       id = "bv-graph-preview-target-layout",
       parentId = HopGuiBusinessVaultTableContext.CONTEXT_ID,
       type = GuiActionType.Info,
@@ -2047,7 +2067,7 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
       tooltip = "i18n::HopGuiBusinessVaultGraph.Context.PreviewTargetLayout.Tooltip",
       image = "ui/images/preview.svg",
       category = "Business Vault",
-      categoryOrder = "5")
+      categoryOrder = "6")
   public void previewTargetLayoutAction(HopGuiBusinessVaultTableContext context) {
     IBvTable table = context.getTable();
     BusinessVaultModel bvModel = context.getModel();

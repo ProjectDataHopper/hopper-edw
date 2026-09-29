@@ -16,7 +16,9 @@
 package org.hopper.edw.catalog.hopgui.preview;
 
 import org.apache.hop.core.Props;
+import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
@@ -26,11 +28,14 @@ import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.database.dialog.PreviewTableSettingsDialog;
 import org.apache.hop.ui.core.dialog.EnterTextDialog;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
+import org.apache.hop.ui.hopgui.perspective.database.DatabaseWorkbenchDialog;
 import org.apache.hop.ui.pipeline.dialog.PipelinePreviewProgressDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.hopper.edw.catalog.hopgui.perspective.DataCatalogPerspective;
+import org.hopper.edw.catalog.model.PhysicalTableRef;
 import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.catalog.model.RecordDefinitionKey;
+import org.hopper.edw.datavault.hopgui.ModelTargetTablePreviewSupport;
 import org.hopper.edw.datavault.hopgui.dialog.ShowRowsDialog;
 import org.hopper.edw.datavault.metadata.DvSourcePreviewInputSupport;
 
@@ -54,6 +59,11 @@ public final class RecordDefinitionPreviewRunner {
     }
 
     try {
+      if (RecordDefinitionPreviewSupport.isDatabaseTable(definition)) {
+        openDatabaseTableWorkbench(definition, variables, metadataProvider);
+        return;
+      }
+
       PropsUi props = PropsUi.getInstance();
       int defaultRows = Math.min(Math.max(1, props.getDefaultPreviewSize()), MAX_PREVIEW_ROWS);
       PreviewTableSettingsDialog settingsDialog =
@@ -129,5 +139,38 @@ public final class RecordDefinitionPreviewRunner {
     }
     RecordDefinitionKey key = definition.getKey();
     return key != null ? key.toString() : "";
+  }
+
+  private static void openDatabaseTableWorkbench(
+      RecordDefinition definition,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider)
+      throws HopException {
+    PhysicalTableRef physicalTable = definition.getPhysicalTable();
+    if (physicalTable == null) {
+      throw new HopException(
+          BaseMessages.getString(PKG, "RecordDefinitionPreviewSupport.Error.MissingPhysicalTable"));
+    }
+    String connectionName =
+        variables != null
+            ? variables.resolve(physicalTable.getDatabaseMetaName())
+            : physicalTable.getDatabaseMetaName();
+    if (Utils.isEmpty(connectionName)) {
+      throw new HopException(
+          BaseMessages.getString(PKG, "RecordDefinitionPreviewRunner.Error.MissingConnection"));
+    }
+    DatabaseMeta databaseMeta =
+        metadataProvider.getSerializer(DatabaseMeta.class).load(connectionName);
+    if (databaseMeta == null) {
+      throw new HopException(
+          BaseMessages.getString(
+              PKG, "RecordDefinitionPreviewRunner.Error.DatabaseNotFound", connectionName));
+    }
+    String schema = physicalTable.getSchemaName();
+    String table = physicalTable.getTableName();
+    String sql =
+        ModelTargetTablePreviewSupport.previewSelectSql(
+            databaseMeta, variables, schema, table, 1000);
+    DatabaseWorkbenchDialog.openSql(databaseMeta, sql);
   }
 }

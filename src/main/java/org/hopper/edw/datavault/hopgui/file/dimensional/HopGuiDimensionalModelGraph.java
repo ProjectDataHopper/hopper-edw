@@ -81,6 +81,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.hopper.edw.datavault.hopgui.ModelGeneratedArtifactOpenSupport;
 import org.hopper.edw.datavault.hopgui.ModelTableLayoutPreviewSupport;
+import org.hopper.edw.datavault.hopgui.ModelTargetTablePreviewSupport;
 import org.hopper.edw.datavault.hopgui.ModelUpdateActionAuditSupport;
 import org.hopper.edw.datavault.hopgui.ModelUpdateWorkflowClipboardSupport;
 import org.hopper.edw.datavault.hopgui.ai.EdwAiAdvisorOpenSupport;
@@ -1514,6 +1515,9 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     if (ACTION_ID_CREATE_PRESENTATION.equals(contextActionId)) {
       return FactCrosstabGuiSupport.isFactLikeTable(context.getTable());
     }
+    if ("dm-graph-preview-target-table".equals(contextActionId)) {
+      return !(context.getTable() instanceof DmDimensionAlias);
+    }
     return true;
   }
 
@@ -1559,6 +1563,25 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
   }
 
   @GuiContextAction(
+      id = "dm-graph-preview-target-table",
+      parentId = HopGuiDimensionalTableContext.CONTEXT_ID,
+      type = GuiActionType.Info,
+      name = "i18n::HopGuiDimensionalModelGraph.Context.PreviewTargetTable.Name",
+      tooltip = "i18n::HopGuiDimensionalModelGraph.Context.PreviewTargetTable.Tooltip",
+      image = "ui/images/preview.svg",
+      category = "Dimensional",
+      categoryOrder = "7")
+  public void previewTargetTableAction(HopGuiDimensionalTableContext context) {
+    IDmTable table = context.getTable();
+    DimensionalModel dmModel = context.getModel();
+    if (table == null) {
+      return;
+    }
+    ModelTargetTablePreviewSupport.previewDmTargetTable(
+        hopGui.getShell(), getVariables(), hopGui.getMetadataProvider(), dmModel, table);
+  }
+
+  @GuiContextAction(
       id = "dm-graph-preview-target-layout",
       parentId = HopGuiDimensionalTableContext.CONTEXT_ID,
       type = GuiActionType.Info,
@@ -1566,7 +1589,7 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
       tooltip = "i18n::HopGuiDimensionalModelGraph.Context.PreviewTargetLayout.Tooltip",
       image = "ui/images/preview.svg",
       category = "Dimensional",
-      categoryOrder = "7")
+      categoryOrder = "8")
   public void previewTargetLayoutAction(HopGuiDimensionalTableContext context) {
     IDmTable table = context.getTable();
     DimensionalModel dmModel = context.getModel();

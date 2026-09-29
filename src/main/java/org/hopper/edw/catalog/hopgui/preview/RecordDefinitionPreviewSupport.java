@@ -53,6 +53,24 @@ public final class RecordDefinitionPreviewSupport {
     return hasPhysicalTable(definition.getPhysicalTable());
   }
 
+  /**
+   * Returns true if the record definition represents a physical database table that can be queried
+   * directly via SQL.
+   */
+  public static boolean isDatabaseTable(RecordDefinition definition) {
+    if (definition == null) {
+      return false;
+    }
+    if (definition.getType() == RecordDefinitionType.DV_SOURCE) {
+      DvSourceRecord dvSource = definition.getDvSource();
+      String sourceType = dvSource != null ? dvSource.getSourceType() : null;
+      if (!Utils.isEmpty(sourceType) && parseSourceType(sourceType) != DvSourceType.DATABASE) {
+        return false;
+      }
+    }
+    return hasPhysicalTable(definition.getPhysicalTable());
+  }
+
   public static DvSourcePreviewInputSupport.PreviewPipeline buildPreviewPipeline(
       RecordDefinition definition,
       IVariables variables,

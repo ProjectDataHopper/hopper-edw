@@ -17,7 +17,6 @@ package org.hopper.edw.datavault.hopgui.file.dimensional;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.hop.core.Props;
 import org.apache.hop.core.database.Database;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
@@ -27,24 +26,15 @@ import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
-import org.apache.hop.pipeline.Pipeline;
-import org.apache.hop.pipeline.PipelineMeta;
-import org.apache.hop.pipeline.PipelinePreviewFactory;
-import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
-import org.apache.hop.ui.core.PropsUi;
-import org.apache.hop.ui.core.database.dialog.PreviewTableSettingsDialog;
-import org.apache.hop.ui.core.dialog.EnterTextDialog;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
-import org.apache.hop.ui.pipeline.dialog.PipelinePreviewProgressDialog;
+import org.apache.hop.ui.hopgui.perspective.database.DatabaseWorkbenchDialog;
 import org.eclipse.swt.widgets.Shell;
-import org.hopper.edw.datavault.hopgui.dialog.ShowRowsDialog;
-import org.hopper.edw.datavault.metadata.DvSqlSupport;
+import org.hopper.edw.datavault.metadata.database.DvDatabaseSourcePreviewSupport;
 
 /** Preview and field discovery helpers for dimensional source SQL in Hop GUI dialogs. */
 public final class DmSourceSqlGuiSupport {
 
   private static final Class<?> PKG = DmSourceSqlGuiSupport.class;
-  private static final String PREVIEW_TRANSFORM_NAME = "Source SQL";
 
   private DmSourceSqlGuiSupport() {}
 
@@ -108,61 +98,8 @@ public final class DmSourceSqlGuiSupport {
             BaseMessages.getString(PKG, "DmSourceSqlGuiSupport.Error.MissingSql"));
       }
 
-      PropsUi props = PropsUi.getInstance();
-      int defaultRows = props.getDefaultPreviewSize();
-      PreviewTableSettingsDialog settingsDialog =
-          new PreviewTableSettingsDialog(shell, Math.max(1, defaultRows), variables, true);
-      PreviewTableSettingsDialog.Settings settings = settingsDialog.open();
-      if (settings == null) {
-        return;
-      }
-      int previewRows = settings.rowLimit > 0 ? settings.rowLimit : Math.max(1, defaultRows);
-      IVariables previewVariables = settingsDialog.getPreviewExecutionVariables();
-
-      TableInputMeta tableInputMeta = new TableInputMeta();
-      tableInputMeta.setConnection(databaseMeta.getName());
-      DvSqlSupport.assignDisplaySql(tableInputMeta, sql);
-
-      PipelineMeta previewMeta =
-          PipelinePreviewFactory.generatePreviewPipeline(
-              metadataProvider, tableInputMeta, PREVIEW_TRANSFORM_NAME);
-      previewMeta.lookupReferencesAfterLoading();
-
-      PipelinePreviewProgressDialog progressDialog =
-          new PipelinePreviewProgressDialog(
-              shell,
-              previewVariables,
-              previewMeta,
-              new String[] {PREVIEW_TRANSFORM_NAME},
-              new int[] {previewRows});
-      progressDialog.open();
-
-      Pipeline pipeline = progressDialog.getPipeline();
-      String loggingText = progressDialog.getLoggingText();
-
-      if (!progressDialog.isCancelled()) {
-        if (pipeline.getResult() != null && pipeline.getResult().getNrErrors() > 0) {
-          EnterTextDialog etd =
-              new EnterTextDialog(
-                  shell,
-                  BaseMessages.getString(Props.class, "System.Dialog.PreviewError.Title"),
-                  BaseMessages.getString(Props.class, "System.Dialog.PreviewError.Message"),
-                  loggingText,
-                  true);
-          etd.setReadOnly();
-          etd.open();
-        } else {
-          new ShowRowsDialog(
-                  shell,
-                  variables,
-                  BaseMessages.getString(PKG, "DmSourceSqlGuiSupport.PreviewData.Title"),
-                  BaseMessages.getString(
-                      PKG, "DmSourceSqlGuiSupport.PreviewData.Message", databaseMeta.getName()),
-                  progressDialog.getPreviewRowsMeta(PREVIEW_TRANSFORM_NAME),
-                  progressDialog.getPreviewRows(PREVIEW_TRANSFORM_NAME))
-              .open();
-        }
-      }
+      String limitedSql = DvDatabaseSourcePreviewSupport.applyRowLimit(databaseMeta, sql, 1000);
+      DatabaseWorkbenchDialog.openSql(databaseMeta, limitedSql);
     } catch (Exception e) {
       new ErrorDialog(
           shell,

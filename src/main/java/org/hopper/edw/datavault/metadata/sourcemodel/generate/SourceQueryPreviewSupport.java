@@ -90,4 +90,56 @@ public final class SourceQueryPreviewSupport {
       throw new HopException("Error previewing source query", e);
     }
   }
+
+  /**
+   * Opens the query in the Hop Database Perspective SQL workbench editor with a limit of 1000 rows.
+   */
+  public static void openInDatabaseWorkbench(
+      SourceModel model,
+      SourceQuery query,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider)
+      throws HopException {
+    if (query == null) {
+      throw new HopException("Source query is required for preview");
+    }
+    SourceQueryGenerationMode mode =
+        SourceQueryGenerationSupport.resolveEffectiveMode(model, query);
+    if (mode != SourceQueryGenerationMode.SQL && mode != SourceQueryGenerationMode.FREE_SQL) {
+      throw new HopException(
+          "Preview in Database Workbench is currently available for single-connection SQL queries and Free SQL. "
+              + "This query resolves to pipeline generation mode.");
+    }
+    if (mode == SourceQueryGenerationMode.FREE_SQL
+        && !SourceQueryGenerationSupport.canGenerateSingleConnectionSql(model, query)) {
+      throw new HopException(
+          "Preview in Database Workbench requires all tables in the query to be on the same database connection.");
+    }
+    String connectionName = SourceQueryGenerationSupport.resolveSharedDatabaseName(model, query);
+    if (Utils.isEmpty(connectionName)) {
+      throw new HopException("No database connection available for preview");
+    }
+    DatabaseMeta databaseMeta =
+        metadataProvider
+            .getSerializer(DatabaseMeta.class)
+            .load(variables != null ? variables.resolve(connectionName) : connectionName);
+    if (databaseMeta == null) {
+      throw new HopException("Database connection '" + connectionName + "' not found");
+    }
+    String sql;
+    if (mode == SourceQueryGenerationMode.FREE_SQL) {
+      sql = org.apache.hop.core.Const.NVL(query.getFreeSql(), "").trim();
+      if (Utils.isEmpty(sql)) {
+        throw new HopException("Free SQL is empty");
+      }
+    } else {
+      sql = SourceQuerySqlGenerator.generate(model, query, databaseMeta, variables);
+    }
+
+    String limitedSql =
+        org.hopper.edw.datavault.metadata.database.DvDatabaseSourcePreviewSupport.applyRowLimit(
+            databaseMeta, sql, 1000);
+    org.apache.hop.ui.hopgui.perspective.database.DatabaseWorkbenchDialog.openSql(
+        databaseMeta, limitedSql);
+  }
 }

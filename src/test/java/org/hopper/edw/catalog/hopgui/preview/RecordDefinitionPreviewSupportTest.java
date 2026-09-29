@@ -97,6 +97,25 @@ class RecordDefinitionPreviewSupportTest {
   }
 
   @Test
+  void isDatabaseTable_checksPhysicalTableAvailability() {
+    assertFalse(RecordDefinitionPreviewSupport.isDatabaseTable(null));
+
+    RecordDefinition dbDef = dvSourceDefinition("DATABASE");
+    assertFalse(RecordDefinitionPreviewSupport.isDatabaseTable(dbDef));
+    dbDef.setPhysicalTable(physicalTable("Vault", "public", "customers"));
+    assertTrue(RecordDefinitionPreviewSupport.isDatabaseTable(dbDef));
+
+    RecordDefinition csvDef = dvSourceDefinition("CSV");
+    csvDef.setPhysicalTable(physicalTable("Vault", "public", "customers"));
+    assertFalse(RecordDefinitionPreviewSupport.isDatabaseTable(csvDef));
+
+    RecordDefinition hubDef = typedDefinition(RecordDefinitionType.DV_HUB);
+    assertFalse(RecordDefinitionPreviewSupport.isDatabaseTable(hubDef));
+    hubDef.setPhysicalTable(physicalTable("Vault", "dv", "hub_customer"));
+    assertTrue(RecordDefinitionPreviewSupport.isDatabaseTable(hubDef));
+  }
+
+  @Test
   void buildCsvPreview_usesCsvInputForSingleFilename() throws Exception {
     DvCsvSource csvSource = new DvCsvSource();
     csvSource.setSingleFilename("/tmp/customers.csv");

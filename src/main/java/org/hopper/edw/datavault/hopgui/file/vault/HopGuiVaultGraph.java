@@ -110,6 +110,7 @@ import org.hopper.edw.datavault.command.svg.SvgRenderOptions;
 import org.hopper.edw.datavault.config.DataVaultConfigSingleton;
 import org.hopper.edw.datavault.hopgui.ModelGeneratedArtifactOpenSupport;
 import org.hopper.edw.datavault.hopgui.ModelTableLayoutPreviewSupport;
+import org.hopper.edw.datavault.hopgui.ModelTargetTablePreviewSupport;
 import org.hopper.edw.datavault.hopgui.ModelUpdateActionAuditSupport;
 import org.hopper.edw.datavault.hopgui.ModelUpdateWorkflowClipboardSupport;
 import org.hopper.edw.datavault.hopgui.ai.EdwAiAdvisorOpenSupport;
@@ -2065,7 +2066,8 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     IDvTable table = context.getTable();
     if (table != null && table.getTableType() == DvTableType.LINKED_TABLE) {
       if ("vault-graph-edit-table".equals(contextActionId)
-          || "vault-graph-show-table-pipeline".equals(contextActionId)) {
+          || "vault-graph-show-table-pipeline".equals(contextActionId)
+          || "vault-graph-preview-target-table".equals(contextActionId)) {
         return false;
       }
     }
@@ -2129,6 +2131,30 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
   }
 
   @GuiContextAction(
+      id = "vault-graph-preview-target-table",
+      parentId = HopGuiVaultTableContext.CONTEXT_ID,
+      type = GuiActionType.Info,
+      name = "i18n::HopGuiVaultGraph.Context.PreviewTargetTable.Name",
+      tooltip = "i18n::HopGuiVaultGraph.Context.PreviewTargetTable.Tooltip",
+      image = "ui/images/preview.svg",
+      category = "Data Vault",
+      categoryOrder = "5")
+  public void previewTargetTableAction(HopGuiVaultTableContext context) {
+    IDvTable table = context.getTable();
+    DataVaultModel dvModel = context.getModel();
+    HopGuiVaultGraph realGraph = context.getVaultGraph();
+    if (table == null || realGraph == null) {
+      return;
+    }
+    ModelTargetTablePreviewSupport.previewDvTargetTable(
+        realGraph.getShell(),
+        realGraph.getVariables(),
+        hopGui.getMetadataProvider(),
+        dvModel,
+        table);
+  }
+
+  @GuiContextAction(
       id = "vault-graph-preview-target-layout",
       parentId = HopGuiVaultTableContext.CONTEXT_ID,
       type = GuiActionType.Info,
@@ -2136,7 +2162,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       tooltip = "i18n::HopGuiVaultGraph.Context.PreviewTargetLayout.Tooltip",
       image = "ui/images/preview.svg",
       category = "Data Vault",
-      categoryOrder = "5")
+      categoryOrder = "6")
   public void previewTargetLayoutAction(HopGuiVaultTableContext context) {
     IDvTable table = context.getTable();
     DataVaultModel dvModel = context.getModel();
