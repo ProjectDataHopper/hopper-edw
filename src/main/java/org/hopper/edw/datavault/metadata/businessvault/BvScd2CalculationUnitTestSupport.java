@@ -48,7 +48,6 @@ import org.apache.hop.testing.DataSetField;
 import org.apache.hop.testing.PipelineUnitTest;
 import org.apache.hop.testing.PipelineUnitTestFieldMapping;
 import org.apache.hop.testing.PipelineUnitTestSetLocation;
-import org.apache.hop.testing.TestType;
 import org.hopper.edw.datavault.catalog.CatalogModelRegistrySupport;
 import org.hopper.edw.datavault.expression.SqlExpressionProgram;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
@@ -257,7 +256,7 @@ public final class BvScd2CalculationUnitTestSupport {
     PipelineUnitTest unitTest = new PipelineUnitTest();
     unitTest.setName(names.unitTestName());
     unitTest.setDescription("SCD2 calculation unit test for " + names.sanitizedTable());
-    unitTest.setType(TestType.UNIT_TEST);
+    unitTest.setType("UNIT_TEST");
     unitTest.setAutoOpening(true);
     unitTest.setPipelineFilename(pipelineFilenameRelativeToProject(pipelineFilename));
     unitTest
@@ -281,12 +280,16 @@ public final class BvScd2CalculationUnitTestSupport {
 
   public static IRowMeta calculatedLayout(
       BvScd2Table scd2Table, IRowMeta collapseLayout, IVariables variables) throws HopException {
+    try {
     SqlExpressionProgram program =
         SqlExpressionProgram.compile(
             BvScd2CalculationValidationSupport.toSpecs(scd2Table.getCalculations(), variables),
             collapseLayout,
             variables);
     return program.getOutputRowMeta();
+    } catch(Exception e) {
+      throw new HopException("Error calculating layout for SCD2 table", e);
+    }
   }
 
   public static GeneratedArtifacts generate(
