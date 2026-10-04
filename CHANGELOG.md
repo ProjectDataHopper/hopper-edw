@@ -4,6 +4,12 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+## [0.11.0] — 2026-10-04
+
+Requires **Apache Hop 2.20.0-SNAPSHOT** and **Java 21**.
+
+**Downloads:** [GitHub release zip](https://github.com/ProjectDataHopper/hopper-edw/releases/download/v0.11.0/hopper-edw-0.11.0.zip) · [Data Hopper Nexus](https://repository.data-hopper.com/repository/hop-community-plugins/org/hopper/hopper-edw/0.11.0/hopper-edw-0.11.0.zip) (`org.hopper:hopper-edw:0.11.0`)
+
 ### Source model data masking (issue #191)
 
 - A **Source masking** card on a `.hsm` is a virtual table over a parent feed. It stores field-to-pattern names. Pattern definitions stay in Hop **Masking pattern** metadata and are applied by the **Mask fields** transform.

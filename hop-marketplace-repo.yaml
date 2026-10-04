@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Hop marketplace repository definition for hopper-edw (Data Hopper EDW, Hop 2.19+).
+# Hop marketplace repository definition for hopper-edw (Data Hopper EDW, Hop 2.20+).
 #
 # Jenkins publishes continuous SNAPSHOT zips to this Nexus after project changes.
 # Import into Hop so the plugin appears in marketplace query / install:
@@ -53,8 +53,8 @@ description: >
 plugins:
   - groupId: org.hopper
     artifactId: hopper-edw
-    version: 0.10.0
-    minHopVersion: "2.19.0"
+    version: 0.11.0
+    minHopVersion: "2.20.0"
     name: Data Hopper EDW
     category: Community
     description: >
