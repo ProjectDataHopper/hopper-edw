@@ -82,7 +82,9 @@ import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceQueryPipelin
 import org.hopper.edw.datavault.transform.sqlexpression.SqlExpressionMeta;
 import org.hopper.edw.datavault.transform.sqlexpression.SqlExpressionMetaFactory;
 import org.hopper.edw.datavault.virtualization.calcite.HopTypeSystem;
+import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceMaskingPipelineGenerator;
 import org.hopper.edw.datavault.virtualization.calcite.SourceModelJsonTable;
+import org.hopper.edw.datavault.virtualization.calcite.SourceModelMaskingTable;
 import org.hopper.edw.datavault.virtualization.calcite.SourceModelPipelineTable;
 import org.hopper.edw.datavault.virtualization.calcite.SourceModelQueryTable;
 import org.hopper.edw.datavault.virtualization.calcite.SourceModelTable;
@@ -269,6 +271,10 @@ public final class RelToPipelineGenerator {
     if (jsonTable != null) {
       return convertJsonScan(jsonTable, ctx, location);
     }
+    SourceModelMaskingTable maskingTable = scan.getTable().unwrap(SourceModelMaskingTable.class);
+    if (maskingTable != null) {
+      return convertMaskingScan(maskingTable, ctx, location);
+    }
     SourceModelPipelineTable pipelineTable = scan.getTable().unwrap(SourceModelPipelineTable.class);
     if (pipelineTable != null) {
       return convertPipelineScan(pipelineTable, ctx, location);
@@ -378,6 +384,23 @@ public final class RelToPipelineGenerator {
         PipelineSubgraphMerger.merge(
             ctx.pipelineMeta, subgraph, location, base -> uniqueName(ctx, base));
     ctx.residualOps.add("TableScan JSON " + jsonTable.logicalName() + " → Json pipeline");
+    return merged.outputTransform();
+  }
+
+  private static TransformMeta convertMaskingScan(
+      SourceModelMaskingTable maskingTable, GenerationContext ctx, Point location)
+      throws HopException {
+    if (ctx.model == null) {
+      throw new SourceModelSqlException("Source model is required to expand masking table scans");
+    }
+    PipelineMeta subgraph =
+        SourceMaskingPipelineGenerator.generate(
+            ctx.model, maskingTable.getSourceMasking(), ctx.variables, ctx.metadataProvider);
+    PipelineSubgraphMerger.MergedSubgraph merged =
+        PipelineSubgraphMerger.merge(
+            ctx.pipelineMeta, subgraph, location, base -> uniqueName(ctx, base));
+    ctx.residualOps.add(
+        "TableScan MASKING " + maskingTable.logicalName() + " → Mask fields pipeline");
     return merged.outputTransform();
   }
 

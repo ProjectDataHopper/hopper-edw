@@ -50,6 +50,12 @@ public class DvSourceRecord {
   /** Source JSON object name inside the model when {@link #sourceType} is {@code JSON}. */
   private String jsonSourceName;
 
+  /** Path to the {@code .hsm} source model when {@link #sourceType} is {@code MASKING}. */
+  private String maskingSourceModelFilename;
+
+  /** Source masking card name when {@link #sourceType} is {@code MASKING}. */
+  private String maskingSourceName;
+
   /** Path to the source pipeline ({@code .hpl}) when {@link #sourceType} is {@code PIPELINE}. */
   private String pipelineFilename;
 

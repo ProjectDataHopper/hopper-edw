@@ -35,6 +35,7 @@ public final class SourceEndpointSupport {
       case QUERY -> model.findQuery(name) != null;
       case JSON -> model.findJsonSource(name) != null;
       case PIPELINE -> model.findPipelineSource(name) != null;
+      case MASKING -> model.findMaskingSource(name) != null;
     };
   }
 
@@ -46,6 +47,7 @@ public final class SourceEndpointSupport {
       case QUERY -> "query:" + n;
       case JSON -> "json:" + n;
       case PIPELINE -> "pipeline:" + n;
+      case MASKING -> "masking:" + n;
     };
   }
 
@@ -103,6 +105,16 @@ public final class SourceEndpointSupport {
           }
         }
       }
+      case MASKING -> {
+        SourceMasking masking = model.findMaskingSource(name);
+        if (masking != null) {
+          for (SourceMaskingField field : masking.getFields()) {
+            if (field != null && !Utils.isEmpty(field.resolveName())) {
+              names.add(field.resolveName());
+            }
+          }
+        }
+      }
     }
     return names;
   }
@@ -155,6 +167,16 @@ public final class SourceEndpointSupport {
           }
         }
       }
+      case MASKING -> {
+        SourceMasking masking = model.findMaskingSource(name);
+        if (masking != null) {
+          for (SourceMaskingField field : masking.getFields()) {
+            if (field != null && field.isPrimaryKey() && !Utils.isEmpty(field.resolveName())) {
+              names.add(field.resolveName());
+            }
+          }
+        }
+      }
     }
     return names;
   }
@@ -181,6 +203,10 @@ public final class SourceEndpointSupport {
         SourcePipeline pipeline = model.findPipelineSource(name);
         yield pipeline != null ? pipeline.getLocation() : null;
       }
+      case MASKING -> {
+        SourceMasking masking = model.findMaskingSource(name);
+        yield masking != null ? masking.getLocation() : null;
+      }
     };
   }
 
@@ -197,6 +223,9 @@ public final class SourceEndpointSupport {
     if (node instanceof SourcePipeline) {
       return SourceEndpointKind.PIPELINE;
     }
+    if (node instanceof SourceMasking) {
+      return SourceEndpointKind.MASKING;
+    }
     return SourceEndpointKind.TABLE;
   }
 
@@ -212,6 +241,9 @@ public final class SourceEndpointSupport {
     }
     if (node instanceof SourcePipeline pipeline) {
       return pipeline.getName();
+    }
+    if (node instanceof SourceMasking masking) {
+      return masking.getName();
     }
     return null;
   }

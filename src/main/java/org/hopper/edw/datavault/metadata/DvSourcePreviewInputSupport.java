@@ -107,6 +107,13 @@ public final class DvSourcePreviewInputSupport {
       case COMPOSITE ->
           buildCompositePreview(
               recordSource, (DvCompositeSource) dvSource, variables, metadataProvider, rowLimit);
+      case MASKING ->
+          buildMaskingPreview(
+              recordSource,
+              (org.hopper.edw.datavault.metadata.masking.DvMaskingSource) dvSource,
+              variables,
+              metadataProvider,
+              rowLimit);
       case JSON ->
           buildJsonPreview(
               recordSource,
@@ -147,6 +154,29 @@ public final class DvSourcePreviewInputSupport {
         PipelinePreviewFactory.generatePreviewPipeline(
             metadataProvider, metaInjectMeta, transformName);
     return new PreviewPipeline(previewMeta, transformName);
+  }
+
+  private static PreviewPipeline buildMaskingPreview(
+      DataVaultSource recordSource,
+      org.hopper.edw.datavault.metadata.masking.DvMaskingSource source,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider,
+      int rowLimit)
+      throws HopException {
+    if (source == null) {
+      throw new HopException(
+          BaseMessages.getString(PKG, "DvSourcePreviewInputSupport.Error.MissingSource"));
+    }
+    org.hopper.edw.datavault.metadata.masking.DvMaskingSourceResolver.ResolvedMasking resolved =
+        org.hopper.edw.datavault.metadata.masking.DvMaskingSourceResolver.resolve(
+            source, variables, metadataProvider);
+    org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceMaskingPreviewSupport
+            .PreviewPipeline
+        built =
+            org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceMaskingPreviewSupport
+                .buildPreviewPipeline(
+                    resolved.model(), resolved.maskingSource(), variables, metadataProvider);
+    return new PreviewPipeline(built.pipelineMeta(), built.previewTransformName());
   }
 
   private static PreviewPipeline buildJsonPreview(

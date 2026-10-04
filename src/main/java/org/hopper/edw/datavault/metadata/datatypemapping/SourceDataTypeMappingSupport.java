@@ -62,6 +62,21 @@ public final class SourceDataTypeMappingSupport {
     return fields;
   }
 
+  public static List<PhysicalSourceField> physicalFields(
+      org.hopper.edw.datavault.metadata.sourcemodel.SourceMasking masking) {
+    List<PhysicalSourceField> fields = new ArrayList<>();
+    if (masking == null) {
+      return fields;
+    }
+    for (var field : masking.getFields()) {
+      PhysicalSourceField physical = PhysicalSourceField.from(field);
+      if (physical != null && !Utils.isEmpty(physical.getName())) {
+        fields.add(physical);
+      }
+    }
+    return fields;
+  }
+
   public static List<PhysicalSourceField> physicalFields(SourceJson jsonSource) {
     List<PhysicalSourceField> fields = new ArrayList<>();
     if (jsonSource == null) {

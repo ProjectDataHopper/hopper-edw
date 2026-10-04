@@ -63,6 +63,10 @@ public final class SourceModelAiContextBuilder {
     if (model != null) {
       appendNamed(json, model.getPipelineSources());
     }
+    json.append("],\"maskingSources\":[");
+    if (model != null) {
+      appendMasking(json, model.getMaskingSources());
+    }
     json.append("]}");
     return json.toString();
   }
@@ -170,6 +174,36 @@ public final class SourceModelAiContextBuilder {
       json.append(",\"parent\":")
           .append(DvAiContextBuilder.jsonString(relationship.getParentTableName()));
       json.append('}');
+    }
+  }
+
+  private static void appendMasking(
+      StringBuilder json, List<org.hopper.edw.datavault.metadata.sourcemodel.SourceMasking> items) {
+    boolean first = true;
+    if (items == null) {
+      return;
+    }
+    for (org.hopper.edw.datavault.metadata.sourcemodel.SourceMasking item : items) {
+      if (item == null || Utils.isEmpty(item.getName())) {
+        continue;
+      }
+      if (!first) {
+        json.append(',');
+      }
+      first = false;
+      json.append("{\"name\":").append(DvAiContextBuilder.jsonString(item.getName()));
+      json.append(",\"maskedFields\":[");
+      boolean firstField = true;
+      for (var field : item.maskedFields()) {
+        if (!firstField) {
+          json.append(',');
+        }
+        firstField = false;
+        json.append("{\"field\":").append(DvAiContextBuilder.jsonString(field.resolveName()));
+        json.append(",\"pattern\":").append(DvAiContextBuilder.jsonString(field.getPatternName()));
+        json.append('}');
+      }
+      json.append("]}");
     }
   }
 

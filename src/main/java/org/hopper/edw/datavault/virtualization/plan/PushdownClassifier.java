@@ -25,6 +25,7 @@ import org.apache.calcite.rel.core.TableScan;
 import org.apache.hop.core.util.Utils;
 import org.hopper.edw.datavault.metadata.DvSourceType;
 import org.hopper.edw.datavault.virtualization.calcite.SourceModelJsonTable;
+import org.hopper.edw.datavault.virtualization.calcite.SourceModelMaskingTable;
 import org.hopper.edw.datavault.virtualization.calcite.SourceModelPipelineTable;
 import org.hopper.edw.datavault.virtualization.calcite.SourceModelQueryTable;
 import org.hopper.edw.datavault.virtualization.calcite.SourceModelTable;
@@ -75,6 +76,9 @@ public final class PushdownClassifier {
           } else if (scan.getTable().unwrap(SourceModelJsonTable.class) != null) {
             SourceModelJsonTable json = scan.getTable().unwrap(SourceModelJsonTable.class);
             reasons.add("Table '" + json.logicalName() + "' is a JSON source (residual path)");
+          } else if (scan.getTable().unwrap(SourceModelMaskingTable.class) != null) {
+            SourceModelMaskingTable masking = scan.getTable().unwrap(SourceModelMaskingTable.class);
+            reasons.add("Table '" + masking.logicalName() + "' is a masking source (residual path)");
           } else if (scan.getTable().unwrap(SourceModelPipelineTable.class) != null) {
             SourceModelPipelineTable pipe = scan.getTable().unwrap(SourceModelPipelineTable.class);
             reasons.add("Table '" + pipe.logicalName() + "' is a PIPELINE source (residual path)");

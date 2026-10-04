@@ -44,7 +44,7 @@ class SourceToVaultI18nTest {
     assertResolved(
         SourceToVaultReviewDialog.class,
         "SourceToVaultReviewDialog.IncludeNonTableSources.Label",
-        "Include source queries, JSON extractions, and pipelines");
+        "Include source queries, JSON extractions, pipelines, and masking cards");
     assertResolved(
         SourceToVaultReviewDialog.class,
         "SourceToVaultReviewDialog.CreateReferenceTables.Label",
@@ -87,7 +87,7 @@ class SourceToVaultI18nTest {
     assertResolved(
         HopGuiSourceModelGraph.class,
         "HopGuiSourceModelGraph.Toolbar.GenerateVault.Tooltip",
-        "Generate Data Vault hubs, links, satellites, and reference tables from selected source tables, queries, JSON extractions, and pipelines");
+        "Generate Data Vault hubs, links, satellites, and reference tables from selected source tables, queries, JSON extractions, pipelines, and masking cards");
     assertResolved(
         HopGuiVaultGraph.class,
         "HopGuiVaultGraph.Toolbar.GenerateFromSource.Tooltip",

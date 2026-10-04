@@ -126,6 +126,15 @@ public final class CatalogDvSourceMapper {
       compositeSource.setGeneratedSql(dvSourceRecord.getCompositeGeneratedSql());
       return compositeSource;
     }
+    if (sourceType == DvSourceType.MASKING) {
+      org.hopper.edw.datavault.metadata.masking.DvMaskingSource maskingSource =
+          new org.hopper.edw.datavault.metadata.masking.DvMaskingSource();
+      maskingSource.setDescription(definition.getDescription());
+      maskingSource.setFields(fields);
+      maskingSource.setSourceModelFilename(dvSourceRecord.getMaskingSourceModelFilename());
+      maskingSource.setSourceMaskingName(dvSourceRecord.getMaskingSourceName());
+      return maskingSource;
+    }
     if (sourceType == DvSourceType.JSON) {
       org.hopper.edw.datavault.metadata.json.DvJsonSource jsonSource =
           new org.hopper.edw.datavault.metadata.json.DvJsonSource();

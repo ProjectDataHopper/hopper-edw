@@ -50,6 +50,9 @@ Catalog DV_SOURCE (single-table OR COMPOSITE feed)
 |**Source JSON**
 |Named JSON extraction: parent table/query/JSON source, JSON field, projected fields (JsonPath + pass-through keys). JsonInput rules apply (top-level leaves + at most one array). Publish as catalog type `JSON`. Chain Source JSON objects for nested arrays. See image:images/source-modeler-json-source.png[Source JSON dialog,width=480].
 
+|**Source masking**
+|Named virtual table over a parent table, query, JSON source, pipeline, or masking card. Selected fields name a Hop masking pattern. Publish as catalog type `MASKING`. JDBC and Data Vault loads of this card run Mask fields. The parent stays readable. See image:images/source-modeler-masking-fields.png[Source masking Fields tab,width=480] and link:help/source-masking-dialog.adoc[Source masking].
+
 |**Source pipeline**
 |Named pipeline-backed feed: path to a `.hpl`, output transform, and **declared fields** (contract for catalog publish and MetaInject load). Uses the same **catalog connection / namespace** as the rest of the model (Edit model) for **publishing** this feed. Optional **Import** scans the pipeline for zero or more **Record Definition Input** transforms and stores catalog connection / namespace / record name for lineage (not required for load). **Catalog source name** is the published name of *this* pipeline feed (like a table). Publish as catalog type `PIPELINE`.
 
@@ -130,6 +133,19 @@ Project profiles are edited in Metadata (**Scope** + **Rules** tabs):
 image::images/data-type-mapping-rules.png[Data type mapping metadata editor — Rules tab,align="center"]
 
 Model-level defaults live under **Edit model** → **Default data type mappings** (applied on schema import and when adding new cards). Full guide: link:data-type-mappings.adoc[Data type mappings].
+
+== Source masking
+
+image::images/source-modeler-masking-fields.png[Source masking dialog — Fields tab for masked-customer-info. customer_id uses pattern customer-id, city uses pattern city, and the other fields are left blank,align="center"]
+
+A masking card is a virtual table over a parent feed. The parent stays readable. Pattern definitions live in Hop metadata (`metadata/masking-pattern/`). The card stores only the pattern name.
+
+. **Add source masking** (toolbar or canvas context), or double-click an existing masking card.
+. On **General**: name, optional catalog name, **parent kind** (table, query, JSON source, pipeline, or another masking card), and parent name.
+. On **Fields**: **Get fields** copies the parent projection and keeps pattern names already chosen for the same field. Set **Masking pattern** on the columns that must be masked. A blank pattern passes the value through. Unlisted parent columns are not on the card. **Edit masking pattern** opens the Hop metadata editor for the selected row.
+. **Validate**, **Preview**, and publish as catalog type `MASKING`.
+
+JDBC `SELECT` from the card name, and Data Vault loads bound to the published feed, run Mask fields once at the source boundary. Help: link:help/source-masking-dialog.adoc[Source masking].
 
 == Schema import
 

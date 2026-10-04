@@ -36,6 +36,9 @@ import org.hopper.edw.datavault.metadata.iceberg.DvIcebergSatelliteSourcePipelin
 import org.hopper.edw.datavault.metadata.json.DvJsonHubSourcePipelineBuilder;
 import org.hopper.edw.datavault.metadata.json.DvJsonLinkSourcePipelineBuilder;
 import org.hopper.edw.datavault.metadata.json.DvJsonSatelliteSourcePipelineBuilder;
+import org.hopper.edw.datavault.metadata.masking.DvMaskingHubSourcePipelineBuilder;
+import org.hopper.edw.datavault.metadata.masking.DvMaskingLinkSourcePipelineBuilder;
+import org.hopper.edw.datavault.metadata.masking.DvMaskingSatelliteSourcePipelineBuilder;
 import org.hopper.edw.datavault.metadata.pipeline.DvPipelineHubSourcePipelineBuilder;
 import org.hopper.edw.datavault.metadata.pipeline.DvPipelineLinkSourcePipelineBuilder;
 import org.hopper.edw.datavault.metadata.pipeline.DvPipelineSatelliteSourcePipelineBuilder;
@@ -98,6 +101,16 @@ public final class DvSourcePipelineBuilderFactory {
               startPoint);
       case COMPOSITE ->
           new DvCompositeHubSourcePipelineBuilder(
+              variables,
+              metadataProvider,
+              model,
+              pipelineMeta,
+              recordSource,
+              dvSource,
+              hub,
+              startPoint);
+      case MASKING ->
+          new DvMaskingHubSourcePipelineBuilder(
               variables,
               metadataProvider,
               model,
@@ -190,6 +203,16 @@ public final class DvSourcePipelineBuilderFactory {
               dvSource,
               link,
               startPoint);
+      case MASKING ->
+          new DvMaskingLinkSourcePipelineBuilder(
+              variables,
+              metadataProvider,
+              model,
+              pipelineMeta,
+              recordSource,
+              dvSource,
+              link,
+              startPoint);
       case JSON ->
           new DvJsonLinkSourcePipelineBuilder(
               variables,
@@ -274,6 +297,16 @@ public final class DvSourcePipelineBuilderFactory {
               dvSource,
               satellite,
               startPoint);
+      case MASKING ->
+          new DvMaskingSatelliteSourcePipelineBuilder(
+              variables,
+              metadataProvider,
+              model,
+              pipelineMeta,
+              recordSource,
+              dvSource,
+              satellite,
+              startPoint);
       case JSON ->
           new DvJsonSatelliteSourcePipelineBuilder(
               variables,
@@ -328,7 +361,7 @@ public final class DvSourcePipelineBuilderFactory {
               dvSource,
               reference,
               startPoint);
-      case PARQUET, ICEBERG, COMPOSITE, JSON, PIPELINE ->
+      case PARQUET, ICEBERG, COMPOSITE, JSON, MASKING, PIPELINE ->
           throw new HopException(
               "Reference table FULL_REPLACE currently supports DATABASE and CSV sources only (got "
                   + recordSource.getSourceType()

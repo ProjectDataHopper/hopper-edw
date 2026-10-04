@@ -44,6 +44,8 @@ import org.hopper.edw.datavault.metadata.sourcemodel.SourceColumn;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceEndpointSupport;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceJson;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceJsonParentKind;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceMasking;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceMaskingParentKind;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourcePipeline;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceQuery;
@@ -124,6 +126,7 @@ public class SourceModelPainter extends BasePainter {
     drawTables();
     drawQueries();
     drawJsonSources();
+    drawMaskingSources();
     drawPipelineSources();
     drawRect(selectionRegion);
 
@@ -208,6 +211,16 @@ public class SourceModelPainter extends BasePainter {
           continue;
         }
         fillNavRect(graphX, graphY, scaleX, scaleY, jsonBounds(jsonSource), minSize, EColor.GRAY);
+      }
+    }
+
+    if (model.getMaskingSources() != null) {
+      for (SourceMasking maskingSource : model.getMaskingSources()) {
+        if (maskingSource == null || maskingSource.getLocation() == null) {
+          continue;
+        }
+        fillNavRect(
+            graphX, graphY, scaleX, scaleY, maskingBounds(maskingSource), minSize, EColor.LIGHTGRAY);
       }
     }
 
@@ -321,6 +334,20 @@ public class SourceModelPainter extends BasePainter {
           drawCompositionEdge(parentBounds, jsonBounds);
         }
       }
+
+      if (model.getMaskingSources() != null) {
+        for (SourceMasking maskingSource : model.getMaskingSources()) {
+          if (maskingSource == null || maskingSource.getLocation() == null) {
+            continue;
+          }
+          Bounds cardBounds = maskingBounds(maskingSource);
+          Bounds parentBounds = resolveMaskingParentBounds(maskingSource);
+          if (parentBounds == null) {
+            continue;
+          }
+          drawCompositionEdge(parentBounds, cardBounds);
+        }
+      }
     } finally {
       gc.setLineStyle(ELineStyle.SOLID);
       gc.setLineWidth(1);
@@ -408,7 +435,59 @@ public class SourceModelPainter extends BasePainter {
     if (pipeline != null && pipeline.getLocation() != null) {
       return pipelineBounds(pipeline);
     }
+    SourceMasking masking = model.findMaskingSource(feedName);
+    if (masking != null && masking.getLocation() != null) {
+      return maskingBounds(masking);
+    }
     return null;
+  }
+
+  private Bounds resolveMaskingParentBounds(SourceMasking masking) {
+    if (masking == null || Utils.isEmpty(masking.getParentSourceName())) {
+      return null;
+    }
+    String parentName = masking.getParentSourceName();
+    SourceMaskingParentKind kind = masking.resolveParentSourceKind();
+    return switch (kind) {
+      case TABLE -> resolveTableBounds(parentName);
+      case QUERY -> {
+        SourceQuery query = model.findQuery(parentName);
+        yield query != null ? queryBounds(query) : null;
+      }
+      case JSON -> {
+        SourceJson parentJson = model.findJsonSource(parentName);
+        yield parentJson != null ? jsonBounds(parentJson) : null;
+      }
+      case PIPELINE -> {
+        SourcePipeline pipeline = model.findPipelineSource(parentName);
+        yield pipeline != null ? pipelineBounds(pipeline) : null;
+      }
+      case MASKING -> {
+        SourceMasking parent = model.findMaskingSource(parentName);
+        yield parent != null ? maskingBounds(parent) : null;
+      }
+    };
+  }
+
+  private Bounds maskingBounds(SourceMasking masking) {
+    Point loc = masking.getLocation();
+    int x = loc != null ? loc.x : 0;
+    int y = loc != null ? loc.y : 0;
+    if (gc == null) {
+      return new Bounds(x, y, COMPOSITION_CARD_WIDTH, COMPOSITION_CARD_HEIGHT);
+    }
+    String label = Utils.isEmpty(masking.getName()) ? "?" : masking.getName();
+    String secondary =
+        Utils.isEmpty(masking.getParentSourceName()) ? "" : "from " + masking.getParentSourceName();
+    int fieldCount = masking.getFields() != null ? masking.getFields().size() : 0;
+    String extra = fieldCount + " field(s)";
+    ModelGraphTableCardLayout.BoxSize boxSize =
+        ModelGraphTableCardLayout.computeBoxSize(gc, label, secondary, "MASKING", extra);
+    return new Bounds(
+        x,
+        y,
+        Math.max(COMPOSITION_CARD_WIDTH, boxSize.width()),
+        Math.max(COMPOSITION_CARD_HEIGHT, boxSize.height()));
   }
 
   private Bounds queryBounds(SourceQuery query) {
@@ -612,6 +691,9 @@ public class SourceModelPainter extends BasePainter {
     if (node instanceof SourcePipeline pipeline) {
       return pipelineBounds(pipeline);
     }
+    if (node instanceof SourceMasking masking) {
+      return maskingBounds(masking);
+    }
     return null;
   }
 
@@ -755,6 +837,7 @@ public class SourceModelPainter extends BasePainter {
 
   /** Teal/cyan card for JSON extraction nodes (distinct from purple queries). */
   private static final int[] JSON_COLOR = new int[] {20, 130, 140};
+  private static final int[] MASKING_COLOR = new int[] {110, 70, 160};
 
   private static final int[] PIPELINE_COLOR = new int[] {180, 100, 40};
 
@@ -896,6 +979,62 @@ public class SourceModelPainter extends BasePainter {
     }
   }
 
+  private void drawMaskingSources() {
+    if (model.getMaskingSources() == null) {
+      return;
+    }
+    for (SourceMasking masking : model.getMaskingSources()) {
+      if (masking == null || masking.getLocation() == null) {
+        continue;
+      }
+      String label = Utils.isEmpty(masking.getName()) ? "?" : masking.getName();
+      String secondary =
+          Utils.isEmpty(masking.getParentSourceName()) ? "" : "from " + masking.getParentSourceName();
+      String typeLabel = "MASKING";
+      int masked = masking.maskedFields().size();
+      String extra = masked + " masked";
+      ModelGraphTableCardLayout.BoxSize boxSize =
+          ModelGraphTableCardLayout.computeBoxSize(gc, label, secondary, typeLabel, extra);
+      int boxWidth = Math.max(160, boxSize.width());
+      int boxHeight = Math.max(80, boxSize.height());
+      Point screenLoc = real2screen(masking.getLocation().x, masking.getLocation().y);
+      int x = screenLoc.x;
+      int y = screenLoc.y;
+      gc.setBackground(EColor.WHITE);
+      gc.fillRoundRectangle(x, y, boxWidth, boxHeight, CORNER_RADIUS_5, CORNER_RADIUS_5);
+      gc.setLineWidth(masking.isSelected() ? 2 : 1);
+      gc.setForeground(MASKING_COLOR[0], MASKING_COLOR[1], MASKING_COLOR[2]);
+      gc.drawRoundRectangle(x, y, boxWidth, boxHeight, CORNER_RADIUS_5, CORNER_RADIUS_5);
+      gc.setLineWidth(1);
+      ModelGraphTableCardLayout.drawSvgIcon(
+          gc, getClass().getClassLoader(), "source-model.svg", x, y, magnification);
+      Point nameExtent =
+          ModelGraphTableCardLayout.drawName(gc, label, x, y, label.equals(mouseOverTableName));
+      ModelGraphTableCardLayout.drawSecondaryLine(gc, secondary, x, y, nameExtent);
+      Point typeExtent = ModelGraphTableCardLayout.drawTypeBelowIcon(gc, typeLabel, x, y);
+      ModelGraphTableCardLayout.drawExtraLineBelowType(gc, extra, x, y, typeExtent, MASKING_COLOR);
+      if (areaOwners != null) {
+        areaOwners.add(
+            new AreaOwner(
+                AreaType.TRANSFORM_ICON, x, y, boxWidth, boxHeight, offset, masking, label));
+        int nameX = ModelGraphTableCardLayout.nameX(x);
+        int nameY = ModelGraphTableCardLayout.nameY(y);
+        ModelGraphTableNameHitArea.Bounds nameHit =
+            ModelGraphTableNameHitArea.bounds(nameX, nameY, nameExtent);
+        areaOwners.add(
+            new AreaOwner(
+                AreaType.TRANSFORM_NAME,
+                nameHit.x(),
+                nameHit.y(),
+                nameHit.width(),
+                nameHit.height(),
+                offset,
+                masking,
+                label));
+      }
+    }
+  }
+
   private void drawPipelineSources() {
     if (model.getPipelineSources() == null) {
       return;
@@ -967,9 +1106,15 @@ public class SourceModelPainter extends BasePainter {
     boolean notesEmpty = !drawNotes || model.getNotes().isEmpty();
     boolean queriesEmpty = model.getQueries() == null || model.getQueries().isEmpty();
     boolean jsonEmpty = model.getJsonSources() == null || model.getJsonSources().isEmpty();
+    boolean maskingEmpty = model.getMaskingSources() == null || model.getMaskingSources().isEmpty();
     boolean pipelineEmpty =
         model.getPipelineSources() == null || model.getPipelineSources().isEmpty();
-    return model.getTables().isEmpty() && queriesEmpty && jsonEmpty && pipelineEmpty && notesEmpty;
+    return model.getTables().isEmpty()
+        && queriesEmpty
+        && jsonEmpty
+        && maskingEmpty
+        && pipelineEmpty
+        && notesEmpty;
   }
 
   private List<String> getEmptyModelHintLines() {
@@ -978,6 +1123,7 @@ public class SourceModelPainter extends BasePainter {
     lines.add(BaseMessages.getString(PKG, "SourceModelPainter.EmptyModel.AddTables"));
     lines.add(BaseMessages.getString(PKG, "SourceModelPainter.EmptyModel.AddQuery"));
     lines.add(BaseMessages.getString(PKG, "SourceModelPainter.EmptyModel.AddJson"));
+    lines.add(BaseMessages.getString(PKG, "SourceModelPainter.EmptyModel.AddMasking"));
     return lines;
   }
 

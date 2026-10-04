@@ -39,6 +39,7 @@ public final class EdwNamingSchemeTypes {
   public static final String SOURCE_QUERY = "source-query";
   public static final String SOURCE_PIPELINE = "source-pipeline";
   public static final String SOURCE_JSON = "source-json";
+  public static final String SOURCE_MASKING = "source-masking";
 
   public static final String DV_HUB = "dv-hub";
   public static final String DV_LINK = "dv-link";

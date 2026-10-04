@@ -1,0 +1,14 @@
+{
+  "sequenceStart": "1",
+  "piiClassification": "Sensitive",
+  "prefix": "city-",
+  "description": "",
+  "storage": "MEMORY",
+  "schemaName": "",
+  "suffix": "",
+  "tableName": "",
+  "token": "SEQUENCE",
+  "name": "city",
+  "connection": "",
+  "valueSource": "SYNTHETIC"
+}

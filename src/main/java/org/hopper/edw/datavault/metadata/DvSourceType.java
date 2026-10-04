@@ -45,6 +45,11 @@ public enum DvSourceType implements IEnumHasCodeAndDescription {
    */
   JSON("JSON", BaseMessages.getString(DvSourceType.class, "DvSourceType.Json")),
   /**
+   * Masking feed defined by a {@code SourceMasking} card in a {@code .hsm} source model (parent
+   * feed plus Hop Mask fields).
+   */
+  MASKING("MASKING", BaseMessages.getString(DvSourceType.class, "DvSourceType.Masking")),
+  /**
    * Pipeline-backed feed defined by a {@code SourcePipeline} in a {@code .hsm} source model
    * (MetaInject of a user {@code .hpl}).
    */

@@ -75,6 +75,7 @@ public final class RecordDefinitionDiscoveryService {
       case ICEBERG -> discoverIceberg(physicalRef, variables);
       case COMPOSITE -> discoverComposite(physicalRef, variables, metadataProvider);
       case JSON -> discoverJson(physicalRef, variables, metadataProvider);
+      case MASKING -> discoverMasking(physicalRef, variables, metadataProvider);
       case PIPELINE -> discoverPipeline(physicalRef, variables, metadataProvider);
     };
   }
@@ -155,6 +156,45 @@ public final class RecordDefinitionDiscoveryService {
       throw new HopException(
           BaseMessages.getString(
               PKG, "RecordDefinitionDiscoveryService.Error.EmptyCompositeProjection", jsonName));
+    }
+    return new DiscoveryResult(fields, null);
+  }
+
+  private static DiscoveryResult discoverMasking(
+      PhysicalSourceRef physicalRef, IVariables variables, IHopMetadataProvider metadataProvider)
+      throws HopException {
+    if (physicalRef == null
+        || Utils.isEmpty(physicalRef.getMaskingSourceModelFilename())
+        || Utils.isEmpty(physicalRef.getMaskingSourceName())) {
+      throw new HopException(
+          BaseMessages.getString(
+              PKG, "RecordDefinitionDiscoveryService.Error.MissingCompositeRef"));
+    }
+    String modelFile =
+        variables != null
+            ? variables.resolve(physicalRef.getMaskingSourceModelFilename())
+            : physicalRef.getMaskingSourceModelFilename();
+    String maskingName =
+        variables != null
+            ? variables.resolve(physicalRef.getMaskingSourceName())
+            : physicalRef.getMaskingSourceName();
+    SourceModel model = SourceModelLoadSupport.load(modelFile, variables, metadataProvider);
+    org.hopper.edw.datavault.metadata.sourcemodel.SourceMasking masking =
+        model.findMaskingSource(maskingName);
+    if (masking == null) {
+      throw new HopException(
+          BaseMessages.getString(
+              PKG, "RecordDefinitionDiscoveryService.Error.QueryNotFound", maskingName, modelFile));
+    }
+    List<SourceField> fields =
+        org.hopper.edw.datavault.metadata.sourcemodel.publish.SourceMaskingCatalogPublisher
+            .buildFieldsFromProjection(masking, metadataProvider);
+    if (fields == null || fields.isEmpty()) {
+      throw new HopException(
+          BaseMessages.getString(
+              PKG,
+              "RecordDefinitionDiscoveryService.Error.EmptyCompositeProjection",
+              maskingName));
     }
     return new DiscoveryResult(fields, null);
   }

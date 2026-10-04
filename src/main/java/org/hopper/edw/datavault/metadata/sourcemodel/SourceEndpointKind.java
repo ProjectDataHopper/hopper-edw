@@ -30,7 +30,9 @@ public enum SourceEndpointKind implements IEnumHasCodeAndDescription {
   QUERY("QUERY", BaseMessages.getString(SourceEndpointKind.class, "SourceEndpointKind.Query")),
   JSON("JSON", BaseMessages.getString(SourceEndpointKind.class, "SourceEndpointKind.Json")),
   PIPELINE(
-      "PIPELINE", BaseMessages.getString(SourceEndpointKind.class, "SourceEndpointKind.Pipeline"));
+      "PIPELINE", BaseMessages.getString(SourceEndpointKind.class, "SourceEndpointKind.Pipeline")),
+  MASKING(
+      "MASKING", BaseMessages.getString(SourceEndpointKind.class, "SourceEndpointKind.Masking"));
 
   private final String code;
   private final String description;

@@ -449,6 +449,12 @@ public final class SourceToVaultGenerationSupport {
         names.add(pipeline.getName());
       }
     }
+    for (org.hopper.edw.datavault.metadata.sourcemodel.SourceMasking masking :
+        model.getMaskingSources()) {
+      if (masking != null && masking.isSelected() && !Utils.isEmpty(masking.getName())) {
+        names.add(masking.getName());
+      }
+    }
     return names;
   }
 

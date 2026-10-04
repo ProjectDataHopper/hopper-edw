@@ -70,6 +70,11 @@ public final class SourceModelFreeSqlTableSupport {
         modelNames.add(json.getName());
       }
     }
+    for (var masking : model.getMaskingSources()) {
+      if (masking != null && !Utils.isEmpty(masking.getName())) {
+        modelNames.add(masking.getName());
+      }
+    }
     for (var pipeline : model.getPipelineSources()) {
       if (pipeline != null && !Utils.isEmpty(pipeline.getName())) {
         modelNames.add(pipeline.getName());

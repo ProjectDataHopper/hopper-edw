@@ -54,6 +54,18 @@ When present under `json-sources` / `json-source`:
 
 Sample: [hsm-json-excerpt.xml](../samples/hsm-json-excerpt.xml).
 
+## Masking source essentials
+
+When present under `masking-sources` / `masking-source`:
+
+- `parentSourceKind` (`TABLE` / `QUERY` / `JSON` / `PIPELINE` / `MASKING`)
+- `parentSourceName`
+- `fields` / `field`: output name, Hop type, length, precision, key position, optional `patternName`
+- A blank `patternName` passes the parent value through. The pattern itself is Hop metadata, not stored on the card.
+- Publishing creates a catalog **MASKING** `DV_SOURCE`
+
+Sample: [hsm-masking-excerpt.xml](../samples/hsm-masking-excerpt.xml).
+
 ## Pipeline source essentials
 
 When present under `pipeline-sources` / `pipeline-source`:

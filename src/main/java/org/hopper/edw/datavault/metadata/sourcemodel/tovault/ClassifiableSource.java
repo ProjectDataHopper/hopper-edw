@@ -24,6 +24,8 @@ import org.hopper.edw.datavault.metadata.sourcemodel.SourceEndpointKind;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceEndpointSupport;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceJson;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceJsonField;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceMasking;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceMaskingField;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourcePipeline;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceQuery;
@@ -137,6 +139,35 @@ public final class ClassifiableSource {
         SourceEndpointKind.JSON, json.getName(), catalog, pks, namesOf(cols), cols);
   }
 
+  public static ClassifiableSource fromMasking(SourceMasking masking) {
+    if (masking == null || Utils.isEmpty(masking.getName())) {
+      return null;
+    }
+    List<SourceColumn> cols = new ArrayList<>();
+    List<String> pks = new ArrayList<>();
+    for (SourceMaskingField field : masking.getFields()) {
+      if (field == null || Utils.isEmpty(field.resolveName())) {
+        continue;
+      }
+      SourceColumn mapped = new SourceColumn(field.resolveName());
+      mapped.setDescription(field.getDescription());
+      mapped.setHopType(field.getHopType());
+      if (field.getLength() > 0) {
+        mapped.setLength(Integer.toString(field.getLength()));
+      }
+      if (field.getPrecision() >= 0) {
+        mapped.setPrecision(Integer.toString(field.getPrecision()));
+      }
+      mapped.setPrimaryKeyPosition(field.getPrimaryKeyPosition());
+      cols.add(mapped);
+      if (field.isPrimaryKey()) {
+        pks.add(field.resolveName());
+      }
+    }
+    return new ClassifiableSource(
+        SourceEndpointKind.MASKING, masking.getName(), masking.resolveCatalogName(), pks, namesOf(cols), cols);
+  }
+
   public static ClassifiableSource fromPipeline(SourcePipeline pipeline) {
     if (pipeline == null || Utils.isEmpty(pipeline.getName())) {
       return null;
@@ -167,6 +198,7 @@ public final class ClassifiableSource {
       case QUERY -> fromQuery(model.findQuery(name));
       case JSON -> fromJson(model.findJsonSource(name));
       case PIPELINE -> fromPipeline(model.findPipelineSource(name));
+      case MASKING -> fromMasking(model.findMaskingSource(name));
     };
   }
 
@@ -195,6 +227,12 @@ public final class ClassifiableSource {
     }
     for (SourcePipeline pipeline : model.getPipelineSources()) {
       ClassifiableSource source = fromPipeline(pipeline);
+      if (source != null && !source.columnNames.isEmpty()) {
+        sources.add(source);
+      }
+    }
+    for (SourceMasking masking : model.getMaskingSources()) {
+      ClassifiableSource source = fromMasking(masking);
       if (source != null && !source.columnNames.isEmpty()) {
         sources.add(source);
       }

@@ -32,6 +32,8 @@ import org.apache.hop.core.row.value.ValueMetaString;
 import org.apache.hop.core.util.Utils;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceColumn;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceJson;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceMasking;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceMaskingField;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourcePipeline;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceQuery;
@@ -1220,6 +1222,22 @@ public class HopSourceModelJdbcDatabaseMetaData implements DatabaseMetaData {
       }
       list.add(
           new TableEntry(json.getName(), "VIEW", "Source JSON extraction (logical table)", cols));
+    }
+    for (SourceMasking masking : model.getMaskingSources()) {
+      if (masking == null || Utils.isEmpty(masking.getName())) {
+        continue;
+      }
+      List<ColumnEntry> cols = new ArrayList<>();
+      for (SourceMaskingField field : masking.getFields()) {
+        if (field != null && !Utils.isEmpty(field.resolveName())) {
+          cols.add(
+              new ColumnEntry(
+                  field.resolveName(),
+                  field.getHopType() > 0 ? field.getHopType() : IValueMeta.TYPE_STRING));
+        }
+      }
+      list.add(
+          new TableEntry(masking.getName(), "VIEW", "Source masking (logical table)", cols));
     }
     for (SourcePipeline pipeline : model.getPipelineSources()) {
       if (pipeline == null || Utils.isEmpty(pipeline.getName())) {

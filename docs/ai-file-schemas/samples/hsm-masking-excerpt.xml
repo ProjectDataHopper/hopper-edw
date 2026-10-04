@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<source-model>
+  <name>crm-masking</name>
+  <tables>
+    <table>
+      <name>customer</name>
+      <tableName>customer</tableName>
+      <columns>
+        <column>
+          <name>customer_id</name>
+          <hopType>Integer</hopType>
+          <primaryKeyPosition>1</primaryKeyPosition>
+        </column>
+        <column>
+          <name>first_name</name>
+          <hopType>String</hopType>
+        </column>
+      </columns>
+    </table>
+  </tables>
+  <masking-sources>
+    <masking-source>
+      <name>customer_masked</name>
+      <parentSourceKind>TABLE</parentSourceKind>
+      <parentSourceName>customer</parentSourceName>
+      <fields>
+        <field>
+          <name>customer_id</name>
+          <hopType>Integer</hopType>
+          <primaryKeyPosition>1</primaryKeyPosition>
+        </field>
+        <field>
+          <name>first_name</name>
+          <hopType>String</hopType>
+          <patternName>First name</patternName>
+        </field>
+      </fields>
+    </masking-source>
+  </masking-sources>
+</source-model>

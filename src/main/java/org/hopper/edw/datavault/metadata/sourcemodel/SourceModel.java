@@ -128,6 +128,11 @@ public class SourceModel extends HopMetadataBase
   @Setter(AccessLevel.NONE)
   private List<SourcePipeline> pipelineSources = new ArrayList<>();
 
+  @HopMetadataProperty(key = "masking-source", groupKey = "masking-sources")
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.NONE)
+  private List<SourceMasking> maskingSources = new ArrayList<>();
+
   @HopMetadataProperty(key = "note", groupKey = "notes")
   @Getter(AccessLevel.NONE)
   @Setter(AccessLevel.NONE)
@@ -208,6 +213,17 @@ public class SourceModel extends HopMetadataBase
     this.pipelineSources = pipelineSources != null ? pipelineSources : new ArrayList<>();
   }
 
+  public @NonNull List<SourceMasking> getMaskingSources() {
+    if (maskingSources == null) {
+      maskingSources = new ArrayList<>();
+    }
+    return maskingSources;
+  }
+
+  public void setMaskingSources(List<SourceMasking> maskingSources) {
+    this.maskingSources = maskingSources != null ? maskingSources : new ArrayList<>();
+  }
+
   public @NonNull List<DvNote> getNotes() {
     if (notes == null) {
       notes = new ArrayList<>();
@@ -225,6 +241,7 @@ public class SourceModel extends HopMetadataBase
     setQueries(queries);
     setJsonSources(jsonSources);
     setPipelineSources(pipelineSources);
+    setMaskingSources(maskingSources);
     setNotes(notes);
   }
 
@@ -325,6 +342,23 @@ public class SourceModel extends HopMetadataBase
         maxy = loc.y + boxH;
       }
     }
+    for (SourceMasking maskingSource : getMaskingSources()) {
+      if (maskingSource == null) {
+        continue;
+      }
+      Point loc = maskingSource.getLocation();
+      if (loc == null) {
+        continue;
+      }
+      int boxW = 160;
+      int boxH = 80;
+      if (loc.x + boxW > maxx) {
+        maxx = loc.x + boxW;
+      }
+      if (loc.y + boxH > maxy) {
+        maxy = loc.y + boxH;
+      }
+    }
     for (DvNote note : getNotes()) {
       Point loc = note.getLocation();
       if (loc == null) {
@@ -402,6 +436,18 @@ public class SourceModel extends HopMetadataBase
     return null;
   }
 
+  public SourceMasking findMaskingSource(String maskingSourceName) {
+    if (Utils.isEmpty(maskingSourceName)) {
+      return null;
+    }
+    for (SourceMasking maskingSource : getMaskingSources()) {
+      if (maskingSource != null && maskingSourceName.equals(maskingSource.getName())) {
+        return maskingSource;
+      }
+    }
+    return null;
+  }
+
   /**
    * Structural validation for the source model (tables, relationships, queries, JSON sources,
    * pipeline sources).
@@ -433,12 +479,14 @@ public class SourceModel extends HopMetadataBase
     List<SourceQuery> queries = getQueries();
     List<SourceJson> jsonSources = getJsonSources();
     List<SourcePipeline> pipelineSources = getPipelineSources();
+    List<SourceMasking> maskingSources = getMaskingSources();
     int totalWork =
         tables.size()
             + relationships.size()
             + queries.size()
             + jsonSources.size()
-            + pipelineSources.size();
+            + pipelineSources.size()
+            + maskingSources.size();
     monitor.beginTask(BaseMessages.getString(PKG, "SourceModel.Monitor.VerifyingModel"), totalWork);
 
     if (tables.isEmpty()) {
@@ -562,6 +610,26 @@ public class SourceModel extends HopMetadataBase
       remarks.addAll(
           SourcePipelineValidationSupport.check(
               pipelineSource, this, pipelineSourceNames, variables, metadataProvider));
+      monitor.worked(1);
+    }
+
+    Set<String> maskingSourceNames = new HashSet<>();
+    for (SourceMasking maskingSource : maskingSources) {
+      if (monitor.isCanceled()) {
+        monitor.done();
+        return remarks;
+      }
+      if (maskingSource == null) {
+        monitor.worked(1);
+        continue;
+      }
+      String maskingName = maskingSource.getName();
+      monitor.subTask(
+          BaseMessages.getString(
+              PKG, "SourceModel.Monitor.VerifyingMasking", ConstNvl(maskingName)));
+      remarks.addAll(
+          SourceMaskingValidationSupport.check(
+              maskingSource, this, maskingSourceNames, metadataProvider));
       monitor.worked(1);
     }
 

@@ -325,6 +325,14 @@ public class HopGuiSourceRelationshipDialog {
           }
         }
       }
+      case MASKING -> {
+        for (org.hopper.edw.datavault.metadata.sourcemodel.SourceMasking masking :
+            model.getMaskingSources()) {
+          if (masking != null && !Utils.isEmpty(masking.getName())) {
+            names.add(masking.getName());
+          }
+        }
+      }
     }
     return names.toArray(new String[0]);
   }

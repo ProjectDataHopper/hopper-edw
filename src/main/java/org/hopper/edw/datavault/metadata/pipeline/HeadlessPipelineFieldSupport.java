@@ -15,6 +15,7 @@
  */
 package org.hopper.edw.datavault.metadata.pipeline;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -134,7 +135,9 @@ public final class HeadlessPipelineFieldSupport {
       throws HopTransformException {
     ITransformMeta transform = transformMeta.getTransform();
     IRowMeta[] infoRowMeta;
-    TransformMeta[] infoTransforms = pipelineMeta.getInfoTransform(transformMeta);
+    // An optional info stream (Add Sequence configuration) is declared even when it is not wired.
+    // getInfoTransform then returns a null entry. That is not a lookup input.
+    TransformMeta[] infoTransforms = configuredInfoTransforms(pipelineMeta.getInfoTransform(transformMeta));
     if (Utils.isEmpty(infoTransforms)) {
       try {
         infoRowMeta = new IRowMeta[] {transform.getTableFields(variables)};
@@ -175,8 +178,21 @@ public final class HeadlessPipelineFieldSupport {
     return clones;
   }
 
+  private static TransformMeta[] configuredInfoTransforms(TransformMeta[] infoTransforms) {
+    if (infoTransforms == null || infoTransforms.length == 0) {
+      return new TransformMeta[0];
+    }
+    List<TransformMeta> configured = new ArrayList<>();
+    for (TransformMeta infoTransform : infoTransforms) {
+      if (infoTransform != null) {
+        configured.add(infoTransform);
+      }
+    }
+    return configured.toArray(TransformMeta[]::new);
+  }
+
   private static String cacheKey(TransformMeta transformMeta, TransformMeta targetTransform) {
-    return transformMeta.getName()
-        + (targetTransform != null ? "-" + targetTransform.getName() : "");
+    String name = transformMeta != null ? transformMeta.getName() : "";
+    return name + (targetTransform != null ? "-" + targetTransform.getName() : "");
   }
 }

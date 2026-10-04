@@ -591,6 +591,17 @@ public final class SourceToVaultApplySupport {
                       metadataProvider);
               yield published != null ? published.catalogName() : null;
             }
+            case MASKING -> {
+              var published =
+                  org.hopper.edw.datavault.metadata.sourcemodel.publish.SourceMaskingCatalogPublisher
+                      .publish(
+                          sourceModel,
+                          sourceModel.findMaskingSource(source.getName()),
+                          null,
+                          variables,
+                          metadataProvider);
+              yield published != null ? published.catalogName() : null;
+            }
             case JSON -> {
               var published =
                   SourceJsonCatalogPublisher.publish(

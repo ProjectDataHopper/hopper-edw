@@ -110,6 +110,9 @@ public interface IDvSource extends IHasName, IChanged {
       if (DvSourceType.JSON.name().equals(id)) {
         return new DvJsonSource();
       }
+      if (DvSourceType.MASKING.name().equals(id)) {
+        return new org.hopper.edw.datavault.metadata.masking.DvMaskingSource();
+      }
       if (DvSourceType.PIPELINE.name().equals(id)) {
         return new org.hopper.edw.datavault.metadata.pipeline.DvPipelineSource();
       }

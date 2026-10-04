@@ -147,6 +147,10 @@ public final class RecordDefinitionPreviewSupport {
           definition.getDvSource() != null
               && !Utils.isEmpty(definition.getDvSource().getJsonSourceModelFilename())
               && !Utils.isEmpty(definition.getDvSource().getJsonSourceName());
+      case MASKING ->
+          definition.getDvSource() != null
+              && !Utils.isEmpty(definition.getDvSource().getMaskingSourceModelFilename())
+              && !Utils.isEmpty(definition.getDvSource().getMaskingSourceName());
       case PIPELINE ->
           definition.getDvSource() != null
               && !Utils.isEmpty(definition.getDvSource().getPipelineFilename())

@@ -60,6 +60,12 @@ public final class PhysicalSourceRef {
   /** Source JSON object name when refreshing a JSON feed. */
   private final String jsonSourceName;
 
+  /** Path to the {@code .hsm} when refreshing a MASKING feed. */
+  private final String maskingSourceModelFilename;
+
+  /** Source masking card name when refreshing a MASKING feed. */
+  private final String maskingSourceName;
+
   /** Path to the {@code .hsm} source model when refreshing a PIPELINE feed. */
   private final String pipelineSourceModelFilename;
 
@@ -94,6 +100,8 @@ public final class PhysicalSourceRef {
     this.compositeSourceQueryName = builder.compositeSourceQueryName;
     this.jsonSourceModelFilename = builder.jsonSourceModelFilename;
     this.jsonSourceName = builder.jsonSourceName;
+    this.maskingSourceModelFilename = builder.maskingSourceModelFilename;
+    this.maskingSourceName = builder.maskingSourceName;
     this.pipelineSourceModelFilename = builder.pipelineSourceModelFilename;
     this.pipelineSourceName = builder.pipelineSourceName;
     this.pipelineFilename = builder.pipelineFilename;
@@ -182,6 +190,14 @@ public final class PhysicalSourceRef {
 
   public String getJsonSourceName() {
     return jsonSourceName;
+  }
+
+  public String getMaskingSourceModelFilename() {
+    return maskingSourceModelFilename;
+  }
+
+  public String getMaskingSourceName() {
+    return maskingSourceName;
   }
 
   public String getPipelineSourceModelFilename() {
@@ -337,6 +353,8 @@ public final class PhysicalSourceRef {
     private String compositeSourceQueryName;
     private String jsonSourceModelFilename;
     private String jsonSourceName;
+    private String maskingSourceModelFilename;
+    private String maskingSourceName;
     private String pipelineSourceModelFilename;
     private String pipelineSourceName;
     private String pipelineFilename;
@@ -444,6 +462,16 @@ public final class PhysicalSourceRef {
 
     public Builder jsonSourceName(String value) {
       this.jsonSourceName = value;
+      return this;
+    }
+
+    public Builder maskingSourceModelFilename(String value) {
+      this.maskingSourceModelFilename = value;
+      return this;
+    }
+
+    public Builder maskingSourceName(String value) {
+      this.maskingSourceName = value;
       return this;
     }
 

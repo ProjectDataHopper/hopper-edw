@@ -527,6 +527,14 @@ public class SourceModelDataServlet extends BaseHttpServlet implements IHopServe
                 schema, json.getName(), "VIEW", "Source JSON extraction (logical table)"));
       }
     }
+    for (org.hopper.edw.datavault.metadata.sourcemodel.SourceMasking masking :
+        model.getMaskingSources()) {
+      if (masking != null && !Utils.isEmpty(masking.getName())) {
+        list.add(
+            new SourceModelDataJson.TableInfo(
+                schema, masking.getName(), "VIEW", "Source masking (logical table)"));
+      }
+    }
     for (SourcePipeline pipeline : model.getPipelineSources()) {
       if (pipeline != null && !Utils.isEmpty(pipeline.getName())) {
         list.add(

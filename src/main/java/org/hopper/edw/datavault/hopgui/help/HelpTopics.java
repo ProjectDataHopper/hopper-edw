@@ -101,6 +101,7 @@ public final class HelpTopics {
   public static final String SOURCE_TABLE = "source-table-dialog";
   public static final String SOURCE_QUERY = "source-query-dialog";
   public static final String SOURCE_JSON = "source-json-dialog";
+  public static final String SOURCE_MASKING = "source-masking-dialog";
   public static final String SOURCE_PIPELINE = "source-pipeline-dialog";
   public static final String SOURCE_RELATIONSHIP = "source-relationship-dialog";
 
@@ -346,6 +347,10 @@ public final class HelpTopics {
           p(SOURCE_TABLE, "help/source-table-dialog.html", "HelpTopics.SourceTableDialog.Title"),
           p(SOURCE_QUERY, "help/source-query-dialog.html", "HelpTopics.SourceQueryDialog.Title"),
           p(SOURCE_JSON, "help/source-json-dialog.html", "HelpTopics.SourceJsonDialog.Title"),
+          p(
+              SOURCE_MASKING,
+              "help/source-masking-dialog.html",
+              "HelpTopics.SourceMaskingDialog.Title"),
           p(
               SOURCE_PIPELINE,
               "source-modeler-overview.html",

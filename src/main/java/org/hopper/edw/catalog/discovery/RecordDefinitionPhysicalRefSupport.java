@@ -47,6 +47,7 @@ public final class RecordDefinitionPhysicalRefSupport {
       case ICEBERG -> definition.getPhysicalIcebergTable() != null;
       case COMPOSITE -> hasCompositeSourceRef(definition);
       case JSON -> hasJsonSourceRef(definition);
+      case MASKING -> hasMaskingSourceRef(definition);
       case PIPELINE -> hasPipelineSourceRef(definition);
     };
   }
@@ -62,6 +63,15 @@ public final class RecordDefinitionPhysicalRefSupport {
   }
 
   /** JSON feeds are refreshable when they point at a source model JSON object. */
+  static boolean hasMaskingSourceRef(RecordDefinition definition) {
+    if (definition == null || definition.getDvSource() == null) {
+      return false;
+    }
+    DvSourceRecord dvSource = definition.getDvSource();
+    return !Utils.isEmpty(dvSource.getMaskingSourceModelFilename())
+        && !Utils.isEmpty(dvSource.getMaskingSourceName());
+  }
+
   static boolean hasJsonSourceRef(RecordDefinition definition) {
     if (definition == null || definition.getDvSource() == null) {
       return false;
@@ -124,6 +134,7 @@ public final class RecordDefinitionPhysicalRefSupport {
       case ICEBERG -> fromPhysicalIcebergTable(definition.getPhysicalIcebergTable());
       case COMPOSITE -> fromCompositeSource(definition.getDvSource());
       case JSON -> fromJsonSource(definition.getDvSource());
+      case MASKING -> fromMaskingSource(definition.getDvSource());
       case PIPELINE -> fromPipelineSource(definition.getDvSource());
     };
   }
@@ -165,6 +176,20 @@ public final class RecordDefinitionPhysicalRefSupport {
     return PhysicalSourceRef.builder()
         .compositeSourceModelFilename(dvSource.getCompositeSourceModelFilename())
         .compositeSourceQueryName(dvSource.getCompositeSourceQueryName())
+        .build();
+  }
+
+  private static PhysicalSourceRef fromMaskingSource(DvSourceRecord dvSource) throws HopException {
+    if (dvSource == null
+        || Utils.isEmpty(dvSource.getMaskingSourceModelFilename())
+        || Utils.isEmpty(dvSource.getMaskingSourceName())) {
+      throw new HopException(
+          BaseMessages.getString(
+              PKG, "RecordDefinitionPhysicalRefSupport.Error.MissingCompositeRef"));
+    }
+    return PhysicalSourceRef.builder()
+        .maskingSourceModelFilename(dvSource.getMaskingSourceModelFilename())
+        .maskingSourceName(dvSource.getMaskingSourceName())
         .build();
   }
 

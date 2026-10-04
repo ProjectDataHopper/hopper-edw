@@ -134,6 +134,12 @@ public final class DvSourceCatalogMapper {
         dvSourceRecord.setJsonSourceModelFilename(jsonSrc.getSourceModelFilename());
         dvSourceRecord.setJsonSourceName(jsonSrc.getSourceJsonName());
       }
+      if (source.getSourceType() == DvSourceType.MASKING
+          && source.getDvSourceOrDefault()
+              instanceof org.hopper.edw.datavault.metadata.masking.DvMaskingSource maskingSrc) {
+        dvSourceRecord.setMaskingSourceModelFilename(maskingSrc.getSourceModelFilename());
+        dvSourceRecord.setMaskingSourceName(maskingSrc.getSourceMaskingName());
+      }
       if (source.getSourceType() == DvSourceType.PIPELINE
           && source.getDvSourceOrDefault()
               instanceof org.hopper.edw.datavault.metadata.pipeline.DvPipelineSource pipeSrc) {
@@ -166,7 +172,8 @@ public final class DvSourceCatalogMapper {
       definition.setPhysicalTable(null);
       definition.setPhysicalFile(null);
     } else if (source.getSourceType() == DvSourceType.COMPOSITE
-        || source.getSourceType() == DvSourceType.JSON) {
+        || source.getSourceType() == DvSourceType.JSON
+        || source.getSourceType() == DvSourceType.MASKING) {
       definition.setPhysicalTable(null);
       definition.setPhysicalFile(null);
       definition.setPhysicalIcebergTable(null);
@@ -260,6 +267,11 @@ public final class DvSourceCatalogMapper {
         && !Utils.isEmpty(jsonSrc.getSourceModelFilename())) {
       return new SourceModelProvenance(
           jsonSrc.getSourceModelFilename(), jsonSrc.getSourceJsonName(), null);
+    }
+    if (dv instanceof org.hopper.edw.datavault.metadata.masking.DvMaskingSource maskingSrc
+        && !Utils.isEmpty(maskingSrc.getSourceModelFilename())) {
+      return new SourceModelProvenance(
+          maskingSrc.getSourceModelFilename(), maskingSrc.getSourceMaskingName(), null);
     }
     if (dv instanceof DvCompositeSource composite
         && !Utils.isEmpty(composite.getSourceModelFilename())) {

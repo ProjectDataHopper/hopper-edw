@@ -20,6 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -31,6 +33,7 @@ import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
+import org.apache.hop.pipeline.transforms.maskfields.MaskingPattern;
 import org.hopper.edw.datavault.metadata.ModelConfigurationResolver;
 import org.hopper.edw.datavault.metadata.ModelConfigurationTestSupport;
 import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceQueryGenerationSupport;
@@ -78,6 +81,8 @@ class RetailSourceModelFixtureTest {
     model.setFilename(RETAIL_HSM.toString());
     // Free SQL check() plans pipelines and needs RDBMS metadata for named connections.
     seedDatabasesFromModel(model, metadataProvider);
+    // Masking check() resolves pattern names against Hop metadata.
+    seedMaskingPatterns(metadataProvider);
 
     assertFalse(model.getTables().isEmpty());
     assertFalse(model.getRelationships().isEmpty());
@@ -134,6 +139,25 @@ class RetailSourceModelFixtureTest {
       db.setUsername("test");
       db.setPassword("test");
       metadata.getSerializer(DatabaseMeta.class).save(db);
+    }
+  }
+
+  private static void seedMaskingPatterns(IHopMetadataProvider metadata) throws Exception {
+    Path folder = Path.of("retail-example/metadata/masking-pattern");
+    if (!Files.isDirectory(folder)) {
+      return;
+    }
+    ObjectMapper mapper =
+        new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    try (var stream = Files.list(folder)) {
+      for (Path file : stream.filter(path -> path.getFileName().toString().endsWith(".json")).toList()) {
+        MaskingPattern pattern = mapper.readValue(Files.readString(file), MaskingPattern.class);
+        if (pattern.getName() == null || pattern.getName().isBlank()) {
+          String filename = file.getFileName().toString();
+          pattern.setName(filename.substring(0, filename.length() - ".json".length()));
+        }
+        metadata.getSerializer(MaskingPattern.class).save(pattern);
+      }
     }
   }
 }

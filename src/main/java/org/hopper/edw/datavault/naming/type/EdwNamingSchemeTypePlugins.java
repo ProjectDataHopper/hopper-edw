@@ -55,6 +55,9 @@ public final class EdwNamingSchemeTypePlugins {
   @NamingSchemeTypePlugin(id = EdwNamingSchemeTypes.SOURCE_JSON, name = "Source JSON names")
   public static final class SourceJson extends EdwBuiltinNamingSchemeType {}
 
+  @NamingSchemeTypePlugin(id = EdwNamingSchemeTypes.SOURCE_MASKING, name = "Source masking names")
+  public static final class SourceMasking extends EdwBuiltinNamingSchemeType {}
+
   @NamingSchemeTypePlugin(id = EdwNamingSchemeTypes.DV_HUB, name = "Data Vault hub names")
   public static final class DvHub extends EdwBuiltinNamingSchemeType {}
 

@@ -4,6 +4,12 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Source model data masking (issue #191)
+
+- A **Source masking** card on a `.hsm` is a virtual table over a parent feed. It stores field-to-pattern names. Pattern definitions stay in Hop **Masking pattern** metadata and are applied by the **Mask fields** transform.
+- The card is a JDBC view (`jdbc:hop-hsm:`), a catalog `MASKING` feed, and a Data Vault source type. Business Vault and dimensional SQL that select the card, and record-definition loads of the published feed, run the same pipeline. The parent card stays available.
+- A primary key with storage `NONE`, `SET_NULL`, or `SET_EMPTY` is a check warning. A `DATABASE` pattern stores the original value. Docs: [docs/help/source-masking-dialog.adoc](docs/help/source-masking-dialog.adoc).
+
 ### Preview target table actions in Database Workbench (issue #189)
 
 - Added **Preview target table** context actions on tables in Data Vault (`.hdv`), Business Vault (`.hbv`), and Dimensional (`.hdm`) model canvases.

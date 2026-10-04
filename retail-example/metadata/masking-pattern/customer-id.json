@@ -1,0 +1,14 @@
+{
+  "sequenceStart": "1000000",
+  "piiClassification": "Direct identifier",
+  "prefix": "",
+  "description": "",
+  "storage": "NONE",
+  "schemaName": "",
+  "suffix": "",
+  "tableName": "",
+  "token": "SEQUENCE",
+  "name": "customer-id",
+  "connection": "",
+  "valueSource": "SYNTHETIC"
+}

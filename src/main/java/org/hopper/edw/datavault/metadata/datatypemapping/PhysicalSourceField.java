@@ -107,6 +107,24 @@ public class PhysicalSourceField {
     return field;
   }
 
+  public static PhysicalSourceField from(
+      org.hopper.edw.datavault.metadata.sourcemodel.SourceMaskingField maskingField) {
+    if (maskingField == null || Utils.isEmpty(maskingField.resolveName())) {
+      return null;
+    }
+    PhysicalSourceField field = new PhysicalSourceField(maskingField.resolveName());
+    field.setDescription(maskingField.getDescription());
+    field.setHopType(maskingField.getHopType());
+    if (maskingField.getLength() >= 0) {
+      field.setLength(Integer.toString(maskingField.getLength()));
+    }
+    if (maskingField.getPrecision() >= 0) {
+      field.setPrecision(Integer.toString(maskingField.getPrecision()));
+    }
+    field.setPrimaryKeyPosition(maskingField.getPrimaryKeyPosition());
+    return field;
+  }
+
   public static PhysicalSourceField from(SourceJsonField jsonField) {
     if (jsonField == null) {
       return null;

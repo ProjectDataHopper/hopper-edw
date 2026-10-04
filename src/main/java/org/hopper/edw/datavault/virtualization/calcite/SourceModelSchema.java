@@ -23,6 +23,7 @@ import org.apache.calcite.schema.Table;
 import org.apache.calcite.schema.impl.AbstractSchema;
 import org.apache.hop.core.util.Utils;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceJson;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceMasking;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourcePipeline;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceQuery;
@@ -32,7 +33,7 @@ import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
  * Calcite schema exposing source model cards as SQL tables (logical canvas names).
  *
  * <p>Includes DATABASE {@link SourceTable}s, named {@link SourceQuery}s (as virtual tables), {@link
- * SourceJson} extractions, and {@link SourcePipeline} feeds.
+ * SourceJson} extractions, {@link SourceMasking} cards, and {@link SourcePipeline} feeds.
  */
 public class SourceModelSchema extends AbstractSchema {
 
@@ -98,6 +99,17 @@ public class SourceModelSchema extends AbstractSchema {
         continue;
       }
       register(map, json.getName(), new SourceModelJsonTable(json));
+    }
+    for (SourceMasking masking : model.getMaskingSources()) {
+      if (masking == null || Utils.isEmpty(masking.getName())) {
+        continue;
+      }
+      SourceModelMaskingTable maskingTable = new SourceModelMaskingTable(masking);
+      register(map, masking.getName(), maskingTable);
+      if (!Utils.isEmpty(masking.getPublishedCatalogName())
+          && !masking.getPublishedCatalogName().trim().equalsIgnoreCase(masking.getName().trim())) {
+        register(map, masking.getPublishedCatalogName().trim(), maskingTable);
+      }
     }
     for (SourcePipeline pipeline : model.getPipelineSources()) {
       if (pipeline == null || Utils.isEmpty(pipeline.getName())) {

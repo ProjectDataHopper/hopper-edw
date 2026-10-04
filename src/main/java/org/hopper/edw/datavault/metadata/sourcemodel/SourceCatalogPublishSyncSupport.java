@@ -49,6 +49,7 @@ public final class SourceCatalogPublishSyncSupport {
     TABLE,
     QUERY,
     JSON,
+    MASKING,
     PIPELINE
   }
 
@@ -117,6 +118,20 @@ public final class SourceCatalogPublishSyncSupport {
           variables,
           metadataProvider);
     }
+    for (SourceMasking masking : model.getMaskingSources()) {
+      if (masking == null) {
+        continue;
+      }
+      addIfStale(
+          stale,
+          SourceCardKind.MASKING,
+          masking.getName(),
+          masking.resolveCatalogName(),
+          safeMaskingFields(masking, metadataProvider),
+          model,
+          variables,
+          metadataProvider);
+    }
     for (SourcePipeline pipeline : model.getPipelineSources()) {
       if (pipeline == null) {
         continue;
@@ -176,6 +191,16 @@ public final class SourceCatalogPublishSyncSupport {
     try {
       return SourceJsonCatalogPublisher.buildFieldsFromProjection(
           model, jsonSource, metadataProvider);
+    } catch (Exception e) {
+      return List.of();
+    }
+  }
+
+  private static List<SourceField> safeMaskingFields(
+      SourceMasking masking, IHopMetadataProvider metadataProvider) {
+    try {
+      return org.hopper.edw.datavault.metadata.sourcemodel.publish.SourceMaskingCatalogPublisher
+          .buildFieldsFromProjection(masking, metadataProvider);
     } catch (Exception e) {
       return List.of();
     }
