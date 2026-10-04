@@ -539,6 +539,22 @@
       <name>Apache Snapshot Repository</name>
       <url>https://repository.apache.org/snapshots/</url>
     </repository>
+    <!--
+      Mask fields (apache/hop#8748) is on Hop main but not in ASF snapshots yet.
+      The 2.20.0-SNAPSHOT jar is published here until the next ASF snapshot deploy.
+    -->
+    <repository>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
+      </snapshots>
+      <id>apache-hop-plugins</id>
+      <name>Data Hopper Apache Hop plugins</name>
+      <url>https://repository.data-hopper.com/repository/apache-hop-plugins/</url>
+    </repository>
     <repository>
       <releases>
         <enabled>true</enabled>
