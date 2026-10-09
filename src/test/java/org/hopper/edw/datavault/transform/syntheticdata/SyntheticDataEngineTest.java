@@ -141,6 +141,24 @@ class SyntheticDataEngineTest {
   }
 
   @Test
+  void initialOrderWaveMatchesMonthlyUpdateSize() throws Exception {
+    PipelineMeta pipeline = loadRetailPipeline();
+    String count = synthetic(pipeline, "Order headers").getPopulations().get(0).getCount();
+    Variables scale = new Variables();
+    scale.setVariable("ORDERS", "100000");
+    scale.setVariable("MODE", "initial");
+    long initial = NumericExpression.evaluateLong(count, scale, Map.of());
+    scale.setVariable("MODE", "update");
+    long monthly = NumericExpression.evaluateLong(count, scale, Map.of());
+    assertEquals(1000L, monthly);
+    assertEquals(monthly, initial);
+
+    Variables demo = retailVariables("initial", "2024-01-01", "1");
+    demo.setVariable("ORDERS", "8");
+    assertEquals(8L, NumericExpression.evaluateLong(count, demo, Map.of()));
+  }
+
+  @Test
   void twentyFourUpdateWavesKeepDisjointKeysAndMessageIds() throws Exception {
     PipelineMeta pipeline = loadRetailPipeline();
     SyntheticDataMeta customers = synthetic(pipeline, "Customers hub");

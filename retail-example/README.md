@@ -194,10 +194,10 @@ CSV (and ASN XML) files are written to `files/` by `pipelines/generate-retail-da
 
 | Mode | Description |
 |------|-------------|
-| `initial` | Full snapshot wave (`*_initial.csv`, `asn_initial.xml`) |
+| `initial` | Opening wave (`*_initial.csv`, `asn_initial.xml`): full customer, product, and warehouse populations, and one month of orders |
 | `update` | Incremental wave for the last `retail_load_log` date plus one month |
 
-Default scale: 10,000 customers, 1,000 products, 100,000 orders.
+Default scale: 10,000 customers, 1,000 products, and 1,000 orders per wave. `ORDERS` defaults to 100,000; each wave, including the initial load, emits `max(50, ORDERS/100)`.
 
 **Order lines** are generated at grain `(order_id, product_id, line_number)`. The same product can appear on multiple lines of one order; the first order in each wave is forced to do so (with different unit prices) so **transactional link** behaviour (`lnk_order_line` + dependent child key `line_number` in `models/retail-360.hdv`) is easy to verify.
 

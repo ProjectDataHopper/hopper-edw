@@ -44,7 +44,7 @@ limitations under the License.
       <parameter>
         <name>ORDERS</name>
         <default_value>100000</default_value>
-        <description>Order population</description>
+        <description>Order scale. Each wave, including the initial load, emits max(50, ORDERS/100) orders. Later waves start at ORDERS+1.</description>
       </parameter>
       <parameter>
         <name>WAREHOUSES</name>
@@ -636,7 +636,7 @@ limitations under the License.
       <population>
         <kind>RANGE</kind>
         <start>ifEq('${MODE}','initial',1,${ORDERS}+(max(1,${WAVE_INDEX})-1)*max(50,div(${ORDERS},100))+1)</start>
-        <count>ifEq('${MODE}','initial',${ORDERS},max(50,div(${ORDERS},100)))</count>
+        <count>ifEq('${MODE}','initial',min(${ORDERS},max(50,div(${ORDERS},100))),max(50,div(${ORDERS},100)))</count>
       </population>
     </populations>
     <fields>
@@ -2107,7 +2107,7 @@ limitations under the License.
   <notepads>
     <notepad>
       <note>Synthetic data replaces generate-retail-data.py.
-Initial defaults: RETAIL_CSV_WAVE=initial, 10000 customers, 1000 products, 100000 orders.
+Initial defaults: RETAIL_CSV_WAVE=initial, 10000 customers, 1000 products, 1000 orders per wave (ORDERS=100000).
 Update passes MODE=update plus LOAD_DATE, RETAIL_CSV_WAVE and WAVE_INDEX from retail_load_log.
 Each generator copy has its own seed.</note>
       <xloc>720</xloc>

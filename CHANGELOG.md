@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Retail initial order wave (issue #192)
+
+- The retail initial load emits the same number of orders as a monthly update (`max(50, ORDERS/100)`, 1,000 when `ORDERS` is 100,000). Order lines, shipment events, order reps, and ASN lines follow that order count. Customer, product, and warehouse opening populations are unchanged. Later order ids still start at `ORDERS+1`.
+
 ### Fact dimension lookup copies (issue #194)
 
 - The fact **Dimension joins** tab has a **Copies** column. Empty means one copy of the generated Dimension Lookup, or of the date-key transforms when the join truncates to a date key. A variable expression is stored on that transform and resolved when the update pipeline runs. Date joins that use different copy counts are generated as separate transforms. Skipped lookups ignore the value.
