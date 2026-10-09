@@ -515,34 +515,44 @@ public class HopGuiSemanticLayerEditor extends Composite implements IHopFileType
 
   @Override
   public boolean isCloseable() {
-    if (!model.hasChanged()) {
-      return true;
-    }
-    MessageBox box =
-        new MessageBox(hopGui.getShell(), SWT.YES | SWT.NO | SWT.CANCEL | SWT.ICON_QUESTION);
-    box.setText(BaseMessages.getString(PKG, "HopGuiSemanticLayerEditor.SavePrompt.Title"));
-    box.setMessage(BaseMessages.getString(PKG, "HopGuiSemanticLayerEditor.SavePrompt.Message"));
-    int answer = box.open();
-    if (answer == SWT.CANCEL) {
-      return false;
-    }
-    if (answer == SWT.YES) {
-      try {
-        save();
-      } catch (Exception e) {
-        new ErrorDialog(
-            hopGui.getShell(),
-            BaseMessages.getString(PKG, "HopGuiSemanticLayerEditor.Error.Title"),
-            BaseMessages.getString(PKG, "HopGuiSemanticLayerEditor.Error.Save"),
-            e);
+    try {
+      if (hopGui != null && hopGui.fileDelegate != null && hopGui.fileDelegate.isClosing()) {
+        return true;
+      }
+      if (!model.hasChanged()) {
+        return true;
+      }
+      MessageBox box =
+          new MessageBox(hopGui.getShell(), SWT.YES | SWT.NO | SWT.CANCEL | SWT.ICON_QUESTION);
+      box.setText(BaseMessages.getString(PKG, "HopGuiSemanticLayerEditor.SavePrompt.Title"));
+      box.setMessage(BaseMessages.getString(PKG, "HopGuiSemanticLayerEditor.SavePrompt.Message"));
+      int answer = box.open();
+      if (answer == SWT.CANCEL) {
         return false;
       }
+      if (answer == SWT.YES) {
+        save();
+        if (hasChanged()) {
+          return false;
+        }
+      }
+      return true;
+    } catch (Exception e) {
+      new ErrorDialog(
+          hopGui.getShell(),
+          BaseMessages.getString(PKG, "HopGuiSemanticLayerEditor.Error.Title"),
+          BaseMessages.getString(PKG, "HopGuiSemanticLayerEditor.Error.Save"),
+          e);
+      return false;
     }
-    return true;
   }
 
   @Override
-  public void close() {}
+  public void close() {
+    if (perspective != null) {
+      perspective.remove(this);
+    }
+  }
 
   @Override
   public boolean hasChanged() {
