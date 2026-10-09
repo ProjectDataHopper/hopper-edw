@@ -22,7 +22,7 @@ limitations under the License.
   <created_user>-</created_user>
   <modified_user>-</modified_user>
   <created_date>2026/07/01 00:00:00.000</created_date>
-  <modified_date>2026/07/01 00:00:00.000</modified_date>
+  <modified_date>2026/10/09 22:20:24.655</modified_date>
   <created_hop_version/>
   <modified_hop_version>2.20.0-SNAPSHOT</modified_hop_version>
   <workflow_version/>
@@ -113,7 +113,7 @@ limitations under the License.
       <description/>
       <type>WORKFLOW</type>
       <attributes/>
-      <xloc>416</xloc>
+      <xloc>384</xloc>
       <yloc>192</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -154,7 +154,7 @@ limitations under the License.
       <description/>
       <type>CHECK_DB_CONNECTIONS</type>
       <attributes/>
-      <xloc>336</xloc>
+      <xloc>384</xloc>
       <yloc>64</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -194,7 +194,7 @@ limitations under the License.
       <description/>
       <type>EXPORT_ARCHITECTURE</type>
       <attributes/>
-      <xloc>656</xloc>
+      <xloc>608</xloc>
       <yloc>288</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -211,7 +211,7 @@ limitations under the License.
       <description>Append LOAD_DATE after the vault update succeeds</description>
       <type>SQL</type>
       <attributes/>
-      <xloc>624</xloc>
+      <xloc>608</xloc>
       <yloc>192</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -268,6 +268,32 @@ limitations under the License.
       <enabled>Y</enabled>
     </hop>
   </hops>
-  <notepads/>
+  <notepads>
+    <notepad>
+      <note>Run the __initial__ workflow first:
+
+[run-retail-initial.hwf](run-retail-initial.hwf)
+</note>
+      <markdown>Y</markdown>
+      <notetype>INFORMATION</notetype>
+      <fontname>Noto Sans</fontname>
+      <fontsize>9</fontsize>
+      <fontbold>N</fontbold>
+      <fontitalic>N</fontitalic>
+      <fontcolorred>14</fontcolorred>
+      <fontcolorgreen>58</fontcolorgreen>
+      <fontcolorblue>90</fontcolorblue>
+      <backgroundcolorred>201</backgroundcolorred>
+      <backgroundcolorgreen>232</backgroundcolorgreen>
+      <backgroundcolorblue>251</backgroundcolorblue>
+      <bordercolorred>14</bordercolorred>
+      <bordercolorgreen>58</bordercolorgreen>
+      <bordercolorblue>90</bordercolorblue>
+      <xloc>144</xloc>
+      <yloc>352</yloc>
+      <width>320</width>
+      <height>64</height>
+    </notepad>
+  </notepads>
   <attributes/>
 </workflow>

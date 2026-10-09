@@ -1,0 +1,1876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Full-Stack Transparency — Data Hopper EDW (Issue #190)</title>
+  <meta name="description" content="A staccato firehose presentation on enterprise data warehouse pain points, the need for full-stack transparency, and the Hopper EDW solution." />
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    :root {
+      --bg: #070b14;
+      --card-bg: rgba(15, 23, 42, 0.88);
+      --border-color: rgba(255, 255, 255, 0.12);
+      --accent-blue: #3b82f6;
+      --accent-cyan: #06b6d4;
+      --accent-amber: #f59e0b;
+      --accent-red: #ef4444;
+      --accent-emerald: #10b981;
+      --accent-purple: #8b5cf6;
+      --slide-zoom: 1;
+    }
+    body {
+      background-color: var(--bg);
+      color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      overflow: hidden;
+      user-select: none;
+    }
+    #slide-stage {
+      zoom: var(--slide-zoom);
+    }
+    .slide {
+      display: none;
+      opacity: 0;
+      transform: scale(0.99);
+      transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .slide.active {
+      display: flex;
+      opacity: 1;
+      transform: scale(1);
+    }
+    .glow-red {
+      box-shadow: 0 0 45px -5px rgba(239, 68, 68, 0.3);
+    }
+    .glow-amber {
+      box-shadow: 0 0 45px -5px rgba(245, 158, 11, 0.28);
+    }
+    .glow-cyan {
+      box-shadow: 0 0 45px -5px rgba(6, 182, 212, 0.3);
+    }
+    .glow-emerald {
+      box-shadow: 0 0 45px -5px rgba(16, 185, 129, 0.3);
+    }
+    .glow-purple {
+      box-shadow: 0 0 45px -5px rgba(139, 92, 246, 0.3);
+    }
+    .glass-panel {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-color);
+    }
+    .staccato-pulse {
+      animation: staccatoPulse 1.6s infinite;
+    }
+    @keyframes staccatoPulse {
+      0%, 100% { opacity: 0.95; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.03); }
+    }
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.35);
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="h-screen w-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-white">
+
+  <!-- TOP HEADER / CONTROL BAR -->
+  <header class="h-16 border-b border-white/10 px-6 sm:px-10 flex items-center justify-between bg-slate-950/90 backdrop-blur z-30 shrink-0">
+    <div class="flex items-center gap-4 sm:gap-6">
+      <div class="flex items-center gap-2.5">
+        <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-600 to-blue-500 text-white font-extrabold text-sm shadow-md">DH</span>
+        <span class="font-extrabold text-slate-100 text-base sm:text-lg tracking-wide">Data Hopper EDW</span>
+      </div>
+      <span class="text-xs sm:text-sm px-3 py-1 rounded-full bg-cyan-950/70 border border-cyan-500/40 text-cyan-300 font-mono font-semibold">Issue #190</span>
+      <div class="hidden lg:flex items-center gap-2 ml-4">
+        <button onclick="jumpToAct(1)" id="act-btn-1" class="text-sm px-3.5 py-1 rounded-md transition font-semibold text-slate-400 hover:text-slate-100 hover:bg-white/5">1. Firehose</button>
+        <button onclick="jumpToAct(2)" id="act-btn-2" class="text-sm px-3.5 py-1 rounded-md transition font-semibold text-slate-400 hover:text-slate-100 hover:bg-white/5">2. Transparency</button>
+        <button onclick="jumpToAct(3)" id="act-btn-3" class="text-sm px-3.5 py-1 rounded-md transition font-semibold text-slate-400 hover:text-slate-100 hover:bg-white/5">3. Solution Tour</button>
+        <button onclick="jumpToAct(4)" id="act-btn-4" class="text-sm px-3.5 py-1 rounded-md transition font-semibold text-slate-400 hover:text-slate-100 hover:bg-white/5">4. Live Demo</button>
+      </div>
+    </div>
+
+    <!-- Right Controls -->
+    <div class="flex items-center gap-2 sm:gap-3">
+      <!-- Zoom Scale Controls -->
+      <div class="flex items-center bg-slate-900 border border-slate-700/80 rounded-lg p-0.5 text-xs text-slate-300 mr-1">
+        <button onclick="adjustZoom(-0.1)" title="Zoom Out (-)" class="px-2 py-1 hover:bg-slate-800 rounded font-bold hover:text-white transition">−</button>
+        <button onclick="resetZoom()" id="zoom-label" title="Reset Zoom (0)" class="px-2 py-1 font-mono font-semibold hover:bg-slate-800 rounded text-slate-200">100%</button>
+        <button onclick="adjustZoom(0.1)" title="Zoom In (+)" class="px-2 py-1 hover:bg-slate-800 rounded font-bold hover:text-white transition">+</button>
+      </div>
+
+      <!-- Staccato Auto-play -->
+      <button id="firehose-play-btn" onclick="toggleFirehoseMode()" title="Toggle Rapid Staccato Firehose Auto-Run" class="inline-flex items-center gap-2 text-xs sm:text-sm px-3 py-1.5 rounded-lg bg-red-950/60 border border-red-500/50 text-red-300 hover:bg-red-900/50 font-semibold transition">
+        <svg id="firehose-play-icon" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span id="firehose-play-text" class="hidden sm:inline">Firehose Mode</span>
+      </button>
+
+      <!-- Presenter Notes Toggle -->
+      <button onclick="toggleNotes()" title="Toggle Speaker Notes (Key: P)" class="text-xs sm:text-sm px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800 font-semibold transition flex items-center gap-1.5">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        <span>Notes [P]</span>
+      </button>
+
+      <!-- Grid Overview Toggle -->
+      <button onclick="toggleGridOverview()" title="Slide Grid (Key: G)" class="p-2 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800 transition">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+      </button>
+
+      <!-- Fullscreen Toggle -->
+      <button onclick="toggleFullscreen()" title="Fullscreen (Key: F)" class="p-2 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800 transition">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN SLIDES CONTAINER (Full viewport height & width) -->
+  <main id="slide-stage" class="relative flex-1 w-full h-[calc(100vh-8rem)] overflow-hidden flex items-center justify-center p-3 sm:p-6 lg:p-8">
+
+    <!-- ========================================== -->
+    <!-- SLIDE 1: TITLE SLIDE                       -->
+    <!-- ========================================== -->
+    <div class="slide active flex-col items-center justify-between text-center w-full h-full max-w-[94vw] py-6 sm:py-10" data-act="1" data-title="Title: Full-Stack Transparency" data-notes="Opening slide. Set high energy. Say: 'We are here to talk about building enterprise data warehouses in the real world. Not the slide-deck fantasy where every model is clean, every pipeline finishes in 3 minutes, and source DBAs send you bouquets of flowers before changing a schema. In the real world, it is chaos. And if you cannot see it, you cannot own it.'">
+      <div>
+        <div class="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-cyan-950/80 border border-cyan-500/50 text-cyan-300 text-sm sm:text-base font-bold tracking-wider uppercase mb-6 glow-cyan">
+          <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
+          Apache Hop • Hopper EDW Architecture Talk
+        </div>
+        <h1 class="text-5xl sm:text-7xl lg:text-8xl xl:text-9xl font-black tracking-tight text-white mb-6 leading-none">
+          Full-Stack <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-400">Transparency</span>
+        </h1>
+        <p class="text-2xl sm:text-3xl lg:text-4xl text-slate-300 font-light max-w-5xl mx-auto leading-relaxed">
+          Why large enterprise data warehouses break down, and how to own every layer from source to dimensional mart.
+        </p>
+      </div>
+      
+      <div class="p-6 sm:p-8 rounded-3xl glass-panel border border-cyan-500/40 max-w-4xl w-full my-4 shadow-2xl glow-cyan">
+        <p class="text-2xl sm:text-3xl lg:text-4xl font-serif italic text-cyan-100 leading-snug">
+          "If you can't see it, you can't own it. Every layer, every object, every kind of metadata — one click away."
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-center gap-4 text-sm sm:text-base text-slate-300">
+        <span class="flex items-center gap-2 bg-slate-900/90 px-4 py-2 rounded-xl border border-slate-800">
+          <svg class="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          20-Min Talk + 5-Min Live Demo
+        </span>
+        <span class="flex items-center gap-2 bg-slate-900/90 px-4 py-2 rounded-xl border border-slate-800">
+          <svg class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+          Retail-360 Reference Architecture
+        </span>
+        <span class="flex items-center gap-2 bg-slate-900/90 px-4 py-2 rounded-xl border border-slate-800">
+          <svg class="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          Space / Arrow Keys to navigate
+        </span>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SLIDE 2: THE FIREHOSE PRELUDE              -->
+    <!-- ========================================== -->
+    <div class="slide flex-col items-center justify-between text-center w-full h-full max-w-[94vw] py-6 sm:py-8" data-act="1" data-title="Act 1 Prelude: The EDW Reality" data-notes="Transition into the Firehose. Warn the audience: 'I'm not going to start with academic definitions of Data Vault or 3NF vs Inmon. I'm going to give you a staccato firehose of the actual misery we all live with when managing enterprise data stacks. Watch these 10 real-world scenarios. Tell me if any of them feel familiar.'">
+      <div>
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-950/80 border border-red-500/50 text-red-300 text-sm font-bold uppercase mb-4 glow-red">
+          Act 1: Reality Check
+        </div>
+        <h2 class="text-5xl sm:text-7xl lg:text-8xl font-black text-white mb-4">
+          The EDW <span class="text-red-500 underline decoration-red-500/50">Staccato Firehose</span>
+        </h2>
+        <p class="text-2xl sm:text-3xl text-slate-300 max-w-4xl mx-auto leading-relaxed">
+          Why do enterprise data warehouse projects get bogged down, burn millions, and leave engineers exhausted?
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 w-full max-w-6xl my-4 text-left">
+        <div class="p-8 rounded-2xl glass-panel border border-red-500/30 hover:border-red-500/60 transition glow-red">
+          <div class="text-red-400 text-3xl sm:text-4xl font-extrabold mb-3">01. Fragility</div>
+          <p class="text-base sm:text-xl text-slate-200 leading-relaxed">Upstream sources evolve every night. Downstream schemas shatter without warning.</p>
+        </div>
+        <div class="p-8 rounded-2xl glass-panel border border-amber-500/30 hover:border-amber-500/60 transition glow-amber">
+          <div class="text-amber-400 text-3xl sm:text-4xl font-extrabold mb-3">02. Blindness</div>
+          <p class="text-base sm:text-xl text-slate-200 leading-relaxed">Pipelines run in silence across remote servers. When something hangs, you get zero status.</p>
+        </div>
+        <div class="p-8 rounded-2xl glass-panel border border-blue-500/30 hover:border-blue-500/60 transition glow-cyan">
+          <div class="text-blue-400 text-3xl sm:text-4xl font-extrabold mb-3">03. Fragmentation</div>
+          <p class="text-base sm:text-xl text-slate-200 leading-relaxed">12 disjointed tools. One business object shredded across 20 tables and 6 consoles.</p>
+        </div>
+      </div>
+
+      <div>
+        <button onclick="nextSlide()" class="px-8 py-4 rounded-2xl bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-black text-lg sm:text-xl shadow-2xl shadow-red-900/50 flex items-center gap-3">
+          <span>Start The Firehose</span>
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SLIDE 3: NIGHTMARE 1 - SCHEMA DRIFT        -->
+    <!-- ========================================== -->
+    <div class="slide flex-col justify-between w-full h-full max-w-[94vw] py-4 sm:py-8" data-act="1" data-title="Nightmare 1: 02:14 AM Schema Drift" data-notes="Pain point 1: Schema Drift. Emphasize: In big organizations, the source system teams don't ask for permission. They release at 2 AM. A column widens from VARCHAR(20) to VARCHAR(100). The batch job dies midway. Half the tables are loaded, half are corrupt. Who cleans it up? You do.">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-red-950/80 border border-red-500/50 text-red-400 text-sm font-mono font-bold glow-red">
+          FIREHOSE #01 • FRAGILITY
+        </div>
+        <span class="text-sm font-mono text-slate-400">Staccato 1 of 10</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center my-auto">
+        <div class="lg:col-span-7 space-y-5">
+          <div class="inline-flex p-3 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400">
+            <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          </div>
+          <h2 class="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight">
+            The 02:14 AM <span class="text-red-400">Schema Drift</span> Ambush
+          </h2>
+          <div class="p-6 rounded-2xl bg-slate-900/90 border-l-4 border-red-500 text-slate-100 text-xl sm:text-2xl font-mono leading-relaxed">
+            "Source CRM migrated to v3.2. Column <span class="text-amber-300 font-bold">customer_tier</span> widened from VARCHAR(10) to VARCHAR(50). Nightly pipeline crashed with 1.8M half-loaded rows."
+          </div>
+          <div class="space-y-4 text-base sm:text-xl text-slate-200">
+            <div class="flex items-start gap-3">
+              <span class="text-red-400 font-extrabold text-2xl">✕</span>
+              <span><strong>The Old Way:</strong> Detection happens by failure. Target database throws length overflow at 2 AM.</span>
+            </div>
+            <div class="flex items-start gap-3">
+              <span class="text-red-400 font-extrabold text-2xl">✕</span>
+              <span><strong>The Fallout:</strong> Panicked manual DDL <code class="text-sm sm:text-base bg-slate-800 px-2 py-0.5 rounded text-red-300 font-mono">ALTER TABLE</code> in prod, rollback scripts, delayed executive morning reports.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5">
+          <div class="p-8 rounded-3xl glass-panel border border-red-500/40 glow-red">
+            <div class="text-sm font-mono text-red-400 mb-3 flex items-center justify-between font-bold">
+              <span>POSTGRES ERROR 22001</span>
+              <span class="px-2 py-0.5 rounded bg-red-950 text-red-300 border border-red-500/30">CRITICAL</span>
+            </div>
+            <pre class="text-sm sm:text-base font-mono text-slate-200 bg-black/70 p-5 rounded-xl overflow-x-auto border border-red-900/50 leading-relaxed">
+ERROR: value too long for type character varying(10)
+CONTEXT: COPY sat_customer_details, line 842109: 
+"CUST-9921", "PLATINUM_PREMIUM_PLUS", ...
+STATUS: Pipeline failed after 2h 14m.
+Downstream marts blocked: 14</pre>
+            <div class="mt-5 pt-4 border-t border-white/10 flex items-center justify-between text-sm sm:text-base text-slate-300">
+              <span>Root Cause:</span>
+              <span class="text-red-300 font-bold">Silent upstream contract mutation</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SLIDE 4: NIGHTMARE 2 - SILENCE IS NOT STATUS -->
+    <!-- ========================================== -->
+    <div class="slide flex-col justify-between w-full h-full max-w-[94vw] py-4 sm:py-8" data-act="1" data-title="Nightmare 2: Silence is Not a Status" data-notes="Pain point 2: Silence is not a status. When a job is running for 4 hours, is it reading 20 million rows, or did it deadlock on a Postgres lock? Or did the worker thread silently stall? In most architectures, you just stare at a spinning circle. You don't know whether to wait or kill it.">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-amber-950/80 border border-amber-500/50 text-amber-400 text-sm font-mono font-bold glow-amber">
+          FIREHOSE #02 • OBSERVABILITY
+        </div>
+        <span class="text-sm font-mono text-slate-400">Staccato 2 of 10</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center my-auto">
+        <div class="lg:col-span-7 space-y-5">
+          <div class="inline-flex p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400">
+            <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <h2 class="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight">
+            <span class="text-amber-400">Silence</span> Is Not a Status
+          </h2>
+          <div class="p-6 rounded-2xl bg-slate-900/90 border-l-4 border-amber-500 text-slate-100 text-xl sm:text-2xl font-mono leading-relaxed">
+            "The batch load has been running for 4 hours and 18 minutes. Is it deadlocked? Is it processing 100M rows? Or did the remote worker freeze?"
+          </div>
+          <div class="space-y-4 text-base sm:text-xl text-slate-200">
+            <div class="flex items-start gap-3">
+              <span class="text-amber-400 font-extrabold text-2xl">✕</span>
+              <span><strong>The Problem:</strong> Remote, concurrent executions with zero visual stall detection.</span>
+            </div>
+            <div class="flex items-start gap-3">
+              <span class="text-amber-400 font-extrabold text-2xl">✕</span>
+              <span><strong>The Dilemma:</strong> If you kill it, you lose 4 hours of processing. If you wait, you blow the 8 AM SLA.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5">
+          <div class="p-8 rounded-3xl glass-panel border border-amber-500/40 glow-amber text-center">
+            <div class="flex items-center justify-center mb-6">
+              <div class="w-24 h-24 rounded-full border-4 border-amber-500/30 border-t-amber-400 animate-spin flex items-center justify-center">
+                <span class="text-base text-amber-300 font-mono font-bold">RUN</span>
+              </div>
+            </div>
+            <div class="text-2xl sm:text-3xl font-extrabold text-white mb-2">Status: "In Progress"</div>
+            <div class="text-base sm:text-lg text-amber-300 font-mono mb-6 font-bold">Duration: 04:18:22 • Rows: ??? • Rate: 0 r/s</div>
+            <div class="p-4 bg-black/60 rounded-xl text-sm sm:text-base text-slate-300 text-left border border-white/10 space-y-2">
+              <div>• Worker node: <span class="text-slate-100 font-mono font-semibold">ip-10-0-4-88</span></div>
+              <div>• CPU utilization: <span class="text-slate-100 font-mono font-semibold">0.2% (Idle)</span></div>
+              <div>• Lock state: <span class="text-red-400 font-mono font-bold">Waiting on exclusive table lock</span></div>
+              <div>• Diagnostics: <span class="text-slate-400 italic">No stall advisory configured</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SLIDE 5: NIGHTMARE 3 - 14-TAB LABYRINTH    -->
+    <!-- ========================================== -->
+    <div class="slide flex-col justify-between w-full h-full max-w-[94vw] py-4 sm:py-8" data-act="1" data-title="Nightmare 3: The 14-Tab Labyrinth" data-notes="Pain point 3: The 14-Tab Labyrinth. To investigate why a number is wrong in a dashboard, an engineer has to open 14 different tools. A data catalog, a git repo, dbt cloud, Airflow, Postgres console, pgAdmin, Kafka manager, Slack. By the time you find the script, you forgot the original question.">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-purple-950/80 border border-purple-500/50 text-purple-400 text-sm font-mono font-bold glow-purple">
+          FIREHOSE #03 • CONTEXT SWITCHING
+        </div>
+        <span class="text-sm font-mono text-slate-400">Staccato 3 of 10</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center my-auto">
+        <div class="lg:col-span-6 space-y-5">
+          <div class="inline-flex p-3 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-purple-400">
+            <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+          </div>
+          <h2 class="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight">
+            The <span class="text-purple-400">14-Tab</span> Context Labyrinth
+          </h2>
+          <div class="p-6 rounded-2xl bg-slate-900/90 border-l-4 border-purple-500 text-slate-100 text-xl sm:text-2xl font-mono leading-relaxed">
+            "To answer 'Why did inventory turn negative in Region West?', the engineer opens 14 browser tabs across 7 disconnected products."
+          </div>
+          <div class="space-y-4 text-base sm:text-xl text-slate-200">
+            <div class="flex items-start gap-3">
+              <span class="text-purple-400 font-extrabold text-2xl">✕</span>
+              <span><strong>The Toll:</strong> The engineer is forced to act as a human router, stitching together fragmented pieces of metadata.</span>
+            </div>
+            <div class="flex items-start gap-3">
+              <span class="text-purple-400 font-extrabold text-2xl">✕</span>
+              <span><strong>Result:</strong> 45 minutes of cognitive fatigue just to locate where the transformation logic lives.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-6">
+          <div class="p-6 sm:p-8 rounded-3xl glass-panel border border-purple-500/40 glow-purple space-y-3">
+            <div class="text-sm font-mono text-purple-300 uppercase tracking-wider mb-2 font-bold">24 Open Tabs in Browser</div>
+            <div class="grid grid-cols-2 gap-3 text-sm sm:text-base font-semibold">
+              <div class="p-3 rounded-xl bg-slate-900/90 border border-white/10 text-slate-200 flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-blue-400"></span> Data Modeler (ERD)
+              </div>
+              <div class="p-3 rounded-xl bg-slate-900/90 border border-white/10 text-slate-200 flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-green-400"></span> Data Catalog (Purview)
+              </div>
+              <div class="p-3 rounded-xl bg-slate-900/90 border border-white/10 text-slate-200 flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-amber-400"></span> Lineage Web UI (Marquez)
+              </div>
+              <div class="p-3 rounded-xl bg-slate-900/90 border border-white/10 text-slate-200 flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-red-400"></span> Airflow Scheduler
+              </div>
+              <div class="p-3 rounded-xl bg-slate-900/90 border border-white/10 text-slate-200 flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-purple-400"></span> dbt Cloud (SQL)
+              </div>
+              <div class="p-3 rounded-xl bg-slate-900/90 border border-white/10 text-slate-200 flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-cyan-400"></span> DBeaver (Database)
+              </div>
+              <div class="p-3 rounded-xl bg-slate-900/90 border border-white/10 text-slate-200 flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-emerald-400"></span> Great Expectations (DQ)
+              </div>
+              <div class="p-3 rounded-xl bg-slate-900/90 border border-white/10 text-slate-200 flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-pink-400"></span> 5 Slack Incident Channels
+              </div>
+            </div>
+            <div class="mt-4 p-3 bg-red-950/60 rounded-xl border border-red-500/30 text-center text-sm sm:text-base text-red-300 font-bold">
+              ⚡ Cost: 35% of engineering velocity lost to toolchain context switching
+            </div>
+          </div>
+        </div>
+      </div>
+      <div></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SLIDE 6: NIGHTMARE 4 - READ-ONLY ISLANDS   -->
+    <!-- ========================================== -->
+    <div class="slide flex-col justify-between w-full h-full max-w-[94vw] py-4 sm:py-8" data-act="1" data-title="Nightmare 4: The Read-Only Island" data-notes="Pain point 4: Read-Only Islands. Modern catalogs show you graphs and red badges when data quality fails. But you can't touch anything! It is look-only. Seeing the problem and fixing the problem happen in two completely different worlds. If you can't edit it from where you observe it, you don't own it.">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-blue-950/80 border border-blue-500/50 text-blue-400 text-sm font-mono font-bold glow-cyan">
+          FIREHOSE #04 • ISOLATION
+        </div>
+        <span class="text-sm font-mono text-slate-400">Staccato 4 of 10</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center my-auto">
+        <div class="lg:col-span-7 space-y-5">
+          <div class="inline-flex p-3 rounded-2xl bg-blue-500/10 border border-blue-500/30 text-blue-400">
+            <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+          </div>
+          <h2 class="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight">
+            The <span class="text-blue-400">Read-Only Island</span> Trap
+          </h2>
+          <div class="p-6 rounded-2xl bg-slate-900/90 border-l-4 border-blue-500 text-slate-100 text-xl sm:text-2xl font-mono leading-relaxed">
+            "Your enterprise catalog spotted 12,000 orphan records and flagged the lineage node in bright red. Awesome! Can you fix it here? Absolutely not."
+          </div>
+          <div class="space-y-4 text-base sm:text-xl text-slate-200">
+            <div class="flex items-start gap-3">
+              <span class="text-blue-400 font-extrabold text-2xl">✕</span>
+              <span><strong>The Barrier:</strong> Lineage and catalog products are read-only spectators. They tell you where the fire is, but give you no water.</span>
+            </div>
+            <div class="flex items-start gap-3">
+              <span class="text-blue-400 font-extrabold text-2xl">✕</span>
+              <span><strong>The Principle:</strong> Seeing and fixing MUST happen on the same object, in the same place.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5">
+          <div class="p-8 rounded-3xl glass-panel border border-blue-500/40 glow-cyan text-center">
+            <div class="inline-flex p-4 rounded-full bg-blue-500/20 text-blue-400 mb-4">
+              <svg class="w-14 h-14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+            </div>
+            <div class="text-2xl font-extrabold text-white mb-3">Look, But Don't Touch</div>
+            <p class="text-base sm:text-lg text-slate-300 mb-6 leading-relaxed">
+              "We have ingested your metadata into our graph. For remediation, please open your IDE, locate the repository, trace the job, and redeploy."
+            </p>
+            <div class="p-4 bg-slate-900 rounded-xl border border-slate-800 text-sm font-mono text-slate-400">
+              [Status: 403 Forbidden: Modifying pipelines from catalog is not supported]
+            </div>
+          </div>
+        </div>
+      </div>
+      <div></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SLIDE 7: NIGHTMARE 5 - TRIPLE DRIFT SCHISM -->
+    <!-- ========================================== -->
+    <div class="slide flex-col justify-between w-full h-full max-w-[94vw] py-4 sm:py-8" data-act="1" data-title="Nightmare 5: The Triple Drift Schism" data-notes="Pain point 5: Triple Drift Schism. The ERD model in the modeling tool was drawn in January. The database DDL was modified by the DBA in March. The ETL pipeline was patched on the fly in June. None of the three match. When someone asks 'What is our customer schema?', there are three different answers.">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-amber-950/80 border border-amber-500/50 text-amber-400 text-sm font-mono font-bold glow-amber">
+          FIREHOSE #05 • SYNCHRONIZATION
+        </div>
+        <span class="text-sm font-mono text-slate-400">Staccato 5 of 10</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center my-auto">
+        <div class="lg:col-span-7 space-y-5">
+          <div class="inline-flex p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400">
+            <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+          </div>
+          <h2 class="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight">
+            The <span class="text-amber-400">Triple Drift</span> Schism
+          </h2>
+          <div class="p-6 rounded-2xl bg-slate-900/90 border-l-4 border-amber-500 text-slate-100 text-xl sm:text-2xl font-mono leading-relaxed">
+            "The ERD model says Version 4.0. The live database DDL is Version 3.2. The ETL pipelines were hardcoded against Version 2.5."
+          </div>
+          <div class="space-y-4 text-base sm:text-xl text-slate-200">
+            <div class="flex items-start gap-3">
+              <span class="text-amber-400 font-extrabold text-2xl">✕</span>
+              <span><strong>The Mirage:</strong> Architectural diagrams become fiction within weeks because they don't drive execution directly.</span>
+            </div>
+            <div class="flex items-start gap-3">
+              <span class="text-amber-400 font-extrabold text-2xl">✕</span>
+              <span><strong>The Fix:</strong> The model MUST BE the contract, the DDL generator, and the pipeline blueprint.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5">
+          <div class="p-8 rounded-3xl glass-panel border border-amber-500/40 glow-amber space-y-4">
+            <div class="flex items-center justify-between p-4 rounded-xl bg-slate-900/90 border border-white/10">
+              <div class="text-base sm:text-lg font-bold text-slate-200">1. Architectural Model</div>
+              <span class="text-sm sm:text-base font-mono text-cyan-400 font-bold">v4.0 (Aspirational)</span>
+            </div>
+            <div class="flex items-center justify-between p-4 rounded-xl bg-slate-900/90 border border-white/10">
+              <div class="text-base sm:text-lg font-bold text-slate-200">2. Database Schema DDL</div>
+              <span class="text-sm sm:text-base font-mono text-amber-400 font-bold">v3.2 (Patched in Prod)</span>
+            </div>
+            <div class="flex items-center justify-between p-4 rounded-xl bg-slate-900/90 border border-white/10">
+              <div class="text-base sm:text-lg font-bold text-slate-200">3. ETL Code & SQL</div>
+              <span class="text-sm sm:text-base font-mono text-red-400 font-bold">v2.5 (Hardcoded SELECTs)</span>
+            </div>
+            <div class="p-4 bg-amber-950/60 border border-amber-500/30 rounded-xl text-center text-sm sm:text-base text-amber-200 font-bold">
+              ⚠️ Result: No single source of architectural truth exists.
+            </div>
+          </div>
+        </div>
+      </div>
+      <div></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SLIDE 8: NIGHTMARE 6 - SPECIAL CASE GRAVEYARD -->
+    <!-- ========================================== -->
+    <div class="slide flex-col justify-between w-full h-full max-w-[94vw] py-4 sm:py-8" data-act="1" data-title="Nightmare 6: The Special Case Graveyard" data-notes="Pain point 6: Special cases break model-driven tools. Every data warehouse modeler works great on a clean relational table. But then reality hits: streaming Kafka feeds, semi-structured JSON payloads, files with no types or lengths, legacy systems. Because the modeler can't handle it, engineers build shadow pipelines and bash scripts beside the model. And transparency dies.">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-red-950/80 border border-red-500/50 text-red-400 text-sm font-mono font-bold glow-red">
+          FIREHOSE #06 • FLEXIBILITY
+        </div>
+        <span class="text-sm font-mono text-slate-400">Staccato 6 of 10</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center my-auto">
+        <div class="lg:col-span-7 space-y-5">
+          <div class="inline-flex p-3 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400">
+            <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+          </div>
+          <h2 class="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight">
+            The <span class="text-red-400">Special Case</span> Graveyard
+          </h2>
+          <div class="p-6 rounded-2xl bg-slate-900/90 border-l-4 border-red-500 text-slate-100 text-xl sm:text-2xl font-mono leading-relaxed">
+            "Your model-driven framework was immaculate — until Kafka streaming, nested JSON, and typeless Iceberg files forced engineers to build secret bypass bash scripts."
+          </div>
+          <div class="space-y-4 text-base sm:text-xl text-slate-200">
+            <div class="flex items-start gap-3">
+              <span class="text-red-400 font-extrabold text-2xl">✕</span>
+              <span><strong>The Fracture:</strong> The moment a special case requires custom code outside the model, governance and transparency vanish.</span>
+            </div>
+            <div class="flex items-start gap-3">
+              <span class="text-red-400 font-extrabold text-2xl">✕</span>
+              <span><strong>The Rule:</strong> Complexity MUST be solved natively inside the source model (JSON extraction, custom query, typing rules, pipeline cards).</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5">
+          <div class="p-8 rounded-3xl glass-panel border border-red-500/40 glow-red text-center">
+            <div class="text-sm font-mono text-red-400 uppercase tracking-wider mb-4 font-bold">Where Models Go To Die</div>
+            <div class="space-y-3 text-sm sm:text-base text-left font-mono">
+              <div class="p-3.5 rounded-xl bg-black/70 border border-white/10 text-slate-200">
+                <span class="text-red-400 font-bold">➜</span> /opt/scripts/ingest_kafka_raw.sh
+              </div>
+              <div class="p-3.5 rounded-xl bg-black/70 border border-white/10 text-slate-200">
+                <span class="text-red-400 font-bold">➜</span> /cron/flatten_nested_payload.py
+              </div>
+              <div class="p-3.5 rounded-xl bg-black/70 border border-white/10 text-slate-200">
+                <span class="text-red-400 font-bold">➜</span> /scratch/fix_missing_types.sql
+              </div>
+            </div>
+            <p class="text-sm sm:text-base text-slate-400 mt-5 italic">
+              "We'll model it properly in Phase 2..." (Narrator: Phase 2 never happened)
+            </p>
+          </div>
+        </div>
+      </div>
+      <div></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SLIDE 9: NIGHTMARE 7 - DATA VAULT COMPONENT EXPLOSION -->
+    <!-- ========================================== -->
+    <div class="slide flex-col justify-between w-full h-full max-w-[94vw] py-4 sm:py-8" data-act="1" data-title="Nightmare 7: Data Vault Explosion" data-notes="Pain point 7: Data Vault Component Explosion. Data Vault 2.0 is great: it scales, it audits, it handles multiple sources. But a single business concept like 'Customer' gets shredded into: Hub Customer, Sat Address, Sat Contact, Sat Demographics, Link Order, Sat Link Order, PIT Customer, Bridge Customer, Mart Dimension Customer. 10 physical tables! If the engineer cannot follow that object seamlessly across every layer, they drown.">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-blue-950/80 border border-blue-500/50 text-blue-400 text-sm font-mono font-bold glow-cyan">
+          FIREHOSE #07 • DATA VAULT SCALE
+        </div>
+        <span class="text-sm font-mono text-slate-400">Staccato 7 of 10</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center my-auto">
+        <div class="lg:col-span-7 space-y-5">
+          <div class="inline-flex p-3 rounded-2xl bg-blue-500/10 border border-blue-500/30 text-blue-400">
+            <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+          </div>
+          <h2 class="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight">
+            The <span class="text-blue-400">Data Vault Explosion</span> of Pieces
+          </h2>
+          <div class="p-6 rounded-2xl bg-slate-900/90 border-l-4 border-blue-500 text-slate-100 text-xl sm:text-2xl font-mono leading-relaxed">
+            "1 Business Concept ('Customer') ➔ 1 Hub, 4 Satellites, 2 Links, 1 Link Satellite, 1 PIT Table, 1 Business Vault SCD2, 1 Star Mart. Where did this phone number come from?!"
+          </div>
+          <div class="space-y-4 text-base sm:text-xl text-slate-200">
+            <div class="flex items-start gap-3">
+              <span class="text-blue-400 font-extrabold text-2xl">✕</span>
+              <span><strong>The Inherent Cost:</strong> Data Vault deliberately normalizes to 6NF for auditability. But without unified tooling, engineers lose the narrative thread.</span>
+            </div>
+            <div class="flex items-start gap-3">
+              <span class="text-blue-400 font-extrabold text-2xl">✕</span>
+              <span><strong>The Solution:</strong> You must be able to view, trace, and edit the concept as ONE integrated entity across all 4 layers.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5">
+          <div class="p-6 sm:p-8 rounded-3xl glass-panel border border-blue-500/40 glow-cyan">
+            <div class="text-sm font-mono text-blue-300 mb-4 text-center font-bold">1 Concept ➔ 10 Physical Artifacts</div>
+            <div class="space-y-2 text-sm sm:text-base font-mono">
+              <div class="p-2.5 rounded-xl bg-blue-900/40 border border-blue-500/40 text-blue-200 flex justify-between font-bold"><span>hub_customer</span> <span class="text-blue-400">RAW VAULT</span></div>
+              <div class="p-2.5 rounded-xl bg-blue-900/30 border border-blue-500/30 text-blue-200 flex justify-between"><span>sat_customer_crm</span> <span class="text-blue-400">RAW VAULT</span></div>
+              <div class="p-2.5 rounded-xl bg-blue-900/30 border border-blue-500/30 text-blue-200 flex justify-between"><span>sat_customer_erp</span> <span class="text-blue-400">RAW VAULT</span></div>
+              <div class="p-2.5 rounded-xl bg-blue-900/30 border border-blue-500/30 text-blue-200 flex justify-between"><span>lnk_customer_order</span> <span class="text-blue-400">RAW VAULT</span></div>
+              <div class="p-2.5 rounded-xl bg-purple-900/40 border border-purple-500/40 text-purple-200 flex justify-between font-bold"><span>bv_customer_golden</span> <span class="text-purple-400">BUSINESS VAULT</span></div>
+              <div class="p-2.5 rounded-xl bg-purple-900/30 border border-purple-500/30 text-purple-200 flex justify-between"><span>pit_customer</span> <span class="text-purple-400">PIT TABLE</span></div>
+              <div class="p-2.5 rounded-xl bg-emerald-900/40 border border-emerald-500/40 text-emerald-200 flex justify-between font-bold"><span>dim_customer</span> <span class="text-emerald-400">DIMENSIONAL</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SLIDE 10: NIGHTMARE 8 - PERFORMANCE BLINDNESS -->
+    <!-- ========================================== -->
+    <div class="slide flex-col justify-between w-full h-full max-w-[94vw] py-4 sm:py-8" data-act="1" data-title="Nightmare 8: Performance Blindness" data-notes="Pain point 8: Performance Bottleneck Blindness. Nightly run took 7 hours instead of 2. You missed the SLA. There were 60 parallel transforms running. Which one was the bottleneck? Was it a full table scan? A stalled insert? An unindexed link? Good luck grepping through 4 gigabytes of raw text log files.">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-red-950/80 border border-red-500/50 text-red-400 text-sm font-mono font-bold glow-red">
+          FIREHOSE #08 • PERFORMANCE
+        </div>
+        <span class="text-sm font-mono text-slate-400">Staccato 8 of 10</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center my-auto">
+        <div class="lg:col-span-7 space-y-5">
+          <div class="inline-flex p-3 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400">
+            <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          </div>
+          <h2 class="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight">
+            <span class="text-red-400">Performance Bottleneck</span> Blindness
+          </h2>
+          <div class="p-6 rounded-2xl bg-slate-900/90 border-l-4 border-red-500 text-slate-100 text-xl sm:text-2xl font-mono leading-relaxed">
+            "Nightly batch took 6 hours instead of 90 minutes. 75 transforms ran in parallel. Which one choked? Start grepping through 3.8 GB of text logs."
+          </div>
+          <div class="space-y-4 text-base sm:text-xl text-slate-200">
+            <div class="flex items-start gap-3">
+              <span class="text-red-400 font-extrabold text-2xl">✕</span>
+              <span><strong>The Needle in the Haystack:</strong> Text log files provide zero concurrency insight, zero visual Gantt timing, and zero stall detection.</span>
+            </div>
+            <div class="flex items-start gap-3">
+              <span class="text-red-400 font-extrabold text-2xl">✕</span>
+              <span><strong>The Need:</strong> Durations, bottlenecks, and execution metrics MUST sit directly on the model canvas!</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5">
+          <div class="p-8 rounded-3xl glass-panel border border-red-500/40 glow-red">
+            <div class="text-sm font-mono text-red-300 mb-3 font-bold">DEBUGGING LOG HELL</div>
+            <pre class="text-sm sm:text-base font-mono text-slate-200 bg-black/70 p-5 rounded-xl overflow-x-auto border border-white/10 space-y-1.5 leading-relaxed">
+$ grep -i "slow" /var/log/hop/batch_20261009.log | wc -l
+18,412 matches
+$ grep "duration > 60s" /var/log/hop/*.log
+[ERROR: Log format unparseable]
+$ ps aux | grep java
+[PID 9122: 99.8% CPU, 48GB RSS]</pre>
+            <div class="mt-4 text-sm sm:text-base text-center text-slate-300 font-mono">
+              Blind optimization leads to expensive over-provisioning.
+            </div>
+          </div>
+        </div>
+      </div>
+      <div></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SLIDE 11: NIGHTMARE 9 - FINGER-POINTING WAR -->
+    <!-- ========================================== -->
+    <div class="slide flex-col justify-between w-full h-full max-w-[94vw] py-4 sm:py-8" data-act="1" data-title="Nightmare 9: The Finger-Pointing War" data-notes="Pain point 9: The Root-Cause Finger-Pointing War. The report has negative revenue. BI developer says: 'The Mart is broken!' Mart developer says: 'Business Vault gave me bad values.' Vault developer says: 'Raw Vault loaded bad source data.' Source DBA says: 'Our database was fine.' It takes 4 days of meetings because nobody has end-to-end lineage + operational quality in one unified view.">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-amber-950/80 border border-amber-500/50 text-amber-400 text-sm font-mono font-bold glow-amber">
+          FIREHOSE #09 • ACCOUNTABILITY
+        </div>
+        <span class="text-sm font-mono text-slate-400">Staccato 9 of 10</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center my-auto">
+        <div class="lg:col-span-7 space-y-5">
+          <div class="inline-flex p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400">
+            <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 012 2h2v4l.586-.586z"/></svg>
+          </div>
+          <h2 class="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight">
+            The <span class="text-amber-400">Root-Cause</span> Finger-Pointing War
+          </h2>
+          <div class="p-6 rounded-2xl bg-slate-900/90 border-l-4 border-amber-500 text-slate-100 text-xl sm:text-2xl font-mono leading-relaxed">
+            "The executive dashboard displays -$2.4M inventory. BI blames the Mart. Mart blames Business Vault. Business Vault blames Raw Vault. Raw Vault blames the CSV."
+          </div>
+          <div class="space-y-4 text-base sm:text-xl text-slate-200">
+            <div class="flex items-start gap-3">
+              <span class="text-amber-400 font-extrabold text-2xl">✕</span>
+              <span><strong>The Root Cause:</strong> When lineage, data quality findings, and transformation logic are separated into 3 different tools, no one has the complete chain of custody.</span>
+            </div>
+            <div class="flex items-start gap-3">
+              <span class="text-amber-400 font-extrabold text-2xl">✕</span>
+              <span><strong>Days Wasted:</strong> Teams spend 80% of incident response time trying to prove "It wasn't my layer!"</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5">
+          <div class="p-8 rounded-3xl glass-panel border border-amber-500/40 glow-amber text-center">
+            <div class="text-sm font-mono text-amber-300 uppercase mb-4 font-bold">The Endless Blame Loop</div>
+            <div class="space-y-3 text-sm sm:text-base font-semibold">
+              <div class="p-3 rounded-xl bg-red-950/50 text-red-200 border border-red-500/30">Executive: "The dashboard is wrong!"</div>
+              <div class="text-slate-400 font-bold">▼</div>
+              <div class="p-3 rounded-xl bg-amber-950/50 text-amber-200 border border-amber-500/30">BI Analyst: "The dimensional mart has missing keys!"</div>
+              <div class="text-slate-400 font-bold">▼</div>
+              <div class="p-3 rounded-xl bg-blue-950/50 text-blue-200 border border-blue-500/30">EDW Engineer: "Business Vault SCD2 logic was changed!"</div>
+              <div class="text-slate-400 font-bold">▼</div>
+              <div class="p-3 rounded-xl bg-purple-950/50 text-purple-200 border border-purple-500/30">Source DBA: "We didn't touch anything!"</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SLIDE 12: NIGHTMARE 10 - THE TOOL-GLUE TAX -->
+    <!-- ========================================== -->
+    <div class="slide flex-col justify-between w-full h-full max-w-[94vw] py-4 sm:py-8" data-act="1" data-title="Nightmare 10: The Fragile Tool-Glue Tax" data-notes="Pain point 10: The Fragile Tool-Glue Tax. Best-of-breed toolchains promise heaven, but in practice, 60% of your data engineers' time is spent building and maintaining the API glue between your modeler, your catalog, your orchestrator, your ETL, and your database. Integration of the tools became the project, instead of delivering data!">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-red-950/80 border border-red-500/50 text-red-400 text-sm font-mono font-bold glow-red">
+          FIREHOSE #10 • ARCHITECTURE COLLAPSE
+        </div>
+        <span class="text-sm font-mono text-slate-400">Staccato 10 of 10</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center my-auto">
+        <div class="lg:col-span-7 space-y-5">
+          <div class="inline-flex p-3 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400">
+            <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+          </div>
+          <h2 class="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight">
+            The Fragile <span class="text-red-400">Tool-Glue</span> Tax
+          </h2>
+          <div class="p-6 rounded-2xl bg-slate-900/90 border-l-4 border-red-500 text-slate-100 text-xl sm:text-2xl font-mono leading-relaxed">
+            "60% of senior data engineering time is spent writing Python scripts and webhook syncs to keep Tool A, Tool B, and Tool C talking to each other."
+          </div>
+          <div class="space-y-4 text-base sm:text-xl text-slate-200">
+            <div class="flex items-start gap-3">
+              <span class="text-red-400 font-extrabold text-2xl">✕</span>
+              <span><strong>The Trap:</strong> Integration of the toolchain became the project, instead of delivering data value to the enterprise.</span>
+            </div>
+            <div class="flex items-start gap-3">
+              <span class="text-red-400 font-extrabold text-2xl">✕</span>
+              <span><strong>The Irony:</strong> You paid for 8 'best-of-breed' licenses, and now pay 10 engineers full time just to lubricate the gears between them.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5">
+          <div class="p-8 rounded-3xl glass-panel border border-red-500/40 glow-red text-center">
+            <div class="text-base sm:text-lg font-bold text-white mb-4">Where Did The Budget Go?</div>
+            <div class="space-y-4 text-sm sm:text-base mt-4">
+              <div>
+                <div class="flex justify-between text-slate-200 mb-1 font-semibold">
+                  <span>Toolchain Integration & API Syncs</span>
+                  <span class="font-mono text-red-400 font-bold">58%</span>
+                </div>
+                <div class="w-full bg-slate-800 rounded-full h-3.5">
+                  <div class="bg-red-500 h-3.5 rounded-full" style="width: 58%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between text-slate-200 mb-1 font-semibold">
+                  <span>Incident Firefighting & Drift Fixes</span>
+                  <span class="font-mono text-amber-400 font-bold">24%</span>
+                </div>
+                <div class="w-full bg-slate-800 rounded-full h-3.5">
+                  <div class="bg-amber-500 h-3.5 rounded-full" style="width: 24%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between text-slate-200 mb-1 font-semibold">
+                  <span>Actual Business Modeling & Insights</span>
+                  <span class="font-mono text-emerald-400 font-bold">18%</span>
+                </div>
+                <div class="w-full bg-slate-800 rounded-full h-3.5">
+                  <div class="bg-emerald-500 h-3.5 rounded-full" style="width: 18%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SLIDE 13: FIREHOSE SUMMARY MATRIX          -->
+    <!-- ========================================== -->
+    <div class="slide flex-col justify-between w-full h-full max-w-[94vw] py-4 sm:py-8" data-act="1" data-title="The Firehose Verdict" data-notes="Firehose summary. Say: 'That was the 10-shot staccato firehose. Look at the common thread: it is never the modeling theory that failed. Data Vault didn't fail. Dimensional modeling didn't fail. What failed was FRAGMENTATION. The engineer cannot see the object, examine its state, and edit its logic in one coherent place.'">
+      <div class="text-center">
+        <span class="px-4 py-1.5 rounded-full bg-red-950/80 border border-red-500/50 text-red-300 text-sm font-mono font-bold uppercase glow-red">Act 1 Verdict</span>
+        <h2 class="text-4xl sm:text-6xl font-black text-white mt-3">The True Cost of Architectural Fragmentation</h2>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-4 my-auto">
+        <div class="p-6 rounded-2xl bg-slate-900/90 border border-red-500/30 text-center glow-red">
+          <div class="text-red-400 font-mono text-base font-bold mb-2">DRIFT</div>
+          <p class="text-sm sm:text-base text-slate-200">Schemas evolve without warning gates.</p>
+        </div>
+        <div class="p-6 rounded-2xl bg-slate-900/90 border border-amber-500/30 text-center glow-amber">
+          <div class="text-amber-400 font-mono text-base font-bold mb-2">SILENCE</div>
+          <p class="text-sm sm:text-base text-slate-200">Stalls and bottlenecks hidden in log files.</p>
+        </div>
+        <div class="p-6 rounded-2xl bg-slate-900/90 border border-purple-500/30 text-center glow-purple">
+          <div class="text-purple-400 font-mono text-base font-bold mb-2">CONTEXT HELL</div>
+          <p class="text-sm sm:text-base text-slate-200">14 disconnected tabs to trace 1 number.</p>
+        </div>
+        <div class="p-6 rounded-2xl bg-slate-900/90 border border-blue-500/30 text-center glow-cyan">
+          <div class="text-blue-400 font-mono text-base font-bold mb-2">READ-ONLY</div>
+          <p class="text-sm sm:text-base text-slate-200">Catalogs point at problems but can't fix them.</p>
+        </div>
+        <div class="p-6 rounded-2xl bg-slate-900/90 border border-cyan-500/30 text-center glow-cyan">
+          <div class="text-cyan-400 font-mono text-base font-bold mb-2">EXCEPTIONS</div>
+          <p class="text-sm sm:text-base text-slate-200">Special cases bypass models into unowned scripts.</p>
+        </div>
+      </div>
+
+      <div class="p-8 rounded-3xl glass-panel border border-cyan-500/40 text-center max-w-5xl mx-auto w-full glow-cyan">
+        <h3 class="text-2xl sm:text-4xl font-extrabold text-white mb-3">The Diagnosis</h3>
+        <p class="text-xl sm:text-2xl text-slate-200 max-w-4xl mx-auto leading-relaxed">
+          The failure is <span class="text-red-400 font-extrabold">never</span> the modeling technique itself.
+          The failure is the <span class="text-cyan-300 font-extrabold underline decoration-cyan-400">loss of integrated visibility and editability</span>.
+        </p>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SLIDE 14: ACT 2 - BEST OF BREED FALLACY    -->
+    <!-- ========================================== -->
+    <div class="slide flex-col justify-between w-full h-full max-w-[94vw] py-4 sm:py-8" data-act="2" data-title="Act 2: The Best-of-Breed Fallacy" data-notes="Act 2 begins here. Deliver slide line: 'Best tool for each job gives you the best parts. The engineer still needs the whole picture.' Explain: 'When procurement buys best-of-breed tools, they evaluate each in isolation. Depth of data modeling. Depth of lineage. Depth of orchestration. But for the engineer who has to live in this every day, fragmented depth is a curse if nothing connects.'">
+      <div>
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-500/50 text-cyan-300 text-sm font-bold uppercase mb-3 glow-cyan">
+          Act 2: The Core Thesis
+        </div>
+        <h2 class="text-5xl sm:text-7xl font-black text-white">
+          The Fallacy of <span class="text-cyan-400">"Best of Breed"</span>
+        </h2>
+      </div>
+
+      <div class="p-6 sm:p-8 rounded-3xl glass-panel border border-cyan-500/40 max-w-5xl w-full mx-auto my-2 glow-cyan text-center">
+        <p class="text-2xl sm:text-3xl lg:text-4xl font-serif italic text-cyan-100 leading-snug">
+          "Best tool for each job gives you the best parts. The engineer still needs the whole picture."
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl w-full mx-auto my-auto">
+        <div class="p-8 rounded-2xl bg-slate-900/90 border border-white/10 space-y-4">
+          <div class="text-lg font-bold text-slate-200 uppercase tracking-wider flex items-center gap-3">
+            <span class="w-3.5 h-3.5 rounded-full bg-amber-400"></span> What "Best of Breed" Optimizes For
+          </div>
+          <ul class="text-base sm:text-xl text-slate-200 space-y-3 leading-relaxed">
+            <li>• Deep feature silos in one narrow discipline (profiling, lineage, ERD)</li>
+            <li>• Purchasing one category at a time from different vendors</li>
+            <li>• Specialized analysts who live 100% of their day in one tool</li>
+          </ul>
+        </div>
+
+        <div class="p-8 rounded-2xl bg-slate-900/90 border border-red-500/30 space-y-4 glow-red">
+          <div class="text-lg font-bold text-red-400 uppercase tracking-wider flex items-center gap-3">
+            <span class="w-3.5 h-3.5 rounded-full bg-red-400"></span> What It Costs The Data Engineer
+          </div>
+          <ul class="text-base sm:text-xl text-slate-200 space-y-3 leading-relaxed">
+            <li>• <strong>Fragmented context:</strong> Truth is split across 5 tools with different names</li>
+            <li>• <strong>Constant context switching:</strong> Jumping between windows all day</li>
+            <li>• <strong>Drift & sync issues:</strong> Models, schemas, and jobs diverge silently</li>
+            <li>• <strong>Read-only islands:</strong> Observing and fixing live in separate tools</li>
+          </ul>
+        </div>
+      </div>
+      <div></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SLIDE 15: THE 5 PILLARS OF UNIFIED OBJECT  -->
+    <!-- ========================================== -->
+    <div class="slide flex-col justify-between w-full h-full max-w-[94vw] py-4 sm:py-8" data-act="2" data-title="The 5 Pillars of Unified Object" data-notes="Slide 15: The 5 Pillars of Unified Object Knowledge. Emphasize: 'A data engineer must be able to view, examine and edit everything about the object they are working on, in EVERY layer of the stack: Source, Raw Vault, Business Vault, and Dimensional Mart. It must cover Schema, Load Logic, Lineage, Operations, and Quality.'">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-500/50 text-cyan-300 text-sm font-bold uppercase glow-cyan">
+          The Architectural Anchor
+        </div>
+        <span class="text-sm font-mono text-cyan-400 font-semibold">Issue #190 Principle</span>
+      </div>
+
+      <div class="my-2">
+        <h2 class="text-4xl sm:text-6xl font-black text-white mb-2">
+          The 5 Pillars of <span class="text-cyan-400">Unified Object Knowledge</span>
+        </h2>
+        <p class="text-lg sm:text-2xl text-slate-300 max-w-5xl">
+          Every business object in every layer must keep its complete metadata attached — not scattered into external silos.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-5 gap-4 my-auto">
+        <div class="p-6 rounded-2xl glass-panel border border-cyan-500/30 text-center hover:border-cyan-500/60 transition glow-cyan">
+          <div class="text-cyan-400 font-extrabold text-lg sm:text-xl mb-2">1. SCHEMA</div>
+          <p class="text-sm sm:text-base text-slate-200">Contract, column types, keys, target DDL layout.</p>
+        </div>
+        <div class="p-6 rounded-2xl glass-panel border border-blue-500/30 text-center hover:border-blue-500/60 transition glow-cyan">
+          <div class="text-blue-400 font-extrabold text-lg sm:text-xl mb-2">2. ETL LOGIC</div>
+          <p class="text-sm sm:text-base text-slate-200">Inspectable, runnable pipelines — never a black box.</p>
+        </div>
+        <div class="p-6 rounded-2xl glass-panel border border-purple-500/30 text-center hover:border-purple-500/60 transition glow-purple">
+          <div class="text-purple-400 font-extrabold text-lg sm:text-xl mb-2">3. LINEAGE</div>
+          <p class="text-sm sm:text-base text-slate-200">Upstream sources to downstream marts & dashboards.</p>
+        </div>
+        <div class="p-6 rounded-2xl glass-panel border border-amber-500/30 text-center hover:border-amber-500/60 transition glow-amber">
+          <div class="text-amber-400 font-extrabold text-lg sm:text-xl mb-2">4. OPERATIONS</div>
+          <p class="text-sm sm:text-base text-slate-200">Run histories, timings, stalls, row rates right on canvas.</p>
+        </div>
+        <div class="p-6 rounded-2xl glass-panel border border-emerald-500/30 text-center hover:border-emerald-500/60 transition glow-emerald">
+          <div class="text-emerald-400 font-extrabold text-lg sm:text-xl mb-2">5. QUALITY</div>
+          <p class="text-sm sm:text-base text-slate-200">Rules, validation profiles, and remediation proposals.</p>
+        </div>
+      </div>
+
+      <div class="p-5 rounded-2xl bg-slate-900/90 border border-white/10 flex flex-wrap items-center justify-between gap-3">
+        <span class="text-sm sm:text-base font-mono text-slate-400 font-bold">Unbroken Across All 4 Layers:</span>
+        <div class="flex items-center gap-3 text-sm sm:text-base font-bold">
+          <span class="px-3.5 py-1.5 rounded-lg bg-amber-950/70 border border-amber-500/40 text-amber-300">Source Model</span>
+          <span class="text-slate-500">➔</span>
+          <span class="px-3.5 py-1.5 rounded-lg bg-blue-950/70 border border-blue-500/40 text-blue-300">Raw Data Vault</span>
+          <span class="text-slate-500">➔</span>
+          <span class="px-3.5 py-1.5 rounded-lg bg-purple-950/70 border border-purple-500/40 text-purple-300">Business Vault</span>
+          <span class="text-slate-500">➔</span>
+          <span class="px-3.5 py-1.5 rounded-lg bg-emerald-950/70 border border-emerald-500/40 text-emerald-300">Dimensional Marts</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SLIDE 16: LOOKING, DECIDING, LOADING       -->
+    <!-- ========================================== -->
+    <div class="slide flex-col justify-between w-full h-full max-w-[94vw] py-4 sm:py-8" data-act="2" data-title="Looking, Deciding, and Loading" data-notes="Slide 16: Deliver slide line: 'Looking, deciding, and loading are three different acts.' Explain: 'Harvest observes the live source. It does not rewrite the contract. The Schema Gate and Data Quality Gate decide whether this load wave is allowed to proceed. And the Update loads, then publishes back. A deliberate write is not a side effect of looking.'">
+      <div>
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-500/50 text-cyan-300 text-sm font-bold uppercase mb-3 glow-cyan">
+          The Law of Separation
+        </div>
+        <h2 class="text-5xl sm:text-7xl font-black text-white">
+          Three <span class="text-cyan-400">Different Acts</span>
+        </h2>
+      </div>
+
+      <div class="p-6 sm:p-8 rounded-3xl glass-panel border border-cyan-500/40 max-w-5xl w-full mx-auto my-2 glow-cyan text-center">
+        <p class="text-2xl sm:text-3xl lg:text-4xl font-serif italic text-cyan-100 leading-snug">
+          "Looking, deciding, and loading are three different acts. A deliberate write is not a side effect of looking."
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl w-full mx-auto my-auto">
+        <div class="p-8 rounded-2xl bg-slate-900/90 border border-blue-500/40 space-y-3 glow-cyan">
+          <div class="text-blue-400 font-mono text-base font-bold">ACT 1: HARVEST</div>
+          <div class="text-xl font-bold text-white">Observation Without Mutation</div>
+          <p class="text-base sm:text-lg text-slate-300 leading-relaxed">
+            Harvest scans live sources and records what they look like right now. It builds change history without silently rewriting downstream contracts.
+          </p>
+        </div>
+
+        <div class="p-8 rounded-2xl bg-slate-900/90 border border-amber-500/40 space-y-3 glow-amber">
+          <div class="text-amber-400 font-mono text-base font-bold">ACT 2: GATES</div>
+          <div class="text-xl font-bold text-white">Policy Enforcement</div>
+          <p class="text-base sm:text-lg text-slate-300 leading-relaxed">
+            Schema Drift Gate and Quality Gate evaluate whether this wave may load. If a column changed or quality rules fail, execution stops safely before corruption occurs.
+          </p>
+        </div>
+
+        <div class="p-8 rounded-2xl bg-slate-900/90 border border-emerald-500/40 space-y-3 glow-emerald">
+          <div class="text-emerald-400 font-mono text-base font-bold">ACT 3: UPDATE & PUBLISH</div>
+          <div class="text-xl font-bold text-white">Deliberate Write</div>
+          <p class="text-base sm:text-lg text-slate-300 leading-relaxed">
+            The update executes, loads targets, and publishes updated physical layouts back to the catalog as a conscious, auditable act.
+          </p>
+        </div>
+      </div>
+      <div></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SLIDE 17: SEEING AND FIXING IN SAME PLACE  -->
+    <!-- ========================================== -->
+    <div class="slide flex-col justify-between w-full h-full max-w-[94vw] py-4 sm:py-8" data-act="2" data-title="Seeing and Fixing in One Place" data-notes="Slide 17: The principle of Editability. The word that gets dropped in other products is 'EDIT'. You can see a drift in their catalog, but you can't fix it. In Hopper EDW, when a column widens, the system proposes a remediation. In 1 click, it expands the model AND issues the ALTER TABLE DDL. Seeing and fixing are unified.">
+      <div>
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-500/50 text-cyan-300 text-sm font-bold uppercase mb-3 glow-cyan">
+          The Editability Imperative
+        </div>
+        <h2 class="text-5xl sm:text-7xl font-black text-white mb-2">
+          Seeing & Fixing in the <span class="text-cyan-400">Same Place</span>
+        </h2>
+        <p class="text-xl sm:text-2xl text-slate-300 max-w-5xl">
+          Observability without editability is just an expensive alarm clock. An engineer must be able to remediate issues at the exact point of discovery.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl w-full mx-auto my-auto">
+        <div class="p-8 rounded-3xl glass-panel border border-red-500/30">
+          <div class="text-red-400 font-bold text-xl mb-4 flex items-center gap-2.5">
+            <span class="w-3.5 h-3.5 rounded-full bg-red-500"></span> The Disconnected World
+          </div>
+          <ol class="text-base sm:text-lg text-slate-200 space-y-3 list-decimal list-inside leading-relaxed">
+            <li>Catalog alerts: "Column length mismatch!"</li>
+            <li>Open Jira ticket, assign to data engineer</li>
+            <li>Engineer pulls Git repo for pipeline code</li>
+            <li>Engineer requests DBA permission for ALTER TABLE DDL</li>
+            <li>Engineer manually updates 3 pipeline mapping transforms</li>
+            <li>Re-test and deploy across 3 environments</li>
+          </ol>
+          <div class="mt-6 p-4 rounded-xl bg-red-950/60 text-red-200 text-base text-center font-mono font-bold">
+            Elapsed time: 2 days • Risk: Manual error
+          </div>
+        </div>
+
+        <div class="p-8 rounded-3xl glass-panel border border-emerald-500/40 glow-emerald">
+          <div class="text-emerald-400 font-bold text-xl mb-4 flex items-center gap-2.5">
+            <span class="w-3.5 h-3.5 rounded-full bg-emerald-500"></span> The Hopper EDW World
+          </div>
+          <ol class="text-base sm:text-lg text-slate-200 space-y-3 list-decimal list-inside leading-relaxed">
+            <li>Schema Gate flags: "Customer_tier length drifted"</li>
+            <li>System presents <strong>Remediation Proposal</strong> Dialog</li>
+            <li>Review proposed SQL: <code class="text-emerald-300 font-mono">ALTER TABLE VARCHAR(50)</code></li>
+            <li>Click <strong>[Apply Remediation]</strong></li>
+            <li>Model updated, DDL executed, pipelines stay valid</li>
+            <li>Load wave resumes immediately</li>
+          </ol>
+          <div class="mt-6 p-4 rounded-xl bg-emerald-950/60 text-emerald-200 text-base text-center font-mono font-bold">
+            Elapsed time: 30 seconds • 100% auditable
+          </div>
+        </div>
+      </div>
+      <div></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SLIDE 18: ACT 3 - SOLUTION TOUR INTRO      -->
+    <!-- ========================================== -->
+    <div class="slide flex-col items-center justify-between text-center w-full h-full max-w-[94vw] py-6 sm:py-8" data-act="3" data-title="Act 3: Solution Tour" data-notes="Act 3 begins. Introduce the live screenshots of Data Hopper EDW. Say: 'This is not vaporware. Everything I just described is built and shipping in the hopper-edw plugin for Apache Hop. Let's walk through the actual UI screenshots, from the unified Journey navigation to in-canvas operational telemetry.'">
+      <div>
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-950/80 border border-blue-500/50 text-blue-300 text-sm font-bold uppercase mb-4 glow-cyan">
+          Act 3: The Reality
+        </div>
+        <h2 class="text-5xl sm:text-7xl lg:text-8xl font-black text-white mb-4">
+          What We Built in <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-400">Hopper EDW</span>
+        </h2>
+        <p class="text-2xl sm:text-3xl text-slate-300 max-w-4xl mx-auto leading-relaxed">
+          A look inside the Apache Hop plugin providing state-of-the-art modeling, operations, and full-stack transparency.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-5xl w-full text-left my-auto">
+        <div class="p-6 rounded-2xl glass-panel border border-cyan-500/30 glow-cyan">
+          <div class="text-cyan-400 font-extrabold text-xl mb-2">01. Journey</div>
+          <div class="text-sm sm:text-base text-slate-300">Single pane of glass across all models & layers</div>
+        </div>
+        <div class="p-6 rounded-2xl glass-panel border border-amber-500/30 glow-amber">
+          <div class="text-amber-400 font-extrabold text-xl mb-2">02. Source Modeler</div>
+          <div class="text-sm sm:text-base text-slate-300">Solve edge cases at the source with JDBC driver</div>
+        </div>
+        <div class="p-6 rounded-2xl glass-panel border border-blue-500/30 glow-cyan">
+          <div class="text-blue-400 font-extrabold text-xl mb-2">03. Open Vault</div>
+          <div class="text-sm sm:text-base text-slate-300">Generated, inspectable, editable pipelines</div>
+        </div>
+        <div class="p-6 rounded-2xl glass-panel border border-emerald-500/30 glow-emerald">
+          <div class="text-emerald-400 font-extrabold text-xl mb-2">04. Ops Canvas</div>
+          <div class="text-sm sm:text-base text-slate-300">Durations and metrics right on canvas nodes</div>
+        </div>
+      </div>
+
+      <div>
+        <button onclick="nextSlide()" class="px-8 py-4 rounded-2xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-black text-lg sm:text-xl shadow-2xl shadow-cyan-900/50 flex items-center gap-3">
+          <span>Explore Screenshots</span>
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SLIDE 19: SOLUTION 1 - EDW JOURNEY         -->
+    <!-- ========================================== -->
+    <div class="slide flex-col justify-between w-full h-full max-w-[94vw] py-3 sm:py-6" data-act="3" data-title="Solution 1: The EDW Journey" data-notes="Screenshot 1: The EDW Journey Perspective. Explain: 'In Apache Hop GUI, there is one unified navigation sidebar: EDW Journey. In one tree, you have 1. Sources, 2. Controls, 3. Raw Data Vault, 4. Business Vault, 5. Dimensional Marts, 6. Workflows, and 7. Reports. You don't switch tools to switch layers.'">
+      <div class="flex items-center justify-between border-b border-white/10 pb-2">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-950/70 border border-cyan-500/40 text-cyan-400 text-sm font-mono font-bold glow-cyan">
+          SOLUTION 01 • UNIFIED NAVIGATION
+        </div>
+        <span class="text-sm font-semibold text-slate-300">The EDW Journey Perspective</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center my-auto">
+        <div class="lg:col-span-5 space-y-4">
+          <h3 class="text-3xl sm:text-5xl font-black text-white leading-tight">One Unified Spine Across All Layers</h3>
+          <p class="text-base sm:text-xl text-slate-200 leading-relaxed">
+            Instead of spreading models across disconnected files and folders, the <strong>EDW Journey</strong> groups your entire architecture into an orderly, single-click lifecycle:
+          </p>
+          <div class="space-y-2 text-sm sm:text-base text-slate-200 font-semibold">
+            <div class="p-3 rounded-xl bg-slate-900/90 border border-white/10 flex items-center gap-3">
+              <span class="w-3 h-3 rounded-full bg-amber-400"></span> <strong>1. Sources:</strong> Tables, JSON, Streams, Query models
+            </div>
+            <div class="p-3 rounded-xl bg-slate-900/90 border border-white/10 flex items-center gap-3">
+              <span class="w-3 h-3 rounded-full bg-cyan-400"></span> <strong>2. Controls:</strong> Schema harvest, validation gates, DQ
+            </div>
+            <div class="p-3 rounded-xl bg-slate-900/90 border border-white/10 flex items-center gap-3">
+              <span class="w-3 h-3 rounded-full bg-blue-400"></span> <strong>3. Raw Vault:</strong> Hubs, links, satellites
+            </div>
+            <div class="p-3 rounded-xl bg-slate-900/90 border border-white/10 flex items-center gap-3">
+              <span class="w-3 h-3 rounded-full bg-purple-400"></span> <strong>4. Business Vault:</strong> SCD2 timelines, PIT tables
+            </div>
+            <div class="p-3 rounded-xl bg-slate-900/90 border border-white/10 flex items-center gap-3">
+              <span class="w-3 h-3 rounded-full bg-emerald-400"></span> <strong>5. Dimensional:</strong> Star schemas, conformed dimensions
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-7">
+          <div class="p-3 rounded-3xl glass-panel border border-cyan-500/40 shadow-2xl cursor-pointer group glow-cyan" onclick="openLightbox('../images/diagrams/d7-edw-journey.svg', 'The EDW Journey Architecture')">
+            <img src="../images/diagrams/d7-edw-journey.svg" alt="EDW Journey Diagram" class="w-full h-auto rounded-2xl object-contain max-h-[60vh] bg-slate-950/70 p-4 group-hover:scale-[1.01] transition" />
+            <div class="text-xs sm:text-sm text-center text-slate-300 py-2 flex items-center justify-center gap-2">
+              <span>Click to enlarge architecture diagram</span>
+              <svg class="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SLIDE 20: SOLUTION 2 - SOURCE MODELER      -->
+    <!-- ========================================== -->
+    <div class="slide flex-col justify-between w-full h-full max-w-[94vw] py-3 sm:py-6" data-act="3" data-title="Solution 2: Source Modeler" data-notes="Screenshot 2: Source Modeler. Explain: 'We solve complex edge cases directly at the source. Streaming, JSON documents, legacy data types, custom SQL queries, and typing rules are all first-class objects in the Source Modeler. We even created a JDBC driver so external tools can query the source model directly!'">
+      <div class="flex items-center justify-between border-b border-white/10 pb-2">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-950/70 border border-amber-500/40 text-amber-400 text-sm font-mono font-bold glow-amber">
+          SOLUTION 02 • SOURCE MODELER & JDBC
+        </div>
+        <span class="text-sm font-semibold text-slate-300">Handling Real-World Complexity</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center my-auto">
+        <div class="lg:col-span-5 space-y-4">
+          <h3 class="text-3xl sm:text-5xl font-black text-white leading-tight">Edge-Cases Solved at the Source</h3>
+          <p class="text-base sm:text-xl text-slate-200 leading-relaxed">
+            No more unmanaged shadow bash scripts. Complex source extraction is modelled directly inside Hop:
+          </p>
+          <ul class="text-sm sm:text-lg text-slate-200 space-y-3 leading-relaxed">
+            <li class="flex items-start gap-2.5">
+              <span class="text-amber-400 font-extrabold text-xl">✓</span>
+              <span><strong>JSON & Pipeline Cards:</strong> Parse semi-structured feeds natively before raw vault loading.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="text-amber-400 font-extrabold text-xl">✓</span>
+              <span><strong>Data Typing Rules:</strong> Enforce explicit types and lengths on typeless sources (Iceberg, CSV, JSON).</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="text-amber-400 font-extrabold text-xl">✓</span>
+              <span><strong>Direct JDBC Driver:</strong> Query the Hopper source model from DBeaver or BI tools just like a database.</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="lg:col-span-7">
+          <div class="p-3 rounded-3xl glass-panel border border-amber-500/40 shadow-2xl cursor-pointer group glow-amber" onclick="openLightbox('../images/source-modeler-retail-example-with-query-dialog-generated-sql.png', 'Source Modeler with Query Dialog and Generated SQL')">
+            <img src="../images/source-modeler-retail-example-with-query-dialog-generated-sql.png" alt="Source Modeler with Query Dialog" class="w-full h-auto rounded-2xl object-contain max-h-[60vh] bg-slate-950/70 group-hover:scale-[1.01] transition" />
+            <div class="text-xs sm:text-sm text-center text-slate-300 py-2 flex items-center justify-center gap-2">
+              <span>Click to view Source Modeler with SQL Query & Explain Plan</span>
+              <svg class="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SLIDE 21: SOLUTION 3 - MODEL-DRIVEN VAULT  -->
+    <!-- ========================================== -->
+    <div class="slide flex-col justify-between w-full h-full max-w-[94vw] py-3 sm:py-6" data-act="3" data-title="Solution 3: Open Data Vault" data-notes="Screenshot 3: Model-Driven Data Vault. Crucial message: 'Generated, NOT hidden! We generate the load pipelines, the hash keys, and the DDL with one click. BUT it is not a black box! You click 'Show update pipeline', and Hop opens the standard, transparent, editable pipeline. Generation is allowed only because the result stays inspectable.'">
+      <div class="flex items-center justify-between border-b border-white/10 pb-2">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-950/70 border border-blue-500/40 text-blue-400 text-sm font-mono font-bold glow-cyan">
+          SOLUTION 03 • MODEL-DRIVEN VAULT
+        </div>
+        <span class="text-sm font-semibold text-slate-300">Generated, Not Hidden</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center my-auto">
+        <div class="lg:col-span-5 space-y-4">
+          <h3 class="text-3xl sm:text-5xl font-black text-white leading-tight">Full-Fledged Data Vault Modeler</h3>
+          <p class="text-base sm:text-xl text-slate-200 leading-relaxed">
+            Visual canvas for Hubs, Links, and Satellites. Automated generation that never hides the underlying engine:
+          </p>
+          <ul class="text-sm sm:text-lg text-slate-200 space-y-3 leading-relaxed">
+            <li class="flex items-start gap-2.5">
+              <span class="text-blue-400 font-extrabold text-xl">✓</span>
+              <span><strong>1-Click Pipeline Generation:</strong> Hub, Sat, and Link loaders created automatically according to Data Vault 2.0 standards.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="text-blue-400 font-extrabold text-xl">✓</span>
+              <span><strong>Inspectable Hop Pipelines:</strong> Open the pipeline with one click. Every transform, field mapping, and hash calculation is ordinary Hop code.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="text-blue-400 font-extrabold text-xl">✓</span>
+              <span><strong>Integrated Lineage Tab:</strong> Double-click any satellite to see exact parent hubs, source feeds, and downstream paths.</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="lg:col-span-7">
+          <div class="p-3 rounded-3xl glass-panel border border-blue-500/40 shadow-2xl cursor-pointer group glow-cyan" onclick="openLightbox('../images/data-vault-model-retail-360.png', 'Retail 360 Data Vault Model Canvas in Hop GUI')">
+            <img src="../images/data-vault-model-retail-360.png" alt="Data Vault Model Retail 360" class="w-full h-auto rounded-2xl object-contain max-h-[60vh] bg-slate-950/70 group-hover:scale-[1.01] transition" />
+            <div class="text-xs sm:text-sm text-center text-slate-300 py-2 flex items-center justify-center gap-2">
+              <span>Click to view Retail 360 Data Vault Model canvas</span>
+              <svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SLIDE 22: SOLUTION 4 - BUSINESS VAULT & MARTS -->
+    <!-- ========================================== -->
+    <div class="slide flex-col justify-between w-full h-full max-w-[94vw] py-3 sm:py-6" data-act="3" data-title="Solution 4: Business Vault & Marts" data-notes="Screenshot 4: Business Vault & Dimensional Models. Explain: 'Data Vault alone doesn't serve the business. Hopper EDW provides visual modeling for Business Vault (SCD2 timelines, Point-In-Time calculations, survivorship rules, bridge tables) and Dimensional Marts (conformed star schemas, date dimensions, fact tables). Everything remains in the same unified metadata context.'">
+      <div class="flex items-center justify-between border-b border-white/10 pb-2">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-purple-950/70 border border-purple-500/40 text-purple-400 text-sm font-mono font-bold glow-purple">
+          SOLUTION 04 • BUSINESS VAULT & MARTS
+        </div>
+        <span class="text-sm font-semibold text-slate-300">Bridging Vault to Consumption</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center my-auto">
+        <div class="lg:col-span-5 space-y-4">
+          <h3 class="text-3xl sm:text-5xl font-black text-white leading-tight">SCD2 Timelines & Star Schemas</h3>
+          <p class="text-base sm:text-xl text-slate-200 leading-relaxed">
+            Move seamlessly from normalized raw vault to business consumption without leaving Hop:
+          </p>
+          <ul class="text-sm sm:text-lg text-slate-200 space-y-3 leading-relaxed">
+            <li class="flex items-start gap-2.5">
+              <span class="text-purple-400 font-extrabold text-xl">✓</span>
+              <span><strong>Automated SCD2 Timelines:</strong> Point-In-Time (PIT) calculations with unit tests built into the model.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="text-purple-400 font-extrabold text-xl">✓</span>
+              <span><strong>dbt Model Import:</strong> Bring existing dbt SQL models directly into the Business Vault graph.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="text-purple-400 font-extrabold text-xl">✓</span>
+              <span><strong>Conformed Dimensions & Facts:</strong> Visual star schema modeling connected back to the vault lineage.</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="lg:col-span-7">
+          <div class="p-3 rounded-3xl glass-panel border border-purple-500/40 shadow-2xl cursor-pointer group glow-purple" onclick="openLightbox('../images/business-vault-model-customer-360.png', 'Customer 360 Business Vault Model')">
+            <img src="../images/business-vault-model-customer-360.png" alt="Business Vault Model Customer 360" class="w-full h-auto rounded-2xl object-contain max-h-[60vh] bg-slate-950/70 group-hover:scale-[1.01] transition" />
+            <div class="text-xs sm:text-sm text-center text-slate-300 py-2 flex items-center justify-center gap-2">
+              <span>Click to view Customer 360 Business Vault model</span>
+              <svg class="w-4 h-4 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SLIDE 23: SOLUTION 5 - OPERATIONS ON CANVAS -->
+    <!-- ========================================== -->
+    <div class="slide flex-col justify-between w-full h-full max-w-[94vw] py-3 sm:py-6" data-act="3" data-title="Solution 5: Operations on Canvas" data-notes="Screenshot 5: Operations on the Canvas. Key point: 'The canvas IS the operations surface. When a load finishes, execution metrics and last-run duration bars appear directly on the model nodes! Plus live stall detection, pipeline execution maps, and Gantt charts. No more silence!'">
+      <div class="flex items-center justify-between border-b border-white/10 pb-2">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-950/70 border border-emerald-500/40 text-emerald-400 text-sm font-mono font-bold glow-emerald">
+          SOLUTION 05 • IN-CANVAS TELEMETRY
+        </div>
+        <span class="text-sm font-semibold text-slate-300">The Canvas is the Operations Surface</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center my-auto">
+        <div class="lg:col-span-5 space-y-4">
+          <h3 class="text-3xl sm:text-5xl font-black text-white leading-tight">Live Metrics Right on the Model</h3>
+          <p class="text-base sm:text-xl text-slate-200 leading-relaxed">
+            Stop digging through terminal logs. Operations telemetry lives directly on the graphical entities you designed:
+          </p>
+          <ul class="text-sm sm:text-lg text-slate-200 space-y-3 leading-relaxed">
+            <li class="flex items-start gap-2.5">
+              <span class="text-emerald-400 font-extrabold text-xl">✓</span>
+              <span><strong>Duration Overlays:</strong> Last load times and row counts displayed right next to hub and sat cards.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="text-emerald-400 font-extrabold text-xl">✓</span>
+              <span><strong>Execution Gantt Maps:</strong> Visual concurrency timelines revealing exactly which transform lagged.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="text-emerald-400 font-extrabold text-xl">✓</span>
+              <span><strong>Active Stall Detection:</strong> Automatic advisory if a worker thread flatlines or waits on a database lock.</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="lg:col-span-7">
+          <div class="p-3 rounded-3xl glass-panel border border-emerald-500/40 shadow-2xl cursor-pointer group glow-emerald" onclick="openLightbox('../images/data-vault-retail-360-model-with-duration-metrics.png', 'Retail 360 Model with In-Canvas Duration Metrics')">
+            <img src="../images/data-vault-retail-360-model-with-duration-metrics.png" alt="Data Vault Retail 360 with Duration Metrics" class="w-full h-auto rounded-2xl object-contain max-h-[60vh] bg-slate-950/70 group-hover:scale-[1.01] transition" />
+            <div class="text-xs sm:text-sm text-center text-slate-300 py-2 flex items-center justify-center gap-2">
+              <span>Click to view Model Canvas with Duration Metrics Panel</span>
+              <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SLIDE 24: SOLUTION 6 - DRIFT & REMEDIATION -->
+    <!-- ========================================== -->
+    <div class="slide flex-col justify-between w-full h-full max-w-[94vw] py-3 sm:py-6" data-act="3" data-title="Solution 6: Drift & Remediation" data-notes="Screenshot 6: Schema Drift & 1-Click Remediation. Explain: 'Schema harvesting observes changes. When validation runs, if a column widened, the gate blocks execution safely, presents the exact remediation proposals, and applies the DDL and model expansion in 1 click. Seeing and fixing in the exact same tool.'">
+      <div class="flex items-center justify-between border-b border-white/10 pb-2">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-950/70 border border-cyan-500/40 text-cyan-400 text-sm font-mono font-bold glow-cyan">
+          SOLUTION 06 • GATES & REMEDIATION
+        </div>
+        <span class="text-sm font-semibold text-slate-300">Automated Remediation Workflow</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center my-auto">
+        <div class="lg:col-span-5 space-y-4">
+          <h3 class="text-3xl sm:text-5xl font-black text-white leading-tight">1-Click Drift Remediation</h3>
+          <p class="text-base sm:text-xl text-slate-200 leading-relaxed">
+            Turn dreaded 2 AM schema breaks into a controlled, automated governance workflow:
+          </p>
+          <ul class="text-sm sm:text-lg text-slate-200 space-y-3 leading-relaxed">
+            <li class="flex items-start gap-2.5">
+              <span class="text-cyan-400 font-extrabold text-xl">✓</span>
+              <span><strong>Schema Harvest:</strong> Captures live column definitions and tracks full change history.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="text-cyan-400 font-extrabold text-xl">✓</span>
+              <span><strong>Workflow Gate:</strong> Blocks load wave before corrupted data enters the warehouse.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="text-cyan-400 font-extrabold text-xl">✓</span>
+              <span><strong>Remediation Proposals:</strong> Automatically generates and applies target DDL modifications.</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="lg:col-span-7">
+          <div class="p-3 rounded-3xl glass-panel border border-cyan-500/40 shadow-2xl cursor-pointer group glow-cyan" onclick="openLightbox('../images/resource-definition-group-validation-remediation-proposals-dialog.png', 'Remediation Proposals Dialog in Hop GUI')">
+            <img src="../images/resource-definition-group-validation-remediation-proposals-dialog.png" alt="Validation Remediation Proposals Dialog" class="w-full h-auto rounded-2xl object-contain max-h-[60vh] bg-slate-950/70 group-hover:scale-[1.01] transition" />
+            <div class="text-xs sm:text-sm text-center text-slate-300 py-2 flex items-center justify-center gap-2">
+              <span>Click to view Remediation Proposals Dialog</span>
+              <svg class="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SLIDE 25: SOLUTION 7 - OPEN METADATA & AI  -->
+    <!-- ========================================== -->
+    <div class="slide flex-col justify-between w-full h-full max-w-[94vw] py-3 sm:py-6" data-act="3" data-title="Solution 7: Open Metadata & AI" data-notes="Screenshot 7: Open Lineage Bus & AI Advisor. Explain: 'We don't lock you in. Lineage can be exported directly to Marquez / OpenLineage. And we built in an AI Architecture Advisor that inspects your Data Vault models, explains complex link tables, and recommends performance tuning!'">
+      <div class="flex items-center justify-between border-b border-white/10 pb-2">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-purple-950/70 border border-purple-500/40 text-purple-400 text-sm font-mono font-bold glow-purple">
+          SOLUTION 07 • OPEN LINEAGE & AI COPILOT
+        </div>
+        <span class="text-sm font-semibold text-slate-300">Open Standards & Built-In Intelligence</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center my-auto">
+        <div class="lg:col-span-5 space-y-4">
+          <h3 class="text-3xl sm:text-5xl font-black text-white leading-tight">Open Metadata & In-Canvas AI</h3>
+          <p class="text-base sm:text-xl text-slate-200 leading-relaxed">
+            Transparency means open ecosystems. We don't trap your metadata inside a proprietary vault:
+          </p>
+          <ul class="text-sm sm:text-lg text-slate-200 space-y-3 leading-relaxed">
+            <li class="flex items-start gap-2.5">
+              <span class="text-purple-400 font-extrabold text-xl">✓</span>
+              <span><strong>Marquez & OpenLineage:</strong> Export end-to-end dataset and job lineage to enterprise catalogs.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="text-purple-400 font-extrabold text-xl">✓</span>
+              <span><strong>AI Architecture Advisor:</strong> On-demand LLM copilot that reviews models and advises on link structures.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="text-purple-400 font-extrabold text-xl">✓</span>
+              <span><strong>Performance Tuning Proposals:</strong> AI-driven recommendations for transform parallelism and batch sizing.</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="lg:col-span-7">
+          <div class="p-3 rounded-3xl glass-panel border border-purple-500/40 shadow-2xl cursor-pointer group glow-purple" onclick="openLightbox('../images/ai-advisor-offering-performance-tuning-advice.png', 'AI Advisor Offering Performance Tuning Advice in Hop GUI')">
+            <img src="../images/ai-advisor-offering-performance-tuning-advice.png" alt="AI Advisor Offering Performance Advice" class="w-full h-auto rounded-2xl object-contain max-h-[60vh] bg-slate-950/70 group-hover:scale-[1.01] transition" />
+            <div class="text-xs sm:text-sm text-center text-slate-300 py-2 flex items-center justify-center gap-2">
+              <span>Click to view AI Advisor Tuning Dialog</span>
+              <svg class="w-4 h-4 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SLIDE 26: ACT 4 - LIVE DEMO BLUEPRINT      -->
+    <!-- ========================================== -->
+    <div class="slide flex-col justify-between w-full h-full max-w-[94vw] py-3 sm:py-6" data-act="4" data-title="Act 4: 5-Minute Live Demo" data-notes="Act 4: Live Demo time! Switch to Hop GUI. Follow the 5-step runbook: 1. Journey tree (0:30), 2. Source model customer_address (0:45), 3. Data Vault sat_customer_address and click 'Show update pipeline' (1:15), 4. Satellite Lineage tab (1:00), 5. Canvas metrics pane (1:00). Then 30s wrap up!">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-emerald-950/80 border border-emerald-500/50 text-emerald-300 text-sm font-bold uppercase glow-emerald">
+          Act 4: Live Demonstration
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-3 px-4 py-1.5 rounded-xl bg-black/70 border border-emerald-500/40">
+            <span class="text-xs sm:text-sm text-slate-400 font-mono font-bold">TIMER:</span>
+            <span id="demo-clock" class="text-xl sm:text-2xl font-mono font-black text-emerald-400">05:00</span>
+          </div>
+          <button onclick="toggleDemoTimer()" id="demo-timer-btn" class="px-4 py-1.5 text-sm rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition">Start</button>
+          <button onclick="resetDemoTimer()" class="px-3 py-1.5 text-sm rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold transition">Reset</button>
+        </div>
+      </div>
+
+      <div class="my-2">
+        <h2 class="text-4xl sm:text-6xl font-black text-white mb-2">
+          5-Minute Live Demo: <span class="text-emerald-400">The Retail-360 Journey</span>
+        </h2>
+        <p class="text-base sm:text-xl text-slate-300">
+          Live walkthrough in Apache Hop GUI: tracing <code class="text-cyan-300 bg-slate-900 px-2 py-0.5 rounded font-mono font-bold">sat_customer_address</code> from source contract to generated pipeline to runtime telemetry.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-4 my-auto">
+        <div class="p-5 rounded-2xl bg-slate-900/90 border border-emerald-500/40 flex flex-col justify-between glow-emerald">
+          <div>
+            <div class="font-mono text-emerald-400 font-extrabold text-sm mb-1.5">STEP 1 • 0:30</div>
+            <div class="font-extrabold text-white text-base sm:text-lg mb-2">EDW Journey</div>
+            <p class="text-slate-300 text-sm leading-relaxed">Open sidebar. Point at Sources, Controls, Raw Vault. One unified spine.</p>
+          </div>
+          <div class="mt-4 text-xs text-slate-400 font-mono font-semibold">Hop GUI > EDW Journey</div>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slate-900/90 border border-emerald-500/40 flex flex-col justify-between glow-emerald">
+          <div>
+            <div class="font-mono text-emerald-400 font-extrabold text-sm mb-1.5">STEP 2 • 0:45</div>
+            <div class="font-extrabold text-white text-base sm:text-lg mb-2">Source Model</div>
+            <p class="text-slate-300 text-sm leading-relaxed">Open <code class="text-cyan-300">source-tables-crm.hsm</code>. Inspect customer_address card.</p>
+          </div>
+          <div class="mt-4 text-xs text-slate-400 font-mono font-semibold">models/source-tables-crm</div>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slate-900/90 border border-emerald-500/40 flex flex-col justify-between glow-emerald">
+          <div>
+            <div class="font-mono text-emerald-400 font-extrabold text-sm mb-1.5">STEP 3 • 1:15</div>
+            <div class="font-extrabold text-white text-base sm:text-lg mb-2">Inspect Pipeline</div>
+            <p class="text-slate-300 text-sm leading-relaxed">Open <code class="text-blue-300">retail-360.hdv</code>. Click sat icon: <em>Show update pipeline</em>.</p>
+          </div>
+          <div class="mt-4 text-xs text-slate-400 font-mono font-semibold">100% standard Hop code</div>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slate-900/90 border border-emerald-500/40 flex flex-col justify-between glow-emerald">
+          <div>
+            <div class="font-mono text-emerald-400 font-extrabold text-sm mb-1.5">STEP 4 • 1:00</div>
+            <div class="font-extrabold text-white text-base sm:text-lg mb-2">Lineage Tab</div>
+            <p class="text-slate-300 text-sm leading-relaxed">Double click sat name. Open Lineage tab. Point at parent hub and feed.</p>
+          </div>
+          <div class="mt-4 text-xs text-slate-400 font-mono font-semibold">Bidirectional context</div>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slate-900/90 border border-emerald-500/40 flex flex-col justify-between glow-emerald">
+          <div>
+            <div class="font-mono text-emerald-400 font-extrabold text-sm mb-1.5">STEP 5 • 0:30</div>
+            <div class="font-extrabold text-white text-base sm:text-lg mb-2">Ops on Canvas</div>
+            <p class="text-slate-300 text-sm leading-relaxed">Inspect right-hand duration pane. See last execution times and row counts.</p>
+          </div>
+          <div class="mt-4 text-xs text-slate-400 font-mono font-semibold">Silence solved!</div>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-black/60 border border-white/10 flex flex-wrap items-center justify-between text-sm sm:text-base text-slate-300 gap-3">
+        <span class="flex items-center gap-2.5">
+          <svg class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          <span><strong>Fallback Rule:</strong> If Hop GUI or Postgres misbehaves during a live talk, narrate the 5 steps over backup stills.</span>
+        </span>
+        <button onclick="openFallbackGallery()" class="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 font-semibold text-sm">Open Fallback Stills</button>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SLIDE 27: CONCLUSION & THE 3 GOLDEN LINES   -->
+    <!-- ========================================== -->
+    <div class="slide flex-col items-center justify-between text-center w-full h-full max-w-[94vw] py-6 sm:py-8" data-act="4" data-title="Conclusion: The Three Axioms" data-notes="Closing slide. Bring the house down with the 3 lines. Say them clearly: 1. If you can't see it, you can't own it. 2. Best tool for each job gives you the best parts. The engineer still needs the whole picture. 3. Looking, deciding, and loading are three different acts. Thank the audience, invite questions.">
+      <div>
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-500/50 text-cyan-300 text-sm font-bold uppercase mb-4 glow-cyan">
+          Final Takeaway
+        </div>
+        <h2 class="text-5xl sm:text-7xl lg:text-8xl font-black text-white mb-2">
+          Three Lines to Remember
+        </h2>
+      </div>
+
+      <div class="space-y-4 max-w-5xl w-full text-left my-auto">
+        <div class="p-6 sm:p-8 rounded-3xl glass-panel border border-cyan-500/50 glow-cyan flex items-start gap-6">
+          <div class="text-cyan-400 text-3xl sm:text-4xl font-black font-mono">01.</div>
+          <div>
+            <div class="text-2xl sm:text-3xl font-extrabold text-white mb-2">"If you can't see it, you can't own it."</div>
+            <p class="text-base sm:text-xl text-slate-200">Every layer, every object, every kind of metadata — one click away.</p>
+          </div>
+        </div>
+
+        <div class="p-6 sm:p-8 rounded-3xl glass-panel border border-blue-500/50 glow-cyan flex items-start gap-6">
+          <div class="text-blue-400 text-3xl sm:text-4xl font-black font-mono">02.</div>
+          <div>
+            <div class="text-2xl sm:text-3xl font-extrabold text-white mb-2">"Best tool for each job gives you the best parts. The engineer still needs the whole picture."</div>
+            <p class="text-base sm:text-xl text-slate-200">Specialist tools are consumers and producers of shared metadata, not closed silos.</p>
+          </div>
+        </div>
+
+        <div class="p-6 sm:p-8 rounded-3xl glass-panel border border-emerald-500/50 glow-emerald flex items-start gap-6">
+          <div class="text-emerald-400 text-3xl sm:text-4xl font-black font-mono">03.</div>
+          <div>
+            <div class="text-2xl sm:text-3xl font-extrabold text-white mb-2">"Looking, deciding, and loading are three different acts."</div>
+            <p class="text-base sm:text-xl text-slate-200">Harvest observes. Gates decide policy. Updates load and deliberately publish.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-center gap-4 text-sm sm:text-base text-slate-400">
+        <span>Project: <strong class="text-slate-100">ProjectDataHopper/hopper-edw</strong></span>
+        <span>•</span>
+        <span>Platform: <strong class="text-slate-100">Apache Hop</strong></span>
+        <span>•</span>
+        <span>Issue: <strong class="text-cyan-400">#190</strong></span>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- BOTTOM FOOTER / PROGRESS BAR -->
+  <footer class="h-16 border-t border-white/10 px-6 sm:px-10 flex items-center justify-between bg-slate-950/90 backdrop-blur z-30 shrink-0">
+    <div class="flex items-center gap-3 sm:gap-4">
+      <button onclick="prevSlide()" title="Previous Slide (Left Arrow)" class="p-2 sm:p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 transition">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+      </button>
+      <button onclick="nextSlide()" title="Next Slide (Right Arrow / Space)" class="p-2 sm:p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 transition">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+      </button>
+      <span id="slide-title-display" class="hidden md:inline text-sm font-semibold text-slate-300 max-w-md truncate">Title</span>
+    </div>
+
+    <!-- Center Progress Indicators -->
+    <div class="flex items-center gap-3">
+      <div class="w-40 sm:w-80 bg-slate-800 rounded-full h-2 overflow-hidden">
+        <div id="slide-progress-bar" class="bg-gradient-to-r from-cyan-500 to-blue-500 h-2 rounded-full transition-all duration-300" style="width: 3.7%"></div>
+      </div>
+      <span id="slide-counter" class="text-sm font-mono font-bold text-slate-300 min-w-[60px] text-right">01 / 27</span>
+    </div>
+  </footer>
+
+  <!-- PRESENTER NOTES DRAWER -->
+  <div id="notes-drawer" class="fixed bottom-16 right-6 max-w-lg w-full p-6 rounded-3xl glass-panel border border-cyan-500/50 shadow-2xl z-40 hidden transition-all">
+    <div class="flex items-center justify-between border-b border-white/10 pb-3 mb-3">
+      <div class="flex items-center gap-2 text-sm font-extrabold text-cyan-400">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        <span>SPEAKER NOTES</span>
+      </div>
+      <button onclick="toggleNotes()" class="text-slate-400 hover:text-white text-sm font-bold">✕ Close [P]</button>
+    </div>
+    <div id="notes-content" class="text-sm sm:text-base text-slate-200 leading-relaxed max-h-72 overflow-y-auto space-y-3 font-sans">
+      Loading notes...
+    </div>
+  </div>
+
+  <!-- LIGHTBOX MODAL FOR SCREENSHOTS -->
+  <div id="lightbox-modal" class="fixed inset-0 bg-black/95 backdrop-blur-md z-50 hidden flex-col items-center justify-center p-4">
+    <div class="w-full max-w-7xl flex items-center justify-between pb-3 text-white">
+      <span id="lightbox-caption" class="text-base font-bold truncate text-cyan-300">Screenshot Caption</span>
+      <button onclick="closeLightbox()" class="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sm text-slate-200 border border-slate-700 font-semibold">Close [Esc]</button>
+    </div>
+    <div class="max-w-7xl max-h-[88vh] w-full flex items-center justify-center overflow-auto p-2 bg-slate-950/80 rounded-3xl border border-white/10">
+      <img id="lightbox-img" src="" alt="Enlarged screenshot" class="max-h-[84vh] max-w-full object-contain rounded-2xl shadow-2xl" />
+    </div>
+  </div>
+
+  <!-- GRID OVERVIEW MODAL -->
+  <div id="grid-modal" class="fixed inset-0 bg-black/95 backdrop-blur-md z-50 hidden flex-col p-6 sm:p-10 overflow-y-auto">
+    <div class="flex items-center justify-between pb-4 border-b border-white/10 mb-6">
+      <h3 class="text-xl font-extrabold text-white flex items-center gap-3">
+        <span>Slide Matrix Overview</span>
+        <span class="text-sm text-slate-400 font-mono font-normal">(Click any slide to jump)</span>
+      </h3>
+      <button onclick="toggleGridOverview()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sm text-slate-200 font-semibold">Close [Esc]</button>
+    </div>
+    <div id="grid-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      <!-- Injected by JavaScript -->
+    </div>
+  </div>
+
+  <!-- SCRIPT ENGINE -->
+  <script>
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    let currentSlide = 0;
+    let firehoseInterval = null;
+    let demoTimerInterval = null;
+    let demoSeconds = 300; // 5 minutes
+    let zoomLevel = 1.0;
+
+    function adjustZoom(delta) {
+      zoomLevel = Math.max(0.7, Math.min(1.5, Math.round((zoomLevel + delta) * 10) / 10));
+      document.documentElement.style.setProperty('--slide-zoom', zoomLevel);
+      document.getElementById('zoom-label').textContent = `${Math.round(zoomLevel * 100)}%`;
+    }
+
+    function resetZoom() {
+      zoomLevel = 1.0;
+      document.documentElement.style.setProperty('--slide-zoom', zoomLevel);
+      document.getElementById('zoom-label').textContent = `100%`;
+    }
+
+    function updateSlide() {
+      slides.forEach((s, idx) => {
+        s.classList.toggle('active', idx === currentSlide);
+      });
+
+      const current = slides[currentSlide];
+      const act = current.getAttribute('data-act');
+      const title = current.getAttribute('data-title') || `Slide ${currentSlide + 1}`;
+      const notes = current.getAttribute('data-notes') || 'No specific notes for this slide.';
+
+      // Update counters & title
+      document.getElementById('slide-counter').textContent = `${String(currentSlide + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+      document.getElementById('slide-title-display').textContent = title;
+      document.getElementById('slide-progress-bar').style.width = `${((currentSlide + 1) / slides.length) * 100}%`;
+      document.getElementById('notes-content').textContent = notes;
+
+      // Update act buttons
+      [1, 2, 3, 4].forEach(a => {
+        const btn = document.getElementById(`act-btn-${a}`);
+        if (btn) {
+          if (String(a) === act) {
+            btn.className = "text-sm px-3.5 py-1 rounded-md transition font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40";
+          } else {
+            btn.className = "text-sm px-3.5 py-1 rounded-md transition font-semibold text-slate-400 hover:text-slate-100 hover:bg-white/5";
+          }
+        }
+      });
+    }
+
+    function nextSlide() {
+      if (currentSlide < slides.length - 1) {
+        currentSlide++;
+        updateSlide();
+      } else if (firehoseInterval) {
+        stopFirehoseMode();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    function jumpToSlide(idx) {
+      if (idx >= 0 && idx < slides.length) {
+        currentSlide = idx;
+        updateSlide();
+        closeGridOverview();
+      }
+    }
+
+    function jumpToAct(actNum) {
+      const idx = slides.findIndex(s => s.getAttribute('data-act') === String(actNum));
+      if (idx !== -1) {
+        jumpToSlide(idx);
+      }
+    }
+
+    // Firehose Auto-Run mode
+    function toggleFirehoseMode() {
+      if (firehoseInterval) {
+        stopFirehoseMode();
+      } else {
+        startFirehoseMode();
+      }
+    }
+
+    function startFirehoseMode() {
+      if (currentSlide < 2 || currentSlide > 12) {
+        jumpToSlide(2);
+      }
+      document.getElementById('firehose-play-text').textContent = "Pulsing Firehose...";
+      document.getElementById('firehose-play-btn').classList.add('bg-red-600', 'text-white', 'staccato-pulse');
+      
+      firehoseInterval = setInterval(() => {
+        if (currentSlide >= 12) {
+          stopFirehoseMode();
+        } else {
+          nextSlide();
+        }
+      }, 4200); // 4.2 seconds per firehose beat
+    }
+
+    function stopFirehoseMode() {
+      if (firehoseInterval) {
+        clearInterval(firehoseInterval);
+        firehoseInterval = null;
+      }
+      document.getElementById('firehose-play-text').textContent = "Firehose Mode";
+      document.getElementById('firehose-play-btn').classList.remove('bg-red-600', 'text-white', 'staccato-pulse');
+    }
+
+    // Speaker Notes
+    function toggleNotes() {
+      const drawer = document.getElementById('notes-drawer');
+      drawer.classList.toggle('hidden');
+    }
+
+    // Fullscreen
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    // Lightbox
+    function openLightbox(src, caption) {
+      const modal = document.getElementById('lightbox-modal');
+      const img = document.getElementById('lightbox-img');
+      const cap = document.getElementById('lightbox-caption');
+      img.src = src;
+      cap.textContent = caption;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeLightbox() {
+      const modal = document.getElementById('lightbox-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // Fallback stills modal
+    function openFallbackGallery() {
+      openLightbox('../images/data-vault-retail-360-model-with-duration-metrics.png', 'Fallback Still: Retail-360 Model with In-Canvas Durations');
+    }
+
+    // Grid Overview
+    function toggleGridOverview() {
+      const modal = document.getElementById('grid-modal');
+      if (modal.classList.contains('hidden')) {
+        renderGrid();
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      } else {
+        closeGridOverview();
+      }
+    }
+
+    function closeGridOverview() {
+      const modal = document.getElementById('grid-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function renderGrid() {
+      const container = document.getElementById('grid-container');
+      container.innerHTML = '';
+      slides.forEach((s, idx) => {
+        const title = s.getAttribute('data-title') || `Slide ${idx + 1}`;
+        const act = s.getAttribute('data-act');
+        const card = document.createElement('div');
+        const isCurrent = idx === currentSlide;
+        card.className = `p-4 rounded-2xl border text-left cursor-pointer transition ${
+          isCurrent 
+            ? 'bg-cyan-950/70 border-cyan-400 ring-2 ring-cyan-400 shadow-xl' 
+            : 'bg-slate-900 border-white/10 hover:border-slate-400'
+        }`;
+        card.onclick = () => jumpToSlide(idx);
+        card.innerHTML = `
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold text-slate-400">#${String(idx + 1).padStart(2, '0')}</span>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono font-semibold">Act ${act}</span>
+          </div>
+          <div class="text-sm font-bold text-slate-200 line-clamp-2">${title}</div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // 5-Minute Demo Countdown
+    function toggleDemoTimer() {
+      const btn = document.getElementById('demo-timer-btn');
+      if (demoTimerInterval) {
+        clearInterval(demoTimerInterval);
+        demoTimerInterval = null;
+        btn.textContent = "Resume";
+        btn.className = "px-4 py-1.5 text-sm rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold transition";
+      } else {
+        btn.textContent = "Pause";
+        btn.className = "px-4 py-1.5 text-sm rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold transition";
+        demoTimerInterval = setInterval(() => {
+          if (demoSeconds > 0) {
+            demoSeconds--;
+            updateDemoClockDisplay();
+          } else {
+            clearInterval(demoTimerInterval);
+            demoTimerInterval = null;
+            btn.textContent = "Time Up!";
+          }
+        }, 1000);
+      }
+    }
+
+    function resetDemoTimer() {
+      if (demoTimerInterval) {
+        clearInterval(demoTimerInterval);
+        demoTimerInterval = null;
+      }
+      demoSeconds = 300;
+      updateDemoClockDisplay();
+      const btn = document.getElementById('demo-timer-btn');
+      btn.textContent = "Start";
+      btn.className = "px-4 py-1.5 text-sm rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition";
+    }
+
+    function updateDemoClockDisplay() {
+      const mins = Math.floor(demoSeconds / 60);
+      const secs = demoSeconds % 60;
+      document.getElementById('demo-clock').textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    // Keyboard navigation
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'Backspace') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key === 'p' || e.key === 'P') {
+        e.preventDefault();
+        toggleNotes();
+      } else if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        toggleFullscreen();
+      } else if (e.key === 'g' || e.key === 'G') {
+        e.preventDefault();
+        toggleGridOverview();
+      } else if (e.key === '+' || e.key === '=') {
+        adjustZoom(0.1);
+      } else if (e.key === '-' || e.key === '_') {
+        adjustZoom(-0.1);
+      } else if (e.key === '0') {
+        resetZoom();
+      } else if (e.key === 'Escape') {
+        closeLightbox();
+        closeGridOverview();
+      } else if (e.key === 'Home') {
+        jumpToSlide(0);
+      } else if (e.key === 'End') {
+        jumpToSlide(slides.length - 1);
+      }
+    });
+
+    // Initialize
+    updateSlide();
+  </script>
+</body>
+</html>

@@ -33,7 +33,7 @@ limitations under the License.
       <includeHashKey>Y</includeHashKey>
       <includeHubBusinessKeys>Y</includeHubBusinessKeys>
       <parentHubName>hub_customer</parentHubName>
-      <sourceCalendarName>Oracle-Kafka-Calendar</sourceCalendarName>
+      <sourceCalendarName/>
       <identityMapName/>
       <hubBusinessKeysCalculationOnly>N</hubBusinessKeysCalculationOnly>
       <field_mappings>

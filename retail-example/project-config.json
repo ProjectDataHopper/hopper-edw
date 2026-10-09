@@ -3,6 +3,76 @@
   "unitTestsBasePath" : "${PROJECT_HOME}",
   "dataSetsCsvFolder" : "${PROJECT_HOME}/datasets",
   "enforcingExecutionInHome" : true,
+  "autoExportMetadataFilename" : "metadata.json",
+  "embeddedEnvironments" : [ {
+    "name" : "retail-example-docker-postgres",
+    "variables" : [ {
+      "name" : "DB_HOST",
+      "defaultValue" : "localhost",
+      "description" : "Local Docker PostgreSQL (host network from run-hop.sh)",
+      "mandatory" : true
+    }, {
+      "name" : "DB_PORT",
+      "defaultValue" : "54320",
+      "description" : "PostgreSQL port (non-default to avoid collision with host PostgreSQL on 5432)",
+      "mandatory" : true
+    }, {
+      "name" : "DB_USER",
+      "defaultValue" : "test",
+      "description" : "PostgreSQL username",
+      "mandatory" : true
+    }, {
+      "name" : "DB_PASSWORD",
+      "description" : "PostgreSQL password",
+      "mandatory" : true,
+      "secret" : true
+    }, {
+      "name" : "DB_SOURCE_NAME",
+      "defaultValue" : "test_source",
+      "description" : "PostgreSQL database for CRM source landing tables",
+      "mandatory" : true
+    }, {
+      "name" : "DB_TARGET_NAME",
+      "defaultValue" : "test_edw",
+      "description" : "PostgreSQL database for Data Vault / Business Vault / dimensional targets",
+      "mandatory" : true
+    }, {
+      "name" : "DB_OPS_NAME",
+      "defaultValue" : "test_ops",
+      "description" : "PostgreSQL database for execution metrics / load-run operations tables",
+      "mandatory" : true
+    }, {
+      "name" : "OUTPUT_COPIES",
+      "defaultValue" : "2",
+      "description" : "Number of data load threads",
+      "mandatory" : true
+    }, {
+      "name" : "MARQUEZ_API",
+      "defaultValue" : "http://localhost:5001/api/v1/lineage",
+      "description" : "Export data lineage HTTP POST URL (one RunEvent per request)",
+      "mandatory" : true
+    }, {
+      "name" : "MARQUEZ_BASE_URL",
+      "defaultValue" : "http://localhost:5001",
+      "description" : "Marquez host root for Hop Lineage View backends (no /api/v1/lineage)",
+      "mandatory" : true
+    }, {
+      "name" : "MARQUEZ_NAMESPACE_DATASET",
+      "defaultValue" : "retail-dataset",
+      "description" : "The namespace to use in Marquez",
+      "mandatory" : true
+    }, {
+      "name" : "MARQUEZ_NAMESPACE_JOB",
+      "defaultValue" : "retail-job",
+      "description" : "The namespace to use in Marquez",
+      "mandatory" : true
+    }, {
+      "name" : "EXECUTIONS_FOLDER",
+      "defaultValue" : "${java.io.tmpdir}/executions",
+      "description" : "Where to send/find the executions",
+      "mandatory" : true
+    } ]
+  } ],
   "config" : {
     "variables" : [ {
       "name" : "HOP_LICENSE_HEADER_FILE",

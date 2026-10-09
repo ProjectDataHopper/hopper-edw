@@ -22,7 +22,7 @@ limitations under the License.
   <created_user>-</created_user>
   <modified_user>-</modified_user>
   <created_date>2026/07/01 00:00:00.000</created_date>
-  <modified_date>2026/07/01 00:00:00.000</modified_date>
+  <modified_date>2026/10/09 22:20:22.286</modified_date>
   <created_hop_version/>
   <modified_hop_version>2.20.0-SNAPSHOT</modified_hop_version>
   <workflow_version/>
@@ -58,8 +58,8 @@ limitations under the License.
       <description/>
       <type>SPECIAL</type>
       <attributes/>
-      <xloc>96</xloc>
-      <yloc>32</yloc>
+      <xloc>64</xloc>
+      <yloc>64</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
@@ -77,8 +77,8 @@ limitations under the License.
       <name>Generate initial execution map</name>
       <type>GENERATE_EXECUTION_MAP</type>
       <attributes/>
-      <xloc>640</xloc>
-      <yloc>144</yloc>
+      <xloc>608</xloc>
+      <yloc>192</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
@@ -91,8 +91,8 @@ limitations under the License.
       <description/>
       <type>PING</type>
       <attributes/>
-      <xloc>224</xloc>
-      <yloc>32</yloc>
+      <xloc>192</xloc>
+      <yloc>64</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
@@ -118,8 +118,8 @@ limitations under the License.
       <description/>
       <type>CHECK_DB_CONNECTIONS</type>
       <attributes/>
-      <xloc>416</xloc>
-      <yloc>32</yloc>
+      <xloc>384</xloc>
+      <yloc>64</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
@@ -141,8 +141,8 @@ limitations under the License.
       <description/>
       <type>WORKFLOW</type>
       <attributes/>
-      <xloc>224</xloc>
-      <yloc>144</yloc>
+      <xloc>192</xloc>
+      <yloc>192</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
@@ -177,8 +177,8 @@ limitations under the License.
       <description/>
       <type>WORKFLOW</type>
       <attributes/>
-      <xloc>416</xloc>
-      <yloc>144</yloc>
+      <xloc>384</xloc>
+      <yloc>192</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
@@ -194,8 +194,8 @@ limitations under the License.
       <description/>
       <type>EXPORT_ARCHITECTURE</type>
       <attributes/>
-      <xloc>640</xloc>
-      <yloc>224</yloc>
+      <xloc>608</xloc>
+      <yloc>288</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
@@ -244,6 +244,31 @@ limitations under the License.
       <enabled>Y</enabled>
     </hop>
   </hops>
-  <notepads/>
+  <notepads>
+    <notepad>
+      <note>Run the __update__ workflow next:
+
+[run-retail-update.hwf](run-retail-update.hwf)</note>
+      <markdown>Y</markdown>
+      <notetype>INFORMATION</notetype>
+      <fontname>Noto Sans</fontname>
+      <fontsize>9</fontsize>
+      <fontbold>N</fontbold>
+      <fontitalic>N</fontitalic>
+      <fontcolorred>200</fontcolorred>
+      <fontcolorgreen>231</fontcolorgreen>
+      <fontcolorblue>250</fontcolorblue>
+      <backgroundcolorred>15</backgroundcolorred>
+      <backgroundcolorgreen>136</backgroundcolorgreen>
+      <backgroundcolorblue>210</backgroundcolorblue>
+      <bordercolorred>200</bordercolorred>
+      <bordercolorgreen>231</bordercolorgreen>
+      <bordercolorblue>250</bordercolorblue>
+      <xloc>144</xloc>
+      <yloc>352</yloc>
+      <width>320</width>
+      <height>64</height>
+    </notepad>
+  </notepads>
   <attributes/>
 </workflow>
