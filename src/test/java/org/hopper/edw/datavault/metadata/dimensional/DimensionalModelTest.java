@@ -76,7 +76,10 @@ class DimensionalModelTest {
     DmFact fact = new DmFact();
     fact.setName("fact_sales");
     fact.setTableName("f_sales");
-    fact.getDimensionRoles().add(new DmFactDimensionRole("dim_product", "Product", "product_key"));
+    DmFactDimensionRole productRole =
+        new DmFactDimensionRole("dim_product", "Product", "product_key");
+    productRole.setLookupCopies("${FACT_LOOKUP_COPIES}");
+    fact.getDimensionRoles().add(productRole);
     fact.getMeasures().add(new DmFactMeasure("amount", true));
     original.getTables().add(fact);
     DmDimension dimension = new DmDimension();
@@ -105,6 +108,12 @@ class DimensionalModelTest {
     assertEquals(DmTableType.DIMENSION, restored.getTables().get(1).getTableType());
     assertEquals("dim_product", restored.getTables().get(1).getName());
     assertEquals(1, ((DmFact) restored.getTables().get(0)).getDimensionRolesOrEmpty().size());
+    assertEquals(
+        "${FACT_LOOKUP_COPIES}",
+        ((DmFact) restored.getTables().get(0))
+            .getDimensionRolesOrEmpty()
+            .get(0)
+            .getLookupCopies());
     assertEquals(1, ((DmDimension) restored.getTables().get(1)).getNaturalKeysOrEmpty().size());
   }
 }

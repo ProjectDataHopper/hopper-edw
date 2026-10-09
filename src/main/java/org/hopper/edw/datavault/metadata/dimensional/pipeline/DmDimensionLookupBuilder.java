@@ -91,6 +91,7 @@ public final class DmDimensionLookupBuilder {
 
     String transformName = DmFactDimensionJoinBuilder.resolveLookupTransformName(role, dimension);
     TransformMeta tm = new TransformMeta("DimensionLookup", transformName, lookupMeta);
+    tm.setCopiesString(role.resolveLookupCopies());
     tm.setLocation(
         predecessor.getLocation().x + DmPipelineBuilderSupport.SPACING_WIDTH,
         predecessor.getLocation().y);

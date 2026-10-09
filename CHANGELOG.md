@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Fact dimension lookup copies (issue #194)
+
+- The fact **Dimension joins** tab has a **Copies** column. Empty means one copy of the generated Dimension Lookup, or of the date-key transforms when the join truncates to a date key. A variable expression is stored on that transform and resolved when the update pipeline runs. Date joins that use different copy counts are generated as separate transforms. Skipped lookups ignore the value.
+
 ## [0.11.0] — 2026-10-04
 
 Requires **Apache Hop 2.20.0-SNAPSHOT** and **Java 21**.

@@ -18,6 +18,7 @@ package org.hopper.edw.datavault.metadata.dimensional;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.hop.core.util.Utils;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 
 /** Fact-to-dimension join: target dimension, source stream field, and fact foreign key column. */
@@ -51,6 +52,21 @@ public class DmFactDimensionRole {
    * apply automatically.
    */
   @HopMetadataProperty private boolean forceDimensionLookup;
+
+  /**
+   * Copies of the generated Dimension Lookup. Empty means one copy. A variable expression is stored
+   * unresolved and substituted when the update pipeline runs.
+   */
+  @HopMetadataProperty private String lookupCopies;
+
+  /** Copies string for the generated Dimension Lookup. Empty or blank means {@code 1}. */
+  public String resolveLookupCopies() {
+    if (Utils.isEmpty(lookupCopies)) {
+      return "1";
+    }
+    String trimmed = lookupCopies.trim();
+    return trimmed.isEmpty() ? "1" : trimmed;
+  }
 
   public DmFactDimensionRole(String dimensionTableName, String foreignKeyColumn) {
     this.dimensionTableName = dimensionTableName;

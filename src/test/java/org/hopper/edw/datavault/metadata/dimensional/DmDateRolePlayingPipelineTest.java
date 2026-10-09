@@ -33,6 +33,7 @@ import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.apache.hop.pipeline.PipelineMeta;
+import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transforms.calculator.CalculatorMeta;
 import org.apache.hop.pipeline.transforms.dimensionlookup.DimensionLookupMeta;
 import org.apache.hop.pipeline.transforms.selectvalues.SelectMetadataChange;
@@ -149,6 +150,54 @@ class DmDateRolePlayingPipelineTest {
   }
 
   @Test
+  void dateKeyTransformsUseTheCopiesFromEachRole() throws Exception {
+    DimensionalModel model = loadDateRolePlayingModel();
+    DmFact fact = (DmFact) model.findTable("fact_orders");
+    fact.getDimensionRoles().get(0).setLookupCopies("2");
+    fact.getDimensionRoles().get(1).setLookupCopies("4");
+
+    PipelineMeta pipelineMeta =
+        fact.generateUpdatePipelines(testMetadataProvider(), new Variables(), model, new Date())
+            .get(0);
+
+    TransformMeta firstFormat = findTransform(pipelineMeta, "date_keys_format_1");
+    TransformMeta firstInt = findTransform(pipelineMeta, "date_keys_int_1");
+    TransformMeta secondFormat = findTransform(pipelineMeta, "date_keys_format_2");
+    TransformMeta secondInt = findTransform(pipelineMeta, "date_keys_int_2");
+    assertEquals("2", firstFormat.getCopiesString());
+    assertEquals("2", firstInt.getCopiesString());
+    assertEquals("4", secondFormat.getCopiesString());
+    assertEquals("4", secondInt.getCopiesString());
+
+    SelectValuesMeta firstFormatMeta = (SelectValuesMeta) firstFormat.getTransform();
+    SelectValuesMeta secondFormatMeta = (SelectValuesMeta) secondFormat.getTransform();
+    assertEquals("order_date", firstFormatMeta.getSelectOption().getSelectFields().get(0).getName());
+    assertEquals(
+        "shipping_date", secondFormatMeta.getSelectOption().getSelectFields().get(0).getName());
+  }
+
+  @Test
+  void sharedDateKeyCopiesStayOnOneTransformPair() throws Exception {
+    DimensionalModel model = loadDateRolePlayingModel();
+    DmFact fact = (DmFact) model.findTable("fact_orders");
+    for (DmFactDimensionRole role : fact.getDimensionRoles()) {
+      role.setLookupCopies("2");
+    }
+
+    PipelineMeta pipelineMeta =
+        fact.generateUpdatePipelines(testMetadataProvider(), new Variables(), model, new Date())
+            .get(0);
+
+    assertEquals("2", findTransform(pipelineMeta, "date_keys_format").getCopiesString());
+    assertEquals("2", findTransform(pipelineMeta, "date_keys_int").getCopiesString());
+    assertEquals(
+        1,
+        pipelineMeta.getTransforms().stream()
+            .filter(t -> t.getName().startsWith("date_keys_format"))
+            .count());
+  }
+
+  @Test
   void legacyRoleNameOnDateRoleDoesNotCreateLookupTransform() throws Exception {
     DimensionalModel model = loadDateRolePlayingModel();
     DmFact fact = (DmFact) model.findTable("fact_orders");
@@ -174,6 +223,13 @@ class DmDateRolePlayingPipelineTest {
     assertEquals(2, ordered.size());
     assertEquals("dim_date", ordered.get(0).getName());
     assertEquals("fact_orders", ordered.get(1).getName());
+  }
+
+  private static TransformMeta findTransform(PipelineMeta pipelineMeta, String name) {
+    return pipelineMeta.getTransforms().stream()
+        .filter(transform -> name.equals(transform.getName()))
+        .findFirst()
+        .orElseThrow();
   }
 
   private static void assertStringDateKeyMeta(SelectMetadataChange change, String fieldName) {

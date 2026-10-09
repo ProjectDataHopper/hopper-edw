@@ -31,6 +31,7 @@ limitations under the License.
           <preloadLookupCache>Y</preloadLookupCache>
           <skipDimensionLookup>N</skipDimensionLookup>
           <forceDimensionLookup>N</forceDimensionLookup>
+          <lookupCopies>2</lookupCopies>
         </dimension_role>
         <dimension_role>
           <dimensionTableName>d_customer</dimensionTableName>
@@ -40,6 +41,7 @@ limitations under the License.
           <preloadLookupCache>Y</preloadLookupCache>
           <skipDimensionLookup>N</skipDimensionLookup>
           <forceDimensionLookup>N</forceDimensionLookup>
+          <lookupCopies>2</lookupCopies>
         </dimension_role>
         <dimension_role>
           <dimensionTableName>d_order_date</dimensionTableName>
@@ -49,6 +51,7 @@ limitations under the License.
           <preloadLookupCache>N</preloadLookupCache>
           <skipDimensionLookup>N</skipDimensionLookup>
           <forceDimensionLookup>N</forceDimensionLookup>
+          <lookupCopies>2</lookupCopies>
         </dimension_role>
         <dimension_role>
           <dimensionTableName>d_shipping_date</dimensionTableName>
@@ -58,6 +61,7 @@ limitations under the License.
           <preloadLookupCache>N</preloadLookupCache>
           <skipDimensionLookup>N</skipDimensionLookup>
           <forceDimensionLookup>N</forceDimensionLookup>
+          <lookupCopies>2</lookupCopies>
         </dimension_role>
         <dimension_role>
           <dimensionTableName>d_delivery_date</dimensionTableName>
@@ -67,6 +71,7 @@ limitations under the License.
           <preloadLookupCache>N</preloadLookupCache>
           <skipDimensionLookup>N</skipDimensionLookup>
           <forceDimensionLookup>N</forceDimensionLookup>
+          <lookupCopies>2</lookupCopies>
         </dimension_role>
       </dimension_roles>
       <measures>

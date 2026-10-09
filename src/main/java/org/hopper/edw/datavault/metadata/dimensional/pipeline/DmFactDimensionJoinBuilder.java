@@ -16,7 +16,9 @@
 package org.hopper.edw.datavault.metadata.dimensional.pipeline;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.value.ValueMetaFactory;
@@ -260,15 +262,40 @@ public final class DmFactDimensionJoinBuilder {
       if (Utils.isEmpty(fkColumn)) {
         continue;
       }
-      mappings.add(new DateKeyMapping(sourceField, fkColumn));
+      mappings.add(new DateKeyMapping(sourceField, fkColumn, role.resolveLookupCopies()));
     }
 
     if (mappings.isEmpty()) {
       return predecessor;
     }
 
-    predecessor = addDateKeyFormatSelectValues(ctx, pipelineMeta, predecessor, mappings);
-    return addDateKeyIntegerSelectValues(ctx, pipelineMeta, predecessor, mappings);
+    Map<String, List<DateKeyMapping>> grouped = new LinkedHashMap<>();
+    for (DateKeyMapping mapping : mappings) {
+      grouped.computeIfAbsent(mapping.copies(), key -> new ArrayList<>()).add(mapping);
+    }
+    boolean uniqueNames = grouped.size() > 1;
+    int groupIndex = 1;
+    for (Map.Entry<String, List<DateKeyMapping>> entry : grouped.entrySet()) {
+      String suffix = uniqueNames ? "_" + groupIndex : "";
+      predecessor =
+          addDateKeyFormatSelectValues(
+              ctx,
+              pipelineMeta,
+              predecessor,
+              entry.getValue(),
+              DATE_KEYS_FORMAT_TRANSFORM + suffix,
+              entry.getKey());
+      predecessor =
+          addDateKeyIntegerSelectValues(
+              ctx,
+              pipelineMeta,
+              predecessor,
+              entry.getValue(),
+              DATE_KEYS_INT_TRANSFORM + suffix,
+              entry.getKey());
+      groupIndex++;
+    }
+    return predecessor;
   }
 
   public static List<DimensionLookupMeta.DLKey> buildFactLookupKeys(
@@ -312,7 +339,9 @@ public final class DmFactDimensionJoinBuilder {
       DmPipelineBuilderSupport.BuildContext ctx,
       PipelineMeta pipelineMeta,
       TransformMeta predecessor,
-      List<DateKeyMapping> mappings) {
+      List<DateKeyMapping> mappings,
+      String transformName,
+      String copies) {
     SelectValuesMeta selectMeta = new SelectValuesMeta();
     selectMeta.getSelectOption().setSelectingAndSortingUnspecifiedFields(true);
     List<SelectField> selectFields = selectMeta.getSelectOption().getSelectFields();
@@ -334,7 +363,8 @@ public final class DmFactDimensionJoinBuilder {
     }
     addDimensionLookupDatePassthrough(ctx, selectFields);
 
-    TransformMeta tm = new TransformMeta("SelectValues", DATE_KEYS_FORMAT_TRANSFORM, selectMeta);
+    TransformMeta tm = new TransformMeta("SelectValues", transformName, selectMeta);
+    tm.setCopiesString(copies);
     tm.setLocation(
         predecessor.getLocation().x + DmPipelineBuilderSupport.SPACING_WIDTH,
         predecessor.getLocation().y);
@@ -347,7 +377,9 @@ public final class DmFactDimensionJoinBuilder {
       DmPipelineBuilderSupport.BuildContext ctx,
       PipelineMeta pipelineMeta,
       TransformMeta predecessor,
-      List<DateKeyMapping> mappings) {
+      List<DateKeyMapping> mappings,
+      String transformName,
+      String copies) {
     SelectValuesMeta selectMeta = new SelectValuesMeta();
     selectMeta.getSelectOption().setSelectingAndSortingUnspecifiedFields(true);
     List<SelectMetadataChange> metaChanges = selectMeta.getSelectOption().getMeta();
@@ -362,7 +394,8 @@ public final class DmFactDimensionJoinBuilder {
       metaChanges.add(metaChange);
     }
 
-    TransformMeta tm = new TransformMeta("SelectValues", DATE_KEYS_INT_TRANSFORM, selectMeta);
+    TransformMeta tm = new TransformMeta("SelectValues", transformName, selectMeta);
+    tm.setCopiesString(copies);
     tm.setLocation(
         predecessor.getLocation().x + DmPipelineBuilderSupport.SPACING_WIDTH,
         predecessor.getLocation().y);
@@ -385,7 +418,7 @@ public final class DmFactDimensionJoinBuilder {
     return fieldName;
   }
 
-  private record DateKeyMapping(String sourceField, String fkColumn) {}
+  private record DateKeyMapping(String sourceField, String fkColumn, String copies) {}
 
   private record SurrogateKeyMapping(String sourceField, String fkColumn) {}
 }

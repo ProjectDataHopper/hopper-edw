@@ -16,7 +16,7 @@ Name, physical table, Kimball **grain** sentence, **business process** (Business
 
 Write the grain in words on the General tab (for example `one row per order line`). **Check model** warns when it is empty.
 
-* **Dimension roles** — Conformed dimensions (including date aliases) with join source fields and optional lookup date.
+* **Dimension joins** — Conformed dimensions (including date aliases) with the source field, fact key column, truncate-to-date, preload cache, and skip lookup. **Copies** sets how many copies the generated Dimension Lookup runs, and how many copies the date-key transforms run when **Truncate to date** is Y. Leave it empty for one copy. A variable expression such as `${FACT_LOOKUP_COPIES}` is stored on the transform and resolved when the update pipeline runs. Date joins that use different copy counts are generated as separate transforms. Skipped lookups ignore it.
 * **Range / junk roles** — Band and flag dimensions.
 * **Measures** — Additive / semi-additive facts.
 * **Degenerate dimensions** — Degenerate keys stored on the fact.

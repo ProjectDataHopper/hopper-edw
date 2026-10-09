@@ -1842,6 +1842,14 @@ public class HopGuiDmTableDialog {
     skipLookupColumn.setToolTip(
         BaseMessages.getString(
             PKG, "HopGuiDmTableDialog.DimensionRoles.Column.SkipLookup.ToolTip"));
+    ColumnInfo copiesColumn =
+        new ColumnInfo(
+            BaseMessages.getString(PKG, "HopGuiDmTableDialog.DimensionRoles.Column.Copies"),
+            ColumnInfo.COLUMN_TYPE_TEXT,
+            false);
+    copiesColumn.setUsingVariables(true);
+    copiesColumn.setToolTip(
+        BaseMessages.getString(PKG, "HopGuiDmTableDialog.DimensionRoles.Column.Copies.ToolTip"));
     ColumnInfo[] roleColumns =
         new ColumnInfo[] {
           new ColumnInfo(
@@ -1858,7 +1866,8 @@ public class HopGuiDmTableDialog {
               new String[] {"N", "Y"},
               true),
           preloadCacheColumn,
-          skipLookupColumn
+          skipLookupColumn,
+          copiesColumn
         };
 
     Label wlDimensionLookupDate = new Label(comp, SWT.RIGHT);
@@ -2436,6 +2445,9 @@ public class HopGuiDmTableDialog {
         item.setText(4, role.isTruncateToDateKey() ? "Y" : "N");
         item.setText(5, role.isPreloadLookupCache() ? "Y" : "N");
         item.setText(6, formatSkipDimensionLookup(role));
+        if (!Utils.isEmpty(role.getLookupCopies())) {
+          item.setText(7, role.getLookupCopies());
+        }
       }
       wDimensionRoles.optimizeTableView();
       refreshDimensionJoinComboChoices();
@@ -3170,6 +3182,8 @@ public class HopGuiDmTableDialog {
       role.setTruncateToDateKey("Y".equalsIgnoreCase(item.getText(4)));
       role.setPreloadLookupCache("Y".equalsIgnoreCase(item.getText(5)));
       applySkipDimensionLookupFromCombo(role, item.getText(6));
+      String lookupCopies = Const.trim(item.getText(7));
+      role.setLookupCopies(Utils.isEmpty(lookupCopies) ? null : lookupCopies);
       roles.add(role);
     }
     return roles;

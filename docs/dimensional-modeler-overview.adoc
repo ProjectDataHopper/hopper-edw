@@ -132,7 +132,7 @@ Generators are thin builders over native Hop warehouse transforms:
 
 |Junk dimension |Combination Lookup |Key field combinations → surrogate key
 
-|Fact FK resolution |Dimension Lookup (`update=false`) |One lookup per dimension role
+|Fact FK resolution |Dimension Lookup (`update=false`) |One lookup per dimension role. **Copies** on the join (empty = 1; variable expressions allowed) is the lookup transform's copies. Date-key joins use the same value on the generated date-key transforms.
 
 |Bridge / factless / snapshots |Mix of above + TableOutput/InsertUpdate |Catalog-specific builders
 |===
