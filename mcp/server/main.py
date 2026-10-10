@@ -1,94 +1,117 @@
 """
-DataHopper Model Context Protocol (MCP) Server.
-Provides tools, resources, and prompts for AI coding assistants and contributors.
-Backed by Neo4j and the harvested knowledge base.
+Data Hopper Model Context Protocol (MCP) server.
+
+Streamable HTTP at /mcp, plus GET /health. Lookup tools read the harvested
+JSON file. query_knowledge_graph is the only tool that talks to Neo4j.
 """
 
-import sys
 import os
 import json
 from typing import Optional, List, Dict, Any
 
-# Ensure server package path
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from mcp.server.fastmcp import FastMCP
+from starlette.requests import Request
+from starlette.responses import PlainTextResponse, Response
+
 from db import kb
 
-try:
-    from mcp.server.fastmcp import FastMCP
-    mcp = FastMCP("DataHopper Knowledge MCP", dependencies=["neo4j"])
-except ImportError:
-    # Minimal stub if running outside MCP container environment for testing
-    class FastMCPStub:
-        def __init__(self, name, **kwargs):
-            self.name = name
-        def tool(self):
-            def decorator(f):
-                return f
-            return decorator
-        def resource(self, uri):
-            def decorator(f):
-                return f
-            return decorator
-        def prompt(self):
-            def decorator(f):
-                return f
-            return decorator
-        def run(self, **kwargs):
-            print(f"[+] DataHopper MCP server stub running with kwargs: {kwargs}")
-    mcp = FastMCPStub("DataHopper Knowledge MCP")
+SUPPORTED_MODELS = ".hdv, .hbv, .hdm, .hsm, .hsl, .hem, .hlv"
+
+mcp = FastMCP(
+    "DataHopper Knowledge MCP",
+    instructions=(
+        "Public knowledge for the hopper-edw repository: coding rules, model file "
+        "schemas, documentation search, and Hop plugin lookup. Cypher is read-only."
+    ),
+    host="0.0.0.0",
+    port=int(os.getenv("PORT", "8000")),
+    stateless_http=True,
+    json_response=True,
+    streamable_http_path="/mcp",
+)
+
+
+@mcp.custom_route("/health", methods=["GET"])
+async def health(_: Request) -> Response:
+    return PlainTextResponse("ok")
+
 
 @mcp.tool()
 def get_coding_rules(topic: Optional[str] = None) -> List[Dict[str, Any]]:
     """
-    Retrieve architectural and coding rules for hopper-edw and ProjectDataHopper.
+    Retrieve architectural and coding rules for hopper-edw.
     Topics include: VFS (HopVfs vs java.io.File), GUI (GuiCompositeWidgets grouped layouts),
     Lombok, i18n single-quote escaping, and Java 21 hard pins.
     """
     return kb.get_rules(topic)
 
+
 @mcp.tool()
 def get_model_schema(file_type: str) -> Dict[str, Any]:
     """
-    Retrieve model specification, XML/JSON schema, anti-patterns, and sample references
-    for an EDW model format (.hdv, .hbv, .hdm, .hsm).
+    Retrieve the model specification, schema text, anti-patterns, and sample paths
+    for an EDW file (.hdv, .hbv, .hdm, .hsm, .hsl, .hem, .hlv).
     """
     schemas = kb.get_schemas(file_type)
     if not schemas:
-        return {"error": f"Schema not found for file type '{file_type}'. Supported: .hdv, .hbv, .hdm, .hsm"}
+        return {"error": f"Schema not found for file type '{file_type}'. Supported: {SUPPORTED_MODELS}"}
     return schemas[0]
+
 
 @mcp.tool()
 def search_knowledge_base(query: str, category: Optional[str] = None) -> List[Dict[str, Any]]:
     """
-    Search across documentation, rules, concepts, and codebase classes in ProjectDataHopper.
+    Search documentation, rules, model schemas, and codebase classes.
+    Each hit is a short snippet with a path or id. category is an optional substring
+    filter (for example "Data Vault", "action", "Model").
     """
     return kb.search(query, category)
+
 
 @mcp.tool()
 def lookup_plugin_component(keyword: str, plugin_type: Optional[str] = None) -> List[Dict[str, Any]]:
     """
     Find Hop plugins, transforms, actions, metadata objects, and GUI dialogs by keyword.
+    Matches class name, plugin id, and plugin name.
     Optional plugin_type filter: 'transform', 'action', 'metadata', 'gui'.
     """
     return kb.lookup_plugins(keyword, plugin_type)
 
+
 @mcp.tool()
 def query_knowledge_graph(cypher: str) -> List[Dict[str, Any]]:
     """
-    Execute a read-only Cypher query against the live Neo4j knowledge graph.
-    Mutating statements (CREATE, DELETE, SET, etc.) are strictly forbidden.
+    Execute one read-only Cypher query against the Neo4j knowledge graph.
+    The statement must start with MATCH, WITH, RETURN, SHOW, EXPLAIN, or PROFILE.
+    Mutating statements and CALL are rejected. At most 100 rows are returned.
     """
     return kb.query_cypher(cypher)
+
 
 @mcp.resource("hopper://rules/all")
 def resource_rules() -> str:
     """Returns the full catalog of architectural and coding standards."""
     return json.dumps(kb.get_rules(), indent=2)
 
+
 @mcp.resource("hopper://schemas/overview")
 def resource_schemas() -> str:
-    """Returns the overview of all EDW model formats (.hdv, .hbv, .hdm, .hsm)."""
-    return json.dumps(kb.get_schemas(), indent=2)
+    """Returns an overview of the EDW model file types."""
+    overview = []
+    for schema in kb.get_schemas():
+        overview.append(
+            {
+                "repository": schema.get("repository"),
+                "extension": schema.get("extension"),
+                "name": schema.get("name"),
+                "root_xml": schema.get("root_xml"),
+                "summary": schema.get("summary"),
+                "anti_patterns": schema.get("anti_patterns"),
+                "sample_files": schema.get("sample_files"),
+            }
+        )
+    return json.dumps(overview, indent=2)
+
 
 @mcp.prompt()
 def new_hop_transform(transform_name: str, purpose: str) -> str:
@@ -109,10 +132,11 @@ Follow these strict rules:
 7. Use HopVfs and FileObject for all file access, never java.io.File.
 """
 
+
 @mcp.prompt()
 def review_pr_conventions(diff_summary: str) -> str:
-    """Prompt template for reviewing pull requests against DataHopper conventions."""
-    return f"""Please review the following code changes against DataHopper standards:
+    """Prompt template for reviewing pull requests against Data Hopper conventions."""
+    return f"""Please review the following code changes against Data Hopper standards:
 {diff_summary}
 
 Verify:
@@ -122,21 +146,19 @@ Verify:
 - Are resource bundle messages properly escaping variable expressions as '${{VARIABLE}}'?
 """
 
-if __name__ == "__main__":
+
+def main() -> None:
     import argparse
-    parser = argparse.ArgumentParser(description="DataHopper MCP Server")
-    parser.add_argument("--transport", default="sse", choices=["sse", "stdio"], help="Transport mode")
-    parser.add_argument("--host", default="0.0.0.0", help="Host address")
+
+    parser = argparse.ArgumentParser(description="Data Hopper MCP server (Streamable HTTP)")
+    parser.add_argument("--host", default=os.getenv("HOST", "0.0.0.0"), help="Bind address")
     parser.add_argument("--port", type=int, default=int(os.getenv("PORT", "8000")), help="Port number")
     args = parser.parse_args()
+    mcp.settings.host = args.host
+    mcp.settings.port = args.port
+    print(f"[*] Starting Data Hopper MCP server on {args.host}:{args.port} at /mcp")
+    mcp.run(transport="streamable-http")
 
-    print(f"[*] Starting DataHopper MCP server on {args.host}:{args.port} via {args.transport}...")
-    if args.transport == "sse":
-        # FastMCP sse transport
-        try:
-            mcp.run(transport="sse")
-        except TypeError:
-            # Depending on FastMCP version
-            mcp.run()
-    else:
-        mcp.run(transport="stdio")
+
+if __name__ == "__main__":
+    main()

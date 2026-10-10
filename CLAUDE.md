@@ -24,13 +24,13 @@ This file is for **AI coding assistants** and third-party contributors. Read it 
 
 Data Hopper provides a public **Model Context Protocol (MCP)** server to assist AI coding assistants and contributors with project architecture, coding rules, schemas, and Hop plugin lookups:
 
-- **Endpoint**: `https://mcp.data-hopper.com/sse` (Streamable HTTP / SSE)
+- **Endpoint**: `https://mcp.data-hopper.com/mcp` (Streamable HTTP)
 - **Supported clients**: Claude Desktop, Cursor, Antigravity, VS Code (Roo Code / Cline / Continue), Goose.
 - **Configuration**: Standard [`.mcp.json`](.mcp.json) and [`.cursor/mcp.json`](.cursor/mcp.json) are provided at the repository root.
 
 Available MCP tools:
 - `get_coding_rules`: Retrieves rules for HopVfs (no java.io.File), grouped GuiCompositeWidgets, Lombok, and i18n escaping (`'${VAR}'`).
-- `get_model_schema`: Validates `.hdv`, `.hbv`, `.hdm`, `.hsm` structures, schemas, and anti-patterns.
+- `get_model_schema`: Model specification, schema text, and anti-patterns for `.hdv`, `.hbv`, `.hdm`, `.hsm`, `.hsl`, `.hem`, and `.hlv`.
 - `search_knowledge_base`: Searches docs, concepts, and codebase classes across ProjectDataHopper.
 - `lookup_plugin_component`: Locates Hop transforms, actions, metadata objects, and GUI dialogs.
 - `query_knowledge_graph`: Read-only Cypher queries against the Neo4j knowledge graph.
@@ -114,6 +114,7 @@ Do **not** “fix” Hop core inside this repo. Core Hop changes belong in **apa
 | `retail-example/` | End-to-end tutorial (CSV → DV → BV → DM) |
 | `scripts/` | Shared Docker runners and compose files |
 | `docs/` | User-facing documentation |
+| `mcp/` | Public MCP server and knowledge harvest ([`mcp/README.md`](mcp/README.md)) |
 
 **Model file types** (do not invent new extensions lightly):
 

@@ -255,11 +255,11 @@ SELECT * FROM sat_customer WHERE x_load_end_ts IS NULL
 
 We welcome contributions! To make contributing with AI coding assistants (Claude Desktop, Cursor, Antigravity, VS Code, Goose) seamless, we provide a public **Model Context Protocol (MCP)** server hosted on our sandbox:
 
-- **Public Endpoint**: `https://mcp.data-hopper.com/sse`
+- **Public Endpoint**: `https://mcp.data-hopper.com/mcp`
 - **Configuration**: Standard [`.mcp.json`](.mcp.json) and [`.cursor/mcp.json`](.cursor/mcp.json) files are included in the repository.
 - **Capabilities**:
   - Architectural rules enforcement (HopVfs, grouped GuiCompositeWidgets, Lombok, i18n escaping).
-  - Validation schemas, anti-patterns, and sample references for `.hdv`, `.hbv`, `.hdm`, and `.hsm`.
+  - Validation schemas, anti-patterns, and sample references for `.hdv`, `.hbv`, `.hdm`, `.hsm`, `.hsl`, `.hem`, and `.hlv`.
   - Searchable documentation and Hop plugin/dialog catalog.
   - Safe read-only Cypher graph queries over the project knowledge base.
 

@@ -1,0 +1,34 @@
+name: MCP server tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    paths:
+      - "mcp/**"
+      - ".github/workflows/mcp-tests.yml"
+      - "docs/**"
+      - "src/main/java/**"
+      - "CLAUDE.md"
+      - "README.md"
+      - "CHANGELOG.md"
+
+jobs:
+  test:
+    name: Harvest and MCP unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install MCP dependencies
+        run: pip install -r mcp/requirements.txt
+
+      - name: Run MCP tests
+        run: python mcp/tests/test_mcp_server.py
