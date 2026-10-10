@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "datahopper": {
+      "url": "https://mcp.data-hopper.com/sse"
+    }
+  }
+}

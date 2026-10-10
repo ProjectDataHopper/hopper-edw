@@ -20,6 +20,21 @@ This file is for **AI coding assistants** and third-party contributors. Read it 
 
 **Product docs** live under [`docs/`](docs/) (start at [`docs/README.md`](docs/README.md) and [`docs/feature-overview.adoc`](docs/feature-overview.adoc)). Do not restate them here.
 
+## Model Context Protocol (MCP) Server
+
+Data Hopper provides a public **Model Context Protocol (MCP)** server to assist AI coding assistants and contributors with project architecture, coding rules, schemas, and Hop plugin lookups:
+
+- **Endpoint**: `https://mcp.data-hopper.com/sse` (Streamable HTTP / SSE)
+- **Supported clients**: Claude Desktop, Cursor, Antigravity, VS Code (Roo Code / Cline / Continue), Goose.
+- **Configuration**: Standard [`.mcp.json`](.mcp.json) and [`.cursor/mcp.json`](.cursor/mcp.json) are provided at the repository root.
+
+Available MCP tools:
+- `get_coding_rules`: Retrieves rules for HopVfs (no java.io.File), grouped GuiCompositeWidgets, Lombok, and i18n escaping (`'${VAR}'`).
+- `get_model_schema`: Validates `.hdv`, `.hbv`, `.hdm`, `.hsm` structures, schemas, and anti-patterns.
+- `search_knowledge_base`: Searches docs, concepts, and codebase classes across ProjectDataHopper.
+- `lookup_plugin_component`: Locates Hop transforms, actions, metadata objects, and GUI dialogs.
+- `query_knowledge_graph`: Read-only Cypher queries against the Neo4j knowledge graph.
+
 ## What this project is
 
 **Data Hopper EDW** (`hopper-edw`) is a set of Apache Hop plugins to build an **Enterprise Data Warehouse**: visual models (`.hsm` / `.hdv` / `.hbv` / `.hdm`), catalog-first sources (including multi-table composite feeds), model-driven DDL and load pipelines, lineage, schema validation gates, data quality, execution maps (`.hem`), Hop Lineage Views (`.hlv`), the **EDW Journey** perspective, and optional AI help.

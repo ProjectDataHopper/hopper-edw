@@ -250,3 +250,17 @@ SELECT * FROM sat_customer WHERE x_load_end_ts IS NULL
 **Also shipped (0.2.x line):** dimensional modeler, execution maps, catalog-first sources, data quality rules and gates, multi-DB integration hardening, incremental Business Vault SCD2, primary-key import/detection, SQL Server / Unicode EDW hardening.
 
 **Planned:** BV naming rules engine, additional source types, automated execution with dependency resolution.
+
+## Contributing & Model Context Protocol (MCP) Server
+
+We welcome contributions! To make contributing with AI coding assistants (Claude Desktop, Cursor, Antigravity, VS Code, Goose) seamless, we provide a public **Model Context Protocol (MCP)** server hosted on our sandbox:
+
+- **Public Endpoint**: `https://mcp.data-hopper.com/sse`
+- **Configuration**: Standard [`.mcp.json`](.mcp.json) and [`.cursor/mcp.json`](.cursor/mcp.json) files are included in the repository.
+- **Capabilities**:
+  - Architectural rules enforcement (HopVfs, grouped GuiCompositeWidgets, Lombok, i18n escaping).
+  - Validation schemas, anti-patterns, and sample references for `.hdv`, `.hbv`, `.hdm`, and `.hsm`.
+  - Searchable documentation and Hop plugin/dialog catalog.
+  - Safe read-only Cypher graph queries over the project knowledge base.
+
+See **[CLAUDE.md](CLAUDE.md)** and **[mcp/README.md](mcp/README.md)** for detailed developer guidance.

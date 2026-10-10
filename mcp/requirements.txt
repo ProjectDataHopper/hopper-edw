@@ -1,0 +1,12 @@
+# Model Context Protocol & Web Server
+mcp>=1.3.0
+starlette>=0.45.0
+uvicorn>=0.34.0
+pydantic>=2.10.0
+
+# Graph Database
+neo4j>=5.28.0
+
+# Harvester & Parsing
+tree-sitter>=0.23.0
+pyyaml>=6.0.2
