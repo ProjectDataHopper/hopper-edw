@@ -22,6 +22,7 @@ import org.apache.hop.ui.util.EnvironmentUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
@@ -88,11 +89,44 @@ public class MarkdownStyledTextComp extends Composite {
   }
 
   public void setMarkdown(String markdown) {
+    applyMarkdown(markdown, false);
+  }
+
+  /** Replace the markdown and leave the caret and scroll position where they were. */
+  public void setMarkdownKeepingView(String markdown) {
+    applyMarkdown(markdown, true);
+  }
+
+  private void applyMarkdown(String markdown, boolean keepView) {
     if (webText != null) {
+      Point selection = keepView ? webText.getSelection() : null;
+      ScrollBar vertical = keepView ? webText.getVerticalBar() : null;
+      int top = vertical == null || vertical.isDisposed() ? -1 : vertical.getSelection();
       webText.setText(MarkdownStyleRenderer.render(markdown).displayText());
+      if (keepView) {
+        restoreWebSelection(selection);
+        if (vertical != null && !vertical.isDisposed() && top >= 0) {
+          vertical.setSelection(top);
+        }
+      }
       return;
     }
-    MarkdownDesktopStyledText.setMarkdown(textControl, markdown, fixedFont, boldFixedFont);
+    if (keepView) {
+      MarkdownDesktopStyledText.setMarkdownKeepingView(
+          textControl, markdown, fixedFont, boldFixedFont);
+    } else {
+      MarkdownDesktopStyledText.setMarkdown(textControl, markdown, fixedFont, boldFixedFont);
+    }
+  }
+
+  private void restoreWebSelection(Point selection) {
+    if (selection == null || webText.isDisposed()) {
+      return;
+    }
+    int length = webText.getText().length();
+    int start = Math.min(Math.max(0, selection.x), length);
+    int end = Math.min(Math.max(0, selection.y), length);
+    webText.setSelection(start, end);
   }
 
   public int getPreferredHeight(int width) {

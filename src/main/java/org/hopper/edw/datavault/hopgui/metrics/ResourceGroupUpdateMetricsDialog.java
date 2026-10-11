@@ -16,7 +16,11 @@
 package org.hopper.edw.datavault.hopgui.metrics;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
@@ -46,7 +50,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.hopper.edw.datavault.hopgui.dialog.ShowRowsDialog;
 import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
@@ -89,6 +95,8 @@ public final class ResourceGroupUpdateMetricsDialog {
   private UpdateRunWaveSnapshot currentWave;
   private HistoryList historyList;
   private boolean autoRefreshScheduled;
+  /** Details document currently shown. A refresh of the same document keeps the caret and scroll. */
+  private String detailsViewKey;
 
   private ResourceGroupUpdateMetricsDialog(
       Shell parent,
@@ -360,7 +368,8 @@ public final class ResourceGroupUpdateMetricsDialog {
       thisRunDetails.setMarkdown("");
       return;
     }
-    thisRunHeader.setText(
+    setLabelText(
+        thisRunHeader,
         BaseMessages.getString(
             PKG,
             "ResourceGroupUpdateMetrics.ThisRun.Header",
@@ -368,29 +377,124 @@ public final class ResourceGroupUpdateMetricsDialog {
             currentWave.getOverallState() != null ? currentWave.getOverallState().name() : "",
             currentWave.getModelsCompleted() + "/" + currentWave.getModelsTotal(),
             UpdateRunWaveSnapshotSupport.formatDuration(currentWave)));
-    thisRunTable.clearAll(false);
-    List<UpdateRunWaveModelProgress> models = currentWave.getModels();
-    if (models != null) {
-      for (UpdateRunWaveModelProgress model : models) {
-        if (model == null) {
-          continue;
+    syncThisRunRows(currentWave.getModels());
+    updateThisRunDetails();
+  }
+
+  /**
+   * Write model progress into the existing grid. Rebuilding the table, {@code Table.setSelection},
+   * and {@code Table.setTopIndex} all move the viewport. On GTK {@code getTopIndex()} also reports
+   * 0, so restoring it jumps back to the first row.
+   */
+  private void syncThisRunRows(List<UpdateRunWaveModelProgress> models) {
+    Table table = thisRunTable.table;
+    if (table.isDisposed()) {
+      return;
+    }
+    List<UpdateRunWaveModelProgress> rows = nonNullModels(models);
+    if (!rows.isEmpty() && table.getItemCount() == rows.size()) {
+      if (sameThisRunRows(table, rows)) {
+        Map<String, UpdateRunWaveModelProgress> byKey = indexModels(rows);
+        for (TableItem item : table.getItems()) {
+          if (item.getData() instanceof String key) {
+            applyModelRow(item, byKey.get(key));
+          }
         }
-        TableItem item = new TableItem(thisRunTable.table, SWT.NONE);
-        item.setText(1, UpdateRunWaveDiagnosticsFormatter.formatLayer(model.getLayer()));
-        item.setText(2, UpdateRunWaveSnapshotSupport.displayName(model));
-        item.setText(3, model.getState() != null ? model.getState().name() : "");
-        item.setText(4, Const.NVL(model.getCurrentElementName(), ""));
-        item.setText(5, UpdateRunWaveDiagnosticsFormatter.formatElapsed(model));
-        item.setText(6, Long.toString(model.getSourceRowsRead()));
-        item.setText(7, Long.toString(model.getTargetRowsInserted()));
-        item.setText(8, Long.toString(model.getErrors()));
+      } else {
+        for (int i = 0; i < rows.size(); i++) {
+          TableItem item = table.getItem(i);
+          UpdateRunWaveModelProgress model = rows.get(i);
+          item.setData(modelKey(model));
+          applyModelRow(item, model);
+        }
+      }
+      return;
+    }
+    int vertical = barSelection(table.getVerticalBar());
+    int horizontal = barSelection(table.getHorizontalBar());
+    int[] selected = table.getSelectionIndices();
+    boolean dialogOpen = shell != null && !shell.isDisposed() && shell.isVisible();
+    table.removeAll();
+    for (UpdateRunWaveModelProgress model : rows) {
+      TableItem item = new TableItem(table, SWT.NONE);
+      item.setData(modelKey(model));
+      applyModelRow(item, model);
+    }
+    if (table.getItemCount() == 0) {
+      new TableItem(table, SWT.NONE);
+    }
+    thisRunTable.setRowNums();
+    if (!dialogOpen) {
+      thisRunTable.optWidth(true);
+      selectCurrentModelRow();
+      return;
+    }
+    restoreSelection(table, selected);
+    restoreBar(table.getVerticalBar(), vertical);
+    restoreBar(table.getHorizontalBar(), horizontal);
+  }
+
+  private boolean sameThisRunRows(Table table, List<UpdateRunWaveModelProgress> rows) {
+    if (rows.isEmpty() || table.getItemCount() != rows.size()) {
+      return false;
+    }
+    Map<String, UpdateRunWaveModelProgress> byKey = indexModels(rows);
+    if (byKey.size() != rows.size()) {
+      return false;
+    }
+    for (TableItem item : table.getItems()) {
+      if (!(item.getData() instanceof String key) || !byKey.containsKey(key)) {
+        return false;
       }
     }
-    thisRunTable.removeEmptyRows();
-    thisRunTable.setRowNums();
-    thisRunTable.optWidth(true);
-    selectCurrentModelRow();
-    updateThisRunDetails();
+    return true;
+  }
+
+  private static List<UpdateRunWaveModelProgress> nonNullModels(
+      List<UpdateRunWaveModelProgress> models) {
+    if (models == null || models.isEmpty()) {
+      return List.of();
+    }
+    List<UpdateRunWaveModelProgress> rows = new ArrayList<>();
+    for (UpdateRunWaveModelProgress model : models) {
+      if (model != null) {
+        rows.add(model);
+      }
+    }
+    return rows;
+  }
+
+  private static void applyModelRow(TableItem item, UpdateRunWaveModelProgress model) {
+    item.setText(1, UpdateRunWaveDiagnosticsFormatter.formatLayer(model.getLayer()));
+    item.setText(2, UpdateRunWaveSnapshotSupport.displayName(model));
+    item.setText(3, model.getState() != null ? model.getState().name() : "");
+    item.setText(4, Const.NVL(model.getCurrentElementName(), ""));
+    item.setText(5, UpdateRunWaveDiagnosticsFormatter.formatElapsed(model));
+    item.setText(6, Long.toString(model.getSourceRowsRead()));
+    item.setText(7, Long.toString(model.getTargetRowsInserted()));
+    item.setText(8, Long.toString(model.getErrors()));
+  }
+
+  private static Map<String, UpdateRunWaveModelProgress> indexModels(
+      List<UpdateRunWaveModelProgress> models) {
+    Map<String, UpdateRunWaveModelProgress> byKey = new HashMap<>();
+    if (models == null) {
+      return byKey;
+    }
+    for (UpdateRunWaveModelProgress model : models) {
+      if (model != null) {
+        byKey.put(modelKey(model), model);
+      }
+    }
+    return byKey;
+  }
+
+  private static String modelKey(UpdateRunWaveModelProgress model) {
+    return Const.NVL(model.getLayer(), "")
+        + "\u0001"
+        + Const.NVL(model.getModelFile(), "")
+        + "\u0001"
+        + Const.NVL(model.getModelName(), "");
   }
 
   private void selectCurrentModelRow() {
@@ -402,9 +506,13 @@ public final class ResourceGroupUpdateMetricsDialog {
     if (current == null) {
       return;
     }
-    int index = currentWave.getModels().indexOf(current);
-    if (index >= 0 && index < thisRunTable.nrNonEmpty()) {
-      thisRunTable.setSelection(new int[] {index});
+    String key = modelKey(current);
+    TableItem[] items = thisRunTable.table.getItems();
+    for (int index = 0; index < items.length; index++) {
+      if (key.equals(items[index].getData())) {
+        thisRunTable.setSelection(new int[] {index});
+        return;
+      }
     }
   }
 
@@ -413,6 +521,7 @@ public final class ResourceGroupUpdateMetricsDialog {
       return;
     }
     if (currentWave == null) {
+      detailsViewKey = null;
       thisRunDetails.setMarkdown("");
       return;
     }
@@ -420,20 +529,74 @@ public final class ResourceGroupUpdateMetricsDialog {
     UpdateRunWaveModelProgress model = modelAt(selected);
     UpdateRunWaveModelProgress current =
         UpdateRunWaveSnapshotSupport.currentModel(currentWave.getModels());
-    if (model != null && (current == null || model != current)) {
-      thisRunDetails.setMarkdown(UpdateRunWaveDiagnosticsFormatter.formatModelMarkdown(model));
+    boolean selectedModel = model != null && (current == null || model != current);
+    String viewKey = selectedModel ? modelKey(model) : "wave";
+    String markdown =
+        selectedModel
+            ? UpdateRunWaveDiagnosticsFormatter.formatModelMarkdown(model)
+            : UpdateRunWaveDiagnosticsFormatter.formatMarkdown(currentWave);
+    boolean keepView = viewKey.equals(detailsViewKey);
+    detailsViewKey = viewKey;
+    if (keepView) {
+      thisRunDetails.setMarkdownKeepingView(markdown);
     } else {
-      thisRunDetails.setMarkdown(UpdateRunWaveDiagnosticsFormatter.formatMarkdown(currentWave));
+      thisRunDetails.setMarkdown(markdown);
     }
+  }
+
+  private static void setLabelText(Label label, String text) {
+    if (label != null && !label.isDisposed() && !text.equals(label.getText())) {
+      label.setText(text);
+    }
+  }
+
+  private static int barSelection(ScrollBar bar) {
+    return bar == null || bar.isDisposed() ? -1 : bar.getSelection();
+  }
+
+  private static void restoreBar(ScrollBar bar, int selection) {
+    if (bar == null || bar.isDisposed() || selection < 0) {
+      return;
+    }
+    bar.setSelection(selection);
+  }
+
+  /** Re-select rows without {@code Table.setSelection}, which scrolls the selection into view. */
+  private static void restoreSelection(Table table, int[] selected) {
+    if (selected == null || selected.length == 0 || table.isDisposed()) {
+      return;
+    }
+    int count = table.getItemCount();
+    int kept = 0;
+    int[] indices = new int[selected.length];
+    for (int index : selected) {
+      if (index >= 0 && index < count) {
+        indices[kept++] = index;
+      }
+    }
+    if (kept == 0) {
+      return;
+    }
+    if (kept < indices.length) {
+      indices = Arrays.copyOf(indices, kept);
+    }
+    table.deselectAll();
+    table.select(indices);
   }
 
   private UpdateRunWaveModelProgress modelAt(int tableIndex) {
     if (currentWave == null || currentWave.getModels() == null || tableIndex < 0) {
       return null;
     }
-    int modelIndex = tableIndex;
-    if (modelIndex >= 0 && modelIndex < currentWave.getModels().size()) {
-      return currentWave.getModels().get(modelIndex);
+    Table table = thisRunTable.table;
+    if (tableIndex < table.getItemCount() && table.getItem(tableIndex).getData() instanceof String key) {
+      UpdateRunWaveModelProgress tagged = indexModels(currentWave.getModels()).get(key);
+      if (tagged != null) {
+        return tagged;
+      }
+    }
+    if (tableIndex < currentWave.getModels().size()) {
+      return currentWave.getModels().get(tableIndex);
     }
     return null;
   }
@@ -454,25 +617,49 @@ public final class ResourceGroupUpdateMetricsDialog {
       historyMessage.setText(
           BaseMessages.getString(PKG, "ResourceGroupUpdateMetrics.History.Message"));
     }
+    List<OverviewHistoryRow> rows = historyList.rows();
+    Table table = historyTable.table;
+    if (rows != null && !rows.isEmpty() && table.getItemCount() == rows.size()) {
+      for (int i = 0; i < rows.size(); i++) {
+        applyHistoryRow(table.getItem(i), rows.get(i));
+      }
+      return;
+    }
+    int vertical = barSelection(table.getVerticalBar());
+    int horizontal = barSelection(table.getHorizontalBar());
+    int[] selected = table.getSelectionIndices();
+    boolean dialogOpen = shell != null && !shell.isDisposed() && shell.isVisible();
     historyTable.clearAll(false);
-    for (OverviewHistoryRow row : historyList.rows()) {
-      TableItem item = new TableItem(historyTable.table, SWT.NONE);
-      item.setText(1, formatDate(row.finishedAt()));
-      item.setText(2, WorkflowLoadOverviewReportFormatter.formatDuration(nvl(row.durationMs())));
-      item.setText(3, longText(row.modelCount()));
-      item.setText(4, longText(row.totalSourceRowsRead()));
-      item.setText(5, longText(row.totalTargetRowsInserted()));
-      item.setText(6, longText(row.totalErrors()));
-      item.setText(
-          7,
-          Boolean.FALSE.equals(row.success())
-              ? BaseMessages.getString(PKG, "ResourceGroupUpdateMetrics.History.Failed")
-              : BaseMessages.getString(PKG, "ResourceGroupUpdateMetrics.History.Success"));
-      item.setText(8, Const.NVL(row.rootWorkflowName(), ""));
+    if (rows != null) {
+      for (OverviewHistoryRow row : rows) {
+        TableItem item = new TableItem(table, SWT.NONE);
+        applyHistoryRow(item, row);
+      }
     }
     historyTable.removeEmptyRows();
     historyTable.setRowNums();
-    historyTable.optWidth(true);
+    if (!dialogOpen) {
+      historyTable.optWidth(true);
+      return;
+    }
+    restoreSelection(table, selected);
+    restoreBar(table.getVerticalBar(), vertical);
+    restoreBar(table.getHorizontalBar(), horizontal);
+  }
+
+  private static void applyHistoryRow(TableItem item, OverviewHistoryRow row) {
+    item.setText(1, formatDate(row.finishedAt()));
+    item.setText(2, WorkflowLoadOverviewReportFormatter.formatDuration(nvl(row.durationMs())));
+    item.setText(3, longText(row.modelCount()));
+    item.setText(4, longText(row.totalSourceRowsRead()));
+    item.setText(5, longText(row.totalTargetRowsInserted()));
+    item.setText(6, longText(row.totalErrors()));
+    item.setText(
+        7,
+        Boolean.FALSE.equals(row.success())
+            ? BaseMessages.getString(PKG, "ResourceGroupUpdateMetrics.History.Failed")
+            : BaseMessages.getString(PKG, "ResourceGroupUpdateMetrics.History.Success"));
+    item.setText(8, Const.NVL(row.rootWorkflowName(), ""));
   }
 
   private void openHistoryDetail() {

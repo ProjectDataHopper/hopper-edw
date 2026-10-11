@@ -26,6 +26,7 @@ import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.hopper.edw.datavault.hopgui.widget.MarkdownStyleRenderer.RenderedMarkdown;
@@ -57,6 +58,20 @@ final class MarkdownDesktopStyledText {
   }
 
   static void setMarkdown(Control control, String markdown, Font fixedFont, Font boldFixedFont) {
+    setMarkdown(control, markdown, fixedFont, boldFixedFont, false);
+  }
+
+  /**
+   * Replace the markdown without moving the viewport or the caret. {@code StyledText.setText}
+   * always jumps to the top; callers that refresh a live document need the previous position back.
+   */
+  static void setMarkdownKeepingView(
+      Control control, String markdown, Font fixedFont, Font boldFixedFont) {
+    setMarkdown(control, markdown, fixedFont, boldFixedFont, true);
+  }
+
+  private static void setMarkdown(
+      Control control, String markdown, Font fixedFont, Font boldFixedFont, boolean keepView) {
     StyledText styledText = styledText(control);
     GuiResource resources = GuiResource.getInstance();
     ThemeColors colors = ThemeColors.from(resources);
@@ -64,16 +79,46 @@ final class MarkdownDesktopStyledText {
     String displayText = rendered.displayText();
     List<StyleRange> ranges =
         toStyleRanges(rendered.spans(), displayText.length(), fixedFont, boldFixedFont, colors);
+    int topIndex = 0;
+    int horizontal = 0;
+    Point selection = null;
+    if (keepView) {
+      topIndex = styledText.getTopIndex();
+      horizontal = styledText.getHorizontalPixel();
+      selection = styledText.getSelection();
+    }
     styledText.setRedraw(false);
     try {
       applyBaseFont(styledText, fixedFont);
       styledText.setText(displayText);
       applyStyleRangesSafely(styledText, ranges, displayText.length(), fixedFont);
+      if (keepView) {
+        restoreView(styledText, topIndex, horizontal, selection);
+      }
     } catch (RuntimeException ex) {
       clearStyleRanges(styledText);
     } finally {
       styledText.setRedraw(true);
     }
+    if (keepView && !styledText.isDisposed()) {
+      restoreView(styledText, topIndex, horizontal, selection);
+    }
+  }
+
+  private static void restoreView(
+      StyledText styledText, int topIndex, int horizontal, Point selection) {
+    if (styledText.isDisposed()) {
+      return;
+    }
+    int length = styledText.getCharCount();
+    if (selection != null) {
+      int start = Math.min(Math.max(0, selection.x), length);
+      int end = Math.min(Math.max(0, selection.y), length);
+      styledText.setSelection(start, end);
+    }
+    int lastLine = Math.max(0, styledText.getLineCount() - 1);
+    styledText.setTopIndex(Math.min(Math.max(0, topIndex), lastLine));
+    styledText.setHorizontalPixel(Math.max(0, horizontal));
   }
 
   static void setPlainText(Control control, String text, Font fixedFont, Font boldFixedFont) {

@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Resource group load metrics (issue #198)
+
+- Refreshing the resource-group load metrics dialog updates the **This run** grid and the detail text in place. A refresh no longer changes the selected row or moves the table or the detail text back to the top.
+
 ### DDL execution logging (issue #199)
 
 - Data Vault, Business Vault, and dimensional updates log `Executing DDL on target database` once at Basic. Each statement is logged at Detailed and names the table.
