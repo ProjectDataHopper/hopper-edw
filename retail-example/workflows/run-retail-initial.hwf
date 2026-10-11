@@ -222,6 +222,16 @@ limitations under the License.
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
+    <action>
+      <name>Continue after analytics</name>
+      <description>Clear an analytics failure so the retail load still finishes.</description>
+      <type>SUCCESS</type>
+      <attributes/>
+      <xloc>592</xloc>
+      <yloc>320</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
   </actions>
   <hops>
     <hop>
@@ -268,6 +278,27 @@ limitations under the License.
     </hop>
     <hop>
       <from>Run operational analytics</from>
+      <to>Export architecture</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Run operational analytics</from>
+      <to>Continue after analytics</to>
+      <evaluation>N</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Continue after analytics</from>
+      <to>Generate initial execution map</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Continue after analytics</from>
       <to>Export architecture</to>
       <evaluation>Y</evaluation>
       <unconditional>N</unconditional>
