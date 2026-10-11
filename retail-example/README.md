@@ -30,6 +30,7 @@ End-to-end retail data vault example demonstrating initial and incremental loads
 - [docs/target-type-mappings.adoc](../docs/target-type-mappings.adoc) — Hop type → native SQL type preferences for generated DDL
 - [docs/feature-overview.adoc](../docs/feature-overview.adoc) — all plugin capabilities
 - [docs/hop-lineage-view.adoc](../docs/hop-lineage-view.adoc) — Hop Lineage View (`.hlv`) over Marquez / local models
+- [docs/ops-analytics.adoc](../docs/ops-analytics.adoc) — operational analytics generated from OPS
 - [docs/README.md](../docs/README.md) — full documentation index
 
 DV source catalog entries use namespace **`hop/retail-example/sources`**.
@@ -59,17 +60,21 @@ After upgrading to the two-database layout, reset the local Postgres volume once
 
 ## Database layout
 
-Retail uses **two PostgreSQL databases** on the same local instance (port 54320):
+Retail uses these PostgreSQL databases on the same local instance (port 54320):
 
 | Database | Hop connection | Role |
 |----------|----------------|------|
 | `test_source` | **CRM** | E2E landing tables (source system) |
 | `test_edw` | **Vault** | Data Vault, Business Vault, dimensional marts, retail load log, DM staging views |
+| `test_ops` | **OPS** | Execution metrics and load-run operations tables |
+| `test_ops_analytics` | **OpsAnalytics** | Operational analytics Data Vault, Business Vault (`ops_bv`), and dimensional tables |
 
 Environment variables in `environments/local-docker-postgres.json`:
 
 - `DB_SOURCE_NAME` → CRM (`test_source`)
 - `DB_TARGET_NAME` → Vault (`test_edw`)
+- `DB_OPS_NAME` → OPS (`test_ops`)
+- `DB_OPS_ANALYTICS_NAME` → OpsAnalytics (`test_ops_analytics`)
 
 Most DV record sources are **database-backed** catalog entries (`physicalTable` on CRM). The shipment feed is a **JSON** catalog source over `order_shipment_event.payload`. CSV files under `files/` are still generated for debugging; `load-e2e-sources-to-crm.hpl` loads them into CRM before each DV update.
 
@@ -187,6 +192,12 @@ Operations catalog stubs for quality history tables are published under
 `work/edw-catalog/hop/retail-example/operations/` at runtime.
 
 See [docs/data-quality.adoc](../docs/data-quality.adoc) for rule types and action details.
+
+## Operational analytics
+
+`models/ops-analytics/` is a generated warehouse of OPS (`dv_ops`): source model, split raw vault, Business Vault, dimensional model, and workflows `ops-analytics-initial` / `ops-analytics-incremental`. Configurations `ops-analytics-dv`, `ops-analytics-bv`, and `ops-analytics-dm` target connection `OpsAnalytics` (`test_ops_analytics`).
+
+`./scripts/run-postgres.sh up` creates that database and schema `ops_bv`. The initial database setup workflow runs `sql/create-ops-analytics.sql`, which creates the schema again. Then run `models/ops-analytics/workflows/ops-analytics-initial.hwf` once to create the tables. `run-retail-initial` and `run-retail-update` then call the incremental workflow after the retail model update. A failure there does not fail the retail load. Facts insert again on every retail update. See [docs/ops-analytics.adoc](../docs/ops-analytics.adoc).
 
 ## Data generation
 

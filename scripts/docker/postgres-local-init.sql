@@ -19,6 +19,7 @@
 CREATE DATABASE test_source OWNER test;
 CREATE DATABASE test_edw OWNER test;
 CREATE DATABASE test_ops OWNER test;
+CREATE DATABASE test_ops_analytics OWNER test;
 CREATE DATABASE test_aw_edw OWNER test;
 CREATE DATABASE test_aw_ops OWNER test;
 
@@ -56,6 +57,11 @@ CREATE INDEX IF NOT EXISTS idx_hop_exec_parent ON hop_executions(parent_id)
 
 CREATE INDEX IF NOT EXISTS idx_hop_exec_status ON hop_executions(status_description)
 ;
+
+\connect test_ops_analytics;
+
+-- Data Vault and dimensional tables use public. Business Vault objects use ops_bv.
+CREATE SCHEMA IF NOT EXISTS ops_bv;
 
 \connect test_aw_ops;
 

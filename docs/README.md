@@ -115,6 +115,7 @@ Architecture pictures are **committed SVGs** (`docs/images/diagrams/`) generated
 |----------|-------------|
 | [operations.adoc](operations.adoc) | Docker runners, batch orchestration, partial loads, load overview |
 | [edw-journey.adoc](edw-journey.adoc) | **EDW Journey** perspective (warehouse map in operate order) |
+| [ops-analytics.adoc](ops-analytics.adoc) | Warehouse of the OPS database: source model, vault, Business Vault, star, and load workflows |
 | [update-resource-definition-group-action.adoc](update-resource-definition-group-action.adoc) | Preferred multi-model update action (group-scoped) |
 | [search.adoc](search.adoc) | Project search for models and plugin metadata (Hop 2.19) |
 | [execution-maps.adoc](execution-maps.adoc) | `.hem` execution and lineage graphs |

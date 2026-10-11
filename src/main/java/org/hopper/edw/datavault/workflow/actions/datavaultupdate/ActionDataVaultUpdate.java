@@ -270,6 +270,19 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
   @HopMetadataProperty
   private boolean updateTargetDatabaseStructure = true;
 
+  /**
+   * When structure update is off, still run CREATE TABLE for target tables that are not in the
+   * database yet. ALTER statements stay behind {@link #updateTargetDatabaseStructure}.
+   */
+  @GuiWidgetElement(
+      order = "0120",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::ActionDataVaultUpdate.CreateMissingTables.Label",
+      toolTip = "i18n::ActionDataVaultUpdate.CreateMissingTables.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_DDL_TAB_ID)
+  @HopMetadataProperty
+  private boolean createMissingTargetTables;
+
   @GuiWidgetElement(
       order = "0150",
       type = GuiElementType.METADATA,
@@ -360,6 +373,7 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
     this.harvestRunId = meta.harvestRunId;
     this.harvestHistoryDatabase = meta.harvestHistoryDatabase;
     this.updateTargetDatabaseStructure = meta.updateTargetDatabaseStructure;
+    this.createMissingTargetTables = meta.createMissingTargetTables;
     this.targetTypeMapping = meta.targetTypeMapping;
     this.ddlSqlFilename = meta.ddlSqlFilename;
     this.failIfDdlNeeded = meta.failIfDdlNeeded;
@@ -661,6 +675,12 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
           logError("Unable to ensure orphan quarantine table", e);
           totalErrors++;
           success = false;
+        }
+      }
+
+      if (!updateTargetDatabaseStructure && createMissingTargetTables && !doNotUpdateTargetDatabase) {
+        if (!executeMissingTableCreates(tables, model)) {
+          return finishExecution(result, false, Math.max(totalErrors, 1), model);
         }
       }
 
@@ -1293,6 +1313,83 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
         BaseMessages.getString(
             DvIntegerSettingValidationSupport.class,
             "DvIntegerSettingValidation.Label.ParallelPipelineCopies"));
+  }
+
+  /**
+   * Creates target tables that are not in the database yet. Does not apply ALTER statements.
+   *
+   * @return false when DDL generation or execution fails
+   */
+  private boolean executeMissingTableCreates(List<IDvTable> tables, DataVaultModel model) {
+    List<String> creates = new ArrayList<>();
+    for (IDvTable table : tables) {
+      try {
+        for (String ddl : table.generateUpdateDdl(getMetadataProvider(), getVariables(), model)) {
+          if (DvDdlSupport.extractCreateTableName(ddl) != null) {
+            creates.add(ddl);
+          }
+        }
+      } catch (Exception ex) {
+        logError(
+            BaseMessages.getString(
+                PKG, "ActionDataVaultUpdate.Error.DdlGenerateFailed", table.getName()),
+            ex);
+        return false;
+      }
+    }
+    creates = DvDdlSupport.deduplicateCreateTableDdl(creates);
+    if (!hasDdlStatements(creates)) {
+      return true;
+    }
+    DatabaseMeta targetDatabase;
+    try {
+      targetDatabase =
+          DvSpecialRecordSupport.loadTargetDatabase(
+              getMetadataProvider(), model.getConfigurationOrDefault());
+    } catch (Exception e) {
+      logError(BaseMessages.getString(PKG, "ActionDataVaultUpdate.Error.DdlExecutionFailed", ""), e);
+      return false;
+    }
+    if (targetDatabase == null) {
+      logError(BaseMessages.getString(PKG, "ActionDataVaultUpdate.Error.DdlExecutionFailed", ""));
+      return false;
+    }
+    ILoggingObject loggingObject =
+        new SimpleLoggingObject("ActionDataVaultUpdate", LoggingObjectType.GENERAL, null);
+    try (Database db = new Database(loggingObject, getVariables(), targetDatabase)) {
+      db.connect();
+      Set<String> createdInBatch = new HashSet<>();
+      for (String ddl : creates) {
+        if (Utils.isEmpty(ddl)) {
+          continue;
+        }
+        if (DvDdlSupport.shouldSkipCreateTable(
+            db, getVariables(), targetDatabase, ddl, createdInBatch)) {
+          String tableName = DvDdlSupport.extractCreateTableName(ddl);
+          if (!Utils.isEmpty(tableName)) {
+            createdInBatch.add(tableName.toLowerCase(Locale.ROOT));
+          }
+          continue;
+        }
+        String tableName = DvDdlSupport.extractCreateTableName(ddl);
+        logBasic(
+            BaseMessages.getString(
+                PKG,
+                "ActionDataVaultUpdate.Log.CreatingMissingTable",
+                tableName != null ? tableName : targetDatabase.getName()));
+        db.execStatements(ddl);
+        if (!Utils.isEmpty(tableName)) {
+          createdInBatch.add(tableName.toLowerCase(Locale.ROOT));
+        }
+      }
+    } catch (Exception e) {
+      logError(
+          BaseMessages.getString(
+              PKG, "ActionDataVaultUpdate.Error.DdlExecutionFailed", targetDatabase.getName()),
+          e);
+      return false;
+    }
+    return true;
   }
 
   private boolean hasDdlStatements(List<String> ddlStatements) {

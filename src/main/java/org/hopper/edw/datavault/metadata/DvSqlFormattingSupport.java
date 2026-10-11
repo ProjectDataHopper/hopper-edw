@@ -240,7 +240,7 @@ public final class DvSqlFormattingSupport {
     for (int index = 0; index < selectList.length(); index++) {
       char current = selectList.charAt(index);
       quotes.advance(selectList, index, current);
-      if (!quotes.inLiteral()) {
+      if (!quotes.inLiteral() && !quotes.inComment()) {
         if (current == '(') {
           depth++;
         } else if (current == ')') {
@@ -271,7 +271,7 @@ public final class DvSqlFormattingSupport {
       char current = sql.charAt(index);
       quotes.advance(sql, index, current);
 
-      if (!quotes.inLiteral()) {
+      if (!quotes.inLiteral() && !quotes.inComment()) {
         if (current == '(') {
           depth++;
         } else if (current == ')') {
@@ -334,7 +334,7 @@ public final class DvSqlFormattingSupport {
     for (int index = fromIndex; index < sql.length(); index++) {
       char current = sql.charAt(index);
       quotes.advance(sql, index, current);
-      if (!quotes.inLiteral() && current == '(') {
+      if (!quotes.inLiteral() && !quotes.inComment() && current == '(') {
         int next = skipWhitespace(sql, index + 1);
         if (startsWithKeyword(sql, next, "SELECT")) {
           return index;
@@ -359,7 +359,16 @@ public final class DvSqlFormattingSupport {
 
     for (int index = 0; index < sql.length(); index++) {
       char current = sql.charAt(index);
+      boolean inComment = quotes.inComment();
       quotes.advance(sql, index, current);
+
+      if (inComment) {
+        pendingSpace = false;
+        if (current != '\r') {
+          out.append(current);
+        }
+        continue;
+      }
 
       if (quotes.inLiteral()) {
         if (pendingSpace) {
@@ -392,7 +401,7 @@ public final class DvSqlFormattingSupport {
       char current = sql.charAt(index);
       quotes.advance(sql, index, current);
 
-      if (!quotes.inLiteral()) {
+      if (!quotes.inLiteral() && !quotes.inComment()) {
         if (current == '(') {
           depth++;
         } else if (current == ')') {
@@ -417,7 +426,7 @@ public final class DvSqlFormattingSupport {
       char current = sql.charAt(index);
       quotes.advance(sql, index, current);
 
-      if (!quotes.inLiteral()) {
+      if (!quotes.inLiteral() && !quotes.inComment()) {
         if (current == '(') {
           depth++;
         } else if (current == ')') {
@@ -482,8 +491,22 @@ public final class DvSqlFormattingSupport {
   private static final class QuoteState {
     private boolean inSingleQuote;
     private boolean inDoubleQuote;
+    private boolean inLineComment;
+    private boolean inBlockComment;
 
     private void advance(String sql, int index, char current) {
+      if (inLineComment) {
+        if (current == '\n') {
+          inLineComment = false;
+        }
+        return;
+      }
+      if (inBlockComment) {
+        if (current == '/' && index > 0 && sql.charAt(index - 1) == '*') {
+          inBlockComment = false;
+        }
+        return;
+      }
       if (inDoubleQuote) {
         if (current == '"' && !isEscaped(sql, index)) {
           inDoubleQuote = false;
@@ -496,6 +519,14 @@ public final class DvSqlFormattingSupport {
         }
         return;
       }
+      if (current == '-' && index + 1 < sql.length() && sql.charAt(index + 1) == '-') {
+        inLineComment = true;
+        return;
+      }
+      if (current == '/' && index + 1 < sql.length() && sql.charAt(index + 1) == '*') {
+        inBlockComment = true;
+        return;
+      }
       if (current == '\'') {
         inSingleQuote = true;
       } else if (current == '"') {
@@ -505,6 +536,10 @@ public final class DvSqlFormattingSupport {
 
     private boolean inLiteral() {
       return inSingleQuote || inDoubleQuote;
+    }
+
+    private boolean inComment() {
+      return inLineComment || inBlockComment;
     }
   }
 

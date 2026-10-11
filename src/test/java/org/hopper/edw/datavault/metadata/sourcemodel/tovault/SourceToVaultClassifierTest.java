@@ -27,6 +27,8 @@ import org.hopper.edw.datavault.metadata.DvHub;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceColumn;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceEndpointKind;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceQuery;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceQueryColumn;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceRelationship;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
 import org.junit.jupiter.api.Test;
@@ -266,6 +268,78 @@ class SourceToVaultClassifierTest {
     }
     model.getRelationships().add(rel("order_line", "order_header", "order_id"));
     return model;
+  }
+
+  @Test
+  void compositeKeyWithOneParentStaysHubUntilOptionIsOn() {
+    SourceModel model = new SourceModel();
+    model.getTables().add(table("quality_run", pk("quality_run_id"), col("success")));
+    model
+        .getTables()
+        .add(
+            table(
+                "quality_finding",
+                pk("quality_run_id", 1),
+                pk("finding_seq", 2),
+                col("message")));
+    model.getRelationships().add(rel("quality_finding", "quality_run", "quality_run_id"));
+
+    SourceToVaultClassification defaults = SourceToVaultClassifier.classify(model);
+    assertEquals(SourceTableRole.HUB, defaults.findProposal("quality_finding").getRole());
+
+    SourceToVaultOptions options = SourceToVaultOptions.defaults();
+    options.setSingleParentCompositeKeyAsLink(true);
+    SourceToVaultClassification linked =
+        SourceToVaultClassifier.classify(model, null, null, options);
+    SourceToVaultProposal proposal = linked.findProposal("quality_finding");
+    assertEquals(SourceTableRole.LINK, proposal.getRole());
+    ProposedVaultObject link = proposal.firstOfKind(ProposedObjectKind.LINK);
+    assertEquals(List.of("finding_seq"), link.getDependentChildKeyColumns());
+    assertTrue(link.getParticipatingHubNames().contains("hub_quality_run"));
+  }
+
+  @Test
+  void queryParentIsIgnoredUnlessOptionIsOn() {
+    SourceModel model = new SourceModel();
+    model.getTables().add(table("load_run", pk("run_id"), col("workflow_name")));
+    model
+        .getTables()
+        .add(
+            table(
+                "load_pipeline_metric",
+                pk("run_id", 1),
+                pk("pipeline_name", 2),
+                col("duration_ms")));
+    model.getRelationships().add(rel("load_pipeline_metric", "load_run", "run_id"));
+
+    SourceQuery query = new SourceQuery("pipeline");
+    SourceQueryColumn key = new SourceQueryColumn("load_pipeline_metric", "pipeline_name");
+    key.setPrimaryKeyPosition(1);
+    query.getColumns().add(key);
+    model.getQueries().add(query);
+    SourceRelationship toPipeline = new SourceRelationship("fk_metric_pipeline");
+    toPipeline.setChildEndpointKind(SourceEndpointKind.TABLE);
+    toPipeline.setParentEndpointKind(SourceEndpointKind.QUERY);
+    toPipeline.setChildTableName("load_pipeline_metric");
+    toPipeline.setParentTableName("pipeline");
+    toPipeline.getChildColumns().add("pipeline_name");
+    toPipeline.getParentColumns().add("pipeline_name");
+    model.getRelationships().add(toPipeline);
+
+    assertEquals(
+        SourceTableRole.HUB,
+        SourceToVaultClassifier.classify(model).findProposal("load_pipeline_metric").getRole());
+
+    SourceToVaultOptions options = SourceToVaultOptions.defaults();
+    options.setSingleParentCompositeKeyAsLink(true);
+    SourceToVaultProposal linked =
+        SourceToVaultClassifier.classify(model, null, null, options)
+            .findProposal("load_pipeline_metric");
+    assertEquals(SourceTableRole.LINK, linked.getRole());
+    ProposedVaultObject link = linked.firstOfKind(ProposedObjectKind.LINK);
+    assertTrue(link.getParticipatingHubNames().contains("hub_load_run"));
+    assertTrue(link.getParticipatingHubNames().contains("hub_pipeline"));
+    assertTrue(link.getDependentChildKeyColumns().isEmpty());
   }
 
   private static SourceTable table(String name, SourceColumn... columns) {

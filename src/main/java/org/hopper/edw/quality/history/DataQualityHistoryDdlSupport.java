@@ -68,6 +68,12 @@ public final class DataQualityHistoryDdlSupport {
     return buildCreateStatements(databaseMeta, DataQualityHistoryPublisher.DEFAULT_SCHEMA_NAME);
   }
 
+  /** Dialect-specific CREATE statements for the quality history tables. */
+  public static List<String> previewCreateStatements(
+      DatabaseMeta databaseMeta, String operationsSchema) {
+    return buildCreateStatements(databaseMeta, operationsSchema);
+  }
+
   static List<String> buildCreateStatements(DatabaseMeta databaseMeta, String operationsSchema) {
     String schema = resolvePhysicalSchema(operationsSchema, databaseMeta);
     String pluginId =

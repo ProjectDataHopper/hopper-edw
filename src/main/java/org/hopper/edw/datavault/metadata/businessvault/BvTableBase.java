@@ -205,6 +205,14 @@ public abstract class BvTableBase extends HopMetadataBase implements IHopMetadat
     }
 
     String targetTableName = !Utils.isEmpty(getTableName()) ? getTableName() : getName();
+    String schema = ddlSchemaName();
+    if (variables != null && !Utils.isEmpty(schema)) {
+      schema = variables.resolve(schema);
+    }
+    if (!Utils.isEmpty(schema)) {
+      targetTableName =
+          targetDatabaseMeta.getQuotedSchemaTableCombination(variables, schema, targetTableName);
+    }
     IRowMeta targetFields =
         getTargetTableLayout(metadataProvider, variables, model, dataVaultModel);
     if (targetFields == null || targetFields.isEmpty()) {
@@ -239,6 +247,11 @@ public abstract class BvTableBase extends HopMetadataBase implements IHopMetadat
       throw new HopException("Error getting DDL for Business Vault table: " + targetTableName, e);
     }
     return result;
+  }
+
+  /** Schema for generated CREATE TABLE. Empty keeps the connection's default schema. */
+  protected String ddlSchemaName() {
+    return null;
   }
 
   @Override

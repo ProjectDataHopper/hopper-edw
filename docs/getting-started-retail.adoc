@@ -32,10 +32,12 @@ Project details: link:../retail-example/README.md[retail-example/README.md].
 
 == Chapter 1 — Understand the layout
 
-Retail uses two databases on port **54320**:
+Retail uses these databases on port **54320**:
 
 * **CRM** (`test_source`) — landing tables mimicking a source system
 * **Vault** (`test_edw`) — Data Vault, Business Vault, dimensional tables, retail load log
+* **OPS** (`test_ops`) — execution metrics and the `dv_ops` publisher tables
+* **OpsAnalytics** (`test_ops_analytics`) — operational analytics Data Vault, Business Vault, and dimensional tables
 
 Key files:
 
@@ -168,6 +170,12 @@ Full parameter reference, GUI issue dialogs, and sample HTML reports: link:resou
 ----
 
 Repeat to simulate monthly batches. Vault table `retail_load_log` stores each finished load. The next run sets `LOAD_DATE` to that date plus one month and writes the row only after the vault update succeeds.
+
+== Chapter 5c — Operational analytics
+
+After `run-retail-update-models`, both the initial and the update workflow call `models/ops-analytics/workflows/ops-analytics-incremental.hwf`. That reads OPS schema `dv_ops` into the operational-analytics warehouse on connection `OpsAnalytics` (database `test_ops_analytics`). The call does not create tables. Run `models/ops-analytics/workflows/ops-analytics-initial.hwf` once before you expect rows.
+
+The models are already in the project (`models/ops-analytics/`, group `ops-analytics`). `./scripts/run-postgres.sh up` creates `test_ops_analytics` and schema `ops_bv`. The retail database setup workflow runs `sql/create-ops-analytics.sql`, which creates that schema again. The analytics calendar `d_date` is in this database, separate from retail's `d_date` on `Vault`. If analytics fails, the initial workflow still generates the execution map and exports architecture, and the update workflow still records the load and exports architecture. Guide: link:ops-analytics.adoc[Operational analytics].
 
 == Chapter 5b — Transactional links: order lines
 

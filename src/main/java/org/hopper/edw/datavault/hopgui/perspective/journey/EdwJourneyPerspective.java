@@ -38,6 +38,7 @@ import org.apache.hop.ui.core.gui.IToolbarContainer;
 import org.apache.hop.ui.core.widget.MetaSelectionLine;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.hopgui.ToolbarFacade;
+import org.hopper.edw.datavault.hopgui.opsanalytics.OpsAnalyticsDialog;
 import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
 import org.apache.hop.ui.hopgui.perspective.HopPerspectivePlugin;
 import org.apache.hop.ui.hopgui.perspective.IHopPerspective;
@@ -77,6 +78,8 @@ public class EdwJourneyPerspective implements IHopPerspective {
   public static final String TOOLBAR_ITEM_COLLAPSE_ALL =
       "EdwJourneyPerspective-Toolbar-10003-CollapseAll";
   public static final String TOOLBAR_ITEM_AI_HELP = "EdwJourneyPerspective-Toolbar-10010-AI-Help";
+  public static final String TOOLBAR_ITEM_OPS_ANALYTICS =
+      "EdwJourneyPerspective-Toolbar-10020-OpsAnalytics";
 
   @Getter private static EdwJourneyPerspective instance;
 
@@ -368,6 +371,15 @@ public class EdwJourneyPerspective implements IHopPerspective {
       }
     }
     EdwAiAdvisorOpenSupport.openEdwJourney(hopGui, getSnapshot(), getOpsOverlay(), focus);
+  }
+
+  @GuiToolbarElement(
+      root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
+      id = TOOLBAR_ITEM_OPS_ANALYTICS,
+      toolTip = "i18n::EdwJourneyPerspective.Toolbar.OpsAnalytics.Tooltip",
+      image = "datavault-configuration.svg")
+  public void createOperationalAnalytics() {
+    OpsAnalyticsDialog.open(hopGui);
   }
 
   /**

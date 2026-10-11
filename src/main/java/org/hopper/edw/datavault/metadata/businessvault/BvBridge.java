@@ -67,6 +67,11 @@ public class BvBridge extends BvTableBase {
   }
 
   @Override
+  protected String ddlSchemaName() {
+    return schemaName;
+  }
+
+  @Override
   public List<PipelineMeta> generateBuildPipelines(
       IHopMetadataProvider metadataProvider,
       IVariables variables,

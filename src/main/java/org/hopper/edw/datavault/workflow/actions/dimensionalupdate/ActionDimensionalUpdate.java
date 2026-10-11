@@ -231,6 +231,19 @@ public class ActionDimensionalUpdate extends ActionBase implements Cloneable, IA
   @HopMetadataProperty
   private boolean updateTargetDatabaseStructure = true;
 
+  /**
+   * When structure update is off, still run CREATE TABLE for target tables that are not in the
+   * database yet. ALTER statements stay behind {@link #updateTargetDatabaseStructure}.
+   */
+  @GuiWidgetElement(
+      order = "0120",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::ActionDimensionalUpdate.CreateMissingTables.Label",
+      toolTip = "i18n::ActionDimensionalUpdate.CreateMissingTables.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_DDL_TAB_ID)
+  @HopMetadataProperty
+  private boolean createMissingTargetTables;
+
   @GuiWidgetElement(
       order = "0150",
       type = GuiElementType.METADATA,
@@ -284,6 +297,7 @@ public class ActionDimensionalUpdate extends ActionBase implements Cloneable, IA
     this.publishToCatalog = meta.publishToCatalog;
     this.dataCatalogConnection = meta.dataCatalogConnection;
     this.updateTargetDatabaseStructure = meta.updateTargetDatabaseStructure;
+    this.createMissingTargetTables = meta.createMissingTargetTables;
     this.targetTypeMapping = meta.targetTypeMapping;
     this.ddlSqlFilename = meta.ddlSqlFilename;
     this.failIfDdlNeeded = meta.failIfDdlNeeded;
@@ -540,6 +554,12 @@ public class ActionDimensionalUpdate extends ActionBase implements Cloneable, IA
       if (doNotUpdateTargetDatabase) {
         logBasic(BaseMessages.getString(PKG, "ActionDimensionalUpdate.Log.SkippingDataUpdate"));
         return finishExecution(result, success, totalErrors, dmModel);
+      }
+
+      if (!updateTargetDatabaseStructure && createMissingTargetTables) {
+        if (!executeMissingTableCreates(tables, dmModel)) {
+          return finishExecution(result, false, Math.max(totalErrors, 1), dmModel);
+        }
       }
 
       DimensionalConfiguration pipelineConfig = dmModel.getConfigurationOrDefault();
@@ -809,6 +829,84 @@ public class ActionDimensionalUpdate extends ActionBase implements Cloneable, IA
         BaseMessages.getString(
             DvIntegerSettingValidationSupport.class,
             "DvIntegerSettingValidation.Label.ParallelPipelineCopies"));
+  }
+
+  /**
+   * Creates target tables that are not in the database yet. Does not apply ALTER statements.
+   *
+   * @return false when DDL generation or execution fails
+   */
+  private boolean executeMissingTableCreates(List<IDmTable> tables, DimensionalModel dmModel) {
+    List<String> creates = new ArrayList<>();
+    for (IDmTable table : tables) {
+      try {
+        for (String ddl : table.generateBuildDdl(getMetadataProvider(), getVariables(), dmModel)) {
+          if (DvDdlSupport.extractCreateTableName(ddl) != null) {
+            creates.add(ddl);
+          }
+        }
+      } catch (Exception ex) {
+        logError(
+            BaseMessages.getString(
+                PKG, "ActionDimensionalUpdate.Error.DdlGenerateFailed", table.getName()),
+            ex);
+        return false;
+      }
+    }
+    creates = DvDdlSupport.deduplicateCreateTableDdl(creates);
+    if (!hasDdlStatements(creates)) {
+      return true;
+    }
+    DatabaseMeta targetDatabase;
+    try {
+      targetDatabase =
+          DmTargetDatabaseSupport.loadTargetDatabase(
+              getMetadataProvider(), dmModel.getConfigurationOrDefault());
+    } catch (Exception e) {
+      logError(
+          BaseMessages.getString(PKG, "ActionDimensionalUpdate.Error.DdlExecutionFailed", ""), e);
+      return false;
+    }
+    if (targetDatabase == null) {
+      logError(BaseMessages.getString(PKG, "ActionDimensionalUpdate.Error.DdlExecutionFailed", ""));
+      return false;
+    }
+    ILoggingObject loggingObject =
+        new SimpleLoggingObject("ActionDimensionalUpdate", LoggingObjectType.GENERAL, null);
+    try (Database db = new Database(loggingObject, getVariables(), targetDatabase)) {
+      db.connect();
+      Set<String> createdInBatch = new HashSet<>();
+      for (String ddl : creates) {
+        if (Utils.isEmpty(ddl)) {
+          continue;
+        }
+        if (DvDdlSupport.shouldSkipCreateTable(
+            db, getVariables(), targetDatabase, ddl, createdInBatch)) {
+          String tableName = DvDdlSupport.extractCreateTableName(ddl);
+          if (!Utils.isEmpty(tableName)) {
+            createdInBatch.add(tableName.toLowerCase(Locale.ROOT));
+          }
+          continue;
+        }
+        String tableName = DvDdlSupport.extractCreateTableName(ddl);
+        logBasic(
+            BaseMessages.getString(
+                PKG,
+                "ActionDimensionalUpdate.Log.CreatingMissingTable",
+                tableName != null ? tableName : targetDatabase.getName()));
+        db.execStatements(ddl);
+        if (!Utils.isEmpty(tableName)) {
+          createdInBatch.add(tableName.toLowerCase(Locale.ROOT));
+        }
+      }
+    } catch (Exception e) {
+      logError(
+          BaseMessages.getString(
+              PKG, "ActionDimensionalUpdate.Error.DdlExecutionFailed", targetDatabase.getName()),
+          e);
+      return false;
+    }
+    return true;
   }
 
   private boolean hasDdlStatements(List<String> ddlStatements) {

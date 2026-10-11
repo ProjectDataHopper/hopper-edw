@@ -1,0 +1,9 @@
+{
+  "engineRunConfiguration" : {
+    "Local" : { }
+  },
+  "defaultSelection" : false,
+  "name" : "ops-analytics-workflow",
+  "description" : "Local workflow engine for operational analytics updates. Execution information is not written to the OPS executions table.",
+  "executionInfoLocationName" : "ops-analytics-executions"
+}

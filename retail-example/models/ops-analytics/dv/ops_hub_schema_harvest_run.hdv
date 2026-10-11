@@ -1,0 +1,134 @@
+<!--
+Copyright 2026 i-Bridge bv
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<data-vault-model>
+  <name_sync_with_filename>Y</name_sync_with_filename>
+  <description>Generated hub hub_schema_harvest_run and its satellites.</description>
+  <configurationName>ops-analytics-dv</configurationName>
+  <tables>
+    <table>
+      <businessKeys>
+        <name>harvest_run_id</name>
+        <dataType>String</dataType>
+        <length>64</length>
+        <composite>N</composite>
+        <sourceFieldNames/>
+        <sourceFieldName>harvest_run_id</sourceFieldName>
+        <recordSourceName>schema_harvest_run</recordSourceName>
+      </businessKeys>
+      <hashKeyFieldName>schema_harvest_run_hk</hashKeyFieldName>
+      <recordSources>
+        <recordSource>schema_harvest_run</recordSource>
+      </recordSources>
+      <allowInferredInsert>Y</allowInferredInsert>
+      <tableName>hub_schema_harvest_run</tableName>
+      <tableType>HUB</tableType>
+      <integrationMode>HOP_MANAGED</integrationMode>
+      <customUpdatePipelinePaths/>
+      <xloc>64</xloc>
+      <yloc>64</yloc>
+      <name>hub_schema_harvest_run</name>
+      <virtualPath/>
+    </table>
+    <table>
+      <hub>hub_schema_harvest_run</hub>
+      <attributes>
+        <name>started_at</name>
+        <dataType>Date</dataType>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>finished_at</name>
+        <dataType>Date</dataType>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>resource_group_name</name>
+        <dataType>String</dataType>
+        <length>255</length>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>catalog_connection</name>
+        <dataType>String</dataType>
+        <length>255</length>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>expected_baseline</name>
+        <dataType>String</dataType>
+        <length>128</length>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>status</name>
+        <dataType>String</dataType>
+        <length>16</length>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>subject_count</name>
+        <dataType>Integer</dataType>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>change_count</name>
+        <dataType>Integer</dataType>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>error_count</name>
+        <dataType>Integer</dataType>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>subjects_with_changes</name>
+        <dataType>Integer</dataType>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>workflow_name</name>
+        <dataType>String</dataType>
+        <length>255</length>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>scope_summary</name>
+        <dataType>String</dataType>
+        <length>2000</length>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <parentKeySourceFields>
+        <parentKeySourceField>harvest_run_id</parentKeySourceField>
+      </parentKeySourceFields>
+      <recordSource>schema_harvest_run</recordSource>
+      <storeRecordSource>Y</storeRecordSource>
+      <statusTrackingEnabled>N</statusTrackingEnabled>
+      <statusFieldName>record_status</statusFieldName>
+      <activeStatusValue>ACTIVE</activeStatusValue>
+      <deletedStatusValue>DELETED</deletedStatusValue>
+      <tableName>sat_schema_harvest_run</tableName>
+      <tableType>SATELLITE</tableType>
+      <integrationMode>HOP_MANAGED</integrationMode>
+      <customUpdatePipelinePaths/>
+      <xloc>224</xloc>
+      <yloc>64</yloc>
+      <name>sat_schema_harvest_run</name>
+      <virtualPath/>
+    </table>
+  </tables>
+  <notes/>
+  <name>ops_hub_schema_harvest_run</name>
+</data-vault-model>

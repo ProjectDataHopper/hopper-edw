@@ -1,0 +1,249 @@
+<!--
+Copyright 2026 i-Bridge bv
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<semantic-model>
+  <description>Consumption layer for operational analytics.</description>
+  <dimensionalModelFilename>${PROJECT_HOME}/models/ops-analytics/dm/ops-f-pipeline-load.hdm</dimensionalModelFilename>
+  <targetDatabase>ops-analytics-dm</targetDatabase>
+  <entities>
+    <entity>
+      <name>fact_pipeline_load</name>
+      <description>Transaction fact published from link satellite 'sat_lnk_load_pipeline_metric' (parent link 'lnk_load_pipeline_metric').</description>
+      <role>FACT</role>
+      <binding>
+        <kind>HDM</kind>
+        <modelFilename>/home/matt/git/ProjectDataHopper/hopper-edw/retail-example/models/ops-analytics/dm/ops-f-pipeline-load.hdm</modelFilename>
+        <tableName>fact_pipeline_load</tableName>
+        <physicalTableName>f_pipeline_load</physicalTableName>
+      </binding>
+      <attributes>
+        <attribute>
+          <name>run_id</name>
+          <physicalColumn>run_id</physicalColumn>
+          <header>Run id</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>element_type</name>
+          <physicalColumn>element_type</physicalColumn>
+          <header>Element type</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>element_name</name>
+          <physicalColumn>element_name</physicalColumn>
+          <header>Element name</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>source_name</name>
+          <physicalColumn>source_name</physicalColumn>
+          <header>Source name</header>
+          <formatMask/>
+        </attribute>
+      </attributes>
+      <measures>
+        <measure>
+          <name>source_rows_read</name>
+          <physicalColumn>source_rows_read</physicalColumn>
+          <header>Source rows read</header>
+          <formatMask>#,##0.00</formatMask>
+          <aggregation>SUM</aggregation>
+          <additive>Y</additive>
+        </measure>
+        <measure>
+          <name>target_rows_read</name>
+          <physicalColumn>target_rows_read</physicalColumn>
+          <header>Target rows read</header>
+          <formatMask>#,##0.00</formatMask>
+          <aggregation>SUM</aggregation>
+          <additive>Y</additive>
+        </measure>
+        <measure>
+          <name>target_rows_inserted</name>
+          <physicalColumn>target_rows_inserted</physicalColumn>
+          <header>Target rows inserted</header>
+          <formatMask>#,##0.00</formatMask>
+          <aggregation>SUM</aggregation>
+          <additive>Y</additive>
+        </measure>
+        <measure>
+          <name>errors</name>
+          <physicalColumn>errors</physicalColumn>
+          <header>Errors</header>
+          <formatMask>#,##0.00</formatMask>
+          <aggregation>SUM</aggregation>
+          <additive>Y</additive>
+        </measure>
+        <measure>
+          <name>duration_ms</name>
+          <physicalColumn>duration_ms</physicalColumn>
+          <header>Duration ms</header>
+          <formatMask>#,##0.00</formatMask>
+          <aggregation>SUM</aggregation>
+          <additive>Y</additive>
+        </measure>
+      </measures>
+    </entity>
+    <entity>
+      <name>dim_pipeline</name>
+      <description>Conformed dimension dim_pipeline</description>
+      <role>DIMENSION</role>
+      <binding>
+        <kind>HDM</kind>
+        <modelFilename>/home/matt/git/ProjectDataHopper/hopper-edw/retail-example/models/ops-analytics/dm/ops-f-pipeline-load.hdm</modelFilename>
+        <tableName>dim_pipeline</tableName>
+        <physicalTableName>d_pipeline</physicalTableName>
+      </binding>
+      <attributes>
+        <attribute>
+          <name>pipeline_name</name>
+          <physicalColumn>pipeline_name</physicalColumn>
+          <header>Pipeline name</header>
+          <formatMask/>
+        </attribute>
+      </attributes>
+      <measures/>
+    </entity>
+    <entity>
+      <name>dim_load_date</name>
+      <description>Role-playing alias of dim_date</description>
+      <role>DIMENSION</role>
+      <binding>
+        <kind>HDM</kind>
+        <modelFilename>/home/matt/git/ProjectDataHopper/hopper-edw/retail-example/models/ops-analytics/dm/ops-f-pipeline-load.hdm</modelFilename>
+        <tableName>dim_load_date</tableName>
+        <physicalTableName>d_date</physicalTableName>
+      </binding>
+      <attributes>
+        <attribute>
+          <name>date_key</name>
+          <physicalColumn>date_key</physicalColumn>
+          <header>Date key</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>full_date</name>
+          <physicalColumn>full_date</physicalColumn>
+          <header>Full date</header>
+          <formatMask>yyyy-MM-dd</formatMask>
+        </attribute>
+        <attribute>
+          <name>day_of_week</name>
+          <physicalColumn>day_of_week</physicalColumn>
+          <header>Day of week</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>day_of_month</name>
+          <physicalColumn>day_of_month</physicalColumn>
+          <header>Day of month</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>day_of_year</name>
+          <physicalColumn>day_of_year</physicalColumn>
+          <header>Day of year</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>week_of_year</name>
+          <physicalColumn>week_of_year</physicalColumn>
+          <header>Week of year</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>month</name>
+          <physicalColumn>month</physicalColumn>
+          <header>Month</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>month_name</name>
+          <physicalColumn>month_name</physicalColumn>
+          <header>Month name</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>quarter</name>
+          <physicalColumn>quarter</physicalColumn>
+          <header>Quarter</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>year</name>
+          <physicalColumn>year</physicalColumn>
+          <header>Year</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>is_weekend</name>
+          <physicalColumn>is_weekend</physicalColumn>
+          <header>Is weekend</header>
+          <formatMask/>
+        </attribute>
+      </attributes>
+      <measures/>
+    </entity>
+  </entities>
+  <relationships>
+    <relationship>
+      <name>fact_pipeline_load_dim_pipeline</name>
+      <fromEntity>fact_pipeline_load</fromEntity>
+      <toEntity>dim_pipeline</toEntity>
+      <joinType>INNER</joinType>
+      <fromField>pipeline_key</fromField>
+      <toField>pipeline_name</toField>
+      <roleName>dim_pipeline</roleName>
+    </relationship>
+    <relationship>
+      <name>fact_pipeline_load_dim_load_date</name>
+      <fromEntity>fact_pipeline_load</fromEntity>
+      <toEntity>dim_load_date</toEntity>
+      <joinType>INNER</joinType>
+      <fromField>execution_start_date_key</fromField>
+      <toField>date_key</toField>
+      <roleName>dim_load_date</roleName>
+    </relationship>
+  </relationships>
+  <selections>
+    <selection>
+      <name>pipeline-duration-by-day</name>
+      <entityName>fact_pipeline_load</entityName>
+      <groups/>
+      <rows>
+        <row>
+          <entityName>dim_pipeline</entityName>
+          <fieldName>pipeline_name</fieldName>
+        </row>
+      </rows>
+      <columns>
+        <column>
+          <entityName>dim_load_date</entityName>
+          <fieldName>full_date</fieldName>
+        </column>
+      </columns>
+      <measures>
+        <measure>
+          <entityName>fact_pipeline_load</entityName>
+          <fieldName>duration_ms</fieldName>
+        </measure>
+      </measures>
+      <showingHorizontalTotals>Y</showingHorizontalTotals>
+      <showingVerticalTotals>Y</showingVerticalTotals>
+    </selection>
+  </selections>
+  <name>ops-f-pipeline-load</name>
+</semantic-model>

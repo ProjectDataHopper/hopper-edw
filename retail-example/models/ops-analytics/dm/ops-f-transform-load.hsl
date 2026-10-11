@@ -1,0 +1,148 @@
+<!--
+Copyright 2026 i-Bridge bv
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<semantic-model>
+  <description>Consumption layer for operational analytics.</description>
+  <dimensionalModelFilename>${PROJECT_HOME}/models/ops-analytics/dm/ops-f-transform-load.hdm</dimensionalModelFilename>
+  <targetDatabase>ops-analytics-dm</targetDatabase>
+  <entities>
+    <entity>
+      <name>fact_transform_load</name>
+      <description>Transaction fact published from link satellite 'sat_lnk_load_transform_metric' (parent link 'lnk_load_transform_metric').</description>
+      <role>FACT</role>
+      <binding>
+        <kind>HDM</kind>
+        <modelFilename>/home/matt/git/ProjectDataHopper/hopper-edw/retail-example/models/ops-analytics/dm/ops-f-transform-load.hdm</modelFilename>
+        <tableName>fact_transform_load</tableName>
+        <physicalTableName>f_transform_load</physicalTableName>
+      </binding>
+      <attributes>
+        <attribute>
+          <name>run_id</name>
+          <physicalColumn>run_id</physicalColumn>
+          <header>Run id</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>element_type</name>
+          <physicalColumn>element_type</physicalColumn>
+          <header>Element type</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>element_name</name>
+          <physicalColumn>element_name</physicalColumn>
+          <header>Element name</header>
+          <formatMask/>
+        </attribute>
+      </attributes>
+      <measures>
+        <measure>
+          <name>rows_read</name>
+          <physicalColumn>rows_read</physicalColumn>
+          <header>Rows read</header>
+          <formatMask>#,##0.00</formatMask>
+          <aggregation>SUM</aggregation>
+          <additive>Y</additive>
+        </measure>
+        <measure>
+          <name>rows_written</name>
+          <physicalColumn>rows_written</physicalColumn>
+          <header>Rows written</header>
+          <formatMask>#,##0.00</formatMask>
+          <aggregation>SUM</aggregation>
+          <additive>Y</additive>
+        </measure>
+        <measure>
+          <name>rows_updated</name>
+          <physicalColumn>rows_updated</physicalColumn>
+          <header>Rows updated</header>
+          <formatMask>#,##0.00</formatMask>
+          <aggregation>SUM</aggregation>
+          <additive>Y</additive>
+        </measure>
+        <measure>
+          <name>rows_rejected</name>
+          <physicalColumn>rows_rejected</physicalColumn>
+          <header>Rows rejected</header>
+          <formatMask>#,##0.00</formatMask>
+          <aggregation>SUM</aggregation>
+          <additive>Y</additive>
+        </measure>
+        <measure>
+          <name>errors</name>
+          <physicalColumn>errors</physicalColumn>
+          <header>Errors</header>
+          <formatMask>#,##0.00</formatMask>
+          <aggregation>SUM</aggregation>
+          <additive>Y</additive>
+        </measure>
+        <measure>
+          <name>duration_ms</name>
+          <physicalColumn>duration_ms</physicalColumn>
+          <header>Duration ms</header>
+          <formatMask>#,##0.00</formatMask>
+          <aggregation>SUM</aggregation>
+          <additive>Y</additive>
+        </measure>
+      </measures>
+    </entity>
+    <entity>
+      <name>dim_transform</name>
+      <description>Conformed dimension dim_transform</description>
+      <role>DIMENSION</role>
+      <binding>
+        <kind>HDM</kind>
+        <modelFilename>/home/matt/git/ProjectDataHopper/hopper-edw/retail-example/models/ops-analytics/dm/ops-f-transform-load.hdm</modelFilename>
+        <tableName>dim_transform</tableName>
+        <physicalTableName>d_transform</physicalTableName>
+      </binding>
+      <attributes>
+        <attribute>
+          <name>transform_key</name>
+          <physicalColumn>transform_key</physicalColumn>
+          <header>Transform key</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>pipeline_name</name>
+          <physicalColumn>pipeline_name</physicalColumn>
+          <header>Pipeline name</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>transform_name</name>
+          <physicalColumn>transform_name</physicalColumn>
+          <header>Transform name</header>
+          <formatMask/>
+        </attribute>
+      </attributes>
+      <measures/>
+    </entity>
+  </entities>
+  <relationships>
+    <relationship>
+      <name>fact_transform_load_dim_transform</name>
+      <fromEntity>fact_transform_load</fromEntity>
+      <toEntity>dim_transform</toEntity>
+      <joinType>INNER</joinType>
+      <fromField>transform_key</fromField>
+      <toField>transform_key</toField>
+      <roleName>dim_transform</roleName>
+    </relationship>
+  </relationships>
+  <selections/>
+  <name>ops-f-transform-load</name>
+</semantic-model>

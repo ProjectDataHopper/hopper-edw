@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS hop_executions
 , status_description VARCHAR(128)
 , duration_ms BIGINT
 , json TEXT
+, project_id varchar(1024)
 )
 ;
 CREATE INDEX IF NOT EXISTS idx_hop_exec_start ON hop_executions(execution_start_date)

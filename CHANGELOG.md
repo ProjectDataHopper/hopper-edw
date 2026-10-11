@@ -4,6 +4,25 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Operational analytics (issue #195)
+
+- **Create operational analytics...** on the EDW Journey toolbar and under **Tools** generates a source model, raw Data Vault, Business Vault, dimensional model, semantic layer, bus catalog, and two load workflows from the OPS database. The OPS tables have primary keys and no foreign keys; the generator adds the logical relationships and six conformed-key queries. `hop_executions` is optional and is not treated as `workflow_execution_id`.
+- Business Vault views `bv_load_run_duration` and `bv_model_latest_load`, plus bridge `bv_workflow_models`, are created in schema `ops_bv`. Duration SQL follows the target database (Postgres `EXTRACT`, MySQL/SingleStore `TIMESTAMPDIFF`, SQL Server `DATEDIFF_BIG`, Snowflake `DATEDIFF`).
+- The star keeps twelve facts (`f_pipeline_load` through `f_harvest_change`), each in its own `.hdm`. Conformed dimensions, including `dim_date`, are in `ops-analytics-dimensions.hdm`. Fact files alias that file. Type 1 dimensions project the vault load date as `load_dt`. Fact SQL includes degenerate run keys stored on a parent hub, including a source column whose name differs from the hub business key (`load_run_id` from `run_id`). Named selections: `pipeline-duration-by-day`, `model-load-trend`, `quality-findings-by-severity`.
+- `ops-analytics-initial` creates the analytics tables. `ops-analytics-incremental` does not. Data Vault and Business Vault loads stay hash-diff. Dimensional facts insert on every run. The load does not publish metrics back into OPS.
+- The analytics update publishes `ops-analytics.hsm` into the project sources catalog before the load, so feeds such as `load_run` and `transform` exist in `local-catalog`.
+- Operational analytics model check accepts a one-hub link that has a dependent child key. Composite hub keys (`dim_transform`, `dim_model`) are one concatenated natural key. Facts without numeric satellite columns get a `row_count` measure and source SQL.
+- The operational analytics incremental load creates Data Vault tables that are not in the target database yet. It does not alter tables that already exist. The initial load still applies CREATE and ALTER.
+- Retail operational analytics stores Data Vault, Business Vault, and dimensional tables in PostgreSQL database `test_ops_analytics` (connection `OpsAnalytics`). `./scripts/run-postgres.sh up` creates the database and schema `ops_bv`. `retail-example/sql/create-ops-analytics.sql` creates the schema.
+- A Business Vault bridge query resolves `{{ ref() }}` to table names before Table Input runs, so `{...}` is not treated as a JDBC parameter.
+- A Business Vault bridge is created in its schema, such as `ops_bv.bv_workflow_models`, and the incremental load creates that table when it is missing.
+- The incremental operational analytics load also creates missing dimensional tables, such as `d_date` and `d_model`, and does not alter tables that already exist.
+- Generated pipeline SQL keeps a `--` comment intact when the comment contains words such as `from`, so a draft dimension query stays valid.
+- Fact loads resolve a Type 1 dimension key with Database Lookup. Dimension Lookup stays on dimensions that store a date range.
+- **Create operational analytics** asks for the pipeline and workflow run configurations used to update the models. The defaults, `ops-analytics-pipeline` and `ops-analytics-workflow`, have no data profile and write execution information to the file location `ops-analytics-executions` instead of the OPS executions table.
+- A link loaded from a source-model query, such as `lnk_transform`, receives its hub-key mapping when the update pipeline is generated.
+- The retail project ships the generated stack under `retail-example/models/ops-analytics/` with all three targets on connection `Vault`. `run-retail-initial` and `run-retail-update` call the incremental workflow after the model update. An analytics failure continues the retail load. Docs: [docs/ops-analytics.adoc](docs/ops-analytics.adoc).
+
 ### Retail initial order wave (issue #192)
 
 - The retail initial load emits the same number of orders as a monthly update (`max(50, ORDERS/100)`, 1,000 when `ORDERS` is 100,000). Order lines, shipment events, order reps, and ASN lines follow that order count. Customer, product, and warehouse opening populations are unchanged. Later order ids still start at `ORDERS+1`.

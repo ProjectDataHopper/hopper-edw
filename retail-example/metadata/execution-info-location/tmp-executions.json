@@ -2,9 +2,10 @@
   "executionInfoLocation": {
     "caching-file-location": {
       "createParentFolder": true,
+      "maxCacheSize": "20",
       "persistenceDelay": "5000",
       "rootFolder": "${EXECUTIONS_FOLDER}",
-      "maxCacheAge": "86400000"
+      "maxCacheAge": "10000"
     }
   },
   "dataLoggingDelay": "2000",

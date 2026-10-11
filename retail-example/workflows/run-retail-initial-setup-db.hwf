@@ -304,6 +304,23 @@ limitations under the License.
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
+    <action>
+      <sql/>
+      <connection>OpsAnalytics</connection>
+      <useVariableSubstitution>N</useVariableSubstitution>
+      <sqlfromfile>Y</sqlfromfile>
+      <sqlfilename>${PROJECT_HOME}/sql/create-ops-analytics.sql</sqlfilename>
+      <sqlfilename_encoding/>
+      <sendOneStatement>N</sendOneStatement>
+      <name>create-ops-analytics.sql</name>
+      <description>Create schema ops_bv on the operational analytics database</description>
+      <type>SQL</type>
+      <attributes/>
+      <xloc>1200</xloc>
+      <yloc>48</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
   </actions>
   <hops>
     <hop>
@@ -378,6 +395,13 @@ limitations under the License.
     </hop>
     <hop>
       <from>ops-create-hop-executions-table-indexes.sql</from>
+      <to>create-ops-analytics.sql</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>create-ops-analytics.sql</from>
       <to>Bootstrap retail work</to>
       <evaluation>Y</evaluation>
       <unconditional>N</unconditional>

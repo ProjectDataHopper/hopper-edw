@@ -37,6 +37,7 @@ import org.hopper.edw.datavault.metadata.IDvTable;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceColumn;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceEndpointKind;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceQuery;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceRelationship;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
 
@@ -86,6 +87,9 @@ public final class SourceToVaultClassifier {
     List<NormalizedFk> fks = normalizeRelationships(sourceModel, result.getWarnings());
     Map<String, HubCluster> clusters = buildClusters(sourceModel, fks);
     assignHubNames(clusters, existingVault);
+    if (effective.isSingleParentCompositeKeyAsLink()) {
+      registerQueryHubs(sourceModel, clusters);
+    }
     Set<String> referenceNames =
         effective.isCreateReferenceTables()
             ? detectReferenceTables(sourceModel, selected, fks, clusters)
@@ -204,6 +208,11 @@ public final class SourceToVaultClassifier {
         && !ownCluster.kernel.getName().equals(table.getName())
         && ownCluster.members.size() > 1) {
       return classifySameGrainSatellite(table, ownCluster, pk, technical, options);
+    }
+
+    if (options.isSingleParentCompositeKeyAsLink() && isSingleParentCompositeLink(pk, fkGroups)) {
+      return classifyLink(
+          table, pk, fkGroups, outgoing, clusters, technical, options, requiredHubClusters);
     }
 
     return classifyHub(
@@ -461,6 +470,52 @@ public final class SourceToVaultClassifier {
       }
     }
     return coveredPk >= 2;
+  }
+
+  /**
+   * Composite key with at least one foreign-key column and at least one leftover key column. Used
+   * only when {@link SourceToVaultOptions#isSingleParentCompositeKeyAsLink()} is set. A key that is
+   * entirely one foreign key stays a hub or a same-grain satellite.
+   */
+  private static boolean isSingleParentCompositeLink(
+      List<String> pk, Map<String, List<String>> fkGroups) {
+    if (pk.size() < 2 || fkGroups.isEmpty()) {
+      return false;
+    }
+    Set<String> covered = new HashSet<>();
+    for (List<String> cols : fkGroups.values()) {
+      covered.addAll(lowerCopy(cols));
+    }
+    int coveredPk = 0;
+    for (String key : pk) {
+      if (covered.contains(key.toLowerCase(Locale.ROOT))) {
+        coveredPk++;
+      }
+    }
+    return coveredPk >= 1 && coveredPk < pk.size();
+  }
+
+  /**
+   * Keyed source queries become hub parents so a table relationship can target them. Table clusters
+   * are unchanged. Skipped when a table already occupies the query name.
+   */
+  private static void registerQueryHubs(SourceModel model, Map<String, HubCluster> clusters) {
+    if (model == null) {
+      return;
+    }
+    for (SourceQuery query : model.getQueries()) {
+      if (query == null || Utils.isEmpty(query.getName()) || clusters.containsKey(query.getName())) {
+        continue;
+      }
+      ClassifiableSource feed = ClassifiableSource.fromQuery(query);
+      if (feed == null || feed.getPrimaryKeyNames().isEmpty()) {
+        continue;
+      }
+      HubCluster cluster = new HubCluster();
+      cluster.feedName = query.getName();
+      cluster.hubName = SourceToVaultNaming.hubName(query.getName());
+      clusters.put(query.getName(), cluster);
+    }
   }
 
   private static Map<String, List<String>> fkGroupsByParentCluster(
@@ -749,7 +804,13 @@ public final class SourceToVaultClassifier {
   }
 
   private static String clusterId(HubCluster cluster) {
-    return cluster.kernel != null ? cluster.kernel.getName() : cluster.members.get(0).getName();
+    if (cluster.kernel != null) {
+      return cluster.kernel.getName();
+    }
+    if (!Utils.isEmpty(cluster.feedName)) {
+      return cluster.feedName;
+    }
+    return cluster.members.get(0).getName();
   }
 
   private static List<String> satelliteColumns(
@@ -1472,6 +1533,10 @@ public final class SourceToVaultClassifier {
   private static final class HubCluster {
     final List<SourceTable> members = new ArrayList<>();
     SourceTable kernel;
+
+    /** Set when this cluster is a keyed source query rather than a physical table. */
+    String feedName;
+
     String hubName;
     boolean reuseExisting;
   }

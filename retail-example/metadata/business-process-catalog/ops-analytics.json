@@ -1,0 +1,30 @@
+{
+  "virtualPath": "",
+  "domain": [
+    {
+      "name": "Operational analytics",
+      "description": "Warehouse operations"
+    }
+  ],
+  "name": "ops-analytics",
+  "description": "Bus matrix for operational analytics facts.",
+  "level1": [
+    {
+      "parentName": "Operational analytics",
+      "name": "Load",
+      "description": "Load timing and workflow overview"
+    },
+    {
+      "parentName": "Operational analytics",
+      "name": "Quality",
+      "description": "Data quality history"
+    },
+    {
+      "parentName": "Operational analytics",
+      "name": "Harvest",
+      "description": "Schema harvest history"
+    }
+  ],
+  "level3": [],
+  "level2": []
+}

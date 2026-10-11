@@ -145,6 +145,32 @@ class DvLinkValidationTest {
   }
 
   @Test
+  void checkAllowsOneHubWhenDependentChildKeyIsPresent() {
+    DataVaultModel model = new DataVaultModel();
+    DvHub hub = new DvHub("hub_load_run");
+    hub.setHashKeyFieldName("load_run_hk");
+    model.getTables().add(hub);
+
+    DvLink link = new DvLink("lnk_load_insight");
+    link.setLinkHashKeyFieldName("lnk_load_insight_hk");
+    link.getHubNames().add("hub_load_run");
+    link.getDependentChildKeys().add(new DependentChildKey("insight_seq"));
+    model.getTables().add(link);
+
+    List<ICheckResult> remarks = new ArrayList<>();
+    link.check(remarks, null, new Variables(), DvModelCheckOptions.defaults(), model);
+
+    assertFalse(
+        remarks.stream()
+            .anyMatch(
+                r ->
+                    r.getType() == ICheckResult.TYPE_RESULT_ERROR
+                        && r.getText()
+                            .equals(
+                                BaseMessages.getString(PKG, "DvLink.CheckResult.NotEnoughHubs"))));
+  }
+
+  @Test
   void checkErrorsWhenLinkHubSourcesMissing() {
     DvLink link = new DvLink("lnk_order");
     link.getHubNames().add("hub_customer");

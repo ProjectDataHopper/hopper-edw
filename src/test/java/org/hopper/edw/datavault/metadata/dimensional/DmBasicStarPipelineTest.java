@@ -33,6 +33,7 @@ import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
+import org.apache.hop.pipeline.transforms.databaselookup.DatabaseLookupMeta;
 import org.apache.hop.pipeline.transforms.dimensionlookup.DimensionLookupMeta;
 import org.apache.hop.pipeline.transforms.insertupdate.InsertUpdateMeta;
 import org.apache.hop.pipeline.transforms.insertupdate.InsertUpdateValue;
@@ -129,7 +130,7 @@ class DmBasicStarPipelineTest {
 
     long lookupCount =
         pipelineMeta.getTransforms().stream()
-            .filter(t -> t.getTransform() instanceof DimensionLookupMeta)
+            .filter(t -> t.getTransform() instanceof DatabaseLookupMeta)
             .count();
     assertEquals(2, lookupCount);
 
@@ -138,12 +139,13 @@ class DmBasicStarPipelineTest {
             .filter(t -> "lookup_Customer".equals(t.getName()))
             .findFirst()
             .orElseThrow();
-    DimensionLookupMeta customerLookupMeta = (DimensionLookupMeta) customerLookup.getTransform();
-    assertFalse(customerLookupMeta.isUpdate());
-    assertEquals("d_customer", customerLookupMeta.getTableName());
-    assertEquals("customer_key", customerLookupMeta.getFields().getReturns().getKeyRename());
-    assertFalse(customerLookupMeta.isPreloadingCache());
-    assertTrue(Utils.isEmpty(customerLookupMeta.getFields().getDate().getName()));
+    DatabaseLookupMeta customerLookupMeta = (DatabaseLookupMeta) customerLookup.getTransform();
+    assertEquals("d_customer", customerLookupMeta.getLookup().getTableName());
+    assertEquals(
+        "customer_id", customerLookupMeta.getLookup().getReturnValues().get(0).getTableField());
+    assertEquals("customer_key", customerLookupMeta.getLookup().getReturnValues().get(0).getNewName());
+    assertTrue(customerLookupMeta.isCached());
+    assertFalse(customerLookupMeta.isLoadingAllDataInCache());
 
     TransformMeta tableOutput =
         pipelineMeta.getTransforms().stream()
@@ -165,23 +167,23 @@ class DmBasicStarPipelineTest {
     PipelineMeta pipelineMeta =
         fact.generateUpdatePipelines(metadataProvider, new Variables(), model, new Date()).get(0);
 
-    DimensionLookupMeta customerLookupMeta =
-        (DimensionLookupMeta)
+    DatabaseLookupMeta customerLookupMeta =
+        (DatabaseLookupMeta)
             pipelineMeta.getTransforms().stream()
                 .filter(t -> "lookup_Customer".equals(t.getName()))
                 .findFirst()
                 .orElseThrow()
                 .getTransform();
-    DimensionLookupMeta productLookupMeta =
-        (DimensionLookupMeta)
+    DatabaseLookupMeta productLookupMeta =
+        (DatabaseLookupMeta)
             pipelineMeta.getTransforms().stream()
                 .filter(t -> "lookup_Product".equals(t.getName()))
                 .findFirst()
                 .orElseThrow()
                 .getTransform();
 
-    assertTrue(customerLookupMeta.isPreloadingCache());
-    assertFalse(productLookupMeta.isPreloadingCache());
+    assertTrue(customerLookupMeta.isLoadingAllDataInCache());
+    assertFalse(productLookupMeta.isLoadingAllDataInCache());
   }
 
   @Test
@@ -201,8 +203,8 @@ class DmBasicStarPipelineTest {
                 .findFirst()
                 .orElseThrow()
                 .getTransform();
-    DimensionLookupMeta productLookupMeta =
-        (DimensionLookupMeta)
+    DatabaseLookupMeta productLookupMeta =
+        (DatabaseLookupMeta)
             pipelineMeta.getTransforms().stream()
                 .filter(t -> "lookup_Product".equals(t.getName()))
                 .findFirst()
@@ -213,7 +215,7 @@ class DmBasicStarPipelineTest {
     assertEquals("snapshot_date", customerLookupMeta.getFields().getDate().getName());
     assertEquals("date_from", customerLookupMeta.getFields().getDate().getFrom());
     assertEquals("date_to", customerLookupMeta.getFields().getDate().getTo());
-    assertTrue(Utils.isEmpty(productLookupMeta.getFields().getDate().getName()));
+    assertEquals("d_product", productLookupMeta.getLookup().getTableName());
   }
 
   @Test

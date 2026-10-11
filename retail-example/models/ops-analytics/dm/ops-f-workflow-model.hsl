@@ -1,0 +1,186 @@
+<!--
+Copyright 2026 i-Bridge bv
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<semantic-model>
+  <description>Consumption layer for operational analytics.</description>
+  <dimensionalModelFilename>${PROJECT_HOME}/models/ops-analytics/dm/ops-f-workflow-model.hdm</dimensionalModelFilename>
+  <targetDatabase>ops-analytics-dm</targetDatabase>
+  <entities>
+    <entity>
+      <name>fact_workflow_model</name>
+      <description>Transaction fact published from link satellite 'sat_lnk_workflow_load_overview_model' (parent link 'lnk_workflow_load_overview_model').</description>
+      <role>FACT</role>
+      <binding>
+        <kind>HDM</kind>
+        <modelFilename>/home/matt/git/ProjectDataHopper/hopper-edw/retail-example/models/ops-analytics/dm/ops-f-workflow-model.hdm</modelFilename>
+        <tableName>fact_workflow_model</tableName>
+        <physicalTableName>f_workflow_model</physicalTableName>
+      </binding>
+      <attributes>
+        <attribute>
+          <name>overview_id</name>
+          <physicalColumn>overview_id</physicalColumn>
+          <header>Overview id</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>load_run_id</name>
+          <physicalColumn>load_run_id</physicalColumn>
+          <header>Load run id</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>success</name>
+          <physicalColumn>success</physicalColumn>
+          <header>Success</header>
+          <formatMask/>
+        </attribute>
+      </attributes>
+      <measures>
+        <measure>
+          <name>pipeline_count</name>
+          <physicalColumn>pipeline_count</physicalColumn>
+          <header>Pipeline count</header>
+          <formatMask>#,##0.00</formatMask>
+          <aggregation>SUM</aggregation>
+          <additive>Y</additive>
+        </measure>
+        <measure>
+          <name>source_rows_read</name>
+          <physicalColumn>source_rows_read</physicalColumn>
+          <header>Source rows read</header>
+          <formatMask>#,##0.00</formatMask>
+          <aggregation>SUM</aggregation>
+          <additive>Y</additive>
+        </measure>
+        <measure>
+          <name>target_rows_read</name>
+          <physicalColumn>target_rows_read</physicalColumn>
+          <header>Target rows read</header>
+          <formatMask>#,##0.00</formatMask>
+          <aggregation>SUM</aggregation>
+          <additive>Y</additive>
+        </measure>
+        <measure>
+          <name>target_rows_inserted</name>
+          <physicalColumn>target_rows_inserted</physicalColumn>
+          <header>Target rows inserted</header>
+          <formatMask>#,##0.00</formatMask>
+          <aggregation>SUM</aggregation>
+          <additive>Y</additive>
+        </measure>
+        <measure>
+          <name>errors</name>
+          <physicalColumn>errors</physicalColumn>
+          <header>Errors</header>
+          <formatMask>#,##0.00</formatMask>
+          <aggregation>SUM</aggregation>
+          <additive>Y</additive>
+        </measure>
+        <measure>
+          <name>duration_ms</name>
+          <physicalColumn>duration_ms</physicalColumn>
+          <header>Duration ms</header>
+          <formatMask>#,##0.00</formatMask>
+          <aggregation>SUM</aggregation>
+          <additive>Y</additive>
+        </measure>
+        <measure>
+          <name>insight_count</name>
+          <physicalColumn>insight_count</physicalColumn>
+          <header>Insight count</header>
+          <formatMask>#,##0.00</formatMask>
+          <aggregation>SUM</aggregation>
+          <additive>Y</additive>
+        </measure>
+      </measures>
+    </entity>
+    <entity>
+      <name>dim_model</name>
+      <description>Conformed dimension dim_model</description>
+      <role>DIMENSION</role>
+      <binding>
+        <kind>HDM</kind>
+        <modelFilename>/home/matt/git/ProjectDataHopper/hopper-edw/retail-example/models/ops-analytics/dm/ops-f-workflow-model.hdm</modelFilename>
+        <tableName>dim_model</tableName>
+        <physicalTableName>d_model</physicalTableName>
+      </binding>
+      <attributes>
+        <attribute>
+          <name>model_key</name>
+          <physicalColumn>model_key</physicalColumn>
+          <header>Model key</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>model_type</name>
+          <physicalColumn>model_type</physicalColumn>
+          <header>Model type</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>model_name</name>
+          <physicalColumn>model_name</physicalColumn>
+          <header>Model name</header>
+          <formatMask/>
+        </attribute>
+      </attributes>
+      <measures/>
+    </entity>
+  </entities>
+  <relationships>
+    <relationship>
+      <name>fact_workflow_model_dim_model</name>
+      <fromEntity>fact_workflow_model</fromEntity>
+      <toEntity>dim_model</toEntity>
+      <joinType>INNER</joinType>
+      <fromField>model_key</fromField>
+      <toField>model_key</toField>
+      <roleName>dim_model</roleName>
+    </relationship>
+  </relationships>
+  <selections>
+    <selection>
+      <name>model-load-trend</name>
+      <entityName>fact_workflow_model</entityName>
+      <groups/>
+      <rows>
+        <row>
+          <entityName>dim_model</entityName>
+          <fieldName>model_name</fieldName>
+        </row>
+        <row>
+          <entityName>fact_workflow_model</entityName>
+          <fieldName>success</fieldName>
+        </row>
+      </rows>
+      <columns>
+        <column>
+          <entityName>dim_model</entityName>
+          <fieldName>model_type</fieldName>
+        </column>
+      </columns>
+      <measures>
+        <measure>
+          <entityName>fact_workflow_model</entityName>
+          <fieldName>duration_ms</fieldName>
+        </measure>
+      </measures>
+      <showingHorizontalTotals>Y</showingHorizontalTotals>
+      <showingVerticalTotals>Y</showingVerticalTotals>
+    </selection>
+  </selections>
+  <name>ops-f-workflow-model</name>
+</semantic-model>

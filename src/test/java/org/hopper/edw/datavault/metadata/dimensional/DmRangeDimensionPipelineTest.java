@@ -28,7 +28,7 @@ import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
-import org.apache.hop.pipeline.transforms.dimensionlookup.DimensionLookupMeta;
+import org.apache.hop.pipeline.transforms.databaselookup.DatabaseLookupMeta;
 import org.apache.hop.pipeline.transforms.numberrange.NumberRangeMeta;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
 import org.junit.jupiter.api.BeforeAll;
@@ -75,7 +75,7 @@ class DmRangeDimensionPipelineTest {
             .orElseThrow();
     TransformMeta firstLookup =
         pipelineMeta.getTransforms().stream()
-            .filter(t -> t.getTransform() instanceof DimensionLookupMeta)
+            .filter(t -> t.getTransform() instanceof DatabaseLookupMeta)
             .findFirst()
             .orElseThrow();
     assertTrue(pipelineMeta.findPreviousTransforms(numberRange).contains(tableInput));

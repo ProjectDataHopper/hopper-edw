@@ -22,7 +22,7 @@ limitations under the License.
   <created_user>-</created_user>
   <modified_user>-</modified_user>
   <created_date>2026/07/01 00:00:00.000</created_date>
-  <modified_date>2026/10/09 22:20:24.655</modified_date>
+  <modified_date>2026/10/11 12:54:01.780</modified_date>
   <created_hop_version/>
   <modified_hop_version>2.20.0-SNAPSHOT</modified_hop_version>
   <workflow_version/>
@@ -77,7 +77,7 @@ limitations under the License.
       <name>Generate  update execution map</name>
       <type>GENERATE_EXECUTION_MAP</type>
       <attributes/>
-      <xloc>832</xloc>
+      <xloc>976</xloc>
       <yloc>192</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -194,8 +194,8 @@ limitations under the License.
       <description/>
       <type>EXPORT_ARCHITECTURE</type>
       <attributes/>
-      <xloc>608</xloc>
-      <yloc>288</yloc>
+      <xloc>800</xloc>
+      <yloc>320</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
     </action>
@@ -211,7 +211,30 @@ limitations under the License.
       <description>Append LOAD_DATE after the vault update succeeds</description>
       <type>SQL</type>
       <attributes/>
-      <xloc>608</xloc>
+      <xloc>800</xloc>
+      <yloc>192</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <filename>${PROJECT_HOME}/models/ops-analytics/workflows/ops-analytics-incremental.hwf</filename>
+      <params_from_previous>N</params_from_previous>
+      <exec_per_row>N</exec_per_row>
+      <set_logfile>N</set_logfile>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <set_append_logfile>N</set_append_logfile>
+      <create_parent_folder>N</create_parent_folder>
+      <wait_until_finished>Y</wait_until_finished>
+      <parameters>
+        <pass_all_parameters>Y</pass_all_parameters>
+      </parameters>
+      <run_configuration>local</run_configuration>
+      <name>Run operational analytics</name>
+      <description>Load OPS history after the retail vault update. A failure does not stop the retail load.</description>
+      <type>WORKFLOW</type>
+      <attributes/>
+      <xloc>592</xloc>
       <yloc>192</yloc>
       <parallel>N</parallel>
       <attributes_hac/>
@@ -248,13 +271,20 @@ limitations under the License.
     </hop>
     <hop>
       <from>run-retail-update-models</from>
+      <to>Run operational analytics</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Run operational analytics</from>
       <to>Record retail load</to>
       <evaluation>Y</evaluation>
       <unconditional>N</unconditional>
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>run-retail-update-models</from>
+      <from>Run operational analytics</from>
       <to>Export architecture</to>
       <evaluation>Y</evaluation>
       <unconditional>N</unconditional>
