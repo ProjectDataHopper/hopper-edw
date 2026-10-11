@@ -159,6 +159,7 @@
                 <include>org.apache.hop:hop-transform-combinationlookup:jar</include>
                 <include>org.apache.hop:hop-transform-concatfields:jar</include>
                 <include>org.apache.hop:hop-transform-constant:jar</include>
+                <include>org.apache.hop:hop-transform-databaselookup:jar</include>
                 <include>org.apache.hop:hop-transform-dimensionlookup:jar</include>
                 <include>org.apache.hop:hop-transform-filemetadata:jar</include>
                 <include>org.apache.hop:hop-transform-filterrows:jar</include>

@@ -18,11 +18,17 @@ package org.hopper.edw.datavault.metadata.dimensional.pipeline;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.row.IValueMeta;
+import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineHopMeta;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
+import org.apache.hop.pipeline.transforms.databaselookup.DatabaseLookupMeta;
+import org.apache.hop.pipeline.transforms.databaselookup.KeyField;
+import org.apache.hop.pipeline.transforms.databaselookup.Lookup;
+import org.apache.hop.pipeline.transforms.databaselookup.ReturnValue;
 import org.apache.hop.pipeline.transforms.dimensionlookup.DimensionLookupMeta;
 import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataSupport;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalConfiguration;
@@ -36,7 +42,10 @@ import org.hopper.edw.datavault.metadata.dimensional.DmScdUpdatePolicy;
 import org.hopper.edw.datavault.metadata.dimensional.DmSurrogateKeyStrategy;
 import org.hopper.edw.datavault.metadata.dimensional.DmSurrogateKeySupport;
 
-/** Builds Dimension Lookup transforms for fact FK resolution and hybrid / Type 3 dimensions. */
+/**
+ * Builds fact foreign-key lookups and hybrid / Type 3 dimension updates. Type 1 dimensions use
+ * Database Lookup. Effectivity dimensions use Dimension Lookup, which requires date-range columns.
+ */
 public final class DmDimensionLookupBuilder {
 
   private DmDimensionLookupBuilder() {}
@@ -80,6 +89,10 @@ public final class DmDimensionLookupBuilder {
       return null;
     }
 
+    if (!DmLayoutSupport.dimensionUsesEffectivityLookup(dimension)) {
+      return addFactType1DatabaseLookup(ctx, pipelineMeta, predecessor, dimension, role);
+    }
+
     DimensionLookupMeta lookupMeta = new DimensionLookupMeta();
     lookupMeta.setConnection(ctx.targetDbName);
     lookupMeta.setTableName(
@@ -99,6 +112,66 @@ public final class DmDimensionLookupBuilder {
     pipelineMeta.addPipelineHop(new PipelineHopMeta(predecessor, tm));
     GeneratedPipelineMetadataSupport.stampDimensionLookup(tm, ctx, dimension, role);
     return tm;
+  }
+
+  /**
+   * Type 1 tables have no date-range columns. Hop Dimension Lookup rejects a lookup that does not
+   * name those columns, so the surrogate key is resolved with Database Lookup.
+   */
+  private static TransformMeta addFactType1DatabaseLookup(
+      DmPipelineBuilderSupport.BuildContext ctx,
+      PipelineMeta pipelineMeta,
+      TransformMeta predecessor,
+      DmDimension dimension,
+      DmFactDimensionRole role) {
+    DatabaseLookupMeta lookupMeta = new DatabaseLookupMeta();
+    lookupMeta.setConnection(ctx.targetDbName);
+    lookupMeta.setCached(true);
+    lookupMeta.setLoadingAllDataInCache(role.isPreloadLookupCache());
+
+    Lookup lookup = new Lookup();
+    lookup.setTableName(dimensionTableName(dimension));
+    lookup.setFailingOnMultipleResults(true);
+    List<KeyField> keys = new ArrayList<>();
+    for (DimensionLookupMeta.DLKey dlKey :
+        DmFactDimensionJoinBuilder.buildFactLookupKeys(dimension, role, ctx)) {
+      keys.add(new KeyField(dlKey.getName(), null, "=", dlKey.getLookup()));
+    }
+    lookup.setKeyFields(keys);
+
+    String dimKeyField =
+        DmLayoutSupport.resolveDimensionLookupKeyField(dimension, ctx.config, ctx.variables);
+    String fkColumn =
+        DmLayoutSupport.defaultFactForeignKeyColumn(dimension, role, ctx.config, ctx.variables);
+    String rename = dimKeyField != null && dimKeyField.equals(fkColumn) ? null : fkColumn;
+    String defaultValue = null;
+    String defaultType = null;
+    if (DmSurrogateKeySupport.usesStringSurrogate(dimension)) {
+      defaultValue = "?";
+      defaultType = ValueMetaFactory.getValueMetaName(IValueMeta.TYPE_STRING);
+    } else if (DmSurrogateKeySupport.usesSurrogateColumn(dimension)) {
+      defaultValue = "0";
+      defaultType = ValueMetaFactory.getValueMetaName(IValueMeta.TYPE_INTEGER);
+    }
+    lookup
+        .getReturnValues()
+        .add(new ReturnValue(dimKeyField, rename, defaultValue, defaultType, null));
+    lookupMeta.setLookup(lookup);
+
+    String transformName = DmFactDimensionJoinBuilder.resolveLookupTransformName(role, dimension);
+    TransformMeta tm = new TransformMeta("DBLookup", transformName, lookupMeta);
+    tm.setCopiesString(role.resolveLookupCopies());
+    tm.setLocation(
+        predecessor.getLocation().x + DmPipelineBuilderSupport.SPACING_WIDTH,
+        predecessor.getLocation().y);
+    pipelineMeta.addTransform(tm);
+    pipelineMeta.addPipelineHop(new PipelineHopMeta(predecessor, tm));
+    GeneratedPipelineMetadataSupport.stampDimensionLookup(tm, ctx, dimension, role);
+    return tm;
+  }
+
+  private static String dimensionTableName(DmDimension dimension) {
+    return !Utils.isEmpty(dimension.getTableName()) ? dimension.getTableName() : dimension.getName();
   }
 
   private static TransformMeta addHybridDimensionLookup(

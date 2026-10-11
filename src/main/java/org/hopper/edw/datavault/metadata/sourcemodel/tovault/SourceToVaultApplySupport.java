@@ -268,7 +268,9 @@ public final class SourceToVaultApplySupport {
       }
       resolvedHubs.add(actual);
     }
-    if (resolvedHubs.size() < 2) {
+    boolean pegLeg =
+        resolvedHubs.size() == 1 && !object.getDependentChildKeyColumns().isEmpty();
+    if (resolvedHubs.size() < 2 && !pegLeg) {
       result.getWarnings().add("Skipped link " + object.getName() + ": fewer than two hubs");
       return;
     }

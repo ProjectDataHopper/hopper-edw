@@ -159,7 +159,7 @@ ensure_local_postgres_retail_databases() {
     return 0
   fi
 
-  for db in test_source test_edw test_ops; do
+  for db in test_source test_edw test_ops test_ops_analytics; do
     exists="$(
       docker exec "${LOCAL_POSTGRES_CONTAINER}" \
         psql -U "${LOCAL_POSTGRES_USER}" -p "${LOCAL_POSTGRES_PORT}" -d "${LOCAL_POSTGRES_DB}" -tAc \
@@ -173,6 +173,12 @@ ensure_local_postgres_retail_databases() {
         -c "CREATE DATABASE ${db} OWNER ${LOCAL_POSTGRES_USER};" >/dev/null
     fi
   done
+
+  # Operational analytics DV and DM use public. Business Vault objects use ops_bv.
+  docker exec -i "${LOCAL_POSTGRES_CONTAINER}" \
+    psql -q -U "${LOCAL_POSTGRES_USER}" -p "${LOCAL_POSTGRES_PORT}" -d test_ops_analytics >/dev/null <<'SQL'
+CREATE SCHEMA IF NOT EXISTS ops_bv;
+SQL
 }
 
 # AdventureWorks sample databases (SQL Server source lives in compose.adventureworks.yml).

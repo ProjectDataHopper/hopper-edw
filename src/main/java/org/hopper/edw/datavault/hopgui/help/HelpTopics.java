@@ -157,6 +157,7 @@ public final class HelpTopics {
   public static final String DATA_QUALITY_RULE_SET = "data-quality-rule-set-dialog";
   public static final String BUSINESS_PROCESS_CATALOG = "business-process-catalog-dialog";
   public static final String BUS_MATRIX = "bus-matrix-dialog";
+  public static final String OPS_ANALYTICS = "ops-analytics-dialog";
 
   /**
    * Plugin-shipped HTML page for a Help topic. {@code htmlPage} is relative to {@code docs/} (for
@@ -520,7 +521,11 @@ public final class HelpTopics {
               BUSINESS_PROCESS_CATALOG,
               "help/business-process-catalog-dialog.html",
               "HelpTopics.BusinessProcessCatalogDialog.Title"),
-          p(BUS_MATRIX, "help/bus-matrix-dialog.html", "HelpTopics.BusMatrixDialog.Title"));
+          p(BUS_MATRIX, "help/bus-matrix-dialog.html", "HelpTopics.BusMatrixDialog.Title"),
+          p(
+              OPS_ANALYTICS,
+              "help/ops-analytics-dialog.html",
+              "HelpTopics.OpsAnalyticsDialog.Title"));
 
   private static final Map<String, HelpPage> BY_ID = index(PAGES);
 

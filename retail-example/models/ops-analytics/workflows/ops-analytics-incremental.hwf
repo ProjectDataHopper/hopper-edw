@@ -1,0 +1,104 @@
+<!--
+Copyright 2026 i-Bridge bv
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<workflow>
+  <name>ops-analytics-incremental</name>
+  <name_sync_with_filename>N</name_sync_with_filename>
+  <description>Load OPS history again without changing analytics table structure.</description>
+  <created_user>-</created_user>
+  <modified_user>-</modified_user>
+  <created_date>2026/10/11 13:58:20.843</created_date>
+  <modified_date>2026/10/11 13:58:20.843</modified_date>
+  <created_hop_version/>
+  <modified_hop_version/>
+  <parameters/>
+  <actions>
+    <action>
+      <repeat>N</repeat>
+      <schedulerType>0</schedulerType>
+      <intervalSeconds>0</intervalSeconds>
+      <intervalMinutes>60</intervalMinutes>
+      <DayOfMonth>1</DayOfMonth>
+      <weekDay>1</weekDay>
+      <minutes>0</minutes>
+      <hour>12</hour>
+      <doNotWaitOnFirstExecution>N</doNotWaitOnFirstExecution>
+      <name>Start</name>
+      <description/>
+      <type>SPECIAL</type>
+      <attributes/>
+      <xloc>50</xloc>
+      <yloc>80</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+    <action>
+      <resourceDefinitionGroup>ops-analytics</resourceDefinitionGroup>
+      <includeDataVault>Y</includeDataVault>
+      <includeBusinessVault>Y</includeBusinessVault>
+      <includeDimensional>Y</includeDimensional>
+      <pipelineRunConfiguration>ops-analytics-pipeline</pipelineRunConfiguration>
+      <workflowRunConfiguration>ops-analytics-workflow</workflowRunConfiguration>
+      <parallelPipelineCopies>1</parallelPipelineCopies>
+      <logModelCheckFailures>Y</logModelCheckFailures>
+      <abortOnModelCheckFailures>Y</abortOnModelCheckFailures>
+      <detailedDataTypeChecking>Y</detailedDataTypeChecking>
+      <preferHarvestForTypeChecks>Y</preferHarvestForTypeChecks>
+      <harvestRunId>${DV_SCHEMA_HARVEST_RUN_ID}</harvestRunId>
+      <modelCheckParallelism>8</modelCheckParallelism>
+      <ignoreModelCheckWarnings>Y</ignoreModelCheckWarnings>
+      <writeValidationReport>N</writeValidationReport>
+      <validationReportFolder>${PROJECT_HOME}/work/reports</validationReportFolder>
+      <validationReportFormat>MARKDOWN</validationReportFormat>
+      <updateTargetDatabaseStructure>N</updateTargetDatabaseStructure>
+      <createMissingTargetTables>Y</createMissingTargetTables>
+      <failIfDdlNeeded>N</failIfDdlNeeded>
+      <doNotUpdateTargetDatabase>N</doNotUpdateTargetDatabase>
+      <publishToCatalog>N</publishToCatalog>
+      <sourceModelFilename>${PROJECT_HOME}/models/ops-analytics/ops-analytics.hsm</sourceModelFilename>
+      <ensureSpecialRecords>Y</ensureSpecialRecords>
+      <manageVaultUpdateMetrics>N</manageVaultUpdateMetrics>
+      <useWorkflowLogChannelId>Y</useWorkflowLogChannelId>
+      <publishMetricsToDatabase>Y</publishMetricsToDatabase>
+      <publishMetricsToCatalog>Y</publishMetricsToCatalog>
+      <logMetricsToWorkflow>Y</logMetricsToWorkflow>
+      <writeMarkdownReport>N</writeMarkdownReport>
+      <writeHtmlReport>N</writeHtmlReport>
+      <reportOutputFolder>${PROJECT_HOME}/work/reports</reportOutputFolder>
+      <failIfNoMetricsFound>N</failIfNoMetricsFound>
+      <includePipelineDetail>Y</includePipelineDetail>
+      <includeInsights>Y</includeInsights>
+      <name>Update operational analytics</name>
+      <description>Load OPS history again without changing analytics table structure.</description>
+      <type>UPDATE_RESOURCE_DEFINITION_GROUP</type>
+      <attributes/>
+      <xloc>280</xloc>
+      <yloc>80</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
+    </action>
+  </actions>
+  <hops>
+    <hop>
+      <from>Start</from>
+      <to>Update operational analytics</to>
+      <evaluation>Y</evaluation>
+      <unconditional>Y</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+  </hops>
+  <notepads/>
+  <attributes/>
+</workflow>

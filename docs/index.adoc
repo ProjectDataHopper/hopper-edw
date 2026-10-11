@@ -127,6 +127,9 @@ Sources are the AsciiDoc files in the repository `docs/` folder. Architecture pi
 
 |link:operations.adoc[operations]
 |Day-2 runners and load overview
+
+|link:ops-analytics.adoc[ops-analytics]
+|Warehouse of the OPS database
 |===
 
 == Regenerating this HTML set

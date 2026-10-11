@@ -16,6 +16,7 @@
 package org.hopper.edw.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -79,5 +80,21 @@ class DvSqlFormattingSupportTest {
     String formatted = DvSqlFormattingSupport.formatForDisplay(sql);
 
     assertTrue(formatted.contains("'value with spaces'"));
+  }
+
+  @Test
+  void formatForDisplayKeepsALineCommentContainingFrom() {
+    String sql =
+        "-- DRAFT: review source SQL published from 'hub_pipeline'\n"
+            + "SELECT *, load_date AS load_dt FROM hub_pipeline";
+
+    String formatted = DvSqlFormattingSupport.formatForDisplay(sql);
+
+    assertTrue(
+        formatted.startsWith("-- DRAFT: review source SQL published from 'hub_pipeline'"),
+        formatted);
+    assertTrue(formatted.contains("\nSELECT *, load_date AS load_dt"), formatted);
+    assertTrue(formatted.contains("\nFROM hub_pipeline"), formatted);
+    assertFalse(formatted.contains("\nfrom 'hub_pipeline'"), formatted);
   }
 }

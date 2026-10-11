@@ -1,0 +1,174 @@
+<!--
+Copyright 2026 i-Bridge bv
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<semantic-model>
+  <description>Consumption layer for operational analytics.</description>
+  <dimensionalModelFilename>${PROJECT_HOME}/models/ops-analytics/dm/ops-f-harvest-run.hdm</dimensionalModelFilename>
+  <targetDatabase>ops-analytics-dm</targetDatabase>
+  <entities>
+    <entity>
+      <name>fact_harvest_run</name>
+      <description>Insert-only fact from sat_schema_harvest_run</description>
+      <role>FACT</role>
+      <binding>
+        <kind>HDM</kind>
+        <modelFilename>/home/matt/git/ProjectDataHopper/hopper-edw/retail-example/models/ops-analytics/dm/ops-f-harvest-run.hdm</modelFilename>
+        <tableName>fact_harvest_run</tableName>
+        <physicalTableName>f_harvest_run</physicalTableName>
+      </binding>
+      <attributes>
+        <attribute>
+          <name>status</name>
+          <physicalColumn>status</physicalColumn>
+          <header>Status</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>workflow_name</name>
+          <physicalColumn>workflow_name</physicalColumn>
+          <header>Workflow name</header>
+          <formatMask/>
+        </attribute>
+      </attributes>
+      <measures>
+        <measure>
+          <name>subject_count</name>
+          <physicalColumn>subject_count</physicalColumn>
+          <header>Subject count</header>
+          <formatMask>#,##0.00</formatMask>
+          <aggregation>SUM</aggregation>
+          <additive>Y</additive>
+        </measure>
+        <measure>
+          <name>change_count</name>
+          <physicalColumn>change_count</physicalColumn>
+          <header>Change count</header>
+          <formatMask>#,##0.00</formatMask>
+          <aggregation>SUM</aggregation>
+          <additive>Y</additive>
+        </measure>
+        <measure>
+          <name>error_count</name>
+          <physicalColumn>error_count</physicalColumn>
+          <header>Error count</header>
+          <formatMask>#,##0.00</formatMask>
+          <aggregation>SUM</aggregation>
+          <additive>Y</additive>
+        </measure>
+        <measure>
+          <name>subjects_with_changes</name>
+          <physicalColumn>subjects_with_changes</physicalColumn>
+          <header>Subjects with changes</header>
+          <formatMask>#,##0.00</formatMask>
+          <aggregation>SUM</aggregation>
+          <additive>Y</additive>
+        </measure>
+      </measures>
+    </entity>
+    <entity>
+      <name>dim_harvest_date</name>
+      <description>Role-playing alias of dim_date</description>
+      <role>DIMENSION</role>
+      <binding>
+        <kind>HDM</kind>
+        <modelFilename>/home/matt/git/ProjectDataHopper/hopper-edw/retail-example/models/ops-analytics/dm/ops-f-harvest-run.hdm</modelFilename>
+        <tableName>dim_harvest_date</tableName>
+        <physicalTableName>d_date</physicalTableName>
+      </binding>
+      <attributes>
+        <attribute>
+          <name>date_key</name>
+          <physicalColumn>date_key</physicalColumn>
+          <header>Date key</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>full_date</name>
+          <physicalColumn>full_date</physicalColumn>
+          <header>Full date</header>
+          <formatMask>yyyy-MM-dd</formatMask>
+        </attribute>
+        <attribute>
+          <name>day_of_week</name>
+          <physicalColumn>day_of_week</physicalColumn>
+          <header>Day of week</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>day_of_month</name>
+          <physicalColumn>day_of_month</physicalColumn>
+          <header>Day of month</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>day_of_year</name>
+          <physicalColumn>day_of_year</physicalColumn>
+          <header>Day of year</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>week_of_year</name>
+          <physicalColumn>week_of_year</physicalColumn>
+          <header>Week of year</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>month</name>
+          <physicalColumn>month</physicalColumn>
+          <header>Month</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>month_name</name>
+          <physicalColumn>month_name</physicalColumn>
+          <header>Month name</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>quarter</name>
+          <physicalColumn>quarter</physicalColumn>
+          <header>Quarter</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>year</name>
+          <physicalColumn>year</physicalColumn>
+          <header>Year</header>
+          <formatMask>#,##0</formatMask>
+        </attribute>
+        <attribute>
+          <name>is_weekend</name>
+          <physicalColumn>is_weekend</physicalColumn>
+          <header>Is weekend</header>
+          <formatMask/>
+        </attribute>
+      </attributes>
+      <measures/>
+    </entity>
+  </entities>
+  <relationships>
+    <relationship>
+      <name>fact_harvest_run_dim_harvest_date</name>
+      <fromEntity>fact_harvest_run</fromEntity>
+      <toEntity>dim_harvest_date</toEntity>
+      <joinType>INNER</joinType>
+      <fromField>started_at_key</fromField>
+      <toField>date_key</toField>
+      <roleName>dim_harvest_date</roleName>
+    </relationship>
+  </relationships>
+  <selections/>
+  <name>ops-f-harvest-run</name>
+</semantic-model>

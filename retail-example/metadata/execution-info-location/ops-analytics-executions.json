@@ -1,0 +1,15 @@
+{
+  "executionInfoLocation": {
+    "caching-file-location": {
+      "createParentFolder": true,
+      "maxCacheSize": "50",
+      "persistenceDelay": "5000",
+      "rootFolder": "${PROJECT_HOME}/work/ops-analytics-executions",
+      "maxCacheAge": "10000"
+    }
+  },
+  "dataLoggingDelay": "2000",
+  "name": "ops-analytics-executions",
+  "description": "File execution information for operational analytics loads. Not the OPS executions table.",
+  "dataLoggingInterval": "5000"
+}

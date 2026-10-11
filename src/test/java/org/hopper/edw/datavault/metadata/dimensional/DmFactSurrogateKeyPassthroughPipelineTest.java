@@ -31,7 +31,7 @@ import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
-import org.apache.hop.pipeline.transforms.dimensionlookup.DimensionLookupMeta;
+import org.apache.hop.pipeline.transforms.databaselookup.DatabaseLookupMeta;
 import org.apache.hop.pipeline.transforms.selectvalues.SelectValuesMeta;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -94,15 +94,15 @@ class DmFactSurrogateKeyPassthroughPipelineTest {
     assertTrue(
         pipelineMeta.getTransforms().stream().anyMatch(t -> "lookup_Customer".equals(t.getName())));
 
-    DimensionLookupMeta productLookupMeta =
-        (DimensionLookupMeta)
+    DatabaseLookupMeta productLookupMeta =
+        (DatabaseLookupMeta)
             pipelineMeta.getTransforms().stream()
                 .filter(t -> "lookup_Product".equals(t.getName()))
                 .findFirst()
                 .orElseThrow()
                 .getTransform();
-    assertEquals("d_product", productLookupMeta.getTableName());
-    assertEquals("product_hk", productLookupMeta.getFields().getReturns().getKeyField());
+    assertEquals("d_product", productLookupMeta.getLookup().getTableName());
+    assertEquals("product_hk", productLookupMeta.getLookup().getReturnValues().get(0).getTableField());
   }
 
   @Test
@@ -116,7 +116,7 @@ class DmFactSurrogateKeyPassthroughPipelineTest {
 
     long lookupCount =
         pipelineMeta.getTransforms().stream()
-            .filter(t -> t.getTransform() instanceof DimensionLookupMeta)
+            .filter(t -> t.getTransform() instanceof DatabaseLookupMeta)
             .count();
     assertEquals(1, lookupCount);
 
@@ -125,9 +125,9 @@ class DmFactSurrogateKeyPassthroughPipelineTest {
             .filter(t -> "lookup_Customer".equals(t.getName()))
             .findFirst()
             .orElseThrow();
-    DimensionLookupMeta customerLookupMeta = (DimensionLookupMeta) customerLookup.getTransform();
-    assertEquals("d_customer", customerLookupMeta.getTableName());
-    assertEquals("customer_key", customerLookupMeta.getFields().getReturns().getKeyRename());
+    DatabaseLookupMeta customerLookupMeta = (DatabaseLookupMeta) customerLookup.getTransform();
+    assertEquals("d_customer", customerLookupMeta.getLookup().getTableName());
+    assertEquals("customer_key", customerLookupMeta.getLookup().getReturnValues().get(0).getNewName());
   }
 
   @Test

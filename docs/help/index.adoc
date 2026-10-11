@@ -195,6 +195,9 @@ Guides for the same features live in the parent folder (link:../index.adoc[docum
 |link:model-ai-proposal-review-dialog.adoc[model-ai-proposal-review-dialog]
 |Model proposal review
 
+|link:ops-analytics-dialog.adoc[ops-analytics-dialog]
+|Create operational analytics
+
 |link:pipeline-ai-advisor-dialog.adoc[pipeline-ai-advisor-dialog]
 |Pipeline AI advisor
 

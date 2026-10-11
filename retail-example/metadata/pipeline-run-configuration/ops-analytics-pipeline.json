@@ -1,0 +1,9 @@
+{
+  "engineRunConfiguration" : {
+    "Local" : { }
+  },
+  "defaultSelection" : false,
+  "name" : "ops-analytics-pipeline",
+  "description" : "Local pipeline engine for operational analytics updates. No data profile, so row samples are not stored.",
+  "executionInfoLocationName" : "ops-analytics-executions"
+}

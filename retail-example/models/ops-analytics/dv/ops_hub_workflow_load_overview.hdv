@@ -1,0 +1,130 @@
+<!--
+Copyright 2026 i-Bridge bv
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<data-vault-model>
+  <name_sync_with_filename>Y</name_sync_with_filename>
+  <description>Generated hub hub_workflow_load_overview and its satellites.</description>
+  <configurationName>ops-analytics-dv</configurationName>
+  <tables>
+    <table>
+      <businessKeys>
+        <name>overview_id</name>
+        <dataType>String</dataType>
+        <length>64</length>
+        <composite>N</composite>
+        <sourceFieldNames/>
+        <sourceFieldName>overview_id</sourceFieldName>
+        <recordSourceName>workflow_load_overview</recordSourceName>
+      </businessKeys>
+      <hashKeyFieldName>workflow_load_overview_hk</hashKeyFieldName>
+      <recordSources>
+        <recordSource>workflow_load_overview</recordSource>
+      </recordSources>
+      <allowInferredInsert>Y</allowInferredInsert>
+      <tableName>hub_workflow_load_overview</tableName>
+      <tableType>HUB</tableType>
+      <integrationMode>HOP_MANAGED</integrationMode>
+      <customUpdatePipelinePaths/>
+      <xloc>64</xloc>
+      <yloc>64</yloc>
+      <name>hub_workflow_load_overview</name>
+      <virtualPath/>
+    </table>
+    <table>
+      <hub>hub_workflow_load_overview</hub>
+      <attributes>
+        <name>root_workflow_name</name>
+        <dataType>String</dataType>
+        <length>255</length>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>metrics_workflow_name</name>
+        <dataType>String</dataType>
+        <length>255</length>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>started_at</name>
+        <dataType>Date</dataType>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>finished_at</name>
+        <dataType>Date</dataType>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>duration_ms</name>
+        <dataType>Integer</dataType>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>model_count</name>
+        <dataType>Integer</dataType>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>pipeline_count</name>
+        <dataType>Integer</dataType>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>insight_count</name>
+        <dataType>Integer</dataType>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>total_source_rows_read</name>
+        <dataType>Integer</dataType>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>total_target_rows_inserted</name>
+        <dataType>Integer</dataType>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>total_errors</name>
+        <dataType>Integer</dataType>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <attributes>
+        <name>success</name>
+        <dataType>Boolean</dataType>
+        <includeInChangeDataCapture>Y</includeInChangeDataCapture>
+      </attributes>
+      <parentKeySourceFields>
+        <parentKeySourceField>overview_id</parentKeySourceField>
+      </parentKeySourceFields>
+      <recordSource>workflow_load_overview</recordSource>
+      <storeRecordSource>Y</storeRecordSource>
+      <statusTrackingEnabled>N</statusTrackingEnabled>
+      <statusFieldName>record_status</statusFieldName>
+      <activeStatusValue>ACTIVE</activeStatusValue>
+      <deletedStatusValue>DELETED</deletedStatusValue>
+      <tableName>sat_workflow_load_overview</tableName>
+      <tableType>SATELLITE</tableType>
+      <integrationMode>HOP_MANAGED</integrationMode>
+      <customUpdatePipelinePaths/>
+      <xloc>224</xloc>
+      <yloc>64</yloc>
+      <name>sat_workflow_load_overview</name>
+      <virtualPath/>
+    </table>
+  </tables>
+  <notes/>
+  <name>ops_hub_workflow_load_overview</name>
+</data-vault-model>

@@ -17,17 +17,22 @@ package org.hopper.edw.datavault.metadata.businessvault;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.ICheckResult;
+import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.core.xml.XmlHandler;
+import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
+import org.apache.hop.pipeline.PipelineMeta;
+import org.apache.hop.pipeline.transforms.tableoutput.TableOutputMeta;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvHub;
 import org.hopper.edw.datavault.metadata.DvLink;
@@ -102,8 +107,57 @@ class BvBridgeTest {
     bridge.setName("customer_account_bridge");
     bridge.getDerivatives().add(new BvDerivativeRef("lnk_customer_account", DvTableType.LINK));
 
-    String sql = BvBridgePipelineSupport.buildSourceSql(bridge, dv, new Variables(), null, null);
+    String sql =
+        BvBridgePipelineSupport.buildSourceSql(
+            bridge, new BusinessVaultModel(), dv, new Variables(), null, null);
     assertEquals("SELECT customer_hk, account_hk FROM lnk_customer_account", sql);
+  }
+
+  @Test
+  void sqlQueryRefsAreResolvedBeforeTableInput() throws Exception {
+    DataVaultModel dv = customerAccountVault();
+    BvBridge bridge = new BvBridge();
+    bridge.setName("customer_account_bridge");
+    bridge.setSqlQuery(
+        "SELECT customer_hk, account_hk FROM {{ ref('lnk_customer_account') }} a");
+
+    String sql =
+        BvBridgePipelineSupport.buildSourceSql(
+            bridge, new BusinessVaultModel(), dv, new Variables(), null, null);
+
+    assertFalse(sql.contains("{"), sql);
+    assertTrue(sql.contains("lnk_customer_account"), sql);
+  }
+
+  @Test
+  void bridgeLoadUsesTheBridgeSchema() throws Exception {
+    MemoryMetadataProvider provider = new MemoryMetadataProvider();
+    DatabaseMeta database = new DatabaseMeta();
+    database.setName("OpsAnalytics");
+    database.setDatabaseType("POSTGRESQL");
+    provider.getSerializer(DatabaseMeta.class).save(database);
+
+    BusinessVaultModel businessVault = new BusinessVaultModel();
+    businessVault.getConfigurationOrDefault().setTargetDatabase("OpsAnalytics");
+    BvBridge bridge = new BvBridge();
+    bridge.setName("customer_account_bridge");
+    bridge.setTableName("br_customer_account");
+    bridge.setSchemaName("ops_bv");
+    bridge.getDerivatives().add(new BvDerivativeRef("lnk_customer_account", DvTableType.LINK));
+
+    PipelineMeta pipeline =
+        BvBridgePipelineSupport.generatePipeline(
+            provider, new Variables(), businessVault, customerAccountVault(), bridge);
+
+    TableOutputMeta output = null;
+    for (int i = 0; i < pipeline.nrTransforms(); i++) {
+      if (pipeline.getTransform(i).getTransform() instanceof TableOutputMeta tableOutput) {
+        output = tableOutput;
+      }
+    }
+    assertNotNull(output);
+    assertEquals("ops_bv", output.getSchemaName());
+    assertEquals("br_customer_account", output.getTableName());
   }
 
   @Test

@@ -28,6 +28,7 @@ import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
+import org.apache.hop.pipeline.transforms.tableoutput.TableOutputMeta;
 import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvConstraintDdlSupport;
@@ -103,7 +104,9 @@ public final class BvBridgePipelineSupport {
     String targetTableName =
         !Utils.isEmpty(bridge.getTableName()) ? bridge.getTableName() : bridge.getName();
     String pipelineName = bvConfig.buildBridgePipelineName(variables, targetTableName);
-    String sql = buildSourceSql(bridge, dvModel, variables, metadataProvider, sourceDatabaseMeta);
+    String sql =
+        buildSourceSql(
+            bridge, bvModel, dvModel, variables, metadataProvider, sourceDatabaseMeta);
     IRowMeta targetLayout =
         BvBridgeLayoutSupport.buildTargetTableLayout(
             bridge, bvModel, dvModel, variables, metadataProvider);
@@ -155,6 +158,13 @@ public final class BvBridgePipelineSupport {
             writePredecessor,
             java.util.Collections.emptySet(),
             false);
+    if (result != null
+        && result.transformMeta != null
+        && result.transformMeta.getTransform() instanceof TableOutputMeta tableOutput
+        && !Utils.isEmpty(bridge.getSchemaName())) {
+      String schema = variables != null ? variables.resolve(bridge.getSchemaName()) : bridge.getSchemaName();
+      tableOutput.setSchemaName(schema);
+    }
     if (result != null && result.transformMeta != null) {
       GeneratedPipelineMetadataSupport.stampWriteTarget(
           result.transformMeta,
@@ -170,6 +180,7 @@ public final class BvBridgePipelineSupport {
 
   public static String buildSourceSql(
       BvBridge bridge,
+      BusinessVaultModel bvModel,
       DataVaultModel dvModel,
       IVariables variables,
       IHopMetadataProvider metadataProvider,
@@ -179,7 +190,16 @@ public final class BvBridgePipelineSupport {
       throw new HopException("Bridge table is required");
     }
     if (!Utils.isEmpty(bridge.getSqlQuery())) {
-      return bridge.getSqlQuery().trim();
+      // Table Input treats {name} as a JDBC parameter. Resolve {{ ref() }} first.
+      BvBusinessTable query = new BvBusinessTable();
+      query.setName(bridge.getName());
+      query.setTableName(
+          !Utils.isEmpty(bridge.getTableName()) ? bridge.getTableName() : bridge.getName());
+      query.setSchemaName(bridge.getSchemaName());
+      query.setSqlQuery(bridge.getSqlQuery());
+      return BvSqlRefResolver.resolveSql(
+              query, bvModel, dvModel, metadataProvider, variables, sourceDatabaseMeta)
+          .trim();
     }
 
     DvLink link = BvBridgeLayoutSupport.resolveFirstLinkDerivative(bridge, dvModel);

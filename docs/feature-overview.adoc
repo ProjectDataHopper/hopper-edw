@@ -250,6 +250,10 @@ For a slide-style executive summary, see link:presentations/hop-data-vault-overv
 |Available (map, Open, last-run, grow, contextual docs)
 |link:edw-journey.adoc[EDW Journey]
 
+|Operational analytics
+|Available
+|Generate a source model, raw vault, Business Vault, dimensional model, and load workflows from the OPS database. **Tools → Create operational analytics...** and the EDW Journey toolbar. link:ops-analytics.adoc[Operational analytics], issue https://github.com/ProjectDataHopper/hopper-edw/issues/195[#195]
+
 |Hop Web modelers (`.hsm`/`.hdv`/`.hbv`/`.hdm`/`.hem`/`.hlv`)
 |Available (experimental; needs Hop canvas SPI)
 |link:hop-web-modelers.md[Hop Web modelers], issue https://github.com/ProjectDataHopper/hopper-edw/issues/119[#119]

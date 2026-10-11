@@ -61,6 +61,15 @@ public class SourceToVaultOptions {
   private boolean includeNonTableSources = true;
 
   /**
+   * When true, a composite primary key that is only partly covered by foreign keys becomes a
+   * non-historized link: covered key columns are hub references and the leftover key columns are
+   * dependent child keys. Keyed source queries are also registered as hub parents so a relationship
+   * to a query can satisfy that rule. Default false. Retail and AdventureWorks classification does
+   * not set this.
+   */
+  private boolean singleParentCompositeKeyAsLink;
+
+  /**
    * When true, applying a link or hub-satellite also lists that child feed as a record source on
    * each participating parent hub (BK mappings copied from the link/sat).
    */

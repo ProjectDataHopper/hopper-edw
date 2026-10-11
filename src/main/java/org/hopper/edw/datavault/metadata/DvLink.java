@@ -226,7 +226,10 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
       DvModelCheckOptions options,
       DataVaultModel model) {
     super.check(remarks, metadataProvider, variables, options, model);
-    if (Utils.isEmpty(hubNames) || hubNames.size() < 2) {
+    int hubCount = hubNames == null ? 0 : hubNames.size();
+    // A transactional link may hang off one hub when the remaining grain is a dependent child key.
+    boolean pegLeg = hubCount == 1 && !Utils.isEmpty(dependentChildKeys);
+    if (hubCount < 2 && !pegLeg) {
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_ERROR,
@@ -236,7 +239,12 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_OK,
-              BaseMessages.getString(PKG, "DvLink.CheckResult.ConnectedToHubs", hubNames.size()),
+              pegLeg
+                  ? BaseMessages.getString(
+                      PKG,
+                      "DvLink.CheckResult.ConnectedWithDependentChildKeys",
+                      dependentChildKeys.size())
+                  : BaseMessages.getString(PKG, "DvLink.CheckResult.ConnectedToHubs", hubCount),
               this));
       // Distinct role hash columns when the same physical hub is role-played via aliases.
       Set<String> roleHashColumns = new LinkedHashSet<>();
@@ -1093,13 +1101,8 @@ public class DvLink extends DvTableBase implements IDvTable, IGuiPosition, IBase
             ctx.dvSource,
             this,
             new Point(LOCATION_START_LINE_2.x, LOCATION_START_LINE_2.y));
-    if (builder instanceof DvDatabaseLinkSourcePipelineBuilder dbBuilder) {
-      dbBuilder.setDvLinkHubSource(linkSource);
-    } else if (builder
-        instanceof
-        org.hopper.edw.datavault.metadata.file.DvCsvLinkSourcePipelineBuilder csvBuilder) {
-      csvBuilder.setDvLinkHubSource(linkSource);
-    }
+    // Composite, file, and database link builders all read this mapping when they project hub keys.
+    builder.setDvLinkHubSource(linkSource);
     builder.build();
     builder.applyCatalogDataTypeMappings();
     return builder.getResultTransform();

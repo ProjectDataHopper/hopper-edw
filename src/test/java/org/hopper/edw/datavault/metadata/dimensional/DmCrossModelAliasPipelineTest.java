@@ -31,7 +31,7 @@ import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
-import org.apache.hop.pipeline.transforms.dimensionlookup.DimensionLookupMeta;
+import org.apache.hop.pipeline.transforms.databaselookup.DatabaseLookupMeta;
 import org.apache.hop.pipeline.transforms.selectvalues.SelectValuesMeta;
 import org.hopper.edw.datavault.hopgui.file.dimensional.HopDimensionalFileType;
 import org.junit.jupiter.api.BeforeAll;
@@ -74,17 +74,17 @@ class DmCrossModelAliasPipelineTest {
             .filter(t -> "lookup_dim_customer".equals(t.getName()))
             .findFirst()
             .orElseThrow();
-    DimensionLookupMeta customerLookupMeta = (DimensionLookupMeta) customerLookup.getTransform();
-    assertEquals("d_customer", customerLookupMeta.getTableName());
-    assertEquals("customer_key", customerLookupMeta.getFields().getReturns().getKeyRename());
+    DatabaseLookupMeta customerLookupMeta = (DatabaseLookupMeta) customerLookup.getTransform();
+    assertEquals("d_customer", customerLookupMeta.getLookup().getTableName());
+    assertEquals("customer_key", customerLookupMeta.getLookup().getReturnValues().get(0).getNewName());
 
     TransformMeta productLookup =
         pipelineMeta.getTransforms().stream()
             .filter(t -> "lookup_dim_product".equals(t.getName()))
             .findFirst()
             .orElseThrow();
-    DimensionLookupMeta productLookupMeta = (DimensionLookupMeta) productLookup.getTransform();
-    assertEquals("d_product", productLookupMeta.getTableName());
+    DatabaseLookupMeta productLookupMeta = (DatabaseLookupMeta) productLookup.getTransform();
+    assertEquals("d_product", productLookupMeta.getLookup().getTableName());
 
     assertTrue(
         pipelineMeta.getTransforms().stream()
@@ -99,7 +99,7 @@ class DmCrossModelAliasPipelineTest {
     assertEquals(
         2,
         pipelineMeta.getTransforms().stream()
-            .filter(t -> t.getTransform() instanceof DimensionLookupMeta)
+            .filter(t -> t.getTransform() instanceof DatabaseLookupMeta)
             .count());
   }
 

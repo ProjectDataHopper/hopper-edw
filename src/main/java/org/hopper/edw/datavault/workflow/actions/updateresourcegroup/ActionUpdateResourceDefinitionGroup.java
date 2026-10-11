@@ -44,7 +44,9 @@ import org.apache.hop.workflow.action.IAction;
 import org.apache.hop.workflow.config.WorkflowRunConfiguration;
 import org.hopper.edw.catalog.metadata.DataCatalogMeta;
 import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
+import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
+import org.hopper.edw.datavault.opsanalytics.OpsAnalyticsSourcePublisher;
 import org.hopper.edw.datavault.metadata.DvReadOnlyExistingVaultSupport;
 import org.hopper.edw.datavault.metadata.targettypemapping.TargetTypeMappingMeta;
 import org.hopper.edw.datavault.metrics.VaultUpdateExecutionSupport;
@@ -336,6 +338,19 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
   @HopMetadataProperty
   private boolean updateTargetDatabaseStructure = true;
 
+  /**
+   * When structure update is off, child Data Vault updates still create target tables that are not
+   * in the database yet. Existing tables are not altered.
+   */
+  @GuiWidgetElement(
+      order = "0602",
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.CreateMissingTables.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.CreateMissingTables.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_OPERATIONS_TAB_ID)
+  @HopMetadataProperty
+  private boolean createMissingTargetTables;
+
   @GuiWidgetElement(
       order = "0605",
       type = GuiElementType.METADATA,
@@ -387,6 +402,20 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
       parentId = GUI_PLUGIN_ELEMENT_CATALOG_TAB_ID)
   @HopMetadataProperty
   private String dataCatalogConnection;
+
+  /**
+   * When set, tables and queries on this source model are published as DV sources before the load.
+   * Operational analytics needs this because the vault reads OPS feeds from the catalog.
+   */
+  @GuiWidgetElement(
+      order = "0635",
+      type = GuiElementType.FILENAME,
+      variables = true,
+      label = "i18n::ActionUpdateResourceDefinitionGroup.SourceModel.Label",
+      toolTip = "i18n::ActionUpdateResourceDefinitionGroup.SourceModel.ToolTip",
+      parentId = GUI_PLUGIN_ELEMENT_CATALOG_TAB_ID)
+  @HopMetadataProperty
+  private String sourceModelFilename;
 
   @GuiWidgetElement(
       order = "0640",
@@ -561,11 +590,13 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
             ? meta.validationReportFormat
             : GroupModelValidationReportFileWriter.ReportFormat.MARKDOWN.name();
     this.updateTargetDatabaseStructure = meta.updateTargetDatabaseStructure;
+    this.createMissingTargetTables = meta.createMissingTargetTables;
     this.targetTypeMapping = meta.targetTypeMapping;
     this.failIfDdlNeeded = meta.failIfDdlNeeded;
     this.doNotUpdateTargetDatabase = meta.doNotUpdateTargetDatabase;
     this.publishToCatalog = meta.publishToCatalog;
     this.dataCatalogConnection = meta.dataCatalogConnection;
+    this.sourceModelFilename = meta.sourceModelFilename;
     this.ensureSpecialRecords = meta.ensureSpecialRecords;
     this.recordSourceGroup = meta.recordSourceGroup;
     this.manageVaultUpdateMetrics = meta.manageVaultUpdateMetrics;
@@ -621,6 +652,7 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
     }
 
     String catalogConnection = resolveCatalogConnection(group);
+    publishSourceModel(catalogConnection);
     String metricsProfile = Const.NVL(resolve(executionMetricsProfile), "");
     int checkParallelism = resolveModelCheckParallelism();
 
@@ -1010,6 +1042,7 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
     action.setDataVaultModelFile(modelFile);
     action.setPipelineRunConfiguration(pipelineRunConfiguration);
     action.setWorkflowRunConfiguration(workflowRunConfiguration);
+    action.setCreateMissingTargetTables(createMissingTargetTables);
     action.setParallelPipelineCopies(parallelPipelineCopies);
     action.setLogModelCheckFailures(!skipChildModelCheck && logModelCheckFailures);
     action.setAbortOnModelCheckFailures(!skipChildModelCheck && abortOnModelCheckFailures);
@@ -1044,6 +1077,7 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
     action.setLogModelCheckFailures(!skipChildModelCheck && logModelCheckFailures);
     action.setAbortOnModelCheckFailures(!skipChildModelCheck && abortOnModelCheckFailures);
     action.setUpdateTargetDatabaseStructure(updateTargetDatabaseStructure);
+    action.setCreateMissingTargetTables(createMissingTargetTables);
     action.setTargetTypeMapping(targetTypeMapping);
     action.setFailIfDdlNeeded(failIfDdlNeeded);
     action.setPublishToCatalog(publishToCatalog && !doNotUpdateTargetDatabase);
@@ -1067,6 +1101,7 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
     action.setLogModelCheckFailures(!skipChildModelCheck && logModelCheckFailures);
     action.setAbortOnModelCheckFailures(!skipChildModelCheck && abortOnModelCheckFailures);
     action.setUpdateTargetDatabaseStructure(updateTargetDatabaseStructure);
+    action.setCreateMissingTargetTables(createMissingTargetTables);
     action.setTargetTypeMapping(targetTypeMapping);
     action.setFailIfDdlNeeded(failIfDdlNeeded);
     action.setPublishToCatalog(publishToCatalog && !doNotUpdateTargetDatabase);
@@ -1203,6 +1238,25 @@ public class ActionUpdateResourceDefinitionGroup extends ActionBase implements C
           BaseMessages.getString(
               PKG, "ActionUpdateResourceDefinitionGroup.Log.OverviewAfterFailure", resolvedId));
     }
+  }
+
+  private void publishSourceModel(String catalogConnection) throws HopException {
+    if (Utils.isEmpty(sourceModelFilename)) {
+      return;
+    }
+    String catalog = catalogConnection;
+    if (Utils.isEmpty(catalog)) {
+      catalog = DvSourceCatalogService.DEFAULT_SOURCE_CATALOG_CONNECTION;
+    }
+    String filename = resolve(sourceModelFilename);
+    int published =
+        OpsAnalyticsSourcePublisher.publish(filename, catalog, this, getMetadataProvider());
+    logBasic(
+        BaseMessages.getString(
+            PKG,
+            "ActionUpdateResourceDefinitionGroup.Log.PublishedSourceModel",
+            Integer.toString(published),
+            filename));
   }
 
   private String resolveCatalogConnection(ResourceDefinitionGroupMeta group) {

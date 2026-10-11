@@ -75,7 +75,7 @@ echo "=== Running ${HOP_PROJECT_DIR}/${WORKFLOW_ARG} in Hop docker container ===
 echo "Project folder: ${HOP_PROJECT_FOLDER}"
 echo "Environment: ${HOP_ENVIRONMENT_NAME:-local-docker-postgres} (${LOCAL_POSTGRES_ENV_FILE})"
 if [ "${HOP_PROJECT_DIR}" = "retail-example" ]; then
-  echo "Databases: CRM=test_source, Vault=test_edw, OPS=test_ops (${LOCAL_POSTGRES_USER}@${LOCAL_POSTGRES_HOST}:${LOCAL_POSTGRES_PORT})"
+  echo "Databases: CRM=test_source, Vault=test_edw, OPS=test_ops, OpsAnalytics=test_ops_analytics (${LOCAL_POSTGRES_USER}@${LOCAL_POSTGRES_HOST}:${LOCAL_POSTGRES_PORT})"
 elif [ "${HOP_PROJECT_DIR}" = "adventureworks" ]; then
   echo "Databases: AdventureWorks SQL Server + Vault=test_aw_edw, OPS=test_aw_ops (${LOCAL_POSTGRES_USER}@${LOCAL_POSTGRES_HOST}:${LOCAL_POSTGRES_PORT})"
 else

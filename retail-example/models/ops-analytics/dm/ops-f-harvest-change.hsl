@@ -1,0 +1,90 @@
+<!--
+Copyright 2026 i-Bridge bv
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<semantic-model>
+  <description>Consumption layer for operational analytics.</description>
+  <dimensionalModelFilename>${PROJECT_HOME}/models/ops-analytics/dm/ops-f-harvest-change.hdm</dimensionalModelFilename>
+  <targetDatabase>ops-analytics-dm</targetDatabase>
+  <entities>
+    <entity>
+      <name>fact_harvest_change</name>
+      <description>Insert-only fact from sat_lnk_schema_harvest_change</description>
+      <role>FACT</role>
+      <binding>
+        <kind>HDM</kind>
+        <modelFilename>/home/matt/git/ProjectDataHopper/hopper-edw/retail-example/models/ops-analytics/dm/ops-f-harvest-change.hdm</modelFilename>
+        <tableName>fact_harvest_change</tableName>
+        <physicalTableName>f_harvest_change</physicalTableName>
+      </binding>
+      <attributes>
+        <attribute>
+          <name>field_name</name>
+          <physicalColumn>field_name</physicalColumn>
+          <header>Field name</header>
+          <formatMask/>
+        </attribute>
+        <attribute>
+          <name>severity</name>
+          <physicalColumn>severity</physicalColumn>
+          <header>Severity</header>
+          <formatMask/>
+        </attribute>
+      </attributes>
+      <measures>
+        <measure>
+          <name>row_count</name>
+          <physicalColumn>row_count</physicalColumn>
+          <header>Row count</header>
+          <formatMask>#,##0.00</formatMask>
+          <aggregation>SUM</aggregation>
+          <additive>Y</additive>
+        </measure>
+      </measures>
+    </entity>
+    <entity>
+      <name>dim_subject</name>
+      <description>Conformed dimension dim_subject</description>
+      <role>DIMENSION</role>
+      <binding>
+        <kind>HDM</kind>
+        <modelFilename>/home/matt/git/ProjectDataHopper/hopper-edw/retail-example/models/ops-analytics/dm/ops-f-harvest-change.hdm</modelFilename>
+        <tableName>dim_subject</tableName>
+        <physicalTableName>d_subject</physicalTableName>
+      </binding>
+      <attributes>
+        <attribute>
+          <name>subject_key</name>
+          <physicalColumn>subject_key</physicalColumn>
+          <header>Subject key</header>
+          <formatMask/>
+        </attribute>
+      </attributes>
+      <measures/>
+    </entity>
+  </entities>
+  <relationships>
+    <relationship>
+      <name>fact_harvest_change_dim_subject</name>
+      <fromEntity>fact_harvest_change</fromEntity>
+      <toEntity>dim_subject</toEntity>
+      <joinType>INNER</joinType>
+      <fromField>subject_key</fromField>
+      <toField>subject_key</toField>
+      <roleName>dim_subject</roleName>
+    </relationship>
+  </relationships>
+  <selections/>
+  <name>ops-f-harvest-change</name>
+</semantic-model>

@@ -33,6 +33,7 @@ import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
+import org.apache.hop.pipeline.transforms.databaselookup.DatabaseLookupMeta;
 import org.apache.hop.pipeline.transforms.dimensionlookup.DimensionLookupMeta;
 import org.apache.hop.pipeline.transforms.insertupdate.InsertUpdateMeta;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
@@ -149,9 +150,14 @@ class DmCatalogPipelineTest {
 
     assertEquals(4, pipeline.getTransforms().size());
     assertEquals(
-        2,
+        1,
         pipeline.getTransforms().stream()
             .filter(t -> t.getTransform() instanceof DimensionLookupMeta)
+            .count());
+    assertEquals(
+        1,
+        pipeline.getTransforms().stream()
+            .filter(t -> t.getTransform() instanceof DatabaseLookupMeta)
             .count());
     TableOutputMeta tableOutput =
         (TableOutputMeta)

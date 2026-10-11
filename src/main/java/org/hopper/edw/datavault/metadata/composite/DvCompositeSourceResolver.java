@@ -23,6 +23,7 @@ import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModelLoadSupport;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceQuery;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceQueryGenerationMode;
 import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceQueryGenerationSupport;
 import org.hopper.edw.datavault.metadata.sourcemodel.generate.SourceQuerySqlGenerator;
@@ -78,6 +79,9 @@ public final class DvCompositeSourceResolver {
     if (query != null && model != null) {
       SourceQueryGenerationMode mode =
           SourceQueryGenerationSupport.resolveEffectiveMode(model, query);
+      if (mode == SourceQueryGenerationMode.FREE_SQL && !Utils.isEmpty(query.getFreeSql())) {
+        return resolveFreeSql(model, query, mode, variables, metadataProvider);
+      }
       String sharedDb = SourceQueryGenerationSupport.resolveSharedDatabaseName(model, query);
       DatabaseMeta databaseMeta = null;
       String sql = null;
@@ -109,6 +113,33 @@ public final class DvCompositeSourceResolver {
     }
     throw new HopException(
         "Composite source is missing source model filename / query name and has no cached SQL");
+  }
+
+  /**
+   * Free SQL is already dialect SQL, including schema qualifiers the source-model planner does not
+   * treat as tables. Run it on the driving table connection.
+   */
+  private static ResolvedComposite resolveFreeSql(
+      SourceModel model,
+      SourceQuery query,
+      SourceQueryGenerationMode mode,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider)
+      throws HopException {
+    String sharedDb = SourceQueryGenerationSupport.resolveSharedDatabaseName(model, query);
+    if (Utils.isEmpty(sharedDb) && !Utils.isEmpty(query.getDrivingTableName())) {
+      SourceTable driving = model.findTable(query.getDrivingTableName());
+      if (driving != null && !Utils.isEmpty(driving.getDatabaseName())) {
+        sharedDb = driving.getDatabaseName().trim();
+      }
+    }
+    DatabaseMeta databaseMeta = null;
+    if (!Utils.isEmpty(sharedDb) && metadataProvider != null) {
+      String resolved = variables != null ? variables.resolve(sharedDb) : sharedDb;
+      databaseMeta = metadataProvider.getSerializer(DatabaseMeta.class).load(resolved);
+    }
+    return new ResolvedComposite(
+        model, query, mode, sharedDb, databaseMeta, query.getFreeSql(), false);
   }
 
   /**
