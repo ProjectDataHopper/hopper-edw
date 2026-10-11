@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### DDL execution logging (issue #199)
+
+- Data Vault, Business Vault, and dimensional updates log `Executing DDL on target database` once at Basic. Each statement is logged at Detailed and names the table.
+
 ### Operational analytics (issue #195)
 
 - **Create operational analytics...** on the EDW Journey toolbar and under **Tools** generates a source model, raw Data Vault, Business Vault, dimensional model, semantic layer, bus catalog, and two load workflows from the OPS database. The OPS tables have primary keys and no foreign keys; the generator adds the logical relationships and six conformed-key queries. `hop_executions` is optional and is not treated as `workflow_execution_id`.

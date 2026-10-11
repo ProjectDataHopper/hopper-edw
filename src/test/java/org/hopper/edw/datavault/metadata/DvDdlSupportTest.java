@@ -17,6 +17,7 @@ package org.hopper.edw.datavault.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
@@ -98,6 +99,38 @@ class DvDdlSupportTest {
     assertTrue(DvDdlSupport.isCreateTableDdl("CREATE TABLE foo (id INT);"));
     assertFalse(DvDdlSupport.isCreateTableDdl("ALTER TABLE foo ADD COLUMN bar INT;"));
     assertFalse(DvDdlSupport.isCreateTableDdl(""));
+  }
+
+  @Test
+  void extractDdlTargetTableNameReadsCreateAlterAndIndexTargets() {
+    assertEquals(
+        "sat_syn_product",
+        DvDdlSupport.extractDdlTargetTableName(
+            "CREATE TABLE sat_syn_product\n(\n  order_hk BYTEA\n);"));
+    assertEquals(
+        "sat_syn_product",
+        DvDdlSupport.extractDdlTargetTableName("CREATE TABLE vault.sat_syn_product (id INT);"));
+    assertEquals(
+        "hub_customer",
+        DvDdlSupport.extractDdlTargetTableName(
+            "CREATE TABLE \"public\".\"hub_customer\" (id INT);"));
+    assertEquals(
+        "sat_customer_demo",
+        DvDdlSupport.extractDdlTargetTableName(
+            "ALTER TABLE sat_customer_demo ADD segment VARCHAR(50);"));
+    assertEquals(
+        "hub_customer",
+        DvDdlSupport.extractDdlTargetTableName(
+            "ALTER TABLE \"public\".\"hub_customer\" ADD \"new_col\" INT"));
+    assertEquals(
+        "sat_x",
+        DvDdlSupport.extractDdlTargetTableName("CREATE INDEX idx_sat_x_hk ON sat_x (id)"));
+    assertEquals(
+        "sat_x",
+        DvDdlSupport.extractDdlTargetTableName(
+            "CREATE UNIQUE INDEX IF NOT EXISTS idx ON vault.sat_x (id)"));
+    assertNull(DvDdlSupport.extractDdlTargetTableName("SELECT 1"));
+    assertNull(DvDdlSupport.extractDdlTargetTableName(""));
   }
 
   @Test

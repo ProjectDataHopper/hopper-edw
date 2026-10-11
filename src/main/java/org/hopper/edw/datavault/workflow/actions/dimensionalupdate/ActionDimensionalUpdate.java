@@ -496,6 +496,11 @@ public class ActionDimensionalUpdate extends ActionBase implements Cloneable, IA
                       "ActionDimensionalUpdate", LoggingObjectType.GENERAL, null);
               try (Database db = new Database(loggingObject, getVariables(), targetDatabase)) {
                 db.connect();
+                logBasic(
+                    BaseMessages.getString(
+                        PKG,
+                        "ActionDimensionalUpdate.Log.ExecutingDdl",
+                        targetDatabase.getName()));
                 Set<String> createdInBatch = new HashSet<>();
                 for (String ddl : ddlStatements) {
                   if (Utils.isEmpty(ddl)) {
@@ -514,11 +519,7 @@ public class ActionDimensionalUpdate extends ActionBase implements Cloneable, IA
                     }
                     continue;
                   }
-                  logBasic(
-                      BaseMessages.getString(
-                          PKG,
-                          "ActionDimensionalUpdate.Log.ExecutingDdl",
-                          targetDatabase.getName()));
+                  logDetailed(executingDdlForTable(ddl, targetDatabase.getName()));
                   db.execStatements(ddl);
                   String tableName = DvDdlSupport.extractCreateTableName(ddl);
                   if (!Utils.isEmpty(tableName)) {
@@ -907,6 +908,16 @@ public class ActionDimensionalUpdate extends ActionBase implements Cloneable, IA
       return false;
     }
     return true;
+  }
+
+  private String executingDdlForTable(String ddl, String databaseName) {
+    String tableName = DvDdlSupport.extractDdlTargetTableName(ddl);
+    if (Utils.isEmpty(tableName)) {
+      return BaseMessages.getString(
+          PKG, "ActionDimensionalUpdate.Log.ExecutingDdlStatement", databaseName);
+    }
+    return BaseMessages.getString(
+        PKG, "ActionDimensionalUpdate.Log.ExecutingDdlForTable", tableName, databaseName);
   }
 
   private boolean hasDdlStatements(List<String> ddlStatements) {

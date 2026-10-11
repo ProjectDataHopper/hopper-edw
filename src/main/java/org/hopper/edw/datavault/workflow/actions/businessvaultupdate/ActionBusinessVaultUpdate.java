@@ -491,6 +491,11 @@ public class ActionBusinessVaultUpdate extends ActionBase implements Cloneable, 
                       "ActionBusinessVaultUpdate", LoggingObjectType.GENERAL, null);
               try (Database db = new Database(loggingObject, getVariables(), targetDatabase)) {
                 db.connect();
+                logBasic(
+                    BaseMessages.getString(
+                        PKG,
+                        "ActionBusinessVaultUpdate.Log.ExecutingDdl",
+                        targetDatabase.getName()));
                 Set<String> createdInBatch = new HashSet<>();
                 for (String ddl : ddlStatements) {
                   if (Utils.isEmpty(ddl)) {
@@ -509,11 +514,7 @@ public class ActionBusinessVaultUpdate extends ActionBase implements Cloneable, 
                     }
                     continue;
                   }
-                  logBasic(
-                      BaseMessages.getString(
-                          PKG,
-                          "ActionBusinessVaultUpdate.Log.ExecutingDdl",
-                          targetDatabase.getName()));
+                  logDetailed(executingDdlForTable(ddl, targetDatabase.getName()));
                   db.execStatements(ddl);
                   String tableName = DvDdlSupport.extractCreateTableName(ddl);
                   if (!Utils.isEmpty(tableName)) {
@@ -1123,6 +1124,16 @@ public class ActionBusinessVaultUpdate extends ActionBase implements Cloneable, 
       return false;
     }
     return true;
+  }
+
+  private String executingDdlForTable(String ddl, String databaseName) {
+    String tableName = DvDdlSupport.extractDdlTargetTableName(ddl);
+    if (Utils.isEmpty(tableName)) {
+      return BaseMessages.getString(
+          PKG, "ActionBusinessVaultUpdate.Log.ExecutingDdlStatement", databaseName);
+    }
+    return BaseMessages.getString(
+        PKG, "ActionBusinessVaultUpdate.Log.ExecutingDdlForTable", tableName, databaseName);
   }
 
   private boolean hasDdlStatements(List<String> ddlStatements) {

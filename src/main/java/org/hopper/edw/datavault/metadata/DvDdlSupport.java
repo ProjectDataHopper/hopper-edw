@@ -305,6 +305,96 @@ public final class DvDdlSupport {
   }
 
   /**
+   * Physical table targeted by a CREATE TABLE, ALTER TABLE, or CREATE INDEX statement. Returns
+   * {@code null} when the statement cannot be parsed. Quoted and schema-qualified names yield the
+   * table, not the schema.
+   */
+  public static String extractDdlTargetTableName(String ddl) {
+    if (Utils.isEmpty(ddl)) {
+      return null;
+    }
+    String trimmed = ddl.trim();
+    String remainder = null;
+    String withoutCreateTable =
+        trimmed.replaceFirst(
+            "(?is)^CREATE\\s+(OR\\s+REPLACE\\s+)?TABLE\\s+(IF\\s+NOT\\s+EXISTS\\s+)?", "");
+    if (!withoutCreateTable.equals(trimmed)) {
+      remainder = withoutCreateTable;
+    } else {
+      String withoutAlter =
+          trimmed.replaceFirst("(?is)^ALTER\\s+TABLE\\s+(ONLY\\s+)?(IF\\s+EXISTS\\s+)?", "");
+      if (!withoutAlter.equals(trimmed)) {
+        remainder = withoutAlter;
+      } else if (trimmed.regionMatches(true, 0, "CREATE", 0, 6)
+          && trimmed.matches("(?is).*\\bINDEX\\b.*")) {
+        String withoutOn = trimmed.replaceFirst("(?is)^.*?\\bON\\s+", "");
+        if (!withoutOn.equals(trimmed)) {
+          remainder = withoutOn;
+        }
+      }
+    }
+    if (remainder == null) {
+      return null;
+    }
+    return lastQualifiedIdentifier(remainder.trim());
+  }
+
+  /** Last identifier in a possibly schema-qualified, quoted table reference. */
+  private static String lastQualifiedIdentifier(String remainder) {
+    if (Utils.isEmpty(remainder)) {
+      return null;
+    }
+    int i = 0;
+    String last = null;
+    while (i < remainder.length()) {
+      while (i < remainder.length() && Character.isWhitespace(remainder.charAt(i))) {
+        i++;
+      }
+      if (i >= remainder.length()) {
+        break;
+      }
+      char c = remainder.charAt(i);
+      String ident;
+      if (c == '"' || c == '`' || c == '[') {
+        char end = c == '[' ? ']' : c;
+        int close = remainder.indexOf(end, i + 1);
+        if (close < 0) {
+          return last;
+        }
+        ident = remainder.substring(i + 1, close);
+        i = close + 1;
+      } else if (Character.isLetterOrDigit(c) || c == '_') {
+        int start = i;
+        i++;
+        while (i < remainder.length()) {
+          char next = remainder.charAt(i);
+          if (Character.isLetterOrDigit(next) || next == '_') {
+            i++;
+          } else {
+            break;
+          }
+        }
+        ident = remainder.substring(start, i);
+      } else {
+        break;
+      }
+      if (ident.isEmpty()) {
+        break;
+      }
+      last = ident;
+      while (i < remainder.length() && Character.isWhitespace(remainder.charAt(i))) {
+        i++;
+      }
+      if (i < remainder.length() && remainder.charAt(i) == '.') {
+        i++;
+        continue;
+      }
+      break;
+    }
+    return Utils.isEmpty(last) ? null : last;
+  }
+
+  /**
    * Removes duplicate CREATE TABLE statements that target the same physical table. Keeps the first
    * statement for each table name.
    */
