@@ -15,6 +15,7 @@
  */
 package org.hopper.edw.datavault.layout;
 
+import java.util.EnumSet;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.util.Utils;
@@ -25,12 +26,14 @@ import org.eclipse.elk.core.math.ElkPadding;
 import org.eclipse.elk.core.options.ContentAlignment;
 import org.eclipse.elk.core.options.CoreOptions;
 import org.eclipse.elk.core.options.HierarchyHandling;
+import org.eclipse.elk.core.options.SizeConstraint;
 import org.eclipse.elk.graph.ElkNode;
 
 /**
- * Configuration for ELK graph layout (layered Sugiyama or rectangle packing). This class is
- * independent of any specific consumer and can be reused by other Hop plugins or applications that
- * use the Eclipse Layout Kernel.
+ * Configuration for ELK graph layout. Layered Sugiyama suits pipelines and workflows. Stress and
+ * force suit cyclic relationship graphs. Rectangle packing ignores edges. This class is independent
+ * of any specific consumer and can be reused by other Hop plugins or applications that use the
+ * Eclipse Layout Kernel.
  */
 @Getter
 @Setter
@@ -38,6 +41,8 @@ public class ElkLayout {
 
   public static final boolean DEFAULT_ENABLED = true;
   public static final ElkLayoutAlgorithm DEFAULT_ALGORITHM = ElkLayoutAlgorithm.LAYERED;
+  public static final String STRESS_ALGORITHM_ID = "org.eclipse.elk.stress";
+  public static final String FORCE_ALGORITHM_ID = "org.eclipse.elk.force";
   public static final int DEFAULT_SPACING_WITHIN_LAYER = 48;
   public static final int DEFAULT_SPACING_BETWEEN_LAYERS = 16;
   public static final int DEFAULT_SPACING_EDGE_NODE = 16;
@@ -234,11 +239,22 @@ public class ElkLayout {
 
   /** Applies layout options to the root node of an ELK graph. */
   public void applyTo(ElkNode root) {
-    if (getAlgorithm() == ElkLayoutAlgorithm.RECT_PACKING) {
-      applyRectPackingTo(root);
-    } else {
-      applyLayeredTo(root);
+    switch (getAlgorithm()) {
+      case RECT_PACKING -> applyRectPackingTo(root);
+      case STRESS -> applyRelationshipLayout(root, STRESS_ALGORITHM_ID);
+      case FORCE -> applyRelationshipLayout(root, FORCE_ALGORITHM_ID);
+      default -> applyLayeredTo(root);
     }
+  }
+
+  /** Stress and force place an undirected relationship graph. Card size is a hard minimum. */
+  private void applyRelationshipLayout(ElkNode root, String algorithmId) {
+    int paddingX = getOriginX();
+    int paddingY = getOriginY();
+    root.setProperty(CoreOptions.ALGORITHM, algorithmId);
+    root.setProperty(CoreOptions.PADDING, new ElkPadding(paddingX, paddingY, paddingX, paddingY));
+    root.setProperty(CoreOptions.SPACING_NODE_NODE, (double) getSpacingWithinLayer());
+    root.setProperty(CoreOptions.NODE_SIZE_CONSTRAINTS, EnumSet.of(SizeConstraint.MINIMUM_SIZE));
   }
 
   private void applyLayeredTo(ElkNode root) {

@@ -39,7 +39,16 @@ public final class ElkLayoutGuiSupport {
    * on OK, or {@code null} when cancelled.
    */
   public static ElkLayout promptForLayout(Shell shell) {
-    ElkLayoutDialog dialog = new ElkLayoutDialog(shell, new ElkLayout(getConfig()));
+    return promptForLayout(shell, new ElkLayout(getConfig()));
+  }
+
+  /**
+   * Opens the layout dialog from {@code initial}. Saving as default still writes the chosen
+   * options. Callers can preselect an algorithm without changing the stored default until the user
+   * asks to save it.
+   */
+  public static ElkLayout promptForLayout(Shell shell, ElkLayout initial) {
+    ElkLayoutDialog dialog = new ElkLayoutDialog(shell, new ElkLayout(initial));
     if (!dialog.open()) {
       return null;
     }

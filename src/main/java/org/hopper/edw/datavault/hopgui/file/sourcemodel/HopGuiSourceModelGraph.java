@@ -23,10 +23,10 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.Props;
-import org.apache.hop.core.RowMetaAndData;
 import org.apache.hop.core.action.GuiContextAction;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.AreaOwner;
+import org.apache.hop.core.gui.DPoint;
 import org.apache.hop.core.gui.IGc;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.SnapAllignDistribute;
@@ -71,6 +71,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
@@ -136,6 +137,11 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       "HopGuiSourceModelGraph-ToolBar-10030-Zoom-100";
   public static final String TOOLBAR_ITEM_ZOOM_FIT =
       "HopGuiSourceModelGraph-ToolBar-10040-Zoom-Fit";
+  public static final String TOOLBAR_ITEM_BROWSE = "HopGuiSourceModelGraph-ToolBar-10046-Browse";
+  public static final String TOOLBAR_ITEM_BROWSE_BACK =
+      "HopGuiSourceModelGraph-ToolBar-10048-Browse-Back";
+  public static final String TOOLBAR_ITEM_BROWSE_DEPTH =
+      "HopGuiSourceModelGraph-ToolBar-10049-Browse-Depth";
   public static final String TOOLBAR_ITEM_EDIT_MODEL =
       "HopGuiSourceModelGraph-ToolBar-10050-Edit-Model";
   public static final String TOOLBAR_ITEM_IMPORT_SCHEMA =
@@ -172,6 +178,10 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
   private SourceModel model;
   private Control toolBar;
   private GuiToolbarWidgets toolBarWidgets;
+  private final SourceModelBrowseSession browseSession = new SourceModelBrowseSession();
+  private SourceModelBrowseLayout.Node browseClick;
+  private DPoint browseSavedOffset;
+  private float browseSavedMagnification;
   private boolean changed;
   private String filename;
 
@@ -282,7 +292,11 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
 
   private SourceModelCanvasSvgRenderer.Context buildSourceSvgContext(int width, int height) {
     PropsUi propsUi = PropsUi.getInstance();
-    maximum = model.getMaximum();
+    if (browseSession.isActive()) {
+      browseSession.rebuild(model);
+    } else {
+      maximum = model.getMaximum();
+    }
     SourceModelCanvasSvgRenderer.Context ctx = new SourceModelCanvasSvgRenderer.Context();
     ctx.variables = variables;
     ctx.model = model;
@@ -294,7 +308,6 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     ctx.magnification = (float) (magnification * PropsUi.getNativeZoomFactor());
     ctx.screenMagnification = magnification;
     ctx.zoomFactor = propsUi.getZoomFactor();
-    ctx.maximum = maximum;
     ctx.mouseOverTableName = mouseOverTableName;
     ctx.mouseOverNoteLink = mouseOverNoteLink;
     ctx.noteImageBaseFilename = getFilename();
@@ -303,13 +316,19 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     ctx.startRelationshipNode = startRelationshipNode;
     ctx.relationshipDragEndLocation = relationshipDragEndLocation;
     ctx.candidateRelationshipTarget = candidateRelationshipTarget;
+    ctx.browseView = framedBrowseView();
+    ctx.maximum = maximum;
     return ctx;
   }
 
   private void drawSourceModelImage(GC swtGc, int width, int height) {
     PropsUi propsUi = PropsUi.getInstance();
     IGc gc = new SwtGc(swtGc, width, height, propsUi.getIconSize());
-    maximum = model.getMaximum();
+    if (browseSession.isActive()) {
+      browseSession.rebuild(model);
+    } else {
+      maximum = model.getMaximum();
+    }
     try {
       areaOwners.clear();
       SourceModelPainter painter = new SourceModelPainter(model, gc, variables, width, height);
@@ -328,6 +347,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       painter.setShowingNavigationView(!propsUi.isHideViewportEnabled());
       painter.setRelationshipDragInfo(
           startRelationshipNode, relationshipDragEndLocation, candidateRelationshipTarget);
+      painter.setBrowseView(framedBrowseView());
       painter.drawSourceModel(hopGui.getMetadataProvider());
       captureNavigationViewGeometry(painter);
       CanvasFacade.setData(canvas, magnification, offset, model);
@@ -351,26 +371,58 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       return nodes;
     }
     for (SourceTable table : model.getTables()) {
-      putWebNode(nodes, table != null ? table.getName() : null, table);
+      putWebNode(nodes, SourceEndpointKind.TABLE, table != null ? table.getName() : null, table);
     }
     for (SourceQuery query : model.getQueries()) {
-      putWebNode(nodes, query != null ? query.getName() : null, query);
+      putWebNode(nodes, SourceEndpointKind.QUERY, query != null ? query.getName() : null, query);
     }
     for (SourceJson json : model.getJsonSources()) {
-      putWebNode(nodes, json != null ? json.getName() : null, json);
+      putWebNode(nodes, SourceEndpointKind.JSON, json != null ? json.getName() : null, json);
     }
     for (SourceMasking masking : model.getMaskingSources()) {
-      putWebNode(nodes, masking != null ? masking.getName() : null, masking);
+      putWebNode(
+          nodes, SourceEndpointKind.MASKING, masking != null ? masking.getName() : null, masking);
     }
     for (SourcePipeline pipeline : model.getPipelineSources()) {
-      putWebNode(nodes, pipeline != null ? pipeline.getName() : null, pipeline);
+      putWebNode(
+          nodes,
+          SourceEndpointKind.PIPELINE,
+          pipeline != null ? pipeline.getName() : null,
+          pipeline);
     }
     return nodes;
   }
 
-  private static void putWebNode(
-      Map<String, ModelGraphWebCanvasData.NodePos> nodes, String name, Object card) {
+  private void putWebNode(
+      Map<String, ModelGraphWebCanvasData.NodePos> nodes,
+      SourceEndpointKind kind,
+      String name,
+      Object card) {
     if (Utils.isEmpty(name) || card == null) {
+      return;
+    }
+    if (browseSession.isActive()) {
+      SourceModelBrowseLayout.Result framed = framedBrowseView();
+      SourceModelBrowseLayout.Node node = framed != null ? framed.node(kind, name) : null;
+      if (node == null) {
+        return;
+      }
+      boolean selected = false;
+      if (card instanceof SourceTable table) {
+        selected = table.isSelected();
+      } else if (card instanceof SourceQuery query) {
+        selected = query.isSelected();
+      } else if (card instanceof SourceJson json) {
+        selected = json.isSelected();
+      } else if (card instanceof SourceMasking masking) {
+        selected = masking.isSelected();
+      } else if (card instanceof SourcePipeline pipeline) {
+        selected = pipeline.isSelected();
+      }
+      nodes.put(
+          name,
+          ModelGraphWebCanvasData.NodePos.of(
+              node.x(), node.y(), selected, node.width(), node.height()));
       return;
     }
     Point loc = null;
@@ -475,7 +527,72 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       image = "ui/images/zoom-fit.svg")
   @Override
   public void zoomFitToScreen() {
+    if (browseSession.isActive()) {
+      fitBrowseRing();
+      return;
+    }
     performZoomFitToScreen();
+  }
+
+  @GuiToolbarElement(
+      root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
+      id = TOOLBAR_ITEM_BROWSE,
+      toolTip = "i18n::HopGuiSourceModelGraph.Toolbar.Browse.Tooltip",
+      type = GuiToolbarElementType.BUTTON,
+      image = "ui/images/view.svg",
+      separator = true)
+  public void toggleBrowse() {
+    if (model == null) {
+      return;
+    }
+    if (browseSession.isActive()) {
+      exitBrowse();
+      return;
+    }
+    SourceModelBrowseSession.Focus focus = selectedBrowseFocus();
+    if (focus == null) {
+      return;
+    }
+    rememberBrowseViewport();
+    browseSession.enter(model, focus.kind(), focus.name());
+    showBrowse();
+  }
+
+  @GuiToolbarElement(
+      root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
+      id = TOOLBAR_ITEM_BROWSE_BACK,
+      toolTip = "i18n::HopGuiSourceModelGraph.Toolbar.BrowseBack.Tooltip",
+      type = GuiToolbarElementType.BUTTON,
+      image = "ui/images/navigate-back.svg")
+  public void browseBack() {
+    if (model != null && browseSession.back(model)) {
+      showBrowse();
+    }
+  }
+
+  @GuiToolbarElement(
+      root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
+      id = TOOLBAR_ITEM_BROWSE_DEPTH,
+      label = "i18n::HopGuiSourceModelGraph.Toolbar.BrowseDepth.Label",
+      toolTip = "i18n::HopGuiSourceModelGraph.Toolbar.BrowseDepth.Tooltip",
+      type = GuiToolbarElementType.COMBO,
+      comboValuesMethod = "getBrowseDepthValues")
+  public void browseDepthChanged() {
+    if (toolBarWidgets == null) {
+      return;
+    }
+    Control control = toolBarWidgets.getWidgetsMap().get(TOOLBAR_ITEM_BROWSE_DEPTH);
+    if (!(control instanceof Combo combo) || combo.isDisposed()) {
+      return;
+    }
+    browseSession.setDepth(model, "2".equals(combo.getText().trim()) ? 2 : 1);
+    if (browseSession.isActive()) {
+      showBrowse();
+    }
+  }
+
+  public List<String> getBrowseDepthValues() {
+    return List.of("1", "2");
   }
 
   @GuiToolbarElement(
@@ -719,6 +836,10 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       image = "ui/images/unselect-all.svg")
   @Override
   public void unselectAll() {
+    if (browseSession.isActive()) {
+      exitBrowse();
+      return;
+    }
     mouseInteractions().unselectAllOnCanvas();
     clearSelectionRegion();
     redraw();
@@ -2395,6 +2516,91 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
   }
 
   @GuiContextAction(
+      id = "source-model-table-browse",
+      parentId = HopGuiSourceTableContext.CONTEXT_ID,
+      type = GuiActionType.Modify,
+      name = "i18n::HopGuiSourceModelGraph.Context.Browse.Name",
+      tooltip = "i18n::HopGuiSourceModelGraph.Context.Browse.Tooltip",
+      image = "ui/images/view.svg",
+      category = "Basic",
+      categoryOrder = "0")
+  public void browseFromTable(HopGuiSourceTableContext context) {
+    if (context != null && context.getTable() != null) {
+      HopGuiSourceModelGraph graph =
+          context.getSourceModelGraph() != null ? context.getSourceModelGraph() : this;
+      graph.browseFrom(SourceEndpointKind.TABLE, context.getTable().getName());
+    }
+  }
+
+  @GuiContextAction(
+      id = "source-model-query-browse",
+      parentId = HopGuiSourceQueryContext.CONTEXT_ID,
+      type = GuiActionType.Modify,
+      name = "i18n::HopGuiSourceModelGraph.Context.Browse.Name",
+      tooltip = "i18n::HopGuiSourceModelGraph.Context.Browse.Tooltip",
+      image = "ui/images/view.svg",
+      category = "Basic",
+      categoryOrder = "0")
+  public void browseFromQuery(HopGuiSourceQueryContext context) {
+    if (context != null && context.getQuery() != null) {
+      HopGuiSourceModelGraph graph =
+          context.getSourceModelGraph() != null ? context.getSourceModelGraph() : this;
+      graph.browseFrom(SourceEndpointKind.QUERY, context.getQuery().getName());
+    }
+  }
+
+  @GuiContextAction(
+      id = "source-model-json-browse",
+      parentId = HopGuiSourceJsonContext.CONTEXT_ID,
+      type = GuiActionType.Modify,
+      name = "i18n::HopGuiSourceModelGraph.Context.Browse.Name",
+      tooltip = "i18n::HopGuiSourceModelGraph.Context.Browse.Tooltip",
+      image = "ui/images/view.svg",
+      category = "Basic",
+      categoryOrder = "0")
+  public void browseFromJson(HopGuiSourceJsonContext context) {
+    if (context != null && context.getJsonSource() != null) {
+      HopGuiSourceModelGraph graph =
+          context.getSourceModelGraph() != null ? context.getSourceModelGraph() : this;
+      graph.browseFrom(SourceEndpointKind.JSON, context.getJsonSource().getName());
+    }
+  }
+
+  @GuiContextAction(
+      id = "source-model-pipeline-browse",
+      parentId = HopGuiSourcePipelineContext.CONTEXT_ID,
+      type = GuiActionType.Modify,
+      name = "i18n::HopGuiSourceModelGraph.Context.Browse.Name",
+      tooltip = "i18n::HopGuiSourceModelGraph.Context.Browse.Tooltip",
+      image = "ui/images/view.svg",
+      category = "Basic",
+      categoryOrder = "0")
+  public void browseFromPipeline(HopGuiSourcePipelineContext context) {
+    if (context != null && context.getPipelineSource() != null) {
+      HopGuiSourceModelGraph graph =
+          context.getSourceModelGraph() != null ? context.getSourceModelGraph() : this;
+      graph.browseFrom(SourceEndpointKind.PIPELINE, context.getPipelineSource().getName());
+    }
+  }
+
+  @GuiContextAction(
+      id = "source-model-masking-browse",
+      parentId = HopGuiSourceMaskingContext.CONTEXT_ID,
+      type = GuiActionType.Modify,
+      name = "i18n::HopGuiSourceModelGraph.Context.Browse.Name",
+      tooltip = "i18n::HopGuiSourceModelGraph.Context.Browse.Tooltip",
+      image = "ui/images/view.svg",
+      category = "Basic",
+      categoryOrder = "0")
+  public void browseFromMasking(HopGuiSourceMaskingContext context) {
+    if (context != null && context.getMaskingSource() != null) {
+      HopGuiSourceModelGraph graph =
+          context.getSourceModelGraph() != null ? context.getSourceModelGraph() : this;
+      graph.browseFrom(SourceEndpointKind.MASKING, context.getMaskingSource().getName());
+    }
+  }
+
+  @GuiContextAction(
       id = "source-model-query-ai-help",
       parentId = HopGuiSourceQueryContext.CONTEXT_ID,
       type = GuiActionType.Modify,
@@ -3564,6 +3770,235 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
   }
 
+  private void rememberBrowseViewport() {
+    browseSavedOffset = new DPoint(offset.x, offset.y);
+    browseSavedMagnification = magnification;
+  }
+
+  private void exitBrowse() {
+    browseSession.exit();
+    browseClick = null;
+    if (browseSavedOffset != null) {
+      offset.x = browseSavedOffset.x;
+      offset.y = browseSavedOffset.y;
+      magnification = browseSavedMagnification;
+      browseSavedOffset = null;
+    }
+    if (model != null) {
+      maximum = model.getMaximum();
+    }
+    setZoomLabel();
+    redraw();
+  }
+
+  /**
+   * Browse coordinates are centered on the origin. Drawing adds {@code offset} by hand and then
+   * scales; {@code IGc.setTransform} does not translate. A positive offset is also rejected, so the
+   * focus card is moved to the canvas center in graph coordinates instead.
+   */
+  private SourceModelBrowseLayout.Result framedBrowseView() {
+    SourceModelBrowseLayout.Result view = browseSession.view();
+    if (view == null) {
+      return null;
+    }
+    SourceModelBrowseLayout.Node focus = view.focus();
+    if (focus == null || canvas == null || canvas.isDisposed()) {
+      maximum = view.maximum();
+      return view;
+    }
+    Point area = getArea();
+    if (area == null || area.x <= 0 || area.y <= 0) {
+      maximum = view.maximum();
+      return view;
+    }
+    float mag = (float) (magnification * PropsUi.getNativeZoomFactor());
+    if (mag <= 0f) {
+      mag = 1f;
+    }
+    int centerX = Math.round(area.x / (2f * mag));
+    int centerY = Math.round(area.y / (2f * mag));
+    SourceModelBrowseLayout.Result framed =
+        view.translated(centerX - focus.centerX(), centerY - focus.centerY());
+    maximum = framed.maximum();
+    return framed;
+  }
+
+  private void showBrowse() {
+    if (browseSession.view() == null) {
+      return;
+    }
+    // Keep the pan offset at the origin. The focus card is placed at the canvas center in graph
+    // coordinates because IGc.setTransform ignores translation and validateOffset rejects a
+    // positive offset.
+    offset = new DPoint(0, 0);
+    syncBrowseDepthCombo();
+    redraw();
+  }
+
+  private void syncBrowseDepthCombo() {
+    if (toolBarWidgets == null) {
+      return;
+    }
+    Control control = toolBarWidgets.getWidgetsMap().get(TOOLBAR_ITEM_BROWSE_DEPTH);
+    if (control instanceof Combo combo && !combo.isDisposed()) {
+      String text = Integer.toString(browseSession.getDepth());
+      if (!text.equals(combo.getText())) {
+        combo.setText(text);
+      }
+    }
+  }
+
+  private void fitBrowseRing() {
+    SourceModelBrowseLayout.Result view = browseSession.view();
+    if (view == null || view.nodes().isEmpty() || canvas == null || canvas.isDisposed()) {
+      return;
+    }
+    int minX = Integer.MAX_VALUE;
+    int minY = Integer.MAX_VALUE;
+    int maxX = Integer.MIN_VALUE;
+    int maxY = Integer.MIN_VALUE;
+    for (SourceModelBrowseLayout.Node node : view.nodes().values()) {
+      minX = Math.min(minX, node.x());
+      minY = Math.min(minY, node.y());
+      maxX = Math.max(maxX, node.x() + node.width());
+      maxY = Math.max(maxY, node.y() + node.height());
+    }
+    int width = Math.max(1, maxX - minX);
+    int height = Math.max(1, maxY - minY);
+    org.eclipse.swt.graphics.Rectangle canvasBounds = canvas.getBounds();
+    double zoomX = canvasBounds.width / (width * PropsUi.getNativeZoomFactor()) * 0.85;
+    double zoomY = canvasBounds.height / (height * PropsUi.getNativeZoomFactor()) * 0.85;
+    magnification = (float) Math.max(0.1, Math.min(zoomX, zoomY));
+    offset = new DPoint(0, 0);
+    setZoomLabel();
+    redraw();
+  }
+
+  private SourceModelBrowseSession.Focus selectedBrowseFocus() {
+    if (model == null) {
+      return null;
+    }
+    for (SourceTable table : model.getTables()) {
+      if (table != null && table.isSelected() && !Utils.isEmpty(table.getName())) {
+        return new SourceModelBrowseSession.Focus(SourceEndpointKind.TABLE, table.getName());
+      }
+    }
+    for (SourceQuery query : model.getQueries()) {
+      if (query != null && query.isSelected() && !Utils.isEmpty(query.getName())) {
+        return new SourceModelBrowseSession.Focus(SourceEndpointKind.QUERY, query.getName());
+      }
+    }
+    for (SourceJson json : model.getJsonSources()) {
+      if (json != null && json.isSelected() && !Utils.isEmpty(json.getName())) {
+        return new SourceModelBrowseSession.Focus(SourceEndpointKind.JSON, json.getName());
+      }
+    }
+    for (SourcePipeline pipeline : model.getPipelineSources()) {
+      if (pipeline != null && pipeline.isSelected() && !Utils.isEmpty(pipeline.getName())) {
+        return new SourceModelBrowseSession.Focus(SourceEndpointKind.PIPELINE, pipeline.getName());
+      }
+    }
+    for (SourceMasking masking : model.getMaskingSources()) {
+      if (masking != null && masking.isSelected() && !Utils.isEmpty(masking.getName())) {
+        return new SourceModelBrowseSession.Focus(SourceEndpointKind.MASKING, masking.getName());
+      }
+    }
+    for (SourceTable table : model.getTables()) {
+      if (table != null && !Utils.isEmpty(table.getName())) {
+        return new SourceModelBrowseSession.Focus(SourceEndpointKind.TABLE, table.getName());
+      }
+    }
+    for (SourceQuery query : model.getQueries()) {
+      if (query != null && !Utils.isEmpty(query.getName())) {
+        return new SourceModelBrowseSession.Focus(SourceEndpointKind.QUERY, query.getName());
+      }
+    }
+    return null;
+  }
+
+  private void browseFrom(SourceEndpointKind kind, String name) {
+    if (model == null || Utils.isEmpty(name) || !SourceEndpointSupport.exists(model, kind, name)) {
+      return;
+    }
+    if (!browseSession.isActive()) {
+      rememberBrowseViewport();
+      browseSession.enter(model, kind, name);
+    } else {
+      browseSession.walk(model, kind, name);
+    }
+    showBrowse();
+  }
+
+  private SourceModelBrowseLayout.Node browseNode(Object card) {
+    SourceModelBrowseLayout.Result view = browseSession.view();
+    if (view == null || card == null) {
+      return null;
+    }
+    if (card instanceof SourceTable table) {
+      return view.node(SourceEndpointKind.TABLE, table.getName());
+    }
+    if (card instanceof SourceQuery query) {
+      return view.node(SourceEndpointKind.QUERY, query.getName());
+    }
+    if (card instanceof SourceJson json) {
+      return view.node(SourceEndpointKind.JSON, json.getName());
+    }
+    if (card instanceof SourcePipeline pipeline) {
+      return view.node(SourceEndpointKind.PIPELINE, pipeline.getName());
+    }
+    if (card instanceof SourceMasking masking) {
+      return view.node(SourceEndpointKind.MASKING, masking.getName());
+    }
+    return null;
+  }
+
+  private boolean isBrowseFocus(SourceModelBrowseLayout.Node node) {
+    if (node == null) {
+      return false;
+    }
+    SourceModelBrowseSession.Focus focus = browseSession.focus();
+    return node.kind() == focus.kind() && node.name().equals(focus.name());
+  }
+
+  private void showBrowseFocusMenu(Event e, SourceModelBrowseLayout.Node node) {
+    if (node == null || model == null) {
+      return;
+    }
+    switch (node.kind()) {
+      case TABLE -> {
+        SourceTable table = model.findTable(node.name());
+        if (table != null) {
+          showTableContextDialog(e, table);
+        }
+      }
+      case QUERY -> {
+        SourceQuery query = model.findQuery(node.name());
+        if (query != null) {
+          showQueryContextDialog(e, query);
+        }
+      }
+      case JSON -> {
+        SourceJson json = model.findJsonSource(node.name());
+        if (json != null) {
+          showJsonContextDialog(e, json);
+        }
+      }
+      case PIPELINE -> {
+        SourcePipeline pipeline = model.findPipelineSource(node.name());
+        if (pipeline != null) {
+          showPipelineContextDialog(e, pipeline);
+        }
+      }
+      case MASKING -> {
+        SourceMasking masking = model.findMaskingSource(node.name());
+        if (masking != null) {
+          showMaskingContextDialog(e, masking);
+        }
+      }
+      default -> {}
+    }
+  }
+
   private final class SourceMouseInteractions implements ModelGraphMouseInteractions {
 
     @Override
@@ -3590,6 +4025,21 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     @Override
     public boolean handleObjectMouseDown(
         Event e, Point real, ModelGraphHit hit, boolean shift, boolean control) {
+      if (browseSession.isActive()) {
+        if (e.button == 2 || shift) {
+          return true;
+        }
+        if (e.button == 1
+            && !control
+            && hit.areaType() == AreaOwner.AreaType.TRANSFORM_ICON
+            && hit.canvasObject() != null) {
+          browseClick = browseNode(hit.canvasObject());
+          clearTableDragState();
+          clearSelectionRegion();
+          avoidContextDialog = browseClick == null || !isBrowseFocus(browseClick);
+          return true;
+        }
+      }
       Object obj = hit.canvasObject();
       if (obj instanceof SourceQuery queryHit) {
         AreaOwner.AreaType areaType = hit.areaType();
@@ -3809,6 +4259,9 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
 
     @Override
     public boolean handleObjectMouseMove(Point real, boolean leftButtonDown) {
+      if (browseSession.isActive()) {
+        return false;
+      }
       if (!leftButtonDown
           || (currentTable == null
               && currentQuery == null
@@ -3950,7 +4403,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
 
     @Override
     public void selectInLassoRegion(int lassoMinX, int lassoMinY, int lassoMaxX, int lassoMaxY) {
-      if (model == null) {
+      if (model == null || browseSession.isActive()) {
         return;
       }
       for (SourceTable table : model.getTables()) {
@@ -4008,6 +4461,21 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
 
     @Override
     public boolean handlePureClickMouseUp(Event e, Point real) {
+      if (browseSession.isActive() && e.button == 1) {
+        SourceModelBrowseLayout.Node clicked = browseClick;
+        browseClick = null;
+        if (clicked != null && isUnmovedClick(real)) {
+          if (!isBrowseFocus(clicked)) {
+            browseSession.walk(model, clicked.kind(), clicked.name());
+            showBrowse();
+          } else if (!avoidContextDialog) {
+            showBrowseFocusMenu(e, clicked);
+          }
+          clearTableDragState();
+          avoidContextDialog = false;
+          return true;
+        }
+      }
       // Hop model canvases use left-click for action menus (not right-click).
       if (e.button != 1) {
         clearTableDragState();

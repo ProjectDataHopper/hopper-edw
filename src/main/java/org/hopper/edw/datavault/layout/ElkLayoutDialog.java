@@ -403,16 +403,16 @@ public class ElkLayoutDialog {
   }
 
   private void updateAlgorithmWidgets() {
-    boolean rectPacking =
-        ElkLayoutValues.getSelectedEnum(wAlgorithm, ElkLayoutAlgorithm.class)
-            == ElkLayoutAlgorithm.RECT_PACKING;
-    wTargetWidth.setEnabled(rectPacking);
-    wDirection.setEnabled(!rectPacking);
-    wSpacingBetweenLayers.setEnabled(!rectPacking);
-    wSpacingEdgeNode.setEnabled(!rectPacking);
-    wCrossingMinimization.setEnabled(!rectPacking);
-    wNodePlacement.setEnabled(!rectPacking);
-    wLayeringStrategy.setEnabled(!rectPacking);
-    wCycleBreaking.setEnabled(!rectPacking);
+    ElkLayoutAlgorithm algorithm =
+        ElkLayoutValues.getSelectedEnum(wAlgorithm, ElkLayoutAlgorithm.class);
+    boolean layered = algorithm == ElkLayoutAlgorithm.LAYERED;
+    wTargetWidth.setEnabled(algorithm == ElkLayoutAlgorithm.RECT_PACKING);
+    wDirection.setEnabled(layered);
+    wSpacingBetweenLayers.setEnabled(layered);
+    wSpacingEdgeNode.setEnabled(layered);
+    wCrossingMinimization.setEnabled(layered);
+    wNodePlacement.setEnabled(layered);
+    wLayeringStrategy.setEnabled(layered);
+    wCycleBreaking.setEnabled(layered);
   }
 }

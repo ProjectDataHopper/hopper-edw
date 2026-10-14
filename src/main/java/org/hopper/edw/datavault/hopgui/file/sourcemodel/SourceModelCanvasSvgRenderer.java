@@ -58,6 +58,7 @@ public final class SourceModelCanvasSvgRenderer {
     public Object startRelationshipNode;
     public Point relationshipDragEndLocation;
     public Object candidateRelationshipTarget;
+    public SourceModelBrowseLayout.Result browseView;
   }
 
   public static ModelGraphCanvasSvgResult render(Context ctx) throws HopException {
@@ -91,6 +92,7 @@ public final class SourceModelCanvasSvgRenderer {
           ctx.startRelationshipNode,
           ctx.relationshipDragEndLocation,
           ctx.candidateRelationshipTarget);
+      painter.setBrowseView(ctx.browseView);
 
       painter.drawSourceModel(ctx.metadataProvider);
 

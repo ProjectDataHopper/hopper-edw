@@ -20,6 +20,7 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.hop.core.gui.IGuiPosition;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.naming.NamingSchemeKind;
 import org.apache.hop.metadata.api.HopMetadataBase;
@@ -45,7 +46,7 @@ import org.jspecify.annotations.NonNull;
 @Setter
 @NamingSchemeKind(EdwNamingSchemeTypes.SOURCE_PIPELINE)
 public class SourcePipeline extends HopMetadataBase
-    implements IHopMetadata, IDataTypeMappingTarget {
+    implements IHopMetadata, IDataTypeMappingTarget, IGuiPosition {
 
   @HopMetadataProperty private String description;
 
@@ -179,6 +180,7 @@ public class SourcePipeline extends HopMetadataBase
     return getName() != null ? getName().trim() : "";
   }
 
+  @Override
   public Point getLocation() {
     if (location == null) {
       location = new Point(50, 50);
@@ -186,6 +188,7 @@ public class SourcePipeline extends HopMetadataBase
     return location;
   }
 
+  @Override
   public void setLocation(Point p) {
     if (p == null) {
       this.location = new Point(50, 50);
@@ -194,6 +197,7 @@ public class SourcePipeline extends HopMetadataBase
     }
   }
 
+  @Override
   public void setLocation(int x, int y) {
     if (location == null) {
       location = new Point(x, y);

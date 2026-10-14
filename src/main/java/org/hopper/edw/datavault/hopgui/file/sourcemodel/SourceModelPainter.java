@@ -41,6 +41,7 @@ import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphTableNameHitAre
 import org.hopper.edw.datavault.hopgui.file.vault.BasePainter;
 import org.hopper.edw.datavault.metadata.DvNote;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceColumn;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceEndpointKind;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceEndpointSupport;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceJson;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceJsonParentKind;
@@ -84,6 +85,9 @@ public class SourceModelPainter extends BasePainter {
   /** Table, query, JSON, or pipeline node under the cursor during relationship drag. */
   private Object candidateRelationshipTarget;
 
+  /** When set, only the browse neighborhood is painted, at ring coordinates. */
+  private SourceModelBrowseLayout.Result browseView;
+
   public SourceModelPainter(
       SourceModel model, IGc gc, IVariables variables, int width, int height) {
     super(gc, variables, model, new Point(width, height));
@@ -122,7 +126,9 @@ public class SourceModelPainter extends BasePainter {
     drawCompositionDependencyLines();
     drawRelationshipLines();
     drawRelationshipCandidateLine();
-    drawNotes(model.getNotes());
+    if (browseView == null) {
+      drawNotes(model.getNotes());
+    }
     drawTables();
     drawQueries();
     drawJsonSources();
@@ -135,6 +141,7 @@ public class SourceModelPainter extends BasePainter {
     if (showEmptyModelHint && isEmptyModel()) {
       drawEmptyModelHint();
     }
+    drawBrowseStatus();
 
     drawNavigationView();
   }
@@ -162,18 +169,23 @@ public class SourceModelPainter extends BasePainter {
         if (relationship == null) {
           continue;
         }
+        if (browseView != null && !browseView.drawsRelationship(relationship)) {
+          continue;
+        }
         Bounds child =
             SourceRelationshipEdgeLayout.boundsOfEndpoint(
                 model,
                 tableByName,
                 relationship.resolveChildEndpointKind(),
-                relationship.getChildTableName());
+                relationship.getChildTableName(),
+                browseView);
         Bounds parent =
             SourceRelationshipEdgeLayout.boundsOfEndpoint(
                 model,
                 tableByName,
                 relationship.resolveParentEndpointKind(),
-                relationship.getParentTableName());
+                relationship.getParentTableName(),
+                browseView);
         if (child == null || parent == null) {
           continue;
         }
@@ -187,56 +199,61 @@ public class SourceModelPainter extends BasePainter {
 
     // Tables (blue fill).
     for (SourceTable table : model.getTables()) {
-      if (table == null || table.getLocation() == null) {
+      if (table == null) {
         continue;
       }
       Bounds b = tableBounds(table);
+      if (b == null) {
+        continue;
+      }
       fillNavRect(graphX, graphY, scaleX, scaleY, b, minSize, EColor.BLUE);
     }
 
     // Queries (dark gray fill — purple is not an EColor; still distinct from tables).
     if (model.getQueries() != null) {
       for (SourceQuery query : model.getQueries()) {
-        if (query == null || query.getLocation() == null) {
+        Bounds bounds = query != null ? queryBounds(query) : null;
+        if (bounds == null) {
           continue;
         }
-        fillNavRect(graphX, graphY, scaleX, scaleY, queryBounds(query), minSize, EColor.DARKGRAY);
+        fillNavRect(graphX, graphY, scaleX, scaleY, bounds, minSize, EColor.DARKGRAY);
       }
     }
 
     // JSON sources.
     if (model.getJsonSources() != null) {
       for (SourceJson jsonSource : model.getJsonSources()) {
-        if (jsonSource == null || jsonSource.getLocation() == null) {
+        Bounds bounds = jsonSource != null ? jsonBounds(jsonSource) : null;
+        if (bounds == null) {
           continue;
         }
-        fillNavRect(graphX, graphY, scaleX, scaleY, jsonBounds(jsonSource), minSize, EColor.GRAY);
+        fillNavRect(graphX, graphY, scaleX, scaleY, bounds, minSize, EColor.GRAY);
       }
     }
 
     if (model.getMaskingSources() != null) {
       for (SourceMasking maskingSource : model.getMaskingSources()) {
-        if (maskingSource == null || maskingSource.getLocation() == null) {
+        Bounds bounds = maskingSource != null ? maskingBounds(maskingSource) : null;
+        if (bounds == null) {
           continue;
         }
-        fillNavRect(
-            graphX, graphY, scaleX, scaleY, maskingBounds(maskingSource), minSize, EColor.LIGHTGRAY);
+        fillNavRect(graphX, graphY, scaleX, scaleY, bounds, minSize, EColor.LIGHTGRAY);
       }
     }
 
     // Pipeline sources.
     if (model.getPipelineSources() != null) {
       for (SourcePipeline pipelineSource : model.getPipelineSources()) {
-        if (pipelineSource == null || pipelineSource.getLocation() == null) {
+        Bounds bounds = pipelineSource != null ? pipelineBounds(pipelineSource) : null;
+        if (bounds == null) {
           continue;
         }
-        fillNavRect(
-            graphX, graphY, scaleX, scaleY, pipelineBounds(pipelineSource), minSize, EColor.BLACK);
+        fillNavRect(graphX, graphY, scaleX, scaleY, bounds, minSize, EColor.BLACK);
       }
     }
 
     // Notes as light rectangles.
-    if (drawNotes && model.getNotes() != null) {
+    if (browseView == null && drawNotes && model.getNotes() != null) {
       for (DvNote note : model.getNotes()) {
         if (note == null || note.getLocation() == null) {
           continue;
@@ -294,7 +311,7 @@ public class SourceModelPainter extends BasePainter {
    * like FK relationships.
    */
   private void drawCompositionDependencyLines() {
-    if (model == null || gc == null) {
+    if (model == null || gc == null || browseView != null) {
       return;
     }
     try {
@@ -389,7 +406,7 @@ public class SourceModelPainter extends BasePainter {
     if (table == null) {
       table = model.findTable(tableName);
     }
-    if (table == null || table.getLocation() == null) {
+    if (table == null) {
       return null;
     }
     return tableBounds(table);
@@ -470,7 +487,10 @@ public class SourceModelPainter extends BasePainter {
   }
 
   private Bounds maskingBounds(SourceMasking masking) {
-    Point loc = masking.getLocation();
+    Point loc = placed(SourceEndpointKind.MASKING, masking.getName(), masking.getLocation());
+    if (loc == null) {
+      return null;
+    }
     int x = loc != null ? loc.x : 0;
     int y = loc != null ? loc.y : 0;
     if (gc == null) {
@@ -491,7 +511,10 @@ public class SourceModelPainter extends BasePainter {
   }
 
   private Bounds queryBounds(SourceQuery query) {
-    Point loc = query.getLocation();
+    Point loc = placed(SourceEndpointKind.QUERY, query.getName(), query.getLocation());
+    if (loc == null) {
+      return null;
+    }
     int x = loc != null ? loc.x : 0;
     int y = loc != null ? loc.y : 0;
     if (gc == null) {
@@ -512,7 +535,10 @@ public class SourceModelPainter extends BasePainter {
   }
 
   private Bounds jsonBounds(SourceJson jsonSource) {
-    Point loc = jsonSource.getLocation();
+    Point loc = placed(SourceEndpointKind.JSON, jsonSource.getName(), jsonSource.getLocation());
+    if (loc == null) {
+      return null;
+    }
     int x = loc != null ? loc.x : 0;
     int y = loc != null ? loc.y : 0;
     if (gc == null) {
@@ -544,9 +570,12 @@ public class SourceModelPainter extends BasePainter {
     gc.setLineWidth(1);
     gc.setLineStyle(ELineStyle.SOLID);
     Map<SourceRelationship, SourceRelationshipEdgeLayout.EdgeGeometry> edgeLayout =
-        SourceRelationshipEdgeLayout.layout(model, tableByName);
+        SourceRelationshipEdgeLayout.layout(model, tableByName, browseView);
     for (SourceRelationship relationship : model.getRelationships()) {
       if (relationship == null) {
+        continue;
+      }
+      if (browseView != null && !browseView.drawsRelationship(relationship)) {
         continue;
       }
       Bounds childBounds =
@@ -554,13 +583,15 @@ public class SourceModelPainter extends BasePainter {
               model,
               tableByName,
               relationship.resolveChildEndpointKind(),
-              relationship.getChildTableName());
+              relationship.getChildTableName(),
+              browseView);
       Bounds parentBounds =
           SourceRelationshipEdgeLayout.boundsOfEndpoint(
               model,
               tableByName,
               relationship.resolveParentEndpointKind(),
-              relationship.getParentTableName());
+              relationship.getParentTableName(),
+              browseView);
       if (childBounds == null || parentBounds == null) {
         continue;
       }
@@ -698,7 +729,11 @@ public class SourceModelPainter extends BasePainter {
   }
 
   private Bounds pipelineBounds(SourcePipeline pipelineSource) {
-    Point loc = pipelineSource.getLocation();
+    Point loc =
+        placed(SourceEndpointKind.PIPELINE, pipelineSource.getName(), pipelineSource.getLocation());
+    if (loc == null) {
+      return null;
+    }
     int x = loc != null ? loc.x : 0;
     int y = loc != null ? loc.y : 0;
     if (gc == null) {
@@ -720,8 +755,14 @@ public class SourceModelPainter extends BasePainter {
         Math.max(COMPOSITION_CARD_HEIGHT, boxSize.height()));
   }
 
-  private static Bounds tableBounds(SourceTable table) {
-    Point loc = table.getLocation();
+  private Bounds tableBounds(SourceTable table) {
+    if (table == null) {
+      return null;
+    }
+    Point loc = placed(SourceEndpointKind.TABLE, table.getName(), table.getLocation());
+    if (loc == null) {
+      return null;
+    }
     return new Bounds(
         loc != null ? loc.x : 0,
         loc != null ? loc.y : 0,
@@ -734,7 +775,7 @@ public class SourceModelPainter extends BasePainter {
       if (table == null) {
         continue;
       }
-      Point loc = table.getLocation();
+      Point loc = placed(SourceEndpointKind.TABLE, table.getName(), table.getLocation());
       if (loc == null) {
         continue;
       }
@@ -837,6 +878,7 @@ public class SourceModelPainter extends BasePainter {
 
   /** Teal/cyan card for JSON extraction nodes (distinct from purple queries). */
   private static final int[] JSON_COLOR = new int[] {20, 130, 140};
+
   private static final int[] MASKING_COLOR = new int[] {110, 70, 160};
 
   private static final int[] PIPELINE_COLOR = new int[] {180, 100, 40};
@@ -849,7 +891,7 @@ public class SourceModelPainter extends BasePainter {
       if (query == null) {
         continue;
       }
-      Point loc = query.getLocation();
+      Point loc = placed(SourceEndpointKind.QUERY, query.getName(), query.getLocation());
       if (loc == null) {
         continue;
       }
@@ -914,7 +956,7 @@ public class SourceModelPainter extends BasePainter {
       if (jsonSource == null) {
         continue;
       }
-      Point loc = jsonSource.getLocation();
+      Point loc = placed(SourceEndpointKind.JSON, jsonSource.getName(), jsonSource.getLocation());
       if (loc == null) {
         continue;
       }
@@ -984,12 +1026,18 @@ public class SourceModelPainter extends BasePainter {
       return;
     }
     for (SourceMasking masking : model.getMaskingSources()) {
-      if (masking == null || masking.getLocation() == null) {
+      if (masking == null) {
+        continue;
+      }
+      Point loc = placed(SourceEndpointKind.MASKING, masking.getName(), masking.getLocation());
+      if (loc == null) {
         continue;
       }
       String label = Utils.isEmpty(masking.getName()) ? "?" : masking.getName();
       String secondary =
-          Utils.isEmpty(masking.getParentSourceName()) ? "" : "from " + masking.getParentSourceName();
+          Utils.isEmpty(masking.getParentSourceName())
+              ? ""
+              : "from " + masking.getParentSourceName();
       String typeLabel = "MASKING";
       int masked = masking.maskedFields().size();
       String extra = masked + " masked";
@@ -997,7 +1045,7 @@ public class SourceModelPainter extends BasePainter {
           ModelGraphTableCardLayout.computeBoxSize(gc, label, secondary, typeLabel, extra);
       int boxWidth = Math.max(160, boxSize.width());
       int boxHeight = Math.max(80, boxSize.height());
-      Point screenLoc = real2screen(masking.getLocation().x, masking.getLocation().y);
+      Point screenLoc = real2screen(loc.x, loc.y);
       int x = screenLoc.x;
       int y = screenLoc.y;
       gc.setBackground(EColor.WHITE);
@@ -1043,7 +1091,9 @@ public class SourceModelPainter extends BasePainter {
       if (pipelineSource == null) {
         continue;
       }
-      Point loc = pipelineSource.getLocation();
+      Point loc =
+          placed(
+              SourceEndpointKind.PIPELINE, pipelineSource.getName(), pipelineSource.getLocation());
       if (loc == null) {
         continue;
       }
@@ -1100,6 +1150,43 @@ public class SourceModelPainter extends BasePainter {
                 label));
       }
     }
+  }
+
+  private Point placed(SourceEndpointKind kind, String name, Point saved) {
+    if (browseView == null) {
+      return saved;
+    }
+    return browseView.location(kind, name);
+  }
+
+  /**
+   * Screen-space banner. {@link IGc#setTransform} ignores x/y translation and only scales, so the
+   * banner is drawn at the origin and scaled by the UI zoom factor. Without that scale the text is
+   * far smaller than the cards, which are painted under the magnified transform.
+   */
+  private void drawBrowseStatus() {
+    if (browseView == null || gc == null || area == null || area.x <= 0) {
+      return;
+    }
+    String focus = browseView.focusName() != null ? browseView.focusName() : "?";
+    String text =
+        BaseMessages.getString(
+            PKG, "SourceModelPainter.Browse.Status", focus, Integer.toString(browseView.depth()));
+    float scale = (float) Math.max(1.0d, zoomFactor);
+    gc.setFont(EFont.GRAPH);
+    Point extent = gc.textExtent(text);
+    int pad = 6;
+    int width = extent.x + pad * 2;
+    int height = extent.y + pad * 2;
+    gc.setTransform(0, 0, scale);
+    gc.setBackground(EColor.BACKGROUND);
+    gc.fillRectangle(8, 8, width, height);
+    gc.setForeground(EColor.DARKGRAY);
+    gc.drawRectangle(8, 8, width, height);
+    gc.setForeground(EColor.BLACK);
+    gc.drawText(text, 8 + pad, 8 + pad, true);
+    gc.setTransform(0, 0, 1.0f);
+    gc.setFont(EFont.GRAPH);
   }
 
   private boolean isEmptyModel() {

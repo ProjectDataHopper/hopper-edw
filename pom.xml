@@ -388,6 +388,11 @@
     </dependency>
     <dependency>
       <groupId>org.eclipse.elk</groupId>
+      <artifactId>org.eclipse.elk.alg.force</artifactId>
+      <version>${elk.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.elk</groupId>
       <artifactId>org.eclipse.elk.alg.layered</artifactId>
       <version>${elk.version}</version>
     </dependency>

@@ -25,6 +25,8 @@ import org.apache.hop.metadata.api.IEnumHasCodeAndDescription;
 public enum ElkLayoutAlgorithm implements IEnumHasCodeAndDescription {
   LAYERED(
       "LAYERED", BaseMessages.getString(ElkLayoutAlgorithm.class, "ElkLayoutAlgorithm.Layered")),
+  STRESS("STRESS", BaseMessages.getString(ElkLayoutAlgorithm.class, "ElkLayoutAlgorithm.Stress")),
+  FORCE("FORCE", BaseMessages.getString(ElkLayoutAlgorithm.class, "ElkLayoutAlgorithm.Force")),
   RECT_PACKING(
       "RECT_PACKING",
       BaseMessages.getString(ElkLayoutAlgorithm.class, "ElkLayoutAlgorithm.RectPacking"));

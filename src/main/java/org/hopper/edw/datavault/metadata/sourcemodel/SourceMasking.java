@@ -20,6 +20,7 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.hop.core.gui.IGuiPosition;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.naming.NamingSchemeKind;
 import org.apache.hop.core.util.Utils;
@@ -41,7 +42,8 @@ import org.jspecify.annotations.NonNull;
 @Getter
 @Setter
 @NamingSchemeKind(EdwNamingSchemeTypes.SOURCE_MASKING)
-public class SourceMasking extends HopMetadataBase implements IHopMetadata, IDataTypeMappingTarget {
+public class SourceMasking extends HopMetadataBase
+    implements IHopMetadata, IDataTypeMappingTarget, IGuiPosition {
 
   @HopMetadataProperty private String description;
 
@@ -124,11 +126,22 @@ public class SourceMasking extends HopMetadataBase implements IHopMetadata, IDat
     return parentSourceKind != null ? parentSourceKind : SourceMaskingParentKind.TABLE;
   }
 
+  @Override
   public Point getLocation() {
     if (location == null) {
       location = new Point(50, 50);
     }
     return location;
+  }
+
+  @Override
+  public void setLocation(int x, int y) {
+    if (location == null) {
+      location = new Point(x, y);
+    } else {
+      location.x = x;
+      location.y = y;
+    }
   }
 
   public String resolveCatalogName() {

@@ -62,9 +62,9 @@ import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapDocument;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapEdge;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapNode;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceEndpointKind;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceRelationship;
-import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
 
 /**
  * Applies {@link ElkLayout} to an abstract graph of {@link ElkLayoutNode} nodes and {@link
@@ -624,41 +624,46 @@ public final class ElkGraphLayout {
     return new ElkGraphLayout(name, nodes, edges);
   }
 
-  /** Layout graph for a source system model ({@code .hsm}): tables linked by FK relationships. */
+  /**
+   * Layout graph for a source system model ({@code .hsm}): tables, queries, JSON, pipelines, and
+   * masking cards linked by relationships. Node ids include the endpoint kind.
+   */
   public static ElkGraphLayout fromSourceModel(SourceModel sourceModel) {
     List<ElkLayoutNode> nodes = new ArrayList<>();
     List<ElkLayoutEdge> edges = new ArrayList<>();
-    ElkLayout defaults = ElkLayout.createDefault();
     Set<String> edgeKeys = new HashSet<>();
+    Set<String> nodeIds = new HashSet<>();
     String name =
         sourceModel != null && !Utils.isEmpty(sourceModel.getName())
             ? sourceModel.getName()
             : "source-model";
 
     if (sourceModel != null) {
-      for (SourceTable table : sourceModel.getTables()) {
-        if (table == null || Utils.isEmpty(table.getName())) {
+      for (SourceModelEndpoints.Endpoint card : SourceModelEndpoints.cards(sourceModel)) {
+        String id = SourceModelEndpoints.id(card.kind(), card.name());
+        if (!nodeIds.add(id)) {
           continue;
         }
-        nodes.add(
-            new ElkLayoutNode(
-                table.getName(),
-                table.getName(),
-                defaults.estimateNodeWidth(table.getName()),
-                VAULT_NODE_HEIGHT,
-                table));
+        nodes.add(new ElkLayoutNode(id, card.name(), card.width(), card.height(), card.position()));
       }
       for (SourceRelationship relationship : sourceModel.getRelationships()) {
         if (relationship == null) {
           continue;
         }
-        String child = relationship.getChildTableName();
-        String parent = relationship.getParentTableName();
-        if (Utils.isEmpty(child) || Utils.isEmpty(parent)) {
+        String childName = relationship.getChildTableName();
+        String parentName = relationship.getParentTableName();
+        if (Utils.isEmpty(childName) || Utils.isEmpty(parentName)) {
+          continue;
+        }
+        SourceEndpointKind childKind = relationship.resolveChildEndpointKind();
+        SourceEndpointKind parentKind = relationship.resolveParentEndpointKind();
+        String childId = SourceModelEndpoints.id(childKind, childName);
+        String parentId = SourceModelEndpoints.id(parentKind, parentName);
+        if (!nodeIds.contains(childId) || !nodeIds.contains(parentId)) {
           continue;
         }
         // Parent first in layout flow (lookup → child), then child depends on parent.
-        addEdgeOnce(edges, edgeKeys, parent, child);
+        addEdgeOnce(edges, edgeKeys, parentId, childId);
       }
     }
 
@@ -744,6 +749,10 @@ public final class ElkGraphLayout {
         int h = dim != null ? (int) Math.round(dim[1]) : layout.getNodeHeight();
         result.put(node.getId(), new ElkLayoutBox(node.getId(), x, y, w, h));
       }
+      if (layout.getAlgorithm() == ElkLayoutAlgorithm.STRESS
+          || layout.getAlgorithm() == ElkLayoutAlgorithm.FORCE) {
+        result = ElkRectangleSeparation.separate(result, layout.getSpacingWithinLayer());
+      }
       return result;
     } catch (Exception e) {
       throw new HopException(
@@ -772,6 +781,9 @@ public final class ElkGraphLayout {
     if (target instanceof DmTableBase dmTable && dmTable.getDrawnBoxWidth() > 0) {
       return dmTable.getDrawnBoxWidth();
     }
+    if (node.getWidth() > 0) {
+      return node.getWidth();
+    }
     return layout.estimateNodeWidth(node.getLabel());
   }
 
@@ -791,6 +803,9 @@ public final class ElkGraphLayout {
             || target instanceof BvTableBase
             || target instanceof DmTableBase)) {
       return VAULT_NODE_HEIGHT;
+    }
+    if (node.getHeight() > 0) {
+      return node.getHeight();
     }
     return layout.getNodeHeight();
   }

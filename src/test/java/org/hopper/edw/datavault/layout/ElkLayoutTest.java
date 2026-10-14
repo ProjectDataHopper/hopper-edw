@@ -24,6 +24,7 @@ import org.eclipse.elk.alg.layered.options.LayeredOptions;
 import org.eclipse.elk.alg.rectpacking.options.RectPackingOptions;
 import org.eclipse.elk.alg.rectpacking.p1widthapproximation.WidthApproximationStrategy;
 import org.eclipse.elk.core.options.CoreOptions;
+import org.eclipse.elk.core.options.SizeConstraint;
 import org.eclipse.elk.graph.ElkNode;
 import org.eclipse.elk.graph.util.ElkGraphUtil;
 import org.junit.jupiter.api.Test;
@@ -88,5 +89,30 @@ class ElkLayoutTest {
     assertEquals(LayeredOptions.ALGORITHM_ID, root.getProperty(CoreOptions.ALGORITHM));
     assertEquals(
         ElkLayoutDirection.RIGHT.toElkDirection(), root.getProperty(CoreOptions.DIRECTION));
+  }
+
+  @Test
+  void stressAndForceSetRelationshipAlgorithmIds() {
+    ElkNode stress = ElkGraphUtil.createGraph();
+    ElkLayout stressLayout = new ElkLayout();
+    stressLayout.setAlgorithm(ElkLayoutAlgorithm.STRESS);
+    stressLayout.setSpacingWithinLayer(48);
+    stressLayout.applyTo(stress);
+
+    assertEquals(ElkLayout.STRESS_ALGORITHM_ID, stress.getProperty(CoreOptions.ALGORITHM));
+    assertEquals(48.0, stress.getProperty(CoreOptions.SPACING_NODE_NODE));
+    assertTrue(
+        stress
+            .getProperty(CoreOptions.NODE_SIZE_CONSTRAINTS)
+            .contains(SizeConstraint.MINIMUM_SIZE));
+    assertFalse(stress.hasProperty(CoreOptions.DIRECTION));
+
+    ElkNode force = ElkGraphUtil.createGraph();
+    ElkLayout forceLayout = new ElkLayout();
+    forceLayout.setAlgorithm(ElkLayoutAlgorithm.FORCE);
+    forceLayout.applyTo(force);
+    assertEquals(ElkLayout.FORCE_ALGORITHM_ID, force.getProperty(CoreOptions.ALGORITHM));
+    assertTrue(
+        force.getProperty(CoreOptions.NODE_SIZE_CONSTRAINTS).contains(SizeConstraint.MINIMUM_SIZE));
   }
 }

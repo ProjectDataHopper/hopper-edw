@@ -50,6 +50,13 @@ public final class SourceRelationshipEdgeLayout {
 
   public static Map<SourceRelationship, EdgeGeometry> layout(
       SourceModel model, Map<String, SourceTable> tableByName) {
+    return layout(model, tableByName, null);
+  }
+
+  public static Map<SourceRelationship, EdgeGeometry> layout(
+      SourceModel model,
+      Map<String, SourceTable> tableByName,
+      SourceModelBrowseLayout.Result browse) {
     Map<SourceRelationship, EdgeGeometry> result = new HashMap<>();
     if (model == null) {
       return result;
@@ -67,13 +74,15 @@ public final class SourceRelationshipEdgeLayout {
               model,
               tableByName,
               relationship.resolveChildEndpointKind(),
-              relationship.getChildTableName());
+              relationship.getChildTableName(),
+              browse);
       Bounds parentB =
           boundsOfEndpoint(
               model,
               tableByName,
               relationship.resolveParentEndpointKind(),
-              relationship.getParentTableName());
+              relationship.getParentTableName(),
+              browse);
       if (childB == null || parentB == null) {
         continue;
       }
@@ -113,6 +122,34 @@ public final class SourceRelationshipEdgeLayout {
   }
 
   static Bounds boundsOfEndpoint(
+      SourceModel model,
+      Map<String, SourceTable> tableByName,
+      SourceEndpointKind kind,
+      String name) {
+    return boundsOfEndpoint(model, tableByName, kind, name, null);
+  }
+
+  static Bounds boundsOfEndpoint(
+      SourceModel model,
+      Map<String, SourceTable> tableByName,
+      SourceEndpointKind kind,
+      String name,
+      SourceModelBrowseLayout.Result browse) {
+    if (browse != null && !browse.isVisible(kind, name)) {
+      return null;
+    }
+    Bounds bounds = boundsAtModelLocation(model, tableByName, kind, name);
+    if (bounds == null || browse == null) {
+      return bounds;
+    }
+    Point placed = browse.location(kind, name);
+    if (placed == null) {
+      return bounds;
+    }
+    return new Bounds(placed.x, placed.y, bounds.width(), bounds.height());
+  }
+
+  private static Bounds boundsAtModelLocation(
       SourceModel model,
       Map<String, SourceTable> tableByName,
       SourceEndpointKind kind,

@@ -4,6 +4,11 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Source model browse and relationship layout (issue #197)
+
+- **Browse** on the source-model toolbar centers one table, query, JSON, pipeline, or masking card and places its neighbors on a ring. Depth 2 adds an outer ring. Click a neighbor to walk. Escape restores the previous scroll and zoom. Saved positions are unchanged.
+- Graph layout offers **Stress** and **Force-directed** in addition to layered Sugiyama and rectangle packing. A source model opens the dialog on Stress when the saved default is still Layered. The layout includes every canvas card, uses the painted card size, and separates overlapping rectangles after Stress or Force.
+
 ### Resource group load metrics (issue #198)
 
 - Refreshing the resource-group load metrics dialog updates the **This run** grid and the detail text in place. A refresh no longer changes the selected row or moves the table or the detail text back to the top.

@@ -8,4 +8,29 @@ Related guide: link:../datavault-plugin.adoc[datavault-plugin].
 
 Run an **ELK** layout pass on the current model canvas (source, Data Vault, Business Vault, dimensional, or execution map).
 
-Choose direction and spacing. Layout only moves boxes; it does not change metadata. Undo is available afterwards.
+Choose the algorithm and spacing. Layout only moves boxes. It does not change metadata. Undo is available afterwards.
+
+[cols="1,2"]
+|===
+|Algorithm |Use it for
+
+|Stress (relationship graph)
+|Source models and other graphs full of cycles. Related cards cluster. Hubs sit near the middle.
+
+|Force-directed
+|The same kind of graph, with springs and repulsion. The picture can differ between runs more than Stress does.
+
+|Layered (Sugiyama)
+|Pipelines, workflows, and execution maps. The graph is ranked in one direction.
+
+|Rectangle packing
+|A compact grid of cards. Relationships do not affect the positions.
+|===
+
+On a source model the dialog opens with **Stress** when the saved default is still Layered. Pipelines and execution maps keep Layered. **Save as default** stores the choice for every graph that shares these options.
+
+== Browse
+
+The source-model toolbar **Browse** centers one card and places its neighbors on a ring. Depth **1** is the direct relationships. Depth **2** adds a second ring. Edges on that outer ring are drawn only when they touch the center or the inner ring.
+
+Click a neighbor to walk. **Back** returns to the previous card. Escape leaves browse and restores the scroll and zoom from before browse. Saved coordinates are not changed, and the model is not marked modified.

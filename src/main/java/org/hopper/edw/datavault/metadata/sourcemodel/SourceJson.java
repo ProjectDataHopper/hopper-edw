@@ -20,6 +20,7 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.hop.core.gui.IGuiPosition;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.naming.NamingSchemeKind;
 import org.apache.hop.metadata.api.HopMetadataBase;
@@ -42,7 +43,8 @@ import org.jspecify.annotations.NonNull;
 @Getter
 @Setter
 @NamingSchemeKind(EdwNamingSchemeTypes.SOURCE_JSON)
-public class SourceJson extends HopMetadataBase implements IHopMetadata, IDataTypeMappingTarget {
+public class SourceJson extends HopMetadataBase
+    implements IHopMetadata, IDataTypeMappingTarget, IGuiPosition {
 
   @HopMetadataProperty private String description;
 
@@ -145,11 +147,22 @@ public class SourceJson extends HopMetadataBase implements IHopMetadata, IDataTy
     return parentSourceKind != null ? parentSourceKind : SourceJsonParentKind.TABLE;
   }
 
+  @Override
   public Point getLocation() {
     if (location == null) {
       location = new Point(50, 50);
     }
     return location;
+  }
+
+  @Override
+  public void setLocation(int x, int y) {
+    if (location == null) {
+      location = new Point(x, y);
+    } else {
+      location.x = x;
+      location.y = y;
+    }
   }
 
   /** Extracted (non pass-through) fields only. */

@@ -50,7 +50,11 @@ public class SourceElkLayout {
     }
 
     try {
-      ElkLayout layout = ElkLayoutGuiSupport.promptForLayout(hopGui.getShell());
+      ElkLayout seed = new ElkLayout(ElkLayoutGuiSupport.getConfig());
+      if (seed.getAlgorithm() == ElkLayoutAlgorithm.LAYERED) {
+        seed.setAlgorithm(ElkLayoutAlgorithm.STRESS);
+      }
+      ElkLayout layout = ElkLayoutGuiSupport.promptForLayout(hopGui.getShell(), seed);
       if (layout == null) {
         return;
       }

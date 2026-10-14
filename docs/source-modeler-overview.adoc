@@ -157,6 +157,8 @@ Toolbar **Import schema** (or canvas context):
 . Optional: publish each table as a single-table catalog `DV_SOURCE`.
 . Auto-layout (ELK) when many tables arrive.
 
+**Browse** on the source-model toolbar centers one card and draws only its neighborhood, one or two relationships deep. That view does not rewrite the saved layout. For a full rearrangement of a cyclic model, open **Graph layout** and choose **Stress**. Layered layout remains the default for pipelines and execution maps. See link:help/elk-layout-dialog.adoc[Graph layout].
+
 If the database has no FKs, import still seeds tables and PKs; draw relationships with **Shift+drag** (or middle-button drag) between table cards.
 
 === Relationship multiplicity (crow's foot)
