@@ -15,5 +15,12 @@
   -
   -->
 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-    <rect x="2" y="2" width="27" height="27" fill="#286ea0"/>
-    <text x="16" y="21" font-size="12" fill="white" text-anchor="middle">SM</text></svg>
+  <!-- Model file page -->
+  <path d="M5 1.5 H19.5 L26.5 8.5 V30.5 H5 Z" fill="#fefefe" stroke="#646464" stroke-width="1.2" stroke-linejoin="round"/>
+  <path d="M19.5 1.5 V8.5 H26.5" fill="none" stroke="#646464" stroke-width="1.2" stroke-linejoin="round"/>
+  <!-- Source database -->
+  <path d="M9.75 12.5 V25.5 A6.0 2.16 0 0 0 21.75 25.5 V12.5 Z" fill="#286ea0"/>
+  <ellipse cx="15.75" cy="12.5" rx="6.0" ry="2.16" fill="#4a9ad4"/>
+  <path d="M9.75 16.83 A6.0 2.16 0 0 0 21.75 16.83" fill="none" stroke="#1d5582" stroke-width="0.9"/>
+  <path d="M9.75 21.17 A6.0 2.16 0 0 0 21.75 21.17" fill="none" stroke="#1d5582" stroke-width="0.9"/>
+</svg>

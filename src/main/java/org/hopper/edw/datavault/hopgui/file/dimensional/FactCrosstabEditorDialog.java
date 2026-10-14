@@ -714,11 +714,8 @@ public class FactCrosstabEditorDialog {
       return image("dimension.svg");
     }
     return switch (type) {
-      case FACT,
-              FACTLESS_FACT,
-              PERIODIC_SNAPSHOT_FACT,
-              ACCUMULATING_SNAPSHOT_FACT,
-              AGGREGATE_FACT ->
+      case FACTLESS_FACT -> image("fact-factless.svg");
+      case FACT, PERIODIC_SNAPSHOT_FACT, ACCUMULATING_SNAPSHOT_FACT, AGGREGATE_FACT ->
           image("fact.svg");
       case DIMENSION_ALIAS -> image("dimension-alias.svg");
       case JUNK_DIMENSION -> image("dimension-junk.svg");

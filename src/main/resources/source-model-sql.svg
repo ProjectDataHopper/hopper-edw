@@ -15,5 +15,21 @@
   -
   -->
 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-    <rect x="2" y="2" width="27" height="27" fill="#286ea0"/>
-    <text x="16" y="21" font-size="12" fill="white" text-anchor="middle">SM</text></svg>
+  <!-- Model file page -->
+  <path d="M5 1.5 H19.5 L26.5 8.5 V30.5 H5 Z" fill="#fefefe" stroke="#646464" stroke-width="1.2" stroke-linejoin="round"/>
+  <path d="M19.5 1.5 V8.5 H26.5" fill="none" stroke="#646464" stroke-width="1.2" stroke-linejoin="round"/>
+  <!-- Source database -->
+  <path d="M8.0 12 V23 A5.5 1.98 0 0 0 19.0 23 V12 Z" fill="#286ea0"/>
+  <ellipse cx="13.5" cy="12" rx="5.5" ry="1.98" fill="#4a9ad4"/>
+  <path d="M8.0 15.67 A5.5 1.98 0 0 0 19.0 15.67" fill="none" stroke="#1d5582" stroke-width="0.9"/>
+  <path d="M8.0 19.33 A5.5 1.98 0 0 0 19.0 19.33" fill="none" stroke="#1d5582" stroke-width="0.9"/>
+  <!-- SQL badge -->
+  <circle cx="25" cy="25" r="6.5" fill="#1d5582" stroke="white" stroke-width="1"/>
+  <!-- SQL letters -->
+  <g fill="none" stroke="white" stroke-width="1.05" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22.8 23.2 C22.5 22.8 22.1 22.7 21.7 22.7 C21 22.7 20.5 23.1 20.5 23.7 C20.5 24.9 22.9 24.6 22.9 26 C22.9 26.8 22.3 27.3 21.6 27.3 C21.1 27.3 20.7 27.1 20.4 26.7"/>
+    <ellipse cx="25" cy="25" rx="1.35" ry="2.3"/>
+    <path d="M25.4 26.3 L26.6 27.6"/>
+    <path d="M27.5 22.7 V27.3 H29.5"/>
+  </g>
+</svg>

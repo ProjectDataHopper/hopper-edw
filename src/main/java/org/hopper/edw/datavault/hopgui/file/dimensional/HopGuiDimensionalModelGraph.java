@@ -1258,7 +1258,7 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
       type = GuiActionType.Create,
       name = "i18n::HopGuiDimensionalModelGraph.Context.AddFactlessFact.Name",
       tooltip = "i18n::HopGuiDimensionalModelGraph.Context.AddFactlessFact.Tooltip",
-      image = "fact.svg",
+      image = "fact-factless.svg",
       category = "Dimensional",
       categoryOrder = "4")
   public void addFactlessFact(HopGuiDimensionalContext context) {

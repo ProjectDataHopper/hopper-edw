@@ -37,6 +37,7 @@ public final class DmTableDisplaySupport {
   public static final String JUNK_DIMENSION_ICON = "dimension-junk.svg";
   public static final String RANGE_DIMENSION_ICON = "dimension-range.svg";
   public static final String FACT_ICON = "fact.svg";
+  public static final String FACTLESS_FACT_ICON = "fact-factless.svg";
   public static final String BRIDGE_ICON = "bridge.svg";
 
   private DmTableDisplaySupport() {}
@@ -46,12 +47,8 @@ public final class DmTableDisplaySupport {
       return DIMENSION_ICON;
     }
     return switch (tableType) {
-      case FACT,
-              FACTLESS_FACT,
-              PERIODIC_SNAPSHOT_FACT,
-              ACCUMULATING_SNAPSHOT_FACT,
-              AGGREGATE_FACT ->
-          FACT_ICON;
+      case FACTLESS_FACT -> FACTLESS_FACT_ICON;
+      case FACT, PERIODIC_SNAPSHOT_FACT, ACCUMULATING_SNAPSHOT_FACT, AGGREGATE_FACT -> FACT_ICON;
       case DIMENSION_ALIAS -> DIMENSION_ALIAS_ICON;
       case JUNK_DIMENSION -> JUNK_DIMENSION_ICON;
       case RANGE_DIMENSION -> RANGE_DIMENSION_ICON;

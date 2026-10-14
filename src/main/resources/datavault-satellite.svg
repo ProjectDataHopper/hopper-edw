@@ -14,4 +14,21 @@
   - limitations under the License.
   -
   -->
-<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" fill="#8b008b"/><text x="16" y="21" font-size="14" fill="white" text-anchor="middle">S</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <!-- Struts -->
+  <path d="M8 12 H11 M17 12 H20" stroke="#b45cb4" stroke-width="1.2"/>
+  <!-- Solar wings -->
+  <rect x="1" y="8.5" width="7" height="7" fill="#4a63c8" stroke="#8c9eff" stroke-width="0.8"/>
+  <rect x="20" y="8.5" width="7" height="7" fill="#4a63c8" stroke="#8c9eff" stroke-width="0.8"/>
+  <path d="M4.5 8.5 V15.5 M1 12 H8 M23.5 8.5 V15.5 M20 12 H27" stroke="#9fa8da" stroke-width="0.6"/>
+  <!-- Cylinder body -->
+  <path d="M11 6 V18 A3 1.2 0 0 0 17 18 V6 Z" fill="#8b008b"/>
+  <ellipse cx="14" cy="6" rx="3" ry="1.2" fill="#b03cb0"/>
+  <path d="M11 10 A3 1.2 0 0 0 17 10 M11 14 A3 1.2 0 0 0 17 14" fill="none" stroke="#5c005c" stroke-width="0.7"/>
+  <!-- Antenna -->
+  <path d="M14 4.8 V2" stroke="#b45cb4" stroke-width="0.9"/>
+  <circle cx="14" cy="1.8" r="0.9" fill="#b45cb4"/>
+  <!-- Badge -->
+  <circle cx="25" cy="25" r="6.5" fill="#5c005c" stroke="white" stroke-width="1"/>
+  <path d="M27 23.1 C26.5 22.4 25.6 22.2 24.9 22.3 C23.7 22.5 23.2 23.6 23.9 24.4 C24.4 25 25.6 25 26.2 25.6 C26.9 26.4 26.4 27.7 25.1 27.7 C24.3 27.7 23.5 27.4 23 26.8" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
