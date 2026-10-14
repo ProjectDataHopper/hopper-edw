@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Hand-laid poster. Rows are positioned by hand. There is no .puml. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="708" viewBox="0 0 1280 708" role="img">
+<title>Data Hopper EDW overview</title>
+<desc>Landing databases, files, and JSON feed a source model. Clients query that model through Hop JDBC. Hop loads the Data Vault, Business Vault, and dimensional databases from their model files and records OPS metrics and lineage. The coach moves from one model to the next. Generate Data Vault builds the raw vault from the source model. Hopper presentations report from the dimensional model. The catalog sits under every model. Documentation, the EDW Journey, and the lineage view sit on that catalog. A harvester watches live schemas and the catalog.</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 1.1 L 10 5 L 0 8.9 Z" fill="#5A6A7E"/></marker>
+<marker id="arrow-start" viewBox="0 0 10 10" refX="1.5" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M 10 1.1 L 0 5 L 10 8.9 Z" fill="#5A6A7E"/></marker>
+<marker id="arrow-coach" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 1.1 L 10 5 L 0 8.9 Z" fill="#8A5A12"/></marker>
+</defs>
+<rect width="1280" height="708" fill="#FAFBFC"/>
+<rect x="6" y="6" width="1268" height="696" rx="12" fill="none" stroke="#d5dde6" stroke-width="1"/>
+<line x1="24" y1="230" x2="24" y2="570.0" fill="none" stroke="#5A6A7E" stroke-width="1.6" marker-end="url(#arrow)" marker-start="url(#arrow-start)"/>
+<text x="24" y="400.0" fill="#3d4a5c" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle" transform="rotate(-90 24 400.0)">Harvester</text>
+<text x="104.0" y="204" fill="#3d4a5c" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle">Landing</text>
+<rect x="56" y="218" width="96" height="70" rx="8" ry="8" fill="#FFFFFF" stroke="#181818" stroke-width="1.5"/>
+<path d="M 88.0 234 L 88.0 246 A 16.0 11 0 0 0 120.0 246 L 120.0 234 A 16.0 11 0 0 0 88.0 234 Z" fill="#FFF6E8" stroke="#181818" stroke-width="1.5"/>
+<ellipse cx="104.0" cy="234" rx="16.0" ry="11" fill="#FFF6E8" stroke="#181818" stroke-width="1.5"/>
+<text x="104.0" y="278" fill="#181818" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle">RDBMS</text>
+<rect x="56" y="300" width="96" height="64" rx="8" ry="8" fill="#FFFFFF" stroke="#181818" stroke-width="1.5"/>
+<path d="M 92.0 308 H 110.0 L 118.0 316 V 332 H 92.0 Z" fill="#FFF6E8" stroke="#181818" stroke-width="1.2"/>
+<path d="M 110.0 308 V 316 H 118.0" fill="none" stroke="#181818" stroke-width="1.2"/>
+<line x1="96.0" y1="320" x2="108.0" y2="320" stroke="#3d4a5c" stroke-width="1"/>
+<line x1="96.0" y1="325" x2="108.0" y2="325" stroke="#3d4a5c" stroke-width="1"/>
+<line x1="96.0" y1="330" x2="108.0" y2="330" stroke="#3d4a5c" stroke-width="1"/>
+<text x="104.0" y="354" fill="#181818" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle">Files</text>
+<rect x="56" y="376" width="96" height="64" rx="8" ry="8" fill="#FFFFFF" stroke="#181818" stroke-width="1.5"/>
+<text x="104.0" y="404" fill="#3d4a5c" font-family="sans-serif" font-size="16" font-weight="bold" text-anchor="middle">{ }</text>
+<text x="104.0" y="430" fill="#181818" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle">JSON</text>
+<rect x="180" y="214" width="150" height="300" rx="10" ry="10" fill="#FFF6E8" stroke="#181818" stroke-width="2"/>
+<text x="255.0" y="322" fill="#181818" font-family="sans-serif" font-size="15" font-weight="bold" text-anchor="middle">Source</text>
+<text x="255.0" y="342" fill="#181818" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">models</text>
+<text x="255.0" y="372" fill="#181818" font-family="ui-monospace, monospace" font-size="18" font-weight="bold" text-anchor="middle">.hsm</text>
+<line x1="202" y1="390" x2="308" y2="390" stroke="#c5ced8" stroke-width="1"/>
+<text x="255.0" y="418" fill="#3d4a5c" font-family="sans-serif" font-size="13" font-weight="normal" text-anchor="middle">Tables and keys</text>
+<text x="255.0" y="442" fill="#3d4a5c" font-family="sans-serif" font-size="13" font-weight="normal" text-anchor="middle">Queries and JSON</text>
+<text x="255.0" y="466" fill="#3d4a5c" font-family="sans-serif" font-size="13" font-weight="normal" text-anchor="middle">Pipelines</text>
+<rect x="414" y="214" width="150" height="300" rx="10" ry="10" fill="#E8F0FB" stroke="#181818" stroke-width="2"/>
+<text x="489.0" y="322" fill="#181818" font-family="sans-serif" font-size="15" font-weight="bold" text-anchor="middle">Data Vault</text>
+<text x="489.0" y="342" fill="#181818" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">models</text>
+<text x="489.0" y="372" fill="#181818" font-family="ui-monospace, monospace" font-size="18" font-weight="bold" text-anchor="middle">.hdv</text>
+<line x1="436" y1="390" x2="542" y2="390" stroke="#c5ced8" stroke-width="1"/>
+<text x="489.0" y="418" fill="#3d4a5c" font-family="sans-serif" font-size="13" font-weight="normal" text-anchor="middle">Hubs and links</text>
+<text x="489.0" y="442" fill="#3d4a5c" font-family="sans-serif" font-size="13" font-weight="normal" text-anchor="middle">Satellites</text>
+<text x="489.0" y="466" fill="#3d4a5c" font-family="sans-serif" font-size="13" font-weight="normal" text-anchor="middle">Reference tables</text>
+<rect x="648" y="214" width="150" height="300" rx="10" ry="10" fill="#F3EBFB" stroke="#181818" stroke-width="2"/>
+<text x="723.0" y="322" fill="#181818" font-family="sans-serif" font-size="15" font-weight="bold" text-anchor="middle">Business Vault</text>
+<text x="723.0" y="342" fill="#181818" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">models</text>
+<text x="723.0" y="372" fill="#181818" font-family="ui-monospace, monospace" font-size="18" font-weight="bold" text-anchor="middle">.hbv</text>
+<line x1="670" y1="390" x2="776" y2="390" stroke="#c5ced8" stroke-width="1"/>
+<text x="723.0" y="418" fill="#3d4a5c" font-family="sans-serif" font-size="13" font-weight="normal" text-anchor="middle">Current views</text>
+<text x="723.0" y="442" fill="#3d4a5c" font-family="sans-serif" font-size="13" font-weight="normal" text-anchor="middle">Snapshots</text>
+<text x="723.0" y="466" fill="#3d4a5c" font-family="sans-serif" font-size="13" font-weight="normal" text-anchor="middle">Bridges</text>
+<rect x="882" y="214" width="150" height="300" rx="10" ry="10" fill="#E7F6ED" stroke="#181818" stroke-width="2"/>
+<text x="957.0" y="322" fill="#181818" font-family="sans-serif" font-size="15" font-weight="bold" text-anchor="middle">Dimensional</text>
+<text x="957.0" y="342" fill="#181818" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">models</text>
+<text x="957.0" y="372" fill="#181818" font-family="ui-monospace, monospace" font-size="18" font-weight="bold" text-anchor="middle">.hdm</text>
+<line x1="904" y1="390" x2="1010" y2="390" stroke="#c5ced8" stroke-width="1"/>
+<text x="957.0" y="418" fill="#3d4a5c" font-family="sans-serif" font-size="13" font-weight="normal" text-anchor="middle">Dimensions</text>
+<text x="957.0" y="442" fill="#3d4a5c" font-family="sans-serif" font-size="13" font-weight="normal" text-anchor="middle">Facts</text>
+<text x="957.0" y="466" fill="#3d4a5c" font-family="sans-serif" font-size="13" font-weight="normal" text-anchor="middle">Bridges</text>
+<path d="M 192 150 H 1242 Q 1254 150 1254 162 V 184 Q 1254 196 1242 196 H 192 Q 180 196 180 184 V 162 Q 180 150 192 150 Z" fill="#033D5D"/>
+<path d="M 1048 150 H 1242 Q 1254 150 1254 162 V 184 Q 1254 196 1242 196 H 1048 Z" fill="#0C5C7A"/>
+<line x1="1048" y1="158" x2="1048" y2="188" stroke="#ffffff" stroke-width="1" stroke-opacity="0.4"/>
+<text x="255.0" y="178" fill="#ffffff" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Hop JDBC</text>
+<text x="489.0" y="178" fill="#ffffff" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Hop</text>
+<text x="723.0" y="178" fill="#ffffff" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Hop</text>
+<text x="957.0" y="178" fill="#ffffff" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Hop</text>
+<text x="1151.0" y="178" fill="#ffffff" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle">OPS metrics + lineage</text>
+<ellipse cx="255.0" cy="78" rx="64" ry="28" fill="#FFFFFF" stroke="#181818" stroke-width="1.5"/>
+<text x="255.0" y="83" fill="#181818" font-family="sans-serif" font-size="15" font-weight="bold" text-anchor="middle">Clients</text>
+<path d="M 453.0 57 L 453.0 121 A 36.0 11 0 0 0 525.0 121 L 525.0 57 A 36.0 11 0 0 0 453.0 57 Z" fill="#E8F0FB" stroke="#181818" stroke-width="1.5"/>
+<ellipse cx="489.0" cy="57" rx="36.0" ry="11" fill="#E8F0FB" stroke="#181818" stroke-width="1.5"/>
+<text x="489.0" y="99.32" fill="#181818" font-family="sans-serif" font-size="16" font-weight="bold" text-anchor="middle">DV</text>
+<path d="M 687.0 57 L 687.0 121 A 36.0 11 0 0 0 759.0 121 L 759.0 57 A 36.0 11 0 0 0 687.0 57 Z" fill="#F3EBFB" stroke="#181818" stroke-width="1.5"/>
+<ellipse cx="723.0" cy="57" rx="36.0" ry="11" fill="#F3EBFB" stroke="#181818" stroke-width="1.5"/>
+<text x="723.0" y="99.32" fill="#181818" font-family="sans-serif" font-size="16" font-weight="bold" text-anchor="middle">BV</text>
+<path d="M 921.0 57 L 921.0 121 A 36.0 11 0 0 0 993.0 121 L 993.0 57 A 36.0 11 0 0 0 921.0 57 Z" fill="#E7F6ED" stroke="#181818" stroke-width="1.5"/>
+<ellipse cx="957.0" cy="57" rx="36.0" ry="11" fill="#E7F6ED" stroke="#181818" stroke-width="1.5"/>
+<text x="957.0" y="99.32" fill="#181818" font-family="sans-serif" font-size="16" font-weight="bold" text-anchor="middle">DM</text>
+<line x1="255.0" y1="108" x2="255.0" y2="149" fill="none" stroke="#5A6A7E" stroke-width="1.6"/>
+<line x1="489.0" y1="134" x2="489.0" y2="149" fill="none" stroke="#5A6A7E" stroke-width="1.6"/>
+<line x1="723.0" y1="134" x2="723.0" y2="149" fill="none" stroke="#5A6A7E" stroke-width="1.6"/>
+<line x1="957.0" y1="134" x2="957.0" y2="149" fill="none" stroke="#5A6A7E" stroke-width="1.6"/>
+<line x1="255.0" y1="197" x2="255.0" y2="213" fill="none" stroke="#5A6A7E" stroke-width="1.6"/>
+<line x1="489.0" y1="197" x2="489.0" y2="213" fill="none" stroke="#5A6A7E" stroke-width="1.6"/>
+<line x1="723.0" y1="197" x2="723.0" y2="213" fill="none" stroke="#5A6A7E" stroke-width="1.6"/>
+<line x1="957.0" y1="197" x2="957.0" y2="213" fill="none" stroke="#5A6A7E" stroke-width="1.6"/>
+<rect x="1118" y="328" width="136" height="108" rx="8" ry="8" fill="#FFF3DF" stroke="#181818" stroke-width="1.5"/>
+<text x="1186.0" y="366" fill="#181818" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Hopper</text>
+<text x="1186.0" y="386" fill="#181818" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">presentations</text>
+<text x="1186.0" y="412" fill="#3d4a5c" font-family="sans-serif" font-size="13" font-weight="normal" text-anchor="middle">Reporting</text>
+<path d="M 1034 382 Q 1075.0 352 1116 382" fill="none" stroke="#5A6A7E" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M 334 308 Q 372.0 280 408 308" fill="none" stroke="#8A5A12" stroke-width="1.8" marker-end="url(#arrow-coach)"/>
+<text x="372.0" y="268" fill="#8A5A12" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle">Coach</text>
+<path d="M 334 430 Q 372.0 466 408 430" fill="none" stroke="#8A5A12" stroke-width="1.8" marker-end="url(#arrow-coach)"/>
+<text x="372.0" y="486" fill="#8A5A12" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle">Generate</text>
+<text x="372.0" y="502" fill="#8A5A12" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle">Data Vault</text>
+<path d="M 568 360 Q 606.0 332 642 360" fill="none" stroke="#8A5A12" stroke-width="1.8" marker-end="url(#arrow-coach)"/>
+<text x="606.0" y="320" fill="#8A5A12" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle">Coach</text>
+<path d="M 802 360 Q 840.0 332 876 360" fill="none" stroke="#8A5A12" stroke-width="1.8" marker-end="url(#arrow-coach)"/>
+<text x="840.0" y="320" fill="#8A5A12" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle">Coach</text>
+<line x1="153" y1="253.0" x2="177" y2="253.0" fill="none" stroke="#5A6A7E" stroke-width="1.6" marker-end="url(#arrow)"/>
+<line x1="153" y1="332.0" x2="177" y2="332.0" fill="none" stroke="#5A6A7E" stroke-width="1.6" marker-end="url(#arrow)"/>
+<line x1="153" y1="408.0" x2="177" y2="408.0" fill="none" stroke="#5A6A7E" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="180" y="544" width="852" height="52" rx="8" ry="8" fill="#E6EBF1" stroke="#181818" stroke-width="1.75"/>
+<text x="198" y="576" fill="#181818" font-family="sans-serif" font-size="16" font-weight="bold" text-anchor="start">Catalog</text>
+<text x="288" y="576" fill="#3d4a5c" font-family="sans-serif" font-size="13" font-weight="normal" text-anchor="start">Source feeds and published layouts</text>
+<line x1="255.0" y1="515" x2="255.0" y2="543" fill="none" stroke="#5A6A7E" stroke-width="1.6" marker-end="url(#arrow)" marker-start="url(#arrow-start)"/>
+<line x1="489.0" y1="515" x2="489.0" y2="543" fill="none" stroke="#5A6A7E" stroke-width="1.6" marker-end="url(#arrow)" marker-start="url(#arrow-start)"/>
+<line x1="723.0" y1="515" x2="723.0" y2="543" fill="none" stroke="#5A6A7E" stroke-width="1.6" marker-end="url(#arrow)" marker-start="url(#arrow-start)"/>
+<line x1="957.0" y1="515" x2="957.0" y2="543" fill="none" stroke="#5A6A7E" stroke-width="1.6" marker-end="url(#arrow)" marker-start="url(#arrow-start)"/>
+<rect x="180" y="618" width="1074" height="56" rx="8" ry="8" fill="#E7F3F6" stroke="#181818" stroke-width="1.5"/>
+<text x="359.0" y="651" fill="#181818" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Documentation</text>
+<text x="717.0" y="651" fill="#181818" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">EDW Journey</text>
+<line x1="538.0" y1="632" x2="538.0" y2="660" stroke="#b7c9d0" stroke-width="1"/>
+<text x="1075.0" y="651" fill="#181818" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Lineage view (.hlv)</text>
+<line x1="896.0" y1="632" x2="896.0" y2="660" stroke="#b7c9d0" stroke-width="1"/>
+</svg>
+

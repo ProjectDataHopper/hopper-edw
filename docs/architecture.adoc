@@ -14,6 +14,17 @@ It is *not* a Draw.io export of one project. For those derived diagrams see link
 * **Tour a finished sample:** link:getting-started-retail.adoc[Getting started — retail example]
 * **Resource definition group (the spine):** link:resource-definition-group.adoc[Resource definition group]
 
+[[overview]]
+== Overview
+
+image::images/diagrams/edw-overview.svg[Data Hopper EDW overview. Landing sources feed a source model. Clients use Hop JDBC. Hop loads the Data Vault, Business Vault, and dimensional databases. The catalog, documentation, Journey, and lineage view sit underneath.,align="center"]
+
+Landing databases, files, and JSON feed the source model. Clients query that model through Hop JDBC. Hop loads each later layer into its database and records OPS metrics and lineage. The coach is the guide from one model file to the next, and **Generate Data Vault** builds the raw vault from the source model. Hopper presentations report from the dimensional model. The catalog under the models is the shared contract. Documentation, the EDW Journey, and the lineage view (`.hlv`) read that stack.
+
+The sections below take one slice of this picture. To build a warehouse in this order, start at link:getting-started-edw.adoc[Getting started — building an EDW].
+
+Picture: link:images/diagrams/edw-overview.svg[edw-overview.svg].
+
 == Why the catalog sits in the middle
 
 Hubs, links, satellites, Business Vault tables, and dimensional tables bind to **catalog names**, not raw connection strings. The catalog is the shared vocabulary:

@@ -4,13 +4,53 @@
 
 toc::[]
 
-This is the **build-from-scratch** guide. You create a source model, publish contracts to the Data Catalog, generate a Data Vault, put it on a **resource definition group**, and load with **Update resource definition group**. After that you grow the *same* group with Business Vault and dimensional models.
+This is the **build-from-scratch** guide for an enterprise data warehouse (EDW). You create a source model, publish contracts to the Data Catalog, generate a Data Vault, put it on a **resource definition group**, and load with **Update resource definition group**. After that you grow the *same* group with Business Vault and dimensional models.
 
-Architecture pictures (catalog in/out, RDG spine, four controls): link:architecture.adoc[Architecture].
+Architecture pictures (catalog in/out, resource definition group spine, four controls): link:architecture.adoc[Architecture].
 
 To **run a finished warehouse** instead of building one, use link:getting-started-retail.adoc[Getting started — retail example] or link:getting-started-adventureworks.adoc[Getting started — AdventureWorks]. Advanced fixtures: link:getting-started-integration-tests.adoc[integration test fixtures].
 
 Estimated time for a small source system (a handful of tables): a few hours in Hop GUI once connections exist.
+
+[[overview]]
+== Overview
+
+image::images/diagrams/edw-overview.svg[Data Hopper EDW overview. Landing sources feed a source model. Clients use Hop JDBC. Hop loads the Data Vault, Business Vault, and dimensional databases. The catalog, documentation, Journey, and lineage view sit underneath.,align="center"]
+
+The four model files run left to right.
+
+* **Landing** databases, files, and JSON are imported into a **source model** (`.hsm`). The **harvester** watches live schemas and the catalog, and can generate a source model from what it finds.
+* **Clients** query the source model through **Hop JDBC**. **Hop** loads the Data Vault, Business Vault, and dimensional databases from `.hdv`, `.hbv`, and `.hdm`. **OPS metrics and lineage** are recorded on that same runtime.
+* The **coach** is the guide from one model file to the next. **Generate Data Vault** builds the raw vault from the source model. **Hopper presentations** report from the dimensional model.
+* Every model publishes to the **catalog** and reads from it. **Documentation**, the **EDW Journey**, and the **lineage view** (`.hlv`) sit on that catalog.
+
+Names for the four model files are in <<terms>>. The link:architecture.adoc[architecture] page splits this picture into the catalog, the resource definition group, and the load wave.
+
+[[terms]]
+== Terms
+
+The chapters below use these short names. Each row is a model file you open in Hop GUI.
+
+[cols="1,2,5", options="header"]
+|===
+|Acronym |File extension |Description
+
+|link:source-modeler-overview.adoc[HSM]
+|`.hsm`
+|Source model. Tables, primary and foreign keys, and relationships from a source system, plus queries and other feeds you publish to the Data Catalog. Generating a Data Vault starts from this file.
+
+|link:datavault-plugin.adoc[DV]
+|`.hdv`
+|Raw Data Vault. Data Vault 2.0 hubs, links, satellites, and reference tables. A load appends new keys and new versions of descriptive data.
+
+|link:business-vault-overview.adoc[BV]
+|`.hbv`
+|Business Vault. Business rules calculated from the raw vault and stored as their own tables, such as a current view of a hub, a snapshot of related satellites, or a bridge.
+
+|link:dimensional-modeler-overview.adoc[DM]
+|`.hdm`
+|Dimensional model. Dimensions and facts for reporting, usually loaded from the Business Vault, the raw vault, or both.
+|===
 
 == What you will have at each checkpoint
 

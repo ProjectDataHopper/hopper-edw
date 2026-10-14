@@ -4,11 +4,16 @@ PlantUML (`.puml`) is the source of truth for the user-facing architecture pictu
 
 Use `!pragma layout smetana` in every file so Graphviz is not required.
 
+`edw-overview.svg` is a hand-laid poster under `docs/images/diagrams/`. The rows are positioned by hand, so it has no `.puml` and `mvn generate-resources` leaves it alone.
+
 == Files
 
 [cols="1,2", options="header"]
 |===
 |Source |Used from
+
+|link:../images/diagrams/edw-overview.svg[edw-overview.svg]
+|link:../getting-started-edw.adoc#overview[Getting started — overview], link:../architecture.adoc#overview[Architecture — overview]
 
 |link:d1-logical-layers.puml[d1-logical-layers.puml]
 |link:../architecture.adoc#d1-logical-layers[architecture D1], feature-overview
