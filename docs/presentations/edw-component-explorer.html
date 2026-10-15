@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<!--
+Copyright 2026 i-Bridge bv
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Data Hopper EDW - Component Explorer (Issue #190)</title>
+<meta name="description" content="Interactive companion to images/diagrams/edw-overview.svg: click any block of the Data Hopper EDW picture and get the layer, the model, the screenshots and the docs behind it." />
+<style>
+  :root{
+    --bg:#eaeff6;
+    --panel:#ffffff;
+    --panel-2:#f6f8fb;
+    --ink:#0e1a2b;
+    --ink-soft:#3f4f68;
+    --muted:#6b7a90;
+    --line:#cfd9e6;
+    --line-2:#e3e9f2;
+    --accent:#0b5fc4;
+    --accent-ink:#ffffff;
+    --accent-soft:#e6f0fb;
+    --amber:#8a5a12;
+    --amber-soft:#fff5e2;
+    --ok:#0f7a4d;
+    --bad:#b3261e;
+    --gal-bg:#f2f5fa;
+    --shadow:0 10px 30px rgba(15,27,45,.14);
+    --shadow-lg:0 30px 80px rgba(6,14,28,.42);
+    --fs:21px;
+    --h1:clamp(34px, 3.1vw, 60px);
+    --h2:clamp(22px, 1.6vw, 32px);
+    --body:clamp(19px, 1.06vw, 26px);
+    --small:clamp(17px, .96vw, 22px);
+    --chip:clamp(18px, .92vw, 21px);
+  }
+  [data-theme="dark"]{
+    --bg:#080f1c;
+    --panel:#111a2a;
+    --panel-2:#16203212;
+    --panel-2:#162032;
+    --ink:#eef3fa;
+    --ink-soft:#c3cee0;
+    --muted:#93a3ba;
+    --line:#28354c;
+    --line-2:#1d2839;
+    --accent:#63acff;
+    --accent-ink:#04182e;
+    --accent-soft:#152a45;
+    --amber:#f0b866;
+    --amber-soft:#2a2113;
+    --ok:#4ecb8d;
+    --bad:#ff8b82;
+    --gal-bg:#0c1524;
+    --shadow:0 10px 30px rgba(0,0,0,.5);
+    --shadow-lg:0 30px 80px rgba(0,0,0,.6);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%}
+  body{
+    background:var(--bg);color:var(--ink);font-size:var(--fs);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;display:flex;flex-direction:column;height:100vh;overflow:hidden;
+  }
+  button{font-family:inherit;font-size:var(--small);font-weight:700;color:var(--ink);background:var(--panel);
+    border:1px solid var(--line);border-radius:10px;padding:.42em .8em;cursor:pointer;transition:background .13s,border-color .13s,color .13s,transform .13s}
+  button:hover{background:var(--accent-soft);border-color:var(--accent)}
+  button:active{transform:translateY(1px)}
+  button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+  button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+  button.primary:hover{filter:brightness(1.08)}
+
+  /* ---------- top bar ---------- */
+  #topbar{display:flex;align-items:center;gap:clamp(8px,1vw,22px);padding:clamp(8px,.7vw,14px) clamp(12px,1.4vw,28px);
+    background:var(--panel);border-bottom:1px solid var(--line);flex:0 0 auto;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:.6em;min-width:0}
+  .logo{display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:10px;
+    background:linear-gradient(145deg,#0b5fc4,#0aa2b8);color:#fff;font-weight:900;font-size:calc(var(--small) * .9);letter-spacing:.02em}
+  .brand-txt{display:flex;flex-direction:column;line-height:1.05;min-width:0}
+  .brand-txt b{font-size:calc(var(--small) * 1.06);font-weight:800;white-space:nowrap}
+  .brand-txt span{font-size:calc(var(--small) * .78);color:var(--muted);font-weight:600;white-space:nowrap}
+  .spacer{flex:1 1 auto}
+  .navgroup,.tools{display:flex;align-items:center;gap:clamp(6px,.5vw,12px);flex-wrap:wrap}
+  #jump{font-size:var(--small);font-weight:700;color:var(--ink);background:var(--panel);border:1px solid var(--line);
+    border-radius:10px;padding:.42em .5em;max-width:min(34vw,420px);cursor:pointer}
+  #jump:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+  .zoom{display:flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel)}
+  .zoom button{border:0;border-radius:0;padding:.42em .6em;background:transparent}
+  .zoom button:hover{background:var(--accent-soft)}
+  #zoomLabel{font-size:calc(var(--small) * .86);font-weight:800;color:var(--ink-soft);padding:0 .35em;min-width:4.4em;text-align:center;font-variant-numeric:tabular-nums}
+  .kbd{display:inline-block;font-size:.86em;font-weight:800;border:1px solid var(--line);border-bottom-width:2px;
+    border-radius:5px;padding:0 .34em;color:var(--muted);background:var(--panel-2);margin-left:.45em}
+
+  /* ---------- stage ---------- */
+  #stage{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+  #framewrap{flex:1 1 auto;min-height:0;overflow:auto;display:flex;align-items:center;justify-content:center;padding:clamp(6px,.8vw,18px)}
+  #poster{background:#fafbfc;border-radius:14px;box-shadow:var(--shadow);display:block;flex:0 0 auto}
+  #poster .comp .hit{fill:#000;fill-opacity:0;stroke:transparent;stroke-width:4;cursor:pointer;transition:fill-opacity .12s}
+  #poster .comp:hover .hit,#poster .comp.is-active .hit{fill:#0b5fc4;fill-opacity:.09;stroke:#0b5fc4;stroke-opacity:.95}
+  #poster .comp .hit.anchor{fill-opacity:.001}
+  #poster .comp{transition:opacity .16s ease}
+  #poster.dim .comp:not(.is-active){opacity:.38}
+  #poster .comp:focus{outline:none}
+  #poster .comp:focus-visible .hit{stroke:#0b5fc4;stroke-opacity:1;stroke-dasharray:9 6;fill-opacity:.07}
+  #poster .flow{stroke-dasharray:8 7;animation:dash 1.15s linear infinite}
+  @keyframes dash{to{stroke-dashoffset:-30}}
+  @media (prefers-reduced-motion:reduce){#poster .flow{animation:none}}
+
+  /* ---------- three acts strip ---------- */
+  #acts{flex:0 0 auto;display:flex;align-items:center;justify-content:center;gap:clamp(8px,1vw,18px);flex-wrap:wrap;
+    padding:clamp(4px,.5vw,10px) clamp(12px,1.4vw,28px) clamp(10px,.9vw,20px)}
+  .act{display:flex;align-items:center;gap:.6em;padding:.5em .9em;border-radius:999px;background:var(--panel);
+    border:1px solid var(--line);box-shadow:var(--shadow);font-weight:800;font-size:var(--small)}
+  .act:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .act .n{display:inline-flex;align-items:center;justify-content:center;width:1.55em;height:1.55em;border-radius:50%;
+    background:var(--accent);color:var(--accent-ink);font-size:.92em}
+  .act .sub{font-weight:600;color:var(--muted);font-size:.86em}
+  .acts-lead{font-size:var(--small);font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
+
+  /* ---------- hint bar ---------- */
+  #hintbar{flex:0 0 auto;display:flex;align-items:center;gap:1.2em;flex-wrap:wrap;justify-content:center;
+    padding:clamp(6px,.55vw,12px) clamp(12px,1.4vw,28px);border-top:1px solid var(--line);background:var(--panel);
+    font-size:calc(var(--small) * .9);color:var(--ink-soft);font-weight:600}
+  #hintbar b{color:var(--ink)}
+  #hintbar .sep{color:var(--line)}
+
+  /* ---------- hover tip ---------- */
+  #tip{position:fixed;z-index:70;pointer-events:none;opacity:0;transform:translateY(6px);transition:opacity .12s ease,transform .12s ease;
+    background:#0e1a2b;color:#fff;padding:.5em .75em;border-radius:11px;font-size:var(--small);font-weight:700;
+    max-width:38ch;line-height:1.25;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+  #tip.on{opacity:1;transform:translateY(0)}
+  #tip .tip-sub{display:block;font-weight:600;font-size:.84em;color:#a9c4e8;margin-top:.18em}
+
+  /* ---------- pancard ---------- */
+  #pancard{position:fixed;inset:0;z-index:60;background:rgba(6,13,25,.55);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
+    display:flex;padding:clamp(8px,1.3vw,26px);overflow:hidden}
+  #pancard[hidden]{display:none}
+  .pc-inner{background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow-lg);
+    width:100%;max-width:2000px;margin:0 auto;display:flex;flex-direction:column;min-height:0;overflow:hidden;
+    animation:pop .18s cubic-bezier(.16,1,.3,1)}
+  @keyframes pop{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:scale(1)}}
+  @media (prefers-reduced-motion:reduce){.pc-inner{animation:none}}
+  .pc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:clamp(10px,1.2vw,28px);
+    padding:clamp(12px,1.1vw,24px) clamp(16px,1.6vw,38px);border-bottom:1px solid var(--line);background:var(--panel)}
+  .pc-kicker{font-size:var(--small);font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--accent)}
+  #pcTitle{margin:.1em 0 0;font-size:var(--h1);line-height:1.02;font-weight:800;letter-spacing:-.015em}
+  .pc-head-actions{display:flex;align-items:center;gap:clamp(6px,.55vw,12px);flex-wrap:wrap;justify-content:flex-end;flex:0 0 auto}
+  .pc-pain{display:flex;gap:.7em;align-items:flex-start;padding:clamp(10px,.85vw,20px) clamp(16px,1.6vw,38px);
+    background:var(--accent-soft);border-bottom:1px solid var(--line);font-size:var(--body);font-weight:700;line-height:1.32}
+  .pc-pain .tag{flex:0 0 auto;font-size:calc(var(--small) * .84);font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+    background:var(--amber-soft);color:var(--amber);border:1px solid currentColor;border-radius:999px;padding:.2em .7em;margin-top:.18em}
+  .pc-body{flex:1 1 auto;min-height:0;overflow:auto;display:grid;gap:clamp(12px,1.3vw,34px);
+    grid-template-columns:minmax(0,1.18fr) minmax(0,1fr);padding:clamp(12px,1.1vw,26px) clamp(16px,1.6vw,38px)}
+  @media (max-width:1180px){.pc-body{grid-template-columns:minmax(0,1fr)}}
+  .pc-facts{display:flex;flex-direction:column;gap:clamp(12px,1vw,22px);min-width:0}
+  .fact{min-width:0}
+  .fact h2{margin:0 0 .25em;font-size:var(--h2);font-weight:800;color:var(--ink);line-height:1.12;
+    display:flex;align-items:center;gap:.5em}
+  .fact h2 .dot{width:.5em;height:.5em;border-radius:50%;background:var(--accent);flex:0 0 auto}
+  .fact ul{margin:0;padding-left:1.15em}
+  .fact li{font-size:var(--body);line-height:1.34;margin:.3em 0;color:var(--ink-soft)}
+  .fact li b,.fact li strong{color:var(--ink)}
+  .fact.two ul{columns:2;column-gap:clamp(16px,2.2vw,52px)}
+  .fact.two li{break-inside:avoid}
+  @media (max-width:1180px){.fact.two ul{columns:1}}
+  .pc-gallery{display:flex;flex-direction:column;gap:clamp(6px,.6vw,12px);min-width:0}
+  .gal-stage{display:flex;align-items:stretch;gap:clamp(4px,.5vw,12px);min-height:0;flex:1 1 auto}
+  .gal-frame{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:.5em;background:var(--gal-bg);
+    border:1px solid var(--line);border-radius:14px;padding:clamp(6px,.6vw,14px);height:100%}
+  .gal-frame .imgwrap{flex:1 1 auto;min-height:min(38vh,360px);display:flex;align-items:center;justify-content:center}
+  #galImg{max-width:100%;max-height:min(52vh,620px);width:auto;height:auto;object-fit:contain;border-radius:9px;
+    background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.16);cursor:zoom-in}
+  #galCaption{font-size:var(--small);font-weight:700;color:var(--ink);line-height:1.28}
+  #galCount{font-size:calc(var(--small) * .88);font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+  .gal-nav{align-self:center;flex:0 0 auto;width:clamp(50px,3.6vw,74px);height:clamp(50px,3.6vw,74px);border-radius:50%;
+    font-size:clamp(22px,1.7vw,34px);line-height:1;display:flex;align-items:center;justify-content:center;padding:0}
+  .gal-nav[disabled]{opacity:.32;cursor:default}
+  .gal-thumbs{display:flex;gap:clamp(5px,.45vw,10px);overflow-x:auto;padding:.25em .1em;flex:0 0 auto}
+  .gal-thumbs img{height:clamp(54px,4vw,86px);width:auto;border-radius:7px;border:2px solid transparent;opacity:.62;
+    cursor:pointer;background:#fff;transition:opacity .12s,border-color .12s}
+  .gal-thumbs img:hover{opacity:.92}
+  .gal-thumbs img.on{border-color:var(--accent);opacity:1}
+  .gal-missing{font-size:var(--small);font-weight:700;color:var(--bad);text-align:center;padding:1em}
+  .pc-meta{display:flex;flex-direction:column;gap:.45em;align-items:stretch;
+    padding:clamp(10px,.9vw,20px) clamp(16px,1.6vw,38px);border-top:1px solid var(--line);background:var(--panel-2)}
+  .pc-chips{display:flex;gap:.45em;flex-wrap:wrap;max-width:100%}
+  .chip{font-size:var(--chip);font-weight:700;color:var(--ink-soft);background:var(--panel);border:1px solid var(--line);
+    border-radius:999px;padding:.24em .75em;white-space:nowrap}
+  .pc-related{display:flex;align-items:center;gap:.45em;flex-wrap:wrap;justify-content:flex-start;max-width:100%}
+  .rel-label{font-size:calc(var(--small) * .86);font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  a.doclink{color:var(--accent);font-weight:700;text-decoration:none;border-bottom:2px solid color-mix(in srgb,var(--accent) 35%,transparent);
+    font-size:var(--chip);padding:.18em .1em}
+  a.doclink:hover{border-bottom-color:var(--accent)}
+  .pc-foot{display:flex;align-items:center;gap:1em;flex-wrap:wrap;padding:clamp(6px,.6vw,14px) clamp(16px,1.6vw,38px);
+    border-top:1px solid var(--line-2);background:var(--panel)}
+  .pc-foot .grow{flex:1 1 auto}
+
+  /* ---------- help ---------- */
+  #help{position:fixed;inset:0;z-index:65;background:rgba(6,13,25,.5);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+    display:flex;align-items:center;justify-content:center;padding:clamp(10px,1.4vw,30px)}
+  #help[hidden]{display:none}
+  .help-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow-lg);
+    padding:clamp(16px,1.4vw,32px);max-width:1000px;width:100%;max-height:88vh;overflow:auto}
+  .help-card h2{margin:0 0 .5em;font-size:var(--h2);font-weight:800}
+  .help-card table{border-collapse:collapse;width:100%;font-size:var(--body)}
+  .help-card td{padding:.32em .6em .32em 0;vertical-align:top;color:var(--ink-soft);line-height:1.3}
+  .help-card td:first-child{white-space:nowrap;width:1%}
+  .help-card p{font-size:var(--small);color:var(--muted);line-height:1.35}
+  .help-card kbd{font-size:.82em;font-weight:800;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;
+    padding:.1em .45em;background:var(--panel-2);color:var(--ink)}
+  .help-foot{display:flex;justify-content:flex-end;gap:.6em;margin-top:1em}
+</style>
+</head>
+<body>
+
+<header id="topbar">
+  <div class="brand">
+    <span class="logo">DH</span>
+    <span class="brand-txt">
+      <b>EDW Component Explorer</b>
+      <span>Data Hopper EDW &middot; Issue #190 &middot; full-stack transparency</span>
+    </span>
+  </div>
+  <div class="spacer"></div>
+  <div class="navgroup">
+    <button id="prevBtn" title="Previous component (arrow left, or [ )">&#9664; Prev</button>
+    <select id="jump" aria-label="Jump to a component"></select>
+    <button id="nextBtn" class="primary" title="Next component (arrow right, or ] )">Next &#9654;</button>
+  </div>
+  <div class="tools">
+    <div class="zoom" role="group" aria-label="Diagram zoom">
+      <button id="zoomOut" title="Zoom out (-)">&minus;</button>
+      <button id="zoomLabel" title="Reset zoom to fit">fit</button>
+      <button id="zoomIn" title="Zoom in (+)">+</button>
+    </div>
+    <button id="tourBtn" title="Open the first component of the tour (t)">Guided tour</button>
+    <button id="themeBtn" title="Light / dark chrome (d)">Dark</button>
+    <button id="helpBtn" title="Keys and how to present this (?)">?</button>
+  </div>
+</header>
+
+<main id="stage">
+<div id="framewrap">
+<!-- Interactive variant of docs/images/diagrams/edw-overview.svg.
+     Geometry, colours and wording follow the poster; label sizes are raised so the
+     diagram stays readable from the back of a room. Every block is a .comp group. -->
+<svg id="poster" width="1280" height="708" viewBox="0 0 1280 708" role="group"
+     aria-label="Interactive Data Hopper EDW overview: click any block for details">
+<title>Data Hopper EDW overview (interactive)</title>
+<desc>Landing databases, files, and JSON feed a source model. Clients query that model through Hop JDBC. Hop loads the Data Vault, Business Vault, and dimensional databases from their model files and records OPS metrics and lineage. The coach moves from one model to the next. Generate Data Vault builds the raw vault from the source model. Hopper presentations report from the dimensional model. The catalog sits under every model. Documentation, the EDW Journey, and the lineage view sit on that catalog. A harvester watches live schemas and the catalog. Every element in this picture is clickable.</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 1.1 L 10 5 L 0 8.9 Z" fill="#5A6A7E"/></marker>
+<marker id="arrow-start" viewBox="0 0 10 10" refX="1.5" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M 10 1.1 L 0 5 L 10 8.9 Z" fill="#5A6A7E"/></marker>
+<marker id="arrow-coach" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 1.1 L 10 5 L 0 8.9 Z" fill="#8A5A12"/></marker>
+</defs>
+<rect width="1280" height="708" fill="#FAFBFC"/>
+<rect x="6" y="6" width="1268" height="696" rx="12" fill="none" stroke="#d5dde6" stroke-width="1"/>
+
+<!-- ============ Harvester ============ -->
+<g class="comp" data-comp="harvester" role="button" tabindex="0" aria-label="Harvester - schema harvest">
+  <line class="flow" x1="24" y1="230" x2="24" y2="570" fill="none" stroke="#5A6A7E" stroke-width="1.6" marker-end="url(#arrow)" marker-start="url(#arrow-start)"/>
+  <text x="24" y="400" fill="#3d4a5c" font-family="sans-serif" font-size="15" font-weight="bold" text-anchor="middle" transform="rotate(-90 24 400)">Harvester</text>
+  <rect class="hit" x="4" y="222" width="40" height="356" rx="8"/>
+</g>
+
+<!-- ============ Landing sources ============ -->
+<g class="comp" data-comp="landing" role="button" tabindex="0" aria-label="Landing sources - RDBMS, Files, JSON">
+  <text x="104" y="204" fill="#3d4a5c" font-family="sans-serif" font-size="15" font-weight="bold" text-anchor="middle">Landing</text>
+  <rect x="56" y="218" width="96" height="70" rx="8" ry="8" fill="#FFFFFF" stroke="#181818" stroke-width="1.5"/>
+  <path d="M 88 234 L 88 246 A 16 11 0 0 0 120 246 L 120 234 A 16 11 0 0 0 88 234 Z" fill="#FFF6E8" stroke="#181818" stroke-width="1.5"/>
+  <ellipse cx="104" cy="234" rx="16" ry="11" fill="#FFF6E8" stroke="#181818" stroke-width="1.5"/>
+  <text x="104" y="278" fill="#181818" font-family="sans-serif" font-size="15" font-weight="bold" text-anchor="middle">RDBMS</text>
+  <rect x="56" y="300" width="96" height="64" rx="8" ry="8" fill="#FFFFFF" stroke="#181818" stroke-width="1.5"/>
+  <path d="M 92 308 H 110 L 118 316 V 332 H 92 Z" fill="#FFF6E8" stroke="#181818" stroke-width="1.2"/>
+  <path d="M 110 308 V 316 H 118" fill="none" stroke="#181818" stroke-width="1.2"/>
+  <line x1="96" y1="320" x2="108" y2="320" stroke="#3d4a5c" stroke-width="1"/>
+  <line x1="96" y1="325" x2="108" y2="325" stroke="#3d4a5c" stroke-width="1"/>
+  <line x1="96" y1="330" x2="108" y2="330" stroke="#3d4a5c" stroke-width="1"/>
+  <text x="104" y="354" fill="#181818" font-family="sans-serif" font-size="15" font-weight="bold" text-anchor="middle">Files</text>
+  <rect x="56" y="376" width="96" height="64" rx="8" ry="8" fill="#FFFFFF" stroke="#181818" stroke-width="1.5"/>
+  <text x="104" y="404" fill="#3d4a5c" font-family="sans-serif" font-size="20" font-weight="bold" text-anchor="middle">{ }</text>
+  <text x="104" y="430" fill="#181818" font-family="sans-serif" font-size="15" font-weight="bold" text-anchor="middle">JSON</text>
+  <rect class="hit" x="48" y="188" width="112" height="266" rx="10"/>
+</g>
+<line x1="153" y1="253" x2="177" y2="253" fill="none" stroke="#5A6A7E" stroke-width="1.6" marker-end="url(#arrow)"/>
+<line x1="153" y1="332" x2="177" y2="332" fill="none" stroke="#5A6A7E" stroke-width="1.6" marker-end="url(#arrow)"/>
+<line x1="153" y1="408" x2="177" y2="408" fill="none" stroke="#5A6A7E" stroke-width="1.6" marker-end="url(#arrow)"/>
+
+<!-- ============ Source models ============ -->
+<g class="comp" data-comp="source-models" role="button" tabindex="0" aria-label="Source models (.hsm)">
+  <rect x="180" y="214" width="150" height="300" rx="10" ry="10" fill="#FFF6E8" stroke="#181818" stroke-width="2"/>
+  <text x="255" y="322" fill="#181818" font-family="sans-serif" font-size="19" font-weight="bold" text-anchor="middle">Source</text>
+  <text x="255" y="344" fill="#181818" font-family="sans-serif" font-size="16" font-weight="bold" text-anchor="middle">models</text>
+  <text x="255" y="374" fill="#181818" font-family="ui-monospace, monospace" font-size="22" font-weight="bold" text-anchor="middle">.hsm</text>
+  <line x1="202" y1="390" x2="308" y2="390" stroke="#c5ced8" stroke-width="1"/>
+  <text x="255" y="417" fill="#3d4a5c" font-family="sans-serif" font-size="16" text-anchor="middle">Tables and keys</text>
+  <text x="255" y="441" fill="#3d4a5c" font-family="sans-serif" font-size="16" text-anchor="middle">Queries and JSON</text>
+  <text x="255" y="465" fill="#3d4a5c" font-family="sans-serif" font-size="16" text-anchor="middle">Pipelines</text>
+  <rect class="hit" x="178" y="198" width="154" height="316" rx="12"/>
+</g>
+
+<!-- ============ Data Vault models ============ -->
+<g class="comp" data-comp="dv-models" role="button" tabindex="0" aria-label="Data Vault models (.hdv)">
+  <rect x="414" y="214" width="150" height="300" rx="10" ry="10" fill="#E8F0FB" stroke="#181818" stroke-width="2"/>
+  <text x="489" y="322" fill="#181818" font-family="sans-serif" font-size="19" font-weight="bold" text-anchor="middle">Data Vault</text>
+  <text x="489" y="344" fill="#181818" font-family="sans-serif" font-size="16" font-weight="bold" text-anchor="middle">models</text>
+  <text x="489" y="374" fill="#181818" font-family="ui-monospace, monospace" font-size="22" font-weight="bold" text-anchor="middle">.hdv</text>
+  <line x1="436" y1="390" x2="542" y2="390" stroke="#c5ced8" stroke-width="1"/>
+  <text x="489" y="417" fill="#3d4a5c" font-family="sans-serif" font-size="16" text-anchor="middle">Hubs and links</text>
+  <text x="489" y="441" fill="#3d4a5c" font-family="sans-serif" font-size="16" text-anchor="middle">Satellites</text>
+  <text x="489" y="465" fill="#3d4a5c" font-family="sans-serif" font-size="16" text-anchor="middle">Reference tables</text>
+  <rect class="hit" x="412" y="198" width="154" height="316" rx="12"/>
+</g>
+
+<!-- ============ Business Vault models ============ -->
+<g class="comp" data-comp="bv-models" role="button" tabindex="0" aria-label="Business Vault models (.hbv)">
+  <rect x="648" y="214" width="150" height="300" rx="10" ry="10" fill="#F3EBFB" stroke="#181818" stroke-width="2"/>
+  <text x="723" y="322" fill="#181818" font-family="sans-serif" font-size="19" font-weight="bold" text-anchor="middle">Business Vault</text>
+  <text x="723" y="344" fill="#181818" font-family="sans-serif" font-size="16" font-weight="bold" text-anchor="middle">models</text>
+  <text x="723" y="374" fill="#181818" font-family="ui-monospace, monospace" font-size="22" font-weight="bold" text-anchor="middle">.hbv</text>
+  <line x1="670" y1="390" x2="776" y2="390" stroke="#c5ced8" stroke-width="1"/>
+  <text x="723" y="417" fill="#3d4a5c" font-family="sans-serif" font-size="16" text-anchor="middle">Current views</text>
+  <text x="723" y="441" fill="#3d4a5c" font-family="sans-serif" font-size="16" text-anchor="middle">Snapshots</text>
+  <text x="723" y="465" fill="#3d4a5c" font-family="sans-serif" font-size="16" text-anchor="middle">Bridges</text>
+  <rect class="hit" x="646" y="198" width="154" height="316" rx="12"/>
+</g>
+
+<!-- ============ Dimensional models ============ -->
+<g class="comp" data-comp="dm-models" role="button" tabindex="0" aria-label="Dimensional models (.hdm)">
+  <rect x="882" y="214" width="150" height="300" rx="10" ry="10" fill="#E7F6ED" stroke="#181818" stroke-width="2"/>
+  <text x="957" y="322" fill="#181818" font-family="sans-serif" font-size="19" font-weight="bold" text-anchor="middle">Dimensional</text>
+  <text x="957" y="344" fill="#181818" font-family="sans-serif" font-size="16" font-weight="bold" text-anchor="middle">models</text>
+  <text x="957" y="374" fill="#181818" font-family="ui-monospace, monospace" font-size="22" font-weight="bold" text-anchor="middle">.hdm</text>
+  <line x1="904" y1="390" x2="1010" y2="390" stroke="#c5ced8" stroke-width="1"/>
+  <text x="957" y="417" fill="#3d4a5c" font-family="sans-serif" font-size="16" text-anchor="middle">Dimensions</text>
+  <text x="957" y="441" fill="#3d4a5c" font-family="sans-serif" font-size="16" text-anchor="middle">Facts</text>
+  <text x="957" y="465" fill="#3d4a5c" font-family="sans-serif" font-size="16" text-anchor="middle">Bridges</text>
+  <rect class="hit" x="880" y="198" width="154" height="316" rx="12"/>
+</g>
+
+<!-- ============ Runtime banner (JDBC | Hop | Hop | Hop | OPS) ============ -->
+<path d="M 192 150 H 1242 Q 1254 150 1254 162 V 184 Q 1254 196 1242 196 H 192 Q 180 196 180 184 V 162 Q 180 150 192 150 Z" fill="#033D5D"/>
+<path d="M 1048 150 H 1242 Q 1254 150 1254 162 V 184 Q 1254 196 1242 196 H 1048 Z" fill="#0C5C7A"/>
+<line x1="414" y1="154" x2="414" y2="192" stroke="#ffffff" stroke-width="1" stroke-opacity="0.22"/>
+<line x1="648" y1="154" x2="648" y2="192" stroke="#ffffff" stroke-width="1" stroke-opacity="0.22"/>
+<line x1="882" y1="154" x2="882" y2="192" stroke="#ffffff" stroke-width="1" stroke-opacity="0.22"/>
+<line x1="1048" y1="158" x2="1048" y2="188" stroke="#ffffff" stroke-width="1" stroke-opacity="0.4"/>
+<text x="255" y="178" fill="#ffffff" font-family="sans-serif" font-size="17" font-weight="bold" text-anchor="middle">Hop JDBC</text>
+<text x="489" y="178" fill="#ffffff" font-family="sans-serif" font-size="17" font-weight="bold" text-anchor="middle">Hop</text>
+<text x="723" y="178" fill="#ffffff" font-family="sans-serif" font-size="17" font-weight="bold" text-anchor="middle">Hop</text>
+<text x="957" y="178" fill="#ffffff" font-family="sans-serif" font-size="17" font-weight="bold" text-anchor="middle">Hop</text>
+<text x="1151" y="178" fill="#ffffff" font-family="sans-serif" font-size="16" font-weight="bold" text-anchor="middle">OPS metrics + lineage</text>
+<g class="comp" data-comp="hop-jdbc" role="button" tabindex="0" aria-label="Hop JDBC - query any model with SQL">
+  <rect class="hit" x="180" y="148" width="234" height="50" rx="10"/>
+</g>
+<g class="comp" data-comp="hop-engine" role="button" tabindex="0" aria-label="Hop - the execution engine">
+  <rect class="hit" x="414" y="148" width="634" height="50" rx="4"/>
+</g>
+<g class="comp" data-comp="ops" role="button" tabindex="0" aria-label="OPS metrics and lineage">
+  <rect class="hit" x="1048" y="148" width="206" height="50" rx="10"/>
+</g>
+
+<!-- ============ Clients + generated databases ============ -->
+<g class="comp" data-comp="clients" role="button" tabindex="0" aria-label="Clients - SQL tools, BI, Hop GUI and Hop Web">
+  <ellipse cx="255" cy="78" rx="64" ry="28" fill="#FFFFFF" stroke="#181818" stroke-width="1.5"/>
+  <text x="255" y="84" fill="#181818" font-family="sans-serif" font-size="20" font-weight="bold" text-anchor="middle">Clients</text>
+  <rect class="hit" x="185" y="44" width="140" height="68" rx="30"/>
+</g>
+<line x1="255" y1="108" x2="255" y2="149" fill="none" stroke="#5A6A7E" stroke-width="1.6"/>
+
+<g class="comp" data-comp="dv-db" role="button" tabindex="0" aria-label="Generated raw Data Vault database">
+  <path d="M 453 57 L 453 121 A 36 11 0 0 0 525 121 L 525 57 A 36 11 0 0 0 453 57 Z" fill="#E8F0FB" stroke="#181818" stroke-width="1.5"/>
+  <ellipse cx="489" cy="57" rx="36" ry="11" fill="#E8F0FB" stroke="#181818" stroke-width="1.5"/>
+  <text x="489" y="100" fill="#181818" font-family="sans-serif" font-size="20" font-weight="bold" text-anchor="middle">DV</text>
+  <rect class="hit" x="449" y="42" width="80" height="92" rx="12"/>
+</g>
+<g class="comp" data-comp="bv-db" role="button" tabindex="0" aria-label="Generated Business Vault database">
+  <path d="M 687 57 L 687 121 A 36 11 0 0 0 759 121 L 759 57 A 36 11 0 0 0 687 57 Z" fill="#F3EBFB" stroke="#181818" stroke-width="1.5"/>
+  <ellipse cx="723" cy="57" rx="36" ry="11" fill="#F3EBFB" stroke="#181818" stroke-width="1.5"/>
+  <text x="723" y="100" fill="#181818" font-family="sans-serif" font-size="20" font-weight="bold" text-anchor="middle">BV</text>
+  <rect class="hit" x="683" y="42" width="80" height="92" rx="12"/>
+</g>
+<g class="comp" data-comp="dm-db" role="button" tabindex="0" aria-label="Generated dimensional database">
+  <path d="M 921 57 L 921 121 A 36 11 0 0 0 993 121 L 993 57 A 36 11 0 0 0 921 57 Z" fill="#E7F6ED" stroke="#181818" stroke-width="1.5"/>
+  <ellipse cx="957" cy="57" rx="36" ry="11" fill="#E7F6ED" stroke="#181818" stroke-width="1.5"/>
+  <text x="957" y="100" fill="#181818" font-family="sans-serif" font-size="20" font-weight="bold" text-anchor="middle">DM</text>
+  <rect class="hit" x="917" y="42" width="80" height="92" rx="12"/>
+</g>
+<line x1="489" y1="134" x2="489" y2="149" fill="none" stroke="#5A6A7E" stroke-width="1.6"/>
+<line x1="723" y1="134" x2="723" y2="149" fill="none" stroke="#5A6A7E" stroke-width="1.6"/>
+<line x1="957" y1="134" x2="957" y2="149" fill="none" stroke="#5A6A7E" stroke-width="1.6"/>
+<line x1="255" y1="197" x2="255" y2="213" fill="none" stroke="#5A6A7E" stroke-width="1.6"/>
+<line x1="489" y1="197" x2="489" y2="213" fill="none" stroke="#5A6A7E" stroke-width="1.6"/>
+<line x1="723" y1="197" x2="723" y2="213" fill="none" stroke="#5A6A7E" stroke-width="1.6"/>
+<line x1="957" y1="197" x2="957" y2="213" fill="none" stroke="#5A6A7E" stroke-width="1.6"/>
+
+<!-- ============ Coach / Generate ============ -->
+<g class="comp" data-comp="coach" role="button" tabindex="0" aria-label="Coach and Generate - the next step in place">
+  <path class="flow" d="M 334 308 Q 372 280 408 308" fill="none" stroke="#8A5A12" stroke-width="1.8" marker-end="url(#arrow-coach)"/>
+  <text x="372" y="268" fill="#8A5A12" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Coach</text>
+  <path class="flow" d="M 334 430 Q 372 466 408 430" fill="none" stroke="#8A5A12" stroke-width="1.8" marker-end="url(#arrow-coach)"/>
+  <text x="372" y="485" fill="#8A5A12" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Generate</text>
+  <text x="372" y="501" fill="#8A5A12" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Data Vault</text>
+  <path class="flow" d="M 568 360 Q 606 332 642 360" fill="none" stroke="#8A5A12" stroke-width="1.8" marker-end="url(#arrow-coach)"/>
+  <text x="606" y="320" fill="#8A5A12" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Coach</text>
+  <path class="flow" d="M 802 360 Q 840 332 876 360" fill="none" stroke="#8A5A12" stroke-width="1.8" marker-end="url(#arrow-coach)"/>
+  <text x="840" y="320" fill="#8A5A12" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Coach</text>
+  <rect class="hit" x="330" y="252" width="80" height="58" rx="10"/>
+  <rect class="hit" x="330" y="422" width="80" height="88" rx="10"/>
+</g>
+
+<!-- ============ Hopper presentations ============ -->
+<g class="comp" data-comp="presentations" role="button" tabindex="0" aria-label="Hopper presentations - generated dashboards">
+  <rect x="1118" y="328" width="136" height="108" rx="8" ry="8" fill="#FFF3DF" stroke="#181818" stroke-width="1.5"/>
+  <text x="1186" y="366" fill="#181818" font-family="sans-serif" font-size="17" font-weight="bold" text-anchor="middle">Hopper</text>
+  <text x="1186" y="386" fill="#181818" font-family="sans-serif" font-size="17" font-weight="bold" text-anchor="middle">presentations</text>
+  <text x="1186" y="412" fill="#3d4a5c" font-family="sans-serif" font-size="16" text-anchor="middle">Reporting</text>
+  <rect class="hit" x="1112" y="322" width="148" height="120" rx="12"/>
+</g>
+<path d="M 1034 382 Q 1075 352 1116 382" fill="none" stroke="#5A6A7E" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+<!-- ============ Catalog ============ -->
+<g class="comp" data-comp="catalog" role="button" tabindex="0" aria-label="Catalog - source feeds and published layouts">
+  <rect x="180" y="544" width="852" height="52" rx="8" ry="8" fill="#E6EBF1" stroke="#181818" stroke-width="1.75"/>
+  <text x="198" y="577" fill="#181818" font-family="sans-serif" font-size="21" font-weight="bold" text-anchor="start">Catalog</text>
+  <text x="306" y="577" fill="#3d4a5c" font-family="sans-serif" font-size="17" text-anchor="start">Source feeds and published layouts</text>
+  <rect class="hit" x="178" y="540" width="856" height="60" rx="12"/>
+</g>
+
+<!-- ============ Schema / quality gate ============ -->
+<g class="comp" data-comp="gates" role="button" tabindex="0" aria-label="Schema and quality gates">
+  <line x1="255" y1="515" x2="255" y2="543" fill="none" stroke="#5A6A7E" stroke-width="1.6" marker-end="url(#arrow)" marker-start="url(#arrow-start)"/>
+  <line x1="489" y1="515" x2="489" y2="543" fill="none" stroke="#5A6A7E" stroke-width="1.6" marker-end="url(#arrow)" marker-start="url(#arrow-start)"/>
+  <line x1="723" y1="515" x2="723" y2="543" fill="none" stroke="#5A6A7E" stroke-width="1.6" marker-end="url(#arrow)" marker-start="url(#arrow-start)"/>
+  <line x1="957" y1="515" x2="957" y2="543" fill="none" stroke="#5A6A7E" stroke-width="1.6" marker-end="url(#arrow)" marker-start="url(#arrow-start)"/>
+  <rect class="hit" x="237" y="515" width="36" height="28" rx="7"/>
+  <rect class="hit" x="471" y="515" width="36" height="28" rx="7"/>
+  <rect class="hit" x="705" y="515" width="36" height="28" rx="7"/>
+  <rect class="hit" x="939" y="515" width="36" height="28" rx="7"/>
+</g>
+
+<!-- ============ Outputs bar: Documentation | EDW Journey | Lineage view ============ -->
+<rect x="180" y="618" width="1074" height="56" rx="8" ry="8" fill="#E7F3F6" stroke="#181818" stroke-width="1.5"/>
+<line x1="538" y1="632" x2="538" y2="660" stroke="#b7c9d0" stroke-width="1"/>
+<line x1="896" y1="632" x2="896" y2="660" stroke="#b7c9d0" stroke-width="1"/>
+<text x="359" y="652" fill="#181818" font-family="sans-serif" font-size="20" font-weight="bold" text-anchor="middle">Documentation</text>
+<text x="717" y="652" fill="#181818" font-family="sans-serif" font-size="20" font-weight="bold" text-anchor="middle">EDW Journey</text>
+<text x="1075" y="652" fill="#181818" font-family="sans-serif" font-size="20" font-weight="bold" text-anchor="middle">Lineage view (.hlv)</text>
+<g class="comp" data-comp="documentation" role="button" tabindex="0" aria-label="Documentation">
+  <rect class="hit" x="182" y="620" width="354" height="52" rx="8"/>
+</g>
+<g class="comp" data-comp="edw-journey" role="button" tabindex="0" aria-label="EDW Journey perspective">
+  <rect class="hit" x="538" y="620" width="356" height="52" rx="8"/>
+</g>
+<g class="comp" data-comp="lineage-view" role="button" tabindex="0" aria-label="Lineage view (.hlv)">
+  <rect class="hit" x="896" y="620" width="356" height="52" rx="8"/>
+</g>
+</svg>
+</div><!-- /framewrap -->
+
+<div id="acts" role="group" aria-label="The three acts that keep the picture honest">
+  <span class="acts-lead">Observe &rarr; decide &rarr; act</span>
+  <button class="act" data-comp="harvester"><span class="n">1</span> Harvest <span class="sub">observe only, never writes</span></button>
+  <button class="act" data-comp="gates"><span class="n">2</span> Gates <span class="sub">schema + quality decide</span></button>
+  <button class="act" data-comp="publish"><span class="n">3</span> Update &amp; publish <span class="sub">a deliberate write</span></button>
+  <button class="act" data-comp="hop-engine"><span class="n">4</span> Run <span class="sub">ordinary Hop pipelines</span></button>
+</div>
+</main>
+
+<div id="hintbar">
+  <span><b>Click any block</b> on the picture for what is behind it, with screenshots to flip through.</span>
+  <span class="sep">|</span>
+  <span><b>&larr; &rarr;</b> flip screenshots <span class="kbd">Esc</span> close</span>
+  <span class="sep">|</span>
+  <span><b>]</b> next component &middot; <b>[</b> previous <span class="kbd">?</span> all keys</span>
+</div>
+
+<div id="tip" role="status" aria-live="polite"></div>
+
+<!-- ==================== PANCARD ==================== -->
+<section id="pancard" hidden aria-modal="true" role="dialog" aria-labelledby="pcTitle">
+  <div class="pc-inner">
+    <header class="pc-head">
+      <div>
+        <div class="pc-kicker" id="pcKicker"></div>
+        <h1 id="pcTitle"></h1>
+      </div>
+      <div class="pc-head-actions">
+        <button id="pcPrev" title="Previous component ([)">&#9664; Previous</button>
+        <button id="pcNext" title="Next component (])">Next &#9654;</button>
+        <button id="pcClose" class="primary" title="Close (Esc)">&#10005; Close</button>
+      </div>
+    </header>
+    <div class="pc-pain" id="pcPain"></div>
+    <div class="pc-body">
+      <div class="pc-facts" id="pcFacts"></div>
+      <div class="pc-gallery">
+        <div class="gal-stage">
+          <button class="gal-nav" id="galPrev" title="Previous screenshot (arrow left)">&#9664;</button>
+          <div class="gal-frame">
+            <div class="imgwrap"><img id="galImg" alt="" loading="eager" /></div>
+            <div id="galCaption"></div>
+          </div>
+          <button class="gal-nav" id="galNext" title="Next screenshot (arrow right)">&#9654;</button>
+        </div>
+        <div id="galCount"></div>
+        <div class="gal-thumbs" id="galThumbs"></div>
+      </div>
+    </div>
+    <div class="pc-meta">
+      <div class="pc-chips" id="pcChips"></div>
+      <div class="pc-related">
+        <span class="rel-label">Leads to</span>
+        <span id="pcRelated"></span>
+      </div>
+    </div>
+    <footer class="pc-foot">
+      <span id="pcLinks"></span>
+      <span class="grow"></span>
+      <span id="pcHint" style="color:var(--muted);font-size:calc(var(--small) * .9);font-weight:700"></span>
+    </footer>
+  </div>
+</section>
+
+<!-- ==================== HELP ==================== -->
+<div id="help" hidden aria-modal="true" role="dialog" aria-labelledby="helpTitle">
+  <div class="help-card">
+    <h2 id="helpTitle">Presenting this picture</h2>
+    <p>Everything on the diagram is clickable. Each block opens a pancard: what the block actually is, which firehose
+       pain it answers, capability chips, and the real screenshots from <code>docs/images/</code>. Screenshots flip with
+       the arrow keys; click one to open it full size in a new tab.</p>
+    <table>
+      <tr><td><kbd>Click</kbd> a block</td><td>Open its pancard</td></tr>
+      <tr><td><kbd>&larr;</kbd> <kbd>&rarr;</kbd></td><td>Previous / next screenshot inside the pancard</td></tr>
+      <tr><td><kbd>&uarr;</kbd> <kbd>&darr;</kbd></td><td>Scroll a long pancard (the deepest cards hold more than one screen of detail)</td></tr>
+      <tr><td><kbd>]</kbd> / <kbd>[</kbd> or <kbd>Page&nbsp;Down</kbd> / <kbd>Page&nbsp;Up</kbd></td><td>Next / previous component (tour order)</td></tr>
+      <tr><td><kbd>Esc</kbd></td><td>Close the pancard / help</td></tr>
+      <tr><td><kbd>t</kbd></td><td>Start the guided tour (component 1, then Next)</td></tr>
+      <tr><td><kbd>+</kbd> <kbd>&minus;</kbd> <kbd>0</kbd></td><td>Zoom the diagram, reset to fit</td></tr>
+      <tr><td><kbd>d</kbd></td><td>Light / dark chrome (the poster itself stays light so it reads on any projector)</td></tr>
+      <tr><td><kbd>f</kbd></td><td>Full screen</td></tr>
+      <tr><td><kbd>?</kbd></td><td>This panel</td></tr>
+    </table>
+    <p>Deep links work: <code>#sources</code>, <code>#gates</code>, <code>#ops</code>, &hellip; - the open pancard is written into the URL,
+       so a slide deck can link straight to a layer.</p>
+    <p>Everything is in this one file: no CDN, no web server, no build step, no network. Open it from disk and it works offline.</p>
+    <div class="help-foot"><button id="helpClose" class="primary">Got it</button></div>
+  </div>
+</div>
+<script>
+/* ---------------------------------------------------------------------------
+   Data for the explorer. One entry per clickable thing on edw-overview.svg
+   plus the three acts under the poster. Screenshots live in docs/images/.
+   Doc links point at the repository so they stay clickable from a browser.
+   --------------------------------------------------------------------------- */
+const DOC = "https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/";
+const IMG = "../images/";
+
+const COMPONENTS = {
+
+/* ============================ SOURCES ============================ */
+"landing": {
+  label: "Landing sources",
+  kicker: "Start of the stack - what actually arrives",
+  title: "RDBMS, files, and JSON",
+  pain: {tag:"Firehose #06", text:"\"Because the tool cannot handle the edge case at the source, engineers write secret bash scripts and unmanaged side pipelines. That is where models go to die.\""},
+  sections: [
+    {h:"Natively modelled - a card on the source canvas", two:true, items:[
+      "<b>Database table</b> - any engine with a Hop JDBC driver: keys imported, live <i>Get columns</i> schema compare, validate at design time.",
+      "<b>Source query</b> - named multi-table projection: driving table, ordered joins, column list, WHERE, generation mode AUTO / SQL / PIPELINE. Sparse source ERs become <b>one composite feed</b>, not a satellite per physical table.",
+      "<b>Source JSON</b> - parent table/query/JSON, the JSON field, JsonPath projections and pass-through keys; <i>Sample and propose fields</i> types them (epoch to Date). Nested arrays: chain a second Source JSON.",
+      "<b>Source pipeline</b> - a card declaring an existing <code>.hpl</code>, its output transform and the feed fields; loaded through MetaInject. <i>Import</i> scans for Record Definition Input transforms.",
+      "<b>Source masking</b> - a virtual table over a parent card whose fields name Hop masking patterns. Loads of that card run Mask fields; the parent stays readable.",
+      "<b>Notes</b> - canvas notes on the source model, so why a feed exists travels with it."
+    ]},
+    {h:"Everything else - one pipeline source card, no bespoke loader", two:true, items:[
+      "<b>Streaming</b> - Kafka, JMS, MQTT: ordinary Hop consumers, contract declared on the card.",
+      "<b>Files and object stores</b> - CSV, fixed width and headerless files, Excel, Parquet, Avro, ORC, XML and JSON, through Hop VFS (local, S3, GCS, Azure).",
+      "<b>APIs and SaaS</b> - REST/HTTP, SOAP, and the SaaS connectors you already run as Hop transforms.",
+      "<b>NoSQL and lakes</b> - Elasticsearch, MongoDB, Neo4j, Iceberg: if Hop can read it, a card can declare it.",
+      "<b>Your own graph</b> - Get data from XML, MetaInject templates, script steps, house transforms: the card declares the <b>contract</b>, the pipeline stays yours.",
+      "<b>Typeless landing tables</b> - record definitions type the columns once; the drift gate compares against that contract from then on."
+    ]}
+  ],
+  chips:["Database table","Source query","Source JSON","Source pipeline","Source masking","Composite feeds","PostgreSQL, MySQL, SingleStore, SQL Server, Snowflake","Kafka / streaming","REST and SaaS","Object stores","Headerless files","Masking patterns"],
+  gallery:[
+    [IMG+"source-modeler-example.png","Source modeler canvas: tables, relationships, a multi-table query and a JSON source card in one model"],
+    [IMG+"source-modeler-source-table.png","Source table dialog - columns and primary-key positions, imported over JDBC"],
+    [IMG+"source-modeler-json-source.png","Source JSON - parent source, JSON field, pass-through keys and JsonPath extractions"],
+    [IMG+"source-modeler-pipeline-source-graph.png","Pipeline source card (asn-package-lines) related to the CRM tables"],
+    [IMG+"source-modeler-pipeline-source-dialog.png","Source pipeline - file, output transform, catalog name, imported lineage, declared fields"],
+    [IMG+"source-modeler-masking-fields.png","Source masking - a virtual table whose fields point at Hop masking patterns"],
+    [IMG+"source-model-table-data-type-mapping.png","Source table data type mapping tab - profiles, overrides and the effective layout"],
+    [IMG+"source-modeler-retail-example-with-query-dialog-generated-sql.png","Retail CRM source model with the \u201cAll customer info\u201d query and the SQL it will run"]
+  ],
+  links:[["Source modeler overview","source-modeler-overview.adoc"],["Data Vault source feeds","datavault-source.adoc"],["Record definition input","record-definition-input.adoc"]],
+  related:["source-models","harvester","catalog"]
+},
+
+"harvester": {
+  label: "Harvester",
+  kicker: "Act 1 - observation",
+  title: "Harvest: look at the live source, change nothing",
+  pain: {tag:"Firehose #01", text:"\"An upstream team shipped a minor release without a ticket. The column widened by 40 characters. Detection happened by failure at 02:14.\""},
+  sections:[
+    {h:"What it does", items:[
+      "The <b>Harvest source metadata</b> workflow action reads the live schemas now and stores what the sources actually look like, run by run.",
+      "<b>The catalog is never rewritten by harvest alone</b> - no DDL, no mutation of the published contract. Looking is not writing.",
+      "Harvest history and changes dialogs answer \"what moved since last time?\" per subject, with expected vs discovered values.",
+      "It feeds the schema gate: contract, version tag, harvest run and target DDL are compared <i>after</i> observation, not instead of it.",
+      "Efficiency knobs keep a nightly harvest cheap on big source estates."
+    ]},
+    {h:"Why the separation matters", items:[
+      "Observability that silently edits your models is not observability - it is an unlogged deployment.",
+      "Because the observed reality and the published contract are two different records, a gate can say <b>stop</b> instead of a load discovering it halfway.",
+      "Everything harvested remains inspectable from the resource definition group, the EDW Journey Controls stage and the catalog."
+    ]}
+  ],
+  chips:["Harvest source metadata","Run history","Expected vs discovered","Observation only","Feeds the schema gate"],
+  gallery:[
+    [IMG+"schema-harvest-history-dialog.png","Schema harvest history: runs with status, subjects, changes, baseline and run id"],
+    [IMG+"schema-harvest-changes-dialog.png","Harvest changes: expected length 9, discovered 10 - WARNING CHANGED on customer_id"],
+    [IMG+"resource-definition-group-editor.png","Resource definition group editor - harvest actions, lineage, catalog version, Validate sources"],
+    [IMG+"diagrams/d5-four-controls.svg","D5 - harvest, schema gate, quality gate, then Update RDG: the order the four controls run in"]
+  ],
+  links:[["Metadata harvesting","metadata-harvesting.adoc"],["Resource definition validation","resource-definition-validation.adoc"],["Architecture D5 - four controls","architecture.adoc"]],
+  related:["gates","source-models","catalog"]
+},
+
+/* ============================ SOURCE MODEL + JDBC ============================ */
+"source-models": {
+  label: "Source models (.hsm)",
+  kicker: "Layer 2 - the source contract",
+  title: "Source models: the source ER as a first-class model",
+  pain: {tag:"Firehose #05, #06, #07", text:"\"The ERD was drawn in Q1, the DBA patched the DDL in Q2, the ETL was patched last Tuesday. Three answers to one question.\""},
+  sections:[
+    {h:"What is in the model", items:[
+      "Tables with columns, primary-key positions and imported foreign keys; relationships as real edges (child to parent, join type, crow's-foot multiplicity).",
+      "Source queries, Source JSON extractions, pipeline sources, masking cards and notes - all on the same canvas, with the same canvas behaviour as <code>.hdv</code> / <code>.hbv</code> / <code>.hdm</code>.",
+      "Columns carry a data type mapping profile, per-field overrides and an effective-layout preview, so the contract that leaves the source is explicit.",
+      "Query cards open the <b>generated SQL</b> next to the canvas: no hand-written SELECT per join, and nothing hidden."
+    ]},
+    {h:"From contract to vault", items:[
+      "Feeds are published to the catalog as <code>DV_SOURCE</code> sources (single table, composite query, JSON, PIPELINE or MASKING) with portable provenance back to the <code>.hsm</code>.",
+      "<b>Generate Data Vault from source model</b> proposes hubs, links and satellites straight from the source tables - reviewed in a dialog before anything is created.",
+      "Schema harvest and validation both rediscover pipeline and JSON feeds by rebuilding fields from the source-model projection, so they are never treated as \"physical table unavailable\".",
+      "Hubs, links and satellites bind to the published feed name - and the catalog record has <i>Go to origin</i> back to the card."
+    ]}
+  ],
+  chips:["Tables and keys","Multi-table queries","JSON extractions","Pipeline feeds","Masking","Type mapping","Generate Data Vault","One contract per feed"],
+  gallery:[
+    [IMG+"source-modeler-retail-example-with-query-dialog-generated-sql.png","Retail source model (source-tables-crm.hsm) with the \u201cAll customer info\u201d query and its generated SQL"],
+    [IMG+"source-modeler-source-table.png","Source table dialog - columns and primary-key positions"],
+    [IMG+"source-modeler-json-source.png","Source JSON dialog - JsonPath projections over a parent JSON column"],
+    [IMG+"source-modeler-generate-data-vault-model-dialog.png","Generate Data Vault from source model - review the proposed hubs, satellites and links"],
+    [IMG+"source-modeler-generated-data-vault-result.png","After apply: the generated Data Vault canvas, 20 tables created"],
+    [IMG+"data-type-mapping-rules.png","Data type mapping metadata - project-wide rules for the source side"]
+  ],
+  links:[["Source modeler overview","source-modeler-overview.adoc"],["Generate Data Vault","generating-data-vault-from-source-model.adoc"],["Hub","dv-hub.adoc"],["Link","dv-link.adoc"],["Satellite","dv-satellite.adoc"]],
+  related:["landing","catalog","dv-models","coach"]
+},
+
+"hop-jdbc": {
+  label: "Hop JDBC",
+  kicker: "Access path - jdbc:hop-hsm:",
+  title: "The model is queryable: any SQL client can ask",
+  pain: {tag:"Firehose #04", text:"\"The catalog shows you a beautiful graph. Can you query it from your SQL tool? No. Two worlds again.\""},
+  sections:[
+    {h:"How it works", items:[
+      "A <b>Source model service</b> metadata object points at one <code>.hsm</code> (with a catalog connection and namespace for publishing), and a thin JDBC driver speaks <code>jdbc:hop-hsm:</code>.",
+      "File mode: <code>jdbc:hop-hsm:file=/path/to/model.hsm</code> (optional <code>;rowLimit=N</code>). Server mode: <code>jdbc:hop-hsm://user:pass@host:8888/crm</code>; <i>Allow schema metadata</i> lets a client browse tables and columns.",
+      "DBeaver (or any JDBC tool) then sees the Model's tables and can join them, query JSON extractions and masked fields with plain SQL.",
+      "Inside pipelines, <b>Source model SQL</b> and Free SQL transforms use the same model, and the EXPLAIN plan dialog shows what will be pushed before you run it."
+    ]},
+    {h:"Why it is in the picture", items:[
+      "The source contract stops being documentation nobody can execute.",
+      "Analysts and BI tools reach source-shaped data without waiting for a warehouse model, using the same definition the vault loads from.",
+      "Generated SQL is readable and reviewable - virtualisation without an opaque engine in the middle."
+    ]}
+  ],
+  chips:["jdbc:hop-hsm:","Source model service","DBeaver","Schema metadata","Source model SQL","EXPLAIN plan"],
+  gallery:[
+    [IMG+"hop-source-model-jdbc-dbeaver-query-editor.png","DBeaver SQL editor querying crm.order_header through the Hop source model driver"],
+    [IMG+"hop-source-model-jdbc-dbeaver-database-connection.png","DBeaver connection settings for the source model (host, port, schema crm)"],
+    [IMG+"hop-source-model-jdbc-dbeaver-database-driver-manager.png","DBeaver Driver Manager - registering the thin Hop source model driver"],
+    [IMG+"hop-source-model-service-editor.png","Source model service metadata editor pointing at source-tables-crm.hsm"],
+    [IMG+"source-model-sql-transform-dialog.png","Source model SQL transform - model queries used from inside a pipeline"],
+    [IMG+"source-model-sql-explain-plan-dialog.png","EXPLAIN plan dialog - inspect the query before it runs"]
+  ],
+  links:[["JDBC in the source modeler","source-modeler-overview.adoc"],["Source modeler overview","source-modeler-overview.adoc"]],
+  related:["source-models","clients","catalog"]
+},
+
+/* ============================ CI/CD SPINE ============================ */
+"catalog": {
+  label: "Catalog",
+  kicker: "Spine - the contract bus under every layer",
+  title: "Catalog: one contract, four layers",
+  pain: {tag:"Firehose #03, #04, #05", text:"\"Fourteen tabs across seven products to answer one question, and you still cannot edit anything from the graph you were shown.\""},
+  sections:[
+    {h:"What lives here", items:[
+      "A file-based catalog (Hop VFS, so git- and version-friendly) with namespaces, record definitions and <b>structured field lists</b> - never a rowMetaXml blob.",
+      "<b>Source feeds</b> (<code>DV_SOURCE</code>: table, composite query, JSON, PIPELINE, MASKING) and <b>published target layouts</b> (<code>physicalTable</code>) in the same place, one row per real object.",
+      "Record definitions carry layout, primary keys, foreign keys, CSV options and quality bindings; published pipeline and JSON feeds keep provenance back to the source model.",
+      "Catalog versions freeze source record definitions under a tag (<code>v2.4.0</code>, <code>2026-Q3-Release</code>) as a design-time baseline for comparison and CI gates."
+    ]},
+    {h:"Why the catalog is not a read-only island", items:[
+      "<b>Validate</b> on a record group runs feed-level schema checks with remediation proposals and acknowledgements.",
+      "<b>Go to origin</b> jumps from a catalog record to the exact source card; model objects link back the other way.",
+      "The model registry indexes published DV/BV/DM tables for short <code>ref('model','table')</code> lookups; search (<i>Search Everywhere</i> and the search panel) finds a match inside models, not just filenames.",
+      "Everything on this diagram points down into it: sources publish up, targets publish down, and the gate and quality rules read from it."
+    ]}
+  ],
+  chips:["Record definitions","DV_SOURCE feeds","Published layouts","Namespaces","Version tags","Validate","Model registry","Search","Go to origin"],
+  gallery:[
+    [IMG+"resource-definition-group-editor.png","Resource definition group 'retail-sources' - model lists plus harvest, lineage, catalog version and Validate sources"],
+    [IMG+"resource-definition-group-editor-with-version-mgt-buttons.png","The same group with catalog version management - freeze a baseline and gate against it"],
+    [IMG+"record-definition-input-dialog-general-settings.png","Catalog record definition - general settings"],
+    [IMG+"record-definition-input-dialog-output-fields.png","Catalog record definition - the structured field layout the loads and gates resolve against"],
+    [IMG+"search-dialog-finding-results-in-models.png","Search Everywhere - a hit inside a Data Vault model, under Project files"],
+    [IMG+"search-panel-model-results.png","Search panel - a model source field match with canvas context"],
+    [IMG+"business-process-catalog-editor-level1-tab.png","Business process catalog - the business levels behind the bus matrix"]
+  ],
+  links:[["Data catalog","data-catalog.adoc"],["Resource definition group","resource-definition-group.adoc"],["Resource definition validation","resource-definition-validation.adoc"],["Search","search.adoc"]],
+  related:["source-models","gates","publish","dm-models"]
+},
+
+"gates": {
+  label: "Gates",
+  kicker: "Act 2 - the decision",
+  title: "Gates: may this load wave run at all?",
+  pain: {tag:"Firehose #01, #05, #09", text:"\"Half the tables loaded, half are corrupt, and four days of committee meetings to prove it was not your layer.\""},
+  sections:[
+    {h:"The controls, and what each one answers", items:[
+      "<b>Check model</b> (toolbar or update action) - is this <code>.hdv</code> / <code>.hbv</code> / <code>.hdm</code> structurally sound? Optional abort on errors.",
+      "<b>Harvest source metadata</b> - what do live sources look like now? Observation only, never fails a load by default.",
+      "<b>Validate resource definitions</b> - the schema gate. It compares the catalog contract, a catalog version tag, a harvest run and/or target DDL, and <b>fails the load by policy</b> (<code>FAIL_ON_BLOCKING</code>) before target corruption.",
+      "<b>Measure data quality + Evaluate quality gate</b> - are the <i>rows</i> acceptable (not empty, allowed values, ranges, nulls, counts)? Pre-load strict by policy, post-load usually ALERT_ONLY."
+    ]},
+    {h:"What makes it a gate and not a report", items:[
+      "Every issue carries an <b>exact remediation proposal</b> and can be acknowledged with an audit trail.",
+      "The same validation writes HTML/Markdown gate reports under <code>work/reports</code>, so CI can promote on the same evidence a human sees in the GUI.",
+      "This is the only block on the picture whose job is to say <b>no</b> - which is why it sits between the contract and the write."
+    ]}
+  ],
+  chips:["Check model","Schema gate","FAIL_ON_BLOCKING","Quality rules","Remediation proposal","Acknowledge issue","HTML/Markdown reports","CI promotion"],
+  gallery:[
+    [IMG+"resource-definition-group-validate-sources-dialog.png","Validate sources - baseline (working catalog or a version tag), check axes, optional report path"],
+    [IMG+"resource-definition-group-validation-results-dialog.png","Validation results - CRITICAL BLOCKED with expected vs actual length on address_line1"],
+    [IMG+"resource-definition-group-validation-remediation-proposals-dialog.png","Remediation proposals - expand the field length in the target models and schemas"],
+    [IMG+"resource-definition-group-validation-remediation-confirmation-dialog.png","Confirm remediation - models and SQL are updated from the catalog length, the catalog itself is not changed"],
+    [IMG+"resource-definition-group-validation-remediation-result-dialog.png","Remediation result - BV and DM targets, SQL path, workflow path"],
+    [IMG+"data-vault-ddl-validation-report-critical-blocked.png","HTML gate report - CRITICAL BLOCKED with the column drift table and downstream impact"],
+    [IMG+"data-vault-ddl-validation-report-pass.png","The same report on a clean wave - WORKING_VS_VERSION, status PASS"],
+    [IMG+"validate-resource-definitions-action-dialog.png","The workflow action that runs the gate in production and in CI"]
+  ],
+  links:[["Resource definition validation","resource-definition-validation.adoc"],["Data quality","data-quality.adoc"],["Metadata harvesting","metadata-harvesting.adoc"],["Architecture D5","architecture.adoc"]],
+  related:["harvester","publish","catalog","dv-models"]
+},
+
+"publish": {
+  label: "Update & publish",
+  kicker: "Act 3 - the deliberate write",
+  title: "Update & publish: the only place that writes",
+  pain: {tag:"Firehose #05, #07", text:"\"Three definitions of the customer schema, and the one that is true is whichever table someone last patched by hand.\""},
+  sections:[
+    {h:"One action runs the wave", items:[
+      "<b>Update resource definition group</b> walks the group in operate order: check model, optional harvest, schema gate, then load DV, BV and DM, then publish the target layouts back to the catalog.",
+      "<b>Update target database structure</b> creates and patches DDL; <b>Publish target tables to catalog</b> writes the real layouts back so the next gate and quality binding work on the truth.",
+      "Layer includes and run options are explicit in the dialog - nothing is implied by convention.",
+      "Load metrics come back live (wave progress, per-transform metrics) while the wave runs."
+    ]},
+    {h:"Why this is the whole point of the picture", items:[
+      "Observation (harvest), decision (gates) and the write are three separate acts - a deliberate write is not a side effect of looking.",
+      "The write lands in ordinary Hop pipelines and workflows, so the same action used for a greenfield first load is the one running nightly.",
+      "Catalog targets then carry layout, quality rules and lineage, which makes the next wave's gates sharper than the last."
+    ]}
+  ],
+  chips:["Update resource definition group","Update target DB structure","Publish targets to catalog","Layer includes","Live load metrics","Runs as a workflow"],
+  gallery:[
+    [IMG+"update-resource-definition-group-action-dialog.png","Update resource definition group - group selection and layer includes"],
+    [IMG+"action-update-resource-group-load-metrics-dialog.png","Load metrics - this run tab during a retail-sources update (model 5 of 8, fact f_orders loading)"],
+    [IMG+"resource-definition-group-editor-with-version-mgt-buttons.png","The group where the wave starts, with catalog versions and Validate sources next to it"],
+    [IMG+"open-execution-of-data-vault-update-action.png","Opening the execution of a Data Vault Update action from the workflow"],
+    [IMG+"workflow-load-overview-summary-models.png","Workflow load overview report - summary and per-model table for run-retail-initial"]
+  ],
+  links:[["Update resource definition group","update-resource-definition-group-action.adoc"],["Resource definition group","resource-definition-group.adoc"],["Getting started EDW","getting-started-edw.adoc"]],
+  related:["gates","hop-engine","catalog"]
+},
+
+/* ============================ BUILD LAYERS ============================ */
+"dv-models": {
+  label: "Data Vault models (.hdv)",
+  kicker: "Layer 3 - the raw vault",
+  title: "Raw Data Vault: modelled, generated, and still yours",
+  pain: {tag:"Firehose #07", text:"\"One business concept - Customer - shreds into ten physical tables. If the engineer cannot follow it, they drown.\""},
+  sections:[
+    {h:"What is behind the block", items:[
+      "Hubs (including multi-source hubs and composite business keys in a single vault column), links with hub aliases and dependent child keys, satellites, reference tables - drawn, not scripted.",
+      "Hash keys and standard columns are model settings, not magic: strategy, hash type (SHA1/SHA256, binary hashing) and the resulting column layout are all in the model dialog.",
+      "Invalid records and unknown records have their own tabs - the vault's defensive behaviour is declared, not implicit.",
+      "Target loading options per model: insert-only vs update, batch and orchestration settings."
+    ]},
+    {h:"Generation you are allowed to trust", items:[
+      "<b>Show update pipeline</b> opens the ordinary Hop pipeline that loads the table: standard transforms, inspectable, debuggable, editable. Generation is only acceptable because the result stays a normal artifact.",
+      "The <b>explainable DDL</b> view traces every statement to the model object and its lineage, and the validation report says PASS or BLOCKED with reasons.",
+      "Models reference each other across <code>.hdv</code> files rather than hiding a linked-model setting; <b>Check model</b> reports structural problems before a load does.",
+      "AI help is available on the model and on proposed changes - it explains link tables, reviews proposals, and never edits silently."
+    ]}
+  ],
+  chips:["Hubs","Links","Satellites","Reference tables","Hub aliases","Dependent child keys","Multi-source hubs","Hash keys","Standard columns","Show update pipeline","Explainable DDL","Check model"],
+  gallery:[
+    [IMG+"data-vault-model-retail-360.png","Retail 360 raw vault - hubs, links and satellites on the Hop canvas"],
+    [IMG+"data-vault-model-retail-example.png","Retail example Data Vault model - customer, order, product and warehouse entities"],
+    [IMG+"data-vault-model-dialog-generated-pipelines-tab.png","Model dialog - generated pipelines tab: the artifacts this model will produce"],
+    [IMG+"data-vault-model-dialog-target-loading-tab.png","Target loading tab - how the vault tables get loaded"],
+    [IMG+"data-vault-model-dialog-standard-columns-tab.png","Standard columns tab - the column pack every vault table gets"],
+    [IMG+"data-vault-model-dialog-invalid-records-tab.png","Invalid records - what happens to rows that break the contract"],
+    [IMG+"data-vault-model-dialog-unknown-records-tab.png","Unknown records - the zero key and its target handling"],
+    [IMG+"data-vault-link-table-with-dependent-child-keys.png","Link editor - dependent child keys tab on lnk_order_line (line_number), model canvas behind"],
+    [IMG+"data-vault-link-table-hub-alias.png","A link with natural hub participation plus a hub alias for a second role of the same hub"],
+    [IMG+"data-vault-ddl-validation-report-pass.png","Explainable DDL validation report - PASS on a clean wave"],
+    [IMG+"data-vault-ai-help-dialog.png","AI help on the model - questions answered next to the object, not in another product"],
+    [IMG+"ai-advisor-explaining-link-tables.png","AI advisor explaining a link table and its participants"]
+  ],
+  links:[["Data Vault plugin","datavault-plugin.adoc"],["Hub","dv-hub.adoc"],["Link","dv-link.adoc"],["Satellite","dv-satellite.adoc"],["Integration modes","dv-integration-modes.adoc"],["Data Vault Update action","datavault-update-action.adoc"]],
+  related:["dv-db","source-models","coach","gates"]
+},
+
+"bv-models": {
+  label: "Business Vault models (.hbv)",
+  kicker: "Layer 4 - the business view of history",
+  title: "Business Vault: current views, SCD2, PIT, bridges",
+  pain: {tag:"Firehose #07, #09", text:"\"BI blames the mart, the mart blames the vault, and nobody can show what actually changed between two runs.\""},
+  sections:[
+    {h:"Table types you get", two:true, items:[
+      "<b>SCD2</b> - merge DV satellites into a functional timeline, with the parent hub on the canvas so grain and business keys stay visible.",
+      "<b>PIT</b> - hub grain times snapshot dates with satellite load-timestamp pointers, for technical as-of queries.",
+      "<b>Business / SQL table</b> - a view or a table with dbt-style <code>ref()</code> / <code>source()</code> dependencies across <code>.hbv</code> files.",
+      "<b>Bridge</b> - query-friendly hub key combinations from a link, with optional weight and load SQL.",
+      "<b>Identity map</b> - raw hub hash to durable hash; it does not truncate, so the durable key survives the next run.",
+      "<b>Source calendar</b> - shared cutover windows (calendar system, effective from/to) picked on satellite settings.",
+      "<b>Source query</b> - satellite-shaped input that SCD2 and PIT can hop to, from a table/view or SQL."
+    ]},
+    {h:"Why it is more than a generator", items:[
+      "Raw vault hubs, links and satellites are referenced with <b>canvas aliases</b>, optionally from several <code>.hdv</code> models - no hidden linkage.",
+      "Existing <b>dbt models import</b> into the BV graph, keeping the dbt reference style you already reviewed.",
+      "Generated calculation logic ships with <b>unit tests</b>: the SCD2 calculation tests run against sampled warehouse rows and produce a completion report.",
+      "<b>Business Vault Update</b> mirrors the DV action: model check, optional DDL, pipeline generation, parallel orchestration, optional catalog publish."
+    ]}
+  ],
+  chips:["SCD2","PIT","SQL view / table","Bridge","Identity map","Source calendar","dbt import","Calculation unit tests","Canvas aliases"],
+  gallery:[
+    [IMG+"business-vault-model-customer-360.png","Customer 360 Business Vault model - the SCD2 table on the canvas"],
+    [IMG+"business-vault-scd2-table-dialog-field-mappings.png","SCD2 table dialog - field mappings from the DV satellites into the functional timeline"],
+    [IMG+"business-vault-scd2-table-dialog-satellite-settings.png","SCD2 satellite settings - which satellites feed the timeline, and the cutover calendar"],
+    [IMG+"business-vault-sql-table-dbt-reference-style.png","Business table in dbt reference style - ref()/source() dependencies as SQL"],
+    [IMG+"business-vault-dbt-import-models-dialog.png","Import dbt models - project folder, model list, destination and macro library"],
+    [IMG+"business-vault-import-dbt-models-context-action.png","Import dbt models from the BV canvas context menu"],
+    [IMG+"generate-calculations-unit-test-scd2-context-action.png","Generate calculation unit test on customer_360_bv - from the SCD2 table's context menu"],
+    [IMG+"generate-calculations-unit-test-scd2-completion-report.png","The completion report: pipeline, input data set and golden data set names"],
+    [IMG+"bv-scd2-calculations-pipeline-unit-test.png","The generated unit-test pipeline that pins the calculation down"]
+  ],
+  links:[["Business Vault overview","business-vault-overview.adoc"],["SCD2","business-vault-scd2.adoc"],["PIT","business-vault-pit.adoc"],["Bridge","business-vault-bridge.adoc"],["SQL views and tables","business-vault-sql-view.adoc"],["Import dbt models","dbt-import.adoc"],["Business Vault Update","business-vault-update-action.adoc"]],
+  related:["bv-db","dv-models","dm-models","coach"]
+},
+
+"dm-models": {
+  label: "Dimensional models (.hdm)",
+  kicker: "Layer 5 - the star schemas",
+  title: "Dimensional: conformed stars you can still see through",
+  pain: {tag:"Firehose #07, #09", text:"\"The dashboard shows -2.4M of inventory and the whole chain of custody is somewhere in someone's head.\""},
+  sections:[
+    {h:"Table types", two:true, items:[
+      "<b>Dimension</b> - SCD1, SCD2 or SCD3/hybrid loads, with per-dimension surrogate key strategy.",
+      "<b>Fact</b> - transaction grain with dimension roles and measures.",
+      "<b>Junk dimension</b> - low-cardinality flag combinations via Combination Lookup.",
+      "<b>Bridge</b> - many-to-many resolution between dimensions.",
+      "<b>Factless fact</b>, <b>periodic snapshot</b>, <b>accumulating snapshot</b> (milestones updated across a lifecycle), <b>aggregate fact</b> (pre-computed rollup)."
+    ]},
+    {h:"The parts that keep it honest", items:[
+      "<b>Staging sources per table</b>: Database/SQL, a Hop pipeline via MetaInject, a catalog record definition, or the built-in <b>date generator</b>. Validation refuses an incomplete source configuration.",
+      "<b>Date dimension</b> - <i>Add date dimension</i> creates <code>dim_date</code>/<code>d_date</code> with relative and fiscal field packs, preview, and Type 1 skip-unchanged loads.",
+      "<b>Conformed dimension registry</b>, several date roles on one fact, and optional DDL constraints (PK/FK - not on SingleStore - plus lookup indexes on the columns the load looks up).",
+      "<b>Logical contracts</b> (source type None) sketch the star before staging SQL exists; the canvas badges them and Check model warns.",
+      "<b>Field documentation</b>: description plus Markdown notes and requirements on attributes, keys, measures and degenerates - rendered into the project documentation.",
+      "<b>Bus matrix</b> from the business process catalog, and <b>Create presentation</b> through the semantic layer."
+    ]}
+  ],
+  chips:["Dimensions","Facts","Junk / bridge","Factless","Snapshots","Aggregates","Date generator","Conformed registry","Surrogate key strategy","Lookup indexes","Field notes","Bus matrix"],
+  gallery:[
+    [IMG+"dimensional-model-f-order-lines.png","f_order_lines - conformed dimension aliases and multiple date roles on one canvas"],
+    [IMG+"dimensional-model-f-orders.png","f_orders - the transaction fact and its dimensions"],
+    [IMG+"dimensional-model-fact-table-dialog-lineage-tab.png","Fact table dialog - the Lineage tab for f_orders: where the rows come from"],
+    [IMG+"dimensional-model-date-dimension.png","Date dimension source tab - the built-in date generator, no external pipeline"],
+    [IMG+"bus-matrix-of-the-retail-example.png","Bus matrix for retail-sources - facts against conformed dimensions"],
+    [IMG+"business-process-catalog-editor-level2-tab.png","Business process catalog - the process levels the bus matrix is built from"],
+    [IMG+"architecture-export-retail-example-dimensional-model-drawio.png","Retail dimensional model exported as architecture (draw.io export)"]
+  ],
+  links:[["Dimensional modeler overview","dimensional-modeler-overview.adoc"],["Date dimension generator","date-dimension-generator.adoc"],["Bus matrix","bus-matrix.adoc"],["Semantic layer","semantic-layer.adoc"],["Dimensional Update","dimensional-update-action.adoc"]],
+  related:["dm-db","bv-models","presentations","ops"]
+},
+
+/* ============================ GENERATED DATABASES ============================ */
+"dv-db": {
+  label: "Raw vault database",
+  kicker: "Target - generated DDL",
+  title: "The raw vault database",
+  pain: {tag:"Firehose #05", text:"\"The DDL in production was patched by hand. Nobody can say what the model thinks the table looks like.\""},
+  sections:[
+    {h:"What gets created", items:[
+      "Hubs, links, satellites and reference tables, with standard columns and hash keys, in the target engine's own dialect.",
+      "<b>Target type mappings</b> are project policy: rules like String length 1 to <code>CHAR(1)</code>, or max-length 2000 to <code>NVARCHAR({length})</code>, with a preview tab that shows the resolved type before you commit.",
+      "On <b>Snowflake</b> the plugin corrects Hop's dialect defaults that are wrong for Data Vault (<code>TYPE_BINARY</code> to <code>BINARY(n)</code>, timestamps to <code>TIMESTAMP_NTZ</code>, dates to <code>DATE</code>), and a target type mapping still wins when a rule matches.",
+      "<b>Explainable DDL</b>: every statement traces back to the model object and its lineage, and the validation report says PASS or BLOCKED with the reason."
+    ]},
+    {h:"How it stays true", items:[
+      "The DDL is generated from the model on demand (<i>Update target database structure</i>) - the model is the source of truth, not a diagram of it.",
+      "Validation compares working catalog, catalog version tag, harvest result and target DDL, so hand-patching production is something the next wave detects.",
+      "Loads are insert-only or update per model, with the unknown/invalid record behaviour you declared."
+    ]}
+  ],
+  chips:["CREATE TABLE from model","Target type mappings","Per-engine dialect","Snowflake corrections","Explainable DDL","Hash keys","Standard columns"],
+  gallery:[
+    [IMG+"target-type-mapping-editor-rules-tab.png","Target type mapping editor - rules with match criteria and the target SQL type"],
+    [IMG+"target-type-mapping-editor-preview-tab.png","Preview tab - what each rule resolves to before you apply it"],
+    [IMG+"data-vault-ddl-validation-report-pass.png","DDL validation report - WORKING_VS_VERSION, status PASS"],
+    [IMG+"data-vault-model-dialog-target-loading-tab.png","Target loading - insert-only vs update, and the orchestration settings behind them"],
+    [IMG+"data-type-mapping-rules.png","Data type mapping metadata editor - the project-wide rules behind the DDL"]
+  ],
+  links:[["Target type mappings","target-type-mappings.adoc"],["Data type mappings","data-type-mappings.adoc"],["Data Vault Update action","datavault-update-action.adoc"],["Satellite target layout","dv-satellite.adoc"]],
+  related:["dv-models","hop-engine","gates"]
+},
+
+"bv-db": {
+  label: "Business Vault database",
+  kicker: "Target - business vault DDL",
+  title: "The Business Vault database",
+  pain: {tag:"Firehose #07", text:"\"A PIT table, four SCD2 tables and an identity map - built by a script you cannot open.\""},
+  sections:[
+    {h:"What gets created", items:[
+      "SCD2 timelines, PIT tables, bridges, current views or materialised tables, and identity maps.",
+      "Identity maps deliberately <b>do not truncate</b>, so durable hashes survive the next run and SCD2 history does not fracture.",
+      "Generated calculation logic is bound by <b>unit tests</b> that run against sampled warehouse rows.",
+      "Target layouts are published back to the catalog as <code>physicalTable</code> records - which is what lets the next gate and the quality rules bind to something real."
+    ]},
+    {h:"Operationally", items:[
+      "<b>Business Vault Update</b> runs the same pattern as the raw vault: model check, optional DDL, pipeline generation, parallel orchestration, optional catalog publish.",
+      "Because it is generated from the same models the engineer edits, an SCD2 change is one model edit plus one wave - not a hand-written migration."
+    ]}
+  ],
+  chips:["SCD2 timelines","PIT tables","Bridges","Identity maps","Unit-tested logic","Publish to catalog","Business Vault Update"],
+  gallery:[
+    [IMG+"business-vault-model-customer-360.png","Customer 360 Business Vault model - the object behind the database table"],
+    [IMG+"business-vault-scd2-table-dialog-field-mappings.png","SCD2 field mappings - what lands in the timeline table"],
+    [IMG+"generate-calculations-unit-test-scd2-completion-report.png","Calculation unit-test completion report - the generated logic is pinned by tests"],
+    [IMG+"bv-scd2-calculations-pipeline-unit-test.png","The generated unit-test pipeline behind that report"],
+    [IMG+"business-vault-sql-table-dbt-reference-style.png","A BV SQL table in dbt reference style - ref()/source() resolve across models"]
+  ],
+  links:[["Business Vault Update","business-vault-update-action.adoc"],["Business Vault overview","business-vault-overview.adoc"],["SCD2","business-vault-scd2.adoc"]],
+  related:["bv-models","gates","publish"]
+},
+
+"dm-db": {
+  label: "Dimensional database",
+  kicker: "Target - query-ready marts",
+  title: "The dimensional database",
+  pain: {tag:"Firehose #09", text:"\"The mart is the last layer everybody blames and the first layer nobody can trace.\""},
+  sections:[
+    {h:"What gets created", items:[
+      "Star schemas: dimensions, facts, junk dimensions, bridges, snapshots and aggregates, with conformed dimensions shared across facts.",
+      "<b>Lookup indexes are created on the columns the load actually looks up</b> (dimension natural keys, versioned dimensions, junk hashes, bridge keys, snapshot grain keys). Snowflake is skipped by design.",
+      "Optional DDL constraints: primary keys and foreign keys where the engine supports them (not SingleStore), CREATE-only in this release.",
+      "A calendar dimension such as <code>d_date</code> is generated by the modeler's date generator, not by a bespoke script."
+    ]},
+    {h:"What it feeds", items:[
+      "<b>Hopper presentations</b> - generated dashboards, crosstabs and Gantt/performance views over the loaded warehouse.",
+      "The <b>semantic layer</b> (<code>.hsl</code>) binds consumption metadata (entities, measures, selections) to this model and compiles Calcite SQL for presentations.",
+      "BI and SQL clients on the warehouse side, reading the same declarations the modeler generated."
+    ]}
+  ],
+  chips:["Star schemas","Conformed dimensions","Lookup indexes","PK / FK DDL","Date dimension","Dimensional Update","Dimensional Publish"],
+  gallery:[
+    [IMG+"dimensional-model-f-order-lines.png","f_order_lines - the fact that lands in the star schema"],
+    [IMG+"dimensional-model-f-orders.png","f_orders - fact and dimensions"],
+    [IMG+"workflow-load-overview-summary-models.png","Load overview - per-model summary of the wave that fills it"],
+    [IMG+"workflow-load-overview-model-metrics.png","Load overview - per-pipeline metrics for the dimensional models"],
+    [IMG+"architecture-export-retail-example-dimensional-model-drawio.png","The dimensional model as an architecture export"]
+  ],
+  links:[["Dimensional Update and Publish","dimensional-update-action.adoc"],["Dimensional modeler overview","dimensional-modeler-overview.adoc"],["Semantic layer","semantic-layer.adoc"],["Operational analytics","ops-analytics.adoc"]],
+  related:["dm-models","presentations","ops","publish"]
+},
+
+/* ============================ RUNTIME ============================ */
+"hop-engine": {
+  label: "Hop (execution engine)",
+  kicker: "Runtime - pipelines, workflows, execution maps",
+  title: "Hop runs it - and you can open what runs",
+  pain: {tag:"Firehose #04, #08", text:"\"Generated artifacts become black boxes, and when the SLA misses you are grepping 3.8 GB of text logs to find the slow transform.\""},
+  sections:[
+    {h:"What is executed", items:[
+      "Loads are <b>ordinary Apache Hop pipelines and workflows</b>. Generation is allowed only because the result stays inspectable, steppable, debuggable and editable.",
+      "Workflow actions run the waves: <b>Data Vault Update</b>, <b>Business Vault Update</b>, <b>Dimensional Update / Publish</b>, <b>Update resource definition group</b>, plus the check/harvest/gate actions.",
+      "Generated orchestration uses parallel execution where the model allows it, with the metrics landing in the target load tables.",
+      "Parameters and project variables (a wave id, a project folder) are normal Hop variables - no separate parameter map on the side."
+    ]},
+    {h:"Making runs visible", items:[
+      "<b>Execution maps</b> (<code>.hem</code>) capture what happened across workflows - including a <i>simulate-6-months</i> map - and step through the run in Hop GUI or Hop Web.",
+      "Per-action durations appear in the workflow Gantt tab; pipeline throughput over time in the Performance tab.",
+      "The <b>workflow load overview</b> turns one wave into a report: per-model summary and per-pipeline metrics.",
+      "<b>Check model</b> and the validation actions run before anything touches a target, so the engine is not the first line of defence."
+    ]}
+  ],
+  chips:["Ordinary Hop pipelines","Editable generated artifacts","Parallel orchestration","DATA_VAULT_UPDATE","BUSINESS_VAULT_UPDATE","Execution maps (.hem)","Performance tab","Gantt tab","Simulate 6 months"],
+  gallery:[
+    [IMG+"action-data-vault-update.png","Data Vault Update workflow action - the wave that loads the raw vault"],
+    [IMG+"execution-map-in-hop-gui-simulate-six-months.png","Execution map in Hop GUI - the simulate-6-months root workflow with nested update paths"],
+    [IMG+"update-resource-definition-group-action-dialog.png","Update resource definition group - layer includes for the operate wave"],
+    [IMG+"validate-resource-definitions-action-dialog.png","Validate resource definitions - the schema gate as a workflow action"],
+    [IMG+"open-execution-of-data-vault-update-action.png","Opening the last execution of a Data Vault Update action"],
+    [IMG+"workflow-run-tests-screenshot.png","Workflow unit tests - the same engine running the tests"],
+    [IMG+"workflow-load-overview-summary-models.png","Load overview - per-model summary of a run"]
+  ],
+  links:[["Data Vault Update action","datavault-update-action.adoc"],["Execution maps","execution-maps.adoc"],["Operations","operations.adoc"],["Hop Web modelers","hop-web-modelers.md"]],
+  related:["publish","ops","dv-db"]
+},
+
+"ops": {
+  label: "OPS metrics + lineage",
+  kicker: "Runtime - telemetry and chain of custody",
+  title: "Operations and lineage, on the object",
+  pain: {tag:"Firehose #02, #08, #09", text:"\"Four hours in: deadlocked, reading 100M rows, or frozen? Nobody can tell, and the blame meeting starts at 09:00.\""},
+  sections:[
+    {h:"Telemetry where the model is", items:[
+      "Execution metrics and last-run <b>duration bars render on the model nodes</b> - the canvas is the operations surface, not a separate monitoring product.",
+      "Stall detection and per-run progress so silence stops being a status; load metrics for a wave show which model and which transform is running now.",
+      "Workflow Gantt (action durations) and pipeline Performance (throughput over time) cover the engine side."
+    ]},
+    {h:"Lineage, both directions", items:[
+      "The <b>Lineage tab on any model object</b> shows the parent hub, the source feed and the downstream BV/DM consumers - at table and field level, with reason codes.",
+      "The <b>Export data lineage</b> action writes OpenLineage events (jobs, datasets, column lineage, physical location facets) to Marquez or a folder.",
+      "<b>Hop Lineage View</b> (<code>.hlv</code>) reads those back with an OPS load-time overlay, so \"when did this change and what ran\" sits on the same graph.",
+      "<b>Operational analytics</b> generates a source model, raw vault, Business Vault, dimensional model and load workflows <i>from your own OPS database</i> - the warehouse reports on the warehouse, using the same modelers."
+    ]}
+  ],
+  chips:["Duration bars on nodes","Stall detection","Load metrics","Gantt","Throughput","Lineage tab","OpenLineage / Marquez","Column-level lineage","OPS overlay","Operational analytics"],
+  gallery:[
+    [IMG+"data-vault-retail-360-model-with-duration-metrics.png","Retail 360 model with load duration bars in the right-hand pane - metrics beside the architecture"],
+    [IMG+"data-vault-satellite-dialog-lineage-tab.png","Satellite dialog - Lineage tab for sat_customer_address: parent hub, source feed, consumers"],
+    [IMG+"action-update-resource-group-load-metrics-dialog.png","Live load metrics during a wave - model 5 of 8, fact f_orders loading"],
+    [IMG+"workflow-load-overview-model-metrics.png","Load overview - per-pipeline metrics for the dimensional models"],
+    [IMG+"create-operational-analytics-dialog.png","Create operational analytics - generate the warehouse models from the OPS database"],
+    [IMG+"data-lineage-marquez-job-lineage.png","Marquez job lineage graph - datasets and jobs for the retail dimensional models"],
+    [IMG+"data-lineage-marquez-column-level-lineage.png","Marquez column-level lineage from the customer feeds through satellites to customer_360_bv"],
+    [IMG+"data-lineage-marquez-dataset-source-table-details.png","Marquez dataset detail - JDBC URI and hop_location connection/table facets"],
+    [IMG+"data-lineage-export-data-lineage-action-dialog.png","Export data lineage action - OpenLineage out of a workflow"]
+  ],
+  links:[["Operations","operations.adoc"],["OpenLineage export","openlineage-export.adoc"],["Source-to-target lineage","source-to-target-lineage.adoc"],["Operational analytics","ops-analytics.adoc"],["Hop Lineage View","hop-lineage-view.adoc"]],
+  related:["lineage-view","hop-engine","presentations","dm-db"]
+},
+
+/* ============================ GUIDANCE AND CONSUMPTION ============================ */
+"coach": {
+  label: "Coach & Generate",
+  kicker: "Guidance - the next step, in place",
+  title: "Coach: from one model to the next without leaving",
+  pain: {tag:"Firehose #03, #10", text:"\"Fourteen tabs and eight licenses to move one concept up one layer.\""},
+  sections:[
+    {h:"What the arrows actually do", items:[
+      "<b>Generate Data Vault</b> - from the source model: proposed hubs, links and satellites shown for review, then created as real models, DDL and loads.",
+      "<b>Coach to the Business Vault</b> - hubs, links and satellites are referenced onto the BV canvas as aliases (optionally from several <code>.hdv</code> files), with <i>Suggest mappings</i> proposing hub source mappings.",
+      "<b>Coach to the Dimensional layer</b> - conformed dimension bindings, date roles and fact source configuration, on the same canvas model.",
+      "<b>Create presentation</b> on a fact, the bus matrix, or project documentation - consumption is one context action away, not another tool."
+    ]},
+    {h:"Assistance that stays reviewable", items:[
+      "The <b>AI advisor</b> reviews models, explains link relationships, and proposes performance tuning (for example raising parallelism) - proposals are reviewed in a dialog before anything is applied.",
+      "Dialogs always show what will be created or changed; there is no silent generation step anywhere in the flow.",
+      "Everything produced lands as an ordinary model, pipeline or workflow you can edit, diff and put in git."
+    ]}
+  ],
+  chips:["Generate Data Vault","Hub / link / sat references","Suggest mappings","Add date dimension","Create presentation","AI advisor","Proposal review"],
+  gallery:[
+    [IMG+"source-modeler-generate-data-vault-model.png","Generate Data Vault from the source modeler toolbar, over the retail CRM tables"],
+    [IMG+"source-modeler-generate-data-vault-model-dialog.png","Review dialog - proposed hubs, satellites and links before anything is created"],
+    [IMG+"source-modeler-generated-data-vault-result.png","After apply - the generated vault canvas and the Created 20 tables confirmation"],
+    [IMG+"business-vault-import-dbt-models-context-action.png","Context actions on the canvas - importing existing dbt models into the BV graph"],
+    [IMG+"lineage-view-model-context-action.png","Show lineage from a dimensional fact - one context action from the model to the graph"],
+    [IMG+"ai-advisor-offering-performance-tuning-advice.png","AI advisor - performance tuning recommendations on a vault model"],
+    [IMG+"ai-advisor-proposal-review-increase-parallelism.png","Reviewing an AI proposal (increase parallelism) before it is applied"],
+    [IMG+"data-vault-ai-help-dialog.png","AI help - explanations next to the object you are looking at"]
+  ],
+  links:[["Generate Data Vault","generating-data-vault-from-source-model.adoc"],["Cross-model references","dv-cross-model-references.adoc"],["Import dbt models","dbt-import.adoc"],["Feature overview","feature-overview.adoc"]],
+  related:["source-models","dv-models","bv-models","dm-models"]
+},
+
+"edw-journey": {
+  label: "EDW Journey",
+  kicker: "Navigation - one tree, whole lifecycle",
+  title: "EDW Journey: the picture becomes a tree you can walk",
+  pain: {tag:"Firehose #03", text:"\"To answer one question you opened 14 tabs across 7 products and acted as a human network router.\""},
+  sections:[
+    {h:"The stages, always in the same order", items:[
+      "<b>1 Sources</b> - the <code>.hsm</code> files discovered from the feeds the group's models use, then the catalog feeds themselves.",
+      "<b>2 Controls</b> - harvest, schema gate, source quality, catalog version tags.",
+      "<b>3 Raw Data Vault</b> - the group's <code>.hdv</code> paths in update order; expand for table names.",
+      "<b>4 Business Vault</b> - <code>.hbv</code> paths on the group. <b>5 Dimensional</b> - <code>.hdm</code> paths on the group.",
+      "<b>6 Target quality</b> - post-load quality (last-run overlay lands here in a later phase).",
+      "<b>7 Orchestration</b> - project <code>.hwf</code> files whose actions name this group. <b>8 Outputs</b> - <code>work/reports</code>, <code>work/execution-maps</code> and project <code>.hlv</code> files."
+    ]},
+    {h:"What selecting a node gives you", items:[
+      "Identity: path, catalog key, table count - plus last run and current problems.",
+      "Buttons that jump to the source / DV / BV / DM canvas, the catalog record, the resource definition group metadata, the workflow or the report.",
+      "A group picker at the top, and <b>Grow the warehouse</b> for adding the next layer to the same group.",
+      "Stages are present even when empty - the shape of the lifecycle does not change because a layer is not built yet."
+    ]}
+  ],
+  chips:["One perspective","Resource definition group picker","8 stages in operate order","Last run and problems","Jump to any editor","Grow the warehouse","Empty stages explained"],
+  gallery:[
+    [IMG+"diagrams/d7-edw-journey.svg","D7 - the EDW Journey perspective over a resource definition group"],
+    [IMG+"diagrams/d3-rdg-spine.svg","D3 - the resource definition group as the spine for models, harvest, gate and load"],
+    [IMG+"hopgui-data-vault-model-toolbar.png","The model toolbar in Hop GUI - where the Journey and the modelers meet"],
+    [IMG+"hopgui-configuration-perspecive-data-vault-options.png","Hop GUI configuration perspective - the plugin's global options"],
+    [IMG+"resource-definition-group-editor.png","The group the Journey walks - models, catalog actions, harvest, lineage, versions"],
+    [IMG+"lineage-view-with-information-pane.png","A .hlv listed under Outputs, opened with its information pane"]
+  ],
+  links:[["EDW Journey perspective","edw-journey.adoc"],["Architecture D7","architecture.adoc"],["Resource definition group","resource-definition-group.adoc"]],
+  related:["catalog","gates","lineage-view","documentation"]
+},
+
+"lineage-view": {
+  label: "Lineage view (.hlv)",
+  kicker: "Discovery - the graph is not stored",
+  title: "Lineage view: one definition, any backend",
+  pain: {tag:"Firehose #09", text:"\"Four days of committee meetings because nobody has the chain of custody next to the model.\""},
+  sections:[
+    {h:"What a .hlv is", items:[
+      "A <b>definition</b> over a lineage backend - Marquez/OpenLineage, an export folder, or the local models - <b>not</b> a stored graph. The repository stays small and the graph follows the data.",
+      "Seed a view from a chosen model table (<i>Show lineage from a model table</i>), then navigate from any node; namespaces must match the export.",
+      "An information pane carries details per node, and an <b>OPS load-time overlay</b> annotates the graph with run durations.",
+      "In Hop Web the same views render inline (SVG + JS), so a reviewer does not need the desktop."
+    ]},
+    {h:"Why it belongs under the catalog", items:[
+      "It is where the catalog's source-to-target lineage becomes a graph you can navigate - the same records the gate and the loads use.",
+      "Reverse lineage (source field to consumers) turns \"who uses this column?\" into a click during impact analysis.",
+      "Export is not a load: lineage export never writes to the warehouse, and the view never mutates the models."
+    ]}
+  ],
+  chips:["Definition, not a stored graph","Marquez / OpenLineage","Export folder","Local models","Seed from a model table","OPS overlay","Hop Web rendering"],
+  gallery:[
+    [IMG+"lineage-view-with-information-pane.png","Hop Lineage View - upstream jobs and datasets for retail f_order_lines, OPS badges and the details pane"],
+    [IMG+"lineage-view-model-context-action.png","Show lineage from the dimensional fact f_pit_inventory - one context action from the model"],
+    [IMG+"diagrams/d2-catalog-bus.svg","D2 - the catalog as the contract bus: writers, namespaces and readers"],
+    [IMG+"data-lineage-export-data-lineage-action-dialog.png","Export data lineage - the action that feeds the backend a view reads from"],
+    [IMG+"data-lineage-marquez-column-level-lineage.png","Marquez column-level lineage from source feeds through satellites to customer_360_bv"]
+  ],
+  links:[["Hop Lineage View","hop-lineage-view.adoc"],["OpenLineage export","openlineage-export.adoc"],["Source-to-target lineage","source-to-target-lineage.adoc"]],
+  related:["ops","catalog","edw-journey"]
+},
+
+"presentations": {
+  label: "Hopper presentations",
+  kicker: "Consumption - dashboards inside Hop",
+  title: "Presentations: the warehouse reports on itself",
+  pain: {tag:"Firehose #10", text:"\"Sixty percent of senior engineer hours went into making tool A talk to tool B instead of delivering data value.\""},
+  sections:[
+    {h:"Generated, not installed", two:true, items:[
+      "<b>Tools &rarr; Project presentation&hellip;</b> and the explorer's <b>View execution presentation</b> on a <code>.hpl</code>/<code>.hwf</code> build dashboards on the fly. No web server, no library of metadata editors to keep in sync.",
+      "Pipeline results carry a <b>Performance</b> tab (throughput over time); workflow results a <b>Gantt</b> tab (action durations).",
+      "Built with <code>HSimplePresentation</code> and drawn by <code>HPresentationViewer</code>/<code>HPresentationSession</code> - in Hop Web the same charts render as inline SVG plus JS.",
+      "The <b>semantic layer</b> (<code>.hsl</code>) binds consumption metadata to a dimensional model: entities, measures with format masks, relationships, named selections, Calcite SQL compile.",
+      "<b>Create presentation&hellip;</b> on a fact opens the crosstab editor (groups, axes, measures) and generates a star-join crosstab against the target warehouse.",
+      "Named selections save on the fact's <code>.hsl</code>, so a good crosstab becomes a reusable view instead of a screenshot."
+    ]},
+    {h:"Why this closes the loop", items:[
+      "Because reports are generated from the same models, changing a measure is a model edit - the dashboard moves with it.",
+      "Ops analytics ships as source model, raw vault, BV, DM plus load workflows: the operational reporting is itself editable.",
+      "No second BI installation is needed before the first load lands."
+    ]}
+  ],
+  chips:["Tools - Project presentation","View execution presentation","Performance tab","Gantt tab","Semantic layer (.hsl)","Crosstab editor","Named selections","Calcite SQL","Hop Web rendering"],
+  gallery:[
+    [IMG+"workflow-load-overview-summary-models.png","Workflow load overview - summary and per-model table for run-retail-initial"],
+    [IMG+"workflow-load-overview-model-metrics.png","Load overview - per-pipeline metrics for the dimensional models"],
+    [IMG+"bus-matrix-of-the-retail-example.png","Bus matrix - process against conformed dimensions, generated from the catalog"],
+    [IMG+"architecture-export-retail-example-solution-drawio.png","Retail solution architecture as an export - documentation from the same models"],
+    [IMG+"create-operational-analytics-dialog.png","Create operational analytics - the reports that report on the warehouse"]
+  ],
+  links:[["Operational analytics","ops-analytics.adoc"],["Semantic layer","semantic-layer.adoc"],["Feature overview","feature-overview.adoc"],["Bus matrix","bus-matrix.adoc"]],
+  related:["dm-db","ops","dm-models"]
+},
+
+"clients": {
+  label: "Clients",
+  kicker: "Consumption - whoever needs the data",
+  title: "Clients: SQL tools, BI, Hop GUI and Hop Web",
+  pain: {tag:"Firehose #03, #04", text:"\"Different tools showed different truths, and the one that could explain it could not edit it.\""},
+  sections:[
+    {h:"Who connects, and to what", items:[
+      "Any <b>JDBC client</b> (DBeaver, SQL consoles, BI tools) through <code>jdbc:hop-hsm:</code> against the source model - joins, JSON extractions and masked fields included.",
+      "<b>Hop GUI</b> for the modelers (source, DV, BV, DM, execution maps, lineage views) and the EDW Journey perspective.",
+      "<b>Hop Web</b> for browser access to the same modelers and views (experimental, needs the Hop canvas SPI) - useful for reviewers who do not install anything.",
+      "Warehouse-side BI and SQL clients read the generated star schemas directly, with the lookup indexes the modeler created."
+    ]},
+    {h:"The point of drawing them at the top", items:[
+      "Consumers read the same declarations the engineers edit - the source model and the star schemas - instead of a parallel copy maintained by hand.",
+      "Presentations cover the operational view inside Hop, so the observability story does not require an extra dashboard product.",
+      "Access is a property of the contract, not of a person's local setup."
+    ]}
+  ],
+  chips:["Any JDBC client","jdbc:hop-hsm:","DBeaver","BI over star schemas","Hop GUI","Hop Web","Presentations"],
+  gallery:[
+    [IMG+"hop-source-model-jdbc-dbeaver-query-editor.png","A SQL client querying the source model - crm.order_header with a result grid"],
+    [IMG+"hop-source-model-jdbc-dbeaver-database-connection.png","The connection that makes it possible - host, port, schema"],
+    [IMG+"hop-source-model-service-editor.png","The source model service those clients point at"],
+    [IMG+"architecture-export-retail-example-solution-drawio.png","The retail solution at a glance - where clients sit in the picture"]
+  ],
+  links:[["Source modeler overview (JDBC)","source-modeler-overview.adoc"],["Hop Web modelers","hop-web-modelers.md"]],
+  related:["hop-jdbc","source-models","presentations"]
+},
+
+"documentation": {
+  label: "Documentation",
+  kicker: "Outputs - docs that follow the models",
+  title: "Documentation: generated, contextual, in the plugin",
+  pain: {tag:"Firehose #10", text:"\"The one document that explained the model was last updated two releases ago, by someone who left.\""},
+  sections:[
+    {h:"Generated output", items:[
+      "<b>Generate project documentation</b> (workflow action or EDW Journey) writes a static HTML set: models, tables, fields, lineage, quality rules and the Markdown notes and requirements carried on the model objects.",
+      "The output has a documented CSS contract, so a team can restyle it to fit their intranet without touching the generator.",
+      "It renders the same Markdown field notes the modeler stores, which is where mapping comments used to live in a spreadsheet."
+    ]},
+    {h:"Contextual and shipped", items:[
+      "Every dialog has an asciidoc help page under <code>docs/help/</code> in the plugin - the manual travels with the install and matches the version you run.",
+      "Canvas notes on any model (note pads) render into the documentation, including the Data Vault model annotations.",
+      "The product docs (<code>docs/</code>) are packaged into the plugin zip alongside the code, and the architecture diagrams are generated from PlantUML sources in the repository."
+    ]}
+  ],
+  chips:["Static HTML output","CSS contract","Markdown field notes","docs/help per dialog","Canvas notes","Shipped in the plugin zip","PlantUML diagrams"],
+  gallery:[
+    [IMG+"data-vault-model-note-dialog.png","Edit note on a model - documentation captured where the modeler is, not after the fact"],
+    [IMG+"data-vault-model-note-rendered.png","Notes rendered back onto the Data Vault canvas"],
+    [IMG+"architecture-export-retail-example-data-vault-drawio.png","Retail Data Vault export - architecture documents from the same models"],
+    [IMG+"architecture-export-retail-example-inventory-drawio.png","Retail data inventory export"],
+    [IMG+"jinja-macro-library-editor.png","Macro library editor - templating that feeds generated documentation and models"]
+  ],
+  links:[["Project documentation","project-documentation.adoc"],["Feature overview","feature-overview.adoc"],["Architecture","architecture.adoc"]],
+  related:["edw-journey","dm-models","catalog"]
+}
+
+};
+
+/* Tour order - the story of the stack, start to finish */
+const ORDER = ["landing","harvester","source-models","hop-jdbc","catalog","gates","publish",
+               "hop-engine","dv-models","dv-db","bv-models","bv-db","dm-models","dm-db",
+               "ops","coach","edw-journey","lineage-view","presentations","clients","documentation"];
+
+/* Deep-link aliases so #sources, #layer-vault, and so on work as well */
+const ALIAS = {sources:"landing","source":"landing","jdbc":"hop-jdbc","harvest":"harvester",
+  "quality":"gates","validate":"gates","update":"publish","engine":"hop-engine","vault":"dv-models",
+  "raw-vault":"dv-models","dv":"dv-models","business-vault":"bv-models","bv":"bv-models",
+  "dimensional":"dm-models","dm":"dm-models","lineage":"lineage-view","presentation":"presentations",
+  "journey":"edw-journey","docs":"documentation","client":"clients","advisor":"coach","coaching":"coach"};
+</script>
+<script>
+/* ---------------------------------------------------------------------------
+   EdwComponentExplorer: single-file interactive companion to
+   docs/images/diagrams/edw-overview.svg. No dependencies, no network.
+   --------------------------------------------------------------------------- */
+(function(){
+  "use strict";
+
+  var el = function(id){ return document.getElementById(id); };
+  var esc = function(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); };
+
+  var poster   = el("poster"),
+      framewrap= el("framewrap"),
+      tip      = el("tip"),
+      pancard  = el("pancard"),
+      help     = el("help"),
+      jump     = el("jump"),
+      zoomLabel= el("zoomLabel");
+
+  var current = null, galList = [], galIdx = 0, userZoom = 1, baseScale = 1;
+  var tipOn = false;
+
+  /* ---------------------------------------------------------------- bootstrap */
+  ORDER.forEach(function(id, i){
+    var c = COMPONENTS[id];
+    var o = document.createElement("option");
+    o.value = id;
+    o.textContent = (i + 1) + ". " + c.label;
+    jump.appendChild(o);
+  });
+  jump.addEventListener("change", function(){ openComp(jump.value); });
+
+  Array.prototype.forEach.call(document.querySelectorAll("#acts [data-comp]"), function(b){
+    b.addEventListener("click", function(){ openComp(b.getAttribute("data-comp")); });
+  });
+
+  /* ------------------------------------------------------------- poster input */
+  function compFromEvent(e){
+    var t = e.target;
+    while (t && t !== poster){
+      if (t.classList && t.classList.contains("comp")) return t;
+      t = t.parentNode;
+    }
+    return null;
+  }
+  function activate(g, x, y){
+    if (!g) return;
+    var c = COMPONENTS[g.getAttribute("data-comp")];
+    poster.classList.add("dim");
+    Array.prototype.forEach.call(poster.querySelectorAll(".comp.is-active"), function(o){ o.classList.remove("is-active"); });
+    g.classList.add("is-active");
+    if (c){
+      tip.innerHTML = esc(c.label) + '<span class="tip-sub">' + esc(c.kicker) + " &middot; click for details</span>";
+      tip.classList.add("on"); tipOn = true;
+      moveTip(x, y);
+    }
+  }
+  function deactivate(){
+    poster.classList.remove("dim");
+    Array.prototype.forEach.call(poster.querySelectorAll(".comp.is-active"), function(o){ o.classList.remove("is-active"); });
+    tip.classList.remove("on"); tipOn = false;
+  }
+  function moveTip(x, y){
+    if (!tipOn) return;
+    var pad = 16, w = tip.offsetWidth, h = tip.offsetHeight;
+    var left = Math.min(Math.max(pad, x + 18), window.innerWidth - w - pad);
+    var top  = Math.min(Math.max(pad, y + 18), window.innerHeight - h - pad);
+    tip.style.left = left + "px";
+    tip.style.top  = top + "px";
+  }
+  poster.addEventListener("mouseover", function(e){ activate(compFromEvent(e), e.clientX, e.clientY); });
+  poster.addEventListener("mousemove", function(e){
+    var g = compFromEvent(e);
+    if (!g) deactivate(); else if (tipOn) moveTip(e.clientX, e.clientY);
+  });
+  poster.addEventListener("mouseleave", deactivate);
+  poster.addEventListener("click", function(e){
+    var g = compFromEvent(e);
+    if (g) openComp(g.getAttribute("data-comp"));
+  });
+  poster.addEventListener("focusin", function(e){
+    var g = compFromEvent(e);
+    if (g){
+      var r = g.getBoundingClientRect();
+      activate(g, r.left + r.width / 2, r.top + r.height);
+    }
+  });
+  poster.addEventListener("focusout", deactivate);
+  poster.addEventListener("keydown", function(e){
+    if (e.key === "Enter" || e.key === " " || e.key === "Spacebar"){
+      var g = compFromEvent(e);
+      if (g){ e.preventDefault(); openComp(g.getAttribute("data-comp")); }
+    }
+  });
+
+  /* ---------------------------------------------------------------- pancard */
+  function openComp(id, push){
+    var c = COMPONENTS[id];
+    if (!c) return;
+    current = id;
+
+    el("pcKicker").textContent = c.kicker || "";
+    el("pcTitle").textContent  = c.title || c.label;
+    el("pcPain").innerHTML = c.pain
+      ? '<span class="tag">' + esc(c.pain.tag) + "</span><span>" + c.pain.text + "</span>"
+      : "";
+
+    el("pcFacts").innerHTML = (c.sections || []).map(function(s){
+      return '<div class="fact' + (s.two ? " two" : "") + '">' +
+             "<h2><span class=\"dot\"></span>" + esc(s.h) + "</h2><ul>" +
+             s.items.map(function(i){ return "<li>" + i + "</li>"; }).join("") +
+             "</ul></div>";
+    }).join("");
+
+    galList = (c.gallery || []).map(function(g){
+      var src = g[0];
+      /* doc-relative paths (used by the diagram helpers) become image paths */
+      if (src.indexOf("../images/") !== 0 && src.indexOf("http") !== 0) src = IMG + src.replace(/^.*docs\//, "");
+      return [src, g[1] || ""];
+    });
+    buildThumbs();
+    setGallery(0);
+
+    el("pcChips").innerHTML = (c.chips || []).map(function(t){
+      return '<span class="chip">' + esc(t) + "</span>";
+    }).join("");
+    el("pcRelated").innerHTML = (c.related || []).map(function(rid){
+      var rc = COMPONENTS[rid];
+      return rc ? '<button data-rel="' + rid + '">' + esc(rc.label) + "</button>" : "";
+    }).join(" ");
+    Array.prototype.forEach.call(el("pcRelated").querySelectorAll("[data-rel]"), function(b){
+      b.addEventListener("click", function(){ openComp(b.getAttribute("data-rel")); });
+    });
+
+    el("pcLinks").innerHTML = (c.links || []).map(function(l){
+      return '<a class="doclink" href="' + DOC + l[1] + '" target="_blank" rel="noopener">' + esc(l[0]) + "</a>";
+    }).join(" &nbsp; ");
+
+    var i = ORDER.indexOf(id);
+    el("pcHint").textContent = "Component " + (i + 1) + " of " + ORDER.length +
+      "  |  next: " + COMPONENTS[ORDER[(i + 1) % ORDER.length]].label;
+    jump.value = id;
+
+    pancard.hidden = false;
+    el("pcClose").focus({preventScroll:true});
+    requestAnimationFrame(sizeGallery);
+    setTimeout(sizeGallery, 90);
+    if (push !== false && location.hash.slice(1) !== id){
+      try { history.replaceState(null, "", "#" + id); } catch(err){ location.hash = id; }
+    }
+    preload();
+  }
+
+  function closeComp(){
+    if (pancard.hidden) return;
+    pancard.hidden = true;
+    current = null;
+    if (location.hash) { try { history.replaceState(null, "", location.pathname + location.search); } catch(err){} }
+  }
+
+  function step(delta){
+    var i = current ? ORDER.indexOf(current) : -1;
+    var n = (i + delta + ORDER.length * 2) % ORDER.length;
+    openComp(ORDER[n]);
+  }
+
+  /* ---------------------------------------------------------------- gallery */
+  /* Keep the screenshot inside the pancard: size it to the space left over from
+     the caption, the counter, the thumbnail strip and the frame padding. */
+  function sizeGallery(){
+    if (pancard.hidden) return;
+    var body = document.querySelector(".pc-body");
+    var img = el("galImg");
+    var wrapEl = document.querySelector(".gal-frame .imgwrap");
+    if (!body || !img || !wrapEl) return;
+    var preferred = Math.round(window.innerHeight * 0.52);
+    var floor = Math.round(window.innerHeight * 0.32);
+    var wrapH = wrapEl.clientHeight;
+    var target = Math.max(floor, Math.min(preferred, wrapH > 60 ? wrapH : preferred));
+    img.style.maxHeight = Math.round(target) + "px";
+  }
+  function buildThumbs(){
+    var box = el("galThumbs");
+    box.innerHTML = "";
+    galList.forEach(function(g, i){
+      var t = document.createElement("img");
+      t.src = g[0]; t.alt = g[1] || ("Screenshot " + (i + 1)); t.title = g[1] || "";
+      t.addEventListener("click", function(){ setGallery(i); });
+      box.appendChild(t);
+    });
+  }
+  function setGallery(i){
+    var n = galList.length;
+    if (!n) return;
+    galIdx = ((i % n) + n) % n;
+    var g = galList[galIdx], img = el("galImg");
+    img.classList.remove("gal-missing");
+    img.style.display = "";
+    img.src = g[0];
+    img.alt = g[1] || "";
+    el("galCaption").textContent = g[1] || "";
+    el("galCount").textContent = (galIdx + 1) + " / " + n + (n > 1 ? "  -  flip with the arrow keys" : "");
+    el("galPrev").disabled = n < 2;
+    el("galNext").disabled = n < 2;
+    Array.prototype.forEach.call(el("galThumbs").children, function(t, k){
+      t.classList.toggle("on", k === galIdx);
+    });
+    var on = el("galThumbs").children[galIdx];
+    if (on && on.scrollIntoView) on.scrollIntoView({block:"nearest", inline:"nearest"});
+    preload();
+    requestAnimationFrame(sizeGallery);
+  }
+  function preload(){
+    if (galList.length < 2) return;
+    [galIdx + 1, galIdx - 1].forEach(function(k){
+      var g = galList[((k % galList.length) + galList.length) % galList.length];
+      if (g) { var i = new Image(); i.src = g[0]; }
+    });
+  }
+  el("galPrev").addEventListener("click", function(){ setGallery(galIdx - 1); });
+  el("galNext").addEventListener("click", function(){ setGallery(galIdx + 1); });
+  el("galImg").addEventListener("error", function(){
+    var caption = el("galCaption");
+    el("galCount").textContent = "screenshot not found: " + (this.getAttribute("src") || "");
+    if (!caption.textContent) caption.textContent = "Missing screenshot - check docs/images/ for this file.";
+  });
+  el("galImg").addEventListener("click", function(){
+    if (this.src) window.open(this.src, "_blank", "noopener");
+  });
+
+  /* ---------------------------------------------------------------- zoom/fit */
+  function fit(){
+    var availW = framewrap.clientWidth - 24;
+    var availH = framewrap.clientHeight - 20;
+    baseScale = Math.max(0.2, Math.min(availW / 1280, availH / 708));
+    applyZoom();
+  }
+  function applyZoom(){
+    var z = baseScale * userZoom;
+    poster.setAttribute("width", Math.round(1280 * z));
+    poster.setAttribute("height", Math.round(708 * z));
+    zoomLabel.textContent = Math.round(z * 100) + "%" + (userZoom === 1 ? " fit" : "");
+  }
+  function bump(delta){
+    userZoom = Math.min(4, Math.max(1, Math.round((userZoom + delta) * 100) / 100));
+    applyZoom();
+    if (userZoom > 1) framewrap.scrollLeft = Math.max(0, (framewrap.scrollWidth - framewrap.clientWidth) / 2);
+  }
+  el("zoomIn").addEventListener("click", function(){ bump(0.15); });
+  el("zoomOut").addEventListener("click", function(){ bump(-0.15); });
+  zoomLabel.addEventListener("click", function(){ userZoom = 1; applyZoom(); });
+  framewrap.addEventListener("wheel", function(e){
+    if (e.ctrlKey || e.metaKey){ e.preventDefault(); bump(e.deltaY < 0 ? 0.1 : -0.1); }
+  }, {passive:false});
+  var rz; window.addEventListener("resize", function(){ clearTimeout(rz); rz = setTimeout(function(){ fit(); sizeGallery(); }, 120); });
+
+  /* ---------------------------------------------------------------- chrome */
+  var themeBtn = el("themeBtn");
+  function setTheme(t){
+    document.documentElement.setAttribute("data-theme", t);
+    themeBtn.textContent = t === "dark" ? "Light" : "Dark";
+    try { localStorage.setItem("edwExplorerTheme", t); } catch(err){}
+  }
+  themeBtn.addEventListener("click", function(){
+    setTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark");
+  });
+  try {
+    var saved = localStorage.getItem("edwExplorerTheme");
+    if (saved) setTheme(saved);
+    else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) setTheme("dark");
+  } catch(err){}
+
+  function toggleHelp(force){
+    var show = force !== undefined ? force : help.hidden;
+    help.hidden = !show;
+    if (show) el("helpClose").focus({preventScroll:true});
+  }
+  el("helpBtn").addEventListener("click", function(){ toggleHelp(); });
+  el("helpClose").addEventListener("click", function(){ toggleHelp(false); });
+  help.addEventListener("click", function(e){ if (e.target === help) toggleHelp(false); });
+  pancard.addEventListener("click", function(e){ if (e.target === pancard) closeComp(); });
+
+  el("pcClose").addEventListener("click", closeComp);
+  el("pcPrev").addEventListener("click", function(){ step(-1); });
+  el("pcNext").addEventListener("click", function(){ step(1); });
+  el("prevBtn").addEventListener("click", function(){ step(-1); });
+  el("nextBtn").addEventListener("click", function(){ step(1); });
+  el("tourBtn").addEventListener("click", function(){ openComp(ORDER[0]); });
+
+  document.addEventListener("keydown", function(e){
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var tag = (e.target.tagName || "").toLowerCase();
+    if (tag === "select" && (e.key === "ArrowLeft" || e.key === "ArrowRight")) return;
+    var k = e.key;
+    if (k === "?" || (k === "/" && e.shiftKey)){ e.preventDefault(); toggleHelp(); return; }
+    if (k === "Escape"){
+      if (!help.hidden){ toggleHelp(false); return; }
+      if (!pancard.hidden){ closeComp(); return; }
+      return;
+    }
+    if (k === "ArrowLeft")  { if (!pancard.hidden){ e.preventDefault(); setGallery(galIdx - 1); } return; }
+    if (k === "ArrowRight") { if (!pancard.hidden){ e.preventDefault(); setGallery(galIdx + 1); } return; }
+    if (k === "]" || k === "PageDown"){ e.preventDefault(); step(1); return; }
+    if (k === "[" || k === "PageUp"){ e.preventDefault(); step(-1); return; }
+    if (k === "ArrowDown" || k === "ArrowUp"){
+      if (!pancard.hidden && tag !== "select"){
+        var pane = document.querySelector(".pc-body");
+        if (pane.clientHeight > 0){
+          e.preventDefault();
+          pane.scrollBy({top: (k === "ArrowDown" ? 1 : -1) * Math.round(pane.clientHeight * 0.55), behavior: "smooth"});
+        }
+      }
+      return;
+    }
+    if (k === "+" || k === "="){ e.preventDefault(); bump(0.15); return; }
+    if (k === "-" || k === "_"){ e.preventDefault(); bump(-0.15); return; }
+    if (k === "0"){ userZoom = 1; applyZoom(); return; }
+    if (k === "d"){ themeBtn.click(); return; }
+    if (k === "t"){ e.preventDefault(); openComp(ORDER[0]); return; }
+    if (k === "f"){
+      e.preventDefault();
+      if (document.fullscreenElement) document.exitFullscreen();
+      else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+      return;
+    }
+  });
+
+  window.addEventListener("hashchange", function(){
+    var id = location.hash.slice(1);
+    if (!id){ if (!pancard.hidden) { pancard.hidden = true; current = null; } return; }
+    id = ALIAS[id] || id;
+    if (COMPONENTS[id] && id !== current) openComp(id, false);
+  });
+
+  /* ---------------------------------------------------------------- go */
+  fit();
+  window.addEventListener("load", fit);
+  document.addEventListener("fullscreenchange", function(){ setTimeout(fit, 150); });
+  var start = ALIAS[location.hash.slice(1)] || location.hash.slice(1);
+  if (COMPONENTS[start]) openComp(start, false);
+  setTimeout(fit, 60);
+})();
+</script>
+</body>
+</html>

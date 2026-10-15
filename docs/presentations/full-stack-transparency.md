@@ -18,6 +18,7 @@ limitations under the License.
 
 **A 20-minute talk + 5-minute live demo on Enterprise Data Warehouse reality, architectural transparency, and the Data Hopper EDW solution.**  
 Interactive Presentation: [full-stack-transparency.html](full-stack-transparency.html)  
+Interactive Component Explorer: [edw-component-explorer.html](edw-component-explorer.html) — the EDW overview as a clickable web app: every block of `images/diagrams/edw-overview.svg` opens a pancard with the layer, the models, the capabilities, the real screenshots (flip through them) and the docs behind it. Self-contained, offline, built for a big screen.  
 Issue Reference: [Issue #190](https://github.com/ProjectDataHopper/hopper-edw/issues/190)
 
 ---
@@ -127,8 +128,9 @@ Say these three lines out loud at key transitions. They anchor the entire messag
 ### Act 3: Hopper EDW Solution Tour (Slides 18–25, ~5:00)
 
 #### Slide 18: What We Built in Hopper EDW (0:30)
-- **On screen:** Solution Tour Intro: Journey, Source Modeler, Open Vault, Ops Canvas.
+- **On screen:** Solution Tour Intro: Journey, Source Modeler, Open Vault, Ops Canvas. Link: **[Component Explorer]**.
 - **Spoken:** *"This is not theoretical. Everything I'm describing is built, shipping, and running in Apache Hop through our Hopper EDW plugin. Let's look at the actual screenshots of what we built."*
+- **Optional interactive beat:** open [edw-component-explorer.html](edw-component-explorer.html) and click one block (Sources or the Catalog) instead of narrating the static slides. Each block opens one pancard with the layer, the capabilities and its screenshots; arrows flip screenshots, `]` moves to the next component. Use it as the tour surface if the room prefers to pick the layer themselves, and as the fallback if Hop GUI itself is unavailable.
 
 #### Slide 19: Solution 01 — The EDW Journey (0:40)
 - **On screen:** `diagrams/d7-edw-journey.svg` — Single navigation tree in Apache Hop GUI.
@@ -213,3 +215,5 @@ If Hop GUI or the Postgres container encounters an unexpected local issue during
    - `docs/images/data-vault-satellite-dialog-lineage-tab.png`
    - `docs/images/data-vault-retail-360-model-with-duration-metrics.png`
 3. Resume Slide 27 for the closing axioms.
+
+Alternative fallback (no slides either): open [edw-component-explorer.html](edw-component-explorer.html) full screen. It carries the same screenshots per layer and needs no Hop install, no Docker and no network — click Sources, then Raw Vault, then OPS metrics + lineage, and flip the screenshots with the arrow keys.
