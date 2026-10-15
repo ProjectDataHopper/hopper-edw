@@ -16,12 +16,18 @@
 package org.hopper.edw.datavault.hopgui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.hop.core.HopEnvironment;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.variables.Variables;
+import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
+import org.hopper.edw.datavault.hopgui.file.dimensional.HopDimensionalFileType;
+import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphSnapshotUndo;
+import org.hopper.edw.datavault.metadata.dimensional.DimensionalConfiguration;
+import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -108,6 +114,66 @@ class ModelTargetTablePreviewSupportTest {
             postgres, variables, "${MY_SCHEMA}", "${MY_TABLE}", 100);
     assertTrue(sql.contains("analytics.fct_sales"), sql);
     assertTrue(sql.toLowerCase().contains("limit 100"), sql);
+  }
+
+  @Test
+  void namedConfigurationSuppliesTargetDatabaseWhenEmbeddedCopyIsEmpty() throws Exception {
+    MemoryMetadataProvider provider = new MemoryMetadataProvider();
+    DimensionalConfiguration shared = new DimensionalConfiguration();
+    shared.setName("dimensional-orders");
+    shared.setTargetDatabase("Vault");
+    provider.getSerializer(DimensionalConfiguration.class).save(shared);
+    DatabaseMeta vault =
+        new DatabaseMeta("Vault", "PostgreSQL", "Native", "", "localhost", "test", "user", "");
+    provider.getSerializer(DatabaseMeta.class).save(vault);
+
+    DimensionalModel model = new DimensionalModel();
+    model.setConfigurationName("dimensional-orders");
+    DimensionalConfiguration embedded = new DimensionalConfiguration();
+    model.setConfiguration(embedded);
+
+    assertNull(model.getMetadataProvider());
+    DatabaseMeta resolved = ModelTargetTablePreviewSupport.resolveDmTargetDatabase(provider, model);
+    assertEquals("Vault", resolved.getName());
+    assertEquals("Vault", model.getConfigurationOrDefault().getTargetDatabase());
+  }
+
+  @Test
+  void inlineConfigurationSuppliesTargetDatabaseWhenNoNameIsSet() throws Exception {
+    MemoryMetadataProvider provider = new MemoryMetadataProvider();
+    DatabaseMeta vault =
+        new DatabaseMeta("Vault", "PostgreSQL", "Native", "", "localhost", "test", "user", "");
+    provider.getSerializer(DatabaseMeta.class).save(vault);
+
+    DimensionalModel model = new DimensionalModel();
+    model.getConfigurationOrDefault().setTargetDatabase("Vault");
+
+    DatabaseMeta resolved = ModelTargetTablePreviewSupport.resolveDmTargetDatabase(provider, model);
+    assertEquals("Vault", resolved.getName());
+  }
+
+  @Test
+  void undoKeepsNamedConfigurationTargetDatabase() throws Exception {
+    MemoryMetadataProvider provider = new MemoryMetadataProvider();
+    DimensionalConfiguration shared = new DimensionalConfiguration();
+    shared.setName("dimensional-orders");
+    shared.setTargetDatabase("Vault");
+    provider.getSerializer(DimensionalConfiguration.class).save(shared);
+
+    DimensionalModel model = new DimensionalModel();
+    model.setName("orders");
+    model.setConfigurationName("dimensional-orders");
+    model.setConfiguration(new DimensionalConfiguration());
+
+    ModelGraphSnapshotUndo<DimensionalModel> undo =
+        new ModelGraphSnapshotUndo<>(
+            DimensionalModel.class, HopDimensionalFileType.XML_TAG, DimensionalModel::new);
+    undo.markChange(model, provider);
+    model.setDescription("edited");
+
+    DimensionalModel restored = undo.undo(model, provider, "orders.hdm");
+    assertEquals("dimensional-orders", restored.getConfigurationName());
+    assertEquals("Vault", restored.getConfigurationOrDefault().getTargetDatabase());
   }
 
   @Test

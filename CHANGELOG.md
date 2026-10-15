@@ -4,6 +4,11 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Target table preview (issue #205)
+
+- **Preview target table** loads the target database from the configuration named on the model. A dimensional model that stores only `configurationName`, such as a fact model, opens that connection in the Database Workbench. Data Vault and Business Vault previews resolve their named configuration the same way.
+- Undo and redo bind the metadata provider on the restored model, so the named configuration stays available after the model is reloaded from its snapshot.
+
 ### Source model configuration (issue #202)
 
 - **Catalog connection** on a source model configuration is a dropdown of project data catalog connections. The stored value is still the connection name.

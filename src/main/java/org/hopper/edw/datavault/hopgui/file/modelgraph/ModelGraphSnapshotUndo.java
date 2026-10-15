@@ -30,6 +30,7 @@ import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.hopper.edw.datavault.config.DataVaultConfigSingleton;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
+import org.hopper.edw.datavault.metadata.ModelConfigurationResolver;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -168,6 +169,8 @@ public class ModelGraphSnapshotUndo<M> {
       M restored = modelFactory.get();
       XmlMetadataUtil.deSerializeFromXml(rootNode, modelClass, restored, metadataProvider);
       preserveFilename(restored, preserveFilename);
+      // configurationName is serialized; the provider that loads it is not.
+      ModelConfigurationResolver.attach(restored, metadataProvider);
       if (restored instanceof org.apache.hop.core.changed.IChanged changed) {
         changed.clearChanged();
       }

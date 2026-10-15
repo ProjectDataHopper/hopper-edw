@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvSpecialRecordSupport;
 import org.hopper.edw.datavault.metadata.IDvTable;
+import org.hopper.edw.datavault.metadata.ModelConfigurationResolver;
 import org.hopper.edw.datavault.metadata.businessvault.BvBusinessTable;
 import org.hopper.edw.datavault.metadata.businessvault.BvTargetDatabaseSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
@@ -83,9 +84,7 @@ public final class ModelTargetTablePreviewSupport {
         throw new HopException(
             BaseMessages.getString(PKG, "ModelTargetTablePreviewSupport.Error.MissingDvModel"));
       }
-      DatabaseMeta dbMeta =
-          DvSpecialRecordSupport.loadTargetDatabase(
-              metadataProvider, model.getConfigurationOrDefault());
+      DatabaseMeta dbMeta = resolveDvTargetDatabase(metadataProvider, model);
       if (dbMeta == null) {
         throw new HopException(
             BaseMessages.getString(
@@ -115,9 +114,7 @@ public final class ModelTargetTablePreviewSupport {
         throw new HopException(
             BaseMessages.getString(PKG, "ModelTargetTablePreviewSupport.Error.MissingBvModel"));
       }
-      DatabaseMeta dbMeta =
-          BvTargetDatabaseSupport.loadTargetDatabase(
-              metadataProvider, model.getConfigurationOrDefault());
+      DatabaseMeta dbMeta = resolveBvTargetDatabase(metadataProvider, model);
       if (dbMeta == null) {
         throw new HopException(
             BaseMessages.getString(
@@ -151,9 +148,7 @@ public final class ModelTargetTablePreviewSupport {
         throw new HopException(
             BaseMessages.getString(PKG, "ModelTargetTablePreviewSupport.Error.MissingDmModel"));
       }
-      DatabaseMeta dbMeta =
-          DmTargetDatabaseSupport.loadTargetDatabase(
-              metadataProvider, model.getConfigurationOrDefault());
+      DatabaseMeta dbMeta = resolveDmTargetDatabase(metadataProvider, model);
       if (dbMeta == null) {
         throw new HopException(
             BaseMessages.getString(
@@ -167,6 +162,40 @@ public final class ModelTargetTablePreviewSupport {
     } catch (Exception e) {
       showError(shell, e);
     }
+  }
+
+  /**
+   * Binds {@code metadataProvider} so {@code configurationName} can load the shared configuration
+   * that holds the target database.
+   */
+  static DatabaseMeta resolveDvTargetDatabase(
+      IHopMetadataProvider metadataProvider, DataVaultModel model) throws HopException {
+    if (model == null) {
+      return null;
+    }
+    ModelConfigurationResolver.attach(model, metadataProvider);
+    return DvSpecialRecordSupport.loadTargetDatabase(
+        metadataProvider, model.getConfigurationOrDefault());
+  }
+
+  static DatabaseMeta resolveBvTargetDatabase(
+      IHopMetadataProvider metadataProvider, BusinessVaultModel model) throws HopException {
+    if (model == null) {
+      return null;
+    }
+    ModelConfigurationResolver.attach(model, metadataProvider);
+    return BvTargetDatabaseSupport.loadTargetDatabase(
+        metadataProvider, model.getConfigurationOrDefault());
+  }
+
+  static DatabaseMeta resolveDmTargetDatabase(
+      IHopMetadataProvider metadataProvider, DimensionalModel model) throws HopException {
+    if (model == null) {
+      return null;
+    }
+    ModelConfigurationResolver.attach(model, metadataProvider);
+    return DmTargetDatabaseSupport.loadTargetDatabase(
+        metadataProvider, model.getConfigurationOrDefault());
   }
 
   private static String resolveTableName(IDvTable table) throws HopException {
