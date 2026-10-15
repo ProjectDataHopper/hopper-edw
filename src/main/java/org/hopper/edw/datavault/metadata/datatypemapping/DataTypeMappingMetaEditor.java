@@ -310,22 +310,22 @@ public class DataTypeMappingMetaEditor extends MetadataEditor<DataTypeMappingMet
         BaseMessages.getString(PKG, "DataTypeMappingMetaEditor.RulePattern.ToolTip");
     ColumnInfo[] columns =
         new ColumnInfo[] {
-          col("Id", ColumnInfo.COLUMN_TYPE_TEXT, 80, null),
-          col("Name", ColumnInfo.COLUMN_TYPE_TEXT, 100, null),
-          colCcombo("Match hop type", hopTypes, 100),
-          col("Match source type", ColumnInfo.COLUMN_TYPE_TEXT, 110, rulePatternTip),
-          col("Match field name", ColumnInfo.COLUMN_TYPE_TEXT, 110, rulePatternTip),
-          colCcombo("Length absent", new String[] {"Y", "N"}, 80),
-          colCcombo("Target hop type", hopTypes, 100),
-          col("Target length", ColumnInfo.COLUMN_TYPE_TEXT, 80, null),
-          col("Target precision", ColumnInfo.COLUMN_TYPE_TEXT, 80, null),
-          col("Target name", ColumnInfo.COLUMN_TYPE_TEXT, 100, null),
-          col("Conversion mask", ColumnInfo.COLUMN_TYPE_TEXT, 120, null),
-          col("Decimal", ColumnInfo.COLUMN_TYPE_TEXT, 50, null),
-          col("Grouping", ColumnInfo.COLUMN_TYPE_TEXT, 50, null),
-          col("Locale", ColumnInfo.COLUMN_TYPE_TEXT, 60, null),
-          col("Time zone", ColumnInfo.COLUMN_TYPE_TEXT, 70, null),
-          colCcombo("Enabled", new String[] {"Y", "N"}, 60)
+          col("Id", ColumnInfo.COLUMN_TYPE_TEXT, null),
+          col("Name", ColumnInfo.COLUMN_TYPE_TEXT, null),
+          colCcombo("Match hop type", hopTypes),
+          col("Match source type", ColumnInfo.COLUMN_TYPE_TEXT, rulePatternTip),
+          col("Match field name", ColumnInfo.COLUMN_TYPE_TEXT, rulePatternTip),
+          colCcombo("Length absent", new String[] {"Y", "N"}),
+          colCcombo("Target hop type", hopTypes),
+          col("Target length", ColumnInfo.COLUMN_TYPE_TEXT, null),
+          col("Target precision", ColumnInfo.COLUMN_TYPE_TEXT, null),
+          col("Target name", ColumnInfo.COLUMN_TYPE_TEXT, null),
+          col("Conversion mask", ColumnInfo.COLUMN_TYPE_TEXT, null),
+          col("Decimal", ColumnInfo.COLUMN_TYPE_TEXT, null),
+          col("Grouping", ColumnInfo.COLUMN_TYPE_TEXT, null),
+          col("Locale", ColumnInfo.COLUMN_TYPE_TEXT, null),
+          col("Time zone", ColumnInfo.COLUMN_TYPE_TEXT, null),
+          colCcombo("Enabled", new String[] {"Y", "N"})
         };
 
     wRules =
@@ -403,11 +403,9 @@ public class DataTypeMappingMetaEditor extends MetadataEditor<DataTypeMappingMet
       item.setText(15, Const.NVL(conv.getDateFormatTimeZone(), ""));
       item.setText(16, rule.isEnabled() ? "Y" : "N");
     }
-    if (wRules.table.getItemCount() == 0) {
-      new TableItem(wRules.table, SWT.NONE);
-    }
-    wRules.setRowNums();
-    wRules.optWidth(true);
+    // Pack to the header and the cell text. Fixed ColumnInfo widths are narrower than the headers,
+    // and optWidth keeps those widths, so values draw into the next column.
+    wRules.optimizeTableView();
   }
 
   @Override
@@ -485,21 +483,16 @@ public class DataTypeMappingMetaEditor extends MetadataEditor<DataTypeMappingMet
     return kinds;
   }
 
-  private static ColumnInfo col(String name, int type, int width, String tooltip) {
+  private static ColumnInfo col(String name, int type, String tooltip) {
     ColumnInfo c = new ColumnInfo(name, type, false);
-    c.setWidth(width);
-    c.setAutoResize(false);
     if (!Utils.isEmpty(tooltip)) {
       c.setToolTip(tooltip);
     }
     return c;
   }
 
-  private static ColumnInfo colCcombo(String name, String[] values, int width) {
-    ColumnInfo c = new ColumnInfo(name, ColumnInfo.COLUMN_TYPE_CCOMBO, values);
-    c.setWidth(width);
-    c.setAutoResize(false);
-    return c;
+  private static ColumnInfo colCcombo(String name, String[] values) {
+    return new ColumnInfo(name, ColumnInfo.COLUMN_TYPE_CCOMBO, values);
   }
 
   /** Expose source type codes for tests / docs alignment with {@link DvSourceType}. */

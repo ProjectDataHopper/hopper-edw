@@ -95,7 +95,12 @@ Applies to:
 
 === Edit model defaults
 
-**Edit model** → **Default data type mappings**: comma-separated profile names. Used when:
+**Edit model** and the **Source model configuration** metadata editor share **Default data type mappings**: a comma-separated list of profile names. **Select** and **Edit** sit to the right of the field.
+
+* **Select** chooses one or more existing profiles. The field is replaced with that selection, in the order you pick them.
+* **Edit** opens the profile named in the field. Several names ask which one to edit. An empty field creates a profile and adds its name.
+
+Used when:
 
 * Importing schema tables
 * Adding a new table / query / JSON / pipeline card that has no profiles yet

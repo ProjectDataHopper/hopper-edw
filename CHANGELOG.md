@@ -4,6 +4,11 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Source model configuration (issue #202)
+
+- **Catalog connection** on a source model configuration is a dropdown of project data catalog connections. The stored value is still the connection name.
+- **Default data type mappings** has **Select** and **Edit** to the right of the field, on **Edit model** and on the source model configuration metadata editor. **Select** replaces the field with existing profiles. **Edit** opens the profile named in the field, asks which one to edit when several names are listed, and creates a profile when the field is empty.
+
 ### Lookup indexes (issue #204)
 
 - Target DDL now adds a non-unique index on the columns a load looks up, and on the logical key when primary-key DDL is off. A Type 1 date dimension such as `d_date` is indexed on `date_key`. Versioned dimensions are indexed on the natural keys plus `date_from`, and on the surrogate key when that column is not already the primary key. Junk dimensions keep the hash-key index, or an index on the junk key fields when there is no hash column. Bridges and accumulating-snapshot facts are indexed on their upsert keys.

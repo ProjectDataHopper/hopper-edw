@@ -204,6 +204,7 @@ public class HopGuiSourceModelDialog {
         wGeneralTabComp,
         SourceModelConfiguration.GUI_PLUGIN_ELEMENT_PARENT_ID,
         null);
+    SourceModelDataTypeMappingButtons.attach(widgets, variables, hopGui.getMetadataProvider());
 
     wTabFolder.setSelection(0);
     getData();

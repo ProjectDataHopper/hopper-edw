@@ -16,21 +16,19 @@
 package org.hopper.edw.datavault.metadata.sourcemodel;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.gui.plugin.GuiElementType;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.GuiWidgetElement;
-import org.apache.hop.core.util.Utils;
 import org.apache.hop.metadata.api.HopMetadata;
 import org.apache.hop.metadata.api.HopMetadataBase;
 import org.apache.hop.metadata.api.HopMetadataProperty;
 import org.apache.hop.metadata.api.HopMetadataPropertyType;
 import org.apache.hop.metadata.api.IHopMetadata;
+import org.hopper.edw.catalog.metadata.DataCatalogMeta;
 import org.hopper.edw.datavault.metadata.EdwMetadataCategory;
 import org.hopper.edw.datavault.metadata.datatypemapping.IDataTypeMappingTarget;
 
@@ -54,6 +52,9 @@ import org.hopper.edw.datavault.metadata.datatypemapping.IDataTypeMappingTarget;
 public class SourceModelConfiguration extends HopMetadataBase implements IHopMetadata {
 
   public static final String GUI_PLUGIN_ELEMENT_PARENT_ID = "SOURCE_MODEL_DIALOG";
+
+  /** Widget id of {@link #defaultDataTypeMappingNames}. Select and Edit sit to its right. */
+  public static final String WIDGET_DEFAULT_DATA_TYPE_MAPPINGS = "defaultDataTypeMappingNames";
 
   public static SourceModelConfiguration createDefault() {
     return new SourceModelConfiguration();
@@ -84,8 +85,8 @@ public class SourceModelConfiguration extends HopMetadataBase implements IHopMet
   /** Optional catalog connection used when publishing single-table or composite feeds. */
   @GuiWidgetElement(
       order = "0300",
-      type = GuiElementType.TEXT,
-      variables = true,
+      type = GuiElementType.METADATA,
+      metadata = DataCatalogMeta.class,
       label = "i18n::SourceModelConfiguration.CatalogConnection.Label",
       toolTip = "i18n::SourceModelConfiguration.CatalogConnection.ToolTip",
       parentId = GUI_PLUGIN_ELEMENT_PARENT_ID)
@@ -108,6 +109,7 @@ public class SourceModelConfiguration extends HopMetadataBase implements IHopMet
    * (or newly added) source tables/queries/JSON/pipeline cards when they have no profiles yet.
    */
   @GuiWidgetElement(
+      id = WIDGET_DEFAULT_DATA_TYPE_MAPPINGS,
       order = "0500",
       type = GuiElementType.TEXT,
       variables = true,
@@ -119,13 +121,7 @@ public class SourceModelConfiguration extends HopMetadataBase implements IHopMet
 
   /** Parse {@link #defaultDataTypeMappingNames} into an ordered list of profile names. */
   public List<String> resolveDefaultDataTypeMappingNames() {
-    if (Utils.isEmpty(defaultDataTypeMappingNames)) {
-      return List.of();
-    }
-    return Arrays.stream(defaultDataTypeMappingNames.split("[,;]"))
-        .map(String::trim)
-        .filter(s -> !s.isEmpty())
-        .collect(Collectors.toCollection(ArrayList::new));
+    return DefaultDataTypeMappingNames.parse(defaultDataTypeMappingNames);
   }
 
   /**
