@@ -104,11 +104,21 @@ public final class DmDimensionLoadStrategySupport {
     return resolveLoadStrategy(dimension) == DmDimensionLoadStrategy.DIMENSION_LOOKUP;
   }
 
+  /** Pure Type 1 load that compares the source to the table and writes only new or changed rows. */
+  public static boolean usesSkipUnchanged(DmDimension dimension) {
+    return dimension != null
+        && resolveLoadStrategy(dimension) == DmDimensionLoadStrategy.PURE_TYPE1
+        && dimension.getType1UpdateModeOrDefault() == DmType1UpdateMode.SKIP_UNCHANGED;
+  }
+
   public static String resolveDisplayLabel(DmDimension dimension) {
     DmDimensionLoadStrategy strategy = resolveLoadStrategy(dimension);
     return switch (strategy) {
       case PURE_TYPE1 ->
-          BaseMessages.getString(PKG, "DmDimensionLoadStrategySupport.Display.Type1");
+          (dimension == null
+                  ? DmType1UpdateMode.OVERWRITE
+                  : dimension.getType1UpdateModeOrDefault())
+              .getDescription();
       case PURE_TYPE2 ->
           BaseMessages.getString(PKG, "DmDimensionLoadStrategySupport.Display.Type2");
       case DIMENSION_LOOKUP -> resolveDimensionLookupDisplayLabel(dimension);

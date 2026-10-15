@@ -12,6 +12,13 @@ Edit a Kimball **dimension** on a `.hdm` canvas.
 
 Name, physical table, description, and staging **source** (none / logical, SQL, pipeline, record definition, or date generator).
 
+**Load strategy** is derived from the attribute SCD policies. When every attribute is Type 1, the field offers two choices:
+
+* **Type 1 — overwrite** writes every source row with Insert/Update.
+* **Type 1 — skip unchanged** compares the source with the dimension table (Merge rows (diff)) and sends only `new` and `changed` rows to Insert/Update. The load timestamp and load cycle id are not compared. Identical rows keep the values already stored. Rows present in the table and absent from the source are not deleted.
+
+Type 2, Type 3, and hybrid dimensions show the derived strategy and ignore a stored skip-unchanged choice until every attribute is Type 1 again.
+
 == Keys and attributes
 
 * **Surrogate key** — Strategy (none, auto-increment, source field such as a DV hash) and column name.

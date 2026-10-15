@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Date dimension load (issue #201)
+
+- A pure Type 1 dimension can use **Type 1 — skip unchanged** on the General tab. The generated load compares the source with the dimension table using Merge rows (diff) and sends only new and changed rows to Insert/Update. **Type 1 — overwrite** remains the default. **Add date dimension** selects skip unchanged. The load timestamp is not part of the comparison.
+
 ### Source model browse and relationship layout (issue #197)
 
 - **Browse** on the source-model toolbar centers one table, query, JSON, pipeline, or masking card and places its neighbors on a ring. Depth 2 adds an outer ring. Click a neighbor to walk. Escape restores the previous scroll and zoom. Saved positions are unchanged.

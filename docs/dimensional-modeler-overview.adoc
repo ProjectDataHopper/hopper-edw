@@ -88,10 +88,11 @@ Model validation requires a complete source configuration for the selected type 
 
 For the standard calendar dimension:
 
-* Canvas action **Add date dimension** creates `dim_date` / `d_date` with source type **Date generator**, default calendar fields, and TYPE1 attributes.
+* Canvas action **Add date dimension** creates `dim_date` / `d_date` with source type **Date generator**, default calendar fields, TYPE1 attributes, and load strategy **Type 1 — skip unchanged**.
 * On the **Source** tab, **Date generator** embeds the link:date-dimension-generator.adoc[Date Dimension Generator] in the generated Dimensional Update pipeline: start/end dates, optional reference date, fiscal day/week/month offsets, and a field table. No external `.hpl` is required for the standard calendar.
 * Use **Load defaults**, **Add relative fields**, **Add fiscal fields**, and **Add load timestamp** to manage the output field pack; **Preview data** generates sample rows with the same logic as the transform.
 * Type 1 loads need the model load timestamp column (for example `x_load_ts`) on the source stream. The date generator adds that field automatically as a `Timestamp` with mask `@now` when it is not already in the field table.
+* **Type 1 — skip unchanged** compares the generator with the rows already in the dimension and sends only new and changed rows to Insert/Update. The load timestamp is not part of that comparison, so an unchanged row keeps the timestamp already stored. Relative attributes such as `month_rel` are compared, so those rows still update when they move. Choose **Type 1 — overwrite** on the General tab to write every source row. Rows that leave the generator range are left in the table.
 * Advanced customizations (holidays, bespoke SQL) can still use **Pipeline** or **SQL** sources.
 
 The generator's **Load defaults** field pack matches the modeler template (`date_key`, `full_date`, `day_of_week`, and related columns). Optional relative and fiscal field packs support dynamic reporting filters (`month_rel = 0`, YTD) and fiscal calendars.
@@ -124,7 +125,9 @@ Generators are thin builders over native Hop warehouse transforms:
 |===
 |Kimball pattern |Hop transform |Notes
 
-|SCD Type 1 (all attributes Type 1) |Insert/Update |Overwrite attributes on natural key match
+|SCD Type 1 (all attributes Type 1) |Insert/Update |**Type 1 — overwrite**. Every source row is written on the natural key
+
+|SCD Type 1, skip unchanged |Merge rows (diff), then Insert/Update |**Type 1 — skip unchanged**. Identical rows are not written. **Add date dimension** uses this mode
 
 |SCD Type 2 (all attributes Type 2) |MergeRows chain (satellite pattern) |Ported from `DvSatellite` load-end-date chain
 

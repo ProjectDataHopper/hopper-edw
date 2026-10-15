@@ -16,6 +16,7 @@
 package org.hopper.edw.datavault.metadata.dimensional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.hopper.edw.datavault.metadata.dimensional.DmDimensionLoadStrategySupport.DmDimensionLoadStrategy;
@@ -80,6 +81,35 @@ class DmDimensionLoadStrategySupportTest {
     assertEquals(
         DmDimensionLoadStrategy.DIMENSION_LOOKUP,
         DmDimensionLoadStrategySupport.resolveLoadStrategy(dimension));
+  }
+
+  @Test
+  void pureType1DisplayLabelFollowsUpdateMode() {
+    DmDimension overwrite = new DmDimension();
+    overwrite.getAttributes().add(new DmDimensionAttribute("name", DmScdUpdatePolicy.TYPE1));
+
+    assertEquals(
+        "Type 1 — overwrite", DmDimensionLoadStrategySupport.resolveDisplayLabel(overwrite));
+    assertFalse(DmDimensionLoadStrategySupport.usesSkipUnchanged(overwrite));
+
+    DmDimension skip = new DmDimension();
+    skip.setType1UpdateMode(DmType1UpdateMode.SKIP_UNCHANGED);
+    skip.getAttributes().add(new DmDimensionAttribute("name", DmScdUpdatePolicy.TYPE1));
+
+    assertEquals(
+        "Type 1 — skip unchanged", DmDimensionLoadStrategySupport.resolveDisplayLabel(skip));
+    assertTrue(DmDimensionLoadStrategySupport.usesSkipUnchanged(skip));
+  }
+
+  @Test
+  void type2IgnoresStoredSkipUnchangedMode() {
+    DmDimension dimension = new DmDimension();
+    dimension.setType1UpdateMode(DmType1UpdateMode.SKIP_UNCHANGED);
+    dimension.getAttributes().add(new DmDimensionAttribute("name", DmScdUpdatePolicy.TYPE2));
+
+    assertEquals(
+        "Type 2 — historize", DmDimensionLoadStrategySupport.resolveDisplayLabel(dimension));
+    assertFalse(DmDimensionLoadStrategySupport.usesSkipUnchanged(dimension));
   }
 
   @Test

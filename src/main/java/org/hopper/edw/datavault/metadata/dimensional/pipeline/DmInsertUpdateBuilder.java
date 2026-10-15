@@ -69,7 +69,7 @@ public final class DmInsertUpdateBuilder {
     return pipelineMeta;
   }
 
-  private static TransformMeta addInsertUpdate(
+  static TransformMeta addInsertUpdate(
       DmPipelineBuilderSupport.BuildContext ctx,
       PipelineMeta pipelineMeta,
       TransformMeta predecessor,

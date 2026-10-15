@@ -53,6 +53,7 @@ class DmDateGeneratorSourceTest {
     assertFalse(
         dimension.getSourceOrDefault().getDateGeneratorOrDefault().getFieldsOrEmpty().isEmpty());
     assertEquals("date_key", dimension.getNaturalKeysOrEmpty().get(0).getFieldName());
+    assertEquals(DmType1UpdateMode.SKIP_UNCHANGED, dimension.getType1UpdateModeOrDefault());
   }
 
   @Test

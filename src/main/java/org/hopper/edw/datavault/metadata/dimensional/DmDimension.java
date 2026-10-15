@@ -33,6 +33,7 @@ import org.hopper.edw.datavault.metadata.dimensional.DmDimensionLoadStrategySupp
 import org.hopper.edw.datavault.metadata.dimensional.pipeline.DmDimensionLookupBuilder;
 import org.hopper.edw.datavault.metadata.dimensional.pipeline.DmInsertUpdateBuilder;
 import org.hopper.edw.datavault.metadata.dimensional.pipeline.DmScd2DimensionBuilder;
+import org.hopper.edw.datavault.metadata.dimensional.pipeline.DmType1SkipUnchangedBuilder;
 import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 
 /** Kimball dimension table. */
@@ -71,6 +72,13 @@ public class DmDimension extends DmTableBase {
    */
   @HopMetadataProperty private String effectiveDateSourceField;
 
+  /**
+   * Pure Type 1 write mode. Ignored unless every attribute is Type 1. Missing XML stays {@link
+   * DmType1UpdateMode#OVERWRITE}.
+   */
+  @HopMetadataProperty(storeWithCode = true)
+  private DmType1UpdateMode type1UpdateMode = DmType1UpdateMode.OVERWRITE;
+
   public DmDimension() {
     super(DmTableType.DIMENSION);
   }
@@ -85,6 +93,10 @@ public class DmDimension extends DmTableBase {
 
   public DmDimensionLoadStrategy resolveLoadStrategy() {
     return DmDimensionLoadStrategySupport.resolveLoadStrategy(this);
+  }
+
+  public DmType1UpdateMode getType1UpdateModeOrDefault() {
+    return type1UpdateMode != null ? type1UpdateMode : DmType1UpdateMode.OVERWRITE;
   }
 
   public List<DmNaturalKeyField> getNaturalKeysOrEmpty() {
@@ -183,7 +195,11 @@ public class DmDimension extends DmTableBase {
               DmDimensionLookupBuilder.generateHybridDimensionPipeline(
                   metadataProvider, variables, model, this);
           default ->
-              DmInsertUpdateBuilder.generatePipeline(metadataProvider, variables, model, this);
+              DmDimensionLoadStrategySupport.usesSkipUnchanged(this)
+                  ? DmType1SkipUnchangedBuilder.generatePipeline(
+                      metadataProvider, variables, model, this)
+                  : DmInsertUpdateBuilder.generatePipeline(
+                      metadataProvider, variables, model, this);
         };
     return List.of(pipelineMeta);
   }

@@ -48,6 +48,7 @@ import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.apache.hop.ui.util.EnvironmentUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
+
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
@@ -78,6 +79,8 @@ import org.hopper.edw.datavault.metadata.dimensional.DmDimension;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimensionAlias;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimensionAttribute;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimensionLoadStrategySupport;
+import org.hopper.edw.datavault.metadata.dimensional.DmDimensionLoadStrategySupport.DmDimensionLoadStrategy;
+import org.hopper.edw.datavault.metadata.dimensional.DmType1UpdateMode;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimensionOutriggerRef;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimensionResolutionSupport;
 import org.hopper.edw.datavault.metadata.dimensional.DmFact;
@@ -160,7 +163,10 @@ public class HopGuiDmTableDialog {
   private Button wSourceRecordPreviewData;
   private Button wSourceRecordPreviewFields;
   private DmSourceDateGeneratorGuiSupport.Widgets dateGeneratorWidgets;
-  private Text wDerivedLoadStrategy;
+  private Combo wDerivedLoadStrategy;
+  private DmType1UpdateMode selectedType1UpdateMode = DmType1UpdateMode.OVERWRITE;
+  private boolean populatingAttributes;
+  private boolean refreshingLoadStrategy;
   private Combo wSurrogateKeyStrategy;
   private Text wSurrogateKeyField;
   private Text wSurrogateKeySourceField;
@@ -421,10 +427,22 @@ public class HopGuiDmTableDialog {
       wlDerivedLoadStrategy.setLayoutData(
           new FormDataBuilder().left().top(wDescription, margin).right(middle, -margin).result());
 
-      wDerivedLoadStrategy = new Text(comp, SWT.READ_ONLY | SWT.BORDER);
+      wDerivedLoadStrategy = new Combo(comp, SWT.READ_ONLY | SWT.BORDER);
       PropsUi.setLook(wDerivedLoadStrategy);
+      wDerivedLoadStrategy.setToolTipText(
+          BaseMessages.getString(PKG, "HopGuiDmTableDialog.DerivedLoadStrategy.ToolTip"));
       wDerivedLoadStrategy.setLayoutData(
           new FormDataBuilder().left(middle, 0).top(wDescription, margin).right().result());
+      wDerivedLoadStrategy.addListener(
+          SWT.Selection,
+          e -> {
+            if (populatingAttributes || refreshingLoadStrategy || !wDerivedLoadStrategy.isEnabled()) {
+              return;
+            }
+            selectedType1UpdateMode =
+                EnumDialogSupport.readCombo(
+                    wDerivedLoadStrategy, DmType1UpdateMode.class, DmType1UpdateMode.OVERWRITE);
+          });
       addSurrogateKeyControls(comp, wDerivedLoadStrategy);
     } else if (junk) {
       addJunkSurrogateKeyControls(comp, wDescription);
@@ -1764,6 +1782,7 @@ public class HopGuiDmTableDialog {
                 shell, wAttributes, HopGuiDmFieldEditorDialog.Kind.ATTRIBUTE));
     HopGuiDmFieldTableSupport.wireDefaultSelection(
         shell, wAttributes, HopGuiDmFieldEditorDialog.Kind.ATTRIBUTE);
+    wAttributes.addModifyListener(e -> refreshDerivedLoadStrategyFromUi());
   }
 
   private void addOutriggersTab() {
@@ -2374,51 +2393,59 @@ public class HopGuiDmTableDialog {
     }
 
     if (dimension && input instanceof DmDimension dmDimension) {
-      refreshDerivedLoadStrategyLabel(dmDimension);
-      if (dmDimension.getSurrogateKeyStrategy() != null) {
-        EnumDialogSupport.selectCombo(wSurrogateKeyStrategy, dmDimension.getSurrogateKeyStrategy());
-      } else {
-        EnumDialogSupport.selectCombo(
-            wSurrogateKeyStrategy, DmSurrogateKeySupport.resolveStrategy(dmDimension));
-      }
-      if (wSurrogateKeyField != null && !Utils.isEmpty(dmDimension.getSurrogateKeyField())) {
-        wSurrogateKeyField.setText(dmDimension.getSurrogateKeyField());
-      }
-      if (wSurrogateKeySourceField != null
-          && !Utils.isEmpty(dmDimension.getSurrogateKeySourceField())) {
-        wSurrogateKeySourceField.setText(dmDimension.getSurrogateKeySourceField());
-      }
-      refreshSurrogateKeyFieldState();
-      wNaturalKeys.clearAll();
-      for (DmNaturalKeyField naturalKey : dmDimension.getNaturalKeysOrEmpty()) {
-        if (naturalKey == null || Utils.isEmpty(naturalKey.getFieldName())) {
-          continue;
+      dmDimension.normalizeLegacyScdType();
+      selectedType1UpdateMode = dmDimension.getType1UpdateModeOrDefault();
+      populatingAttributes = true;
+      try {
+        if (dmDimension.getSurrogateKeyStrategy() != null) {
+          EnumDialogSupport.selectCombo(
+              wSurrogateKeyStrategy, dmDimension.getSurrogateKeyStrategy());
+        } else {
+          EnumDialogSupport.selectCombo(
+              wSurrogateKeyStrategy, DmSurrogateKeySupport.resolveStrategy(dmDimension));
         }
-        TableItem item = new TableItem(wNaturalKeys.table, SWT.NONE);
-        HopGuiDmFieldTableSupport.populateNaturalKey(item, naturalKey);
-      }
-      wNaturalKeys.optimizeTableView();
-      wAttributes.clearAll();
-      for (DmDimensionAttribute attribute : dmDimension.getAttributesOrEmpty()) {
-        if (attribute == null || Utils.isEmpty(attribute.getFieldName())) {
-          continue;
+        if (wSurrogateKeyField != null && !Utils.isEmpty(dmDimension.getSurrogateKeyField())) {
+          wSurrogateKeyField.setText(dmDimension.getSurrogateKeyField());
         }
-        TableItem item = new TableItem(wAttributes.table, SWT.NONE);
-        HopGuiDmFieldTableSupport.populateAttribute(item, attribute);
-      }
-      wAttributes.optimizeTableView();
-      wOutriggers.clearAll();
-      for (DmDimensionOutriggerRef outrigger : dmDimension.getOutriggersOrEmpty()) {
-        if (outrigger == null || Utils.isEmpty(outrigger.getDimensionTableName())) {
-          continue;
+        if (wSurrogateKeySourceField != null
+            && !Utils.isEmpty(dmDimension.getSurrogateKeySourceField())) {
+          wSurrogateKeySourceField.setText(dmDimension.getSurrogateKeySourceField());
         }
-        TableItem item = new TableItem(wOutriggers.table, SWT.NONE);
-        item.setText(1, outrigger.getDimensionTableName());
-        if (!Utils.isEmpty(outrigger.getForeignKeyColumn())) {
-          item.setText(2, outrigger.getForeignKeyColumn());
+        refreshSurrogateKeyFieldState();
+        wNaturalKeys.clearAll();
+        for (DmNaturalKeyField naturalKey : dmDimension.getNaturalKeysOrEmpty()) {
+          if (naturalKey == null || Utils.isEmpty(naturalKey.getFieldName())) {
+            continue;
+          }
+          TableItem item = new TableItem(wNaturalKeys.table, SWT.NONE);
+          HopGuiDmFieldTableSupport.populateNaturalKey(item, naturalKey);
         }
+        wNaturalKeys.optimizeTableView();
+        wAttributes.clearAll();
+        for (DmDimensionAttribute attribute : dmDimension.getAttributesOrEmpty()) {
+          if (attribute == null || Utils.isEmpty(attribute.getFieldName())) {
+            continue;
+          }
+          TableItem item = new TableItem(wAttributes.table, SWT.NONE);
+          HopGuiDmFieldTableSupport.populateAttribute(item, attribute);
+        }
+        wAttributes.optimizeTableView();
+        wOutriggers.clearAll();
+        for (DmDimensionOutriggerRef outrigger : dmDimension.getOutriggersOrEmpty()) {
+          if (outrigger == null || Utils.isEmpty(outrigger.getDimensionTableName())) {
+            continue;
+          }
+          TableItem item = new TableItem(wOutriggers.table, SWT.NONE);
+          item.setText(1, outrigger.getDimensionTableName());
+          if (!Utils.isEmpty(outrigger.getForeignKeyColumn())) {
+            item.setText(2, outrigger.getForeignKeyColumn());
+          }
+        }
+        wOutriggers.optimizeTableView();
+      } finally {
+        populatingAttributes = false;
       }
-      wOutriggers.optimizeTableView();
+      refreshLoadStrategyCombo(dmDimension);
       refreshFieldComboChoices();
     }
 
@@ -2721,7 +2748,10 @@ public class HopGuiDmTableDialog {
           dmDimension.getAttributes().add(attribute);
         }
       }
-      refreshDerivedLoadStrategyLabel(dmDimension);
+      if (DmDimensionLoadStrategySupport.resolveLoadStrategy(dmDimension)
+          == DmDimensionLoadStrategy.PURE_TYPE1) {
+        dmDimension.setType1UpdateMode(selectedType1UpdateMode);
+      }
       dmDimension.getOutriggers().clear();
       for (TableItem item : wOutriggers.getNonEmptyItems()) {
         String dimensionName = item.getText(1);
@@ -3412,19 +3442,19 @@ public class HopGuiDmTableDialog {
     refreshDerivedLoadStrategyFromUi();
   }
 
-  private void refreshDerivedLoadStrategyLabel(DmDimension dimension) {
-    if (wDerivedLoadStrategy == null || dimension == null) {
+  private void refreshDerivedLoadStrategyFromUi() {
+    if (wDerivedLoadStrategy == null || populatingAttributes) {
       return;
     }
-    dimension.normalizeLegacyScdType();
-    wDerivedLoadStrategy.setText(DmDimensionLoadStrategySupport.resolveDisplayLabel(dimension));
+    refreshLoadStrategyCombo(previewDimensionFromAttributes());
   }
 
-  private void refreshDerivedLoadStrategyFromUi() {
-    if (wDerivedLoadStrategy == null) {
-      return;
-    }
+  private DmDimension previewDimensionFromAttributes() {
     DmDimension preview = new DmDimension();
+    preview.setType1UpdateMode(selectedType1UpdateMode);
+    if (wAttributes == null) {
+      return preview;
+    }
     for (TableItem item : wAttributes.getNonEmptyItems()) {
       String targetFieldName = item.getText(2);
       if (Utils.isEmpty(targetFieldName)) {
@@ -3443,7 +3473,38 @@ public class HopGuiDmTableDialog {
       }
       preview.getAttributes().add(attribute);
     }
-    wDerivedLoadStrategy.setText(DmDimensionLoadStrategySupport.resolveDisplayLabel(preview));
+    return preview;
+  }
+
+  private void refreshLoadStrategyCombo(DmDimension dimension) {
+    if (wDerivedLoadStrategy == null || wDerivedLoadStrategy.isDisposed() || refreshingLoadStrategy) {
+      return;
+    }
+    refreshingLoadStrategy = true;
+    try {
+      if (dimension != null) {
+        dimension.normalizeLegacyScdType();
+      }
+      boolean pureType1 =
+          dimension != null
+              && DmDimensionLoadStrategySupport.resolveLoadStrategy(dimension)
+                  == DmDimensionLoadStrategy.PURE_TYPE1;
+      if (pureType1) {
+        wDerivedLoadStrategy.setEnabled(true);
+        wDerivedLoadStrategy.setItems(DmType1UpdateMode.getDescriptions());
+        EnumDialogSupport.selectCombo(wDerivedLoadStrategy, selectedType1UpdateMode);
+      } else {
+        String label =
+            dimension == null
+                ? ""
+                : DmDimensionLoadStrategySupport.resolveDisplayLabel(dimension);
+        wDerivedLoadStrategy.setItems(new String[] {label});
+        wDerivedLoadStrategy.select(0);
+        wDerivedLoadStrategy.setEnabled(false);
+      }
+    } finally {
+      refreshingLoadStrategy = false;
+    }
   }
 
   private void showSourceFieldError(HopException exception) {

@@ -42,6 +42,7 @@ public final class DmDateDimensionTemplate {
     dimension.setTableName(DEFAULT_TABLE_NAME);
     dimension.setDescription("Calendar date dimension");
     dimension.setScdType(DmDimensionScdType.TYPE1);
+    dimension.setType1UpdateMode(DmType1UpdateMode.SKIP_UNCHANGED);
     dimension.setLocation(location != null ? location.x : 0, location != null ? location.y : 0);
     dimension.setSurrogateKeyStrategy(DmSurrogateKeyStrategy.NONE);
     DmSourceConfiguration source = dimension.getSourceOrDefault();
