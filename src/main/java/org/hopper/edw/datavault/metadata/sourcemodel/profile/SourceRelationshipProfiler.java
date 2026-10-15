@@ -282,7 +282,7 @@ public final class SourceRelationshipProfiler {
 
     // Parent key uniqueness.
     String parentDupSql =
-        "SELECT COUNT(*) FROM (SELECT 1 FROM "
+        "SELECT COUNT(*) FROM (SELECT 1 AS dup FROM "
             + parentSource
             + " p GROUP BY "
             + parentKeys.stream()
