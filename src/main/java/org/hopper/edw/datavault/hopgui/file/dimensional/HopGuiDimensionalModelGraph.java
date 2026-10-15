@@ -58,7 +58,6 @@ import org.apache.hop.ui.core.gui.IToolbarContainer;
 import org.apache.hop.ui.hopgui.CanvasFacade;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.hopgui.ToolbarFacade;
-import org.apache.hop.ui.hopgui.context.GuiContextUtil;
 import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
 import org.apache.hop.ui.hopgui.file.IHopFileType;
 import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
@@ -1012,8 +1011,7 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
           BaseMessages.getString(PKG, "HopGuiDimensionalModelGraph.Context.Background.Message");
       IGuiContextHandler contextHandler = new HopGuiDimensionalContext(model, this, real);
       avoidContextDialog =
-          GuiContextUtil.getInstance()
-              .handleActionSelection(getShell(), message, new Point(p.x, p.y), contextHandler);
+          openModelContextDialog(getShell(), message, new Point(p.x, p.y), contextHandler);
     } catch (Exception ex) {
       new ErrorDialog(
           hopGui.getShell(),
@@ -1038,8 +1036,7 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
       IGuiContextHandler contextHandler =
           new HopGuiDimensionalTableContext(model, this, table, real);
       avoidContextDialog =
-          GuiContextUtil.getInstance()
-              .handleActionSelection(getShell(), message, new Point(p.x, p.y), contextHandler);
+          openModelContextDialog(getShell(), message, new Point(p.x, p.y), contextHandler);
     } catch (Exception ex) {
       new ErrorDialog(
           hopGui.getShell(),

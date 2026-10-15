@@ -75,7 +75,6 @@ import org.apache.hop.ui.core.gui.IToolbarContainer;
 import org.apache.hop.ui.hopgui.CanvasFacade;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.hopgui.ToolbarFacade;
-import org.apache.hop.ui.hopgui.context.GuiContextUtil;
 import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
 import org.apache.hop.ui.hopgui.file.IGraphSnapAlignDistribute;
 import org.apache.hop.ui.hopgui.file.IHopFileType;
@@ -2606,8 +2605,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       String message = "Select the action to execute or the table type to add:";
       IGuiContextHandler contextHandler = new HopGuiVaultContext(model, this, real);
       avoidContextDialog =
-          GuiContextUtil.getInstance()
-              .handleActionSelection(parent, message, new Point(p.x, p.y), contextHandler);
+          openModelContextDialog(parent, message, new Point(p.x, p.y), contextHandler);
     } catch (Exception ex) {
       new ErrorDialog(
           HopGui.getInstance().getShell(), "Error", "Error showing vault context dialog: ", ex);
@@ -2625,8 +2623,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       String message = "Select action for table '" + table.getName() + "':";
       IGuiContextHandler contextHandler = new HopGuiVaultTableContext(model, this, table, real);
       avoidContextDialog =
-          GuiContextUtil.getInstance()
-              .handleActionSelection(parent, message, new Point(p.x, p.y), contextHandler);
+          openModelContextDialog(parent, message, new Point(p.x, p.y), contextHandler);
     } catch (Exception ex) {
       new ErrorDialog(
           HopGui.getInstance().getShell(), "Error", "Error showing table context dialog: ", ex);

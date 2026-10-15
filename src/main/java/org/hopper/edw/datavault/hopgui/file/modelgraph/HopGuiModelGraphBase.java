@@ -1710,6 +1710,35 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
     }
   }
 
+  /**
+   * Drops the button press, mouse capture, and any armed drag before a context dialog. The dialog
+   * runs its own display event loop. A move outside the dialog is delivered to this canvas, and
+   * {@link #lastButton} would still say the button is down, so the clicked table would follow the
+   * pointer.
+   */
+  protected void clearMouseStatus() {
+    lastButton = 0;
+    iconOffset = null;
+    noteOffset = null;
+    resize = null;
+    iconDragStart = null;
+    iconDragCommitted = false;
+    dragSelection = false;
+    if (canvas != null && !canvas.isDisposed() && !EnvironmentUtils.getInstance().isWeb()) {
+      canvas.setCapture(false);
+    }
+    mouseInteractions().clearObjectDragState();
+    clearNoteDragState();
+    ModelGraphWebCanvasData.clearMode(canvas);
+  }
+
+  /** Opens a model context dialog after {@link #clearMouseStatus()}. */
+  protected boolean openModelContextDialog(
+      Shell parent, String message, Point location, IGuiContextHandler handler) {
+    clearMouseStatus();
+    return GuiContextUtil.getInstance().handleActionSelection(parent, message, location, handler);
+  }
+
   protected void showNoteContextDialog(Event e, DvNote note, Point real) {
     if (note == null) {
       return;
@@ -1720,8 +1749,7 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
       String message = getNoteContextDialogMessage();
       IGuiContextHandler contextHandler = createNoteContextHandler(note, real);
       avoidContextDialog =
-          GuiContextUtil.getInstance()
-              .handleActionSelection(parent, message, new Point(p.x, p.y), contextHandler);
+          openModelContextDialog(parent, message, new Point(p.x, p.y), contextHandler);
     } catch (Exception ex) {
       new ErrorDialog(hopGui.getShell(), "Error", "Error showing note context dialog: ", ex);
     } finally {

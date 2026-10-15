@@ -52,7 +52,6 @@ import org.apache.hop.ui.core.gui.IToolbarContainer;
 import org.apache.hop.ui.hopgui.CanvasFacade;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.hopgui.ToolbarFacade;
-import org.apache.hop.ui.hopgui.context.GuiContextUtil;
 import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
 import org.apache.hop.ui.hopgui.file.IHopFileType;
 import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
@@ -515,9 +514,8 @@ public class HopGuiExecutionMapGraph extends HopGuiModelGraphBase
       IGuiContextHandler contextHandler =
           new HopGuiExecutionMapNodeContext(document, this, node, real);
       avoidContextDialog =
-          GuiContextUtil.getInstance()
-              .handleActionSelection(
-                  getShell(), message, new Point(screenPoint.x, screenPoint.y), contextHandler);
+          openModelContextDialog(
+              getShell(), message, new Point(screenPoint.x, screenPoint.y), contextHandler);
     } catch (Exception ex) {
       new ErrorDialog(
           hopGui.getShell(),

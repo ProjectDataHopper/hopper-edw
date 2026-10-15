@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Modeler context dialog
+
+- Opening a context dialog in the source, Data Vault, Business Vault, or dimensional modeler drops the mouse-button and drag state first. Moving the pointer outside the dialog no longer drags the clicked table or card.
+
 ### Target table preview (issue #205)
 
 - **Preview target table** loads the target database from the configuration named on the model. A dimensional model that stores only `configurationName`, such as a fact model, opens that connection in the Database Workbench. Data Vault and Business Vault previews resolve their named configuration the same way.

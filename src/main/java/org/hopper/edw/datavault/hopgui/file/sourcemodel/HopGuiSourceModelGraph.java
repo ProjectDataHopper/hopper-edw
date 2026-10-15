@@ -55,7 +55,6 @@ import org.apache.hop.ui.core.gui.IToolbarContainer;
 import org.apache.hop.ui.hopgui.CanvasFacade;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.hopgui.ToolbarFacade;
-import org.apache.hop.ui.hopgui.context.GuiContextUtil;
 import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
 import org.apache.hop.ui.hopgui.file.IHopFileType;
 import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
@@ -2093,8 +2092,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
               PKG, "HopGuiSourceModelGraph.Context.Masking.Message", maskingSource.getName());
       IGuiContextHandler contextHandler =
           new HopGuiSourceMaskingContext(model, this, maskingSource, new Point(p.x, p.y));
-      GuiContextUtil.getInstance()
-          .handleActionSelection(getShell(), message, new Point(p.x, p.y), contextHandler);
+      openModelContextDialog(getShell(), message, new Point(p.x, p.y), contextHandler);
     } catch (Exception ex) {
       new ErrorDialog(
           getShell(),
@@ -2359,8 +2357,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
               PKG, "HopGuiSourceModelGraph.Context.Table.Message", table.getName());
       IGuiContextHandler contextHandler =
           new HopGuiSourceTableContext(model, this, table, new Point(p.x, p.y));
-      GuiContextUtil.getInstance()
-          .handleActionSelection(getShell(), message, new Point(p.x, p.y), contextHandler);
+      openModelContextDialog(getShell(), message, new Point(p.x, p.y), contextHandler);
     } catch (Exception ex) {
       new ErrorDialog(
           getShell(),
@@ -2380,8 +2377,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
               PKG, "HopGuiSourceModelGraph.Context.Relationship.Message", relationship.getName());
       IGuiContextHandler contextHandler =
           new HopGuiSourceRelationshipContext(model, this, relationship, new Point(p.x, p.y));
-      GuiContextUtil.getInstance()
-          .handleActionSelection(getShell(), message, new Point(p.x, p.y), contextHandler);
+      openModelContextDialog(getShell(), message, new Point(p.x, p.y), contextHandler);
     } catch (Exception ex) {
       new ErrorDialog(
           getShell(),
@@ -2401,8 +2397,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
               PKG, "HopGuiSourceModelGraph.Context.Query.Message", query.getName());
       IGuiContextHandler contextHandler =
           new HopGuiSourceQueryContext(model, this, query, new Point(p.x, p.y));
-      GuiContextUtil.getInstance()
-          .handleActionSelection(getShell(), message, new Point(p.x, p.y), contextHandler);
+      openModelContextDialog(getShell(), message, new Point(p.x, p.y), contextHandler);
     } catch (Exception ex) {
       new ErrorDialog(
           getShell(),
@@ -2422,8 +2417,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
               PKG, "HopGuiSourceModelGraph.Context.Json.Message", jsonSource.getName());
       IGuiContextHandler contextHandler =
           new HopGuiSourceJsonContext(model, this, jsonSource, new Point(p.x, p.y));
-      GuiContextUtil.getInstance()
-          .handleActionSelection(getShell(), message, new Point(p.x, p.y), contextHandler);
+      openModelContextDialog(getShell(), message, new Point(p.x, p.y), contextHandler);
     } catch (Exception ex) {
       new ErrorDialog(
           getShell(),
@@ -2443,8 +2437,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
               PKG, "HopGuiSourceModelGraph.Context.Pipeline.Message", pipelineSource.getName());
       IGuiContextHandler contextHandler =
           new HopGuiSourcePipelineContext(model, this, pipelineSource, new Point(p.x, p.y));
-      GuiContextUtil.getInstance()
-          .handleActionSelection(getShell(), message, new Point(p.x, p.y), contextHandler);
+      openModelContextDialog(getShell(), message, new Point(p.x, p.y), contextHandler);
     } catch (Exception ex) {
       new ErrorDialog(
           getShell(),
@@ -3757,8 +3750,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       org.eclipse.swt.graphics.Point p = parent.getDisplay().map(canvas, null, e.x, e.y);
       String message = BaseMessages.getString(PKG, "HopGuiSourceModelGraph.Context.Canvas.Message");
       IGuiContextHandler contextHandler = new HopGuiSourceModelContext(model, this, real);
-      GuiContextUtil.getInstance()
-          .handleActionSelection(parent, message, new Point(p.x, p.y), contextHandler);
+      openModelContextDialog(parent, message, new Point(p.x, p.y), contextHandler);
     } catch (Exception ex) {
       new ErrorDialog(
           getShell(),
