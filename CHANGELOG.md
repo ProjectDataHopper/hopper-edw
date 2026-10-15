@@ -4,6 +4,12 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+## [0.12.0] — 2026-10-15
+
+Requires **Apache Hop 2.20.0-SNAPSHOT** and **Java 21**.
+
+**Downloads:** [GitHub release zip](https://github.com/ProjectDataHopper/hopper-edw/releases/download/v0.12.0/hopper-edw-0.12.0.zip) · [Data Hopper Nexus](https://repository.data-hopper.com/repository/hop-community-plugins/org/hopper/hopper-edw/0.12.0/hopper-edw-0.12.0.zip) (`org.hopper:hopper-edw:0.12.0`)
+
 ### Modeler context dialog
 
 - Opening a context dialog in the source, Data Vault, Business Vault, or dimensional modeler drops the mouse-button and drag state first. Moving the pointer outside the dialog no longer drags the clicked table or card.
