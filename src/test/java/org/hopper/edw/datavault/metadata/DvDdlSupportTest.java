@@ -98,6 +98,10 @@ class DvDdlSupportTest {
   void isCreateTableDdlDetectsCreateStatements() {
     assertTrue(DvDdlSupport.isCreateTableDdl("CREATE TABLE foo (id INT);"));
     assertFalse(DvDdlSupport.isCreateTableDdl("ALTER TABLE foo ADD COLUMN bar INT;"));
+    assertFalse(DvDdlSupport.isCreateTableDdl("CREATE INDEX idx_foo ON foo (id);"));
+    assertTrue(DvDdlSupport.isCreateIndexDdl("CREATE INDEX idx_foo ON foo (id);"));
+    assertTrue(
+        DvDdlSupport.isCreateIndexDdl("CREATE UNIQUE INDEX IF NOT EXISTS idx ON vault.sat_x (id)"));
     assertFalse(DvDdlSupport.isCreateTableDdl(""));
   }
 
@@ -145,6 +149,7 @@ class DvDdlSupportTest {
     assertEquals(
         "sat_syn_product",
         DvDdlSupport.extractCreateTableName("CREATE TABLE \"sat_syn_product\" (id INT);"));
+    assertNull(DvDdlSupport.extractCreateTableName("CREATE INDEX idx_sat_x_hk ON sat_x (id)"));
   }
 
   @Test
@@ -255,6 +260,18 @@ class DvDdlSupportTest {
     assertEquals(2, deduplicated.size());
     assertEquals(first, deduplicated.get(0));
     assertEquals(link, deduplicated.get(1));
+  }
+
+  @Test
+  void deduplicateCreateTableDdlKeepsEveryCreateIndex() {
+    String create = "CREATE TABLE d_date (date_key INT);";
+    String naturalKey = "CREATE INDEX idx_d_date_nk ON d_date (date_key);";
+    String technicalKey = "CREATE INDEX idx_d_date_tk ON d_date (dim_key);";
+
+    List<String> deduplicated =
+        DvDdlSupport.deduplicateCreateTableDdl(Arrays.asList(create, naturalKey, technicalKey));
+
+    assertEquals(List.of(create, naturalKey, technicalKey), deduplicated);
   }
 
   @Test

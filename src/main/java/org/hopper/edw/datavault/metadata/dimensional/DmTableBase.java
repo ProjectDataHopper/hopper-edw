@@ -164,6 +164,16 @@ public abstract class DmTableBase extends HopMetadataBase implements IHopMetadat
           metadataProvider,
           variables,
           model);
+      DmLookupIndexSupport.appendLookupIndexes(
+          result,
+          db,
+          targetDatabaseMeta,
+          variables,
+          targetTableName,
+          targetFields,
+          primaryKeyColumns,
+          this,
+          config);
     } catch (Exception e) {
       throw new HopException("Error getting DDL for dimensional table: " + targetTableName, e);
     }

@@ -41,7 +41,7 @@ The action follows the same pattern as link:datavault-update-action.adoc[Data Va
 |Worker count for staged pipeline execution.
 
 |Update target database structure
-|Generate and execute CREATE TABLE DDL before loads.
+|Generate and execute CREATE TABLE DDL before loads. Also creates lookup indexes (for example `date_key` on `d_date`) and adds a missing index the next time structure update runs.
 
 |Pipeline staging folder
 |Optional; defaults under `${java.io.tmpdir}` when empty.

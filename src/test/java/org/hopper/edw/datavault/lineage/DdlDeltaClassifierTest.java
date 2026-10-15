@@ -35,6 +35,15 @@ class DdlDeltaClassifierTest {
   }
 
   @Test
+  void classifiesCreateIndexOnItsTable() {
+    DdlDelta delta =
+        DdlDeltaClassifier.classifyOne("CREATE INDEX idx_d_date_nk ON vault.d_date (date_key);");
+    assertEquals(DdlDeltaType.OTHER, delta.getType());
+    assertEquals("d_date", delta.getTableName());
+    assertEquals("CREATE INDEX d_date", delta.getSummary());
+  }
+
+  @Test
   void classifiesAddColumn() {
     List<DdlDelta> deltas =
         DdlDeltaClassifier.classify(

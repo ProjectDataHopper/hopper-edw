@@ -73,6 +73,13 @@ public final class DdlDeltaClassifier {
       return delta;
     }
 
+    if (DvDdlSupport.isCreateIndexDdl(sql)) {
+      String table = unquote(DvDdlSupport.extractDdlTargetTableName(sql));
+      DdlDelta delta = new DdlDelta(DdlDeltaType.OTHER, table, null, sql);
+      delta.setSummary("CREATE INDEX " + nvl(table));
+      return delta;
+    }
+
     Matcher add = ALTER_ADD.matcher(sql);
     if (add.find()) {
       DdlDelta delta =
@@ -149,7 +156,7 @@ public final class DdlDeltaClassifier {
   }
 
   private static boolean isCreateTable(String ddl) {
-    return ddl.trim().regionMatches(true, 0, "CREATE", 0, 6);
+    return DvDdlSupport.isCreateTableDdl(ddl);
   }
 
   private static String nvl(String value) {

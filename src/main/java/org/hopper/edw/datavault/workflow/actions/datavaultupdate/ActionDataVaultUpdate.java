@@ -1323,11 +1323,14 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
    */
   private boolean executeMissingTableCreates(List<IDvTable> tables, DataVaultModel model) {
     List<String> creates = new ArrayList<>();
+    List<String> indexes = new ArrayList<>();
     for (IDvTable table : tables) {
       try {
         for (String ddl : table.generateUpdateDdl(getMetadataProvider(), getVariables(), model)) {
           if (DvDdlSupport.extractCreateTableName(ddl) != null) {
             creates.add(ddl);
+          } else if (DvDdlSupport.isCreateIndexDdl(ddl)) {
+            indexes.add(ddl);
           }
         }
       } catch (Exception ex) {
@@ -1360,6 +1363,7 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
     try (Database db = new Database(loggingObject, getVariables(), targetDatabase)) {
       db.connect();
       Set<String> createdInBatch = new HashSet<>();
+      Set<String> createdNow = new HashSet<>();
       for (String ddl : creates) {
         if (Utils.isEmpty(ddl)) {
           continue;
@@ -1380,8 +1384,19 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
                 tableName != null ? tableName : targetDatabase.getName()));
         db.execStatements(ddl);
         if (!Utils.isEmpty(tableName)) {
-          createdInBatch.add(tableName.toLowerCase(Locale.ROOT));
+          String key = tableName.toLowerCase(Locale.ROOT);
+          createdInBatch.add(key);
+          createdNow.add(key);
         }
+      }
+      for (String indexDdl : indexes) {
+        String indexTable = DvDdlSupport.extractDdlTargetTableName(indexDdl);
+        if (Utils.isEmpty(indexTable)
+            || !createdNow.contains(indexTable.toLowerCase(Locale.ROOT))) {
+          continue;
+        }
+        logDetailed(executingDdlForTable(indexDdl, targetDatabase.getName()));
+        db.execStatements(indexDdl);
       }
     } catch (Exception e) {
       logError(

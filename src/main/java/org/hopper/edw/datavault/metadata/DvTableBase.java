@@ -415,6 +415,17 @@ public abstract class DvTableBase extends HopMetadataBase implements IHopMetadat
       if (!Utils.isEmpty(ddl)) {
         result.add(ddl);
       }
+      DvIndexDdlSupport.appendDataVaultIndex(
+          result,
+          db,
+          targetDatabaseMeta,
+          variables,
+          targetTableName,
+          this,
+          model,
+          config,
+          metadataProvider,
+          targetFields);
     } catch (Exception e) {
       throw new HopException("Error getting DDL for target table: " + targetTableName, e);
     }

@@ -33,6 +33,7 @@ Optional DDL constraints (both off by default):
 
 * **Generate primary keys** — dimension and junk surrogate keys, and bridge composite keys, as `PRIMARY KEY` on CREATE TABLE. Fact tables do not receive a primary key in this release.
 * **Generate foreign keys** — fact/bridge roles and dimension outriggers emit `FOREIGN KEY` clauses when the target engine supports them (not SingleStore). Parent dimensions receive a primary key when FK generation is enabled so references are valid. CREATE only; no ALTER retrofit.
+* **Lookup indexes** — update DDL also creates a non-unique index on the columns the load looks up: dimension natural keys (plus `date_from` on a versioned dimension), the surrogate key when it is not already the primary key, junk hash or key fields, bridge foreign keys, and accumulating-snapshot grain keys. A calendar dimension such as `d_date` is indexed on `date_key`. Run **Update target database structure** again to add these indexes on tables that already exist. Snowflake is skipped. Insert-only fact foreign keys are not indexed.
 
 
 Open a `.hdm` file in Hop GUI for the visual editor (same interaction model as the Data Vault canvas).

@@ -75,6 +75,7 @@ class DmJunkDimensionDdlTest {
 
     assertTrue(sql.contains("create table"), sql);
     assertFalse(sql.contains("idx_d_orders_junk_hk"), sql);
+    assertTrue(sql.contains("idx_d_orders_junk_nk"), sql);
   }
 
   @Test

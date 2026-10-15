@@ -113,7 +113,23 @@ public final class DvConstraintDdlSupport {
     if (!wantPk) {
       return List.of();
     }
+    return resolveDvLogicalKeyColumns(table, model, config, variables, layout);
+  }
 
+  /**
+   * Grain columns a load looks up, whether or not primary-key DDL is enabled. Hub and link hash
+   * keys, reference natural keys, and the satellite grain (parent hash, driving key, load date).
+   */
+  public static List<String> resolveDvLogicalKeyColumns(
+      DvTableBase table,
+      DataVaultModel model,
+      DataVaultConfiguration config,
+      IVariables variables,
+      IRowMeta layout)
+      throws HopException {
+    if (table == null || config == null) {
+      return List.of();
+    }
     if (table instanceof DvHub hub) {
       return nonEmptyList(resolveHubHashKeyColumn(hub, variables));
     }
@@ -360,7 +376,24 @@ public final class DvConstraintDdlSupport {
     if (table == null || config == null || !config.isGeneratePrimaryKeys()) {
       return List.of();
     }
+    return resolveBvLogicalKeyColumns(table, model, config, dataVaultModel, variables, layout);
+  }
 
+  /**
+   * Grain columns a Business Vault load looks up, whether or not primary-key DDL is enabled.
+   * Business SQL tables have no grain.
+   */
+  public static List<String> resolveBvLogicalKeyColumns(
+      BvTableBase table,
+      BusinessVaultModel model,
+      BusinessVaultConfiguration config,
+      DataVaultModel dataVaultModel,
+      IVariables variables,
+      IRowMeta layout)
+      throws HopException {
+    if (table == null || config == null) {
+      return List.of();
+    }
     if (table instanceof BvScd2Table scd2) {
       return resolveScd2PrimaryKeyColumns(scd2, config, dataVaultModel, variables, layout);
     }

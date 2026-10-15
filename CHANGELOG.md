@@ -4,6 +4,12 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Lookup indexes (issue #204)
+
+- Target DDL now adds a non-unique index on the columns a load looks up, and on the logical key when primary-key DDL is off. A Type 1 date dimension such as `d_date` is indexed on `date_key`. Versioned dimensions are indexed on the natural keys plus `date_from`, and on the surrogate key when that column is not already the primary key. Junk dimensions keep the hash-key index, or an index on the junk key fields when there is no hash column. Bridges and accumulating-snapshot facts are indexed on their upsert keys.
+- Data Vault satellites are indexed on parent hash, driving key, and load date, including when load-end-date is off. Hubs, links, and reference tables are indexed on their key when primary-key DDL does not already cover it. Business Vault identity maps, SCD2 tables, PIT tables, and bridges get the same treatment. Business SQL tables are unchanged.
+- Run **Update target database structure** to add the index on a table that already exists. Creating a missing table also creates its index. Snowflake is skipped. Insert-only fact foreign keys are not indexed.
+
 ### Date dimension load (issue #201)
 
 - A pure Type 1 dimension can use **Type 1 — skip unchanged** on the General tab. The generated load compares the source with the dimension table using Merge rows (diff) and sends only new and changed rows to Insert/Update. **Type 1 — overwrite** remains the default. **Add date dimension** selects skip unchanged. The load timestamp is not part of the comparison.

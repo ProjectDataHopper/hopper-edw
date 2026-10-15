@@ -43,6 +43,7 @@ import org.apache.hop.workflow.WorkflowMeta;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvConstraintDdlSupport;
 import org.hopper.edw.datavault.metadata.DvDdlSupport;
+import org.hopper.edw.datavault.metadata.DvIndexDdlSupport;
 import org.hopper.edw.datavault.metadata.ForeignKeySpec;
 import org.hopper.edw.datavault.metadata.ModelConfigurationResolver;
 import org.hopper.edw.datavault.metadata.targettypemapping.TargetTypeMappingSupport;
@@ -204,14 +205,16 @@ public abstract class BvTableBase extends HopMetadataBase implements IHopMetadat
       return result;
     }
 
-    String targetTableName = !Utils.isEmpty(getTableName()) ? getTableName() : getName();
+    String physicalTableName = !Utils.isEmpty(getTableName()) ? getTableName() : getName();
     String schema = ddlSchemaName();
     if (variables != null && !Utils.isEmpty(schema)) {
       schema = variables.resolve(schema);
     }
+    String targetTableName = physicalTableName;
     if (!Utils.isEmpty(schema)) {
       targetTableName =
-          targetDatabaseMeta.getQuotedSchemaTableCombination(variables, schema, targetTableName);
+          targetDatabaseMeta.getQuotedSchemaTableCombination(
+              variables, schema, physicalTableName);
     }
     IRowMeta targetFields =
         getTargetTableLayout(metadataProvider, variables, model, dataVaultModel);
@@ -243,8 +246,21 @@ public abstract class BvTableBase extends HopMetadataBase implements IHopMetadat
       if (!Utils.isEmpty(ddl)) {
         result.add(ddl);
       }
+      DvIndexDdlSupport.appendBusinessVaultIndex(
+          result,
+          db,
+          targetDatabaseMeta,
+          variables,
+          schema,
+          physicalTableName,
+          this,
+          model,
+          config,
+          dataVaultModel,
+          targetFields);
     } catch (Exception e) {
-      throw new HopException("Error getting DDL for Business Vault table: " + targetTableName, e);
+      throw new HopException(
+          "Error getting DDL for Business Vault table: " + physicalTableName, e);
     }
     return result;
   }

@@ -787,10 +787,6 @@ public class DvSatellite extends DvTableBase
     }
 
     DataVaultConfiguration config = model.getConfigurationOrDefault();
-    if (config != null && config.isUseLoadEndDate()) {
-      appendLoadEndDateHashKeyIndexDdl(result, metadataProvider, variables, model, config);
-    }
-
     if (!isStatusTrackingEnabled()) {
       return result;
     }
@@ -826,6 +822,17 @@ public class DvSatellite extends DvTableBase
       if (!Utils.isEmpty(ddl)) {
         result.add(ddl);
       }
+      DvIndexDdlSupport.appendDataVaultIndex(
+          result,
+          db,
+          targetDatabaseMeta,
+          variables,
+          stsTableName,
+          this,
+          model,
+          config,
+          metadataProvider,
+          stsLayout);
     } catch (Exception e) {
       throw new HopException("Error getting DDL for STS target table: " + stsTableName, e);
     }
@@ -854,60 +861,6 @@ public class DvSatellite extends DvTableBase
       return columns;
     }
     return new String[] {columns[0], drivingKeyColumn};
-  }
-
-  /**
-   * Adds a hash-key index on the satellite target table when load-end-date updates are enabled.
-   * Supports the Update transform that closes prior satellite rows by parent hash key.
-   */
-  private void appendLoadEndDateHashKeyIndexDdl(
-      List<String> result,
-      IHopMetadataProvider metadataProvider,
-      IVariables variables,
-      DataVaultModel model,
-      DataVaultConfiguration config)
-      throws HopException {
-    DatabaseMeta targetDatabaseMeta =
-        DvSpecialRecordSupport.loadTargetDatabase(metadataProvider, config);
-    if (targetDatabaseMeta == null) {
-      return;
-    }
-
-    IRowMeta targetLayout = getTargetTableLayout(metadataProvider, variables, model);
-    if (targetLayout == null || targetLayout.isEmpty()) {
-      return;
-    }
-
-    String hashKeyField = targetLayout.getValueMeta(0).getName();
-    String targetTableName = !Utils.isEmpty(getTableName()) ? getTableName() : getName();
-    if (Utils.isEmpty(hashKeyField) || Utils.isEmpty(targetTableName)) {
-      return;
-    }
-
-    String schemaTable =
-        targetDatabaseMeta.getQuotedSchemaTableCombination(variables, null, targetTableName);
-    String[] idxFields = new String[] {hashKeyField};
-
-    ILoggingObject loggingObject =
-        new SimpleLoggingObject(
-            getClass().getSimpleName() + ".generateUpdateDdl.index",
-            LoggingObjectType.GENERAL,
-            null);
-    try (Database db = new Database(loggingObject, variables, targetDatabaseMeta)) {
-      db.connect();
-      if (!db.checkIndexExists(schemaTable, idxFields)) {
-        String indexName = "idx_" + targetTableName + "_hk";
-        String indexDdl =
-            db.getCreateIndexStatement(
-                schemaTable, indexName, idxFields, false, false, false, true);
-        if (!Utils.isEmpty(indexDdl)) {
-          result.add(indexDdl);
-        }
-      }
-    } catch (Exception e) {
-      throw new HopException(
-          "Error getting hash key index DDL for satellite target table: " + targetTableName, e);
-    }
   }
 
   @Override

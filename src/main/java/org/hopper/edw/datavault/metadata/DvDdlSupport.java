@@ -258,11 +258,22 @@ public final class DvDdlSupport {
     return enrichEngineDdl(databaseMeta, hopDdl);
   }
 
-  static boolean isCreateTableDdl(String ddl) {
+  /** True for {@code CREATE TABLE} only. {@code CREATE INDEX} is not a table create. */
+  public static boolean isCreateTableDdl(String ddl) {
     if (Utils.isEmpty(ddl)) {
       return false;
     }
-    return ddl.trim().regionMatches(true, 0, "CREATE", 0, 6);
+    return ddl.trim().matches("(?is)^CREATE\\s+(OR\\s+REPLACE\\s+)?TABLE\\b.*");
+  }
+
+  /** True for {@code CREATE INDEX} and {@code CREATE UNIQUE INDEX}. */
+  public static boolean isCreateIndexDdl(String ddl) {
+    if (Utils.isEmpty(ddl) || isCreateTableDdl(ddl)) {
+      return false;
+    }
+    String trimmed = ddl.trim();
+    return trimmed.regionMatches(true, 0, "CREATE", 0, 6)
+        && trimmed.matches("(?is).*\\bINDEX\\b.*");
   }
 
   /**
