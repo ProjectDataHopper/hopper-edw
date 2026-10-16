@@ -77,6 +77,18 @@ Prerequisites: **Apache Hop 2.20** (development `2.20.0-SNAPSHOT`) and **Java 21
 Compose v2 for the two commands above. See link:../getting-started-retail.adoc[getting-started-retail]
 for what the sample contains.
 
+What you should see (verified on 2026-10-16):
+
+* The first command ends with
+  `PostgreSQL is ready (test@localhost:54320/test; also test_source, test_edw, test_ops, test_ops_analytics for retail-example; ...)`.
+* The initial load ends with `Workflow execution finished` and a duration of about two minutes, after
+  writing `retail-example/work/reports/retail-dv-initial-report.md` (and `.html`).
+* `\dt` lists the loaded warehouse in `test_edw`: `hub_customer`, `hub_order`, `sat_*`, `lnk_*`,
+  `d_customer`, `d_date`, `f_orders`, `f_order_lines`, `customer_360_bv`, plus the OPS tables
+  `hub_model`, `hub_load_run`, `hub_hop_executions`.
+* `retail-example/work/` also holds `execution-maps/run-retail-initial.hem` (476 nodes) and
+  `drawio/retail-solution.drawio` — the artifacts modules 4 and 7 read.
+
 == Writing a new module
 
 Copy link:module-template.adoc[module-template.adoc] and keep the six sections in order. The format
