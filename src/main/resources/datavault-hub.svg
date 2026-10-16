@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
   - Copyright 2026 i-Bridge bv
   -
@@ -14,4 +15,71 @@
   - limitations under the License.
   -
   -->
-<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" fill="#2e8b57"/><text x="16" y="21" font-size="14" fill="white" text-anchor="middle">H</text></svg>
+
+<svg
+   width="32"
+   height="32"
+   viewBox="0 0 32 32"
+   version="1.1"
+   id="svg4"
+   sodipodi:docname="datavault-hub.svg"
+   inkscape:version="1.4.3 (0d15f75042, 2025-12-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="namedview4"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="27.6875"
+     inkscape:cx="16"
+     inkscape:cy="16"
+     inkscape:window-width="1920"
+     inkscape:window-height="1128"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg4" />
+  <!-- Silo: domed roof over a banded cylinder -->
+  <path
+     d="M5 11 V27 A7 2 0 0 0 19 27 V11 Z"
+     fill="#2e8b57"
+     id="path2" />
+  <ellipse
+     cx="12"
+     cy="11"
+     rx="7"
+     ry="2"
+     fill="#3cb371"
+     id="ellipse2" />
+  <path
+     d="M5 16.5 A7 2 0 0 0 19 16.5 M5 22 A7 2 0 0 0 19 22"
+     fill="none"
+     stroke="#1f5f3b"
+     stroke-width="1"
+     id="path3" />
+  <!-- Badge -->
+  <circle
+     cx="25"
+     cy="25"
+     r="6.5"
+     fill="#1f5f3b"
+     stroke="white"
+     stroke-width="1"
+     id="circle3" />
+  <path
+     d="M23 22.3 V27.7 M27 22.3 V27.7 M23 25 H27"
+     fill="none"
+     stroke="white"
+     stroke-width="1.6"
+     stroke-linecap="round"
+     id="path4" />
+</svg>

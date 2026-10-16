@@ -69,7 +69,7 @@ class DmTableDisplaySupportTest {
         DmTableDisplaySupport.FACT_ICON,
         DmTableDisplaySupport.resolveTableIconPath(DmTableType.FACT));
     assertEquals(
-        DmTableDisplaySupport.FACT_ICON,
+        DmTableDisplaySupport.FACTLESS_FACT_ICON,
         DmTableDisplaySupport.resolveTableIconPath(DmTableType.FACTLESS_FACT));
     assertEquals(
         DmTableDisplaySupport.FACT_ICON,

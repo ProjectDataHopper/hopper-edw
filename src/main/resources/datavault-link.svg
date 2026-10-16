@@ -14,4 +14,18 @@
   - limitations under the License.
   -
   -->
-<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" fill="#ff8c00"/><text x="16" y="21" font-size="14" fill="white" text-anchor="middle">L</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <!-- Two curvy cables crossing at the joint -->
+  <path d="M4 5 C13 5 9 19 19 19" fill="none" stroke="#ff8c00" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M4 19 C13 19 9 5 19 5" fill="none" stroke="#b35f00" stroke-width="2.6" stroke-linecap="round"/>
+  <!-- Plugs -->
+  <rect x="1" y="3" width="4" height="4" rx="1" fill="#b35f00"/>
+  <rect x="1" y="17" width="4" height="4" rx="1" fill="#b35f00"/>
+  <rect x="18" y="3" width="4" height="4" rx="1" fill="#b35f00"/>
+  <rect x="18" y="17" width="4" height="4" rx="1" fill="#b35f00"/>
+  <!-- Joint -->
+  <circle cx="11.5" cy="12" r="2.2" fill="white" stroke="#b35f00" stroke-width="1.2"/>
+  <!-- Badge -->
+  <circle cx="25" cy="25" r="6.5" fill="#b35f00" stroke="white" stroke-width="1"/>
+  <path d="M23.5 22.3 V27.5 H27" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

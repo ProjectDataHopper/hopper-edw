@@ -15,5 +15,14 @@
   -
   -->
 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-    <rect x="2" y="2" width="27" height="27" fill="#1e3a5f"/>
-    <text x="16" y="21" font-size="14" fill="white" text-anchor="middle">EM</text></svg>
+  <!-- Performance gauge -->
+  <path d="M4.50 18.00 A11.5 11.5 0 0 1 9.91 8.25" fill="none" stroke="#3cb371" stroke-width="4"/>
+  <path d="M10.42 7.94 A11.5 11.5 0 0 1 21.58 7.94" fill="none" stroke="#ff8c00" stroke-width="4"/>
+  <path d="M22.09 8.25 A11.5 11.5 0 0 1 27.50 18.00" fill="none" stroke="#e0473c" stroke-width="4"/>
+  <path d="M16 18 L19.08 9.54" stroke="#0e3a5a" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="16" cy="18" r="2.4" fill="#0e3a5a"/>
+  <!-- Metric bars -->
+  <rect x="7" y="25" width="4" height="5" rx="0.6" fill="#4a90e2"/>
+  <rect x="14" y="23" width="4" height="7" rx="0.6" fill="#4a90e2"/>
+  <rect x="21" y="26" width="4" height="4" rx="0.6" fill="#4a90e2"/>
+</svg>
