@@ -890,6 +890,14 @@
                   </includes>
                 </resource>
                 <resource>
+                  <directory>${project.basedir}/docs/training</directory>
+                  <targetPath>training</targetPath>
+                  <includes>
+                    <include>*.js</include>
+                    <include>*.css</include>
+                  </includes>
+                </resource>
+                <resource>
                   <directory>${project.basedir}/docs</directory>
                   <includes>
                     <include>hop-web-modelers.md</include>
