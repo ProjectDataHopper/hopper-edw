@@ -1,0 +1,161 @@
+/*
+ * Copyright 2026 i-Bridge bv
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* Questionnaire widget for the Data Hopper EDW training modules. */
+
+.edw-quiz {
+  margin: 1.6em 0;
+  padding: 1.1em 1.3em;
+  border: 1px solid #cfd9e6;
+  border-radius: 8px;
+  background: #f6f8fb;
+  color: #0e1a2b;
+}
+
+.edw-quiz-q {
+  padding: 0.85em 0;
+  border-top: 1px solid #e3e9f2;
+}
+
+.edw-quiz-q:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.edw-quiz-prompt {
+  margin: 0 0 0.6em;
+  font-weight: 600;
+}
+
+.edw-quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35em;
+}
+
+.edw-quiz-option {
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  padding: 0.45em 0.7em;
+  border: 1px solid #cfd9e6;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #0e1a2b;
+}
+
+.edw-quiz-option:hover:not(:disabled) {
+  border-color: #0b5fc4;
+}
+
+.edw-quiz-option:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.edw-quiz-option.is-picked {
+  border-color: #0b5fc4;
+  box-shadow: inset 3px 0 0 0 #0b5fc4;
+}
+
+.edw-quiz-option.is-correct {
+  border-color: #0f7a4d;
+  background: #eaf7f0;
+  box-shadow: inset 3px 0 0 0 #0f7a4d;
+}
+
+.edw-quiz-option.is-wrong {
+  border-color: #b3261e;
+  background: #fdeceb;
+  box-shadow: inset 3px 0 0 0 #b3261e;
+}
+
+.edw-quiz-explain {
+  margin: 0.6em 0 0;
+  font-size: 0.96em;
+  color: #3f4f68;
+  background: #ffffff;
+  border-left: 3px solid #0b5fc4;
+  padding: 0.55em 0.75em;
+  border-radius: 0 6px 6px 0;
+}
+
+.edw-quiz-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75em;
+  margin-top: 1.1em;
+  padding-top: 0.8em;
+  border-top: 1px solid #e3e9f2;
+}
+
+.edw-quiz-score {
+  flex: 1 1 14em;
+  font-weight: 600;
+}
+
+.edw-quiz-retry,
+.edw-quiz-copy {
+  font: inherit;
+  cursor: pointer;
+  padding: 0.4em 0.9em;
+  border-radius: 6px;
+  border: 1px solid #0b5fc4;
+  background: #e6f0fb;
+  color: #0b5fc4;
+}
+
+.edw-quiz-copy {
+  background: #0b5fc4;
+  color: #ffffff;
+  border-color: #0b5fc4;
+}
+
+.edw-quiz-copy-area {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .edw-quiz {
+    background: #16202e;
+    border-color: #2b3a4d;
+    color: #e7edf6;
+  }
+  .edw-quiz-q,
+  .edw-quiz-footer {
+    border-color: #2b3a4d;
+  }
+  .edw-quiz-option,
+  .edw-quiz-explain {
+    background: #1d2a3a;
+    color: #e7edf6;
+    border-color: #33455c;
+  }
+  .edw-quiz-option.is-correct {
+    background: #10352a;
+    border-color: #1c9a67;
+  }
+  .edw-quiz-option.is-wrong {
+    background: #3a1a19;
+    border-color: #d1594f;
+  }
+  .edw-quiz-explain {
+    color: #c2cddd;
+  }
+}

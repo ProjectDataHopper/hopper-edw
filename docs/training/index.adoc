@@ -1,0 +1,151 @@
+= Data Hopper EDW training
+:toc: left
+:toclevels: 2
+:sectanchors:
+
+These modules teach Data Hopper EDW by walking a real warehouse — the `retail-example` project that
+ships with this repository — and then check what you learned with a short questionnaire.
+
+The path is built for **orientation and confidence**: when you finish the core path you can set up
+hopper-edw, model a source, generate and load a raw vault, and explain how the layers relate. Expert
+detail lives in the reference guides linked from each module.
+
+== How a module works
+
+Every module has the same six parts:
+
+. **Why it matters** — the problem the topic solves.
+. **Concepts** — the minimum theory, with a picture.
+. **Guided walkthrough** — step by step in Hop GUI.
+. **Try it yourself** — a small exercise with a checkable outcome.
+. **Questionnaire** — 5-10 questions, each with an explanation for the answer. Answer them in the
+page: the score updates as you go, and **Copy my results** puts a text summary on your clipboard so
+you can send it to your trainer or keep it with your notes.
+. **Where to go next** — the reference documents behind the module.
+
+== Paths
+
+[cols="1,2,2", options="header"]
+|===
+|Path |Modules |What you can do at the end
+
+|Core — getting started
+|0, 1, 2, 3, 4
+|Set up hopper-edw, model a source, generate and load a raw vault
+
+|Advanced — warehouse engineering
+|5, 6, 7, 8
+|Business Vault, marts, lineage, quality, operations, AI help
+
+|Manager and architect
+|0, 7
+|Explain the layers, the build order, and where the controls sit
+|===
+
+== Modules
+
+[cols="1,2,1", options="header"]
+|===
+|# |Module |Time
+
+|0
+|link:module-0-orientation.adoc[Orientation: the EDW Journey]
+|20-30 min
+
+|1
+|link:module-1-installation-and-setup.adoc[Installation and EDW setup]
+|25-35 min
+
+|2
+|link:module-2-catalog-and-source-models.adoc[Data Catalog and source models]
+|30-40 min
+
+|3
+|link:module-3-raw-data-vault.adoc[Raw Data Vault]
+|30-40 min
+
+|4
+|link:module-4-loading-and-resource-groups.adoc[Loading and resource definition groups]
+|30-40 min
+
+|5
+|link:module-5-business-vault.adoc[Business Vault]
+|30-40 min
+
+|6
+|link:module-6-dimensional-models.adoc[Dimensional models]
+|30-40 min
+
+|7
+|link:module-7-lineage-quality-operations.adoc[Lineage, quality and operations]
+|30-40 min
+
+|8
+|link:module-8-ai-help-and-mcp.adoc[AI help and the MCP server (optional)]
+|20-30 min
+|===
+
+Every module is checked by
+`src/test/java/org/hopper/edw/datavault/docs/TrainingModulesTest.java`; module 1 also pins the
+supported versions (Apache Hop 2.20, Java 21).
+
+== Training environment
+
+Everything except module 1 is done inside the `retail-example` project — there is nothing to build
+by hand.
+
+[source,sh]
+----
+# once: local PostgreSQL on port 54320 (container hop-data-vault-postgres-local)
+./scripts/run-postgres.sh up
+
+# optional but recommended: the finished warehouse, so you can compare with your own work
+./scripts/run-hop.sh retail-example workflows/run-retail-initial.hwf
+
+# optional, for module 7: the local Marquez stack a Hop Lineage View reads
+./scripts/run-marquez.sh up
+
+# then: open Hop GUI on the project folder
+#   File -> Open project -> retail-example
+----
+
+Prerequisites: **Apache Hop 2.20** (development `2.20.0-SNAPSHOT`) and **Java 21**, plus Docker with
+Compose v2 for the commands above. Marquez is only needed for module 7; `./scripts/run-marquez.sh
+status` reports whether its API answers, `down` stops the stack and `reset` wipes its database too.
+See link:../getting-started-retail.adoc[getting-started-retail]
+for what the sample contains.
+
+What you should see (verified on 2026-10-16):
+
+* The first command ends with
+  `PostgreSQL is ready (test@localhost:54320/test; also test_source, test_edw, test_ops, test_ops_analytics for retail-example; ...)`.
+* The initial load ends with `Workflow execution finished` and a duration of about two minutes, after
+  writing `retail-example/work/reports/retail-dv-initial-report.md` (and `.html`).
+* `retail-example/work/` also holds `execution-maps/run-retail-initial.hem` (476 nodes) and
+  `drawio/retail-solution.drawio` — the artifacts modules 4 and 7 read.
+* In Hop GUI the **Database** perspective lists the loaded warehouse on connection **Vault** —
+  expand **Vault → public** for `hub_customer`, `hub_order`, `sat_*`, `lnk_*`, `d_customer`, `d_date`,
+  `f_orders`, `f_order_lines` and `customer_360_bv`. The OPS tables (`hub_model`, `hub_load_run`,
+  `hub_hop_executions`) are on connection **OPS**; **CRM** holds the source tables and
+  **OpsAnalytics** the operational analytics warehouse.
+
+== Writing a new module
+
+Copy link:module-template.adoc[module-template.adoc] and keep the six sections in order. The format
+is enforced by `src/test/java/org/hopper/edw/datavault/docs/TrainingModulesTest.java`:
+
+[source,sh]
+----
+mvn -o test -Dtest=TrainingModulesTest
+mvn -o asciidoctor:process-asciidoc@generate-html-docs   # preview in target/generated-docs/training/
+----
+
+Add the module to `MODULES` in that test **and** to the table above in the same commit; the test
+fails if either is missing.
+
+== Related documentation
+
+* link:../architecture.adoc[Architecture] — catalog, resource definition group, build vs run
+* link:../getting-started-edw.adoc[Getting started — building an EDW]
+* link:../getting-started-retail.adoc[Getting started — retail example tour]
+* link:../feature-overview.adoc[Feature overview]
