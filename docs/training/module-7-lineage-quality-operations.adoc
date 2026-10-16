@@ -366,3 +366,8 @@ text summary to keep.
 * link:module-0-orientation.adoc[Module 0 — Orientation: the EDW Journey] — the manager and architect path pairs module 0 with this one
 * link:module-8-ai-help-and-mcp.adoc[Module 8 — AI help and MCP] — next step
 * link:index.adoc[Training index] — all modules as they land
+
+'''
+
+[.text-center]
+link:index.adoc[← Back to the training index]

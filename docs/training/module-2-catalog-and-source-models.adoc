@@ -298,3 +298,8 @@ a text summary to keep.
 * link:../getting-started-edw.adoc[Getting started — building an EDW] — chapter 1: source model and publish to the catalog
 * link:module-3-raw-data-vault.adoc[Module 3 — Raw Data Vault] — next step
 * link:index.adoc[Training index] — modules 1 to 8 are published there as they land
+
+'''
+
+[.text-center]
+link:index.adoc[← Back to the training index]

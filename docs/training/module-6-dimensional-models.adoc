@@ -267,4 +267,9 @@ a text summary to keep.
 * link:../bus-matrix.adoc[Kimball bus matrix] — tagging facts, the viewers, CSV/SVG export and the CLI
 * link:../dimensional-update-action.adoc[Dimensional Update and Publish actions] — the two workflow actions, option by option
 * link:module-7-lineage-quality-operations.adoc[Module 7 — Lineage, quality and operations] — next step
-* link:index.adoc[Training index] — modules 1 to 8 as they land
+* link:index.adoc[Training index] — all modules and the training environment
+
+'''
+
+[.text-center]
+link:index.adoc[← Back to the training index]

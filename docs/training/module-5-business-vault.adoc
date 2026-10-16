@@ -349,3 +349,8 @@ text summary to keep.
 * link:../business-vault-configuration.adoc[Business Vault configuration] — target database, sentinels and SCD2 defaults
 * link:../dv-integration-modes.adoc[Data Vault integration modes] — when the raw vault is loaded outside Hop
 * link:module-6-dimensional-models.adoc[Module 6 — Dimensional models] — next step: facts, dimensions and the bus matrix
+
+'''
+
+[.text-center]
+link:index.adoc[← Back to the training index]

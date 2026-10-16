@@ -305,3 +305,8 @@ text summary to keep.
 * link:../operations.adoc[Operations] — Docker runners, the batch wave, metrics and reports
 * link:../getting-started-edw.adoc[Getting started — building an EDW] — chapters 3-5 follow this module end to end
 * link:module-5-business-vault.adoc[Module 5 — Business Vault] — next step: add a Business Vault to the same group
+
+'''
+
+[.text-center]
+link:index.adoc[← Back to the training index]

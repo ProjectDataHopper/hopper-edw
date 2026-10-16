@@ -213,3 +213,8 @@ text summary to keep.
 * link:../edw-journey.adoc[EDW Journey perspective] — every node and button of the tree
 * link:../feature-overview.adoc[Feature overview] — the capability list with maturity
 * link:module-1-installation-and-setup.adoc[Module 1 — Installation and EDW setup] — next step
+
+'''
+
+[.text-center]
+link:index.adoc[← Back to the training index]

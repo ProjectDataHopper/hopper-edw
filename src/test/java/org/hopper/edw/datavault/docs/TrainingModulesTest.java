@@ -226,6 +226,23 @@ class TrainingModulesTest {
   }
 
   @Test
+  void everyModuleLinksBackToTheIndexAtTheBottom() throws IOException {
+    List<String> pages = new java.util.ArrayList<>(MODULES);
+    pages.add("module-template.adoc");
+    for (String page : pages) {
+      Path path = TRAINING.resolve(page);
+      String adoc = read(path).stripTrailing();
+      assertTrue(
+          adoc.contains("Back to the training index"),
+          path + " must end with a link back to the training index");
+      String tail = adoc.substring(Math.max(0, adoc.length() - 200));
+      assertTrue(
+          tail.contains("link:index.adoc["),
+          path + " must put the link back to the training index at the very bottom");
+    }
+  }
+
+  @Test
   void installModuleNamesTheSupportedVersions() throws IOException {
     String module = read(TRAINING.resolve("module-1-installation-and-setup.adoc"));
     assertTrue(module.contains("2.20"), "module 1 must name the supported Hop version (2.20)");

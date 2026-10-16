@@ -63,3 +63,8 @@
 
 * link:index.adoc[Training index]
 * link:../architecture.adoc[Architecture]
+
+'''
+
+[.text-center]
+link:index.adoc[← Back to the training index]

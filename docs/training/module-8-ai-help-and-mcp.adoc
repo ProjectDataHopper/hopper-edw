@@ -293,3 +293,8 @@ a text summary to keep.
 the repository under `docs/ai-file-schemas/` — it is not part of this offline documentation bundle.
 * https://mcp.data-hopper.com/mcp — the public MCP server; tool list and client configuration in `mcp/README.md`
 * link:index.adoc[Training index] — the other modules in this curriculum
+
+'''
+
+[.text-center]
+link:index.adoc[← Back to the training index]

@@ -285,3 +285,8 @@ you a text summary to keep.
 * link:../getting-started-edw.adoc[Getting started — building an EDW] — chapter 0 bootstrap and the troubleshooting table
 * link:module-2-catalog-and-source-models.adoc[Module 2 — Data Catalog and source models] — next step
 * link:index.adoc[Training index] — all modules and the training environment
+
+'''
+
+[.text-center]
+link:index.adoc[← Back to the training index]
