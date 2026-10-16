@@ -207,15 +207,12 @@ the file on the **Business Vault models** tab and save.
 Business Vault models, then all dimensional models, each layer in list order; watch the log for the
 SCD2 and PIT pipelines.
 . Prove it in the database. In the retail example the SCD2 table is `customer_360_bv`; use the name your
-own model generated if you followed the steps on your own vault:
+own model generated if you followed the steps on your own vault. In the **Database** perspective,
+connect **Vault**, expand **Vault → public**, select the table and press **Show object information**:
 +
-[source,sh]
-----
-docker exec hop-data-vault-postgres-local psql -U test -p 54320 -d test_edw -c '\d+ customer_360_bv'
-----
-+
-Expected: the parent hash key, the hub business keys, the validity columns (`x_from_ts` / `x_to_ts` in
-this project), and one column per field mapping.
+Expected in the column list: the parent hash key, the hub business keys, the validity columns
+(`x_from_ts` / `x_to_ts` in this project), and one column per field mapping. **Preview table** shows the
+rows themselves.
 
 == Try it yourself
 

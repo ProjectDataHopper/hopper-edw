@@ -162,27 +162,40 @@ Run the training environment end to end, from the repository root:
 # 2. the finished retail warehouse, so you can compare with your own work later
 ./scripts/run-hop.sh retail-example workflows/run-retail-initial.hwf
 
-# 3. prove the warehouse database answers
-docker exec hop-data-vault-postgres-local psql -U test -p 54320 -d test_edw -c '\dt' | head -20
-
-# 4. optional, for module 7: the local Marquez stack a Hop Lineage View reads
+# 3. optional, for module 7: the local Marquez stack a Hop Lineage View reads
 ./scripts/run-marquez.sh up
 ----
 
 The first `run-hop.sh` call builds or reuses the local Hop image (`docker-hop:latest`); if you
 rebuilt the plugin and want the image refreshed, force it with `./scripts/rebuild-hop.sh`. The third
-command prints the table list of `test_edw`: empty before the first load, or the retail tables after
-it — either is fine; the point is that the connection works. The fourth command answers with
-`Marquez is ready.` and the API/UI URLs; skip it if you are not going to do module 7, and stop the
-stack later with `./scripts/run-marquez.sh down`.
+command answers with `Marquez is ready.` and the API/UI URLs; skip it if you are not going to do
+module 7, and stop the stack later with `./scripts/run-marquez.sh down`.
+
+Check the warehouse the way the later modules do — in Hop GUI:
+
+. Open the **Database** perspective (the database icon in the perspective bar).
+. Select connection **Vault** and press **Connect**: schemas and tables load, so expanding
+**Vault → public** lists the warehouse tables — empty before the first load, or `hub_*`, `sat_*`,
+`d_*` and `f_*` after it. The other `retail-example` connections are **CRM** (source tables), **OPS**
+(the operations database) and **OpsAnalytics**.
+. Press **Open SQL editor** on **Vault** and run a query with **Run** (`Ctrl+Enter`):
++
+[source,sql]
+----
+select count(*) from f_orders;
+----
++
+`relation "f_orders" does not exist` before the initial load is expected: that is the state a
+hand-built warehouse starts from in modules 2 to 4.
 
 Checkpoint — you can show all five:
 
 * `retail-example` opens in Hop GUI,
 * **Tools → Configure EDW setup...** opens and shows `local-catalog` and the four shared
   configurations,
-* connection `Vault` reaches the database started by `run-postgres.sh up`,
-* `docker exec ... -c '\dt'` answers against `test_edw`, and
+* connection `Vault` connects in the **Database** perspective and lists the warehouse tables under
+  **public**,
+* a query in **Vault**'s SQL editor returns a result (after the initial load), and
 * `./scripts/run-marquez.sh status` reports the API accepting requests on
   `http://localhost:5001`.
 

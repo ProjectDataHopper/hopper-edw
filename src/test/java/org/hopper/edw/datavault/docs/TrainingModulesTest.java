@@ -16,6 +16,7 @@
 package org.hopper.edw.datavault.docs;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -239,6 +240,28 @@ class TrainingModulesTest {
       assertTrue(
           tail.contains("link:index.adoc["),
           path + " must put the link back to the training index at the very bottom");
+    }
+  }
+
+  /**
+   * The curriculum teaches the Hop GUI: learners verify the warehouse in the **Database**
+   * perspective on the `CRM` / `OPS` / `Vault` connections, never with command-line SQL on the
+   * database container (maintainer decision, 2026-10-17). Shell steps are limited to starting the
+   * environment.
+   */
+  @Test
+  void modulesNeverAskTheLearnerToUseCommandLineDatabase() throws IOException {
+    List<String> pages = new java.util.ArrayList<>(MODULES);
+    pages.add("module-template.adoc");
+    pages.add("index.adoc");
+    for (String page : pages) {
+      Path path = TRAINING.resolve(page);
+      String adoc = read(path);
+      assertFalse(
+          adoc.contains("docker exec") || adoc.contains("psql "),
+          path
+              + " must send the learner to the Database perspective instead of command-line SQL"
+              + " (use the CRM / OPS / Vault connections)");
     }
   }
 

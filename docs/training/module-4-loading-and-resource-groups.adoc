@@ -154,14 +154,10 @@ image::../images/update-resource-definition-group-action-dialog.png[The Update r
 
 . Run the workflow from the GUI (or with `hop-run` / a Docker runner). Watch the log and the action's
 corner badge.
-. When the run has finished, confirm the tables exist on the target connection:
+. When the run has finished, confirm the tables exist on the target connection. In the **Database**
+perspective, connect **Vault** and expand **Vault → public**:
 +
-[source,sh]
-----
-docker exec hop-data-vault-postgres-local psql -U test -p 54320 -d test_edw -c '\dt' | head -20
-----
-+
-Expected: `hub_*`, `lnk_*` and `sat_*` tables.
+Expected: `hub_*`, `lnk_*` and `sat_*` tables. Select one and press **Preview table** to see rows.
 . Compare: every hub, link and satellite table name from your `.hdv` appears in the list.
 
 === Find what the load published

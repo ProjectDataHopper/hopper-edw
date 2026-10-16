@@ -135,11 +135,12 @@ date aliases collapse into `d_date` and the cell shows a role count.
 +
 image::../images/bus-matrix-of-the-retail-example.png[Bus matrix for retail-sources — inventory, order lines, and orders against conformed dimensions,align="center"]
 
-. Query a loaded fact through the `Vault` connection to prove the grain:
+. Query a loaded fact on the `Vault` connection to prove the grain — in the **Database** perspective,
+**Open SQL editor** on **Vault**, then **Run** (`Ctrl+Enter`):
 +
-[source,sh]
+[source,sql]
 ----
-docker exec hop-data-vault-postgres-local psql -U test -p 54320 -d test_edw -c 'select count(*) from f_orders'
+select count(*) from f_orders;
 ----
 +
 One row per order — the grain you read on the fact in step 2, now in the database.
@@ -157,12 +158,9 @@ table).
 
 Check your work: no model check errors, the fact still loads, and the bus matrix for your group
 shows your fact against the new dimension next to the existing ones — if the fact's row is missing,
-give it a **Business** / process level tag first. The new table is in the database list too:
-
-[source,sh]
-----
-docker exec hop-data-vault-postgres-local psql -U test -p 54320 -d test_edw -c '\dt'
-----
+give it a **Business** / process level tag first. The new table is in the tree too: in the
+**Database** perspective, **Vault → public** lists it next to the other marts. To read the fact's
+columns instead of its rows, select it and press **Show object information**.
 
 If you have not built your own models yet, do the reading version instead: write down the grain, the
 measures and the three date roles of `f_order_lines`, then find its row in the retail bus matrix and
