@@ -289,6 +289,7 @@ a text summary to keep.
 == Where to go next
 
 * link:../ai-advisory.md[AI help and advisory] — prerequisites, providers, scenarios, context inclusions, proposal types and the privacy rules
-* link:../ai-file-schemas/README.md[AI file-schema pack] — XSD and JSON Schema plus purpose docs for external agents
+* The **AI file-schema pack** (XSD and JSON Schema plus purpose docs for external agents) lives in
+the repository under `docs/ai-file-schemas/` — it is not part of this offline documentation bundle.
 * https://mcp.data-hopper.com/mcp — the public MCP server; tool list and client configuration in `mcp/README.md`
 * link:index.adoc[Training index] — the other modules in this curriculum

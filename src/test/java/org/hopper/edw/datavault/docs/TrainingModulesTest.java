@@ -72,6 +72,14 @@ class TrainingModulesTest {
   private static final String CORRECT_MARKER = "data-correct=\"true\"";
   private static final String EXPLAIN_MARKER = "class=\"edw-quiz-explain\"";
 
+  /**
+   * Markdown files the docs build copies into the generated bundle (pom.xml asciidoctor resources).
+   * A training page may not link to a Markdown file outside this set: the link would dangle in
+   * {@code target/generated-docs} and in the plugin zip, which is what users read.
+   */
+  private static final Set<String> SHIPPED_MARKDOWN =
+      Set.of("ai-advisory.md", "performance-tuning.md", "hop-web-modelers.md");
+
   @Test
   void indexListsEveryModule() throws IOException {
     String index = read(INDEX);
@@ -186,6 +194,34 @@ class TrainingModulesTest {
     for (String required : SECTION_TITLES) {
       assertTrue(
           titles.contains(required), TEMPLATE + " is missing the '== " + required + "' section");
+    }
+  }
+
+  @Test
+  void everyLinkPointsAtAShippedDocument() throws IOException {
+    Path docs = Path.of("docs");
+    for (String module : MODULES) {
+      Path path = TRAINING.resolve(module);
+      for (String link : literalTargets(LINK, read(path))) {
+        String cleaned = link.split("#", 2)[0].trim();
+        if (cleaned.isEmpty() || cleaned.startsWith("http") || cleaned.startsWith("mailto:")) {
+          continue;
+        }
+        Path target = path.getParent().resolve(cleaned).normalize();
+        if (!Files.isRegularFile(target) || !target.startsWith(docs)) {
+          continue; // everyImageAndDocumentLinkResolves reports dangling or outside-docs targets
+        }
+        String relative =
+            docs.relativize(target).toString().replace('\\', '/');
+        if (relative.endsWith(".md")) {
+          assertTrue(
+              SHIPPED_MARKDOWN.contains(relative) || relative.startsWith("presentations/"),
+              path
+                  + " links "
+                  + relative
+                  + ", which the docs build does not copy into the bundle (pom.xml resources)");
+        }
+      }
     }
   }
 
