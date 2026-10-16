@@ -1,0 +1,77 @@
+<!--
+Copyright 2026 i-Bridge bv
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+= Module template — copy me
+:toc: left
+:toclevels: 2
+:sectanchors:
+
+++++
+<link rel="stylesheet" href="quiz.css" />
+++++
+
+// Copy this file to module-<n>-<slug>.adoc and fill every section.
+// Rules (enforced by src/test/java/org/hopper/edw/datavault/docs/TrainingModulesTest.java):
+//   * link the new file from index.adoc and add it to MODULES in the test, in the same commit
+//   * the six section titles below, in this order, with '==' level
+//   * 5-10 questions, 2-5 options each, exactly one data-correct="true", one explanation each
+//   * image:: and link: targets must exist on disk (relative to docs/training/)
+
+== Why it matters
+
+// Three to six sentences: the problem this topic solves, and what the learner can do afterwards.
+// No marketing: state the failure mode that happens without this topic.
+
+== Concepts
+
+// The minimum theory, one picture, short paragraphs. Reuse an existing diagram or screenshot
+// (for example image::../images/diagrams/d1-logical-layers.svg[The four layers,align="center"]).
+// Stop when the walkthrough can start; the reference guides carry the depth.
+
+== Guided walkthrough
+
+// Numbered steps, each with the exact GUI path ("Metadata -> EDW -> Resource definition group").
+// One image:: per step group. End with the observable proof that the step worked.
+
+== Try it yourself
+
+// One exercise with a checkable outcome: "the catalog lists feed X", "Check model reports 0 errors",
+// "the journey tree shows your .hdv".
+
+== Questionnaire
+
+// 5-10 questions. Keep the attribute order: class first, then data-id. Replace this sample question.
+++++
+<div class="edw-quiz" data-module="module-template">
+
+  <div class="edw-quiz-q" data-id="tpl-q1">
+    <p class="edw-quiz-prompt">1. Which file extension holds the raw Data Vault model?</p>
+    <div class="edw-quiz-options">
+      <button type="button" class="edw-quiz-option">a) .hsm</button>
+      <button type="button" class="edw-quiz-option" data-correct="true">b) .hdv</button>
+      <button type="button" class="edw-quiz-option">c) .hbv</button>
+      <button type="button" class="edw-quiz-option">d) .hdm</button>
+    </div>
+    <p class="edw-quiz-explain" hidden><strong>b)</strong> <code>.hdv</code> is the raw Data Vault model. <code>.hsm</code> is the source model, <code>.hbv</code> the Business Vault model, <code>.hdm</code> the dimensional model.</p>
+  </div>
+
+</div>
+++++
+
+== Where to go next
+
+* link:index.adoc[Training index]
+* link:../architecture.adoc[Architecture]
