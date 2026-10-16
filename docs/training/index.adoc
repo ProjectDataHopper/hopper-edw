@@ -102,12 +102,17 @@ by hand.
 # optional but recommended: the finished warehouse, so you can compare with your own work
 ./scripts/run-hop.sh retail-example workflows/run-retail-initial.hwf
 
+# optional, for module 7: the local Marquez stack a Hop Lineage View reads
+./scripts/run-marquez.sh up
+
 # then: open Hop GUI on the project folder
 #   File -> Open project -> retail-example
 ----
 
 Prerequisites: **Apache Hop 2.20** (development `2.20.0-SNAPSHOT`) and **Java 21**, plus Docker with
-Compose v2 for the two commands above. See link:../getting-started-retail.adoc[getting-started-retail]
+Compose v2 for the commands above. Marquez is only needed for module 7; `./scripts/run-marquez.sh
+status` reports whether its API answers, `down` stops the stack and `reset` wipes its database too.
+See link:../getting-started-retail.adoc[getting-started-retail]
 for what the sample contains.
 
 What you should see (verified on 2026-10-16):
