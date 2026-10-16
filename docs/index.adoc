@@ -40,6 +40,9 @@ Sources are the AsciiDoc files in the repository `docs/` folder. Architecture pi
 
 |link:help/index.adoc[Dialog help]
 |Per-dialog HTML opened from Hop GUI **Help** buttons
+
+|link:training/index.adoc[training]
+|Guided training modules: walkthrough plus questionnaire
 |===
 
 == Managers and architects

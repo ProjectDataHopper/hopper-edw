@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Training modules (issue #206)
+
+- **docs/training/**: guided training modules with a walkthrough and a questionnaire, shipped in the offline HTML documentation (`plugins/misc/hopper-edw/docs/training/`) and linked from the documentation index. Module 0 (orientation: the EDW Journey) and the module template land first; the questionnaire widget (`quiz.js` / `quiz.css`) marks answers with explanations, scores the page, copies a text summary to the clipboard, and raises `edw-quiz-complete` for a future host site.
+
 ## [0.12.0] — 2026-10-15
 
 Requires **Apache Hop 2.20.0-SNAPSHOT** and **Java 21**.

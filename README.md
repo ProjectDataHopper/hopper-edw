@@ -64,6 +64,7 @@ Full index: **[docs/README.md](docs/README.md)**
 | Audience | Document |
 |----------|----------|
 | Everyone (start here) | [`docs/architecture.adoc`](docs/architecture.adoc) then [`docs/getting-started-edw.adoc`](docs/getting-started-edw.adoc) |
+| Guided training | [`docs/training/index.adoc`](docs/training/index.adoc) — walkthrough plus questionnaire, module 0 first |
 | Feature list | [`docs/feature-overview.adoc`](docs/feature-overview.adoc) |
 | Tour the sample | [`docs/getting-started-retail.adoc`](docs/getting-started-retail.adoc) |
 | AdventureWorks demo (SQL Server → Postgres) | [`docs/getting-started-adventureworks.adoc`](docs/getting-started-adventureworks.adoc) |
