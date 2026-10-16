@@ -212,4 +212,4 @@ text summary to keep.
 * link:../architecture.adoc[Architecture] — D1 to D7: layers, catalog bus, group spine, build vs run, the four controls, growth
 * link:../edw-journey.adoc[EDW Journey perspective] — every node and button of the tree
 * link:../feature-overview.adoc[Feature overview] — the capability list with maturity
-* link:index.adoc[Training index] — modules 1 to 8 are published there as they land
+* link:module-1-installation-and-setup.adoc[Module 1 — Installation and EDW setup] — next step

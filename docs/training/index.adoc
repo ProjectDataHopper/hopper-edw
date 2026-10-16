@@ -51,10 +51,43 @@ you can send it to your trainer or keep it with your notes.
 |0
 |link:module-0-orientation.adoc[Orientation: the EDW Journey]
 |20-30 min
+
+|1
+|link:module-1-installation-and-setup.adoc[Installation and EDW setup]
+|25-35 min
+
+|2
+|link:module-2-catalog-and-source-models.adoc[Data Catalog and source models]
+|30-40 min
+
+|3
+|link:module-3-raw-data-vault.adoc[Raw Data Vault]
+|30-40 min
+
+|4
+|link:module-4-loading-and-resource-groups.adoc[Loading and resource definition groups]
+|30-40 min
+
+|5
+|link:module-5-business-vault.adoc[Business Vault]
+|30-40 min
+
+|6
+|link:module-6-dimensional-models.adoc[Dimensional models]
+|30-40 min
+
+|7
+|link:module-7-lineage-quality-operations.adoc[Lineage, quality and operations]
+|30-40 min
+
+|8
+|link:module-8-ai-help-and-mcp.adoc[AI help and the MCP server (optional)]
+|20-30 min
 |===
 
-Modules 1-8 are published as they land; each new module is added to this table and to the test that
-guards the format.
+Every module is checked by
+`src/test/java/org/hopper/edw/datavault/docs/TrainingModulesTest.java`; module 1 also pins the
+supported versions (Apache Hop 2.20, Java 21).
 
 == Training environment
 

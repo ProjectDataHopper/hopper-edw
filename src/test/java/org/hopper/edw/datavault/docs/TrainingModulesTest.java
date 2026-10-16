@@ -41,7 +41,17 @@ class TrainingModulesTest {
   private static final Path TEMPLATE = TRAINING.resolve("module-template.adoc");
 
   /** Module files in curriculum order. Add the next module here before writing it. */
-  private static final List<String> MODULES = List.of("module-0-orientation.adoc");
+  private static final List<String> MODULES =
+      List.of(
+          "module-0-orientation.adoc",
+          "module-1-installation-and-setup.adoc",
+          "module-2-catalog-and-source-models.adoc",
+          "module-3-raw-data-vault.adoc",
+          "module-4-loading-and-resource-groups.adoc",
+          "module-5-business-vault.adoc",
+          "module-6-dimensional-models.adoc",
+          "module-7-lineage-quality-operations.adoc",
+          "module-8-ai-help-and-mcp.adoc");
 
   private static final List<String> SECTION_TITLES =
       List.of(
@@ -177,6 +187,13 @@ class TrainingModulesTest {
       assertTrue(
           titles.contains(required), TEMPLATE + " is missing the '== " + required + "' section");
     }
+  }
+
+  @Test
+  void installModuleNamesTheSupportedVersions() throws IOException {
+    String module = read(TRAINING.resolve("module-1-installation-and-setup.adoc"));
+    assertTrue(module.contains("2.20"), "module 1 must name the supported Hop version (2.20)");
+    assertTrue(module.contains("Java 21"), "module 1 must name the required JDK (Java 21)");
   }
 
   private static String read(Path path) throws IOException {
