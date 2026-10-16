@@ -81,7 +81,14 @@ class TrainingModulesTest {
         assertTrue(found >= 0, path + " is missing the '== " + required + "' section");
         assertTrue(
             found > cursor,
-            path + " has '== " + required + "' out of order (index " + found + ", after " + cursor + ")");
+            path
+                + " has '== "
+                + required
+                + "' out of order (index "
+                + found
+                + ", after "
+                + cursor
+                + ")");
         cursor = found;
       }
     }
@@ -121,17 +128,16 @@ class TrainingModulesTest {
             countMatches(Pattern.compile(Pattern.quote(CORRECT_MARKER)), block),
             path + " " + id + ": exactly one option must carry data-correct=\"true\"");
         assertTrue(
-            block.contains(EXPLAIN_MARKER), path + " " + id + ": missing edw-quiz-explain paragraph");
+            block.contains(EXPLAIN_MARKER),
+            path + " " + id + ": missing edw-quiz-explain paragraph");
       }
     }
   }
 
   @Test
   void everyModuleLoadsTheQuizAssets() throws IOException {
-    assertTrue(
-        Files.isRegularFile(TRAINING.resolve("quiz.css")), "missing docs/training/quiz.css");
-    assertTrue(
-        Files.isRegularFile(TRAINING.resolve("quiz.js")), "missing docs/training/quiz.js");
+    assertTrue(Files.isRegularFile(TRAINING.resolve("quiz.css")), "missing docs/training/quiz.css");
+    assertTrue(Files.isRegularFile(TRAINING.resolve("quiz.js")), "missing docs/training/quiz.js");
     for (String module : MODULES) {
       String adoc = read(TRAINING.resolve(module));
       assertTrue(adoc.contains("href=\"quiz.css\""), module + " does not link quiz.css");
@@ -165,7 +171,8 @@ class TrainingModulesTest {
   void templateShowsTheSixSections() throws IOException {
     List<String> titles = sectionTitles(read(TEMPLATE));
     for (String required : SECTION_TITLES) {
-      assertTrue(titles.contains(required), TEMPLATE + " is missing the '== " + required + "' section");
+      assertTrue(
+          titles.contains(required), TEMPLATE + " is missing the '== " + required + "' section");
     }
   }
 
@@ -185,8 +192,8 @@ class TrainingModulesTest {
 
   /**
    * One entry per questionnaire question: the text between a question marker and the next one. The
-   * final block is cut at the closing {@code ++++} of the passthrough block so later sections cannot
-   * leak into it.
+   * final block is cut at the closing {@code ++++} of the passthrough block so later sections
+   * cannot leak into it.
    */
   private static List<String> questionBlocks(String adoc) {
     String[] parts = adoc.split(Pattern.quote(QUESTION_MARKER), -1);
