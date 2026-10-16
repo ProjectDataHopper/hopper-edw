@@ -138,6 +138,9 @@ class TrainingModulesTest {
   void everyModuleLoadsTheQuizAssets() throws IOException {
     assertTrue(Files.isRegularFile(TRAINING.resolve("quiz.css")), "missing docs/training/quiz.css");
     assertTrue(Files.isRegularFile(TRAINING.resolve("quiz.js")), "missing docs/training/quiz.js");
+    String template = read(TEMPLATE);
+    assertTrue(template.contains("href=\"quiz.css\""), TEMPLATE + " does not link quiz.css");
+    assertTrue(template.contains("src=\"quiz.js\""), TEMPLATE + " does not load quiz.js");
     for (String module : MODULES) {
       String adoc = read(TRAINING.resolve(module));
       assertTrue(adoc.contains("href=\"quiz.css\""), module + " does not link quiz.css");

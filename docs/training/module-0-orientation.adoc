@@ -203,9 +203,9 @@ text summary to keep.
   </div>
 
 </div>
-++++
 
 <script src="quiz.js"></script>
+++++
 
 == Where to go next
 
