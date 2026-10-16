@@ -40,3 +40,4 @@ For product documentation, start at [../README.md](../README.md) or [../feature-
 | (session plan / issue #25) | Static HTML project documentation — product doc: [../project-documentation.adoc](../project-documentation.adoc) |
 | [adventureworks-sample-plan.md](adventureworks-sample-plan.md) | Issue #180 — AdventureWorks SQL Server → Postgres EDW demo / benchmark |
 | [edw-operational-analytics-plan.md](edw-operational-analytics-plan.md) | Issue #195 — generate an EDW stack from the OPS database. Product doc: [../ops-analytics.adoc](../ops-analytics.adoc) |
+| [online-training-modules-plan.md](online-training-modules-plan.md) | Issue #206 — online training modules (walkthrough + questionnaire) over the existing docs build. Product entry point: [../training/index.adoc](../training/index.adoc) |
