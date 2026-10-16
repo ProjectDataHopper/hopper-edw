@@ -1,0 +1,115 @@
+<!--
+Copyright 2026 i-Bridge bv
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+= Data Hopper EDW training
+:toc: left
+:toclevels: 2
+:sectanchors:
+
+These modules teach Data Hopper EDW by walking a real warehouse — the `retail-example` project that
+ships with this repository — and then check what you learned with a short questionnaire.
+
+The path is built for **orientation and confidence**: when you finish the core path you can set up
+hopper-edw, model a source, generate and load a raw vault, and explain how the layers relate. Expert
+detail lives in the reference guides linked from each module.
+
+== How a module works
+
+Every module has the same six parts:
+
+. **Why it matters** — the problem the topic solves.
+. **Concepts** — the minimum theory, with a picture.
+. **Guided walkthrough** — step by step in Hop GUI.
+. **Try it yourself** — a small exercise with a checkable outcome.
+. **Questionnaire** — 5-10 questions, each with an explanation for the answer. Answer them in the
+page: the score updates as you go, and **Copy my results** puts a text summary on your clipboard so
+you can send it to your trainer or keep it with your notes.
+. **Where to go next** — the reference documents behind the module.
+
+== Paths
+
+[cols="1,2,2", options="header"]
+|===
+|Path |Modules |What you can do at the end
+
+|Core — getting started
+|0, 1, 2, 3, 4
+|Set up hopper-edw, model a source, generate and load a raw vault
+
+|Advanced — warehouse engineering
+|5, 6, 7, 8
+|Business Vault, marts, lineage, quality, operations, AI help
+
+|Manager and architect
+|0, 7
+|Explain the layers, the build order, and where the controls sit
+|===
+
+== Modules
+
+[cols="1,2,1", options="header"]
+|===
+|# |Module |Time
+
+|0
+|link:module-0-orientation.adoc[Orientation: the EDW Journey]
+|20-30 min
+|===
+
+Modules 1-8 are published as they land; each new module is added to this table and to the test that
+guards the format.
+
+== Training environment
+
+Everything except module 1 is done inside the `retail-example` project — there is nothing to build
+by hand.
+
+[source,sh]
+----
+# once: local PostgreSQL on port 54320 (container hop-data-vault-postgres-local)
+./scripts/run-postgres.sh up
+
+# optional but recommended: the finished warehouse, so you can compare with your own work
+./scripts/run-hop.sh retail-example workflows/run-retail-initial.hwf
+
+# then: open Hop GUI on the project folder
+#   File -> Open project -> retail-example
+----
+
+Prerequisites: **Apache Hop 2.20** (development `2.20.0-SNAPSHOT`) and **Java 21**, plus Docker with
+Compose v2 for the two commands above. See link:../getting-started-retail.adoc[getting-started-retail]
+for what the sample contains.
+
+== Writing a new module
+
+Copy link:module-template.adoc[module-template.adoc] and keep the six sections in order. The format
+is enforced by `src/test/java/org/hopper/edw/datavault/docs/TrainingModulesTest.java`:
+
+[source,sh]
+----
+mvn -o test -Dtest=TrainingModulesTest
+mvn -o asciidoctor:process-asciidoc@generate-html-docs   # preview in target/generated-docs/training/
+----
+
+Add the module to `MODULES` in that test **and** to the table above in the same commit; the test
+fails if either is missing.
+
+== Related documentation
+
+* link:../architecture.adoc[Architecture] — catalog, resource definition group, build vs run
+* link:../getting-started-edw.adoc[Getting started — building an EDW]
+* link:../getting-started-retail.adoc[Getting started — retail example tour]
+* link:../feature-overview.adoc[Feature overview]
