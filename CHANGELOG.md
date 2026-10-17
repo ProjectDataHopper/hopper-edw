@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Hidden source cards (issue #208)
+
+- A source table, query, JSON extraction, masking card, or pipeline feed can be marked **Hidden** on its General tab. The source modeler prints `hidden` in the bottom-right corner of the tile. JDBC clients (`jdbc:hop-hsm:` and the Hop Server source-model service) leave the card out of table and column metadata, and a `SELECT` of its name fails. Masking, JSON, queries, catalog publish, and vault loads can still use a hidden parent.
+
 ### Training modules (issue #206)
 
 - **docs/training/**: guided training modules with a walkthrough and a questionnaire, shipped in the offline HTML documentation (`plugins/misc/hopper-edw/docs/training/`) and linked from the documentation index. Module 0 (orientation: the EDW Journey) and the module template land first; the questionnaire widget (`quiz.js` / `quiz.css`) marks answers with explanations, scores the page, copies a text summary to the clipboard, and raises `edw-quiz-complete` for a future host site.

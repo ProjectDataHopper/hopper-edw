@@ -794,9 +794,11 @@ public class SourceModelPainter extends BasePainter {
       }
 
       ModelGraphTableCardLayout.BoxSize boxSize =
-          ModelGraphTableCardLayout.computeBoxSize(gc, label, physical, typeLabel, pkSummary);
-      int boxWidth = Math.max(160, boxSize.width());
-      int boxHeight = Math.max(80, boxSize.height());
+          frameCard(
+              ModelGraphTableCardLayout.computeBoxSize(gc, label, physical, typeLabel, pkSummary),
+              table.isHidden());
+      int boxWidth = boxSize.width();
+      int boxHeight = boxSize.height();
       table.setDrawnBoxWidth(boxWidth);
       table.setDrawnBoxHeight(boxHeight);
 
@@ -820,6 +822,7 @@ public class SourceModelPainter extends BasePainter {
       Point typeExtent = ModelGraphTableCardLayout.drawTypeBelowIcon(gc, typeLabel, x, y);
       ModelGraphTableCardLayout.drawExtraLineBelowType(
           gc, pkSummary, x, y, typeExtent, TABLE_COLOR);
+      drawHiddenBadge(table.isHidden(), x, y, boxWidth, boxHeight);
 
       if (areaOwners != null) {
         areaOwners.add(
@@ -903,9 +906,11 @@ public class SourceModelPainter extends BasePainter {
       String extra = joins + " join(s), " + query.getColumns().size() + " col(s)";
 
       ModelGraphTableCardLayout.BoxSize boxSize =
-          ModelGraphTableCardLayout.computeBoxSize(gc, label, secondary, typeLabel, extra);
-      int boxWidth = Math.max(160, boxSize.width());
-      int boxHeight = Math.max(80, boxSize.height());
+          frameCard(
+              ModelGraphTableCardLayout.computeBoxSize(gc, label, secondary, typeLabel, extra),
+              query.isHidden());
+      int boxWidth = boxSize.width();
+      int boxHeight = boxSize.height();
 
       Point screenLoc = real2screen(loc.x, loc.y);
       int x = screenLoc.x;
@@ -925,6 +930,7 @@ public class SourceModelPainter extends BasePainter {
       ModelGraphTableCardLayout.drawSecondaryLine(gc, secondary, x, y, nameExtent);
       Point typeExtent = ModelGraphTableCardLayout.drawTypeBelowIcon(gc, typeLabel, x, y);
       ModelGraphTableCardLayout.drawExtraLineBelowType(gc, extra, x, y, typeExtent, QUERY_COLOR);
+      drawHiddenBadge(query.isHidden(), x, y, boxWidth, boxHeight);
 
       if (areaOwners != null) {
         areaOwners.add(
@@ -976,9 +982,11 @@ public class SourceModelPainter extends BasePainter {
       String extra = fieldCount + " field(s)";
 
       ModelGraphTableCardLayout.BoxSize boxSize =
-          ModelGraphTableCardLayout.computeBoxSize(gc, label, secondary, typeLabel, extra);
-      int boxWidth = Math.max(160, boxSize.width());
-      int boxHeight = Math.max(80, boxSize.height());
+          frameCard(
+              ModelGraphTableCardLayout.computeBoxSize(gc, label, secondary, typeLabel, extra),
+              jsonSource.isHidden());
+      int boxWidth = boxSize.width();
+      int boxHeight = boxSize.height();
 
       Point screenLoc = real2screen(loc.x, loc.y);
       int x = screenLoc.x;
@@ -998,6 +1006,7 @@ public class SourceModelPainter extends BasePainter {
       ModelGraphTableCardLayout.drawSecondaryLine(gc, secondary, x, y, nameExtent);
       Point typeExtent = ModelGraphTableCardLayout.drawTypeBelowIcon(gc, typeLabel, x, y);
       ModelGraphTableCardLayout.drawExtraLineBelowType(gc, extra, x, y, typeExtent, JSON_COLOR);
+      drawHiddenBadge(jsonSource.isHidden(), x, y, boxWidth, boxHeight);
 
       if (areaOwners != null) {
         areaOwners.add(
@@ -1042,9 +1051,11 @@ public class SourceModelPainter extends BasePainter {
       int masked = masking.maskedFields().size();
       String extra = masked + " masked";
       ModelGraphTableCardLayout.BoxSize boxSize =
-          ModelGraphTableCardLayout.computeBoxSize(gc, label, secondary, typeLabel, extra);
-      int boxWidth = Math.max(160, boxSize.width());
-      int boxHeight = Math.max(80, boxSize.height());
+          frameCard(
+              ModelGraphTableCardLayout.computeBoxSize(gc, label, secondary, typeLabel, extra),
+              masking.isHidden());
+      int boxWidth = boxSize.width();
+      int boxHeight = boxSize.height();
       Point screenLoc = real2screen(loc.x, loc.y);
       int x = screenLoc.x;
       int y = screenLoc.y;
@@ -1061,6 +1072,7 @@ public class SourceModelPainter extends BasePainter {
       ModelGraphTableCardLayout.drawSecondaryLine(gc, secondary, x, y, nameExtent);
       Point typeExtent = ModelGraphTableCardLayout.drawTypeBelowIcon(gc, typeLabel, x, y);
       ModelGraphTableCardLayout.drawExtraLineBelowType(gc, extra, x, y, typeExtent, MASKING_COLOR);
+      drawHiddenBadge(masking.isHidden(), x, y, boxWidth, boxHeight);
       if (areaOwners != null) {
         areaOwners.add(
             new AreaOwner(
@@ -1107,9 +1119,11 @@ public class SourceModelPainter extends BasePainter {
       String extra = fieldCount + " field(s)";
 
       ModelGraphTableCardLayout.BoxSize boxSize =
-          ModelGraphTableCardLayout.computeBoxSize(gc, label, secondary, typeLabel, extra);
-      int boxWidth = Math.max(160, boxSize.width());
-      int boxHeight = Math.max(80, boxSize.height());
+          frameCard(
+              ModelGraphTableCardLayout.computeBoxSize(gc, label, secondary, typeLabel, extra),
+              pipelineSource.isHidden());
+      int boxWidth = boxSize.width();
+      int boxHeight = boxSize.height();
 
       Point screenLoc = real2screen(loc.x, loc.y);
       int x = screenLoc.x;
@@ -1129,6 +1143,7 @@ public class SourceModelPainter extends BasePainter {
       ModelGraphTableCardLayout.drawSecondaryLine(gc, secondary, x, y, nameExtent);
       Point typeExtent = ModelGraphTableCardLayout.drawTypeBelowIcon(gc, typeLabel, x, y);
       ModelGraphTableCardLayout.drawExtraLineBelowType(gc, extra, x, y, typeExtent, PIPELINE_COLOR);
+      drawHiddenBadge(pipelineSource.isHidden(), x, y, boxWidth, boxHeight);
 
       if (areaOwners != null) {
         areaOwners.add(
@@ -1150,6 +1165,28 @@ public class SourceModelPainter extends BasePainter {
                 label));
       }
     }
+  }
+
+  private ModelGraphTableCardLayout.BoxSize frameCard(
+      ModelGraphTableCardLayout.BoxSize boxSize, boolean hidden) {
+    ModelGraphTableCardLayout.BoxSize framed =
+        new ModelGraphTableCardLayout.BoxSize(
+            Math.max(160, boxSize.width()), Math.max(80, boxSize.height()));
+    if (!hidden) {
+      return framed;
+    }
+    return ModelGraphTableCardLayout.withBottomRightLabel(gc, framed, hiddenLabel());
+  }
+
+  private void drawHiddenBadge(boolean hidden, int x, int y, int boxWidth, int boxHeight) {
+    if (!hidden) {
+      return;
+    }
+    ModelGraphTableCardLayout.drawBottomRightLabel(gc, hiddenLabel(), x, y, boxWidth, boxHeight);
+  }
+
+  private String hiddenLabel() {
+    return BaseMessages.getString(PKG, "SourceModelPainter.Hidden.Label");
   }
 
   private Point placed(SourceEndpointKind kind, String name, Point saved) {

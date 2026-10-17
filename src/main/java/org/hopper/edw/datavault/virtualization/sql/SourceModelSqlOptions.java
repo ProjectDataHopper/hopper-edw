@@ -45,6 +45,12 @@ public class SourceModelSqlOptions {
    */
   @Builder.Default private final String jdbcSchemaAlias = null;
 
+  /**
+   * When true, the Calcite schema omits cards marked hidden. JDBC entry points set this. Modeler
+   * plans, including a visible query whose free SQL names a hidden parent, leave it false.
+   */
+  @Builder.Default private final boolean omitHiddenSources = false;
+
   public static SourceModelSqlOptions defaults() {
     return SourceModelSqlOptions.builder().build();
   }

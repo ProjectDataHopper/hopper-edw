@@ -18,6 +18,7 @@ package org.hopper.edw.datavault.virtualization;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -33,7 +34,11 @@ import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceColumn;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceQuery;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceQueryColumn;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceQueryGenerationMode;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
+import org.hopper.edw.datavault.virtualization.calcite.SourceModelSchema;
 import org.hopper.edw.datavault.virtualization.sql.SourceModelSqlEngine;
 import org.hopper.edw.datavault.virtualization.sql.SourceModelSqlException;
 import org.hopper.edw.datavault.virtualization.sql.SourceModelSqlOptions;
@@ -195,6 +200,53 @@ class SourceModelSqlEngineTest {
       assertNotNull(plan.pipelineMeta());
       assertTrue(plan.pipelineMeta().nrTransforms() >= 1);
     }
+  }
+
+  @Test
+  void jdbcExposureOmitsAHiddenTableAndItsPublishedAlias() throws Exception {
+    SourceModel model = sampleTwoTableModel("CRM", "CRM");
+    model.findTable("customer").setHidden(true);
+    SourceQuery feed = new SourceQuery("feed_customer");
+    feed.setHidden(true);
+    feed.setGenerationMode(SourceQueryGenerationMode.FREE_SQL);
+    feed.setFreeSql("SELECT customer_id, name FROM customer");
+    feed.setPublishedCatalogName("customer_feed");
+    feed.getColumns().add(new SourceQueryColumn("customer", "customer_id"));
+    feed.getColumns().add(new SourceQueryColumn("customer", "name"));
+    model.getQueries().add(feed);
+
+    IHopMetadataProvider metadata = memoryWithDb("CRM");
+    SourceModelSqlOptions jdbc = SourceModelSqlOptions.builder().omitHiddenSources(true).build();
+    SourceModelSqlOptions modeler = SourceModelSqlOptions.defaults();
+
+    assertThrows(
+        SourceModelSqlException.class,
+        () ->
+            SourceModelSqlEngine.plan(
+                model, "SELECT customer_id FROM customer", new Variables(), metadata, jdbc));
+    assertNotNull(
+        SourceModelSqlEngine.plan(
+            model, "SELECT customer_id FROM customer", new Variables(), metadata, modeler));
+
+    SourceModelSchema hiddenFromJdbc = new SourceModelSchema(model, true);
+    assertNotNull(hiddenFromJdbc.findTable("address"));
+    assertNull(hiddenFromJdbc.findTable("customer"));
+    assertNull(hiddenFromJdbc.findTable("customer_feed"));
+    assertNull(hiddenFromJdbc.findTable("feed_customer"));
+    assertThrows(
+        SourceModelSqlException.class,
+        () ->
+            SourceModelSqlEngine.plan(
+                model, "SELECT customer_id FROM customer_feed", new Variables(), metadata, jdbc));
+
+    SourceModelSchema full = new SourceModelSchema(model, false);
+    assertNotNull(full.findTable("customer"));
+    assertNotNull(full.findTable("customer_feed"));
+
+    feed.setHidden(false);
+    assertNotNull(
+        SourceModelSqlEngine.plan(
+            model, "SELECT customer_id FROM customer_feed", new Variables(), metadata, jdbc));
   }
 
   private static void seedRetailDatabases(SourceModel model, IHopMetadataProvider metadata)

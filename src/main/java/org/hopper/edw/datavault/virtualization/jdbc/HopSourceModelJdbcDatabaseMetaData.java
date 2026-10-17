@@ -31,6 +31,7 @@ import org.apache.hop.core.row.value.ValueMetaInteger;
 import org.apache.hop.core.row.value.ValueMetaString;
 import org.apache.hop.core.util.Utils;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceColumn;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceJdbcExposure;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceJson;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceMasking;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceMaskingField;
@@ -856,7 +857,9 @@ public class HopSourceModelJdbcDatabaseMetaData implements DatabaseMetaData {
     SourceModel model = connection.model();
     if (model != null && !Utils.isEmpty(table)) {
       for (SourceTable st : model.getTables()) {
-        if (st == null || !table.equalsIgnoreCase(st.getName())) {
+        if (st == null
+            || !SourceJdbcExposure.include(st)
+            || !table.equalsIgnoreCase(st.getName())) {
           continue;
         }
         short seq = 1;
@@ -1176,7 +1179,7 @@ public class HopSourceModelJdbcDatabaseMetaData implements DatabaseMetaData {
   private static List<TableEntry> listTables(SourceModel model) {
     List<TableEntry> list = new ArrayList<>();
     for (SourceTable table : model.getTables()) {
-      if (table == null || Utils.isEmpty(table.getName())) {
+      if (table == null || Utils.isEmpty(table.getName()) || !SourceJdbcExposure.include(table)) {
         continue;
       }
       List<ColumnEntry> cols = new ArrayList<>();
@@ -1191,7 +1194,7 @@ public class HopSourceModelJdbcDatabaseMetaData implements DatabaseMetaData {
       list.add(new TableEntry(table.getName(), "TABLE", "Source table", cols));
     }
     for (SourceQuery query : model.getQueries()) {
-      if (query == null || Utils.isEmpty(query.getName())) {
+      if (query == null || Utils.isEmpty(query.getName()) || !SourceJdbcExposure.include(query)) {
         continue;
       }
       List<ColumnEntry> cols = new ArrayList<>();
@@ -1203,7 +1206,7 @@ public class HopSourceModelJdbcDatabaseMetaData implements DatabaseMetaData {
       list.add(new TableEntry(query.getName(), "VIEW", "Source query (virtual table)", cols));
     }
     for (SourceJson json : model.getJsonSources()) {
-      if (json == null || Utils.isEmpty(json.getName())) {
+      if (json == null || Utils.isEmpty(json.getName()) || !SourceJdbcExposure.include(json)) {
         continue;
       }
       List<ColumnEntry> cols = new ArrayList<>();
@@ -1224,7 +1227,9 @@ public class HopSourceModelJdbcDatabaseMetaData implements DatabaseMetaData {
           new TableEntry(json.getName(), "VIEW", "Source JSON extraction (logical table)", cols));
     }
     for (SourceMasking masking : model.getMaskingSources()) {
-      if (masking == null || Utils.isEmpty(masking.getName())) {
+      if (masking == null
+          || Utils.isEmpty(masking.getName())
+          || !SourceJdbcExposure.include(masking)) {
         continue;
       }
       List<ColumnEntry> cols = new ArrayList<>();
@@ -1240,7 +1245,9 @@ public class HopSourceModelJdbcDatabaseMetaData implements DatabaseMetaData {
           new TableEntry(masking.getName(), "VIEW", "Source masking (logical table)", cols));
     }
     for (SourcePipeline pipeline : model.getPipelineSources()) {
-      if (pipeline == null || Utils.isEmpty(pipeline.getName())) {
+      if (pipeline == null
+          || Utils.isEmpty(pipeline.getName())
+          || !SourceJdbcExposure.include(pipeline)) {
         continue;
       }
       List<ColumnEntry> cols = new ArrayList<>();

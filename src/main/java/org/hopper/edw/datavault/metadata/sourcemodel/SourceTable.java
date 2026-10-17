@@ -41,9 +41,12 @@ import org.jspecify.annotations.NonNull;
 @Setter
 @NamingSchemeKind(EdwNamingSchemeTypes.SOURCE_TABLE)
 public class SourceTable extends HopMetadataBase
-    implements IHopMetadata, IGuiPosition, IDataTypeMappingTarget {
+    implements IHopMetadata, IGuiPosition, IDataTypeMappingTarget, IJdbcHiddenSource {
 
   @HopMetadataProperty private String description;
+
+  /** When true, JDBC clients do not see this card. */
+  @HopMetadataProperty private boolean hidden;
 
   /** Optional link to a catalog {@code DV_SOURCE} record name. */
   @HopMetadataProperty private String catalogSourceName;

@@ -22,6 +22,7 @@ import java.util.Map;
 import org.apache.calcite.schema.Table;
 import org.apache.calcite.schema.impl.AbstractSchema;
 import org.apache.hop.core.util.Utils;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceJdbcExposure;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceJson;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceMasking;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
@@ -41,8 +42,16 @@ public class SourceModelSchema extends AbstractSchema {
   private final Map<String, Table> tableMap;
 
   public SourceModelSchema(SourceModel model) {
+    this(model, false);
+  }
+
+  /**
+   * @param omitHiddenSources when true, cards with {@code hidden} set are left out of the schema,
+   *     including a published catalog alias of the same card
+   */
+  public SourceModelSchema(SourceModel model, boolean omitHiddenSources) {
     this.model = model;
-    this.tableMap = buildTableMap(model);
+    this.tableMap = buildTableMap(model, omitHiddenSources);
   }
 
   public SourceModel getModel() {
@@ -71,20 +80,20 @@ public class SourceModelSchema extends AbstractSchema {
     return null;
   }
 
-  private static Map<String, Table> buildTableMap(SourceModel model) {
+  private static Map<String, Table> buildTableMap(SourceModel model, boolean omitHiddenSources) {
     Map<String, Table> map = new LinkedHashMap<>();
     if (model == null) {
       return Collections.unmodifiableMap(map);
     }
     for (SourceTable table : model.getTables()) {
-      if (table == null || Utils.isEmpty(table.getName())) {
+      if (table == null || Utils.isEmpty(table.getName()) || skip(table, omitHiddenSources)) {
         continue;
       }
       register(map, table.getName(), new SourceModelTable(table));
     }
     // Named source queries as virtual tables (FROM feed_customer_enriched).
     for (SourceQuery query : model.getQueries()) {
-      if (query == null || Utils.isEmpty(query.getName())) {
+      if (query == null || Utils.isEmpty(query.getName()) || skip(query, omitHiddenSources)) {
         continue;
       }
       SourceModelQueryTable queryTable = new SourceModelQueryTable(query);
@@ -95,13 +104,13 @@ public class SourceModelSchema extends AbstractSchema {
       }
     }
     for (SourceJson json : model.getJsonSources()) {
-      if (json == null || Utils.isEmpty(json.getName())) {
+      if (json == null || Utils.isEmpty(json.getName()) || skip(json, omitHiddenSources)) {
         continue;
       }
       register(map, json.getName(), new SourceModelJsonTable(json));
     }
     for (SourceMasking masking : model.getMaskingSources()) {
-      if (masking == null || Utils.isEmpty(masking.getName())) {
+      if (masking == null || Utils.isEmpty(masking.getName()) || skip(masking, omitHiddenSources)) {
         continue;
       }
       SourceModelMaskingTable maskingTable = new SourceModelMaskingTable(masking);
@@ -112,12 +121,18 @@ public class SourceModelSchema extends AbstractSchema {
       }
     }
     for (SourcePipeline pipeline : model.getPipelineSources()) {
-      if (pipeline == null || Utils.isEmpty(pipeline.getName())) {
+      if (pipeline == null
+          || Utils.isEmpty(pipeline.getName())
+          || skip(pipeline, omitHiddenSources)) {
         continue;
       }
       register(map, pipeline.getName(), new SourceModelPipelineTable(pipeline));
     }
     return Collections.unmodifiableMap(map);
+  }
+
+  private static boolean skip(Object card, boolean omitHiddenSources) {
+    return omitHiddenSources && !SourceJdbcExposure.include(card);
   }
 
   private static void register(Map<String, Table> map, String name, Table table) {

@@ -121,6 +121,7 @@ public class HopGuiSourceQueryDialog {
   private Text wPublishedCatalogName;
   private Combo wDrivingTable;
   private Combo wGenerationMode;
+  private Button wHidden;
   private TableView wJoins;
   private TableView wColumns;
   private TextComposite wWhere;
@@ -317,11 +318,18 @@ public class HopGuiSourceQueryDialog {
     wGenerationMode.setLayoutData(
         new FormDataBuilder().left(middle, 0).top(wDrivingTable, margin).right().result());
 
+    wHidden = new Button(comp, SWT.CHECK);
+    PropsUi.setLook(wHidden);
+    wHidden.setText(BaseMessages.getString(PKG, "SourceCard.Hidden.Label"));
+    wHidden.setToolTipText(BaseMessages.getString(PKG, "SourceCard.Hidden.ToolTip"));
+    wHidden.setLayoutData(
+        new FormDataBuilder().left(middle, 0).top(wGenerationMode, margin).right().result());
+
     Label wlWhere = new Label(comp, SWT.LEFT);
     wlWhere.setText(BaseMessages.getString(PKG, "HopGuiSourceQueryDialog.Where.Label"));
     PropsUi.setLook(wlWhere);
     wlWhere.setLayoutData(
-        new FormDataBuilder().left().top(wGenerationMode, margin * 2).right().result());
+        new FormDataBuilder().left().top(wHidden, margin * 2).right().result());
     wWhere =
         new StyledTextComp(
             variables, comp, SWT.MULTI | SWT.LEFT | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
@@ -774,6 +782,7 @@ public class HopGuiSourceQueryDialog {
     wPublishedCatalogName.setText(Const.NVL(input.getPublishedCatalogName(), ""));
     wDrivingTable.setText(Const.NVL(input.getDrivingTableName(), ""));
     EnumDialogSupport.selectCombo(wGenerationMode, input.resolveGenerationMode());
+    wHidden.setSelection(input.isHidden());
     wWhere.setText(Const.NVL(input.getWhereClause(), ""));
     if (wFreeSql != null) {
       wFreeSql.setText(Const.NVL(input.getFreeSql(), ""));
@@ -1217,6 +1226,7 @@ public class HopGuiSourceQueryDialog {
     input.setPublishedCatalogName(Utils.isEmpty(catalogFeed) ? null : catalogFeed);
     input.setDrivingTableName(wDrivingTable.getText());
     input.setGenerationMode(mode);
+    input.setHidden(wHidden.getSelection());
     input.setWhereClause(wWhere.getText());
     if (wFreeSql != null) {
       input.setFreeSql(wFreeSql.getText());

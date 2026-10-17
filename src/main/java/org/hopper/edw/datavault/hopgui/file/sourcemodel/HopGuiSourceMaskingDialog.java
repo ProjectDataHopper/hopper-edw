@@ -98,6 +98,7 @@ public class HopGuiSourceMaskingDialog {
   private Text wPublishedCatalogName;
   private CCombo wParentKind;
   private CCombo wParentName;
+  private Button wHidden;
   private TableView wFields;
   private SourceDataTypeMappingTab dataTypeMappingTab;
   private boolean ok;
@@ -235,6 +236,12 @@ public class HopGuiSourceMaskingDialog {
     wParentName = new CCombo(comp, SWT.BORDER);
     PropsUi.setLook(wParentName);
     wParentName.setLayoutData(belowField(wParentKind, middle, margin));
+
+    wHidden = new Button(comp, SWT.CHECK);
+    PropsUi.setLook(wHidden);
+    wHidden.setText(BaseMessages.getString(PKG, "SourceCard.Hidden.Label"));
+    wHidden.setToolTipText(BaseMessages.getString(PKG, "SourceCard.Hidden.ToolTip"));
+    wHidden.setLayoutData(belowField(wParentName, middle, margin));
   }
 
   private void addFieldsTab(CTabFolder tabFolder, int margin) {
@@ -317,6 +324,7 @@ public class HopGuiSourceMaskingDialog {
     wPublishedCatalogName.setText(Const.NVL(input.getPublishedCatalogName(), ""));
     wParentKind.setText(input.resolveParentSourceKind().getDescription());
     refreshParentNames(input.getParentSourceName());
+    wHidden.setSelection(input.isHidden());
     wFields.clearAll(false);
     for (SourceMaskingField field : input.getFields()) {
       if (field == null) {
@@ -355,6 +363,7 @@ public class HopGuiSourceMaskingDialog {
     input.setPublishedCatalogName(wPublishedCatalogName.getText());
     input.setParentSourceKind(SourceMaskingParentKind.lookupDescription(wParentKind.getText()));
     input.setParentSourceName(wParentName.getText());
+    input.setHidden(wHidden.getSelection());
     input.setFields(readFields());
     if (dataTypeMappingTab != null) {
       dataTypeMappingTab.saveTo(input);
@@ -628,6 +637,7 @@ public class HopGuiSourceMaskingDialog {
     draft.setPublishedCatalogName(wPublishedCatalogName.getText());
     draft.setParentSourceKind(SourceMaskingParentKind.lookupDescription(wParentKind.getText()));
     draft.setParentSourceName(wParentName.getText());
+    draft.setHidden(wHidden.getSelection());
     draft.setFields(readFields());
     draft.setSampleRowLimit(input.getSampleRowLimit());
     if (dataTypeMappingTab != null) {

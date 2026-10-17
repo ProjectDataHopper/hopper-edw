@@ -70,6 +70,13 @@ class ModelGraphTableCardLayoutTest {
   }
 
   @Test
+  void bottomRightLabelSitsInsideTheBottomRightCorner() {
+    Point origin = ModelGraphTableCardLayout.bottomRightLabelOrigin(10, 20, 160, 80, 40, 12);
+    assertEquals(10 + 160 - ModelGraphTableCardLayout.MARGIN - 40, origin.x);
+    assertEquals(20 + 80 - ModelGraphTableCardLayout.MARGIN - 12, origin.y);
+  }
+
+  @Test
   void ceilToGridLeavesNonPositiveSizesUnchanged() {
     assertEquals(0, ModelGraphTableCardLayout.ceilToGrid(0, 16));
     assertEquals(-3, ModelGraphTableCardLayout.ceilToGrid(-3, 16));

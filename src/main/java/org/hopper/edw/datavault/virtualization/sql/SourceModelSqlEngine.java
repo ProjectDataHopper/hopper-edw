@@ -50,7 +50,8 @@ public final class SourceModelSqlEngine {
     String resolved = resolveSql(sql, variables);
     SourceModelSqlOptions opts = options != null ? options : SourceModelSqlOptions.defaults();
     SourceModelRelPlanner.PlannedQuery planned =
-        SourceModelRelPlanner.plan(model, resolved, opts.getJdbcSchemaAlias());
+        SourceModelRelPlanner.plan(
+            model, resolved, opts.getJdbcSchemaAlias(), opts.isOmitHiddenSources());
     return RelToPipelineGenerator.generate(planned.rel(), model, variables, metadataProvider, opts);
   }
 

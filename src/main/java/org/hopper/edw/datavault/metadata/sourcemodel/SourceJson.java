@@ -44,9 +44,12 @@ import org.jspecify.annotations.NonNull;
 @Setter
 @NamingSchemeKind(EdwNamingSchemeTypes.SOURCE_JSON)
 public class SourceJson extends HopMetadataBase
-    implements IHopMetadata, IDataTypeMappingTarget, IGuiPosition {
+    implements IHopMetadata, IDataTypeMappingTarget, IGuiPosition, IJdbcHiddenSource {
 
   @HopMetadataProperty private String description;
+
+  /** When true, JDBC clients do not see this card. */
+  @HopMetadataProperty private boolean hidden;
 
   /** Parent object kind on the source model canvas. */
   @HopMetadataProperty(storeWithCode = true)

@@ -41,9 +41,12 @@ import org.jspecify.annotations.NonNull;
 @Setter
 @NamingSchemeKind(EdwNamingSchemeTypes.SOURCE_QUERY)
 public class SourceQuery extends HopMetadataBase
-    implements IHopMetadata, IDataTypeMappingTarget, IGuiPosition {
+    implements IHopMetadata, IDataTypeMappingTarget, IGuiPosition, IJdbcHiddenSource {
 
   @HopMetadataProperty private String description;
+
+  /** When true, JDBC clients do not see this card. */
+  @HopMetadataProperty private boolean hidden;
 
   /** Driving table name (FROM clause). */
   @HopMetadataProperty private String drivingTableName;

@@ -53,6 +53,8 @@ import org.hopper.edw.datavault.metadata.sourcemodel.service.SourceModelService;
 import org.hopper.edw.datavault.transform.sqlexpression.SqlExpressionMeta;
 import org.hopper.edw.datavault.virtualization.sql.SourceModelFreeSqlTableSupport;
 import org.hopper.edw.datavault.virtualization.sql.SourceModelSqlEngine;
+import org.hopper.edw.datavault.virtualization.sql.SourceModelSqlException;
+import org.hopper.edw.datavault.virtualization.sql.SourceModelSqlOptions;
 import org.hopper.edw.datavault.virtualization.sql.SourceModelSqlPlan;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -163,6 +165,70 @@ class HopSourceModelJdbcDriverTest {
   }
 
   @Test
+  void hiddenTableIsOmittedFromJdbcMetadataAndSelect() throws Exception {
+    SourceModel model = new SourceModel();
+    model.setName("crm");
+    SourceTable hidden = new SourceTable("raw_customer");
+    hidden.setHidden(true);
+    hidden.setDatabaseName("CRM");
+    hidden.setTableName("raw_customer");
+    SourceColumn hiddenId = new SourceColumn("customer_id");
+    hiddenId.setHopType(IValueMeta.TYPE_INTEGER);
+    hiddenId.setPrimaryKeyPosition(1);
+    hidden.getColumns().add(hiddenId);
+    model.getTables().add(hidden);
+
+    SourceTable visible = new SourceTable("customer_masked");
+    visible.setDatabaseName("CRM");
+    visible.setTableName("customer_masked");
+    SourceColumn visibleId = new SourceColumn("customer_id");
+    visibleId.setHopType(IValueMeta.TYPE_INTEGER);
+    visible.getColumns().add(visibleId);
+    model.getTables().add(visible);
+
+    MemoryMetadataProvider metadata = new MemoryMetadataProvider();
+    DatabaseMeta db = new DatabaseMeta();
+    db.setName("CRM");
+    db.setDatabaseType("POSTGRESQL");
+    db.setAccessType(DatabaseMeta.TYPE_ACCESS_NATIVE);
+    metadata.getSerializer(DatabaseMeta.class).save(db);
+
+    HopSourceModelJdbcConnection conn =
+        new HopSourceModelJdbcConnection(model, new Variables(), metadata, 0);
+    DatabaseMetaData md = conn.getMetaData();
+    try (ResultSet tables = md.getTables(null, null, "%", null)) {
+      assertTrue(tables.next());
+      assertEquals("customer_masked", tables.getString("TABLE_NAME"));
+      assertFalse(tables.next());
+    }
+    try (ResultSet cols = md.getColumns(null, null, "%", "%")) {
+      boolean sawHidden = false;
+      boolean sawVisible = false;
+      while (cols.next()) {
+        String tableName = cols.getString("TABLE_NAME");
+        if ("raw_customer".equals(tableName)) {
+          sawHidden = true;
+        }
+        if ("customer_masked".equals(tableName)) {
+          sawVisible = true;
+        }
+      }
+      assertFalse(sawHidden);
+      assertTrue(sawVisible);
+    }
+    try (ResultSet pks = md.getPrimaryKeys(null, null, "raw_customer")) {
+      assertFalse(pks.next());
+    }
+    try (Statement statement = conn.createStatement()) {
+      SQLException ex =
+          assertThrows(
+              SQLException.class,
+              () -> statement.executeQuery("SELECT customer_id FROM raw_customer"));
+      assertTrue(ex.getMessage().toLowerCase().contains("raw_customer"));
+    }
+  }
+
+  @Test
   void connectionIsReadOnlyAndCreatesStatement() throws Exception {
     SourceModel model = new SourceModel();
     model.setName("empty");
@@ -186,6 +252,7 @@ class HopSourceModelJdbcDriverTest {
     SourceQuery q = new SourceQuery();
     q.setName("feed_customer");
     model.getQueries().add(q);
+    t.setHidden(true);
     List<String> names = SourceModelFreeSqlTableSupport.queryableObjectNames(model);
     assertTrue(names.contains("customer"));
     assertTrue(names.contains("feed_customer"));
@@ -240,6 +307,53 @@ class HopSourceModelJdbcDriverTest {
         plan.pipelineMeta().getTransforms().stream()
             .anyMatch(t -> t.getTransform() instanceof SqlExpressionMeta),
         plan.explainText());
+  }
+
+  @Test
+  void visibleJsonStillPlansWhenItsParentIsHiddenFromJdbc() throws Exception {
+    SourceModel model = new SourceModel();
+    model.setName("crm");
+    SourceTable orders = new SourceTable("orders");
+    orders.setHidden(true);
+    orders.setDatabaseName("CRM");
+    orders.setTableName("orders");
+    SourceColumn payload = new SourceColumn("payload");
+    payload.setHopType(IValueMeta.TYPE_STRING);
+    orders.getColumns().add(payload);
+    model.getTables().add(orders);
+
+    SourceJson json = new SourceJson("order_events");
+    json.setParentSourceKind(SourceJsonParentKind.TABLE);
+    json.setParentSourceName("orders");
+    json.setJsonFieldName("payload");
+    SourceJsonField eventId = new SourceJsonField();
+    eventId.setName("event_id");
+    eventId.setHopType(IValueMeta.TYPE_STRING);
+    eventId.setPath("$.event_id");
+    json.getFields().add(eventId);
+    model.getJsonSources().add(json);
+
+    MemoryMetadataProvider metadata = new MemoryMetadataProvider();
+    DatabaseMeta db = new DatabaseMeta();
+    db.setName("CRM");
+    db.setDatabaseType("POSTGRESQL");
+    db.setAccessType(DatabaseMeta.TYPE_ACCESS_NATIVE);
+    db.setHostname("localhost");
+    db.setDBName("test");
+    db.setPort("5432");
+    metadata.getSerializer(DatabaseMeta.class).save(db);
+
+    SourceModelSqlOptions jdbcOptions =
+        SourceModelSqlOptions.builder().omitHiddenSources(true).build();
+    SourceModelSqlPlan plan =
+        SourceModelSqlEngine.plan(
+            model, "SELECT event_id FROM order_events", new Variables(), metadata, jdbcOptions);
+    assertNotNull(plan.pipelineMeta());
+    assertThrows(
+        SourceModelSqlException.class,
+        () ->
+            SourceModelSqlEngine.plan(
+                model, "SELECT payload FROM orders", new Variables(), metadata, jdbcOptions));
   }
 
   @Test

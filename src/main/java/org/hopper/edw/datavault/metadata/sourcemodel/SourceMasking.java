@@ -43,9 +43,12 @@ import org.jspecify.annotations.NonNull;
 @Setter
 @NamingSchemeKind(EdwNamingSchemeTypes.SOURCE_MASKING)
 public class SourceMasking extends HopMetadataBase
-    implements IHopMetadata, IDataTypeMappingTarget, IGuiPosition {
+    implements IHopMetadata, IDataTypeMappingTarget, IGuiPosition, IJdbcHiddenSource {
 
   @HopMetadataProperty private String description;
+
+  /** When true, JDBC clients do not see this card. */
+  @HopMetadataProperty private boolean hidden;
 
   @HopMetadataProperty(storeWithCode = true)
   private SourceMaskingParentKind parentSourceKind = SourceMaskingParentKind.TABLE;

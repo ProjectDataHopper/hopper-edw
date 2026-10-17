@@ -85,6 +85,7 @@ public class HopGuiSourceTableDialog {
   private Text wSchemaName;
   private Text wTableName;
   private Text wCatalogSourceName;
+  private Button wHidden;
   private TableView wColumns;
   private SourceDataTypeMappingTab dataTypeMappingTab;
 
@@ -249,6 +250,13 @@ public class HopGuiSourceTableDialog {
         BaseMessages.getString(PKG, "HopGuiSourceTableDialog.CatalogSourceName.ToolTip"));
     wCatalogSourceName.setLayoutData(
         new FormDataBuilder().left(middle, 0).top(wTableName, margin).right().result());
+
+    wHidden = new Button(comp, SWT.CHECK);
+    PropsUi.setLook(wHidden);
+    wHidden.setText(BaseMessages.getString(PKG, "SourceCard.Hidden.Label"));
+    wHidden.setToolTipText(BaseMessages.getString(PKG, "SourceCard.Hidden.ToolTip"));
+    wHidden.setLayoutData(
+        new FormDataBuilder().left(middle, 0).top(wCatalogSourceName, margin).right().result());
   }
 
   private void addColumnsTab(CTabFolder tabFolder, int margin) {
@@ -337,6 +345,7 @@ public class HopGuiSourceTableDialog {
     wSchemaName.setText(Const.NVL(input.getSchemaName(), ""));
     wTableName.setText(Const.NVL(input.getTableName(), ""));
     wCatalogSourceName.setText(Const.NVL(input.getCatalogSourceName(), ""));
+    wHidden.setSelection(input.isHidden());
 
     wColumns.clearAll(false);
     for (SourceColumn column : input.getColumns()) {
@@ -384,6 +393,7 @@ public class HopGuiSourceTableDialog {
     input.setSchemaName(wSchemaName.getText());
     input.setTableName(wTableName.getText());
     input.setCatalogSourceName(wCatalogSourceName.getText());
+    input.setHidden(wHidden.getSelection());
     input.setColumns(readColumnsFromTable());
     if (dataTypeMappingTab != null) {
       dataTypeMappingTab.saveTo(input);

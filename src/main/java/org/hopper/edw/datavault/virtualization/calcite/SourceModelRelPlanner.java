@@ -59,6 +59,16 @@ public final class SourceModelRelPlanner {
    */
   public static PlannedQuery plan(SourceModel model, String sql, String jdbcSchemaAlias)
       throws SourceModelSqlException {
+    return plan(model, sql, jdbcSchemaAlias, false);
+  }
+
+  /**
+   * @param omitHiddenSources when true, hidden source cards are not Calcite tables. JDBC clients
+   *     set this. Internal plans leave it false so a visible query can still read a hidden parent.
+   */
+  public static PlannedQuery plan(
+      SourceModel model, String sql, String jdbcSchemaAlias, boolean omitHiddenSources)
+      throws SourceModelSqlException {
     if (model == null) {
       throw new SourceModelSqlException("Source model is required for SQL planning");
     }
@@ -66,7 +76,7 @@ public final class SourceModelRelPlanner {
       throw new SourceModelSqlException("SQL is empty");
     }
 
-    SourceModelSchema schema = new SourceModelSchema(model);
+    SourceModelSchema schema = new SourceModelSchema(model, omitHiddenSources);
     SchemaPlus rootSchema = Frameworks.createRootSchema(true);
     // Register under every alias DBeaver / SQL clients may use to qualify tables.
     for (String alias : schemaAliases(model, jdbcSchemaAlias)) {

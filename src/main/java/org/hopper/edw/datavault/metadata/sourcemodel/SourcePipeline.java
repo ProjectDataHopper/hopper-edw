@@ -46,9 +46,12 @@ import org.jspecify.annotations.NonNull;
 @Setter
 @NamingSchemeKind(EdwNamingSchemeTypes.SOURCE_PIPELINE)
 public class SourcePipeline extends HopMetadataBase
-    implements IHopMetadata, IDataTypeMappingTarget, IGuiPosition {
+    implements IHopMetadata, IDataTypeMappingTarget, IGuiPosition, IJdbcHiddenSource {
 
   @HopMetadataProperty private String description;
+
+  /** When true, JDBC clients do not see this card. */
+  @HopMetadataProperty private boolean hidden;
 
   /** Path to the source pipeline ({@code .hpl}); variables allowed. */
   @HopMetadataProperty private String pipelineFilename;

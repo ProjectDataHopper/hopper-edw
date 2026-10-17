@@ -73,10 +73,14 @@ public class HopSourceModelJdbcStatement implements Statement {
                 connection.variables(),
                 connection.metadataProvider(),
                 limit,
-                schemaAlias);
+                schemaAlias,
+                true);
       } else {
         SourceModelSqlOptions options =
-            SourceModelSqlOptions.builder().jdbcSchemaAlias(schemaAlias).build();
+            SourceModelSqlOptions.builder()
+                .jdbcSchemaAlias(schemaAlias)
+                .omitHiddenSources(true)
+                .build();
         SourceModelSqlPlan plan =
             SourceModelSqlEngine.plan(
                 model, sql, connection.variables(), connection.metadataProvider(), options);

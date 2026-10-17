@@ -106,6 +106,7 @@ class SourceModelTest {
 
     SourceQuery query = restored.findQuery("feed_product_enriched");
     assertNotNull(query);
+    assertFalse(product.isHidden());
     assertEquals("product", query.getDrivingTableName());
     assertEquals(1, query.getJoins().size());
     assertEquals("product_type", query.getJoins().get(0).getTableName());
@@ -113,6 +114,51 @@ class SourceModelTest {
     assertEquals(4, query.getColumns().size());
     assertEquals("type_name", query.getColumns().get(3).resolveAlias());
     assertEquals(SourceQueryGenerationMode.AUTO, query.resolveGenerationMode());
+  }
+
+  @Test
+  void xmlRoundTripPreservesHiddenOnEverySourceCard() throws Exception {
+    SourceModel original = new SourceModel();
+    original.setName("hidden-sources");
+
+    SourceTable visible = new SourceTable("visible");
+    SourceTable hiddenTable = new SourceTable("raw_customer");
+    hiddenTable.setHidden(true);
+    original.getTables().add(visible);
+    original.getTables().add(hiddenTable);
+
+    SourceQuery hiddenQuery = new SourceQuery("raw_feed");
+    hiddenQuery.setHidden(true);
+    original.getQueries().add(hiddenQuery);
+
+    SourceJson hiddenJson = new SourceJson("raw_events");
+    hiddenJson.setHidden(true);
+    original.getJsonSources().add(hiddenJson);
+
+    SourceMasking hiddenMask = new SourceMasking("raw_masked");
+    hiddenMask.setHidden(true);
+    original.getMaskingSources().add(hiddenMask);
+
+    SourcePipeline hiddenPipeline = new SourcePipeline("raw_pipeline");
+    hiddenPipeline.setHidden(true);
+    original.getPipelineSources().add(hiddenPipeline);
+
+    String xml =
+        XmlHandler.aroundTag(SourceModel.XML_TAG, XmlMetadataUtil.serializeObjectToXml(original));
+    Document document = XmlHandler.loadXmlString(xml);
+    Node rootNode = XmlHandler.getSubNode(document, SourceModel.XML_TAG);
+    SourceModel restored = new SourceModel();
+    XmlMetadataUtil.deSerializeFromXml(rootNode, SourceModel.class, restored, null);
+
+    assertFalse(restored.findTable("visible").isHidden());
+    assertTrue(restored.findTable("raw_customer").isHidden());
+    assertTrue(restored.findQuery("raw_feed").isHidden());
+    assertTrue(restored.findJsonSource("raw_events").isHidden());
+    assertTrue(restored.findMaskingSource("raw_masked").isHidden());
+    assertTrue(restored.findPipelineSource("raw_pipeline").isHidden());
+    assertTrue(SourceJdbcExposure.include(restored.findTable("visible")));
+    assertFalse(SourceJdbcExposure.include(restored.findTable("raw_customer")));
+    assertFalse(SourceJdbcExposure.include(null));
   }
 
   @Test

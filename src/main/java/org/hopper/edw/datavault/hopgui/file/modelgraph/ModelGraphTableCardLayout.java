@@ -161,4 +161,41 @@ public final class ModelGraphTableCardLayout {
     }
     gc.drawText(extraLine, typeLabelX(boxX), extraLineBelowTypeY(boxY, typeExtent), true);
   }
+
+  /**
+   * Grows {@code size} by one small-font line so {@link #drawBottomRightLabel} sits under the
+   * existing type and extra lines.
+   */
+  public static BoxSize withBottomRightLabel(IGc gc, BoxSize size, String label) {
+    if (gc == null || size == null || Utils.isEmpty(label)) {
+      return size;
+    }
+    gc.setFont(EFont.SMALL);
+    Point extent = gc.textExtent(label);
+    gc.setFont(EFont.GRAPH);
+    int width = Math.max(size.width(), MARGIN + extent.x + MARGIN);
+    int height = size.height() + SECONDARY_LABEL_GAP + extent.y;
+    return new BoxSize(width, height);
+  }
+
+  /** Top-left of a small label inset from the card's bottom-right corner. */
+  public static Point bottomRightLabelOrigin(
+      int boxX, int boxY, int boxWidth, int boxHeight, int textWidth, int textHeight) {
+    return new Point(boxX + boxWidth - MARGIN - textWidth, boxY + boxHeight - MARGIN - textHeight);
+  }
+
+  /** Draws {@code label} in the small graph font, right-aligned on the bottom edge of the card. */
+  public static void drawBottomRightLabel(
+      IGc gc, String label, int boxX, int boxY, int boxWidth, int boxHeight) {
+    if (gc == null || Utils.isEmpty(label)) {
+      return;
+    }
+    gc.setFont(EFont.SMALL);
+    gc.setForeground(EColor.DARKGRAY);
+    Point extent = gc.textExtent(label);
+    Point origin =
+        bottomRightLabelOrigin(boxX, boxY, boxWidth, boxHeight, extent.x, extent.y);
+    gc.drawText(label, origin.x, origin.y, true);
+    gc.setFont(EFont.GRAPH);
+  }
 }

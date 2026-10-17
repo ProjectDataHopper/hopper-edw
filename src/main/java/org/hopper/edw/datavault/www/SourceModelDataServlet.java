@@ -47,6 +47,7 @@ import org.apache.hop.www.HopServerConfig;
 import org.apache.hop.www.IHopServerPlugin;
 import org.apache.hop.www.PipelineMap;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceColumn;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceJdbcExposure;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceJson;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModelLoadSupport;
@@ -236,7 +237,7 @@ public class SourceModelDataServlet extends BaseHttpServlet implements IHopServe
             int fetch = limit < Integer.MAX_VALUE ? limit + 1 : limit;
             rows =
                 SourceModelSqlExecutor.preview(
-                    model, sql, variables, metadataProvider, fetch, schemaAlias);
+                    model, sql, variables, metadataProvider, fetch, schemaAlias, true);
             if (rows.size() > limit) {
               truncated = true;
               rows = new ArrayList<>(rows.subList(0, limit));
@@ -244,7 +245,7 @@ public class SourceModelDataServlet extends BaseHttpServlet implements IHopServe
           } else {
             rows =
                 SourceModelSqlExecutor.preview(
-                    model, sql, variables, metadataProvider, Integer.MAX_VALUE, schemaAlias);
+                    model, sql, variables, metadataProvider, Integer.MAX_VALUE, schemaAlias, true);
           }
           writeJson(
               response,
@@ -508,20 +509,20 @@ public class SourceModelDataServlet extends BaseHttpServlet implements IHopServe
       return list;
     }
     for (SourceTable table : model.getTables()) {
-      if (table != null && !Utils.isEmpty(table.getName())) {
+      if (exposed(table) && !Utils.isEmpty(table.getName())) {
         list.add(
             new SourceModelDataJson.TableInfo(schema, table.getName(), "TABLE", "Source table"));
       }
     }
     for (SourceQuery query : model.getQueries()) {
-      if (query != null && !Utils.isEmpty(query.getName())) {
+      if (exposed(query) && !Utils.isEmpty(query.getName())) {
         list.add(
             new SourceModelDataJson.TableInfo(
                 schema, query.getName(), "VIEW", "Source query (virtual table)"));
       }
     }
     for (SourceJson json : model.getJsonSources()) {
-      if (json != null && !Utils.isEmpty(json.getName())) {
+      if (exposed(json) && !Utils.isEmpty(json.getName())) {
         list.add(
             new SourceModelDataJson.TableInfo(
                 schema, json.getName(), "VIEW", "Source JSON extraction (logical table)"));
@@ -529,14 +530,14 @@ public class SourceModelDataServlet extends BaseHttpServlet implements IHopServe
     }
     for (org.hopper.edw.datavault.metadata.sourcemodel.SourceMasking masking :
         model.getMaskingSources()) {
-      if (masking != null && !Utils.isEmpty(masking.getName())) {
+      if (exposed(masking) && !Utils.isEmpty(masking.getName())) {
         list.add(
             new SourceModelDataJson.TableInfo(
                 schema, masking.getName(), "VIEW", "Source masking (logical table)"));
       }
     }
     for (SourcePipeline pipeline : model.getPipelineSources()) {
-      if (pipeline != null && !Utils.isEmpty(pipeline.getName())) {
+      if (exposed(pipeline) && !Utils.isEmpty(pipeline.getName())) {
         list.add(
             new SourceModelDataJson.TableInfo(
                 schema, pipeline.getName(), "VIEW", "Source pipeline feed (logical table)"));
@@ -552,7 +553,7 @@ public class SourceModelDataServlet extends BaseHttpServlet implements IHopServe
       return list;
     }
     for (SourceTable table : model.getTables()) {
-      if (table == null
+      if (!exposed(table)
           || Utils.isEmpty(table.getName())
           || !matches(tablePattern, table.getName())) {
         continue;
@@ -575,7 +576,7 @@ public class SourceModelDataServlet extends BaseHttpServlet implements IHopServe
       }
     }
     for (SourceQuery query : model.getQueries()) {
-      if (query == null
+      if (!exposed(query)
           || Utils.isEmpty(query.getName())
           || !matches(tablePattern, query.getName())) {
         continue;
@@ -597,6 +598,10 @@ public class SourceModelDataServlet extends BaseHttpServlet implements IHopServe
       }
     }
     return list;
+  }
+
+  private static boolean exposed(Object card) {
+    return card != null && SourceJdbcExposure.include(card);
   }
 
   private static boolean matches(String pattern, String name) {

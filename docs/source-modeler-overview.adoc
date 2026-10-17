@@ -51,7 +51,7 @@ Catalog DV_SOURCE (single-table OR COMPOSITE feed)
 |Named JSON extraction: parent table/query/JSON source, JSON field, projected fields (JsonPath + pass-through keys). JsonInput rules apply (top-level leaves + at most one array). Publish as catalog type `JSON`. Chain Source JSON objects for nested arrays. See image:images/source-modeler-json-source.png[Source JSON dialog,width=480].
 
 |**Source masking**
-|Named virtual table over a parent table, query, JSON source, pipeline, or masking card. Selected fields name a Hop masking pattern. Publish as catalog type `MASKING`. JDBC and Data Vault loads of this card run Mask fields. The parent stays readable. See image:images/source-modeler-masking-fields.png[Source masking Fields tab,width=480] and link:help/source-masking-dialog.adoc[Source masking].
+|Named virtual table over a parent table, query, JSON source, pipeline, or masking card. Selected fields name a Hop masking pattern. Publish as catalog type `MASKING`. JDBC and Data Vault loads of this card run Mask fields. The parent stays available to the modeler and to loads, and can be marked hidden so JDBC clients see only the masked card. See image:images/source-modeler-masking-fields.png[Source masking Fields tab,width=480] and link:help/source-masking-dialog.adoc[Source masking].
 
 |**Source pipeline**
 |Named pipeline-backed feed: path to a `.hpl`, output transform, and **declared fields** (contract for catalog publish and MetaInject load). Uses the same **catalog connection / namespace** as the rest of the model (Edit model) for **publishing** this feed. Optional **Import** scans the pipeline for zero or more **Record Definition Input** transforms and stores catalog connection / namespace / record name for lineage (not required for load). **Catalog source name** is the published name of *this* pipeline feed (like a table). Publish as catalog type `PIPELINE`.
@@ -59,6 +59,12 @@ Catalog DV_SOURCE (single-table OR COMPOSITE feed)
 |**Note**
 |Canvas documentation (same note pads as other modelers).
 |===
+
+== Hidden sources
+
+Each source card (table, query, JSON extraction, masking card, pipeline feed) has **Hidden** on its **General** tab. A hidden card stays on the canvas. The source modeler prints `hidden` in the bottom-right corner of the tile.
+
+JDBC clients do not see a hidden card. It is left out of table and column metadata, and `SELECT` of its name, or of a published catalog alias of that card, fails. A visible child still reads a hidden parent: masking, JSON extraction, and queries (including free SQL inside a visible query) look the parent up on the model. Catalog publish, Data Vault generation, the query dialog **Insert tables…** list, and the **Source model SQL** transform also still see hidden cards.
 
 == Source pipeline
 
@@ -138,10 +144,10 @@ Model-level defaults live under **Edit model** → **Default data type mappings*
 
 image::images/source-modeler-masking-fields.png[Source masking dialog — Fields tab for masked-customer-info. customer_id uses pattern customer-id, city uses pattern city, and the other fields are left blank,align="center"]
 
-A masking card is a virtual table over a parent feed. The parent stays readable. Pattern definitions live in Hop metadata (`metadata/masking-pattern/`). The card stores only the pattern name.
+A masking card is a virtual table over a parent feed. The parent stays available to the modeler and to vault loads. Mark the parent **Hidden** when JDBC clients should see only the masked card. Pattern definitions live in Hop metadata (`metadata/masking-pattern/`). The card stores only the pattern name.
 
 . **Add source masking** (toolbar or canvas context), or double-click an existing masking card.
-. On **General**: name, optional catalog name, **parent kind** (table, query, JSON source, pipeline, or another masking card), and parent name.
+. On **General**: name, optional catalog name, **parent kind** (table, query, JSON source, pipeline, or another masking card), parent name, and **Hidden**.
 . On **Fields**: **Get fields** copies the parent projection and keeps pattern names already chosen for the same field. Set **Masking pattern** on the columns that must be masked. A blank pattern passes the value through. Unlisted parent columns are not on the card. **Edit masking pattern** opens the Hop metadata editor for the selected row.
 . **Validate**, **Preview**, and publish as catalog type `MASKING`.
 
@@ -211,6 +217,7 @@ The transform plans with Calcite (same engine as Free SQL on the source query di
 * URL: `jdbc:hop-hsm:file=/path/to/model.hsm` (optional `;rowLimit=N`)
 * Driver: `org.hopper.edw.datavault.virtualization.jdbc.HopSourceModelJdbcDriver`
 * Requires full Hop + plugin on the classpath (GUI / CLI / embedded)
+* Cards marked **Hidden** are omitted from `getTables` / `getColumns` and cannot be selected. The same rule applies to the Hop Server source-model service used by the thin client.
 
 ==== Remote Hop Server (thin client)
 

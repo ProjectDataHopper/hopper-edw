@@ -65,12 +65,29 @@ public final class SourceModelSqlExecutor {
       int rowLimit,
       String jdbcSchemaAlias)
       throws HopException {
+    return preview(model, sql, variables, metadataProvider, rowLimit, jdbcSchemaAlias, false);
+  }
+
+  /**
+   * @param omitHiddenSources when true, hidden source cards are not valid {@code FROM} names. JDBC
+   *     callers set this. The Source model SQL transform and query preview leave it false.
+   */
+  public static List<RowMetaAndData> preview(
+      SourceModel model,
+      String sql,
+      IVariables variables,
+      IHopMetadataProvider metadataProvider,
+      int rowLimit,
+      String jdbcSchemaAlias,
+      boolean omitHiddenSources)
+      throws HopException {
     int limit = rowLimit > 0 ? rowLimit : DEFAULT_ROW_LIMIT;
     SourceModelSqlOptions options =
         SourceModelSqlOptions.builder()
             .pipelineName("source-model-sql-preview")
             .previewRowLimit(limit)
             .jdbcSchemaAlias(jdbcSchemaAlias)
+            .omitHiddenSources(omitHiddenSources)
             .build();
     SourceModelSqlPlan plan =
         SourceModelSqlEngine.plan(model, sql, variables, metadataProvider, options);

@@ -90,6 +90,17 @@ class SourceMaskingPipelineGeneratorTest {
   }
 
   @Test
+  void generatesPipelineWhenParentIsHidden() throws Exception {
+    SourceModel model = sampleModel();
+    model.findTable("customer").setHidden(true);
+    PipelineMeta pipeline =
+        SourceMaskingPipelineGenerator.generate(
+            model, model.findMaskingSource("customer_masked"), new Variables(), memoryProvider());
+    assertTrue(
+        pipeline.getTransforms().stream().anyMatch(t -> t.getTransform() instanceof TableInputMeta));
+  }
+
+  @Test
   void omitsMaskFieldsWhenNoPatternIsSet() throws Exception {
     SourceModel model = sampleModel();
     model.findMaskingSource("customer_masked").getFields().get(1).setPatternName("");

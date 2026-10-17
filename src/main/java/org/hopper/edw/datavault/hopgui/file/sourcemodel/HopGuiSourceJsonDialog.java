@@ -110,6 +110,7 @@ public class HopGuiSourceJsonDialog {
   private Combo wJsonField;
   private Button wIgnoreMissingPath;
   private Button wDefaultPathLeafToNull;
+  private Button wHidden;
   private TableView wFields;
   private ColumnInfo colParentField;
   private SourceDataTypeMappingTab dataTypeMappingTab;
@@ -290,13 +291,20 @@ public class HopGuiSourceJsonDialog {
     wDefaultPathLeafToNull.setLayoutData(
         new FormDataBuilder().left(middle, 0).top(wIgnoreMissingPath, margin).right().result());
 
+    wHidden = new Button(comp, SWT.CHECK);
+    PropsUi.setLook(wHidden);
+    wHidden.setText(BaseMessages.getString(PKG, "SourceCard.Hidden.Label"));
+    wHidden.setToolTipText(BaseMessages.getString(PKG, "SourceCard.Hidden.ToolTip"));
+    wHidden.setLayoutData(
+        new FormDataBuilder().left(middle, 0).top(wDefaultPathLeafToNull, margin).right().result());
+
     Label wlHint = new Label(comp, SWT.LEFT | SWT.WRAP);
     wlHint.setText(BaseMessages.getString(PKG, "HopGuiSourceJsonDialog.General.Hint"));
     PropsUi.setLook(wlHint);
     wlHint.setLayoutData(
         new FormDataBuilder()
             .left()
-            .top(wDefaultPathLeafToNull, margin * 2)
+            .top(wHidden, margin * 2)
             .right()
             .bottom(100, -margin)
             .result());
@@ -728,6 +736,7 @@ public class HopGuiSourceJsonDialog {
     refreshJsonFieldItems(Const.NVL(input.getJsonFieldName(), ""));
     wIgnoreMissingPath.setSelection(input.isIgnoreMissingPath());
     wDefaultPathLeafToNull.setSelection(input.isDefaultPathLeafToNull());
+    wHidden.setSelection(input.isHidden());
 
     wFields.clearAll(false);
     SourceJsonFieldSupport.applyMissingPassThroughTypes(model, input);
@@ -752,6 +761,7 @@ public class HopGuiSourceJsonDialog {
     target.setJsonFieldName(wJsonField.getText());
     target.setIgnoreMissingPath(wIgnoreMissingPath.getSelection());
     target.setDefaultPathLeafToNull(wDefaultPathLeafToNull.getSelection());
+    target.setHidden(wHidden.getSelection());
     if (!Utils.isEmpty(input.getArrayFocusPath())) {
       target.setArrayFocusPath(input.getArrayFocusPath());
     }

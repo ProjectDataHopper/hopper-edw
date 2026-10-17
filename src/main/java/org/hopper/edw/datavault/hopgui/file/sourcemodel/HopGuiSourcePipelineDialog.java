@@ -96,6 +96,7 @@ public class HopGuiSourcePipelineDialog {
   private Button wSelectTransform;
   private MetaSelectionLine<PipelineRunConfiguration> wRunConfiguration;
   private Text wCatalogSourceName;
+  private Button wHidden;
   private TableView wCatalogSources;
   private TableView wFields;
   private SourceDataTypeMappingTab dataTypeMappingTab;
@@ -308,6 +309,13 @@ public class HopGuiSourcePipelineDialog {
         BaseMessages.getString(PKG, "HopGuiSourcePipelineDialog.CatalogSourceName.ToolTip"));
     wCatalogSourceName.setLayoutData(
         new FormDataBuilder().left(middle, 0).top(wRunConfiguration, margin).right().result());
+
+    wHidden = new Button(comp, SWT.CHECK);
+    PropsUi.setLook(wHidden);
+    wHidden.setText(BaseMessages.getString(PKG, "SourceCard.Hidden.Label"));
+    wHidden.setToolTipText(BaseMessages.getString(PKG, "SourceCard.Hidden.ToolTip"));
+    wHidden.setLayoutData(
+        new FormDataBuilder().left(middle, 0).top(wCatalogSourceName, margin).right().result());
   }
 
   private void addCatalogSourcesTab(CTabFolder tabFolder, int margin) {
@@ -449,6 +457,7 @@ public class HopGuiSourcePipelineDialog {
     }
     wRunConfiguration.setText(Const.NVL(input.getPipelineRunConfiguration(), ""));
     wCatalogSourceName.setText(Const.NVL(input.getCatalogSourceName(), ""));
+    wHidden.setSelection(input.isHidden());
     populateCatalogSourcesTable(input.getCatalogSources());
     populateFieldsTable(input.getFields());
     if (dataTypeMappingTab != null) {
@@ -656,6 +665,7 @@ public class HopGuiSourcePipelineDialog {
     target.setOutputTransformName(wOutputTransform.getText());
     target.setPipelineRunConfiguration(wRunConfiguration.getText());
     target.setCatalogSourceName(wCatalogSourceName.getText());
+    target.setHidden(wHidden.getSelection());
 
     List<SourcePipelineCatalogSource> catalogSources = new ArrayList<>();
     for (int i = 0; i < wCatalogSources.nrNonEmpty(); i++) {
