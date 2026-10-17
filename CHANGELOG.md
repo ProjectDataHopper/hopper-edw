@@ -4,13 +4,31 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+## [0.13.0] — 2026-10-17
+
+Requires **Apache Hop 2.20.0-SNAPSHOT** and **Java 21**.
+
+**Downloads:** [GitHub release zip](https://github.com/ProjectDataHopper/hopper-edw/releases/download/v0.13.0/hopper-edw-0.13.0.zip) · [Data Hopper Nexus](https://repository.data-hopper.com/repository/hop-community-plugins/org/hopper/hopper-edw/0.13.0/hopper-edw-0.13.0.zip) (`org.hopper:hopper-edw:0.13.0`)
+
+### EDW icons
+
+- Canvas, file-type, and metadata icons are drawn pictures instead of letters on colored squares. They stay readable at toolbar size in light and dark mode. Hub, link, satellite, and reference tiles keep their colors and add a letter badge. Model files (`.hsm`, `.hdv`, `.hbv`, `.hdm`, `.hem`) share one page style. A factless fact uses its own icon instead of the fact icon.
+
+### Training modules (issue #206)
+
+- **docs/training/**: guided modules 0–8 (orientation, installation and EDW setup, catalog and source models, raw Data Vault, loading and resource definition groups, Business Vault, dimensional models, lineage/quality/operations, and optional AI help and the MCP server). Each module is a walkthrough plus a questionnaire. The pages ship in the offline HTML documentation (`plugins/misc/hopper-edw/docs/training/`) and are linked from the documentation index. The questionnaire widget (`quiz.js` / `quiz.css`) marks answers with explanations, scores the page, copies a text summary to the clipboard, and raises `edw-quiz-complete` for a future host site.
+
 ### Hidden source cards (issue #208)
 
 - A source table, query, JSON extraction, masking card, or pipeline feed can be marked **Hidden** on its General tab. The source modeler prints `hidden` in the bottom-right corner of the tile. JDBC clients (`jdbc:hop-hsm:` and the Hop Server source-model service) leave the card out of table and column metadata, and a `SELECT` of its name fails. Masking, JSON, queries, catalog publish, and vault loads can still use a hidden parent.
 
-### Training modules (issue #206)
+### Relationship profile on SQL Server
 
-- **docs/training/**: guided training modules with a walkthrough and a questionnaire, shipped in the offline HTML documentation (`plugins/misc/hopper-edw/docs/training/`) and linked from the documentation index. Module 0 (orientation: the EDW Journey) and the module template land first; the questionnaire widget (`quiz.js` / `quiz.css`) marks answers with explanations, scores the page, copies a text summary to the clipboard, and raises `edw-quiz-complete` for a future host site.
+- **Profile** on a source-model relationship names the derived-table column (`SELECT 1 AS dup`) in the parent-key uniqueness check. SQL Server accepts the statement. Other engines are unchanged.
+
+### EDW component explorer (issue #190)
+
+- `docs/presentations/edw-component-explorer.html` is an interactive companion to the overview poster. Click a block to see the layer, the model, screenshots, and the docs behind it.
 
 ## [0.12.0] — 2026-10-15
 

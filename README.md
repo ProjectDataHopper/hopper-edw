@@ -18,7 +18,7 @@ limitations under the License.
 
 ![EDW](docs/images/edw-logo.svg)
 
-Apache Hop plugins to design, generate, and operate an **Enterprise Data Warehouse**: Data Catalog, source models, **Data Vault 2.0**, **Business Vault**, **dimensional** models, quality, lineage, and the **EDW Journey** map. Version **0.13.0-SNAPSHOT** (latest release **0.12.0**) requires **Apache Hop 2.20** (development **2.20.0-SNAPSHOT**) and **Java 21**.
+Apache Hop plugins to design, generate, and operate an **Enterprise Data Warehouse**: Data Catalog, source models, **Data Vault 2.0**, **Business Vault**, **dimensional** models, quality, lineage, and the **EDW Journey** map. Version **0.13.0** requires **Apache Hop 2.20.0-SNAPSHOT** and **Java 21**.
 
 **Hop 2.20.0-SNAPSHOT is required.** Hop **2.19.x** and earlier are **not** supported for this development line.
 
@@ -133,15 +133,15 @@ mvn clean package
 
 Artifacts:
 
-- `target/hopper-edw-0.13.0-SNAPSHOT.jar`
-- `target/hopper-edw-0.13.0-SNAPSHOT.zip` (ready-to-unzip plugin layout)
+- `target/hopper-edw-0.13.0.jar`
+- `target/hopper-edw-0.13.0.zip` (ready-to-unzip plugin layout)
 
 Maven coordinates from **0.10.0** onward: `org.hopper:hopper-edw`. Release **0.9.0** was published as `org.apache.hop:hop-datavault` and unpacked under `plugins/misc/datavault/`.
 
-Published release artifacts for **0.12.0**:
+Published release artifacts for **0.13.0**:
 
-- **GitHub:** [v0.12.0 release](https://github.com/ProjectDataHopper/hopper-edw/releases/tag/v0.12.0) — [hopper-edw-0.12.0.zip](https://github.com/ProjectDataHopper/hopper-edw/releases/download/v0.12.0/hopper-edw-0.12.0.zip)
-- **Nexus (Marketplace):** [hopper-edw-0.12.0.zip](https://repository.data-hopper.com/repository/hop-community-plugins/org/hopper/hopper-edw/0.12.0/hopper-edw-0.12.0.zip) (`org.hopper:hopper-edw:0.12.0`)
+- **GitHub:** [v0.13.0 release](https://github.com/ProjectDataHopper/hopper-edw/releases/tag/v0.13.0) — [hopper-edw-0.13.0.zip](https://github.com/ProjectDataHopper/hopper-edw/releases/download/v0.13.0/hopper-edw-0.13.0.zip)
+- **Nexus (Marketplace):** [hopper-edw-0.13.0.zip](https://repository.data-hopper.com/repository/hop-community-plugins/org/hopper/hopper-edw/0.13.0/hopper-edw-0.13.0.zip) (`org.hopper:hopper-edw:0.13.0`)
 
 ## Installation (external plugin)
 
@@ -174,7 +174,7 @@ If you previously installed **0.9.0** as `hop-datavault`, remove `$HOP_HOME/plug
 ```
 
 ```text
-| hopper-edw                | 0.12.0          | Community     | data-hopper-community |           | 2026-10-15 | Apache Hop plugins to build an Enterprise Data Wareho... |
+| hopper-edw                | 0.13.0          | Community     | data-hopper-community |           | 2026-10-17 | Apache Hop plugins to build an Enterprise Data Wareho... |
 ```
 
 **3. Install** the plugin (latest release or continuous SNAPSHOT when published):
@@ -184,10 +184,10 @@ If you previously installed **0.9.0** as `hop-datavault`, remove `$HOP_HOME/plug
 ```
 
 ```text
-Resolved hopper-edw → org.hopper:hopper-edw:0.12.0 (prefer repo 'data-hopper-community')
-… Marketplace - Downloading org.hopper:hopper-edw:0.12.0 from https://repository.data-hopper.com/repository/hop-community-plugins/…
-… Marketplace - Installed org.hopper:hopper-edw:0.12.0. Restart Hop to load the plugin.
-Plugin org.hopper:hopper-edw:0.12.0 installed under $HOP_HOME from repo 'data-hopper-community'. Restart Hop to load it.
+Resolved hopper-edw → org.hopper:hopper-edw:0.13.0 (prefer repo 'data-hopper-community')
+… Marketplace - Downloading org.hopper:hopper-edw:0.13.0 from https://repository.data-hopper.com/repository/hop-community-plugins/…
+… Marketplace - Installed org.hopper:hopper-edw:0.13.0. Restart Hop to load the plugin.
+Plugin org.hopper:hopper-edw:0.13.0 installed under $HOP_HOME from repo 'data-hopper-community'. Restart Hop to load it.
 ```
 
 You can also use **Tools → Marketplace…** in Hop GUI: import the repository on the **Repositories** tab, then install from the **Plugins** tab.
@@ -229,6 +229,8 @@ SELECT * FROM sat_customer WHERE x_load_end_ts IS NULL
 - Record source groups for partial model updates
 
 ## Roadmap / releases
+
+**Shipped in 0.13.0:** drawn EDW icons and a factless-fact icon; training modules 0–8 (#206); hidden source cards (#208); SQL Server relationship profile; EDW component explorer (#190). See [CHANGELOG.md](CHANGELOG.md).
 
 **Shipped in 0.12.0:** operational analytics from the OPS database (#195); source-model browse and stress/force layout (#197); lookup indexes on load keys (#204); Type 1 skip-unchanged loads (#201); fact dimension-join copies (#194); catalog connection and data-type mapping editors (#202); target-table preview from the named configuration (#205); quieter DDL logging (#199). See [CHANGELOG.md](CHANGELOG.md).
 
