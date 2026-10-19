@@ -32,6 +32,7 @@ import org.hopper.edw.datavault.ai.EdwAiAdvisorLocations;
 import org.hopper.edw.datavault.ai.EdwAiInclusions;
 import org.hopper.edw.datavault.ai.EdwAiProposalSupport;
 import org.hopper.edw.datavault.hopgui.ai.EdwAiAdvisorGraphSupport;
+import org.hopper.edw.datavault.hopgui.ai.EdwAiBoundModel;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 
 @AiAdvisorPlugin(
@@ -112,8 +113,7 @@ public class BusinessVaultAiAdvisor implements IAiAdvisor {
   @Override
   public List<AiProposalValidation> validateProposals(
       AiAdvisorRequest request, List<AiProposal> proposals) {
-    BusinessVaultModel model =
-        request != null && request.getArtifact() instanceof BusinessVaultModel m ? m : null;
+    BusinessVaultModel model = EdwAiBoundModel.bind(request, BusinessVaultModel.class);
     return EdwAiProposalSupport.toBvValidations(
         BvAiProposalValidator.validate(
             model,
@@ -132,6 +132,7 @@ public class BusinessVaultAiAdvisor implements IAiAdvisor {
         EdwAiProposalSupport.fromAi(selected),
         request.getMetadataProvider(),
         request.getVariables());
+    EdwAiBoundModel.writeBack(model, request);
   }
 
   @Override
@@ -140,8 +141,9 @@ public class BusinessVaultAiAdvisor implements IAiAdvisor {
   }
 
   private static BusinessVaultModel modelFrom(AiAdvisorRequest request) throws HopException {
-    if (request == null || !(request.getArtifact() instanceof BusinessVaultModel model)) {
-      throw new HopException("No Business Vault model is bound to this session.");
+    BusinessVaultModel model = EdwAiBoundModel.bind(request, BusinessVaultModel.class);
+    if (model == null) {
+      throw new HopException(EdwAiBoundModel.unbound("Business Vault model", request));
     }
     return model;
   }

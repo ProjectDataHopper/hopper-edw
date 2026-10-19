@@ -30,6 +30,7 @@ import org.hopper.edw.datavault.ai.EdwAiAdvisorLocations;
 import org.hopper.edw.datavault.ai.EdwAiInclusions;
 import org.hopper.edw.datavault.ai.EdwChatOnlyAdvisorSupport;
 import org.hopper.edw.datavault.ai.HopAiPromptLoader;
+import org.hopper.edw.datavault.hopgui.ai.EdwAiBoundModel;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 
 @AiAdvisorPlugin(
@@ -108,8 +109,9 @@ public class SourceModelAiAdvisor implements IAiAdvisor {
   }
 
   private static SourceModel modelFrom(AiAdvisorRequest request) throws HopException {
-    if (request == null || !(request.getArtifact() instanceof SourceModel model)) {
-      throw new HopException("No source model is bound to this session.");
+    SourceModel model = EdwAiBoundModel.bind(request, SourceModel.class);
+    if (model == null) {
+      throw new HopException(EdwAiBoundModel.unbound("source model", request));
     }
     return model;
   }

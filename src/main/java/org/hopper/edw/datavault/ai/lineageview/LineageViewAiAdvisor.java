@@ -28,6 +28,7 @@ import org.apache.hop.i18n.BaseMessages;
 import org.hopper.edw.datavault.ai.EdwAiAdvisorLocations;
 import org.hopper.edw.datavault.ai.EdwChatOnlyAdvisorSupport;
 import org.hopper.edw.datavault.ai.HopAiPromptLoader;
+import org.hopper.edw.datavault.hopgui.ai.EdwAiBoundModel;
 import org.hopper.edw.datavault.lineageview.HopLineageViewDocument;
 
 @AiAdvisorPlugin(
@@ -97,8 +98,9 @@ public class LineageViewAiAdvisor implements IAiAdvisor {
   }
 
   private static HopLineageViewDocument documentFrom(AiAdvisorRequest request) throws HopException {
-    if (request == null || !(request.getArtifact() instanceof HopLineageViewDocument document)) {
-      throw new HopException("No lineage view is bound to this session.");
+    HopLineageViewDocument document = EdwAiBoundModel.bind(request, HopLineageViewDocument.class);
+    if (document == null) {
+      throw new HopException(EdwAiBoundModel.unbound("lineage view", request));
     }
     return document;
   }

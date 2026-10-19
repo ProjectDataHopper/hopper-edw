@@ -31,6 +31,7 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.i18n.BaseMessages;
 import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
 import org.hopper.edw.datavault.hopgui.ai.EdwAiAdvisorGraphSupport;
+import org.hopper.edw.datavault.hopgui.ai.EdwAiBoundModel;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 
 @AiAdvisorPlugin(
@@ -90,8 +91,8 @@ public class DataVaultAiAdvisor implements IAiAdvisor {
   @Override
   public List<AiAdvisorInclusionChoice> listInclusionChoices(
       String inclusionId, AiAdvisorRequest request) {
-    if (!EdwAiInclusions.CATALOG.equals(inclusionId)
-        || !(request != null && request.getArtifact() instanceof DataVaultModel model)) {
+    DataVaultModel model = EdwAiBoundModel.bind(request, DataVaultModel.class);
+    if (!EdwAiInclusions.CATALOG.equals(inclusionId) || model == null) {
       return List.of();
     }
     try {
@@ -134,8 +135,7 @@ public class DataVaultAiAdvisor implements IAiAdvisor {
   @Override
   public List<AiProposalValidation> validateProposals(
       AiAdvisorRequest request, List<AiProposal> proposals) {
-    DataVaultModel model =
-        request != null && request.getArtifact() instanceof DataVaultModel m ? m : null;
+    DataVaultModel model = EdwAiBoundModel.bind(request, DataVaultModel.class);
     return EdwAiProposalSupport.toDvValidations(
         DvAiProposalValidator.validate(
             model,
@@ -154,6 +154,7 @@ public class DataVaultAiAdvisor implements IAiAdvisor {
         EdwAiProposalSupport.fromAi(selected),
         request.getMetadataProvider(),
         request.getVariables());
+    EdwAiBoundModel.writeBack(model, request);
   }
 
   @Override
@@ -162,8 +163,9 @@ public class DataVaultAiAdvisor implements IAiAdvisor {
   }
 
   private static DataVaultModel modelFrom(AiAdvisorRequest request) throws HopException {
-    if (request == null || !(request.getArtifact() instanceof DataVaultModel model)) {
-      throw new HopException("No Data Vault model is bound to this session.");
+    DataVaultModel model = EdwAiBoundModel.bind(request, DataVaultModel.class);
+    if (model == null) {
+      throw new HopException(EdwAiBoundModel.unbound("Data Vault model", request));
     }
     return model;
   }

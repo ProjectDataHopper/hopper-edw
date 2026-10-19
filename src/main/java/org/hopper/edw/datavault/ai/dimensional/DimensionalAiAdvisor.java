@@ -32,6 +32,7 @@ import org.hopper.edw.datavault.ai.EdwAiAdvisorLocations;
 import org.hopper.edw.datavault.ai.EdwAiInclusions;
 import org.hopper.edw.datavault.ai.EdwAiProposalSupport;
 import org.hopper.edw.datavault.hopgui.ai.EdwAiAdvisorGraphSupport;
+import org.hopper.edw.datavault.hopgui.ai.EdwAiBoundModel;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
 
 @AiAdvisorPlugin(
@@ -87,6 +88,10 @@ public class DimensionalAiAdvisor implements IAiAdvisor {
 
   @Override
   public AiAdvisorPrompt buildPrompt(AiAdvisorRequest request) throws HopException {
+    Object artifact = request == null ? null : request.getArtifact();
+    if (EdwAiBoundModel.isForeignModel(artifact, DimensionalModel.class)) {
+      return promptFromStructure(request, EdwAiBoundModel.structureOf(artifact));
+    }
     DimensionalModel model = modelFrom(request);
     DmAiContextBundle context =
         DmAiContextBuilder.build(
@@ -111,8 +116,7 @@ public class DimensionalAiAdvisor implements IAiAdvisor {
   @Override
   public List<AiProposalValidation> validateProposals(
       AiAdvisorRequest request, List<AiProposal> proposals) {
-    DimensionalModel model =
-        request != null && request.getArtifact() instanceof DimensionalModel m ? m : null;
+    DimensionalModel model = EdwAiBoundModel.bind(request, DimensionalModel.class);
     return EdwAiProposalSupport.toDmValidations(
         DmAiProposalValidator.validate(
             model,
@@ -131,6 +135,7 @@ public class DimensionalAiAdvisor implements IAiAdvisor {
         EdwAiProposalSupport.fromAi(selected),
         request.getMetadataProvider(),
         request.getVariables());
+    EdwAiBoundModel.writeBack(model, request);
   }
 
   @Override
@@ -138,9 +143,34 @@ public class DimensionalAiAdvisor implements IAiAdvisor {
     EdwAiAdvisorGraphSupport.afterApply(request);
   }
 
+  private static AiAdvisorPrompt promptFromStructure(AiAdvisorRequest request, String structure)
+      throws HopException {
+    DmAiRequest dmRequest = toDmRequest(request);
+    DmAiScenario scenario =
+        dmRequest.getScenario() != null ? dmRequest.getScenario() : DmAiScenario.GENERAL;
+    DmAiContextBundle context =
+        DmAiContextBundle.builder()
+            .scenario(scenario)
+            .userPrompt(dmRequest.getUserPrompt())
+            .modelStructureJson(structure)
+            .modelSummaryJson("{}")
+            .followUp(dmRequest.isFollowUp())
+            .appliedChangeSummaries(
+                dmRequest.getAppliedChangeSummaries() != null
+                    ? dmRequest.getAppliedChangeSummaries()
+                    : List.of())
+            .build();
+    String userPrompt =
+        request.isFollowUp()
+            ? DmAiAdvisorService.buildFollowUpUserPrompt(context)
+            : DmAiAdvisorService.buildInitialUserPrompt(context);
+    return new AiAdvisorPrompt(DmAiAdvisorService.buildSystemPrompt(context), userPrompt);
+  }
+
   private static DimensionalModel modelFrom(AiAdvisorRequest request) throws HopException {
-    if (request == null || !(request.getArtifact() instanceof DimensionalModel model)) {
-      throw new HopException("No dimensional model is bound to this session.");
+    DimensionalModel model = EdwAiBoundModel.bind(request, DimensionalModel.class);
+    if (model == null) {
+      throw new HopException(EdwAiBoundModel.unbound("dimensional model", request));
     }
     return model;
   }

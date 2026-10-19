@@ -193,7 +193,7 @@ public class HopGuiExecutionMapGraph extends HopGuiModelGraphBase
           ToolbarFacade.createToolbarContainer(this, SWT.WRAP | SWT.LEFT | SWT.HORIZONTAL);
       toolBar = toolBarContainer.getControl();
       toolBarWidgets = new GuiToolbarWidgets();
-      toolBarWidgets.registerGuiPluginObject(this);
+      bindToolbarToThisGraph(toolBarWidgets);
       toolBarWidgets.createToolbarWidgets(toolBarContainer, GUI_PLUGIN_TOOLBAR_PARENT_ID);
       FormData layoutData = new FormData();
       layoutData.left = new FormAttachment(0, 0);

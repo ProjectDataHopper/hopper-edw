@@ -28,6 +28,7 @@ import org.apache.hop.i18n.BaseMessages;
 import org.hopper.edw.datavault.ai.EdwAiAdvisorLocations;
 import org.hopper.edw.datavault.ai.EdwChatOnlyAdvisorSupport;
 import org.hopper.edw.datavault.ai.HopAiPromptLoader;
+import org.hopper.edw.datavault.hopgui.ai.EdwAiBoundModel;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapDocument;
 
 @AiAdvisorPlugin(
@@ -94,8 +95,9 @@ public class ExecutionMapAiAdvisor implements IAiAdvisor {
   }
 
   private static ExecutionMapDocument documentFrom(AiAdvisorRequest request) throws HopException {
-    if (request == null || !(request.getArtifact() instanceof ExecutionMapDocument document)) {
-      throw new HopException("No execution map is bound to this session.");
+    ExecutionMapDocument document = EdwAiBoundModel.bind(request, ExecutionMapDocument.class);
+    if (document == null) {
+      throw new HopException(EdwAiBoundModel.unbound("execution map", request));
     }
     return document;
   }

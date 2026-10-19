@@ -17,6 +17,13 @@ package org.hopper.edw.datavault.ai.dimensional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
@@ -33,7 +40,6 @@ import org.hopper.edw.datavault.metadata.dimensional.DmDimension;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimensionAlias;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimensionAttribute;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimensionLoadStrategySupport;
-import org.hopper.edw.datavault.metadata.dimensional.DmDimensionResolutionSupport;
 import org.hopper.edw.datavault.metadata.dimensional.DmFactDimensionRole;
 import org.hopper.edw.datavault.metadata.dimensional.DmFactMeasure;
 import org.hopper.edw.datavault.metadata.dimensional.DmNaturalKeyField;
@@ -78,24 +84,30 @@ public final class DmAiContextBuilder {
       checkResultsJson = serializeCheckResults(model.check(metadataProvider, variables));
     }
 
+    // Metrics open a database. That runs beside the UI thread and is abandoned if it does not
+    // return, so a quiet or unreachable metrics database cannot freeze Hop.
     String loadRunMetricsJson =
-        MetricsAiContextBuilder.buildMetricsContext(
-            request.isIncludeLoadRunMetrics(),
-            scenario == DmAiScenario.PERFORMANCE_TUNING,
-            request.getUserPrompt(),
-            model.getName(),
-            GeneratedPipelineMetadataConstants.MODEL_TYPE_DM,
-            metadataProvider,
-            variables);
+        bounded(
+            () ->
+                MetricsAiContextBuilder.buildMetricsContext(
+                    request.isIncludeLoadRunMetrics(),
+                    scenario == DmAiScenario.PERFORMANCE_TUNING,
+                    request.getUserPrompt(),
+                    model.getName(),
+                    GeneratedPipelineMetadataConstants.MODEL_TYPE_DM,
+                    metadataProvider,
+                    variables));
     String executionInfoJson =
-        ExecutionInfoAiContextBuilder.buildExecutionInfoContext(
-            request.isIncludeExecutionInfo(),
-            scenario == DmAiScenario.PERFORMANCE_TUNING,
-            request.getUserPrompt(),
-            model.getName(),
-            GeneratedPipelineMetadataConstants.MODEL_TYPE_DM,
-            metadataProvider,
-            variables);
+        bounded(
+            () ->
+                ExecutionInfoAiContextBuilder.buildExecutionInfoContext(
+                    request.isIncludeExecutionInfo(),
+                    scenario == DmAiScenario.PERFORMANCE_TUNING,
+                    request.getUserPrompt(),
+                    model.getName(),
+                    GeneratedPipelineMetadataConstants.MODEL_TYPE_DM,
+                    metadataProvider,
+                    variables));
 
     return DmAiContextBundle.builder()
         .scenario(scenario)
@@ -161,11 +173,6 @@ public final class DmAiContextBuilder {
               .append(DvAiContextBuilder.jsonString(alias.getReferencedModelFilename()));
           json.append(",\"external\":true");
         }
-        json.append(",\"physicalTable\":")
-            .append(
-                DvAiContextBuilder.jsonString(
-                    DmDimensionResolutionSupport.resolvePhysicalTableName(
-                        model, alias.getName(), null)));
       } else if (table instanceof IDmFactLikeTable factLike) {
         json.append(",\"measures\":[");
         appendMeasures(json, factLike.getMeasuresOrEmpty());
@@ -313,6 +320,32 @@ public final class DmAiContextBuilder {
           + "}";
     } catch (Exception e) {
       return DvAiContextBuilder.jsonString(name);
+    }
+  }
+
+  /** At most two seconds. A stuck metrics connection must not block the Hop UI thread. */
+  private static String bounded(Supplier<String> call) {
+    ExecutorService executor =
+        Executors.newSingleThreadExecutor(
+            runnable -> {
+              Thread thread = new Thread(runnable, "edw-ai-context");
+              thread.setDaemon(true);
+              return thread;
+            });
+    Future<String> future = executor.submit(call::get);
+    try {
+      String value = future.get(2, TimeUnit.SECONDS);
+      return value == null ? "" : value;
+    } catch (TimeoutException e) {
+      future.cancel(true);
+      return "";
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      return "";
+    } catch (ExecutionException e) {
+      return "";
+    } finally {
+      executor.shutdownNow();
     }
   }
 

@@ -142,6 +142,17 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
     this.perspective = perspective;
   }
 
+  /**
+   * Toolbar callbacks are stored under an instance id. Graphs that share the empty id lose that
+   * registration when any other toolbar closes, so AI Help then has no graph and never binds the
+   * open model. Each graph keeps its own id.
+   */
+  protected void bindToolbarToThisGraph(GuiToolbarWidgets widgets) {
+    widgets.setInstanceId(
+        getClass().getName() + "#" + Integer.toHexString(System.identityHashCode(this)));
+    widgets.registerGuiPluginObject(this);
+  }
+
   protected abstract ModelGraphMouseInteractions createMouseInteractions();
 
   protected abstract String getMetricsModelName();

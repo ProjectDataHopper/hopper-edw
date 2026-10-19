@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Dimensional model AI advisor
+
+- Asking a question or choosing **Show what is sent** no longer freezes Hop. The prompt records a dimension alias and the file it points at, and does not open that file. Metrics and execution info cannot block the window.
+
 ### EDW Journey architecture poster (issue #209)
 
 - Opening the EDW Journey, or selecting the resource definition group, shows the architecture poster with a status mark on each block that has a project or OPS signal. Clicking a block opens a Hopper presentation: trends when history exists, and tables whose rows open the source, Data Vault, Business Vault, dimensional model, catalog record, or the existing harvest, validate, lineage, and operational-analytics dialogs.
