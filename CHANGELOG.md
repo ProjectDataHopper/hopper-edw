@@ -4,6 +4,13 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### EDW Journey architecture poster (issue #209)
+
+- Opening the EDW Journey, or selecting the resource definition group, shows the architecture poster with a status mark on each block that has a project or OPS signal. Clicking a block opens a Hopper presentation: trends when history exists, and tables whose rows open the source, Data Vault, Business Vault, dimensional model, catalog record, or the existing harvest, validate, lineage, and operational-analytics dialogs.
+- A presentation link uses `hop-edw://`. A table cell click carries every field of the row, including columns the table does not display, and an Open link can substitute `{field}` from that row.
+- The dashboard under the poster uses the report viewer (zoom, fit width, export) and stays in the light poster palette even when Hop is dark. The report toolbar sits at the top of that panel. Charts keep a fixed height. Tables and titles size to their content and sit beside or under the previous block. A Float icon on that toolbar opens the same presentation in its own window.
+- The wave-board chart of models in the latest wave draws category labels at −25° so long names stay apart. Clicking a bar opens that model. A name that exists in more than one layer is labeled with the layer.
+
 ## [0.13.0] — 2026-10-17
 
 Requires **Apache Hop 2.20.0-SNAPSHOT** and **Java 21**.

@@ -38,13 +38,13 @@ import org.apache.hop.ui.core.gui.IToolbarContainer;
 import org.apache.hop.ui.core.widget.MetaSelectionLine;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.hopgui.ToolbarFacade;
-import org.hopper.edw.datavault.hopgui.opsanalytics.OpsAnalyticsDialog;
 import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
 import org.apache.hop.ui.hopgui.perspective.HopPerspectivePlugin;
 import org.apache.hop.ui.hopgui.perspective.IHopPerspective;
 import org.apache.hop.ui.hopgui.shared.SashFormMemory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
@@ -55,9 +55,25 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupModelDiscoverySupport;
+import org.hopper.edw.datavault.hopgui.EdwDocsGuiPlugin;
 import org.hopper.edw.datavault.hopgui.GuiBusySupport;
 import org.hopper.edw.datavault.hopgui.ai.EdwAiAdvisorOpenSupport;
+import org.hopper.edw.datavault.hopgui.opsanalytics.OpsAnalyticsDialog;
 import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneyTreeNode.Kind;
+import org.hopper.edw.datavault.hopgui.perspective.journey.link.EdwJourneyGuiNavigator;
+import org.hopper.edw.datavault.hopgui.perspective.journey.link.EdwJourneyPresentationHost;
+import org.hopper.edw.datavault.hopgui.perspective.journey.panel.EdwJourneyConsumptionProbe;
+import org.hopper.edw.datavault.hopgui.perspective.journey.panel.EdwJourneyHistory;
+import org.hopper.edw.datavault.hopgui.perspective.journey.panel.EdwJourneyHistoryQuery;
+import org.hopper.edw.datavault.hopgui.perspective.journey.panel.EdwJourneyPanelBuilder;
+import org.hopper.edw.datavault.hopgui.perspective.journey.panel.EdwJourneyPanelContent;
+import org.hopper.edw.datavault.hopgui.perspective.journey.panel.EdwJourneyPanelContent.Inputs;
+import org.hopper.edw.datavault.hopgui.perspective.journey.panel.EdwJourneyPanelContent.JdbcService;
+import org.hopper.edw.datavault.hopgui.perspective.journey.panel.EdwJourneyPanelId;
+import org.hopper.edw.datavault.hopgui.perspective.journey.poster.EdwJourneyPoster;
+import org.hopper.edw.datavault.hopgui.perspective.journey.poster.EdwJourneyPosterStatus;
+import org.hopper.edw.datavault.hopgui.presentation.EdwPresentationViewerPane;
+import org.hopper.presentation.simple.HGeneratedCatalog;
 
 /** Hop GUI perspective for the EDW data journey of a resource definition group. */
 @HopPerspectivePlugin(
@@ -93,10 +109,24 @@ public class EdwJourneyPerspective implements IHopPerspective {
   private MetaSelectionLine<ResourceDefinitionGroupMeta> wGroup;
   private GuiToolbarWidgets toolBarWidgets;
   private EdwJourneyDetailsPanel detailsPanel;
+  private EdwJourneyPoster poster;
+  private Composite detailsHost;
+  private Composite viewerHost;
+  private Composite bottomStackComposite;
+  private StackLayout bottomStack;
+  private EdwPresentationViewerPane presentationPane;
+  private EdwJourneyPresentationHost presentationHost;
   private EdwJourneySnapshot snapshot = EdwJourneySnapshot.empty();
   private EdwJourneyOpsOverlay opsOverlay = EdwJourneyOpsOverlay.empty();
+  private EdwJourneyHistory history = EdwJourneyHistory.empty(null);
+  private boolean semanticLayerPresent;
+  private List<String> semanticFiles = List.of();
+  private List<JdbcService> jdbcServices = List.of();
+  private EdwJourneyPanelId activePanel = EdwJourneyPanelId.PROJECT_PULSE;
+  private boolean preferPanel;
   private ResourceDefinitionGroupMeta selectedGroup;
   private boolean suppressingGroupEvents;
+  private boolean applyingTreeSelection;
 
   public EdwJourneyPerspective() {
     instance = this;
@@ -218,7 +248,14 @@ public class EdwJourneyPerspective implements IHopPerspective {
     fdTree.right = new FormAttachment(100, 0);
     fdTree.bottom = new FormAttachment(100, 0);
     tree.setLayoutData(fdTree);
-    tree.addListener(SWT.Selection, e -> updateSelection());
+    tree.addListener(
+        SWT.Selection,
+        e -> {
+          if (!applyingTreeSelection) {
+            preferPanel = false;
+          }
+          updateSelection();
+        });
     tree.addListener(
         SWT.DefaultSelection,
         e -> {
@@ -242,29 +279,51 @@ public class EdwJourneyPerspective implements IHopPerspective {
   }
 
   private void createDetailsPane(Composite parent) {
-    Composite detailsComposite = new Composite(parent, SWT.BORDER);
-    detailsComposite.setLayout(new FormLayout());
-    PropsUi.setLook(detailsComposite);
+    SashForm right = new SashForm(parent, SWT.VERTICAL);
+    PropsUi.setLook(right);
+    poster = new EdwJourneyPoster(right, hopGui.getVariables(), this::onBlockSelected);
 
-    Label wlDetails = new Label(detailsComposite, SWT.LEFT);
-    PropsUi.setLook(wlDetails);
-    wlDetails.setText(BaseMessages.getString(PKG, "EdwJourneyPerspective.Details.Label"));
-    FormData fdlDetails = new FormData();
-    fdlDetails.left = new FormAttachment(0, PropsUi.getMargin());
-    fdlDetails.top = new FormAttachment(0, PropsUi.getMargin());
-    wlDetails.setLayoutData(fdlDetails);
+    Composite bottom = new Composite(right, SWT.BORDER);
+    bottom.setLayout(new FormLayout());
+    PropsUi.setLook(bottom);
 
-    Composite detailsBody = new Composite(detailsComposite, SWT.NONE);
-    detailsBody.setLayout(new FormLayout());
-    PropsUi.setLook(detailsBody);
-    FormData fdBody = new FormData();
-    fdBody.left = new FormAttachment(0, 0);
-    fdBody.top = new FormAttachment(wlDetails, PropsUi.getMargin());
-    fdBody.right = new FormAttachment(100, 0);
-    fdBody.bottom = new FormAttachment(100, 0);
-    detailsBody.setLayoutData(fdBody);
+    bottomStackComposite = new Composite(bottom, SWT.NONE);
+    bottomStack = new StackLayout();
+    bottomStackComposite.setLayout(bottomStack);
+    PropsUi.setLook(bottomStackComposite);
+    FormData fdStack = new FormData();
+    fdStack.left = new FormAttachment(0, 0);
+    fdStack.top = new FormAttachment(0, 0);
+    fdStack.right = new FormAttachment(100, 0);
+    fdStack.bottom = new FormAttachment(100, 0);
+    bottomStackComposite.setLayoutData(fdStack);
 
-    detailsPanel = new EdwJourneyDetailsPanel(detailsBody, hopGui, this::onGroupCreated);
+    detailsHost = new Composite(bottomStackComposite, SWT.NONE);
+    detailsHost.setLayout(new FormLayout());
+    PropsUi.setLook(detailsHost);
+    viewerHost = new Composite(bottomStackComposite, SWT.NONE);
+    viewerHost.setLayout(new FormLayout());
+    org.eclipse.swt.graphics.Color pageColor =
+        new org.eclipse.swt.graphics.Color(viewerHost.getDisplay(), 0xFA, 0xFB, 0xFC);
+    viewerHost.setBackground(pageColor);
+    viewerHost.addDisposeListener(e -> pageColor.dispose());
+    presentationHost =
+        new EdwJourneyPresentationHost(
+            () -> snapshot,
+            () ->
+                new EdwJourneyGuiNavigator(
+                    hopGui, selectedGroup, snapshot, this::showPanelFromLink));
+    presentationPane = new EdwPresentationViewerPane(viewerHost, presentationHost, false);
+    FormData fdPane = new FormData();
+    fdPane.left = new FormAttachment(12, 0);
+    fdPane.right = new FormAttachment(88, 0);
+    fdPane.top = new FormAttachment(0, 0);
+    fdPane.bottom = new FormAttachment(100, 0);
+    presentationPane.setLayoutData(fdPane);
+    bottomStack.topControl = detailsHost;
+    detailsPanel = new EdwJourneyDetailsPanel(detailsHost, hopGui, this::onGroupCreated);
+
+    right.setWeights(new int[] {45, 55});
   }
 
   /**
@@ -452,6 +511,9 @@ public class EdwJourneyPerspective implements IHopPerspective {
     ResourceDefinitionGroupMeta[] groupHolder = new ResourceDefinitionGroupMeta[1];
     EdwJourneySnapshot[] snapshotHolder = new EdwJourneySnapshot[1];
     EdwJourneyOpsOverlay[] overlayHolder = new EdwJourneyOpsOverlay[1];
+    EdwJourneyHistory[] historyHolder = new EdwJourneyHistory[1];
+    List<String>[] semanticHolder = new List[1];
+    List<JdbcService>[] jdbcHolder = new List[1];
     GuiBusySupport.showWhile(
         composite,
         () -> {
@@ -462,10 +524,25 @@ public class EdwJourneyPerspective implements IHopPerspective {
           overlayHolder[0] =
               EdwJourneyOpsOverlayLoader.load(
                   groupHolder[0], hopGui.getVariables(), hopGui.getMetadataProvider());
+          historyHolder[0] =
+              EdwJourneyHistoryQuery.load(
+                  groupHolder[0], hopGui.getVariables(), hopGui.getMetadataProvider());
+          EdwJourneySnapshot built =
+              snapshotHolder[0] != null ? snapshotHolder[0] : EdwJourneySnapshot.empty();
+          semanticHolder[0] =
+              EdwJourneyConsumptionProbe.semanticFiles(
+                  built.dimensionalModels(), hopGui.getVariables());
+          jdbcHolder[0] =
+              EdwJourneyConsumptionProbe.jdbcServices(
+                  hopGui.getMetadataProvider(), built.sourceModels(), hopGui.getVariables());
         });
     selectedGroup = groupHolder[0];
     snapshot = snapshotHolder[0] != null ? snapshotHolder[0] : EdwJourneySnapshot.empty();
     opsOverlay = overlayHolder[0] != null ? overlayHolder[0] : EdwJourneyOpsOverlay.empty();
+    history = historyHolder[0] != null ? historyHolder[0] : EdwJourneyHistory.empty(null);
+    semanticFiles = semanticHolder[0] != null ? semanticHolder[0] : List.of();
+    semanticLayerPresent = !semanticFiles.isEmpty();
+    jdbcServices = jdbcHolder[0] != null ? jdbcHolder[0] : List.of();
     rebuildTree(previousId);
   }
 
@@ -609,7 +686,14 @@ public class EdwJourneyPerspective implements IHopPerspective {
     if (detailsPanel == null) {
       return;
     }
+    if (poster != null) {
+      poster.setMarks(EdwJourneyPosterStatus.marks(snapshot, opsOverlay));
+    }
     if (selectedGroup == null) {
+      if (poster != null) {
+        poster.setSelected(null);
+      }
+      showDetails();
       try {
         detailsPanel.showNoGroup(!listGroupNames().isEmpty());
       } catch (HopException e) {
@@ -619,15 +703,145 @@ public class EdwJourneyPerspective implements IHopPerspective {
     }
     TreeItem[] selection = tree.getSelection();
     if (selection.length == 0) {
-      detailsPanel.clear();
+      showPresentation(activePanel);
       return;
     }
     Object data = selection[0].getData();
-    if (data instanceof EdwJourneyTreeNode node) {
-      detailsPanel.setNode(snapshot, opsOverlay, selectedGroup, node);
-    } else {
+    if (!(data instanceof EdwJourneyTreeNode node)) {
+      showDetails();
       detailsPanel.clear();
+      return;
     }
+    if (node.kind() == Kind.GROUP) {
+      if (poster != null) {
+        poster.setSelected(blockForPanel(activePanel));
+      }
+      showPresentation(activePanel);
+      return;
+    }
+    String block = blockForNode(node);
+    if (poster != null) {
+      poster.setSelected(block);
+    }
+    if (preferPanel && block != null) {
+      showPresentation(EdwJourneyPanelId.forBlock(block));
+    } else {
+      showDetails();
+      detailsPanel.setNode(snapshot, opsOverlay, selectedGroup, node);
+    }
+  }
+
+  private void onBlockSelected(String blockId) {
+    if (blockId == null) {
+      showMap();
+      return;
+    }
+    if ("documentation".equals(blockId)) {
+      EdwDocsGuiPlugin.openHtml(hopGui, "index.html");
+      return;
+    }
+    preferPanel = true;
+    activePanel = EdwJourneyPanelId.forBlock(blockId);
+    if (poster != null) {
+      poster.setSelected(blockId);
+    }
+    showPresentation(activePanel);
+  }
+
+  private void showMap() {
+    preferPanel = true;
+    activePanel = EdwJourneyPanelId.PROJECT_PULSE;
+    if (poster != null) {
+      poster.setSelected(null);
+    }
+    if (tree != null && !tree.isDisposed() && tree.getItemCount() > 0) {
+      applyingTreeSelection = true;
+      try {
+        tree.setSelection(tree.getItem(0));
+      } finally {
+        applyingTreeSelection = false;
+      }
+    }
+    showPresentation(EdwJourneyPanelId.PROJECT_PULSE);
+  }
+
+  private void showPanelFromLink(String panelId) {
+    EdwJourneyPanelId panel = EdwJourneyPanelId.fromWire(panelId);
+    if (panel == null) {
+      return;
+    }
+    preferPanel = true;
+    activePanel = panel;
+    showPresentation(panel);
+  }
+
+  private void showDetails() {
+    if (bottomStack != null && detailsHost != null) {
+      bottomStack.topControl = detailsHost;
+      bottomStackComposite.layout();
+    }
+  }
+
+  private void showPresentation(EdwJourneyPanelId panel) {
+    EdwJourneyPanelId shown = panel == null ? EdwJourneyPanelId.PROJECT_PULSE : panel;
+    activePanel = shown;
+    if (viewerHost == null || viewerHost.isDisposed() || presentationPane == null) {
+      return;
+    }
+    try {
+      Inputs inputs =
+          new Inputs(
+              snapshot, opsOverlay, history, semanticLayerPresent, semanticFiles, jdbcServices);
+      HGeneratedCatalog catalog =
+          EdwJourneyPanelBuilder.build(EdwJourneyPanelContent.build(shown, inputs));
+      presentationPane.show(
+          catalog, BaseMessages.getString(PKG, "EdwJourneyPanel." + shown.name()));
+      bottomStack.topControl = viewerHost;
+      bottomStackComposite.layout(true, true);
+      viewerHost.layout(true, true);
+    } catch (Exception e) {
+      showDetails();
+      new ErrorDialog(
+          hopGui.getShell(),
+          BaseMessages.getString(PKG, "EdwJourneyPerspective.Error.Open.Title"),
+          BaseMessages.getString(PKG, "EdwJourneyPerspective.Error.Open.Message"),
+          e instanceof HopException hop ? hop : new HopException(e));
+    }
+  }
+
+  private static String blockForNode(EdwJourneyTreeNode node) {
+    if (node == null || node.stage() == null) {
+      return null;
+    }
+    return switch (node.stage()) {
+      case SOURCES -> "source-models";
+      case CONTROLS, TARGET_QUALITY -> "gates";
+      case DATA_VAULT -> "dv-models";
+      case BUSINESS_VAULT -> "bv-models";
+      case DIMENSIONAL -> "dm-models";
+      case ORCHESTRATION -> "hop-engine";
+      case OUTPUTS -> "lineage-view";
+    };
+  }
+
+  private static String blockForPanel(EdwJourneyPanelId panel) {
+    if (panel == null) {
+      return null;
+    }
+    return switch (panel) {
+      case SOURCE_DRIFT -> "source-models";
+      case HARVEST_WATCH -> "harvester";
+      case GATE_DESK -> "gates";
+      case WAVE_BOARD -> "hop-engine";
+      case RAW_VAULT -> "dv-models";
+      case BUSINESS_VAULT -> "bv-models";
+      case DIMENSIONAL -> "dm-models";
+      case CONTRACT -> "catalog";
+      case LINEAGE_OPS -> "ops";
+      case NEXT_MOVE -> "coach";
+      case CONSUMPTION -> "presentations";
+      case PROJECT_PULSE -> null;
+    };
   }
 
   private void onGroupCreated(ResourceDefinitionGroupMeta group) {

@@ -3741,6 +3741,11 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     return uniqueName;
   }
 
+  /** Opens the table dialog for a table already on this canvas. */
+  public void editNamedTable(String tableName) {
+    editTableByName(tableName);
+  }
+
   private void editTableByName(String tableName) {
     if (Utils.isEmpty(tableName) || model == null) {
       return;

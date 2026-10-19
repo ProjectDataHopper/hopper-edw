@@ -1003,6 +1003,20 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
   }
 
+  /** Select the card and enter browse centered on it. */
+  public void browseNamedElement(String elementName) {
+    if (Utils.isEmpty(elementName) || model == null) {
+      return;
+    }
+    if (!selectCanvasElement(elementName, false)) {
+      return;
+    }
+    SourceModelBrowseSession.Focus focus = selectedBrowseFocus();
+    if (focus != null) {
+      browseFrom(focus.kind(), focus.name());
+    }
+  }
+
   /**
    * @param openEditor when true, open the element dialog (search); when false, only select/center
    * @return true if an element was found

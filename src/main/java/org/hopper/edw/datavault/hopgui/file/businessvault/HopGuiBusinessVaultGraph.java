@@ -119,9 +119,9 @@ import org.hopper.edw.datavault.metadata.businessvault.BvBridge;
 import org.hopper.edw.datavault.metadata.businessvault.BvBusinessTable;
 import org.hopper.edw.datavault.metadata.businessvault.BvBvTableReference;
 import org.hopper.edw.datavault.metadata.businessvault.BvDvTableReference;
+import org.hopper.edw.datavault.metadata.businessvault.BvIdentityMap;
 import org.hopper.edw.datavault.metadata.businessvault.BvPitTable;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2Table;
-import org.hopper.edw.datavault.metadata.businessvault.BvIdentityMap;
 import org.hopper.edw.datavault.metadata.businessvault.BvSourceCalendar;
 import org.hopper.edw.datavault.metadata.businessvault.BvSourceQuery;
 import org.hopper.edw.datavault.metadata.businessvault.BvTableBase;
@@ -3874,6 +3874,11 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     setChanged();
     redraw();
     return table.getName();
+  }
+
+  /** Opens the table dialog for a business vault table already on this canvas. */
+  public void editNamedTable(String tableName) {
+    editBvTableByName(tableName);
   }
 
   private void editBvTableByName(String tableName) {

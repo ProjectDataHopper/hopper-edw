@@ -3131,6 +3131,22 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     return table.getName();
   }
 
+  /** Opens the dimensional table dialog for a table already on this canvas. */
+  public void editNamedTable(String tableName) {
+    editDmTableByName(tableName);
+  }
+
+  /** Opens the update pipeline for one fact or dimension on this canvas. */
+  public void openNamedUpdatePipeline(String tableName) {
+    if (Utils.isEmpty(tableName) || model == null) {
+      return;
+    }
+    IDmTable table = model.findTable(tableName);
+    if (table != null) {
+      openUpdatePipeline(table);
+    }
+  }
+
   private void editDmTableByName(String tableName) {
     if (Utils.isEmpty(tableName) || model == null) {
       return;
