@@ -71,12 +71,12 @@ group — you create that yourself once the first `.hdv` checks clean (module 4)
 
 === Plugin-wide options
 
-The per-model settings have a global counterpart. Hop GUI keeps the plugin-wide Data Vault 2.0
-options under **Configuration → Data Vault 2.0** — for example whether hash key columns are drawn
+The per-model settings have a global counterpart. Hop GUI keeps the plugin-wide Hopper EDW
+options under **Configuration → Hopper EDW** — for example whether hash key columns are drawn
 in the model, and the default-on **Enforce Unicode-capable target databases (EDW)** check. These
 settings live in the Hop GUI configuration, not inside the model files.
 
-image::../images/hopgui-configuration-perspecive-data-vault-options.png[Hop GUI Data Vault 2.0 configuration options,align="center"]
+image::../images/hopgui-configuration-perspecive-data-vault-options.png[Hopper EDW options in the Hop configuration perspective,align="center"]
 
 == Guided walkthrough
 

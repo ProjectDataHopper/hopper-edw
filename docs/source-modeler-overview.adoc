@@ -408,7 +408,7 @@ Source model **Check model** validates:
 
 The same catalog-stale check runs from **Validate** on the table, query, JSON, and pipeline dialogs.
 
-Saving the `.hsm` also compares published feeds. When any published catalog feed lags the canvas, a dialog asks **Do you want to publish these?** (with **Don't remind me after save**). The reminder is on by default under **Configuration → Data Vault 2.0**. Never-published draft cards are not included.
+Saving the `.hsm` also compares published feeds. When any published catalog feed lags the canvas, a dialog asks **Do you want to publish these?** (with **Don't remind me after save**). The reminder is on by default under **Configuration → Hopper EDW**. Never-published draft cards are not included.
 
 Vault **Check model** continues to validate hub/sat field mappings against catalog field lists for composite feeds like any other source.
 

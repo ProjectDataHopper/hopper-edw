@@ -43,7 +43,7 @@ import picocli.CommandLine;
 
 @ConfigPlugin(
     id = "DataVaultConfigOptionPlugin",
-    description = "Configuration options for the data vault 2.0 plugin")
+    description = "Configuration options for Hopper EDW")
 @GuiPlugin(description = "i18n::DataVaultConfig.Tab.Name")
 @Getter
 @Setter

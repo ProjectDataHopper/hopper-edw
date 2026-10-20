@@ -153,7 +153,7 @@ image::images/resource-definition-group-validation-remediation-confirmation-dial
 
 === Schema remediation package
 
-Under the **Schema remediation folder** (Data Vault 2.0 plugin settings; default `${PROJECT_HOME}/workflows/schema-remediation/<name>/`) the plugin writes:
+Under the **Schema remediation folder** (Hopper EDW plugin settings; default `${PROJECT_HOME}/workflows/schema-remediation/<name>/`) the plugin writes:
 
 * a reviewable **SQL script** (always when DDL is needed), with sections per affected table
 * a Hop **workflow** with **one SQL action per target table** (run later per DTAP environment — **not** executed immediately)

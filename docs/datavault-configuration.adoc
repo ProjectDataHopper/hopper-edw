@@ -289,9 +289,9 @@ image::images/data-vault-model-configuration-editor-generated-artifacts-tab.png[
 
 == Plugin-wide GUI options
 
-In addition to the per-model configuration above, Hop GUI exposes global options under **Configuration → Data Vault 2.0**:
+In addition to the per-model configuration above, Hop GUI exposes global options under **Configuration → Hopper EDW**:
 
-image::images/hopgui-configuration-perspecive-data-vault-options.png[Hop GUI Data Vault 2.0 configuration options,align="center"]
+image::images/hopgui-configuration-perspecive-data-vault-options.png[Hopper EDW options in the Hop configuration perspective,align="center"]
 
 [cols="1,3", options="header"]
 |===

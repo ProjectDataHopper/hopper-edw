@@ -37,7 +37,7 @@ The catalog describes a source table. Validation may compare it to the live sour
 
 Physical DDL is **not** run when you apply. Run the generated workflow per environment when ready.
 
-Configure the root folder under **Configuration → Data Vault 2.0 → Schema remediation folder**.
+Configure the root folder under **Configuration → Hopper EDW → Schema remediation folder**.
 
 == Tips
 

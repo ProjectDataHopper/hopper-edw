@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Configuration perspective label (issue #220)
+
+- The Hop configuration perspective tab is **Hopper EDW**. It was labeled Data Vault 2.0.
+
 ### Component explorer in the documentation (issue #219)
 
 - The generated documentation index lists the component explorer. The HTML page already ships under `presentations/` in the plugin docs.
@@ -14,7 +18,7 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ### Model metrics panel (issue #216)
 
-- **Configuration → Data Vault 2.0 → Load runs shown in the model metrics panel** sets how many recent executions that panel lists. The default stays 20.
+- **Configuration → Hopper EDW → Load runs shown in the model metrics panel** sets how many recent executions that panel lists. The default stays 20.
 
 ### Target type mapping editor (issue #215)
 
