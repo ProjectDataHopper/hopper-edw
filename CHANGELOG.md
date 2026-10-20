@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Documentation icon (issue #218)
+
+- Generated HTML pages and the component explorer use the EDW logo as the browser tab icon.
+
 ### Model metrics panel (issue #216)
 
 - **Configuration → Data Vault 2.0 → Load runs shown in the model metrics panel** sets how many recent executions that panel lists. The default stays 20.

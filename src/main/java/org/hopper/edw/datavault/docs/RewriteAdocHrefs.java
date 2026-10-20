@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -48,6 +49,9 @@ public final class RewriteAdocHrefs {
       Pattern.compile(
           "(?<open><a\\b[^>]*>)(?<text>[^<]*?)\\.adoc(?<rest>[^<]*)(?<close></a>)",
           Pattern.CASE_INSENSITIVE);
+
+  static final Pattern HEAD_OPEN = Pattern.compile("(?i)<head\\b[^>]*>");
+  static final String FAVICON_FILE = "images/edw-logo.svg";
 
   private RewriteAdocHrefs() {}
 
@@ -82,6 +86,41 @@ public final class RewriteAdocHrefs {
     return textOut.toString();
   }
 
+  /** Relative href from an HTML file under {@code root} to {@code images/edw-logo.svg}. */
+  static String faviconHref(Path root, Path htmlFile) {
+    Path base = root.toAbsolutePath().normalize();
+    Path parent = htmlFile.toAbsolutePath().normalize().getParent();
+    if (parent == null) {
+      return FAVICON_FILE;
+    }
+    Path relative = base.relativize(parent);
+    if (relative.toString().isEmpty()) {
+      return FAVICON_FILE;
+    }
+    StringBuilder prefix = new StringBuilder();
+    for (int i = 0; i < relative.getNameCount(); i++) {
+      prefix.append("../");
+    }
+    return prefix + FAVICON_FILE;
+  }
+
+  /**
+   * Inserts the EDW logo as the browser-tab icon. Leaves a page that already has {@code rel="icon"}
+   * unchanged.
+   */
+  static String injectFavicon(String html, String href) {
+    if (html == null || html.toLowerCase(Locale.ROOT).contains("rel=\"icon\"")) {
+      return html;
+    }
+    Matcher head = HEAD_OPEN.matcher(html);
+    if (!head.find()) {
+      return html;
+    }
+    String link =
+        "\n<link rel=\"icon\" href=\"" + href + "\" type=\"image/svg+xml\">";
+    return html.substring(0, head.end()) + link + html.substring(head.end());
+  }
+
   public static int rewriteDirectory(Path root) throws IOException {
     if (!Files.isDirectory(root)) {
       throw new IOException("Not a directory: " + root);
@@ -92,8 +131,8 @@ public final class RewriteAdocHrefs {
       for (Path path : walk.filter(p -> p.toString().endsWith(".html")).sorted().toList()) {
         String original = Files.readString(path, StandardCharsets.UTF_8);
         int[] counts = new int[1];
-        String updated = rewrite(original, counts);
-        if (counts[0] > 0) {
+        String updated = injectFavicon(rewrite(original, counts), faviconHref(root, path));
+        if (counts[0] > 0 || !updated.equals(original)) {
           Files.writeString(path, updated, StandardCharsets.UTF_8);
           files++;
           total += counts[0];

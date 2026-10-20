@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 
 class RewriteAdocHrefsTest {
@@ -36,5 +37,29 @@ class RewriteAdocHrefsTest {
     assertTrue(out.contains("href='getting-started-edw.html#build'"));
     assertTrue(out.contains(">getting-started-edw build</a>"));
     assertFalse(out.contains(".adoc"));
+  }
+
+  @Test
+  void faviconHrefWalksUpToTheDocsRoot() {
+    Path root = Path.of("/docs");
+    assertEquals(
+        "images/edw-logo.svg",
+        RewriteAdocHrefs.faviconHref(root, root.resolve("index.html")));
+    assertEquals(
+        "../images/edw-logo.svg",
+        RewriteAdocHrefs.faviconHref(root, root.resolve("training/module.html")));
+    assertEquals(
+        "../../images/edw-logo.svg",
+        RewriteAdocHrefs.faviconHref(root, root.resolve("help/dialogs/page.html")));
+  }
+
+  @Test
+  void injectFaviconOnceAfterHead() {
+    String html = "<html><head><meta charset=\"utf-8\"></head><body></body></html>";
+    String once = RewriteAdocHrefs.injectFavicon(html, "images/edw-logo.svg");
+    assertTrue(
+        once.contains(
+            "<head>\n<link rel=\"icon\" href=\"images/edw-logo.svg\" type=\"image/svg+xml\">"));
+    assertEquals(once, RewriteAdocHrefs.injectFavicon(once, "other.svg"));
   }
 }
