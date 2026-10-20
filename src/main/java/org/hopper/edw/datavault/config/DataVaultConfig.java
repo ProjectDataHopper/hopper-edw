@@ -29,6 +29,9 @@ public class DataVaultConfig {
   public static final int DEFAULT_MAX_UNDO_OPERATIONS = 200;
   public static final int DEFAULT_LIVE_UPDATE_POLL_INTERVAL_SECONDS = 10;
 
+  /** Recent executions listed in the model metrics panel. */
+  public static final int DEFAULT_METRICS_PANEL_MAX_RUNS = 20;
+
   /** Default root for named schema-remediation packages (workflow, SQL, report). */
   public static final String DEFAULT_SCHEMA_REMEDIATION_FOLDER =
       "${PROJECT_HOME}/workflows/schema-remediation";
@@ -63,6 +66,7 @@ public class DataVaultConfig {
   private String defaultPipelineRunConfiguration;
   private String defaultWorkflowRunConfiguration;
   private int liveUpdatePollIntervalSeconds = DEFAULT_LIVE_UPDATE_POLL_INTERVAL_SECONDS;
+  private int metricsPanelMaxRuns = DEFAULT_METRICS_PANEL_MAX_RUNS;
   private ExecutionMapLineStyle executionMapLineStyle = ExecutionMapLineStyle.DIRECT_CENTER;
   private String schemaRemediationFolder = DEFAULT_SCHEMA_REMEDIATION_FOLDER;
 
@@ -87,6 +91,7 @@ public class DataVaultConfig {
     defaultPipelineRunConfiguration = config.defaultPipelineRunConfiguration;
     defaultWorkflowRunConfiguration = config.defaultWorkflowRunConfiguration;
     setLiveUpdatePollIntervalSeconds(config.getLiveUpdatePollIntervalSeconds());
+    setMetricsPanelMaxRuns(config.getMetricsPanelMaxRuns());
     setExecutionMapLineStyle(config.getExecutionMapLineStyleOrDefault());
     setSchemaRemediationFolder(config.getSchemaRemediationFolderOrDefault());
   }
@@ -147,6 +152,15 @@ public class DataVaultConfig {
         liveUpdatePollIntervalSeconds > 0
             ? liveUpdatePollIntervalSeconds
             : DEFAULT_LIVE_UPDATE_POLL_INTERVAL_SECONDS;
+  }
+
+  public int getMetricsPanelMaxRuns() {
+    return metricsPanelMaxRuns > 0 ? metricsPanelMaxRuns : DEFAULT_METRICS_PANEL_MAX_RUNS;
+  }
+
+  public void setMetricsPanelMaxRuns(int metricsPanelMaxRuns) {
+    this.metricsPanelMaxRuns =
+        metricsPanelMaxRuns > 0 ? metricsPanelMaxRuns : DEFAULT_METRICS_PANEL_MAX_RUNS;
   }
 
   /** Poll interval for live model-update metrics in the Hop GUI. */

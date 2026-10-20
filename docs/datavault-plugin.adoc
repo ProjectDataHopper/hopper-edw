@@ -218,6 +218,7 @@ image::images/hopgui-configuration-perspecive-data-vault-options.png[Data Vault 
 * **Draw hash keys in model** – When enabled, hash key column names are shown on table cards in the visual editor.
 * **Remind to publish catalog feeds when saving a source model** – When enabled (default), saving a `.hsm` whose published catalog feeds lag the canvas asks whether to publish them. The dialog has **Don't remind me after save**; you can turn the option back on here.
 * **Maximum undo/redo operations kept in memory** – Size of the snapshot undo stack for `.hdv` files (default 200).
+* **Load runs shown in the model metrics panel** – How many recent executions the panel to the right of a model lists (default 20).
 
 == Business Vault
 

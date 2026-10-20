@@ -72,6 +72,7 @@ public class DataVaultConfigOptionPlugin
       "10090-default-workflow-run-configuration";
   private static final String WIDGET_ID_LIVE_UPDATE_POLL_INTERVAL_SECONDS =
       "10100-live-update-poll-interval-seconds";
+  private static final String WIDGET_ID_METRICS_PANEL_MAX_RUNS = "10105-metrics-panel-max-runs";
   private static final String WIDGET_ID_SCHEMA_REMEDIATION_FOLDER =
       "10110-schema-remediation-folder";
   private static final String WIDGET_ID_REMIND_UNPUBLISHED_CATALOG_ON_SAVE =
@@ -200,6 +201,19 @@ public class DataVaultConfigOptionPlugin
   private String liveUpdatePollIntervalSeconds;
 
   @GuiWidgetElement(
+      id = WIDGET_ID_METRICS_PANEL_MAX_RUNS,
+      parentId = ConfigPluginOptionsTab.GUI_WIDGETS_PARENT_ID,
+      type = GuiElementType.TEXT,
+      variables = false,
+      label = "i18n::DataVaultConfigOptionPlugin.MetricsPanelMaxRuns.Message",
+      toolTip = "i18n::DataVaultConfigOptionPlugin.MetricsPanelMaxRuns.ToolTip")
+  @CommandLine.Option(
+      names = {"--dv-metrics-panel-max-runs"},
+      description =
+          "How many recent executions the model metrics panel lists (default 20)")
+  private String metricsPanelMaxRuns;
+
+  @GuiWidgetElement(
       id = WIDGET_ID_SCHEMA_REMEDIATION_FOLDER,
       parentId = ConfigPluginOptionsTab.GUI_WIDGETS_PARENT_ID,
       type = GuiElementType.TEXT,
@@ -241,6 +255,7 @@ public class DataVaultConfigOptionPlugin
     instance.defaultWorkflowRunConfiguration = config.getDefaultWorkflowRunConfiguration();
     instance.liveUpdatePollIntervalSeconds =
         Integer.toString(config.getLiveUpdatePollIntervalSeconds());
+    instance.metricsPanelMaxRuns = Integer.toString(config.getMetricsPanelMaxRuns());
     instance.schemaRemediationFolder = config.getSchemaRemediationFolderOrDefault();
     instance.remindUnpublishedCatalogOnSourceModelSave =
         config.isRemindUnpublishedCatalogOnSourceModelSave();
@@ -292,6 +307,12 @@ public class DataVaultConfigOptionPlugin
             "Set live model-update poll interval to "
                 + config.getLiveUpdatePollIntervalSeconds()
                 + " seconds");
+        changed = true;
+      }
+      if (metricsPanelMaxRuns != null) {
+        config.setMetricsPanelMaxRuns(parseMetricsPanelMaxRuns(metricsPanelMaxRuns));
+        log.logBasic(
+            "Set model metrics panel run limit to " + config.getMetricsPanelMaxRuns());
         changed = true;
       }
       if (remindUnpublishedCatalogOnSourceModelSave != null) {
@@ -387,6 +408,10 @@ public class DataVaultConfigOptionPlugin
           config.setLiveUpdatePollIntervalSeconds(
               parseLiveUpdatePollIntervalSeconds(liveUpdatePollIntervalSeconds));
           break;
+        case WIDGET_ID_METRICS_PANEL_MAX_RUNS:
+          metricsPanelMaxRuns = getTextValue(control);
+          config.setMetricsPanelMaxRuns(parseMetricsPanelMaxRuns(metricsPanelMaxRuns));
+          break;
         case WIDGET_ID_SCHEMA_REMEDIATION_FOLDER:
           schemaRemediationFolder = getTextValue(control);
           config.setSchemaRemediationFolder(schemaRemediationFolder);
@@ -436,6 +461,18 @@ public class DataVaultConfigOptionPlugin
       return Math.max(1, parsed);
     } catch (NumberFormatException e) {
       return DataVaultConfig.DEFAULT_MAX_UNDO_OPERATIONS;
+    }
+  }
+
+  private static int parseMetricsPanelMaxRuns(String value) {
+    if (value == null || value.isBlank()) {
+      return DataVaultConfig.DEFAULT_METRICS_PANEL_MAX_RUNS;
+    }
+    try {
+      int parsed = Integer.parseInt(value.trim());
+      return Math.max(1, parsed);
+    } catch (NumberFormatException e) {
+      return DataVaultConfig.DEFAULT_METRICS_PANEL_MAX_RUNS;
     }
   }
 

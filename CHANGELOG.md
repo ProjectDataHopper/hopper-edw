@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Model metrics panel (issue #216)
+
+- **Configuration → Data Vault 2.0 → Load runs shown in the model metrics panel** sets how many recent executions that panel lists. The default stays 20.
+
 ### Target type mapping editor (issue #215)
 
 - The Rules table packs each column to its header and cell text when the editor opens.

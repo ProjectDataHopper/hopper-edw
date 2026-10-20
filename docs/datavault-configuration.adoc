@@ -289,7 +289,7 @@ image::images/data-vault-model-configuration-editor-generated-artifacts-tab.png[
 
 == Plugin-wide GUI options
 
-In addition to the per-model configuration above, Hop GUI exposes two global options under **Configuration → Data Vault 2.0**:
+In addition to the per-model configuration above, Hop GUI exposes global options under **Configuration → Data Vault 2.0**:
 
 image::images/hopgui-configuration-perspecive-data-vault-options.png[Hop GUI Data Vault 2.0 configuration options,align="center"]
 
@@ -311,6 +311,9 @@ image::images/hopgui-configuration-perspecive-data-vault-options.png[Hop GUI Dat
 
 |Maximum undo/redo operations kept in memory
 |Number of gzip-compressed XML snapshots kept for undo/redo on `.hdv` files (default 200). Older snapshots are discarded when the limit is exceeded.
+
+|Load runs shown in the model metrics panel
+|How many recent executions the panel to the right of a model lists (default 20).
 |===
 
 These settings are stored in the Hop GUI configuration, not inside individual `.hdv` files.

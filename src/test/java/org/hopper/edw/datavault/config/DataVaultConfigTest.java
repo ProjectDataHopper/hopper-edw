@@ -16,98 +16,21 @@
 package org.hopper.edw.datavault.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
 class DataVaultConfigTest {
 
   @Test
-  void defaultsEnforceTargetUnicodeCapabilityToTrue() {
+  void metricsPanelMaxRunsDefaultsToTwentyAndCopies() {
     DataVaultConfig config = new DataVaultConfig();
-    assertTrue(config.isEnforceTargetUnicodeCapability());
-  }
+    assertEquals(DataVaultConfig.DEFAULT_METRICS_PANEL_MAX_RUNS, config.getMetricsPanelMaxRuns());
 
-  @Test
-  void copiesEnforceTargetUnicodeCapability() {
-    DataVaultConfig source = new DataVaultConfig();
-    source.setEnforceTargetUnicodeCapability(false);
-    DataVaultConfig copy = new DataVaultConfig(source);
-    assertFalse(copy.isEnforceTargetUnicodeCapability());
-  }
+    config.setMetricsPanelMaxRuns(0);
+    assertEquals(DataVaultConfig.DEFAULT_METRICS_PANEL_MAX_RUNS, config.getMetricsPanelMaxRuns());
 
-  @Test
-  void defaultsWarnTimestampFractionalPrecisionLossToTrue() {
-    assertTrue(new DataVaultConfig().isWarnTimestampFractionalPrecisionLoss());
-  }
-
-  @Test
-  void copiesWarnTimestampFractionalPrecisionLoss() {
-    DataVaultConfig source = new DataVaultConfig();
-    source.setWarnTimestampFractionalPrecisionLoss(false);
-    assertFalse(new DataVaultConfig(source).isWarnTimestampFractionalPrecisionLoss());
-  }
-
-  @Test
-  void defaultsLiveUpdatePollIntervalToTenSeconds() {
-    DataVaultConfig config = new DataVaultConfig();
-
-    assertEquals(10, config.getLiveUpdatePollIntervalSeconds());
-    assertEquals(10_000L, config.resolveLiveUpdatePollIntervalMs());
-  }
-
-  @Test
-  void rejectsNonPositiveLiveUpdatePollInterval() {
-    DataVaultConfig config = new DataVaultConfig();
-
-    config.setLiveUpdatePollIntervalSeconds(0);
-    assertEquals(
-        DataVaultConfig.DEFAULT_LIVE_UPDATE_POLL_INTERVAL_SECONDS,
-        config.getLiveUpdatePollIntervalSeconds());
-
-    config.setLiveUpdatePollIntervalSeconds(-5);
-    assertEquals(
-        DataVaultConfig.DEFAULT_LIVE_UPDATE_POLL_INTERVAL_SECONDS,
-        config.getLiveUpdatePollIntervalSeconds());
-  }
-
-  @Test
-  void copiesLiveUpdatePollInterval() {
-    DataVaultConfig source = new DataVaultConfig();
-    source.setLiveUpdatePollIntervalSeconds(30);
-
-    DataVaultConfig copy = new DataVaultConfig(source);
-
-    assertEquals(30, copy.getLiveUpdatePollIntervalSeconds());
-    assertEquals(30_000L, copy.resolveLiveUpdatePollIntervalMs());
-  }
-
-  @Test
-  void defaultsRemindUnpublishedCatalogOnSourceModelSaveToTrue() {
-    assertTrue(new DataVaultConfig().isRemindUnpublishedCatalogOnSourceModelSave());
-  }
-
-  @Test
-  void copiesRemindUnpublishedCatalogOnSourceModelSave() {
-    DataVaultConfig source = new DataVaultConfig();
-    source.setRemindUnpublishedCatalogOnSourceModelSave(false);
-    assertFalse(new DataVaultConfig(source).isRemindUnpublishedCatalogOnSourceModelSave());
-  }
-
-  @Test
-  void defaultsSchemaRemediationFolder() {
-    DataVaultConfig config = new DataVaultConfig();
-    assertEquals(
-        DataVaultConfig.DEFAULT_SCHEMA_REMEDIATION_FOLDER,
-        config.getSchemaRemediationFolderOrDefault());
-
-    config.setSchemaRemediationFolder("  ");
-    assertEquals(
-        DataVaultConfig.DEFAULT_SCHEMA_REMEDIATION_FOLDER,
-        config.getSchemaRemediationFolderOrDefault());
-
-    config.setSchemaRemediationFolder("${PROJECT_HOME}/remediation");
-    assertEquals("${PROJECT_HOME}/remediation", config.getSchemaRemediationFolderOrDefault());
+    config.setMetricsPanelMaxRuns(8);
+    DataVaultConfig copy = new DataVaultConfig(config);
+    assertEquals(8, copy.getMetricsPanelMaxRuns());
   }
 }

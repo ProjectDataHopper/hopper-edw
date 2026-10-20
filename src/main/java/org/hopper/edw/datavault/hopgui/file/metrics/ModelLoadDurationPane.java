@@ -48,6 +48,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
+import org.hopper.edw.datavault.config.DataVaultConfigSingleton;
 import org.hopper.edw.datavault.metrics.LoadRunDurationMetricsLoader;
 import org.hopper.edw.datavault.metrics.LoadRunDurationSnapshot;
 
@@ -239,7 +240,12 @@ public class ModelLoadDurationPane extends Composite {
             () -> {
               LoadRunDurationSnapshot loaded =
                   LoadRunDurationMetricsLoader.load(
-                      modelName, modelType, tableNames, metadataProvider, variables);
+                      modelName,
+                      modelType,
+                      tableNames,
+                      metadataProvider,
+                      variables,
+                      DataVaultConfigSingleton.getConfig().getMetricsPanelMaxRuns());
               if (display.isDisposed()) {
                 return;
               }
