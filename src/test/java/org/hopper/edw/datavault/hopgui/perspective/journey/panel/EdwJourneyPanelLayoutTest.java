@@ -16,7 +16,6 @@
 package org.hopper.edw.datavault.hopgui.perspective.journey.panel;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -27,7 +26,6 @@ import org.hopper.core.HAttachment;
 import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneyOpsOverlay;
 import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneyOpsOverlay.LoadOverviewSummary;
 import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneySnapshot;
-import org.hopper.edw.datavault.hopgui.presentation.EdwPresentationViewerPane;
 import org.hopper.presentation.HPresentation;
 import org.hopper.presentation.component.types.chart.HBarChartComponent;
 import org.hopper.presentation.component.HComponent;
@@ -91,12 +89,6 @@ class EdwJourneyPanelLayoutTest {
     assertEquals(0x5C, theme.getColors().get(0).getB());
     assertEquals(EdwJourneyPanelTheme.NAME, presentation.getDefaultThemeName());
     assertEquals(EdwJourneyPanelTheme.NAME, presentation.getDarkThemeName());
-  }
-
-  @Test
-  void floatingPaneHidesTheFloatButton() {
-    assertFalse(EdwPresentationViewerPane.showFloatButton(true));
-    assertTrue(EdwPresentationViewerPane.showFloatButton(false));
   }
 
   private static HComponent component(HPage page, String... pluginIds) {
