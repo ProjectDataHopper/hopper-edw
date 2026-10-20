@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Source model save (issue #214)
+
+- Saving an open source model writes the current file. Undo keeps the file path on source, dimensional, execution map, and lineage documents, so Save does not ask for a filename again.
+
 ## [0.15.0] — 2026-10-20
 
 Requires **Apache Hop 2.20.0-SNAPSHOT** and **Java 21**.

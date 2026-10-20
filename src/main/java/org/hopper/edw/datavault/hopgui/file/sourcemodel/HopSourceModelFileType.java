@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Properties;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.file.IHasFilename;
 import org.apache.hop.core.gui.plugin.action.GuiAction;
 import org.apache.hop.core.gui.plugin.action.GuiActionType;
@@ -248,11 +249,15 @@ public class HopSourceModelFileType extends HopFileTypeBase {
 
   public void saveFile(HopGui hopGui, HopGuiSourceModelGraph graph) throws HopException {
     String filename = graph.getFilename();
-    if (filename == null) {
+    if (Utils.isEmpty(filename)) {
       saveFileAs(hopGui, graph, null);
       return;
     }
-    saveModelToFile(graph.getModel(), filename, hopGui.getVariables());
+    SourceModel model = graph.getModel();
+    if (model != null && Utils.isEmpty(model.getFilename())) {
+      model.setFilename(filename);
+    }
+    saveModelToFile(model, filename, hopGui.getVariables());
     graph.clearChanged();
     SourceModelSaveCatalogReminder.offerAfterSave(hopGui, graph);
   }

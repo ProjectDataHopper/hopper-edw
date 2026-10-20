@@ -29,9 +29,13 @@ import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
 import org.hopper.edw.datavault.config.DataVaultConfigSingleton;
+import org.hopper.edw.datavault.lineageview.HopLineageViewDocument;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.ModelConfigurationResolver;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
+import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
+import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapDocument;
+import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -196,14 +200,26 @@ public class ModelGraphSnapshotUndo<M> {
     }
   }
 
+  /**
+   * The open path is runtime-only and is not in the XML snapshot. Put it back on the restored
+   * document so Save keeps writing the current file instead of asking for a name.
+   */
   private static void preserveFilename(Object restored, String preserveFilename) {
-    if (preserveFilename == null || restored == null) {
+    if (preserveFilename == null || preserveFilename.isBlank() || restored == null) {
       return;
     }
     if (restored instanceof DataVaultModel dataVaultModel) {
       dataVaultModel.setFilename(preserveFilename);
     } else if (restored instanceof BusinessVaultModel businessVaultModel) {
       businessVaultModel.setFilename(preserveFilename);
+    } else if (restored instanceof SourceModel sourceModel) {
+      sourceModel.setFilename(preserveFilename);
+    } else if (restored instanceof DimensionalModel dimensionalModel) {
+      dimensionalModel.setFilename(preserveFilename);
+    } else if (restored instanceof ExecutionMapDocument executionMap) {
+      executionMap.setFilename(preserveFilename);
+    } else if (restored instanceof HopLineageViewDocument lineageView) {
+      lineageView.setFilename(preserveFilename);
     }
   }
 

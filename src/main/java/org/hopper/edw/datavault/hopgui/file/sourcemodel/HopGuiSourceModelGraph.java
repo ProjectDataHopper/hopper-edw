@@ -1107,15 +1107,17 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
 
   @Override
   public String getFilename() {
-    return model != null ? model.getFilename() : filename;
+    if (model != null && !Utils.isEmpty(model.getFilename())) {
+      return model.getFilename();
+    }
+    return filename;
   }
 
   @Override
   public void setFilename(String filename) {
+    this.filename = filename;
     if (model != null) {
       model.setFilename(filename);
-    } else {
-      this.filename = filename;
     }
     if (perspective != null) {
       perspective.updateTabItem(this);
@@ -1372,6 +1374,9 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       mouseOverTableName = null;
       mouseOverNoteLink = null;
       model = sourceModel;
+      if (Utils.isEmpty(model.getFilename()) && !Utils.isEmpty(filename)) {
+        model.setFilename(filename);
+      }
       setChanged();
       if (perspective != null) {
         perspective.updateTabItem(this);
