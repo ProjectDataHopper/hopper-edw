@@ -12,7 +12,7 @@ toc::[]
 
 **Build an EDW:** link:getting-started-edw.adoc[Getting started — building an EDW]. **Architecture** (catalog, resource definition group, four controls): link:architecture.adoc[Architecture]. **Tour the sample:** link:getting-started-retail.adoc[Getting started — retail]. **AdventureWorks demo** (SQL Server source → Postgres DV/BV/DM): link:getting-started-adventureworks.adoc[Getting started — AdventureWorks] (issue https://github.com/ProjectDataHopper/hopper-edw/issues/180[#180]).
 
-For a slide-style executive summary, see link:presentations/hop-data-vault-overview.md[presentations/hop-data-vault-overview.md]. Interactive HTML presentation: link:presentations/hop-data-vault-features.html[hop-data-vault-features.html]. For DV concepts and canvas usage, see link:datavault-plugin.adoc[Data Vault plugin].
+For a slide-style executive summary, see link:presentations/hop-data-vault-overview.md[presentations/hop-data-vault-overview.md]. Interactive HTML presentation: link:presentations/hop-data-vault-features.html[hop-data-vault-features.html]. Clickable overview: link:presentations/edw-component-explorer.html[component explorer]. For DV concepts and canvas usage, see link:datavault-plugin.adoc[Data Vault plugin].
 
 **Large teams / hundreds of tables:** how to split models, assign personas (modeler, admin, ops, BV/DM, analysts), use git and the data catalog, and orchestrate loads — see link:enterprise-modeling-and-team-collaboration.adoc[Organizing large Data Vault programs].
 

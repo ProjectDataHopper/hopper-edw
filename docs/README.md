@@ -52,6 +52,7 @@ Architecture pictures are **committed SVGs** (`docs/images/diagrams/`) generated
 | [architecture-export.adoc](architecture-export.adoc) | Export SOLUTION architecture, DATA inventory, and aggregated DV/BV/DM ELK Draw.io diagrams |
 | [project-documentation.adoc](project-documentation.adoc) | Static HTML+JS documentation set for a Hop project (search, SVG, themes) |
 | [presentations/hop-data-vault-overview.md](presentations/hop-data-vault-overview.md) | High-level slide deck: goals, architecture, hybrid warehouses |
+| [presentations/edw-component-explorer.html](presentations/edw-component-explorer.html) | Clickable EDW overview: each block opens the layer, the model, screenshots, and the docs behind it |
 | [presentations/full-stack-transparency.md](presentations/full-stack-transparency.md) | **20-minute talk:** full-stack transparency (issue #190). Interactive deck: [full-stack-transparency.html](presentations/full-stack-transparency.html), slides: [full-stack-transparency.pptx](presentations/full-stack-transparency.pptx), clickable EDW overview: [edw-component-explorer.html](presentations/edw-component-explorer.html) |
 
 ## Data Catalog and sources

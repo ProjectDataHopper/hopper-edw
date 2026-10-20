@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Component explorer in the documentation (issue #219)
+
+- The generated documentation index lists the component explorer. The HTML page already ships under `presentations/` in the plugin docs.
+
 ### Documentation icon (issue #218)
 
 - Generated HTML pages and the component explorer use the EDW logo as the browser tab icon.
